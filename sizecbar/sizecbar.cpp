@@ -254,7 +254,7 @@ CSize CSizingControlBar::CalcFixedLayout(BOOL bStretch, BOOL bHorz)
     GetRowSizingBars(arrSCBars);
     AFX_SIZEPARENTPARAMS layout;
     layout.hDWP = pDockBar->m_bLayoutQuery ?
-        NULL : ::BeginDeferWindowPos(arrSCBars.GetSize());
+        NULL : ::BeginDeferWindowPos((int)arrSCBars.GetSize());
     for (int i = 0; i < arrSCBars.GetSize(); i++)
         if (arrSCBars[i]->m_nStateFlags & (delayHide|delayShow))
             arrSCBars[i]->RecalcDelayShow(&layout);
@@ -532,9 +532,11 @@ void CSizingControlBar::OnNcPaint()
     CRect rcDraw = rcBar;
     DrawBorders(&mdc, rcDraw);
 
+#pragma warning( disable : 4312 ) 
     // erase the NC background
     mdc.FillRect(rcDraw, CBrush::FromHandle(
         (HBRUSH) GetClassLong(m_hWnd, GCL_HBRBACKGROUND)));
+#pragma warning( default : 4312 ) 
 
     if (m_dwSCBStyle & SCBS_SHOWEDGES)
     {
@@ -762,7 +764,7 @@ void CSizingControlBar::OnTrackUpdateSize(CPoint& point)
 
         // the others are shrinking
         int nFirst = bBefore ? nGrowingBar - 1 : nGrowingBar + 1;
-        int nLimit = bBefore ? -1 : arrSCBars.GetSize();
+        int nLimit = bBefore ? -1 : (int)arrSCBars.GetSize();
 
         for (int i = nFirst; nDelta != 0 && i != nLimit; i += (bBefore ? -1 : 1))
         {
@@ -871,7 +873,7 @@ void CSizingControlBar::GetRowInfo(int& nFirst, int& nLast, int& nThis)
     nThis = m_pDockBar->FindBar(this);
     ASSERT(nThis != -1);
 
-    int i, nBars = m_pDockBar->m_arrBars.GetSize();
+    int i, nBars = (int)m_pDockBar->m_arrBars.GetSize();
 
     // find the first and the last bar in row
     for (nFirst = -1, i = nThis - 1; i >= 0 && nFirst == -1; i--)
@@ -907,7 +909,7 @@ void CSizingControlBar::GetRowSizingBars(CSCBArray& arrSCBars, int& nThis)
         if (pBar->IsKindOf(RUNTIME_CLASS(CSizingControlBar)))
         {
             if (pBar == this)
-                nThis = arrSCBars.GetSize();
+                nThis = (int)arrSCBars.GetSize();
 
             arrSCBars.Add(pBar);
         }
@@ -987,7 +989,7 @@ BOOL CSizingControlBar::NegotiateSpace(int nLengthTotal, BOOL bHorz)
 
     CSCBArray arrSCBars;
     GetRowSizingBars(arrSCBars);
-    int nNumBars = arrSCBars.GetSize();
+    int nNumBars = (int)arrSCBars.GetSize();
     int nDelta = nLengthAvail - nLengthActual;
 
     // return faster when there is only one sizing bar per row (this one)
@@ -1112,7 +1114,8 @@ void CSizingControlBar::LoadState(LPCTSTR lpszProfileName)
         if (!pInfo->m_bFloating)
             continue;
         
-        // this is a floating dockbar - check the ID array
+#pragma warning( disable : 4311 )
+		// this is a floating dockbar - check the ID array
         for (int j = 0; j < pInfo->m_arrBarID.GetSize(); j++)
             if ((DWORD) pInfo->m_arrBarID[j] == nID)
             {
@@ -1122,6 +1125,7 @@ void CSizingControlBar::LoadState(LPCTSTR lpszProfileName)
                     ::GetSystemMetrics(SM_CYSMCAPTION) + 1;
                 pInfo->SaveState(lpszProfileName, i);
             }
+#pragma warning( default : 4311 )
     }
 #endif //_SCB_REPLACE_MINIFRAME && !_SCB_MINIFRAME_CAPTION
 
@@ -1293,7 +1297,7 @@ BOOL CSCBMiniDockFrameWnd::Create(CWnd* pParent, DWORD dwBarStyle)
 #endif
 
     if (!CMiniFrameWnd::CreateEx(dwExStyle,
-        NULL, &afxChNil, dwStyle, rectDefault, pParent))
+        NULL, _T(""), dwStyle, rectDefault, pParent))
     {
         m_bInRecalcLayout = FALSE;
         return FALSE;

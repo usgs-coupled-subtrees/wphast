@@ -862,12 +862,19 @@ class ETSGUI_EXT_CLASS ETSLayoutPropertySheet : public CPropertySheet, protected
 public:
 	ETSLayoutPropertySheet(UINT nIDCaption, CWnd *pParentWnd = NULL, UINT iSelectPage = 0, LPCTSTR strName=NULL, bool bGripper=true);
 	ETSLayoutPropertySheet(LPCTSTR pszCaption, CWnd *pParentWnd = NULL, UINT iSelectPage = 0, LPCTSTR strName=NULL, bool bGripper=true);
+	//{{SRC_MODIFICATION
+	ETSLayoutPropertySheet(LPCTSTR pszCaption, CWnd* pParentWnd, UINT iSelectPage, HBITMAP hbmWatermark, HPALETTE hpalWatermark = NULL, HBITMAP hbmHeader = NULL, LPCTSTR strName=NULL, bool bGripper=true);
+	//}}SRC_MODIFICATION
 
 // Operationen
 public:
 	void	SetAutoDestroy()		{ m_bAutoDestroy = true; }
 	void	SetAutoDestroyPages()	{ m_bAutoDestroyPages = true; }
 	void	ModelessWithButtons()	{ m_bModelessButtons = true; }
+	//{{SRC_MODIFICATION
+	bool        HasGripper()	        { return m_bGripper; }
+	CStatusBar* GetStatusBar()	        { return &m_StatusBar; }
+	//}}SRC_MODIFICATION
 // Overrides
     virtual void AddMainArea(CPane paneRoot, CPaneBase itemTab);
     virtual void AddButtons(CPane paneBottom);

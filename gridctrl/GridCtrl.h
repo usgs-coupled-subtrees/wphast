@@ -276,7 +276,7 @@ public:
     void     SetGridColor(COLORREF clr)           { m_crGridColour = clr;             }
     COLORREF GetGridColor() const                 { return m_crGridColour;            }
 
-    int GetSelectedCount() const                  { return m_SelectedCellMap.GetCount(); }
+    int GetSelectedCount() const                  { return (int)m_SelectedCellMap.GetCount(); }
 
     CCellID GetFocusCell() const                  { return m_idCurrentCell;           }
 

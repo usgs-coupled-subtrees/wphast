@@ -49,6 +49,12 @@ CTitleTip::CTitleTip()
 
 CTitleTip::~CTitleTip()
 {
+	//{{ MOD:
+	//{{
+	if (this->GetSafeHwnd())
+	//}}
+	this->SendMessage(WM_CLOSE);
+	//}} MOD:
 }
 
 
@@ -201,6 +207,7 @@ BOOL CTitleTip::PreTranslateMessage(MSG* pMsg)
 	case WM_LBUTTONDOWN:
 	case WM_RBUTTONDOWN:
 	case WM_MBUTTONDOWN:
+		{
 		POINTS pts = MAKEPOINTS( pMsg->lParam );
 		POINT  point;
 		point.x = pts.x;
@@ -231,8 +238,9 @@ BOOL CTitleTip::PreTranslateMessage(MSG* pMsg)
 			pMsg->lParam = MAKELONG(point.x,point.y);
 		}
 
-        Hide();
+		Hide();
 		pWnd->PostMessage(pMsg->message,pMsg->wParam,pMsg->lParam);
+		}
 		return TRUE;	
 		
 	case WM_KEYDOWN:

@@ -1834,7 +1834,7 @@ COleDataSource* CGridCtrl::CopyTextFromGrid()
     char c = '\0';
     sf.Write(&c, 1);
 
-    DWORD dwLen = sf.GetLength();
+    DWORD dwLen = (DWORD)sf.GetLength();
     HGLOBAL hMem = sf.Detach();
     if (!hMem) 
         return NULL;

@@ -149,6 +149,10 @@
 #include "stdafx.h"
 #include "ETSLayout.h"
 
+//{{SRC
+///#include <uxtheme.h>
+//}}SRC
+
 using namespace ETSLayout;
 #pragma warning(disable: 4097 4610 4510 4100)
 
@@ -408,6 +412,7 @@ void ETSLayoutMgr::UpdateLayout()
 	else
 		Layout(rcClient);
 
+#ifdef SRC_SAVE // 
 	// Take special care of SpinButtons (Up-Down Controls) with Buddy set, enumerate
 	// all childs:
 	CWnd* pWndChild = GetWnd()->GetWindow(GW_CHILD);
@@ -417,7 +422,15 @@ void ETSLayoutMgr::UpdateLayout()
 		::GetClassName( pWndChild->GetSafeHwnd(), szClassName, MAX_PATH );
 		DWORD dwStyle = pWndChild->GetStyle();
 
+		//{{SRC
 		// is it a SpinButton?
+		if( _tcscmp(szClassName, UPDOWN_CLASS) == 0) {
+			TRACE("BUDDY: IsWindowVisible : %s\n", 
+				::IsWindowVisible(pWndChild->GetSafeHwnd()) ? _T("Yes") : _T("No"));
+
+		}
+		//}}SRC
+
 		if( _tcscmp(szClassName, UPDOWN_CLASS)==0 && ::IsWindowVisible(pWndChild->GetSafeHwnd()) ) {
 			HWND hwndBuddy = (HWND)::SendMessage( pWndChild->GetSafeHwnd(), UDM_GETBUDDY, 0, 0);
 			if( hwndBuddy != 0 && (dwStyle&(UDS_ALIGNRIGHT|UDS_ALIGNLEFT)) != 0 )
@@ -430,6 +443,7 @@ void ETSLayoutMgr::UpdateLayout()
 
 		pWndChild = pWndChild->GetWindow(GW_HWNDNEXT);
 	}
+#endif
 
 
 	GetWnd()->Invalidate();
@@ -485,7 +499,7 @@ void ETSLayoutMgr::EraseBkgnd(CDC* pDC)
 
 	CRgn	rgn;
 	rgn.CreateRectRgnIndirect(rcClient);
-    TRACE("CreateRgn (%d,%d,%d,%d)\n", rcClient.left, rcClient.top, rcClient.right, rcClient.bottom );
+    /// TRACE("CreateRgn (%d,%d,%d,%d)\n", rcClient.left, rcClient.top, rcClient.right, rcClient.bottom );
 
 	CRgn    rgnRect;
 	rgnRect.CreateRectRgn(0,0,0,0);
@@ -495,7 +509,11 @@ void ETSLayoutMgr::EraseBkgnd(CDC* pDC)
 
 	TCHAR szClassName[ MAX_PATH ];
 
-    pDC->SelectClipRgn(NULL);
+	// bool XP = IsAppThemed();
+	bool XP = true;
+	if (!XP) {
+		pDC->SelectClipRgn(NULL);
+	}
     
 	while( pWndChild ) {
 		
@@ -1694,6 +1712,10 @@ bool ETSLayoutMgr::Pane::resizeToGreedy(int& availSpace, int nGreedy, CArray<int
 
 bool ETSLayoutMgr::Pane::resizeTo(CRect& rcNewArea) 
 {
+	//{{SRC
+	if (m_paneItems.GetSize() == 0) return true;
+	//}}SRC
+
 	// There must be some items or subpanes
 	ASSERT(m_paneItems.GetSize());
 
@@ -1842,7 +1864,7 @@ ETSLayoutDialog::ETSLayoutDialog(UINT nID, CWnd* pParent /*=NULL*/, LPCTSTR strN
 }
 #pragma warning(default: 4355)
 
-BEGIN_MESSAGE_MAP(ETSLayoutDialog, CBaseDialog)
+BEGIN_MESSAGE_MAP(ETSLayoutDialog, CDialog)
 	//{{AFX_MSG_MAP(ETSLayoutDialog)
 	ON_WM_SIZE()
 	ON_WM_GETMINMAXINFO()
@@ -2006,7 +2028,7 @@ ETSLayoutDialogBar::ETSLayoutDialogBar()
 }
 #pragma warning(default: 4355)
 
-BEGIN_MESSAGE_MAP(ETSLayoutDialogBar, CBaseDialogBar)
+BEGIN_MESSAGE_MAP(ETSLayoutDialogBar, CDialogBar)
 	//{{AFX_MSG_MAP(ETSLayoutDialogBar)
 	ON_WM_SIZE()
 	ON_WM_GETMINMAXINFO()
@@ -2149,7 +2171,7 @@ ETSLayoutFormView::ETSLayoutFormView(UINT nID, LPCTSTR strName /*=NULL*/)
 }
 #pragma warning(default: 4355)
 
-BEGIN_MESSAGE_MAP(ETSLayoutFormView, CBaseFormView)
+BEGIN_MESSAGE_MAP(ETSLayoutFormView, CFormView)
 	//{{AFX_MSG_MAP(ETSLayoutFormView)
 	ON_WM_SIZE()
 	ON_WM_GETMINMAXINFO()
@@ -2286,7 +2308,7 @@ ETSLayoutPropertyPage::~ETSLayoutPropertyPage()
 }
 
 
-BEGIN_MESSAGE_MAP(ETSLayoutPropertyPage, CBasePropertyPage)
+BEGIN_MESSAGE_MAP(ETSLayoutPropertyPage, CPropertyPage)
 	//{{AFX_MSG_MAP(ETSLayoutPropertyPage)
 	ON_WM_SIZE()
 	ON_WM_GETMINMAXINFO()
@@ -2326,6 +2348,13 @@ void ETSLayoutPropertyPage::OnWindowPosChanged(WINDOWPOS FAR* lpwndpos)
 				::GetClassName( pWndChild->GetSafeHwnd(), szClassName, MAX_PATH );
 				DWORD dwStyle = pWndChild->GetStyle();
 
+				//{{SRC
+				// is it a SpinButton?
+				if( _tcscmp(szClassName, UPDOWN_CLASS) == 0) {
+					TRACE("BUDDY: IsWindowVisible : %s", 
+						::IsWindowVisible(pWndChild->GetSafeHwnd()) ? _T("Yes") : _T("No"));
+				}
+				//}}SRC
 				// is it a SpinButton?
 				if( _tcscmp(szClassName, UPDOWN_CLASS)==0 && ::IsWindowVisible(pWndChild->GetSafeHwnd()) ) {
 					HWND hwndBuddy = (HWND)::SendMessage( pWndChild->GetSafeHwnd(), UDM_GETBUDDY, 0, 0);
@@ -2489,7 +2518,17 @@ ETSLayoutPropertySheet::ETSLayoutPropertySheet(LPCTSTR pszCaption, CWnd* pParent
 {
 	Init(strName, bGripper);
 }
+//{{SRC_MODIFICATION
+ETSLayoutPropertySheet::ETSLayoutPropertySheet(LPCTSTR pszCaption, CWnd* pParentWnd, UINT iSelectPage,
+											   HBITMAP hbmWatermark, HPALETTE hpalWatermark, HBITMAP hbmHeader,
+											   LPCTSTR strName, bool bGripper)
+	: CPropertySheet(pszCaption, pParentWnd, iSelectPage, hbmWatermark, hpalWatermark, hbmHeader), ETSLayoutMgr( this )
+{
+	Init(strName, bGripper);
+}
+//}}SRC_MODIFICATION
 #pragma warning(default: 4355)
+
 
 void ETSLayoutPropertySheet::Init(LPCTSTR strName, bool bGripper)
 {
@@ -2704,7 +2743,7 @@ BOOL ETSLayoutPropertySheet::OnInitDialog()
 	pPage->GetClientRect(&rcPage);
 
 	CreateRoot(VERTICAL);
-	ASSERT(m_RootPane);
+	//// ASSERT(m_RootPane);
 
 	// Add Tabcontrol to root pane
 	m_ItemTab = item( GetTabControl(), GREEDY, 0, 0, 0, 0);
