@@ -1,0 +1,20 @@
+#include "StdAfx.h"
+#include "TestCPrintFreqPropertyPage.h"
+
+#include "PrintFreqPropertyPage.h"
+
+
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#endif
+
+void TestCPrintFreqPropertyPage::testDoModal(void)
+{
+	// For richedit in dialogs
+	::AfxInitRichEdit2();
+
+	CPropertySheet sheet("Test CPrintFreqPropertyPage", 0);
+	CPrintFreqPropertyPage page;
+	sheet.AddPage(&page);
+	sheet.DoModal();
+}

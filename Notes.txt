@@ -1,0 +1,35 @@
+Notes:
+Check 3DSMAX to see if keyboard input to the main scene is
+forwarded to the dialog boxes or not.
+
+Also check how 3DSMAX handles invalid data in dialog bars
+
+Use the following regexp to retrieve control ids from RC file
+Search:
+^.*\(IDC_[^,]*\),.*$
+Replace:
+\1
+
+To renumber #defines in RC file:
+Search:
+^.*\(IDC_[^,]*,\).*$
+Replace:
+\i(####)
+
+ie to change
+#define IDC_STATIC_P1_GB                1155
+#define IDC_STATIC_XP1                  1156
+#define IDC_EDIT_XP1                    1157
+#define IDC_SPIN_XP1                    1158
+to
+#define IDC_STATIC_P1_GB                1156
+#define IDC_STATIC_XP1                  1157
+#define IDC_EDIT_XP1                    1158
+#define IDC_SPIN_XP1                    1159
+
+Search:
+^\(.* \)[[:digit:]]+$
+
+Replace:
+\1\i(1156)
+

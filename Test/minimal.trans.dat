@@ -1,0 +1,39 @@
+SOLUTE_TRANSPORT	false
+UNITS
+	-time		s
+	-horizontal	m
+	-vertical	m
+	-head		m
+	-hydraulic	m/s
+	-specific	1/m
+GRID
+	-uniform X 
+		0 1 2
+	-uniform Y 
+		0 1 2
+	-uniform Z 
+		0 1 2
+	-print_orientation XY
+MEDIA
+	-zone	0 0 0 1 1 1
+		-Kx	.001
+		-Ky	.001
+		-Kz	.001
+		-porosity	.1
+		-storage	1e-6
+SPECIFIED_HEAD_BC
+	-zone	0 0 0 0 1 1
+		-head
+		    0    1
+	-zone	1 0 0 1 1 1
+		-head
+		    0    0
+HEAD_IC
+	-zone	0 0 0 1 1 1
+		-head	1
+TIME_CONTROL
+	-time_step
+		0	100
+	-time_change
+		100
+END		

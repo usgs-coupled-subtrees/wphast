@@ -1,0 +1,21 @@
+6/3/2004
+MultiTimeControl
+    Cells that should be non-editable are editable if the column has dropdown button
+
+6/2/2004
+NewModelWizard
+	Forward and back changing pages that add and remove pages
+	is buggy
+
+
+5/27/2004
+
+1. Click new zone button
+2. Attempt to edit an existing zone using CPropertyTreeControlBar
+
+	see the following:
+		vtkInteractorStyleTrackballCameraEx::HighlightProp3D
+		CZoneActor::Select(CWPhastView* pView)
+		CPropertyTreeControlBar::OnLButtonDown(UINT nFlags, CPoint point)
+		void CWPhastView::EndNewZone(void)
+		CViewVTKCommand::OnMouseMoveEvent

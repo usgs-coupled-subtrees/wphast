@@ -1,0 +1,2861 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)\r\n"
+    "LANGUAGE 9, 1\r\n"
+    "#pragma code_page(1252)\r\n"
+    "#include ""res\\WPhast.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "#include ""afxres.rc""         // Standard components\r\n"
+    "#include ""afxprint.rc""       // printing/print preview resources\r\n"
+    "#endif\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_MAINFRAME           ICON                    "res\\WPhast.ico"
+IDR_WPhastTYPE          ICON                    "res\\WPhastDoc.ico"
+IDR_MAINFRAME_SDI       ICON                    "res\\idr_main.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDR_MAINFRAME           BITMAP                  "res\\Toolbar.bmp"
+IDB_CHECKS              BITMAP                  "res\\checks.bmp"
+IDB_CHECKS_TREE         BITMAP                  "res\\checks_tree.bmp"
+IDB_BANNER              BITMAP                  "res\\header.bmp"
+IDB_WATERMARK           BITMAP                  "res\\watermrk.bmp"
+IDR_LONG_TOOLBAR        BITMAP                  "res\\LongToolBar.bmp"
+IDB_EYES_TREE           BITMAP                  "res\\eyes_tree.bmp"
+IDB_EYES_TREE2          BITMAP                  "res\\eyes_tree2.bmp"
+IDB_EYES_TREE3          BITMAP                  "res\\eyes_tree3.bmp"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Toolbar
+//
+
+IDR_MAINFRAME TOOLBAR  16, 15
+BEGIN
+    BUTTON      ID_FILE_NEW
+    BUTTON      ID_FILE_OPEN
+    BUTTON      ID_FILE_SAVE
+    SEPARATOR
+    BUTTON      ID_EDIT_CUT
+    BUTTON      ID_EDIT_COPY
+    BUTTON      ID_EDIT_PASTE
+    SEPARATOR
+    BUTTON      ID_FILE_PRINT
+    BUTTON      ID_APP_ABOUT
+    SEPARATOR
+    BUTTON      ID_TOOLS_NEWZONE
+    BUTTON      ID_TOOLS_NEWWELL
+    BUTTON      ID_TOOLS_NEWSTRESSPERIOD
+    BUTTON      ID_FILE_RUN
+END
+
+IDR_LONG_TOOLBAR TOOLBAR  121, 15
+BEGIN
+    BUTTON      ID_TOOLS_NEWZONE
+    BUTTON      ID_TOOLS_NEWSTRESSPERIOD
+    BUTTON      ID_FILE_RUN
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_MAINFRAME MENU 
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "&New\tCtrl+N",                ID_FILE_NEW
+        MENUITEM "&Open...\tCtrl+O",            ID_FILE_OPEN
+        MENUITEM SEPARATOR
+        MENUITEM "P&rint Setup...",             ID_FILE_PRINT_SETUP
+        MENUITEM SEPARATOR
+        MENUITEM "Recent File",                 ID_FILE_MRU_FILE1, GRAYED
+        MENUITEM SEPARATOR
+        MENUITEM "&Close",                      ID_FILE_CLOSE
+        MENUITEM "E&xit",                       ID_APP_EXIT
+    END
+    POPUP "&View"
+    BEGIN
+        MENUITEM "&Toolbar",                    ID_VIEW_TOOLBAR
+        MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
+        MENUITEM SEPARATOR
+        MENUITEM "&Reset Default Layout",       ID_VIEW_RESETDEFAULTLAYOUT
+    END
+    POPUP "&Help"
+    BEGIN
+        MENUITEM "&About WPhast...",            ID_APP_ABOUT
+    END
+END
+
+IDR_WPhastTYPE MENU 
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "&New\tCtrl+N",                ID_FILE_NEW
+        MENUITEM "&Open...\tCtrl+O",            ID_FILE_OPEN
+        MENUITEM "&Close",                      ID_FILE_CLOSE
+        MENUITEM "&Save\tCtrl+S",               ID_FILE_SAVE
+        MENUITEM "Save &As...",                 ID_FILE_SAVE_AS
+        MENUITEM SEPARATOR
+        MENUITEM "&Print...\tCtrl+P",           ID_FILE_PRINT
+        MENUITEM "Print Pre&view",              ID_FILE_PRINT_PREVIEW
+        MENUITEM "P&rint Setup...",             ID_FILE_PRINT_SETUP
+        MENUITEM SEPARATOR
+        MENUITEM "Recent File",                 ID_FILE_MRU_FILE1, GRAYED
+        MENUITEM SEPARATOR
+        MENUITEM "E&xit",                       ID_APP_EXIT
+    END
+    POPUP "&Edit"
+    BEGIN
+        MENUITEM "&Undo\tCtrl+Z",               ID_EDIT_UNDO
+        MENUITEM "&Redo\t Ctrl+Y",              57644
+        MENUITEM SEPARATOR
+        MENUITEM "Cu&t\tCtrl+X",                ID_EDIT_CUT
+        MENUITEM "&Copy\tCtrl+C",               ID_EDIT_COPY
+        MENUITEM "&Paste\tCtrl+V",              ID_EDIT_PASTE
+    END
+    POPUP "&View"
+    BEGIN
+        MENUITEM "&Toolbar",                    ID_VIEW_TOOLBAR
+        MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
+        MENUITEM SEPARATOR
+        MENUITEM "&Reset Default Layout",       ID_VIEW_RESETDEFAULTLAYOUT
+    END
+    POPUP "&Window"
+    BEGIN
+        MENUITEM "&New Window",                 ID_WINDOW_NEW
+        MENUITEM "&Cascade",                    ID_WINDOW_CASCADE
+        MENUITEM "&Tile",                       ID_WINDOW_TILE_HORZ
+        MENUITEM "&Arrange Icons",              ID_WINDOW_ARRANGE
+    END
+    POPUP "&Help"
+    BEGIN
+        MENUITEM "&About WPhast...",            ID_APP_ABOUT
+    END
+END
+
+IDR_MAINFRAME_SDI MENU 
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "&New\tCtrl+N",                57600
+        MENUITEM "&Open...\tCtrl+O",            57601
+        MENUITEM "&Save\tCtrl+S",               57603
+        MENUITEM "Save &As...",                 57604
+        MENUITEM SEPARATOR
+        MENUITEM "&Import",                     ID_FILE_IMPORT
+        MENUITEM "&Export",                     ID_FILE_EXPORT
+        MENUITEM SEPARATOR
+        MENUITEM "&Run",                        ID_FILE_RUN
+        MENUITEM SEPARATOR
+        MENUITEM "&Print...\tCtrl+P",           57607
+        MENUITEM "Print Pre&view",              57609
+        MENUITEM "P&rint Setup...",             57606
+        MENUITEM SEPARATOR
+        MENUITEM "Recent File",                 57616, GRAYED
+        MENUITEM SEPARATOR
+        MENUITEM "E&xit",                       57665
+    END
+    POPUP "&Edit"
+    BEGIN
+        MENUITEM "&Undo\tCtrl+Z",               57643
+        MENUITEM "&Redo\t Ctrl+Y",              57644
+        MENUITEM SEPARATOR
+        MENUITEM "Cu&t\tCtrl+X",                57635
+        MENUITEM "&Copy\tCtrl+C",               57634
+        MENUITEM "&Paste\tCtrl+V",              57637
+    END
+    POPUP "&View"
+    BEGIN
+        MENUITEM "&Toolbar",                    59392
+        MENUITEM "&Status Bar",                 59393
+        MENUITEM SEPARATOR
+        MENUITEM "A&xes",                       ID_VIEW_AXES
+        MENUITEM "&Grid",                       ID_VIEW_GRID
+        MENUITEM "S&ite Map",                   ID_VIEW_SITEMAP
+        MENUITEM SEPARATOR
+        POPUP "IC Zones"
+        BEGIN
+            MENUITEM "Hide All",                    ID_ICZONES_HIDEALL
+            MENUITEM "Show Selected",               ID_ICZONES_SHOWSELECTED
+            MENUITEM SEPARATOR
+            MENUITEM "Select All",                  ID_ICZONES_SELECTALL
+            MENUITEM "Unselect All",                ID_ICZONES_UNSELECTALL
+        END
+        POPUP "BC Zones"
+        BEGIN
+            MENUITEM "Hide All",                    ID_BCZONES_HIDEALL
+            MENUITEM "Show Selected",               ID_BCZONES_SHOWSELECTED
+            MENUITEM SEPARATOR
+            MENUITEM "Select All",                  ID_BCZONES_SELECTALL
+            MENUITEM "Unselect All",                ID_BCZONES_UNSELECTALL
+        END
+        POPUP "&Media Zones"
+        BEGIN
+            MENUITEM "Hide All",                    ID_MEDIAZONES_HIDEALL
+            MENUITEM "Show Selected",               ID_MEDIAZONES_SHOWSELECTED
+
+            MENUITEM SEPARATOR
+            MENUITEM "Select All",                  ID_MEDIAZONES_SELECTALL
+            MENUITEM "Unselect All",                ID_MEDIAZONES_UNSELECTALL
+
+        END
+        POPUP "&Wells"
+        BEGIN
+            MENUITEM "Hide All",                    ID_WELLS_HIDEALL
+            MENUITEM "Show Selected",               ID_WELLS_SHOWSELECTED
+            MENUITEM SEPARATOR
+            MENUITEM "Select All",                  ID_WELLS_SELECTALL
+            MENUITEM "Unselect All",                ID_WELLS_UNSELECTALL
+        END
+        MENUITEM SEPARATOR
+        MENUITEM "View From &Next Direction\tCtrl+D", 
+                                                ID_VIEW_FROM_NEXT_DIRECTION
+        POPUP "View From &Direction"
+        BEGIN
+            MENUITEM "+x",                          ID_VIEW_FROM_PX
+            MENUITEM "-x",                          ID_VIEW_FROM_NX
+            MENUITEM "+y",                          ID_VIEW_FROM_PY
+            MENUITEM "-y",                          ID_VIEW_FROM_NY
+            MENUITEM "+z",                          ID_VIEW_FROM_PZ
+            MENUITEM "-z",                          ID_VIEW_FROM_NZ
+        END
+        MENUITEM SEPARATOR
+        POPUP "Set &Projection To"
+        BEGIN
+            MENUITEM "&Perspective",                ID_SETPROJECTIONTO_PERSPECTIVE
+
+            MENUITEM "Pa&rallel",                   ID_SETPROJECTIONTO_PARALLEL
+
+        END
+        MENUITEM SEPARATOR
+        MENUITEM "&Reset Default Layout",       ID_VIEW_RESETDEFAULTLAYOUT
+    END
+    POPUP "&Tools"
+    BEGIN
+        MENUITEM "New &Well",                   ID_TOOLS_NEWWELL
+        MENUITEM "New &Zone",                   ID_TOOLS_NEWZONE
+        MENUITEM "New &Simulation Period...",   ID_TOOLS_NEWSTRESSPERIOD
+        MENUITEM SEPARATOR
+        MENUITEM "&Geometry...",                ID_TOOLS_GEOMETRY
+    END
+    POPUP "&Help"
+    BEGIN
+        MENUITEM "&About WPhast...",            57664
+    END
+END
+
+IDR_MENU1 MENU 
+BEGIN
+    POPUP "Tools"
+    BEGIN
+        MENUITEM "New Zone",                    ID_TOOLS_NEWZONE
+        MENUITEM "New Simulation Period",       ID_TOOLS_NEWSTRESSPERIOD
+    END
+END
+
+IDR_POPUP MENU 
+BEGIN
+    POPUP "_POPUP_"
+    BEGIN
+        MENUITEM "Cu&t\tCtrl+X",                ID_EDIT_CUT
+        MENUITEM "&Copy\tCtrl+C",               ID_EDIT_COPY
+        MENUITEM "&Paste\tCtrl+V",              ID_EDIT_PASTE
+        MENUITEM "&Delete\tDel",                ID_EDIT_CLEAR
+    END
+END
+
+IDR_MAP_DIALOG_MENU MENU 
+BEGIN
+    MENUITEM "&File",                       0
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Accelerator
+//
+
+IDR_MAINFRAME ACCELERATORS 
+BEGIN
+    "C",            ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
+    VK_INSERT,      ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
+    VK_DELETE,      ID_EDIT_CUT,            VIRTKEY, SHIFT, NOINVERT
+    "X",            ID_EDIT_CUT,            VIRTKEY, CONTROL, NOINVERT
+    "V",            ID_EDIT_PASTE,          VIRTKEY, CONTROL, NOINVERT
+    VK_INSERT,      ID_EDIT_PASTE,          VIRTKEY, SHIFT, NOINVERT
+    VK_BACK,        ID_EDIT_UNDO,           VIRTKEY, ALT, NOINVERT
+    "Z",            ID_EDIT_UNDO,           VIRTKEY, CONTROL, NOINVERT
+    "N",            ID_FILE_NEW,            VIRTKEY, CONTROL, NOINVERT
+    "O",            ID_FILE_OPEN,           VIRTKEY, CONTROL, NOINVERT
+    "P",            ID_FILE_PRINT,          VIRTKEY, CONTROL, NOINVERT
+    "S",            ID_FILE_SAVE,           VIRTKEY, CONTROL, NOINVERT
+    VK_F6,          ID_NEXT_PANE,           VIRTKEY, NOINVERT
+    VK_F6,          ID_PREV_PANE,           VIRTKEY, SHIFT, NOINVERT
+    "Y",            ID_EDIT_REDO,           VIRTKEY, CONTROL, NOINVERT
+END
+
+IDR_MAINFRAME_SDI ACCELERATORS 
+BEGIN
+    "C",            ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
+    VK_INSERT,      ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
+    VK_DELETE,      ID_EDIT_CUT,            VIRTKEY, SHIFT, NOINVERT
+    "X",            ID_EDIT_CUT,            VIRTKEY, CONTROL, NOINVERT
+    "V",            ID_EDIT_PASTE,          VIRTKEY, CONTROL, NOINVERT
+    VK_INSERT,      ID_EDIT_PASTE,          VIRTKEY, SHIFT, NOINVERT
+    "Y",            ID_EDIT_REDO,           VIRTKEY, CONTROL, NOINVERT
+    VK_BACK,        ID_EDIT_UNDO,           VIRTKEY, ALT, NOINVERT
+    "Z",            ID_EDIT_UNDO,           VIRTKEY, CONTROL, NOINVERT
+    "N",            ID_FILE_NEW,            VIRTKEY, CONTROL, NOINVERT
+    "O",            ID_FILE_OPEN,           VIRTKEY, CONTROL, NOINVERT
+    "P",            ID_FILE_PRINT,          VIRTKEY, CONTROL, NOINVERT
+    "S",            ID_FILE_SAVE,           VIRTKEY, CONTROL, NOINVERT
+    VK_F6,          ID_NEXT_PANE,           VIRTKEY, NOINVERT
+    VK_F6,          ID_PREV_PANE,           VIRTKEY, SHIFT, NOINVERT
+    "D",            ID_VIEW_FROM_NEXT_DIRECTION, VIRTKEY, CONTROL, NOINVERT
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_ABOUTBOX DIALOGEX 0, 0, 235, 66
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CLIPSIBLINGS | 
+    WS_CLIPCHILDREN | WS_CAPTION | WS_SYSMENU
+CAPTION "About WPhast"
+FONT 8, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+    ICON            IDR_MAINFRAME,IDC_STATIC,11,17,21,20
+    LTEXT           "WPhast Version 1.0",IDC_STATIC,40,10,119,8,SS_NOPREFIX
+    LTEXT           "Copyright (C) 2003",IDC_STATIC,40,25,119,8
+    DEFPUSHBUTTON   "OK",IDOK,178,7,50,16,WS_GROUP
+END
+
+IDD_PROPS_CUBE DIALOGEX 0, 0, 127, 132
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    LTEXT           "X:",IDC_STATIC_X,7,10,38,8,0,WS_EX_RIGHT
+    LTEXT           "Y:",IDC_STATIC,7,26,38,8,0,WS_EX_RIGHT
+    LTEXT           "Z:",IDC_STATIC,7,42,38,8,0,WS_EX_RIGHT
+    EDITTEXT        IDC_EDIT_X,47,8,46,12,ES_AUTOHSCROLL | ES_WANTRETURN
+    EDITTEXT        IDC_EDIT_Y,47,24,46,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_Z,47,40,46,12,ES_AUTOHSCROLL
+    LTEXT           "Length (X):",IDC_LENGTH_STATIC,7,63,38,8,0,WS_EX_RIGHT
+    LTEXT           "Width (Y):",IDC_STATIC,7,79,38,8,0,WS_EX_RIGHT
+    LTEXT           "Height (Z):",IDC_STATIC,7,95,38,8,0,WS_EX_RIGHT
+    EDITTEXT        IDC_EDIT_LENGTH,47,61,46,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_WIDTH,47,77,46,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_HEIGHT,47,93,46,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "Apply",IDC_APPLY,52,111,23,14
+    EDITTEXT        IDC_EDIT_HEIGHT_UNITS,95,95,23,12,ES_AUTOHSCROLL | 
+                    ES_READONLY | NOT WS_BORDER
+    EDITTEXT        IDC_EDIT_WIDTH_UNITS,95,79,23,12,ES_AUTOHSCROLL | 
+                    ES_READONLY | NOT WS_BORDER
+    EDITTEXT        IDC_EDIT_LENGTH_UNITS,95,63,23,12,ES_AUTOHSCROLL | 
+                    ES_READONLY | NOT WS_BORDER
+    EDITTEXT        IDC_EDIT_X_UNITS,95,10,23,12,ES_AUTOHSCROLL | 
+                    ES_READONLY | NOT WS_BORDER
+    EDITTEXT        IDC_EDIT_Y_UNITS,95,26,23,12,ES_AUTOHSCROLL | 
+                    ES_READONLY | NOT WS_BORDER
+    EDITTEXT        IDC_EDIT_Z_UNITS,95,42,23,12,ES_AUTOHSCROLL | 
+                    ES_READONLY | NOT WS_BORDER
+END
+
+IDD_MEDIA_PROPPAGE DIALOGEX 0, 0, 235, 242
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Media Properties"
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    CONTROL         "",IDC_PROP_TREE,"SysTreeView32",TVS_SHOWSELALWAYS | 
+                    TVS_NOSCROLL | WS_TABSTOP,7,7,82,128,WS_EX_CLIENTEDGE
+    CONTROL         "Single Value",IDC_SINGLE_VALUE_RADIO,"Button",
+                    BS_AUTORADIOBUTTON | WS_GROUP,101,7,54,10
+    CONTROL         "Linear Interpolation",IDC_LINEAR_INTERPOLATION_RADIO,
+                    "Button",BS_AUTORADIOBUTTON,101,31,79,10
+    LTEXT           "Value:",IDC_SINGLE_VALUE_STATIC,126,19,21,8
+    EDITTEXT        IDC_SINGLE_VALUE_EDIT,153,17,46,12,ES_AUTOHSCROLL
+    CONTROL         "X",IDC_X_RADIO,"Button",BS_AUTORADIOBUTTON | WS_GROUP,
+                    124,43,20,10
+    CONTROL         "Y",IDC_Y_RADIO,"Button",BS_AUTORADIOBUTTON,146,43,20,10
+    CONTROL         "Z",IDC_Z_RADIO,"Button",BS_AUTORADIOBUTTON,168,43,20,10
+    LTEXT           "Value 1:",IDC_VALUE1_STATIC,152,56,27,8
+    EDITTEXT        IDC_VALUE1_EDIT,182,54,46,12,ES_AUTOHSCROLL
+    LTEXT           "Distance 1:",IDC_DISTANCE1_STATIC,142,72,37,8
+    EDITTEXT        IDC_DISTANCE1_EDIT,182,70,46,12,ES_AUTOHSCROLL
+    LTEXT           "Value 2:",IDC_VALUE2_STATIC,152,88,27,8
+    EDITTEXT        IDC_VALUE2_EDIT,182,86,46,12,ES_AUTOHSCROLL
+    LTEXT           "Distance 2:",IDC_DISTANCE2_STATIC,142,104,37,8
+    EDITTEXT        IDC_DISTANCE2_EDIT,182,102,46,12,ES_AUTOHSCROLL
+    CONTROL         "",IDC_DESC_RICHEDIT,"RichEdit20A",ES_MULTILINE | 
+                    ES_AUTOHSCROLL | ES_READONLY | WS_BORDER | WS_VSCROLL | 
+                    WS_HSCROLL | WS_TABSTOP,7,142,221,93
+END
+
+IDD_GRID_PROPPAGE_OLD DIALOGEX 0, 0, 317, 193
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Grid Properties"
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    LTEXT           "Xmin:",IDC_STATIC,35,47,18,8,0,WS_EX_RIGHT
+    EDITTEXT        IDC_XMIN_EDIT,56,45,46,12,ES_AUTOHSCROLL | ES_WANTRETURN
+    LTEXT           "Xmax:",IDC_STATIC,122,47,21,8,0,WS_EX_RIGHT
+    EDITTEXT        IDC_XMAX_EDIT,145,45,46,12,ES_AUTOHSCROLL | 
+                    ES_WANTRETURN
+    LTEXT           "X Nodes:",IDC_STATIC,210,47,30,8
+    EDITTEXT        IDC_X_NODES_EDIT,241,45,34,12,ES_AUTOHSCROLL
+    CONTROL         "",IDC_X_SPIN,"msctls_updown32",UDS_SETBUDDYINT | 
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,264,44,11,
+                    12
+    LTEXT           "Ymin:",IDC_STATIC,35,77,18,8,0,WS_EX_RIGHT
+    EDITTEXT        IDC_YMIN_EDIT,56,75,46,12,ES_AUTOHSCROLL
+    LTEXT           "Ymax:",IDC_STATIC,122,77,21,8,0,WS_EX_RIGHT
+    EDITTEXT        IDC_YMAX_EDIT,145,75,46,12,ES_AUTOHSCROLL
+    LTEXT           "Y Nodes:",IDC_STATIC,210,77,30,8
+    EDITTEXT        IDC_Y_NODES_EDIT,241,76,34,12,ES_AUTOHSCROLL
+    CONTROL         "",IDC_Y_SPIN,"msctls_updown32",UDS_SETBUDDYINT | 
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,264,75,11,
+                    12
+    LTEXT           "Zmin:",IDC_STATIC,35,106,18,8,0,WS_EX_RIGHT
+    EDITTEXT        IDC_ZMIN_EDIT,56,104,46,12,ES_AUTOHSCROLL
+    LTEXT           "Zmax:",IDC_STATIC,122,106,21,8,0,WS_EX_RIGHT
+    EDITTEXT        IDC_ZMAX_EDIT,145,104,46,12,ES_AUTOHSCROLL
+    LTEXT           "Z Nodes:",IDC_STATIC,210,107,30,8
+    EDITTEXT        IDC_Z_NODES_EDIT,241,105,34,12,ES_AUTOHSCROLL
+    CONTROL         "",IDC_Z_SPIN,"msctls_updown32",UDS_SETBUDDYINT | 
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,264,103,
+                    11,12
+    CONTROL         "Flow Only (No solute transport)",IDC_FLOW_ONLY,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,100,140,117,10
+END
+
+IDD_SCALE_PROPPAGE DIALOGEX 0, 0, 140, 90
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Scale"
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    LTEXT           "x:",IDC_STATIC,39,20,8,8
+    EDITTEXT        IDC_XSCALE,52,17,40,12,ES_AUTOHSCROLL
+    LTEXT           "y:",IDC_STATIC,39,39,8,8
+    EDITTEXT        IDC_YSCALE,52,38,40,12,ES_AUTOHSCROLL
+    LTEXT           "z:",IDC_STATIC,39,58,8,8
+    EDITTEXT        IDC_ZSCALE,52,57,40,12,ES_AUTOHSCROLL
+END
+
+IDD_NEW_ZONE_PROPPAGE DIALOGEX 0, 0, 317, 193
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Choose Type of Zone"
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    CONTROL         "",IDC_TREE_ZONES,"SysTreeView32",TVS_HASBUTTONS | 
+                    TVS_HASLINES | TVS_LINESATROOT | TVS_DISABLEDRAGDROP | 
+                    TVS_SHOWSELALWAYS | TVS_NOSCROLL | WS_BORDER | 
+                    WS_TABSTOP,7,7,144,179,WS_EX_CLIENTEDGE
+END
+
+IDD_BC_FLUX_PROPPAGE DIALOGEX 0, 0, 235, 242
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Flux Properties"
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    CONTROL         "",IDC_PROP_TREE,"SysTreeView32",TVS_SHOWSELALWAYS | 
+                    TVS_NOSCROLL | WS_TABSTOP,7,40,82,128,WS_EX_CLIENTEDGE
+    CONTROL         "Single Value",IDC_SINGLE_VALUE_RADIO,"Button",
+                    BS_AUTORADIOBUTTON | WS_GROUP,101,40,54,10
+    CONTROL         "Linear Interpolation",IDC_LINEAR_INTERPOLATION_RADIO,
+                    "Button",BS_AUTORADIOBUTTON,101,64,79,10
+    LTEXT           "Value:",IDC_SINGLE_VALUE_STATIC,126,52,21,8
+    EDITTEXT        IDC_SINGLE_VALUE_EDIT,153,50,46,12,ES_AUTOHSCROLL
+    CONTROL         "X",IDC_X_RADIO,"Button",BS_AUTORADIOBUTTON | WS_GROUP,
+                    124,76,20,10
+    CONTROL         "Y",IDC_Y_RADIO,"Button",BS_AUTORADIOBUTTON,146,76,20,10
+    CONTROL         "Z",IDC_Z_RADIO,"Button",BS_AUTORADIOBUTTON,168,76,20,10
+    LTEXT           "Value 1:",IDC_VALUE1_STATIC,152,89,27,8
+    EDITTEXT        IDC_VALUE1_EDIT,182,87,46,12,ES_AUTOHSCROLL
+    LTEXT           "Distance 1:",IDC_DISTANCE1_STATIC,142,105,37,8
+    EDITTEXT        IDC_DISTANCE1_EDIT,182,103,46,12,ES_AUTOHSCROLL
+    LTEXT           "Value 2:",IDC_VALUE2_STATIC,152,121,27,8
+    EDITTEXT        IDC_VALUE2_EDIT,182,119,46,12,ES_AUTOHSCROLL
+    LTEXT           "Distance 2:",IDC_DISTANCE2_STATIC,142,137,37,8
+    EDITTEXT        IDC_DISTANCE2_EDIT,182,135,46,12,ES_AUTOHSCROLL
+    LTEXT           "Solution type:",IDC_SOL_TYPE_STATIC,104,148,46,8,NOT 
+                    WS_VISIBLE | WS_DISABLED
+    CONTROL         "Associated",IDC_ASSOC_RADIO,"Button",BS_AUTORADIOBUTTON | 
+                    NOT WS_VISIBLE | WS_DISABLED,110,158,51,10
+    CONTROL         "Fixed",IDC_FIXED_RADIO,"Button",BS_AUTORADIOBUTTON | 
+                    NOT WS_VISIBLE | WS_DISABLED,174,158,33,10
+    GROUPBOX        "Face:",IDC_FACE_STATIC,7,7,221,24
+    CONTROL         "X",IDC_FACE_X_RADIO,"Button",BS_AUTORADIOBUTTON | 
+                    WS_GROUP,27,17,20,10
+    CONTROL         "Y",IDC_FACE_Y_RADIO,"Button",BS_AUTORADIOBUTTON,49,17,
+                    20,10
+    CONTROL         "Z",IDC_FACE_Z_RADIO,"Button",BS_AUTORADIOBUTTON,71,17,
+                    20,10
+    CONTROL         "",IDC_DESC_RICHEDIT,"RichEdit20A",ES_MULTILINE | 
+                    ES_AUTOHSCROLL | ES_READONLY | WS_BORDER | WS_VSCROLL | 
+                    WS_HSCROLL,7,178,221,58
+END
+
+IDD_TEST_PROPPAGE_LARGE DIALOGEX 0, 0, 359, 214
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Test Property Page"
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    LISTBOX         IDC_LIST1,7,60,104,146,LBS_SORT | LBS_OWNERDRAWFIXED | 
+                    LBS_HASSTRINGS | LBS_NOINTEGRALHEIGHT | WS_VSCROLL | 
+                    WS_TABSTOP
+    CONTROL         "",IDC_TREE1,"SysTreeView32",TVS_SHOWSELALWAYS | 
+                    TVS_NOSCROLL | WS_BORDER | WS_TABSTOP,128,60,104,146
+    CONTROL         "",IDC_LIST2,"SysListView32",LVS_LIST | 
+                    LVS_SHOWSELALWAYS | LVS_ALIGNLEFT | WS_BORDER | 
+                    WS_TABSTOP,249,60,104,146
+    LTEXT           "Value 1:",IDC_VALUE1_STATIC,127,9,27,8
+    EDITTEXT        IDC_VALUE1_EDIT,157,7,46,12,ES_AUTOHSCROLL
+    LTEXT           "Value 2:",IDC_VALUE2_STATIC,127,28,27,8
+    EDITTEXT        IDC_VALUE2_EDIT,157,26,46,12,ES_AUTOHSCROLL
+END
+
+IDD_PROTO_PROPPAGE DIALOGEX 0, 0, 235, 199
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Prototype Property Page"
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    CONTROL         "",IDC_PROP_TREE,"SysTreeView32",TVS_SHOWSELALWAYS | 
+                    TVS_CHECKBOXES | TVS_NOSCROLL | WS_TABSTOP,7,7,82,123,
+                    WS_EX_CLIENTEDGE
+    CONTROL         "Single Value",IDC_SINGLE_VALUE_RADIO,"Button",
+                    BS_AUTORADIOBUTTON | WS_GROUP,101,7,54,10
+    CONTROL         "Linear Interpolation",IDC_LINEAR_INTERPOLATION_RADIO,
+                    "Button",BS_AUTORADIOBUTTON,101,31,79,10
+    LTEXT           "Value:",IDC_SINGLE_VALUE_STATIC,126,19,21,8
+    EDITTEXT        IDC_SINGLE_VALUE_EDIT,153,17,46,12,ES_AUTOHSCROLL
+    CONTROL         "X",IDC_X_RADIO,"Button",BS_AUTORADIOBUTTON | WS_GROUP,
+                    124,43,20,10
+    CONTROL         "Y",IDC_Y_RADIO,"Button",BS_AUTORADIOBUTTON,146,43,20,10
+    CONTROL         "Z",IDC_Z_RADIO,"Button",BS_AUTORADIOBUTTON,168,43,20,10
+    LTEXT           "Value 1:",IDC_VALUE1_STATIC,152,57,27,8
+    EDITTEXT        IDC_VALUE1_EDIT,182,55,46,12,ES_AUTOHSCROLL
+    LTEXT           "Distance 1:",IDC_DISTANCE1_STATIC,142,72,37,8
+    EDITTEXT        IDC_DISTANCE1_EDIT,182,71,46,12,ES_AUTOHSCROLL
+    LTEXT           "Value 2:",IDC_VALUE2_STATIC,152,88,27,8
+    EDITTEXT        IDC_VALUE2_EDIT,182,86,46,12,ES_AUTOHSCROLL
+    LTEXT           "Distance 2:",IDC_DISTANCE2_STATIC,142,104,37,8
+    EDITTEXT        IDC_DISTANCE2_EDIT,182,102,46,12,ES_AUTOHSCROLL
+    CONTROL         "",IDC_RICHEDIT22,"RichEdit20A",ES_AUTOHSCROLL | 
+                    WS_BORDER | WS_TABSTOP,7,137,221,55
+    LTEXT           "Face:",IDC_FACE_STATIC,103,121,19,8
+    CONTROL         "X",IDC_FACE_X_RADIO,"Button",BS_AUTORADIOBUTTON | 
+                    WS_GROUP,126,121,20,10
+    CONTROL         "Y",IDC_FACE_Y_RADIO,"Button",BS_AUTORADIOBUTTON,148,121,
+                    20,10
+    CONTROL         "Z",IDC_FACE_Z_RADIO,"Button",BS_AUTORADIOBUTTON,170,121,
+                    20,10
+END
+
+IDD_PROTO2_PROPPAGE DIALOGEX 0, 0, 235, 215
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Prototype 2"
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    CONTROL         "",IDC_PROP_LIST,"SysListView32",LVS_LIST | 
+                    LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_ALIGNLEFT | 
+                    WS_BORDER | WS_TABSTOP,7,38,87,108
+    CONTROL         "Single Value",IDC_SINGLE_VALUE_RADIO,"Button",
+                    BS_AUTORADIOBUTTON | WS_GROUP,101,37,54,10
+    CONTROL         "Linear Interpolation",IDC_LINEAR_INTERPOLATION_RADIO,
+                    "Button",BS_AUTORADIOBUTTON,101,61,79,10
+    LTEXT           "Value:",IDC_SINGLE_VALUE_STATIC,126,49,21,8
+    EDITTEXT        IDC_SINGLE_VALUE_EDIT,153,47,46,12,ES_AUTOHSCROLL
+    CONTROL         "X",IDC_X_RADIO,"Button",BS_AUTORADIOBUTTON | WS_GROUP,
+                    124,73,20,10
+    CONTROL         "Y",IDC_Y_RADIO,"Button",BS_AUTORADIOBUTTON,146,73,20,10
+    CONTROL         "Z",IDC_Z_RADIO,"Button",BS_AUTORADIOBUTTON,168,73,20,10
+    LTEXT           "Value 1:",IDC_VALUE1_STATIC,152,87,27,8
+    EDITTEXT        IDC_VALUE1_EDIT,182,85,46,12,ES_AUTOHSCROLL
+    LTEXT           "Distance 1:",IDC_DISTANCE1_STATIC,142,102,37,8
+    EDITTEXT        IDC_DISTANCE1_EDIT,182,101,46,12,ES_AUTOHSCROLL
+    LTEXT           "Value 2:",IDC_VALUE2_STATIC,152,118,27,8
+    EDITTEXT        IDC_VALUE2_EDIT,182,116,46,12,ES_AUTOHSCROLL
+    LTEXT           "Distance 2:",IDC_DISTANCE2_STATIC,142,134,37,8
+    EDITTEXT        IDC_DISTANCE2_EDIT,182,132,46,12,ES_AUTOHSCROLL
+    CONTROL         "X",IDC_FACE_X_RADIO,"Button",BS_AUTORADIOBUTTON | 
+                    WS_GROUP,23,17,20,10
+    CONTROL         "Y",IDC_FACE_Y_RADIO,"Button",BS_AUTORADIOBUTTON,45,17,
+                    20,10
+    CONTROL         "Z",IDC_FACE_Z_RADIO,"Button",BS_AUTORADIOBUTTON,67,17,
+                    20,10
+    CONTROL         "",IDC_RICHEDIT22,"RichEdit20A",ES_AUTOHSCROLL | 
+                    WS_BORDER | WS_TABSTOP,7,154,221,55
+    GROUPBOX        "Face",IDC_STATIC,7,7,221,26
+END
+
+IDD_PROTO3_PROPPAGE DIALOGEX 0, 0, 235, 242
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Prototype 3"
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    CONTROL         "",IDC_PROP_TREE,"SysTreeView32",TVS_SHOWSELALWAYS | 
+                    TVS_NOSCROLL | WS_TABSTOP,7,40,82,128,WS_EX_CLIENTEDGE
+    CONTROL         "Single Value",IDC_SINGLE_VALUE_RADIO,"Button",
+                    BS_AUTORADIOBUTTON | WS_GROUP,101,40,54,10
+    CONTROL         "Linear Interpolation",IDC_LINEAR_INTERPOLATION_RADIO,
+                    "Button",BS_AUTORADIOBUTTON,101,64,79,10
+    LTEXT           "Value:",IDC_SINGLE_VALUE_STATIC,126,52,21,8
+    EDITTEXT        IDC_SINGLE_VALUE_EDIT,153,50,46,12,ES_AUTOHSCROLL
+    CONTROL         "X",IDC_X_RADIO,"Button",BS_AUTORADIOBUTTON | WS_GROUP,
+                    124,76,20,10
+    CONTROL         "Y",IDC_Y_RADIO,"Button",BS_AUTORADIOBUTTON,146,76,20,10
+    CONTROL         "Z",IDC_Z_RADIO,"Button",BS_AUTORADIOBUTTON,168,76,20,10
+    LTEXT           "Value 1:",IDC_VALUE1_STATIC,152,89,27,8
+    EDITTEXT        IDC_VALUE1_EDIT,182,87,46,12,ES_AUTOHSCROLL
+    LTEXT           "Distance 1:",IDC_DISTANCE1_STATIC,142,105,37,8
+    EDITTEXT        IDC_DISTANCE1_EDIT,182,103,46,12,ES_AUTOHSCROLL
+    LTEXT           "Value 2:",IDC_VALUE2_STATIC,152,121,27,8
+    EDITTEXT        IDC_VALUE2_EDIT,182,119,46,12,ES_AUTOHSCROLL
+    LTEXT           "Distance 2:",IDC_DISTANCE2_STATIC,142,137,37,8
+    EDITTEXT        IDC_DISTANCE2_EDIT,182,135,46,12,ES_AUTOHSCROLL
+    LTEXT           "Solution type:",IDC_SOL_TYPE_STATIC,104,148,46,8,
+                    WS_DISABLED
+    CONTROL         "Associated",IDC_ASSOC_RADIO,"Button",BS_AUTORADIOBUTTON | 
+                    WS_DISABLED,110,158,51,10
+    CONTROL         "Fixed",IDC_FIXED_RADIO,"Button",BS_AUTORADIOBUTTON | 
+                    WS_DISABLED,174,158,33,10
+    GROUPBOX        "Face:",IDC_FACE_STATIC,7,7,221,24,WS_DISABLED
+    CONTROL         "X",IDC_FACE_X_RADIO,"Button",BS_AUTORADIOBUTTON | 
+                    WS_DISABLED | WS_GROUP,27,17,20,10
+    CONTROL         "Y",IDC_FACE_Y_RADIO,"Button",BS_AUTORADIOBUTTON | 
+                    WS_DISABLED,49,17,20,10
+    CONTROL         "Z",IDC_FACE_Z_RADIO,"Button",BS_AUTORADIOBUTTON | 
+                    WS_DISABLED,71,17,20,10
+    CONTROL         "",IDC_DESC_RICHEDIT,"RichEdit20A",ES_MULTILINE | 
+                    ES_AUTOHSCROLL | ES_READONLY | WS_BORDER | WS_VSCROLL | 
+                    WS_HSCROLL | WS_TABSTOP,7,178,221,58
+END
+
+IDD_BC_LEAKY_PROPPAGE DIALOGEX 0, 0, 236, 242
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Leaky Properties"
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    CONTROL         "",IDC_PROP_TREE,"SysTreeView32",TVS_SHOWSELALWAYS | 
+                    TVS_NOSCROLL | WS_TABSTOP,7,40,82,128,WS_EX_CLIENTEDGE
+    CONTROL         "Single Value",IDC_SINGLE_VALUE_RADIO,"Button",
+                    BS_AUTORADIOBUTTON | WS_GROUP,101,40,54,10
+    CONTROL         "Linear Interpolation",IDC_LINEAR_INTERPOLATION_RADIO,
+                    "Button",BS_AUTORADIOBUTTON,101,64,79,10
+    LTEXT           "Value:",IDC_SINGLE_VALUE_STATIC,126,52,21,8
+    EDITTEXT        IDC_SINGLE_VALUE_EDIT,153,50,46,12,ES_AUTOHSCROLL
+    CONTROL         "X",IDC_X_RADIO,"Button",BS_AUTORADIOBUTTON | WS_GROUP,
+                    124,76,20,10
+    CONTROL         "Y",IDC_Y_RADIO,"Button",BS_AUTORADIOBUTTON,146,76,20,10
+    CONTROL         "Z",IDC_Z_RADIO,"Button",BS_AUTORADIOBUTTON,168,76,20,10
+    LTEXT           "Value 1:",IDC_VALUE1_STATIC,152,89,27,8
+    EDITTEXT        IDC_VALUE1_EDIT,183,87,46,12,ES_AUTOHSCROLL
+    LTEXT           "Distance 1:",IDC_DISTANCE1_STATIC,142,105,37,8
+    EDITTEXT        IDC_DISTANCE1_EDIT,183,103,46,12,ES_AUTOHSCROLL
+    LTEXT           "Value 2:",IDC_VALUE2_STATIC,152,121,27,8
+    EDITTEXT        IDC_VALUE2_EDIT,183,119,46,12,ES_AUTOHSCROLL
+    LTEXT           "Distance 2:",IDC_DISTANCE2_STATIC,142,137,37,8
+    EDITTEXT        IDC_DISTANCE2_EDIT,183,135,46,12,ES_AUTOHSCROLL
+    LTEXT           "Solution type:",IDC_SOL_TYPE_STATIC,104,148,46,8,NOT 
+                    WS_VISIBLE | WS_DISABLED
+    CONTROL         "Associated",IDC_ASSOC_RADIO,"Button",BS_AUTORADIOBUTTON | 
+                    NOT WS_VISIBLE | WS_DISABLED,110,158,51,10
+    CONTROL         "Fixed",IDC_FIXED_RADIO,"Button",BS_AUTORADIOBUTTON | 
+                    NOT WS_VISIBLE | WS_DISABLED,174,158,33,10
+    GROUPBOX        "Face:",IDC_FACE_STATIC,7,7,222,24
+    CONTROL         "X",IDC_FACE_X_RADIO,"Button",BS_AUTORADIOBUTTON | 
+                    WS_GROUP,27,17,20,10
+    CONTROL         "Y",IDC_FACE_Y_RADIO,"Button",BS_AUTORADIOBUTTON,49,17,
+                    20,10
+    CONTROL         "Z",IDC_FACE_Z_RADIO,"Button",BS_AUTORADIOBUTTON,71,17,
+                    20,10
+    CONTROL         "",IDC_DESC_RICHEDIT,"RichEdit20A",ES_MULTILINE | 
+                    ES_AUTOHSCROLL | ES_READONLY | WS_BORDER | WS_VSCROLL | 
+                    WS_HSCROLL,7,177,222,58
+END
+
+IDD_BC_SPECIFIED_PROPPAGE DIALOGEX 0, 0, 235, 242
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Specified Value Properties"
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    CONTROL         "",IDC_PROP_TREE,"SysTreeView32",TVS_SHOWSELALWAYS | 
+                    TVS_NOSCROLL | WS_TABSTOP,7,40,82,128,WS_EX_CLIENTEDGE
+    CONTROL         "Single Value",IDC_SINGLE_VALUE_RADIO,"Button",
+                    BS_AUTORADIOBUTTON | WS_GROUP,101,40,54,10
+    CONTROL         "Linear Interpolation",IDC_LINEAR_INTERPOLATION_RADIO,
+                    "Button",BS_AUTORADIOBUTTON,101,64,79,10
+    LTEXT           "Value:",IDC_SINGLE_VALUE_STATIC,126,52,21,8
+    EDITTEXT        IDC_SINGLE_VALUE_EDIT,153,50,46,12,ES_AUTOHSCROLL
+    CONTROL         "X",IDC_X_RADIO,"Button",BS_AUTORADIOBUTTON | WS_GROUP,
+                    124,76,20,10
+    CONTROL         "Y",IDC_Y_RADIO,"Button",BS_AUTORADIOBUTTON,146,76,20,10
+    CONTROL         "Z",IDC_Z_RADIO,"Button",BS_AUTORADIOBUTTON,168,76,20,10
+    LTEXT           "Value 1:",IDC_VALUE1_STATIC,152,89,27,8
+    EDITTEXT        IDC_VALUE1_EDIT,182,87,46,12,ES_AUTOHSCROLL
+    LTEXT           "Distance 1:",IDC_DISTANCE1_STATIC,142,105,37,8
+    EDITTEXT        IDC_DISTANCE1_EDIT,182,103,46,12,ES_AUTOHSCROLL
+    LTEXT           "Value 2:",IDC_VALUE2_STATIC,152,121,27,8
+    EDITTEXT        IDC_VALUE2_EDIT,182,119,46,12,ES_AUTOHSCROLL
+    LTEXT           "Distance 2:",IDC_DISTANCE2_STATIC,142,137,37,8
+    EDITTEXT        IDC_DISTANCE2_EDIT,182,135,46,12,ES_AUTOHSCROLL
+    LTEXT           "Solution type:",IDC_SOL_TYPE_STATIC,104,148,46,8
+    CONTROL         "Associated",IDC_ASSOC_RADIO,"Button",BS_AUTORADIOBUTTON,
+                    110,158,51,10
+    CONTROL         "Fixed",IDC_FIXED_RADIO,"Button",BS_AUTORADIOBUTTON,174,
+                    158,33,10
+    GROUPBOX        "Face:",IDC_FACE_STATIC,7,7,221,24
+    CONTROL         "X",IDC_FACE_X_RADIO,"Button",BS_AUTORADIOBUTTON | 
+                    WS_GROUP,27,17,20,10
+    CONTROL         "Y",IDC_FACE_Y_RADIO,"Button",BS_AUTORADIOBUTTON,49,17,
+                    20,10
+    CONTROL         "Z",IDC_FACE_Z_RADIO,"Button",BS_AUTORADIOBUTTON,71,17,
+                    20,10
+    CONTROL         "",IDC_DESC_RICHEDIT,"RichEdit20A",ES_MULTILINE | 
+                    ES_AUTOHSCROLL | ES_READONLY | WS_BORDER | WS_VSCROLL | 
+                    WS_HSCROLL,7,178,221,58
+END
+
+IDD_INTRO DIALOGEX 0, 0, 317, 193
+STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Welcome Page"
+FONT 8, "MS Sans Serif", 400, 0, 0x0
+BEGIN
+    LTEXT           "Welcome to Wiz97",IDC_TITLE,115,8,195,24,NOT WS_GROUP
+    LTEXT           "Some explanatory text",IDC_INTRO_TEXT,115,40,189,18
+END
+
+IDD_END DIALOGEX 0, 0, 317, 193
+STYLE DS_SETFONT | WS_POPUP | WS_DISABLED | WS_CAPTION
+CAPTION "Completion Page"
+FONT 8, "MS Sans Serif", 400, 0, 0x0
+BEGIN
+    LTEXT           "Completing Wiz97",IDC_TITLE,115,8,195,37
+    LTEXT           "Some Explanatory Text",IDC_STATIC,115,58,195,128
+END
+
+IDD_INTERIOR1 DIALOGEX 0, 0, 317, 143
+STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "First Interior Page"
+FONT 8, "MS Sans Serif", 400, 0, 0x0
+BEGIN
+    LTEXT           "You must click the checkbox or a radio button to advance to the next page",
+                    IDC_STATIC,21,1,282,14
+    CONTROL         "A  radio button",IDC_RADIO1,"Button",BS_AUTORADIOBUTTON,
+                    28,41,62,10
+    CONTROL         "Another radio Button",IDC_RADIO2,"Button",
+                    BS_AUTORADIOBUTTON,28,61,81,10
+    CONTROL         "A third radio button",IDC_RADIO3,"Button",
+                    BS_AUTORADIOBUTTON,28,80,75,10
+    GROUPBOX        "A Group of radio buttons",IDC_GROUP1,21,24,119,74,
+                    WS_GROUP
+    CONTROL         "Go directly to the last page",IDC_CHECK1,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,194,61,100,10
+END
+
+IDD_INTERIOR2 DIALOGEX 0, 0, 317, 143
+STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Second Interior Page"
+FONT 8, "MS Sans Serif", 400, 0, 0x0
+BEGIN
+    LTEXT           "Some explanatory text",IDC_STATIC,21,1,70,8
+    LTEXT           "An Edit Box",IDC_STATIC,21,38,38,8
+    LTEXT           "Another Edit Box",IDC_STATIC,21,67,54,8
+    LTEXT           "A Third Edit Box",IDC_STATIC,21,96,52,8
+    EDITTEXT        IDC_EDIT2,108,38,86,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT3,108,67,86,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT4,108,96,86,14,ES_AUTOHSCROLL
+END
+
+IDD_MEDIA_EXT_PROPPAGE DIALOGEX 0, 0, 317, 193
+STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Media Properties"
+FONT 8, "MS Sans Serif", 400, 0, 0x0
+BEGIN
+    CONTROL         "",IDC_PROP_TREE,"SysTreeView32",TVS_SHOWSELALWAYS | 
+                    TVS_NOSCROLL | WS_TABSTOP,7,7,120,111,WS_EX_CLIENTEDGE
+    CONTROL         "",IDC_DESC_RICHEDIT,"RichEdit20A",ES_MULTILINE | 
+                    ES_AUTOHSCROLL | ES_READONLY | WS_BORDER | WS_VSCROLL | 
+                    WS_HSCROLL,7,124,303,62
+    CONTROL         "Single Value",IDC_SINGLE_VALUE_RADIO,"Button",
+                    BS_AUTORADIOBUTTON | WS_GROUP,137,7,54,10
+    CONTROL         "Linear Interpolation",IDC_LINEAR_INTERPOLATION_RADIO,
+                    "Button",BS_AUTORADIOBUTTON,137,38,79,10
+    LTEXT           "Value:",IDC_SINGLE_VALUE_STATIC,165,22,21,8
+    EDITTEXT        IDC_SINGLE_VALUE_EDIT,194,21,56,12,ES_AUTOHSCROLL
+    CONTROL         "X",IDC_X_RADIO,"Button",BS_AUTORADIOBUTTON | WS_GROUP,
+                    161,71,20,10
+    CONTROL         "Y",IDC_Y_RADIO,"Button",BS_AUTORADIOBUTTON,161,86,20,10
+    CONTROL         "Z",IDC_Z_RADIO,"Button",BS_AUTORADIOBUTTON,161,101,20,
+                    10
+    LTEXT           "Value 1:",IDC_VALUE1_STATIC,209,61,27,8
+    EDITTEXT        IDC_VALUE1_EDIT,244,59,56,12,ES_AUTOHSCROLL
+    LTEXT           "Distance 1:",IDC_DISTANCE1_STATIC,199,77,37,8
+    EDITTEXT        IDC_DISTANCE1_EDIT,244,75,56,12,ES_AUTOHSCROLL
+    LTEXT           "Value 2:",IDC_VALUE2_STATIC,209,93,27,8
+    EDITTEXT        IDC_VALUE2_EDIT,244,91,56,12,ES_AUTOHSCROLL
+    LTEXT           "Distance 2:",IDC_DISTANCE2_STATIC,199,109,37,8
+    EDITTEXT        IDC_DISTANCE2_EDIT,244,107,56,12,ES_AUTOHSCROLL
+    GROUPBOX        "Direction",IDC_STATIC_DIRECTION,150,58,44,59
+END
+
+IDD_BC_FLUX_PROPPAGE2 DIALOGEX 0, 0, 317, 193
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Flux Properties"
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    GROUPBOX        "Face:",IDC_FACE_STATIC,7,7,303,24
+    CONTROL         "X",IDC_FACE_X_RADIO,"Button",BS_AUTORADIOBUTTON | 
+                    WS_GROUP,27,17,20,10
+    CONTROL         "Y",IDC_FACE_Y_RADIO,"Button",BS_AUTORADIOBUTTON,49,17,
+                    20,10
+    CONTROL         "Z",IDC_FACE_Z_RADIO,"Button",BS_AUTORADIOBUTTON,71,17,
+                    20,10
+    CONTROL         "",IDC_PROP_TREE,"SysTreeView32",TVS_SHOWSELALWAYS | 
+                    TVS_NOSCROLL | WS_TABSTOP,7,34,120,96,WS_EX_CLIENTEDGE
+    CONTROL         "Single Value",IDC_SINGLE_VALUE_RADIO,"Button",
+                    BS_AUTORADIOBUTTON | WS_GROUP,137,34,54,10
+    CONTROL         "Linear Interpolation",IDC_LINEAR_INTERPOLATION_RADIO,
+                    "Button",BS_AUTORADIOBUTTON,137,58,79,10
+    LTEXT           "Value:",IDC_SINGLE_VALUE_STATIC,163,46,21,8
+    EDITTEXT        IDC_SINGLE_VALUE_EDIT,193,44,56,12,ES_AUTOHSCROLL
+    CONTROL         "X",IDC_X_RADIO,"Button",BS_AUTORADIOBUTTON | WS_GROUP,
+                    168,83,20,10
+    CONTROL         "Y",IDC_Y_RADIO,"Button",BS_AUTORADIOBUTTON,168,99,20,10
+    CONTROL         "Z",IDC_Z_RADIO,"Button",BS_AUTORADIOBUTTON,168,115,20,
+                    10
+    LTEXT           "Value 1:",IDC_VALUE1_STATIC,213,73,27,8
+    EDITTEXT        IDC_VALUE1_EDIT,244,71,56,12,ES_AUTOHSCROLL
+    LTEXT           "Distance 1:",IDC_DISTANCE1_STATIC,203,89,37,8
+    EDITTEXT        IDC_DISTANCE1_EDIT,244,87,56,12,ES_AUTOHSCROLL
+    LTEXT           "Value 2:",IDC_VALUE2_STATIC,213,105,27,8
+    EDITTEXT        IDC_VALUE2_EDIT,244,103,56,12,ES_AUTOHSCROLL
+    LTEXT           "Distance 2:",IDC_DISTANCE2_STATIC,203,121,37,8
+    EDITTEXT        IDC_DISTANCE2_EDIT,244,119,56,12,ES_AUTOHSCROLL
+    CONTROL         "",IDC_DESC_RICHEDIT,"RichEdit20A",ES_MULTILINE | 
+                    ES_AUTOHSCROLL | ES_READONLY | WS_BORDER | WS_VSCROLL | 
+                    WS_HSCROLL,7,135,303,51
+    GROUPBOX        "Direction",IDC_STATIC_DIRECTION,155,71,44,59
+END
+
+IDD_BC_SPECIFIED_PROPPAGE2 DIALOGEX 0, 0, 317, 193
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Specified Value Properties"
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    CONTROL         "",IDC_PROP_TREE,"SysTreeView32",TVS_SHOWSELALWAYS | 
+                    TVS_NOSCROLL | WS_TABSTOP,7,7,108,113,WS_EX_CLIENTEDGE
+    CONTROL         "Single Value",IDC_SINGLE_VALUE_RADIO,"Button",
+                    BS_AUTORADIOBUTTON | WS_GROUP,123,7,54,10
+    CONTROL         "Linear Interpolation",IDC_LINEAR_INTERPOLATION_RADIO,
+                    "Button",BS_AUTORADIOBUTTON,123,31,79,10
+    LTEXT           "Value:",IDC_SINGLE_VALUE_STATIC,154,19,21,8
+    EDITTEXT        IDC_SINGLE_VALUE_EDIT,180,17,56,12,ES_AUTOHSCROLL
+    CONTROL         "X",IDC_X_RADIO,"Button",BS_AUTORADIOBUTTON | WS_GROUP,
+                    155,57,20,10
+    CONTROL         "Y",IDC_Y_RADIO,"Button",BS_AUTORADIOBUTTON,156,72,20,10
+    CONTROL         "Z",IDC_Z_RADIO,"Button",BS_AUTORADIOBUTTON,155,89,20,10
+    LTEXT           "Value 1:",IDC_VALUE1_STATIC,213,49,27,8
+    EDITTEXT        IDC_VALUE1_EDIT,244,47,56,12,ES_AUTOHSCROLL
+    LTEXT           "Distance 1:",IDC_DISTANCE1_STATIC,203,65,37,8
+    EDITTEXT        IDC_DISTANCE1_EDIT,244,63,56,12,ES_AUTOHSCROLL
+    LTEXT           "Value 2:",IDC_VALUE2_STATIC,213,81,27,8
+    EDITTEXT        IDC_VALUE2_EDIT,244,79,56,12,ES_AUTOHSCROLL
+    LTEXT           "Distance 2:",IDC_DISTANCE2_STATIC,203,97,37,8
+    EDITTEXT        IDC_DISTANCE2_EDIT,244,95,56,12,ES_AUTOHSCROLL
+    LTEXT           "Solution type:",IDC_SOL_TYPE_STATIC,126,111,46,8
+    CONTROL         "Associated",IDC_ASSOC_RADIO,"Button",BS_AUTORADIOBUTTON,
+                    180,111,51,10
+    CONTROL         "Fixed",IDC_FIXED_RADIO,"Button",BS_AUTORADIOBUTTON,235,
+                    111,33,10
+    CONTROL         "",IDC_DESC_RICHEDIT,"RichEdit20A",ES_MULTILINE | 
+                    ES_AUTOHSCROLL | ES_READONLY | WS_BORDER | WS_VSCROLL | 
+                    WS_HSCROLL,7,127,303,59
+    GROUPBOX        "Direction",IDC_STATIC_DIRECTION,143,46,44,59
+END
+
+IDD_IMPORT_ERROR_DIALOG DIALOGEX 0, 0, 306, 147
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "Input Contains Errors"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,128,126,50,14
+    LTEXT           "The file contains the following errors:",IDC_STATIC,41,
+                    7,258,20,SS_CENTERIMAGE | SS_WORDELLIPSIS
+    CONTROL         "",IDC_ERRORS_RICHEDIT,"RichEdit20A",ES_MULTILINE | 
+                    ES_AUTOHSCROLL | WS_BORDER | WS_VSCROLL | WS_TABSTOP,7,
+                    37,292,85
+END
+
+IDD_UNITS1_PROPPAGE DIALOGEX 0, 0, 317, 143
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_CAPTION
+CAPTION "Primary Units"
+FONT 8, "MS Shell Dlg", 400, 0, 0x0
+BEGIN
+    LTEXT           "Time:",IDC_STATIC,36,7,73,12,SS_CENTERIMAGE
+    COMBOBOX        IDC_TIME_COMBO,132,7,62,57,CBS_DROPDOWNLIST | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Horizontal Grid:",IDC_STATIC,36,26,73,12,SS_CENTERIMAGE
+    COMBOBOX        IDC_HORZ_COMBO,132,26,62,57,CBS_DROPDOWNLIST | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Vertical Grid:",IDC_STATIC,36,45,73,12,SS_CENTERIMAGE
+    COMBOBOX        IDC_VERT_COMBO,132,45,62,57,CBS_DROPDOWNLIST | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Head:",IDC_STATIC,36,64,73,12,SS_CENTERIMAGE
+    COMBOBOX        IDC_HEAD_COMBO,132,64,62,57,CBS_DROPDOWNLIST | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Hydraulic Conductivity:",IDC_STATIC,36,83,73,12,
+                    SS_CENTERIMAGE
+    COMBOBOX        IDC_HYD_COND_NUM_COMBO,132,83,62,57,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           " / ",IDC_STATIC,205,85,8,8
+    COMBOBOX        IDC_HYD_COND_DENOM_COMBO,220,83,62,57,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Specific Storage:",IDC_STATIC,36,102,73,12,
+                    SS_CENTERIMAGE
+    RTEXT           "1",IDC_STATIC,132,104,62,12
+    LTEXT           " / ",IDC_STATIC,205,104,8,8
+    COMBOBOX        IDC_STORAGE_DENOM_COMBO,220,102,62,57,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Dispersivity:",IDC_STATIC,36,121,73,12,SS_CENTERIMAGE
+    COMBOBOX        IDC_DISP_COMBO,132,121,62,57,CBS_DROPDOWNLIST | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+END
+
+IDD_UNITS_OLD DIALOGEX 0, 0, 317, 193
+STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Units"
+FONT 8, "MS Sans Serif", 400, 0, 0x0
+BEGIN
+    LISTBOX         IDC_LIST2,7,7,118,179,LBS_SORT | LBS_NOINTEGRALHEIGHT | 
+                    WS_VSCROLL | WS_TABSTOP
+    CONTROL         "seconds",IDC_RADIO1,"Button",BS_AUTORADIOBUTTON,140,15,
+                    43,10
+    CONTROL         "minutes",IDC_RADIO2,"Button",BS_AUTORADIOBUTTON,140,27,
+                    43,10
+    CONTROL         "hours",IDC_RADIO3,"Button",BS_AUTORADIOBUTTON,140,39,43,
+                    10
+    CONTROL         "days",IDC_RADIO4,"Button",BS_AUTORADIOBUTTON,140,51,43,
+                    10
+    CONTROL         "years",IDC_RADIO5,"Button",BS_AUTORADIOBUTTON,140,63,43,
+                    10
+    CONTROL         "inches",IDC_RADIO6,"Button",BS_AUTORADIOBUTTON,238,15,
+                    52,10
+    CONTROL         "feet",IDC_RADIO7,"Button",BS_AUTORADIOBUTTON,238,27,52,
+                    10
+    CONTROL         "miles",IDC_RADIO8,"Button",BS_AUTORADIOBUTTON,238,39,52,
+                    10
+    CONTROL         "millimeters",IDC_RADIO9,"Button",BS_AUTORADIOBUTTON,238,
+                    51,52,10
+    CONTROL         "centimeters",IDC_RADIO10,"Button",BS_AUTORADIOBUTTON,
+                    238,63,52,10
+    CONTROL         "meters",IDC_RADIO11,"Button",BS_AUTORADIOBUTTON,238,75,
+                    52,10
+    CONTROL         "kilometers",IDC_RADIO12,"Button",BS_AUTORADIOBUTTON,238,
+                    87,52,10
+    CONTROL         "ft^3",IDC_RADIO13,"Button",BS_AUTORADIOBUTTON,149,99,38,
+                    10
+    CONTROL         "m^3",IDC_RADIO14,"Button",BS_AUTORADIOBUTTON,149,113,38,
+                    10
+    CONTROL         "liters",IDC_RADIO15,"Button",BS_AUTORADIOBUTTON,149,127,
+                    38,10
+    CONTROL         "gallons",IDC_RADIO16,"Button",BS_AUTORADIOBUTTON,149,
+                    141,38,10
+END
+
+IDD_UNITS2_PROPPAGE_OLD DIALOGEX 0, 0, 317, 193
+STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Units 2"
+FONT 8, "MS Sans Serif", 400, 0, 0x0
+BEGIN
+    LTEXT           "Flux:",IDC_STATIC,27,9,73,12,SS_CENTERIMAGE
+    COMBOBOX        IDC_FLUX_NUM_COMBO,138,9,62,57,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           " / ",IDC_STATIC,205,11,8,12,SS_CENTERIMAGE
+    COMBOBOX        IDC_FLUX_DENOM_COMBO,219,9,62,57,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Leaky Hydraulic Conductivity:",IDC_STATIC,27,36,94,12,
+                    SS_CENTERIMAGE
+    COMBOBOX        IDC_LEAKY_COND_NUM_COMBO,138,36,62,57,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           " / ",IDC_STATIC,205,38,8,12,SS_CENTERIMAGE
+    COMBOBOX        IDC_LEAKY_COND_DENOM_COMBO,219,36,62,57,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Leaky Thickness:",IDC_STATIC,27,63,73,12,SS_CENTERIMAGE
+    COMBOBOX        IDC_LEAKY_THICK_COMBO,138,63,62,57,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Well Diameter:",IDC_STATIC,27,90,73,12,SS_CENTERIMAGE
+    COMBOBOX        IDC_WELL_DIAM_COMBO,138,90,62,57,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Well Flow Rate:",IDC_STATIC,27,117,73,12,SS_CENTERIMAGE
+    COMBOBOX        IDC_WELL_FLOW_NUM_COMBO,138,117,62,57,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           " / ",IDC_STATIC,205,119,8,12,SS_CENTERIMAGE
+    COMBOBOX        IDC_WELL_FLOW_DENOM_COMBO,219,117,62,57,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "River Bed Hydraulic Conductivity:",IDC_STATIC,27,144,
+                    106,12,SS_CENTERIMAGE
+    COMBOBOX        IDC_RIVER_COND_NUM_COMBO,138,144,62,57,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           " / ",IDC_STATIC,205,146,8,12,SS_CENTERIMAGE
+    COMBOBOX        IDC_RIVER_COND_DENOM_COMBO,219,144,62,57,
+                    CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "River Bed Thickness:",IDC_STATIC,27,171,73,12,
+                    SS_CENTERIMAGE
+    COMBOBOX        IDC_RIVER_THICK_COMBO,138,171,62,57,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+END
+
+IDD_BC_LEAKY_PROPPAGE2 DIALOGEX 0, 0, 317, 193
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Leaky Properties"
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    GROUPBOX        "Face:",IDC_FACE_STATIC,7,7,303,24
+    CONTROL         "X",IDC_FACE_X_RADIO,"Button",BS_AUTORADIOBUTTON | 
+                    WS_GROUP,27,17,20,10
+    CONTROL         "Y",IDC_FACE_Y_RADIO,"Button",BS_AUTORADIOBUTTON,49,17,
+                    20,10
+    CONTROL         "Z",IDC_FACE_Z_RADIO,"Button",BS_AUTORADIOBUTTON,71,17,
+                    20,10
+    CONTROL         "",IDC_PROP_TREE,"SysTreeView32",TVS_SHOWSELALWAYS | 
+                    TVS_NOSCROLL | WS_TABSTOP,7,34,120,96,WS_EX_CLIENTEDGE
+    CONTROL         "Single Value",IDC_SINGLE_VALUE_RADIO,"Button",
+                    BS_AUTORADIOBUTTON | WS_GROUP,137,34,54,10
+    CONTROL         "Linear Interpolation",IDC_LINEAR_INTERPOLATION_RADIO,
+                    "Button",BS_AUTORADIOBUTTON,137,58,79,10
+    LTEXT           "Value:",IDC_SINGLE_VALUE_STATIC,163,46,21,8
+    EDITTEXT        IDC_SINGLE_VALUE_EDIT,193,44,56,12,ES_AUTOHSCROLL
+    CONTROL         "X",IDC_X_RADIO,"Button",BS_AUTORADIOBUTTON | WS_GROUP,
+                    168,83,20,10
+    CONTROL         "Y",IDC_Y_RADIO,"Button",BS_AUTORADIOBUTTON,168,99,20,10
+    CONTROL         "Z",IDC_Z_RADIO,"Button",BS_AUTORADIOBUTTON,168,115,20,
+                    10
+    LTEXT           "Value 1:",IDC_VALUE1_STATIC,213,73,27,8
+    EDITTEXT        IDC_VALUE1_EDIT,244,71,56,12,ES_AUTOHSCROLL
+    LTEXT           "Distance 1:",IDC_DISTANCE1_STATIC,203,89,37,8
+    EDITTEXT        IDC_DISTANCE1_EDIT,244,87,56,12,ES_AUTOHSCROLL
+    LTEXT           "Value 2:",IDC_VALUE2_STATIC,213,105,27,8
+    EDITTEXT        IDC_VALUE2_EDIT,244,103,56,12,ES_AUTOHSCROLL
+    LTEXT           "Distance 2:",IDC_DISTANCE2_STATIC,203,121,37,8
+    EDITTEXT        IDC_DISTANCE2_EDIT,244,119,56,12,ES_AUTOHSCROLL
+    CONTROL         "",IDC_DESC_RICHEDIT,"RichEdit20A",ES_MULTILINE | 
+                    ES_AUTOHSCROLL | ES_READONLY | WS_BORDER | WS_VSCROLL | 
+                    WS_HSCROLL,7,135,303,51
+    GROUPBOX        "Direction",IDC_STATIC_DIRECTION,155,71,44,59
+END
+
+IDD_UNITS1_PROPPAGE_OLD DIALOGEX 0, 0, 317, 193
+STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Units 1"
+FONT 8, "MS Sans Serif", 400, 0, 0x0
+BEGIN
+    LTEXT           "Time:",IDC_STATIC,27,9,73,12,SS_CENTERIMAGE
+    COMBOBOX        IDC_TIME_COMBO,108,9,62,57,CBS_DROPDOWNLIST | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Horizontal Grid:",IDC_STATIC,27,36,73,12,SS_CENTERIMAGE
+    COMBOBOX        IDC_HORZ_COMBO,108,36,62,57,CBS_DROPDOWNLIST | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Vertical Grid:",IDC_STATIC,27,63,73,12,SS_CENTERIMAGE
+    COMBOBOX        IDC_VERT_COMBO,108,63,62,57,CBS_DROPDOWNLIST | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Head:",IDC_STATIC,27,90,73,12,SS_CENTERIMAGE
+    COMBOBOX        IDC_HEAD_COMBO,108,90,62,57,CBS_DROPDOWNLIST | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Hydraulic Conductivity:",IDC_STATIC,27,117,73,12,
+                    SS_CENTERIMAGE
+    COMBOBOX        IDC_HYD_COND_NUM_COMBO,108,117,62,57,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           " / ",IDC_STATIC,175,119,8,8
+    COMBOBOX        IDC_HYD_COND_DENOM_COMBO,189,117,62,57,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Specific Storage:",IDC_STATIC,27,144,73,12,
+                    SS_CENTERIMAGE
+    RTEXT           "1",IDC_STATIC,107,147,62,12
+    LTEXT           " / ",IDC_STATIC,175,147,8,8
+    COMBOBOX        IDC_STORAGE_DENOM_COMBO,189,145,62,57,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Dispersivity:",IDC_STATIC,27,171,73,12,SS_CENTERIMAGE
+    COMBOBOX        IDC_DISP_COMBO,108,171,62,57,CBS_DROPDOWNLIST | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+END
+
+IDD_UNITS2_PROPPAGE DIALOGEX 0, 0, 317, 143
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_CAPTION
+CAPTION "Boundary Condition and Well Units"
+FONT 8, "MS Shell Dlg", 400, 0, 0x0
+BEGIN
+    LTEXT           "Flux:",IDC_STATIC,19,7,73,12,SS_CENTERIMAGE
+    COMBOBOX        IDC_FLUX_NUM_COMBO,132,7,62,57,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           " / ",IDC_STATIC,205,7,8,12,SS_CENTERIMAGE
+    COMBOBOX        IDC_FLUX_DENOM_COMBO,220,7,62,57,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Leaky Hydraulic Conductivity:",IDC_STATIC,19,26,94,12,
+                    SS_CENTERIMAGE
+    COMBOBOX        IDC_LEAKY_COND_NUM_COMBO,132,26,62,57,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           " / ",IDC_STATIC,205,26,8,12,SS_CENTERIMAGE
+    COMBOBOX        IDC_LEAKY_COND_DENOM_COMBO,220,26,62,57,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Leaky Thickness:",IDC_STATIC,19,45,73,12,SS_CENTERIMAGE
+    COMBOBOX        IDC_LEAKY_THICK_COMBO,132,45,62,57,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Well Diameter:",IDC_STATIC,19,64,73,12,SS_CENTERIMAGE
+    COMBOBOX        IDC_WELL_DIAM_COMBO,132,64,62,57,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Well Flow Rate:",IDC_STATIC,19,83,73,12,SS_CENTERIMAGE
+    COMBOBOX        IDC_WELL_FLOW_NUM_COMBO,132,83,62,57,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           " / ",IDC_STATIC,205,83,8,12,SS_CENTERIMAGE
+    COMBOBOX        IDC_WELL_FLOW_DENOM_COMBO,220,83,62,57,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "River Bed Hydraulic Conductivity:",IDC_STATIC,19,102,
+                    106,12,SS_CENTERIMAGE
+    COMBOBOX        IDC_RIVER_COND_NUM_COMBO,132,102,62,57,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           " / ",IDC_STATIC,205,102,8,12,SS_CENTERIMAGE
+    COMBOBOX        IDC_RIVER_COND_DENOM_COMBO,220,102,62,57,
+                    CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "River Bed Thickness:",IDC_STATIC,19,121,73,12,
+                    SS_CENTERIMAGE
+    COMBOBOX        IDC_RIVER_THICK_COMBO,132,121,62,57,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+END
+
+IDD_GRID_PROPPAGE DIALOGEX 0, 0, 319, 142
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_CAPTION
+CAPTION "Grid Properties"
+FONT 8, "MS Shell Dlg", 400, 0, 0x0
+BEGIN
+    LTEXT           "Xmin: ",IDC_STATIC,7,29,23,8,0,WS_EX_RIGHT
+    EDITTEXT        IDC_XMIN_EDIT,30,27,47,12,ES_AUTOHSCROLL | ES_WANTRETURN
+    LTEXT           "Xmax: ",IDC_STATIC,115,29,23,8,0,WS_EX_RIGHT
+    EDITTEXT        IDC_XMAX_EDIT,138,27,47,12,ES_AUTOHSCROLL | 
+                    ES_WANTRETURN
+    LTEXT           "X Nodes:",IDC_STATIC,222,29,30,8
+    EDITTEXT        IDC_X_NODES_EDIT,252,27,34,12,ES_AUTOHSCROLL
+    CONTROL         "",IDC_X_SPIN,"msctls_updown32",UDS_SETBUDDYINT | 
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,283,27,11,
+                    12
+    LTEXT           "Ymin: ",IDC_STATIC,7,68,23,8,0,WS_EX_RIGHT
+    EDITTEXT        IDC_YMIN_EDIT,30,66,47,12,ES_AUTOHSCROLL
+    LTEXT           "Ymax: ",IDC_STATIC,115,68,23,8,0,WS_EX_RIGHT
+    EDITTEXT        IDC_YMAX_EDIT,138,66,47,12,ES_AUTOHSCROLL
+    LTEXT           "Y Nodes:",IDC_STATIC,222,68,30,8
+    EDITTEXT        IDC_Y_NODES_EDIT,252,66,34,12,ES_AUTOHSCROLL
+    CONTROL         "",IDC_Y_SPIN,"msctls_updown32",UDS_SETBUDDYINT | 
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,283,66,11,
+                    12
+    LTEXT           "Zmin: ",IDC_STATIC,7,105,23,8,0,WS_EX_RIGHT
+    EDITTEXT        IDC_ZMIN_EDIT,30,103,47,12,ES_AUTOHSCROLL
+    LTEXT           "Zmax: ",IDC_STATIC,115,105,23,8,0,WS_EX_RIGHT
+    EDITTEXT        IDC_ZMAX_EDIT,138,103,47,12,ES_AUTOHSCROLL
+    LTEXT           "Z Nodes:",IDC_STATIC,222,105,30,8
+    EDITTEXT        IDC_Z_NODES_EDIT,252,103,34,12,ES_AUTOHSCROLL
+    CONTROL         "",IDC_Z_SPIN,"msctls_updown32",UDS_SETBUDDYINT | 
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,283,103,
+                    11,12
+    CONTROL         "[mile]",IDC_XMIN_UNITS_STATIC,"Static",
+                    SS_LEFTNOWORDWRAP | WS_GROUP,81,29,18,8
+    CONTROL         "[mile]",IDC_XMAX_UNITS_STATIC,"Static",
+                    SS_LEFTNOWORDWRAP | WS_GROUP,190,29,18,8
+    CONTROL         "[mile]",IDC_YMIN_UNITS_STATIC,"Static",
+                    SS_LEFTNOWORDWRAP | WS_GROUP,81,68,18,8
+    CONTROL         "[mile]",IDC_ZMIN_UNITS_STATIC,"Static",
+                    SS_LEFTNOWORDWRAP | WS_GROUP,81,105,18,8
+    CONTROL         "[mile]",IDC_YMAX_UNITS_STATIC,"Static",
+                    SS_LEFTNOWORDWRAP | WS_GROUP,190,68,18,8
+    CONTROL         "[mile]",IDC_ZMAX_UNITS_STATIC,"Static",
+                    SS_LEFTNOWORDWRAP | WS_GROUP,190,105,18,8
+END
+
+IDD_MEDIA_INT_PROPPAGE DIALOGEX 0, 0, 317, 143
+STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Media Properties"
+FONT 8, "MS Sans Serif", 400, 0, 0x0
+BEGIN
+    CONTROL         "",IDC_PROP_TREE,"SysTreeView32",TVS_SHOWSELALWAYS | 
+                    TVS_NOSCROLL | WS_TABSTOP,7,7,120,96,WS_EX_CLIENTEDGE
+    CONTROL         "",IDC_DESC_RICHEDIT,"RichEdit20A",ES_MULTILINE | 
+                    ES_AUTOHSCROLL | ES_READONLY | WS_BORDER | WS_VSCROLL | 
+                    WS_HSCROLL,7,108,303,28
+    CONTROL         "Single Value",IDC_SINGLE_VALUE_RADIO,"Button",
+                    BS_AUTORADIOBUTTON | WS_GROUP,137,7,54,10
+    CONTROL         "Linear Interpolation",IDC_LINEAR_INTERPOLATION_RADIO,
+                    "Button",BS_AUTORADIOBUTTON,137,32,79,10
+    LTEXT           "Value:",IDC_SINGLE_VALUE_STATIC,157,18,21,8
+    EDITTEXT        IDC_SINGLE_VALUE_EDIT,189,16,56,12,ES_AUTOHSCROLL
+    CONTROL         "X",IDC_X_RADIO,"Button",BS_AUTORADIOBUTTON | WS_GROUP,
+                    161,57,20,10
+    CONTROL         "Y",IDC_Y_RADIO,"Button",BS_AUTORADIOBUTTON,161,72,20,10
+    CONTROL         "Z",IDC_Z_RADIO,"Button",BS_AUTORADIOBUTTON,161,87,20,10
+    LTEXT           "Value 1:",IDC_VALUE1_STATIC,209,46,27,8
+    EDITTEXT        IDC_VALUE1_EDIT,244,44,56,12,ES_AUTOHSCROLL
+    LTEXT           "Distance 1:",IDC_DISTANCE1_STATIC,199,62,37,8
+    EDITTEXT        IDC_DISTANCE1_EDIT,244,60,56,12,ES_AUTOHSCROLL
+    LTEXT           "Value 2:",IDC_VALUE2_STATIC,209,78,27,8
+    EDITTEXT        IDC_VALUE2_EDIT,244,76,56,12,ES_AUTOHSCROLL
+    LTEXT           "Distance 2:",IDC_DISTANCE2_STATIC,199,94,37,8
+    EDITTEXT        IDC_DISTANCE2_EDIT,244,92,56,12,ES_AUTOHSCROLL
+    GROUPBOX        "Direction",IDC_STATIC_DIRECTION,150,44,44,59
+END
+
+IDD_IC_HEAD_INT_PROPPAGE DIALOGEX 0, 0, 317, 143
+STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Head IC Properties"
+FONT 8, "MS Sans Serif", 400, 0, 0x0
+BEGIN
+    CONTROL         "",IDC_PROP_TREE,"SysTreeView32",TVS_SHOWSELALWAYS | 
+                    TVS_NOSCROLL | WS_TABSTOP,7,7,120,96,WS_EX_CLIENTEDGE
+    CONTROL         "",IDC_DESC_RICHEDIT,"RichEdit20A",ES_MULTILINE | 
+                    ES_AUTOHSCROLL | ES_READONLY | WS_BORDER | WS_VSCROLL | 
+                    WS_HSCROLL,7,108,303,28
+    CONTROL         "Single Value",IDC_SINGLE_VALUE_RADIO,"Button",
+                    BS_AUTORADIOBUTTON | WS_GROUP,137,7,54,10
+    CONTROL         "Linear Interpolation",IDC_LINEAR_INTERPOLATION_RADIO,
+                    "Button",BS_AUTORADIOBUTTON,137,32,79,10
+    LTEXT           "Value:",IDC_SINGLE_VALUE_STATIC,157,18,21,8
+    EDITTEXT        IDC_SINGLE_VALUE_EDIT,189,16,56,12,ES_AUTOHSCROLL
+    CONTROL         "X",IDC_X_RADIO,"Button",BS_AUTORADIOBUTTON | WS_GROUP,
+                    161,57,20,10
+    CONTROL         "Y",IDC_Y_RADIO,"Button",BS_AUTORADIOBUTTON,161,72,20,10
+    CONTROL         "Z",IDC_Z_RADIO,"Button",BS_AUTORADIOBUTTON,161,87,20,10
+    LTEXT           "Value 1:",IDC_VALUE1_STATIC,209,46,27,8
+    EDITTEXT        IDC_VALUE1_EDIT,244,44,56,12,ES_AUTOHSCROLL
+    LTEXT           "Distance 1:",IDC_DISTANCE1_STATIC,199,62,37,8
+    EDITTEXT        IDC_DISTANCE1_EDIT,244,60,56,12,ES_AUTOHSCROLL
+    LTEXT           "Value 2:",IDC_VALUE2_STATIC,209,78,27,8
+    EDITTEXT        IDC_VALUE2_EDIT,244,76,56,12,ES_AUTOHSCROLL
+    LTEXT           "Distance 2:",IDC_DISTANCE2_STATIC,199,94,37,8
+    EDITTEXT        IDC_DISTANCE2_EDIT,244,92,56,12,ES_AUTOHSCROLL
+    GROUPBOX        "Direction",IDC_STATIC_DIRECTION,150,44,44,59
+END
+
+IDD_IC_HEAD_EXT_PROPPAGE DIALOGEX 0, 0, 317, 193
+STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Head IC Properties"
+FONT 8, "MS Sans Serif", 400, 0, 0x0
+BEGIN
+    CONTROL         "",IDC_PROP_TREE,"SysTreeView32",TVS_SHOWSELALWAYS | 
+                    TVS_NOSCROLL | WS_TABSTOP,7,7,120,111,WS_EX_CLIENTEDGE
+    CONTROL         "",IDC_DESC_RICHEDIT,"RichEdit20A",ES_MULTILINE | 
+                    ES_AUTOHSCROLL | ES_READONLY | WS_BORDER | WS_VSCROLL | 
+                    WS_HSCROLL,7,124,303,62
+    CONTROL         "Single Value",IDC_SINGLE_VALUE_RADIO,"Button",
+                    BS_AUTORADIOBUTTON | WS_GROUP,137,7,54,10
+    CONTROL         "Linear Interpolation",IDC_LINEAR_INTERPOLATION_RADIO,
+                    "Button",BS_AUTORADIOBUTTON,137,38,79,10
+    LTEXT           "Value:",IDC_SINGLE_VALUE_STATIC,165,22,21,8
+    EDITTEXT        IDC_SINGLE_VALUE_EDIT,194,21,56,12,ES_AUTOHSCROLL
+    CONTROL         "X",IDC_X_RADIO,"Button",BS_AUTORADIOBUTTON | WS_GROUP,
+                    161,71,20,10
+    CONTROL         "Y",IDC_Y_RADIO,"Button",BS_AUTORADIOBUTTON,161,86,20,10
+    CONTROL         "Z",IDC_Z_RADIO,"Button",BS_AUTORADIOBUTTON,161,101,20,
+                    10
+    LTEXT           "Value 1:",IDC_VALUE1_STATIC,209,61,27,8
+    EDITTEXT        IDC_VALUE1_EDIT,244,59,56,12,ES_AUTOHSCROLL
+    LTEXT           "Distance 1:",IDC_DISTANCE1_STATIC,199,77,37,8
+    EDITTEXT        IDC_DISTANCE1_EDIT,244,75,56,12,ES_AUTOHSCROLL
+    LTEXT           "Value 2:",IDC_VALUE2_STATIC,209,93,27,8
+    EDITTEXT        IDC_VALUE2_EDIT,244,91,56,12,ES_AUTOHSCROLL
+    LTEXT           "Distance 2:",IDC_DISTANCE2_STATIC,199,109,37,8
+    EDITTEXT        IDC_DISTANCE2_EDIT,244,107,56,12,ES_AUTOHSCROLL
+    GROUPBOX        "Direction",IDC_STATIC_DIRECTION,150,58,44,59
+END
+
+IDD_NEW_MODEL_INTRO DIALOGEX 0, 0, 317, 193
+STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "New Model Wizard"
+FONT 8, "MS Sans Serif", 400, 0, 0x0
+BEGIN
+    LTEXT           "Welcome to the New Model Wizard",IDC_TITLE,115,8,195,24,
+                    NOT WS_GROUP
+    LTEXT           "Some explanatory text",IDC_INTRO_TEXT,115,40,189,18,NOT 
+                    WS_VISIBLE
+    CONTROL         "Solute transport and chemistry",
+                    IDC_SOLUTE_TRANSPORT_RADIO,"Button",BS_AUTORADIOBUTTON,
+                    115,114,142,11
+    CONTROL         "Flow Only",IDC_FLOW_ONLY_RADIO,"Button",
+                    BS_AUTORADIOBUTTON,115,148,47,10
+    LTEXT           "Molecular Diffusivity",IDC_MOL_DIFF_STATIC,132,130,73,8
+    EDITTEXT        IDC_MOL_DIFF_EDIT,202,129,79,11,ES_AUTOHSCROLL
+END
+
+IDD_TC_INT_PROPPAGE DIALOGEX 0, 0, 317, 143
+STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Time Control Properties"
+FONT 8, "MS Sans Serif", 400, 0, 0x0
+BEGIN
+    CONTROL         "",IDC_DESC_RICHEDIT,"RichEdit20A",ES_MULTILINE | 
+                    ES_AUTOHSCROLL | ES_READONLY | WS_BORDER | WS_VSCROLL | 
+                    WS_HSCROLL,7,81,303,55
+    LTEXT           "Time step:",IDC_TIME_STEP_STATIC,47,26,53,8
+    LTEXT           "Time end:",IDC_TIME_CHANGE_STATIC,47,51,55,8
+    EDITTEXT        IDC_TIME_STEP_EDIT,116,22,56,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_TIME_CHANGE_EDIT,116,47,56,12,ES_AUTOHSCROLL
+    COMBOBOX        IDC_TIME_STEP_COMBO,208,22,62,60,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_TIME_CHANGE_COMBO,208,47,62,60,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+END
+
+IDD_RUN_OUTPUT_DIALOG DIALOGEX 0, 0, 306, 147
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "Running..."
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,191,126,50,14
+    CONTROL         "",IDC_ERRORS_RICHEDIT,"RichEdit20A",ES_MULTILINE | 
+                    ES_AUTOHSCROLL | WS_BORDER | WS_VSCROLL | WS_TABSTOP,7,7,
+                    292,115
+    PUSHBUTTON      "Abort",IDC_ABORT,249,126,50,14
+END
+
+IDD_TC_INT_M_PROPPAGE DIALOGEX 0, 0, 317, 143
+STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Time Control Properties"
+FONT 8, "MS Sans Serif", 400, 0, 0x0
+BEGIN
+    PUSHBUTTON      "New...",IDC_NEW_BUTTON,7,122,50,14,NOT WS_VISIBLE | 
+                    WS_DISABLED
+    PUSHBUTTON      "Edit...",IDC_EDIT_BUTTON,61,122,50,14,NOT WS_VISIBLE | 
+                    WS_DISABLED
+    PUSHBUTTON      "Delete",IDC_DELETE_BUTTON,114,122,50,14,NOT WS_VISIBLE | 
+                    WS_DISABLED
+    CONTROL         "Custom1",IDC_GRID,"MFCGridCtrl",WS_BORDER | WS_TABSTOP,
+                    7,7,303,108
+END
+
+IDD_TC_INT_PROPPAGE1 DIALOGEX 0, 0, 317, 143
+STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Time Control Properties"
+FONT 8, "MS Sans Serif", 400, 0, 0x0
+BEGIN
+    CONTROL         "",IDC_DESC_RICHEDIT,"RichEdit20A",ES_MULTILINE | 
+                    ES_AUTOHSCROLL | ES_READONLY | WS_BORDER | WS_VSCROLL | 
+                    WS_HSCROLL,7,81,303,55
+    LTEXT           "Time step:",IDC_TIME_STEP_STATIC,19,26,53,8
+    LTEXT           "Time change:",IDC_TIME_CHANGE_STATIC,19,51,55,8
+    EDITTEXT        IDC_TIME_STEP_EDIT,70,22,56,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_TIME_CHANGE_EDIT,70,47,56,12,ES_AUTOHSCROLL
+    COMBOBOX        IDC_TIME_STEP_COMBO,236,22,62,60,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_TIME_CHANGE_COMBO,236,47,62,60,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "Default (seconds)",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,146,25,82,10
+    CONTROL         "Default (wwwwwww)",IDC_CHECK2,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,146,50,82,10
+END
+
+IDD_TEST_VTK DIALOGEX 0, 0, 310, 195
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | 
+    WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+CAPTION "Dialog"
+MENU IDR_MAINFRAME_SDI
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,199,174,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,253,174,50,14
+    LTEXT           "Model Origin",IDC_STATIC_MODEL_ORIGIN,236,7,67,8
+    LTEXT           "X",IDC_STATIC_MO_X,236,18,24,8
+    EDITTEXT        IDC_EDIT_MO_X,261,16,42,12,ES_AUTOHSCROLL
+    LTEXT           "Y",IDC_STATIC_MO_Y,236,31,24,8
+    EDITTEXT        IDC_EDIT_MO_Y,261,29,42,12,ES_AUTOHSCROLL
+    LTEXT           "Angle",IDC_STATIC_MO_ANGLE,236,45,24,8
+    EDITTEXT        IDC_EDIT_MO_ANGLE,261,43,42,12,ES_AUTOHSCROLL
+END
+
+IDD_MAP_DIALOG DIALOGEX 0, 0, 382, 278
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | 
+    WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+CAPTION "Arrange Grid"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    GROUPBOX        "Point 1",IDC_STATIC_P1_GB,7,6,133,64,BS_NOTIFY,
+                    WS_EX_TRANSPARENT
+    RTEXT           "X pixel:",IDC_STATIC_XP1,21,16,46,8
+    EDITTEXT        IDC_EDIT_XP1,67,14,56,12,ES_AUTOHSCROLL
+    CONTROL         "",IDC_SPIN_XP1,"msctls_updown32",UDS_SETBUDDYINT | 
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,123,14,11,
+                    12
+    RTEXT           "Y pixel:",IDC_STATIC_YP1,21,29,46,8
+    EDITTEXT        IDC_EDIT_YP1,67,27,56,12,ES_AUTOHSCROLL
+    CONTROL         "",IDC_SPIN_YP1,"msctls_updown32",UDS_SETBUDDYINT | 
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,123,27,11,
+                    12
+    RTEXT           "X coor:",IDC_STATIC_XC1,21,43,46,8,SS_NOTIFY
+    EDITTEXT        IDC_EDIT_XC1,67,41,56,12,ES_AUTOHSCROLL | ES_WANTRETURN
+    RTEXT           "Y coor:",IDC_STATIC_YC1,21,57,46,8,SS_NOTIFY
+    EDITTEXT        IDC_EDIT_YC1,67,55,56,12,ES_AUTOHSCROLL | ES_WANTRETURN
+    GROUPBOX        "Point 2",IDC_STATIC_P2_GB,7,73,133,64,BS_NOTIFY,
+                    WS_EX_TRANSPARENT
+    RTEXT           "X pixel:",IDC_STATIC_XP2,21,83,46,8
+    EDITTEXT        IDC_EDIT_XP2,67,81,56,12,ES_AUTOHSCROLL
+    CONTROL         "",IDC_SPIN_XP2,"msctls_updown32",UDS_SETBUDDYINT | 
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,123,81,11,
+                    12
+    RTEXT           "Y pixel:",IDC_STATIC_YP2,21,96,46,8
+    EDITTEXT        IDC_EDIT_YP2,67,94,56,12,ES_AUTOHSCROLL
+    CONTROL         "",IDC_SPIN_YP2,"msctls_updown32",UDS_SETBUDDYINT | 
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,123,94,11,
+                    12
+    RTEXT           "X coor:",IDC_STATIC_XC2,21,110,46,8,SS_NOTIFY
+    EDITTEXT        IDC_EDIT_XC2,67,108,56,12,ES_AUTOHSCROLL | ES_WANTRETURN
+    RTEXT           "Y coor:",IDC_STATIC_YC2,21,124,46,8,SS_NOTIFY
+    EDITTEXT        IDC_EDIT_YC2,67,122,56,12,ES_AUTOHSCROLL | ES_WANTRETURN
+    GROUPBOX        "World Parameters",IDC_STATIC_WORLD_GB,7,148,133,111,NOT 
+                    WS_VISIBLE
+    RTEXT           "X-dim/pixel:",IDC_STATIC_WXP,21,172,46,8,NOT WS_VISIBLE
+    EDITTEXT        IDC_EDIT_WXP,67,170,56,12,ES_AUTOHSCROLL | ES_READONLY | 
+                    NOT WS_VISIBLE
+    RTEXT           "Y-dim/pixel:",IDC_STATIC_WYP,21,188,46,8,NOT WS_VISIBLE
+    EDITTEXT        IDC_EDIT_WYP,67,186,56,12,ES_AUTOHSCROLL | ES_READONLY | 
+                    NOT WS_VISIBLE
+    RTEXT           "X coor UL:",IDC_STATIC_WXC,21,204,46,8,NOT WS_VISIBLE
+    EDITTEXT        IDC_EDIT_WXC,67,202,56,12,ES_AUTOHSCROLL | ES_READONLY | 
+                    NOT WS_VISIBLE
+    RTEXT           "Y coor UL:",IDC_STATIC_WYC,21,224,46,8,NOT WS_VISIBLE
+    EDITTEXT        IDC_EDIT_WYC,67,222,56,12,ES_AUTOHSCROLL | ES_READONLY | 
+                    NOT WS_VISIBLE
+    GROUPBOX        "Grid origin in map coordinates",IDC_STATIC_MO_GB,222,6,
+                    143,54,BS_NOTIFY,WS_EX_TRANSPARENT
+    RTEXT           "X:",IDC_STATIC_MO_X,256,16,46,8
+    EDITTEXT        IDC_EDIT_MO_X,302,14,56,12,ES_AUTOHSCROLL
+    RTEXT           "Y:",IDC_STATIC_MO_Y,256,29,46,8
+    EDITTEXT        IDC_EDIT_MO_Y,302,27,56,12,ES_AUTOHSCROLL
+    RTEXT           "Angle:",IDC_STATIC_MO_ANGLE,256,43,46,8,SS_NOTIFY
+    EDITTEXT        IDC_EDIT_MO_ANGLE,302,41,56,12,ES_AUTOHSCROLL | 
+                    ES_WANTRETURN
+    GROUPBOX        "Grid origin in model coordinates",IDC_STATIC_XY,222,64,
+                    143,56
+    LTEXT           "Xmin:",IDC_STATIC_X,256,74,46,8,0,WS_EX_RIGHT
+    EDITTEXT        IDC_EDIT_X,302,72,56,12,ES_AUTOHSCROLL | ES_WANTRETURN
+    LTEXT           "Ymin:",IDC_STATIC_Y,256,88,46,8,0,WS_EX_RIGHT
+    EDITTEXT        IDC_EDIT_Y,302,86,56,12,ES_AUTOHSCROLL
+    LTEXT           "Zmin:",IDC_STATIC_Z,256,101,46,8,0,WS_EX_RIGHT
+    EDITTEXT        IDC_EDIT_Z,302,99,56,12,ES_AUTOHSCROLL
+    GROUPBOX        "Grid dimensions",IDC_STATIC_GD,222,121,153,107
+    LTEXT           "Length (X):",IDC_STATIC_LENGTH,256,129,46,8,0,
+                    WS_EX_RIGHT
+    EDITTEXT        IDC_EDIT_LENGTH,302,127,56,12,ES_AUTOHSCROLL
+    LTEXT           "Width (Y):",IDC_STATIC_WIDTH,256,144,46,8,0,WS_EX_RIGHT
+    EDITTEXT        IDC_EDIT_WIDTH,302,142,56,12,ES_AUTOHSCROLL
+    LTEXT           "Depth (Z):",IDC_STATIC_DEPTH,256,160,46,8,0,WS_EX_RIGHT
+    EDITTEXT        IDC_EDIT_DEPTH,302,158,56,12,ES_AUTOHSCROLL
+    RTEXT           "X Nodes:",IDC_X_NODES_STATIC,256,180,46,8
+    EDITTEXT        IDC_X_NODES_EDIT,302,178,56,12,ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    CONTROL         "",IDC_X_SPIN,"msctls_updown32",UDS_SETBUDDYINT | 
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,357,178,
+                    11,12
+    RTEXT           "Y Nodes:",IDC_Y_NODES_STATIC,256,197,46,8
+    EDITTEXT        IDC_Y_NODES_EDIT,302,195,56,12,ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    CONTROL         "",IDC_Y_SPIN,"msctls_updown32",UDS_SETBUDDYINT | 
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,357,195,
+                    11,12
+    RTEXT           "Z Nodes:",IDC_Z_NODES_STATIC,256,213,46,8
+    EDITTEXT        IDC_Z_NODES_EDIT,302,211,56,12,ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    CONTROL         "",IDC_Z_SPIN,"msctls_updown32",UDS_SETBUDDYINT | 
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,357,211,
+                    11,12
+    DEFPUSHBUTTON   "OK",IDOK,256,257,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,321,257,50,14
+    PUSHBUTTON      "< &Back",IDC_BACK_BUTTON,172,257,50,14,WS_DISABLED
+    CONTROL         "Modify",IDC_MODIFY_CHECK,"Button",BS_AUTOCHECKBOX | NOT 
+                    WS_VISIBLE | WS_TABSTOP,15,159,85,10
+END
+
+IDD_AXES_PROPPAGE DIALOGEX 0, 0, 140, 86
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Axes"
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    CONTROL         "Tube",IDC_TUBE,"Button",BS_AUTORADIOBUTTON | 
+                    WS_DISABLED | WS_GROUP | WS_TABSTOP,7,11,33,10
+    CONTROL         "Line",IDC_LINE,"Button",BS_AUTORADIOBUTTON | 
+                    WS_DISABLED,43,11,29,10
+    LTEXT           "Size:",IDC_STATIC,9,33,16,8,WS_DISABLED
+    EDITTEXT        IDC_AXES_SIZE,29,30,40,14,ES_AUTOHSCROLL | WS_DISABLED | 
+                    WS_GROUP
+    LTEXT           "Tube Diam:",IDC_STATIC,7,54,17,16,WS_DISABLED
+    EDITTEXT        IDC_AXES_TUBE_DIAMETER,29,55,40,14,ES_AUTOHSCROLL | 
+                    WS_DISABLED
+    LTEXT           "x:",IDC_STATIC,82,27,8,8
+    EDITTEXT        IDC_X_ORIGIN,93,24,40,14,ES_AUTOHSCROLL
+    LTEXT           "y:",IDC_STATIC,82,46,8,8
+    EDITTEXT        IDC_Y_ORIGIN,93,44,40,14,ES_AUTOHSCROLL
+    LTEXT           "z:",IDC_STATIC,82,65,8,8
+    EDITTEXT        IDC_Z_ORIGIN,93,64,40,14,ES_AUTOHSCROLL
+    LTEXT           "Position",IDC_STATIC,94,11,26,8
+END
+
+IDD_MAP_PROPPAGE DIALOGEX 0, 0, 317, 143
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_CAPTION
+CAPTION "IDD_MAP_PROPPAGE"
+FONT 8, "MS Shell Dlg", 400, 0, 0x0
+BEGIN
+    CONTROL         "",IDC_LIST1,"SysListView32",LVS_ALIGNLEFT | WS_BORDER | 
+                    WS_TABSTOP,7,7,303,129
+END
+
+IDD_IMPORT_MAP_PROPPAGE DIALOGEX 0, 0, 317, 143
+STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "IMPORT MAP CAPTION"
+FONT 8, "MS Sans Serif", 400, 0, 0x0
+BEGIN
+    LTEXT           "Import a site map?",IDC_STATIC,7,7,303,9
+    CONTROL         "&No",IDC_IMPORT_NO,"Button",BS_AUTORADIOBUTTON,17,24,
+                    293,10
+    CONTROL         "&Yes",IDC_IMPORT_YES,"Button",BS_AUTORADIOBUTTON,17,44,
+                    293,10
+    EDITTEXT        IDC_MAP_EDIT,31,60,257,15,ES_AUTOHSCROLL | WS_DISABLED
+    PUSHBUTTON      "B&rowse...",IDC_BROWSE_MAP_BUTTON,230,79,51,13,
+                    WS_DISABLED
+    CONTROL         "&Use world file",IDC_USE_WORLD_CHECK,"Button",
+                    BS_AUTOCHECKBOX | WS_DISABLED | WS_TABSTOP,31,87,89,11
+    EDITTEXT        IDC_WORLD_EDIT,31,103,257,15,ES_AUTOHSCROLL | 
+                    WS_DISABLED
+    PUSHBUTTON      "Brow&se...",IDC_BROWSE_WORLD_BUTTON,230,123,51,13,
+                    WS_DISABLED
+END
+
+IDD_COOR_DIALOG DIALOGEX 0, 0, 179, 55
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "Enter coordinates"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    LTEXT           "X:",IDC_STATIC_XC1,13,14,8,8,SS_NOTIFY
+    EDITTEXT        IDC_EDIT_XC1,23,12,56,12,ES_AUTOHSCROLL | ES_WANTRETURN
+    LTEXT           "Y:",IDC_STATIC_YC1,102,14,8,8,SS_NOTIFY
+    EDITTEXT        IDC_EDIT_YC1,111,12,56,12,ES_AUTOHSCROLL | ES_WANTRETURN
+    DEFPUSHBUTTON   "OK",IDOK,31,34,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,98,33,50,14
+END
+
+IDD_NEW_MODEL_INTRO2 DIALOGEX 0, 0, 317, 193
+STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "New Model Wizard"
+FONT 8, "MS Sans Serif", 400, 0, 0x0
+BEGIN
+    LTEXT           "Welcome to the New Model Wizard",IDC_TITLE,115,8,195,11,
+                    NOT WS_GROUP
+    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDFRAME,132,23,178,56
+    CONTROL         "Solute transport and chemistry",
+                    IDC_SOLUTE_TRANSPORT_RADIO,"Button",BS_AUTORADIOBUTTON | 
+                    WS_GROUP,142,32,130,11
+    CONTROL         "Flow only",IDC_FLOW_ONLY_RADIO,"Button",
+                    BS_AUTORADIOBUTTON,142,63,45,10
+    LTEXT           "Molecular Diffusivity",IDC_MOL_DIFF_STATIC,167,48,66,8
+    EDITTEXT        IDC_MOL_DIFF_EDIT,236,46,54,12,ES_AUTOHSCROLL
+    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDFRAME,132,88,178,45
+    CONTROL         "Transient flow",IDC_TRANSIENT_FLOW_RADIO,"Button",
+                    BS_AUTORADIOBUTTON | WS_GROUP,142,98,86,8
+    CONTROL         "Steady flow",IDC_STEADY_FLOW_RADIO,"Button",
+                    BS_AUTORADIOBUTTON,142,117,91,8
+    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDFRAME,132,141,178,45
+    CONTROL         "Free surface",IDC_FREE_SURFACE_RADIO,"Button",
+                    BS_AUTORADIOBUTTON | WS_GROUP,142,150,131,10
+    CONTROL         "Confined flow",IDC_CONFINED_FLOW_RADIO,"Button",
+                    BS_AUTORADIOBUTTON,142,170,119,10
+END
+
+IDD_MODEL_OPTIONS DIALOGEX 0, 0, 317, 143
+STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "IDD_MODEL_OPTIONS"
+FONT 8, "MS Sans Serif", 400, 0, 0x0
+BEGIN
+    GROUPBOX        "",IDC_STATIC,7,7,130,56
+    CONTROL         "Free surface",IDC_RADIO3,"Button",BS_AUTORADIOBUTTON | 
+                    WS_GROUP,21,16,101,14
+    CONTROL         "Confined flow",IDC_RADIO4,"Button",BS_AUTORADIOBUTTON,
+                    21,38,76,15
+    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDFRAME,186,7,124,56
+    CONTROL         "Transient flow",IDC_RADIO2,"Button",BS_AUTORADIOBUTTON | 
+                    WS_GROUP,208,21,86,8
+    CONTROL         "Steady flow",IDC_RADIO1,"Button",BS_AUTORADIOBUTTON,208,
+                    42,91,8
+END
+
+IDD_CHEM_IC_INT_PROPPAGE DIALOGEX 0, 0, 317, 143
+STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Chemistry Initial Condition Properties"
+FONT 8, "MS Sans Serif", 400, 0, 0x0
+BEGIN
+    CONTROL         "",IDC_PROP_TREE,"SysTreeView32",TVS_SHOWSELALWAYS | 
+                    TVS_NOSCROLL | WS_TABSTOP,7,7,120,96,WS_EX_CLIENTEDGE
+    CONTROL         "",IDC_DESC_RICHEDIT,"RichEdit20A",ES_MULTILINE | 
+                    ES_AUTOHSCROLL | ES_READONLY | WS_BORDER | WS_VSCROLL | 
+                    WS_HSCROLL,7,108,303,28
+    CONTROL         "Single Value",IDC_SINGLE_VALUE_RADIO,"Button",
+                    BS_AUTORADIOBUTTON | WS_GROUP,137,7,54,10
+    CONTROL         "Linear Interpolation",IDC_LINEAR_INTERPOLATION_RADIO,
+                    "Button",BS_AUTORADIOBUTTON,137,32,79,10
+    LTEXT           "Value:",IDC_SINGLE_VALUE_STATIC,157,18,21,8
+    EDITTEXT        IDC_SINGLE_VALUE_EDIT,189,16,56,12,ES_AUTOHSCROLL
+    CONTROL         "X",IDC_X_RADIO,"Button",BS_AUTORADIOBUTTON | WS_GROUP,
+                    161,57,20,10
+    CONTROL         "Y",IDC_Y_RADIO,"Button",BS_AUTORADIOBUTTON,161,72,20,10
+    CONTROL         "Z",IDC_Z_RADIO,"Button",BS_AUTORADIOBUTTON,161,87,20,10
+    LTEXT           "Value 1:",IDC_VALUE1_STATIC,209,46,27,8
+    EDITTEXT        IDC_VALUE1_EDIT,244,44,56,12,ES_AUTOHSCROLL
+    LTEXT           "Distance 1:",IDC_DISTANCE1_STATIC,199,62,37,8
+    EDITTEXT        IDC_DISTANCE1_EDIT,244,60,56,12,ES_AUTOHSCROLL
+    LTEXT           "Value 2:",IDC_VALUE2_STATIC,209,78,27,8
+    EDITTEXT        IDC_VALUE2_EDIT,244,76,56,12,ES_AUTOHSCROLL
+    LTEXT           "Distance 2:",IDC_DISTANCE2_STATIC,199,94,37,8
+    EDITTEXT        IDC_DISTANCE2_EDIT,244,92,56,12,ES_AUTOHSCROLL
+    GROUPBOX        "Direction",IDC_STATIC_DIRECTION,150,44,44,59
+END
+
+IDD_FLOW_ONLY_INT_PROPPAGE DIALOGEX 0, 0, 317, 143
+STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Flow Only Properties"
+FONT 8, "MS Sans Serif", 400, 0, 0x0
+BEGIN
+    CONTROL         "",IDC_DESC_RICHEDIT,"RichEdit20A",ES_MULTILINE | 
+                    ES_AUTOHSCROLL | ES_READONLY | WS_BORDER | WS_VSCROLL | 
+                    WS_HSCROLL,7,83,303,53
+    CONTROL         "Solute transport and chemistry",
+                    IDC_SOLUTE_TRANSPORT_RADIO,"Button",BS_AUTORADIOBUTTON,7,
+                    21,142,11
+    CONTROL         "Flow Only",IDC_FLOW_ONLY_RADIO,"Button",
+                    BS_AUTORADIOBUTTON,7,54,47,10
+    LTEXT           "Molecular Diffusivity",IDC_MOL_DIFF_STATIC,43,38,73,8
+    EDITTEXT        IDC_MOL_DIFF_EDIT,113,37,79,12,ES_AUTOHSCROLL
+END
+
+IDD_STEADY_FLOW_INT_PROPPAGE DIALOGEX 0, 0, 317, 143
+STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Steady Flow Properties"
+FONT 8, "MS Sans Serif", 400, 0, 0x0
+BEGIN
+    CONTROL         "",IDC_DESC_RICHEDIT,"RichEdit20A",ES_MULTILINE | 
+                    ES_AUTOHSCROLL | ES_READONLY | WS_BORDER | WS_VSCROLL | 
+                    WS_HSCROLL,7,83,303,53
+    CONTROL         "Transient flow",IDC_TRANSIENT_FLOW_RADIO,"Button",
+                    BS_AUTORADIOBUTTON | WS_GROUP,38,24,86,8
+    CONTROL         "Steady flow",IDC_STEADY_FLOW_RADIO,"Button",
+                    BS_AUTORADIOBUTTON,38,48,91,8
+END
+
+IDD_FREE_SURFACE_INT_PROPPAGE DIALOGEX 0, 0, 317, 143
+STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Free Surface Properties"
+FONT 8, "MS Sans Serif", 400, 0, 0x0
+BEGIN
+    CONTROL         "",IDC_DESC_RICHEDIT,"RichEdit20A",ES_MULTILINE | 
+                    ES_AUTOHSCROLL | ES_READONLY | WS_BORDER | WS_VSCROLL | 
+                    WS_HSCROLL,7,83,303,53
+    CONTROL         "Free surface",IDC_FREE_SURFACE_RADIO,"Button",
+                    BS_AUTORADIOBUTTON | WS_GROUP,38,25,131,10
+    CONTROL         "Confined flow",IDC_CONFINED_FLOW_RADIO,"Button",
+                    BS_AUTORADIOBUTTON,38,49,119,10
+END
+
+IDD_PRINT_FREQUENCY_EXT_PROPPAGE DIALOGEX 0, 0, 317, 193
+STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Print Frequency Properties"
+FONT 8, "MS Sans Serif", 400, 0, 0x0
+BEGIN
+    CONTROL         "Custom1",IDC_GRID,"MFCGridCtrl",WS_BORDER | WS_TABSTOP,
+                    7,7,303,179
+    LTEXT           "NOTE: This invisible control is needed so that the background of the dialog is painted correctly.",
+                    IDC_STATIC,75,77,159,22,NOT WS_VISIBLE
+END
+
+IDD_STARTUP_INTRO DIALOGEX 0, 0, 254, 71
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "Startup"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,197,7,50,14
+    CONTROL         "Open an existing file.",IDC_OPEN_FILE,"Button",
+                    BS_AUTORADIOBUTTON,20,23,163,10
+    CONTROL         "Use the new file wizard to create a new model.",
+                    IDC_NEW_WIZARD,"Button",BS_AUTORADIOBUTTON | 
+                    BS_MULTILINE,20,41,163,10
+    GROUPBOX        "Choose an action to perform",IDC_STATIC,7,7,185,57
+END
+
+IDD_FLOW_ONLY_INT_PROPPAGE2 DIALOGEX 0, 0, 317, 143
+STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Note"
+FONT 8, "MS Sans Serif", 400, 0, 0x0
+BEGIN
+    LTEXT           "Changing from flow only to solute transport may require you to define the following:",
+                    IDC_STATIC,21,22,258,8
+    LTEXT           "1. Chemistry initial conditions (CHEMISTRY_IC)",
+                    IDC_STATIC,41,46,149,8
+    LTEXT           "2. Dispersivities (MEDIA)",IDC_STATIC,41,65,86,8
+    LTEXT           "3. Solutions associated with boundary conditions (FLUX, LEAKY and SPECIFIED_VALUE)",
+                    IDC_STATIC,41,84,232,26
+END
+
+IDD_PROPS_CUBE2 DIALOGEX 0, 0, 127, 132
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    LTEXT           "X:",IDC_STATIC_X,7,31,8,8,0,WS_EX_RIGHT
+    EDITTEXT        IDC_EDIT_XMIN,19,29,46,12,ES_AUTOHSCROLL | ES_WANTRETURN
+    EDITTEXT        IDC_EDIT_XMAX,73,29,46,12,ES_AUTOHSCROLL
+    LTEXT           "Y:",IDC_STATIC,7,51,8,8,0,WS_EX_RIGHT
+    EDITTEXT        IDC_EDIT_YMIN,19,49,46,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_YMAX,74,49,46,12,ES_AUTOHSCROLL
+    LTEXT           "Z:",IDC_STATIC,7,72,8,8,0,WS_EX_RIGHT
+    EDITTEXT        IDC_EDIT_ZMIN,19,70,46,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_ZMAX,74,70,46,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "Apply",IDC_APPLY,52,111,23,14
+    LTEXT           "Min",IDC_STATIC,36,15,12,8
+    LTEXT           "Max",IDC_STATIC,89,15,14,8
+END
+
+IDD_WELL_PROPPAGE DIALOGEX 0, 0, 316, 274
+STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Well Properties"
+FONT 8, "MS Sans Serif", 400, 0, 0x0
+BEGIN
+    CONTROL         "Custom1",IDC_GRID_SCHEDULES,"MFCGridCtrl",WS_BORDER | 
+                    WS_TABSTOP,7,169,191,49
+    CONTROL         "",IDC_DESC_RICHEDIT,"RichEdit20A",ES_MULTILINE | 
+                    ES_AUTOHSCROLL | ES_READONLY | WS_BORDER | WS_VSCROLL | 
+                    WS_HSCROLL,7,230,302,37
+    CONTROL         "Custom1",IDC_GRID_SCREENS,"MFCGridCtrl",WS_BORDER | 
+                    WS_TABSTOP,7,104,191,48
+    LTEXT           "Well Number",IDC_STATIC,7,13,42,8
+    EDITTEXT        IDC_EDIT1,54,11,30,12,ES_AUTOHSCROLL
+    LTEXT           "Description",IDC_STATIC,96,13,36,8
+    EDITTEXT        IDC_EDIT2,136,11,173,12,ES_AUTOHSCROLL
+    LTEXT           "X:",IDC_STATIC,7,34,8,8
+    LTEXT           "Y:",IDC_STATIC,95,34,8,8
+    EDITTEXT        IDC_EDIT5,18,32,43,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT6,106,32,43,12,ES_AUTOHSCROLL
+    LTEXT           "(ft)",IDC_X_UNITS_STATIC,65,34,17,8
+    LTEXT           "(ft)",IDC_Y_UNITS_STATIC,154,34,17,8
+    CONTROL         "",IDC_STATIC,"Static",SS_BLACKFRAME,209,38,100,180
+    LTEXT           "Open intervals",IDC_STATIC,7,76,46,8
+    LTEXT           "Pumping schedule",IDC_STATIC,7,158,59,8
+    CONTROL         "By depth",IDC_BY_DEPTH_CHECK,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,164,64,44,10
+    EDITTEXT        IDC_LSD_EDIT,128,88,43,12,ES_AUTOHSCROLL
+    LTEXT           "(ft)",IDC_LSD_UNITS_STATIC,176,90,17,8
+    CONTROL         "Depth",IDC_RADIO1,"Button",BS_AUTORADIOBUTTON,71,89,35,
+                    10
+    CONTROL         "Elevation",IDC_RADIO2,"Button",BS_AUTORADIOBUTTON,17,89,
+                    45,10
+    LTEXT           "Land surface datum",IDC_LSD_STATIC,120,76,64,8
+    EDITTEXT        IDC_LSD_EDIT2,107,53,43,12,ES_AUTOHSCROLL
+    LTEXT           "(ft)",IDC_LSD_UNITS_STATIC2,154,55,17,8
+    CONTROL         "Radius",IDC_RADIO3,"Button",BS_AUTORADIOBUTTON,60,54,38,
+                    10
+    CONTROL         "Diameter",IDC_RADIO4,"Button",BS_AUTORADIOBUTTON,7,54,
+                    44,10
+END
+
+IDD_WELL_PROPPAGE1 DIALOGEX 0, 0, 379, 315
+STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Well Properties"
+FONT 8, "MS Sans Serif", 400, 0, 0x0
+BEGIN
+    GROUPBOX        "Location",IDC_STATIC,7,22,241,27
+    GROUPBOX        "Dimension",IDC_STATIC,7,50,241,27
+    GROUPBOX        "Open intervals",IDC_STATIC,7,104,241,91
+    GROUPBOX        "Pumping schedule",IDC_STATIC,7,195,241,63,0,
+                    WS_EX_TRANSPARENT
+    LTEXT           "&Well Number",IDC_STATIC,7,8,42,8
+    EDITTEXT        IDC_NUSER_EDIT,54,7,34,12,ES_AUTOHSCROLL
+    LTEXT           "De&scription",IDC_STATIC,98,8,36,8
+    EDITTEXT        IDC_DESC_EDIT,139,7,233,12,ES_AUTOHSCROLL
+    LTEXT           "&X:",IDC_STATIC,15,35,8,8
+    EDITTEXT        IDC_X_EDIT,25,33,43,12,ES_AUTOHSCROLL
+    LTEXT           "(ft)",IDC_X_UNITS_STATIC,71,35,17,8
+    LTEXT           "&Y:",IDC_STATIC,98,35,8,8
+    EDITTEXT        IDC_Y_EDIT,110,33,43,12,ES_AUTOHSCROLL
+    LTEXT           "(ft)",IDC_Y_UNITS_STATIC,156,35,17,8
+    CONTROL         "&Diameter",IDC_DIAM_RADIO,"Button",BS_AUTORADIOBUTTON,
+                    15,61,44,10
+    CONTROL         "&Radius",IDC_RADIUS_RADIO,"Button",BS_AUTORADIOBUTTON,
+                    66,61,38,10
+    EDITTEXT        IDC_DIAM_EDIT,109,60,43,12,ES_AUTOHSCROLL
+    LTEXT           "(ft)",IDC_DIAMETER_UNITS_STATIC,155,62,17,8
+    LTEXT           "Specify by",IDC_STATIC,15,115,34,8
+    CONTROL         "&Elevation",IDC_ELEVATION_RADIO,"Button",
+                    BS_AUTORADIOBUTTON,53,115,45,10
+    CONTROL         "De&pth",IDC_DEPTH_RADIO,"Button",BS_AUTORADIOBUTTON,99,
+                    115,35,10
+    LTEXT           "&Land surface datum",IDC_LSD_STATIC,15,130,64,8
+    EDITTEXT        IDC_LSD_EDIT,83,128,43,12,ES_AUTOHSCROLL
+    LTEXT           "(ft)",IDC_LSD_UNITS_STATIC,129,130,17,8
+    CONTROL         "Custom1",IDC_GRID_SCREENS,"MFCGridCtrl",WS_BORDER | 
+                    WS_TABSTOP,13,146,228,43
+    CONTROL         "Custom1",IDC_GRID_SCHEDULES,"MFCGridCtrl",WS_BORDER | 
+                    WS_TABSTOP,14,205,227,47
+    CONTROL         "",IDC_DESC_RICHEDIT,"RichEdit20A",ES_MULTILINE | 
+                    ES_AUTOHSCROLL | ES_READONLY | WS_BORDER | WS_VSCROLL | 
+                    WS_HSCROLL,7,266,365,42
+    CONTROL         "",IDC_WELL_STATIC,"Static",SS_BLACKFRAME,260,26,112,231
+    CONTROL         "Allocate by pressure and mobility",IDC_ALLOCATE_BY_HEAD,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,88,118,10
+    GROUPBOX        "Options",IDC_STATIC,7,77,241,27
+END
+
+IDD_WELL_PROPPAGE2 DIALOGEX 0, 0, 320, 315
+STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Well Properties"
+FONT 8, "MS Sans Serif", 400, 0, 0x0
+BEGIN
+    GROUPBOX        "Location",IDC_STATIC,7,22,187,27
+    GROUPBOX        "Dimension",IDC_STATIC,7,50,187,27
+    GROUPBOX        "Open intervals",IDC_STATIC,7,104,187,91
+    GROUPBOX        "Pumping schedule",IDC_STATIC,7,195,306,63,0,
+                    WS_EX_TRANSPARENT
+    LTEXT           "&Well Number",IDC_STATIC,7,8,42,8
+    EDITTEXT        IDC_NUSER_EDIT,54,7,34,12,ES_AUTOHSCROLL
+    LTEXT           "De&scription",IDC_STATIC,98,8,36,8
+    EDITTEXT        IDC_DESC_EDIT,141,7,172,12,ES_AUTOHSCROLL
+    LTEXT           "&X:",IDC_STATIC,15,35,8,8
+    EDITTEXT        IDC_X_EDIT,25,33,43,12,ES_AUTOHSCROLL
+    LTEXT           "(ft)",IDC_X_UNITS_STATIC,71,35,17,8
+    LTEXT           "&Y:",IDC_STATIC,98,35,8,8
+    EDITTEXT        IDC_Y_EDIT,110,33,43,12,ES_AUTOHSCROLL
+    LTEXT           "(ft)",IDC_Y_UNITS_STATIC,156,35,17,8
+    CONTROL         "&Diameter",IDC_DIAM_RADIO,"Button",BS_AUTORADIOBUTTON,
+                    15,61,44,10
+    CONTROL         "&Radius",IDC_RADIUS_RADIO,"Button",BS_AUTORADIOBUTTON,
+                    66,61,38,10
+    EDITTEXT        IDC_DIAM_EDIT,109,60,43,12,ES_AUTOHSCROLL
+    LTEXT           "(ft)",IDC_DIAMETER_UNITS_STATIC,155,62,17,8
+    LTEXT           "Specify by",IDC_STATIC,15,115,34,8
+    CONTROL         "&Elevation",IDC_ELEVATION_RADIO,"Button",
+                    BS_AUTORADIOBUTTON,53,115,45,10
+    CONTROL         "De&pth",IDC_DEPTH_RADIO,"Button",BS_AUTORADIOBUTTON,99,
+                    115,35,10
+    LTEXT           "&Land surface datum",IDC_LSD_STATIC,15,130,64,8
+    EDITTEXT        IDC_LSD_EDIT,83,128,43,12,ES_AUTOHSCROLL
+    LTEXT           "(ft)",IDC_LSD_UNITS_STATIC,129,130,17,8
+    CONTROL         "Custom1",IDC_GRID_SCREENS,"MFCGridCtrl",WS_BORDER | 
+                    WS_TABSTOP,13,146,174,43
+    CONTROL         "Custom1",IDC_GRID_SCHEDULES,"MFCGridCtrl",WS_BORDER | 
+                    WS_TABSTOP,14,205,292,47
+    CONTROL         "",IDC_DESC_RICHEDIT,"RichEdit20A",ES_MULTILINE | 
+                    ES_AUTOHSCROLL | ES_READONLY | WS_BORDER | WS_VSCROLL | 
+                    WS_HSCROLL,7,266,306,42
+    CONTROL         "",IDC_WELL_STATIC,"Static",SS_BLACKFRAME,201,26,112,169
+    CONTROL         "Allocate by pressure and mobility",IDC_ALLOCATE_BY_HEAD,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,88,118,10
+    GROUPBOX        "Options",IDC_STATIC,7,77,187,27
+END
+
+IDD_BC_SPECIFIED_HEAD_PROPPAGE DIALOGEX 0, 0, 418, 222
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Specified Head Properties"
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    LTEXT           "Solution type:",IDC_SOL_TYPE_STATIC,7,79,46,8
+    CONTROL         "Associated",IDC_ASSOC_RADIO,"Button",BS_AUTORADIOBUTTON,
+                    61,79,51,10
+    CONTROL         "Fixed",IDC_FIXED_RADIO,"Button",BS_AUTORADIOBUTTON,127,
+                    79,33,10
+    CONTROL         "",IDC_DESC_RICHEDIT,"RichEdit20A",ES_MULTILINE | 
+                    ES_AUTOHSCROLL | ES_READONLY | WS_BORDER | WS_VSCROLL | 
+                    WS_HSCROLL,7,166,404,49
+    CONTROL         "Custom1",IDC_HEAD_GRID,"MFCGridCtrl",WS_BORDER | 
+                    WS_TABSTOP,7,7,404,60
+    CONTROL         "Custom1",IDC_SOLUTION_GRID,"MFCGridCtrl",WS_BORDER | 
+                    WS_TABSTOP,7,93,404,60
+END
+
+IDD_TEST_CMODGRIDCTRLEX DIALOGEX 0, 0, 317, 143
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "IDD_TEST_CMODGRIDCTRLEX"
+FONT 8, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+    CONTROL         "Custom1",IDC_GRID,"MFCGridCtrl",WS_BORDER | WS_TABSTOP,
+                    7,7,303,83
+    PUSHBUTTON      "Button1",IDC_BUTTON1,7,103,103,13
+    PUSHBUTTON      "CB_SHOWDROPDOWN",IDC_BUTTON2,121,103,78,14
+    COMBOBOX        IDC_COMBO1,207,104,103,237,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    CONTROL         "Check1",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,126,39,10
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,0,7
+ PRODUCTVERSION 1,0,0,7
+ FILEFLAGSMASK 0x37L
+#ifdef _DEBUG
+ FILEFLAGS 0x21L
+#else
+ FILEFLAGS 0x20L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904e4"
+        BEGIN
+            VALUE "Comments", "$Name:  $"
+            VALUE "CompanyName", "U.S. Geological Survey"
+            VALUE "FileDescription", "WPhast executable"
+            VALUE "FileVersion", "1.0.0.7"
+            VALUE "InternalName", "WPhast.exe"
+            VALUE "LegalCopyright", "public domain"
+            VALUE "OriginalFilename", "WPhast.exe"
+            VALUE "ProductName", "WPhast"
+            VALUE "ProductVersion", "1.0.0.7"
+            VALUE "SpecialBuild", "$Date: 2005/04/01 03:52:33 $"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1252
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_ABOUTBOX, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 228
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 59
+    END
+
+    IDD_PROPS_CUBE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 120
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 125
+    END
+
+    IDD_MEDIA_PROPPAGE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 228
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 235
+    END
+
+    IDD_GRID_PROPPAGE_OLD, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 310
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 186
+    END
+
+    IDD_SCALE_PROPPAGE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 133
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 83
+    END
+
+    IDD_NEW_ZONE_PROPPAGE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 310
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 186
+    END
+
+    IDD_BC_FLUX_PROPPAGE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 228
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 235
+    END
+
+    IDD_TEST_PROPPAGE_LARGE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 352
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 207
+    END
+
+    IDD_PROTO_PROPPAGE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 228
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 192
+    END
+
+    IDD_PROTO2_PROPPAGE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 228
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 208
+    END
+
+    IDD_PROTO3_PROPPAGE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 228
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 235
+    END
+
+    IDD_BC_LEAKY_PROPPAGE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 229
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 235
+    END
+
+    IDD_BC_SPECIFIED_PROPPAGE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 228
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 235
+    END
+
+    IDD_INTRO, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 310
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 186
+    END
+
+    IDD_END, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 310
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 186
+    END
+
+    IDD_INTERIOR1, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 310
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 136
+    END
+
+    IDD_INTERIOR2, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 310
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 136
+    END
+
+    IDD_MEDIA_EXT_PROPPAGE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 310
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 186
+    END
+
+    IDD_BC_FLUX_PROPPAGE2, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 310
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 186
+    END
+
+    IDD_BC_SPECIFIED_PROPPAGE2, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 310
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 186
+    END
+
+    IDD_IMPORT_ERROR_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 299
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 140
+    END
+
+    IDD_UNITS1_PROPPAGE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 310
+        VERTGUIDE, 36
+        VERTGUIDE, 132
+        VERTGUIDE, 205
+        VERTGUIDE, 220
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 136
+    END
+
+    IDD_UNITS_OLD, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 310
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 186
+    END
+
+    IDD_UNITS2_PROPPAGE_OLD, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 310
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 186
+    END
+
+    IDD_BC_LEAKY_PROPPAGE2, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 310
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 186
+    END
+
+    IDD_UNITS1_PROPPAGE_OLD, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 310
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 186
+    END
+
+    IDD_UNITS2_PROPPAGE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 310
+        VERTGUIDE, 19
+        VERTGUIDE, 132
+        VERTGUIDE, 205
+        VERTGUIDE, 220
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 136
+    END
+
+    IDD_GRID_PROPPAGE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 312
+        VERTGUIDE, 30
+        VERTGUIDE, 64
+        VERTGUIDE, 90
+        VERTGUIDE, 111
+        VERTGUIDE, 138
+        VERTGUIDE, 199
+        VERTGUIDE, 252
+        VERTGUIDE, 288
+        VERTGUIDE, 300
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 135
+        HORZGUIDE, 33
+        HORZGUIDE, 72
+        HORZGUIDE, 109
+    END
+
+    IDD_MEDIA_INT_PROPPAGE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 310
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 136
+    END
+
+    IDD_IC_HEAD_INT_PROPPAGE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 310
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 136
+    END
+
+    IDD_IC_HEAD_EXT_PROPPAGE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 310
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 186
+    END
+
+    IDD_NEW_MODEL_INTRO, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 310
+        VERTGUIDE, 115
+        VERTGUIDE, 128
+        VERTGUIDE, 142
+        VERTGUIDE, 292
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 186
+        HORZGUIDE, 44
+        HORZGUIDE, 59
+        HORZGUIDE, 75
+        HORZGUIDE, 99
+        HORZGUIDE, 116
+        HORZGUIDE, 135
+        HORZGUIDE, 150
+    END
+
+    IDD_TC_INT_PROPPAGE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 310
+        VERTGUIDE, 47
+        VERTGUIDE, 144
+        VERTGUIDE, 270
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 136
+        HORZGUIDE, 34
+        HORZGUIDE, 59
+        HORZGUIDE, 81
+    END
+
+    IDD_RUN_OUTPUT_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 299
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 140
+    END
+
+    IDD_TC_INT_M_PROPPAGE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 310
+        VERTGUIDE, 61
+        VERTGUIDE, 114
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 136
+        HORZGUIDE, 115
+    END
+
+    IDD_TC_INT_PROPPAGE1, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 310
+        VERTGUIDE, 19
+        VERTGUIDE, 98
+        VERTGUIDE, 146
+        VERTGUIDE, 298
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 136
+        HORZGUIDE, 34
+        HORZGUIDE, 59
+        HORZGUIDE, 81
+    END
+
+    IDD_TEST_VTK, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 303
+        VERTGUIDE, 236
+        VERTGUIDE, 261
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 188
+        HORZGUIDE, 22
+        HORZGUIDE, 35
+        HORZGUIDE, 49
+    END
+
+    IDD_MAP_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 375
+        VERTGUIDE, 222
+        VERTGUIDE, 256
+        VERTGUIDE, 302
+        TOPMARGIN, 6
+        BOTTOMMARGIN, 271
+        HORZGUIDE, 20
+        HORZGUIDE, 33
+        HORZGUIDE, 47
+        HORZGUIDE, 78
+        HORZGUIDE, 92
+        HORZGUIDE, 105
+        HORZGUIDE, 133
+        HORZGUIDE, 148
+        HORZGUIDE, 164
+        HORZGUIDE, 184
+        HORZGUIDE, 201
+        HORZGUIDE, 217
+    END
+
+    IDD_AXES_PROPPAGE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 133
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 79
+    END
+
+    IDD_MAP_PROPPAGE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 310
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 136
+    END
+
+    IDD_IMPORT_MAP_PROPPAGE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 310
+        VERTGUIDE, 17
+        VERTGUIDE, 31
+        VERTGUIDE, 230
+        VERTGUIDE, 288
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 136
+    END
+
+    IDD_COOR_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 12
+        RIGHTMARGIN, 167
+        VERTGUIDE, 56
+        VERTGUIDE, 123
+        TOPMARGIN, 12
+        BOTTOMMARGIN, 48
+    END
+
+    IDD_NEW_MODEL_INTRO2, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 310
+        VERTGUIDE, 115
+        VERTGUIDE, 132
+        VERTGUIDE, 142
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 186
+    END
+
+    IDD_MODEL_OPTIONS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 310
+        VERTGUIDE, 21
+        VERTGUIDE, 208
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 136
+        HORZGUIDE, 25
+    END
+
+    IDD_CHEM_IC_INT_PROPPAGE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 310
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 136
+    END
+
+    IDD_FLOW_ONLY_INT_PROPPAGE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 310
+        VERTGUIDE, 20
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 136
+    END
+
+    IDD_STEADY_FLOW_INT_PROPPAGE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 310
+        VERTGUIDE, 38
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 136
+    END
+
+    IDD_FREE_SURFACE_INT_PROPPAGE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 310
+        VERTGUIDE, 38
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 136
+    END
+
+    IDD_PRINT_FREQUENCY_EXT_PROPPAGE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 310
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 186
+    END
+
+    IDD_STARTUP_INTRO, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 247
+        VERTGUIDE, 20
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 64
+    END
+
+    IDD_FLOW_ONLY_INT_PROPPAGE2, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 310
+        VERTGUIDE, 41
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 136
+    END
+
+    IDD_PROPS_CUBE2, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 120
+        VERTGUIDE, 42
+        VERTGUIDE, 96
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 125
+        HORZGUIDE, 19
+        HORZGUIDE, 35
+        HORZGUIDE, 55
+        HORZGUIDE, 76
+    END
+
+    IDD_WELL_PROPPAGE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 309
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 267
+        HORZGUIDE, 17
+        HORZGUIDE, 38
+        HORZGUIDE, 59
+        HORZGUIDE, 80
+        HORZGUIDE, 94
+        HORZGUIDE, 128
+        HORZGUIDE, 162
+        HORZGUIDE, 193
+    END
+
+    IDD_WELL_PROPPAGE1, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 372
+        VERTGUIDE, 248
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 308
+        HORZGUIDE, 12
+    END
+
+    IDD_WELL_PROPPAGE2, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 313
+        VERTGUIDE, 194
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 308
+        HORZGUIDE, 12
+    END
+
+    IDD_BC_SPECIFIED_HEAD_PROPPAGE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 411
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 215
+    END
+
+    IDD_TEST_CMODGRIDCTRLEX, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 310
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 136
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Cursor
+//
+
+IDC_PAN_REAL            CURSOR                  "res\\pan_real.cur"
+IDC_NULL                CURSOR                  "res\\null.cur"
+IDC_RESIZE_COLUMN       CURSOR                  "res\\resize_column.cur"
+IDC_RESIZE_ROW          CURSOR                  "res\\resize_row.cur"
+IDC_ZOOM_REAL           CURSOR                  "res\\zoom_real.cur"
+IDC_SCALE_OBJ           CURSOR                  "res\\scale_obj.cur"
+IDC_PIXEL_PICKER        CURSOR                  "res\\pixelpicker.cur"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// RTF
+//
+
+IDR_MEDIA_KX_RTF        RTF                     "res\\MEDIA_KX.rtf"
+IDR_MEDIA_ACTIVE_RTF    RTF                     "res\\MEDIA_ACTIVE.rtf"
+IDR_MEDIA_KY_RTF        RTF                     "res\\MEDIA_KY.rtf"
+IDR_MEDIA_KZ_RTF        RTF                     "res\\MEDIA_KZ.rtf"
+IDR_MEDIA_POROSITY_RTF  RTF                     "res\\MEDIA_POROSITY.rtf"
+IDR_MEDIA_LONG_DISP_RTF RTF                     "res\\MEDIA_LONG_DISP.rtf"
+IDR_MEDIA_SPEC_STORAGE_RTF RTF                     "res\\MEDIA_SPEC_STORAGE.rtf"
+IDR_MEDIA_TRANS_DISP_RTF RTF                     "res\\MEDIA_TRANS_DISP.rtf"
+IDR_BC_FLUX_ASSOC_SOL_RTF RTF                     "res\\BC_FLUX_ASSOC_SOL.rtf"
+IDR_BC_FLUX_FLUX_RTF    RTF                     "res\\BC_FLUX_FLUX.rtf"
+IDR_BC_LEAKY_HEAD_RTF   RTF                     "res\\BC_LEAKY_HEAD.rtf"
+IDR_BC_LEAKY_THICKNESS_RTF RTF                     "res\\BC_LEAKY_THICKNESS.rtf"
+IDR_BC_LEAKY_HYD_COND_RTF RTF                     "res\\BC_LEAKY_HYD_COND.rtf"
+IDR_BC_LEAKY_ASSOC_SOL_RTF RTF                     "res\\BC_LEAKY_ASSOC_SOL.rtf"
+IDR_BC_SPECIFIED_HEAD_RTF RTF                     "res\\BC_SPECIFIED_HEAD.rtf"
+IDR_BC_SPECIFIED_SOL_RTF RTF                     "res\\BC_SPECIFIED_SOL.rtf"
+IDR_IC_HEAD_MASK_RTF    RTF                     "res\\IC_HEAD_MASK.rtf"
+IDR_IC_HEAD_HEAD_RTF    RTF                     "res\\IC_HEAD_HEAD.rtf"
+IDR_TC_TIME_STEP_RTF    RTF                     "res\\IDR_TC_TIME_STEP.rtf"
+IDR_TC_TIME_CHANGE_RTF  RTF                     "res\\IDR_TC_TIME_CHANGE.rtf"
+IDR_MEDIA_ALPHA_HORZ_RTF RTF                     "res\\ALPHA_HORZ.rtf"
+IDR_MEDIA_ALPHA_VERT_RTF RTF                     "res\\ALPHA_VERT.rtf"
+IDR_CHEM_IC_SOLUTION_RTF RTF                     "res\\CHEM_IC_SOLUTION.rtf"
+IDR_CHEM_IC_EQUILIBRIUM_PHASES_RTF RTF                     "res\\CHEM_IC_EQUILIBRIUM_PHASES.rtf"
+IDR_CHEM_IC_SURFACE_RTF RTF                     "res\\CHEM_IC_SURFACE.rtf"
+IDR_CHEM_IC_EXCHANGE_RTF RTF                     "res\\CHEM_IC_EXCHANGE.rtf"
+IDR_CHEM_IC_GAS_PHASE_RTF RTF                     "res\\CHEM_IC_GAS_PHASE.rtf"
+IDR_CHEM_IC_SOLID_SOLUTIONS_RTF RTF                     "res\\CHEM_IC_SOLID_SOLUTIONS.rtf"
+IDR_CHEM_IC_KINETICS_RTF RTF                     "res\\CHEM_IC_KINETICS.rtf"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// RT_MANIFEST
+//
+
+IDR_MANIFEST            RT_MANIFEST             "res\\WPhast.manifest"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog Info
+//
+
+IDD_TEST_CMODGRIDCTRLEX DLGINIT
+BEGIN
+    IDC_COMBO1, 0x403, 8, 0
+0x6573, 0x6f63, 0x646e, 0x0073, 
+    IDC_COMBO1, 0x403, 8, 0
+0x696d, 0x756e, 0x6574, 0x0073, 
+    IDC_COMBO1, 0x403, 6, 0
+0x6f68, 0x7275, 0x0073, 
+    IDC_COMBO1, 0x403, 5, 0
+0x6164, 0x7379, "\000" 
+    IDC_COMBO1, 0x403, 6, 0
+0x6579, 0x7261, 0x0073, 
+    0
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE 
+BEGIN
+    IDR_MAINFRAME           "WPhast"
+    IDR_WPhastTYPE          "\nWPhast\nWPhast\nWPhast Files (*.wphast)\n.wphast\nWPhast.Document\nWPhast.Document"
+    ID_VIEW_RESETDEFAULTLAYOUT "Resets all toolbars to their original state"
+    ID_INDICATOR_XYZ        "                                                                                "
+    IDR_MAINFRAME_SDI       "WPhast\n\nWPhast\nWPhast Files (*.wphast)\n.wphast\nWPhast.Document\nWPhast.Document"
+    IDS_IMPORT_PHAST_TRANS_133 "Select Phast Transport File to Import from"
+    ID_TOOLS_NEWZONE        "Creates a new zone\nCreate new zone"
+    IDS_MEDIA_PROPS_WIZ_135 "Define media properties for this zone"
+    IDS_EXPORT_PHAST_TRANS_136 "Select Phast Transport File to Export to"
+    IDS_UNITS1_CAPTION_137  "New Model Wizard"
+    IDS_UNITS1_TITLE_138    "Step 1 of 8"
+    IDS_UNITS1_SUBTITLE_139 "Define the units for the following parameters"
+    IDS_UNITS2_CAPTION_140  "New Model Wizard"
+    IDS_UNITS2_TITLE_141    "Step 2 of 8"
+    IDS_UNITS2_SUBTITLE_142 "Define the units for the following parameters"
+    IDS_GRID_CAPTION_143    "New Model Wizard"
+END
+
+STRINGTABLE 
+BEGIN
+    AFX_IDS_APP_TITLE       "WPhast"
+    AFX_IDS_IDLEMESSAGE     "Ready"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_INDICATOR_EXT        "EXT"
+    ID_INDICATOR_CAPS       "CAP"
+    ID_INDICATOR_NUM        "NUM"
+    ID_INDICATOR_SCRL       "SCRL"
+    ID_INDICATOR_OVR        "OVR"
+    ID_INDICATOR_REC        "REC"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_FILE_NEW             "Create a new document\nNew"
+    ID_FILE_OPEN            "Open an existing document\nOpen"
+    ID_FILE_CLOSE           "Close the active document\nClose"
+    ID_FILE_SAVE            "Save the active document\nSave"
+    ID_FILE_SAVE_AS         "Save the active document with a new name\nSave As"
+    ID_FILE_PAGE_SETUP      "Change the printing options\nPage Setup"
+    ID_FILE_PRINT_SETUP     "Change the printer and printing options\nPrint Setup"
+    ID_FILE_PRINT           "Print the active document\nPrint"
+    ID_FILE_PRINT_PREVIEW   "Display full pages\nPrint Preview"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_APP_ABOUT            "Display program information, version number and copyright\nAbout"
+    ID_APP_EXIT             "Quit the application; prompts to save documents\nExit"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_FILE_MRU_FILE1       "Open this document"
+    ID_FILE_MRU_FILE2       "Open this document"
+    ID_FILE_MRU_FILE3       "Open this document"
+    ID_FILE_MRU_FILE4       "Open this document"
+    ID_FILE_MRU_FILE5       "Open this document"
+    ID_FILE_MRU_FILE6       "Open this document"
+    ID_FILE_MRU_FILE7       "Open this document"
+    ID_FILE_MRU_FILE8       "Open this document"
+    ID_FILE_MRU_FILE9       "Open this document"
+    ID_FILE_MRU_FILE10      "Open this document"
+    ID_FILE_MRU_FILE11      "Open this document"
+    ID_FILE_MRU_FILE12      "Open this document"
+    ID_FILE_MRU_FILE13      "Open this document"
+    ID_FILE_MRU_FILE14      "Open this document"
+    ID_FILE_MRU_FILE15      "Open this document"
+    ID_FILE_MRU_FILE16      "Open this document"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_NEXT_PANE            "Switch to the next window pane\nNext Pane"
+    ID_PREV_PANE            "Switch back to the previous window pane\nPrevious Pane"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_WINDOW_NEW           "Open another window for the active document\nNew Window"
+    ID_WINDOW_ARRANGE       "Arrange icons at the bottom of the window\nArrange Icons"
+    ID_WINDOW_CASCADE       "Arrange windows so they overlap\nCascade Windows"
+    ID_WINDOW_TILE_HORZ     "Arrange windows as non-overlapping tiles\nTile Windows"
+    ID_WINDOW_TILE_VERT     "Arrange windows as non-overlapping tiles\nTile Windows"
+    ID_WINDOW_SPLIT         "Split the active window into panes\nSplit"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_EDIT_CLEAR           "Erase the selection\nErase"
+    ID_EDIT_CLEAR_ALL       "Erase everything\nErase All"
+    ID_EDIT_COPY            "Copy the selection and put it on the Clipboard\nCopy"
+    ID_EDIT_CUT             "Cut the selection and put it on the Clipboard\nCut"
+    ID_EDIT_FIND            "Find the specified text\nFind"
+    ID_EDIT_PASTE           "Insert Clipboard contents\nPaste"
+    ID_EDIT_REPEAT          "Repeat the last action\nRepeat"
+    ID_EDIT_REPLACE         "Replace specific text with different text\nReplace"
+    ID_EDIT_SELECT_ALL      "Select the entire document\nSelect All"
+    ID_EDIT_UNDO            "Undo the last action\nUndo"
+    ID_EDIT_REDO            "Redo the previously undone action\nRedo"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_VIEW_TOOLBAR         "Show or hide the toolbar\nToggle ToolBar"
+    ID_VIEW_STATUS_BAR      "Show or hide the status bar\nToggle StatusBar"
+END
+
+STRINGTABLE 
+BEGIN
+    AFX_IDS_SCSIZE          "Change the window size"
+    AFX_IDS_SCMOVE          "Change the window position"
+    AFX_IDS_SCMINIMIZE      "Reduce the window to an icon"
+    AFX_IDS_SCMAXIMIZE      "Enlarge the window to full size"
+    AFX_IDS_SCNEXTWINDOW    "Switch to the next document window"
+    AFX_IDS_SCPREVWINDOW    "Switch to the previous document window"
+    AFX_IDS_SCCLOSE         "Close the active window and prompts to save the documents"
+END
+
+STRINGTABLE 
+BEGIN
+    AFX_IDS_SCRESTORE       "Restore the window to normal size"
+    AFX_IDS_SCTASKLIST      "Activate Task List"
+    AFX_IDS_MDICHILD        "Step 6 of 6"
+END
+
+STRINGTABLE 
+BEGIN
+    AFX_IDS_PREVIEW_CLOSE   "Close print preview mode\nCancel Preview"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_NEW_CUBE             "Create a new box.\nCreate Box"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_CHEM_IC_SUBTITLE_160 
+                            "Set the default initial condition chemistry properties"
+    IDS_CHEM_IC_CAPTION161  "Chemistry IC Properties"
+    ID_FILE_EXPORT          "Export to trans.dat file"
+    ID_FILE_RUN             "Runs the current simulation\nRun simulation"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_GRID_TITLE_144      "Step 4 of 8"
+    IDS_GRID_SUBTITLE_145   "Enter the grid dimensions"
+    IDS_MEDIA_CAPTION_146   "New Model Wizard"
+    IDS_MEDIA_TITLE_147     "Step 5 of 8"
+    IDS_MEDIA_SUBTITLE_148  "Set the default media properties"
+    IDS_IC_HEAD_CAPTION_149 "New Model Wizard"
+    IDS_IC_HEAD_TITLE_150   "Step 6 of 8"
+    IDS_IC_HEAD_SUBTITLE_151 "Set the default initial head properties"
+    IDS_TC_CAPTION_152      "New Model Wizard"
+    IDS_TC_TITLE_153        "Step 8 of 8"
+    IDS_TC_SUBTITLE_154     "Define the time step and the time at which the first simulation period ends"
+    IDS_IMPMAP_CAPTION_155  "New Model Wizard"
+    IDS_IMPMAP_TITLE_156    "Step 3 of 8"
+    IDS_IMPMAP_SUBTITLE_157 "Import map file"
+    IDS_CHEM_IC_CAPTION_158 "New Model Wizard"
+    IDS_CHEM_IC_TITLE_159   "Step 7 of 8"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_TOOLS_NEWSTRESSPERIOD 
+                            "Creates a new simulation period\nCreate new simulation period"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_MDS_POINT1_177      "Define the first georeference point"
+    IDS_MDS_POINT2_178      "Define the second georeference point"
+    IDS_MDS_GRID_179        "Place the grid"
+    IDS_MDS_POINT1_SUB_180  "Click a point on the image with known coordinates"
+    IDS_MDS_POINT2_SUB_181  "Click a different point on the image with known coordinates"
+    IDS_MDS_GRID_SUB_182    "Size/Move/Rotate the grid.  Rotate the grid using the right-mouse button while pressing the control key."
+END
+
+STRINGTABLE 
+BEGIN
+    ID_TOOLS_NEWWELL        "Creates a new well\nCreate new well"
+END
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+LANGUAGE 9, 1
+#pragma code_page(1252)
+#include "res\WPhast.rc2"  // non-Microsoft Visual C++ edited resources
+#include "afxres.rc"         // Standard components
+#include "afxprint.rc"       // printing/print preview resources
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+
