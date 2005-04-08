@@ -956,16 +956,16 @@ HIMAGELIST CreateCheckBoxImagelist(HIMAGELIST himl, BOOL fTree, BOOL fUseColorKe
         OffsetRect(&rc, -1, 0);  
     }
 
-	if (hTheme)
-	{
-		::DrawThemeBackground(hTheme,
-			hdc,
-			BP_CHECKBOX,
-			CBS_CHECKEDNORMAL,
-			&rc,
-			NULL);
-	}
-	else
+// COMMENT: {4/6/2005 6:59:30 PM}	if (hTheme)
+// COMMENT: {4/6/2005 6:59:30 PM}	{
+// COMMENT: {4/6/2005 6:59:30 PM}		::DrawThemeBackground(hTheme,
+// COMMENT: {4/6/2005 6:59:30 PM}			hdc,
+// COMMENT: {4/6/2005 6:59:30 PM}			BP_CHECKBOX,
+// COMMENT: {4/6/2005 6:59:30 PM}			CBS_CHECKEDNORMAL,
+// COMMENT: {4/6/2005 6:59:30 PM}			&rc,
+// COMMENT: {4/6/2005 6:59:30 PM}			NULL);
+// COMMENT: {4/6/2005 6:59:30 PM}	}
+// COMMENT: {4/6/2005 6:59:30 PM}	else
 	{
 		::DrawFrameControl(hdc, &rc, DFC_BUTTON, DFCS_BUTTONCHECK | DFCS_FLAT | DFCS_CHECKED | 
 			(fUseColorKey? 0 : /*SRC DFCS_TRANSPARENT SRC*/0));
@@ -989,6 +989,10 @@ HIMAGELIST CreateCheckBoxImagelist(HIMAGELIST himl, BOOL fTree, BOOL fUseColorKe
 // COMMENT: {9/8/2004 8:40:16 PM}        ImageList_ReplaceIcon(himl, nImages-1, hIcon);
 // COMMENT: {9/8/2004 8:40:16 PM}    }
 
+	//{{
+	::CloseThemeData(hTheme);
+	//}}
+
 	::DeleteDC(hdc);
 	::DeleteObject( hbm );
     return himl;
@@ -1009,24 +1013,21 @@ int CPropertyTreeControlBar::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	}
 	m_wndTree.ModifyStyleEx(0, WS_EX_CLIENTEDGE);
 
-	// setup image list
-	//
-	this->m_pImageList = new CImageList();
-	ASSERT_VALID(this->m_pImageList);
-#if defined(_DEBUG)
-	this->m_pImageList->Create(IDB_CHECKS_TREE, 14, 0, RGB(255, 0, 255));
-	//this->m_pImageList->Create(IDB_EYES_TREE, 15, 0, RGB(255, 0, 255));
-	//this->m_pImageList->Create(IDB_EYES_TREE2, 16, 0, RGB(255, 0, 255));
-#else
-	this->m_pImageList->Create(IDB_EYES_TREE3, 16, 0, RGB(255, 0, 255));
-#endif
-
-#if 0
-	//{{
+// COMMENT: {4/6/2005 6:49:11 PM}	// setup image list
+// COMMENT: {4/6/2005 6:49:11 PM}	//
+// COMMENT: {4/6/2005 6:49:11 PM}	this->m_pImageList = new CImageList();
+// COMMENT: {4/6/2005 6:49:11 PM}	ASSERT_VALID(this->m_pImageList);
+// COMMENT: {4/6/2005 6:49:11 PM}#if defined(_DEBUG)
+// COMMENT: {4/6/2005 6:49:11 PM}	this->m_pImageList->Create(IDB_CHECKS_TREE, 14, 0, RGB(255, 0, 255));
+// COMMENT: {4/6/2005 6:49:11 PM}#else
+// COMMENT: {4/6/2005 6:49:11 PM}	// this->m_pImageList->Create(IDB_EYES_TREE3, 16, 0, RGB(255, 0, 255));
+// COMMENT: {4/6/2005 6:49:11 PM}	this->m_pImageList->Create(IDB_CHECKS_TREE, 14, 0, RGB(255, 0, 255));
+// COMMENT: {4/6/2005 6:49:11 PM}#endif
+// COMMENT: {4/6/2005 6:49:11 PM}
+// COMMENT: {4/6/2005 6:49:11 PM}#if 0
 	this->m_pImageList = new CImageList();
 	this->m_pImageList->Attach(CreateCheckBoxImagelist(this->m_pImageList->GetSafeHandle(), TRUE, FALSE, FALSE));
-	//}}
-#endif
+// COMMENT: {4/6/2005 6:49:14 PM}#endif
 
 	this->m_wndTree.SetImageList(this->m_pImageList, LVSIL_STATE);
 

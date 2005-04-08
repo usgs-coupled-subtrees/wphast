@@ -3,11 +3,16 @@
 #include "VisualStylesXP/VisualStylesXP.h"
 
 
+IMPLEMENT_DYNCREATE(ETSLayoutPropertyPageXP, ETSLayoutPropertyPage)
+
+
+ETSLayoutPropertyPageXP::ETSLayoutPropertyPageXP(void) : ETSLayoutPropertyPage()
+{
+}
+
 ETSLayoutPropertyPageXP::ETSLayoutPropertyPageXP( UINT nIDTemplate, UINT nIDCaption /*= 0*/ )
 	: ETSLayoutPropertyPage(nIDTemplate, nIDCaption)
 {
-	m_bLockMove = false;
-	m_bResetBuddyOnNextTimeVisible = true;
 }
 
 ETSLayoutPropertyPageXP::~ETSLayoutPropertyPageXP()

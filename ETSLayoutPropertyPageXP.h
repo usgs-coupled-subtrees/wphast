@@ -3,10 +3,11 @@
 
 class ETSLayoutPropertyPageXP :	public ETSLayoutPropertyPage
 {
+	DECLARE_DYNCREATE(ETSLayoutPropertyPageXP)
 
 public:
-	//ETSLayoutPropertyPageXP( );
-	ETSLayoutPropertyPageXP( UINT nIDTemplate, UINT nIDCaption = 0 );
+	ETSLayoutPropertyPageXP(void);
+	ETSLayoutPropertyPageXP(UINT nIDTemplate, UINT nIDCaption = 0);
 	//ETSLayoutPropertyPageXP( LPCTSTR lpszTemplateName, UINT nIDCaption = 0 );
 
 	~ETSLayoutPropertyPageXP();

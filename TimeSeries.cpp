@@ -38,6 +38,7 @@ CTimeSeries<int>& CTimeSeries<int>::operator=(const struct time_series& rhs)
 	return *this;
 }
 
+#ifdef _DEBUG
 // specialization for Cproperty
 template<>
 void CTimeSeries<Cproperty>::AssertValid(void)const
@@ -48,3 +49,4 @@ void CTimeSeries<Cproperty>::AssertValid(void)const
 		iter->second.AssertValid();
 	}
 }
+#endif

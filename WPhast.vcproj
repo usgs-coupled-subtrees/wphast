@@ -552,18 +552,6 @@
 				RelativePath="TempPropertyPage.cpp">
 			</File>
 			<File
-				RelativePath="TestCBCZone.cpp">
-			</File>
-			<File
-				RelativePath="TestCModGridCtrlEx.cpp">
-			</File>
-			<File
-				RelativePath="TestCModGridCtrlExPage.cpp">
-			</File>
-			<File
-				RelativePath="TestCZone.cpp">
-			</File>
-			<File
 				RelativePath="TimeControl.cpp">
 			</File>
 			<File
@@ -961,18 +949,6 @@
 				RelativePath="TempPropertyPage.h">
 			</File>
 			<File
-				RelativePath="TestCBCZone.h">
-			</File>
-			<File
-				RelativePath="TestCModGridCtrlEx.h">
-			</File>
-			<File
-				RelativePath="TestCModGridCtrlExPage.h">
-			</File>
-			<File
-				RelativePath="TestCZone.h">
-			</File>
-			<File
 				RelativePath="TimeControl.h">
 			</File>
 			<File
@@ -1274,6 +1250,12 @@
 				<File
 					RelativePath="NewModelWizard2.cpp">
 					<FileConfiguration
+						Name="Release|Win32"
+						ExcludedFromBuild="TRUE">
+						<Tool
+							Name="VCCLCompilerTool"/>
+					</FileConfiguration>
+					<FileConfiguration
 						Name="cppunitRelease|Win32"
 						ExcludedFromBuild="TRUE">
 						<Tool
@@ -1356,6 +1338,15 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="cppunitRelease|Win32"
+						ExcludedFromBuild="TRUE">
+						<Tool
+							Name="VCCLCompilerTool"/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="TestCBCZone.cpp">
+					<FileConfiguration
+						Name="Release|Win32"
 						ExcludedFromBuild="TRUE">
 						<Tool
 							Name="VCCLCompilerTool"/>
@@ -1470,6 +1461,24 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="cppunitRelease|Win32"
+						ExcludedFromBuild="TRUE">
+						<Tool
+							Name="VCCLCompilerTool"/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="TestCModGridCtrlEx.cpp">
+					<FileConfiguration
+						Name="Release|Win32"
+						ExcludedFromBuild="TRUE">
+						<Tool
+							Name="VCCLCompilerTool"/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="TestCModGridCtrlExPage.cpp">
+					<FileConfiguration
+						Name="Release|Win32"
 						ExcludedFromBuild="TRUE">
 						<Tool
 							Name="VCCLCompilerTool"/>
@@ -1734,6 +1743,15 @@
 					</FileConfiguration>
 				</File>
 				<File
+					RelativePath="TestCZone.cpp">
+					<FileConfiguration
+						Name="Release|Win32"
+						ExcludedFromBuild="TRUE">
+						<Tool
+							Name="VCCLCompilerTool"/>
+					</FileConfiguration>
+				</File>
+				<File
 					RelativePath="TestCtime.cpp">
 					<FileConfiguration
 						Name="Debug|Win32"
@@ -1831,6 +1849,9 @@
 					RelativePath="TestCBCSpecifiedPropertyPage.h">
 				</File>
 				<File
+					RelativePath="TestCBCZone.h">
+				</File>
+				<File
 					RelativePath="TestCGrid.h">
 				</File>
 				<File
@@ -1841,6 +1862,12 @@
 				</File>
 				<File
 					RelativePath="TestCMapDialog.h">
+				</File>
+				<File
+					RelativePath="TestCModGridCtrlEx.h">
+				</File>
+				<File
+					RelativePath="TestCModGridCtrlExPage.h">
 				</File>
 				<File
 					RelativePath="TestCNewModelWizard.h">
@@ -1871,6 +1898,9 @@
 				</File>
 				<File
 					RelativePath="TestCWellPropertyPage.h">
+				</File>
+				<File
+					RelativePath="TestCZone.h">
 				</File>
 				<File
 					RelativePath="TestCtime.h">
@@ -1922,7 +1952,31 @@
 			<File
 				RelativePath="Parser.cpp">
 				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="vtkMemDebug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"/>
+				</FileConfiguration>
+				<FileConfiguration
 					Name="cppunit|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="cppunitRelease|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
 						UsePrecompiledHeader="0"/>
@@ -2719,15 +2773,15 @@
 			Name="Build Logs"
 			Filter="">
 			<File
-				RelativePath="cppunit\BuildLog.htm"
-				DeploymentContent="TRUE">
-			</File>
-			<File
 				RelativePath="Debug\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 			<File
 				RelativePath="Release\BuildLog.htm"
+				DeploymentContent="TRUE">
+			</File>
+			<File
+				RelativePath="cppunit\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 		</Filter>

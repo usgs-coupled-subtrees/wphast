@@ -41,18 +41,23 @@ void TCPPUnit::RunUnitTests(void)
 	{
 		CppUnit::TextUi::TestRunner runner;
 
-		runner.addTest(TestCPhastInput::suite());
-		runner.addTest(TestCZone::suite());
+// COMMENT: {4/6/2005 6:18:52 PM}		runner.addTest(TestCPhastInput::suite());
+// COMMENT: {4/6/2005 6:18:52 PM}		runner.addTest(TestCZone::suite());
+// COMMENT: {4/6/2005 6:18:52 PM}		runner.addTest(TestCGrid::suite());
+// COMMENT: {4/6/2005 6:18:52 PM}		runner.addTest(TestCtime::suite());
+// COMMENT: {4/6/2005 6:18:52 PM}		runner.addTest(TestCBC::suite());
+// COMMENT: {4/6/2005 6:18:52 PM}		runner.addTest(TestCTimeControl::suite());
+// COMMENT: {4/6/2005 6:18:52 PM}		runner.addTest(TestCWPhastDoc::suite());
+// COMMENT: {4/6/2005 6:18:52 PM}		runner.addTest(TestCParser::suite());
+// COMMENT: {4/6/2005 6:18:52 PM}		runner.addTest(TestCPropertyTreeControlBar::suite());
+// COMMENT: {4/6/2005 6:18:52 PM}		runner.addTest(TestCUnits::suite());
+// COMMENT: {4/6/2005 6:18:52 PM}		runner.addTest(TestCPhastInput::suite());
+
+#ifdef __DEPRECATED__
 		runner.addTest(TestCBCZone::suite());
-		runner.addTest(TestCGrid::suite());
-		runner.addTest(TestCtime::suite());
-		runner.addTest(TestCBC::suite());
-		runner.addTest(TestCTimeControl::suite());
-		runner.addTest(TestCWPhastDoc::suite());
-		runner.addTest(TestCParser::suite());
-		runner.addTest(TestCPropertyTreeControlBar::suite());
-		runner.addTest(TestCUnits::suite());
-		runner.addTest(TestCPhastInput::suite());
+		runner.addTest(TestCBCSpecifiedPropertyPage::suite());
+#endif
+
 
 		/**********************************************************
 		// the following require user input
@@ -65,9 +70,9 @@ void TCPPUnit::RunUnitTests(void)
 		runner.addTest(TestCNewModelWizard::suite());
 		runner.addTest(TestCPrintFreqPropertyPage::suite());
 		runner.addTest(TestCWellPropertyPage::suite());
-		runner.addTest(TestCBCSpecifiedPropertyPage::suite());
 		***********************************************************/
 
+		runner.addTest(TestCModGridCtrlEx::suite());
 
 		std::ostringstream oss_out;
 		runner.setOutputter(CppUnit::CompilerOutputter::defaultOutputter(&runner.result(), oss_out));
@@ -80,8 +85,6 @@ void TCPPUnit::RunUnitTests(void)
 		}
 	}
 
-	/***
 	CPPUNIT_ASSERT(::fcloseall() == 0);
 	exit(0);
-	***/
 }
