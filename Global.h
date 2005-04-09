@@ -12,6 +12,7 @@ class vtkProp3D;
 #include <list>
 #include <string>
 // #include "BC.h"
+#include "TimeSeries.h"
 class CBC;
 class Cproperty;
 class CCheckTreeCtrl;
@@ -59,6 +60,9 @@ public:
 public:
 	static herr_t HDFSerializeAllocate(bool bStoring, hid_t loc_id, const char* szName, hsize_t& count, double** buffer);
 	static herr_t HDFSerializeAllocate(bool bStoring, hid_t loc_id, const char* szName, hsize_t& count, int** buffer);
+
+public:
+	static void DDX_GridTimeSeries(CDataExchange* pDX, int nIDC, CTimeSeries<Cproperty> &r_ts);
 
 private:
 	template<typename T> static herr_t HDFSerializeAllocate(bool bStoring, hid_t loc_id, const char* szName, hid_t mem_type_id, hsize_t& count, T** buffer);

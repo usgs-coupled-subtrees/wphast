@@ -11,6 +11,7 @@ class TestCBC :
 	CPPUNIT_TEST_SUITE( TestCBC );
 	CPPUNIT_TEST( testCopyCtor );
 	CPPUNIT_TEST( testOperatorEqual );
+	CPPUNIT_TEST( testOperatorEqual2 );
 	CPPUNIT_TEST( testMerge );
 	CPPUNIT_TEST( testMergeDifferentSolutionTypes );
 	CPPUNIT_TEST( testAssertValid );
@@ -22,6 +23,7 @@ class TestCBC :
 protected:
 	void testCopyCtor(void);
 	void testOperatorEqual(void);
+	void testOperatorEqual2(void);
 	void testMerge(void);
 	void testMergeDifferentSolutionTypes(void);
 	void testAssertValid(void);

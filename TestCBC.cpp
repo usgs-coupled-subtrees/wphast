@@ -41,6 +41,69 @@ void TestCBC::testOperatorEqual(void)
 		bcEqual = bc;
 		bc.AssertValid(1);
 		bcEqual.AssertValid(1);
+
+		CPPUNIT_ASSERT(bcEqual.m_bc_flux.size()     == 0);
+		CPPUNIT_ASSERT(bcEqual.m_bc_head.size()     == 0);
+		CPPUNIT_ASSERT(bcEqual.m_bc_solution.size() == 0);
+	}
+	newMemState.Checkpoint();
+	CPPUNIT_ASSERT(diffMemState.Difference( oldMemState, newMemState ) == 0);
+}
+
+void TestCBC::testOperatorEqual2(void)
+{
+	CBC bc;
+	Ctime t;
+	t.SetValue(0.0);
+	Cproperty p;
+	p.type    = FIXED;
+	p.v[0]    = 2.0;
+	p.count_v = 1;
+
+	bc.m_bc_head.insert(CTimeSeries<Cproperty>::value_type(t, p));
+
+	t.SetValue(10.0);
+	p.v[0] = 4.0;
+	bc.m_bc_head.insert(CTimeSeries<Cproperty>::value_type(t, p));
+
+	CPPUNIT_ASSERT(bc.m_bc_head.size() == 2);
+
+	Ctime zero;
+	zero.SetValue(0.0);
+	CPPUNIT_ASSERT(bc.m_bc_head[zero].type == FIXED);
+	CPPUNIT_ASSERT(bc.m_bc_head[zero].v[0] == 2.0);
+
+	Ctime ten;
+	ten.SetValue(10.0);
+	CPPUNIT_ASSERT(bc.m_bc_head[ten].type == FIXED);
+	CPPUNIT_ASSERT(bc.m_bc_head[ten].v[0] == 4.0);
+
+
+	CMemoryState oldMemState, newMemState, diffMemState;
+	oldMemState.Checkpoint();
+	{
+		CBC bcEqual;
+		bcEqual = bc;
+
+		CPPUNIT_ASSERT(bcEqual.m_bc_flux.size()     == 0);
+		CPPUNIT_ASSERT(bcEqual.m_bc_head.size()     == 2);
+		CPPUNIT_ASSERT(bcEqual.m_bc_solution.size() == 0);
+
+		Ctime zero;
+		zero.SetValue(0.0);
+		CPPUNIT_ASSERT(bcEqual.m_bc_head[zero].type == FIXED);
+		CPPUNIT_ASSERT(bcEqual.m_bc_head[zero].v[0] == 2.0);
+
+		Ctime ten;
+		ten.SetValue(10.0);
+		CPPUNIT_ASSERT(bcEqual.m_bc_head[ten].type == FIXED);
+		CPPUNIT_ASSERT(bcEqual.m_bc_head[ten].v[0] == 4.0);
+
+		CBC empty;
+		bcEqual = empty;
+		CPPUNIT_ASSERT(bcEqual.m_bc_flux.size()     == 0);
+		CPPUNIT_ASSERT(bcEqual.m_bc_head.size()     == 0);
+		CPPUNIT_ASSERT(bcEqual.m_bc_solution.size() == 0);
 	}
 	newMemState.Checkpoint();
 	CPPUNIT_ASSERT(diffMemState.Difference( oldMemState, newMemState ) == 0);

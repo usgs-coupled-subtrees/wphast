@@ -69,11 +69,11 @@ void CBC::InternalDelete(void)
 {
 	delete static_cast<CZone*>(this->zone);
 	delete static_cast<Cproperty*>(this->mask);
-// COMMENT: {2/23/2005 1:20:55 PM}	delete static_cast<Cproperty*>(this->bc_head);
-// COMMENT: {2/23/2005 1:20:59 PM}	delete static_cast<Cproperty*>(this->bc_flux);
+	this->m_bc_head.clear();
+	this->m_bc_flux.clear();
 	delete static_cast<Cproperty*>(this->bc_k);
 	delete static_cast<Cproperty*>(this->bc_thick);
-// COMMENT: {2/23/2005 1:21:07 PM}	delete static_cast<Cproperty*>(this->bc_solution);
+	this->m_bc_solution.clear();
 }
 
 void CBC::InternalInit(void)
@@ -152,6 +152,22 @@ CBC& CBC::operator=(const CBC& rhs) // copy assignment
 		this->InternalDelete();
 // COMMENT: {8/12/2004 7:45:57 PM}		this->InternalInit();
 		this->InternalCopy(rhs);
+		//{{
+		//
+		// copy time series
+		//
+		ASSERT(this->bc_head     == NULL);
+		ASSERT(this->bc_flux     == NULL);
+		ASSERT(this->bc_solution == NULL);
+
+		ASSERT(this->m_bc_head.empty());
+		ASSERT(this->m_bc_flux.empty());
+		ASSERT(this->m_bc_solution.empty());
+
+		this->m_bc_head     = rhs.m_bc_head;
+		this->m_bc_flux     = rhs.m_bc_flux;
+		this->m_bc_solution = rhs.m_bc_solution;
+		//}}
 	}
 	return *this;
 }

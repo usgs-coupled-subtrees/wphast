@@ -1256,6 +1256,12 @@
 							Name="VCCLCompilerTool"/>
 					</FileConfiguration>
 					<FileConfiguration
+						Name="vtkMemDebug|Win32"
+						ExcludedFromBuild="TRUE">
+						<Tool
+							Name="VCCLCompilerTool"/>
+					</FileConfiguration>
+					<FileConfiguration
 						Name="cppunitRelease|Win32"
 						ExcludedFromBuild="TRUE">
 						<Tool
@@ -1317,6 +1323,15 @@
 					</FileConfiguration>
 				</File>
 				<File
+					RelativePath="TestCBCSpecifiedHeadPropertyPage.cpp">
+					<FileConfiguration
+						Name="vtkMemDebug|Win32"
+						ExcludedFromBuild="TRUE">
+						<Tool
+							Name="VCCLCompilerTool"/>
+					</FileConfiguration>
+				</File>
+				<File
 					RelativePath="TestCBCSpecifiedPropertyPage.cpp">
 					<FileConfiguration
 						Name="Debug|Win32"
@@ -1347,6 +1362,12 @@
 					RelativePath="TestCBCZone.cpp">
 					<FileConfiguration
 						Name="Release|Win32"
+						ExcludedFromBuild="TRUE">
+						<Tool
+							Name="VCCLCompilerTool"/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkMemDebug|Win32"
 						ExcludedFromBuild="TRUE">
 						<Tool
 							Name="VCCLCompilerTool"/>
@@ -1474,11 +1495,23 @@
 						<Tool
 							Name="VCCLCompilerTool"/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkMemDebug|Win32"
+						ExcludedFromBuild="TRUE">
+						<Tool
+							Name="VCCLCompilerTool"/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="TestCModGridCtrlExPage.cpp">
 					<FileConfiguration
 						Name="Release|Win32"
+						ExcludedFromBuild="TRUE">
+						<Tool
+							Name="VCCLCompilerTool"/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkMemDebug|Win32"
 						ExcludedFromBuild="TRUE">
 						<Tool
 							Name="VCCLCompilerTool"/>
@@ -1750,6 +1783,12 @@
 						<Tool
 							Name="VCCLCompilerTool"/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkMemDebug|Win32"
+						ExcludedFromBuild="TRUE">
+						<Tool
+							Name="VCCLCompilerTool"/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="TestCtime.cpp">
@@ -1844,6 +1883,9 @@
 				</File>
 				<File
 					RelativePath="TestCBC.h">
+				</File>
+				<File
+					RelativePath="TestCBCSpecifiedHeadPropertyPage.h">
 				</File>
 				<File
 					RelativePath="TestCBCSpecifiedPropertyPage.h">
@@ -2773,15 +2815,15 @@
 			Name="Build Logs"
 			Filter="">
 			<File
-				RelativePath="Debug\BuildLog.htm"
-				DeploymentContent="TRUE">
-			</File>
-			<File
 				RelativePath="Release\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 			<File
 				RelativePath="cppunit\BuildLog.htm"
+				DeploymentContent="TRUE">
+			</File>
+			<File
+				RelativePath="Debug\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 		</Filter>

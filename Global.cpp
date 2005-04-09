@@ -12,6 +12,7 @@
 #include "CheckTreeCtrl.h"
 #include "ZoneActor.h"
 
+#include "gridctrl/ModGridCtrlEx.h"
 
 #include "vtkPropPickerFixed.h"
 
@@ -1428,4 +1429,213 @@ ErrorHDFSerializeBinaryFile:
 	}
 
 	return status;
+}
+
+void CGlobal::DDX_GridTimeSeries(CDataExchange* pDX, int nIDC, CTimeSeries<Cproperty> &r_ts)
+{
+	CModGridCtrlEx* pGrid = static_cast<CModGridCtrlEx*>(pDX->m_pDlgWnd->GetDlgItem(nIDC));
+	if (!pGrid) return;
+
+	if (pDX->m_bSaveAndValidate)
+	{
+		CTimeSeries<Cproperty> ts;
+
+		for (int iRow = pGrid->GetFixedRowCount(); iRow < pGrid->GetRowCount(); ++iRow)
+		{
+			// time start
+			//
+			CString start;
+			::DDX_TextGridControl(pDX, nIDC, iRow, 0, start);
+			if (start.IsEmpty())
+			{
+				continue;
+			}
+
+			double d;
+			::DDX_TextGridControl(pDX, nIDC, iRow, 0, d);
+			Ctime t;
+			t.SetValue(d);
+
+			Cproperty p;
+			if (pGrid->GetCheck(iRow, 3) != BST_CHECKED)
+			{
+				if (iRow == 1)
+				{
+					start.Empty();
+					::DDX_TextGridControl(pDX, nIDC, iRow, 2, start);
+					if (start.IsEmpty())
+					{
+						continue;
+					}
+				}
+
+				// value
+				//
+				::DDX_TextGridControl(pDX, nIDC, iRow, 2, p.v[0]);
+
+				p.type    = FIXED;
+				p.count_v = 1;
+				ts.insert(CTimeSeries<Cproperty>::value_type(t, p));
+			}
+			else
+			{
+				// direction
+				//
+				if (iRow == 1)
+				{
+					start.Empty();
+					::DDX_TextGridControl(pDX, nIDC, iRow, 3, start);
+					if (start.IsEmpty())
+					{
+						continue;
+					}
+				}
+
+				// direction
+				//
+				::DDX_TextGridControl(pDX, nIDC, iRow, 3, start);
+				start.Trim();
+				if (start.IsEmpty())
+				{
+					continue;
+				}
+				else
+				{
+					if (start[0] == 'X' || start[0] == 'x')
+					{
+						p.coord = 'x';
+					}
+					else if (start[0] == 'Y' || start[0] == 'y')
+					{
+						p.coord = 'y';
+					}
+					else if (start[0] == 'Z' || start[0] == 'z')
+					{
+						p.coord = 'z';
+					}
+					else
+					{
+						ASSERT(FALSE);
+						p.coord = 'x';
+					}
+				}
+
+				// value 1
+				//
+				::DDX_TextGridControl(pDX, nIDC, iRow, 5, p.v[0]);
+
+				// dist 1
+				//
+				::DDX_TextGridControl(pDX, nIDC, iRow, 6, p.dist1);
+
+				// value 2
+				//
+				::DDX_TextGridControl(pDX, nIDC, iRow, 7, p.v[1]);
+
+				// dist 2
+				//
+				::DDX_TextGridControl(pDX, nIDC, iRow, 8, p.dist2);
+
+				p.type    = LINEAR;
+				p.count_v = 2;
+				ts.insert(CTimeSeries<Cproperty>::value_type(t, p));
+			}
+		}
+		r_ts = ts;
+	}
+	else
+	{
+		CTimeSeries<Cproperty>::iterator iter = r_ts.begin();
+		for (int nRow = 1; iter != r_ts.end(); ++iter, ++nRow)
+		{
+			// time start
+			Ctime t(iter->first);
+			::DDX_TextGridControl(pDX, nIDC, nRow, 0, t.value);
+
+			// head
+			if (iter->second.type == FIXED)
+			{
+				ASSERT(iter->second.count_v == 1);
+				::DDX_TextGridControl(pDX, nIDC, nRow, 2, iter->second.v[0]);
+			}
+			else if (iter->second.type == LINEAR)
+			{
+				ASSERT(iter->second.count_v == 2);
+
+				// set checkmark
+				//
+				pGrid->SetCheck(nRow, 3, BST_CHECKED);
+				pGrid->DisableCell(nRow, 2);
+				for (int nCol = 4; nCol < 9; ++nCol)
+				{
+					pGrid->EnableCell(nRow, nCol);
+				}
+				
+				// direction
+				CString dir(iter->second.coord);
+				::DDX_TextGridControl(pDX, nIDC, nRow, 4, dir);
+
+				// value 1
+				::DDX_TextGridControl(pDX, nIDC, nRow, 5, iter->second.v[0]);
+
+				// dist 1
+				::DDX_TextGridControl(pDX, nIDC, nRow, 6, iter->second.dist1);
+
+				// value 2
+				::DDX_TextGridControl(pDX, nIDC, nRow, 7, iter->second.v[1]);
+
+				// dist 2
+				::DDX_TextGridControl(pDX, nIDC, nRow, 8, iter->second.dist2);
+			}
+			else
+			{
+				ASSERT(FALSE);
+			}
+		}
+// COMMENT: {4/8/2005 5:51:31 PM}		for (int i = 0; iter != r_ts.end(); ++iter, ++i)
+// COMMENT: {4/8/2005 5:51:31 PM}		{
+// COMMENT: {4/8/2005 5:51:31 PM}			// time start
+// COMMENT: {4/8/2005 5:51:31 PM}			Ctime t(iter->first);
+// COMMENT: {4/8/2005 5:51:31 PM}			::DDX_TextGridControl(pDX, nIDC, i + 1, 0, t.value);
+// COMMENT: {4/8/2005 5:51:31 PM}
+// COMMENT: {4/8/2005 5:51:31 PM}			// head
+// COMMENT: {4/8/2005 5:51:31 PM}			if (iter->second.type == FIXED)
+// COMMENT: {4/8/2005 5:51:31 PM}			{
+// COMMENT: {4/8/2005 5:51:31 PM}				ASSERT(iter->second.count_v == 1);
+// COMMENT: {4/8/2005 5:51:31 PM}				::DDX_TextGridControl(pDX, nIDC, i + 1, 2, iter->second.v[0]);
+// COMMENT: {4/8/2005 5:51:31 PM}			}
+// COMMENT: {4/8/2005 5:51:31 PM}			else if (iter->second.type == LINEAR)
+// COMMENT: {4/8/2005 5:51:31 PM}			{
+// COMMENT: {4/8/2005 5:51:31 PM}				ASSERT(iter->second.count_v == 2);
+// COMMENT: {4/8/2005 5:51:31 PM}
+// COMMENT: {4/8/2005 5:51:31 PM}				// set checkmark
+// COMMENT: {4/8/2005 5:51:31 PM}				pGrid->SetCheck(i + 1, 3, BST_CHECKED);
+// COMMENT: {4/8/2005 5:51:31 PM}				pGrid->DisableCell(i + 1, 2);
+// COMMENT: {4/8/2005 5:51:31 PM}				for (int col = 4; col < 9; ++col)
+// COMMENT: {4/8/2005 5:51:31 PM}				{
+// COMMENT: {4/8/2005 5:51:31 PM}					pGrid->EnableCell(i + 1, col);
+// COMMENT: {4/8/2005 5:51:31 PM}				}
+// COMMENT: {4/8/2005 5:51:31 PM}				
+// COMMENT: {4/8/2005 5:51:31 PM}				// direction
+// COMMENT: {4/8/2005 5:51:31 PM}				CString dir(iter->second.coord);
+// COMMENT: {4/8/2005 5:51:31 PM}				::DDX_TextGridControl(pDX, nIDC, i + 1, 4, dir);
+// COMMENT: {4/8/2005 5:51:31 PM}
+// COMMENT: {4/8/2005 5:51:31 PM}				// value 1
+// COMMENT: {4/8/2005 5:51:31 PM}				::DDX_TextGridControl(pDX, nIDC, i + 1, 5, iter->second.v[0]);
+// COMMENT: {4/8/2005 5:51:31 PM}
+// COMMENT: {4/8/2005 5:51:31 PM}				// dist 1
+// COMMENT: {4/8/2005 5:51:31 PM}				::DDX_TextGridControl(pDX, nIDC, i + 1, 6, iter->second.dist1);
+// COMMENT: {4/8/2005 5:51:31 PM}
+// COMMENT: {4/8/2005 5:51:31 PM}				// value 2
+// COMMENT: {4/8/2005 5:51:31 PM}				::DDX_TextGridControl(pDX, nIDC, i + 1, 7, iter->second.v[1]);
+// COMMENT: {4/8/2005 5:51:31 PM}
+// COMMENT: {4/8/2005 5:51:31 PM}				// dist 2
+// COMMENT: {4/8/2005 5:51:31 PM}				::DDX_TextGridControl(pDX, nIDC, i + 1, 8, iter->second.dist2);
+// COMMENT: {4/8/2005 5:51:31 PM}			}
+// COMMENT: {4/8/2005 5:51:31 PM}			else
+// COMMENT: {4/8/2005 5:51:31 PM}			{
+// COMMENT: {4/8/2005 5:51:31 PM}				ASSERT(FALSE);
+// COMMENT: {4/8/2005 5:51:31 PM}			}
+// COMMENT: {4/8/2005 5:51:31 PM}		}
+	}
 }

@@ -24,6 +24,8 @@
 #include "TestCWellPropertyPage.h"
 #include "TestCZone.h"
 #include "TestCtime.h"
+#include "TestCBCSpecifiedHeadPropertyPage.h"
+
 
 TCPPUnit::TCPPUnit(void)
 {
@@ -45,7 +47,7 @@ void TCPPUnit::RunUnitTests(void)
 // COMMENT: {4/6/2005 6:18:52 PM}		runner.addTest(TestCZone::suite());
 // COMMENT: {4/6/2005 6:18:52 PM}		runner.addTest(TestCGrid::suite());
 // COMMENT: {4/6/2005 6:18:52 PM}		runner.addTest(TestCtime::suite());
-// COMMENT: {4/6/2005 6:18:52 PM}		runner.addTest(TestCBC::suite());
+		runner.addTest(TestCBC::suite());
 // COMMENT: {4/6/2005 6:18:52 PM}		runner.addTest(TestCTimeControl::suite());
 // COMMENT: {4/6/2005 6:18:52 PM}		runner.addTest(TestCWPhastDoc::suite());
 // COMMENT: {4/6/2005 6:18:52 PM}		runner.addTest(TestCParser::suite());
@@ -72,7 +74,8 @@ void TCPPUnit::RunUnitTests(void)
 		runner.addTest(TestCWellPropertyPage::suite());
 		***********************************************************/
 
-		runner.addTest(TestCModGridCtrlEx::suite());
+		//runner.addTest(TestCModGridCtrlEx::suite());
+		//runner.addTest(TestCBCSpecifiedHeadPropertyPage::suite());
 
 		std::ostringstream oss_out;
 		runner.setOutputter(CppUnit::CompilerOutputter::defaultOutputter(&runner.result(), oss_out));
@@ -86,5 +89,5 @@ void TCPPUnit::RunUnitTests(void)
 	}
 
 	CPPUNIT_ASSERT(::fcloseall() == 0);
-	exit(0);
+	// exit(0);
 }
