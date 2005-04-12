@@ -88,11 +88,11 @@ public:
 	int GetNextWellNumber(void)const;
 
 
-	CTreeCtrlNode AddStressPeriod(const CTimeControl& timeControl);
-	void RemoveStressPeriod(int nStressPeriod);
+// COMMENT: {4/8/2005 6:50:23 PM}	CTreeCtrlNode AddStressPeriod(const CTimeControl& timeControl);
+// COMMENT: {4/8/2005 6:50:23 PM}	void RemoveStressPeriod(int nStressPeriod);
 
-	int GetStressPeriodCount(void);
-	CTreeCtrlNode GetStressPeriodNode(int nStressPeriod);
+// COMMENT: {4/8/2005 6:50:29 PM}	int GetStressPeriodCount(void);
+// COMMENT: {4/8/2005 6:50:29 PM}	CTreeCtrlNode GetStressPeriodNode(int nStressPeriod);
 
 	void SetUnits(CUnits *pUnits);
 	void SetFlowOnly(CFlowOnly *pFlowOnly);
@@ -100,12 +100,16 @@ public:
 	void SetSteadyFlow(CSteadyFlow *pSteadyFlow);
 
 	void SetTimeControl(CTimeControl* pTimeControl);
-	void SetTimeControl(const CTimeControl& timeControl, int nStressPeriod = 1);
-	CTimeControl* GetTimeControl(int nStressPeriod);
+// COMMENT: {4/8/2005 7:05:37 PM}	void SetTimeControl(const CTimeControl& timeControl, int nStressPeriod = 1);
+// COMMENT: {4/8/2005 7:05:37 PM}	CTimeControl* GetTimeControl(int nStressPeriod);
+	void SetTimeControl(const CTimeControl& timeControl);
+	CTimeControl* GetTimeControl(void);
 
 	void SetPrintFrequency(CPrintFreq* pPrintFreq);
-	void SetPrintFrequency(const CPrintFreq& printFreq, int nStressPeriod = 1);
-	CPrintFreq* GetPrintFrequency(int nStressPeriod);
+// COMMENT: {4/8/2005 7:06:02 PM}	void SetPrintFrequency(const CPrintFreq& printFreq, int nStressPeriod = 1);
+// COMMENT: {4/8/2005 7:06:02 PM}	CPrintFreq* GetPrintFrequency(int nStressPeriod);
+	void SetPrintFrequency(const CPrintFreq& printFreq);
+	CPrintFreq* GetPrintFrequency(void);
 
 	void SetModel(CNewModel* pModel);
 
@@ -117,9 +121,12 @@ public:
 	CTreeCtrlNode GetUnitsNode(void)   {return m_nodeUnits;}
 	CTreeCtrlNode GetICNode(void)      {return m_nodeIC;}
 	CTreeCtrlNode GetWellsNode(void)const   {return m_nodeWells;}
-	CTreeCtrlNode GetBCNode(int nStressPeriod = 1);
-	CTreeCtrlNode GetTimeControlNode(int nStressPeriod = 1);
-	CTreeCtrlNode GetPrintFrequencyNode(int nStressPeriod = 1);
+// COMMENT: {4/8/2005 7:01:33 PM}	CTreeCtrlNode GetBCNode(int nStressPeriod = 1);
+// COMMENT: {4/8/2005 7:01:33 PM}	CTreeCtrlNode GetTimeControlNode(int nStressPeriod = 1);
+// COMMENT: {4/8/2005 7:01:33 PM}	CTreeCtrlNode GetPrintFrequencyNode(int nStressPeriod = 1);
+	CTreeCtrlNode GetBCNode(void);
+	CTreeCtrlNode GetTimeControlNode(void);
+	CTreeCtrlNode GetPrintFrequencyNode(void);
 
 	void SetNodeCheck(CTreeCtrlNode node, UINT nCheckState);
 	void SetBCCheck(UINT nCheckState);

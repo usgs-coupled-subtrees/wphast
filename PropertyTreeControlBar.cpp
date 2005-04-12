@@ -731,53 +731,53 @@ void CPropertyTreeControlBar::OnNMDblClk(NMHDR* pNMHDR, LRESULT* pResult)
 		return;
 	}
 
-	// Handle stress periods
-	int nStressPeriodCount = this->GetStressPeriodCount();
-	int nStressPeriod = 0;
-	for (int i = 2; i <= nStressPeriodCount; ++i) {
-		if (item.IsNodeAncestor(this->GetStressPeriodNode(i))) {
-			if (item != this->GetStressPeriodNode(i)) {
-				nStressPeriod = i;
-			}
-			break;
-		}
-	}
-	if (nStressPeriod > 1) {
-		// BOUNDARY_CONDITIONS
-		//
-		if (item.IsNodeAncestor(this->GetBCNode(nStressPeriod))) {
-			if (item != this->GetBCNode(nStressPeriod)) {
-				while (item.GetParent() != this->GetBCNode(nStressPeriod)) {
-					item = item.GetParent();
-					if (!item) break;
-				}
-				if (item && item.GetData()) {
-					if (CBCZoneActor* pZone = CBCZoneActor::SafeDownCast((vtkObject*)item.GetData())) {
-						pZone->Edit(&this->m_wndTree, nStressPeriod);
-						*pResult = TRUE;
-						return;
-					}
-				}
-			}
-			TRACE("BC not found\n");
-			return;
-		}
-
-		// TIME_CONTROL
-		//
-		if (item.IsNodeAncestor(this->GetTimeControlNode(nStressPeriod))) {
-			if (this->GetTimeControlNode(nStressPeriod).GetData()) {
-				CTimeControl* pTC = (CTimeControl*)this->GetTimeControlNode(nStressPeriod).GetData();
-				pTC->EditMultiple(this);
-				*pResult = TRUE;
-				return;
-			}
-			return;
-		}
-		::AfxMessageBox("Edit Node Greater than simulation 1 BUT NOT FOUND(time_control, bc)");
-		*pResult = TRUE;
-		return;
-	}
+// COMMENT: {4/8/2005 7:08:44 PM}	// Handle stress periods
+// COMMENT: {4/8/2005 7:08:44 PM}	int nStressPeriodCount = this->GetStressPeriodCount();
+// COMMENT: {4/8/2005 7:08:44 PM}	int nStressPeriod = 0;
+// COMMENT: {4/8/2005 7:08:44 PM}	for (int i = 2; i <= nStressPeriodCount; ++i) {
+// COMMENT: {4/8/2005 7:08:44 PM}		if (item.IsNodeAncestor(this->GetStressPeriodNode(i))) {
+// COMMENT: {4/8/2005 7:08:44 PM}			if (item != this->GetStressPeriodNode(i)) {
+// COMMENT: {4/8/2005 7:08:44 PM}				nStressPeriod = i;
+// COMMENT: {4/8/2005 7:08:44 PM}			}
+// COMMENT: {4/8/2005 7:08:44 PM}			break;
+// COMMENT: {4/8/2005 7:08:44 PM}		}
+// COMMENT: {4/8/2005 7:08:44 PM}	}
+// COMMENT: {4/8/2005 7:08:44 PM}	if (nStressPeriod > 1) {
+// COMMENT: {4/8/2005 7:08:44 PM}		// BOUNDARY_CONDITIONS
+// COMMENT: {4/8/2005 7:08:44 PM}		//
+// COMMENT: {4/8/2005 7:08:44 PM}		if (item.IsNodeAncestor(this->GetBCNode(nStressPeriod))) {
+// COMMENT: {4/8/2005 7:08:44 PM}			if (item != this->GetBCNode(nStressPeriod)) {
+// COMMENT: {4/8/2005 7:08:44 PM}				while (item.GetParent() != this->GetBCNode(nStressPeriod)) {
+// COMMENT: {4/8/2005 7:08:44 PM}					item = item.GetParent();
+// COMMENT: {4/8/2005 7:08:44 PM}					if (!item) break;
+// COMMENT: {4/8/2005 7:08:44 PM}				}
+// COMMENT: {4/8/2005 7:08:44 PM}				if (item && item.GetData()) {
+// COMMENT: {4/8/2005 7:08:44 PM}					if (CBCZoneActor* pZone = CBCZoneActor::SafeDownCast((vtkObject*)item.GetData())) {
+// COMMENT: {4/8/2005 7:08:44 PM}						pZone->Edit(&this->m_wndTree, nStressPeriod);
+// COMMENT: {4/8/2005 7:08:44 PM}						*pResult = TRUE;
+// COMMENT: {4/8/2005 7:08:44 PM}						return;
+// COMMENT: {4/8/2005 7:08:44 PM}					}
+// COMMENT: {4/8/2005 7:08:44 PM}				}
+// COMMENT: {4/8/2005 7:08:44 PM}			}
+// COMMENT: {4/8/2005 7:08:44 PM}			TRACE("BC not found\n");
+// COMMENT: {4/8/2005 7:08:44 PM}			return;
+// COMMENT: {4/8/2005 7:08:44 PM}		}
+// COMMENT: {4/8/2005 7:08:44 PM}
+// COMMENT: {4/8/2005 7:08:44 PM}		// TIME_CONTROL
+// COMMENT: {4/8/2005 7:08:44 PM}		//
+// COMMENT: {4/8/2005 7:08:44 PM}		if (item.IsNodeAncestor(this->GetTimeControlNode(nStressPeriod))) {
+// COMMENT: {4/8/2005 7:08:44 PM}			if (this->GetTimeControlNode(nStressPeriod).GetData()) {
+// COMMENT: {4/8/2005 7:08:44 PM}				CTimeControl* pTC = (CTimeControl*)this->GetTimeControlNode(nStressPeriod).GetData();
+// COMMENT: {4/8/2005 7:08:44 PM}				pTC->EditMultiple(this);
+// COMMENT: {4/8/2005 7:08:44 PM}				*pResult = TRUE;
+// COMMENT: {4/8/2005 7:08:44 PM}				return;
+// COMMENT: {4/8/2005 7:08:44 PM}			}
+// COMMENT: {4/8/2005 7:08:44 PM}			return;
+// COMMENT: {4/8/2005 7:08:44 PM}		}
+// COMMENT: {4/8/2005 7:08:44 PM}		::AfxMessageBox("Edit Node Greater than simulation 1 BUT NOT FOUND(time_control, bc)");
+// COMMENT: {4/8/2005 7:08:44 PM}		*pResult = TRUE;
+// COMMENT: {4/8/2005 7:08:44 PM}		return;
+// COMMENT: {4/8/2005 7:08:44 PM}	}
 
 	//// handle zones
 	////
@@ -1074,30 +1074,30 @@ void CPropertyTreeControlBar::SetTimeControl(CTimeControl* pTimeControl)
 	pTimeControl->Insert(&this->m_wndTree, this->m_nodeTimeControl);
 }
 
-void CPropertyTreeControlBar::SetTimeControl(const CTimeControl& timeControl, int nStressPeriod)
-{
-	CTreeCtrlNode nodeTC = this->GetTimeControlNode(nStressPeriod);
-	ASSERT(nodeTC.GetData());
-	if (CTimeControl* pTimeControl = (CTimeControl*)(nodeTC.GetData())) {
-		(*pTimeControl) = timeControl;
-		pTimeControl->Insert(&this->m_wndTree, pTimeControl->GetTreeItem());
-	}
-}
+// COMMENT: {4/11/2005 1:10:33 PM}void CPropertyTreeControlBar::SetTimeControl(const CTimeControl& timeControl, int nStressPeriod)
+// COMMENT: {4/11/2005 1:10:33 PM}{
+// COMMENT: {4/11/2005 1:10:33 PM}	CTreeCtrlNode nodeTC = this->GetTimeControlNode(nStressPeriod);
+// COMMENT: {4/11/2005 1:10:33 PM}	ASSERT(nodeTC.GetData());
+// COMMENT: {4/11/2005 1:10:33 PM}	if (CTimeControl* pTimeControl = (CTimeControl*)(nodeTC.GetData())) {
+// COMMENT: {4/11/2005 1:10:33 PM}		(*pTimeControl) = timeControl;
+// COMMENT: {4/11/2005 1:10:33 PM}		pTimeControl->Insert(&this->m_wndTree, pTimeControl->GetTreeItem());
+// COMMENT: {4/11/2005 1:10:33 PM}	}
+// COMMENT: {4/11/2005 1:10:33 PM}}
 
 void CPropertyTreeControlBar::SetPrintFrequency(CPrintFreq* pPrintFreq)
 {
 	pPrintFreq->Insert(&this->m_wndTree, this->m_nodePF);
 }
 
-void CPropertyTreeControlBar::SetPrintFrequency(const CPrintFreq& printFreq, int nStressPeriod)
-{
-	CTreeCtrlNode nodePF = this->GetPrintFrequencyNode(nStressPeriod);
-	ASSERT(nodePF.GetData());
-	if (CPrintFreq* pPrintFreq = (CPrintFreq*)(nodePF.GetData())) {
-		(*pPrintFreq) = printFreq;
-		pPrintFreq->Insert(&this->m_wndTree, pPrintFreq->GetTreeItem());
-	}
-}
+// COMMENT: {4/11/2005 1:10:15 PM}void CPropertyTreeControlBar::SetPrintFrequency(const CPrintFreq& printFreq, int nStressPeriod)
+// COMMENT: {4/11/2005 1:10:15 PM}{
+// COMMENT: {4/11/2005 1:10:15 PM}	CTreeCtrlNode nodePF = this->GetPrintFrequencyNode(nStressPeriod);
+// COMMENT: {4/11/2005 1:10:15 PM}	ASSERT(nodePF.GetData());
+// COMMENT: {4/11/2005 1:10:15 PM}	if (CPrintFreq* pPrintFreq = (CPrintFreq*)(nodePF.GetData())) {
+// COMMENT: {4/11/2005 1:10:15 PM}		(*pPrintFreq) = printFreq;
+// COMMENT: {4/11/2005 1:10:15 PM}		pPrintFreq->Insert(&this->m_wndTree, pPrintFreq->GetTreeItem());
+// COMMENT: {4/11/2005 1:10:15 PM}	}
+// COMMENT: {4/11/2005 1:10:15 PM}}
 
 void CPropertyTreeControlBar::AddZone(CZoneActor* pZone)
 {
@@ -1116,53 +1116,77 @@ void CPropertyTreeControlBar::RemoveZone(CZoneActor* pZone)
 	m_wndTree.RedrawWindow();
 }
 
-CTreeCtrlNode CPropertyTreeControlBar::GetBCNode(int nStressPeriod)
+// COMMENT: {4/8/2005 7:02:52 PM}CTreeCtrlNode CPropertyTreeControlBar::GetBCNode(int nStressPeriod)
+// COMMENT: {4/8/2005 7:02:52 PM}{
+// COMMENT: {4/8/2005 7:02:52 PM}	ASSERT(nStressPeriod > 0);
+// COMMENT: {4/8/2005 7:02:52 PM}	ASSERT(nStressPeriod <= this->GetStressPeriodCount());
+// COMMENT: {4/8/2005 7:02:52 PM}
+// COMMENT: {4/8/2005 7:02:52 PM}	if (nStressPeriod == 1)	return this->m_nodeBC;
+// COMMENT: {4/8/2005 7:02:52 PM}
+// COMMENT: {4/8/2005 7:02:52 PM}	CTreeCtrlNode item = this->GetStressPeriodNode(nStressPeriod).GetChildAt(BC_INDEX);
+// COMMENT: {4/8/2005 7:02:52 PM}	ASSERT(item.GetText().Compare(this->m_nodeBC.GetText()) == 0);
+// COMMENT: {4/8/2005 7:02:52 PM}	return item;
+// COMMENT: {4/8/2005 7:02:52 PM}}
+CTreeCtrlNode CPropertyTreeControlBar::GetBCNode(void)
 {
-	ASSERT(nStressPeriod > 0);
-	ASSERT(nStressPeriod <= this->GetStressPeriodCount());
-
-	if (nStressPeriod == 1)	return this->m_nodeBC;
-
-	CTreeCtrlNode item = this->GetStressPeriodNode(nStressPeriod).GetChildAt(BC_INDEX);
-	ASSERT(item.GetText().Compare(this->m_nodeBC.GetText()) == 0);
-	return item;
+	return this->m_nodeBC;
 }
 
-CTreeCtrlNode CPropertyTreeControlBar::GetTimeControlNode(int nStressPeriod)
+// COMMENT: {4/8/2005 7:00:15 PM}CTreeCtrlNode CPropertyTreeControlBar::GetTimeControlNode(int nStressPeriod)
+// COMMENT: {4/8/2005 7:00:15 PM}{
+// COMMENT: {4/8/2005 7:00:15 PM}	ASSERT(nStressPeriod > 0);
+// COMMENT: {4/8/2005 7:00:15 PM}	ASSERT(nStressPeriod <= this->GetStressPeriodCount());
+// COMMENT: {4/8/2005 7:00:15 PM}
+// COMMENT: {4/8/2005 7:00:15 PM}	if (nStressPeriod == 1)	return this->m_nodeTimeControl;
+// COMMENT: {4/8/2005 7:00:15 PM}
+// COMMENT: {4/8/2005 7:00:15 PM}	CTreeCtrlNode item = this->GetStressPeriodNode(nStressPeriod).GetChildAt(TIME_CONTROL_INDEX);
+// COMMENT: {4/8/2005 7:00:15 PM}	ASSERT(item.GetText().Compare(this->m_nodeTimeControl.GetText()) == 0);
+// COMMENT: {4/8/2005 7:00:15 PM}	return item;
+// COMMENT: {4/8/2005 7:00:15 PM}}
+CTreeCtrlNode CPropertyTreeControlBar::GetTimeControlNode(void)
 {
-	ASSERT(nStressPeriod > 0);
-	ASSERT(nStressPeriod <= this->GetStressPeriodCount());
-
-	if (nStressPeriod == 1)	return this->m_nodeTimeControl;
-
-	CTreeCtrlNode item = this->GetStressPeriodNode(nStressPeriod).GetChildAt(TIME_CONTROL_INDEX);
-	ASSERT(item.GetText().Compare(this->m_nodeTimeControl.GetText()) == 0);
-	return item;
+	return this->m_nodeTimeControl;
 }
 
-CTreeCtrlNode CPropertyTreeControlBar::GetPrintFrequencyNode(int nStressPeriod)
+// COMMENT: {4/8/2005 7:03:15 PM}CTreeCtrlNode CPropertyTreeControlBar::GetPrintFrequencyNode(int nStressPeriod)
+// COMMENT: {4/8/2005 7:03:15 PM}{
+// COMMENT: {4/8/2005 7:03:15 PM}	ASSERT(nStressPeriod > 0);
+// COMMENT: {4/8/2005 7:03:15 PM}	ASSERT(nStressPeriod <= this->GetStressPeriodCount());
+// COMMENT: {4/8/2005 7:03:15 PM}
+// COMMENT: {4/8/2005 7:03:15 PM}	if (nStressPeriod == 1)	return this->m_nodePF;
+// COMMENT: {4/8/2005 7:03:15 PM}
+// COMMENT: {4/8/2005 7:03:15 PM}	CTreeCtrlNode item = this->GetStressPeriodNode(nStressPeriod).GetChildAt(PRINT_FREQUENCY_INDEX);
+// COMMENT: {4/8/2005 7:03:15 PM}	ASSERT(item.GetText().Compare(this->m_nodePF.GetText()) == 0);
+// COMMENT: {4/8/2005 7:03:15 PM}	return item;
+// COMMENT: {4/8/2005 7:03:15 PM}}
+CTreeCtrlNode CPropertyTreeControlBar::GetPrintFrequencyNode(void)
 {
-	ASSERT(nStressPeriod > 0);
-	ASSERT(nStressPeriod <= this->GetStressPeriodCount());
-
-	if (nStressPeriod == 1)	return this->m_nodePF;
-
-	CTreeCtrlNode item = this->GetStressPeriodNode(nStressPeriod).GetChildAt(PRINT_FREQUENCY_INDEX);
-	ASSERT(item.GetText().Compare(this->m_nodePF.GetText()) == 0);
-	return item;
+	return this->m_nodePF;
 }
 
 
-CTimeControl* CPropertyTreeControlBar::GetTimeControl(int nStressPeriod)
+// COMMENT: {4/11/2005 1:09:44 PM}CTimeControl* CPropertyTreeControlBar::GetTimeControl(int nStressPeriod)
+// COMMENT: {4/11/2005 1:09:44 PM}{
+// COMMENT: {4/11/2005 1:09:44 PM}	CTreeCtrlNode node = this->GetTimeControlNode(nStressPeriod);
+// COMMENT: {4/11/2005 1:09:44 PM}	ASSERT(node.GetData());
+// COMMENT: {4/11/2005 1:09:44 PM}	return (CTimeControl*)node.GetData();
+// COMMENT: {4/11/2005 1:09:44 PM}}
+CTimeControl* CPropertyTreeControlBar::GetTimeControl(void)
 {
-	CTreeCtrlNode node = this->GetTimeControlNode(nStressPeriod);
+	CTreeCtrlNode node = this->GetTimeControlNode();
 	ASSERT(node.GetData());
 	return (CTimeControl*)node.GetData();
 }
 
-CPrintFreq* CPropertyTreeControlBar::GetPrintFrequency(int nStressPeriod)
+// COMMENT: {4/11/2005 1:08:48 PM}CPrintFreq* CPropertyTreeControlBar::GetPrintFrequency(int nStressPeriod)
+// COMMENT: {4/11/2005 1:08:48 PM}{
+// COMMENT: {4/11/2005 1:08:48 PM}	CTreeCtrlNode node = this->GetPrintFrequencyNode(nStressPeriod);
+// COMMENT: {4/11/2005 1:08:48 PM}	ASSERT(node.GetData());
+// COMMENT: {4/11/2005 1:08:48 PM}	return (CPrintFreq*)node.GetData();
+// COMMENT: {4/11/2005 1:08:48 PM}}
+CPrintFreq* CPropertyTreeControlBar::GetPrintFrequency(void)
 {
-	CTreeCtrlNode node = this->GetPrintFrequencyNode(nStressPeriod);
+	CTreeCtrlNode node = this->GetPrintFrequencyNode();
 	ASSERT(node.GetData());
 	return (CPrintFreq*)node.GetData();
 }
@@ -1173,140 +1197,143 @@ CTreeCtrlNode CPropertyTreeControlBar::_InsertStressPeriod(const CTimeControl& t
 }
 **/
 
-CTreeCtrlNode CPropertyTreeControlBar::AddStressPeriod(const CTimeControl& timeControl)
-{
-	CTimeControl* pTimeControl = new CTimeControl(timeControl);
+// COMMENT: {4/8/2005 6:52:24 PM}CTreeCtrlNode CPropertyTreeControlBar::AddStressPeriod(const CTimeControl& timeControl)
+// COMMENT: {4/8/2005 6:52:24 PM}{
+// COMMENT: {4/8/2005 6:52:24 PM}	ASSERT(FALSE); // FIXME
+// COMMENT: {4/8/2005 6:52:24 PM}	return CTreeCtrlNode();
+// COMMENT: {4/8/2005 6:52:24 PM}
+// COMMENT: {4/8/2005 6:52:24 PM}	CTimeControl* pTimeControl = new CTimeControl(timeControl);
+// COMMENT: {4/8/2005 6:52:24 PM}
+// COMMENT: {4/8/2005 6:52:24 PM}	int nStressPeriod = this->GetStressPeriodCount() + 1;
+// COMMENT: {4/8/2005 6:52:24 PM}
+// COMMENT: {4/8/2005 6:52:24 PM}	CString str;
+// COMMENT: {4/8/2005 6:52:24 PM}	str.Format(szPeriodFormat, nStressPeriod);
+// COMMENT: {4/8/2005 6:52:24 PM}	CTreeCtrlNode nodeSP = this->m_wndTree.InsertItem(str);
+// COMMENT: {4/8/2005 6:52:24 PM}
+// COMMENT: {4/8/2005 6:52:24 PM}	/*
+// COMMENT: {4/8/2005 6:52:24 PM}	HTREEITEM InsertItem(
+// COMMENT: {4/8/2005 6:52:24 PM}	LPCTSTR lpszItem,
+// COMMENT: {4/8/2005 6:52:24 PM}	HTREEITEM hParent = TVI_ROOT,
+// COMMENT: {4/8/2005 6:52:24 PM}	HTREEITEM hInsertAfter = TVI_LAST 
+// COMMENT: {4/8/2005 6:52:24 PM}	);
+// COMMENT: {4/8/2005 6:52:24 PM}	*/
+// COMMENT: {4/8/2005 6:52:24 PM}
+// COMMENT: {4/8/2005 6:52:24 PM}	// BOUNDARY_CONDITIONS
+// COMMENT: {4/8/2005 6:52:24 PM}	//
+// COMMENT: {4/8/2005 6:52:24 PM}	CTreeCtrlNode nodeBC = m_wndTree.InsertItem(szBOUNDARY_CONDITIONS, nodeSP);
+// COMMENT: {4/8/2005 6:52:24 PM}	int nCount = this->m_nodeBC.GetChildCount();
+// COMMENT: {4/8/2005 6:52:24 PM}	for (int i = 0; i < nCount; ++i) {
+// COMMENT: {4/8/2005 6:52:24 PM}		CTreeCtrlNode child = this->m_nodeBC.GetChildAt(i);
+// COMMENT: {4/8/2005 6:52:24 PM}		ASSERT(child.GetData());
+// COMMENT: {4/8/2005 6:52:24 PM}		if (child.GetData()) {
+// COMMENT: {4/8/2005 6:52:24 PM}			if (CBCZoneActor* pZone = CBCZoneActor::SafeDownCast((vtkObject*)child.GetData())) {
+// COMMENT: {4/8/2005 6:52:24 PM}				pZone->AddStressPeriod(this, nStressPeriod);
+// COMMENT: {4/8/2005 6:52:24 PM}			}
+// COMMENT: {4/8/2005 6:52:24 PM}			else {
+// COMMENT: {4/8/2005 6:52:24 PM}				ASSERT(FALSE);
+// COMMENT: {4/8/2005 6:52:24 PM}			}
+// COMMENT: {4/8/2005 6:52:24 PM}		}
+// COMMENT: {4/8/2005 6:52:24 PM}	}
+// COMMENT: {4/8/2005 6:52:24 PM}
+// COMMENT: {4/8/2005 6:52:24 PM}	// PRINT_FREQUENCY
+// COMMENT: {4/8/2005 6:52:24 PM}	//
+// COMMENT: {4/8/2005 6:52:24 PM}	CTreeCtrlNode nodePF = this->m_wndTree.InsertItem(szPRINT_FREQUENCY, nodeSP);
+// COMMENT: {4/8/2005 6:52:24 PM}	CPrintFreq* pPrintFreq = new CPrintFreq();
+// COMMENT: {4/8/2005 6:52:24 PM}	(*pPrintFreq) = (*this->GetPrintFrequency(nStressPeriod - 1));
+// COMMENT: {4/8/2005 6:52:24 PM}	pPrintFreq->Insert(&this->m_wndTree, nodePF);
+// COMMENT: {4/8/2005 6:52:24 PM}
+// COMMENT: {4/8/2005 6:52:24 PM}	// TIME_CONTROL
+// COMMENT: {4/8/2005 6:52:24 PM}	//
+// COMMENT: {4/8/2005 6:52:24 PM}	CTreeCtrlNode nodeTimeControl = this->m_wndTree.InsertItem(szTIME_CONTROL, nodeSP);
+// COMMENT: {4/8/2005 6:52:24 PM}	pTimeControl->Insert(&this->m_wndTree, nodeTimeControl);
+// COMMENT: {4/8/2005 6:52:24 PM}
+// COMMENT: {4/8/2005 6:52:24 PM}	return nodeSP;
+// COMMENT: {4/8/2005 6:52:24 PM}}
 
-	int nStressPeriod = this->GetStressPeriodCount() + 1;
-
-	CString str;
-	str.Format(szPeriodFormat, nStressPeriod);
-	CTreeCtrlNode nodeSP = this->m_wndTree.InsertItem(str);
-
-	/*
-	HTREEITEM InsertItem(
-	LPCTSTR lpszItem,
-	HTREEITEM hParent = TVI_ROOT,
-	HTREEITEM hInsertAfter = TVI_LAST 
-	);
-	*/
-
-	// BOUNDARY_CONDITIONS
-	//
-	CTreeCtrlNode nodeBC = m_wndTree.InsertItem(szBOUNDARY_CONDITIONS, nodeSP);
-	int nCount = this->m_nodeBC.GetChildCount();
-	for (int i = 0; i < nCount; ++i) {
-		CTreeCtrlNode child = this->m_nodeBC.GetChildAt(i);
-		ASSERT(child.GetData());
-		if (child.GetData()) {
-			if (CBCZoneActor* pZone = CBCZoneActor::SafeDownCast((vtkObject*)child.GetData())) {
-				pZone->AddStressPeriod(this, nStressPeriod);
-			}
-			else {
-				ASSERT(FALSE);
-			}
-		}
-	}
-
-	// PRINT_FREQUENCY
-	//
-	CTreeCtrlNode nodePF = this->m_wndTree.InsertItem(szPRINT_FREQUENCY, nodeSP);
-	CPrintFreq* pPrintFreq = new CPrintFreq();
-	(*pPrintFreq) = (*this->GetPrintFrequency(nStressPeriod - 1));
-	pPrintFreq->Insert(&this->m_wndTree, nodePF);
-
-	// TIME_CONTROL
-	//
-	CTreeCtrlNode nodeTimeControl = this->m_wndTree.InsertItem(szTIME_CONTROL, nodeSP);
-	pTimeControl->Insert(&this->m_wndTree, nodeTimeControl);
-
-	return nodeSP;
-}
-
-void CPropertyTreeControlBar::RemoveStressPeriod(int nStressPeriod)
-{
-	CTreeCtrlNode nodeSP = this->GetStressPeriodNode(nStressPeriod);
-	ASSERT(nodeSP);
-	if (nodeSP) {
-#ifdef _DEBUG
-		CString str;
-		str.Format(szPeriodFormat, nStressPeriod);
-		ASSERT(nodeSP.GetText().Compare(str) == 0);
-#endif
-		// free TIME_CONTROL 
-		CTreeCtrlNode nodeTC = this->GetTimeControlNode(nStressPeriod);
-		ASSERT(nodeTC.GetData());
-		if (CTimeControl* pTimeControl = (CTimeControl*)(nodeTC.GetData())) {
-			delete pTimeControl;
-			nodeTC.SetData(0);
-		}
-		nodeTC.Delete();
-
-		// PRINT_FREQUENCY
-		//		
-		CTreeCtrlNode nodePF = this->GetPrintFrequencyNode(nStressPeriod);
-		ASSERT(nodePF.GetData());
-		if (CPrintFreq* pPrintFreq = (CPrintFreq*)(nodePF.GetData())) {
-			delete pPrintFreq;
-			nodePF.SetData(0);
-		}
-		nodePF.Delete();
-
-		// BOUNDARY_CONDITIONS
-		//
-		CTreeCtrlNode nodeBC = this->GetBCNode(nStressPeriod);
-		int nCount = this->m_nodeBC.GetChildCount();
-		for (int i = 0; i < nCount; ++i) {
-			CTreeCtrlNode child = this->m_nodeBC.GetChildAt(i);
-			ASSERT(child.GetData());
-			if (child.GetData()) {
-				if (CBCZoneActor* pZone = CBCZoneActor::SafeDownCast((vtkObject*)child.GetData())) {
-					pZone->RemoveStressPeriod(this, nStressPeriod);
-				}
-				else {
-					ASSERT(FALSE);
-				}
-			}
-		}
-		ASSERT(nodeBC.GetChildCount() == 0);
-		nodeBC.Delete();
-	}
-	ASSERT(nodeSP.GetChildCount() == 0);
-	nodeSP.Delete();
-}
+// COMMENT: {4/8/2005 6:52:34 PM}void CPropertyTreeControlBar::RemoveStressPeriod(int nStressPeriod)
+// COMMENT: {4/8/2005 6:52:34 PM}{
+// COMMENT: {4/8/2005 6:52:34 PM}	CTreeCtrlNode nodeSP = this->GetStressPeriodNode(nStressPeriod);
+// COMMENT: {4/8/2005 6:52:34 PM}	ASSERT(nodeSP);
+// COMMENT: {4/8/2005 6:52:34 PM}	if (nodeSP) {
+// COMMENT: {4/8/2005 6:52:34 PM}#ifdef _DEBUG
+// COMMENT: {4/8/2005 6:52:34 PM}		CString str;
+// COMMENT: {4/8/2005 6:52:34 PM}		str.Format(szPeriodFormat, nStressPeriod);
+// COMMENT: {4/8/2005 6:52:34 PM}		ASSERT(nodeSP.GetText().Compare(str) == 0);
+// COMMENT: {4/8/2005 6:52:34 PM}#endif
+// COMMENT: {4/8/2005 6:52:34 PM}		// free TIME_CONTROL 
+// COMMENT: {4/8/2005 6:52:34 PM}		CTreeCtrlNode nodeTC = this->GetTimeControlNode(nStressPeriod);
+// COMMENT: {4/8/2005 6:52:34 PM}		ASSERT(nodeTC.GetData());
+// COMMENT: {4/8/2005 6:52:34 PM}		if (CTimeControl* pTimeControl = (CTimeControl*)(nodeTC.GetData())) {
+// COMMENT: {4/8/2005 6:52:34 PM}			delete pTimeControl;
+// COMMENT: {4/8/2005 6:52:34 PM}			nodeTC.SetData(0);
+// COMMENT: {4/8/2005 6:52:34 PM}		}
+// COMMENT: {4/8/2005 6:52:34 PM}		nodeTC.Delete();
+// COMMENT: {4/8/2005 6:52:34 PM}
+// COMMENT: {4/8/2005 6:52:34 PM}		// PRINT_FREQUENCY
+// COMMENT: {4/8/2005 6:52:34 PM}		//		
+// COMMENT: {4/8/2005 6:52:34 PM}		CTreeCtrlNode nodePF = this->GetPrintFrequencyNode(nStressPeriod);
+// COMMENT: {4/8/2005 6:52:34 PM}		ASSERT(nodePF.GetData());
+// COMMENT: {4/8/2005 6:52:34 PM}		if (CPrintFreq* pPrintFreq = (CPrintFreq*)(nodePF.GetData())) {
+// COMMENT: {4/8/2005 6:52:34 PM}			delete pPrintFreq;
+// COMMENT: {4/8/2005 6:52:34 PM}			nodePF.SetData(0);
+// COMMENT: {4/8/2005 6:52:34 PM}		}
+// COMMENT: {4/8/2005 6:52:34 PM}		nodePF.Delete();
+// COMMENT: {4/8/2005 6:52:34 PM}
+// COMMENT: {4/8/2005 6:52:34 PM}		// BOUNDARY_CONDITIONS
+// COMMENT: {4/8/2005 6:52:34 PM}		//
+// COMMENT: {4/8/2005 6:52:34 PM}		CTreeCtrlNode nodeBC = this->GetBCNode(nStressPeriod);
+// COMMENT: {4/8/2005 6:52:34 PM}		int nCount = this->m_nodeBC.GetChildCount();
+// COMMENT: {4/8/2005 6:52:34 PM}		for (int i = 0; i < nCount; ++i) {
+// COMMENT: {4/8/2005 6:52:34 PM}			CTreeCtrlNode child = this->m_nodeBC.GetChildAt(i);
+// COMMENT: {4/8/2005 6:52:34 PM}			ASSERT(child.GetData());
+// COMMENT: {4/8/2005 6:52:34 PM}			if (child.GetData()) {
+// COMMENT: {4/8/2005 6:52:34 PM}				if (CBCZoneActor* pZone = CBCZoneActor::SafeDownCast((vtkObject*)child.GetData())) {
+// COMMENT: {4/8/2005 6:52:34 PM}					pZone->RemoveStressPeriod(this, nStressPeriod);
+// COMMENT: {4/8/2005 6:52:34 PM}				}
+// COMMENT: {4/8/2005 6:52:34 PM}				else {
+// COMMENT: {4/8/2005 6:52:34 PM}					ASSERT(FALSE);
+// COMMENT: {4/8/2005 6:52:34 PM}				}
+// COMMENT: {4/8/2005 6:52:34 PM}			}
+// COMMENT: {4/8/2005 6:52:34 PM}		}
+// COMMENT: {4/8/2005 6:52:34 PM}		ASSERT(nodeBC.GetChildCount() == 0);
+// COMMENT: {4/8/2005 6:52:34 PM}		nodeBC.Delete();
+// COMMENT: {4/8/2005 6:52:34 PM}	}
+// COMMENT: {4/8/2005 6:52:34 PM}	ASSERT(nodeSP.GetChildCount() == 0);
+// COMMENT: {4/8/2005 6:52:34 PM}	nodeSP.Delete();
+// COMMENT: {4/8/2005 6:52:34 PM}}
 
 
-int CPropertyTreeControlBar::GetStressPeriodCount(void)
-{
-	int nCount = 0;
-	CTreeCtrlNode node = this->m_nodeSP1;
-	for (; node; node = node.GetNextSibling()) {
-		++nCount;
-#ifdef _DEBUG
-		CString str;
-		str.Format(szPeriodFormat, nCount);
-		ASSERT(node.GetText().Compare(str) == 0);
-#endif
-	}
-	return nCount;
-}
+// COMMENT: {4/8/2005 6:49:05 PM}int CPropertyTreeControlBar::GetStressPeriodCount(void)
+// COMMENT: {4/8/2005 6:49:05 PM}{
+// COMMENT: {4/8/2005 6:49:05 PM}	int nCount = 0;
+// COMMENT: {4/8/2005 6:49:05 PM}	CTreeCtrlNode node = this->m_nodeSP1;
+// COMMENT: {4/8/2005 6:49:05 PM}	for (; node; node = node.GetNextSibling()) {
+// COMMENT: {4/8/2005 6:49:05 PM}		++nCount;
+// COMMENT: {4/8/2005 6:49:05 PM}#ifdef _DEBUG
+// COMMENT: {4/8/2005 6:49:05 PM}		CString str;
+// COMMENT: {4/8/2005 6:49:05 PM}		str.Format(szPeriodFormat, nCount);
+// COMMENT: {4/8/2005 6:49:05 PM}		ASSERT(node.GetText().Compare(str) == 0);
+// COMMENT: {4/8/2005 6:49:05 PM}#endif
+// COMMENT: {4/8/2005 6:49:05 PM}	}
+// COMMENT: {4/8/2005 6:49:05 PM}	return nCount;
+// COMMENT: {4/8/2005 6:49:05 PM}}
 
-CTreeCtrlNode CPropertyTreeControlBar::GetStressPeriodNode(int nStressPeriod)
-{
-	ASSERT(0 < nStressPeriod && nStressPeriod <= this->GetStressPeriodCount());
-
-	CTreeCtrlNode nodeSP = this->m_nodeSP1; // Stress Period 1
-	for (int i = 1; i < nStressPeriod; ++i) {
-		nodeSP = nodeSP.GetNextSibling(); // Stress Period i+1
-		ASSERT(nodeSP);
-	}
-#ifdef _DEBUG
-	CString str;
-	str.Format(szPeriodFormat, nStressPeriod);
-	ASSERT(nodeSP.GetText().Compare(str) == 0);
-#endif
-	return nodeSP;
-}
+// COMMENT: {4/8/2005 6:49:11 PM}CTreeCtrlNode CPropertyTreeControlBar::GetStressPeriodNode(int nStressPeriod)
+// COMMENT: {4/8/2005 6:49:11 PM}{
+// COMMENT: {4/8/2005 6:49:11 PM}	ASSERT(0 < nStressPeriod && nStressPeriod <= this->GetStressPeriodCount());
+// COMMENT: {4/8/2005 6:49:11 PM}
+// COMMENT: {4/8/2005 6:49:11 PM}	CTreeCtrlNode nodeSP = this->m_nodeSP1; // Stress Period 1
+// COMMENT: {4/8/2005 6:49:11 PM}	for (int i = 1; i < nStressPeriod; ++i) {
+// COMMENT: {4/8/2005 6:49:11 PM}		nodeSP = nodeSP.GetNextSibling(); // Stress Period i+1
+// COMMENT: {4/8/2005 6:49:11 PM}		ASSERT(nodeSP);
+// COMMENT: {4/8/2005 6:49:11 PM}	}
+// COMMENT: {4/8/2005 6:49:11 PM}#ifdef _DEBUG
+// COMMENT: {4/8/2005 6:49:11 PM}	CString str;
+// COMMENT: {4/8/2005 6:49:11 PM}	str.Format(szPeriodFormat, nStressPeriod);
+// COMMENT: {4/8/2005 6:49:11 PM}	ASSERT(nodeSP.GetText().Compare(str) == 0);
+// COMMENT: {4/8/2005 6:49:11 PM}#endif
+// COMMENT: {4/8/2005 6:49:11 PM}	return nodeSP;
+// COMMENT: {4/8/2005 6:49:11 PM}}
 
 
 //CTreeCtrl* CPropertyTreeControlBar::GetTreeCtrl()
@@ -1390,25 +1417,25 @@ void CPropertyTreeControlBar::SetGridLODActor(CGridLODActor* pGridLODActor)
 
 void CPropertyTreeControlBar::DeleteContents()
 {
-	// free time_controls and print_freqs
-	//
-	int nStressPeriods = this->GetStressPeriodCount();
-	for (int i = 2; i <= nStressPeriods; ++i) {
-		// TIME_CONTROL 
-		CTreeCtrlNode nodeTC = this->GetTimeControlNode(i);
-		ASSERT(nodeTC.GetData());
-		if (CTimeControl* pTimeControl = (CTimeControl*)(nodeTC.GetData())) {
-			delete pTimeControl;
-			nodeTC.SetData(0);
-		}
-		// PRINT_FREQUENCY 
-		CTreeCtrlNode nodePF = this->GetPrintFrequencyNode(i);
-		ASSERT(nodePF.GetData());
-		if (CPrintFreq* pPrintFreq = (CPrintFreq*)(nodePF.GetData())) {
-			delete pPrintFreq;
-			nodePF.SetData(0);
-		}
-	}
+// COMMENT: {4/11/2005 1:07:44 PM}	// free time_controls and print_freqs
+// COMMENT: {4/11/2005 1:07:44 PM}	//
+// COMMENT: {4/11/2005 1:07:44 PM}	int nStressPeriods = this->GetStressPeriodCount();
+// COMMENT: {4/11/2005 1:07:44 PM}	for (int i = 2; i <= nStressPeriods; ++i) {
+// COMMENT: {4/11/2005 1:07:44 PM}		// TIME_CONTROL 
+// COMMENT: {4/11/2005 1:07:44 PM}		CTreeCtrlNode nodeTC = this->GetTimeControlNode(i);
+// COMMENT: {4/11/2005 1:07:44 PM}		ASSERT(nodeTC.GetData());
+// COMMENT: {4/11/2005 1:07:44 PM}		if (CTimeControl* pTimeControl = (CTimeControl*)(nodeTC.GetData())) {
+// COMMENT: {4/11/2005 1:07:44 PM}			delete pTimeControl;
+// COMMENT: {4/11/2005 1:07:44 PM}			nodeTC.SetData(0);
+// COMMENT: {4/11/2005 1:07:44 PM}		}
+// COMMENT: {4/11/2005 1:07:44 PM}		// PRINT_FREQUENCY 
+// COMMENT: {4/11/2005 1:07:44 PM}		CTreeCtrlNode nodePF = this->GetPrintFrequencyNode(i);
+// COMMENT: {4/11/2005 1:07:44 PM}		ASSERT(nodePF.GetData());
+// COMMENT: {4/11/2005 1:07:44 PM}		if (CPrintFreq* pPrintFreq = (CPrintFreq*)(nodePF.GetData())) {
+// COMMENT: {4/11/2005 1:07:44 PM}			delete pPrintFreq;
+// COMMENT: {4/11/2005 1:07:44 PM}			nodePF.SetData(0);
+// COMMENT: {4/11/2005 1:07:44 PM}		}
+// COMMENT: {4/11/2005 1:07:44 PM}	}
 	this->m_wndTree.DeleteAllItems();
 
 	// reset next zone
@@ -1424,17 +1451,21 @@ void CPropertyTreeControlBar::DeleteContents()
 	this->m_nodeIC          = this->m_wndTree.InsertItem(szINITIAL_CONDITIONS );
 
 
-	// add first simulation period
-	CString str;
-	str.Format(szPeriodFormat, 1);
-	this->m_nodeSP1         = this->m_wndTree.InsertItem(str);
+// COMMENT: {4/11/2005 7:50:38 PM}	// add first simulation period
+// COMMENT: {4/11/2005 7:50:38 PM}	CString str;
+// COMMENT: {4/11/2005 7:50:38 PM}	str.Format(szPeriodFormat, 1);
+// COMMENT: {4/11/2005 7:50:38 PM}	this->m_nodeSP1         = this->m_wndTree.InsertItem(str);
 
 	// populate the first simulation period
 	//
-	this->m_nodeBC          = this->m_wndTree.InsertItem(szBOUNDARY_CONDITIONS, this->m_nodeSP1);
-	this->m_nodeWells       = this->m_wndTree.InsertItem(szWELLS,               this->m_nodeSP1);
-	this->m_nodePF          = this->m_wndTree.InsertItem(szPRINT_FREQUENCY,     this->m_nodeSP1);
-	this->m_nodeTimeControl = this->m_wndTree.InsertItem(szTIME_CONTROL,        this->m_nodeSP1);
+// COMMENT: {4/8/2005 6:45:59 PM}	this->m_nodeBC          = this->m_wndTree.InsertItem(szBOUNDARY_CONDITIONS, this->m_nodeSP1);
+// COMMENT: {4/8/2005 6:45:59 PM}	this->m_nodeWells       = this->m_wndTree.InsertItem(szWELLS,               this->m_nodeSP1);
+// COMMENT: {4/8/2005 6:45:59 PM}	this->m_nodePF          = this->m_wndTree.InsertItem(szPRINT_FREQUENCY,     this->m_nodeSP1);
+// COMMENT: {4/8/2005 6:45:59 PM}	this->m_nodeTimeControl = this->m_wndTree.InsertItem(szTIME_CONTROL,        this->m_nodeSP1);
+	this->m_nodeBC          = this->m_wndTree.InsertItem(szBOUNDARY_CONDITIONS );
+	this->m_nodeWells       = this->m_wndTree.InsertItem(szWELLS               );
+	this->m_nodePF          = this->m_wndTree.InsertItem(szPRINT_FREQUENCY     );
+	this->m_nodeTimeControl = this->m_wndTree.InsertItem(szTIME_CONTROL        );
 
 	// set initial checkmark states (eyes)
 	this->m_wndTree.SetItemState(this->m_nodeMedia, INDEXTOSTATEIMAGEMASK(BST_CHECKED + 1), TVIS_STATEIMAGEMASK);
@@ -1444,8 +1475,7 @@ void CPropertyTreeControlBar::DeleteContents()
 	this->m_wndTree.SetItemState(this->m_nodeWells, INDEXTOSTATEIMAGEMASK(BST_CHECKED + 1), TVIS_STATEIMAGEMASK);
 
 
-	ASSERT(this->GetStressPeriodCount() == 1);
-	ASSERT(this->GetStressPeriodCount() == 1);
+// COMMENT: {4/11/2005 1:07:32 PM}	ASSERT(this->GetStressPeriodCount() == 1);
 }
 
 void CPropertyTreeControlBar::Update(IObserver* pSender, LPARAM lHint, CObject* pHint, vtkObject* pObject)
@@ -1806,61 +1836,61 @@ void CPropertyTreeControlBar::OnKeyDown(NMHDR* pNMHDR, LRESULT* pResult)
 		}
 
 
-		// Handle stress periods greater than 1
-		int nStressPeriodCount = this->GetStressPeriodCount();
-		int nStressPeriod = 0;
-		for (int i = 2; i <= nStressPeriodCount; ++i) {
-			if (sel.IsNodeAncestor(this->GetStressPeriodNode(i))) {
-				if (sel != this->GetStressPeriodNode(i)) {
-					// TODO: May want to implement deleting stressperiods
-					nStressPeriod = i;
-				}
-				break;
-			}
-		}
-		if (nStressPeriod > 1) {
-			// BOUNDARY_CONDITIONS
-			//
-			if (sel.IsNodeAncestor(this->GetBCNode(nStressPeriod))) {
-				if (sel != this->GetBCNode(nStressPeriod)) {
-					while (sel.GetParent() != this->GetBCNode(nStressPeriod)) {
-						sel = sel.GetParent();
-						if (!sel) break;
-					}
-					if (sel && sel.GetData()) {
-						if (CBCZoneActor* pZone = CBCZoneActor::SafeDownCast((vtkObject*)sel.GetData())) {
-							::AfxMessageBox(_T("Boundary conditions can only be deleted from the first simulation period."));
-							//CTreeCtrlNode parent = sel.GetParent();
-							//ASSERT(!pZone->GetDefault()); // no default BCs
-							//if (CWPhastDoc* pDoc = this->GetDocument()) {
-							//	pDoc->Execute(new CZoneRemoveAction(pDoc, pZone, this));
-							//	parent.Select();
-							//}
-							*pResult = TRUE;
-							return;
-						}
-					}
-				}
-				ASSERT(FALSE);
-				TRACE("BC not found\n");
-				return;
-			}
-
-			// TIME_CONTROL
-			//
-			if (sel.IsNodeAncestor(this->GetTimeControlNode(nStressPeriod))) {
-				if (this->GetTimeControlNode(nStressPeriod).GetData()) {
-					CTimeControl* pTC = (CTimeControl*)this->GetTimeControlNode(nStressPeriod).GetData();
-					::AfxMessageBox("Deleting TIME_CONTROL not currently implemented");
-					*pResult = TRUE;
-					return;
-				}
-				return;
-			}
-			::AfxMessageBox("Delete Node Greater than simulation 1 BUT NOT FOUND(time_control, bc)");
-			*pResult = TRUE;
-			return;
-		}
+// COMMENT: {4/11/2005 1:06:40 PM}		// Handle stress periods greater than 1
+// COMMENT: {4/11/2005 1:06:40 PM}		int nStressPeriodCount = this->GetStressPeriodCount();
+// COMMENT: {4/11/2005 1:06:40 PM}		int nStressPeriod = 0;
+// COMMENT: {4/11/2005 1:06:40 PM}		for (int i = 2; i <= nStressPeriodCount; ++i) {
+// COMMENT: {4/11/2005 1:06:40 PM}			if (sel.IsNodeAncestor(this->GetStressPeriodNode(i))) {
+// COMMENT: {4/11/2005 1:06:40 PM}				if (sel != this->GetStressPeriodNode(i)) {
+// COMMENT: {4/11/2005 1:06:40 PM}					// TODO: May want to implement deleting stressperiods
+// COMMENT: {4/11/2005 1:06:40 PM}					nStressPeriod = i;
+// COMMENT: {4/11/2005 1:06:40 PM}				}
+// COMMENT: {4/11/2005 1:06:40 PM}				break;
+// COMMENT: {4/11/2005 1:06:40 PM}			}
+// COMMENT: {4/11/2005 1:06:40 PM}		}
+// COMMENT: {4/11/2005 1:06:40 PM}		if (nStressPeriod > 1) {
+// COMMENT: {4/11/2005 1:06:40 PM}			// BOUNDARY_CONDITIONS
+// COMMENT: {4/11/2005 1:06:40 PM}			//
+// COMMENT: {4/11/2005 1:06:40 PM}			if (sel.IsNodeAncestor(this->GetBCNode(nStressPeriod))) {
+// COMMENT: {4/11/2005 1:06:40 PM}				if (sel != this->GetBCNode(nStressPeriod)) {
+// COMMENT: {4/11/2005 1:06:40 PM}					while (sel.GetParent() != this->GetBCNode(nStressPeriod)) {
+// COMMENT: {4/11/2005 1:06:40 PM}						sel = sel.GetParent();
+// COMMENT: {4/11/2005 1:06:40 PM}						if (!sel) break;
+// COMMENT: {4/11/2005 1:06:40 PM}					}
+// COMMENT: {4/11/2005 1:06:40 PM}					if (sel && sel.GetData()) {
+// COMMENT: {4/11/2005 1:06:40 PM}						if (CBCZoneActor* pZone = CBCZoneActor::SafeDownCast((vtkObject*)sel.GetData())) {
+// COMMENT: {4/11/2005 1:06:40 PM}							::AfxMessageBox(_T("Boundary conditions can only be deleted from the first simulation period."));
+// COMMENT: {4/11/2005 1:06:40 PM}							//CTreeCtrlNode parent = sel.GetParent();
+// COMMENT: {4/11/2005 1:06:40 PM}							//ASSERT(!pZone->GetDefault()); // no default BCs
+// COMMENT: {4/11/2005 1:06:40 PM}							//if (CWPhastDoc* pDoc = this->GetDocument()) {
+// COMMENT: {4/11/2005 1:06:40 PM}							//	pDoc->Execute(new CZoneRemoveAction(pDoc, pZone, this));
+// COMMENT: {4/11/2005 1:06:40 PM}							//	parent.Select();
+// COMMENT: {4/11/2005 1:06:40 PM}							//}
+// COMMENT: {4/11/2005 1:06:40 PM}							*pResult = TRUE;
+// COMMENT: {4/11/2005 1:06:40 PM}							return;
+// COMMENT: {4/11/2005 1:06:40 PM}						}
+// COMMENT: {4/11/2005 1:06:40 PM}					}
+// COMMENT: {4/11/2005 1:06:40 PM}				}
+// COMMENT: {4/11/2005 1:06:40 PM}				ASSERT(FALSE);
+// COMMENT: {4/11/2005 1:06:40 PM}				TRACE("BC not found\n");
+// COMMENT: {4/11/2005 1:06:40 PM}				return;
+// COMMENT: {4/11/2005 1:06:40 PM}			}
+// COMMENT: {4/11/2005 1:06:40 PM}
+// COMMENT: {4/11/2005 1:06:40 PM}			// TIME_CONTROL
+// COMMENT: {4/11/2005 1:06:40 PM}			//
+// COMMENT: {4/11/2005 1:06:40 PM}			if (sel.IsNodeAncestor(this->GetTimeControlNode(nStressPeriod))) {
+// COMMENT: {4/11/2005 1:06:40 PM}				if (this->GetTimeControlNode(nStressPeriod).GetData()) {
+// COMMENT: {4/11/2005 1:06:40 PM}					CTimeControl* pTC = (CTimeControl*)this->GetTimeControlNode(nStressPeriod).GetData();
+// COMMENT: {4/11/2005 1:06:40 PM}					::AfxMessageBox("Deleting TIME_CONTROL not currently implemented");
+// COMMENT: {4/11/2005 1:06:40 PM}					*pResult = TRUE;
+// COMMENT: {4/11/2005 1:06:40 PM}					return;
+// COMMENT: {4/11/2005 1:06:40 PM}				}
+// COMMENT: {4/11/2005 1:06:40 PM}				return;
+// COMMENT: {4/11/2005 1:06:40 PM}			}
+// COMMENT: {4/11/2005 1:06:40 PM}			::AfxMessageBox("Delete Node Greater than simulation 1 BUT NOT FOUND(time_control, bc)");
+// COMMENT: {4/11/2005 1:06:40 PM}			*pResult = TRUE;
+// COMMENT: {4/11/2005 1:06:40 PM}			return;
+// COMMENT: {4/11/2005 1:06:40 PM}		}
 	}
 }
 

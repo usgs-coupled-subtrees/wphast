@@ -33,7 +33,8 @@ public:
 	void Serialize(bool bStoring, hid_t loc_id);
 	friend std::ostream& operator<< (std::ostream &os, const CTimeControl& tc);
 
-	void Edit(CTreeCtrl* pTreeCtrl, int nStressPeriod = 1);
+// COMMENT: {4/11/2005 1:48:26 PM}	void Edit(CTreeCtrl* pTreeCtrl, int nStressPeriod = 1);
+	void Edit(CTreeCtrl* pTreeCtrl);
 	HTREEITEM GetTreeItem(void)const { return m_htiTimeControl; }
 	void EditMultiple(CPropertyTreeControlBar* pPropTree);
 

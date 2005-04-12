@@ -111,9 +111,9 @@ protected:
 	void InternalDelete(CZoneActor *pZoneActor, bool bDelete);
 
 public:
-	CTreeCtrlNode AddStressPeriod(const CTimeControl& timeControl);
-	void RemoveStressPeriod(int nStressPeriod);
-	int GetStressPeriodCount(void)const;
+// COMMENT: {4/8/2005 6:51:46 PM}	CTreeCtrlNode AddStressPeriod(const CTimeControl& timeControl);
+// COMMENT: {4/8/2005 6:51:46 PM}	void RemoveStressPeriod(int nStressPeriod);
+// COMMENT: {4/8/2005 6:51:46 PM}	int GetStressPeriodCount(void)const;
 
 	void ReleaseGraphicsResources(vtkProp* pProp);
 	void ClearSelection(void);
@@ -182,8 +182,10 @@ protected:
 
 protected:
 	void InitDocument();
-	void SerializeBC(bool bStoring, hid_t loc_id, int nStressPeriod = 1);
-	void SerializeTimeControl(bool bStoring, hid_t loc_id, int nStressPeriod = 1);
+// COMMENT: {4/11/2005 1:28:13 PM}	void SerializeBC(bool bStoring, hid_t loc_id, int nStressPeriod = 1);
+// COMMENT: {4/11/2005 1:28:13 PM}	void SerializeTimeControl(bool bStoring, hid_t loc_id, int nStressPeriod = 1);
+	void SerializeBC(bool bStoring, hid_t loc_id);
+// COMMENT: {4/11/2005 1:34:34 PM}	void SerializeTimeControl(bool bStoring, hid_t loc_id);
 	void SerializeIC(bool bStoring, hid_t loc_id);
 	void SerializeMedia(bool bStoring, hid_t loc_id);
 	void SerializeStressPeriods(bool bStoring, hid_t loc_id);
@@ -225,11 +227,15 @@ public:
 	void GetUnits(CUnits& units)const;
 	void SetUnits(const CUnits& units);
 
-	void SetTimeControl(const CTimeControl& timeControl, int nStressPeriod = 1);
-	const CTimeControl& GetTimeControl(int nStressPeriod = 1)const;
+// COMMENT: {4/11/2005 1:44:07 PM}	void SetTimeControl(const CTimeControl& timeControl, int nStressPeriod = 1);
+// COMMENT: {4/11/2005 1:44:07 PM}	const CTimeControl& GetTimeControl(int nStressPeriod = 1)const;
+	void SetTimeControl(const CTimeControl& timeControl);
+	const CTimeControl& GetTimeControl(void)const;
 
-	void SetPrintFrequency(const CPrintFreq& printFreq, int nStressPeriod = 1);
-	const CPrintFreq& GetPrintFrequency(int nStressPeriod = 1)const;
+// COMMENT: {4/11/2005 1:21:22 PM}	void SetPrintFrequency(const CPrintFreq& printFreq, int nStressPeriod = 1);
+// COMMENT: {4/11/2005 1:21:22 PM}	const CPrintFreq& GetPrintFrequency(int nStressPeriod = 1)const;
+	void SetPrintFrequency(const CPrintFreq& printFreq);
+	const CPrintFreq& GetPrintFrequency(void)const;
 
 
 	float* GetGridBounds();

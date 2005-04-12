@@ -29,7 +29,7 @@ CBCSpecifiedPropertyPage::~CBCSpecifiedPropertyPage()
 {
 }
 
-void CBCSpecifiedPropertyPage::SetProperties(const CBCZone& r_bc)
+void CBCSpecifiedPropertyPage::SetProperties(const CBC& r_bc)
 {
 #ifdef _DEBUG
 	ASSERT(this->m_nStressPeriod >= 1);
@@ -38,27 +38,27 @@ void CBCSpecifiedPropertyPage::SetProperties(const CBCZone& r_bc)
 	this->_SetProperties(r_bc);
 }
 
-void CBCSpecifiedPropertyPage::_SetProperties(const CBCZone& r_bc)
+void CBCSpecifiedPropertyPage::_SetProperties(const CBC& r_bc)
 {
 	this->m_bc = r_bc;
 
-	// fill empty properties
-	//
-
-	// Head
-	if (!this->m_bc.bc_head) {
-		this->m_bc.bc_head = new CTimeSeries<Cproperty>;
-	}
-	// Solution (Fixed or Associated)
-	if (!this->m_bc.bc_solution) {
-		this->m_bc.bc_solution = new CTimeSeries<Cproperty>;
-	}
+// COMMENT: {4/11/2005 4:41:39 PM}	// fill empty properties
+// COMMENT: {4/11/2005 4:41:39 PM}	//
+// COMMENT: {4/11/2005 4:41:39 PM}
+// COMMENT: {4/11/2005 4:41:39 PM}	// Head
+// COMMENT: {4/11/2005 4:41:39 PM}	if (!this->m_bc.bc_head) {
+// COMMENT: {4/11/2005 4:41:39 PM}		this->m_bc.bc_head = new CTimeSeries<Cproperty>;
+// COMMENT: {4/11/2005 4:41:39 PM}	}
+// COMMENT: {4/11/2005 4:41:39 PM}	// Solution (Fixed or Associated)
+// COMMENT: {4/11/2005 4:41:39 PM}	if (!this->m_bc.bc_solution) {
+// COMMENT: {4/11/2005 4:41:39 PM}		this->m_bc.bc_solution = new CTimeSeries<Cproperty>;
+// COMMENT: {4/11/2005 4:41:39 PM}	}
 
 	// copy to fixed and linear
 	this->m_bcFixed = this->m_bcLinear = this->m_bc;
 }
 
-void CBCSpecifiedPropertyPage::GetProperties(CBCZone& r_bc)
+void CBCSpecifiedPropertyPage::GetProperties(CBC& r_bc)
 {
 	r_bc = this->m_bc;
 

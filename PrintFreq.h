@@ -18,7 +18,8 @@ public:
 	friend std::ostream& operator<< (std::ostream &os, const CPrintFreq& pf);
 	static void OutputCtime(std::ostream &os, const Ctime& time, LPCTSTR lpName);
 
-	void Edit(CTreeCtrl* pTreeCtrl, int nStressPeriod = 1);
+// COMMENT: {4/11/2005 1:42:37 PM}	void Edit(CTreeCtrl* pTreeCtrl, int nStressPeriod = 1);
+	void Edit(CTreeCtrl* pTreeCtrl);
 	HTREEITEM GetTreeItem(void)const { return m_htiPrintFreq; }
 
 public:

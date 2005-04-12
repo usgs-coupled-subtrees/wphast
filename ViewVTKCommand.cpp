@@ -683,10 +683,11 @@ void CViewVTKCommand::OnLeftButtonReleaseEvent(vtkObject* caller, void* callData
 				CBCZoneActor::Create(pDoc, absZone, bc);
 			}
 			// ID_ZONE_TYPE_BC_SPECIFIED
-			else if (newZone.GetType() == ID_ZONE_TYPE_BC_SPECIFIED) {
-				CBCZone bc;
+			else if (newZone.GetType() == ID_ZONE_TYPE_BC_SPECIFIED)
+			{
+				CBC bc;
 				specifiedProps.GetProperties(bc);
-// COMMENT: {2/25/2005 7:27:46 PM}				CBCZoneActor::Create(pDoc, absZone, bc);
+				CBCZoneActor::Create(pDoc, absZone, bc);
 			}
 			// ID_ZONE_TYPE_IC_HEAD
 			else if (newZone.GetType() == ID_ZONE_TYPE_IC_HEAD) {

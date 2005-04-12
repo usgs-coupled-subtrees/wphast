@@ -306,9 +306,6 @@
 				RelativePath="BCSpecifiedPropertyPage.cpp">
 			</File>
 			<File
-				RelativePath="BCZone.cpp">
-			</File>
-			<File
 				RelativePath="BCZoneActor.cpp">
 			</File>
 			<File
@@ -725,9 +722,6 @@
 			</File>
 			<File
 				RelativePath="BCSpecifiedPropertyPage.h">
-			</File>
-			<File
-				RelativePath="BCZone.h">
 			</File>
 			<File
 				RelativePath="BCZoneActor.h">
@@ -1325,6 +1319,18 @@
 				<File
 					RelativePath="TestCBCSpecifiedHeadPropertyPage.cpp">
 					<FileConfiguration
+						Name="Debug|Win32"
+						ExcludedFromBuild="TRUE">
+						<Tool
+							Name="VCCLCompilerTool"/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						ExcludedFromBuild="TRUE">
+						<Tool
+							Name="VCCLCompilerTool"/>
+					</FileConfiguration>
+					<FileConfiguration
 						Name="vtkMemDebug|Win32"
 						ExcludedFromBuild="TRUE">
 						<Tool
@@ -1353,21 +1359,6 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="cppunitRelease|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath="TestCBCZone.cpp">
-					<FileConfiguration
-						Name="Release|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="vtkMemDebug|Win32"
 						ExcludedFromBuild="TRUE">
 						<Tool
 							Name="VCCLCompilerTool"/>
@@ -1889,9 +1880,6 @@
 				</File>
 				<File
 					RelativePath="TestCBCSpecifiedPropertyPage.h">
-				</File>
-				<File
-					RelativePath="TestCBCZone.h">
 				</File>
 				<File
 					RelativePath="TestCGrid.h">
@@ -2815,15 +2803,15 @@
 			Name="Build Logs"
 			Filter="">
 			<File
-				RelativePath="Release\BuildLog.htm"
-				DeploymentContent="TRUE">
-			</File>
-			<File
 				RelativePath="cppunit\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 			<File
 				RelativePath="Debug\BuildLog.htm"
+				DeploymentContent="TRUE">
+			</File>
+			<File
+				RelativePath="Release\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 		</Filter>

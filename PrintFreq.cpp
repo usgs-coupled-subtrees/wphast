@@ -537,7 +537,8 @@ void CPrintFreq::Serialize(bool bStoring, hid_t loc_id)
 // COMMENT: {2/22/2005 7:22:43 PM}	}
 }
 
-void CPrintFreq::Edit(CTreeCtrl* pTreeCtrl, int nStressPeriod)
+// COMMENT: {4/11/2005 1:42:02 PM}void CPrintFreq::Edit(CTreeCtrl* pTreeCtrl, int nStressPeriod)
+void CPrintFreq::Edit(CTreeCtrl* pTreeCtrl)
 {
 	ASSERT(this);
 	ASSERT(pTreeCtrl);
@@ -562,7 +563,8 @@ void CPrintFreq::Edit(CTreeCtrl* pTreeCtrl, int nStressPeriod)
 			{
 				CPrintFreq newPrintFreq;
 				newPrintFreq = pfPage.m_printFreq;
-				pDoc->Execute(new CSetPrintFreqAction(pDoc, newPrintFreq, nStressPeriod));
+// COMMENT: {4/11/2005 1:41:51 PM}				pDoc->Execute(new CSetPrintFreqAction(pDoc, newPrintFreq, nStressPeriod));
+				pDoc->Execute(new CSetPrintFreqAction(pDoc, newPrintFreq));
 			}
 			break;
 		case IDCANCEL:

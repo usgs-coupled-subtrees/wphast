@@ -136,7 +136,8 @@ std::ostream& operator<< (std::ostream &os, const CTimeControl &tc)
 	return os;
 }
 
-void CTimeControl::Edit(CTreeCtrl* pTreeCtrl, int nStressPeriod)
+// COMMENT: {4/11/2005 1:44:53 PM}void CTimeControl::Edit(CTreeCtrl* pTreeCtrl, int nStressPeriod)
+void CTimeControl::Edit(CTreeCtrl* pTreeCtrl)
 {
 	ASSERT(this);
 	ASSERT(pTreeCtrl);
@@ -152,9 +153,9 @@ void CTimeControl::Edit(CTreeCtrl* pTreeCtrl, int nStressPeriod)
 
 	CTimeControlPropertyPage tcPage;
 	tcPage.SetProperties(*this);
-	if (nStressPeriod > 1) {
-		tcPage.SetPreviousTimeStep(pDoc->GetTimeControl(nStressPeriod - 1));
-	}
+// COMMENT: {4/11/2005 1:45:28 PM}	if (nStressPeriod > 1) {
+// COMMENT: {4/11/2005 1:45:28 PM}		tcPage.SetPreviousTimeStep(pDoc->GetTimeControl(nStressPeriod - 1));
+// COMMENT: {4/11/2005 1:45:28 PM}	}
 
 	propSheet.AddPage(&tcPage);
 
@@ -163,7 +164,8 @@ void CTimeControl::Edit(CTreeCtrl* pTreeCtrl, int nStressPeriod)
 			{
 				CTimeControl newTimeControl;
 				tcPage.GetProperties(newTimeControl);
-				pDoc->Execute(new CSetTimeControlAction(pDoc, newTimeControl, nStressPeriod));
+// COMMENT: {4/11/2005 1:45:40 PM}				pDoc->Execute(new CSetTimeControlAction(pDoc, newTimeControl, nStressPeriod));
+				pDoc->Execute(new CSetTimeControlAction(pDoc, newTimeControl));
 			}
 			break;
 		case IDCANCEL:
@@ -175,38 +177,42 @@ void CTimeControl::Edit(CTreeCtrl* pTreeCtrl, int nStressPeriod)
 
 void CTimeControl::EditMultiple(CPropertyTreeControlBar* pPropTree)
 {
-	ASSERT(this);
-	ASSERT(pPropTree);
-
-	CFrameWnd *pFrame = (CFrameWnd*)::AfxGetApp()->m_pMainWnd;
-	ASSERT_VALID(pFrame);
-	CWPhastDoc* pDoc = reinterpret_cast<CWPhastDoc*>(pFrame->GetActiveDocument());
-	ASSERT_VALID(pDoc);
-
-	// show property sheet
-	//
-	CPropertySheet propSheet("Time Control", ::AfxGetMainWnd());
-
-	CTimeControlMultiPropertyPage tcPage;
-	for (int sp = 1; sp <= pPropTree->GetStressPeriodCount(); ++sp) {
-		tcPage.m_listTC.push_back(*pPropTree->GetTimeControl(sp));
-	}
-	propSheet.AddPage(&tcPage);
-
-	switch (propSheet.DoModal()) {
-		case IDOK:
-			{
-				CMacroAction* pMacro = new CMacroAction();
-				std::list<CTimeControl>::iterator iterTC = tcPage.m_listTC.begin();
-				for (int sp = 1; iterTC != tcPage.m_listTC.end(); ++sp, ++iterTC) {
-					pMacro->Add(new CSetTimeControlAction(pDoc, *iterTC, sp));
-				}
-				pDoc->Execute(pMacro);
-			}
-			break;
-		case IDCANCEL:
-			break;
-		default:
-			ASSERT(FALSE);
-	}
+	ASSERT(FALSE);
+// COMMENT: {4/11/2005 1:12:09 PM}	ASSERT(this);
+// COMMENT: {4/11/2005 1:12:09 PM}	ASSERT(pPropTree);
+// COMMENT: {4/11/2005 1:12:09 PM}
+// COMMENT: {4/11/2005 1:12:09 PM}	CFrameWnd *pFrame = (CFrameWnd*)::AfxGetApp()->m_pMainWnd;
+// COMMENT: {4/11/2005 1:12:09 PM}	ASSERT_VALID(pFrame);
+// COMMENT: {4/11/2005 1:12:09 PM}	CWPhastDoc* pDoc = reinterpret_cast<CWPhastDoc*>(pFrame->GetActiveDocument());
+// COMMENT: {4/11/2005 1:12:09 PM}	ASSERT_VALID(pDoc);
+// COMMENT: {4/11/2005 1:12:09 PM}
+// COMMENT: {4/11/2005 1:12:09 PM}	// show property sheet
+// COMMENT: {4/11/2005 1:12:09 PM}	//
+// COMMENT: {4/11/2005 1:12:09 PM}	CPropertySheet propSheet("Time Control", ::AfxGetMainWnd());
+// COMMENT: {4/11/2005 1:12:09 PM}
+// COMMENT: {4/11/2005 1:12:09 PM}	CTimeControlMultiPropertyPage tcPage;
+// COMMENT: {4/11/2005 1:12:09 PM}	for (int sp = 1; sp <= pPropTree->GetStressPeriodCount(); ++sp)
+// COMMENT: {4/11/2005 1:12:09 PM}	{
+// COMMENT: {4/11/2005 1:12:09 PM}		tcPage.m_listTC.push_back(*pPropTree->GetTimeControl(sp));
+// COMMENT: {4/11/2005 1:12:09 PM}	}
+// COMMENT: {4/11/2005 1:12:09 PM}	propSheet.AddPage(&tcPage);
+// COMMENT: {4/11/2005 1:12:09 PM}
+// COMMENT: {4/11/2005 1:12:09 PM}	switch (propSheet.DoModal())
+// COMMENT: {4/11/2005 1:12:09 PM}	{
+// COMMENT: {4/11/2005 1:12:09 PM}		case IDOK:
+// COMMENT: {4/11/2005 1:12:09 PM}			{
+// COMMENT: {4/11/2005 1:12:09 PM}				CMacroAction* pMacro = new CMacroAction();
+// COMMENT: {4/11/2005 1:12:09 PM}				std::list<CTimeControl>::iterator iterTC = tcPage.m_listTC.begin();
+// COMMENT: {4/11/2005 1:12:09 PM}				for (int sp = 1; iterTC != tcPage.m_listTC.end(); ++sp, ++iterTC)
+// COMMENT: {4/11/2005 1:12:09 PM}				{
+// COMMENT: {4/11/2005 1:12:09 PM}					pMacro->Add(new CSetTimeControlAction(pDoc, *iterTC, sp));
+// COMMENT: {4/11/2005 1:12:09 PM}				}
+// COMMENT: {4/11/2005 1:12:09 PM}				pDoc->Execute(pMacro);
+// COMMENT: {4/11/2005 1:12:09 PM}			}
+// COMMENT: {4/11/2005 1:12:09 PM}			break;
+// COMMENT: {4/11/2005 1:12:09 PM}		case IDCANCEL:
+// COMMENT: {4/11/2005 1:12:09 PM}			break;
+// COMMENT: {4/11/2005 1:12:09 PM}		default:
+// COMMENT: {4/11/2005 1:12:09 PM}			ASSERT(FALSE);
+// COMMENT: {4/11/2005 1:12:09 PM}	}
 }

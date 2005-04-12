@@ -1,6 +1,6 @@
 #pragma once
 
-#include "BCZone.h"
+#include "BC.h"
 #include "CheckTreeCtrl.h"
 #include <string>
 
@@ -14,8 +14,8 @@ public:
 	CBCSpecifiedPropertyPage();
 	virtual ~CBCSpecifiedPropertyPage();
 
-	void SetProperties(const CBCZone& r_bc);
-	void GetProperties(CBCZone& r_bc);
+	void SetProperties(const CBC& r_bc);
+	void GetProperties(CBC& r_bc);
 
 	void SetStressPeriod(int nStressPeriod) { m_nStressPeriod = nStressPeriod;}
 	int  GetStressPeriod(void)const         { return m_nStressPeriod; }
@@ -25,7 +25,7 @@ public:
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-	void _SetProperties(const CBCZone& r_bc);
+	void _SetProperties(const CBC& r_bc);
 
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnTvnSelchangedPropTree(NMHDR *pNMHDR, LRESULT *pResult);
@@ -38,12 +38,12 @@ protected:
 	afx_msg void OnBnClickedLinearInterpolationRadio();
 protected:
 	CCheckTreeCtrl m_wndTreeCtrl;
-	CRichEditCtrl m_wndRichEditCtrl;
-	HTREEITEM m_htiDDX;
+	CRichEditCtrl  m_wndRichEditCtrl;
+	HTREEITEM      m_htiDDX;
 
-	CBCZone m_bc;
-	CBCZone m_bcFixed;
-	CBCZone m_bcLinear;
+	CBC m_bc;
+	CBC m_bcFixed;
+	CBC m_bcLinear;
 
 	std::string m_sHeadRTF;      // IDR_BC_SPECIFIED_HEAD_RTF
 	std::string m_sSolutionRTF;  // IDR_BC_SPECIFIED_SOL_RTF

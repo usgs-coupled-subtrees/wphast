@@ -62,7 +62,8 @@ void TestCBCSpecifiedPropertyPage::testCannotChangeSolutionType(void)
 		CPPUNIT_ASSERT(pPhastInput->GetErrorCount() == 0);
 		CPPUNIT_ASSERT(::count_bc == 1);
 		// copy SPECIFIED_VALUE_BC
-		CBCZone bc(*::bc[0]);
+// COMMENT: {4/11/2005 4:42:11 PM}		CBCZone bc(*::bc[0]);
+		CBC bc(*::bc[0]);
 		pPhastInput->Delete();
 		pPhastInput = NULL;
 

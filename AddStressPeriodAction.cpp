@@ -18,12 +18,12 @@ CAddStressPeriodAction::~CAddStressPeriodAction(void)
 
 void CAddStressPeriodAction::Execute()
 {
-	this->m_pDoc->AddStressPeriod(this->m_tc);
-	this->m_nStressPeriod = this->m_pDoc->GetStressPeriodCount();
+// COMMENT: {4/8/2005 6:53:23 PM}	this->m_pDoc->AddStressPeriod(this->m_tc);
+// COMMENT: {4/8/2005 6:53:23 PM}	this->m_nStressPeriod = this->m_pDoc->GetStressPeriodCount();
 }
 
 void CAddStressPeriodAction::UnExecute()
 {
-	this->m_pDoc->RemoveStressPeriod(this->m_nStressPeriod);
+// COMMENT: {4/8/2005 6:53:25 PM}	this->m_pDoc->RemoveStressPeriod(this->m_nStressPeriod);
 }
 

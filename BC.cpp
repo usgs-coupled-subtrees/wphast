@@ -474,11 +474,14 @@ void CBC::Serialize(bool bStoring, hid_t loc_id)
 		status = CGlobal::HDFSerialize(bStoring, loc_id, szSolType, H5T_NATIVE_INT, 1, &this->bc_solution_type);
 
 		// properties
-// COMMENT: {2/23/2005 1:22:22 PM}		Cproperty::SerializeCreate(szFlux,     static_cast<Cproperty*>(this->bc_flux),     loc_id);
-// COMMENT: {2/23/2005 1:22:28 PM}		Cproperty::SerializeCreate(szHead,     static_cast<Cproperty*>(this->bc_head),     loc_id);
-// COMMENT: {2/23/2005 1:22:28 PM}		Cproperty::SerializeCreate(szK,        static_cast<Cproperty*>(this->bc_k),        loc_id);
-// COMMENT: {2/23/2005 1:22:28 PM}		Cproperty::SerializeCreate(szThick,    static_cast<Cproperty*>(this->bc_thick),    loc_id);
-// COMMENT: {2/23/2005 1:22:28 PM}		Cproperty::SerializeCreate(szSolution, static_cast<Cproperty*>(this->bc_solution), loc_id);
+		Cproperty::SerializeCreate(szK,        static_cast<Cproperty*>(this->bc_k),        loc_id);
+		Cproperty::SerializeCreate(szThick,    static_cast<Cproperty*>(this->bc_thick),    loc_id);
+
+		// CTimeSeries properties
+		CTimeSeries<Cproperty>::SerializeCreate(szFlux,     this->m_bc_flux,     loc_id);
+		CTimeSeries<Cproperty>::SerializeCreate(szHead,     this->m_bc_head,     loc_id);
+		CTimeSeries<Cproperty>::SerializeCreate(szSolution, this->m_bc_solution, loc_id);
+
 	}
 	else
 	{
@@ -502,11 +505,13 @@ void CBC::Serialize(bool bStoring, hid_t loc_id)
 		status = CGlobal::HDFSerialize(bStoring, loc_id, szSolType, H5T_NATIVE_INT, 1, &this->bc_solution_type);
 
 		// properties
-		Cproperty::SerializeOpen(szFlux,     (Cproperty**)&this->bc_flux,     loc_id);
-		Cproperty::SerializeOpen(szHead,     (Cproperty**)&this->bc_head,     loc_id);
 		Cproperty::SerializeOpen(szK,        (Cproperty**)&this->bc_k,        loc_id);
 		Cproperty::SerializeOpen(szThick,    (Cproperty**)&this->bc_thick,    loc_id);
-		Cproperty::SerializeOpen(szSolution, (Cproperty**)&this->bc_solution, loc_id);
+
+		// CTimeSeries properties
+		CTimeSeries<Cproperty>::SerializeOpen(szFlux,     this->m_bc_flux,     loc_id);
+		CTimeSeries<Cproperty>::SerializeOpen(szHead,     this->m_bc_head,     loc_id);
+		CTimeSeries<Cproperty>::SerializeOpen(szSolution, this->m_bc_solution, loc_id);
 
 #ifdef _DEBUG
 		static_cast<CZone*>(this->zone)->AssertValid();
@@ -635,17 +640,6 @@ std::ostream& operator<< (std::ostream &os, const CBC &a)
 				}
 			}
 
-// COMMENT: {3/28/2005 8:38:38 PM}			if (a.bc_solution && a.bc_solution->type != UNDEFINED && a.bc_solution_type == ASSOCIATED) {
-// COMMENT: {3/28/2005 8:38:38 PM}				os << "\t\t-associated_solution  " << static_cast<Cproperty>(*a.bc_solution);
-// COMMENT: {3/28/2005 8:38:38 PM}			}
-// COMMENT: {3/28/2005 8:38:38 PM}			// fixed_solution
-// COMMENT: {3/28/2005 8:38:38 PM}			if (a.bc_solution && a.bc_solution->type != UNDEFINED && a.bc_solution_type == FIXED) {
-// COMMENT: {3/28/2005 8:38:38 PM}				os << "\t\t-fixed_solution       " << static_cast<Cproperty>(*a.bc_solution);
-// COMMENT: {3/28/2005 8:38:38 PM}			}
-// COMMENT: {3/28/2005 8:38:38 PM}			// head
-// COMMENT: {3/28/2005 8:38:38 PM}			if (a.bc_head && a.bc_head->type != UNDEFINED) {
-// COMMENT: {3/28/2005 8:38:38 PM}				os << "\t\t-head                 " << static_cast<Cproperty>(*a.bc_head);
-// COMMENT: {3/28/2005 8:38:38 PM}			}
 			break;
 
 		case FLUX:
@@ -667,13 +661,53 @@ std::ostream& operator<< (std::ostream &os, const CBC &a)
 				}
 			}
 			// associated_solution
-// COMMENT: {2/23/2005 1:23:11 PM}			if (a.bc_solution && a.bc_solution->type != UNDEFINED) {
-// COMMENT: {2/23/2005 1:23:11 PM}				os << "\t\t-associated_solution  " << static_cast<Cproperty>(*a.bc_solution);
-// COMMENT: {2/23/2005 1:23:11 PM}			}
-// COMMENT: {2/23/2005 1:23:11 PM}			// flux
-// COMMENT: {2/23/2005 1:23:11 PM}			if (a.bc_flux && a.bc_flux->type != UNDEFINED) {
-// COMMENT: {2/23/2005 1:23:11 PM}				os << "\t\t-flux                 " << static_cast<Cproperty>(*a.bc_flux);
-// COMMENT: {2/23/2005 1:23:11 PM}			}
+			if (a.m_bc_solution.size() && a.bc_solution_type == ASSOCIATED)
+			{
+				os << "\t\t-associated_solution\n";
+				CTimeSeries<Cproperty>::const_iterator iter = a.m_bc_solution.begin();
+				for (; iter != a.m_bc_solution.end(); ++iter)
+				{
+					ASSERT((*iter).second.type != UNDEFINED);
+					if ((*iter).second.type == UNDEFINED) continue;
+
+					os << "\t\t\t";
+					if ((*iter).first.input)
+					{
+						os << (*iter).first.value << " " << (*iter).first.input;
+					}
+					else
+					{
+						os << (*iter).first.value;
+					}
+					os << "\t";
+					os << (*iter).second;
+				}
+			}
+
+			// flux
+			if (a.m_bc_flux.size())
+			{
+				os << "\t\t-flux\n";
+				CTimeSeries<Cproperty>::const_iterator iter = a.m_bc_flux.begin();
+				for (; iter != a.m_bc_flux.end(); ++iter)
+				{
+					ASSERT((*iter).second.type != UNDEFINED);
+					if ((*iter).second.type == UNDEFINED) continue;
+
+					os << "\t\t\t";
+					if ((*iter).first.input)
+					{
+						os << (*iter).first.value << " " << (*iter).first.input;
+					}
+					else
+					{
+						os << (*iter).first.value;
+					}
+					os << "\t";
+					os << (*iter).second;
+				}
+			}
+
 			break;
 
 		case LEAKY:
@@ -695,21 +729,60 @@ std::ostream& operator<< (std::ostream &os, const CBC &a)
 				}
 			}
 			// associated_solution
-// COMMENT: {2/23/2005 1:23:22 PM}			if (a.bc_solution && a.bc_solution->type != UNDEFINED) {
-// COMMENT: {2/23/2005 1:23:22 PM}				os << "\t\t-associated_solution     " << static_cast<Cproperty>(*a.bc_solution);
-// COMMENT: {2/23/2005 1:23:22 PM}			}
-// COMMENT: {2/23/2005 1:23:22 PM}			// head
-// COMMENT: {2/23/2005 1:23:22 PM}			if (a.bc_head && a.bc_head->type != UNDEFINED) {
-// COMMENT: {2/23/2005 1:23:22 PM}				os << "\t\t-head                    " << static_cast<Cproperty>(*a.bc_head);
-// COMMENT: {2/23/2005 1:23:22 PM}			}
-// COMMENT: {2/23/2005 1:23:22 PM}			// hydraulic_conductivity
-// COMMENT: {2/23/2005 1:23:22 PM}			if (a.bc_k && a.bc_k->type != UNDEFINED) {
-// COMMENT: {2/23/2005 1:23:22 PM}				os << "\t\t-hydraulic_conductivity  " << static_cast<Cproperty>(*a.bc_k);
-// COMMENT: {2/23/2005 1:23:22 PM}			}
-// COMMENT: {2/23/2005 1:23:22 PM}			// thickness
-// COMMENT: {2/23/2005 1:23:22 PM}			if (a.bc_thick && a.bc_thick->type != UNDEFINED) {
-// COMMENT: {2/23/2005 1:23:22 PM}				os << "\t\t-thickness               " << static_cast<Cproperty>(*a.bc_thick);
-// COMMENT: {2/23/2005 1:23:22 PM}			}
+			if (a.m_bc_solution.size() && a.bc_solution_type == ASSOCIATED)
+			{
+				os << "\t\t-associated_solution\n";
+				CTimeSeries<Cproperty>::const_iterator iter = a.m_bc_solution.begin();
+				for (; iter != a.m_bc_solution.end(); ++iter)
+				{
+					ASSERT((*iter).second.type != UNDEFINED);
+					if ((*iter).second.type == UNDEFINED) continue;
+
+					os << "\t\t\t";
+					if ((*iter).first.input)
+					{
+						os << (*iter).first.value << " " << (*iter).first.input;
+					}
+					else
+					{
+						os << (*iter).first.value;
+					}
+					os << "\t";
+					os << (*iter).second;
+				}
+			}
+			// head
+			if (a.m_bc_head.size())
+			{
+				os << "\t\t-head\n";
+				CTimeSeries<Cproperty>::const_iterator iter = a.m_bc_head.begin();
+				for (; iter != a.m_bc_head.end(); ++iter)
+				{
+					ASSERT((*iter).second.type != UNDEFINED);
+					if ((*iter).second.type == UNDEFINED) continue;
+
+					os << "\t\t\t";
+					if ((*iter).first.input)
+					{
+						os << (*iter).first.value << " " << (*iter).first.input;
+					}
+					else
+					{
+						os << (*iter).first.value;
+					}
+					os << "\t";
+					os << (*iter).second;
+				}
+			}
+
+			// hydraulic_conductivity
+			if (a.bc_k && a.bc_k->type != UNDEFINED) {
+				os << "\t\t-hydraulic_conductivity  " << static_cast<Cproperty>(*a.bc_k);
+			}
+			// thickness
+			if (a.bc_thick && a.bc_thick->type != UNDEFINED) {
+				os << "\t\t-thickness               " << static_cast<Cproperty>(*a.bc_thick);
+			}
 			break;
 
 		default:

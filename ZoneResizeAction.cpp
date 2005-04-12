@@ -131,7 +131,7 @@ void CZoneResizeAction::Execute(void)
 
 	// render
 	//
-// COMMENT: {11/3/2004 2:54:27 PM}	this->m_pView->GetDocument()->UpdateAllViews(0);
+	this->m_pView->GetDocument()->UpdateAllViews(0);
 }
 
 void CZoneResizeAction::UnExecute(void)

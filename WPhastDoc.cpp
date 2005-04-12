@@ -395,8 +395,8 @@ void CWPhastDoc::Serialize(CArchive& ar)
 			// store time control
 			this->m_pTimeControl->Serialize(bStoring, wphast_id);
 
-			// store additional stress periods
-			this->SerializeStressPeriods(bStoring, wphast_id);
+// COMMENT: {4/8/2005 6:55:22 PM}			// store additional stress periods
+// COMMENT: {4/8/2005 6:55:22 PM}			this->SerializeStressPeriods(bStoring, wphast_id);
 
 			// close WPhast group
 			status = ::H5Gclose(wphast_id);
@@ -498,8 +498,8 @@ void CWPhastDoc::Serialize(CArchive& ar)
 				pTree->SetTimeControl(this->m_pTimeControl);
 			}
 
-			// load additional stress periods
-			this->SerializeStressPeriods(bStoring, wphast_id);
+// COMMENT: {4/8/2005 6:55:32 PM}			// load additional stress periods
+// COMMENT: {4/8/2005 6:55:32 PM}			this->SerializeStressPeriods(bStoring, wphast_id);
 
 			// close WPhast group
 			status = ::H5Gclose(wphast_id);
@@ -623,7 +623,132 @@ void CWPhastDoc::SerializeMedia(bool bStoring, hid_t loc_id)
 	}
 }
 
-void CWPhastDoc::SerializeBC(bool bStoring, hid_t loc_id, int nStressPeriod)
+// COMMENT: {4/11/2005 1:31:43 PM}void CWPhastDoc::SerializeBC(bool bStoring, hid_t loc_id, int nStressPeriod)
+// COMMENT: {4/11/2005 1:30:56 PM}{
+// COMMENT: {4/11/2005 1:30:56 PM}	static const char szBC[]    = "BC";
+// COMMENT: {4/11/2005 1:30:56 PM}	static const char szZones[] = "Zones";
+// COMMENT: {4/11/2005 1:30:56 PM}
+// COMMENT: {4/11/2005 1:30:56 PM}	hid_t bc_id;
+// COMMENT: {4/11/2005 1:30:56 PM}	hid_t zone_id;
+// COMMENT: {4/11/2005 1:30:56 PM}	herr_t status;
+// COMMENT: {4/11/2005 1:30:56 PM}
+// COMMENT: {4/11/2005 1:30:56 PM}	if (bStoring)
+// COMMENT: {4/11/2005 1:30:56 PM}	{
+// COMMENT: {4/11/2005 1:30:56 PM}		// add storing code here
+// COMMENT: {4/11/2005 1:30:56 PM}
+// COMMENT: {4/11/2005 1:30:56 PM}		// Create the szBC group
+// COMMENT: {4/11/2005 1:30:56 PM}		bc_id = ::H5Gcreate(loc_id, szBC, 0); // always created even if empty
+// COMMENT: {4/11/2005 1:30:56 PM}		ASSERT(bc_id > 0);
+// COMMENT: {4/11/2005 1:30:56 PM}		if (bc_id > 0)
+// COMMENT: {4/11/2005 1:30:56 PM}		{
+// COMMENT: {4/11/2005 1:30:56 PM}// COMMENT: {4/11/2005 1:13:28 PM}			CTreeCtrlNode nodeBC = this->GetPropertyTreeControlBar()->GetBCNode(nStressPeriod);
+// COMMENT: {4/11/2005 1:30:56 PM}			CTreeCtrlNode nodeBC = this->GetPropertyTreeControlBar()->GetBCNode(nStressPeriod);
+// COMMENT: {4/11/2005 1:30:56 PM}			int nCount = nodeBC.GetChildCount();
+// COMMENT: {4/11/2005 1:30:56 PM}			std::list<LPCTSTR> listNames;
+// COMMENT: {4/11/2005 1:30:56 PM}			std::list<CBCZoneActor*> listZones;
+// COMMENT: {4/11/2005 1:30:56 PM}			for (int i = 0; i < nCount; ++i)
+// COMMENT: {4/11/2005 1:30:56 PM}			{
+// COMMENT: {4/11/2005 1:30:56 PM}				if (CBCZoneActor *pZone = CBCZoneActor::SafeDownCast((vtkObject*)nodeBC.GetChildAt(i).GetData()))
+// COMMENT: {4/11/2005 1:30:56 PM}				{
+// COMMENT: {4/11/2005 1:30:56 PM}					listZones.push_back(pZone);
+// COMMENT: {4/11/2005 1:30:56 PM}					ASSERT(pZone->GetName());
+// COMMENT: {4/11/2005 1:30:56 PM}					listNames.push_back(pZone->GetName());
+// COMMENT: {4/11/2005 1:30:56 PM}				}
+// COMMENT: {4/11/2005 1:30:56 PM}				else ASSERT(FALSE);
+// COMMENT: {4/11/2005 1:30:56 PM}			}
+// COMMENT: {4/11/2005 1:30:56 PM}			if (listNames.size() > 0)
+// COMMENT: {4/11/2005 1:30:56 PM}			{
+// COMMENT: {4/11/2005 1:30:56 PM}				CGlobal::WriteList(bc_id, szZones, listNames);
+// COMMENT: {4/11/2005 1:30:56 PM}				std::list<CBCZoneActor*>::iterator iter = listZones.begin();
+// COMMENT: {4/11/2005 1:30:56 PM}				for (; iter != listZones.end(); ++iter)
+// COMMENT: {4/11/2005 1:30:56 PM}				{
+// COMMENT: {4/11/2005 1:30:56 PM}					// create zone group
+// COMMENT: {4/11/2005 1:30:56 PM}					zone_id = ::H5Gcreate(bc_id, (*iter)->GetName(), 0);
+// COMMENT: {4/11/2005 1:30:56 PM}					ASSERT(zone_id > 0);
+// COMMENT: {4/11/2005 1:30:56 PM}					if (zone_id > 0)
+// COMMENT: {4/11/2005 1:30:56 PM}					{
+// COMMENT: {4/11/2005 1:30:56 PM}						// serialize bc
+// COMMENT: {4/11/2005 1:30:56 PM}						if (nStressPeriod == 1)
+// COMMENT: {4/11/2005 1:30:56 PM}						{
+// COMMENT: {4/11/2005 1:30:56 PM}							(*iter)->Serialize(bStoring, zone_id, this->GetUnits());
+// COMMENT: {4/11/2005 1:30:56 PM}						}
+// COMMENT: {4/11/2005 1:30:56 PM}						else
+// COMMENT: {4/11/2005 1:30:56 PM}						{
+// COMMENT: {4/11/2005 1:30:56 PM}							(*iter)->SerializeStressPeriod(nStressPeriod, bStoring, zone_id);
+// COMMENT: {4/11/2005 1:30:56 PM}						}
+// COMMENT: {4/11/2005 1:30:56 PM}
+// COMMENT: {4/11/2005 1:30:56 PM}						// close the szZones group
+// COMMENT: {4/11/2005 1:30:56 PM}						status = ::H5Gclose(zone_id);
+// COMMENT: {4/11/2005 1:30:56 PM}						ASSERT(status >= 0);
+// COMMENT: {4/11/2005 1:30:56 PM}					}
+// COMMENT: {4/11/2005 1:30:56 PM}				}
+// COMMENT: {4/11/2005 1:30:56 PM}			}
+// COMMENT: {4/11/2005 1:30:56 PM}			// close the szMedia group
+// COMMENT: {4/11/2005 1:30:56 PM}			status = ::H5Gclose(bc_id);
+// COMMENT: {4/11/2005 1:30:56 PM}			ASSERT(status >= 0);
+// COMMENT: {4/11/2005 1:30:56 PM}		}
+// COMMENT: {4/11/2005 1:30:56 PM}	}
+// COMMENT: {4/11/2005 1:30:56 PM}	else
+// COMMENT: {4/11/2005 1:30:56 PM}	{
+// COMMENT: {4/11/2005 1:30:56 PM}		// add loading code here
+// COMMENT: {4/11/2005 1:30:56 PM}
+// COMMENT: {4/11/2005 1:30:56 PM}		// Open the szBC group
+// COMMENT: {4/11/2005 1:30:56 PM}		bc_id = ::H5Gopen(loc_id, szBC);
+// COMMENT: {4/11/2005 1:30:56 PM}		ASSERT(bc_id > 0);
+// COMMENT: {4/11/2005 1:30:56 PM}		if (bc_id > 0)
+// COMMENT: {4/11/2005 1:30:56 PM}		{
+// COMMENT: {4/11/2005 1:30:56 PM}			std::list<std::string> listNames;
+// COMMENT: {4/11/2005 1:30:56 PM}			CGlobal::ReadList(bc_id, szZones, listNames);
+// COMMENT: {4/11/2005 1:30:56 PM}			std::list<std::string>::iterator iter = listNames.begin();
+// COMMENT: {4/11/2005 1:30:56 PM}			for (; iter != listNames.end(); ++iter)
+// COMMENT: {4/11/2005 1:30:56 PM}			{
+// COMMENT: {4/11/2005 1:30:56 PM}				// open zone group
+// COMMENT: {4/11/2005 1:30:56 PM}				zone_id = ::H5Gopen(bc_id, (*iter).c_str());
+// COMMENT: {4/11/2005 1:30:56 PM}				ASSERT(zone_id > 0);
+// COMMENT: {4/11/2005 1:30:56 PM}				if (zone_id > 0)
+// COMMENT: {4/11/2005 1:30:56 PM}				{
+// COMMENT: {4/11/2005 1:30:56 PM}// COMMENT: {4/11/2005 1:13:50 PM}					if (nStressPeriod == 1)
+// COMMENT: {4/11/2005 1:30:56 PM}// COMMENT: {4/11/2005 1:13:50 PM}					{
+// COMMENT: {4/11/2005 1:30:56 PM}						CBCZoneActor* pZone = CBCZoneActor::New();
+// COMMENT: {4/11/2005 1:30:56 PM}
+// COMMENT: {4/11/2005 1:30:56 PM}						// load bc
+// COMMENT: {4/11/2005 1:30:56 PM}						pZone->SetName((*iter).c_str());
+// COMMENT: {4/11/2005 1:30:56 PM}						pZone->Serialize(bStoring, zone_id, this->GetUnits());
+// COMMENT: {4/11/2005 1:30:56 PM}						this->Add(pZone);
+// COMMENT: {4/11/2005 1:30:56 PM}						pZone->Delete(); // ok ref counted
+// COMMENT: {4/11/2005 1:30:56 PM}// COMMENT: {4/11/2005 1:13:57 PM}					}
+// COMMENT: {4/11/2005 1:30:56 PM}// COMMENT: {4/11/2005 1:13:57 PM}					else
+// COMMENT: {4/11/2005 1:30:56 PM}// COMMENT: {4/11/2005 1:13:57 PM}					{
+// COMMENT: {4/11/2005 1:30:56 PM}// COMMENT: {4/11/2005 1:13:57 PM}						CTreeCtrlNode nodeBC = this->GetPropertyTreeControlBar()->GetBCNode(1);
+// COMMENT: {4/11/2005 1:30:56 PM}// COMMENT: {4/11/2005 1:13:57 PM}						int nCount = nodeBC.GetChildCount();
+// COMMENT: {4/11/2005 1:30:56 PM}// COMMENT: {4/11/2005 1:13:57 PM}						for (int i = 0; i < nCount; ++i)
+// COMMENT: {4/11/2005 1:30:56 PM}// COMMENT: {4/11/2005 1:13:57 PM}						{
+// COMMENT: {4/11/2005 1:30:56 PM}// COMMENT: {4/11/2005 1:13:57 PM}							if (CBCZoneActor *pZone = CBCZoneActor::SafeDownCast((vtkObject*)nodeBC.GetChildAt(i).GetData()))
+// COMMENT: {4/11/2005 1:30:56 PM}// COMMENT: {4/11/2005 1:13:57 PM}							{
+// COMMENT: {4/11/2005 1:30:56 PM}// COMMENT: {4/11/2005 1:13:57 PM}								if (::strcmp(pZone->GetName(), (*iter).c_str()) == 0)
+// COMMENT: {4/11/2005 1:30:56 PM}// COMMENT: {4/11/2005 1:13:57 PM}								{
+// COMMENT: {4/11/2005 1:30:56 PM}// COMMENT: {4/11/2005 1:13:57 PM}									// load bc for stress period
+// COMMENT: {4/11/2005 1:30:56 PM}// COMMENT: {4/11/2005 1:13:57 PM}									pZone->SerializeStressPeriod(nStressPeriod, bStoring, zone_id);
+// COMMENT: {4/11/2005 1:30:56 PM}// COMMENT: {4/11/2005 1:13:57 PM}									pZone->UpdateTree(this->GetPropertyTreeControlBar(), nStressPeriod);
+// COMMENT: {4/11/2005 1:30:56 PM}// COMMENT: {4/11/2005 1:13:57 PM}									break;
+// COMMENT: {4/11/2005 1:30:56 PM}// COMMENT: {4/11/2005 1:13:57 PM}								}
+// COMMENT: {4/11/2005 1:30:56 PM}// COMMENT: {4/11/2005 1:13:57 PM}							}
+// COMMENT: {4/11/2005 1:30:56 PM}// COMMENT: {4/11/2005 1:13:57 PM}						}
+// COMMENT: {4/11/2005 1:30:56 PM}// COMMENT: {4/11/2005 1:13:57 PM}					}
+// COMMENT: {4/11/2005 1:30:56 PM}
+// COMMENT: {4/11/2005 1:30:56 PM}					// close the szZones group
+// COMMENT: {4/11/2005 1:30:56 PM}					status = ::H5Gclose(zone_id);
+// COMMENT: {4/11/2005 1:30:56 PM}					ASSERT(status >= 0);
+// COMMENT: {4/11/2005 1:30:56 PM}				}
+// COMMENT: {4/11/2005 1:30:56 PM}			}
+// COMMENT: {4/11/2005 1:30:56 PM}
+// COMMENT: {4/11/2005 1:30:56 PM}			// close the szBC group
+// COMMENT: {4/11/2005 1:30:56 PM}			status = ::H5Gclose(bc_id);
+// COMMENT: {4/11/2005 1:30:56 PM}			ASSERT(status >= 0);
+// COMMENT: {4/11/2005 1:30:56 PM}		}
+// COMMENT: {4/11/2005 1:30:56 PM}	}
+// COMMENT: {4/11/2005 1:30:56 PM}}
+void CWPhastDoc::SerializeBC(bool bStoring, hid_t loc_id)
 {
 	static const char szBC[]    = "BC";
 	static const char szZones[] = "Zones";
@@ -641,7 +766,7 @@ void CWPhastDoc::SerializeBC(bool bStoring, hid_t loc_id, int nStressPeriod)
 		ASSERT(bc_id > 0);
 		if (bc_id > 0)
 		{
-			CTreeCtrlNode nodeBC = this->GetPropertyTreeControlBar()->GetBCNode(nStressPeriod);
+			CTreeCtrlNode nodeBC = this->GetPropertyTreeControlBar()->GetBCNode();
 			int nCount = nodeBC.GetChildCount();
 			std::list<LPCTSTR> listNames;
 			std::list<CBCZoneActor*> listZones;
@@ -666,13 +791,7 @@ void CWPhastDoc::SerializeBC(bool bStoring, hid_t loc_id, int nStressPeriod)
 					ASSERT(zone_id > 0);
 					if (zone_id > 0)
 					{
-						// serialize bc
-						if (nStressPeriod == 1) {
-							(*iter)->Serialize(bStoring, zone_id, this->GetUnits());
-						}
-						else {
-							(*iter)->SerializeStressPeriod(nStressPeriod, bStoring, zone_id);
-						}
+						(*iter)->Serialize(bStoring, zone_id, this->GetUnits());
 
 						// close the szZones group
 						status = ::H5Gclose(zone_id);
@@ -704,34 +823,13 @@ void CWPhastDoc::SerializeBC(bool bStoring, hid_t loc_id, int nStressPeriod)
 				ASSERT(zone_id > 0);
 				if (zone_id > 0)
 				{
-					if (nStressPeriod == 1)
-					{
-						CBCZoneActor* pZone = CBCZoneActor::New();
+					CBCZoneActor* pZone = CBCZoneActor::New();
 
-						// load bc
-						pZone->SetName((*iter).c_str());
-						pZone->Serialize(bStoring, zone_id, this->GetUnits());
-						this->Add(pZone);
-						pZone->Delete(); // ok ref counted
-					}
-					else
-					{
-						CTreeCtrlNode nodeBC = this->GetPropertyTreeControlBar()->GetBCNode(1);
-						int nCount = nodeBC.GetChildCount();
-						for (int i = 0; i < nCount; ++i)
-						{
-							if (CBCZoneActor *pZone = CBCZoneActor::SafeDownCast((vtkObject*)nodeBC.GetChildAt(i).GetData()))
-							{
-								if (::strcmp(pZone->GetName(), (*iter).c_str()) == 0)
-								{
-									// load bc for stress period
-									pZone->SerializeStressPeriod(nStressPeriod, bStoring, zone_id);
-									pZone->UpdateTree(this->GetPropertyTreeControlBar(), nStressPeriod);
-									break;
-								}
-							}
-						}
-					}
+					// load bc
+					pZone->SetName((*iter).c_str());
+					pZone->Serialize(bStoring, zone_id, this->GetUnits());
+					this->Add(pZone);
+					pZone->Delete(); // ok ref counted
 
 					// close the szZones group
 					status = ::H5Gclose(zone_id);
@@ -745,7 +843,6 @@ void CWPhastDoc::SerializeBC(bool bStoring, hid_t loc_id, int nStressPeriod)
 		}
 	}
 }
-
 void CWPhastDoc::SerializeWells(bool bStoring, hid_t loc_id)
 {
 	static const char szWells[] = "Wells";
@@ -943,123 +1040,124 @@ void CWPhastDoc::SerializeIC(bool bStoring, hid_t loc_id)
 
 void CWPhastDoc::SerializeStressPeriods(bool bStoring, hid_t loc_id)
 {
-	static const char szStressPeriods[]      = "StressPeriods";
-	static const char szStressPeriodFormat[] = "Stress Period %d";
-
-	hid_t sp_id;
-	hid_t period_id;
-	herr_t status;
-	int nStressPeriodCount;
-	CString str;
-
-	if (bStoring)
-	{
-		// add storing code here
-
-		// Create the szStressPeriods group
-		sp_id = ::H5Gcreate(loc_id, szStressPeriods, 0); // always created even if empty
-		ASSERT(sp_id > 0);
-		if (sp_id > 0)
-		{
-			nStressPeriodCount = this->GetPropertyTreeControlBar()->GetStressPeriodCount();
-
-			std::vector<std::string> vec_strings;
-			vec_strings.reserve(nStressPeriodCount);
-			std::list<LPCTSTR> listNames;
-			for (int i = 2; i <= nStressPeriodCount; ++i)
-			{
-				str.Format(szStressPeriodFormat, i);
-				vec_strings.push_back((LPCTSTR)str);
-				listNames.push_back(vec_strings.back().c_str());
-			}
-			if (listNames.size() > 0)
-			{
-				// store list of stress periods
-				CGlobal::WriteList(sp_id, szStressPeriods, listNames);
-
-				// store each stress period
-				std::list<LPCTSTR>::iterator iter = listNames.begin();
-				for (int i = 2; iter != listNames.end(); ++iter, ++i)
-				{
-					// create stress period group
-					period_id = ::H5Gcreate(sp_id, (*iter), 0);
-					ASSERT(period_id > 0);
-					if (period_id > 0)
-					{
-						// store BCs
-						this->SerializeBC(bStoring, period_id, i);
-
-						// store time_control 
-						this->SerializeTimeControl(bStoring, period_id, i);
-
-						// close the stress period group group
-						status = ::H5Gclose(period_id);
-						ASSERT(status >= 0);
-					}
-				}
-			}
-			// close the szStressPeriods group
-			status = ::H5Gclose(sp_id);
-			ASSERT(status >= 0);
-		}
-	}
-	else
-	{
-		// add loading code here
-
-		// Open the szStressPeriods group
-		sp_id = ::H5Gopen(loc_id, szStressPeriods);
-		ASSERT(sp_id > 0);
-		if (sp_id > 0)
-		{
-			std::list<std::string> listNames;
-			CGlobal::ReadList(sp_id, szStressPeriods, listNames);
-			std::list<std::string>::iterator iter = listNames.begin();
-			for (int i = 2; iter != listNames.end(); ++iter, ++i)
-			{
-				// open zone group
-				period_id = ::H5Gopen(sp_id, (*iter).c_str());
-				ASSERT(period_id > 0);
-				if (period_id > 0)
-				{
-					// load time_control 
-					this->SerializeTimeControl(bStoring, period_id, i);
-
-					// load BCs
-					this->SerializeBC(bStoring, period_id, i);
-
-					// close the stress period group group
-					status = ::H5Gclose(period_id);
-					ASSERT(status >= 0);
-				}
-			}
-			// close the szStressPeriods group
-			status = ::H5Gclose(sp_id);
-			ASSERT(status >= 0);
-		}
-	}
+	ASSERT(FALSE);
+// COMMENT: {4/8/2005 6:56:13 PM}	static const char szStressPeriods[]      = "StressPeriods";
+// COMMENT: {4/8/2005 6:56:13 PM}	static const char szStressPeriodFormat[] = "Stress Period %d";
+// COMMENT: {4/8/2005 6:56:13 PM}
+// COMMENT: {4/8/2005 6:56:13 PM}	hid_t sp_id;
+// COMMENT: {4/8/2005 6:56:13 PM}	hid_t period_id;
+// COMMENT: {4/8/2005 6:56:13 PM}	herr_t status;
+// COMMENT: {4/8/2005 6:56:13 PM}	int nStressPeriodCount;
+// COMMENT: {4/8/2005 6:56:13 PM}	CString str;
+// COMMENT: {4/8/2005 6:56:13 PM}
+// COMMENT: {4/8/2005 6:56:13 PM}	if (bStoring)
+// COMMENT: {4/8/2005 6:56:13 PM}	{
+// COMMENT: {4/8/2005 6:56:13 PM}		// add storing code here
+// COMMENT: {4/8/2005 6:56:13 PM}
+// COMMENT: {4/8/2005 6:56:13 PM}		// Create the szStressPeriods group
+// COMMENT: {4/8/2005 6:56:13 PM}		sp_id = ::H5Gcreate(loc_id, szStressPeriods, 0); // always created even if empty
+// COMMENT: {4/8/2005 6:56:13 PM}		ASSERT(sp_id > 0);
+// COMMENT: {4/8/2005 6:56:13 PM}		if (sp_id > 0)
+// COMMENT: {4/8/2005 6:56:13 PM}		{
+// COMMENT: {4/8/2005 6:56:13 PM}			nStressPeriodCount = this->GetPropertyTreeControlBar()->GetStressPeriodCount();
+// COMMENT: {4/8/2005 6:56:13 PM}
+// COMMENT: {4/8/2005 6:56:13 PM}			std::vector<std::string> vec_strings;
+// COMMENT: {4/8/2005 6:56:13 PM}			vec_strings.reserve(nStressPeriodCount);
+// COMMENT: {4/8/2005 6:56:13 PM}			std::list<LPCTSTR> listNames;
+// COMMENT: {4/8/2005 6:56:13 PM}			for (int i = 2; i <= nStressPeriodCount; ++i)
+// COMMENT: {4/8/2005 6:56:13 PM}			{
+// COMMENT: {4/8/2005 6:56:13 PM}				str.Format(szStressPeriodFormat, i);
+// COMMENT: {4/8/2005 6:56:13 PM}				vec_strings.push_back((LPCTSTR)str);
+// COMMENT: {4/8/2005 6:56:13 PM}				listNames.push_back(vec_strings.back().c_str());
+// COMMENT: {4/8/2005 6:56:13 PM}			}
+// COMMENT: {4/8/2005 6:56:13 PM}			if (listNames.size() > 0)
+// COMMENT: {4/8/2005 6:56:13 PM}			{
+// COMMENT: {4/8/2005 6:56:13 PM}				// store list of stress periods
+// COMMENT: {4/8/2005 6:56:13 PM}				CGlobal::WriteList(sp_id, szStressPeriods, listNames);
+// COMMENT: {4/8/2005 6:56:13 PM}
+// COMMENT: {4/8/2005 6:56:13 PM}				// store each stress period
+// COMMENT: {4/8/2005 6:56:13 PM}				std::list<LPCTSTR>::iterator iter = listNames.begin();
+// COMMENT: {4/8/2005 6:56:13 PM}				for (int i = 2; iter != listNames.end(); ++iter, ++i)
+// COMMENT: {4/8/2005 6:56:13 PM}				{
+// COMMENT: {4/8/2005 6:56:13 PM}					// create stress period group
+// COMMENT: {4/8/2005 6:56:13 PM}					period_id = ::H5Gcreate(sp_id, (*iter), 0);
+// COMMENT: {4/8/2005 6:56:13 PM}					ASSERT(period_id > 0);
+// COMMENT: {4/8/2005 6:56:13 PM}					if (period_id > 0)
+// COMMENT: {4/8/2005 6:56:13 PM}					{
+// COMMENT: {4/8/2005 6:56:13 PM}						// store BCs
+// COMMENT: {4/8/2005 6:56:13 PM}						this->SerializeBC(bStoring, period_id, i);
+// COMMENT: {4/8/2005 6:56:13 PM}
+// COMMENT: {4/8/2005 6:56:13 PM}						// store time_control 
+// COMMENT: {4/8/2005 6:56:13 PM}						this->SerializeTimeControl(bStoring, period_id, i);
+// COMMENT: {4/8/2005 6:56:13 PM}
+// COMMENT: {4/8/2005 6:56:13 PM}						// close the stress period group group
+// COMMENT: {4/8/2005 6:56:13 PM}						status = ::H5Gclose(period_id);
+// COMMENT: {4/8/2005 6:56:13 PM}						ASSERT(status >= 0);
+// COMMENT: {4/8/2005 6:56:13 PM}					}
+// COMMENT: {4/8/2005 6:56:13 PM}				}
+// COMMENT: {4/8/2005 6:56:13 PM}			}
+// COMMENT: {4/8/2005 6:56:13 PM}			// close the szStressPeriods group
+// COMMENT: {4/8/2005 6:56:13 PM}			status = ::H5Gclose(sp_id);
+// COMMENT: {4/8/2005 6:56:13 PM}			ASSERT(status >= 0);
+// COMMENT: {4/8/2005 6:56:13 PM}		}
+// COMMENT: {4/8/2005 6:56:13 PM}	}
+// COMMENT: {4/8/2005 6:56:13 PM}	else
+// COMMENT: {4/8/2005 6:56:13 PM}	{
+// COMMENT: {4/8/2005 6:56:13 PM}		// add loading code here
+// COMMENT: {4/8/2005 6:56:13 PM}
+// COMMENT: {4/8/2005 6:56:13 PM}		// Open the szStressPeriods group
+// COMMENT: {4/8/2005 6:56:13 PM}		sp_id = ::H5Gopen(loc_id, szStressPeriods);
+// COMMENT: {4/8/2005 6:56:13 PM}		ASSERT(sp_id > 0);
+// COMMENT: {4/8/2005 6:56:13 PM}		if (sp_id > 0)
+// COMMENT: {4/8/2005 6:56:13 PM}		{
+// COMMENT: {4/8/2005 6:56:13 PM}			std::list<std::string> listNames;
+// COMMENT: {4/8/2005 6:56:13 PM}			CGlobal::ReadList(sp_id, szStressPeriods, listNames);
+// COMMENT: {4/8/2005 6:56:13 PM}			std::list<std::string>::iterator iter = listNames.begin();
+// COMMENT: {4/8/2005 6:56:13 PM}			for (int i = 2; iter != listNames.end(); ++iter, ++i)
+// COMMENT: {4/8/2005 6:56:13 PM}			{
+// COMMENT: {4/8/2005 6:56:13 PM}				// open zone group
+// COMMENT: {4/8/2005 6:56:13 PM}				period_id = ::H5Gopen(sp_id, (*iter).c_str());
+// COMMENT: {4/8/2005 6:56:13 PM}				ASSERT(period_id > 0);
+// COMMENT: {4/8/2005 6:56:13 PM}				if (period_id > 0)
+// COMMENT: {4/8/2005 6:56:13 PM}				{
+// COMMENT: {4/8/2005 6:56:13 PM}					// load time_control 
+// COMMENT: {4/8/2005 6:56:13 PM}					this->SerializeTimeControl(bStoring, period_id, i);
+// COMMENT: {4/8/2005 6:56:13 PM}
+// COMMENT: {4/8/2005 6:56:13 PM}					// load BCs
+// COMMENT: {4/8/2005 6:56:13 PM}					this->SerializeBC(bStoring, period_id, i);
+// COMMENT: {4/8/2005 6:56:13 PM}
+// COMMENT: {4/8/2005 6:56:13 PM}					// close the stress period group group
+// COMMENT: {4/8/2005 6:56:13 PM}					status = ::H5Gclose(period_id);
+// COMMENT: {4/8/2005 6:56:13 PM}					ASSERT(status >= 0);
+// COMMENT: {4/8/2005 6:56:13 PM}				}
+// COMMENT: {4/8/2005 6:56:13 PM}			}
+// COMMENT: {4/8/2005 6:56:13 PM}			// close the szStressPeriods group
+// COMMENT: {4/8/2005 6:56:13 PM}			status = ::H5Gclose(sp_id);
+// COMMENT: {4/8/2005 6:56:13 PM}			ASSERT(status >= 0);
+// COMMENT: {4/8/2005 6:56:13 PM}		}
+// COMMENT: {4/8/2005 6:56:13 PM}	}
 }
 
-void CWPhastDoc::SerializeTimeControl(bool bStoring, hid_t loc_id, int nStressPeriod)
-{
-	ASSERT(nStressPeriod > 1); // use this->m_pTimeControl->Serialize instead
-	if (bStoring)
-	{
-		// store time_control 
-		CTreeCtrlNode nodeTC = this->GetPropertyTreeControlBar()->GetTimeControlNode(nStressPeriod);
-		ASSERT(nodeTC.GetData());
-		if (CTimeControl* pTimeControl = (CTimeControl*)(nodeTC.GetData())) {
-			pTimeControl->Serialize(bStoring, loc_id);
-		}
-	}
-	else
-	{
-		// load time_control 
-		CTimeControl tc;
-		tc.Serialize(bStoring, loc_id);
-		this->AddStressPeriod(tc);
-	}
-}
+// COMMENT: {4/11/2005 1:34:09 PM}void CWPhastDoc::SerializeTimeControl(bool bStoring, hid_t loc_id, int nStressPeriod)
+// COMMENT: {4/11/2005 1:34:09 PM}{
+// COMMENT: {4/11/2005 1:34:09 PM}	ASSERT(nStressPeriod > 1); // use this->m_pTimeControl->Serialize instead
+// COMMENT: {4/11/2005 1:34:09 PM}	if (bStoring)
+// COMMENT: {4/11/2005 1:34:09 PM}	{
+// COMMENT: {4/11/2005 1:34:09 PM}		// store time_control 
+// COMMENT: {4/11/2005 1:34:09 PM}		CTreeCtrlNode nodeTC = this->GetPropertyTreeControlBar()->GetTimeControlNode(nStressPeriod);
+// COMMENT: {4/11/2005 1:34:09 PM}		ASSERT(nodeTC.GetData());
+// COMMENT: {4/11/2005 1:34:09 PM}		if (CTimeControl* pTimeControl = (CTimeControl*)(nodeTC.GetData())) {
+// COMMENT: {4/11/2005 1:34:09 PM}			pTimeControl->Serialize(bStoring, loc_id);
+// COMMENT: {4/11/2005 1:34:09 PM}		}
+// COMMENT: {4/11/2005 1:34:09 PM}	}
+// COMMENT: {4/11/2005 1:34:09 PM}	else
+// COMMENT: {4/11/2005 1:34:09 PM}	{
+// COMMENT: {4/11/2005 1:34:09 PM}		// load time_control 
+// COMMENT: {4/11/2005 1:34:09 PM}		CTimeControl tc;
+// COMMENT: {4/11/2005 1:34:09 PM}		tc.Serialize(bStoring, loc_id);
+// COMMENT: {4/11/2005 1:34:09 PM}// COMMENT: {4/8/2005 6:52:58 PM}		this->AddStressPeriod(tc);
+// COMMENT: {4/11/2005 1:34:09 PM}	}
+// COMMENT: {4/11/2005 1:34:09 PM}}
 
 // CWPhastDoc diagnostics
 
@@ -2363,7 +2461,8 @@ BOOL CWPhastDoc::DoExport(LPCTSTR lpszPathName)
 {
 	std::ofstream ofs;
 	ofs.open(lpszPathName);
-	if (!ofs.is_open()) {
+	if (!ofs.is_open())
+	{
 		CString str("Unable to open \"");
 		str += lpszPathName;
 		str += "\" for writing.";
@@ -2372,10 +2471,12 @@ BOOL CWPhastDoc::DoExport(LPCTSTR lpszPathName)
 	}
 
 	CString path = this->GetPathName();
-	if (path.IsEmpty()) {
+	if (path.IsEmpty())
+	{
 		ofs << "# Exported from WPhast(Unsaved File)\n";
 	}
-	else {
+	else
+	{
 		ofs << "# Exported from WPhast(" << (LPCTSTR)path <<  ")\n";
 	}
 
@@ -2386,7 +2487,7 @@ BOOL CWPhastDoc::WriteTransDat(std::ostream& os)
 {
 	int nCount;
 
-#ifndef _DEBUG
+// COMMENT: {4/11/2005 1:53:16 PM}#ifndef _DEBUG
 	// FLOW_ONLY
 	os << this->m_pModel->m_flowOnly;
 
@@ -2450,7 +2551,7 @@ BOOL CWPhastDoc::WriteTransDat(std::ostream& os)
 			}
 		}
 	}
-#endif
+// COMMENT: {4/11/2005 1:53:20 PM}#endif
 
 	std::multimap<Ctime, ISerial*> series;
 
@@ -2474,84 +2575,84 @@ BOOL CWPhastDoc::WriteTransDat(std::ostream& os)
 		}
 	}
 
-	// Additional stress periods
-	int nStressPeriods = this->GetPropertyTreeControlBar()->GetStressPeriodCount();
-	int nSimulation = 2;
-	{
-		int i = 1;
-		std::multimap<Ctime, ISerial*>::iterator seriesIter = series.begin();
-		CTimeControl* pTimeControl = 0;
-		while (i <= nStressPeriods)
-		{
-			// TIME_CONTROL 
-			CTreeCtrlNode nodeTC = this->GetPropertyTreeControlBar()->GetTimeControlNode(i);
-			ASSERT(nodeTC.GetData());
-			pTimeControl = (CTimeControl*)(nodeTC.GetData());
-			ASSERT(pTimeControl);
-
-			if (((*seriesIter).first < pTimeControl->GetTimeEnd()))
-			{
-				Ctime timeToOutput((*seriesIter).first);
-				for (; seriesIter != series.end(); ++seriesIter)
-				{
-					if (timeToOutput < (*seriesIter).first)
-					{
-						if ((*seriesIter).first < pTimeControl->GetTimeEnd())
-						{
-							CTimeControl tc(pTimeControl->GetTimeStep(), (*seriesIter).first);
-							os << tc;
-							os << "END\n";
-							os.flush();
-						}
-						else
-						{
-							os << (*pTimeControl);
-							os << "END\n";
-							os.flush();
-							++i;
-						}
-						break;
-					}
-#ifdef _DEBUG
-					os << "#### for " << (*seriesIter).first.value << " " << (*seriesIter).first.input << "\n";
-#endif
-					(*seriesIter).second->Output(os, (*seriesIter).first);
-					os.flush();
-				}
-			}
-			else
-			{
-				// TIME_CONTROL 
-				if (pTimeControl) {
-					os << (*pTimeControl);
-				}
-
-				// END
-				os << "END\n";
-				++i;
-			}
-		}
-
-		// Warn about any remaining time series beyond
-		// the final time control
-		//
-		if (seriesIter != series.end())
-		{
-			// create set of unique ISerial's in order to 
-			// only display warning once from each ISerial
-			std::set<ISerial*> setSerial;
-			for (; seriesIter != series.end(); ++seriesIter)
-			{
-				setSerial.insert((*seriesIter).second);
-			}
-			std::set<ISerial*>::iterator setIter = setSerial.begin();
-			for (; setIter != setSerial.end(); ++setIter)
-			{
-				CString warning = (*setIter)->GetWarning(pTimeControl);
-				::AfxMessageBox(warning, MB_OK);
-			}
-		}
-	}
+// COMMENT: {4/8/2005 6:57:04 PM}	// Additional stress periods
+// COMMENT: {4/8/2005 6:57:04 PM}	int nStressPeriods = this->GetPropertyTreeControlBar()->GetStressPeriodCount();
+// COMMENT: {4/8/2005 6:57:04 PM}	int nSimulation = 2;
+// COMMENT: {4/8/2005 6:57:04 PM}	{
+// COMMENT: {4/8/2005 6:57:04 PM}		int i = 1;
+// COMMENT: {4/8/2005 6:57:04 PM}		std::multimap<Ctime, ISerial*>::iterator seriesIter = series.begin();
+// COMMENT: {4/8/2005 6:57:04 PM}		CTimeControl* pTimeControl = 0;
+// COMMENT: {4/8/2005 6:57:04 PM}		while (i <= nStressPeriods)
+// COMMENT: {4/8/2005 6:57:04 PM}		{
+// COMMENT: {4/8/2005 6:57:04 PM}			// TIME_CONTROL 
+// COMMENT: {4/8/2005 6:57:04 PM}			CTreeCtrlNode nodeTC = this->GetPropertyTreeControlBar()->GetTimeControlNode(i);
+// COMMENT: {4/8/2005 6:57:04 PM}			ASSERT(nodeTC.GetData());
+// COMMENT: {4/8/2005 6:57:04 PM}			pTimeControl = (CTimeControl*)(nodeTC.GetData());
+// COMMENT: {4/8/2005 6:57:04 PM}			ASSERT(pTimeControl);
+// COMMENT: {4/8/2005 6:57:04 PM}
+// COMMENT: {4/8/2005 6:57:04 PM}			if (((*seriesIter).first < pTimeControl->GetTimeEnd()))
+// COMMENT: {4/8/2005 6:57:04 PM}			{
+// COMMENT: {4/8/2005 6:57:04 PM}				Ctime timeToOutput((*seriesIter).first);
+// COMMENT: {4/8/2005 6:57:04 PM}				for (; seriesIter != series.end(); ++seriesIter)
+// COMMENT: {4/8/2005 6:57:04 PM}				{
+// COMMENT: {4/8/2005 6:57:04 PM}					if (timeToOutput < (*seriesIter).first)
+// COMMENT: {4/8/2005 6:57:04 PM}					{
+// COMMENT: {4/8/2005 6:57:04 PM}						if ((*seriesIter).first < pTimeControl->GetTimeEnd())
+// COMMENT: {4/8/2005 6:57:04 PM}						{
+// COMMENT: {4/8/2005 6:57:04 PM}							CTimeControl tc(pTimeControl->GetTimeStep(), (*seriesIter).first);
+// COMMENT: {4/8/2005 6:57:04 PM}							os << tc;
+// COMMENT: {4/8/2005 6:57:04 PM}							os << "END\n";
+// COMMENT: {4/8/2005 6:57:04 PM}							os.flush();
+// COMMENT: {4/8/2005 6:57:04 PM}						}
+// COMMENT: {4/8/2005 6:57:04 PM}						else
+// COMMENT: {4/8/2005 6:57:04 PM}						{
+// COMMENT: {4/8/2005 6:57:04 PM}							os << (*pTimeControl);
+// COMMENT: {4/8/2005 6:57:04 PM}							os << "END\n";
+// COMMENT: {4/8/2005 6:57:04 PM}							os.flush();
+// COMMENT: {4/8/2005 6:57:04 PM}							++i;
+// COMMENT: {4/8/2005 6:57:04 PM}						}
+// COMMENT: {4/8/2005 6:57:04 PM}						break;
+// COMMENT: {4/8/2005 6:57:04 PM}					}
+// COMMENT: {4/8/2005 6:57:04 PM}#ifdef _DEBUG
+// COMMENT: {4/8/2005 6:57:04 PM}					os << "#### for " << (*seriesIter).first.value << " " << (*seriesIter).first.input << "\n";
+// COMMENT: {4/8/2005 6:57:04 PM}#endif
+// COMMENT: {4/8/2005 6:57:04 PM}					(*seriesIter).second->Output(os, (*seriesIter).first);
+// COMMENT: {4/8/2005 6:57:04 PM}					os.flush();
+// COMMENT: {4/8/2005 6:57:04 PM}				}
+// COMMENT: {4/8/2005 6:57:04 PM}			}
+// COMMENT: {4/8/2005 6:57:04 PM}			else
+// COMMENT: {4/8/2005 6:57:04 PM}			{
+// COMMENT: {4/8/2005 6:57:04 PM}				// TIME_CONTROL 
+// COMMENT: {4/8/2005 6:57:04 PM}				if (pTimeControl) {
+// COMMENT: {4/8/2005 6:57:04 PM}					os << (*pTimeControl);
+// COMMENT: {4/8/2005 6:57:04 PM}				}
+// COMMENT: {4/8/2005 6:57:04 PM}
+// COMMENT: {4/8/2005 6:57:04 PM}				// END
+// COMMENT: {4/8/2005 6:57:04 PM}				os << "END\n";
+// COMMENT: {4/8/2005 6:57:04 PM}				++i;
+// COMMENT: {4/8/2005 6:57:04 PM}			}
+// COMMENT: {4/8/2005 6:57:04 PM}		}
+// COMMENT: {4/8/2005 6:57:04 PM}
+// COMMENT: {4/8/2005 6:57:04 PM}		// Warn about any remaining time series beyond
+// COMMENT: {4/8/2005 6:57:04 PM}		// the final time control
+// COMMENT: {4/8/2005 6:57:04 PM}		//
+// COMMENT: {4/8/2005 6:57:04 PM}		if (seriesIter != series.end())
+// COMMENT: {4/8/2005 6:57:04 PM}		{
+// COMMENT: {4/8/2005 6:57:04 PM}			// create set of unique ISerial's in order to 
+// COMMENT: {4/8/2005 6:57:04 PM}			// only display warning once from each ISerial
+// COMMENT: {4/8/2005 6:57:04 PM}			std::set<ISerial*> setSerial;
+// COMMENT: {4/8/2005 6:57:04 PM}			for (; seriesIter != series.end(); ++seriesIter)
+// COMMENT: {4/8/2005 6:57:04 PM}			{
+// COMMENT: {4/8/2005 6:57:04 PM}				setSerial.insert((*seriesIter).second);
+// COMMENT: {4/8/2005 6:57:04 PM}			}
+// COMMENT: {4/8/2005 6:57:04 PM}			std::set<ISerial*>::iterator setIter = setSerial.begin();
+// COMMENT: {4/8/2005 6:57:04 PM}			for (; setIter != setSerial.end(); ++setIter)
+// COMMENT: {4/8/2005 6:57:04 PM}			{
+// COMMENT: {4/8/2005 6:57:04 PM}				CString warning = (*setIter)->GetWarning(pTimeControl);
+// COMMENT: {4/8/2005 6:57:04 PM}				::AfxMessageBox(warning, MB_OK);
+// COMMENT: {4/8/2005 6:57:04 PM}			}
+// COMMENT: {4/8/2005 6:57:04 PM}		}
+// COMMENT: {4/8/2005 6:57:04 PM}	}
 
 	return TRUE;
 }
@@ -2939,115 +3040,145 @@ void CWPhastDoc::OnFileRun()
 	}
 }
 
-CTreeCtrlNode CWPhastDoc::AddStressPeriod(const CTimeControl& timeControl)
-{
-    CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar();
-	ASSERT(pTree);
-	CTreeCtrlNode node = pTree->AddStressPeriod(timeControl);
-	return node;
-}
+// COMMENT: {4/8/2005 6:51:09 PM}CTreeCtrlNode CWPhastDoc::AddStressPeriod(const CTimeControl& timeControl)
+// COMMENT: {4/8/2005 6:51:09 PM}{
+// COMMENT: {4/8/2005 6:51:09 PM}    CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar();
+// COMMENT: {4/8/2005 6:51:09 PM}	ASSERT(pTree);
+// COMMENT: {4/8/2005 6:51:09 PM}	CTreeCtrlNode node = pTree->AddStressPeriod(timeControl);
+// COMMENT: {4/8/2005 6:51:09 PM}	return node;
+// COMMENT: {4/8/2005 6:51:09 PM}}
 
-void CWPhastDoc::RemoveStressPeriod(int nStressPeriod)
-{
-    CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar();
-	ASSERT(pTree);
-	pTree->RemoveStressPeriod(nStressPeriod);
-}
+// COMMENT: {4/8/2005 6:51:14 PM}void CWPhastDoc::RemoveStressPeriod(int nStressPeriod)
+// COMMENT: {4/8/2005 6:51:14 PM}{
+// COMMENT: {4/8/2005 6:51:14 PM}    CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar();
+// COMMENT: {4/8/2005 6:51:14 PM}	ASSERT(pTree);
+// COMMENT: {4/8/2005 6:51:14 PM}	pTree->RemoveStressPeriod(nStressPeriod);
+// COMMENT: {4/8/2005 6:51:14 PM}}
 
-int CWPhastDoc::GetStressPeriodCount(void)const
-{
-    CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar();
-	ASSERT(pTree);
-	return pTree->GetStressPeriodCount();
-}
+// COMMENT: {4/8/2005 6:51:20 PM}int CWPhastDoc::GetStressPeriodCount(void)const
+// COMMENT: {4/8/2005 6:51:20 PM}{
+// COMMENT: {4/8/2005 6:51:20 PM}    CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar();
+// COMMENT: {4/8/2005 6:51:20 PM}	ASSERT(pTree);
+// COMMENT: {4/8/2005 6:51:20 PM}	return pTree->GetStressPeriodCount();
+// COMMENT: {4/8/2005 6:51:20 PM}}
 
-void CWPhastDoc::SetTimeControl(const CTimeControl& timeControl, int nStressPeriod)
+// COMMENT: {4/11/2005 1:22:32 PM}void CWPhastDoc::SetTimeControl(const CTimeControl& timeControl, int nStressPeriod)
+// COMMENT: {4/11/2005 1:22:32 PM}{
+// COMMENT: {4/11/2005 1:22:32 PM}	if (nStressPeriod == 1) {
+// COMMENT: {4/11/2005 1:22:32 PM}		(*this->m_pTimeControl) = timeControl;
+// COMMENT: {4/11/2005 1:22:32 PM}
+// COMMENT: {4/11/2005 1:22:32 PM}		// update properties bar
+// COMMENT: {4/11/2005 1:22:32 PM}		//
+// COMMENT: {4/11/2005 1:22:32 PM}		if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar()) {
+// COMMENT: {4/11/2005 1:22:32 PM}			pTree->SetTimeControl(this->m_pTimeControl);
+// COMMENT: {4/11/2005 1:22:32 PM}		}
+// COMMENT: {4/11/2005 1:22:32 PM}	}
+// COMMENT: {4/11/2005 1:22:32 PM}	else {
+// COMMENT: {4/11/2005 1:22:32 PM}		CTimeControl copy(timeControl);
+// COMMENT: {4/11/2005 1:22:32 PM}		if (copy.GetTimeEndInput() == 0) {
+// COMMENT: {4/11/2005 1:22:32 PM}			copy.SetTimeEndInput(this->GetUnits().time.c_str());
+// COMMENT: {4/11/2005 1:22:32 PM}		}
+// COMMENT: {4/11/2005 1:22:32 PM}		if (copy.GetTimeStepInput() == 0) {
+// COMMENT: {4/11/2005 1:22:32 PM}			copy.SetTimeStepInput(this->GetUnits().time.c_str());
+// COMMENT: {4/11/2005 1:22:32 PM}		}
+// COMMENT: {4/11/2005 1:22:32 PM}
+// COMMENT: {4/11/2005 1:22:32 PM}		// update properties bar
+// COMMENT: {4/11/2005 1:22:32 PM}		//
+// COMMENT: {4/11/2005 1:22:32 PM}		if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar()) {
+// COMMENT: {4/11/2005 1:22:32 PM}			pTree->SetTimeControl(copy, nStressPeriod);
+// COMMENT: {4/11/2005 1:22:32 PM}		}
+// COMMENT: {4/11/2005 1:22:32 PM}	}
+// COMMENT: {4/11/2005 1:22:32 PM}}
+void CWPhastDoc::SetTimeControl(const CTimeControl& timeControl)
 {
-	if (nStressPeriod == 1) {
-		(*this->m_pTimeControl) = timeControl;
+	(*this->m_pTimeControl) = timeControl;
 
-		// update properties bar
-		//
-		if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar()) {
-			pTree->SetTimeControl(this->m_pTimeControl);
-		}
+	// update properties bar
+	//
+	if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar())
+	{
+		pTree->SetTimeControl(this->m_pTimeControl);
 	}
-	else {
-		CTimeControl copy(timeControl);
-		if (copy.GetTimeEndInput() == 0) {
-			copy.SetTimeEndInput(this->GetUnits().time.c_str());
-		}
-		if (copy.GetTimeStepInput() == 0) {
-			copy.SetTimeStepInput(this->GetUnits().time.c_str());
-		}
-
-		// update properties bar
-		//
-		if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar()) {
-			pTree->SetTimeControl(copy, nStressPeriod);
-		}
-	}
 }
 
-const CTimeControl& CWPhastDoc::GetTimeControl(int nStressPeriod)const
+// COMMENT: {4/11/2005 1:23:48 PM}const CTimeControl& CWPhastDoc::GetTimeControl(int nStressPeriod)const
+// COMMENT: {4/11/2005 1:23:48 PM}{
+// COMMENT: {4/11/2005 1:23:48 PM}	if (nStressPeriod > 1) {
+// COMMENT: {4/11/2005 1:23:48 PM}		if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar()) {
+// COMMENT: {4/11/2005 1:23:48 PM}			return (*pTree->GetTimeControl(nStressPeriod));
+// COMMENT: {4/11/2005 1:23:48 PM}		}
+// COMMENT: {4/11/2005 1:23:48 PM}		// BUGBUG can't return NULL
+// COMMENT: {4/11/2005 1:23:48 PM}	}
+// COMMENT: {4/11/2005 1:23:48 PM}	return (*this->m_pTimeControl);
+// COMMENT: {4/11/2005 1:23:48 PM}}
+const CTimeControl& CWPhastDoc::GetTimeControl(void)const
 {
-	if (nStressPeriod > 1) {
-		if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar()) {
-			return (*pTree->GetTimeControl(nStressPeriod));
-		}
-		// BUGBUG can't return NULL
-	}
 	return (*this->m_pTimeControl);
 }
 
 // COMMENT: {6/9/2004 10:40:35 PM}	void SetPrintFrequency(const CPrintFreq& printFreq, int nStressPeriod = 1);
-void CWPhastDoc::SetPrintFrequency(const CPrintFreq& printFreq, int nStressPeriod)
+// COMMENT: {4/11/2005 1:24:43 PM}void CWPhastDoc::SetPrintFrequency(const CPrintFreq& printFreq, int nStressPeriod)
+// COMMENT: {4/11/2005 1:24:43 PM}{
+// COMMENT: {4/11/2005 1:24:43 PM}	if (nStressPeriod == 1) {
+// COMMENT: {4/11/2005 1:24:43 PM}		(*this->m_pPrintFreq) = printFreq;
+// COMMENT: {4/11/2005 1:24:43 PM}
+// COMMENT: {4/11/2005 1:24:43 PM}		// update properties bar
+// COMMENT: {4/11/2005 1:24:43 PM}		//
+// COMMENT: {4/11/2005 1:24:43 PM}		if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar()) {
+// COMMENT: {4/11/2005 1:24:43 PM}			pTree->SetPrintFrequency(this->m_pPrintFreq);
+// COMMENT: {4/11/2005 1:24:43 PM}		}
+// COMMENT: {4/11/2005 1:24:43 PM}	}
+// COMMENT: {4/11/2005 1:24:43 PM}	else {
+// COMMENT: {4/11/2005 1:24:43 PM}		CPrintFreq copy(printFreq);
+// COMMENT: {4/11/2005 1:24:43 PM}
+// COMMENT: {4/11/2005 1:24:43 PM}		// update properties bar
+// COMMENT: {4/11/2005 1:24:43 PM}		//
+// COMMENT: {4/11/2005 1:24:43 PM}		if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar()) {
+// COMMENT: {4/11/2005 1:24:43 PM}			pTree->SetPrintFrequency(copy, nStressPeriod);
+// COMMENT: {4/11/2005 1:24:43 PM}		}
+// COMMENT: {4/11/2005 1:24:43 PM}	}
+// COMMENT: {4/11/2005 1:24:43 PM}}
+void CWPhastDoc::SetPrintFrequency(const CPrintFreq& printFreq)
 {
-	if (nStressPeriod == 1) {
-		(*this->m_pPrintFreq) = printFreq;
+	(*this->m_pPrintFreq) = printFreq;
 
-		// update properties bar
-		//
-		if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar()) {
-			pTree->SetPrintFrequency(this->m_pPrintFreq);
-		}
-	}
-	else {
-		CPrintFreq copy(printFreq);
-
-		// update properties bar
-		//
-		if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar()) {
-			pTree->SetPrintFrequency(copy, nStressPeriod);
-		}
+	// update properties bar
+	//
+	if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar())
+	{
+		pTree->SetPrintFrequency(this->m_pPrintFreq);
 	}
 }
 
-const CPrintFreq& CWPhastDoc::GetPrintFrequency(int nStressPeriod)const
+// COMMENT: {4/11/2005 1:15:16 PM}const CPrintFreq& CWPhastDoc::GetPrintFrequency(int nStressPeriod)const
+// COMMENT: {4/11/2005 1:15:16 PM}{
+// COMMENT: {4/11/2005 1:15:16 PM}	if (nStressPeriod > 1) {
+// COMMENT: {4/11/2005 1:15:16 PM}		if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar()) {
+// COMMENT: {4/11/2005 1:15:16 PM}			return (*pTree->GetPrintFrequency(nStressPeriod));
+// COMMENT: {4/11/2005 1:15:16 PM}		}
+// COMMENT: {4/11/2005 1:15:16 PM}		// BUGBUG can't return NULL
+// COMMENT: {4/11/2005 1:15:16 PM}	}
+// COMMENT: {4/11/2005 1:15:16 PM}	return (*this->m_pPrintFreq);
+// COMMENT: {4/11/2005 1:15:16 PM}}
+const CPrintFreq& CWPhastDoc::GetPrintFrequency(void)const
 {
-	if (nStressPeriod > 1) {
-		if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar()) {
-			return (*pTree->GetPrintFrequency(nStressPeriod));
-		}
-		// BUGBUG can't return NULL
-	}
 	return (*this->m_pPrintFreq);
 }
 
 void CWPhastDoc::OnToolsNewStressPeriod(void)
 {
-	if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar()) {
-		CPropertySheet props(_T("New Simulation Period"));
-		CTimeControlPropertyPage tcPage;
-		tcPage.SetPreviousTimeStep(*pTree->GetTimeControl(pTree->GetStressPeriodCount()));
-		props.AddPage(&tcPage);
-
-		if (props.DoModal() == IDOK) {
-			CTimeControl tc;
-			tcPage.GetProperties(tc);
-			this->Execute(new CAddStressPeriodAction(this, tc));
-		}
-	}
+// COMMENT: {4/8/2005 6:57:20 PM}	if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar()) {
+// COMMENT: {4/8/2005 6:57:20 PM}		CPropertySheet props(_T("New Simulation Period"));
+// COMMENT: {4/8/2005 6:57:20 PM}		CTimeControlPropertyPage tcPage;
+// COMMENT: {4/8/2005 6:57:20 PM}		tcPage.SetPreviousTimeStep(*pTree->GetTimeControl(pTree->GetStressPeriodCount()));
+// COMMENT: {4/8/2005 6:57:20 PM}		props.AddPage(&tcPage);
+// COMMENT: {4/8/2005 6:57:20 PM}
+// COMMENT: {4/8/2005 6:57:20 PM}		if (props.DoModal() == IDOK) {
+// COMMENT: {4/8/2005 6:57:20 PM}			CTimeControl tc;
+// COMMENT: {4/8/2005 6:57:20 PM}			tcPage.GetProperties(tc);
+// COMMENT: {4/8/2005 6:57:20 PM}			this->Execute(new CAddStressPeriodAction(this, tc));
+// COMMENT: {4/8/2005 6:57:20 PM}		}
+// COMMENT: {4/8/2005 6:57:20 PM}	}
 }
 
 // COMMENT: {7/15/2004 6:06:19 PM}void CWPhastDoc::RemoveProp3D(vtkProp3D* pProp3D)
@@ -3119,9 +3250,11 @@ void CWPhastDoc::ReleaseGraphicsResources(vtkProp* pProp)
 	// foreach view
 	//
 	POSITION pos = this->GetFirstViewPosition();
-	while (pos != NULL) {
+	while (pos != NULL)
+	{
 		CView *pView = this->GetNextView(pos);
-		if (CWPhastView *pWPhastView = static_cast<CWPhastView*>(pView)) {
+		if (CWPhastView *pWPhastView = static_cast<CWPhastView*>(pView))
+		{
 			ASSERT_KINDOF(CWPhastView, pWPhastView);
 			ASSERT_VALID(pWPhastView);
 			pProp->ReleaseGraphicsResources(pWPhastView->GetRenderer()->GetVTKWindow());

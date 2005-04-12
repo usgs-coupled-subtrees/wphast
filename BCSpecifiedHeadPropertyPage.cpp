@@ -54,13 +54,16 @@ void CBCSpecifiedHeadPropertyPage::DoDataExchange(CDataExchange* pDX)
 	{
 		CBC bc;
 
+		// bc_type
+		bc.bc_type = SPECIFIED;
+
 		// head time series
 		//
 		CGlobal::DDX_GridTimeSeries(pDX, IDC_HEAD_GRID, bc.m_bc_head);
 
 		// solution time series
 		//
-		CGlobal::DDX_GridTimeSeries(pDX, IDC_HEAD_GRID, bc.m_bc_solution);
+		CGlobal::DDX_GridTimeSeries(pDX, IDC_SOLUTION_GRID, bc.m_bc_solution);
 
 		// solution type
 		//
@@ -237,9 +240,9 @@ BOOL CBCSpecifiedHeadPropertyPage::SetupGrids(void)
 	vecTimeUnits.push_back(_T("years"));
 
 	std::vector<LPCTSTR> vecDirection;
-	vecDirection.push_back(_T("x"));
-	vecDirection.push_back(_T("y"));
-	vecDirection.push_back(_T("z"));
+	vecDirection.push_back(_T("X"));
+	vecDirection.push_back(_T("Y"));
+	vecDirection.push_back(_T("Z"));
 
 	GV_ITEM Item;
 	Item.mask = GVIF_TEXT;

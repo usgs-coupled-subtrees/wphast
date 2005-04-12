@@ -10,7 +10,9 @@
 #include "PropertyTreeControlBar.h"
 #include "BCFluxPropertyPage.h"
 #include "BCLeakyPropertyPage.h"
-#include "BCSpecifiedPropertyPage.h"
+// COMMENT: {4/11/2005 2:14:18 PM}#include "BCSpecifiedPropertyPage.h"
+#include "BCSpecifiedHeadPropertyPage.h"
+#include "ETSLayout/ETSLayout.h"
 
 #include "WPhastDoc.h"
 #include "SetBCAction.h"
@@ -64,12 +66,12 @@ void CBCZoneActor::Insert(CPropertyTreeControlBar* pTreeControlBar)
 	CTreeCtrlNode node(this->m_hti, pTreeControlBar->GetTreeCtrlEx());
 	pTreeControlBar->SetNodeCheck(node, BST_CHECKED);
 
-	// add additional stressperiods
-	int n = pTreeControlBar->GetStressPeriodCount();
-	for (int i = 2; i <= n; ++i) {
-		this->AddStressPeriod(pTreeControlBar, i);
-	}
-	ASSERT(this->GetStressPeriodCount() == pTreeControlBar->GetStressPeriodCount());
+// COMMENT: {4/11/2005 1:35:36 PM}	// add additional stressperiods
+// COMMENT: {4/11/2005 1:35:36 PM}	int n = pTreeControlBar->GetStressPeriodCount();
+// COMMENT: {4/11/2005 1:35:36 PM}	for (int i = 2; i <= n; ++i) {
+// COMMENT: {4/11/2005 1:35:36 PM}		this->AddStressPeriod(pTreeControlBar, i);
+// COMMENT: {4/11/2005 1:35:36 PM}	}
+// COMMENT: {4/11/2005 1:35:36 PM}	ASSERT(this->GetStressPeriodCount() == pTreeControlBar->GetStressPeriodCount());
 }
 
 void CBCZoneActor::InsertAt(CTreeCtrl* pTreeCtrl, HTREEITEM hParent, HTREEITEM hInsertAfter)
@@ -105,25 +107,26 @@ void CBCZoneActor::Remove(CPropertyTreeControlBar* pTreeControlBar)
 
 void CBCZoneActor::UnRemove(CPropertyTreeControlBar* pTreeControlBar)
 {
-	ASSERT(this->GetStressPeriodCount() == pTreeControlBar->GetStressPeriodCount());
-
-	ASSERT(this->m_vecBC.size() == this->m_vecHParent.size());
-	ASSERT(this->m_vecBC.size() == this->m_vecHInsertAfter.size());
-	ASSERT(this->m_vecBC.size() == this->m_vecHTI.size());
-
-	CTreeCtrl* pTreeCtrl = pTreeControlBar->GetTreeCtrl();
-	CString str = this->GetTreeHeading();
-	size_t nsize = this->m_vecBC.size();
-	for (size_t i = 0; i < nsize; ++i) {
-		HTREEITEM hParent = this->m_vecHParent[i];
-		HTREEITEM hInsertAfter = this->m_vecHInsertAfter[i];
-
-		HTREEITEM hti = pTreeCtrl->InsertItem(str, hParent, hInsertAfter);
-		pTreeCtrl->SetItemData(hti, (DWORD_PTR)this);
-		this->Update(pTreeCtrl, hti, this->m_vecBC[i]);
-
-		this->m_vecHTI[i] = hti;
-	}
+// COMMENT: {4/11/2005 1:37:53 PM}	ASSERT(this->GetStressPeriodCount() == pTreeControlBar->GetStressPeriodCount());
+// COMMENT: {4/11/2005 1:37:53 PM}
+// COMMENT: {4/11/2005 1:37:53 PM}	ASSERT(this->m_vecBC.size() == this->m_vecHParent.size());
+// COMMENT: {4/11/2005 1:37:53 PM}	ASSERT(this->m_vecBC.size() == this->m_vecHInsertAfter.size());
+// COMMENT: {4/11/2005 1:37:53 PM}	ASSERT(this->m_vecBC.size() == this->m_vecHTI.size());
+// COMMENT: {4/11/2005 1:37:53 PM}
+// COMMENT: {4/11/2005 1:37:53 PM}	CTreeCtrl* pTreeCtrl = pTreeControlBar->GetTreeCtrl();
+// COMMENT: {4/11/2005 1:37:53 PM}	CString str = this->GetTreeHeading();
+// COMMENT: {4/11/2005 1:37:53 PM}	size_t nsize = this->m_vecBC.size();
+// COMMENT: {4/11/2005 1:37:53 PM}	for (size_t i = 0; i < nsize; ++i) {
+// COMMENT: {4/11/2005 1:37:53 PM}		HTREEITEM hParent = this->m_vecHParent[i];
+// COMMENT: {4/11/2005 1:37:53 PM}		HTREEITEM hInsertAfter = this->m_vecHInsertAfter[i];
+// COMMENT: {4/11/2005 1:37:53 PM}
+// COMMENT: {4/11/2005 1:37:53 PM}		HTREEITEM hti = pTreeCtrl->InsertItem(str, hParent, hInsertAfter);
+// COMMENT: {4/11/2005 1:37:53 PM}		pTreeCtrl->SetItemData(hti, (DWORD_PTR)this);
+// COMMENT: {4/11/2005 1:37:53 PM}		this->Update(pTreeCtrl, hti, this->m_vecBC[i]);
+// COMMENT: {4/11/2005 1:37:53 PM}
+// COMMENT: {4/11/2005 1:37:53 PM}		this->m_vecHTI[i] = hti;
+// COMMENT: {4/11/2005 1:37:53 PM}	}
+	ASSERT(FALSE); // may need work
 
 	// call base class
 	CZoneActor::UnRemove(pTreeControlBar);
@@ -133,12 +136,13 @@ CString CBCZoneActor::GetTreeHeading(void)const
 {
 	CString str;
 	// UNDEFINED, SPECIFIED, FLUX, LEAKY
-	switch (this->m_bc.bc_type) {
+	switch (this->m_bc.bc_type)
+	{
 		case UNDEFINED:
 			str.Format(_T("UNDEFINED %s"), this->GetName());
 			break;
 		case SPECIFIED:
-			str.Format(_T("SPECIFIED %s"), this->GetName());
+			str.Format(_T("SPECIFIED_HEAD %s"), this->GetName());
 			break;
 		case FLUX:
 			str.Format(_T("FLUX %s"), this->GetName());
@@ -155,26 +159,27 @@ CString CBCZoneActor::GetTreeHeading(void)const
 
 void CBCZoneActor::AddStressPeriod(CPropertyTreeControlBar* pTreeControlBar, int nStressPeriod)
 {
-	// Note: nStressPeriod is probably unnecessary
-	ASSERT(nStressPeriod >= 2);
-	ASSERT(nStressPeriod == this->m_vecBC.size() + 2); // size is 0 for nStressPeriod=2
-
-	CBC newBC(this->m_bc);
-	// remove unnecessary properties
-	//newBC.ClearProperties();
-	newBC.RemoveMutableProperties();
-
-	this->m_vecBC.push_back(newBC);
-
-	CTreeCtrl* pTreeCtrl = pTreeControlBar->GetTreeCtrl();
-	HTREEITEM htiBC = pTreeControlBar->GetBCNode(nStressPeriod);
-	ASSERT(htiBC);
-
-	CString str = this->GetTreeHeading();;
-	HTREEITEM hti = pTreeCtrl->InsertItem(str, htiBC, TVI_LAST);
-	this->m_vecHTI.push_back(hti);
-	pTreeCtrl->SetItemData(hti, (DWORD_PTR)this);
-	this->Update(pTreeCtrl, hti, this->m_vecBC.back());
+	ASSERT(FALSE); // may need work
+// COMMENT: {4/11/2005 1:38:40 PM}	// Note: nStressPeriod is probably unnecessary
+// COMMENT: {4/11/2005 1:38:40 PM}	ASSERT(nStressPeriod >= 2);
+// COMMENT: {4/11/2005 1:38:40 PM}	ASSERT(nStressPeriod == this->m_vecBC.size() + 2); // size is 0 for nStressPeriod=2
+// COMMENT: {4/11/2005 1:38:40 PM}
+// COMMENT: {4/11/2005 1:38:40 PM}	CBC newBC(this->m_bc);
+// COMMENT: {4/11/2005 1:38:40 PM}	// remove unnecessary properties
+// COMMENT: {4/11/2005 1:38:40 PM}	//newBC.ClearProperties();
+// COMMENT: {4/11/2005 1:38:40 PM}	newBC.RemoveMutableProperties();
+// COMMENT: {4/11/2005 1:38:40 PM}
+// COMMENT: {4/11/2005 1:38:40 PM}	this->m_vecBC.push_back(newBC);
+// COMMENT: {4/11/2005 1:38:40 PM}
+// COMMENT: {4/11/2005 1:38:40 PM}	CTreeCtrl* pTreeCtrl = pTreeControlBar->GetTreeCtrl();
+// COMMENT: {4/11/2005 1:38:40 PM}	HTREEITEM htiBC = pTreeControlBar->GetBCNode(nStressPeriod);
+// COMMENT: {4/11/2005 1:38:40 PM}	ASSERT(htiBC);
+// COMMENT: {4/11/2005 1:38:40 PM}
+// COMMENT: {4/11/2005 1:38:40 PM}	CString str = this->GetTreeHeading();;
+// COMMENT: {4/11/2005 1:38:40 PM}	HTREEITEM hti = pTreeCtrl->InsertItem(str, htiBC, TVI_LAST);
+// COMMENT: {4/11/2005 1:38:40 PM}	this->m_vecHTI.push_back(hti);
+// COMMENT: {4/11/2005 1:38:40 PM}	pTreeCtrl->SetItemData(hti, (DWORD_PTR)this);
+// COMMENT: {4/11/2005 1:38:40 PM}	this->Update(pTreeCtrl, hti, this->m_vecBC.back());
 }
 
 //void CBCZoneActor::ReInsertStressPeriod(CPropertyTreeControlBar* pTreeControlBar, int nStressPeriod)
@@ -265,8 +270,10 @@ void CBCZoneActor::Update(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent, const CBC& 
 			break;
 
 		case SPECIFIED:
-			if (crBC.face_defined) {
-				switch (crBC.face) {
+			if (crBC.face_defined)
+			{
+				switch (crBC.face)
+				{
 					case 0:
 						pTreeCtrl->InsertItem(_T("face X"), htiParent);						
 						break;
@@ -278,6 +285,32 @@ void CBCZoneActor::Update(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent, const CBC& 
 						break;
 				}
 			}
+// COMMENT: {2/23/2005 1:14:03 PM}			// head
+// COMMENT: {2/23/2005 1:14:03 PM}			if (crBC.bc_head && crBC.bc_head->type != UNDEFINED) {
+// COMMENT: {2/23/2005 1:14:03 PM}				static_cast<Cproperty*>(crBC.bc_head)->Insert(pTreeCtrl, htiParent, "head");
+// COMMENT: {2/23/2005 1:14:03 PM}			}
+			// head
+			if (crBC.m_bc_head.size())
+			{
+				htiParent = pTreeCtrl->InsertItem("head", htiParent);
+				CTimeSeries<Cproperty>::const_iterator iter = crBC.m_bc_head.begin();
+				for (; iter != crBC.m_bc_head.end(); ++iter)
+				{
+					ASSERT((*iter).second.type != UNDEFINED);
+					if ((*iter).second.type == UNDEFINED) continue;
+
+					CString str;
+					if ((*iter).first.input)
+					{
+						str.Format("%g %s", (*iter).first.value, (*iter).first.input);
+					}
+					else
+					{
+						str.Format("%g", (*iter).first.value);
+					}
+					iter->second.Insert(pTreeCtrl, htiParent, str);
+				}
+			}
 // COMMENT: {2/23/2005 1:14:03 PM}			// associated_solution
 // COMMENT: {2/23/2005 1:14:03 PM}			if (crBC.bc_solution && crBC.bc_solution->type != UNDEFINED && crBC.bc_solution_type == ASSOCIATED) {
 // COMMENT: {2/23/2005 1:14:03 PM}				static_cast<Cproperty*>(crBC.bc_solution)->Insert(pTreeCtrl, htiParent, "associated_solution");
@@ -285,10 +318,6 @@ void CBCZoneActor::Update(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent, const CBC& 
 // COMMENT: {2/23/2005 1:14:03 PM}			// fixed_solution
 // COMMENT: {2/23/2005 1:14:03 PM}			if (crBC.bc_solution && crBC.bc_solution->type != UNDEFINED && crBC.bc_solution_type == FIXED) {
 // COMMENT: {2/23/2005 1:14:03 PM}				static_cast<Cproperty*>(crBC.bc_solution)->Insert(pTreeCtrl, htiParent, "fixed_solution");
-// COMMENT: {2/23/2005 1:14:03 PM}			}
-// COMMENT: {2/23/2005 1:14:03 PM}			// head
-// COMMENT: {2/23/2005 1:14:03 PM}			if (crBC.bc_head && crBC.bc_head->type != UNDEFINED) {
-// COMMENT: {2/23/2005 1:14:03 PM}				static_cast<Cproperty*>(crBC.bc_head)->Insert(pTreeCtrl, htiParent, "head");
 // COMMENT: {2/23/2005 1:14:03 PM}			}
 			break;
 
@@ -363,7 +392,8 @@ void CBCZoneActor::Edit(CTreeCtrl* pTreeCtrl, int nStressPeriod)
 {
 	CString str;
 	str.Format(_T("%s Properties"), this->GetName());
-	CPropertySheet props(str);
+// COMMENT: {4/11/2005 2:16:04 PM}	CPropertySheet props(str);
+	ETSLayoutPropertySheet props(str);
 
 	CFrameWnd *pFrame = (CFrameWnd*)::AfxGetApp()->m_pMainWnd;
 	ASSERT_VALID(pFrame);
@@ -394,19 +424,25 @@ void CBCZoneActor::Edit(CTreeCtrl* pTreeCtrl, int nStressPeriod)
 			pDoc->Execute(new CSetBCAction(this, pTreeCtrl, bc, nStressPeriod));
 		}
 	}
-	else if (this->m_bc.bc_type == SPECIFIED) {
-		CBCSpecifiedPropertyPage specified;
+	else if (this->m_bc.bc_type == SPECIFIED)
+	{
+		// CBCSpecifiedPropertyPage specified;
+		CBCSpecifiedHeadPropertyPage specified;
 		props.AddPage(&specified);
 		// TODO should SetStressPeriod and SetProperties be combined ?
-		specified.SetStressPeriod(nStressPeriod);		
+// COMMENT: {4/11/2005 2:14:40 PM}		specified.SetStressPeriod(nStressPeriod);		
 		specified.SetProperties(this->GetBC(nStressPeriod));		
-		if (props.DoModal() == IDOK) {
-			CBCZone bc;
+		if (props.DoModal() == IDOK)
+		{
+// COMMENT: {4/11/2005 2:13:45 PM}			CBCZone bc;
+			CBC bc;
 			specified.GetProperties(bc);
 // COMMENT: {2/25/2005 7:28:41 PM}			pDoc->Execute(new CSetBCAction(this, pTreeCtrl, bc, nStressPeriod));
+			pDoc->Execute(new CSetBCAction(this, pTreeCtrl, bc, 1));
 		}		
 	}
-	else {
+	else 
+	{
 		ASSERT(FALSE);
 	}
 }
