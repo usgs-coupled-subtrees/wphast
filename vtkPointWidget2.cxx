@@ -4,7 +4,7 @@
   Module:    $RCSfile: vtkPointWidget2.cxx,v $
   Language:  C++
   Date:      $Date: 2004/08/31 02:21:49 $
-  Version:   $Revision: 1.1 $
+  Version:   $Revision$
 
   Copyright (c) 1993-2002 Ken Martin, Will Schroeder, Bill Lorensen 
   All rights reserved.
@@ -32,7 +32,7 @@
 #include "vtkRenderWindow.h"
 #include "vtkObjectFactory.h"
 
-vtkCxxRevisionMacro(vtkPointWidget2, "$Revision: 1.1 $");
+vtkCxxRevisionMacro(vtkPointWidget2, "$Revision$");
 vtkStandardNewMacro(vtkPointWidget2);
 
 vtkPointWidget2::vtkPointWidget2()

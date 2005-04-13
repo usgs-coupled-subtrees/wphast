@@ -21,7 +21,7 @@
 
 
 
-vtkCxxRevisionMacro(vtkInteractorStyleTrackballCameraEx, "$Revision: 1.5 $");
+vtkCxxRevisionMacro(vtkInteractorStyleTrackballCameraEx, "$Revision$");
 vtkStandardNewMacro(vtkInteractorStyleTrackballCameraEx);
 
 

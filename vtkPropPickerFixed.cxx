@@ -4,7 +4,7 @@
   Module:    $RCSfile: vtkPropPickerFixed.cxx,v $
   Language:  C++
   Date:      $Date: 2003/06/26 02:49:59 $
-  Version:   $Revision: 1.1 $
+  Version:   $Revision$
 
   Copyright (c) 1993-2002 Ken Martin, Will Schroeder, Bill Lorensen 
   All rights reserved.
@@ -28,7 +28,7 @@
 #include "vtkRenderer.h"
 #include "vtkWorldPointPicker.h"
 
-vtkCxxRevisionMacro(vtkPropPickerFixed, "$Revision: 1.1 $");
+vtkCxxRevisionMacro(vtkPropPickerFixed, "$Revision$");
 vtkStandardNewMacro(vtkPropPickerFixed);
 
 vtkPropPickerFixed::vtkPropPickerFixed()
