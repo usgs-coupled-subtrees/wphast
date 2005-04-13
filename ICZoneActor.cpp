@@ -18,7 +18,7 @@
 #include <vtkPropAssembly.h>
 
 
-vtkCxxRevisionMacro(CICZoneActor, "$Revision: 1.11 $");
+vtkCxxRevisionMacro(CICZoneActor, "$Revision$");
 vtkStandardNewMacro(CICZoneActor);
 
 CICZoneActor::CICZoneActor(void)

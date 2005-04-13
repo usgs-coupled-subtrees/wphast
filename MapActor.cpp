@@ -15,7 +15,7 @@
 #include "WorldTransform.h"
 #include "SiteMap.h"
 
-vtkCxxRevisionMacro(CMapActor, "$Revision: 1.6 $");
+vtkCxxRevisionMacro(CMapActor, "$Revision$");
 vtkStandardNewMacro(CMapActor);
 
 

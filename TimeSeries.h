@@ -22,6 +22,7 @@ public:
 	static void SerializeCreate(const char *heading, CTimeSeries& series, hid_t loc_id);
 	static void SerializeOpen(const char *heading, CTimeSeries& series, hid_t loc_id);
 
+	HTREEITEM InsertItem(CTreeCtrl* pTreeCtrl, LPCTSTR lpszHeading, HTREEITEM hParent = TVI_ROOT, HTREEITEM hInsertAfter = TVI_LAST)const;
 };
 
 template<>

@@ -12,7 +12,7 @@
 #include "Global.h"
 #include "WorldTransform.h"
 
-vtkCxxRevisionMacro(CMapImageActor, "$Revision: 1.6 $");
+vtkCxxRevisionMacro(CMapImageActor, "$Revision$");
 vtkStandardNewMacro(CMapImageActor);
 
 // Note: No header files should follow the next three lines

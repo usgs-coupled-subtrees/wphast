@@ -198,3 +198,30 @@ void CTimeSeries<Cproperty>::Serialize(bool bStoring, hid_t loc_id)
 		}
 	}
 }
+
+template<>
+HTREEITEM CTimeSeries<Cproperty>::InsertItem(CTreeCtrl* pTreeCtrl, LPCTSTR lpszHeading, HTREEITEM hParent /* = TVI_ROOT*/, HTREEITEM hInsertAfter /* = TVI_LAST*/)const
+{
+	HTREEITEM item = 0;
+	if (!pTreeCtrl || this->size() == 0) return item;
+
+	item = pTreeCtrl->InsertItem(lpszHeading, hParent, hInsertAfter);
+	CTimeSeries<Cproperty>::const_iterator iter = this->begin();
+	for (; iter != this->end(); ++iter)
+	{
+		ASSERT((*iter).second.type != UNDEFINED);
+		if ((*iter).second.type == UNDEFINED) continue;
+
+		CString str;
+		if ((*iter).first.input)
+		{
+			str.Format("%g %s", (*iter).first.value, (*iter).first.input);
+		}
+		else
+		{
+			str.Format("%g", (*iter).first.value);
+		}
+		iter->second.Insert(pTreeCtrl, item, str);
+	}
+	return item;
+}

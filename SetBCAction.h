@@ -9,7 +9,7 @@ class CBCZoneActor;
 class CSetBCAction : public CAction
 {
 public:
-	CSetBCAction(CBCZoneActor* pBCZoneActor, CTreeCtrl* pTreeCtrl, const CBC& newBC, int nStressPeriod);
+	CSetBCAction(CBCZoneActor* pBCZoneActor, CTreeCtrl* pTreeCtrl, const CBC& newBC);
 	virtual ~CSetBCAction(void);
 
 	virtual void Execute();
@@ -23,5 +23,4 @@ protected:
 	CTreeCtrl*      m_pTreeCtrl;
 	CBC             m_oldBC;
 	CBC             m_newBC;
-	int             m_nStressPeriod;
 };

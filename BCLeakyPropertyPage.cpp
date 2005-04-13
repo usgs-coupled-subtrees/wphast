@@ -171,11 +171,11 @@ void CBCLeakyPropertyPage::DoDataExchange(CDataExchange* pDX)
 		}
 		// Thickness
 		else if ( strItem.Compare(_T("Thickness")) == 0) {
-// COMMENT: {2/23/2005 1:17:30 PM}			CGlobal::DDX_Property(pDX, &this->m_wndTreeCtrl, this->m_htiDDX,
-// COMMENT: {2/23/2005 1:17:30 PM}				static_cast<Cproperty*>(this->m_bc.bc_thick),
-// COMMENT: {2/23/2005 1:17:30 PM}				static_cast<Cproperty*>(this->m_bcFixed.bc_thick),
-// COMMENT: {2/23/2005 1:17:30 PM}				static_cast<Cproperty*>(this->m_bcLinear.bc_thick)
-// COMMENT: {2/23/2005 1:17:30 PM}				);
+			CGlobal::DDX_Property(pDX, &this->m_wndTreeCtrl, this->m_htiDDX,
+				static_cast<Cproperty*>(this->m_bc.bc_thick),
+				static_cast<Cproperty*>(this->m_bcFixed.bc_thick),
+				static_cast<Cproperty*>(this->m_bcLinear.bc_thick)
+				);
 		}
 		// Hydraulic Conductivity
 		else if ( strItem.Compare(_T("Hydraulic Conductivity")) == 0) {

@@ -42,16 +42,16 @@ void CBCFluxPropertyPage2::DoDataExchange(CDataExchange* pDX)
 		//
 		switch(this->m_bc.face)
 		{
-		case 'x':
+		case 0: // x
 			this->CheckRadioButton(IDC_FACE_X_RADIO, IDC_FACE_Z_RADIO, IDC_FACE_X_RADIO);
 			break;
-		case 'y':
+		case 1: // y
 			this->CheckRadioButton(IDC_FACE_X_RADIO, IDC_FACE_Z_RADIO, IDC_FACE_Y_RADIO);
 			break;
-		case 'z':
+		case 2: // z
 			this->CheckRadioButton(IDC_FACE_X_RADIO, IDC_FACE_Z_RADIO, IDC_FACE_Z_RADIO);
 			break;
-		default:
+		default: // x
 			this->CheckRadioButton(IDC_FACE_X_RADIO, IDC_FACE_Z_RADIO, IDC_FACE_X_RADIO);
 		}
 	}
@@ -76,17 +76,17 @@ void CBCFluxPropertyPage2::DoDataExchange(CDataExchange* pDX)
 		if (this->IsDlgButtonChecked(IDC_FACE_X_RADIO))
 		{
 			bc.face_defined = TRUE;
-			bc.face         = 'x';
+			bc.face         = 0;
 		}
 		if (this->IsDlgButtonChecked(IDC_FACE_Y_RADIO))
 		{
 			bc.face_defined = TRUE;
-			bc.face         = 'y';
+			bc.face         = 1;
 		}
 		if (this->IsDlgButtonChecked(IDC_FACE_Z_RADIO))
 		{
 			bc.face_defined = TRUE;
-			bc.face         = 'z';
+			bc.face         = 2;
 		}
 		this->m_bc = bc;
 	}

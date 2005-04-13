@@ -8,7 +8,7 @@
 
 #include <vtkObjectFactory.h>
 
-vtkCxxRevisionMacro(CAxesActor, "$Revision: 1.1 $");
+vtkCxxRevisionMacro(CAxesActor, "$Revision$");
 vtkStandardNewMacro(CAxesActor);
 
 // Note: No header files should follow the next three lines

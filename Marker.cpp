@@ -6,7 +6,7 @@
 #include <vtkPolyDataMapper.h>
 
 #include <vtkObjectFactory.h>
-vtkCxxRevisionMacro(CMarker, "$Revision: 1.1 $");
+vtkCxxRevisionMacro(CMarker, "$Revision$");
 vtkStandardNewMacro(CMarker);
 
 

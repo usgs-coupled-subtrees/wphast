@@ -16,7 +16,7 @@
 
 
 #include <vtkObjectFactory.h> // reqd by vtkStandardNewMacro
-vtkCxxRevisionMacro(CWellActor, "$Revision: 1.8 $");
+vtkCxxRevisionMacro(CWellActor, "$Revision$");
 vtkStandardNewMacro(CWellActor);
 
 

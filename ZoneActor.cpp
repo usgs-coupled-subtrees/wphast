@@ -32,7 +32,7 @@
 #include <float.h>
 
 
-vtkCxxRevisionMacro(CZoneActor, "$Revision: 1.20 $");
+vtkCxxRevisionMacro(CZoneActor, "$Revision$");
 // vtkStandardNewMacro(CZoneActor); // not used for abstract class
 
 CZoneActor::CZoneActor(void)

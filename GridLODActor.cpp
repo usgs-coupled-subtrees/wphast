@@ -25,7 +25,7 @@
 #include "Units.h"
 #include "Zone.h"
 
-vtkCxxRevisionMacro(CGridLODActor, "$Revision: 1.16 $");
+vtkCxxRevisionMacro(CGridLODActor, "$Revision$");
 vtkStandardNewMacro(CGridLODActor);
 
 // Note: No header files should follow the next three lines

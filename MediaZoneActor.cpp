@@ -15,7 +15,7 @@
 
 #include <vtkObjectFactory.h> // reqd by vtkStandardNewMacro
 
-vtkCxxRevisionMacro(CMediaZoneActor, "$Revision: 1.15 $");
+vtkCxxRevisionMacro(CMediaZoneActor, "$Revision$");
 vtkStandardNewMacro(CMediaZoneActor);
 
 CMediaZoneActor::CMediaZoneActor(void)
