@@ -32,7 +32,7 @@
 //}}
 #include "resource.h"
 
-vtkCxxRevisionMacro(vtkPlaneWidget2, "");
+vtkCxxRevisionMacro(vtkPlaneWidget2, "$Revision$");
 vtkStandardNewMacro(vtkPlaneWidget2);
 
 vtkPlaneWidget2::vtkPlaneWidget2(void)

@@ -4,7 +4,7 @@
 
 #include <vtkObjectFactory.h> // reqd by vtkStandardNewMacro
 
-vtkCxxRevisionMacro(vtkInteractorStyleImage2, "");
+vtkCxxRevisionMacro(vtkInteractorStyleImage2, "$Revision$");
 vtkStandardNewMacro(vtkInteractorStyleImage2);
 
 
