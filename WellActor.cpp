@@ -180,15 +180,18 @@ void CWellActor::Update(CTreeCtrlNode node)const
 
 	// remove all previous items
 	//
-	while (node.HasChildren()) {
+	while (node.HasChildren())
+	{
 		node.GetChild().Delete();
 	}
 
 	CString strItem;
-	if ( this->m_well.description && ::strlen(this->m_well.description) ) {
+	if (this->m_well.description && ::strlen(this->m_well.description))
+	{
 		strItem.Format("Well %d %s", this->m_well.n_user, this->m_well.description);
 	}
-	else {
+	else
+	{
 		strItem.Format("Well %d", this->m_well.n_user);
 	}
 	node.SetText(strItem);
@@ -242,7 +245,19 @@ void CWellActor::Update(CTreeCtrlNode node)const
 		node.AddTail(strItem);
 	}
 
-	CTreeCtrlNode seriesNode = node.AddTail("pumping rate");
+	bool bPumping = false;
+	std::map<Ctime, CWellRate>::const_iterator it = this->m_well.m_map.begin();
+	for(; it != this->m_well.m_map.end(); ++it)
+	{
+		CWellRate rate((*it).second);
+		if (rate.q_defined)
+		{
+			bPumping = (rate.q < 0);
+			break;
+		}
+	}
+
+	CTreeCtrlNode seriesNode = bPumping ? node.AddTail("pumping rate") : node.AddTail("injection rate");
 
 	// add the time series nodes
 	std::map<Ctime, CWellRate>::const_iterator rateIter = this->m_well.m_map.begin();
@@ -252,17 +267,26 @@ void CWellActor::Update(CTreeCtrlNode node)const
 		CWellRate rate((*rateIter).second);
 
 		strItem.Format("%g", time.value);
-		ASSERT(time.type == UNITS);
-		if (time.type == UNITS) {
+		if (time.type == UNITS)
+		{
 			strItem += " ";
 			strItem += time.input;
 		}
-		if (rate.q_defined) {
+		if (rate.q_defined)
+		{
 			CString str;
-			str.Format(" %g", rate.q);
+			if (bPumping)
+			{
+				str.Format(" %g", -rate.q);
+			}
+			else
+			{
+				str.Format(" %g", rate.q);
+			}
 			strItem += str;
 		}
-		if (rate.solution_defined) {
+		if (rate.solution_defined)
+		{
 			CString str;
 			str.Format(" %d", rate.solution);
 			strItem += str;

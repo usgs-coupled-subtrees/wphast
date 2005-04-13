@@ -16,6 +16,26 @@ CWellSchedule::~CWellSchedule(void)
 CWellSchedule::CWellSchedule(const struct Well& src)
 : CWell(src) // Note: if this weren't here CWell() would be called instead
 {
+	//{{
+	if (src.q_defined && src.q)
+	{
+		for (int i = 0; i < src.q->count_properties; ++i)
+		{
+			Ctime t(src.q->properties[i]->time);
+			CWellRate r(src.q->properties[i]->property->v[0]);
+			this->m_map.insert(std::map<Ctime, CWellRate>::value_type(t, r));
+		}
+	}
+	if (src.solution_defined && src.solution)
+	{
+		for (int i = 0; i < src.solution->count_properties; ++i)
+		{
+			Ctime t(src.solution->properties[i]->time);
+			CWellRate r = this->m_map[t];
+			r.SetSolution((int)src.solution->properties[i]->property->v[0]);
+		}
+	}
+	//}}
 }
 
 CWellSchedule::CWellSchedule(const CWell& src)

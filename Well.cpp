@@ -40,7 +40,6 @@ void CWell::InternalInit(void)
 	this->y                     = 0;
 	this->y_defined             = FALSE;
 
-// COMMENT: {2/23/2005 1:12:57 PM}	this->solution              = -99;
 	this->solution_defined      = FALSE;
 
 	this->lsd                   = 0;
@@ -54,7 +53,6 @@ void CWell::InternalInit(void)
 	this->elevation_defined     = FALSE;
 	this->count_elevation       = 0;
 
-// COMMENT: {2/23/2005 1:13:07 PM}	this->q                     = 0;
 	this->q_defined             = FALSE;
 
 	this->diameter              = 0;
@@ -80,6 +78,9 @@ void CWell::InternalDelete(void)
 	this->count_cell_fraction = 0;
 	delete[] this->cell_fraction;
 	this->cell_fraction = NULL;
+
+	this->m_solution.clear();
+	this->m_q.clear();
 }
 
 void CWell::InternalCopy(const Well& src)
@@ -88,21 +89,24 @@ void CWell::InternalCopy(const Well& src)
 
 	this->count_depth           = src.count_depth;
 	this->depth                 = new Well_Interval[this->count_depth + 1];
-	for (i = 0; i < this->count_depth; ++i) {
+	for (i = 0; i < this->count_depth; ++i)
+	{
 		this->depth[i].bottom = src.depth[i].bottom;
 		this->depth[i].top    = src.depth[i].top;
 	}
 
 	this->count_elevation       = src.count_elevation;
 	this->elevation             = new Well_Interval[this->count_elevation + 1];
-	for (i = 0; i < this->count_elevation; ++i) {
+	for (i = 0; i < this->count_elevation; ++i)
+	{
 		this->elevation[i].bottom = src.elevation[i].bottom;
 		this->elevation[i].top    = src.elevation[i].top;
 	}
 
 	this->count_cell_fraction   = src.count_cell_fraction;
 	this->cell_fraction         = new Cell_Fraction[this->count_cell_fraction + 1];
-	for (i = 0; i < this->count_cell_fraction; ++i) {
+	for (i = 0; i < this->count_cell_fraction; ++i)
+	{
 		this->cell_fraction[i].cell  = src.cell_fraction[i].cell;
 		this->cell_fraction[i].f     = src.cell_fraction[i].f;
 		this->cell_fraction[i].upper = src.cell_fraction[i].upper;
@@ -112,12 +116,14 @@ void CWell::InternalCopy(const Well& src)
 	this->new_def               = src.new_def;
 	this->n_user                = src.n_user;
 
-	if (src.description) {
+	if (src.description)
+	{
 		size_t n = ::strlen(src.description);
 		this->description = new char[n + 1];
 		::strcpy(this->description, src.description);
 	}
-	else {
+	else 
+	{
 		this->description = 0;
 	}
 
@@ -127,7 +133,6 @@ void CWell::InternalCopy(const Well& src)
 	this->y                     = src.y;
 	this->y_defined             = src.y_defined;
 
-	this->solution              = src.solution;
 	this->solution_defined      = src.solution_defined;
 
 	this->lsd                   = src.lsd;
@@ -141,7 +146,6 @@ void CWell::InternalCopy(const Well& src)
 	this->elevation_defined     = src.elevation_defined;
 	this->count_elevation       = src.count_elevation;
 
-	this->q                     = src.q;
 	this->q_defined             = src.q_defined;
 
 	this->diameter              = src.diameter;
@@ -188,23 +192,56 @@ void CWell::Reduce(void)
 CWell::CWell(const Well& src) // copy ctor
 {
 	this->InternalCopy(src);
+	if (src.q)
+	{
+		this->m_q = *src.q;
+	}
+	if (src.solution)
+	{
+		this->m_solution = *src.solution;
+	}
+	ASSERT((src.q_defined        == TRUE && this->m_q.size()        > 0) || (src.q_defined        == FALSE && this->m_q.size()        == 0));
+	ASSERT((src.solution_defined == TRUE && this->m_solution.size() > 0) || (src.solution_defined == FALSE && this->m_solution.size() == 0));
 }
 
 CWell::CWell(const CWell& src) // copy ctor
 {
 	this->InternalCopy(src);
+	this->m_q        = src.m_q;
+	this->m_solution = src.m_solution;
 }
 
 CWell& CWell::operator=(const CWell& rhs) // copy assignment
 {
-	if (this != &rhs) {
+	if (this != &rhs)
+	{
 		this->InternalDelete();
 		this->InternalCopy(rhs);
+		this->m_q        = rhs.m_q;
+		this->m_solution = rhs.m_solution;
 	}
 	return *this;
 }
 
-
+CWell& CWell::operator=(const Well& rhs) // copy assignment
+{
+	if (this != &rhs)
+	{
+		this->InternalDelete();
+		this->InternalCopy(rhs);
+		if (rhs.q)
+		{
+			this->m_q = *rhs.q;
+		}
+		if (rhs.solution)
+		{
+			this->m_solution = *rhs.solution;
+		}
+		ASSERT((rhs.q_defined        == TRUE && this->m_q.size()        > 0) || (rhs.q_defined        == FALSE && this->m_q.size()        == 0));
+		ASSERT((rhs.solution_defined == TRUE && this->m_solution.size() > 0) || (rhs.solution_defined == FALSE && this->m_solution.size() == 0));
+	}
+	return *this;
+}
 
 #define DECL_SZ_MACRO(name) \
 	static const char sz_##name[] = #name

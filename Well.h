@@ -11,6 +11,8 @@ extern "C" {
 }
 
 #include <iosfwd> // std::ostream
+#include "TimeSeries.h"
+#include "property.h"
 
 class CWell : public Well
 {
@@ -23,6 +25,7 @@ public:
 	CWell(const struct Well& src);
 	CWell(const CWell& src);
 	// copy assignment
+	CWell& operator=(const Well& rhs);
 	CWell& operator=(const CWell& rhs);
 	// serialize
 	void Serialize(bool bStoring, hid_t loc_id);
@@ -32,4 +35,7 @@ private:
 	void InternalCopy(const Well& src);
 	void InternalDelete(void);
 	void InternalInit(void);
+public:
+	CTimeSeries<Cproperty> m_q;
+	CTimeSeries<Cproperty> m_solution;
 };

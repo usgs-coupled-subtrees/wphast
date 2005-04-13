@@ -9,6 +9,7 @@
 
 #include "PropertyTreeControlBar.h"
 #include "BCFluxPropertyPage.h"
+#include "BCFluxPropertyPage2.h"
 #include "BCLeakyPropertyPage.h"
 // COMMENT: {4/11/2005 2:14:18 PM}#include "BCSpecifiedPropertyPage.h"
 #include "BCSpecifiedHeadPropertyPage.h"
@@ -292,7 +293,7 @@ void CBCZoneActor::Update(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent, const CBC& 
 			// head
 			if (crBC.m_bc_head.size())
 			{
-				htiParent = pTreeCtrl->InsertItem("head", htiParent);
+				HTREEITEM hti = pTreeCtrl->InsertItem("head", htiParent);
 				CTimeSeries<Cproperty>::const_iterator iter = crBC.m_bc_head.begin();
 				for (; iter != crBC.m_bc_head.end(); ++iter)
 				{
@@ -308,17 +309,61 @@ void CBCZoneActor::Update(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent, const CBC& 
 					{
 						str.Format("%g", (*iter).first.value);
 					}
-					iter->second.Insert(pTreeCtrl, htiParent, str);
+					iter->second.Insert(pTreeCtrl, hti, str);
 				}
 			}
 // COMMENT: {2/23/2005 1:14:03 PM}			// associated_solution
 // COMMENT: {2/23/2005 1:14:03 PM}			if (crBC.bc_solution && crBC.bc_solution->type != UNDEFINED && crBC.bc_solution_type == ASSOCIATED) {
 // COMMENT: {2/23/2005 1:14:03 PM}				static_cast<Cproperty*>(crBC.bc_solution)->Insert(pTreeCtrl, htiParent, "associated_solution");
 // COMMENT: {2/23/2005 1:14:03 PM}			}
+			// associated_solution
+			if (crBC.m_bc_solution.size() && crBC.bc_solution_type == ASSOCIATED)
+			{
+				HTREEITEM hti = pTreeCtrl->InsertItem("associated_solution", htiParent);
+				CTimeSeries<Cproperty>::const_iterator iter = crBC.m_bc_solution.begin();
+				for (; iter != crBC.m_bc_solution.end(); ++iter)
+				{
+					ASSERT((*iter).second.type != UNDEFINED);
+					if ((*iter).second.type == UNDEFINED) continue;
+
+					CString str;
+					if ((*iter).first.input)
+					{
+						str.Format("%g %s", (*iter).first.value, (*iter).first.input);
+					}
+					else
+					{
+						str.Format("%g", (*iter).first.value);
+					}
+					iter->second.Insert(pTreeCtrl, hti, str);
+				}
+			}
 // COMMENT: {2/23/2005 1:14:03 PM}			// fixed_solution
 // COMMENT: {2/23/2005 1:14:03 PM}			if (crBC.bc_solution && crBC.bc_solution->type != UNDEFINED && crBC.bc_solution_type == FIXED) {
 // COMMENT: {2/23/2005 1:14:03 PM}				static_cast<Cproperty*>(crBC.bc_solution)->Insert(pTreeCtrl, htiParent, "fixed_solution");
 // COMMENT: {2/23/2005 1:14:03 PM}			}
+			// associated_solution
+			if (crBC.m_bc_solution.size() && crBC.bc_solution_type == FIXED)
+			{
+				HTREEITEM hti = pTreeCtrl->InsertItem("fixed_solution", htiParent);
+				CTimeSeries<Cproperty>::const_iterator iter = crBC.m_bc_solution.begin();
+				for (; iter != crBC.m_bc_solution.end(); ++iter)
+				{
+					ASSERT((*iter).second.type != UNDEFINED);
+					if ((*iter).second.type == UNDEFINED) continue;
+
+					CString str;
+					if ((*iter).first.input)
+					{
+						str.Format("%g %s", (*iter).first.value, (*iter).first.input);
+					}
+					else
+					{
+						str.Format("%g", (*iter).first.value);
+					}
+					iter->second.Insert(pTreeCtrl, hti, str);
+				}
+			}
 			break;
 
 		case FLUX:
@@ -400,25 +445,27 @@ void CBCZoneActor::Edit(CTreeCtrl* pTreeCtrl, int nStressPeriod)
 	CWPhastDoc* pDoc = reinterpret_cast<CWPhastDoc*>(pFrame->GetActiveDocument());
 	ASSERT_VALID(pDoc);
 
-	if (this->m_bc.bc_type == FLUX) {
-		CBCFluxPropertyPage fluxProps;
+	if (this->m_bc.bc_type == FLUX)
+	{
+		CBCFluxPropertyPage2 fluxProps;
 		props.AddPage(&fluxProps);
-		// TODO should SetStressPeriod and SetProperties be combined ?
-		fluxProps.SetStressPeriod(nStressPeriod);		
-		fluxProps.SetProperties(this->GetBC(nStressPeriod));		
-		if (props.DoModal() == IDOK) {
+		fluxProps.SetProperties(this->GetBC(1));
+		if (props.DoModal() == IDOK)
+		{
 			CBC bc;
 			fluxProps.GetProperties(bc);
-			pDoc->Execute(new CSetBCAction(this, pTreeCtrl, bc, nStressPeriod));
+			pDoc->Execute(new CSetBCAction(this, pTreeCtrl, bc, 1));
 		}
 	}
-	else if (this->m_bc.bc_type == LEAKY) {
+	else if (this->m_bc.bc_type == LEAKY)
+	{
 		CBCLeakyPropertyPage leakyProps;
 		props.AddPage(&leakyProps);
 		// TODO should SetStressPeriod and SetProperties be combined ?
 		leakyProps.SetStressPeriod(nStressPeriod);		
 		leakyProps.SetProperties(this->GetBC(nStressPeriod));		
-		if (props.DoModal() == IDOK) {
+		if (props.DoModal() == IDOK)
+		{
 			CBC bc;
 			leakyProps.GetProperties(bc);
 			pDoc->Execute(new CSetBCAction(this, pTreeCtrl, bc, nStressPeriod));
@@ -431,7 +478,7 @@ void CBCZoneActor::Edit(CTreeCtrl* pTreeCtrl, int nStressPeriod)
 		props.AddPage(&specified);
 		// TODO should SetStressPeriod and SetProperties be combined ?
 // COMMENT: {4/11/2005 2:14:40 PM}		specified.SetStressPeriod(nStressPeriod);		
-		specified.SetProperties(this->GetBC(nStressPeriod));		
+		specified.SetProperties(this->GetBC(1));		
 		if (props.DoModal() == IDOK)
 		{
 // COMMENT: {4/11/2005 2:13:45 PM}			CBCZone bc;

@@ -297,6 +297,9 @@
 				RelativePath="BCFluxPropertyPage.cpp">
 			</File>
 			<File
+				RelativePath="BCFluxPropertyPage2.cpp">
+			</File>
+			<File
 				RelativePath="BCLeakyPropertyPage.cpp">
 			</File>
 			<File
@@ -713,6 +716,9 @@
 			</File>
 			<File
 				RelativePath="BCFluxPropertyPage.h">
+			</File>
+			<File
+				RelativePath="BCFluxPropertyPage2.h">
 			</File>
 			<File
 				RelativePath="BCLeakyPropertyPage.h">

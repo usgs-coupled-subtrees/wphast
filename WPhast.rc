@@ -1951,6 +1951,27 @@ BEGIN
                     WS_TABSTOP,7,126,39,10
 END
 
+IDD_BC_FLUX_PROPPAGE3 DIALOGEX 0, 0, 418, 222
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Flux Properties"
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    LTEXT           "Face:",IDC_FACE_STATIC,7,148,19,8
+    CONTROL         "",IDC_DESC_RICHEDIT,"RichEdit20A",ES_MULTILINE | 
+                    ES_AUTOHSCROLL | ES_READONLY | WS_BORDER | WS_VSCROLL | 
+                    WS_HSCROLL,7,166,404,49
+    CONTROL         "Custom1",IDC_FLUX_GRID,"MFCGridCtrl",WS_BORDER | 
+                    WS_TABSTOP,7,7,404,60
+    CONTROL         "Custom1",IDC_SOLUTION_GRID,"MFCGridCtrl",WS_BORDER | 
+                    WS_TABSTOP,7,82,404,60
+    CONTROL         "X",IDC_FACE_X_RADIO,"Button",BS_AUTORADIOBUTTON | 
+                    WS_GROUP,32,148,20,10
+    CONTROL         "Y",IDC_FACE_Y_RADIO,"Button",BS_AUTORADIOBUTTON,54,148,
+                    20,10
+    CONTROL         "Z",IDC_FACE_Z_RADIO,"Button",BS_AUTORADIOBUTTON,76,148,
+                    20,10
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -1983,7 +2004,7 @@ BEGIN
             VALUE "OriginalFilename", "WPhast.exe"
             VALUE "ProductName", "WPhast"
             VALUE "ProductVersion", "1.0.0.7"
-            VALUE "SpecialBuild", "$Date: 2005/04/01 03:52:33 $"
+            VALUE "SpecialBuild", "$Date: 2005/04/01 02:08:12 $"
         END
     END
     BLOCK "VarFileInfo"
@@ -2557,6 +2578,14 @@ BEGIN
         RIGHTMARGIN, 310
         TOPMARGIN, 7
         BOTTOMMARGIN, 136
+    END
+
+    IDD_BC_FLUX_PROPPAGE3, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 411
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 215
     END
 END
 #endif    // APSTUDIO_INVOKED

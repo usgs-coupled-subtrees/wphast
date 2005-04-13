@@ -1710,20 +1710,28 @@ void CPropertyTreeControlBar::OnKeyDown(NMHDR* pNMHDR, LRESULT* pResult)
 
 		// MEDIA
 		//
-		if (sel.IsNodeAncestor(this->m_nodeMedia)) {
-			if (sel != this->m_nodeMedia) {
-				while (sel.GetParent() != this->m_nodeMedia) {
+		if (sel.IsNodeAncestor(this->m_nodeMedia))
+		{
+			if (sel != this->m_nodeMedia)
+			{
+				while (sel.GetParent() != this->m_nodeMedia)
+				{
 					sel = sel.GetParent();
 					if (!sel) break;
 				}
-				if (sel.GetData()) {
-					if (CZoneActor* pZone = CZoneActor::SafeDownCast((vtkObject*)sel.GetData())) {
-						if (pZone->GetDefault()) {
+				if (sel.GetData())
+				{
+					if (CZoneActor* pZone = CZoneActor::SafeDownCast((vtkObject*)sel.GetData()))
+					{
+						if (pZone->GetDefault())
+						{
 							::AfxMessageBox(_T("The default MEDIA zone cannot be deleted."));
 						}
-						else {
+						else
+						{
 							CTreeCtrlNode parent = sel.GetParent();
-							if (CWPhastDoc* pDoc = this->GetDocument()) {
+							if (CWPhastDoc* pDoc = this->GetDocument())
+							{
 								parent.Select();
 								pDoc->Execute(new CZoneRemoveAction(pDoc, pZone, this));
 							}
@@ -1768,25 +1776,35 @@ void CPropertyTreeControlBar::OnKeyDown(NMHDR* pNMHDR, LRESULT* pResult)
 
 		// INITIAL_CONDITIONS
 		//
-		if (sel.IsNodeAncestor(this->m_nodeIC)) {
-			if (sel != this->m_nodeIC) {
-				while (sel.GetParent() != this->m_nodeIC) {
+		if (sel.IsNodeAncestor(this->m_nodeIC))
+		{
+			if (sel != this->m_nodeIC)
+			{
+				while (sel.GetParent() != this->m_nodeIC)
+				{
 					sel = sel.GetParent();
 					if (!sel) break;
 				}
-				if (sel.GetData()) {
-					if (CICZoneActor* pZone = CICZoneActor::SafeDownCast((vtkObject*)sel.GetData())) {
-						if (pZone->GetDefault()) {
-							if (pZone->GetType() == CICZoneActor::IC_HEAD) {
+				if (sel.GetData())
+				{
+					if (CICZoneActor* pZone = CICZoneActor::SafeDownCast((vtkObject*)sel.GetData()))
+					{
+						if (pZone->GetDefault())
+						{
+							if (pZone->GetType() == CICZoneActor::IC_HEAD)
+							{
 								::AfxMessageBox(_T("The default HEAD_IC zone cannot be deleted."));
 							}
-							else if (pZone->GetType() == CICZoneActor::IC_CHEM) {
+							else if (pZone->GetType() == CICZoneActor::IC_CHEM)
+							{
 								::AfxMessageBox(_T("The default CHEMISTRY_IC zone cannot be deleted."));
 							}
 						}
-						else {
+						else
+						{
 							CTreeCtrlNode parent = sel.GetParent();
-							if (CWPhastDoc* pDoc = this->GetDocument()) {
+							if (CWPhastDoc* pDoc = this->GetDocument())
+							{
 								parent.Select();
 								pDoc->Execute(new CZoneRemoveAction(pDoc, pZone, this));
 							}
@@ -1801,17 +1819,23 @@ void CPropertyTreeControlBar::OnKeyDown(NMHDR* pNMHDR, LRESULT* pResult)
 
 		// BOUNDARY_CONDITIONS (first stress period)
 		//
-		if (sel.IsNodeAncestor(this->m_nodeBC)) {
-			if (sel != this->m_nodeBC) {
-				while (sel.GetParent() != this->m_nodeBC) {
+		if (sel.IsNodeAncestor(this->m_nodeBC))
+		{
+			if (sel != this->m_nodeBC)
+			{
+				while (sel.GetParent() != this->m_nodeBC)
+				{
 					sel = sel.GetParent();
 					if (!sel) break;
 				}
-				if (sel.GetData()) {
-					if (CZoneActor* pZone = CZoneActor::SafeDownCast((vtkObject*)sel.GetData())) {
+				if (sel.GetData())
+				{
+					if (CZoneActor* pZone = CZoneActor::SafeDownCast((vtkObject*)sel.GetData()))
+					{
 						ASSERT(!pZone->GetDefault()); // no default BCs
 						CTreeCtrlNode parent = sel.GetParent();
-						if (CWPhastDoc* pDoc = this->GetDocument()) {
+						if (CWPhastDoc* pDoc = this->GetDocument())
+						{
 							parent.Select();
 							pDoc->Execute(new CZoneRemoveAction(pDoc, pZone, this));
 						}
@@ -1825,8 +1849,10 @@ void CPropertyTreeControlBar::OnKeyDown(NMHDR* pNMHDR, LRESULT* pResult)
 
 		// TIME_CONTROL
 		//
-		if (sel.IsNodeAncestor(this->m_nodeTimeControl)) {
-			if (this->m_nodeTimeControl.GetData()) {
+		if (sel.IsNodeAncestor(this->m_nodeTimeControl))
+		{
+			if (this->m_nodeTimeControl.GetData())
+			{
 				CTimeControl* pTC = (CTimeControl*)this->m_nodeTimeControl.GetData();
 				::AfxMessageBox("Deleting TIME_CONTROL not currently implemented");
 				*pResult = TRUE;

@@ -374,7 +374,6 @@ void CWellPropertyPage::DoDataExchange(CDataExchange* pDX)
 
 	}
 
-	//{{
 	// pumping-rates
 	//
 	if (pDX->m_bSaveAndValidate)
@@ -409,7 +408,6 @@ void CWellPropertyPage::DoDataExchange(CDataExchange* pDX)
 				}
 				time.SetValue(value);
 
-				//{{
 				// time units
 				DDX_TextGridControl(pDX, IDC_GRID_SCHEDULES, row, 1, strValue);
 				if (strValue.IsEmpty() || time.SetInput(strValue) != OK) {
@@ -417,7 +415,6 @@ void CWellPropertyPage::DoDataExchange(CDataExchange* pDX)
 					::AfxMessageBox("Please enter the start time units.", MB_ICONEXCLAMATION);
 					pDX->Fail();
 				}
-				//}}
 
 				// rate
 				strValue = this->m_wndPumpSchedGrid.GetItemText(row, 2);

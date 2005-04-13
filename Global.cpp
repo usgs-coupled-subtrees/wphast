@@ -46,9 +46,11 @@ CGlobal::~CGlobal(void)
 void CGlobal::LoadRTFString(std::string& str, UINT nID)
 {
 	HRSRC hRes = ::FindResource(::AfxGetResourceHandle(), MAKEINTRESOURCE(nID), "RTF");
-	if (hRes) {
+	if (hRes)
+	{
 		HGLOBAL hData = ::LoadResource(::AfxGetResourceHandle(), hRes);
-		if (hData) {
+		if (hData)
+		{
             LPCTSTR lp = (LPCTSTR)::LockResource(hData);
 			str = lp;
 			::UnlockResource(hRes);
@@ -66,10 +68,10 @@ void CGlobal::PickProp(CWPhastView* pView, vtkProp3D* pProp3D)
 
 	////CGlobal::PickProp(pProp3D, pView->GetRenderer(), pView->GetRenderWindowInteractor());
 
-	if (CZoneActor* pZone = CZoneActor::SafeDownCast(pProp3D)) {
+	if (CZoneActor* pZone = CZoneActor::SafeDownCast(pProp3D))
+	{
 		pZone->Select(pView);
 	}
-
 }
 
 void CGlobal::PickProp(vtkProp3D* pProp3D, vtkRenderer* pRenderer, vtkRenderWindowInteractor* pRenderWindowInteractor)
@@ -140,39 +142,46 @@ herr_t CGlobal::HDFSerialize(bool bStoring, hid_t loc_id, const char* szName, hi
 		// Create the szName dataspace
 		dims[0] = maxdims[0] = count;
 		dspace_id = ::H5Screate_simple(1, dims, maxdims);
-		if (dspace_id > 0) {
+		if (dspace_id > 0)
+		{
 			// Create the szName dataset
 			dset_id = ::H5Dcreate(loc_id, szName, mem_type_id, dspace_id, H5P_DEFAULT);
-			if (dset_id > 0) {
+			if (dset_id > 0)
+			{
 				// Write the szName dataset
 				status = ::H5Dwrite(dset_id, mem_type_id, dspace_id, H5S_ALL, H5P_DEFAULT, buf);
-				if (status < 0) {
+				if (status < 0)
+				{
 					ASSERT(FALSE); // unable to write dataset
 					return_val = status;
 					goto HDFSerializeError;
 				}
 				// Close the szName dataset
 				status = ::H5Dclose(dset_id);
-				if (status < 0) {
+				if (status < 0)
+				{
 					ASSERT(FALSE); // unable to close dataset
 					return_val = status;
 					goto HDFSerializeError;
 				}
 			}
-			else {
+			else
+			{
 				ASSERT(FALSE); // unable to create dataspace
 				return_val = dset_id;
 				goto HDFSerializeError;
 			}
 			// Close the szName dataspace
 			status = ::H5Sclose(dspace_id);
-			if (status < 0) {
+			if (status < 0)
+			{
 				ASSERT(FALSE); // unable to close dataspace
 				return_val = status;
 				goto HDFSerializeError;
 			}
 		}
-		else {
+		else
+		{
 			ASSERT(FALSE); // unable to create dataspace
 			return_val = dspace_id;
 			goto HDFSerializeError;
@@ -182,17 +191,22 @@ herr_t CGlobal::HDFSerialize(bool bStoring, hid_t loc_id, const char* szName, hi
 	{
 		// Open the szName dataset
 		dset_id = ::H5Dopen(loc_id, szName);
-		if (dset_id > 0) {
+		if (dset_id > 0)
+		{
 			// get the szName dataspace
 			dspace_id = ::H5Dget_space(dset_id);
-			if (dspace_id > 0) {
+			if (dspace_id > 0)
+			{
 				int n_dims = ::H5Sget_simple_extent_dims(dspace_id, dims, maxdims);
-				if (n_dims == 1) {
+				if (n_dims == 1)
+				{
 					ASSERT(dims[0] == count); // count mismatch
-					if (dims[0] == count) {
+					if (dims[0] == count)
+					{
 						// read the szName dataset
 						status = ::H5Dread(dset_id, mem_type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
-						if (status < 0) {
+						if (status < 0)
+						{
 							ASSERT(FALSE); // unable to read dataset
 							return_val = status;
 							goto HDFSerializeError;
@@ -201,13 +215,15 @@ herr_t CGlobal::HDFSerialize(bool bStoring, hid_t loc_id, const char* szName, hi
 						status = ::H5Sclose(dspace_id);
 						ASSERT(status >= 0); // unable to close dataspace
 					}
-					else {
+					else
+					{
 						ASSERT(FALSE); // count mismatch
 						return_val = -1;
 						goto HDFSerializeError;
 					}
 				}
-				else {
+				else
+				{
 					ASSERT(FALSE); // unable to get_simple_extent_dims
 					return_val = n_dims;
 					goto HDFSerializeError;
@@ -216,13 +232,15 @@ herr_t CGlobal::HDFSerialize(bool bStoring, hid_t loc_id, const char* szName, hi
 				status = ::H5Dclose(dset_id);
 				ASSERT(status >= 0); // unable to close dataset
 			}
-			else {
+			else
+			{
 				ASSERT(FALSE); // unable to open dataspace
 				return_val = dspace_id;
 				goto HDFSerializeError;
 			}
 		}
-		else {
+		else
+		{
 			ASSERT(FALSE); // unable to open dataset
 			return_val = dset_id;
 			goto HDFSerializeError;
@@ -235,15 +253,16 @@ herr_t CGlobal::HDFSerialize(bool bStoring, hid_t loc_id, const char* szName, hi
 
 HDFSerializeError:
 
-	if (dset_id > 0) {
+	if (dset_id > 0)
+	{
 		status = ::H5Dclose(dset_id);
 		ASSERT(status >= 0); // unable to close dataset
 	}
-	if (dspace_id > 0) {
+	if (dspace_id > 0)
+	{
 		status = ::H5Sclose(dspace_id);
 		ASSERT(status >= 0); // unable to close dataspace
 	}
-
 	return return_val;
 }
 
@@ -262,39 +281,46 @@ herr_t CGlobal::HDFSerializeWithSize(bool bStoring, hid_t loc_id, const char* sz
 		// Create the szName dataspace
 		dims[0] = maxdims[0] = count;
 		dspace_id = ::H5Screate_simple(1, dims, maxdims);
-		if (dspace_id > 0) {
+		if (dspace_id > 0)
+		{
 			// Create the szName dataset
 			dset_id = ::H5Dcreate(loc_id, szName, mem_type_id, dspace_id, H5P_DEFAULT);
-			if (dset_id > 0) {
+			if (dset_id > 0)
+			{
 				// Write the szName dataset
 				status = ::H5Dwrite(dset_id, mem_type_id, dspace_id, H5S_ALL, H5P_DEFAULT, buf);
-				if (status < 0) {
+				if (status < 0)
+				{
 					ASSERT(FALSE); // unable to write dataset
 					return_val = status;
 					goto HDFSerializeWithSizeError;
 				}
 				// Close the szName dataset
 				status = ::H5Dclose(dset_id);
-				if (status < 0) {
+				if (status < 0)
+				{
 					ASSERT(FALSE); // unable to close dataset
 					return_val = status;
 					goto HDFSerializeWithSizeError;
 				}
 			}
-			else {
+			else
+			{
 				ASSERT(FALSE); // unable to create dataspace
 				return_val = dset_id;
 				goto HDFSerializeWithSizeError;
 			}
 			// Close the szName dataspace
 			status = ::H5Sclose(dspace_id);
-			if (status < 0) {
+			if (status < 0)
+			{
 				ASSERT(FALSE); // unable to close dataspace
 				return_val = status;
 				goto HDFSerializeWithSizeError;
 			}
 		}
-		else {
+		else
+		{
 			ASSERT(FALSE); // unable to create dataspace
 			return_val = dspace_id;
 			goto HDFSerializeWithSizeError;
@@ -304,16 +330,20 @@ herr_t CGlobal::HDFSerializeWithSize(bool bStoring, hid_t loc_id, const char* sz
 	{
 		// Open the szName dataset
 		dset_id = ::H5Dopen(loc_id, szName);
-		if (dset_id > 0) {
+		if (dset_id > 0)
+		{
 			// get the szName dataspace
 			dspace_id = ::H5Dget_space(dset_id);
-			if (dspace_id > 0) {
+			if (dspace_id > 0)
+			{
 				int n_dims = ::H5Sget_simple_extent_dims(dspace_id, dims, maxdims);
-				if (n_dims == 1) {
+				if (n_dims == 1)
+				{
 					count = dims[0];
 					// read the szName dataset
 					status = ::H5Dread(dset_id, mem_type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
-					if (status < 0) {
+					if (status < 0)
+					{
 						ASSERT(FALSE); // unable to read dataset
 						return_val = status;
 						goto HDFSerializeWithSizeError;
@@ -322,7 +352,8 @@ herr_t CGlobal::HDFSerializeWithSize(bool bStoring, hid_t loc_id, const char* sz
 					status = ::H5Sclose(dspace_id);
 					ASSERT(status >= 0); // unable to close dataspace
 				}
-				else {
+				else
+				{
 					ASSERT(FALSE); // unable to get_simple_extent_dims
 					return_val = n_dims;
 					goto HDFSerializeWithSizeError;
@@ -331,17 +362,18 @@ herr_t CGlobal::HDFSerializeWithSize(bool bStoring, hid_t loc_id, const char* sz
 				status = ::H5Dclose(dset_id);
 				ASSERT(status >= 0); // unable to close dataset
 			}
-			else {
+			else
+			{
 				ASSERT(FALSE); // unable to open dataspace
 				return_val = dspace_id;
 				goto HDFSerializeWithSizeError;
 			}
 		}
-		else {
+		else
+		{
 			ASSERT(FALSE); // unable to open dataset
 			return_val = dset_id;
 			goto HDFSerializeWithSizeError;
-
 		}
 	}
 
@@ -350,15 +382,16 @@ herr_t CGlobal::HDFSerializeWithSize(bool bStoring, hid_t loc_id, const char* sz
 
 HDFSerializeWithSizeError:
 
-	if (dset_id > 0) {
+	if (dset_id > 0)
+	{
 		status = ::H5Dclose(dset_id);
 		ASSERT(status >= 0); // unable to close dataset
 	}
-	if (dspace_id > 0) {
+	if (dspace_id > 0)
+	{
 		status = ::H5Sclose(dspace_id);
 		ASSERT(status >= 0); // unable to close dataspace
 	}
-
 	return return_val;
 }
 
@@ -638,19 +671,23 @@ void CGlobal::DDX_Property(CDataExchange* pDX, CCheckTreeCtrl* pTree, HTREEITEM 
 	{
 		// get type
 		//
-		if (pDX->m_pDlgWnd->IsDlgButtonChecked(IDC_SINGLE_VALUE_RADIO)) {
+		if (pDX->m_pDlgWnd->IsDlgButtonChecked(IDC_SINGLE_VALUE_RADIO))
+		{
 			value->type = FIXED;
 		}
-		else if (pDX->m_pDlgWnd->IsDlgButtonChecked(IDC_LINEAR_INTERPOLATION_RADIO)) {
+		else if (pDX->m_pDlgWnd->IsDlgButtonChecked(IDC_LINEAR_INTERPOLATION_RADIO))
+		{
 			value->type = LINEAR;
 		}
-		else {
+		else
+		{
 			ASSERT(FALSE);
 		}
 
 		// check if defining
 		//
-		if (!(pTree->GetCheck(hti) == BST_CHECKED)) {
+		if (!(pTree->GetCheck(hti) == BST_CHECKED))
+		{
 			// save last type
 			//
 			pTree->SetItemData(hti, value->type);
@@ -660,25 +697,31 @@ void CGlobal::DDX_Property(CDataExchange* pDX, CCheckTreeCtrl* pTree, HTREEITEM 
 
 		// validate single
 		//
-		if (value->type == FIXED) {
+		if (value->type == FIXED)
+		{
 			DDX_Text(pDX, IDC_SINGLE_VALUE_EDIT, value->v[0]);
 		}
 
 		// validate linear
 		//
-		if (value->type == LINEAR) {
+		if (value->type == LINEAR)
+		{
 			int nDirection = pDX->m_pDlgWnd->GetCheckedRadioButton(IDC_X_RADIO, IDC_Z_RADIO);
 			value->coord = 'x';
-			if (nDirection == IDC_X_RADIO) {
+			if (nDirection == IDC_X_RADIO)
+			{
 				value->coord = 'x';
 			}
-			else if (nDirection == IDC_Y_RADIO) {
+			else if (nDirection == IDC_Y_RADIO)
+			{
 				value->coord = 'y';
 			}
-			else if (nDirection == IDC_Z_RADIO) {
+			else if (nDirection == IDC_Z_RADIO)
+			{
 				value->coord = 'z';
 			}
-			else {
+			else
+			{
 				ASSERT(FALSE);
 			}
 			DDX_Text(pDX, IDC_VALUE1_EDIT, value->v[0]);
@@ -688,11 +731,13 @@ void CGlobal::DDX_Property(CDataExchange* pDX, CCheckTreeCtrl* pTree, HTREEITEM 
 		}
 
 		// all ok so copy 
-		if (value->type == FIXED) {
+		if (value->type == FIXED)
+		{
 			value->count_v = 1;
 			(*fixed) = (*value);
 		}
-		else if (value->type == LINEAR) {
+		else if (value->type == LINEAR)
+		{
 			value->count_v = 2;
 			(*linear) = (*value);
 		}
@@ -704,20 +749,24 @@ void CGlobal::DDX_Property(CDataExchange* pDX, CCheckTreeCtrl* pTree, HTREEITEM 
 	{
 		// fixed
 		//
-		if (fixed->type == FIXED) {
+		if (fixed->type == FIXED)
+		{
 			DDX_Text(pDX, IDC_SINGLE_VALUE_EDIT, fixed->v[0]);
 		}
-		else {
+		else
+		{
 			CString strEmpty("");
 			DDX_Text(pDX, IDC_SINGLE_VALUE_EDIT, strEmpty);
 		}
 
 		// linear
 		//
-		if (linear->type == LINEAR) {
+		if (linear->type == LINEAR)
+		{
 			// set direction
 			//
-			switch (linear->coord) {
+			switch (linear->coord)
+			{
 				case 'x':
 					pDX->m_pDlgWnd->CheckRadioButton(IDC_X_RADIO, IDC_Z_RADIO, IDC_X_RADIO);
 					break;
@@ -738,7 +787,8 @@ void CGlobal::DDX_Property(CDataExchange* pDX, CCheckTreeCtrl* pTree, HTREEITEM 
 			DDX_Text(pDX, IDC_VALUE2_EDIT, linear->v[1]);
 			DDX_Text(pDX, IDC_DISTANCE2_EDIT, linear->dist2);
 		}
-		else {
+		else
+		{
 			// set direction default to x
 			//
 			pDX->m_pDlgWnd->CheckRadioButton(IDC_X_RADIO, IDC_Z_RADIO, IDC_X_RADIO);
@@ -753,9 +803,11 @@ void CGlobal::DDX_Property(CDataExchange* pDX, CCheckTreeCtrl* pTree, HTREEITEM 
 		}
 
 		int type = value->type;
-		switch (type) {
+		switch (type)
+		{
 		case UNDEFINED:
-			switch (pTree->GetItemData(hti)) {
+			switch (pTree->GetItemData(hti))
+			{
 				case FIXED:
 					// check fixed value radio button
 					pDX->m_pDlgWnd->CheckRadioButton(IDC_SINGLE_VALUE_RADIO, IDC_LINEAR_INTERPOLATION_RADIO, IDC_SINGLE_VALUE_RADIO);
@@ -790,13 +842,15 @@ void CGlobal::DDX_Property(CDataExchange* pDX, CCheckTreeCtrl* pTree, HTREEITEM 
 
 		// enable/disable
 		//
-		if (pTree->GetCheck(hti) == BST_CHECKED) {
+		if (pTree->GetCheck(hti) == BST_CHECKED)
+		{
 			// enable radio buttons
 			//
 			pDX->m_pDlgWnd->GetDlgItem(IDC_SINGLE_VALUE_RADIO)->EnableWindow(TRUE);
 			pDX->m_pDlgWnd->GetDlgItem(IDC_LINEAR_INTERPOLATION_RADIO)->EnableWindow(TRUE);
 
-			switch (type) {
+			switch (type)
+			{
 				case FIXED:
 					CGlobal::EnableFixed(pDX->m_pDlgWnd, TRUE);
 					CGlobal::EnableLinearInterpolation(pDX->m_pDlgWnd, FALSE);
@@ -809,7 +863,8 @@ void CGlobal::DDX_Property(CDataExchange* pDX, CCheckTreeCtrl* pTree, HTREEITEM 
 					ASSERT(FALSE);
 			}
 		}
-		else {
+		else
+		{
 			// disable fixed input
 			//
 			CGlobal::EnableFixed(pDX->m_pDlgWnd, FALSE);
@@ -860,10 +915,12 @@ void CGlobal::DDX_AssocFixed(CDataExchange* pDX, CTreeCtrl* pTree, HTREEITEM hti
 
 	ASSERT(pTree && ::IsWindow(pTree->m_hWnd));
 
-	if (pDX->m_bSaveAndValidate) {
+	if (pDX->m_bSaveAndValidate)
+	{
 		// get radio button
 		//
-		switch (pDX->m_pDlgWnd->GetCheckedRadioButton(IDC_ASSOC_RADIO, IDC_FIXED_RADIO)) {
+		switch (pDX->m_pDlgWnd->GetCheckedRadioButton(IDC_ASSOC_RADIO, IDC_FIXED_RADIO))
+		{
 			case IDC_ASSOC_RADIO:
 				value.bc_solution_type = ASSOCIATED;
 				break;
@@ -876,29 +933,35 @@ void CGlobal::DDX_AssocFixed(CDataExchange* pDX, CTreeCtrl* pTree, HTREEITEM hti
 				break;
 		}
 	}
-	else {
+	else
+	{
 		// check radio button
 		//
-		if (value.bc_solution_type == ASSOCIATED) {
+		if (value.bc_solution_type == ASSOCIATED)
+		{
 			pDX->m_pDlgWnd->CheckRadioButton(IDC_ASSOC_RADIO, IDC_FIXED_RADIO, IDC_ASSOC_RADIO);
 		}
-		else if (value.bc_solution_type == FIXED) {
+		else if (value.bc_solution_type == FIXED)
+		{
 			pDX->m_pDlgWnd->CheckRadioButton(IDC_ASSOC_RADIO, IDC_FIXED_RADIO, IDC_FIXED_RADIO);
 		}
-		else {
+		else
+		{
 			pDX->m_pDlgWnd->CheckRadioButton(IDC_ASSOC_RADIO, IDC_FIXED_RADIO, IDC_ASSOC_RADIO);
 		}
 
 		// enable/disable
 		//
-		if (pTree->GetCheck(hti) == BST_CHECKED) {
+		if (pTree->GetCheck(hti) == BST_CHECKED)
+		{
 			// enable radio buttons
 			//
 			pDX->m_pDlgWnd->GetDlgItem(IDC_SOL_TYPE_STATIC)->EnableWindow(TRUE);
 			pDX->m_pDlgWnd->GetDlgItem(IDC_ASSOC_RADIO)->EnableWindow(TRUE);
 			pDX->m_pDlgWnd->GetDlgItem(IDC_FIXED_RADIO)->EnableWindow(TRUE);
 		}
-		else {
+		else
+		{
 			// disable radio buttons
 			//
 			pDX->m_pDlgWnd->GetDlgItem(IDC_SOL_TYPE_STATIC)->EnableWindow(FALSE);
@@ -913,9 +976,11 @@ herr_t CGlobal::HDFSerializeString(bool bStoring, hid_t loc_id, const char* szNa
 	herr_t status = -1;
 	if (bStoring)
 	{
-		if (!str.empty()) {
+		if (!str.empty())
+		{
 			char *szCopy = new char[str.length() + 2];
-			if (szCopy != NULL) {
+			if (szCopy != NULL)
+			{
 				::strcpy(szCopy, str.c_str());
 				status = HDFSerializeStringOrNull(bStoring, loc_id, szName, &szCopy);
 				delete[] szCopy;
@@ -926,10 +991,12 @@ herr_t CGlobal::HDFSerializeString(bool bStoring, hid_t loc_id, const char* szNa
 	{
 		char *szCopy = NULL;
 		status = HDFSerializeStringOrNull(bStoring, loc_id, szName, &szCopy);
-		if (szCopy == NULL) {
+		if (szCopy == NULL)
+		{
 			str.clear();
 		}
-		else {
+		else
+		{
 			str = szCopy;	
 			delete[] szCopy;
 		}
@@ -949,7 +1016,8 @@ herr_t CGlobal::HDFSerializeStringOrNull(bool bStoring, hid_t loc_id, const char
 
 	if (bStoring)
 	{
-		if (*szString == NULL) {
+		if (*szString == NULL)
+		{
 			return -1;
 		}
 		size_t len = ::strlen(*szString);
@@ -985,7 +1053,8 @@ herr_t CGlobal::HDFSerializeStringOrNull(bool bStoring, hid_t loc_id, const char
 	{
 		// loading
 		dset_id = ::H5Dopen(loc_id, szName);
-		if (dset_id <= 0) {
+		if (dset_id <= 0)
+		{
 			if (*szString) delete *szString;
 			*szString = NULL;
 			return -1; // not found
@@ -1016,17 +1085,20 @@ herr_t CGlobal::HDFSerializeStringOrNull(bool bStoring, hid_t loc_id, const char
 
 ErrorHDFSerializeString:
 
-	if (dtype_id > 0) {
+	if (dtype_id > 0)
+	{
 		status = ::H5Tclose(dtype_id);
 		ASSERT(status >= 0);
 	}
 
-	if (dspace_id > 0) {
+	if (dspace_id > 0)
+	{
 		status = ::H5Sclose(dspace_id);
 		ASSERT(status >= 0);
 	}
 
-	if (dset_id > 0) {
+	if (dset_id > 0)
+	{
 		status = ::H5Dclose(dset_id);
 		ASSERT(status >= 0);
 	}
@@ -1070,9 +1142,11 @@ std::string CGlobal::GetStdLengthUnits(const char* unit)
 	CUnits units_usr;
 
 	VERIFY(units_usr.horizontal.set_input(unit) == OK);
-	for (size_t i = 0; i < sizeof(s_length_units) / sizeof(s_length_units[0]); ++i) {
+	for (size_t i = 0; i < sizeof(s_length_units) / sizeof(s_length_units[0]); ++i)
+	{
 		units_std.horizontal.set_input(s_length_units[i]);
-		if (units_usr.horizontal.input_to_si == units_std.horizontal.input_to_si) {
+		if (units_usr.horizontal.input_to_si == units_std.horizontal.input_to_si)
+		{
 			return s_length_units[i];
 		}
 	}
@@ -1087,7 +1161,8 @@ int CGlobal::AddTimeUnits(CComboBox* pCombo)
 #ifdef _DEBUG
 	CUnits units;
 #endif
-	for (size_t i = 0; i < sizeof(s_time_units) / sizeof(s_time_units[0]); ++i) {
+	for (size_t i = 0; i < sizeof(s_time_units) / sizeof(s_time_units[0]); ++i)
+	{
 #ifdef _DEBUG
 		ASSERT(units.time.set_input(s_time_units[i]) == OK);
 #endif
@@ -1102,9 +1177,11 @@ std::string CGlobal::GetStdTimeUnits(const char* unit)
 	CUnits units_usr;
 
 	VERIFY(units_usr.time.set_input(unit) == OK);
-	for (size_t i = 0; i < sizeof(s_time_units) / sizeof(s_time_units[0]); ++i) {
+	for (size_t i = 0; i < sizeof(s_time_units) / sizeof(s_time_units[0]); ++i)
+	{
 		units_std.time.set_input(s_time_units[i]);
-		if (units_usr.time.input_to_si == units_std.time.input_to_si) {
+		if (units_usr.time.input_to_si == units_std.time.input_to_si)
+		{
 			return s_time_units[i];
 		}
 	}
@@ -1120,7 +1197,8 @@ int CGlobal::AddVolumeUnits(CComboBox* pCombo)
 #ifdef _DEBUG
 	CUnits units;
 #endif
-	for (size_t i = 0; i < sizeof(s_volume_units) / sizeof(s_volume_units[0]); ++i) {
+	for (size_t i = 0; i < sizeof(s_volume_units) / sizeof(s_volume_units[0]); ++i)
+	{
 #ifdef _DEBUG
 		std::string str(s_volume_units[i]);
 		str.append("/s");
@@ -1140,11 +1218,13 @@ std::string CGlobal::GetStdVolumeUnits(const char* unit)
 	units_per_second += "/s";
 
 	VERIFY(units_usr.well_pumpage.set_input(units_per_second.c_str()) == OK);
-	for (size_t i = 0; i < sizeof(s_time_units) / sizeof(s_time_units[0]); ++i) {
+	for (size_t i = 0; i < sizeof(s_time_units) / sizeof(s_time_units[0]); ++i)
+	{
 		units_per_second = s_volume_units[i];
 		units_per_second += "/s";
 		units_std.well_pumpage.set_input(units_per_second.c_str());
-		if (units_usr.well_pumpage.input_to_si == units_std.well_pumpage.input_to_si) {
+		if (units_usr.well_pumpage.input_to_si == units_std.well_pumpage.input_to_si)
+		{
 			return s_volume_units[i];
 		}
 	}
@@ -1159,7 +1239,8 @@ int CGlobal::AddTimeUnitsDenom(CComboBox* pCombo)
 #ifdef _DEBUG
 	CUnits units;
 #endif
-	for (size_t i = 0; i < sizeof(s_time_units_denom) / sizeof(s_time_units_denom[0]); ++i) {
+	for (size_t i = 0; i < sizeof(s_time_units_denom) / sizeof(s_time_units_denom[0]); ++i)
+	{
 #ifdef _DEBUG
 		ASSERT(units.time.set_input(s_time_units_denom[i]) == OK);
 #endif
@@ -1174,9 +1255,11 @@ std::string CGlobal::GetStdTimeUnitsDenom(const char* unit)
 	CUnits units_usr;
 
 	VERIFY(units_usr.time.set_input(unit) == OK);
-	for (size_t i = 0; i < sizeof(s_time_units_denom) / sizeof(s_time_units_denom[0]); ++i) {
+	for (size_t i = 0; i < sizeof(s_time_units_denom) / sizeof(s_time_units_denom[0]); ++i)
+	{
 		units_std.time.set_input(s_time_units_denom[i]);
-		if (units_usr.time.input_to_si == units_std.time.input_to_si) {
+		if (units_usr.time.input_to_si == units_std.time.input_to_si)
+		{
 			return s_time_units_denom[i];
 		}
 	}
@@ -1192,7 +1275,8 @@ int CGlobal::AddLengthUnitsDenom(CComboBox* pCombo)
 	CUnits units;
 #endif
 
-	for (size_t i = 0; i < sizeof(s_length_units_denom) / sizeof(s_length_units_denom[0]); ++i) {
+	for (size_t i = 0; i < sizeof(s_length_units_denom) / sizeof(s_length_units_denom[0]); ++i)
+	{
 #ifdef _DEBUG
 		ASSERT(units.horizontal.set_input(s_length_units_denom[i]) == OK);
 #endif
@@ -1207,9 +1291,11 @@ std::string CGlobal::GetStdLengthUnitsDenom(const char* unit)
 	CUnits units_usr;
 
 	VERIFY(units_usr.horizontal.set_input(unit) == OK);
-	for (size_t i = 0; i < sizeof(s_length_units_denom) / sizeof(s_length_units_denom[0]); ++i) {
+	for (size_t i = 0; i < sizeof(s_length_units_denom) / sizeof(s_length_units_denom[0]); ++i)
+	{
 		units_std.horizontal.set_input(s_length_units_denom[i]);
-		if (units_usr.horizontal.input_to_si == units_std.horizontal.input_to_si) {
+		if (units_usr.horizontal.input_to_si == units_std.horizontal.input_to_si)
+		{
 			return s_length_units_denom[i];
 		}
 	}
@@ -1221,11 +1307,14 @@ herr_t CGlobal::HDFSerializeBool(bool bStoring, hid_t loc_id, const char* szName
 {
 	int nValue;
 
-	if (bStoring) {
-		if (bValue) {
+	if (bStoring)
+	{
+		if (bValue)
+		{
 			nValue = 1;
 		}
-		else {
+		else
+		{
 			nValue = 0;
 		}
 	}
@@ -1233,10 +1322,10 @@ herr_t CGlobal::HDFSerializeBool(bool bStoring, hid_t loc_id, const char* szName
 	herr_t status = CGlobal::HDFSerialize(bStoring, loc_id, szName, H5T_NATIVE_INT, 1, &nValue);
 	ASSERT(status >= 0);
 
-	if (!bStoring && status >= 0) {
+	if (!bStoring && status >= 0)
+	{
 		bValue = (nValue != 0);
 	}
-
 	return status;
 }
 
@@ -1414,20 +1503,20 @@ herr_t CGlobal::HDFSerializeBinaryFile(bool bStoring, hid_t loc_id, const char* 
 
 ErrorHDFSerializeBinaryFile:
 
-	if (dspace_id > 0) {
+	if (dspace_id > 0)
+	{
 		status = ::H5Sclose(dspace_id);
 		ASSERT(status >= 0);
 	}
-
-	if (dset_id > 0) {
+	if (dset_id > 0)
+	{
 		status = ::H5Dclose(dset_id);
 		ASSERT(status >= 0);
 	}
-
-	if (bigbuffer) {
+	if (bigbuffer)
+	{
 		delete[] bigbuffer;
 	}
-
 	return status;
 }
 

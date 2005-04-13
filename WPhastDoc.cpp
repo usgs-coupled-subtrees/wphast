@@ -2054,13 +2054,6 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 		// FLOW_ONLY
 		//
 		CFlowOnly flowOnly(::flow_only != 0);
-#if defined(ONLY_FLOW_ONLY_SUPPORTED)
-		if (::flow_only == FALSE)
-		{
-			::AfxMessageBox("Warning: At this time only flow only simulations are supported. FLOW_ONLY has been overridden.", MB_OK);
-			flowOnly = true;
-		}
-#endif
 		if (!flowOnly)
 		{
 			flowOnly.SetDiffusivity(::fluid_diffusivity);
@@ -2118,7 +2111,8 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 			// not undoable
 			const struct grid_elt* grid_elt_ptr = ::grid_elt_zones[i];
 
-			if (i == 0) {
+			if (i == 0)
+			{
 				// if the first zone is equivalent to the default gridElt
 				// don't add it
 
@@ -2143,7 +2137,8 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 		// BC Zones
 		//
 		std::list<CBCZoneActor*> listBCZoneActors;
-		for (int i = 0; i < ::count_bc; ++i) {
+		for (int i = 0; i < ::count_bc; ++i)
+		{
 			const struct bc* bc_ptr = ::bc[i];
 
 			// not undoable
@@ -2170,6 +2165,7 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 		{
 			const Well* well_ptr = &::wells[i];			
 			CWellSchedule well(*well_ptr);
+			// CWell well(*well_ptr);
 
 // COMMENT: {2/23/2005 1:08:49 PM}			CWellRate rate(*well_ptr);
 // COMMENT: {2/23/2005 1:07:49 PM}			well.Insert(timeBegin, rate);
@@ -2193,66 +2189,66 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 // COMMENT: {9/2/2004 9:56:17 PM}				well.Insert(t, test);
 // COMMENT: {9/2/2004 9:56:17 PM}			}
 ///TEST 2
-			// simulate the following
-			/*
-			[-]-WELL 2
-			     |
-			    [-]-pumping rate
-			          |- 600 seconds -66
-			*/
-			if (well.n_user == 2)
-			{
-// COMMENT: {2/23/2005 1:08:57 PM}				CWellRate test(*well_ptr);
-// COMMENT: {2/23/2005 1:08:57 PM}				test.SetRate(-66);
-// COMMENT: {2/23/2005 1:08:57 PM}				Ctime t;
-// COMMENT: {2/23/2005 1:08:57 PM}				t.SetInput("seconds");
-// COMMENT: {2/23/2005 1:08:57 PM}				t.SetValue(600);
-// COMMENT: {2/23/2005 1:08:57 PM}				well.Insert(t, test);
-			}
-///TEST 3
-			// simulate the following
-			/*
-			[-]-WELL 2
-			     |
-			    [-]-pumping rate
-			          |- 5000 seconds -55
-			*/
-			if (well.n_user == 2)
-			{
-// COMMENT: {2/23/2005 1:09:02 PM}				CWellRate test(*well_ptr);
-// COMMENT: {2/23/2005 1:09:02 PM}				test.SetRate(-55);
-// COMMENT: {2/23/2005 1:09:02 PM}				Ctime t;
-// COMMENT: {2/23/2005 1:09:02 PM}				t.SetInput("seconds");
-// COMMENT: {2/23/2005 1:09:02 PM}				t.SetValue(5000);
-// COMMENT: {2/23/2005 1:09:02 PM}				well.Insert(t, test);
-			}
-			if (well.n_user == 2)
-			{
-// COMMENT: {2/23/2005 1:09:07 PM}				CWellRate test(*well_ptr);
-// COMMENT: {2/23/2005 1:09:07 PM}				test.SetRate(-66);
-// COMMENT: {2/23/2005 1:09:07 PM}				Ctime t;
-// COMMENT: {2/23/2005 1:09:07 PM}				t.SetInput("seconds");
-// COMMENT: {2/23/2005 1:09:07 PM}				t.SetValue(6000);
-// COMMENT: {2/23/2005 1:09:07 PM}				well.Insert(t, test);
-			}
-			if (well.n_user == 2)
-			{
-// COMMENT: {2/23/2005 1:09:12 PM}				CWellRate test(*well_ptr);
-// COMMENT: {2/23/2005 1:09:12 PM}				test.SetRate(-77);
-// COMMENT: {2/23/2005 1:09:12 PM}				Ctime t;
-// COMMENT: {2/23/2005 1:09:12 PM}				t.SetInput("seconds");
-// COMMENT: {2/23/2005 1:09:12 PM}				t.SetValue(7000);
-// COMMENT: {2/23/2005 1:09:12 PM}				well.Insert(t, test);
-			}
-			if (well.n_user == 2)
-			{
-// COMMENT: {2/23/2005 1:09:18 PM}				CWellRate test(*well_ptr);
-// COMMENT: {2/23/2005 1:09:18 PM}				test.SetRate(-88);
-// COMMENT: {2/23/2005 1:09:18 PM}				Ctime t;
-// COMMENT: {2/23/2005 1:09:18 PM}				t.SetInput("seconds");
-// COMMENT: {2/23/2005 1:09:18 PM}				t.SetValue(8000);
-// COMMENT: {2/23/2005 1:09:18 PM}				well.Insert(t, test);
-			}
+// COMMENT: {4/12/2005 9:59:41 AM}			// simulate the following
+// COMMENT: {4/12/2005 9:59:41 AM}			/*
+// COMMENT: {4/12/2005 9:59:41 AM}			[-]-WELL 2
+// COMMENT: {4/12/2005 9:59:41 AM}			     |
+// COMMENT: {4/12/2005 9:59:41 AM}			    [-]-pumping rate
+// COMMENT: {4/12/2005 9:59:41 AM}			          |- 600 seconds -66
+// COMMENT: {4/12/2005 9:59:41 AM}			*/
+// COMMENT: {4/12/2005 9:59:41 AM}			if (well.n_user == 2)
+// COMMENT: {4/12/2005 9:59:41 AM}			{
+// COMMENT: {4/12/2005 9:59:41 AM}// COMMENT: {2/23/2005 1:08:57 PM}				CWellRate test(*well_ptr);
+// COMMENT: {4/12/2005 9:59:41 AM}// COMMENT: {2/23/2005 1:08:57 PM}				test.SetRate(-66);
+// COMMENT: {4/12/2005 9:59:41 AM}// COMMENT: {2/23/2005 1:08:57 PM}				Ctime t;
+// COMMENT: {4/12/2005 9:59:41 AM}// COMMENT: {2/23/2005 1:08:57 PM}				t.SetInput("seconds");
+// COMMENT: {4/12/2005 9:59:41 AM}// COMMENT: {2/23/2005 1:08:57 PM}				t.SetValue(600);
+// COMMENT: {4/12/2005 9:59:41 AM}// COMMENT: {2/23/2005 1:08:57 PM}				well.Insert(t, test);
+// COMMENT: {4/12/2005 9:59:41 AM}			}
+// COMMENT: {4/12/2005 9:59:41 AM}///TEST 3
+// COMMENT: {4/12/2005 9:59:41 AM}			// simulate the following
+// COMMENT: {4/12/2005 9:59:41 AM}			/*
+// COMMENT: {4/12/2005 9:59:41 AM}			[-]-WELL 2
+// COMMENT: {4/12/2005 9:59:41 AM}			     |
+// COMMENT: {4/12/2005 9:59:41 AM}			    [-]-pumping rate
+// COMMENT: {4/12/2005 9:59:41 AM}			          |- 5000 seconds -55
+// COMMENT: {4/12/2005 9:59:41 AM}			*/
+// COMMENT: {4/12/2005 9:59:41 AM}			if (well.n_user == 2)
+// COMMENT: {4/12/2005 9:59:41 AM}			{
+// COMMENT: {4/12/2005 9:59:41 AM}// COMMENT: {2/23/2005 1:09:02 PM}				CWellRate test(*well_ptr);
+// COMMENT: {4/12/2005 9:59:41 AM}// COMMENT: {2/23/2005 1:09:02 PM}				test.SetRate(-55);
+// COMMENT: {4/12/2005 9:59:41 AM}// COMMENT: {2/23/2005 1:09:02 PM}				Ctime t;
+// COMMENT: {4/12/2005 9:59:41 AM}// COMMENT: {2/23/2005 1:09:02 PM}				t.SetInput("seconds");
+// COMMENT: {4/12/2005 9:59:41 AM}// COMMENT: {2/23/2005 1:09:02 PM}				t.SetValue(5000);
+// COMMENT: {4/12/2005 9:59:41 AM}// COMMENT: {2/23/2005 1:09:02 PM}				well.Insert(t, test);
+// COMMENT: {4/12/2005 9:59:41 AM}			}
+// COMMENT: {4/12/2005 9:59:41 AM}			if (well.n_user == 2)
+// COMMENT: {4/12/2005 9:59:41 AM}			{
+// COMMENT: {4/12/2005 9:59:41 AM}// COMMENT: {2/23/2005 1:09:07 PM}				CWellRate test(*well_ptr);
+// COMMENT: {4/12/2005 9:59:41 AM}// COMMENT: {2/23/2005 1:09:07 PM}				test.SetRate(-66);
+// COMMENT: {4/12/2005 9:59:41 AM}// COMMENT: {2/23/2005 1:09:07 PM}				Ctime t;
+// COMMENT: {4/12/2005 9:59:41 AM}// COMMENT: {2/23/2005 1:09:07 PM}				t.SetInput("seconds");
+// COMMENT: {4/12/2005 9:59:41 AM}// COMMENT: {2/23/2005 1:09:07 PM}				t.SetValue(6000);
+// COMMENT: {4/12/2005 9:59:41 AM}// COMMENT: {2/23/2005 1:09:07 PM}				well.Insert(t, test);
+// COMMENT: {4/12/2005 9:59:41 AM}			}
+// COMMENT: {4/12/2005 9:59:41 AM}			if (well.n_user == 2)
+// COMMENT: {4/12/2005 9:59:41 AM}			{
+// COMMENT: {4/12/2005 9:59:41 AM}// COMMENT: {2/23/2005 1:09:12 PM}				CWellRate test(*well_ptr);
+// COMMENT: {4/12/2005 9:59:41 AM}// COMMENT: {2/23/2005 1:09:12 PM}				test.SetRate(-77);
+// COMMENT: {4/12/2005 9:59:41 AM}// COMMENT: {2/23/2005 1:09:12 PM}				Ctime t;
+// COMMENT: {4/12/2005 9:59:41 AM}// COMMENT: {2/23/2005 1:09:12 PM}				t.SetInput("seconds");
+// COMMENT: {4/12/2005 9:59:41 AM}// COMMENT: {2/23/2005 1:09:12 PM}				t.SetValue(7000);
+// COMMENT: {4/12/2005 9:59:41 AM}// COMMENT: {2/23/2005 1:09:12 PM}				well.Insert(t, test);
+// COMMENT: {4/12/2005 9:59:41 AM}			}
+// COMMENT: {4/12/2005 9:59:41 AM}			if (well.n_user == 2)
+// COMMENT: {4/12/2005 9:59:41 AM}			{
+// COMMENT: {4/12/2005 9:59:41 AM}// COMMENT: {2/23/2005 1:09:18 PM}				CWellRate test(*well_ptr);
+// COMMENT: {4/12/2005 9:59:41 AM}// COMMENT: {2/23/2005 1:09:18 PM}				test.SetRate(-88);
+// COMMENT: {4/12/2005 9:59:41 AM}// COMMENT: {2/23/2005 1:09:18 PM}				Ctime t;
+// COMMENT: {4/12/2005 9:59:41 AM}// COMMENT: {2/23/2005 1:09:18 PM}				t.SetInput("seconds");
+// COMMENT: {4/12/2005 9:59:41 AM}// COMMENT: {2/23/2005 1:09:18 PM}				t.SetValue(8000);
+// COMMENT: {4/12/2005 9:59:41 AM}// COMMENT: {2/23/2005 1:09:18 PM}				well.Insert(t, test);
+// COMMENT: {4/12/2005 9:59:41 AM}			}
 #endif
 
 			// not undoable
@@ -2268,7 +2264,8 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 		{
 			const struct head_ic* head_ic_ptr = ::head_ic[i];
 
-			if (i == 0) {
+			if (i == 0)
+			{
 				// if the first zone is equivalent to the default headIC
 				// don't add it
 

@@ -203,6 +203,7 @@
 #define ID_MEDIAZONES_RESETALLON        223
 #define IDD_TEST_CMODGRIDCTRLEX         223
 #define ID_MEDIAZONES_RESETALLOFF       224
+#define IDD_BC_FLUX_PROPPAGE3           224
 #define ID_MEDIAZONES_SETALLSELECTED    225
 #define ID_MEDIAZONES_SETALLOFF         226
 #define ID_MEDIAZONES_SELECTALL         227
@@ -479,6 +480,7 @@
 #define IDC_DESC_EDIT                   1223
 #define IDC_ALLOCATE_BY_HEAD            1224
 #define IDC_HEAD_GRID                   1225
+#define IDC_FLUX_GRID                   1229
 #define IDC_RESIZE_COLUMN               28654
 #define IDC_RESIZE_ROW                  28655
 #define IDR_POPUP                       28656
@@ -492,7 +494,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        248
 #define _APS_NEXT_COMMAND_VALUE         32793
-#define _APS_NEXT_CONTROL_VALUE         1228
+#define _APS_NEXT_CONTROL_VALUE         1230
 #define _APS_NEXT_SYMED_VALUE           125
 #endif
 #endif
