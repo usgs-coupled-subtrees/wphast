@@ -61,7 +61,7 @@ void CBCFluxPropertyPage2::DoDataExchange(CDataExchange* pDX)
 		CBC bc;
 
 		// bc_type
-		bc.bc_type = SPECIFIED;
+		bc.bc_type = FLUX;
 
 		// flux time series
 		//
@@ -70,6 +70,10 @@ void CBCFluxPropertyPage2::DoDataExchange(CDataExchange* pDX)
 		// solution time series
 		//
 		CGlobal::DDX_GridTimeSeries(pDX, IDC_SOLUTION_GRID, bc.m_bc_solution);
+		if (bc.m_bc_solution.size())
+		{
+			bc.bc_solution_type = ASSOCIATED;
+		}
 
 		// face
 		//

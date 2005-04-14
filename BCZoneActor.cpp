@@ -11,6 +11,7 @@
 #include "BCFluxPropertyPage.h"
 #include "BCFluxPropertyPage2.h"
 #include "BCLeakyPropertyPage.h"
+#include "BCLeakyPropertyPage2.h"
 // COMMENT: {4/11/2005 2:14:18 PM}#include "BCSpecifiedPropertyPage.h"
 #include "BCSpecifiedHeadPropertyPage.h"
 #include "ETSLayout/ETSLayout.h"
@@ -249,7 +250,7 @@ void CBCZoneActor::Edit(CTreeCtrl* pTreeCtrl, int nStressPeriod)
 	}
 	else if (this->m_bc.bc_type == LEAKY)
 	{
-		CBCLeakyPropertyPage leakyProps;
+		CBCLeakyPropertyPage2 leakyProps;
 		props.AddPage(&leakyProps);
 		leakyProps.SetProperties(this->GetBC());		
 		if (props.DoModal() == IDOK)

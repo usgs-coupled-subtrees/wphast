@@ -22,6 +22,7 @@
 #include "MediaPropertyPage.h"
 #include "BCFluxPropertyPage.h"
 #include "BCLeakyPropertyPage.h"
+#include "BCLeakyPropertyPage2.h"
 #include "BCSpecifiedPropertyPage.h"
 #include "ICHeadPropertyPage.h"
 #include "ChemICPropertyPage.h"

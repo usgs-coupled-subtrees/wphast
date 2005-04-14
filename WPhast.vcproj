@@ -303,6 +303,9 @@
 				RelativePath="BCLeakyPropertyPage.cpp">
 			</File>
 			<File
+				RelativePath="BCLeakyPropertyPage2.cpp">
+			</File>
+			<File
 				RelativePath="BCSpecifiedHeadPropertyPage.cpp">
 			</File>
 			<File
@@ -722,6 +725,9 @@
 			</File>
 			<File
 				RelativePath="BCLeakyPropertyPage.h">
+			</File>
+			<File
+				RelativePath="BCLeakyPropertyPage2.h">
 			</File>
 			<File
 				RelativePath="BCSpecifiedHeadPropertyPage.h">

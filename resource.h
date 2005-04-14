@@ -205,6 +205,7 @@
 #define ID_MEDIAZONES_RESETALLOFF       224
 #define IDD_BC_FLUX_PROPPAGE3           224
 #define ID_MEDIAZONES_SETALLSELECTED    225
+#define IDD_BC_LEAKY_PROPPAGE3          225
 #define ID_MEDIAZONES_SETALLOFF         226
 #define ID_MEDIAZONES_SELECTALL         227
 #define ID_MEDIAZONES_UNSELECTALL       228
@@ -369,6 +370,8 @@
 #define IDC_BOTTOM                      1113
 #define IDC_GRID_SCHEDULES              1113
 #define IDC_SOLUTION_GRID               1113
+#define IDC_SOLUTION_GRID2              1114
+#define IDC_SINGLE_GRID                 1114
 #define IDC_EDIT_MO_X                   1115
 #define IDC_STATIC_MODEL_ORIGIN         1116
 #define IDC_EDIT_MO_Y                   1119
