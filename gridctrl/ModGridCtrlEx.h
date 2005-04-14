@@ -107,6 +107,8 @@ protected:
 	BOOL                                 m_bButtonCaptured;
 	CRect                                m_rcButton;
 	CRect                                m_rcListBox;
+	CCellID m_idLastHotCell;
+
 
 	static CTheme s_themeButton;
 	static CTheme s_themeCombo;

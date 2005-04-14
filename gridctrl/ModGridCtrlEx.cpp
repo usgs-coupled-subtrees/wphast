@@ -517,24 +517,23 @@ void CModGridCtrlEx::OnMouseMove(UINT nFlags, CPoint point)
 		this->m_bButtonDown = FALSE;
 		if (this->s_themeButton || this->s_themeCombo)
 		{
-			static CCellID idLastHotCell;
-			if (idLastHotCell.IsValid())
+			if (this->m_idLastHotCell.IsValid())
 			{
-				this->RedrawCell(idLastHotCell);
-				idLastHotCell.col = idLastHotCell.row = -1;
+				this->RedrawCell(this->m_idLastHotCell);
+				this->m_idLastHotCell.col = this->m_idLastHotCell.row = -1;
 			}
 			CCellID idHotCell = this->GetCellFromPt(point);
 			if (this->IsCheckMarkCell(idHotCell))
 			{
 				this->RedrawCell(idHotCell);
-				idLastHotCell = idHotCell;
+				this->m_idLastHotCell = idHotCell;
 			}
 			if (idHotCell == this->m_idCurrentCell)
 			{
 				if (this->IsDropDownCell(idHotCell))
 				{
 					this->RedrawCell(idHotCell);
-					idLastHotCell = idHotCell;
+					this->m_idLastHotCell = idHotCell;
 				}
 			}
 		}
