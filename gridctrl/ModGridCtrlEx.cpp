@@ -449,6 +449,9 @@ void CModGridCtrlEx::OnLButtonDblClk(UINT nFlags, CPoint point)
 		CCellID dblClkCell = this->GetCellFromPt(point);
 		if (this->IsCheckMarkCell(dblClkCell))
 		{
+			//{{ {4/14/2005 8:02:17 PM}
+			if (!this->m_idCurrentCell.IsValid()) return;
+			//}} {4/14/2005 8:02:17 PM}
 			if (!this->IsCellEnabled(this->m_idCurrentCell)) return;
 
 			CRect rc = this->GetCheckRect(dblClkCell.row, dblClkCell.col);

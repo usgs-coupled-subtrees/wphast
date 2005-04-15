@@ -119,7 +119,7 @@ BOOL CBCLeakyPropertyPage2::OnInitDialog()
 	this->CreateRoot(VERTICAL)
 		<< item(IDC_HEAD_GRID, GREEDY)
 		<< item(IDC_SOLUTION_GRID, GREEDY)
-		<< item(IDC_SINGLE_GRID, GREEDY)
+		<< item(IDC_SINGLE_GRID, ABSOLUTE_VERT)
 		//<< itemFixed(VERTICAL, 3)
 		<< 	( pane(HORIZONTAL, ABSOLUTE_VERT, 0, 0, 0 )
 			<< item(IDC_FACE_STATIC, NORESIZE, 0, 0, 0, 0)
@@ -168,7 +168,7 @@ BOOL CBCLeakyPropertyPage2::SetupGrids(void)
 		this->m_gridSolution.EnableTitleTips(FALSE);
 
 		this->m_gridSingle.SetRowCount(3);
-		this->m_gridSingle.SetColumnCount(7);
+		this->m_gridSingle.SetColumnCount(8);
 		VERIFY(this->m_gridSingle.SetFixedRowCount(1) == TRUE);
 		this->m_gridSingle.SetFixedColumnCount(1);
 		this->m_gridSingle.EnableTitleTips(FALSE);
@@ -289,21 +289,38 @@ BOOL CBCLeakyPropertyPage2::SetupGrids(void)
 	Item.szText = _T("Distance 1");
 	this->m_gridHead.SetItem(&Item);
 	this->m_gridSolution.SetItem(&Item);
+	//{{
+	Item.col = 5;
+	this->m_gridSingle.SetItem(&Item);
+	//}}
 
 	Item.col = 7;
 	Item.szText = _T("Value 2");
 	this->m_gridHead.SetItem(&Item);
 	this->m_gridSolution.SetItem(&Item);
+	//{{
+	Item.col = 6;
+	this->m_gridSingle.SetItem(&Item);
+	//}}
 
 	Item.col = 8;
 	Item.szText = _T("Distance 2");
 	this->m_gridHead.SetItem(&Item);
 	this->m_gridSolution.SetItem(&Item);
+	//{{
+	Item.col = 7;
+	this->m_gridSingle.SetItem(&Item);
+	//}}
+
+	this->m_gridSingle.SetItemText(1, 0, _T("Thickness"));
+	this->m_gridSingle.SetItemText(2, 0, _T("Hydraulic conductivity"));
+
 
 	this->m_gridHead.SetItemText(1, 0, _T("0"));
 	this->m_gridHead.DisableCell(1, 0);
 	this->m_gridSolution.SetItemText(1, 0, _T("0"));
 	this->m_gridSolution.DisableCell(1, 0);
+	this->m_gridSolution.AutoSizeColumn(0);
 
 	this->m_gridHead.DisableCell(1, 1);
 	this->m_gridSolution.DisableCell(1, 1);

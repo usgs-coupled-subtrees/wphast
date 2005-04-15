@@ -96,6 +96,9 @@ void CZoneResizeAction::Execute(void)
 	///CGlobal::PickProp(this->m_pZone, this->m_pView->GetRenderer(), this->m_pView->GetRenderWindowInteractor());
 	///CGlobal::PickProp(this->m_pView, this->m_pZone);
 // COMMENT: {11/3/2004 3:32:40 PM}	this->m_pZone->Select(this->m_pView);
+	//this->m_pZone->Select(this->m_pView);
+	this->m_pView->GetBoxWidget()->SetProp3D(this->m_pZone);
+	this->m_pView->GetBoxWidget()->PlaceWidget();
 
 	////{{{{Should be handled by pick
 
