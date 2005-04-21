@@ -39,6 +39,7 @@ protected:  // control bar embedded members
 	CPropertyTreeControlBar m_wndTreeControlBar;
 	// CSizingDialogBarCFVS7   m_wndDialogBarBoxProperties;
 	CBoxPropertiesDialogBar   m_wndDialogBarBoxProperties;
+	//CReBar      m_wndReBar;
 	//}}SRC
 #endif
 

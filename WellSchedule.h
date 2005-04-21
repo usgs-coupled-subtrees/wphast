@@ -16,6 +16,7 @@ extern "C" {
 
 #include "time.h"
 #include "property.h"
+#include "TimeSeries.h"
 
 class CWellRate
 {
@@ -111,7 +112,6 @@ public:
 
 	CWellSchedule& operator=(const CWellSchedule& rhs); // copy assignment
 
-
 // COMMENT: {8/30/2004 9:21:03 PM}	std::pair<std::map<Ctime, CWellRate>::iterator, bool>
 // COMMENT: {8/30/2004 9:21:03 PM}		Insert(const Ctime& time, const CWellRate& rate);
 
@@ -120,13 +120,14 @@ public:
 	void InsertSolution(const Ctime& time, const Cproperty& solution);
 
 	void Serialize(bool bStoring, hid_t loc_id);
-	std::map<Ctime, CWellRate> GetMap(void)const;
-
+// COMMENT: {4/19/2005 1:51:32 PM}	std::map<Ctime, CWellRate> GetMap(void)const;
+	const CTimeSeries<CWellRate>& GetPumpSched(void)const;
 
 protected:
 	friend class CWellActor;
 	friend std::ostream& operator<< (std::ostream &os, const CWellSchedule &a);
-	std::map<Ctime, CWellRate> m_map;
-	std::map<Ctime, Cproperty> m_q_map;
-	std::map<Ctime, Cproperty> m_solution_map;
+	CTimeSeries<CWellRate> m_pumpingSchedule;
+	//std::map<Ctime, CWellRate> m_map;
+	//std::map<Ctime, Cproperty> m_q_map;
+	//std::map<Ctime, Cproperty> m_solution_map;
 };

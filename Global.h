@@ -39,7 +39,11 @@ public:
 	static bool IsValidTransform(vtkTransform* pTransform);
 	static void EnableFace(CDataExchange* pDX, BOOL bEnable);
 	static void DDX_Face(CDataExchange* pDX, CBC& r_bc);
+
+	// Cproperty
 	static void DDX_Property(CDataExchange* pDX, CCheckTreeCtrl* pTree, HTREEITEM hti, Cproperty* value, Cproperty* fixed, Cproperty* linear);
+	static void DDX_Property(CDataExchange* pDX, int nIDC, int nRow, struct property* pProperty, bool bRequired);
+
 	static void EnableFixed(CWnd* pDlgWnd, BOOL bEnable);
 	static void EnableLinearInterpolation(CWnd* pDlgWnd, BOOL bEnable);
 	static void DDX_AssocFixed(CDataExchange* pDX, CTreeCtrl* pTree, HTREEITEM hti, CBC& value);

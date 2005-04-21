@@ -2165,91 +2165,6 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 		{
 			const Well* well_ptr = &::wells[i];			
 			CWellSchedule well(*well_ptr);
-			// CWell well(*well_ptr);
-
-// COMMENT: {2/23/2005 1:08:49 PM}			CWellRate rate(*well_ptr);
-// COMMENT: {2/23/2005 1:07:49 PM}			well.Insert(timeBegin, rate);
-
-#if defined(__CPPUNIT__)
-// COMMENT: {9/2/2004 9:56:17 PM}///TEST 1
-// COMMENT: {9/2/2004 9:56:17 PM}			// simulate the following
-// COMMENT: {9/2/2004 9:56:17 PM}			/*
-// COMMENT: {9/2/2004 9:56:17 PM}			[-]-WELL 2
-// COMMENT: {9/2/2004 9:56:17 PM}			     |
-// COMMENT: {9/2/2004 9:56:17 PM}			    [-]-pumping rate
-// COMMENT: {9/2/2004 9:56:17 PM}			          |- 1300 seconds -88
-// COMMENT: {9/2/2004 9:56:17 PM}			*/
-// COMMENT: {9/2/2004 9:56:17 PM}			if (well.n_user == 2)
-// COMMENT: {9/2/2004 9:56:17 PM}			{
-// COMMENT: {9/2/2004 9:56:17 PM}				CWellRate test(*well_ptr);
-// COMMENT: {9/2/2004 9:56:17 PM}				test.SetRate(-88);
-// COMMENT: {9/2/2004 9:56:17 PM}				Ctime t;
-// COMMENT: {9/2/2004 9:56:17 PM}				t.SetInput("seconds");
-// COMMENT: {9/2/2004 9:56:17 PM}				t.SetValue(1300);
-// COMMENT: {9/2/2004 9:56:17 PM}				well.Insert(t, test);
-// COMMENT: {9/2/2004 9:56:17 PM}			}
-///TEST 2
-// COMMENT: {4/12/2005 9:59:41 AM}			// simulate the following
-// COMMENT: {4/12/2005 9:59:41 AM}			/*
-// COMMENT: {4/12/2005 9:59:41 AM}			[-]-WELL 2
-// COMMENT: {4/12/2005 9:59:41 AM}			     |
-// COMMENT: {4/12/2005 9:59:41 AM}			    [-]-pumping rate
-// COMMENT: {4/12/2005 9:59:41 AM}			          |- 600 seconds -66
-// COMMENT: {4/12/2005 9:59:41 AM}			*/
-// COMMENT: {4/12/2005 9:59:41 AM}			if (well.n_user == 2)
-// COMMENT: {4/12/2005 9:59:41 AM}			{
-// COMMENT: {4/12/2005 9:59:41 AM}// COMMENT: {2/23/2005 1:08:57 PM}				CWellRate test(*well_ptr);
-// COMMENT: {4/12/2005 9:59:41 AM}// COMMENT: {2/23/2005 1:08:57 PM}				test.SetRate(-66);
-// COMMENT: {4/12/2005 9:59:41 AM}// COMMENT: {2/23/2005 1:08:57 PM}				Ctime t;
-// COMMENT: {4/12/2005 9:59:41 AM}// COMMENT: {2/23/2005 1:08:57 PM}				t.SetInput("seconds");
-// COMMENT: {4/12/2005 9:59:41 AM}// COMMENT: {2/23/2005 1:08:57 PM}				t.SetValue(600);
-// COMMENT: {4/12/2005 9:59:41 AM}// COMMENT: {2/23/2005 1:08:57 PM}				well.Insert(t, test);
-// COMMENT: {4/12/2005 9:59:41 AM}			}
-// COMMENT: {4/12/2005 9:59:41 AM}///TEST 3
-// COMMENT: {4/12/2005 9:59:41 AM}			// simulate the following
-// COMMENT: {4/12/2005 9:59:41 AM}			/*
-// COMMENT: {4/12/2005 9:59:41 AM}			[-]-WELL 2
-// COMMENT: {4/12/2005 9:59:41 AM}			     |
-// COMMENT: {4/12/2005 9:59:41 AM}			    [-]-pumping rate
-// COMMENT: {4/12/2005 9:59:41 AM}			          |- 5000 seconds -55
-// COMMENT: {4/12/2005 9:59:41 AM}			*/
-// COMMENT: {4/12/2005 9:59:41 AM}			if (well.n_user == 2)
-// COMMENT: {4/12/2005 9:59:41 AM}			{
-// COMMENT: {4/12/2005 9:59:41 AM}// COMMENT: {2/23/2005 1:09:02 PM}				CWellRate test(*well_ptr);
-// COMMENT: {4/12/2005 9:59:41 AM}// COMMENT: {2/23/2005 1:09:02 PM}				test.SetRate(-55);
-// COMMENT: {4/12/2005 9:59:41 AM}// COMMENT: {2/23/2005 1:09:02 PM}				Ctime t;
-// COMMENT: {4/12/2005 9:59:41 AM}// COMMENT: {2/23/2005 1:09:02 PM}				t.SetInput("seconds");
-// COMMENT: {4/12/2005 9:59:41 AM}// COMMENT: {2/23/2005 1:09:02 PM}				t.SetValue(5000);
-// COMMENT: {4/12/2005 9:59:41 AM}// COMMENT: {2/23/2005 1:09:02 PM}				well.Insert(t, test);
-// COMMENT: {4/12/2005 9:59:41 AM}			}
-// COMMENT: {4/12/2005 9:59:41 AM}			if (well.n_user == 2)
-// COMMENT: {4/12/2005 9:59:41 AM}			{
-// COMMENT: {4/12/2005 9:59:41 AM}// COMMENT: {2/23/2005 1:09:07 PM}				CWellRate test(*well_ptr);
-// COMMENT: {4/12/2005 9:59:41 AM}// COMMENT: {2/23/2005 1:09:07 PM}				test.SetRate(-66);
-// COMMENT: {4/12/2005 9:59:41 AM}// COMMENT: {2/23/2005 1:09:07 PM}				Ctime t;
-// COMMENT: {4/12/2005 9:59:41 AM}// COMMENT: {2/23/2005 1:09:07 PM}				t.SetInput("seconds");
-// COMMENT: {4/12/2005 9:59:41 AM}// COMMENT: {2/23/2005 1:09:07 PM}				t.SetValue(6000);
-// COMMENT: {4/12/2005 9:59:41 AM}// COMMENT: {2/23/2005 1:09:07 PM}				well.Insert(t, test);
-// COMMENT: {4/12/2005 9:59:41 AM}			}
-// COMMENT: {4/12/2005 9:59:41 AM}			if (well.n_user == 2)
-// COMMENT: {4/12/2005 9:59:41 AM}			{
-// COMMENT: {4/12/2005 9:59:41 AM}// COMMENT: {2/23/2005 1:09:12 PM}				CWellRate test(*well_ptr);
-// COMMENT: {4/12/2005 9:59:41 AM}// COMMENT: {2/23/2005 1:09:12 PM}				test.SetRate(-77);
-// COMMENT: {4/12/2005 9:59:41 AM}// COMMENT: {2/23/2005 1:09:12 PM}				Ctime t;
-// COMMENT: {4/12/2005 9:59:41 AM}// COMMENT: {2/23/2005 1:09:12 PM}				t.SetInput("seconds");
-// COMMENT: {4/12/2005 9:59:41 AM}// COMMENT: {2/23/2005 1:09:12 PM}				t.SetValue(7000);
-// COMMENT: {4/12/2005 9:59:41 AM}// COMMENT: {2/23/2005 1:09:12 PM}				well.Insert(t, test);
-// COMMENT: {4/12/2005 9:59:41 AM}			}
-// COMMENT: {4/12/2005 9:59:41 AM}			if (well.n_user == 2)
-// COMMENT: {4/12/2005 9:59:41 AM}			{
-// COMMENT: {4/12/2005 9:59:41 AM}// COMMENT: {2/23/2005 1:09:18 PM}				CWellRate test(*well_ptr);
-// COMMENT: {4/12/2005 9:59:41 AM}// COMMENT: {2/23/2005 1:09:18 PM}				test.SetRate(-88);
-// COMMENT: {4/12/2005 9:59:41 AM}// COMMENT: {2/23/2005 1:09:18 PM}				Ctime t;
-// COMMENT: {4/12/2005 9:59:41 AM}// COMMENT: {2/23/2005 1:09:18 PM}				t.SetInput("seconds");
-// COMMENT: {4/12/2005 9:59:41 AM}// COMMENT: {2/23/2005 1:09:18 PM}				t.SetValue(8000);
-// COMMENT: {4/12/2005 9:59:41 AM}// COMMENT: {2/23/2005 1:09:18 PM}				well.Insert(t, test);
-// COMMENT: {4/12/2005 9:59:41 AM}			}
-#endif
 
 			// not undoable
 			CWellCreateAction *pAction = new CWellCreateAction(this, well);
@@ -2552,6 +2467,25 @@ BOOL CWPhastDoc::WriteTransDat(std::ostream& os)
 
 	std::multimap<Ctime, ISerial*> series;
 
+// COMMENT: {4/19/2005 2:09:54 PM}	// Wells
+// COMMENT: {4/19/2005 2:09:54 PM}	CTreeCtrlNode nodeWells = this->GetPropertyTreeControlBar()->GetWellsNode();
+// COMMENT: {4/19/2005 2:09:54 PM}	nCount = nodeWells.GetChildCount();
+// COMMENT: {4/19/2005 2:09:54 PM}	for (int i = 0; i < nCount; ++i)
+// COMMENT: {4/19/2005 2:09:54 PM}	{
+// COMMENT: {4/19/2005 2:09:54 PM}		if (CWellActor *pWellActor = CWellActor::SafeDownCast((vtkObject*)nodeWells.GetChildAt(i).GetData()))
+// COMMENT: {4/19/2005 2:09:54 PM}		{
+// COMMENT: {4/19/2005 2:09:54 PM}			std::map<Ctime, CWellRate> map = pWellActor->GetWell().GetMap();
+// COMMENT: {4/19/2005 2:09:54 PM}			ASSERT(map.size() > 0);
+// COMMENT: {4/19/2005 2:09:54 PM}			if (map.size() > 0)
+// COMMENT: {4/19/2005 2:09:54 PM}			{
+// COMMENT: {4/19/2005 2:09:54 PM}				std::map<Ctime, CWellRate>::const_iterator iter = map.begin();
+// COMMENT: {4/19/2005 2:09:54 PM}				for (; iter != map.end(); ++iter)
+// COMMENT: {4/19/2005 2:09:54 PM}				{
+// COMMENT: {4/19/2005 2:09:54 PM}					series.insert(std::multimap<Ctime, ISerial*>::value_type((*iter).first, pWellActor));
+// COMMENT: {4/19/2005 2:09:54 PM}				}
+// COMMENT: {4/19/2005 2:09:54 PM}			}
+// COMMENT: {4/19/2005 2:09:54 PM}		}
+// COMMENT: {4/19/2005 2:09:54 PM}	}
 	// Wells
 	CTreeCtrlNode nodeWells = this->GetPropertyTreeControlBar()->GetWellsNode();
 	nCount = nodeWells.GetChildCount();
@@ -2559,18 +2493,10 @@ BOOL CWPhastDoc::WriteTransDat(std::ostream& os)
 	{
 		if (CWellActor *pWellActor = CWellActor::SafeDownCast((vtkObject*)nodeWells.GetChildAt(i).GetData()))
 		{
-			std::map<Ctime, CWellRate> map = pWellActor->GetWell().GetMap();
-			ASSERT(map.size() > 0);
-			if (map.size() > 0)
-			{
-				std::map<Ctime, CWellRate>::const_iterator iter = map.begin();
-				for (; iter != map.end(); ++iter)
-				{
-					series.insert(std::multimap<Ctime, ISerial*>::value_type((*iter).first, pWellActor));
-				}
-			}
+			os << pWellActor->GetWell();
 		}
 	}
+
 
 // COMMENT: {4/8/2005 6:57:04 PM}	// Additional stress periods
 // COMMENT: {4/8/2005 6:57:04 PM}	int nStressPeriods = this->GetPropertyTreeControlBar()->GetStressPeriodCount();

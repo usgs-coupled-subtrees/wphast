@@ -4,9 +4,17 @@
 
 #define GVIS_DISABLED             0x0200
 
+#define GV_HIGHLIGHT_NEVER        0x0000
+#define GV_HIGHLIGHT_ALWAYS       0x0001
+#define GV_HIGHLIGHT_WITH_FOCUS   0x0002
+
 void AFXAPI DDX_TextGridControl(CDataExchange* pDX, int nIDC, int nRow, int nCol, double& value);
 void AFXAPI DDX_TextGridControl(CDataExchange* pDX, int nIDC, int nRow, int nCol, CString& value);
 void AFXAPI DDX_TextGridControl(CDataExchange* pDX, int nIDC, int nRow, int nCol, int& value);
+
+void AFXAPI DDX_GridControlFail(CDataExchange* pDX, int nIDC, int nRow, int nCol, LPCTSTR lpszText);
+void AFXAPI DDX_GridControlFail(CDataExchange* pDX, int nIDC, int nRow, int nCol, UINT nIDText);
+
 
 class CModGridCtrl :
 	public CGridCtrl
@@ -23,6 +31,8 @@ public:
 	BOOL EnableCell(const CCellID& cell);
 	bool IsCellEnabled(int nRow, int nCol)const;
 	bool IsCellEnabled(const CCellID& cell)const;
+	void SetHighLight(long nNewValue);
+	long GetHighLight(void)const;
 
 protected:
 	// Virtual overrides
@@ -38,6 +48,7 @@ protected:
 	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
     afx_msg void OnEndInPlaceEdit(NMHDR* pNMHDR, LRESULT* pResult);
+	long m_nHighLight;
 public:
 //	afx_msg void OnChar(UINT nChar, UINT nRepCnt, UINT nFlags);
 	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
@@ -45,4 +56,6 @@ public:
 	afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnChar(UINT nChar, UINT nRepCnt, UINT nFlags);
 	afx_msg UINT OnGetDlgCode();
+	afx_msg void OnKillFocus(CWnd* pNewWnd);
+	afx_msg void OnSetFocus(CWnd* pOldWnd);
 };

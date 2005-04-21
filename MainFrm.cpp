@@ -109,6 +109,18 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	DockControlBar(&m_wndToolBar);
 
 #ifndef USE_ORIGINAL
+// COMMENT: {4/20/2005 6:25:54 PM}	////{{{{
+// COMMENT: {4/20/2005 6:25:54 PM}	if (!m_wndReBar.Create(this) || !m_wndReBar.AddBar(&m_wndToolBar))
+// COMMENT: {4/20/2005 6:25:54 PM}	{
+// COMMENT: {4/20/2005 6:25:54 PM}		TRACE0("Failed to create rebar\n");
+// COMMENT: {4/20/2005 6:25:54 PM}		return -1;      // fail to create
+// COMMENT: {4/20/2005 6:25:54 PM}	}
+// COMMENT: {4/20/2005 6:25:54 PM}	m_wndReBar.SetBarStyle(m_wndReBar.GetBarStyle() & ~CBRS_HIDE_INPLACE);
+// COMMENT: {4/20/2005 6:25:54 PM}
+// COMMENT: {4/20/2005 6:25:54 PM}	// position m_wndToolBarRun next to m_wndToolBar
+// COMMENT: {4/20/2005 6:25:54 PM}	m_wndReBar.GetReBarCtrl().MaximizeBand(1);
+// COMMENT: {4/20/2005 6:25:54 PM}	////}}}}
+
 	// Layout ControlBars
 	//
 	OnViewResetDefaultLayout();

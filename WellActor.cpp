@@ -154,7 +154,7 @@ void CWellActor::UnAdd(CPropertyTreeControlBar *pTree)
 	}
 }
 
-void CWellActor::Update(CTreeCtrlNode node)const
+void CWellActor::Update(CTreeCtrlNode node)
 {
 	// delay the refresh
 	//
@@ -164,16 +164,27 @@ void CWellActor::Update(CTreeCtrlNode node)const
 	// store expanded states
 	bool bMainExpanded = false;
 	bool bRatesExpanded = false;
+	bool bSolnsExpanded = false;
 	if (node.HasChildren())
 	{
 		bMainExpanded = ((node.GetState(TVIS_EXPANDED) & TVIS_EXPANDED) != 0);
 		if (bMainExpanded)
 		{
-			// CTreeCtrlNode nodeRates = node.GetLastChild();
-			if (node.GetLastChild().HasChildren())
+// COMMENT: {4/19/2005 4:33:23 PM}			// CTreeCtrlNode nodeRates = node.GetLastChild();
+// COMMENT: {4/19/2005 4:33:23 PM}			if (node.GetLastChild().HasChildren())
+// COMMENT: {4/19/2005 4:33:23 PM}			{
+// COMMENT: {4/19/2005 4:33:23 PM}				bRatesExpanded = ((node.GetLastChild().GetState(TVIS_EXPANDED) & TVIS_EXPANDED) != 0);
+// COMMENT: {4/19/2005 4:33:23 PM}			}
+			//{{
+			if (this->m_nodeRates)
 			{
-				bRatesExpanded = ((node.GetLastChild().GetState(TVIS_EXPANDED) & TVIS_EXPANDED) != 0);
+				bRatesExpanded = ((this->m_nodeRates.GetState(TVIS_EXPANDED) & TVIS_EXPANDED) != 0);
 			}
+			if (this->m_nodeSolutions)
+			{
+				bSolnsExpanded = ((this->m_nodeSolutions.GetState(TVIS_EXPANDED) & TVIS_EXPANDED) != 0);
+			}
+			//}}
 		}		
 	}
 	//}}
@@ -246,31 +257,49 @@ void CWellActor::Update(CTreeCtrlNode node)const
 	}
 
 	bool bPumping = false;
-	std::map<Ctime, CWellRate>::const_iterator it = this->m_well.m_map.begin();
-	for(; it != this->m_well.m_map.end(); ++it)
+	size_t nSolutions = 0;
+	size_t nRates     = 0;
+	const CTimeSeries<CWellRate>& map = this->m_well.GetPumpSched();
+	CTimeSeries<CWellRate>::const_iterator it = map.begin();
+	for(; it != map.end(); ++it)
 	{
 		CWellRate rate((*it).second);
 		if (rate.q_defined)
 		{
-			bPumping = (rate.q < 0);
-			break;
+			++nRates;
+			bPumping = (rate.q < 0);			
+		}
+		if (rate.solution_defined)
+		{
+			++nSolutions;
 		}
 	}
 
-	CTreeCtrlNode seriesNode = bPumping ? node.AddTail("pumping rate") : node.AddTail("injection rate");
+	CTreeCtrlNode rateNode;
+	CTreeCtrlNode solnNode;
+	if (nRates)
+	{
+		rateNode = bPumping ? node.AddTail("pumping rate") : node.AddTail("injection rate");
+	}
+	if (nSolutions)
+	{
+		solnNode = node.AddTail("solution");
+	}
 
 	// add the time series nodes
-	std::map<Ctime, CWellRate>::const_iterator rateIter = this->m_well.m_map.begin();
-	for(; rateIter != this->m_well.m_map.end(); ++rateIter)
+	//
+	it = map.begin();
+	CString strTime;
+	for(; it != map.end(); ++it)
 	{
-		Ctime time((*rateIter).first);
-		CWellRate rate((*rateIter).second);
+		Ctime time(it->first);
+		CWellRate rate(it->second);
 
-		strItem.Format("%g", time.value);
+		strTime.Format("%g", time.value);
 		if (time.type == UNITS)
 		{
-			strItem += " ";
-			strItem += time.input;
+			strTime += " ";
+			strTime += time.input;
 		}
 		if (rate.q_defined)
 		{
@@ -283,15 +312,14 @@ void CWellActor::Update(CTreeCtrlNode node)const
 			{
 				str.Format(" %g", rate.q);
 			}
-			strItem += str;
+			rateNode.AddTail(strTime + str);
 		}
 		if (rate.solution_defined)
 		{
 			CString str;
 			str.Format(" %d", rate.solution);
-			strItem += str;
+			solnNode.AddTail(strTime + str);
 		}
-		seriesNode.AddTail(strItem);
 	}
 
 	if (bMainExpanded)
@@ -299,9 +327,15 @@ void CWellActor::Update(CTreeCtrlNode node)const
 		node.Expand(TVE_EXPAND);
 		if (bRatesExpanded)
 		{
-			node.GetLastChild().Expand(TVE_EXPAND);
+			rateNode.Expand(TVE_EXPAND);
+		}
+		if (bSolnsExpanded)
+		{
+			solnNode.Expand(TVE_EXPAND);
 		}
 	}
+	this->m_nodeRates = rateNode;
+	this->m_nodeSolutions = solnNode;
 }
 
 void CWellActor::Remove(CPropertyTreeControlBar* /*pTree*/)
@@ -381,10 +415,11 @@ std::ostream& CWellActor::Output(std::ostream& os, const Ctime& time)const
 {
 	os << (*this);
 
-	std::map<Ctime, CWellRate> map = this->m_well.GetMap();
+	//std::map<Ctime, CWellRate> map = this->m_well.GetMap();
+	const CTimeSeries<CWellRate>& map = this->m_well.GetPumpSched();
 	if (map.size() > 0)
 	{
-		std::map<Ctime, CWellRate>::const_iterator iter = map.begin();
+		CTimeSeries<CWellRate>::const_iterator iter = map.begin();
 		for (; iter != map.end(); ++iter)
 		{
 			Ctime t((*iter).first);
@@ -401,45 +436,46 @@ std::ostream& CWellActor::Output(std::ostream& os, const Ctime& time)const
 
 std::ostream& operator<< (std::ostream &os, const CWellActor &a)
 {
-	os << "Well " << a.m_well.n_user << a.m_well.description << "\n";
-	os << "\t" << a.m_well.x << " " << a.m_well.y << "\n";	
-
-	if (a.m_well.diameter_defined)
-	{
-		os << "\t" << "-diameter " << a.m_well.diameter << "\n";
-	}
-	else if (a.m_well.radius_defined)
-	{
-		os << "\t" << "-radius " << a.m_well.radius << "\n";
-	}
-	else
-	{
-		ASSERT(FALSE);
-	}
-
-	for (int i = 0; i < a.m_well.count_elevation; ++i)
-	{
-		os << "\t" << "-elevation " << a.m_well.elevation[i].bottom << " " << a.m_well.elevation[i].top << "\n";
-	}
-
-	if (a.m_well.lsd_defined)
-	{
-		os << "\t" << "-land_surface_datum " << a.m_well.lsd << "\n";
-	}
-
-	for (int i = 0; i < a.m_well.count_depth; ++i)
-	{
-		os << "\t" << "-depth " << a.m_well.depth[i].bottom << " " << a.m_well.depth[i].top << "\n";
-	}
-
-	if (a.m_well.mobility_and_pressure)
-	{
-		os << "\t" << "-allocate_by_head_and_mobility True\n";
-	}
-	else
-	{
-		os << "\t" << "-allocate_by_head_and_mobility False\n";
-	}
+	os << a.m_well;
+// COMMENT: {4/19/2005 2:20:49 PM}	os << "Well " << a.m_well.n_user << a.m_well.description << "\n";
+// COMMENT: {4/19/2005 2:20:49 PM}	os << "\t" << a.m_well.x << " " << a.m_well.y << "\n";	
+// COMMENT: {4/19/2005 2:20:49 PM}
+// COMMENT: {4/19/2005 2:20:49 PM}	if (a.m_well.diameter_defined)
+// COMMENT: {4/19/2005 2:20:49 PM}	{
+// COMMENT: {4/19/2005 2:20:49 PM}		os << "\t" << "-diameter " << a.m_well.diameter << "\n";
+// COMMENT: {4/19/2005 2:20:49 PM}	}
+// COMMENT: {4/19/2005 2:20:49 PM}	else if (a.m_well.radius_defined)
+// COMMENT: {4/19/2005 2:20:49 PM}	{
+// COMMENT: {4/19/2005 2:20:49 PM}		os << "\t" << "-radius " << a.m_well.radius << "\n";
+// COMMENT: {4/19/2005 2:20:49 PM}	}
+// COMMENT: {4/19/2005 2:20:49 PM}	else
+// COMMENT: {4/19/2005 2:20:49 PM}	{
+// COMMENT: {4/19/2005 2:20:49 PM}		ASSERT(FALSE);
+// COMMENT: {4/19/2005 2:20:49 PM}	}
+// COMMENT: {4/19/2005 2:20:49 PM}
+// COMMENT: {4/19/2005 2:20:49 PM}	for (int i = 0; i < a.m_well.count_elevation; ++i)
+// COMMENT: {4/19/2005 2:20:49 PM}	{
+// COMMENT: {4/19/2005 2:20:49 PM}		os << "\t" << "-elevation " << a.m_well.elevation[i].bottom << " " << a.m_well.elevation[i].top << "\n";
+// COMMENT: {4/19/2005 2:20:49 PM}	}
+// COMMENT: {4/19/2005 2:20:49 PM}
+// COMMENT: {4/19/2005 2:20:49 PM}	if (a.m_well.lsd_defined)
+// COMMENT: {4/19/2005 2:20:49 PM}	{
+// COMMENT: {4/19/2005 2:20:49 PM}		os << "\t" << "-land_surface_datum " << a.m_well.lsd << "\n";
+// COMMENT: {4/19/2005 2:20:49 PM}	}
+// COMMENT: {4/19/2005 2:20:49 PM}
+// COMMENT: {4/19/2005 2:20:49 PM}	for (int i = 0; i < a.m_well.count_depth; ++i)
+// COMMENT: {4/19/2005 2:20:49 PM}	{
+// COMMENT: {4/19/2005 2:20:49 PM}		os << "\t" << "-depth " << a.m_well.depth[i].bottom << " " << a.m_well.depth[i].top << "\n";
+// COMMENT: {4/19/2005 2:20:49 PM}	}
+// COMMENT: {4/19/2005 2:20:49 PM}
+// COMMENT: {4/19/2005 2:20:49 PM}	if (a.m_well.mobility_and_pressure)
+// COMMENT: {4/19/2005 2:20:49 PM}	{
+// COMMENT: {4/19/2005 2:20:49 PM}		os << "\t" << "-allocate_by_head_and_mobility True\n";
+// COMMENT: {4/19/2005 2:20:49 PM}	}
+// COMMENT: {4/19/2005 2:20:49 PM}	else
+// COMMENT: {4/19/2005 2:20:49 PM}	{
+// COMMENT: {4/19/2005 2:20:49 PM}		os << "\t" << "-allocate_by_head_and_mobility False\n";
+// COMMENT: {4/19/2005 2:20:49 PM}	}
 
 	return os;
 }

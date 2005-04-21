@@ -1995,6 +1995,20 @@ BEGIN
                     WS_TABSTOP,7,122,404,38
 END
 
+IDD_TC_INT_M_PROPPAGE2 DIALOGEX 0, 0, 418, 222
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Time Control Properties"
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    CONTROL         "",IDC_DESC_RICHEDIT,"RichEdit20A",ES_MULTILINE | 
+                    ES_AUTOHSCROLL | ES_READONLY | WS_BORDER | WS_VSCROLL | 
+                    WS_HSCROLL,7,165,404,49
+    CONTROL         "Custom1",IDC_TIMESTEP_GRID,"MFCGridCtrl",WS_BORDER | 
+                    WS_TABSTOP,7,7,404,70
+    CONTROL         "Custom1",IDC_TIMEEND_GRID,"MFCGridCtrl",WS_BORDER | 
+                    WS_TABSTOP,7,86,404,70
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -2612,6 +2626,14 @@ BEGIN
     END
 
     IDD_BC_LEAKY_PROPPAGE3, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 411
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 215
+    END
+
+    IDD_TC_INT_M_PROPPAGE2, DIALOG
     BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 411

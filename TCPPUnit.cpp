@@ -43,23 +43,24 @@ void TCPPUnit::RunUnitTests(void)
 	{
 		CppUnit::TextUi::TestRunner runner;
 
-		runner.addTest(TestCPhastInput::suite());
-		runner.addTest(TestCZone::suite());
-		runner.addTest(TestCGrid::suite());
-		runner.addTest(TestCtime::suite());
-		runner.addTest(TestCBC::suite());
-		runner.addTest(TestCTimeControl::suite());
-		runner.addTest(TestCWPhastDoc::suite());
-		runner.addTest(TestCParser::suite());
-		runner.addTest(TestCPropertyTreeControlBar::suite());
-		runner.addTest(TestCUnits::suite());
-		runner.addTest(TestCPhastInput::suite());
+// COMMENT: {4/20/2005 7:08:55 PM}		runner.addTest(TestCPhastInput::suite());
+// COMMENT: {4/20/2005 7:08:55 PM}		runner.addTest(TestCZone::suite());
+// COMMENT: {4/20/2005 7:08:55 PM}		runner.addTest(TestCGrid::suite());
+// COMMENT: {4/20/2005 7:08:55 PM}		runner.addTest(TestCtime::suite());
+// COMMENT: {4/20/2005 7:08:55 PM}		runner.addTest(TestCBC::suite());
+// COMMENT: {4/20/2005 7:08:55 PM}		runner.addTest(TestCTimeControl::suite());
+// COMMENT: {4/20/2005 7:08:55 PM}		runner.addTest(TestCWPhastDoc::suite());
+// COMMENT: {4/20/2005 7:08:55 PM}		runner.addTest(TestCParser::suite());
+// COMMENT: {4/20/2005 7:08:55 PM}		runner.addTest(TestCPropertyTreeControlBar::suite());
+// COMMENT: {4/20/2005 7:08:55 PM}		runner.addTest(TestCUnits::suite());
+// COMMENT: {4/20/2005 7:08:55 PM}		runner.addTest(TestCPhastInput::suite());
 
 #ifdef __DEPRECATED__
 		runner.addTest(TestCBCZone::suite());
 		runner.addTest(TestCBCSpecifiedPropertyPage::suite());
 #endif
-
+		runner.addTest(TestCTimeControlMultiPropertyPage::suite());
+		runner.addTest(TestCPrintFreqPropertyPage::suite());
 
 		/**********************************************************
 		// the following require user input

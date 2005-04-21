@@ -234,6 +234,12 @@ void CWPhastApp::OnAppAbout()
 
 void CWPhastApp::OnFileNew()
 {
+	//{{
+	if (this->m_pMainWnd && ::IsWindow(this->m_pMainWnd->m_hWnd))
+	{
+		this->m_pMainWnd->Invalidate(TRUE);
+	}
+	//}}
 	// CWinApp::OnFileNew();
 	if (m_pDocManager != NULL) {
 		POSITION pos = m_pDocManager->GetFirstDocTemplatePosition();

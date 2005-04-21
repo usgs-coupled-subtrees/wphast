@@ -3,6 +3,34 @@
 #include <float.h>  // DBL_DIG
 
 
+void AFXAPI DDX_GridControlFail(CDataExchange* pDX, int nIDC, int nRow, int nCol, LPCTSTR lpszText)
+{
+	CModGridCtrl* pGrid = static_cast<CModGridCtrl*>(pDX->m_pDlgWnd->GetDlgItem(nIDC));
+	if (pDX->m_bSaveAndValidate)
+	{
+		pGrid->SetCurrentFocusCell(nRow, nCol);
+
+		long nSaveHighLight = pGrid->GetHighLight();
+		pGrid->SetHighLight(GV_HIGHLIGHT_ALWAYS);
+
+		pGrid->RedrawCell(nRow, nCol);
+		::AfxMessageBox(lpszText);
+		pGrid->SetHighLight(nSaveHighLight);
+		pDX->Fail();            // throws exception
+	}
+}
+
+void AFXAPI DDX_GridControlFail(CDataExchange* pDX, int nIDC, int nRow, int nCol, UINT nIDText)
+{
+	CString string;
+	if (!string.LoadString(nIDText))
+	{
+		TRACE("Error: failed to load message box prompt string 0x%04x.\n", nIDText);
+		ASSERT(FALSE);
+	}
+	::DDX_GridControlFail(pDX, nIDC, nRow, nCol, string);
+}
+
 void AFXAPI DDX_TextGridControl(CDataExchange* pDX, int nIDC, int nRow, int nCol, double& value)
 {
 	pDX->PrepareCtrl(nIDC);
@@ -15,9 +43,7 @@ void AFXAPI DDX_TextGridControl(CDataExchange* pDX, int nIDC, int nRow, int nCol
 		double d;
 		if (_stscanf(str, _T("%lf"), &d) != 1)
 		{
-			pGrid->SetCurrentFocusCell(nRow, nCol);
-			AfxMessageBox(AFX_IDP_PARSE_REAL);
-			pDX->Fail();            // throws exception
+			::DDX_GridControlFail(pDX, nIDC, nRow, nCol, AFX_IDP_PARSE_REAL);
 		}
 		value = d;
 	}
@@ -57,9 +83,7 @@ void AFXAPI DDX_TextGridControl(CDataExchange* pDX, int nIDC, int nRow, int nCol
 		int n;
 		if (_stscanf(str, _T("%d"), &n) != 1)
 		{
-			pGrid->SetCurrentFocusCell(nRow, nCol);
-			AfxMessageBox(AFX_IDP_PARSE_INT);
-			pDX->Fail();            // throws exception
+			::DDX_GridControlFail(pDX, nIDC, nRow, nCol, AFX_IDP_PARSE_INT);
 		}
 		value = n;
 	}
@@ -75,6 +99,8 @@ void AFXAPI DDX_TextGridControl(CDataExchange* pDX, int nIDC, int nRow, int nCol
 
 CModGridCtrl::CModGridCtrl(int nRows, int nCols, int nFixedRows, int nFixedCols)
 : CGridCtrl(nRows, nCols, nFixedRows, nFixedCols)
+, m_nHighLight(GV_HIGHLIGHT_WITH_FOCUS)
+// , m_nHighLight(GV_HIGHLIGHT_ALWAYS)
 {
 }
 
@@ -91,6 +117,8 @@ BEGIN_MESSAGE_MAP(CModGridCtrl, CGridCtrl)
     ON_NOTIFY(GVN_ENDLABELEDIT, IDC_INPLACE_CONTROL, OnEndInPlaceEdit)
 	ON_WM_CHAR()
 	ON_WM_GETDLGCODE()
+	ON_WM_KILLFOCUS()
+	ON_WM_SETFOCUS()
 END_MESSAGE_MAP()
 
 // MODIFICATIONS:
@@ -211,19 +239,32 @@ BOOL CModGridCtrl::DrawCell(CDC* pDC, int nRow, int nCol, CRect rect, BOOL bEras
 
     pDC->SetBkMode(TRANSPARENT);
 
-    if (Item.state & GVIS_FOCUSED) 
+	bool bDrawHighLight = false;
+	switch (this->GetHighLight())
+	{
+	case GV_HIGHLIGHT_NEVER:
+		break;
+	case GV_HIGHLIGHT_ALWAYS:
+		bDrawHighLight = true;
+		break;
+	case GV_HIGHLIGHT_WITH_FOCUS:
+		bDrawHighLight = (this->GetSafeHwnd() == ::GetFocus());
+		break;
+	}
+
+    if (Item.state & GVIS_FOCUSED && bDrawHighLight) 
     {
-        rect.right++; rect.bottom++;    // FillRect doesn't draw RHS or bottom
-        if (bEraseBk) 
-        {
-            CBrush brush(TextBkClr);
-            pDC->FillRect(rect, &brush);
-        }
-        rect.right--; rect.bottom--;    
-        pDC->SelectStockObject(BLACK_PEN);
-        pDC->SelectStockObject(NULL_BRUSH);
-        pDC->Rectangle(rect);
-        pDC->SetTextColor(TextClr);
+		rect.right++; rect.bottom++;    // FillRect doesn't draw RHS or bottom
+		if (bEraseBk) 
+		{
+			CBrush brush(TextBkClr);
+			pDC->FillRect(rect, &brush);
+		}
+		rect.right--; rect.bottom--;    
+		pDC->SelectStockObject(BLACK_PEN);
+		pDC->SelectStockObject(NULL_BRUSH);
+		pDC->Rectangle(rect);
+		pDC->SetTextColor(TextClr);
 		/// TRACE("GVIS_FOCUSED\n");
 
 		//{{MODIFIED
@@ -231,7 +272,7 @@ BOOL CModGridCtrl::DrawCell(CDC* pDC, int nRow, int nCol, CRect rect, BOOL bEras
 		//}}MODIFIED
 
     }
-    else if (Item.state & GVIS_SELECTED) 
+    else if (Item.state & GVIS_SELECTED && bDrawHighLight) 
     {
         rect.right++; rect.bottom++;    // FillRect doesn't draw RHS or bottom
         pDC->FillSolidRect(rect, ::GetSysColor(COLOR_HIGHLIGHT));
@@ -616,4 +657,31 @@ bool CModGridCtrl::IsCellEnabled(int nRow, int nCol)const
         return false;
 	}
 	return ((pCell->state & GVIS_DISABLED) == 0);
+}
+
+void CModGridCtrl::OnKillFocus(CWnd* pNewWnd)
+{
+	CGridCtrl::OnKillFocus(pNewWnd);
+
+	// TODO: Add your message handler code here
+	this->Invalidate(TRUE);
+}
+
+void CModGridCtrl::OnSetFocus(CWnd* pOldWnd)
+{
+	CGridCtrl::OnSetFocus(pOldWnd);
+
+	// TODO: Add your message handler code here
+	this->Invalidate(TRUE);
+}
+
+void CModGridCtrl::SetHighLight(long nNewValue)
+{
+	this->m_nHighLight = nNewValue;
+	this->Invalidate(TRUE);
+}
+
+long CModGridCtrl::GetHighLight(void)const
+{
+	return this->m_nHighLight;
 }

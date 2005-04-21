@@ -115,53 +115,49 @@ void CTimeControlMultiPropertyPage::DoDataExchange(CDataExchange* pDX)
 			// TimeStep
 			nCol = 1;
 			DDX_TextGridControl(pDX, IDC_GRID, nRow, nCol, dVal);
-			if (dVal <= 0.0) {
-				this->m_Grid.SetCurrentFocusCell(nRow, nCol);
-				::AfxMessageBox("Please enter a number greater than 0.0.", MB_ICONEXCLAMATION);
-				pDX->Fail();
+			if (dVal <= 0.0)
+			{
+				::DDX_GridControlFail(pDX, IDC_GRID, nRow, nCol, "Please enter a number greater than 0.0.");
 			}
 			timeStep.SetValue(dVal);
 
 			// TimeStep Units
 			nCol = 2;
 			DDX_TextGridControl(pDX, IDC_GRID, nRow, nCol, sVal);
-			if (sVal.IsEmpty() || timeStep.SetInput(sVal) != OK) {
-				this->m_Grid.SetCurrentFocusCell(nRow, nCol);
-				::AfxMessageBox("Please enter the time step units.", MB_ICONEXCLAMATION);
-				pDX->Fail();
+			if (sVal.IsEmpty() || timeStep.SetInput(sVal) != OK)
+			{
+				::DDX_GridControlFail(pDX, IDC_GRID, nRow, nCol, "Please enter the time step units.");
 			}
 
 			// TimeEnd
 			nCol = 3;
 			DDX_TextGridControl(pDX, IDC_GRID, nRow, nCol, dVal);
-			if (dVal <= 0.0) {
-				this->m_Grid.SetCurrentFocusCell(nRow, nCol);
-				::AfxMessageBox("Please enter a number greater than 0.0.", MB_ICONEXCLAMATION);
-				pDX->Fail();
+			if (dVal <= 0.0)
+			{
+				::DDX_GridControlFail(pDX, IDC_GRID, nRow, nCol, "Please enter a number greater than 0.0.");
 			}
 			timeEnd.SetValue(dVal);
 
 			// TimeEnd Units
 			nCol = 4;
 			DDX_TextGridControl(pDX, IDC_GRID, nRow, nCol, sVal);
-			if (sVal.IsEmpty() || timeEnd.SetInput(sVal) != OK) {
-				this->m_Grid.SetCurrentFocusCell(nRow, nCol);
-				::AfxMessageBox("Please enter the time end units.", MB_ICONEXCLAMATION);
-				pDX->Fail();
+			if (sVal.IsEmpty() || timeEnd.SetInput(sVal) != OK)
+			{
+				::DDX_GridControlFail(pDX, IDC_GRID, nRow, nCol, "Please enter the time end units.");
 			}
 
-			if (iter != this->m_listTC.begin()) {
+			if (iter != this->m_listTC.begin())
+			{
 				nCol = 3;
-				if ((timeEnd.value * timeEnd.input_to_si) <= (prevTimeEnd.value * prevTimeEnd.input_to_si)) {
-					this->m_Grid.SetCurrentFocusCell(nRow, nCol);
+				if ((timeEnd.value * timeEnd.input_to_si) <= (prevTimeEnd.value * prevTimeEnd.input_to_si))
+				{
 					CString str;
 					str.Format(
 						"Time_end value is %g %s, previous time_end was %g %s.\n"
 						"Time_end must be greater than zero and greater than the time_end\n"
 						"of the previous simulation period.",
 						timeEnd.value, timeEnd.input, prevTimeEnd.value, prevTimeEnd.input);
-					::AfxMessageBox(str);
-					pDX->Fail();
+					::DDX_GridControlFail(pDX, IDC_GRID, nRow, nCol, str);
 				}
 			}
 

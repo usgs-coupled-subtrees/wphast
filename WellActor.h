@@ -175,7 +175,7 @@ public:
 	void Remove(CPropertyTreeControlBar *pTree);
 	void UnRemove(CPropertyTreeControlBar *pTree);
 
-	void Update(CTreeCtrlNode node)const;
+	void Update(CTreeCtrlNode node);
 
 	void Edit(CWPhastDoc *pDoc);
 
@@ -205,6 +205,9 @@ protected:
 	float               m_DefaultTubeDiameter;
 
 	CTreeCtrlNode       m_node;
+	CTreeCtrlNode       m_nodeRates;
+	CTreeCtrlNode       m_nodeSolutions;
+
 	CTreeMemento       *m_pTreeMemento;
 
 	std::string         m_serialName;

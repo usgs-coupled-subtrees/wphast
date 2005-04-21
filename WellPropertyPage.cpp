@@ -49,7 +49,7 @@ void CWellPropertyPage::DoDataExchange(CDataExchange* pDX)
 			this->m_wndScreensGrid.SetFixedRowCount(1);
 			this->m_wndScreensGrid.SetFixedColumnCount(0);
 			this->m_wndScreensGrid.EnableTitleTips(FALSE);
-			// this->m_wndScreensGrid.EnableSelection(FALSE);
+			// this->m_wndScreensGrid.EnableSelection(FALSE); // this breaks CutSelectedText
 		}
 		CATCH (CMemoryException, e)
 		{
@@ -72,16 +72,17 @@ void CWellPropertyPage::DoDataExchange(CDataExchange* pDX)
 
 	// Prepare Pump Sched. Grid
 	//
-	if (!pDX->m_bSaveAndValidate && this->m_wndPumpSchedGrid.GetColumnCount() == 0) {
+	if (!pDX->m_bSaveAndValidate && this->m_wndPumpSchedGrid.GetColumnCount() == 0)
+	{
 		const int MIN_ROWS = 10;
 		TRY
 		{
-			this->m_wndPumpSchedGrid.SetRowCount(MIN_ROWS + (int)this->m_well.GetMap().size());
+			this->m_wndPumpSchedGrid.SetRowCount(MIN_ROWS + (int)this->m_well.GetPumpSched().size());
 			this->m_wndPumpSchedGrid.SetColumnCount(4);
 			this->m_wndPumpSchedGrid.SetFixedRowCount(1);
 			this->m_wndPumpSchedGrid.SetFixedColumnCount(0);
 			this->m_wndPumpSchedGrid.EnableTitleTips(FALSE);
-			this->m_wndPumpSchedGrid.EnableSelection(FALSE);
+			// this->m_wndPumpSchedGrid.EnableSelection(FALSE); // this breaks CutSelectedText
 
 			std::vector<LPCTSTR> options;
 			options.push_back(_T("seconds"));
@@ -403,17 +404,18 @@ void CWellPropertyPage::DoDataExchange(CDataExchange* pDX)
 				DDX_TextGridControl(pDX, IDC_GRID_SCHEDULES, row, 0, value);
 				if (value < 0.0)
 				{
-					::AfxMessageBox(_T("Start time must be positive."));
-					pDX->Fail();
+					::DDX_GridControlFail(pDX, IDC_GRID_SCHEDULES, row, 0, _T("Start time must be positive."));
 				}
 				time.SetValue(value);
 
 				// time units
 				DDX_TextGridControl(pDX, IDC_GRID_SCHEDULES, row, 1, strValue);
-				if (strValue.IsEmpty() || time.SetInput(strValue) != OK) {
-					this->m_wndPumpSchedGrid.SetCurrentFocusCell(row, 1);
-					::AfxMessageBox("Please enter the start time units.", MB_ICONEXCLAMATION);
-					pDX->Fail();
+				if (strValue.IsEmpty() || time.SetInput(strValue) != OK)
+				{
+					if (row != 1)
+					{
+						::DDX_GridControlFail(pDX, IDC_GRID_SCHEDULES, row, 1, _T("Please enter the start time units."));
+					}
 				}
 
 				// rate
@@ -442,10 +444,14 @@ void CWellPropertyPage::DoDataExchange(CDataExchange* pDX)
 		GV_ITEM Item;
 		Item.mask = GVIF_TEXT;
 
+		
+
 		// CWellRates
 		//
-		std::map<Ctime, CWellRate> map = this->m_well.GetMap();
-		std::map<Ctime, CWellRate>::const_iterator iter = map.begin();
+// COMMENT: {4/19/2005 1:58:25 PM}		std::map<Ctime, CWellRate> map = this->m_well.GetMap();
+// COMMENT: {4/19/2005 1:58:25 PM}		std::map<Ctime, CWellRate>::const_iterator iter = map.begin();
+		const CTimeSeries<CWellRate>& map = this->m_well.GetPumpSched();
+		CTimeSeries<CWellRate>::const_iterator iter = map.begin();
 		for (int i = 0; iter != map.end(); ++iter, ++i)
 		{
 			Item.row = i + 1;
@@ -597,37 +603,20 @@ BOOL CWellPropertyPage::OnInitDialog()
 
 void CWellPropertyPage::SetPumpSchedHeadings(void)
 {
-	GV_ITEM Item;
-	Item.mask = GVIF_TEXT;
-	Item.row = 0;
+	CString str;
+	str.Format(_T("Rate %s"), this->m_strWellPumpageUnits);
 
-	Item.col = 0;
-	Item.szText.Format(_T("Start"));
-	this->m_wndPumpSchedGrid.SetItem(&Item);
+	VERIFY(this->m_wndPumpSchedGrid.SetItemText(0, 0, _T("Start")));
+	VERIFY(this->m_wndPumpSchedGrid.SetItemText(0, 1, _T("Units")));
+	VERIFY(this->m_wndPumpSchedGrid.SetItemText(0, 2, str));
+	VERIFY(this->m_wndPumpSchedGrid.SetItemText(0, 3, _T("Solution")));
 
-	Item.col = 1;
-	Item.szText.Format(_T("Units"));
-	this->m_wndPumpSchedGrid.SetItem(&Item);
+	VERIFY(this->m_wndPumpSchedGrid.SetItemText(1, 0, _T("0.0")));
 
-	Item.col = 2;
-	Item.szText.Format(_T("Rate %s"), this->m_strWellPumpageUnits);
-	this->m_wndPumpSchedGrid.SetItem(&Item);
-
-	Item.col = 3;
-	Item.szText.Format(_T("Solution"));
-	this->m_wndPumpSchedGrid.SetItem(&Item);
-
-	Item.row = 1;
-	Item.col = 0;
-	Item.szText.Format(_T("0"));
-	Item.mask = GVIF_TEXT | GVIF_STATE | GVIF_BKCLR;
-	Item.state = GVIS_READONLY;
-	Item.crBkClr = this->m_wndPumpSchedGrid.GetFixedBkColor();
-	// Item.crBkClr = ::GetSysColor(COLOR_GRAYTEXT);
-	this->m_wndPumpSchedGrid.SetItem(&Item);
+	VERIFY(this->m_wndPumpSchedGrid.DisableCell(1, 0));
+	VERIFY(this->m_wndPumpSchedGrid.DisableCell(1, 1));
 
 	this->m_wndPumpSchedGrid.RedrawWindow();
-
 }
 
 void CWellPropertyPage::FillUnits(void)

@@ -98,6 +98,10 @@ protected:
 	virtual void  DrawButton2(CDC* pDC, int nRow, int nCol, CRect rcCell, BOOL bEraseBk, BOOL bDown);
 	virtual void  DrawButtonCheck(CDC* pDC, int nRow, int nCol, CRect rcCell, BOOL bEraseBk, int nCheck);	
 
+#ifndef GRIDCONTROL_NO_CLIPBOARD
+    virtual void CutSelectedText();
+#endif
+
 	void ShowDropDown(BOOL bShowIt);
 
 protected:

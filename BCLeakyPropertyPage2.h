@@ -36,6 +36,9 @@ protected:
 	CModGridCtrlEx   m_gridSingle;   // IDC_SINGLE_GRID
 
 	DECLARE_MESSAGE_MAP()
+	afx_msg void OnItemChangedHead(NMHDR *pNotifyStruct, LRESULT *result);
+	afx_msg void OnItemChangedSolution(NMHDR *pNotifyStruct, LRESULT *result);
+	afx_msg void OnItemChangedSingle(NMHDR *pNotifyStruct, LRESULT *result);
 public:
 	virtual BOOL OnInitDialog();
 };

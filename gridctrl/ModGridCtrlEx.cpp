@@ -40,8 +40,23 @@ BOOL CModGridCtrlEx::DrawCell(CDC* pDC, int nRow, int nCol, CRect rect, BOOL bEr
 		if (!GetItem(&Item))
 			return FALSE;
 
+		//{{
+		bool bDrawHighLight = false;
+		switch (this->GetHighLight())
+		{
+		case GV_HIGHLIGHT_NEVER:
+			break;
+		case GV_HIGHLIGHT_ALWAYS:
+			bDrawHighLight = true;
+			break;
+		case GV_HIGHLIGHT_WITH_FOCUS:
+			bDrawHighLight = (this->GetSafeHwnd() == ::GetFocus());
+			break;
+		}
+		//}}
+
 		// draw button
-		if ((Item.state & GVIS_FOCUSED))
+		if ((Item.state & GVIS_FOCUSED) && bDrawHighLight)
 		{
 			if (this->IsDropDownCell(nRow, nCol))
 			{
@@ -132,12 +147,14 @@ CString CModGridCtrlEx::GetItemText(int nRow, int nCol)
 
 BOOL CModGridCtrlEx::SetColumnOptions(int nCol, const std::vector<LPCTSTR>& vecOptions)
 {
-	try {
+	try
+	{
 		// NOTE: may want to update map on Insert/Delete Column
 
 		//{{HACK
 		// don't allow paste
-		for (int i = 0; i < this->GetRowCount(); ++i) {
+		for (int i = 0; i < this->GetRowCount(); ++i)
+		{
 			this->SetItemState(i, nCol, this->GetItemState(i, nCol) | GVIS_READONLY);
 		}
 		//}}HACK
@@ -170,12 +187,14 @@ BOOL CModGridCtrlEx::SetColumnOptions(int nCol, const std::vector<LPCTSTR>& vecO
 		ASSERT(this->m_mapColToList[nCol]->GetParent() == CWnd::GetDesktopWindow());	
 
 		std::vector<LPCTSTR>::const_iterator opt = vecOptions.begin();
-		for (; opt != vecOptions.end(); ++opt) {
+		for (; opt != vecOptions.end(); ++opt)
+		{
 			this->m_mapColToList[nCol]->AddString(*opt);
 		}
 		ASSERT(this->m_mapColToList[nCol]->GetCount() == (int)vecOptions.size());
 	}
-	catch(...) {
+	catch(...)
+	{
 		ASSERT(FALSE);
 		return FALSE;
 	}
@@ -290,7 +309,8 @@ const std::vector<LPCTSTR>* CModGridCtrlEx::GetOptionsVector(int nRow, int nCol)
 	std::map<int, std::vector<LPCTSTR> >::const_iterator iter =
 		this->m_mapColToOptions.find(nCol);
 
-	if (iter != this->m_mapColToOptions.end()) {
+	if (iter != this->m_mapColToOptions.end())
+	{
 		return &(iter->second);
 	}
 	return 0;
@@ -307,7 +327,8 @@ CListBox* CModGridCtrlEx::GetListBox(int nRow, int nCol)
 	if (nCol < this->GetFixedColumnCount()) return 0;
 
 	std::map<int, CListBox*>::iterator iter = this->m_mapColToList.find(nCol);
-	if (iter != this->m_mapColToList.end()) {
+	if (iter != this->m_mapColToList.end())
+	{
 		return (iter->second);
 	}
 	return 0;
@@ -419,7 +440,7 @@ void CModGridCtrlEx::OnLButtonDblClk(UINT nFlags, CPoint point)
 		&&
 		this->m_LeftClickDownCell == this->m_idCurrentCell
 		)
-	{	
+	{
 		if (!this->IsCellEnabled(this->m_idCurrentCell)) return;
 
 		const std::vector<LPCTSTR>* pVec = 
@@ -429,8 +450,10 @@ void CModGridCtrlEx::OnLButtonDblClk(UINT nFlags, CPoint point)
 		int nItemCount = (int)pVec->size();
 		CString item = this->GetItemText(this->m_idCurrentCell);
 		int nCurrent = -1;
-		for (int i = 0; i < nItemCount; ++i) {
-			if (item.Compare(pVec->at(i)) == 0) {
+		for (int i = 0; i < nItemCount; ++i)
+		{
+			if (item.Compare(pVec->at(i)) == 0)
+			{
 				nCurrent = i;
 				break;
 			}
@@ -595,6 +618,30 @@ void CModGridCtrlEx::OnLButtonUp(UINT nFlags, CPoint point)
 	}
 	else
 	{
+#if defined(_DEBUG)
+		if (this->m_MouseMode == MOUSE_SIZING_COL)
+		{
+			if (m_LeftClickDownPoint != point) 
+			{   
+				CPoint start;
+				if (this->GetCellOrigin(m_LeftClickDownCell, &start))
+				{
+					TRACE("SetColumnWidth(%d, %d)\n", m_LeftClickDownCell.col, point.x - start.x);
+				}
+			}
+		}
+		if (this->m_MouseMode == MOUSE_SIZING_ROW)
+		{
+			if (m_LeftClickDownPoint != point) 
+			{   
+				CPoint start;
+				if (this->GetCellOrigin(m_LeftClickDownCell, &start))
+				{
+					TRACE("SetRowHeight(%d, %d)\n", m_LeftClickDownCell.row, point.y - start.y);
+				}
+			}
+		}
+#endif
 		CModGridCtrl::OnLButtonUp(nFlags, point);
 	}
 
@@ -638,7 +685,8 @@ void CModGridCtrlEx::ShowDropDown(BOOL bShowIt)
 		// hide DropDown
 		this->m_mapColToList[this->m_idCurrentCell.col]->SetWindowPos(&wndTopMost, 0, 0, 0, 0, SWP_HIDEWINDOW);
 
-		if (CWnd* pParent = this->GetParent()) {
+		if (CWnd* pParent = this->GetParent())
+		{
 			/** TODO
 			pParent->SendMessage(
 				WM_COMMAND,
@@ -653,7 +701,8 @@ void CModGridCtrlEx::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 {
 	// TODO: Add your message handler code here and/or call default
 	CListBox* pListBox = this->GetListBox(this->m_idCurrentCell);
-	if (pListBox && pListBox->IsWindowVisible()) {
+	if (pListBox && pListBox->IsWindowVisible())
+	{
 		pListBox->SendMessage(WM_KEYDOWN, nChar, MAKEWORD(nRepCnt, nFlags));
 		return;
 		//switch (nChar) {
@@ -1031,9 +1080,41 @@ LRESULT CModGridCtrlEx::OnThemeChanged()
 {
 	// This feature requires Windows XP or greater.
 	// The symbol _WIN32_WINNT must be >= 0x0501.
-	// TODO: Add your message handler code here and/or call default
+	// Add your message handler code here and/or call default
 	this->s_themeButton.OnThemeChanged(L"BUTTON");
 	this->s_themeCombo.OnThemeChanged(L"COMBOBOX");
 
 	return 1;
+}
+
+void CModGridCtrlEx::CutSelectedText()
+{
+    if (!IsEditable())
+        return;
+
+    // Clear contents of selected cells.
+    for (POSITION pos = m_SelectedCellMap.GetStartPosition(); pos != NULL; )
+    {
+        DWORD key;
+        CCellID cell;
+        m_SelectedCellMap.GetNextAssoc(pos, key, (CCellID&)cell);
+
+        if (!IsCellEditable(cell))
+		{
+			if (!this->IsDropDownCell(cell))
+			{
+				continue;
+			}
+		}
+
+        CGridCell* pCell = GetCell(cell.row, cell.col);
+        if (pCell)
+        {
+		    SendMessageToParent(cell.row, cell.col, GVN_BEGINLABELEDIT);
+			SetItemText(cell.row, cell.col, _T(""));
+            SetModified(TRUE, cell.row, cell.col);
+		    SendMessageToParent(cell.row, cell.col, GVN_ENDLABELEDIT);
+			RedrawCell(cell);
+        }
+    }
 }

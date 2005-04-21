@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "TimeSeries.h"
 #include "property.h"
+#include "WellSchedule.h"
 
 // specialization for Ctime
 template<>
@@ -224,4 +225,133 @@ HTREEITEM CTimeSeries<Cproperty>::InsertItem(CTreeCtrl* pTreeCtrl, LPCTSTR lpszH
 		iter->second.Insert(pTreeCtrl, item, str);
 	}
 	return item;
+}
+
+// specialization for CWellRate
+template<>
+void CTimeSeries<CWellRate>::Serialize(bool bStoring, hid_t loc_id)
+{
+	static const char szSteps[]       = "Steps";
+	static const char szStepsFormat[] = "Step %d";
+
+	static const char szCtime[]       = "Ctime";
+	static const char szCWellRate[]   = "CWellRate";
+
+
+	hid_t  step_id;
+	hid_t  time_id;
+	hid_t  rate_id;
+
+	herr_t status;
+
+  	ASSERT(this);
+
+	if (bStoring)
+	{
+		if (this->size())
+		{
+			std::list<LPCTSTR> listNames;
+			CString* arrName = new CString[this->size()];
+
+			CTimeSeries<CWellRate>::iterator iter = this->begin();
+			for (size_t i = 0; iter != this->end(); ++iter, ++i)
+			{
+				arrName[i].Format(szStepsFormat, i);
+
+				// Create the "Step %d" group
+				step_id = ::H5Gcreate(loc_id, arrName[i], 0);
+				ASSERT(step_id > 0);
+				if (step_id > 0)
+				{
+					// Create the szCtime group
+					time_id = ::H5Gcreate(step_id, szCtime, 0);
+					ASSERT(time_id > 0);
+					if (time_id > 0)
+					{
+						// first is const
+						Ctime t(iter->first);
+						t.Serialize(bStoring, time_id);
+						status = ::H5Gclose(time_id);
+						ASSERT(status >= 0);
+					}
+					else
+					{
+						continue;
+					}
+
+					// Create the szCWellRate group
+					rate_id = ::H5Gcreate(step_id, szCWellRate, 0);
+					ASSERT(rate_id > 0);
+					if (rate_id > 0)
+					{
+						iter->second.Serialize(bStoring, rate_id);
+						status = ::H5Gclose(rate_id);
+						ASSERT(status >= 0);
+					}
+					else
+					{
+						continue;
+					}
+
+					status = ::H5Gclose(step_id);
+					ASSERT(status >= 0);
+
+					listNames.push_back(arrName[i]);
+				}
+			}
+
+			CGlobal::WriteList(loc_id, szSteps, listNames);
+			delete[] arrName;
+		}
+	}
+	else
+	{
+		std::list<std::string> listNames;
+		CGlobal::ReadList(loc_id, szSteps, listNames);
+		std::list<std::string>::iterator iter = listNames.begin();
+		for (; iter != listNames.end(); ++iter)
+		{
+			Ctime t;
+			CWellRate r;
+
+			// Open the "Step %d" group
+			step_id = ::H5Gopen(loc_id, (*iter).c_str());
+			ASSERT(step_id > 0);
+			if (step_id > 0)
+			{
+				// Open the szCtime group
+				time_id = ::H5Gopen(step_id, szCtime);
+				ASSERT(time_id > 0);
+				if (time_id > 0)
+				{
+					t.Serialize(bStoring, time_id);
+					status = ::H5Gclose(time_id);
+					ASSERT(status >= 0);
+				}
+				else
+				{
+					continue;
+				}
+
+				// Open the szCWellRate group
+				rate_id = ::H5Gopen(step_id, szCWellRate);
+				ASSERT(rate_id > 0);
+				if (rate_id > 0)
+				{
+					r.Serialize(bStoring, rate_id);
+					status = ::H5Gclose(rate_id);
+					ASSERT(status >= 0);
+				}
+				else
+				{
+					continue;
+				}
+
+				status = ::H5Gclose(step_id);
+				ASSERT(status >= 0);
+
+				this->insert(CTimeSeries<CWellRate>::value_type(t, r));
+			}
+		}
+	}
 }

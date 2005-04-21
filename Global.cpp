@@ -1522,6 +1522,7 @@ ErrorHDFSerializeBinaryFile:
 
 void CGlobal::DDX_GridTimeSeries(CDataExchange* pDX, int nIDC, CTimeSeries<Cproperty> &r_ts)
 {
+	const bool bTimeZeroRequired = true;
 	CModGridCtrlEx* pGrid = static_cast<CModGridCtrlEx*>(pDX->m_pDlgWnd->GetDlgItem(nIDC));
 	if (!pGrid) return;
 
@@ -1549,13 +1550,16 @@ void CGlobal::DDX_GridTimeSeries(CDataExchange* pDX, int nIDC, CTimeSeries<Cprop
 			Cproperty p;
 			if (pGrid->GetCheck(iRow, 3) != BST_CHECKED)
 			{
-				if (iRow == 1)
+				if (!bTimeZeroRequired)
 				{
-					start.Empty();
-					::DDX_TextGridControl(pDX, nIDC, iRow, 2, start);
-					if (start.IsEmpty())
+					if (iRow == 1)
 					{
-						continue;
+						start.Empty();
+						::DDX_TextGridControl(pDX, nIDC, iRow, 2, start);
+						if (start.IsEmpty())
+						{
+							continue;
+						}
 					}
 				}
 
@@ -1571,13 +1575,16 @@ void CGlobal::DDX_GridTimeSeries(CDataExchange* pDX, int nIDC, CTimeSeries<Cprop
 			{
 				// direction
 				//
-				if (iRow == 1)
+				if (!bTimeZeroRequired)
 				{
-					start.Empty();
-					::DDX_TextGridControl(pDX, nIDC, iRow, 4, start);
-					if (start.IsEmpty())
+					if (iRow == 1)
 					{
-						continue;
+						start.Empty();
+						::DDX_TextGridControl(pDX, nIDC, iRow, 4, start);
+						if (start.IsEmpty())
+						{
+							continue;
+						}
 					}
 				}
 
@@ -1682,6 +1689,178 @@ void CGlobal::DDX_GridTimeSeries(CDataExchange* pDX, int nIDC, CTimeSeries<Cprop
 			{
 				ASSERT(FALSE);
 			}
+		}
+	}
+}
+
+void CGlobal::DDX_Property(CDataExchange* pDX, int nIDC, int nRow, struct property* pProperty, bool bRequired)
+{
+	static const int COL_VALUE       = 1;
+	static const int COL_INTERPOLATE = 2;
+	static const int COL_DIRECTION   = 3;
+	static const int COL_VALUE_1     = 4;
+	static const int COL_DISTANCE_1  = 5;
+	static const int COL_VALUE_2     = 6;
+	static const int COL_DISTANCE_2  = 7;
+
+	CModGridCtrlEx* pGrid = static_cast<CModGridCtrlEx*>(pDX->m_pDlgWnd->GetDlgItem(nIDC));
+	if (!pGrid || !pProperty) return;
+
+
+	if (pDX->m_bSaveAndValidate)
+	{
+		// assume failure
+		pProperty->type = UNDEFINED;
+
+		Cproperty p;
+
+		ASSERT(pGrid->IsCheckMarkCell(nRow, COL_INTERPOLATE));
+
+		if (pGrid->GetCheck(nRow, COL_INTERPOLATE) != BST_CHECKED)
+		{
+			// value
+			//
+			CString value;
+			::DDX_TextGridControl(pDX, nIDC, nRow, COL_VALUE, value);
+			value.Trim();
+			if (value.IsEmpty())
+			{
+				if (bRequired)
+				{
+					::DDX_GridControlFail(pDX, nIDC, nRow, COL_VALUE, "No value specified.");
+				}
+				return;
+			}
+
+			// value
+			//
+			::DDX_TextGridControl(pDX, nIDC, nRow, COL_VALUE, p.v[0]);
+
+			p.type    = FIXED;
+			p.count_v = 1;
+		}
+		else
+		{
+			// direction
+			//
+			CString direction;
+			::DDX_TextGridControl(pDX, nIDC, nRow, COL_DIRECTION, direction);
+			direction.Trim();
+			if (direction.IsEmpty())
+			{
+				if (bRequired)
+				{
+					::DDX_GridControlFail(pDX, nIDC, nRow, COL_DIRECTION, "Please choose X, Y, or Z");
+				}
+				return;
+			}
+			else
+			{
+				if (direction[0] == 'X' || direction[0] == 'x')
+				{
+					p.coord = 'x';
+				}
+				else if (direction[0] == 'Y' || direction[0] == 'y')
+				{
+					p.coord = 'y';
+				}
+				else if (direction[0] == 'Z' || direction[0] == 'z')
+				{
+					p.coord = 'z';
+				}
+				else
+				{
+					ASSERT(FALSE);
+					p.coord = 'x';
+				}
+			}
+
+			// value 1
+			//
+			::DDX_TextGridControl(pDX, nIDC, nRow, COL_VALUE_1, p.v[0]);
+
+			// dist 1
+			//
+			::DDX_TextGridControl(pDX, nIDC, nRow, COL_DISTANCE_1, p.dist1);
+
+			// value 2
+			//
+			::DDX_TextGridControl(pDX, nIDC, nRow, COL_VALUE_2, p.v[1]);
+
+			// dist 2
+			//
+			::DDX_TextGridControl(pDX, nIDC, nRow, COL_DISTANCE_2, p.dist2);
+
+			p.type    = LINEAR;
+			p.count_v = 2;
+		}
+		// (*pProperty) = p;
+		Cproperty::CopyProperty(&pProperty, &p);
+	}
+	else
+	{
+		if (pProperty->type == FIXED)
+		{
+			// value
+			//
+			ASSERT(pProperty->count_v == 1);
+			::DDX_TextGridControl(pDX, nIDC, nRow, COL_VALUE, pProperty->v[0]);
+
+			// set checkmark
+			//
+			pGrid->SetCheck(nRow, COL_INTERPOLATE, BST_UNCHECKED);
+
+			// enable/disable cells
+			//
+			pGrid->EnableCell(nRow, COL_VALUE);
+			pGrid->DisableCell(nRow, COL_DIRECTION);
+			pGrid->DisableCell(nRow, COL_VALUE_1);
+			pGrid->DisableCell(nRow, COL_DISTANCE_1);
+			pGrid->DisableCell(nRow, COL_VALUE_2);
+			pGrid->DisableCell(nRow, COL_DISTANCE_2);
+		}
+		else if (pProperty->type == LINEAR)
+		{
+			ASSERT(pProperty->count_v == 2);
+
+			// set checkmark
+			//
+			pGrid->SetCheck(nRow, COL_INTERPOLATE, BST_CHECKED);
+
+			// enable/disable cells
+			//
+			pGrid->DisableCell(nRow, COL_VALUE);
+			pGrid->EnableCell(nRow, COL_DIRECTION);
+			pGrid->EnableCell(nRow, COL_VALUE_1);
+			pGrid->EnableCell(nRow, COL_DISTANCE_1);
+			pGrid->EnableCell(nRow, COL_VALUE_2);
+			pGrid->EnableCell(nRow, COL_DISTANCE_2);
+			
+			// direction
+			//
+			CString dir(pProperty->coord);
+			dir.MakeUpper();
+			::DDX_TextGridControl(pDX, nIDC, nRow, COL_DIRECTION, dir);
+
+			// value 1
+			//
+			::DDX_TextGridControl(pDX, nIDC, nRow, COL_VALUE_1, pProperty->v[0]);
+
+			// dist 1
+			//
+			::DDX_TextGridControl(pDX, nIDC, nRow, COL_DISTANCE_1, pProperty->dist1);
+
+			// value 2
+			//
+			::DDX_TextGridControl(pDX, nIDC, nRow, COL_VALUE_2, pProperty->v[1]);
+
+			// dist 2
+			//
+			::DDX_TextGridControl(pDX, nIDC, nRow, COL_DISTANCE_2, pProperty->dist2);
+		}
+		else
+		{
+			ASSERT(FALSE);
 		}
 	}
 }
