@@ -3822,7 +3822,7 @@ void CWPhastDoc::Remove(CWellActor *pWellActor)
 	ASSERT(wellscale[1] == scale[1]);
 	ASSERT(wellscale[2] == scale[2]);
 
-	// make sure pZoneActor ref count doesn't go to zero
+	// make sure pWellActor ref count doesn't go to zero
 	//
 	ASSERT(this->m_pRemovedPropCollection);
 	ASSERT(!this->m_pRemovedPropCollection->IsItemPresent(pWellActor));
@@ -3834,10 +3834,10 @@ void CWPhastDoc::Remove(CWellActor *pWellActor)
 	{
 		ASSERT(pPropAssembly->GetParts()->IsItemPresent(pWellActor));
 		pPropAssembly->RemovePart(pWellActor);
-// COMMENT: {8/25/2004 3:17:22 PM}		// VTK HACK
-// COMMENT: {8/25/2004 3:17:22 PM}		// This is req'd because ReleaseGraphicsResources is not called when
-// COMMENT: {8/25/2004 3:17:22 PM}		// vtkPropAssembly::RemovePart(vtkProp *prop) is called
-// COMMENT: {8/25/2004 3:17:22 PM}		this->ReleaseGraphicsResources(pWellActor);
+		// VTK HACK
+		// This is req'd because ReleaseGraphicsResources is not called when
+		// vtkPropAssembly::RemovePart(vtkProp *prop) is called
+		this->ReleaseGraphicsResources(pWellActor);
 	}
 
 	// remove from property tree

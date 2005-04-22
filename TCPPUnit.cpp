@@ -59,8 +59,7 @@ void TCPPUnit::RunUnitTests(void)
 		runner.addTest(TestCBCZone::suite());
 		runner.addTest(TestCBCSpecifiedPropertyPage::suite());
 #endif
-		runner.addTest(TestCTimeControlMultiPropertyPage::suite());
-		runner.addTest(TestCPrintFreqPropertyPage::suite());
+		runner.addTest(TestCModGridCtrlEx::suite());
 
 		/**********************************************************
 		// the following require user input
@@ -82,7 +81,8 @@ void TCPPUnit::RunUnitTests(void)
 		runner.setOutputter(CppUnit::CompilerOutputter::defaultOutputter(&runner.result(), oss_out));
 		bool bOk = runner.run("", false);
 		TRACE("%s\n", oss_out.str().c_str());
-		if (!bOk) {
+		if (!bOk)
+		{
 			::AfxMessageBox("Unit Tests Failed", MB_OK);
 			::AfxAbort();
 			DebugBreak();
@@ -90,5 +90,5 @@ void TCPPUnit::RunUnitTests(void)
 	}
 
 	CPPUNIT_ASSERT(::fcloseall() == 0);
-	// exit(0);
+	///exit(0);
 }

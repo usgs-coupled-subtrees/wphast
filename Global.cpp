@@ -1547,6 +1547,14 @@ void CGlobal::DDX_GridTimeSeries(CDataExchange* pDX, int nIDC, CTimeSeries<Cprop
 			t.type = UNITS;
 			t.SetValue(d);
 
+			// time units
+			//
+			::DDX_TextGridControl(pDX, nIDC, iRow, 1, start);
+			if (!start.IsEmpty())
+			{
+				t.SetInput(start);
+			}
+
 			Cproperty p;
 			if (pGrid->GetCheck(iRow, 3) != BST_CHECKED)
 			{
@@ -1646,10 +1654,18 @@ void CGlobal::DDX_GridTimeSeries(CDataExchange* pDX, int nIDC, CTimeSeries<Cprop
 		for (int nRow = 1; iter != r_ts.end(); ++iter, ++nRow)
 		{
 			// time start
+			//
 			Ctime t(iter->first);
 			::DDX_TextGridControl(pDX, nIDC, nRow, 0, t.value);
 
-			// head
+			// time units
+			//
+			if (t.input && ::strlen(t.input))
+			{
+				CString str(t.input);
+				::DDX_TextGridControl(pDX, nIDC, nRow, 1, str);
+			}
+
 			if (iter->second.type == FIXED)
 			{
 				ASSERT(iter->second.count_v == 1);
@@ -1669,20 +1685,25 @@ void CGlobal::DDX_GridTimeSeries(CDataExchange* pDX, int nIDC, CTimeSeries<Cprop
 				}
 				
 				// direction
+				//
 				CString dir(iter->second.coord);
 				dir.MakeUpper();
 				::DDX_TextGridControl(pDX, nIDC, nRow, 4, dir);
 
 				// value 1
+				//
 				::DDX_TextGridControl(pDX, nIDC, nRow, 5, iter->second.v[0]);
 
 				// dist 1
+				//
 				::DDX_TextGridControl(pDX, nIDC, nRow, 6, iter->second.dist1);
 
 				// value 2
+				//
 				::DDX_TextGridControl(pDX, nIDC, nRow, 7, iter->second.v[1]);
 
 				// dist 2
+				//
 				::DDX_TextGridControl(pDX, nIDC, nRow, 8, iter->second.dist2);
 			}
 			else

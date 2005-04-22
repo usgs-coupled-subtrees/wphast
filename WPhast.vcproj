@@ -561,6 +561,9 @@
 				RelativePath="TimeControlMultiPropertyPage.cpp">
 			</File>
 			<File
+				RelativePath="TimeControlMultiPropertyPage2.cpp">
+			</File>
+			<File
 				RelativePath="TimeControlPropertyPage.cpp">
 			</File>
 			<File
@@ -959,6 +962,9 @@
 			</File>
 			<File
 				RelativePath="TimeControlMultiPropertyPage.h">
+			</File>
+			<File
+				RelativePath="TimeControlMultiPropertyPage2.h">
 			</File>
 			<File
 				RelativePath="TimeControlPropertyPage.h">
@@ -2815,15 +2821,15 @@
 			Name="Build Logs"
 			Filter="">
 			<File
-				RelativePath="cppunit\BuildLog.htm"
-				DeploymentContent="TRUE">
-			</File>
-			<File
 				RelativePath="Debug\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 			<File
 				RelativePath="Release\BuildLog.htm"
+				DeploymentContent="TRUE">
+			</File>
+			<File
+				RelativePath="cppunit\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 		</Filter>

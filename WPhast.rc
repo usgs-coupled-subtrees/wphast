@@ -2004,9 +2004,11 @@ BEGIN
                     ES_AUTOHSCROLL | ES_READONLY | WS_BORDER | WS_VSCROLL | 
                     WS_HSCROLL,7,165,404,49
     CONTROL         "Custom1",IDC_TIMESTEP_GRID,"MFCGridCtrl",WS_BORDER | 
-                    WS_TABSTOP,7,7,404,70
+                    WS_TABSTOP,169,7,242,149
     CONTROL         "Custom1",IDC_TIMEEND_GRID,"MFCGridCtrl",WS_BORDER | 
-                    WS_TABSTOP,7,86,404,70
+                    WS_TABSTOP,7,7,144,149
+    LTEXT           "NOTE: This invisible control is needed so that the background of the dialog is painted correctly.",
+                    IDC_STATIC,75,77,159,22,NOT WS_VISIBLE
 END
 
 

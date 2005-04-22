@@ -4,6 +4,7 @@
 #include "ETSLayout/ETSLayout.h"
 #include "BCSpecifiedHeadPropertyPage.h"
 #include "BCFluxPropertyPage2.h"
+#include "TimeControlMultiPropertyPage2.h"
 
 
 #ifdef _DEBUG
@@ -21,7 +22,12 @@ void TestCModGridCtrlEx::testInDialog(void)
 	// CPropertySheet sheet(_T("Multiple Time Control"), 0);
 	// TestCModGridCtrlExPage page;
 	// CBCSpecifiedHeadPropertyPage page;
-	CBCFluxPropertyPage2 page;
+	//CBCFluxPropertyPage2 page;
+	//sheet.AddPage(&page);
+	//sheet.DoModal();
+
+	CTimeControlMultiPropertyPage2 page;
 	sheet.AddPage(&page);
 	sheet.DoModal();
+
 }
