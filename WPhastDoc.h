@@ -33,6 +33,7 @@ class CFreeSurface;
 class CGridElt;
 class CHeadIC;
 class CTimeControl;
+class CTimeControl2;
 class CPrintFreq;
 class CNewModel;
 
@@ -168,11 +169,12 @@ protected:
 	CScalePropertyPage     *m_pScalePage;
 
 	// properties
-	CUnits       *m_pUnits;
-	CTimeControl *m_pTimeControl;
-	CPrintFreq   *m_pPrintFreq;
+	CUnits        *m_pUnits;
+	CTimeControl  *m_pTimeControl;
+	CTimeControl2 *m_pTimeControl2;
+	CPrintFreq    *m_pPrintFreq;
 
-	CNewModel    *m_pModel;
+	CNewModel     *m_pModel;
 
 
 	// properties
@@ -227,10 +229,12 @@ public:
 	void GetUnits(CUnits& units)const;
 	void SetUnits(const CUnits& units);
 
-// COMMENT: {4/11/2005 1:44:07 PM}	void SetTimeControl(const CTimeControl& timeControl, int nStressPeriod = 1);
-// COMMENT: {4/11/2005 1:44:07 PM}	const CTimeControl& GetTimeControl(int nStressPeriod = 1)const;
 	void SetTimeControl(const CTimeControl& timeControl);
 	const CTimeControl& GetTimeControl(void)const;
+
+	void SetTimeControl2(const CTimeControl2& timeControl2);
+	const CTimeControl2& GetTimeControl2(void)const;
+
 
 // COMMENT: {4/11/2005 1:21:22 PM}	void SetPrintFrequency(const CPrintFreq& printFreq, int nStressPeriod = 1);
 // COMMENT: {4/11/2005 1:21:22 PM}	const CPrintFreq& GetPrintFrequency(int nStressPeriod = 1)const;

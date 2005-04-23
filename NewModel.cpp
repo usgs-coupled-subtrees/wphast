@@ -17,18 +17,19 @@ CNewModel CNewModel::Default(void)
 	model.m_headIC = CHeadIC::NewDefaults();
 	model.m_chemIC = CChemIC::NewDefaults();
 
-	for(int i = 0; i < 3; ++i) {	
+	for(int i = 0; i < 3; ++i)
+	{	
 		model.m_grid[i].count_coord = 2;
-		model.m_grid[i].uniform = TRUE;
-		model.m_grid[i].coord[0] = 0;
-		model.m_grid[i].coord[1] = 1;
+		model.m_grid[i].uniform     = TRUE;
+		model.m_grid[i].coord[0]    = 0;
+		model.m_grid[i].coord[1]    = 1;
 	}
 	model.m_grid[0].c = 'x';
 	model.m_grid[1].c = 'y';
 	model.m_grid[2].c = 'z';
 
-	model.m_timeControl.SetTimeStepValue(1.0);
-	model.m_timeControl.SetTimeEndValue(1.0);
+// COMMENT: {4/22/2005 3:43:39 PM}	model.m_timeControl.SetTimeStepValue(1.0);
+// COMMENT: {4/22/2005 3:43:39 PM}	model.m_timeControl.SetTimeEndValue(1.0);
 
 	return model;
 }

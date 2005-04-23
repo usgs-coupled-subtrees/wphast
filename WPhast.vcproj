@@ -525,6 +525,9 @@
 				RelativePath="SetSteadyFlowAction.cpp">
 			</File>
 			<File
+				RelativePath="SetTimeControl2Action.cpp">
+			</File>
+			<File
 				RelativePath="SetTimeControlAction.cpp">
 			</File>
 			<File
@@ -555,7 +558,13 @@
 				RelativePath="TempPropertyPage.cpp">
 			</File>
 			<File
+				RelativePath="TestCTimeControlMultiPropertyPage2.cpp">
+			</File>
+			<File
 				RelativePath="TimeControl.cpp">
+			</File>
+			<File
+				RelativePath="TimeControl2.cpp">
 			</File>
 			<File
 				RelativePath="TimeControlMultiPropertyPage.cpp">
@@ -928,6 +937,9 @@
 				RelativePath="SetSteadyFlowAction.h">
 			</File>
 			<File
+				RelativePath="SetTimeControl2Action.h">
+			</File>
+			<File
 				RelativePath="SetTimeControlAction.h">
 			</File>
 			<File
@@ -958,7 +970,13 @@
 				RelativePath="TempPropertyPage.h">
 			</File>
 			<File
+				RelativePath="TestCTimeControlMultiPropertyPage2.h">
+			</File>
+			<File
 				RelativePath="TimeControl.h">
+			</File>
+			<File
+				RelativePath="TimeControl2.h">
 			</File>
 			<File
 				RelativePath="TimeControlMultiPropertyPage.h">

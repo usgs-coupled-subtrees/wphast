@@ -30,6 +30,14 @@ Ctime::Ctime(const struct time& t)
 	this->input = 0;
 #endif
 	Ctime::Copy(*this, t);
+	//{{{4/21/2005 9:52:09 PM}
+	if (t.input && ::strlen(t.input))
+	{
+		ASSERT(t.type == UNITS);
+		ASSERT(this->type == UNITS);
+		this->SetInput(t.input);
+	}
+	//}}{4/21/2005 9:52:09 PM}
 }
 
 Ctime::Ctime(const Ctime& t)
@@ -38,6 +46,14 @@ Ctime::Ctime(const Ctime& t)
 	this->input = 0;
 #endif
 	Ctime::Copy(*this, t);
+	//{{{4/21/2005 9:52:09 PM}
+	if (t.input && ::strlen(t.input))
+	{
+		ASSERT(t.type == UNITS);
+		ASSERT(this->type == UNITS);
+		this->SetInput(t.input);
+	}
+	//}}{4/21/2005 9:52:09 PM}
 }
 
 void Ctime::Copy(struct time& dest, const struct time& src)

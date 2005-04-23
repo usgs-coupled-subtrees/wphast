@@ -4,7 +4,7 @@
 #include "ETSLayout/ETSLayout.h"
 #include "ETSLayoutPropertyPageXP.h"
 
-////#include "BC.h"
+#include "TimeControl2.h"
 
 #ifndef baseCTimeControlMultiPropertyPage2
 #define baseCTimeControlMultiPropertyPage2 ETSLayoutPropertyPageXP
@@ -20,6 +20,9 @@ public:
 	CTimeControlMultiPropertyPage2();
 	virtual ~CTimeControlMultiPropertyPage2();
 
+	void SetProperties(const CTimeControl2& r_tc2);
+	void GetProperties(CTimeControl2& r_tc2);
+
 // Dialog Data
 	enum { IDD = IDD_TC_INT_M_PROPPAGE2 };
 
@@ -29,6 +32,8 @@ protected:
 
 	CModGridCtrlEx   m_gridTimeEnd;     // IDC_TIMEEND_GRID
 	CModGridCtrlEx   m_gridTimeStep;    // IDC_TIMESTEP_GRID
+
+	CTimeControl2 m_tc2;
 
 	DECLARE_MESSAGE_MAP()
 public:

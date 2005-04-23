@@ -73,10 +73,8 @@ CNewModel CNewModelWizard::GetModel(void)const
 	}
 	this->m_mediaPage.GetProperties(model.m_media);
 	this->m_icHeadPage.GetProperties(model.m_headIC);
-	//{{
 	this->m_chemICPage.GetProperties(model.m_chemIC);
-	//}}
-	this->m_tcPage.GetProperties(model.m_timeControl);
+// COMMENT: {4/22/2005 3:43:04 PM}	this->m_tcPage.GetProperties(model.m_timeControl);
 	return model;
 }
 

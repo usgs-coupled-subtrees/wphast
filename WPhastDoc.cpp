@@ -69,7 +69,7 @@
 #include "FreeSurface.h"
 
 #include "HeadIC.h"
-#include "TimeControl.h"
+#include "TimeControl2.h"
 #include "MapActor.h"
 #include "MapImageActor.h"
 #include "WorldTransform.h"
@@ -240,6 +240,7 @@ CWPhastDoc::CWPhastDoc()
 	// create time control
 	//
 	this->m_pTimeControl = new CTimeControl;
+	this->m_pTimeControl2 = new CTimeControl2;
 
 	// create print_frequency
 	this->m_pPrintFreq = new CPrintFreq;
@@ -393,10 +394,7 @@ void CWPhastDoc::Serialize(CArchive& ar)
 			this->m_pPrintFreq->Serialize(bStoring, wphast_id);
 
 			// store time control
-			this->m_pTimeControl->Serialize(bStoring, wphast_id);
-
-// COMMENT: {4/8/2005 6:55:22 PM}			// store additional stress periods
-// COMMENT: {4/8/2005 6:55:22 PM}			this->SerializeStressPeriods(bStoring, wphast_id);
+			this->m_pTimeControl2->Serialize(bStoring, wphast_id);
 
 			// close WPhast group
 			status = ::H5Gclose(wphast_id);
@@ -487,19 +485,18 @@ void CWPhastDoc::Serialize(CArchive& ar)
 			// load PRINT_FREQUENCY
 			this->m_pPrintFreq->Serialize(bStoring, wphast_id);
 			// update properties bar
-			if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar()) {
+			if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar())
+			{
 				pTree->SetPrintFrequency(this->m_pPrintFreq);
 			}
 
 			// load time control
-			this->m_pTimeControl->Serialize(bStoring, wphast_id);
+			this->m_pTimeControl2->Serialize(bStoring, wphast_id);
 			// update properties bar
-			if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar()) {
-				pTree->SetTimeControl(this->m_pTimeControl);
+			if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar())
+			{
+				pTree->SetTimeControl2(this->m_pTimeControl2);
 			}
-
-// COMMENT: {4/8/2005 6:55:32 PM}			// load additional stress periods
-// COMMENT: {4/8/2005 6:55:32 PM}			this->SerializeStressPeriods(bStoring, wphast_id);
 
 			// close WPhast group
 			status = ::H5Gclose(wphast_id);
@@ -2084,23 +2081,26 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 // COMMENT: {2/23/2005 1:07:32 PM}		CTimeControl timeControl(time_step, time_end);
 // COMMENT: {2/23/2005 1:07:32 PM}		Ctime timeBegin(time_end);
 // COMMENT: {2/23/2005 1:07:32 PM}		timeBegin.SetValue(0.0);
+		// TIME_CONTROL
+		//
+		CTimeControl2 timeControl2(::time_step, ::time_end, ::count_time_end);
 
 
 		// create new document
 		//
 		CNewModel model;
-		model.m_flowOnly    = flowOnly;
-		model.m_freeSurface = (::free_surface != 0);
-		model.m_steadyFlow  = (::steady_flow != 0);  // TODO later there'll be additional member vars
-		model.m_units       = ::units;
-		model.m_grid[0]     = ::grid[0];
-		model.m_grid[1]     = ::grid[1];
-		model.m_grid[2]     = ::grid[2];		
-		model.m_media       = gridElt;
-		model.m_headIC      = headIC;
-		model.m_chemIC      = chemIC;
-		model.m_printFreq   = printFreq;
-// COMMENT: {2/23/2005 1:08:11 PM}		model.m_timeControl = timeControl;
+		model.m_flowOnly     = flowOnly;
+		model.m_freeSurface  = (::free_surface != 0);
+		model.m_steadyFlow   = (::steady_flow != 0);  // TODO later there'll be additional member vars
+		model.m_units        = ::units;
+		model.m_grid[0]      = ::grid[0];
+		model.m_grid[1]      = ::grid[1];
+		model.m_grid[2]      = ::grid[2];		
+		model.m_media        = gridElt;
+		model.m_headIC       = headIC;
+		model.m_chemIC       = chemIC;
+		model.m_printFreq    = printFreq;
+		model.m_timeControl2 = timeControl2;
 
 		this->New(model);
 
@@ -2850,20 +2850,28 @@ void CWPhastDoc::New(const CNewModel& model)
 		pTree->SetPrintFrequency(this->m_pPrintFreq);
 	}
 
-	// TimeControl
+// COMMENT: {4/22/2005 3:40:19 PM}	// TimeControl
+// COMMENT: {4/22/2005 3:40:19 PM}	//
+// COMMENT: {4/22/2005 3:40:19 PM}	(*this->m_pTimeControl) = model.m_timeControl;
+// COMMENT: {4/22/2005 3:40:19 PM}	if (this->m_pTimeControl->GetTimeEndInput() == 0) {
+// COMMENT: {4/22/2005 3:40:19 PM}		this->m_pTimeControl->SetTimeEndInput(this->m_pUnits->time.c_str());
+// COMMENT: {4/22/2005 3:40:19 PM}	}
+// COMMENT: {4/22/2005 3:40:19 PM}	if (this->m_pTimeControl->GetTimeStepInput() == 0) {
+// COMMENT: {4/22/2005 3:40:19 PM}		this->m_pTimeControl->SetTimeStepInput(this->m_pUnits->time.c_str());
+// COMMENT: {4/22/2005 3:40:19 PM}	}
+	// TimeControl2
 	//
-	(*this->m_pTimeControl) = model.m_timeControl;
-	if (this->m_pTimeControl->GetTimeEndInput() == 0) {
-		this->m_pTimeControl->SetTimeEndInput(this->m_pUnits->time.c_str());
+	(*this->m_pTimeControl2) = model.m_timeControl2;
+	if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar())
+	{
+		pTree->SetTimeControl2(this->m_pTimeControl2);
 	}
-	if (this->m_pTimeControl->GetTimeStepInput() == 0) {
-		this->m_pTimeControl->SetTimeStepInput(this->m_pUnits->time.c_str());
-	}
-	// update properties bar
-	//
-	if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar()) {
-		pTree->SetTimeControl(this->m_pTimeControl);
-	}
+
+// COMMENT: {4/22/2005 3:50:05 PM}	// update properties bar
+// COMMENT: {4/22/2005 3:50:05 PM}	//
+// COMMENT: {4/22/2005 3:50:05 PM}	if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar()) {
+// COMMENT: {4/22/2005 3:50:05 PM}		pTree->SetTimeControl(this->m_pTimeControl);
+// COMMENT: {4/22/2005 3:50:05 PM}	}
 
 	if (model.HasSiteMap()) {
 		ASSERT(this->m_pMapActor == NULL);
@@ -3016,11 +3024,23 @@ void CWPhastDoc::SetTimeControl(const CTimeControl& timeControl)
 {
 	(*this->m_pTimeControl) = timeControl;
 
+// COMMENT: {4/22/2005 4:21:13 PM}	// update properties bar
+// COMMENT: {4/22/2005 4:21:13 PM}	//
+// COMMENT: {4/22/2005 4:21:13 PM}	if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar())
+// COMMENT: {4/22/2005 4:21:13 PM}	{
+// COMMENT: {4/22/2005 4:21:13 PM}		pTree->SetTimeControl(this->m_pTimeControl);
+// COMMENT: {4/22/2005 4:21:13 PM}	}
+}
+
+void CWPhastDoc::SetTimeControl2(const CTimeControl2& timeControl2)
+{
+	(*this->m_pTimeControl2) = timeControl2;
+
 	// update properties bar
 	//
 	if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar())
 	{
-		pTree->SetTimeControl(this->m_pTimeControl);
+		pTree->SetTimeControl2(this->m_pTimeControl2);
 	}
 }
 
@@ -3037,6 +3057,11 @@ void CWPhastDoc::SetTimeControl(const CTimeControl& timeControl)
 const CTimeControl& CWPhastDoc::GetTimeControl(void)const
 {
 	return (*this->m_pTimeControl);
+}
+
+const CTimeControl2& CWPhastDoc::GetTimeControl2(void)const
+{
+	return (*this->m_pTimeControl2);
 }
 
 // COMMENT: {6/9/2004 10:40:35 PM}	void SetPrintFrequency(const CPrintFreq& printFreq, int nStressPeriod = 1);

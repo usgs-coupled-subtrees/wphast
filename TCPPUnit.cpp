@@ -25,6 +25,7 @@
 #include "TestCZone.h"
 #include "TestCtime.h"
 #include "TestCBCSpecifiedHeadPropertyPage.h"
+#include "TestCTimeControlMultiPropertyPage2.h"
 
 
 TCPPUnit::TCPPUnit(void)
@@ -59,7 +60,7 @@ void TCPPUnit::RunUnitTests(void)
 		runner.addTest(TestCBCZone::suite());
 		runner.addTest(TestCBCSpecifiedPropertyPage::suite());
 #endif
-		runner.addTest(TestCModGridCtrlEx::suite());
+		runner.addTest(TestCTimeControlMultiPropertyPage2::suite());
 
 		/**********************************************************
 		// the following require user input

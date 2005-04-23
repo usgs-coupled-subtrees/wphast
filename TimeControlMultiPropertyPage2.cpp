@@ -28,6 +28,126 @@ void CTimeControlMultiPropertyPage2::DoDataExchange(CDataExchange* pDX)
 	if (this->m_bFirstSetActive)
 	{
 		this->SetupGrids();
+
+		// time_end
+		//
+		std::set<Ctime>::iterator tIter = this->m_tc2.m_timeEnd.begin();
+		for (int nRow = 1; tIter != this->m_tc2.m_timeEnd.end(); ++tIter, ++nRow)
+		{
+			ASSERT(tIter->value_defined);
+			::DDX_TextGridControl(pDX, IDC_TIMEEND_GRID, nRow, 0, tIter->value);
+			if (tIter->input)
+			{
+				CString str(tIter->input);
+				::DDX_TextGridControl(pDX, IDC_TIMEEND_GRID, nRow, 1, str);
+			}
+		}
+
+		// time_step
+		//
+		CTimeSeries<Ctime>::iterator tsIter = this->m_tc2.m_timeStep.begin();
+		for (int nRow = 1; tsIter != this->m_tc2.m_timeStep.end(); ++tsIter, ++nRow)
+		{
+			Ctime t(tsIter->first);
+			ASSERT(t.value_defined);
+			::DDX_TextGridControl(pDX, IDC_TIMESTEP_GRID, nRow, 0, t.value);
+			if (t.input)
+			{
+				CString str(t.input);
+				::DDX_TextGridControl(pDX, IDC_TIMESTEP_GRID, nRow, 1, str);
+			}
+
+			ASSERT(tsIter->second.value_defined);
+			::DDX_TextGridControl(pDX, IDC_TIMESTEP_GRID, nRow, 2, tsIter->second.value);
+			if (tsIter->second.input)
+			{
+				CString str(tsIter->second.input);
+				::DDX_TextGridControl(pDX, IDC_TIMESTEP_GRID, nRow, 3, str);
+			}
+		}
+	}
+
+	if (pDX->m_bSaveAndValidate)
+	{
+		CTimeControl2 tc2;
+
+		// time_end
+		//
+		int nIDC = IDC_TIMEEND_GRID;
+		CModGridCtrlEx* pGrid = &this->m_gridTimeEnd;
+
+		for (int iRow = pGrid->GetFixedRowCount(); iRow < pGrid->GetRowCount(); ++iRow)
+		{
+			// time start
+			//
+			CString start;
+			::DDX_TextGridControl(pDX, nIDC, iRow, 0, start);
+			if (start.IsEmpty())
+			{
+				continue;
+			}
+
+			double d;
+			::DDX_TextGridControl(pDX, nIDC, iRow, 0, d);
+			Ctime t;
+			t.type = UNITS;
+			t.SetValue(d);
+
+			// time units
+			//
+			::DDX_TextGridControl(pDX, nIDC, iRow, 1, start);
+			if (!start.IsEmpty())
+			{
+				t.SetInput(start);
+			}
+			tc2.m_timeEnd.insert(t);
+		}
+
+		// time_step
+		//
+		nIDC = IDC_TIMESTEP_GRID;
+		pGrid = &this->m_gridTimeStep;
+
+		for (int iRow = pGrid->GetFixedRowCount(); iRow < pGrid->GetRowCount(); ++iRow)
+		{
+			// time start
+			//
+			CString start;
+			::DDX_TextGridControl(pDX, nIDC, iRow, 0, start);
+			if (start.IsEmpty())
+			{
+				continue;
+			}
+
+			double d;
+			::DDX_TextGridControl(pDX, nIDC, iRow, 0, d);
+			Ctime t;
+			t.type = UNITS;
+			t.SetValue(d);
+
+			// time units
+			//
+			::DDX_TextGridControl(pDX, nIDC, iRow, 1, start);
+			if (!start.IsEmpty())
+			{
+				t.SetInput(start);
+			}
+
+			::DDX_TextGridControl(pDX, nIDC, iRow, 2, d);
+			Ctime t2;
+			t2.type = UNITS;
+			t2.SetValue(d);
+
+			// time units
+			//
+			::DDX_TextGridControl(pDX, nIDC, iRow, 3, start);
+			if (!start.IsEmpty())
+			{
+				t2.SetInput(start);
+			}
+			tc2.m_timeStep.insert(CTimeSeries<Ctime>::value_type(t, t2));
+		}
+		this->m_tc2 = tc2;
 	}
 }
 
@@ -119,4 +239,14 @@ BOOL CTimeControlMultiPropertyPage2::SetupGrids(void)
 	this->m_gridTimeStep.SetItemText(1, 1, "");  this->m_gridTimeStep.DisableCell(1, 1);
 
 	return TRUE;
+}
+
+void CTimeControlMultiPropertyPage2::SetProperties(const CTimeControl2& r_tc2)
+{
+	this->m_tc2 = r_tc2;
+}
+
+void CTimeControlMultiPropertyPage2::GetProperties(CTimeControl2& r_tc2)
+{
+	r_tc2 = this->m_tc2;
 }

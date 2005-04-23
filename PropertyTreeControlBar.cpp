@@ -22,7 +22,7 @@
 #include "Units.h"
 #include "NewModel.h"
 #include "FlowOnly.h"
-#include "TimeControl.h"
+#include "TimeControl2.h"
 #include "Units1PropertyPage.h"
 #include "Units2PropertyPage.h"
 #include "BoxPropertiesDialogBar.h"
@@ -721,10 +721,12 @@ void CPropertyTreeControlBar::OnNMDblClk(NMHDR* pNMHDR, LRESULT* pResult)
 
 	// TIME_CONTROL
 	//
-	if (item.IsNodeAncestor(this->m_nodeTimeControl)) {
-		if (this->m_nodeTimeControl.GetData()) {
-			CTimeControl* pTC = (CTimeControl*)this->m_nodeTimeControl.GetData();
-			pTC->EditMultiple(this);
+	if (item.IsNodeAncestor(this->m_nodeTimeControl2))
+	{
+		if (this->m_nodeTimeControl2.GetData())
+		{
+			CTimeControl2* pTC = (CTimeControl2*)this->m_nodeTimeControl2.GetData();
+			pTC->Edit(&this->m_wndTree);
 			*pResult = TRUE;
 			return;
 		}
@@ -1069,9 +1071,9 @@ void CPropertyTreeControlBar::SetModel(CNewModel* pModel)
 	this->SetSteadyFlow(&pModel->m_steadyFlow);
 }
 
-void CPropertyTreeControlBar::SetTimeControl(CTimeControl* pTimeControl)
+void CPropertyTreeControlBar::SetTimeControl2(CTimeControl2* pTimeControl2)
 {
-	pTimeControl->Insert(&this->m_wndTree, this->m_nodeTimeControl);
+	pTimeControl2->Insert(&this->m_wndTree, this->m_nodeTimeControl2);
 }
 
 // COMMENT: {4/11/2005 1:10:33 PM}void CPropertyTreeControlBar::SetTimeControl(const CTimeControl& timeControl, int nStressPeriod)
@@ -1148,6 +1150,11 @@ CTreeCtrlNode CPropertyTreeControlBar::GetTimeControlNode(void)
 	return this->m_nodeTimeControl;
 }
 
+CTreeCtrlNode CPropertyTreeControlBar::GetTimeControl2Node(void)
+{
+	return this->m_nodeTimeControl2;
+}
+
 // COMMENT: {4/8/2005 7:03:15 PM}CTreeCtrlNode CPropertyTreeControlBar::GetPrintFrequencyNode(int nStressPeriod)
 // COMMENT: {4/8/2005 7:03:15 PM}{
 // COMMENT: {4/8/2005 7:03:15 PM}	ASSERT(nStressPeriod > 0);
@@ -1171,11 +1178,11 @@ CTreeCtrlNode CPropertyTreeControlBar::GetPrintFrequencyNode(void)
 // COMMENT: {4/11/2005 1:09:44 PM}	ASSERT(node.GetData());
 // COMMENT: {4/11/2005 1:09:44 PM}	return (CTimeControl*)node.GetData();
 // COMMENT: {4/11/2005 1:09:44 PM}}
-CTimeControl* CPropertyTreeControlBar::GetTimeControl(void)
+CTimeControl2* CPropertyTreeControlBar::GetTimeControl2(void)
 {
-	CTreeCtrlNode node = this->GetTimeControlNode();
+	CTreeCtrlNode node = this->GetTimeControl2Node();
 	ASSERT(node.GetData());
-	return (CTimeControl*)node.GetData();
+	return (CTimeControl2*)node.GetData();
 }
 
 // COMMENT: {4/11/2005 1:08:48 PM}CPrintFreq* CPropertyTreeControlBar::GetPrintFrequency(int nStressPeriod)
@@ -1462,10 +1469,11 @@ void CPropertyTreeControlBar::DeleteContents()
 // COMMENT: {4/8/2005 6:45:59 PM}	this->m_nodeWells       = this->m_wndTree.InsertItem(szWELLS,               this->m_nodeSP1);
 // COMMENT: {4/8/2005 6:45:59 PM}	this->m_nodePF          = this->m_wndTree.InsertItem(szPRINT_FREQUENCY,     this->m_nodeSP1);
 // COMMENT: {4/8/2005 6:45:59 PM}	this->m_nodeTimeControl = this->m_wndTree.InsertItem(szTIME_CONTROL,        this->m_nodeSP1);
-	this->m_nodeBC          = this->m_wndTree.InsertItem(szBOUNDARY_CONDITIONS );
-	this->m_nodeWells       = this->m_wndTree.InsertItem(szWELLS               );
-	this->m_nodePF          = this->m_wndTree.InsertItem(szPRINT_FREQUENCY     );
-	this->m_nodeTimeControl = this->m_wndTree.InsertItem(szTIME_CONTROL        );
+	this->m_nodeBC           = this->m_wndTree.InsertItem(szBOUNDARY_CONDITIONS );
+	this->m_nodeWells        = this->m_wndTree.InsertItem(szWELLS               );
+	this->m_nodePF           = this->m_wndTree.InsertItem(szPRINT_FREQUENCY     );
+// COMMENT: {4/22/2005 3:55:31 PM}	this->m_nodeTimeControl = this->m_wndTree.InsertItem(szTIME_CONTROL        );
+	this->m_nodeTimeControl2 = this->m_wndTree.InsertItem(szTIME_CONTROL        );
 
 	// set initial checkmark states (eyes)
 	this->m_wndTree.SetItemState(this->m_nodeMedia, INDEXTOSTATEIMAGEMASK(BST_CHECKED + 1), TVIS_STATEIMAGEMASK);

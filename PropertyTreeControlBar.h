@@ -12,7 +12,7 @@ class CFlowOnly;
 class CSteadyFlow;
 class CFreeSurface;
 class CNewModel;
-class CTimeControl;
+class CTimeControl2;
 class CPrintFreq;
 class CZoneActor;
 class CWPhastDoc;
@@ -60,6 +60,7 @@ protected:
 	CTreeCtrlNode   m_nodeUnits;
 	CTreeCtrlNode   m_nodeFlowOnly;
 	CTreeCtrlNode   m_nodeTimeControl;
+	CTreeCtrlNode   m_nodeTimeControl2;
 	CTreeCtrlNode   m_nodeSP1;
 	CTreeCtrlNode   m_nodePF;
 	CTreeCtrlNode   m_nodeFreeSurface;
@@ -99,11 +100,8 @@ public:
 	void SetFreeSurface(CFreeSurface *pFreeSurface);
 	void SetSteadyFlow(CSteadyFlow *pSteadyFlow);
 
-	void SetTimeControl(CTimeControl* pTimeControl);
-// COMMENT: {4/8/2005 7:05:37 PM}	void SetTimeControl(const CTimeControl& timeControl, int nStressPeriod = 1);
-// COMMENT: {4/8/2005 7:05:37 PM}	CTimeControl* GetTimeControl(int nStressPeriod);
-	void SetTimeControl(const CTimeControl& timeControl);
-	CTimeControl* GetTimeControl(void);
+	void SetTimeControl2(CTimeControl2* pTimeControl2);
+	CTimeControl2* GetTimeControl2(void);
 
 	void SetPrintFrequency(CPrintFreq* pPrintFreq);
 // COMMENT: {4/8/2005 7:06:02 PM}	void SetPrintFrequency(const CPrintFreq& printFreq, int nStressPeriod = 1);
@@ -126,6 +124,7 @@ public:
 // COMMENT: {4/8/2005 7:01:33 PM}	CTreeCtrlNode GetPrintFrequencyNode(int nStressPeriod = 1);
 	CTreeCtrlNode GetBCNode(void);
 	CTreeCtrlNode GetTimeControlNode(void);
+	CTreeCtrlNode GetTimeControl2Node(void);
 	CTreeCtrlNode GetPrintFrequencyNode(void);
 
 	void SetNodeCheck(CTreeCtrlNode node, UINT nCheckState);
