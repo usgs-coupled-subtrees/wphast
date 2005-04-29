@@ -2,7 +2,7 @@
 #include "gridctrl.h"
 #include "../resource.h" // IDC_RESIZE_COLUMN, IDC_RESIZE_ROW
 
-#define GVIS_DISABLED             0x0200
+#define GVIS_DISABLED             0x00800000
 
 #define GV_HIGHLIGHT_NEVER        0x0000
 #define GV_HIGHLIGHT_ALWAYS       0x0001

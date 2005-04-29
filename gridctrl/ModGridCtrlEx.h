@@ -1,16 +1,19 @@
 #pragma once
 #include "ModGridCtrl.h"
 
-// Additinal Cell states
-#define GVIS_UNCHECKED            0x0040
-#define GVIS_CHECKED              0x0080
-#define GVIS_INDETERMINATE        0x0100
-#define GVIS_DISABLED             0x0200
-
-
-#define GVIM_CHECKMARK            0x01C0
-
 #define GVN_ITEMCHANGED          LVN_ITEMCHANGED
+
+// checkmark states
+#define GVIS_UNCHECKED            0x00100000
+#define GVIS_CHECKED              0x00200000
+#define GVIS_INDETERMINATE        0x00400000
+
+// checkmark masks
+#define GVIM_CHECKMARK            0x00700000 // (GVIS_UNCHECKED|GVIS_CHECKED|GVIS_INDETERMINATE)
+
+// list states
+#define GVIS_DROPDOWN             0x01000000
+
 
 #include <map>
 #include <vector>
@@ -105,13 +108,17 @@ protected:
 	void ShowDropDown(BOOL bShowIt);
 
 protected:
-	std::map<int, std::vector<LPCTSTR> > m_mapColToOptions;
-	std::map<int, CListBox*>             m_mapColToList;
+// COMMENT: {4/28/2005 8:21:11 PM}	std::map<int, std::vector<LPCTSTR> > m_mapColToOptions;
+// COMMENT: {4/28/2005 8:21:11 PM}	std::map<int, CListBox*>             m_mapColToList;
 	BOOL                                 m_bButtonDown;
 	BOOL                                 m_bButtonCaptured;
 	CRect                                m_rcButton;
 	CRect                                m_rcListBox;
 	CCellID m_idLastHotCell;
+
+	//{{
+	std::map< std::vector<LPCTSTR>, CListBox* > m_mapVectorToList;
+	//}}
 
 
 	static CTheme s_themeButton;
