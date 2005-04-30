@@ -7,6 +7,8 @@
 
 #include "Global.h"
 
+#define strText szText
+
 // CWellPropertyPage dialog
 
 IMPLEMENT_DYNAMIC(CWellPropertyPage, CPropertyPage)
@@ -340,12 +342,12 @@ void CWellPropertyPage::DoDataExchange(CDataExchange* pDX)
 			// set grid bottom
 			Item.row = i + 1;
 			Item.col = 0;
-			Item.szText.Format(_T("%g"), this->m_well.elevation[i].bottom);
+			Item.strText.Format(_T("%g"), this->m_well.elevation[i].bottom);
 			this->m_wndScreensGrid.SetItem(&Item);
 
 			// set grid top
 			Item.col = 1;
-			Item.szText.Format(_T("%g"), this->m_well.elevation[i].top);
+			Item.strText.Format(_T("%g"), this->m_well.elevation[i].top);
 			this->m_wndScreensGrid.SetItem(&Item);
 
 // COMMENT: {8/25/2004 4:37:02 PM}			this->m_wndScreensGrid.RedrawWindow();
@@ -361,12 +363,12 @@ void CWellPropertyPage::DoDataExchange(CDataExchange* pDX)
 			// set grid bottom
 			Item.row = i + 1;
 			Item.col = 0;
-			Item.szText.Format(_T("%g"), this->m_well.depth[i].bottom);
+			Item.strText.Format(_T("%g"), this->m_well.depth[i].bottom);
 			this->m_wndScreensGrid.SetItem(&Item);
 
 			// set grid top
 			Item.col = 1;
-			Item.szText.Format(_T("%g"), this->m_well.depth[i].top);
+			Item.strText.Format(_T("%g"), this->m_well.depth[i].top);
 			this->m_wndScreensGrid.SetItem(&Item);
 
 			// add screen
@@ -458,31 +460,31 @@ void CWellPropertyPage::DoDataExchange(CDataExchange* pDX)
 
 			// start time
 			Item.col = 0;
-			Item.szText.Format(_T("%g"), (*iter).first.value);
+			Item.strText.Format(_T("%g"), (*iter).first.value);
 			this->m_wndPumpSchedGrid.SetItem(&Item);
 
 			// start time units
 			if ((*iter).first.type == UNDEFINED)
 			{
 				ASSERT(this->m_units.time.input && ::strlen(this->m_units.time.input));
-				Item.szText = CGlobal::GetStdTimeUnits(this->m_units.time.input).c_str();
+				Item.strText = CGlobal::GetStdTimeUnits(this->m_units.time.input).c_str();
 			}
 			else if ((*iter).first.type == STEP)
 			{
 				ASSERT(FALSE);
-				Item.szText = CGlobal::GetStdTimeUnits(this->m_units.time.input).c_str();
+				Item.strText = CGlobal::GetStdTimeUnits(this->m_units.time.input).c_str();
 			}
 			else if ((*iter).first.type == UNITS)
 			{
 				ASSERT((*iter).first.input && ::strlen((*iter).first.input));
 				if ((*iter).first.input)
 				{
-					Item.szText = CGlobal::GetStdTimeUnits((*iter).first.input).c_str();
+					Item.strText = CGlobal::GetStdTimeUnits((*iter).first.input).c_str();
 				}
 				else
 				{
 					ASSERT(this->m_units.time.input && ::strlen(this->m_units.time.input));
-					Item.szText = CGlobal::GetStdTimeUnits(this->m_units.time.input).c_str();
+					Item.strText = CGlobal::GetStdTimeUnits(this->m_units.time.input).c_str();
 				}
 			}
 			Item.col = 1;
@@ -490,20 +492,20 @@ void CWellPropertyPage::DoDataExchange(CDataExchange* pDX)
 
 
 			// Item.szText = (*iter).first.input;
-			Item.szText = (*iter).first.input ? "" : "";
+			Item.strText = (*iter).first.input ? "" : "";
 
 			// rate
 			if ((*iter).second.q_defined)
 			{
 				Item.col = 2;
-				Item.szText.Format(_T("%g"), (*iter).second.q);
+				Item.strText.Format(_T("%g"), (*iter).second.q);
 				this->m_wndPumpSchedGrid.SetItem(&Item);
 			}
 			// solution
 			if ((*iter).second.solution_defined)
 			{
 				Item.col = 3;
-				Item.szText.Format(_T("%d"), (*iter).second.solution);
+				Item.strText.Format(_T("%d"), (*iter).second.solution);
 				this->m_wndPumpSchedGrid.SetItem(&Item);
 			}
 		}
@@ -558,20 +560,20 @@ void CWellPropertyPage::SetScreenHeadings(BOOL bByDepth)
 
 	if (bByDepth) {
 		Item.col = 0;
-		Item.szText.Format(_T("Bottom depth %s"), this->m_strVerticalUnits);
+		Item.strText.Format(_T("Bottom depth %s"), this->m_strVerticalUnits);
 		this->m_wndScreensGrid.SetItem(&Item);
 
 		Item.col = 1;
-		Item.szText.Format(_T("Top depth %s"), this->m_strVerticalUnits);
+		Item.strText.Format(_T("Top depth %s"), this->m_strVerticalUnits);
 		this->m_wndScreensGrid.SetItem(&Item);
 	}
 	else {
 		Item.col = 0;
-		Item.szText.Format(_T("Bottom elevation %s"), this->m_strVerticalUnits);
+		Item.strText.Format(_T("Bottom elevation %s"), this->m_strVerticalUnits);
 		this->m_wndScreensGrid.SetItem(&Item);
 
 		Item.col = 1;
-		Item.szText.Format(_T("Top elevation %s"), this->m_strVerticalUnits);
+		Item.strText.Format(_T("Top elevation %s"), this->m_strVerticalUnits);
 		this->m_wndScreensGrid.SetItem(&Item);
 	}
 	this->m_wndScreensGrid.RedrawWindow();

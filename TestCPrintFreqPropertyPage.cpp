@@ -1,6 +1,7 @@
 #include "StdAfx.h"
 #include "TestCPrintFreqPropertyPage.h"
 
+#include "ETSLayout/ETSLayout.h"
 #include "PrintFreqPropertyPage.h"
 
 
@@ -13,7 +14,7 @@ void TestCPrintFreqPropertyPage::testDoModal(void)
 	// For richedit in dialogs
 	::AfxInitRichEdit2();
 
-	CPropertySheet sheet("Test CPrintFreqPropertyPage", 0);
+	ETSLayoutPropertySheet sheet("Test CPrintFreqPropertyPage", 0);
 	CPrintFreqPropertyPage page;
 	sheet.AddPage(&page);
 	sheet.DoModal();

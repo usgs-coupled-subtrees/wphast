@@ -13,6 +13,7 @@
 //#include "MacroAction.h"
 #include "PrintFreqPropertyPage.h"
 #include "PropertyTreeControlBar.h"
+#include "ETSLayout/ETSLayout.h"
 
 CPrintFreq::CPrintFreq(void)
 {
@@ -550,7 +551,7 @@ void CPrintFreq::Edit(CTreeCtrl* pTreeCtrl)
 
 	// show property sheet
 	//
-	CPropertySheet propSheet("Print Frequency", ::AfxGetMainWnd());
+	ETSLayoutPropertySheet propSheet("Print Frequency", ::AfxGetMainWnd());
 
 	CPrintFreqPropertyPage pfPage;
 	//{{ HACK

@@ -139,6 +139,7 @@ std::ostream& operator<< (std::ostream &os, const CTimeControl &tc)
 // COMMENT: {4/11/2005 1:44:53 PM}void CTimeControl::Edit(CTreeCtrl* pTreeCtrl, int nStressPeriod)
 void CTimeControl::Edit(CTreeCtrl* pTreeCtrl)
 {
+	ASSERT(FALSE); // replaced by CTimeControl2
 	ASSERT(this);
 	ASSERT(pTreeCtrl);
 
@@ -165,7 +166,7 @@ void CTimeControl::Edit(CTreeCtrl* pTreeCtrl)
 				CTimeControl newTimeControl;
 				tcPage.GetProperties(newTimeControl);
 // COMMENT: {4/11/2005 1:45:40 PM}				pDoc->Execute(new CSetTimeControlAction(pDoc, newTimeControl, nStressPeriod));
-				pDoc->Execute(new CSetTimeControlAction(pDoc, newTimeControl));
+// COMMENT: {4/26/2005 8:57:13 PM}				pDoc->Execute(new CSetTimeControlAction(pDoc, newTimeControl));
 			}
 			break;
 		case IDCANCEL:

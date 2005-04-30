@@ -170,8 +170,6 @@ protected:
 
 	// properties
 	CUnits        *m_pUnits;
-	CTimeControl  *m_pTimeControl;
-	CTimeControl2 *m_pTimeControl2;
 	CPrintFreq    *m_pPrintFreq;
 
 	CNewModel     *m_pModel;
@@ -228,9 +226,6 @@ public:
 	const CUnits& GetUnits(void)const;
 	void GetUnits(CUnits& units)const;
 	void SetUnits(const CUnits& units);
-
-	void SetTimeControl(const CTimeControl& timeControl);
-	const CTimeControl& GetTimeControl(void)const;
 
 	void SetTimeControl2(const CTimeControl2& timeControl2);
 	const CTimeControl2& GetTimeControl2(void)const;

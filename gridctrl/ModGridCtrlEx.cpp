@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "ModGridCtrlEx.h"
+#include <uxtheme.h>
 
 #ifndef WM_THEMECHANGED
 #define WM_THEMECHANGED 0x031A
@@ -21,10 +22,6 @@ CModGridCtrlEx::CModGridCtrlEx(int nRows, int nCols, int nFixedRows, int nFixedC
 
 CModGridCtrlEx::~CModGridCtrlEx(void)
 {
-// COMMENT: {4/28/2005 8:21:27 PM}	std::map<int, CListBox*>::iterator iter = this->m_mapColToList.begin();
-// COMMENT: {4/28/2005 8:21:27 PM}	for (; iter != this->m_mapColToList.end(); ++iter) {
-// COMMENT: {4/28/2005 8:21:27 PM}		delete iter->second;
-// COMMENT: {4/28/2005 8:21:27 PM}	}
 	std::map< std::vector<LPCTSTR>, CListBox* >::iterator it = this->m_mapVectorToList.begin();
 	for (; it != this->m_mapVectorToList.end(); ++it)
 	{
@@ -154,49 +151,25 @@ BOOL CModGridCtrlEx::SetColumnOptions(int nCol, const std::vector<LPCTSTR>& vecO
 {
 	try
 	{
-// COMMENT: {4/28/2005 8:22:01 PM}		// NOTE: may want to update map on Insert/Delete Column
-// COMMENT: {4/28/2005 8:22:01 PM}
-// COMMENT: {4/28/2005 8:22:01 PM}		//{{HACK
-// COMMENT: {4/28/2005 8:22:01 PM}		// don't allow paste
-// COMMENT: {4/28/2005 8:22:01 PM}		for (int i = 0; i < this->GetRowCount(); ++i)
-// COMMENT: {4/28/2005 8:22:01 PM}		{
-// COMMENT: {4/28/2005 8:22:01 PM}			this->SetItemState(i, nCol, this->GetItemState(i, nCol) | GVIS_READONLY);
-// COMMENT: {4/28/2005 8:22:01 PM}		}
-// COMMENT: {4/28/2005 8:22:01 PM}		//}}HACK
-// COMMENT: {4/28/2005 8:22:01 PM}
-// COMMENT: {4/28/2005 8:22:01 PM}		this->m_mapColToOptions.insert(std::map< int, std::vector<LPCTSTR> >::value_type(nCol, vecOptions));
-// COMMENT: {4/28/2005 8:22:01 PM}		this->m_mapColToList.insert(std::map< int, CListBox* >::value_type(nCol, new CListBoxDrop()));
-// COMMENT: {4/28/2005 8:22:01 PM}
-// COMMENT: {4/28/2005 8:22:01 PM}		ASSERT(this->m_mapColToList[nCol]);
 		CString strWindowName;
 #ifdef _DEBUG
 		strWindowName.Format(_T("Col %d"), nCol);
 #endif
 
-// COMMENT: {4/28/2005 8:22:10 PM}		CRect rect(0, 0, 0, 0);
-// COMMENT: {4/28/2005 8:22:10 PM}		VERIFY(this->m_mapColToList[nCol]->CreateEx(
-// COMMENT: {4/28/2005 8:22:10 PM}			WS_EX_TOPMOST|WS_EX_TOOLWINDOW,
-// COMMENT: {4/28/2005 8:22:10 PM}			_T("LISTBOX"),
-// COMMENT: {4/28/2005 8:22:10 PM}			strWindowName,
-// COMMENT: {4/28/2005 8:22:10 PM}			WS_CHILDWINDOW|WS_CLIPSIBLINGS|WS_BORDER,
-// COMMENT: {4/28/2005 8:22:10 PM}			rect,
-// COMMENT: {4/28/2005 8:22:10 PM}			CWnd::GetDesktopWindow(),
-// COMMENT: {4/28/2005 8:22:10 PM}			IDC_INPLACE_CONTROL,
-// COMMENT: {4/28/2005 8:22:10 PM}			NULL
-// COMMENT: {4/28/2005 8:22:10 PM}			));
-
-		//{{
 		std::map< std::vector<LPCTSTR>, CListBox* >::const_iterator item = this->m_mapVectorToList.find(vecOptions);
 		if (item == this->m_mapVectorToList.end())
 		{
-			this->m_mapVectorToList.insert(std::map< std::vector<LPCTSTR>, CListBox* >::value_type(vecOptions, new CListBoxDrop()));
-			item = this->m_mapVectorToList.find(vecOptions);
+			item = (this->m_mapVectorToList.insert(std::map< std::vector<LPCTSTR>, CListBox* >::value_type(vecOptions, new CListBoxDrop()))).first;
+
+			ASSERT(item == this->m_mapVectorToList.find(vecOptions));
 			ASSERT(item != this->m_mapVectorToList.end());
 			ASSERT(item->first.size() == vecOptions.size());
 			ASSERT(&item->first != &vecOptions);
 
+			CListBox* pListBox = item->second;
+
 			CRect rect(0, 0, 0, 0);
-			VERIFY(this->m_mapVectorToList[vecOptions]->CreateEx(
+			VERIFY(pListBox->CreateEx(
 				WS_EX_TOPMOST|WS_EX_TOOLWINDOW,
 				_T("LISTBOX"),
 				strWindowName,
@@ -207,8 +180,8 @@ BOOL CModGridCtrlEx::SetColumnOptions(int nCol, const std::vector<LPCTSTR>& vecO
 				NULL
 				));
 
-			this->m_mapVectorToList[vecOptions]->SetFont(this->GetParent()->GetFont());
-			this->m_mapVectorToList[vecOptions]->SetOwner(this);
+			pListBox->SetFont(this->GetParent()->GetFont());
+			pListBox->SetOwner(this);
 
 			ASSERT(this->m_mapVectorToList[vecOptions]->GetOwner() == this);
 			ASSERT(this->m_mapVectorToList[vecOptions]->GetParent() == CWnd::GetDesktopWindow());
@@ -216,33 +189,30 @@ BOOL CModGridCtrlEx::SetColumnOptions(int nCol, const std::vector<LPCTSTR>& vecO
 			std::vector<LPCTSTR>::const_iterator opt = vecOptions.begin();
 			for (; opt != vecOptions.end(); ++opt)
 			{
-				this->m_mapVectorToList[vecOptions]->AddString(*opt);
+				pListBox->AddString(*opt);
 			}
-			ASSERT(this->m_mapVectorToList[vecOptions]->GetCount() == (int)vecOptions.size());
+			ASSERT(pListBox->GetCount() == (int)vecOptions.size());
 		}
+		else
+		{
+#ifdef _DEBUG
+			CString str;
+			CListBox *pListBox = item->second;
+			pListBox->GetWindowText(str);
+			strWindowName.Format(_T("%s, Col %d"), str, nCol);
+			pListBox->SetWindowText(strWindowName);
+#endif
+		}
+
 		for (int nRow = this->GetFixedRowCount(); nRow < this->GetRowCount(); ++nRow)
 		{
-// COMMENT: {4/28/2005 8:16:51 PM}			this->SetItemData(nRow, nCol, (LPARAM)this->m_mapVectorToList[vecOptions]);
 			this->SetItemData(nRow, nCol, (LPARAM)&item->first);
-			//{{HACK
-			// don't allow paste
-			this->SetItemState(nRow, nCol, this->GetItemState(nRow, nCol) | GVIS_READONLY | GVIS_DROPDOWN);
-			//}}HACK
+// COMMENT: {4/28/2005 10:16:16 PM}			//{{HACK
+// COMMENT: {4/28/2005 10:16:16 PM}			// don't allow paste
+// COMMENT: {4/28/2005 10:16:16 PM}			this->SetItemState(nRow, nCol, this->GetItemState(nRow, nCol) | GVIS_READONLY | GVIS_DROPDOWN);
+// COMMENT: {4/28/2005 10:16:16 PM}			//}}HACK
+			this->SetItemState(nRow, nCol, this->GetItemState(nRow, nCol) | GVIS_DROPDOWN);
 		}
-		//}}
-
-// COMMENT: {4/28/2005 8:22:35 PM}		this->m_mapColToList[nCol]->SetFont(this->GetParent()->GetFont());
-// COMMENT: {4/28/2005 8:22:35 PM}
-// COMMENT: {4/28/2005 8:22:35 PM}		this->m_mapColToList[nCol]->SetOwner(this);
-// COMMENT: {4/28/2005 8:22:35 PM}		ASSERT(this->m_mapColToList[nCol]->GetOwner() == this);	
-// COMMENT: {4/28/2005 8:22:35 PM}		ASSERT(this->m_mapColToList[nCol]->GetParent() == CWnd::GetDesktopWindow());	
-// COMMENT: {4/28/2005 8:22:35 PM}
-// COMMENT: {4/28/2005 8:22:35 PM}		std::vector<LPCTSTR>::const_iterator opt = vecOptions.begin();
-// COMMENT: {4/28/2005 8:22:35 PM}		for (; opt != vecOptions.end(); ++opt)
-// COMMENT: {4/28/2005 8:22:35 PM}		{
-// COMMENT: {4/28/2005 8:22:35 PM}			this->m_mapColToList[nCol]->AddString(*opt);
-// COMMENT: {4/28/2005 8:22:35 PM}		}
-// COMMENT: {4/28/2005 8:22:35 PM}		ASSERT(this->m_mapColToList[nCol]->GetCount() == (int)vecOptions.size());
 	}
 	catch(...)
 	{
@@ -251,6 +221,75 @@ BOOL CModGridCtrlEx::SetColumnOptions(int nCol, const std::vector<LPCTSTR>& vecO
 	}
 	return TRUE;
 }
+
+BOOL CModGridCtrlEx::SetCellOptions(int nRow, int nCol, const std::vector<LPCTSTR>& vecOptions)
+{
+	try
+	{
+		CString strWindowName;
+#ifdef _DEBUG
+		strWindowName.Format(_T("Cell (%d,%d)"), nRow, nCol);
+#endif
+
+		std::map< std::vector<LPCTSTR>, CListBox* >::const_iterator item = this->m_mapVectorToList.find(vecOptions);
+		if (item == this->m_mapVectorToList.end())
+		{
+			item = (this->m_mapVectorToList.insert(std::map< std::vector<LPCTSTR>, CListBox* >::value_type(vecOptions, new CListBoxDrop()))).first;
+
+			ASSERT(item == this->m_mapVectorToList.find(vecOptions));
+			ASSERT(item != this->m_mapVectorToList.end());
+			ASSERT(item->first.size() == vecOptions.size());
+			ASSERT(&item->first != &vecOptions);
+
+			CListBox* pListBox = item->second;
+
+			CRect rect(0, 0, 0, 0);
+			VERIFY(pListBox->CreateEx(
+				WS_EX_TOPMOST|WS_EX_TOOLWINDOW,
+				_T("LISTBOX"),
+				strWindowName,
+				WS_CHILDWINDOW|WS_CLIPSIBLINGS|WS_BORDER,
+				rect,
+				CWnd::GetDesktopWindow(),
+				IDC_INPLACE_CONTROL,
+				NULL
+				));
+
+			pListBox->SetFont(this->GetParent()->GetFont());
+			pListBox->SetOwner(this);
+
+			ASSERT(this->m_mapVectorToList[vecOptions]->GetOwner() == this);
+			ASSERT(this->m_mapVectorToList[vecOptions]->GetParent() == CWnd::GetDesktopWindow());
+
+			std::vector<LPCTSTR>::const_iterator opt = vecOptions.begin();
+			for (; opt != vecOptions.end(); ++opt)
+			{
+				pListBox->AddString(*opt);
+			}
+			ASSERT(pListBox->GetCount() == (int)vecOptions.size());
+		}
+		else
+		{
+#ifdef _DEBUG
+			CString str;
+			CListBox *pListBox = item->second;
+			pListBox->GetWindowText(str);
+			strWindowName.Format(_T("%s, Cell (%d,%d)"), str, nRow, nCol);
+			pListBox->SetWindowText(strWindowName);
+#endif
+		}
+
+		this->SetItemData(nRow, nCol, (LPARAM)&item->first);
+		this->SetItemState(nRow, nCol, this->GetItemState(nRow, nCol) | GVIS_DROPDOWN);
+	}
+	catch(...)
+	{
+		ASSERT(FALSE);
+		return FALSE;
+	}
+	return TRUE;
+}
+
 
 bool CModGridCtrlEx::IsDropDownCell(const CCellID& cell)const
 {
@@ -262,10 +301,6 @@ bool CModGridCtrlEx::IsDropDownCell(int nRow, int nCol)const
 	if (nRow < this->GetFixedRowCount()) return false;
 	if (nCol < this->GetFixedColumnCount()) return false;
 
-// COMMENT: {4/28/2005 7:40:32 PM}	std::map<int, std::vector<LPCTSTR> >::const_iterator iter = this->m_mapColToOptions.find(nCol);
-// COMMENT: {4/28/2005 7:40:32 PM}	ASSERT(iter != this->m_mapColToOptions.end() ||
-// COMMENT: {4/28/2005 7:40:32 PM}		this->m_mapColToList.find(nCol) == this->m_mapColToList.end());
-// COMMENT: {4/28/2005 7:40:32 PM}	return (iter != this->m_mapColToOptions.end());
 	if (CGridCell *pCell = CGridCtrl::GetCell(nRow, nCol))
 	{
 		return ((pCell->state & GVIS_DROPDOWN) != 0);
@@ -280,6 +315,9 @@ bool CModGridCtrlEx::IsCheckMarkCell(const CCellID& cell)const
 
 bool CModGridCtrlEx::IsCheckMarkCell(int nRow, int nCol)const
 {
+	if (nRow < this->GetFixedRowCount()) return false;
+	if (nCol < this->GetFixedColumnCount()) return false;
+
 	if (CGridCell *pCell = CGridCtrl::GetCell(nRow, nCol))
 	{
 		return ((pCell->state & GVIM_CHECKMARK) != 0);
@@ -311,6 +349,7 @@ int CModGridCtrlEx::GetCheck(int nRow, int nCol)const
 			}
 		}
 	}
+	ASSERT(FALSE);
 	return BST_UNCHECKED;
 }
 
@@ -335,15 +374,15 @@ BOOL CModGridCtrlEx::SetCheck(int nRow, int nCol, int nState)
 	{
 	case BST_UNCHECKED:
 		pCell->state |= GVIS_UNCHECKED;
-		pCell->state |= GVIS_READONLY;
+// COMMENT: {4/29/2005 4:16:27 PM}		pCell->state |= GVIS_READONLY;
 		break;
 	case BST_CHECKED:
 		pCell->state |= GVIS_CHECKED;
-		pCell->state |= GVIS_READONLY;
+// COMMENT: {4/29/2005 4:16:31 PM}		pCell->state |= GVIS_READONLY;
 		break;
 	case BST_INDETERMINATE:
 		pCell->state |= GVIS_INDETERMINATE;
-		pCell->state |= GVIS_READONLY;
+// COMMENT: {4/29/2005 4:16:34 PM}		pCell->state |= GVIS_READONLY;
 		break;
 	default:
 		ASSERT(FALSE);
@@ -362,14 +401,6 @@ const std::vector<LPCTSTR>* CModGridCtrlEx::GetOptionsVector(int nRow, int nCol)
 	if (nRow < this->GetFixedRowCount()) return 0;
 	if (nCol < this->GetFixedColumnCount()) return 0;
 
-// COMMENT: {4/28/2005 8:15:18 PM}	std::map<int, std::vector<LPCTSTR> >::const_iterator iter =
-// COMMENT: {4/28/2005 8:15:18 PM}		this->m_mapColToOptions.find(nCol);
-// COMMENT: {4/28/2005 8:15:18 PM}
-// COMMENT: {4/28/2005 8:15:18 PM}	if (iter != this->m_mapColToOptions.end())
-// COMMENT: {4/28/2005 8:15:18 PM}	{
-// COMMENT: {4/28/2005 8:15:18 PM}		return &(iter->second);
-// COMMENT: {4/28/2005 8:15:18 PM}	}
-	//{{
 	if (this->IsDropDownCell(nRow, nCol) && this->GetItemData(nRow, nCol))
 	{
 		std::vector<LPCTSTR> *pVector = (std::vector<LPCTSTR>*)this->GetItemData(nRow, nCol);
@@ -377,7 +408,6 @@ const std::vector<LPCTSTR>* CModGridCtrlEx::GetOptionsVector(int nRow, int nCol)
 		ASSERT(iter != this->m_mapVectorToList.end());
 		return pVector;
 	}
-	//}}
 	return 0;
 }
 
@@ -390,17 +420,6 @@ CListBox* CModGridCtrlEx::GetListBox(int nRow, int nCol)
 {
 	if (nRow < this->GetFixedRowCount()) return 0;
 	if (nCol < this->GetFixedColumnCount()) return 0;
-
-// COMMENT: {4/28/2005 7:47:41 PM}	std::map<int, CListBox*>::iterator iter = this->m_mapColToList.find(nCol);
-// COMMENT: {4/28/2005 7:47:41 PM}	if (iter != this->m_mapColToList.end())
-// COMMENT: {4/28/2005 7:47:41 PM}	{
-// COMMENT: {4/28/2005 7:47:41 PM}		return (iter->second);
-// COMMENT: {4/28/2005 7:47:41 PM}	}
-
-// COMMENT: {4/28/2005 8:11:53 PM}	if (this->IsDropDownCell(nRow, nCol))
-// COMMENT: {4/28/2005 8:11:53 PM}	{
-// COMMENT: {4/28/2005 8:11:53 PM}		return (CListBox*)this->GetItemData(nRow, nCol);
-// COMMENT: {4/28/2005 8:11:53 PM}	}
 
 	if (this->IsDropDownCell(nRow, nCol) && this->GetItemData(nRow, nCol))
 	{
@@ -523,8 +542,7 @@ void CModGridCtrlEx::OnLButtonDblClk(UINT nFlags, CPoint point)
 	{
 		if (!this->IsCellEnabled(this->m_idCurrentCell)) return;
 
-		const std::vector<LPCTSTR>* pVec = 
-			this->GetOptionsVector(this->m_idCurrentCell);
+		const std::vector<LPCTSTR>* pVec = this->GetOptionsVector(this->m_idCurrentCell);
 		ASSERT(pVec);
 
 		int nItemCount = (int)pVec->size();
@@ -732,34 +750,6 @@ void CModGridCtrlEx::ShowDropDown(BOOL bShowIt)
 {
 	if (bShowIt)
 	{
-		/* TODO
-		if (CWnd* pParent = this->GetParent()) {
-			pParent->SendMessage(WM_COMMAND, CBN_DROPDOWN, (LPARAM)this->GetSafeHwnd());
-		}
-		*/
-
-// COMMENT: {4/28/2005 8:29:22 PM}		// determine size of dropdown list
-// COMMENT: {4/28/2005 8:29:22 PM}		CRect rc;
-// COMMENT: {4/28/2005 8:29:22 PM}		if (!this->GetCellRect(this->m_idCurrentCell, &rc)) return;
-// COMMENT: {4/28/2005 8:29:22 PM}		this->MapWindowPoints(CWnd::GetDesktopWindow(), &rc);
-// COMMENT: {4/28/2005 8:29:22 PM}		rc.OffsetRect(0, rc.Height());
-// COMMENT: {4/28/2005 8:29:22 PM}
-// COMMENT: {4/28/2005 8:29:22 PM}		int x, y, cx, cy;
-// COMMENT: {4/28/2005 8:29:22 PM}		cx = rc.Width();
-// COMMENT: {4/28/2005 8:29:22 PM}		x = rc.left;
-// COMMENT: {4/28/2005 8:29:22 PM}		y = rc.top;
-
-// COMMENT: {4/28/2005 8:23:40 PM}		this->m_mapColToList[this->m_idCurrentCell.col]->GetCurSel();
-// COMMENT: {4/28/2005 8:23:40 PM}		this->m_mapColToList[this->m_idCurrentCell.col]->SetTopIndex(0);
-// COMMENT: {4/28/2005 8:23:40 PM}		cy = this->m_mapColToList[this->m_idCurrentCell.col]->GetItemHeight(0) * this->m_mapColToList[this->m_idCurrentCell.col]->GetCount() + 2;
-
-// COMMENT: {4/28/2005 8:26:37 PM}		// this->m_rcListBox.SetRect(x, y, cx, cy);
-// COMMENT: {4/28/2005 8:26:37 PM}		this->m_rcListBox.SetRect(x, y, x+cx, y+cy);
-// COMMENT: {4/28/2005 8:26:37 PM}		this->ScreenToClient(&this->m_rcListBox);
-// COMMENT: {4/28/2005 8:26:37 PM}
-// COMMENT: {4/28/2005 8:26:37 PM}		// place in front of all windows
-// COMMENT: {4/28/2005 8:26:37 PM}		this->m_mapColToList[this->m_idCurrentCell.col]->SetWindowPos(&wndTopMost, x, y, cx, cy, SWP_NOACTIVATE|SWP_SHOWWINDOW);
-
 		CRect rc;
 		if (!this->GetCellRect(this->m_idCurrentCell, &rc)) return;
 
@@ -787,18 +777,6 @@ void CModGridCtrlEx::ShowDropDown(BOOL bShowIt)
 	}
 	else
 	{
-// COMMENT: {4/28/2005 8:28:15 PM}		// hide DropDown
-// COMMENT: {4/28/2005 8:28:15 PM}		this->m_mapColToList[this->m_idCurrentCell.col]->SetWindowPos(&wndTopMost, 0, 0, 0, 0, SWP_HIDEWINDOW);
-// COMMENT: {4/28/2005 8:28:15 PM}
-// COMMENT: {4/28/2005 8:28:15 PM}		if (CWnd* pParent = this->GetParent())
-// COMMENT: {4/28/2005 8:28:15 PM}		{
-// COMMENT: {4/28/2005 8:28:15 PM}			/** TODO
-// COMMENT: {4/28/2005 8:28:15 PM}			pParent->SendMessage(
-// COMMENT: {4/28/2005 8:28:15 PM}				WM_COMMAND,
-// COMMENT: {4/28/2005 8:28:15 PM}				MAKEWORD(this->GetDlgCtrlID(), CBN_CLOSEUP),
-// COMMENT: {4/28/2005 8:28:15 PM}				(LPARAM)this->GetSafeHwnd());
-// COMMENT: {4/28/2005 8:28:15 PM}			**/
-// COMMENT: {4/28/2005 8:28:15 PM}		}
 		// hide DropDown
 		if (CListBox *pListBox = this->GetListBox(this->m_idCurrentCell))
 		{
@@ -901,7 +879,7 @@ void CModGridCtrlEx::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
 		}
 		else
 		{
-			if (!IsCTRLpressed() && m_MouseMode == MOUSE_NOTHING)
+			if (!IsCTRLpressed() && this->m_MouseMode == MOUSE_NOTHING)
 			{
 				if (!this->m_bHandleTabKey || (this->m_bHandleTabKey && nChar != VK_TAB))
 				{
@@ -929,10 +907,11 @@ void CModGridCtrlEx::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
 			}
 		}
 	}
+
 	//
 	// Checkmark handling
 	//
-	if (this->IsCheckMarkCell(this->m_idCurrentCell) && nChar == ' ')
+	if (this->IsCheckMarkCell(this->m_idCurrentCell) && nChar == _T(' '))
 	{
 		TRACE("CModGridCtrlEx::OnChar in Check\n");
 		switch (this->GetCheck(this->m_idCurrentCell))
@@ -955,6 +934,10 @@ void CModGridCtrlEx::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
 			ASSERT(FALSE);
 		}
 	}
+
+	//{{
+	if (this->IsCheckMarkCell(this->m_idCurrentCell)) return;
+	//}}
 
 	CModGridCtrl::OnChar(nChar, nRepCnt, nFlags);
 }
@@ -1013,7 +996,6 @@ void CModGridCtrlEx::DrawButton2(CDC* pDC, int nRow, int nCol, CRect rcCell, BOO
 	}
 }
 
-#include <uxtheme.h>
 void CModGridCtrlEx::DrawButtonCheck(CDC* pDC, int nRow, int nCol, CRect rcCell, BOOL bEraseBk, int nCheck)
 {
 	UNREFERENCED_PARAMETER(bEraseBk);
@@ -1178,7 +1160,7 @@ void CModGridCtrlEx::TraceMouseMode(void)const
 	}
 }
 
-LRESULT CModGridCtrlEx::OnThemeChanged()
+LRESULT CModGridCtrlEx::OnThemeChanged(void)
 {
 	// This feature requires Windows XP or greater.
 	// The symbol _WIN32_WINNT must be >= 0x0501.
@@ -1189,7 +1171,8 @@ LRESULT CModGridCtrlEx::OnThemeChanged()
 	return 1;
 }
 
-void CModGridCtrlEx::CutSelectedText()
+#ifndef GRIDCONTROL_NO_CLIPBOARD
+void CModGridCtrlEx::CutSelectedText(void)
 {
     if (!IsEditable())
         return;
@@ -1220,3 +1203,264 @@ void CModGridCtrlEx::CutSelectedText()
         }
     }
 }
+#endif
+
+#ifndef GRIDCONTROL_NO_CLIPBOARD
+BOOL CModGridCtrlEx::PasteTextToGrid(CCellID cell, COleDataObject* pDataObject)
+{
+    if (!IsValid(cell) || !IsCellEditable(cell) || !pDataObject->IsDataAvailable(CF_TEXT))
+        return FALSE;
+
+    // Get the text from the COleDataObject
+    HGLOBAL hmem = pDataObject->GetGlobalData(CF_TEXT);
+    CMemFile sf((BYTE*) ::GlobalLock(hmem), ::GlobalSize(hmem));
+
+    // CF_TEXT is ANSI text, so we need to allocate a char* buffer
+    // to hold this.
+    LPTSTR szBuffer = new TCHAR[::GlobalSize(hmem)];
+    if (!szBuffer)
+        return FALSE;
+
+    sf.Read(szBuffer, ::GlobalSize(hmem));
+    ::GlobalUnlock(hmem);
+
+    // Now store in generic TCHAR form so we no longer have to deal with
+    // ANSI/UNICODE problems
+    CString strText = szBuffer;
+    delete szBuffer;
+
+    // Parse text data and set in cells...
+    strText.LockBuffer();
+    CString strLine = strText;
+    int nLine = 0;
+
+    // Find the end of the first line
+	CCellRange PasteRange(cell.row, cell.col,-1,-1);
+    int nIndex;
+    do
+    {
+        int nColumn = 0;
+        nIndex = strLine.Find(_T("\n"));
+
+        // Store the remaining chars after the newline
+        CString strNext = (nIndex < 0)? _T("")  : strLine.Mid(nIndex + 1);
+
+        // Remove all chars after the newline
+        if (nIndex >= 0)
+            strLine = strLine.Left(nIndex);
+
+        int nLineIndex = strLine.FindOneOf(_T("\t,"));
+        CString strCellText = (nLineIndex >= 0)? strLine.Left(nLineIndex) : strLine;
+
+        // skip hidden rows
+        int iRowVis = cell.row + nLine;
+        while( iRowVis < GetRowCount())
+        {
+            if( GetRowHeight( iRowVis) > 0)
+                break;
+            nLine++;
+            iRowVis++;
+        }
+
+        while (!strLine.IsEmpty())
+        {
+            // skip hidden columns
+            int iColVis = cell.col + nColumn;
+            while( iColVis < GetColumnCount())
+            {
+                if( GetColumnWidth( iColVis) > 0)
+                    break;
+                nColumn++;
+                iColVis++;
+            }
+
+            CCellID TargetCell(iRowVis, iColVis);
+            if (IsValid(TargetCell))
+            {
+                strCellText.TrimLeft();
+                strCellText.TrimRight();
+
+                ValidateAndModifyCellContents(TargetCell.row, TargetCell.col, strCellText);
+
+                // Make sure cell is not selected to avoid data loss
+                SetItemState(TargetCell.row, TargetCell.col,
+                    GetItemState(TargetCell.row, TargetCell.col) & ~GVIS_SELECTED);
+
+				if (iRowVis > PasteRange.GetMaxRow()) PasteRange.SetMaxRow(iRowVis);
+				if (iColVis > PasteRange.GetMaxCol()) PasteRange.SetMaxCol(iColVis);
+            }
+
+            strLine = (nLineIndex >= 0)? strLine.Mid(nLineIndex + 1) : _T("");
+            nLineIndex = strLine.FindOneOf(_T("\t,"));
+            strCellText = (nLineIndex >= 0)? strLine.Left(nLineIndex) : strLine;
+
+            nColumn++;
+        }
+
+        strLine = strNext;
+        nLine++;
+    } while (nIndex >= 0);
+
+    strText.UnlockBuffer();
+
+// COMMENT: {4/29/2005 3:56:53 PM}	if (bSelectPastedCells)
+		SetSelectedRange(PasteRange, TRUE);
+// COMMENT: {4/29/2005 3:56:56 PM}	else
+// COMMENT: {4/29/2005 3:56:56 PM}	{
+// COMMENT: {4/29/2005 3:56:56 PM}		ResetSelectedRange();
+// COMMENT: {4/29/2005 3:56:56 PM}		Refresh();
+// COMMENT: {4/29/2005 3:56:56 PM}	}
+
+    return TRUE;
+}
+#endif
+
+#ifndef GRIDCONTROL_NO_CLIPBOARD
+COleDataSource* CModGridCtrlEx::CopyTextFromGrid()
+{
+    USES_CONVERSION;
+
+    CCellRange Selection = GetSelectedCellRange();
+    if (!IsValid(Selection)) return NULL;
+
+    // Write to shared file (REMEBER: CF_TEXT is ANSI, not UNICODE, so we need to convert)
+    CSharedFile sf(GMEM_MOVEABLE|GMEM_DDESHARE|GMEM_ZEROINIT);
+
+    // Get a tab delimited string to copy to cache
+    CString str;
+    CGridCell *pCell;
+    for (int row = Selection.GetMinRow(); row <= Selection.GetMaxRow(); row++) 
+    {
+        str.Empty();
+        for (int col = Selection.GetMinCol(); col <= Selection.GetMaxCol(); col++)
+        {
+			if (this->IsCheckMarkCell(row, col))
+			{
+				// may want to change this so that szText contains
+				// FALSE or TRUE but DrawCell doesn't display it
+				//
+				switch (this->GetCheck(row, col))
+				{
+				case BST_CHECKED:
+					str += _T("TRUE");
+					break;
+				case BST_UNCHECKED:
+					str += _T("FALSE");
+					break;
+				default:
+					str += _T(" ");
+					break;
+				}
+			}
+			else
+			{
+				pCell = GetCell(row,col);
+				if (pCell && (pCell->state  & GVIS_SELECTED))
+				{
+					if (pCell->szText.IsEmpty())
+						str += _T(" ");
+					else 
+					str += pCell->szText;
+				}
+			}
+            if (col != Selection.GetMaxCol()) 
+                str += _T("\t");
+        }
+        if (row != Selection.GetMaxRow()) 
+            str += _T("\n");
+
+        sf.Write(T2A(str.GetBuffer(1)), str.GetLength());
+        str.ReleaseBuffer();
+    }
+
+    char c = '\0';
+    sf.Write(&c, 1);
+
+    DWORD dwLen = (DWORD)sf.GetLength();
+    HGLOBAL hMem = sf.Detach();
+    if (!hMem) 
+        return NULL;
+
+    hMem = ::GlobalReAlloc(hMem, dwLen, GMEM_MOVEABLE|GMEM_DDESHARE|GMEM_ZEROINIT);
+    if (!hMem) 
+        return NULL;
+
+    // Cache data
+    COleDataSource* pSource = new COleDataSource();
+    pSource->CacheGlobalData(CF_TEXT, hMem);
+
+    return pSource;
+}
+#endif
+
+
+void CModGridCtrlEx::ValidateAndModifyCellContents(int nRow, int nCol, LPCTSTR strText)
+{
+    if (!IsCellEditable(nRow, nCol))
+        return;
+
+    if (SendMessageToParent(nRow, nCol, GVN_BEGINLABELEDIT) >= 0)
+    {
+		if (this->IsCheckMarkCell(nRow, nCol))
+		{
+			// yes, no, false, true
+			CString strValue(strText);
+			strValue.MakeUpper();
+
+			if (strValue.Compare("TRUE") == 0 || strValue.Compare("YES") == 0)
+			{
+				this->SetCheck(nRow, nCol, BST_CHECKED);
+			}
+			else if (strValue.Compare("FALSE") == 0 || strValue.Compare("NO") == 0)
+			{
+				this->SetCheck(nRow, nCol, BST_UNCHECKED);
+			}
+			return;
+		}
+
+		if (this->IsDropDownCell(nRow, nCol))
+		{
+			const std::vector<LPCTSTR>* pVec = this->GetOptionsVector(nRow, nCol);
+			ASSERT(pVec);
+			if (pVec)
+			{
+				int nItemCount = (int)pVec->size();
+				CString item = strText;
+				int nCurrent = -1;
+				for (int i = 0; i < nItemCount; ++i)
+				{
+					if (item.Compare(pVec->at(i)) == 0)
+					{
+						nCurrent = i;
+						break;
+					}
+				}
+				if (nCurrent == -1) return;
+			}
+		}
+
+		CString strCurrentText = GetItemText(nRow, nCol);
+        if (strCurrentText != strText)
+        {
+            SetItemText(nRow, nCol, strText);
+            if (ValidateEdit(nRow, nCol, strText) && 
+                SendMessageToParent(nRow, nCol, GVN_ENDLABELEDIT) >= 0)
+            {
+                SetModified(TRUE, nRow, nCol);
+                RedrawCell(nRow, nCol);
+            }
+            else
+            {
+                SetItemText(nRow, nCol, strCurrentText);
+            }
+        }
+    }
+}
+
+// If this returns FALSE then the editing isn't allowed
+// virtual
+BOOL CModGridCtrlEx::ValidateEdit(int nRow, int nCol, LPCTSTR str)
+{
+	return TRUE;
+}
+

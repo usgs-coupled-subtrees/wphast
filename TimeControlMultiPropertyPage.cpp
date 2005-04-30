@@ -8,7 +8,7 @@
 #include "TimeControlPropertyPage.h"
 #include "Units1PropertyPage.h"
 
-
+#define strText szText
 
 // CTimeControlMultiPropertyPage dialog
 
@@ -75,23 +75,23 @@ void CTimeControlMultiPropertyPage::DoDataExchange(CDataExchange* pDX)
 		Item.row = 0;
 
 		Item.col = 0;
-		Item.szText = _T("Simulation period");
+		Item.strText = _T("Simulation period");
 		this->m_Grid.SetItem(&Item);
 
 		Item.col = 1;
-		Item.szText = _T("Time step");
+		Item.strText = _T("Time step");
 		this->m_Grid.SetItem(&Item);
 
 		Item.col = 2;
-		Item.szText = _T("Time step units");
+		Item.strText = _T("Time step units");
 		this->m_Grid.SetItem(&Item);
 
 		Item.col = 3;
-		Item.szText = _T("Time end");
+		Item.strText = _T("Time end");
 		this->m_Grid.SetItem(&Item);
 
 		Item.col = 4;
-		Item.szText = _T("Time end units");
+		Item.strText = _T("Time end units");
 		this->m_Grid.SetItem(&Item);
 
 		// this->m_Grid.ExpandColumnsToFit();

@@ -5,6 +5,8 @@
 #include "WPhast.h"
 #include "BCFluxPropertyPage2.h"
 
+#define strText szText
+
 #include "Global.h"
 
 // CBCFluxPropertyPage2 dialog
@@ -165,54 +167,54 @@ BOOL CBCFluxPropertyPage2::SetupGrids(void)
 	Item.row = 0;
 
 	Item.col = 0;
-	Item.szText = _T("Time");
+	Item.strText = _T("Time");
 	this->m_gridFlux.SetItem(&Item);
 	this->m_gridSolution.SetItem(&Item);
 
 	Item.col = 1;
-	Item.szText = _T("Units");
+	Item.strText = _T("Units");
 	this->m_gridFlux.SetItem(&Item);
 	this->m_gridFlux.SetColumnOptions(Item.col, vecTimeUnits);
 	this->m_gridSolution.SetItem(&Item);
 	this->m_gridSolution.SetColumnOptions(Item.col, vecTimeUnits);
 
 	Item.col = 2;
-	Item.szText = _T("Flux");
+	Item.strText = _T("Flux");
 	this->m_gridFlux.SetItem(&Item);
-	Item.szText = _T("Solution");
+	Item.strText = _T("Solution");
 	this->m_gridSolution.SetItem(&Item);
 
 	Item.col = 3;
-	Item.szText = _T("Interpolate");
+	Item.strText = _T("Interpolate");
 	this->m_gridFlux.SetItem(&Item);
 	this->m_gridFlux.SetColumnCheck(Item.col, BST_UNCHECKED);
 	this->m_gridSolution.SetItem(&Item);
 	this->m_gridSolution.SetColumnCheck(Item.col, BST_UNCHECKED);
 
 	Item.col = 4;
-	Item.szText = _T("Direction");
+	Item.strText = _T("Direction");
 	this->m_gridFlux.SetItem(&Item);
 	this->m_gridFlux.SetColumnOptions(Item.col, vecDirection);
 	this->m_gridSolution.SetItem(&Item);
 	this->m_gridSolution.SetColumnOptions(Item.col, vecDirection);
 
 	Item.col = 5;
-	Item.szText = _T("Value 1");
+	Item.strText = _T("Value 1");
 	this->m_gridFlux.SetItem(&Item);
 	this->m_gridSolution.SetItem(&Item);
 
 	Item.col = 6;
-	Item.szText = _T("Distance 1");
+	Item.strText = _T("Distance 1");
 	this->m_gridFlux.SetItem(&Item);
 	this->m_gridSolution.SetItem(&Item);
 
 	Item.col = 7;
-	Item.szText = _T("Value 2");
+	Item.strText = _T("Value 2");
 	this->m_gridFlux.SetItem(&Item);
 	this->m_gridSolution.SetItem(&Item);
 
 	Item.col = 8;
-	Item.szText = _T("Distance 2");
+	Item.strText = _T("Distance 2");
 	this->m_gridFlux.SetItem(&Item);
 	this->m_gridSolution.SetItem(&Item);
 

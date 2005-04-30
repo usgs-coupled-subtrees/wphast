@@ -1,7 +1,9 @@
 #include "stdafx.h"
 #include "TimeSeries.h"
+
 #include "property.h"
 #include "WellSchedule.h"
+#include "Global.h"
 
 // specialization for Ctime
 template<>
@@ -39,8 +41,25 @@ CTimeSeries<int>& CTimeSeries<int>::operator=(const struct time_series& rhs)
 	return *this;
 }
 
+// specialization for CWellRate
+template<>
+CTimeSeries<CWellRate>& CTimeSeries<CWellRate>::operator=(const struct time_series& rhs)
+{
+	this->clear();
+	ASSERT(FALSE); // no-op for CWellRate
+	return *this;
+}
+
+
 #ifdef _DEBUG
-// specialization for Cproperty
+// AssertValid should be a member of an interface such as IDebug.  This would allow
+// us to make the specialization for any class that inherited from IDebug.
+//
+template<typename T>
+void CTimeSeries<T>::AssertValid(void)const
+{
+	ASSERT(FALSE); // no-op except for Cproperty
+}
 template<>
 void CTimeSeries<Cproperty>::AssertValid(void)const
 {
@@ -52,151 +71,15 @@ void CTimeSeries<Cproperty>::AssertValid(void)const
 }
 #endif
 
-/**
-inline void Cproperty::SerializeCreate(const char *heading, Cproperty* prop, hid_t loc_id)
+template<typename T>
+HTREEITEM CTimeSeries<T>::InsertItem(CTreeCtrl* pTreeCtrl, LPCTSTR lpszHeading, HTREEITEM hParent /* = TVI_ROOT*/, HTREEITEM hInsertAfter /* = TVI_LAST*/)const
 {
-	if (prop && prop->type != UNDEFINED) {
-		hid_t group_id = ::H5Gcreate(loc_id, heading, 0);
-		ASSERT(group_id > 0);
-		if (group_id > 0) {
-			prop->Serialize(true, group_id);
-			::H5Gclose(group_id);
-		}
-	}
+	ASSERT(FALSE); // no-op except for Cproperty
+	HTREEITEM item = 0;
+	return item;
 }
-**/
 
-#include "Global.h"
-#include <list>
-
-// COMMENT: {4/22/2005 5:21:13 PM}template<typename T>
-// COMMENT: {4/22/2005 5:21:13 PM}void CTimeSeries<T>::Serialize(bool bStoring, hid_t loc_id)
-// COMMENT: {4/22/2005 5:21:13 PM}{
-// COMMENT: {4/22/2005 5:21:13 PM}	static const char szSteps[]       = "Steps";
-// COMMENT: {4/22/2005 5:21:13 PM}	static const char szStepsFormat[] = "Step %d";
-// COMMENT: {4/22/2005 5:21:13 PM}
-// COMMENT: {4/22/2005 5:21:13 PM}	static const char szCtime[]       = "Ctime";
-// COMMENT: {4/22/2005 5:21:13 PM}	static const char szCproperty[]   = "Cproperty";
-// COMMENT: {4/22/2005 5:21:13 PM}
-// COMMENT: {4/22/2005 5:21:13 PM}
-// COMMENT: {4/22/2005 5:21:13 PM}	hid_t  step_id;
-// COMMENT: {4/22/2005 5:21:13 PM}	hid_t  time_id;
-// COMMENT: {4/22/2005 5:21:13 PM}	hid_t  prop_id;
-// COMMENT: {4/22/2005 5:21:13 PM}
-// COMMENT: {4/22/2005 5:21:13 PM}	herr_t status;
-// COMMENT: {4/22/2005 5:21:13 PM}
-// COMMENT: {4/22/2005 5:21:13 PM}  	ASSERT(this);
-// COMMENT: {4/22/2005 5:21:13 PM}
-// COMMENT: {4/22/2005 5:21:13 PM}	if (bStoring)
-// COMMENT: {4/22/2005 5:21:13 PM}	{
-// COMMENT: {4/22/2005 5:21:13 PM}		if (this->size())
-// COMMENT: {4/22/2005 5:21:13 PM}		{
-// COMMENT: {4/22/2005 5:21:13 PM}			std::list<LPCTSTR> listNames;
-// COMMENT: {4/22/2005 5:21:13 PM}			CString* arrName = new CString[this->size()];
-// COMMENT: {4/22/2005 5:21:13 PM}
-// COMMENT: {4/22/2005 5:21:13 PM}			CTimeSeries<T>::iterator iter = this->begin();
-// COMMENT: {4/22/2005 5:21:13 PM}			for (size_t i = 0; iter != this->end(); ++iter, ++i)
-// COMMENT: {4/22/2005 5:21:13 PM}			{
-// COMMENT: {4/22/2005 5:21:13 PM}				arrName[i].Format(szStepsFormat, i);
-// COMMENT: {4/22/2005 5:21:13 PM}
-// COMMENT: {4/22/2005 5:21:13 PM}				// Create the "Step %d" group
-// COMMENT: {4/22/2005 5:21:13 PM}				step_id = ::H5Gcreate(loc_id, arrName[i], 0);
-// COMMENT: {4/22/2005 5:21:13 PM}				ASSERT(step_id > 0);
-// COMMENT: {4/22/2005 5:21:13 PM}				if (step_id > 0)
-// COMMENT: {4/22/2005 5:21:13 PM}				{
-// COMMENT: {4/22/2005 5:21:13 PM}					// Create the szCtime group
-// COMMENT: {4/22/2005 5:21:13 PM}					time_id = ::H5Gcreate(step_id, szCtime, 0);
-// COMMENT: {4/22/2005 5:21:13 PM}					ASSERT(time_id > 0);
-// COMMENT: {4/22/2005 5:21:13 PM}					if (time_id > 0)
-// COMMENT: {4/22/2005 5:21:13 PM}					{
-// COMMENT: {4/22/2005 5:21:13 PM}						// first is const
-// COMMENT: {4/22/2005 5:21:13 PM}						Ctime t(iter->first);
-// COMMENT: {4/22/2005 5:21:13 PM}						t.Serialize(bStoring, time_id);
-// COMMENT: {4/22/2005 5:21:13 PM}						status = ::H5Gclose(time_id);
-// COMMENT: {4/22/2005 5:21:13 PM}						ASSERT(status >= 0);
-// COMMENT: {4/22/2005 5:21:13 PM}					}
-// COMMENT: {4/22/2005 5:21:13 PM}					else
-// COMMENT: {4/22/2005 5:21:13 PM}					{
-// COMMENT: {4/22/2005 5:21:13 PM}						continue;
-// COMMENT: {4/22/2005 5:21:13 PM}					}
-// COMMENT: {4/22/2005 5:21:13 PM}
-// COMMENT: {4/22/2005 5:21:13 PM}					// Create the szCproperty group
-// COMMENT: {4/22/2005 5:21:13 PM}					prop_id = ::H5Gcreate(step_id, szCproperty, 0);
-// COMMENT: {4/22/2005 5:21:13 PM}					ASSERT(prop_id > 0);
-// COMMENT: {4/22/2005 5:21:13 PM}					if (prop_id > 0)
-// COMMENT: {4/22/2005 5:21:13 PM}					{
-// COMMENT: {4/22/2005 5:21:13 PM}						iter->second.Serialize(bStoring, prop_id);
-// COMMENT: {4/22/2005 5:21:13 PM}						status = ::H5Gclose(prop_id);
-// COMMENT: {4/22/2005 5:21:13 PM}						ASSERT(status >= 0);
-// COMMENT: {4/22/2005 5:21:13 PM}					}
-// COMMENT: {4/22/2005 5:21:13 PM}					else
-// COMMENT: {4/22/2005 5:21:13 PM}					{
-// COMMENT: {4/22/2005 5:21:13 PM}						continue;
-// COMMENT: {4/22/2005 5:21:13 PM}					}
-// COMMENT: {4/22/2005 5:21:13 PM}
-// COMMENT: {4/22/2005 5:21:13 PM}					status = ::H5Gclose(step_id);
-// COMMENT: {4/22/2005 5:21:13 PM}					ASSERT(status >= 0);
-// COMMENT: {4/22/2005 5:21:13 PM}
-// COMMENT: {4/22/2005 5:21:13 PM}					listNames.push_back(arrName[i]);
-// COMMENT: {4/22/2005 5:21:13 PM}				}
-// COMMENT: {4/22/2005 5:21:13 PM}			}
-// COMMENT: {4/22/2005 5:21:13 PM}
-// COMMENT: {4/22/2005 5:21:13 PM}			CGlobal::WriteList(loc_id, szSteps, listNames);
-// COMMENT: {4/22/2005 5:21:13 PM}			delete[] arrName;
-// COMMENT: {4/22/2005 5:21:13 PM}		}
-// COMMENT: {4/22/2005 5:21:13 PM}	}
-// COMMENT: {4/22/2005 5:21:13 PM}	else
-// COMMENT: {4/22/2005 5:21:13 PM}	{
-// COMMENT: {4/22/2005 5:21:13 PM}		std::list<std::string> listNames;
-// COMMENT: {4/22/2005 5:21:13 PM}		CGlobal::ReadList(loc_id, szSteps, listNames);
-// COMMENT: {4/22/2005 5:21:13 PM}		std::list<std::string>::iterator iter = listNames.begin();
-// COMMENT: {4/22/2005 5:21:13 PM}		for (; iter != listNames.end(); ++iter)
-// COMMENT: {4/22/2005 5:21:13 PM}		{
-// COMMENT: {4/22/2005 5:21:13 PM}			Ctime t;
-// COMMENT: {4/22/2005 5:21:13 PM}			Cproperty p;
-// COMMENT: {4/22/2005 5:21:13 PM}
-// COMMENT: {4/22/2005 5:21:13 PM}			// Open the "Step %d" group
-// COMMENT: {4/22/2005 5:21:13 PM}			step_id = ::H5Gopen(loc_id, (*iter).c_str());
-// COMMENT: {4/22/2005 5:21:13 PM}			ASSERT(step_id > 0);
-// COMMENT: {4/22/2005 5:21:13 PM}			if (step_id > 0)
-// COMMENT: {4/22/2005 5:21:13 PM}			{
-// COMMENT: {4/22/2005 5:21:13 PM}				// Open the szCtime group
-// COMMENT: {4/22/2005 5:21:13 PM}				time_id = ::H5Gopen(step_id, szCtime);
-// COMMENT: {4/22/2005 5:21:13 PM}				ASSERT(time_id > 0);
-// COMMENT: {4/22/2005 5:21:13 PM}				if (time_id > 0)
-// COMMENT: {4/22/2005 5:21:13 PM}				{
-// COMMENT: {4/22/2005 5:21:13 PM}					t.Serialize(bStoring, time_id);
-// COMMENT: {4/22/2005 5:21:13 PM}					status = ::H5Gclose(time_id);
-// COMMENT: {4/22/2005 5:21:13 PM}					ASSERT(status >= 0);
-// COMMENT: {4/22/2005 5:21:13 PM}				}
-// COMMENT: {4/22/2005 5:21:13 PM}				else
-// COMMENT: {4/22/2005 5:21:13 PM}				{
-// COMMENT: {4/22/2005 5:21:13 PM}					continue;
-// COMMENT: {4/22/2005 5:21:13 PM}				}
-// COMMENT: {4/22/2005 5:21:13 PM}
-// COMMENT: {4/22/2005 5:21:13 PM}				// Open the szCproperty group
-// COMMENT: {4/22/2005 5:21:13 PM}				prop_id = ::H5Gopen(step_id, szCproperty);
-// COMMENT: {4/22/2005 5:21:13 PM}				ASSERT(prop_id > 0);
-// COMMENT: {4/22/2005 5:21:13 PM}				if (prop_id > 0)
-// COMMENT: {4/22/2005 5:21:13 PM}				{
-// COMMENT: {4/22/2005 5:21:13 PM}					p.Serialize(bStoring, prop_id);
-// COMMENT: {4/22/2005 5:21:13 PM}					status = ::H5Gclose(prop_id);
-// COMMENT: {4/22/2005 5:21:13 PM}					ASSERT(status >= 0);
-// COMMENT: {4/22/2005 5:21:13 PM}				}
-// COMMENT: {4/22/2005 5:21:13 PM}				else
-// COMMENT: {4/22/2005 5:21:13 PM}				{
-// COMMENT: {4/22/2005 5:21:13 PM}					continue;
-// COMMENT: {4/22/2005 5:21:13 PM}				}
-// COMMENT: {4/22/2005 5:21:13 PM}
-// COMMENT: {4/22/2005 5:21:13 PM}				status = ::H5Gclose(step_id);
-// COMMENT: {4/22/2005 5:21:13 PM}				ASSERT(status >= 0);
-// COMMENT: {4/22/2005 5:21:13 PM}
-// COMMENT: {4/22/2005 5:21:13 PM}				this->insert(CTimeSeries<T>::value_type(t, p));
-// COMMENT: {4/22/2005 5:21:13 PM}			}
-// COMMENT: {4/22/2005 5:21:13 PM}		}
-// COMMENT: {4/22/2005 5:21:13 PM}	}
-// COMMENT: {4/22/2005 5:21:13 PM}}
-
+// specialization for Cproperty
 template<>
 HTREEITEM CTimeSeries<Cproperty>::InsertItem(CTreeCtrl* pTreeCtrl, LPCTSTR lpszHeading, HTREEITEM hParent /* = TVI_ROOT*/, HTREEITEM hInsertAfter /* = TVI_LAST*/)const
 {
@@ -353,160 +236,6 @@ void CTimeSeries<CWellRate>::Serialize(bool bStoring, hid_t loc_id)
 	}
 }
 
-// COMMENT: {4/22/2005 5:03:41 PM}template<typename T>
-// COMMENT: {4/22/2005 5:03:41 PM}void CTimeSeries<T>::Serialize(bool bStoring, hid_t loc_id)
-// COMMENT: {4/22/2005 5:03:41 PM}{
-// COMMENT: {4/22/2005 5:03:41 PM}	static const char szSteps[]       = "Steps";
-// COMMENT: {4/22/2005 5:03:41 PM}	static const char szStepsFormat[] = "Step %d";
-// COMMENT: {4/22/2005 5:03:41 PM}
-// COMMENT: {4/22/2005 5:03:41 PM}	static const char szCtime[]       = "Ctime";
-// COMMENT: {4/22/2005 5:03:41 PM}	static const char szCproperty[]   = "Cproperty";
-// COMMENT: {4/22/2005 5:03:41 PM}
-// COMMENT: {4/22/2005 5:03:41 PM}
-// COMMENT: {4/22/2005 5:03:41 PM}	hid_t  step_id;
-// COMMENT: {4/22/2005 5:03:41 PM}	hid_t  time_id;
-// COMMENT: {4/22/2005 5:03:41 PM}	hid_t  prop_id;
-// COMMENT: {4/22/2005 5:03:41 PM}
-// COMMENT: {4/22/2005 5:03:41 PM}	herr_t status;
-// COMMENT: {4/22/2005 5:03:41 PM}
-// COMMENT: {4/22/2005 5:03:41 PM}  	ASSERT(this);
-// COMMENT: {4/22/2005 5:03:41 PM}
-// COMMENT: {4/22/2005 5:03:41 PM}	if (bStoring)
-// COMMENT: {4/22/2005 5:03:41 PM}	{
-// COMMENT: {4/22/2005 5:03:41 PM}		if (this->size())
-// COMMENT: {4/22/2005 5:03:41 PM}		{
-// COMMENT: {4/22/2005 5:03:41 PM}			std::list<LPCTSTR> listNames;
-// COMMENT: {4/22/2005 5:03:41 PM}			CString* arrName = new CString[this->size()];
-// COMMENT: {4/22/2005 5:03:41 PM}
-// COMMENT: {4/22/2005 5:03:41 PM}			CTimeSeries<T>::iterator iter = this->begin();
-// COMMENT: {4/22/2005 5:03:41 PM}			for (size_t i = 0; iter != this->end(); ++iter, ++i)
-// COMMENT: {4/22/2005 5:03:41 PM}			{
-// COMMENT: {4/22/2005 5:03:41 PM}				arrName[i].Format(szStepsFormat, i);
-// COMMENT: {4/22/2005 5:03:41 PM}
-// COMMENT: {4/22/2005 5:03:41 PM}				// Create the "Step %d" group
-// COMMENT: {4/22/2005 5:03:41 PM}				step_id = ::H5Gcreate(loc_id, arrName[i], 0);
-// COMMENT: {4/22/2005 5:03:41 PM}				ASSERT(step_id > 0);
-// COMMENT: {4/22/2005 5:03:41 PM}				if (step_id > 0)
-// COMMENT: {4/22/2005 5:03:41 PM}				{
-// COMMENT: {4/22/2005 5:03:41 PM}					// Create the szCtime group
-// COMMENT: {4/22/2005 5:03:41 PM}					time_id = ::H5Gcreate(step_id, szCtime, 0);
-// COMMENT: {4/22/2005 5:03:41 PM}					ASSERT(time_id > 0);
-// COMMENT: {4/22/2005 5:03:41 PM}					if (time_id > 0)
-// COMMENT: {4/22/2005 5:03:41 PM}					{
-// COMMENT: {4/22/2005 5:03:41 PM}						// first is const
-// COMMENT: {4/22/2005 5:03:41 PM}						Ctime t(iter->first);
-// COMMENT: {4/22/2005 5:03:41 PM}						t.Serialize(bStoring, time_id);
-// COMMENT: {4/22/2005 5:03:41 PM}						status = ::H5Gclose(time_id);
-// COMMENT: {4/22/2005 5:03:41 PM}						ASSERT(status >= 0);
-// COMMENT: {4/22/2005 5:03:41 PM}					}
-// COMMENT: {4/22/2005 5:03:41 PM}					else
-// COMMENT: {4/22/2005 5:03:41 PM}					{
-// COMMENT: {4/22/2005 5:03:41 PM}						continue;
-// COMMENT: {4/22/2005 5:03:41 PM}					}
-// COMMENT: {4/22/2005 5:03:41 PM}
-// COMMENT: {4/22/2005 5:03:41 PM}					// Create the szCproperty group
-// COMMENT: {4/22/2005 5:03:41 PM}					prop_id = ::H5Gcreate(step_id, szCproperty, 0);
-// COMMENT: {4/22/2005 5:03:41 PM}					ASSERT(prop_id > 0);
-// COMMENT: {4/22/2005 5:03:41 PM}					if (prop_id > 0)
-// COMMENT: {4/22/2005 5:03:41 PM}					{
-// COMMENT: {4/22/2005 5:03:41 PM}						iter->second.Serialize(bStoring, prop_id);
-// COMMENT: {4/22/2005 5:03:41 PM}						status = ::H5Gclose(prop_id);
-// COMMENT: {4/22/2005 5:03:41 PM}						ASSERT(status >= 0);
-// COMMENT: {4/22/2005 5:03:41 PM}					}
-// COMMENT: {4/22/2005 5:03:41 PM}					else
-// COMMENT: {4/22/2005 5:03:41 PM}					{
-// COMMENT: {4/22/2005 5:03:41 PM}						continue;
-// COMMENT: {4/22/2005 5:03:41 PM}					}
-// COMMENT: {4/22/2005 5:03:41 PM}
-// COMMENT: {4/22/2005 5:03:41 PM}					status = ::H5Gclose(step_id);
-// COMMENT: {4/22/2005 5:03:41 PM}					ASSERT(status >= 0);
-// COMMENT: {4/22/2005 5:03:41 PM}
-// COMMENT: {4/22/2005 5:03:41 PM}					listNames.push_back(arrName[i]);
-// COMMENT: {4/22/2005 5:03:41 PM}				}
-// COMMENT: {4/22/2005 5:03:41 PM}			}
-// COMMENT: {4/22/2005 5:03:41 PM}
-// COMMENT: {4/22/2005 5:03:41 PM}			CGlobal::WriteList(loc_id, szSteps, listNames);
-// COMMENT: {4/22/2005 5:03:41 PM}			delete[] arrName;
-// COMMENT: {4/22/2005 5:03:41 PM}		}
-// COMMENT: {4/22/2005 5:03:41 PM}	}
-// COMMENT: {4/22/2005 5:03:41 PM}	else
-// COMMENT: {4/22/2005 5:03:41 PM}	{
-// COMMENT: {4/22/2005 5:03:41 PM}		std::list<std::string> listNames;
-// COMMENT: {4/22/2005 5:03:41 PM}		CGlobal::ReadList(loc_id, szSteps, listNames);
-// COMMENT: {4/22/2005 5:03:41 PM}		std::list<std::string>::iterator iter = listNames.begin();
-// COMMENT: {4/22/2005 5:03:41 PM}		for (; iter != listNames.end(); ++iter)
-// COMMENT: {4/22/2005 5:03:41 PM}		{
-// COMMENT: {4/22/2005 5:03:41 PM}			Ctime t;
-// COMMENT: {4/22/2005 5:03:41 PM}			Ctime p;
-// COMMENT: {4/22/2005 5:03:41 PM}
-// COMMENT: {4/22/2005 5:03:41 PM}			// Open the "Step %d" group
-// COMMENT: {4/22/2005 5:03:41 PM}			step_id = ::H5Gopen(loc_id, (*iter).c_str());
-// COMMENT: {4/22/2005 5:03:41 PM}			ASSERT(step_id > 0);
-// COMMENT: {4/22/2005 5:03:41 PM}			if (step_id > 0)
-// COMMENT: {4/22/2005 5:03:41 PM}			{
-// COMMENT: {4/22/2005 5:03:41 PM}				// Open the szCtime group
-// COMMENT: {4/22/2005 5:03:41 PM}				time_id = ::H5Gopen(step_id, szCtime);
-// COMMENT: {4/22/2005 5:03:41 PM}				ASSERT(time_id > 0);
-// COMMENT: {4/22/2005 5:03:41 PM}				if (time_id > 0)
-// COMMENT: {4/22/2005 5:03:41 PM}				{
-// COMMENT: {4/22/2005 5:03:41 PM}					t.Serialize(bStoring, time_id);
-// COMMENT: {4/22/2005 5:03:41 PM}					status = ::H5Gclose(time_id);
-// COMMENT: {4/22/2005 5:03:41 PM}					ASSERT(status >= 0);
-// COMMENT: {4/22/2005 5:03:41 PM}				}
-// COMMENT: {4/22/2005 5:03:41 PM}				else
-// COMMENT: {4/22/2005 5:03:41 PM}				{
-// COMMENT: {4/22/2005 5:03:41 PM}					continue;
-// COMMENT: {4/22/2005 5:03:41 PM}				}
-// COMMENT: {4/22/2005 5:03:41 PM}
-// COMMENT: {4/22/2005 5:03:41 PM}				// Open the szCproperty group
-// COMMENT: {4/22/2005 5:03:41 PM}				prop_id = ::H5Gopen(step_id, szCproperty);
-// COMMENT: {4/22/2005 5:03:41 PM}				ASSERT(prop_id > 0);
-// COMMENT: {4/22/2005 5:03:41 PM}				if (prop_id > 0)
-// COMMENT: {4/22/2005 5:03:41 PM}				{
-// COMMENT: {4/22/2005 5:03:41 PM}					p.Serialize(bStoring, prop_id);
-// COMMENT: {4/22/2005 5:03:41 PM}					status = ::H5Gclose(prop_id);
-// COMMENT: {4/22/2005 5:03:41 PM}					ASSERT(status >= 0);
-// COMMENT: {4/22/2005 5:03:41 PM}				}
-// COMMENT: {4/22/2005 5:03:41 PM}				else
-// COMMENT: {4/22/2005 5:03:41 PM}				{
-// COMMENT: {4/22/2005 5:03:41 PM}					continue;
-// COMMENT: {4/22/2005 5:03:41 PM}				}
-// COMMENT: {4/22/2005 5:03:41 PM}
-// COMMENT: {4/22/2005 5:03:41 PM}				status = ::H5Gclose(step_id);
-// COMMENT: {4/22/2005 5:03:41 PM}				ASSERT(status >= 0);
-// COMMENT: {4/22/2005 5:03:41 PM}
-// COMMENT: {4/22/2005 5:03:41 PM}				this->insert(CTimeSeries<T>::value_type(t, p));
-// COMMENT: {4/22/2005 5:03:41 PM}			}
-// COMMENT: {4/22/2005 5:03:41 PM}		}
-// COMMENT: {4/22/2005 5:03:41 PM}	}
-// COMMENT: {4/22/2005 5:03:41 PM}}
-
-//{{
-template<typename T>
-inline void CTimeSeries<T>::SerializeCreate(const char *heading, CTimeSeries<T>& series, hid_t loc_id)
-{
-	hid_t group_id = ::H5Gcreate(loc_id, heading, 0);
-	ASSERT(group_id > 0);
-	if (group_id > 0)
-	{
-		series.Serialize(true, group_id);
-		::H5Gclose(group_id);
-	}
-}
-
-template<typename T>
-inline void CTimeSeries<T>::SerializeOpen(const char *heading, CTimeSeries<T>& series, hid_t loc_id)
-{
-	hid_t group_id = ::H5Gopen(loc_id, heading);
-	if (group_id > 0)
-	{
-		series.Serialize(false, group_id);
-		::H5Gclose(group_id);
-	}
-}
-
-// COMMENT: {4/22/2005 8:50:18 PM}#include "Global.h"
-
 template<typename T>
 void CTimeSeries<T>::Serialize(bool bStoring, hid_t loc_id)
 {
@@ -634,4 +363,10 @@ void CTimeSeries<T>::Serialize(bool bStoring, hid_t loc_id)
 		}
 	}
 }
-//}}
+
+//
+// explicit template instantiations
+//
+template class CTimeSeries<Cproperty>;
+template class CTimeSeries<Ctime>;
+template class CTimeSeries<CWellRate>;

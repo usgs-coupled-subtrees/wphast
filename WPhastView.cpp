@@ -361,6 +361,21 @@ LRESULT CWPhastView::WindowProc(UINT message, WPARAM wParam, LPARAM lParam)
 
 		if (this->m_RenderWindowInteractor->GetInitialized())
 		{
+			if (message == WM_CHAR)
+			{
+				switch (wParam)
+				{
+				case 'Q' :
+				case 'q' :
+				case 'e' :
+				case 'E' :
+					// don't allow vtkHandleMessage2 call ExitCallback
+					return CView::WindowProc(message, wParam, lParam);
+					break;
+				default  :
+					break;
+				}
+			}
 			return vtkHandleMessage2(this->m_hWnd, message, wParam, lParam, this->m_RenderWindowInteractor);
 		}
 		break;

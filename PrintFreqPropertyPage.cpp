@@ -9,9 +9,9 @@
 
 // CPrintFreqPropertyPage dialog
 
-IMPLEMENT_DYNAMIC(CPrintFreqPropertyPage, CPropertyPage)
+IMPLEMENT_DYNAMIC(CPrintFreqPropertyPage, baseCPrintFreqPropertyPage)
 CPrintFreqPropertyPage::CPrintFreqPropertyPage()
-	: CPropertyPage(CPrintFreqPropertyPage::IDD)
+	: baseCPrintFreqPropertyPage(CPrintFreqPropertyPage::IDD)
 {
 // COMMENT: {6/10/2004 3:43:10 PM}	//{{ HACK
 // COMMENT: {6/10/2004 3:43:10 PM}	this->m_printFreq.print_hdf_chem.SetValue(2000);
@@ -31,18 +31,18 @@ CPrintFreqPropertyPage::~CPrintFreqPropertyPage()
 
 void CPrintFreqPropertyPage::DoDataExchange(CDataExchange* pDX)
 {
-	CPropertyPage::DoDataExchange(pDX);
+	baseCPrintFreqPropertyPage::DoDataExchange(pDX);
 	DDX_GridControl(pDX, IDC_GRID, m_Grid);
 
-	if (this->m_Grid.GetColumnCount() == 0) {
-		TRY {
-			this->m_Grid.SetRowCount(18);
+	if (this->m_Grid.GetColumnCount() == 0)
+	{
+		try
+		{
+			this->m_Grid.SetRowCount(19);
 			this->m_Grid.SetColumnCount(4);
 			this->m_Grid.SetFixedRowCount(1);
-			//this->m_Grid.SetFixedColumnCount(0);
 			this->m_Grid.SetFixedColumnCount(2);
 			this->m_Grid.EnableTitleTips(FALSE);
-			this->m_Grid.EnableSelection(FALSE);
 
 			std::vector<LPCTSTR> options;
 			options.push_back(_T("default"));
@@ -52,217 +52,115 @@ void CPrintFreqPropertyPage::DoDataExchange(CDataExchange* pDX)
 			options.push_back(_T("days"));
 			options.push_back(_T("years"));
 			options.push_back(_T("step"));
-
 			this->m_Grid.SetColumnOptions(3, options);
+
+			std::vector<LPCTSTR> times;
+			times.push_back(_T("default"));
+			times.push_back(_T("seconds"));
+			times.push_back(_T("minutes"));
+			times.push_back(_T("hours"));
+			times.push_back(_T("days"));
+			times.push_back(_T("years"));
+			this->m_Grid.SetCellOptions(1, 3, times);
 		}
-		CATCH (CMemoryException, e)
+		catch (CMemoryException *e)
 		{
 			e->ReportError();
 			e->Delete();
 		}
-		END_CATCH
 
 		// set default format
 		GV_ITEM defaultFormat;
-		defaultFormat.mask    = GVIF_FORMAT;
+		defaultFormat.mask = GVIF_FORMAT;
 		for (int row = 0; row < this->m_Grid.GetRowCount(); ++row)
 		{
 			defaultFormat.row = row;
 			for (int col = 0; col < this->m_Grid.GetColumnCount(); ++col)
 			{ 
 				defaultFormat.col = col;
-				if (col == 2 && row != 0) {
+				if (col == 2 && row != 0)
+				{
 					defaultFormat.nFormat = DT_RIGHT|DT_BOTTOM|DT_END_ELLIPSIS;
 				}
-				else {
+				else
+				{
 					defaultFormat.nFormat = DT_LEFT|DT_BOTTOM|DT_END_ELLIPSIS;
 				}
 				this->m_Grid.SetItem(&defaultFormat);
 			}
 		}
 
-		GV_ITEM Item;
-		Item.mask = GVIF_TEXT;
-		Item.row = 0;
+		this->m_Grid.SetItemText(0, 0, _T("Output"));
+		this->m_Grid.SetItemText(0, 1, _T("Output file"));
 
-		Item.col = 0;
-		Item.szText = _T("Output");
-		this->m_Grid.SetItem(&Item);
+		this->m_Grid.SetItemText(0, 2, _T("Print every"));
+		this->m_Grid.SetItemText(0, 3, _T("Units"));
 
-		Item.col = 1;
-		Item.szText = _T("Output file");
-		this->m_Grid.SetItem(&Item);
-
-		Item.col = 2;
-		Item.szText = _T("Print every");
-		this->m_Grid.SetItem(&Item);
-
-		Item.col = 3;
-		Item.szText = _T("Units");
-		this->m_Grid.SetItem(&Item);
-
-// COMMENT: {6/9/2004 7:02:32 PM}		Item.col = 0;
-// COMMENT: {6/9/2004 7:02:32 PM}		Item.row = 1;
-// COMMENT: {6/9/2004 7:02:32 PM}		Item.szText = _T("Flow rates in boundary condition cells");
-// COMMENT: {6/9/2004 7:02:32 PM}		this->m_Grid.SetItem(&Item);
-// COMMENT: {6/9/2004 7:02:32 PM}
-// COMMENT: {6/9/2004 7:02:32 PM}		Item.col = 1;
-// COMMENT: {6/9/2004 7:02:32 PM}		Item.row = 1;
-// COMMENT: {6/9/2004 7:02:32 PM}		Item.szText = _T("*.O.BCF");
-// COMMENT: {6/9/2004 7:02:32 PM}		this->m_Grid.SetItem(&Item);
-
-		Item.row = 1;
-		Item.col = 0;
-		Item.szText = _T("Flow rates in boundary condition cells");
-		this->m_Grid.SetItem(&Item);
-		Item.col = 1;
-		Item.szText = _T("*.O.BCF");
-		this->m_Grid.SetItem(&Item);
-
-		Item.row = 2;
-		Item.col = 0;
-		Item.szText = _T("Components");
-		this->m_Grid.SetItem(&Item);
-		Item.col = 1;
-		Item.szText = _T("*.O.comps");
-		this->m_Grid.SetItem(&Item);
-
-		Item.row = 3;
-		Item.col = 0;
-		Item.szText = _T("Conductance");
-		this->m_Grid.SetItem(&Item);
-		Item.col = 1;
-		Item.szText = _T("*.O.kd");
-		this->m_Grid.SetItem(&Item);
-
-		Item.row = 4;
-		Item.col = 0;
-		Item.szText = _T("Flow balance");
-		this->m_Grid.SetItem(&Item);
-		Item.col = 1;
-		Item.szText = _T("*.O.bal");
-		this->m_Grid.SetItem(&Item);
-
-		Item.row = 5;
-		Item.col = 0;
-		Item.szText = _T("Force chemistry print");
-		this->m_Grid.SetItem(&Item);
-		Item.col = 1;
-		Item.szText = _T("*.O.chem");
-		this->m_Grid.SetItem(&Item);
-
-		Item.row = 6;
-		Item.col = 0;
-		Item.szText = _T("HDF chemistry");
-		this->m_Grid.SetItem(&Item);
-		Item.col = 1;
-		Item.szText = _T("*.h5");
-		this->m_Grid.SetItem(&Item);
-
-		Item.row = 7;
-		Item.col = 0;
-		Item.szText = _T("HDF heads");
-		this->m_Grid.SetItem(&Item);
-		Item.col = 1;
-		Item.szText = _T("*.h5");
-		this->m_Grid.SetItem(&Item);
-
-		Item.row = 8;
-		Item.col = 0;
-		Item.szText = _T("HDF velocities");
-		this->m_Grid.SetItem(&Item);
-		Item.col = 1;
-		Item.szText = _T("*.h5");
-		this->m_Grid.SetItem(&Item);
-
-		Item.row = 9;
-		Item.col = 0;
-		Item.szText = _T("Heads");
-		this->m_Grid.SetItem(&Item);
-		Item.col = 1;
-		Item.szText = _T("*.O.head");
-		this->m_Grid.SetItem(&Item);
-
-		Item.row = 10;
-		Item.col = 0;
-		Item.szText = _T("Progress statistics");
-		this->m_Grid.SetItem(&Item);
-		Item.col = 1;
-		Item.szText = _T("*.log");
-		this->m_Grid.SetItem(&Item);
-
-		Item.row = 11;
-		Item.col = 0;
-		Item.szText = _T("Velocities");
-		this->m_Grid.SetItem(&Item);
-		Item.col = 1;
-		Item.szText = _T("*.O.vel");
-		this->m_Grid.SetItem(&Item);
-
-		Item.row = 12;
-		Item.col = 0;
-		Item.szText = _T("Wells");
-		this->m_Grid.SetItem(&Item);
-		Item.col = 1;
-		Item.szText = _T("*.O.wel");
-		this->m_Grid.SetItem(&Item);
-
-		Item.row = 13;
-		Item.col = 0;
-		Item.szText = _T("XYZ chemistry");
-		this->m_Grid.SetItem(&Item);
-		Item.col = 1;
-		Item.szText = _T("*.xyz.chem");
-		this->m_Grid.SetItem(&Item);
-
-		Item.row = 14;
-		Item.col = 0;
-		Item.szText = _T("XYZ components");
-		this->m_Grid.SetItem(&Item);
-		Item.col = 1;
-		Item.szText = _T("*.xyz.comps");
-		this->m_Grid.SetItem(&Item);
-
-		Item.row = 15;
-		Item.col = 0;
-		Item.szText = _T("XYZ heads");
-		this->m_Grid.SetItem(&Item);
-		Item.col = 1;
-		Item.szText = _T("*.xyz.head");
-		this->m_Grid.SetItem(&Item);
-
-		Item.row = 16;
-		Item.col = 0;
-		Item.szText = _T("XYZ velocities");
-		this->m_Grid.SetItem(&Item);
-		Item.col = 1;
-		Item.szText = _T("*.xyz.vel");
-		this->m_Grid.SetItem(&Item);
-
-		Item.row = 17;
-		Item.col = 0;
-		Item.szText = _T("XYZ wells");
-		this->m_Grid.SetItem(&Item);
-		Item.col = 1;
-		Item.szText = _T("*.xyz.wel");
-		this->m_Grid.SetItem(&Item);
+		this->m_Grid.SetItemText(1, 0, _T("Time"));
+		
+		this->m_Grid.SetItemText(2, 0, _T("Flow rates in boundary condition cells"));		
+		this->m_Grid.SetItemText(2, 1, _T("*.O.BCF"));
+		
+		this->m_Grid.SetItemText(3, 0, _T("Components"));
+		this->m_Grid.SetItemText(3, 1, _T("*.O.comps"));
+		
+		this->m_Grid.SetItemText(4, 0, _T("Conductance"));
+		this->m_Grid.SetItemText(4, 1, _T("*.O.kd"));
+		
+		this->m_Grid.SetItemText(5, 0, _T("Flow balance"));
+		this->m_Grid.SetItemText(5, 1, _T("*.O.bal"));
+		
+		this->m_Grid.SetItemText(6, 0, _T("Force chemistry print"));
+		this->m_Grid.SetItemText(6, 1, _T("*.O.chem"));
+		
+		this->m_Grid.SetItemText(7, 0, _T("HDF chemistry"));
+		this->m_Grid.SetItemText(7, 1, _T("*.h5"));
+		
+		this->m_Grid.SetItemText(8, 0, _T("HDF heads"));
+		this->m_Grid.SetItemText(8, 1, _T("*.h5"));
+		
+		this->m_Grid.SetItemText(9, 0, _T("HDF velocities"));
+		this->m_Grid.SetItemText(9, 1, _T("*.h5"));
+		
+		this->m_Grid.SetItemText(10, 0, _T("Heads"));
+		this->m_Grid.SetItemText(10, 1, _T("*.O.head"));
+		
+		this->m_Grid.SetItemText(11, 0, _T("Progress statistics"));
+		this->m_Grid.SetItemText(11, 1, _T("*.log"));
+		
+		this->m_Grid.SetItemText(12, 0, _T("Velocities"));
+		this->m_Grid.SetItemText(12, 1, _T("*.O.vel"));
+		
+		this->m_Grid.SetItemText(13, 0, _T("Wells"));
+		this->m_Grid.SetItemText(13, 1, _T("*.O.wel"));
+		
+		this->m_Grid.SetItemText(14, 0, _T("XYZ chemistry"));
+		this->m_Grid.SetItemText(14, 1, _T("*.xyz.chem"));
+		
+		this->m_Grid.SetItemText(15, 0, _T("XYZ components"));
+		this->m_Grid.SetItemText(15, 1, _T("*.xyz.comps"));
+		
+		this->m_Grid.SetItemText(16, 0, _T("XYZ heads"));
+		this->m_Grid.SetItemText(16, 1, _T("*.xyz.head"));
+		
+		this->m_Grid.SetItemText(17, 0, _T("XYZ velocities"));
+		this->m_Grid.SetItemText(17, 1, _T("*.xyz.vel"));
+		
+		this->m_Grid.SetItemText(18, 0, _T("XYZ wells"));
+		this->m_Grid.SetItemText(18, 1, _T("*.xyz.wel"));
 
 		// this->m_Grid.ExpandColumnsToFit();
 		this->m_Grid.AutoSizeColumns();
-
-		Item.row = 2;
-		Item.col = 3;
-		Item.szText = _T("seconds");
-		this->m_Grid.SetItem(&Item);
 
 		// manually resize grid
 		this->m_Grid.SetColumnWidth(0, this->m_Grid.GetColumnWidth(0) * 0.85);
 		this->m_Grid.SetColumnWidth(3, this->m_Grid.GetColumnWidth(3) * 1.5);
 
-		Item.row = 2;
-		Item.col = 3;
-		Item.szText = _T("");
-		this->m_Grid.SetItem(&Item);
+		this->m_Grid.SetItemText(1, 2, _T("0"));
+		this->m_Grid.DisableCell(1, 2);
+
+		this->m_Grid.SetItemText(1, 3, _T(""));
+		this->m_Grid.DisableCell(1, 3);
 	}
 
 // COMMENT: {2/23/2005 1:03:13 PM}	this->DDX_PRINT(pDX,  1, this->m_printFreq.print_bc_flow);
@@ -299,53 +197,64 @@ void CPrintFreqPropertyPage::DDX_PRINT(CDataExchange* pDX, int nRow, Ctime& time
 
 		// Print every
 		DDX_TextGridControl(pDX, IDC_GRID, nRow, 2, str);
-		if (str.IsEmpty()) {
+		if (str.IsEmpty())
+		{
 			time.type = UNDEFINED;
 			time.value_defined = FALSE;
 			return;
 		}
-		else {
+		else
+		{
 			DDX_TextGridControl(pDX, IDC_GRID, nRow, 2, dVal);
 			time.SetValue(dVal);
 		}
 
 		// UNITS
 		DDX_TextGridControl(pDX, IDC_GRID, nRow, 3, str);			
-		if (str.IsEmpty()) {
+		if (str.IsEmpty())
+		{
 			// TODO
 			ASSERT(FALSE); // should never be empty
 		}
 		else
 		{
-			if (str.Compare("default") == 0) {
+			if (str.Compare("default") == 0)
+			{
 				time.type = UNITS;
 				if (time.input) delete[] time.input;
 				time.input = NULL;
 			}
-			else if (str.Compare("seconds") == 0) {
+			else if (str.Compare("seconds") == 0)
+			{
 				time.SetInput(str.GetString());
 				ASSERT(time.type == UNITS);
 			}
-			else if (str.Compare("minutes") == 0) {
+			else if (str.Compare("minutes") == 0)
+			{
 				time.SetInput(str.GetString());
 				ASSERT(time.type == UNITS);
 			}
-			else if (str.Compare("hours") == 0) {
+			else if (str.Compare("hours") == 0)
+			{
 				time.SetInput(str.GetString());
 				ASSERT(time.type == UNITS);
 			}
-			else if (str.Compare("days") == 0) {
+			else if (str.Compare("days") == 0)
+			{
 				time.SetInput(str.GetString());
 				ASSERT(time.type == UNITS);
 			}
-			else if (str.Compare("years") == 0) {
+			else if (str.Compare("years") == 0)
+			{
 				time.SetInput(str.GetString());
 				ASSERT(time.type == UNITS);
 			}
-			else if (str.Compare("step") == 0) {
+			else if (str.Compare("step") == 0)
+			{
 				time.type = STEP;
 			}
-			else {
+			else
+			{
 				ASSERT(FALSE);
 			}
 
@@ -405,8 +314,136 @@ void CPrintFreqPropertyPage::DDX_PRINT(CDataExchange* pDX, int nRow, Ctime& time
 }
 
 
-BEGIN_MESSAGE_MAP(CPrintFreqPropertyPage, CPropertyPage)
+BEGIN_MESSAGE_MAP(CPrintFreqPropertyPage, baseCPrintFreqPropertyPage)
+	ON_BN_CLICKED(IDC_BUTTON_ADD, OnBnClickedButtonAdd)
+	ON_BN_CLICKED(IDC_BUTTON_INSERT, OnBnClickedButtonInsert)
+	ON_BN_CLICKED(IDC_BUTTON_DELETE, OnBnClickedButtonDelete)
 END_MESSAGE_MAP()
 
 
 // CPrintFreqPropertyPage message handlers
+
+void CPrintFreqPropertyPage::OnBnClickedButtonAdd()
+{
+	this->m_Grid.InsertColumn(_T("Print every"), DT_RIGHT|DT_BOTTOM|DT_END_ELLIPSIS);
+	this->m_Grid.InsertColumn(_T("Units"), DT_LEFT|DT_BOTTOM|DT_END_ELLIPSIS);
+
+	int nCol = this->m_Grid.GetColumnCount() - 1;
+
+	std::vector<LPCTSTR> options;
+	options.push_back(_T("default"));
+	options.push_back(_T("seconds"));
+	options.push_back(_T("minutes"));
+	options.push_back(_T("hours"));
+	options.push_back(_T("days"));
+	options.push_back(_T("years"));
+	options.push_back(_T("step"));
+	this->m_Grid.SetColumnOptions(nCol, options);
+
+	std::vector<LPCTSTR> times;
+	times.push_back(_T("default"));
+	times.push_back(_T("seconds"));
+	times.push_back(_T("minutes"));
+	times.push_back(_T("hours"));
+	times.push_back(_T("days"));
+	times.push_back(_T("years"));
+	this->m_Grid.SetCellOptions(1, nCol, times);
+
+	this->m_Grid.SetColumnWidth(nCol, 64);
+	this->m_Grid.SetItemFormat(0, nCol - 1, DT_LEFT|DT_BOTTOM|DT_END_ELLIPSIS);
+	this->m_Grid.RedrawWindow();
+}
+
+void CPrintFreqPropertyPage::OnBnClickedButtonInsert()
+{
+	CCellID focusCell = this->m_Grid.GetFocusCell();
+
+	int nColumn;
+
+	if (focusCell.col < 4)
+	{
+		nColumn = 4;
+	}
+	else
+	{
+		nColumn = focusCell.col - (focusCell.col % 2);
+	}
+
+    if (nColumn >= this->m_Grid.GetColumnCount())
+	{
+		nColumn = this->m_Grid.InsertColumn(_T("Print every"), DT_RIGHT|DT_BOTTOM|DT_END_ELLIPSIS, -1);
+		this->m_Grid.InsertColumn(_T("Units"), DT_LEFT|DT_BOTTOM|DT_END_ELLIPSIS, -1);
+	}
+	else
+	{
+		nColumn = this->m_Grid.InsertColumn(_T("Print every"), DT_RIGHT|DT_BOTTOM|DT_END_ELLIPSIS, nColumn);
+		this->m_Grid.InsertColumn(_T("Units"), DT_LEFT|DT_BOTTOM|DT_END_ELLIPSIS, nColumn + 1);
+	}
+
+	std::vector<LPCTSTR> options;
+	options.push_back(_T("default"));
+	options.push_back(_T("seconds"));
+	options.push_back(_T("minutes"));
+	options.push_back(_T("hours"));
+	options.push_back(_T("days"));
+	options.push_back(_T("years"));
+	options.push_back(_T("step"));
+	this->m_Grid.SetColumnOptions(nColumn + 1, options);
+
+	std::vector<LPCTSTR> times;
+	times.push_back(_T("default"));
+	times.push_back(_T("seconds"));
+	times.push_back(_T("minutes"));
+	times.push_back(_T("hours"));
+	times.push_back(_T("days"));
+	times.push_back(_T("years"));
+	this->m_Grid.SetCellOptions(1, nColumn + 1, times);
+
+	this->m_Grid.SetColumnWidth(nColumn + 1, 64);
+	this->m_Grid.SetItemFormat(0, nColumn, DT_LEFT|DT_BOTTOM|DT_END_ELLIPSIS);
+	this->m_Grid.RedrawWindow();
+}
+
+void CPrintFreqPropertyPage::OnBnClickedButtonDelete()
+{
+	CCellID focusCell = this->m_Grid.GetFocusCell();
+
+	int nColumn;
+
+	if (focusCell.col < 4)
+	{
+		::AfxMessageBox("Time 0 cannot be deleted");
+		this->m_Grid.SetFocus();
+	}
+	else
+	{
+		nColumn = focusCell.col - (focusCell.col % 2);
+		VERIFY(this->m_Grid.DeleteColumn(nColumn));
+		VERIFY(this->m_Grid.DeleteColumn(nColumn));
+		this->m_Grid.RedrawWindow();
+	}
+}
+
+BOOL CPrintFreqPropertyPage::OnInitDialog()
+{
+	baseCPrintFreqPropertyPage::OnInitDialog();
+
+	// Add extra initialization here
+
+	// Layout controls
+	this->CreateRoot(VERTICAL)
+		<< item(IDC_GRID, GREEDY)
+		//<< itemFixed(VERTICAL, 3)
+		<< 	( pane(HORIZONTAL, ABSOLUTE_VERT, 0, 0, 0 )
+			// << itemFixed(HORIZONTAL, 3)
+			<< item(IDC_BUTTON_ADD, NORESIZE, 0, 0, 0, 0)
+			<< item(IDC_BUTTON_INSERT, NORESIZE, 0, 0, 0, 0)
+			<< item(IDC_BUTTON_DELETE, NORESIZE, 0, 0, 0, 0)
+			)
+		<< item(IDC_DESC_RICHEDIT, ABSOLUTE_VERT)		
+		;
+	UpdateLayout();
+
+	return TRUE;  // return TRUE unless you set the focus to a control
+	// EXCEPTION: OCX Property Pages should return FALSE
+}

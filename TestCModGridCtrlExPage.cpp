@@ -5,6 +5,7 @@
 #include "WPhast.h"
 #include "TestCModGridCtrlExPage.h"
 
+#define strText szText
 
 // TestCModGridCtrlExPage dialog
 
@@ -83,25 +84,25 @@ BOOL TestCModGridCtrlExPage::OnInitDialog()
 	Item.row = 0;
 
 	Item.col = 0;
-	Item.szText = _T("Simulation period");
+	Item.strText = _T("Simulation period");
 	this->m_Grid.SetItem(&Item);
 
 	Item.col = 1;
-	Item.szText = _T("Time step");
+	Item.strText = _T("Time step");
 	this->m_Grid.SetItem(&Item);
 	this->m_Grid.SetColumnCheck(1, BST_UNCHECKED);
 	//this->m_Grid.SetColumnCheck(1, BST_INDETERMINATE);
 
 	Item.col = 2;
-	Item.szText = _T("Time step units");
+	Item.strText = _T("Time step units");
 	this->m_Grid.SetItem(&Item);
 
 	Item.col = 3;
-	Item.szText = _T("Time change");
+	Item.strText = _T("Time change");
 	this->m_Grid.SetItem(&Item);
 
 	Item.col = 4;
-	Item.szText = _T("Time change units");
+	Item.strText = _T("Time change units");
 	this->m_Grid.SetItem(&Item);
 
 	this->m_Grid.ExpandColumnsToFit();

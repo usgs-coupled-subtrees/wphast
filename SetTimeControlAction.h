@@ -2,7 +2,7 @@
 
 #include "Action.h"
 
-#include "TimeControl.h"
+#include "TimeControl2.h"
 
 class CWPhastDoc;
 
@@ -10,8 +10,7 @@ class CSetTimeControlAction :
 	public CAction
 {
 public:
-// COMMENT: {4/11/2005 1:47:15 PM}	CSetTimeControlAction(CWPhastDoc* pDoc, const CTimeControl& newTimeControl, int nStressPeriod);
-	CSetTimeControlAction(CWPhastDoc* pDoc, const CTimeControl& newTimeControl);
+	CSetTimeControlAction(CWPhastDoc* pDoc, const CTimeControl2& newTimeControl);
 	virtual ~CSetTimeControlAction(void);
 
 	virtual void Execute();
@@ -19,7 +18,6 @@ public:
 
 protected:
 	CWPhastDoc*  m_pDoc;
-	CTimeControl m_originalTimeControl;
-	CTimeControl m_newTimeControl;
-// COMMENT: {4/11/2005 1:47:23 PM}	int          m_nStressPeriod;
+	CTimeControl2 m_originalTimeControl;
+	CTimeControl2 m_newTimeControl;
 };

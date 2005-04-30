@@ -71,6 +71,7 @@ public:
 	virtual ~CModGridCtrlEx(void);
 
 	// Methods
+	BOOL SetCellOptions(int nRol, int nCol, const std::vector<LPCTSTR>& vecOptions);
 	BOOL SetColumnOptions(int nCol, const std::vector<LPCTSTR>& vecOptions);
 	bool IsDropDownCell(int nRow, int nCol)const;
 	bool IsDropDownCell(const CCellID& cell)const;
@@ -93,6 +94,9 @@ public:
 
 	void TraceMouseMode(void)const;
 
+	void ValidateAndModifyCellContents(int nRow, int nCol, LPCTSTR strText);
+	virtual BOOL ValidateEdit(int nRow, int nCol, LPCTSTR str);
+
 
 protected:
 	// Virtual overrides
@@ -103,6 +107,8 @@ protected:
 
 #ifndef GRIDCONTROL_NO_CLIPBOARD
     virtual void CutSelectedText();
+    virtual BOOL PasteTextToGrid(CCellID cell, COleDataObject* pDataObject);
+    virtual COleDataSource* CopyTextFromGrid();
 #endif
 
 	void ShowDropDown(BOOL bShowIt);

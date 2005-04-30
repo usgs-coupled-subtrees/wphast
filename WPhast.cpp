@@ -121,11 +121,22 @@ BOOL CWPhastApp::InitInstance()
 	//}}
 
 	// Initialize OLE libraries
-	if (!AfxOleInit())
+// COMMENT: {4/27/2005 4:19:12 PM}	if (!AfxOleInit())
+// COMMENT: {4/27/2005 4:19:12 PM}	{
+// COMMENT: {4/27/2005 4:19:12 PM}		AfxMessageBox(IDP_OLE_INIT_FAILED);
+// COMMENT: {4/27/2005 4:19:12 PM}		return FALSE;
+// COMMENT: {4/27/2005 4:19:12 PM}	}
+	//{{
+	// HACK
+    _AFX_THREAD_STATE* pState = AfxGetThreadState();
+    if (!pState->m_bNeedTerm && !AfxOleInit())
 	{
 		AfxMessageBox(IDP_OLE_INIT_FAILED);
 		return FALSE;
 	}
+	//}}
+
+
 	AfxEnableControlContainer();
 	// Standard initialization
 	// If you are not using these features and wish to reduce the size

@@ -2820,6 +2820,34 @@
 			<File
 				RelativePath="gridctrl\TitleTip.h">
 			</File>
+			<Filter
+				Name="New"
+				Filter="">
+				<File
+					RelativePath="gridctrl\GridCell.cpp">
+					<FileConfiguration
+						Name="cppunit|Win32"
+						ExcludedFromBuild="TRUE">
+						<Tool
+							Name="VCCLCompilerTool"/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="gridctrl\GridCell.h">
+				</File>
+				<File
+					RelativePath="gridctrl\GridCellBase.cpp">
+					<FileConfiguration
+						Name="cppunit|Win32"
+						ExcludedFromBuild="TRUE">
+						<Tool
+							Name="VCCLCompilerTool"/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="gridctrl\GridCellBase.h">
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="ETSLayout"

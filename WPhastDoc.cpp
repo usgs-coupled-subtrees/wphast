@@ -177,7 +177,6 @@ CWPhastDoc::CWPhastDoc()
 , m_pScalePage(0)
 , m_pUnits(0)
 , m_pModel(0) // , m_pFlowOnly(0)
-, m_pTimeControl(0)
 , m_pPrintFreq(0)
 , m_ProjectionMode(PT_PERSPECTIVE)
 , m_pMapActor(0)
@@ -236,11 +235,6 @@ CWPhastDoc::CWPhastDoc()
 	// create model
 	//
 	this->m_pModel = new CNewModel;
-
-	// create time control
-	//
-	this->m_pTimeControl = new CTimeControl;
-	this->m_pTimeControl2 = new CTimeControl2;
 
 	// create print_frequency
 	this->m_pPrintFreq = new CPrintFreq;
@@ -308,7 +302,6 @@ CWPhastDoc::~CWPhastDoc()
 
 	ASSERT_DELETE_SET_NULL_MACRO(this->m_pUnits);
 	ASSERT_DELETE_SET_NULL_MACRO(this->m_pModel);
-	ASSERT_DELETE_SET_NULL_MACRO(this->m_pTimeControl);
 	ASSERT_DELETE_SET_NULL_MACRO(this->m_pPrintFreq);
 
 	if (this->m_pMapActor) {
@@ -344,7 +337,8 @@ void CWPhastDoc::Serialize(CArchive& ar)
 	{
 		// Update StatusBar
 		//
-		if (CWnd* pWnd = ((CFrameWnd*)::AfxGetMainWnd())->GetMessageBar()) {
+		if (CWnd* pWnd = ((CFrameWnd*)::AfxGetMainWnd())->GetMessageBar())
+		{
 			CString status(_T("Saving..."));
 			pWnd->SetWindowText(status);
 		}
@@ -358,7 +352,8 @@ void CWPhastDoc::Serialize(CArchive& ar)
 		//
 		hid_t wphast_id = ::H5Gcreate(pFile->GetHID(), szWPhast, 0);
 		ASSERT(wphast_id > 0);
-		if (wphast_id > 0) {
+		if (wphast_id > 0)
+		{
 			// store flowonly
 			ASSERT(this->m_pModel);
 			this->m_pModel->m_flowOnly.Serialize(bStoring, wphast_id);
@@ -394,7 +389,7 @@ void CWPhastDoc::Serialize(CArchive& ar)
 			this->m_pPrintFreq->Serialize(bStoring, wphast_id);
 
 			// store time control
-			this->m_pTimeControl2->Serialize(bStoring, wphast_id);
+			this->m_pModel->m_timeControl2.Serialize(bStoring, wphast_id);
 
 			// close WPhast group
 			status = ::H5Gclose(wphast_id);
@@ -407,11 +402,11 @@ void CWPhastDoc::Serialize(CArchive& ar)
 
 		// Update StatusBar
 		//
-		if (CWnd* pWnd = ((CFrameWnd*)::AfxGetMainWnd())->GetMessageBar()) {
+		if (CWnd* pWnd = ((CFrameWnd*)::AfxGetMainWnd())->GetMessageBar())
+		{
 			CString status(_T("Loading..."));
 			pWnd->SetWindowText(status);
 		}
-
 
 		CHDFMirrorFile* pFile = (CHDFMirrorFile*)ar.GetFile();
 		ASSERT(pFile->GetHID() > 0);
@@ -421,7 +416,8 @@ void CWPhastDoc::Serialize(CArchive& ar)
 		//
 		hid_t wphast_id = ::H5Gopen(pFile->GetHID(), szWPhast);
 		ASSERT(wphast_id > 0);
-		if (wphast_id > 0) {
+		if (wphast_id > 0)
+		{
 			// Note: can't call this->New(...) here since the defaults are unknown
 			// until this->SerializeMedia and this->SerializeIC are called
 
@@ -438,7 +434,8 @@ void CWPhastDoc::Serialize(CArchive& ar)
 			ASSERT(this->m_pUnits);
 			this->m_pUnits->Serialize(bStoring, wphast_id);
 			// update properties bar
-			if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar()) {
+			if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar())
+			{
 				pTree->SetUnits(this->m_pUnits);
 			}
 
@@ -491,11 +488,12 @@ void CWPhastDoc::Serialize(CArchive& ar)
 			}
 
 			// load time control
-			this->m_pTimeControl2->Serialize(bStoring, wphast_id);
+			this->m_pModel->m_timeControl2.Serialize(bStoring, wphast_id);			
+
 			// update properties bar
 			if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar())
 			{
-				pTree->SetTimeControl2(this->m_pTimeControl2);
+				pTree->SetTimeControl2(&this->m_pModel->m_timeControl2);
 			}
 
 			// close WPhast group
@@ -1334,7 +1332,6 @@ void CWPhastDoc::DeleteContents()
 	ASSERT(this->m_pModel);
 	delete this->m_pModel;
 	this->m_pModel = new CNewModel();
-
 
 	// reset units
 	ASSERT(this->m_pUnits);
@@ -2850,30 +2847,15 @@ void CWPhastDoc::New(const CNewModel& model)
 		pTree->SetPrintFrequency(this->m_pPrintFreq);
 	}
 
-// COMMENT: {4/22/2005 3:40:19 PM}	// TimeControl
-// COMMENT: {4/22/2005 3:40:19 PM}	//
-// COMMENT: {4/22/2005 3:40:19 PM}	(*this->m_pTimeControl) = model.m_timeControl;
-// COMMENT: {4/22/2005 3:40:19 PM}	if (this->m_pTimeControl->GetTimeEndInput() == 0) {
-// COMMENT: {4/22/2005 3:40:19 PM}		this->m_pTimeControl->SetTimeEndInput(this->m_pUnits->time.c_str());
-// COMMENT: {4/22/2005 3:40:19 PM}	}
-// COMMENT: {4/22/2005 3:40:19 PM}	if (this->m_pTimeControl->GetTimeStepInput() == 0) {
-// COMMENT: {4/22/2005 3:40:19 PM}		this->m_pTimeControl->SetTimeStepInput(this->m_pUnits->time.c_str());
-// COMMENT: {4/22/2005 3:40:19 PM}	}
-	// TimeControl2
+	// update properties bar
 	//
-	(*this->m_pTimeControl2) = model.m_timeControl2;
 	if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar())
 	{
-		pTree->SetTimeControl2(this->m_pTimeControl2);
+		pTree->SetTimeControl2(&this->m_pModel->m_timeControl2);
 	}
 
-// COMMENT: {4/22/2005 3:50:05 PM}	// update properties bar
-// COMMENT: {4/22/2005 3:50:05 PM}	//
-// COMMENT: {4/22/2005 3:50:05 PM}	if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar()) {
-// COMMENT: {4/22/2005 3:50:05 PM}		pTree->SetTimeControl(this->m_pTimeControl);
-// COMMENT: {4/22/2005 3:50:05 PM}	}
-
-	if (model.HasSiteMap()) {
+	if (model.HasSiteMap())
+	{
 		ASSERT(this->m_pMapActor == NULL);
 		this->m_pMapActor = CMapActor::New();   // Note pixel(0,0) is the same size as all other pixels
 		this->m_pMapActor->SetSiteMap(model.GetSiteMap());
@@ -3020,72 +3002,25 @@ void CWPhastDoc::OnFileRun()
 // COMMENT: {4/11/2005 1:22:32 PM}		}
 // COMMENT: {4/11/2005 1:22:32 PM}	}
 // COMMENT: {4/11/2005 1:22:32 PM}}
-void CWPhastDoc::SetTimeControl(const CTimeControl& timeControl)
-{
-	(*this->m_pTimeControl) = timeControl;
-
-// COMMENT: {4/22/2005 4:21:13 PM}	// update properties bar
-// COMMENT: {4/22/2005 4:21:13 PM}	//
-// COMMENT: {4/22/2005 4:21:13 PM}	if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar())
-// COMMENT: {4/22/2005 4:21:13 PM}	{
-// COMMENT: {4/22/2005 4:21:13 PM}		pTree->SetTimeControl(this->m_pTimeControl);
-// COMMENT: {4/22/2005 4:21:13 PM}	}
-}
 
 void CWPhastDoc::SetTimeControl2(const CTimeControl2& timeControl2)
 {
-	(*this->m_pTimeControl2) = timeControl2;
+	ASSERT(this->m_pModel);
+	this->m_pModel->m_timeControl2 = timeControl2;
 
 	// update properties bar
 	//
 	if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar())
 	{
-		pTree->SetTimeControl2(this->m_pTimeControl2);
+		pTree->SetTimeControl2(&this->m_pModel->m_timeControl2);
 	}
-}
-
-// COMMENT: {4/11/2005 1:23:48 PM}const CTimeControl& CWPhastDoc::GetTimeControl(int nStressPeriod)const
-// COMMENT: {4/11/2005 1:23:48 PM}{
-// COMMENT: {4/11/2005 1:23:48 PM}	if (nStressPeriod > 1) {
-// COMMENT: {4/11/2005 1:23:48 PM}		if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar()) {
-// COMMENT: {4/11/2005 1:23:48 PM}			return (*pTree->GetTimeControl(nStressPeriod));
-// COMMENT: {4/11/2005 1:23:48 PM}		}
-// COMMENT: {4/11/2005 1:23:48 PM}		// BUGBUG can't return NULL
-// COMMENT: {4/11/2005 1:23:48 PM}	}
-// COMMENT: {4/11/2005 1:23:48 PM}	return (*this->m_pTimeControl);
-// COMMENT: {4/11/2005 1:23:48 PM}}
-const CTimeControl& CWPhastDoc::GetTimeControl(void)const
-{
-	return (*this->m_pTimeControl);
 }
 
 const CTimeControl2& CWPhastDoc::GetTimeControl2(void)const
 {
-	return (*this->m_pTimeControl2);
+	return this->m_pModel->m_timeControl2;
 }
 
-// COMMENT: {6/9/2004 10:40:35 PM}	void SetPrintFrequency(const CPrintFreq& printFreq, int nStressPeriod = 1);
-// COMMENT: {4/11/2005 1:24:43 PM}void CWPhastDoc::SetPrintFrequency(const CPrintFreq& printFreq, int nStressPeriod)
-// COMMENT: {4/11/2005 1:24:43 PM}{
-// COMMENT: {4/11/2005 1:24:43 PM}	if (nStressPeriod == 1) {
-// COMMENT: {4/11/2005 1:24:43 PM}		(*this->m_pPrintFreq) = printFreq;
-// COMMENT: {4/11/2005 1:24:43 PM}
-// COMMENT: {4/11/2005 1:24:43 PM}		// update properties bar
-// COMMENT: {4/11/2005 1:24:43 PM}		//
-// COMMENT: {4/11/2005 1:24:43 PM}		if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar()) {
-// COMMENT: {4/11/2005 1:24:43 PM}			pTree->SetPrintFrequency(this->m_pPrintFreq);
-// COMMENT: {4/11/2005 1:24:43 PM}		}
-// COMMENT: {4/11/2005 1:24:43 PM}	}
-// COMMENT: {4/11/2005 1:24:43 PM}	else {
-// COMMENT: {4/11/2005 1:24:43 PM}		CPrintFreq copy(printFreq);
-// COMMENT: {4/11/2005 1:24:43 PM}
-// COMMENT: {4/11/2005 1:24:43 PM}		// update properties bar
-// COMMENT: {4/11/2005 1:24:43 PM}		//
-// COMMENT: {4/11/2005 1:24:43 PM}		if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar()) {
-// COMMENT: {4/11/2005 1:24:43 PM}			pTree->SetPrintFrequency(copy, nStressPeriod);
-// COMMENT: {4/11/2005 1:24:43 PM}		}
-// COMMENT: {4/11/2005 1:24:43 PM}	}
-// COMMENT: {4/11/2005 1:24:43 PM}}
 void CWPhastDoc::SetPrintFrequency(const CPrintFreq& printFreq)
 {
 	(*this->m_pPrintFreq) = printFreq;
@@ -3098,16 +3033,6 @@ void CWPhastDoc::SetPrintFrequency(const CPrintFreq& printFreq)
 	}
 }
 
-// COMMENT: {4/11/2005 1:15:16 PM}const CPrintFreq& CWPhastDoc::GetPrintFrequency(int nStressPeriod)const
-// COMMENT: {4/11/2005 1:15:16 PM}{
-// COMMENT: {4/11/2005 1:15:16 PM}	if (nStressPeriod > 1) {
-// COMMENT: {4/11/2005 1:15:16 PM}		if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar()) {
-// COMMENT: {4/11/2005 1:15:16 PM}			return (*pTree->GetPrintFrequency(nStressPeriod));
-// COMMENT: {4/11/2005 1:15:16 PM}		}
-// COMMENT: {4/11/2005 1:15:16 PM}		// BUGBUG can't return NULL
-// COMMENT: {4/11/2005 1:15:16 PM}	}
-// COMMENT: {4/11/2005 1:15:16 PM}	return (*this->m_pPrintFreq);
-// COMMENT: {4/11/2005 1:15:16 PM}}
 const CPrintFreq& CWPhastDoc::GetPrintFrequency(void)const
 {
 	return (*this->m_pPrintFreq);
@@ -3128,70 +3053,6 @@ void CWPhastDoc::OnToolsNewStressPeriod(void)
 // COMMENT: {4/8/2005 6:57:20 PM}		}
 // COMMENT: {4/8/2005 6:57:20 PM}	}
 }
-
-// COMMENT: {7/15/2004 6:06:19 PM}void CWPhastDoc::RemoveProp3D(vtkProp3D* pProp3D)
-// COMMENT: {7/15/2004 6:06:19 PM}{
-// COMMENT: {7/15/2004 6:06:19 PM}	// Note: this just makes sure the pProp3D reference count
-// COMMENT: {7/15/2004 6:06:19 PM}	// doesn't go to zero
-// COMMENT: {7/15/2004 6:06:19 PM}	this->m_pRemovedPropCollection->AddItem(pProp3D);
-// COMMENT: {7/15/2004 6:06:19 PM}
-// COMMENT: {7/15/2004 6:06:19 PM}	/////{{{{{
-// COMMENT: {7/15/2004 6:06:19 PM}	this->UnAddZone((CZoneActor*)pProp3D);
-// COMMENT: {7/15/2004 6:06:19 PM}	return;
-// COMMENT: {7/15/2004 6:06:19 PM}	/////}}}}}
-// COMMENT: {7/15/2004 6:06:19 PM}
-// COMMENT: {7/15/2004 6:06:19 PM}	while(this->m_pPropCollection->IsItemPresent(pProp3D)) {
-// COMMENT: {7/15/2004 6:06:19 PM}		this->m_pPropCollection->RemoveItem(pProp3D);
-// COMMENT: {7/15/2004 6:06:19 PM}	}
-// COMMENT: {7/15/2004 6:06:19 PM}
-// COMMENT: {7/15/2004 6:06:19 PM}	// update views
-// COMMENT: {7/15/2004 6:06:19 PM}	//
-// COMMENT: {7/15/2004 6:06:19 PM}	POSITION pos = this->GetFirstViewPosition();
-// COMMENT: {7/15/2004 6:06:19 PM}	while (pos != NULL) {
-// COMMENT: {7/15/2004 6:06:19 PM}		CView *pView = this->GetNextView(pos);
-// COMMENT: {7/15/2004 6:06:19 PM}		if (CWPhastView *pWPhastView = static_cast<CWPhastView*>(pView)) {
-// COMMENT: {7/15/2004 6:06:19 PM}			ASSERT_KINDOF(CWPhastView, pWPhastView);
-// COMMENT: {7/15/2004 6:06:19 PM}			ASSERT_VALID(pWPhastView);
-// COMMENT: {7/15/2004 6:06:19 PM}			pWPhastView->ClearSelection();
-// COMMENT: {7/15/2004 6:06:19 PM}			pWPhastView->GetRenderer()->RemoveProp(pProp3D);
-// COMMENT: {7/15/2004 6:06:19 PM}		}
-// COMMENT: {7/15/2004 6:06:19 PM}	}
-// COMMENT: {7/15/2004 6:06:19 PM}	this->UpdateAllViews(0);
-// COMMENT: {7/15/2004 6:06:19 PM}}
-// COMMENT: {7/15/2004 6:06:19 PM}
-// COMMENT: {7/15/2004 6:06:19 PM}void CWPhastDoc::UnRemoveProp3D(vtkProp3D* pProp3D)
-// COMMENT: {7/15/2004 6:06:19 PM}{
-// COMMENT: {7/15/2004 6:06:19 PM}	// Note: see RemoveProp3D
-// COMMENT: {7/15/2004 6:06:19 PM}	//
-// COMMENT: {7/15/2004 6:06:19 PM}	ASSERT(this->m_pRemovedPropCollection->IsItemPresent(pProp3D));
-// COMMENT: {7/15/2004 6:06:19 PM}	while(this->m_pRemovedPropCollection->IsItemPresent(pProp3D)) {
-// COMMENT: {7/15/2004 6:06:19 PM}		this->m_pRemovedPropCollection->RemoveItem(pProp3D);
-// COMMENT: {7/15/2004 6:06:19 PM}	}
-// COMMENT: {7/15/2004 6:06:19 PM}
-// COMMENT: {7/15/2004 6:06:19 PM}	/////{{{{{
-// COMMENT: {7/15/2004 6:06:19 PM}	this->AddZone((CZoneActor*)pProp3D);
-// COMMENT: {7/15/2004 6:06:19 PM}	return;
-// COMMENT: {7/15/2004 6:06:19 PM}	/////}}}}}
-// COMMENT: {7/15/2004 6:06:19 PM}
-// COMMENT: {7/15/2004 6:06:19 PM}
-// COMMENT: {7/15/2004 6:06:19 PM}// COMMENT: {7/13/2004 5:24:05 PM}	this->m_pPropCollection->AddItem(pProp3D);
-// COMMENT: {7/15/2004 6:06:19 PM}
-// COMMENT: {7/15/2004 6:06:19 PM}	// update views (select the prop)
-// COMMENT: {7/15/2004 6:06:19 PM}	//
-// COMMENT: {7/15/2004 6:06:19 PM}	POSITION pos = this->GetFirstViewPosition();
-// COMMENT: {7/15/2004 6:06:19 PM}	while (pos != NULL) {
-// COMMENT: {7/15/2004 6:06:19 PM}		CView *pView = this->GetNextView(pos);
-// COMMENT: {7/15/2004 6:06:19 PM}		if (CWPhastView *pWPhastView = static_cast<CWPhastView*>(pView)) {
-// COMMENT: {7/15/2004 6:06:19 PM}			ASSERT_KINDOF(CWPhastView, pWPhastView);
-// COMMENT: {7/15/2004 6:06:19 PM}			ASSERT_VALID(pWPhastView);
-// COMMENT: {7/15/2004 6:06:19 PM}			if (CZoneActor* pZone = CZoneActor::SafeDownCast(pProp3D)) {
-// COMMENT: {7/15/2004 6:06:19 PM}				pWPhastView->ClearSelection();
-// COMMENT: {7/15/2004 6:06:19 PM}				pZone->Select(pWPhastView);
-// COMMENT: {7/15/2004 6:06:19 PM}			}
-// COMMENT: {7/15/2004 6:06:19 PM}		}
-// COMMENT: {7/15/2004 6:06:19 PM}	}
-// COMMENT: {7/15/2004 6:06:19 PM}	this->UpdateAllViews(0);
-// COMMENT: {7/15/2004 6:06:19 PM}}
 
 void CWPhastDoc::ReleaseGraphicsResources(vtkProp* pProp)
 {

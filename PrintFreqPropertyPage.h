@@ -4,9 +4,16 @@
 #include "PrintFreq.h"
 #include "gridctrl/ModGridCtrlEx.h"
 #include "Units.h"
+#include "ETSLayout/ETSLayout.h"
+#include "ETSLayoutPropertyPageXP.h"
+
+#ifndef baseCPrintFreqPropertyPage
+#define baseCPrintFreqPropertyPage ETSLayoutPropertyPageXP
+#endif
+
 // CPrintFreqPropertyPage dialog
 
-class CPrintFreqPropertyPage : public CPropertyPage
+class CPrintFreqPropertyPage : public baseCPrintFreqPropertyPage
 {
 	DECLARE_DYNAMIC(CPrintFreqPropertyPage)
 
@@ -28,4 +35,9 @@ protected:
 	CModGridCtrlEx   m_Grid;              // IDC_GRID
 
 	DECLARE_MESSAGE_MAP()
+public:
+	afx_msg void OnBnClickedButtonAdd();
+	afx_msg void OnBnClickedButtonInsert();
+	afx_msg void OnBnClickedButtonDelete();
+	virtual BOOL OnInitDialog();
 };
