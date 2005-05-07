@@ -4,6 +4,8 @@
 #include "time.h"
 #include "TimeSeries.h"
 
+class CPhastInput;
+
 class CPrintFreq
 {
 public:
@@ -11,12 +13,21 @@ public:
 	~CPrintFreq(void);
 
 	void Insert(CTreeCtrl* pTreeCtrl, HTREEITEM htiPrintFreq);
-	void InsertCtime(CTreeCtrl* pTreeCtrl, Ctime& time, LPCTSTR lpName);
+	void InsertCtimeSeries(CTreeCtrl* pTreeCtrl, HTREEITEM hParent, CTimeSeries<Ctime>& timeSeries, const Ctime& time, LPCTSTR lpName);
+	void InsertCtime(CTreeCtrl* pTreeCtrl, HTREEITEM hParent, Ctime& time, LPCTSTR lpName);
+
+	void InsertCtimeSeries(CTreeCtrl* pTreeCtrl, HTREEITEM hParent, CTimeSeries<int>& timeSeries, const Ctime& time, LPCTSTR lpName);
+	void InsertCtime(CTreeCtrl* pTreeCtrl, HTREEITEM hParent, int& value, LPCTSTR lpName);
+
 	void Serialize(bool bStoring, hid_t loc_id);
 	void SyncWithSrcInput(void);
+	void InitSync(CPhastInput* input = NULL);
+
+	static CPrintFreq NewDefaults(void);
 
 	friend std::ostream& operator<< (std::ostream &os, const CPrintFreq& pf);
 	static void OutputCtime(std::ostream &os, const Ctime& time, LPCTSTR lpName);
+	static void OutputCtimeSeries(std::ostream &os, const CTimeSeries<Ctime>& timeSeries, const Ctime& time, LPCTSTR lpName);
 
 // COMMENT: {4/11/2005 1:42:37 PM}	void Edit(CTreeCtrl* pTreeCtrl, int nStressPeriod = 1);
 	void Edit(CTreeCtrl* pTreeCtrl);
@@ -42,6 +53,7 @@ public:
 	CTimeSeries<Ctime> print_xyz_head;
 	CTimeSeries<Ctime> print_xyz_velocity;
 	CTimeSeries<Ctime> print_xyz_wells;
+	int save_final_heads;
  
 protected:
 	HTREEITEM m_htiPrintFreq;

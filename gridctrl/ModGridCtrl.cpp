@@ -95,6 +95,21 @@ void AFXAPI DDX_TextGridControl(CDataExchange* pDX, int nIDC, int nRow, int nCol
 	}
 }
 
+void AFXAPI DDX_GridDisableCell(CDataExchange* pDX, int nIDC, int nRow, int nCol)
+{
+	pDX->PrepareCtrl(nIDC);
+	CModGridCtrl* pGrid = static_cast<CModGridCtrl*>(pDX->m_pDlgWnd->GetDlgItem(nIDC));
+	ASSERT_KINDOF(CModGridCtrl, pGrid);
+	pGrid->DisableCell(nRow, nCol);
+}
+
+void AFXAPI DDX_GridEnableCell(CDataExchange* pDX, int nIDC, int nRow, int nCol)
+{
+	pDX->PrepareCtrl(nIDC);
+	CModGridCtrl* pGrid = static_cast<CModGridCtrl*>(pDX->m_pDlgWnd->GetDlgItem(nIDC));
+	ASSERT_KINDOF(CModGridCtrl, pGrid);
+	pGrid->EnableCell(nRow, nCol);
+}
 
 
 CModGridCtrl::CModGridCtrl(int nRows, int nCols, int nFixedRows, int nFixedCols)
@@ -569,10 +584,8 @@ void CModGridCtrl::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
 
 UINT CModGridCtrl::OnGetDlgCode()
 {
-	// TODO: Add your message handler code here and/or call default
 	TRACE("CModGridCtrl::OnGetDlgCode()\n");
 	return DLGC_WANTALLKEYS;
-	// return CGridCtrl::OnGetDlgCode();
 }
 
 void CModGridCtrl::CutSelectedText()

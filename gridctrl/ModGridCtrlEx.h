@@ -19,6 +19,8 @@
 #include <vector>
 #include "../VisualStylesXP/VisualStylesXP.h"
 
+void AFXAPI DDX_GridCheck(CDataExchange* pDX, int nIDC, int nRow, int nCol, int& nState);
+
 class CTheme
 {
 public:

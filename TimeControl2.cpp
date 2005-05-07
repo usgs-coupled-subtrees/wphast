@@ -4,6 +4,7 @@
 #include "SetTimeControl2Action.h"
 #include "WPhastDoc.h"
 #include "TimeControlMultiPropertyPage2.h"
+#include "Global.h"
 
 CTimeControl2::CTimeControl2(void)
 {
@@ -163,7 +164,6 @@ void CTimeControl2::Serialize(bool bStoring, hid_t loc_id)
 		ASSERT(timeend_id > 0);
 	}
 
-	//{{
 	if (timecontrol_id > 0)
 	{
 		if (timestep_id > 0)
@@ -173,38 +173,71 @@ void CTimeControl2::Serialize(bool bStoring, hid_t loc_id)
 			status = ::H5Gclose(timestep_id);
 			ASSERT(status >= 0);
 		}
-
 		if (timeend_id > 0)
 		{
 			// serialize this->m_timeEnd
-			//////this->m_timeEnd.Serialize(bStoring, timestep_id);
+			status = CGlobal::HDFSerializeSetOfTimes(bStoring, timeend_id, this->m_timeEnd);
+			ASSERT(status >= 0);
 			status = ::H5Gclose(timeend_id);
 			ASSERT(status >= 0);
 		}
-
 		// close the szTimeControl2 group
 		status = ::H5Gclose(timecontrol_id);
 		ASSERT(status >= 0);
 	}
-	//}}
 
-// COMMENT: {4/22/2005 4:29:51 PM}	if (timecontrol_id > 0) {
-// COMMENT: {4/22/2005 4:29:51 PM}
-// COMMENT: {4/22/2005 4:29:51 PM}		if (timestep_id > 0) {
-// COMMENT: {4/22/2005 4:29:51 PM}			// serialize this->m_timeStep
-// COMMENT: {4/22/2005 4:29:51 PM}			this->m_timeStep.Serialize(bStoring, timestep_id);
-// COMMENT: {4/22/2005 4:29:51 PM}			status = ::H5Gclose(timestep_id);
-// COMMENT: {4/22/2005 4:29:51 PM}			ASSERT(status >= 0);
-// COMMENT: {4/22/2005 4:29:51 PM}		}
-// COMMENT: {4/22/2005 4:29:51 PM}		if (timechange_id > 0) {
-// COMMENT: {4/22/2005 4:29:51 PM}			// serialize this->m_timeEnd
-// COMMENT: {4/22/2005 4:29:51 PM}			this->m_timeEnd.Serialize(bStoring, timechange_id);
-// COMMENT: {4/22/2005 4:29:51 PM}			status = ::H5Gclose(timechange_id);
-// COMMENT: {4/22/2005 4:29:51 PM}			ASSERT(status >= 0);
-// COMMENT: {4/22/2005 4:29:51 PM}		}
-// COMMENT: {4/22/2005 4:29:51 PM}
-// COMMENT: {4/22/2005 4:29:51 PM}		// close the szFlowOnly group
-// COMMENT: {4/22/2005 4:29:51 PM}		status = ::H5Gclose(timecontrol_id);
-// COMMENT: {4/22/2005 4:29:51 PM}		ASSERT(status >= 0);
-// COMMENT: {4/22/2005 4:29:51 PM}	}
+}
+
+std::ostream& operator<< (std::ostream &os, const CTimeControl2 &tc2)
+{
+	static const char szSpace[] = " ";
+	static const char szTimeControl[] = "TIME_CONTROL";
+	static const char szTimeStep[]    = "-time_step";
+	static const char szTimeChange[]  = "-time_change";
+
+	os << szTimeControl << "\n";
+	os << "\t" << szTimeStep << "\n";
+
+	CTimeSeries<Ctime>::const_iterator tsIter = tc2.m_timeStep.begin();
+	for(; tsIter != tc2.m_timeStep.end(); ++tsIter)
+	{
+		// time
+		os << "\t\t" << tsIter->first.value;
+
+		// [units]
+		ASSERT(tsIter->first.type == UNITS);
+		if (tsIter->first.type == UNITS && tsIter->first.input && ::strlen(tsIter->first.input))
+		{
+			os << szSpace << tsIter->first.input;
+		}
+
+		// time_step
+		os  << szSpace << tsIter->second.value;
+
+		// [units]
+		if (tsIter->second.type == UNITS && tsIter->second.input && ::strlen(tsIter->second.input))
+		{
+			os << szSpace << tsIter->second.input;
+		}
+		os << "\n";
+	}
+
+
+	os << "\t" << szTimeChange << "\n";
+	std::set<Ctime>::const_iterator sIter = tc2.m_timeEnd.begin();
+	for(; sIter != tc2.m_timeEnd.end(); ++sIter)
+	{
+		// time
+		os << "\t\t" << sIter->value;
+
+		// [units]
+		ASSERT(sIter->type == UNITS);
+		if (sIter->type == UNITS && sIter->input && ::strlen(sIter->input))
+		{
+			os << szSpace << sIter->input;
+		}
+		os << "\n";
+	}
+
+	return os;
 }

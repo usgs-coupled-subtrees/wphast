@@ -46,17 +46,19 @@ void CFlowOnly::Insert(CTreeCtrl* pTreeCtrl, HTREEITEM htiFlowOnly)const
 {
 	// remove all previous items
 	//
-	while (HTREEITEM hChild = pTreeCtrl->GetChildItem(htiFlowOnly)) {
+	while (HTREEITEM hChild = pTreeCtrl->GetChildItem(htiFlowOnly))
+	{
 		pTreeCtrl->DeleteItem(hChild);
 	}
 
-	if (this->m_bFlowOnly) {
-		pTreeCtrl->SetItemText(htiFlowOnly, "FLOW_ONLY true");
+	if (this->m_bFlowOnly)
+	{
+		/////pTreeCtrl->SetItemText(htiFlowOnly, "FLOW_ONLY true");
+		pTreeCtrl->SetItemText(htiFlowOnly, "SOLUTE_TRANSPORT false");
 	}
-	else {
-		///pTreeCtrl->SetItemText(htiFlowOnly, "FLOW_ONLY false");
-		///pTreeCtrl->SetItemText(htiFlowOnly, "SOLUTE_TRANSPORT true");
-		pTreeCtrl->SetItemText(htiFlowOnly, "Solute transport true");
+	else
+	{
+		pTreeCtrl->SetItemText(htiFlowOnly, "SOLUTE_TRANSPORT true");
 		CString str;
 		str.Format("-diffusivity %g", this->m_dFluidDiffusivity);
 		pTreeCtrl->InsertItem(str, htiFlowOnly);
@@ -101,11 +103,13 @@ void CFlowOnly::Serialize(bool bStoring, hid_t loc_id)
 
 std::ostream& operator<< (std::ostream &os, const CFlowOnly &a)
 {
-	if (a.m_bFlowOnly) {
-		os << "FLOW_ONLY true\n";
+	if (a.m_bFlowOnly)
+	{
+		os << "SOLUTE_TRANSPORT false\n";
 	}
-	else {
-		os << "FLOW_ONLY false\n";
+	else
+	{
+		os << "SOLUTE_TRANSPORT true\n";
 		os << "    -diffusivity  " << a.m_dFluidDiffusivity << "\n";
 	}
 	return os;

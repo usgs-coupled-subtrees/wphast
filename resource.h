@@ -448,7 +448,6 @@
 #define IDC_BACK_BUTTON                 1188
 #define IDC_BUTTON_INSERT               1188
 #define IDC_MODIFY_CHECK                1189
-#define IDC_BUTTON4                     1189
 #define IDC_BUTTON_DELETE               1189
 #define IDC_STEADY_FLOW_RADIO           1191
 #define IDC_TRANSIENT_FLOW_RADIO        1192
@@ -490,6 +489,7 @@
 #define IDC_TIMESTEP_GRID               1230
 #define IDC_TIMEEND_GRID                1231
 #define IDC_BUTTON_ADD                  1232
+#define IDC_CHECK_SAVE_HEADS            1233
 #define IDC_RESIZE_COLUMN               28654
 #define IDC_RESIZE_ROW                  28655
 #define IDR_POPUP                       28656
@@ -503,7 +503,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        248
 #define _APS_NEXT_COMMAND_VALUE         32793
-#define _APS_NEXT_CONTROL_VALUE         1233
+#define _APS_NEXT_CONTROL_VALUE         1234
 #define _APS_NEXT_SYMED_VALUE           125
 #endif
 #endif

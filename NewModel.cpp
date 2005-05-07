@@ -13,9 +13,10 @@ CNewModel::~CNewModel(void)
 CNewModel CNewModel::Default(void)
 {
 	CNewModel model;
-	model.m_media  = CGridElt::NewDefaults();
-	model.m_headIC = CHeadIC::NewDefaults();
-	model.m_chemIC = CChemIC::NewDefaults();
+	model.m_media     = CGridElt::NewDefaults();
+	model.m_headIC    = CHeadIC::NewDefaults();
+	model.m_chemIC    = CChemIC::NewDefaults();
+	model.m_printFreq = CPrintFreq::NewDefaults();
 
 	for(int i = 0; i < 3; ++i)
 	{	

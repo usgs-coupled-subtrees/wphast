@@ -30,7 +30,11 @@ public:
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-	void DDX_PRINT(CDataExchange* pDX, int row, Ctime& time);
+	void DDX_PRINT(CDataExchange* pDX, int nRow, int nCol, Ctime& time);
+	void DDX_PRINT(CDataExchange* pDX, int nRow, int nCol, int& value);
+	void DDX_PRINT(CDataExchange* pDX, int nRow, int nCol, CTimeSeries<Ctime>& timeSeries, const Ctime& time);
+	void DDX_PRINT(CDataExchange* pDX, int nRow, int nCol, CTimeSeries<int>& timeSeries, const Ctime& time);
+
 
 	CModGridCtrlEx   m_Grid;              // IDC_GRID
 
@@ -39,5 +43,7 @@ public:
 	afx_msg void OnBnClickedButtonAdd();
 	afx_msg void OnBnClickedButtonInsert();
 	afx_msg void OnBnClickedButtonDelete();
+
+	afx_msg void OnEndLabelEditGrid(NMHDR *pNotifyStruct, LRESULT *result);
 	virtual BOOL OnInitDialog();
 };

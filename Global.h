@@ -10,6 +10,7 @@ class vtkProp3D;
 #include <hdf5.h>        /* HDF routines */
 
 #include <list>
+#include <set>
 #include <string>
 // #include "BC.h"
 #include "TimeSeries.h"
@@ -60,6 +61,8 @@ public:
 	static bool SimpleFloatParse(LPCTSTR lpszText, double& d);
 
 	static int LoadWorldFile(const char *filename, CWorldTransform &wtrans);
+
+	static herr_t HDFSerializeSetOfTimes(bool bStoring, hid_t loc_id, std::set<Ctime>& setOfTimes);
 
 public:
 	static herr_t HDFSerializeAllocate(bool bStoring, hid_t loc_id, const char* szName, hsize_t& count, double** buffer);

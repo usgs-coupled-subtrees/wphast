@@ -33,8 +33,7 @@ Ctime::Ctime(const struct time& t)
 	//{{{4/21/2005 9:52:09 PM}
 	if (t.input && ::strlen(t.input))
 	{
-		ASSERT(t.type == UNITS);
-		ASSERT(this->type == UNITS);
+		ASSERT(t.type == UNITS || t.type == STEP);
 		this->SetInput(t.input);
 	}
 	//}}{4/21/2005 9:52:09 PM}
@@ -49,8 +48,7 @@ Ctime::Ctime(const Ctime& t)
 	//{{{4/21/2005 9:52:09 PM}
 	if (t.input && ::strlen(t.input))
 	{
-		ASSERT(t.type == UNITS);
-		ASSERT(this->type == UNITS);
+		ASSERT(t.type == UNITS || t.type == STEP);
 		this->SetInput(t.input);
 	}
 	//}}{4/21/2005 9:52:09 PM}
@@ -116,21 +114,33 @@ bool Ctime::operator<(const Ctime& rhs)const
 int Ctime::SetInput(const char* input)
 {
 	if (!input) return ERROR;
+	int n = ERROR;
 
-	std::string s =  CGlobal::GetStdTimeUnits(input);
-	delete[] this->input;
-	this->input = new char[s.length() + 1];
-	::strcpy(this->input, s.c_str());
-
-	int n = ::units_conversion(this->input, "s", &(this->input_to_si), FALSE);
-	if (n == OK)
+	if (::strstr(input, "step") == input)
 	{
-		this->type = UNITS;
+		delete[] this->input;
+		this->input = new char[::strlen(input) + 1];
+		::strcpy(this->input, input);
+		this->type = STEP;
+		n = OK;
 	}
 	else
 	{
+		std::string s =  CGlobal::GetStdTimeUnits(input);
 		delete[] this->input;
-		this->input = NULL;
+		this->input = new char[s.length() + 1];
+		::strcpy(this->input, s.c_str());
+
+		n = ::units_conversion(this->input, "s", &(this->input_to_si), FALSE);
+		if (n == OK)
+		{
+			this->type = UNITS;
+		}
+		else
+		{
+			delete[] this->input;
+			this->input = NULL;
+		}
 	}
 	return n;
 }
@@ -143,11 +153,16 @@ void Ctime::SetValue(double dValue)
 
 void Ctime::Serialize(bool bStoring, hid_t loc_id)
 {
-	static const char szValue[] = "value";
-	static const char szType[]  = "type";
-	static const char szInput[] = "input";
+	static const char szValue[]        = "value";
+	static const char szType[]         = "type";
+	static const char szInput[]        = "input";
+	static const char szValueDefined[] = "value_defined";
 
 	herr_t status;
+
+	// value_defined
+	status = CGlobal::HDFSerialize(bStoring, loc_id, szValueDefined, H5T_NATIVE_INT, 1, &this->value_defined);
+	ASSERT(status >= 0);
 
 	// value
 	status = CGlobal::HDFSerialize(bStoring, loc_id, szValue, H5T_NATIVE_DOUBLE, 1, &this->value);
@@ -163,7 +178,8 @@ void Ctime::Serialize(bool bStoring, hid_t loc_id)
 			ASSERT(status >= 0 || this->input == NULL);
 			break;
 		case STEP:
-			// nothing to do ???
+			status = CGlobal::HDFSerializeStringOrNull(bStoring, loc_id, szInput, &this->input);
+			ASSERT(status >= 0 || this->input == NULL);
 			break;
 		case UNDEFINED:
 			ASSERT(this->input == NULL);
@@ -177,7 +193,6 @@ void Ctime::Serialize(bool bStoring, hid_t loc_id)
 	}
 	else 
 	{
-		this->SetValue(this->value);
 		switch (this->type)
 		{
 			case UNITS:

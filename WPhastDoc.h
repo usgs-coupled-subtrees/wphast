@@ -170,7 +170,7 @@ protected:
 
 	// properties
 	CUnits        *m_pUnits;
-	CPrintFreq    *m_pPrintFreq;
+// COMMENT: {5/5/2005 3:51:04 PM}	CPrintFreq    *m_pPrintFreq;
 
 	CNewModel     *m_pModel;
 

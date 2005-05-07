@@ -15,6 +15,8 @@ class CTimeSeries : public std::map<Ctime, T>
 {
 public:
 	CTimeSeries& operator=(const struct time_series& rhs);
+	CTimeSeries& Append(const struct time_series& rhs);
+
 #ifdef _DEBUG
 	void AssertValid(void)const;
 #endif

@@ -1885,3 +1885,83 @@ void CGlobal::DDX_Property(CDataExchange* pDX, int nIDC, int nRow, struct proper
 		}
 	}
 }
+
+herr_t CGlobal::HDFSerializeSetOfTimes(bool bStoring, hid_t loc_id, std::set<Ctime>& setOfTimes)
+{
+	static const char szSteps[]       = "Steps";
+	static const char szStepsFormat[] = "Step %d";
+	static const char szCtime[]       = "Ctime";
+
+
+	hid_t  step_id;
+	hid_t  time_id;
+
+	herr_t status;
+
+	if (bStoring)
+	{
+		if (!setOfTimes.empty())
+		{
+			std::list<LPCTSTR> listNames;
+			CString* arrName = new CString[setOfTimes.size()];
+
+			std::set<Ctime>::iterator iter = setOfTimes.begin();
+			for (size_t i = 0; iter != setOfTimes.end(); ++iter, ++i)
+			{
+				arrName[i].Format(szStepsFormat, i);
+
+				// Create the "Step %d" group
+				step_id = ::H5Gcreate(loc_id, arrName[i], 0);
+				ASSERT(step_id > 0);
+				if (step_id > 0)
+				{
+					// Create the szCtime group
+					time_id = ::H5Gcreate(step_id, szCtime, 0);
+					ASSERT(time_id > 0);
+					if (time_id > 0)
+					{
+						// first is const
+						Ctime t(*iter);
+						t.Serialize(bStoring, time_id);
+						status = ::H5Gclose(time_id);
+						ASSERT(status >= 0);
+						listNames.push_back(arrName[i]);
+					}
+					status = ::H5Gclose(step_id);
+					ASSERT(status >= 0);
+				}
+			}
+			CGlobal::WriteList(loc_id, szSteps, listNames);
+			delete[] arrName;
+		}
+	}
+	else
+	{
+		std::list<std::string> listNames;
+		CGlobal::ReadList(loc_id, szSteps, listNames);
+		std::list<std::string>::iterator iter = listNames.begin();
+		for (; iter != listNames.end(); ++iter)
+		{
+			// Open the "Step %d" group
+			step_id = ::H5Gopen(loc_id, (*iter).c_str());
+			ASSERT(step_id > 0);
+			if (step_id > 0)
+			{
+				// Open the szCtime group
+				time_id = ::H5Gopen(step_id, szCtime);
+				ASSERT(time_id > 0);
+				if (time_id > 0)
+				{
+					Ctime t;
+					t.Serialize(bStoring, time_id);
+					status = ::H5Gclose(time_id);
+					ASSERT(status >= 0);
+					setOfTimes.insert(t);
+				}
+				status = ::H5Gclose(step_id);
+				ASSERT(status >= 0);
+			}
+		}
+	}
+	return status;
+}

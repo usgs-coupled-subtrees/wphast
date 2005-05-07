@@ -8,6 +8,22 @@
 
 #include "ListBoxDrop.h"
 
+void AFXAPI DDX_GridCheck(CDataExchange* pDX, int nIDC, int nRow, int nCol, int& nState)
+{
+	pDX->PrepareCtrl(nIDC);
+	CModGridCtrlEx* pGrid = static_cast<CModGridCtrlEx*>(pDX->m_pDlgWnd->GetDlgItem(nIDC));
+	ASSERT_KINDOF(CModGridCtrlEx, pGrid);
+	ASSERT(pGrid->IsCheckMarkCell(nRow, nCol));
+	if (pDX->m_bSaveAndValidate)
+	{
+		nState = pGrid->GetCheck(nRow, nCol);
+	}
+	else
+	{
+		pGrid->SetCheck(nRow, nCol, nState);
+	}
+}
+
 CTheme CModGridCtrlEx::s_themeButton;
 CTheme CModGridCtrlEx::s_themeCombo;
 
@@ -451,8 +467,12 @@ void CModGridCtrlEx::OnLButtonDown(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
 
-	CModGridCtrl::OnLButtonDown(nFlags, point);
-	TraceMouseMode();
+    //CCellID cell = this->GetCellFromPt(point);
+	//if (!this->IsCheckMarkCell(cell))
+	{
+		CModGridCtrl::OnLButtonDown(nFlags, point);
+		TraceMouseMode();
+	}
 
 	if (this->m_MouseMode == MOUSE_PREPARE_EDIT)
 	{
@@ -503,6 +523,9 @@ void CModGridCtrlEx::OnLButtonDown(UINT nFlags, CPoint point)
 				this->m_bButtonDown = TRUE;
 				this->RedrawCell(this->m_LeftClickDownCell);
 			}
+			//{{
+			this->m_MouseMode = MOUSE_NOTHING;
+			//}}
 		}
 	}
 	else if (this->m_MouseMode == MOUSE_SELECT_CELLS)
@@ -559,7 +582,8 @@ void CModGridCtrlEx::OnLButtonDblClk(UINT nFlags, CPoint point)
 		int nNext = (nCurrent + 1) % nItemCount;
 		// Note: OnEndEditCell doesn't check if cell is editable
 		this->OnEndEditCell(this->m_idCurrentCell.row, this->m_idCurrentCell.col, pVec->at(nNext));
-		this->RedrawCell(this->m_idCurrentCell);
+		this->InvalidateCellRect(this->m_idCurrentCell);
+		this->SendMessageToParent(this->m_idCurrentCell.row, this->m_idCurrentCell.col, GVN_ENDLABELEDIT);
 	}
 	else
 	{
@@ -570,9 +594,7 @@ void CModGridCtrlEx::OnLButtonDblClk(UINT nFlags, CPoint point)
 		CCellID dblClkCell = this->GetCellFromPt(point);
 		if (this->IsCheckMarkCell(dblClkCell))
 		{
-			//{{ {4/14/2005 8:02:17 PM}
 			if (!this->m_idCurrentCell.IsValid()) return;
-			//}} {4/14/2005 8:02:17 PM}
 			if (!this->IsCellEnabled(this->m_idCurrentCell)) return;
 
 			CRect rc = this->GetCheckRect(dblClkCell.row, dblClkCell.col);
@@ -600,6 +622,7 @@ void CModGridCtrlEx::OnLButtonDblClk(UINT nFlags, CPoint point)
 				}
 				return;
 			}
+			return; // don't start edit
 		}
 		CModGridCtrl::OnLButtonDblClk(nFlags, point);
 	}
@@ -641,7 +664,7 @@ void CModGridCtrlEx::OnMouseMove(UINT nFlags, CPoint point)
 		this->m_bButtonDown = FALSE;
 		if (this->s_themeButton || this->s_themeCombo)
 		{
-			if (this->m_idLastHotCell.IsValid())
+			if (this->IsValid(this->m_idLastHotCell))
 			{
 				this->RedrawCell(this->m_idLastHotCell);
 				this->m_idLastHotCell.col = this->m_idLastHotCell.row = -1;
@@ -899,7 +922,8 @@ void CModGridCtrlEx::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
 					if (nItem > -1)
 					{
 						this->OnEndEditCell(this->m_idCurrentCell.row, this->m_idCurrentCell.col, str);
-						this->RedrawCell(this->m_idCurrentCell);
+						this->InvalidateCellRect(this->m_idCurrentCell);
+						this->SendMessageToParent(this->m_idCurrentCell.row, this->m_idCurrentCell.col, GVN_ENDLABELEDIT);
 					}
 					CWnd::OnChar(nChar, nRepCnt, nFlags);
 					return;

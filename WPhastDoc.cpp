@@ -177,7 +177,6 @@ CWPhastDoc::CWPhastDoc()
 , m_pScalePage(0)
 , m_pUnits(0)
 , m_pModel(0) // , m_pFlowOnly(0)
-, m_pPrintFreq(0)
 , m_ProjectionMode(PT_PERSPECTIVE)
 , m_pMapActor(0)
 , m_pPropAssemblyMedia(0)
@@ -235,9 +234,7 @@ CWPhastDoc::CWPhastDoc()
 	// create model
 	//
 	this->m_pModel = new CNewModel;
-
-	// create print_frequency
-	this->m_pPrintFreq = new CPrintFreq;
+	this->m_pModel->m_printFreq = CPrintFreq::NewDefaults();
 }
 
 #define CLEANUP_ASSEMBLY_MACRO(PTR_ASSEMBLY) \
@@ -302,7 +299,7 @@ CWPhastDoc::~CWPhastDoc()
 
 	ASSERT_DELETE_SET_NULL_MACRO(this->m_pUnits);
 	ASSERT_DELETE_SET_NULL_MACRO(this->m_pModel);
-	ASSERT_DELETE_SET_NULL_MACRO(this->m_pPrintFreq);
+// COMMENT: {5/5/2005 3:51:23 PM}	ASSERT_DELETE_SET_NULL_MACRO(this->m_pPrintFreq);
 
 	if (this->m_pMapActor) {
 		this->m_pMapActor->Delete();
@@ -386,7 +383,7 @@ void CWPhastDoc::Serialize(CArchive& ar)
 			this->SerializeWells(bStoring, wphast_id);
 
 			// store PRINT_FREQUENCY
-			this->m_pPrintFreq->Serialize(bStoring, wphast_id);
+			this->m_pModel->m_printFreq.Serialize(bStoring, wphast_id);
 
 			// store time control
 			this->m_pModel->m_timeControl2.Serialize(bStoring, wphast_id);
@@ -480,11 +477,11 @@ void CWPhastDoc::Serialize(CArchive& ar)
 			this->SerializeWells(bStoring, wphast_id);
 
 			// load PRINT_FREQUENCY
-			this->m_pPrintFreq->Serialize(bStoring, wphast_id);
+			this->m_pModel->m_printFreq.Serialize(bStoring, wphast_id);
 			// update properties bar
 			if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar())
 			{
-				pTree->SetPrintFrequency(this->m_pPrintFreq);
+				pTree->SetPrintFrequency(&this->m_pModel->m_printFreq);
 			}
 
 			// load time control
@@ -1332,6 +1329,7 @@ void CWPhastDoc::DeleteContents()
 	ASSERT(this->m_pModel);
 	delete this->m_pModel;
 	this->m_pModel = new CNewModel();
+	this->m_pModel->m_printFreq = CPrintFreq::NewDefaults();
 
 	// reset units
 	ASSERT(this->m_pUnits);
@@ -2021,11 +2019,15 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 		return FALSE;
 	}
 
+
 	CPhastInput* pInput = CPhastInput::New(ifs, strPrefix);
 	if (!pInput) return FALSE;
 
 	try
 	{
+		CPrintFreq printFreq;
+		printFreq.InitSync(pInput); // must be called before Load()
+
 		pInput->Load();
 		// check for errors
 		for (int i = 0; i < 3; ++i)
@@ -2070,8 +2072,12 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 
 		// PRINT_FREQUENCY
 		//
-		CPrintFreq printFreq;
 		printFreq.SyncWithSrcInput();
+#ifdef _DEBUG
+		std::ostringstream oss;
+		oss << printFreq;
+		TRACE("%s\n", oss.str().c_str());
+#endif
 
 // COMMENT: {2/23/2005 1:07:32 PM}		// TIME_CONTROL
 // COMMENT: {2/23/2005 1:07:32 PM}		//
@@ -2494,6 +2500,10 @@ BOOL CWPhastDoc::WriteTransDat(std::ostream& os)
 		}
 	}
 
+	os << this->GetPrintFrequency();
+
+	os << this->GetTimeControl2();
+
 
 // COMMENT: {4/8/2005 6:57:04 PM}	// Additional stress periods
 // COMMENT: {4/8/2005 6:57:04 PM}	int nStressPeriods = this->GetPropertyTreeControlBar()->GetStressPeriodCount();
@@ -2751,6 +2761,7 @@ void CWPhastDoc::New(const CNewModel& model)
 	// set FlowOnly
 	// set SteadyFlow
 	// set FreeSurface
+	// set PrintFreq
 	this->SetModel(model);
 	///this->SetFlowOnly(model.m_flowOnly);
 
@@ -2841,10 +2852,10 @@ void CWPhastDoc::New(const CNewModel& model)
 
 	// PRINT_FREQUENCY
 	//
-	(*this->m_pPrintFreq) = model.m_printFreq;
 	// update properties bar
-	if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar()) {
-		pTree->SetPrintFrequency(this->m_pPrintFreq);
+	if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar())
+	{
+		pTree->SetPrintFrequency(&this->m_pModel->m_printFreq);
 	}
 
 	// update properties bar
@@ -3023,19 +3034,19 @@ const CTimeControl2& CWPhastDoc::GetTimeControl2(void)const
 
 void CWPhastDoc::SetPrintFrequency(const CPrintFreq& printFreq)
 {
-	(*this->m_pPrintFreq) = printFreq;
+	this->m_pModel->m_printFreq = printFreq;
 
 	// update properties bar
 	//
 	if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar())
 	{
-		pTree->SetPrintFrequency(this->m_pPrintFreq);
+		pTree->SetPrintFrequency(&this->m_pModel->m_printFreq);
 	}
 }
 
 const CPrintFreq& CWPhastDoc::GetPrintFrequency(void)const
 {
-	return (*this->m_pPrintFreq);
+	return this->m_pModel->m_printFreq;
 }
 
 void CWPhastDoc::OnToolsNewStressPeriod(void)
