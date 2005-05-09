@@ -1258,11 +1258,17 @@ BOOL CModGridCtrlEx::PasteTextToGrid(CCellID cell, COleDataObject* pDataObject)
     CString strLine = strText;
     int nLine = 0;
 
+#ifdef _DEBUG
+	std::vector< std::vector< CString > > vvRows;
+#endif
     // Find the end of the first line
 	CCellRange PasteRange(cell.row, cell.col,-1,-1);
     int nIndex;
     do
     {
+#ifdef _DEBUG
+		std::vector< CString > vRow;
+#endif
         int nColumn = 0;
         nIndex = strLine.Find(_T("\n"));
 
@@ -1303,6 +1309,9 @@ BOOL CModGridCtrlEx::PasteTextToGrid(CCellID cell, COleDataObject* pDataObject)
             {
                 strCellText.TrimLeft();
                 strCellText.TrimRight();
+#ifdef _DEBUG
+				vRow.push_back(strCellText);
+#endif
 
                 ValidateAndModifyCellContents(TargetCell.row, TargetCell.col, strCellText);
 
@@ -1323,6 +1332,9 @@ BOOL CModGridCtrlEx::PasteTextToGrid(CCellID cell, COleDataObject* pDataObject)
 
         strLine = strNext;
         nLine++;
+#ifdef _DEBUG
+		vvRows.push_back(vRow);
+#endif
     } while (nIndex >= 0);
 
     strText.UnlockBuffer();
@@ -1334,6 +1346,20 @@ BOOL CModGridCtrlEx::PasteTextToGrid(CCellID cell, COleDataObject* pDataObject)
 // COMMENT: {4/29/2005 3:56:56 PM}		ResetSelectedRange();
 // COMMENT: {4/29/2005 3:56:56 PM}		Refresh();
 // COMMENT: {4/29/2005 3:56:56 PM}	}
+#ifdef _DEBUG
+	// dump paste cells
+	//vvsCols[(info.item.iRow - ptUpperLeft.x) % sizeSrc.cx][(info.item.iCol - ptUpperLeft.y) % sizeSrc.cy]
+	std::vector<CString>::size_type row, col;
+	for (row = 0; row < vvRows.size(); ++row)
+	{
+		TRACE("Row %d\n", row);
+		for (col = 0; col < vvRows[row].size(); ++col)
+		{
+			TRACE("%s ", vvRows[row][col]);
+		}
+		TRACE("\n");
+	}
+#endif
 
     return TRUE;
 }
