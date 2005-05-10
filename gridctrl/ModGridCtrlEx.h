@@ -1,7 +1,8 @@
 #pragma once
 #include "ModGridCtrl.h"
 
-#define GVN_ITEMCHANGED          LVN_ITEMCHANGED
+//#define GVN_ITEMCHANGED          LVN_ITEMCHANGED
+#define GVN_CHECKCHANGED          (LVN_FIRST-109)
 
 // checkmark states
 #define GVIS_UNCHECKED            0x00100000

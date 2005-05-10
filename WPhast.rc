@@ -1883,27 +1883,28 @@ STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Well Properties"
 FONT 8, "MS Sans Serif", 400, 0, 0x0
 BEGIN
-    GROUPBOX        "Location",IDC_STATIC,7,22,187,27
-    GROUPBOX        "Dimension",IDC_STATIC,7,50,187,27
-    GROUPBOX        "Open intervals",IDC_STATIC,7,104,187,91
-    GROUPBOX        "Pumping schedule",IDC_STATIC,7,195,306,63,0,
-                    WS_EX_TRANSPARENT
     LTEXT           "&Well Number",IDC_STATIC,7,8,42,8
     EDITTEXT        IDC_NUSER_EDIT,54,7,34,12,ES_AUTOHSCROLL
     LTEXT           "De&scription",IDC_STATIC,98,8,36,8
     EDITTEXT        IDC_DESC_EDIT,141,7,172,12,ES_AUTOHSCROLL
+    GROUPBOX        "Location",IDC_STATIC,7,22,187,27
     LTEXT           "&X:",IDC_STATIC,15,35,8,8
     EDITTEXT        IDC_X_EDIT,25,33,43,12,ES_AUTOHSCROLL
     LTEXT           "(ft)",IDC_X_UNITS_STATIC,71,35,17,8
     LTEXT           "&Y:",IDC_STATIC,98,35,8,8
     EDITTEXT        IDC_Y_EDIT,110,33,43,12,ES_AUTOHSCROLL
     LTEXT           "(ft)",IDC_Y_UNITS_STATIC,156,35,17,8
+    GROUPBOX        "Dimension",IDC_STATIC,7,50,187,27
     CONTROL         "&Diameter",IDC_DIAM_RADIO,"Button",BS_AUTORADIOBUTTON,
                     15,61,44,10
     CONTROL         "&Radius",IDC_RADIUS_RADIO,"Button",BS_AUTORADIOBUTTON,
                     66,61,38,10
     EDITTEXT        IDC_DIAM_EDIT,109,60,43,12,ES_AUTOHSCROLL
     LTEXT           "(ft)",IDC_DIAMETER_UNITS_STATIC,155,62,17,8
+    GROUPBOX        "Options",IDC_STATIC,7,77,187,27
+    CONTROL         "Allocate by pressure and mobility",IDC_ALLOCATE_BY_HEAD,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,88,118,10
+    GROUPBOX        "Open intervals",IDC_STATIC,7,104,187,91
     LTEXT           "Specify by",IDC_STATIC,15,115,34,8
     CONTROL         "&Elevation",IDC_ELEVATION_RADIO,"Button",
                     BS_AUTORADIOBUTTON,53,115,45,10
@@ -1914,15 +1915,14 @@ BEGIN
     LTEXT           "(ft)",IDC_LSD_UNITS_STATIC,129,130,17,8
     CONTROL         "Custom1",IDC_GRID_SCREENS,"MFCGridCtrl",WS_BORDER | 
                     WS_TABSTOP,13,146,174,43
+    GROUPBOX        "Pumping schedule",IDC_STATIC,7,195,306,63,0,
+                    WS_EX_TRANSPARENT
     CONTROL         "Custom1",IDC_GRID_SCHEDULES,"MFCGridCtrl",WS_BORDER | 
                     WS_TABSTOP,14,205,292,47
     CONTROL         "",IDC_DESC_RICHEDIT,"RichEdit20A",ES_MULTILINE | 
                     ES_AUTOHSCROLL | ES_READONLY | WS_BORDER | WS_VSCROLL | 
                     WS_HSCROLL,7,266,306,42
     CONTROL         "",IDC_WELL_STATIC,"Static",SS_BLACKFRAME,201,26,112,169
-    CONTROL         "Allocate by pressure and mobility",IDC_ALLOCATE_BY_HEAD,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,88,118,10
-    GROUPBOX        "Options",IDC_STATIC,7,77,187,27
 END
 
 IDD_BC_SPECIFIED_HEAD_PROPPAGE DIALOGEX 0, 0, 418, 222
@@ -2028,6 +2028,20 @@ BEGIN
                     ES_AUTOHSCROLL | ES_READONLY | WS_BORDER | WS_VSCROLL | 
                     WS_HSCROLL,7,142,404,73
     CONTROL         "Custom1",IDC_MEDIA_GRID,"MFCGridCtrl",WS_BORDER | 
+                    WS_TABSTOP,7,7,404,120
+    LTEXT           "NOTE: This invisible control is needed so that the background of the dialog is painted correctly.",
+                    IDC_STATIC,75,77,159,22,NOT WS_VISIBLE
+END
+
+IDD_CHEMICSPREAD_PROPPAGE DIALOGEX 0, 0, 418, 222
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Chemistry Initial Condition Properties"
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    CONTROL         "",IDC_DESC_RICHEDIT,"RichEdit20A",ES_MULTILINE | 
+                    ES_AUTOHSCROLL | ES_READONLY | WS_BORDER | WS_VSCROLL | 
+                    WS_HSCROLL,7,142,404,73
+    CONTROL         "Custom1",IDC_CHEMIC_GRID,"MFCGridCtrl",WS_BORDER | 
                     WS_TABSTOP,7,7,404,120
     LTEXT           "NOTE: This invisible control is needed so that the background of the dialog is painted correctly.",
                     IDC_STATIC,75,77,159,22,NOT WS_VISIBLE
@@ -2666,6 +2680,14 @@ BEGIN
     END
 
     IDD_MEDIASPREAD_EXT_PROPPAGE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 411
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 215
+    END
+
+    IDD_CHEMICSPREAD_PROPPAGE, DIALOG
     BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 411

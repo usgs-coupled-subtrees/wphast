@@ -87,8 +87,8 @@ void CBCSpecifiedHeadPropertyPage::DoDataExchange(CDataExchange* pDX)
 
 
 BEGIN_MESSAGE_MAP(CBCSpecifiedHeadPropertyPage, baseCBCSpecifiedHeadPropertyPage)
-	ON_NOTIFY(GVN_ITEMCHANGED, IDC_HEAD_GRID, OnItemChangedHead)
-	ON_NOTIFY(GVN_ITEMCHANGED, IDC_SOLUTION_GRID, OnItemChangedSolution)
+	ON_NOTIFY(GVN_CHECKCHANGED, IDC_HEAD_GRID, OnCheckChangedHead)
+	ON_NOTIFY(GVN_CHECKCHANGED, IDC_SOLUTION_GRID, OnCheckChangedSolution)
 END_MESSAGE_MAP()
 
 
@@ -130,7 +130,7 @@ void CBCSpecifiedHeadPropertyPage::GetProperties(CBC& r_bc)
 	r_bc = this->m_bc;
 }
 
-void CBCSpecifiedHeadPropertyPage::OnItemChangedHead(NMHDR *pNotifyStruct, LRESULT *result)
+void CBCSpecifiedHeadPropertyPage::OnCheckChangedHead(NMHDR *pNotifyStruct, LRESULT *result)
 {
 	NM_GRIDVIEW *pnmgv = (NM_GRIDVIEW*)pNotifyStruct;
 	if (pnmgv->iColumn == 3)
@@ -156,7 +156,7 @@ void CBCSpecifiedHeadPropertyPage::OnItemChangedHead(NMHDR *pNotifyStruct, LRESU
 	}
 }
 
-void CBCSpecifiedHeadPropertyPage::OnItemChangedSolution(NMHDR *pNotifyStruct, LRESULT *result)
+void CBCSpecifiedHeadPropertyPage::OnCheckChangedSolution(NMHDR *pNotifyStruct, LRESULT *result)
 {
 	NM_GRIDVIEW *pnmgv = (NM_GRIDVIEW*)pNotifyStruct;
 	if (pnmgv->iColumn == 3)

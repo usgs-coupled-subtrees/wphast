@@ -36,8 +36,8 @@ protected:
 	CModGridCtrlEx   m_gridSolution; // IDC_SOLUTION_GRID
 
 	DECLARE_MESSAGE_MAP()
-	afx_msg void OnItemChangedFlux(NMHDR *pNotifyStruct, LRESULT *result);
-	afx_msg void OnItemChangedSolution(NMHDR *pNotifyStruct, LRESULT *result);
+	afx_msg void OnCheckChangedFlux(NMHDR *pNotifyStruct, LRESULT *result);
+	afx_msg void OnCheckChangedSolution(NMHDR *pNotifyStruct, LRESULT *result);
 
 public:
 	virtual BOOL OnInitDialog();

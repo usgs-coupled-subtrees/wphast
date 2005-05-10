@@ -34,7 +34,30 @@ IMPLEMENT_DYNAMIC(CMediaSpreadPropertyPage, CPropertyPage)
 CMediaSpreadPropertyPage::CMediaSpreadPropertyPage()
 	: CPropertyPage(CMediaSpreadPropertyPage::IDD)
 {
+	this->CommonConstruct();
 }
+
+void CMediaSpreadPropertyPage::CommonConstruct(void)
+{
+	this->SetFlowOnly(false);
+
+	// init properties
+	//
+	this->SetProperties(this->m_gridElt);
+
+	// load property descriptions
+	//
+	CGlobal::LoadRTFString(this->m_sActiveRTF,          IDR_MEDIA_ACTIVE_RTF);
+	CGlobal::LoadRTFString(this->m_sKxRTF,              IDR_MEDIA_KX_RTF);
+	CGlobal::LoadRTFString(this->m_sKyRTF,              IDR_MEDIA_KY_RTF);
+	CGlobal::LoadRTFString(this->m_sKzRTF,              IDR_MEDIA_KZ_RTF);
+	CGlobal::LoadRTFString(this->m_sPorosityRTF,        IDR_MEDIA_POROSITY_RTF);
+	CGlobal::LoadRTFString(this->m_sStorageRTF,         IDR_MEDIA_SPEC_STORAGE_RTF);
+	CGlobal::LoadRTFString(this->m_sAlphaLongRTF,       IDR_MEDIA_LONG_DISP_RTF);
+	CGlobal::LoadRTFString(this->m_sAlphaHorizontalRTF, IDR_MEDIA_ALPHA_HORZ_RTF);
+	CGlobal::LoadRTFString(this->m_sAlphaVerticalRTF,   IDR_MEDIA_ALPHA_VERT_RTF);
+}
+
 
 CMediaSpreadPropertyPage::~CMediaSpreadPropertyPage()
 {
@@ -48,10 +71,15 @@ void CMediaSpreadPropertyPage::DoDataExchange(CDataExchange* pDX)
 	CPropertyPage::DoDataExchange(pDX);
 
 	DDX_GridControl(pDX, IDC_MEDIA_GRID, m_gridMedia);
+	DDX_Control(pDX, IDC_DESC_RICHEDIT, m_wndRichEditCtrl);
 
 	if (this->m_bFirstSetActive)
 	{
 		this->SetupGrids();
+
+		// wrap richedit to window
+		this->m_wndRichEditCtrl.SetTargetDevice(NULL, 0);
+		this->m_wndRichEditCtrl.SetWindowText(this->m_sActiveRTF.c_str());
 	}
 
 	int nRow = 0;
@@ -125,7 +153,8 @@ void CMediaSpreadPropertyPage::DoDataExchange(CDataExchange* pDX)
 
 
 BEGIN_MESSAGE_MAP(CMediaSpreadPropertyPage, CPropertyPage)
-	ON_NOTIFY(GVN_ITEMCHANGED, IDC_MEDIA_GRID, OnItemChangedMedia)
+	ON_NOTIFY(GVN_CHECKCHANGED, IDC_MEDIA_GRID, OnCheckChangedMedia)
+	ON_NOTIFY(GVN_SELCHANGED, IDC_MEDIA_GRID, OnSelChangedMedia)
 END_MESSAGE_MAP()
 
 
@@ -244,6 +273,8 @@ BOOL CMediaSpreadPropertyPage::SetupGrids(void)
 		VERIFY(this->m_gridMedia.SetFixedRowCount(1) == TRUE);
 		this->m_gridMedia.SetFixedColumnCount(1);
 		this->m_gridMedia.EnableTitleTips(FALSE);
+		this->m_gridMedia.SetRowResize(FALSE);
+
 
 		// set default format
 		GV_ITEM defaultFormat;
@@ -291,7 +322,7 @@ BOOL CMediaSpreadPropertyPage::SetupGrids(void)
 	return TRUE;
 }
 
-void CMediaSpreadPropertyPage::OnItemChangedMedia(NMHDR *pNotifyStruct, LRESULT *result)
+void CMediaSpreadPropertyPage::OnCheckChangedMedia(NMHDR *pNotifyStruct, LRESULT *result)
 {
 	static const int COL_VALUE       = 1;
 	static const int COL_INTERPOLATE = 2;
@@ -331,4 +362,69 @@ void CMediaSpreadPropertyPage::OnItemChangedMedia(NMHDR *pNotifyStruct, LRESULT 
 		}
 		pGrid->Invalidate();
 	}
+}
+
+void CMediaSpreadPropertyPage::OnSelChangedMedia(NMHDR *pNotifyStruct, LRESULT *result)
+{
+	TRACE("OnSelChangedMedia\n");
+	CCellID focus = this->m_gridMedia.GetFocusCell();
+
+	if (!this->m_gridMedia.IsValid(focus)) return;
+	
+	CString strItem = this->m_gridMedia.GetItemText(focus.row, 0);
+
+	// ACTIVE
+	if (strItem.Compare(ACTIVE) == 0)
+	{
+		this->m_wndRichEditCtrl.SetWindowText(this->m_sActiveRTF.c_str());
+	}
+	// KX
+	else if (strItem.Compare(KX) == 0)
+	{
+		this->m_wndRichEditCtrl.SetWindowText(this->m_sKxRTF.c_str());
+	}
+	// KY
+	else if (strItem.Compare(KY) == 0)
+	{
+		this->m_wndRichEditCtrl.SetWindowText(this->m_sKyRTF.c_str());
+	}
+	// KZ
+	else if (strItem.Compare(KZ) == 0)
+	{
+		this->m_wndRichEditCtrl.SetWindowText(this->m_sKzRTF.c_str());
+	}
+	// ALPHA_LONG
+	else if (strItem.Compare(ALPHA_LONG) == 0)
+	{
+		// this->m_wndRichEditCtrl.SetWindowText(this->m_sLongDispRTF.c_str());
+		this->m_wndRichEditCtrl.SetWindowText(this->m_sAlphaLongRTF.c_str());
+	}
+	// POROSITY
+	else if (strItem.Compare(POROSITY) == 0)
+	{
+		this->m_wndRichEditCtrl.SetWindowText(this->m_sPorosityRTF.c_str());
+	}
+	// STORAGE
+	else if (strItem.Compare(STORAGE) == 0)
+	{
+		// this->m_wndRichEditCtrl.SetWindowText(this->m_sSpecStorageRTF.c_str());
+		this->m_wndRichEditCtrl.SetWindowText(this->m_sStorageRTF.c_str());
+	}
+	// ALPHA_HORIZONTAL
+	else if (strItem.Compare(ALPHA_HORIZONTAL) == 0)
+	{
+		this->m_wndRichEditCtrl.SetWindowText(this->m_sAlphaHorizontalRTF.c_str());
+	}
+	// ALPHA_VERTICAL
+	else if (strItem.Compare(ALPHA_VERTICAL) == 0)
+	{
+		this->m_wndRichEditCtrl.SetWindowText(this->m_sAlphaVerticalRTF.c_str());
+	}
+	// ERROR
+	else
+	{
+		ASSERT(FALSE);
+		this->m_wndRichEditCtrl.SetWindowText("");
+	}
+
 }

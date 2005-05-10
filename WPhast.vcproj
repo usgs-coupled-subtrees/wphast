@@ -330,6 +330,9 @@
 				RelativePath="ChemICPropertyPage.cpp">
 			</File>
 			<File
+				RelativePath="ChemICSpreadPropertyPage.cpp">
+			</File>
+			<File
 				RelativePath="ChildFrm.cpp">
 			</File>
 			<File
@@ -764,6 +767,9 @@
 			</File>
 			<File
 				RelativePath="ChemICPropertyPage.h">
+			</File>
+			<File
+				RelativePath="ChemICSpreadPropertyPage.h">
 			</File>
 			<File
 				RelativePath="ChildFrm.h">

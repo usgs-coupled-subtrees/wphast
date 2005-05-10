@@ -126,9 +126,9 @@ void CBCLeakyPropertyPage2::DoDataExchange(CDataExchange* pDX)
 
 
 BEGIN_MESSAGE_MAP(CBCLeakyPropertyPage2, baseCBCLeakyPropertyPage2)
-	ON_NOTIFY(GVN_ITEMCHANGED, IDC_HEAD_GRID, OnItemChangedHead)
-	ON_NOTIFY(GVN_ITEMCHANGED, IDC_SOLUTION_GRID, OnItemChangedSolution)
-	ON_NOTIFY(GVN_ITEMCHANGED, IDC_SINGLE_GRID, OnItemChangedSingle)
+	ON_NOTIFY(GVN_CHECKCHANGED, IDC_HEAD_GRID, OnCheckChangedHead)
+	ON_NOTIFY(GVN_CHECKCHANGED, IDC_SOLUTION_GRID, OnCheckChangedSolution)
+	ON_NOTIFY(GVN_CHECKCHANGED, IDC_SINGLE_GRID, OnCheckChangedSingle)
 END_MESSAGE_MAP()
 
 
@@ -199,6 +199,7 @@ BOOL CBCLeakyPropertyPage2::SetupGrids(void)
 		VERIFY(this->m_gridSingle.SetFixedRowCount(1) == TRUE);
 		this->m_gridSingle.SetFixedColumnCount(1);
 		this->m_gridSingle.EnableTitleTips(FALSE);
+		this->m_gridSingle.SetRowResize(FALSE);
 
 	}
 	catch (CMemoryException *e)
@@ -370,7 +371,7 @@ BOOL CBCLeakyPropertyPage2::SetupGrids(void)
 	return TRUE;
 }
 
-void CBCLeakyPropertyPage2::OnItemChangedHead(NMHDR *pNotifyStruct, LRESULT *result)
+void CBCLeakyPropertyPage2::OnCheckChangedHead(NMHDR *pNotifyStruct, LRESULT *result)
 {
 	static const int COL_VALUE       = 2;
 	static const int COL_INTERPOLATE = 3;
@@ -412,7 +413,7 @@ void CBCLeakyPropertyPage2::OnItemChangedHead(NMHDR *pNotifyStruct, LRESULT *res
 	}
 }
 
-void CBCLeakyPropertyPage2::OnItemChangedSolution(NMHDR *pNotifyStruct, LRESULT *result)
+void CBCLeakyPropertyPage2::OnCheckChangedSolution(NMHDR *pNotifyStruct, LRESULT *result)
 {
 	static const int COL_VALUE       = 2;
 	static const int COL_INTERPOLATE = 3;
@@ -454,7 +455,7 @@ void CBCLeakyPropertyPage2::OnItemChangedSolution(NMHDR *pNotifyStruct, LRESULT 
 	}
 }
 
-void CBCLeakyPropertyPage2::OnItemChangedSingle(NMHDR *pNotifyStruct, LRESULT *result)
+void CBCLeakyPropertyPage2::OnCheckChangedSingle(NMHDR *pNotifyStruct, LRESULT *result)
 {
 	static const int COL_VALUE       = 1;
 	static const int COL_INTERPOLATE = 2;

@@ -246,8 +246,8 @@ BOOL CBCFluxPropertyPage2::SetupGrids(void)
 
 
 BEGIN_MESSAGE_MAP(CBCFluxPropertyPage2, baseCBCFluxPropertyPage2)
-	ON_NOTIFY(GVN_ITEMCHANGED, IDC_FLUX_GRID, OnItemChangedFlux)
-	ON_NOTIFY(GVN_ITEMCHANGED, IDC_SOLUTION_GRID, OnItemChangedSolution)
+	ON_NOTIFY(GVN_CHECKCHANGED, IDC_FLUX_GRID, OnCheckChangedFlux)
+	ON_NOTIFY(GVN_CHECKCHANGED, IDC_SOLUTION_GRID, OnCheckChangedSolution)
 END_MESSAGE_MAP()
 
 
@@ -289,7 +289,7 @@ void CBCFluxPropertyPage2::GetProperties(CBC& r_bc)
 	r_bc = this->m_bc;
 }
 
-void CBCFluxPropertyPage2::OnItemChangedFlux(NMHDR *pNotifyStruct, LRESULT *result)
+void CBCFluxPropertyPage2::OnCheckChangedFlux(NMHDR *pNotifyStruct, LRESULT *result)
 {
 	NM_GRIDVIEW *pnmgv = (NM_GRIDVIEW*)pNotifyStruct;
 	if (pnmgv->iColumn == 3)
@@ -315,7 +315,7 @@ void CBCFluxPropertyPage2::OnItemChangedFlux(NMHDR *pNotifyStruct, LRESULT *resu
 	}
 }
 
-void CBCFluxPropertyPage2::OnItemChangedSolution(NMHDR *pNotifyStruct, LRESULT *result)
+void CBCFluxPropertyPage2::OnCheckChangedSolution(NMHDR *pNotifyStruct, LRESULT *result)
 {
 	NM_GRIDVIEW *pnmgv = (NM_GRIDVIEW*)pNotifyStruct;
 	if (pnmgv->iColumn == 3)

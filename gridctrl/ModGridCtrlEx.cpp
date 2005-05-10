@@ -606,13 +606,13 @@ void CModGridCtrlEx::OnLButtonDblClk(UINT nFlags, CPoint point)
 				case BST_CHECKED:
 					this->SetCheck(dblClkCell, BST_UNCHECKED);
 					this->SetModified(TRUE, dblClkCell.row, dblClkCell.col);
-					this->SendMessageToParent(dblClkCell.row, dblClkCell.col, GVN_ITEMCHANGED);
+					this->SendMessageToParent(dblClkCell.row, dblClkCell.col, GVN_CHECKCHANGED);
 					this->RedrawCell(dblClkCell);
 					break;
 				case BST_UNCHECKED:
 					this->SetCheck(dblClkCell, BST_CHECKED);
 					this->SetModified(TRUE, dblClkCell.row, dblClkCell.col);
-					this->SendMessageToParent(dblClkCell.row, dblClkCell.col, GVN_ITEMCHANGED);
+					this->SendMessageToParent(dblClkCell.row, dblClkCell.col, GVN_CHECKCHANGED);
 					this->RedrawCell(dblClkCell);
 					break;
 				case BST_INDETERMINATE:
@@ -720,13 +720,13 @@ void CModGridCtrlEx::OnLButtonUp(UINT nFlags, CPoint point)
 				case BST_CHECKED:
 					this->SetCheck(this->m_LeftClickDownCell, BST_UNCHECKED);
 					this->SetModified(TRUE, this->m_LeftClickDownCell.row, this->m_LeftClickDownCell.col);
-					this->SendMessageToParent(this->m_LeftClickDownCell.row, this->m_LeftClickDownCell.col, GVN_ITEMCHANGED);
+					this->SendMessageToParent(this->m_LeftClickDownCell.row, this->m_LeftClickDownCell.col, GVN_CHECKCHANGED);
 					this->RedrawCell(this->m_LeftClickDownCell);
 					break;
 				case BST_UNCHECKED:
 					this->SetCheck(this->m_LeftClickDownCell, BST_CHECKED);
 					this->SetModified(TRUE, this->m_LeftClickDownCell.row, this->m_LeftClickDownCell.col);
-					this->SendMessageToParent(this->m_LeftClickDownCell.row, this->m_LeftClickDownCell.col, GVN_ITEMCHANGED);
+					this->SendMessageToParent(this->m_LeftClickDownCell.row, this->m_LeftClickDownCell.col, GVN_CHECKCHANGED);
 					this->RedrawCell(this->m_LeftClickDownCell);
 					break;
 				case BST_INDETERMINATE:
@@ -943,13 +943,13 @@ void CModGridCtrlEx::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
 		case BST_CHECKED:
 			this->SetCheck(this->m_idCurrentCell, BST_UNCHECKED);
 			this->SetModified(TRUE, this->m_idCurrentCell.row, this->m_idCurrentCell.col);
-			this->SendMessageToParent(this->m_idCurrentCell.row, this->m_idCurrentCell.col, GVN_ITEMCHANGED);
+			this->SendMessageToParent(this->m_idCurrentCell.row, this->m_idCurrentCell.col, GVN_CHECKCHANGED);
 			this->RedrawCell(this->m_idCurrentCell);
 			break;
 		case BST_UNCHECKED:
 			this->SetCheck(this->m_idCurrentCell, BST_CHECKED);
 			this->SetModified(TRUE, this->m_idCurrentCell.row, this->m_idCurrentCell.col);
-			this->SendMessageToParent(this->m_idCurrentCell.row, this->m_idCurrentCell.col, GVN_ITEMCHANGED);
+			this->SendMessageToParent(this->m_idCurrentCell.row, this->m_idCurrentCell.col, GVN_CHECKCHANGED);
 			this->RedrawCell(this->m_idCurrentCell);
 			break;
 		case BST_INDETERMINATE:

@@ -65,6 +65,7 @@ void CPrintFreqPropertyPage::DoDataExchange(CDataExchange* pDX)
 			this->m_Grid.SetFixedRowCount(1);
 			this->m_Grid.SetFixedColumnCount(2);
 			this->m_Grid.EnableTitleTips(FALSE);
+			this->m_Grid.SetRowResize(FALSE);
 
 			std::vector<LPCTSTR> options;
 			options.push_back(_T("default"));

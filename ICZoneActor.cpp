@@ -4,6 +4,7 @@
 #include "PropertyTreeControlBar.h"
 #include "ICHeadPropertyPage.h"
 #include "ChemICPropertyPage.h"
+#include "ChemICSpreadPropertyPage.h"
 
 #include "property.h"
 #include "Global.h"
@@ -278,14 +279,16 @@ void CICZoneActor::Edit(CTreeCtrl* pTreeCtrl)
 	}
 	else if (this->GetType() == CICZoneActor::IC_CHEM)
 	{
-		CChemICPropertyPage chemICProps;
+		CChemICSpreadPropertyPage chemICProps;
 		chemICProps.SetProperties(this->m_chemIC);
-		if (this->GetDefault()) {
+		if (this->GetDefault())
+		{
 			chemICProps.SetFlowOnly(bool(pDoc->GetFlowOnly()));
 		}
 
 		props.AddPage(&chemICProps);
-		if (props.DoModal() == IDOK) {
+		if (props.DoModal() == IDOK)
+		{
 			CChemIC chemIC;
 			chemICProps.GetProperties(chemIC);
 			pDoc->Execute(new CSetChemICAction(this, pTreeCtrl, chemIC));
