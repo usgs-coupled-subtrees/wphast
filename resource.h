@@ -209,6 +209,8 @@
 #define ID_MEDIAZONES_SETALLOFF         226
 #define IDD_TC_INT_M_PROPPAGE2          226
 #define ID_MEDIAZONES_SELECTALL         227
+#define IDD_MEDIA_EXT_PROPPAGE2         227
+#define IDD_MEDIASPREAD_EXT_PROPPAGE    227
 #define ID_MEDIAZONES_UNSELECTALL       228
 #define ID_VIEW_BCZONES                 229
 #define ID_VIEW_ICZONES                 230
@@ -490,6 +492,7 @@
 #define IDC_TIMEEND_GRID                1231
 #define IDC_BUTTON_ADD                  1232
 #define IDC_CHECK_SAVE_HEADS            1233
+#define IDC_MEDIA_GRID                  1234
 #define IDC_RESIZE_COLUMN               28654
 #define IDC_RESIZE_ROW                  28655
 #define IDR_POPUP                       28656
@@ -503,7 +506,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        248
 #define _APS_NEXT_COMMAND_VALUE         32793
-#define _APS_NEXT_CONTROL_VALUE         1234
+#define _APS_NEXT_CONTROL_VALUE         1235
 #define _APS_NEXT_SYMED_VALUE           125
 #endif
 #endif

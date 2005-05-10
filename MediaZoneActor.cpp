@@ -3,6 +3,7 @@
 #include "MediaZoneActor.h"
 #include "PropertyTreeControlBar.h"
 #include "MediaPropertyPage.h"
+#include "MediaSpreadPropertyPage.h"
 #include "property.h"
 
 #include "WPhastDoc.h"
@@ -117,59 +118,64 @@ void CMediaZoneActor::Update(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent)
 
 	// remove all previous items
 	//
-	while (HTREEITEM hChild = pTreeCtrl->GetChildItem(htiParent)) {
+	while (HTREEITEM hChild = pTreeCtrl->GetChildItem(htiParent))
+	{
 		pTreeCtrl->DeleteItem(hChild);
 	}
 
 	// active
-	if (this->m_grid_elt.active) {
+	if (this->m_grid_elt.active)
+	{
 		static_cast<Cproperty*>(this->m_grid_elt.active)->Insert(pTreeCtrl, htiParent, "active");
 	}
 
 	// kx
-	if (this->m_grid_elt.kx) {
+	if (this->m_grid_elt.kx)
+	{
 		static_cast<Cproperty*>(this->m_grid_elt.kx)->Insert(pTreeCtrl, htiParent, "Kx");
 	}
 
 	// ky
-	if (this->m_grid_elt.ky) {
+	if (this->m_grid_elt.ky)
+	{
 		static_cast<Cproperty*>(this->m_grid_elt.ky)->Insert(pTreeCtrl, htiParent, "Ky");
 	}
 
 	// kz
-	if (this->m_grid_elt.kz) {
+	if (this->m_grid_elt.kz)
+	{
 		static_cast<Cproperty*>(this->m_grid_elt.kz)->Insert(pTreeCtrl, htiParent, "Kz");
 	}
 
-	// alpha_long
-	if (this->m_grid_elt.alpha_long) {
-		static_cast<Cproperty*>(this->m_grid_elt.alpha_long)->Insert(pTreeCtrl, htiParent, "long_dispersivity");
-	}
-
-	// alpha_horizontal
-	if (this->m_grid_elt.alpha_horizontal) {
-		static_cast<Cproperty*>(this->m_grid_elt.alpha_horizontal)->Insert(pTreeCtrl, htiParent, "horizontal_dispersivity");
-	}
-
-	// alpha_vertical
-	if (this->m_grid_elt.alpha_vertical) {
-		static_cast<Cproperty*>(this->m_grid_elt.alpha_vertical)->Insert(pTreeCtrl, htiParent, "vertical_dispersivity");
-	}
-
 	// porosity
-	if (this->m_grid_elt.porosity) {
+	if (this->m_grid_elt.porosity)
+	{
 		static_cast<Cproperty*>(this->m_grid_elt.porosity)->Insert(pTreeCtrl, htiParent, "porosity");
 	}
 
 	// storage
-	if (this->m_grid_elt.storage) {
+	if (this->m_grid_elt.storage)
+	{
 		static_cast<Cproperty*>(this->m_grid_elt.storage)->Insert(pTreeCtrl, htiParent, "specific_storage");
 	}
 
-// COMMENT: {6/2/2004 8:01:18 PM}	// alpha_trans
-// COMMENT: {6/2/2004 8:01:18 PM}	if (this->m_grid_elt.alpha_trans) {
-// COMMENT: {6/2/2004 8:01:18 PM}		static_cast<Cproperty*>(this->m_grid_elt.alpha_trans)->Insert(pTreeCtrl, htiParent, "trans_dispersivity");
-// COMMENT: {6/2/2004 8:01:18 PM}	}
+	// alpha_long
+	if (this->m_grid_elt.alpha_long)
+	{
+		static_cast<Cproperty*>(this->m_grid_elt.alpha_long)->Insert(pTreeCtrl, htiParent, "long_dispersivity");
+	}
+
+	// alpha_horizontal
+	if (this->m_grid_elt.alpha_horizontal)
+	{
+		static_cast<Cproperty*>(this->m_grid_elt.alpha_horizontal)->Insert(pTreeCtrl, htiParent, "horizontal_dispersivity");
+	}
+
+	// alpha_vertical
+	if (this->m_grid_elt.alpha_vertical)
+	{
+		static_cast<Cproperty*>(this->m_grid_elt.alpha_vertical)->Insert(pTreeCtrl, htiParent, "vertical_dispersivity");
+	}
 }
 
 void CMediaZoneActor::Edit(CTreeCtrl* pTreeCtrl)
@@ -183,16 +189,18 @@ void CMediaZoneActor::Edit(CTreeCtrl* pTreeCtrl)
 	CWPhastDoc* pDoc = reinterpret_cast<CWPhastDoc*>(pFrame->GetActiveDocument());
 	ASSERT_VALID(pDoc);
 
-	CMediaPropertyPage mediaProps;
-	mediaProps.SetProperties(this->m_grid_elt);
-	if (this->GetDefault()) {
-		mediaProps.SetFlowOnly(bool(pDoc->GetFlowOnly()));
+	CMediaSpreadPropertyPage mediaSpreadProps;
+	mediaSpreadProps.SetProperties(this->m_grid_elt);
+	if (this->GetDefault())
+	{
+		mediaSpreadProps.SetFlowOnly(bool(pDoc->GetFlowOnly()));
 	}
-	props.AddPage(&mediaProps);
+	props.AddPage(&mediaSpreadProps);
 
-	if (props.DoModal() == IDOK) {
+	if (props.DoModal() == IDOK)
+	{
 		CGridElt grid_elt;
-		mediaProps.GetProperties(grid_elt);
+		mediaSpreadProps.GetProperties(grid_elt);
 		pDoc->Execute(new CSetMediaAction(this, pTreeCtrl, grid_elt));
 	}
 }

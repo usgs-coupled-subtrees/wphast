@@ -453,6 +453,9 @@
 				RelativePath="MediaPropertyPage.cpp">
 			</File>
 			<File
+				RelativePath="MediaSpreadPropertyPage.cpp">
+			</File>
+			<File
 				RelativePath="MediaZoneActor.cpp">
 			</File>
 			<File
@@ -854,6 +857,9 @@
 			</File>
 			<File
 				RelativePath="MediaPropertyPage.h">
+			</File>
+			<File
+				RelativePath="MediaSpreadPropertyPage.h">
 			</File>
 			<File
 				RelativePath="MediaZoneActor.h">
@@ -2939,15 +2945,15 @@
 			Name="Build Logs"
 			Filter="">
 			<File
-				RelativePath="Release\BuildLog.htm"
-				DeploymentContent="TRUE">
-			</File>
-			<File
 				RelativePath="cppunit\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 			<File
 				RelativePath="Debug\BuildLog.htm"
+				DeploymentContent="TRUE">
+			</File>
+			<File
+				RelativePath="Release\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 		</Filter>

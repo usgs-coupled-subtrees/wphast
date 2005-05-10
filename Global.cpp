@@ -1879,6 +1879,25 @@ void CGlobal::DDX_Property(CDataExchange* pDX, int nIDC, int nRow, struct proper
 			//
 			::DDX_TextGridControl(pDX, nIDC, nRow, COL_DISTANCE_2, pProperty->dist2);
 		}
+		else if (pProperty->type == UNDEFINED)
+		{
+			// value
+			//
+			::DDX_TextGridControl(pDX, nIDC, nRow, COL_VALUE, CString(""));
+
+			// set checkmark
+			//
+			pGrid->SetCheck(nRow, COL_INTERPOLATE, BST_UNCHECKED);
+
+			// enable/disable cells
+			//
+			pGrid->EnableCell(nRow, COL_VALUE);
+			pGrid->DisableCell(nRow, COL_DIRECTION);
+			pGrid->DisableCell(nRow, COL_VALUE_1);
+			pGrid->DisableCell(nRow, COL_DISTANCE_1);
+			pGrid->DisableCell(nRow, COL_VALUE_2);
+			pGrid->DisableCell(nRow, COL_DISTANCE_2);
+		}
 		else
 		{
 			ASSERT(FALSE);
