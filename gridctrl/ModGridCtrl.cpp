@@ -129,11 +129,12 @@ BEGIN_MESSAGE_MAP(CModGridCtrl, CGridCtrl)
 	ON_WM_KEYDOWN()
 	ON_WM_CONTEXTMENU()
 	ON_WM_RBUTTONDOWN()
-    ON_NOTIFY(GVN_ENDLABELEDIT, IDC_INPLACE_CONTROL, OnEndInPlaceEdit)
+	ON_NOTIFY(GVN_ENDLABELEDIT, IDC_INPLACE_CONTROL, OnEndInPlaceEdit)
 	ON_WM_CHAR()
 	ON_WM_GETDLGCODE()
 	ON_WM_KILLFOCUS()
 	ON_WM_SETFOCUS()
+	ON_WM_SIZE()
 END_MESSAGE_MAP()
 
 // MODIFICATIONS:
@@ -697,4 +698,28 @@ void CModGridCtrl::SetHighLight(long nNewValue)
 long CModGridCtrl::GetHighLight(void)const
 {
 	return this->m_nHighLight;
+}
+
+void CModGridCtrl::OnSize(UINT nType, int cx, int cy) 
+{
+	static BOOL bAlreadyInsideThisProcedure = FALSE;
+	if (bAlreadyInsideThisProcedure)
+		return;
+
+	if (!::IsWindow(m_hWnd))
+		return;
+
+	// Start re-entry blocking
+	bAlreadyInsideThisProcedure = TRUE;
+
+	if (GetFocus()->GetDlgCtrlID() == IDC_INPLACE_CONTROL)
+	{
+		SetFocus();        // Auto-destroy any InPlaceEdit's
+	}
+
+	CWnd::OnSize(nType, cx, cy);
+	ResetScrollBars();
+
+	// End re-entry blocking
+	bAlreadyInsideThisProcedure = FALSE;
 }

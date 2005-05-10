@@ -39,18 +39,18 @@ public:
 
 protected:
 	// Virtual overrides
-    virtual BOOL  DrawFixedCell(CDC* pDC, int nRow, int nCol, CRect rect, BOOL bEraseBk=FALSE);
-    virtual BOOL  DrawCell(CDC* pDC, int nRow, int nCol, CRect rect, BOOL bEraseBk=FALSE);
+	virtual BOOL  DrawFixedCell(CDC* pDC, int nRow, int nCol, CRect rect, BOOL bEraseBk=FALSE);
+	virtual BOOL  DrawCell(CDC* pDC, int nRow, int nCol, CRect rect, BOOL bEraseBk=FALSE);
 
 #ifndef GRIDCONTROL_NO_CLIPBOARD
-    virtual void CutSelectedText();
+	virtual void CutSelectedText();
 #endif
 
 protected:
 	DECLARE_MESSAGE_MAP()
 	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
-    afx_msg void OnEndInPlaceEdit(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnEndInPlaceEdit(NMHDR* pNMHDR, LRESULT* pResult);
 	long m_nHighLight;
 public:
 //	afx_msg void OnChar(UINT nChar, UINT nRepCnt, UINT nFlags);
@@ -61,4 +61,5 @@ public:
 	afx_msg UINT OnGetDlgCode();
 	afx_msg void OnKillFocus(CWnd* pNewWnd);
 	afx_msg void OnSetFocus(CWnd* pOldWnd);
+	afx_msg void OnSize(UINT nType, int cx, int cy);
 };
