@@ -274,6 +274,7 @@ BOOL CMediaSpreadPropertyPage::SetupGrids(void)
 		this->m_gridMedia.SetFixedColumnCount(1);
 		this->m_gridMedia.EnableTitleTips(FALSE);
 		this->m_gridMedia.SetRowResize(FALSE);
+		this->m_gridMedia.SetCurrentFocusCell(1, 1);
 
 
 		// set default format

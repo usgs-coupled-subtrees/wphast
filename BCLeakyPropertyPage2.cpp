@@ -187,12 +187,14 @@ BOOL CBCLeakyPropertyPage2::SetupGrids(void)
 		this->m_gridHead.SetFixedRowCount(1);
 		this->m_gridHead.SetFixedColumnCount(0);
 		this->m_gridHead.EnableTitleTips(FALSE);
+		this->m_gridHead.SetCurrentFocusCell(1, 2);
 
 		this->m_gridSolution.SetRowCount(nSolnRows);
 		this->m_gridSolution.SetColumnCount(9);
 		this->m_gridSolution.SetFixedRowCount(1);
 		this->m_gridSolution.SetFixedColumnCount(0);
 		this->m_gridSolution.EnableTitleTips(FALSE);
+		this->m_gridSolution.SetCurrentFocusCell(1, 2);
 
 		this->m_gridSingle.SetRowCount(3);
 		this->m_gridSingle.SetColumnCount(8);
@@ -200,6 +202,7 @@ BOOL CBCLeakyPropertyPage2::SetupGrids(void)
 		this->m_gridSingle.SetFixedColumnCount(1);
 		this->m_gridSingle.EnableTitleTips(FALSE);
 		this->m_gridSingle.SetRowResize(FALSE);
+		this->m_gridSingle.SetCurrentFocusCell(1, 1);
 
 	}
 	catch (CMemoryException *e)

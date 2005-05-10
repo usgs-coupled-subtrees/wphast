@@ -5,6 +5,7 @@
 #include "ICHeadPropertyPage.h"
 #include "ChemICPropertyPage.h"
 #include "ChemICSpreadPropertyPage.h"
+#include "ICHeadSpreadPropertyPage.h"
 
 #include "property.h"
 #include "Global.h"
@@ -267,7 +268,7 @@ void CICZoneActor::Edit(CTreeCtrl* pTreeCtrl)
 
 	if (this->GetType() == CICZoneActor::IC_HEAD)
 	{
-		CICHeadPropertyPage icHeadProps;
+		CICHeadSpreadPropertyPage icHeadProps;
 		icHeadProps.SetProperties(this->m_headIC);		
 
 		props.AddPage(&icHeadProps);

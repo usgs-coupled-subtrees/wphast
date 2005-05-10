@@ -51,6 +51,7 @@ void CWellPropertyPage::DoDataExchange(CDataExchange* pDX)
 			this->m_wndScreensGrid.SetFixedRowCount(1);
 			this->m_wndScreensGrid.SetFixedColumnCount(0);
 			this->m_wndScreensGrid.EnableTitleTips(FALSE);
+			this->m_wndScreensGrid.SetCurrentFocusCell(1, 0);
 			// this->m_wndScreensGrid.EnableSelection(FALSE); // this breaks CutSelectedText
 		}
 		CATCH (CMemoryException, e)
@@ -85,6 +86,7 @@ void CWellPropertyPage::DoDataExchange(CDataExchange* pDX)
 			this->m_wndPumpSchedGrid.SetFixedColumnCount(0);
 			this->m_wndPumpSchedGrid.EnableTitleTips(FALSE);
 			// this->m_wndPumpSchedGrid.EnableSelection(FALSE); // this breaks CutSelectedText
+			this->m_wndPumpSchedGrid.SetCurrentFocusCell(1, 2);
 
 			std::vector<LPCTSTR> options;
 			options.push_back(_T("seconds"));

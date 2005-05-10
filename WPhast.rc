@@ -1930,18 +1930,18 @@ STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Specified Head Properties"
 FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
+    CONTROL         "Custom1",IDC_HEAD_GRID,"MFCGridCtrl",WS_BORDER | 
+                    WS_TABSTOP,7,7,404,60
     LTEXT           "Solution type:",IDC_SOL_TYPE_STATIC,7,79,46,8
     CONTROL         "Associated",IDC_ASSOC_RADIO,"Button",BS_AUTORADIOBUTTON,
                     61,79,51,10
     CONTROL         "Fixed",IDC_FIXED_RADIO,"Button",BS_AUTORADIOBUTTON,127,
                     79,33,10
+    CONTROL         "Custom1",IDC_SOLUTION_GRID,"MFCGridCtrl",WS_BORDER | 
+                    WS_TABSTOP,7,93,404,60
     CONTROL         "",IDC_DESC_RICHEDIT,"RichEdit20A",ES_MULTILINE | 
                     ES_AUTOHSCROLL | ES_READONLY | WS_BORDER | WS_VSCROLL | 
                     WS_HSCROLL,7,166,404,49
-    CONTROL         "Custom1",IDC_HEAD_GRID,"MFCGridCtrl",WS_BORDER | 
-                    WS_TABSTOP,7,7,404,60
-    CONTROL         "Custom1",IDC_SOLUTION_GRID,"MFCGridCtrl",WS_BORDER | 
-                    WS_TABSTOP,7,93,404,60
 END
 
 IDD_TEST_CMODGRIDCTRLEX DIALOGEX 0, 0, 317, 143
@@ -1964,20 +1964,20 @@ STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Flux Properties"
 FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
-    LTEXT           "Face:",IDC_FACE_STATIC,7,148,19,8
-    CONTROL         "",IDC_DESC_RICHEDIT,"RichEdit20A",ES_MULTILINE | 
-                    ES_AUTOHSCROLL | ES_READONLY | WS_BORDER | WS_VSCROLL | 
-                    WS_HSCROLL,7,166,404,49
     CONTROL         "Custom1",IDC_FLUX_GRID,"MFCGridCtrl",WS_BORDER | 
                     WS_TABSTOP,7,7,404,60
     CONTROL         "Custom1",IDC_SOLUTION_GRID,"MFCGridCtrl",WS_BORDER | 
                     WS_TABSTOP,7,82,404,60
+    LTEXT           "Face:",IDC_FACE_STATIC,7,148,19,8
     CONTROL         "X",IDC_FACE_X_RADIO,"Button",BS_AUTORADIOBUTTON | 
                     WS_GROUP,32,148,20,10
     CONTROL         "Y",IDC_FACE_Y_RADIO,"Button",BS_AUTORADIOBUTTON,54,148,
                     20,10
     CONTROL         "Z",IDC_FACE_Z_RADIO,"Button",BS_AUTORADIOBUTTON,76,148,
                     20,10
+    CONTROL         "",IDC_DESC_RICHEDIT,"RichEdit20A",ES_MULTILINE | 
+                    ES_AUTOHSCROLL | ES_READONLY | WS_BORDER | WS_VSCROLL | 
+                    WS_HSCROLL,7,166,404,49
 END
 
 IDD_BC_LEAKY_PROPPAGE3 DIALOGEX 0, 0, 418, 222
@@ -1985,22 +1985,22 @@ STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Leaky Properties"
 FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
-    LTEXT           "Face:",IDC_FACE_STATIC,7,164,19,8
-    CONTROL         "",IDC_DESC_RICHEDIT,"RichEdit20A",ES_MULTILINE | 
-                    ES_AUTOHSCROLL | ES_READONLY | WS_BORDER | WS_VSCROLL | 
-                    WS_HSCROLL,7,177,404,38
     CONTROL         "Custom1",IDC_HEAD_GRID,"MFCGridCtrl",WS_BORDER | 
                     WS_TABSTOP,7,7,404,48
     CONTROL         "Custom1",IDC_SOLUTION_GRID,"MFCGridCtrl",WS_BORDER | 
                     WS_TABSTOP,7,66,404,48
+    CONTROL         "Custom1",IDC_SINGLE_GRID,"MFCGridCtrl",WS_BORDER | 
+                    WS_TABSTOP,7,122,404,38
+    LTEXT           "Face:",IDC_FACE_STATIC,7,164,19,8
     CONTROL         "X",IDC_FACE_X_RADIO,"Button",BS_AUTORADIOBUTTON | 
                     WS_GROUP,32,164,20,10
     CONTROL         "Y",IDC_FACE_Y_RADIO,"Button",BS_AUTORADIOBUTTON,54,164,
                     20,10
     CONTROL         "Z",IDC_FACE_Z_RADIO,"Button",BS_AUTORADIOBUTTON,76,164,
                     20,10
-    CONTROL         "Custom1",IDC_SINGLE_GRID,"MFCGridCtrl",WS_BORDER | 
-                    WS_TABSTOP,7,122,404,38
+    CONTROL         "",IDC_DESC_RICHEDIT,"RichEdit20A",ES_MULTILINE | 
+                    ES_AUTOHSCROLL | ES_READONLY | WS_BORDER | WS_VSCROLL | 
+                    WS_HSCROLL,7,177,404,38
 END
 
 IDD_TC_INT_M_PROPPAGE2 DIALOGEX 0, 0, 418, 222
@@ -2008,13 +2008,13 @@ STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Time Control Properties"
 FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
+    CONTROL         "Custom1",IDC_TIMEEND_GRID,"MFCGridCtrl",WS_BORDER | 
+                    WS_TABSTOP,7,7,144,149
+    CONTROL         "Custom1",IDC_TIMESTEP_GRID,"MFCGridCtrl",WS_BORDER | 
+                    WS_TABSTOP,169,7,242,149
     CONTROL         "",IDC_DESC_RICHEDIT,"RichEdit20A",ES_MULTILINE | 
                     ES_AUTOHSCROLL | ES_READONLY | WS_BORDER | WS_VSCROLL | 
                     WS_HSCROLL,7,165,404,49
-    CONTROL         "Custom1",IDC_TIMESTEP_GRID,"MFCGridCtrl",WS_BORDER | 
-                    WS_TABSTOP,169,7,242,149
-    CONTROL         "Custom1",IDC_TIMEEND_GRID,"MFCGridCtrl",WS_BORDER | 
-                    WS_TABSTOP,7,7,144,149
     LTEXT           "NOTE: This invisible control is needed so that the background of the dialog is painted correctly.",
                     IDC_STATIC,75,77,159,22,NOT WS_VISIBLE
 END
@@ -2042,6 +2042,20 @@ BEGIN
                     ES_AUTOHSCROLL | ES_READONLY | WS_BORDER | WS_VSCROLL | 
                     WS_HSCROLL,7,142,404,73
     CONTROL         "Custom1",IDC_CHEMIC_GRID,"MFCGridCtrl",WS_BORDER | 
+                    WS_TABSTOP,7,7,404,120
+    LTEXT           "NOTE: This invisible control is needed so that the background of the dialog is painted correctly.",
+                    IDC_STATIC,75,77,159,22,NOT WS_VISIBLE
+END
+
+IDD_IC_HEAD_SPREAD_PROPPAGE DIALOGEX 0, 0, 418, 222
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Head IC Properties"
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    CONTROL         "",IDC_DESC_RICHEDIT,"RichEdit20A",ES_MULTILINE | 
+                    ES_AUTOHSCROLL | ES_READONLY | WS_BORDER | WS_VSCROLL | 
+                    WS_HSCROLL,7,142,404,73
+    CONTROL         "Custom1",IDC_HEADIC_GRID,"MFCGridCtrl",WS_BORDER | 
                     WS_TABSTOP,7,7,404,120
     LTEXT           "NOTE: This invisible control is needed so that the background of the dialog is painted correctly.",
                     IDC_STATIC,75,77,159,22,NOT WS_VISIBLE
@@ -2688,6 +2702,14 @@ BEGIN
     END
 
     IDD_CHEMICSPREAD_PROPPAGE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 411
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 215
+    END
+
+    IDD_IC_HEAD_SPREAD_PROPPAGE, DIALOG
     BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 411

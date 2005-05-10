@@ -213,6 +213,7 @@
 #define ID_MEDIAZONES_UNSELECTALL       228
 #define IDD_CHEMICSPREAD_PROPPAGE       228
 #define ID_VIEW_BCZONES                 229
+#define IDD_IC_HEAD_SPREAD_PROPPAGE     229
 #define ID_VIEW_ICZONES                 230
 #define ID_BCZONES_HIDEALL              231
 #define ID_BCZONES_SHOWSELECTED         232
@@ -493,8 +494,8 @@
 #define IDC_BUTTON_ADD                  1232
 #define IDC_CHECK_SAVE_HEADS            1233
 #define IDC_MEDIA_GRID                  1234
-#define IDC_CHECMIC_GRID                1235
 #define IDC_CHEMIC_GRID                 1235
+#define IDC_HEADIC_GRID                 1236
 #define IDC_RESIZE_COLUMN               28654
 #define IDC_RESIZE_ROW                  28655
 #define IDR_POPUP                       28656
@@ -508,7 +509,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        248
 #define _APS_NEXT_COMMAND_VALUE         32793
-#define _APS_NEXT_CONTROL_VALUE         1236
+#define _APS_NEXT_CONTROL_VALUE         1237
 #define _APS_NEXT_SYMED_VALUE           125
 #endif
 #endif

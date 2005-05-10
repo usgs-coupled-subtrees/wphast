@@ -35,6 +35,12 @@ CChemICSpreadPropertyPage::CChemICSpreadPropertyPage()
 
 void CChemICSpreadPropertyPage::CommonConstruct(void)
 {
+	// fill empty properties
+	//
+	this->SetProperties(this->m_chemIC);
+
+	// set
+	//
 	this->SetFlowOnly(false);
 
 	// load property descriptions
@@ -211,6 +217,8 @@ BOOL CChemICSpreadPropertyPage::SetupGrids(void)
 		this->m_gridChemIC.SetFixedColumnCount(1);
 		this->m_gridChemIC.EnableTitleTips(FALSE);
 		this->m_gridChemIC.SetRowResize(FALSE);
+		this->m_gridChemIC.SetCurrentFocusCell(1, 1);
+
 
 		// set default format
 		GV_ITEM defaultFormat;
@@ -227,7 +235,6 @@ BOOL CChemICSpreadPropertyPage::SetupGrids(void)
 		}
 
 		int nRow = 0;
-
 		this->m_gridChemIC.SetItemText(++nRow, 0, PSZ_SOLUTION);
 		this->m_gridChemIC.SetItemText(++nRow, 0, PSZ_EQUILIBRIUM_PHASES);
 		this->m_gridChemIC.SetItemText(++nRow, 0, PSZ_EXCHANGE);

@@ -112,12 +112,14 @@ BOOL CBCFluxPropertyPage2::SetupGrids(void)
 		this->m_gridFlux.SetFixedRowCount(1);
 		this->m_gridFlux.SetFixedColumnCount(0);
 		this->m_gridFlux.EnableTitleTips(FALSE);
+		this->m_gridFlux.SetCurrentFocusCell(1, 2);
 
 		this->m_gridSolution.SetRowCount(nSolnRows);
 		this->m_gridSolution.SetColumnCount(9);
 		this->m_gridSolution.SetFixedRowCount(1);
 		this->m_gridSolution.SetFixedColumnCount(0);
 		this->m_gridSolution.EnableTitleTips(FALSE);
+		this->m_gridSolution.SetCurrentFocusCell(1, 2);
 
 	}
 	catch (CMemoryException *e)

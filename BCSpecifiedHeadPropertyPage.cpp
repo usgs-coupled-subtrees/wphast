@@ -196,12 +196,14 @@ BOOL CBCSpecifiedHeadPropertyPage::SetupGrids(void)
 		this->m_gridHead.SetFixedRowCount(1);
 		this->m_gridHead.SetFixedColumnCount(0);
 		this->m_gridHead.EnableTitleTips(FALSE);
+		this->m_gridHead.SetCurrentFocusCell(1, 2);
 
 		this->m_gridSolution.SetRowCount(nSolnRows);
 		this->m_gridSolution.SetColumnCount(9);
 		this->m_gridSolution.SetFixedRowCount(1);
 		this->m_gridSolution.SetFixedColumnCount(0);
 		this->m_gridSolution.EnableTitleTips(FALSE);
+		this->m_gridSolution.SetCurrentFocusCell(1, 2);
 
 	}
 	catch (CMemoryException *e)

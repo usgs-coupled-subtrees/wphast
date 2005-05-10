@@ -414,6 +414,9 @@
 				RelativePath="ICHeadPropertyPage.cpp">
 			</File>
 			<File
+				RelativePath="ICHeadSpreadPropertyPage.cpp">
+			</File>
+			<File
 				RelativePath="ICZoneActor.cpp">
 			</File>
 			<File
@@ -821,6 +824,9 @@
 			</File>
 			<File
 				RelativePath="ICHeadPropertyPage.h">
+			</File>
+			<File
+				RelativePath="ICHeadSpreadPropertyPage.h">
 			</File>
 			<File
 				RelativePath="ICZoneActor.h">

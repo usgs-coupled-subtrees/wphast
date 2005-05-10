@@ -193,12 +193,15 @@ BOOL CTimeControlMultiPropertyPage2::SetupGrids(void)
 		this->m_gridTimeEnd.SetFixedRowCount(1);
 		this->m_gridTimeEnd.SetFixedColumnCount(0);
 		this->m_gridTimeEnd.EnableTitleTips(FALSE);
+		this->m_gridTimeEnd.SetCurrentFocusCell(1, 0);
+
 
 		this->m_gridTimeStep.SetRowCount(nTimeStepRows);
 		this->m_gridTimeStep.SetColumnCount(4);
 		this->m_gridTimeStep.SetFixedRowCount(1);
 		this->m_gridTimeStep.SetFixedColumnCount(0);
 		this->m_gridTimeStep.EnableTitleTips(FALSE);
+		this->m_gridTimeStep.SetCurrentFocusCell(1, 2);
 	}
 	catch (CMemoryException *e)
 	{
