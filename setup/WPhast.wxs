@@ -22,15 +22,11 @@
             <Directory Id="D__bin" Name="bin">
             
               <Component Id='C__MainExecutable' Guid='154A8C11-2222-47cb-968A-28012FEAFA34'>
-                <File Id='WPhastEXE' Name='WPhast.exe' DiskId='1'
-                  src='..\Release\WPhast.exe' Vital='yes'>
-                  <Shortcut Id="startmenuWPhast00" Directory="ProgramMenuDir" Name="WPhast00" 
-                    LongName="WPhast 0.0"
-                    Icon="WPhast.exe" IconIndex="0" Target="MainProgram" />
+                <File Id='WPhastEXE' Name='WPhast.exe' DiskId='1' src='..\Release\WPhast.exe' Vital='yes'>
+                  <Shortcut Id="startmenuWPhast00" Directory="ProgramMenuDir" Name="WPhast" Icon="WPhast.exe" IconIndex="0" Target="MainProgram" />
                 </File>
                 <RemoveFolder Id="Shortcut0" Directory="ProgramMenuDir" On="uninstall" />
-                <File Id='PhastEXE' Name='phast.exe' DiskId='1'
-                  src='C:\Program Files\USGS\phast-1.1\bin\phast-ser.exe' Vital='yes' />
+                <File Id='PhastEXE' Name='phast.exe' DiskId='1' src='C:\Program Files\USGS\phast-1.1\bin\phast-ser.exe' Vital='yes' Checksum='yes'/>
                 <ProgId Id="WPhast.Document" Description="WPhast.Document" Icon='[!WPhastEXE]' IconIndex='1'>
                   <Extension Id="wphast">
                     <Verb Id="open" Target='[!WPhastEXE]' Argument='"%1"'/>
@@ -70,7 +66,10 @@
             <Directory Id="D__doc" Name="doc">
               <Component Id='C__Documentation' Guid='5E5DF2AA-627A-4c53-83F4-665AEA8D66E2' >
                 <File Id='F__PhastPDF' Name='phast.pdf' DiskId='1' src='C:\Program Files\USGS\phast-1.1\doc\phast.pdf' >
-                  <Shortcut Id="startmenuManual" Directory="ProgramMenuDir" Name="Manual" LongName="User's Guide to PHAST (PDF)" />
+                  <Shortcut Id="S__PHASTManual" Directory="ProgramMenuDir" Name="PHAST" LongName="User's Guide to PHAST (PDF)" />
+                </File>
+                <File Id='F__phreeqcPDF' Name='phreeqc.pdf' DiskId='1' src='C:\Program Files\USGS\phast-1.1\doc\phreeqc.pdf' >
+                  <Shortcut Id="S__PHREEQCManual" Directory="ProgramMenuDir" Name="PHREEQC" LongName="User's Guide to PHREEQC (Version 2 PDF)" />
                 </File>
                 <RemoveFolder Id="Shortcut1" Directory="ProgramMenuDir" On="uninstall" />
               </Component>
