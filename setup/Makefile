@@ -1,4 +1,19 @@
-WPhast.msi : WPhast.wixobj ../Release/WPhast.exe
+BINARIES=\
+	Binary/Banner.bmp\
+	Binary/Banner.bmp\
+	Binary/Complete.ico\
+	Binary/Custom.ico\
+	Binary/Dialog.bmp\
+	Binary/Exclam.ico\
+	Binary/Info.ico\
+	Binary/License.rtf\
+	Binary/New.ico\
+	Binary/Remove.ico\
+	Binary/Repair.ico\
+	Binary/Typical.ico\
+	Binary/Up.ico
+	
+WPhast.msi : WPhast.wixobj ../Release/WPhast.exe $(BINARIES)
 	light -nologo WPhast.wixobj
 
 WPhast.wixobj : WPhast.wxs
