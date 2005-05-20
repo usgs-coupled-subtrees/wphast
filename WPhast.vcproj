@@ -94,6 +94,7 @@
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
+				SetChecksum="TRUE"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"
@@ -2957,15 +2958,15 @@
 			Name="Build Logs"
 			Filter="">
 			<File
-				RelativePath="cppunit\BuildLog.htm"
-				DeploymentContent="TRUE">
-			</File>
-			<File
 				RelativePath="Debug\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 			<File
 				RelativePath="Release\BuildLog.htm"
+				DeploymentContent="TRUE">
+			</File>
+			<File
+				RelativePath="cppunit\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 		</Filter>
