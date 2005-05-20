@@ -11,5 +11,5 @@ uninstall :
 	msiexec.exe /x WPhast.msi /qn+
 
 check : WPhast.msi
-	/cygdrive/c/Program\ Files/MsiVal2/msival2 WPhast.msi 'C:\Program Files\MsiVal2\logo.cub' | egrep ERROR
+	/cygdrive/c/Program\ Files/MsiVal2/msival2 WPhast.msi 'C:\Program Files\MsiVal2\logo.cub' | egrep "ERROR|WARNING"
 	
