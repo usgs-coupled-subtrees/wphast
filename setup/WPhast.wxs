@@ -1,13 +1,19 @@
 <?xml version='1.0' encoding='windows-1252'?>
 <Wix xmlns='http://schemas.microsoft.com/wix/2003/01/wi'>
-  <Product Name='WPhast 0.0' Id='3C1C0D5D-5BB1-421e-9BB4-ABEB5C7ECDF3'
-    Language='1033' Codepage='1252' Version='0.0.0' Manufacturer='U.S. Geological Survey'>
+  <Product
+    Name='WPhast 0.0'
+    Id='3C1C0D5D-5BB1-421e-9BB4-ABEB5C7ECDF3'
+    Language='1033'
+    Codepage='1252'
+    Version='0.0.0'
+    Manufacturer='U.S. Geological Survey'
+    UpgradeCode='BB03D5EE-DB02-463d-8CE4-F7724B006ACF' >
 
     <Package Id='????????-????-????-????-????????????'
       Keywords='Installer'
       Description="USGS WPhast 0.0 Installer"
       Manufacturer='U.S. Geological Survey'
-      InstallerVersion='150'
+      InstallerVersion='200'
       Languages='1033'
       Compressed='yes'
       SummaryCodepage='1252' />
@@ -20,12 +26,13 @@
         <Directory Id='D__USGS' Name='USGS'>
           <Directory Id='INSTALLLOCATION' Name='WPhast' LongName='WPhast 0.0'>
             <Directory Id="D__bin" Name="bin">
-            
+
               <Component Id='C__MainExecutable' Guid='154A8C11-2222-47cb-968A-28012FEAFA34'>
                 <File Id='F__WPhast.exe' Name='WPhast.exe' DiskId='1' src='..\Release\WPhast.exe' Vital='yes'>
-                  <Shortcut Id="startmenuWPhast00" Directory="ProgramMenuDir" Name="WPhast" Icon="WPhast.exe" IconIndex="0" Target="F__MainProgram" />
+                  <Shortcut Id="S__WPhast" Directory="D_PrgMenu.2FB136FF_6AAD_442A_A6EB_99511F1CDF82" Name="WPhast" Icon="WPhast.exe" IconIndex="0" Target="F__MainProgram" />
                 </File>
-                <RemoveFolder Id="Shortcut0" Directory="ProgramMenuDir" On="uninstall" />
+                <Registry Id="R__phast.exe" Root="HKMU" Key="SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\WPhast.exe" Type="string" Value="[#F__WPhast.exe]" />
+                <!-- <RemoveFolder Id="Shortcut0" Directory="ProgramMenuDir" On="uninstall" /> -->
                 <File Id='F__phast.exe' Name='phast.exe' DiskId='1' src='C:\Program Files\USGS\phast-1.1\bin\phast-ser.exe' Vital='yes' Checksum='yes'/>
                 <ProgId Id="WPhast.Document" Description="WPhast.Document" Icon='[!F__WPhast.exe]' IconIndex='1'>
                   <Extension Id="wphast">
@@ -35,10 +42,10 @@
                   </Extension>
                 </ProgId>
               </Component>
-              
+
               <Merge Id="VC_CRT.12121212-6C3B-4C70-8DFF-B3749533716E" Language="1033" src="C:\Program Files\Common Files\Merge Modules\VC_CRT.msm" DiskId="1" />
               <Merge Id="VC_STL.12121212-FF27-4ff8-911C-03CD09DDB3E5" Language="1033" src="C:\Program Files\Common Files\Merge Modules\VC_STL.msm" DiskId="1" />
-              
+
               <Component Id='C__hdf5Library' Guid='BF8F23F9-8A71-441c-9EA3-2CF8A4860F60' >
                 <File Id="F__hdf5dll.dll" Name="hdf5dll.dll" Vital="yes" DiskId='1' src="..\Release\hdf5dll.dll" />
                 <File Id="F__zlib.dll"    Name="zlib.dll" Vital="yes" DiskId='1' src="..\Release\zlib.dll" />
@@ -66,18 +73,18 @@
             <Directory Id="D__doc" Name="doc">
               <Component Id='C__Documentation' Guid='5E5DF2AA-627A-4c53-83F4-665AEA8D66E2' >
                 <File Id='F__phast.pdf' Name='phast.pdf' DiskId='1' src='C:\Program Files\USGS\phast-1.1\doc\phast.pdf' >
-                  <Shortcut Id="S__PHASTManual" Directory="ProgramMenuDir" Name="PHAST" LongName="User's Guide to PHAST (PDF)" />
+                  <Shortcut Id="S__PHASTManual" Directory="D_PrgMenu.2FB136FF_6AAD_442A_A6EB_99511F1CDF82" Name="PHAST" LongName="User's Guide to PHAST (PDF)" />
                 </File>
                 <File Id='F__phreeqc.pdf' Name='phreeqc.pdf' DiskId='1' src='C:\Program Files\USGS\phast-1.1\doc\phreeqc.pdf' >
-                  <Shortcut Id="S__PHREEQCManual" Directory="ProgramMenuDir" Name="PHREEQC" LongName="User's Guide to PHREEQC (Version 2 PDF)" />
+                  <Shortcut Id="S__PHREEQCManual" Directory="D_PrgMenu.2FB136FF_6AAD_442A_A6EB_99511F1CDF82" Name="PHREEQC" LongName="User's Guide to PHREEQC (Version 2 PDF)" />
                 </File>
-                <RemoveFolder Id="RF_ProgramMenuDir" Directory="ProgramMenuDir" On="uninstall" />
+                <!-- <RemoveFolder Id="RF_ProgramMenuDir" Directory="ProgramMenuDir" On="uninstall" /> -->
               </Component>
             </Directory>
-            
-            
+
+
             <Directory Id="D__examples" Name="examples">
-            
+
               <Directory Id="D__decay" Name="decay">
                 <Component Id='C__decay' Guid='C37C0FE8-9FE3-43d3-93D1-578923AB9285' DiskId="1">
                   <File Id="F__decay.chem.dat"  Name="DECAYC~1.DAT" LongName="decay.chem.dat" src="C:\cygwin\home\charlton\programs\WPhast\setup\tree\USGS\WPhast 0.0\examples\decay\decay.chem.dat" />
@@ -85,7 +92,7 @@
                   <File Id="F__decay.wphast"    Name="DECAY~1.WPH" LongName="decay.wphast" src="C:\cygwin\home\charlton\programs\WPhast\setup\tree\USGS\WPhast 0.0\examples\decay\decay.wphast" />
                   <File Id="F__phast.dat.decay" Name="phast.dat" src="C:\cygwin\home\charlton\programs\WPhast\setup\tree\USGS\WPhast 0.0\examples\decay\phast.dat" />
                 </Component>
-              </Directory>              
+              </Directory>
               <Directory Id="D__disp2d" Name="disp2d">
                 <Component Id='C__disp2d' Guid='6D9D633F-DA50-4831-8527-8F0E442D43C4' DiskId="1">
                   <File Id="F__disp2d.chem.dat"  Name="DISP2D~1.DAT" LongName="disp2d.chem.dat" src="C:\cygwin\home\charlton\programs\WPhast\setup\tree\USGS\WPhast 0.0\examples\disp2d\disp2d.chem.dat" />
@@ -94,7 +101,7 @@
                   <File Id="F__phast.dat.disp2d" Name="phast.dat" src="C:\cygwin\home\charlton\programs\WPhast\setup\tree\USGS\WPhast 0.0\examples\disp2d\phast.dat" />
                 </Component>
               </Directory>
-              
+
               <Directory Id="D__ex1" Name="ex1">
                 <Component Id='C__ex1' Guid='8FD4C404-9A57-4457-83A5-329296A74479' DiskId="1">
                   <File Id="F__ex1.chem.dat"  Name="EX1CHE~1.DAT" LongName="ex1.chem.dat" src="C:\cygwin\home\charlton\programs\WPhast\setup\tree\USGS\WPhast 0.0\examples\ex1\ex1.chem.dat" />
@@ -102,14 +109,14 @@
                   <File Id="F__ex1.wphast"    Name="EX1~1.WPH" LongName="ex1.wphast" src="C:\cygwin\home\charlton\programs\WPhast\setup\tree\USGS\WPhast 0.0\examples\ex1\ex1.wphast" />
                   <File Id="F__phast.dat.ex1" Name="phast.dat" src="C:\cygwin\home\charlton\programs\WPhast\setup\tree\USGS\WPhast 0.0\examples\ex1\phast.dat" />
                 </Component>
-              </Directory>              
+              </Directory>
               <Directory Id="D__ex2" Name="ex2">
                 <Component Id='C__ex2' Guid='81D8FC72-1E6E-4545-9DB3-4F234D220B91' DiskId="1">
                   <File Id="F__ex2.chem.dat"  Name="EX2CHE~1.DAT" LongName="ex2.chem.dat" src="C:\cygwin\home\charlton\programs\WPhast\setup\tree\USGS\WPhast 0.0\examples\ex2\ex2.chem.dat" />
                   <File Id="F__ex2.trans.dat" Name="EX2TRA~1.DAT" LongName="ex2.trans.dat" src="C:\cygwin\home\charlton\programs\WPhast\setup\tree\USGS\WPhast 0.0\examples\ex2\ex2.trans.dat" />
                   <File Id="F__phast.dat.ex2" Name="phast.dat" src="C:\cygwin\home\charlton\programs\WPhast\setup\tree\USGS\WPhast 0.0\examples\ex2\phast.dat" />
                 </Component>
-              </Directory>              
+              </Directory>
               <Directory Id="D__ex3" Name="ex3">
                 <Component Id='C__ex3' Guid='79C20B9C-17F2-4f13-8C1A-1FBD514A6B25' DiskId="1">
                   <File Id="F__ex3.chem.dat"  Name="EX3CHE~1.DAT" LongName="ex3.chem.dat" src="C:\cygwin\home\charlton\programs\WPhast\setup\tree\USGS\WPhast 0.0\examples\ex3\ex3.chem.dat" />
@@ -117,7 +124,7 @@
                   <File Id="F__ex3.wphast"    Name="EX3~1.WPH" LongName="ex3.wphast" src="C:\cygwin\home\charlton\programs\WPhast\setup\tree\USGS\WPhast 0.0\examples\ex3\ex3.wphast" />
                   <File Id="F__phast.dat.ex3" Name="phast.dat" src="C:\cygwin\home\charlton\programs\WPhast\setup\tree\USGS\WPhast 0.0\examples\ex3\phast.dat" />
                 </Component>
-              </Directory>              
+              </Directory>
               <Directory Id="D__ex4" Name="ex4">
                 <Component Id='C__ex4' Guid='F594BE7A-F0D2-4f61-9AF3-8FA906393E38' DiskId="1">
                   <File Id="F__ex4.chem.dat"  Name="EX4CHE~1.DAT" LongName="ex4.chem.dat" src="C:\cygwin\home\charlton\programs\WPhast\setup\tree\USGS\WPhast 0.0\examples\ex4\ex4.chem.dat" />
@@ -212,24 +219,31 @@
                   <File Id="F__well.wphast5"   Name="WELL~1.WPH" LongName="well.wphast" src="C:\cygwin\home\charlton\programs\WPhast\setup\tree\USGS\WPhast 0.0\examples\well\well.wphast" />
                 </Component>
               </Directory>
-              
-            </Directory>            
+
+            </Directory>
           </Directory>
         </Directory>
       </Directory>
 
+
+<!--
       <Directory Id="ProgramMenuFolder" Name="PMenu" LongName="Programs">
         <Directory Id="ProgramMenuDir" Name='WPhast00' LongName="WPhast 0.0" />
       </Directory>
+-->
+      <Directory Id="StartMenuFolder.2FB136FF_6AAD_442A_A6EB_99511F1CDF82" Name="StrtFldr">
+        <Directory Id="ProgramMenuFolder.2FB136FF_6AAD_442A_A6EB_99511F1CDF82" Name="PrgFldr">
+          <Directory Id="D_PrgMenu.2FB136FF_6AAD_442A_A6EB_99511F1CDF82" Name="WPhast" LongName="WPhast 0.0" />
+        </Directory>
+      </Directory>
 
-      <Directory Id="DesktopFolder" Name="Desktop" />
     </Directory>
 
     <Feature Id='F__Complete' Title='WPhast 1.0' Description='The complete package.' TypicalDefault='install' Display='expand' Level='1' ConfigurableDirectory='INSTALLLOCATION'>
-    
+
       <Feature Id='F__MainProgram' Title='Program' Description='The main executable.' TypicalDefault='install' Level='1' AllowAdvertise='no'>
         <ComponentRef Id='C__MainExecutable' />
-        <ComponentRef Id='C__hdf5Library' />        
+        <ComponentRef Id='C__hdf5Library' />
         <ComponentRef Id='C__vtkLibrary' />
         <MergeRef Id="VC_CRT.12121212-6C3B-4C70-8DFF-B3749533716E" />
         <MergeRef Id="VC_STL.12121212-FF27-4ff8-911C-03CD09DDB3E5" />
@@ -238,7 +252,7 @@
       <Feature Id='F__Documentation' Title='Documentation' Description='The PHAST manual.' TypicalDefault='install' Level='1'>
         <ComponentRef Id='C__Documentation' />
       </Feature>
-      
+
       <Feature Id='F__Examples' Title='Examples' Description='Example input files' TypicalDefault='install' Level='1'>
         <ComponentRef Id='C__decay' />
         <ComponentRef Id='C__disp2d' />
@@ -246,7 +260,7 @@
         <ComponentRef Id='C__ex2' />
         <ComponentRef Id='C__ex3' />
         <ComponentRef Id='C__ex4' />
-        
+
         <ComponentRef Id='C__free' />
         <ComponentRef Id='C__kindred4.4' />
         <ComponentRef Id='C__leaky' />
@@ -260,8 +274,12 @@
         <ComponentRef Id='C__unconf' />
         <ComponentRef Id='C__well' />
       </Feature>
-      
+
     </Feature>
+
+	<!-- Custom Actions -->
+    <CustomAction Id="ProgramMenuFolder.2FB136FF_6AAD_442A_A6EB_99511F1CDF82" Return="check" Property="ProgramMenuFolder.2FB136FF_6AAD_442A_A6EB_99511F1CDF82" Value="[ProgramMenuFolder]" />
+    <CustomAction Id="StartMenuFolder.2FB136FF_6AAD_442A_A6EB_99511F1CDF82" Return="check" Property="StartMenuFolder.2FB136FF_6AAD_442A_A6EB_99511F1CDF82" Value="[StartMenuFolder]" />
 
     <UI>
       <Property Id="DefaultUIFont">DlgFont8</Property>
@@ -1326,6 +1344,8 @@
         <Show Dialog="PrepareDlg" Before="CostInitialize"></Show>
         <Show Dialog="AdminWelcomeDlg" After="CostFinalize" />
         <Show Dialog="ProgressDlg" After="AdminWelcomeDlg" />
+        <Custom Action="StartMenuFolder.2FB136FF_6AAD_442A_A6EB_99511F1CDF82" Before="ProgramMenuFolder.2FB136FF_6AAD_442A_A6EB_99511F1CDF82" />
+        <Custom Action="ProgramMenuFolder.2FB136FF_6AAD_442A_A6EB_99511F1CDF82" Before="PrepareDlg" />
       </AdminUISequence>
 
       <InstallUISequence>
@@ -1337,6 +1357,8 @@
         <Show Dialog="ResumeDlg" After="WelcomeDlg">Installed AND (RESUME OR Preselected)</Show>
         <Show Dialog="MaintenanceWelcomeDlg" After="ResumeDlg">Installed AND NOT RESUME AND NOT Preselected</Show>
         <Show Dialog="ProgressDlg" After="MaintenanceWelcomeDlg" />
+        <Custom Action="StartMenuFolder.2FB136FF_6AAD_442A_A6EB_99511F1CDF82" Before="ProgramMenuFolder.2FB136FF_6AAD_442A_A6EB_99511F1CDF82" />
+        <Custom Action="ProgramMenuFolder.2FB136FF_6AAD_442A_A6EB_99511F1CDF82" Before="LaunchConditions" />
       </InstallUISequence>
     </UI>
 
@@ -1380,11 +1402,21 @@
     <Property Id="BannerBitmap">bannrbmp</Property>
     <Property Id="ButtonText_OK">OK</Property>
 
-    <AdminExecuteSequence />
+    <AdminExecuteSequence>
+      <Custom Action="ProgramMenuFolder.2FB136FF_6AAD_442A_A6EB_99511F1CDF82" Before="CostInitialize" />
+      <Custom Action="StartMenuFolder.2FB136FF_6AAD_442A_A6EB_99511F1CDF82" Before="ProgramMenuFolder.2FB136FF_6AAD_442A_A6EB_99511F1CDF82" />
+    </AdminExecuteSequence>
 
     <InstallExecuteSequence>
       <RemoveExistingProducts After='InstallFinalize' />
+      <Custom Action="ProgramMenuFolder.2FB136FF_6AAD_442A_A6EB_99511F1CDF82" Before="LaunchConditions" />
+      <Custom Action="StartMenuFolder.2FB136FF_6AAD_442A_A6EB_99511F1CDF82" Before="ProgramMenuFolder.2FB136FF_6AAD_442A_A6EB_99511F1CDF82" />
     </InstallExecuteSequence>
+
+    <AdvertiseExecuteSequence>
+      <Custom Action="ProgramMenuFolder.2FB136FF_6AAD_442A_A6EB_99511F1CDF82" Before="CostInitialize" />
+      <Custom Action="StartMenuFolder.2FB136FF_6AAD_442A_A6EB_99511F1CDF82" Before="ProgramMenuFolder.2FB136FF_6AAD_442A_A6EB_99511F1CDF82" />
+    </AdvertiseExecuteSequence>
 
     <Binary Id="Up" src="Binary\Up.ico" />
     <Binary Id="New" src="Binary\New.ico" />
