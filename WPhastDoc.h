@@ -195,6 +195,12 @@ protected:
 // Generated message map functions
 protected:
 	DECLARE_MESSAGE_MAP()
+#if defined(WPHAST_AUTOMATION)
+	// Generated OLE dispatch map functions
+
+	DECLARE_DISPATCH_MAP()
+	DECLARE_INTERFACE_MAP()
+#endif
 public:
 	virtual BOOL OnOpenDocument(LPCTSTR lpszPathName);
 	BOOL DoImport(LPCTSTR lpszPathName);
@@ -313,6 +319,13 @@ public:
 	// ID_WELLS_UNSELECTALL handlers
 	afx_msg void OnWellsUnselectAll();
 
+protected:
+	enum 
+	{
+		dispidVisible = 1
+	};
+	VARIANT GetVisible(void);
+	void SetVisible(const VARIANT FAR& newVal);
 };
 
 inline vtkPropAssembly* CWPhastDoc::GetPropAssemblyMedia() const

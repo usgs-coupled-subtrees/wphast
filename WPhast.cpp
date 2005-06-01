@@ -77,6 +77,19 @@ CWPhastApp::CWPhastApp()
 
 CWPhastApp theApp;
 
+#if defined(WPHAST_AUTOMATION)
+// This identifier was generated to be statistically unique for your app
+// You may change it if you prefer to choose a specific identifier
+
+// {36353903-2137-43FD-9AD6-40B65A96A839}
+static const CLSID clsid =
+{ 0x36353903, 0x2137, 0x43FD, { 0x9A, 0xD6, 0x40, 0xB6, 0x5A, 0x96, 0xA8, 0x39 } };
+const GUID CDECL BASED_CODE _tlid =
+		{ 0xD2FD46F3, 0xCD0, 0x4432, { 0xB8, 0x80, 0x72, 0xEC, 0xBE, 0x57, 0xD7, 0xD4 } };
+const WORD _wVerMajor = 1;
+const WORD _wVerMinor = 0;
+#endif
+
 
 // CWPhastApp initialization
 
@@ -156,6 +169,18 @@ BOOL CWPhastApp::InitInstance()
 		RUNTIME_CLASS(CMainFrame),       // main SDI frame window
 		RUNTIME_CLASS(CWPhastView));
 	AddDocTemplate(pDocTemplate);
+#if defined(WPHAST_AUTOMATION)
+	// Connect the COleTemplateServer to the document template
+	//  The COleTemplateServer creates new documents on behalf
+	//  of requesting OLE containers by using information
+	//  specified in the document template
+	m_server.ConnectTemplate(clsid, pDocTemplate, FALSE);
+	// Register all OLE server factories as running.  This enables the
+	//  OLE libraries to create objects from other applications
+	COleTemplateServer::RegisterAll();
+		// Note: MDI applications register all server objects without regard
+		//  to the /Embedding or /Automation on the command line
+#endif
 #ifdef RUN_AS_MDI
 	// create main MDI Frame window
 	CMainFrame* pMainFrame = new CMainFrame;
@@ -173,6 +198,54 @@ BOOL CWPhastApp::InitInstance()
 	// Parse command line for standard shell commands, DDE, file open
 	CCommandLineInfo cmdInfo;
 	ParseCommandLine(cmdInfo);
+#if defined(WPHAST_AUTOMATION)
+	// App was launched with /Embedding or /Automation switch.
+	// Run app as automation server.
+	if (cmdInfo.m_bRunEmbedded || cmdInfo.m_bRunAutomated)
+	{
+// COMMENT: {5/31/2005 8:23:21 PM}		char buffer[256];
+// COMMENT: {5/31/2005 8:23:21 PM}		sprintf(buffer, "cmdInfo.m_bRunEmbedded = %d cmdInfo.m_bRunAutomated = %d", cmdInfo.m_bRunEmbedded, cmdInfo.m_bRunAutomated);
+// COMMENT: {5/31/2005 8:23:21 PM}		::AfxMessageBox(buffer);
+// COMMENT: {5/31/2005 8:23:21 PM}		//{{
+// COMMENT: {5/31/2005 8:23:21 PM}		///::AfxMessageBox("Running in automation mode");
+// COMMENT: {5/31/2005 8:23:21 PM}		// Dispatch commands specified on the command line.  Will return FALSE if
+// COMMENT: {5/31/2005 8:23:21 PM}		// app was launched with /RegServer, /Register, /Unregserver or /Unregister.
+// COMMENT: {5/31/2005 8:23:21 PM}		//if (!ProcessShellCommand(cmdInfo))
+// COMMENT: {5/31/2005 8:23:21 PM}			//return FALSE;
+// COMMENT: {5/31/2005 8:23:21 PM}		//}}
+// COMMENT: {5/31/2005 8:23:21 PM}		OpenDefault();
+// COMMENT: {5/31/2005 8:23:21 PM}		m_pMainWnd->ShowWindow(SW_SHOW);
+// COMMENT: {5/31/2005 8:23:21 PM}		m_pMainWnd->UpdateWindow();
+// COMMENT: {5/31/2005 8:23:21 PM}		// call DragAcceptFiles only if there's a suffix
+// COMMENT: {5/31/2005 8:23:21 PM}		//  In an SDI app, this should occur after ProcessShellCommand
+// COMMENT: {5/31/2005 8:23:21 PM}		return TRUE;
+// COMMENT: {5/31/2005 8:23:21 PM}
+// COMMENT: {5/31/2005 8:23:21 PM}		// Don't show the main window
+// COMMENT: {5/31/2005 8:23:21 PM}		//// return TRUE;
+		// Register all OLE server factories as running.  This enables the
+		//  OLE libraries to create objects from other applications
+		COleTemplateServer::RegisterAll();
+
+		// Don't show the main window
+		return TRUE;
+
+	}
+	// App was launched with /Unregserver or /Unregister switch.  Unregister
+	// typelibrary.  Other unregistration occurs in ProcessShellCommand().
+	else if (cmdInfo.m_nShellCommand == CCommandLineInfo::AppUnregister)
+	{
+		m_server.UpdateRegistry(OAT_DISPATCH_OBJECT, NULL, NULL, FALSE);
+		AfxOleUnregisterTypeLib(_tlid, _wVerMajor, _wVerMinor);
+	}
+	// App was launched standalone or with other switches (e.g. /Register
+	// or /Regserver).  Update registry entries, including typelibrary.
+	else
+	{
+		m_server.UpdateRegistry(OAT_DISPATCH_OBJECT);
+		COleObjectFactory::UpdateRegistryAll();
+		AfxOleRegisterTypeLib(AfxGetInstanceHandle(), _tlid);
+	}
+#endif
 	////{{SRC
 	//DebugBreak();
 	if (cmdInfo.m_nShellCommand == CCommandLineInfo::FileNew) {
@@ -358,4 +431,35 @@ void CWPhastApp::OnFileNew()
 		}
 	}
 #endif // RUN_AS_MDI
+}
+
+void CWPhastApp::OpenDefault()
+{
+	if (m_pDocManager != NULL)
+	{
+		POSITION pos = m_pDocManager->GetFirstDocTemplatePosition();
+		if (pos == NULL)
+		{
+			TRACE(traceAppMsg, 0, "Error: no document templates registered with CWinApp.\n");
+			AfxMessageBox(AFX_IDP_FAILED_TO_CREATE_DOC);
+			return;
+		}
+		CDocTemplate* pTemplate = m_pDocManager->GetNextDocTemplate(pos);
+		ASSERT(pTemplate != NULL);
+		ASSERT_KINDOF(CDocTemplate, pTemplate);
+
+		CWPhastDoc* pDoc = static_cast<CWPhastDoc*> (pTemplate->OpenDocumentFile(NULL));
+
+		// The main window has been initialized, so show and update it
+		////m_pMainWnd->ShowWindow(SW_SHOW);
+		////m_pMainWnd->UpdateWindow();
+
+		if (pDoc)
+		{
+			///pDoc->New(CNewModel::Default());
+			pDoc->DoImport("C:\\cygwin\\home\\charlton\\programs\\WPhast\\setup\\tree\\USGS\\WPhast 0.0\\examples\\ex1\\ex1.trans.dat");
+			pDoc->SetModifiedFlag(FALSE);
+		}
+		return;
+	}
 }

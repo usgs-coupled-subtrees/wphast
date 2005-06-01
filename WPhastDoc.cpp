@@ -166,6 +166,26 @@ BEGIN_MESSAGE_MAP(CWPhastDoc, CDocument)
 	ON_COMMAND(ID_WELLS_UNSELECTALL, OnWellsUnselectAll)
 END_MESSAGE_MAP()
 
+#if defined(WPHAST_AUTOMATION)
+BEGIN_DISPATCH_MAP(CWPhastDoc, CDocument)
+// COMMENT: {5/31/2005 9:56:13 PM}	DISP_PROPERTY_EX_ID(CWPhastDoc, "Visible", dispidVisible, GetVisible, SetVisible, VT_BOOL)
+// COMMENT: {5/31/2005 9:56:13 PM}	DISP_PROPERTY_EX_ID(CWPhastDoc, "Vis", dispidVis, GetVisible, SetVisible, VT_VARIANT)
+// COMMENT: {5/31/2005 9:56:13 PM}	DISP_PROPERTY_EX_ID(CWPhastDoc, "visLONG", dispidvisLONG, GetvisLONG, SetvisLONG, VT_I4)
+	DISP_PROPERTY_EX_ID(CWPhastDoc, "Visible", dispidVisible, GetVisible, SetVisible, VT_VARIANT)
+END_DISPATCH_MAP()
+
+// Note: we add support for IID_IWPhast to support typesafe binding
+//  from VBA.  This IID must match the GUID that is attached to the 
+//  dispinterface in the .IDL file.
+
+// {7AF963C5-1815-4D7A-81DC-1987723AB9CE}
+static const IID IID_IWPhast =
+{ 0x7AF963C5, 0x1815, 0x4D7A, { 0x81, 0xDC, 0x19, 0x87, 0x72, 0x3A, 0xB9, 0xCE } };
+
+BEGIN_INTERFACE_MAP(CWPhastDoc, CDocument)
+	INTERFACE_PART(CWPhastDoc, IID_IWPhast, Dispatch)
+END_INTERFACE_MAP()
+#endif
 
 CWPhastDoc::CWPhastDoc()
 : m_pimpl(0)
@@ -184,6 +204,12 @@ CWPhastDoc::CWPhastDoc()
 , m_pPropAssemblyIC(0)
 , m_pPropAssemblyWells(0)
 {
+#if defined(WPHAST_AUTOMATION)
+	EnableAutomation();
+
+	AfxOleLockApp();
+#endif
+
 	ASSERT(this->m_pimpl == 0);
 	this->m_pimpl = new WPhastDocImpl();
 	this->m_pimpl->m_vectorActionsIndex = 0;
@@ -235,6 +261,9 @@ CWPhastDoc::CWPhastDoc()
 	//
 	this->m_pModel = new CNewModel;
 	this->m_pModel->m_printFreq = CPrintFreq::NewDefaults();
+	//{{5/31/2005 10:40:08 PM
+	this->New(CNewModel::Default());
+	//}}5/31/2005 10:40:08 PM
 }
 
 #define CLEANUP_ASSEMBLY_MACRO(PTR_ASSEMBLY) \
@@ -256,6 +285,10 @@ CWPhastDoc::CWPhastDoc()
 
 CWPhastDoc::~CWPhastDoc()
 {
+#if defined(WPHAST_AUTOMATION)
+	AfxOleUnlockApp();
+#endif
+
 	ASSERT(this->m_pimpl);
 	if (this->m_pimpl) {
 		ASSERT(this->m_pimpl->m_vectorActions.empty()); // should be emptied in DeleteContents
@@ -3891,3 +3924,157 @@ void CWPhastDoc::OnWellsUnselectAll()
 	}
 	this->UpdateAllViews(0);
 }
+
+// COMMENT: {5/31/2005 9:53:58 PM}VARIANT_BOOL CWPhastDoc::GetVisible(void)
+// COMMENT: {5/31/2005 9:53:58 PM}{
+// COMMENT: {5/31/2005 9:53:58 PM}	AFX_MANAGE_STATE(AfxGetAppModuleState());
+// COMMENT: {5/31/2005 9:53:58 PM}
+// COMMENT: {5/31/2005 9:53:58 PM}	// TODO: Add your dispatch handler code here
+// COMMENT: {5/31/2005 9:53:58 PM}
+// COMMENT: {5/31/2005 9:53:58 PM}	return VARIANT_TRUE;
+// COMMENT: {5/31/2005 9:53:58 PM}}
+// COMMENT: {5/31/2005 9:53:58 PM}
+// COMMENT: {5/31/2005 9:53:58 PM}void CWPhastDoc::SetVisible(VARIANT_BOOL newVal)
+// COMMENT: {5/31/2005 9:53:58 PM}{
+// COMMENT: {5/31/2005 9:53:58 PM}	AFX_MANAGE_STATE(AfxGetAppModuleState());
+// COMMENT: {5/31/2005 9:53:58 PM}
+// COMMENT: {5/31/2005 9:53:58 PM}	// TODO: Add your property handler code here
+// COMMENT: {5/31/2005 9:53:58 PM}
+// COMMENT: {5/31/2005 9:53:58 PM}	SetModifiedFlag();
+// COMMENT: {5/31/2005 9:53:58 PM}}
+
+VARIANT CWPhastDoc::GetVisible(void)
+{
+	AFX_MANAGE_STATE(AfxGetAppModuleState());
+
+	VARIANT vaResult;
+	VariantInit(&vaResult);
+
+	// TODO: Add your dispatch handler code here
+
+	return vaResult;
+}
+
+//void CWPhastDoc::SetVis(VARIANT newVal)
+void CWPhastDoc::SetVisible(const VARIANT FAR& newVal)
+{
+	AFX_MANAGE_STATE(AfxGetAppModuleState());
+
+	// TODO: Add your property handler code here
+	char buffer[256];
+    switch ( newVal.vt ) 
+    { 
+        case VT_I4 : sprintf( buffer, "VT_I4 %d", newVal.lVal ); break; 
+        case VT_UI1 : sprintf( buffer, "VT_UI1 %d", newVal.bVal ); break; 
+        case VT_I2 : sprintf( buffer, "VT_I2 %d", newVal.iVal ); break; 
+        case VT_R4 : sprintf( buffer, "VT_R4 %f", newVal.fltVal ); break; 
+        case VT_R8 : sprintf( buffer, "VT_R8 %lf", newVal.dblVal ); break; 
+        case VT_BOOL : sprintf( buffer, "VT_BOOL %d", newVal.boolVal ); break; 
+        case VT_ERROR : sprintf( buffer, "VT_ERROR %#x", newVal.scode ); break; 
+        case VT_CY : sprintf( buffer, "VT_CY " ); break; 
+        case VT_DATE : sprintf( buffer, "VT_DATE " ); break; 
+        case VT_BSTR : sprintf( buffer, "VT_BSTR '%ws'", newVal.bstrVal ); break; 
+        case VT_UNKNOWN : sprintf( buffer, "VT_UNKNOWN " ); break; 
+        case VT_DISPATCH : sprintf( buffer, "VT_DISPATCH " ); break; 
+        case VT_BYREF|VT_UI1 : sprintf( buffer, "VT_BYREF|VT_UI1 " ); break; 
+        case VT_BYREF|VT_I2 : sprintf( buffer, "VT_BYREF|VT_I2 " ); break; 
+        case VT_BYREF|VT_I4 : sprintf( buffer, "VT_BYREF|VT_I4 " ); break; 
+        case VT_BYREF|VT_R4 : sprintf( buffer, "VT_BYREF|VT_R4 " ); break; 
+        case VT_BYREF|VT_R8 : sprintf( buffer, "VT_BYREF|VT_R8 " ); break; 
+        case VT_BYREF|VT_BOOL : sprintf( buffer, "VT_BYREF|VT_BOOL " ); break; 
+        case VT_BYREF|VT_ERROR : sprintf( buffer, "VT_BYREF|VT_ERROR " ); break; 
+        case VT_BYREF|VT_CY : sprintf( buffer, "VT_BYREF|VT_CY " ); break; 
+        case VT_BYREF|VT_DATE : sprintf( buffer, "VT_BYREF|VT_DATE " ); break; 
+        case VT_BYREF|VT_BSTR : sprintf( buffer, "VT_BYREF|VT_BSTR " ); break; 
+        case VT_BYREF|VT_UNKNOWN : sprintf( buffer, "VT_BYREF|VT_UNKNOWN " ); break; 
+        case VT_BYREF|VT_DISPATCH : sprintf( buffer, "VT_BYREF|VT_DISPATCH " ); break; 
+        case VT_BYREF|VT_ARRAY : sprintf( buffer, "VT_BYREF|VT_ARRAY " ); break; 
+        case VT_BYREF|VT_VARIANT : sprintf( buffer, "VT_BYREF|VT_VARIANT " ); break; 
+        case VT_I1 : sprintf( buffer, "VT_I1 %d", newVal.bVal ); break; 
+        case VT_UI2 : sprintf( buffer, "VT_UI2 %u", newVal.uiVal ); break; 
+        case VT_UI4 : sprintf( buffer, "VT_UI4 %u", newVal.ulVal ); break; 
+        case VT_INT : sprintf( buffer, "VT_INT %d", newVal.lVal ); break; 
+        case VT_UINT : sprintf( buffer, "VT_UINT %u", newVal.ulVal ); break; 
+        case VT_BYREF|VT_DECIMAL : sprintf( buffer, "VT_BYREF|VT_DECIMAL " ); break; 
+        case VT_BYREF|VT_I1 : sprintf( buffer, "VT_BYREF|VT_I1 " ); break; 
+        case VT_BYREF|VT_UI2 : sprintf( buffer, "VT_BYREF|VT_UI2 " ); break; 
+        case VT_BYREF|VT_UI4 : sprintf( buffer, "VT_BYREF|VT_UI4 " ); break; 
+        case VT_BYREF|VT_INT : sprintf( buffer, "VT_BYREF|VT_INT " ); break; 
+        case VT_BYREF|VT_UINT : sprintf( buffer, "VT_BYREF|VT_UINT " ); break; 
+// COMMENT: {5/31/2005 9:03:11 PM}        case VT_LPSTR : sprintf( buffer, "VT_LPSTR '%s'", newVal.pszVal ); break; 
+// COMMENT: {5/31/2005 9:03:17 PM}        case VT_LPWSTR : sprintf( buffer, "VT_LPWSTR '%ws'", newVal.pwszVal ); break; 
+// COMMENT: {5/31/2005 9:02:57 PM}        case VT_I8 : sprintf( buffer, "VT_I8 %I64d", newVal.hVal ); break; 
+// COMMENT: {5/31/2005 9:02:46 PM}        case VT_UI8 : sprintf( buffer, "VT_I8 %I64u", newVal.hVal ); break; 
+        case VT_VECTOR | VT_I1: 
+            sprintf( buffer, "VT_VECTOR | VT_I1 " ); 
+            break; 
+        case VT_VECTOR | VT_I2: 
+            sprintf( buffer, "VT_VECTOR | VT_I2 " ); 
+            break; 
+        case VT_VECTOR | VT_I4: 
+            sprintf( buffer, "VT_VECTOR | VT_I4 " ); 
+            break; 
+        case VT_VECTOR | VT_I8: 
+            sprintf( buffer, "VT_VECTOR | VT_I8 " ); 
+            break; 
+        case VT_VECTOR | VT_UI1: 
+            sprintf( buffer, "VT_VECTOR | VT_UI1 " ); 
+            break; 
+        case VT_VECTOR | VT_UI2: 
+            sprintf( buffer, "VT_VECTOR | VT_UI2 " ); 
+            break; 
+        case VT_VECTOR | VT_UI4: 
+            sprintf( buffer, "VT_VECTOR | VT_UI4 " ); 
+            break; 
+        case VT_VECTOR | VT_UI8: 
+            sprintf( buffer, "VT_VECTOR | VT_UI8 " ); 
+            break; 
+        case VT_VECTOR | VT_BSTR: 
+            sprintf( buffer, "VT_VECTOR | VT_BSTR " ); 
+            break; 
+        case VT_VECTOR | VT_LPSTR: 
+            sprintf( buffer, "VT_VECTOR | VT_LPSTR " ); 
+            break; 
+        case VT_VECTOR | VT_LPWSTR: 
+            sprintf( buffer, "VT_VECTOR | VT_LPWSTR " ); 
+            break; 
+        case VT_VECTOR | VT_R4: 
+            sprintf( buffer, "VT_VECTOR | VT_R4 " ); 
+            break; 
+        case VT_VECTOR | VT_R8: 
+            sprintf( buffer, "VT_VECTOR | VT_R8 " ); 
+            break; 
+        default : sprintf( buffer, "unknown vt %#x", newVal.vt ); 
+    } 
+	/// ::AfxMessageBox(buffer);
+
+
+	if (newVal.boolVal)
+	{
+		::AfxGetApp()->m_pMainWnd->ShowWindow(SW_SHOW);
+	}
+	else
+	{
+		::AfxGetApp()->m_pMainWnd->ShowWindow(SW_HIDE);
+	}
+
+	/// SetModifiedFlag();
+}
+
+// COMMENT: {5/31/2005 9:56:24 PM}LONG CWPhastDoc::GetvisLONG(void)
+// COMMENT: {5/31/2005 9:56:24 PM}{
+// COMMENT: {5/31/2005 9:56:24 PM}	AFX_MANAGE_STATE(AfxGetAppModuleState());
+// COMMENT: {5/31/2005 9:56:24 PM}
+// COMMENT: {5/31/2005 9:56:24 PM}	// TODO: Add your dispatch handler code here
+// COMMENT: {5/31/2005 9:56:24 PM}
+// COMMENT: {5/31/2005 9:56:24 PM}	return 0;
+// COMMENT: {5/31/2005 9:56:24 PM}}
+// COMMENT: {5/31/2005 9:56:24 PM}
+// COMMENT: {5/31/2005 9:56:24 PM}void CWPhastDoc::SetvisLONG(LONG newVal)
+// COMMENT: {5/31/2005 9:56:24 PM}{
+// COMMENT: {5/31/2005 9:56:24 PM}	AFX_MANAGE_STATE(AfxGetAppModuleState());
+// COMMENT: {5/31/2005 9:56:24 PM}
+// COMMENT: {5/31/2005 9:56:24 PM}	// TODO: Add your property handler code here
+// COMMENT: {5/31/2005 9:56:24 PM}
+// COMMENT: {5/31/2005 9:56:24 PM}	SetModifiedFlag();
+// COMMENT: {5/31/2005 9:56:24 PM}}

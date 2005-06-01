@@ -22,8 +22,13 @@ public:
 // Overrides
 public:
 	virtual BOOL InitInstance();
+	void OpenDefault();
 
 // Implementation
+#if defined(WPHAST_AUTOMATION)
+	COleTemplateServer m_server;
+		// Server object for document creation
+#endif
 	afx_msg void OnAppAbout();
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnFileNew();
