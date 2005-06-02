@@ -203,32 +203,12 @@ BOOL CWPhastApp::InitInstance()
 	// Run app as automation server.
 	if (cmdInfo.m_bRunEmbedded || cmdInfo.m_bRunAutomated)
 	{
-// COMMENT: {5/31/2005 8:23:21 PM}		char buffer[256];
-// COMMENT: {5/31/2005 8:23:21 PM}		sprintf(buffer, "cmdInfo.m_bRunEmbedded = %d cmdInfo.m_bRunAutomated = %d", cmdInfo.m_bRunEmbedded, cmdInfo.m_bRunAutomated);
-// COMMENT: {5/31/2005 8:23:21 PM}		::AfxMessageBox(buffer);
-// COMMENT: {5/31/2005 8:23:21 PM}		//{{
-// COMMENT: {5/31/2005 8:23:21 PM}		///::AfxMessageBox("Running in automation mode");
-// COMMENT: {5/31/2005 8:23:21 PM}		// Dispatch commands specified on the command line.  Will return FALSE if
-// COMMENT: {5/31/2005 8:23:21 PM}		// app was launched with /RegServer, /Register, /Unregserver or /Unregister.
-// COMMENT: {5/31/2005 8:23:21 PM}		//if (!ProcessShellCommand(cmdInfo))
-// COMMENT: {5/31/2005 8:23:21 PM}			//return FALSE;
-// COMMENT: {5/31/2005 8:23:21 PM}		//}}
-// COMMENT: {5/31/2005 8:23:21 PM}		OpenDefault();
-// COMMENT: {5/31/2005 8:23:21 PM}		m_pMainWnd->ShowWindow(SW_SHOW);
-// COMMENT: {5/31/2005 8:23:21 PM}		m_pMainWnd->UpdateWindow();
-// COMMENT: {5/31/2005 8:23:21 PM}		// call DragAcceptFiles only if there's a suffix
-// COMMENT: {5/31/2005 8:23:21 PM}		//  In an SDI app, this should occur after ProcessShellCommand
-// COMMENT: {5/31/2005 8:23:21 PM}		return TRUE;
-// COMMENT: {5/31/2005 8:23:21 PM}
-// COMMENT: {5/31/2005 8:23:21 PM}		// Don't show the main window
-// COMMENT: {5/31/2005 8:23:21 PM}		//// return TRUE;
 		// Register all OLE server factories as running.  This enables the
 		//  OLE libraries to create objects from other applications
 		COleTemplateServer::RegisterAll();
 
 		// Don't show the main window
 		return TRUE;
-
 	}
 	// App was launched with /Unregserver or /Unregister switch.  Unregister
 	// typelibrary.  Other unregistration occurs in ProcessShellCommand().

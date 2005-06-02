@@ -18,6 +18,9 @@ library WPhast
 		[id(1), helpstring("property Visible")] VARIANT Visible;
 
 		methods:
+		[id(2), helpstring("method SaveAs")] VARIANT SaveAs(VARIANT FileName);
+		[id(3), helpstring("method Import")] VARIANT Import(VARIANT FileName);
+		[id(4), helpstring("method Run")] VARIANT Run(void);
 	};
 
 	//  Class information for CWPhastDoc

@@ -322,10 +322,15 @@ public:
 protected:
 	enum 
 	{
-		dispidVisible = 1
+		dispidRun = 4L,		dispidImport = 3L,		dispidSaveAs = 2L,		dispidVisible = 1
 	};
+	// Properties
 	VARIANT GetVisible(void);
-	void SetVisible(const VARIANT FAR& newVal);
+	void SetVisible(const VARIANT& newVal);
+	// Methods
+	VARIANT SaveAs(const VARIANT& FileName);
+	VARIANT Import(const VARIANT& FileName);
+	VARIANT Run(void);
 };
 
 inline vtkPropAssembly* CWPhastDoc::GetPropAssemblyMedia() const

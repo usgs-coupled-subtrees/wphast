@@ -1915,7 +1915,7 @@ herr_t CGlobal::HDFSerializeSetOfTimes(bool bStoring, hid_t loc_id, std::set<Cti
 	hid_t  step_id;
 	hid_t  time_id;
 
-	herr_t status;
+	herr_t status = 0;
 
 	if (bStoring)
 	{
