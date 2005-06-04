@@ -154,6 +154,7 @@ protected:
 	vtkPropAssembly   *m_pPropAssemblyBC;
 	vtkPropAssembly   *m_pPropAssemblyIC;
 	vtkPropAssembly   *m_pPropAssemblyWells;
+	vtkPropAssembly   *m_pPropAssemblyRivers;
 
 	// grid
 	CGridLODActor *m_pGridLODActor;
@@ -301,6 +302,7 @@ public:
 	vtkPropAssembly* GetPropAssemblyIC(void)const;
 	vtkPropAssembly* GetPropAssemblyBC(void)const;
 	vtkPropAssembly* GetPropAssemblyWells(void)const;
+	vtkPropAssembly* GetPropAssemblyRivers(void)const;
 
 public:
 	void GetGrid(CGrid& x, CGrid& y, CGrid& z)const;
@@ -344,3 +346,6 @@ inline vtkPropAssembly* CWPhastDoc::GetPropAssemblyBC() const
 
 inline vtkPropAssembly* CWPhastDoc::GetPropAssemblyWells() const
 { return this->m_pPropAssemblyWells; }
+
+inline vtkPropAssembly* CWPhastDoc::GetPropAssemblyRivers() const
+{ return this->m_pPropAssemblyRivers; }

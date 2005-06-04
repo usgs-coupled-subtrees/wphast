@@ -203,6 +203,7 @@ CWPhastDoc::CWPhastDoc()
 , m_pPropAssemblyBC(0)
 , m_pPropAssemblyIC(0)
 , m_pPropAssemblyWells(0)
+, m_pPropAssemblyRivers(0)
 {
 #if defined(WPHAST_AUTOMATION)
 	EnableAutomation();
@@ -233,14 +234,16 @@ CWPhastDoc::CWPhastDoc()
 
 	// create the prop-assemblies
 	//
-	this->m_pPropAssemblyMedia = vtkPropAssembly::New();
-	this->m_pPropAssemblyIC    = vtkPropAssembly::New();
-	this->m_pPropAssemblyBC    = vtkPropAssembly::New();
-	this->m_pPropAssemblyWells = vtkPropAssembly::New();
+	this->m_pPropAssemblyMedia  = vtkPropAssembly::New();
+	this->m_pPropAssemblyIC     = vtkPropAssembly::New();
+	this->m_pPropAssemblyBC     = vtkPropAssembly::New();
+	this->m_pPropAssemblyWells  = vtkPropAssembly::New();
+	this->m_pPropAssemblyRivers = vtkPropAssembly::New();
 	this->m_pPropCollection->AddItem(this->m_pPropAssemblyMedia);
 	this->m_pPropCollection->AddItem(this->m_pPropAssemblyIC);
 	this->m_pPropCollection->AddItem(this->m_pPropAssemblyBC);
 	this->m_pPropCollection->AddItem(this->m_pPropAssemblyWells);
+	this->m_pPropCollection->AddItem(this->m_pPropAssemblyRivers);
 
 	// create the axes
 	//
@@ -320,6 +323,7 @@ CWPhastDoc::~CWPhastDoc()
 	CLEANUP_ASSEMBLY_MACRO(this->m_pPropAssemblyIC);
 	CLEANUP_ASSEMBLY_MACRO(this->m_pPropAssemblyBC);
 	CLEANUP_ASSEMBLY_MACRO(this->m_pPropAssemblyWells);
+	CLEANUP_ASSEMBLY_MACRO(this->m_pPropAssemblyRivers);	
 
 	ASSERT(this->m_pAxesActor);
 	if (this->m_pAxesActor) {
@@ -1434,6 +1438,7 @@ void CWPhastDoc::DeleteContents()
 	CLEAR_PROP_ASSEMBLY_MACRO(this->m_pPropAssemblyIC);
 	CLEAR_PROP_ASSEMBLY_MACRO(this->m_pPropAssemblyBC);
 	CLEAR_PROP_ASSEMBLY_MACRO(this->m_pPropAssemblyWells);
+	CLEAR_PROP_ASSEMBLY_MACRO(this->m_pPropAssemblyRivers);
 
 	// update tree
 	//
