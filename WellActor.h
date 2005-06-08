@@ -162,6 +162,8 @@ public:
 
 	float GetNormalizedTubeDiameter(void)const;
 
+	void SetRadius(float r);
+
 	void SetWell(const CWellSchedule &well, const CUnits &units);
 	CWellSchedule GetWell(void)const;
 

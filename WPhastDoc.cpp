@@ -59,6 +59,7 @@
 #include "ZoneCreateAction.h"
 #include "AddStressPeriodAction.h"
 #include "WellCreateAction.h"
+#include "RiverCreateAction.h"
 
 
 #include "Unit.h"
@@ -77,6 +78,7 @@
 #include "NewModel.h"
 
 #include "WellActor.h"
+#include "RiverActor.h"
 
 extern void GetDefaultMedia(struct grid_elt* p_grid_elt);
 extern void GetDefaultHeadIC(struct head_ic* p_head_ic);
@@ -1599,11 +1601,16 @@ void CWPhastDoc::SetScale(float x, float y, float z)
 							if (CWellActor *pWellActor = CWellActor::SafeDownCast(prop3D))
 							{
 								pWellActor->SetDefaultTubeDiameter(defaultAxesSize * 0.17 / sqrt(scale[0] * scale[1]));
+								// pWellActor->SetRadius(defaultAxesSize * 0.085);
+							}
+							if (CRiverActor *pRiverActor = CRiverActor::SafeDownCast(prop3D))
+							{
+								pRiverActor->SetRadius(defaultAxesSize * 0.085);
 							}
 						}
 					}
 				}
-			}			
+			}
 		}
 	}
 
@@ -2213,6 +2220,18 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 			delete pAction;
 		}
 
+		// RIVER
+		//
+		for (int i = 0; i < ::count_rivers; ++i)
+		{
+			const River* river_ptr = &::rivers[i];
+			CRiver river(*river_ptr);
+			
+			// not undoable
+			CRiverCreateAction *pAction = new CRiverCreateAction(this, river);
+			pAction->Execute();
+			delete pAction;
+		}
 
 		// IC
 		//
@@ -2728,27 +2747,104 @@ void CWPhastDoc::SetUnits(const CUnits& units)
 		}
 	}
 
-	// Update wells
-	if (vtkPropCollection *pPropCollection = this->GetPropAssemblyWells()->GetParts())
+	//{{{{
+	// set scale for all zones
+	//
+	if (vtkPropCollection* pCollection = this->GetPropCollection())
 	{
-		// determine well diameter for displaying
-		//
+		//{{
 		float *scale = this->GetScale();
 		float *bounds = this->GetGridBounds();
 		float defaultAxesSize = (bounds[1]-bounds[0] + bounds[3]-bounds[2] + bounds[5]-bounds[4])/12;
-		float defaultTubeDiameter = defaultAxesSize * 0.17 / sqrt(scale[0] * scale[1]);
-
-		vtkProp *pProp = 0;
-		pPropCollection->InitTraversal();
-		for (; (pProp = pPropCollection->GetNextProp()); )
+		//}}
+		pCollection->InitTraversal();
+		for (int i = 0; i < pCollection->GetNumberOfItems(); ++i)
 		{
-			if (CWellActor *pWellActor = CWellActor::SafeDownCast(pProp))
+			vtkProp* prop = pCollection->GetNextProp();
+			if (CZoneActor *pZone = CZoneActor::SafeDownCast(prop))
 			{
-				pWellActor->SetUnits(units);
-				pWellActor->SetDefaultTubeDiameter(defaultTubeDiameter);
+				ASSERT(FALSE);
+				pZone->SetUnits(units);
+			}
+			if (vtkAssembly *pAssembly = vtkAssembly::SafeDownCast(prop))
+			{
+				ASSERT(FALSE); // no longer using vtkAssembly ???
+			}
+			if (vtkPropAssembly *pPropAssembly = vtkPropAssembly::SafeDownCast(prop))
+			{
+				if (vtkPropCollection *pPropCollection = pPropAssembly->GetParts())
+				{
+					vtkProp *pProp;
+					pPropCollection->InitTraversal();
+					for (; (pProp = pPropCollection->GetNextProp()); )
+					{
+						if (vtkProp3D *prop3D = vtkProp3D::SafeDownCast(pProp))
+						{
+							if (CZoneActor *pZone = CZoneActor::SafeDownCast(prop3D))
+							{
+								pZone->SetUnits(units);
+							}
+							if (CWellActor *pWellActor = CWellActor::SafeDownCast(prop3D))
+							{
+								pWellActor->SetUnits(units);
+								pWellActor->SetDefaultTubeDiameter(defaultAxesSize * 0.17 / sqrt(scale[0] * scale[1]));
+								// pWellActor->SetRadius(defaultAxesSize * 0.085);
+							}
+							if (CRiverActor *pRiverActor = CRiverActor::SafeDownCast(prop3D))
+							{
+								pRiverActor->SetUnits(units);
+								pRiverActor->SetRadius(defaultAxesSize * 0.085);
+							}
+						}
+					}
+				}
 			}
 		}
 	}
+	//}}}}
+
+// COMMENT: {6/7/2005 6:11:55 PM}	// Update wells
+// COMMENT: {6/7/2005 6:11:55 PM}	if (vtkPropCollection *pPropCollection = this->GetPropAssemblyWells()->GetParts())
+// COMMENT: {6/7/2005 6:11:55 PM}	{
+// COMMENT: {6/7/2005 6:11:55 PM}		// determine well diameter for displaying
+// COMMENT: {6/7/2005 6:11:55 PM}		//
+// COMMENT: {6/7/2005 6:11:55 PM}		float *scale = this->GetScale();
+// COMMENT: {6/7/2005 6:11:55 PM}		float *bounds = this->GetGridBounds();
+// COMMENT: {6/7/2005 6:11:55 PM}		float defaultAxesSize = (bounds[1]-bounds[0] + bounds[3]-bounds[2] + bounds[5]-bounds[4])/12;
+// COMMENT: {6/7/2005 6:11:55 PM}		float defaultTubeDiameter = defaultAxesSize * 0.17 / sqrt(scale[0] * scale[1]);
+// COMMENT: {6/7/2005 6:11:55 PM}
+// COMMENT: {6/7/2005 6:11:55 PM}		vtkProp *pProp = 0;
+// COMMENT: {6/7/2005 6:11:55 PM}		pPropCollection->InitTraversal();
+// COMMENT: {6/7/2005 6:11:55 PM}		for (; (pProp = pPropCollection->GetNextProp()); )
+// COMMENT: {6/7/2005 6:11:55 PM}		{
+// COMMENT: {6/7/2005 6:11:55 PM}			if (CWellActor *pWellActor = CWellActor::SafeDownCast(pProp))
+// COMMENT: {6/7/2005 6:11:55 PM}			{
+// COMMENT: {6/7/2005 6:11:55 PM}				pWellActor->SetUnits(units);
+// COMMENT: {6/7/2005 6:11:55 PM}				pWellActor->SetDefaultTubeDiameter(defaultTubeDiameter);
+// COMMENT: {6/7/2005 6:11:55 PM}			}
+// COMMENT: {6/7/2005 6:11:55 PM}		}
+// COMMENT: {6/7/2005 6:11:55 PM}	}
+// COMMENT: {6/7/2005 6:11:55 PM}
+// COMMENT: {6/7/2005 6:11:55 PM}	// Update rivers
+// COMMENT: {6/7/2005 6:11:55 PM}	if (vtkPropCollection *pPropCollection = this->GetPropAssemblyRivers()->GetParts())
+// COMMENT: {6/7/2005 6:11:55 PM}	{
+// COMMENT: {6/7/2005 6:11:55 PM}		// determine well diameter for displaying
+// COMMENT: {6/7/2005 6:11:55 PM}		//
+// COMMENT: {6/7/2005 6:11:55 PM}		float *bounds = this->GetGridBounds();
+// COMMENT: {6/7/2005 6:11:55 PM}		float defaultAxesSize = (bounds[1]-bounds[0] + bounds[3]-bounds[2] + bounds[5]-bounds[4])/12;
+// COMMENT: {6/7/2005 6:11:55 PM}
+// COMMENT: {6/7/2005 6:11:55 PM}		vtkProp *pProp = 0;
+// COMMENT: {6/7/2005 6:11:55 PM}		pPropCollection->InitTraversal();
+// COMMENT: {6/7/2005 6:11:55 PM}		for (; (pProp = pPropCollection->GetNextProp()); )
+// COMMENT: {6/7/2005 6:11:55 PM}		{
+// COMMENT: {6/7/2005 6:11:55 PM}			if (CRiverActor *pRiverActor = CRiverActor::SafeDownCast(pProp))
+// COMMENT: {6/7/2005 6:11:55 PM}			{
+// COMMENT: {6/7/2005 6:11:55 PM}				pRiverActor->SetUnits(units);
+// COMMENT: {6/7/2005 6:11:55 PM}				pRiverActor->SetRadius(defaultAxesSize * 0.085);
+// COMMENT: {6/7/2005 6:11:55 PM}			}
+// COMMENT: {6/7/2005 6:11:55 PM}		}
+// COMMENT: {6/7/2005 6:11:55 PM}	}
+
 
 
 	// for all views
@@ -3687,8 +3783,7 @@ void CWPhastDoc::Add(CWellActor *pWellActor)
 	//
 	float *bounds = this->GetGridBounds();
 	float defaultAxesSize = (bounds[1]-bounds[0] + bounds[3]-bounds[2] + bounds[5]-bounds[4])/12;
-	// TODO should this have scale factored in ??? (see SetScale)
-	pWellActor->SetDefaultTubeDiameter(defaultAxesSize * 0.17);
+	pWellActor->SetDefaultTubeDiameter(defaultAxesSize * 0.17 / sqrt(scale[0] * scale[1]));
 
 
 	// add to well assembly
@@ -4057,4 +4152,59 @@ VARIANT CWPhastDoc::Run(void)
 	::AfxMessageBox("This method has not been implemented yet");
 
 	return vaResult;
+}
+
+void CWPhastDoc::Add(CRiverActor *pRiverActor)
+{
+	ASSERT(pRiverActor);
+	if (!pRiverActor) return;
+
+	// set scale
+	//
+	float *scale = this->GetScale();
+	pRiverActor->SetScale(scale[0], scale[1], scale[2]);
+
+
+	// set radius
+	//
+	float *bounds = this->GetGridBounds();
+	float defaultAxesSize = (bounds[1]-bounds[0] + bounds[3]-bounds[2] + bounds[5]-bounds[4])/12;
+	// TODO should this have scale factored in ??? (see SetScale)
+	//pWellActor->SetDefaultTubeDiameter(defaultAxesSize * 0.17);
+	pRiverActor->SetRadius(defaultAxesSize * 0.085 / sqrt(scale[0] * scale[1]));
+
+	// set z
+	//
+	pRiverActor->SetZ(bounds[5]);
+
+	// add to well assembly
+	//
+	if (vtkPropAssembly *pPropAssembly = this->GetPropAssemblyRivers())
+	{
+		ASSERT(!pPropAssembly->GetParts()->IsItemPresent(pRiverActor));
+		pPropAssembly->AddPart(pRiverActor);
+		if (!this->GetPropCollection()->IsItemPresent(pPropAssembly))
+		{
+			this->GetPropCollection()->AddItem(pPropAssembly);
+		}
+	}
+
+}
+
+void CWPhastDoc::UnAdd(CRiverActor *pRiverActor)
+{
+	ASSERT(pRiverActor);
+	if (!pRiverActor) return;
+
+	// remove from wells assembly
+	//
+	if (vtkPropAssembly *pPropAssembly = this->GetPropAssemblyRivers())
+	{
+		ASSERT(pPropAssembly->GetParts()->IsItemPresent(pRiverActor));
+		pPropAssembly->RemovePart(pRiverActor);
+		// VTK HACK
+		// This is req'd because ReleaseGraphicsResources is not called when
+		// vtkPropAssembly::RemovePart(vtkProp *prop) is called
+		this->ReleaseGraphicsResources(pRiverActor);
+	}
 }

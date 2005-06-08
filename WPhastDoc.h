@@ -50,6 +50,7 @@ class vtkProp3D;
   class vtkAssembly;
   class vtkPropAssembly;
   class CWellActor;
+  class CRiverActor;
 
 // map
 class CMapImageActor;
@@ -106,6 +107,10 @@ public:
 	void Remove(CWellActor *pWellActor);
 	void UnRemove(CWellActor *pWellActor);
 	void Select(CWellActor *pWellActor);
+
+	// River actions
+	void Add(CRiverActor *pRiverActor);
+	void UnAdd(CRiverActor *pRiverActor);
 
 protected:
 	void InternalAdd(CZoneActor *pZoneActor, bool bAdd);

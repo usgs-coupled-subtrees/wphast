@@ -479,3 +479,8 @@ std::ostream& operator<< (std::ostream &os, const CWellActor &a)
 
 	return os;
 }
+
+void CWellActor::SetRadius(float r)
+{
+	this->m_pTubeFilter->SetRadius(r);
+}

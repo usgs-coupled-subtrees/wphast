@@ -621,6 +621,15 @@
 				RelativePath="ResizeGridAction.cpp">
 			</File>
 			<File
+				RelativePath="River.cpp">
+			</File>
+			<File
+				RelativePath="RiverActor.cpp">
+			</File>
+			<File
+				RelativePath="RiverCreateAction.cpp">
+			</File>
+			<File
 				RelativePath="RunDialog.cpp">
 			</File>
 			<File
@@ -757,11 +766,6 @@
 				<FileConfiguration
 					Name="cppunitRelease|Win32"
 					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCMIDLTool"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AutoDebug|Win32">
 					<Tool
 						Name="VCMIDLTool"/>
 				</FileConfiguration>
@@ -1087,6 +1091,15 @@
 			</File>
 			<File
 				RelativePath="Resource.h">
+			</File>
+			<File
+				RelativePath="River.h">
+			</File>
+			<File
+				RelativePath="RiverActor.h">
+			</File>
+			<File
+				RelativePath="RiverCreateAction.h">
 			</File>
 			<File
 				RelativePath="RunDialog.h">
@@ -3741,15 +3754,15 @@
 			Name="Build Logs"
 			Filter="">
 			<File
-				RelativePath="Debug\BuildLog.htm"
-				DeploymentContent="TRUE">
-			</File>
-			<File
 				RelativePath="Release\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 			<File
 				RelativePath="cppunit\BuildLog.htm"
+				DeploymentContent="TRUE">
+			</File>
+			<File
+				RelativePath="Debug\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 		</Filter>
