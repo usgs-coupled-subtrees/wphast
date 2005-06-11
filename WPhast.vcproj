@@ -220,61 +220,6 @@
 				Name="VCWebDeploymentTool"/>
 		</Configuration>
 		<Configuration
-			Name="cppunitRelease|Win32"
-			OutputDirectory="cppunitRelease"
-			IntermediateDirectory="cppunitRelease"
-			ConfigurationType="1"
-			UseOfMFC="1"
-			CharacterSet="2">
-			<Tool
-				Name="VCCLCompilerTool"
-				Optimization="2"
-				InlineFunctionExpansion="1"
-				OmitFramePointers="TRUE"
-				AdditionalIncludeDirectories="$(DEV_CPPUNIT_INC);$(DEV_VTK42_VS7_DLL_INC);$(DEV_HDF5_INC)"
-				PreprocessorDefinitions="ONLY_FLOW_ONLY_SUPPORTED;__CPPUNIT__;WIN32;_WINDOWS;NDEBUG;__WPHAST__"
-				StringPooling="TRUE"
-				MinimalRebuild="FALSE"
-				RuntimeLibrary="0"
-				EnableFunctionLevelLinking="TRUE"
-				TreatWChar_tAsBuiltInType="TRUE"
-				UsePrecompiledHeader="3"
-				WarningLevel="3"
-				Detect64BitPortabilityProblems="TRUE"
-				DebugInformationFormat="3"/>
-			<Tool
-				Name="VCCustomBuildTool"/>
-			<Tool
-				Name="VCLinkerTool"
-				AdditionalDependencies="cppunitdVS7.lib $(DEV_VTK42_LINK) vtkParallel.lib hdf5dll.lib"
-				LinkIncremental="1"
-				AdditionalLibraryDirectories="$(DEV_CPPUNIT_LIB);$(DEV_VTK42_VS7_DLL_LIB);$(DEV_HDF5_LIBDLL)"
-				GenerateDebugInformation="TRUE"
-				SubSystem="2"
-				OptimizeReferences="2"
-				EnableCOMDATFolding="2"
-				TargetMachine="1"/>
-			<Tool
-				Name="VCMIDLTool"
-				PreprocessorDefinitions="NDEBUG"
-				MkTypLibCompatible="FALSE"/>
-			<Tool
-				Name="VCPostBuildEventTool"/>
-			<Tool
-				Name="VCPreBuildEventTool"/>
-			<Tool
-				Name="VCPreLinkEventTool"/>
-			<Tool
-				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="NDEBUG"
-				Culture="1033"
-				AdditionalIncludeDirectories="$(IntDir)"/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
-			<Tool
-				Name="VCWebDeploymentTool"/>
-		</Configuration>
-		<Configuration
 			Name="AutoRelease|Win32"
 			OutputDirectory="AutoRelease"
 			IntermediateDirectory="AutoRelease"
@@ -492,12 +437,6 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="cppunit|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="cppunitRelease|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
 						UsePrecompiledHeader="0"/>
@@ -763,12 +702,6 @@
 					<Tool
 						Name="VCMIDLTool"/>
 				</FileConfiguration>
-				<FileConfiguration
-					Name="cppunitRelease|Win32"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCMIDLTool"/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="WPhastDoc.cpp">
@@ -843,12 +776,6 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="cppunit|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="1"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="cppunitRelease|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
 						UsePrecompiledHeader="1"/>
@@ -1490,12 +1417,6 @@
 							Name="VCCLCompilerTool"/>
 					</FileConfiguration>
 					<FileConfiguration
-						Name="cppunitRelease|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"/>
-					</FileConfiguration>
-					<FileConfiguration
 						Name="AutoRelease|Win32"
 						ExcludedFromBuild="TRUE">
 						<Tool
@@ -1518,12 +1439,6 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="vtkMemDebug|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="cppunitRelease|Win32"
 						ExcludedFromBuild="TRUE">
 						<Tool
 							Name="VCCLCompilerTool"/>
@@ -1557,12 +1472,6 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="vtkMemDebug|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="cppunitRelease|Win32"
 						ExcludedFromBuild="TRUE">
 						<Tool
 							Name="VCCLCompilerTool"/>
@@ -1634,12 +1543,6 @@
 							Name="VCCLCompilerTool"/>
 					</FileConfiguration>
 					<FileConfiguration
-						Name="cppunitRelease|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"/>
-					</FileConfiguration>
-					<FileConfiguration
 						Name="AutoRelease|Win32"
 						ExcludedFromBuild="TRUE">
 						<Tool
@@ -1679,12 +1582,6 @@
 							UsePrecompiledHeader="3"/>
 					</FileConfiguration>
 					<FileConfiguration
-						Name="cppunitRelease|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"/>
-					</FileConfiguration>
-					<FileConfiguration
 						Name="AutoRelease|Win32"
 						ExcludedFromBuild="TRUE">
 						<Tool
@@ -1713,12 +1610,6 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="vtkMemDebug|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="cppunitRelease|Win32"
 						ExcludedFromBuild="TRUE">
 						<Tool
 							Name="VCCLCompilerTool"/>
@@ -1757,12 +1648,6 @@
 							Name="VCCLCompilerTool"/>
 					</FileConfiguration>
 					<FileConfiguration
-						Name="cppunitRelease|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"/>
-					</FileConfiguration>
-					<FileConfiguration
 						Name="AutoRelease|Win32"
 						ExcludedFromBuild="TRUE">
 						<Tool
@@ -1791,12 +1676,6 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="vtkMemDebug|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="cppunitRelease|Win32"
 						ExcludedFromBuild="TRUE">
 						<Tool
 							Name="VCCLCompilerTool"/>
@@ -1901,12 +1780,6 @@
 							Name="VCCLCompilerTool"/>
 					</FileConfiguration>
 					<FileConfiguration
-						Name="cppunitRelease|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"/>
-					</FileConfiguration>
-					<FileConfiguration
 						Name="AutoRelease|Win32"
 						ExcludedFromBuild="TRUE">
 						<Tool
@@ -1940,12 +1813,6 @@
 							Name="VCCLCompilerTool"/>
 					</FileConfiguration>
 					<FileConfiguration
-						Name="cppunitRelease|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"/>
-					</FileConfiguration>
-					<FileConfiguration
 						Name="AutoRelease|Win32"
 						ExcludedFromBuild="TRUE">
 						<Tool
@@ -1974,12 +1841,6 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="vtkMemDebug|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="cppunitRelease|Win32"
 						ExcludedFromBuild="TRUE">
 						<Tool
 							Name="VCCLCompilerTool"/>
@@ -2051,12 +1912,6 @@
 							Name="VCCLCompilerTool"/>
 					</FileConfiguration>
 					<FileConfiguration
-						Name="cppunitRelease|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"/>
-					</FileConfiguration>
-					<FileConfiguration
 						Name="AutoRelease|Win32"
 						ExcludedFromBuild="TRUE">
 						<Tool
@@ -2085,12 +1940,6 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="vtkMemDebug|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="cppunitRelease|Win32"
 						ExcludedFromBuild="TRUE">
 						<Tool
 							Name="VCCLCompilerTool"/>
@@ -2129,12 +1978,6 @@
 							Name="VCCLCompilerTool"/>
 					</FileConfiguration>
 					<FileConfiguration
-						Name="cppunitRelease|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"/>
-					</FileConfiguration>
-					<FileConfiguration
 						Name="AutoRelease|Win32"
 						ExcludedFromBuild="TRUE">
 						<Tool
@@ -2163,12 +2006,6 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="vtkMemDebug|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="cppunitRelease|Win32"
 						ExcludedFromBuild="TRUE">
 						<Tool
 							Name="VCCLCompilerTool"/>
@@ -2207,12 +2044,6 @@
 							Name="VCCLCompilerTool"/>
 					</FileConfiguration>
 					<FileConfiguration
-						Name="cppunitRelease|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"/>
-					</FileConfiguration>
-					<FileConfiguration
 						Name="AutoRelease|Win32"
 						ExcludedFromBuild="TRUE">
 						<Tool
@@ -2241,12 +2072,6 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="vtkMemDebug|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="cppunitRelease|Win32"
 						ExcludedFromBuild="TRUE">
 						<Tool
 							Name="VCCLCompilerTool"/>
@@ -2351,12 +2176,6 @@
 							Name="VCCLCompilerTool"/>
 					</FileConfiguration>
 					<FileConfiguration
-						Name="cppunitRelease|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"/>
-					</FileConfiguration>
-					<FileConfiguration
 						Name="AutoRelease|Win32"
 						ExcludedFromBuild="TRUE">
 						<Tool
@@ -2390,12 +2209,6 @@
 							Name="VCCLCompilerTool"/>
 					</FileConfiguration>
 					<FileConfiguration
-						Name="cppunitRelease|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"/>
-					</FileConfiguration>
-					<FileConfiguration
 						Name="AutoRelease|Win32"
 						ExcludedFromBuild="TRUE">
 						<Tool
@@ -2424,12 +2237,6 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="vtkMemDebug|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="cppunitRelease|Win32"
 						ExcludedFromBuild="TRUE">
 						<Tool
 							Name="VCCLCompilerTool"/>
@@ -2558,12 +2365,6 @@
 						UsePrecompiledHeader="0"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="cppunitRelease|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="AutoRelease|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2598,12 +2399,6 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="cppunit|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="cppunitRelease|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
 						UsePrecompiledHeader="0"/>
@@ -2651,12 +2446,6 @@
 						UsePrecompiledHeader="0"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="cppunitRelease|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="AutoRelease|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2691,12 +2480,6 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="cppunit|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="cppunitRelease|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
 						UsePrecompiledHeader="0"/>
@@ -2741,12 +2524,6 @@
 						UsePrecompiledHeader="0"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="cppunitRelease|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="AutoRelease|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2781,12 +2558,6 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="cppunit|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="cppunitRelease|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
 						UsePrecompiledHeader="0"/>
@@ -2829,12 +2600,6 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="cppunit|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="cppunitRelease|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
 						UsePrecompiledHeader="0"/>
@@ -2888,12 +2653,6 @@
 						UsePrecompiledHeader="0"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="cppunitRelease|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="AutoRelease|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2933,12 +2692,6 @@
 						UsePrecompiledHeader="0"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="cppunitRelease|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="AutoRelease|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2973,12 +2726,6 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="cppunit|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="cppunitRelease|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
 						UsePrecompiledHeader="0"/>
@@ -3026,12 +2773,6 @@
 						UsePrecompiledHeader="0"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="cppunitRelease|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="AutoRelease|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -3071,12 +2812,6 @@
 						UsePrecompiledHeader="0"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="cppunitRelease|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="AutoRelease|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -3111,12 +2846,6 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="cppunit|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="cppunitRelease|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
 						UsePrecompiledHeader="0"/>
@@ -3168,13 +2897,6 @@
 						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="cppunitRelease|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="AutoRelease|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -3219,12 +2941,6 @@
 						UsePrecompiledHeader="0"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="cppunitRelease|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="AutoRelease|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -3264,12 +2980,6 @@
 						UsePrecompiledHeader="0"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="cppunitRelease|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="AutoRelease|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -3304,12 +3014,6 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="cppunit|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="cppunitRelease|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
 						UsePrecompiledHeader="0"/>
@@ -3358,12 +3062,6 @@
 						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="cppunitRelease|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="AutoRelease|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -3401,12 +3099,6 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="cppunit|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="cppunitRelease|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
 						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
@@ -3454,12 +3146,6 @@
 						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="cppunitRelease|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="AutoRelease|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -3502,12 +3188,6 @@
 						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="cppunitRelease|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="AutoRelease|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -3545,12 +3225,6 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="cppunit|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="cppunitRelease|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
 						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
@@ -3665,12 +3339,6 @@
 							Name="VCCLCompilerTool"/>
 					</FileConfiguration>
 					<FileConfiguration
-						Name="cppunitRelease|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"/>
-					</FileConfiguration>
-					<FileConfiguration
 						Name="AutoRelease|Win32"
 						ExcludedFromBuild="TRUE">
 						<Tool
@@ -3713,12 +3381,6 @@
 							Name="VCCLCompilerTool"/>
 					</FileConfiguration>
 					<FileConfiguration
-						Name="cppunitRelease|Win32"
-						ExcludedFromBuild="TRUE">
-						<Tool
-							Name="VCCLCompilerTool"/>
-					</FileConfiguration>
-					<FileConfiguration
 						Name="AutoRelease|Win32"
 						ExcludedFromBuild="TRUE">
 						<Tool
@@ -3754,15 +3416,15 @@
 			Name="Build Logs"
 			Filter="">
 			<File
-				RelativePath="Release\BuildLog.htm"
-				DeploymentContent="TRUE">
-			</File>
-			<File
 				RelativePath="cppunit\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 			<File
 				RelativePath="Debug\BuildLog.htm"
+				DeploymentContent="TRUE">
+			</File>
+			<File
+				RelativePath="Release\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 		</Filter>
@@ -3791,12 +3453,6 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="cppunit|Win32"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCCLCompilerTool"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="cppunitRelease|Win32"
 					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"/>
@@ -3841,12 +3497,6 @@
 						Name="VCCLCompilerTool"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="cppunitRelease|Win32"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCCLCompilerTool"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="AutoRelease|Win32"
 					ExcludedFromBuild="TRUE">
 					<Tool
@@ -3881,12 +3531,6 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="cppunit|Win32"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCCLCompilerTool"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="cppunitRelease|Win32"
 					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"/>
@@ -3929,6 +3573,45 @@
 		</File>
 		<File
 			RelativePath="WPhast.reg">
+		</File>
+		<File
+			RelativePath="..\..\..\..\..\3RDPARTY\vtk-4-2-1-bin-mem\Common\Debug\vtkCommon.bsc">
+		</File>
+		<File
+			RelativePath="..\..\..\..\..\3RDPARTY\vtk-4-2-1-bin-mem\Filtering\Debug\vtkFiltering.bsc">
+		</File>
+		<File
+			RelativePath="..\..\..\..\..\3RDPARTY\vtk-4-2-1-bin-mem\Graphics\Debug\vtkGraphics.bsc">
+		</File>
+		<File
+			RelativePath="..\..\..\..\..\3RDPARTY\vtk-4-2-1-bin-mem\IO\Debug\vtkIO.bsc">
+		</File>
+		<File
+			RelativePath="..\..\..\..\..\3RDPARTY\vtk-4-2-1-bin-mem\Imaging\Debug\vtkImaging.bsc">
+		</File>
+		<File
+			RelativePath="..\..\..\..\..\3RDPARTY\vtk-4-2-1-bin-mem\Rendering\Debug\vtkRendering.bsc">
+		</File>
+		<File
+			RelativePath="..\..\..\..\..\3RDPARTY\vtk-4-2-1-bin-mem\Utilities\expat\Debug\vtkexpat.bsc">
+		</File>
+		<File
+			RelativePath="..\..\..\..\..\3RDPARTY\vtk-4-2-1-bin-mem\Utilities\freetype\Debug\vtkfreetype.bsc">
+		</File>
+		<File
+			RelativePath="..\..\..\..\..\3RDPARTY\vtk-4-2-1-bin-mem\Utilities\ftgl\Debug\vtkftgl.bsc">
+		</File>
+		<File
+			RelativePath="..\..\..\..\..\3RDPARTY\vtk-4-2-1-bin-mem\Utilities\jpeg\Debug\vtkjpeg.bsc">
+		</File>
+		<File
+			RelativePath="..\..\..\..\..\3RDPARTY\vtk-4-2-1-bin-mem\Utilities\png\Debug\vtkpng.bsc">
+		</File>
+		<File
+			RelativePath="..\..\..\..\..\3RDPARTY\vtk-4-2-1-bin-mem\Utilities\tiff\Debug\vtktiff.bsc">
+		</File>
+		<File
+			RelativePath="..\..\..\..\..\3RDPARTY\vtk-4-2-1-bin-mem\Utilities\zlib\Debug\vtkzlib.bsc">
 		</File>
 	</Files>
 	<Globals>

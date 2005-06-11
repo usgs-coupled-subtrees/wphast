@@ -4169,13 +4169,20 @@ void CWPhastDoc::Add(CRiverActor *pRiverActor)
 	//
 	float *bounds = this->GetGridBounds();
 	float defaultAxesSize = (bounds[1]-bounds[0] + bounds[3]-bounds[2] + bounds[5]-bounds[4])/12;
-	// TODO should this have scale factored in ??? (see SetScale)
-	//pWellActor->SetDefaultTubeDiameter(defaultAxesSize * 0.17);
 	pRiverActor->SetRadius(defaultAxesSize * 0.085 / sqrt(scale[0] * scale[1]));
 
 	// set z
 	//
 	pRiverActor->SetZ(bounds[5]);
+
+
+	POSITION pos = this->GetFirstViewPosition();
+	while (pos != NULL)
+	{
+		CWPhastView *pView = (CWPhastView*) GetNextView(pos);
+		ASSERT_VALID(pView);
+		pRiverActor->SetInteractor(pView->GetRenderWindowInteractor());
+	}	
 
 	// add to well assembly
 	//

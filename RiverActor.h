@@ -13,6 +13,7 @@ class CRiverActor : public vtkAssembly
 public:
 	vtkTypeRevisionMacro(CRiverActor,vtkAssembly);
 	static CRiverActor *New();
+	void PrintSelf(ostream& os, vtkIndent indent);
 
 	void SetRiver(const CRiver &river, const CUnits &units);
 	CRiver GetRiver(void)const;
@@ -29,11 +30,31 @@ public:
 	void UpdatePoints(void);
 	void ClearPoints(void);
 
+	// Description:
+	// This method is used to associate the widget with the render window
+	// interactor.  Observers of the appropriate events invoked in the render
+	// window interactor are set up as a result of this method invocation.
+	// The SetInteractor() method must be invoked prior to enabling the
+	// vtkInteractorObserver.
+	virtual void SetInteractor(vtkRenderWindowInteractor* iren);
+	vtkGetObjectMacro(Interactor, vtkRenderWindowInteractor);
 
 protected:
 	CRiverActor(void);
 	~CRiverActor(void);
-	///void AddPart(vtkProp3D *pProp3D);
+
+	// Description:
+	// Main process event method
+	static void ProcessEvents(vtkObject* object, unsigned long event, void* clientdata, void* calldata);
+
+	// Used to process events
+	vtkCallbackCommand* EventCallbackCommand;
+
+	// Used to associate observers with the interactor
+	vtkRenderWindowInteractor *Interactor;
+
+	// Internal ivars for processing events
+	vtkRenderer *CurrentRenderer;
 
 	std::string         m_serialName;
 	CRiver              m_river;
@@ -47,6 +68,11 @@ protected:
 	std::list<vtkSphereSource*>   m_listSphereSource;
 	std::list<vtkPolyDataMapper*> m_listPolyDataMapper;
 	std::list<vtkActor*>          m_listActor;
+
+	std::list<vtkLineSource*>     m_listLineSource;
+	std::list<vtkPolyDataMapper*> m_listLinePolyDataMapper;
+	std::list<vtkTubeFilter*>     m_listTubeFilter;
+	std::list<vtkActor*>          m_listLineActor;
 
 	vtkPoints     *m_pPoints;
 	vtkTransform  *m_pTransformUnits;
