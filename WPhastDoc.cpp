@@ -4182,6 +4182,7 @@ void CWPhastDoc::Add(CRiverActor *pRiverActor)
 		CWPhastView *pView = (CWPhastView*) GetNextView(pos);
 		ASSERT_VALID(pView);
 		pRiverActor->SetInteractor(pView->GetRenderWindowInteractor());
+		pRiverActor->SetEnabled(1);
 	}	
 
 	// add to well assembly

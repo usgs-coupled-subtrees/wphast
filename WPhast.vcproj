@@ -3416,15 +3416,15 @@
 			Name="Build Logs"
 			Filter="">
 			<File
-				RelativePath="cppunit\BuildLog.htm"
-				DeploymentContent="TRUE">
-			</File>
-			<File
 				RelativePath="Debug\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 			<File
 				RelativePath="Release\BuildLog.htm"
+				DeploymentContent="TRUE">
+			</File>
+			<File
+				RelativePath="cppunit\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 		</Filter>
@@ -3582,6 +3582,9 @@
 		</File>
 		<File
 			RelativePath="..\..\..\..\..\3RDPARTY\vtk-4-2-1-bin-mem\Graphics\Debug\vtkGraphics.bsc">
+		</File>
+		<File
+			RelativePath="..\..\..\..\..\3RDPARTY\vtk-4-2-1-bin-mem\Hybrid\Debug\vtkHybrid.bsc">
 		</File>
 		<File
 			RelativePath="..\..\..\..\..\3RDPARTY\vtk-4-2-1-bin-mem\IO\Debug\vtkIO.bsc">

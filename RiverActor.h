@@ -30,6 +30,8 @@ public:
 	void UpdatePoints(void);
 	void ClearPoints(void);
 
+	void SetEnabled(int enabling);
+
 	// Description:
 	// This method is used to associate the widget with the render window
 	// interactor.  Observers of the appropriate events invoked in the render
@@ -47,6 +49,23 @@ protected:
 	// Main process event method
 	static void ProcessEvents(vtkObject* object, unsigned long event, void* clientdata, void* calldata);
 
+	// Properties used to control the appearance of selected objects and
+	// the manipulator in general.
+	vtkProperty *HandleProperty;
+	vtkProperty *SelectedHandleProperty;
+	void CreateDefaultProperties(void);
+
+	int HighlightHandle(vtkProp *prop);
+
+	// ProcessEvents() dispatches to these methods.
+	void OnMouseMove(void);
+	void OnLeftButtonDown(void);
+	void OnLeftButtonUp(void);
+
+	//
+	void Update(void);
+	double m_WorldPointXYPlane[4];
+
 	// Used to process events
 	vtkCallbackCommand* EventCallbackCommand;
 
@@ -59,6 +78,7 @@ protected:
 	std::string         m_serialName;
 	CRiver              m_river;
 	float               m_fRadius;
+	int                 Enabled;
 
 private:
 	CRiverActor(const CRiverActor&);  // Not implemented.
@@ -77,6 +97,10 @@ protected:
 	vtkPoints     *m_pPoints;
 	vtkTransform  *m_pTransformUnits;
 	vtkTransform  *m_pTransformScale;
-	vtkCellPicker *m_pCellPicker;
 
+	// Do the picking
+	vtkCellPicker   *m_pCellPicker;
+	vtkActor        *CurrentHandle;
+	vtkSphereSource *CurrentSource;
+	vtkIdType        CurrentId;
 };

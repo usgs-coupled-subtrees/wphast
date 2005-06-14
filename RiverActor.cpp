@@ -16,6 +16,11 @@ vtkStandardNewMacro(CRiverActor);
 CRiverActor::CRiverActor(void)
 : m_fRadius(1.0)
 , Interactor(0)
+, CurrentRenderer(0)
+, Enabled(0)
+, CurrentHandle(0)
+, CurrentSource(0)
+, CurrentId(-1)
 {
 	this->m_pPoints         = vtkPoints::New();
 	this->m_pTransformUnits = vtkTransform::New();
@@ -27,19 +32,39 @@ CRiverActor::CRiverActor(void)
 	this->m_pCellPicker->SetTolerance(0.001);
 	this->m_pCellPicker->PickFromListOn();
 
+	static int count = 0;
+	TRACE("CRiverActor ctor %d \n", count);
+	++count;
+
 	this->EventCallbackCommand = vtkCallbackCommand::New();
 	this->EventCallbackCommand->SetClientData(this); 
 	this->EventCallbackCommand->SetCallback(CRiverActor::ProcessEvents);
+
+	this->CreateDefaultProperties();
 }
 
 CRiverActor::~CRiverActor(void)
 {
+	static int count = 0;
+	TRACE("CRiverActor dtor %d \n", count);
+	++count;
+
+	if (this->Interactor)
+	{
+		this->Interactor->RemoveObserver(this->EventCallbackCommand);
+		this->Interactor->UnRegister(this);
+	}
+	this->EventCallbackCommand->Delete();    this->EventCallbackCommand   = 0;
+
 	this->ClearPoints();
 
-	this->m_pPoints->Delete();
-	this->m_pTransformUnits->Delete();
-	this->m_pTransformScale->Delete();
-	this->m_pCellPicker->Delete();
+	this->m_pPoints->Delete();               this->m_pPoints              = 0;
+	this->m_pTransformUnits->Delete();       this->m_pTransformUnits      = 0;
+	this->m_pTransformScale->Delete();       this->m_pTransformScale      = 0;
+	this->m_pCellPicker->Delete();           this->m_pCellPicker          = 0;
+
+	this->HandleProperty->Delete();          this->HandleProperty         = 0;
+	this->SelectedHandleProperty->Delete();  this->SelectedHandleProperty = 0;
 }
 
 vtkIdType CRiverActor::InsertNextPoint(double x, double y, double z)
@@ -62,7 +87,8 @@ vtkIdType CRiverActor::InsertNextPoint(double x, double y, double z)
 
 	vtkActor *pActor = vtkActor::New();
 	pActor->SetMapper(pPolyDataMapper);
-	pActor->GetProperty()->SetColor(0., 0., 1.);
+	pActor->SetProperty(this->HandleProperty);
+	
 
     this->m_pCellPicker->AddPickList(pActor);
 	this->AddPart(pActor);
@@ -84,7 +110,7 @@ vtkIdType CRiverActor::InsertNextPoint(double x, double y, double z)
 		pActor->SetMapper(pPolyDataMapper);
 		pActor->GetProperty()->SetColor(0., 1., 1.);
 		this->AddPart(pActor);
-		this->m_pCellPicker->AddPickList(pActor);
+// COMMENT: {6/13/2005 3:32:40 PM}		this->m_pCellPicker->AddPickList(pActor);
 
 		this->m_listLineSource.push_back(pLineSource);
 		this->m_listTubeFilter.push_back(pTubeFilter);
@@ -124,7 +150,7 @@ void CRiverActor::InsertPoint(vtkIdType id, double x, double y, double z)
 
 	vtkActor *pActor = vtkActor::New();
 	pActor->SetMapper(pPolyDataMapper);
-	pActor->GetProperty()->SetColor(0., 0., 1.);
+	pActor->SetProperty(this->HandleProperty);
 
     this->m_pCellPicker->AddPickList(pActor);
 	this->AddPart(pActor);
@@ -332,25 +358,36 @@ void CRiverActor::SetInteractor(vtkRenderWindowInteractor* i)
 	// if we already have an Interactor then stop observing it
 	if (this->Interactor)
 	{
+		//{{
+		this->Interactor->UnRegister(this);
+		//}}
 		this->Interactor->RemoveObserver(this->EventCallbackCommand);
 	}
 
 	this->Interactor = i;
+	//{{
+	this->Interactor->Register(this);
+	//}}
 
-	if(i)
+	if (i)
 	{
-		i->AddObserver(vtkCommand::EnterEvent, 
-			this->EventCallbackCommand, 
-			1);
-
-		i->AddObserver(vtkCommand::LeaveEvent, 
-			this->EventCallbackCommand, 
-			1);
-
-		i->AddObserver(vtkCommand::MouseMoveEvent, 
-			this->EventCallbackCommand, 
-			1);
+		this->SetEnabled(1);
 	}
+
+// COMMENT: {6/13/2005 3:54:53 PM}	if (i)
+// COMMENT: {6/13/2005 3:54:53 PM}	{
+// COMMENT: {6/13/2005 3:54:53 PM}		i->AddObserver(vtkCommand::LeftButtonPressEvent, 
+// COMMENT: {6/13/2005 3:54:53 PM}			this->EventCallbackCommand, 
+// COMMENT: {6/13/2005 3:54:53 PM}			1);
+// COMMENT: {6/13/2005 3:54:53 PM}
+// COMMENT: {6/13/2005 3:54:53 PM}		i->AddObserver(vtkCommand::LeftButtonReleaseEvent, 
+// COMMENT: {6/13/2005 3:54:53 PM}			this->EventCallbackCommand, 
+// COMMENT: {6/13/2005 3:54:53 PM}			1);
+// COMMENT: {6/13/2005 3:54:53 PM}
+// COMMENT: {6/13/2005 3:54:53 PM}		i->AddObserver(vtkCommand::MouseMoveEvent, 
+// COMMENT: {6/13/2005 3:54:53 PM}			this->EventCallbackCommand, 
+// COMMENT: {6/13/2005 3:54:53 PM}			1);
+// COMMENT: {6/13/2005 3:54:53 PM}	}
 	this->Modified();
 }
 
@@ -383,45 +420,15 @@ void CRiverActor::ProcessEvents(vtkObject* vtkNotUsed(object),
 		break;
 
 	case vtkCommand::MouseMoveEvent:
-		TRACE("MouseMoveEvent\n");
-		{
-			int X = self->Interactor->GetEventPosition()[0];
-			int Y = self->Interactor->GetEventPosition()[1];
-
-			// Okay, we can process this. Try to pick handles first;
-			// if no handles picked, then pick the bounding box.
-			vtkRenderer *ren = self->Interactor->FindPokedRenderer(X,Y);
-// COMMENT: {6/10/2005 2:55:30 PM}			if ( ren != this->CurrentRenderer )
-// COMMENT: {6/10/2005 2:55:30 PM}			{
-// COMMENT: {6/10/2005 2:55:30 PM}				this->State = vtkBoxWidget::Outside;
-// COMMENT: {6/10/2005 2:55:30 PM}				return;
-// COMMENT: {6/10/2005 2:55:30 PM}			}
-			vtkAssemblyPath *path;
-			self->m_pCellPicker->Pick(X, Y, 0.0, ren);
-			path = self->m_pCellPicker->GetPath();
-			if ( path != NULL )
-			{
-				TRACE("Actor found\n");
-				// ASSERT(path->GetFirstNode()->GetProp()->IsA("vtkAssembly"));
-				ostrstream oss;
-				path->GetFirstNode()->GetProp()->PrintSelf(oss, 4);
-				oss << ends;
-				TRACE("\n");
-				afxDump << "vtkAssemblyPath{{\n" << oss.str() << "vtkAssemblyPath}}\n";
-				oss.rdbuf()->freeze(false); // this must be called after str() to avoid memory leak
-				if (vtkActor* pActor = vtkActor::SafeDownCast(path->GetFirstNode()->GetProp()))
-				{
-					pActor->GetProperty()->SetColor(1., 0., 0.);
-					self->Interactor->Render();
-				}
-			}
-		}
+		self->OnMouseMove();
 		break;
 
 	case vtkCommand::LeftButtonPressEvent: 
+		self->OnLeftButtonDown();
 		break;
 
 	case vtkCommand::LeftButtonReleaseEvent:
+		self->OnLeftButtonUp();
 		break;
 
 	case vtkCommand::MiddleButtonPressEvent:
@@ -450,8 +457,351 @@ void CRiverActor::ProcessEvents(vtkObject* vtkNotUsed(object),
 	}
 }
 
+void CRiverActor::OnLeftButtonDown()
+{
+	if (!this->Interactor) return;
+
+	int X = this->Interactor->GetEventPosition()[0];
+	int Y = this->Interactor->GetEventPosition()[1];
+
+	vtkRenderer *ren = this->Interactor->FindPokedRenderer(X,Y);
+	if ( ren != this->CurrentRenderer )
+	{
+		return;
+	}
+
+	vtkAssemblyPath *path;
+	this->m_pCellPicker->Pick(X, Y, 0.0, ren);
+	path = this->m_pCellPicker->GetPath();
+	if (path != NULL)
+	{
+		if (vtkActor* pActor = vtkActor::SafeDownCast(path->GetFirstNode()->GetProp()))
+		{
+			////pActor->GetProperty()->SetColor(1., 0., 0.);
+			////this->Interactor->Render();
+			this->HighlightHandle(path->GetFirstNode()->GetProp());
+			this->EventCallbackCommand->SetAbortFlag(1);
+			this->Interactor->Render();
+		}
+	}
+}
+
+void CRiverActor::OnMouseMove()
+{
+	if (!this->Interactor) return;
+
+	int X = this->Interactor->GetEventPosition()[0];
+	int Y = this->Interactor->GetEventPosition()[1];
+
+	vtkRenderer *ren = this->Interactor->FindPokedRenderer(X,Y);
+	if ( ren != this->CurrentRenderer )
+	{
+		return;
+	}
+
+// COMMENT: {6/13/2005 4:08:46 PM}	vtkAssemblyPath *path;
+// COMMENT: {6/13/2005 4:08:46 PM}	this->m_pCellPicker->Pick(X, Y, 0.0, ren);
+// COMMENT: {6/13/2005 4:08:46 PM}	path = this->m_pCellPicker->GetPath();
+// COMMENT: {6/13/2005 4:08:46 PM}	if (path != NULL)
+// COMMENT: {6/13/2005 4:08:46 PM}	{
+// COMMENT: {6/13/2005 4:08:46 PM}		if (vtkActor* pActor = vtkActor::SafeDownCast(path->GetFirstNode()->GetProp()))
+// COMMENT: {6/13/2005 4:08:46 PM}		{
+// COMMENT: {6/13/2005 4:08:46 PM}			////pActor->GetProperty()->SetColor(1., 0., 0.);
+// COMMENT: {6/13/2005 4:08:46 PM}			////this->Interactor->Render();
+// COMMENT: {6/13/2005 4:08:46 PM}			this->EventCallbackCommand->SetAbortFlag(1);
+// COMMENT: {6/13/2005 4:08:46 PM}			this->Interactor->Render();
+// COMMENT: {6/13/2005 4:08:46 PM}		}
+// COMMENT: {6/13/2005 4:08:46 PM}	}
+
+	//{{
+	if (this->CurrentHandle && this->CurrentSource)
+	{
+		///this->CurrentSource->SetCenter(pt[0], pt[1], pt[2]);
+		TRACE("X=%d Y=%d\n", X, Y);
+		this->Update();
+		TRACE("x=%g y=%g z=%g\n", this->m_WorldPointXYPlane[0], this->m_WorldPointXYPlane[1], this->m_WorldPointXYPlane[2]);
+
+		//{{
+		double pt[3];
+
+		this->m_pPoints->SetPoint(this->CurrentId, this->m_WorldPointXYPlane);
+// COMMENT: {6/13/2005 7:00:13 PM}		////this->m_pTransformScale->TransformPoint(pt, pt);
+// COMMENT: {6/13/2005 7:00:13 PM}		////this->m_pTransformUnits->TransformPoint(pt, pt);
+// COMMENT: {6/13/2005 7:00:13 PM}		this->CurrentSource->SetCenter(this->m_WorldPointXYPlane[0], this->m_WorldPointXYPlane[1], this->m_WorldPointXYPlane[2]);
+// COMMENT: {6/13/2005 7:00:13 PM}		//}}
+		UpdatePoints();
+
+
+		//{{
+		//double pt[3];
+		//pt[0] = x; pt[1] = y; pt[2] = z;
+		//this->m_pTransformScale->GetInverse()->TransformPoint(pt, pt);
+		//this->m_pTransformUnits->GetInverse()->TransformPoint(pt, pt);
+		//this->CurrentSource->SetCenter(pt[0], pt[1], pt[2]);
+		//}}
+
+		this->EventCallbackCommand->SetAbortFlag(1);
+		this->Interactor->Render();
+	}
+	//}}
+
+
+}
+
+void CRiverActor::OnLeftButtonUp()
+{
+	if (!this->Interactor) return;
+
+	int X = this->Interactor->GetEventPosition()[0];
+	int Y = this->Interactor->GetEventPosition()[1];
+
+	vtkRenderer *ren = this->Interactor->FindPokedRenderer(X,Y);
+	if ( ren != this->CurrentRenderer )
+	{
+		return;
+	}
+
+	vtkAssemblyPath *path;
+	this->m_pCellPicker->Pick(X, Y, 0.0, ren);
+	path = this->m_pCellPicker->GetPath();
+	if (path != NULL)
+	{
+		if (vtkActor* pActor = vtkActor::SafeDownCast(path->GetFirstNode()->GetProp()))
+		{
+			////pActor->GetProperty()->SetColor(1., 0., 0.);
+			////this->Interactor->Render();
+			this->HighlightHandle(NULL);
+			this->EventCallbackCommand->SetAbortFlag(1);
+			this->Interactor->Render();
+		}
+	}
+}
+
+int CRiverActor::HighlightHandle(vtkProp *prop)
+{
+	// first unhighlight anything picked
+	if (this->CurrentHandle)
+	{
+		this->CurrentHandle->SetProperty(this->HandleProperty);
+	}
+
+	this->CurrentHandle = (vtkActor *)prop;
+
+	if (this->CurrentHandle)
+	{
+		this->CurrentHandle->SetProperty(this->SelectedHandleProperty);
+		std::list<vtkActor*>::iterator iterActor = this->m_listActor.begin();
+		std::list<vtkSphereSource*>::iterator iterSource = this->m_listSphereSource.begin();
+		for (vtkIdType i = 0; iterActor != this->m_listActor.end(); ++i, ++iterActor, ++iterSource)
+		{
+			if (this->CurrentHandle == *iterActor)
+			{
+				this->CurrentSource = *iterSource;
+				this->CurrentId = i;
+				return i;
+			}
+		}
+	}
+	return -1;
+}
+
+void CRiverActor::CreateDefaultProperties()
+{
+  // Handle properties
+  this->HandleProperty = vtkProperty::New();
+  this->HandleProperty->SetColor(0, 0, 1);
+
+  this->SelectedHandleProperty = vtkProperty::New();
+  this->SelectedHandleProperty->SetColor(1, 0, 0);
+}
+
 void CRiverActor::PrintSelf(ostream& os, vtkIndent indent)
 {
 	this->Superclass::PrintSelf(os, indent);
 	this->m_pPoints->PrintSelf(os, indent.GetNextIndent());
+}
+
+void CRiverActor::SetEnabled(int enabling)
+{
+	if (!this->Interactor)
+	{
+		vtkErrorMacro(<<"The interactor must be set prior to enabling/disabling widget");
+		return;
+	}
+
+	if ( enabling ) //------------------------------------------------------------
+	{
+		vtkDebugMacro(<<"Enabling river");
+
+		if ( this->Enabled ) //already enabled, just return
+		{
+			return;
+		}
+
+		if ( ! this->CurrentRenderer )
+		{
+			this->CurrentRenderer = this->Interactor->FindPokedRenderer(
+				this->Interactor->GetLastEventPosition()[0],
+				this->Interactor->GetLastEventPosition()[1]);
+			if (this->CurrentRenderer == NULL)
+			{
+				return;
+			}
+		}
+
+		this->Enabled = 1;
+
+		// listen to the following events
+		vtkRenderWindowInteractor *i = this->Interactor;
+		i->AddObserver(vtkCommand::MouseMoveEvent, this->EventCallbackCommand, 
+			1);
+		i->AddObserver(vtkCommand::LeftButtonPressEvent, 
+			this->EventCallbackCommand, 1);
+		i->AddObserver(vtkCommand::LeftButtonReleaseEvent, 
+			this->EventCallbackCommand, 1);
+		i->AddObserver(vtkCommand::MiddleButtonPressEvent, 
+			this->EventCallbackCommand, 1);
+		i->AddObserver(vtkCommand::MiddleButtonReleaseEvent, 
+			this->EventCallbackCommand, 1);
+		i->AddObserver(vtkCommand::RightButtonPressEvent, 
+			this->EventCallbackCommand, 1);
+		i->AddObserver(vtkCommand::RightButtonReleaseEvent, 
+			this->EventCallbackCommand, 1);
+// COMMENT: {6/13/2005 3:46:25 PM}
+// COMMENT: {6/13/2005 3:46:25 PM}		// Add the various actors
+// COMMENT: {6/13/2005 3:46:25 PM}		// Add the outline
+// COMMENT: {6/13/2005 3:46:25 PM}		this->CurrentRenderer->AddActor(this->HexActor);
+// COMMENT: {6/13/2005 3:46:25 PM}		this->CurrentRenderer->AddActor(this->HexOutline);
+// COMMENT: {6/13/2005 3:46:25 PM}		this->HexActor->SetProperty(this->OutlineProperty);
+// COMMENT: {6/13/2005 3:46:25 PM}		this->HexOutline->SetProperty(this->OutlineProperty);
+// COMMENT: {6/13/2005 3:46:25 PM}
+// COMMENT: {6/13/2005 3:46:25 PM}		// Add the hex face
+// COMMENT: {6/13/2005 3:46:25 PM}		this->CurrentRenderer->AddActor(this->HexFace);
+// COMMENT: {6/13/2005 3:46:25 PM}		this->HexFace->SetProperty(this->FaceProperty);
+// COMMENT: {6/13/2005 3:46:25 PM}
+// COMMENT: {6/13/2005 3:46:25 PM}		// turn on the handles
+// COMMENT: {6/13/2005 3:46:25 PM}		for (int j=0; j<7; j++)
+// COMMENT: {6/13/2005 3:46:25 PM}		{
+// COMMENT: {6/13/2005 3:46:25 PM}			this->CurrentRenderer->AddActor(this->Handle[j]);
+// COMMENT: {6/13/2005 3:46:25 PM}			this->Handle[j]->SetProperty(this->HandleProperty);
+// COMMENT: {6/13/2005 3:46:25 PM}		}
+// COMMENT: {6/13/2005 3:46:25 PM}
+// COMMENT: {6/13/2005 3:46:25 PM}		this->InvokeEvent(vtkCommand::EnableEvent,NULL);
+	}
+
+	else //disabling-------------------------------------------------------------
+	{
+		vtkDebugMacro(<<"Disabling river");
+
+		if ( ! this->Enabled ) //already disabled, just return
+		{
+			return;
+		}
+
+		this->Enabled = 0;
+
+		// don't listen for events any more
+		this->Interactor->RemoveObserver(this->EventCallbackCommand);
+// COMMENT: {6/13/2005 3:46:25 PM}
+// COMMENT: {6/13/2005 3:46:25 PM}		// turn off the outline
+// COMMENT: {6/13/2005 3:46:25 PM}		this->CurrentRenderer->RemoveActor(this->HexActor);
+// COMMENT: {6/13/2005 3:46:25 PM}		this->CurrentRenderer->RemoveActor(this->HexOutline);
+// COMMENT: {6/13/2005 3:46:25 PM}
+// COMMENT: {6/13/2005 3:46:25 PM}		// turn off the hex face
+// COMMENT: {6/13/2005 3:46:25 PM}		this->CurrentRenderer->RemoveActor(this->HexFace);
+// COMMENT: {6/13/2005 3:46:25 PM}
+// COMMENT: {6/13/2005 3:46:25 PM}		// turn off the handles
+// COMMENT: {6/13/2005 3:46:25 PM}		for (int i=0; i<7; i++)
+// COMMENT: {6/13/2005 3:46:25 PM}		{
+// COMMENT: {6/13/2005 3:46:25 PM}			this->CurrentRenderer->RemoveActor(this->Handle[i]);
+// COMMENT: {6/13/2005 3:46:25 PM}		}
+// COMMENT: {6/13/2005 3:46:25 PM}
+		this->CurrentHandle = NULL;
+// COMMENT: {6/13/2005 3:46:25 PM}		this->InvokeEvent(vtkCommand::DisableEvent,NULL);
+		this->CurrentRenderer = NULL;
+	}
+
+	this->Interactor->Render();
+}
+
+void CRiverActor::Update()
+{
+	if (!this->CurrentRenderer) return;
+
+	int i;
+
+	// get the position of the mouse cursor in screen/window coordinates
+	// (pixel)
+	vtkRenderer *renderer = this->CurrentRenderer;
+	int* pos = this->Interactor->GetEventPosition();
+
+	// get the focal point in world coordinates
+	//
+	vtkCamera *camera = renderer->GetActiveCamera();	
+	float cameraFP[4];
+	camera->GetFocalPoint((float*)cameraFP); cameraFP[3] = 1.0;
+
+	// Convert the focal point coordinates to display (or screen) coordinates.
+	//
+	renderer->SetWorldPoint(cameraFP);
+	renderer->WorldToDisplay();
+	float *displayCoords = renderer->GetDisplayPoint();
+
+	// Convert the selection point into world coordinates.
+	//
+	renderer->SetDisplayPoint(pos[0], pos[1], displayCoords[2]);
+	renderer->DisplayToWorld();
+	float *worldCoords = renderer->GetWorldPoint();
+	if ( worldCoords[3] == 0.0 ) {
+		ASSERT(FALSE);
+		return;
+	}
+	float PickPosition[3];
+	for (i = 0; i < 3; ++i) {
+		PickPosition[i] = worldCoords[i] / worldCoords[3];
+	}
+
+// COMMENT: {6/13/2005 4:43:17 PM}	float* bounds = this->m_pView->GetDocument()->GetGridBounds();
+// COMMENT: {6/13/2005 4:43:17 PM}	float zMin = bounds[4];
+// COMMENT: {6/13/2005 4:43:17 PM}	float zMax = bounds[5];
+	double pt[3];
+	this->m_pPoints->GetPoint(0, pt);
+	double zOrig = pt[2];
+
+	this->m_pTransformScale->TransformPoint(pt, pt);
+	this->m_pTransformUnits->TransformPoint(pt, pt);
+
+	float zPos = pt[2];
+
+	if ( camera->GetParallelProjection() )
+	{
+		double* cameraDOP = camera->GetDirectionOfProjection();
+		// double t = -PickPosition[2] / cameraDOP[2];
+		double t = (zPos - PickPosition[2]) / cameraDOP[2];
+		for (i = 0; i < 2; ++i) {
+			this->m_WorldPointXYPlane[i] = PickPosition[i] + t * cameraDOP[i];
+		}
+	}
+	else
+	{
+		double *cameraPos = camera->GetPosition();
+		// double t = -cameraPos[2] / ( PickPosition[2] - cameraPos[2] );
+		double t = (zPos - cameraPos[2]) / ( PickPosition[2] - cameraPos[2] );
+		for (i = 0; i < 2; ++i) {
+			this->m_WorldPointXYPlane[i] = cameraPos[i] + t * ( PickPosition[i] - cameraPos[i] );
+		}
+	}
+	this->m_WorldPointXYPlane[2] = zPos;
+
+	// SCALE
+	//
+// COMMENT: {6/13/2005 4:42:06 PM}	float* scale = this->m_pView->GetDocument()->GetScale();
+	this->m_pTransformScale->GetInverse()->TransformPoint(this->m_WorldPointXYPlane, this->m_WorldPointXYPlane);
+	this->m_pTransformUnits->GetInverse()->TransformPoint(this->m_WorldPointXYPlane, this->m_WorldPointXYPlane);
+
+	this->m_WorldPointXYPlane[2] = zOrig;
+// COMMENT: {6/13/2005 4:42:12 PM}	// UNITS
+// COMMENT: {6/13/2005 4:42:12 PM}	const CUnits& units = this->m_pView->GetDocument()->GetUnits();
+// COMMENT: {6/13/2005 4:42:12 PM}	const char* xy = units.horizontal.defined ? units.horizontal.input : units.horizontal.si;
+// COMMENT: {6/13/2005 4:42:12 PM}	const char* z = units.vertical.defined ? units.vertical.input : units.vertical.si;
 }
