@@ -45,6 +45,7 @@
 
 #include "ZoneActor.h"
 #include "WellActor.h"
+#include "RiverActor.h"
 
 
 // #include "CreateZoneAction.h"
@@ -1109,6 +1110,34 @@ void CWPhastView::HighlightProp(vtkProp *pProp)
 	//}}
 }
 
+void CWPhastView::HighlightProp3D(vtkProp3D *pProp3D)
+{
+	if (vtkInteractorStyle *pStyle = vtkInteractorStyle::SafeDownCast(this->GetRenderWindowInteractor()->GetInteractorStyle()))
+	{
+		if (vtkInteractorStyleSwitch* switcher = vtkInteractorStyleSwitch::SafeDownCast(pStyle))
+		{
+			pStyle = switcher->GetCurrentStyle();
+		}
+
+		if (pStyle->GetInteractor())
+		{
+			pStyle->HighlightProp3D(pProp3D);
+		}
+		else
+		{
+			// HACK {{
+			// temporarily reattach interactor
+			// pStyle->HighlightProp will attempt to use its Interactor
+			// causing a GPF
+			pStyle->SetInteractor(this->m_RenderWindowInteractor);
+			ASSERT(pStyle->GetInteractor() == this->m_RenderWindowInteractor);
+			pStyle->HighlightProp3D(pProp3D);
+			pStyle->SetInteractor(0);
+			// HACK }}
+		}
+	}
+}
+
 void CWPhastView::OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint)
 {
 	CView::OnUpdate(pSender, lHint, pHint);
@@ -1161,6 +1190,23 @@ void CWPhastView::Update(IObserver* pSender, LPARAM lHint, CObject* /*pHint*/, v
 				this->Invalidate(TRUE);
 				//}}
 			}
+			else if (CRiverActor *pRiverActor = CRiverActor::SafeDownCast(pProp))
+			{
+				//{{ TESTING
+				if (vtkAbstractPropPicker *picker = vtkAbstractPropPicker::SafeDownCast( this->GetRenderWindowInteractor()->GetPicker() )) {
+					vtkAssemblyPath *path = vtkAssemblyPath::New();
+					path->AddNode(pRiverActor, pRiverActor->GetMatrix());
+					picker->SetPath(path);
+					path->Delete();
+				}
+				//}} TESTING
+
+				// Hide Zone BoxWidget
+				this->GetBoxWidget()->Off();
+				this->m_pPointWidget2->Off();
+
+				this->Invalidate(TRUE);
+			}			
 			else
 			{
 				ASSERT(FALSE); // untested

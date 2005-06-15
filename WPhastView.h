@@ -38,6 +38,8 @@ public:
 // Operations
 public:
 	void HighlightProp(vtkProp *pProp);
+	void HighlightProp3D(vtkProp3D *pProp3D);
+
 	// IObserver
 	virtual void Update(IObserver* pSender = 0, LPARAM lHint = 0L, CObject* pHint = 0, vtkObject* pObject = 0);
 

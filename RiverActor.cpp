@@ -8,6 +8,8 @@
 #include <vtkPoints.h>
 #include <vtkCellPicker.h>
 #include "Units.h"
+#include "PropertyTreeControlBar.h"
+#include "DelayRedraw.h"
 
 vtkCxxRevisionMacro(CRiverActor, "$Revision: 244 $");
 vtkStandardNewMacro(CRiverActor);
@@ -477,10 +479,10 @@ void CRiverActor::OnLeftButtonDown()
 	{
 		if (vtkActor* pActor = vtkActor::SafeDownCast(path->GetFirstNode()->GetProp()))
 		{
-			////pActor->GetProperty()->SetColor(1., 0., 0.);
-			////this->Interactor->Render();
 			this->HighlightHandle(path->GetFirstNode()->GetProp());
+			this->m_pPoints->GetPoint(this->GetCurrentPointId(), this->m_WorldPointXYPlane);
 			this->EventCallbackCommand->SetAbortFlag(1);
+			this->InvokeEvent(CRiverActor::StartMovePointEvent, NULL);
 			this->Interactor->Render();
 		}
 	}
@@ -499,53 +501,17 @@ void CRiverActor::OnMouseMove()
 		return;
 	}
 
-// COMMENT: {6/13/2005 4:08:46 PM}	vtkAssemblyPath *path;
-// COMMENT: {6/13/2005 4:08:46 PM}	this->m_pCellPicker->Pick(X, Y, 0.0, ren);
-// COMMENT: {6/13/2005 4:08:46 PM}	path = this->m_pCellPicker->GetPath();
-// COMMENT: {6/13/2005 4:08:46 PM}	if (path != NULL)
-// COMMENT: {6/13/2005 4:08:46 PM}	{
-// COMMENT: {6/13/2005 4:08:46 PM}		if (vtkActor* pActor = vtkActor::SafeDownCast(path->GetFirstNode()->GetProp()))
-// COMMENT: {6/13/2005 4:08:46 PM}		{
-// COMMENT: {6/13/2005 4:08:46 PM}			////pActor->GetProperty()->SetColor(1., 0., 0.);
-// COMMENT: {6/13/2005 4:08:46 PM}			////this->Interactor->Render();
-// COMMENT: {6/13/2005 4:08:46 PM}			this->EventCallbackCommand->SetAbortFlag(1);
-// COMMENT: {6/13/2005 4:08:46 PM}			this->Interactor->Render();
-// COMMENT: {6/13/2005 4:08:46 PM}		}
-// COMMENT: {6/13/2005 4:08:46 PM}	}
-
-	//{{
 	if (this->CurrentHandle && this->CurrentSource)
 	{
-		///this->CurrentSource->SetCenter(pt[0], pt[1], pt[2]);
-		TRACE("X=%d Y=%d\n", X, Y);
+		// update m_WorldPointXYPlane
+		//
 		this->Update();
-		TRACE("x=%g y=%g z=%g\n", this->m_WorldPointXYPlane[0], this->m_WorldPointXYPlane[1], this->m_WorldPointXYPlane[2]);
-
-		//{{
-		double pt[3];
-
 		this->m_pPoints->SetPoint(this->CurrentId, this->m_WorldPointXYPlane);
-// COMMENT: {6/13/2005 7:00:13 PM}		////this->m_pTransformScale->TransformPoint(pt, pt);
-// COMMENT: {6/13/2005 7:00:13 PM}		////this->m_pTransformUnits->TransformPoint(pt, pt);
-// COMMENT: {6/13/2005 7:00:13 PM}		this->CurrentSource->SetCenter(this->m_WorldPointXYPlane[0], this->m_WorldPointXYPlane[1], this->m_WorldPointXYPlane[2]);
-// COMMENT: {6/13/2005 7:00:13 PM}		//}}
 		UpdatePoints();
-
-
-		//{{
-		//double pt[3];
-		//pt[0] = x; pt[1] = y; pt[2] = z;
-		//this->m_pTransformScale->GetInverse()->TransformPoint(pt, pt);
-		//this->m_pTransformUnits->GetInverse()->TransformPoint(pt, pt);
-		//this->CurrentSource->SetCenter(pt[0], pt[1], pt[2]);
-		//}}
 
 		this->EventCallbackCommand->SetAbortFlag(1);
 		this->Interactor->Render();
 	}
-	//}}
-
-
 }
 
 void CRiverActor::OnLeftButtonUp()
@@ -561,19 +527,32 @@ void CRiverActor::OnLeftButtonUp()
 		return;
 	}
 
-	vtkAssemblyPath *path;
-	this->m_pCellPicker->Pick(X, Y, 0.0, ren);
-	path = this->m_pCellPicker->GetPath();
-	if (path != NULL)
+// COMMENT: {6/14/2005 2:38:22 PM}	vtkAssemblyPath *path;
+// COMMENT: {6/14/2005 2:38:22 PM}	this->m_pCellPicker->Pick(X, Y, 0.0, ren);
+// COMMENT: {6/14/2005 2:38:22 PM}	path = this->m_pCellPicker->GetPath();
+// COMMENT: {6/14/2005 2:38:22 PM}	if (path != NULL)
+// COMMENT: {6/14/2005 2:38:22 PM}	{
+// COMMENT: {6/14/2005 2:38:22 PM}		if (vtkActor* pActor = vtkActor::SafeDownCast(path->GetFirstNode()->GetProp()))
+// COMMENT: {6/14/2005 2:38:22 PM}		{
+// COMMENT: {6/14/2005 2:38:22 PM}			this->HighlightHandle(NULL);
+// COMMENT: {6/14/2005 2:38:22 PM}			this->EventCallbackCommand->SetAbortFlag(1);
+// COMMENT: {6/14/2005 2:38:22 PM}			this->InvokeEvent(CRiverActor::EndMovePointEvent, NULL);
+// COMMENT: {6/14/2005 2:38:22 PM}			this->Interactor->Render();
+// COMMENT: {6/14/2005 2:38:22 PM}		}
+// COMMENT: {6/14/2005 2:38:22 PM}	}
+
+	if (this->CurrentHandle && this->CurrentSource)
 	{
-		if (vtkActor* pActor = vtkActor::SafeDownCast(path->GetFirstNode()->GetProp()))
-		{
-			////pActor->GetProperty()->SetColor(1., 0., 0.);
-			////this->Interactor->Render();
-			this->HighlightHandle(NULL);
-			this->EventCallbackCommand->SetAbortFlag(1);
-			this->Interactor->Render();
-		}
+		// update m_WorldPointXYPlane
+		//
+		this->Update();
+		this->m_pPoints->SetPoint(this->CurrentId, this->m_WorldPointXYPlane);
+		UpdatePoints();
+
+		this->HighlightHandle(NULL);
+		this->EventCallbackCommand->SetAbortFlag(1);
+		this->InvokeEvent(CRiverActor::EndMovePointEvent, NULL);
+		this->Interactor->Render();
 	}
 }
 
@@ -752,18 +731,17 @@ void CRiverActor::Update()
 	renderer->SetDisplayPoint(pos[0], pos[1], displayCoords[2]);
 	renderer->DisplayToWorld();
 	float *worldCoords = renderer->GetWorldPoint();
-	if ( worldCoords[3] == 0.0 ) {
+	if ( worldCoords[3] == 0.0 )
+	{
 		ASSERT(FALSE);
 		return;
 	}
 	float PickPosition[3];
-	for (i = 0; i < 3; ++i) {
+	for (i = 0; i < 3; ++i)
+	{
 		PickPosition[i] = worldCoords[i] / worldCoords[3];
 	}
 
-// COMMENT: {6/13/2005 4:43:17 PM}	float* bounds = this->m_pView->GetDocument()->GetGridBounds();
-// COMMENT: {6/13/2005 4:43:17 PM}	float zMin = bounds[4];
-// COMMENT: {6/13/2005 4:43:17 PM}	float zMax = bounds[5];
 	double pt[3];
 	this->m_pPoints->GetPoint(0, pt);
 	double zOrig = pt[2];
@@ -776,32 +754,181 @@ void CRiverActor::Update()
 	if ( camera->GetParallelProjection() )
 	{
 		double* cameraDOP = camera->GetDirectionOfProjection();
-		// double t = -PickPosition[2] / cameraDOP[2];
 		double t = (zPos - PickPosition[2]) / cameraDOP[2];
-		for (i = 0; i < 2; ++i) {
+		for (i = 0; i < 2; ++i)
+		{
 			this->m_WorldPointXYPlane[i] = PickPosition[i] + t * cameraDOP[i];
 		}
 	}
 	else
 	{
 		double *cameraPos = camera->GetPosition();
-		// double t = -cameraPos[2] / ( PickPosition[2] - cameraPos[2] );
-		double t = (zPos - cameraPos[2]) / ( PickPosition[2] - cameraPos[2] );
-		for (i = 0; i < 2; ++i) {
-			this->m_WorldPointXYPlane[i] = cameraPos[i] + t * ( PickPosition[i] - cameraPos[i] );
+		double t = (zPos - cameraPos[2]) / (PickPosition[2] - cameraPos[2]);
+		for (i = 0; i < 2; ++i)
+		{
+			this->m_WorldPointXYPlane[i] = cameraPos[i] + t * (PickPosition[i] - cameraPos[i]);
 		}
 	}
-	this->m_WorldPointXYPlane[2] = zPos;
+// COMMENT: {6/13/2005 7:49:38 PM}	this->m_WorldPointXYPlane[2] = zPos;
 
-	// SCALE
+	// UN-SCALE
 	//
-// COMMENT: {6/13/2005 4:42:06 PM}	float* scale = this->m_pView->GetDocument()->GetScale();
 	this->m_pTransformScale->GetInverse()->TransformPoint(this->m_WorldPointXYPlane, this->m_WorldPointXYPlane);
 	this->m_pTransformUnits->GetInverse()->TransformPoint(this->m_WorldPointXYPlane, this->m_WorldPointXYPlane);
-
 	this->m_WorldPointXYPlane[2] = zOrig;
-// COMMENT: {6/13/2005 4:42:12 PM}	// UNITS
-// COMMENT: {6/13/2005 4:42:12 PM}	const CUnits& units = this->m_pView->GetDocument()->GetUnits();
-// COMMENT: {6/13/2005 4:42:12 PM}	const char* xy = units.horizontal.defined ? units.horizontal.input : units.horizontal.si;
-// COMMENT: {6/13/2005 4:42:12 PM}	const char* z = units.vertical.defined ? units.vertical.input : units.vertical.si;
 }
+
+void CRiverActor::Add(CPropertyTreeControlBar *pTree)
+{
+	CTreeCtrlNode node = pTree->GetRiversNode();
+	this->m_node = node.InsertAfter(_T(""), TVI_LAST);
+	this->Update(this->m_node);
+	this->m_node.SetData((DWORD_PTR)this);
+	if (this->GetVisibility())
+	{
+		this->m_node.SetState(INDEXTOSTATEIMAGEMASK(BST_CHECKED + 1), TVIS_STATEIMAGEMASK);
+	}
+	else
+	{
+		this->m_node.SetState(INDEXTOSTATEIMAGEMASK(BST_UNCHECKED + 1), TVIS_STATEIMAGEMASK);
+	}
+	VERIFY(this->m_node.Select());
+}
+
+void CRiverActor::UnAdd(CPropertyTreeControlBar *pTree)
+{
+	ASSERT(FALSE); // TODO
+}
+
+void CRiverActor::Remove(CPropertyTreeControlBar *pTree)
+{
+	ASSERT(FALSE); // TODO
+}
+
+void CRiverActor::UnRemove(CPropertyTreeControlBar *pTree)
+{
+	ASSERT(FALSE); // TODO
+}
+
+void CRiverActor::Update(CTreeCtrlNode node)
+{
+	// delay the refresh
+	//
+	CDelayRedraw redraw(node.GetWnd());
+
+	// store expanded states
+	bool bMainExpanded = false;
+	if (node.HasChildren())
+	{
+		bMainExpanded = ((node.GetState(TVIS_EXPANDED) & TVIS_EXPANDED) != 0);
+	}
+
+	// remove all previous items
+	//
+	while (node.HasChildren())
+	{
+		node.GetChild().Delete();
+	}
+
+	CString strItem;
+	if (this->m_river.description.empty())
+	{
+		strItem.Format("River %d", this->m_river.n_user);
+	}
+	else
+	{
+		strItem.Format("River %d %s", this->m_river.n_user, this->m_river.description.c_str());
+	}
+	node.SetText(strItem);
+
+	std::list<CRiverPoint>::const_iterator it = this->m_river.m_listPoints.begin();
+	for (; it != this->m_river.m_listPoints.end(); ++it)
+	{
+		strItem.Format("point %g   %g", it->x, it->y);
+		CTreeCtrlNode pointBranch = node.AddTail(strItem);
+	}
+
+	if (bMainExpanded)
+	{
+		node.Expand(TVE_EXPAND);
+	}
+}
+
+vtkActor* CRiverActor::GetPoint(int index)
+{
+	std::list<vtkActor*>::iterator iterActor = this->m_listActor.begin();
+	for (int i = 0; iterActor != this->m_listActor.end(); ++i, ++iterActor)
+	{
+		if (i == index)
+		{
+			return *iterActor;
+		}
+	}
+	ASSERT(FALSE);
+	return NULL;
+}
+
+void CRiverActor::SelectPoint(int index)
+{
+	this->HighlightHandle(NULL);
+	this->HighlightHandle(this->GetPoint(index));
+	//{{
+	this->CurrentSource = NULL;
+	//}}
+	if (this->Interactor)
+	{
+		this->Interactor->Render();
+	}
+}
+
+void CRiverActor::ClearSelection(void)
+{
+	this->HighlightHandle(NULL);
+}
+
+vtkIdType CRiverActor::GetCurrentPointId(void)const
+{
+	return this->CurrentId;
+}
+
+double* CRiverActor::GetCurrentPointPosition(void)
+{
+	return this->m_WorldPointXYPlane;
+}
+
+void CRiverActor::GetCurrentPointPosition(double x[3])const
+{
+	x[0] = this->m_WorldPointXYPlane[0];
+	x[1] = this->m_WorldPointXYPlane[1];
+	x[2] = this->m_WorldPointXYPlane[2];
+}
+
+void CRiverActor::MovePoint(vtkIdType id, double x, double y)
+{
+	if (this->m_pPoints)
+	{
+		double pt[3];
+		this->m_pPoints->GetPoint(id, pt);
+		pt[0] = x;
+		pt[1] = y;
+		this->m_pPoints->SetPoint(id, pt);
+		this->UpdatePoints();
+		if (this->Interactor)
+		{
+			this->Interactor->Render();
+		}
+	}
+
+	std::list<CRiverPoint>::iterator iter = this->m_river.m_listPoints.begin();
+	for (vtkIdType i = 0; iter != this->m_river.m_listPoints.end(); ++i, ++iter)
+	{
+		if (id == i)
+		{
+			(*iter).x = x;
+			(*iter).y = y;
+			break;
+		}
+	}
+	this->Update(this->m_node);
+}
+

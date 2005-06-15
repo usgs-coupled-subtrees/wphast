@@ -569,6 +569,9 @@
 				RelativePath="RiverCreateAction.cpp">
 			</File>
 			<File
+				RelativePath="RiverMovePointAction.cpp">
+			</File>
+			<File
 				RelativePath="RunDialog.cpp">
 			</File>
 			<File
@@ -1027,6 +1030,9 @@
 			</File>
 			<File
 				RelativePath="RiverCreateAction.h">
+			</File>
+			<File
+				RelativePath="RiverMovePointAction.h">
 			</File>
 			<File
 				RelativePath="RunDialog.h">

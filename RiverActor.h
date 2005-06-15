@@ -4,9 +4,11 @@
 #include <vtkAssembly.h>
 #include <vtkIdType.h>
 
-#include "River.h"
+#include "River.h"          // CRiver
+#include "tree.h"           // CTreeCtrlNode
 
 class CUnits;
+class CPropertyTreeControlBar;
 
 class CRiverActor : public vtkAssembly
 {
@@ -29,8 +31,32 @@ public:
 
 	void UpdatePoints(void);
 	void ClearPoints(void);
+	void SelectPoint(int index);
+	vtkActor* GetPoint(int index);
+	void ClearSelection(void);
 
 	void SetEnabled(int enabling);
+
+	// CPropertyTreeControlBar operations
+	//
+	void Add(CPropertyTreeControlBar *pTree);
+	void UnAdd(CPropertyTreeControlBar *pTree);
+
+	void Remove(CPropertyTreeControlBar *pTree);
+	void UnRemove(CPropertyTreeControlBar *pTree);
+
+	void Update(CTreeCtrlNode node);
+
+	enum EventIds {
+		StartMovePointEvent = vtkCommand::UserEvent + 500,
+		EndMovePointEvent
+	};
+
+	void MovePoint(vtkIdType id, double x, double y);
+
+	vtkIdType GetCurrentPointId(void)const;
+	double*   GetCurrentPointPosition(void);
+	void      GetCurrentPointPosition(double x[3])const;
 
 	// Description:
 	// This method is used to associate the widget with the render window
@@ -79,6 +105,7 @@ protected:
 	CRiver              m_river;
 	float               m_fRadius;
 	int                 Enabled;
+	///double              currentPoint[3];
 
 private:
 	CRiverActor(const CRiverActor&);  // Not implemented.
@@ -103,4 +130,7 @@ protected:
 	vtkActor        *CurrentHandle;
 	vtkSphereSource *CurrentSource;
 	vtkIdType        CurrentId;
+
+	CTreeCtrlNode       m_node;
+
 };

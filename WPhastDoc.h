@@ -51,6 +51,7 @@ class vtkProp3D;
   class vtkPropAssembly;
   class CWellActor;
   class CRiverActor;
+  class CRiverMovePointAction;
 
 // map
 class CMapImageActor;
@@ -111,6 +112,9 @@ public:
 	// River actions
 	void Add(CRiverActor *pRiverActor);
 	void UnAdd(CRiverActor *pRiverActor);
+	void Select(CRiverActor *pRiverActor);
+
+	static void RiverListener(vtkObject* caller, unsigned long eid, void* clientdata, void *calldata);
 
 protected:
 	void InternalAdd(CZoneActor *pZoneActor, bool bAdd);
@@ -179,6 +183,10 @@ protected:
 // COMMENT: {5/5/2005 3:51:04 PM}	CPrintFreq    *m_pPrintFreq;
 
 	CNewModel     *m_pModel;
+
+	// callbacks
+	vtkCallbackCommand    *RiverCallbackCommand;
+	CRiverMovePointAction *RiverMovePointAction;
 
 
 	// properties

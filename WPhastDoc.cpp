@@ -35,6 +35,7 @@
 #include "ICZoneActor.h"
 
 #include "ISerial.h"
+#include "DelayRedraw.h"
 
 ////#include "ZoneLODActor.h"
 #include "GridLODActor.h"
@@ -60,7 +61,7 @@
 #include "AddStressPeriodAction.h"
 #include "WellCreateAction.h"
 #include "RiverCreateAction.h"
-
+#include "RiverMovePointAction.h"
 
 #include "Unit.h"
 #include "Units.h"
@@ -206,6 +207,8 @@ CWPhastDoc::CWPhastDoc()
 , m_pPropAssemblyIC(0)
 , m_pPropAssemblyWells(0)
 , m_pPropAssemblyRivers(0)
+, RiverCallbackCommand(0)
+, RiverMovePointAction(0)
 {
 #if defined(WPHAST_AUTOMATION)
 	EnableAutomation();
@@ -266,9 +269,13 @@ CWPhastDoc::CWPhastDoc()
 	//
 	this->m_pModel = new CNewModel;
 	this->m_pModel->m_printFreq = CPrintFreq::NewDefaults();
-	//{{5/31/2005 10:40:08 PM
 	this->New(CNewModel::Default());
-	//}}5/31/2005 10:40:08 PM
+
+	// river event listener
+	//
+	this->RiverCallbackCommand = vtkCallbackCommand::New();
+	this->RiverCallbackCommand->SetClientData(this);
+	this->RiverCallbackCommand->SetCallback(CWPhastDoc::RiverListener);
 }
 
 #define CLEANUP_ASSEMBLY_MACRO(PTR_ASSEMBLY) \
@@ -344,6 +351,13 @@ CWPhastDoc::~CWPhastDoc()
 		this->m_pMapActor->Delete();
 		this->m_pMapActor = 0;
 	}
+
+	// callbacks
+	//
+	if (this->RiverCallbackCommand)
+	{
+		this->RiverCallbackCommand->Delete();
+	}
 }
 
 BOOL CWPhastDoc::OnNewDocument()
@@ -358,7 +372,6 @@ BOOL CWPhastDoc::OnNewDocument()
 
 	return TRUE;
 }
-
 
 // CWPhastDoc serialization
 
@@ -443,6 +456,19 @@ void CWPhastDoc::Serialize(CArchive& ar)
 			CString status(_T("Loading..."));
 			pWnd->SetWindowText(status);
 		}
+
+		// delay redrawing treectrl
+		//
+		CWnd *pWndTreeCtrl = 0;
+		if (CPropertyTreeControlBar *pPropertyTreeControlBar = this->GetPropertyTreeControlBar())
+		{
+			pWndTreeCtrl = pPropertyTreeControlBar->GetTreeCtrl();
+		}
+		CDelayRedraw delayTree(pWndTreeCtrl);
+
+		// delay redrawing render window
+		//
+		CDelayRedraw delayRender(::AfxGetMainWnd()->GetActiveWindow());
 
 		CHDFMirrorFile* pFile = (CHDFMirrorFile*)ar.GetFile();
 		ASSERT(pFile->GetHID() > 0);
@@ -554,8 +580,6 @@ void CWPhastDoc::Serialize(CArchive& ar)
 		pWnd->SetWindowText(status);
 	}
 }
-
-
 
 void CWPhastDoc::SerializeMedia(bool bStoring, hid_t loc_id)
 {
@@ -1631,6 +1655,10 @@ void CWPhastDoc::SetScale(float x, float y, float z)
 				{
 					pZone->Select(pView);
 				}
+				else
+				{
+					pView->HighlightProp3D(prop); // doesn't immediately render
+				}
 			}
 		}
 
@@ -2067,6 +2095,16 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 
 	CPhastInput* pInput = CPhastInput::New(ifs, strPrefix);
 	if (!pInput) return FALSE;
+
+
+	// delay redrawing treectrl
+	//
+	CWnd *pWnd = 0;
+	if (CPropertyTreeControlBar *pPropertyTreeControlBar = this->GetPropertyTreeControlBar())
+	{
+		pWnd = pPropertyTreeControlBar->GetTreeCtrl();
+	}
+	CDelayRedraw delayTree(pWnd);
 
 	try
 	{
@@ -3626,6 +3664,19 @@ void CWPhastDoc::ClearSelection(void)
 			pWPhastView->ClearSelection();
 		}
 	}
+
+	// clear selected river points
+	//
+	vtkPropCollection *pPropCollection = this->GetPropAssemblyRivers()->GetParts();
+	pPropCollection->InitTraversal();
+	vtkProp* pProp = pPropCollection->GetNextProp();
+	for (; pProp; pProp = pPropCollection->GetNextProp())
+	{
+		if (CRiverActor *pActor = CRiverActor::SafeDownCast(pProp))
+		{
+			pActor->ClearSelection();
+		}
+	}
 }
 
 void CWPhastDoc::Add(CZoneActor *pZoneActor)
@@ -3937,6 +3988,11 @@ void CWPhastDoc::Select(CWellActor *pWellActor)
 	this->Notify(0, WPN_SELCHANGED, 0, pWellActor);
 }
 
+void CWPhastDoc::Select(CRiverActor *pRiverActor)
+{
+	this->Notify(0, WPN_SELCHANGED, 0, pRiverActor);
+}
+
 void CWPhastDoc::GetGrid(CGrid& x, CGrid& y, CGrid& z)const
 {
 	this->m_pGridLODActor->GetGrid(x, y, z);
@@ -4159,6 +4215,11 @@ void CWPhastDoc::Add(CRiverActor *pRiverActor)
 	ASSERT(pRiverActor);
 	if (!pRiverActor) return;
 
+	// add listeners
+	//
+	pRiverActor->AddObserver(CRiverActor::StartMovePointEvent, RiverCallbackCommand);
+	pRiverActor->AddObserver(CRiverActor::EndMovePointEvent, RiverCallbackCommand);
+
 	// set scale
 	//
 	float *scale = this->GetScale();
@@ -4185,7 +4246,7 @@ void CWPhastDoc::Add(CRiverActor *pRiverActor)
 		pRiverActor->SetEnabled(1);
 	}	
 
-	// add to well assembly
+	// add to river assembly
 	//
 	if (vtkPropAssembly *pPropAssembly = this->GetPropAssemblyRivers())
 	{
@@ -4197,6 +4258,16 @@ void CWPhastDoc::Add(CRiverActor *pRiverActor)
 		}
 	}
 
+	// add to property tree
+	//
+	if (CPropertyTreeControlBar *pTree = this->GetPropertyTreeControlBar())
+	{
+		pRiverActor->Add(pTree);
+	}
+
+	// render
+	//
+	this->UpdateAllViews(0);
 }
 
 void CWPhastDoc::UnAdd(CRiverActor *pRiverActor)
@@ -4216,3 +4287,31 @@ void CWPhastDoc::UnAdd(CRiverActor *pRiverActor)
 		this->ReleaseGraphicsResources(pRiverActor);
 	}
 }
+
+void CWPhastDoc::RiverListener(vtkObject* caller, unsigned long eid, void* clientdata, void *calldata)
+{
+	ASSERT(caller->IsA("CRiverActor"));
+	ASSERT(clientdata);
+
+	if (CRiverActor* river = CRiverActor::SafeDownCast(caller))
+	{
+		CWPhastDoc* self = reinterpret_cast<CWPhastDoc*>(clientdata);
+
+		switch (eid)
+		{
+		case CRiverActor::StartMovePointEvent:
+			ASSERT(self->RiverMovePointAction == 0);
+			self->RiverMovePointAction = new CRiverMovePointAction(river, self, river->GetCurrentPointId(), river->GetCurrentPointPosition()[0], river->GetCurrentPointPosition()[1]);
+			break;
+		case CRiverActor::EndMovePointEvent:
+			ASSERT(self->RiverMovePointAction != 0);
+			self->RiverMovePointAction->SetPoint(river->GetCurrentPointPosition()[0], river->GetCurrentPointPosition()[1]);
+			self->Execute(self->RiverMovePointAction);
+			self->RiverMovePointAction = 0;
+			break;
+		}
+	}
+}
+
+
+

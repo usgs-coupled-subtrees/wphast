@@ -66,6 +66,7 @@ protected:
 	CTreeCtrlNode   m_nodeFreeSurface;
 	CTreeCtrlNode   m_nodeSteadyFlow;
 	CTreeCtrlNode   m_nodeWells;
+	CTreeCtrlNode   m_nodeRivers;
 	
 	bool            m_bSelectingProp;
 	int             m_nNextZone;
@@ -114,11 +115,12 @@ public:
 	CTreeCtrl* GetTreeCtrl(void)       {return &m_wndTree;}
 	CTreeCtrlEx* GetTreeCtrlEx(void)   {return &m_wndTree;}
 
-	CTreeCtrlNode GetGridNode(void)    {return m_nodeGrid;}
-	CTreeCtrlNode GetMediaNode(void)   {return m_nodeMedia;}
-	CTreeCtrlNode GetUnitsNode(void)   {return m_nodeUnits;}
-	CTreeCtrlNode GetICNode(void)      {return m_nodeIC;}
+	CTreeCtrlNode GetGridNode(void)         {return m_nodeGrid;}
+	CTreeCtrlNode GetMediaNode(void)        {return m_nodeMedia;}
+	CTreeCtrlNode GetUnitsNode(void)        {return m_nodeUnits;}
+	CTreeCtrlNode GetICNode(void)           {return m_nodeIC;}
 	CTreeCtrlNode GetWellsNode(void)const   {return m_nodeWells;}
+	CTreeCtrlNode GetRiversNode(void)const  {return m_nodeRivers;}
 // COMMENT: {4/8/2005 7:01:33 PM}	CTreeCtrlNode GetBCNode(int nStressPeriod = 1);
 // COMMENT: {4/8/2005 7:01:33 PM}	CTreeCtrlNode GetTimeControlNode(int nStressPeriod = 1);
 // COMMENT: {4/8/2005 7:01:33 PM}	CTreeCtrlNode GetPrintFrequencyNode(int nStressPeriod = 1);

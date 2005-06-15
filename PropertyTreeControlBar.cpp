@@ -16,6 +16,7 @@
 #include "GridPropertyPage.h"
 #include "ZoneActor.h"
 #include "WellActor.h"
+#include "RiverActor.h"
 #include "MediaZoneActor.h"
 #include "ICZoneActor.h"
 #include "BCZoneActor.h"
@@ -58,6 +59,7 @@ static const TCHAR szTIME_CONTROL[]        = _T("TIME_CONTROL");
 static const TCHAR szPRINT_FREQUENCY[]     = _T("PRINT_FREQUENCY");
 
 static const TCHAR szWELLS[]               = _T("WELLS");
+static const TCHAR szRIVERS[]              = _T("RIVERS");
 
 static const TCHAR szZoneFormat[]          = _T("Zone %d");
 
@@ -178,8 +180,45 @@ void CPropertyTreeControlBar::OnSelChanged(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 		return;
 	}
 
+	///{{{{{
+	// Rivers
+	//
+	if (item.IsNodeAncestor(this->GetRiversNode()))
+	{
+		if ((item != this->GetRiversNode()) && (item.GetParent() != this->GetRiversNode()))
+		{
+			CTreeCtrlNode riverNode = item.GetParent();
+			if (riverNode.GetData())
+			{
+				if (CRiverActor *pRiverActor = CRiverActor::SafeDownCast(reinterpret_cast<vtkObject*>(riverNode.GetData())))
+				{
+// COMMENT: {6/14/2005 12:48:43 PM}					// clear selected points from remaining rivers
+// COMMENT: {6/14/2005 12:48:43 PM}					//
+// COMMENT: {6/14/2005 12:48:43 PM}					CTreeCtrlNode child = this->GetRiversNode().GetChild();
+// COMMENT: {6/14/2005 12:48:43 PM}					for (; child; child = child.GetNextSibling())
+// COMMENT: {6/14/2005 12:48:43 PM}					{
+// COMMENT: {6/14/2005 12:48:43 PM}						if (child != riverNode)
+// COMMENT: {6/14/2005 12:48:43 PM}						{
+// COMMENT: {6/14/2005 12:48:43 PM}							if (CRiverActor *pActor = CRiverActor::SafeDownCast(reinterpret_cast<vtkObject*>(child.GetData())))
+// COMMENT: {6/14/2005 12:48:43 PM}							{
+// COMMENT: {6/14/2005 12:48:43 PM}								pActor->ClearSelection();
+// COMMENT: {6/14/2005 12:48:43 PM}							}
+// COMMENT: {6/14/2005 12:48:43 PM}						}
+// COMMENT: {6/14/2005 12:48:43 PM}					}
+					pRiverActor->SelectPoint(riverNode.GetIndex(item));
+				}
+				else
+				{
+					ASSERT(FALSE);
+				}
+			}
+		}
+	}
+	///}}}}}
 
-	if (m_wndTree.GetItemData(pNMTREEVIEW->itemNew.hItem)) {
+
+	if (m_wndTree.GetItemData(pNMTREEVIEW->itemNew.hItem))
+	{
 		HTREEITEM hParent = m_wndTree.GetParentItem(pNMTREEVIEW->itemNew.hItem);
 		// if (pNMTREEVIEW->itemNew.hItem == m_htiGrid || hParent == m_htiGrid) {
 		// if (pNMTREEVIEW->itemNew.hItem == m_nodeGrid || hParent == m_nodeGrid) {
@@ -188,7 +227,8 @@ void CPropertyTreeControlBar::OnSelChanged(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 // COMMENT: {7/15/2004 1:28:10 PM}		}
 
 
-		if (hParent == m_nodeMedia || hParent == this->m_nodeBC || hParent == this->m_nodeIC) {
+		if (hParent == m_nodeMedia || hParent == this->m_nodeBC || hParent == this->m_nodeIC)
+		{
 
 			CZoneActor* pZone = reinterpret_cast<CZoneActor*>(m_wndTree.GetItemData(pNMTREEVIEW->itemNew.hItem));
 
@@ -209,6 +249,19 @@ void CPropertyTreeControlBar::OnSelChanged(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 		else if (hParent == this->m_nodeWells)
 		{
 			// if (CWellActor* pWell = reinterpret_cast<CWellActor*>(item.GetData()))
+			if (item.GetData())
+			{
+				if (vtkProp* pProp = vtkProp::SafeDownCast(reinterpret_cast<vtkObject*>(item.GetData())))
+				{
+					if (CWPhastDoc* pDoc = this->GetDocument())
+					{
+						pDoc->Notify(this, WPN_SELCHANGED, 0, pProp);
+					}
+				}
+			}
+		}
+		else if (hParent == this->m_nodeRivers)
+		{
 			if (item.GetData())
 			{
 				if (vtkProp* pProp = vtkProp::SafeDownCast(reinterpret_cast<vtkObject*>(item.GetData())))
@@ -366,6 +419,12 @@ void CPropertyTreeControlBar::SetNodeCheck(CTreeCtrlNode node, UINT nCheckState)
 			return;
 		}
 	}
+	else if (node == this->GetRiversNode())
+	{
+		if (!((pDoc = this->GetDocument()) && (pPropAssembly = pDoc->GetPropAssemblyRivers()))) {
+			return;
+		}
+	}
 	else if (node == this->GetGridNode()) {
 		if (CWPhastDoc *pDoc = this->GetDocument()) {
 			pDoc->OnViewGrid();
@@ -373,7 +432,13 @@ void CPropertyTreeControlBar::SetNodeCheck(CTreeCtrlNode node, UINT nCheckState)
 		return;
 	}
 	else {
-		ASSERT( node.GetParent() == this->GetMediaNode() || node.GetParent() == this->GetICNode() || node.GetParent() == this->GetBCNode() || node.GetParent() == this->GetWellsNode() );
+		ASSERT(
+			node.GetParent() == this->GetMediaNode()  ||
+            node.GetParent() == this->GetICNode()     ||
+            node.GetParent() == this->GetBCNode()     ||
+            node.GetParent() == this->GetWellsNode()  ||
+            node.GetParent() == this->GetRiversNode()
+				);
 	}
 
 	// set check mark
@@ -599,7 +664,24 @@ void CPropertyTreeControlBar::OnNMDblClk(NMHDR* pNMHDR, LRESULT* pResult)
 		return;
 	}
 
-
+	// RIVERS
+	//
+	if (item.IsNodeAncestor(this->m_nodeRivers))
+	{
+		if (item != this->m_nodeRivers)
+		{
+			while (item.GetParent() != this->m_nodeRivers)
+			{
+				item = item.GetParent();
+				if (!item) break;
+			}
+			if (item.GetData())
+			{
+				ASSERT(FALSE); // TODO
+			}
+		}
+		return;
+	}
 
 
 	// GRID
@@ -1471,16 +1553,18 @@ void CPropertyTreeControlBar::DeleteContents()
 // COMMENT: {4/8/2005 6:45:59 PM}	this->m_nodeTimeControl = this->m_wndTree.InsertItem(szTIME_CONTROL,        this->m_nodeSP1);
 	this->m_nodeBC           = this->m_wndTree.InsertItem(szBOUNDARY_CONDITIONS );
 	this->m_nodeWells        = this->m_wndTree.InsertItem(szWELLS               );
+	this->m_nodeRivers       = this->m_wndTree.InsertItem(szRIVERS              );
 	this->m_nodePF           = this->m_wndTree.InsertItem(szPRINT_FREQUENCY     );
 // COMMENT: {4/22/2005 3:55:31 PM}	this->m_nodeTimeControl = this->m_wndTree.InsertItem(szTIME_CONTROL        );
 	this->m_nodeTimeControl2 = this->m_wndTree.InsertItem(szTIME_CONTROL        );
 
 	// set initial checkmark states (eyes)
-	this->m_wndTree.SetItemState(this->m_nodeMedia, INDEXTOSTATEIMAGEMASK(BST_CHECKED + 1), TVIS_STATEIMAGEMASK);
-	this->m_wndTree.SetItemState(this->m_nodeGrid,  INDEXTOSTATEIMAGEMASK(BST_CHECKED + 1), TVIS_STATEIMAGEMASK);
-	this->m_wndTree.SetItemState(this->m_nodeIC,    INDEXTOSTATEIMAGEMASK(BST_CHECKED + 1), TVIS_STATEIMAGEMASK);
-	this->m_wndTree.SetItemState(this->m_nodeBC,    INDEXTOSTATEIMAGEMASK(BST_CHECKED + 1), TVIS_STATEIMAGEMASK);
-	this->m_wndTree.SetItemState(this->m_nodeWells, INDEXTOSTATEIMAGEMASK(BST_CHECKED + 1), TVIS_STATEIMAGEMASK);
+	this->m_wndTree.SetItemState(this->m_nodeMedia,  INDEXTOSTATEIMAGEMASK(BST_CHECKED + 1), TVIS_STATEIMAGEMASK);
+	this->m_wndTree.SetItemState(this->m_nodeGrid,   INDEXTOSTATEIMAGEMASK(BST_CHECKED + 1), TVIS_STATEIMAGEMASK);
+	this->m_wndTree.SetItemState(this->m_nodeIC,     INDEXTOSTATEIMAGEMASK(BST_CHECKED + 1), TVIS_STATEIMAGEMASK);
+	this->m_wndTree.SetItemState(this->m_nodeBC,     INDEXTOSTATEIMAGEMASK(BST_CHECKED + 1), TVIS_STATEIMAGEMASK);
+	this->m_wndTree.SetItemState(this->m_nodeWells,  INDEXTOSTATEIMAGEMASK(BST_CHECKED + 1), TVIS_STATEIMAGEMASK);
+	this->m_wndTree.SetItemState(this->m_nodeRivers, INDEXTOSTATEIMAGEMASK(BST_CHECKED + 1), TVIS_STATEIMAGEMASK);
 
 
 // COMMENT: {4/11/2005 1:07:32 PM}	ASSERT(this->GetStressPeriodCount() == 1);
@@ -1522,6 +1606,27 @@ void CPropertyTreeControlBar::Update(IObserver* pSender, LPARAM lHint, CObject* 
 				}
 				ASSERT(bFound);
 				if (!bFound) wells.Select();
+			}
+			else if (CRiverActor* pRiverActor = CRiverActor::SafeDownCast(pProp))
+			{
+				CTreeCtrlNode rivers = this->GetRiversNode();
+				bool bFound = false;
+				for (int i = 0; i < rivers.GetChildCount(); ++i)
+				{
+					CTreeCtrlNode riv = rivers.GetChildAt(i);
+					if (riv.GetData())
+					{
+						CRiverActor *pRiverActor = (CRiverActor*)riv.GetData();
+						if (pRiverActor == pObject)
+						{
+							riv.Select();
+							bFound = true;
+							break;
+						}
+					}
+				}
+				ASSERT(bFound);
+				if (!bFound) rivers.Select();
 			}
 			else
 			{

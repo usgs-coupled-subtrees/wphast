@@ -24,6 +24,7 @@
 #include "ZoneResizeAction.h"
 #include "ZoneActor.h"
 #include "WellActor.h"
+#include "RiverActor.h"
 
 #include "Units.h"
 #include "Global.h"
@@ -109,6 +110,10 @@ void CBoxPropertiesDialogBar::Update(IObserver* pSender, LPARAM lHint, CObject* 
 			{
 				CUnits units;
 				this->Set(0, 0, units);
+			}
+			else if (CRiverActor* pWellActor = CRiverActor::SafeDownCast(pProp))
+			{
+				TRACE("TODO\n");
 			}
 			else
 			{
