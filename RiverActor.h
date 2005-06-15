@@ -2,6 +2,7 @@
 #include <list>
 
 #include <vtkAssembly.h>
+#include <vtkPropAssembly.h>
 #include <vtkIdType.h>
 
 #include "River.h"          // CRiver
@@ -10,10 +11,13 @@
 class CUnits;
 class CPropertyTreeControlBar;
 
+
 class CRiverActor : public vtkAssembly
+///class CRiverActor : public vtkPropAssembly
 {
 public:
 	vtkTypeRevisionMacro(CRiverActor,vtkAssembly);
+	///vtkTypeRevisionMacro(CRiverActor,vtkPropAssembly);
 	static CRiverActor *New();
 	void PrintSelf(ostream& os, vtkIndent indent);
 
@@ -26,8 +30,12 @@ public:
 	void SetUnits(const CUnits &units);
 	void SetScale(float x, float y, float z);
 	void SetScale(double x, double y, double z);
+
 	void SetRadius(float radius);
+	float GetRadius(void)const;
+
 	void SetZ(double z);
+	double GetZ(void)const;
 
 	void UpdatePoints(void);
 	void ClearPoints(void);
@@ -57,6 +65,12 @@ public:
 	vtkIdType GetCurrentPointId(void)const;
 	double*   GetCurrentPointPosition(void);
 	void      GetCurrentPointPosition(double x[3])const;
+
+	LPCTSTR GetSerialName(void)const;
+	void Serialize(bool bStoring, hid_t loc_id, const CUnits &units);
+
+	void SetVisibility(int visibility);
+	int GetVisibility(void);
 
 	// Description:
 	// This method is used to associate the widget with the render window
@@ -104,8 +118,8 @@ protected:
 	std::string         m_serialName;
 	CRiver              m_river;
 	float               m_fRadius;
+	double              m_Z;
 	int                 Enabled;
-	///double              currentPoint[3];
 
 private:
 	CRiverActor(const CRiverActor&);  // Not implemented.

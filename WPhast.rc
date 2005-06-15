@@ -299,7 +299,7 @@ BEGIN
     BEGIN
         MENUITEM "New &Well",                   ID_TOOLS_NEWWELL
         MENUITEM "New &Zone",                   ID_TOOLS_NEWZONE
-        MENUITEM "New &Simulation Period...",   ID_TOOLS_NEWSTRESSPERIOD
+        MENUITEM "New &River",                  ID_TOOLS_NEWRIVER
         MENUITEM SEPARATOR
         MENUITEM "&Geometry...",                ID_TOOLS_GEOMETRY
     END

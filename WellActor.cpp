@@ -108,10 +108,22 @@ void CWellActor::Edit(CWPhastDoc *pWPhastDoc)
 	str.Format(_T("Well %d Properties"), this->m_well.n_user);
 	CPropertySheet props(str);
 
+	std::set<int> wellNums;
+	pWPhastDoc->GetUsedWellNumbers(wellNums);
+
+	// remove this well number from used list
+	std::set<int>::iterator iter = wellNums.find(this->GetWell().n_user);
+	ASSERT(iter != wellNums.end());
+	if (iter != wellNums.end())
+	{
+		wellNums.erase(iter);
+	}
+
 	CWellPropertyPage wellProps;
 	props.AddPage(&wellProps);
 	wellProps.SetProperties(this->GetWell());
 	wellProps.SetUnits(pWPhastDoc->GetUnits());
+	wellProps.SetUsedWellNumbers(wellNums);
 	
 	CGrid x, y, z;
 	pWPhastDoc->GetGrid(x, y, z);

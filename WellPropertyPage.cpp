@@ -120,6 +120,15 @@ void CWellPropertyPage::DoDataExchange(CDataExchange* pDX)
 	// well.n_user
 	//
 	DDX_Text(pDX, IDC_NUSER_EDIT, well.n_user);
+	if (pDX->m_bSaveAndValidate)
+	{
+		std::set<int>::iterator iter = this->m_usedWellNumbers.find(well.n_user);
+		if (iter != this->m_usedWellNumbers.end())
+		{
+			::AfxMessageBox("This well number is already in use. Please choose a different number.");
+			pDX->Fail();        // throws exception
+		}
+	}
 
 	// well.description
 	//
@@ -874,4 +883,9 @@ void CWellPropertyPage::UpdateScreens(BOOL bByDepth)
 			this->m_wndWellCtrl.AddScreen((*iter).bottom, (*iter).top);
 		}
 	}
+}
+
+void CWellPropertyPage::SetUsedWellNumbers(const std::set<int>& used)
+{
+	this->m_usedWellNumbers = used;
 }

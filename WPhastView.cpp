@@ -86,6 +86,8 @@ BEGIN_MESSAGE_MAP(CWPhastView, CView)
 	ON_COMMAND(ID_VIEW_FROM_NEXT_DIRECTION, OnViewFromNextDirection)
 	ON_COMMAND(ID_TOOLS_NEWWELL, OnToolsNewWell)
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_NEWWELL, OnUpdateToolsNewWell)
+	ON_UPDATE_COMMAND_UI(ID_TOOLS_NEWRIVER, OnUpdateToolsNewRiver)
+	ON_COMMAND(ID_TOOLS_NEWRIVER, OnToolsNewRiver)
 END_MESSAGE_MAP()
 
 // CWPhastView construction/destruction
@@ -99,6 +101,7 @@ CWPhastView::CWPhastView()
 , m_ViewFromDirection(ID_VIEW_FROM_PZ)
 , m_pWellActor(0)
 , m_pPointWidget2(0)
+, m_pRiverActor(0)
 {
 	// Create the renderer, window and interactor objects.
 	//
@@ -195,6 +198,19 @@ CWPhastView::~CWPhastView()
 	this->m_Renderer->Delete();
 	this->m_RenderWindowInteractor->Delete();
 
+	// Well actor
+	if (this->m_pWellActor)
+	{
+		this->m_pWellActor->Delete();
+		this->m_pWellActor = 0;
+	}
+
+	// River actor
+	if (this->m_pRiverActor)
+	{
+		this->m_pRiverActor->Delete();
+		this->m_pRiverActor = 0;
+	}
 }
 
 BOOL CWPhastView::PreCreateWindow(CREATESTRUCT& cs)
@@ -561,6 +577,10 @@ void CWPhastView::OnToolsNewZone()
 	}
 	else
 	{
+		if (this->CreatingNewRiver())
+		{
+			this->CancelNewRiver();
+		}
 		if (this->CreatingNewWell())
 		{
 			this->CancelNewWell();
@@ -1010,6 +1030,7 @@ void CWPhastView::StartNewWell(void)
 	// Note: This is reqd because the widget will 
 	// recieve all the mouse input
 	this->m_pBoxWidget->Off();
+	this->m_pPointWidget2->Off();
 }
 
 void CWPhastView::CancelNewWell(void)
@@ -1057,6 +1078,10 @@ void CWPhastView::OnToolsNewWell()
 	}
 	else
 	{
+		if (this->CreatingNewRiver())
+		{
+			this->CancelNewRiver();
+		}
 		if (this->CreatingNewZone())
 		{
 			this->CancelNewZone();
@@ -1243,5 +1268,144 @@ void CWPhastView::Update(IObserver* pSender, LPARAM lHint, CObject* /*pHint*/, v
 		break;
 	default:
 		ASSERT(FALSE);
+	}
+}
+
+void CWPhastView::OnUpdateToolsNewRiver(CCmdUI *pCmdUI)
+{
+	pCmdUI->Enable(TRUE);
+	if (this->CreatingNewRiver())
+	{
+		pCmdUI->SetCheck(1);
+	}
+	else
+	{
+		pCmdUI->SetCheck(0);
+	}
+}
+
+void CWPhastView::OnToolsNewRiver()
+{
+	if (this->CreatingNewRiver())
+	{
+		this->CancelNewRiver();
+	}
+	else
+	{
+		if (this->CreatingNewZone())
+		{
+			this->CancelNewZone();
+		}
+		if (this->CreatingNewWell())
+		{
+			this->CancelNewWell();
+		}
+		this->StartNewRiver();
+	}
+}
+
+bool CWPhastView::CreatingNewRiver(void)const
+{
+	return (this->m_pRiverActor != 0);
+}
+
+void CWPhastView::StartNewRiver(void)
+{
+	// set size of 3D cursor
+	//
+	float* bounds = this->GetDocument()->GetGridBounds();
+	float dim = (bounds[1] - bounds[0]) / 20.0;
+	this->m_pCursor3D->SetModelBounds(-dim, dim, -dim, dim, -dim, dim);
+	this->m_pCursor3DActor->VisibilityOn();
+
+	// set blue cursor
+	//
+	this->m_pCursor3DActor->GetProperty()->SetColor(0, 0, 1);
+
+	// create river actor
+	//
+	ASSERT(this->m_pRiverActor == 0);
+	this->m_pRiverActor = CRiverActor::New();
+
+// COMMENT: {6/15/2005 5:28:07 PM}	///{{{
+// COMMENT: {6/15/2005 5:28:07 PM}	// set scale
+// COMMENT: {6/15/2005 5:28:07 PM}	//
+// COMMENT: {6/15/2005 5:28:07 PM}	float* scale = this->GetDocument()->GetScale();
+// COMMENT: {6/15/2005 5:28:07 PM}	this->m_pRiverActor->SetScale(scale[0], scale[1], scale[2]);
+// COMMENT: {6/15/2005 5:28:07 PM}
+// COMMENT: {6/15/2005 5:28:07 PM}	// set radius
+// COMMENT: {6/15/2005 5:28:07 PM}	//
+// COMMENT: {6/15/2005 5:28:07 PM}	float defaultAxesSize = (bounds[1]-bounds[0] + bounds[3]-bounds[2] + bounds[5]-bounds[4])/12;
+// COMMENT: {6/15/2005 5:28:07 PM}	///this->m_pRiverActor->SetRadius(defaultAxesSize * 0.085 / sqrt(scale[0] * scale[1]));
+// COMMENT: {6/15/2005 5:28:07 PM}	this->m_pRiverActor->SetRadius(defaultAxesSize * 0.085);
+// COMMENT: {6/15/2005 5:28:07 PM}
+// COMMENT: {6/15/2005 5:28:07 PM}	// set z
+// COMMENT: {6/15/2005 5:28:07 PM}	//
+// COMMENT: {6/15/2005 5:28:07 PM}	this->m_pRiverActor->SetZ(bounds[5]);
+// COMMENT: {6/15/2005 5:28:07 PM}
+// COMMENT: {6/15/2005 5:28:07 PM}	this->m_Renderer->AddProp(this->m_pRiverActor);
+// COMMENT: {6/15/2005 5:28:07 PM}	///}}}
+
+	/////{{
+	this->GetDocument()->Add(this->m_pRiverActor);
+	/////}}
+
+	// Disable Interactor
+	//
+	if (vtkInteractorStyle* style = vtkInteractorStyle::SafeDownCast(this->m_pInteractorStyle))
+	{
+		if (vtkInteractorStyleSwitch* switcher = vtkInteractorStyleSwitch::SafeDownCast(style))
+		{
+			style = switcher->GetCurrentStyle();
+		}
+		style->SetInteractor(0);
+	}
+
+	// hide Widgets
+	//
+	// Note: This is reqd because the widget will 
+	// recieve all the mouse input
+	this->m_pBoxWidget->Off();
+	this->m_pPointWidget2->Off();
+}
+
+void CWPhastView::EndNewRiver(void)
+{
+	// reset cursor
+	//
+	this->m_pCursor3DActor->VisibilityOff();
+
+	// reattach interactor
+	//
+	if (vtkInteractorStyle* style = vtkInteractorStyle::SafeDownCast(this->m_pInteractorStyle))
+	{
+		if (vtkInteractorStyleSwitch* switcher = vtkInteractorStyleSwitch::SafeDownCast(style))
+		{
+			style = switcher->GetCurrentStyle();
+		}
+		style->SetInteractor(this->m_RenderWindowInteractor);
+	}
+
+	// stop rendering the river actor
+	//
+	this->m_Renderer->RemoveProp(this->m_pRiverActor);
+
+	// clean-up
+	//
+	ASSERT(this->m_pRiverActor != 0);
+	if (this->m_pRiverActor)
+	{
+		this->m_pRiverActor->Delete();
+		this->m_pRiverActor = 0;
+	}
+	this->GetDocument()->UpdateAllViews(0);
+}
+
+void CWPhastView::CancelNewRiver(void)
+{
+	if (this->CreatingNewRiver())
+	{
+		this->EndNewRiver();
+		this->GetDocument()->UpdateAllViews(0);
 	}
 }

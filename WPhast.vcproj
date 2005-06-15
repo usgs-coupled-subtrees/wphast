@@ -3422,15 +3422,15 @@
 			Name="Build Logs"
 			Filter="">
 			<File
-				RelativePath="Debug\BuildLog.htm"
-				DeploymentContent="TRUE">
-			</File>
-			<File
 				RelativePath="Release\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 			<File
 				RelativePath="cppunit\BuildLog.htm"
+				DeploymentContent="TRUE">
+			</File>
+			<File
+				RelativePath="Debug\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 		</Filter>
@@ -3624,5 +3624,8 @@
 		</File>
 	</Files>
 	<Globals>
+		<Global
+			Name="RESOURCE_FILE"
+			Value="WPhast.rc"/>
 	</Globals>
 </VisualStudioProject>

@@ -17,6 +17,7 @@ vtkStandardNewMacro(CRiverActor);
 
 CRiverActor::CRiverActor(void)
 : m_fRadius(1.0)
+, m_Z(0.0)
 , Interactor(0)
 , CurrentRenderer(0)
 , Enabled(0)
@@ -43,6 +44,10 @@ CRiverActor::CRiverActor(void)
 	this->EventCallbackCommand->SetCallback(CRiverActor::ProcessEvents);
 
 	this->CreateDefaultProperties();
+
+#ifdef __CPPUNIT__
+	// this->SetDebug(1);
+#endif
 }
 
 CRiverActor::~CRiverActor(void)
@@ -88,6 +93,13 @@ vtkIdType CRiverActor::InsertNextPoint(double x, double y, double z)
 	pPolyDataMapper->SetInput(pSphereSource->GetOutput());
 
 	vtkActor *pActor = vtkActor::New();
+#ifdef __CPPUNIT__
+	if (id == 0)
+	{
+		// pActor->SetDebug(1);
+	}
+#endif
+
 	pActor->SetMapper(pPolyDataMapper);
 	pActor->SetProperty(this->HandleProperty);
 	
@@ -202,15 +214,22 @@ void CRiverActor::SetScale(float x, float y, float z)
 
 void CRiverActor::SetZ(double z)
 {
+	this->m_Z = z;
+
 	double pt[3];
 	vtkIdType np = this->m_pPoints->GetNumberOfPoints();
 	for (vtkIdType i = 0; i < np; ++i)
 	{
 		this->m_pPoints->GetPoint(i, pt);
-		pt[2] = z;
+		pt[2] = this->m_Z;
 		this->m_pPoints->SetPoint(i, pt);
 	}
 	this->UpdatePoints();
+}
+
+double CRiverActor::GetZ(void)const
+{
+	return this->m_Z;
 }
 
 void CRiverActor::SetScale(double x, double y, double z)
@@ -228,7 +247,7 @@ void CRiverActor::UpdatePoints(void)
 	ASSERT(np == this->m_listActor.size());
 	ASSERT(np == this->m_listPolyDataMapper.size());
 
-	ASSERT(np - 1 == this->m_listLineSource.size());
+	ASSERT(np - 1 == this->m_listLineSource.size() || this->m_listLineSource.size() == 0);
 
 	std::list<vtkSphereSource*>::iterator iterSphereSource = this->m_listSphereSource.begin();
 	std::list<vtkLineSource*>::iterator iterLineSource = this->m_listLineSource.begin();
@@ -332,6 +351,11 @@ void CRiverActor::SetRiver(const CRiver &river, const CUnits &units)
 CRiver CRiverActor::GetRiver(void)const
 {
 	return this->m_river;
+}
+
+float CRiverActor::GetRadius(void)const
+{
+	return this->m_fRadius;
 }
 
 void CRiverActor::SetRadius(float radius)
@@ -932,3 +956,49 @@ void CRiverActor::MovePoint(vtkIdType id, double x, double y)
 	this->Update(this->m_node);
 }
 
+LPCTSTR CRiverActor::GetSerialName(void)const
+{
+	return this->m_serialName.c_str();
+}
+
+void CRiverActor::Serialize(bool bStoring, hid_t loc_id, const CUnits &units)
+{
+	if (bStoring)
+	{
+		this->m_river.Serialize(bStoring, loc_id);
+	}
+	else
+	{
+		CRiver river;
+		river.Serialize(bStoring, loc_id);
+		this->SetRiver(river, units);
+	}
+}
+
+void CRiverActor::SetVisibility(int visibility)
+{
+	vtkDebugMacro(<< this->GetClassName() << " (" << this << "): setting Visibility to " << visibility);
+	if (this->Visibility != visibility)
+	{
+		std::list<vtkActor*>::iterator it = this->m_listActor.begin();
+		for (; it != this->m_listActor.end(); ++it)
+		{
+			(*it)->SetVisibility(visibility);
+		}
+
+		std::list<vtkActor*>::iterator itLine = this->m_listLineActor.begin();
+		for (; itLine != this->m_listLineActor.end(); ++itLine)
+		{
+			(*itLine)->SetVisibility(visibility);
+		}
+
+		this->Visibility = visibility;
+		this->Modified();
+	}
+}
+
+int CRiverActor::GetVisibility(void)
+{
+	vtkDebugMacro(<< this->GetClassName() << " (" << this << "): returning Visibility of " << this->Visibility );
+	return this->Visibility;
+}

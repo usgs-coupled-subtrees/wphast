@@ -17,6 +17,10 @@
 #include "Well.h"
 #include "WellPropertyPage.h"
 
+#include "RiverActor.h"
+#include "River.h"
+//#include "RiverPropertyPage.h"
+
 #include "ZoneResizeAction.h"
 #include "NewZonePropertyPage.h"
 #include "MediaPropertyPage.h"
@@ -448,6 +452,20 @@ void CViewVTKCommand::OnLeftButtonPressEvent(vtkObject* caller, void* callData)
 {
 	TRACE("OnLeftButtonPressEvent\n");
 
+	if (this->m_pView->CreatingNewRiver())
+	{
+		this->m_pView->m_pCursor3DActor->SetPosition(this->m_WorldPointXYPlane[0], this->m_WorldPointXYPlane[1], this->m_WorldPointXYPlane[2]);
+		this->m_pView->m_Renderer->ResetCameraClippingRange();
+		this->m_pView->m_RenderWindowInteractor->Render();
+
+		// update m_WorldPointXYPlane and save starting point
+		//
+		Update();
+		for (int i = 0; i < 3; ++i) {
+			this->m_BeginPoint[i] = this->m_WorldPointXYPlane[i];
+		}
+	}
+
 	if (this->m_pView->CreatingNewWell()) {
 		this->m_pView->m_pCursor3DActor->SetPosition(this->m_WorldPointXYPlane[0], this->m_WorldPointXYPlane[1], this->m_WorldPointXYPlane[2]);
 		this->m_pView->m_Renderer->ResetCameraClippingRange();
@@ -495,6 +513,21 @@ void CViewVTKCommand::OnLeftButtonPressEvent(vtkObject* caller, void* callData)
 void CViewVTKCommand::OnLeftButtonReleaseEvent(vtkObject* caller, void* callData)
 {
 	TRACE("OnLeftButtonReleaseEvent\n");
+
+	if (this->m_pView->CreatingNewRiver())
+	{
+		float* scale = this->m_pView->GetDocument()->GetScale();
+
+		this->m_pView->m_pRiverActor->InsertNextPoint(
+			this->m_BeginPoint[0] / scale[0] / this->m_pView->GetDocument()->GetUnits().horizontal.input_to_si,
+			this->m_BeginPoint[1] / scale[1] / this->m_pView->GetDocument()->GetUnits().horizontal.input_to_si,
+			this->m_pView->m_pRiverActor->GetZ()
+			);
+
+		this->m_pView->m_Renderer->Render();
+
+		/// this->m_pView->CancelNewRiver();
+	}
 
 	if (this->m_pView->CreatingNewWell())
 	{
@@ -553,10 +586,15 @@ void CViewVTKCommand::OnLeftButtonReleaseEvent(vtkObject* caller, void* callData
 		// display well properties
 		//
 		CPropertySheet sheet(_T("Define well properties"), 0);
+
+		std::set<int> wellNums;
+		this->m_pView->GetDocument()->GetUsedWellNumbers(wellNums);
+
 		CWellPropertyPage page;
 		page.SetProperties(well);
 		page.SetGrid(grid[2]);
 		page.SetUnits(this->m_pView->GetDocument()->GetUnits());
+		page.SetUsedWellNumbers(wellNums);
 
 		sheet.AddPage(&page);
 
@@ -716,7 +754,8 @@ void CViewVTKCommand::OnMouseMoveEvent(vtkObject* caller, void* callData)
 {
 	Update();
 
-	if (this->m_pView->CreatingNewWell()) {
+	if (this->m_pView->CreatingNewWell() || this->m_pView->CreatingNewRiver())
+	{
 		this->m_pView->m_pCursor3DActor->SetPosition(this->m_WorldPointXYPlane[0], this->m_WorldPointXYPlane[1], this->m_WorldPointXYPlane[2]);
 		this->m_pView->m_Renderer->ResetCameraClippingRange();
 		this->m_pView->m_RenderWindowInteractor->Render();

@@ -434,6 +434,9 @@ void CWPhastDoc::Serialize(CArchive& ar)
 			// store wells
 			this->SerializeWells(bStoring, wphast_id);
 
+			// store rivers
+			this->SerializeRivers(bStoring, wphast_id);
+
 			// store PRINT_FREQUENCY
 			this->m_pModel->m_printFreq.Serialize(bStoring, wphast_id);
 
@@ -540,6 +543,9 @@ void CWPhastDoc::Serialize(CArchive& ar)
 
 			// load wells
 			this->SerializeWells(bStoring, wphast_id);
+
+			// load rivers
+			this->SerializeRivers(bStoring, wphast_id);
 
 			// load PRINT_FREQUENCY
 			this->m_pModel->m_printFreq.Serialize(bStoring, wphast_id);
@@ -898,6 +904,7 @@ void CWPhastDoc::SerializeBC(bool bStoring, hid_t loc_id)
 		}
 	}
 }
+
 void CWPhastDoc::SerializeWells(bool bStoring, hid_t loc_id)
 {
 	static const char szWells[] = "Wells";
@@ -993,6 +1000,106 @@ void CWPhastDoc::SerializeWells(bool bStoring, hid_t loc_id)
 			// close the wells group
 			// 
 			status = ::H5Gclose(wells_id);
+			ASSERT(status >= 0);
+		}
+	}
+}
+
+void CWPhastDoc::SerializeRivers(bool bStoring, hid_t loc_id)
+{
+	static const char szRivers[] = "Rivers";
+
+	hid_t rivers_id;
+	herr_t status;
+
+	if (bStoring)
+	{
+		// Create the rivers group
+		rivers_id = ::H5Gcreate(loc_id, szRivers, 0); // always created even if empty
+		ASSERT(rivers_id > 0);
+		if (rivers_id > 0)
+		{
+			// create list of rivers and river names
+			//
+			CTreeCtrlNode nodeRivers = this->GetPropertyTreeControlBar()->GetRiversNode();
+			int nCount = nodeRivers.GetChildCount();
+			std::list<LPCTSTR> listSerialNames;
+			std::list<CRiverActor*> listRivers;
+			for (int i = 0; i < nCount; ++i)
+			{
+				if (CRiverActor *pRiverActor = CRiverActor::SafeDownCast((vtkObject*)nodeRivers.GetChildAt(i).GetData()))
+				{
+					listRivers.push_back(pRiverActor);
+					listSerialNames.push_back(pRiverActor->GetSerialName());
+				}
+				else ASSERT(FALSE);
+			}
+
+			if (listSerialNames.size() > 0)
+			{
+				// store river names
+				//
+				CGlobal::WriteList(rivers_id, szRivers, listSerialNames);
+
+				// store each river
+				//
+				std::list<CRiverActor*>::iterator iter = listRivers.begin();
+				for (; iter != listRivers.end(); ++iter)
+				{
+					hid_t riv_id = ::H5Gcreate(rivers_id, (*iter)->GetSerialName(), 0);
+					ASSERT(riv_id > 0);
+					if (riv_id > 0)
+					{
+						// store river
+						(*iter)->Serialize(true, riv_id, this->GetUnits());
+
+						// close the river group
+						status = ::H5Gclose(riv_id);
+						ASSERT(status >= 0);
+					}
+				}
+			}
+
+			// close the rivers group
+			//
+			status = ::H5Gclose(rivers_id);
+			ASSERT(status >= 0);
+		}
+	}
+	else
+	{
+		// Open the rivers group
+		//
+		rivers_id = ::H5Gopen(loc_id, szRivers);
+		/// ASSERT(rivers_id > 0);
+		if (rivers_id > 0)
+		{
+			// read in the list of river names
+			//
+			std::list<std::string> listSerialNames;
+			CGlobal::ReadList(rivers_id, szRivers, listSerialNames);
+			std::list<std::string>::iterator iter = listSerialNames.begin();
+			for (; iter != listSerialNames.end(); ++iter)
+			{
+				hid_t riv_id = ::H5Gopen(rivers_id, (*iter).c_str());
+				ASSERT(riv_id > 0);
+				if (riv_id > 0)
+				{
+					CRiverActor *pRiverActor = CRiverActor::New();
+					pRiverActor->Serialize(bStoring, riv_id, this->GetUnits());
+
+					this->Add(pRiverActor);
+					pRiverActor->Delete(); // ok ref counted
+
+					// close the river group
+					//
+					status = ::H5Gclose(riv_id);
+					ASSERT(status >= 0);
+				}
+			}
+			// close the rivers group
+			// 
+			status = ::H5Gclose(rivers_id);
 			ASSERT(status >= 0);
 		}
 	}
@@ -1985,7 +2092,37 @@ CString CWPhastDoc::GetNextZoneName(void)
 
 int CWPhastDoc::GetNextWellNumber(void)
 {
-	int nMax = 0;
+// COMMENT: {6/14/2005 9:06:36 PM}	int nMax = 0;
+// COMMENT: {6/14/2005 9:06:36 PM}	if (vtkPropCollection *pPropCollection = this->GetPropAssemblyWells()->GetParts())
+// COMMENT: {6/14/2005 9:06:36 PM}	{
+// COMMENT: {6/14/2005 9:06:36 PM}		vtkProp *pProp = 0;
+// COMMENT: {6/14/2005 9:06:36 PM}		pPropCollection->InitTraversal();
+// COMMENT: {6/14/2005 9:06:36 PM}		for (; (pProp = pPropCollection->GetNextProp()); )
+// COMMENT: {6/14/2005 9:06:36 PM}		{
+// COMMENT: {6/14/2005 9:06:36 PM}			if (CWellActor *pWellActor = CWellActor::SafeDownCast(pProp))
+// COMMENT: {6/14/2005 9:06:36 PM}			{
+// COMMENT: {6/14/2005 9:06:36 PM}				CWellSchedule well = pWellActor->GetWell();
+// COMMENT: {6/14/2005 9:06:36 PM}				nMax = max(nMax, well.n_user);
+// COMMENT: {6/14/2005 9:06:36 PM}			}
+// COMMENT: {6/14/2005 9:06:36 PM}		}
+// COMMENT: {6/14/2005 9:06:36 PM}	}
+// COMMENT: {6/14/2005 9:06:36 PM}	return (nMax + 1);
+	std::set<int> wellNums;
+	this->GetUsedWellNumbers(wellNums);
+	if (wellNums.rbegin() != wellNums.rend())
+	{
+		return (*wellNums.rbegin()) + 1;
+	}
+	else
+	{
+		return 1;
+	}
+}
+
+void CWPhastDoc::GetUsedWellNumbers(std::set<int>& usedNums)
+{
+	//std::set<int> usedWellNumbers;
+	usedNums.clear();
 	if (vtkPropCollection *pPropCollection = this->GetPropAssemblyWells()->GetParts())
 	{
 		vtkProp *pProp = 0;
@@ -1994,12 +2131,35 @@ int CWPhastDoc::GetNextWellNumber(void)
 		{
 			if (CWellActor *pWellActor = CWellActor::SafeDownCast(pProp))
 			{
-				CWellSchedule well = pWellActor->GetWell();
-				nMax = max(nMax, well.n_user);
+				// store used n_user numbers
+				//
+				std::pair< std::set<int>::iterator, bool > pr;
+				pr = usedNums.insert( pWellActor->GetWell().n_user );
+				ASSERT(pr.second); // duplicate?
 			}
 		}
 	}
-	return (nMax + 1);
+}
+
+void CWPhastDoc::GetUsedRiverNumbers(std::set<int>& usedNums)
+{
+	usedNums.clear();
+	if (vtkPropCollection *pPropCollection = this->GetPropAssemblyRivers()->GetParts())
+	{
+		vtkProp *pProp = 0;
+		pPropCollection->InitTraversal();
+		for (; (pProp = pPropCollection->GetNextProp()); )
+		{
+			if (CRiverActor *pRiverActor = CRiverActor::SafeDownCast(pProp))
+			{
+				// store used n_user numbers
+				//
+				std::pair< std::set<int>::iterator, bool > pr;
+				pr = usedNums.insert( pRiverActor->GetRiver().n_user );
+				ASSERT(pr.second); // duplicate?
+			}
+		}
+	}
 }
 
 BOOL CWPhastDoc::OnSaveDocument(LPCTSTR lpszPathName)
@@ -3816,13 +3976,12 @@ void CWPhastDoc::Add(CWellActor *pWellActor)
 {
 	ASSERT(pWellActor);
 	if (!pWellActor) return;
+	ASSERT(pWellActor->GetPickable());
 
 	// set scale
 	//
 	float *scale = this->GetScale();
 	pWellActor->SetScale(scale[0], scale[1], scale[2]);
-
-	ASSERT(pWellActor->GetPickable());
 
 	// set height
 	//
@@ -4224,7 +4383,6 @@ void CWPhastDoc::Add(CRiverActor *pRiverActor)
 	//
 	float *scale = this->GetScale();
 	pRiverActor->SetScale(scale[0], scale[1], scale[2]);
-
 
 	// set radius
 	//

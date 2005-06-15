@@ -455,9 +455,17 @@ void CPropertyTreeControlBar::SetNodeCheck(CTreeCtrlNode node, UINT nCheckState)
 		ASSERT(node.GetData());
 		if (node.GetData())
 		{
-			if (vtkActor* pActor = vtkActor::SafeDownCast((vtkObject*)node.GetData()))
+// COMMENT: {6/15/2005 1:49:44 PM}			if (vtkActor* pActor = vtkActor::SafeDownCast((vtkObject*)node.GetData()))
+// COMMENT: {6/15/2005 1:49:44 PM}			{
+// COMMENT: {6/15/2005 1:49:44 PM}				pActor->SetVisibility(nCheckState == BST_CHECKED);
+// COMMENT: {6/15/2005 1:49:44 PM}			}
+// COMMENT: {6/15/2005 1:49:44 PM}			if (CRiverActor* pActor = CRiverActor::SafeDownCast((vtkObject*)node.GetData()))
+// COMMENT: {6/15/2005 1:49:44 PM}			{
+// COMMENT: {6/15/2005 1:49:44 PM}				pActor->SetVisibility(nCheckState == BST_CHECKED);
+// COMMENT: {6/15/2005 1:49:44 PM}			}
+			if (vtkProp3D* pProp3D = vtkProp3D::SafeDownCast((vtkObject*)node.GetData()))
 			{
-				pActor->SetVisibility(nCheckState == BST_CHECKED);
+				pProp3D->SetVisibility(nCheckState == BST_CHECKED);
 			}
 		}
 	}
@@ -677,7 +685,8 @@ void CPropertyTreeControlBar::OnNMDblClk(NMHDR* pNMHDR, LRESULT* pResult)
 			}
 			if (item.GetData())
 			{
-				ASSERT(FALSE); // TODO
+				// ASSERT(FALSE); // TODO
+				::AfxMessageBox("Not currently supported");
 			}
 		}
 		return;

@@ -1,10 +1,12 @@
 #pragma once
+#include <set>
 
 #include "gridctrl/ModGridCtrlEx.h"
 #include "Units.h"
 #include "Well.h"
 #include "WellSchedule.h"
 #include "wellctrl.h"
+
 
 // CWellPropertyPage dialog
 
@@ -21,6 +23,8 @@ public:
 
 	void SetProperties(const CWellSchedule& well);
 	void GetProperties(CWellSchedule& well)const;
+
+	void SetUsedWellNumbers(const std::set<int>& used);
 
 	BOOL SetGrid(const struct grid &g);
 
@@ -46,6 +50,7 @@ protected:
 	CGrid            m_grid;
 	CModGridCtrlEx   m_wndScreensGrid;      // IDC_GRID_SCREENS
 	CModGridCtrlEx   m_wndPumpSchedGrid;    // IDC_GRID_SCHEDULES
+	std::set<int>    m_usedWellNumbers;
 
 	DECLARE_MESSAGE_MAP()
 public:

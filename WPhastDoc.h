@@ -108,11 +108,14 @@ public:
 	void Remove(CWellActor *pWellActor);
 	void UnRemove(CWellActor *pWellActor);
 	void Select(CWellActor *pWellActor);
+	void GetUsedWellNumbers(std::set<int>& usedNums);
+
 
 	// River actions
 	void Add(CRiverActor *pRiverActor);
 	void UnAdd(CRiverActor *pRiverActor);
 	void Select(CRiverActor *pRiverActor);
+	void GetUsedRiverNumbers(std::set<int>& usedNums);
 
 	static void RiverListener(vtkObject* caller, unsigned long eid, void* clientdata, void *calldata);
 
@@ -204,6 +207,7 @@ protected:
 	void SerializeMedia(bool bStoring, hid_t loc_id);
 	void SerializeStressPeriods(bool bStoring, hid_t loc_id);
 	void SerializeWells(bool bStoring, hid_t loc_id);
+	void SerializeRivers(bool bStoring, hid_t loc_id);
 
 
 // Generated message map functions

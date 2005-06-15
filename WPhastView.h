@@ -93,6 +93,9 @@ protected:
 	// new well
 	CWellActor                     *m_pWellActor;
 
+	// new rier
+	CRiverActor                    *m_pRiverActor;
+
 	friend class CViewVTKCommand;
 
 
@@ -137,7 +140,6 @@ public:
 	void CancelNewWell(void);
 	void EndNewWell(void);
 
-
 public:
 
 	afx_msg void OnUpdateViewFromNx(CCmdUI *pCmdUI);
@@ -160,6 +162,16 @@ public:
 
 protected:
 	virtual void OnUpdate(CView* /*pSender*/, LPARAM /*lHint*/, CObject* /*pHint*/);
+
+public:
+	afx_msg void OnUpdateToolsNewRiver(CCmdUI *pCmdUI);
+	afx_msg void OnToolsNewRiver();
+
+	bool CreatingNewRiver(void)const;
+	void StartNewRiver(void);
+	void CancelNewRiver(void);
+	void EndNewRiver(void);
+
 };
 
 #ifndef _DEBUG  // debug version in WPhastView.cpp
