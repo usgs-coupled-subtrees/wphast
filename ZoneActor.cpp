@@ -137,7 +137,7 @@ void CZoneActor::Resize(CWPhastView* pView)
 
 		widget->GetPolyData(pPD);
 		// pPD->ComputeBounds();
-		float bounds[6];
+		vtkFloatingPointType bounds[6];
 		pPD->GetBounds(bounds);
 		TRACE("bounds[0] = %g\n", bounds[0]);
 		TRACE("bounds[1] = %g\n", bounds[1]);
@@ -154,7 +154,7 @@ void CZoneActor::Resize(CWPhastView* pView)
 		this->SetUserTransform(0);
 ///{{{TESTING
 		// Scale
-		float* scale = this->GetScale();
+		vtkFloatingPointType* scale = this->GetScale();
 
 		// Units
 		//
@@ -425,22 +425,22 @@ float CZoneActor::GetZLength()
 	return this->m_pSource->GetZLength();
 }
 
-void CZoneActor::SetCenter(float x, float y, float z)
+void CZoneActor::SetCenter(vtkFloatingPointType x, vtkFloatingPointType y, vtkFloatingPointType z)
 {
 	this->m_pSource->SetCenter(x, y, z);
 }
 
-void CZoneActor::SetCenter(float pos[3])
+void CZoneActor::SetCenter(vtkFloatingPointType pos[3])
 {
 	this->m_pSource->SetCenter(pos);
 }
 
-float* CZoneActor::GetCenter()
+vtkFloatingPointType* CZoneActor::GetCenter()
 {
 	return this->m_pSource->GetCenter();
 }
 
-void CZoneActor::GetCenter(float data[3])
+void CZoneActor::GetCenter(vtkFloatingPointType data[3])
 {
 	this->m_pSource->GetCenter(data);
 }
@@ -641,7 +641,8 @@ void CZoneActor::Serialize(bool bStoring, hid_t loc_id)
 	static const char szDefault[] = "Default";
 
 	herr_t status;
-	float color[3];
+	vtkFloatingPointType color[3];
+	double double_color[3];
 
 	if (bStoring)
 	{
@@ -652,7 +653,8 @@ void CZoneActor::Serialize(bool bStoring, hid_t loc_id)
 		// store color
 		//
 		this->GetProperty()->GetColor(color);
-		status = CGlobal::HDFSerialize(bStoring, loc_id, szColor, H5T_NATIVE_FLOAT, 3, color);
+		double_color[0] = color[0];  double_color[1] = color[1];  double_color[2] = color[2];
+		status = CGlobal::HDFSerialize(bStoring, loc_id, szColor, H5T_NATIVE_DOUBLE, 3, double_color);
 		ASSERT(status >= 0);
 
 		// TODO store opacity 
@@ -666,9 +668,11 @@ void CZoneActor::Serialize(bool bStoring, hid_t loc_id)
 
 		// load color
 		//
-		status = CGlobal::HDFSerialize(bStoring, loc_id, szColor, H5T_NATIVE_FLOAT, 3, color);
+		status = CGlobal::HDFSerialize(bStoring, loc_id, szColor, H5T_NATIVE_DOUBLE, 3, double_color);
 		ASSERT(status >= 0);
-		if (status >= 0) {
+		if (status >= 0)
+		{
+			color[0] = double_color[0];  color[1] = double_color[1];  color[2] = double_color[2];
 			this->GetProperty()->SetColor(color);
 		}
 

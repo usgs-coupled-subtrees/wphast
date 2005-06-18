@@ -170,7 +170,7 @@ int CMapImageActor::SetWorldFileName(const char *filename)
 	return 1; // success
 }
 
-int CMapImageActor::PlaceMap(float xPos, float yPos, float zPos, float angle)
+int CMapImageActor::PlaceMap(vtkFloatingPointType xPos, vtkFloatingPointType yPos, vtkFloatingPointType zPos, vtkFloatingPointType angle)
 {
 	//{{
 	int *dims = this->GetDataExtent();
@@ -216,8 +216,8 @@ void CMapImageActor::UpdateImageReader2(void)
 
 
 		//{{
-		float* origin = this->m_MapImageReader2->GetDataOrigin();
-		float newOrigin[3];
+		vtkFloatingPointType* origin = this->m_MapImageReader2->GetDataOrigin();
+		vtkFloatingPointType newOrigin[3];
 		for (int i = 0; i < 3; ++i) {
 			newOrigin[i] = origin[i] * this->m_Scale[i];
 		}
@@ -245,7 +245,7 @@ void CMapImageActor::UpdateImageReader2(void)
 	}
 }
 
-void CMapImageActor::SetScale(float xScale, float yScale, float zScale)
+void CMapImageActor::SetScale(vtkFloatingPointType xScale, vtkFloatingPointType yScale, vtkFloatingPointType zScale)
 {
 	this->m_Scale[0] = xScale;
 	this->m_Scale[1] = yScale;

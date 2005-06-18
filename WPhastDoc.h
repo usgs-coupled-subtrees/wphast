@@ -77,6 +77,11 @@ enum WPhastNotification {
 	WPN_DELETE_WELL   = 3,
 };
 
+#ifndef vtkFloatingPointType
+#define vtkFloatingPointType vtkFloatingPointType
+typedef float vtkFloatingPointType;
+#endif
+
 class CWPhastDoc : public CDocument, public CSubject
 {
 protected: // create from serialization only
@@ -261,10 +266,10 @@ public:
 	const CPrintFreq& GetPrintFrequency(void)const;
 
 
-	float* GetGridBounds();
-	void SetScale(float x, float y, float z);
-	float* GetScale();
-	void GetScale(float data[3]);
+	vtkFloatingPointType* GetGridBounds();
+	void SetScale(vtkFloatingPointType x, vtkFloatingPointType y, vtkFloatingPointType z);
+	vtkFloatingPointType* GetScale();
+	void GetScale(vtkFloatingPointType data[3]);
 	afx_msg void OnUpdateToolsGeometry(CCmdUI *pCmdUI);
 	afx_msg void OnToolsGeometry();
 	virtual void DeleteContents();

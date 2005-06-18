@@ -89,7 +89,7 @@ void CGlobal::PickProp(vtkProp3D* pProp3D, vtkRenderer* pRenderer, vtkRenderWind
 
 	// get center of prop
 	//
-	float *bounds = pProp3D->GetBounds();
+	vtkFloatingPointType *bounds = pProp3D->GetBounds();
 	vtkCoordinate* pCoor = vtkCoordinate::New();
 	pCoor->SetCoordinateSystemToWorld();
 	pCoor->SetValue((bounds[0] + bounds[1])/2, (bounds[2] + bounds[3])/2, (bounds[4] + bounds[5])/2);

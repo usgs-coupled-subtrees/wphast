@@ -13,6 +13,11 @@ class vtkRenderWindowInteractor;
 class CPropertyTreeControlBar;
 class CUnits;
 
+#ifndef vtkFloatingPointType
+#define vtkFloatingPointType vtkFloatingPointType
+typedef float vtkFloatingPointType;
+#endif 
+
 class CZoneActor : public vtkLODActor
 {
 public:
@@ -91,8 +96,8 @@ private:
 	float GetYLength(void); // use SetBounds instead.
 	float GetZLength(void); // use SetBounds instead.
 
-	void SetCenter(float x, float y, float z); // use SetBounds instead.
-	void SetCenter(float data[3]); // use SetBounds instead.
-	float* GetCenter(void); // use SetBounds instead.
-	void GetCenter(float data[3]); // use SetBounds instead.
+	void SetCenter(vtkFloatingPointType x, vtkFloatingPointType y, vtkFloatingPointType z); // use SetBounds instead.
+	void SetCenter(vtkFloatingPointType data[3]); // use SetBounds instead.
+	vtkFloatingPointType* GetCenter(void); // use SetBounds instead.
+	void GetCenter(vtkFloatingPointType data[3]); // use SetBounds instead.
 };

@@ -172,6 +172,8 @@ public:
 	void CancelNewRiver(void);
 	void EndNewRiver(void);
 
+	afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
+	afx_msg void OnDestroy();
 };
 
 #ifndef _DEBUG  // debug version in WPhastView.cpp

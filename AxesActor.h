@@ -9,13 +9,18 @@ class vtkLookupTable;
 struct AxesActorProperties {
 };
 
+#ifndef vtkFloatingPointType
+#define vtkFloatingPointType vtkFloatingPointType
+typedef float vtkFloatingPointType;
+#endif
+
 class CAxesActor : public vtkOpenGLActor
 {
 public:
 	vtkTypeRevisionMacro(CAxesActor,vtkOpenGLActor);
 	static CAxesActor *New();
 
-	void SetDefaultPositions(const float p[6]);
+	void SetDefaultPositions(const vtkFloatingPointType p[6]);
 	void SetDefaultSize(float s);
 	void SetDefaultTubeDiameter(float d);
 

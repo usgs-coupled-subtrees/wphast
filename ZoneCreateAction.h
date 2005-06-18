@@ -6,6 +6,11 @@
 #include "WPhastDoc.h"
 #include <vtkProperty.h>
 
+#ifndef vtkFloatingPointType
+#define vtkFloatingPointType vtkFloatingPointType
+typedef float vtkFloatingPointType;
+#endif
+
 template<typename T>
 class CZoneCreateAction : public CAction
 {
@@ -28,7 +33,7 @@ protected:
 	float m_zMin;
 	float m_zMax;
 	T* m_pZoneActor;
-	float m_color[3];
+	vtkFloatingPointType m_color[3];
 };
 
 template<typename T>

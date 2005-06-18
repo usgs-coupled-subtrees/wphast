@@ -9,6 +9,11 @@ class vtkPolyDataMapper;
 class CWorldTransform;
 // class CSiteMap;
 
+#ifndef vtkFloatingPointType
+#define vtkFloatingPointType vtkFloatingPointType
+typedef float vtkFloatingPointType;
+#endif
+
 class CMapActor : public vtkOpenGLActor
 {
 public:
@@ -24,7 +29,7 @@ protected:
 	CMapActor(void);
 	virtual ~CMapActor(void);
 
-	int PlaceMap(float xPos, float yPos, float zPos, float angle);
+	int PlaceMap(vtkFloatingPointType xPos, vtkFloatingPointType yPos, vtkFloatingPointType zPos, vtkFloatingPointType angle);
 	int SetFileName(const char *filename);
 	int SetWorldTransform(const CWorldTransform &wtrans);
 	int SetWorldFileName(const char *filename);
@@ -42,8 +47,8 @@ public:
 	double m_YUpperLeft;
 
 protected:
-	float m_UpperLeft[3];
-	float m_DataSpacing[3];
+	vtkFloatingPointType m_UpperLeft[3];
+	vtkFloatingPointType m_DataSpacing[3];
 	CSiteMap m_siteMap;
 	TCHAR m_szTempFileName[MAX_PATH];
 private:

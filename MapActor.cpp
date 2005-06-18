@@ -116,11 +116,11 @@ int CMapActor::SetWorldTransform(const CWorldTransform &wtrans)
 		ASSERT(cy > 0);
 		ASSERT(cz == 0);
 
-		float xMin = this->m_XUpperLeft;
-		float xMax = cx * this->m_XDataSpacing + this->m_XUpperLeft;
+		vtkFloatingPointType xMin = this->m_XUpperLeft;
+		vtkFloatingPointType xMax = cx * this->m_XDataSpacing + this->m_XUpperLeft;
 
-		float yMin = this->m_YUpperLeft - cy * this->m_YDataSpacing;
-		float yMax = this->m_YUpperLeft;
+		vtkFloatingPointType yMin = this->m_YUpperLeft - cy * this->m_YDataSpacing;
+		vtkFloatingPointType yMax = this->m_YUpperLeft;
 
 		this->m_PlaneSource->SetOrigin(xMin, yMin, 0.0);
 		this->m_PlaneSource->SetPoint1(xMax, yMin, 0.0);
@@ -238,12 +238,12 @@ CDumpContext& operator<< (CDumpContext &dc, vtkObject &o)
 }
 #endif // _DEBUG
 
-int CMapActor::PlaceMap(float xPos, float yPos, float zPos, float angle)
+int CMapActor::PlaceMap(vtkFloatingPointType xPos, vtkFloatingPointType yPos, vtkFloatingPointType zPos, vtkFloatingPointType angle)
 {
 	vtkTransform* transform = vtkTransform::New();
 
 	////{{{{
-	float* center = this->m_PlaneSource->GetCenter();
+	vtkFloatingPointType* center = this->m_PlaneSource->GetCenter();
 	//transform->Translate(center[0],center[1],center[2]);
 	transform->RotateZ(-angle);
 	//transform->Translate(-center[0],-center[1],-center[2]);
@@ -252,11 +252,11 @@ int CMapActor::PlaceMap(float xPos, float yPos, float zPos, float angle)
 	// translate
 	///transform->Translate(-xPos, -yPos, -zPos);
 	transform->Translate(-xPos, -yPos, zPos);
-	float *o = this->m_PlaneSource->GetOrigin();
-	float *pt1 = this->m_PlaneSource->GetPoint1();
-	float *pt2 = this->m_PlaneSource->GetPoint2();
+	vtkFloatingPointType *o = this->m_PlaneSource->GetOrigin();
+	vtkFloatingPointType *pt1 = this->m_PlaneSource->GetPoint1();
+	vtkFloatingPointType *pt2 = this->m_PlaneSource->GetPoint2();
 
-	float oNew[3], pt1New[3], pt2New[3];
+	vtkFloatingPointType oNew[3], pt1New[3], pt2New[3];
 	transform->TransformPoint(o,oNew);
 	transform->TransformPoint(pt1,pt1New);
 	transform->TransformPoint(pt2,pt2New);

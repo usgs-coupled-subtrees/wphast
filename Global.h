@@ -26,6 +26,11 @@ class CWorldTransform;
 #define UM_CHECKSTATECHANGE (WM_USER + 100)
 #define UM_DDX_FAILURE (WM_USER + 101)
 
+#ifndef vtkFloatingPointType
+#define vtkFloatingPointType vtkFloatingPointType
+typedef float vtkFloatingPointType;
+#endif
+
 class CGlobal
 {
 public:

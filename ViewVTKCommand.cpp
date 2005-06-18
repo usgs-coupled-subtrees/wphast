@@ -155,7 +155,7 @@ void CViewVTKCommand::OnEndInteractionEvent(vtkObject* caller, void* callData)
 			const CUnits& units = this->m_pView->GetDocument()->GetUnits();
 
 			// Scale
-			const float* scale = this->m_pView->GetDocument()->GetScale();
+			const vtkFloatingPointType* scale = this->m_pView->GetDocument()->GetScale();
 
 			double x = widget->GetPosition()[0] / scale[0] / units.horizontal.input_to_si;
 			double y = widget->GetPosition()[1] / scale[1] / units.horizontal.input_to_si;
@@ -270,7 +270,7 @@ void CViewVTKCommand::OnInteractionEvent(vtkObject* caller, void* callData)
 			const CUnits& units = this->m_pView->GetDocument()->GetUnits();
 
 			// Scale
-			const float* scale = pWellActor->GetScale();
+			const vtkFloatingPointType* scale = pWellActor->GetScale();
 
 			CWellSchedule well = pWellActor->GetWell();
 			well.x = widget->GetPosition()[0] / scale[0] / units.horizontal.input_to_si;
@@ -299,13 +299,13 @@ void CViewVTKCommand::OnInteractionEvent(vtkObject* caller, void* callData)
 						vtkTransform *t = vtkTransform::New();
 						widget->GetTransform(t);
 #ifdef _DEBUG
-						float* pos = widget->GetProp3D()->GetPosition();
+						vtkFloatingPointType* pos = widget->GetProp3D()->GetPosition();
 						ASSERT(pos[0] == 0.0);
 						ASSERT(pos[1] == 0.0);
 						ASSERT(pos[2] == 0.0);
 #endif
-						float* scale = actor->GetScale();
-						float* center = cube->GetCenter();
+						vtkFloatingPointType* scale = actor->GetScale();
+						vtkFloatingPointType* center = cube->GetCenter();
 						widget->GetProp3D()->SetPosition(center[0]*scale[0], center[1]*scale[1], center[2]*scale[2]);
 						widget->GetTransform(t);
 #if (0)
@@ -335,9 +335,9 @@ void CViewVTKCommand::OnInteractionEvent(vtkObject* caller, void* callData)
 		// Update StatusBar
 		//
 		if (CWnd* pWnd = ((CFrameWnd*)::AfxGetMainWnd())->GetMessageBar()) {
-			float bounds[6];
+			vtkFloatingPointType bounds[6];
 			widget->GetProp3D()->GetBounds(bounds);
-			float* scale = widget->GetProp3D()->GetScale();
+			vtkFloatingPointType* scale = widget->GetProp3D()->GetScale();
 			TCHAR buffer[80];
 			const CUnits& units = this->m_pView->GetDocument()->GetUnits();
 			::_sntprintf(buffer, 80, "%g[%s] x %g[%s] x %g[%s])",
@@ -376,36 +376,36 @@ void CViewVTKCommand::Update()
 	// get the focal point in world coordinates
 	//
 	vtkCamera *camera = renderer->GetActiveCamera();	
-	float cameraFP[4];
-	camera->GetFocalPoint((float*)cameraFP); cameraFP[3] = 1.0;
+	vtkFloatingPointType cameraFP[4];
+	camera->GetFocalPoint((vtkFloatingPointType*)cameraFP); cameraFP[3] = 1.0;
 
 	// Convert the focal point coordinates to display (or screen) coordinates.
 	//
 	renderer->SetWorldPoint(cameraFP);
 	renderer->WorldToDisplay();
-	float *displayCoords = renderer->GetDisplayPoint();
+	vtkFloatingPointType *displayCoords = renderer->GetDisplayPoint();
 
 	// Convert the selection point into world coordinates.
 	//
 	renderer->SetDisplayPoint(pos[0], pos[1], displayCoords[2]);
 	renderer->DisplayToWorld();
-	float *worldCoords = renderer->GetWorldPoint();
+	vtkFloatingPointType *worldCoords = renderer->GetWorldPoint();
 	if ( worldCoords[3] == 0.0 ) {
 		ASSERT(FALSE);
 		return;
 	}
-	float PickPosition[3];
+	vtkFloatingPointType PickPosition[3];
 	for (i = 0; i < 3; ++i) {
 		PickPosition[i] = worldCoords[i] / worldCoords[3];
 	}
 
-	float* bounds = this->m_pView->GetDocument()->GetGridBounds();
-	float zMin = bounds[4];
-	float zMax = bounds[5];
+	vtkFloatingPointType* bounds = this->m_pView->GetDocument()->GetGridBounds();
+	vtkFloatingPointType zMin = bounds[4];
+	vtkFloatingPointType zMax = bounds[5];
 #ifdef USE_ZMAX
-	float zPos = zMax;
+	vtkFloatingPointType zPos = zMax;
 #else
-	float zPos = zMin;
+	vtkFloatingPointType zPos = zMin;
 #endif
 
 	if ( camera->GetParallelProjection() )
@@ -430,7 +430,7 @@ void CViewVTKCommand::Update()
 
 	// SCALE
 	//
-	float* scale = this->m_pView->GetDocument()->GetScale();
+	vtkFloatingPointType* scale = this->m_pView->GetDocument()->GetScale();
 
 	// UNITS
 	const CUnits& units = this->m_pView->GetDocument()->GetUnits();
@@ -516,7 +516,7 @@ void CViewVTKCommand::OnLeftButtonReleaseEvent(vtkObject* caller, void* callData
 
 	if (this->m_pView->CreatingNewRiver())
 	{
-		float* scale = this->m_pView->GetDocument()->GetScale();
+		vtkFloatingPointType* scale = this->m_pView->GetDocument()->GetScale();
 
 		this->m_pView->m_pRiverActor->InsertNextPoint(
 			this->m_BeginPoint[0] / scale[0] / this->m_pView->GetDocument()->GetUnits().horizontal.input_to_si,
@@ -532,18 +532,18 @@ void CViewVTKCommand::OnLeftButtonReleaseEvent(vtkObject* caller, void* callData
 	if (this->m_pView->CreatingNewWell())
 	{
 
-		float* bounds = this->m_pView->GetDocument()->GetGridBounds();
-		float zMin = bounds[4];
-		float zMax = bounds[5];
+		vtkFloatingPointType* bounds = this->m_pView->GetDocument()->GetGridBounds();
+		vtkFloatingPointType zMin = bounds[4];
+		vtkFloatingPointType zMax = bounds[5];
 
 		// set radius
 		//
-		float defaultAxesSize = (bounds[1]-bounds[0] + bounds[3]-bounds[2] + bounds[5]-bounds[4])/12;
+		vtkFloatingPointType defaultAxesSize = (bounds[1]-bounds[0] + bounds[3]-bounds[2] + bounds[5]-bounds[4])/12;
 		this->m_pView->m_pWellActor->SetDefaultTubeDiameter(defaultAxesSize * 0.17);
 
 		// set scale
 		//
-		float* scale = this->m_pView->GetDocument()->GetScale();
+		vtkFloatingPointType* scale = this->m_pView->GetDocument()->GetScale();
 		this->m_pView->m_pWellActor->SetScale(scale);
 
 
@@ -642,7 +642,7 @@ void CViewVTKCommand::OnLeftButtonReleaseEvent(vtkObject* caller, void* callData
 		
 		// get bounds before calling EndNewZone
 		//
-		float scaled_meters[6];
+		vtkFloatingPointType scaled_meters[6];
 		this->m_pView->m_pNewCubeActor->GetBounds(scaled_meters);
 // COMMENT: {5/27/2004 8:36:31 PM}		this->m_pView->EndNewZone();
 
@@ -691,7 +691,7 @@ void CViewVTKCommand::OnLeftButtonReleaseEvent(vtkObject* caller, void* callData
 			//
 
 			// determine absolute zone
-			float* scale = this->m_pView->GetDocument()->GetScale();
+			vtkFloatingPointType* scale = this->m_pView->GetDocument()->GetScale();
 			CZone absZone;
 			const CUnits& units = this->m_pView->GetDocument()->GetUnits();
 			absZone.x1 = scaled_meters[0] / scale[0] / units.horizontal.input_to_si;
@@ -781,7 +781,7 @@ void CViewVTKCommand::OnMouseMoveEvent(vtkObject* caller, void* callData)
 #endif
 
 
-			float* scale = this->m_pView->GetDocument()->GetScale();
+			vtkFloatingPointType* scale = this->m_pView->GetDocument()->GetScale();
 			if (CWnd* pWnd = ((CFrameWnd*)::AfxGetMainWnd())->GetMessageBar()) {
 				static TCHAR buffer[80];
 				const CUnits& units = this->m_pView->GetDocument()->GetUnits();

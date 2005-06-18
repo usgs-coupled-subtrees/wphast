@@ -39,6 +39,7 @@ CWellActor::CWellActor(void)
 
 	this->m_pPolyDataMapper = vtkPolyDataMapper::New();
 	this->m_pPolyDataMapper->SetInput(this->m_pTubeFilter->GetOutput());
+// COMMENT: {6/17/2005 9:37:50 PM}	this->m_pPolyDataMapper->SetInput(this->m_pLineSource->GetOutput());
 
 	this->SetMapper(this->m_pPolyDataMapper);
 	this->GetProperty()->SetOpacity(0.6);
@@ -98,6 +99,7 @@ void CWellActor::SetDefaultTubeDiameter(float d)
 float CWellActor::GetNormalizedTubeDiameter(void) const
 {
 	return (2 * this->m_pTubeFilter->GetRadius() / this->m_DefaultTubeDiameter);
+	return 1;
 }
 
 void CWellActor::Edit(CWPhastDoc *pWPhastDoc)

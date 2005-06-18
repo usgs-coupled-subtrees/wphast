@@ -16,7 +16,7 @@ vtkStandardNewMacro(CRiverActor);
 
 
 CRiverActor::CRiverActor(void)
-: m_fRadius(1.0)
+: m_Radius(1.0)
 , m_Z(0.0)
 , Interactor(0)
 , CurrentRenderer(0)
@@ -81,7 +81,7 @@ vtkIdType CRiverActor::InsertNextPoint(double x, double y, double z)
 	vtkSphereSource *pSphereSource = vtkSphereSource::New();
 	pSphereSource->SetPhiResolution(10);
 	pSphereSource->SetThetaResolution(10);
-	pSphereSource->SetRadius(this->m_fRadius);
+	pSphereSource->SetRadius(this->m_Radius);
 
 	double pt[3];
 	pt[0] = x; pt[1] = y; pt[2] = z;
@@ -117,7 +117,7 @@ vtkIdType CRiverActor::InsertNextPoint(double x, double y, double z)
 		vtkTubeFilter *pTubeFilter = vtkTubeFilter::New();
 		pTubeFilter->SetNumberOfSides(8);
 		pTubeFilter->SetInput(pLineSource->GetOutput());
-		pTubeFilter->SetRadius(this->m_fRadius / 2.0);
+		pTubeFilter->SetRadius(this->m_Radius / 2.0);
 		vtkPolyDataMapper *pPolyDataMapper = vtkPolyDataMapper::New();
 		pPolyDataMapper->SetInput(pTubeFilter->GetOutput());
 		vtkActor *pActor = vtkActor::New();
@@ -151,7 +151,7 @@ void CRiverActor::InsertPoint(vtkIdType id, double x, double y, double z)
 	vtkSphereSource *pSphereSource = vtkSphereSource::New();
 	pSphereSource->SetPhiResolution(10);
 	pSphereSource->SetThetaResolution(10);
-	pSphereSource->SetRadius(this->m_fRadius);
+	pSphereSource->SetRadius(this->m_Radius);
 
 	double pt[3];
 	pt[0] = x; pt[1] = y; pt[2] = z;
@@ -175,7 +175,7 @@ void CRiverActor::InsertPoint(vtkIdType id, double x, double y, double z)
 		vtkTubeFilter *pTubeFilter = vtkTubeFilter::New();
 		pTubeFilter->SetNumberOfSides(8);
 		pTubeFilter->SetInput(pLineSource->GetOutput());
-		pTubeFilter->SetRadius(this->m_fRadius / 2.0);
+		pTubeFilter->SetRadius(this->m_Radius / 2.0);
 		vtkPolyDataMapper *pPolyDataMapper = vtkPolyDataMapper::New();
 		pPolyDataMapper->SetInput(pTubeFilter->GetOutput());
 		vtkActor *pActor = vtkActor::New();
@@ -353,24 +353,24 @@ CRiver CRiverActor::GetRiver(void)const
 	return this->m_river;
 }
 
-float CRiverActor::GetRadius(void)const
+vtkFloatingPointType CRiverActor::GetRadius(void)const
 {
-	return this->m_fRadius;
+	return this->m_Radius;
 }
 
-void CRiverActor::SetRadius(float radius)
+void CRiverActor::SetRadius(vtkFloatingPointType radius)
 {
-	this->m_fRadius = radius;
+	this->m_Radius = radius;
 	std::list<vtkSphereSource*>::iterator iterSphereSource = this->m_listSphereSource.begin();
 	for (; iterSphereSource != this->m_listSphereSource.end(); ++iterSphereSource)
 	{
-		(*iterSphereSource)->SetRadius(this->m_fRadius);
+		(*iterSphereSource)->SetRadius(this->m_Radius);
 	}
 
 	std::list<vtkTubeFilter*>::iterator iterTubeFilter = this->m_listTubeFilter.begin();
 	for (; iterTubeFilter != this->m_listTubeFilter.end(); ++iterTubeFilter)
 	{
-		(*iterTubeFilter)->SetRadius(this->m_fRadius / 2.0);
+		(*iterTubeFilter)->SetRadius(this->m_Radius / 2.0);
 	}
 }
 
@@ -656,8 +656,8 @@ void CRiverActor::SetEnabled(int enabling)
 
 		// listen to the following events
 		vtkRenderWindowInteractor *i = this->Interactor;
-		i->AddObserver(vtkCommand::MouseMoveEvent, this->EventCallbackCommand, 
-			1);
+		i->AddObserver(vtkCommand::MouseMoveEvent,
+			this->EventCallbackCommand, 1);
 		i->AddObserver(vtkCommand::LeftButtonPressEvent, 
 			this->EventCallbackCommand, 1);
 		i->AddObserver(vtkCommand::LeftButtonReleaseEvent, 
@@ -670,26 +670,6 @@ void CRiverActor::SetEnabled(int enabling)
 			this->EventCallbackCommand, 1);
 		i->AddObserver(vtkCommand::RightButtonReleaseEvent, 
 			this->EventCallbackCommand, 1);
-// COMMENT: {6/13/2005 3:46:25 PM}
-// COMMENT: {6/13/2005 3:46:25 PM}		// Add the various actors
-// COMMENT: {6/13/2005 3:46:25 PM}		// Add the outline
-// COMMENT: {6/13/2005 3:46:25 PM}		this->CurrentRenderer->AddActor(this->HexActor);
-// COMMENT: {6/13/2005 3:46:25 PM}		this->CurrentRenderer->AddActor(this->HexOutline);
-// COMMENT: {6/13/2005 3:46:25 PM}		this->HexActor->SetProperty(this->OutlineProperty);
-// COMMENT: {6/13/2005 3:46:25 PM}		this->HexOutline->SetProperty(this->OutlineProperty);
-// COMMENT: {6/13/2005 3:46:25 PM}
-// COMMENT: {6/13/2005 3:46:25 PM}		// Add the hex face
-// COMMENT: {6/13/2005 3:46:25 PM}		this->CurrentRenderer->AddActor(this->HexFace);
-// COMMENT: {6/13/2005 3:46:25 PM}		this->HexFace->SetProperty(this->FaceProperty);
-// COMMENT: {6/13/2005 3:46:25 PM}
-// COMMENT: {6/13/2005 3:46:25 PM}		// turn on the handles
-// COMMENT: {6/13/2005 3:46:25 PM}		for (int j=0; j<7; j++)
-// COMMENT: {6/13/2005 3:46:25 PM}		{
-// COMMENT: {6/13/2005 3:46:25 PM}			this->CurrentRenderer->AddActor(this->Handle[j]);
-// COMMENT: {6/13/2005 3:46:25 PM}			this->Handle[j]->SetProperty(this->HandleProperty);
-// COMMENT: {6/13/2005 3:46:25 PM}		}
-// COMMENT: {6/13/2005 3:46:25 PM}
-// COMMENT: {6/13/2005 3:46:25 PM}		this->InvokeEvent(vtkCommand::EnableEvent,NULL);
 	}
 
 	else //disabling-------------------------------------------------------------
@@ -705,22 +685,7 @@ void CRiverActor::SetEnabled(int enabling)
 
 		// don't listen for events any more
 		this->Interactor->RemoveObserver(this->EventCallbackCommand);
-// COMMENT: {6/13/2005 3:46:25 PM}
-// COMMENT: {6/13/2005 3:46:25 PM}		// turn off the outline
-// COMMENT: {6/13/2005 3:46:25 PM}		this->CurrentRenderer->RemoveActor(this->HexActor);
-// COMMENT: {6/13/2005 3:46:25 PM}		this->CurrentRenderer->RemoveActor(this->HexOutline);
-// COMMENT: {6/13/2005 3:46:25 PM}
-// COMMENT: {6/13/2005 3:46:25 PM}		// turn off the hex face
-// COMMENT: {6/13/2005 3:46:25 PM}		this->CurrentRenderer->RemoveActor(this->HexFace);
-// COMMENT: {6/13/2005 3:46:25 PM}
-// COMMENT: {6/13/2005 3:46:25 PM}		// turn off the handles
-// COMMENT: {6/13/2005 3:46:25 PM}		for (int i=0; i<7; i++)
-// COMMENT: {6/13/2005 3:46:25 PM}		{
-// COMMENT: {6/13/2005 3:46:25 PM}			this->CurrentRenderer->RemoveActor(this->Handle[i]);
-// COMMENT: {6/13/2005 3:46:25 PM}		}
-// COMMENT: {6/13/2005 3:46:25 PM}
 		this->CurrentHandle = NULL;
-// COMMENT: {6/13/2005 3:46:25 PM}		this->InvokeEvent(vtkCommand::DisableEvent,NULL);
 		this->CurrentRenderer = NULL;
 	}
 
@@ -741,26 +706,26 @@ void CRiverActor::Update()
 	// get the focal point in world coordinates
 	//
 	vtkCamera *camera = renderer->GetActiveCamera();	
-	float cameraFP[4];
-	camera->GetFocalPoint((float*)cameraFP); cameraFP[3] = 1.0;
+	vtkFloatingPointType cameraFP[4];
+	camera->GetFocalPoint((vtkFloatingPointType*)cameraFP); cameraFP[3] = 1.0;
 
 	// Convert the focal point coordinates to display (or screen) coordinates.
 	//
 	renderer->SetWorldPoint(cameraFP);
 	renderer->WorldToDisplay();
-	float *displayCoords = renderer->GetDisplayPoint();
+	vtkFloatingPointType *displayCoords = renderer->GetDisplayPoint();
 
 	// Convert the selection point into world coordinates.
 	//
 	renderer->SetDisplayPoint(pos[0], pos[1], displayCoords[2]);
 	renderer->DisplayToWorld();
-	float *worldCoords = renderer->GetWorldPoint();
+	vtkFloatingPointType *worldCoords = renderer->GetWorldPoint();
 	if ( worldCoords[3] == 0.0 )
 	{
 		ASSERT(FALSE);
 		return;
 	}
-	float PickPosition[3];
+	vtkFloatingPointType PickPosition[3];
 	for (i = 0; i < 3; ++i)
 	{
 		PickPosition[i] = worldCoords[i] / worldCoords[3];
@@ -773,7 +738,7 @@ void CRiverActor::Update()
 	this->m_pTransformScale->TransformPoint(pt, pt);
 	this->m_pTransformUnits->TransformPoint(pt, pt);
 
-	float zPos = pt[2];
+	double zPos = pt[2];
 
 	if ( camera->GetParallelProjection() )
 	{

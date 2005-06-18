@@ -173,45 +173,45 @@ void CHDFMirrorFile::Close()
 
 ////
 
-/*-------------------------------------------------------------------------
- * Function:         write_axis
- *
- * Purpose:          Writes the given vector <name> to the loc_id group.
- *
- * Preconditions:    loc_id                     open
- *
- * Postconditions:   "loc_id/<name>" is written to HDF
- *-------------------------------------------------------------------------
- */
-void CHDFMirrorFile::write_axis(hid_t loc_id, double* a, int na, const char* name)
-{
-    hsize_t dims[1], maxdims[1];
-    hid_t dspace_id;
-    hid_t dset_id;
-    herr_t status;
-  
-    if (!(na > 0)) return;
-  
-    /* Create the "/Grid/name" dataspace. */
-    dims[0] = maxdims[0] = na;
-    dspace_id = H5Screate_simple(1, dims, maxdims);
-    
-    /* Create the "/Grid/name" dataset */
-    dset_id = H5Dcreate(loc_id, name, H5T_NATIVE_FLOAT, dspace_id, H5P_DEFAULT);
-    
-    /* Write the "/Grid/name" dataset */
-    if (H5Dwrite(dset_id, H5T_NATIVE_DOUBLE, dspace_id, H5S_ALL, H5P_DEFAULT, a) < 0) {
-        ///sprintf(error_string, "HDF Error: Unable to write \"/%s/%s\" dataset\n", szGrid, name);
-        ///error_msg(error_string, STOP);
-		return;
-    }
-    
-    /* Close the "/Grid/name" dataset */
-    status = H5Dclose(dset_id);
-    ASSERT(status >= 0);
-  
-    /* Close the "/Grid/name" dataspace */
-    status = H5Sclose(dspace_id);
-    ASSERT(status >= 0);
-}
+// COMMENT: {6/17/2005 9:11:13 PM}/*-------------------------------------------------------------------------
+// COMMENT: {6/17/2005 9:11:13 PM} * Function:         write_axis
+// COMMENT: {6/17/2005 9:11:13 PM} *
+// COMMENT: {6/17/2005 9:11:13 PM} * Purpose:          Writes the given vector <name> to the loc_id group.
+// COMMENT: {6/17/2005 9:11:13 PM} *
+// COMMENT: {6/17/2005 9:11:13 PM} * Preconditions:    loc_id                     open
+// COMMENT: {6/17/2005 9:11:13 PM} *
+// COMMENT: {6/17/2005 9:11:13 PM} * Postconditions:   "loc_id/<name>" is written to HDF
+// COMMENT: {6/17/2005 9:11:13 PM} *-------------------------------------------------------------------------
+// COMMENT: {6/17/2005 9:11:13 PM} */
+// COMMENT: {6/17/2005 9:11:13 PM}void CHDFMirrorFile::write_axis(hid_t loc_id, double* a, int na, const char* name)
+// COMMENT: {6/17/2005 9:11:13 PM}{
+// COMMENT: {6/17/2005 9:11:13 PM}    hsize_t dims[1], maxdims[1];
+// COMMENT: {6/17/2005 9:11:13 PM}    hid_t dspace_id;
+// COMMENT: {6/17/2005 9:11:13 PM}    hid_t dset_id;
+// COMMENT: {6/17/2005 9:11:13 PM}    herr_t status;
+// COMMENT: {6/17/2005 9:11:13 PM}  
+// COMMENT: {6/17/2005 9:11:13 PM}    if (!(na > 0)) return;
+// COMMENT: {6/17/2005 9:11:13 PM}  
+// COMMENT: {6/17/2005 9:11:13 PM}    /* Create the "/Grid/name" dataspace. */
+// COMMENT: {6/17/2005 9:11:13 PM}    dims[0] = maxdims[0] = na;
+// COMMENT: {6/17/2005 9:11:13 PM}    dspace_id = H5Screate_simple(1, dims, maxdims);
+// COMMENT: {6/17/2005 9:11:13 PM}    
+// COMMENT: {6/17/2005 9:11:13 PM}    /* Create the "/Grid/name" dataset */
+// COMMENT: {6/17/2005 9:11:13 PM}    dset_id = H5Dcreate(loc_id, name, H5T_NATIVE_FLOAT, dspace_id, H5P_DEFAULT);
+// COMMENT: {6/17/2005 9:11:13 PM}    
+// COMMENT: {6/17/2005 9:11:13 PM}    /* Write the "/Grid/name" dataset */
+// COMMENT: {6/17/2005 9:11:13 PM}    if (H5Dwrite(dset_id, H5T_NATIVE_DOUBLE, dspace_id, H5S_ALL, H5P_DEFAULT, a) < 0) {
+// COMMENT: {6/17/2005 9:11:13 PM}        ///sprintf(error_string, "HDF Error: Unable to write \"/%s/%s\" dataset\n", szGrid, name);
+// COMMENT: {6/17/2005 9:11:13 PM}        ///error_msg(error_string, STOP);
+// COMMENT: {6/17/2005 9:11:13 PM}		return;
+// COMMENT: {6/17/2005 9:11:13 PM}    }
+// COMMENT: {6/17/2005 9:11:13 PM}    
+// COMMENT: {6/17/2005 9:11:13 PM}    /* Close the "/Grid/name" dataset */
+// COMMENT: {6/17/2005 9:11:13 PM}    status = H5Dclose(dset_id);
+// COMMENT: {6/17/2005 9:11:13 PM}    ASSERT(status >= 0);
+// COMMENT: {6/17/2005 9:11:13 PM}  
+// COMMENT: {6/17/2005 9:11:13 PM}    /* Close the "/Grid/name" dataspace */
+// COMMENT: {6/17/2005 9:11:13 PM}    status = H5Sclose(dspace_id);
+// COMMENT: {6/17/2005 9:11:13 PM}    ASSERT(status >= 0);
+// COMMENT: {6/17/2005 9:11:13 PM}}
 

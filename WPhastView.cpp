@@ -51,6 +51,11 @@
 // #include "CreateZoneAction.h"
 #include "ZoneCreateAction.h"
 
+#ifndef vtkFloatingPointType
+#define vtkFloatingPointType vtkFloatingPointType
+typedef float vtkFloatingPointType;
+#endif
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -88,6 +93,8 @@ BEGIN_MESSAGE_MAP(CWPhastView, CView)
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_NEWWELL, OnUpdateToolsNewWell)
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_NEWRIVER, OnUpdateToolsNewRiver)
 	ON_COMMAND(ID_TOOLS_NEWRIVER, OnToolsNewRiver)
+	ON_WM_LBUTTONDBLCLK()
+	ON_WM_DESTROY()
 END_MESSAGE_MAP()
 
 // CWPhastView construction/destruction
@@ -192,11 +199,6 @@ CWPhastView::~CWPhastView()
 	this->m_pCursor3DMapper->Delete();
 	this->m_pCursor3DActor->Delete();
 
-	// Delete the the renderer, window and interactor objects.
-	//
-	this->m_RenderWindow->Delete();
-	this->m_Renderer->Delete();
-	this->m_RenderWindowInteractor->Delete();
 
 	// Well actor
 	if (this->m_pWellActor)
@@ -211,6 +213,15 @@ CWPhastView::~CWPhastView()
 		this->m_pRiverActor->Delete();
 		this->m_pRiverActor = 0;
 	}
+
+	// Delete the the renderer, window and interactor objects.
+	//
+	//{{
+	this->m_RenderWindowInteractor->SetRenderWindow(NULL);
+	//}}
+	this->m_Renderer->Delete();
+	this->m_RenderWindowInteractor->Delete();
+	this->m_RenderWindow->Delete();
 }
 
 BOOL CWPhastView::PreCreateWindow(CREATESTRUCT& cs)
@@ -234,7 +245,13 @@ void CWPhastView::OnDraw(CDC* pDC)
 		CRect rect;
 
 		this->GetClientRect(&rect);
+// COMMENT: {6/16/2005 9:39:20 PM}		//{{
+// COMMENT: {6/16/2005 9:39:20 PM}		WNDPROC OldProc = (WNDPROC)GetWindowLong(m_hWnd,GWL_WNDPROC);
+// COMMENT: {6/16/2005 9:39:20 PM}		//}}
 		this->m_RenderWindowInteractor->Initialize();
+// COMMENT: {6/16/2005 9:39:24 PM}		//{{
+// COMMENT: {6/16/2005 9:39:24 PM}		SetWindowLong(m_hWnd,GWL_WNDPROC,(LONG)OldProc);
+// COMMENT: {6/16/2005 9:39:24 PM}		//}}
 		this->m_RenderWindow->SetSize(rect.right-rect.left,rect.bottom-rect.top);
 
 		this->m_Renderer->ResetCamera();
@@ -334,7 +351,14 @@ int CWPhastView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	this->m_RenderWindow->AddRenderer(this->m_Renderer);
 	// setup the parent window
 	this->m_RenderWindow->SetParentId(this->m_hWnd);
+// COMMENT: {6/16/2005 9:36:20 PM}	this->m_RenderWindow->SetParentId(lpCreateStruct->hwndParent);
+
+// COMMENT: {6/16/2005 9:39:34 PM}	///{{{6/16/2005 4:25:02 PM
+// COMMENT: {6/16/2005 9:39:34 PM}	this->m_RenderWindow->SetParentId(this->GetParent()->GetSafeHwnd());
+// COMMENT: {6/16/2005 9:39:34 PM}	this->m_RenderWindow->SetWindowId(this->GetSafeHwnd());
+// COMMENT: {6/16/2005 9:39:34 PM}	///}}}6/16/2005 4:25:02 PM
 	this->m_RenderWindowInteractor->SetRenderWindow(this->m_RenderWindow);
+
 
 	CCreateContext *pContext = static_cast<CCreateContext*>(lpCreateStruct->lpCreateParams);
 	ASSERT(pContext);
@@ -396,6 +420,11 @@ LRESULT CWPhastView::WindowProc(UINT message, WPARAM wParam, LPARAM lParam)
 			return vtkHandleMessage2(this->m_hWnd, message, wParam, lParam, this->m_RenderWindowInteractor);
 		}
 		break;
+	//{{
+    case WM_LBUTTONDBLCLK:
+		TRACE("Recieved WM_LBUTTONDBLCLK\n");
+		break;
+	//}}
 	}
 
 	return CView::WindowProc(message, wParam, lParam);
@@ -468,7 +497,7 @@ void CWPhastView::OnActivateView(BOOL bActivate, CView* pActivateView, CView* pD
 			// Update StatusBar
 			//
 			if (CWnd* pWnd = ((CFrameWnd*)::AfxGetMainWnd())->GetMessageBar()) {
-				float* bounds = prop->GetBounds();
+				vtkFloatingPointType* bounds = prop->GetBounds();
 				TCHAR buffer[80];
 				// ::_sntprintf(buffer, 80, "%6.4f x %6.4f x %6.4f", fabs(bounds[1] - bounds[0]), fabs(bounds[3] - bounds[2]), fabs(bounds[5] - bounds[4]));
 				::_sntprintf(buffer, 80, "%6.4g x %6.4g x %6.4g", fabs(bounds[1] - bounds[0]), fabs(bounds[3] - bounds[2]), fabs(bounds[5] - bounds[4]));
@@ -598,8 +627,8 @@ void CWPhastView::StartNewZone(void)
 {
 	// set size of 3D cursor
 	//
-	float* bounds = this->GetDocument()->GetGridBounds();
-	float dim = (bounds[1] - bounds[0]) / 20.0;
+	vtkFloatingPointType* bounds = this->GetDocument()->GetGridBounds();
+	vtkFloatingPointType dim = (bounds[1] - bounds[0]) / 20.0;
 	this->m_pCursor3D->SetModelBounds(-dim, dim, -dim, dim, -dim, dim);
 	this->m_pCursor3DActor->VisibilityOn();
 
@@ -1002,8 +1031,8 @@ void CWPhastView::StartNewWell(void)
 {
 	// set size of 3D cursor
 	//
-	float* bounds = this->GetDocument()->GetGridBounds();
-	float dim = (bounds[1] - bounds[0]) / 20.0;
+	vtkFloatingPointType* bounds = this->GetDocument()->GetGridBounds();
+	vtkFloatingPointType dim = (bounds[1] - bounds[0]) / 20.0;
 	this->m_pCursor3D->SetModelBounds(-dim, dim, -dim, dim, -dim, dim);
 	this->m_pCursor3DActor->VisibilityOn();
 
@@ -1313,8 +1342,8 @@ void CWPhastView::StartNewRiver(void)
 {
 	// set size of 3D cursor
 	//
-	float* bounds = this->GetDocument()->GetGridBounds();
-	float dim = (bounds[1] - bounds[0]) / 20.0;
+	vtkFloatingPointType* bounds = this->GetDocument()->GetGridBounds();
+	vtkFloatingPointType dim = (bounds[1] - bounds[0]) / 20.0;
 	this->m_pCursor3D->SetModelBounds(-dim, dim, -dim, dim, -dim, dim);
 	this->m_pCursor3DActor->VisibilityOn();
 
@@ -1408,4 +1437,18 @@ void CWPhastView::CancelNewRiver(void)
 		this->EndNewRiver();
 		this->GetDocument()->UpdateAllViews(0);
 	}
+}
+
+void CWPhastView::OnLButtonDblClk(UINT nFlags, CPoint point)
+{
+	// TODO: Add your message handler code here and/or call default
+
+	__super::OnLButtonDblClk(nFlags, point);
+}
+
+void CWPhastView::OnDestroy()
+{
+	__super::OnDestroy();
+
+	// TODO: Add your message handler code here
 }

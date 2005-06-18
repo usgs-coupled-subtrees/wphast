@@ -49,15 +49,15 @@ void vtkPropPickerFixed::Initialize()
 }
 
 // Pick from the given collection
-int vtkPropPickerFixed::Pick(float selectionX, float selectionY, 
-                        float vtkNotUsed(z), vtkRenderer *renderer)
+int vtkPropPickerFixed::Pick(vtkFloatingPointType selectionX, vtkFloatingPointType selectionY, 
+                        vtkFloatingPointType vtkNotUsed(z), vtkRenderer *renderer)
 {
   return this->PickProp(selectionX, selectionY, renderer);
 }
 
 
 // Pick from the given collection
-int vtkPropPickerFixed::PickProp(float selectionX, float selectionY,
+int vtkPropPickerFixed::PickProp(vtkFloatingPointType selectionX, vtkFloatingPointType selectionY,
                             vtkRenderer *renderer, vtkPropCollection* pickfrom)
 {
   this->PickFromProps = pickfrom;
@@ -70,7 +70,7 @@ int vtkPropPickerFixed::PickProp(float selectionX, float selectionY,
 
 // Perform pick operation with selection point provided. The z location
 // is recovered from the zBuffer. Always returns 0 since no actors are picked.
-int vtkPropPickerFixed::PickProp(float selectionX, float selectionY, 
+int vtkPropPickerFixed::PickProp(vtkFloatingPointType selectionX, vtkFloatingPointType selectionY, 
                             vtkRenderer *renderer)
 {
   //  Initialize picking process

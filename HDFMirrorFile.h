@@ -19,7 +19,7 @@ public:
 	virtual ULONGLONG GetLength() const {return 2000;}
 
 	hid_t GetHID()const {return m_hidFile;}
-	void write_axis(hid_t loc_id, double* a, int na, const char* name);
+// COMMENT: {6/17/2005 9:11:03 PM}	void write_axis(hid_t loc_id, double* a, int na, const char* name);
 
 protected:
 	CString m_strMirrorName;

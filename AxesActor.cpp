@@ -66,7 +66,7 @@ CAxesActor::~CAxesActor(void)
 	this->m_LookupTable->Delete();
 }
 
-void CAxesActor::SetDefaultPositions(const float p[6])
+void CAxesActor::SetDefaultPositions(const vtkFloatingPointType p[6])
 {
 	this->m_DefaultPositions[0] = p[0];
 	this->m_DefaultPositions[1] = p[1];

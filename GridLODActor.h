@@ -10,6 +10,11 @@ class vtkPolyDataMapper;
 class CUnits;
 class CZone;
 
+#ifndef vtkFloatingPointType
+#define vtkFloatingPointType vtkFloatingPointType
+typedef float vtkFloatingPointType;
+#endif
+
 class CGridLODActor : public vtkLODActor
 {
 public:

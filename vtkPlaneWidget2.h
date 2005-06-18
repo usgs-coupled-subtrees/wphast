@@ -4,6 +4,11 @@
 
 class vtkArrowSource;
 
+#ifndef vtkFloatingPointType
+#define vtkFloatingPointType vtkFloatingPointType
+typedef float vtkFloatingPointType;
+#endif
+
 class vtkPlaneWidget2 : public vtkPlaneWidget  
 {
 
@@ -20,7 +25,7 @@ public:
 	double GetAngle(void); // degrees
 	void SetAngle(double angle); // degrees
 	
-	float* GetModelOrigin(void); // degrees
+	vtkFloatingPointType* GetModelOrigin(void); // degrees
 	void SetModelOrigin(float x, float y);
 
 	void SetResolution(int index, int n);
@@ -87,7 +92,7 @@ protected:
 	vtkActor          *XAxisActor;
 	vtkActor          *YAxisActor;
 	double            Angle;
-	float             m_InvisablePosX[3];
+	vtkFloatingPointType   m_InvisablePosX[3];
 #if defined(_DEBUG)
 	vtkActor          *m_VisHandle;
 	vtkPolyDataMapper *m_VisHandleMapper;

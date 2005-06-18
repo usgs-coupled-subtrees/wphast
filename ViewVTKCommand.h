@@ -4,6 +4,11 @@
 class CWPhastView;
 class CAction;
 
+#ifndef vtkFloatingPointType
+#define vtkFloatingPointType vtkFloatingPointType
+typedef float vtkFloatingPointType;
+#endif
+
 class CViewVTKCommand : public vtkCommand
 {
 public:

@@ -147,6 +147,12 @@ static UINT s_GridIDs[] =
 	this->GetDlgItem(ID)->SendMessage(EM_SETSEL, 0, -1)
 
 
+#ifndef vtkFloatingPointType
+#define vtkFloatingPointType vtkFloatingPointType
+typedef float vtkFloatingPointType;
+#endif
+
+
 const UINT FIRST_NODE_ID = IDC_X_NODES_EDIT;
 
 CGridPoint::CGridPoint(void)
@@ -331,9 +337,9 @@ void CMapDialog::DDX_Point2(CDataExchange* pDX)
 
 		///////{{
 		{
-			float *dataSpacing = this->m_MapImageActor->GetImageReader2()->GetDataSpacing();
-			float *dataOrigin  = this->m_MapImageActor->GetImageReader2()->GetDataOrigin();
-			int   *dataExtent  = this->m_MapImageActor->GetDataExtent();
+			vtkFloatingPointType *dataSpacing = this->m_MapImageActor->GetImageReader2()->GetDataSpacing();
+			vtkFloatingPointType *dataOrigin  = this->m_MapImageActor->GetImageReader2()->GetDataOrigin();
+			int                  *dataExtent  = this->m_MapImageActor->GetDataExtent();
 			ASSERT(dataSpacing[0] != 0);
 			ASSERT(dataSpacing[1] != 0);
 			ASSERT(dataSpacing[2] != 0);
@@ -1051,23 +1057,23 @@ void CMapDialog::ProcessEvents(vtkObject* caller,
 				vtkRenderer *renderer = self->m_Renderer;
 
 				vtkCamera *camera = renderer->GetActiveCamera();	
-				float cameraFP[4];
-				camera->GetFocalPoint((float *)cameraFP); cameraFP[3] = 1.0;
+				vtkFloatingPointType cameraFP[4];
+				camera->GetFocalPoint((vtkFloatingPointType*)cameraFP); cameraFP[3] = 1.0;
 
 				renderer->SetWorldPoint(cameraFP);
 				renderer->WorldToDisplay();
-				float *displayCoords = renderer->GetDisplayPoint();
+				vtkFloatingPointType *displayCoords = renderer->GetDisplayPoint();
 
 				// Convert the selection point into world coordinates.
 				//
 				renderer->SetDisplayPoint(pos[0], pos[1], displayCoords[2]);
 				renderer->DisplayToWorld();
-				float *worldCoords = renderer->GetWorldPoint();
+				vtkFloatingPointType *worldCoords = renderer->GetWorldPoint();
 				if ( worldCoords[3] == 0.0 ) {
 					ASSERT(FALSE);
 					return;
 				}
-				float PickPosition[3];
+				vtkFloatingPointType PickPosition[3];
 				for (i = 0; i < 3; ++i) {
 					PickPosition[i] = worldCoords[i] / worldCoords[3];
 				}
@@ -1089,8 +1095,8 @@ void CMapDialog::ProcessEvents(vtkObject* caller,
 					}
 				}
 
-				float* dataSpacing = self->m_MapImageActor->GetImageReader2()->GetDataSpacing();
-				float* dataOrigin = self->m_MapImageActor->GetImageReader2()->GetDataOrigin();
+				vtkFloatingPointType* dataSpacing = self->m_MapImageActor->GetImageReader2()->GetDataSpacing();
+				vtkFloatingPointType* dataOrigin = self->m_MapImageActor->GetImageReader2()->GetDataOrigin();
 
 				ASSERT(dataSpacing[0] == 1);
 				ASSERT(dataSpacing[1] == 1);
@@ -1137,7 +1143,7 @@ void CMapDialog::OnEnKillfocusEditMoAngle()
 void CMapDialog::OnEnKillfocusEditMoY()
 {
 	double value;
-	float* origin = this->m_Widget->GetModelOrigin();
+	vtkFloatingPointType* origin = this->m_Widget->GetModelOrigin();
 	if (CGlobal::GetEditValue(this, IDC_EDIT_MO_Y, value)) {
 		this->m_Widget->SetModelOrigin(origin[0], value);
 		this->m_RenderWindowInteractor->Render();
@@ -1153,7 +1159,7 @@ void CMapDialog::OnEnKillfocusEditMoY()
 void CMapDialog::OnEnKillfocusEditMoX()
 {
 	double value;
-	float* origin = this->m_Widget->GetModelOrigin();
+	vtkFloatingPointType* origin = this->m_Widget->GetModelOrigin();
 	if (CGlobal::GetEditValue(this, IDC_EDIT_MO_X, value)) {
 		this->m_Widget->SetModelOrigin(value, origin[1]);
 		this->m_RenderWindowInteractor->Render();
@@ -1200,7 +1206,7 @@ void CMapDialog::UpdateModelOriginX(void)const
 {
 	const TCHAR format[] = "%.2f";
 	static TCHAR buffer[40];
-	float* origin = this->m_Widget->GetModelOrigin();
+	vtkFloatingPointType* origin = this->m_Widget->GetModelOrigin();
 	
 	::sprintf(buffer, format, origin[0]);
 	this->GetDlgItem(IDC_EDIT_MO_X)->SetWindowText(buffer);
@@ -1210,7 +1216,7 @@ void CMapDialog::UpdateModelOriginY(void)const
 {
 	const TCHAR format[] = "%.2f";
 	static TCHAR buffer[40];
-	float* origin = this->m_Widget->GetModelOrigin();
+	vtkFloatingPointType* origin = this->m_Widget->GetModelOrigin();
 	
 	::sprintf(buffer, format, origin[1]);
 	this->GetDlgItem(IDC_EDIT_MO_Y)->SetWindowText(buffer);
@@ -2453,8 +2459,8 @@ void CMapDialog::OnEnUpdateEditXp1()
 	int pixel =(int)this->GetDlgItemInt(IDC_EDIT_XP1, &bTranslated, TRUE);
 	if (bTranslated)
 	{
-		float* dataSpacing = this->m_MapImageActor->GetImageReader2()->GetDataSpacing();
-		float* dataOrigin  = this->m_MapImageActor->GetImageReader2()->GetDataOrigin();
+		vtkFloatingPointType* dataSpacing = this->m_MapImageActor->GetImageReader2()->GetDataSpacing();
+		vtkFloatingPointType* dataOrigin  = this->m_MapImageActor->GetImageReader2()->GetDataOrigin();
 
 		this->m_point1.x       = pixel;
 		this->m_point1.x_world = pixel * dataSpacing[0] + dataOrigin[0];
@@ -2472,8 +2478,8 @@ void CMapDialog::OnEnUpdateEditYp1()
 	int pixel =(int)this->GetDlgItemInt(IDC_EDIT_YP1, &bTranslated, TRUE);
 	if (bTranslated)
 	{
-		float* dataSpacing = this->m_MapImageActor->GetImageReader2()->GetDataSpacing();
-		float* dataOrigin = this->m_MapImageActor->GetImageReader2()->GetDataOrigin();
+		vtkFloatingPointType* dataSpacing = this->m_MapImageActor->GetImageReader2()->GetDataSpacing();
+		vtkFloatingPointType* dataOrigin = this->m_MapImageActor->GetImageReader2()->GetDataOrigin();
 
 		this->m_point1.y       = pixel;
 		this->m_point1.y_world = pixel * dataSpacing[1] + dataOrigin[1];
@@ -2493,8 +2499,8 @@ void CMapDialog::OnEnUpdateEditXp2()
 	int pixel =(int)this->GetDlgItemInt(IDC_EDIT_XP2, &bTranslated, TRUE);
 	if (bTranslated)
 	{
-		float* dataSpacing = this->m_MapImageActor->GetImageReader2()->GetDataSpacing();
-		float* dataOrigin = this->m_MapImageActor->GetImageReader2()->GetDataOrigin();
+		vtkFloatingPointType* dataSpacing = this->m_MapImageActor->GetImageReader2()->GetDataSpacing();
+		vtkFloatingPointType* dataOrigin = this->m_MapImageActor->GetImageReader2()->GetDataOrigin();
 
 		this->m_point2.x       = pixel;
 		this->m_point2.x_world = pixel * dataSpacing[0] + dataOrigin[0];
@@ -2514,8 +2520,8 @@ void CMapDialog::OnEnUpdateEditYp2()
 	int pixel =(int)this->GetDlgItemInt(IDC_EDIT_YP2, &bTranslated, TRUE);
 	if (bTranslated)
 	{
-		float* dataSpacing = this->m_MapImageActor->GetImageReader2()->GetDataSpacing();
-		float* dataOrigin = this->m_MapImageActor->GetImageReader2()->GetDataOrigin();
+		vtkFloatingPointType* dataSpacing = this->m_MapImageActor->GetImageReader2()->GetDataSpacing();
+		vtkFloatingPointType* dataOrigin = this->m_MapImageActor->GetImageReader2()->GetDataOrigin();
 
 		this->m_point2.y       = pixel;
 		this->m_point2.y_world = pixel * dataSpacing[1] + dataOrigin[1];

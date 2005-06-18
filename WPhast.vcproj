@@ -126,7 +126,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="$(DEV_VTK42_MEM_INC);$(DEV_HDF5_INC)"
+				AdditionalIncludeDirectories="$(DEV_VTK44_MEM_INC);$(DEV_HDF5_INC)"
 				PreprocessorDefinitions="ONLY_FLOW_ONLY_SUPPORTED;WIN32;_WINDOWS;_DEBUG;__WPHAST__"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -142,7 +142,7 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="UxTheme.lib OpenGL32.Lib hdf5ddll.lib $(DEV_VTK42_LINK)"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="$(DEV_VTK42_MEM_LIB_D);$(DEV_HDF5_LIBDLL_D)"
+				AdditionalLibraryDirectories="$(DEV_VTK44_MEM_LIB_D);$(DEV_HDF5_LIBDLL_D)"
 				GenerateDebugInformation="TRUE"
 				SubSystem="2"
 				TargetMachine="1"/>
@@ -3422,15 +3422,15 @@
 			Name="Build Logs"
 			Filter="">
 			<File
-				RelativePath="Release\BuildLog.htm"
-				DeploymentContent="TRUE">
-			</File>
-			<File
 				RelativePath="cppunit\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 			<File
 				RelativePath="Debug\BuildLog.htm"
+				DeploymentContent="TRUE">
+			</File>
+			<File
+				RelativePath="Release\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 		</Filter>
@@ -3581,46 +3581,49 @@
 			RelativePath="WPhast.reg">
 		</File>
 		<File
-			RelativePath="..\..\..\..\..\3RDPARTY\vtk-4-2-1-bin-mem\Common\Debug\vtkCommon.bsc">
+			RelativePath="\\mackey\c$\3RDPARTY\VTK-4.4-bin-mem\bin\debug\vtkCommon.bsc">
 		</File>
 		<File
-			RelativePath="..\..\..\..\..\3RDPARTY\vtk-4-2-1-bin-mem\Filtering\Debug\vtkFiltering.bsc">
+			RelativePath="\\mackey\c$\3RDPARTY\VTK-4.4-bin-mem\bin\debug\vtkDICOMParser.bsc">
 		</File>
 		<File
-			RelativePath="..\..\..\..\..\3RDPARTY\vtk-4-2-1-bin-mem\Graphics\Debug\vtkGraphics.bsc">
+			RelativePath="\\mackey\c$\3RDPARTY\VTK-4.4-bin-mem\bin\debug\vtkFiltering.bsc">
 		</File>
 		<File
-			RelativePath="..\..\..\..\..\3RDPARTY\vtk-4-2-1-bin-mem\Hybrid\Debug\vtkHybrid.bsc">
+			RelativePath="\\mackey\c$\3RDPARTY\VTK-4.4-bin-mem\bin\debug\vtkGraphics.bsc">
 		</File>
 		<File
-			RelativePath="..\..\..\..\..\3RDPARTY\vtk-4-2-1-bin-mem\IO\Debug\vtkIO.bsc">
+			RelativePath="\\mackey\c$\3RDPARTY\VTK-4.4-bin-mem\bin\debug\vtkHybrid.bsc">
 		</File>
 		<File
-			RelativePath="..\..\..\..\..\3RDPARTY\vtk-4-2-1-bin-mem\Imaging\Debug\vtkImaging.bsc">
+			RelativePath="\\mackey\c$\3RDPARTY\VTK-4.4-bin-mem\bin\debug\vtkIO.bsc">
 		</File>
 		<File
-			RelativePath="..\..\..\..\..\3RDPARTY\vtk-4-2-1-bin-mem\Rendering\Debug\vtkRendering.bsc">
+			RelativePath="\\mackey\c$\3RDPARTY\VTK-4.4-bin-mem\bin\debug\vtkImaging.bsc">
 		</File>
 		<File
-			RelativePath="..\..\..\..\..\3RDPARTY\vtk-4-2-1-bin-mem\Utilities\expat\Debug\vtkexpat.bsc">
+			RelativePath="\\mackey\c$\3RDPARTY\VTK-4.4-bin-mem\bin\debug\vtkRendering.bsc">
 		</File>
 		<File
-			RelativePath="..\..\..\..\..\3RDPARTY\vtk-4-2-1-bin-mem\Utilities\freetype\Debug\vtkfreetype.bsc">
+			RelativePath="\\mackey\c$\3RDPARTY\VTK-4.4-bin-mem\bin\debug\vtkexpat.bsc">
 		</File>
 		<File
-			RelativePath="..\..\..\..\..\3RDPARTY\vtk-4-2-1-bin-mem\Utilities\ftgl\Debug\vtkftgl.bsc">
+			RelativePath="\\mackey\c$\3RDPARTY\VTK-4.4-bin-mem\bin\debug\vtkfreetype.bsc">
 		</File>
 		<File
-			RelativePath="..\..\..\..\..\3RDPARTY\vtk-4-2-1-bin-mem\Utilities\jpeg\Debug\vtkjpeg.bsc">
+			RelativePath="\\mackey\c$\3RDPARTY\VTK-4.4-bin-mem\bin\debug\vtkftgl.bsc">
 		</File>
 		<File
-			RelativePath="..\..\..\..\..\3RDPARTY\vtk-4-2-1-bin-mem\Utilities\png\Debug\vtkpng.bsc">
+			RelativePath="\\mackey\c$\3RDPARTY\VTK-4.4-bin-mem\bin\debug\vtkjpeg.bsc">
 		</File>
 		<File
-			RelativePath="..\..\..\..\..\3RDPARTY\vtk-4-2-1-bin-mem\Utilities\tiff\Debug\vtktiff.bsc">
+			RelativePath="\\mackey\c$\3RDPARTY\VTK-4.4-bin-mem\bin\debug\vtkpng.bsc">
 		</File>
 		<File
-			RelativePath="..\..\..\..\..\3RDPARTY\vtk-4-2-1-bin-mem\Utilities\zlib\Debug\vtkzlib.bsc">
+			RelativePath="\\mackey\c$\3RDPARTY\VTK-4.4-bin-mem\bin\debug\vtktiff.bsc">
+		</File>
+		<File
+			RelativePath="\\mackey\c$\3RDPARTY\VTK-4.4-bin-mem\bin\debug\vtkzlib.bsc">
 		</File>
 	</Files>
 	<Globals>

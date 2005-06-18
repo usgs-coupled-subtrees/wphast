@@ -89,8 +89,6 @@ extern "C" {
 int error_msg (const char *err_str, const int stop);
 }
 
-
-
 // Note: No header files should follow the following three lines
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -570,7 +568,7 @@ void CWPhastDoc::Serialize(CArchive& ar)
 		}
 
 		// set scale for all zones, wells ...
-		float* scale = this->m_pGridLODActor->GetScale();
+		vtkFloatingPointType* scale = this->m_pGridLODActor->GetScale();
 		this->SetScale(scale[0], scale[1], scale[2]);
 
 		// TODO: eventually the camera position will be stored in the HDF file
@@ -1656,13 +1654,13 @@ void CWPhastDoc::OnEditRedo() // 57644
 	this->SetModifiedFlag(this->m_pimpl->m_vectorActionsIndex != this->m_pimpl->m_lastSaveIndex);
 }
 
-void CWPhastDoc::SetScale(float x, float y, float z)
+void CWPhastDoc::SetScale(vtkFloatingPointType x, vtkFloatingPointType y, vtkFloatingPointType z)
 {
 	ASSERT(x != 0);
 	ASSERT(y != 0);
 	ASSERT(z != 0);
 
-	float scale[3];
+	vtkFloatingPointType scale[3];
 	scale[0] = x;
 	scale[1] = y;
 	scale[2] = z;
@@ -1687,7 +1685,7 @@ void CWPhastDoc::SetScale(float x, float y, float z)
 
 	// reset the axes
 	//
-	float bounds[6];
+	vtkFloatingPointType bounds[6];
 	this->m_pGridLODActor->GetBounds(bounds);
 	float defaultAxesSize = (bounds[1]-bounds[0] + bounds[3]-bounds[2] + bounds[5]-bounds[4])/12;
 	this->m_pAxesActor->SetDefaultPositions(bounds);
@@ -1909,7 +1907,7 @@ void CWPhastDoc::ResizeGrid(const CGrid& x, const CGrid&  y, const CGrid&  z)
 
 	// reset the axes
 	//
-	float bounds[6];
+	vtkFloatingPointType bounds[6];
 	this->m_pGridLODActor->GetBounds(bounds);
 	float defaultAxesSize = (bounds[1]-bounds[0] + bounds[3]-bounds[2] + bounds[5]-bounds[4])/12;
 	this->m_pAxesActor->SetDefaultPositions(bounds);
@@ -2004,17 +2002,17 @@ void CWPhastDoc::AddDefaultZone(CZone* pZone)
 	}
 }
 
-float* CWPhastDoc::GetScale()
+vtkFloatingPointType* CWPhastDoc::GetScale()
 {
 	return this->m_pGridLODActor->GetScale();
 }
 
-void CWPhastDoc::GetScale(float data[3])
+void CWPhastDoc::GetScale(vtkFloatingPointType data[3])
 {
 	this->m_pGridLODActor->GetScale(data);
 }
 
-float* CWPhastDoc::GetGridBounds()
+vtkFloatingPointType* CWPhastDoc::GetGridBounds()
 {
 	if (this->m_pGridLODActor) {
 		return this->m_pGridLODActor->GetBounds();
@@ -2951,9 +2949,9 @@ void CWPhastDoc::SetUnits(const CUnits& units)
 	if (vtkPropCollection* pCollection = this->GetPropCollection())
 	{
 		//{{
-		float *scale = this->GetScale();
-		float *bounds = this->GetGridBounds();
-		float defaultAxesSize = (bounds[1]-bounds[0] + bounds[3]-bounds[2] + bounds[5]-bounds[4])/12;
+		vtkFloatingPointType *scale = this->GetScale();
+		vtkFloatingPointType *bounds = this->GetGridBounds();
+		vtkFloatingPointType defaultAxesSize = (bounds[1]-bounds[0] + bounds[3]-bounds[2] + bounds[5]-bounds[4])/12;
 		//}}
 		pCollection->InitTraversal();
 		for (int i = 0; i < pCollection->GetNumberOfItems(); ++i)
@@ -3120,8 +3118,8 @@ void CWPhastDoc::New(const CNewModel& model)
 	//
 	///float bounds[6];
 	///this->m_pGridLODActor->GetBounds(bounds);
-	float *bounds = this->GetGridBounds();
-	float defaultAxesSize = (bounds[1]-bounds[0] + bounds[3]-bounds[2] + bounds[5]-bounds[4])/12;
+	vtkFloatingPointType *bounds = this->GetGridBounds();
+	vtkFloatingPointType defaultAxesSize = (bounds[1]-bounds[0] + bounds[3]-bounds[2] + bounds[5]-bounds[4])/12;
 	this->m_pAxesActor->SetDefaultPositions(bounds);
 	this->m_pAxesActor->SetDefaultSize(defaultAxesSize);
 	this->m_pAxesActor->SetDefaultTubeDiameter(defaultAxesSize * 0.1);
@@ -3866,7 +3864,7 @@ void CWPhastDoc::InternalAdd(CZoneActor *pZoneActor, bool bAdd)
 
 	// set scale
 	//
-	float *scale = this->GetScale();
+	vtkFloatingPointType *scale = this->GetScale();
 	pZoneActor->SetScale(scale[0], scale[1], scale[2]);
 
 
@@ -3974,13 +3972,15 @@ void CWPhastDoc::InternalDelete(CZoneActor *pZoneActor, bool bDelete)
 
 void CWPhastDoc::Add(CWellActor *pWellActor)
 {
+// COMMENT: {6/17/2005 9:21:49 PM}	return;
+
 	ASSERT(pWellActor);
 	if (!pWellActor) return;
 	ASSERT(pWellActor->GetPickable());
 
 	// set scale
 	//
-	float *scale = this->GetScale();
+	vtkFloatingPointType *scale = this->GetScale();
 	pWellActor->SetScale(scale[0], scale[1], scale[2]);
 
 	// set height
@@ -3991,7 +3991,7 @@ void CWPhastDoc::Add(CWellActor *pWellActor)
 
 	// set radius
 	//
-	float *bounds = this->GetGridBounds();
+	vtkFloatingPointType *bounds = this->GetGridBounds();
 	float defaultAxesSize = (bounds[1]-bounds[0] + bounds[3]-bounds[2] + bounds[5]-bounds[4])/12;
 	pWellActor->SetDefaultTubeDiameter(defaultAxesSize * 0.17 / sqrt(scale[0] * scale[1]));
 
@@ -4056,8 +4056,8 @@ void CWPhastDoc::Remove(CWellActor *pWellActor)
 
 	// validate actor
 	//
-	float *scale = this->GetScale();
-	float *wellscale = pWellActor->GetScale();
+	vtkFloatingPointType *scale = this->GetScale();
+	vtkFloatingPointType *wellscale = pWellActor->GetScale();
 	ASSERT(wellscale[0] == scale[0]);
 	ASSERT(wellscale[1] == scale[1]);
 	ASSERT(wellscale[2] == scale[2]);
@@ -4103,8 +4103,8 @@ void CWPhastDoc::UnRemove(CWellActor *pWellActor)
 
 	// verify scale
 	//
-	float *scale = this->GetScale();
-	float *wellscale = pWellActor->GetScale();
+	vtkFloatingPointType *scale = this->GetScale();
+	vtkFloatingPointType *wellscale = pWellActor->GetScale();
 	ASSERT(wellscale[0] == scale[0]);
 	ASSERT(wellscale[1] == scale[1]);
 	ASSERT(wellscale[2] == scale[2]);
@@ -4381,13 +4381,13 @@ void CWPhastDoc::Add(CRiverActor *pRiverActor)
 
 	// set scale
 	//
-	float *scale = this->GetScale();
+	vtkFloatingPointType *scale = this->GetScale();
 	pRiverActor->SetScale(scale[0], scale[1], scale[2]);
 
 	// set radius
 	//
-	float *bounds = this->GetGridBounds();
-	float defaultAxesSize = (bounds[1]-bounds[0] + bounds[3]-bounds[2] + bounds[5]-bounds[4])/12;
+	vtkFloatingPointType *bounds = this->GetGridBounds();
+	vtkFloatingPointType defaultAxesSize = (bounds[1]-bounds[0] + bounds[3]-bounds[2] + bounds[5]-bounds[4])/12;
 	pRiverActor->SetRadius(defaultAxesSize * 0.085 / sqrt(scale[0] * scale[1]));
 
 	// set z

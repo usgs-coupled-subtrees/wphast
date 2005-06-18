@@ -11,6 +11,10 @@
 class CUnits;
 class CPropertyTreeControlBar;
 
+#ifndef vtkFloatingPointType
+#define vtkFloatingPointType vtkFloatingPointType
+typedef float vtkFloatingPointType;
+#endif
 
 class CRiverActor : public vtkAssembly
 ///class CRiverActor : public vtkPropAssembly
@@ -31,8 +35,8 @@ public:
 	void SetScale(float x, float y, float z);
 	void SetScale(double x, double y, double z);
 
-	void SetRadius(float radius);
-	float GetRadius(void)const;
+	void SetRadius(vtkFloatingPointType radius);
+	vtkFloatingPointType GetRadius(void)const;
 
 	void SetZ(double z);
 	double GetZ(void)const;
@@ -115,11 +119,11 @@ protected:
 	// Internal ivars for processing events
 	vtkRenderer *CurrentRenderer;
 
-	std::string         m_serialName;
-	CRiver              m_river;
-	float               m_fRadius;
-	double              m_Z;
-	int                 Enabled;
+	std::string          m_serialName;
+	CRiver               m_river;
+	vtkFloatingPointType m_Radius;
+	double               m_Z;
+	int                  Enabled;
 
 private:
 	CRiverActor(const CRiverActor&);  // Not implemented.

@@ -99,7 +99,8 @@ void CGridLODActor::Serialize(bool bStoring, hid_t loc_id)
 	static const char szScale[] = "Scale";
 	//static const char szFlowOnly[] = "FlowOnly";
 	
-	float scale[3];
+	vtkFloatingPointType scale[3];
+	double double_scale[3];
 
 	herr_t status;
 
@@ -140,7 +141,8 @@ void CGridLODActor::Serialize(bool bStoring, hid_t loc_id)
 				// Scale
 				//
 				this->GetScale(scale);
-				status = CGlobal::HDFSerialize(bStoring, grid_gr_id, szScale, H5T_NATIVE_FLOAT, 3, scale);
+				double_scale[0] = scale[0];    double_scale[1] = scale[1];    double_scale[2] = scale[2];
+				status = CGlobal::HDFSerialize(bStoring, grid_gr_id, szScale, H5T_NATIVE_DOUBLE, 3, double_scale);
 				ASSERT(status >= 0);
 
 				// close grid group
@@ -215,8 +217,12 @@ void CGridLODActor::Serialize(bool bStoring, hid_t loc_id)
 				scale[0] = 1;
 				scale[1] = 1;
 				scale[2] = 1;
-				status = CGlobal::HDFSerialize(bStoring, grid_gr_id, szScale, H5T_NATIVE_FLOAT, 3, scale);
+				status = CGlobal::HDFSerialize(bStoring, grid_gr_id, szScale, H5T_NATIVE_DOUBLE, 3, double_scale);
 				ASSERT(status >= 0);
+				if (status >= 0)
+				{
+					scale[0] = double_scale[0];    scale[1] = double_scale[1];    scale[2] = double_scale[2];
+				}
 				this->SetScale(scale);
 
 				// close grid group
