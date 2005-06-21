@@ -1,6 +1,7 @@
 #pragma once
 
-#include "vtkLODActor.h"
+#include "vtkOpenGLActor.h"
+
 #include "ISerial.h"
 
 #include "WellSchedule.h"
@@ -149,10 +150,10 @@ inline CTreeCtrlNode CTreeMemento::Restore(void)
 	return node;
 }
 
-class CWellActor : public vtkLODActor, public ISerial
+class CWellActor : public vtkOpenGLActor, public ISerial
 {
 public:
-	vtkTypeRevisionMacro(CWellActor,vtkLODActor);
+	vtkTypeRevisionMacro(CWellActor,vtkOpenGLActor);
 	static CWellActor *New();
 
 public:	

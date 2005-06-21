@@ -39,7 +39,6 @@ CWellActor::CWellActor(void)
 
 	this->m_pPolyDataMapper = vtkPolyDataMapper::New();
 	this->m_pPolyDataMapper->SetInput(this->m_pTubeFilter->GetOutput());
-// COMMENT: {6/17/2005 9:37:50 PM}	this->m_pPolyDataMapper->SetInput(this->m_pLineSource->GetOutput());
 
 	this->SetMapper(this->m_pPolyDataMapper);
 	this->GetProperty()->SetOpacity(0.6);
@@ -99,7 +98,6 @@ void CWellActor::SetDefaultTubeDiameter(float d)
 float CWellActor::GetNormalizedTubeDiameter(void) const
 {
 	return (2 * this->m_pTubeFilter->GetRadius() / this->m_DefaultTubeDiameter);
-	return 1;
 }
 
 void CWellActor::Edit(CWPhastDoc *pWPhastDoc)
@@ -451,46 +449,6 @@ std::ostream& CWellActor::Output(std::ostream& os, const Ctime& time)const
 std::ostream& operator<< (std::ostream &os, const CWellActor &a)
 {
 	os << a.m_well;
-// COMMENT: {4/19/2005 2:20:49 PM}	os << "Well " << a.m_well.n_user << a.m_well.description << "\n";
-// COMMENT: {4/19/2005 2:20:49 PM}	os << "\t" << a.m_well.x << " " << a.m_well.y << "\n";	
-// COMMENT: {4/19/2005 2:20:49 PM}
-// COMMENT: {4/19/2005 2:20:49 PM}	if (a.m_well.diameter_defined)
-// COMMENT: {4/19/2005 2:20:49 PM}	{
-// COMMENT: {4/19/2005 2:20:49 PM}		os << "\t" << "-diameter " << a.m_well.diameter << "\n";
-// COMMENT: {4/19/2005 2:20:49 PM}	}
-// COMMENT: {4/19/2005 2:20:49 PM}	else if (a.m_well.radius_defined)
-// COMMENT: {4/19/2005 2:20:49 PM}	{
-// COMMENT: {4/19/2005 2:20:49 PM}		os << "\t" << "-radius " << a.m_well.radius << "\n";
-// COMMENT: {4/19/2005 2:20:49 PM}	}
-// COMMENT: {4/19/2005 2:20:49 PM}	else
-// COMMENT: {4/19/2005 2:20:49 PM}	{
-// COMMENT: {4/19/2005 2:20:49 PM}		ASSERT(FALSE);
-// COMMENT: {4/19/2005 2:20:49 PM}	}
-// COMMENT: {4/19/2005 2:20:49 PM}
-// COMMENT: {4/19/2005 2:20:49 PM}	for (int i = 0; i < a.m_well.count_elevation; ++i)
-// COMMENT: {4/19/2005 2:20:49 PM}	{
-// COMMENT: {4/19/2005 2:20:49 PM}		os << "\t" << "-elevation " << a.m_well.elevation[i].bottom << " " << a.m_well.elevation[i].top << "\n";
-// COMMENT: {4/19/2005 2:20:49 PM}	}
-// COMMENT: {4/19/2005 2:20:49 PM}
-// COMMENT: {4/19/2005 2:20:49 PM}	if (a.m_well.lsd_defined)
-// COMMENT: {4/19/2005 2:20:49 PM}	{
-// COMMENT: {4/19/2005 2:20:49 PM}		os << "\t" << "-land_surface_datum " << a.m_well.lsd << "\n";
-// COMMENT: {4/19/2005 2:20:49 PM}	}
-// COMMENT: {4/19/2005 2:20:49 PM}
-// COMMENT: {4/19/2005 2:20:49 PM}	for (int i = 0; i < a.m_well.count_depth; ++i)
-// COMMENT: {4/19/2005 2:20:49 PM}	{
-// COMMENT: {4/19/2005 2:20:49 PM}		os << "\t" << "-depth " << a.m_well.depth[i].bottom << " " << a.m_well.depth[i].top << "\n";
-// COMMENT: {4/19/2005 2:20:49 PM}	}
-// COMMENT: {4/19/2005 2:20:49 PM}
-// COMMENT: {4/19/2005 2:20:49 PM}	if (a.m_well.mobility_and_pressure)
-// COMMENT: {4/19/2005 2:20:49 PM}	{
-// COMMENT: {4/19/2005 2:20:49 PM}		os << "\t" << "-allocate_by_head_and_mobility True\n";
-// COMMENT: {4/19/2005 2:20:49 PM}	}
-// COMMENT: {4/19/2005 2:20:49 PM}	else
-// COMMENT: {4/19/2005 2:20:49 PM}	{
-// COMMENT: {4/19/2005 2:20:49 PM}		os << "\t" << "-allocate_by_head_and_mobility False\n";
-// COMMENT: {4/19/2005 2:20:49 PM}	}
-
 	return os;
 }
 
