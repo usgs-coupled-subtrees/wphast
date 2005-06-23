@@ -11,6 +11,7 @@ public:
 	~CRiverMovePointAction(void);
 
 	void SetPoint(double x, double y);
+	CRiverActor* GetRiverActor(void) { return m_pRiverActor; }
 
 	virtual void Execute(void);
 	virtual void UnExecute(void);

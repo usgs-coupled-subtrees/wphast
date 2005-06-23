@@ -1563,6 +1563,13 @@ void CWPhastDoc::DeleteContents()
 		this->m_pRemovedPropCollection->RemoveAllItems();
 	}
 
+	// update tree
+	//
+	if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar()) {
+		ASSERT_VALID(pTree);
+		pTree->DeleteContents();
+	}
+
 	// clear the zone prop-assemblies
 	//
 	CLEAR_PROP_ASSEMBLY_MACRO(this->m_pPropAssemblyMedia);
@@ -1570,13 +1577,6 @@ void CWPhastDoc::DeleteContents()
 	CLEAR_PROP_ASSEMBLY_MACRO(this->m_pPropAssemblyBC);
 	CLEAR_PROP_ASSEMBLY_MACRO(this->m_pPropAssemblyWells);
 	CLEAR_PROP_ASSEMBLY_MACRO(this->m_pPropAssemblyRivers);
-
-	// update tree
-	//
-	if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar()) {
-		ASSERT_VALID(pTree);
-		pTree->DeleteContents();
-	}
 
 	// reset scale
 	//
@@ -3833,6 +3833,7 @@ void CWPhastDoc::ClearSelection(void)
 		if (CRiverActor *pActor = CRiverActor::SafeDownCast(pProp))
 		{
 			pActor->ClearSelection();
+			pActor->SetEnabled(0);
 		}
 	}
 }
@@ -3972,8 +3973,6 @@ void CWPhastDoc::InternalDelete(CZoneActor *pZoneActor, bool bDelete)
 
 void CWPhastDoc::Add(CWellActor *pWellActor)
 {
-// COMMENT: {6/17/2005 9:21:49 PM}	return;
-
 	ASSERT(pWellActor);
 	if (!pWellActor) return;
 	ASSERT(pWellActor->GetPickable());
@@ -4374,11 +4373,6 @@ void CWPhastDoc::Add(CRiverActor *pRiverActor)
 	ASSERT(pRiverActor);
 	if (!pRiverActor) return;
 
-	// add listeners
-	//
-	pRiverActor->AddObserver(CRiverActor::StartMovePointEvent, RiverCallbackCommand);
-	pRiverActor->AddObserver(CRiverActor::EndMovePointEvent, RiverCallbackCommand);
-
 	// set scale
 	//
 	vtkFloatingPointType *scale = this->GetScale();
@@ -4386,22 +4380,25 @@ void CWPhastDoc::Add(CRiverActor *pRiverActor)
 
 	// set radius
 	//
-	vtkFloatingPointType *bounds = this->GetGridBounds();
-	vtkFloatingPointType defaultAxesSize = (bounds[1]-bounds[0] + bounds[3]-bounds[2] + bounds[5]-bounds[4])/12;
-	pRiverActor->SetRadius(defaultAxesSize * 0.085 / sqrt(scale[0] * scale[1]));
+	pRiverActor->ScaleFromBounds(this->GetGridBounds());
 
 	// set z
 	//
-	pRiverActor->SetZ(bounds[5]);
+// COMMENT: {6/22/2005 5:50:09 PM}	vtkFloatingPointType *bounds = this->GetGridBounds();
+	CGrid x, y, z;
+	this->GetGrid(x, y, z);
+	z.Setup();
+	pRiverActor->SetZ(z.coord[z.count_coord - 1]);
 
-
+	// for all views disable interaction
+	//
 	POSITION pos = this->GetFirstViewPosition();
 	while (pos != NULL)
 	{
 		CWPhastView *pView = (CWPhastView*) GetNextView(pos);
 		ASSERT_VALID(pView);
 		pRiverActor->SetInteractor(pView->GetRenderWindowInteractor());
-		pRiverActor->SetEnabled(1);
+		pRiverActor->SetEnabled(0);
 	}	
 
 	// add to river assembly
@@ -4422,6 +4419,12 @@ void CWPhastDoc::Add(CRiverActor *pRiverActor)
 	{
 		pRiverActor->Add(pTree);
 	}
+
+	// add listeners
+	//
+	pRiverActor->AddObserver(CRiverActor::StartMovePointEvent, RiverCallbackCommand);
+	pRiverActor->AddObserver(CRiverActor::MovingPointEvent, RiverCallbackCommand);
+	pRiverActor->AddObserver(CRiverActor::EndMovePointEvent, RiverCallbackCommand);
 
 	// render
 	//
@@ -4460,6 +4463,21 @@ void CWPhastDoc::RiverListener(vtkObject* caller, unsigned long eid, void* clien
 		case CRiverActor::StartMovePointEvent:
 			ASSERT(self->RiverMovePointAction == 0);
 			self->RiverMovePointAction = new CRiverMovePointAction(river, self, river->GetCurrentPointId(), river->GetCurrentPointPosition()[0], river->GetCurrentPointPosition()[1]);
+			break;
+		case CRiverActor::MovingPointEvent:
+			ASSERT(self->RiverMovePointAction != 0);
+			if (CWnd* pWnd = ((CFrameWnd*)::AfxGetMainWnd())->GetMessageBar())
+			{
+				static TCHAR buffer[80];
+				const CUnits& units = self->GetUnits();
+				::_sntprintf(buffer, 80, "%g[%s] x %g[%s]",
+					self->RiverMovePointAction->GetRiverActor()->GetCurrentPointPosition()[0] / units.horizontal.input_to_si,
+					units.horizontal.defined ? units.horizontal.input : units.horizontal.si,
+					self->RiverMovePointAction->GetRiverActor()->GetCurrentPointPosition()[1] / units.horizontal.input_to_si,
+					units.horizontal.defined ? units.horizontal.input : units.horizontal.si
+					);
+				pWnd->SetWindowText(buffer);
+			}
 			break;
 		case CRiverActor::EndMovePointEvent:
 			ASSERT(self->RiverMovePointAction != 0);

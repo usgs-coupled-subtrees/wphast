@@ -6,9 +6,10 @@ Global
 		ConfigName.0 = AutoDebug
 		ConfigName.1 = AutoRelease
 		ConfigName.2 = cppunit
-		ConfigName.3 = Debug
-		ConfigName.4 = Release
-		ConfigName.5 = vtkMemDebug
+		ConfigName.3 = cppunit4.4
+		ConfigName.4 = Debug
+		ConfigName.5 = Release
+		ConfigName.6 = vtkMemDebug
 	EndGlobalSection
 	GlobalSection(ProjectDependencies) = postSolution
 	EndGlobalSection
@@ -19,6 +20,8 @@ Global
 		{A7CB3EF2-FCFD-4E6C-98A8-C6EFCD35955C}.AutoRelease.Build.0 = AutoRelease|Win32
 		{A7CB3EF2-FCFD-4E6C-98A8-C6EFCD35955C}.cppunit.ActiveCfg = cppunit|Win32
 		{A7CB3EF2-FCFD-4E6C-98A8-C6EFCD35955C}.cppunit.Build.0 = cppunit|Win32
+		{A7CB3EF2-FCFD-4E6C-98A8-C6EFCD35955C}.cppunit4.4.ActiveCfg = cppunit4.4|Win32
+		{A7CB3EF2-FCFD-4E6C-98A8-C6EFCD35955C}.cppunit4.4.Build.0 = cppunit4.4|Win32
 		{A7CB3EF2-FCFD-4E6C-98A8-C6EFCD35955C}.Debug.ActiveCfg = Debug|Win32
 		{A7CB3EF2-FCFD-4E6C-98A8-C6EFCD35955C}.Debug.Build.0 = Debug|Win32
 		{A7CB3EF2-FCFD-4E6C-98A8-C6EFCD35955C}.Release.ActiveCfg = Release|Win32

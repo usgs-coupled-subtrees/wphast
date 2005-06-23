@@ -24,6 +24,16 @@ CRiverActor::CRiverActor(void)
 , CurrentHandle(0)
 , CurrentSource(0)
 , CurrentId(-1)
+, HandleProperty(0)
+, SelectedHandleProperty(0)
+, EnabledHandleProperty(0)
+, State(CRiverActor::None)
+, m_pCursor3D(0)
+, m_pCursor3DMapper(0)
+, m_pCursor3DActor(0)
+, ConnectingLineSource(0)
+, ConnectingMapper(0)
+, ConnectingActor(0)
 {
 	this->m_pPoints         = vtkPoints::New();
 	this->m_pTransformUnits = vtkTransform::New();
@@ -72,10 +82,65 @@ CRiverActor::~CRiverActor(void)
 
 	this->HandleProperty->Delete();          this->HandleProperty         = 0;
 	this->SelectedHandleProperty->Delete();  this->SelectedHandleProperty = 0;
+	this->EnabledHandleProperty->Delete();   this->EnabledHandleProperty  = 0;
+
+	if (this->m_pCursor3D)
+	{
+		this->m_pCursor3D->Delete();
+		this->m_pCursor3D = 0;
+	}
+	if (this->m_pCursor3DMapper)
+	{
+		this->m_pCursor3DMapper->Delete();
+		this->m_pCursor3DMapper = 0;
+	}
+	if (this->m_pCursor3DActor)
+	{
+		this->m_pCursor3DActor->Delete();
+		this->m_pCursor3DActor = 0;
+	}
+
+	if (this->ConnectingLineSource)
+	{
+		this->ConnectingLineSource->Delete();
+		this->ConnectingLineSource = 0;
+	}
+	if (this->ConnectingMapper)
+	{
+		this->ConnectingMapper->Delete();
+		this->ConnectingMapper = 0;
+	}
+	if (this->ConnectingActor)
+	{
+		this->ConnectingActor->Delete();
+		this->ConnectingActor = 0;
+	}
 }
 
 vtkIdType CRiverActor::InsertNextPoint(double x, double y, double z)
 {
+	// only insert point if different enough from last point
+	// otherwise an error will occur in vtkTubeFilter
+	//
+	//vtkIdType np = this->m_pPoints->GetNumberOfPoints();
+	if (vtkIdType np = this->m_pPoints->GetNumberOfPoints())
+	{
+		vtkFloatingPointType p[3];
+		vtkFloatingPointType pNext[3];
+		vtkFloatingPointType sNext[3];
+		this->m_pPoints->GetPoint(np - 1, p);
+		pNext[0] = x, pNext[1] = y, pNext[2] = z;
+		for (int i = 0; i < 3; ++i) 
+		{
+			sNext[i] = pNext[i] - p[i];
+		}
+		if (vtkMath::Normalize(sNext) == 0.0)
+		{
+			TRACE("Coincident points in CRiverActor...can't compute normals\n");
+			return np;
+		}
+	}
+
 	vtkIdType id = this->m_pPoints->InsertNextPoint(x, y, z);
 
 	vtkSphereSource *pSphereSource = vtkSphereSource::New();
@@ -133,6 +198,9 @@ vtkIdType CRiverActor::InsertNextPoint(double x, double y, double z)
 
 		this->m_pTransformScale->TransformPoint(prev_pt, prev_pt);
 		this->m_pTransformUnits->TransformPoint(prev_pt, prev_pt);
+		//{{
+		ASSERT( !(((prev_pt[0] - pt[0]) == 0.0) && ((prev_pt[1] - pt[1]) == 0.0)) );
+		//}}
 		pLineSource->SetPoint1(prev_pt[0], prev_pt[1], prev_pt[2]);
 		pLineSource->SetPoint2(pt[0], pt[1], pt[2]);
 	}
@@ -146,6 +214,8 @@ vtkIdType CRiverActor::InsertNextPoint(double x, double y, double z)
 
 void CRiverActor::InsertPoint(vtkIdType id, double x, double y, double z)
 {
+	ASSERT(FALSE); // sync with other InsertPoint
+
 	this->m_pPoints->InsertPoint(id, x, y, z);
 
 	vtkSphereSource *pSphereSource = vtkSphereSource::New();
@@ -191,6 +261,9 @@ void CRiverActor::InsertPoint(vtkIdType id, double x, double y, double z)
 		this->m_pPoints->GetPoint(id - 1, prev_pt);
 		this->m_pTransformScale->TransformPoint(prev_pt, prev_pt);
 		this->m_pTransformUnits->TransformPoint(prev_pt, prev_pt);
+		//{{
+		ASSERT( !(((prev_pt[0] - pt[0]) == 0.0) && ((prev_pt[1] - pt[1]) == 0.0)) );
+		//}}
 		pLineSource->SetPoint1(prev_pt[0], prev_pt[1], prev_pt[2]);
 		pLineSource->SetPoint2(pt[0], pt[1], pt[2]);
 	}
@@ -384,16 +457,12 @@ void CRiverActor::SetInteractor(vtkRenderWindowInteractor* i)
 	// if we already have an Interactor then stop observing it
 	if (this->Interactor)
 	{
-		//{{
 		this->Interactor->UnRegister(this);
-		//}}
 		this->Interactor->RemoveObserver(this->EventCallbackCommand);
 	}
 
 	this->Interactor = i;
-	//{{
 	this->Interactor->Register(this);
-	//}}
 
 	if (i)
 	{
@@ -496,19 +565,34 @@ void CRiverActor::OnLeftButtonDown()
 		return;
 	}
 
-	vtkAssemblyPath *path;
-	this->m_pCellPicker->Pick(X, Y, 0.0, ren);
-	path = this->m_pCellPicker->GetPath();
-	if (path != NULL)
+	//{{
+	if (this->State == CRiverActor::None)
 	{
-		if (vtkActor* pActor = vtkActor::SafeDownCast(path->GetFirstNode()->GetProp()))
+	//}}
+		vtkAssemblyPath *path;
+		this->m_pCellPicker->Pick(X, Y, 0.0, ren);
+		path = this->m_pCellPicker->GetPath();
+		if (path != NULL)
 		{
-			this->HighlightHandle(path->GetFirstNode()->GetProp());
-			this->m_pPoints->GetPoint(this->GetCurrentPointId(), this->m_WorldPointXYPlane);
-			this->EventCallbackCommand->SetAbortFlag(1);
-			this->InvokeEvent(CRiverActor::StartMovePointEvent, NULL);
-			this->Interactor->Render();
+			if (vtkActor* pActor = vtkActor::SafeDownCast(path->GetFirstNode()->GetProp()))
+			{
+				this->HighlightHandle(path->GetFirstNode()->GetProp());
+				this->m_pPoints->GetPoint(this->GetCurrentPointId(), this->m_WorldPointXYPlane);
+				this->EventCallbackCommand->SetAbortFlag(1);
+				this->State = CRiverActor::MovingPoint;
+				this->InvokeEvent(CRiverActor::StartMovePointEvent, NULL);
+				this->Interactor->Render();
+			}
 		}
+	//{{
+	}
+	//}}
+
+	if (this->State == CRiverActor::CreatingRiver)
+	{
+		this->Update();
+		this->m_pCursor3DActor->SetPosition(this->WorldSIPoint[0], this->WorldSIPoint[1], this->WorldSIPoint[2]);
+		this->Interactor->Render();
 	}
 }
 
@@ -525,14 +609,30 @@ void CRiverActor::OnMouseMove()
 		return;
 	}
 
-	if (this->CurrentHandle && this->CurrentSource)
+	//if (this->CurrentHandle && this->CurrentSource)
+	if (this->State == CRiverActor::MovingPoint)
 	{
 		// update m_WorldPointXYPlane
 		//
 		this->Update();
 		this->m_pPoints->SetPoint(this->CurrentId, this->m_WorldPointXYPlane);
-		UpdatePoints();
+		this->UpdatePoints();
 
+		this->EventCallbackCommand->SetAbortFlag(1);
+		this->InvokeEvent(CRiverActor::MovingPointEvent, NULL);
+		this->Interactor->Render();
+	}
+
+	if (this->State == CRiverActor::CreatingRiver)
+	{
+		this->Update();
+		this->m_pCursor3DActor->SetPosition(this->WorldSIPoint[0], this->WorldSIPoint[1], this->WorldSIPoint[2]);
+		this->m_pCursor3DActor->VisibilityOn();
+		if (this->m_pPoints->GetNumberOfPoints())
+		{
+			this->ConnectingLineSource->SetPoint2(this->WorldSIPoint[0], this->WorldSIPoint[1], this->WorldSIPoint[2]);
+			this->ConnectingActor->VisibilityOn();
+		}
 		this->EventCallbackCommand->SetAbortFlag(1);
 		this->Interactor->Render();
 	}
@@ -565,7 +665,8 @@ void CRiverActor::OnLeftButtonUp()
 // COMMENT: {6/14/2005 2:38:22 PM}		}
 // COMMENT: {6/14/2005 2:38:22 PM}	}
 
-	if (this->CurrentHandle && this->CurrentSource)
+	// if (this->CurrentHandle && this->CurrentSource)
+	if (this->State == CRiverActor::MovingPoint)
 	{
 		// update m_WorldPointXYPlane
 		//
@@ -575,7 +676,18 @@ void CRiverActor::OnLeftButtonUp()
 
 		this->HighlightHandle(NULL);
 		this->EventCallbackCommand->SetAbortFlag(1);
+		this->State = CRiverActor::None;
 		this->InvokeEvent(CRiverActor::EndMovePointEvent, NULL);
+		this->Interactor->Render();
+	}
+
+	if (this->State == CRiverActor::CreatingRiver)
+	{
+		this->Update();
+		this->InsertNextPoint(this->m_WorldPointXYPlane[0], this->m_WorldPointXYPlane[1], this->m_WorldPointXYPlane[2]);
+		this->UpdatePoints();
+		this->ConnectingLineSource->SetPoint1(this->WorldSIPoint[0], this->WorldSIPoint[1], this->WorldSIPoint[2]);
+		this->ConnectingLineSource->SetPoint2(this->WorldSIPoint[0], this->WorldSIPoint[1], this->WorldSIPoint[2]);
 		this->Interactor->Render();
 	}
 }
@@ -585,7 +697,14 @@ int CRiverActor::HighlightHandle(vtkProp *prop)
 	// first unhighlight anything picked
 	if (this->CurrentHandle)
 	{
-		this->CurrentHandle->SetProperty(this->HandleProperty);
+		if (this->Enabled)
+		{
+			this->CurrentHandle->SetProperty(this->EnabledHandleProperty);
+		}
+		else
+		{
+			this->CurrentHandle->SetProperty(this->HandleProperty);
+		}
 	}
 
 	this->CurrentHandle = (vtkActor *)prop;
@@ -616,6 +735,9 @@ void CRiverActor::CreateDefaultProperties()
 
   this->SelectedHandleProperty = vtkProperty::New();
   this->SelectedHandleProperty->SetColor(1, 0, 0);
+
+  this->EnabledHandleProperty = vtkProperty::New();
+  this->EnabledHandleProperty->SetColor(1, 1, 1);
 }
 
 void CRiverActor::PrintSelf(ostream& os, vtkIndent indent)
@@ -657,19 +779,17 @@ void CRiverActor::SetEnabled(int enabling)
 		// listen to the following events
 		vtkRenderWindowInteractor *i = this->Interactor;
 		i->AddObserver(vtkCommand::MouseMoveEvent,
-			this->EventCallbackCommand, 1);
+			this->EventCallbackCommand, 10);
 		i->AddObserver(vtkCommand::LeftButtonPressEvent, 
-			this->EventCallbackCommand, 1);
+			this->EventCallbackCommand, 10);
 		i->AddObserver(vtkCommand::LeftButtonReleaseEvent, 
-			this->EventCallbackCommand, 1);
-		i->AddObserver(vtkCommand::MiddleButtonPressEvent, 
-			this->EventCallbackCommand, 1);
-		i->AddObserver(vtkCommand::MiddleButtonReleaseEvent, 
-			this->EventCallbackCommand, 1);
-		i->AddObserver(vtkCommand::RightButtonPressEvent, 
-			this->EventCallbackCommand, 1);
-		i->AddObserver(vtkCommand::RightButtonReleaseEvent, 
-			this->EventCallbackCommand, 1);
+			this->EventCallbackCommand, 10);
+
+		std::list<vtkActor*>::iterator iterActor = this->m_listActor.begin();
+		for(; iterActor != this->m_listActor.end(); ++iterActor)
+		{
+			(*iterActor)->SetProperty(this->EnabledHandleProperty);
+		}
 	}
 
 	else //disabling-------------------------------------------------------------
@@ -687,6 +807,12 @@ void CRiverActor::SetEnabled(int enabling)
 		this->Interactor->RemoveObserver(this->EventCallbackCommand);
 		this->CurrentHandle = NULL;
 		this->CurrentRenderer = NULL;
+
+		std::list<vtkActor*>::iterator iterActor = this->m_listActor.begin();
+		for(; iterActor != this->m_listActor.end(); ++iterActor)
+		{
+			(*iterActor)->SetProperty(this->HandleProperty);
+		}
 	}
 
 	this->Interactor->Render();
@@ -732,8 +858,8 @@ void CRiverActor::Update()
 	}
 
 	double pt[3];
-	this->m_pPoints->GetPoint(0, pt);
-	double zOrig = pt[2];
+// COMMENT: {6/21/2005 7:11:19 PM}	double zOrig = this->m_Z;
+	pt[2] = this->m_Z;
 
 	this->m_pTransformScale->TransformPoint(pt, pt);
 	this->m_pTransformUnits->TransformPoint(pt, pt);
@@ -747,6 +873,7 @@ void CRiverActor::Update()
 		for (i = 0; i < 2; ++i)
 		{
 			this->m_WorldPointXYPlane[i] = PickPosition[i] + t * cameraDOP[i];
+			this->WorldSIPoint[i] = PickPosition[i] + t * cameraDOP[i];
 		}
 	}
 	else
@@ -756,6 +883,7 @@ void CRiverActor::Update()
 		for (i = 0; i < 2; ++i)
 		{
 			this->m_WorldPointXYPlane[i] = cameraPos[i] + t * (PickPosition[i] - cameraPos[i]);
+			this->WorldSIPoint[i] = cameraPos[i] + t * (PickPosition[i] - cameraPos[i]);
 		}
 	}
 // COMMENT: {6/13/2005 7:49:38 PM}	this->m_WorldPointXYPlane[2] = zPos;
@@ -764,7 +892,13 @@ void CRiverActor::Update()
 	//
 	this->m_pTransformScale->GetInverse()->TransformPoint(this->m_WorldPointXYPlane, this->m_WorldPointXYPlane);
 	this->m_pTransformUnits->GetInverse()->TransformPoint(this->m_WorldPointXYPlane, this->m_WorldPointXYPlane);
-	this->m_WorldPointXYPlane[2] = zOrig;
+
+	this->m_pTransformScale->GetInverse()->TransformPoint(this->WorldSIPoint, this->WorldScaledUnitPoint);
+	this->m_pTransformUnits->GetInverse()->TransformPoint(this->WorldSIPoint, this->WorldScaledUnitPoint);
+
+// COMMENT: {6/21/2005 7:11:23 PM}	this->m_WorldPointXYPlane[2] = zOrig;
+	this->m_WorldPointXYPlane[2] = this->m_Z;
+	this->WorldSIPoint[2] = pt[2];
 }
 
 void CRiverActor::Add(CPropertyTreeControlBar *pTree)
@@ -861,9 +995,7 @@ void CRiverActor::SelectPoint(int index)
 {
 	this->HighlightHandle(NULL);
 	this->HighlightHandle(this->GetPoint(index));
-	//{{
 	this->CurrentSource = NULL;
-	//}}
 	if (this->Interactor)
 	{
 		this->Interactor->Render();
@@ -966,4 +1098,69 @@ int CRiverActor::GetVisibility(void)
 {
 	vtkDebugMacro(<< this->GetClassName() << " (" << this << "): returning Visibility of " << this->Visibility );
 	return this->Visibility;
+}
+
+void CRiverActor::ScaleFromBounds(vtkFloatingPointType bounds[6])
+{
+	// set radius
+	//
+	vtkFloatingPointType defaultAxesSize = (bounds[1]-bounds[0] + bounds[3]-bounds[2] + bounds[5]-bounds[4])/12;
+	this->SetRadius(defaultAxesSize * 0.085 /* / sqrt(scale[0] * scale[1]) */ );
+
+	if (this->m_pCursor3D)
+	{
+		// set size of 3D cursor
+		//
+		vtkFloatingPointType dim = (bounds[1] - bounds[0]) / 20.0;
+		this->m_pCursor3D->SetModelBounds(-dim, dim, -dim, dim, -dim, dim);
+	}
+}
+
+CRiverActor* CRiverActor::StartNewRiver(vtkRenderWindowInteractor* pRenderWindowInteractor)
+{
+	CRiverActor* pRiverActor = CRiverActor::New();
+
+	// 3D Cursor
+	//
+	pRiverActor->m_pCursor3D = vtkCursor3D::New();
+	pRiverActor->m_pCursor3D->XShadowsOff();
+	pRiverActor->m_pCursor3D->YShadowsOff();
+	pRiverActor->m_pCursor3D->ZShadowsOff();
+	pRiverActor->m_pCursor3D->OutlineOff();
+
+	pRiverActor->m_pCursor3DMapper = vtkPolyDataMapper::New();
+	pRiverActor->m_pCursor3DMapper->SetInput(pRiverActor->m_pCursor3D->GetOutput());
+	
+	pRiverActor->m_pCursor3DActor = vtkActor::New();
+	pRiverActor->m_pCursor3DActor->SetMapper(pRiverActor->m_pCursor3DMapper);
+	pRiverActor->m_pCursor3DActor->SetPosition(0, 0, 0);
+	pRiverActor->m_pCursor3DActor->VisibilityOff();
+	pRiverActor->m_pCursor3DActor->GetProperty()->SetColor(0, 0, 1);
+
+	pRiverActor->AddPart(pRiverActor->m_pCursor3DActor);
+
+	pRiverActor->SetInteractor(pRenderWindowInteractor);
+	pRiverActor->SetEnabled(1);
+
+	pRiverActor->State = CRiverActor::CreatingRiver;
+
+	// instantiate the line connector
+	//
+	ASSERT(pRiverActor->ConnectingLineSource == 0);
+	ASSERT(pRiverActor->ConnectingMapper == 0);
+	ASSERT(pRiverActor->ConnectingActor == 0);
+
+	pRiverActor->ConnectingLineSource = vtkLineSource::New();
+
+	pRiverActor->ConnectingMapper = vtkPolyDataMapper::New();
+	pRiverActor->ConnectingMapper->SetInput(pRiverActor->ConnectingLineSource->GetOutput());
+
+	pRiverActor->ConnectingActor = vtkActor::New();
+	pRiverActor->ConnectingActor->SetMapper(pRiverActor->ConnectingMapper);
+	pRiverActor->ConnectingActor->GetProperty()->SetColor(0., 1., 1.);
+	pRiverActor->ConnectingActor->VisibilityOff();
+
+	pRiverActor->AddPart(pRiverActor->ConnectingActor);
+
+	return pRiverActor;
 }

@@ -38,6 +38,8 @@ public:
 	void SetRadius(vtkFloatingPointType radius);
 	vtkFloatingPointType GetRadius(void)const;
 
+	void ScaleFromBounds(vtkFloatingPointType bounds[6]);
+
 	void SetZ(double z);
 	double GetZ(void)const;
 
@@ -61,6 +63,7 @@ public:
 
 	enum EventIds {
 		StartMovePointEvent = vtkCommand::UserEvent + 500,
+		MovingPointEvent,
 		EndMovePointEvent
 	};
 
@@ -85,9 +88,19 @@ public:
 	virtual void SetInteractor(vtkRenderWindowInteractor* iren);
 	vtkGetObjectMacro(Interactor, vtkRenderWindowInteractor);
 
+	static CRiverActor* StartNewRiver(vtkRenderWindowInteractor* pRenderWindowInteractor);
+
 protected:
 	CRiverActor(void);
 	~CRiverActor(void);
+
+	enum RiverState
+	{
+		None,
+		MovingPoint,
+		CreatingRiver,
+	} State;
+
 
 	// Description:
 	// Main process event method
@@ -97,6 +110,7 @@ protected:
 	// the manipulator in general.
 	vtkProperty *HandleProperty;
 	vtkProperty *SelectedHandleProperty;
+	vtkProperty *EnabledHandleProperty;
 	void CreateDefaultProperties(void);
 
 	int HighlightHandle(vtkProp *prop);
@@ -109,6 +123,8 @@ protected:
 	//
 	void Update(void);
 	double m_WorldPointXYPlane[4];
+	double WorldSIPoint[4];
+	double WorldScaledUnitPoint[4];
 
 	// Used to process events
 	vtkCallbackCommand* EventCallbackCommand;
@@ -124,6 +140,10 @@ protected:
 	vtkFloatingPointType m_Radius;
 	double               m_Z;
 	int                  Enabled;
+
+	vtkLineSource     *ConnectingLineSource;
+	vtkPolyDataMapper *ConnectingMapper;
+	vtkActor          *ConnectingActor;
 
 private:
 	CRiverActor(const CRiverActor&);  // Not implemented.
@@ -151,4 +171,8 @@ protected:
 
 	CTreeCtrlNode       m_node;
 
+	// 3D Cursor
+	vtkCursor3D                    *m_pCursor3D;
+	vtkPolyDataMapper              *m_pCursor3DMapper;
+	vtkActor                       *m_pCursor3DActor;
 };

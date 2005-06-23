@@ -46,6 +46,7 @@
 #include "ZoneActor.h"
 #include "WellActor.h"
 #include "RiverActor.h"
+#include "Grid.h"
 
 
 // #include "CreateZoneAction.h"
@@ -245,13 +246,7 @@ void CWPhastView::OnDraw(CDC* pDC)
 		CRect rect;
 
 		this->GetClientRect(&rect);
-// COMMENT: {6/16/2005 9:39:20 PM}		//{{
-// COMMENT: {6/16/2005 9:39:20 PM}		WNDPROC OldProc = (WNDPROC)GetWindowLong(m_hWnd,GWL_WNDPROC);
-// COMMENT: {6/16/2005 9:39:20 PM}		//}}
 		this->m_RenderWindowInteractor->Initialize();
-// COMMENT: {6/16/2005 9:39:24 PM}		//{{
-// COMMENT: {6/16/2005 9:39:24 PM}		SetWindowLong(m_hWnd,GWL_WNDPROC,(LONG)OldProc);
-// COMMENT: {6/16/2005 9:39:24 PM}		//}}
 		this->m_RenderWindow->SetSize(rect.right-rect.left,rect.bottom-rect.top);
 
 		this->m_Renderer->ResetCamera();
@@ -349,14 +344,13 @@ int CWPhastView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		return -1;
 
 	this->m_RenderWindow->AddRenderer(this->m_Renderer);
-	// setup the parent window
-	this->m_RenderWindow->SetParentId(this->m_hWnd);
-// COMMENT: {6/16/2005 9:36:20 PM}	this->m_RenderWindow->SetParentId(lpCreateStruct->hwndParent);
-
-// COMMENT: {6/16/2005 9:39:34 PM}	///{{{6/16/2005 4:25:02 PM
-// COMMENT: {6/16/2005 9:39:34 PM}	this->m_RenderWindow->SetParentId(this->GetParent()->GetSafeHwnd());
-// COMMENT: {6/16/2005 9:39:34 PM}	this->m_RenderWindow->SetWindowId(this->GetSafeHwnd());
-// COMMENT: {6/16/2005 9:39:34 PM}	///}}}6/16/2005 4:25:02 PM
+#if ((VTK_MAJOR_VERSION <= 4) && (VTK_MINOR_VERSION <= 2))
+	// Note: No double-click events will be received
+	//
+	this->m_RenderWindow->SetParentId(this->GetSafeHwnd());
+#else
+	this->m_RenderWindow->SetWindowId(this->GetSafeHwnd());
+#endif
 	this->m_RenderWindowInteractor->SetRenderWindow(this->m_RenderWindow);
 
 
@@ -373,9 +367,11 @@ void CWPhastView::OnSize(UINT nType, int cx, int cy)
 {
 	CView::OnSize(nType, cx, cy);
 
+#if ((VTK_MAJOR_VERSION <= 4) && (VTK_MINOR_VERSION <= 2))
 	CRect rect;
 	this->GetClientRect(&rect);
 	this->m_RenderWindow->SetSize(rect.right-rect.left,rect.bottom-rect.top);
+#endif
 }
 
 BOOL CWPhastView::OnEraseBkgnd(CDC* pDC)
@@ -420,11 +416,6 @@ LRESULT CWPhastView::WindowProc(UINT message, WPARAM wParam, LPARAM lParam)
 			return vtkHandleMessage2(this->m_hWnd, message, wParam, lParam, this->m_RenderWindowInteractor);
 		}
 		break;
-	//{{
-    case WM_LBUTTONDBLCLK:
-		TRACE("Recieved WM_LBUTTONDBLCLK\n");
-		break;
-	//}}
 	}
 
 	return CView::WindowProc(message, wParam, lParam);
@@ -739,6 +730,13 @@ BOOL CWPhastView::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 		return TRUE;
 	}
 
+	//{{
+	if (this->m_pRiverActor && nHitTest == HTCLIENT)
+	{
+		::SetCursor(AfxGetApp()->LoadCursor(IDC_NULL));
+		return TRUE;
+	}
+	//}}
 
 	return CView::OnSetCursor(pWnd, nHitTest, message);
 }
@@ -1258,6 +1256,7 @@ void CWPhastView::Update(IObserver* pSender, LPARAM lHint, CObject* /*pHint*/, v
 				// Hide Zone BoxWidget
 				this->GetBoxWidget()->Off();
 				this->m_pPointWidget2->Off();
+				pRiverActor->SetEnabled(1);
 
 				this->Invalidate(TRUE);
 			}			
@@ -1340,44 +1339,68 @@ bool CWPhastView::CreatingNewRiver(void)const
 
 void CWPhastView::StartNewRiver(void)
 {
-	// set size of 3D cursor
+	///////////////////////////////
 	//
-	vtkFloatingPointType* bounds = this->GetDocument()->GetGridBounds();
-	vtkFloatingPointType dim = (bounds[1] - bounds[0]) / 20.0;
-	this->m_pCursor3D->SetModelBounds(-dim, dim, -dim, dim, -dim, dim);
-	this->m_pCursor3DActor->VisibilityOn();
+	{
+		this->m_pRiverActor = CRiverActor::StartNewRiver(this->GetRenderWindowInteractor());
 
-	// set blue cursor
+// COMMENT: {6/22/2005 2:13:28 PM}		/////{{
+// COMMENT: {6/22/2005 2:13:28 PM}		this->GetDocument()->Add(this->m_pRiverActor);
+// COMMENT: {6/22/2005 2:13:28 PM}		/////}}
+
+		float* scale = this->GetDocument()->GetScale();
+		this->m_pRiverActor->SetScale(scale[0], scale[1], scale[2]);
+
+		this->m_pRiverActor->ScaleFromBounds(this->GetDocument()->GetGridBounds());
+
+		CGrid x, y, z;
+		this->GetDocument()->GetGrid(x, y, z);
+		z.Setup();
+		this->m_pRiverActor->SetZ(z.coord[z.count_coord - 1]);
+
+		this->m_Renderer->AddProp(this->m_pRiverActor);
+	}
 	//
-	this->m_pCursor3DActor->GetProperty()->SetColor(0, 0, 1);
+	///////////////////////////////
 
-	// create river actor
-	//
-	ASSERT(this->m_pRiverActor == 0);
-	this->m_pRiverActor = CRiverActor::New();
-
-// COMMENT: {6/15/2005 5:28:07 PM}	///{{{
-// COMMENT: {6/15/2005 5:28:07 PM}	// set scale
-// COMMENT: {6/15/2005 5:28:07 PM}	//
-// COMMENT: {6/15/2005 5:28:07 PM}	float* scale = this->GetDocument()->GetScale();
-// COMMENT: {6/15/2005 5:28:07 PM}	this->m_pRiverActor->SetScale(scale[0], scale[1], scale[2]);
-// COMMENT: {6/15/2005 5:28:07 PM}
-// COMMENT: {6/15/2005 5:28:07 PM}	// set radius
-// COMMENT: {6/15/2005 5:28:07 PM}	//
-// COMMENT: {6/15/2005 5:28:07 PM}	float defaultAxesSize = (bounds[1]-bounds[0] + bounds[3]-bounds[2] + bounds[5]-bounds[4])/12;
-// COMMENT: {6/15/2005 5:28:07 PM}	///this->m_pRiverActor->SetRadius(defaultAxesSize * 0.085 / sqrt(scale[0] * scale[1]));
-// COMMENT: {6/15/2005 5:28:07 PM}	this->m_pRiverActor->SetRadius(defaultAxesSize * 0.085);
-// COMMENT: {6/15/2005 5:28:07 PM}
-// COMMENT: {6/15/2005 5:28:07 PM}	// set z
-// COMMENT: {6/15/2005 5:28:07 PM}	//
-// COMMENT: {6/15/2005 5:28:07 PM}	this->m_pRiverActor->SetZ(bounds[5]);
-// COMMENT: {6/15/2005 5:28:07 PM}
-// COMMENT: {6/15/2005 5:28:07 PM}	this->m_Renderer->AddProp(this->m_pRiverActor);
-// COMMENT: {6/15/2005 5:28:07 PM}	///}}}
-
-	/////{{
-	this->GetDocument()->Add(this->m_pRiverActor);
-	/////}}
+// COMMENT: {6/21/2005 5:52:08 PM}	// set size of 3D cursor
+// COMMENT: {6/21/2005 5:52:08 PM}	//
+// COMMENT: {6/21/2005 5:52:08 PM}	vtkFloatingPointType* bounds = this->GetDocument()->GetGridBounds();
+// COMMENT: {6/21/2005 5:52:08 PM}	vtkFloatingPointType dim = (bounds[1] - bounds[0]) / 20.0;
+// COMMENT: {6/21/2005 5:52:08 PM}	this->m_pCursor3D->SetModelBounds(-dim, dim, -dim, dim, -dim, dim);
+// COMMENT: {6/21/2005 5:52:08 PM}	this->m_pCursor3DActor->VisibilityOn();
+// COMMENT: {6/21/2005 5:52:08 PM}
+// COMMENT: {6/21/2005 5:52:08 PM}	// set blue cursor
+// COMMENT: {6/21/2005 5:52:08 PM}	//
+// COMMENT: {6/21/2005 5:52:08 PM}	this->m_pCursor3DActor->GetProperty()->SetColor(0, 0, 1);
+// COMMENT: {6/21/2005 5:52:08 PM}
+// COMMENT: {6/21/2005 5:52:08 PM}	// create river actor
+// COMMENT: {6/21/2005 5:52:08 PM}	//
+// COMMENT: {6/21/2005 5:52:08 PM}	ASSERT(this->m_pRiverActor == 0);
+// COMMENT: {6/21/2005 5:52:08 PM}	this->m_pRiverActor = CRiverActor::New();
+// COMMENT: {6/21/2005 5:52:08 PM}
+// COMMENT: {6/21/2005 5:52:08 PM}// COMMENT: {6/15/2005 5:28:07 PM}	///{{{
+// COMMENT: {6/21/2005 5:52:08 PM}// COMMENT: {6/15/2005 5:28:07 PM}	// set scale
+// COMMENT: {6/21/2005 5:52:08 PM}// COMMENT: {6/15/2005 5:28:07 PM}	//
+// COMMENT: {6/21/2005 5:52:08 PM}// COMMENT: {6/15/2005 5:28:07 PM}	float* scale = this->GetDocument()->GetScale();
+// COMMENT: {6/21/2005 5:52:08 PM}// COMMENT: {6/15/2005 5:28:07 PM}	this->m_pRiverActor->SetScale(scale[0], scale[1], scale[2]);
+// COMMENT: {6/21/2005 5:52:08 PM}// COMMENT: {6/15/2005 5:28:07 PM}
+// COMMENT: {6/21/2005 5:52:08 PM}// COMMENT: {6/15/2005 5:28:07 PM}	// set radius
+// COMMENT: {6/21/2005 5:52:08 PM}// COMMENT: {6/15/2005 5:28:07 PM}	//
+// COMMENT: {6/21/2005 5:52:08 PM}// COMMENT: {6/15/2005 5:28:07 PM}	float defaultAxesSize = (bounds[1]-bounds[0] + bounds[3]-bounds[2] + bounds[5]-bounds[4])/12;
+// COMMENT: {6/21/2005 5:52:08 PM}// COMMENT: {6/15/2005 5:28:07 PM}	///this->m_pRiverActor->SetRadius(defaultAxesSize * 0.085 / sqrt(scale[0] * scale[1]));
+// COMMENT: {6/21/2005 5:52:08 PM}// COMMENT: {6/15/2005 5:28:07 PM}	this->m_pRiverActor->SetRadius(defaultAxesSize * 0.085);
+// COMMENT: {6/21/2005 5:52:08 PM}// COMMENT: {6/15/2005 5:28:07 PM}
+// COMMENT: {6/21/2005 5:52:08 PM}// COMMENT: {6/15/2005 5:28:07 PM}	// set z
+// COMMENT: {6/21/2005 5:52:08 PM}// COMMENT: {6/15/2005 5:28:07 PM}	//
+// COMMENT: {6/21/2005 5:52:08 PM}// COMMENT: {6/15/2005 5:28:07 PM}	this->m_pRiverActor->SetZ(bounds[5]);
+// COMMENT: {6/21/2005 5:52:08 PM}// COMMENT: {6/15/2005 5:28:07 PM}
+// COMMENT: {6/21/2005 5:52:08 PM}// COMMENT: {6/15/2005 5:28:07 PM}	this->m_Renderer->AddProp(this->m_pRiverActor);
+// COMMENT: {6/21/2005 5:52:08 PM}// COMMENT: {6/15/2005 5:28:07 PM}	///}}}
+// COMMENT: {6/21/2005 5:52:08 PM}
+// COMMENT: {6/21/2005 5:52:08 PM}	/////{{
+// COMMENT: {6/21/2005 5:52:08 PM}	this->GetDocument()->Add(this->m_pRiverActor);
+// COMMENT: {6/21/2005 5:52:08 PM}	/////}}
 
 	// Disable Interactor
 	//
@@ -1442,6 +1465,7 @@ void CWPhastView::CancelNewRiver(void)
 void CWPhastView::OnLButtonDblClk(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
+	::AfxMessageBox("OnLButtonDblClk");
 
 	__super::OnLButtonDblClk(nFlags, point);
 }

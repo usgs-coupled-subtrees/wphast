@@ -1,5 +1,6 @@
 #pragma once
 #include <vtkOpenGLActor.h>
+#include <vtkLODActor.h>
 
 class vtkAxes;
 class vtkTubeFilter;
@@ -14,10 +15,15 @@ struct AxesActorProperties {
 typedef float vtkFloatingPointType;
 #endif
 
-class CAxesActor : public vtkOpenGLActor
+// 6/20/05 Why is this inherited from vtkOpenGLActor and not vtkActor?
+// It isn't visible if vtkActor is used
+
+// class CAxesActor : public vtkOpenGLActor
+class CAxesActor : public vtkLODActor
 {
 public:
-	vtkTypeRevisionMacro(CAxesActor,vtkOpenGLActor);
+	// vtkTypeRevisionMacro(CAxesActor,vtkOpenGLActor);
+	vtkTypeRevisionMacro(CAxesActor,vtkLODActor);
 	static CAxesActor *New();
 
 	void SetDefaultPositions(const vtkFloatingPointType p[6]);

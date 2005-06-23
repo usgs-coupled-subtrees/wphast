@@ -452,19 +452,19 @@ void CViewVTKCommand::OnLeftButtonPressEvent(vtkObject* caller, void* callData)
 {
 	TRACE("OnLeftButtonPressEvent\n");
 
-	if (this->m_pView->CreatingNewRiver())
-	{
-		this->m_pView->m_pCursor3DActor->SetPosition(this->m_WorldPointXYPlane[0], this->m_WorldPointXYPlane[1], this->m_WorldPointXYPlane[2]);
-		this->m_pView->m_Renderer->ResetCameraClippingRange();
-		this->m_pView->m_RenderWindowInteractor->Render();
-
-		// update m_WorldPointXYPlane and save starting point
-		//
-		Update();
-		for (int i = 0; i < 3; ++i) {
-			this->m_BeginPoint[i] = this->m_WorldPointXYPlane[i];
-		}
-	}
+// COMMENT: {6/22/2005 7:34:29 PM}	if (this->m_pView->CreatingNewRiver())
+// COMMENT: {6/22/2005 7:34:29 PM}	{
+// COMMENT: {6/22/2005 7:34:29 PM}		this->m_pView->m_pCursor3DActor->SetPosition(this->m_WorldPointXYPlane[0], this->m_WorldPointXYPlane[1], this->m_WorldPointXYPlane[2]);
+// COMMENT: {6/22/2005 7:34:29 PM}		this->m_pView->m_Renderer->ResetCameraClippingRange();
+// COMMENT: {6/22/2005 7:34:29 PM}		this->m_pView->m_RenderWindowInteractor->Render();
+// COMMENT: {6/22/2005 7:34:29 PM}
+// COMMENT: {6/22/2005 7:34:29 PM}		// update m_WorldPointXYPlane and save starting point
+// COMMENT: {6/22/2005 7:34:29 PM}		//
+// COMMENT: {6/22/2005 7:34:29 PM}		Update();
+// COMMENT: {6/22/2005 7:34:29 PM}		for (int i = 0; i < 3; ++i) {
+// COMMENT: {6/22/2005 7:34:29 PM}			this->m_BeginPoint[i] = this->m_WorldPointXYPlane[i];
+// COMMENT: {6/22/2005 7:34:29 PM}		}
+// COMMENT: {6/22/2005 7:34:29 PM}	}
 
 	if (this->m_pView->CreatingNewWell()) {
 		this->m_pView->m_pCursor3DActor->SetPosition(this->m_WorldPointXYPlane[0], this->m_WorldPointXYPlane[1], this->m_WorldPointXYPlane[2]);
@@ -514,20 +514,20 @@ void CViewVTKCommand::OnLeftButtonReleaseEvent(vtkObject* caller, void* callData
 {
 	TRACE("OnLeftButtonReleaseEvent\n");
 
-	if (this->m_pView->CreatingNewRiver())
-	{
-		vtkFloatingPointType* scale = this->m_pView->GetDocument()->GetScale();
-
-		this->m_pView->m_pRiverActor->InsertNextPoint(
-			this->m_BeginPoint[0] / scale[0] / this->m_pView->GetDocument()->GetUnits().horizontal.input_to_si,
-			this->m_BeginPoint[1] / scale[1] / this->m_pView->GetDocument()->GetUnits().horizontal.input_to_si,
-			this->m_pView->m_pRiverActor->GetZ()
-			);
-
-		this->m_pView->m_Renderer->Render();
-
-		/// this->m_pView->CancelNewRiver();
-	}
+// COMMENT: {6/22/2005 6:27:15 PM}	if (this->m_pView->CreatingNewRiver())
+// COMMENT: {6/22/2005 6:27:15 PM}	{
+// COMMENT: {6/22/2005 6:27:15 PM}		vtkFloatingPointType* scale = this->m_pView->GetDocument()->GetScale();
+// COMMENT: {6/22/2005 6:27:15 PM}
+// COMMENT: {6/22/2005 6:27:15 PM}		this->m_pView->m_pRiverActor->InsertNextPoint(
+// COMMENT: {6/22/2005 6:27:15 PM}			this->m_BeginPoint[0] / scale[0] / this->m_pView->GetDocument()->GetUnits().horizontal.input_to_si,
+// COMMENT: {6/22/2005 6:27:15 PM}			this->m_BeginPoint[1] / scale[1] / this->m_pView->GetDocument()->GetUnits().horizontal.input_to_si,
+// COMMENT: {6/22/2005 6:27:15 PM}			this->m_pView->m_pRiverActor->GetZ()
+// COMMENT: {6/22/2005 6:27:15 PM}			);
+// COMMENT: {6/22/2005 6:27:15 PM}
+// COMMENT: {6/22/2005 6:27:15 PM}		this->m_pView->m_Renderer->Render();
+// COMMENT: {6/22/2005 6:27:15 PM}
+// COMMENT: {6/22/2005 6:27:15 PM}		/// this->m_pView->CancelNewRiver();
+// COMMENT: {6/22/2005 6:27:15 PM}	}
 
 	if (this->m_pView->CreatingNewWell())
 	{

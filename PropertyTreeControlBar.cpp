@@ -183,7 +183,16 @@ void CPropertyTreeControlBar::OnSelChanged(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 	///{{{{{
 	// Rivers
 	//
-	if (item.IsNodeAncestor(this->GetRiversNode()))
+	CTreeCtrlNode child = this->GetRiversNode().GetChild();
+	for (; child; child = child.GetNextSibling())
+	{
+		if (CRiverActor *pActor = CRiverActor::SafeDownCast(reinterpret_cast<vtkObject*>(child.GetData())))
+		{
+			pActor->ClearSelection();
+			pActor->SetEnabled(0);
+		}
+	}
+	if (item.IsNodeAncestor(this->GetRiversNode()) && item != this->GetRiversNode())
 	{
 		if ((item != this->GetRiversNode()) && (item.GetParent() != this->GetRiversNode()))
 		{
@@ -192,19 +201,6 @@ void CPropertyTreeControlBar::OnSelChanged(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 			{
 				if (CRiverActor *pRiverActor = CRiverActor::SafeDownCast(reinterpret_cast<vtkObject*>(riverNode.GetData())))
 				{
-// COMMENT: {6/14/2005 12:48:43 PM}					// clear selected points from remaining rivers
-// COMMENT: {6/14/2005 12:48:43 PM}					//
-// COMMENT: {6/14/2005 12:48:43 PM}					CTreeCtrlNode child = this->GetRiversNode().GetChild();
-// COMMENT: {6/14/2005 12:48:43 PM}					for (; child; child = child.GetNextSibling())
-// COMMENT: {6/14/2005 12:48:43 PM}					{
-// COMMENT: {6/14/2005 12:48:43 PM}						if (child != riverNode)
-// COMMENT: {6/14/2005 12:48:43 PM}						{
-// COMMENT: {6/14/2005 12:48:43 PM}							if (CRiverActor *pActor = CRiverActor::SafeDownCast(reinterpret_cast<vtkObject*>(child.GetData())))
-// COMMENT: {6/14/2005 12:48:43 PM}							{
-// COMMENT: {6/14/2005 12:48:43 PM}								pActor->ClearSelection();
-// COMMENT: {6/14/2005 12:48:43 PM}							}
-// COMMENT: {6/14/2005 12:48:43 PM}						}
-// COMMENT: {6/14/2005 12:48:43 PM}					}
 					pRiverActor->SelectPoint(riverNode.GetIndex(item));
 				}
 				else
@@ -214,7 +210,6 @@ void CPropertyTreeControlBar::OnSelChanged(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 			}
 		}
 	}
-	///}}}}}
 
 
 	if (m_wndTree.GetItemData(pNMTREEVIEW->itemNew.hItem))
