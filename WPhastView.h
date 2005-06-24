@@ -167,6 +167,11 @@ public:
 	afx_msg void OnUpdateToolsNewRiver(CCmdUI *pCmdUI);
 	afx_msg void OnToolsNewRiver();
 
+	// Rivers
+	//
+	vtkCallbackCommand    *RiverCallbackCommand;
+	static void RiverListener(vtkObject* caller, unsigned long eid, void* clientdata, void *calldata);
+	void OnEndNewRiver(void);
 	bool CreatingNewRiver(void)const;
 	void StartNewRiver(void);
 	void CancelNewRiver(void);

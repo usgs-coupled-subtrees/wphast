@@ -64,7 +64,12 @@ public:
 	enum EventIds {
 		StartMovePointEvent = vtkCommand::UserEvent + 500,
 		MovingPointEvent,
-		EndMovePointEvent
+		EndMovePointEvent,
+		//{{
+		StartNewRiverEvent,
+		CancelNewRiverEvent,
+		EndNewRiverEvent,
+		//}}
 	};
 
 	void MovePoint(vtkIdType id, double x, double y);
@@ -89,6 +94,8 @@ public:
 	vtkGetObjectMacro(Interactor, vtkRenderWindowInteractor);
 
 	static CRiverActor* StartNewRiver(vtkRenderWindowInteractor* pRenderWindowInteractor);
+	void CancelNewRiver(void);
+	void EndNewRiver(void);
 
 protected:
 	CRiverActor(void);
@@ -119,6 +126,7 @@ protected:
 	void OnMouseMove(void);
 	void OnLeftButtonDown(void);
 	void OnLeftButtonUp(void);
+	void OnKeyPress(void);
 
 	//
 	void Update(void);

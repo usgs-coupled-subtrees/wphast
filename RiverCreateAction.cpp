@@ -11,10 +11,19 @@ CRiverCreateAction::CRiverCreateAction(CWPhastDoc* pDoc, const CRiver &river)
 	ASSERT(this->m_pRiverActor->IsA("CRiverActor"));
 
 	this->m_pRiverActor->SetRiver(river, this->m_pDoc->GetUnits());
-#ifdef _DEBUG
-	this->m_pRiverActor->SetRiver(river, this->m_pDoc->GetUnits());
-#endif
 }
+
+CRiverCreateAction::CRiverCreateAction(CWPhastDoc* pDoc, CRiverActor *pRiverActor)
+: m_pDoc(pDoc)
+, m_pRiverActor(pRiverActor)
+, m_river(pRiverActor->GetRiver())
+{
+	ASSERT_VALID(this->m_pDoc);
+
+	ASSERT(this->m_pRiverActor);
+	ASSERT(this->m_pRiverActor->IsA("CRiverActor"));
+}
+
 
 CRiverCreateAction::~CRiverCreateAction(void)
 {

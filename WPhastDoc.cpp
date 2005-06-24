@@ -2139,6 +2139,20 @@ void CWPhastDoc::GetUsedWellNumbers(std::set<int>& usedNums)
 	}
 }
 
+int CWPhastDoc::GetNextRiverNumber(void)
+{
+	std::set<int> riverNums;
+	this->GetUsedRiverNumbers(riverNums);
+	if (riverNums.rbegin() != riverNums.rend())
+	{
+		return (*riverNums.rbegin()) + 1;
+	}
+	else
+	{
+		return 1;
+	}
+}
+
 void CWPhastDoc::GetUsedRiverNumbers(std::set<int>& usedNums)
 {
 	usedNums.clear();
@@ -4436,7 +4450,7 @@ void CWPhastDoc::UnAdd(CRiverActor *pRiverActor)
 	ASSERT(pRiverActor);
 	if (!pRiverActor) return;
 
-	// remove from wells assembly
+	// remove from rivers assembly
 	//
 	if (vtkPropAssembly *pPropAssembly = this->GetPropAssemblyRivers())
 	{
@@ -4447,6 +4461,10 @@ void CWPhastDoc::UnAdd(CRiverActor *pRiverActor)
 		// vtkPropAssembly::RemovePart(vtkProp *prop) is called
 		this->ReleaseGraphicsResources(pRiverActor);
 	}
+
+	// render
+	//
+	this->UpdateAllViews(0);
 }
 
 void CWPhastDoc::RiverListener(vtkObject* caller, unsigned long eid, void* clientdata, void *calldata)

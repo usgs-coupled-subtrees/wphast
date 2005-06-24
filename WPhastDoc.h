@@ -113,6 +113,7 @@ public:
 	void Remove(CWellActor *pWellActor);
 	void UnRemove(CWellActor *pWellActor);
 	void Select(CWellActor *pWellActor);
+	int GetNextWellNumber(void);
 	void GetUsedWellNumbers(std::set<int>& usedNums);
 
 
@@ -120,6 +121,7 @@ public:
 	void Add(CRiverActor *pRiverActor);
 	void UnAdd(CRiverActor *pRiverActor);
 	void Select(CRiverActor *pRiverActor);
+	int GetNextRiverNumber(void);
 	void GetUsedRiverNumbers(std::set<int>& usedNums);
 
 	static void RiverListener(vtkObject* caller, unsigned long eid, void* clientdata, void *calldata);
@@ -275,7 +277,6 @@ public:
 	virtual void DeleteContents();
 	void ResetCamera(void);
 	CString GetNextZoneName(void);
-	int GetNextWellNumber(void);
 private:
 	void AddDefaultZone(CZone* pZone);
 public:

@@ -9,6 +9,7 @@ class CRiverCreateAction : public CAction
 {
 public:
 	CRiverCreateAction(CWPhastDoc* pDoc, const CRiver &river);
+	CRiverCreateAction(CWPhastDoc* pDoc, CRiverActor *pRiverActor);
 	~CRiverCreateAction(void);
 
 	virtual void Execute();

@@ -7,6 +7,8 @@
 #include <vtkActor.h>
 #include <vtkPoints.h>
 #include <vtkCellPicker.h>
+#include <vtkProp3DCollection.h>
+
 #include "Units.h"
 #include "PropertyTreeControlBar.h"
 #include "DelayRedraw.h"
@@ -539,6 +541,7 @@ void CRiverActor::ProcessEvents(vtkObject* vtkNotUsed(object),
 		break;
 
 	case vtkCommand::KeyPressEvent:
+		self->OnKeyPress();
 		break;
 
 	case vtkCommand::KeyReleaseEvent: 
@@ -685,9 +688,29 @@ void CRiverActor::OnLeftButtonUp()
 	{
 		this->Update();
 		this->InsertNextPoint(this->m_WorldPointXYPlane[0], this->m_WorldPointXYPlane[1], this->m_WorldPointXYPlane[2]);
+		//{{
+		CRiverPoint rivpt;
+		rivpt.x = this->m_WorldPointXYPlane[0]; rivpt.y = this->m_WorldPointXYPlane[1];
+		this->m_river.m_listPoints.push_back(rivpt);
+		//}}
 		this->UpdatePoints();
 		this->ConnectingLineSource->SetPoint1(this->WorldSIPoint[0], this->WorldSIPoint[1], this->WorldSIPoint[2]);
 		this->ConnectingLineSource->SetPoint2(this->WorldSIPoint[0], this->WorldSIPoint[1], this->WorldSIPoint[2]);
+		this->Interactor->Render();
+	}
+}
+
+void CRiverActor::OnKeyPress()
+{
+	if (!this->Interactor) return;
+
+	if (this->State == CRiverActor::CreatingRiver)
+	{
+		char* keysym = this->Interactor->GetKeySym();		
+		// if (::strcmp(keysym, "Escape") == 0)
+		{
+			this->EndNewRiver();
+		}
 		this->Interactor->Render();
 	}
 }
@@ -783,6 +806,8 @@ void CRiverActor::SetEnabled(int enabling)
 		i->AddObserver(vtkCommand::LeftButtonPressEvent, 
 			this->EventCallbackCommand, 10);
 		i->AddObserver(vtkCommand::LeftButtonReleaseEvent, 
+			this->EventCallbackCommand, 10);
+		i->AddObserver(vtkCommand::KeyPressEvent, 
 			this->EventCallbackCommand, 10);
 
 		std::list<vtkActor*>::iterator iterActor = this->m_listActor.begin();
@@ -1161,6 +1186,111 @@ CRiverActor* CRiverActor::StartNewRiver(vtkRenderWindowInteractor* pRenderWindow
 	pRiverActor->ConnectingActor->VisibilityOff();
 
 	pRiverActor->AddPart(pRiverActor->ConnectingActor);
+	pRiverActor->InvokeEvent(CRiverActor::StartNewRiverEvent, NULL);
 
 	return pRiverActor;
+}
+
+void CRiverActor::CancelNewRiver()
+{
+	if (this->State == CRiverActor::CreatingRiver)
+	{
+		ASSERT(this->m_pCursor3D != 0);
+		ASSERT(this->m_pCursor3DMapper != 0);
+		ASSERT(this->m_pCursor3DActor != 0);
+		if (this->m_pCursor3DActor)
+		{
+			ASSERT(this->GetParts()->IsItemPresent(this->m_pCursor3DActor));
+			this->RemovePart(this->m_pCursor3DActor);
+			this->m_pCursor3DActor->Delete();
+			this->m_pCursor3DActor = 0;
+		}
+		if (this->m_pCursor3DMapper)
+		{
+			this->m_pCursor3DMapper->Delete();
+			this->m_pCursor3DMapper = 0;
+		}
+		if (this->m_pCursor3D)
+		{
+			this->m_pCursor3D->Delete();
+			this->m_pCursor3D = 0;
+		}
+
+		ASSERT(this->ConnectingLineSource != 0);
+		ASSERT(this->ConnectingMapper != 0);
+		ASSERT(this->ConnectingActor != 0);
+		if (this->ConnectingActor)
+		{
+			ASSERT(this->GetParts()->IsItemPresent(this->ConnectingActor));
+			this->RemovePart(this->ConnectingActor);
+			this->ConnectingActor->Delete();
+			this->ConnectingActor = 0;
+		}
+		if (this->ConnectingMapper)
+		{
+			this->ConnectingMapper->Delete();
+			this->ConnectingMapper = 0;
+		}
+		if (this->ConnectingLineSource)
+		{
+			this->ConnectingLineSource->Delete();
+			this->ConnectingLineSource = 0;
+		}
+		this->Interactor->Render();
+		this->InvokeEvent(CRiverActor::CancelNewRiverEvent, NULL);
+	}
+	this->SetEnabled(0);
+	this->State = CRiverActor::None;
+}
+
+void CRiverActor::EndNewRiver()
+{
+	if (this->State == CRiverActor::CreatingRiver)
+	{
+		ASSERT(this->m_pCursor3D != 0);
+		ASSERT(this->m_pCursor3DMapper != 0);
+		ASSERT(this->m_pCursor3DActor != 0);
+		if (this->m_pCursor3DActor)
+		{
+			ASSERT(this->GetParts()->IsItemPresent(this->m_pCursor3DActor));
+			this->RemovePart(this->m_pCursor3DActor);
+			this->m_pCursor3DActor->Delete();
+			this->m_pCursor3DActor = 0;
+		}
+		if (this->m_pCursor3DMapper)
+		{
+			this->m_pCursor3DMapper->Delete();
+			this->m_pCursor3DMapper = 0;
+		}
+		if (this->m_pCursor3D)
+		{
+			this->m_pCursor3D->Delete();
+			this->m_pCursor3D = 0;
+		}
+
+		ASSERT(this->ConnectingLineSource != 0);
+		ASSERT(this->ConnectingMapper != 0);
+		ASSERT(this->ConnectingActor != 0);
+		if (this->ConnectingActor)
+		{
+			ASSERT(this->GetParts()->IsItemPresent(this->ConnectingActor));
+			this->RemovePart(this->ConnectingActor);
+			this->ConnectingActor->Delete();
+			this->ConnectingActor = 0;
+		}
+		if (this->ConnectingMapper)
+		{
+			this->ConnectingMapper->Delete();
+			this->ConnectingMapper = 0;
+		}
+		if (this->ConnectingLineSource)
+		{
+			this->ConnectingLineSource->Delete();
+			this->ConnectingLineSource = 0;
+		}
+		this->Interactor->Render();
+		this->InvokeEvent(CRiverActor::EndNewRiverEvent, NULL);
+	}
+	this->SetEnabled(0);
+	this->State = CRiverActor::None;
 }

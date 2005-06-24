@@ -46,6 +46,7 @@
 #include "ZoneActor.h"
 #include "WellActor.h"
 #include "RiverActor.h"
+#include "RiverCreateAction.h"
 #include "Grid.h"
 
 
@@ -100,7 +101,6 @@ END_MESSAGE_MAP()
 
 // CWPhastView construction/destruction
 
-
 CWPhastView::CWPhastView()
 : m_bResetCamera(false)
 , m_pNewCube(0)
@@ -110,6 +110,7 @@ CWPhastView::CWPhastView()
 , m_pWellActor(0)
 , m_pPointWidget2(0)
 , m_pRiverActor(0)
+, RiverCallbackCommand(0)
 {
 	// Create the renderer, window and interactor objects.
 	//
@@ -211,8 +212,15 @@ CWPhastView::~CWPhastView()
 	// River actor
 	if (this->m_pRiverActor)
 	{
+		this->m_Renderer->RemoveProp(this->m_pRiverActor);
 		this->m_pRiverActor->Delete();
 		this->m_pRiverActor = 0;
+	}
+	// River listener
+	if (this->RiverCallbackCommand)
+	{
+		this->RiverCallbackCommand->Delete();
+		this->RiverCallbackCommand = 0;
 	}
 
 	// Delete the the renderer, window and interactor objects.
@@ -573,6 +581,12 @@ void CWPhastView::DeleteContents(void)
 	pCamera->SetFocalPoint(0, 0, 0);
 	pCamera->SetPosition(0, 0, 1);
 	pCamera->SetViewUp(0, 1, 0);
+
+	//{{
+	this->CancelNewZone();
+	this->CancelNewWell();
+	this->CancelNewRiver();  // TODO check this out
+	//}}
 }
 
 void CWPhastView::OnUpdateToolsNewZone(CCmdUI *pCmdUI)
@@ -730,13 +744,11 @@ BOOL CWPhastView::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 		return TRUE;
 	}
 
-	//{{
-	if (this->m_pRiverActor && nHitTest == HTCLIENT)
+	if (this->CreatingNewRiver() && nHitTest == HTCLIENT)
 	{
 		::SetCursor(AfxGetApp()->LoadCursor(IDC_NULL));
 		return TRUE;
 	}
-	//}}
 
 	return CView::OnSetCursor(pWnd, nHitTest, message);
 }
@@ -1334,21 +1346,30 @@ void CWPhastView::OnToolsNewRiver()
 
 bool CWPhastView::CreatingNewRiver(void)const
 {
-	return (this->m_pRiverActor != 0);
+	return (this->RiverCallbackCommand != 0);
 }
 
 void CWPhastView::StartNewRiver(void)
 {
-	///////////////////////////////
-	//
 	{
+		ASSERT(this->RiverCallbackCommand == 0);
+		this->RiverCallbackCommand = vtkCallbackCommand::New();
+		this->RiverCallbackCommand->SetClientData(this);
+		this->RiverCallbackCommand->SetCallback(CWPhastView::RiverListener);
+
+		if (this->m_pRiverActor != 0)
+		{
+			this->m_pRiverActor->Delete();
+		}
 		this->m_pRiverActor = CRiverActor::StartNewRiver(this->GetRenderWindowInteractor());
+		
+		CRiver river;
+		river.n_user = this->GetDocument()->GetNextRiverNumber();
+		this->m_pRiverActor->SetRiver(river, this->GetDocument()->GetUnits());
 
-// COMMENT: {6/22/2005 2:13:28 PM}		/////{{
-// COMMENT: {6/22/2005 2:13:28 PM}		this->GetDocument()->Add(this->m_pRiverActor);
-// COMMENT: {6/22/2005 2:13:28 PM}		/////}}
+		this->m_pRiverActor->AddObserver(CRiverActor::EndNewRiverEvent, RiverCallbackCommand);
 
-		float* scale = this->GetDocument()->GetScale();
+		vtkFloatingPointType* scale = this->GetDocument()->GetScale();
 		this->m_pRiverActor->SetScale(scale[0], scale[1], scale[2]);
 
 		this->m_pRiverActor->ScaleFromBounds(this->GetDocument()->GetGridBounds());
@@ -1357,50 +1378,8 @@ void CWPhastView::StartNewRiver(void)
 		this->GetDocument()->GetGrid(x, y, z);
 		z.Setup();
 		this->m_pRiverActor->SetZ(z.coord[z.count_coord - 1]);
-
 		this->m_Renderer->AddProp(this->m_pRiverActor);
 	}
-	//
-	///////////////////////////////
-
-// COMMENT: {6/21/2005 5:52:08 PM}	// set size of 3D cursor
-// COMMENT: {6/21/2005 5:52:08 PM}	//
-// COMMENT: {6/21/2005 5:52:08 PM}	vtkFloatingPointType* bounds = this->GetDocument()->GetGridBounds();
-// COMMENT: {6/21/2005 5:52:08 PM}	vtkFloatingPointType dim = (bounds[1] - bounds[0]) / 20.0;
-// COMMENT: {6/21/2005 5:52:08 PM}	this->m_pCursor3D->SetModelBounds(-dim, dim, -dim, dim, -dim, dim);
-// COMMENT: {6/21/2005 5:52:08 PM}	this->m_pCursor3DActor->VisibilityOn();
-// COMMENT: {6/21/2005 5:52:08 PM}
-// COMMENT: {6/21/2005 5:52:08 PM}	// set blue cursor
-// COMMENT: {6/21/2005 5:52:08 PM}	//
-// COMMENT: {6/21/2005 5:52:08 PM}	this->m_pCursor3DActor->GetProperty()->SetColor(0, 0, 1);
-// COMMENT: {6/21/2005 5:52:08 PM}
-// COMMENT: {6/21/2005 5:52:08 PM}	// create river actor
-// COMMENT: {6/21/2005 5:52:08 PM}	//
-// COMMENT: {6/21/2005 5:52:08 PM}	ASSERT(this->m_pRiverActor == 0);
-// COMMENT: {6/21/2005 5:52:08 PM}	this->m_pRiverActor = CRiverActor::New();
-// COMMENT: {6/21/2005 5:52:08 PM}
-// COMMENT: {6/21/2005 5:52:08 PM}// COMMENT: {6/15/2005 5:28:07 PM}	///{{{
-// COMMENT: {6/21/2005 5:52:08 PM}// COMMENT: {6/15/2005 5:28:07 PM}	// set scale
-// COMMENT: {6/21/2005 5:52:08 PM}// COMMENT: {6/15/2005 5:28:07 PM}	//
-// COMMENT: {6/21/2005 5:52:08 PM}// COMMENT: {6/15/2005 5:28:07 PM}	float* scale = this->GetDocument()->GetScale();
-// COMMENT: {6/21/2005 5:52:08 PM}// COMMENT: {6/15/2005 5:28:07 PM}	this->m_pRiverActor->SetScale(scale[0], scale[1], scale[2]);
-// COMMENT: {6/21/2005 5:52:08 PM}// COMMENT: {6/15/2005 5:28:07 PM}
-// COMMENT: {6/21/2005 5:52:08 PM}// COMMENT: {6/15/2005 5:28:07 PM}	// set radius
-// COMMENT: {6/21/2005 5:52:08 PM}// COMMENT: {6/15/2005 5:28:07 PM}	//
-// COMMENT: {6/21/2005 5:52:08 PM}// COMMENT: {6/15/2005 5:28:07 PM}	float defaultAxesSize = (bounds[1]-bounds[0] + bounds[3]-bounds[2] + bounds[5]-bounds[4])/12;
-// COMMENT: {6/21/2005 5:52:08 PM}// COMMENT: {6/15/2005 5:28:07 PM}	///this->m_pRiverActor->SetRadius(defaultAxesSize * 0.085 / sqrt(scale[0] * scale[1]));
-// COMMENT: {6/21/2005 5:52:08 PM}// COMMENT: {6/15/2005 5:28:07 PM}	this->m_pRiverActor->SetRadius(defaultAxesSize * 0.085);
-// COMMENT: {6/21/2005 5:52:08 PM}// COMMENT: {6/15/2005 5:28:07 PM}
-// COMMENT: {6/21/2005 5:52:08 PM}// COMMENT: {6/15/2005 5:28:07 PM}	// set z
-// COMMENT: {6/21/2005 5:52:08 PM}// COMMENT: {6/15/2005 5:28:07 PM}	//
-// COMMENT: {6/21/2005 5:52:08 PM}// COMMENT: {6/15/2005 5:28:07 PM}	this->m_pRiverActor->SetZ(bounds[5]);
-// COMMENT: {6/21/2005 5:52:08 PM}// COMMENT: {6/15/2005 5:28:07 PM}
-// COMMENT: {6/21/2005 5:52:08 PM}// COMMENT: {6/15/2005 5:28:07 PM}	this->m_Renderer->AddProp(this->m_pRiverActor);
-// COMMENT: {6/21/2005 5:52:08 PM}// COMMENT: {6/15/2005 5:28:07 PM}	///}}}
-// COMMENT: {6/21/2005 5:52:08 PM}
-// COMMENT: {6/21/2005 5:52:08 PM}	/////{{
-// COMMENT: {6/21/2005 5:52:08 PM}	this->GetDocument()->Add(this->m_pRiverActor);
-// COMMENT: {6/21/2005 5:52:08 PM}	/////}}
 
 	// Disable Interactor
 	//
@@ -1417,16 +1396,13 @@ void CWPhastView::StartNewRiver(void)
 	//
 	// Note: This is reqd because the widget will 
 	// recieve all the mouse input
+	this->GetDocument()->ClearSelection();
 	this->m_pBoxWidget->Off();
 	this->m_pPointWidget2->Off();
 }
 
 void CWPhastView::EndNewRiver(void)
 {
-	// reset cursor
-	//
-	this->m_pCursor3DActor->VisibilityOff();
-
 	// reattach interactor
 	//
 	if (vtkInteractorStyle* style = vtkInteractorStyle::SafeDownCast(this->m_pInteractorStyle))
@@ -1450,6 +1426,13 @@ void CWPhastView::EndNewRiver(void)
 		this->m_pRiverActor->Delete();
 		this->m_pRiverActor = 0;
 	}
+	ASSERT(this->RiverCallbackCommand != 0);
+	if (this->RiverCallbackCommand)
+	{
+		this->RiverCallbackCommand->Delete();
+		this->RiverCallbackCommand = 0;
+	}
+
 	this->GetDocument()->UpdateAllViews(0);
 }
 
@@ -1460,6 +1443,69 @@ void CWPhastView::CancelNewRiver(void)
 		this->EndNewRiver();
 		this->GetDocument()->UpdateAllViews(0);
 	}
+}
+
+void CWPhastView::RiverListener(vtkObject* caller, unsigned long eid, void* clientdata, void *calldata)
+{
+	ASSERT(caller->IsA("CRiverActor"));
+	ASSERT(clientdata);
+
+	if (CRiverActor* pRiverActor = CRiverActor::SafeDownCast(caller))
+	{
+		CWPhastView* self = reinterpret_cast<CWPhastView*>(clientdata);
+		ASSERT(pRiverActor == self->m_pRiverActor);
+		switch (eid)
+		{
+		case CRiverActor::StartNewRiverEvent:
+			break;
+		case CRiverActor::CancelNewRiverEvent:
+			break;
+		case CRiverActor::EndNewRiverEvent:
+			self->OnEndNewRiver();
+			break;
+		}
+	}
+}
+
+void CWPhastView::OnEndNewRiver(void)
+{
+	// reattach interactor
+	//
+	if (vtkInteractorStyle* style = vtkInteractorStyle::SafeDownCast(this->m_pInteractorStyle))
+	{
+		if (vtkInteractorStyleSwitch* switcher = vtkInteractorStyleSwitch::SafeDownCast(style))
+		{
+			style = switcher->GetCurrentStyle();
+		}
+		style->SetInteractor(this->m_RenderWindowInteractor);
+	}
+
+	//
+	// NOTE: this->m_pRiverActor->Delete() can't be called
+	// because the list of listeners will also be deleted
+	// this may be fixed in 4.4
+	//
+	ASSERT(this->m_pRiverActor != 0);
+	if (this->m_pRiverActor)
+	{
+		if (::AfxMessageBox("TODO", MB_OKCANCEL) == IDOK)
+		{
+			this->m_Renderer->RemoveProp(this->m_pRiverActor);
+			this->GetDocument()->Execute(new CRiverCreateAction(this->GetDocument(), this->m_pRiverActor->GetRiver()));
+			this->m_pRiverActor = 0;
+		}
+		else
+		{
+			this->m_Renderer->RemoveProp(this->m_pRiverActor);
+		}
+	}
+
+	if (this->RiverCallbackCommand)
+	{
+		this->RiverCallbackCommand->Delete();
+		this->RiverCallbackCommand = 0;
+	}
+	this->GetDocument()->UpdateAllViews(0);
 }
 
 void CWPhastView::OnLButtonDblClk(UINT nFlags, CPoint point)
