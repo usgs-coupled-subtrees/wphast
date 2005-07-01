@@ -3,6 +3,7 @@
 
 #include "property.h"
 #include "WellSchedule.h"
+#include "River.h"
 #include "Global.h"
 
 // specialization for Ctime
@@ -406,12 +407,31 @@ void CTimeSeries<T>::Serialize(bool bStoring, hid_t loc_id)
 	}
 }
 
+// specialization for CRiverState
+template<>
+CTimeSeries<CRiverState>& CTimeSeries<CRiverState>::operator=(const struct time_series& rhs)
+{
+	this->clear();
+	ASSERT(FALSE); // no-op for CRiverState
+	return *this;
+}
+
+// specialization for CRiverState
+template<>
+CTimeSeries<CRiverState>& CTimeSeries<CRiverState>::Append(const struct time_series& rhs)
+{
+	ASSERT(FALSE); // no-op for CRiverState
+	return *this;
+}
+
+
 //
 // explicit template instantiations
 //
 template class CTimeSeries<Cproperty>;
 template class CTimeSeries<Ctime>;
 template class CTimeSeries<CWellRate>;
+template class CTimeSeries<CRiverState>;
 ///template class CTimeSeries<int>;
 
 template<>

@@ -945,7 +945,12 @@ void CRiverActor::Add(CPropertyTreeControlBar *pTree)
 
 void CRiverActor::UnAdd(CPropertyTreeControlBar *pTree)
 {
-	ASSERT(FALSE); // TODO
+	if (this->m_node)
+	{
+		CTreeCtrlNode node = this->m_node.GetParent();
+		node.Select();
+		VERIFY(this->m_node.Delete());
+	}
 }
 
 void CRiverActor::Remove(CPropertyTreeControlBar *pTree)

@@ -14,6 +14,8 @@
 #include "WPhastView.h"
 #include "MediaPropertyPage.h"
 #include "GridPropertyPage.h"
+#include "RiverPropertySheet.h"
+
 #include "ZoneActor.h"
 #include "WellActor.h"
 #include "RiverActor.h"
@@ -680,8 +682,36 @@ void CPropertyTreeControlBar::OnNMDblClk(NMHDR* pNMHDR, LRESULT* pResult)
 			}
 			if (item.GetData())
 			{
-				// ASSERT(FALSE); // TODO
-				::AfxMessageBox("Not currently supported");
+				if (CRiverActor* pRiverActor = CRiverActor::SafeDownCast((vtkObject*)item.GetData()))
+				{
+					CRiver river = pRiverActor->GetRiver();
+					CRiverPropertySheet sheet("RIVER");
+
+					if (CWPhastDoc* pWPhastDoc = this->GetDocument())
+					{
+						std::set<int> riverNums;
+						pWPhastDoc->GetUsedRiverNumbers(riverNums);
+						sheet.SetRiver(river, pWPhastDoc->GetUnits());
+
+						// remove this river number from used list
+						std::set<int>::iterator iter = riverNums.find(river.n_user);
+						ASSERT(iter != riverNums.end());
+						if (iter != riverNums.end())
+						{
+							riverNums.erase(iter);
+						}
+						// TODO sheet.SetUsedRiverNumbers(riverNums);
+
+						if (sheet.DoModal() == IDOK)
+						{
+							CRiver river;
+							sheet.GetRiver(river);
+							//TODO pWPhastDoc->Execute(new CSetRiverAction(pRiverActor, river, pWPhastDoc));
+						}
+						*pResult = TRUE;
+						return;
+					}
+				}
 			}
 		}
 		return;

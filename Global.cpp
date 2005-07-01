@@ -1119,6 +1119,21 @@ void CGlobal::MinimizeLengthUnits(CString& strUnits)
 	strUnits.Replace("milli", "m");
 }
 
+void CGlobal::MinimizeTimeUnits(CString& strUnits)
+{
+	strUnits.MakeLower();
+	strUnits.Replace("second", "s");
+	strUnits.Replace("seconds", "s");
+	strUnits.Replace("minute", "min");
+	strUnits.Replace("minutes", "min");
+	strUnits.Replace("hours", "hr");
+	strUnits.Replace("hour", "hr");
+	strUnits.Replace("day", "d");
+	strUnits.Replace("days", "d");
+	strUnits.Replace("year", "yr");
+	strUnits.Replace("years", "yr");
+}
+
 static const char* s_length_units[] = {"inches", "ft", "miles", "millimeters", "centimeters", "meters", "kilometers"};
 
 int CGlobal::AddLengthUnits(CComboBox* pCombo)

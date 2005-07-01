@@ -4462,6 +4462,13 @@ void CWPhastDoc::UnAdd(CRiverActor *pRiverActor)
 		this->ReleaseGraphicsResources(pRiverActor);
 	}
 
+	// remove from property tree
+	//
+	if (CPropertyTreeControlBar *pTree = this->GetPropertyTreeControlBar())
+	{
+		pRiverActor->UnAdd(pTree);
+	}
+
 	// render
 	//
 	this->UpdateAllViews(0);

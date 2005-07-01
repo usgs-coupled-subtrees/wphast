@@ -61,6 +61,8 @@ public:
 
 	static herr_t HDFSerializeBool(bool bStoring, hid_t loc_id, const char* szName, bool& bValue);
 	static void MinimizeLengthUnits(CString& strUnits);
+	static void MinimizeTimeUnits(CString& strUnits);
+
 
 	static bool GetEditValue(CWnd *pDlg, int nID, double& d);
 	static bool SimpleFloatParse(LPCTSTR lpszText, double& d);

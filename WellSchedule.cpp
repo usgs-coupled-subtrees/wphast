@@ -73,7 +73,15 @@ void CWellSchedule::Insert(const Ctime& time, const CWellRate& rate)
 // COMMENT: {4/19/2005 1:45:38 PM}	/* return this->m_map.insert(std::map<Ctime, CWellRate>::value_type(time, rate)); */
 // COMMENT: {4/19/2005 1:45:38 PM}	this->m_map.insert(std::map<Ctime, CWellRate>::value_type(time, rate));
 	CWellRate& r = this->m_pumpingSchedule[time];
-	r = rate;
+	////r = rate;
+	if (rate.q_defined)
+	{
+		r.SetRate(rate.q);
+	}
+	if (rate.solution_defined)
+	{
+		r.SetSolution(rate.solution);
+	}
 }
 
 void CWellSchedule::InsertRate(const Ctime& time, const Cproperty& rate)

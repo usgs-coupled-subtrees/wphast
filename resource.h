@@ -37,6 +37,7 @@
 #define IDR_HTML_IMPORTERRORDIALOG      121
 #define IDR_HTML_UNITS1PROPERTYPAGE     122
 #define ID_ZONE_TYPE_IC_CHEM            123
+#define IDD_CHILDPROPERTYPAGE           125
 #define IDR_MAINFRAME                   128
 #define IDR_WPhastTYPE                  129
 #define IDR_MEDIA_LONG_DISP_RTF         129
@@ -216,8 +217,11 @@
 #define IDD_IC_HEAD_SPREAD_PROPPAGE     229
 #define ID_VIEW_ICZONES                 230
 #define ID_BCZONES_HIDEALL              231
+#define IDD_RIVER_PROPPAGE2             231
 #define ID_BCZONES_SHOWSELECTED         232
+#define IDD_RIVER_PROPPAGE              232
 #define ID_BCZONES_SELECTALL            233
+#define IDD_RIVERPT_PROPPAGE            233
 #define ID_BCZONES_UNSELECTALL          234
 #define ID_ICZONES_HIDEALL              235
 #define ID_ICZONES_SHOWSELECTED         236
@@ -480,9 +484,13 @@
 #define IDC_DIAM_EDIT                   1215
 #define IDC_DIAMETER_UNITS_STATIC       1216
 #define IDC_ELEVATION_RADIO             1217
+#define IDC_DIAMETER_UNITS_STATIC3      1217
 #define IDC_DEPTH_RADIO                 1218
+#define IDC_DIAMETER_UNITS_STATIC4      1218
 #define IDC_DIAM_RADIO                  1219
+#define IDC_WIDTH_EDIT                  1219
 #define IDC_RADIUS_RADIO                1220
+#define IDC_DIAMETER_UNITS_STATIC2      1220
 #define IDC_WELL_STATIC                 1221
 #define IDC_NUSER_EDIT                  1222
 #define IDC_DESC_EDIT                   1223
@@ -496,13 +504,22 @@
 #define IDC_MEDIA_GRID                  1234
 #define IDC_CHEMIC_GRID                 1235
 #define IDC_HEADIC_GRID                 1236
+#define IDC_DEPTH_EDIT                  1237
+#define IDC_DEPTH_EDIT2                 1238
+#define IDC_RIVER_PTS                   1238
+#define IDC_DEPTH_EDIT3                 1239
+#define IDC_DEPTH_UNITS_STATIC          1240
+#define IDC_WIDTH_UNITS_STATIC          1241
+#define IDC_RIVER_K_UNITS_STATIC        1242
+#define IDC_RIVER_THICK_UNITS_STATIC    1243
+#define IDC_RIVER_K_UNITS_EDIT          1244
+#define IDC_RIVER_THICK_UNITS_EDIT      1245
 #define IDC_RESIZE_COLUMN               28654
 #define IDC_RESIZE_ROW                  28655
 #define IDR_POPUP                       28656
 #define ID_NEW_CUBE                     32773
 #define ID_TOOLS_NEWRIVER               32793
 #define ID_BUTTON32795                  32795
-#define ID_BUTTON32800                  32800
 #define IDW_CONTROLBAR_TREE             59424
 #define IDW_CONTROLBAR_BOXPROPS         59425
 
@@ -512,7 +529,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        248
 #define _APS_NEXT_COMMAND_VALUE         32801
-#define _APS_NEXT_CONTROL_VALUE         1237
-#define _APS_NEXT_SYMED_VALUE           125
+#define _APS_NEXT_CONTROL_VALUE         1246
+#define _APS_NEXT_SYMED_VALUE           126
 #endif
 #endif

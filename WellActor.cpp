@@ -160,7 +160,7 @@ void CWellActor::UnAdd(CPropertyTreeControlBar *pTree)
 {
 	if (this->m_node)
 	{
-		CTreeCtrlNode node = pTree->GetWellsNode();
+		CTreeCtrlNode node = this->m_node.GetParent();
 		node.Select();
 		VERIFY(this->m_node.Delete());
 	}

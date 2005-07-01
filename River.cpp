@@ -1,5 +1,5 @@
 #include "StdAfx.h"
-#include "river.h"
+#include "River.h"
 
 #include "Global.h"
 
@@ -16,10 +16,12 @@ CRiver::CRiver(const River &r)
 	for (int ip = 0; ip < r.count_points; ++ip)
 	{
 		const River_Point* point_ptr = &r.points[ip];
-		CRiverPoint rp;
-		rp.x = point_ptr->x;
-		rp.y = point_ptr->y;
-		rp.z = point_ptr->z;
+// COMMENT: {6/30/2005 4:48:30 PM}		CRiverPoint rp;
+// COMMENT: {6/30/2005 4:48:30 PM}		rp.x = point_ptr->x;
+// COMMENT: {6/30/2005 4:48:30 PM}		rp.y = point_ptr->y;
+// COMMENT: {6/30/2005 4:48:30 PM}		rp.z = point_ptr->z;
+// COMMENT: {6/30/2005 4:48:30 PM}		m_listPoints.push_back(rp);
+		CRiverPoint rp(*point_ptr);
 		m_listPoints.push_back(rp);
 	}	
 }
@@ -40,6 +42,13 @@ CRiver::~CRiver(void)
 		DECL_SZ_MACRO(name); \
 		VERIFY(0 <= CGlobal::HDFSerialize(bStoring, loc_id, sz_##name, h5_type, 1, &this->name)); \
 	} while(0)
+
+#define HDF_GETSET_DEFINED_MACRO(name, h5_type) \
+	do { \
+		DECL_SZ_DEFINED_MACRO(name); \
+		HDF_GETSET_MACRO(name##_defined, H5T_NATIVE_INT); \
+		HDF_GETSET_MACRO(name, h5_type); \
+	} while (0)
 
 #define HDF_STD_STRING_MACRO(name) \
 	do { \
@@ -112,9 +121,104 @@ void CRiver::Serialize(bool bStoring, hid_t loc_id)
 	}
 }
 
+CRiverPoint::CRiverPoint(void)
+: x_defined(0)
+, y_defined(0)
+, z_defined(0)
+, depth_defined(0)
+{
+}
+
+/*
+	double x;         int x_defined;
+	double y;         int y_defined;
+	double z;         int z_defined;
+	double depth;     int depth_defined;
+	double k;         int k_defined;
+	double width;     int width_defined;
+	double thickness; int thickness_defined;
+*/
+
+CRiverPoint::CRiverPoint(const River_Point& rp)
+: x_defined(rp.x_defined)
+, y_defined(rp.y_defined)
+, z_defined(rp.z_defined)
+, depth_defined(rp.depth_defined)
+, k_defined(rp.k_defined)
+, width_defined(rp.width_defined)
+, thickness_defined(rp.thickness_defined)
+{
+	if (this->x_defined)         this->x         = rp.x;
+	if (this->y_defined)         this->y         = rp.y;
+	if (this->z_defined)         this->z         = rp.z;
+	if (this->depth_defined)     this->depth     = rp.depth;
+	if (this->k_defined)         this->k         = rp.k;
+	if (this->width_defined)     this->width     = rp.width;
+	if (this->thickness_defined) this->thickness = rp.thickness;
+
+	if (rp.head_defined && rp.head)
+	{
+		for (int i = 0; i < rp.head->count_properties; ++i)
+		{
+			Ctime t(rp.head->properties[i]->time);
+			CRiverState rpt(rp.head->properties[i]->property->v[0]);
+			this->Insert(t, rpt);
+		}
+	}
+	if (rp.solution_defined && rp.solution)
+	{
+		for (int i = 0; i < rp.solution->count_properties; ++i)
+		{
+			Ctime t(rp.solution->properties[i]->time);
+			CRiverState rpt((int)rp.solution->properties[i]->property->v[0]);
+			this->Insert(t, rpt);
+		}
+	}
+}
+
+void CRiverPoint::Insert(const Ctime& time, const CRiverState& state)
+{
+	CRiverState& rs = this->m_riverSchedule[time];
+
+	if (state.head_defined)
+	{
+		rs.SetHead(state.head);
+	}
+	if (state.solution_defined)
+	{
+		rs.SetSolution(state.solution);
+	}
+}
+
+bool CRiverPoint::IsAnyThingDefined(void)const
+{
+	return (this->depth_defined || this->k_defined || this->width_defined || this->thickness_defined || !this->m_riverSchedule.empty());
+}
+
 void CRiverPoint::Serialize(bool bStoring, hid_t loc_id)
 {
-	HDF_GETSET_MACRO(x, H5T_NATIVE_DOUBLE);
-	HDF_GETSET_MACRO(y, H5T_NATIVE_DOUBLE);
-	HDF_GETSET_MACRO(z, H5T_NATIVE_DOUBLE);
+	HDF_GETSET_DEFINED_MACRO(x,         H5T_NATIVE_DOUBLE);
+	HDF_GETSET_DEFINED_MACRO(y,         H5T_NATIVE_DOUBLE);
+	HDF_GETSET_DEFINED_MACRO(z,         H5T_NATIVE_DOUBLE);
+	HDF_GETSET_DEFINED_MACRO(depth,     H5T_NATIVE_DOUBLE);
+	HDF_GETSET_DEFINED_MACRO(k,         H5T_NATIVE_DOUBLE);
+	HDF_GETSET_DEFINED_MACRO(width,     H5T_NATIVE_DOUBLE);
+	HDF_GETSET_DEFINED_MACRO(thickness, H5T_NATIVE_DOUBLE);
+
+	static const char sz_schedule[] = "Schedule";
+
+	if (bStoring)
+	{
+		CTimeSeries<CRiverState>::SerializeCreate(sz_schedule, this->m_riverSchedule, loc_id);
+	}
+	else
+	{
+		CTimeSeries<CRiverState>::SerializeOpen(sz_schedule, this->m_riverSchedule, loc_id);
+	}
+}
+
+void CRiverState::Serialize(bool bStoring, hid_t loc_id)
+{
+	HDF_GETSET_DEFINED_MACRO(head,     H5T_NATIVE_DOUBLE);
+	HDF_GETSET_DEFINED_MACRO(solution, H5T_NATIVE_INT   );
 }
