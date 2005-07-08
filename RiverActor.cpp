@@ -230,66 +230,66 @@ vtkIdType CRiverActor::InsertNextPoint(double x, double y, double z)
 	return id;
 }
 
-void CRiverActor::InsertPoint(vtkIdType id, double x, double y, double z)
-{
-	ASSERT(FALSE); // sync with other InsertPoint
-
-	this->m_pPoints->InsertPoint(id, x, y, z);
-
-	vtkSphereSource *pSphereSource = vtkSphereSource::New();
-	pSphereSource->SetPhiResolution(10);
-	pSphereSource->SetThetaResolution(10);
-	pSphereSource->SetRadius(this->m_Radius);
-
-	double pt[3];
-	pt[0] = x; pt[1] = y; pt[2] = z;
-	this->m_pTransformScale->TransformPoint(pt, pt);
-	this->m_pTransformUnits->TransformPoint(pt, pt);
-	pSphereSource->SetCenter(pt[0], pt[1], pt[2]);
-
-	vtkPolyDataMapper *pPolyDataMapper = vtkPolyDataMapper::New();
-	pPolyDataMapper->SetInput(pSphereSource->GetOutput());
-
-	vtkActor *pActor = vtkActor::New();
-	pActor->SetMapper(pPolyDataMapper);
-	pActor->SetProperty(this->HandleProperty);
-
-    this->m_pCellPicker->AddPickList(pActor);
-	this->AddPart(pActor);
-
-	if (this->m_pPoints->GetNumberOfPoints() > 1)
-	{
-		vtkLineSource *pLineSource = vtkLineSource::New();
-		vtkTubeFilter *pTubeFilter = vtkTubeFilter::New();
-		pTubeFilter->SetNumberOfSides(8);
-		pTubeFilter->SetInput(pLineSource->GetOutput());
-		pTubeFilter->SetRadius(this->m_Radius / 2.0);
-		vtkPolyDataMapper *pPolyDataMapper = vtkPolyDataMapper::New();
-		pPolyDataMapper->SetInput(pTubeFilter->GetOutput());
-		vtkActor *pActor = vtkActor::New();
-		pActor->SetMapper(pPolyDataMapper);
-		this->AddPart(pActor);
-
-		this->m_listLineSource.push_back(pLineSource);
-		this->m_listTubeFilter.push_back(pTubeFilter);
-		this->m_listLinePolyDataMapper.push_back(pPolyDataMapper);
-		this->m_listLineActor.push_back(pActor);
-
-		double prev_pt[3];
-		this->m_pPoints->GetPoint(id - 1, prev_pt);
-		this->m_pTransformScale->TransformPoint(prev_pt, prev_pt);
-		this->m_pTransformUnits->TransformPoint(prev_pt, prev_pt);
-		//{{
-		ASSERT( !(((prev_pt[0] - pt[0]) == 0.0) && ((prev_pt[1] - pt[1]) == 0.0)) );
-		//}}
-		pLineSource->SetPoint1(prev_pt[0], prev_pt[1], prev_pt[2]);
-		pLineSource->SetPoint2(pt[0], pt[1], pt[2]);
-	}
-
-	this->m_listSphereSource.push_back(pSphereSource);
-	this->m_listPolyDataMapper.push_back(pPolyDataMapper);
-	this->m_listActor.push_back(pActor);
-}
+// COMMENT: {7/8/2005 10:01:07 AM}void CRiverActor::InsertPoint(vtkIdType id, double x, double y, double z)
+// COMMENT: {7/8/2005 10:01:07 AM}{
+// COMMENT: {7/8/2005 10:01:07 AM}	ASSERT(FALSE); // sync with other InsertPoint
+// COMMENT: {7/8/2005 10:01:07 AM}
+// COMMENT: {7/8/2005 10:01:07 AM}	this->m_pPoints->InsertPoint(id, x, y, z);
+// COMMENT: {7/8/2005 10:01:07 AM}
+// COMMENT: {7/8/2005 10:01:07 AM}	vtkSphereSource *pSphereSource = vtkSphereSource::New();
+// COMMENT: {7/8/2005 10:01:07 AM}	pSphereSource->SetPhiResolution(10);
+// COMMENT: {7/8/2005 10:01:07 AM}	pSphereSource->SetThetaResolution(10);
+// COMMENT: {7/8/2005 10:01:07 AM}	pSphereSource->SetRadius(this->m_Radius);
+// COMMENT: {7/8/2005 10:01:07 AM}
+// COMMENT: {7/8/2005 10:01:07 AM}	double pt[3];
+// COMMENT: {7/8/2005 10:01:07 AM}	pt[0] = x; pt[1] = y; pt[2] = z;
+// COMMENT: {7/8/2005 10:01:07 AM}	this->m_pTransformScale->TransformPoint(pt, pt);
+// COMMENT: {7/8/2005 10:01:07 AM}	this->m_pTransformUnits->TransformPoint(pt, pt);
+// COMMENT: {7/8/2005 10:01:07 AM}	pSphereSource->SetCenter(pt[0], pt[1], pt[2]);
+// COMMENT: {7/8/2005 10:01:07 AM}
+// COMMENT: {7/8/2005 10:01:07 AM}	vtkPolyDataMapper *pPolyDataMapper = vtkPolyDataMapper::New();
+// COMMENT: {7/8/2005 10:01:07 AM}	pPolyDataMapper->SetInput(pSphereSource->GetOutput());
+// COMMENT: {7/8/2005 10:01:07 AM}
+// COMMENT: {7/8/2005 10:01:07 AM}	vtkActor *pActor = vtkActor::New();
+// COMMENT: {7/8/2005 10:01:07 AM}	pActor->SetMapper(pPolyDataMapper);
+// COMMENT: {7/8/2005 10:01:07 AM}	pActor->SetProperty(this->HandleProperty);
+// COMMENT: {7/8/2005 10:01:07 AM}
+// COMMENT: {7/8/2005 10:01:07 AM}    this->m_pCellPicker->AddPickList(pActor);
+// COMMENT: {7/8/2005 10:01:07 AM}	this->AddPart(pActor);
+// COMMENT: {7/8/2005 10:01:07 AM}
+// COMMENT: {7/8/2005 10:01:07 AM}	if (this->m_pPoints->GetNumberOfPoints() > 1)
+// COMMENT: {7/8/2005 10:01:07 AM}	{
+// COMMENT: {7/8/2005 10:01:07 AM}		vtkLineSource *pLineSource = vtkLineSource::New();
+// COMMENT: {7/8/2005 10:01:07 AM}		vtkTubeFilter *pTubeFilter = vtkTubeFilter::New();
+// COMMENT: {7/8/2005 10:01:07 AM}		pTubeFilter->SetNumberOfSides(8);
+// COMMENT: {7/8/2005 10:01:07 AM}		pTubeFilter->SetInput(pLineSource->GetOutput());
+// COMMENT: {7/8/2005 10:01:07 AM}		pTubeFilter->SetRadius(this->m_Radius / 2.0);
+// COMMENT: {7/8/2005 10:01:07 AM}		vtkPolyDataMapper *pPolyDataMapper = vtkPolyDataMapper::New();
+// COMMENT: {7/8/2005 10:01:07 AM}		pPolyDataMapper->SetInput(pTubeFilter->GetOutput());
+// COMMENT: {7/8/2005 10:01:07 AM}		vtkActor *pActor = vtkActor::New();
+// COMMENT: {7/8/2005 10:01:07 AM}		pActor->SetMapper(pPolyDataMapper);
+// COMMENT: {7/8/2005 10:01:07 AM}		this->AddPart(pActor);
+// COMMENT: {7/8/2005 10:01:07 AM}
+// COMMENT: {7/8/2005 10:01:07 AM}		this->m_listLineSource.push_back(pLineSource);
+// COMMENT: {7/8/2005 10:01:07 AM}		this->m_listTubeFilter.push_back(pTubeFilter);
+// COMMENT: {7/8/2005 10:01:07 AM}		this->m_listLinePolyDataMapper.push_back(pPolyDataMapper);
+// COMMENT: {7/8/2005 10:01:07 AM}		this->m_listLineActor.push_back(pActor);
+// COMMENT: {7/8/2005 10:01:07 AM}
+// COMMENT: {7/8/2005 10:01:07 AM}		double prev_pt[3];
+// COMMENT: {7/8/2005 10:01:07 AM}		this->m_pPoints->GetPoint(id - 1, prev_pt);
+// COMMENT: {7/8/2005 10:01:07 AM}		this->m_pTransformScale->TransformPoint(prev_pt, prev_pt);
+// COMMENT: {7/8/2005 10:01:07 AM}		this->m_pTransformUnits->TransformPoint(prev_pt, prev_pt);
+// COMMENT: {7/8/2005 10:01:07 AM}		//{{
+// COMMENT: {7/8/2005 10:01:07 AM}		ASSERT( !(((prev_pt[0] - pt[0]) == 0.0) && ((prev_pt[1] - pt[1]) == 0.0)) );
+// COMMENT: {7/8/2005 10:01:07 AM}		//}}
+// COMMENT: {7/8/2005 10:01:07 AM}		pLineSource->SetPoint1(prev_pt[0], prev_pt[1], prev_pt[2]);
+// COMMENT: {7/8/2005 10:01:07 AM}		pLineSource->SetPoint2(pt[0], pt[1], pt[2]);
+// COMMENT: {7/8/2005 10:01:07 AM}	}
+// COMMENT: {7/8/2005 10:01:07 AM}
+// COMMENT: {7/8/2005 10:01:07 AM}	this->m_listSphereSource.push_back(pSphereSource);
+// COMMENT: {7/8/2005 10:01:07 AM}	this->m_listPolyDataMapper.push_back(pPolyDataMapper);
+// COMMENT: {7/8/2005 10:01:07 AM}	this->m_listActor.push_back(pActor);
+// COMMENT: {7/8/2005 10:01:07 AM}}
 
 void CRiverActor::SetUnits(const CUnits &units)
 {
@@ -615,85 +615,87 @@ void CRiverActor::OnLeftButtonDown()
 				// this->m_pPoints->GetPoint(i, pt);
 				std::list<vtkActor*>::iterator iterActor = this->m_listLineActor.begin();
 				std::list<vtkLineSource*>::iterator iterSource = this->m_listLineSource.begin();
-				for (vtkIdType i = 0; iterActor != this->m_listLineActor.end(); ++i, ++iterActor, ++iterSource)
+				for (vtkIdType id = 0; iterActor != this->m_listLineActor.end(); ++id, ++iterActor, ++iterSource)
 				{
 					if (pActor == *iterActor)
 					{
 						this->Update();
-
 						vtkIdType before = this->m_pPoints->GetNumberOfPoints();
-						/////////this->m_pPoints->InsertNextPoint(this->m_WorldPointXYPlane);
-						//{{
-						double prev[3];
-						vtkIdType count = this->m_pPoints->GetNumberOfPoints();
-						for (vtkIdType j = count; j > i; --j)
-						{
-							this->m_pPoints->GetPoint(j - 1, prev);
-							this->m_pPoints->InsertPoint(j, prev);
-						}
-						this->m_pPoints->InsertPoint(i + 1, this->m_WorldPointXYPlane);
-						//}}
-						vtkIdType after = this->m_pPoints->GetNumberOfPoints();
-
-						vtkSphereSource *pSphereSource = vtkSphereSource::New();
-						pSphereSource->SetPhiResolution(10);
-						pSphereSource->SetThetaResolution(10);
-						pSphereSource->SetRadius(this->m_Radius);
-
-						vtkPolyDataMapper *pPolyDataMapper = vtkPolyDataMapper::New();
-						pPolyDataMapper->SetInput(pSphereSource->GetOutput());
-
-						vtkActor *pActor = vtkActor::New();
-						pActor->SetMapper(pPolyDataMapper);
-
-						ASSERT(this->Enabled);
-						//if (this->Enabled)
-						{
-							pActor->SetProperty(this->EnabledHandleProperty);
-						}
-						//else
-						{
-							pActor->SetProperty(this->HandleProperty);
-						}	
-
-						this->m_pCellPicker->AddPickList(pActor);
-						this->AddPart(pActor);
-
-						{
-							vtkLineSource *pLineSource = vtkLineSource::New();
-							vtkTubeFilter *pTubeFilter = vtkTubeFilter::New();
-							pTubeFilter->SetNumberOfSides(8);
-							pTubeFilter->SetInput(pLineSource->GetOutput());
-							pTubeFilter->SetRadius(this->m_Radius / 2.0);
-							vtkPolyDataMapper *pPolyDataMapper = vtkPolyDataMapper::New();
-							pPolyDataMapper->SetInput(pTubeFilter->GetOutput());
-							vtkActor *pActor = vtkActor::New();
-							pActor->SetMapper(pPolyDataMapper);
-							pActor->GetProperty()->SetColor(0., 1., 1.);
-
-							this->m_pLineCellPicker->AddPickList(pActor);
-							this->AddPart(pActor);
-
-							this->m_listLineSource.push_back(pLineSource);
-							this->m_listTubeFilter.push_back(pTubeFilter);
-							this->m_listLinePolyDataMapper.push_back(pPolyDataMapper);
-							this->m_listLineActor.push_back(pActor);
-
-							///////this->m_pTransformScale->TransformPoint(prev_pt, prev_pt);
-							///////this->m_pTransformUnits->TransformPoint(prev_pt, prev_pt);
-							//{{
-							///////ASSERT( !(((prev_pt[0] - pt[0]) == 0.0) && ((prev_pt[1] - pt[1]) == 0.0)) );
-							//}}
-							///////pLineSource->SetPoint1(prev_pt[0], prev_pt[1], prev_pt[2]);
-							///////pLineSource->SetPoint2(pt[0], pt[1], pt[2]);
-						}
-
-						this->m_listSphereSource.push_back(pSphereSource);
-						this->m_listPolyDataMapper.push_back(pPolyDataMapper);
-						this->m_listActor.push_back(pActor);
-						//}}
-						this->UpdatePoints();
+						this->InsertPoint(id, this->m_WorldPointXYPlane[0], this->m_WorldPointXYPlane[1], this->m_WorldPointXYPlane[2]);
 						this->Interactor->Render();
+
+// COMMENT: {7/8/2005 10:02:29 AM}						/////////this->m_pPoints->InsertNextPoint(this->m_WorldPointXYPlane);
+// COMMENT: {7/8/2005 10:02:29 AM}						//{{
+// COMMENT: {7/8/2005 10:02:29 AM}						double prev[3];
+// COMMENT: {7/8/2005 10:02:29 AM}						vtkIdType count = this->m_pPoints->GetNumberOfPoints();
+// COMMENT: {7/8/2005 10:02:29 AM}						for (vtkIdType j = count; j > i; --j)
+// COMMENT: {7/8/2005 10:02:29 AM}						{
+// COMMENT: {7/8/2005 10:02:29 AM}							this->m_pPoints->GetPoint(j - 1, prev);
+// COMMENT: {7/8/2005 10:02:29 AM}							this->m_pPoints->InsertPoint(j, prev);
+// COMMENT: {7/8/2005 10:02:29 AM}						}
+// COMMENT: {7/8/2005 10:02:29 AM}						this->m_pPoints->InsertPoint(i + 1, this->m_WorldPointXYPlane);
+// COMMENT: {7/8/2005 10:02:29 AM}						//}}
+// COMMENT: {7/8/2005 10:02:29 AM}						vtkIdType after = this->m_pPoints->GetNumberOfPoints();
+// COMMENT: {7/8/2005 10:02:29 AM}
+// COMMENT: {7/8/2005 10:02:29 AM}						vtkSphereSource *pSphereSource = vtkSphereSource::New();
+// COMMENT: {7/8/2005 10:02:29 AM}						pSphereSource->SetPhiResolution(10);
+// COMMENT: {7/8/2005 10:02:29 AM}						pSphereSource->SetThetaResolution(10);
+// COMMENT: {7/8/2005 10:02:29 AM}						pSphereSource->SetRadius(this->m_Radius);
+// COMMENT: {7/8/2005 10:02:29 AM}
+// COMMENT: {7/8/2005 10:02:29 AM}						vtkPolyDataMapper *pPolyDataMapper = vtkPolyDataMapper::New();
+// COMMENT: {7/8/2005 10:02:29 AM}						pPolyDataMapper->SetInput(pSphereSource->GetOutput());
+// COMMENT: {7/8/2005 10:02:29 AM}
+// COMMENT: {7/8/2005 10:02:29 AM}						vtkActor *pActor = vtkActor::New();
+// COMMENT: {7/8/2005 10:02:29 AM}						pActor->SetMapper(pPolyDataMapper);
+// COMMENT: {7/8/2005 10:02:29 AM}
+// COMMENT: {7/8/2005 10:02:29 AM}						ASSERT(this->Enabled);
+// COMMENT: {7/8/2005 10:02:29 AM}						//if (this->Enabled)
+// COMMENT: {7/8/2005 10:02:29 AM}						{
+// COMMENT: {7/8/2005 10:02:29 AM}							pActor->SetProperty(this->EnabledHandleProperty);
+// COMMENT: {7/8/2005 10:02:29 AM}						}
+// COMMENT: {7/8/2005 10:02:29 AM}						//else
+// COMMENT: {7/8/2005 10:02:29 AM}						{
+// COMMENT: {7/8/2005 10:02:29 AM}							pActor->SetProperty(this->HandleProperty);
+// COMMENT: {7/8/2005 10:02:29 AM}						}	
+// COMMENT: {7/8/2005 10:02:29 AM}
+// COMMENT: {7/8/2005 10:02:29 AM}						this->m_pCellPicker->AddPickList(pActor);
+// COMMENT: {7/8/2005 10:02:29 AM}						this->AddPart(pActor);
+// COMMENT: {7/8/2005 10:02:29 AM}
+// COMMENT: {7/8/2005 10:02:29 AM}						{
+// COMMENT: {7/8/2005 10:02:29 AM}							vtkLineSource *pLineSource = vtkLineSource::New();
+// COMMENT: {7/8/2005 10:02:29 AM}							vtkTubeFilter *pTubeFilter = vtkTubeFilter::New();
+// COMMENT: {7/8/2005 10:02:29 AM}							pTubeFilter->SetNumberOfSides(8);
+// COMMENT: {7/8/2005 10:02:29 AM}							pTubeFilter->SetInput(pLineSource->GetOutput());
+// COMMENT: {7/8/2005 10:02:29 AM}							pTubeFilter->SetRadius(this->m_Radius / 2.0);
+// COMMENT: {7/8/2005 10:02:29 AM}							vtkPolyDataMapper *pPolyDataMapper = vtkPolyDataMapper::New();
+// COMMENT: {7/8/2005 10:02:29 AM}							pPolyDataMapper->SetInput(pTubeFilter->GetOutput());
+// COMMENT: {7/8/2005 10:02:29 AM}							vtkActor *pActor = vtkActor::New();
+// COMMENT: {7/8/2005 10:02:29 AM}							pActor->SetMapper(pPolyDataMapper);
+// COMMENT: {7/8/2005 10:02:29 AM}							pActor->GetProperty()->SetColor(0., 1., 1.);
+// COMMENT: {7/8/2005 10:02:29 AM}
+// COMMENT: {7/8/2005 10:02:29 AM}							this->m_pLineCellPicker->AddPickList(pActor);
+// COMMENT: {7/8/2005 10:02:29 AM}							this->AddPart(pActor);
+// COMMENT: {7/8/2005 10:02:29 AM}
+// COMMENT: {7/8/2005 10:02:29 AM}							this->m_listLineSource.push_back(pLineSource);
+// COMMENT: {7/8/2005 10:02:29 AM}							this->m_listTubeFilter.push_back(pTubeFilter);
+// COMMENT: {7/8/2005 10:02:29 AM}							this->m_listLinePolyDataMapper.push_back(pPolyDataMapper);
+// COMMENT: {7/8/2005 10:02:29 AM}							this->m_listLineActor.push_back(pActor);
+// COMMENT: {7/8/2005 10:02:29 AM}
+// COMMENT: {7/8/2005 10:02:29 AM}							///////this->m_pTransformScale->TransformPoint(prev_pt, prev_pt);
+// COMMENT: {7/8/2005 10:02:29 AM}							///////this->m_pTransformUnits->TransformPoint(prev_pt, prev_pt);
+// COMMENT: {7/8/2005 10:02:29 AM}							//{{
+// COMMENT: {7/8/2005 10:02:29 AM}							///////ASSERT( !(((prev_pt[0] - pt[0]) == 0.0) && ((prev_pt[1] - pt[1]) == 0.0)) );
+// COMMENT: {7/8/2005 10:02:29 AM}							//}}
+// COMMENT: {7/8/2005 10:02:29 AM}							///////pLineSource->SetPoint1(prev_pt[0], prev_pt[1], prev_pt[2]);
+// COMMENT: {7/8/2005 10:02:29 AM}							///////pLineSource->SetPoint2(pt[0], pt[1], pt[2]);
+// COMMENT: {7/8/2005 10:02:29 AM}						}
+// COMMENT: {7/8/2005 10:02:29 AM}
+// COMMENT: {7/8/2005 10:02:29 AM}						this->m_listSphereSource.push_back(pSphereSource);
+// COMMENT: {7/8/2005 10:02:29 AM}						this->m_listPolyDataMapper.push_back(pPolyDataMapper);
+// COMMENT: {7/8/2005 10:02:29 AM}						this->m_listActor.push_back(pActor);
+// COMMENT: {7/8/2005 10:02:29 AM}						//}}
+// COMMENT: {7/8/2005 10:02:29 AM}						this->UpdatePoints();
+// COMMENT: {7/8/2005 10:02:29 AM}						this->Interactor->Render();
 						break;
 					}
 				}
@@ -1482,4 +1484,70 @@ void CRiverActor::EndNewRiver()
 	}
 	this->SetEnabled(0);
 	this->State = CRiverActor::None;
+}
+
+void CRiverActor::InsertPoint(vtkIdType id, double world_x, double world_y, double world_z)
+{
+	// move points after inserted point
+	//
+	double prev[3];
+	vtkIdType count = this->m_pPoints->GetNumberOfPoints();
+	for (vtkIdType j = count; j > id; --j)
+	{
+		this->m_pPoints->GetPoint(j - 1, prev);
+		this->m_pPoints->InsertPoint(j, prev);
+	}
+	this->m_pPoints->InsertPoint(id + 1, world_x, world_y, world_z);
+
+	// create new point
+	//
+	vtkSphereSource *pSphereSource = vtkSphereSource::New();
+	pSphereSource->SetPhiResolution(10);
+	pSphereSource->SetThetaResolution(10);
+	pSphereSource->SetRadius(this->m_Radius);
+	this->m_listSphereSource.push_back(pSphereSource);
+
+	vtkPolyDataMapper *pPolyDataMapper = vtkPolyDataMapper::New();
+	pPolyDataMapper->SetInput(pSphereSource->GetOutput());
+	this->m_listPolyDataMapper.push_back(pPolyDataMapper);
+
+	vtkActor *pActor = vtkActor::New();
+	pActor->SetMapper(pPolyDataMapper);
+	if (this->Enabled)
+	{
+		pActor->SetProperty(this->EnabledHandleProperty);
+	}
+	else
+	{
+		pActor->SetProperty(this->HandleProperty);
+	}	
+	this->m_listActor.push_back(pActor);
+	this->m_pCellPicker->AddPickList(pActor);
+	this->AddPart(pActor);
+
+	if (this->m_pPoints->GetNumberOfPoints() > 1)
+	{
+		// create new connecting tube
+		//
+		vtkLineSource *pLineSource = vtkLineSource::New();
+		this->m_listLineSource.push_back(pLineSource);
+
+		vtkTubeFilter *pTubeFilter = vtkTubeFilter::New();
+		pTubeFilter->SetNumberOfSides(8);
+		pTubeFilter->SetInput(pLineSource->GetOutput());
+		pTubeFilter->SetRadius(this->m_Radius / 2.0);
+		this->m_listTubeFilter.push_back(pTubeFilter);
+
+		vtkPolyDataMapper *pPolyDataMapper = vtkPolyDataMapper::New();
+		pPolyDataMapper->SetInput(pTubeFilter->GetOutput());
+		this->m_listLinePolyDataMapper.push_back(pPolyDataMapper);
+		
+		vtkActor *pActor = vtkActor::New();
+		pActor->SetMapper(pPolyDataMapper);
+		pActor->GetProperty()->SetColor(0., 1., 1.);
+		this->m_listLineActor.push_back(pActor);
+		this->m_pLineCellPicker->AddPickList(pActor);
+		this->AddPart(pActor);
+	}
+	this->UpdatePoints();
 }
