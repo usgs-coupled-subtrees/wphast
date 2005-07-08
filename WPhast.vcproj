@@ -586,6 +586,9 @@
 				RelativePath="MediaZoneActor.cpp">
 			</File>
 			<File
+				RelativePath="Mediator.cpp">
+			</File>
+			<File
 				RelativePath="ModelessPropertySheet.cpp">
 			</File>
 			<File
@@ -631,10 +634,16 @@
 				RelativePath="RiverCreateAction.cpp">
 			</File>
 			<File
+				RelativePath="RiverMediator.cpp">
+			</File>
+			<File
 				RelativePath="RiverMovePointAction.cpp">
 			</File>
 			<File
 				RelativePath="RiverPointPropertyPage.cpp">
+			</File>
+			<File
+				RelativePath="RiverPropertyPage2.cpp">
 			</File>
 			<File
 				RelativePath="RiverPropertySheet.cpp">
@@ -665,6 +674,9 @@
 			</File>
 			<File
 				RelativePath="SetPrintFreqAction.cpp">
+			</File>
+			<File
+				RelativePath="SetRiverAction.cpp">
 			</File>
 			<File
 				RelativePath="SetScaleAction.cpp">
@@ -1064,6 +1076,9 @@
 				RelativePath="MediaZoneActor.h">
 			</File>
 			<File
+				RelativePath="Mediator.h">
+			</File>
+			<File
 				RelativePath="ModelessPropertySheet.h">
 			</File>
 			<File
@@ -1115,10 +1130,16 @@
 				RelativePath="RiverCreateAction.h">
 			</File>
 			<File
+				RelativePath="RiverMediator.h">
+			</File>
+			<File
 				RelativePath="RiverMovePointAction.h">
 			</File>
 			<File
 				RelativePath="RiverPointPropertyPage.h">
+			</File>
+			<File
+				RelativePath="RiverPropertyPage2.h">
 			</File>
 			<File
 				RelativePath="RiverPropertySheet.h">
@@ -1149,6 +1170,9 @@
 			</File>
 			<File
 				RelativePath="SetPrintFreqAction.h">
+			</File>
+			<File
+				RelativePath="SetRiverAction.h">
 			</File>
 			<File
 				RelativePath="SetScaleAction.h">

@@ -32,11 +32,11 @@ void CRiverPointPropertyPage::DoDataExchange(CDataExchange* pDX)
 {
 	baseCRiverPointPropertyPage::DoDataExchange(pDX);
 	DDX_GridControl(pDX, IDC_GRID_SCHEDULES, this->m_wndScheduleGrid);
+
 	DDX_Text(pDX, IDC_X_UNITS_STATIC, this->m_strHorizontalUnits);
 	DDX_Text(pDX, IDC_Y_UNITS_STATIC, this->m_strHorizontalUnits);
 	DDX_Text(pDX, IDC_WIDTH_UNITS_STATIC, this->m_strHorizontalUnits);
-	DDX_Text(pDX, IDC_DEPTH_UNITS_STATIC, this->m_strVerticalUnits);
-	
+	DDX_Text(pDX, IDC_DEPTH_UNITS_STATIC, this->m_strVerticalUnits);	
 	DDX_Text(pDX, IDC_RIVER_K_UNITS_STATIC, this->m_strRiverBedKUnits);
 	DDX_Text(pDX, IDC_RIVER_THICK_UNITS_STATIC, this->m_strRiverBedThicknessUnits);
 

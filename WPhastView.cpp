@@ -47,6 +47,7 @@
 #include "WellActor.h"
 #include "RiverActor.h"
 #include "RiverCreateAction.h"
+#include "RiverPropertyPage2.h"
 #include "Grid.h"
 
 
@@ -1481,23 +1482,32 @@ void CWPhastView::OnEndNewRiver(void)
 	}
 
 	//
-	// NOTE: this->m_pRiverActor->Delete() can't be called
-	// because the list of listeners will also be deleted
-	// this may be fixed in 4.4
+	// NOTE: this->m_pRiverActor->Delete() can't be called within
+	// here because the list of listeners will also be deleted
+	// *** this may be fixed in 4.4 ***
 	//
 	ASSERT(this->m_pRiverActor != 0);
 	if (this->m_pRiverActor)
 	{
-		if (::AfxMessageBox("TODO", MB_OKCANCEL) == IDOK)
+		if (this->m_pRiverActor->GetPointCount() > 1)
 		{
-			this->m_Renderer->RemoveProp(this->m_pRiverActor);
-			this->GetDocument()->Execute(new CRiverCreateAction(this->GetDocument(), this->m_pRiverActor->GetRiver()));
-			this->m_pRiverActor = 0;
+			CPropertySheet sheet;
+			CRiverPropertyPage2 page;
+			page.SetProperties(this->m_pRiverActor->GetRiver());
+			page.SetUnits(this->GetDocument()->GetUnits());
+			sheet.AddPage(&page);
+			if (sheet.DoModal() == IDOK)
+			{
+				CRiver river;
+				page.GetProperties(river);
+				this->GetDocument()->Execute(new CRiverCreateAction(this->GetDocument(), river));
+			}
 		}
 		else
 		{
-			this->m_Renderer->RemoveProp(this->m_pRiverActor);
+			::AfxMessageBox("Rivers must contain at least two points");
 		}
+		this->m_Renderer->RemoveProp(this->m_pRiverActor);
 	}
 
 	if (this->RiverCallbackCommand)

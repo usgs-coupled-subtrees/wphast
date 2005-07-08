@@ -15,6 +15,7 @@
 #include "MediaPropertyPage.h"
 #include "GridPropertyPage.h"
 #include "RiverPropertySheet.h"
+#include "SetRiverAction.h"
 
 #include "ZoneActor.h"
 #include "WellActor.h"
@@ -30,6 +31,7 @@
 #include "Units2PropertyPage.h"
 #include "BoxPropertiesDialogBar.h"
 #include "Global.h"
+#include "RiverPropertyPage2.h"
 
 // Actions
 #include "ResizeGridAction.h"
@@ -675,23 +677,49 @@ void CPropertyTreeControlBar::OnNMDblClk(NMHDR* pNMHDR, LRESULT* pResult)
 	{
 		if (item != this->m_nodeRivers)
 		{
+			CTreeCtrlNode ptNode = item;
 			while (item.GetParent() != this->m_nodeRivers)
 			{
 				item = item.GetParent();
 				if (!item) break;
 			}
+
+			// determine point being edited
+			//
+			int point = 0;
+			if (ptNode != item)
+			{
+				while (ptNode.GetParent() != item)
+				{
+					ptNode = ptNode.GetParent();
+					if (!ptNode) break;
+				}
+				point = item.GetIndex(ptNode);
+			}
+
 			if (item.GetData())
 			{
 				if (CRiverActor* pRiverActor = CRiverActor::SafeDownCast((vtkObject*)item.GetData()))
 				{
 					CRiver river = pRiverActor->GetRiver();
-					CRiverPropertySheet sheet("RIVER");
+
+					CString str;
+					str.Format(_T("River %d Properties"), river.n_user);
+					CPropertySheet sheet(str);
+					
+					CRiverPropertyPage2 page;
+					sheet.AddPage(&page);
+
+					////CRiverPropertySheet sheet("RIVER");
 
 					if (CWPhastDoc* pWPhastDoc = this->GetDocument())
 					{
 						std::set<int> riverNums;
 						pWPhastDoc->GetUsedRiverNumbers(riverNums);
-						sheet.SetRiver(river, pWPhastDoc->GetUnits());
+						// sheet.SetRiver(river, pWPhastDoc->GetUnits());
+						page.SetProperties(river);
+						page.SetUnits(pWPhastDoc->GetUnits());
+						if (point) page.SetPoint(point);
 
 						// remove this river number from used list
 						std::set<int>::iterator iter = riverNums.find(river.n_user);
@@ -705,8 +733,8 @@ void CPropertyTreeControlBar::OnNMDblClk(NMHDR* pNMHDR, LRESULT* pResult)
 						if (sheet.DoModal() == IDOK)
 						{
 							CRiver river;
-							sheet.GetRiver(river);
-							//TODO pWPhastDoc->Execute(new CSetRiverAction(pRiverActor, river, pWPhastDoc));
+							page.GetProperties(river);
+							pWPhastDoc->Execute(new CSetRiverAction(pRiverActor, river, pWPhastDoc));
 						}
 						*pResult = TRUE;
 						return;

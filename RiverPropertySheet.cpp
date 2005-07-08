@@ -71,4 +71,16 @@ void CRiverPropertySheet::SetRiver(const CRiver& r_river, const CUnits& r_units)
 void CRiverPropertySheet::GetRiver(CRiver& r_river)const
 {
 	r_river = this->m_river;
+
+	// TODO update remaining river properties
+	//
+
+	r_river.m_listPoints.clear();
+	int n = this->GetPageCount();
+	for (int i = 0; i < n; ++i)
+	{
+		CRiverPoint pt;
+		this->m_pPages[i].GetProperties(pt);
+		r_river.m_listPoints.push_back(pt);
+	}
 }

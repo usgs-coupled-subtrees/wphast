@@ -78,6 +78,8 @@ public:
 	double*   GetCurrentPointPosition(void);
 	void      GetCurrentPointPosition(double x[3])const;
 
+	size_t GetPointCount(void)const;
+
 	LPCTSTR GetSerialName(void)const;
 	void Serialize(bool bStoring, hid_t loc_id, const CUnits &units);
 
@@ -96,6 +98,8 @@ public:
 	static CRiverActor* StartNewRiver(vtkRenderWindowInteractor* pRenderWindowInteractor);
 	void CancelNewRiver(void);
 	void EndNewRiver(void);
+
+	CTreeCtrlNode GetTreeCtrlNode(void)      { return m_node; }
 
 protected:
 	CRiverActor(void);
@@ -173,6 +177,7 @@ protected:
 
 	// Do the picking
 	vtkCellPicker   *m_pCellPicker;
+	vtkCellPicker   *m_pLineCellPicker;
 	vtkActor        *CurrentHandle;
 	vtkSphereSource *CurrentSource;
 	vtkIdType        CurrentId;

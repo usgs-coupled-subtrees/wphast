@@ -36,6 +36,8 @@ CRiverActor::CRiverActor(void)
 , ConnectingLineSource(0)
 , ConnectingMapper(0)
 , ConnectingActor(0)
+, m_pLineCellPicker(0)
+, m_pCellPicker(0)
 {
 	this->m_pPoints         = vtkPoints::New();
 	this->m_pTransformUnits = vtkTransform::New();
@@ -46,6 +48,10 @@ CRiverActor::CRiverActor(void)
 	this->m_pCellPicker     = vtkCellPicker::New();
 	this->m_pCellPicker->SetTolerance(0.001);
 	this->m_pCellPicker->PickFromListOn();
+
+	this->m_pLineCellPicker     = vtkCellPicker::New();
+	this->m_pLineCellPicker->SetTolerance(0.001);
+	this->m_pLineCellPicker->PickFromListOn();
 
 	static int count = 0;
 	TRACE("CRiverActor ctor %d \n", count);
@@ -81,6 +87,7 @@ CRiverActor::~CRiverActor(void)
 	this->m_pTransformUnits->Delete();       this->m_pTransformUnits      = 0;
 	this->m_pTransformScale->Delete();       this->m_pTransformScale      = 0;
 	this->m_pCellPicker->Delete();           this->m_pCellPicker          = 0;
+	this->m_pLineCellPicker->Delete();       this->m_pLineCellPicker      = 0;	
 
 	this->HandleProperty->Delete();          this->HandleProperty         = 0;
 	this->SelectedHandleProperty->Delete();  this->SelectedHandleProperty = 0;
@@ -139,7 +146,8 @@ vtkIdType CRiverActor::InsertNextPoint(double x, double y, double z)
 		if (vtkMath::Normalize(sNext) == 0.0)
 		{
 			TRACE("Coincident points in CRiverActor...can't compute normals\n");
-			return np;
+			///return np;
+			return -1;
 		}
 	}
 
@@ -168,8 +176,15 @@ vtkIdType CRiverActor::InsertNextPoint(double x, double y, double z)
 #endif
 
 	pActor->SetMapper(pPolyDataMapper);
-	pActor->SetProperty(this->HandleProperty);
-	
+
+	if (this->Enabled)
+	{
+		pActor->SetProperty(this->EnabledHandleProperty);
+	}
+	else
+	{
+		pActor->SetProperty(this->HandleProperty);
+	}	
 
     this->m_pCellPicker->AddPickList(pActor);
 	this->AddPart(pActor);
@@ -190,8 +205,9 @@ vtkIdType CRiverActor::InsertNextPoint(double x, double y, double z)
 		vtkActor *pActor = vtkActor::New();
 		pActor->SetMapper(pPolyDataMapper);
 		pActor->GetProperty()->SetColor(0., 1., 1.);
+
+		this->m_pLineCellPicker->AddPickList(pActor);
 		this->AddPart(pActor);
-// COMMENT: {6/13/2005 3:32:40 PM}		this->m_pCellPicker->AddPickList(pActor);
 
 		this->m_listLineSource.push_back(pLineSource);
 		this->m_listTubeFilter.push_back(pTubeFilter);
@@ -372,6 +388,7 @@ void CRiverActor::ClearPoints(void)
 	for(; iterActor != this->m_listActor.end(); ++iterActor)
 	{
 		this->RemovePart(*iterActor);
+		this->m_pCellPicker->DeletePickList(*iterActor);
 		(*iterActor)->Delete();
 	}
 	this->m_listActor.clear();
@@ -401,6 +418,7 @@ void CRiverActor::ClearPoints(void)
 	for(; iterLineActor != this->m_listLineActor.end(); ++iterLineActor)
 	{
 		this->RemovePart(*iterLineActor);
+		this->m_pLineCellPicker->DeletePickList(*iterLineActor);
 		(*iterLineActor)->Delete();
 	}
 	this->m_listLineActor.clear();
@@ -568,10 +586,8 @@ void CRiverActor::OnLeftButtonDown()
 		return;
 	}
 
-	//{{
 	if (this->State == CRiverActor::None)
 	{
-	//}}
 		vtkAssemblyPath *path;
 		this->m_pCellPicker->Pick(X, Y, 0.0, ren);
 		path = this->m_pCellPicker->GetPath();
@@ -585,11 +601,108 @@ void CRiverActor::OnLeftButtonDown()
 				this->State = CRiverActor::MovingPoint;
 				this->InvokeEvent(CRiverActor::StartMovePointEvent, NULL);
 				this->Interactor->Render();
+				return;
 			}
 		}
-	//{{
+
+		//{{
+		this->m_pLineCellPicker->Pick(X, Y, 0.0, ren);
+		path = this->m_pLineCellPicker->GetPath();
+		if (path != NULL)
+		{
+			if (vtkActor* pActor = vtkActor::SafeDownCast(path->GetFirstNode()->GetProp()))
+			{
+				// this->m_pPoints->GetPoint(i, pt);
+				std::list<vtkActor*>::iterator iterActor = this->m_listLineActor.begin();
+				std::list<vtkLineSource*>::iterator iterSource = this->m_listLineSource.begin();
+				for (vtkIdType i = 0; iterActor != this->m_listLineActor.end(); ++i, ++iterActor, ++iterSource)
+				{
+					if (pActor == *iterActor)
+					{
+						this->Update();
+
+						vtkIdType before = this->m_pPoints->GetNumberOfPoints();
+						/////////this->m_pPoints->InsertNextPoint(this->m_WorldPointXYPlane);
+						//{{
+						double prev[3];
+						vtkIdType count = this->m_pPoints->GetNumberOfPoints();
+						for (vtkIdType j = count; j > i; --j)
+						{
+							this->m_pPoints->GetPoint(j - 1, prev);
+							this->m_pPoints->InsertPoint(j, prev);
+						}
+						this->m_pPoints->InsertPoint(i + 1, this->m_WorldPointXYPlane);
+						//}}
+						vtkIdType after = this->m_pPoints->GetNumberOfPoints();
+
+						vtkSphereSource *pSphereSource = vtkSphereSource::New();
+						pSphereSource->SetPhiResolution(10);
+						pSphereSource->SetThetaResolution(10);
+						pSphereSource->SetRadius(this->m_Radius);
+
+						vtkPolyDataMapper *pPolyDataMapper = vtkPolyDataMapper::New();
+						pPolyDataMapper->SetInput(pSphereSource->GetOutput());
+
+						vtkActor *pActor = vtkActor::New();
+						pActor->SetMapper(pPolyDataMapper);
+
+						ASSERT(this->Enabled);
+						//if (this->Enabled)
+						{
+							pActor->SetProperty(this->EnabledHandleProperty);
+						}
+						//else
+						{
+							pActor->SetProperty(this->HandleProperty);
+						}	
+
+						this->m_pCellPicker->AddPickList(pActor);
+						this->AddPart(pActor);
+
+						{
+							vtkLineSource *pLineSource = vtkLineSource::New();
+							vtkTubeFilter *pTubeFilter = vtkTubeFilter::New();
+							pTubeFilter->SetNumberOfSides(8);
+							pTubeFilter->SetInput(pLineSource->GetOutput());
+							pTubeFilter->SetRadius(this->m_Radius / 2.0);
+							vtkPolyDataMapper *pPolyDataMapper = vtkPolyDataMapper::New();
+							pPolyDataMapper->SetInput(pTubeFilter->GetOutput());
+							vtkActor *pActor = vtkActor::New();
+							pActor->SetMapper(pPolyDataMapper);
+							pActor->GetProperty()->SetColor(0., 1., 1.);
+
+							this->m_pLineCellPicker->AddPickList(pActor);
+							this->AddPart(pActor);
+
+							this->m_listLineSource.push_back(pLineSource);
+							this->m_listTubeFilter.push_back(pTubeFilter);
+							this->m_listLinePolyDataMapper.push_back(pPolyDataMapper);
+							this->m_listLineActor.push_back(pActor);
+
+							///////this->m_pTransformScale->TransformPoint(prev_pt, prev_pt);
+							///////this->m_pTransformUnits->TransformPoint(prev_pt, prev_pt);
+							//{{
+							///////ASSERT( !(((prev_pt[0] - pt[0]) == 0.0) && ((prev_pt[1] - pt[1]) == 0.0)) );
+							//}}
+							///////pLineSource->SetPoint1(prev_pt[0], prev_pt[1], prev_pt[2]);
+							///////pLineSource->SetPoint2(pt[0], pt[1], pt[2]);
+						}
+
+						this->m_listSphereSource.push_back(pSphereSource);
+						this->m_listPolyDataMapper.push_back(pPolyDataMapper);
+						this->m_listActor.push_back(pActor);
+						//}}
+						this->UpdatePoints();
+						this->Interactor->Render();
+						break;
+					}
+				}
+				///::AfxMessageBox("CRiverActor::OnLeftButtonDown on line actor");
+				this->EventCallbackCommand->SetAbortFlag(1);
+			}
+		}
+		//}}
 	}
-	//}}
 
 	if (this->State == CRiverActor::CreatingRiver)
 	{
@@ -687,16 +800,19 @@ void CRiverActor::OnLeftButtonUp()
 	if (this->State == CRiverActor::CreatingRiver)
 	{
 		this->Update();
-		this->InsertNextPoint(this->m_WorldPointXYPlane[0], this->m_WorldPointXYPlane[1], this->m_WorldPointXYPlane[2]);
-		//{{
-		CRiverPoint rivpt;
-		rivpt.x = this->m_WorldPointXYPlane[0]; rivpt.y = this->m_WorldPointXYPlane[1];
-		this->m_river.m_listPoints.push_back(rivpt);
-		//}}
-		this->UpdatePoints();
-		this->ConnectingLineSource->SetPoint1(this->WorldSIPoint[0], this->WorldSIPoint[1], this->WorldSIPoint[2]);
-		this->ConnectingLineSource->SetPoint2(this->WorldSIPoint[0], this->WorldSIPoint[1], this->WorldSIPoint[2]);
-		this->Interactor->Render();
+		if (this->InsertNextPoint(this->m_WorldPointXYPlane[0], this->m_WorldPointXYPlane[1], this->m_WorldPointXYPlane[2]) != -1)
+		{
+			//{{
+			CRiverPoint rivpt;
+			rivpt.x = this->m_WorldPointXYPlane[0]; rivpt.x_defined = TRUE;
+			rivpt.y = this->m_WorldPointXYPlane[1]; rivpt.y_defined = TRUE;
+			this->m_river.m_listPoints.push_back(rivpt);
+			//}}
+			this->UpdatePoints();
+			this->ConnectingLineSource->SetPoint1(this->WorldSIPoint[0], this->WorldSIPoint[1], this->WorldSIPoint[2]);
+			this->ConnectingLineSource->SetPoint2(this->WorldSIPoint[0], this->WorldSIPoint[1], this->WorldSIPoint[2]);
+			this->Interactor->Render();
+		}
 	}
 }
 
@@ -999,6 +1115,69 @@ void CRiverActor::Update(CTreeCtrlNode node)
 	{
 		strItem.Format("point %g   %g", it->x, it->y);
 		CTreeCtrlNode pointBranch = node.AddTail(strItem);
+		if (pointBranch)
+		{
+			if (!it->m_riverSchedule.empty())
+			{
+				CTimeSeries<CRiverState>::const_iterator iterState = it->m_riverSchedule.begin();
+				CTreeCtrlNode headNode;
+				CTreeCtrlNode solutionNode;
+				for (; iterState != it->m_riverSchedule.end(); ++iterState)
+				{
+					CString strTime;
+					Ctime time(iterState->first);
+					CRiverState rate(iterState->second);
+
+					strTime.Format("%g", time.value);
+					if (time.type == UNITS)
+					{
+						strTime += " ";
+						strTime += time.input;
+					}
+
+					if (rate.head_defined)
+					{
+						if (!headNode)
+						{
+							headNode = pointBranch.AddHead("head");
+						}
+						strItem.Format(" %g", rate.head);
+						headNode.AddHead(strTime + strItem);
+					}
+
+					if (rate.solution_defined)
+					{
+						if (!solutionNode)
+						{
+							solutionNode = pointBranch.AddHead("solution");
+						}
+						strItem.Format(" %d", rate.solution);
+						solutionNode.AddHead(strTime + strItem);
+					}
+				}
+			}
+
+			if (it->width_defined)
+			{
+				strItem.Format("width %g", it->width);
+                pointBranch.AddHead(strItem);
+			}
+			if (it->k_defined)
+			{
+				strItem.Format("bed_hydraulic_conductivity %g", it->k);
+                pointBranch.AddHead(strItem);
+			}
+			if (it->thickness_defined)
+			{
+				strItem.Format("bed_thickness %g", it->thickness);
+                pointBranch.AddHead(strItem);
+			}
+			if (it->depth_defined)
+			{
+				strItem.Format("depth %g", it->depth);
+                pointBranch.AddHead(strItem);
+			}
+		}
 	}
 
 	if (bMainExpanded)
@@ -1045,6 +1224,11 @@ vtkIdType CRiverActor::GetCurrentPointId(void)const
 double* CRiverActor::GetCurrentPointPosition(void)
 {
 	return this->m_WorldPointXYPlane;
+}
+
+size_t CRiverActor::GetPointCount(void)const
+{
+	return this->m_listActor.size();
 }
 
 void CRiverActor::GetCurrentPointPosition(double x[3])const
