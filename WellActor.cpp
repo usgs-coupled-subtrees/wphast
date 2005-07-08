@@ -13,6 +13,7 @@
 #include "DelayRedraw.h"
 #include "Global.h"
 #include "Units.h"
+#include "TreeMemento.h"
 
 
 #include <vtkObjectFactory.h> // reqd by vtkStandardNewMacro

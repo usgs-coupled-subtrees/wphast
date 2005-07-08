@@ -4474,6 +4474,100 @@ void CWPhastDoc::UnAdd(CRiverActor *pRiverActor)
 	this->UpdateAllViews(0);
 }
 
+void CWPhastDoc::Remove(CRiverActor *pRiverActor)
+{
+	ASSERT(pRiverActor && pRiverActor->IsA("CRiverActor"));
+	if (pRiverActor == 0) return;
+
+	// validate actor
+	//
+	vtkFloatingPointType *scale = this->GetScale();
+	vtkFloatingPointType *riverscale = pRiverActor->GetScale();
+	ASSERT(riverscale[0] == scale[0]);
+	ASSERT(riverscale[1] == scale[1]);
+	ASSERT(riverscale[2] == scale[2]);
+
+	// make sure pWellActor ref count doesn't go to zero
+	//
+	ASSERT(this->m_pRemovedPropCollection);
+	ASSERT(!this->m_pRemovedPropCollection->IsItemPresent(pRiverActor));
+	this->m_pRemovedPropCollection->AddItem(pRiverActor);
+
+	// remove from rivers assembly
+	//
+	if (vtkPropAssembly *pPropAssembly = this->GetPropAssemblyRivers())
+	{
+		ASSERT(pPropAssembly->GetParts()->IsItemPresent(pRiverActor));
+		pPropAssembly->RemovePart(pRiverActor);
+		// VTK HACK
+		// This is req'd because ReleaseGraphicsResources is not called when
+		// vtkPropAssembly::RemovePart(vtkProp *prop) is called
+		this->ReleaseGraphicsResources(pRiverActor);
+	}
+
+	// remove from property tree
+	//
+	if (CPropertyTreeControlBar *pTree = this->GetPropertyTreeControlBar())
+	{
+		pRiverActor->Remove(pTree);
+	}
+
+	// render scene
+	//
+	this->UpdateAllViews(0);
+}
+
+void CWPhastDoc::UnRemove(CRiverActor *pRiverActor)
+{
+	ASSERT(pRiverActor && pRiverActor->IsA("CRiverActor"));
+	if (pRiverActor == 0) return;
+
+	// validate pWellActor
+	//
+	ASSERT(pRiverActor->GetReferenceCount() > 0);
+
+	// verify scale
+	//
+	vtkFloatingPointType *scale = this->GetScale();
+	vtkFloatingPointType *riverscale = pRiverActor->GetScale();
+	ASSERT(riverscale[0] == scale[0]);
+	ASSERT(riverscale[1] == scale[1]);
+	ASSERT(riverscale[2] == scale[2]);
+
+	// add to rivers assembly
+	//
+	if (vtkPropAssembly *pPropAssembly = this->GetPropAssemblyRivers())
+	{
+		ASSERT(!pPropAssembly->GetParts()->IsItemPresent(pRiverActor));
+		pPropAssembly->AddPart(pRiverActor);
+		if (!this->GetPropCollection()->IsItemPresent(pPropAssembly))
+		{
+			this->GetPropCollection()->AddItem(pPropAssembly);
+			ASSERT(pRiverActor->GetReferenceCount() > 1);
+		}
+	}
+
+	// see CWPhastDoc::Delete
+	//
+	ASSERT(this->m_pRemovedPropCollection);
+	ASSERT(this->m_pRemovedPropCollection->IsItemPresent(pRiverActor));
+	this->m_pRemovedPropCollection->RemoveItem(pRiverActor);
+	ASSERT(pRiverActor->GetReferenceCount() > 0);
+
+
+	// add to property tree
+	//
+	if (CPropertyTreeControlBar *pTree = this->GetPropertyTreeControlBar())
+	{
+		pRiverActor->UnRemove(pTree);
+	}
+
+	// render scene
+	//
+	this->UpdateAllViews(0);
+}
+
+
 void CWPhastDoc::RiverListener(vtkObject* caller, unsigned long eid, void* clientdata, void *calldata)
 {
 	ASSERT(caller->IsA("CRiverActor"));

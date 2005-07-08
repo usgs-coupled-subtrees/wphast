@@ -16,6 +16,7 @@
 #include "GridPropertyPage.h"
 #include "RiverPropertySheet.h"
 #include "SetRiverAction.h"
+#include "RiverDeleteAction.h"
 
 #include "ZoneActor.h"
 #include "WellActor.h"
@@ -1948,6 +1949,34 @@ void CPropertyTreeControlBar::OnKeyDown(NMHDR* pNMHDR, LRESULT* pResult)
 			return;
 		}
 
+		// RIVERS
+		//
+		if (sel.IsNodeAncestor(this->GetRiversNode()))
+		{
+			if (sel != this->GetRiversNode())
+			{
+				while (sel.GetParent() != this->GetRiversNode())
+				{
+					sel = sel.GetParent();
+					if (!sel) break;
+				}
+				if (sel && sel.GetData())
+				{
+					if (CRiverActor* pRiverActor = CRiverActor::SafeDownCast((vtkObject*)sel.GetData()))
+					{
+						CTreeCtrlNode parent = sel.GetParent();
+						if (CWPhastDoc* pDoc = this->GetDocument())
+						{
+							VERIFY(parent.Select());
+							pDoc->Execute(new CRiverDeleteAction(pDoc, pRiverActor));
+						}
+						*pResult = TRUE;
+						return;
+					}
+				}
+			}
+			return;
+		}
 
 		// INITIAL_CONDITIONS
 		//

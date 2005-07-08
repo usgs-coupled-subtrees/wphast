@@ -120,6 +120,8 @@ public:
 	// River actions
 	void Add(CRiverActor *pRiverActor);
 	void UnAdd(CRiverActor *pRiverActor);
+	void Remove(CRiverActor *pRiverActor);
+	void UnRemove(CRiverActor *pRiverActor);
 	void Select(CRiverActor *pRiverActor);
 	int GetNextRiverNumber(void);
 	void GetUsedRiverNumbers(std::set<int>& usedNums);

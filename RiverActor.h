@@ -10,6 +10,7 @@
 
 class CUnits;
 class CPropertyTreeControlBar;
+class CTreeMemento;
 
 #ifndef vtkFloatingPointType
 #define vtkFloatingPointType vtkFloatingPointType
@@ -69,6 +70,7 @@ public:
 		StartNewRiverEvent,
 		CancelNewRiverEvent,
 		EndNewRiverEvent,
+		InsertPointEvent,
 		//}}
 	};
 
@@ -185,6 +187,7 @@ protected:
 	vtkIdType        CurrentId;
 
 	CTreeCtrlNode       m_node;
+	CTreeMemento       *TreeMemento;
 
 	// 3D Cursor
 	vtkCursor3D                    *m_pCursor3D;

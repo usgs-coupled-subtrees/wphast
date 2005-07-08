@@ -634,6 +634,9 @@
 				RelativePath="RiverCreateAction.cpp">
 			</File>
 			<File
+				RelativePath="RiverDeleteAction.cpp">
+			</File>
+			<File
 				RelativePath="RiverMediator.cpp">
 			</File>
 			<File
@@ -1130,6 +1133,9 @@
 				RelativePath="RiverCreateAction.h">
 			</File>
 			<File
+				RelativePath="RiverDeleteAction.h">
+			</File>
+			<File
 				RelativePath="RiverMediator.h">
 			</File>
 			<File
@@ -1239,6 +1245,9 @@
 			</File>
 			<File
 				RelativePath="Tree.inl">
+			</File>
+			<File
+				RelativePath="TreeMemento.h">
 			</File>
 			<File
 				RelativePath="Unit.h">
@@ -3686,15 +3695,15 @@
 			Name="Build Logs"
 			Filter="">
 			<File
-				RelativePath="Release\BuildLog.htm"
-				DeploymentContent="TRUE">
-			</File>
-			<File
 				RelativePath="cppunit\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 			<File
 				RelativePath="Debug\BuildLog.htm"
+				DeploymentContent="TRUE">
+			</File>
+			<File
+				RelativePath="Release\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 		</Filter>
