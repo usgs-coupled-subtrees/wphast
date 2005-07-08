@@ -105,6 +105,8 @@ protected:
 	CRiverActor(void);
 	~CRiverActor(void);
 
+	void AddPoint(void);
+
 	enum RiverState
 	{
 		None,
