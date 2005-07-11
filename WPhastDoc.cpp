@@ -62,6 +62,7 @@
 #include "WellCreateAction.h"
 #include "RiverCreateAction.h"
 #include "RiverMovePointAction.h"
+#include "RiverInsertPointAction.h"
 
 #include "Unit.h"
 #include "Units.h"
@@ -4439,6 +4440,7 @@ void CWPhastDoc::Add(CRiverActor *pRiverActor)
 	pRiverActor->AddObserver(CRiverActor::StartMovePointEvent, RiverCallbackCommand);
 	pRiverActor->AddObserver(CRiverActor::MovingPointEvent, RiverCallbackCommand);
 	pRiverActor->AddObserver(CRiverActor::EndMovePointEvent, RiverCallbackCommand);
+	pRiverActor->AddObserver(CRiverActor::InsertPointEvent, RiverCallbackCommand);	
 
 	// render
 	//
@@ -4583,10 +4585,13 @@ void CWPhastDoc::RiverListener(vtkObject* caller, unsigned long eid, void* clien
 			ASSERT(self->RiverMovePointAction == 0);
 			self->RiverMovePointAction = new CRiverMovePointAction(river, self, river->GetCurrentPointId(), river->GetCurrentPointPosition()[0], river->GetCurrentPointPosition()[1]);
 			break;
+
 		case CRiverActor::MovingPointEvent:
 			ASSERT(self->RiverMovePointAction != 0);
 			if (CWnd* pWnd = ((CFrameWnd*)::AfxGetMainWnd())->GetMessageBar())
 			{
+				// update message bar
+				//
 				static TCHAR buffer[80];
 				const CUnits& units = self->GetUnits();
 				::_sntprintf(buffer, 80, "%g[%s] x %g[%s]",
@@ -4598,15 +4603,47 @@ void CWPhastDoc::RiverListener(vtkObject* caller, unsigned long eid, void* clien
 				pWnd->SetWindowText(buffer);
 			}
 			break;
+
 		case CRiverActor::EndMovePointEvent:
 			ASSERT(self->RiverMovePointAction != 0);
 			self->RiverMovePointAction->SetPoint(river->GetCurrentPointPosition()[0], river->GetCurrentPointPosition()[1]);
 			self->Execute(self->RiverMovePointAction);
 			self->RiverMovePointAction = 0;
 			break;
+
+		case CRiverActor::InsertPointEvent:
+			{
+				double* pos = river->GetCurrentPointPosition();
+				vtkIdType id = river->GetCurrentPointId();
+				CRiverInsertPointAction* pRiverInsertPointAction = new CRiverInsertPointAction(river, id, pos[0], pos[1], pos[2], true);
+				self->Execute(pRiverInsertPointAction);
+			}
+			break;
 		}
 	}
 }
+
+// COMMENT: {7/11/2005 1:29:00 PM}#if defined(_DEBUG)
+// COMMENT: {7/11/2005 1:29:00 PM}{
+// COMMENT: {7/11/2005 1:29:00 PM}	vtkIdType id = this->GetCurrentPointId();
+// COMMENT: {7/11/2005 1:29:00 PM}	this->DeletePoint(id);
+// COMMENT: {7/11/2005 1:29:00 PM}
+// COMMENT: {7/11/2005 1:29:00 PM}	// update data
+// COMMENT: {7/11/2005 1:29:00 PM}	std::list<CRiverPoint>::iterator iterRivPt = this->m_river.m_listPoints.begin();
+// COMMENT: {7/11/2005 1:29:00 PM}	for (vtkIdType i = 0; iterRivPt != this->m_river.m_listPoints.end(); ++i, ++iterRivPt)
+// COMMENT: {7/11/2005 1:29:00 PM}	{
+// COMMENT: {7/11/2005 1:29:00 PM}		if (i == id)
+// COMMENT: {7/11/2005 1:29:00 PM}		{
+// COMMENT: {7/11/2005 1:29:00 PM}			this->m_river.m_listPoints.erase(iterRivPt);
+// COMMENT: {7/11/2005 1:29:00 PM}			break;
+// COMMENT: {7/11/2005 1:29:00 PM}		}
+// COMMENT: {7/11/2005 1:29:00 PM}	}
+// COMMENT: {7/11/2005 1:29:00 PM}
+// COMMENT: {7/11/2005 1:29:00 PM}	// update tree
+// COMMENT: {7/11/2005 1:29:00 PM}	this->Update(this->m_node);
+// COMMENT: {7/11/2005 1:29:00 PM}}
+// COMMENT: {7/11/2005 1:29:00 PM}#endif
+
 
 
 

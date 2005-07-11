@@ -1953,13 +1953,17 @@ void CPropertyTreeControlBar::OnKeyDown(NMHDR* pNMHDR, LRESULT* pResult)
 		//
 		if (sel.IsNodeAncestor(this->GetRiversNode()))
 		{
-			if (sel != this->GetRiversNode())
+			if (sel != this->GetRiversNode() &&
+				/* HACK */ sel.GetParent() == this->GetRiversNode()
+				)
 			{
+				/*				
 				while (sel.GetParent() != this->GetRiversNode())
 				{
 					sel = sel.GetParent();
 					if (!sel) break;
 				}
+				*/
 				if (sel && sel.GetData())
 				{
 					if (CRiverActor* pRiverActor = CRiverActor::SafeDownCast((vtkObject*)sel.GetData()))

@@ -17,6 +17,8 @@
 vtkCxxRevisionMacro(CRiverActor, "$Revision: 244 $");
 vtkStandardNewMacro(CRiverActor);
 
+const bool bShowGhostPoint = true;
+
 
 CRiverActor::CRiverActor(void)
 : m_Radius(1.0)
@@ -40,6 +42,9 @@ CRiverActor::CRiverActor(void)
 , m_pLineCellPicker(0)
 , m_pCellPicker(0)
 , TreeMemento(0)
+, GhostSphereSource(0)
+, GhostPolyDataMapper(0)
+, GhostActor(0)
 {
 	this->m_pPoints         = vtkPoints::New();
 	this->m_pTransformUnits = vtkTransform::New();
@@ -51,7 +56,7 @@ CRiverActor::CRiverActor(void)
 	this->m_pCellPicker->SetTolerance(0.001);
 	this->m_pCellPicker->PickFromListOn();
 
-	this->m_pLineCellPicker     = vtkCellPicker::New();
+	this->m_pLineCellPicker = vtkCellPicker::New();
 	this->m_pLineCellPicker->SetTolerance(0.001);
 	this->m_pLineCellPicker->PickFromListOn();
 
@@ -62,6 +67,24 @@ CRiverActor::CRiverActor(void)
 	this->EventCallbackCommand = vtkCallbackCommand::New();
 	this->EventCallbackCommand->SetClientData(this); 
 	this->EventCallbackCommand->SetCallback(CRiverActor::ProcessEvents);
+
+	if (bShowGhostPoint)
+	{
+		this->GhostSphereSource = vtkSphereSource::New();
+		this->GhostSphereSource->SetPhiResolution(10);
+		this->GhostSphereSource->SetThetaResolution(10);
+		this->GhostSphereSource->SetRadius(this->m_Radius);
+
+		this->GhostPolyDataMapper = vtkPolyDataMapper::New();
+		this->GhostPolyDataMapper->SetInput(this->GhostSphereSource->GetOutput());
+
+		this->GhostActor = vtkActor::New();
+		this->GhostActor->SetMapper(this->GhostPolyDataMapper);
+		this->GhostActor->GetProperty()->SetColor(1, 1, 1);
+		this->GhostActor->GetProperty()->SetOpacity(0.33);
+		this->GhostActor->VisibilityOff();		
+		this->AddPart(this->GhostActor);
+	}
 
 	this->CreateDefaultProperties();
 
@@ -131,6 +154,25 @@ CRiverActor::~CRiverActor(void)
 		delete this->TreeMemento;
 		this->TreeMemento = 0;
 	}
+	if (bShowGhostPoint)
+	{
+		if (this->GhostSphereSource)
+		{
+			this->GhostSphereSource->Delete();
+			this->GhostSphereSource = 0;
+		}
+		if (this->GhostPolyDataMapper)
+		{
+			this->GhostPolyDataMapper->Delete();
+			this->GhostPolyDataMapper = 0;
+		}
+		if (this->GhostActor)
+		{
+			this->GhostActor->Delete();
+			this->GhostActor = 0;
+		}
+	}
+
 }
 
 vtkIdType CRiverActor::InsertNextPoint(double x, double y, double z)
@@ -166,7 +208,7 @@ vtkIdType CRiverActor::InsertNextPoint(double x, double y, double z)
 
 	// add vtk objects
 	//
-	this->AddPoint();
+	this->AddGraphicPoint();
 
 	// update vtk objects
 	//
@@ -349,6 +391,13 @@ void CRiverActor::SetRadius(vtkFloatingPointType radius)
 	{
 		(*iterTubeFilter)->SetRadius(this->m_Radius / 2.0);
 	}
+	if (bShowGhostPoint)
+	{
+		if (this->GhostSphereSource)
+		{
+			this->GhostSphereSource->SetRadius(this->m_Radius);
+		}
+	}
 }
 
 void CRiverActor::SetInteractor(vtkRenderWindowInteractor* i)
@@ -511,82 +560,39 @@ void CRiverActor::OnLeftButtonDown()
 						this->InsertPoint(id, this->m_WorldPointXYPlane[0], this->m_WorldPointXYPlane[1], this->m_WorldPointXYPlane[2]);
 						this->SelectPoint(id + 1);
 
-						// update data
-						CRiverPoint rivpt;
-						rivpt.x = this->m_WorldPointXYPlane[0]; rivpt.x_defined = TRUE;
-						rivpt.y = this->m_WorldPointXYPlane[1]; rivpt.y_defined = TRUE;
-						this->m_river.m_listPoints.insert(++iterRivPt, rivpt);
-
-						// update tree
-						this->Update(this->m_node);
+// COMMENT: {7/11/2005 4:30:02 PM}						// update data
+// COMMENT: {7/11/2005 4:30:02 PM}						CRiverPoint rivpt;
+// COMMENT: {7/11/2005 4:30:02 PM}						rivpt.x = this->m_WorldPointXYPlane[0]; rivpt.x_defined = TRUE;
+// COMMENT: {7/11/2005 4:30:02 PM}						rivpt.y = this->m_WorldPointXYPlane[1]; rivpt.y_defined = TRUE;
+// COMMENT: {7/11/2005 4:30:02 PM}						this->m_river.m_listPoints.insert(++iterRivPt, rivpt);
+// COMMENT: {7/11/2005 4:30:02 PM}
+// COMMENT: {7/11/2005 4:30:02 PM}						// update tree
+// COMMENT: {7/11/2005 4:30:02 PM}						this->Update(this->m_node);
 
 						// notify listeners
 						this->InvokeEvent(CRiverActor::InsertPointEvent, NULL);
 
-						this->Interactor->Render();
-						//{{
-#if defined(_DEBUG)
-						::Sleep(2000);
-						{
-							vtkIdType id = this->GetCurrentPointId();
-							// remove point
-							{
-							}
-
-							// remove point
-							{
-								// create new point
-								//
-								vtkSphereSource *pSphereSource = this->m_listSphereSource.back();
-
-// COMMENT: {7/8/2005 12:14:53 PM}								vtkPolyDataMapper *pPolyDataMapper = vtkPolyDataMapper::New();
-// COMMENT: {7/8/2005 12:14:53 PM}								pPolyDataMapper->SetInput(pSphereSource->GetOutput());
-// COMMENT: {7/8/2005 12:14:53 PM}								this->m_listPolyDataMapper.push_back(pPolyDataMapper);
-// COMMENT: {7/8/2005 12:14:53 PM}
-// COMMENT: {7/8/2005 12:14:53 PM}								vtkActor *pActor = vtkActor::New();
-// COMMENT: {7/8/2005 12:14:53 PM}								pActor->SetMapper(pPolyDataMapper);
-// COMMENT: {7/8/2005 12:14:53 PM}								if (this->Enabled)
-// COMMENT: {7/8/2005 12:14:53 PM}								{
-// COMMENT: {7/8/2005 12:14:53 PM}									pActor->SetProperty(this->EnabledHandleProperty);
-// COMMENT: {7/8/2005 12:14:53 PM}								}
-// COMMENT: {7/8/2005 12:14:53 PM}								else
-// COMMENT: {7/8/2005 12:14:53 PM}								{
-// COMMENT: {7/8/2005 12:14:53 PM}									pActor->SetProperty(this->HandleProperty);
-// COMMENT: {7/8/2005 12:14:53 PM}								}	
-// COMMENT: {7/8/2005 12:14:53 PM}								this->m_listActor.push_back(pActor);
-// COMMENT: {7/8/2005 12:14:53 PM}								this->m_pCellPicker->AddPickList(pActor);
-// COMMENT: {7/8/2005 12:14:53 PM}								this->AddPart(pActor);
-// COMMENT: {7/8/2005 12:14:53 PM}
-// COMMENT: {7/8/2005 12:14:53 PM}								if (this->m_pPoints->GetNumberOfPoints() > 1)
-// COMMENT: {7/8/2005 12:14:53 PM}								{
-// COMMENT: {7/8/2005 12:14:53 PM}									// create new connecting tube
-// COMMENT: {7/8/2005 12:14:53 PM}									//
-// COMMENT: {7/8/2005 12:14:53 PM}									vtkLineSource *pLineSource = vtkLineSource::New();
-// COMMENT: {7/8/2005 12:14:53 PM}									this->m_listLineSource.push_back(pLineSource);
-// COMMENT: {7/8/2005 12:14:53 PM}
-// COMMENT: {7/8/2005 12:14:53 PM}									vtkTubeFilter *pTubeFilter = vtkTubeFilter::New();
-// COMMENT: {7/8/2005 12:14:53 PM}									pTubeFilter->SetNumberOfSides(8);
-// COMMENT: {7/8/2005 12:14:53 PM}									pTubeFilter->SetInput(pLineSource->GetOutput());
-// COMMENT: {7/8/2005 12:14:53 PM}									pTubeFilter->SetRadius(this->m_Radius / 2.0);
-// COMMENT: {7/8/2005 12:14:53 PM}									this->m_listTubeFilter.push_back(pTubeFilter);
-// COMMENT: {7/8/2005 12:14:53 PM}
-// COMMENT: {7/8/2005 12:14:53 PM}									vtkPolyDataMapper *pPolyDataMapper = vtkPolyDataMapper::New();
-// COMMENT: {7/8/2005 12:14:53 PM}									pPolyDataMapper->SetInput(pTubeFilter->GetOutput());
-// COMMENT: {7/8/2005 12:14:53 PM}									this->m_listLinePolyDataMapper.push_back(pPolyDataMapper);
-// COMMENT: {7/8/2005 12:14:53 PM}									
-// COMMENT: {7/8/2005 12:14:53 PM}									vtkActor *pActor = vtkActor::New();
-// COMMENT: {7/8/2005 12:14:53 PM}									pActor->SetMapper(pPolyDataMapper);
-// COMMENT: {7/8/2005 12:14:53 PM}									pActor->GetProperty()->SetColor(0., 1., 1.);
-// COMMENT: {7/8/2005 12:14:53 PM}									this->m_listLineActor.push_back(pActor);
-// COMMENT: {7/8/2005 12:14:53 PM}									this->m_pLineCellPicker->AddPickList(pActor);
-// COMMENT: {7/8/2005 12:14:53 PM}									this->AddPart(pActor);
-// COMMENT: {7/8/2005 12:14:53 PM}								}
-
-							}
-
-						}
-#endif
-						//}}
+// COMMENT: {7/11/2005 4:31:19 PM}						this->Interactor->Render();
+// COMMENT: {7/8/2005 3:25:47 PM}#if defined(_DEBUG)
+// COMMENT: {7/8/2005 3:25:47 PM}{
+// COMMENT: {7/8/2005 3:25:47 PM}	vtkIdType id = this->GetCurrentPointId();
+// COMMENT: {7/8/2005 3:25:47 PM}	this->DeletePoint(id);
+// COMMENT: {7/8/2005 3:25:47 PM}
+// COMMENT: {7/8/2005 3:25:47 PM}	// update data
+// COMMENT: {7/8/2005 3:25:47 PM}	std::list<CRiverPoint>::iterator iterRivPt = this->m_river.m_listPoints.begin();
+// COMMENT: {7/8/2005 3:25:47 PM}	for (vtkIdType i = 0; iterRivPt != this->m_river.m_listPoints.end(); ++i, ++iterRivPt)
+// COMMENT: {7/8/2005 3:25:47 PM}	{
+// COMMENT: {7/8/2005 3:25:47 PM}		if (i == id)
+// COMMENT: {7/8/2005 3:25:47 PM}		{
+// COMMENT: {7/8/2005 3:25:47 PM}			this->m_river.m_listPoints.erase(iterRivPt);
+// COMMENT: {7/8/2005 3:25:47 PM}			break;
+// COMMENT: {7/8/2005 3:25:47 PM}		}
+// COMMENT: {7/8/2005 3:25:47 PM}	}
+// COMMENT: {7/8/2005 3:25:47 PM}
+// COMMENT: {7/8/2005 3:25:47 PM}	// update tree
+// COMMENT: {7/8/2005 3:25:47 PM}	this->Update(this->m_node);
+// COMMENT: {7/8/2005 3:25:47 PM}}
+// COMMENT: {7/8/2005 3:25:47 PM}#endif
 						break;
 					}
 				}
@@ -616,7 +622,38 @@ void CRiverActor::OnMouseMove()
 		return;
 	}
 
-	//if (this->CurrentHandle && this->CurrentSource)
+	if (bShowGhostPoint && this->State == CRiverActor::None)
+	{
+		vtkAssemblyPath *path;
+		this->m_pCellPicker->Pick(X, Y, 0.0, ren);
+		path = this->m_pCellPicker->GetPath();
+		if (path == NULL)
+		{
+			this->m_pLineCellPicker->Pick(X, Y, 0.0, ren);
+			path = this->m_pLineCellPicker->GetPath();
+			if (path != NULL)
+			{
+				if (vtkActor* pActor = vtkActor::SafeDownCast(path->GetFirstNode()->GetProp()))
+				{
+					this->Update();
+					this->GhostSphereSource->SetCenter(this->WorldSIPoint[0], this->WorldSIPoint[1], this->WorldSIPoint[2]);
+					this->GhostActor->VisibilityOn();
+					this->Interactor->Render();
+				}
+			}
+			else
+			{
+				this->GhostActor->VisibilityOff();
+				this->Interactor->Render();
+			}
+		}
+		else
+		{
+			this->GhostActor->VisibilityOff();
+			this->Interactor->Render();
+		}
+	}
+
 	if (this->State == CRiverActor::MovingPoint)
 	{
 		// update m_WorldPointXYPlane
@@ -1138,10 +1175,12 @@ void CRiverActor::GetCurrentPointPosition(double x[3])const
 
 void CRiverActor::MovePoint(vtkIdType id, double x, double y)
 {
+	// update points object
+	//
 	if (this->m_pPoints)
 	{
 		double pt[3];
-		this->m_pPoints->GetPoint(id, pt);
+		this->m_pPoints->GetPoint(id, pt); // get previous z-value
 		pt[0] = x;
 		pt[1] = y;
 		this->m_pPoints->SetPoint(id, pt);
@@ -1152,6 +1191,7 @@ void CRiverActor::MovePoint(vtkIdType id, double x, double y)
 		}
 	}
 
+	// update data (CRiver)
 	std::list<CRiverPoint>::iterator iter = this->m_river.m_listPoints.begin();
 	for (vtkIdType i = 0; iter != this->m_river.m_listPoints.end(); ++i, ++iter)
 	{
@@ -1162,6 +1202,8 @@ void CRiverActor::MovePoint(vtkIdType id, double x, double y)
 			break;
 		}
 	}
+
+	// update tree
 	this->Update(this->m_node);
 }
 
@@ -1394,11 +1436,58 @@ void CRiverActor::InsertPoint(vtkIdType id, double x, double y, double z)
 		this->m_pPoints->InsertPoint(j, prev);
 	}
 	this->m_pPoints->InsertPoint(id + 1, x, y, z);
-	this->AddPoint();
+	this->AddGraphicPoint();
 	this->UpdatePoints();
+
+	//{{
+	// update data
+	std::list<CRiverPoint>::iterator iterRivPt = this->m_river.m_listPoints.begin();
+	for (vtkIdType i = 0; ; ++i, ++iterRivPt)
+	{
+		if (i == id)
+		{
+			CRiverPoint rivpt;
+			rivpt.x = this->m_WorldPointXYPlane[0]; rivpt.x_defined = TRUE;
+			rivpt.y = this->m_WorldPointXYPlane[1]; rivpt.y_defined = TRUE;
+			this->m_river.m_listPoints.insert(++iterRivPt, rivpt);
+			break;
+		}
+	}
+	//}}
+
+	// update tree
+	this->Update(this->m_node);
+
+	if (this->Interactor)
+	{
+		this->Interactor->Render();
+	}
+
+
+// COMMENT: {7/11/2005 4:24:31 PM}	////////{{{{{{{{
+// COMMENT: {7/11/2005 4:24:31 PM}	// add and select point
+// COMMENT: {7/11/2005 4:24:31 PM}	this->Update();
+// COMMENT: {7/11/2005 4:24:31 PM}	this->InsertPoint(id, this->m_WorldPointXYPlane[0], this->m_WorldPointXYPlane[1], this->m_WorldPointXYPlane[2]);
+// COMMENT: {7/11/2005 4:24:31 PM}	this->SelectPoint(id + 1);
+// COMMENT: {7/11/2005 4:24:31 PM}
+// COMMENT: {7/11/2005 4:24:31 PM}	// update data
+// COMMENT: {7/11/2005 4:24:31 PM}	CRiverPoint rivpt;
+// COMMENT: {7/11/2005 4:24:31 PM}	rivpt.x = this->m_WorldPointXYPlane[0]; rivpt.x_defined = TRUE;
+// COMMENT: {7/11/2005 4:24:31 PM}	rivpt.y = this->m_WorldPointXYPlane[1]; rivpt.y_defined = TRUE;
+// COMMENT: {7/11/2005 4:24:31 PM}	this->m_river.m_listPoints.insert(++iterRivPt, rivpt);
+// COMMENT: {7/11/2005 4:24:31 PM}
+// COMMENT: {7/11/2005 4:24:31 PM}	// update tree
+// COMMENT: {7/11/2005 4:24:31 PM}	this->Update(this->m_node);
+// COMMENT: {7/11/2005 4:24:31 PM}
+// COMMENT: {7/11/2005 4:24:31 PM}	// notify listeners
+// COMMENT: {7/11/2005 4:24:31 PM}	this->InvokeEvent(CRiverActor::InsertPointEvent, NULL);
+// COMMENT: {7/11/2005 4:24:31 PM}
+// COMMENT: {7/11/2005 4:24:31 PM}	this->Interactor->Render();
+// COMMENT: {7/11/2005 4:24:31 PM}	////////}}}}}}}}}
+
 }
 
-void CRiverActor::AddPoint(void)
+void CRiverActor::AddGraphicPoint(void)
 {
 	// create new point
 	//
@@ -1451,3 +1540,140 @@ void CRiverActor::AddPoint(void)
 		this->AddPart(pActor);
 	}
 }
+
+void CRiverActor::DeletePoint(vtkIdType id)
+{
+	// TODO check for at least two points
+	ASSERT(id < this->m_pPoints->GetNumberOfPoints());
+
+	// reset color
+	//
+	vtkActor *pActor = this->GetPoint(id);
+	if (this->Enabled)
+	{
+		pActor->SetProperty(this->EnabledHandleProperty);
+	}
+	else
+	{
+		pActor->SetProperty(this->HandleProperty);
+	}
+
+	//{{
+	// update data
+	std::list<CRiverPoint>::iterator iterRivPt = this->m_river.m_listPoints.begin();
+	for (vtkIdType i = 0; iterRivPt != this->m_river.m_listPoints.end(); ++i, ++iterRivPt)
+	{
+		if (i == id)
+		{
+			this->m_river.m_listPoints.erase(iterRivPt);
+			break;
+		}
+	}
+
+	// update tree
+	this->Update(this->m_node);
+	//}}
+
+	double next[3];
+	vtkIdType count = this->m_pPoints->GetNumberOfPoints();
+	for (vtkIdType j = id; j < count; ++j)
+	{
+		this->m_pPoints->GetPoint(j + 1, next);
+		this->m_pPoints->InsertPoint(j, next);
+	}
+	this->m_pPoints->SetNumberOfPoints(count - 1);
+
+	this->DeleteGraphicPoint();
+	this->UpdatePoints();
+	if (this->Interactor)
+	{
+		this->Interactor->Render();
+	}
+}
+
+void CRiverActor::DeleteGraphicPoint(void)
+{
+	// remove last point
+	//
+	vtkSphereSource *pSphereSource = this->m_listSphereSource.back();
+	pSphereSource->Delete();
+	this->m_listSphereSource.pop_back();
+
+	vtkPolyDataMapper *pPolyDataMapper = this->m_listPolyDataMapper.back();
+	pPolyDataMapper->Delete();
+	this->m_listPolyDataMapper.pop_back();
+
+	vtkActor *pActor = this->m_listActor.back();
+	this->m_pCellPicker->DeletePickList(pActor);
+	this->RemovePart(pActor);
+	pActor->Delete();
+	this->m_listActor.pop_back();
+
+	if (true)
+	{
+		vtkLineSource *pLineSource = this->m_listLineSource.back();
+		pLineSource->Delete();
+		this->m_listLineSource.pop_back();
+
+		vtkTubeFilter *pTubeFilter = this->m_listTubeFilter.back();
+		pTubeFilter->Delete();
+		this->m_listTubeFilter.pop_back();
+
+		vtkPolyDataMapper *pPolyDataMapper = this->m_listLinePolyDataMapper.back();
+		pPolyDataMapper->Delete();
+		this->m_listLinePolyDataMapper.pop_back();
+
+		vtkActor *pActor = this->m_listLineActor.back();
+		this->m_pLineCellPicker->DeletePickList(pActor);
+		this->RemovePart(pActor);
+		pActor->Delete();
+		this->m_listLineActor.pop_back();
+	}
+}
+
+// COMMENT: {7/11/2005 1:33:22 PM}void CRiverActor::InsertPoint(vtkIdType id, double x, double y)
+// COMMENT: {7/11/2005 1:33:22 PM}{
+// COMMENT: {7/11/2005 1:33:22 PM}	// update points object
+// COMMENT: {7/11/2005 1:33:22 PM}	//
+// COMMENT: {7/11/2005 1:33:22 PM}	if (this->m_pPoints)
+// COMMENT: {7/11/2005 1:33:22 PM}	{
+// COMMENT: {7/11/2005 1:33:22 PM}		double pt[3];
+// COMMENT: {7/11/2005 1:33:22 PM}		pt[0] = x;
+// COMMENT: {7/11/2005 1:33:22 PM}		pt[1] = y;
+// COMMENT: {7/11/2005 1:33:22 PM}		this->m_pPoints->SetPoint(id, pt);
+// COMMENT: {7/11/2005 1:33:22 PM}		this->UpdatePoints();
+// COMMENT: {7/11/2005 1:33:22 PM}		if (this->Interactor)
+// COMMENT: {7/11/2005 1:33:22 PM}		{
+// COMMENT: {7/11/2005 1:33:22 PM}			this->Interactor->Render();
+// COMMENT: {7/11/2005 1:33:22 PM}		}
+// COMMENT: {7/11/2005 1:33:22 PM}	}
+// COMMENT: {7/11/2005 1:33:22 PM}
+// COMMENT: {7/11/2005 1:33:22 PM}	// update data (CRiver)
+// COMMENT: {7/11/2005 1:33:22 PM}	std::list<CRiverPoint>::iterator iter = this->m_river.m_listPoints.begin();
+// COMMENT: {7/11/2005 1:33:22 PM}	for (vtkIdType i = 0; iter != this->m_river.m_listPoints.end(); ++i, ++iter)
+// COMMENT: {7/11/2005 1:33:22 PM}	{
+// COMMENT: {7/11/2005 1:33:22 PM}		if (id == i)
+// COMMENT: {7/11/2005 1:33:22 PM}		{
+// COMMENT: {7/11/2005 1:33:22 PM}			(*iter).x = x;
+// COMMENT: {7/11/2005 1:33:22 PM}			(*iter).y = y;
+// COMMENT: {7/11/2005 1:33:22 PM}			break;
+// COMMENT: {7/11/2005 1:33:22 PM}		}
+// COMMENT: {7/11/2005 1:33:22 PM}	}
+// COMMENT: {7/11/2005 1:33:22 PM}
+// COMMENT: {7/11/2005 1:33:22 PM}	// update data (CRiver)
+// COMMENT: {7/11/2005 1:33:22 PM}	std::list<CRiverPoint>::iterator iterRivPt = this->m_river.m_listPoints.begin();
+// COMMENT: {7/11/2005 1:33:22 PM}	for (vtkIdType i = 0; iter != this->m_river.m_listPoints.end(); ++i, ++iter)
+// COMMENT: {7/11/2005 1:33:22 PM}	{
+// COMMENT: {7/11/2005 1:33:22 PM}		if (id == i)
+// COMMENT: {7/11/2005 1:33:22 PM}		{
+// COMMENT: {7/11/2005 1:33:22 PM}			CRiverPoint rivpt;
+// COMMENT: {7/11/2005 1:33:22 PM}			rivpt.x = this->m_WorldPointXYPlane[0]; rivpt.x_defined = TRUE;
+// COMMENT: {7/11/2005 1:33:22 PM}			rivpt.y = this->m_WorldPointXYPlane[1]; rivpt.y_defined = TRUE;
+// COMMENT: {7/11/2005 1:33:22 PM}			this->m_river.m_listPoints.insert(++iterRivPt, rivpt);
+// COMMENT: {7/11/2005 1:33:22 PM}			break;
+// COMMENT: {7/11/2005 1:33:22 PM}		}
+// COMMENT: {7/11/2005 1:33:22 PM}	}
+// COMMENT: {7/11/2005 1:33:22 PM}
+// COMMENT: {7/11/2005 1:33:22 PM}	// update tree
+// COMMENT: {7/11/2005 1:33:22 PM}	this->Update(this->m_node);
+// COMMENT: {7/11/2005 1:33:22 PM}}

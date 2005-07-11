@@ -32,6 +32,8 @@ public:
 	vtkIdType InsertNextPoint(double x, double y, double z);
 	void InsertPoint(vtkIdType id, double x, double y, double z);
 
+	void DeletePoint(vtkIdType id);
+
 	void SetUnits(const CUnits &units);
 	void SetScale(float x, float y, float z);
 	void SetScale(double x, double y, double z);
@@ -66,12 +68,13 @@ public:
 		StartMovePointEvent = vtkCommand::UserEvent + 500,
 		MovingPointEvent,
 		EndMovePointEvent,
-		//{{
+
 		StartNewRiverEvent,
 		CancelNewRiverEvent,
 		EndNewRiverEvent,
+
 		InsertPointEvent,
-		//}}
+		DeletePointEvent,
 	};
 
 	void MovePoint(vtkIdType id, double x, double y);
@@ -107,7 +110,8 @@ protected:
 	CRiverActor(void);
 	~CRiverActor(void);
 
-	void AddPoint(void);
+	void AddGraphicPoint(void);
+	void DeleteGraphicPoint(void);
 
 	enum RiverState
 	{
@@ -116,6 +120,10 @@ protected:
 		CreatingRiver,
 	} State;
 
+	// ghost point
+	vtkSphereSource*   GhostSphereSource;
+	vtkPolyDataMapper* GhostPolyDataMapper;
+	vtkActor*          GhostActor;
 
 	// Description:
 	// Main process event method
