@@ -4614,7 +4614,7 @@ void CWPhastDoc::RiverListener(vtkObject* caller, unsigned long eid, void* clien
 		case CRiverActor::InsertPointEvent:
 			{
 				double* pos = river->GetCurrentPointPosition();
-				vtkIdType id = river->GetCurrentPointId();
+				vtkIdType id = river->GetCurrentPointId() - 1;
 				CRiverInsertPointAction* pRiverInsertPointAction = new CRiverInsertPointAction(river, id, pos[0], pos[1], pos[2], true);
 				self->Execute(pRiverInsertPointAction);
 			}
@@ -4622,28 +4622,3 @@ void CWPhastDoc::RiverListener(vtkObject* caller, unsigned long eid, void* clien
 		}
 	}
 }
-
-// COMMENT: {7/11/2005 1:29:00 PM}#if defined(_DEBUG)
-// COMMENT: {7/11/2005 1:29:00 PM}{
-// COMMENT: {7/11/2005 1:29:00 PM}	vtkIdType id = this->GetCurrentPointId();
-// COMMENT: {7/11/2005 1:29:00 PM}	this->DeletePoint(id);
-// COMMENT: {7/11/2005 1:29:00 PM}
-// COMMENT: {7/11/2005 1:29:00 PM}	// update data
-// COMMENT: {7/11/2005 1:29:00 PM}	std::list<CRiverPoint>::iterator iterRivPt = this->m_river.m_listPoints.begin();
-// COMMENT: {7/11/2005 1:29:00 PM}	for (vtkIdType i = 0; iterRivPt != this->m_river.m_listPoints.end(); ++i, ++iterRivPt)
-// COMMENT: {7/11/2005 1:29:00 PM}	{
-// COMMENT: {7/11/2005 1:29:00 PM}		if (i == id)
-// COMMENT: {7/11/2005 1:29:00 PM}		{
-// COMMENT: {7/11/2005 1:29:00 PM}			this->m_river.m_listPoints.erase(iterRivPt);
-// COMMENT: {7/11/2005 1:29:00 PM}			break;
-// COMMENT: {7/11/2005 1:29:00 PM}		}
-// COMMENT: {7/11/2005 1:29:00 PM}	}
-// COMMENT: {7/11/2005 1:29:00 PM}
-// COMMENT: {7/11/2005 1:29:00 PM}	// update tree
-// COMMENT: {7/11/2005 1:29:00 PM}	this->Update(this->m_node);
-// COMMENT: {7/11/2005 1:29:00 PM}}
-// COMMENT: {7/11/2005 1:29:00 PM}#endif
-
-
-
-

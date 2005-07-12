@@ -550,8 +550,7 @@ void CRiverActor::OnLeftButtonDown()
 			{
 				ASSERT(this->m_listLineActor.size() == this->m_river.m_listPoints.size() - 1);
 				std::list<vtkActor*>::iterator iterActor = this->m_listLineActor.begin();
-				std::list<CRiverPoint>::iterator iterRivPt = this->m_river.m_listPoints.begin();
-				for (vtkIdType id = 0; iterActor != this->m_listLineActor.end(); ++id, ++iterActor, ++iterRivPt)
+				for (vtkIdType id = 0; iterActor != this->m_listLineActor.end(); ++id, ++iterActor)
 				{
 					if (pActor == *iterActor)
 					{
@@ -560,39 +559,8 @@ void CRiverActor::OnLeftButtonDown()
 						this->InsertPoint(id, this->m_WorldPointXYPlane[0], this->m_WorldPointXYPlane[1], this->m_WorldPointXYPlane[2]);
 						this->SelectPoint(id + 1);
 
-// COMMENT: {7/11/2005 4:30:02 PM}						// update data
-// COMMENT: {7/11/2005 4:30:02 PM}						CRiverPoint rivpt;
-// COMMENT: {7/11/2005 4:30:02 PM}						rivpt.x = this->m_WorldPointXYPlane[0]; rivpt.x_defined = TRUE;
-// COMMENT: {7/11/2005 4:30:02 PM}						rivpt.y = this->m_WorldPointXYPlane[1]; rivpt.y_defined = TRUE;
-// COMMENT: {7/11/2005 4:30:02 PM}						this->m_river.m_listPoints.insert(++iterRivPt, rivpt);
-// COMMENT: {7/11/2005 4:30:02 PM}
-// COMMENT: {7/11/2005 4:30:02 PM}						// update tree
-// COMMENT: {7/11/2005 4:30:02 PM}						this->Update(this->m_node);
-
 						// notify listeners
 						this->InvokeEvent(CRiverActor::InsertPointEvent, NULL);
-
-// COMMENT: {7/11/2005 4:31:19 PM}						this->Interactor->Render();
-// COMMENT: {7/8/2005 3:25:47 PM}#if defined(_DEBUG)
-// COMMENT: {7/8/2005 3:25:47 PM}{
-// COMMENT: {7/8/2005 3:25:47 PM}	vtkIdType id = this->GetCurrentPointId();
-// COMMENT: {7/8/2005 3:25:47 PM}	this->DeletePoint(id);
-// COMMENT: {7/8/2005 3:25:47 PM}
-// COMMENT: {7/8/2005 3:25:47 PM}	// update data
-// COMMENT: {7/8/2005 3:25:47 PM}	std::list<CRiverPoint>::iterator iterRivPt = this->m_river.m_listPoints.begin();
-// COMMENT: {7/8/2005 3:25:47 PM}	for (vtkIdType i = 0; iterRivPt != this->m_river.m_listPoints.end(); ++i, ++iterRivPt)
-// COMMENT: {7/8/2005 3:25:47 PM}	{
-// COMMENT: {7/8/2005 3:25:47 PM}		if (i == id)
-// COMMENT: {7/8/2005 3:25:47 PM}		{
-// COMMENT: {7/8/2005 3:25:47 PM}			this->m_river.m_listPoints.erase(iterRivPt);
-// COMMENT: {7/8/2005 3:25:47 PM}			break;
-// COMMENT: {7/8/2005 3:25:47 PM}		}
-// COMMENT: {7/8/2005 3:25:47 PM}	}
-// COMMENT: {7/8/2005 3:25:47 PM}
-// COMMENT: {7/8/2005 3:25:47 PM}	// update tree
-// COMMENT: {7/8/2005 3:25:47 PM}	this->Update(this->m_node);
-// COMMENT: {7/8/2005 3:25:47 PM}}
-// COMMENT: {7/8/2005 3:25:47 PM}#endif
 						break;
 					}
 				}
@@ -622,22 +590,30 @@ void CRiverActor::OnMouseMove()
 		return;
 	}
 
-	if (bShowGhostPoint && this->State == CRiverActor::None)
+	if (bShowGhostPoint)
 	{
-		vtkAssemblyPath *path;
-		this->m_pCellPicker->Pick(X, Y, 0.0, ren);
-		path = this->m_pCellPicker->GetPath();
-		if (path == NULL)
+		if (this->State == CRiverActor::None)
 		{
-			this->m_pLineCellPicker->Pick(X, Y, 0.0, ren);
-			path = this->m_pLineCellPicker->GetPath();
-			if (path != NULL)
+			vtkAssemblyPath *path;
+			this->m_pCellPicker->Pick(X, Y, 0.0, ren);
+			path = this->m_pCellPicker->GetPath();
+			if (path == NULL)
 			{
-				if (vtkActor* pActor = vtkActor::SafeDownCast(path->GetFirstNode()->GetProp()))
+				this->m_pLineCellPicker->Pick(X, Y, 0.0, ren);
+				path = this->m_pLineCellPicker->GetPath();
+				if (path != NULL)
 				{
-					this->Update();
-					this->GhostSphereSource->SetCenter(this->WorldSIPoint[0], this->WorldSIPoint[1], this->WorldSIPoint[2]);
-					this->GhostActor->VisibilityOn();
+					if (vtkActor* pActor = vtkActor::SafeDownCast(path->GetFirstNode()->GetProp()))
+					{
+						this->Update();
+						this->GhostSphereSource->SetCenter(this->WorldSIPoint[0], this->WorldSIPoint[1], this->WorldSIPoint[2]);
+						this->GhostActor->VisibilityOn();
+						this->Interactor->Render();
+					}
+				}
+				else
+				{
+					this->GhostActor->VisibilityOff();
 					this->Interactor->Render();
 				}
 			}
@@ -646,11 +622,6 @@ void CRiverActor::OnMouseMove()
 				this->GhostActor->VisibilityOff();
 				this->Interactor->Render();
 			}
-		}
-		else
-		{
-			this->GhostActor->VisibilityOff();
-			this->Interactor->Render();
 		}
 	}
 
@@ -695,21 +666,6 @@ void CRiverActor::OnLeftButtonUp()
 		return;
 	}
 
-// COMMENT: {6/14/2005 2:38:22 PM}	vtkAssemblyPath *path;
-// COMMENT: {6/14/2005 2:38:22 PM}	this->m_pCellPicker->Pick(X, Y, 0.0, ren);
-// COMMENT: {6/14/2005 2:38:22 PM}	path = this->m_pCellPicker->GetPath();
-// COMMENT: {6/14/2005 2:38:22 PM}	if (path != NULL)
-// COMMENT: {6/14/2005 2:38:22 PM}	{
-// COMMENT: {6/14/2005 2:38:22 PM}		if (vtkActor* pActor = vtkActor::SafeDownCast(path->GetFirstNode()->GetProp()))
-// COMMENT: {6/14/2005 2:38:22 PM}		{
-// COMMENT: {6/14/2005 2:38:22 PM}			this->HighlightHandle(NULL);
-// COMMENT: {6/14/2005 2:38:22 PM}			this->EventCallbackCommand->SetAbortFlag(1);
-// COMMENT: {6/14/2005 2:38:22 PM}			this->InvokeEvent(CRiverActor::EndMovePointEvent, NULL);
-// COMMENT: {6/14/2005 2:38:22 PM}			this->Interactor->Render();
-// COMMENT: {6/14/2005 2:38:22 PM}		}
-// COMMENT: {6/14/2005 2:38:22 PM}	}
-
-	// if (this->CurrentHandle && this->CurrentSource)
 	if (this->State == CRiverActor::MovingPoint)
 	{
 		// update m_WorldPointXYPlane
@@ -926,7 +882,6 @@ void CRiverActor::Update()
 	}
 
 	double pt[3];
-// COMMENT: {6/21/2005 7:11:19 PM}	double zOrig = this->m_Z;
 	pt[2] = this->m_Z;
 
 	this->m_pTransformScale->TransformPoint(pt, pt);
@@ -954,7 +909,6 @@ void CRiverActor::Update()
 			this->WorldSIPoint[i] = cameraPos[i] + t * (PickPosition[i] - cameraPos[i]);
 		}
 	}
-// COMMENT: {6/13/2005 7:49:38 PM}	this->m_WorldPointXYPlane[2] = zPos;
 
 	// UN-SCALE
 	//
@@ -964,7 +918,6 @@ void CRiverActor::Update()
 	this->m_pTransformScale->GetInverse()->TransformPoint(this->WorldSIPoint, this->WorldScaledUnitPoint);
 	this->m_pTransformUnits->GetInverse()->TransformPoint(this->WorldSIPoint, this->WorldScaledUnitPoint);
 
-// COMMENT: {6/21/2005 7:11:23 PM}	this->m_WorldPointXYPlane[2] = zOrig;
 	this->m_WorldPointXYPlane[2] = this->m_Z;
 	this->WorldSIPoint[2] = pt[2];
 }
@@ -1132,6 +1085,19 @@ vtkActor* CRiverActor::GetPoint(int index)
 		}
 	}
 	ASSERT(FALSE);
+	return NULL;
+}
+
+CRiverPoint* CRiverActor::GetRiverPoint(int index)
+{
+	std::list<CRiverPoint>::iterator iter = this->m_river.m_listPoints.begin();
+	for (vtkIdType i = 0; iter != this->m_river.m_listPoints.end(); ++i, ++iter)
+	{
+		if (i == index)
+		{
+			return &(*iter);
+		}
+	}
 	return NULL;
 }
 
@@ -1424,7 +1390,7 @@ void CRiverActor::EndNewRiver()
 	this->State = CRiverActor::None;
 }
 
-void CRiverActor::InsertPoint(vtkIdType id, double x, double y, double z)
+void CRiverActor::InsertPoint(vtkIdType id, CRiverPoint riverPoint)
 {
 	// move existing points after inserted point
 	//
@@ -1435,25 +1401,25 @@ void CRiverActor::InsertPoint(vtkIdType id, double x, double y, double z)
 		this->m_pPoints->GetPoint(j - 1, prev);
 		this->m_pPoints->InsertPoint(j, prev);
 	}
-	this->m_pPoints->InsertPoint(id + 1, x, y, z);
+	ASSERT(riverPoint.x_defined && riverPoint.y_defined);
+	this->m_pPoints->InsertPoint(id + 1, riverPoint.x, riverPoint.y, this->m_Z);
 	this->AddGraphicPoint();
 	this->UpdatePoints();
 
-	//{{
 	// update data
 	std::list<CRiverPoint>::iterator iterRivPt = this->m_river.m_listPoints.begin();
 	for (vtkIdType i = 0; ; ++i, ++iterRivPt)
 	{
 		if (i == id)
 		{
-			CRiverPoint rivpt;
-			rivpt.x = this->m_WorldPointXYPlane[0]; rivpt.x_defined = TRUE;
-			rivpt.y = this->m_WorldPointXYPlane[1]; rivpt.y_defined = TRUE;
-			this->m_river.m_listPoints.insert(++iterRivPt, rivpt);
+			///CRiverPoint rivpt;
+			///rivpt.x = x;   rivpt.x_defined = TRUE;
+			///rivpt.y = y;   rivpt.y_defined = TRUE;
+			///this->m_river.m_listPoints.insert(++iterRivPt, rivpt);
+			this->m_river.m_listPoints.insert(++iterRivPt, riverPoint);
 			break;
 		}
 	}
-	//}}
 
 	// update tree
 	this->Update(this->m_node);
@@ -1462,29 +1428,49 @@ void CRiverActor::InsertPoint(vtkIdType id, double x, double y, double z)
 	{
 		this->Interactor->Render();
 	}
+}
 
+void CRiverActor::InsertPoint(vtkIdType id, double x, double y, double z)
+{
+	CRiverPoint rivpt;
+	rivpt.x = x;   rivpt.x_defined = TRUE;
+	rivpt.y = y;   rivpt.y_defined = TRUE;
+	this->InsertPoint(id, rivpt);
 
-// COMMENT: {7/11/2005 4:24:31 PM}	////////{{{{{{{{
-// COMMENT: {7/11/2005 4:24:31 PM}	// add and select point
-// COMMENT: {7/11/2005 4:24:31 PM}	this->Update();
-// COMMENT: {7/11/2005 4:24:31 PM}	this->InsertPoint(id, this->m_WorldPointXYPlane[0], this->m_WorldPointXYPlane[1], this->m_WorldPointXYPlane[2]);
-// COMMENT: {7/11/2005 4:24:31 PM}	this->SelectPoint(id + 1);
-// COMMENT: {7/11/2005 4:24:31 PM}
-// COMMENT: {7/11/2005 4:24:31 PM}	// update data
-// COMMENT: {7/11/2005 4:24:31 PM}	CRiverPoint rivpt;
-// COMMENT: {7/11/2005 4:24:31 PM}	rivpt.x = this->m_WorldPointXYPlane[0]; rivpt.x_defined = TRUE;
-// COMMENT: {7/11/2005 4:24:31 PM}	rivpt.y = this->m_WorldPointXYPlane[1]; rivpt.y_defined = TRUE;
-// COMMENT: {7/11/2005 4:24:31 PM}	this->m_river.m_listPoints.insert(++iterRivPt, rivpt);
-// COMMENT: {7/11/2005 4:24:31 PM}
-// COMMENT: {7/11/2005 4:24:31 PM}	// update tree
-// COMMENT: {7/11/2005 4:24:31 PM}	this->Update(this->m_node);
-// COMMENT: {7/11/2005 4:24:31 PM}
-// COMMENT: {7/11/2005 4:24:31 PM}	// notify listeners
-// COMMENT: {7/11/2005 4:24:31 PM}	this->InvokeEvent(CRiverActor::InsertPointEvent, NULL);
-// COMMENT: {7/11/2005 4:24:31 PM}
-// COMMENT: {7/11/2005 4:24:31 PM}	this->Interactor->Render();
-// COMMENT: {7/11/2005 4:24:31 PM}	////////}}}}}}}}}
-
+// COMMENT: {7/11/2005 6:10:45 PM}	// move existing points after inserted point
+// COMMENT: {7/11/2005 6:10:45 PM}	//
+// COMMENT: {7/11/2005 6:10:45 PM}	double prev[3];
+// COMMENT: {7/11/2005 6:10:45 PM}	vtkIdType count = this->m_pPoints->GetNumberOfPoints();
+// COMMENT: {7/11/2005 6:10:45 PM}	for (vtkIdType j = count; j > id; --j)
+// COMMENT: {7/11/2005 6:10:45 PM}	{
+// COMMENT: {7/11/2005 6:10:45 PM}		this->m_pPoints->GetPoint(j - 1, prev);
+// COMMENT: {7/11/2005 6:10:45 PM}		this->m_pPoints->InsertPoint(j, prev);
+// COMMENT: {7/11/2005 6:10:45 PM}	}
+// COMMENT: {7/11/2005 6:10:45 PM}	this->m_pPoints->InsertPoint(id + 1, x, y, z);
+// COMMENT: {7/11/2005 6:10:45 PM}	this->AddGraphicPoint();
+// COMMENT: {7/11/2005 6:10:45 PM}	this->UpdatePoints();
+// COMMENT: {7/11/2005 6:10:45 PM}
+// COMMENT: {7/11/2005 6:10:45 PM}	// update data
+// COMMENT: {7/11/2005 6:10:45 PM}	std::list<CRiverPoint>::iterator iterRivPt = this->m_river.m_listPoints.begin();
+// COMMENT: {7/11/2005 6:10:45 PM}	for (vtkIdType i = 0; ; ++i, ++iterRivPt)
+// COMMENT: {7/11/2005 6:10:45 PM}	{
+// COMMENT: {7/11/2005 6:10:45 PM}		if (i == id)
+// COMMENT: {7/11/2005 6:10:45 PM}		{
+// COMMENT: {7/11/2005 6:10:45 PM}			CRiverPoint rivpt;
+// COMMENT: {7/11/2005 6:10:45 PM}			rivpt.x = x;   rivpt.x_defined = TRUE;
+// COMMENT: {7/11/2005 6:10:45 PM}			rivpt.y = y;   rivpt.y_defined = TRUE;
+// COMMENT: {7/11/2005 6:10:45 PM}			this->m_river.m_listPoints.insert(++iterRivPt, rivpt);
+// COMMENT: {7/11/2005 6:10:45 PM}			break;
+// COMMENT: {7/11/2005 6:10:45 PM}		}
+// COMMENT: {7/11/2005 6:10:45 PM}	}
+// COMMENT: {7/11/2005 6:10:45 PM}
+// COMMENT: {7/11/2005 6:10:45 PM}	// update tree
+// COMMENT: {7/11/2005 6:10:45 PM}	this->Update(this->m_node);
+// COMMENT: {7/11/2005 6:10:45 PM}
+// COMMENT: {7/11/2005 6:10:45 PM}	if (this->Interactor)
+// COMMENT: {7/11/2005 6:10:45 PM}	{
+// COMMENT: {7/11/2005 6:10:45 PM}		this->Interactor->Render();
+// COMMENT: {7/11/2005 6:10:45 PM}	}
 }
 
 void CRiverActor::AddGraphicPoint(void)
@@ -1558,7 +1544,6 @@ void CRiverActor::DeletePoint(vtkIdType id)
 		pActor->SetProperty(this->HandleProperty);
 	}
 
-	//{{
 	// update data
 	std::list<CRiverPoint>::iterator iterRivPt = this->m_river.m_listPoints.begin();
 	for (vtkIdType i = 0; iterRivPt != this->m_river.m_listPoints.end(); ++i, ++iterRivPt)
@@ -1572,7 +1557,6 @@ void CRiverActor::DeletePoint(vtkIdType id)
 
 	// update tree
 	this->Update(this->m_node);
-	//}}
 
 	double next[3];
 	vtkIdType count = this->m_pPoints->GetNumberOfPoints();
@@ -1630,50 +1614,3 @@ void CRiverActor::DeleteGraphicPoint(void)
 		this->m_listLineActor.pop_back();
 	}
 }
-
-// COMMENT: {7/11/2005 1:33:22 PM}void CRiverActor::InsertPoint(vtkIdType id, double x, double y)
-// COMMENT: {7/11/2005 1:33:22 PM}{
-// COMMENT: {7/11/2005 1:33:22 PM}	// update points object
-// COMMENT: {7/11/2005 1:33:22 PM}	//
-// COMMENT: {7/11/2005 1:33:22 PM}	if (this->m_pPoints)
-// COMMENT: {7/11/2005 1:33:22 PM}	{
-// COMMENT: {7/11/2005 1:33:22 PM}		double pt[3];
-// COMMENT: {7/11/2005 1:33:22 PM}		pt[0] = x;
-// COMMENT: {7/11/2005 1:33:22 PM}		pt[1] = y;
-// COMMENT: {7/11/2005 1:33:22 PM}		this->m_pPoints->SetPoint(id, pt);
-// COMMENT: {7/11/2005 1:33:22 PM}		this->UpdatePoints();
-// COMMENT: {7/11/2005 1:33:22 PM}		if (this->Interactor)
-// COMMENT: {7/11/2005 1:33:22 PM}		{
-// COMMENT: {7/11/2005 1:33:22 PM}			this->Interactor->Render();
-// COMMENT: {7/11/2005 1:33:22 PM}		}
-// COMMENT: {7/11/2005 1:33:22 PM}	}
-// COMMENT: {7/11/2005 1:33:22 PM}
-// COMMENT: {7/11/2005 1:33:22 PM}	// update data (CRiver)
-// COMMENT: {7/11/2005 1:33:22 PM}	std::list<CRiverPoint>::iterator iter = this->m_river.m_listPoints.begin();
-// COMMENT: {7/11/2005 1:33:22 PM}	for (vtkIdType i = 0; iter != this->m_river.m_listPoints.end(); ++i, ++iter)
-// COMMENT: {7/11/2005 1:33:22 PM}	{
-// COMMENT: {7/11/2005 1:33:22 PM}		if (id == i)
-// COMMENT: {7/11/2005 1:33:22 PM}		{
-// COMMENT: {7/11/2005 1:33:22 PM}			(*iter).x = x;
-// COMMENT: {7/11/2005 1:33:22 PM}			(*iter).y = y;
-// COMMENT: {7/11/2005 1:33:22 PM}			break;
-// COMMENT: {7/11/2005 1:33:22 PM}		}
-// COMMENT: {7/11/2005 1:33:22 PM}	}
-// COMMENT: {7/11/2005 1:33:22 PM}
-// COMMENT: {7/11/2005 1:33:22 PM}	// update data (CRiver)
-// COMMENT: {7/11/2005 1:33:22 PM}	std::list<CRiverPoint>::iterator iterRivPt = this->m_river.m_listPoints.begin();
-// COMMENT: {7/11/2005 1:33:22 PM}	for (vtkIdType i = 0; iter != this->m_river.m_listPoints.end(); ++i, ++iter)
-// COMMENT: {7/11/2005 1:33:22 PM}	{
-// COMMENT: {7/11/2005 1:33:22 PM}		if (id == i)
-// COMMENT: {7/11/2005 1:33:22 PM}		{
-// COMMENT: {7/11/2005 1:33:22 PM}			CRiverPoint rivpt;
-// COMMENT: {7/11/2005 1:33:22 PM}			rivpt.x = this->m_WorldPointXYPlane[0]; rivpt.x_defined = TRUE;
-// COMMENT: {7/11/2005 1:33:22 PM}			rivpt.y = this->m_WorldPointXYPlane[1]; rivpt.y_defined = TRUE;
-// COMMENT: {7/11/2005 1:33:22 PM}			this->m_river.m_listPoints.insert(++iterRivPt, rivpt);
-// COMMENT: {7/11/2005 1:33:22 PM}			break;
-// COMMENT: {7/11/2005 1:33:22 PM}		}
-// COMMENT: {7/11/2005 1:33:22 PM}	}
-// COMMENT: {7/11/2005 1:33:22 PM}
-// COMMENT: {7/11/2005 1:33:22 PM}	// update tree
-// COMMENT: {7/11/2005 1:33:22 PM}	this->Update(this->m_node);
-// COMMENT: {7/11/2005 1:33:22 PM}}

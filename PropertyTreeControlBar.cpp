@@ -17,6 +17,7 @@
 #include "RiverPropertySheet.h"
 #include "SetRiverAction.h"
 #include "RiverDeleteAction.h"
+#include "RiverDeletePointAction.h"
 
 #include "ZoneActor.h"
 #include "WellActor.h"
@@ -1953,17 +1954,19 @@ void CPropertyTreeControlBar::OnKeyDown(NMHDR* pNMHDR, LRESULT* pResult)
 		//
 		if (sel.IsNodeAncestor(this->GetRiversNode()))
 		{
-			if (sel != this->GetRiversNode() &&
-				/* HACK */ sel.GetParent() == this->GetRiversNode()
-				)
+			if (sel != this->GetRiversNode())
 			{
-				/*				
+				CTreeCtrlNode ptNode = sel;
 				while (sel.GetParent() != this->GetRiversNode())
 				{
 					sel = sel.GetParent();
 					if (!sel) break;
 				}
-				*/
+
+				// determine if point is being deleted
+				//
+				int point = sel.GetIndex(ptNode);
+
 				if (sel && sel.GetData())
 				{
 					if (CRiverActor* pRiverActor = CRiverActor::SafeDownCast((vtkObject*)sel.GetData()))
@@ -1971,8 +1974,16 @@ void CPropertyTreeControlBar::OnKeyDown(NMHDR* pNMHDR, LRESULT* pResult)
 						CTreeCtrlNode parent = sel.GetParent();
 						if (CWPhastDoc* pDoc = this->GetDocument())
 						{
-							VERIFY(parent.Select());
-							pDoc->Execute(new CRiverDeleteAction(pDoc, pRiverActor));
+							if (point >= 0)
+							{
+								VERIFY(ptNode.GetParent().Select());
+								pDoc->Execute(new CRiverDeletePointAction(pRiverActor, point));
+							}
+							else
+							{
+								VERIFY(parent.Select());
+								pDoc->Execute(new CRiverDeleteAction(pDoc, pRiverActor));
+							}							
 						}
 						*pResult = TRUE;
 						return;

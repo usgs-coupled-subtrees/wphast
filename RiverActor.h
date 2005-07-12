@@ -31,6 +31,7 @@ public:
 
 	vtkIdType InsertNextPoint(double x, double y, double z);
 	void InsertPoint(vtkIdType id, double x, double y, double z);
+	void InsertPoint(vtkIdType id, CRiverPoint riverPoint);
 
 	void DeletePoint(vtkIdType id);
 
@@ -51,6 +52,8 @@ public:
 	void SelectPoint(int index);
 	vtkActor* GetPoint(int index);
 	void ClearSelection(void);
+
+	CRiverPoint* CRiverActor::GetRiverPoint(int index);
 
 	void SetEnabled(int enabling);
 

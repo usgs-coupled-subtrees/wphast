@@ -637,6 +637,9 @@
 				RelativePath="RiverDeleteAction.cpp">
 			</File>
 			<File
+				RelativePath="RiverDeletePointAction.cpp">
+			</File>
+			<File
 				RelativePath="RiverInsertPointAction.cpp">
 			</File>
 			<File
@@ -1137,6 +1140,9 @@
 			</File>
 			<File
 				RelativePath="RiverDeleteAction.h">
+			</File>
+			<File
+				RelativePath="RiverDeletePointAction.h">
 			</File>
 			<File
 				RelativePath="RiverInsertPointAction.h">
