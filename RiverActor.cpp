@@ -1412,10 +1412,6 @@ void CRiverActor::InsertPoint(vtkIdType id, CRiverPoint riverPoint)
 	{
 		if (i == id)
 		{
-			///CRiverPoint rivpt;
-			///rivpt.x = x;   rivpt.x_defined = TRUE;
-			///rivpt.y = y;   rivpt.y_defined = TRUE;
-			///this->m_river.m_listPoints.insert(++iterRivPt, rivpt);
 			this->m_river.m_listPoints.insert(++iterRivPt, riverPoint);
 			break;
 		}
@@ -1436,41 +1432,6 @@ void CRiverActor::InsertPoint(vtkIdType id, double x, double y, double z)
 	rivpt.x = x;   rivpt.x_defined = TRUE;
 	rivpt.y = y;   rivpt.y_defined = TRUE;
 	this->InsertPoint(id, rivpt);
-
-// COMMENT: {7/11/2005 6:10:45 PM}	// move existing points after inserted point
-// COMMENT: {7/11/2005 6:10:45 PM}	//
-// COMMENT: {7/11/2005 6:10:45 PM}	double prev[3];
-// COMMENT: {7/11/2005 6:10:45 PM}	vtkIdType count = this->m_pPoints->GetNumberOfPoints();
-// COMMENT: {7/11/2005 6:10:45 PM}	for (vtkIdType j = count; j > id; --j)
-// COMMENT: {7/11/2005 6:10:45 PM}	{
-// COMMENT: {7/11/2005 6:10:45 PM}		this->m_pPoints->GetPoint(j - 1, prev);
-// COMMENT: {7/11/2005 6:10:45 PM}		this->m_pPoints->InsertPoint(j, prev);
-// COMMENT: {7/11/2005 6:10:45 PM}	}
-// COMMENT: {7/11/2005 6:10:45 PM}	this->m_pPoints->InsertPoint(id + 1, x, y, z);
-// COMMENT: {7/11/2005 6:10:45 PM}	this->AddGraphicPoint();
-// COMMENT: {7/11/2005 6:10:45 PM}	this->UpdatePoints();
-// COMMENT: {7/11/2005 6:10:45 PM}
-// COMMENT: {7/11/2005 6:10:45 PM}	// update data
-// COMMENT: {7/11/2005 6:10:45 PM}	std::list<CRiverPoint>::iterator iterRivPt = this->m_river.m_listPoints.begin();
-// COMMENT: {7/11/2005 6:10:45 PM}	for (vtkIdType i = 0; ; ++i, ++iterRivPt)
-// COMMENT: {7/11/2005 6:10:45 PM}	{
-// COMMENT: {7/11/2005 6:10:45 PM}		if (i == id)
-// COMMENT: {7/11/2005 6:10:45 PM}		{
-// COMMENT: {7/11/2005 6:10:45 PM}			CRiverPoint rivpt;
-// COMMENT: {7/11/2005 6:10:45 PM}			rivpt.x = x;   rivpt.x_defined = TRUE;
-// COMMENT: {7/11/2005 6:10:45 PM}			rivpt.y = y;   rivpt.y_defined = TRUE;
-// COMMENT: {7/11/2005 6:10:45 PM}			this->m_river.m_listPoints.insert(++iterRivPt, rivpt);
-// COMMENT: {7/11/2005 6:10:45 PM}			break;
-// COMMENT: {7/11/2005 6:10:45 PM}		}
-// COMMENT: {7/11/2005 6:10:45 PM}	}
-// COMMENT: {7/11/2005 6:10:45 PM}
-// COMMENT: {7/11/2005 6:10:45 PM}	// update tree
-// COMMENT: {7/11/2005 6:10:45 PM}	this->Update(this->m_node);
-// COMMENT: {7/11/2005 6:10:45 PM}
-// COMMENT: {7/11/2005 6:10:45 PM}	if (this->Interactor)
-// COMMENT: {7/11/2005 6:10:45 PM}	{
-// COMMENT: {7/11/2005 6:10:45 PM}		this->Interactor->Render();
-// COMMENT: {7/11/2005 6:10:45 PM}	}
 }
 
 void CRiverActor::AddGraphicPoint(void)
