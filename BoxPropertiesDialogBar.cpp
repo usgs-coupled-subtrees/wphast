@@ -124,6 +124,8 @@ void CBoxPropertiesDialogBar::Update(IObserver* pSender, LPARAM lHint, CObject* 
 	case WPN_VISCHANGED:
 		// TODO ??  ASSERT(FALSE);
 		break;
+	case WPN_SCALE_CHANGED:
+		break;
 	default:
 		ASSERT(FALSE);
 	}

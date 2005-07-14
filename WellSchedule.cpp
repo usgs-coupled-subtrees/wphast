@@ -285,7 +285,7 @@ std::ostream& operator<< (std::ostream &os, const CWellSchedule &a)
 				{
 					os << " " << time.input;
 				}
-				os << "     " << -rate.q << "\n";
+				os << "     " << rate.solution << "\n";
 			}
 		}
 	}

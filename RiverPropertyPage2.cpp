@@ -17,6 +17,7 @@ CRiverPropertyPage2::CRiverPropertyPage2()
 	: CPropertyPage(CRiverPropertyPage2::IDD)
 	, m_bFullVerify(true)
 	, m_pointIndex(0)
+	, m_bFlowOnly(true)
 {
 	this->m_strHorizontalUnits.Format("(%s)", this->m_units.horizontal.si);
 	this->m_strHeadUnits.Format("(%s)", this->m_units.head.si);
@@ -42,6 +43,7 @@ void CRiverPropertyPage2::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_Y_UNITS_STATIC, this->m_strHorizontalUnits);
 	DDX_Text(pDX, IDC_WIDTH_UNITS_STATIC, this->m_strHorizontalUnits);
 	DDX_Text(pDX, IDC_DEPTH_UNITS_STATIC, this->m_strVerticalUnits);	
+	DDX_Text(pDX, IDC_BOTTOM_UNITS_STATIC, this->m_strVerticalUnits);
 	DDX_Text(pDX, IDC_RIVER_K_UNITS_STATIC, this->m_strRiverBedKUnits);
 	DDX_Text(pDX, IDC_RIVER_THICK_UNITS_STATIC, this->m_strRiverBedThicknessUnits);
 
@@ -64,7 +66,6 @@ void CRiverPropertyPage2::DoDataExchange(CDataExchange* pDX)
 	{
 		VERIFY(this->m_wndTreeCtrl.SelectSetFirstVisible(this->m_wndTreeCtrl.GetFirstVisibleItem()));
 		this->m_wndTreeCtrl.SetFocus();
-		///VERIFY(this->m_wndTreeCtrl.SelectSetFirstVisible(this->m_wndTreeCtrl.GetRootItem().GetChild()));
 
 		// Prepare Pump Sched. Grid
 		//
@@ -97,38 +98,46 @@ void CRiverPropertyPage2::DoDataExchange(CDataExchange* pDX)
 			}
 			END_CATCH
 
-				// set default format
-				for (int row = 0; row < this->m_wndScheduleGrid.GetRowCount(); ++row)
-				{
-					for (int col = 0; col < this->m_wndScheduleGrid.GetColumnCount(); ++col)
-					{ 
-						this->m_wndScheduleGrid.SetItemFormat(row, col, DT_LEFT|DT_BOTTOM|DT_END_ELLIPSIS);
-					}
+			// set default format
+			for (int row = 0; row < this->m_wndScheduleGrid.GetRowCount(); ++row)
+			{
+				for (int col = 0; col < this->m_wndScheduleGrid.GetColumnCount(); ++col)
+				{ 
+					this->m_wndScheduleGrid.SetItemFormat(row, col, DT_LEFT|DT_BOTTOM|DT_END_ELLIPSIS);
 				}
+			}
 
-				CString str;
-				str.Format(_T("Head %s"), m_strHeadUnits);
+			CString str;
+			str.Format(_T("Head %s"), m_strHeadUnits);
 
-				VERIFY(this->m_wndScheduleGrid.SetItemText(0, 0, _T("Start")));
-				VERIFY(this->m_wndScheduleGrid.SetItemText(0, 1, _T("Units")));
-				VERIFY(this->m_wndScheduleGrid.SetItemText(0, 2, str));
-				VERIFY(this->m_wndScheduleGrid.SetItemText(0, 3, _T("Solution")));
+			VERIFY(this->m_wndScheduleGrid.SetItemText(0, 0, _T("Start")));
+			VERIFY(this->m_wndScheduleGrid.SetItemText(0, 1, _T("Units")));
+			VERIFY(this->m_wndScheduleGrid.SetItemText(0, 2, str));
+			VERIFY(this->m_wndScheduleGrid.SetItemText(0, 3, _T("Solution")));
 
-				VERIFY(this->m_wndScheduleGrid.SetItemText(1, 0, _T("0.0")));
+			VERIFY(this->m_wndScheduleGrid.SetItemText(1, 0, _T("0.0")));
 
-				VERIFY(this->m_wndScheduleGrid.DisableCell(1, 0));
-				VERIFY(this->m_wndScheduleGrid.DisableCell(1, 1));
+			VERIFY(this->m_wndScheduleGrid.DisableCell(1, 0));
+			VERIFY(this->m_wndScheduleGrid.DisableCell(1, 1));
 
-				this->m_wndScheduleGrid.RedrawWindow();
+			this->m_wndScheduleGrid.RedrawWindow();
 
-				this->m_wndScheduleGrid.ExpandColumnsToFit();
+			this->m_wndScheduleGrid.ExpandColumnsToFit();
 		}
-
 	}
 
 	// n_user
 	//
 	DDX_Text(pDX, IDC_NUSER_EDIT, this->m_river.n_user);
+	if (pDX->m_bSaveAndValidate)
+	{
+		std::set<int>::iterator iter = this->m_usedRiverNumbers.find(this->m_river.n_user);
+		if (iter != this->m_usedRiverNumbers.end())
+		{
+			::AfxMessageBox("This river number is already in use. Please choose a different number.");
+			pDX->Fail();        // throws exception
+		}
+	}
 
 	// description
 	//
@@ -199,40 +208,6 @@ void CRiverPropertyPage2::DoDataExchange(CDataExchange* pDX)
 		DDX_Text(pDX, IDC_Y_EDIT, pPt->y);
 	}
 
-	// Depth
-	//
-	if (pDX->m_bSaveAndValidate)
-	{
-		CString str;
-		DDX_Text(pDX, IDC_DEPTH_EDIT, str);
-		pPt->depth_defined = FALSE;
-		if (str.IsEmpty())
-		{
-			if (bFirstOrLastPoint)
-			{
-				::AfxMessageBox("Depth must be defined for at least the first and the last river points.");
-				pDX->Fail();
-			}
-		}
-		else
-		{
-			DDX_Text(pDX, IDC_DEPTH_EDIT, pPt->depth);
-			pPt->depth_defined = TRUE;
-		}
-	}
-	else
-	{
-		if (pPt->depth_defined)
-		{
-			DDX_Text(pDX, IDC_DEPTH_EDIT, pPt->depth);
-		}
-		else
-		{
-			CString empty;
-			DDX_Text(pDX, IDC_DEPTH_EDIT, empty);
-		}
-	}
-
 	// Width
 	//
 	if (pDX->m_bSaveAndValidate)
@@ -264,6 +239,97 @@ void CRiverPropertyPage2::DoDataExchange(CDataExchange* pDX)
 		{
 			CString empty;
 			DDX_Text(pDX, IDC_WIDTH_EDIT, empty);
+		}
+	}
+
+	// Depth / Bottom radio
+	//
+	if (pDX->m_bSaveAndValidate)
+	{
+		if (this->GetCheckedRadioButton(IDC_RADIO_BOTTOM, IDC_RADIO_DEPTH) == IDC_RADIO_BOTTOM)
+		{
+			// Bottom
+			//
+			CString str;
+			DDX_Text(pDX, IDC_BOTTOM_EDIT, str);
+			pPt->z_defined = FALSE;
+			if (str.IsEmpty())
+			{
+				if (bFirstOrLastPoint)
+				{
+					::AfxMessageBox("Either depth or bottom must be defined for the first and the last river points.");
+					pDX->Fail();
+				}
+			}
+			else
+			{
+				DDX_Text(pDX, IDC_BOTTOM_EDIT, pPt->z);
+				pPt->z_defined = TRUE;
+			}
+			pPt->depth_defined = FALSE;
+		}
+		else
+		{
+			// Depth
+			//
+			CString str;
+			DDX_Text(pDX, IDC_DEPTH_EDIT, str);
+			pPt->depth_defined = FALSE;
+			if (str.IsEmpty())
+			{
+				if (bFirstOrLastPoint)
+				{
+					::AfxMessageBox("Either depth or bottom must be defined for the first and the last river points.");
+					pDX->Fail();
+				}
+			}
+			else
+			{
+				DDX_Text(pDX, IDC_DEPTH_EDIT, pPt->depth);
+				pPt->depth_defined = TRUE;
+			}
+			pPt->z_defined = FALSE;
+		}
+	}
+	else
+	{
+		// Bottom
+		//
+		if (pPt->z_defined)
+		{
+			ASSERT(!pPt->depth_defined);
+			this->CheckRadioButton(IDC_RADIO_BOTTOM, IDC_RADIO_DEPTH, IDC_RADIO_BOTTOM);
+			this->OnBnClickedRadioBottom();
+
+			DDX_Text(pDX, IDC_BOTTOM_EDIT, pPt->z);
+		}
+		else
+		{
+			CString empty;
+			DDX_Text(pDX, IDC_BOTTOM_EDIT, empty);
+		}
+
+		// Depth
+		//
+		if (pPt->depth_defined)
+		{
+			ASSERT(!pPt->z_defined);
+			this->CheckRadioButton(IDC_RADIO_BOTTOM, IDC_RADIO_DEPTH, IDC_RADIO_DEPTH);
+			this->OnBnClickedRadioDepth();
+
+			DDX_Text(pDX, IDC_DEPTH_EDIT, pPt->depth);
+		}
+		else
+		{
+			CString empty;
+			DDX_Text(pDX, IDC_DEPTH_EDIT, empty);
+		}
+
+		if (!pPt->z_defined && !pPt->depth_defined)
+		{
+			ASSERT(!pPt->z_defined);
+			this->CheckRadioButton(IDC_RADIO_BOTTOM, IDC_RADIO_DEPTH, IDC_RADIO_DEPTH);
+			this->OnBnClickedRadioDepth();
 		}
 	}
 
@@ -335,7 +401,6 @@ void CRiverPropertyPage2::DoDataExchange(CDataExchange* pDX)
 		}
 	}
 
-	//{{
 	// river states
 	//
 	if (pDX->m_bSaveAndValidate)
@@ -372,31 +437,42 @@ void CRiverPropertyPage2::DoDataExchange(CDataExchange* pDX)
 
 				// time units
 				DDX_TextGridControl(pDX, IDC_GRID_SCHEDULES, row, 1, strValue);
-				if (strValue.IsEmpty() || time.SetInput(strValue) != OK)
+				if (!strValue.IsEmpty())
 				{
-					if (row != 1)
+					if (time.SetInput(strValue) != OK)
 					{
 						::DDX_GridControlFail(pDX, IDC_GRID_SCHEDULES, row, 1, _T("Please enter the start time units."));
 					}
 				}
 
 				// head
-				strValue = this->m_wndScheduleGrid.GetItemText(row, 2);
+				DDX_TextGridControl(pDX, IDC_GRID_SCHEDULES, row, 2, strValue);
 				strValue.Trim();
 				if (!strValue.IsEmpty())
 				{
 					DDX_TextGridControl(pDX, IDC_GRID_SCHEDULES, row, 2, value);
 					state.SetHead(value);
 				}
+				if (row == 1 && !state.head_defined && bFirstOrLastPoint)
+				{
+					CString string("A head must be defined for time zero.");
+					::DDX_GridControlFail(pDX, IDC_GRID_SCHEDULES, row, 2, string);
+				}
 
 				// solution
-				strValue = this->m_wndScheduleGrid.GetItemText(row, 3);
+				DDX_TextGridControl(pDX, IDC_GRID_SCHEDULES, row, 3, strValue);
 				strValue.Trim();
 				if (!strValue.IsEmpty())
 				{
 					DDX_TextGridControl(pDX, IDC_GRID_SCHEDULES, row, 3, solution);
 					state.SetSolution(solution);
 				}
+				if (row == 1 && !this->m_bFlowOnly && !state.solution_defined && bFirstOrLastPoint)
+				{
+					CString string("A solution must be defined for time zero.");
+					::DDX_GridControlFail(pDX, IDC_GRID_SCHEDULES, row, 3, string);
+				}
+
 				if (state.head_defined || state.solution_defined)
 				{
 					pPt->Insert(time, state);
@@ -426,8 +502,9 @@ void CRiverPropertyPage2::DoDataExchange(CDataExchange* pDX)
 			// start time units
 			if ((*iter).first.type == UNDEFINED)
 			{
-				ASSERT(this->m_units.time.input && ::strlen(this->m_units.time.input));
-				Item.strText = CGlobal::GetStdTimeUnits(this->m_units.time.input).c_str();
+				///ASSERT(this->m_units.time.input && ::strlen(this->m_units.time.input));
+				///Item.strText = CGlobal::GetStdTimeUnits(this->m_units.time.input).c_str();
+				Item.strText.Empty();
 			}
 			else if ((*iter).first.type == STEP)
 			{
@@ -442,8 +519,9 @@ void CRiverPropertyPage2::DoDataExchange(CDataExchange* pDX)
 				}
 				else
 				{
-					ASSERT(this->m_units.time.input && ::strlen(this->m_units.time.input));
-					Item.strText = CGlobal::GetStdTimeUnits(this->m_units.time.input).c_str();
+					///ASSERT(this->m_units.time.input && ::strlen(this->m_units.time.input));
+					///Item.strText = CGlobal::GetStdTimeUnits(this->m_units.time.input).c_str();
+					Item.strText.Empty();
 				}
 			}
 			Item.col = 1;
@@ -474,9 +552,10 @@ void CRiverPropertyPage2::DoDataExchange(CDataExchange* pDX)
 				this->m_wndScheduleGrid.SetItemText(j, 0, Item.strText);
 
 				// start units
-				ASSERT(this->m_units.time.input && ::strlen(this->m_units.time.input));
-				Item.strText = CGlobal::GetStdTimeUnits(this->m_units.time.input).c_str();
-				this->m_wndScheduleGrid.SetItemText(j, 1, Item.strText);
+				///ASSERT(this->m_units.time.input && ::strlen(this->m_units.time.input));
+				///Item.strText = CGlobal::GetStdTimeUnits(this->m_units.time.input).c_str();
+				///this->m_wndScheduleGrid.SetItemText(j, 1, Item.strText);
+				this->m_wndScheduleGrid.SetItemText(j, 1, _T(""));
 			}
 			else
 			{
@@ -487,15 +566,69 @@ void CRiverPropertyPage2::DoDataExchange(CDataExchange* pDX)
 			this->m_wndScheduleGrid.SetItemText(j, 3, _T(""));
 		}
 	}
-	//}}
 
 	if (pDX->m_bSaveAndValidate && this->m_bFullVerify)
 	{
-		if (!this->m_river.m_listPoints.back().depth_defined)
-		{
-			// The first doesn't need to be checked since it is the
-			// first node to display.
+        bool head_defined;
+		bool solution_defined;
+		CTimeSeries<CRiverState>::iterator it;
 
+		// verify first point
+		//
+        head_defined = false;
+		solution_defined = false;
+		it = this->m_river.m_listPoints.front().m_riverSchedule.begin();
+		for (; it != this->m_river.m_listPoints.front().m_riverSchedule.end(); ++it)
+		{
+			if (it->second.head_defined)     head_defined = true;
+			if (it->second.solution_defined) solution_defined = true;
+		}
+		if ((!this->m_river.m_listPoints.front().depth_defined && !this->m_river.m_listPoints.front().z_defined)
+			||
+			!this->m_river.m_listPoints.front().k_defined
+			||
+			!this->m_river.m_listPoints.front().thickness_defined
+			||
+			!this->m_river.m_listPoints.front().width_defined
+			||
+			this->m_river.m_listPoints.front().m_riverSchedule.empty()
+			||
+			!head_defined
+			||
+			(!solution_defined && !this->m_bFlowOnly)
+			)
+		{
+			CTreeCtrlNode first = this->m_wndTreeCtrl.GetRootItem();
+			::PostMessage(this->GetSafeHwnd(), UM_DDX_FAILURE, (WPARAM)0, (LPARAM)(HTREEITEM)first);
+			pDX->Fail();
+		}
+
+
+		// verify last point
+		//
+        head_defined = false;
+		solution_defined = false;
+		it = this->m_river.m_listPoints.back().m_riverSchedule.begin();
+		for (; it != this->m_river.m_listPoints.back().m_riverSchedule.end(); ++it)
+		{
+			if (it->second.head_defined)     head_defined = true;
+			if (it->second.solution_defined) solution_defined = true;
+		}
+		if ((!this->m_river.m_listPoints.back().depth_defined && !this->m_river.m_listPoints.back().z_defined)
+			||
+			!this->m_river.m_listPoints.back().k_defined
+			||
+			!this->m_river.m_listPoints.back().thickness_defined
+			||
+			!this->m_river.m_listPoints.back().width_defined
+			||
+			this->m_river.m_listPoints.back().m_riverSchedule.empty()
+			||
+			!head_defined
+			||
+			(!solution_defined && !this->m_bFlowOnly)
+			)
+		{
 			CTreeCtrlNode last = this->m_wndTreeCtrl.GetRootItem();
 			while(last.GetNextSibling())
 			{
@@ -512,6 +645,8 @@ BEGIN_MESSAGE_MAP(CRiverPropertyPage2, CPropertyPage)
 	ON_NOTIFY(TVN_SELCHANGING, IDC_PROP_TREE, OnTvnSelchangingPropTree)
 	ON_NOTIFY(TVN_SELCHANGED, IDC_PROP_TREE, OnTvnSelchangedPropTree)
 	ON_MESSAGE(UM_DDX_FAILURE, OnUM_DDXFailure)
+	ON_BN_CLICKED(IDC_RADIO_DEPTH, OnBnClickedRadioDepth)
+	ON_BN_CLICKED(IDC_RADIO_BOTTOM, OnBnClickedRadioBottom)
 END_MESSAGE_MAP()
 
 
@@ -599,7 +734,6 @@ void CRiverPropertyPage2::SetPoint(int index)
 void CRiverPropertyPage2::OnTvnSelchangingPropTree(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	LPNMTREEVIEW pNMTreeView = reinterpret_cast<LPNMTREEVIEW>(pNMHDR);
-	// TODO: Add your control notification handler code here
 
 	// validate itemOld
 	//
@@ -648,4 +782,49 @@ LRESULT CRiverPropertyPage2::OnUM_DDXFailure(WPARAM wParam, LPARAM lParam)
 		this->UpdateData(TRUE);
 	}
 	return 0;
+}
+
+void CRiverPropertyPage2::OnBnClickedRadioDepth()
+{
+	if (CWnd* pWnd = this->GetDlgItem(IDC_DEPTH_EDIT))
+	{
+		pWnd->EnableWindow(TRUE);
+	}
+	if (CWnd* pWnd = this->GetDlgItem(IDC_DEPTH_UNITS_STATIC))
+	{
+		pWnd->EnableWindow(TRUE);
+	}
+	if (CWnd* pWnd = this->GetDlgItem(IDC_BOTTOM_EDIT))
+	{
+		pWnd->EnableWindow(FALSE);
+	}
+	if (CWnd* pWnd = this->GetDlgItem(IDC_BOTTOM_UNITS_STATIC))
+	{
+		pWnd->EnableWindow(FALSE);
+	}	
+}
+
+void CRiverPropertyPage2::OnBnClickedRadioBottom()
+{
+	if (CWnd* pWnd = this->GetDlgItem(IDC_DEPTH_EDIT))
+	{
+		pWnd->EnableWindow(FALSE);
+	}
+	if (CWnd* pWnd = this->GetDlgItem(IDC_DEPTH_UNITS_STATIC))
+	{
+		pWnd->EnableWindow(FALSE);
+	}
+	if (CWnd* pWnd = this->GetDlgItem(IDC_BOTTOM_EDIT))
+	{
+		pWnd->EnableWindow(TRUE);
+	}
+	if (CWnd* pWnd = this->GetDlgItem(IDC_BOTTOM_UNITS_STATIC))
+	{
+		pWnd->EnableWindow(TRUE);
+	}
+}
+
+void CRiverPropertyPage2::SetUsedRiverNumbers(const std::set<int>& used)
+{
+	this->m_usedRiverNumbers = used;
 }

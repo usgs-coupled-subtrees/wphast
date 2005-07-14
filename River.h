@@ -146,6 +146,8 @@ public:
 	CTimeSeries<CRiverState> m_riverSchedule;
 public:
 	void Serialize(bool bStoring, hid_t loc_id);
+protected:
+	friend std::ostream& operator<< (std::ostream &os, const CRiverPoint &a);
 };
 
 class CRiver
@@ -161,4 +163,6 @@ public:
 	int n_user;
 	std::string description;
 	std::list<CRiverPoint> m_listPoints;
+protected:
+	friend std::ostream& operator<< (std::ostream &os, const CRiver &a);
 };

@@ -293,6 +293,8 @@ void CRiverActor::UpdatePoints(void)
 
 void CRiverActor::ClearPoints(void)
 {
+	this->CurrentHandle = NULL;
+
 	this->m_pPoints->Initialize();
 	ASSERT(this->m_pPoints->GetNumberOfPoints() == 0);
 
@@ -597,7 +599,8 @@ void CRiverActor::OnMouseMove()
 			vtkAssemblyPath *path;
 			this->m_pCellPicker->Pick(X, Y, 0.0, ren);
 			path = this->m_pCellPicker->GetPath();
-			if (path == NULL)
+
+			if (path == NULL && !(::GetAsyncKeyState(VK_LBUTTON) < 0) && !(::GetAsyncKeyState(VK_RBUTTON) < 0) && !(::GetAsyncKeyState(VK_MBUTTON) < 0))
 			{
 				this->m_pLineCellPicker->Pick(X, Y, 0.0, ren);
 				path = this->m_pLineCellPicker->GetPath();
@@ -1574,4 +1577,10 @@ void CRiverActor::DeleteGraphicPoint(void)
 		pActor->Delete();
 		this->m_listLineActor.pop_back();
 	}
+}
+
+std::ostream& operator<< (std::ostream &os, const CRiverActor &a)
+{
+	os << a.m_river;
+	return os;
 }

@@ -193,6 +193,31 @@ void CPrintFreqPropertyPage::DoDataExchange(CDataExchange* pDX)
 		this->m_Grid.DisableCell(1, 3);
 	}
 
+	//{{
+	if (pDX->m_bSaveAndValidate)
+	{
+		this->m_printFreq.print_bc_flow.clear();
+		this->m_printFreq.print_comp.clear();
+		this->m_printFreq.print_conductances.clear();
+		this->m_printFreq.print_flow_balance.clear();
+		this->m_printFreq.print_force_chem.clear();
+		this->m_printFreq.print_hdf_chem.clear();
+		this->m_printFreq.print_hdf_head.clear();
+		this->m_printFreq.print_hdf_velocity.clear();
+		this->m_printFreq.print_head.clear();
+		this->m_printFreq.print_statistics.clear();
+		this->m_printFreq.print_velocity.clear();
+		this->m_printFreq.print_wells.clear();
+		this->m_printFreq.print_xyz_chem.clear();
+		this->m_printFreq.print_xyz_comp.clear();
+		this->m_printFreq.print_xyz_head.clear();
+		this->m_printFreq.print_xyz_velocity.clear();
+		this->m_printFreq.print_xyz_wells.clear();
+		this->m_printFreq.print_bc.clear();
+	}
+	//}}
+
+
 	Ctime zero;
 	zero.SetValue(0.0);
 	this->DDX_PRINT(pDX,  2, 2, this->m_printFreq.print_bc_flow[zero]);
@@ -677,9 +702,45 @@ void CPrintFreqPropertyPage::OnBnClickedButtonDelete()
 	else
 	{
 		nColumn = focusCell.col - (focusCell.col % 2);
+
+// COMMENT: {7/12/2005 2:21:36 PM}		CTime time;
+// COMMENT: {7/12/2005 2:21:36 PM}		this->DoDataExchange()
+// COMMENT: {7/12/2005 2:21:36 PM}		this->UpdateData()
+// COMMENT: {7/12/2005 2:21:36 PM}
+// COMMENT: {7/12/2005 2:21:36 PM}		// time
+// COMMENT: {7/12/2005 2:21:36 PM}		CString str;
+// COMMENT: {7/12/2005 2:21:36 PM}		str = this->m_Grid.GetItemText(1, nColumn);
+// COMMENT: {7/12/2005 2:21:36 PM}
+// COMMENT: {7/12/2005 2:21:36 PM}		DDX_TextGridControl(pDX, IDC_GRID, 1, nCol, str);
+// COMMENT: {7/12/2005 2:21:36 PM}		if (str.IsEmpty())
+// COMMENT: {7/12/2005 2:21:36 PM}		{
+// COMMENT: {7/12/2005 2:21:36 PM}			continue;
+// COMMENT: {7/12/2005 2:21:36 PM}		}
+// COMMENT: {7/12/2005 2:21:36 PM}		else
+// COMMENT: {7/12/2005 2:21:36 PM}		{
+// COMMENT: {7/12/2005 2:21:36 PM}			double dVal;
+// COMMENT: {7/12/2005 2:21:36 PM}			DDX_TextGridControl(pDX, IDC_GRID, 1, nCol, dVal);
+// COMMENT: {7/12/2005 2:21:36 PM}			time.SetValue(dVal);
+// COMMENT: {7/12/2005 2:21:36 PM}		}
+// COMMENT: {7/12/2005 2:21:36 PM}
+// COMMENT: {7/12/2005 2:21:36 PM}		// units
+// COMMENT: {7/12/2005 2:21:36 PM}		DDX_TextGridControl(pDX, IDC_GRID, 1, nCol + 1, str);			
+// COMMENT: {7/12/2005 2:21:36 PM}		if (str.IsEmpty() || str.Compare("default") == 0)
+// COMMENT: {7/12/2005 2:21:36 PM}		{
+// COMMENT: {7/12/2005 2:21:36 PM}			time.type = UNITS;
+// COMMENT: {7/12/2005 2:21:36 PM}			if (time.input) delete[] time.input;
+// COMMENT: {7/12/2005 2:21:36 PM}			time.input = NULL;
+// COMMENT: {7/12/2005 2:21:36 PM}		}
+// COMMENT: {7/12/2005 2:21:36 PM}		else
+// COMMENT: {7/12/2005 2:21:36 PM}		{
+// COMMENT: {7/12/2005 2:21:36 PM}			time.SetInput(str.GetString());
+// COMMENT: {7/12/2005 2:21:36 PM}			ASSERT(time.type == UNITS);
+// COMMENT: {7/12/2005 2:21:36 PM}		}
+
+
 		VERIFY(this->m_Grid.DeleteColumn(nColumn));
 		VERIFY(this->m_Grid.DeleteColumn(nColumn));
-		this->m_Grid.RedrawWindow();
+		this->m_Grid.RedrawWindow();		
 	}
 }
 

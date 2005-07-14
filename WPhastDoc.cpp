@@ -1730,7 +1730,8 @@ void CWPhastDoc::SetScale(vtkFloatingPointType x, vtkFloatingPointType y, vtkFlo
 							prop3D->SetScale(scale);
 							if (CWellActor *pWellActor = CWellActor::SafeDownCast(prop3D))
 							{
-								pWellActor->SetDefaultTubeDiameter(defaultAxesSize * 0.17 / sqrt(scale[0] * scale[1]));
+// COMMENT: {7/12/2005 3:21:11 PM}								pWellActor->SetDefaultTubeDiameter(defaultAxesSize * 0.17 / sqrt(scale[0] * scale[1]));
+								pWellActor->SetDefaultTubeDiameter(defaultAxesSize * 0.17);
 								// pWellActor->SetRadius(defaultAxesSize * 0.085);
 							}
 							if (CRiverActor *pRiverActor = CRiverActor::SafeDownCast(prop3D))
@@ -1768,6 +1769,9 @@ void CWPhastDoc::SetScale(vtkFloatingPointType x, vtkFloatingPointType y, vtkFlo
 			}
 		}
 
+		// resize the well interactor
+		//
+
 		// resize the Box Widget
 		//
 		if (pView->GetBoxWidget()->GetProp3D())
@@ -1779,6 +1783,9 @@ void CWPhastDoc::SetScale(vtkFloatingPointType x, vtkFloatingPointType y, vtkFlo
 		//
 		pView->ResetCamera();
 	}
+	//{{
+	this->Notify(0, WPN_SCALE_CHANGED, 0, 0);
+	//}}
 	this->UpdateAllViews(0);
 }
 
@@ -2765,6 +2772,17 @@ BOOL CWPhastDoc::WriteTransDat(std::ostream& os)
 		if (CWellActor *pWellActor = CWellActor::SafeDownCast((vtkObject*)nodeWells.GetChildAt(i).GetData()))
 		{
 			os << pWellActor->GetWell();
+		}
+	}
+
+	// RIVERS
+	CTreeCtrlNode nodeRivers = this->GetPropertyTreeControlBar()->GetRiversNode();
+	nCount = nodeRivers.GetChildCount();
+	for (int i = 0; i < nCount; ++i)
+	{
+		if (CRiverActor *pRiverActor = CRiverActor::SafeDownCast((vtkObject*)nodeRivers.GetChildAt(i).GetData()))
+		{
+			os << *pRiverActor;
 		}
 	}
 
@@ -4157,7 +4175,7 @@ void CWPhastDoc::UnRemove(CWellActor *pWellActor)
 }
 
 void CWPhastDoc::Select(CWellActor *pWellActor)
-{
+{	
 	this->Notify(0, WPN_SELCHANGED, 0, pWellActor);
 }
 
@@ -4485,9 +4503,9 @@ void CWPhastDoc::Remove(CRiverActor *pRiverActor)
 	//
 	vtkFloatingPointType *scale = this->GetScale();
 	vtkFloatingPointType *riverscale = pRiverActor->GetScale();
-	ASSERT(riverscale[0] == scale[0]);
-	ASSERT(riverscale[1] == scale[1]);
-	ASSERT(riverscale[2] == scale[2]);
+// COMMENT: {7/12/2005 3:42:06 PM}	ASSERT(riverscale[0] == scale[0]);
+// COMMENT: {7/12/2005 3:42:06 PM}	ASSERT(riverscale[1] == scale[1]);
+// COMMENT: {7/12/2005 3:42:06 PM}	ASSERT(riverscale[2] == scale[2]);
 
 	// make sure pWellActor ref count doesn't go to zero
 	//
@@ -4532,9 +4550,9 @@ void CWPhastDoc::UnRemove(CRiverActor *pRiverActor)
 	//
 	vtkFloatingPointType *scale = this->GetScale();
 	vtkFloatingPointType *riverscale = pRiverActor->GetScale();
-	ASSERT(riverscale[0] == scale[0]);
-	ASSERT(riverscale[1] == scale[1]);
-	ASSERT(riverscale[2] == scale[2]);
+// COMMENT: {7/12/2005 3:41:44 PM}	ASSERT(riverscale[0] == scale[0]);
+// COMMENT: {7/12/2005 3:41:44 PM}	ASSERT(riverscale[1] == scale[1]);
+// COMMENT: {7/12/2005 3:41:44 PM}	ASSERT(riverscale[2] == scale[2]);
 
 	// add to rivers assembly
 	//

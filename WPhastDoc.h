@@ -75,6 +75,7 @@ enum WPhastNotification {
 	WPN_SELCHANGED    = 1,
 	WPN_VISCHANGED    = 2,
 	WPN_DELETE_WELL   = 3,
+	WPN_SCALE_CHANGED = 4,
 };
 
 #ifndef vtkFloatingPointType

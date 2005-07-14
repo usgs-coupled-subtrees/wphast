@@ -225,6 +225,7 @@
 #define ID_BCZONES_UNSELECTALL          234
 #define IDD_RIVER_PROPPAGE3             234
 #define ID_ICZONES_HIDEALL              235
+#define IDD_RIVER_PROPPAGE4             235
 #define ID_ICZONES_SHOWSELECTED         236
 #define ID_ICZONES_SELECTALL            237
 #define ID_ICZONES_UNSELECTALL          238
@@ -515,8 +516,12 @@
 #define IDC_RIVER_THICK_UNITS_STATIC    1243
 #define IDC_RIVER_K_UNITS_EDIT          1244
 #define IDC_RIVER_THICK_UNITS_EDIT      1245
+#define IDC_BOTTOM_UNITS_STATIC         1245
 #define IDC_RIVER_K_EDIT                1246
 #define IDC_RIVER_THICK_EDIT            1247
+#define IDC_RADIO_BOTTOM                1248
+#define IDC_BOTTOM_EDIT                 1249
+#define IDC_RADIO_DEPTH                 1250
 #define IDC_RESIZE_COLUMN               28654
 #define IDC_RESIZE_ROW                  28655
 #define IDR_POPUP                       28656
@@ -532,7 +537,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        248
 #define _APS_NEXT_COMMAND_VALUE         32801
-#define _APS_NEXT_CONTROL_VALUE         1248
+#define _APS_NEXT_CONTROL_VALUE         1251
 #define _APS_NEXT_SYMED_VALUE           126
 #endif
 #endif

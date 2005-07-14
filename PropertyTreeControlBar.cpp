@@ -712,16 +712,15 @@ void CPropertyTreeControlBar::OnNMDblClk(NMHDR* pNMHDR, LRESULT* pResult)
 					CRiverPropertyPage2 page;
 					sheet.AddPage(&page);
 
-					////CRiverPropertySheet sheet("RIVER");
-
 					if (CWPhastDoc* pWPhastDoc = this->GetDocument())
 					{
-						std::set<int> riverNums;
-						pWPhastDoc->GetUsedRiverNumbers(riverNums);
-						// sheet.SetRiver(river, pWPhastDoc->GetUnits());
 						page.SetProperties(river);
+						page.SetFlowOnly(bool(pWPhastDoc->GetFlowOnly()));
 						page.SetUnits(pWPhastDoc->GetUnits());
 						if (point) page.SetPoint(point);
+
+						std::set<int> riverNums;
+						pWPhastDoc->GetUsedRiverNumbers(riverNums);
 
 						// remove this river number from used list
 						std::set<int>::iterator iter = riverNums.find(river.n_user);
@@ -730,7 +729,7 @@ void CPropertyTreeControlBar::OnNMDblClk(NMHDR* pNMHDR, LRESULT* pResult)
 						{
 							riverNums.erase(iter);
 						}
-						// TODO sheet.SetUsedRiverNumbers(riverNums);
+						page.SetUsedRiverNumbers(riverNums);
 
 						if (sheet.DoModal() == IDOK)
 						{
@@ -1703,6 +1702,9 @@ void CPropertyTreeControlBar::Update(IObserver* pSender, LPARAM lHint, CObject* 
 		ASSERT(FALSE);
 		break;
 
+	case WPN_SCALE_CHANGED:
+		break;
+
 	default:
 		ASSERT(FALSE);
 	}
@@ -1976,8 +1978,15 @@ void CPropertyTreeControlBar::OnKeyDown(NMHDR* pNMHDR, LRESULT* pResult)
 						{
 							if (point >= 0)
 							{
-								VERIFY(ptNode.GetParent().Select());
-								pDoc->Execute(new CRiverDeletePointAction(pRiverActor, point));
+								if (point == 0 || point == pRiverActor->GetPointCount() - 1)
+								{
+									::AfxMessageBox("The first and the last river points cannot be deleted.");
+								}
+								else
+								{
+									VERIFY(ptNode.GetParent().Select());
+									pDoc->Execute(new CRiverDeletePointAction(pRiverActor, point));
+								}
 							}
 							else
 							{

@@ -49,6 +49,7 @@
 #include "RiverCreateAction.h"
 #include "RiverPropertyPage2.h"
 #include "Grid.h"
+#include "FlowOnly.h"
 
 
 // #include "CreateZoneAction.h"
@@ -1307,6 +1308,21 @@ void CWPhastView::Update(IObserver* pSender, LPARAM lHint, CObject* /*pHint*/, v
 			}
 		}		
 		break;
+	case WPN_SCALE_CHANGED:
+		if (this->m_pPointWidget2->GetEnabled())
+		{
+			if (vtkProp3D* pProp3D = this->m_pPointWidget2->GetProp3D())
+			{
+				this->m_pPointWidget2->TranslationModeOff();
+				this->m_pPointWidget2->SetProp3D(0);
+				this->m_pPointWidget2->SetProp3D(pProp3D);
+				this->m_pPointWidget2->PlaceWidget();
+				ASSERT(pProp3D == this->m_pPointWidget2->GetProp3D());
+				this->m_pPointWidget2->TranslationModeOn();
+				this->m_pPointWidget2->On();
+			}
+		}
+		break;
 	default:
 		ASSERT(FALSE);
 	}
@@ -1495,6 +1511,10 @@ void CWPhastView::OnEndNewRiver(void)
 			CRiverPropertyPage2 page;
 			page.SetProperties(this->m_pRiverActor->GetRiver());
 			page.SetUnits(this->GetDocument()->GetUnits());
+			page.SetFlowOnly(bool(this->GetDocument()->GetFlowOnly()));
+			std::set<int> riverNums;
+			this->GetDocument()->GetUsedRiverNumbers(riverNums);
+			page.SetUsedRiverNumbers(riverNums);
 			sheet.AddPage(&page);
 			if (sheet.DoModal() == IDOK)
 			{

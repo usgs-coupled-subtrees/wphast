@@ -19,6 +19,11 @@ class CTreeMemento;
 
 #include <string>
 
+#ifndef vtkFloatingPointType
+#define vtkFloatingPointType vtkFloatingPointType
+typedef float vtkFloatingPointType;
+#endif
+
 class CWellActor : public vtkOpenGLActor, public ISerial
 {
 public:
@@ -59,8 +64,14 @@ public:
 	std::ostream& Output(std::ostream& os, const Ctime& time)const;
 	CString GetWarning(CTimeControl *pTimeControl)const;
 
+	virtual void SetScale(vtkFloatingPointType x, vtkFloatingPointType y, vtkFloatingPointType z);
+	virtual void SetScale(vtkFloatingPointType scale[3]);
+
+
 protected:
 	friend std::ostream& operator<< (std::ostream &os, const CWellActor &a);
+
+	void UpdatePoints(void);
 
 	CWellActor(void);
 	virtual ~CWellActor(void);
@@ -84,7 +95,11 @@ protected:
 
 	std::string         m_serialName;
 
+	vtkTransform       *m_pTransformUnits;
+	vtkTransform       *m_pTransformScale;
+
 private:
 	CWellActor(const CWellActor&);  // Not implemented.
 	void operator=(const CWellActor&);  // Not implemented.
 };
+

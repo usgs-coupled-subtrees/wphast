@@ -11,16 +11,12 @@ CRiver::CRiver(const River &r)
 {
 	this->n_user      = r.n_user;
 	this->description = r.description;
+
 	// points
 	//
 	for (int ip = 0; ip < r.count_points; ++ip)
 	{
 		const River_Point* point_ptr = &r.points[ip];
-// COMMENT: {6/30/2005 4:48:30 PM}		CRiverPoint rp;
-// COMMENT: {6/30/2005 4:48:30 PM}		rp.x = point_ptr->x;
-// COMMENT: {6/30/2005 4:48:30 PM}		rp.y = point_ptr->y;
-// COMMENT: {6/30/2005 4:48:30 PM}		rp.z = point_ptr->z;
-// COMMENT: {6/30/2005 4:48:30 PM}		m_listPoints.push_back(rp);
 		CRiverPoint rp(*point_ptr);
 		m_listPoints.push_back(rp);
 	}	
@@ -53,7 +49,7 @@ CRiver::~CRiver(void)
 #define HDF_STD_STRING_MACRO(name) \
 	do { \
 		DECL_SZ_MACRO(name); \
-		VERIFY(0 <= CGlobal::HDFSerializeString(bStoring, loc_id, sz_##name, this->name)); \
+		CGlobal::HDFSerializeString(bStoring, loc_id, sz_##name, this->name); \
 	} while(0)
 
 void CRiver::Serialize(bool bStoring, hid_t loc_id)
@@ -132,20 +128,10 @@ CRiverPoint::CRiverPoint(void)
 {
 }
 
-/*
-	double x;         int x_defined;
-	double y;         int y_defined;
-	double z;         int z_defined;
-	double depth;     int depth_defined;
-	double k;         int k_defined;
-	double width;     int width_defined;
-	double thickness; int thickness_defined;
-*/
-
 CRiverPoint::CRiverPoint(const River_Point& rp)
 : x_defined(rp.x_defined)
 , y_defined(rp.y_defined)
-, z_defined(rp.z_defined)
+, z_defined(rp.z_input_defined)
 , depth_defined(rp.depth_defined)
 , k_defined(rp.k_defined)
 , width_defined(rp.width_defined)
@@ -224,4 +210,126 @@ void CRiverState::Serialize(bool bStoring, hid_t loc_id)
 {
 	HDF_GETSET_DEFINED_MACRO(head,     H5T_NATIVE_DOUBLE);
 	HDF_GETSET_DEFINED_MACRO(solution, H5T_NATIVE_INT   );
+}
+
+std::ostream& operator<< (std::ostream &os, const CRiver &a)
+{
+	os << "RIVER " << a.n_user;
+	if (!a.description.empty())
+	{
+		os << " " << a.description;
+	}
+	os << "\n";
+
+	std::list<CRiverPoint>::const_iterator it = a.m_listPoints.begin();
+	for(; it != a.m_listPoints.end(); ++it)
+	{
+		os << (*it);
+	}
+
+	return os;
+}
+
+std::ostream& operator<< (std::ostream &os, const CRiverPoint &a)
+{
+	os << "\t-point " << a.x << " " << a.y << "\n";
+
+	size_t nSolutions = 0;
+	size_t nHeads     = 0;
+	CTimeSeries<CRiverState>::const_iterator it = a.m_riverSchedule.begin();
+	for(; it != a.m_riverSchedule.end(); ++it)
+	{
+		CRiverState state((*it).second);
+		if (state.head_defined)
+		{
+			++nHeads;
+		}
+		if (state.solution_defined)
+		{
+			++nSolutions;
+		}
+	}
+
+	// heads
+	//
+	if (nHeads)
+	{
+		os << "\t\t-head\n";
+		it = a.m_riverSchedule.begin();
+		for(; it != a.m_riverSchedule.end(); ++it)
+		{
+			Ctime time(it->first);
+			CRiverState state(it->second);
+			if (state.head_defined)
+			{
+				os << "\t\t\t" << time.value;
+				if (time.type == UNITS && time.input && ::strlen(time.input))
+				{
+					os << " " << time.input;
+				}
+				os << "     " << state.head << "\n";
+			}
+		}
+	}
+
+	// solutions
+	//
+	if (nSolutions)
+	{
+		os << "\t\t-solution\n";
+		it = a.m_riverSchedule.begin();
+		for(; it != a.m_riverSchedule.end(); ++it)
+		{
+			Ctime time(it->first);
+			CRiverState state(it->second);
+			if (state.solution_defined)
+			{
+				os << "\t\t\t" << time.value;
+				if (time.type == UNITS && time.input && ::strlen(time.input))
+				{
+					os << " " << time.input;
+				}
+				os << "     " << state.solution << "\n";
+			}
+		}
+	}
+
+	// width
+	//
+	if (a.width_defined)
+	{
+		os << "\t\t-width                       " << a.width << "\n";
+	}
+
+	// bed_hydraulic_conductivity
+	//
+	if (a.k_defined)
+	{
+		os << "\t\t-bed_hydraulic_conductivity  " << a.k << "\n";
+	}
+
+	// bed_hydraulic_conductivity
+	//
+	if (a.thickness_defined)
+	{
+		os << "\t\t-bed_thickness               " << a.thickness << "\n";
+	}
+
+	// depth
+	//
+	if (a.depth_defined)
+	{
+		os << "\t\t-depth                       " << a.depth << "\n";
+	}
+
+	/**************
+	// bottom
+	//
+	if (a.z_defined)
+	{
+		os << "\t\t-bottom                      " << a.z << "\n";
+	}
+	***************/
+
+	return os;
 }

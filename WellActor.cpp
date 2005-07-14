@@ -29,7 +29,14 @@ CWellActor::CWellActor(void)
 , m_zMax(1)
 , m_DefaultTubeDiameter(1.0)
 , m_pTreeMemento(0)
+, m_pTransformUnits(0)
+, m_pTransformScale(0)
 {
+	this->m_pTransformUnits = vtkTransform::New();
+	this->m_pTransformScale = vtkTransform::New();
+	this->m_pTransformUnits->Identity();
+	this->m_pTransformScale->Identity();
+
 	this->m_pLineSource = vtkLineSource::New();
 	this->SetWell(this->m_well, CUnits());
 
@@ -53,16 +60,50 @@ CWellActor::~CWellActor(void)
 	this->m_pPolyDataMapper->Delete();
 
 	if (this->m_pTreeMemento) delete this->m_pTreeMemento;
+
+	if (this->m_pTransformUnits)
+	{
+		this->m_pTransformUnits->Delete();
+		this->m_pTransformUnits = 0;
+	}
+	if (this->m_pTransformScale)
+	{
+		this->m_pTransformScale->Delete();
+		this->m_pTransformScale = 0;
+	}
 }
 
 void CWellActor::SetUnits(const CUnits &units)
 {
-	double x = this->m_well.x * units.horizontal.input_to_si;
-	double y = this->m_well.y * units.horizontal.input_to_si;
-	double zMin = this->m_zMin * units.vertical.input_to_si;
-	double zMax = this->m_zMax * units.vertical.input_to_si;
-	this->m_pLineSource->SetPoint1(x, y, zMin);
-	this->m_pLineSource->SetPoint2(x, y, zMax);
+	//double x = this->m_well.x * units.horizontal.input_to_si;
+	//double y = this->m_well.y * units.horizontal.input_to_si;
+	//double zMin = this->m_zMin * units.vertical.input_to_si;
+	//double zMax = this->m_zMax * units.vertical.input_to_si;
+	//this->m_pLineSource->SetPoint1(x, y, zMin);
+	//this->m_pLineSource->SetPoint2(x, y, zMax);
+
+	this->m_pTransformUnits->Identity();
+	this->m_pTransformUnits->Scale(units.horizontal.input_to_si, units.horizontal.input_to_si, units.vertical.input_to_si);
+	this->UpdatePoints();
+}
+
+void CWellActor::UpdatePoints(void)
+{
+	vtkFloatingPointType point1[3];
+	vtkFloatingPointType point2[3];
+
+	point1[0] = point2[0] = this->m_well.x;
+	point1[1] = point2[1] = this->m_well.y;
+	point1[2] = this->m_zMin;
+	point2[2] = this->m_zMax;
+
+	this->m_pTransformScale->TransformPoint(point1, point1);
+	this->m_pTransformUnits->TransformPoint(point1, point1);
+	this->m_pLineSource->SetPoint1(point1);
+
+	this->m_pTransformScale->TransformPoint(point2, point2);
+	this->m_pTransformUnits->TransformPoint(point2, point2);
+	this->m_pLineSource->SetPoint2(point2);
 }
 
 void CWellActor::SetWell(const CWellSchedule &well, const CUnits &units)
@@ -456,4 +497,17 @@ std::ostream& operator<< (std::ostream &os, const CWellActor &a)
 void CWellActor::SetRadius(float r)
 {
 	this->m_pTubeFilter->SetRadius(r);
+}
+
+void CWellActor::SetScale(vtkFloatingPointType x, vtkFloatingPointType y, vtkFloatingPointType z)
+{
+	//this->vtkProp3D::SetScale(x, y, z);
+	this->m_pTransformScale->Identity();
+	this->m_pTransformScale->Scale(x, y, z);
+	this->UpdatePoints();
+}
+
+void CWellActor::SetScale(vtkFloatingPointType scale[3])
+{
+	this->SetScale(scale[0], scale[1], scale[2]);
 }

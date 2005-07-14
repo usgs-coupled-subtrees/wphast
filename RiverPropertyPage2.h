@@ -1,5 +1,6 @@
 #pragma once
 
+#include <set>
 #include "gridctrl/ModGridCtrlEx.h"
 #include "River.h"
 #include "Units.h"
@@ -21,8 +22,13 @@ public:
 	void SetUnits(const CUnits& units);
 	void SetPoint(int index);
 
+	void SetFlowOnly(bool bFlowOnly)     { m_bFlowOnly = bFlowOnly; }
+	bool GetFlowOnly(void)const          { return m_bFlowOnly; }
+
+	void SetUsedRiverNumbers(const std::set<int>& used);
+
 // Dialog Data
-	enum { IDD = IDD_RIVER_PROPPAGE3 };
+	enum { IDD = IDD_RIVER_PROPPAGE4 };
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
@@ -45,10 +51,14 @@ protected:
 
 	bool             m_bFullVerify;
 	UINT             m_pointIndex;
+	bool             m_bFlowOnly;
+	std::set<int>    m_usedRiverNumbers;
 
 public:
 	afx_msg void OnTvnSelchangingPropTree(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnTvnSelchangedPropTree(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg LRESULT OnUM_DDXFailure(WPARAM wParam, LPARAM lParam);
 
+	afx_msg void OnBnClickedRadioDepth();
+	afx_msg void OnBnClickedRadioBottom();
 };

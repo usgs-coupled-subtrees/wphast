@@ -116,6 +116,8 @@ protected:
 	void AddGraphicPoint(void);
 	void DeleteGraphicPoint(void);
 
+	friend std::ostream& operator<< (std::ostream &os, const CRiverActor &a);
+
 	enum RiverState
 	{
 		None,
