@@ -677,7 +677,7 @@ void CRiverPropertyPage2::SetProperties(const CRiver& river)
 {
 	this->m_river = river;
 #if defined(_DEBUG)
-	if (!this->m_river.m_listPoints.front().depth_defined)
+	if (!this->m_river.m_listPoints.front().depth_defined && !this->m_river.m_listPoints.front().z_defined)
 	{
 		this->m_river.m_listPoints.front().depth = 1;
 		this->m_river.m_listPoints.front().depth_defined = TRUE;
@@ -698,7 +698,7 @@ void CRiverPropertyPage2::SetProperties(const CRiver& river)
 		this->m_river.m_listPoints.front().width_defined = TRUE;
 	}
 
-	if (!this->m_river.m_listPoints.back().depth_defined)
+	if (!this->m_river.m_listPoints.back().depth_defined && !this->m_river.m_listPoints.back().z_defined)
 	{
 		this->m_river.m_listPoints.back().depth = this->m_river.m_listPoints.size();
 		this->m_river.m_listPoints.back().depth_defined = TRUE;

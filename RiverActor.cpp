@@ -359,6 +359,7 @@ void CRiverActor::SetRiver(const CRiver &river, const CUnits &units)
 	char buffer[40];
 	::sprintf(buffer, "River %d", this->m_river.n_user);
 	this->m_serialName = buffer;
+	TRACE("CRiverActor::SetRiver IN\n");
 
 	this->ClearPoints();
 	std::list<CRiverPoint>::iterator iter = this->m_river.m_listPoints.begin();
@@ -367,6 +368,7 @@ void CRiverActor::SetRiver(const CRiver &river, const CUnits &units)
 		this->InsertNextPoint((*iter).x, (*iter).y, (*iter).z);
 	}
 	this->SetUnits(units);
+	TRACE("CRiverActor::SetRiver OUT\n");
 }
 
 CRiver CRiverActor::GetRiver(void)const
@@ -1030,7 +1032,7 @@ void CRiverActor::Update(CTreeCtrlNode node)
 					{
 						if (!headNode)
 						{
-							headNode = pointBranch.AddHead("head");
+							headNode = pointBranch.AddTail("head");
 						}
 						strItem.Format(" %g", rate.head);
 						headNode.AddHead(strTime + strItem);
@@ -1040,10 +1042,10 @@ void CRiverActor::Update(CTreeCtrlNode node)
 					{
 						if (!solutionNode)
 						{
-							solutionNode = pointBranch.AddHead("solution");
+							solutionNode = pointBranch.AddTail("solution");
 						}
 						strItem.Format(" %d", rate.solution);
-						solutionNode.AddHead(strTime + strItem);
+						solutionNode.AddTail(strTime + strItem);
 					}
 				}
 			}
@@ -1051,22 +1053,27 @@ void CRiverActor::Update(CTreeCtrlNode node)
 			if (it->width_defined)
 			{
 				strItem.Format("width %g", it->width);
-                pointBranch.AddHead(strItem);
+                pointBranch.AddTail(strItem);
 			}
 			if (it->k_defined)
 			{
 				strItem.Format("bed_hydraulic_conductivity %g", it->k);
-                pointBranch.AddHead(strItem);
+                pointBranch.AddTail(strItem);
 			}
 			if (it->thickness_defined)
 			{
 				strItem.Format("bed_thickness %g", it->thickness);
-                pointBranch.AddHead(strItem);
+                pointBranch.AddTail(strItem);
 			}
 			if (it->depth_defined)
 			{
 				strItem.Format("depth %g", it->depth);
-                pointBranch.AddHead(strItem);
+                pointBranch.AddTail(strItem);
+			}
+			if (it->z_defined)
+			{
+				strItem.Format("bottom %g", it->z);
+                pointBranch.AddTail(strItem);
 			}
 		}
 	}
@@ -1451,7 +1458,8 @@ void CRiverActor::AddGraphicPoint(void)
 	pPolyDataMapper->SetInput(pSphereSource->GetOutput());
 	this->m_listPolyDataMapper.push_back(pPolyDataMapper);
 
-	vtkActor *pActor = vtkActor::New();
+// COMMENT: {7/14/2005 3:19:25 PM}	vtkActor *pActor = vtkActor::New();
+	vtkLODActor *pActor = vtkLODActor::New();
 	pActor->SetMapper(pPolyDataMapper);
 	if (this->Enabled)
 	{
@@ -1482,7 +1490,8 @@ void CRiverActor::AddGraphicPoint(void)
 		pPolyDataMapper->SetInput(pTubeFilter->GetOutput());
 		this->m_listLinePolyDataMapper.push_back(pPolyDataMapper);
 		
-		vtkActor *pActor = vtkActor::New();
+// COMMENT: {7/14/2005 3:19:58 PM}		vtkActor *pActor = vtkActor::New();
+		vtkLODActor *pActor = vtkLODActor::New();		
 		pActor->SetMapper(pPolyDataMapper);
 		pActor->GetProperty()->SetColor(0., 1., 1.);
 		this->m_listLineActor.push_back(pActor);

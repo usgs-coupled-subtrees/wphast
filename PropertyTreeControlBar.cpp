@@ -731,6 +731,15 @@ void CPropertyTreeControlBar::OnNMDblClk(NMHDR* pNMHDR, LRESULT* pResult)
 						}
 						page.SetUsedRiverNumbers(riverNums);
 
+// COMMENT: {7/14/2005 2:43:57 PM}                        //{{
+// COMMENT: {7/14/2005 2:43:57 PM}						POSITION pos = pWPhastDoc->GetFirstViewPosition();
+// COMMENT: {7/14/2005 2:43:57 PM}						while (pos != NULL)
+// COMMENT: {7/14/2005 2:43:57 PM}						{
+// COMMENT: {7/14/2005 2:43:57 PM}							CView* pView = pWPhastDoc->GetNextView(pos);
+// COMMENT: {7/14/2005 2:43:57 PM}							pView->UpdateWindow();
+// COMMENT: {7/14/2005 2:43:57 PM}							pView->EnableWindow(FALSE);
+// COMMENT: {7/14/2005 2:43:57 PM}						}
+// COMMENT: {7/14/2005 2:43:57 PM}						//}}
 						if (sheet.DoModal() == IDOK)
 						{
 							CRiver river;
