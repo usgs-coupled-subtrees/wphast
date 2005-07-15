@@ -2292,15 +2292,15 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 		printFreq.InitSync(pInput); // must be called before Load()
 
 		pInput->Load();
-		// check for errors
-		for (int i = 0; i < 3; ++i)
-		{
-			if (grid[i].uniform != TRUE)
-			{
-				::error_msg("Currently only uniform grids are supported.", CONTINUE);
-				++input_error;
-			}
-		}
+// COMMENT: {7/14/2005 7:44:09 PM}		// check for errors
+// COMMENT: {7/14/2005 7:44:09 PM}		for (int i = 0; i < 3; ++i)
+// COMMENT: {7/14/2005 7:44:09 PM}		{
+// COMMENT: {7/14/2005 7:44:09 PM}			if (grid[i].uniform != TRUE)
+// COMMENT: {7/14/2005 7:44:09 PM}			{
+// COMMENT: {7/14/2005 7:44:09 PM}				::error_msg("Currently only uniform grids are supported.", CONTINUE);
+// COMMENT: {7/14/2005 7:44:09 PM}				++input_error;
+// COMMENT: {7/14/2005 7:44:09 PM}			}
+// COMMENT: {7/14/2005 7:44:09 PM}		}
 		if (pInput->GetErrorCount() != 0)
 		{
 			// goto ImportError;

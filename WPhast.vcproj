@@ -526,6 +526,9 @@
 				RelativePath="GridPropertyPage.cpp">
 			</File>
 			<File
+				RelativePath="GridPropertyPage2.cpp">
+			</File>
+			<File
 				RelativePath="HDFMirrorFile.cpp">
 			</File>
 			<File
@@ -1023,6 +1026,9 @@
 			</File>
 			<File
 				RelativePath="GridPropertyPage.h">
+			</File>
+			<File
+				RelativePath="GridPropertyPage2.h">
 			</File>
 			<File
 				RelativePath="HDFMirrorFile.h">
@@ -3707,15 +3713,15 @@
 			Name="Build Logs"
 			Filter="">
 			<File
-				RelativePath="cppunit\BuildLog.htm"
-				DeploymentContent="TRUE">
-			</File>
-			<File
 				RelativePath="Debug\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 			<File
 				RelativePath="Release\BuildLog.htm"
+				DeploymentContent="TRUE">
+			</File>
+			<File
+				RelativePath="cppunit\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 		</Filter>

@@ -267,8 +267,10 @@ void CGrid::Setup(void)
 void CGrid::Insert(CTreeCtrl* pTreeCtrl, HTREEITEM htiGrid)
 {
 	CString format;
-	if (this->uniform == TRUE) {
-		if (this->uniform_expanded == TRUE) {
+	if (this->uniform == TRUE)
+	{
+		if (this->uniform_expanded == TRUE)
+		{
 			ASSERT(AfxIsValidAddress(this->coord, sizeof(double) * this->count_coord));
 			format.Format("uniform %c %g %g %d",
 				::toupper(this->c),
@@ -277,7 +279,8 @@ void CGrid::Insert(CTreeCtrl* pTreeCtrl, HTREEITEM htiGrid)
 				this->count_coord
 				);
 		}
-		else {
+		else
+		{
 			ASSERT(AfxIsValidAddress(this->coord, sizeof(double) * 2));
 			format.Format("uniform %c %g %g %d",
 				::toupper(this->c),
@@ -286,11 +289,16 @@ void CGrid::Insert(CTreeCtrl* pTreeCtrl, HTREEITEM htiGrid)
 				this->count_coord
 				);
 		}
-		pTreeCtrl->InsertItem(format, htiGrid);
 	}
-	else {
-		ASSERT(FALSE); // TODO:
+	else
+	{
+		format.Format("nonuniform %c %g ... %g",
+			::toupper(this->c),
+			this->coord[0],
+			this->coord[this->count_coord - 1]
+			);
 	}
+	pTreeCtrl->InsertItem(format, htiGrid);
 }
 
 void CGrid::Serialize(bool bStoring, hid_t loc_id)
@@ -302,7 +310,8 @@ void CGrid::Serialize(bool bStoring, hid_t loc_id)
 
 	herr_t status;
 
-	if (bStoring) {
+	if (bStoring)
+	{
 		// uniform
 		//
 		status = CGlobal::HDFSerialize(bStoring, loc_id, szUniform, H5T_NATIVE_INT, 1, &this->uniform);
@@ -321,21 +330,26 @@ void CGrid::Serialize(bool bStoring, hid_t loc_id)
 		//
 		// coord
 		//
-		if (this->uniform == TRUE) {
-			if (this->uniform_expanded == TRUE) {
+		if (this->uniform == TRUE)
+		{
+			if (this->uniform_expanded == TRUE)
+			{
 				double v[2];
 				v[0] = this->coord[0];
 				v[1] = this->coord[this->count_coord - 1];
 				status = CGlobal::HDFSerialize(bStoring, loc_id, szCoord, H5T_NATIVE_DOUBLE, 2, v);
 				ASSERT(status >= 0);
 			}
-			else {
+			else
+			{
 				status = CGlobal::HDFSerialize(bStoring, loc_id, szCoord, H5T_NATIVE_DOUBLE, 2, this->coord);
 				ASSERT(status >= 0);
 			}
 		}
-		else {
-			ASSERT(FALSE); // TODO:
+		else
+		{
+			status = CGlobal::HDFSerialize(bStoring, loc_id, szCoord, H5T_NATIVE_DOUBLE, this->count_coord, this->coord);
+			ASSERT(status >= 0);
 		}
 	}
 	else
@@ -357,12 +371,17 @@ void CGrid::Serialize(bool bStoring, hid_t loc_id)
 
 		// coord
 		//
-		if (this->uniform == TRUE) {
+		if (this->uniform == TRUE)
+		{
 			CGlobal::HDFSerialize(bStoring, loc_id, "coord", H5T_NATIVE_DOUBLE, 2, this->coord);
 			this->uniform_expanded = FALSE;
 		}
-		else {
-			ASSERT(FALSE); // TODO:
+		else
+		{
+			delete[] this->coord;
+			this->coord = new double[this->count_coord];
+			status = CGlobal::HDFSerialize(bStoring, loc_id, szCoord, H5T_NATIVE_DOUBLE, this->count_coord, this->coord);
+			ASSERT(status >= 0);
 		}
 
 		// elt_centroid
@@ -425,7 +444,8 @@ void CGrid::Dump(CDumpContext& dc)const
 
 std::ostream& operator<< (std::ostream &os, const CGrid &a)
 {
-	switch (a.uniform)  {
+	switch (a.uniform)
+	{
 		case UNDEFINED:
 			ASSERT(FALSE);
 			break;
@@ -438,7 +458,19 @@ std::ostream& operator<< (std::ostream &os, const CGrid &a)
 				<< "\n";
 			break;
 		default:
-			os << "\t-nonuniform";
+			os << "\t-nonuniform" << " " << (char)::toupper((int)a.c);
+			for (int i = 0; i < a.count_coord; ++i)
+			{
+				if (i % 5)
+				{
+					os << "    " << a.coord[i];
+				}
+				else
+				{
+					os << "\n\t\t" << a.coord[i];
+				}
+			}
+			os << "\n";
 			break;
 	}
 

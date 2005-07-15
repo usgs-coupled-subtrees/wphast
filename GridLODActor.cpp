@@ -267,9 +267,9 @@ void CGridLODActor::GetGrid(CGrid& x, CGrid& y, CGrid& z)const
 
 void CGridLODActor::Setup(const CUnits& units)
 {
-	ASSERT(this->m_grid[0].uniform == TRUE);
-	ASSERT(this->m_grid[1].uniform == TRUE);
-	ASSERT(this->m_grid[2].uniform == TRUE);
+// COMMENT: {7/14/2005 8:29:43 PM}	ASSERT(this->m_grid[0].uniform == TRUE);
+// COMMENT: {7/14/2005 8:29:43 PM}	ASSERT(this->m_grid[1].uniform == TRUE);
+// COMMENT: {7/14/2005 8:29:43 PM}	ASSERT(this->m_grid[2].uniform == TRUE);
 	ASSERT(this->m_grid[0].uniform_expanded == FALSE);
 	ASSERT(this->m_grid[1].uniform_expanded == FALSE);
 	ASSERT(this->m_grid[2].uniform_expanded == FALSE);
@@ -277,7 +277,8 @@ void CGridLODActor::Setup(const CUnits& units)
 	int i;
 	double incr[3];
 	double min[3];
-	for (i = 0; i < 3; ++i) {
+	for (i = 0; i < 3; ++i)
+	{
 		incr[i] = (this->m_grid[i].coord[1] - this->m_grid[i].coord[0]) / (this->m_grid[i].count_coord - 1);
 	}
 
@@ -319,14 +320,38 @@ void CGridLODActor::Setup(const CUnits& units)
 	//
 	float x[3];
 	register int j, k, offset, jOffset, kOffset;
-	for (k = 0; k < this->m_grid[2].count_coord; ++k) {
-		x[2] = min[2] + k * incr[2];
+	for (k = 0; k < this->m_grid[2].count_coord; ++k)
+	{
+		if (this->m_grid[2].uniform)
+		{
+			x[2] = min[2] + k * incr[2];
+		}
+		else
+		{
+			x[2] = this->m_grid[2].coord[k];
+		}
 		kOffset = k * this->m_grid[0].count_coord * this->m_grid[1].count_coord;
-		for (j = 0; j < this->m_grid[1].count_coord; ++j) {
-			x[1] = min[1] + j * incr[1];
+		for (j = 0; j < this->m_grid[1].count_coord; ++j)
+		{
+			if (this->m_grid[1].uniform)
+			{
+				x[1] = min[1] + j * incr[1];
+			}
+			else
+			{
+				x[1] = this->m_grid[1].coord[j];
+			}
 			jOffset = j * this->m_grid[0].count_coord;
-			for (i = 0; i < this->m_grid[0].count_coord; ++i) {
-				x[0] = min[0] + i * incr[0];
+			for (i = 0; i < this->m_grid[0].count_coord; ++i)
+			{
+				if (this->m_grid[0].uniform)
+				{
+					x[0] = min[0] + i * incr[0];
+				}
+				else
+				{
+					x[0] = this->m_grid[0].coord[i];
+				}
 				offset = i + jOffset + kOffset;
 				points->InsertPoint(offset, x);
 			}
@@ -393,30 +418,39 @@ void CGridLODActor::Setup(const CUnits& units)
 
 void CGridLODActor::GetDefaultZone(CZone& rZone)
 {
-	ASSERT(this->m_grid[0].uniform == TRUE);
-	ASSERT(this->m_grid[1].uniform == TRUE);
-	ASSERT(this->m_grid[2].uniform == TRUE);
+// COMMENT: {7/14/2005 8:43:01 PM}	ASSERT(this->m_grid[0].uniform == TRUE);
+// COMMENT: {7/14/2005 8:43:01 PM}	ASSERT(this->m_grid[1].uniform == TRUE);
+// COMMENT: {7/14/2005 8:43:01 PM}	ASSERT(this->m_grid[2].uniform == TRUE);
 
 	rZone.zone_defined = TRUE;
 	rZone.x1 = this->m_grid[0].coord[0];
 	rZone.y1 = this->m_grid[1].coord[0];
 	rZone.z1 = this->m_grid[2].coord[0];
-	if (this->m_grid[0].uniform_expanded == TRUE) {
+
+	if (!this->m_grid[0].uniform || this->m_grid[0].uniform_expanded == TRUE)
+	{
 		rZone.x2 = this->m_grid[0].coord[this->m_grid[0].count_coord - 1];
 	}
-	else {
+	else
+	{
 		rZone.x2 = this->m_grid[0].coord[1];
 	}
-	if (this->m_grid[1].uniform_expanded == TRUE) {
+
+	if (!this->m_grid[1].uniform || this->m_grid[1].uniform_expanded == TRUE)
+	{
 		rZone.y2 = this->m_grid[1].coord[this->m_grid[1].count_coord - 1];
 	}
-	else {
+	else
+	{
 		rZone.y2 = this->m_grid[1].coord[1];
 	}
-	if (this->m_grid[2].uniform_expanded == TRUE) {
+
+	if (!this->m_grid[2].uniform || this->m_grid[2].uniform_expanded == TRUE)
+	{
 		rZone.z2 = this->m_grid[2].coord[this->m_grid[2].count_coord - 1];
 	}
-	else {
+	else
+	{
 		rZone.z2 = this->m_grid[2].coord[1];
 	}
 }
