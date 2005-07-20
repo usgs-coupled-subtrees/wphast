@@ -520,6 +520,9 @@
 				RelativePath="GridElt.cpp">
 			</File>
 			<File
+				RelativePath="GridKeyword.cpp">
+			</File>
+			<File
 				RelativePath="GridLODActor.cpp">
 			</File>
 			<File
@@ -527,6 +530,9 @@
 			</File>
 			<File
 				RelativePath="GridPropertyPage2.cpp">
+			</File>
+			<File
+				RelativePath="GridSetAction.cpp">
 			</File>
 			<File
 				RelativePath="HDFMirrorFile.cpp">
@@ -710,6 +716,9 @@
 			</File>
 			<File
 				RelativePath="SiteMap.cpp">
+			</File>
+			<File
+				RelativePath="Snap.cpp">
 			</File>
 			<File
 				RelativePath="Startup.cpp">
@@ -1022,6 +1031,9 @@
 				RelativePath="GridElt.h">
 			</File>
 			<File
+				RelativePath="GridKeyword.h">
+			</File>
+			<File
 				RelativePath="GridLODActor.h">
 			</File>
 			<File
@@ -1029,6 +1041,9 @@
 			</File>
 			<File
 				RelativePath="GridPropertyPage2.h">
+			</File>
+			<File
+				RelativePath="GridSetAction.h">
 			</File>
 			<File
 				RelativePath="HDFMirrorFile.h">
@@ -1218,6 +1233,9 @@
 			</File>
 			<File
 				RelativePath="SiteMap.h">
+			</File>
+			<File
+				RelativePath="Snap.h">
 			</File>
 			<File
 				RelativePath="Startup.h">
@@ -3713,15 +3731,15 @@
 			Name="Build Logs"
 			Filter="">
 			<File
+				RelativePath="cppunit\BuildLog.htm"
+				DeploymentContent="TRUE">
+			</File>
+			<File
 				RelativePath="Debug\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 			<File
 				RelativePath="Release\BuildLog.htm"
-				DeploymentContent="TRUE">
-			</File>
-			<File
-				RelativePath="cppunit\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 		</Filter>

@@ -2,7 +2,8 @@
 
 #include "FlowOnly.h"
 #include "Units.h"
-#include "Grid.h"
+//#include "Grid.h"
+#include "GridKeyword.h"
 #include "GridElt.h"
 #include "HeadIC.h"
 #include "TimeControl2.h"
@@ -11,6 +12,7 @@
 #include "FreeSurface.h"
 #include "PrintFreq.h"
 #include "ChemIC.h"
+#include "Snap.h"
 
 class CNewModel
 {
@@ -28,7 +30,11 @@ public:
 	CSteadyFlow      m_steadyFlow;
 	CFreeSurface     m_freeSurface;
 	CUnits           m_units;
-	CGrid            m_grid[3];
+	//CGrid            m_grid[3];
+	//int              m_axes[3];
+	//CSnap            m_snap;
+	//bool             m_print_input_xy;
+	CGridKeyword     m_gridKeyword;
 	CGridElt         m_media;
 	CHeadIC          m_headIC;
 	CChemIC          m_chemIC;

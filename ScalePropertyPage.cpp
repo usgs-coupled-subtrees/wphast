@@ -21,6 +21,7 @@ CScalePropertyPage::CScalePropertyPage()
 	, m_pDoc(0)
 	, m_bNeedAction(FALSE)
 	, m_pAction(0)
+	, m_bModifiedDoc(false)
 {
 }
 
@@ -80,25 +81,35 @@ END_MESSAGE_MAP()
 BOOL CScalePropertyPage::OnApply()
 {
 	// Add your specialized code here and/or call the base class
-	if (this->m_bNeedAction && this->UpdateData(TRUE)) {
+	if (this->m_bNeedAction && this->UpdateData(TRUE))
+	{
 // COMMENT: {3/8/2004 8:37:31 PM}		CSetScaleAction* pSetScaleAction = new CSetScaleAction(this->m_pDoc, m_XScale, m_YScale, m_ZScale);
 // COMMENT: {3/8/2004 8:37:31 PM}		this->m_pDoc->Execute(pSetScaleAction);
 // COMMENT: {3/8/2004 8:37:31 PM}		////// this->CancelToClose(); // broken
 // COMMENT: {3/8/2004 8:37:31 PM}		//////this->GetParent()->PostMessage(PSM_CANCELTOCLOSE);
 // COMMENT: {3/8/2004 8:37:31 PM}		this->m_bNeedAction = false;
 		//{{
-		if (this->m_pAction == 0) {
+		if (this->m_pAction == 0)
+		{
 			ASSERT(this->m_pDoc);
 			this->m_pAction = new CSetScaleAction(this->m_pDoc, m_XScale, m_YScale, m_ZScale);
 			if (this->m_pAction == 0) ::AfxMessageBox("Out of Memory");
-			if (CModelessPropertySheet *pSheet = reinterpret_cast<CModelessPropertySheet*>(this->GetParent())) {
-				if (this->m_pAction) {
+			if (CModelessPropertySheet *pSheet = reinterpret_cast<CModelessPropertySheet*>(this->GetParent()))
+			{
+				if (this->m_pAction)
+				{
+					if (!this->m_pDoc->IsModified())
+					{
+						this->m_bModifiedDoc = true;
+						this->m_pDoc->SetModifiedFlag(TRUE);
+					}
 					this->m_pAction->Execute();
 					pSheet->AddAction(this->m_pAction);
 				}
 			}
 		}
-		else {
+		else
+		{
 			this->m_pAction->Apply(this->m_XScale, this->m_YScale, this->m_ZScale);
 		}
 		this->m_bNeedAction = false;
@@ -124,7 +135,13 @@ void CScalePropertyPage::OnOK()
 void CScalePropertyPage::OnCancel()
 {
 	// TODO: Add your specialized code here and/or call the base class
-	if (this->m_pAction) {
+	if (this->m_pAction)
+	{
+		if (this->m_bModifiedDoc && this->m_pDoc)
+		{
+			ASSERT(this->m_pDoc->IsModified());
+			this->m_pDoc->SetModifiedFlag(FALSE);
+		}
 		this->m_pAction->UnExecute();
 	}
 

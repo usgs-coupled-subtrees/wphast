@@ -231,6 +231,7 @@
 #define ID_ICZONES_SELECTALL            237
 #define IDD_GRID_PROPPAGE3              237
 #define ID_ICZONES_UNSELECTALL          238
+#define IDD_GRID_PROPPAGE4              238
 #define ID_TOOLS_NEWSTRESSPERIOD        239
 #define ID_TOOLS_NEWWELL                240
 #define ID_WELLS_HIDEALL                241
@@ -361,6 +362,7 @@
 #define IDC_XMAX_UNITS_STATIC           1095
 #define IDC_YMIN_UNITS_STATIC           1096
 #define IDC_MOL_DIFF_EDIT               1096
+#define IDC_STATIC_SNAP_UNITS           1096
 #define IDC_ZMIN_UNITS_STATIC           1097
 #define IDC_FLOW_ONLY_RADIO             1097
 #define IDC_YMAX_UNITS_STATIC           1098
@@ -529,7 +531,31 @@
 #define IDC_RADIO_BOTTOM                1248
 #define IDC_BOTTOM_EDIT                 1249
 #define IDC_RADIO_DEPTH                 1250
-#define IDC_TAB1                        1251
+#define IDC_TAB_COOR                    1251
+#define IDC_GRID_NONUNIFORM             1253
+#define IDC_RADIO_UNIFORM               1254
+#define IDC_RADIO_NONUNIFORM            1255
+#define IDC_STATIC_MIN                  1256
+#define IDC_EDIT_MIN                    1257
+#define IDC_STATIC_MIN_UNITS            1258
+#define IDC_STATIC_MAX_UNITS            1259
+#define IDC_STATIC_MAX                  1260
+#define IDC_STATIC_U_NODES              1261
+#define IDC_STATIC_N_NODES              1262
+#define IDC_EDIT_MAX                    1263
+#define IDC_EDIT_U_NODES                1264
+#define IDC_SPIN_U_NODES                1265
+#define IDC_SPIN_N_NODES                1266
+#define IDC_EDIT_SNAP                   1267
+#define IDC_EDIT_N_NODES                1268
+#define IDC_BUTTON_INS                  1269
+#define IDC_BUTTON_DEL                  1270
+#define IDC_BUTTON_SERIES               1271
+#define IDC_RADIO_XY                    1272
+#define IDC_RADIO_XZ                    1273
+#define IDC_CHECK_X                     1274
+#define IDC_CHECK_Y                     1275
+#define IDC_CHECK_Z                     1276
 #define IDC_RESIZE_COLUMN               28654
 #define IDC_RESIZE_ROW                  28655
 #define IDR_POPUP                       28656
@@ -545,7 +571,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        248
 #define _APS_NEXT_COMMAND_VALUE         32801
-#define _APS_NEXT_CONTROL_VALUE         1253
+#define _APS_NEXT_CONTROL_VALUE         1277
 #define _APS_NEXT_SYMED_VALUE           126
 #endif
 #endif

@@ -19,6 +19,9 @@
 #include "RiverDeleteAction.h"
 #include "RiverDeletePointAction.h"
 
+#include "ModelessPropertySheet.h"
+#include "GridPropertyPage2.h"
+
 #include "ZoneActor.h"
 #include "WellActor.h"
 #include "RiverActor.h"
@@ -128,10 +131,12 @@ CPropertyTreeControlBar::~CPropertyTreeControlBar(void)
 
 CWPhastDoc* CPropertyTreeControlBar::GetDocument(void)const
 {
-	if (CFrameWnd *pFrame = reinterpret_cast<CFrameWnd*>(AfxGetApp()->m_pMainWnd)) {
+	if (CFrameWnd *pFrame = reinterpret_cast<CFrameWnd*>(AfxGetApp()->m_pMainWnd))
+	{
 		ASSERT_KINDOF(CFrameWnd, pFrame);
 		ASSERT_VALID(pFrame);
-		if (CWPhastDoc* pDoc = reinterpret_cast<CWPhastDoc*>(pFrame->GetActiveDocument())) {
+		if (CWPhastDoc* pDoc = reinterpret_cast<CWPhastDoc*>(pFrame->GetActiveDocument()))
+		{
 			ASSERT_KINDOF(CWPhastDoc, pDoc);
 			ASSERT_VALID(pDoc);
 			return pDoc;
@@ -758,48 +763,73 @@ void CPropertyTreeControlBar::OnNMDblClk(NMHDR* pNMHDR, LRESULT* pResult)
 
 	// GRID
 	//
-	if (item.IsNodeAncestor(this->m_nodeGrid)) {
-		// TODO: pGrid.Edit(&this->m_wndTree);
-		if (CGridLODActor* pGrid = CGridLODActor::SafeDownCast((vtkObject*)m_nodeGrid.GetData())) {
+	if (item.IsNodeAncestor(this->m_nodeGrid))
+	{
+// COMMENT: {7/15/2005 3:32:08 PM}		if (CGridLODActor* pGrid = CGridLODActor::SafeDownCast((vtkObject*)m_nodeGrid.GetData()))
+// COMMENT: {7/15/2005 3:32:08 PM}		{
+// COMMENT: {7/15/2005 3:32:08 PM}			CFrameWnd *pFrame = (CFrameWnd*)AfxGetApp()->m_pMainWnd;
+// COMMENT: {7/15/2005 3:32:08 PM}			ASSERT_VALID(pFrame);
+// COMMENT: {7/15/2005 3:32:08 PM}			CWPhastDoc* pDoc = reinterpret_cast<CWPhastDoc*>(pFrame->GetActiveDocument());
+// COMMENT: {7/15/2005 3:32:08 PM}			ASSERT_VALID(pDoc);
+// COMMENT: {7/15/2005 3:32:08 PM}
+// COMMENT: {7/15/2005 3:32:08 PM}			// show property sheet
+// COMMENT: {7/15/2005 3:32:08 PM}			//
+// COMMENT: {7/15/2005 3:32:08 PM}			CPropertySheet propSheet("Define grid", ::AfxGetMainWnd());
+// COMMENT: {7/15/2005 3:32:08 PM}			CGridPropertyPage gridPage;
+// COMMENT: {7/15/2005 3:32:08 PM}
+// COMMENT: {7/15/2005 3:32:08 PM}			CGrid gridx, gridy, gridz;
+// COMMENT: {7/15/2005 3:32:08 PM}			pGrid->GetGrid(gridx, gridy, gridz);
+// COMMENT: {7/15/2005 3:32:08 PM}			gridPage.m_grid[0] = gridx;
+// COMMENT: {7/15/2005 3:32:08 PM}			gridPage.m_grid[1] = gridy;
+// COMMENT: {7/15/2005 3:32:08 PM}			gridPage.m_grid[2] = gridz;
+// COMMENT: {7/15/2005 3:32:08 PM}
+// COMMENT: {7/15/2005 3:32:08 PM}			gridPage.SetApply(pDoc);
+// COMMENT: {7/15/2005 3:32:08 PM}			propSheet.AddPage(&gridPage);
+// COMMENT: {7/15/2005 3:32:08 PM}			
+// COMMENT: {7/15/2005 3:32:08 PM}			// support undo
+// COMMENT: {7/15/2005 3:32:08 PM}			//
+// COMMENT: {7/15/2005 3:32:08 PM}			CResizeGridAction* pAction = new CResizeGridAction(pDoc, gridPage.m_grid, pGrid);
+// COMMENT: {7/15/2005 3:32:08 PM}
+// COMMENT: {7/15/2005 3:32:08 PM}			switch (propSheet.DoModal()) {
+// COMMENT: {7/15/2005 3:32:08 PM}				case IDOK:
+// COMMENT: {7/15/2005 3:32:08 PM}					////pDoc->SetFlowOnly(gridPage.m_bFlowOnly); // TODO: make undoable
+// COMMENT: {7/15/2005 3:32:08 PM}					pAction->Reset(gridPage.m_grid);
+// COMMENT: {7/15/2005 3:32:08 PM}					pDoc->Execute(pAction);
+// COMMENT: {7/15/2005 3:32:08 PM}					break;
+// COMMENT: {7/15/2005 3:32:08 PM}				case IDCANCEL:
+// COMMENT: {7/15/2005 3:32:08 PM}					pAction->UnExecute();
+// COMMENT: {7/15/2005 3:32:08 PM}					delete pAction;
+// COMMENT: {7/15/2005 3:32:08 PM}					break;
+// COMMENT: {7/15/2005 3:32:08 PM}				default:
+// COMMENT: {7/15/2005 3:32:08 PM}					ASSERT(FALSE);
+// COMMENT: {7/15/2005 3:32:08 PM}			}
+// COMMENT: {7/15/2005 3:32:08 PM}			*pResult = TRUE;
+// COMMENT: {7/15/2005 3:32:08 PM}			return;
+// COMMENT: {7/15/2005 3:32:08 PM}		}
+		//{{
+		if (CGridLODActor* pGridActor = CGridLODActor::SafeDownCast((vtkObject*)m_nodeGrid.GetData()))
+		{
 			CFrameWnd *pFrame = (CFrameWnd*)AfxGetApp()->m_pMainWnd;
 			ASSERT_VALID(pFrame);
-			CWPhastDoc* pDoc = reinterpret_cast<CWPhastDoc*>(pFrame->GetActiveDocument());
-			ASSERT_VALID(pDoc);
+			CWPhastDoc* pWPhastDoc = reinterpret_cast<CWPhastDoc*>(pFrame->GetActiveDocument());
+			ASSERT_VALID(pWPhastDoc);
 
-			// show property sheet
-			//
-			CPropertySheet propSheet("Define grid", ::AfxGetMainWnd());
-			CGridPropertyPage gridPage;
-
-			CGrid gridx, gridy, gridz;
-			pGrid->GetGrid(gridx, gridy, gridz);
-			gridPage.m_grid[0] = gridx;
-			gridPage.m_grid[1] = gridy;
-			gridPage.m_grid[2] = gridz;
-
-			gridPage.SetApply(pDoc);
-			propSheet.AddPage(&gridPage);
-			
-			// support undo
-			//
-			CResizeGridAction* pAction = new CResizeGridAction(pDoc, gridPage.m_grid, pGrid);
-
-			switch (propSheet.DoModal()) {
-				case IDOK:
-					////pDoc->SetFlowOnly(gridPage.m_bFlowOnly); // TODO: make undoable
-					pAction->Reset(gridPage.m_grid);
-					pDoc->Execute(pAction);
-					break;
-				case IDCANCEL:
-					pAction->UnExecute();
-					delete pAction;
-					break;
-				default:
-					ASSERT(FALSE);
-			}
+			pWPhastDoc->Edit(pGridActor);
 			*pResult = TRUE;
 			return;
+
+// COMMENT: {7/15/2005 3:35:24 PM}			// show property sheet
+// COMMENT: {7/15/2005 3:35:24 PM}			//
+// COMMENT: {7/15/2005 3:35:24 PM}			CPropertySheet propSheet("Define grid", ::AfxGetMainWnd());
+// COMMENT: {7/15/2005 3:35:24 PM}			CGridPropertyPage gridPage;
+// COMMENT: {7/15/2005 3:35:24 PM}
+// COMMENT: {7/15/2005 3:35:24 PM}			CGrid gridx, gridy, gridz;
+// COMMENT: {7/15/2005 3:35:24 PM}			pGridActor->GetGrid(gridx, gridy, gridz);
+// COMMENT: {7/15/2005 3:35:24 PM}			gridPage.m_grid[0] = gridx;
+// COMMENT: {7/15/2005 3:35:24 PM}			gridPage.m_grid[1] = gridy;
+// COMMENT: {7/15/2005 3:35:24 PM}			gridPage.m_grid[2] = gridz;
 		}
+		//}}
 	}
 
 	// MEDIA

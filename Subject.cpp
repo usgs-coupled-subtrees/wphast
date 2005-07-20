@@ -30,7 +30,8 @@ void CSubject::Notify(IObserver* pObserver, LPARAM lHint, CObject* pHint, vtkObj
 	std::set<IObserver*>::iterator it = this->m_observers.begin();
 	for (; it != this->m_observers.end(); ++it)
 	{
-		if (pObserver != (*it)) {
+		if (pObserver != (*it))
+		{
 			(*it)->Update(pObserver, lHint, pHint, pObject);
 		}
 	}

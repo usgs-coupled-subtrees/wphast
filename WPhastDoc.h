@@ -12,6 +12,7 @@
 // forward declarations
 #include <iosfwd> // std::ostream
 #include "Subject.h"
+#include "IObserver.h"
 
 class vtkProp;
 class vtkPropCollection;
@@ -26,6 +27,7 @@ class CZoneLODActor;
 class CGridLODActor;
 
 class CGrid;
+class CGridKeyword;
 class CUnits;
 class CFlowOnly;
 class CSteadyFlow;
@@ -39,6 +41,7 @@ class CNewModel;
 
 class CModelessPropertySheet;
 class CScalePropertyPage;
+class CGridPropertyPage2;
 
 class vtkAxes;
 class vtkTubeFilter;
@@ -83,7 +86,7 @@ enum WPhastNotification {
 typedef float vtkFloatingPointType;
 #endif
 
-class CWPhastDoc : public CDocument, public CSubject
+class CWPhastDoc : public CDocument, public CSubject, public IObserver
 {
 protected: // create from serialization only
 	CWPhastDoc();
@@ -103,10 +106,18 @@ public:
 	void New(const CNewModel& model);
 
 public:
+
+	// IObserver interface
+	//
+	virtual void Update(IObserver* pSender = 0, LPARAM lHint = 0L, CObject* pHint = 0, vtkObject* pObject = 0);
+
 	void Add(CZoneActor *pZoneActor);
 	void UnAdd(CZoneActor *pZoneActor);
 	void Delete(CZoneActor *pZoneActor);
 	void UnDelete(CZoneActor *pZoneActor);
+
+	void Edit(CGridLODActor* pGridLODActor);
+	void SetGridKeyword(const CGridKeyword& gridKeyword);
 
 	// Well actions
 	void Add(CWellActor *pWellActor);
@@ -206,6 +217,10 @@ protected:
 	int m_nNextZone;
 	enum ProjectionType m_ProjectionMode;
 
+	// grid
+	//
+	CModelessPropertySheet     *m_pGridSheet;
+	CGridPropertyPage2         *m_pGridPage;
 
 protected:
 	void InitDocument();

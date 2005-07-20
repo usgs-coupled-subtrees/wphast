@@ -50,3 +50,4 @@ void CResizeGridAction::UnExecute(void)
 	this->m_pDoc->UpdateAllViews(0);
 }
 
+

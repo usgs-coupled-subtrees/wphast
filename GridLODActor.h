@@ -1,7 +1,9 @@
 #pragma once
 #include <vtkLODActor.h>
 // #include "structs.h"
-#include "Grid.h"
+///#include "Grid.h"
+#include "GridKeyword.h"
+#include "Snap.h"
 
 class vtkGeometryFilter;
 class vtkFeatureEdges;
@@ -22,12 +24,31 @@ public:
 
 	static CGridLODActor *New();
 
-	void CGridLODActor::SetGrid(const CGrid& x, const CGrid& y, const CGrid& z, const CUnits& units);
-	void CGridLODActor::GetGrid(CGrid& x, CGrid& y, CGrid& z)const;
+	void SetGrid(const CGrid& x, const CGrid& y, const CGrid& z, const CUnits& units);
+	void GetGrid(CGrid& x, CGrid& y, CGrid& z)const;
 
 	//void SetFlowOnly(BOOL bFlowOnly);
 	//BOOL GetFlowOnly(void);
 	void GetDefaultZone(CZone& rZone);
+
+	void GetSnap(CSnap &snap)const { snap = this->m_gridKeyword.m_snap; };
+	void SetSnap(const CSnap &snap) { this->m_gridKeyword.m_snap = snap; };
+
+	void GetAxes(int axes[3])const
+	{
+		axes[0] = this->m_gridKeyword.m_axes[0];
+		axes[1] = this->m_gridKeyword.m_axes[1];
+		axes[2] = this->m_gridKeyword.m_axes[2];
+	};
+	void SetAxes(const int axes[3])
+	{
+		this->m_gridKeyword.m_axes[0] = axes[0];
+		this->m_gridKeyword.m_axes[1] = axes[1];
+		this->m_gridKeyword.m_axes[2] = axes[2];
+	};
+
+	void GetGridKeyword(CGridKeyword& gridKeyword)const;
+	void SetGridKeyword(const CGridKeyword& gridKeyword, const CUnits& units);
 
 	void Serialize(bool bStoring, hid_t loc_id);
 
@@ -52,7 +73,11 @@ protected:
 	vtkFeatureEdges*    m_pFeatureEdges;
 	vtkPolyDataMapper*  m_pPolyDataMapper;
 
-	CGrid               m_grid[3];
+	///CGrid               m_grid[3];
+	///CSnap               m_snap;
+	///int                 m_axes[3];
+	///bool                m_print_input_xy;
+	CGridKeyword        m_gridKeyword;
 	HTREEITEM           m_htiGrid;
 
 private:

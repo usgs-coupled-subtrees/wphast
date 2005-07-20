@@ -51,6 +51,9 @@
 
 #include "ModelessPropertySheet.h"
 #include "ScalePropertyPage.h"
+
+#include "GridPropertyPage2.h"
+
 #include <vtkBoxWidget.h>
 
 #include <vtkAbstractPropPicker.h>
@@ -208,6 +211,8 @@ CWPhastDoc::CWPhastDoc()
 , m_pPropAssemblyRivers(0)
 , RiverCallbackCommand(0)
 , RiverMovePointAction(0)
+, m_pGridSheet(0)
+, m_pGridPage(0)
 {
 #if defined(WPHAST_AUTOMATION)
 	EnableAutomation();
@@ -301,28 +306,32 @@ CWPhastDoc::~CWPhastDoc()
 #endif
 
 	ASSERT(this->m_pimpl);
-	if (this->m_pimpl) {
+	if (this->m_pimpl)
+	{
 		ASSERT(this->m_pimpl->m_vectorActions.empty()); // should be emptied in DeleteContents
 		delete this->m_pimpl;
 		this->m_pimpl = 0;
 	}
 
 	ASSERT(this->m_pPropCollection);
-	if (this->m_pPropCollection) {
+	if (this->m_pPropCollection)
+	{
 		ASSERT(this->m_pPropCollection->GetNumberOfItems() == 0); // should be emptied in DeleteContents
 		this->m_pPropCollection->Delete();
 		this->m_pPropCollection = 0;
 	}
 
 	ASSERT(this->m_pRemovedPropCollection);
-	if (this->m_pRemovedPropCollection) {
+	if (this->m_pRemovedPropCollection)
+	{
 		ASSERT(this->m_pRemovedPropCollection->GetNumberOfItems() == 0); // should be emptied in DeleteContents
 		this->m_pRemovedPropCollection->Delete();
 		this->m_pRemovedPropCollection = 0;
 	}
 
  	ASSERT(this->m_pGridLODActor);
-	if (this->m_pGridLODActor) {
+	if (this->m_pGridLODActor)
+	{
 		this->m_pGridLODActor->Delete();
 		this->m_pGridLODActor = 0;
 	}
@@ -334,7 +343,8 @@ CWPhastDoc::~CWPhastDoc()
 	CLEANUP_ASSEMBLY_MACRO(this->m_pPropAssemblyRivers);	
 
 	ASSERT(this->m_pAxesActor);
-	if (this->m_pAxesActor) {
+	if (this->m_pAxesActor)
+	{
 		this->m_pAxesActor->Delete();
 		this->m_pAxesActor = 0;
 	}
@@ -346,7 +356,8 @@ CWPhastDoc::~CWPhastDoc()
 	ASSERT_DELETE_SET_NULL_MACRO(this->m_pModel);
 // COMMENT: {5/5/2005 3:51:23 PM}	ASSERT_DELETE_SET_NULL_MACRO(this->m_pPrintFreq);
 
-	if (this->m_pMapActor) {
+	if (this->m_pMapActor)
+	{
 		this->m_pMapActor->Delete();
 		this->m_pMapActor = 0;
 	}
@@ -356,6 +367,21 @@ CWPhastDoc::~CWPhastDoc()
 	if (this->RiverCallbackCommand)
 	{
 		this->RiverCallbackCommand->Delete();
+	}
+
+	// Grid
+	//
+	if (this->m_pGridPage)
+	{
+		this->m_pGridPage->DestroyWindow();
+		delete this->m_pGridPage;
+		this->m_pGridPage = 0;
+	}
+	if (this->m_pGridSheet)
+	{
+		this->m_pGridSheet->DestroyWindow();
+		delete this->m_pGridSheet;
+		this->m_pGridSheet = 0;
 	}
 }
 
@@ -1602,6 +1628,8 @@ void CWPhastDoc::DeleteContents()
 		}
 	}
 
+
+
 	// Update BoxPropertiesDialogBar
 	//
 	if (CBoxPropertiesDialogBar* pBar = this->GetBoxPropertiesDialogBar()) {
@@ -1909,7 +1937,8 @@ void CWPhastDoc::ResizeGrid(const CGrid& x, const CGrid&  y, const CGrid&  z)
 	this->m_pGridLODActor->SetGrid(x, y, z, *this->m_pUnits);
 	this->m_pGridLODActor->SetPickable(0);
 	this->m_pPropCollection->AddItem(this->m_pGridLODActor);
-	if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar()) {
+	if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar())
+	{
 		pTree->SetGridLODActor(this->m_pGridLODActor);
 	}
 
@@ -1924,13 +1953,14 @@ void CWPhastDoc::ResizeGrid(const CGrid& x, const CGrid&  y, const CGrid&  z)
 
 	// update default zones
 	//
-	if (vtkPropCollection* pCollection = this->GetPropCollection()) {
+	if (vtkPropCollection* pCollection = this->GetPropCollection())
+	{
 		CZone bounds;
 		this->m_pGridLODActor->GetDefaultZone(bounds);
 		pCollection->InitTraversal();
-		for (int i = 0; i < pCollection->GetNumberOfItems(); ++i) {
+		for (int i = 0; i < pCollection->GetNumberOfItems(); ++i)
+		{
 			vtkProp* prop = pCollection->GetNextProp();
-			//{{
 			if (vtkPropAssembly *pPropAssembly = vtkPropAssembly::SafeDownCast(prop))
 			{
 				if (vtkPropCollection *pPropCollection = pPropAssembly->GetParts())
@@ -1949,9 +1979,10 @@ void CWPhastDoc::ResizeGrid(const CGrid& x, const CGrid&  y, const CGrid&  z)
 					}
 				}
 			}
-			//}}
-			if (CZoneActor *pZone = CZoneActor::SafeDownCast(prop)) {
-				if (pZone->GetDefault()) {
+			if (CZoneActor *pZone = CZoneActor::SafeDownCast(prop))
+			{
+				if (pZone->GetDefault())
+				{
 					pZone->SetBounds(bounds, *this->m_pUnits);
 				}
 			}
@@ -2031,10 +2062,12 @@ vtkFloatingPointType* CWPhastDoc::GetGridBounds()
 
 void CWPhastDoc::OnUpdateToolsGeometry(CCmdUI *pCmdUI)
 {
-	if (this->m_pGeometrySheet->GetSafeHwnd()) {
+	if (this->m_pGeometrySheet->GetSafeHwnd())
+	{
 		pCmdUI->SetCheck(1);
 	}
-	else {
+	else
+	{
 		pCmdUI->SetCheck(0);
 	}
 }
@@ -2065,14 +2098,15 @@ void CWPhastDoc::OnToolsGeometry()
 // COMMENT: {3/9/2004 8:21:04 PM}	}
 // COMMENT: {3/9/2004 8:21:04 PM}#endif
 
-	if (this->m_pGeometrySheet->GetSafeHwnd()) {
+	if (this->m_pGeometrySheet->GetSafeHwnd())
+	{
 		this->m_pGeometrySheet->DestroyWindow();
 	}
-	else {
+	else
+	{
 		// this allows main window to cover the propertysheet but
 		// also causes the propertysheet to display on the taskbar
 		///this->m_pGeometrySheet->Create();
-
 
 		// this forces the propertysheet to always be on top of
 		// the main window but the propertysheet doesn't show up
@@ -2208,6 +2242,21 @@ void CWPhastDoc::OnCloseDocument()
 	this->m_pGeometrySheet->DestroyWindow();
 	delete this->m_pGeometrySheet;
 	this->m_pGeometrySheet = 0;
+
+// COMMENT: {7/19/2005 8:13:02 PM}	// Grid
+// COMMENT: {7/19/2005 8:13:02 PM}	//
+// COMMENT: {7/19/2005 8:13:02 PM}	if (this->m_pGridPage)
+// COMMENT: {7/19/2005 8:13:02 PM}	{
+// COMMENT: {7/19/2005 8:13:02 PM}		this->m_pGridPage->DestroyWindow();
+// COMMENT: {7/19/2005 8:13:02 PM}		delete this->m_pGridPage;
+// COMMENT: {7/19/2005 8:13:02 PM}		this->m_pGridPage = 0;
+// COMMENT: {7/19/2005 8:13:02 PM}	}
+// COMMENT: {7/19/2005 8:13:02 PM}	if (this->m_pGridSheet)
+// COMMENT: {7/19/2005 8:13:02 PM}	{
+// COMMENT: {7/19/2005 8:13:02 PM}		this->m_pGridSheet->DestroyWindow();
+// COMMENT: {7/19/2005 8:13:02 PM}		delete this->m_pGridSheet;
+// COMMENT: {7/19/2005 8:13:02 PM}		this->m_pGridSheet = 0;
+// COMMENT: {7/19/2005 8:13:02 PM}	}
 
 	CDocument::OnCloseDocument();
 }
@@ -2355,18 +2404,24 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 		// create new document
 		//
 		CNewModel model;
-		model.m_flowOnly     = flowOnly;
-		model.m_freeSurface  = (::free_surface != 0);
-		model.m_steadyFlow   = (::steady_flow != 0);  // TODO later there'll be additional member vars
-		model.m_units        = ::units;
-		model.m_grid[0]      = ::grid[0];
-		model.m_grid[1]      = ::grid[1];
-		model.m_grid[2]      = ::grid[2];		
-		model.m_media        = gridElt;
-		model.m_headIC       = headIC;
-		model.m_chemIC       = chemIC;
-		model.m_printFreq    = printFreq;
-		model.m_timeControl2 = timeControl2;
+		model.m_flowOnly       = flowOnly;
+		model.m_freeSurface    = (::free_surface != 0);
+		model.m_steadyFlow     = (::steady_flow != 0);  // TODO later there'll be additional member vars
+		model.m_units          = ::units;
+		//model.m_grid[0]        = ::grid[0];
+		//model.m_grid[1]        = ::grid[1];
+		//model.m_grid[2]        = ::grid[2];
+		//model.m_snap           = ::snap;
+		//model.m_print_input_xy = (::print_input_xy != 0);
+		//model.m_axes[0]        = ::axes[0];
+		//model.m_axes[1]        = ::axes[1];
+		//model.m_axes[2]        = ::axes[2];
+		model.m_gridKeyword    = CGridKeyword(::grid, ::snap, ::axes, ::print_input_xy);
+		model.m_media          = gridElt;
+		model.m_headIC         = headIC;
+		model.m_chemIC         = chemIC;
+		model.m_printFreq      = printFreq;
+		model.m_timeControl2   = timeControl2;
 
 		this->New(model);
 
@@ -2695,7 +2750,8 @@ BOOL CWPhastDoc::WriteTransDat(std::ostream& os)
 
 	// GRID
 	os << "GRID\n";
-	for (int i = 0; i < 3; ++i) {
+	for (int i = 0; i < 3; ++i)
+	{
 		os << xyz[i];
 	}
 
@@ -3140,7 +3196,9 @@ void CWPhastDoc::New(const CNewModel& model)
 
 	// set the grid
 	//
-	this->m_pGridLODActor->SetGrid(model.m_grid[0], model.m_grid[1], model.m_grid[2], *this->m_pUnits);
+// COMMENT: {7/18/2005 8:45:06 PM}	this->m_pGridLODActor->SetGrid(model.m_gridKeyword.m_grid[0], model.m_gridKeyword.m_grid[1], model.m_gridKeyword.m_grid[2], *this->m_pUnits);
+// COMMENT: {7/18/2005 8:45:06 PM}	this->m_pGridLODActor->SetSnap(model.m_gridKeyword.m_snap);
+	this->m_pGridLODActor->SetGridKeyword(model.m_gridKeyword, this->GetUnits());
 	this->m_pGridLODActor->SetPickable(0);
 	this->m_pPropCollection->AddItem(this->m_pGridLODActor);
 	if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar()) {
@@ -4639,4 +4697,33 @@ void CWPhastDoc::RiverListener(vtkObject* caller, unsigned long eid, void* clien
 			break;
 		}
 	}
+}
+
+void CWPhastDoc::SetGridKeyword(const CGridKeyword& gridKeyword)
+{
+	this->ResizeGrid(gridKeyword.m_grid[0], gridKeyword.m_grid[1], gridKeyword.m_grid[2]);
+	this->m_pGridLODActor->SetGridKeyword(gridKeyword, this->GetUnits());
+}
+
+void CWPhastDoc::Edit(CGridLODActor* pGridLODActor)
+{
+	this->m_pGridSheet = new CModelessPropertySheet("Grid");
+	this->m_pGridPage  = new CGridPropertyPage2();
+	
+	CGridKeyword gridKeyword;
+	pGridLODActor->GetGridKeyword(gridKeyword);
+	this->m_pGridPage->SetProperties(gridKeyword);
+	this->m_pGridPage->SetUnits(this->GetUnits());
+
+	//{{
+	this->m_pGridPage->m_pDoc = this;
+	this->m_pGridPage->m_pActor = this->m_pGridLODActor;
+	//}}
+
+	this->m_pGridSheet->AddPage(this->m_pGridPage);
+	this->m_pGridSheet->Create(::AfxGetApp()->m_pMainWnd);
+}
+
+void CWPhastDoc::Update(IObserver* pSender, LPARAM lHint, CObject* pHint, vtkObject* pObject)
+{
 }

@@ -21,9 +21,8 @@ public:
 	float	m_ZScale;
 	CWPhastDoc* m_pDoc;
 	bool    m_bNeedAction;
-	//{{
 	CSetScaleAction* m_pAction;
-	//}}
+	bool    m_bModifiedDoc;
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support

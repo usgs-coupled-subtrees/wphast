@@ -1,7 +1,8 @@
 #pragma once
 #include "afxcmn.h"
 
-#include "GridLODActor.h"
+//#include "GridLODActor.h"
+#include "Grid.h"
 #include "Units.h"
 
 class CWPhastDoc;

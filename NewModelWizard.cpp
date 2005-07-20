@@ -69,7 +69,7 @@ CNewModel CNewModelWizard::GetModel(void)const
 		model.SetSiteMap(site);
 	}
 	for (int i = 0; i < 3; ++i) {
-		model.m_grid[i] = this->m_gridPage.m_grid[i];
+		model.m_gridKeyword.m_grid[i] = this->m_gridPage.m_grid[i];
 	}
 	this->m_mediaPage.GetProperties(model.m_media);
 	this->m_icHeadPage.GetProperties(model.m_headIC);

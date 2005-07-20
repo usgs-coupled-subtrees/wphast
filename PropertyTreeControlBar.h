@@ -20,6 +20,10 @@ class CWPhastDoc;
 ////class CZoneLODActor;
 class vtkProp3D;
 class CGridLODActor;
+
+class CModelessPropertySheet;
+class CGridPropertyPage2;
+
 //class vtkPropCollection;
 
 //// axes

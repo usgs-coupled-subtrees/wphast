@@ -3,7 +3,12 @@
 
 CNewModel::CNewModel(void)
 : m_bHaveSiteMap(false)
+// COMMENT: {7/18/2005 6:39:21 PM}, m_print_input_xy(true)
 {
+// COMMENT: {7/18/2005 6:39:19 PM}	for(int i = 0; i < 3; ++i)
+// COMMENT: {7/18/2005 6:39:19 PM}	{	
+// COMMENT: {7/18/2005 6:39:19 PM}		this->m_axes[i] = TRUE;
+// COMMENT: {7/18/2005 6:39:19 PM}	}
 }
 
 CNewModel::~CNewModel(void)
@@ -18,16 +23,16 @@ CNewModel CNewModel::Default(void)
 	model.m_chemIC    = CChemIC::NewDefaults();
 	model.m_printFreq = CPrintFreq::NewDefaults();
 
-	for(int i = 0; i < 3; ++i)
-	{	
-		model.m_grid[i].count_coord = 2;
-		model.m_grid[i].uniform     = TRUE;
-		model.m_grid[i].coord[0]    = 0;
-		model.m_grid[i].coord[1]    = 1;
-	}
-	model.m_grid[0].c = 'x';
-	model.m_grid[1].c = 'y';
-	model.m_grid[2].c = 'z';
+// COMMENT: {7/18/2005 6:39:30 PM}	for(int i = 0; i < 3; ++i)
+// COMMENT: {7/18/2005 6:39:30 PM}	{	
+// COMMENT: {7/18/2005 6:39:30 PM}		model.m_grid[i].count_coord = 2;
+// COMMENT: {7/18/2005 6:39:30 PM}		model.m_grid[i].uniform     = TRUE;
+// COMMENT: {7/18/2005 6:39:30 PM}		model.m_grid[i].coord[0]    = 0;
+// COMMENT: {7/18/2005 6:39:30 PM}		model.m_grid[i].coord[1]    = 1;
+// COMMENT: {7/18/2005 6:39:30 PM}	}
+// COMMENT: {7/18/2005 6:39:30 PM}	model.m_grid[0].c = 'x';
+// COMMENT: {7/18/2005 6:39:30 PM}	model.m_grid[1].c = 'y';
+// COMMENT: {7/18/2005 6:39:30 PM}	model.m_grid[2].c = 'z';
 
 // COMMENT: {4/22/2005 3:43:39 PM}	model.m_timeControl.SetTimeStepValue(1.0);
 // COMMENT: {4/22/2005 3:43:39 PM}	model.m_timeControl.SetTimeEndValue(1.0);

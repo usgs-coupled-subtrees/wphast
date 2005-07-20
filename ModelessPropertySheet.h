@@ -26,6 +26,8 @@ public:
 	virtual BOOL OnInitDialog();
 	afx_msg void OnOK();
 	afx_msg void OnCancel();
+protected:
+	virtual void PostNcDestroy();
 };
 
 

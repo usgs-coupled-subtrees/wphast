@@ -12,7 +12,8 @@ extern "C" {
 
 #include <iosfwd> // std::ostream
 
-class CGrid : public grid {
+class CGrid : public grid
+{
 public:
 	// ctor
 	CGrid();
