@@ -99,15 +99,28 @@ void CGridPropertyPage2::DoDataExchange(CDataExchange* pDX)
 			// Maximum
 			DDX_Text(pDX, IDC_EDIT_MAX, this->m_gridKeyword.m_grid[this->m_nIndex].coord[1]);
 
+			if (this->m_gridKeyword.m_grid[this->m_nIndex].coord[0] >= this->m_gridKeyword.m_grid[this->m_nIndex].coord[1])
+			{
+				CString str("Coordinate values must be in ascending order.");
+				::AfxMessageBox(str);
+				pDX->Fail();
+			}
+
 			// Number of nodes
 			DDX_Text(pDX, IDC_EDIT_U_NODES, this->m_gridKeyword.m_grid[this->m_nIndex].count_coord);
+			DDV_MinMaxInt(pDX, this->m_gridKeyword.m_grid[this->m_nIndex].count_coord, 2, INT_MAX);
+
 		}
 		else
 		{
 			this->m_gridKeyword.m_grid[this->m_nIndex].uniform = FALSE;
 
+			// Number of nodes
 			int size;
 			DDX_Text(pDX, IDC_EDIT_N_NODES, size);
+			DDV_MinMaxInt(pDX, size, 2, INT_MAX);
+			ASSERT(size == this->m_wndNonuniformGrid.GetRowCount() - 1);
+
 			this->m_gridKeyword.m_grid[this->m_nIndex].Resize(size);
 
 			for (int row = 1; row < this->m_wndNonuniformGrid.GetRowCount(); ++row)
@@ -318,59 +331,15 @@ void CGridPropertyPage2::SetUnits(const CUnits& units)
 
 void CGridPropertyPage2::OnBnClickedRadioUniform()
 {
-// COMMENT: {7/21/2005 8:52:36 PM}	// Uniform
-// COMMENT: {7/21/2005 8:52:36 PM}	//
-// COMMENT: {7/21/2005 8:52:36 PM}	int arrUniform[] =
-// COMMENT: {7/21/2005 8:52:36 PM}	{ 
-// COMMENT: {7/21/2005 8:52:36 PM}		IDC_STATIC_MIN,
-// COMMENT: {7/21/2005 8:52:36 PM}		IDC_EDIT_MIN,
-// COMMENT: {7/21/2005 8:52:36 PM}		IDC_STATIC_MAX,
-// COMMENT: {7/21/2005 8:52:36 PM}		IDC_EDIT_MAX,
-// COMMENT: {7/21/2005 8:52:36 PM}		IDC_STATIC_U_NODES,
-// COMMENT: {7/21/2005 8:52:36 PM}		IDC_EDIT_U_NODES,
-// COMMENT: {7/21/2005 8:52:36 PM}		IDC_SPIN_U_NODES,
-// COMMENT: {7/21/2005 8:52:36 PM}		IDC_STATIC_MIN_UNITS,
-// COMMENT: {7/21/2005 8:52:36 PM}		IDC_STATIC_MAX_UNITS,
-// COMMENT: {7/21/2005 8:52:36 PM}	};
-// COMMENT: {7/21/2005 8:52:36 PM}	for (int i = 0; i < sizeof(arrUniform)/sizeof(arrUniform[0]); ++i)
-// COMMENT: {7/21/2005 8:52:36 PM}	{
-// COMMENT: {7/21/2005 8:52:36 PM}		if (CWnd* pWnd = this->GetDlgItem(arrUniform[i]))
-// COMMENT: {7/21/2005 8:52:36 PM}		{
-// COMMENT: {7/21/2005 8:52:36 PM}			pWnd->EnableWindow(TRUE);
-// COMMENT: {7/21/2005 8:52:36 PM}		}
-// COMMENT: {7/21/2005 8:52:36 PM}	}
-// COMMENT: {7/21/2005 8:52:36 PM}
-// COMMENT: {7/21/2005 8:52:36 PM}	//
-// COMMENT: {7/21/2005 8:52:36 PM}	// Nonuniform
-// COMMENT: {7/21/2005 8:52:36 PM}	int arrNonuniform[] =
-// COMMENT: {7/21/2005 8:52:36 PM}	{ 
-// COMMENT: {7/21/2005 8:52:36 PM}		///IDC_GRID_NONUNIFORM,
-// COMMENT: {7/21/2005 8:52:36 PM}		IDC_EDIT_N_NODES,
-// COMMENT: {7/21/2005 8:52:36 PM}		IDC_STATIC_N_NODES,
-// COMMENT: {7/21/2005 8:52:36 PM}		IDC_SPIN_N_NODES,
-// COMMENT: {7/21/2005 8:52:36 PM}		IDC_BUTTON_INS,
-// COMMENT: {7/21/2005 8:52:36 PM}		IDC_BUTTON_DEL,
-// COMMENT: {7/21/2005 8:52:36 PM}		IDC_BUTTON_SERIES,
-// COMMENT: {7/21/2005 8:52:36 PM}	};
-// COMMENT: {7/21/2005 8:52:36 PM}	for (int i = 0; i < sizeof(arrNonuniform)/sizeof(arrNonuniform[0]); ++i)
-// COMMENT: {7/21/2005 8:52:36 PM}	{
-// COMMENT: {7/21/2005 8:52:36 PM}		if (CWnd* pWnd = this->GetDlgItem(arrNonuniform[i]))
-// COMMENT: {7/21/2005 8:52:36 PM}		{
-// COMMENT: {7/21/2005 8:52:36 PM}			pWnd->EnableWindow(FALSE);
-// COMMENT: {7/21/2005 8:52:36 PM}		}
-// COMMENT: {7/21/2005 8:52:36 PM}	}
-// COMMENT: {7/21/2005 8:52:36 PM}	for (int row = 0; row < this->m_wndNonuniformGrid.GetRowCount(); ++row)
-// COMMENT: {7/21/2005 8:52:36 PM}	{
-// COMMENT: {7/21/2005 8:52:36 PM}		for (int col = 0; col < this->m_wndNonuniformGrid.GetColumnCount(); ++col)
-// COMMENT: {7/21/2005 8:52:36 PM}		{ 
-// COMMENT: {7/21/2005 8:52:36 PM}			VERIFY(this->m_wndNonuniformGrid.DisableCell(row, col));
-// COMMENT: {7/21/2005 8:52:36 PM}		}
-// COMMENT: {7/21/2005 8:52:36 PM}	}
-// COMMENT: {7/21/2005 8:52:36 PM}	this->m_wndNonuniformGrid.SetFixedTextColor(::GetSysColor(COLOR_GRAYTEXT));
-// COMMENT: {7/21/2005 8:52:36 PM}	this->m_wndNonuniformGrid.RedrawWindow();
 	this->EnableUniform(TRUE);
 	this->EnableNonuniform(FALSE);
+	this->SetModified(TRUE);
+}
 
+void CGridPropertyPage2::OnBnClickedRadioNonuniform()
+{
+	this->EnableNonuniform(TRUE);
+	this->EnableUniform(FALSE);
 	this->SetModified(TRUE);
 }
 
@@ -443,36 +412,6 @@ void CGridPropertyPage2::EnableNonuniform(BOOL bEnable)
 		this->m_wndNonuniformGrid.SetFixedTextColor(::GetSysColor(COLOR_GRAYTEXT));
 	}
 	this->m_wndNonuniformGrid.RedrawWindow();
-}
-
-void CGridPropertyPage2::OnBnClickedRadioNonuniform()
-{
-	this->EnableNonuniform(TRUE);
-	this->EnableUniform(FALSE);
-
-// COMMENT: {7/21/2005 8:43:48 PM}	// Uniform
-// COMMENT: {7/21/2005 8:43:48 PM}	//
-// COMMENT: {7/21/2005 8:43:48 PM}	int arrUniform[] =
-// COMMENT: {7/21/2005 8:43:48 PM}	{ 
-// COMMENT: {7/21/2005 8:43:48 PM}		IDC_STATIC_MIN,
-// COMMENT: {7/21/2005 8:43:48 PM}		IDC_EDIT_MIN,
-// COMMENT: {7/21/2005 8:43:48 PM}		IDC_STATIC_MAX,
-// COMMENT: {7/21/2005 8:43:48 PM}		IDC_EDIT_MAX,
-// COMMENT: {7/21/2005 8:43:48 PM}		IDC_STATIC_U_NODES,
-// COMMENT: {7/21/2005 8:43:48 PM}		IDC_EDIT_U_NODES,
-// COMMENT: {7/21/2005 8:43:48 PM}		IDC_SPIN_U_NODES,
-// COMMENT: {7/21/2005 8:43:48 PM}		IDC_STATIC_MIN_UNITS,
-// COMMENT: {7/21/2005 8:43:48 PM}		IDC_STATIC_MAX_UNITS,
-// COMMENT: {7/21/2005 8:43:48 PM}	};
-// COMMENT: {7/21/2005 8:43:48 PM}	for (int i = 0; i < sizeof(arrUniform)/sizeof(arrUniform[0]); ++i)
-// COMMENT: {7/21/2005 8:43:48 PM}	{
-// COMMENT: {7/21/2005 8:43:48 PM}		if (CWnd* pWnd = this->GetDlgItem(arrUniform[i]))
-// COMMENT: {7/21/2005 8:43:48 PM}		{
-// COMMENT: {7/21/2005 8:43:48 PM}			pWnd->EnableWindow(FALSE);
-// COMMENT: {7/21/2005 8:43:48 PM}		}
-// COMMENT: {7/21/2005 8:43:48 PM}	}
-
-	this->SetModified(TRUE);
 }
 
 void CGridPropertyPage2::OnTcnSelchangingTabCoor(NMHDR *pNMHDR, LRESULT *pResult)

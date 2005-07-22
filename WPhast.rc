@@ -2343,7 +2343,7 @@ STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_CAPTION
 CAPTION "Grid Properties"
 FONT 8, "MS Shell Dlg", 400, 0, 0x0
 BEGIN
-    CONTROL         "",IDC_TAB_COOR,"SysTabControl32",0x0,7,7,391,16
+    CONTROL         "",IDC_TAB_COOR,"SysTabControl32",0x0,7,7,391,136
     GROUPBOX        "",-1,15,25,142,75
     CONTROL         "&Uniform",IDC_RADIO_UNIFORM,"Button",BS_AUTORADIOBUTTON,
                     20,25,41,10

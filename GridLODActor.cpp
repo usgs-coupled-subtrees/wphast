@@ -369,7 +369,7 @@ void CGridLODActor::Setup(const CUnits& units)
 		}
 		else
 		{
-			x[2] = this->m_gridKeyword.m_grid[2].coord[k];
+			x[2] = this->m_gridKeyword.m_grid[2].coord[k] * units.vertical.input_to_si;
 		}
 		kOffset = k * this->m_gridKeyword.m_grid[0].count_coord * this->m_gridKeyword.m_grid[1].count_coord;
 		for (j = 0; j < this->m_gridKeyword.m_grid[1].count_coord; ++j)
@@ -380,7 +380,7 @@ void CGridLODActor::Setup(const CUnits& units)
 			}
 			else
 			{
-				x[1] = this->m_gridKeyword.m_grid[1].coord[j];
+				x[1] = this->m_gridKeyword.m_grid[1].coord[j] * units.horizontal.input_to_si;
 			}
 			jOffset = j * this->m_gridKeyword.m_grid[0].count_coord;
 			for (i = 0; i < this->m_gridKeyword.m_grid[0].count_coord; ++i)
@@ -391,7 +391,7 @@ void CGridLODActor::Setup(const CUnits& units)
 				}
 				else
 				{
-					x[0] = this->m_gridKeyword.m_grid[0].coord[i];
+					x[0] = this->m_gridKeyword.m_grid[0].coord[i] * units.horizontal.input_to_si;
 				}
 				offset = i + jOffset + kOffset;
 				points->InsertPoint(offset, x);
