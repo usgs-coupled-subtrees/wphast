@@ -16,13 +16,17 @@
 CGrid::CGrid()
 {
 	this->InternalInit();
-	this->coord = new double[2];
+	///this->coord = new double[2];
+	this->m_coordinates.resize(2);
+	this->coord = &this->m_coordinates[0];
 }
 
 CGrid::CGrid(double minimum, double maximum, int nodes)
 {
 	this->InternalInit();
-	this->coord = new double[2];
+	///this->coord = new double[2];
+	this->m_coordinates.resize(2);
+	this->coord = &this->m_coordinates[0];
 	this->SetUniformRange(minimum, maximum, nodes);
 }
 
@@ -47,18 +51,22 @@ void CGrid::InternalInit(void)
 
 void CGrid::InternalDelete(void)
 {
-	if (this->uniform == TRUE) {
-		if (this->uniform_expanded) {
+	if (this->uniform == TRUE)
+	{
+		if (this->uniform_expanded)
+		{
 			ASSERT(AfxIsValidAddress(this->coord, sizeof(double) * this->count_coord));
 		}
-		else {
+		else
+		{
 			ASSERT(AfxIsValidAddress(this->coord, sizeof(double) * 2));
 		}
 	}
 
-	delete[] this->coord;
+	///delete[] this->coord;
 
-	if (this->elt_centroid) {
+	if (this->elt_centroid)
+	{
 		ASSERT(AfxIsValidAddress(this->elt_centroid, sizeof(double) * (this->count_coord - 1)));
 		delete[] this->elt_centroid;
 	}
@@ -105,32 +113,47 @@ void CGrid::InternalCopy(const struct grid& p)
 
 	// coord
 	//
-	if (p.coord) {
-		if (p.uniform == TRUE) {
+	if (p.coord)
+	{
+		if (p.uniform == TRUE)
+		{
 			// only do shallow copy
-			this->coord = new double[2];
-			if (p.uniform_expanded == TRUE) {
+			///this->coord = new double[2];
+			this->m_coordinates.resize(2);
+			this->coord = &this->m_coordinates[0];
+			if (p.uniform_expanded == TRUE)
+			{
 				this->coord[0] = p.coord[0];
 				this->coord[1] = p.coord[p.count_coord - 1];
 			}
-			else {
+			else
+			{
 				this->coord[0] = p.coord[0];
 				this->coord[1] = p.coord[1];
 			}
 		}
-		else {
-			if (p.count_coord > 0) {
-				this->coord = new double[p.count_coord];
-				for (int i = 0; i < p.count_coord; ++i) {
+		else
+		{
+			if (p.count_coord > 0)
+			{
+				///this->coord = new double[p.count_coord];
+				this->m_coordinates.resize(p.count_coord);
+				this->coord = &this->m_coordinates[0];
+				for (int i = 0; i < p.count_coord; ++i)
+				{
 					this->coord[i] = p.coord[i];
 				}
 			}
-			else  {
-				this->coord = new double[2];
+			else
+			{
+				///this->coord = new double[2];
+				this->m_coordinates.resize(2);
+				this->coord = &this->m_coordinates[0];
 			}
 		}
 	}
-	else {
+	else
+	{
 		ASSERT(p.count_coord == 0);
 		ASSERT(p.uniform == FALSE || p.uniform == UNDEFINED);
 	}
@@ -155,11 +178,13 @@ void CGrid::InternalCopy(const struct grid& p)
 
 	// elt_centroid
 	//
-	if (p.elt_centroid) {
+	if (p.elt_centroid)
+	{
 		ASSERT(AfxIsValidAddress(p.elt_centroid, sizeof(double) * (p.count_coord - 1)));
 		ASSERT(this->count_coord > 0);
 		this->elt_centroid = new double[this->count_coord - 1];
-		for (int j = 0; j < this->count_coord - 1; j++) {
+		for (int j = 0; j < this->count_coord - 1; j++)
+		{
 			this->elt_centroid[j] = p.elt_centroid[j];
 		}
 	}
@@ -168,7 +193,8 @@ void CGrid::InternalCopy(const struct grid& p)
 CGrid& CGrid::operator=(const CGrid& rhs) // copy assignment
 {
 	//{{
-	if (this != &rhs) {
+	if (this != &rhs)
+	{
 		this->InternalDelete();
 		this->InternalInit();
 		this->InternalCopy(rhs);
@@ -228,24 +254,31 @@ CGrid& CGrid::operator=(const CGrid& rhs) // copy assignment
 
 void CGrid::Setup(void)
 {
-	if (this->uniform == UNDEFINED) {
+	if (this->uniform == UNDEFINED)
+	{
 		ASSERT(false);
 	}
-	else if (this->uniform == TRUE) {
-		if (this->uniform_expanded == TRUE) {
+	else if (this->uniform == TRUE)
+	{
+		if (this->uniform_expanded == TRUE)
+		{
 			// already expanded
 			ASSERT(AfxIsValidAddress(this->coord, sizeof(double) * this->count_coord));
 		}
-		else {
+		else
+		{
 			double x1 = this->coord[0];
 			double x2 = this->coord[1];
 			ASSERT(x1 < x2);
 			double increment = (x2 - x1) / (this->count_coord - 1);
 
-			delete[] this->coord;
-			this->coord = new double[this->count_coord];
+			///delete[] this->coord;
+			///this->coord = new double[this->count_coord];
+			this->m_coordinates.resize(this->count_coord);
+			this->coord = &this->m_coordinates[0];
 
-			for (int j = 0; j < this->count_coord; ++j) {
+			for (int j = 0; j < this->count_coord; ++j)
+			{
 				this->coord[j] = x1 + j * increment;
 			}
 			//{{
@@ -254,10 +287,14 @@ void CGrid::Setup(void)
 			//}}
 			this->uniform_expanded = TRUE;
 		}
-	} else {
+	}
+	else
+	{
 		ASSERT(AfxIsValidAddress(this->coord, sizeof(double) * this->count_coord));
-		for (int j = 1; j < this->count_coord; ++j) {
-			if (this->coord[j] <= this->coord[j-1]) {
+		for (int j = 1; j < this->count_coord; ++j)
+		{
+			if (this->coord[j] <= this->coord[j-1])
+			{
 				ASSERT(false);
 			}
 		}
@@ -378,8 +415,10 @@ void CGrid::Serialize(bool bStoring, hid_t loc_id)
 		}
 		else
 		{
-			delete[] this->coord;
-			this->coord = new double[this->count_coord];
+			///delete[] this->coord;
+			///this->coord = new double[this->count_coord];
+			this->m_coordinates.resize(this->count_coord);
+			this->coord = &this->m_coordinates[0];
 			status = CGlobal::HDFSerialize(bStoring, loc_id, szCoord, H5T_NATIVE_DOUBLE, this->count_coord, this->coord);
 			ASSERT(status >= 0);
 		}
@@ -403,15 +442,18 @@ void CGrid::SetUniformRange(double minimum, double maximum, int count_coord)
 void CGrid::Dump(CDumpContext& dc)const
 {
 	dc << "<CGrid>\n";
-	switch (this->uniform)  {
+	switch (this->uniform)
+	{
 		case UNDEFINED:
 			dc << "<UNDEFINED>\n";
 			break;
 		case TRUE:
-			if (this->uniform_expanded == TRUE) {
+			if (this->uniform_expanded == TRUE)
+			{
 				dc << "<UNIFORM \"expanded = \"TRUE\">\n";
 			}
-			else {
+			else
+			{
 				dc << "<UNIFORM \"expanded = \"FALSE\">\n";
 			}
 			break;
@@ -424,15 +466,20 @@ void CGrid::Dump(CDumpContext& dc)const
 	dc << "<c>" << buffer << "</c>\n";
 	dc << "<count_coord>" << this->count_coord << "</count_coord>\n";
 	dc << "<coord>\n";
-	if (this->uniform == TRUE && this->uniform_expanded != TRUE) {
-		for (int i = 0; i < 2; ++i) {
+	if (this->uniform == TRUE && this->uniform_expanded != TRUE)
+	{
+		for (int i = 0; i < 2; ++i)
+		{
 			dc << this->coord[i] << " ";
 		}
 	}
-	else {
-		for (int i = 0; i < this->count_coord; ++i) {
+	else
+	{
+		for (int i = 0; i < this->count_coord; ++i)
+		{
 			dc << this->coord[i] << " ";
-			if (i % 7 == 6) {
+			if (i % 7 == 6)
+			{
 				dc << "\n";
 			}
 		}
@@ -473,6 +520,31 @@ std::ostream& operator<< (std::ostream &os, const CGrid &a)
 			os << "\n";
 			break;
 	}
-
 	return os;
+}
+
+void CGrid::Resize(size_t count)
+{
+// COMMENT: {7/21/2005 3:43:25 PM}	if (count > (size_t)this->count_coord)
+// COMMENT: {7/21/2005 3:43:25 PM}	{
+// COMMENT: {7/21/2005 3:43:25 PM}		if (this->coord)
+// COMMENT: {7/21/2005 3:43:25 PM}		{
+// COMMENT: {7/21/2005 3:43:25 PM}			delete[] this->coord;
+// COMMENT: {7/21/2005 3:43:25 PM}		}
+// COMMENT: {7/21/2005 3:43:25 PM}		this->coord = new double[count];
+// COMMENT: {7/21/2005 3:43:25 PM}	}
+	if (count > 2)
+	{
+		this->count_coord = (int)count;
+		this->m_coordinates.resize(count);
+		this->coord = &this->m_coordinates[0];
+	}
+}
+
+double& CGrid::At(size_t pos)
+{
+	ASSERT(pos < (size_t)this->count_coord);
+	ASSERT(this->m_coordinates.size() == this->count_coord);
+	///return this->coord[pos];
+	return this->m_coordinates.at(pos);
 }

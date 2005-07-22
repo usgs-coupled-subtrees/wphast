@@ -46,7 +46,7 @@ void TCPPUnit::RunUnitTests(void)
 
 // COMMENT: {4/20/2005 7:08:55 PM}		runner.addTest(TestCPhastInput::suite());
 // COMMENT: {4/20/2005 7:08:55 PM}		runner.addTest(TestCZone::suite());
-// COMMENT: {4/20/2005 7:08:55 PM}		runner.addTest(TestCGrid::suite());
+		runner.addTest(TestCGrid::suite());
 // COMMENT: {4/20/2005 7:08:55 PM}		runner.addTest(TestCtime::suite());
 // COMMENT: {4/20/2005 7:08:55 PM}		runner.addTest(TestCBC::suite());
 // COMMENT: {4/20/2005 7:08:55 PM}		runner.addTest(TestCTimeControl::suite());

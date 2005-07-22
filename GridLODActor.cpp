@@ -146,6 +146,9 @@ void CGridLODActor::Serialize(bool bStoring, hid_t loc_id)
 
 				// chemistry_dimensions
 				//
+				ASSERT(this->m_gridKeyword.m_axes[0] == 0 || this->m_gridKeyword.m_axes[0] == 1);
+				ASSERT(this->m_gridKeyword.m_axes[1] == 0 || this->m_gridKeyword.m_axes[1] == 1);
+				ASSERT(this->m_gridKeyword.m_axes[2] == 0 || this->m_gridKeyword.m_axes[2] == 1);
 				status = CGlobal::HDFSerialize(bStoring, grid_gr_id, szChemDims, H5T_NATIVE_INT, 3, this->m_gridKeyword.m_axes);
 				ASSERT(status >= 0);
 
@@ -227,6 +230,13 @@ void CGridLODActor::Serialize(bool bStoring, hid_t loc_id)
 				status = CGlobal::HDFSerialize(bStoring, grid_gr_id, szChemDims, H5T_NATIVE_INT, 3, this->m_gridKeyword.m_axes);
 				ASSERT(status >= 0);
 
+				ASSERT(this->m_gridKeyword.m_axes[0] == 0 || this->m_gridKeyword.m_axes[0] == 1);
+				ASSERT(this->m_gridKeyword.m_axes[1] == 0 || this->m_gridKeyword.m_axes[1] == 1);
+				ASSERT(this->m_gridKeyword.m_axes[2] == 0 || this->m_gridKeyword.m_axes[2] == 1);
+				if (this->m_gridKeyword.m_axes[0] == 0 || this->m_gridKeyword.m_axes[0] == 1) this->m_gridKeyword.m_axes[0] = 1;
+				if (this->m_gridKeyword.m_axes[1] == 0 || this->m_gridKeyword.m_axes[1] == 1) this->m_gridKeyword.m_axes[1] = 1;
+				if (this->m_gridKeyword.m_axes[2] == 0 || this->m_gridKeyword.m_axes[2] == 1) this->m_gridKeyword.m_axes[2] = 1;
+
 				// close grid group
 				//
 				status = ::H5Gclose(grid_gr_id);
@@ -275,7 +285,7 @@ void CGridLODActor::Insert(CTreeCtrl* pTreeCtrl, HTREEITEM htiGrid)
 	// chem dims
 	if (!this->m_gridKeyword.m_axes[0] || !this->m_gridKeyword.m_axes[1] || !this->m_gridKeyword.m_axes[2])
 	{
-		CString str;
+		CString str("chemistry_dimensions ");
 		if (this->m_gridKeyword.m_axes[0]) str += _T("X");
 		if (this->m_gridKeyword.m_axes[1]) str += _T("Y");
 		if (this->m_gridKeyword.m_axes[2]) str += _T("Z");
@@ -321,20 +331,25 @@ void CGridLODActor::Setup(const CUnits& units)
 	ASSERT(this->m_gridKeyword.m_grid[2].uniform_expanded == FALSE);
 
 	register int i;
-	double incr[3];
+	double inc[3];
 	double min[3];
 	for (i = 0; i < 3; ++i)
 	{
-		incr[i] = (this->m_gridKeyword.m_grid[i].coord[1] - this->m_gridKeyword.m_grid[i].coord[0]) / (this->m_gridKeyword.m_grid[i].count_coord - 1);
+		if (this->m_gridKeyword.m_grid[i].uniform)
+		{
+			inc[i] = (this->m_gridKeyword.m_grid[i].coord[1] - this->m_gridKeyword.m_grid[i].coord[0]) / (this->m_gridKeyword.m_grid[i].count_coord - 1);
+			if (i == 2)
+			{
+				min[2] = this->m_gridKeyword.m_grid[2].coord[0] * units.vertical.input_to_si;
+				inc[2] *= units.vertical.input_to_si;
+			}
+			else
+			{
+				min[i] = this->m_gridKeyword.m_grid[i].coord[0] * units.horizontal.input_to_si;
+				inc[i] *= units.horizontal.input_to_si;
+			}
+		}
 	}
-
-	incr[0] *= units.horizontal.input_to_si;
-	incr[1] *= units.horizontal.input_to_si;
-	incr[2] *= units.vertical.input_to_si;
-
-	min[0] = this->m_gridKeyword.m_grid[0].coord[0] * units.horizontal.input_to_si;
-	min[1] = this->m_gridKeyword.m_grid[1].coord[0] * units.horizontal.input_to_si;
-	min[2] = this->m_gridKeyword.m_grid[2].coord[0] * units.vertical.input_to_si;
 
 	vtkStructuredGrid *sgrid = vtkStructuredGrid::New();
 	sgrid->SetDimensions(this->m_gridKeyword.m_grid[0].count_coord, this->m_gridKeyword.m_grid[1].count_coord, this->m_gridKeyword.m_grid[2].count_coord);
@@ -350,7 +365,7 @@ void CGridLODActor::Setup(const CUnits& units)
 	{
 		if (this->m_gridKeyword.m_grid[2].uniform)
 		{
-			x[2] = min[2] + k * incr[2];
+			x[2] = min[2] + k * inc[2];
 		}
 		else
 		{
@@ -361,7 +376,7 @@ void CGridLODActor::Setup(const CUnits& units)
 		{
 			if (this->m_gridKeyword.m_grid[1].uniform)
 			{
-				x[1] = min[1] + j * incr[1];
+				x[1] = min[1] + j * inc[1];
 			}
 			else
 			{
@@ -372,7 +387,7 @@ void CGridLODActor::Setup(const CUnits& units)
 			{
 				if (this->m_gridKeyword.m_grid[0].uniform)
 				{
-					x[0] = min[0] + i * incr[0];
+					x[0] = min[0] + i * inc[0];
 				}
 				else
 				{

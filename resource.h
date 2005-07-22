@@ -238,6 +238,7 @@
 #define ID_WELLS_SHOWSELECTED           242
 #define ID_WELLS_SELECTALL              243
 #define ID_WELLS_UNSELECTALL            244
+#define IDD_SERIES_DIALOG               248
 #define IDC_EDIT_X                      1000
 #define IDC_PROPERTIES                  1000
 #define IDC_TITLE                       1000
@@ -399,6 +400,7 @@
 #define IDC_EDIT1                       1129
 #define IDC_STATIC_DEPTH                1129
 #define IDC_WORLD_EDIT                  1130
+#define IDC_EDIT_START                  1130
 #define IDC_STATIC_Y2                   1131
 #define IDC_STATIC_YC3                  1131
 #define IDC_EDIT_YC3                    1132
@@ -556,6 +558,10 @@
 #define IDC_CHECK_X                     1274
 #define IDC_CHECK_Y                     1275
 #define IDC_CHECK_Z                     1276
+#define IDC_EDIT_STEP                   1277
+#define IDC_EDIT_STOP                   1278
+#define IDC_RADIO_LINEAR                1279
+#define IDC_RADIO_GROWTH                1280
 #define IDC_RESIZE_COLUMN               28654
 #define IDC_RESIZE_ROW                  28655
 #define IDR_POPUP                       28656
@@ -569,9 +575,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        248
+#define _APS_NEXT_RESOURCE_VALUE        249
 #define _APS_NEXT_COMMAND_VALUE         32801
-#define _APS_NEXT_CONTROL_VALUE         1277
+#define _APS_NEXT_CONTROL_VALUE         1281
 #define _APS_NEXT_SYMED_VALUE           126
 #endif
 #endif

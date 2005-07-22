@@ -673,6 +673,9 @@
 				RelativePath="ScalePropertyPage.cpp">
 			</File>
 			<File
+				RelativePath="SeriesDialog.cpp">
+			</File>
+			<File
 				RelativePath="SetBCAction.cpp">
 			</File>
 			<File
@@ -1188,6 +1191,9 @@
 			</File>
 			<File
 				RelativePath="ScalePropertyPage.h">
+			</File>
+			<File
+				RelativePath="SeriesDialog.h">
 			</File>
 			<File
 				RelativePath="SetBCAction.h">

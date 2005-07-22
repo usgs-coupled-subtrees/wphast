@@ -10,6 +10,7 @@ extern "C" {
 #undef EXTERNAL
 }
 
+#include <vector>
 #include <iosfwd> // std::ostream
 
 class CGrid : public grid
@@ -30,11 +31,15 @@ public:
 	void SetUniformRange(double minimum, double maximum, int count_coord);
 	void Serialize(bool bStoring, hid_t loc_id);
 	void Insert(CTreeCtrl* pTreeCtrl, HTREEITEM htiGrid);
+	void Resize(size_t count);
+	double& At(size_t pos);
 #ifdef _DEBUG
 	void Dump(CDumpContext& dc)const;
 #endif
 
 	friend std::ostream& operator<< (std::ostream &os, const CGrid &a);
+protected:
+	std::vector<double> m_coordinates;
 
 private:
 	void InternalCopy(const struct grid& src);

@@ -4701,14 +4701,21 @@ void CWPhastDoc::RiverListener(vtkObject* caller, unsigned long eid, void* clien
 
 void CWPhastDoc::SetGridKeyword(const CGridKeyword& gridKeyword)
 {
-	this->ResizeGrid(gridKeyword.m_grid[0], gridKeyword.m_grid[1], gridKeyword.m_grid[2]);
 	this->m_pGridLODActor->SetGridKeyword(gridKeyword, this->GetUnits());
+	this->ResizeGrid(gridKeyword.m_grid[0], gridKeyword.m_grid[1], gridKeyword.m_grid[2]);
 }
 
 void CWPhastDoc::Edit(CGridLODActor* pGridLODActor)
 {
-	this->m_pGridSheet = new CModelessPropertySheet("Grid");
-	this->m_pGridPage  = new CGridPropertyPage2();
+	if (!this->m_pGridSheet)
+	{
+		this->m_pGridSheet = new CModelessPropertySheet("Grid");
+	}
+	if (!this->m_pGridPage)
+	{
+		this->m_pGridPage  = new CGridPropertyPage2();
+		this->m_pGridSheet->AddPage(this->m_pGridPage);
+	}
 	
 	CGridKeyword gridKeyword;
 	pGridLODActor->GetGridKeyword(gridKeyword);
@@ -4720,7 +4727,6 @@ void CWPhastDoc::Edit(CGridLODActor* pGridLODActor)
 	this->m_pGridPage->m_pActor = this->m_pGridLODActor;
 	//}}
 
-	this->m_pGridSheet->AddPage(this->m_pGridPage);
 	this->m_pGridSheet->Create(::AfxGetApp()->m_pMainWnd);
 }
 
