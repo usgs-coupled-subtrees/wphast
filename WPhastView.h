@@ -77,6 +77,7 @@ protected:
 	vtkInteractorStyle             *m_pInteractorStyle;
 
 	bool                            m_bResetCamera;
+	bool                            m_bMovingGridLine;
 
 	// 3D Cursor
 	vtkCursor3D                    *m_pCursor3D;
@@ -179,6 +180,8 @@ public:
 
 	afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
 	afx_msg void OnDestroy();
+	afx_msg void OnToolsMoveVerLine();
+	afx_msg void OnUpdateToolsMoveVerLine(CCmdUI *pCmdUI);
 };
 
 #ifndef _DEBUG  // debug version in WPhastView.cpp

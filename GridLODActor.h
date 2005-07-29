@@ -3,13 +3,14 @@
 // #include "structs.h"
 ///#include "Grid.h"
 #include "GridKeyword.h"
+#include "Units.h"
 #include "Snap.h"
 
 class vtkGeometryFilter;
 class vtkFeatureEdges;
 class vtkPolyDataMapper;
+class vtkImplicitPlaneWidget;
 
-class CUnits;
 class CZone;
 
 #ifndef vtkFloatingPointType
@@ -52,6 +53,26 @@ public:
 
 	void Serialize(bool bStoring, hid_t loc_id);
 
+	virtual void SetInteractor(vtkRenderWindowInteractor* iren);
+	vtkGetObjectMacro(Interactor, vtkRenderWindowInteractor);
+
+	void SetEnabled(int enabling);
+
+	// Description:
+	// Main process event method
+	static void ProcessEvents(vtkObject* object, unsigned long event, void* clientdata, void* calldata);
+
+	// ProcessEvents() dispatches to these methods.
+	void OnMouseMove(void);
+	void OnLeftButtonDown(void);
+	void OnLeftButtonUp(void);
+	void OnKeyPress(void);
+
+#if defined(WIN32)
+	BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
+#endif
+
+
 #ifdef _DEBUG
 	void Dump(CDumpContext& dc)const;
 #endif
@@ -73,12 +94,29 @@ protected:
 	vtkFeatureEdges*    m_pFeatureEdges;
 	vtkPolyDataMapper*  m_pPolyDataMapper;
 
+	// Used to associate observers with the interactor
+	vtkRenderWindowInteractor *Interactor;
+
+	// Used to process events
+	vtkCallbackCommand* EventCallbackCommand;
+
+	vtkImplicitPlaneWidget    *PlaneWidget;
+
+	int                 Enabled;
+
+	// Internal ivars for processing events
+	vtkRenderer        *CurrentRenderer;
+
 	///CGrid               m_grid[3];
 	///CSnap               m_snap;
 	///int                 m_axes[3];
 	///bool                m_print_input_xy;
 	CGridKeyword        m_gridKeyword;
+	CUnits              m_units;
 	HTREEITEM           m_htiGrid;
+
+	float               m_min[3];
+	float               m_max[3];
 
 private:
   CGridLODActor(const CGridLODActor&);  // Not implemented.

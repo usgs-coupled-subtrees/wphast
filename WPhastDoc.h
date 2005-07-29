@@ -118,6 +118,7 @@ public:
 
 	void Edit(CGridLODActor* pGridLODActor);
 	void SetGridKeyword(const CGridKeyword& gridKeyword);
+	vtkActor* GetGridActor(void);
 
 	// Well actions
 	void Add(CWellActor *pWellActor);

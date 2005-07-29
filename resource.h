@@ -239,6 +239,10 @@
 #define ID_WELLS_SELECTALL              243
 #define ID_WELLS_UNSELECTALL            244
 #define IDD_SERIES_DIALOG               248
+#define IDC_VE_SPLIT                    249
+#define IDC_HO_SPLIT                    250
+#define IDC_4WAY_02                     251
+#define IDC_4WAY02                      251
 #define IDC_EDIT_X                      1000
 #define IDC_PROPERTIES                  1000
 #define IDC_TITLE                       1000
@@ -568,6 +572,7 @@
 #define ID_NEW_CUBE                     32773
 #define ID_TOOLS_NEWRIVER               32793
 #define ID_BUTTON32795                  32795
+#define ID_TOOLS_MOVE_VER_LINE          32801
 #define IDW_CONTROLBAR_TREE             59424
 #define IDW_CONTROLBAR_BOXPROPS         59425
 
@@ -575,8 +580,8 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        249
-#define _APS_NEXT_COMMAND_VALUE         32801
+#define _APS_NEXT_RESOURCE_VALUE        252
+#define _APS_NEXT_COMMAND_VALUE         32803
 #define _APS_NEXT_CONTROL_VALUE         1281
 #define _APS_NEXT_SYMED_VALUE           126
 #endif

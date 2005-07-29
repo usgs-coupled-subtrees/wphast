@@ -46,6 +46,7 @@
 #include "ZoneActor.h"
 #include "WellActor.h"
 #include "RiverActor.h"
+#include "GridLODActor.h"
 #include "RiverCreateAction.h"
 #include "RiverPropertyPage2.h"
 #include "Grid.h"
@@ -99,6 +100,8 @@ BEGIN_MESSAGE_MAP(CWPhastView, CView)
 	ON_COMMAND(ID_TOOLS_NEWRIVER, OnToolsNewRiver)
 	ON_WM_LBUTTONDBLCLK()
 	ON_WM_DESTROY()
+	ON_COMMAND(ID_TOOLS_MOVE_VER_LINE, OnToolsMoveVerLine)
+	ON_UPDATE_COMMAND_UI(ID_TOOLS_MOVE_VER_LINE, OnUpdateToolsMoveVerLine)
 END_MESSAGE_MAP()
 
 // CWPhastView construction/destruction
@@ -113,6 +116,7 @@ CWPhastView::CWPhastView()
 , m_pPointWidget2(0)
 , m_pRiverActor(0)
 , RiverCallbackCommand(0)
+, m_bMovingGridLine(false)
 {
 	// Create the renderer, window and interactor objects.
 	//
@@ -224,6 +228,17 @@ CWPhastView::~CWPhastView()
 		this->RiverCallbackCommand->Delete();
 		this->RiverCallbackCommand = 0;
 	}
+
+	//{{
+	if (this->m_bMovingGridLine)
+	{
+		if (CGridLODActor* pGridLODActor = CGridLODActor::SafeDownCast(this->GetDocument()->GetGridActor()))
+		{
+			pGridLODActor->SetEnabled(0);
+		}
+	}
+	//}}
+
 
 	// Delete the the renderer, window and interactor objects.
 	//
@@ -589,6 +604,12 @@ void CWPhastView::DeleteContents(void)
 	this->CancelNewWell();
 	this->CancelNewRiver();  // TODO check this out
 	//}}
+
+	if (CGridLODActor* pGridLODActor = CGridLODActor::SafeDownCast(this->GetDocument()->GetGridActor()))
+	{
+		pGridLODActor->SetInteractor(0);
+	}
+	this->m_bMovingGridLine = false;
 }
 
 void CWPhastView::OnUpdateToolsNewZone(CCmdUI *pCmdUI)
@@ -750,6 +771,17 @@ BOOL CWPhastView::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 	{
 		::SetCursor(AfxGetApp()->LoadCursor(IDC_NULL));
 		return TRUE;
+	}
+
+	if (this->m_bMovingGridLine && nHitTest == HTCLIENT)
+	{
+		if (CGridLODActor* pGridLODActor = CGridLODActor::SafeDownCast(this->GetDocument()->GetGridActor()))
+		{
+			if (pGridLODActor->OnSetCursor(pWnd, nHitTest, message))
+			{
+				return TRUE;
+			}
+		}
 	}
 
 	return CView::OnSetCursor(pWnd, nHitTest, message);
@@ -1398,7 +1430,7 @@ void CWPhastView::StartNewRiver(void)
 		this->m_Renderer->AddProp(this->m_pRiverActor);
 	}
 
-	// Disable Interactor
+	// Disable Interactor - NOTE (This may be unnec)
 	//
 	if (vtkInteractorStyle* style = vtkInteractorStyle::SafeDownCast(this->m_pInteractorStyle))
 	{
@@ -1551,4 +1583,42 @@ void CWPhastView::OnDestroy()
 	__super::OnDestroy();
 
 	// TODO: Add your message handler code here
+}
+
+void CWPhastView::OnToolsMoveVerLine()
+{
+	// TODO: Add your command handler code here
+	if (this->m_bMovingGridLine)
+	{
+		////this->GetDocument()->GetGridActor()->CancelMoveGridLine();
+		if (CGridLODActor* pGridLODActor = CGridLODActor::SafeDownCast(this->GetDocument()->GetGridActor()))
+		{
+			// pGridLODActor->SetInteractor(0);
+			pGridLODActor->SetEnabled(0);
+		}
+		this->m_bMovingGridLine = false;
+	}
+	else
+	{
+		this->m_bMovingGridLine = true;
+		////this->GetDocument()->GetGridActor()->StartMoveGridLine(this->m_RenderWindowInteractor);
+		if (CGridLODActor* pGridLODActor = CGridLODActor::SafeDownCast(this->GetDocument()->GetGridActor()))
+		{
+			pGridLODActor->SetInteractor(this->m_RenderWindowInteractor);
+			// pGridLODActor->SetEnabled(1);
+		}
+	}
+}
+
+void CWPhastView::OnUpdateToolsMoveVerLine(CCmdUI *pCmdUI)
+{
+	pCmdUI->Enable(TRUE);
+	if (this->m_bMovingGridLine)
+	{
+		pCmdUI->SetCheck(1);
+	}
+	else
+	{
+		pCmdUI->SetCheck(0);
+	}
 }

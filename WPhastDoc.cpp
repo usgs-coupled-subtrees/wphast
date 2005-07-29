@@ -225,11 +225,11 @@ CWPhastDoc::CWPhastDoc()
 	this->m_pimpl->m_vectorActionsIndex = 0;
 	this->m_pimpl->m_lastSaveIndex = -1;
 
-	// create the grid
-	//
-	ASSERT(this->m_pGridLODActor == 0);
-	this->m_pGridLODActor = CGridLODActor::New();
-	this->m_pGridLODActor->GetProperty()->SetColor(1.0, 0.8, 0.6);
+// COMMENT: {7/28/2005 2:48:16 PM}	// create the grid
+// COMMENT: {7/28/2005 2:48:16 PM}	//
+// COMMENT: {7/28/2005 2:48:16 PM}	ASSERT(this->m_pGridLODActor == 0);
+// COMMENT: {7/28/2005 2:48:16 PM}	this->m_pGridLODActor = CGridLODActor::New();
+// COMMENT: {7/28/2005 2:48:16 PM}	this->m_pGridLODActor->GetProperty()->SetColor(1.0, 0.8, 0.6);
 
 	// create the prop list
 	//
@@ -273,7 +273,7 @@ CWPhastDoc::CWPhastDoc()
 	//
 	this->m_pModel = new CNewModel;
 	this->m_pModel->m_printFreq = CPrintFreq::NewDefaults();
-	this->New(CNewModel::Default());
+// COMMENT: {7/28/2005 2:54:07 PM}	this->New(CNewModel::Default());
 
 	// river event listener
 	//
@@ -1354,7 +1354,7 @@ void CWPhastDoc::AssertValid() const
 	CDocument::AssertValid();
 	ASSERT(this->m_pAxesActor != 0);
 // COMMENT: {7/15/2004 1:15:38 PM}	ASSERT(this->m_pGeometrySheet != 0);
-	ASSERT(this->m_pGridLODActor != 0);
+// COMMENT: {7/28/2005 2:55:59 PM}	ASSERT(this->m_pGridLODActor != 0);
 	ASSERT(this->m_pimpl != 0);
 	ASSERT(this->m_pPropCollection != 0);
 	ASSERT(this->m_pRemovedPropCollection != 0);
@@ -1546,6 +1546,20 @@ void CWPhastDoc::DeleteContents()
 		this->m_pimpl->m_lastSaveIndex = -1;
 	}
 
+	//{{
+	// create the grid
+	//
+	if (this->m_pGridLODActor)
+	{
+		this->m_pGridLODActor->Delete();
+	}
+	this->m_pGridLODActor = CGridLODActor::New();
+	this->m_pGridLODActor->GetProperty()->SetColor(1.0, 0.8, 0.6);
+	//}}
+	ASSERT(this->m_pGridLODActor);
+	this->m_pGridLODActor->SetScale(1, 1, 1);
+
+
 	// update views
 	//
 	POSITION pos = this->GetFirstViewPosition();
@@ -1592,7 +1606,8 @@ void CWPhastDoc::DeleteContents()
 
 	// update tree
 	//
-	if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar()) {
+	if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar())
+	{
 		ASSERT_VALID(pTree);
 		pTree->DeleteContents();
 	}
@@ -1607,10 +1622,22 @@ void CWPhastDoc::DeleteContents()
 
 	// reset scale
 	//
-	ASSERT(this->m_pGridLODActor);
-	this->m_pGridLODActor->SetScale(1, 1, 1);
+	
+// COMMENT: {7/28/2005 4:38:34 PM}	//{{
+// COMMENT: {7/28/2005 4:38:34 PM}	// create the grid
+// COMMENT: {7/28/2005 4:38:34 PM}	//
+// COMMENT: {7/28/2005 4:38:34 PM}	if (this->m_pGridLODActor)
+// COMMENT: {7/28/2005 4:38:34 PM}	{
+// COMMENT: {7/28/2005 4:38:34 PM}		this->m_pGridLODActor->Delete();
+// COMMENT: {7/28/2005 4:38:34 PM}	}
+// COMMENT: {7/28/2005 4:38:34 PM}	this->m_pGridLODActor = CGridLODActor::New();
+// COMMENT: {7/28/2005 4:38:34 PM}	this->m_pGridLODActor->GetProperty()->SetColor(1.0, 0.8, 0.6);
+// COMMENT: {7/28/2005 4:38:34 PM}	//}}
+// COMMENT: {7/28/2005 4:38:34 PM}	ASSERT(this->m_pGridLODActor);
+// COMMENT: {7/28/2005 4:38:34 PM}	this->m_pGridLODActor->SetScale(1, 1, 1);
 
-	if (this->m_pMapActor) {
+	if (this->m_pMapActor)
+	{
 		this->m_pMapActor->Delete();
 		this->m_pMapActor = 0;
 	}
@@ -1619,11 +1646,13 @@ void CWPhastDoc::DeleteContents()
 	// Note: can't call this->SetScale(1.0f, 1.0f, 1.0f);
 	// Since the this->m_pGridLODActor contains no data for
 	// this->m_pGridLODActor->GetBounds
-	if (this->m_pScalePage) {
+	if (this->m_pScalePage)
+	{
 		this->m_pScalePage->m_XScale = 1;
 		this->m_pScalePage->m_YScale = 1;
 		this->m_pScalePage->m_ZScale = 1;
-		if (this->m_pScalePage->GetSafeHwnd()) {
+		if (this->m_pScalePage->GetSafeHwnd())
+		{
 			this->m_pScalePage->UpdateData(FALSE);
 		}
 	}
@@ -1632,7 +1661,8 @@ void CWPhastDoc::DeleteContents()
 
 	// Update BoxPropertiesDialogBar
 	//
-	if (CBoxPropertiesDialogBar* pBar = this->GetBoxPropertiesDialogBar()) {
+	if (CBoxPropertiesDialogBar* pBar = this->GetBoxPropertiesDialogBar())
+	{
 		pBar->Set(0, 0, this->GetUnits());
 	}
 
@@ -4732,4 +4762,9 @@ void CWPhastDoc::Edit(CGridLODActor* pGridLODActor)
 
 void CWPhastDoc::Update(IObserver* pSender, LPARAM lHint, CObject* pHint, vtkObject* pObject)
 {
+}
+
+vtkActor* CWPhastDoc::GetGridActor(void)
+{
+	return this->m_pGridLODActor;
 }

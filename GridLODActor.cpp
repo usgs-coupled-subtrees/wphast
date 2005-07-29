@@ -20,10 +20,16 @@
 #include <vtkThreshold.h>
 #include <vtkPolyData.h>
 #include <vtkUnstructuredGrid.h>
+#include <vtkImplicitPlaneWidget.h>
 
 #include "Global.h"
 #include "Units.h"
 #include "Zone.h"
+
+#if defined(WIN32)
+#include "Resource.h"
+#endif
+
 
 vtkCxxRevisionMacro(CGridLODActor, "$Revision$");
 vtkStandardNewMacro(CGridLODActor);
@@ -38,6 +44,11 @@ CGridLODActor::CGridLODActor(void)
 	, m_pFeatureEdges(0)
 	, m_pPolyDataMapper(0)
 	, m_htiGrid(0)
+	, Interactor(0)
+	, CurrentRenderer(0)
+	, EventCallbackCommand(0)
+	, Enabled(0)
+	, PlaneWidget(0)
 {
 	this->m_pGeometryFilter = vtkGeometryFilter::New();
 
@@ -56,6 +67,10 @@ CGridLODActor::CGridLODActor(void)
 	this->m_gridKeyword.m_grid[0].c = 'X';
 	this->m_gridKeyword.m_grid[1].c = 'Y';
 	this->m_gridKeyword.m_grid[2].c = 'Z';
+
+	this->EventCallbackCommand = vtkCallbackCommand::New();
+	this->EventCallbackCommand->SetClientData(this); 
+	this->EventCallbackCommand->SetCallback(CGridLODActor::ProcessEvents);
 }
 
 CGridLODActor::~CGridLODActor(void)
@@ -63,6 +78,21 @@ CGridLODActor::~CGridLODActor(void)
 	this->m_pGeometryFilter->Delete();
 	this->m_pFeatureEdges->Delete();
 	this->m_pPolyDataMapper->Delete();
+
+	if (this->PlaneWidget)
+	{
+		if (this->PlaneWidget->GetEnabled())
+		{
+			this->PlaneWidget->SetEnabled(0);
+		}
+		this->PlaneWidget->Delete();
+	}
+	if (this->Interactor)
+	{
+		this->Interactor->RemoveObserver(this->EventCallbackCommand);
+		this->Interactor->UnRegister(this);
+	}
+	this->EventCallbackCommand->Delete();
 }
 
 #ifdef _DEBUG
@@ -321,6 +351,7 @@ void CGridLODActor::GetGridKeyword(CGridKeyword& gridKeyword)const
 void CGridLODActor::SetGridKeyword(const CGridKeyword& gridKeyword, const CUnits& units)
 {
 	this->m_gridKeyword = gridKeyword;
+	this->m_units = units;
 	this->Setup(units);
 }
 
@@ -399,8 +430,41 @@ void CGridLODActor::Setup(const CUnits& units)
 		}
 	}
 
+	for (i = 0; i < 3; ++i)
+	{
+		if (this->m_gridKeyword.m_grid[i].uniform)
+		{
+			this->m_min[i] = min[i];
+		}
+		else
+		{
+			if (i == 2)
+			{
+				this->m_min[i] = this->m_gridKeyword.m_grid[i].coord[0] * units.vertical.input_to_si;
+			}
+			else
+			{
+				this->m_min[i] = this->m_gridKeyword.m_grid[i].coord[0] * units.horizontal.input_to_si;
+			}
+		}
+		this->m_max[i] = x[i];
+	}
+
 	sgrid->SetPoints(points);
 	points->Delete();
+
+	//{{
+	if (!this->PlaneWidget)
+	{
+		this->PlaneWidget = vtkImplicitPlaneWidget::New();
+
+		//this->PlaneWidget->SetInteractor(this->Interactor);
+		this->PlaneWidget->SetInput(sgrid);
+		this->PlaneWidget->PlaceWidget();
+		//this->PlaneWidget->NormalToZAxisOn();
+		//this->PlaneWidget->EnabledOn();
+	}
+	//}}
 
 	this->m_pGeometryFilter->SetInput(sgrid);
 	sgrid->Delete();
@@ -446,3 +510,356 @@ void CGridLODActor::GetDefaultZone(CZone& rZone)
 		rZone.z2 = this->m_gridKeyword.m_grid[2].coord[this->m_gridKeyword.m_grid[2].count_coord - 1];
 	}
 }
+
+void CGridLODActor::SetInteractor(vtkRenderWindowInteractor* iren)
+{
+	if (iren == this->Interactor)
+	{
+		return;
+	}
+
+	// if we already have an Interactor then stop observing it
+	if (this->Interactor)
+	{
+		this->Interactor->UnRegister(this);
+		this->Interactor->RemoveObserver(this->EventCallbackCommand);
+	}
+
+// COMMENT: {7/28/2005 6:24:13 PM}	//{{
+// COMMENT: {7/28/2005 6:24:13 PM}	if (this->PlaneWidget)
+// COMMENT: {7/28/2005 6:24:13 PM}	{
+// COMMENT: {7/28/2005 6:24:13 PM}		this->PlaneWidget->SetInteractor(iren);
+// COMMENT: {7/28/2005 6:24:13 PM}	}
+// COMMENT: {7/28/2005 6:24:13 PM}	//}}
+
+	this->Interactor = iren;
+	this->Interactor->Register(this);
+
+	if (iren)
+	{
+		this->SetEnabled(1);
+	}
+	this->Modified();
+}
+
+void CGridLODActor::SetEnabled(int enabling)
+{
+	if (!this->Interactor)
+	{
+		vtkErrorMacro(<<"The interactor must be set prior to enabling/disabling widget");
+		return;
+	}
+
+	if ( enabling ) //------------------------------------------------------------
+	{
+		vtkDebugMacro(<<"Enabling grid interaction");
+
+		if ( this->Enabled ) //already enabled, just return
+		{
+			return;
+		}
+
+		if ( ! this->CurrentRenderer )
+		{
+			this->CurrentRenderer = this->Interactor->FindPokedRenderer(
+				this->Interactor->GetLastEventPosition()[0],
+				this->Interactor->GetLastEventPosition()[1]);
+			if (this->CurrentRenderer == NULL)
+			{
+				return;
+			}
+		}
+
+		this->Enabled = 1;
+
+		// listen to the following events
+		vtkRenderWindowInteractor *i = this->Interactor;
+		i->AddObserver(vtkCommand::MouseMoveEvent,
+			this->EventCallbackCommand, 10);
+		i->AddObserver(vtkCommand::LeftButtonPressEvent, 
+			this->EventCallbackCommand, 10);
+		i->AddObserver(vtkCommand::LeftButtonReleaseEvent, 
+			this->EventCallbackCommand, 10);
+		i->AddObserver(vtkCommand::KeyPressEvent, 
+			this->EventCallbackCommand, 10);
+
+	}
+
+	else //disabling-------------------------------------------------------------
+	{
+		vtkDebugMacro(<<"Disabling river");
+
+		if ( ! this->Enabled ) //already disabled, just return
+		{
+			return;
+		}
+
+		this->Enabled = 0;
+
+		// don't listen for events any more
+		if (this->Interactor)
+		{
+			//{{
+			if (this->PlaneWidget)
+			{
+				this->PlaneWidget->SetEnabled(enabling);
+			}
+			//}}
+			this->Interactor->RemoveObserver(this->EventCallbackCommand);
+			//{{
+			this->Interactor->UnRegister(this);
+			this->Interactor = 0;
+			//}}
+		}
+	}
+
+
+	//{{
+	if (this->Interactor)
+	{
+	//}}
+		this->Interactor->Render();
+	//{{
+	}
+	//}}
+}
+
+void CGridLODActor::ProcessEvents(vtkObject* vtkNotUsed(object), 
+									   unsigned long event,
+									   void* clientdata, 
+									   void* vtkNotUsed(calldata))
+{
+	CGridLODActor* self 
+		= reinterpret_cast<CGridLODActor *>( clientdata );
+
+	switch(event)
+	{
+	case vtkCommand::MouseMoveEvent:
+		self->OnMouseMove();
+		break;
+
+	case vtkCommand::LeftButtonPressEvent: 
+		self->OnLeftButtonDown();
+		break;
+
+	case vtkCommand::LeftButtonReleaseEvent:
+		self->OnLeftButtonUp();
+		break;
+
+	case vtkCommand::KeyPressEvent:
+		self->OnKeyPress();
+		break;
+	}
+}
+
+
+void CGridLODActor::OnLeftButtonDown()
+{
+	if (!this->Interactor) return;
+
+	int X = this->Interactor->GetEventPosition()[0];
+	int Y = this->Interactor->GetEventPosition()[1];
+
+	vtkRenderer *ren = this->Interactor->FindPokedRenderer(X,Y);
+	if ( ren != this->CurrentRenderer )
+	{
+		return;
+	}
+}
+
+void CGridLODActor::OnMouseMove()
+{
+	if (!this->Interactor) return;
+
+	int X = this->Interactor->GetEventPosition()[0];
+	int Y = this->Interactor->GetEventPosition()[1];
+
+	vtkRenderer *ren = this->Interactor->FindPokedRenderer(X,Y);
+	if ( ren != this->CurrentRenderer )
+	{
+		return;
+	}
+
+	vtkCellPicker* pCellPicker = vtkCellPicker::New();
+	pCellPicker->SetTolerance(0.004);
+	pCellPicker->PickFromListOn();
+	this->PickableOn();
+	pCellPicker->AddPickList(this);
+	if (pCellPicker->Pick(X, Y, 0.0, this->CurrentRenderer))
+	{
+		vtkIdType n = pCellPicker->GetCellId();
+		float* pt = pCellPicker->GetPickPosition();
+		if (vtkDataSet* pDataSet = pCellPicker->GetDataSet())
+		{
+			vtkCell* pCell = pDataSet->GetCell(n);
+			if (pCell->GetCellType() == VTK_LINE)
+			{
+				ASSERT(pCell->GetNumberOfPoints() == 2);				
+				if (vtkPoints* pPoints = pCell->GetPoints())
+				{
+					float* pt0 = pPoints->GetPoint(0);
+					float* pt1 = pPoints->GetPoint(1);
+					TRACE("pt0[0] = %g, pt0[1] = %g\n", pt0[0], pt0[1]);
+					TRACE("pt1[0] = %g, pt1[1] = %g\n", pt1[0], pt1[1]);
+
+// COMMENT: {7/28/2005 2:31:14 PM}					if (!this->PlaneWidget)
+// COMMENT: {7/28/2005 2:31:14 PM}					{
+// COMMENT: {7/28/2005 2:31:14 PM}						this->PlaneWidget = vtkImplicitPlaneWidget::New();
+// COMMENT: {7/28/2005 2:31:14 PM}
+// COMMENT: {7/28/2005 2:31:14 PM}						this->PlaneWidget->SetInteractor(this->Interactor);
+// COMMENT: {7/28/2005 2:31:14 PM}						this->PlaneWidget->SetInput(this->m_pGeometryFilter->GetOutput());
+// COMMENT: {7/28/2005 2:31:14 PM}						///this->PlaneWidget->SetInput(this->m_pFeatureEdges->GetOutput());
+// COMMENT: {7/28/2005 2:31:14 PM}						this->PlaneWidget->PlaceWidget();
+// COMMENT: {7/28/2005 2:31:14 PM}						///this->PlaneWidget->PlaceWidget(this->GetBounds());
+// COMMENT: {7/28/2005 2:31:14 PM}						this->PlaneWidget->NormalToZAxisOn();
+// COMMENT: {7/28/2005 2:31:14 PM}						this->PlaneWidget->EnabledOn();
+// COMMENT: {7/28/2005 2:31:14 PM}					}
+					if (this->PlaneWidget && !this->PlaneWidget->GetEnabled())
+					{
+						this->PlaneWidget->SetPlaceFactor(1);
+						this->PlaneWidget->SetInteractor(this->Interactor);
+						this->PlaneWidget->NormalToYAxisOn();
+						this->PlaneWidget->PlaceWidget(this->GetBounds());
+						this->PlaneWidget->SetOrigin((this->m_min[0] + this->m_max[0]) / 2, (this->m_min[1] + this->m_max[1]) / 2, (this->m_min[2] + this->m_max[2]) / 2);
+						this->PlaneWidget->EnabledOn();
+					}
+
+
+					ASSERT(this->m_gridKeyword.m_grid[0].uniform_expanded == FALSE);
+					ASSERT(this->m_gridKeyword.m_grid[1].uniform_expanded == FALSE);
+					ASSERT(this->m_gridKeyword.m_grid[2].uniform_expanded == FALSE);
+
+					// case 1 +z plane
+					//double zmax = this->m_gridKeyword.m_grid[2];
+					float planePoint1[3];
+					float planePoint2[3];
+					float planePoint3[3];
+					float planePoint4[3];
+
+					if (pt0[2] == this->m_max[2] && pt1[2] == this->m_max[2])
+					{
+						// +z plane
+						//
+						if (pt0[0] == pt1[0])
+						{
+							planePoint1[0] = pt0[0];
+							planePoint1[1] = this->m_min[1];
+							planePoint1[2] = this->m_max[2];
+
+							planePoint2[0] = pt0[0];
+							planePoint2[1] = this->m_max[1];
+							planePoint2[2] = this->m_max[2];
+
+							planePoint3[0] = pt0[0];
+							planePoint3[1] = this->m_max[1];
+							planePoint3[2] = this->m_min[2];
+
+							planePoint4[0] = pt0[0];
+							planePoint4[1] = this->m_min[1];
+							planePoint4[2] = this->m_min[2];
+						}
+					}
+
+
+#if defined(WIN32)
+					if (pt0[1] == pt1[1])
+					{
+						::SetCursor(AfxGetApp()->LoadCursor(IDC_HO_SPLIT));
+					}
+					else if (pt0[0] == pt1[0])
+					{
+						::SetCursor(AfxGetApp()->LoadCursor(IDC_VE_SPLIT));
+					}
+#endif
+				}
+			}
+		}
+		TRACE("pt[0] = %g, pt[1] = %g, pt[2] = %g\n", pt[0], pt[1], pt[2]);
+	}
+	pCellPicker->Delete();
+	this->PickableOff();
+}
+
+void CGridLODActor::OnLeftButtonUp()
+{
+	if (!this->Interactor) return;
+
+	int X = this->Interactor->GetEventPosition()[0];
+	int Y = this->Interactor->GetEventPosition()[1];
+
+	vtkRenderer *ren = this->Interactor->FindPokedRenderer(X,Y);
+	if ( ren != this->CurrentRenderer )
+	{
+		return;
+	}
+}
+
+void CGridLODActor::OnKeyPress()
+{
+	if (!this->Interactor) return;
+
+// COMMENT: {7/26/2005 7:01:34 PM}	if (this->State == CRiverActor::CreatingRiver)
+// COMMENT: {7/26/2005 7:01:34 PM}	{
+// COMMENT: {7/26/2005 7:01:34 PM}		char* keysym = this->Interactor->GetKeySym();		
+// COMMENT: {7/26/2005 7:01:34 PM}		// if (::strcmp(keysym, "Escape") == 0)
+// COMMENT: {7/26/2005 7:01:34 PM}		this->Interactor->Render();
+// COMMENT: {7/26/2005 7:01:34 PM}	}
+}
+
+#if defined(WIN32)
+BOOL CGridLODActor::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
+{
+	if (!this->Interactor) return FALSE;
+
+	int X = this->Interactor->GetEventPosition()[0];
+	int Y = this->Interactor->GetEventPosition()[1];
+
+	vtkRenderer *ren = this->Interactor->FindPokedRenderer(X,Y);
+	if ( ren != this->CurrentRenderer )
+	{
+		return FALSE;
+	}
+
+// COMMENT: {7/28/2005 3:26:36 PM}	vtkCellPicker* pCellPicker = vtkCellPicker::New();
+// COMMENT: {7/28/2005 3:26:36 PM}	pCellPicker->SetTolerance(0.004);
+// COMMENT: {7/28/2005 3:26:36 PM}	pCellPicker->PickFromListOn();
+// COMMENT: {7/28/2005 3:26:36 PM}	this->PickableOn();
+// COMMENT: {7/28/2005 3:26:36 PM}	pCellPicker->AddPickList(this);
+// COMMENT: {7/28/2005 3:26:36 PM}	if (pCellPicker->Pick(X, Y, 0.0, this->CurrentRenderer))
+// COMMENT: {7/28/2005 3:26:36 PM}	{
+// COMMENT: {7/28/2005 3:26:36 PM}		vtkIdType n = pCellPicker->GetCellId();
+// COMMENT: {7/28/2005 3:26:36 PM}		if (vtkDataSet* pDataSet = pCellPicker->GetDataSet())
+// COMMENT: {7/28/2005 3:26:36 PM}		{
+// COMMENT: {7/28/2005 3:26:36 PM}			vtkCell* pCell = pDataSet->GetCell(n);
+// COMMENT: {7/28/2005 3:26:36 PM}			if (pCell->GetCellType() == VTK_LINE)
+// COMMENT: {7/28/2005 3:26:36 PM}			{
+// COMMENT: {7/28/2005 3:26:36 PM}				ASSERT(pCell->GetNumberOfPoints() == 2);				
+// COMMENT: {7/28/2005 3:26:36 PM}				if (vtkPoints* pPoints = pCell->GetPoints())
+// COMMENT: {7/28/2005 3:26:36 PM}				{
+// COMMENT: {7/28/2005 3:26:36 PM}					float* pt0 = pPoints->GetPoint(0);
+// COMMENT: {7/28/2005 3:26:36 PM}					float* pt1 = pPoints->GetPoint(1);
+// COMMENT: {7/28/2005 3:26:36 PM}					TRACE("pt0[0] = %g, pt0[1] = %g\n", pt0[0], pt0[1]);
+// COMMENT: {7/28/2005 3:26:36 PM}					TRACE("pt1[0] = %g, pt1[1] = %g\n", pt1[0], pt1[1]);
+// COMMENT: {7/28/2005 3:26:36 PM}					if (pt0[1] == pt1[1])
+// COMMENT: {7/28/2005 3:26:36 PM}					{
+// COMMENT: {7/28/2005 3:26:36 PM}						::SetCursor(AfxGetApp()->LoadCursor(IDC_HO_SPLIT));
+// COMMENT: {7/28/2005 3:26:36 PM}						pCellPicker->Delete();
+// COMMENT: {7/28/2005 3:26:36 PM}						this->PickableOff();
+// COMMENT: {7/28/2005 3:26:36 PM}						return TRUE;
+// COMMENT: {7/28/2005 3:26:36 PM}					}
+// COMMENT: {7/28/2005 3:26:36 PM}					else if (pt0[0] == pt1[0])
+// COMMENT: {7/28/2005 3:26:36 PM}					{
+// COMMENT: {7/28/2005 3:26:36 PM}						::SetCursor(AfxGetApp()->LoadCursor(IDC_VE_SPLIT));
+// COMMENT: {7/28/2005 3:26:36 PM}						pCellPicker->Delete();
+// COMMENT: {7/28/2005 3:26:36 PM}						this->PickableOff();
+// COMMENT: {7/28/2005 3:26:36 PM}						return TRUE;
+// COMMENT: {7/28/2005 3:26:36 PM}					}
+// COMMENT: {7/28/2005 3:26:36 PM}				}
+// COMMENT: {7/28/2005 3:26:36 PM}			}
+// COMMENT: {7/28/2005 3:26:36 PM}		}
+// COMMENT: {7/28/2005 3:26:36 PM}	}
+// COMMENT: {7/28/2005 3:26:36 PM}	pCellPicker->Delete();
+// COMMENT: {7/28/2005 3:26:36 PM}	this->PickableOff();
+	return FALSE;
+}
+#endif

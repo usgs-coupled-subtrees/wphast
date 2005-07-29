@@ -1389,6 +1389,9 @@
 			Name="Resource Files"
 			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;jpg;jpeg;jpe;manifest;rtf">
 			<File
+				RelativePath="res\4way02.cur">
+			</File>
+			<File
 				RelativePath="res\ALPHA_HORZ.rtf">
 			</File>
 			<File
@@ -1438,6 +1441,9 @@
 			</File>
 			<File
 				RelativePath="res\CHEM_IC_SURFACE.rtf">
+			</File>
+			<File
+				RelativePath="res\HO_SPLIT.CUR">
 			</File>
 			<File
 				RelativePath="res\IC_HEAD_HEAD.rtf">
@@ -1558,6 +1564,9 @@
 			</File>
 			<File
 				RelativePath="res\scale_obj.cur">
+			</File>
+			<File
+				RelativePath="res\ve_split.cur">
 			</File>
 			<File
 				RelativePath="res\watermrk.bmp">
@@ -3737,15 +3746,15 @@
 			Name="Build Logs"
 			Filter="">
 			<File
+				RelativePath="Release\BuildLog.htm"
+				DeploymentContent="TRUE">
+			</File>
+			<File
 				RelativePath="cppunit\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 			<File
 				RelativePath="Debug\BuildLog.htm"
-				DeploymentContent="TRUE">
-			</File>
-			<File
-				RelativePath="Release\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 		</Filter>
