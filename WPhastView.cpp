@@ -605,23 +605,18 @@ void CWPhastView::DeleteContents(void)
 	this->CancelNewRiver();  // TODO check this out
 	//}}
 
-	if (CGridLODActor* pGridLODActor = CGridLODActor::SafeDownCast(this->GetDocument()->GetGridActor()))
-	{
-		pGridLODActor->SetInteractor(0);
-	}
 	this->m_bMovingGridLine = false;
 }
 
 void CWPhastView::OnUpdateToolsNewZone(CCmdUI *pCmdUI)
 {
 	pCmdUI->Enable(TRUE);
-// COMMENT: {7/19/2004 7:04:55 PM}	if (this->m_pCursor3DActor->GetVisibility() == 0) {
-	if (!this->CreatingNewZone()) {
-		// pCmdUI->Enable(TRUE);
+	if (!this->CreatingNewZone())
+	{
 		pCmdUI->SetCheck(0);
 	}
-	else {
-		// pCmdUI->Enable(FALSE);
+	else
+	{
 		pCmdUI->SetCheck(1);
 	}
 }
@@ -689,8 +684,10 @@ void CWPhastView::StartNewZone(void)
 
 	// Disable Interactor
 	//
-	if (vtkInteractorStyle* style = vtkInteractorStyle::SafeDownCast(this->m_pInteractorStyle)) {
-		if (vtkInteractorStyleSwitch* switcher = vtkInteractorStyleSwitch::SafeDownCast(style)) {
+	if (vtkInteractorStyle* style = vtkInteractorStyle::SafeDownCast(this->m_pInteractorStyle))
+	{
+		if (vtkInteractorStyleSwitch* switcher = vtkInteractorStyleSwitch::SafeDownCast(style))
+		{
 			style = switcher->GetCurrentStyle();
 		}
 		style->SetInteractor(0);
@@ -708,7 +705,8 @@ void CWPhastView::StartNewZone(void)
 
 void CWPhastView::CancelNewZone(void)
 {
-	if (this->CreatingNewZone()) {
+	if (this->CreatingNewZone())
+	{
 		this->EndNewZone();
 		this->GetDocument()->UpdateAllViews(0);
 	}
@@ -726,8 +724,10 @@ void CWPhastView::EndNewZone(void)
 
 	// reattach interactor
 	//
-	if (vtkInteractorStyle* style = vtkInteractorStyle::SafeDownCast(this->m_pInteractorStyle)) {
-		if (vtkInteractorStyleSwitch* switcher = vtkInteractorStyleSwitch::SafeDownCast(style)) {
+	if (vtkInteractorStyle* style = vtkInteractorStyle::SafeDownCast(this->m_pInteractorStyle))
+	{
+		if (vtkInteractorStyleSwitch* switcher = vtkInteractorStyleSwitch::SafeDownCast(style))
+		{
 			style = switcher->GetCurrentStyle();
 		}
 		style->SetInteractor(this->m_RenderWindowInteractor);
@@ -751,18 +751,21 @@ BOOL CWPhastView::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 {
 	// set real-time pan cursor
 	//
-	if (::GetAsyncKeyState(VK_MBUTTON) < 0) {
+	if (::GetAsyncKeyState(VK_MBUTTON) < 0)
+	{
 		::SetCursor(AfxGetApp()->LoadCursor(IDC_PAN_REAL));
 		return TRUE;
 	}
-	if (::GetAsyncKeyState(VK_SHIFT) < 0 && ::GetAsyncKeyState(VK_LBUTTON)) {
+	if (::GetAsyncKeyState(VK_SHIFT) < 0 && ::GetAsyncKeyState(VK_LBUTTON))
+	{
 		::SetCursor(AfxGetApp()->LoadCursor(IDC_PAN_REAL));
 		return TRUE;
 	}
 
 	// set 3D cursor
 	//
-	if (this->m_pCursor3DActor->GetVisibility() && nHitTest == HTCLIENT) {
+	if (this->m_pCursor3DActor->GetVisibility() && nHitTest == HTCLIENT)
+	{
 		::SetCursor(AfxGetApp()->LoadCursor(IDC_NULL));
 		return TRUE;
 	}

@@ -1620,6 +1620,14 @@ void CWPhastDoc::DeleteContents()
 	CLEAR_PROP_ASSEMBLY_MACRO(this->m_pPropAssemblyWells);
 	CLEAR_PROP_ASSEMBLY_MACRO(this->m_pPropAssemblyRivers);
 
+	// Turn-all on by default
+	//
+	this->m_pPropAssemblyMedia->SetVisibility(1);
+	this->m_pPropAssemblyIC->SetVisibility(1);
+	this->m_pPropAssemblyBC->SetVisibility(1);
+	this->m_pPropAssemblyWells->SetVisibility(1);
+	this->m_pPropAssemblyRivers->SetVisibility(1);
+
 	// reset scale
 	//
 	

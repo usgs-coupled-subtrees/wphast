@@ -21,6 +21,7 @@
 #include <vtkPolyData.h>
 #include <vtkUnstructuredGrid.h>
 #include <vtkImplicitPlaneWidget.h>
+#include "GridLineWidget.h"
 
 #include "Global.h"
 #include "Units.h"
@@ -49,6 +50,7 @@ CGridLODActor::CGridLODActor(void)
 	, EventCallbackCommand(0)
 	, Enabled(0)
 	, PlaneWidget(0)
+	, State(CGridLODActor::Start)
 {
 	this->m_pGeometryFilter = vtkGeometryFilter::New();
 
@@ -284,9 +286,6 @@ void CGridLODActor::Insert(CTreeCtrl* pTreeCtrl, HTREEITEM htiGrid)
 	}
 
 	// insert
-	//this->m_gridKeyword.m_grid[0].Insert(pTreeCtrl, htiGrid);
-	//this->m_gridKeyword.m_grid[1].Insert(pTreeCtrl, htiGrid);
-	//this->m_gridKeyword.m_grid[2].Insert(pTreeCtrl, htiGrid);
 	this->m_gridKeyword.m_grid[0].Insert(pTreeCtrl, htiGrid);
 	this->m_gridKeyword.m_grid[1].Insert(pTreeCtrl, htiGrid);
 	this->m_gridKeyword.m_grid[2].Insert(pTreeCtrl, htiGrid);
@@ -456,7 +455,17 @@ void CGridLODActor::Setup(const CUnits& units)
 	//{{
 	if (!this->PlaneWidget)
 	{
-		this->PlaneWidget = vtkImplicitPlaneWidget::New();
+		//this->PlaneWidget = vtkImplicitPlaneWidget::New();
+		this->PlaneWidget = CGridLineWidget::New();
+
+		vtkCallbackCommand* Callback = vtkCallbackCommand::New();
+		Callback->SetClientData(this); 
+		Callback->SetCallback(CGridLODActor::ProcessEvents);
+
+		this->PlaneWidget->AddObserver(vtkCommand::InteractionEvent, Callback);
+		this->PlaneWidget->AddObserver(vtkCommand::EndInteractionEvent, Callback);
+		this->PlaneWidget->AddObserver(vtkCommand::StartInteractionEvent, Callback);
+		Callback->Delete();
 
 		//this->PlaneWidget->SetInteractor(this->Interactor);
 		this->PlaneWidget->SetInput(sgrid);
@@ -525,13 +534,6 @@ void CGridLODActor::SetInteractor(vtkRenderWindowInteractor* iren)
 		this->Interactor->RemoveObserver(this->EventCallbackCommand);
 	}
 
-// COMMENT: {7/28/2005 6:24:13 PM}	//{{
-// COMMENT: {7/28/2005 6:24:13 PM}	if (this->PlaneWidget)
-// COMMENT: {7/28/2005 6:24:13 PM}	{
-// COMMENT: {7/28/2005 6:24:13 PM}		this->PlaneWidget->SetInteractor(iren);
-// COMMENT: {7/28/2005 6:24:13 PM}	}
-// COMMENT: {7/28/2005 6:24:13 PM}	//}}
-
 	this->Interactor = iren;
 	this->Interactor->Register(this);
 
@@ -599,35 +601,27 @@ void CGridLODActor::SetEnabled(int enabling)
 		// don't listen for events any more
 		if (this->Interactor)
 		{
-			//{{
 			if (this->PlaneWidget)
 			{
 				this->PlaneWidget->SetEnabled(enabling);
 			}
-			//}}
 			this->Interactor->RemoveObserver(this->EventCallbackCommand);
-			//{{
 			this->Interactor->UnRegister(this);
 			this->Interactor = 0;
-			//}}
 		}
 	}
 
-
-	//{{
 	if (this->Interactor)
 	{
-	//}}
 		this->Interactor->Render();
-	//{{
 	}
-	//}}
 }
 
-void CGridLODActor::ProcessEvents(vtkObject* vtkNotUsed(object), 
-									   unsigned long event,
-									   void* clientdata, 
-									   void* vtkNotUsed(calldata))
+//void CGridLODActor::ProcessEvents(vtkObject* vtkNotUsed(object), 
+//									   unsigned long event,
+//									   void* clientdata, 
+//									   void* vtkNotUsed(calldata))
+void CGridLODActor::ProcessEvents(vtkObject* object, unsigned long event, void* clientdata, void* calldata)
 {
 	CGridLODActor* self 
 		= reinterpret_cast<CGridLODActor *>( clientdata );
@@ -648,6 +642,24 @@ void CGridLODActor::ProcessEvents(vtkObject* vtkNotUsed(object),
 
 	case vtkCommand::KeyPressEvent:
 		self->OnKeyPress();
+		break;
+
+	case vtkCommand::InteractionEvent:
+		TRACE("InteractionEvent\n");
+		ASSERT(object == self->PlaneWidget);
+		self->State = CGridLODActor::Pushing;
+		break;
+
+	case vtkCommand::EndInteractionEvent:
+		TRACE("EndInteractionEvent\n");
+		ASSERT(object == self->PlaneWidget);
+		self->State = CGridLODActor::Start;
+		break;
+
+	case vtkCommand::StartInteractionEvent:
+		TRACE("StartInteractionEvent\n");
+		ASSERT(object == self->PlaneWidget);
+		self->State = CGridLODActor::Pushing;
 		break;
 	}
 }
@@ -680,6 +692,30 @@ void CGridLODActor::OnMouseMove()
 		return;
 	}
 
+	//{{
+	if (this->State != CGridLODActor::Start)
+	{
+		return;
+	}
+#if defined(WIN32)
+	if (::GetAsyncKeyState(VK_LBUTTON) < 0)
+	{
+		// ignore if right mouse button is down
+		return;
+	}
+	if (::GetAsyncKeyState(VK_RBUTTON) < 0)
+	{
+		// ignore if right mouse button is down
+		return;
+	}
+	if (::GetAsyncKeyState(VK_MBUTTON) < 0)
+	{
+		// ignore if right mouse button is down
+		return;
+	}
+#endif
+	//}}
+
 	vtkCellPicker* pCellPicker = vtkCellPicker::New();
 	pCellPicker->SetTolerance(0.004);
 	pCellPicker->PickFromListOn();
@@ -688,7 +724,7 @@ void CGridLODActor::OnMouseMove()
 	if (pCellPicker->Pick(X, Y, 0.0, this->CurrentRenderer))
 	{
 		vtkIdType n = pCellPicker->GetCellId();
-		float* pt = pCellPicker->GetPickPosition();
+		vtkFloatingPointType* pt = pCellPicker->GetPickPosition();
 		if (vtkDataSet* pDataSet = pCellPicker->GetDataSet())
 		{
 			vtkCell* pCell = pDataSet->GetCell(n);
@@ -697,85 +733,163 @@ void CGridLODActor::OnMouseMove()
 				ASSERT(pCell->GetNumberOfPoints() == 2);				
 				if (vtkPoints* pPoints = pCell->GetPoints())
 				{
-					float* pt0 = pPoints->GetPoint(0);
-					float* pt1 = pPoints->GetPoint(1);
-					TRACE("pt0[0] = %g, pt0[1] = %g\n", pt0[0], pt0[1]);
-					TRACE("pt1[0] = %g, pt1[1] = %g\n", pt1[0], pt1[1]);
+					vtkFloatingPointType* pt0 = pPoints->GetPoint(0);
+					vtkFloatingPointType* pt1 = pPoints->GetPoint(1);
+					TRACE("Before\n");
+					TRACE("pt0[0] = %g, pt0[1] = %g, pt0[2] = %g\n", pt0[0], pt0[1], pt0[2]);
+					TRACE("pt1[0] = %g, pt1[1] = %g, pt1[2] = %g\n", pt1[0], pt1[1], pt1[2]);
+					vtkFloatingPointType* scale = this->GetScale();
 
-// COMMENT: {7/28/2005 2:31:14 PM}					if (!this->PlaneWidget)
-// COMMENT: {7/28/2005 2:31:14 PM}					{
-// COMMENT: {7/28/2005 2:31:14 PM}						this->PlaneWidget = vtkImplicitPlaneWidget::New();
-// COMMENT: {7/28/2005 2:31:14 PM}
-// COMMENT: {7/28/2005 2:31:14 PM}						this->PlaneWidget->SetInteractor(this->Interactor);
-// COMMENT: {7/28/2005 2:31:14 PM}						this->PlaneWidget->SetInput(this->m_pGeometryFilter->GetOutput());
-// COMMENT: {7/28/2005 2:31:14 PM}						///this->PlaneWidget->SetInput(this->m_pFeatureEdges->GetOutput());
-// COMMENT: {7/28/2005 2:31:14 PM}						this->PlaneWidget->PlaceWidget();
-// COMMENT: {7/28/2005 2:31:14 PM}						///this->PlaneWidget->PlaceWidget(this->GetBounds());
-// COMMENT: {7/28/2005 2:31:14 PM}						this->PlaneWidget->NormalToZAxisOn();
-// COMMENT: {7/28/2005 2:31:14 PM}						this->PlaneWidget->EnabledOn();
-// COMMENT: {7/28/2005 2:31:14 PM}					}
-					if (this->PlaneWidget && !this->PlaneWidget->GetEnabled())
+					vtkFloatingPointType length;
+					vtkFloatingPointType bounds[6];
+					this->GetBounds(bounds);
+
+					if ((pt0[2] == this->m_min[2] && pt1[2] == this->m_min[2]) || (pt0[2] == this->m_max[2] && pt1[2] == this->m_max[2]))
 					{
-						this->PlaneWidget->SetPlaceFactor(1);
-						this->PlaneWidget->SetInteractor(this->Interactor);
-						this->PlaneWidget->NormalToYAxisOn();
-						this->PlaneWidget->PlaceWidget(this->GetBounds());
-						this->PlaneWidget->SetOrigin((this->m_min[0] + this->m_max[0]) / 2, (this->m_min[1] + this->m_max[1]) / 2, (this->m_min[2] + this->m_max[2]) / 2);
-						this->PlaneWidget->EnabledOn();
-					}
-
-
-					ASSERT(this->m_gridKeyword.m_grid[0].uniform_expanded == FALSE);
-					ASSERT(this->m_gridKeyword.m_grid[1].uniform_expanded == FALSE);
-					ASSERT(this->m_gridKeyword.m_grid[2].uniform_expanded == FALSE);
-
-					// case 1 +z plane
-					//double zmax = this->m_gridKeyword.m_grid[2];
-					float planePoint1[3];
-					float planePoint2[3];
-					float planePoint3[3];
-					float planePoint4[3];
-
-					if (pt0[2] == this->m_max[2] && pt1[2] == this->m_max[2])
-					{
-						// +z plane
+						// +z / -z
 						//
 						if (pt0[0] == pt1[0])
 						{
-							planePoint1[0] = pt0[0];
-							planePoint1[1] = this->m_min[1];
-							planePoint1[2] = this->m_max[2];
-
-							planePoint2[0] = pt0[0];
-							planePoint2[1] = this->m_max[1];
-							planePoint2[2] = this->m_max[2];
-
-							planePoint3[0] = pt0[0];
-							planePoint3[1] = this->m_max[1];
-							planePoint3[2] = this->m_min[2];
-
-							planePoint4[0] = pt0[0];
-							planePoint4[1] = this->m_min[1];
-							planePoint4[2] = this->m_min[2];
+							if (this->PlaneWidget /** && !this->PlaneWidget->GetEnabled() **/)
+							{
+								this->PlaneWidget->SetPlaceFactor(1);
+								this->PlaneWidget->SetInteractor(this->Interactor);
+								this->PlaneWidget->NormalToXAxisOn();
+								length = (bounds[1] - bounds[0]);
+								bounds[0] -= length * 4;
+								bounds[1] += length * 4;
+								this->PlaneWidget->PlaceWidget(bounds);
+								//this->PlaneWidget->SetOrigin(pt0[0] * scale[0], (this->m_min[1] + this->m_max[1]) / 2 * scale[1], (this->m_min[2] + this->m_max[2]) / 2 * scale[2]);
+								this->PlaneWidget->SetOrigin(pt0[0] * scale[0], 0, 0);
+								this->PlaneWidget->EnabledOn();
+								this->Interactor->Render();
+							}
+						}
+						else if (pt0[1] == pt1[1])
+						{
+							if (this->PlaneWidget)
+							{
+								this->PlaneWidget->SetPlaceFactor(1);
+								this->PlaneWidget->SetInteractor(this->Interactor);
+								this->PlaneWidget->NormalToYAxisOn();
+								length = (bounds[3] - bounds[2]);
+								bounds[2] -= length * 4;
+								bounds[3] += length * 4;
+								this->PlaneWidget->PlaceWidget(bounds);
+								//this->PlaneWidget->SetOrigin((this->m_min[0] + this->m_max[0]) / 2, pt0[1] * scale[1], (this->m_min[2] + this->m_max[2]) / 2);
+								this->PlaneWidget->SetOrigin(0, pt0[1] * scale[1], 0);
+								this->PlaneWidget->EnabledOn();
+								this->Interactor->Render();
+							}
+						}
+						else
+						{
+							this->PlaneWidget->SetInteractor(this->Interactor);
+							this->PlaneWidget->EnabledOff();
+							this->Interactor->Render();
+						}
+					}
+					else if ((pt0[1] == this->m_min[1] && pt1[1] == this->m_min[1]) || (pt0[1] == this->m_max[1] && pt1[1] == this->m_max[1]))
+					{
+						// -y / +y
+						//
+						if (pt0[0] == pt1[0])
+						{
+							if (this->PlaneWidget)
+							{
+								this->PlaneWidget->SetPlaceFactor(1);
+								this->PlaneWidget->SetInteractor(this->Interactor);
+								this->PlaneWidget->NormalToXAxisOn();
+								this->PlaneWidget->PlaceWidget(this->GetBounds());
+								this->PlaneWidget->SetOrigin(pt0[0] * scale[0], 0, 0);
+								this->PlaneWidget->EnabledOn();
+								this->Interactor->Render();
+							}
+						}
+						else if (pt0[2] == pt1[2])
+						{
+							if (this->PlaneWidget)
+							{
+								this->PlaneWidget->SetPlaceFactor(1);
+								this->PlaneWidget->SetInteractor(this->Interactor);
+								this->PlaneWidget->NormalToZAxisOn();
+								this->PlaneWidget->PlaceWidget(this->GetBounds());
+// COMMENT: {7/28/2005 7:45:05 PM}								this->PlaneWidget->SetOrigin((this->m_min[0] + this->m_max[0]) / 2, (this->m_min[1] + this->m_max[1]) / 2, (this->m_min[2] + this->m_max[2]) / 2);
+								this->PlaneWidget->SetOrigin(0, 0, pt0[2] * scale[2]);
+								this->PlaneWidget->EnabledOn();
+								this->Interactor->Render();
+							}
+						}
+						else
+						{
+							this->PlaneWidget->SetInteractor(this->Interactor);
+							this->PlaneWidget->EnabledOff();
+							this->Interactor->Render();
+						}
+					}
+					else if ((pt0[0] == this->m_max[0] && pt1[0] == this->m_max[0]) || (pt0[0] == this->m_min[0] && pt1[0] == this->m_min[0]))
+					{
+						// +x / -x
+						//
+						if (pt0[1] == pt1[1])
+						{
+							if (this->PlaneWidget)
+							{
+								this->PlaneWidget->SetPlaceFactor(1);
+								this->PlaneWidget->SetInteractor(this->Interactor);
+								this->PlaneWidget->NormalToYAxisOn();
+								this->PlaneWidget->PlaceWidget(this->GetBounds());
+								this->PlaneWidget->SetOrigin(0, pt0[1] * scale[1], 0);
+								this->PlaneWidget->EnabledOn();
+								this->Interactor->Render();
+							}
+						}
+						else if (pt0[2] == pt1[2])
+						{
+							if (this->PlaneWidget)
+							{
+								this->PlaneWidget->SetPlaceFactor(1);
+								this->PlaneWidget->SetInteractor(this->Interactor);
+								this->PlaneWidget->NormalToZAxisOn();
+								this->PlaneWidget->PlaceWidget(this->GetBounds());
+								this->PlaneWidget->SetOrigin(0, 0, pt0[2] * scale[2]);
+								this->PlaneWidget->EnabledOn();
+								this->Interactor->Render();
+							}
+						}
+						else
+						{
+							this->PlaneWidget->SetInteractor(this->Interactor);
+							this->PlaneWidget->EnabledOff();
+							this->Interactor->Render();
 						}
 					}
 
 
-#if defined(WIN32)
-					if (pt0[1] == pt1[1])
-					{
-						::SetCursor(AfxGetApp()->LoadCursor(IDC_HO_SPLIT));
-					}
-					else if (pt0[0] == pt1[0])
-					{
-						::SetCursor(AfxGetApp()->LoadCursor(IDC_VE_SPLIT));
-					}
-#endif
+
+// COMMENT: {7/28/2005 9:03:02 PM}#if defined(WIN32)
+// COMMENT: {7/28/2005 9:03:02 PM}					if (pt0[1] == pt1[1])
+// COMMENT: {7/28/2005 9:03:02 PM}					{
+// COMMENT: {7/28/2005 9:03:02 PM}						::SetCursor(AfxGetApp()->LoadCursor(IDC_HO_SPLIT));
+// COMMENT: {7/28/2005 9:03:02 PM}					}
+// COMMENT: {7/28/2005 9:03:02 PM}					else if (pt0[0] == pt1[0])
+// COMMENT: {7/28/2005 9:03:02 PM}					{
+// COMMENT: {7/28/2005 9:03:02 PM}						::SetCursor(AfxGetApp()->LoadCursor(IDC_VE_SPLIT));
+// COMMENT: {7/28/2005 9:03:02 PM}					}
+// COMMENT: {7/28/2005 9:03:02 PM}#endif
 				}
 			}
 		}
 		TRACE("pt[0] = %g, pt[1] = %g, pt[2] = %g\n", pt[0], pt[1], pt[2]);
 	}
+	//{{
+	else
+	{
+		this->PlaneWidget->SetInteractor(this->Interactor);
+		this->PlaneWidget->EnabledOff();
+		this->Interactor->Render();
+	}
+	//}}
 	pCellPicker->Delete();
 	this->PickableOff();
 }

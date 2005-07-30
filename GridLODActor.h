@@ -10,6 +10,7 @@ class vtkGeometryFilter;
 class vtkFeatureEdges;
 class vtkPolyDataMapper;
 class vtkImplicitPlaneWidget;
+class CGridLineWidget;
 
 class CZone;
 
@@ -88,6 +89,14 @@ protected:
 	CGridLODActor(void);
 	virtual ~CGridLODActor(void);
 
+	int State;
+	enum WidgetState
+	{
+		Start=0,
+		Pushing,
+	};
+
+
 	void Setup(const CUnits& units);
 
 	vtkGeometryFilter*  m_pGeometryFilter;
@@ -100,7 +109,8 @@ protected:
 	// Used to process events
 	vtkCallbackCommand* EventCallbackCommand;
 
-	vtkImplicitPlaneWidget    *PlaneWidget;
+	// vtkImplicitPlaneWidget    *PlaneWidget;	
+	CGridLineWidget           *PlaneWidget;
 
 	int                 Enabled;
 

@@ -399,18 +399,24 @@ void CPropertyTreeControlBar::SetNodeCheck(CTreeCtrlNode node, UINT nCheckState)
 	vtkPropAssembly *pPropAssembly = 0;
 	CWPhastDoc *pDoc = 0;
 
-	if (node == this->GetMediaNode()) {
-		if (!((pDoc = this->GetDocument()) && (pPropAssembly = pDoc->GetPropAssemblyMedia()))) {
+	if (node == this->GetMediaNode())
+	{
+		if (!((pDoc = this->GetDocument()) && (pPropAssembly = pDoc->GetPropAssemblyMedia())))
+		{
 			return;
 		}
 	}
-	else if (node == this->GetICNode()) {
-		if (!((pDoc = this->GetDocument()) && (pPropAssembly = pDoc->GetPropAssemblyIC()))) {
+	else if (node == this->GetICNode())
+	{
+		if (!((pDoc = this->GetDocument()) && (pPropAssembly = pDoc->GetPropAssemblyIC())))
+		{
 			return;
 		}
 	}
-	else if (node == this->GetBCNode()) {
-		if (!((pDoc = this->GetDocument()) && (pPropAssembly = pDoc->GetPropAssemblyBC()))) {
+	else if (node == this->GetBCNode())
+	{
+		if (!((pDoc = this->GetDocument()) && (pPropAssembly = pDoc->GetPropAssemblyBC())))
+		{
 			return;
 		}
 	}
@@ -421,23 +427,28 @@ void CPropertyTreeControlBar::SetNodeCheck(CTreeCtrlNode node, UINT nCheckState)
 // COMMENT: {9/8/2004 5:11:03 PM}		node.SetState(INDEXTOSTATEIMAGEMASK(nCheckState + 1), TVIS_STATEIMAGEMASK);
 // COMMENT: {9/8/2004 5:11:03 PM}		return;
 // COMMENT: {9/8/2004 5:11:03 PM}		// HACK }}
-		if (!((pDoc = this->GetDocument()) && (pPropAssembly = pDoc->GetPropAssemblyWells()))) {
+		if (!((pDoc = this->GetDocument()) && (pPropAssembly = pDoc->GetPropAssemblyWells())))
+		{
 			return;
 		}
 	}
 	else if (node == this->GetRiversNode())
 	{
-		if (!((pDoc = this->GetDocument()) && (pPropAssembly = pDoc->GetPropAssemblyRivers()))) {
+		if (!((pDoc = this->GetDocument()) && (pPropAssembly = pDoc->GetPropAssemblyRivers())))
+		{
 			return;
 		}
 	}
-	else if (node == this->GetGridNode()) {
-		if (CWPhastDoc *pDoc = this->GetDocument()) {
+	else if (node == this->GetGridNode())
+	{
+		if (CWPhastDoc *pDoc = this->GetDocument())
+		{
 			pDoc->OnViewGrid();
 		}
 		return;
 	}
-	else {
+	else
+	{
 		ASSERT(
 			node.GetParent() == this->GetMediaNode()  ||
             node.GetParent() == this->GetICNode()     ||
