@@ -5,6 +5,7 @@
 #include "GridKeyword.h"
 #include "Units.h"
 #include "Snap.h"
+#include "tree.h"           // CTreeCtrlNode
 
 class vtkGeometryFilter;
 class vtkFeatureEdges;
@@ -49,6 +50,9 @@ public:
 		this->m_gridKeyword.m_axes[2] = axes[2];
 	};
 
+	int GetAxisIndex(void) { return AxisIndex; }
+	int GetPlaneIndex(void) { return PlaneIndex; }
+
 	void GetGridKeyword(CGridKeyword& gridKeyword)const;
 	void SetGridKeyword(const CGridKeyword& gridKeyword, const CUnits& units);
 
@@ -78,6 +82,8 @@ public:
 	void Dump(CDumpContext& dc)const;
 #endif
 	void Insert(CTreeCtrl* pTreeCtrl, HTREEITEM htiGrid);
+	void Insert(CTreeCtrlNode node);
+
 
 
 	////void SetDimensions(int dims[3])    { m_nDimensions[0] = dims[0]; m_nDimensions[1] = dims[1]; m_nDimensions[2] = dims[2]; }
@@ -117,13 +123,18 @@ protected:
 	// Internal ivars for processing events
 	vtkRenderer        *CurrentRenderer;
 
+	int                    AxisIndex;
+	int                    PlaneIndex;
+	vtkFloatingPointType   CurrentPoint[3];
+
 	///CGrid               m_grid[3];
 	///CSnap               m_snap;
 	///int                 m_axes[3];
 	///bool                m_print_input_xy;
 	CGridKeyword        m_gridKeyword;
 	CUnits              m_units;
-	HTREEITEM           m_htiGrid;
+	// HTREEITEM           m_htiGrid;
+	CTreeCtrlNode       m_node;
 
 	float               m_min[3];
 	float               m_max[3];

@@ -244,6 +244,10 @@ void CGridPropertyPage2::DoDataExchange(CDataExchange* pDX)
 			this->EnableNonuniform(TRUE);
 			this->EnableUniform(FALSE);
 		}
+
+		//{{
+		this->Invalidate(); // Note: this causes flashing but the grid might disappear otherwise
+		//}}
 	}
 
 	// snap
@@ -435,6 +439,7 @@ void CGridPropertyPage2::OnTcnSelchangeTabCoor(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	this->m_nIndex = this->m_tabCtrl.GetCurSel();
 	this->UpdateData(FALSE);
+	this->Invalidate(); // Note: this causes flashing but the grid might disappear otherwise
 	*pResult = 0;
 }
 

@@ -303,6 +303,12 @@ void CGrid::Setup(void)
 
 void CGrid::Insert(CTreeCtrl* pTreeCtrl, HTREEITEM htiGrid)
 {
+	CTreeCtrlNode node(htiGrid, (CTreeCtrlEx*)pTreeCtrl);
+	this->Insert(node);
+}
+
+void CGrid::Insert(CTreeCtrlNode node)
+{
 	CString format;
 	if (this->uniform == TRUE)
 	{
@@ -335,8 +341,9 @@ void CGrid::Insert(CTreeCtrl* pTreeCtrl, HTREEITEM htiGrid)
 			this->coord[this->count_coord - 1]
 			);
 	}
-	pTreeCtrl->InsertItem(format, htiGrid);
+	node.AddTail(format);
 }
+
 
 void CGrid::Serialize(bool bStoring, hid_t loc_id)
 {

@@ -11,7 +11,8 @@ extern "C" {
 }
 
 #include <vector>
-#include <iosfwd> // std::ostream
+#include <iosfwd>  // std::ostream
+#include "tree.h"  // CTreeCtrlNode
 
 class CGrid : public grid
 {
@@ -31,8 +32,23 @@ public:
 	void SetUniformRange(double minimum, double maximum, int count_coord);
 	void Serialize(bool bStoring, hid_t loc_id);
 	void Insert(CTreeCtrl* pTreeCtrl, HTREEITEM htiGrid);
+	void Insert(CTreeCtrlNode node);
 	void Resize(size_t count);
 	double& At(size_t pos);
+	//{{
+	template<class InputIterator>
+		void insert(InputIterator First, InputIterator Last)
+		{	// insert [First, Last), arbitrary iterators
+			this->m_coordinates.clear();
+            for (; First != Last; ++First)
+			{
+				this->m_coordinates.push_back(*First);
+			}
+			this->uniform = FALSE;
+			this->count_coord = (int)this->m_coordinates.size();
+			this->coord = &this->m_coordinates[0];
+		}
+	//}}
 #ifdef _DEBUG
 	void Dump(CDumpContext& dc)const;
 #endif

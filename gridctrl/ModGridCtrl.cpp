@@ -712,7 +712,7 @@ void CModGridCtrl::OnSize(UINT nType, int cx, int cy)
 	// Start re-entry blocking
 	bAlreadyInsideThisProcedure = TRUE;
 
-	if (GetFocus()->GetDlgCtrlID() == IDC_INPLACE_CONTROL)
+	if (GetFocus() && GetFocus()->GetDlgCtrlID() == IDC_INPLACE_CONTROL)
 	{
 		SetFocus();        // Auto-destroy any InPlaceEdit's
 	}

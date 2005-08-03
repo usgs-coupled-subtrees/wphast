@@ -26,6 +26,7 @@
 #include "Global.h"
 #include "Units.h"
 #include "Zone.h"
+#include "DelayRedraw.h"
 
 #if defined(WIN32)
 #include "Resource.h"
@@ -44,13 +45,13 @@ CGridLODActor::CGridLODActor(void)
 	: m_pGeometryFilter(0)
 	, m_pFeatureEdges(0)
 	, m_pPolyDataMapper(0)
-	, m_htiGrid(0)
 	, Interactor(0)
 	, CurrentRenderer(0)
 	, EventCallbackCommand(0)
 	, Enabled(0)
 	, PlaneWidget(0)
 	, State(CGridLODActor::Start)
+	, AxisIndex(-1)
 {
 	this->m_pGeometryFilter = vtkGeometryFilter::New();
 
@@ -278,6 +279,40 @@ void CGridLODActor::Serialize(bool bStoring, hid_t loc_id)
 	}
 }
 
+void CGridLODActor::Insert(CTreeCtrlNode node)
+{
+	ASSERT(node);
+
+	// delay the refresh
+	//
+	CDelayRedraw redraw(node.GetWnd());
+
+	// store expanded states
+	bool bMainExpanded = false;
+	if (node.HasChildren())
+	{
+		bMainExpanded = ((node.GetState(TVIS_EXPANDED) & TVIS_EXPANDED) != 0);
+	}
+
+	// remove all previous items
+	//
+	while (node.HasChildren())
+	{
+		node.GetChild().Delete();
+	}
+
+	// insert
+	this->m_gridKeyword.m_grid[0].Insert(node);
+	this->m_gridKeyword.m_grid[1].Insert(node);
+	this->m_gridKeyword.m_grid[2].Insert(node);
+
+	if (bMainExpanded)
+	{
+		node.Expand(TVE_EXPAND);
+	}
+	this->m_node = node;
+}
+
 void CGridLODActor::Insert(CTreeCtrl* pTreeCtrl, HTREEITEM htiGrid)
 {
 	while (HTREEITEM hChild = pTreeCtrl->GetChildItem(htiGrid))
@@ -323,7 +358,8 @@ void CGridLODActor::Insert(CTreeCtrl* pTreeCtrl, HTREEITEM htiGrid)
 
 	// set data
 	pTreeCtrl->SetItemData(htiGrid, (DWORD_PTR)this);
-	this->m_htiGrid = htiGrid;
+	//this->m_htiGrid = htiGrid;
+	this->m_node = CTreeCtrlNode(htiGrid, (CTreeCtrlEx*)pTreeCtrl);
 }
 
 void CGridLODActor::SetGrid(const CGrid& x, const CGrid& y, const CGrid& z, const CUnits& units)
@@ -469,9 +505,13 @@ void CGridLODActor::Setup(const CUnits& units)
 
 		//this->PlaneWidget->SetInteractor(this->Interactor);
 		this->PlaneWidget->SetInput(sgrid);
-		this->PlaneWidget->PlaceWidget();
+// COMMENT: {8/1/2005 6:36:30 PM}		this->PlaneWidget->PlaceWidget();
 		//this->PlaneWidget->NormalToZAxisOn();
 		//this->PlaneWidget->EnabledOn();
+
+		//{{
+		this->PlaneWidget->SetPlaceFactor(1);
+		//}}
 	}
 	//}}
 
@@ -653,6 +693,42 @@ void CGridLODActor::ProcessEvents(vtkObject* object, unsigned long event, void* 
 	case vtkCommand::EndInteractionEvent:
 		TRACE("EndInteractionEvent\n");
 		ASSERT(object == self->PlaneWidget);
+		{
+			self->PlaneIndex = -1;
+			CGrid grid = self->m_gridKeyword.m_grid[self->AxisIndex];
+			grid.Setup();
+			for (int pi = 0; pi < grid.count_coord; ++pi)
+			{
+				if (grid.coord[pi] == self->CurrentPoint[self->AxisIndex])
+				{
+					self->PlaneIndex = pi;
+					break;
+				}
+			}
+			if (self->PlaneIndex == -1)
+			{
+				TRACE("Warning self->PlaneIndex is -1\n");
+			}
+			std::set<double> coordinates;
+			coordinates.insert(grid.coord, grid.coord + grid.count_coord);
+			double value = self->PlaneWidget->GetOrigin()[self->AxisIndex] / self->GetScale()[self->AxisIndex];
+			if (coordinates.insert(value).second)
+			{
+				if (!(::GetAsyncKeyState(VK_CONTROL) < 0))
+				{
+					coordinates.erase(self->CurrentPoint[self->AxisIndex]);
+				}
+			}
+			std::set<double>::iterator i = coordinates.begin();
+			for (; i != coordinates.end(); ++i)
+			{
+				TRACE("%g\n", *i);
+			}
+			self->m_gridKeyword.m_grid[self->AxisIndex].insert(coordinates.begin(), coordinates.end());
+			self->Setup(self->m_units);
+			self->Insert(self->m_node);
+			self->PlaneWidget->Off();
+		}
 		self->State = CGridLODActor::Start;
 		break;
 
@@ -677,6 +753,7 @@ void CGridLODActor::OnLeftButtonDown()
 	{
 		return;
 	}
+	TRACE("OnLeftButtonDown X = %d, Y= %d\n", X, Y);
 }
 
 void CGridLODActor::OnMouseMove()
@@ -714,16 +791,23 @@ void CGridLODActor::OnMouseMove()
 		return;
 	}
 #endif
+	TRACE("OnMouseMove X = %d, Y= %d\n", X, Y);
 	//}}
 
 	vtkCellPicker* pCellPicker = vtkCellPicker::New();
-	pCellPicker->SetTolerance(0.004);
+	pCellPicker->SetTolerance(0.001);
+	//pCellPicker->SetTolerance(0.004);
+	//pCellPicker->SetTolerance(0.5);
 	pCellPicker->PickFromListOn();
 	this->PickableOn();
 	pCellPicker->AddPickList(this);
+
 	if (pCellPicker->Pick(X, Y, 0.0, this->CurrentRenderer))
 	{
+		ASSERT(pCellPicker->GetPath()->GetFirstNode()->GetProp() == this);
+
 		vtkIdType n = pCellPicker->GetCellId();
+		TRACE("CellId = %d\n", n);
 		vtkFloatingPointType* pt = pCellPicker->GetPickPosition();
 		if (vtkDataSet* pDataSet = pCellPicker->GetDataSet())
 		{
@@ -735,7 +819,87 @@ void CGridLODActor::OnMouseMove()
 				{
 					vtkFloatingPointType* pt0 = pPoints->GetPoint(0);
 					vtkFloatingPointType* pt1 = pPoints->GetPoint(1);
-					TRACE("Before\n");
+					TRACE("pt0[0] = %g, pt0[1] = %g, pt0[2] = %g\n", pt0[0], pt0[1], pt0[2]);
+					TRACE("pt1[0] = %g, pt1[1] = %g, pt1[2] = %g\n", pt1[0], pt1[1], pt1[2]);
+
+					if ((pt0[2] == this->m_min[2] && pt1[2] == this->m_min[2]) || (pt0[2] == this->m_max[2] && pt1[2] == this->m_max[2]))
+					{
+						// +z / -z
+						//
+						if (pt0[0] == pt1[0])
+						{
+							if (this->PlaneWidget /** && !this->PlaneWidget->GetEnabled() **/)
+							{
+								TRACE("this->PlaneWidget->NormalToXAxisOn()\n");
+							}
+						}
+						else if (pt0[1] == pt1[1])
+						{
+							if (this->PlaneWidget)
+							{
+								TRACE("this->PlaneWidget->NormalToYAxisOn()\n");
+							}
+						}
+					}
+					else if ((pt0[1] == this->m_min[1] && pt1[1] == this->m_min[1]) || (pt0[1] == this->m_max[1] && pt1[1] == this->m_max[1]))
+					{
+						// -y / +y
+						//
+						if (pt0[0] == pt1[0])
+						{
+							if (this->PlaneWidget)
+							{
+								TRACE("this->PlaneWidget->NormalToXAxisOn()\n");
+							}
+						}
+						else if (pt0[2] == pt1[2])
+						{
+							if (this->PlaneWidget)
+							{
+								TRACE("this->PlaneWidget->NormalToZAxisOn()\n");
+							}
+						}
+					}
+					else if ((pt0[0] == this->m_max[0] && pt1[0] == this->m_max[0]) || (pt0[0] == this->m_min[0] && pt1[0] == this->m_min[0]))
+					{
+						// +x / -x
+						//
+						if (pt0[1] == pt1[1])
+						{
+							if (this->PlaneWidget)
+							{
+								TRACE("this->PlaneWidget->NormalToYAxisOn()\n");
+							}
+						}
+						else if (pt0[2] == pt1[2])
+						{
+							if (this->PlaneWidget)
+							{
+								TRACE("this->PlaneWidget->NormalToZAxisOn()\n");
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	if (pCellPicker->Pick(X, Y, 0.0, this->CurrentRenderer))
+	{
+		vtkIdType n = pCellPicker->GetCellId();
+		TRACE("CellId = %d\n", n);
+		vtkFloatingPointType* pt = pCellPicker->GetPickPosition();
+		if (vtkDataSet* pDataSet = pCellPicker->GetDataSet())
+		{
+			vtkCell* pCell = pDataSet->GetCell(n);
+			if (pCell->GetCellType() == VTK_LINE)
+			{
+				ASSERT(pCell->GetNumberOfPoints() == 2);				
+				if (vtkPoints* pPoints = pCell->GetPoints())
+				{
+					pPoints->GetPoint(0, this->CurrentPoint);
+					vtkFloatingPointType* pt0 = this->CurrentPoint;
+					vtkFloatingPointType* pt1 = pPoints->GetPoint(1);
 					TRACE("pt0[0] = %g, pt0[1] = %g, pt0[2] = %g\n", pt0[0], pt0[1], pt0[2]);
 					TRACE("pt1[0] = %g, pt1[1] = %g, pt1[2] = %g\n", pt1[0], pt1[1], pt1[2]);
 					vtkFloatingPointType* scale = this->GetScale();
@@ -750,16 +914,16 @@ void CGridLODActor::OnMouseMove()
 						//
 						if (pt0[0] == pt1[0])
 						{
-							if (this->PlaneWidget /** && !this->PlaneWidget->GetEnabled() **/)
+							if (this->PlaneWidget)
 							{
-								this->PlaneWidget->SetPlaceFactor(1);
+								this->AxisIndex = 0;
+								//this->CurrentPoint;
 								this->PlaneWidget->SetInteractor(this->Interactor);
 								this->PlaneWidget->NormalToXAxisOn();
 								length = (bounds[1] - bounds[0]);
 								bounds[0] -= length * 4;
 								bounds[1] += length * 4;
 								this->PlaneWidget->PlaceWidget(bounds);
-								//this->PlaneWidget->SetOrigin(pt0[0] * scale[0], (this->m_min[1] + this->m_max[1]) / 2 * scale[1], (this->m_min[2] + this->m_max[2]) / 2 * scale[2]);
 								this->PlaneWidget->SetOrigin(pt0[0] * scale[0], 0, 0);
 								this->PlaneWidget->EnabledOn();
 								this->Interactor->Render();
@@ -769,14 +933,13 @@ void CGridLODActor::OnMouseMove()
 						{
 							if (this->PlaneWidget)
 							{
-								this->PlaneWidget->SetPlaceFactor(1);
+								this->AxisIndex = 1;
 								this->PlaneWidget->SetInteractor(this->Interactor);
 								this->PlaneWidget->NormalToYAxisOn();
 								length = (bounds[3] - bounds[2]);
 								bounds[2] -= length * 4;
 								bounds[3] += length * 4;
 								this->PlaneWidget->PlaceWidget(bounds);
-								//this->PlaneWidget->SetOrigin((this->m_min[0] + this->m_max[0]) / 2, pt0[1] * scale[1], (this->m_min[2] + this->m_max[2]) / 2);
 								this->PlaneWidget->SetOrigin(0, pt0[1] * scale[1], 0);
 								this->PlaneWidget->EnabledOn();
 								this->Interactor->Render();
@@ -797,10 +960,13 @@ void CGridLODActor::OnMouseMove()
 						{
 							if (this->PlaneWidget)
 							{
-								this->PlaneWidget->SetPlaceFactor(1);
+								this->AxisIndex = 0;
 								this->PlaneWidget->SetInteractor(this->Interactor);
 								this->PlaneWidget->NormalToXAxisOn();
-								this->PlaneWidget->PlaceWidget(this->GetBounds());
+								length = (bounds[1] - bounds[0]);
+								bounds[0] -= length * 4;
+								bounds[1] += length * 4;
+								this->PlaneWidget->PlaceWidget(bounds);
 								this->PlaneWidget->SetOrigin(pt0[0] * scale[0], 0, 0);
 								this->PlaneWidget->EnabledOn();
 								this->Interactor->Render();
@@ -810,11 +976,13 @@ void CGridLODActor::OnMouseMove()
 						{
 							if (this->PlaneWidget)
 							{
-								this->PlaneWidget->SetPlaceFactor(1);
+								this->AxisIndex = 2;
 								this->PlaneWidget->SetInteractor(this->Interactor);
 								this->PlaneWidget->NormalToZAxisOn();
-								this->PlaneWidget->PlaceWidget(this->GetBounds());
-// COMMENT: {7/28/2005 7:45:05 PM}								this->PlaneWidget->SetOrigin((this->m_min[0] + this->m_max[0]) / 2, (this->m_min[1] + this->m_max[1]) / 2, (this->m_min[2] + this->m_max[2]) / 2);
+								length = (bounds[5] - bounds[4]);
+								bounds[4] -= length * 4;
+								bounds[5] += length * 4;
+								this->PlaneWidget->PlaceWidget(bounds);
 								this->PlaneWidget->SetOrigin(0, 0, pt0[2] * scale[2]);
 								this->PlaneWidget->EnabledOn();
 								this->Interactor->Render();
@@ -822,6 +990,7 @@ void CGridLODActor::OnMouseMove()
 						}
 						else
 						{
+							this->AxisIndex = -1;
 							this->PlaneWidget->SetInteractor(this->Interactor);
 							this->PlaneWidget->EnabledOff();
 							this->Interactor->Render();
@@ -835,10 +1004,13 @@ void CGridLODActor::OnMouseMove()
 						{
 							if (this->PlaneWidget)
 							{
-								this->PlaneWidget->SetPlaceFactor(1);
+								this->AxisIndex = 1;
 								this->PlaneWidget->SetInteractor(this->Interactor);
 								this->PlaneWidget->NormalToYAxisOn();
-								this->PlaneWidget->PlaceWidget(this->GetBounds());
+								length = (bounds[3] - bounds[2]);
+								bounds[2] -= length * 4;
+								bounds[3] += length * 4;
+								this->PlaneWidget->PlaceWidget(bounds);
 								this->PlaneWidget->SetOrigin(0, pt0[1] * scale[1], 0);
 								this->PlaneWidget->EnabledOn();
 								this->Interactor->Render();
@@ -848,10 +1020,13 @@ void CGridLODActor::OnMouseMove()
 						{
 							if (this->PlaneWidget)
 							{
-								this->PlaneWidget->SetPlaceFactor(1);
+								this->AxisIndex = 2;
 								this->PlaneWidget->SetInteractor(this->Interactor);
 								this->PlaneWidget->NormalToZAxisOn();
-								this->PlaneWidget->PlaceWidget(this->GetBounds());
+								length = (bounds[5] - bounds[4]);
+								bounds[4] -= length * 4;
+								bounds[5] += length * 4;
+								this->PlaneWidget->PlaceWidget(bounds);
 								this->PlaneWidget->SetOrigin(0, 0, pt0[2] * scale[2]);
 								this->PlaneWidget->EnabledOn();
 								this->Interactor->Render();
@@ -859,37 +1034,24 @@ void CGridLODActor::OnMouseMove()
 						}
 						else
 						{
+							this->AxisIndex = -1;
 							this->PlaneWidget->SetInteractor(this->Interactor);
 							this->PlaneWidget->EnabledOff();
 							this->Interactor->Render();
 						}
 					}
-
-
-
-// COMMENT: {7/28/2005 9:03:02 PM}#if defined(WIN32)
-// COMMENT: {7/28/2005 9:03:02 PM}					if (pt0[1] == pt1[1])
-// COMMENT: {7/28/2005 9:03:02 PM}					{
-// COMMENT: {7/28/2005 9:03:02 PM}						::SetCursor(AfxGetApp()->LoadCursor(IDC_HO_SPLIT));
-// COMMENT: {7/28/2005 9:03:02 PM}					}
-// COMMENT: {7/28/2005 9:03:02 PM}					else if (pt0[0] == pt1[0])
-// COMMENT: {7/28/2005 9:03:02 PM}					{
-// COMMENT: {7/28/2005 9:03:02 PM}						::SetCursor(AfxGetApp()->LoadCursor(IDC_VE_SPLIT));
-// COMMENT: {7/28/2005 9:03:02 PM}					}
-// COMMENT: {7/28/2005 9:03:02 PM}#endif
 				}
 			}
 		}
 		TRACE("pt[0] = %g, pt[1] = %g, pt[2] = %g\n", pt[0], pt[1], pt[2]);
 	}
-	//{{
 	else
 	{
+		this->AxisIndex = -1;
 		this->PlaneWidget->SetInteractor(this->Interactor);
 		this->PlaneWidget->EnabledOff();
 		this->Interactor->Render();
 	}
-	//}}
 	pCellPicker->Delete();
 	this->PickableOff();
 }
@@ -911,6 +1073,69 @@ void CGridLODActor::OnLeftButtonUp()
 void CGridLODActor::OnKeyPress()
 {
 	if (!this->Interactor) return;
+
+	char* keysym = this->Interactor->GetKeySym();
+	TRACE("OnKeyPress %s\n", keysym);
+
+	
+	if (this->PlaneWidget->GetEnabled())
+	{
+		if (::strcmp(keysym, "Delete") == 0)
+		{
+			this->PlaneIndex = -1;
+			CGrid grid = this->m_gridKeyword.m_grid[this->AxisIndex];
+			grid.Setup();
+			for (int pi = 0; pi < grid.count_coord; ++pi)
+			{
+				if (grid.coord[pi] == this->CurrentPoint[this->AxisIndex])
+				{
+					this->PlaneIndex = pi;
+					break;
+				}
+			}
+			ASSERT(this->PlaneIndex != -1);
+			std::set<double> coordinates;
+			coordinates.insert(grid.coord, grid.coord + grid.count_coord);
+			coordinates.erase(this->CurrentPoint[this->AxisIndex]);
+			if (coordinates.size() >= 2)
+			{
+				this->m_gridKeyword.m_grid[this->AxisIndex].insert(coordinates.begin(), coordinates.end());
+				this->Setup(this->m_units);
+				this->Insert(this->m_node);
+			}
+			else
+			{
+				::AfxMessageBox("TODO");
+			}
+			this->PlaneWidget->Off();
+			this->State = CGridLODActor::Start;
+		}
+	}
+
+
+// COMMENT: {8/2/2005 9:25:12 PM}	if (this->PlaneWidget->GetEnabled())
+// COMMENT: {8/2/2005 9:25:12 PM}	{
+// COMMENT: {8/2/2005 9:25:12 PM}		if (::strcmp(keysym, "Escape") == 0)
+// COMMENT: {8/2/2005 9:25:12 PM}		{
+// COMMENT: {8/2/2005 9:25:12 PM}			if (this->PlaneWidget)
+// COMMENT: {8/2/2005 9:25:12 PM}			{
+// COMMENT: {8/2/2005 9:25:12 PM}				if (this->PlaneWidget->GetEnabled())
+// COMMENT: {8/2/2005 9:25:12 PM}				{
+// COMMENT: {8/2/2005 9:25:12 PM}					this->PlaneWidget->SetEnabled(0);
+// COMMENT: {8/2/2005 9:25:12 PM}				}
+// COMMENT: {8/2/2005 9:25:12 PM}				this->PlaneWidget->Delete();
+// COMMENT: {8/2/2005 9:25:12 PM}				this->PlaneWidget = 0;
+// COMMENT: {8/2/2005 9:25:12 PM}			}
+// COMMENT: {8/2/2005 9:25:12 PM}			this->Setup(this->m_units);
+// COMMENT: {8/2/2005 9:25:12 PM}
+// COMMENT: {8/2/2005 9:25:12 PM}			// this->PlaneWidget->Off();
+// COMMENT: {8/2/2005 9:25:12 PM}			this->AxisIndex = -1;
+// COMMENT: {8/2/2005 9:25:12 PM}			this->PlaneWidget->SetInteractor(this->Interactor);
+// COMMENT: {8/2/2005 9:25:12 PM}			this->PlaneWidget->EnabledOff();
+// COMMENT: {8/2/2005 9:25:12 PM}			this->Interactor->Render();
+// COMMENT: {8/2/2005 9:25:12 PM}			this->State = CGridLODActor::Start;
+// COMMENT: {8/2/2005 9:25:12 PM}		}
+// COMMENT: {8/2/2005 9:25:12 PM}	}
 
 // COMMENT: {7/26/2005 7:01:34 PM}	if (this->State == CRiverActor::CreatingRiver)
 // COMMENT: {7/26/2005 7:01:34 PM}	{
