@@ -425,7 +425,10 @@ void CGridLODActor::Setup(const CUnits& units)
 
 	// load grid points
 	//
-	float x[3];
+	this->ValueToIndex[0].clear();
+	this->ValueToIndex[1].clear();
+	this->ValueToIndex[2].clear();
+	vtkFloatingPointType x[3];
 	register int j, k, offset, jOffset, kOffset;
 	for (k = 0; k < this->m_gridKeyword.m_grid[2].count_coord; ++k)
 	{
@@ -438,6 +441,9 @@ void CGridLODActor::Setup(const CUnits& units)
 			x[2] = this->m_gridKeyword.m_grid[2].coord[k] * units.vertical.input_to_si;
 		}
 		kOffset = k * this->m_gridKeyword.m_grid[0].count_coord * this->m_gridKeyword.m_grid[1].count_coord;
+		//{{
+		VERIFY(this->ValueToIndex[2].insert(std::map<vtkFloatingPointType, int>::value_type(x[2], k)).second);
+		//}}
 		for (j = 0; j < this->m_gridKeyword.m_grid[1].count_coord; ++j)
 		{
 			if (this->m_gridKeyword.m_grid[1].uniform)
@@ -449,6 +455,12 @@ void CGridLODActor::Setup(const CUnits& units)
 				x[1] = this->m_gridKeyword.m_grid[1].coord[j] * units.horizontal.input_to_si;
 			}
 			jOffset = j * this->m_gridKeyword.m_grid[0].count_coord;
+			//{{
+			if (k == 0)
+			{
+				VERIFY(this->ValueToIndex[1].insert(std::map<vtkFloatingPointType, int>::value_type(x[1], j)).second);
+			}
+			//}}
 			for (i = 0; i < this->m_gridKeyword.m_grid[0].count_coord; ++i)
 			{
 				if (this->m_gridKeyword.m_grid[0].uniform)
@@ -460,10 +472,19 @@ void CGridLODActor::Setup(const CUnits& units)
 					x[0] = this->m_gridKeyword.m_grid[0].coord[i] * units.horizontal.input_to_si;
 				}
 				offset = i + jOffset + kOffset;
+				//{{
+				if (k == 0 && j == 0)
+				{
+					VERIFY(this->ValueToIndex[0].insert(std::map<vtkFloatingPointType, int>::value_type(x[0], i)).second);
+				}
+				//}}
 				points->InsertPoint(offset, x);
 			}
 		}
 	}
+	ASSERT(ValueToIndex[0].size() == this->m_gridKeyword.m_grid[0].count_coord);
+	ASSERT(ValueToIndex[1].size() == this->m_gridKeyword.m_grid[1].count_coord);
+	ASSERT(ValueToIndex[2].size() == this->m_gridKeyword.m_grid[2].count_coord);
 
 	for (i = 0; i < 3; ++i)
 	{
@@ -694,12 +715,13 @@ void CGridLODActor::ProcessEvents(vtkObject* object, unsigned long event, void* 
 		TRACE("EndInteractionEvent\n");
 		ASSERT(object == self->PlaneWidget);
 		{
+			ASSERT(self->AxisIndex != -1);
 			self->PlaneIndex = -1;
 			CGrid grid = self->m_gridKeyword.m_grid[self->AxisIndex];
 			grid.Setup();
 			for (int pi = 0; pi < grid.count_coord; ++pi)
 			{
-				if (grid.coord[pi] == self->CurrentPoint[self->AxisIndex])
+				if ((vtkFloatingPointType)grid.coord[pi] == self->CurrentPoint[self->AxisIndex])
 				{
 					self->PlaneIndex = pi;
 					break;
@@ -708,6 +730,11 @@ void CGridLODActor::ProcessEvents(vtkObject* object, unsigned long event, void* 
 			if (self->PlaneIndex == -1)
 			{
 				TRACE("Warning self->PlaneIndex is -1\n");
+				////{{
+				std::map<vtkFloatingPointType, int>::iterator i = self->ValueToIndex[self->AxisIndex].find(self->CurrentPoint[self->AxisIndex]);
+				ASSERT(i != self->ValueToIndex[self->AxisIndex].end());
+				self->PlaneIndex = i->second;
+				////}}
 			}
 			std::set<double> coordinates;
 			coordinates.insert(grid.coord, grid.coord + grid.count_coord);
@@ -716,20 +743,25 @@ void CGridLODActor::ProcessEvents(vtkObject* object, unsigned long event, void* 
 			{
 				if (!(::GetAsyncKeyState(VK_CONTROL) < 0))
 				{
-					coordinates.erase(self->CurrentPoint[self->AxisIndex]);
+					///std::set<double>::size_type n = coordinates.erase(self->CurrentPoint[self->AxisIndex]);
+					std::set<double>::size_type n = coordinates.erase(grid.coord[self->PlaneIndex]);
+					ASSERT(n == 1);
 				}
 			}
-			std::set<double>::iterator i = coordinates.begin();
-			for (; i != coordinates.end(); ++i)
-			{
-				TRACE("%g\n", *i);
-			}
+// COMMENT: {8/4/2005 4:15:57 PM}			std::set<double>::iterator i = coordinates.begin();
+// COMMENT: {8/4/2005 4:15:57 PM}			for (; i != coordinates.end(); ++i)
+// COMMENT: {8/4/2005 4:15:57 PM}			{
+// COMMENT: {8/4/2005 4:15:57 PM}				TRACE("%g\n", *i);
+// COMMENT: {8/4/2005 4:15:57 PM}			}
 			self->m_gridKeyword.m_grid[self->AxisIndex].insert(coordinates.begin(), coordinates.end());
 			self->Setup(self->m_units);
 			self->Insert(self->m_node);
 			self->PlaneWidget->Off();
 		}
 		self->State = CGridLODActor::Start;
+		//{{
+		self->AxisIndex = -1;
+		//}}
 		break;
 
 	case vtkCommand::StartInteractionEvent:
@@ -1087,28 +1119,31 @@ void CGridLODActor::OnKeyPress()
 			grid.Setup();
 			for (int pi = 0; pi < grid.count_coord; ++pi)
 			{
-				if (grid.coord[pi] == this->CurrentPoint[this->AxisIndex])
+				if ((vtkFloatingPointType)grid.coord[pi] == this->CurrentPoint[this->AxisIndex])
 				{
 					this->PlaneIndex = pi;
 					break;
 				}
 			}
 			ASSERT(this->PlaneIndex != -1);
-			std::set<double> coordinates;
-			coordinates.insert(grid.coord, grid.coord + grid.count_coord);
-			coordinates.erase(this->CurrentPoint[this->AxisIndex]);
-			if (coordinates.size() >= 2)
+			if (this->PlaneIndex != -1)
 			{
-				this->m_gridKeyword.m_grid[this->AxisIndex].insert(coordinates.begin(), coordinates.end());
-				this->Setup(this->m_units);
-				this->Insert(this->m_node);
+				std::set<double> coordinates;
+				coordinates.insert(grid.coord, grid.coord + grid.count_coord);
+				coordinates.erase(this->CurrentPoint[this->AxisIndex]);
+				if (coordinates.size() >= 2)
+				{
+					this->m_gridKeyword.m_grid[this->AxisIndex].insert(coordinates.begin(), coordinates.end());
+					this->Setup(this->m_units);
+					this->Insert(this->m_node);
+				}
+				else
+				{
+					::AfxMessageBox("The minimum number of nodes is two.");
+				}
+				this->PlaneWidget->Off();
+				this->State = CGridLODActor::Start;
 			}
-			else
-			{
-				::AfxMessageBox("TODO");
-			}
-			this->PlaneWidget->Off();
-			this->State = CGridLODActor::Start;
 		}
 	}
 

@@ -7,6 +7,8 @@ vtkStandardNewMacro(CGridLineWidget);
 
 CGridLineWidget::CGridLineWidget(void)
 {
+  this->EventCallbackCommand->SetCallback(CGridLineWidget::ProcessEvents);
+  this->Picker->AddPickList(this->EdgesActor);
 }
 
 CGridLineWidget::~CGridLineWidget(void)
@@ -128,5 +130,107 @@ void CGridLineWidget::SetEnabled(int enabling)
     this->SetCurrentRenderer(NULL);
     }
 
+  this->Interactor->Render();
+}
+
+void CGridLineWidget::ProcessEvents(vtkObject* vtkNotUsed(object), 
+                                           unsigned long event,
+                                           void* clientdata, 
+                                           void* vtkNotUsed(calldata))
+{
+  CGridLineWidget* self = 
+    reinterpret_cast<CGridLineWidget *>( clientdata );
+
+  //okay, let's do the right thing
+  switch(event)
+    {
+    case vtkCommand::LeftButtonPressEvent:
+      self->OnLeftButtonDown();
+      break;
+    case vtkCommand::LeftButtonReleaseEvent:
+      self->OnLeftButtonUp();
+      break;
+    case vtkCommand::MiddleButtonPressEvent:
+      self->OnMiddleButtonDown();
+      break;
+    case vtkCommand::MiddleButtonReleaseEvent:
+      self->OnMiddleButtonUp();
+      break;
+    case vtkCommand::RightButtonPressEvent:
+      self->OnRightButtonDown();
+      break;
+    case vtkCommand::RightButtonReleaseEvent:
+      self->OnRightButtonUp();
+      break;
+    case vtkCommand::MouseMoveEvent:
+      self->OnMouseMove();
+      break;
+    }
+}
+
+void CGridLineWidget::OnLeftButtonDown()
+{
+  // We're only here if we are enabled
+  int X = this->Interactor->GetEventPosition()[0];
+  int Y = this->Interactor->GetEventPosition()[1];
+
+  // Okay, we can process this. See if we've picked anything.
+  // Make sure it's in the activated renderer
+  vtkRenderer *ren = this->Interactor->FindPokedRenderer(X,Y);
+  if ( ren != this->CurrentRenderer )
+    {
+    this->State = vtkImplicitPlaneWidget::Outside;
+    return;
+    }
+  
+  vtkAssemblyPath *path;
+  int n = this->Picker->Pick(X,Y,0.0,this->CurrentRenderer);
+  path = this->Picker->GetPath();
+
+  if ( path == NULL ) //not picking this widget
+    {
+    this->HighlightPlane(0);
+    this->HighlightNormal(0);
+    this->HighlightOutline(0);
+    this->State = vtkImplicitPlaneWidget::Outside;
+    return;
+    }
+
+  vtkProp *prop = path->GetFirstNode()->GetProp();
+  this->ValidPick = 1;
+  this->Picker->GetPickPosition(this->LastPickPosition);
+  if ( prop == this->ConeActor || prop == this->LineActor ||
+       prop == this->ConeActor2 || prop == this->LineActor2 )
+    {
+    this->HighlightPlane(1);
+    this->HighlightNormal(1);
+    this->State = vtkImplicitPlaneWidget::Rotating;
+    }
+#ifdef USE_ORIGINAL
+  else if ( prop == this->CutActor )
+#else USE_ORIGINAL
+  else if ( prop == this->CutActor || prop == this->EdgesActor )
+#endif
+    {
+    this->HighlightPlane(1);
+    this->State = vtkImplicitPlaneWidget::Pushing;
+    }
+  else if ( prop == this->SphereActor )
+    {
+    this->HighlightNormal(1);
+    this->State = vtkImplicitPlaneWidget::MovingOrigin;
+    }
+  else
+    {
+    if ( this->OutlineTranslation )
+      {
+      this->HighlightOutline(1);
+      this->State = vtkImplicitPlaneWidget::MovingOutline;
+      }
+    }
+  
+  this->EventCallbackCommand->SetAbortFlag(1);
+  this->StartInteraction();
+  this->InvokeEvent(vtkCommand::StartInteractionEvent,NULL);
   this->Interactor->Render();
 }

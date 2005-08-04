@@ -1,4 +1,5 @@
 #pragma once
+#include <map>
 #include <vtkLODActor.h>
 // #include "structs.h"
 ///#include "Grid.h"
@@ -123,9 +124,11 @@ protected:
 	// Internal ivars for processing events
 	vtkRenderer        *CurrentRenderer;
 
-	int                    AxisIndex;
-	int                    PlaneIndex;
-	vtkFloatingPointType   CurrentPoint[3];
+	int                                  AxisIndex;
+	int                                  PlaneIndex;
+	vtkFloatingPointType                 CurrentPoint[3];
+	std::map<vtkFloatingPointType, int>  ValueToIndex[3];
+
 
 	///CGrid               m_grid[3];
 	///CSnap               m_snap;
