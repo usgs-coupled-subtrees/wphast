@@ -241,8 +241,9 @@
 #define IDD_SERIES_DIALOG               248
 #define IDC_VE_SPLIT                    249
 #define IDC_HO_SPLIT                    250
-#define IDC_4WAY_02                     251
 #define IDC_4WAY02                      251
+#define IDB_BITMAP1                     252
+#define IDB_PLUS_MERGE                  252
 #define IDC_EDIT_X                      1000
 #define IDC_PROPERTIES                  1000
 #define IDC_TITLE                       1000
@@ -580,7 +581,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        252
+#define _APS_NEXT_RESOURCE_VALUE        253
 #define _APS_NEXT_COMMAND_VALUE         32803
 #define _APS_NEXT_CONTROL_VALUE         1281
 #define _APS_NEXT_SYMED_VALUE           126

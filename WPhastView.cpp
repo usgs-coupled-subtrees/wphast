@@ -780,6 +780,19 @@ BOOL CWPhastView::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 	{
 		if (CGridLODActor* pGridLODActor = CGridLODActor::SafeDownCast(this->GetDocument()->GetGridActor()))
 		{
+// COMMENT: {8/4/2005 8:57:01 PM}			extern HCURSOR Test();
+// COMMENT: {8/4/2005 8:57:01 PM}			//{{
+// COMMENT: {8/4/2005 8:57:01 PM}			static HCURSOR s_hcur = 0;
+// COMMENT: {8/4/2005 8:57:01 PM}			if (s_hcur == 0)
+// COMMENT: {8/4/2005 8:57:01 PM}			{
+// COMMENT: {8/4/2005 8:57:01 PM}				s_hcur = Test();
+// COMMENT: {8/4/2005 8:57:01 PM}			}
+// COMMENT: {8/4/2005 8:57:01 PM}			if (s_hcur && (::GetKeyState(VK_CONTROL) < 0))
+// COMMENT: {8/4/2005 8:57:01 PM}			{
+// COMMENT: {8/4/2005 8:57:01 PM}				::SetCursor(s_hcur);
+// COMMENT: {8/4/2005 8:57:01 PM}				return TRUE;
+// COMMENT: {8/4/2005 8:57:01 PM}			}
+// COMMENT: {8/4/2005 8:57:01 PM}			//}}
 			if (pGridLODActor->OnSetCursor(pWnd, nHitTest, message))
 			{
 				return TRUE;
@@ -1624,4 +1637,331 @@ void CWPhastView::OnUpdateToolsMoveVerLine(CCmdUI *pCmdUI)
 	{
 		pCmdUI->SetCheck(0);
 	}
+}
+
+
+#define CreateMonoBitmap( cx,  cy) CreateBitmap(cx, cy, 1, 1, NULL)
+#define _BitSizeOf(x) (sizeof(x)*8)
+#define SIZEOF(x) (sizeof(x))
+typedef WORD CURMASK;
+#define	DROPEFFECT_NONE	( 0 )
+#define	DROPEFFECT_COPY	( 1 )
+#define	DROPEFFECT_MOVE	( 2 )
+#define	DROPEFFECT_LINK	( 4 )
+
+extern HBITMAP FAR PASCAL CreateColorBitmap(int cx, int cy);
+
+// COMMENT: {8/4/2005 9:28:44 PM}HBITMAP FAR PASCAL CreateColorBitmap(int cx, int cy)
+// COMMENT: {8/4/2005 9:28:44 PM}{
+// COMMENT: {8/4/2005 9:28:44 PM}    HBITMAP hbm;
+// COMMENT: {8/4/2005 9:28:44 PM}    HDC hdc;
+// COMMENT: {8/4/2005 9:28:44 PM}
+// COMMENT: {8/4/2005 9:28:44 PM}    hdc = GetDC(NULL);
+// COMMENT: {8/4/2005 9:28:44 PM}
+// COMMENT: {8/4/2005 9:28:44 PM}    //
+// COMMENT: {8/4/2005 9:28:44 PM}    // on a multimonitor system with mixed bitdepths
+// COMMENT: {8/4/2005 9:28:44 PM}    // always use a 32bit bitmap for our work buffer
+// COMMENT: {8/4/2005 9:28:44 PM}    // this will prevent us from losing colors when
+// COMMENT: {8/4/2005 9:28:44 PM}    // blting to and from the screen.  this is mainly
+// COMMENT: {8/4/2005 9:28:44 PM}    // important for the drag & drop offscreen buffers.
+// COMMENT: {8/4/2005 9:28:44 PM}    //
+// COMMENT: {8/4/2005 9:28:44 PM}// COMMENT: {9/8/2004 10:48:49 PM}    if (!(GetDeviceCaps(hdc, RASTERCAPS) & RC_PALETTE) &&
+// COMMENT: {8/4/2005 9:28:44 PM}// COMMENT: {9/8/2004 10:48:49 PM}		TRUE &&
+// COMMENT: {8/4/2005 9:28:44 PM}// COMMENT: {9/8/2004 10:48:49 PM}		TRUE)
+// COMMENT: {8/4/2005 9:28:44 PM}// COMMENT: {9/8/2004 10:48:49 PM}// COMMENT: {9/8/2004 8:42:09 PM}        GetSystemMetrics(SM_CMONITORS) > 1 &&
+// COMMENT: {8/4/2005 9:28:44 PM}// COMMENT: {9/8/2004 10:48:49 PM}// COMMENT: {9/8/2004 8:42:09 PM}        GetSystemMetrics(SM_SAMEDISPLAYFORMAT) == 0)
+// COMMENT: {8/4/2005 9:28:44 PM}// COMMENT: {9/8/2004 10:48:49 PM}    {
+// COMMENT: {8/4/2005 9:28:44 PM}// COMMENT: {9/8/2004 10:48:49 PM}        LPVOID p;
+// COMMENT: {8/4/2005 9:28:44 PM}// COMMENT: {9/8/2004 10:48:49 PM}#ifndef UNIX
+// COMMENT: {8/4/2005 9:28:44 PM}// COMMENT: {9/8/2004 10:48:49 PM}        BITMAPINFO bi = {sizeof(BITMAPINFOHEADER), cx, cy, 1, 32};
+// COMMENT: {8/4/2005 9:28:44 PM}// COMMENT: {9/8/2004 10:48:49 PM}#else
+// COMMENT: {8/4/2005 9:28:44 PM}// COMMENT: {9/8/2004 10:48:49 PM}        BITMAPINFO bi;
+// COMMENT: {8/4/2005 9:28:44 PM}// COMMENT: {9/8/2004 10:48:49 PM}        bi.bmiHeader.biSize     = sizeof(BITMAPINFOHEADER); 
+// COMMENT: {8/4/2005 9:28:44 PM}// COMMENT: {9/8/2004 10:48:49 PM}        bi.bmiHeader.biWidth    = cx;
+// COMMENT: {8/4/2005 9:28:44 PM}// COMMENT: {9/8/2004 10:48:49 PM}        bi.bmiHeader.biHeight   = cy;
+// COMMENT: {8/4/2005 9:28:44 PM}// COMMENT: {9/8/2004 10:48:49 PM}        bi.bmiHeader.biPlanes   = 1 ;
+// COMMENT: {8/4/2005 9:28:44 PM}// COMMENT: {9/8/2004 10:48:49 PM}        bi.bmiHeader.biBitCount = 32;
+// COMMENT: {8/4/2005 9:28:44 PM}// COMMENT: {9/8/2004 10:48:49 PM}#endif
+// COMMENT: {8/4/2005 9:28:44 PM}// COMMENT: {9/8/2004 10:48:49 PM}        hbm = CreateDIBSection(hdc, &bi, DIB_RGB_COLORS, &p, NULL, 0);
+// COMMENT: {8/4/2005 9:28:44 PM}// COMMENT: {9/8/2004 10:48:49 PM}    }
+// COMMENT: {8/4/2005 9:28:44 PM}// COMMENT: {9/8/2004 10:48:49 PM}    else
+// COMMENT: {8/4/2005 9:28:44 PM}    {
+// COMMENT: {8/4/2005 9:28:44 PM}        hbm = CreateCompatibleBitmap(hdc, cx, cy);
+// COMMENT: {8/4/2005 9:28:44 PM}    }
+// COMMENT: {8/4/2005 9:28:44 PM}
+// COMMENT: {8/4/2005 9:28:44 PM}    ReleaseDC(NULL, hdc);
+// COMMENT: {8/4/2005 9:28:44 PM}    return hbm;
+// COMMENT: {8/4/2005 9:28:44 PM}}
+
+void GetCursorLowerRight(HCURSOR hcursor, int * px, int * py, POINT *pptHotSpot)
+{
+    ICONINFO iconinfo;
+    CURMASK CurMask[16*8];
+    BITMAP bm;
+    int i;
+    int xFine = 16;
+
+    GetIconInfo(hcursor, &iconinfo);
+    GetObject(iconinfo.hbmMask, SIZEOF(bm), (LPTSTR)&bm);
+    GetBitmapBits(iconinfo.hbmMask, SIZEOF(CurMask), CurMask);
+    pptHotSpot->x = iconinfo.xHotspot;
+    pptHotSpot->y = iconinfo.yHotspot;
+    if (iconinfo.hbmColor) 
+    {
+        i = (int)(bm.bmWidth * bm.bmHeight / _BitSizeOf(CURMASK) - 1);
+    } 
+    else 
+    {
+        i = (int)(bm.bmWidth * (bm.bmHeight/2) / _BitSizeOf(CURMASK) - 1);
+    }
+
+    if ( i >= SIZEOF(CurMask)) 
+    {
+        i = SIZEOF(CurMask) -1;
+    }
+
+    // BUGBUG: this assumes that the first pixel encountered on this bottom
+    // up/right to left search will be reasonably close to the rightmost pixel
+    // which for all of our cursors is correct, but it not necessarly correct.
+
+    // also, it assumes the cursor has a good mask... not like the IBeam XOR only
+    // cursor
+    for (; i >= 0; i--)   
+    {
+        if (CurMask[i] != 0xFFFF) 
+        {
+            // this is only accurate to 16 pixels... which is a big gap..
+            // so let's try to be a bit more accurate.
+            int j;
+            DWORD dwMask;
+
+            for (j = 0; j < 16; j++, xFine--) 
+            {
+                if (j < 8) 
+                {
+                    dwMask = (1 << (8 + j));
+                } 
+                else 
+                {
+                    dwMask = (1 << (j - 8));
+                }
+
+                if (!(CurMask[i] & dwMask))
+                    break;
+            }
+            ASSERT(j < 16);
+            break;
+        }
+    }
+
+    if (iconinfo.hbmColor) 
+    {
+        DeleteObject(iconinfo.hbmColor);
+    }
+
+    if (iconinfo.hbmMask) 
+    {
+        DeleteObject(iconinfo.hbmMask);
+    }
+
+    // Compute the pointer height
+    // use width in both directions because the cursor is square, but the
+    // height might be doubleheight if it's mono
+    *py = ((i + 1) * _BitSizeOf(CURMASK)) / (int)bm.bmWidth;
+    *px = ((i * _BitSizeOf(CURMASK)) % (int)bm.bmWidth) + xFine + 2; // hang it off a little
+}
+
+
+
+// this will draw iiMerge's image over iiMain on main's lower right.
+BOOL MergeIcons(HCURSOR hcursor, LPCTSTR idMerge, HBITMAP *phbmImage, HBITMAP *phbmMask, POINT* pptHotSpot)
+{
+    BITMAP bm;
+    int xBitmap;
+    int yBitmap;
+    int xDraw;
+    int yDraw;
+    HDC hdcCursor, hdcBitmap;
+    HBITMAP hbmTemp;
+    HBITMAP hbmImage;
+    HBITMAP hbmMask;
+    int xCursor = GetSystemMetrics(SM_CXCURSOR);
+    int yCursor = GetSystemMetrics(SM_CYCURSOR);
+    HBITMAP hbmp;
+
+    // find the lower corner of the cursor and put it there.
+    // do this whether or not we have an idMerge because it will set the hotspot
+    GetCursorLowerRight(hcursor, &xDraw, &yDraw, pptHotSpot);
+    if (idMerge != (LPCTSTR)-1) 
+    {
+// COMMENT: {8/4/2005 7:50:45 PM}        hbmp = (HBITMAP)LoadImage(HINST_THISDLL, idMerge, IMAGE_BITMAP, 0, 0, 0);
+        hbmp = (HBITMAP)LoadImage(AfxGetInstanceHandle(), idMerge, IMAGE_BITMAP, 0, 0, 0);		
+        if (hbmp) 
+        {
+            // GetObject(hbmp, SIZEOF(bm), &bm);
+            GetObject(hbmp, sizeof(bm), &bm);
+            xBitmap = bm.bmWidth;
+            yBitmap = bm.bmHeight/2;
+
+            if (xDraw + xBitmap > xCursor)
+                xDraw = xCursor - xBitmap;
+            if (yDraw + yBitmap > yCursor)
+                yDraw = yCursor - yBitmap;
+        }
+    } 
+    else
+        hbmp = NULL;
+
+
+    hdcCursor = CreateCompatibleDC(NULL);
+
+    hbmMask = CreateMonoBitmap(xCursor, yCursor);
+    hbmImage = CreateColorBitmap(xCursor, yCursor);
+
+    if (hdcCursor && hbmMask && hbmImage) 
+    {
+
+        hbmTemp = (HBITMAP)SelectObject(hdcCursor, hbmImage);
+        DrawIconEx(hdcCursor, 0, 0, hcursor, 0, 0, 0, NULL, DI_NORMAL);
+
+        if (hbmp) 
+        {
+            hdcBitmap = CreateCompatibleDC(NULL);
+            SelectObject(hdcBitmap, hbmp);
+
+            //blt the two bitmaps onto the color and mask bitmaps for the cursor
+            BitBlt(hdcCursor, xDraw, yDraw, xBitmap, yBitmap, hdcBitmap, 0, 0, SRCCOPY);
+        }
+
+        SelectObject(hdcCursor, hbmMask);
+
+        DrawIconEx(hdcCursor, 0, 0, hcursor, 0, 0, 0, NULL, DI_MASK);
+
+        if (hbmp) 
+        {
+            BitBlt(hdcCursor, xDraw, yDraw, xBitmap, yBitmap, hdcBitmap, 0, yBitmap, SRCCOPY);
+
+            // select back in the old bitmaps
+            SelectObject(hdcBitmap, hbmTemp);
+            DeleteDC(hdcBitmap);
+            DeleteObject(hbmp);
+        }
+
+        // select back in the old bitmaps
+        SelectObject(hdcCursor, hbmTemp);
+    }
+
+    if (hdcCursor)
+        DeleteDC(hdcCursor);
+
+    *phbmImage = hbmImage;
+    *phbmMask = hbmMask;
+    return (hbmImage && hbmMask);
+}
+
+HCURSOR SetCursorHotspot(HCURSOR hcur, POINT *ptHot)
+{
+    ICONINFO iconinfo;
+    HCURSOR hcurHotspot;
+
+    GetIconInfo(hcur, &iconinfo);
+    iconinfo.xHotspot = ptHot->x;
+    iconinfo.yHotspot = ptHot->y;
+    iconinfo.fIcon = FALSE;
+    hcurHotspot = (HCURSOR)CreateIconIndirect(&iconinfo);
+    if (iconinfo.hbmColor) 
+    {
+        DeleteObject(iconinfo.hbmColor);
+    }
+
+    if (iconinfo.hbmMask) 
+    {
+        DeleteObject(iconinfo.hbmMask);
+    }
+    return hcurHotspot;
+}
+
+
+HCURSOR Test()
+{
+	//{{
+    HIMAGELIST  _himlCursors;
+
+    UINT uFlags = ILC_MASK;
+
+    //
+    // if this is not a palette device, use a DDB for the imagelist
+    // this is important when displaying high-color cursors
+    //
+	HDC hdc = ::GetDC(NULL);
+	if (!(::GetDeviceCaps(hdc, RASTERCAPS) & RC_PALETTE))
+    {
+        uFlags |= ILC_COLORDDB;
+    }
+	::ReleaseDC(NULL, hdc);
+
+	_himlCursors = ImageList_Create(::GetSystemMetrics(SM_CXCURSOR),
+		::GetSystemMetrics(SM_CYCURSOR),
+		uFlags, 1, 0);
+	//}}
+
+	//{{
+	// _MapCursorIDToImageListIndex(DCID_INVALID);
+	POINT ptHotSpot;
+	{
+		HCURSOR hcur = ::LoadCursor(NULL, IDC_ARROW);
+		//int n = AddCursorToImageList(hcur, MAKEINTRESOURCE(IDB_PLUS_MERGE), &ptHotSpot);
+		{
+			/// int CDragImages::_AddCursorToImageList(HCURSOR hcur, LPCTSTR idMerge, POINT *pptHotSpot)
+			LPCTSTR idMerge = MAKEINTRESOURCE(IDB_PLUS_MERGE);
+			POINT *pptHotSpot = &ptHotSpot;
+			{
+				int iIndex;
+				HBITMAP hbmImage, hbmMask;
+
+				// merge in the plus or link arrow if it's specified
+				if (MergeIcons(hcur, idMerge, &hbmImage, &hbmMask, pptHotSpot)) 
+				{
+					iIndex = ImageList_Add(_himlCursors, hbmImage, hbmMask);
+				} 
+				else 
+				{
+					iIndex = -1;
+				}
+
+				if (hbmImage)
+					DeleteObject(hbmImage);
+
+				if (hbmMask)
+					DeleteObject(hbmMask);
+
+				//return iIndex;
+			}
+		}
+	}
+	//}}
+
+// COMMENT: {8/4/2005 8:03:58 PM}	HCURSOR hcurColor = ImageList_GetIcon(_himlCursors, iIndex, 0);
+	HCURSOR hcurColor = ImageList_GetIcon(_himlCursors, 0, 0);
+	//
+	// On non C1_COLORCURSOR displays, CopyImage() will enforce
+	// monochrome.  So on color cursor displays, we'll get colored
+	// dragdrop pix.
+	//
+	HCURSOR hcurScreen = (HCURSOR)::CopyImage(hcurColor, IMAGE_CURSOR,
+		0, 0, LR_COPYRETURNORG | LR_DEFAULTSIZE);
+
+	HCURSOR hcurFinal = SetCursorHotspot(hcurScreen, &ptHotSpot);
+
+	if (hcurScreen != hcurColor) 
+	{
+		::DestroyCursor(hcurColor);
+	}
+
+	if (hcurFinal)
+		::DestroyCursor(hcurScreen);
+	else
+		hcurFinal = hcurScreen;
+
+	return hcurFinal;
 }

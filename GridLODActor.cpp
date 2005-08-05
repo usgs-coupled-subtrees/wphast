@@ -32,6 +32,10 @@
 #include "Resource.h"
 #endif
 
+//{{
+static HCURSOR s_hcur = 0;
+//}}
+
 
 vtkCxxRevisionMacro(CGridLODActor, "$Revision$");
 vtkStandardNewMacro(CGridLODActor);
@@ -709,6 +713,21 @@ void CGridLODActor::ProcessEvents(vtkObject* object, unsigned long event, void* 
 		TRACE("InteractionEvent\n");
 		ASSERT(object == self->PlaneWidget);
 		self->State = CGridLODActor::Pushing;
+		//{{
+		extern HCURSOR Test();
+		if (s_hcur == 0)
+		{
+			s_hcur = Test();
+		}
+		if (s_hcur && (::GetAsyncKeyState(VK_CONTROL) < 0))
+		{
+			::SetCursor(s_hcur);
+		}
+		else
+		{
+			::SetCursor(::LoadCursor(NULL, IDC_ARROW));
+		}
+		//}}
 		break;
 
 	case vtkCommand::EndInteractionEvent:
@@ -716,51 +735,70 @@ void CGridLODActor::ProcessEvents(vtkObject* object, unsigned long event, void* 
 		ASSERT(object == self->PlaneWidget);
 		{
 			ASSERT(self->AxisIndex != -1);
+// COMMENT: {8/4/2005 4:25:48 PM}			CGrid grid = self->m_gridKeyword.m_grid[self->AxisIndex];
+// COMMENT: {8/4/2005 4:25:48 PM}			grid.Setup();
+// COMMENT: {8/4/2005 4:25:48 PM}			for (int pi = 0; pi < grid.count_coord; ++pi)
+// COMMENT: {8/4/2005 4:25:48 PM}			{
+// COMMENT: {8/4/2005 4:25:48 PM}				if ((vtkFloatingPointType)grid.coord[pi] == self->CurrentPoint[self->AxisIndex])
+// COMMENT: {8/4/2005 4:25:48 PM}				{
+// COMMENT: {8/4/2005 4:25:48 PM}					self->PlaneIndex = pi;
+// COMMENT: {8/4/2005 4:25:48 PM}					break;
+// COMMENT: {8/4/2005 4:25:48 PM}				}
+// COMMENT: {8/4/2005 4:25:48 PM}			}
+// COMMENT: {8/4/2005 4:25:48 PM}			if (self->PlaneIndex == -1)
+// COMMENT: {8/4/2005 4:25:48 PM}			{
+// COMMENT: {8/4/2005 4:25:48 PM}				TRACE("Warning self->PlaneIndex is -1\n");
+// COMMENT: {8/4/2005 4:25:48 PM}				////{{
+// COMMENT: {8/4/2005 4:25:48 PM}				std::map<vtkFloatingPointType, int>::iterator i = self->ValueToIndex[self->AxisIndex].find(self->CurrentPoint[self->AxisIndex]);
+// COMMENT: {8/4/2005 4:25:48 PM}				ASSERT(i != self->ValueToIndex[self->AxisIndex].end());
+// COMMENT: {8/4/2005 4:25:48 PM}				self->PlaneIndex = i->second;
+// COMMENT: {8/4/2005 4:25:48 PM}				////}}
+// COMMENT: {8/4/2005 4:25:48 PM}			}
 			self->PlaneIndex = -1;
-			CGrid grid = self->m_gridKeyword.m_grid[self->AxisIndex];
-			grid.Setup();
-			for (int pi = 0; pi < grid.count_coord; ++pi)
+			std::map<vtkFloatingPointType, int>::iterator i = self->ValueToIndex[self->AxisIndex].find(self->CurrentPoint[self->AxisIndex]);
+			if (i != self->ValueToIndex[self->AxisIndex].end())
 			{
-				if ((vtkFloatingPointType)grid.coord[pi] == self->CurrentPoint[self->AxisIndex])
-				{
-					self->PlaneIndex = pi;
-					break;
-				}
-			}
-			if (self->PlaneIndex == -1)
-			{
-				TRACE("Warning self->PlaneIndex is -1\n");
-				////{{
-				std::map<vtkFloatingPointType, int>::iterator i = self->ValueToIndex[self->AxisIndex].find(self->CurrentPoint[self->AxisIndex]);
-				ASSERT(i != self->ValueToIndex[self->AxisIndex].end());
 				self->PlaneIndex = i->second;
-				////}}
-			}
-			std::set<double> coordinates;
-			coordinates.insert(grid.coord, grid.coord + grid.count_coord);
-			double value = self->PlaneWidget->GetOrigin()[self->AxisIndex] / self->GetScale()[self->AxisIndex];
-			if (coordinates.insert(value).second)
-			{
-				if (!(::GetAsyncKeyState(VK_CONTROL) < 0))
+
+				CGrid grid = self->m_gridKeyword.m_grid[self->AxisIndex];
+				grid.Setup();
+				std::set<double> coordinates;
+				coordinates.insert(grid.coord, grid.coord + grid.count_coord);
+				double value = self->PlaneWidget->GetOrigin()[self->AxisIndex] / self->GetScale()[self->AxisIndex];
+				TRACE("Adding %g to grid[%d]\n", value, self->AxisIndex);
+				if (coordinates.insert(value).second)
 				{
-					///std::set<double>::size_type n = coordinates.erase(self->CurrentPoint[self->AxisIndex]);
-					std::set<double>::size_type n = coordinates.erase(grid.coord[self->PlaneIndex]);
-					ASSERT(n == 1);
+					if (!(::GetAsyncKeyState(VK_CONTROL) < 0))
+					{
+						///std::set<double>::size_type n = coordinates.erase(self->CurrentPoint[self->AxisIndex]);
+						TRACE("Removing %g from grid[%d]\n", grid.coord[self->PlaneIndex], self->AxisIndex);
+						VERIFY(coordinates.erase(grid.coord[self->PlaneIndex]) == 1);
+					}
 				}
+				self->m_gridKeyword.m_grid[self->AxisIndex].insert(coordinates.begin(), coordinates.end());
+				self->Setup(self->m_units);
+				self->Insert(self->m_node);
+				self->PlaneWidget->Off();
 			}
+			else
+			{
+				ASSERT(FALSE);
+			}
+
 // COMMENT: {8/4/2005 4:15:57 PM}			std::set<double>::iterator i = coordinates.begin();
 // COMMENT: {8/4/2005 4:15:57 PM}			for (; i != coordinates.end(); ++i)
 // COMMENT: {8/4/2005 4:15:57 PM}			{
 // COMMENT: {8/4/2005 4:15:57 PM}				TRACE("%g\n", *i);
 // COMMENT: {8/4/2005 4:15:57 PM}			}
-			self->m_gridKeyword.m_grid[self->AxisIndex].insert(coordinates.begin(), coordinates.end());
-			self->Setup(self->m_units);
-			self->Insert(self->m_node);
-			self->PlaneWidget->Off();
+// COMMENT: {8/4/2005 4:27:27 PM}			self->m_gridKeyword.m_grid[self->AxisIndex].insert(coordinates.begin(), coordinates.end());
+// COMMENT: {8/4/2005 4:27:27 PM}			self->Setup(self->m_units);
+// COMMENT: {8/4/2005 4:27:27 PM}			self->Insert(self->m_node);
+// COMMENT: {8/4/2005 4:27:27 PM}			self->PlaneWidget->Off();
 		}
 		self->State = CGridLODActor::Start;
 		//{{
 		self->AxisIndex = -1;
+		::SetCursor(::LoadCursor(NULL, IDC_ARROW));
 		//}}
 		break;
 
@@ -800,8 +838,6 @@ void CGridLODActor::OnMouseMove()
 	{
 		return;
 	}
-
-	//{{
 	if (this->State != CGridLODActor::Start)
 	{
 		return;
@@ -823,98 +859,13 @@ void CGridLODActor::OnMouseMove()
 		return;
 	}
 #endif
-	TRACE("OnMouseMove X = %d, Y= %d\n", X, Y);
-	//}}
+	TRACE("CGridLODActor::OnMouseMove X = %d, Y= %d\n", X, Y);
 
 	vtkCellPicker* pCellPicker = vtkCellPicker::New();
 	pCellPicker->SetTolerance(0.001);
-	//pCellPicker->SetTolerance(0.004);
-	//pCellPicker->SetTolerance(0.5);
 	pCellPicker->PickFromListOn();
 	this->PickableOn();
 	pCellPicker->AddPickList(this);
-
-	if (pCellPicker->Pick(X, Y, 0.0, this->CurrentRenderer))
-	{
-		ASSERT(pCellPicker->GetPath()->GetFirstNode()->GetProp() == this);
-
-		vtkIdType n = pCellPicker->GetCellId();
-		TRACE("CellId = %d\n", n);
-		vtkFloatingPointType* pt = pCellPicker->GetPickPosition();
-		if (vtkDataSet* pDataSet = pCellPicker->GetDataSet())
-		{
-			vtkCell* pCell = pDataSet->GetCell(n);
-			if (pCell->GetCellType() == VTK_LINE)
-			{
-				ASSERT(pCell->GetNumberOfPoints() == 2);				
-				if (vtkPoints* pPoints = pCell->GetPoints())
-				{
-					vtkFloatingPointType* pt0 = pPoints->GetPoint(0);
-					vtkFloatingPointType* pt1 = pPoints->GetPoint(1);
-					TRACE("pt0[0] = %g, pt0[1] = %g, pt0[2] = %g\n", pt0[0], pt0[1], pt0[2]);
-					TRACE("pt1[0] = %g, pt1[1] = %g, pt1[2] = %g\n", pt1[0], pt1[1], pt1[2]);
-
-					if ((pt0[2] == this->m_min[2] && pt1[2] == this->m_min[2]) || (pt0[2] == this->m_max[2] && pt1[2] == this->m_max[2]))
-					{
-						// +z / -z
-						//
-						if (pt0[0] == pt1[0])
-						{
-							if (this->PlaneWidget /** && !this->PlaneWidget->GetEnabled() **/)
-							{
-								TRACE("this->PlaneWidget->NormalToXAxisOn()\n");
-							}
-						}
-						else if (pt0[1] == pt1[1])
-						{
-							if (this->PlaneWidget)
-							{
-								TRACE("this->PlaneWidget->NormalToYAxisOn()\n");
-							}
-						}
-					}
-					else if ((pt0[1] == this->m_min[1] && pt1[1] == this->m_min[1]) || (pt0[1] == this->m_max[1] && pt1[1] == this->m_max[1]))
-					{
-						// -y / +y
-						//
-						if (pt0[0] == pt1[0])
-						{
-							if (this->PlaneWidget)
-							{
-								TRACE("this->PlaneWidget->NormalToXAxisOn()\n");
-							}
-						}
-						else if (pt0[2] == pt1[2])
-						{
-							if (this->PlaneWidget)
-							{
-								TRACE("this->PlaneWidget->NormalToZAxisOn()\n");
-							}
-						}
-					}
-					else if ((pt0[0] == this->m_max[0] && pt1[0] == this->m_max[0]) || (pt0[0] == this->m_min[0] && pt1[0] == this->m_min[0]))
-					{
-						// +x / -x
-						//
-						if (pt0[1] == pt1[1])
-						{
-							if (this->PlaneWidget)
-							{
-								TRACE("this->PlaneWidget->NormalToYAxisOn()\n");
-							}
-						}
-						else if (pt0[2] == pt1[2])
-						{
-							if (this->PlaneWidget)
-							{
-								TRACE("this->PlaneWidget->NormalToZAxisOn()\n");
-							}
-						}
-					}
-				}
-			}
-		}
-	}
 
 	if (pCellPicker->Pick(X, Y, 0.0, this->CurrentRenderer))
 	{
@@ -1108,76 +1059,39 @@ void CGridLODActor::OnKeyPress()
 
 	char* keysym = this->Interactor->GetKeySym();
 	TRACE("OnKeyPress %s\n", keysym);
-
 	
 	if (this->PlaneWidget->GetEnabled())
 	{
-		if (::strcmp(keysym, "Delete") == 0)
+		ASSERT(this->AxisIndex != -1);
+		if (::strcmp(keysym, "Delete") == 0 && this->AxisIndex != -1)
 		{
 			this->PlaneIndex = -1;
-			CGrid grid = this->m_gridKeyword.m_grid[this->AxisIndex];
-			grid.Setup();
-			for (int pi = 0; pi < grid.count_coord; ++pi)
+			std::map<vtkFloatingPointType, int>::iterator i = this->ValueToIndex[this->AxisIndex].find(this->CurrentPoint[this->AxisIndex]);
+			if (i != this->ValueToIndex[this->AxisIndex].end())
 			{
-				if ((vtkFloatingPointType)grid.coord[pi] == this->CurrentPoint[this->AxisIndex])
-				{
-					this->PlaneIndex = pi;
-					break;
-				}
-			}
-			ASSERT(this->PlaneIndex != -1);
-			if (this->PlaneIndex != -1)
-			{
+				this->PlaneIndex = i->second;
+
+				CGrid grid = this->m_gridKeyword.m_grid[this->AxisIndex];
+				grid.Setup();
 				std::set<double> coordinates;
 				coordinates.insert(grid.coord, grid.coord + grid.count_coord);
-				coordinates.erase(this->CurrentPoint[this->AxisIndex]);
-				if (coordinates.size() >= 2)
+				TRACE("Removing %g from grid[%d]\n", grid.coord[this->PlaneIndex], this->AxisIndex);
+				VERIFY(coordinates.erase(grid.coord[this->PlaneIndex]) == 1);
+				if (coordinates.size() > 1)
 				{
 					this->m_gridKeyword.m_grid[this->AxisIndex].insert(coordinates.begin(), coordinates.end());
 					this->Setup(this->m_units);
 					this->Insert(this->m_node);
+					this->PlaneWidget->Off();
 				}
 				else
 				{
-					::AfxMessageBox("The minimum number of nodes is two.");
+					::AfxMessageBox("There must be at least two nodes in each coordinate direction.");
 				}
-				this->PlaneWidget->Off();
 				this->State = CGridLODActor::Start;
 			}
 		}
 	}
-
-
-// COMMENT: {8/2/2005 9:25:12 PM}	if (this->PlaneWidget->GetEnabled())
-// COMMENT: {8/2/2005 9:25:12 PM}	{
-// COMMENT: {8/2/2005 9:25:12 PM}		if (::strcmp(keysym, "Escape") == 0)
-// COMMENT: {8/2/2005 9:25:12 PM}		{
-// COMMENT: {8/2/2005 9:25:12 PM}			if (this->PlaneWidget)
-// COMMENT: {8/2/2005 9:25:12 PM}			{
-// COMMENT: {8/2/2005 9:25:12 PM}				if (this->PlaneWidget->GetEnabled())
-// COMMENT: {8/2/2005 9:25:12 PM}				{
-// COMMENT: {8/2/2005 9:25:12 PM}					this->PlaneWidget->SetEnabled(0);
-// COMMENT: {8/2/2005 9:25:12 PM}				}
-// COMMENT: {8/2/2005 9:25:12 PM}				this->PlaneWidget->Delete();
-// COMMENT: {8/2/2005 9:25:12 PM}				this->PlaneWidget = 0;
-// COMMENT: {8/2/2005 9:25:12 PM}			}
-// COMMENT: {8/2/2005 9:25:12 PM}			this->Setup(this->m_units);
-// COMMENT: {8/2/2005 9:25:12 PM}
-// COMMENT: {8/2/2005 9:25:12 PM}			// this->PlaneWidget->Off();
-// COMMENT: {8/2/2005 9:25:12 PM}			this->AxisIndex = -1;
-// COMMENT: {8/2/2005 9:25:12 PM}			this->PlaneWidget->SetInteractor(this->Interactor);
-// COMMENT: {8/2/2005 9:25:12 PM}			this->PlaneWidget->EnabledOff();
-// COMMENT: {8/2/2005 9:25:12 PM}			this->Interactor->Render();
-// COMMENT: {8/2/2005 9:25:12 PM}			this->State = CGridLODActor::Start;
-// COMMENT: {8/2/2005 9:25:12 PM}		}
-// COMMENT: {8/2/2005 9:25:12 PM}	}
-
-// COMMENT: {7/26/2005 7:01:34 PM}	if (this->State == CRiverActor::CreatingRiver)
-// COMMENT: {7/26/2005 7:01:34 PM}	{
-// COMMENT: {7/26/2005 7:01:34 PM}		char* keysym = this->Interactor->GetKeySym();		
-// COMMENT: {7/26/2005 7:01:34 PM}		// if (::strcmp(keysym, "Escape") == 0)
-// COMMENT: {7/26/2005 7:01:34 PM}		this->Interactor->Render();
-// COMMENT: {7/26/2005 7:01:34 PM}	}
 }
 
 #if defined(WIN32)
@@ -1194,6 +1108,18 @@ BOOL CGridLODActor::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 		return FALSE;
 	}
 
+	//{{
+	extern HCURSOR Test();
+	if (s_hcur == 0)
+	{
+		s_hcur = Test();
+	}
+	if (s_hcur && (::GetAsyncKeyState(VK_CONTROL) < 0))
+	{
+		::SetCursor(s_hcur);
+		return TRUE;
+	}
+	//}}
 // COMMENT: {7/28/2005 3:26:36 PM}	vtkCellPicker* pCellPicker = vtkCellPicker::New();
 // COMMENT: {7/28/2005 3:26:36 PM}	pCellPicker->SetTolerance(0.004);
 // COMMENT: {7/28/2005 3:26:36 PM}	pCellPicker->PickFromListOn();

@@ -1512,6 +1512,9 @@
 				RelativePath="res\WPhastDoc.ico">
 			</File>
 			<File
+				RelativePath="res\bitmap1.bmp">
+			</File>
+			<File
 				RelativePath="res\checks.bmp">
 			</File>
 			<File
@@ -1552,6 +1555,9 @@
 			</File>
 			<File
 				RelativePath="res\pixelpicker.cur">
+			</File>
+			<File
+				RelativePath="res\plusmrge.bmp">
 			</File>
 			<File
 				RelativePath="res\resize_column.cur">
@@ -3749,15 +3755,15 @@
 			Name="Build Logs"
 			Filter="">
 			<File
-				RelativePath="cppunit\BuildLog.htm"
-				DeploymentContent="TRUE">
-			</File>
-			<File
 				RelativePath="Debug\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 			<File
 				RelativePath="Release\BuildLog.htm"
+				DeploymentContent="TRUE">
+			</File>
+			<File
+				RelativePath="cppunit\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 		</Filter>
