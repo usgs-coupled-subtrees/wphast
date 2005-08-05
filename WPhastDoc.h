@@ -131,6 +131,7 @@ public:
 
 
 	// River actions
+	//
 	void Add(CRiverActor *pRiverActor);
 	void UnAdd(CRiverActor *pRiverActor);
 	void Remove(CRiverActor *pRiverActor);
@@ -140,6 +141,13 @@ public:
 	void GetUsedRiverNumbers(std::set<int>& usedNums);
 
 	static void RiverListener(vtkObject* caller, unsigned long eid, void* clientdata, void *calldata);
+
+	// Grid actions
+	//
+	static void GridListener(vtkObject* caller, unsigned long eid, void* clientdata, void *calldata);	
+	
+	void UpdateGridDomain(void);
+
 
 protected:
 	void InternalAdd(CZoneActor *pZoneActor, bool bAdd);
@@ -211,6 +219,7 @@ protected:
 
 	// callbacks
 	vtkCallbackCommand    *RiverCallbackCommand;
+	vtkCallbackCommand    *GridCallbackCommand;
 	CRiverMovePointAction *RiverMovePointAction;
 
 

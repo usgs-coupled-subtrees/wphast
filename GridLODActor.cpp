@@ -735,25 +735,6 @@ void CGridLODActor::ProcessEvents(vtkObject* object, unsigned long event, void* 
 		ASSERT(object == self->PlaneWidget);
 		{
 			ASSERT(self->AxisIndex != -1);
-// COMMENT: {8/4/2005 4:25:48 PM}			CGrid grid = self->m_gridKeyword.m_grid[self->AxisIndex];
-// COMMENT: {8/4/2005 4:25:48 PM}			grid.Setup();
-// COMMENT: {8/4/2005 4:25:48 PM}			for (int pi = 0; pi < grid.count_coord; ++pi)
-// COMMENT: {8/4/2005 4:25:48 PM}			{
-// COMMENT: {8/4/2005 4:25:48 PM}				if ((vtkFloatingPointType)grid.coord[pi] == self->CurrentPoint[self->AxisIndex])
-// COMMENT: {8/4/2005 4:25:48 PM}				{
-// COMMENT: {8/4/2005 4:25:48 PM}					self->PlaneIndex = pi;
-// COMMENT: {8/4/2005 4:25:48 PM}					break;
-// COMMENT: {8/4/2005 4:25:48 PM}				}
-// COMMENT: {8/4/2005 4:25:48 PM}			}
-// COMMENT: {8/4/2005 4:25:48 PM}			if (self->PlaneIndex == -1)
-// COMMENT: {8/4/2005 4:25:48 PM}			{
-// COMMENT: {8/4/2005 4:25:48 PM}				TRACE("Warning self->PlaneIndex is -1\n");
-// COMMENT: {8/4/2005 4:25:48 PM}				////{{
-// COMMENT: {8/4/2005 4:25:48 PM}				std::map<vtkFloatingPointType, int>::iterator i = self->ValueToIndex[self->AxisIndex].find(self->CurrentPoint[self->AxisIndex]);
-// COMMENT: {8/4/2005 4:25:48 PM}				ASSERT(i != self->ValueToIndex[self->AxisIndex].end());
-// COMMENT: {8/4/2005 4:25:48 PM}				self->PlaneIndex = i->second;
-// COMMENT: {8/4/2005 4:25:48 PM}				////}}
-// COMMENT: {8/4/2005 4:25:48 PM}			}
 			self->PlaneIndex = -1;
 			std::map<vtkFloatingPointType, int>::iterator i = self->ValueToIndex[self->AxisIndex].find(self->CurrentPoint[self->AxisIndex]);
 			if (i != self->ValueToIndex[self->AxisIndex].end())
@@ -770,7 +751,6 @@ void CGridLODActor::ProcessEvents(vtkObject* object, unsigned long event, void* 
 				{
 					if (!(::GetAsyncKeyState(VK_CONTROL) < 0))
 					{
-						///std::set<double>::size_type n = coordinates.erase(self->CurrentPoint[self->AxisIndex]);
 						TRACE("Removing %g from grid[%d]\n", grid.coord[self->PlaneIndex], self->AxisIndex);
 						VERIFY(coordinates.erase(grid.coord[self->PlaneIndex]) == 1);
 					}
@@ -784,22 +764,10 @@ void CGridLODActor::ProcessEvents(vtkObject* object, unsigned long event, void* 
 			{
 				ASSERT(FALSE);
 			}
-
-// COMMENT: {8/4/2005 4:15:57 PM}			std::set<double>::iterator i = coordinates.begin();
-// COMMENT: {8/4/2005 4:15:57 PM}			for (; i != coordinates.end(); ++i)
-// COMMENT: {8/4/2005 4:15:57 PM}			{
-// COMMENT: {8/4/2005 4:15:57 PM}				TRACE("%g\n", *i);
-// COMMENT: {8/4/2005 4:15:57 PM}			}
-// COMMENT: {8/4/2005 4:27:27 PM}			self->m_gridKeyword.m_grid[self->AxisIndex].insert(coordinates.begin(), coordinates.end());
-// COMMENT: {8/4/2005 4:27:27 PM}			self->Setup(self->m_units);
-// COMMENT: {8/4/2005 4:27:27 PM}			self->Insert(self->m_node);
-// COMMENT: {8/4/2005 4:27:27 PM}			self->PlaneWidget->Off();
 		}
 		self->State = CGridLODActor::Start;
-		//{{
 		self->AxisIndex = -1;
 		::SetCursor(::LoadCursor(NULL, IDC_ARROW));
-		//}}
 		break;
 
 	case vtkCommand::StartInteractionEvent:
@@ -1069,25 +1037,41 @@ void CGridLODActor::OnKeyPress()
 			std::map<vtkFloatingPointType, int>::iterator i = this->ValueToIndex[this->AxisIndex].find(this->CurrentPoint[this->AxisIndex]);
 			if (i != this->ValueToIndex[this->AxisIndex].end())
 			{
-				this->PlaneIndex = i->second;
-
-				CGrid grid = this->m_gridKeyword.m_grid[this->AxisIndex];
-				grid.Setup();
-				std::set<double> coordinates;
-				coordinates.insert(grid.coord, grid.coord + grid.count_coord);
-				TRACE("Removing %g from grid[%d]\n", grid.coord[this->PlaneIndex], this->AxisIndex);
-				VERIFY(coordinates.erase(grid.coord[this->PlaneIndex]) == 1);
-				if (coordinates.size() > 1)
+				//{{
+				if (this->m_gridKeyword.m_grid[this->AxisIndex].count_coord > 2)
 				{
-					this->m_gridKeyword.m_grid[this->AxisIndex].insert(coordinates.begin(), coordinates.end());
-					this->Setup(this->m_units);
-					this->Insert(this->m_node);
-					this->PlaneWidget->Off();
+					this->PlaneIndex = i->second;
+					VERIFY(this->DeleteLine(this->AxisIndex, this->PlaneIndex));
+
+					// notify listeners
+					//
+					this->InvokeEvent(CGridLODActor::DeleteGridLineEvent, &this->m_dDeletedValue);
 				}
 				else
 				{
 					::AfxMessageBox("There must be at least two nodes in each coordinate direction.");
 				}
+				//}}
+// COMMENT: {8/5/2005 4:27:08 PM}				this->PlaneIndex = i->second;
+// COMMENT: {8/5/2005 4:27:08 PM}
+// COMMENT: {8/5/2005 4:27:08 PM}				CGrid grid = this->m_gridKeyword.m_grid[this->AxisIndex];
+// COMMENT: {8/5/2005 4:27:08 PM}				grid.Setup();
+// COMMENT: {8/5/2005 4:27:08 PM}				std::set<double> coordinates;
+// COMMENT: {8/5/2005 4:27:08 PM}				coordinates.insert(grid.coord, grid.coord + grid.count_coord);
+// COMMENT: {8/5/2005 4:27:08 PM}				TRACE("Removing %g from grid[%d]\n", grid.coord[this->PlaneIndex], this->AxisIndex);
+// COMMENT: {8/5/2005 4:27:08 PM}				VERIFY(coordinates.erase(grid.coord[this->PlaneIndex]) == 1);
+// COMMENT: {8/5/2005 4:27:08 PM}				if (coordinates.size() > 1)
+// COMMENT: {8/5/2005 4:27:08 PM}				{
+// COMMENT: {8/5/2005 4:27:08 PM}					this->m_gridKeyword.m_grid[this->AxisIndex].insert(coordinates.begin(), coordinates.end());
+// COMMENT: {8/5/2005 4:27:08 PM}					this->Setup(this->m_units);
+// COMMENT: {8/5/2005 4:27:08 PM}					this->Insert(this->m_node);
+// COMMENT: {8/5/2005 4:27:08 PM}					this->PlaneWidget->Off();
+// COMMENT: {8/5/2005 4:27:08 PM}					// notify
+// COMMENT: {8/5/2005 4:27:08 PM}					this->InvokeEvent(CGridLODActor::DeleteGridLineEvent, NULL);
+// COMMENT: {8/5/2005 4:27:08 PM}				}
+// COMMENT: {8/5/2005 4:27:08 PM}				else
+// COMMENT: {8/5/2005 4:27:08 PM}				{
+// COMMENT: {8/5/2005 4:27:08 PM}				}
 				this->State = CGridLODActor::Start;
 			}
 		}
@@ -1163,3 +1147,40 @@ BOOL CGridLODActor::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 	return FALSE;
 }
 #endif
+
+BOOL CGridLODActor::DeleteLine(int nAxisIndex, int nPlaneIndex)
+{
+	CGrid grid = this->m_gridKeyword.m_grid[nAxisIndex];
+	if ( (grid.count_coord > 2) && (0 <= nPlaneIndex) && (nPlaneIndex < grid.count_coord) )
+	{
+		// expand uniform grids
+		grid.Setup();
+
+		// store coordinates
+		std::set<double> coordinates;
+		coordinates.insert(grid.coord, grid.coord + grid.count_coord);
+
+		this->m_dDeletedValue = grid.coord[nPlaneIndex];
+		TRACE("CGridLODActor::DeleteLine %d = %g from grid[%d]\n", nPlaneIndex, this->m_dDeletedValue, nAxisIndex);
+
+		// remove coordinate
+		VERIFY(coordinates.erase(grid.coord[nPlaneIndex]) == 1);
+
+		// insert new coordinates
+		this->m_gridKeyword.m_grid[nAxisIndex].insert(coordinates.begin(), coordinates.end());
+
+		// update grid data
+		this->Setup(this->m_units);
+
+		// update tree
+		this->Insert(this->m_node);
+
+		// turn off widget
+		if (this->PlaneWidget) this->PlaneWidget->Off();
+
+		return TRUE; // success
+	}
+
+	TRACE("CGridLODActor::DeleteLine: Bad Plane Index => %d for grid[%d]\n", nPlaneIndex, nAxisIndex);
+	return FALSE; // failure
+}

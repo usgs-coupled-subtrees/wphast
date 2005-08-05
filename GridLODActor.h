@@ -28,6 +28,16 @@ public:
 
 	static CGridLODActor *New();
 
+	enum EventIds {
+		StartDragLineEvent = vtkCommand::UserEvent + 600,
+		DraggingLineEvent,
+		EndMoveLineEvent,
+		EndCopyLineEvent,
+		InsertGridLineEvent,
+		DeleteGridLineEvent,
+	};
+
+
 	void SetGrid(const CGrid& x, const CGrid& y, const CGrid& z, const CUnits& units);
 	void GetGrid(CGrid& x, CGrid& y, CGrid& z)const;
 
@@ -56,6 +66,8 @@ public:
 
 	void GetGridKeyword(CGridKeyword& gridKeyword)const;
 	void SetGridKeyword(const CGridKeyword& gridKeyword, const CUnits& units);
+
+	BOOL DeleteLine(int nAxisIndex, int nPlaneIndex);
 
 	void Serialize(bool bStoring, hid_t loc_id);
 
@@ -141,6 +153,8 @@ protected:
 
 	float               m_min[3];
 	float               m_max[3];
+
+	double              m_dDeletedValue;
 
 private:
   CGridLODActor(const CGridLODActor&);  // Not implemented.

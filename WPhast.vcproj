@@ -517,6 +517,9 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="GridDeleteLineAction.cpp">
+			</File>
+			<File
 				RelativePath="GridElt.cpp">
 			</File>
 			<File
@@ -1032,6 +1035,9 @@
 			</File>
 			<File
 				RelativePath="Grid.h">
+			</File>
+			<File
+				RelativePath="GridDeleteLineAction.h">
 			</File>
 			<File
 				RelativePath="GridElt.h">
@@ -3755,15 +3761,15 @@
 			Name="Build Logs"
 			Filter="">
 			<File
-				RelativePath="Debug\BuildLog.htm"
-				DeploymentContent="TRUE">
-			</File>
-			<File
 				RelativePath="Release\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 			<File
 				RelativePath="cppunit\BuildLog.htm"
+				DeploymentContent="TRUE">
+			</File>
+			<File
+				RelativePath="Debug\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 		</Filter>

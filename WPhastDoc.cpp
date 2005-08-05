@@ -66,6 +66,7 @@
 #include "RiverCreateAction.h"
 #include "RiverMovePointAction.h"
 #include "RiverInsertPointAction.h"
+#include "GridDeleteLineAction.h"
 
 #include "Unit.h"
 #include "Units.h"
@@ -210,6 +211,7 @@ CWPhastDoc::CWPhastDoc()
 , m_pPropAssemblyWells(0)
 , m_pPropAssemblyRivers(0)
 , RiverCallbackCommand(0)
+, GridCallbackCommand(0)
 , RiverMovePointAction(0)
 , m_pGridSheet(0)
 , m_pGridPage(0)
@@ -280,6 +282,12 @@ CWPhastDoc::CWPhastDoc()
 	this->RiverCallbackCommand = vtkCallbackCommand::New();
 	this->RiverCallbackCommand->SetClientData(this);
 	this->RiverCallbackCommand->SetCallback(CWPhastDoc::RiverListener);
+
+	// grid event listener
+	//
+	this->GridCallbackCommand = vtkCallbackCommand::New();
+	this->GridCallbackCommand->SetClientData(this);
+	this->GridCallbackCommand->SetCallback(CWPhastDoc::GridListener);
 }
 
 #define CLEANUP_ASSEMBLY_MACRO(PTR_ASSEMBLY) \
@@ -367,6 +375,10 @@ CWPhastDoc::~CWPhastDoc()
 	if (this->RiverCallbackCommand)
 	{
 		this->RiverCallbackCommand->Delete();
+	}
+	if (this->GridCallbackCommand)
+	{
+		this->GridCallbackCommand->Delete();
 	}
 
 	// Grid
@@ -1554,6 +1566,7 @@ void CWPhastDoc::DeleteContents()
 		this->m_pGridLODActor->Delete();
 	}
 	this->m_pGridLODActor = CGridLODActor::New();
+	this->m_pGridLODActor->AddObserver(CGridLODActor::DeleteGridLineEvent, this->GridCallbackCommand);
 	this->m_pGridLODActor->GetProperty()->SetColor(1.0, 0.8, 0.6);
 	//}}
 	ASSERT(this->m_pGridLODActor);
@@ -1980,101 +1993,17 @@ void CWPhastDoc::ResizeGrid(const CGrid& x, const CGrid&  y, const CGrid&  z)
 		pTree->SetGridLODActor(this->m_pGridLODActor);
 	}
 
-	// reset the axes
+	// Update default zones etc.
 	//
-	vtkFloatingPointType bounds[6];
-	this->m_pGridLODActor->GetBounds(bounds);
-	float defaultAxesSize = (bounds[1]-bounds[0] + bounds[3]-bounds[2] + bounds[5]-bounds[4])/12;
-	this->m_pAxesActor->SetDefaultPositions(bounds);
-	this->m_pAxesActor->SetDefaultSize(defaultAxesSize);
-	this->m_pAxesActor->SetDefaultTubeDiameter(defaultAxesSize * 0.1);
-
-	// update default zones
-	//
-	if (vtkPropCollection* pCollection = this->GetPropCollection())
-	{
-		CZone bounds;
-		this->m_pGridLODActor->GetDefaultZone(bounds);
-		pCollection->InitTraversal();
-		for (int i = 0; i < pCollection->GetNumberOfItems(); ++i)
-		{
-			vtkProp* prop = pCollection->GetNextProp();
-			if (vtkPropAssembly *pPropAssembly = vtkPropAssembly::SafeDownCast(prop))
-			{
-				if (vtkPropCollection *pPropCollection = pPropAssembly->GetParts())
-				{
-					pPropCollection->InitTraversal();
-					for (int i = 0; i < pPropCollection->GetNumberOfItems(); ++i)
-					{
-						vtkProp* prop = pPropCollection->GetNextProp();
-						if (CZoneActor *pZone = CZoneActor::SafeDownCast(prop))
-						{
-							if (pZone->GetDefault())
-							{
-								pZone->SetBounds(bounds, *this->m_pUnits);
-							}
-						}
-					}
-				}
-			}
-			if (CZoneActor *pZone = CZoneActor::SafeDownCast(prop))
-			{
-				if (pZone->GetDefault())
-				{
-					pZone->SetBounds(bounds, *this->m_pUnits);
-				}
-			}
-		}
-	}
-
-#ifdef SAVE_2003_10_24_2030
-	// This used to resize the highlight box and BoxWidget if 
-	// the current zone was a default zone.  Since default zones
-	// are no longer pickable this code has become obsolete.
-	//
-	// Note. That this code caused an exception in Release builds.
-	// To reproduce:
-	// 1. New... (accept all defaults)
-	// 2. create a zone
-	// 3. double-click on grid in tree (Press OK or Apply)
-	// This problem didn't occur when debugging the Release
-	// build but did occur when 'Start Without Debugging'
-	// and attaching to the process Debug->Processes...
-
-	// for all views
-	//
-	POSITION pos = this->GetFirstViewPosition();
-	while (pos != NULL) {
-		CWPhastView *pView = (CWPhastView*) GetNextView(pos);
-
-		// resize the selection bounding box
-		//
-		if (vtkAbstractPropPicker *picker = vtkAbstractPropPicker::SafeDownCast( pView->GetRenderWindowInteractor()->GetPicker() )) {
-			if (vtkProp3D* prop = picker->GetProp3D()) {
-				if (CZoneActor *pZone = CZoneActor::SafeDownCast(prop)) {
-					pZone->Pick(pView->GetRenderer(), pView->GetRenderWindowInteractor());
-				}
-			}
-		}
-
-		// resize the Box Widget
-		//
-		if (pView->GetBoxWidget()->GetProp3D()) {
-			pView->GetBoxWidget()->PlaceWidget();
-		}
-	}
-#endif
-
-
-	// refresh screen
-	//
-	this->UpdateAllViews(0);
+	this->UpdateGridDomain();
 }
 
 
 void CWPhastDoc::AddDefaultZone(CZone* pZone)
 {
-	if (pZone) {
+	// TODO : Is this still used?
+	if (pZone)
+	{
 		this->m_pimpl->m_vectorDefaultZones.push_back(pZone);
 	}
 }
@@ -2091,7 +2020,8 @@ void CWPhastDoc::GetScale(vtkFloatingPointType data[3])
 
 vtkFloatingPointType* CWPhastDoc::GetGridBounds()
 {
-	if (this->m_pGridLODActor) {
+	if (this->m_pGridLODActor)
+	{
 		return this->m_pGridLODActor->GetBounds();
 	}
 	ASSERT(FALSE);
@@ -4551,10 +4481,10 @@ void CWPhastDoc::Add(CRiverActor *pRiverActor)
 
 	// add listeners
 	//
-	pRiverActor->AddObserver(CRiverActor::StartMovePointEvent, RiverCallbackCommand);
-	pRiverActor->AddObserver(CRiverActor::MovingPointEvent, RiverCallbackCommand);
-	pRiverActor->AddObserver(CRiverActor::EndMovePointEvent, RiverCallbackCommand);
-	pRiverActor->AddObserver(CRiverActor::InsertPointEvent, RiverCallbackCommand);	
+	pRiverActor->AddObserver(CRiverActor::StartMovePointEvent, this->RiverCallbackCommand);
+	pRiverActor->AddObserver(CRiverActor::MovingPointEvent,    this->RiverCallbackCommand);
+	pRiverActor->AddObserver(CRiverActor::EndMovePointEvent,   this->RiverCallbackCommand);
+	pRiverActor->AddObserver(CRiverActor::InsertPointEvent,    this->RiverCallbackCommand);	
 
 	// render
 	//
@@ -4775,4 +4705,135 @@ void CWPhastDoc::Update(IObserver* pSender, LPARAM lHint, CObject* pHint, vtkObj
 vtkActor* CWPhastDoc::GetGridActor(void)
 {
 	return this->m_pGridLODActor;
+}
+
+void CWPhastDoc::GridListener(vtkObject* caller, unsigned long eid, void* clientdata, void *calldata)
+{
+	ASSERT(caller->IsA("CGridLODActor"));
+	ASSERT(clientdata);
+
+	if (CGridLODActor* grid = CGridLODActor::SafeDownCast(caller))
+	{
+		CWPhastDoc* self = reinterpret_cast<CWPhastDoc*>(clientdata);
+		switch (eid)
+		{
+		case CGridLODActor::DeleteGridLineEvent:
+			{
+				int axis =  grid->GetAxisIndex();
+				int index =  grid->GetPlaneIndex();
+				double value = *(double*)calldata;
+				CGridDeleteLineAction* pGridDeleteLineAction = new CGridDeleteLineAction(grid, self, axis, index, value, true);
+				self->Execute(pGridDeleteLineAction);
+			}
+			break;
+		}
+	}
+}
+
+void CWPhastDoc::UpdateGridDomain(void)
+{
+	// get scale
+	//
+	vtkFloatingPointType *scale = this->GetScale();
+
+	// get bounds
+	//
+	vtkFloatingPointType bounds[6];
+	this->m_pGridLODActor->GetBounds(bounds);
+	float defaultAxesSize = (bounds[1]-bounds[0] + bounds[3]-bounds[2] + bounds[5]-bounds[4])/12;
+
+	// reset the axes
+	//
+	this->m_pAxesActor->SetDefaultPositions(bounds);
+	this->m_pAxesActor->SetDefaultSize(defaultAxesSize);
+	this->m_pAxesActor->SetDefaultTubeDiameter(defaultAxesSize * 0.1);
+
+	// update default zones
+	//
+	if (vtkPropCollection* pCollection = this->GetPropCollection())
+	{
+		CZone bounds;
+		this->m_pGridLODActor->GetDefaultZone(bounds);
+		pCollection->InitTraversal();
+		for (int i = 0; i < pCollection->GetNumberOfItems(); ++i)
+		{
+			vtkProp* prop = pCollection->GetNextProp();
+			if (vtkPropAssembly *pPropAssembly = vtkPropAssembly::SafeDownCast(prop))
+			{
+				if (vtkPropCollection *pPropCollection = pPropAssembly->GetParts())
+				{
+					pPropCollection->InitTraversal();
+					for (int i = 0; i < pPropCollection->GetNumberOfItems(); ++i)
+					{
+						vtkProp* prop = pPropCollection->GetNextProp();
+						if (CZoneActor *pZone = CZoneActor::SafeDownCast(prop))
+						{
+							if (pZone->GetDefault())
+							{
+								pZone->SetBounds(bounds, this->GetUnits());
+							}
+						}
+					}
+				}
+			}
+			if (CZoneActor *pZone = CZoneActor::SafeDownCast(prop))
+			{
+				if (pZone->GetDefault())
+				{
+					pZone->SetBounds(bounds, this->GetUnits());
+				}
+			}
+		}
+	}
+
+	// update rivers
+	//
+	if (vtkPropAssembly *pPropAssembly = this->GetPropAssemblyRivers())
+	{
+		if (vtkPropCollection *pPropCollection = pPropAssembly->GetParts())
+		{
+			vtkProp *pProp;
+			pPropCollection->InitTraversal();
+			for (; (pProp = pPropCollection->GetNextProp()); )
+			{
+				if (CRiverActor* pRiverActor = CRiverActor::SafeDownCast(pProp))
+				{
+					// update radius
+					//
+					pRiverActor->ScaleFromBounds(this->GetGridBounds());
+				}
+			}
+		}
+	}
+
+	// update wells
+	//
+	if (vtkPropAssembly *pPropAssembly = this->GetPropAssemblyWells())
+	{
+		CGrid xyz[3];
+		this->GetGrid(xyz[0], xyz[1], xyz[2]);
+		if (vtkPropCollection *pPropCollection = pPropAssembly->GetParts())
+		{
+			vtkProp *pProp;
+			pPropCollection->InitTraversal();
+			for (; (pProp = pPropCollection->GetNextProp()); )
+			{
+				if (CWellActor* pWellActor = CWellActor::SafeDownCast(pProp))
+				{
+					// update height
+					//
+					pWellActor->SetZAxis(xyz[2], this->GetUnits());
+
+					// update radius
+					//
+					pWellActor->SetDefaultTubeDiameter(defaultAxesSize * 0.17 / sqrt(scale[0] * scale[1]));
+				}
+			}
+		}
+	}
+
+
+	// refresh screen
+	//
+	this->UpdateAllViews(0);
 }
