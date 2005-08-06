@@ -37,7 +37,6 @@ public:
 		DeleteGridLineEvent,
 	};
 
-
 	void SetGrid(const CGrid& x, const CGrid& y, const CGrid& z, const CUnits& units);
 	void GetGrid(CGrid& x, CGrid& y, CGrid& z)const;
 
@@ -68,6 +67,7 @@ public:
 	void SetGridKeyword(const CGridKeyword& gridKeyword, const CUnits& units);
 
 	BOOL DeleteLine(int nAxisIndex, int nPlaneIndex);
+	int InsertLine(int nAxisIndex, double dValue);
 
 	void Serialize(bool bStoring, hid_t loc_id);
 

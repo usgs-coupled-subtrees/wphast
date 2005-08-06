@@ -24,7 +24,7 @@ void CGridDeleteLineAction::Execute()
 {
 	if (!this->m_bSkipFirstExecute)
 	{
-		this->m_pGridLODActor->DeleteLine(this->m_nGridIndex, this->m_nPlaneIndex);
+		VERIFY(this->m_pGridLODActor->DeleteLine(this->m_nGridIndex, this->m_nPlaneIndex));
 	}
 	this->m_bSkipFirstExecute = false;
 
@@ -35,7 +35,6 @@ void CGridDeleteLineAction::Execute()
 
 void CGridDeleteLineAction::UnExecute()
 {
-	// void CGridLODActor::InsertLine(int nGridIndex, double dValue);
-	//this->m_pGridLODActor->InsertLine(this->m_nGridIndex, this->m_dValue);
+	VERIFY(this->m_pGridLODActor->InsertLine(this->m_nGridIndex, this->m_dValue));
 	this->m_pWPhastDoc->UpdateGridDomain();
 }
