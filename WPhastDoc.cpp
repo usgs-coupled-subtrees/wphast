@@ -4739,8 +4739,6 @@ void CWPhastDoc::GridListener(vtkObject* caller, unsigned long eid, void* client
 			break;
 		case CGridLODActor::MoveGridLineEvent:
 			{
-				//int axis =  grid->GetAxisIndex();
-				//int index =  grid->GetPlaneIndex();
 				GridLineMoveMemento memento = *(GridLineMoveMemento*)calldata;
 				CGridMoveLineAction* pGridMoveLineAction = new CGridMoveLineAction(grid, self, memento, true);
 				self->Execute(pGridMoveLineAction);

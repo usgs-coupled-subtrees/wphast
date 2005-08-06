@@ -9,7 +9,6 @@ class CGridLODActor;
 class CGridMoveLineAction : public CAction
 {
 public:
-	// CGridMoveLineAction(CGridLODActor *pGridLODActor, CWPhastDoc *pWPhastDoc, int nGridIndex, int nPlaneIndex, double dValue, bool bSkipFirstExecute = false);
 	CGridMoveLineAction(CGridLODActor *pGridLODActor, CWPhastDoc *pWPhastDoc, GridLineMoveMemento memento, bool bSkipFirstExecute = false);
 	~CGridMoveLineAction(void);
 	virtual void Execute();
