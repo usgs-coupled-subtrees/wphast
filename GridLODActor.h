@@ -29,12 +29,9 @@ public:
 	static CGridLODActor *New();
 
 	enum EventIds {
-		StartDragLineEvent = vtkCommand::UserEvent + 600,
-		DraggingLineEvent,
-		EndMoveLineEvent,
-		EndCopyLineEvent,
+		DeleteGridLineEvent = vtkCommand::UserEvent + 600,
 		InsertGridLineEvent,
-		DeleteGridLineEvent,
+		MoveGridLineEvent,
 	};
 
 	void SetGrid(const CGrid& x, const CGrid& y, const CGrid& z, const CUnits& units);
@@ -60,8 +57,9 @@ public:
 		this->m_gridKeyword.m_axes[2] = axes[2];
 	};
 
-	int GetAxisIndex(void) { return AxisIndex; }
-	int GetPlaneIndex(void) { return PlaneIndex; }
+	int GetAxisIndex(void)           { return AxisIndex; }
+	int GetPlaneIndex(void)          { return PlaneIndex; }
+	double GetLastDeletedValue(void) { return m_dDeletedValue; }
 
 	void GetGridKeyword(CGridKeyword& gridKeyword)const;
 	void SetGridKeyword(const CGridKeyword& gridKeyword, const CUnits& units);
@@ -85,6 +83,9 @@ public:
 	void OnLeftButtonDown(void);
 	void OnLeftButtonUp(void);
 	void OnKeyPress(void);
+	void OnInteraction(void);
+	void OnEndInteraction(void);
+
 
 #if defined(WIN32)
 	BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);

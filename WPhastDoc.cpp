@@ -67,6 +67,8 @@
 #include "RiverMovePointAction.h"
 #include "RiverInsertPointAction.h"
 #include "GridDeleteLineAction.h"
+#include "GridInsertLineAction.h"
+#include "GridMoveLineAction.h"
 
 #include "Unit.h"
 #include "Units.h"
@@ -1558,7 +1560,6 @@ void CWPhastDoc::DeleteContents()
 		this->m_pimpl->m_lastSaveIndex = -1;
 	}
 
-	//{{
 	// create the grid
 	//
 	if (this->m_pGridLODActor)
@@ -1566,12 +1567,13 @@ void CWPhastDoc::DeleteContents()
 		this->m_pGridLODActor->Delete();
 	}
 	this->m_pGridLODActor = CGridLODActor::New();
-	this->m_pGridLODActor->AddObserver(CGridLODActor::DeleteGridLineEvent, this->GridCallbackCommand);
-	this->m_pGridLODActor->GetProperty()->SetColor(1.0, 0.8, 0.6);
-	//}}
 	ASSERT(this->m_pGridLODActor);
+	this->m_pGridLODActor->AddObserver(CGridLODActor::DeleteGridLineEvent, this->GridCallbackCommand);
+	this->m_pGridLODActor->AddObserver(CGridLODActor::InsertGridLineEvent, this->GridCallbackCommand);
+	this->m_pGridLODActor->AddObserver(CGridLODActor::MoveGridLineEvent,   this->GridCallbackCommand);
+	this->m_pGridLODActor->GetProperty()->SetColor(1.0, 0.8, 0.6);
 	this->m_pGridLODActor->SetScale(1, 1, 1);
-
+	this->m_pGridLODActor->SetPickable(0);
 
 	// update views
 	//
@@ -4724,6 +4726,24 @@ void CWPhastDoc::GridListener(vtkObject* caller, unsigned long eid, void* client
 				double value = *(double*)calldata;
 				CGridDeleteLineAction* pGridDeleteLineAction = new CGridDeleteLineAction(grid, self, axis, index, value, true);
 				self->Execute(pGridDeleteLineAction);
+			}
+			break;
+		case CGridLODActor::InsertGridLineEvent:
+			{
+				int axis =  grid->GetAxisIndex();
+				int index =  grid->GetPlaneIndex();
+				double value = *(double*)calldata;
+				CGridInsertLineAction* pGridInsertLineAction = new CGridInsertLineAction(grid, self, axis, index, value, true);
+				self->Execute(pGridInsertLineAction);
+			}
+			break;
+		case CGridLODActor::MoveGridLineEvent:
+			{
+				//int axis =  grid->GetAxisIndex();
+				//int index =  grid->GetPlaneIndex();
+				GridLineMoveMemento memento = *(GridLineMoveMemento*)calldata;
+				CGridMoveLineAction* pGridMoveLineAction = new CGridMoveLineAction(grid, self, memento, true);
+				self->Execute(pGridMoveLineAction);
 			}
 			break;
 		}

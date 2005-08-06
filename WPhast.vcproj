@@ -523,6 +523,9 @@
 				RelativePath="GridElt.cpp">
 			</File>
 			<File
+				RelativePath="GridInsertLineAction.cpp">
+			</File>
+			<File
 				RelativePath="GridKeyword.cpp">
 			</File>
 			<File
@@ -530,6 +533,9 @@
 			</File>
 			<File
 				RelativePath="GridLineWidget.cpp">
+			</File>
+			<File
+				RelativePath="GridMoveLineAction.cpp">
 			</File>
 			<File
 				RelativePath="GridPropertyPage.cpp">
@@ -1043,13 +1049,22 @@
 				RelativePath="GridElt.h">
 			</File>
 			<File
+				RelativePath="GridInsertLineAction.h">
+			</File>
+			<File
 				RelativePath="GridKeyword.h">
 			</File>
 			<File
 				RelativePath="GridLODActor.h">
 			</File>
 			<File
+				RelativePath="GridLineMoveMemento.h">
+			</File>
+			<File
 				RelativePath="GridLineWidget.h">
+			</File>
+			<File
+				RelativePath="GridMoveLineAction.h">
 			</File>
 			<File
 				RelativePath="GridPropertyPage.h">
@@ -3761,15 +3776,15 @@
 			Name="Build Logs"
 			Filter="">
 			<File
-				RelativePath="Release\BuildLog.htm"
-				DeploymentContent="TRUE">
-			</File>
-			<File
 				RelativePath="cppunit\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 			<File
 				RelativePath="Debug\BuildLog.htm"
+				DeploymentContent="TRUE">
+			</File>
+			<File
+				RelativePath="Release\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 		</Filter>

@@ -5,11 +5,11 @@
 class CWPhastDoc;
 class CGridLODActor;
 
-class CGridDeleteLineAction : public CAction
+class CGridInsertLineAction : public CAction
 {
 public:
-	CGridDeleteLineAction(CGridLODActor *pGridLODActor, CWPhastDoc *pWPhastDoc, int nGridIndex, int nPlaneIndex, double dValue, bool bSkipFirstExecute = false);
-	~CGridDeleteLineAction(void);
+	CGridInsertLineAction(CGridLODActor *pGridLODActor, CWPhastDoc *pWPhastDoc, int nGridIndex, int nPlaneIndex, double dValue, bool bSkipFirstExecute = false);
+	~CGridInsertLineAction(void);
 	virtual void Execute();
 	virtual void UnExecute();
 

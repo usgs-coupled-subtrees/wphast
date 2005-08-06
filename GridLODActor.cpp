@@ -22,6 +22,7 @@
 #include <vtkUnstructuredGrid.h>
 #include <vtkImplicitPlaneWidget.h>
 #include "GridLineWidget.h"
+#include "GridLineMoveMemento.h"
 
 #include "Global.h"
 #include "Units.h"
@@ -710,116 +711,13 @@ void CGridLODActor::ProcessEvents(vtkObject* object, unsigned long event, void* 
 		break;
 
 	case vtkCommand::InteractionEvent:
-		TRACE("InteractionEvent\n");
 		ASSERT(object == self->PlaneWidget);
-		self->State = CGridLODActor::Pushing;
-		//{{
-		extern HCURSOR Test();
-		if (s_hcur == 0)
-		{
-			s_hcur = Test();
-		}
-		if (s_hcur && (::GetAsyncKeyState(VK_CONTROL) < 0))
-		{
-			::SetCursor(s_hcur);
-		}
-		else
-		{
-			::SetCursor(::LoadCursor(NULL, IDC_ARROW));
-		}
-		//}}
+		self->OnInteraction();
 		break;
 
 	case vtkCommand::EndInteractionEvent:
-		TRACE("EndInteractionEvent\n");
 		ASSERT(object == self->PlaneWidget);
-		//{{
-		if (0 <= self->AxisIndex && self->AxisIndex < 3)
-		{
-			bool bCopying = (::GetAsyncKeyState(VK_CONTROL) < 0);
-			self->PlaneIndex = -1;
-			std::map<vtkFloatingPointType, int>::iterator i = self->ValueToIndex[self->AxisIndex].find(self->CurrentPoint[self->AxisIndex]);
-			if (i != self->ValueToIndex[self->AxisIndex].end())
-			{
-				self->PlaneIndex = i->second;
-				if (!bCopying)
-				{
-					VERIFY(self->DeleteLine(self->AxisIndex, self->PlaneIndex));
-				}
-				double value = self->PlaneWidget->GetOrigin()[self->AxisIndex] / self->GetScale()[self->AxisIndex];
-				int index = self->InsertLine(self->AxisIndex, value);
-				TRACE("Inserted line at %d\n", index);
-				VERIFY(index != -1);
-				if (!bCopying)
-				{
-					// notify listeners
-					self->PlaneIndex = index;
-					this->InvokeEvent(CGridLODActor::MoveGridLineEvent, &this->m_dDeletedValue);
-					// Need: AxisIndex PlaneIndex m_dDeletedValue
-				}
-				else
-				{
-					// Need: AxisIndex PlaneIndex m_dDeletedValue
-				}
-// COMMENT: {8/5/2005 9:45:08 PM}				self->Interactor->Render();
-// COMMENT: {8/5/2005 9:45:08 PM}				::Sleep(3000);
-// COMMENT: {8/5/2005 9:45:08 PM}				TRACE("Sleeping\n");
-// COMMENT: {8/5/2005 9:45:08 PM}				{
-// COMMENT: {8/5/2005 9:45:08 PM}					// Undo !
-// COMMENT: {8/5/2005 9:45:08 PM}					VERIFY(self->DeleteLine(self->AxisIndex, index));
-// COMMENT: {8/5/2005 9:45:08 PM}					if (!bCopying)
-// COMMENT: {8/5/2005 9:45:08 PM}					{
-// COMMENT: {8/5/2005 9:45:08 PM}						VERIFY(self->InsertLine(self->AxisIndex, dDeleted) != -1);
-// COMMENT: {8/5/2005 9:45:08 PM}					}
-// COMMENT: {8/5/2005 9:45:08 PM}					self->Interactor->Render();
-// COMMENT: {8/5/2005 9:45:08 PM}					::Sleep(3000);
-// COMMENT: {8/5/2005 9:45:08 PM}
-// COMMENT: {8/5/2005 9:45:08 PM}					// Redo !
-// COMMENT: {8/5/2005 9:45:08 PM}					if (!bCopying)
-// COMMENT: {8/5/2005 9:45:08 PM}					{
-// COMMENT: {8/5/2005 9:45:08 PM}						VERIFY(self->DeleteLine(self->AxisIndex, self->PlaneIndex));
-// COMMENT: {8/5/2005 9:45:08 PM}					}
-// COMMENT: {8/5/2005 9:45:08 PM}					index = self->InsertLine(self->AxisIndex, value);
-// COMMENT: {8/5/2005 9:45:08 PM}					self->Interactor->Render();
-// COMMENT: {8/5/2005 9:45:08 PM}				}
-			}
-		}
-		//}}
-// COMMENT: {8/5/2005 7:19:49 PM}		{
-// COMMENT: {8/5/2005 7:19:49 PM}			ASSERT(self->AxisIndex != -1);
-// COMMENT: {8/5/2005 7:19:49 PM}			self->PlaneIndex = -1;
-// COMMENT: {8/5/2005 7:19:49 PM}			std::map<vtkFloatingPointType, int>::iterator i = self->ValueToIndex[self->AxisIndex].find(self->CurrentPoint[self->AxisIndex]);
-// COMMENT: {8/5/2005 7:19:49 PM}			if (i != self->ValueToIndex[self->AxisIndex].end())
-// COMMENT: {8/5/2005 7:19:49 PM}			{
-// COMMENT: {8/5/2005 7:19:49 PM}				self->PlaneIndex = i->second;
-// COMMENT: {8/5/2005 7:19:49 PM}
-// COMMENT: {8/5/2005 7:19:49 PM}				CGrid grid = self->m_gridKeyword.m_grid[self->AxisIndex];
-// COMMENT: {8/5/2005 7:19:49 PM}				grid.Setup();
-// COMMENT: {8/5/2005 7:19:49 PM}				std::set<double> coordinates;
-// COMMENT: {8/5/2005 7:19:49 PM}				coordinates.insert(grid.coord, grid.coord + grid.count_coord);
-// COMMENT: {8/5/2005 7:19:49 PM}				double value = self->PlaneWidget->GetOrigin()[self->AxisIndex] / self->GetScale()[self->AxisIndex];
-// COMMENT: {8/5/2005 7:19:49 PM}				TRACE("Adding %g to grid[%d]\n", value, self->AxisIndex);
-// COMMENT: {8/5/2005 7:19:49 PM}				if (coordinates.insert(value).second)
-// COMMENT: {8/5/2005 7:19:49 PM}				{
-// COMMENT: {8/5/2005 7:19:49 PM}					if (!(::GetAsyncKeyState(VK_CONTROL) < 0))
-// COMMENT: {8/5/2005 7:19:49 PM}					{
-// COMMENT: {8/5/2005 7:19:49 PM}						TRACE("Removing %g from grid[%d]\n", grid.coord[self->PlaneIndex], self->AxisIndex);
-// COMMENT: {8/5/2005 7:19:49 PM}						VERIFY(coordinates.erase(grid.coord[self->PlaneIndex]) == 1);
-// COMMENT: {8/5/2005 7:19:49 PM}					}
-// COMMENT: {8/5/2005 7:19:49 PM}				}
-// COMMENT: {8/5/2005 7:19:49 PM}				self->m_gridKeyword.m_grid[self->AxisIndex].insert(coordinates.begin(), coordinates.end());
-// COMMENT: {8/5/2005 7:19:49 PM}				self->Setup(self->m_units);
-// COMMENT: {8/5/2005 7:19:49 PM}				self->Insert(self->m_node);
-// COMMENT: {8/5/2005 7:19:49 PM}				self->PlaneWidget->Off();
-// COMMENT: {8/5/2005 7:19:49 PM}			}
-// COMMENT: {8/5/2005 7:19:49 PM}			else
-// COMMENT: {8/5/2005 7:19:49 PM}			{
-// COMMENT: {8/5/2005 7:19:49 PM}				ASSERT(FALSE);
-// COMMENT: {8/5/2005 7:19:49 PM}			}
-// COMMENT: {8/5/2005 7:19:49 PM}		}
-		self->State = CGridLODActor::Start;
-		self->AxisIndex = -1;
-		::SetCursor(::LoadCursor(NULL, IDC_ARROW));
+		self->OnEndInteraction();
 		break;
 
 	case vtkCommand::StartInteractionEvent:
@@ -1105,6 +1003,119 @@ void CGridLODActor::OnKeyPress()
 			}
 		}
 	}
+}
+
+void CGridLODActor::OnInteraction(void)
+{
+	TRACE("CGridLODActor::OnInteraction\n");
+	// set state
+	this->State = CGridLODActor::Pushing;
+
+	// HACK {{
+	extern HCURSOR Test();
+	if (s_hcur == 0)
+	{
+		s_hcur = Test();
+	}
+	if (s_hcur && (::GetAsyncKeyState(VK_CONTROL) < 0))
+	{
+		::SetCursor(s_hcur);
+	}
+	else
+	{
+		::SetCursor(::LoadCursor(NULL, IDC_ARROW));
+	}
+	// HACK }}
+}
+
+void CGridLODActor::OnEndInteraction(void)
+{
+	if (0 <= this->AxisIndex && this->AxisIndex < 3)
+	{
+		// if Ctrl is pressed copy line otherwise move line
+		//
+		bool bMoving = !(::GetAsyncKeyState(VK_CONTROL) < 0);
+
+		// lookup current point and convert to grid index
+		//
+		std::map<vtkFloatingPointType, int>::iterator setIter = this->ValueToIndex[this->AxisIndex].find(this->CurrentPoint[this->AxisIndex]);
+		if (setIter != this->ValueToIndex[this->AxisIndex].end())
+		{
+			int originalPlaneIndex = setIter->second;
+			// be careful here the iterator setIter should not be used below here
+			// because DeleteLine/InsertLine refill ValueToIndex making the
+			// interator no longer valid
+			if (bMoving)
+			{
+				ASSERT(this->DeleteLine(this->AxisIndex, originalPlaneIndex));
+			}
+			double value = this->PlaneWidget->GetOrigin()[this->AxisIndex] / this->GetScale()[this->AxisIndex];
+			this->PlaneIndex = this->InsertLine(this->AxisIndex, value);
+			if (this->PlaneIndex != -1)
+			{
+				if (bMoving)
+				{
+					// the memento is the only information listeners
+					// need in order to undo/redo
+					struct GridLineMoveMemento memento;
+					memento.AxisIndex          = this->AxisIndex;
+					memento.OriginalPlaneIndex = originalPlaneIndex;
+					memento.NewPlaneIndex      = this->PlaneIndex;
+					memento.OriginalCoord      = this->m_dDeletedValue;
+					memento.NewCoord           = value;
+
+					// notify listeners
+					this->InvokeEvent(CGridLODActor::MoveGridLineEvent, &memento);
+				}
+				else
+				{
+					// at this point the variables:
+					//     AxisIndex
+					//     PlaneIndex
+					// should be valid for the use of the listeners use
+
+					// notify listeners
+					this->InvokeEvent(CGridLODActor::InsertGridLineEvent, &value);
+				}
+			}
+			else
+			{
+				// PlaneIndex well be -1 if the moved line lands exactly
+				// on an existing line.  Therefore this just becomes a deleted line.
+				this->PlaneIndex = originalPlaneIndex;
+
+				// notify listeners
+				this->InvokeEvent(CGridLODActor::DeleteGridLineEvent, &this->m_dDeletedValue);
+			}
+		}
+	}
+
+	// reset state
+	//
+	this->State = CGridLODActor::Start;
+	this->AxisIndex = -1;
+	this->PlaneIndex = -1;
+	::SetCursor(::LoadCursor(NULL, IDC_ARROW));
+//{{
+// COMMENT: {8/5/2005 9:45:08 PM}				{
+// COMMENT: {8/5/2005 9:45:08 PM}					// Undo !
+// COMMENT: {8/5/2005 9:45:08 PM}					VERIFY(self->DeleteLine(self->AxisIndex, index));
+// COMMENT: {8/5/2005 9:45:08 PM}					if (!bCopying)
+// COMMENT: {8/5/2005 9:45:08 PM}					{
+// COMMENT: {8/5/2005 9:45:08 PM}						VERIFY(self->InsertLine(self->AxisIndex, dDeleted) != -1);
+// COMMENT: {8/5/2005 9:45:08 PM}					}
+// COMMENT: {8/5/2005 9:45:08 PM}					self->Interactor->Render();
+// COMMENT: {8/5/2005 9:45:08 PM}					::Sleep(3000);
+// COMMENT: {8/5/2005 9:45:08 PM}
+// COMMENT: {8/5/2005 9:45:08 PM}					// Redo !
+// COMMENT: {8/5/2005 9:45:08 PM}					if (!bCopying)
+// COMMENT: {8/5/2005 9:45:08 PM}					{
+// COMMENT: {8/5/2005 9:45:08 PM}						VERIFY(self->DeleteLine(self->AxisIndex, self->PlaneIndex));
+// COMMENT: {8/5/2005 9:45:08 PM}					}
+// COMMENT: {8/5/2005 9:45:08 PM}					index = self->InsertLine(self->AxisIndex, value);
+// COMMENT: {8/5/2005 9:45:08 PM}					self->Interactor->Render();
+// COMMENT: {8/5/2005 9:45:08 PM}				}
+//}}
 }
 
 #if defined(WIN32)
