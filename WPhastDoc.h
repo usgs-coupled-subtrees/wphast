@@ -24,7 +24,7 @@ class vtkLODActor;
 
 class CZone;
 class CZoneLODActor;
-class CGridLODActor;
+class CGridActor;
 
 class CGrid;
 class CGridKeyword;
@@ -116,9 +116,9 @@ public:
 	void Delete(CZoneActor *pZoneActor);
 	void UnDelete(CZoneActor *pZoneActor);
 
-	void Edit(CGridLODActor* pGridLODActor);
+	void Edit(CGridActor* pGridActor);
 	void SetGridKeyword(const CGridKeyword& gridKeyword);
-	vtkActor* GetGridActor(void);
+	vtkProp3D* GetGridActor(void);
 
 	// Well actions
 	void Add(CWellActor *pWellActor);
@@ -199,7 +199,7 @@ protected:
 	vtkPropAssembly   *m_pPropAssemblyRivers;
 
 	// grid
-	CGridLODActor *m_pGridLODActor;
+	CGridActor *m_pGridActor;
 
 	// axes
 	CAxesActor *m_pAxesActor;

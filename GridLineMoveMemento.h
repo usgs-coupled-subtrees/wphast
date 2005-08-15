@@ -7,4 +7,5 @@ struct GridLineMoveMemento
 	int NewPlaneIndex;
 	double OriginalCoord;
 	double NewCoord;
+	int Uniform;
 };

@@ -2,10 +2,10 @@
 #include "GridInsertLineAction.h"
 
 #include "WPhastDoc.h"
-#include "GridLODActor.h"
+#include "GridActor.h"
 
-CGridInsertLineAction::CGridInsertLineAction(CGridLODActor *pGridLODActor, CWPhastDoc *pWPhastDoc, int nGridIndex, int nPlaneIndex, double dValue, bool bSkipFirstExecute)
-: m_pGridLODActor(pGridLODActor)
+CGridInsertLineAction::CGridInsertLineAction(CGridActor *pGridActor, CWPhastDoc *pWPhastDoc, int nGridIndex, int nPlaneIndex, double dValue, bool bSkipFirstExecute)
+: m_pGridActor(pGridActor)
 , m_pWPhastDoc(pWPhastDoc)
 , m_nGridIndex(nGridIndex)
 , m_nPlaneIndex(nPlaneIndex)
@@ -13,7 +13,7 @@ CGridInsertLineAction::CGridInsertLineAction(CGridLODActor *pGridLODActor, CWPha
 , m_bSkipFirstExecute(bSkipFirstExecute)
 {
 	ASSERT(this->m_bSkipFirstExecute || this->m_nPlaneIndex != -1);
-	ASSERT(this->m_pGridLODActor && this->m_pGridLODActor->IsA("CGridLODActor"));
+	ASSERT(this->m_pGridActor && this->m_pGridActor->IsA("CGridActor"));
 }
 
 CGridInsertLineAction::~CGridInsertLineAction(void)
@@ -24,7 +24,7 @@ void CGridInsertLineAction::Execute()
 {
 	if (!this->m_bSkipFirstExecute)
 	{
-		this->m_nPlaneIndex = this->m_pGridLODActor->InsertLine(this->m_nGridIndex, this->m_dValue);
+		this->m_nPlaneIndex = this->m_pGridActor->InsertLine(this->m_nGridIndex, this->m_dValue);
 		ASSERT(this->m_nPlaneIndex != -1);
 	}
 	this->m_bSkipFirstExecute = false;
@@ -37,6 +37,6 @@ void CGridInsertLineAction::Execute()
 void CGridInsertLineAction::UnExecute()
 {
 	ASSERT(this->m_nPlaneIndex != -1);
-	VERIFY(this->m_pGridLODActor->DeleteLine(this->m_nGridIndex, this->m_nPlaneIndex));
+	VERIFY(this->m_pGridActor->DeleteLine(this->m_nGridIndex, this->m_nPlaneIndex));
 	this->m_pWPhastDoc->UpdateGridDomain();
 }

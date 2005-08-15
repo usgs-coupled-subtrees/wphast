@@ -38,7 +38,7 @@
 #include "DelayRedraw.h"
 
 ////#include "ZoneLODActor.h"
-#include "GridLODActor.h"
+#include "GridActor.h"
 #include "AxesActor.h"
 #include "Global.h"
 
@@ -199,7 +199,7 @@ CWPhastDoc::CWPhastDoc()
 : m_pimpl(0)
 , m_pPropCollection(0)
 , m_pRemovedPropCollection(0)
-, m_pGridLODActor(0)
+, m_pGridActor(0)
 , m_pAxesActor(0)
 , m_pGeometrySheet(0)
 , m_pScalePage(0)
@@ -231,9 +231,9 @@ CWPhastDoc::CWPhastDoc()
 
 // COMMENT: {7/28/2005 2:48:16 PM}	// create the grid
 // COMMENT: {7/28/2005 2:48:16 PM}	//
-// COMMENT: {7/28/2005 2:48:16 PM}	ASSERT(this->m_pGridLODActor == 0);
-// COMMENT: {7/28/2005 2:48:16 PM}	this->m_pGridLODActor = CGridLODActor::New();
-// COMMENT: {7/28/2005 2:48:16 PM}	this->m_pGridLODActor->GetProperty()->SetColor(1.0, 0.8, 0.6);
+// COMMENT: {7/28/2005 2:48:16 PM}	ASSERT(this->m_pGridActor == 0);
+// COMMENT: {7/28/2005 2:48:16 PM}	this->m_pGridActor = CGridActor::New();
+// COMMENT: {7/28/2005 2:48:16 PM}	this->m_pGridActor->GetProperty()->SetColor(1.0, 0.8, 0.6);
 
 	// create the prop list
 	//
@@ -339,11 +339,11 @@ CWPhastDoc::~CWPhastDoc()
 		this->m_pRemovedPropCollection = 0;
 	}
 
- 	ASSERT(this->m_pGridLODActor);
-	if (this->m_pGridLODActor)
+ 	ASSERT(this->m_pGridActor);
+	if (this->m_pGridActor)
 	{
-		this->m_pGridLODActor->Delete();
-		this->m_pGridLODActor = 0;
+		this->m_pGridActor->Delete();
+		this->m_pGridActor = 0;
 	}
 
 	CLEANUP_ASSEMBLY_MACRO(this->m_pPropAssemblyMedia);
@@ -453,7 +453,7 @@ void CWPhastDoc::Serialize(CArchive& ar)
 			this->m_pUnits->Serialize(bStoring, wphast_id);
 
 			// store grid
-			this->m_pGridLODActor->Serialize(bStoring, wphast_id);
+			this->m_pGridActor->Serialize(bStoring, wphast_id);
 
 			// store axes
 			//this->m_pAxesActor->Serialize(bStoring, wphast_id);  // not implemented
@@ -544,11 +544,11 @@ void CWPhastDoc::Serialize(CArchive& ar)
 			}
 
 			// load grid
-			this->m_pGridLODActor->Serialize(bStoring, wphast_id);
+			this->m_pGridActor->Serialize(bStoring, wphast_id);
 
 			// set grid
 			CGrid x, y, z;
-			this->m_pGridLODActor->GetGrid(x, y, z);
+			this->m_pGridActor->GetGrid(x, y, z);
 			this->ResizeGrid(x, y, z);
 
 			// load axes
@@ -609,7 +609,7 @@ void CWPhastDoc::Serialize(CArchive& ar)
 		}
 
 		// set scale for all zones, wells ...
-		vtkFloatingPointType* scale = this->m_pGridLODActor->GetScale();
+		vtkFloatingPointType* scale = this->m_pGridActor->GetScale();
 		this->SetScale(scale[0], scale[1], scale[2]);
 
 		// TODO: eventually the camera position will be stored in the HDF file
@@ -1368,7 +1368,7 @@ void CWPhastDoc::AssertValid() const
 	CDocument::AssertValid();
 	ASSERT(this->m_pAxesActor != 0);
 // COMMENT: {7/15/2004 1:15:38 PM}	ASSERT(this->m_pGeometrySheet != 0);
-// COMMENT: {7/28/2005 2:55:59 PM}	ASSERT(this->m_pGridLODActor != 0);
+// COMMENT: {7/28/2005 2:55:59 PM}	ASSERT(this->m_pGridActor != 0);
 	ASSERT(this->m_pimpl != 0);
 	ASSERT(this->m_pPropCollection != 0);
 	ASSERT(this->m_pRemovedPropCollection != 0);
@@ -1462,9 +1462,9 @@ void CWPhastDoc::InitDocument()
 
 	////// create the grid
 	//////
-	////ASSERT(this->m_pGridLODActor == 0);
-	////this->m_pGridLODActor = CGridLODActor::New();
-	////this->m_pGridLODActor->GetProperty()->SetColor(1.0, 0.8, 0.6);
+	////ASSERT(this->m_pGridActor == 0);
+	////this->m_pGridActor = CGridActor::New();
+	////this->m_pGridActor->GetProperty()->SetColor(1.0, 0.8, 0.6);
 
 	//////// create the axes
 	////////
@@ -1562,18 +1562,22 @@ void CWPhastDoc::DeleteContents()
 
 	// create the grid
 	//
-	if (this->m_pGridLODActor)
+	if (this->m_pGridActor)
 	{
-		this->m_pGridLODActor->Delete();
+		if (this->m_pGridActor->GetEnabled())
+		{
+			this->m_pGridActor->SetEnabled(0);
+		}
+		this->m_pGridActor->Delete();
 	}
-	this->m_pGridLODActor = CGridLODActor::New();
-	ASSERT(this->m_pGridLODActor);
-	this->m_pGridLODActor->AddObserver(CGridLODActor::DeleteGridLineEvent, this->GridCallbackCommand);
-	this->m_pGridLODActor->AddObserver(CGridLODActor::InsertGridLineEvent, this->GridCallbackCommand);
-	this->m_pGridLODActor->AddObserver(CGridLODActor::MoveGridLineEvent,   this->GridCallbackCommand);
-	this->m_pGridLODActor->GetProperty()->SetColor(1.0, 0.8, 0.6);
-	this->m_pGridLODActor->SetScale(1, 1, 1);
-	this->m_pGridLODActor->SetPickable(0);
+	this->m_pGridActor = CGridActor::New();
+	ASSERT(this->m_pGridActor);
+	this->m_pGridActor->AddObserver(CGridActor::DeleteGridLineEvent, this->GridCallbackCommand);
+	this->m_pGridActor->AddObserver(CGridActor::InsertGridLineEvent, this->GridCallbackCommand);
+	this->m_pGridActor->AddObserver(CGridActor::MoveGridLineEvent,   this->GridCallbackCommand);
+// COMMENT: {8/9/2005 7:57:14 PM}	this->m_pGridActor->GetProperty()->SetColor(1.0, 0.8, 0.6);
+	this->m_pGridActor->SetScale(1, 1, 1);
+	this->m_pGridActor->SetPickable(0);
 
 	// update views
 	//
@@ -1596,7 +1600,7 @@ void CWPhastDoc::DeleteContents()
 
 		// all vtkProps must release before the Renderer is destroyed
 		// ie when an import fails
-		this->m_pGridLODActor->ReleaseGraphicsResources(pView->GetRenderer()->GetVTKWindow());
+		this->m_pGridActor->ReleaseGraphicsResources(pView->GetRenderer()->GetVTKWindow());
 		this->m_pAxesActor->ReleaseGraphicsResources(pView->GetRenderer()->GetVTKWindow());		
 
 		pView->DeleteContents();
@@ -1649,15 +1653,15 @@ void CWPhastDoc::DeleteContents()
 // COMMENT: {7/28/2005 4:38:34 PM}	//{{
 // COMMENT: {7/28/2005 4:38:34 PM}	// create the grid
 // COMMENT: {7/28/2005 4:38:34 PM}	//
-// COMMENT: {7/28/2005 4:38:34 PM}	if (this->m_pGridLODActor)
+// COMMENT: {7/28/2005 4:38:34 PM}	if (this->m_pGridActor)
 // COMMENT: {7/28/2005 4:38:34 PM}	{
-// COMMENT: {7/28/2005 4:38:34 PM}		this->m_pGridLODActor->Delete();
+// COMMENT: {7/28/2005 4:38:34 PM}		this->m_pGridActor->Delete();
 // COMMENT: {7/28/2005 4:38:34 PM}	}
-// COMMENT: {7/28/2005 4:38:34 PM}	this->m_pGridLODActor = CGridLODActor::New();
-// COMMENT: {7/28/2005 4:38:34 PM}	this->m_pGridLODActor->GetProperty()->SetColor(1.0, 0.8, 0.6);
+// COMMENT: {7/28/2005 4:38:34 PM}	this->m_pGridActor = CGridActor::New();
+// COMMENT: {7/28/2005 4:38:34 PM}	this->m_pGridActor->GetProperty()->SetColor(1.0, 0.8, 0.6);
 // COMMENT: {7/28/2005 4:38:34 PM}	//}}
-// COMMENT: {7/28/2005 4:38:34 PM}	ASSERT(this->m_pGridLODActor);
-// COMMENT: {7/28/2005 4:38:34 PM}	this->m_pGridLODActor->SetScale(1, 1, 1);
+// COMMENT: {7/28/2005 4:38:34 PM}	ASSERT(this->m_pGridActor);
+// COMMENT: {7/28/2005 4:38:34 PM}	this->m_pGridActor->SetScale(1, 1, 1);
 
 	if (this->m_pMapActor)
 	{
@@ -1667,8 +1671,8 @@ void CWPhastDoc::DeleteContents()
 
 	// update geometry property sheet
 	// Note: can't call this->SetScale(1.0f, 1.0f, 1.0f);
-	// Since the this->m_pGridLODActor contains no data for
-	// this->m_pGridLODActor->GetBounds
+	// Since the this->m_pGridActor contains no data for
+	// this->m_pGridActor->GetBounds
 	if (this->m_pScalePage)
 	{
 		this->m_pScalePage->m_XScale = 1;
@@ -1763,12 +1767,12 @@ void CWPhastDoc::SetScale(vtkFloatingPointType x, vtkFloatingPointType y, vtkFlo
 
 	// set scale for the grid
 	//
-	this->m_pGridLODActor->SetScale(scale);
+	this->m_pGridActor->SetScale(scale);
 
 	// reset the axes
 	//
 	vtkFloatingPointType bounds[6];
-	this->m_pGridLODActor->GetBounds(bounds);
+	this->m_pGridActor->GetBounds(bounds);
 	float defaultAxesSize = (bounds[1]-bounds[0] + bounds[3]-bounds[2] + bounds[5]-bounds[4])/12;
 	this->m_pAxesActor->SetDefaultPositions(bounds);
 	this->m_pAxesActor->SetDefaultSize(defaultAxesSize);
@@ -1793,11 +1797,11 @@ void CWPhastDoc::SetScale(vtkFloatingPointType x, vtkFloatingPointType y, vtkFlo
 			{
 				pZone->SetScale(scale);
 			}
-			if (vtkAssembly *pAssembly = vtkAssembly::SafeDownCast(prop))
-			{
-				ASSERT(FALSE); // no longer using vtkAssembly ???
-				pAssembly->SetScale(scale);
-			}
+// COMMENT: {8/9/2005 8:04:44 PM}			if (vtkAssembly *pAssembly = vtkAssembly::SafeDownCast(prop))
+// COMMENT: {8/9/2005 8:04:44 PM}			{
+// COMMENT: {8/9/2005 8:04:44 PM}				ASSERT(FALSE); // no longer using vtkAssembly ???
+// COMMENT: {8/9/2005 8:04:44 PM}				pAssembly->SetScale(scale);
+// COMMENT: {8/9/2005 8:04:44 PM}			}
 			if (vtkPropAssembly *pPropAssembly = vtkPropAssembly::SafeDownCast(prop))
 			{
 				if (vtkPropCollection *pPropCollection = pPropAssembly->GetParts())
@@ -1934,7 +1938,7 @@ void CWPhastDoc::SetModel(const CNewModel& model)
 
 //void CWPhastDoc::SetGrid(CGrid* x, CGrid* y, CGrid* z)
 //{
-//	ASSERT(this->m_pGridLODActor);
+//	ASSERT(this->m_pGridActor);
 //	ASSERT(this->m_pAxes);
 //	ASSERT(this->m_pAxesTubeFilter);
 //	ASSERT(this->m_pAxesActor);
@@ -1956,17 +1960,17 @@ void CWPhastDoc::SetModel(const CNewModel& model)
 //
 //	// set the grid
 //	//
-//	this->m_pGridLODActor->SetGrid(x, y, z, this->m_pUnits);
-//	this->m_pGridLODActor->SetPickable(0);
-//	this->m_pPropCollection->AddItem(this->m_pGridLODActor);
+//	this->m_pGridActor->SetGrid(x, y, z, this->m_pUnits);
+//	this->m_pGridActor->SetPickable(0);
+//	this->m_pPropCollection->AddItem(this->m_pGridActor);
 //	if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar()) {
-//		pTree->SetGridLODActor(this->m_pGridLODActor);
+//		pTree->SetGridActor(this->m_pGridActor);
 //	}
 //
 //	// set the axes
 //	//
 //	float bounds[6];
-//	this->m_pGridLODActor->GetBounds(bounds);
+//	this->m_pGridActor->GetBounds(bounds);
 //	this->m_pAxes->SetScaleFactor((bounds[1] - bounds[0])/5);
 //	this->m_pAxesTubeFilter->SetRadius(this->m_pAxes->GetScaleFactor()/25.0);
 //	this->m_pPropCollection->AddItem(this->m_pAxesActor);
@@ -1978,7 +1982,7 @@ void CWPhastDoc::SetModel(const CNewModel& model)
 
 void CWPhastDoc::ResizeGrid(const CGrid& x, const CGrid&  y, const CGrid&  z)
 {
-	ASSERT(this->m_pGridLODActor);
+	ASSERT(this->m_pGridActor);
 	ASSERT(this->m_pAxesActor);
 	ASSERT(this->m_pPropCollection);
 	ASSERT(this->m_pimpl);
@@ -1987,12 +1991,12 @@ void CWPhastDoc::ResizeGrid(const CGrid& x, const CGrid&  y, const CGrid&  z)
 
 	// reset the grid
 	//
-	this->m_pGridLODActor->SetGrid(x, y, z, *this->m_pUnits);
-	this->m_pGridLODActor->SetPickable(0);
-	this->m_pPropCollection->AddItem(this->m_pGridLODActor);
+	this->m_pGridActor->SetGrid(x, y, z, *this->m_pUnits);
+	this->m_pGridActor->SetPickable(0);
+	this->m_pPropCollection->AddItem(this->m_pGridActor);
 	if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar())
 	{
-		pTree->SetGridLODActor(this->m_pGridLODActor);
+		pTree->SetGridActor(this->m_pGridActor);
 	}
 
 	// Update default zones etc.
@@ -2012,19 +2016,19 @@ void CWPhastDoc::AddDefaultZone(CZone* pZone)
 
 vtkFloatingPointType* CWPhastDoc::GetScale()
 {
-	return this->m_pGridLODActor->GetScale();
+	return this->m_pGridActor->GetScale();
 }
 
 void CWPhastDoc::GetScale(vtkFloatingPointType data[3])
 {
-	this->m_pGridLODActor->GetScale(data);
+	this->m_pGridActor->GetScale(data);
 }
 
 vtkFloatingPointType* CWPhastDoc::GetGridBounds()
 {
-	if (this->m_pGridLODActor)
+	if (this->m_pGridActor)
 	{
-		return this->m_pGridLODActor->GetBounds();
+		return this->m_pGridActor->GetBounds();
 	}
 	ASSERT(FALSE);
 	return 0;
@@ -2716,7 +2720,7 @@ BOOL CWPhastDoc::WriteTransDat(std::ostream& os)
 	os << this->GetUnits();
 
 	CGrid xyz[3];
-	this->m_pGridLODActor->GetGrid(xyz[0], xyz[1], xyz[2]);
+	this->m_pGridActor->GetGrid(xyz[0], xyz[1], xyz[2]);
 
 	// GRID
 	os << "GRID\n";
@@ -2979,7 +2983,7 @@ void CWPhastDoc::SetUnits(const CUnits& units)
 	// update grid
 	//
 	CGrid x, y, z;
-	this->m_pGridLODActor->GetGrid(x, y, z);
+	this->m_pGridActor->GetGrid(x, y, z);
 	this->ResizeGrid(x, y, z);
 
 	// update zones
@@ -3141,7 +3145,7 @@ void CWPhastDoc::SetUnits(const CUnits& units)
 // void CWPhastDoc::New(const CFlowOnly& flowOnly, const CUnits& units, const CGrid& x, const CGrid& y, const CGrid& z, const CGridElt& media, const CHeadIC& headIC, const CTimeControl& timeControl)
 void CWPhastDoc::New(const CNewModel& model)
 {
-	ASSERT(this->m_pGridLODActor);
+	ASSERT(this->m_pGridActor);
 	ASSERT(this->m_pAxesActor);
 	ASSERT(this->m_pPropCollection);
 	ASSERT(this->m_pimpl);
@@ -3166,19 +3170,19 @@ void CWPhastDoc::New(const CNewModel& model)
 
 	// set the grid
 	//
-// COMMENT: {7/18/2005 8:45:06 PM}	this->m_pGridLODActor->SetGrid(model.m_gridKeyword.m_grid[0], model.m_gridKeyword.m_grid[1], model.m_gridKeyword.m_grid[2], *this->m_pUnits);
-// COMMENT: {7/18/2005 8:45:06 PM}	this->m_pGridLODActor->SetSnap(model.m_gridKeyword.m_snap);
-	this->m_pGridLODActor->SetGridKeyword(model.m_gridKeyword, this->GetUnits());
-	this->m_pGridLODActor->SetPickable(0);
-	this->m_pPropCollection->AddItem(this->m_pGridLODActor);
+// COMMENT: {7/18/2005 8:45:06 PM}	this->m_pGridActor->SetGrid(model.m_gridKeyword.m_grid[0], model.m_gridKeyword.m_grid[1], model.m_gridKeyword.m_grid[2], *this->m_pUnits);
+// COMMENT: {7/18/2005 8:45:06 PM}	this->m_pGridActor->SetSnap(model.m_gridKeyword.m_snap);
+	this->m_pGridActor->SetGridKeyword(model.m_gridKeyword, this->GetUnits());
+	this->m_pGridActor->SetPickable(0);
+	this->m_pPropCollection->AddItem(this->m_pGridActor);
 	if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar()) {
-		pTree->SetGridLODActor(this->m_pGridLODActor);
+		pTree->SetGridActor(this->m_pGridActor);
 	}
 
 	// set the axes
 	//
 	///float bounds[6];
-	///this->m_pGridLODActor->GetBounds(bounds);
+	///this->m_pGridActor->GetBounds(bounds);
 	vtkFloatingPointType *bounds = this->GetGridBounds();
 	vtkFloatingPointType defaultAxesSize = (bounds[1]-bounds[0] + bounds[3]-bounds[2] + bounds[5]-bounds[4])/12;
 	this->m_pAxesActor->SetDefaultPositions(bounds);
@@ -3189,7 +3193,7 @@ void CWPhastDoc::New(const CNewModel& model)
 	// create the default zones
 	//
 	CZone zone;
-	this->m_pGridLODActor->GetDefaultZone(zone);
+	this->m_pGridActor->GetDefaultZone(zone);
 
 	// default media
 	//
@@ -3570,7 +3574,7 @@ void CWPhastDoc::OnViewSitemap()
 
 void CWPhastDoc::OnUpdateViewGrid(CCmdUI *pCmdUI)
 {
-	if (this->m_pGridLODActor->GetVisibility())
+	if (this->m_pGridActor->GetVisibility())
 	{
 		pCmdUI->SetCheck(1);
 	}
@@ -3584,16 +3588,16 @@ void CWPhastDoc::OnViewGrid()
 {
 	CPropertyTreeControlBar *pTree = this->GetPropertyTreeControlBar();
 
-	if (this->m_pGridLODActor->GetVisibility())
+	if (this->m_pGridActor->GetVisibility())
 	{
-		this->m_pGridLODActor->SetVisibility(0);
+		this->m_pGridActor->SetVisibility(0);
 		// if (pTree) pTree->SetNodeCheck(pTree->GetGridNode(), BST_UNCHECKED);
 		if (pTree) pTree->GetGridNode().SetState(INDEXTOSTATEIMAGEMASK(BST_UNCHECKED + 1), TVIS_STATEIMAGEMASK);
 
 	}
 	else
 	{
-		this->m_pGridLODActor->SetVisibility(1);
+		this->m_pGridActor->SetVisibility(1);
 		// if (pTree) pTree->SetNodeCheck(pTree->GetGridNode(), BST_CHECKED);
 		if (pTree) pTree->GetGridNode().SetState(INDEXTOSTATEIMAGEMASK(BST_CHECKED + 1), TVIS_STATEIMAGEMASK);
 	}
@@ -4214,7 +4218,7 @@ void CWPhastDoc::Select(CRiverActor *pRiverActor)
 
 void CWPhastDoc::GetGrid(CGrid& x, CGrid& y, CGrid& z)const
 {
-	this->m_pGridLODActor->GetGrid(x, y, z);
+	this->m_pGridActor->GetGrid(x, y, z);
 }
 
 void CWPhastDoc::OnUpdateWellsHideAll(CCmdUI *pCmdUI)
@@ -4671,11 +4675,11 @@ void CWPhastDoc::RiverListener(vtkObject* caller, unsigned long eid, void* clien
 
 void CWPhastDoc::SetGridKeyword(const CGridKeyword& gridKeyword)
 {
-	this->m_pGridLODActor->SetGridKeyword(gridKeyword, this->GetUnits());
+	this->m_pGridActor->SetGridKeyword(gridKeyword, this->GetUnits());
 	this->ResizeGrid(gridKeyword.m_grid[0], gridKeyword.m_grid[1], gridKeyword.m_grid[2]);
 }
 
-void CWPhastDoc::Edit(CGridLODActor* pGridLODActor)
+void CWPhastDoc::Edit(CGridActor* pGridActor)
 {
 	if (!this->m_pGridSheet)
 	{
@@ -4688,13 +4692,13 @@ void CWPhastDoc::Edit(CGridLODActor* pGridLODActor)
 	}
 	
 	CGridKeyword gridKeyword;
-	pGridLODActor->GetGridKeyword(gridKeyword);
+	pGridActor->GetGridKeyword(gridKeyword);
 	this->m_pGridPage->SetProperties(gridKeyword);
 	this->m_pGridPage->SetUnits(this->GetUnits());
 
 	//{{
 	this->m_pGridPage->m_pDoc = this;
-	this->m_pGridPage->m_pActor = this->m_pGridLODActor;
+	this->m_pGridPage->m_pActor = this->m_pGridActor;
 	//}}
 
 	this->m_pGridSheet->Create(::AfxGetApp()->m_pMainWnd);
@@ -4704,22 +4708,22 @@ void CWPhastDoc::Update(IObserver* pSender, LPARAM lHint, CObject* pHint, vtkObj
 {
 }
 
-vtkActor* CWPhastDoc::GetGridActor(void)
+vtkProp3D* CWPhastDoc::GetGridActor(void)
 {
-	return this->m_pGridLODActor;
+	return this->m_pGridActor;
 }
 
 void CWPhastDoc::GridListener(vtkObject* caller, unsigned long eid, void* clientdata, void *calldata)
 {
-	ASSERT(caller->IsA("CGridLODActor"));
+	ASSERT(caller->IsA("CGridActor"));
 	ASSERT(clientdata);
 
-	if (CGridLODActor* grid = CGridLODActor::SafeDownCast(caller))
+	if (CGridActor* grid = CGridActor::SafeDownCast(caller))
 	{
 		CWPhastDoc* self = reinterpret_cast<CWPhastDoc*>(clientdata);
 		switch (eid)
 		{
-		case CGridLODActor::DeleteGridLineEvent:
+		case CGridActor::DeleteGridLineEvent:
 			{
 				int axis =  grid->GetAxisIndex();
 				int index =  grid->GetPlaneIndex();
@@ -4728,7 +4732,7 @@ void CWPhastDoc::GridListener(vtkObject* caller, unsigned long eid, void* client
 				self->Execute(pGridDeleteLineAction);
 			}
 			break;
-		case CGridLODActor::InsertGridLineEvent:
+		case CGridActor::InsertGridLineEvent:
 			{
 				int axis =  grid->GetAxisIndex();
 				int index =  grid->GetPlaneIndex();
@@ -4737,7 +4741,7 @@ void CWPhastDoc::GridListener(vtkObject* caller, unsigned long eid, void* client
 				self->Execute(pGridInsertLineAction);
 			}
 			break;
-		case CGridLODActor::MoveGridLineEvent:
+		case CGridActor::MoveGridLineEvent:
 			{
 				GridLineMoveMemento memento = *(GridLineMoveMemento*)calldata;
 				CGridMoveLineAction* pGridMoveLineAction = new CGridMoveLineAction(grid, self, memento, true);
@@ -4757,7 +4761,7 @@ void CWPhastDoc::UpdateGridDomain(void)
 	// get bounds
 	//
 	vtkFloatingPointType bounds[6];
-	this->m_pGridLODActor->GetBounds(bounds);
+	this->m_pGridActor->GetBounds(bounds);
 	float defaultAxesSize = (bounds[1]-bounds[0] + bounds[3]-bounds[2] + bounds[5]-bounds[4])/12;
 
 	// reset the axes
@@ -4771,7 +4775,7 @@ void CWPhastDoc::UpdateGridDomain(void)
 	if (vtkPropCollection* pCollection = this->GetPropCollection())
 	{
 		CZone bounds;
-		this->m_pGridLODActor->GetDefaultZone(bounds);
+		this->m_pGridActor->GetDefaultZone(bounds);
 		pCollection->InitTraversal();
 		for (int i = 0; i < pCollection->GetNumberOfItems(); ++i)
 		{

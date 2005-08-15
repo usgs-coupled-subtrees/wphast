@@ -9,7 +9,7 @@
 
 class CGridSetAction;
 class CWPhastDoc;
-class CGridLODActor;
+class CGridActor;
 class CGridSetAction;
 
 
@@ -67,7 +67,7 @@ public:
 // COMMENT: {7/20/2005 3:34:22 PM}	bool             m_print_input_xy;
 
 	CWPhastDoc      *m_pDoc;
-	CGridLODActor   *m_pActor;
+	CGridActor      *m_pActor;
 
 	afx_msg void OnTcnSelchangeTabCoor(NMHDR *pNMHDR, LRESULT *pResult);
 	virtual BOOL OnApply();

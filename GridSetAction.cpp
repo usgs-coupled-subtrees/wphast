@@ -2,11 +2,11 @@
 #include "GridSetAction.h"
 
 #include "WPhastDoc.h"
-#include "GridLODActor.h"
+#include "GridActor.h"
 
-CGridSetAction::CGridSetAction(CWPhastDoc* pDoc, CGridLODActor* pActor, const CGridKeyword& gridKeyword)
+CGridSetAction::CGridSetAction(CWPhastDoc* pDoc, CGridActor* pActor, const CGridKeyword& gridKeyword)
 : m_pDoc(pDoc)
-, m_pGridLODActor(pActor)
+, m_pGridActor(pActor)
 , m_newGridKeyword(gridKeyword)
 {
 	pActor->GetGridKeyword(this->m_origGridKeyword);

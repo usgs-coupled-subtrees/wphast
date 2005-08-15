@@ -19,7 +19,7 @@ class CWPhastDoc;
 
 ////class CZoneLODActor;
 class vtkProp3D;
-class CGridLODActor;
+class CGridActor;
 
 class CModelessPropertySheet;
 class CGridPropertyPage2;
@@ -150,6 +150,6 @@ public:
 // COMMENT: {10/23/2003 8:08:41 PM}	HTREEITEM SelectProp(vtkProp3D* pProp);
 #endif
 	void SelectGridNode(void);
-	void SetGridLODActor(CGridLODActor* pGridLODActor);
+	void SetGridActor(CGridActor* pGridActor);
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 };

@@ -9,7 +9,7 @@
 #undef GetNextSibling                            // defined in windowsx.h
 
 //// #include "ZoneLODActor.h"
-#include "GridLODActor.h"
+#include "GridActor.h"
 #include "WPhastDoc.h"
 #include "WPhastView.h"
 #include "MediaPropertyPage.h"
@@ -229,7 +229,7 @@ void CPropertyTreeControlBar::OnSelChanged(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 		// if (pNMTREEVIEW->itemNew.hItem == m_htiGrid || hParent == m_htiGrid) {
 		// if (pNMTREEVIEW->itemNew.hItem == m_nodeGrid || hParent == m_nodeGrid) {
 // COMMENT: {7/15/2004 1:28:10 PM}		if (this->m_nodeGrid.IsNodeAncestor(CTreeCtrlNode(pNMTREEVIEW->itemNew.hItem, &this->m_wndTree))) {
-// COMMENT: {7/15/2004 1:28:10 PM}			//CGridLODActor* pZone = reinterpret_cast<CGridLODActor*>(m_wndTree.GetItemData(pNMTREEVIEW->itemNew.hItem));
+// COMMENT: {7/15/2004 1:28:10 PM}			//CGridActor* pZone = reinterpret_cast<CGridActor*>(m_wndTree.GetItemData(pNMTREEVIEW->itemNew.hItem));
 // COMMENT: {7/15/2004 1:28:10 PM}		}
 
 
@@ -776,7 +776,7 @@ void CPropertyTreeControlBar::OnNMDblClk(NMHDR* pNMHDR, LRESULT* pResult)
 	//
 	if (item.IsNodeAncestor(this->m_nodeGrid))
 	{
-// COMMENT: {7/15/2005 3:32:08 PM}		if (CGridLODActor* pGrid = CGridLODActor::SafeDownCast((vtkObject*)m_nodeGrid.GetData()))
+// COMMENT: {7/15/2005 3:32:08 PM}		if (CGridActor* pGrid = CGridActor::SafeDownCast((vtkObject*)m_nodeGrid.GetData()))
 // COMMENT: {7/15/2005 3:32:08 PM}		{
 // COMMENT: {7/15/2005 3:32:08 PM}			CFrameWnd *pFrame = (CFrameWnd*)AfxGetApp()->m_pMainWnd;
 // COMMENT: {7/15/2005 3:32:08 PM}			ASSERT_VALID(pFrame);
@@ -818,7 +818,7 @@ void CPropertyTreeControlBar::OnNMDblClk(NMHDR* pNMHDR, LRESULT* pResult)
 // COMMENT: {7/15/2005 3:32:08 PM}			return;
 // COMMENT: {7/15/2005 3:32:08 PM}		}
 		//{{
-		if (CGridLODActor* pGridActor = CGridLODActor::SafeDownCast((vtkObject*)m_nodeGrid.GetData()))
+		if (CGridActor* pGridActor = CGridActor::SafeDownCast((vtkObject*)m_nodeGrid.GetData()))
 		{
 			CFrameWnd *pFrame = (CFrameWnd*)AfxGetApp()->m_pMainWnd;
 			ASSERT_VALID(pFrame);
@@ -995,8 +995,8 @@ void CPropertyTreeControlBar::OnNMDblClk(NMHDR* pNMHDR, LRESULT* pResult)
 
 //float* CPropertyTreeControlBar::GetGridBounds()
 //{
-//	if (this->m_pGridLODActor) {
-//		return this->m_pGridLODActor->GetBounds();
+//	if (this->m_pGridActor) {
+//		return this->m_pGridActor->GetBounds();
 //	}
 //	else {
 //		ASSERT(FALSE);
@@ -1608,12 +1608,12 @@ BOOL CPropertyTreeControlBar::SelectWithoutNotification(HTREEITEM htItem)
 #endif // WPHAST_DEPRECATED
 
 
-void CPropertyTreeControlBar::SetGridLODActor(CGridLODActor* pGridLODActor)
+void CPropertyTreeControlBar::SetGridActor(CGridActor* pGridActor)
 {
-	ASSERT(pGridLODActor != NULL);
-	//pGridLODActor->Insert(&m_wndTree, m_htiGrid);
-	//m_wndTree.SetItemData(m_htiGrid, (DWORD_PTR)pGridLODActor);
-	pGridLODActor->Insert(&m_wndTree, m_nodeGrid);
+	ASSERT(pGridActor != NULL);
+	//pGridActor->Insert(&m_wndTree, m_htiGrid);
+	//m_wndTree.SetItemData(m_htiGrid, (DWORD_PTR)pGridActor);
+	pGridActor->Insert(&m_wndTree, m_nodeGrid);
 	m_wndTree.RedrawWindow();
 }
 
@@ -1764,25 +1764,25 @@ void CPropertyTreeControlBar::Update(IObserver* pSender, LPARAM lHint, CObject* 
 //void CPropertyTreeControlBar::SetGrid(grid* x, grid* y, grid* z)
 //{
 //	ASSERT(this->m_pPropCollection);
-//	ASSERT(this->m_pGridLODActor);
+//	ASSERT(this->m_pGridActor);
 //	ASSERT(this->m_pAxes);
 //	ASSERT(this->m_pAxesTubeFilter);
 //	ASSERT(this->m_pAxesActor);
 //
 //	// set the grid
 //	//
-//	this->m_pGridLODActor->SetGrid(x, y, z);
-//	this->m_pGridLODActor->SetPickable(0);
+//	this->m_pGridActor->SetGrid(x, y, z);
+//	this->m_pGridActor->SetPickable(0);
 //	// add to collection
-//	this->m_pPropCollection->AddItem(this->m_pGridLODActor);
-//	this->m_pGridLODActor->Insert(&this->m_wndTree, this->m_nodeGrid);
+//	this->m_pPropCollection->AddItem(this->m_pGridActor);
+//	this->m_pGridActor->Insert(&this->m_wndTree, this->m_nodeGrid);
 //	m_wndTree.RedrawWindow();
 //
 //
 //	// set the axes
 //	//
 //	float bounds[6];
-//	this->m_pGridLODActor->GetBounds(bounds);
+//	this->m_pGridActor->GetBounds(bounds);
 //	this->m_pAxes->SetScaleFactor((bounds[1] - bounds[0])/5);
 //	this->m_pAxesTubeFilter->SetRadius(this->m_pAxes->GetScaleFactor()/25.0);
 //	// add to collection
@@ -1844,7 +1844,7 @@ void CPropertyTreeControlBar::Update(IObserver* pSender, LPARAM lHint, CObject* 
 //		pCollection->InitTraversal();
 //		for (int i = 0; i < pCollection->GetNumberOfItems(); ++i) {
 //			vtkProp* prop = pCollection->GetNextProp();
-//			if (CGridLODActor *pGridActor = CGridLODActor::SafeDownCast(prop)) {
+//			if (CGridActor *pGridActor = CGridActor::SafeDownCast(prop)) {
 //				pGridActor->SetScale(scale);
 //			}
 //			if (CZone *pZone = CZone::SafeDownCast(prop)) {
@@ -1857,7 +1857,7 @@ void CPropertyTreeControlBar::Update(IObserver* pSender, LPARAM lHint, CObject* 
 //	// set scale for the axes
 //	//
 //	float bounds[6];
-//	this->m_pGridLODActor->GetBounds(bounds);
+//	this->m_pGridActor->GetBounds(bounds);
 //	this->m_pAxes->SetScaleFactor((bounds[1] - bounds[0])/5);
 //	this->m_pAxesTubeFilter->SetRadius(this->m_pAxes->GetScaleFactor()/25.0);
 //

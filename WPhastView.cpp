@@ -47,6 +47,7 @@
 #include "WellActor.h"
 #include "RiverActor.h"
 #include "GridLODActor.h"
+#include "GridActor.h"
 #include "RiverCreateAction.h"
 #include "RiverPropertyPage2.h"
 #include "Grid.h"
@@ -1607,10 +1608,11 @@ void CWPhastView::OnToolsMoveVerLine()
 	if (this->m_bMovingGridLine)
 	{
 		////this->GetDocument()->GetGridActor()->CancelMoveGridLine();
-		if (CGridLODActor* pGridLODActor = CGridLODActor::SafeDownCast(this->GetDocument()->GetGridActor()))
+		///if (CGridLODActor* pGridLODActor = CGridLODActor::SafeDownCast(this->GetDocument()->GetGridActor()))
+		if (CGridActor* pGridActor = CGridActor::SafeDownCast(this->GetDocument()->GetGridActor()))
 		{
 			// pGridLODActor->SetInteractor(0);
-			pGridLODActor->SetEnabled(0);
+			pGridActor->SetEnabled(0);
 		}
 		this->m_bMovingGridLine = false;
 	}
@@ -1618,9 +1620,9 @@ void CWPhastView::OnToolsMoveVerLine()
 	{
 		this->m_bMovingGridLine = true;
 		////this->GetDocument()->GetGridActor()->StartMoveGridLine(this->m_RenderWindowInteractor);
-		if (CGridLODActor* pGridLODActor = CGridLODActor::SafeDownCast(this->GetDocument()->GetGridActor()))
+		if (CGridActor* pGridActor = CGridActor::SafeDownCast(this->GetDocument()->GetGridActor()))
 		{
-			pGridLODActor->SetInteractor(this->m_RenderWindowInteractor);
+			pGridActor->SetInteractor(this->m_RenderWindowInteractor);
 			// pGridLODActor->SetEnabled(1);
 		}
 	}

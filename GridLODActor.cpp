@@ -780,7 +780,9 @@ void CGridLODActor::OnMouseMove()
 	TRACE("CGridLODActor::OnMouseMove X = %d, Y= %d\n", X, Y);
 
 	vtkCellPicker* pCellPicker = vtkCellPicker::New();
-	pCellPicker->SetTolerance(0.001);
+	//pCellPicker->SetTolerance(0.001);
+	//pCellPicker->SetTolerance(0.025);
+	pCellPicker->SetTolerance(0.025 / this->GetScale()[0]);
 	pCellPicker->PickFromListOn();
 	this->PickableOn();
 	pCellPicker->AddPickList(this);
@@ -1045,6 +1047,8 @@ void CGridLODActor::OnEndInteraction(void)
 			// be careful here the iterator setIter should not be used below here
 			// because DeleteLine/InsertLine refill ValueToIndex making the
 			// interator no longer valid
+			struct GridLineMoveMemento memento;
+			memento.Uniform = this->m_gridKeyword.m_grid[this->AxisIndex].uniform;
 			if (bMoving)
 			{
 				ASSERT(this->DeleteLine(this->AxisIndex, originalPlaneIndex));
@@ -1057,7 +1061,6 @@ void CGridLODActor::OnEndInteraction(void)
 				{
 					// the memento is the only information listeners
 					// need in order to undo/redo
-					struct GridLineMoveMemento memento;
 					memento.AxisIndex          = this->AxisIndex;
 					memento.OriginalPlaneIndex = originalPlaneIndex;
 					memento.NewPlaneIndex      = this->PlaneIndex;
@@ -1215,7 +1218,7 @@ BOOL CGridLODActor::DeleteLine(int nAxisIndex, int nPlaneIndex)
 			this->Setup(this->m_units);
 
 			// update tree
-			this->Insert(this->m_node);
+			this->UpdateNode();
 
 			// turn off widget
 			if (this->PlaneWidget) this->PlaneWidget->Off();
@@ -1259,7 +1262,7 @@ int CGridLODActor::InsertLine(int nAxisIndex, double dValue)
 			this->Setup(this->m_units);
 
 			// update tree
-			this->Insert(this->m_node);
+			this->UpdateNode();
 
 			// turn off widget
 			if (this->PlaneWidget) this->PlaneWidget->Off();
@@ -1312,7 +1315,7 @@ BOOL CGridLODActor::MoveLine(int nAxisIndex, int nPlaneIndex, double dValue)
 				this->Setup(this->m_units);
 
 				// update tree
-				this->Insert(this->m_node);
+				this->UpdateNode();
 
 				// turn off widget
 				if (this->PlaneWidget) this->PlaneWidget->Off();
@@ -1332,3 +1335,9 @@ BOOL CGridLODActor::MoveLine(int nAxisIndex, int nPlaneIndex, double dValue)
 	return FALSE; // failure
 }
 #endif
+
+void CGridLODActor::UpdateNode(void)
+{
+	// update tree
+	this->Insert(this->m_node);
+}

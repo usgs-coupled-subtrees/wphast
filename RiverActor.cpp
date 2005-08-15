@@ -606,6 +606,12 @@ void CRiverActor::OnMouseMove()
 			{
 				this->m_pLineCellPicker->Pick(X, Y, 0.0, ren);
 				path = this->m_pLineCellPicker->GetPath();
+				if (path)
+				{
+					TRACE("found\n");
+				}
+				this->m_pLineCellPicker->Pick(X, Y, 0.0, ren);
+				path = this->m_pLineCellPicker->GetPath();
 				if (path != NULL)
 				{
 					if (vtkActor* pActor = vtkActor::SafeDownCast(path->GetFirstNode()->GetProp()))

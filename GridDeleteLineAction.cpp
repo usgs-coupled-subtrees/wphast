@@ -2,29 +2,29 @@
 #include "GridDeleteLineAction.h"
 
 #include "WPhastDoc.h"
-#include "GridLODActor.h"
+#include "GridActor.h"
 
-CGridDeleteLineAction::CGridDeleteLineAction(CGridLODActor *pGridLODActor, CWPhastDoc *pWPhastDoc, int nGridIndex, int nPlaneIndex, double dValue, bool bSkipFirstExecute)
-: m_pGridLODActor(pGridLODActor)
+CGridDeleteLineAction::CGridDeleteLineAction(CGridActor *pGridActor, CWPhastDoc *pWPhastDoc, int nGridIndex, int nPlaneIndex, double dValue, bool bSkipFirstExecute)
+: m_pGridActor(pGridActor)
 , m_pWPhastDoc(pWPhastDoc)
 , m_nGridIndex(nGridIndex)
 , m_nPlaneIndex(nPlaneIndex)
 , m_dValue(dValue)
 , m_bSkipFirstExecute(bSkipFirstExecute)
 {
-	ASSERT(this->m_pGridLODActor && this->m_pGridLODActor->IsA("CGridLODActor"));
+	ASSERT(this->m_pGridActor && this->m_pGridActor->IsA("CGridActor"));
 }
 
 CGridDeleteLineAction::~CGridDeleteLineAction(void)
 {
-	ASSERT(this->m_pGridLODActor && this->m_pGridLODActor->IsA("CGridLODActor"));
+	ASSERT(this->m_pGridActor && this->m_pGridActor->IsA("CGridActor"));
 }
 
 void CGridDeleteLineAction::Execute()
 {
 	if (!this->m_bSkipFirstExecute)
 	{
-		VERIFY(this->m_pGridLODActor->DeleteLine(this->m_nGridIndex, this->m_nPlaneIndex));
+		VERIFY(this->m_pGridActor->DeleteLine(this->m_nGridIndex, this->m_nPlaneIndex));
 	}
 	this->m_bSkipFirstExecute = false;
 
@@ -35,6 +35,6 @@ void CGridDeleteLineAction::Execute()
 
 void CGridDeleteLineAction::UnExecute()
 {
-	VERIFY(this->m_pGridLODActor->InsertLine(this->m_nGridIndex, this->m_dValue));
+	VERIFY(this->m_pGridActor->InsertLine(this->m_nGridIndex, this->m_dValue));
 	this->m_pWPhastDoc->UpdateGridDomain();
 }

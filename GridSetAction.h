@@ -4,13 +4,13 @@
 #include "GridKeyword.h"
 
 class CWPhastDoc;
-class CGridLODActor;
+class CGridActor;
 
 
 class CGridSetAction : public CAction
 {
 public:
-	CGridSetAction(CWPhastDoc* pDoc, CGridLODActor* pActor, const CGridKeyword& gridKeyword);
+	CGridSetAction(CWPhastDoc* pDoc, CGridActor* pActor, const CGridKeyword& gridKeyword);
 	virtual ~CGridSetAction(void);
 
 	virtual void Execute();
@@ -20,7 +20,7 @@ public:
 
 protected:
 	CWPhastDoc     *m_pDoc;
-	CGridLODActor  *m_pGridLODActor;
+	CGridActor     *m_pGridActor;
 	CGridKeyword    m_origGridKeyword;
 	CGridKeyword    m_newGridKeyword;
 };

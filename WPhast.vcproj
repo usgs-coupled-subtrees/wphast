@@ -517,6 +517,9 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="GridActor.cpp">
+			</File>
+			<File
 				RelativePath="GridDeleteLineAction.cpp">
 			</File>
 			<File
@@ -1041,6 +1044,9 @@
 			</File>
 			<File
 				RelativePath="Grid.h">
+			</File>
+			<File
+				RelativePath="GridActor.h">
 			</File>
 			<File
 				RelativePath="GridDeleteLineAction.h">
@@ -3776,15 +3782,15 @@
 			Name="Build Logs"
 			Filter="">
 			<File
-				RelativePath="cppunit\BuildLog.htm"
-				DeploymentContent="TRUE">
-			</File>
-			<File
 				RelativePath="Debug\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 			<File
 				RelativePath="Release\BuildLog.htm"
+				DeploymentContent="TRUE">
+			</File>
+			<File
+				RelativePath="cppunit\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 		</Filter>

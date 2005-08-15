@@ -1,6 +1,7 @@
 #pragma once
 #include <map>
 #include <vtkLODActor.h>
+#include <vtkAssembly.h>
 // #include "structs.h"
 ///#include "Grid.h"
 #include "GridKeyword.h"
@@ -21,12 +22,13 @@ class CZone;
 typedef float vtkFloatingPointType;
 #endif
 
-class CGridLODActor : public vtkLODActor
+//class CGridActor : public vtkLODActor
+class CGridActor : public vtkAssembly
 {
 public:
-	vtkTypeRevisionMacro(CGridLODActor,vtkLODActor);
+	vtkTypeRevisionMacro(CGridActor,vtkAssembly);
 
-	static CGridLODActor *New();
+	static CGridActor *New();
 
 	enum EventIds {
 		DeleteGridLineEvent = vtkCommand::UserEvent + 600,
@@ -73,6 +75,11 @@ public:
 	vtkGetObjectMacro(Interactor, vtkRenderWindowInteractor);
 
 	void SetEnabled(int enabling);
+	//vtkGetMacro(Enabled, int);
+	int GetEnabled(void)
+	{ 
+		return this->Enabled;
+	}
 
 	// Description:
 	// Main process event method
@@ -85,6 +92,10 @@ public:
 	void OnKeyPress(void);
 	void OnInteraction(void);
 	void OnEndInteraction(void);
+
+	///virtual void SetScale(float x, float y, float z);
+	virtual void SetScale(vtkFloatingPointType x, vtkFloatingPointType y, vtkFloatingPointType z);
+	virtual void SetScale(vtkFloatingPointType scale[3]);
 
 
 #if defined(WIN32)
@@ -106,8 +117,8 @@ public:
 
 
 protected:
-	CGridLODActor(void);
-	virtual ~CGridLODActor(void);
+	CGridActor(void);
+	virtual ~CGridActor(void);
 
 	int State;
 	enum WidgetState
@@ -118,6 +129,10 @@ protected:
 
 
 	void Setup(const CUnits& units);
+	void UpdatePoints(void);
+
+
+	vtkLODActor*        Actor;
 
 	vtkGeometryFilter*  m_pGeometryFilter;
 	vtkFeatureEdges*    m_pFeatureEdges;
@@ -128,6 +143,22 @@ protected:
 
 	// Used to process events
 	vtkCallbackCommand* EventCallbackCommand;
+
+	int                  PosXLineCount;
+	vtkLineSource      **PosXLineSources;
+	vtkPolyDataMapper  **PosXLineMappers;
+	vtkTubeFilter      **PosXLineFilters;
+	vtkActor           **PosXLineActors;
+
+	vtkPlaneSource*     PlaneSources[6];
+	vtkPolyDataMapper*  PlaneMappers[6];
+	vtkLODActor*        PlaneActors[6];
+
+	vtkCellPicker*      PlanePicker;
+	vtkCellPicker*      LinePicker;
+
+	vtkTransform*       ScaleTransform;
+	vtkTransform*       UnitsTransform;
 
 	// vtkImplicitPlaneWidget    *PlaneWidget;	
 	CGridLineWidget           *PlaneWidget;
@@ -158,7 +189,7 @@ protected:
 	double              m_dDeletedValue;
 
 private:
-  CGridLODActor(const CGridLODActor&);  // Not implemented.
-  void operator=(const CGridLODActor&);  // Not implemented.
+  CGridActor(const CGridActor&);  // Not implemented.
+  void operator=(const CGridActor&);  // Not implemented.
 
 };
