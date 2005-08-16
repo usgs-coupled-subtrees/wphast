@@ -97,6 +97,8 @@ public:
 	virtual void SetScale(vtkFloatingPointType x, vtkFloatingPointType y, vtkFloatingPointType z);
 	virtual void SetScale(vtkFloatingPointType scale[3]);
 
+	virtual vtkFloatingPointType* GetScale(void);
+	virtual void GetScale(vtkFloatingPointType scale[3]);
 
 #if defined(WIN32)
 	BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);

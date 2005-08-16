@@ -98,6 +98,15 @@ void CGridLineWidget::SetEnabled(int enabling)
     this->CutActor->SetProperty(this->PlaneProperty);
 
     this->UpdateRepresentation();
+#ifndef USE_ORIGINAL
+	if (!this->ValidPick)
+	{
+		this->LastPickPosition[0] = this->InitialPickPosition[0];
+		this->LastPickPosition[1] = this->InitialPickPosition[1];
+		this->LastPickPosition[2] = this->InitialPickPosition[2];
+		this->ValidPick = 1;
+	}
+#endif
     this->SizeHandles();
     this->InvokeEvent(vtkCommand::EnableEvent,NULL);
     }
@@ -233,4 +242,31 @@ void CGridLineWidget::OnLeftButtonDown()
   this->StartInteraction();
   this->InvokeEvent(vtkCommand::StartInteractionEvent,NULL);
   this->Interactor->Render();
+}
+
+void CGridLineWidget::OnLeftButtonUp()
+{
+  if ( this->State == vtkImplicitPlaneWidget::Outside )
+    {
+    return;
+    }
+
+  this->State = vtkImplicitPlaneWidget::Start;
+  this->HighlightPlane(0);
+  this->HighlightOutline(0);
+  this->HighlightNormal(0);
+  this->SizeHandles();
+
+  this->EventCallbackCommand->SetAbortFlag(1);
+  this->EndInteraction();
+  this->InvokeEvent(vtkCommand::EndInteractionEvent,NULL);
+  this->Interactor->Render();
+}
+
+void CGridLineWidget::SetInitialPickPosition(vtkFloatingPointType pos[3])
+{
+	for (int i = 0; i < 3; ++i)
+	{
+		this->InitialPickPosition[i] = pos[i];
+	}
 }

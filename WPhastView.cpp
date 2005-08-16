@@ -230,7 +230,6 @@ CWPhastView::~CWPhastView()
 		this->RiverCallbackCommand = 0;
 	}
 
-	//{{
 	if (this->m_bMovingGridLine)
 	{
 		if (CGridLODActor* pGridLODActor = CGridLODActor::SafeDownCast(this->GetDocument()->GetGridActor()))
@@ -238,14 +237,16 @@ CWPhastView::~CWPhastView()
 			pGridLODActor->SetEnabled(0);
 		}
 	}
-	//}}
+
+	if (this->CreatingNewZone())
+	{
+		this->EndNewZone();
+	}
 
 
 	// Delete the the renderer, window and interactor objects.
 	//
-	//{{
 	this->m_RenderWindowInteractor->SetRenderWindow(NULL);
-	//}}
 	this->m_Renderer->Delete();
 	this->m_RenderWindowInteractor->Delete();
 	this->m_RenderWindow->Delete();

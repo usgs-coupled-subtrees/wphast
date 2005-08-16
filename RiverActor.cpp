@@ -1291,7 +1291,8 @@ CRiverActor* CRiverActor::StartNewRiver(vtkRenderWindowInteractor* pRenderWindow
 	pRiverActor->ConnectingMapper = vtkPolyDataMapper::New();
 	pRiverActor->ConnectingMapper->SetInput(pRiverActor->ConnectingLineSource->GetOutput());
 
-	pRiverActor->ConnectingActor = vtkActor::New();
+// COMMENT: {8/15/2005 5:51:26 PM}	pRiverActor->ConnectingActor = vtkActor::New();
+	pRiverActor->ConnectingActor = vtkLODActor::New();
 	pRiverActor->ConnectingActor->SetMapper(pRiverActor->ConnectingMapper);
 	pRiverActor->ConnectingActor->GetProperty()->SetColor(0., 1., 1.);
 	pRiverActor->ConnectingActor->VisibilityOff();
