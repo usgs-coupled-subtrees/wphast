@@ -6,7 +6,7 @@
 #include <vtkPolyDataMapper.h>
 #include <vtkObjectFactory.h>
 
-#include <vtkPointPicker.h>
+//#include <vtkPointPicker.h>
 
 #include <vtkFloatArray.h>
 #include <vtkMath.h>
@@ -93,7 +93,6 @@ CGridActor::CGridActor(void)
 	this->EventCallbackCommand = vtkCallbackCommand::New();
 	this->EventCallbackCommand->SetClientData(this); 
 	this->EventCallbackCommand->SetCallback(CGridActor::ProcessEvents);
-
 
 	this->PlanePicker = vtkCellPicker::New();
 	this->PlanePicker->PickFromListOn();
@@ -582,157 +581,8 @@ void CGridActor::Setup(const CUnits& units)
 
 	this->UpdatePoints();
 	
-// COMMENT: {8/12/2005 4:49:00 PM}	//{{
-// COMMENT: {8/12/2005 4:49:00 PM}	if ( this->PosXLineCount > 0 )
-// COMMENT: {8/12/2005 4:49:00 PM}	{
-// COMMENT: {8/12/2005 4:49:00 PM}		for (int i = 0; i < this->PosXLineCount; ++i)
-// COMMENT: {8/12/2005 4:49:00 PM}		{
-// COMMENT: {8/12/2005 4:49:00 PM}			this->RemovePart(this->PosXLineActors[i]);
-// COMMENT: {8/12/2005 4:49:00 PM}			this->PosXLineSources[i]->Delete();
-// COMMENT: {8/12/2005 4:49:00 PM}			this->PosXLineFilters[i]->Delete();
-// COMMENT: {8/12/2005 4:49:00 PM}			this->PosXLineMappers[i]->Delete();
-// COMMENT: {8/12/2005 4:49:00 PM}			this->PosXLineActors[i]->Delete();
-// COMMENT: {8/12/2005 4:49:00 PM}		}
-// COMMENT: {8/12/2005 4:49:00 PM}		delete [] this->PosXLineSources; this->PosXLineSources = NULL;
-// COMMENT: {8/12/2005 4:49:00 PM}		delete [] this->PosXLineFilters; this->PosXLineFilters = NULL;
-// COMMENT: {8/12/2005 4:49:00 PM}		delete [] this->PosXLineMappers; this->PosXLineMappers = NULL;
-// COMMENT: {8/12/2005 4:49:00 PM}		delete [] this->PosXLineActors; this->PosXLineActors = NULL;
-// COMMENT: {8/12/2005 4:49:00 PM}		this->PosXLineCount = 0;
-// COMMENT: {8/12/2005 4:49:00 PM}	}
-// COMMENT: {8/12/2005 4:49:00 PM}
-// COMMENT: {8/12/2005 4:49:00 PM}	int num = this->m_gridKeyword.m_grid[0].count_coord + this->m_gridKeyword.m_grid[1].count_coord;
-// COMMENT: {8/12/2005 4:49:00 PM}	this->PosXLineSources = new vtkLineSource* [num];
-// COMMENT: {8/12/2005 4:49:00 PM}	this->PosXLineFilters = new vtkTubeFilter* [num];
-// COMMENT: {8/12/2005 4:49:00 PM}	this->PosXLineMappers = new vtkPolyDataMapper* [num];
-// COMMENT: {8/12/2005 4:49:00 PM}	this->PosXLineActors = new vtkActor* [num];
-// COMMENT: {8/12/2005 4:49:00 PM}
-// COMMENT: {8/12/2005 4:49:00 PM}	float pt1[3];
-// COMMENT: {8/12/2005 4:49:00 PM}	float pt2[3];
-// COMMENT: {8/12/2005 4:49:00 PM}	for (int i = 0; i < this->m_gridKeyword.m_grid[0].count_coord; ++i)
-// COMMENT: {8/12/2005 4:49:00 PM}	{
-// COMMENT: {8/12/2005 4:49:00 PM}		this->PosXLineSources[i] = vtkLineSource::New();
-// COMMENT: {8/12/2005 4:49:00 PM}		this->PosXLineFilters[i] = vtkTubeFilter::New();
-// COMMENT: {8/12/2005 4:49:00 PM}		this->PosXLineFilters[i]->SetRadius(250);
-// COMMENT: {8/12/2005 4:49:00 PM}		this->PosXLineFilters[i]->SetNumberOfSides(8);
-// COMMENT: {8/12/2005 4:49:00 PM}		this->PosXLineFilters[i]->SetInput(this->PosXLineSources[i]->GetOutput());
-// COMMENT: {8/12/2005 4:49:00 PM}		this->PosXLineMappers[i] = vtkPolyDataMapper::New();
-// COMMENT: {8/12/2005 4:49:00 PM}		//this->PosXLineMappers[i]->SetInput(this->PosXLineSources[i]->GetOutput());
-// COMMENT: {8/12/2005 4:49:00 PM}		this->PosXLineMappers[i]->SetInput(this->PosXLineFilters[i]->GetOutput());
-// COMMENT: {8/12/2005 4:49:00 PM}
-// COMMENT: {8/12/2005 4:49:00 PM}		this->PosXLineActors[i] = vtkLODActor::New();
-// COMMENT: {8/12/2005 4:49:00 PM}		this->PosXLineActors[i]->SetMapper(this->PosXLineMappers[i]);
-// COMMENT: {8/12/2005 4:49:00 PM}		{
-// COMMENT: {8/12/2005 4:49:00 PM}			if (this->m_gridKeyword.m_grid[0].uniform)
-// COMMENT: {8/12/2005 4:49:00 PM}			{
-// COMMENT: {8/12/2005 4:49:00 PM}				x[0] = min[0] + i * inc[0];
-// COMMENT: {8/12/2005 4:49:00 PM}			}
-// COMMENT: {8/12/2005 4:49:00 PM}			else
-// COMMENT: {8/12/2005 4:49:00 PM}			{
-// COMMENT: {8/12/2005 4:49:00 PM}				x[0] = this->m_gridKeyword.m_grid[0].coord[i] * units.horizontal.input_to_si;
-// COMMENT: {8/12/2005 4:49:00 PM}			}
-// COMMENT: {8/12/2005 4:49:00 PM}			//{{
-// COMMENT: {8/12/2005 4:49:00 PM}			pt1[1] = this->m_min[1];
-// COMMENT: {8/12/2005 4:49:00 PM}			pt1[2] = this->m_max[2];
-// COMMENT: {8/12/2005 4:49:00 PM}			pt2[1] = this->m_max[1];
-// COMMENT: {8/12/2005 4:49:00 PM}			pt2[2] = this->m_max[2];
-// COMMENT: {8/12/2005 4:49:00 PM}			//}}
-// COMMENT: {8/12/2005 4:49:00 PM}			pt1[0] = pt2[0] = x[0];
-// COMMENT: {8/12/2005 4:49:00 PM}			this->ScaleTransform->TransformPoint(pt1, pt1);
-// COMMENT: {8/12/2005 4:49:00 PM}			this->ScaleTransform->TransformPoint(pt2, pt2);
-// COMMENT: {8/12/2005 4:49:00 PM}			this->PosXLineSources[i]->SetPoint1(pt1);
-// COMMENT: {8/12/2005 4:49:00 PM}			this->PosXLineSources[i]->SetPoint2(pt2);
-// COMMENT: {8/12/2005 4:49:00 PM}		}
-// COMMENT: {8/12/2005 4:49:00 PM}// COMMENT: {8/12/2005 1:34:28 PM}		this->AddPart(this->PosXLineActors[i]);
-// COMMENT: {8/12/2005 4:49:00 PM}	}
-// COMMENT: {8/12/2005 4:49:00 PM}
-// COMMENT: {8/12/2005 4:49:00 PM}	for (int i = this->m_gridKeyword.m_grid[0].count_coord; i < num; ++i)
-// COMMENT: {8/12/2005 4:49:00 PM}	{
-// COMMENT: {8/12/2005 4:49:00 PM}		this->PosXLineSources[i] = vtkLineSource::New();
-// COMMENT: {8/12/2005 4:49:00 PM}		this->PosXLineFilters[i] = vtkTubeFilter::New();
-// COMMENT: {8/12/2005 4:49:00 PM}		this->PosXLineFilters[i]->SetRadius(250);
-// COMMENT: {8/12/2005 4:49:00 PM}		this->PosXLineFilters[i]->SetNumberOfSides(8);
-// COMMENT: {8/12/2005 4:49:00 PM}		this->PosXLineFilters[i]->SetInput(this->PosXLineSources[i]->GetOutput());
-// COMMENT: {8/12/2005 4:49:00 PM}		this->PosXLineMappers[i] = vtkPolyDataMapper::New();
-// COMMENT: {8/12/2005 4:49:00 PM}		//this->PosXLineMappers[i]->SetInput(this->PosXLineSources[i]->GetOutput());
-// COMMENT: {8/12/2005 4:49:00 PM}		this->PosXLineMappers[i]->SetInput(this->PosXLineFilters[i]->GetOutput());
-// COMMENT: {8/12/2005 4:49:00 PM}		this->PosXLineActors[i] = vtkLODActor::New();
-// COMMENT: {8/12/2005 4:49:00 PM}		this->PosXLineActors[i]->SetMapper(this->PosXLineMappers[i]);
-// COMMENT: {8/12/2005 4:49:00 PM}		{
-// COMMENT: {8/12/2005 4:49:00 PM}			int j = i - this->m_gridKeyword.m_grid[0].count_coord;
-// COMMENT: {8/12/2005 4:49:00 PM}			if (this->m_gridKeyword.m_grid[1].uniform)
-// COMMENT: {8/12/2005 4:49:00 PM}			{
-// COMMENT: {8/12/2005 4:49:00 PM}				x[1] = min[1] + j * inc[1];
-// COMMENT: {8/12/2005 4:49:00 PM}			}
-// COMMENT: {8/12/2005 4:49:00 PM}			else
-// COMMENT: {8/12/2005 4:49:00 PM}			{
-// COMMENT: {8/12/2005 4:49:00 PM}				x[1] = this->m_gridKeyword.m_grid[1].coord[j] * units.horizontal.input_to_si;
-// COMMENT: {8/12/2005 4:49:00 PM}			}
-// COMMENT: {8/12/2005 4:49:00 PM}			//{{
-// COMMENT: {8/12/2005 4:49:00 PM}			pt1[0] = this->m_min[0];
-// COMMENT: {8/12/2005 4:49:00 PM}			pt1[2] = this->m_max[2];
-// COMMENT: {8/12/2005 4:49:00 PM}			pt2[0] = this->m_max[0];
-// COMMENT: {8/12/2005 4:49:00 PM}			pt2[2] = this->m_max[2];
-// COMMENT: {8/12/2005 4:49:00 PM}			//}}
-// COMMENT: {8/12/2005 4:49:00 PM}			pt1[1] = pt2[1] = x[1];
-// COMMENT: {8/12/2005 4:49:00 PM}			this->ScaleTransform->TransformPoint(pt1, pt1);
-// COMMENT: {8/12/2005 4:49:00 PM}			this->ScaleTransform->TransformPoint(pt2, pt2);
-// COMMENT: {8/12/2005 4:49:00 PM}			this->PosXLineSources[i]->SetPoint1(pt1);
-// COMMENT: {8/12/2005 4:49:00 PM}			this->PosXLineSources[i]->SetPoint2(pt2);
-// COMMENT: {8/12/2005 4:49:00 PM}		}
-// COMMENT: {8/12/2005 4:49:00 PM}// COMMENT: {8/12/2005 1:34:22 PM}		this->AddPart(this->PosXLineActors[i]);
-// COMMENT: {8/12/2005 4:49:00 PM}	}
-// COMMENT: {8/12/2005 4:49:00 PM}
-// COMMENT: {8/12/2005 4:49:00 PM}	this->PosXLineCount = num;
-// COMMENT: {8/12/2005 4:49:00 PM}	//}}
-
-
-// COMMENT: {8/10/2005 5:14:49 PM}	// +z plane
-// COMMENT: {8/10/2005 5:14:49 PM}	this->PlaneSources[0]->SetOrigin(this->m_min[0], this->m_min[1], this->m_max[2]);
-// COMMENT: {8/10/2005 5:14:49 PM}	this->PlaneSources[0]->SetPoint1(this->m_min[0], this->m_max[1], this->m_max[2]);
-// COMMENT: {8/10/2005 5:14:49 PM}	this->PlaneSources[0]->SetPoint2(this->m_max[0], this->m_min[1], this->m_max[2]);
-// COMMENT: {8/10/2005 5:14:49 PM}	this->PlaneActors[0]->GetProperty()->SetColor(0, 0, 1);
-// COMMENT: {8/10/2005 5:14:49 PM}	this->PlaneActors[0]->GetProperty()->SetOpacity(0.1);
-// COMMENT: {8/10/2005 5:14:49 PM}
-// COMMENT: {8/10/2005 5:14:49 PM}	// -z plane
-// COMMENT: {8/10/2005 5:14:49 PM}	this->PlaneSources[1]->SetOrigin(this->m_min[0], this->m_min[1], this->m_min[2]);
-// COMMENT: {8/10/2005 5:14:49 PM}	this->PlaneSources[1]->SetPoint1(this->m_min[0], this->m_max[1], this->m_min[2]);
-// COMMENT: {8/10/2005 5:14:49 PM}	this->PlaneSources[1]->SetPoint2(this->m_max[0], this->m_min[1], this->m_min[2]);
-// COMMENT: {8/10/2005 5:14:49 PM}	this->PlaneActors[1]->GetProperty()->SetColor(0, 0, 1);
-// COMMENT: {8/10/2005 5:14:49 PM}	this->PlaneActors[1]->GetProperty()->SetOpacity(0.1);
-// COMMENT: {8/10/2005 5:14:49 PM}
-// COMMENT: {8/10/2005 5:14:49 PM}
-// COMMENT: {8/10/2005 5:14:49 PM}	// +y plane
-// COMMENT: {8/10/2005 5:14:49 PM}	this->PlaneSources[2]->SetOrigin(this->m_min[0], this->m_max[1], this->m_min[2]);
-// COMMENT: {8/10/2005 5:14:49 PM}	this->PlaneSources[2]->SetPoint1(this->m_min[0], this->m_max[1], this->m_max[2]);
-// COMMENT: {8/10/2005 5:14:49 PM}	this->PlaneSources[2]->SetPoint2(this->m_max[0], this->m_max[1], this->m_min[2]);
-// COMMENT: {8/10/2005 5:14:49 PM}	this->PlaneActors[2]->GetProperty()->SetColor(0, 1, 0);
-// COMMENT: {8/10/2005 5:14:49 PM}	this->PlaneActors[2]->GetProperty()->SetOpacity(0.1);
-// COMMENT: {8/10/2005 5:14:49 PM}
-// COMMENT: {8/10/2005 5:14:49 PM}	// -y plane
-// COMMENT: {8/10/2005 5:14:49 PM}	this->PlaneSources[3]->SetOrigin(this->m_min[0], this->m_min[1], this->m_min[2]);
-// COMMENT: {8/10/2005 5:14:49 PM}	this->PlaneSources[3]->SetPoint1(this->m_min[0], this->m_min[1], this->m_max[2]);
-// COMMENT: {8/10/2005 5:14:49 PM}	this->PlaneSources[3]->SetPoint2(this->m_max[0], this->m_min[1], this->m_min[2]);
-// COMMENT: {8/10/2005 5:14:49 PM}	this->PlaneActors[3]->GetProperty()->SetColor(0, 1, 0);
-// COMMENT: {8/10/2005 5:14:49 PM}	this->PlaneActors[3]->GetProperty()->SetOpacity(0.1);
-// COMMENT: {8/10/2005 5:14:49 PM}
-// COMMENT: {8/10/2005 5:14:49 PM}	// +x plane
-// COMMENT: {8/10/2005 5:14:49 PM}	this->PlaneSources[4]->SetOrigin(this->m_max[0], this->m_min[1], this->m_min[2]);
-// COMMENT: {8/10/2005 5:14:49 PM}	this->PlaneSources[4]->SetPoint1(this->m_max[0], this->m_min[1], this->m_max[2]);
-// COMMENT: {8/10/2005 5:14:49 PM}	this->PlaneSources[4]->SetPoint2(this->m_max[0], this->m_max[1], this->m_min[2]);
-// COMMENT: {8/10/2005 5:14:49 PM}	this->PlaneActors[4]->GetProperty()->SetColor(1, 0, 0);
-// COMMENT: {8/10/2005 5:14:49 PM}	this->PlaneActors[4]->GetProperty()->SetOpacity(0.1);
-// COMMENT: {8/10/2005 5:14:49 PM}
-// COMMENT: {8/10/2005 5:14:49 PM}	// -x plane
-// COMMENT: {8/10/2005 5:14:49 PM}	this->PlaneSources[5]->SetOrigin(this->m_min[0], this->m_min[1], this->m_min[2]);
-// COMMENT: {8/10/2005 5:14:49 PM}	this->PlaneSources[5]->SetPoint1(this->m_min[0], this->m_min[1], this->m_max[2]);
-// COMMENT: {8/10/2005 5:14:49 PM}	this->PlaneSources[5]->SetPoint2(this->m_min[0], this->m_max[1], this->m_min[2]);
-// COMMENT: {8/10/2005 5:14:49 PM}	this->PlaneActors[5]->GetProperty()->SetColor(1, 0, 0);
-// COMMENT: {8/10/2005 5:14:49 PM}	this->PlaneActors[5]->GetProperty()->SetOpacity(0.1);
-
-
 	if (!this->PlaneWidget)
 	{
-		//this->PlaneWidget = vtkImplicitPlaneWidget::New();
 		this->PlaneWidget = CGridLineWidget::New();
 
 		vtkCallbackCommand* Callback = vtkCallbackCommand::New();
@@ -744,15 +594,8 @@ void CGridActor::Setup(const CUnits& units)
 		this->PlaneWidget->AddObserver(vtkCommand::StartInteractionEvent, Callback);
 		Callback->Delete();
 
-		//this->PlaneWidget->SetInteractor(this->Interactor);
 		this->PlaneWidget->SetInput(sgrid);
-// COMMENT: {8/1/2005 6:36:30 PM}		this->PlaneWidget->PlaceWidget();
-		//this->PlaneWidget->NormalToZAxisOn();
-		//this->PlaneWidget->EnabledOn();
-
-		//{{
 		this->PlaneWidget->SetPlaceFactor(1);
-		//}}
 	}
 
 	this->m_pGeometryFilter->SetInput(sgrid);
@@ -864,6 +707,10 @@ void CGridActor::SetEnabled(int enabling)
 			this->EventCallbackCommand, 10);
 		i->AddObserver(vtkCommand::KeyPressEvent, 
 			this->EventCallbackCommand, 10);
+		//{{
+		i->AddObserver(vtkCommand::CharEvent, 
+			this->EventCallbackCommand, 10);		
+		//}}
 
 	}
 
@@ -1029,6 +876,23 @@ void CGridActor::ProcessEvents(vtkObject* object, unsigned long event, void* cli
 		self->OnKeyPress();
 		break;
 
+	case vtkCommand::CharEvent:
+		{
+			switch (self->Interactor->GetKeyCode())
+			{
+			case 'p':
+			case 'P':
+				if (self->PlaneWidget->GetEnabled())
+				{
+					// don't allow the PlaneWidget to be picked
+					//
+					self->EventCallbackCommand->SetAbortFlag(1);
+				}
+				break;
+			}
+		}
+		break;	
+
 	case vtkCommand::InteractionEvent:
 		ASSERT(object == self->PlaneWidget);
 		self->OnInteraction();
@@ -1124,39 +988,19 @@ void CGridActor::OnMouseMove()
 		return;
 	}
 
-// COMMENT: {8/16/2005 4:36:46 PM}	this->LinePicker->Pick(X, Y, 0.0, ren);
 	this->LinePicker->PickFromListOn();
-	this->LinePicker->AddPickList(this->Actor);
-	//{{
-// COMMENT: {8/16/2005 4:36:19 PM}	vtkCellPicker* pCellPicker = this->LinePicker;
-	//}}
-
-
-// COMMENT: {8/16/2005 4:33:08 PM}	vtkCellPicker* pCellPicker = vtkCellPicker::New();
-// COMMENT: {8/16/2005 4:33:08 PM}	//pCellPicker->SetTolerance(0.001);
-// COMMENT: {8/16/2005 4:33:08 PM}	pCellPicker->SetTolerance(0.002);
-// COMMENT: {8/16/2005 4:33:55 PM}	pCellPicker->PickFromListOn();
-// COMMENT: {8/16/2005 4:33:55 PM}	this->PickableOn();
-// COMMENT: {8/9/2005 8:09:18 PM}	pCellPicker->AddPickList(this);
 	this->Actor->PickableOn();
-// COMMENT: {8/16/2005 4:34:02 PM}	pCellPicker->AddPickList(this->Actor);
+	this->LinePicker->AddPickList(this->Actor);
 
-	//{{
-	vtkAssemblyPath *path;
 	this->LinePicker->Pick(X, Y, 0.0, ren);
-	path = this->LinePicker->GetPath();
-	//}}
+	vtkAssemblyPath *path = this->LinePicker->GetPath();
 
-// COMMENT: {8/11/2005 3:29:09 PM}	if (pCellPicker->Pick(X, Y, 0.0, this->CurrentRenderer))
 	if (path != 0)
 	{
-		//{{
 		vtkActor* pActor = vtkActor::SafeDownCast(path->GetFirstNode()->GetProp());
 		ASSERT(path->GetNumberOfItems() == 1);
 		ASSERT(pActor);
 		ASSERT(pActor == this->Actor);
-// COMMENT: {8/11/2005 3:35:26 PM}		return;
-		//}}
 
 		vtkIdType n = this->LinePicker->GetCellId();
 		TRACE("CellId = %d\n", n);
@@ -1349,8 +1193,6 @@ void CGridActor::OnMouseMove()
 		this->Interactor->Render();
 	}
 	this->LinePicker->DeletePickList(this->Actor);
-// COMMENT: {8/16/2005 4:34:51 PM}	pCellPicker->Delete();
-// COMMENT: {8/16/2005 4:35:02 PM}	this->PickableOff();
 	this->Actor->PickableOff();
 }
 
@@ -1470,7 +1312,7 @@ void CGridActor::OnEndInteraction(void)
 					// at this point the variables:
 					//     AxisIndex
 					//     PlaneIndex
-					// should be valid for the use of the listeners use
+					// should be valid for the listeners use
 
 					// notify listeners
 					this->InvokeEvent(CGridActor::InsertGridLineEvent, &value);
@@ -1731,8 +1573,6 @@ void CGridActor::SetScale(vtkFloatingPointType scale[3])
 {
 	this->ScaleTransform->Identity();
 	this->ScaleTransform->Scale(scale);
-	///this->UpdatePoints();
-	///this->Actor->SetScale(scale);
 	this->Setup(this->m_units);
 }
 

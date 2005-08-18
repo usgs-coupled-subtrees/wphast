@@ -184,3 +184,256 @@ void TestCGrid::testUniformCtorAgreesWithSetUniformRange(void)
 	CPPUNIT_ASSERT(x.c                == gridX.c);
 	CPPUNIT_ASSERT(x.elt_centroid     == gridX.elt_centroid);
 }
+
+void TestCGrid::testSubDivideByOne(void)
+{
+	CGrid start(0.0, 1000.0, 6);
+	start.Setup();
+
+	CGrid same(0.0, 1000.0, 6);
+	same.Setup();
+
+	same.SubDivide(0, 1, 1);
+	CPPUNIT_ASSERT(start.count_coord == same.count_coord);
+}
+
+void TestCGrid::testSubDivideByTwo(void)
+{
+	CGrid uni6(0.0, 1000.0, 6);
+	uni6.Setup();
+
+	afxDump << "uni6\n";
+	uni6.Dump(afxDump);
+
+	CGrid sub012(uni6);
+	CPPUNIT_ASSERT(sub012.count_coord == 6);
+
+	sub012.SubDivide(0, 1, 2);
+	CPPUNIT_ASSERT(sub012.count_coord == 7);
+	CPPUNIT_ASSERT(sub012.coord[0] == uni6.coord[0]);
+	CPPUNIT_ASSERT(sub012.coord[2] == uni6.coord[1]);
+
+	afxDump << "sub012\n";
+	sub012.Dump(afxDump);
+}
+
+void TestCGrid::testSubDivideByThree(void)
+{
+	CGrid uni6(0.0, 1000.0, 6);
+	uni6.Setup();
+
+	afxDump << "uni6\n";
+	uni6.Dump(afxDump);
+
+	CGrid sub013(uni6);
+	CPPUNIT_ASSERT(sub013.count_coord == 6);
+
+	sub013.SubDivide(0, 1, 3);
+	CPPUNIT_ASSERT(sub013.count_coord == 8);
+	CPPUNIT_ASSERT(sub013.coord[0] == uni6.coord[0]);
+	CPPUNIT_ASSERT(sub013.coord[3] == uni6.coord[1]);
+	for (int i = 4; i < sub013.count_coord; ++i)
+	{
+		CPPUNIT_ASSERT(sub013.coord[i] == uni6.coord[i - 2]);
+	}
+
+	afxDump << "sub013\n";
+	sub013.Dump(afxDump);
+}
+
+void TestCGrid::testRefineByOne(void)
+{
+// COMMENT: {8/17/2005 5:39:07 PM}	CGrid start(0.0, 1000.0, 6);
+// COMMENT: {8/17/2005 5:39:07 PM}	start.Setup();
+// COMMENT: {8/17/2005 5:39:07 PM}
+// COMMENT: {8/17/2005 5:39:07 PM}	CGrid same(0.0, 1000.0, 6);
+// COMMENT: {8/17/2005 5:39:07 PM}	same.Setup();
+// COMMENT: {8/17/2005 5:39:07 PM}
+// COMMENT: {8/17/2005 5:39:07 PM}	CPPUNIT_ASSERT(start.count_coord == same.count_coord);
+// COMMENT: {8/17/2005 5:39:07 PM}	start.Setup();
+// COMMENT: {8/17/2005 5:39:07 PM}	same.Setup();
+// COMMENT: {8/17/2005 5:39:07 PM}	for (int i = 0; i < start.count_coord; ++i)
+// COMMENT: {8/17/2005 5:39:07 PM}	{
+// COMMENT: {8/17/2005 5:39:07 PM}		CPPUNIT_ASSERT(start.coord[i] == same.coord[i]);
+// COMMENT: {8/17/2005 5:39:07 PM}	}
+
+	const int count_uniform = 6;
+	const int count_parts = 1;
+
+	CGrid uniform(0.0, 1000.0, count_uniform);
+	uniform.Setup();
+	afxDump << "\n";
+	afxDump << "uniform(0.0, 1000.0," << count_uniform << ");\n";
+	uniform.Dump(afxDump);
+
+	for (int i = 0; i < uniform.count_coord - 1; ++i)
+	{
+		CGrid sub(uniform);
+		sub.Setup();
+		CPPUNIT_ASSERT(sub.count_coord == uniform.count_coord);
+		sub.SubDivide(i, i + 1, count_parts);
+		CPPUNIT_ASSERT(sub.count_coord == uniform.count_coord + count_parts - 1);
+
+		afxDump << "\n";
+		afxDump << "sub.SubDivide(" << i << ", " << i + 1 << ", " << count_parts << ")\n";
+		sub.Dump(afxDump);
+
+		CGrid ref(sub);
+		ref.Setup();
+		ref.Refine(i, i + count_parts, count_parts);
+		CPPUNIT_ASSERT(ref.count_coord == uniform.count_coord);
+
+		for (int i = 0; i < ref.count_coord; ++i)
+		{
+			CPPUNIT_ASSERT(ref.coord[i] == uniform.coord[i]);
+		}
+	}
+
+}
+
+void TestCGrid::testRefineByTwo(void)
+{
+	const int count_uniform = 6;
+	const int count_parts = 2;
+
+	CGrid uniform(0.0, 1000.0, count_uniform);
+	uniform.Setup();
+	afxDump << "\n";
+	afxDump << "uniform(0.0, 1000.0," << count_uniform << ");\n";
+	uniform.Dump(afxDump);
+
+	for (int i = 0; i < uniform.count_coord - 1; ++i)
+	{
+		CGrid sub(uniform);
+		sub.Setup();
+		CPPUNIT_ASSERT(sub.count_coord == uniform.count_coord);
+		sub.SubDivide(i, i + 1, count_parts);
+		CPPUNIT_ASSERT(sub.count_coord == uniform.count_coord + count_parts - 1);
+
+		afxDump << "\n";
+		afxDump << "sub.SubDivide(" << i << ", " << i + 1 << ", " << count_parts << ")\n";
+		sub.Dump(afxDump);
+
+		CGrid ref(sub);
+		ref.Setup();
+		ref.Refine(i, i + count_parts, count_parts);
+		CPPUNIT_ASSERT(ref.count_coord == uniform.count_coord);
+
+		for (int i = 0; i < ref.count_coord; ++i)
+		{
+			CPPUNIT_ASSERT(ref.coord[i] == uniform.coord[i]);
+		}
+	}
+}
+
+void TestCGrid::testRefineByThree(void)
+{
+	const int count_uniform = 6;
+	const int count_parts = 3;
+
+	CGrid uniform(0.0, 1000.0, count_uniform);
+	uniform.Setup();
+	afxDump << "\n";
+	afxDump << "uniform(0.0, 1000.0," << count_uniform << ");\n";
+	uniform.Dump(afxDump);
+
+	for (int i = 0; i < uniform.count_coord - 1; ++i)
+	{
+		CGrid sub(uniform);
+		sub.Setup();
+		CPPUNIT_ASSERT(sub.count_coord == uniform.count_coord);
+		sub.SubDivide(i, i + 1, count_parts);
+		CPPUNIT_ASSERT(sub.count_coord == uniform.count_coord + count_parts - 1);
+
+		afxDump << "\n";
+		afxDump << "sub.SubDivide(" << i << ", " << i + 1 << ", " << count_parts << ")\n";
+		sub.Dump(afxDump);
+
+		CGrid ref(sub);
+		ref.Setup();
+		ref.Refine(i, i + count_parts, count_parts);
+		CPPUNIT_ASSERT(ref.count_coord == uniform.count_coord);
+
+		for (int i = 0; i < ref.count_coord; ++i)
+		{
+			CPPUNIT_ASSERT(ref.coord[i] == uniform.coord[i]);
+		}
+	}
+}
+
+void TestCGrid::testSubDivideAll(void)
+{
+	const int count_uniform = 6;
+	const int count_parts_max = 20;
+
+	CGrid uniform(0.0, 1000.0, count_uniform);
+	uniform.Setup();
+	afxDump << "\n";
+	afxDump << "uniform(0.0, 1000.0, " << count_uniform << "):\n";
+	uniform.Dump(afxDump);
+
+	for (int n = 2; n < count_parts_max; ++n)
+	{
+		CGrid sub(uniform);
+		sub.SubDivide(0, uniform.count_coord - 1, n);
+	
+		ASSERT(sub.count_coord == (uniform.count_coord - 1) * n + 1);
+		CPPUNIT_ASSERT(sub.count_coord == (uniform.count_coord - 1) * n + 1);
+	}
+}
+
+void TestCGrid::testRefineAll(void)
+{
+	const int count_uniform = 6;
+	const int count_parts_max = 20;
+
+	CGrid uniform(0.0, 1000.0, count_uniform);
+	uniform.Setup();
+
+	for (int n = 2; n < count_parts_max; ++n)
+	{
+		CGrid sub(uniform);
+		sub.SubDivide(0, uniform.count_coord - 1, n);
+	
+		ASSERT(sub.count_coord == (uniform.count_coord - 1) * n + 1);
+		CPPUNIT_ASSERT(sub.count_coord == (uniform.count_coord - 1) * n + 1);
+
+		CGrid ref(sub);
+		ref.Refine(0, ref.count_coord - 1, n);
+
+		for (int i = 0; i < ref.count_coord; ++i)
+		{
+			ASSERT(ref.coord[i] == uniform.coord[i]);
+			CPPUNIT_ASSERT(ref.coord[i] == uniform.coord[i]);
+		}
+	}
+}
+
+void TestCGrid::testClosest(void)
+{
+	CGrid uniform(0.0, 1000.0, 6);
+	uniform.Setup();
+
+	int val;
+	val = uniform.Closest(-1.0);
+	ASSERT(val == 0);
+	CPPUNIT_ASSERT(val == 0);
+
+	val = uniform.Closest(2000.0);
+	ASSERT(val == uniform.count_coord - 1);
+	CPPUNIT_ASSERT(val == uniform.count_coord - 1);
+
+	for (int i = 0; i < uniform.count_coord; ++i)
+	{
+        ASSERT(uniform.Closest(uniform.coord[i]) == i);
+        CPPUNIT_ASSERT(uniform.Closest(uniform.coord[i]) == i);
+	}
+
+	// what about midway?
+	for (int i = 0; i < uniform.count_coord - 1; ++i)
+	{
+		val = uniform.Closest((uniform.coord[i] + uniform.coord[i + 1]) / 2);
+        ASSERT(val == i + 1);
+        CPPUNIT_ASSERT(val == i + 1);
+	}
+}

@@ -60,7 +60,7 @@ void TCPPUnit::RunUnitTests(void)
 		runner.addTest(TestCBCZone::suite());
 		runner.addTest(TestCBCSpecifiedPropertyPage::suite());
 #endif
-		runner.addTest(TestCTimeControlMultiPropertyPage2::suite());
+// COMMENT: {8/17/2005 3:52:59 PM}		runner.addTest(TestCTimeControlMultiPropertyPage2::suite());
 
 		/**********************************************************
 		// the following require user input
@@ -91,5 +91,5 @@ void TCPPUnit::RunUnitTests(void)
 	}
 
 	CPPUNIT_ASSERT(::fcloseall() == 0);
-	///exit(0);
+	exit(0);
 }

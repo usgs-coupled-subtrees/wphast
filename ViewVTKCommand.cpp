@@ -182,32 +182,51 @@ void CViewVTKCommand::OnEndPickEvent(vtkObject* caller, void* callData)
 				afxDump << "vtkAssemblyPath{{\n" << oss.str() << "vtkAssemblyPath}}\n";
 				oss.rdbuf()->freeze(false); // this must be called after str() to avoid memory leak
 
-				ASSERT(path->GetNumberOfItems() == 2); // the vtkPropAssembly and the CZoneActor or CWellActor
 				ASSERT(path->GetFirstNode()->GetProp()->IsA("vtkPropAssembly"));
 
-				// this will change as additional pickable types are added
-				//
-				ASSERT(
-                    path->GetLastNode()->GetProp()->IsA("CZoneActor")
-					||
-					path->GetLastNode()->GetProp()->IsA("CWellActor")
-					);
+				if (path->GetNumberOfItems() == 3)
+				{
+					// should be river
+					//
+					path->InitTraversal();
+					vtkProp* pPropAssembly = path->GetNextNode()->GetProp();
+					ASSERT(pPropAssembly->IsA("vtkPropAssembly"));
+					vtkProp* pRiverActor = path->GetNextNode()->GetProp();
+					ASSERT(pRiverActor->IsA("CRiverActor"));
+					if (CRiverActor *pRiver = CRiverActor::SafeDownCast(pRiverActor))
+					{
+						this->m_pView->GetDocument()->Select(pRiver);
+					}
+				}
+				else
+				{
+					ASSERT(path->GetNumberOfItems() == 2); // the vtkPropAssembly and the CZoneActor or CWellActor
+
+					// this will change as additional pickable types are added
+					//
+					ASSERT(
+						path->GetLastNode()->GetProp()->IsA("CZoneActor")
+						||
+						path->GetLastNode()->GetProp()->IsA("CWellActor")
+						);
+
+					// check if zone
+					//
+					if (CZoneActor *pZone = CZoneActor::SafeDownCast(path->GetLastNode()->GetProp()))
+					{
+						pZone->Select(this->m_pView);
+					}
+
+					// check if well
+					//
+					if (CWellActor *pWell = CWellActor::SafeDownCast(path->GetLastNode()->GetProp()))
+					{
+						this->m_pView->GetDocument()->Select(pWell);
+					}
+
+				}
 			}
 #endif
-
-			// check if zone
-			//
-			if (CZoneActor *pZone = CZoneActor::SafeDownCast(path->GetLastNode()->GetProp()))
-			{
-				pZone->Select(this->m_pView);
-			}
-
-			// check if well
-			//
-			if (CWellActor *pWell = CWellActor::SafeDownCast(path->GetLastNode()->GetProp()))
-			{
-				this->m_pView->GetDocument()->Select(pWell);
-			}
 
 #ifdef _DEBUG
 			int* xy = this->m_pView->GetRenderWindowInteractor()->GetEventPosition();

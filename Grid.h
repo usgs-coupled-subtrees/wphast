@@ -35,7 +35,6 @@ public:
 	void Insert(CTreeCtrlNode node);
 	void Resize(size_t count);
 	double& At(size_t pos);
-	//{{
 	template<class InputIterator>
 		void insert(InputIterator First, InputIterator Last)
 		{	// insert [First, Last), arbitrary iterators
@@ -48,7 +47,10 @@ public:
 			this->count_coord = (int)this->m_coordinates.size();
 			this->coord = &this->m_coordinates[0];
 		}
-	//}}
+	void SubDivide(int nStart, int nEnd, int nParts);
+	void Refine(int nStart, int nEnd, int nParts);
+	int Closest(double value)const;
+	static void Fill(std::vector<double>& vec, double x1, double x2, int count);
 #ifdef _DEBUG
 	void Dump(CDumpContext& dc)const;
 #endif

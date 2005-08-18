@@ -2,7 +2,8 @@
 #include "Grid.h"
 
 #include "Global.h"
-#include <ostream> // std::ostream
+#include <ostream>   // std::ostream
+#include <algorithm> // std::lower_bound
 
 // Note: No header files should follow the following three lines
 #ifdef _DEBUG
@@ -263,33 +264,22 @@ void CGrid::Setup(void)
 		if (this->uniform_expanded == TRUE)
 		{
 			// already expanded
-			ASSERT(AfxIsValidAddress(this->coord, sizeof(double) * this->count_coord));
+			ASSERT(AfxIsValidAddress(this->coord, sizeof(double) * 2));
 		}
 		else
 		{
-			double x1 = this->coord[0];
-			double x2 = this->coord[1];
-			ASSERT(x1 < x2);
-			double increment = (x2 - x1) / (this->count_coord - 1);
+			ASSERT(AfxIsValidAddress(this->coord, sizeof(double) * 2));
 
-			///delete[] this->coord;
-			///this->coord = new double[this->count_coord];
-			this->m_coordinates.resize(this->count_coord);
-			this->coord = &this->m_coordinates[0];
-
-			for (int j = 0; j < this->count_coord; ++j)
-			{
-				this->coord[j] = x1 + j * increment;
-			}
-			//{{
-			this->coord[0]                     = x1;
-			this->coord[this->count_coord - 1] = x2;
-			//}}
+			CGrid::Fill(this->m_coordinates, this->coord[0], this->coord[1], this->count_coord);
+			this->coord            = &this->m_coordinates[0];
 			this->uniform_expanded = TRUE;
+
+			ASSERT(AfxIsValidAddress(this->coord, sizeof(double) * this->count_coord));
 		}
 	}
 	else
 	{
+#ifdef _DEBUG
 		ASSERT(AfxIsValidAddress(this->coord, sizeof(double) * this->count_coord));
 		for (int j = 1; j < this->count_coord; ++j)
 		{
@@ -298,6 +288,7 @@ void CGrid::Setup(void)
 				ASSERT(false);
 			}
 		}
+#endif
 	}
 }
 
@@ -422,8 +413,6 @@ void CGrid::Serialize(bool bStoring, hid_t loc_id)
 		}
 		else
 		{
-			///delete[] this->coord;
-			///this->coord = new double[this->count_coord];
 			this->m_coordinates.resize(this->count_coord);
 			this->coord = &this->m_coordinates[0];
 			status = CGlobal::HDFSerialize(bStoring, loc_id, szCoord, H5T_NATIVE_DOUBLE, this->count_coord, this->coord);
@@ -438,6 +427,9 @@ void CGrid::Serialize(bool bStoring, hid_t loc_id)
 
 void CGrid::SetUniformRange(double minimum, double maximum, int count_coord)
 {
+	ASSERT(this->m_coordinates.size() >= 2);
+	ASSERT(AfxIsValidAddress(this->coord, sizeof(double) * 2));
+
 	this->count_coord      = count_coord;
 	this->uniform          = TRUE;
 	this->uniform_expanded = FALSE;
@@ -532,14 +524,7 @@ std::ostream& operator<< (std::ostream &os, const CGrid &a)
 
 void CGrid::Resize(size_t count)
 {
-// COMMENT: {7/21/2005 3:43:25 PM}	if (count > (size_t)this->count_coord)
-// COMMENT: {7/21/2005 3:43:25 PM}	{
-// COMMENT: {7/21/2005 3:43:25 PM}		if (this->coord)
-// COMMENT: {7/21/2005 3:43:25 PM}		{
-// COMMENT: {7/21/2005 3:43:25 PM}			delete[] this->coord;
-// COMMENT: {7/21/2005 3:43:25 PM}		}
-// COMMENT: {7/21/2005 3:43:25 PM}		this->coord = new double[count];
-// COMMENT: {7/21/2005 3:43:25 PM}	}
+	ASSERT(count >= 2);
 	if (count > 2)
 	{
 		this->count_coord = (int)count;
@@ -552,6 +537,108 @@ double& CGrid::At(size_t pos)
 {
 	ASSERT(pos < (size_t)this->count_coord);
 	ASSERT(this->m_coordinates.size() == this->count_coord);
-	///return this->coord[pos];
 	return this->m_coordinates.at(pos);
+}
+
+void CGrid::SubDivide(int nStart, int nEnd, int nParts)
+{
+	ASSERT(0 <= nStart);
+	ASSERT(nStart <= nEnd);
+	ASSERT(nEnd < this->count_coord);
+
+	if (nParts == 1) return;
+
+	if (nStart == nEnd) return;
+
+	if (this->uniform && !this->uniform_expanded)
+	{
+		this->Setup();
+	}
+
+	// store coordinates
+	std::set<double> coordinates;
+	coordinates.insert(this->coord, this->coord + this->count_coord);
+
+	// insert coordinates
+	for (int i = nStart; i < nEnd; ++i)
+	{
+		double d1 = this->coord[i];
+		double d2 = this->coord[i + 1];
+		for (int c = 1; c < nParts; ++c)
+		{
+			double v = d1 + c * (d2 - d1) / nParts;
+			coordinates.insert(v);
+		}
+	}
+	this->insert(coordinates.begin(), coordinates.end());    
+}
+
+void CGrid::Refine(int nStart, int nEnd, int nParts)
+{
+	ASSERT(0 <= nStart);
+	ASSERT(nStart <= nEnd);
+	ASSERT(nEnd < this->count_coord);
+
+	if (nParts == 1) return;
+
+	if (nStart == nEnd) return;
+
+	if (this->uniform && !this->uniform_expanded)
+	{
+		this->Setup();
+	}
+
+	// store coordinates
+	std::set<double> coordinates;
+	coordinates.insert(this->coord, this->coord + this->count_coord);
+
+	// remove coordinates
+	for (int i = nStart; i < nEnd; i += nParts)
+	{
+		for (int c = 1; c < nParts; ++c)
+		{
+			double v = this->coord[i + c];
+			VERIFY(coordinates.erase(v) == 1);
+		}
+	}
+	this->insert(coordinates.begin(), coordinates.end());    
+}
+
+int CGrid::Closest(double value)const
+{
+	std::vector<double>::const_iterator begin;
+	std::vector<double>::const_iterator end;
+	std::vector<double> t_vector;
+	if (this->uniform && !this->uniform_expanded)
+	{
+		CGrid::Fill(t_vector, this->coord[0], this->coord[1], this->count_coord);
+		begin = t_vector.begin();
+		end = t_vector.end();
+	}
+	else
+	{
+		begin = this->m_coordinates.begin();
+		end = this->m_coordinates.end();
+	}
+
+	std::vector<double>::const_iterator iter;
+	iter = std::lower_bound(begin, end, value);
+	if (iter == end)
+	{
+		return (this->count_coord - 1);
+	}
+	return (iter - begin);
+}
+
+void CGrid::Fill(std::vector<double>& vec, double x1, double x2, int count)
+{
+	ASSERT(x1 < x2);
+	double increment = (x2 - x1) / (count - 1);
+	vec.resize(count);
+	for (int j = 0; j < count; ++j)
+	{
+		vec[j] = x1 + j * increment;
+	}
+	vec[0]         = x1;
+	vec[count - 1] = x2;
 }

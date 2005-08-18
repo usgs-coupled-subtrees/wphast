@@ -30,7 +30,7 @@ protected:
 
 	// ProcessEvents() dispatches to these methods.
 	void OnLeftButtonDown();
-	void OnLeftButtonUp();
+	//void OnLeftButtonUp();
 	//void OnMiddleButtonDown();
 	//void OnMiddleButtonUp();
 	//void OnRightButtonDown();

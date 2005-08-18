@@ -244,25 +244,6 @@ void CGridLineWidget::OnLeftButtonDown()
   this->Interactor->Render();
 }
 
-void CGridLineWidget::OnLeftButtonUp()
-{
-  if ( this->State == vtkImplicitPlaneWidget::Outside )
-    {
-    return;
-    }
-
-  this->State = vtkImplicitPlaneWidget::Start;
-  this->HighlightPlane(0);
-  this->HighlightOutline(0);
-  this->HighlightNormal(0);
-  this->SizeHandles();
-
-  this->EventCallbackCommand->SetAbortFlag(1);
-  this->EndInteraction();
-  this->InvokeEvent(vtkCommand::EndInteractionEvent,NULL);
-  this->Interactor->Render();
-}
-
 void CGridLineWidget::SetInitialPickPosition(vtkFloatingPointType pos[3])
 {
 	for (int i = 0; i < 3; ++i)

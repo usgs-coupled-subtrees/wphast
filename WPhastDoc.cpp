@@ -4208,11 +4208,13 @@ void CWPhastDoc::UnRemove(CWellActor *pWellActor)
 
 void CWPhastDoc::Select(CWellActor *pWellActor)
 {	
+	ASSERT(pWellActor && pWellActor->IsA("CWellActor"));
 	this->Notify(0, WPN_SELCHANGED, 0, pWellActor);
 }
 
 void CWPhastDoc::Select(CRiverActor *pRiverActor)
 {
+	ASSERT(pRiverActor && pRiverActor->IsA("CRiverActor"));
 	this->Notify(0, WPN_SELCHANGED, 0, pRiverActor);
 }
 
@@ -4823,6 +4825,13 @@ void CWPhastDoc::UpdateGridDomain(void)
 					// update radius
 					//
 					pRiverActor->ScaleFromBounds(this->GetGridBounds());
+
+					//
+					//
+					CGrid x, y, z;
+					this->GetGrid(x, y, z);
+					z.Setup();
+					pRiverActor->SetZ(z.coord[z.count_coord - 1]);
 				}
 			}
 		}
@@ -4848,7 +4857,8 @@ void CWPhastDoc::UpdateGridDomain(void)
 
 					// update radius
 					//
-					pWellActor->SetDefaultTubeDiameter(defaultAxesSize * 0.17 / sqrt(scale[0] * scale[1]));
+// COMMENT: {8/16/2005 6:59:13 PM}					pWellActor->SetDefaultTubeDiameter(defaultAxesSize * 0.17 / sqrt(scale[0] * scale[1]));
+					pWellActor->SetDefaultTubeDiameter(defaultAxesSize * 0.17);
 				}
 			}
 		}
