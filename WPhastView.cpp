@@ -52,6 +52,8 @@
 #include "RiverPropertyPage2.h"
 #include "Grid.h"
 #include "FlowOnly.h"
+#include "ModifyGridCommand.h"
+#include <vtkImplicitPlaneWidget.h>
 
 
 // #include "CreateZoneAction.h"
@@ -103,6 +105,8 @@ BEGIN_MESSAGE_MAP(CWPhastView, CView)
 	ON_WM_DESTROY()
 	ON_COMMAND(ID_TOOLS_MOVE_VER_LINE, OnToolsMoveVerLine)
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_MOVE_VER_LINE, OnUpdateToolsMoveVerLine)
+	ON_UPDATE_COMMAND_UI(ID_TOOLS_MODIFYGRID, OnUpdateToolsModifyGrid)
+	ON_COMMAND(ID_TOOLS_MODIFYGRID, OnToolsModifyGrid)
 END_MESSAGE_MAP()
 
 // CWPhastView construction/destruction
@@ -117,6 +121,7 @@ CWPhastView::CWPhastView()
 , m_pPointWidget2(0)
 , m_pRiverActor(0)
 , RiverCallbackCommand(0)
+, ModifyGridCommand(0)
 , m_bMovingGridLine(false)
 {
 	// Create the renderer, window and interactor objects.
@@ -241,6 +246,12 @@ CWPhastView::~CWPhastView()
 	if (this->CreatingNewZone())
 	{
 		this->EndNewZone();
+	}
+
+	if (this->ModifyGridCommand)
+	{
+		this->ModifyGridCommand->Delete();
+		this->ModifyGridCommand = 0;
 	}
 
 
@@ -1631,7 +1642,22 @@ void CWPhastView::OnToolsMoveVerLine()
 
 void CWPhastView::OnUpdateToolsMoveVerLine(CCmdUI *pCmdUI)
 {
-	pCmdUI->Enable(TRUE);
+	if (CGridActor* pGridActor = CGridActor::SafeDownCast(this->GetDocument()->GetGridActor()))
+	{
+		if (pGridActor->GetVisibility())
+		{
+			pCmdUI->Enable(TRUE);
+		}
+		else
+		{
+			pCmdUI->Enable(FALSE);
+		}
+	}
+	else
+	{
+		pCmdUI->Enable(FALSE);
+	}
+
 	if (this->m_bMovingGridLine)
 	{
 		pCmdUI->SetCheck(1);
@@ -1968,3 +1994,133 @@ HCURSOR Test()
 
 	return hcurFinal;
 }
+
+void CWPhastView::OnUpdateToolsModifyGrid(CCmdUI *pCmdUI)
+{
+	if (CGridActor* pGridActor = CGridActor::SafeDownCast(this->GetDocument()->GetGridActor()))
+	{
+		if (pGridActor->GetVisibility())
+		{
+			pCmdUI->Enable(TRUE);
+		}
+		else
+		{
+			pCmdUI->Enable(FALSE);
+		}
+	}
+	else
+	{
+		pCmdUI->Enable(FALSE);
+	}
+
+	if (this->ModifyGridCommand)
+	{
+		pCmdUI->SetCheck(1);
+	}
+	else
+	{
+		pCmdUI->SetCheck(0);
+	}
+}
+
+void CWPhastView::OnToolsModifyGrid()
+{
+// COMMENT: {8/18/2005 8:57:33 PM}	if (CGridActor* pGridActor = CGridActor::SafeDownCast(this->GetDocument()->GetGridActor()))
+// COMMENT: {8/18/2005 8:57:33 PM}	{
+// COMMENT: {8/18/2005 8:57:33 PM}		int nCount = 3;
+// COMMENT: {8/18/2005 8:57:33 PM}		// int nEnd = grid.m_grid[0].count_coord - 1;
+// COMMENT: {8/18/2005 8:57:33 PM}		int nStart = 2;
+// COMMENT: {8/18/2005 8:57:33 PM}		int nEnd;
+// COMMENT: {8/18/2005 8:57:33 PM}
+// COMMENT: {8/18/2005 8:57:33 PM}		CGridKeyword grid;
+// COMMENT: {8/18/2005 8:57:33 PM}		pGridActor->GetGridKeyword(grid);
+// COMMENT: {8/18/2005 8:57:33 PM}
+// COMMENT: {8/18/2005 8:57:33 PM}		for (nEnd = 1; nEnd < grid.m_grid[0].count_coord; ++nEnd)
+// COMMENT: {8/18/2005 8:57:33 PM}		{
+// COMMENT: {8/18/2005 8:57:33 PM}			for (nStart = 0; nStart < nEnd; ++nStart)
+// COMMENT: {8/18/2005 8:57:33 PM}			{
+// COMMENT: {8/18/2005 8:57:33 PM}				pGridActor->GetGridKeyword(grid);
+// COMMENT: {8/18/2005 8:57:33 PM}				grid.m_grid[0].SubDivide(nStart, nEnd, nCount);
+// COMMENT: {8/18/2005 8:57:33 PM}				this->GetDocument()->SetGridKeyword(grid);
+// COMMENT: {8/18/2005 8:57:33 PM}				this->m_RenderWindowInteractor->Render();
+// COMMENT: {8/18/2005 8:57:33 PM}				::Sleep(250);
+// COMMENT: {8/18/2005 8:57:33 PM}
+// COMMENT: {8/18/2005 8:57:33 PM}				int new_end = (nEnd - nStart) * nCount + nStart;
+// COMMENT: {8/18/2005 8:57:33 PM}				grid.m_grid[0].Refine(nStart, new_end, nCount);
+// COMMENT: {8/18/2005 8:57:33 PM}				///grid.m_grid[1].Refine(0, grid.m_grid[1].count_coord - 1, nCount);
+// COMMENT: {8/18/2005 8:57:33 PM}				this->GetDocument()->SetGridKeyword(grid);
+// COMMENT: {8/18/2005 8:57:33 PM}				this->m_RenderWindowInteractor->Render();
+// COMMENT: {8/18/2005 8:57:33 PM}				::Sleep(250);
+// COMMENT: {8/18/2005 8:57:33 PM}			}
+// COMMENT: {8/18/2005 8:57:33 PM}		}
+// COMMENT: {8/18/2005 8:57:33 PM}	}
+
+
+// COMMENT: {8/18/2005 9:08:52 PM}	if (this->ModifyingGrid())
+// COMMENT: {8/18/2005 9:08:52 PM}	{
+// COMMENT: {8/18/2005 9:08:52 PM}		this->CancelModifyGrid();
+// COMMENT: {8/18/2005 9:08:52 PM}	}
+// COMMENT: {8/18/2005 9:08:52 PM}	else
+// COMMENT: {8/18/2005 9:08:52 PM}	{
+// COMMENT: {8/18/2005 9:08:52 PM}		this->CancelMode();
+// COMMENT: {8/18/2005 9:08:52 PM}		this->StartModifyGrid();
+// COMMENT: {8/18/2005 9:08:52 PM}	}
+
+	if (this->ModifyGridCommand)
+	{
+		this->ModifyGridCommand->Delete();
+		this->ModifyGridCommand = 0;
+	}
+	else
+	{
+		//this->ModifyGridCommand = CModifyGridCommand::New();
+		this->ModifyGridCommand = vtkImplicitPlaneWidget::New();
+		//this->ModifyGridCommand = CGridLineSelector::New();
+		this->ModifyGridCommand->SetInteractor(this->m_RenderWindowInteractor);
+		this->ModifyGridCommand->SetEnabled(1);
+		//this->ModifyGridCommand->SetGridActor(this->GridActor);
+		//this->ModifyGridCommand->SetDocument(this->GetDocument());
+		// add doc listener?
+		// this->ModifyGridCommand->AddListener(this->GetDocument());
+		// note: vtkCommand doesn't implement AddObserver
+		// use multiple inheritance ???
+	}
+
+
+// COMMENT: {8/18/2005 11:12:48 PM}	if (this->m_bMovingGridLine)
+// COMMENT: {8/18/2005 11:12:48 PM}	{
+// COMMENT: {8/18/2005 11:12:48 PM}		if (CGridActor* pGridActor = CGridActor::SafeDownCast(this->GetDocument()->GetGridActor()))
+// COMMENT: {8/18/2005 11:12:48 PM}		{
+// COMMENT: {8/18/2005 11:12:48 PM}			pGridActor->SetEnabled(0);
+// COMMENT: {8/18/2005 11:12:48 PM}		}
+// COMMENT: {8/18/2005 11:12:48 PM}		this->m_bMovingGridLine = false;
+// COMMENT: {8/18/2005 11:12:48 PM}	}
+// COMMENT: {8/18/2005 11:12:48 PM}	else
+// COMMENT: {8/18/2005 11:12:48 PM}	{
+// COMMENT: {8/18/2005 11:12:48 PM}		this->m_bMovingGridLine = true;
+// COMMENT: {8/18/2005 11:12:48 PM}		if (CGridActor* pGridActor = CGridActor::SafeDownCast(this->GetDocument()->GetGridActor()))
+// COMMENT: {8/18/2005 11:12:48 PM}		{
+// COMMENT: {8/18/2005 11:12:48 PM}			pGridActor->SetInteractor(this->m_RenderWindowInteractor);
+// COMMENT: {8/18/2005 11:12:48 PM}		}
+// COMMENT: {8/18/2005 11:12:48 PM}	}
+
+
+}
+
+void CWPhastView::CancelMode(void)
+{
+	if (this->CreatingNewRiver())
+	{
+		this->CancelNewRiver();
+	}
+	if (this->CreatingNewWell())
+	{
+		this->CancelNewWell();
+	}
+	if (this->CreatingNewZone())
+	{
+		this->CancelNewZone();
+	}
+}
+
+

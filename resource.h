@@ -240,9 +240,9 @@
 #define ID_WELLS_UNSELECTALL            244
 #define IDD_SERIES_DIALOG               248
 #define IDC_VE_SPLIT                    249
+#define IDD_GRID_DENSIFY                249
 #define IDC_HO_SPLIT                    250
 #define IDC_4WAY02                      251
-#define IDB_BITMAP1                     252
 #define IDB_PLUS_MERGE                  252
 #define IDC_EDIT_X                      1000
 #define IDC_PROPERTIES                  1000
@@ -553,9 +553,13 @@
 #define IDC_EDIT_U_NODES                1264
 #define IDC_SPIN_U_NODES                1265
 #define IDC_SPIN_N_NODES                1266
+#define IDC_EDIT_U_NODES2               1266
 #define IDC_EDIT_SNAP                   1267
+#define IDC_SPIN_U_NODES2               1267
 #define IDC_EDIT_N_NODES                1268
+#define IDC_EDIT_U_NODES3               1268
 #define IDC_BUTTON_INS                  1269
+#define IDC_SPIN_U_NODES3               1269
 #define IDC_BUTTON_DEL                  1270
 #define IDC_BUTTON_SERIES               1271
 #define IDC_RADIO_XY                    1272
@@ -574,6 +578,8 @@
 #define ID_TOOLS_NEWRIVER               32793
 #define ID_BUTTON32795                  32795
 #define ID_TOOLS_MOVE_VER_LINE          32801
+#define ID_BUTTON32803                  32803
+#define ID_TOOLS_MODIFYGRID             32805
 #define IDW_CONTROLBAR_TREE             59424
 #define IDW_CONTROLBAR_BOXPROPS         59425
 
@@ -582,7 +588,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        253
-#define _APS_NEXT_COMMAND_VALUE         32803
+#define _APS_NEXT_COMMAND_VALUE         32806
 #define _APS_NEXT_CONTROL_VALUE         1281
 #define _APS_NEXT_SYMED_VALUE           126
 #endif

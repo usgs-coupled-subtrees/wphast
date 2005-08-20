@@ -535,6 +535,9 @@
 				RelativePath="GridLODActor.cpp">
 			</File>
 			<File
+				RelativePath="GridLineSelector.cpp">
+			</File>
+			<File
 				RelativePath="GridLineWidget.cpp">
 			</File>
 			<File
@@ -614,6 +617,9 @@
 			</File>
 			<File
 				RelativePath="ModelessPropertySheet.cpp">
+			</File>
+			<File
+				RelativePath="ModifyGridCommand.cpp">
 			</File>
 			<File
 				RelativePath="NewModel.cpp">
@@ -1067,6 +1073,9 @@
 				RelativePath="GridLineMoveMemento.h">
 			</File>
 			<File
+				RelativePath="GridLineSelector.h">
+			</File>
+			<File
 				RelativePath="GridLineWidget.h">
 			</File>
 			<File
@@ -1146,6 +1155,9 @@
 			</File>
 			<File
 				RelativePath="ModelessPropertySheet.h">
+			</File>
+			<File
+				RelativePath="ModifyGridCommand.h">
 			</File>
 			<File
 				RelativePath="NewModel.h">
@@ -3782,15 +3794,15 @@
 			Name="Build Logs"
 			Filter="">
 			<File
+				RelativePath="cppunit\BuildLog.htm"
+				DeploymentContent="TRUE">
+			</File>
+			<File
 				RelativePath="Debug\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 			<File
 				RelativePath="Release\BuildLog.htm"
-				DeploymentContent="TRUE">
-			</File>
-			<File
-				RelativePath="cppunit\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 		</Filter>

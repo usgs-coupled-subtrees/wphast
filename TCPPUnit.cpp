@@ -91,5 +91,5 @@ void TCPPUnit::RunUnitTests(void)
 	}
 
 	CPPUNIT_ASSERT(::fcloseall() == 0);
-	exit(0);
+// COMMENT: {8/18/2005 3:12:55 PM}	exit(0);
 }

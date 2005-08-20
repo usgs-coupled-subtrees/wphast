@@ -384,27 +384,30 @@ void TestCGrid::testSubDivideAll(void)
 
 void TestCGrid::testRefineAll(void)
 {
-	const int count_uniform = 6;
-	const int count_parts_max = 20;
+	// const int count_uniform = 6;
+	const int count_uniform = 7;
+	const int nPartsMax = 20;
 
 	CGrid uniform(0.0, 1000.0, count_uniform);
 	uniform.Setup();
-
-	for (int n = 2; n < count_parts_max; ++n)
+	for (int nParts = 2; nParts < nPartsMax; ++nParts)
 	{
-		CGrid sub(uniform);
-		sub.SubDivide(0, uniform.count_coord - 1, n);
-	
-		ASSERT(sub.count_coord == (uniform.count_coord - 1) * n + 1);
-		CPPUNIT_ASSERT(sub.count_coord == (uniform.count_coord - 1) * n + 1);
-
-		CGrid ref(sub);
-		ref.Refine(0, ref.count_coord - 1, n);
-
-		for (int i = 0; i < ref.count_coord; ++i)
+		for (int nEnd = 1; nEnd < uniform.count_coord; ++nEnd)
 		{
-			ASSERT(ref.coord[i] == uniform.coord[i]);
-			CPPUNIT_ASSERT(ref.coord[i] == uniform.coord[i]);
+			for (int nStart = 0; nStart < nEnd; ++nStart)
+			{
+				CGrid sub(uniform);
+				sub.SubDivide(nStart, nEnd, nParts);
+
+				int newEnd = (nEnd - nStart) * nParts + nStart;
+				CGrid ref(sub);
+				ref.Refine(nStart, newEnd, nParts);
+				for (int i = 0; i < ref.count_coord; ++i)
+				{
+					ASSERT(ref.coord[i] == uniform.coord[i]);
+					CPPUNIT_ASSERT(ref.coord[i] == uniform.coord[i]);
+				}
+			}
 		}
 	}
 }

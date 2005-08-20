@@ -25,6 +25,10 @@ class vtkCubeSource;
 class vtkCylinderSource;
 class CWellActor;
 
+class CModifyGridCommand;
+class vtkImplicitPlaneWidget;
+class CGridLineSelector;
+
 class CWPhastView : public CView, public IObserver
 {
 protected: // create from serialization only
@@ -97,6 +101,12 @@ protected:
 	// new rier
 	CRiverActor                    *m_pRiverActor;
 
+	//
+	//
+	//CModifyGridCommand             *ModifyGridCommand;
+	vtkImplicitPlaneWidget         *ModifyGridCommand;
+	//CGridLineSelector               *ModifyGridCommand;
+
 	friend class CViewVTKCommand;
 
 
@@ -131,6 +141,9 @@ public:
 	bool CreatingNewZone(void)const;
 	void StartNewZone(void);
 	void EndNewZone(void);
+
+	void CancelMode(void);
+
 
 public:
 	afx_msg void OnToolsNewWell();
@@ -182,6 +195,8 @@ public:
 	afx_msg void OnDestroy();
 	afx_msg void OnToolsMoveVerLine();
 	afx_msg void OnUpdateToolsMoveVerLine(CCmdUI *pCmdUI);
+	afx_msg void OnUpdateToolsModifyGrid(CCmdUI *pCmdUI);
+	afx_msg void OnToolsModifyGrid();
 };
 
 #ifndef _DEBUG  // debug version in WPhastView.cpp
