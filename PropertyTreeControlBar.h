@@ -152,4 +152,5 @@ public:
 	void SelectGridNode(void);
 	void SetGridActor(CGridActor* pGridActor);
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
+	afx_msg void OnContextMenu(CWnd* /*pWnd*/, CPoint /*point*/);
 };

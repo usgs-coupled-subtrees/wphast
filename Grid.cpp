@@ -677,3 +677,55 @@ void CGrid::Fill(std::vector<double>& vec, double x1, double x2, int count)
 	vec[0]         = x1;
 	vec[count - 1] = x2;
 }
+
+int CGrid::lower_bound(double value)const
+{
+	std::vector<double>::const_iterator begin;
+	std::vector<double>::const_iterator end;
+	std::vector<double> t_vector;
+	if (this->uniform && !this->uniform_expanded)
+	{
+		CGrid::Fill(t_vector, this->coord[0], this->coord[1], this->count_coord);
+		begin = t_vector.begin();
+		end = t_vector.end();
+	}
+	else
+	{
+		begin = this->m_coordinates.begin();
+		end = this->m_coordinates.end();
+	}
+
+	std::vector<double>::const_iterator iter;
+	iter = std::lower_bound(begin, end, value);
+	if (iter == end)
+	{
+		return (this->count_coord - 1);
+	}
+	return (iter - begin);
+}
+
+int CGrid::upper_bound(double value)const
+{
+	std::vector<double>::const_iterator begin;
+	std::vector<double>::const_iterator end;
+	std::vector<double> t_vector;
+	if (this->uniform && !this->uniform_expanded)
+	{
+		CGrid::Fill(t_vector, this->coord[0], this->coord[1], this->count_coord);
+		begin = t_vector.begin();
+		end = t_vector.end();
+	}
+	else
+	{
+		begin = this->m_coordinates.begin();
+		end = this->m_coordinates.end();
+	}
+
+	std::vector<double>::const_iterator iter;
+	iter = std::upper_bound(begin, end, value);
+	if (iter == end)
+	{
+		return (this->count_coord - 1);
+	}
+	return (iter - begin);
+}

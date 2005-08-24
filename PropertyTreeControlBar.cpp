@@ -90,6 +90,7 @@ BEGIN_MESSAGE_MAP(CPropertyTreeControlBar, CSizingControlBarCFVS7)
 	ON_NOTIFY(TVN_KEYDOWN, IDC_PROPERTY_TREE, OnKeyDown)		
 	ON_WM_DESTROY()
 	ON_WM_LBUTTONDOWN()
+	ON_WM_CONTEXTMENU()
 END_MESSAGE_MAP()
 /**
 NM_CLICK
@@ -2224,4 +2225,9 @@ void CPropertyTreeControlBar::OnLButtonDown(UINT nFlags, CPoint point)
 	//}}HACK
 
 	CSizingControlBarCFVS7::OnLButtonDown(nFlags, point);
+}
+
+void CPropertyTreeControlBar::OnContextMenu(CWnd* /*pWnd*/, CPoint /*point*/)
+{
+	// TODO: Add your message handler code here
 }

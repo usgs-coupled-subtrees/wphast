@@ -473,6 +473,45 @@ void CGridLineSelector::OnMouseMove(void)
 		bounds[3] = max(StartPoint[1], endPoint[1]);
 		this->OutlineSource->SetBounds(bounds);
 
+		//{{
+		int X = this->Interactor->GetEventPosition()[0];
+		int Y = this->Interactor->GetEventPosition()[1];
+
+		if (this->GridActor->PlanePicker->Pick(X, Y, 0, this->CurrentRenderer))
+		{
+			vtkFloatingPointType* bounds = this->GridActor->GetBounds();
+
+#if defined(SELECT_WITH_INTERSECTION)
+			// intersection 
+			//
+			this->Min[0] = this->GridKeyword.m_grid[0].Element(this->OutlineSource->GetBounds()[0]);
+			this->Min[1] = this->GridKeyword.m_grid[1].Element(this->OutlineSource->GetBounds()[2]);
+			this->Max[0] = this->GridKeyword.m_grid[0].Element(this->OutlineSource->GetBounds()[1]) + 1;
+			this->Max[1] = this->GridKeyword.m_grid[1].Element(this->OutlineSource->GetBounds()[3]) + 1;
+#else
+			// interior only
+			//
+			this->Min[0] = this->GridKeyword.m_grid[0].upper_bound(this->OutlineSource->GetBounds()[0]);
+			this->Min[1] = this->GridKeyword.m_grid[1].upper_bound(this->OutlineSource->GetBounds()[2]);
+			this->Max[0] = this->GridKeyword.m_grid[0].lower_bound(this->OutlineSource->GetBounds()[1]) - 1;
+			this->Max[1] = this->GridKeyword.m_grid[1].lower_bound(this->OutlineSource->GetBounds()[3]) - 1;
+#endif
+			//if (xstart != -1)
+			{
+				this->Source->SetBounds(
+					this->GridKeyword.m_grid[0].coord[this->Min[0]],
+					this->GridKeyword.m_grid[0].coord[this->Max[0]],
+					this->GridKeyword.m_grid[1].coord[this->Min[1]],
+					this->GridKeyword.m_grid[1].coord[this->Max[1]],
+					bounds[4],
+					bounds[5]
+					);
+				this->Actor->SetVisibility(1);
+				//this->Interactor->Render();
+			}
+		}
+		//}}
+
 		this->EventCallbackCommand->SetAbortFlag(1);
 		this->Interactor->Render();
 	}
@@ -485,8 +524,15 @@ void CGridLineSelector::OnLeftButtonDown(void)
 	{
 		this->State = CGridLineSelector::Selecting;
 
-		vtkFloatingPointType bounds[6];
-		this->GridActor->GetBounds(bounds);
+		this->GridKeyword = this->GridActor->m_gridKeyword;
+		for (int i = 0; i < 3; ++i)
+		{
+			this->GridKeyword.m_grid[i].Setup();
+		}
+
+		//vtkFloatingPointType bounds[6];
+		//this->GridActor->GetBounds(bounds);
+		vtkFloatingPointType* bounds = this->GridActor->GetBounds();
 
 		::GetXYatZ(this->Interactor, this->CurrentRenderer, bounds[5], this->StartPoint);
 
@@ -494,18 +540,55 @@ void CGridLineSelector::OnLeftButtonDown(void)
 		//bounds[2] = bounds[3] = this->StartPoint[1];
 		///this->OutlineSource->SetBounds(bounds);
 		this->OutlineSource->SetBounds(
-			this->StartPoint[0], this->StartPoint[0],
-			this->StartPoint[1], this->StartPoint[1],
-			bounds[4], bounds[5]	
-		);
+			this->StartPoint[0],
+			this->StartPoint[0],
+			this->StartPoint[1],
+			this->StartPoint[1],
+			bounds[4],
+			bounds[5]
+            );
 		this->OutlineActor->SetVisibility(1);
 
-// COMMENT: {8/23/2005 6:27:32 PM}		//{{
-// COMMENT: {8/23/2005 6:27:32 PM}		int X = this->Interactor->GetEventPosition()[0];
-// COMMENT: {8/23/2005 6:27:32 PM}		int Y = this->Interactor->GetEventPosition()[1];
-// COMMENT: {8/23/2005 6:27:32 PM}
-// COMMENT: {8/23/2005 6:27:32 PM}		if (this->GridActor->PlanePicker->Pick(X, Y, 0, this->CurrentRenderer))
-// COMMENT: {8/23/2005 6:27:32 PM}		{
+		//{{
+		int X = this->Interactor->GetEventPosition()[0];
+		int Y = this->Interactor->GetEventPosition()[1];
+
+		if (this->GridActor->PlanePicker->Pick(X, Y, 0, this->CurrentRenderer))
+		{
+			vtkFloatingPointType* bounds = this->GridActor->GetBounds();
+
+#if defined(SELECT_WITH_INTERSECTION)
+			// intersection 
+			//
+			this->Min[0] = this->GridKeyword.m_grid[0].Element(this->OutlineSource->GetBounds()[0]);
+			this->Min[1] = this->GridKeyword.m_grid[1].Element(this->OutlineSource->GetBounds()[2]);
+			this->Max[0] = this->GridKeyword.m_grid[0].Element(this->OutlineSource->GetBounds()[1]) + 1;
+			this->Max[1] = this->GridKeyword.m_grid[1].Element(this->OutlineSource->GetBounds()[3]) + 1;
+#else
+			// interior only
+			//
+			this->Min[0] = this->GridKeyword.m_grid[0].upper_bound(this->OutlineSource->GetBounds()[0]);
+			this->Min[1] = this->GridKeyword.m_grid[1].upper_bound(this->OutlineSource->GetBounds()[2]);
+			this->Max[0] = this->GridKeyword.m_grid[0].lower_bound(this->OutlineSource->GetBounds()[1]) - 1;
+			this->Max[1] = this->GridKeyword.m_grid[1].lower_bound(this->OutlineSource->GetBounds()[3]) - 1;
+#endif
+
+
+			//if (xstart != -1)
+			{
+				this->Source->SetBounds(
+					this->GridKeyword.m_grid[0].coord[this->Min[0]],
+					this->GridKeyword.m_grid[0].coord[this->Max[0]],
+					this->GridKeyword.m_grid[1].coord[this->Min[1]],
+					this->GridKeyword.m_grid[1].coord[this->Max[1]],
+					bounds[4],
+					bounds[5]
+					);
+				this->Actor->SetVisibility(1);
+				this->Interactor->Render();
+			}
+
+
 // COMMENT: {8/23/2005 6:27:32 PM}			vtkFloatingPointType bounds[6];
 // COMMENT: {8/23/2005 6:27:32 PM}			this->GridActor->GetBounds(bounds);
 // COMMENT: {8/23/2005 6:27:32 PM}
@@ -538,11 +621,11 @@ void CGridLineSelector::OnLeftButtonDown(void)
 // COMMENT: {8/23/2005 6:27:32 PM}			{
 // COMMENT: {8/23/2005 6:27:32 PM}				ASSERT(FALSE);
 // COMMENT: {8/23/2005 6:27:32 PM}			}
-// COMMENT: {8/23/2005 6:27:32 PM}		}
-// COMMENT: {8/23/2005 6:27:32 PM}		else
-// COMMENT: {8/23/2005 6:27:32 PM}		{
-// COMMENT: {8/23/2005 6:27:32 PM}		}
-// COMMENT: {8/23/2005 6:27:32 PM}		//}}
+		}
+		else
+		{
+		}
+		//}}
 
 
 		this->EventCallbackCommand->SetAbortFlag(1);

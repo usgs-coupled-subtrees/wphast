@@ -384,6 +384,22 @@ protected:
 	VARIANT SaveAs(const VARIANT& FileName);
 	VARIANT Import(const VARIANT& FileName);
 	VARIANT Run(void);
+public:
+	afx_msg void OnViewHideAll();
+
+	// ID_RIVERS_HIDEALL handlers
+	afx_msg void OnUpdateRiversHideAll(CCmdUI *pCmdUI);
+	afx_msg void OnRiversHideAll();
+
+	// ID_RIVERS_SHOWSELECTED handlers
+	afx_msg void OnUpdateRiversShowSelected(CCmdUI *pCmdUI);
+	afx_msg void OnRiversShowSelected();
+
+	// ID_RIVERS_SELECTALL handlers
+	afx_msg void OnRiversSelectAll();
+
+	// ID_RIVERS_UNSELECTALL handlers
+	afx_msg void OnRiversUnselectAll();
 };
 
 inline vtkPropAssembly* CWPhastDoc::GetPropAssemblyMedia() const

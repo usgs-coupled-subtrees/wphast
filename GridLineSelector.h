@@ -3,6 +3,8 @@
 #include <vtk3DWidget.h>
 #include <vtkBoxWidget.h>
 
+#include "GridKeyword.h"
+
 class CGridActor;
 
 #ifndef vtkFloatingPointType
@@ -59,6 +61,11 @@ protected:
 	vtkPolyDataMapper    *OutlineMapper;
 	vtkOutlineSource     *OutlineSource;
 	vtkFloatingPointType  StartPoint[3];
+
+	int Min[3];
+	int Max[3];
+
+	CGridKeyword          GridKeyword;
 
 	// Handles the events
 	static void ProcessEvents(vtkObject* object, 

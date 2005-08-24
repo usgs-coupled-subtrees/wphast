@@ -51,6 +51,9 @@ public:
 	void Refine(int nStart, int nEnd, int nParts);
 	int Closest(double value)const;
 	int Element(double value)const;
+	int lower_bound(double value)const;
+	int upper_bound(double value)const;
+
 	static void Fill(std::vector<double>& vec, double x1, double x2, int count);
 #ifdef _DEBUG
 	void Dump(CDumpContext& dc)const;

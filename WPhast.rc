@@ -269,6 +269,14 @@ BEGIN
             MENUITEM "Unselect All",                ID_MEDIAZONES_UNSELECTALL
 
         END
+        POPUP "Rivers"
+        BEGIN
+            MENUITEM "Hide All",                    ID_RIVERS_HIDEALL
+            MENUITEM "Show Selected",               ID_RIVERS_SHOWSELECTED
+            MENUITEM SEPARATOR
+            MENUITEM "Select All",                  ID_RIVERS_SELECTALL
+            MENUITEM "Unselect All",                ID_RIVERS_UNSELECTALL
+        END
         POPUP "&Wells"
         BEGIN
             MENUITEM "Hide All",                    ID_WELLS_HIDEALL
@@ -277,6 +285,7 @@ BEGIN
             MENUITEM "Select All",                  ID_WELLS_SELECTALL
             MENUITEM "Unselect All",                ID_WELLS_UNSELECTALL
         END
+        MENUITEM "&Hide All",                   ID_VIEW_HIDEALL
         MENUITEM SEPARATOR
         MENUITEM "View From &Next Direction\tCtrl+D", 
                                                 ID_VIEW_FROM_NEXT_DIRECTION

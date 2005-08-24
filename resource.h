@@ -580,6 +580,11 @@
 #define ID_TOOLS_MOVE_VER_LINE          32801
 #define ID_BUTTON32803                  32803
 #define ID_TOOLS_MODIFYGRID             32805
+#define ID_VIEW_HIDEALL                 32806
+#define ID_RIVERS_HIDEALL               32807
+#define ID_RIVERS_SHOWSELECTED          32808
+#define ID_RIVERS_SELECTALL             32809
+#define ID_RIVERS_UNSELECTALL           32810
 #define IDW_CONTROLBAR_TREE             59424
 #define IDW_CONTROLBAR_BOXPROPS         59425
 
@@ -588,7 +593,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        253
-#define _APS_NEXT_COMMAND_VALUE         32806
+#define _APS_NEXT_COMMAND_VALUE         32811
 #define _APS_NEXT_CONTROL_VALUE         1281
 #define _APS_NEXT_SYMED_VALUE           126
 #endif

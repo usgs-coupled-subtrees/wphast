@@ -172,6 +172,22 @@ BEGIN_MESSAGE_MAP(CWPhastDoc, CDocument)
 
 	// ID_WELLS_UNSELECTALL
 	ON_COMMAND(ID_WELLS_UNSELECTALL, OnWellsUnselectAll)
+
+	// ID_RIVERS_HIDEALL
+	ON_UPDATE_COMMAND_UI(ID_RIVERS_HIDEALL, OnUpdateRiversHideAll)
+	ON_COMMAND(ID_RIVERS_HIDEALL, OnRiversHideAll)
+
+	// ID_RIVERS_SHOWSELECTED
+	ON_UPDATE_COMMAND_UI(ID_RIVERS_SHOWSELECTED, OnUpdateRiversShowSelected)
+	ON_COMMAND(ID_RIVERS_SHOWSELECTED, OnRiversShowSelected)
+
+	// ID_RIVERS_SELECTALL
+	ON_COMMAND(ID_RIVERS_SELECTALL, OnRiversSelectAll)
+
+	// ID_RIVERS_UNSELECTALL
+	ON_COMMAND(ID_RIVERS_UNSELECTALL, OnRiversUnselectAll)
+
+	ON_COMMAND(ID_VIEW_HIDEALL, OnViewHideAll)
 END_MESSAGE_MAP()
 
 #if defined(WPHAST_AUTOMATION)
@@ -4867,5 +4883,101 @@ void CWPhastDoc::UpdateGridDomain(void)
 
 	// refresh screen
 	//
+	this->UpdateAllViews(0);
+}
+
+void CWPhastDoc::OnViewHideAll()
+{
+	if (CPropertyTreeControlBar *pTree = this->GetPropertyTreeControlBar())
+	{	
+		pTree->SetMediaCheck(BST_UNCHECKED);
+		pTree->SetBCCheck(BST_UNCHECKED);
+		pTree->SetICCheck(BST_UNCHECKED);
+		pTree->SetNodeCheck(pTree->GetWellsNode(), BST_UNCHECKED);
+		pTree->SetNodeCheck(pTree->GetRiversNode(), BST_UNCHECKED);
+		pTree->GetGridNode().Select();
+	}
+	this->UpdateAllViews(0);
+}
+
+void CWPhastDoc::OnUpdateRiversHideAll(CCmdUI *pCmdUI)
+{
+	if (vtkPropAssembly *pPropAssembly = this->GetPropAssemblyRivers())
+	{
+		if (pPropAssembly->GetVisibility())
+		{
+			pCmdUI->SetRadio(FALSE);
+		}
+		else
+		{
+			pCmdUI->SetRadio(TRUE);
+		}
+	}
+}
+void CWPhastDoc::OnRiversHideAll()
+{
+	if (CPropertyTreeControlBar *pTree = this->GetPropertyTreeControlBar())
+	{	
+		pTree->SetNodeCheck(pTree->GetRiversNode(), BST_UNCHECKED);
+	}
+	this->UpdateAllViews(0);
+}
+
+void CWPhastDoc::OnUpdateRiversShowSelected(CCmdUI *pCmdUI)
+{
+	if (CPropertyTreeControlBar *pTree = this->GetPropertyTreeControlBar())
+	{	
+		switch (pTree->GetNodeCheck(pTree->GetRiversNode()))
+		{
+		case BST_UNCHECKED:
+			// currently unchecked
+			pCmdUI->SetRadio(FALSE);
+			break;
+		case BST_CHECKED:
+			// currently checked
+			pCmdUI->SetRadio(TRUE);
+			break;
+		default:
+			ASSERT(FALSE);
+			pCmdUI->Enable(FALSE);
+			break;
+		}
+	}
+}
+
+void CWPhastDoc::OnRiversShowSelected()
+{
+	if (CPropertyTreeControlBar *pTree = this->GetPropertyTreeControlBar())
+	{	
+		pTree->SetNodeCheck(pTree->GetRiversNode(), BST_CHECKED);
+	}
+	this->UpdateAllViews(0);
+}
+
+void CWPhastDoc::OnRiversSelectAll()
+{
+	if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar())
+	{
+		CTreeCtrlNode node = pTree->GetRiversNode();
+		int nCount = node.GetChildCount();
+		for (int i = 0; i < nCount; ++i)
+		{
+			pTree->SetNodeCheck(node.GetChildAt(i), BST_CHECKED);
+		}
+	}
+	this->UpdateAllViews(0);
+}
+
+void CWPhastDoc::OnRiversUnselectAll()
+{
+	if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar())
+	{
+		CTreeCtrlNode node = pTree->GetRiversNode();
+		int nCount = node.GetChildCount();
+		for (int i = 0; i < nCount; ++i)
+		{
+			pTree->SetNodeCheck(node.GetChildAt(i), BST_UNCHECKED);
+		}
+	}
 	this->UpdateAllViews(0);
 }
