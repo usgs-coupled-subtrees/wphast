@@ -52,7 +52,9 @@
 #include "RiverPropertyPage2.h"
 #include "Grid.h"
 #include "FlowOnly.h"
+
 #include "ModifyGridCommand.h"
+#include "GridLineSelector.h"
 #include <vtkImplicitPlaneWidget.h>
 
 
@@ -2074,9 +2076,11 @@ void CWPhastView::OnToolsModifyGrid()
 	else
 	{
 		//this->ModifyGridCommand = CModifyGridCommand::New();
-		this->ModifyGridCommand = vtkImplicitPlaneWidget::New();
-		//this->ModifyGridCommand = CGridLineSelector::New();
+		//this->ModifyGridCommand = vtkImplicitPlaneWidget::New();
+		this->ModifyGridCommand = CGridLineSelector::New();
+		//this->ModifyGridCommand = vtkBoxWidget::New();		
 		this->ModifyGridCommand->SetInteractor(this->m_RenderWindowInteractor);
+		this->ModifyGridCommand->SetGridActor(reinterpret_cast<CGridActor *>(this->GetDocument()->GetGridActor()));
 		this->ModifyGridCommand->SetEnabled(1);
 		//this->ModifyGridCommand->SetGridActor(this->GridActor);
 		//this->ModifyGridCommand->SetDocument(this->GetDocument());

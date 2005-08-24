@@ -104,8 +104,9 @@ protected:
 	//
 	//
 	//CModifyGridCommand             *ModifyGridCommand;
-	vtkImplicitPlaneWidget         *ModifyGridCommand;
-	//CGridLineSelector               *ModifyGridCommand;
+	//vtkImplicitPlaneWidget         *ModifyGridCommand;
+	CGridLineSelector              *ModifyGridCommand;
+	//vtkBoxWidget                   *ModifyGridCommand;
 
 	friend class CViewVTKCommand;
 

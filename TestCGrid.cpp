@@ -440,3 +440,36 @@ void TestCGrid::testClosest(void)
         CPPUNIT_ASSERT(val == i + 1);
 	}
 }
+
+void TestCGrid::testElement(void)
+{
+	CGrid uniform(0.0, 1000.0, 6);
+	uniform.Setup();
+
+	int val;
+	val = uniform.Element(uniform.coord[0] - (uniform.coord[1] - uniform.coord[0]));
+	ASSERT(val == -1);
+	CPPUNIT_ASSERT(val == -1);
+
+	val = uniform.Element(uniform.coord[uniform.count_coord - 1] + (uniform.coord[1] - uniform.coord[0]));
+	ASSERT(val == -1);
+	CPPUNIT_ASSERT(val == -1);
+
+	for (int i = 0; i < uniform.count_coord - 1; ++i)
+	{
+		// midpoint
+		val = uniform.Element((uniform.coord[i] + uniform.coord[i + 1]) / 2);
+        ASSERT(val == i);
+        CPPUNIT_ASSERT(val == i);
+
+		// +delta
+		val = uniform.Element(uniform.coord[i] + (uniform.coord[i + 1] - uniform.coord[i]) / 100);
+        ASSERT(val == i);
+        CPPUNIT_ASSERT(val == i);
+
+		// -delta
+		val = uniform.Element(uniform.coord[i + 1] - (uniform.coord[i + 1] - uniform.coord[i]) / 100);
+        ASSERT(val == i);
+        CPPUNIT_ASSERT(val == i);
+	}
+}

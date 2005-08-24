@@ -630,6 +630,41 @@ int CGrid::Closest(double value)const
 	return (iter - begin);
 }
 
+int CGrid::Element(double value)const
+{
+	std::vector<double>::const_iterator begin;
+	std::vector<double>::const_iterator end;
+	std::vector<double> t_vector;
+	if (this->uniform && !this->uniform_expanded)
+	{
+		CGrid::Fill(t_vector, this->coord[0], this->coord[1], this->count_coord);
+		begin = t_vector.begin();
+		end = t_vector.end();
+	}
+	else
+	{
+		begin = this->m_coordinates.begin();
+		end = this->m_coordinates.end();
+	}
+
+	std::vector<double>::const_iterator lower;
+	std::vector<double>::const_iterator upper;
+	lower = std::lower_bound(begin, end, value);
+	upper = std::upper_bound(begin, end, value);
+	if (lower == begin)
+	{
+		return -1; // less than
+	}
+	if (upper == end)
+	{
+		return -1; // greater than
+	}
+	TRACE("lower == %g\n", *lower);
+	TRACE("upper == %g\n", *upper);
+    TRACE("lower - begin = %d\n", lower - begin);
+    return (lower - begin - 1);
+}
+
 void CGrid::Fill(std::vector<double>& vec, double x1, double x2, int count)
 {
 	ASSERT(x1 < x2);

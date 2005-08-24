@@ -122,6 +122,8 @@ protected:
 	CGridActor(void);
 	virtual ~CGridActor(void);
 
+	friend class CGridLineSelector;
+
 	int State;
 	enum WidgetState
 	{

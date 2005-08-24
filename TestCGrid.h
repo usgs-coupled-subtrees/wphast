@@ -24,6 +24,7 @@ class TestCGrid :
 	CPPUNIT_TEST( testSubDivideAll );
 	CPPUNIT_TEST( testRefineAll );
 	CPPUNIT_TEST( testClosest );
+	CPPUNIT_TEST( testElement );
 
 	CPPUNIT_TEST_SUITE_END();
 protected:
@@ -42,5 +43,6 @@ protected:
 	void testSubDivideAll(void);
 	void testRefineAll(void);
 	void testClosest(void);
+	void testElement(void);
 
 };
