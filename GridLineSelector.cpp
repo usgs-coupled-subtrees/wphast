@@ -27,7 +27,8 @@ CGridLineSelector::CGridLineSelector(void)
 	this->EventCallbackCommand->SetCallback(CGridLineSelector::ProcessEvents);
 	this->SetKeyPressActivation(0);
 
-	// selection
+	// element selection
+	//
 	this->Source = vtkCubeSource::New();
 	this->Mapper = vtkPolyDataMapper::New();
 	this->Mapper->SetResolveCoincidentTopologyToPolygonOffset();
@@ -38,17 +39,15 @@ CGridLineSelector::CGridLineSelector(void)
 	this->Actor->SetVisibility(0);
 
 	// outline
-	///this->OutlineSource = vtkCubeSource::New();
+	//
 	this->OutlineSource = vtkOutlineSource::New();
 
 	this->OutlineMapper = vtkPolyDataMapper::New();
-	///this->OutlineMapper->SetResolveCoincidentTopologyToPolygonOffset();
 	this->OutlineMapper->SetInput( this->OutlineSource->GetOutput() );
 
 	this->OutlineActor = vtkActor::New();
 	this->OutlineActor->SetMapper( this->OutlineMapper );
 	this->OutlineActor->SetVisibility(0);
-    ///this->OutlineActor->GetProperty()->SetRepresentationToWireframe();
     this->OutlineActor->GetProperty()->SetColor(1, 0, 0);
 }
 
@@ -113,36 +112,10 @@ void CGridLineSelector::SetEnabled(int enabling)
 			this->EventCallbackCommand, this->Priority);
 		i->AddObserver(vtkCommand::LeftButtonReleaseEvent, 
 			this->EventCallbackCommand, this->Priority);
-// COMMENT: {8/22/2005 5:23:49 PM}		i->AddObserver(vtkCommand::MiddleButtonPressEvent, 
-// COMMENT: {8/22/2005 5:23:49 PM}			this->EventCallbackCommand, this->Priority);
-// COMMENT: {8/22/2005 5:23:49 PM}		i->AddObserver(vtkCommand::MiddleButtonReleaseEvent, 
-// COMMENT: {8/22/2005 5:23:49 PM}			this->EventCallbackCommand, this->Priority);
-// COMMENT: {8/22/2005 5:23:49 PM}		i->AddObserver(vtkCommand::RightButtonPressEvent, 
-// COMMENT: {8/22/2005 5:23:49 PM}			this->EventCallbackCommand, this->Priority);
-// COMMENT: {8/22/2005 5:23:49 PM}		i->AddObserver(vtkCommand::RightButtonReleaseEvent, 
-// COMMENT: {8/22/2005 5:23:49 PM}			this->EventCallbackCommand, this->Priority);
 
-// COMMENT: {8/22/2005 3:39:29 PM}		// Add the various actors
-// COMMENT: {8/22/2005 3:39:29 PM}		// Add the outline
-// COMMENT: {8/22/2005 3:39:29 PM}		this->CurrentRenderer->AddActor(this->HexActor);
-// COMMENT: {8/22/2005 3:39:29 PM}		this->CurrentRenderer->AddActor(this->HexOutline);
-// COMMENT: {8/22/2005 3:39:29 PM}		this->HexActor->SetProperty(this->OutlineProperty);
-// COMMENT: {8/22/2005 3:39:29 PM}		this->HexOutline->SetProperty(this->OutlineProperty);
-// COMMENT: {8/22/2005 3:39:29 PM}
-// COMMENT: {8/22/2005 3:39:29 PM}		// Add the hex face
-// COMMENT: {8/22/2005 3:39:29 PM}		this->CurrentRenderer->AddActor(this->HexFace);
-// COMMENT: {8/22/2005 3:39:29 PM}		this->HexFace->SetProperty(this->FaceProperty);
-
-// COMMENT: {8/22/2005 3:38:21 PM}		// turn on the handles
-// COMMENT: {8/22/2005 3:38:21 PM}		for (int j=0; j<7; j++)
-// COMMENT: {8/22/2005 3:38:21 PM}		{
-// COMMENT: {8/22/2005 3:38:21 PM}			this->CurrentRenderer->AddActor(this->Handle[j]);
-// COMMENT: {8/22/2005 3:38:21 PM}			this->Handle[j]->SetProperty(this->HandleProperty);
-// COMMENT: {8/22/2005 3:38:21 PM}		}
-// COMMENT: {8/22/2005 3:38:21 PM}
 		this->CurrentRenderer->AddActor(this->Actor);
 		this->CurrentRenderer->AddActor(this->OutlineActor);
-// COMMENT: {8/22/2005 3:38:21 PM}		this->InvokeEvent(vtkCommand::EnableEvent,NULL);
+		this->InvokeEvent(vtkCommand::EnableEvent, NULL);
 	}
 
 	else //disabling-------------------------------------------------------------
@@ -158,27 +131,6 @@ void CGridLineSelector::SetEnabled(int enabling)
 
 		// don't listen for events any more
 		this->Interactor->RemoveObserver(this->EventCallbackCommand);
-
-// COMMENT: {8/22/2005 3:38:03 PM}		// turn off the outline
-// COMMENT: {8/22/2005 3:38:03 PM}		this->CurrentRenderer->RemoveActor(this->HexActor);
-// COMMENT: {8/22/2005 3:38:03 PM}		this->CurrentRenderer->RemoveActor(this->HexOutline);
-// COMMENT: {8/22/2005 3:38:03 PM}
-// COMMENT: {8/22/2005 3:38:03 PM}		// turn off the hex face
-// COMMENT: {8/22/2005 3:38:03 PM}		this->CurrentRenderer->RemoveActor(this->HexFace);
-// COMMENT: {8/22/2005 3:38:03 PM}
-// COMMENT: {8/22/2005 3:37:53 PM}		// turn off the handles
-// COMMENT: {8/22/2005 3:37:53 PM}		for (int i=0; i<7; i++)
-// COMMENT: {8/22/2005 3:37:53 PM}		{
-// COMMENT: {8/22/2005 3:37:53 PM}			this->CurrentRenderer->RemoveActor(this->Handle[i]);
-// COMMENT: {8/22/2005 3:37:53 PM}		}
-// COMMENT: {8/22/2005 3:37:53 PM}
-// COMMENT: {8/22/2005 3:37:53 PM}		this->CurrentHandle = NULL;
-// COMMENT: {8/22/2005 3:37:53 PM}		this->InvokeEvent(vtkCommand::DisableEvent,NULL);
-
-// COMMENT: {8/24/2005 5:18:57 PM}		this->CurrentRenderer->RemoveActor(this->Actor);
-// COMMENT: {8/24/2005 5:18:57 PM}		this->CurrentRenderer->RemoveActor(this->OutlineActor);
-
-// COMMENT: {8/24/2005 5:27:28 PM}		this->CurrentRenderer = NULL;
 	}
 
 	this->Interactor->Render();
@@ -186,31 +138,7 @@ void CGridLineSelector::SetEnabled(int enabling)
 
 void CGridLineSelector::PlaceWidget(float bds[6])
 {
-// COMMENT: {8/22/2005 3:40:52 PM}  int i;
-// COMMENT: {8/22/2005 3:40:52 PM}  double bounds[6], center[3];
-// COMMENT: {8/22/2005 3:40:52 PM}  
-// COMMENT: {8/22/2005 3:40:52 PM}  this->AdjustBounds(bds,bounds,center);
-// COMMENT: {8/22/2005 3:40:52 PM}  
-// COMMENT: {8/22/2005 3:40:52 PM}  this->Points->SetPoint(0, bounds[0], bounds[2], bounds[4]);
-// COMMENT: {8/22/2005 3:40:52 PM}  this->Points->SetPoint(1, bounds[1], bounds[2], bounds[4]);
-// COMMENT: {8/22/2005 3:40:52 PM}  this->Points->SetPoint(2, bounds[1], bounds[3], bounds[4]);
-// COMMENT: {8/22/2005 3:40:52 PM}  this->Points->SetPoint(3, bounds[0], bounds[3], bounds[4]);
-// COMMENT: {8/22/2005 3:40:52 PM}  this->Points->SetPoint(4, bounds[0], bounds[2], bounds[5]);
-// COMMENT: {8/22/2005 3:40:52 PM}  this->Points->SetPoint(5, bounds[1], bounds[2], bounds[5]);
-// COMMENT: {8/22/2005 3:40:52 PM}  this->Points->SetPoint(6, bounds[1], bounds[3], bounds[5]);
-// COMMENT: {8/22/2005 3:40:52 PM}  this->Points->SetPoint(7, bounds[0], bounds[3], bounds[5]);
-// COMMENT: {8/22/2005 3:40:52 PM}
-// COMMENT: {8/22/2005 3:40:52 PM}  for (i=0; i<6; i++)
-// COMMENT: {8/22/2005 3:40:52 PM}    {
-// COMMENT: {8/22/2005 3:40:52 PM}    this->InitialBounds[i] = bounds[i];
-// COMMENT: {8/22/2005 3:40:52 PM}    }
-// COMMENT: {8/22/2005 3:40:52 PM}  this->InitialLength = sqrt((bounds[1]-bounds[0])*(bounds[1]-bounds[0]) +
-// COMMENT: {8/22/2005 3:40:52 PM}                             (bounds[3]-bounds[2])*(bounds[3]-bounds[2]) +
-// COMMENT: {8/22/2005 3:40:52 PM}                             (bounds[5]-bounds[4])*(bounds[5]-bounds[4]));
-// COMMENT: {8/22/2005 3:40:52 PM}
-// COMMENT: {8/22/2005 3:40:52 PM}  this->PositionHandles();
-// COMMENT: {8/22/2005 3:40:52 PM}  this->ComputeNormals();
-// COMMENT: {8/22/2005 3:40:52 PM}  this->SizeHandles();
+
 }
 
 //void GetXYatZ(vtkRenderWindowInteractor *interactor, vtkRenderer *renderer, vtkFloatingPointType value, vtkFloatingPointType point[3])
@@ -756,6 +684,7 @@ void CGridLineSelector::OnLeftButtonDown(void)
 			bounds[2 * i + 1] = this->StartPoint[i];
 		}
 	}
+	this->OutlineSource->SetBounds(bounds);
 	this->OutlineActor->SetVisibility(1);
 
 	if (this->bSelectElementIntersection)
