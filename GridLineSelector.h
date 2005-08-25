@@ -62,6 +62,9 @@ protected:
 	vtkOutlineSource     *OutlineSource;
 	vtkFloatingPointType  StartPoint[3];
 
+	int FixedPlane;  // [0-5]
+	int FixedCoord;  // [0-2]
+
 	int Min[3];
 	int Max[3];
 
