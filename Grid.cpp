@@ -725,7 +725,8 @@ int CGrid::upper_bound(double value)const
 	iter = std::upper_bound(begin, end, value);
 	if (iter == end)
 	{
-		return (this->count_coord - 1);
+		//return (this->count_coord - 1);
+		return (this->count_coord);
 	}
 	return (iter - begin);
 }
