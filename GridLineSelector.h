@@ -70,6 +70,9 @@ protected:
 
 	CGridKeyword          GridKeyword;
 
+	bool bSelectElementIntersection;
+
+
 	// Handles the events
 	static void ProcessEvents(vtkObject* object, 
 		unsigned long event,

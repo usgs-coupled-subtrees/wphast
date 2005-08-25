@@ -22,6 +22,7 @@ CGridLineSelector::CGridLineSelector(void)
 , OutlineMapper(0)
 , OutlineActor(0)
 , State(CGridLineSelector::Start)
+, bSelectElementIntersection(false)
 {
 	this->EventCallbackCommand->SetCallback(CGridLineSelector::ProcessEvents);
 	this->SetKeyPressActivation(0);
@@ -651,45 +652,21 @@ void CGridLineSelector::OnMouseMove(void)
 			}
 			else
 			{
-				if (false) // bSelectInterior
+				if (this->bSelectElementIntersection)
 				{
-					this->Min[i] = this->GridKeyword.m_grid[i].lower_bound(this->OutlineSource->GetBounds()[2 * i]     / scale[i]);
-					this->Max[i] = this->GridKeyword.m_grid[i].upper_bound(this->OutlineSource->GetBounds()[2 * i + 1] / scale[i]) - 1;
-				}
-				else // bSelectIntersection
-				{
-// COMMENT: {8/24/2005 9:53:16 PM}					this->Min[i] = this->GridKeyword.m_grid[i].Element(this->OutlineSource->GetBounds()[2 * i]     / scale[i]);
-// COMMENT: {8/24/2005 9:53:16 PM}					this->Max[i] = this->GridKeyword.m_grid[i].Element(this->OutlineSource->GetBounds()[2 * i + 1] / scale[i]) + 1;
-
-					//this->Min[i] = this->GridKeyword.m_grid[i].lower_bound(this->OutlineSource->GetBounds()[2 * i]     / scale[i]);
-					this->Min[i] = this->GridKeyword.m_grid[i].upper_bound(this->OutlineSource->GetBounds()[2 * i]     / scale[i]) - 1;
+					// select intersected elements
+					this->Min[i] = this->GridKeyword.m_grid[i].upper_bound(this->OutlineSource->GetBounds()[2 * i] / scale[i]) - 1;
 					if (this->Min[i] < 0)
 					{
 						this->Min[i] = 0;
-						this->Min[i] = this->GridKeyword.m_grid[i].upper_bound(this->OutlineSource->GetBounds()[2 * i]     / scale[i]) - 1;
-						this->Min[i] = 0;
 					}
-
-					// this->Max[i] = this->GridKeyword.m_grid[i].upper_bound(this->OutlineSource->GetBounds()[2 * i + 1] / scale[i]);
 					this->Max[i] = this->GridKeyword.m_grid[i].lower_bound(this->OutlineSource->GetBounds()[2 * i + 1] / scale[i]);
-
-
-// COMMENT: {8/24/2005 9:52:52 PM}					//{{
-// COMMENT: {8/24/2005 9:52:52 PM}					lower = std::lower_bound(begin, end, value);
-// COMMENT: {8/24/2005 9:52:52 PM}					upper = std::upper_bound(begin, end, value);
-// COMMENT: {8/24/2005 9:52:52 PM}					if (lower == begin)
-// COMMENT: {8/24/2005 9:52:52 PM}					{
-// COMMENT: {8/24/2005 9:52:52 PM}						return -1; // less than
-// COMMENT: {8/24/2005 9:52:52 PM}					}
-// COMMENT: {8/24/2005 9:52:52 PM}					if (upper == end)
-// COMMENT: {8/24/2005 9:52:52 PM}					{
-// COMMENT: {8/24/2005 9:52:52 PM}						return -1; // greater than
-// COMMENT: {8/24/2005 9:52:52 PM}					}
-// COMMENT: {8/24/2005 9:52:52 PM}					TRACE("lower == %g\n", *lower);
-// COMMENT: {8/24/2005 9:52:52 PM}					TRACE("upper == %g\n", *upper);
-// COMMENT: {8/24/2005 9:52:52 PM}					TRACE("lower - begin = %d\n", lower - begin);
-// COMMENT: {8/24/2005 9:52:52 PM}					return (lower - begin - 1);
-// COMMENT: {8/24/2005 9:52:52 PM}					//}}
+				}
+				else
+				{
+					// only select interior elements
+					this->Min[i] = this->GridKeyword.m_grid[i].lower_bound(this->OutlineSource->GetBounds()[2 * i] / scale[i]);
+					this->Max[i] = this->GridKeyword.m_grid[i].upper_bound(this->OutlineSource->GetBounds()[2 * i + 1] / scale[i]) - 1;
 				}
 				ASSERT( 0 <= this->Min[i] && this->Min[i] < this->GridKeyword.m_grid[i].count_coord );
 				ASSERT( 0 <= this->Max[i] && this->Max[i] < this->GridKeyword.m_grid[i].count_coord );
@@ -736,7 +713,7 @@ void CGridLineSelector::OnLeftButtonDown(void)
 	camera->GetViewPlaneNormal(viewPlaneNormal);
 	for (int i = 0; i < 3; ++i)
 	{
-		// Note: fabs is ~4x slower
+		// Note: fabs() is ~4x slower
 		//
 		if ( max < FABS(viewPlaneNormal[i]) )
 		{
@@ -779,8 +756,37 @@ void CGridLineSelector::OnLeftButtonDown(void)
 			bounds[2 * i + 1] = this->StartPoint[i];
 		}
 	}
-	this->OutlineSource->SetBounds(bounds);
 	this->OutlineActor->SetVisibility(1);
+
+	if (this->bSelectElementIntersection)
+	{
+		// set bounds for the highlighted elements
+		//
+		vtkFloatingPointType *scale = this->GridActor->GetScale();
+		for (int i = 0; i < 3; ++i)
+		{
+			if (i == this->FixedCoord)
+			{
+				this->Min[i] = 0;
+				this->Max[i] = this->GridKeyword.m_grid[i].count_coord - 1;
+			}
+			else
+			{
+				this->Min[i] = this->GridKeyword.m_grid[i].upper_bound(this->StartPoint[i] / scale[i]) - 1;
+				if (this->Min[i] < 0)
+				{
+					this->Min[i] = 0;
+				}
+				this->Max[i] = this->GridKeyword.m_grid[i].lower_bound(this->StartPoint[i] / scale[i]);
+			}
+			ASSERT( 0 <= this->Min[i] && this->Min[i] < this->GridKeyword.m_grid[i].count_coord );
+			ASSERT( 0 <= this->Max[i] && this->Max[i] < this->GridKeyword.m_grid[i].count_coord );
+			bounds[2 * i]     = this->GridKeyword.m_grid[i].coord[this->Min[i]] * scale[i];
+			bounds[2 * i + 1] = this->GridKeyword.m_grid[i].coord[this->Max[i]] * scale[i];
+		}
+		this->Source->SetBounds(bounds);
+		this->Actor->SetVisibility(1);
+	}
 
 	// stop forwarding event
 	//
