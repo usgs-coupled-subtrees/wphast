@@ -13,14 +13,14 @@ class CWPhastDoc;
 typedef float vtkFloatingPointType;
 #endif
 
-class CGridLineSelector : public vtk3DWidget
+class CGridElementsSelector : public vtk3DWidget
 {
 public:
 	// Description:
 	// Instantiate the object.
-	static CGridLineSelector *New();
+	static CGridElementsSelector *New();
 
-	vtkTypeRevisionMacro(CGridLineSelector, vtk3DWidget);
+	vtkTypeRevisionMacro(CGridElementsSelector, vtk3DWidget);
 	//void PrintSelf(ostream& os, vtkIndent indent);
 
 	// Description:
@@ -76,9 +76,9 @@ public:
 
 
 protected:
-	CGridLineSelector(void);
-	//virtual ~CGridLineSelector(void);
-	~CGridLineSelector(void);
+	CGridElementsSelector(void);
+	//virtual ~CGridElementsSelector(void);
+	~CGridElementsSelector(void);
 
 	int State;
 	enum WidgetState
@@ -131,7 +131,7 @@ protected:
 // COMMENT: {8/22/2005 3:46:36 PM}	void OnRightButtonUp();
 
 private:
-	CGridLineSelector(const CGridLineSelector&);  // Not implemented.
-	void operator=(const CGridLineSelector&);     // Not implemented.
+	CGridElementsSelector(const CGridElementsSelector&);  // Not implemented.
+	void operator=(const CGridElementsSelector&);     // Not implemented.
 
 };

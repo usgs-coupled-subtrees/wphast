@@ -1,5 +1,5 @@
 #include "StdAfx.h"
-#include "GridLineSelector.h"
+#include "GridElementsSelector.h"
 
 #include "GridActor.h"
 #include "WPhastDoc.h"
@@ -11,10 +11,10 @@
 #define FABS(x) ((x < 0) ? -x : x) // this is slightly slower than the intrinsic
 #endif
 
-vtkCxxRevisionMacro(CGridLineSelector, "$Revision: 1.28 $");
-vtkStandardNewMacro(CGridLineSelector);
+vtkCxxRevisionMacro(CGridElementsSelector, "$Revision: 1.28 $");
+vtkStandardNewMacro(CGridElementsSelector);
 
-CGridLineSelector::CGridLineSelector(void)
+CGridElementsSelector::CGridElementsSelector(void)
 : GridActor(0)
 , Source(0)
 , Mapper(0)
@@ -22,10 +22,10 @@ CGridLineSelector::CGridLineSelector(void)
 , OutlineSource(0)
 , OutlineMapper(0)
 , OutlineActor(0)
-, State(CGridLineSelector::Start)
+, State(CGridElementsSelector::Start)
 , SelectElementIntersection(true)
 {
-	this->EventCallbackCommand->SetCallback(CGridLineSelector::ProcessEvents);
+	this->EventCallbackCommand->SetCallback(CGridElementsSelector::ProcessEvents);
 	this->SetKeyPressActivation(0);
 
 	// element selection
@@ -52,7 +52,7 @@ CGridLineSelector::CGridLineSelector(void)
     this->OutlineActor->GetProperty()->SetColor(1, 0, 0);
 }
 
-CGridLineSelector::~CGridLineSelector(void)
+CGridElementsSelector::~CGridElementsSelector(void)
 {
 	this->EventCallbackCommand->SetCallback(0);
 	this->KeyPressCallbackCommand->SetCallback(0);
@@ -75,7 +75,7 @@ CGridLineSelector::~CGridLineSelector(void)
 	this->OutlineActor->Delete();
 }
 
-void CGridLineSelector::SetEnabled(int enabling)
+void CGridElementsSelector::SetEnabled(int enabling)
 {
 	if ( ! this->Interactor )
 	{
@@ -138,7 +138,7 @@ void CGridLineSelector::SetEnabled(int enabling)
 	this->Interactor->Render();
 }
 
-void CGridLineSelector::PlaceWidget(vtkFloatingPointType bounds[6])
+void CGridElementsSelector::PlaceWidget(vtkFloatingPointType bounds[6])
 {
 	// set bounds for the outline
 	//
@@ -223,12 +223,12 @@ void GetWorldPointAtFixedPlane(vtkRenderWindowInteractor *interactor, vtkRendere
 	point[fixed] = value;
 }
 
-void CGridLineSelector::ProcessEvents(vtkObject* vtkNotUsed(object), 
+void CGridElementsSelector::ProcessEvents(vtkObject* vtkNotUsed(object), 
 								 unsigned long event,
 								 void* clientdata, 
 								 void* vtkNotUsed(calldata))
 {
-	CGridLineSelector* self = reinterpret_cast<CGridLineSelector *>( clientdata );
+	CGridElementsSelector* self = reinterpret_cast<CGridElementsSelector *>( clientdata );
 
 	if ( !self || !self->GridActor ) return;
 
@@ -257,9 +257,9 @@ void CGridLineSelector::ProcessEvents(vtkObject* vtkNotUsed(object),
 	}
 }
 
-void CGridLineSelector::OnMouseMove(void)
+void CGridElementsSelector::OnMouseMove(void)
 {
-	if ( this->State == CGridLineSelector::Selecting )
+	if ( this->State == CGridElementsSelector::Selecting )
 	{
 		vtkFloatingPointType bounds[6];
 		this->GridActor->GetBounds(bounds);
@@ -311,7 +311,7 @@ void CGridLineSelector::OnMouseMove(void)
 			}
 		}
 
-		TRACE("CGridLineSelector::OnMouseMove\n");
+		TRACE("CGridElementsSelector::OnMouseMove\n");
 		TRACE("X (%d, %d) (%g, %g)\n", this->Min[0], this->Max[0], bounds[0], bounds[1]);
 		TRACE("Y (%d, %d) (%g, %g)\n", this->Min[1], this->Max[1], bounds[2], bounds[3]);
 		TRACE("Z (%d, %d) (%g, %g)\n", this->Min[2], this->Max[2], bounds[4], bounds[5]);
@@ -324,13 +324,13 @@ void CGridLineSelector::OnMouseMove(void)
 	}
 }
 
-void CGridLineSelector::OnLeftButtonDown(void)
+void CGridElementsSelector::OnLeftButtonDown(void)
 {
-	ASSERT ( this->State == CGridLineSelector::Start );
+	ASSERT ( this->State == CGridElementsSelector::Start );
 
 	// set state
 	//
-	this->State = CGridLineSelector::Selecting;
+	this->State = CGridElementsSelector::Selecting;
 
 	// setup grids (for faster usage in mouse move)
 	//
@@ -431,11 +431,11 @@ void CGridLineSelector::OnLeftButtonDown(void)
 	this->Interactor->Render();
 }
 
-void CGridLineSelector::OnLeftButtonUp(void)
+void CGridElementsSelector::OnLeftButtonUp(void)
 {
-	if ( this->State == CGridLineSelector::Selecting )
+	if ( this->State == CGridElementsSelector::Selecting )
 	{
-		this->State = CGridLineSelector::Start;
+		this->State = CGridElementsSelector::Start;
 		this->EventCallbackCommand->SetAbortFlag(1);
 		this->OutlineActor->SetVisibility(0);
 		this->SetEnabled(0);
@@ -447,7 +447,7 @@ void CGridLineSelector::OnLeftButtonUp(void)
 	}
 }
 
-void CGridLineSelector::SetIBounds(int imin, int imax, int jmin, int jmax, int kmin, int kmax)
+void CGridElementsSelector::SetIBounds(int imin, int imax, int jmin, int jmax, int kmin, int kmax)
 {
 	int ibounds[6];
 	ibounds[0] = imin;
@@ -459,7 +459,7 @@ void CGridLineSelector::SetIBounds(int imin, int imax, int jmin, int jmax, int k
 	this->SetIBounds(ibounds);
 }
 
-void CGridLineSelector::SetIBounds(int ibounds[6])
+void CGridElementsSelector::SetIBounds(int ibounds[6])
 {
 	vtkFloatingPointType *scale = this->GridActor->GetScale();
 	vtkFloatingPointType bounds[6];
@@ -491,7 +491,7 @@ void CGridLineSelector::SetIBounds(int ibounds[6])
 	if (this->Interactor) this->Interactor->Render();
 }
 
-void CGridLineSelector::Update(void)
+void CGridElementsSelector::Update(void)
 {
 	this->GridKeyword = this->GridActor->m_gridKeyword;
 	for (int i = 0; i < 3; ++i)
