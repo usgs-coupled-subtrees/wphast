@@ -53,6 +53,8 @@
 #include "ScalePropertyPage.h"
 
 #include "GridPropertyPage2.h"
+#include "DensifyGridPage.h"
+#include "GridLineSelector.h"
 
 #include <vtkBoxWidget.h>
 
@@ -233,6 +235,8 @@ CWPhastDoc::CWPhastDoc()
 , RiverMovePointAction(0)
 , m_pGridSheet(0)
 , m_pGridPage(0)
+, ModifyGridSheet(0)
+, DensifyGridPage(0)
 {
 #if defined(WPHAST_AUTOMATION)
 	EnableAutomation();
@@ -4699,6 +4703,7 @@ void CWPhastDoc::SetGridKeyword(const CGridKeyword& gridKeyword)
 
 void CWPhastDoc::Edit(CGridActor* pGridActor)
 {
+	ASSERT(pGridActor == this->m_pGridActor);
 	if (!this->m_pGridSheet)
 	{
 		this->m_pGridSheet = new CModelessPropertySheet("Grid");
@@ -4714,12 +4719,68 @@ void CWPhastDoc::Edit(CGridActor* pGridActor)
 	this->m_pGridPage->SetProperties(gridKeyword);
 	this->m_pGridPage->SetUnits(this->GetUnits());
 
-	//{{
 	this->m_pGridPage->m_pDoc = this;
-	this->m_pGridPage->m_pActor = this->m_pGridActor;
-	//}}
+	this->m_pGridPage->m_pActor = pGridActor;
 
 	this->m_pGridSheet->Create(::AfxGetApp()->m_pMainWnd);
+}
+
+void CWPhastDoc::ModifyGrid(CGridActor* gridActor, CGridLineSelector* gridLineSelector)
+{
+	ASSERT(gridActor == this->m_pGridActor);
+	if (!this->ModifyGridSheet)
+	{
+		this->ModifyGridSheet = new CModelessPropertySheet("");
+	}
+	if (!this->DensifyGridPage)
+	{
+		this->DensifyGridPage  = new CDensifyGridPage();
+		this->ModifyGridSheet->AddPage(this->DensifyGridPage);
+	}
+	
+	CGridKeyword gridKeyword;
+	gridActor->GetGridKeyword(gridKeyword);
+
+	this->DensifyGridPage->SetProperties(gridKeyword);
+	this->DensifyGridPage->SetUnits(this->GetUnits());
+	this->DensifyGridPage->SetDocument(this);
+	this->DensifyGridPage->SetActor(gridActor);
+	this->DensifyGridPage->SetWidget(gridLineSelector);
+
+	int min[3];
+	gridLineSelector->GetMin(min);
+	this->DensifyGridPage->SetMin(min);
+
+	int max[3];
+	gridLineSelector->GetMax(max);
+	this->DensifyGridPage->SetMax(max);
+
+	this->ModifyGridSheet->Create(::AfxGetApp()->m_pMainWnd);
+
+// COMMENT: {8/26/2005 2:59:00 PM}	ASSERT(gridActor == this->m_pGridActor);
+// COMMENT: {8/26/2005 2:59:00 PM}
+// COMMENT: {8/26/2005 2:59:00 PM}	CPropertySheet sheet;
+// COMMENT: {8/26/2005 2:59:00 PM}	CDensifyGridPage page;
+// COMMENT: {8/26/2005 2:59:00 PM}	sheet.AddPage(&page);
+// COMMENT: {8/26/2005 2:59:00 PM}
+// COMMENT: {8/26/2005 2:59:00 PM}	CGridKeyword gridKeyword;
+// COMMENT: {8/26/2005 2:59:00 PM}	gridActor->GetGridKeyword(gridKeyword);
+// COMMENT: {8/26/2005 2:59:00 PM}
+// COMMENT: {8/26/2005 2:59:00 PM}	page.SetProperties(gridKeyword);
+// COMMENT: {8/26/2005 2:59:00 PM}	page.SetUnits(this->GetUnits());
+// COMMENT: {8/26/2005 2:59:00 PM}	page.SetDocument(this);
+// COMMENT: {8/26/2005 2:59:00 PM}	page.SetActor(gridActor);
+// COMMENT: {8/26/2005 2:59:00 PM}	page.SetWidget(gridLineSelector);
+// COMMENT: {8/26/2005 2:59:00 PM}
+// COMMENT: {8/26/2005 2:59:00 PM}	int min[3];
+// COMMENT: {8/26/2005 2:59:00 PM}	gridLineSelector->GetMin(min);
+// COMMENT: {8/26/2005 2:59:00 PM}	page.SetMin(min);
+// COMMENT: {8/26/2005 2:59:00 PM}
+// COMMENT: {8/26/2005 2:59:00 PM}	int max[3];
+// COMMENT: {8/26/2005 2:59:00 PM}	gridLineSelector->GetMax(max);
+// COMMENT: {8/26/2005 2:59:00 PM}	page.SetMax(max);
+// COMMENT: {8/26/2005 2:59:00 PM}
+// COMMENT: {8/26/2005 2:59:00 PM}	sheet.DoModal();
 }
 
 void CWPhastDoc::Update(IObserver* pSender, LPARAM lHint, CObject* pHint, vtkObject* pObject)

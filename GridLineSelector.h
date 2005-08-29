@@ -6,6 +6,7 @@
 #include "GridKeyword.h"
 
 class CGridActor;
+class CWPhastDoc;
 
 #ifndef vtkFloatingPointType
 #define vtkFloatingPointType vtkFloatingPointType
@@ -36,6 +37,44 @@ public:
 	vtkSetMacro(GridActor,CGridActor*);
 	vtkGetMacro(GridActor,CGridActor*);
 
+	//
+	vtkSetMacro(SelectElementIntersection, int);
+	vtkGetMacro(SelectElementIntersection, int);
+
+	//
+	vtkSetMacro(Document, CWPhastDoc*);
+	vtkGetMacro(Document, CWPhastDoc*);
+
+	void SetIBounds(int imin, int imax, int jmin, int jmax, int kmin, int kmax);
+	void SetIBounds(int ibounds[6]);
+
+
+	//vtkSetVector3Macro(Max, int);
+	//void SetMax(int i, int j, int k);
+	//void SetMax(int max[3]) { this->SetMax(max[0], max[0], max[0]); }
+
+	vtkGetVector3Macro(Min, int);
+// COMMENT: {8/25/2005 8:21:42 PM}	virtual void GetMin(int &_arg1, int &_arg2, int &_arg3)
+// COMMENT: {8/25/2005 8:21:42 PM}	{
+// COMMENT: {8/25/2005 8:21:42 PM}		_arg1 = this->Min[0];
+// COMMENT: {8/25/2005 8:21:42 PM}		_arg2 = this->Min[1];
+// COMMENT: {8/25/2005 8:21:42 PM}		_arg3 = this->Min[2];
+// COMMENT: {8/25/2005 8:21:42 PM}	};
+// COMMENT: {8/25/2005 8:21:42 PM}	virtual void GetMin(int _arg[3])
+// COMMENT: {8/25/2005 8:21:42 PM}	{
+// COMMENT: {8/25/2005 8:21:42 PM}		this->GetMin(_arg[0], _arg[1], _arg[2]);
+// COMMENT: {8/25/2005 8:21:42 PM}	}
+	vtkGetVector3Macro(Max, int);
+
+	//vtkSetVector3Macro(Min, int);
+	//vtkGetVector3Macro(Min, int);
+
+	//void SetMax(int max[3]);
+	//void GetMax(int max[3])const;
+
+	void Update(void);
+
+
 protected:
 	CGridLineSelector(void);
 	//virtual ~CGridLineSelector(void);
@@ -50,6 +89,9 @@ protected:
 
 	//
 	CGridActor  *GridActor;
+
+	// 
+	CWPhastDoc  *Document;
 
 	// element selection
 	vtkCubeSource     *Source;
@@ -70,7 +112,7 @@ protected:
 
 	CGridKeyword          GridKeyword;
 
-	bool bSelectElementIntersection;
+	int SelectElementIntersection;
 
 
 	// Handles the events

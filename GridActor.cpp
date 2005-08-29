@@ -470,6 +470,11 @@ void CGridActor::SetGridKeyword(const CGridKeyword& gridKeyword, const CUnits& u
 	this->m_gridKeyword = gridKeyword;
 	this->m_units = units;
 	this->Setup(units);
+// COMMENT: {8/26/2005 2:56:49 PM}	this->Modified();
+// COMMENT: {8/26/2005 2:56:49 PM}	if (this->Interactor)
+// COMMENT: {8/26/2005 2:56:49 PM}	{
+// COMMENT: {8/26/2005 2:56:49 PM}		this->Interactor->Render();
+// COMMENT: {8/26/2005 2:56:49 PM}	}
 }
 
 void CGridActor::Setup(const CUnits& units)

@@ -451,6 +451,9 @@
 				RelativePath="DelayRedraw.cpp">
 			</File>
 			<File
+				RelativePath="DensifyGridPage.cpp">
+			</File>
+			<File
 				RelativePath="ETSLayoutPropertyPageXP.cpp">
 			</File>
 			<File
@@ -1026,6 +1029,9 @@
 			</File>
 			<File
 				RelativePath="DelayRedraw.h">
+			</File>
+			<File
+				RelativePath="DensifyGridPage.h">
 			</File>
 			<File
 				RelativePath="ETSLayoutPropertyPageXP.h">
@@ -3794,15 +3800,15 @@
 			Name="Build Logs"
 			Filter="">
 			<File
-				RelativePath="cppunit\BuildLog.htm"
-				DeploymentContent="TRUE">
-			</File>
-			<File
 				RelativePath="Debug\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 			<File
 				RelativePath="Release\BuildLog.htm"
+				DeploymentContent="TRUE">
+			</File>
+			<File
+				RelativePath="cppunit\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 		</Filter>

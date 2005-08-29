@@ -553,13 +553,14 @@
 #define IDC_EDIT_U_NODES                1264
 #define IDC_SPIN_U_NODES                1265
 #define IDC_SPIN_N_NODES                1266
-#define IDC_EDIT_U_NODES2               1266
+#define IDC_EDIT_MAX_I                  1266
 #define IDC_EDIT_SNAP                   1267
-#define IDC_SPIN_U_NODES2               1267
+#define IDC_SPIN_MAX_I                  1267
 #define IDC_EDIT_N_NODES                1268
-#define IDC_EDIT_U_NODES3               1268
+#define IDC_EDIT_PARTS_I                1268
 #define IDC_BUTTON_INS                  1269
 #define IDC_SPIN_U_NODES3               1269
+#define IDC_SPIN_PARTS_I                1269
 #define IDC_BUTTON_DEL                  1270
 #define IDC_BUTTON_SERIES               1271
 #define IDC_RADIO_XY                    1272
@@ -571,6 +572,8 @@
 #define IDC_EDIT_STOP                   1278
 #define IDC_RADIO_LINEAR                1279
 #define IDC_RADIO_GROWTH                1280
+#define IDC_EDIT_MIN_I                  1281
+#define IDC_SPIN_MIN_I                  1282
 #define IDC_RESIZE_COLUMN               28654
 #define IDC_RESIZE_ROW                  28655
 #define IDR_POPUP                       28656
@@ -594,7 +597,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        253
 #define _APS_NEXT_COMMAND_VALUE         32811
-#define _APS_NEXT_CONTROL_VALUE         1281
+#define _APS_NEXT_CONTROL_VALUE         1283
 #define _APS_NEXT_SYMED_VALUE           126
 #endif
 #endif

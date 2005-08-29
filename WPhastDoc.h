@@ -42,6 +42,8 @@ class CNewModel;
 class CModelessPropertySheet;
 class CScalePropertyPage;
 class CGridPropertyPage2;
+class CDensifyGridPage;
+class CGridLineSelector;
 
 class vtkAxes;
 class vtkTubeFilter;
@@ -117,6 +119,7 @@ public:
 	void UnDelete(CZoneActor *pZoneActor);
 
 	void Edit(CGridActor* pGridActor);
+	void ModifyGrid(CGridActor* gridActor, CGridLineSelector* gridLineSelector);
 	void SetGridKeyword(const CGridKeyword& gridKeyword);
 	vtkProp3D* GetGridActor(void);
 
@@ -231,6 +234,9 @@ protected:
 	//
 	CModelessPropertySheet     *m_pGridSheet;
 	CGridPropertyPage2         *m_pGridPage;
+
+	CModelessPropertySheet     *ModifyGridSheet;
+	CDensifyGridPage           *DensifyGridPage;
 
 protected:
 	void InitDocument();

@@ -2081,9 +2081,9 @@ void CWPhastView::OnToolsModifyGrid()
 		//this->ModifyGridCommand = vtkBoxWidget::New();		
 		this->ModifyGridCommand->SetInteractor(this->m_RenderWindowInteractor);
 		this->ModifyGridCommand->SetGridActor(reinterpret_cast<CGridActor *>(this->GetDocument()->GetGridActor()));
+		this->ModifyGridCommand->SetDocument(this->GetDocument());
 		this->ModifyGridCommand->SetEnabled(1);
 		//this->ModifyGridCommand->SetGridActor(this->GridActor);
-		//this->ModifyGridCommand->SetDocument(this->GetDocument());
 		// add doc listener?
 		// this->ModifyGridCommand->AddListener(this->GetDocument());
 		// note: vtkCommand doesn't implement AddObserver
