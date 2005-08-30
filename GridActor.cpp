@@ -470,11 +470,6 @@ void CGridActor::SetGridKeyword(const CGridKeyword& gridKeyword, const CUnits& u
 	this->m_gridKeyword = gridKeyword;
 	this->m_units = units;
 	this->Setup(units);
-// COMMENT: {8/26/2005 2:56:49 PM}	this->Modified();
-// COMMENT: {8/26/2005 2:56:49 PM}	if (this->Interactor)
-// COMMENT: {8/26/2005 2:56:49 PM}	{
-// COMMENT: {8/26/2005 2:56:49 PM}		this->Interactor->Render();
-// COMMENT: {8/26/2005 2:56:49 PM}	}
 }
 
 void CGridActor::Setup(const CUnits& units)
@@ -712,10 +707,8 @@ void CGridActor::SetEnabled(int enabling)
 			this->EventCallbackCommand, 10);
 		i->AddObserver(vtkCommand::KeyPressEvent, 
 			this->EventCallbackCommand, 10);
-		//{{
 		i->AddObserver(vtkCommand::CharEvent, 
 			this->EventCallbackCommand, 10);		
-		//}}
 
 	}
 
@@ -755,118 +748,12 @@ void CGridActor::SetEnabled(int enabling)
 //									   void* vtkNotUsed(calldata))
 void CGridActor::ProcessEvents(vtkObject* object, unsigned long event, void* clientdata, void* calldata)
 {
-	CGridActor* self 
-		= reinterpret_cast<CGridActor *>( clientdata );
+	CGridActor* self = reinterpret_cast<CGridActor *>( clientdata );
 
 	switch(event)
 	{
 	case vtkCommand::MouseMoveEvent:
-		if (true)
-		{
-			self->OnMouseMove();
-		}
-		else
-		{
-			if (!self->Interactor) return;
-
-			int X = self->Interactor->GetEventPosition()[0];
-			int Y = self->Interactor->GetEventPosition()[1];
-
-			vtkRenderer *ren = self->Interactor->FindPokedRenderer(X,Y);
-			if ( ren != self->CurrentRenderer )
-			{
-				return;
-			}
-
-			if (self->PlanePicker->Pick(X, Y, 0.0, self->CurrentRenderer))
-			{
-				for (int i = 0; i < 6; ++i)
-				{
-					if (self->PlanePicker->GetActor() == self->PlaneActors[i])
-					{
-						self->PlaneActors[i]->GetProperty()->SetOpacity(1.0);
-						//{{
-						if (i == 0)
-						{
-							//vtkCellPicker* pCellPicker = vtkCellPicker::New();
-							//pCellPicker->PickFromListOn();
-							self->LinePicker->PickFromListOn();
-							for (int j = 0; j < self->PosXLineCount; ++j)
-							{
-								//pCellPicker->AddPickList(self->PosXLineActors[j]);
-								self->LinePicker->AddPickList(self->PosXLineActors[j]);
-								self->PosXLineActors[j]->GetProperty()->SetColor(1, 1, 1);
-							}
-							if (self->LinePicker->Pick(X, Y, 0.0, self->CurrentRenderer))
-							{
-								//TRACE("Line Picked\n");
-								//pCellPicker->GetActor()->GetProperty()->SetColor(1, 0, 0);
-								vtkActorCollection *col = self->LinePicker->GetActors();
-								col->InitTraversal();
-								int item;
-								vtkActor* pItem = self->LinePicker->GetActor();
-								while (vtkActor *pActor = col->GetNextActor())
-								{
-									for (int j = 0; j < self->PosXLineCount; ++j)
-									{
-										if (pActor == self->PosXLineActors[j])
-										{
-											item = j;
-										}
-										if (pActor == self->PosXLineActors[j])
-										{
-											self->PosXLineActors[j]->GetProperty()->SetColor(1, 0, 0);
-											break;
-										}
-									}
-								}
-								////self->LinePicker->GetActor()->GetProperty()->SetColor(1, 1, 0);
-								//{{
-								vtkFloatingPointType length;
-								vtkFloatingPointType bounds[6];
-								self->GetBounds(bounds);
-
-								self->PlaneWidget->SetInteractor(self->Interactor);
-								self->PlaneWidget->NormalToXAxisOn();
-								length = (bounds[1] - bounds[0]);
-								bounds[0] -= length * 4;
-								bounds[1] += length * 4;
-								self->PlaneWidget->PlaceWidget(bounds);
-								///this->PlaneWidget->SetOrigin(pt0[0] * scale[0], 0, 0);
-								vtkFloatingPointType pt1[3];
-								self->PosXLineSources[item]->GetPoint1(pt1);
-								self->PlaneWidget->SetOrigin(pt1[0], 0, 0);
-								self->PlaneWidget->EnabledOn();
-								self->Interactor->Render();
-								//}}
-							}
-							//pCellPicker->Delete();
-						}
-						//}}
-					}
-					else
-					{
-						self->PlaneActors[i]->GetProperty()->SetOpacity(0.1);
-					}
-				}
-			}
-			else
-			{
-				for (int i = 0; i < 6; ++i)
-				{
-					self->PlaneActors[i]->GetProperty()->SetOpacity(0.1);
-				}
-				for (int j = 0; j < self->PosXLineCount; ++j)
-				{
-					self->PosXLineActors[j]->GetProperty()->SetColor(1, 1, 1);
-				}
-			}
-			if (self->Interactor)
-			{
-				self->Interactor->Render();
-			}
-		}
-
+		self->OnMouseMove();
 		break;
 
 	case vtkCommand::LeftButtonPressEvent: 
@@ -882,20 +769,7 @@ void CGridActor::ProcessEvents(vtkObject* object, unsigned long event, void* cli
 		break;
 
 	case vtkCommand::CharEvent:
-		{
-			switch (self->Interactor->GetKeyCode())
-			{
-			case 'p':
-			case 'P':
-				if (self->PlaneWidget->GetEnabled())
-				{
-					// don't allow the PlaneWidget to be picked
-					//
-					self->EventCallbackCommand->SetAbortFlag(1);
-				}
-				break;
-			}
-		}
+		self->OnChar();
 		break;	
 
 	case vtkCommand::InteractionEvent:
@@ -909,9 +783,8 @@ void CGridActor::ProcessEvents(vtkObject* object, unsigned long event, void* cli
 		break;
 
 	case vtkCommand::StartInteractionEvent:
-		TRACE("StartInteractionEvent\n");
 		ASSERT(object == self->PlaneWidget);
-		self->State = CGridActor::Pushing;
+		self->State = CGridActor::Dragging;
 		break;
 	}
 }
@@ -1253,7 +1126,7 @@ void CGridActor::OnInteraction(void)
 {
 	TRACE("CGridActor::OnInteraction\n");
 	// set state
-	this->State = CGridActor::Pushing;
+	this->State = CGridActor::Dragging;
 
 	// HACK {{
 	extern HCURSOR Test();
@@ -1593,3 +1466,18 @@ void CGridActor::GetScale(vtkFloatingPointType scale[3])
 	return this->ScaleTransform->GetScale(scale);
 }
 
+void CGridActor::OnChar(void)
+{
+	switch (this->Interactor->GetKeyCode())
+	{
+	case 'p':
+	case 'P':
+		if (this->PlaneWidget->GetEnabled())
+		{
+			// don't allow the PlaneWidget to be picked
+			//
+			this->EventCallbackCommand->SetAbortFlag(1);
+		}
+		break;
+	}
+}

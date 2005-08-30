@@ -2435,18 +2435,51 @@ STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Densify"
 FONT 8, "MS Sans Serif", 400, 0, 0x0
 BEGIN
-    EDITTEXT        IDC_EDIT_MIN_I,42,19,31,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_MIN_I,52,19,31,12,ES_AUTOHSCROLL
     CONTROL         "",IDC_SPIN_MIN_I,"msctls_updown32",UDS_SETBUDDYINT | 
-                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,72,19,11,
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,62,19,11,
                     12
-    EDITTEXT        IDC_EDIT_MAX_I,123,19,31,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_MAX_I,155,19,31,12,ES_AUTOHSCROLL
     CONTROL         "",IDC_SPIN_MAX_I,"msctls_updown32",UDS_SETBUDDYINT | 
-                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,156,19,11,
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,165,19,11,
                     12
-    EDITTEXT        IDC_EDIT_PARTS_I,206,19,31,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_PARTS_I,260,19,31,12,ES_AUTOHSCROLL
     CONTROL         "",IDC_SPIN_PARTS_I,"msctls_updown32",UDS_SETBUDDYINT | 
-                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,242,19,11,
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,270,19,11,
                     12
+    EDITTEXT        IDC_EDIT_MIN_J,52,59,31,12,ES_AUTOHSCROLL
+    CONTROL         "",IDC_SPIN_MIN_J,"msctls_updown32",UDS_SETBUDDYINT | 
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,62,59,11,
+                    12
+    EDITTEXT        IDC_EDIT_MAX_J,155,59,31,12,ES_AUTOHSCROLL
+    CONTROL         "",IDC_SPIN_MAX_J,"msctls_updown32",UDS_SETBUDDYINT | 
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,165,59,11,
+                    12
+    EDITTEXT        IDC_EDIT_PARTS_J,260,59,31,12,ES_AUTOHSCROLL
+    CONTROL         "",IDC_SPIN_PARTS_J,"msctls_updown32",UDS_SETBUDDYINT | 
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,270,59,11,
+                    12
+    EDITTEXT        IDC_EDIT_MIN_K,52,99,31,12,ES_AUTOHSCROLL
+    CONTROL         "",IDC_SPIN_MIN_K,"msctls_updown32",UDS_SETBUDDYINT | 
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,62,99,11,
+                    12
+    EDITTEXT        IDC_EDIT_MAX_K,155,99,31,12,ES_AUTOHSCROLL
+    CONTROL         "",IDC_SPIN_MAX_K,"msctls_updown32",UDS_SETBUDDYINT | 
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,165,99,11,
+                    12
+    EDITTEXT        IDC_EDIT_PARTS_K,260,99,31,12,ES_AUTOHSCROLL
+    CONTROL         "",IDC_SPIN_PARTS_K,"msctls_updown32",UDS_SETBUDDYINT | 
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,270,99,11,
+                    12
+    LTEXT           "Min X node",IDC_STATIC,7,21,37,8
+    LTEXT           "Min Y node",IDC_STATIC,7,61,37,8
+    LTEXT           "Min Z node",IDC_STATIC,7,101,37,8
+    LTEXT           "Max X node",IDC_STATIC,107,21,39,8
+    LTEXT           "Max Y node",IDC_STATIC,107,61,39,8
+    LTEXT           "Max Z node",IDC_STATIC,107,101,39,8
+    LTEXT           "X subdivisions",IDC_STATIC,207,20,46,8
+    LTEXT           "Y subdivisions",IDC_STATIC,207,61,46,8
+    LTEXT           "Z subdivisions",IDC_STATIC,207,101,46,8
 END
 
 
@@ -3200,9 +3233,16 @@ BEGIN
     BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 310
+        VERTGUIDE, 67
+        VERTGUIDE, 126
+        VERTGUIDE, 170
+        VERTGUIDE, 230
+        VERTGUIDE, 275
         TOPMARGIN, 7
         BOTTOMMARGIN, 136
         HORZGUIDE, 25
+        HORZGUIDE, 65
+        HORZGUIDE, 105
     END
 END
 #endif    // APSTUDIO_INVOKED

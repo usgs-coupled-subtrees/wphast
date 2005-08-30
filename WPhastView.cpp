@@ -54,7 +54,7 @@
 #include "FlowOnly.h"
 
 #include "ModifyGridCommand.h"
-#include "GridLineSelector.h"
+#include "GridElementsSelector.h"
 #include <vtkImplicitPlaneWidget.h>
 
 
@@ -107,8 +107,8 @@ BEGIN_MESSAGE_MAP(CWPhastView, CView)
 	ON_WM_DESTROY()
 	ON_COMMAND(ID_TOOLS_MOVE_VER_LINE, OnToolsMoveVerLine)
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_MOVE_VER_LINE, OnUpdateToolsMoveVerLine)
-	ON_UPDATE_COMMAND_UI(ID_TOOLS_MODIFYGRID, OnUpdateToolsModifyGrid)
-	ON_COMMAND(ID_TOOLS_MODIFYGRID, OnToolsModifyGrid)
+// COMMENT: {8/29/2005 6:46:54 PM}	ON_UPDATE_COMMAND_UI(ID_TOOLS_MODIFYGRID, OnUpdateToolsModifyGrid)
+// COMMENT: {8/29/2005 6:46:54 PM}	ON_COMMAND(ID_TOOLS_MODIFYGRID, OnToolsModifyGrid)
 END_MESSAGE_MAP()
 
 // CWPhastView construction/destruction
@@ -2027,36 +2027,6 @@ void CWPhastView::OnUpdateToolsModifyGrid(CCmdUI *pCmdUI)
 
 void CWPhastView::OnToolsModifyGrid()
 {
-// COMMENT: {8/18/2005 8:57:33 PM}	if (CGridActor* pGridActor = CGridActor::SafeDownCast(this->GetDocument()->GetGridActor()))
-// COMMENT: {8/18/2005 8:57:33 PM}	{
-// COMMENT: {8/18/2005 8:57:33 PM}		int nCount = 3;
-// COMMENT: {8/18/2005 8:57:33 PM}		// int nEnd = grid.m_grid[0].count_coord - 1;
-// COMMENT: {8/18/2005 8:57:33 PM}		int nStart = 2;
-// COMMENT: {8/18/2005 8:57:33 PM}		int nEnd;
-// COMMENT: {8/18/2005 8:57:33 PM}
-// COMMENT: {8/18/2005 8:57:33 PM}		CGridKeyword grid;
-// COMMENT: {8/18/2005 8:57:33 PM}		pGridActor->GetGridKeyword(grid);
-// COMMENT: {8/18/2005 8:57:33 PM}
-// COMMENT: {8/18/2005 8:57:33 PM}		for (nEnd = 1; nEnd < grid.m_grid[0].count_coord; ++nEnd)
-// COMMENT: {8/18/2005 8:57:33 PM}		{
-// COMMENT: {8/18/2005 8:57:33 PM}			for (nStart = 0; nStart < nEnd; ++nStart)
-// COMMENT: {8/18/2005 8:57:33 PM}			{
-// COMMENT: {8/18/2005 8:57:33 PM}				pGridActor->GetGridKeyword(grid);
-// COMMENT: {8/18/2005 8:57:33 PM}				grid.m_grid[0].SubDivide(nStart, nEnd, nCount);
-// COMMENT: {8/18/2005 8:57:33 PM}				this->GetDocument()->SetGridKeyword(grid);
-// COMMENT: {8/18/2005 8:57:33 PM}				this->m_RenderWindowInteractor->Render();
-// COMMENT: {8/18/2005 8:57:33 PM}				::Sleep(250);
-// COMMENT: {8/18/2005 8:57:33 PM}
-// COMMENT: {8/18/2005 8:57:33 PM}				int new_end = (nEnd - nStart) * nCount + nStart;
-// COMMENT: {8/18/2005 8:57:33 PM}				grid.m_grid[0].Refine(nStart, new_end, nCount);
-// COMMENT: {8/18/2005 8:57:33 PM}				///grid.m_grid[1].Refine(0, grid.m_grid[1].count_coord - 1, nCount);
-// COMMENT: {8/18/2005 8:57:33 PM}				this->GetDocument()->SetGridKeyword(grid);
-// COMMENT: {8/18/2005 8:57:33 PM}				this->m_RenderWindowInteractor->Render();
-// COMMENT: {8/18/2005 8:57:33 PM}				::Sleep(250);
-// COMMENT: {8/18/2005 8:57:33 PM}			}
-// COMMENT: {8/18/2005 8:57:33 PM}		}
-// COMMENT: {8/18/2005 8:57:33 PM}	}
-
 
 // COMMENT: {8/18/2005 9:08:52 PM}	if (this->ModifyingGrid())
 // COMMENT: {8/18/2005 9:08:52 PM}	{
@@ -2075,19 +2045,11 @@ void CWPhastView::OnToolsModifyGrid()
 	}
 	else
 	{
-		//this->ModifyGridCommand = CModifyGridCommand::New();
-		//this->ModifyGridCommand = vtkImplicitPlaneWidget::New();
-		this->ModifyGridCommand = CGridLineSelector::New();
-		//this->ModifyGridCommand = vtkBoxWidget::New();		
+		this->ModifyGridCommand = CGridElementsSelector::New();
 		this->ModifyGridCommand->SetInteractor(this->m_RenderWindowInteractor);
 		this->ModifyGridCommand->SetGridActor(reinterpret_cast<CGridActor *>(this->GetDocument()->GetGridActor()));
 		this->ModifyGridCommand->SetDocument(this->GetDocument());
 		this->ModifyGridCommand->SetEnabled(1);
-		//this->ModifyGridCommand->SetGridActor(this->GridActor);
-		// add doc listener?
-		// this->ModifyGridCommand->AddListener(this->GetDocument());
-		// note: vtkCommand doesn't implement AddObserver
-		// use multiple inheritance ???
 	}
 
 

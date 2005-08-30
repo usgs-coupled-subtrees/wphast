@@ -92,6 +92,8 @@ public:
 	void OnKeyPress(void);
 	void OnInteraction(void);
 	void OnEndInteraction(void);
+	void OnChar(void);
+
 
 	///virtual void SetScale(float x, float y, float z);
 	virtual void SetScale(vtkFloatingPointType x, vtkFloatingPointType y, vtkFloatingPointType z);
@@ -122,13 +124,13 @@ protected:
 	CGridActor(void);
 	virtual ~CGridActor(void);
 
-	friend class CGridLineSelector;
+	friend class CGridElementsSelector;
 
 	int State;
 	enum WidgetState
 	{
 		Start=0,
-		Pushing,
+		Dragging, // Pushing,
 	};
 
 

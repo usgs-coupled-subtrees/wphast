@@ -526,6 +526,9 @@
 				RelativePath="GridDeleteLineAction.cpp">
 			</File>
 			<File
+				RelativePath="GridElementsSelector.cpp">
+			</File>
+			<File
 				RelativePath="GridElt.cpp">
 			</File>
 			<File
@@ -536,9 +539,6 @@
 			</File>
 			<File
 				RelativePath="GridLODActor.cpp">
-			</File>
-			<File
-				RelativePath="GridLineSelector.cpp">
 			</File>
 			<File
 				RelativePath="GridLineWidget.cpp">
@@ -554,6 +554,9 @@
 			</File>
 			<File
 				RelativePath="GridSetAction.cpp">
+			</File>
+			<File
+				RelativePath="GridSubDivideAction.cpp">
 			</File>
 			<File
 				RelativePath="HDFMirrorFile.cpp">
@@ -1064,6 +1067,9 @@
 				RelativePath="GridDeleteLineAction.h">
 			</File>
 			<File
+				RelativePath="GridElementsSelector.h">
+			</File>
+			<File
 				RelativePath="GridElt.h">
 			</File>
 			<File
@@ -1079,9 +1085,6 @@
 				RelativePath="GridLineMoveMemento.h">
 			</File>
 			<File
-				RelativePath="GridLineSelector.h">
-			</File>
-			<File
 				RelativePath="GridLineWidget.h">
 			</File>
 			<File
@@ -1095,6 +1098,9 @@
 			</File>
 			<File
 				RelativePath="GridSetAction.h">
+			</File>
+			<File
+				RelativePath="GridSubDivideAction.h">
 			</File>
 			<File
 				RelativePath="HDFMirrorFile.h">
@@ -3800,15 +3806,15 @@
 			Name="Build Logs"
 			Filter="">
 			<File
-				RelativePath="Debug\BuildLog.htm"
-				DeploymentContent="TRUE">
-			</File>
-			<File
 				RelativePath="Release\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 			<File
 				RelativePath="cppunit\BuildLog.htm"
+				DeploymentContent="TRUE">
+			</File>
+			<File
+				RelativePath="Debug\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 		</Filter>

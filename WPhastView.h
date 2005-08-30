@@ -27,7 +27,7 @@ class CWellActor;
 
 class CModifyGridCommand;
 class vtkImplicitPlaneWidget;
-class CGridLineSelector;
+class CGridElementsSelector;
 
 class CWPhastView : public CView, public IObserver
 {
@@ -103,10 +103,7 @@ protected:
 
 	//
 	//
-	//CModifyGridCommand             *ModifyGridCommand;
-	//vtkImplicitPlaneWidget         *ModifyGridCommand;
-	CGridLineSelector              *ModifyGridCommand;
-	//vtkBoxWidget                   *ModifyGridCommand;
+	CGridElementsSelector          *ModifyGridCommand;
 
 	friend class CViewVTKCommand;
 

@@ -43,7 +43,7 @@ class CModelessPropertySheet;
 class CScalePropertyPage;
 class CGridPropertyPage2;
 class CDensifyGridPage;
-class CGridLineSelector;
+class CGridElementsSelector;
 
 class vtkAxes;
 class vtkTubeFilter;
@@ -119,8 +119,10 @@ public:
 	void UnDelete(CZoneActor *pZoneActor);
 
 	void Edit(CGridActor* pGridActor);
-	void ModifyGrid(CGridActor* gridActor, CGridLineSelector* gridLineSelector);
+	void ModifyGrid(CGridActor* gridActor, CGridElementsSelector* gridElementsSelector);
 	void SetGridKeyword(const CGridKeyword& gridKeyword);
+	void GetGridKeyword(CGridKeyword& gridKeyword)const;
+
 	vtkProp3D* GetGridActor(void);
 
 	// Well actions
@@ -237,6 +239,8 @@ protected:
 
 	CModelessPropertySheet     *ModifyGridSheet;
 	CDensifyGridPage           *DensifyGridPage;
+	CGridElementsSelector      *GridElementsSelector;
+
 
 protected:
 	void InitDocument();
@@ -406,6 +410,11 @@ public:
 
 	// ID_RIVERS_UNSELECTALL handlers
 	afx_msg void OnRiversUnselectAll();
+
+	// ID_TOOLS_MODIFYGRID
+	afx_msg void OnUpdateToolsModifyGrid(CCmdUI *pCmdUI);
+	afx_msg void OnToolsModifyGrid();
+	void EndModifyGrid();
 };
 
 inline vtkPropAssembly* CWPhastDoc::GetPropAssemblyMedia() const

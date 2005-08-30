@@ -54,7 +54,7 @@
 
 #include "GridPropertyPage2.h"
 #include "DensifyGridPage.h"
-#include "GridLineSelector.h"
+#include "GridElementsSelector.h"
 
 #include <vtkBoxWidget.h>
 
@@ -190,6 +190,9 @@ BEGIN_MESSAGE_MAP(CWPhastDoc, CDocument)
 	ON_COMMAND(ID_RIVERS_UNSELECTALL, OnRiversUnselectAll)
 
 	ON_COMMAND(ID_VIEW_HIDEALL, OnViewHideAll)
+
+	ON_UPDATE_COMMAND_UI(ID_TOOLS_MODIFYGRID, OnUpdateToolsModifyGrid)
+	ON_COMMAND(ID_TOOLS_MODIFYGRID, OnToolsModifyGrid)
 END_MESSAGE_MAP()
 
 #if defined(WPHAST_AUTOMATION)
@@ -237,6 +240,7 @@ CWPhastDoc::CWPhastDoc()
 , m_pGridPage(0)
 , ModifyGridSheet(0)
 , DensifyGridPage(0)
+, GridElementsSelector(0)
 {
 #if defined(WPHAST_AUTOMATION)
 	EnableAutomation();
@@ -416,6 +420,21 @@ CWPhastDoc::~CWPhastDoc()
 		this->m_pGridSheet->DestroyWindow();
 		delete this->m_pGridSheet;
 		this->m_pGridSheet = 0;
+	}
+
+	// Grid modifiers
+	//
+	if (this->ModifyGridSheet)
+	{
+		this->ModifyGridSheet->DestroyWindow();
+		delete this->ModifyGridSheet;
+		this->ModifyGridSheet = 0;
+	}
+	if (this->DensifyGridPage)
+	{
+		this->DensifyGridPage->DestroyWindow();
+		delete this->DensifyGridPage;
+		this->DensifyGridPage = 0;
 	}
 }
 
@@ -4695,6 +4714,11 @@ void CWPhastDoc::RiverListener(vtkObject* caller, unsigned long eid, void* clien
 	}
 }
 
+void CWPhastDoc::GetGridKeyword(CGridKeyword& gridKeyword)const
+{
+	this->m_pGridActor->GetGridKeyword(gridKeyword);
+}
+
 void CWPhastDoc::SetGridKeyword(const CGridKeyword& gridKeyword)
 {
 	this->m_pGridActor->SetGridKeyword(gridKeyword, this->GetUnits());
@@ -4725,18 +4749,24 @@ void CWPhastDoc::Edit(CGridActor* pGridActor)
 	this->m_pGridSheet->Create(::AfxGetApp()->m_pMainWnd);
 }
 
-void CWPhastDoc::ModifyGrid(CGridActor* gridActor, CGridLineSelector* gridLineSelector)
+void CWPhastDoc::ModifyGrid(CGridActor* gridActor, CGridElementsSelector* gridElementsSelector)
 {
 	ASSERT(gridActor == this->m_pGridActor);
-	if (!this->ModifyGridSheet)
+
+	if (this->ModifyGridSheet)
 	{
-		this->ModifyGridSheet = new CModelessPropertySheet("");
+		this->ModifyGridSheet->DestroyWindow();
+		delete this->ModifyGridSheet;
 	}
-	if (!this->DensifyGridPage)
+	if (this->DensifyGridPage)
 	{
-		this->DensifyGridPage  = new CDensifyGridPage();
-		this->ModifyGridSheet->AddPage(this->DensifyGridPage);
+		this->DensifyGridPage->DestroyWindow();
+		delete this->DensifyGridPage;
 	}
+
+	this->ModifyGridSheet = new CModelessPropertySheet("");
+	this->DensifyGridPage  = new CDensifyGridPage();
+	this->ModifyGridSheet->AddPage(this->DensifyGridPage);
 	
 	CGridKeyword gridKeyword;
 	gridActor->GetGridKeyword(gridKeyword);
@@ -4745,42 +4775,17 @@ void CWPhastDoc::ModifyGrid(CGridActor* gridActor, CGridLineSelector* gridLineSe
 	this->DensifyGridPage->SetUnits(this->GetUnits());
 	this->DensifyGridPage->SetDocument(this);
 	this->DensifyGridPage->SetActor(gridActor);
-	this->DensifyGridPage->SetWidget(gridLineSelector);
+	this->DensifyGridPage->SetWidget(gridElementsSelector);
 
 	int min[3];
-	gridLineSelector->GetMin(min);
+	gridElementsSelector->GetMin(min);
 	this->DensifyGridPage->SetMin(min);
 
 	int max[3];
-	gridLineSelector->GetMax(max);
+	gridElementsSelector->GetMax(max);
 	this->DensifyGridPage->SetMax(max);
 
 	this->ModifyGridSheet->Create(::AfxGetApp()->m_pMainWnd);
-
-// COMMENT: {8/26/2005 2:59:00 PM}	ASSERT(gridActor == this->m_pGridActor);
-// COMMENT: {8/26/2005 2:59:00 PM}
-// COMMENT: {8/26/2005 2:59:00 PM}	CPropertySheet sheet;
-// COMMENT: {8/26/2005 2:59:00 PM}	CDensifyGridPage page;
-// COMMENT: {8/26/2005 2:59:00 PM}	sheet.AddPage(&page);
-// COMMENT: {8/26/2005 2:59:00 PM}
-// COMMENT: {8/26/2005 2:59:00 PM}	CGridKeyword gridKeyword;
-// COMMENT: {8/26/2005 2:59:00 PM}	gridActor->GetGridKeyword(gridKeyword);
-// COMMENT: {8/26/2005 2:59:00 PM}
-// COMMENT: {8/26/2005 2:59:00 PM}	page.SetProperties(gridKeyword);
-// COMMENT: {8/26/2005 2:59:00 PM}	page.SetUnits(this->GetUnits());
-// COMMENT: {8/26/2005 2:59:00 PM}	page.SetDocument(this);
-// COMMENT: {8/26/2005 2:59:00 PM}	page.SetActor(gridActor);
-// COMMENT: {8/26/2005 2:59:00 PM}	page.SetWidget(gridLineSelector);
-// COMMENT: {8/26/2005 2:59:00 PM}
-// COMMENT: {8/26/2005 2:59:00 PM}	int min[3];
-// COMMENT: {8/26/2005 2:59:00 PM}	gridLineSelector->GetMin(min);
-// COMMENT: {8/26/2005 2:59:00 PM}	page.SetMin(min);
-// COMMENT: {8/26/2005 2:59:00 PM}
-// COMMENT: {8/26/2005 2:59:00 PM}	int max[3];
-// COMMENT: {8/26/2005 2:59:00 PM}	gridLineSelector->GetMax(max);
-// COMMENT: {8/26/2005 2:59:00 PM}	page.SetMax(max);
-// COMMENT: {8/26/2005 2:59:00 PM}
-// COMMENT: {8/26/2005 2:59:00 PM}	sheet.DoModal();
 }
 
 void CWPhastDoc::Update(IObserver* pSender, LPARAM lHint, CObject* pHint, vtkObject* pObject)
@@ -5041,4 +5046,67 @@ void CWPhastDoc::OnRiversUnselectAll()
 		}
 	}
 	this->UpdateAllViews(0);
+}
+
+void CWPhastDoc::OnUpdateToolsModifyGrid(CCmdUI *pCmdUI)
+{
+	if (CGridActor* pGridActor = CGridActor::SafeDownCast(this->GetGridActor()))
+	{
+		if (pGridActor->GetVisibility())
+		{
+			pCmdUI->Enable(TRUE);
+		}
+		else
+		{
+			pCmdUI->Enable(FALSE);
+		}
+	}
+	else
+	{
+		pCmdUI->Enable(FALSE);
+	}
+
+	if (this->GridElementsSelector)
+	{
+		pCmdUI->SetCheck(1);
+	}
+	else
+	{
+		pCmdUI->SetCheck(0);
+	}
+}
+
+void CWPhastDoc::OnToolsModifyGrid()
+{
+	if (this->GridElementsSelector)
+	{
+		this->EndModifyGrid();
+	}
+	else
+	{
+		POSITION pos = this->GetFirstViewPosition();
+		if (pos != NULL)
+		{
+			CWPhastView *pView = (CWPhastView*) GetNextView(pos);
+			ASSERT_VALID(pView);
+			ASSERT(pView->GetRenderWindowInteractor());
+			if (pView->GetRenderWindowInteractor())
+			{
+				this->GridElementsSelector = CGridElementsSelector::New();
+				this->GridElementsSelector->SetInteractor(pView->GetRenderWindowInteractor());
+				this->GridElementsSelector->SetGridActor(reinterpret_cast<CGridActor *>(this->GetGridActor()));
+				this->GridElementsSelector->SetDocument(this);
+				this->GridElementsSelector->SetEnabled(1);
+			}
+		}
+	}
+}
+
+void CWPhastDoc::EndModifyGrid()
+{
+	if (this->GridElementsSelector)
+	{
+		this->GridElementsSelector->Delete();
+		this->GridElementsSelector = 0;
+	}
 }
