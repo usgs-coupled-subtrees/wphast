@@ -18,13 +18,15 @@ class TestCGrid :
 	CPPUNIT_TEST( testSubDivideByOne );
 	CPPUNIT_TEST( testSubDivideByTwo );
 	CPPUNIT_TEST( testSubDivideByThree );
-	CPPUNIT_TEST( testRefineByOne );
-	CPPUNIT_TEST( testRefineByTwo );
-	CPPUNIT_TEST( testRefineByThree );
+	CPPUNIT_TEST( testCoarsenByOne );
+	CPPUNIT_TEST( testCoarsenByTwo );
+	CPPUNIT_TEST( testCoarsenByThree );
 	CPPUNIT_TEST( testSubDivideAll );
-	CPPUNIT_TEST( testRefineAll );
+	CPPUNIT_TEST( testCoarsenAll );
 	CPPUNIT_TEST( testClosest );
 	CPPUNIT_TEST( testElement );
+
+	CPPUNIT_TEST( testSparsify );
 
 	CPPUNIT_TEST_SUITE_END();
 protected:
@@ -37,12 +39,15 @@ protected:
 	void testSubDivideByOne(void);
 	void testSubDivideByTwo(void);
 	void testSubDivideByThree(void);
-	void testRefineByOne(void);
-	void testRefineByTwo(void);
-	void testRefineByThree(void);
+	void testCoarsenByOne(void);
+	void testCoarsenByTwo(void);
+	void testCoarsenByThree(void);
 	void testSubDivideAll(void);
-	void testRefineAll(void);
+	void testCoarsenAll(void);
 	void testClosest(void);
 	void testElement(void);
+
+	void testSparsify(void);
+
 
 };

@@ -751,6 +751,9 @@
 				RelativePath="Snap.cpp">
 			</File>
 			<File
+				RelativePath="SparsifyGridPage.cpp">
+			</File>
+			<File
 				RelativePath="Startup.cpp">
 			</File>
 			<File
@@ -1299,6 +1302,9 @@
 			</File>
 			<File
 				RelativePath="Snap.h">
+			</File>
+			<File
+				RelativePath="SparsifyGridPage.h">
 			</File>
 			<File
 				RelativePath="Startup.h">

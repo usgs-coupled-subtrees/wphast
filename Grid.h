@@ -48,7 +48,10 @@ public:
 			this->coord = &this->m_coordinates[0];
 		}
 	void SubDivide(int nStart, int nEnd, int nParts);
-	void Refine(int nStart, int nEnd, int nParts);
+
+	void Coarsen(int nStart, int nEnd, int nParts);
+	void Sparsify(int nStart, int nEnd, int nParts);
+
 	int Closest(double value)const;
 	int Element(double value)const;
 	int lower_bound(double value)const;

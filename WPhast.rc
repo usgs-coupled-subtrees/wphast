@@ -393,6 +393,8 @@ BEGIN
     VK_F6,          ID_NEXT_PANE,           VIRTKEY, NOINVERT
     VK_F6,          ID_PREV_PANE,           VIRTKEY, SHIFT, NOINVERT
     "D",            ID_VIEW_FROM_NEXT_DIRECTION, VIRTKEY, CONTROL, NOINVERT
+    "D",            ID_VIEW_FROM_PREV_DIRECTION, VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
 END
 
 
@@ -2435,51 +2437,133 @@ STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Densify"
 FONT 8, "MS Sans Serif", 400, 0, 0x0
 BEGIN
-    EDITTEXT        IDC_EDIT_MIN_I,52,19,31,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_MIN_I,66,22,31,12,ES_AUTOHSCROLL
     CONTROL         "",IDC_SPIN_MIN_I,"msctls_updown32",UDS_SETBUDDYINT | 
-                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,62,19,11,
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,76,22,11,
                     12
-    EDITTEXT        IDC_EDIT_MAX_I,155,19,31,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_MAX_I,143,22,31,12,ES_AUTOHSCROLL
     CONTROL         "",IDC_SPIN_MAX_I,"msctls_updown32",UDS_SETBUDDYINT | 
-                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,165,19,11,
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,153,22,11,
                     12
-    EDITTEXT        IDC_EDIT_PARTS_I,260,19,31,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_PARTS_I,250,22,31,12,ES_AUTOHSCROLL
     CONTROL         "",IDC_SPIN_PARTS_I,"msctls_updown32",UDS_SETBUDDYINT | 
-                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,270,19,11,
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,260,22,11,
                     12
-    EDITTEXT        IDC_EDIT_MIN_J,52,59,31,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_MIN_J,66,65,31,12,ES_AUTOHSCROLL
     CONTROL         "",IDC_SPIN_MIN_J,"msctls_updown32",UDS_SETBUDDYINT | 
-                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,62,59,11,
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,76,65,11,
                     12
-    EDITTEXT        IDC_EDIT_MAX_J,155,59,31,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_MAX_J,143,65,31,12,ES_AUTOHSCROLL
     CONTROL         "",IDC_SPIN_MAX_J,"msctls_updown32",UDS_SETBUDDYINT | 
-                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,165,59,11,
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,153,65,11,
                     12
-    EDITTEXT        IDC_EDIT_PARTS_J,260,59,31,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_PARTS_J,250,65,31,12,ES_AUTOHSCROLL
     CONTROL         "",IDC_SPIN_PARTS_J,"msctls_updown32",UDS_SETBUDDYINT | 
-                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,270,59,11,
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,260,65,11,
                     12
-    EDITTEXT        IDC_EDIT_MIN_K,52,99,31,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_MIN_K,66,109,31,12,ES_AUTOHSCROLL
     CONTROL         "",IDC_SPIN_MIN_K,"msctls_updown32",UDS_SETBUDDYINT | 
-                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,62,99,11,
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,76,109,11,
                     12
-    EDITTEXT        IDC_EDIT_MAX_K,155,99,31,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_MAX_K,143,109,31,12,ES_AUTOHSCROLL
     CONTROL         "",IDC_SPIN_MAX_K,"msctls_updown32",UDS_SETBUDDYINT | 
-                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,165,99,11,
-                    12
-    EDITTEXT        IDC_EDIT_PARTS_K,260,99,31,12,ES_AUTOHSCROLL
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,153,109,
+                    11,12
+    EDITTEXT        IDC_EDIT_PARTS_K,250,109,31,12,ES_AUTOHSCROLL
     CONTROL         "",IDC_SPIN_PARTS_K,"msctls_updown32",UDS_SETBUDDYINT | 
-                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,270,99,11,
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,260,109,
+                    11,12
+    LTEXT           "Start node",IDC_STATIC,28,24,34,8
+    LTEXT           "Start node",IDC_STATIC,28,67,34,8
+    LTEXT           "Start node",IDC_STATIC,28,111,34,8
+    LTEXT           "End node",IDC_STATIC,107,24,32,8
+    LTEXT           "End node",IDC_STATIC,107,67,32,8
+    LTEXT           "End node",IDC_STATIC,107,111,32,8
+    LTEXT           "Split each node into",IDC_STATIC,181,24,64,8
+    LTEXT           "Split each node into",IDC_STATIC,181,67,64,8
+    LTEXT           "Split each node into",IDC_STATIC,181,111,64,8
+    LTEXT           "nodes",IDC_STATIC,286,24,20,8
+    LTEXT           "nodes",IDC_STATIC,286,67,20,8
+    LTEXT           "nodes",IDC_STATIC,286,111,20,8
+    GROUPBOX        "",IDC_STATIC,7,11,303,33
+    LTEXT           "",IDC_STATIC,12,11,8,8
+    CONTROL         "X",IDC_CHECK4,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,
+                    11,21,10
+    GROUPBOX        "",IDC_STATIC,7,55,303,33
+    LTEXT           "",IDC_STATIC,12,55,8,8
+    CONTROL         "Y",IDC_CHECK5,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,
+                    55,21,10
+    GROUPBOX        "",IDC_STATIC,7,99,303,33
+    LTEXT           "",IDC_STATIC,12,99,8,8
+    CONTROL         "Z",IDC_CHECK7,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,
+                    99,21,10
+END
+
+IDD_GRID_SPARSIFY DIALOGEX 0, 0, 317, 143
+STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Sparsify"
+FONT 8, "MS Sans Serif", 400, 0, 0x0
+BEGIN
+    EDITTEXT        IDC_EDIT_MIN_I,59,22,31,12,ES_AUTOHSCROLL
+    CONTROL         "",IDC_SPIN_MIN_I,"msctls_updown32",UDS_SETBUDDYINT | 
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,69,22,11,
                     12
-    LTEXT           "Min X node",IDC_STATIC,7,21,37,8
-    LTEXT           "Min Y node",IDC_STATIC,7,61,37,8
-    LTEXT           "Min Z node",IDC_STATIC,7,101,37,8
-    LTEXT           "Max X node",IDC_STATIC,107,21,39,8
-    LTEXT           "Max Y node",IDC_STATIC,107,61,39,8
-    LTEXT           "Max Z node",IDC_STATIC,107,101,39,8
-    LTEXT           "X subdivisions",IDC_STATIC,207,20,46,8
-    LTEXT           "Y subdivisions",IDC_STATIC,207,61,46,8
-    LTEXT           "Z subdivisions",IDC_STATIC,207,101,46,8
+    EDITTEXT        IDC_EDIT_MAX_I,134,22,31,12,ES_AUTOHSCROLL
+    CONTROL         "",IDC_SPIN_MAX_I,"msctls_updown32",UDS_SETBUDDYINT | 
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,144,22,11,
+                    12
+    EDITTEXT        IDC_EDIT_PARTS_I,208,22,31,12,ES_AUTOHSCROLL
+    CONTROL         "",IDC_SPIN_PARTS_I,"msctls_updown32",UDS_SETBUDDYINT | 
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,218,22,11,
+                    12
+    EDITTEXT        IDC_EDIT_MIN_J,59,64,31,12,ES_AUTOHSCROLL
+    CONTROL         "",IDC_SPIN_MIN_J,"msctls_updown32",UDS_SETBUDDYINT | 
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,69,64,11,
+                    12
+    EDITTEXT        IDC_EDIT_MAX_J,134,64,31,12,ES_AUTOHSCROLL
+    CONTROL         "",IDC_SPIN_MAX_J,"msctls_updown32",UDS_SETBUDDYINT | 
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,144,64,11,
+                    12
+    EDITTEXT        IDC_EDIT_PARTS_J,208,64,31,12,ES_AUTOHSCROLL
+    CONTROL         "",IDC_SPIN_PARTS_J,"msctls_updown32",UDS_SETBUDDYINT | 
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,218,64,11,
+                    12
+    EDITTEXT        IDC_EDIT_MIN_K,59,106,31,12,ES_AUTOHSCROLL
+    CONTROL         "",IDC_SPIN_MIN_K,"msctls_updown32",UDS_SETBUDDYINT | 
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,69,106,11,
+                    12
+    EDITTEXT        IDC_EDIT_MAX_K,134,106,31,12,ES_AUTOHSCROLL
+    CONTROL         "",IDC_SPIN_MAX_K,"msctls_updown32",UDS_SETBUDDYINT | 
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,144,106,
+                    11,12
+    EDITTEXT        IDC_EDIT_PARTS_K,208,106,31,12,ES_AUTOHSCROLL
+    CONTROL         "",IDC_SPIN_PARTS_K,"msctls_updown32",UDS_SETBUDDYINT | 
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,218,106,
+                    11,12
+    LTEXT           "Start node",IDC_STATIC,21,66,34,8
+    LTEXT           "Start node",IDC_STATIC,21,108,34,8
+    LTEXT           "End node",IDC_STATIC,98,66,32,8
+    LTEXT           "End node",IDC_STATIC,98,108,32,8
+    LTEXT           "Remove",IDC_STATIC,176,66,28,8
+    LTEXT           "Remove",IDC_STATIC,176,108,28,8
+    GROUPBOX        "",IDC_STATIC,7,11,303,33
+    LTEXT           "Start node",IDC_STATIC,21,24,34,8
+    LTEXT           "End node",IDC_STATIC,98,24,32,8
+    LTEXT           "Remove",IDC_STATIC,176,24,28,8
+    LTEXT           "",IDC_STATIC,12,11,8,8
+    CONTROL         "X",IDC_CHECK4,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,
+                    11,21,10
+    LTEXT           "of every XXX nodes",IDC_STATIC_NODES_X,243,24,64,8
+    GROUPBOX        "",IDC_STATIC,7,53,303,33
+    GROUPBOX        "",IDC_STATIC,7,95,303,33
+    LTEXT           "of every XXX nodes",IDC_STATIC_NODES_Y,243,66,64,8
+    LTEXT           "of every XXX nodes",IDC_STATIC_NODES_Z,243,108,64,8
+    LTEXT           "",IDC_STATIC,12,53,8,8
+    LTEXT           "",IDC_STATIC,12,95,8,8
+    CONTROL         "Y",IDC_CHECK5,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,
+                    53,21,10
+    CONTROL         "Z",IDC_CHECK6,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,
+                    95,21,10
 END
 
 
@@ -3233,16 +3317,36 @@ BEGIN
     BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 310
-        VERTGUIDE, 67
-        VERTGUIDE, 126
-        VERTGUIDE, 170
-        VERTGUIDE, 230
+        VERTGUIDE, 45
+        VERTGUIDE, 81
+        VERTGUIDE, 123
+        VERTGUIDE, 158
+        VERTGUIDE, 213
+        VERTGUIDE, 265
+        VERTGUIDE, 286
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 136
+        HORZGUIDE, 28
+        HORZGUIDE, 71
+        HORZGUIDE, 115
+    END
+
+    IDD_GRID_SPARSIFY, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 310
+        VERTGUIDE, 38
+        VERTGUIDE, 74
+        VERTGUIDE, 114
+        VERTGUIDE, 149
+        VERTGUIDE, 190
+        VERTGUIDE, 223
         VERTGUIDE, 275
         TOPMARGIN, 7
         BOTTOMMARGIN, 136
-        HORZGUIDE, 25
-        HORZGUIDE, 65
-        HORZGUIDE, 105
+        HORZGUIDE, 28
+        HORZGUIDE, 70
+        HORZGUIDE, 113
     END
 END
 #endif    // APSTUDIO_INVOKED

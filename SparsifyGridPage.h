@@ -8,15 +8,15 @@ class CWPhastDoc;
 class CGridActor;
 class CGridElementsSelector;
 
-// CDensifyGridPage dialog
+// CSparsifyGridPage dialog
 
-class CDensifyGridPage : public CPropertyPage
+class CSparsifyGridPage : public CPropertyPage
 {
-	DECLARE_DYNAMIC(CDensifyGridPage)
+	DECLARE_DYNAMIC(CSparsifyGridPage)
 
 public:
-	CDensifyGridPage();
-	virtual ~CDensifyGridPage();
+	CSparsifyGridPage();
+	virtual ~CSparsifyGridPage();
 
 	void SetUnits(const CUnits& units);
 	CUnits GetUnits()const;
@@ -42,7 +42,7 @@ public:
 	void UpdateSpinners();
 
 // Dialog Data
-	enum { IDD = IDD_GRID_DENSIFY };
+	enum { IDD = IDD_GRID_SPARSIFY };
 
 protected:
 	bool  NeedAction;

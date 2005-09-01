@@ -54,7 +54,7 @@ void CGridSubDivideAction::UnExecute()
 	for (int i = 0; i < 3; ++i)
 	{
 		int newMax = (this->Max[i] - this->Min[i]) * this->Parts[i] + this->Min[i];
-		gridKeyword.m_grid[i].Refine(this->Min[i], newMax, this->Parts[i]);
+		gridKeyword.m_grid[i].Coarsen(this->Min[i], newMax, this->Parts[i]);
 		if (this->WasUniform[i] && this->Parts[i] > 1)
 		{
 			gridKeyword.m_grid[i].uniform          = TRUE;

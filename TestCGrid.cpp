@@ -241,7 +241,7 @@ void TestCGrid::testSubDivideByThree(void)
 	sub013.Dump(afxDump);
 }
 
-void TestCGrid::testRefineByOne(void)
+void TestCGrid::testCoarsenByOne(void)
 {
 // COMMENT: {8/17/2005 5:39:07 PM}	CGrid start(0.0, 1000.0, 6);
 // COMMENT: {8/17/2005 5:39:07 PM}	start.Setup();
@@ -280,7 +280,7 @@ void TestCGrid::testRefineByOne(void)
 
 		CGrid ref(sub);
 		ref.Setup();
-		ref.Refine(i, i + count_parts, count_parts);
+		ref.Coarsen(i, i + count_parts, count_parts);
 		CPPUNIT_ASSERT(ref.count_coord == uniform.count_coord);
 
 		for (int i = 0; i < ref.count_coord; ++i)
@@ -291,7 +291,7 @@ void TestCGrid::testRefineByOne(void)
 
 }
 
-void TestCGrid::testRefineByTwo(void)
+void TestCGrid::testCoarsenByTwo(void)
 {
 	const int count_uniform = 6;
 	const int count_parts = 2;
@@ -316,7 +316,7 @@ void TestCGrid::testRefineByTwo(void)
 
 		CGrid ref(sub);
 		ref.Setup();
-		ref.Refine(i, i + count_parts, count_parts);
+		ref.Coarsen(i, i + count_parts, count_parts);
 		CPPUNIT_ASSERT(ref.count_coord == uniform.count_coord);
 
 		for (int i = 0; i < ref.count_coord; ++i)
@@ -326,7 +326,7 @@ void TestCGrid::testRefineByTwo(void)
 	}
 }
 
-void TestCGrid::testRefineByThree(void)
+void TestCGrid::testCoarsenByThree(void)
 {
 	const int count_uniform = 6;
 	const int count_parts = 3;
@@ -351,12 +351,12 @@ void TestCGrid::testRefineByThree(void)
 
 		CGrid ref(sub);
 		ref.Setup();
-		ref.Refine(i, i + count_parts, count_parts);
+		ref.Coarsen(i, i + count_parts, count_parts);
 		CPPUNIT_ASSERT(ref.count_coord == uniform.count_coord);
 
 		for (int i = 0; i < ref.count_coord; ++i)
 		{
-			CPPUNIT_ASSERT(ref.coord[i] == uniform.coord[i]);
+			CPPUNIT_ASSERT_EQUAL(ref.coord[i], uniform.coord[i]);
 		}
 	}
 }
@@ -376,13 +376,15 @@ void TestCGrid::testSubDivideAll(void)
 	{
 		CGrid sub(uniform);
 		sub.SubDivide(0, uniform.count_coord - 1, n);
+		ASSERT(sub.uniform);
+		CPPUNIT_ASSERT(sub.uniform);
 	
 		ASSERT(sub.count_coord == (uniform.count_coord - 1) * n + 1);
-		CPPUNIT_ASSERT(sub.count_coord == (uniform.count_coord - 1) * n + 1);
+		CPPUNIT_ASSERT_EQUAL(sub.count_coord, (uniform.count_coord - 1) * n + 1);
 	}
 }
 
-void TestCGrid::testRefineAll(void)
+void TestCGrid::testCoarsenAll(void)
 {
 	// const int count_uniform = 6;
 	const int count_uniform = 7;
@@ -401,11 +403,20 @@ void TestCGrid::testRefineAll(void)
 
 				int newEnd = (nEnd - nStart) * nParts + nStart;
 				CGrid ref(sub);
-				ref.Refine(nStart, newEnd, nParts);
+				ref.Coarsen(nStart, newEnd, nParts);
+
+				if (nStart == 0 && nEnd == uniform.count_coord - 1)
+				{
+					CPPUNIT_ASSERT(sub.uniform);
+					CPPUNIT_ASSERT(ref.uniform);
+				}
+
+				CPPUNIT_ASSERT_EQUAL(ref.count_coord, uniform.count_coord);
+
 				for (int i = 0; i < ref.count_coord; ++i)
 				{
 					ASSERT(ref.coord[i] == uniform.coord[i]);
-					CPPUNIT_ASSERT(ref.coord[i] == uniform.coord[i]);
+					CPPUNIT_ASSERT_EQUAL(ref.coord[i], uniform.coord[i]);
 				}
 			}
 		}
@@ -472,4 +483,265 @@ void TestCGrid::testElement(void)
         ASSERT(val == i);
         CPPUNIT_ASSERT(val == i);
 	}
+}
+
+void TestCGrid::testSparsify(void)
+{
+	CGrid uniform(0, 12, 7);
+	uniform.Setup();
+
+	CPPUNIT_ASSERT_EQUAL( 7, uniform.count_coord);
+
+	CPPUNIT_ASSERT_EQUAL( 0., uniform.coord[0]);
+	CPPUNIT_ASSERT_EQUAL( 2., uniform.coord[1]);
+	CPPUNIT_ASSERT_EQUAL( 4., uniform.coord[2]);
+	CPPUNIT_ASSERT_EQUAL( 6., uniform.coord[3]);
+	CPPUNIT_ASSERT_EQUAL( 8., uniform.coord[4]);
+	CPPUNIT_ASSERT_EQUAL(10., uniform.coord[5]);
+	CPPUNIT_ASSERT_EQUAL(12., uniform.coord[6]);
+
+
+	// 0  2  4  6  8 10 12
+	// 0  1  2  3  4  5  6
+	// O  /  O  O  O  O  O
+	// 0     1  2  3  4  5
+	{
+		CGrid sparse(uniform);
+		sparse.Sparsify(0, 2, 4);
+
+		CPPUNIT_ASSERT_EQUAL( 6, sparse.count_coord);
+
+		CPPUNIT_ASSERT_EQUAL( 0., sparse.coord[0]);
+		CPPUNIT_ASSERT_EQUAL( 4., sparse.coord[1]);
+		CPPUNIT_ASSERT_EQUAL( 6., sparse.coord[2]);
+		CPPUNIT_ASSERT_EQUAL( 8., sparse.coord[3]);
+		CPPUNIT_ASSERT_EQUAL(10., sparse.coord[4]);
+		CPPUNIT_ASSERT_EQUAL(12., sparse.coord[5]);
+	}
+
+	// 0  2  4  6  8 10 12
+	// 0  1  2  3  4  5  6 
+	// O  /  /  O  O  O  O
+	// 0        1  2  3  4
+	{
+		CGrid sparse(uniform);
+		sparse.Sparsify(0, 3, 4);
+
+		CPPUNIT_ASSERT_EQUAL( 5, sparse.count_coord);
+
+		CPPUNIT_ASSERT_EQUAL( 0., sparse.coord[0]);
+		CPPUNIT_ASSERT_EQUAL( 6., sparse.coord[1]);
+		CPPUNIT_ASSERT_EQUAL( 8., sparse.coord[2]);
+		CPPUNIT_ASSERT_EQUAL(10., sparse.coord[3]);
+		CPPUNIT_ASSERT_EQUAL(12., sparse.coord[4]);
+	}
+
+	// 0  2  4  6  8 10 12
+	// 0  1  2  3  4  5  6
+	// O  /  /  /  O  O  O
+	// 0           1  2  3
+	{
+		CGrid sparse(uniform);
+		sparse.Sparsify(0, 4, 4);
+
+		CPPUNIT_ASSERT_EQUAL( 4, sparse.count_coord);
+
+		CPPUNIT_ASSERT_EQUAL( 0., sparse.coord[0]);
+		CPPUNIT_ASSERT_EQUAL( 8., sparse.coord[1]);
+		CPPUNIT_ASSERT_EQUAL(10., sparse.coord[2]);
+		CPPUNIT_ASSERT_EQUAL(12., sparse.coord[3]);
+	}
+
+	// 0  2  4  6  8 10 12
+	// 0  1  2  3  4  5  6
+	// O  /  /  /  /  O  O
+	// 0              1  2
+	{
+		CGrid sparse(uniform);
+		sparse.Sparsify(0, 5, 4);
+
+		CPPUNIT_ASSERT_EQUAL( 3, sparse.count_coord);
+
+		CPPUNIT_ASSERT_EQUAL( 0., sparse.coord[0]);
+		CPPUNIT_ASSERT_EQUAL(10., sparse.coord[1]);
+		CPPUNIT_ASSERT_EQUAL(12., sparse.coord[2]);
+	}
+
+	// 0  2  4  6  8 10 12
+	// 0  1  2  3  4  5  6
+	// O  /  /  /  /  O  O
+	// 0              1  2
+	{
+		CGrid sparse(uniform);
+		sparse.Sparsify(0, 6, 4);
+
+		CPPUNIT_ASSERT_EQUAL( 3, sparse.count_coord);
+
+		CPPUNIT_ASSERT_EQUAL( 0., sparse.coord[0]);
+		CPPUNIT_ASSERT_EQUAL(10., sparse.coord[1]);
+		CPPUNIT_ASSERT_EQUAL(12., sparse.coord[2]);
+	}
+
+	// 0  2  4  6  8 10 12
+	// 0  1  2  3  4  5  6
+	// O  O  O  O  O  O  O
+	// 0  1  2  3  4  5  6
+	{
+		CGrid sparse(uniform);
+		sparse.Sparsify(0, 1, 1);
+
+		CPPUNIT_ASSERT_EQUAL( 7, sparse.count_coord);
+
+		CPPUNIT_ASSERT_EQUAL( 0., sparse.coord[0]);
+		CPPUNIT_ASSERT_EQUAL( 2., sparse.coord[1]);
+		CPPUNIT_ASSERT_EQUAL( 4., sparse.coord[2]);
+		CPPUNIT_ASSERT_EQUAL( 6., sparse.coord[3]);
+		CPPUNIT_ASSERT_EQUAL( 8., sparse.coord[4]);
+		CPPUNIT_ASSERT_EQUAL(10., sparse.coord[5]);
+		CPPUNIT_ASSERT_EQUAL(12., sparse.coord[6]);
+	}
+
+	// 0  2  4  6  8 10 12
+	// 0  1  2  3  4  5  6
+	// O  /  O  O  O  O  O
+	// 0     1  2  3  4  5
+	{
+		CGrid sparse(uniform);
+		sparse.Sparsify(0, 2, 1);
+
+		CPPUNIT_ASSERT_EQUAL( 6, sparse.count_coord);
+
+		CPPUNIT_ASSERT_EQUAL( 0., sparse.coord[0]);
+		CPPUNIT_ASSERT_EQUAL( 4., sparse.coord[1]);
+		CPPUNIT_ASSERT_EQUAL( 6., sparse.coord[2]);
+		CPPUNIT_ASSERT_EQUAL( 8., sparse.coord[3]);
+		CPPUNIT_ASSERT_EQUAL(10., sparse.coord[4]);
+		CPPUNIT_ASSERT_EQUAL(12., sparse.coord[5]);
+	}
+
+	// 0  2  4  6  8 10 12
+	// 0  1  2  3  4  5  6
+	// O  /  O  /  O  /  O
+	// 0     1     2     3
+	{
+		CGrid sparse(uniform);
+		sparse.Sparsify(0, 6, 1);
+
+		CPPUNIT_ASSERT_EQUAL( 4, sparse.count_coord);
+
+		CPPUNIT_ASSERT_EQUAL( 0., sparse.coord[0]);
+		CPPUNIT_ASSERT_EQUAL( 4., sparse.coord[1]);
+		CPPUNIT_ASSERT_EQUAL( 8., sparse.coord[2]);
+		CPPUNIT_ASSERT_EQUAL(12., sparse.coord[3]);
+	}
+
+	// 0  2  4  6  8 10 12
+	// 0  1  2  3  4  5  6
+	// O  /  /  O  /  /  O
+	// 0        1        2
+	{
+		CGrid sparse(uniform);
+		sparse.Sparsify(0, 6, 2);
+
+		CPPUNIT_ASSERT_EQUAL( 3, sparse.count_coord);
+
+		CPPUNIT_ASSERT_EQUAL( 0., sparse.coord[0]);
+		CPPUNIT_ASSERT_EQUAL( 6., sparse.coord[1]);
+		CPPUNIT_ASSERT_EQUAL(12., sparse.coord[2]);
+	}
+
+	// 0  2  4  6  8 10 12
+	// 0  1  2  3  4  5  6
+	// O  /  /  /  O  /  O
+	// 0           1     2
+	{
+		CGrid sparse(uniform);
+		sparse.Sparsify(0, 6, 3);
+
+		CPPUNIT_ASSERT_EQUAL( 3, sparse.count_coord);
+
+		CPPUNIT_ASSERT_EQUAL( 0., sparse.coord[0]);
+		CPPUNIT_ASSERT_EQUAL( 8., sparse.coord[1]);
+		CPPUNIT_ASSERT_EQUAL(12., sparse.coord[2]);
+	}
+
+	// 0  2  4  6  8 10 12
+	// 0  1  2  3  4  5  6
+	// O  /  /  /  /  /  O
+	// 0                 1
+	{
+		CGrid sparse(uniform);
+		sparse.Sparsify(0, 6, 5);
+
+		CPPUNIT_ASSERT_EQUAL( 2, sparse.count_coord);
+
+		CPPUNIT_ASSERT_EQUAL( 0., sparse.coord[0]);
+		CPPUNIT_ASSERT_EQUAL(12., sparse.coord[1]);
+	}
+
+	// 0  2  4  6  8 10 12
+	// 0  1  2  3  4  5  6
+	// O  /  /  /  /  /  O
+	// 0                 1
+	{
+		CGrid sparse(uniform);
+		//sparse.Sparsify(0, 6, 6);
+
+		int start = 0;
+		int end = 6;
+		int n = 6;
+		sparse.Sparsify(start, end, n);
+// COMMENT: {8/31/2005 7:58:07 PM}		CPPUNIT_ASSERT_EQUAL((end - start) / min((n + 1), (end - start)) + start, sparse.count_coord);
+
+		CPPUNIT_ASSERT_EQUAL( 2, sparse.count_coord);
+
+		CPPUNIT_ASSERT_EQUAL( 0., sparse.coord[0]);
+		CPPUNIT_ASSERT_EQUAL(12., sparse.coord[1]);
+	}
+
+	// 0  2  4  6  8 10 12
+	// 0  1  2  3  4  5  6
+	// O  /  /  /  /  /  O
+	// 0                 1
+	{
+		CGrid sparse(uniform);
+		//sparse.Sparsify(0, 6, 7);
+
+		int start = 0;
+		int end = 6;
+		int n = 7;
+		sparse.Sparsify(start, end, n);
+// COMMENT: {8/31/2005 7:58:13 PM}		CPPUNIT_ASSERT_EQUAL((end - start) / min((n + 1), (end - start)) + start, sparse.count_coord);
+
+		CPPUNIT_ASSERT_EQUAL( 2, sparse.count_coord);
+
+		CPPUNIT_ASSERT_EQUAL( 0., sparse.coord[0]);
+		CPPUNIT_ASSERT_EQUAL(12., sparse.coord[1]);
+	}
+
+	// 0  2  4  6  8 10 12
+	// 0  1  2  3  4  5  6
+	// O  O  O  O  O  O  O
+	// 0  1  2  3  4  5  6
+	{
+		CGrid sparse(uniform);
+		//sparse.Sparsify(0, 6, 0);
+
+		int start = 0;
+		int end = 6;
+		int n = 0;
+		sparse.Sparsify(start, end, n);
+// COMMENT: {8/31/2005 7:58:20 PM}		CPPUNIT_ASSERT_EQUAL((end - start) / min((n + 1), (end - start)) + start, sparse.count_coord);
+
+		CPPUNIT_ASSERT_EQUAL( 7, sparse.count_coord);
+
+		CPPUNIT_ASSERT_EQUAL( 0., sparse.coord[0]);
+		CPPUNIT_ASSERT_EQUAL( 2., sparse.coord[1]);
+		CPPUNIT_ASSERT_EQUAL( 4., sparse.coord[2]);
+		CPPUNIT_ASSERT_EQUAL( 6., sparse.coord[3]);
+		CPPUNIT_ASSERT_EQUAL( 8., sparse.coord[4]);
+		CPPUNIT_ASSERT_EQUAL(10., sparse.coord[5]);
+		CPPUNIT_ASSERT_EQUAL(12., sparse.coord[6]);
+	}
+
 }

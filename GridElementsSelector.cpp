@@ -491,7 +491,26 @@ void CGridElementsSelector::SetIBounds(int ibounds[6])
 	if (this->Interactor) this->Interactor->Render();
 }
 
-void CGridElementsSelector::Update(void)
+void CGridElementsSelector::GetIBounds(int &imin, int &imax, int &jmin, int &jmax, int &kmin, int &kmax)
+{
+	imin = this->Min[0];
+	imax = this->Max[0];
+	jmin = this->Min[1];
+	jmax = this->Max[1];
+	kmin = this->Min[2];
+	kmax = this->Max[2];
+}
+
+void CGridElementsSelector::GetIBounds(int ibounds[6])
+{
+	for (int i = 0; i < 3; ++i)
+	{
+		ibounds[2*i]     = this->Min[i];
+		ibounds[2*i + 1] = this->Max[i];
+	}
+}
+
+void CGridElementsSelector::UpdateGrid(void)
 {
 	this->GridKeyword = this->GridActor->m_gridKeyword;
 	for (int i = 0; i < 3; ++i)

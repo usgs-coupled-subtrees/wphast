@@ -1,9 +1,9 @@
-// DensifyGridPage.cpp : implementation file
+// SparsifyGridPage.cpp : implementation file
 //
 
 #include "stdafx.h"
 #include "WPhast.h"
-#include "DensifyGridPage.h"
+#include "SparsifyGridPage.h"
 
 #include "WPhastDoc.h"
 #include "GridElementsSelector.h"
@@ -11,11 +11,11 @@
 #include "GridSubDivideAction.h"
 #include "ModelessPropertySheet.h"
 
-// CDensifyGridPage dialog
+// CSparsifyGridPage dialog
 
-IMPLEMENT_DYNAMIC(CDensifyGridPage, CPropertyPage)
-CDensifyGridPage::CDensifyGridPage()
-	: CPropertyPage(CDensifyGridPage::IDD)
+IMPLEMENT_DYNAMIC(CSparsifyGridPage, CPropertyPage)
+CSparsifyGridPage::CSparsifyGridPage()
+	: CPropertyPage(CSparsifyGridPage::IDD)
 	, Document(0)
 	, Actor(0)
 	, Widget(0)
@@ -25,17 +25,19 @@ CDensifyGridPage::CDensifyGridPage()
 	{
 		this->MinOneBased[i] = 1;
 		this->MaxOneBased[i] = 1;
-		this->Parts[i]       = 1;
+		this->Parts[i]       = 0;
 	}
 }
 
-CDensifyGridPage::~CDensifyGridPage()
+CSparsifyGridPage::~CSparsifyGridPage()
 {
 }
 
-void CDensifyGridPage::DoDataExchange(CDataExchange* pDX)
+void CSparsifyGridPage::DoDataExchange(CDataExchange* pDX)
 {
 	CPropertyPage::DoDataExchange(pDX);
+
+	CString str;
 
 	// X
 	//
@@ -47,7 +49,10 @@ void CDensifyGridPage::DoDataExchange(CDataExchange* pDX)
 	DDV_MinMaxInt(pDX, this->MinOneBased[0], 1, this->GridKeyword.m_grid[0].count_coord);
 
 	DDX_Text(pDX, IDC_EDIT_PARTS_I, this->Parts[0]);
-	DDV_MinMaxInt(pDX, this->Parts[0], 1, INT_MAX);
+	DDV_MinMaxInt(pDX, this->Parts[0], 0, INT_MAX);
+
+	str.Format("of every %d nodes", this->Parts[0] + 1);
+	DDX_Text(pDX, IDC_STATIC_NODES_X, str);
 
 	// Y
 	//
@@ -59,7 +64,10 @@ void CDensifyGridPage::DoDataExchange(CDataExchange* pDX)
 	DDV_MinMaxInt(pDX, this->MinOneBased[1], 1, this->GridKeyword.m_grid[1].count_coord);
 
 	DDX_Text(pDX, IDC_EDIT_PARTS_J, this->Parts[1]);
-	DDV_MinMaxInt(pDX, this->Parts[1], 1, INT_MAX);
+	DDV_MinMaxInt(pDX, this->Parts[1], 0, INT_MAX);
+
+	str.Format("of every %d nodes", this->Parts[1] + 1);
+	DDX_Text(pDX, IDC_STATIC_NODES_Y, str);
 
 	// Z
 	//
@@ -71,7 +79,10 @@ void CDensifyGridPage::DoDataExchange(CDataExchange* pDX)
 	DDV_MinMaxInt(pDX, this->MinOneBased[2], 1, this->GridKeyword.m_grid[2].count_coord);
 
 	DDX_Text(pDX, IDC_EDIT_PARTS_K, this->Parts[2]);
-	DDV_MinMaxInt(pDX, this->Parts[2], 1, INT_MAX);
+	DDV_MinMaxInt(pDX, this->Parts[2], 0, INT_MAX);
+
+	str.Format("of every %d nodes", this->Parts[2] + 1);
+	DDX_Text(pDX, IDC_STATIC_NODES_Z, str);
 
 	// spinners
 	//
@@ -89,58 +100,58 @@ void CDensifyGridPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_SPIN_PARTS_K, spinParts[2]);
 }
 
-void CDensifyGridPage::SetUnits(const CUnits &units)
+void CSparsifyGridPage::SetUnits(const CUnits &units)
 {
 	this->Units = units;
 }
 
-CUnits CDensifyGridPage::GetUnits()const
+CUnits CSparsifyGridPage::GetUnits()const
 {
 	return this->Units;
 }
 
-void CDensifyGridPage::SetProperties(const CGridKeyword &gridKeyword)
+void CSparsifyGridPage::SetProperties(const CGridKeyword &gridKeyword)
 {
 	this->GridKeyword = gridKeyword;
 }
 
-void CDensifyGridPage::GetProperties(CGridKeyword &gridKeyword)const
+void CSparsifyGridPage::GetProperties(CGridKeyword &gridKeyword)const
 {
 	gridKeyword = this->GridKeyword;
 }
 
-void CDensifyGridPage::SetDocument(CWPhastDoc *document)
+void CSparsifyGridPage::SetDocument(CWPhastDoc *document)
 {
 	this->Document = document;
 }
 
-CWPhastDoc* CDensifyGridPage::GetDocument()const
+CWPhastDoc* CSparsifyGridPage::GetDocument()const
 {
 	return this->Document;
 }
 
-void CDensifyGridPage::SetActor(CGridActor *actor)
+void CSparsifyGridPage::SetActor(CGridActor *actor)
 {
 	this->Actor = actor;
 	this->Actor->GetGridKeyword(this->OriginalGridKeyword);
 }
 
-CGridActor* CDensifyGridPage::GetActor()const
+CGridActor* CSparsifyGridPage::GetActor()const
 {
 	return this->Actor;
 }
 
-void CDensifyGridPage::SetWidget(CGridElementsSelector *widget)
+void CSparsifyGridPage::SetWidget(CGridElementsSelector *widget)
 {
 	this->Widget = widget;
 }
 
-CGridElementsSelector* CDensifyGridPage::GetWidget()const
+CGridElementsSelector* CSparsifyGridPage::GetWidget()const
 {
 	return this->Widget;
 }
 
-void CDensifyGridPage::SetMin(int min[3])
+void CSparsifyGridPage::SetMin(int min[3])
 {
 	for (int i = 0; i < 3; ++i)
 	{
@@ -148,7 +159,7 @@ void CDensifyGridPage::SetMin(int min[3])
 	}
 }
 
-void CDensifyGridPage::GetMin(int min[3])const
+void CSparsifyGridPage::GetMin(int min[3])const
 {
 	for (int i = 0; i < 3; ++i)
 	{
@@ -156,7 +167,7 @@ void CDensifyGridPage::GetMin(int min[3])const
 	}
 }
 
-void CDensifyGridPage::SetMax(int max[3])
+void CSparsifyGridPage::SetMax(int max[3])
 {
 	for (int i = 0; i < 3; ++i)
 	{
@@ -164,7 +175,7 @@ void CDensifyGridPage::SetMax(int max[3])
 	}
 }
 
-void CDensifyGridPage::GetMax(int max[3])const
+void CSparsifyGridPage::GetMax(int max[3])const
 {
 	for (int i = 0; i < 3; ++i)
 	{
@@ -172,7 +183,7 @@ void CDensifyGridPage::GetMax(int max[3])const
 	}
 }
 
-BEGIN_MESSAGE_MAP(CDensifyGridPage, CPropertyPage)
+BEGIN_MESSAGE_MAP(CSparsifyGridPage, CPropertyPage)
 	ON_EN_CHANGE(IDC_EDIT_MIN_I, OnEnChangeEditMinI)
 	ON_EN_CHANGE(IDC_EDIT_MAX_I, OnEnChangeEditMaxI)
 	ON_EN_CHANGE(IDC_EDIT_PARTS_I, OnEnChangeEditPartsI)
@@ -188,9 +199,9 @@ BEGIN_MESSAGE_MAP(CDensifyGridPage, CPropertyPage)
 END_MESSAGE_MAP()
 
 
-// CDensifyGridPage message handlers
+// CSparsifyGridPage message handlers
 
-BOOL CDensifyGridPage::OnInitDialog()
+BOOL CSparsifyGridPage::OnInitDialog()
 {
 	CPropertyPage::OnInitDialog();
 
@@ -201,7 +212,7 @@ BOOL CDensifyGridPage::OnInitDialog()
 	// EXCEPTION: OCX Property Pages should return FALSE
 }
 
-void CDensifyGridPage::OnEnChangeEditMinI()
+void CSparsifyGridPage::OnEnChangeEditMinI()
 {
 	const int id = IDC_EDIT_MIN_I;
 	const int c = 0;
@@ -227,7 +238,7 @@ void CDensifyGridPage::OnEnChangeEditMinI()
 	}
 }
 
-void CDensifyGridPage::OnEnChangeEditMinJ()
+void CSparsifyGridPage::OnEnChangeEditMinJ()
 {
 	const int id = IDC_EDIT_MIN_J;
 	const int c = 1;
@@ -253,7 +264,7 @@ void CDensifyGridPage::OnEnChangeEditMinJ()
 	}
 }
 
-void CDensifyGridPage::OnEnChangeEditMinK()
+void CSparsifyGridPage::OnEnChangeEditMinK()
 {
 	const int id = IDC_EDIT_MIN_K;
 	const int c = 2;
@@ -280,7 +291,7 @@ void CDensifyGridPage::OnEnChangeEditMinK()
 }
 
 
-void CDensifyGridPage::OnEnChangeEditMaxI()
+void CSparsifyGridPage::OnEnChangeEditMaxI()
 {
 	const int id = IDC_EDIT_MAX_I;
 	const int c = 0;
@@ -306,7 +317,7 @@ void CDensifyGridPage::OnEnChangeEditMaxI()
 	}
 }
 
-void CDensifyGridPage::OnEnChangeEditMaxJ()
+void CSparsifyGridPage::OnEnChangeEditMaxJ()
 {
 	const int id = IDC_EDIT_MAX_J;
 	const int c = 1;
@@ -332,7 +343,7 @@ void CDensifyGridPage::OnEnChangeEditMaxJ()
 	}
 }
 
-void CDensifyGridPage::OnEnChangeEditMaxK()
+void CSparsifyGridPage::OnEnChangeEditMaxK()
 {
 	const int id = IDC_EDIT_MAX_K;
 	const int c = 2;
@@ -358,23 +369,24 @@ void CDensifyGridPage::OnEnChangeEditMaxK()
 	}
 }
 
-void CDensifyGridPage::OnEnChangeEditPartsI()
+void CSparsifyGridPage::OnEnChangeEditPartsI()
 {
 	const int id = IDC_EDIT_PARTS_I;
 	const int c = 0;
+	const int static_id = IDC_STATIC_NODES_X;
 
 	bool ActionNeeded = false;
 
 	if (!this->m_bFirstSetActive)
 	{
 		BOOL bTranslated;
-		UINT i = this->GetDlgItemInt(id, &bTranslated, FALSE);
+		UINT parts = this->GetDlgItemInt(id, &bTranslated, FALSE);
 		if (bTranslated)
 		{
-			this->Parts[c] = i;
+			this->Parts[c] = parts;
 			for (int i = 0; i < 3; ++i)
 			{
-				if (this->Parts[i] > 1)
+				if (this->Parts[i] > 0)
 				{
 					ActionNeeded = true;
 					break;
@@ -390,14 +402,29 @@ void CDensifyGridPage::OnEnChangeEditPartsI()
 				this->SetModified(FALSE);
 				this->NeedAction = false;
 			}
+			if (CWnd *pWnd = this->GetDlgItem(static_id))
+			{
+				CString str;
+// COMMENT: {8/31/2005 9:13:56 PM}				if (this->Parts[c] > 0)
+// COMMENT: {8/31/2005 9:13:56 PM}				{
+// COMMENT: {8/31/2005 9:13:56 PM}					str.Format("of every %d nodes", this->Parts[c] + 1);
+// COMMENT: {8/31/2005 9:13:56 PM}				}
+// COMMENT: {8/31/2005 9:13:56 PM}				else
+// COMMENT: {8/31/2005 9:13:56 PM}				{
+// COMMENT: {8/31/2005 9:13:56 PM}					str.Format("");
+// COMMENT: {8/31/2005 9:13:56 PM}				}
+				str.Format("of every %d nodes", this->Parts[c] + 1);
+				pWnd->SetWindowText(str);
+			}
 		}
 	}
 }
 
-void CDensifyGridPage::OnEnChangeEditPartsJ()
+void CSparsifyGridPage::OnEnChangeEditPartsJ()
 {
 	const int id = IDC_EDIT_PARTS_J;
 	const int c = 1;
+	const int static_id = IDC_STATIC_NODES_Y;
 
 	bool ActionNeeded = false;
 
@@ -410,7 +437,7 @@ void CDensifyGridPage::OnEnChangeEditPartsJ()
 			this->Parts[c] = i;
 			for (int i = 0; i < 3; ++i)
 			{
-				if (this->Parts[i] > 1)
+				if (this->Parts[i] > 0)
 				{
 					ActionNeeded = true;
 					break;
@@ -426,14 +453,29 @@ void CDensifyGridPage::OnEnChangeEditPartsJ()
 				this->SetModified(FALSE);
 				this->NeedAction = false;
 			}
+			if (CWnd *pWnd = this->GetDlgItem(static_id))
+			{
+				CString str;
+// COMMENT: {8/31/2005 9:13:56 PM}				if (this->Parts[c] > 0)
+// COMMENT: {8/31/2005 9:13:56 PM}				{
+// COMMENT: {8/31/2005 9:13:56 PM}					str.Format("of every %d nodes", this->Parts[c] + 1);
+// COMMENT: {8/31/2005 9:13:56 PM}				}
+// COMMENT: {8/31/2005 9:13:56 PM}				else
+// COMMENT: {8/31/2005 9:13:56 PM}				{
+// COMMENT: {8/31/2005 9:13:56 PM}					str.Format("");
+// COMMENT: {8/31/2005 9:13:56 PM}				}
+				str.Format("of every %d nodes", this->Parts[c] + 1);
+				pWnd->SetWindowText(str);
+			}
 		}
 	}
 }
 
-void CDensifyGridPage::OnEnChangeEditPartsK()
+void CSparsifyGridPage::OnEnChangeEditPartsK()
 {
 	const int id = IDC_EDIT_PARTS_K;
 	const int c = 2;
+	const int static_id = IDC_STATIC_NODES_Z;
 
 	bool ActionNeeded = false;
 
@@ -446,7 +488,7 @@ void CDensifyGridPage::OnEnChangeEditPartsK()
 			this->Parts[c] = i;
 			for (int i = 0; i < 3; ++i)
 			{
-				if (this->Parts[i] > 1)
+				if (this->Parts[i] > 0)
 				{
 					ActionNeeded = true;
 					break;
@@ -462,12 +504,27 @@ void CDensifyGridPage::OnEnChangeEditPartsK()
 				this->SetModified(FALSE);
 				this->NeedAction = false;
 			}
+			if (CWnd *pWnd = this->GetDlgItem(static_id))
+			{
+				CString str;
+// COMMENT: {8/31/2005 9:13:56 PM}				if (this->Parts[c] > 0)
+// COMMENT: {8/31/2005 9:13:56 PM}				{
+// COMMENT: {8/31/2005 9:13:56 PM}					str.Format("of every %d nodes", this->Parts[c] + 1);
+// COMMENT: {8/31/2005 9:13:56 PM}				}
+// COMMENT: {8/31/2005 9:13:56 PM}				else
+// COMMENT: {8/31/2005 9:13:56 PM}				{
+// COMMENT: {8/31/2005 9:13:56 PM}					str.Format("");
+// COMMENT: {8/31/2005 9:13:56 PM}				}
+				str.Format("of every %d nodes", this->Parts[c] + 1);
+				pWnd->SetWindowText(str);
+			}
 		}
 	}
 }
 
-BOOL CDensifyGridPage::OnApply()
+BOOL CSparsifyGridPage::OnApply()
 {
+	TRACE("In CSparsifyGridPage::OnApply\n");
 	ASSERT(this->Document);
 	ASSERT(this->Actor);
 	CWaitCursor wait;
@@ -482,12 +539,38 @@ BOOL CDensifyGridPage::OnApply()
 			{
 				min[i] = this->MinOneBased[i] - 1;
 				max[i] = this->MaxOneBased[i] - 1;
-				new_ibounds[2*i] = min[i];
-				new_ibounds[2*i + 1] = (max[i] - min[i]) * this->Parts[i] + min[i];
+				new_ibounds[2*i]     = min[i];
+				new_ibounds[2*i + 1] = max[i];
+				for (int m = min[i]; m < max[i]; ++m)
+				{
+					if ((m - min[i]) % (this->Parts[i] + 1))
+					{
+						--new_ibounds[2*i + 1];
+					}
+				}
 			}
-			CGridSubDivideAction* action = new CGridSubDivideAction(this->Document, this->Actor, min, max, this->Parts);
-			action->Apply();
-			sheet->AddAction(action);
+// COMMENT: {8/30/2005 7:35:34 PM}			CGridSubDivideAction* action = new CGridSubDivideAction(this->Document, this->Actor, min, max, this->Parts);
+// COMMENT: {8/30/2005 7:35:34 PM}			action->Apply();
+// COMMENT: {8/30/2005 7:35:34 PM}			sheet->AddAction(action);
+			//{{
+			{
+				CGridKeyword gridKeyword;
+				this->Actor->GetGridKeyword(gridKeyword);
+
+				CUnits units;
+				this->Document->GetUnits(units);
+
+				for (int i = 0; i < 3; ++i)
+				{
+					//this->WasUniform[i] = (gridKeyword.m_grid[i].uniform != 0);
+					//gridKeyword.m_grid[i].Coarsen(this->Min[i], this->Max[i], this->Parts[i]);
+					gridKeyword.m_grid[i].Sparsify(min[i], max[i], this->Parts[i]);
+				}
+				this->Actor->SetGridKeyword(gridKeyword, units);
+				this->Actor->UpdateNode();
+				this->Document->UpdateAllViews(0);
+			}
+			//}}
 
 			// update gridKeyword
 			this->Actor->GetGridKeyword(this->GridKeyword);
@@ -499,30 +582,41 @@ BOOL CDensifyGridPage::OnApply()
 			// update maxs
 			this->UpdateSpinners();
 
-			for (int i = 0; i < 3; ++i)
-			{
-				this->MaxOneBased[i] = (max[i] - min[i]) * this->Parts[i] + min[i] + 1;
-				this->Parts[i] = 1;
-			}
-			this->UpdateData(FALSE);
+			// this->Parts updated in OnKillActive
+// COMMENT: {8/31/2005 9:41:51 PM}			for (int i = 0; i < 3; ++i)
+// COMMENT: {8/31/2005 9:41:51 PM}			{
+// COMMENT: {8/31/2005 9:41:51 PM}				// Min and Max are updated by OnSetActive and the above call to SetIBounds
+// COMMENT: {8/31/2005 9:41:51 PM}				this->Parts[i] = 0;
+// COMMENT: {8/31/2005 9:41:51 PM}			}
+// COMMENT: {8/31/2005 9:41:51 PM}			this->UpdateData(FALSE);
 		}
 		this->NeedAction = false;
 	}
-	return CPropertyPage::OnApply();
+	// return CPropertyPage::OnApply();
+	BOOL b = CPropertyPage::OnApply();
+	TRACE("In CSparsifyGridPage::OnApply\n");
+	return b;
 }
 
-void CDensifyGridPage::UpdateSpinners()
+void CSparsifyGridPage::UpdateSpinners()
 {
 	for (int i = 0; i < 3; ++i)
 	{
 		this->spinMin[i].SetRange32(1, this->GridKeyword.m_grid[i].count_coord);
 		this->spinMax[i].SetRange32(1, this->GridKeyword.m_grid[i].count_coord);
-		this->spinParts[i].SetRange32(1, INT_MAX);
+
+		this->spinParts[i].SetRange32(0, INT_MAX);
+// COMMENT: {8/31/2005 5:14:09 PM}		//{{
+// COMMENT: {8/31/2005 5:14:09 PM}		int min = this->spinMin[i].GetPos32();
+// COMMENT: {8/31/2005 5:14:09 PM}		int max = this->spinMax[i].GetPos32();
+// COMMENT: {8/31/2005 5:14:09 PM}		this->spinParts[i].SetRange32(1, max - min);
+// COMMENT: {8/31/2005 5:14:09 PM}		//}}
 	}
 }
 
-void CDensifyGridPage::OnCancel()
+void CSparsifyGridPage::OnCancel()
 {
+	TRACE("In CSparsifyGridPage::OnCancel\n");
 	this->Actor->SetGridKeyword(this->OriginalGridKeyword, this->Units);
 	this->Actor->UpdateNode();
 	this->Document->UpdateAllViews(0);
@@ -530,48 +624,49 @@ void CDensifyGridPage::OnCancel()
 	// Add your specialized code here and/or call the base class
 
 	CPropertyPage::OnCancel();
+	TRACE("Out CSparsifyGridPage::OnCancel\n");
 }
 
-void CDensifyGridPage::PostNcDestroy()
+void CSparsifyGridPage::PostNcDestroy()
 {
-	// TODO: Add your specialized code here and/or call the base class
+	TRACE("In CSparsifyGridPage::PostNcDestroy\n");
 	this->Document->EndModifyGrid();
 	this->Document->UpdateAllViews(0);
+	// TODO: Add your specialized code here and/or call the base class
 	CPropertyPage::PostNcDestroy();
+	TRACE("Out CSparsifyGridPage::PostNcDestroy\n");
 }
 
-BOOL CDensifyGridPage::OnSetActive()
+BOOL CSparsifyGridPage::OnSetActive()
 {
-	//{{
+	TRACE("In CSparsifyGridPage::OnSetActive\n");
 	int ibounds[6];
 	this->Widget->GetIBounds(ibounds);
 	for (int i = 0; i < 3; ++i)
 	{
 		this->MinOneBased[i] = ibounds[2*i] + 1;
 		this->MaxOneBased[i] = ibounds[2*i + 1] + 1;
-		this->Parts[i]       = 1;
+		this->Parts[i]       = 0;
 	}
 	this->NeedAction = false;
 	this->SetModified(FALSE);
 	this->UpdateData(FALSE);
-	//}}
 
-// COMMENT: {8/31/2005 10:11:36 PM}	int ibounds[6];
-// COMMENT: {8/31/2005 10:11:36 PM}	this->Widget->GetIBounds(ibounds);
-// COMMENT: {8/31/2005 10:11:36 PM}	for (int i = 0; i < 3; ++i)
-// COMMENT: {8/31/2005 10:11:36 PM}	{
-// COMMENT: {8/31/2005 10:11:36 PM}		this->MinOneBased[i] = ibounds[2*i] + 1;
-// COMMENT: {8/31/2005 10:11:36 PM}		this->MaxOneBased[i] = ibounds[2*i + 1] + 1;
-// COMMENT: {8/31/2005 10:11:36 PM}	}
-// COMMENT: {8/31/2005 10:11:36 PM}	this->UpdateData(FALSE);
-	return CPropertyPage::OnSetActive();
+	//return CPropertyPage::OnSetActive();
+	BOOL b = CPropertyPage::OnSetActive();
+	TRACE("Out CSparsifyGridPage::OnSetActive\n");
+	return b;
 }
 
-BOOL CDensifyGridPage::OnKillActive()
+BOOL CSparsifyGridPage::OnKillActive()
 {
+	TRACE("In CSparsifyGridPage::OnKillActive\n");
 	this->SetModified(FALSE);
 
-	// Add your specialized code here and/or call the base class
+	// TODO: Add your specialized code here and/or call the base class
 
-	return CPropertyPage::OnKillActive();
+	//return CPropertyPage::OnKillActive();
+	BOOL b = CPropertyPage::OnKillActive();
+	TRACE("Out CSparsifyGridPage::OnKillActive\n");
+	return b;
 }

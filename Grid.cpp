@@ -546,13 +546,33 @@ void CGrid::SubDivide(int nStart, int nEnd, int nParts)
 	ASSERT(nStart <= nEnd);
 	ASSERT(nEnd < this->count_coord);
 
-	if (nParts == 1) return;
+	if (nParts <= 1) return;
 
 	if (nStart == nEnd) return;
 
-	if (this->uniform && !this->uniform_expanded)
+	if (this->uniform)
 	{
-		this->Setup();
+		if (nStart == 0 && nEnd == this->count_coord - 1)
+		{
+			double min = this->coord[0];
+			int count = (this->count_coord - 1) * nParts + 1;
+			if (this->uniform_expanded)
+			{
+				double max = this->coord[this->count_coord - 1];
+				this->SetUniformRange(min, max, count);
+			}
+			else
+			{
+				double max = this->coord[1];
+				this->SetUniformRange(min, max, count);
+			}
+			this->Setup(); // expecting non-uniform after subdivide
+			return;
+		}
+		if (!this->uniform_expanded)
+		{
+			this->Setup();
+		}
 	}
 
 	// store coordinates
@@ -573,19 +593,69 @@ void CGrid::SubDivide(int nStart, int nEnd, int nParts)
 	this->insert(coordinates.begin(), coordinates.end());    
 }
 
-void CGrid::Refine(int nStart, int nEnd, int nParts)
+void CGrid::Sparsify(int nStart, int nEnd, int nParts)
 {
 	ASSERT(0 <= nStart);
 	ASSERT(nStart <= nEnd);
 	ASSERT(nEnd < this->count_coord);
 
-	if (nParts == 1) return;
+	if (this->uniform)
+	{
+		if (!this->uniform_expanded)
+		{
+			this->Setup();
+		}
+	}
+
+	// store coordinates
+	std::set<double> coordinates;
+	coordinates.insert(this->coord, this->coord + this->count_coord);
+
+	// remove coordinates
+	for (int i = nStart; i < nEnd; ++i)
+	{
+		if ((i - nStart) % (nParts + 1))
+		{
+			double v = this->coord[i];
+			VERIFY(coordinates.erase(v) == 1);
+		}
+	}
+	this->insert(coordinates.begin(), coordinates.end());    
+}
+
+void CGrid::Coarsen(int nStart, int nEnd, int nParts)
+{
+	ASSERT(0 <= nStart);
+	ASSERT(nStart <= nEnd);
+	ASSERT(nEnd < this->count_coord);
+
+	if (nParts <= 1) return;
 
 	if (nStart == nEnd) return;
 
-	if (this->uniform && !this->uniform_expanded)
+	if (this->uniform)
 	{
-		this->Setup();
+		if (nStart == 0 && nEnd == this->count_coord - 1 && (nEnd % nParts) == 0)
+		{
+			double min = this->coord[0];
+			int count = nEnd / nParts + 1;
+			if (this->uniform_expanded)
+			{
+				double max = this->coord[this->count_coord - 1];
+				this->SetUniformRange(min, max, count);
+			}
+			else
+			{
+				double max = this->coord[1];
+				this->SetUniformRange(min, max, count);
+			}
+			this->Setup(); // expecting non-uniform after
+			return;
+		}
+		if (!this->uniform_expanded)
+		{
+			this->Setup();
+		}
 	}
 
 	// store coordinates

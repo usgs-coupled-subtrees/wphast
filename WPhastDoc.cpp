@@ -54,6 +54,7 @@
 
 #include "GridPropertyPage2.h"
 #include "DensifyGridPage.h"
+#include "SparsifyGridPage.h"
 #include "GridElementsSelector.h"
 
 #include <vtkBoxWidget.h>
@@ -240,6 +241,7 @@ CWPhastDoc::CWPhastDoc()
 , m_pGridPage(0)
 , ModifyGridSheet(0)
 , DensifyGridPage(0)
+, SparsifyGridPage(0)
 , GridElementsSelector(0)
 {
 #if defined(WPHAST_AUTOMATION)
@@ -435,6 +437,12 @@ CWPhastDoc::~CWPhastDoc()
 		this->DensifyGridPage->DestroyWindow();
 		delete this->DensifyGridPage;
 		this->DensifyGridPage = 0;
+	}
+	if (this->SparsifyGridPage)
+	{
+		this->SparsifyGridPage->DestroyWindow();
+		delete this->SparsifyGridPage;
+		this->SparsifyGridPage = 0;
 	}
 }
 
@@ -4763,10 +4771,17 @@ void CWPhastDoc::ModifyGrid(CGridActor* gridActor, CGridElementsSelector* gridEl
 		this->DensifyGridPage->DestroyWindow();
 		delete this->DensifyGridPage;
 	}
+	if (this->SparsifyGridPage)
+	{
+		this->SparsifyGridPage->DestroyWindow();
+		delete this->SparsifyGridPage;
+	}
 
 	this->ModifyGridSheet = new CModelessPropertySheet("");
 	this->DensifyGridPage  = new CDensifyGridPage();
+	this->SparsifyGridPage = new CSparsifyGridPage();
 	this->ModifyGridSheet->AddPage(this->DensifyGridPage);
+	this->ModifyGridSheet->AddPage(this->SparsifyGridPage);
 	
 	CGridKeyword gridKeyword;
 	gridActor->GetGridKeyword(gridKeyword);
@@ -4777,13 +4792,21 @@ void CWPhastDoc::ModifyGrid(CGridActor* gridActor, CGridElementsSelector* gridEl
 	this->DensifyGridPage->SetActor(gridActor);
 	this->DensifyGridPage->SetWidget(gridElementsSelector);
 
+	this->SparsifyGridPage->SetProperties(gridKeyword);
+	this->SparsifyGridPage->SetUnits(this->GetUnits());
+	this->SparsifyGridPage->SetDocument(this);
+	this->SparsifyGridPage->SetActor(gridActor);
+	this->SparsifyGridPage->SetWidget(gridElementsSelector);
+
 	int min[3];
 	gridElementsSelector->GetMin(min);
 	this->DensifyGridPage->SetMin(min);
+	this->SparsifyGridPage->SetMin(min);
 
 	int max[3];
 	gridElementsSelector->GetMax(max);
 	this->DensifyGridPage->SetMax(max);
+	this->SparsifyGridPage->SetMax(max);
 
 	this->ModifyGridSheet->Create(::AfxGetApp()->m_pMainWnd);
 }

@@ -195,6 +195,7 @@ public:
 	afx_msg void OnUpdateToolsMoveVerLine(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateToolsModifyGrid(CCmdUI *pCmdUI);
 	afx_msg void OnToolsModifyGrid();
+	afx_msg void OnViewFromPrevDirection();
 };
 
 #ifndef _DEBUG  // debug version in WPhastView.cpp

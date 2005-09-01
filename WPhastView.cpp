@@ -109,6 +109,7 @@ BEGIN_MESSAGE_MAP(CWPhastView, CView)
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_MOVE_VER_LINE, OnUpdateToolsMoveVerLine)
 // COMMENT: {8/29/2005 6:46:54 PM}	ON_UPDATE_COMMAND_UI(ID_TOOLS_MODIFYGRID, OnUpdateToolsModifyGrid)
 // COMMENT: {8/29/2005 6:46:54 PM}	ON_COMMAND(ID_TOOLS_MODIFYGRID, OnToolsModifyGrid)
+ON_COMMAND(ID_VIEW_FROM_PREV_DIRECTION, OnViewFromPrevDirection)
 END_MESSAGE_MAP()
 
 // CWPhastView construction/destruction
@@ -977,6 +978,31 @@ void CWPhastView::OnViewFromNextDirection(void)
 		return;
 	case ID_VIEW_FROM_PZ:
 		this->OnViewFromNx();
+		return;
+	}
+}
+
+void CWPhastView::OnViewFromPrevDirection()
+{
+	switch (this->m_ViewFromDirection)
+	{
+	case ID_VIEW_FROM_NX:
+		this->OnViewFromPz();
+		return;
+	case ID_VIEW_FROM_NY:
+		this->OnViewFromNx();
+		return;
+	case ID_VIEW_FROM_PX:
+		this->OnViewFromNy();
+		return;
+	case ID_VIEW_FROM_PY:
+		this->OnViewFromPx();
+		return;
+	case ID_VIEW_FROM_NZ:
+		this->OnViewFromPy();
+		return;
+	case ID_VIEW_FROM_PZ:
+		this->OnViewFromNz();
 		return;
 	}
 }
@@ -2088,5 +2114,4 @@ void CWPhastView::CancelMode(void)
 		this->CancelNewZone();
 	}
 }
-
 

@@ -43,6 +43,7 @@ class CModelessPropertySheet;
 class CScalePropertyPage;
 class CGridPropertyPage2;
 class CDensifyGridPage;
+class CSparsifyGridPage;
 class CGridElementsSelector;
 
 class vtkAxes;
@@ -239,6 +240,7 @@ protected:
 
 	CModelessPropertySheet     *ModifyGridSheet;
 	CDensifyGridPage           *DensifyGridPage;
+	CSparsifyGridPage          *SparsifyGridPage;
 	CGridElementsSelector      *GridElementsSelector;
 
 

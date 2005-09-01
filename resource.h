@@ -242,6 +242,7 @@
 #define IDC_VE_SPLIT                    249
 #define IDD_GRID_DENSIFY                249
 #define IDC_HO_SPLIT                    250
+#define IDD_GRID_SPARSIFY               250
 #define IDC_4WAY02                      251
 #define IDB_PLUS_MERGE                  252
 #define IDC_EDIT_X                      1000
@@ -575,7 +576,6 @@
 #define IDC_CHECK_Z                     1276
 #define IDC_EDIT_PARTS_K                1276
 #define IDC_EDIT_STEP                   1277
-#define IDC_SPIN_PARTS_J2               1277
 #define IDC_SPIN_PARTS_K                1277
 #define IDC_EDIT_STOP                   1278
 #define IDC_RADIO_LINEAR                1279
@@ -586,6 +586,13 @@
 #define IDC_SPIN_MIN_J                  1284
 #define IDC_EDIT_MIN_K                  1285
 #define IDC_SPIN_MIN_K                  1286
+#define IDC_CHECK4                      1290
+#define IDC_CHECK5                      1291
+#define IDC_STATIC_NODES_X              1292
+#define IDC_CHECK7                      1292
+#define IDC_CHECK6                      1293
+#define IDC_STATIC_NODES_Y              1294
+#define IDC_STATIC_NODES_Z              1295
 #define IDC_RESIZE_COLUMN               28654
 #define IDC_RESIZE_ROW                  28655
 #define IDR_POPUP                       28656
@@ -600,6 +607,7 @@
 #define ID_RIVERS_SHOWSELECTED          32808
 #define ID_RIVERS_SELECTALL             32809
 #define ID_RIVERS_UNSELECTALL           32810
+#define ID_VIEW_FROM_PREV_DIRECTION     32812
 #define IDW_CONTROLBAR_TREE             59424
 #define IDW_CONTROLBAR_BOXPROPS         59425
 
@@ -608,8 +616,8 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        253
-#define _APS_NEXT_COMMAND_VALUE         32811
-#define _APS_NEXT_CONTROL_VALUE         1283
+#define _APS_NEXT_COMMAND_VALUE         32814
+#define _APS_NEXT_CONTROL_VALUE         1296
 #define _APS_NEXT_SYMED_VALUE           126
 #endif
 #endif

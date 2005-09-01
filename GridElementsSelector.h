@@ -48,6 +48,8 @@ public:
 	void SetIBounds(int imin, int imax, int jmin, int jmax, int kmin, int kmax);
 	void SetIBounds(int ibounds[6]);
 
+	void GetIBounds(int &imin, int &imax, int &jmin, int &jmax, int &kmin, int &kmax);
+	void GetIBounds(int ibounds[6]);
 
 	//vtkSetVector3Macro(Max, int);
 	//void SetMax(int i, int j, int k);
@@ -72,7 +74,7 @@ public:
 	//void SetMax(int max[3]);
 	//void GetMax(int max[3])const;
 
-	void Update(void);
+	void UpdateGrid(void);
 
 
 protected:
