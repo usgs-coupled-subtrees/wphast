@@ -553,13 +553,13 @@
 				RelativePath="GridPropertyPage2.cpp">
 			</File>
 			<File
+				RelativePath="GridRefineAction.cpp">
+			</File>
+			<File
 				RelativePath="GridSetAction.cpp">
 			</File>
 			<File
 				RelativePath="GridSparsifyAction.cpp">
-			</File>
-			<File
-				RelativePath="GridSubDivideAction.cpp">
 			</File>
 			<File
 				RelativePath="HDFMirrorFile.cpp">
@@ -1103,13 +1103,13 @@
 				RelativePath="GridPropertyPage2.h">
 			</File>
 			<File
+				RelativePath="GridRefineAction.h">
+			</File>
+			<File
 				RelativePath="GridSetAction.h">
 			</File>
 			<File
 				RelativePath="GridSparsifyAction.h">
-			</File>
-			<File
-				RelativePath="GridSubDivideAction.h">
 			</File>
 			<File
 				RelativePath="HDFMirrorFile.h">
@@ -3818,15 +3818,15 @@
 			Name="Build Logs"
 			Filter="">
 			<File
-				RelativePath="cppunit\BuildLog.htm"
-				DeploymentContent="TRUE">
-			</File>
-			<File
 				RelativePath="Debug\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 			<File
 				RelativePath="Release\BuildLog.htm"
+				DeploymentContent="TRUE">
+			</File>
+			<File
+				RelativePath="cppunit\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 		</Filter>

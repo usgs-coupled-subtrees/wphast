@@ -1,5 +1,5 @@
 #include "StdAfx.h"
-#include "GridSubDivideAction.h"
+#include "GridRefineAction.h"
 
 #include "WPhastDoc.h"
 #include "GridActor.h"
