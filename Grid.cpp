@@ -604,34 +604,6 @@ void CGrid::Merge(int nStart, int nEnd, int nParts)
 	if (nParts <= 1) return;
 	if (nStart == nEnd) return;
 
-// COMMENT: {9/1/2005 9:13:24 PM}	if (this->uniform)
-// COMMENT: {9/1/2005 9:13:24 PM}	{
-// COMMENT: {9/1/2005 9:13:24 PM}		if (nStart == 0 && nEnd == this->count_coord - 1)
-// COMMENT: {9/1/2005 9:13:24 PM}		{
-// COMMENT: {9/1/2005 9:13:24 PM}			if ((nEnd - nStart) % nParts == 0)
-// COMMENT: {9/1/2005 9:13:24 PM}			{
-// COMMENT: {9/1/2005 9:13:24 PM}				double min = this->coord[0];
-// COMMENT: {9/1/2005 9:13:24 PM}				int count = nEnd / nParts + 1;
-// COMMENT: {9/1/2005 9:13:24 PM}				if (this->uniform_expanded)
-// COMMENT: {9/1/2005 9:13:24 PM}				{
-// COMMENT: {9/1/2005 9:13:24 PM}					double max = this->coord[this->count_coord - 1];
-// COMMENT: {9/1/2005 9:13:24 PM}					this->SetUniformRange(min, max, count);
-// COMMENT: {9/1/2005 9:13:24 PM}				}
-// COMMENT: {9/1/2005 9:13:24 PM}				else
-// COMMENT: {9/1/2005 9:13:24 PM}				{
-// COMMENT: {9/1/2005 9:13:24 PM}					double max = this->coord[1];
-// COMMENT: {9/1/2005 9:13:24 PM}					this->SetUniformRange(min, max, count);
-// COMMENT: {9/1/2005 9:13:24 PM}				}
-// COMMENT: {9/1/2005 9:13:24 PM}				this->Setup(); // expecting non-uniform after subdivide
-// COMMENT: {9/1/2005 9:13:24 PM}				return;
-// COMMENT: {9/1/2005 9:13:24 PM}			}
-// COMMENT: {9/1/2005 9:13:24 PM}		}
-// COMMENT: {9/1/2005 9:13:24 PM}		if (!this->uniform_expanded)
-// COMMENT: {9/1/2005 9:13:24 PM}		{
-// COMMENT: {9/1/2005 9:13:24 PM}			this->Setup();
-// COMMENT: {9/1/2005 9:13:24 PM}		}
-// COMMENT: {9/1/2005 9:13:24 PM}	}
-
 	this->Sparsify(nStart, nEnd, nParts - 1);
 }
 
