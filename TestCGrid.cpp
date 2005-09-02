@@ -731,6 +731,7 @@ void TestCGrid::testSparsify(void)
 		int end = 6;
 		int n = 0;
 		sparse.Sparsify(start, end, n);
+		sparse.Setup();
 // COMMENT: {8/31/2005 7:58:20 PM}		CPPUNIT_ASSERT_EQUAL((end - start) / min((n + 1), (end - start)) + start, sparse.count_coord);
 
 		CPPUNIT_ASSERT_EQUAL( 7, sparse.count_coord);

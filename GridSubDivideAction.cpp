@@ -48,9 +48,6 @@ void CGridSubDivideAction::UnExecute()
 	CGridKeyword gridKeyword;
 	this->Actor->GetGridKeyword(gridKeyword);
 
-	CUnits units;
-	this->Document->GetUnits(units);
-
 	for (int i = 0; i < 3; ++i)
 	{
 		int newMax = (this->Max[i] - this->Min[i]) * this->Parts[i] + this->Min[i];

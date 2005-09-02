@@ -37,6 +37,13 @@ void CDensifyGridPage::DoDataExchange(CDataExchange* pDX)
 {
 	CPropertyPage::DoDataExchange(pDX);
 
+	if (this->m_bFirstSetActive)
+	{
+		this->CheckDlgButton(IDC_CHECK_X2, BST_CHECKED);
+		this->CheckDlgButton(IDC_CHECK_Y2, BST_CHECKED);
+		this->CheckDlgButton(IDC_CHECK_Z2, BST_CHECKED);
+	}
+
 	// X
 	//
 
@@ -185,6 +192,9 @@ BEGIN_MESSAGE_MAP(CDensifyGridPage, CPropertyPage)
 	ON_EN_CHANGE(IDC_EDIT_MAX_K, OnEnChangeEditMaxK)
 	ON_EN_CHANGE(IDC_EDIT_PARTS_K, OnEnChangeEditPartsK)
 
+	ON_BN_CLICKED(IDC_CHECK_X2, OnBnClickedCheckX)
+	ON_BN_CLICKED(IDC_CHECK_Y2, OnBnClickedCheckY)
+	ON_BN_CLICKED(IDC_CHECK_Z2, OnBnClickedCheckZ)
 END_MESSAGE_MAP()
 
 
@@ -362,6 +372,12 @@ void CDensifyGridPage::OnEnChangeEditPartsI()
 {
 	const int id = IDC_EDIT_PARTS_I;
 	const int c = 0;
+	int CheckIDs[3] = 
+	{
+		IDC_CHECK_X2,
+		IDC_CHECK_Y2,
+		IDC_CHECK_Z2,
+	};
 
 	bool ActionNeeded = false;
 
@@ -374,7 +390,7 @@ void CDensifyGridPage::OnEnChangeEditPartsI()
 			this->Parts[c] = i;
 			for (int i = 0; i < 3; ++i)
 			{
-				if (this->Parts[i] > 1)
+				if (this->Parts[i] > 1 && this->IsDlgButtonChecked(CheckIDs[i]) == BST_CHECKED)
 				{
 					ActionNeeded = true;
 					break;
@@ -398,6 +414,12 @@ void CDensifyGridPage::OnEnChangeEditPartsJ()
 {
 	const int id = IDC_EDIT_PARTS_J;
 	const int c = 1;
+	int CheckIDs[3] = 
+	{
+		IDC_CHECK_X2,
+		IDC_CHECK_Y2,
+		IDC_CHECK_Z2,
+	};
 
 	bool ActionNeeded = false;
 
@@ -410,7 +432,7 @@ void CDensifyGridPage::OnEnChangeEditPartsJ()
 			this->Parts[c] = i;
 			for (int i = 0; i < 3; ++i)
 			{
-				if (this->Parts[i] > 1)
+				if (this->Parts[i] > 1 && this->IsDlgButtonChecked(CheckIDs[i]) == BST_CHECKED)
 				{
 					ActionNeeded = true;
 					break;
@@ -434,6 +456,12 @@ void CDensifyGridPage::OnEnChangeEditPartsK()
 {
 	const int id = IDC_EDIT_PARTS_K;
 	const int c = 2;
+	int CheckIDs[3] = 
+	{
+		IDC_CHECK_X2,
+		IDC_CHECK_Y2,
+		IDC_CHECK_Z2,
+	};
 
 	bool ActionNeeded = false;
 
@@ -446,7 +474,7 @@ void CDensifyGridPage::OnEnChangeEditPartsK()
 			this->Parts[c] = i;
 			for (int i = 0; i < 3; ++i)
 			{
-				if (this->Parts[i] > 1)
+				if (this->Parts[i] > 1 && this->IsDlgButtonChecked(CheckIDs[i]) == BST_CHECKED)
 				{
 					ActionNeeded = true;
 					break;
@@ -574,4 +602,157 @@ BOOL CDensifyGridPage::OnKillActive()
 	// Add your specialized code here and/or call the base class
 
 	return CPropertyPage::OnKillActive();
+}
+
+void CDensifyGridPage::OnBnClickedCheckX()
+{
+	int Ids[] = 
+	{
+		IDC_STATIC_SN_X,
+		IDC_EDIT_MIN_I,
+		IDC_SPIN_MIN_I,
+		IDC_STATIC_EN_X,
+		IDC_EDIT_MAX_I,
+		IDC_SPIN_MAX_I,
+		IDC_STATIC_SE_X,
+		IDC_EDIT_PARTS_I,
+		IDC_SPIN_PARTS_I,
+        IDC_STATIC_E_X,
+	};
+
+	for (int i = 0; i < sizeof(Ids) / sizeof(Ids[0]); ++i)
+	{
+		if (CWnd *pWnd = this->GetDlgItem(Ids[i]))
+		{
+			pWnd->EnableWindow(this->IsDlgButtonChecked(IDC_CHECK_X2) == BST_CHECKED);
+		}
+	}
+
+	int CheckIDs[3] = 
+	{
+		IDC_CHECK_X2,
+		IDC_CHECK_Y2,
+		IDC_CHECK_Z2,
+	};
+	bool ActionNeeded = false;
+	for (int i = 0; i < 3; ++i)
+	{
+		if (this->Parts[i] > 1 && this->IsDlgButtonChecked(CheckIDs[i]) == BST_CHECKED)
+		{
+			ActionNeeded = true;
+			break;
+		}
+	}
+	if (ActionNeeded)
+	{
+		this->SetModified(TRUE);
+		this->NeedAction = true;
+	}
+	else
+	{
+		this->SetModified(FALSE);
+		this->NeedAction = false;
+	}
+}
+
+void CDensifyGridPage::OnBnClickedCheckY()
+{
+	int Ids[] = 
+	{
+		IDC_STATIC_SN_Y,
+		IDC_EDIT_MIN_J,
+		IDC_SPIN_MIN_J,
+		IDC_STATIC_EN_Y,
+		IDC_EDIT_MAX_J,
+		IDC_SPIN_MAX_J,
+		IDC_STATIC_SE_Y,
+		IDC_EDIT_PARTS_J,
+		IDC_SPIN_PARTS_J,
+        IDC_STATIC_E_Y,
+	};
+
+	for (int i = 0; i < sizeof(Ids) / sizeof(Ids[0]); ++i)
+	{
+		if (CWnd *pWnd = this->GetDlgItem(Ids[i]))
+		{
+			pWnd->EnableWindow(this->IsDlgButtonChecked(IDC_CHECK_Y2) == BST_CHECKED);
+		}
+	}
+
+	int CheckIDs[3] = 
+	{
+		IDC_CHECK_X2,
+		IDC_CHECK_Y2,
+		IDC_CHECK_Z2,
+	};
+	bool ActionNeeded = false;
+	for (int i = 0; i < 3; ++i)
+	{
+		if (this->Parts[i] > 1 && this->IsDlgButtonChecked(CheckIDs[i]) == BST_CHECKED)
+		{
+			ActionNeeded = true;
+			break;
+		}
+	}
+	if (ActionNeeded)
+	{
+		this->SetModified(TRUE);
+		this->NeedAction = true;
+	}
+	else
+	{
+		this->SetModified(FALSE);
+		this->NeedAction = false;
+	}
+}
+
+void CDensifyGridPage::OnBnClickedCheckZ()
+{
+	int Ids[] = 
+	{
+		IDC_STATIC_SN_Z,
+		IDC_EDIT_MIN_K,
+		IDC_SPIN_MIN_K,
+		IDC_STATIC_EN_Z,
+		IDC_EDIT_MAX_K,
+		IDC_SPIN_MAX_K,
+		IDC_STATIC_SE_Z,
+		IDC_EDIT_PARTS_K,
+		IDC_SPIN_PARTS_K,
+        IDC_STATIC_E_Z,
+	};
+
+	for (int i = 0; i < sizeof(Ids) / sizeof(Ids[0]); ++i)
+	{
+		if (CWnd *pWnd = this->GetDlgItem(Ids[i]))
+		{
+			pWnd->EnableWindow(this->IsDlgButtonChecked(IDC_CHECK_Z2) == BST_CHECKED);
+		}
+	}
+
+	int CheckIDs[3] = 
+	{
+		IDC_CHECK_X2,
+		IDC_CHECK_Y2,
+		IDC_CHECK_Z2,
+	};
+	bool ActionNeeded = false;
+	for (int i = 0; i < 3; ++i)
+	{
+		if (this->Parts[i] > 1 && this->IsDlgButtonChecked(CheckIDs[i]) == BST_CHECKED)
+		{
+			ActionNeeded = true;
+			break;
+		}
+	}
+	if (ActionNeeded)
+	{
+		this->SetModified(TRUE);
+		this->NeedAction = true;
+	}
+	else
+	{
+		this->SetModified(FALSE);
+		this->NeedAction = false;
+	}
 }

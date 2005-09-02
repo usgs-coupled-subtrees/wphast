@@ -593,14 +593,41 @@ void CGrid::SubDivide(int nStart, int nEnd, int nParts)
 	this->insert(coordinates.begin(), coordinates.end());    
 }
 
+// Merge every nParts elements into 1 element
+//
+void CGrid::Merge(int nStart, int nEnd, int nParts)
+{
+	ASSERT(0 <= nStart);
+	ASSERT(nStart <= nEnd);
+	ASSERT(nEnd < this->count_coord);
+
+	if (nParts <= 1) return;
+	if (nStart == nEnd) return;
+
+	this->Sparsify(nStart, nEnd, nParts - 1);
+}
+
+// Starting from node nStart(zero-based) remove
+// nParts nodes up to but excluding node nEnd
 void CGrid::Sparsify(int nStart, int nEnd, int nParts)
 {
 	ASSERT(0 <= nStart);
 	ASSERT(nStart <= nEnd);
 	ASSERT(nEnd < this->count_coord);
 
+	if (nParts <= 0) return;
+	if (nStart == nEnd) return;
+
 	if (this->uniform)
 	{
+// COMMENT: {9/1/2005 3:26:17 PM}		if (nStart == 0 && nEnd == this->count_coord - 1)
+// COMMENT: {9/1/2005 3:26:17 PM}		{
+// COMMENT: {9/1/2005 3:26:17 PM}
+// COMMENT: {9/1/2005 3:26:17 PM}			if ((nEnd - nStart) % nParts)
+// COMMENT: {9/1/2005 3:26:17 PM}			{
+// COMMENT: {9/1/2005 3:26:17 PM}				return;
+// COMMENT: {9/1/2005 3:26:17 PM}			}
+// COMMENT: {9/1/2005 3:26:17 PM}		}
 		if (!this->uniform_expanded)
 		{
 			this->Setup();

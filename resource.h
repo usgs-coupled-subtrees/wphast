@@ -588,11 +588,22 @@
 #define IDC_SPIN_MIN_K                  1286
 #define IDC_CHECK4                      1290
 #define IDC_CHECK5                      1291
-#define IDC_STATIC_NODES_X              1292
-#define IDC_CHECK7                      1292
+#define IDC_CHECK_Z2                    1292
 #define IDC_CHECK6                      1293
-#define IDC_STATIC_NODES_Y              1294
-#define IDC_STATIC_NODES_Z              1295
+#define IDC_CHECK_X2                    1296
+#define IDC_CHECK_Y2                    1297
+#define IDC_STATIC_SN_X                 1298
+#define IDC_STATIC_SN_Y                 1299
+#define IDC_STATIC_SN_Z                 1300
+#define IDC_STATIC_EN_X                 1301
+#define IDC_STATIC_EN_Y                 1302
+#define IDC_STATIC_EN_Z                 1303
+#define IDC_STATIC_SE_X                 1304
+#define IDC_STATIC_SE_Y                 1305
+#define IDC_STATIC_SE_Z                 1306
+#define IDC_STATIC_E_X                  1307
+#define IDC_STATIC_E_Y                  1308
+#define IDC_STATIC_E_Z                  1309
 #define IDC_RESIZE_COLUMN               28654
 #define IDC_RESIZE_ROW                  28655
 #define IDR_POPUP                       28656
@@ -600,7 +611,6 @@
 #define ID_TOOLS_NEWRIVER               32793
 #define ID_BUTTON32795                  32795
 #define ID_TOOLS_MOVE_VER_LINE          32801
-#define ID_BUTTON32803                  32803
 #define ID_TOOLS_MODIFYGRID             32805
 #define ID_VIEW_HIDEALL                 32806
 #define ID_RIVERS_HIDEALL               32807
@@ -616,8 +626,8 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        253
-#define _APS_NEXT_COMMAND_VALUE         32814
-#define _APS_NEXT_CONTROL_VALUE         1296
+#define _APS_NEXT_COMMAND_VALUE         32824
+#define _APS_NEXT_CONTROL_VALUE         1310
 #define _APS_NEXT_SYMED_VALUE           126
 #endif
 #endif

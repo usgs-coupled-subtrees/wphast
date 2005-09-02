@@ -556,6 +556,9 @@
 				RelativePath="GridSetAction.cpp">
 			</File>
 			<File
+				RelativePath="GridSparsifyAction.cpp">
+			</File>
+			<File
 				RelativePath="GridSubDivideAction.cpp">
 			</File>
 			<File
@@ -1101,6 +1104,9 @@
 			</File>
 			<File
 				RelativePath="GridSetAction.h">
+			</File>
+			<File
+				RelativePath="GridSparsifyAction.h">
 			</File>
 			<File
 				RelativePath="GridSubDivideAction.h">
@@ -3812,15 +3818,15 @@
 			Name="Build Logs"
 			Filter="">
 			<File
-				RelativePath="Release\BuildLog.htm"
-				DeploymentContent="TRUE">
-			</File>
-			<File
 				RelativePath="cppunit\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 			<File
 				RelativePath="Debug\BuildLog.htm"
+				DeploymentContent="TRUE">
+			</File>
+			<File
+				RelativePath="Release\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 		</Filter>

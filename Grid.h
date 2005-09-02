@@ -51,6 +51,7 @@ public:
 
 	void Coarsen(int nStart, int nEnd, int nParts);
 	void Sparsify(int nStart, int nEnd, int nParts);
+	void Merge(int nStart, int nEnd, int nParts);
 
 	int Closest(double value)const;
 	int Element(double value)const;
