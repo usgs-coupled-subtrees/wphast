@@ -243,20 +243,6 @@ void TestCGrid::testSubDivideByThree(void)
 
 void TestCGrid::testCoarsenByOne(void)
 {
-// COMMENT: {8/17/2005 5:39:07 PM}	CGrid start(0.0, 1000.0, 6);
-// COMMENT: {8/17/2005 5:39:07 PM}	start.Setup();
-// COMMENT: {8/17/2005 5:39:07 PM}
-// COMMENT: {8/17/2005 5:39:07 PM}	CGrid same(0.0, 1000.0, 6);
-// COMMENT: {8/17/2005 5:39:07 PM}	same.Setup();
-// COMMENT: {8/17/2005 5:39:07 PM}
-// COMMENT: {8/17/2005 5:39:07 PM}	CPPUNIT_ASSERT(start.count_coord == same.count_coord);
-// COMMENT: {8/17/2005 5:39:07 PM}	start.Setup();
-// COMMENT: {8/17/2005 5:39:07 PM}	same.Setup();
-// COMMENT: {8/17/2005 5:39:07 PM}	for (int i = 0; i < start.count_coord; ++i)
-// COMMENT: {8/17/2005 5:39:07 PM}	{
-// COMMENT: {8/17/2005 5:39:07 PM}		CPPUNIT_ASSERT(start.coord[i] == same.coord[i]);
-// COMMENT: {8/17/2005 5:39:07 PM}	}
-
 	const int count_uniform = 6;
 	const int count_parts = 1;
 
@@ -685,13 +671,8 @@ void TestCGrid::testSparsify(void)
 	// 0                 1
 	{
 		CGrid sparse(uniform);
-		//sparse.Sparsify(0, 6, 6);
-
-		int start = 0;
-		int end = 6;
-		int n = 6;
-		sparse.Sparsify(start, end, n);
-// COMMENT: {8/31/2005 7:58:07 PM}		CPPUNIT_ASSERT_EQUAL((end - start) / min((n + 1), (end - start)) + start, sparse.count_coord);
+		sparse.Sparsify(0, 6, 6);
+		sparse.Setup();
 
 		CPPUNIT_ASSERT_EQUAL( 2, sparse.count_coord);
 
@@ -705,13 +686,8 @@ void TestCGrid::testSparsify(void)
 	// 0                 1
 	{
 		CGrid sparse(uniform);
-		//sparse.Sparsify(0, 6, 7);
-
-		int start = 0;
-		int end = 6;
-		int n = 7;
-		sparse.Sparsify(start, end, n);
-// COMMENT: {8/31/2005 7:58:13 PM}		CPPUNIT_ASSERT_EQUAL((end - start) / min((n + 1), (end - start)) + start, sparse.count_coord);
+		sparse.Sparsify(0, 6, 7);
+		sparse.Setup();
 
 		CPPUNIT_ASSERT_EQUAL( 2, sparse.count_coord);
 
@@ -725,14 +701,8 @@ void TestCGrid::testSparsify(void)
 	// 0  1  2  3  4  5  6
 	{
 		CGrid sparse(uniform);
-		//sparse.Sparsify(0, 6, 0);
-
-		int start = 0;
-		int end = 6;
-		int n = 0;
-		sparse.Sparsify(start, end, n);
+		sparse.Sparsify(0, 6, 0);
 		sparse.Setup();
-// COMMENT: {8/31/2005 7:58:20 PM}		CPPUNIT_ASSERT_EQUAL((end - start) / min((n + 1), (end - start)) + start, sparse.count_coord);
 
 		CPPUNIT_ASSERT_EQUAL( 7, sparse.count_coord);
 
@@ -745,4 +715,30 @@ void TestCGrid::testSparsify(void)
 		CPPUNIT_ASSERT_EQUAL(12., sparse.coord[6]);
 	}
 
+}
+
+void TestCGrid::testUniformMerge(void)
+{
+	const int nPartsMax = 20;
+	for (int count_uniform = 2; count_uniform < 20; ++count_uniform)
+	{
+		CGrid uniform(0.0, 1000.0, count_uniform);
+		uniform.Setup();
+		for (int nParts = 2; nParts < nPartsMax; ++nParts)
+		{
+			CGrid sub(uniform);
+			sub.SubDivide(0, count_uniform - 1, nParts);
+			CPPUNIT_ASSERT(sub.uniform);
+
+			CGrid mer(sub);
+			mer.Merge(0, mer.count_coord - 1, nParts);
+			mer.Setup();
+			CPPUNIT_ASSERT(mer.uniform);
+			CPPUNIT_ASSERT_EQUAL(uniform.count_coord, mer.count_coord);
+			for (int i = 0; i < mer.count_coord; ++i)
+			{
+				CPPUNIT_ASSERT_EQUAL(uniform.coord[i], mer.coord[i]);
+			}
+		}
+	}
 }

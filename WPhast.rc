@@ -2550,30 +2550,30 @@ BEGIN
     CONTROL         "",IDC_SPIN_PARTS_K,"msctls_updown32",UDS_SETBUDDYINT | 
                     UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,205,106,
                     11,12
-    LTEXT           "Start node",IDC_STATIC,14,66,34,8
-    LTEXT           "Start node",IDC_STATIC,14,108,34,8
-    LTEXT           "End node",IDC_STATIC,84,66,32,8
-    LTEXT           "End node",IDC_STATIC,84,108,32,8
-    LTEXT           "Merge every",IDC_STATIC,154,66,40,8
-    LTEXT           "Merge every",IDC_STATIC,154,108,40,8
-    GROUPBOX        "",IDC_STATIC,7,11,303,33
-    LTEXT           "Start node",IDC_STATIC,14,24,34,8
-    LTEXT           "End node",IDC_STATIC,84,24,32,8
-    LTEXT           "Merge every",IDC_STATIC,154,24,40,8
-    LTEXT           "",IDC_STATIC,12,11,8,8
-    CONTROL         "X",IDC_CHECK4,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,
-                    11,21,10
-    LTEXT           "elements into 1 element",IDC_STATIC,230,24,75,8
-    GROUPBOX        "",IDC_STATIC,7,53,303,33
-    GROUPBOX        "",IDC_STATIC,7,95,303,33
-    LTEXT           "elements into 1 element",IDC_STATIC,230,66,75,8
-    LTEXT           "elements into 1 element",IDC_STATIC,230,108,75,8
-    LTEXT           "",IDC_STATIC,12,53,8,8
-    LTEXT           "",IDC_STATIC,12,95,8,8
-    CONTROL         "Y",IDC_CHECK5,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,
-                    53,21,10
-    CONTROL         "Z",IDC_CHECK6,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,
-                    95,21,10
+    LTEXT           "Start node",IDC_STATIC_SN_Y,14,66,34,8
+    LTEXT           "Start node",IDC_STATIC_SN_Z,14,108,34,8
+    LTEXT           "End node",IDC_STATIC_EN_Y,84,66,32,8
+    LTEXT           "End node",IDC_STATIC_EN_Z,84,108,32,8
+    LTEXT           "Merge every",IDC_STATIC_ME_Y,154,66,40,8
+    LTEXT           "Merge every",IDC_STATIC_ME_Z,154,108,40,8
+    GROUPBOX        "",-1,7,11,303,33
+    LTEXT           "Start node",IDC_STATIC_SN_X,14,24,34,8
+    LTEXT           "End node",IDC_STATIC_EN_X,84,24,32,8
+    LTEXT           "Merge every",IDC_STATIC_ME_X,154,24,40,8
+    LTEXT           "",-1,12,11,8,8
+    CONTROL         "X",IDC_CHECK_X2,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    15,11,21,10
+    LTEXT           "elements into 1 element",IDC_STATIC_E_X,230,24,75,8
+    GROUPBOX        "",-1,7,53,303,33
+    GROUPBOX        "",-1,7,95,303,33
+    LTEXT           "elements into 1 element",IDC_STATIC_E_Y,230,66,75,8
+    LTEXT           "elements into 1 element",IDC_STATIC_E_Z,230,108,75,8
+    LTEXT           "",-1,12,53,8,8
+    LTEXT           "",-1,12,95,8,8
+    CONTROL         "Y",IDC_CHECK_Y2,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    15,53,21,10
+    CONTROL         "Z",IDC_CHECK_Z2,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    15,95,21,10
 END
 
 

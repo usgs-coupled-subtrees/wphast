@@ -513,6 +513,8 @@ BOOL CDensifyGridPage::OnApply()
 				new_ibounds[2*i] = min[i];
 				new_ibounds[2*i + 1] = (max[i] - min[i]) * this->Parts[i] + min[i];
 			}
+
+			// Undo / Redo
 			CGridSubDivideAction* action = new CGridSubDivideAction(this->Document, this->Actor, min, max, this->Parts);
 			action->Apply();
 			sheet->AddAction(action);
@@ -526,13 +528,6 @@ BOOL CDensifyGridPage::OnApply()
 
 			// update maxs
 			this->UpdateSpinners();
-
-			for (int i = 0; i < 3; ++i)
-			{
-				this->MaxOneBased[i] = (max[i] - min[i]) * this->Parts[i] + min[i] + 1;
-				this->Parts[i] = 1;
-			}
-			this->UpdateData(FALSE);
 		}
 		this->NeedAction = false;
 	}
@@ -570,7 +565,6 @@ void CDensifyGridPage::PostNcDestroy()
 
 BOOL CDensifyGridPage::OnSetActive()
 {
-	//{{
 	int ibounds[6];
 	this->Widget->GetIBounds(ibounds);
 	for (int i = 0; i < 3; ++i)
@@ -582,16 +576,7 @@ BOOL CDensifyGridPage::OnSetActive()
 	this->NeedAction = false;
 	this->SetModified(FALSE);
 	this->UpdateData(FALSE);
-	//}}
 
-// COMMENT: {8/31/2005 10:11:36 PM}	int ibounds[6];
-// COMMENT: {8/31/2005 10:11:36 PM}	this->Widget->GetIBounds(ibounds);
-// COMMENT: {8/31/2005 10:11:36 PM}	for (int i = 0; i < 3; ++i)
-// COMMENT: {8/31/2005 10:11:36 PM}	{
-// COMMENT: {8/31/2005 10:11:36 PM}		this->MinOneBased[i] = ibounds[2*i] + 1;
-// COMMENT: {8/31/2005 10:11:36 PM}		this->MaxOneBased[i] = ibounds[2*i + 1] + 1;
-// COMMENT: {8/31/2005 10:11:36 PM}	}
-// COMMENT: {8/31/2005 10:11:36 PM}	this->UpdateData(FALSE);
 	return CPropertyPage::OnSetActive();
 }
 

@@ -90,4 +90,7 @@ protected:
 public:
 	virtual BOOL OnSetActive();
 	virtual BOOL OnKillActive();
+	afx_msg void OnBnClickedCheckX();
+	afx_msg void OnBnClickedCheckY();
+	afx_msg void OnBnClickedCheckZ();
 };

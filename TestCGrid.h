@@ -5,8 +5,7 @@
 
 #include "Grid.h"
 
-class TestCGrid :
-	public CppUnit::TestFixture
+class TestCGrid : public CppUnit::TestFixture
 {
 	CPPUNIT_TEST_SUITE( TestCGrid );
 	CPPUNIT_TEST( testCopyCtor );
@@ -14,7 +13,6 @@ class TestCGrid :
 	CPPUNIT_TEST( testOperatorEqual );
 	CPPUNIT_TEST( testUniformCtor );
 	CPPUNIT_TEST( testUniformCtorAgreesWithSetUniformRange );
-
 	CPPUNIT_TEST( testSubDivideByOne );
 	CPPUNIT_TEST( testSubDivideByTwo );
 	CPPUNIT_TEST( testSubDivideByThree );
@@ -25,9 +23,8 @@ class TestCGrid :
 	CPPUNIT_TEST( testCoarsenAll );
 	CPPUNIT_TEST( testClosest );
 	CPPUNIT_TEST( testElement );
-
 	CPPUNIT_TEST( testSparsify );
-
+	CPPUNIT_TEST( testUniformMerge );
 	CPPUNIT_TEST_SUITE_END();
 protected:
 	void testCopyCtor(void);
@@ -35,7 +32,6 @@ protected:
 	void testOperatorEqual(void);
 	void testUniformCtor(void);
 	void testUniformCtorAgreesWithSetUniformRange(void);
-
 	void testSubDivideByOne(void);
 	void testSubDivideByTwo(void);
 	void testSubDivideByThree(void);
@@ -46,8 +42,6 @@ protected:
 	void testCoarsenAll(void);
 	void testClosest(void);
 	void testElement(void);
-
 	void testSparsify(void);
-
-
+	void testUniformMerge(void);
 };

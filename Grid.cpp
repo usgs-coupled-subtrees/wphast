@@ -604,6 +604,34 @@ void CGrid::Merge(int nStart, int nEnd, int nParts)
 	if (nParts <= 1) return;
 	if (nStart == nEnd) return;
 
+// COMMENT: {9/1/2005 9:13:24 PM}	if (this->uniform)
+// COMMENT: {9/1/2005 9:13:24 PM}	{
+// COMMENT: {9/1/2005 9:13:24 PM}		if (nStart == 0 && nEnd == this->count_coord - 1)
+// COMMENT: {9/1/2005 9:13:24 PM}		{
+// COMMENT: {9/1/2005 9:13:24 PM}			if ((nEnd - nStart) % nParts == 0)
+// COMMENT: {9/1/2005 9:13:24 PM}			{
+// COMMENT: {9/1/2005 9:13:24 PM}				double min = this->coord[0];
+// COMMENT: {9/1/2005 9:13:24 PM}				int count = nEnd / nParts + 1;
+// COMMENT: {9/1/2005 9:13:24 PM}				if (this->uniform_expanded)
+// COMMENT: {9/1/2005 9:13:24 PM}				{
+// COMMENT: {9/1/2005 9:13:24 PM}					double max = this->coord[this->count_coord - 1];
+// COMMENT: {9/1/2005 9:13:24 PM}					this->SetUniformRange(min, max, count);
+// COMMENT: {9/1/2005 9:13:24 PM}				}
+// COMMENT: {9/1/2005 9:13:24 PM}				else
+// COMMENT: {9/1/2005 9:13:24 PM}				{
+// COMMENT: {9/1/2005 9:13:24 PM}					double max = this->coord[1];
+// COMMENT: {9/1/2005 9:13:24 PM}					this->SetUniformRange(min, max, count);
+// COMMENT: {9/1/2005 9:13:24 PM}				}
+// COMMENT: {9/1/2005 9:13:24 PM}				this->Setup(); // expecting non-uniform after subdivide
+// COMMENT: {9/1/2005 9:13:24 PM}				return;
+// COMMENT: {9/1/2005 9:13:24 PM}			}
+// COMMENT: {9/1/2005 9:13:24 PM}		}
+// COMMENT: {9/1/2005 9:13:24 PM}		if (!this->uniform_expanded)
+// COMMENT: {9/1/2005 9:13:24 PM}		{
+// COMMENT: {9/1/2005 9:13:24 PM}			this->Setup();
+// COMMENT: {9/1/2005 9:13:24 PM}		}
+// COMMENT: {9/1/2005 9:13:24 PM}	}
+
 	this->Sparsify(nStart, nEnd, nParts - 1);
 }
 
@@ -620,14 +648,26 @@ void CGrid::Sparsify(int nStart, int nEnd, int nParts)
 
 	if (this->uniform)
 	{
-// COMMENT: {9/1/2005 3:26:17 PM}		if (nStart == 0 && nEnd == this->count_coord - 1)
-// COMMENT: {9/1/2005 3:26:17 PM}		{
-// COMMENT: {9/1/2005 3:26:17 PM}
-// COMMENT: {9/1/2005 3:26:17 PM}			if ((nEnd - nStart) % nParts)
-// COMMENT: {9/1/2005 3:26:17 PM}			{
-// COMMENT: {9/1/2005 3:26:17 PM}				return;
-// COMMENT: {9/1/2005 3:26:17 PM}			}
-// COMMENT: {9/1/2005 3:26:17 PM}		}
+		if (nStart == 0 && nEnd == this->count_coord - 1)
+		{
+			if ((nEnd - nStart) % (nParts + 1) == 0)
+			{
+				double min = this->coord[0];
+				int count = nEnd / (nParts + 1) + 1;
+				if (this->uniform_expanded)
+				{
+					double max = this->coord[this->count_coord - 1];
+					this->SetUniformRange(min, max, count);
+				}
+				else
+				{
+					double max = this->coord[1];
+					this->SetUniformRange(min, max, count);
+				}
+				this->Setup(); // expecting non-uniform after subdivide
+				return;
+			}
+		}
 		if (!this->uniform_expanded)
 		{
 			this->Setup();

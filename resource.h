@@ -586,10 +586,7 @@
 #define IDC_SPIN_MIN_J                  1284
 #define IDC_EDIT_MIN_K                  1285
 #define IDC_SPIN_MIN_K                  1286
-#define IDC_CHECK4                      1290
-#define IDC_CHECK5                      1291
 #define IDC_CHECK_Z2                    1292
-#define IDC_CHECK6                      1293
 #define IDC_CHECK_X2                    1296
 #define IDC_CHECK_Y2                    1297
 #define IDC_STATIC_SN_X                 1298
@@ -604,6 +601,9 @@
 #define IDC_STATIC_E_X                  1307
 #define IDC_STATIC_E_Y                  1308
 #define IDC_STATIC_E_Z                  1309
+#define IDC_STATIC_ME_X                 1310
+#define IDC_STATIC_ME_Y                 1311
+#define IDC_STATIC_ME_Z                 1312
 #define IDC_RESIZE_COLUMN               28654
 #define IDC_RESIZE_ROW                  28655
 #define IDR_POPUP                       28656
@@ -627,7 +627,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        253
 #define _APS_NEXT_COMMAND_VALUE         32824
-#define _APS_NEXT_CONTROL_VALUE         1310
+#define _APS_NEXT_CONTROL_VALUE         1313
 #define _APS_NEXT_SYMED_VALUE           126
 #endif
 #endif

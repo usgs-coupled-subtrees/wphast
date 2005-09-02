@@ -38,7 +38,12 @@ void CSparsifyGridPage::DoDataExchange(CDataExchange* pDX)
 {
 	CPropertyPage::DoDataExchange(pDX);
 
-	CString str;
+	if (this->m_bFirstSetActive)
+	{
+		this->CheckDlgButton(IDC_CHECK_X2, BST_CHECKED);
+		this->CheckDlgButton(IDC_CHECK_Y2, BST_CHECKED);
+		this->CheckDlgButton(IDC_CHECK_Z2, BST_CHECKED);
+	}
 
 	// X
 	//
@@ -52,9 +57,6 @@ void CSparsifyGridPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_EDIT_PARTS_I, this->Parts[0]);
 	DDV_MinMaxInt(pDX, this->Parts[0], 1, INT_MAX);
 
-// COMMENT: {9/1/2005 4:01:31 PM}	str.Format("of every %d nodes", this->Parts[0] + 1);
-// COMMENT: {9/1/2005 4:01:31 PM}	DDX_Text(pDX, IDC_STATIC_NODES_X, str);
-
 	// Y
 	//
 
@@ -67,9 +69,6 @@ void CSparsifyGridPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_EDIT_PARTS_J, this->Parts[1]);
 	DDV_MinMaxInt(pDX, this->Parts[1], 1, INT_MAX);
 
-// COMMENT: {9/1/2005 4:01:33 PM}	str.Format("of every %d nodes", this->Parts[1] + 1);
-// COMMENT: {9/1/2005 4:01:33 PM}	DDX_Text(pDX, IDC_STATIC_NODES_Y, str);
-
 	// Z
 	//
 
@@ -81,9 +80,6 @@ void CSparsifyGridPage::DoDataExchange(CDataExchange* pDX)
 
 	DDX_Text(pDX, IDC_EDIT_PARTS_K, this->Parts[2]);
 	DDV_MinMaxInt(pDX, this->Parts[2], 1, INT_MAX);
-
-// COMMENT: {9/1/2005 4:01:36 PM}	str.Format("of every %d nodes", this->Parts[2] + 1);
-// COMMENT: {9/1/2005 4:01:36 PM}	DDX_Text(pDX, IDC_STATIC_NODES_Z, str);
 
 	// spinners
 	//
@@ -197,6 +193,9 @@ BEGIN_MESSAGE_MAP(CSparsifyGridPage, CPropertyPage)
 	ON_EN_CHANGE(IDC_EDIT_MAX_K, OnEnChangeEditMaxK)
 	ON_EN_CHANGE(IDC_EDIT_PARTS_K, OnEnChangeEditPartsK)
 
+	ON_BN_CLICKED(IDC_CHECK_X2, OnBnClickedCheckX)
+	ON_BN_CLICKED(IDC_CHECK_Y2, OnBnClickedCheckY)
+	ON_BN_CLICKED(IDC_CHECK_Z2, OnBnClickedCheckZ)
 END_MESSAGE_MAP()
 
 
@@ -374,7 +373,12 @@ void CSparsifyGridPage::OnEnChangeEditPartsI()
 {
 	const int id = IDC_EDIT_PARTS_I;
 	const int c = 0;
-// COMMENT: {9/1/2005 4:01:49 PM}	const int static_id = IDC_STATIC_NODES_X;
+	int CheckIDs[3] = 
+	{
+		IDC_CHECK_X2,
+		IDC_CHECK_Y2,
+		IDC_CHECK_Z2,
+	};
 
 	bool ActionNeeded = false;
 
@@ -387,7 +391,7 @@ void CSparsifyGridPage::OnEnChangeEditPartsI()
 			this->Parts[c] = parts;
 			for (int i = 0; i < 3; ++i)
 			{
-				if (this->Parts[i] > 1)
+				if (this->Parts[i] > 1 && this->IsDlgButtonChecked(CheckIDs[i]) == BST_CHECKED)
 				{
 					ActionNeeded = true;
 					break;
@@ -403,20 +407,6 @@ void CSparsifyGridPage::OnEnChangeEditPartsI()
 				this->SetModified(FALSE);
 				this->NeedAction = false;
 			}
-// COMMENT: {9/1/2005 4:01:23 PM}			if (CWnd *pWnd = this->GetDlgItem(static_id))
-// COMMENT: {9/1/2005 4:01:23 PM}			{
-// COMMENT: {9/1/2005 4:01:23 PM}				CString str;
-// COMMENT: {9/1/2005 4:01:23 PM}// COMMENT: {8/31/2005 9:13:56 PM}				if (this->Parts[c] > 0)
-// COMMENT: {9/1/2005 4:01:23 PM}// COMMENT: {8/31/2005 9:13:56 PM}				{
-// COMMENT: {9/1/2005 4:01:23 PM}// COMMENT: {8/31/2005 9:13:56 PM}					str.Format("of every %d nodes", this->Parts[c] + 1);
-// COMMENT: {9/1/2005 4:01:23 PM}// COMMENT: {8/31/2005 9:13:56 PM}				}
-// COMMENT: {9/1/2005 4:01:23 PM}// COMMENT: {8/31/2005 9:13:56 PM}				else
-// COMMENT: {9/1/2005 4:01:23 PM}// COMMENT: {8/31/2005 9:13:56 PM}				{
-// COMMENT: {9/1/2005 4:01:23 PM}// COMMENT: {8/31/2005 9:13:56 PM}					str.Format("");
-// COMMENT: {9/1/2005 4:01:23 PM}// COMMENT: {8/31/2005 9:13:56 PM}				}
-// COMMENT: {9/1/2005 4:01:23 PM}				str.Format("of every %d nodes", this->Parts[c] + 1);
-// COMMENT: {9/1/2005 4:01:23 PM}				pWnd->SetWindowText(str);
-// COMMENT: {9/1/2005 4:01:23 PM}			}
 		}
 	}
 }
@@ -425,7 +415,12 @@ void CSparsifyGridPage::OnEnChangeEditPartsJ()
 {
 	const int id = IDC_EDIT_PARTS_J;
 	const int c = 1;
-// COMMENT: {9/1/2005 4:01:53 PM}	const int static_id = IDC_STATIC_NODES_Y;
+	int CheckIDs[3] = 
+	{
+		IDC_CHECK_X2,
+		IDC_CHECK_Y2,
+		IDC_CHECK_Z2,
+	};
 
 	bool ActionNeeded = false;
 
@@ -438,7 +433,7 @@ void CSparsifyGridPage::OnEnChangeEditPartsJ()
 			this->Parts[c] = parts;
 			for (int i = 0; i < 3; ++i)
 			{
-				if (this->Parts[i] > 1)
+				if (this->Parts[i] > 1 && this->IsDlgButtonChecked(CheckIDs[i]) == BST_CHECKED)
 				{
 					ActionNeeded = true;
 					break;
@@ -454,20 +449,6 @@ void CSparsifyGridPage::OnEnChangeEditPartsJ()
 				this->SetModified(FALSE);
 				this->NeedAction = false;
 			}
-// COMMENT: {9/1/2005 4:01:18 PM}			if (CWnd *pWnd = this->GetDlgItem(static_id))
-// COMMENT: {9/1/2005 4:01:18 PM}			{
-// COMMENT: {9/1/2005 4:01:18 PM}				CString str;
-// COMMENT: {9/1/2005 4:01:18 PM}// COMMENT: {8/31/2005 9:13:56 PM}				if (this->Parts[c] > 0)
-// COMMENT: {9/1/2005 4:01:18 PM}// COMMENT: {8/31/2005 9:13:56 PM}				{
-// COMMENT: {9/1/2005 4:01:18 PM}// COMMENT: {8/31/2005 9:13:56 PM}					str.Format("of every %d nodes", this->Parts[c] + 1);
-// COMMENT: {9/1/2005 4:01:18 PM}// COMMENT: {8/31/2005 9:13:56 PM}				}
-// COMMENT: {9/1/2005 4:01:18 PM}// COMMENT: {8/31/2005 9:13:56 PM}				else
-// COMMENT: {9/1/2005 4:01:18 PM}// COMMENT: {8/31/2005 9:13:56 PM}				{
-// COMMENT: {9/1/2005 4:01:18 PM}// COMMENT: {8/31/2005 9:13:56 PM}					str.Format("");
-// COMMENT: {9/1/2005 4:01:18 PM}// COMMENT: {8/31/2005 9:13:56 PM}				}
-// COMMENT: {9/1/2005 4:01:18 PM}				str.Format("of every %d nodes", this->Parts[c] + 1);
-// COMMENT: {9/1/2005 4:01:18 PM}				pWnd->SetWindowText(str);
-// COMMENT: {9/1/2005 4:01:18 PM}			}
 		}
 	}
 }
@@ -476,7 +457,12 @@ void CSparsifyGridPage::OnEnChangeEditPartsK()
 {
 	const int id = IDC_EDIT_PARTS_K;
 	const int c = 2;
-// COMMENT: {9/1/2005 4:01:57 PM}	const int static_id = IDC_STATIC_NODES_Z;
+	int CheckIDs[3] = 
+	{
+		IDC_CHECK_X2,
+		IDC_CHECK_Y2,
+		IDC_CHECK_Z2,
+	};
 
 	bool ActionNeeded = false;
 
@@ -489,7 +475,7 @@ void CSparsifyGridPage::OnEnChangeEditPartsK()
 			this->Parts[c] = parts;
 			for (int i = 0; i < 3; ++i)
 			{
-				if (this->Parts[i] > 1)
+				if (this->Parts[i] > 1 && this->IsDlgButtonChecked(CheckIDs[i]) == BST_CHECKED)
 				{
 					ActionNeeded = true;
 					break;
@@ -505,20 +491,6 @@ void CSparsifyGridPage::OnEnChangeEditPartsK()
 				this->SetModified(FALSE);
 				this->NeedAction = false;
 			}
-// COMMENT: {9/1/2005 4:01:13 PM}			if (CWnd *pWnd = this->GetDlgItem(static_id))
-// COMMENT: {9/1/2005 4:01:13 PM}			{
-// COMMENT: {9/1/2005 4:01:13 PM}				CString str;
-// COMMENT: {9/1/2005 4:01:13 PM}// COMMENT: {8/31/2005 9:13:56 PM}				if (this->Parts[c] > 0)
-// COMMENT: {9/1/2005 4:01:13 PM}// COMMENT: {8/31/2005 9:13:56 PM}				{
-// COMMENT: {9/1/2005 4:01:13 PM}// COMMENT: {8/31/2005 9:13:56 PM}					str.Format("of every %d nodes", this->Parts[c] + 1);
-// COMMENT: {9/1/2005 4:01:13 PM}// COMMENT: {8/31/2005 9:13:56 PM}				}
-// COMMENT: {9/1/2005 4:01:13 PM}// COMMENT: {8/31/2005 9:13:56 PM}				else
-// COMMENT: {9/1/2005 4:01:13 PM}// COMMENT: {8/31/2005 9:13:56 PM}				{
-// COMMENT: {9/1/2005 4:01:13 PM}// COMMENT: {8/31/2005 9:13:56 PM}					str.Format("");
-// COMMENT: {9/1/2005 4:01:13 PM}// COMMENT: {8/31/2005 9:13:56 PM}				}
-// COMMENT: {9/1/2005 4:01:13 PM}				str.Format("of every %d nodes", this->Parts[c] + 1);
-// COMMENT: {9/1/2005 4:01:13 PM}				pWnd->SetWindowText(str);
-// COMMENT: {9/1/2005 4:01:13 PM}			}
 		}
 	}
 }
@@ -544,7 +516,6 @@ BOOL CSparsifyGridPage::OnApply()
 				new_ibounds[2*i + 1] = max[i];
 				for (int m = min[i]; m < max[i]; ++m)
 				{
-					//if ((m - min[i]) % (this->Parts[i] + 1))
 					if ((m - min[i]) % (this->Parts[i]))
 					{
 						--new_ibounds[2*i + 1];
@@ -552,13 +523,12 @@ BOOL CSparsifyGridPage::OnApply()
 				}
 			}
 
-			//{{
+			// Undo / Redo
 			CGridKeyword gridKeyword;
 			this->Actor->GetGridKeyword(gridKeyword);
 			CGridSparsifyAction* action = new CGridSparsifyAction(this->Document, this->Actor, min, max, this->Parts, gridKeyword);
 			action->Apply();
 			sheet->AddAction(action);
-			//}}			
 
 			// update gridKeyword
 			this->Actor->GetGridKeyword(this->GridKeyword);
@@ -569,14 +539,6 @@ BOOL CSparsifyGridPage::OnApply()
 
 			// update maxs
 			this->UpdateSpinners();
-
-			// this->Parts updated in OnKillActive
-// COMMENT: {8/31/2005 9:41:51 PM}			for (int i = 0; i < 3; ++i)
-// COMMENT: {8/31/2005 9:41:51 PM}			{
-// COMMENT: {8/31/2005 9:41:51 PM}				// Min and Max are updated by OnSetActive and the above call to SetIBounds
-// COMMENT: {8/31/2005 9:41:51 PM}				this->Parts[i] = 0;
-// COMMENT: {8/31/2005 9:41:51 PM}			}
-// COMMENT: {8/31/2005 9:41:51 PM}			this->UpdateData(FALSE);
 		}
 		this->NeedAction = false;
 	}
@@ -593,12 +555,7 @@ void CSparsifyGridPage::UpdateSpinners()
 		this->spinMin[i].SetRange32(1, this->GridKeyword.m_grid[i].count_coord);
 		this->spinMax[i].SetRange32(1, this->GridKeyword.m_grid[i].count_coord);
 
-		this->spinParts[i].SetRange32(0, INT_MAX);
-// COMMENT: {8/31/2005 5:14:09 PM}		//{{
-// COMMENT: {8/31/2005 5:14:09 PM}		int min = this->spinMin[i].GetPos32();
-// COMMENT: {8/31/2005 5:14:09 PM}		int max = this->spinMax[i].GetPos32();
-// COMMENT: {8/31/2005 5:14:09 PM}		this->spinParts[i].SetRange32(1, max - min);
-// COMMENT: {8/31/2005 5:14:09 PM}		//}}
+		this->spinParts[i].SetRange32(1, INT_MAX);
 	}
 }
 
@@ -657,4 +614,157 @@ BOOL CSparsifyGridPage::OnKillActive()
 	BOOL b = CPropertyPage::OnKillActive();
 	TRACE("Out CSparsifyGridPage::OnKillActive\n");
 	return b;
+}
+
+void CSparsifyGridPage::OnBnClickedCheckX()
+{
+	int Ids[] = 
+	{
+		IDC_STATIC_SN_X,
+		IDC_EDIT_MIN_I,
+		IDC_SPIN_MIN_I,
+		IDC_STATIC_EN_X,
+		IDC_EDIT_MAX_I,
+		IDC_SPIN_MAX_I,
+		IDC_STATIC_ME_X,
+		IDC_EDIT_PARTS_I,
+		IDC_SPIN_PARTS_I,
+        IDC_STATIC_E_X,
+	};
+
+	for (int i = 0; i < sizeof(Ids) / sizeof(Ids[0]); ++i)
+	{
+		if (CWnd *pWnd = this->GetDlgItem(Ids[i]))
+		{
+			pWnd->EnableWindow(this->IsDlgButtonChecked(IDC_CHECK_X2) == BST_CHECKED);
+		}
+	}
+
+	int CheckIDs[3] = 
+	{
+		IDC_CHECK_X2,
+		IDC_CHECK_Y2,
+		IDC_CHECK_Z2,
+	};
+	bool ActionNeeded = false;
+	for (int i = 0; i < 3; ++i)
+	{
+		if (this->Parts[i] > 1 && this->IsDlgButtonChecked(CheckIDs[i]) == BST_CHECKED)
+		{
+			ActionNeeded = true;
+			break;
+		}
+	}
+	if (ActionNeeded)
+	{
+		this->SetModified(TRUE);
+		this->NeedAction = true;
+	}
+	else
+	{
+		this->SetModified(FALSE);
+		this->NeedAction = false;
+	}
+}
+
+void CSparsifyGridPage::OnBnClickedCheckY()
+{
+	int Ids[] = 
+	{
+		IDC_STATIC_SN_Y,
+		IDC_EDIT_MIN_J,
+		IDC_SPIN_MIN_J,
+		IDC_STATIC_EN_Y,
+		IDC_EDIT_MAX_J,
+		IDC_SPIN_MAX_J,
+		IDC_STATIC_ME_Y,
+		IDC_EDIT_PARTS_J,
+		IDC_SPIN_PARTS_J,
+        IDC_STATIC_E_Y,
+	};
+
+	for (int i = 0; i < sizeof(Ids) / sizeof(Ids[0]); ++i)
+	{
+		if (CWnd *pWnd = this->GetDlgItem(Ids[i]))
+		{
+			pWnd->EnableWindow(this->IsDlgButtonChecked(IDC_CHECK_Y2) == BST_CHECKED);
+		}
+	}
+
+	int CheckIDs[3] = 
+	{
+		IDC_CHECK_X2,
+		IDC_CHECK_Y2,
+		IDC_CHECK_Z2,
+	};
+	bool ActionNeeded = false;
+	for (int i = 0; i < 3; ++i)
+	{
+		if (this->Parts[i] > 1 && this->IsDlgButtonChecked(CheckIDs[i]) == BST_CHECKED)
+		{
+			ActionNeeded = true;
+			break;
+		}
+	}
+	if (ActionNeeded)
+	{
+		this->SetModified(TRUE);
+		this->NeedAction = true;
+	}
+	else
+	{
+		this->SetModified(FALSE);
+		this->NeedAction = false;
+	}
+}
+
+void CSparsifyGridPage::OnBnClickedCheckZ()
+{
+	int Ids[] = 
+	{
+		IDC_STATIC_SN_Z,
+		IDC_EDIT_MIN_K,
+		IDC_SPIN_MIN_K,
+		IDC_STATIC_EN_Z,
+		IDC_EDIT_MAX_K,
+		IDC_SPIN_MAX_K,
+		IDC_STATIC_ME_Z,
+		IDC_EDIT_PARTS_K,
+		IDC_SPIN_PARTS_K,
+        IDC_STATIC_E_Z,
+	};
+
+	for (int i = 0; i < sizeof(Ids) / sizeof(Ids[0]); ++i)
+	{
+		if (CWnd *pWnd = this->GetDlgItem(Ids[i]))
+		{
+			pWnd->EnableWindow(this->IsDlgButtonChecked(IDC_CHECK_Z2) == BST_CHECKED);
+		}
+	}
+
+	int CheckIDs[3] = 
+	{
+		IDC_CHECK_X2,
+		IDC_CHECK_Y2,
+		IDC_CHECK_Z2,
+	};
+	bool ActionNeeded = false;
+	for (int i = 0; i < 3; ++i)
+	{
+		if (this->Parts[i] > 1 && this->IsDlgButtonChecked(CheckIDs[i]) == BST_CHECKED)
+		{
+			ActionNeeded = true;
+			break;
+		}
+	}
+	if (ActionNeeded)
+	{
+		this->SetModified(TRUE);
+		this->NeedAction = true;
+	}
+	else
+	{
+		this->SetModified(FALSE);
+		this->NeedAction = false;
+	}
 }
