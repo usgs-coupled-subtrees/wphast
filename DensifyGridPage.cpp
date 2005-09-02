@@ -8,7 +8,7 @@
 #include "WPhastDoc.h"
 #include "GridElementsSelector.h"
 #include "GridActor.h"
-#include "GridSubDivideAction.h"
+#include "GridRefineAction.h"
 #include "ModelessPropertySheet.h"
 
 // CDensifyGridPage dialog
@@ -515,7 +515,7 @@ BOOL CDensifyGridPage::OnApply()
 			}
 
 			// Undo / Redo
-			CGridSubDivideAction* action = new CGridSubDivideAction(this->Document, this->Actor, min, max, this->Parts);
+			CGridRefineAction* action = new CGridRefineAction(this->Document, this->Actor, min, max, this->Parts);
 			action->Apply();
 			sheet->AddAction(action);
 

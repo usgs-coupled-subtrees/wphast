@@ -5,11 +5,11 @@
 class CWPhastDoc;
 class CGridActor;
 
-class CGridSubDivideAction : public CAction
+class CGridRefineAction : public CAction
 {
 public:
-	CGridSubDivideAction(CWPhastDoc *document, CGridActor *actor, int min[3], int max[3], int parts[3], bool skipFirstExecute = false);
-	~CGridSubDivideAction(void);
+	CGridRefineAction(CWPhastDoc *document, CGridActor *actor, int min[3], int max[3], int parts[3], bool skipFirstExecute = false);
+	~CGridRefineAction(void);
 
 	virtual void Execute();
 	virtual void UnExecute();

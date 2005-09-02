@@ -4,7 +4,7 @@
 #include "WPhastDoc.h"
 #include "GridActor.h"
 
-CGridSubDivideAction::CGridSubDivideAction(CWPhastDoc *document, CGridActor *actor, int min[3], int max[3], int parts[3], bool skipFirstExecute)
+CGridRefineAction::CGridRefineAction(CWPhastDoc *document, CGridActor *actor, int min[3], int max[3], int parts[3], bool skipFirstExecute)
 : Document(document)
 , Actor(actor)
 , SkipFirstExecute(skipFirstExecute)
@@ -17,11 +17,11 @@ CGridSubDivideAction::CGridSubDivideAction(CWPhastDoc *document, CGridActor *act
 	}
 }
 
-CGridSubDivideAction::~CGridSubDivideAction(void)
+CGridRefineAction::~CGridRefineAction(void)
 {
 }
 
-void CGridSubDivideAction::Execute()
+void CGridRefineAction::Execute()
 {
 	if (!this->SkipFirstExecute)
 	{
@@ -43,7 +43,7 @@ void CGridSubDivideAction::Execute()
 	this->SkipFirstExecute = false;
 }
 
-void CGridSubDivideAction::UnExecute()
+void CGridRefineAction::UnExecute()
 {
 	CGridKeyword gridKeyword;
 	this->Actor->GetGridKeyword(gridKeyword);
@@ -63,7 +63,7 @@ void CGridSubDivideAction::UnExecute()
 	this->Document->UpdateAllViews(0);
 }
 
-void CGridSubDivideAction::Apply(void)
+void CGridRefineAction::Apply(void)
 {
 	this->SkipFirstExecute = false;
 	this->Execute();
