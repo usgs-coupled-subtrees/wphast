@@ -42,7 +42,7 @@ class CNewModel;
 class CModelessPropertySheet;
 class CScalePropertyPage;
 class CGridPropertyPage2;
-class CDensifyGridPage;
+class CGridRefinePage;
 class CSparsifyGridPage;
 class CGridElementsSelector;
 
@@ -239,7 +239,7 @@ protected:
 	CGridPropertyPage2         *m_pGridPage;
 
 	CModelessPropertySheet     *ModifyGridSheet;
-	CDensifyGridPage           *DensifyGridPage;
+	CGridRefinePage            *GridRefinePage;
 	CSparsifyGridPage          *SparsifyGridPage;
 	CGridElementsSelector      *GridElementsSelector;
 

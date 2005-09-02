@@ -1,9 +1,9 @@
-// DensifyGridPage.cpp : implementation file
+// GridRefinePage.cpp : implementation file
 //
 
 #include "stdafx.h"
 #include "WPhast.h"
-#include "DensifyGridPage.h"
+#include "GridRefinePage.h"
 
 #include "WPhastDoc.h"
 #include "GridElementsSelector.h"
@@ -11,11 +11,11 @@
 #include "GridRefineAction.h"
 #include "ModelessPropertySheet.h"
 
-// CDensifyGridPage dialog
+// CGridRefinePage dialog
 
-IMPLEMENT_DYNAMIC(CDensifyGridPage, CPropertyPage)
-CDensifyGridPage::CDensifyGridPage()
-	: CPropertyPage(CDensifyGridPage::IDD)
+IMPLEMENT_DYNAMIC(CGridRefinePage, CPropertyPage)
+CGridRefinePage::CGridRefinePage()
+	: CPropertyPage(CGridRefinePage::IDD)
 	, Document(0)
 	, Actor(0)
 	, Widget(0)
@@ -29,11 +29,11 @@ CDensifyGridPage::CDensifyGridPage()
 	}
 }
 
-CDensifyGridPage::~CDensifyGridPage()
+CGridRefinePage::~CGridRefinePage()
 {
 }
 
-void CDensifyGridPage::DoDataExchange(CDataExchange* pDX)
+void CGridRefinePage::DoDataExchange(CDataExchange* pDX)
 {
 	CPropertyPage::DoDataExchange(pDX);
 
@@ -96,58 +96,58 @@ void CDensifyGridPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_SPIN_PARTS_K, spinParts[2]);
 }
 
-void CDensifyGridPage::SetUnits(const CUnits &units)
+void CGridRefinePage::SetUnits(const CUnits &units)
 {
 	this->Units = units;
 }
 
-CUnits CDensifyGridPage::GetUnits()const
+CUnits CGridRefinePage::GetUnits()const
 {
 	return this->Units;
 }
 
-void CDensifyGridPage::SetProperties(const CGridKeyword &gridKeyword)
+void CGridRefinePage::SetProperties(const CGridKeyword &gridKeyword)
 {
 	this->GridKeyword = gridKeyword;
 }
 
-void CDensifyGridPage::GetProperties(CGridKeyword &gridKeyword)const
+void CGridRefinePage::GetProperties(CGridKeyword &gridKeyword)const
 {
 	gridKeyword = this->GridKeyword;
 }
 
-void CDensifyGridPage::SetDocument(CWPhastDoc *document)
+void CGridRefinePage::SetDocument(CWPhastDoc *document)
 {
 	this->Document = document;
 }
 
-CWPhastDoc* CDensifyGridPage::GetDocument()const
+CWPhastDoc* CGridRefinePage::GetDocument()const
 {
 	return this->Document;
 }
 
-void CDensifyGridPage::SetActor(CGridActor *actor)
+void CGridRefinePage::SetActor(CGridActor *actor)
 {
 	this->Actor = actor;
 	this->Actor->GetGridKeyword(this->OriginalGridKeyword);
 }
 
-CGridActor* CDensifyGridPage::GetActor()const
+CGridActor* CGridRefinePage::GetActor()const
 {
 	return this->Actor;
 }
 
-void CDensifyGridPage::SetWidget(CGridElementsSelector *widget)
+void CGridRefinePage::SetWidget(CGridElementsSelector *widget)
 {
 	this->Widget = widget;
 }
 
-CGridElementsSelector* CDensifyGridPage::GetWidget()const
+CGridElementsSelector* CGridRefinePage::GetWidget()const
 {
 	return this->Widget;
 }
 
-void CDensifyGridPage::SetMin(int min[3])
+void CGridRefinePage::SetMin(int min[3])
 {
 	for (int i = 0; i < 3; ++i)
 	{
@@ -155,7 +155,7 @@ void CDensifyGridPage::SetMin(int min[3])
 	}
 }
 
-void CDensifyGridPage::GetMin(int min[3])const
+void CGridRefinePage::GetMin(int min[3])const
 {
 	for (int i = 0; i < 3; ++i)
 	{
@@ -163,7 +163,7 @@ void CDensifyGridPage::GetMin(int min[3])const
 	}
 }
 
-void CDensifyGridPage::SetMax(int max[3])
+void CGridRefinePage::SetMax(int max[3])
 {
 	for (int i = 0; i < 3; ++i)
 	{
@@ -171,7 +171,7 @@ void CDensifyGridPage::SetMax(int max[3])
 	}
 }
 
-void CDensifyGridPage::GetMax(int max[3])const
+void CGridRefinePage::GetMax(int max[3])const
 {
 	for (int i = 0; i < 3; ++i)
 	{
@@ -179,7 +179,7 @@ void CDensifyGridPage::GetMax(int max[3])const
 	}
 }
 
-BEGIN_MESSAGE_MAP(CDensifyGridPage, CPropertyPage)
+BEGIN_MESSAGE_MAP(CGridRefinePage, CPropertyPage)
 	ON_EN_CHANGE(IDC_EDIT_MIN_I, OnEnChangeEditMinI)
 	ON_EN_CHANGE(IDC_EDIT_MAX_I, OnEnChangeEditMaxI)
 	ON_EN_CHANGE(IDC_EDIT_PARTS_I, OnEnChangeEditPartsI)
@@ -198,9 +198,9 @@ BEGIN_MESSAGE_MAP(CDensifyGridPage, CPropertyPage)
 END_MESSAGE_MAP()
 
 
-// CDensifyGridPage message handlers
+// CGridRefinePage message handlers
 
-BOOL CDensifyGridPage::OnInitDialog()
+BOOL CGridRefinePage::OnInitDialog()
 {
 	CPropertyPage::OnInitDialog();
 
@@ -211,7 +211,7 @@ BOOL CDensifyGridPage::OnInitDialog()
 	// EXCEPTION: OCX Property Pages should return FALSE
 }
 
-void CDensifyGridPage::OnEnChangeEditMinI()
+void CGridRefinePage::OnEnChangeEditMinI()
 {
 	const int id = IDC_EDIT_MIN_I;
 	const int c = 0;
@@ -237,7 +237,7 @@ void CDensifyGridPage::OnEnChangeEditMinI()
 	}
 }
 
-void CDensifyGridPage::OnEnChangeEditMinJ()
+void CGridRefinePage::OnEnChangeEditMinJ()
 {
 	const int id = IDC_EDIT_MIN_J;
 	const int c = 1;
@@ -263,7 +263,7 @@ void CDensifyGridPage::OnEnChangeEditMinJ()
 	}
 }
 
-void CDensifyGridPage::OnEnChangeEditMinK()
+void CGridRefinePage::OnEnChangeEditMinK()
 {
 	const int id = IDC_EDIT_MIN_K;
 	const int c = 2;
@@ -290,7 +290,7 @@ void CDensifyGridPage::OnEnChangeEditMinK()
 }
 
 
-void CDensifyGridPage::OnEnChangeEditMaxI()
+void CGridRefinePage::OnEnChangeEditMaxI()
 {
 	const int id = IDC_EDIT_MAX_I;
 	const int c = 0;
@@ -316,7 +316,7 @@ void CDensifyGridPage::OnEnChangeEditMaxI()
 	}
 }
 
-void CDensifyGridPage::OnEnChangeEditMaxJ()
+void CGridRefinePage::OnEnChangeEditMaxJ()
 {
 	const int id = IDC_EDIT_MAX_J;
 	const int c = 1;
@@ -342,7 +342,7 @@ void CDensifyGridPage::OnEnChangeEditMaxJ()
 	}
 }
 
-void CDensifyGridPage::OnEnChangeEditMaxK()
+void CGridRefinePage::OnEnChangeEditMaxK()
 {
 	const int id = IDC_EDIT_MAX_K;
 	const int c = 2;
@@ -368,7 +368,7 @@ void CDensifyGridPage::OnEnChangeEditMaxK()
 	}
 }
 
-void CDensifyGridPage::OnEnChangeEditPartsI()
+void CGridRefinePage::OnEnChangeEditPartsI()
 {
 	const int id = IDC_EDIT_PARTS_I;
 	const int c = 0;
@@ -410,7 +410,7 @@ void CDensifyGridPage::OnEnChangeEditPartsI()
 	}
 }
 
-void CDensifyGridPage::OnEnChangeEditPartsJ()
+void CGridRefinePage::OnEnChangeEditPartsJ()
 {
 	const int id = IDC_EDIT_PARTS_J;
 	const int c = 1;
@@ -452,7 +452,7 @@ void CDensifyGridPage::OnEnChangeEditPartsJ()
 	}
 }
 
-void CDensifyGridPage::OnEnChangeEditPartsK()
+void CGridRefinePage::OnEnChangeEditPartsK()
 {
 	const int id = IDC_EDIT_PARTS_K;
 	const int c = 2;
@@ -494,7 +494,7 @@ void CDensifyGridPage::OnEnChangeEditPartsK()
 	}
 }
 
-BOOL CDensifyGridPage::OnApply()
+BOOL CGridRefinePage::OnApply()
 {
 	ASSERT(this->Document);
 	ASSERT(this->Actor);
@@ -534,7 +534,7 @@ BOOL CDensifyGridPage::OnApply()
 	return CPropertyPage::OnApply();
 }
 
-void CDensifyGridPage::UpdateSpinners()
+void CGridRefinePage::UpdateSpinners()
 {
 	for (int i = 0; i < 3; ++i)
 	{
@@ -544,7 +544,7 @@ void CDensifyGridPage::UpdateSpinners()
 	}
 }
 
-void CDensifyGridPage::OnCancel()
+void CGridRefinePage::OnCancel()
 {
 	this->Actor->SetGridKeyword(this->OriginalGridKeyword, this->Units);
 	this->Actor->UpdateNode();
@@ -555,7 +555,7 @@ void CDensifyGridPage::OnCancel()
 	CPropertyPage::OnCancel();
 }
 
-void CDensifyGridPage::PostNcDestroy()
+void CGridRefinePage::PostNcDestroy()
 {
 	// TODO: Add your specialized code here and/or call the base class
 	this->Document->EndModifyGrid();
@@ -563,7 +563,7 @@ void CDensifyGridPage::PostNcDestroy()
 	CPropertyPage::PostNcDestroy();
 }
 
-BOOL CDensifyGridPage::OnSetActive()
+BOOL CGridRefinePage::OnSetActive()
 {
 	int ibounds[6];
 	this->Widget->GetIBounds(ibounds);
@@ -580,7 +580,7 @@ BOOL CDensifyGridPage::OnSetActive()
 	return CPropertyPage::OnSetActive();
 }
 
-BOOL CDensifyGridPage::OnKillActive()
+BOOL CGridRefinePage::OnKillActive()
 {
 	this->SetModified(FALSE);
 
@@ -589,7 +589,7 @@ BOOL CDensifyGridPage::OnKillActive()
 	return CPropertyPage::OnKillActive();
 }
 
-void CDensifyGridPage::OnBnClickedCheckX()
+void CGridRefinePage::OnBnClickedCheckX()
 {
 	int Ids[] = 
 	{
@@ -640,7 +640,7 @@ void CDensifyGridPage::OnBnClickedCheckX()
 	}
 }
 
-void CDensifyGridPage::OnBnClickedCheckY()
+void CGridRefinePage::OnBnClickedCheckY()
 {
 	int Ids[] = 
 	{
@@ -691,7 +691,7 @@ void CDensifyGridPage::OnBnClickedCheckY()
 	}
 }
 
-void CDensifyGridPage::OnBnClickedCheckZ()
+void CGridRefinePage::OnBnClickedCheckZ()
 {
 	int Ids[] = 
 	{

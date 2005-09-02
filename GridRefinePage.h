@@ -8,15 +8,15 @@ class CWPhastDoc;
 class CGridActor;
 class CGridElementsSelector;
 
-// CDensifyGridPage dialog
+// CGridRefinePage dialog
 
-class CDensifyGridPage : public CPropertyPage
+class CGridRefinePage : public CPropertyPage
 {
-	DECLARE_DYNAMIC(CDensifyGridPage)
+	DECLARE_DYNAMIC(CGridRefinePage)
 
 public:
-	CDensifyGridPage();
-	virtual ~CDensifyGridPage();
+	CGridRefinePage();
+	virtual ~CGridRefinePage();
 
 	void SetUnits(const CUnits& units);
 	CUnits GetUnits()const;

@@ -451,9 +451,6 @@
 				RelativePath="DelayRedraw.cpp">
 			</File>
 			<File
-				RelativePath="DensifyGridPage.cpp">
-			</File>
-			<File
 				RelativePath="ETSLayoutPropertyPageXP.cpp">
 			</File>
 			<File
@@ -554,6 +551,9 @@
 			</File>
 			<File
 				RelativePath="GridRefineAction.cpp">
+			</File>
+			<File
+				RelativePath="GridRefinePage.cpp">
 			</File>
 			<File
 				RelativePath="GridSetAction.cpp">
@@ -1040,9 +1040,6 @@
 				RelativePath="DelayRedraw.h">
 			</File>
 			<File
-				RelativePath="DensifyGridPage.h">
-			</File>
-			<File
 				RelativePath="ETSLayoutPropertyPageXP.h">
 			</File>
 			<File
@@ -1104,6 +1101,9 @@
 			</File>
 			<File
 				RelativePath="GridRefineAction.h">
+			</File>
+			<File
+				RelativePath="GridRefinePage.h">
 			</File>
 			<File
 				RelativePath="GridSetAction.h">

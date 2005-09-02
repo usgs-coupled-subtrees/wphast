@@ -53,7 +53,7 @@
 #include "ScalePropertyPage.h"
 
 #include "GridPropertyPage2.h"
-#include "DensifyGridPage.h"
+#include "GridRefinePage.h"
 #include "SparsifyGridPage.h"
 #include "GridElementsSelector.h"
 
@@ -240,7 +240,7 @@ CWPhastDoc::CWPhastDoc()
 , m_pGridSheet(0)
 , m_pGridPage(0)
 , ModifyGridSheet(0)
-, DensifyGridPage(0)
+, GridRefinePage(0)
 , SparsifyGridPage(0)
 , GridElementsSelector(0)
 {
@@ -432,11 +432,11 @@ CWPhastDoc::~CWPhastDoc()
 		delete this->ModifyGridSheet;
 		this->ModifyGridSheet = 0;
 	}
-	if (this->DensifyGridPage)
+	if (this->GridRefinePage)
 	{
-		this->DensifyGridPage->DestroyWindow();
-		delete this->DensifyGridPage;
-		this->DensifyGridPage = 0;
+		this->GridRefinePage->DestroyWindow();
+		delete this->GridRefinePage;
+		this->GridRefinePage = 0;
 	}
 	if (this->SparsifyGridPage)
 	{
@@ -4766,10 +4766,10 @@ void CWPhastDoc::ModifyGrid(CGridActor* gridActor, CGridElementsSelector* gridEl
 		this->ModifyGridSheet->DestroyWindow();
 		delete this->ModifyGridSheet;
 	}
-	if (this->DensifyGridPage)
+	if (this->GridRefinePage)
 	{
-		this->DensifyGridPage->DestroyWindow();
-		delete this->DensifyGridPage;
+		this->GridRefinePage->DestroyWindow();
+		delete this->GridRefinePage;
 	}
 	if (this->SparsifyGridPage)
 	{
@@ -4778,19 +4778,19 @@ void CWPhastDoc::ModifyGrid(CGridActor* gridActor, CGridElementsSelector* gridEl
 	}
 
 	this->ModifyGridSheet = new CModelessPropertySheet("");
-	this->DensifyGridPage  = new CDensifyGridPage();
+	this->GridRefinePage  = new CGridRefinePage();
 	this->SparsifyGridPage = new CSparsifyGridPage();
-	this->ModifyGridSheet->AddPage(this->DensifyGridPage);
+	this->ModifyGridSheet->AddPage(this->GridRefinePage);
 	this->ModifyGridSheet->AddPage(this->SparsifyGridPage);
 	
 	CGridKeyword gridKeyword;
 	gridActor->GetGridKeyword(gridKeyword);
 
-	this->DensifyGridPage->SetProperties(gridKeyword);
-	this->DensifyGridPage->SetUnits(this->GetUnits());
-	this->DensifyGridPage->SetDocument(this);
-	this->DensifyGridPage->SetActor(gridActor);
-	this->DensifyGridPage->SetWidget(gridElementsSelector);
+	this->GridRefinePage->SetProperties(gridKeyword);
+	this->GridRefinePage->SetUnits(this->GetUnits());
+	this->GridRefinePage->SetDocument(this);
+	this->GridRefinePage->SetActor(gridActor);
+	this->GridRefinePage->SetWidget(gridElementsSelector);
 
 	this->SparsifyGridPage->SetProperties(gridKeyword);
 	this->SparsifyGridPage->SetUnits(this->GetUnits());
@@ -4800,12 +4800,12 @@ void CWPhastDoc::ModifyGrid(CGridActor* gridActor, CGridElementsSelector* gridEl
 
 	int min[3];
 	gridElementsSelector->GetMin(min);
-	this->DensifyGridPage->SetMin(min);
+	this->GridRefinePage->SetMin(min);
 	this->SparsifyGridPage->SetMin(min);
 
 	int max[3];
 	gridElementsSelector->GetMax(max);
-	this->DensifyGridPage->SetMax(max);
+	this->GridRefinePage->SetMax(max);
 	this->SparsifyGridPage->SetMax(max);
 
 	this->ModifyGridSheet->Create(::AfxGetApp()->m_pMainWnd);
