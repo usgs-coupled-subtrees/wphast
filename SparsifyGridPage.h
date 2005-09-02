@@ -42,7 +42,7 @@ public:
 	void UpdateSpinners();
 
 // Dialog Data
-	enum { IDD = IDD_GRID_SPARSIFY };
+	enum { IDD = IDD_GRID_COARSEN };
 
 protected:
 	bool  NeedAction;
