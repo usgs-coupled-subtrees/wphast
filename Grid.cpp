@@ -540,7 +540,7 @@ double& CGrid::At(size_t pos)
 	return this->m_coordinates.at(pos);
 }
 
-void CGrid::SubDivide(int nStart, int nEnd, int nParts)
+void CGrid::Refine(int nStart, int nEnd, int nParts)
 {
 	ASSERT(0 <= nStart);
 	ASSERT(nStart <= nEnd);

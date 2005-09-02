@@ -185,7 +185,7 @@ void TestCGrid::testUniformCtorAgreesWithSetUniformRange(void)
 	CPPUNIT_ASSERT(x.elt_centroid     == gridX.elt_centroid);
 }
 
-void TestCGrid::testSubDivideByOne(void)
+void TestCGrid::testRefineByOne(void)
 {
 	CGrid start(0.0, 1000.0, 6);
 	start.Setup();
@@ -193,11 +193,11 @@ void TestCGrid::testSubDivideByOne(void)
 	CGrid same(0.0, 1000.0, 6);
 	same.Setup();
 
-	same.SubDivide(0, 1, 1);
+	same.Refine(0, 1, 1);
 	CPPUNIT_ASSERT(start.count_coord == same.count_coord);
 }
 
-void TestCGrid::testSubDivideByTwo(void)
+void TestCGrid::testRefineByTwo(void)
 {
 	CGrid uni6(0.0, 1000.0, 6);
 	uni6.Setup();
@@ -208,7 +208,7 @@ void TestCGrid::testSubDivideByTwo(void)
 	CGrid sub012(uni6);
 	CPPUNIT_ASSERT(sub012.count_coord == 6);
 
-	sub012.SubDivide(0, 1, 2);
+	sub012.Refine(0, 1, 2);
 	CPPUNIT_ASSERT(sub012.count_coord == 7);
 	CPPUNIT_ASSERT(sub012.coord[0] == uni6.coord[0]);
 	CPPUNIT_ASSERT(sub012.coord[2] == uni6.coord[1]);
@@ -217,7 +217,7 @@ void TestCGrid::testSubDivideByTwo(void)
 	sub012.Dump(afxDump);
 }
 
-void TestCGrid::testSubDivideByThree(void)
+void TestCGrid::testRefineByThree(void)
 {
 	CGrid uni6(0.0, 1000.0, 6);
 	uni6.Setup();
@@ -228,7 +228,7 @@ void TestCGrid::testSubDivideByThree(void)
 	CGrid sub013(uni6);
 	CPPUNIT_ASSERT(sub013.count_coord == 6);
 
-	sub013.SubDivide(0, 1, 3);
+	sub013.Refine(0, 1, 3);
 	CPPUNIT_ASSERT(sub013.count_coord == 8);
 	CPPUNIT_ASSERT(sub013.coord[0] == uni6.coord[0]);
 	CPPUNIT_ASSERT(sub013.coord[3] == uni6.coord[1]);
@@ -257,11 +257,11 @@ void TestCGrid::testCoarsenByOne(void)
 		CGrid sub(uniform);
 		sub.Setup();
 		CPPUNIT_ASSERT(sub.count_coord == uniform.count_coord);
-		sub.SubDivide(i, i + 1, count_parts);
+		sub.Refine(i, i + 1, count_parts);
 		CPPUNIT_ASSERT(sub.count_coord == uniform.count_coord + count_parts - 1);
 
 		afxDump << "\n";
-		afxDump << "sub.SubDivide(" << i << ", " << i + 1 << ", " << count_parts << ")\n";
+		afxDump << "sub.Refine(" << i << ", " << i + 1 << ", " << count_parts << ")\n";
 		sub.Dump(afxDump);
 
 		CGrid ref(sub);
@@ -293,11 +293,11 @@ void TestCGrid::testCoarsenByTwo(void)
 		CGrid sub(uniform);
 		sub.Setup();
 		CPPUNIT_ASSERT(sub.count_coord == uniform.count_coord);
-		sub.SubDivide(i, i + 1, count_parts);
+		sub.Refine(i, i + 1, count_parts);
 		CPPUNIT_ASSERT(sub.count_coord == uniform.count_coord + count_parts - 1);
 
 		afxDump << "\n";
-		afxDump << "sub.SubDivide(" << i << ", " << i + 1 << ", " << count_parts << ")\n";
+		afxDump << "sub.Refine(" << i << ", " << i + 1 << ", " << count_parts << ")\n";
 		sub.Dump(afxDump);
 
 		CGrid ref(sub);
@@ -328,11 +328,11 @@ void TestCGrid::testCoarsenByThree(void)
 		CGrid sub(uniform);
 		sub.Setup();
 		CPPUNIT_ASSERT(sub.count_coord == uniform.count_coord);
-		sub.SubDivide(i, i + 1, count_parts);
+		sub.Refine(i, i + 1, count_parts);
 		CPPUNIT_ASSERT(sub.count_coord == uniform.count_coord + count_parts - 1);
 
 		afxDump << "\n";
-		afxDump << "sub.SubDivide(" << i << ", " << i + 1 << ", " << count_parts << ")\n";
+		afxDump << "sub.Refine(" << i << ", " << i + 1 << ", " << count_parts << ")\n";
 		sub.Dump(afxDump);
 
 		CGrid ref(sub);
@@ -347,7 +347,7 @@ void TestCGrid::testCoarsenByThree(void)
 	}
 }
 
-void TestCGrid::testSubDivideAll(void)
+void TestCGrid::testRefineAll(void)
 {
 	const int count_uniform = 6;
 	const int count_parts_max = 20;
@@ -361,7 +361,7 @@ void TestCGrid::testSubDivideAll(void)
 	for (int n = 2; n < count_parts_max; ++n)
 	{
 		CGrid sub(uniform);
-		sub.SubDivide(0, uniform.count_coord - 1, n);
+		sub.Refine(0, uniform.count_coord - 1, n);
 		ASSERT(sub.uniform);
 		CPPUNIT_ASSERT(sub.uniform);
 	
@@ -385,7 +385,7 @@ void TestCGrid::testCoarsenAll(void)
 			for (int nStart = 0; nStart < nEnd; ++nStart)
 			{
 				CGrid sub(uniform);
-				sub.SubDivide(nStart, nEnd, nParts);
+				sub.Refine(nStart, nEnd, nParts);
 
 				int newEnd = (nEnd - nStart) * nParts + nStart;
 				CGrid ref(sub);
@@ -727,7 +727,7 @@ void TestCGrid::testUniformMerge(void)
 		for (int nParts = 2; nParts < nPartsMax; ++nParts)
 		{
 			CGrid sub(uniform);
-			sub.SubDivide(0, count_uniform - 1, nParts);
+			sub.Refine(0, count_uniform - 1, nParts);
 			CPPUNIT_ASSERT(sub.uniform);
 
 			CGrid mer(sub);

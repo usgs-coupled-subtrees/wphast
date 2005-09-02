@@ -47,7 +47,7 @@ public:
 			this->count_coord = (int)this->m_coordinates.size();
 			this->coord = &this->m_coordinates[0];
 		}
-	void SubDivide(int nStart, int nEnd, int nParts);
+	void Refine(int nStart, int nEnd, int nParts);
 
 	void Coarsen(int nStart, int nEnd, int nParts);
 	void Sparsify(int nStart, int nEnd, int nParts);

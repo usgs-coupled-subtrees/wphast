@@ -34,7 +34,7 @@ void CGridSubDivideAction::Execute()
 		for (int i = 0; i < 3; ++i)
 		{
 			this->WasUniform[i] = (gridKeyword.m_grid[i].uniform != 0);
-			gridKeyword.m_grid[i].SubDivide(this->Min[i], this->Max[i], this->Parts[i]);
+			gridKeyword.m_grid[i].Refine(this->Min[i], this->Max[i], this->Parts[i]);
 		}
 		this->Actor->SetGridKeyword(gridKeyword, units);
 		this->Actor->UpdateNode();
