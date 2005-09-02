@@ -84,7 +84,6 @@ public:
 
 	virtual BOOL OnApply();
 	virtual void OnCancel();
-//	virtual void OnOK();
 protected:
 	virtual void PostNcDestroy();
 public:

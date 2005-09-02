@@ -240,7 +240,7 @@
 #define ID_WELLS_UNSELECTALL            244
 #define IDD_SERIES_DIALOG               248
 #define IDC_VE_SPLIT                    249
-#define IDD_GRID_DENSIFY                249
+#define IDD_GRID_REFINE                 249
 #define IDC_HO_SPLIT                    250
 #define IDD_GRID_SPARSIFY               250
 #define IDC_4WAY02                      251

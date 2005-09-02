@@ -42,7 +42,7 @@ public:
 	void UpdateSpinners();
 
 // Dialog Data
-	enum { IDD = IDD_GRID_DENSIFY };
+	enum { IDD = IDD_GRID_REFINE };
 
 protected:
 	bool  NeedAction;
@@ -84,7 +84,6 @@ public:
 
 	virtual BOOL OnApply();
 	virtual void OnCancel();
-//	virtual void OnOK();
 protected:
 	virtual void PostNcDestroy();
 public:
