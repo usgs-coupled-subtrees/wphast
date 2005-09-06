@@ -150,12 +150,6 @@ protected:
 	// Used to process events
 	vtkCallbackCommand* EventCallbackCommand;
 
-	int                  PosXLineCount;
-	vtkLineSource      **PosXLineSources;
-	vtkPolyDataMapper  **PosXLineMappers;
-	vtkTubeFilter      **PosXLineFilters;
-	vtkActor           **PosXLineActors;
-
 	vtkPlaneSource*     PlaneSources[6];
 	vtkPolyDataMapper*  PlaneMappers[6];
 	vtkLODActor*        PlaneActors[6];

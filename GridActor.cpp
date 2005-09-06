@@ -62,10 +62,6 @@ CGridActor::CGridActor(void)
 	, AxisIndex(-1)
 	, ScaleTransform(0)
 	, UnitsTransform(0)
-	, PosXLineSources(0)
-	, PosXLineFilters(0)
-	, PosXLineMappers(0)
-	, PosXLineActors(0)
 	, LinePicker(0)
 {
 	this->m_pGeometryFilter = vtkGeometryFilter::New();
@@ -122,22 +118,6 @@ CGridActor::CGridActor(void)
 
 CGridActor::~CGridActor(void)
 {
-	if ( this->PosXLineCount > 0 )
-	{
-		for (int i = 0; i < this->PosXLineCount; ++i)
-		{
-			this->RemovePart(this->PosXLineActors[i]);
-			this->PosXLineSources[i]->Delete();
-			this->PosXLineFilters[i]->Delete();
-			this->PosXLineMappers[i]->Delete();
-			this->PosXLineActors[i]->Delete();
-		}
-		delete [] this->PosXLineSources; this->PosXLineSources = NULL;
-		delete [] this->PosXLineFilters; this->PosXLineFilters = NULL;
-		delete [] this->PosXLineMappers; this->PosXLineMappers = NULL;
-		delete [] this->PosXLineActors; this->PosXLineActors = NULL;
-		this->PosXLineCount = 0;
-	}
 	if (this->LinePicker)
 	{
 		this->LinePicker->Delete();
