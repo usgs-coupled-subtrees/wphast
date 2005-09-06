@@ -43,7 +43,7 @@ class CModelessPropertySheet;
 class CScalePropertyPage;
 class CGridPropertyPage2;
 class CGridRefinePage;
-class CSparsifyGridPage;
+class CGridCoarsenPage;
 class CGridElementsSelector;
 
 class vtkAxes;
@@ -240,7 +240,7 @@ protected:
 
 	CModelessPropertySheet     *ModifyGridSheet;
 	CGridRefinePage            *GridRefinePage;
-	CSparsifyGridPage          *SparsifyGridPage;
+	CGridCoarsenPage           *GridCoarsenPage;
 	CGridElementsSelector      *GridElementsSelector;
 
 

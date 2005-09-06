@@ -8,15 +8,15 @@ class CWPhastDoc;
 class CGridActor;
 class CGridElementsSelector;
 
-// CSparsifyGridPage dialog
+// CGridCoarsenPage dialog
 
-class CSparsifyGridPage : public CPropertyPage
+class CGridCoarsenPage : public CPropertyPage
 {
-	DECLARE_DYNAMIC(CSparsifyGridPage)
+	DECLARE_DYNAMIC(CGridCoarsenPage)
 
 public:
-	CSparsifyGridPage();
-	virtual ~CSparsifyGridPage();
+	CGridCoarsenPage();
+	virtual ~CGridCoarsenPage();
 
 	void SetUnits(const CUnits& units);
 	CUnits GetUnits()const;

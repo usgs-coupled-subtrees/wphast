@@ -1,9 +1,9 @@
-// SparsifyGridPage.cpp : implementation file
+// GridCoarsenPage.cpp : implementation file
 //
 
 #include "stdafx.h"
 #include "WPhast.h"
-#include "SparsifyGridPage.h"
+#include "GridCoarsenPage.h"
 
 #include "WPhastDoc.h"
 #include "GridElementsSelector.h"
@@ -12,11 +12,11 @@
 #include "ModelessPropertySheet.h"
 
 
-// CSparsifyGridPage dialog
+// CGridCoarsenPage dialog
 
-IMPLEMENT_DYNAMIC(CSparsifyGridPage, CPropertyPage)
-CSparsifyGridPage::CSparsifyGridPage()
-	: CPropertyPage(CSparsifyGridPage::IDD)
+IMPLEMENT_DYNAMIC(CGridCoarsenPage, CPropertyPage)
+CGridCoarsenPage::CGridCoarsenPage()
+	: CPropertyPage(CGridCoarsenPage::IDD)
 	, Document(0)
 	, Actor(0)
 	, Widget(0)
@@ -30,11 +30,11 @@ CSparsifyGridPage::CSparsifyGridPage()
 	}
 }
 
-CSparsifyGridPage::~CSparsifyGridPage()
+CGridCoarsenPage::~CGridCoarsenPage()
 {
 }
 
-void CSparsifyGridPage::DoDataExchange(CDataExchange* pDX)
+void CGridCoarsenPage::DoDataExchange(CDataExchange* pDX)
 {
 	CPropertyPage::DoDataExchange(pDX);
 
@@ -97,58 +97,58 @@ void CSparsifyGridPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_SPIN_PARTS_K, spinParts[2]);
 }
 
-void CSparsifyGridPage::SetUnits(const CUnits &units)
+void CGridCoarsenPage::SetUnits(const CUnits &units)
 {
 	this->Units = units;
 }
 
-CUnits CSparsifyGridPage::GetUnits()const
+CUnits CGridCoarsenPage::GetUnits()const
 {
 	return this->Units;
 }
 
-void CSparsifyGridPage::SetProperties(const CGridKeyword &gridKeyword)
+void CGridCoarsenPage::SetProperties(const CGridKeyword &gridKeyword)
 {
 	this->GridKeyword = gridKeyword;
 }
 
-void CSparsifyGridPage::GetProperties(CGridKeyword &gridKeyword)const
+void CGridCoarsenPage::GetProperties(CGridKeyword &gridKeyword)const
 {
 	gridKeyword = this->GridKeyword;
 }
 
-void CSparsifyGridPage::SetDocument(CWPhastDoc *document)
+void CGridCoarsenPage::SetDocument(CWPhastDoc *document)
 {
 	this->Document = document;
 }
 
-CWPhastDoc* CSparsifyGridPage::GetDocument()const
+CWPhastDoc* CGridCoarsenPage::GetDocument()const
 {
 	return this->Document;
 }
 
-void CSparsifyGridPage::SetActor(CGridActor *actor)
+void CGridCoarsenPage::SetActor(CGridActor *actor)
 {
 	this->Actor = actor;
 	this->Actor->GetGridKeyword(this->OriginalGridKeyword);
 }
 
-CGridActor* CSparsifyGridPage::GetActor()const
+CGridActor* CGridCoarsenPage::GetActor()const
 {
 	return this->Actor;
 }
 
-void CSparsifyGridPage::SetWidget(CGridElementsSelector *widget)
+void CGridCoarsenPage::SetWidget(CGridElementsSelector *widget)
 {
 	this->Widget = widget;
 }
 
-CGridElementsSelector* CSparsifyGridPage::GetWidget()const
+CGridElementsSelector* CGridCoarsenPage::GetWidget()const
 {
 	return this->Widget;
 }
 
-void CSparsifyGridPage::SetMin(int min[3])
+void CGridCoarsenPage::SetMin(int min[3])
 {
 	for (int i = 0; i < 3; ++i)
 	{
@@ -156,7 +156,7 @@ void CSparsifyGridPage::SetMin(int min[3])
 	}
 }
 
-void CSparsifyGridPage::GetMin(int min[3])const
+void CGridCoarsenPage::GetMin(int min[3])const
 {
 	for (int i = 0; i < 3; ++i)
 	{
@@ -164,7 +164,7 @@ void CSparsifyGridPage::GetMin(int min[3])const
 	}
 }
 
-void CSparsifyGridPage::SetMax(int max[3])
+void CGridCoarsenPage::SetMax(int max[3])
 {
 	for (int i = 0; i < 3; ++i)
 	{
@@ -172,7 +172,7 @@ void CSparsifyGridPage::SetMax(int max[3])
 	}
 }
 
-void CSparsifyGridPage::GetMax(int max[3])const
+void CGridCoarsenPage::GetMax(int max[3])const
 {
 	for (int i = 0; i < 3; ++i)
 	{
@@ -180,7 +180,7 @@ void CSparsifyGridPage::GetMax(int max[3])const
 	}
 }
 
-BEGIN_MESSAGE_MAP(CSparsifyGridPage, CPropertyPage)
+BEGIN_MESSAGE_MAP(CGridCoarsenPage, CPropertyPage)
 	ON_EN_CHANGE(IDC_EDIT_MIN_I, OnEnChangeEditMinI)
 	ON_EN_CHANGE(IDC_EDIT_MAX_I, OnEnChangeEditMaxI)
 	ON_EN_CHANGE(IDC_EDIT_PARTS_I, OnEnChangeEditPartsI)
@@ -199,9 +199,9 @@ BEGIN_MESSAGE_MAP(CSparsifyGridPage, CPropertyPage)
 END_MESSAGE_MAP()
 
 
-// CSparsifyGridPage message handlers
+// CGridCoarsenPage message handlers
 
-BOOL CSparsifyGridPage::OnInitDialog()
+BOOL CGridCoarsenPage::OnInitDialog()
 {
 	CPropertyPage::OnInitDialog();
 
@@ -212,7 +212,7 @@ BOOL CSparsifyGridPage::OnInitDialog()
 	// EXCEPTION: OCX Property Pages should return FALSE
 }
 
-void CSparsifyGridPage::OnEnChangeEditMinI()
+void CGridCoarsenPage::OnEnChangeEditMinI()
 {
 	const int id = IDC_EDIT_MIN_I;
 	const int c = 0;
@@ -238,7 +238,7 @@ void CSparsifyGridPage::OnEnChangeEditMinI()
 	}
 }
 
-void CSparsifyGridPage::OnEnChangeEditMinJ()
+void CGridCoarsenPage::OnEnChangeEditMinJ()
 {
 	const int id = IDC_EDIT_MIN_J;
 	const int c = 1;
@@ -264,7 +264,7 @@ void CSparsifyGridPage::OnEnChangeEditMinJ()
 	}
 }
 
-void CSparsifyGridPage::OnEnChangeEditMinK()
+void CGridCoarsenPage::OnEnChangeEditMinK()
 {
 	const int id = IDC_EDIT_MIN_K;
 	const int c = 2;
@@ -291,7 +291,7 @@ void CSparsifyGridPage::OnEnChangeEditMinK()
 }
 
 
-void CSparsifyGridPage::OnEnChangeEditMaxI()
+void CGridCoarsenPage::OnEnChangeEditMaxI()
 {
 	const int id = IDC_EDIT_MAX_I;
 	const int c = 0;
@@ -317,7 +317,7 @@ void CSparsifyGridPage::OnEnChangeEditMaxI()
 	}
 }
 
-void CSparsifyGridPage::OnEnChangeEditMaxJ()
+void CGridCoarsenPage::OnEnChangeEditMaxJ()
 {
 	const int id = IDC_EDIT_MAX_J;
 	const int c = 1;
@@ -343,7 +343,7 @@ void CSparsifyGridPage::OnEnChangeEditMaxJ()
 	}
 }
 
-void CSparsifyGridPage::OnEnChangeEditMaxK()
+void CGridCoarsenPage::OnEnChangeEditMaxK()
 {
 	const int id = IDC_EDIT_MAX_K;
 	const int c = 2;
@@ -369,7 +369,7 @@ void CSparsifyGridPage::OnEnChangeEditMaxK()
 	}
 }
 
-void CSparsifyGridPage::OnEnChangeEditPartsI()
+void CGridCoarsenPage::OnEnChangeEditPartsI()
 {
 	const int id = IDC_EDIT_PARTS_I;
 	const int c = 0;
@@ -411,7 +411,7 @@ void CSparsifyGridPage::OnEnChangeEditPartsI()
 	}
 }
 
-void CSparsifyGridPage::OnEnChangeEditPartsJ()
+void CGridCoarsenPage::OnEnChangeEditPartsJ()
 {
 	const int id = IDC_EDIT_PARTS_J;
 	const int c = 1;
@@ -453,7 +453,7 @@ void CSparsifyGridPage::OnEnChangeEditPartsJ()
 	}
 }
 
-void CSparsifyGridPage::OnEnChangeEditPartsK()
+void CGridCoarsenPage::OnEnChangeEditPartsK()
 {
 	const int id = IDC_EDIT_PARTS_K;
 	const int c = 2;
@@ -495,9 +495,9 @@ void CSparsifyGridPage::OnEnChangeEditPartsK()
 	}
 }
 
-BOOL CSparsifyGridPage::OnApply()
+BOOL CGridCoarsenPage::OnApply()
 {
-	TRACE("In CSparsifyGridPage::OnApply\n");
+	TRACE("In CGridCoarsenPage::OnApply\n");
 	ASSERT(this->Document);
 	ASSERT(this->Actor);
 	CWaitCursor wait;
@@ -544,11 +544,11 @@ BOOL CSparsifyGridPage::OnApply()
 	}
 	// return CPropertyPage::OnApply();
 	BOOL b = CPropertyPage::OnApply();
-	TRACE("In CSparsifyGridPage::OnApply\n");
+	TRACE("In CGridCoarsenPage::OnApply\n");
 	return b;
 }
 
-void CSparsifyGridPage::UpdateSpinners()
+void CGridCoarsenPage::UpdateSpinners()
 {
 	for (int i = 0; i < 3; ++i)
 	{
@@ -559,9 +559,9 @@ void CSparsifyGridPage::UpdateSpinners()
 	}
 }
 
-void CSparsifyGridPage::OnCancel()
+void CGridCoarsenPage::OnCancel()
 {
-	TRACE("In CSparsifyGridPage::OnCancel\n");
+	TRACE("In CGridCoarsenPage::OnCancel\n");
 	this->Actor->SetGridKeyword(this->OriginalGridKeyword, this->Units);
 	this->Actor->UpdateNode();
 	this->Document->UpdateAllViews(0);
@@ -569,22 +569,22 @@ void CSparsifyGridPage::OnCancel()
 	// Add your specialized code here and/or call the base class
 
 	CPropertyPage::OnCancel();
-	TRACE("Out CSparsifyGridPage::OnCancel\n");
+	TRACE("Out CGridCoarsenPage::OnCancel\n");
 }
 
-void CSparsifyGridPage::PostNcDestroy()
+void CGridCoarsenPage::PostNcDestroy()
 {
-	TRACE("In CSparsifyGridPage::PostNcDestroy\n");
+	TRACE("In CGridCoarsenPage::PostNcDestroy\n");
 	this->Document->EndModifyGrid();
 	this->Document->UpdateAllViews(0);
 	// TODO: Add your specialized code here and/or call the base class
 	CPropertyPage::PostNcDestroy();
-	TRACE("Out CSparsifyGridPage::PostNcDestroy\n");
+	TRACE("Out CGridCoarsenPage::PostNcDestroy\n");
 }
 
-BOOL CSparsifyGridPage::OnSetActive()
+BOOL CGridCoarsenPage::OnSetActive()
 {
-	TRACE("In CSparsifyGridPage::OnSetActive\n");
+	TRACE("In CGridCoarsenPage::OnSetActive\n");
 	int ibounds[6];
 	this->Widget->GetIBounds(ibounds);
 	for (int i = 0; i < 3; ++i)
@@ -599,24 +599,24 @@ BOOL CSparsifyGridPage::OnSetActive()
 
 	//return CPropertyPage::OnSetActive();
 	BOOL b = CPropertyPage::OnSetActive();
-	TRACE("Out CSparsifyGridPage::OnSetActive\n");
+	TRACE("Out CGridCoarsenPage::OnSetActive\n");
 	return b;
 }
 
-BOOL CSparsifyGridPage::OnKillActive()
+BOOL CGridCoarsenPage::OnKillActive()
 {
-	TRACE("In CSparsifyGridPage::OnKillActive\n");
+	TRACE("In CGridCoarsenPage::OnKillActive\n");
 	this->SetModified(FALSE);
 
 	// TODO: Add your specialized code here and/or call the base class
 
 	//return CPropertyPage::OnKillActive();
 	BOOL b = CPropertyPage::OnKillActive();
-	TRACE("Out CSparsifyGridPage::OnKillActive\n");
+	TRACE("Out CGridCoarsenPage::OnKillActive\n");
 	return b;
 }
 
-void CSparsifyGridPage::OnBnClickedCheckX()
+void CGridCoarsenPage::OnBnClickedCheckX()
 {
 	int Ids[] = 
 	{
@@ -667,7 +667,7 @@ void CSparsifyGridPage::OnBnClickedCheckX()
 	}
 }
 
-void CSparsifyGridPage::OnBnClickedCheckY()
+void CGridCoarsenPage::OnBnClickedCheckY()
 {
 	int Ids[] = 
 	{
@@ -718,7 +718,7 @@ void CSparsifyGridPage::OnBnClickedCheckY()
 	}
 }
 
-void CSparsifyGridPage::OnBnClickedCheckZ()
+void CGridCoarsenPage::OnBnClickedCheckZ()
 {
 	int Ids[] = 
 	{

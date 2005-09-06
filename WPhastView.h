@@ -103,7 +103,7 @@ protected:
 
 	//
 	//
-	CGridElementsSelector          *ModifyGridCommand;
+	CGridElementsSelector          *GridElementsSelector;
 
 	friend class CViewVTKCommand;
 

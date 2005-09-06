@@ -54,7 +54,7 @@
 
 #include "GridPropertyPage2.h"
 #include "GridRefinePage.h"
-#include "SparsifyGridPage.h"
+#include "GridCoarsenPage.h"
 #include "GridElementsSelector.h"
 
 #include <vtkBoxWidget.h>
@@ -241,7 +241,7 @@ CWPhastDoc::CWPhastDoc()
 , m_pGridPage(0)
 , ModifyGridSheet(0)
 , GridRefinePage(0)
-, SparsifyGridPage(0)
+, GridCoarsenPage(0)
 , GridElementsSelector(0)
 {
 #if defined(WPHAST_AUTOMATION)
@@ -438,11 +438,11 @@ CWPhastDoc::~CWPhastDoc()
 		delete this->GridRefinePage;
 		this->GridRefinePage = 0;
 	}
-	if (this->SparsifyGridPage)
+	if (this->GridCoarsenPage)
 	{
-		this->SparsifyGridPage->DestroyWindow();
-		delete this->SparsifyGridPage;
-		this->SparsifyGridPage = 0;
+		this->GridCoarsenPage->DestroyWindow();
+		delete this->GridCoarsenPage;
+		this->GridCoarsenPage = 0;
 	}
 }
 
@@ -4771,17 +4771,17 @@ void CWPhastDoc::ModifyGrid(CGridActor* gridActor, CGridElementsSelector* gridEl
 		this->GridRefinePage->DestroyWindow();
 		delete this->GridRefinePage;
 	}
-	if (this->SparsifyGridPage)
+	if (this->GridCoarsenPage)
 	{
-		this->SparsifyGridPage->DestroyWindow();
-		delete this->SparsifyGridPage;
+		this->GridCoarsenPage->DestroyWindow();
+		delete this->GridCoarsenPage;
 	}
 
 	this->ModifyGridSheet = new CModelessPropertySheet("");
 	this->GridRefinePage  = new CGridRefinePage();
-	this->SparsifyGridPage = new CSparsifyGridPage();
+	this->GridCoarsenPage = new CGridCoarsenPage();
 	this->ModifyGridSheet->AddPage(this->GridRefinePage);
-	this->ModifyGridSheet->AddPage(this->SparsifyGridPage);
+	this->ModifyGridSheet->AddPage(this->GridCoarsenPage);
 	
 	CGridKeyword gridKeyword;
 	gridActor->GetGridKeyword(gridKeyword);
@@ -4792,21 +4792,21 @@ void CWPhastDoc::ModifyGrid(CGridActor* gridActor, CGridElementsSelector* gridEl
 	this->GridRefinePage->SetActor(gridActor);
 	this->GridRefinePage->SetWidget(gridElementsSelector);
 
-	this->SparsifyGridPage->SetProperties(gridKeyword);
-	this->SparsifyGridPage->SetUnits(this->GetUnits());
-	this->SparsifyGridPage->SetDocument(this);
-	this->SparsifyGridPage->SetActor(gridActor);
-	this->SparsifyGridPage->SetWidget(gridElementsSelector);
+	this->GridCoarsenPage->SetProperties(gridKeyword);
+	this->GridCoarsenPage->SetUnits(this->GetUnits());
+	this->GridCoarsenPage->SetDocument(this);
+	this->GridCoarsenPage->SetActor(gridActor);
+	this->GridCoarsenPage->SetWidget(gridElementsSelector);
 
 	int min[3];
 	gridElementsSelector->GetMin(min);
 	this->GridRefinePage->SetMin(min);
-	this->SparsifyGridPage->SetMin(min);
+	this->GridCoarsenPage->SetMin(min);
 
 	int max[3];
 	gridElementsSelector->GetMax(max);
 	this->GridRefinePage->SetMax(max);
-	this->SparsifyGridPage->SetMax(max);
+	this->GridCoarsenPage->SetMax(max);
 
 	this->ModifyGridSheet->Create(::AfxGetApp()->m_pMainWnd);
 }

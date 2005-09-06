@@ -124,7 +124,7 @@ CWPhastView::CWPhastView()
 , m_pPointWidget2(0)
 , m_pRiverActor(0)
 , RiverCallbackCommand(0)
-, ModifyGridCommand(0)
+, GridElementsSelector(0)
 , m_bMovingGridLine(false)
 {
 	// Create the renderer, window and interactor objects.
@@ -251,10 +251,10 @@ CWPhastView::~CWPhastView()
 		this->EndNewZone();
 	}
 
-	if (this->ModifyGridCommand)
+	if (this->GridElementsSelector)
 	{
-		this->ModifyGridCommand->Delete();
-		this->ModifyGridCommand = 0;
+		this->GridElementsSelector->Delete();
+		this->GridElementsSelector = 0;
 	}
 
 
@@ -2041,7 +2041,7 @@ void CWPhastView::OnUpdateToolsModifyGrid(CCmdUI *pCmdUI)
 		pCmdUI->Enable(FALSE);
 	}
 
-	if (this->ModifyGridCommand)
+	if (this->GridElementsSelector)
 	{
 		pCmdUI->SetCheck(1);
 	}
@@ -2053,50 +2053,19 @@ void CWPhastView::OnUpdateToolsModifyGrid(CCmdUI *pCmdUI)
 
 void CWPhastView::OnToolsModifyGrid()
 {
-
-// COMMENT: {8/18/2005 9:08:52 PM}	if (this->ModifyingGrid())
-// COMMENT: {8/18/2005 9:08:52 PM}	{
-// COMMENT: {8/18/2005 9:08:52 PM}		this->CancelModifyGrid();
-// COMMENT: {8/18/2005 9:08:52 PM}	}
-// COMMENT: {8/18/2005 9:08:52 PM}	else
-// COMMENT: {8/18/2005 9:08:52 PM}	{
-// COMMENT: {8/18/2005 9:08:52 PM}		this->CancelMode();
-// COMMENT: {8/18/2005 9:08:52 PM}		this->StartModifyGrid();
-// COMMENT: {8/18/2005 9:08:52 PM}	}
-
-	if (this->ModifyGridCommand)
+	if (this->GridElementsSelector)
 	{
-		this->ModifyGridCommand->Delete();
-		this->ModifyGridCommand = 0;
+		this->GridElementsSelector->Delete();
+		this->GridElementsSelector = 0;
 	}
 	else
 	{
-		this->ModifyGridCommand = CGridElementsSelector::New();
-		this->ModifyGridCommand->SetInteractor(this->m_RenderWindowInteractor);
-		this->ModifyGridCommand->SetGridActor(reinterpret_cast<CGridActor *>(this->GetDocument()->GetGridActor()));
-		this->ModifyGridCommand->SetDocument(this->GetDocument());
-		this->ModifyGridCommand->SetEnabled(1);
+		this->GridElementsSelector = CGridElementsSelector::New();
+		this->GridElementsSelector->SetInteractor(this->m_RenderWindowInteractor);
+		this->GridElementsSelector->SetGridActor(reinterpret_cast<CGridActor *>(this->GetDocument()->GetGridActor()));
+		this->GridElementsSelector->SetDocument(this->GetDocument());
+		this->GridElementsSelector->SetEnabled(1);
 	}
-
-
-// COMMENT: {8/18/2005 11:12:48 PM}	if (this->m_bMovingGridLine)
-// COMMENT: {8/18/2005 11:12:48 PM}	{
-// COMMENT: {8/18/2005 11:12:48 PM}		if (CGridActor* pGridActor = CGridActor::SafeDownCast(this->GetDocument()->GetGridActor()))
-// COMMENT: {8/18/2005 11:12:48 PM}		{
-// COMMENT: {8/18/2005 11:12:48 PM}			pGridActor->SetEnabled(0);
-// COMMENT: {8/18/2005 11:12:48 PM}		}
-// COMMENT: {8/18/2005 11:12:48 PM}		this->m_bMovingGridLine = false;
-// COMMENT: {8/18/2005 11:12:48 PM}	}
-// COMMENT: {8/18/2005 11:12:48 PM}	else
-// COMMENT: {8/18/2005 11:12:48 PM}	{
-// COMMENT: {8/18/2005 11:12:48 PM}		this->m_bMovingGridLine = true;
-// COMMENT: {8/18/2005 11:12:48 PM}		if (CGridActor* pGridActor = CGridActor::SafeDownCast(this->GetDocument()->GetGridActor()))
-// COMMENT: {8/18/2005 11:12:48 PM}		{
-// COMMENT: {8/18/2005 11:12:48 PM}			pGridActor->SetInteractor(this->m_RenderWindowInteractor);
-// COMMENT: {8/18/2005 11:12:48 PM}		}
-// COMMENT: {8/18/2005 11:12:48 PM}	}
-
-
 }
 
 void CWPhastView::CancelMode(void)
