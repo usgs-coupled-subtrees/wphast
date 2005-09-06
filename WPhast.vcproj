@@ -631,9 +631,6 @@
 				RelativePath="ModelessPropertySheet.cpp">
 			</File>
 			<File
-				RelativePath="ModifyGridCommand.cpp">
-			</File>
-			<File
 				RelativePath="NewModel.cpp">
 			</File>
 			<File
@@ -1179,9 +1176,6 @@
 			</File>
 			<File
 				RelativePath="ModelessPropertySheet.h">
-			</File>
-			<File
-				RelativePath="ModifyGridCommand.h">
 			</File>
 			<File
 				RelativePath="NewModel.h">
