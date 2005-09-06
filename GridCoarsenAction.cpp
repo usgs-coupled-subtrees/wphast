@@ -4,7 +4,7 @@
 #include "WPhastDoc.h"
 #include "GridActor.h"
 
-CGridSparsifyAction::CGridSparsifyAction(CWPhastDoc *document, CGridActor *actor, int min[3], int max[3], int parts[3], const CGridKeyword &gridKeyword, bool skipFirstExecute)
+CGridCoarsenAction::CGridCoarsenAction(CWPhastDoc *document, CGridActor *actor, int min[3], int max[3], int parts[3], const CGridKeyword &gridKeyword, bool skipFirstExecute)
 : Document(document)
 , Actor(actor)
 , GridKeyword(gridKeyword)
@@ -18,11 +18,11 @@ CGridSparsifyAction::CGridSparsifyAction(CWPhastDoc *document, CGridActor *actor
 	}
 }
 
-CGridSparsifyAction::~CGridSparsifyAction(void)
+CGridCoarsenAction::~CGridCoarsenAction(void)
 {
 }
 
-void CGridSparsifyAction::Execute()
+void CGridCoarsenAction::Execute()
 {
 	if (!this->SkipFirstExecute)
 	{
@@ -39,14 +39,14 @@ void CGridSparsifyAction::Execute()
 	this->SkipFirstExecute = false;
 }
 
-void CGridSparsifyAction::UnExecute()
+void CGridCoarsenAction::UnExecute()
 {
 	this->Actor->SetGridKeyword(this->GridKeyword, this->Document->GetUnits());
 	this->Actor->UpdateNode();
 	this->Document->UpdateAllViews(0);
 }
 
-void CGridSparsifyAction::Apply(void)
+void CGridCoarsenAction::Apply(void)
 {
 	this->SkipFirstExecute = false;
 	this->Execute();

@@ -526,7 +526,7 @@ BOOL CGridCoarsenPage::OnApply()
 			// Undo / Redo
 			CGridKeyword gridKeyword;
 			this->Actor->GetGridKeyword(gridKeyword);
-			CGridSparsifyAction* action = new CGridSparsifyAction(this->Document, this->Actor, min, max, this->Parts, gridKeyword);
+			CGridCoarsenAction* action = new CGridCoarsenAction(this->Document, this->Actor, min, max, this->Parts, gridKeyword);
 			action->Apply();
 			sheet->AddAction(action);
 

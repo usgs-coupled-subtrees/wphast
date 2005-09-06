@@ -6,11 +6,11 @@
 class CWPhastDoc;
 class CGridActor;
 
-class CGridSparsifyAction : public CAction
+class CGridCoarsenAction : public CAction
 {
 public:
-	CGridSparsifyAction(CWPhastDoc *document, CGridActor *actor, int min[3], int max[3], int parts[3], const CGridKeyword &gridKeyword, bool skipFirstExecute = false);
-	~CGridSparsifyAction(void);
+	CGridCoarsenAction(CWPhastDoc *document, CGridActor *actor, int min[3], int max[3], int parts[3], const CGridKeyword &gridKeyword, bool skipFirstExecute = false);
+	~CGridCoarsenAction(void);
 
 	virtual void Execute();
 	virtual void UnExecute();
