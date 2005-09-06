@@ -1,5 +1,5 @@
 #include "StdAfx.h"
-#include "GridSparsifyAction.h"
+#include "GridCoarsenAction.h"
 
 #include "WPhastDoc.h"
 #include "GridActor.h"

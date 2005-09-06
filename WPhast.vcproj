@@ -520,6 +520,9 @@
 				RelativePath="GridActor.cpp">
 			</File>
 			<File
+				RelativePath="GridCoarsenAction.cpp">
+			</File>
+			<File
 				RelativePath="GridCoarsenPage.cpp">
 			</File>
 			<File
@@ -560,9 +563,6 @@
 			</File>
 			<File
 				RelativePath="GridSetAction.cpp">
-			</File>
-			<File
-				RelativePath="GridSparsifyAction.cpp">
 			</File>
 			<File
 				RelativePath="HDFMirrorFile.cpp">
@@ -1067,6 +1067,9 @@
 				RelativePath="GridActor.h">
 			</File>
 			<File
+				RelativePath="GridCoarsenAction.h">
+			</File>
+			<File
 				RelativePath="GridCoarsenPage.h">
 			</File>
 			<File
@@ -1110,9 +1113,6 @@
 			</File>
 			<File
 				RelativePath="GridSetAction.h">
-			</File>
-			<File
-				RelativePath="GridSparsifyAction.h">
 			</File>
 			<File
 				RelativePath="HDFMirrorFile.h">

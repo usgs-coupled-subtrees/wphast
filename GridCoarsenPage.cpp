@@ -8,7 +8,7 @@
 #include "WPhastDoc.h"
 #include "GridElementsSelector.h"
 #include "GridActor.h"
-#include "GridSparsifyAction.h"
+#include "GridCoarsenAction.h"
 #include "ModelessPropertySheet.h"
 
 
