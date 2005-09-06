@@ -53,7 +53,6 @@
 #include "Grid.h"
 #include "FlowOnly.h"
 
-#include "ModifyGridCommand.h"
 #include "GridElementsSelector.h"
 #include <vtkImplicitPlaneWidget.h>
 

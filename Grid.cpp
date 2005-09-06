@@ -593,7 +593,7 @@ void CGrid::Refine(int nStart, int nEnd, int nParts)
 	this->insert(coordinates.begin(), coordinates.end());    
 }
 
-// Merge every nParts elements into 1 element
+// Merge every nPart elements into 1 element
 //
 void CGrid::Merge(int nStart, int nEnd, int nParts)
 {
