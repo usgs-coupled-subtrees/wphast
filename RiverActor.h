@@ -55,7 +55,19 @@ public:
 
 	CRiverPoint* CRiverActor::GetRiverPoint(int index);
 
+	// Description:
+	// Methods for turning the interactor observer on and off, and determining
+	// its state. All subclasses must provide the SetEnabled() method.
+	// Enabling a vtkInteractorObserver has the side effect of adding
+	// observers; disabling it removes the observers. Prior to enabling the
+	// vtkInteractorObserver you must set the render window interactor (via
+	// SetInteractor()).
 	void SetEnabled(int enabling);
+	int GetEnabled() {return this->Enabled;}
+	void EnabledOn() {this->SetEnabled(1);}
+	void EnabledOff() {this->SetEnabled(0);}
+	void On() {this->SetEnabled(1);}
+	void Off() {this->SetEnabled(0);}
 
 	// CPropertyTreeControlBar operations
 	//

@@ -120,7 +120,7 @@ CWPhastView::CWPhastView()
 , m_pNewCubeActor(0)
 , m_ViewFromDirection(ID_VIEW_FROM_PZ)
 , m_pWellActor(0)
-, m_pPointWidget2(0)
+, PointWidget(0)
 , m_pRiverActor(0)
 , RiverCallbackCommand(0)
 , GridElementsSelector(0)
@@ -134,16 +134,16 @@ CWPhastView::CWPhastView()
 
 	// Create the the BoxWidget
 	//
-	this->m_pBoxWidget = vtkBoxWidget::New();
-	this->m_pBoxWidget->SetInteractor(this->m_RenderWindowInteractor);
-	this->m_pBoxWidget->SetPlaceFactor(1.0);
-	this->m_pBoxWidget->RotationEnabledOff();
+	this->BoxWidget = vtkBoxWidget::New();
+	this->BoxWidget->SetInteractor(this->m_RenderWindowInteractor);
+	this->BoxWidget->SetPlaceFactor(1.0);
+	this->BoxWidget->RotationEnabledOff();
 
 	// Create the the PointWidget2
 	//
-	this->m_pPointWidget2 = vtkPointWidget2::New();
-	this->m_pPointWidget2->SetInteractor(this->m_RenderWindowInteractor);
-	///this->m_pPointWidget2->TranslationModeOn();
+	this->PointWidget = vtkPointWidget2::New();
+	this->PointWidget->SetInteractor(this->m_RenderWindowInteractor);
+	///this->PointWidget->TranslationModeOn();
 
 	//
 	this->m_pInteractorStyle = vtkInteractorStyleTrackballCameraEx::New();
@@ -175,13 +175,13 @@ CWPhastView::CWPhastView()
 	this->m_pViewVTKCommand = CViewVTKCommand::New(this);
 	this->m_RenderWindowInteractor->AddObserver(vtkCommand::EndPickEvent, this->m_pViewVTKCommand);
 
-	this->m_pBoxWidget->AddObserver(vtkCommand::InteractionEvent, this->m_pViewVTKCommand);
-	this->m_pBoxWidget->AddObserver(vtkCommand::EndInteractionEvent, this->m_pViewVTKCommand);
-	this->m_pBoxWidget->AddObserver(vtkCommand::StartInteractionEvent, this->m_pViewVTKCommand);
+	this->BoxWidget->AddObserver(vtkCommand::InteractionEvent, this->m_pViewVTKCommand);
+	this->BoxWidget->AddObserver(vtkCommand::EndInteractionEvent, this->m_pViewVTKCommand);
+	this->BoxWidget->AddObserver(vtkCommand::StartInteractionEvent, this->m_pViewVTKCommand);
 
-	this->m_pPointWidget2->AddObserver(vtkCommand::InteractionEvent, this->m_pViewVTKCommand);
-	this->m_pPointWidget2->AddObserver(vtkCommand::EndInteractionEvent, this->m_pViewVTKCommand);
-	this->m_pPointWidget2->AddObserver(vtkCommand::StartInteractionEvent, this->m_pViewVTKCommand);
+	this->PointWidget->AddObserver(vtkCommand::InteractionEvent, this->m_pViewVTKCommand);
+	this->PointWidget->AddObserver(vtkCommand::EndInteractionEvent, this->m_pViewVTKCommand);
+	this->PointWidget->AddObserver(vtkCommand::StartInteractionEvent, this->m_pViewVTKCommand);
 
 
 	// camera events
@@ -205,8 +205,8 @@ CWPhastView::CWPhastView()
 CWPhastView::~CWPhastView()
 {
 	this->m_pInteractorStyle->Delete();
-	this->m_pBoxWidget->Delete();
-	this->m_pPointWidget2->Delete();
+	this->BoxWidget->Delete();
+	this->PointWidget->Delete();
 
 	this->m_pViewVTKCommand->Delete();
 
@@ -710,7 +710,7 @@ void CWPhastView::StartNewZone(void)
 
 	// hide BoxWidget
 	//
-	this->m_pBoxWidget->Off();
+	this->BoxWidget->Off();
 
 	// render
 	//
@@ -1008,6 +1008,30 @@ void CWPhastView::OnViewFromPrevDirection()
 
 void CWPhastView::Select(vtkProp *pProp)
 {
+	// hide zone widget
+	//
+	if (this->BoxWidget) this->BoxWidget->Off();
+
+	// hide well widget
+	//
+	if (this->PointWidget) this->PointWidget->Off();
+
+	// disable rivers
+	//
+	if (vtkPropCollection *pPropCollection = this->GetDocument()->GetPropAssemblyRivers()->GetParts())
+	{
+		vtkProp *pProp = 0;
+		pPropCollection->InitTraversal();
+		for (; (pProp = pPropCollection->GetNextProp()); )
+		{
+			if (CRiverActor *pRiverActor = CRiverActor::SafeDownCast(pProp))
+			{
+				pRiverActor->ClearSelection();
+				pRiverActor->Off();
+			}
+		}
+	}
+
 	// Highlight Prop
 	//
 	this->HighlightProp(pProp);
@@ -1029,79 +1053,44 @@ void CWPhastView::Select(vtkProp *pProp)
 		}
 	}
 
-	// Set BoxWidget
-	//
-	if (vtkBoxWidget *pBoxWidget = this->GetBoxWidget())
+	if (CZoneActor *pZoneActor = CZoneActor::SafeDownCast(pProp))
 	{
-		if (CZoneActor *pZoneActor = CZoneActor::SafeDownCast(pProp))
-		{
-			pBoxWidget->SetProp3D(pZoneActor);
-			pBoxWidget->PlaceWidget();
-			ASSERT(pZoneActor == pBoxWidget->GetProp3D());
-			pBoxWidget->On();
-		}
-		else if (CWellActor *pWellActor = CWellActor::SafeDownCast(pProp))
+		if (!pZoneActor->GetDefault() && this->BoxWidget)
 		{
 			// Reset BoxWidget
 			//
-			this->m_pPointWidget2->SetProp3D(pWellActor);
-			this->m_pPointWidget2->PlaceWidget();
-			ASSERT(pWellActor == this->m_pPointWidget2->GetProp3D());
-			this->m_pPointWidget2->On();
-
-			// Reset BoxWidget
-			pBoxWidget->Off();
-// COMMENT: {8/30/2004 3:28:11 PM}			pBoxWidget->SetProp3D(pWellActor);
-// COMMENT: {8/30/2004 3:28:11 PM}			pBoxWidget->PlaceWidget();
-// COMMENT: {8/30/2004 3:28:11 PM}			ASSERT(pWellActor == pBoxWidget->GetProp3D());
-// COMMENT: {8/30/2004 3:28:11 PM}			pBoxWidget->On();
-// COMMENT: {8/30/2004 3:28:11 PM}
-// COMMENT: {8/30/2004 3:28:11 PM}			this->m_pPointWidget2->Off();
-
+			this->BoxWidget->SetProp3D(pZoneActor);
+			this->BoxWidget->PlaceWidget();
+			this->BoxWidget->On();
 		}
-		else
+	}
+	else if (CWellActor *pWellActor = CWellActor::SafeDownCast(pProp))
+	{
+		if (this->PointWidget)
 		{
-			pBoxWidget->Off();
-			if (this->m_pPointWidget2) this->m_pPointWidget2->Off();
+			// Reset PointWidget
+			//
+			this->PointWidget->TranslationModeOff();
+			this->PointWidget->SetProp3D(pWellActor);
+			this->PointWidget->PlaceWidget();
+			ASSERT(pWellActor == this->PointWidget->GetProp3D());
+			this->PointWidget->TranslationModeOn();
+			this->PointWidget->On();
 		}
+	}
+	else if (CRiverActor *pRiverActor = CRiverActor::SafeDownCast(pProp))
+	{
+		pRiverActor->On();
+	}
+	else if (pProp)
+	{
+		ASSERT(FALSE); // unknown prop type
 	}
 }
 
 void CWPhastView::ClearSelection(void)
 {
 	this->Select(0);
-
-// COMMENT: {8/17/2004 7:30:58 PM}	if (vtkInteractorStyle *pStyle = vtkInteractorStyle::SafeDownCast(this->GetRenderWindowInteractor()->GetInteractorStyle()))
-// COMMENT: {8/17/2004 7:30:58 PM}	{
-// COMMENT: {8/17/2004 7:30:58 PM}		if (vtkInteractorStyleSwitch* switcher = vtkInteractorStyleSwitch::SafeDownCast(pStyle))
-// COMMENT: {8/17/2004 7:30:58 PM}		{
-// COMMENT: {8/17/2004 7:30:58 PM}			pStyle = switcher->GetCurrentStyle();
-// COMMENT: {8/17/2004 7:30:58 PM}		}
-// COMMENT: {8/17/2004 7:30:58 PM}		if (pStyle->GetInteractor())
-// COMMENT: {8/17/2004 7:30:58 PM}		{
-// COMMENT: {8/17/2004 7:30:58 PM}			pStyle->HighlightProp(0);
-// COMMENT: {8/17/2004 7:30:58 PM}		}
-// COMMENT: {8/17/2004 7:30:58 PM}		else
-// COMMENT: {8/17/2004 7:30:58 PM}		{
-// COMMENT: {8/17/2004 7:30:58 PM}			// HACK {{
-// COMMENT: {8/17/2004 7:30:58 PM}			// temporarily reattach interactor
-// COMMENT: {8/17/2004 7:30:58 PM}			// pStyle->HighlightProp will attempt to use its Interactor
-// COMMENT: {8/17/2004 7:30:58 PM}			// causing a fault
-// COMMENT: {8/17/2004 7:30:58 PM}			pStyle->SetInteractor(this->m_RenderWindowInteractor);
-// COMMENT: {8/17/2004 7:30:58 PM}			ASSERT(pStyle->GetInteractor() == this->m_RenderWindowInteractor);
-// COMMENT: {8/17/2004 7:30:58 PM}			pStyle->HighlightProp(0);
-// COMMENT: {8/17/2004 7:30:58 PM}			pStyle->SetInteractor(0);
-// COMMENT: {8/17/2004 7:30:58 PM}			// HACK }}
-// COMMENT: {8/17/2004 7:30:58 PM}		}
-// COMMENT: {8/17/2004 7:30:58 PM}	}
-// COMMENT: {8/17/2004 7:30:58 PM}	if (vtkAbstractPropPicker *pPicker = vtkAbstractPropPicker::SafeDownCast( this->GetRenderWindowInteractor()->GetPicker() ))
-// COMMENT: {8/17/2004 7:30:58 PM}	{
-// COMMENT: {8/17/2004 7:30:58 PM}		pPicker->SetPath(0);
-// COMMENT: {8/17/2004 7:30:58 PM}	}
-// COMMENT: {8/17/2004 7:30:58 PM}	if (vtkBoxWidget *pBoxWidget = this->GetBoxWidget())
-// COMMENT: {8/17/2004 7:30:58 PM}	{
-// COMMENT: {8/17/2004 7:30:58 PM}		pBoxWidget->Off();
-// COMMENT: {8/17/2004 7:30:58 PM}	}
 }
 
 void CWPhastView::ParallelProjectionOff(void)
@@ -1158,8 +1147,8 @@ void CWPhastView::StartNewWell(void)
 	//
 	// Note: This is reqd because the widget will 
 	// recieve all the mouse input
-	this->m_pBoxWidget->Off();
-	this->m_pPointWidget2->Off();
+	this->BoxWidget->Off();
+	this->PointWidget->Off();
 }
 
 void CWPhastView::CancelNewWell(void)
@@ -1309,63 +1298,76 @@ void CWPhastView::Update(IObserver* pSender, LPARAM lHint, CObject* /*pHint*/, v
 	case WPN_SELCHANGED:
 		if (vtkProp* pProp = vtkProp::SafeDownCast(pObject))
 		{
-			this->HighlightProp(pProp);
+// COMMENT: {9/7/2005 3:56:21 PM}			// hide zone widget
+// COMMENT: {9/7/2005 3:56:21 PM}			//
+// COMMENT: {9/7/2005 3:56:21 PM}			this->GetBoxWidget()->Off();
+// COMMENT: {9/7/2005 3:56:21 PM}
+// COMMENT: {9/7/2005 3:56:21 PM}			// hide well widget
+// COMMENT: {9/7/2005 3:56:21 PM}			//
+// COMMENT: {9/7/2005 3:56:21 PM}			this->PointWidget->Off();
+// COMMENT: {9/7/2005 3:56:21 PM}
+// COMMENT: {9/7/2005 3:56:21 PM}			//{{
+// COMMENT: {9/7/2005 3:56:21 PM}			// disable rivers
+// COMMENT: {9/7/2005 3:56:21 PM}			//
+// COMMENT: {9/7/2005 3:56:21 PM}			if (vtkPropCollection *pPropCollection = this->GetDocument()->GetPropAssemblyRivers()->GetParts())
+// COMMENT: {9/7/2005 3:56:21 PM}			{
+// COMMENT: {9/7/2005 3:56:21 PM}				vtkProp *pProp = 0;
+// COMMENT: {9/7/2005 3:56:21 PM}				pPropCollection->InitTraversal();
+// COMMENT: {9/7/2005 3:56:21 PM}				for (; (pProp = pPropCollection->GetNextProp()); )
+// COMMENT: {9/7/2005 3:56:21 PM}				{
+// COMMENT: {9/7/2005 3:56:21 PM}					if (CRiverActor *pRiverActor = CRiverActor::SafeDownCast(pProp))
+// COMMENT: {9/7/2005 3:56:21 PM}					{
+// COMMENT: {9/7/2005 3:56:21 PM}						pRiverActor->ClearSelection();
+// COMMENT: {9/7/2005 3:56:21 PM}						pRiverActor->SetEnabled(0);
+// COMMENT: {9/7/2005 3:56:21 PM}					}
+// COMMENT: {9/7/2005 3:56:21 PM}				}
+// COMMENT: {9/7/2005 3:56:21 PM}			}
+// COMMENT: {9/7/2005 3:56:21 PM}			//}}
 
-			if (CZoneActor *pZoneActor = CZoneActor::SafeDownCast(pProp))
-			{
-				ASSERT(FALSE); // untested
-				pZoneActor->Select(this);
-			}
-			else if (CWellActor *pWellActor = CWellActor::SafeDownCast(pProp))
-			{
-				//{{ TESTING
-				if (vtkAbstractPropPicker *picker = vtkAbstractPropPicker::SafeDownCast( this->GetRenderWindowInteractor()->GetPicker() )) {
-					vtkAssemblyPath *path = vtkAssemblyPath::New();
-					path->AddNode(pWellActor, pWellActor->GetMatrix());
-					picker->SetPath(path);
-					path->Delete();
-				}
-				//}} TESTING
+// COMMENT: {9/7/2005 3:57:33 PM}			// select prop
+// COMMENT: {9/7/2005 3:57:33 PM}			//
+// COMMENT: {9/7/2005 3:57:33 PM}			this->HighlightProp(pProp);
+// COMMENT: {9/7/2005 3:57:33 PM}			if (vtkAbstractPropPicker *picker = vtkAbstractPropPicker::SafeDownCast( this->GetRenderWindowInteractor()->GetPicker() ))
+// COMMENT: {9/7/2005 3:57:33 PM}			{
+// COMMENT: {9/7/2005 3:57:33 PM}				vtkAssemblyPath *path = vtkAssemblyPath::New();
+// COMMENT: {9/7/2005 3:57:33 PM}				path->AddNode(pProp, pProp->GetMatrix());
+// COMMENT: {9/7/2005 3:57:33 PM}				picker->SetPath(path);
+// COMMENT: {9/7/2005 3:57:33 PM}				path->Delete();
+// COMMENT: {9/7/2005 3:57:33 PM}			}
 
-				//{{
-				this->m_pPointWidget2->TranslationModeOff();
-				this->m_pPointWidget2->SetProp3D(pWellActor);
-				this->m_pPointWidget2->PlaceWidget();
-				ASSERT(pWellActor == this->m_pPointWidget2->GetProp3D());
-				this->m_pPointWidget2->TranslationModeOn();
-				this->m_pPointWidget2->On();
-
-				// Hide Zone BoxWidget
-				this->GetBoxWidget()->Off();
-// COMMENT: {8/30/2004 3:27:03 PM}				this->m_pBoxWidget->SetProp3D(pWellActor);
-// COMMENT: {8/30/2004 3:27:03 PM}				this->m_pBoxWidget->PlaceWidget();
-// COMMENT: {8/30/2004 3:27:03 PM}				this->m_pBoxWidget->On();
-
-				this->Invalidate(TRUE);
-				//}}
-			}
-			else if (CRiverActor *pRiverActor = CRiverActor::SafeDownCast(pProp))
-			{
-				//{{ TESTING
-				if (vtkAbstractPropPicker *picker = vtkAbstractPropPicker::SafeDownCast( this->GetRenderWindowInteractor()->GetPicker() )) {
-					vtkAssemblyPath *path = vtkAssemblyPath::New();
-					path->AddNode(pRiverActor, pRiverActor->GetMatrix());
-					picker->SetPath(path);
-					path->Delete();
-				}
-				//}} TESTING
-
-				// Hide Zone BoxWidget
-				this->GetBoxWidget()->Off();
-				this->m_pPointWidget2->Off();
-				pRiverActor->SetEnabled(1);
-
-				this->Invalidate(TRUE);
-			}			
-			else
-			{
-				ASSERT(FALSE); // untested
-			}
+// COMMENT: {9/7/2005 3:57:44 PM}			if (CZoneActor *pZoneActor = CZoneActor::SafeDownCast(pProp))
+// COMMENT: {9/7/2005 3:57:44 PM}			{
+// COMMENT: {9/7/2005 3:57:44 PM}				if (!pZoneActor->GetDefault())
+// COMMENT: {9/7/2005 3:57:44 PM}				{
+// COMMENT: {9/7/2005 3:57:44 PM}					// Reset BoxWidget
+// COMMENT: {9/7/2005 3:57:44 PM}					//
+// COMMENT: {9/7/2005 3:57:44 PM}					this->GetBoxWidget()->SetProp3D(pZoneActor);
+// COMMENT: {9/7/2005 3:57:44 PM}					this->GetBoxWidget()->PlaceWidget();
+// COMMENT: {9/7/2005 3:57:44 PM}					this->GetBoxWidget()->SetEnabled(1);
+// COMMENT: {9/7/2005 3:57:44 PM}				}
+// COMMENT: {9/7/2005 3:57:44 PM}			}
+// COMMENT: {9/7/2005 3:57:44 PM}			else if (CWellActor *pWellActor = CWellActor::SafeDownCast(pProp))
+// COMMENT: {9/7/2005 3:57:44 PM}			{
+// COMMENT: {9/7/2005 3:57:44 PM}				this->PointWidget->TranslationModeOff();
+// COMMENT: {9/7/2005 3:57:44 PM}				this->PointWidget->SetProp3D(pWellActor);
+// COMMENT: {9/7/2005 3:57:44 PM}				this->PointWidget->PlaceWidget();
+// COMMENT: {9/7/2005 3:57:44 PM}				ASSERT(pWellActor == this->PointWidget->GetProp3D());
+// COMMENT: {9/7/2005 3:57:44 PM}				this->PointWidget->TranslationModeOn();
+// COMMENT: {9/7/2005 3:57:44 PM}				this->PointWidget->On();
+// COMMENT: {9/7/2005 3:57:44 PM}			}
+// COMMENT: {9/7/2005 3:57:44 PM}			else if (CRiverActor *pRiverActor = CRiverActor::SafeDownCast(pProp))
+// COMMENT: {9/7/2005 3:57:44 PM}			{
+// COMMENT: {9/7/2005 3:57:44 PM}				pRiverActor->SetEnabled(1);
+// COMMENT: {9/7/2005 3:57:44 PM}			}			
+// COMMENT: {9/7/2005 3:57:44 PM}			else
+// COMMENT: {9/7/2005 3:57:44 PM}			{
+// COMMENT: {9/7/2005 3:57:44 PM}				ASSERT(FALSE); // untested
+// COMMENT: {9/7/2005 3:57:44 PM}			}
+			///{{{
+			this->Select(pProp);
+			///}}}
+			this->GetDocument()->UpdateAllViews(this);
+			///this->Invalidate(TRUE);
 		}
 		break;
 	case WPN_VISCHANGED:
@@ -1397,17 +1399,17 @@ void CWPhastView::Update(IObserver* pSender, LPARAM lHint, CObject* /*pHint*/, v
 		}		
 		break;
 	case WPN_SCALE_CHANGED:
-		if (this->m_pPointWidget2->GetEnabled())
+		if (this->PointWidget->GetEnabled())
 		{
-			if (vtkProp3D* pProp3D = this->m_pPointWidget2->GetProp3D())
+			if (vtkProp3D* pProp3D = this->PointWidget->GetProp3D())
 			{
-				this->m_pPointWidget2->TranslationModeOff();
-				this->m_pPointWidget2->SetProp3D(0);
-				this->m_pPointWidget2->SetProp3D(pProp3D);
-				this->m_pPointWidget2->PlaceWidget();
-				ASSERT(pProp3D == this->m_pPointWidget2->GetProp3D());
-				this->m_pPointWidget2->TranslationModeOn();
-				this->m_pPointWidget2->On();
+				this->PointWidget->TranslationModeOff();
+				this->PointWidget->SetProp3D(0);
+				this->PointWidget->SetProp3D(pProp3D);
+				this->PointWidget->PlaceWidget();
+				ASSERT(pProp3D == this->PointWidget->GetProp3D());
+				this->PointWidget->TranslationModeOn();
+				this->PointWidget->On();
 			}
 		}
 		break;
@@ -1502,8 +1504,8 @@ void CWPhastView::StartNewRiver(void)
 	// Note: This is reqd because the widget will 
 	// recieve all the mouse input
 	this->GetDocument()->ClearSelection();
-	this->m_pBoxWidget->Off();
-	this->m_pPointWidget2->Off();
+	this->BoxWidget->Off();
+	this->PointWidget->Off();
 }
 
 void CWPhastView::EndNewRiver(void)

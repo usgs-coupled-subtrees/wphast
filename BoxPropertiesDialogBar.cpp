@@ -104,7 +104,14 @@ void CBoxPropertiesDialogBar::Update(IObserver* pSender, LPARAM lHint, CObject* 
 		{
 			if (CZoneActor* pZoneActor = CZoneActor::SafeDownCast(pProp))
 			{
-				ASSERT(FALSE); // untested
+				CFrameWnd *pFrame = reinterpret_cast<CFrameWnd*>(AfxGetApp()->m_pMainWnd);
+				ASSERT_KINDOF(CFrameWnd, pFrame);
+				ASSERT_VALID(pFrame);
+
+				CWPhastView* pView = reinterpret_cast<CWPhastView*>(pFrame->GetActiveView());
+				ASSERT_KINDOF(CWPhastView, pView);
+				ASSERT_VALID(pView);
+				this->Set(pView, pZoneActor, pView->GetDocument()->GetUnits());
 			}
 			else if (CWellActor* pWellActor = CWellActor::SafeDownCast(pProp))
 			{
@@ -114,10 +121,14 @@ void CBoxPropertiesDialogBar::Update(IObserver* pSender, LPARAM lHint, CObject* 
 			else if (CRiverActor* pWellActor = CRiverActor::SafeDownCast(pProp))
 			{
 				TRACE("TODO\n");
+				CUnits units;
+				this->Set(0, 0, units);
 			}
 			else
 			{
 				ASSERT(FALSE); // untested
+				CUnits units;
+				this->Set(0, 0, units);
 			}
 		}
 		break;
@@ -233,7 +244,8 @@ void CBoxPropertiesDialogBar::DoDataExchange(CDataExchange* pDX)
 
 
 	CSizingDialogBarCFVS7::DoDataExchange(pDX);
-	if (!pDX->m_bSaveAndValidate) {
+	if (!pDX->m_bSaveAndValidate) 
+	{
 		this->m_bNeedsUpdate = false;
 		this->GetDlgItem(IDC_APPLY)->EnableWindow(FALSE);
 	}
@@ -241,8 +253,10 @@ void CBoxPropertiesDialogBar::DoDataExchange(CDataExchange* pDX)
 
 void CBoxPropertiesDialogBar::OnBnClickedApply()
 {
-	if (vtkProp3D* pProp3D = this->m_pProp3D) {
-		if (this->UpdateData(TRUE)) {
+	if (vtkProp3D* pProp3D = this->m_pProp3D)
+	{
+		if (this->UpdateData(TRUE))
+		{
             ASSERT(this->m_pView);
 			CAction* pAction = NULL;
 			switch (this->m_nType)
@@ -275,7 +289,8 @@ void CBoxPropertiesDialogBar::OnBnClickedApply()
 				ASSERT(FALSE);
 				break;
 			}
-			if (pAction && this->m_pView) {
+			if (pAction && this->m_pView)
+			{
 				this->m_pView->GetDocument()->Execute(pAction);
 			}
 		}

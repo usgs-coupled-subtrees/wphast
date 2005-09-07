@@ -153,57 +153,48 @@ void CPropertyTreeControlBar::OnSelChanged(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 	NMTREEVIEW *pNMTREEVIEW = (LPNMTREEVIEW)pNMHDR;
 	CTreeCtrlNode item(pNMTREEVIEW->itemNew.hItem, this->GetTreeCtrlEx());
 
-	// MEDIA
-	//
-	if (item.IsNodeAncestor(this->m_nodeMedia))
-	{
-		if (item != this->m_nodeMedia)
-		{
-			while (item.GetParent() != this->m_nodeMedia)
-			{
-				item = item.GetParent();
-				if (!item) break;
-			}
-			if (item.GetData())
-			{
-				if (CZoneActor* pZone = CZoneActor::SafeDownCast((vtkObject*)item.GetData()))
-				{
+// COMMENT: {9/7/2005 2:50:52 PM}	// MEDIA
+// COMMENT: {9/7/2005 2:50:52 PM}	//
+// COMMENT: {9/7/2005 2:50:52 PM}	if (item.IsNodeAncestor(this->m_nodeMedia))
+// COMMENT: {9/7/2005 2:50:52 PM}	{
+// COMMENT: {9/7/2005 2:50:52 PM}		if (item != this->m_nodeMedia)
+// COMMENT: {9/7/2005 2:50:52 PM}		{
+// COMMENT: {9/7/2005 2:50:52 PM}			while (item.GetParent() != this->m_nodeMedia)
+// COMMENT: {9/7/2005 2:50:52 PM}			{
+// COMMENT: {9/7/2005 2:50:52 PM}				item = item.GetParent();
+// COMMENT: {9/7/2005 2:50:52 PM}				if (!item) break;
+// COMMENT: {9/7/2005 2:50:52 PM}			}
+// COMMENT: {9/7/2005 2:50:52 PM}			if (item.GetData())
+// COMMENT: {9/7/2005 2:50:52 PM}			{
+// COMMENT: {9/7/2005 2:50:52 PM}				if (CZoneActor* pZone = CZoneActor::SafeDownCast((vtkObject*)item.GetData()))
+// COMMENT: {9/7/2005 2:50:52 PM}				{
+// COMMENT: {9/7/2005 2:50:52 PM}
+// COMMENT: {9/7/2005 2:50:52 PM}					CFrameWnd *pFrame = reinterpret_cast<CFrameWnd*>(AfxGetApp()->m_pMainWnd);
+// COMMENT: {9/7/2005 2:50:52 PM}					ASSERT_KINDOF(CFrameWnd, pFrame);
+// COMMENT: {9/7/2005 2:50:52 PM}					ASSERT_VALID(pFrame);
+// COMMENT: {9/7/2005 2:50:52 PM}
+// COMMENT: {9/7/2005 2:50:52 PM}					CWPhastView* pView = reinterpret_cast<CWPhastView*>(pFrame->GetActiveView());
+// COMMENT: {9/7/2005 2:50:52 PM}					ASSERT_KINDOF(CWPhastView, pView);
+// COMMENT: {9/7/2005 2:50:52 PM}					ASSERT_VALID(pView);
+// COMMENT: {9/7/2005 2:50:52 PM}
+// COMMENT: {9/7/2005 2:50:52 PM}					pZone->Select(pView);
+// COMMENT: {9/7/2005 2:50:52 PM}				}
+// COMMENT: {9/7/2005 2:50:52 PM}			}
+// COMMENT: {9/7/2005 2:50:52 PM}		}
+// COMMENT: {9/7/2005 2:50:52 PM}		//{{
+// COMMENT: {9/7/2005 2:50:52 PM}		else
+// COMMENT: {9/7/2005 2:50:52 PM}		{
+// COMMENT: {9/7/2005 2:50:52 PM}            if (CWPhastDoc *pDoc = this->GetDocument())
+// COMMENT: {9/7/2005 2:50:52 PM}			{
+// COMMENT: {9/7/2005 2:50:52 PM}				pDoc->ClearSelection();
+// COMMENT: {9/7/2005 2:50:52 PM}			}
+// COMMENT: {9/7/2005 2:50:52 PM}		}
+// COMMENT: {9/7/2005 2:50:52 PM}		//}}
+// COMMENT: {9/7/2005 2:50:52 PM}		return;
+// COMMENT: {9/7/2005 2:50:52 PM}	}
 
-					CFrameWnd *pFrame = reinterpret_cast<CFrameWnd*>(AfxGetApp()->m_pMainWnd);
-					ASSERT_KINDOF(CFrameWnd, pFrame);
-					ASSERT_VALID(pFrame);
-
-					CWPhastView* pView = reinterpret_cast<CWPhastView*>(pFrame->GetActiveView());
-					ASSERT_KINDOF(CWPhastView, pView);
-					ASSERT_VALID(pView);
-
-					pZone->Select(pView);
-				}
-			}
-		}
-		//{{
-		else
-		{
-            if (CWPhastDoc *pDoc = this->GetDocument()) {
-				pDoc->ClearSelection();
-			}
-		}
-		//}}
-		return;
-	}
-
-	///{{{{{
 	// Rivers
 	//
-	CTreeCtrlNode child = this->GetRiversNode().GetChild();
-	for (; child; child = child.GetNextSibling())
-	{
-		if (CRiverActor *pActor = CRiverActor::SafeDownCast(reinterpret_cast<vtkObject*>(child.GetData())))
-		{
-			pActor->ClearSelection();
-			pActor->SetEnabled(0);
-		}
-	}
 	if (item.IsNodeAncestor(this->GetRiversNode()) && item != this->GetRiversNode())
 	{
 		if ((item != this->GetRiversNode()) && (item.GetParent() != this->GetRiversNode()))
@@ -239,19 +230,26 @@ void CPropertyTreeControlBar::OnSelChanged(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 
 			CZoneActor* pZone = reinterpret_cast<CZoneActor*>(m_wndTree.GetItemData(pNMTREEVIEW->itemNew.hItem));
 
-			CFrameWnd *pFrame = reinterpret_cast<CFrameWnd*>(AfxGetApp()->m_pMainWnd);
-			ASSERT_KINDOF(CFrameWnd, pFrame);
-			ASSERT_VALID(pFrame);
+// COMMENT: {9/7/2005 2:23:14 PM}			CFrameWnd *pFrame = reinterpret_cast<CFrameWnd*>(AfxGetApp()->m_pMainWnd);
+// COMMENT: {9/7/2005 2:23:14 PM}			ASSERT_KINDOF(CFrameWnd, pFrame);
+// COMMENT: {9/7/2005 2:23:14 PM}			ASSERT_VALID(pFrame);
+// COMMENT: {9/7/2005 2:23:14 PM}
+// COMMENT: {9/7/2005 2:23:14 PM}			CWPhastDoc* pDoc = reinterpret_cast<CWPhastDoc*>(pFrame->GetActiveDocument());
+// COMMENT: {9/7/2005 2:23:14 PM}			ASSERT_KINDOF(CWPhastDoc, pDoc);
+// COMMENT: {9/7/2005 2:23:14 PM}			ASSERT_VALID(pDoc);
+// COMMENT: {9/7/2005 2:23:14 PM}
+// COMMENT: {9/7/2005 2:23:14 PM}			CWPhastView* pView = reinterpret_cast<CWPhastView*>(pFrame->GetActiveView());
+// COMMENT: {9/7/2005 2:23:14 PM}			ASSERT_KINDOF(CWPhastView, pView);
+// COMMENT: {9/7/2005 2:23:14 PM}			ASSERT_VALID(pView);
+// COMMENT: {9/7/2005 2:23:14 PM}
+// COMMENT: {9/7/2005 2:23:14 PM}			pZone->Select(pView);
 
-			CWPhastDoc* pDoc = reinterpret_cast<CWPhastDoc*>(pFrame->GetActiveDocument());
-			ASSERT_KINDOF(CWPhastDoc, pDoc);
-			ASSERT_VALID(pDoc);
-
-			CWPhastView* pView = reinterpret_cast<CWPhastView*>(pFrame->GetActiveView());
-			ASSERT_KINDOF(CWPhastView, pView);
-			ASSERT_VALID(pView);
-
-			pZone->Select(pView);
+			//{{
+			if (CWPhastDoc* pDoc = this->GetDocument())
+			{
+				pDoc->Notify(this, WPN_SELCHANGED, 0, pZone);
+			}
+			//}}
 		}
 		else if (hParent == this->m_nodeWells)
 		{
@@ -282,7 +280,8 @@ void CPropertyTreeControlBar::OnSelChanged(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 		}
 		else
 		{
-			if (CWPhastDoc *pDoc = this->GetDocument()) {
+			if (CWPhastDoc *pDoc = this->GetDocument())
+			{
 				pDoc->ClearSelection();
 			}
 
@@ -299,7 +298,8 @@ void CPropertyTreeControlBar::OnSelChanged(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 	else
 	{
 		//if (pNMTREEVIEW->itemNew.hItem == this->m_nodeMedia || pNMTREEVIEW->itemNew.hItem == this->m_nodeBC || pNMTREEVIEW->itemNew.hItem == this->m_nodeIC) {
-            if (CWPhastDoc *pDoc = this->GetDocument()) {
+            if (CWPhastDoc *pDoc = this->GetDocument())
+			{
 				pDoc->ClearSelection();
 			}
 		//}
@@ -1694,11 +1694,71 @@ void CPropertyTreeControlBar::Update(IObserver* pSender, LPARAM lHint, CObject* 
 		TRACE("WARNING unexpected\n");
 		break;
 	case WPN_SELCHANGED:
+		this->m_bSelectingProp = TRUE;
 		if (vtkProp* pProp = vtkProp::SafeDownCast(pObject))
 		{
+// COMMENT: {9/7/2005 3:31:04 PM}			//{{
+// COMMENT: {9/7/2005 3:31:04 PM}			// Clear river selections
+// COMMENT: {9/7/2005 3:31:04 PM}			//
+// COMMENT: {9/7/2005 3:31:04 PM}			CTreeCtrlNode child = this->GetRiversNode().GetChild();
+// COMMENT: {9/7/2005 3:31:04 PM}			for (; child; child = child.GetNextSibling())
+// COMMENT: {9/7/2005 3:31:04 PM}			{
+// COMMENT: {9/7/2005 3:31:04 PM}				if (CRiverActor *pActor = CRiverActor::SafeDownCast(reinterpret_cast<vtkObject*>(child.GetData())))
+// COMMENT: {9/7/2005 3:31:04 PM}				{
+// COMMENT: {9/7/2005 3:31:04 PM}					pActor->ClearSelection();
+// COMMENT: {9/7/2005 3:31:04 PM}					pActor->SetEnabled(0);
+// COMMENT: {9/7/2005 3:31:04 PM}				}
+// COMMENT: {9/7/2005 3:31:04 PM}			}
+// COMMENT: {9/7/2005 3:31:04 PM}			//}}
 			if (CZoneActor* pZoneActor = CZoneActor::SafeDownCast(pProp))
 			{
-				ASSERT(FALSE); // untested
+				bool bFound = false;
+				CTreeCtrlNode parent = this->GetMediaNode();
+				for (int i = 0; !bFound && i < parent.GetChildCount(); ++i)
+				{
+					CTreeCtrlNode node = parent.GetChildAt(i);
+					if (node.GetData())
+					{
+						CZoneActor *pZoneActor = (CZoneActor*)node.GetData();
+						if (pZoneActor == pObject)
+						{
+							node.Select();
+							bFound = true;
+							break;
+						}
+					}
+				}
+				parent = this->GetBCNode();
+				for (int i = 0; !bFound && i < parent.GetChildCount(); ++i)
+				{
+					CTreeCtrlNode node = parent.GetChildAt(i);
+					if (node.GetData())
+					{
+						CZoneActor *pZoneActor = (CZoneActor*)node.GetData();
+						if (pZoneActor == pObject)
+						{
+							node.Select();
+							bFound = true;
+							break;
+						}
+					}
+				}
+				parent = this->GetICNode();
+				for (int i = 0; !bFound && i < parent.GetChildCount(); ++i)
+				{
+					CTreeCtrlNode node = parent.GetChildAt(i);
+					if (node.GetData())
+					{
+						CZoneActor *pZoneActor = (CZoneActor*)node.GetData();
+						if (pZoneActor == pObject)
+						{
+							node.Select();
+							bFound = true;
+							break;
+						}
+					}
+				}
+				ASSERT(bFound);
 			}
 			else if (CWellActor* pWellActor = CWellActor::SafeDownCast(pProp))
 			{
@@ -1747,6 +1807,7 @@ void CPropertyTreeControlBar::Update(IObserver* pSender, LPARAM lHint, CObject* 
 				ASSERT(FALSE); // untested
 			}
 		}
+		this->m_bSelectingProp = FALSE;
 		break;
 
 	case WPN_VISCHANGED:

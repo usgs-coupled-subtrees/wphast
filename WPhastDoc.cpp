@@ -4253,6 +4253,12 @@ void CWPhastDoc::UnRemove(CWellActor *pWellActor)
 	this->UpdateAllViews(0);
 }
 
+void CWPhastDoc::Select(CZoneActor *pZoneActor)
+{	
+	ASSERT(pZoneActor && pZoneActor->IsA("CZoneActor"));
+	this->Notify(0, WPN_SELCHANGED, 0, pZoneActor);
+}
+
 void CWPhastDoc::Select(CWellActor *pWellActor)
 {	
 	ASSERT(pWellActor && pWellActor->IsA("CWellActor"));

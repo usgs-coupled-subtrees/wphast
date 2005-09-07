@@ -73,8 +73,8 @@ protected:
 	vtkRenderer                    *m_Renderer;
 	vtkWin32RenderWindowInteractor *m_RenderWindowInteractor;
 
-	vtkBoxWidget                   *m_pBoxWidget;
-	vtkPointWidget2                *m_pPointWidget2;
+	vtkBoxWidget                   *BoxWidget;
+	vtkPointWidget2                *PointWidget;
 
 	CViewVTKCommand                *m_pViewVTKCommand;
 
@@ -118,7 +118,7 @@ public:
 
 	vtkRenderer* GetRenderer(void) const {return this->m_Renderer;}
 	vtkWin32RenderWindowInteractor* GetRenderWindowInteractor(void) const {return this->m_RenderWindowInteractor;}
-	vtkBoxWidget *GetBoxWidget (void)const {return this->m_pBoxWidget;}
+	vtkBoxWidget *GetBoxWidget (void)const {return this->BoxWidget;}
 
 protected:
 	virtual LRESULT WindowProc(UINT message, WPARAM wParam, LPARAM lParam);

@@ -118,6 +118,7 @@ public:
 	void UnAdd(CZoneActor *pZoneActor);
 	void Delete(CZoneActor *pZoneActor);
 	void UnDelete(CZoneActor *pZoneActor);
+	void Select(CZoneActor *pZoneActor);
 
 	void Edit(CGridActor* pGridActor);
 	void ModifyGrid(CGridActor* gridActor, CGridElementsSelector* gridElementsSelector);

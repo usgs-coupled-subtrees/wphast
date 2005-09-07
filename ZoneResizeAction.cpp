@@ -97,8 +97,10 @@ void CZoneResizeAction::Execute(void)
 	///CGlobal::PickProp(this->m_pView, this->m_pZone);
 // COMMENT: {11/3/2004 3:32:40 PM}	this->m_pZone->Select(this->m_pView);
 	//this->m_pZone->Select(this->m_pView);
-	this->m_pView->GetBoxWidget()->SetProp3D(this->m_pZone);
-	this->m_pView->GetBoxWidget()->PlaceWidget();
+// COMMENT: {9/7/2005 2:16:53 PM}	this->m_pView->GetBoxWidget()->SetProp3D(this->m_pZone);
+// COMMENT: {9/7/2005 2:16:53 PM}	this->m_pView->GetBoxWidget()->PlaceWidget();
+	this->m_pView->GetDocument()->Select(this->m_pZone);
+
 
 	////{{{{Should be handled by pick
 
@@ -158,7 +160,8 @@ void CZoneResizeAction::UnExecute(void)
 	// set selection bounding box
 	//
 	///CGlobal::PickProp(this->m_pZone, this->m_pView->GetRenderer(), this->m_pView->GetRenderWindowInteractor());
-	this->m_pZone->Select(this->m_pView);
+// COMMENT: {9/7/2005 2:17:52 PM}	this->m_pZone->Select(this->m_pView);
+	this->m_pView->GetDocument()->Select(this->m_pZone);
 
 
 	////{{{{Should be handled by pick

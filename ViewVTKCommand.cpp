@@ -181,6 +181,7 @@ void CViewVTKCommand::OnEndPickEvent(vtkObject* caller, void* callData)
 				TRACE("\n");
 				afxDump << "vtkAssemblyPath{{\n" << oss.str() << "vtkAssemblyPath}}\n";
 				oss.rdbuf()->freeze(false); // this must be called after str() to avoid memory leak
+#endif
 
 				ASSERT(path->GetFirstNode()->GetProp()->IsA("vtkPropAssembly"));
 
@@ -212,9 +213,10 @@ void CViewVTKCommand::OnEndPickEvent(vtkObject* caller, void* callData)
 
 					// check if zone
 					//
-					if (CZoneActor *pZone = CZoneActor::SafeDownCast(path->GetLastNode()->GetProp()))
+					if (CZoneActor *pZoneActor = CZoneActor::SafeDownCast(path->GetLastNode()->GetProp()))
 					{
-						pZone->Select(this->m_pView);
+						///pZone->Select(this->m_pView);
+						this->m_pView->GetDocument()->Select(pZoneActor);
 					}
 
 					// check if well
@@ -226,7 +228,6 @@ void CViewVTKCommand::OnEndPickEvent(vtkObject* caller, void* callData)
 
 				}
 			}
-#endif
 
 #ifdef _DEBUG
 			int* xy = this->m_pView->GetRenderWindowInteractor()->GetEventPosition();
