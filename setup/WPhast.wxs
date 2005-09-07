@@ -150,6 +150,7 @@
                 <Component Id='C__ex2' Guid='81D8FC72-1E6E-4545-9DB3-4F234D220B91' DiskId="1">
                   <File Id="F__ex2.chem.dat"  Name="EX2CHE~1.DAT" LongName="ex2.chem.dat" src="C:\cygwin\home\charlton\programs\WPhast\setup\tree\USGS\WPhast 0.0\examples\ex2\ex2.chem.dat" />
                   <File Id="F__ex2.trans.dat" Name="EX2TRA~1.DAT" LongName="ex2.trans.dat" src="C:\cygwin\home\charlton\programs\WPhast\setup\tree\USGS\WPhast 0.0\examples\ex2\ex2.trans.dat" />
+                  <File Id="F__ex2.wphast" Name="EX2~1.WPH" LongName="ex2.wphast" src="C:\cygwin\home\charlton\programs\WPhast\setup\tree\USGS\WPhast 0.0\examples\ex2\ex2.wphast" />
                   <File Id="F__phast.dat.ex2" Name="phast.dat" src="C:\cygwin\home\charlton\programs\WPhast\setup\tree\USGS\WPhast 0.0\examples\ex2\phast.dat" />
                 </Component>
               </Directory>
