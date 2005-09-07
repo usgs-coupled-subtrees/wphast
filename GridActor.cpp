@@ -6,8 +6,6 @@
 #include <vtkPolyDataMapper.h>
 #include <vtkObjectFactory.h>
 
-//#include <vtkPointPicker.h>
-
 #include <vtkFloatArray.h>
 #include <vtkMath.h>
 #include <vtkPointData.h>
@@ -461,7 +459,7 @@ void CGridActor::Setup(const CUnits& units)
 	this->UnitsTransform->Identity();
 	this->UnitsTransform->Scale(units.horizontal.input_to_si, units.horizontal.input_to_si, units.vertical.input_to_si);
 
-	register int i;
+	int i;
 	double inc[3];
 	double min[3];
 	for (i = 0; i < 3; ++i)
@@ -495,7 +493,7 @@ void CGridActor::Setup(const CUnits& units)
 	this->ValueToIndex[2].clear();
 	vtkFloatingPointType x[3];
 	vtkFloatingPointType t[3];
-	register int j, k, offset, jOffset, kOffset;
+	int j, k, offset, jOffset, kOffset;
 	for (k = 0; k < this->m_gridKeyword.m_grid[2].count_coord; ++k)
 	{
 		if (this->m_gridKeyword.m_grid[2].uniform)
@@ -1146,7 +1144,7 @@ void CGridActor::OnEndInteraction(void)
 			memento.Uniform = this->m_gridKeyword.m_grid[this->AxisIndex].uniform;
 			if (bMoving)
 			{
-				ASSERT(this->DeleteLine(this->AxisIndex, originalPlaneIndex));
+				VERIFY(this->DeleteLine(this->AxisIndex, originalPlaneIndex));
 			}
 			double value = this->PlaneWidget->GetOrigin()[this->AxisIndex] / this->GetScale()[this->AxisIndex];
 			this->PlaneIndex = this->InsertLine(this->AxisIndex, value);
