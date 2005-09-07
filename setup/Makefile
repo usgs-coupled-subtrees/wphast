@@ -8,6 +8,8 @@ LIGHT = light
 LIGHT_FLAGS=\
 	-nologo
 
+CSCRIPT = cscript
+
 MERGE_DIR="C:\Program Files\Common Files\Merge Modules"
 
 MSIVAL2=/cygdrive/c/Program\ Files/MsiVal2/msival2
@@ -67,3 +69,6 @@ uninstall :
 
 check : WPhast.msi
 	$(MSIVAL2) WPhast.msi 'C:\Program Files\MsiVal2\logo.cub' -f
+
+import : ../AutoRelease/WPhast.exe
+	$(CSCRIPT) /NOLOGO import_files.vbs
