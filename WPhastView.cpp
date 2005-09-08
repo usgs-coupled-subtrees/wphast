@@ -109,6 +109,8 @@ BEGIN_MESSAGE_MAP(CWPhastView, CView)
 // COMMENT: {8/29/2005 6:46:54 PM}	ON_UPDATE_COMMAND_UI(ID_TOOLS_MODIFYGRID, OnUpdateToolsModifyGrid)
 // COMMENT: {8/29/2005 6:46:54 PM}	ON_COMMAND(ID_TOOLS_MODIFYGRID, OnToolsModifyGrid)
 ON_COMMAND(ID_VIEW_FROM_PREV_DIRECTION, OnViewFromPrevDirection)
+ON_UPDATE_COMMAND_UI(ID_TOOLS_SELECTOBJECT, OnUpdateToolsSelectObject)
+ON_COMMAND(ID_TOOLS_SELECTOBJECT, OnToolsSelectObject)
 END_MESSAGE_MAP()
 
 // CWPhastView construction/destruction
@@ -146,8 +148,8 @@ CWPhastView::CWPhastView()
 	///this->PointWidget->TranslationModeOn();
 
 	//
-	this->m_pInteractorStyle = vtkInteractorStyleTrackballCameraEx::New();
-	this->m_RenderWindowInteractor->SetInteractorStyle(this->m_pInteractorStyle);
+	this->InteractorStyle = vtkInteractorStyleTrackballCameraEx::New();
+	this->m_RenderWindowInteractor->SetInteractorStyle(this->InteractorStyle);
 
 	// picker
 	vtkPropPickerFixed* picker = vtkPropPickerFixed::New();
@@ -204,7 +206,7 @@ CWPhastView::CWPhastView()
 
 CWPhastView::~CWPhastView()
 {
-	this->m_pInteractorStyle->Delete();
+	this->InteractorStyle->Delete();
 	this->BoxWidget->Delete();
 	this->PointWidget->Delete();
 
@@ -699,7 +701,7 @@ void CWPhastView::StartNewZone(void)
 
 	// Disable Interactor
 	//
-	if (vtkInteractorStyle* style = vtkInteractorStyle::SafeDownCast(this->m_pInteractorStyle))
+	if (vtkInteractorStyle* style = vtkInteractorStyle::SafeDownCast(this->InteractorStyle))
 	{
 		if (vtkInteractorStyleSwitch* switcher = vtkInteractorStyleSwitch::SafeDownCast(style))
 		{
@@ -739,7 +741,7 @@ void CWPhastView::EndNewZone(void)
 
 	// reattach interactor
 	//
-	if (vtkInteractorStyle* style = vtkInteractorStyle::SafeDownCast(this->m_pInteractorStyle))
+	if (vtkInteractorStyle* style = vtkInteractorStyle::SafeDownCast(this->InteractorStyle))
 	{
 		if (vtkInteractorStyleSwitch* switcher = vtkInteractorStyleSwitch::SafeDownCast(style))
 		{
@@ -764,6 +766,21 @@ void CWPhastView::EndNewZone(void)
 
 BOOL CWPhastView::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 {
+	if (vtkInteractorStyleTrackballCameraEx *style = vtkInteractorStyleTrackballCameraEx::SafeDownCast(this->InteractorStyle))
+	{
+		if (style->GetPickWithMouse())
+		{
+			::SetCursor(AfxGetApp()->LoadCursor(IDC_3DGARROW));
+			return TRUE;
+		}
+	}	
+
+	if (this->CreatingNewWell() || this->CreatingNewRiver())
+	{
+		::SetCursor(AfxGetApp()->LoadCursor(IDC_NULL));
+		return TRUE;
+	}
+
 	// set real-time pan cursor
 	//
 	if (::GetAsyncKeyState(VK_MBUTTON) < 0)
@@ -785,11 +802,11 @@ BOOL CWPhastView::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 		return TRUE;
 	}
 
-	if (this->CreatingNewRiver() && nHitTest == HTCLIENT)
-	{
-		::SetCursor(AfxGetApp()->LoadCursor(IDC_NULL));
-		return TRUE;
-	}
+// COMMENT: {9/7/2005 4:29:33 PM}	if (this->CreatingNewRiver() && nHitTest == HTCLIENT)
+// COMMENT: {9/7/2005 4:29:33 PM}	{
+// COMMENT: {9/7/2005 4:29:33 PM}		::SetCursor(AfxGetApp()->LoadCursor(IDC_NULL));
+// COMMENT: {9/7/2005 4:29:33 PM}		return TRUE;
+// COMMENT: {9/7/2005 4:29:33 PM}	}
 
 	if (this->m_bMovingGridLine && nHitTest == HTCLIENT)
 	{
@@ -1086,6 +1103,10 @@ void CWPhastView::Select(vtkProp *pProp)
 	{
 		ASSERT(FALSE); // unknown prop type
 	}
+
+	// redraw windows
+	//
+	this->GetDocument()->UpdateAllViews(this);
 }
 
 void CWPhastView::ClearSelection(void)
@@ -1095,8 +1116,10 @@ void CWPhastView::ClearSelection(void)
 
 void CWPhastView::ParallelProjectionOff(void)
 {
-	if (vtkRenderer *renderer = this->GetRenderer()) {
-		if (vtkCamera *camera = renderer->GetActiveCamera()) {
+	if (vtkRenderer *renderer = this->GetRenderer())
+	{
+		if (vtkCamera *camera = renderer->GetActiveCamera())
+		{
 			camera->ParallelProjectionOff();
 		}
 	}
@@ -1104,8 +1127,10 @@ void CWPhastView::ParallelProjectionOff(void)
 
 void CWPhastView::ParallelProjectionOn(void)
 {
-	if (vtkRenderer *renderer = this->GetRenderer()) {
-		if (vtkCamera *camera = renderer->GetActiveCamera()) {
+	if (vtkRenderer *renderer = this->GetRenderer())
+	{
+		if (vtkCamera *camera = renderer->GetActiveCamera())
+		{
 			camera->ParallelProjectionOn();
 		}
 	}
@@ -1136,8 +1161,10 @@ void CWPhastView::StartNewWell(void)
 
 	// Disable Interactor
 	//
-	if (vtkInteractorStyle* style = vtkInteractorStyle::SafeDownCast(this->m_pInteractorStyle)) {
-		if (vtkInteractorStyleSwitch* switcher = vtkInteractorStyleSwitch::SafeDownCast(style)) {
+	if (vtkInteractorStyle* style = vtkInteractorStyle::SafeDownCast(this->InteractorStyle))
+	{
+		if (vtkInteractorStyleSwitch* switcher = vtkInteractorStyleSwitch::SafeDownCast(style))
+		{
 			style = switcher->GetCurrentStyle();
 		}
 		style->SetInteractor(0);
@@ -1167,7 +1194,7 @@ void CWPhastView::EndNewWell(void)
 
 	// reattach interactor
 	//
-	if (vtkInteractorStyle* style = vtkInteractorStyle::SafeDownCast(this->m_pInteractorStyle)) {
+	if (vtkInteractorStyle* style = vtkInteractorStyle::SafeDownCast(this->InteractorStyle)) {
 		if (vtkInteractorStyleSwitch* switcher = vtkInteractorStyleSwitch::SafeDownCast(style)) {
 			style = switcher->GetCurrentStyle();
 		}
@@ -1298,76 +1325,7 @@ void CWPhastView::Update(IObserver* pSender, LPARAM lHint, CObject* /*pHint*/, v
 	case WPN_SELCHANGED:
 		if (vtkProp* pProp = vtkProp::SafeDownCast(pObject))
 		{
-// COMMENT: {9/7/2005 3:56:21 PM}			// hide zone widget
-// COMMENT: {9/7/2005 3:56:21 PM}			//
-// COMMENT: {9/7/2005 3:56:21 PM}			this->GetBoxWidget()->Off();
-// COMMENT: {9/7/2005 3:56:21 PM}
-// COMMENT: {9/7/2005 3:56:21 PM}			// hide well widget
-// COMMENT: {9/7/2005 3:56:21 PM}			//
-// COMMENT: {9/7/2005 3:56:21 PM}			this->PointWidget->Off();
-// COMMENT: {9/7/2005 3:56:21 PM}
-// COMMENT: {9/7/2005 3:56:21 PM}			//{{
-// COMMENT: {9/7/2005 3:56:21 PM}			// disable rivers
-// COMMENT: {9/7/2005 3:56:21 PM}			//
-// COMMENT: {9/7/2005 3:56:21 PM}			if (vtkPropCollection *pPropCollection = this->GetDocument()->GetPropAssemblyRivers()->GetParts())
-// COMMENT: {9/7/2005 3:56:21 PM}			{
-// COMMENT: {9/7/2005 3:56:21 PM}				vtkProp *pProp = 0;
-// COMMENT: {9/7/2005 3:56:21 PM}				pPropCollection->InitTraversal();
-// COMMENT: {9/7/2005 3:56:21 PM}				for (; (pProp = pPropCollection->GetNextProp()); )
-// COMMENT: {9/7/2005 3:56:21 PM}				{
-// COMMENT: {9/7/2005 3:56:21 PM}					if (CRiverActor *pRiverActor = CRiverActor::SafeDownCast(pProp))
-// COMMENT: {9/7/2005 3:56:21 PM}					{
-// COMMENT: {9/7/2005 3:56:21 PM}						pRiverActor->ClearSelection();
-// COMMENT: {9/7/2005 3:56:21 PM}						pRiverActor->SetEnabled(0);
-// COMMENT: {9/7/2005 3:56:21 PM}					}
-// COMMENT: {9/7/2005 3:56:21 PM}				}
-// COMMENT: {9/7/2005 3:56:21 PM}			}
-// COMMENT: {9/7/2005 3:56:21 PM}			//}}
-
-// COMMENT: {9/7/2005 3:57:33 PM}			// select prop
-// COMMENT: {9/7/2005 3:57:33 PM}			//
-// COMMENT: {9/7/2005 3:57:33 PM}			this->HighlightProp(pProp);
-// COMMENT: {9/7/2005 3:57:33 PM}			if (vtkAbstractPropPicker *picker = vtkAbstractPropPicker::SafeDownCast( this->GetRenderWindowInteractor()->GetPicker() ))
-// COMMENT: {9/7/2005 3:57:33 PM}			{
-// COMMENT: {9/7/2005 3:57:33 PM}				vtkAssemblyPath *path = vtkAssemblyPath::New();
-// COMMENT: {9/7/2005 3:57:33 PM}				path->AddNode(pProp, pProp->GetMatrix());
-// COMMENT: {9/7/2005 3:57:33 PM}				picker->SetPath(path);
-// COMMENT: {9/7/2005 3:57:33 PM}				path->Delete();
-// COMMENT: {9/7/2005 3:57:33 PM}			}
-
-// COMMENT: {9/7/2005 3:57:44 PM}			if (CZoneActor *pZoneActor = CZoneActor::SafeDownCast(pProp))
-// COMMENT: {9/7/2005 3:57:44 PM}			{
-// COMMENT: {9/7/2005 3:57:44 PM}				if (!pZoneActor->GetDefault())
-// COMMENT: {9/7/2005 3:57:44 PM}				{
-// COMMENT: {9/7/2005 3:57:44 PM}					// Reset BoxWidget
-// COMMENT: {9/7/2005 3:57:44 PM}					//
-// COMMENT: {9/7/2005 3:57:44 PM}					this->GetBoxWidget()->SetProp3D(pZoneActor);
-// COMMENT: {9/7/2005 3:57:44 PM}					this->GetBoxWidget()->PlaceWidget();
-// COMMENT: {9/7/2005 3:57:44 PM}					this->GetBoxWidget()->SetEnabled(1);
-// COMMENT: {9/7/2005 3:57:44 PM}				}
-// COMMENT: {9/7/2005 3:57:44 PM}			}
-// COMMENT: {9/7/2005 3:57:44 PM}			else if (CWellActor *pWellActor = CWellActor::SafeDownCast(pProp))
-// COMMENT: {9/7/2005 3:57:44 PM}			{
-// COMMENT: {9/7/2005 3:57:44 PM}				this->PointWidget->TranslationModeOff();
-// COMMENT: {9/7/2005 3:57:44 PM}				this->PointWidget->SetProp3D(pWellActor);
-// COMMENT: {9/7/2005 3:57:44 PM}				this->PointWidget->PlaceWidget();
-// COMMENT: {9/7/2005 3:57:44 PM}				ASSERT(pWellActor == this->PointWidget->GetProp3D());
-// COMMENT: {9/7/2005 3:57:44 PM}				this->PointWidget->TranslationModeOn();
-// COMMENT: {9/7/2005 3:57:44 PM}				this->PointWidget->On();
-// COMMENT: {9/7/2005 3:57:44 PM}			}
-// COMMENT: {9/7/2005 3:57:44 PM}			else if (CRiverActor *pRiverActor = CRiverActor::SafeDownCast(pProp))
-// COMMENT: {9/7/2005 3:57:44 PM}			{
-// COMMENT: {9/7/2005 3:57:44 PM}				pRiverActor->SetEnabled(1);
-// COMMENT: {9/7/2005 3:57:44 PM}			}			
-// COMMENT: {9/7/2005 3:57:44 PM}			else
-// COMMENT: {9/7/2005 3:57:44 PM}			{
-// COMMENT: {9/7/2005 3:57:44 PM}				ASSERT(FALSE); // untested
-// COMMENT: {9/7/2005 3:57:44 PM}			}
-			///{{{
 			this->Select(pProp);
-			///}}}
-			this->GetDocument()->UpdateAllViews(this);
-			///this->Invalidate(TRUE);
 		}
 		break;
 	case WPN_VISCHANGED:
@@ -1490,7 +1448,7 @@ void CWPhastView::StartNewRiver(void)
 
 	// Disable Interactor - NOTE (This may be unnec)
 	//
-	if (vtkInteractorStyle* style = vtkInteractorStyle::SafeDownCast(this->m_pInteractorStyle))
+	if (vtkInteractorStyle* style = vtkInteractorStyle::SafeDownCast(this->InteractorStyle))
 	{
 		if (vtkInteractorStyleSwitch* switcher = vtkInteractorStyleSwitch::SafeDownCast(style))
 		{
@@ -1512,7 +1470,7 @@ void CWPhastView::EndNewRiver(void)
 {
 	// reattach interactor
 	//
-	if (vtkInteractorStyle* style = vtkInteractorStyle::SafeDownCast(this->m_pInteractorStyle))
+	if (vtkInteractorStyle* style = vtkInteractorStyle::SafeDownCast(this->InteractorStyle))
 	{
 		if (vtkInteractorStyleSwitch* switcher = vtkInteractorStyleSwitch::SafeDownCast(style))
 		{
@@ -1578,7 +1536,7 @@ void CWPhastView::OnEndNewRiver(void)
 {
 	// reattach interactor
 	//
-	if (vtkInteractorStyle* style = vtkInteractorStyle::SafeDownCast(this->m_pInteractorStyle))
+	if (vtkInteractorStyle* style = vtkInteractorStyle::SafeDownCast(this->InteractorStyle))
 	{
 		if (vtkInteractorStyleSwitch* switcher = vtkInteractorStyleSwitch::SafeDownCast(style))
 		{
@@ -2085,3 +2043,38 @@ void CWPhastView::CancelMode(void)
 	}
 }
 
+
+void CWPhastView::OnUpdateToolsSelectObject(CCmdUI *pCmdUI)
+{
+
+	if (vtkInteractorStyleTrackballCameraEx *style = vtkInteractorStyleTrackballCameraEx::SafeDownCast(this->InteractorStyle))
+	{
+		if (style->GetPickWithMouse())
+		{
+			pCmdUI->SetCheck(1);
+		}
+		else
+		{
+			pCmdUI->SetCheck(0);
+		}
+	}
+	else
+	{
+		pCmdUI->Enable(FALSE);
+	}
+}
+
+void CWPhastView::OnToolsSelectObject()
+{
+	if (vtkInteractorStyleTrackballCameraEx *style = vtkInteractorStyleTrackballCameraEx::SafeDownCast(this->InteractorStyle))
+	{
+		if (style->GetPickWithMouse())
+		{
+			style->SetPickWithMouse(0);
+		}
+		else
+		{
+			style->SetPickWithMouse(1);
+		}
+	}
+}

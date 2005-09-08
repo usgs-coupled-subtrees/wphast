@@ -670,8 +670,10 @@ void CViewVTKCommand::OnLeftButtonReleaseEvent(vtkObject* caller, void* callData
 		// otherwise the selection will not be set
 		//
 #ifdef _DEBUG
-		if (vtkInteractorStyle* style = vtkInteractorStyle::SafeDownCast(this->m_pView->m_pInteractorStyle)) {
-			if (vtkInteractorStyleSwitch* switcher = vtkInteractorStyleSwitch::SafeDownCast(style)) {
+		if (vtkInteractorStyle* style = vtkInteractorStyle::SafeDownCast(this->m_pView->InteractorStyle))
+		{
+			if (vtkInteractorStyleSwitch* switcher = vtkInteractorStyleSwitch::SafeDownCast(style))
+			{
 				style = switcher->GetCurrentStyle();
 			}
 // COMMENT: {5/27/2004 8:39:28 PM}			ASSERT(style->GetInteractor() != 0);

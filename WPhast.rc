@@ -93,7 +93,7 @@ IDB_PLUS_MERGE          BITMAP                  "res\\plusmrge.bmp"
 // Toolbar
 //
 
-IDR_MAINFRAME TOOLBAR  16, 15
+IDR_MAINFRAME TOOLBAR  17, 19
 BEGIN
     BUTTON      ID_FILE_NEW
     BUTTON      ID_FILE_OPEN
@@ -112,6 +112,7 @@ BEGIN
     BUTTON      ID_FILE_RUN
     BUTTON      ID_TOOLS_MOVE_VER_LINE
     BUTTON      ID_TOOLS_MODIFYGRID
+    BUTTON      ID_TOOLS_SELECTOBJECT
 END
 
 IDR_LONG_TOOLBAR TOOLBAR  121, 15
@@ -319,6 +320,8 @@ BEGIN
         MENUITEM "&Geometry...",                ID_TOOLS_GEOMETRY
         MENUITEM "Move Vertical",               ID_TOOLS_MOVE_VER_LINE
         MENUITEM "Modify Grid",                 ID_TOOLS_MODIFYGRID
+        MENUITEM SEPARATOR
+        MENUITEM "&Select Object",              ID_TOOLS_SELECTOBJECT
     END
     POPUP "&Help"
     BEGIN
@@ -3377,6 +3380,7 @@ IDC_PIXEL_PICKER        CURSOR                  "res\\pixelpicker.cur"
 IDC_VE_SPLIT            CURSOR                  "res\\ve_split.cur"
 IDC_HO_SPLIT            CURSOR                  "res\\ho_split.cur"
 IDC_4WAY02              CURSOR                  "res\\4way02.cur"
+IDC_3DGARROW            CURSOR                  "res\\3dgarro.cur"
 
 /////////////////////////////////////////////////////////////////////////////
 //

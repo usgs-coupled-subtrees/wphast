@@ -1452,6 +1452,9 @@
 			Name="Resource Files"
 			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;jpg;jpeg;jpe;manifest;rtf">
 			<File
+				RelativePath="res\3dgarro.cur">
+			</File>
+			<File
 				RelativePath="res\4way02.cur">
 			</File>
 			<File
@@ -3812,15 +3815,15 @@
 			Name="Build Logs"
 			Filter="">
 			<File
-				RelativePath="Release\BuildLog.htm"
-				DeploymentContent="TRUE">
-			</File>
-			<File
 				RelativePath="cppunit\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 			<File
 				RelativePath="Debug\BuildLog.htm"
+				DeploymentContent="TRUE">
+			</File>
+			<File
+				RelativePath="Release\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 		</Filter>

@@ -78,7 +78,7 @@ protected:
 
 	CViewVTKCommand                *m_pViewVTKCommand;
 
-	vtkInteractorStyle             *m_pInteractorStyle;
+	vtkInteractorStyle             *InteractorStyle;
 
 	bool                            m_bResetCamera;
 	bool                            m_bMovingGridLine;
@@ -196,6 +196,8 @@ public:
 	afx_msg void OnUpdateToolsModifyGrid(CCmdUI *pCmdUI);
 	afx_msg void OnToolsModifyGrid();
 	afx_msg void OnViewFromPrevDirection();
+	afx_msg void OnUpdateToolsSelectObject(CCmdUI *pCmdUI);
+	afx_msg void OnToolsSelectObject();
 };
 
 #ifndef _DEBUG  // debug version in WPhastView.cpp

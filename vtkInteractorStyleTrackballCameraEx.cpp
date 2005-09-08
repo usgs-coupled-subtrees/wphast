@@ -26,6 +26,7 @@ vtkStandardNewMacro(vtkInteractorStyleTrackballCameraEx);
 
 
 vtkInteractorStyleTrackballCameraEx::vtkInteractorStyleTrackballCameraEx(void)
+: PickWithMouse(0)
 {
 }
 
@@ -68,7 +69,8 @@ void vtkInteractorStyleTrackballCameraEx::HighlightProp3D(vtkProp3D *prop3D)
 	// This is added in order to allow highlights without
 	// actually picking using the mouse+p combination
 	// This may cause problems if there is more than 1 renderer
-	if (!this->PickedRenderer) {
+	if (!this->PickedRenderer)
+	{
 		this->FindPokedRenderer(0, 0);
 	}
 	//{
@@ -93,4 +95,219 @@ void vtkInteractorStyleTrackballCameraEx::HighlightProp3D(vtkProp3D *prop3D)
       }
     this->Outline->SetBounds(prop3D->GetBounds());
     }
+}
+
+//----------------------------------------------------------------------------
+void vtkInteractorStyleTrackballCameraEx::OnChar() 
+{
+  vtkRenderWindowInteractor *rwi = this->Interactor;
+
+  switch (rwi->GetKeyCode()) 
+    {
+    case 'm' :
+    case 'M' :
+      if (this->AnimState == VTKIS_ANIM_OFF) 
+        {
+        this->StartAnimate();
+        }
+      else 
+        {
+        this->StopAnimate();
+        }
+      break;
+
+// COMMENT: {9/7/2005 9:46:57 PM}    case 'Q' :
+// COMMENT: {9/7/2005 9:46:57 PM}    case 'q' :
+// COMMENT: {9/7/2005 9:46:57 PM}    case 'e' :
+// COMMENT: {9/7/2005 9:46:57 PM}    case 'E' :
+// COMMENT: {9/7/2005 9:46:57 PM}      rwi->ExitCallback();
+// COMMENT: {9/7/2005 9:46:57 PM}      break;
+
+    case 'f' :      
+    case 'F' :
+      {
+      this->AnimState = VTKIS_ANIM_ON;
+      vtkAssemblyPath *path = NULL;
+      this->FindPokedRenderer(rwi->GetEventPosition()[0],
+                              rwi->GetEventPosition()[1]);
+      rwi->GetPicker()->Pick(rwi->GetEventPosition()[0],
+                             rwi->GetEventPosition()[1], 
+                             0.0, 
+                             this->CurrentRenderer);
+      vtkAbstractPropPicker *picker;
+      if ((picker=vtkAbstractPropPicker::SafeDownCast(rwi->GetPicker())))
+        {
+        path = picker->GetPath();
+        }
+      if (path != NULL)
+        {
+        rwi->FlyTo(this->CurrentRenderer, picker->GetPickPosition());
+        }
+      this->AnimState = VTKIS_ANIM_OFF;
+      }
+      break;
+
+    case 'u' :
+    case 'U' :
+      rwi->UserCallback();
+      break;
+
+    case 'r' :
+    case 'R' :
+      this->FindPokedRenderer(rwi->GetEventPosition()[0], 
+                              rwi->GetEventPosition()[1]);
+      this->CurrentRenderer->ResetCamera();
+      rwi->Render();
+      break;
+
+    case 'w' :
+    case 'W' :
+      {
+      vtkActorCollection *ac;
+      vtkActor *anActor, *aPart;
+      vtkAssemblyPath *path;
+      this->FindPokedRenderer(rwi->GetEventPosition()[0],
+                              rwi->GetEventPosition()[1]);
+      ac = this->CurrentRenderer->GetActors();
+      for (ac->InitTraversal(); (anActor = ac->GetNextItem()); ) 
+        {
+        for (anActor->InitPathTraversal(); (path=anActor->GetNextPath()); ) 
+          {
+          aPart=(vtkActor *)path->GetLastNode()->GetProp();
+          aPart->GetProperty()->SetRepresentationToWireframe();
+          }
+        }
+      rwi->Render();
+      }
+      break;
+
+    case 's' :
+    case 'S' :
+      {
+      vtkActorCollection *ac;
+      vtkActor *anActor, *aPart;
+      vtkAssemblyPath *path;
+      this->FindPokedRenderer(rwi->GetEventPosition()[0],
+                              rwi->GetEventPosition()[1]);
+      ac = this->CurrentRenderer->GetActors();
+      for (ac->InitTraversal(); (anActor = ac->GetNextItem()); ) 
+        {
+        for (anActor->InitPathTraversal(); (path=anActor->GetNextPath()); ) 
+          {
+          aPart=(vtkActor *)path->GetLastNode()->GetProp();
+          aPart->GetProperty()->SetRepresentationToSurface();
+          }
+        }
+      rwi->Render();
+      }
+      break;
+
+    case 'l' :
+    case 'L' :
+      {
+      int val = vtkTextProperty::GetGlobalAntiAliasing();
+      // Cycle through global anti-aliasing control
+      if (val == VTK_TEXT_GLOBAL_ANTIALIASING_ALL)
+        {
+        val = VTK_TEXT_GLOBAL_ANTIALIASING_SOME;
+        }
+      else
+        {
+        val++;
+        }
+      vtkTextProperty::SetGlobalAntiAliasing(val);
+      rwi->Render();
+      }
+      break;
+
+    case '3' :
+      if (rwi->GetRenderWindow()->GetStereoRender()) 
+        {
+        rwi->GetRenderWindow()->StereoRenderOff();
+        }
+      else 
+        {
+        rwi->GetRenderWindow()->StereoRenderOn();
+        }
+      rwi->Render();
+      break;
+
+    case 'p' :
+    case 'P' :
+      if (this->State == VTKIS_NONE) 
+        {
+        vtkAssemblyPath *path=NULL;
+        this->FindPokedRenderer(rwi->GetEventPosition()[0],
+                                rwi->GetEventPosition()[1]);
+        rwi->StartPickCallback();
+        rwi->GetPicker()->Pick(rwi->GetEventPosition()[0],
+                               rwi->GetEventPosition()[1], 
+                               0.0, 
+                               this->CurrentRenderer);
+        vtkAbstractPropPicker *picker;
+        if ( (picker=vtkAbstractPropPicker::SafeDownCast(rwi->GetPicker())) )
+          {
+          path = picker->GetPath();
+          }
+        if ( path == NULL )
+          {
+          this->HighlightProp(NULL);
+          this->PropPicked = 0;
+          }
+        else
+          {
+          this->HighlightProp(path->GetFirstNode()->GetProp());
+          this->PropPicked = 1;
+          }
+        rwi->EndPickCallback();
+        }
+      break;
+    }
+}
+
+void vtkInteractorStyleTrackballCameraEx::OnLeftButtonDown()
+{
+	if (!this->PickWithMouse)
+	{
+		this->Superclass::OnLeftButtonDown();
+	}
+	else
+	{
+		vtkRenderWindowInteractor *rwi = this->Interactor;
+		if (this->State == VTKIS_NONE) 
+		{
+			vtkAssemblyPath *path=NULL;
+			this->FindPokedRenderer(rwi->GetEventPosition()[0],
+				rwi->GetEventPosition()[1]);
+			rwi->StartPickCallback();
+			rwi->GetPicker()->Pick(rwi->GetEventPosition()[0],
+				rwi->GetEventPosition()[1], 
+				0.0, 
+				this->CurrentRenderer);
+			vtkAbstractPropPicker *picker;
+			if ( (picker=vtkAbstractPropPicker::SafeDownCast(rwi->GetPicker())) )
+			{
+				path = picker->GetPath();
+			}
+			if ( path == NULL )
+			{
+				this->HighlightProp(NULL);
+				this->PropPicked = 0;
+			}
+			else
+			{
+				this->HighlightProp(path->GetFirstNode()->GetProp());
+				this->PropPicked = 1;
+			}
+			rwi->EndPickCallback();
+		}
+	}
+}
+
+void vtkInteractorStyleTrackballCameraEx::OnLeftButtonUp()
+{
+	if (!this->PickWithMouse)
+	{
+		this->Superclass::OnLeftButtonUp();
+	}
 }

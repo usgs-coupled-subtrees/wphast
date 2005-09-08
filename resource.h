@@ -245,6 +245,7 @@
 #define IDD_GRID_COARSEN                250
 #define IDC_4WAY02                      251
 #define IDB_PLUS_MERGE                  252
+#define IDC_3DGARROW                    255
 #define IDC_EDIT_X                      1000
 #define IDC_PROPERTIES                  1000
 #define IDC_TITLE                       1000
@@ -618,6 +619,8 @@
 #define ID_RIVERS_SELECTALL             32809
 #define ID_RIVERS_UNSELECTALL           32810
 #define ID_VIEW_FROM_PREV_DIRECTION     32812
+#define ID_SELECT_OBJECT                32824
+#define ID_TOOLS_SELECTOBJECT           32826
 #define IDW_CONTROLBAR_TREE             59424
 #define IDW_CONTROLBAR_BOXPROPS         59425
 
@@ -625,8 +628,8 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        253
-#define _APS_NEXT_COMMAND_VALUE         32824
+#define _APS_NEXT_RESOURCE_VALUE        256
+#define _APS_NEXT_COMMAND_VALUE         32827
 #define _APS_NEXT_CONTROL_VALUE         1313
 #define _APS_NEXT_SYMED_VALUE           126
 #endif
