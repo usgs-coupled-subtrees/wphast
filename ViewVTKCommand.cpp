@@ -173,8 +173,8 @@ void CViewVTKCommand::OnEndPickEvent(vtkObject* caller, void* callData)
 	{
 		if (vtkAssemblyPath *path = picker->GetPath())
 		{
-#if defined(_DEBUG)
 			{
+#if defined(_DEBUG)
 				ostrstream oss;
 				path->PrintSelf(oss, 4);
 				oss << ends;
@@ -234,45 +234,13 @@ void CViewVTKCommand::OnEndPickEvent(vtkObject* caller, void* callData)
 			TRACE("EventPosition(%d, %d)\n", xy[0], xy[1]);
 #endif
 		}
-// COMMENT: {7/12/2004 9:21:26 PM}		if (vtkProp *pProp = picker->GetProp())
-// COMMENT: {7/12/2004 9:21:26 PM}		{
-// COMMENT: {7/12/2004 9:21:26 PM}			if (vtkPropAssembly *pPropAssembly = vtkPropAssembly::SafeDownCast(pProp)) {
-// COMMENT: {7/12/2004 9:21:26 PM}				if (vtkAssemblyPath *path = picker->GetPath()) {
-// COMMENT: {7/12/2004 9:21:26 PM}					if (CZoneActor *pZone = CZoneActor::SafeDownCast(path->GetLastNode()->GetProp())) {
-// COMMENT: {7/12/2004 9:21:26 PM}						pZone->Select(this->m_pView);
-// COMMENT: {7/12/2004 9:21:26 PM}					}
-// COMMENT: {7/12/2004 9:21:26 PM}				}
-// COMMENT: {7/12/2004 9:21:26 PM}			}
-// COMMENT: {7/12/2004 9:21:26 PM}		}
-// COMMENT: {7/12/2004 9:21:26 PM}		if (vtkProp3D *pProp3D = picker->GetProp3D())
-// COMMENT: {7/12/2004 9:21:26 PM}		{
-// COMMENT: {7/12/2004 9:21:26 PM}			// check for assembly
-// COMMENT: {7/12/2004 9:21:26 PM}			//
-// COMMENT: {7/12/2004 9:21:26 PM}			if (vtkAssembly *pAssembly = vtkAssembly::SafeDownCast(pProp3D)) {
-// COMMENT: {7/12/2004 9:21:26 PM}				ASSERT(FALSE);
-// COMMENT: {7/12/2004 9:21:26 PM}				if (vtkAssemblyPath *path = picker->GetPath()) {
-// COMMENT: {7/12/2004 9:21:26 PM}					pProp3D = (vtkProp3D *)path->GetLastNode()->GetProp();
-// COMMENT: {7/12/2004 9:21:26 PM}				}
-// COMMENT: {7/12/2004 9:21:26 PM}			}
-// COMMENT: {7/12/2004 9:21:26 PM}
-// COMMENT: {7/12/2004 9:21:26 PM}			// select zone
-// COMMENT: {7/12/2004 9:21:26 PM}			//
-// COMMENT: {7/12/2004 9:21:26 PM}			if (CZoneActor *pZone = CZoneActor::SafeDownCast(pProp3D)) {
-// COMMENT: {7/12/2004 9:21:26 PM}				pZone->Select(this->m_pView);
-// COMMENT: {7/12/2004 9:21:26 PM}			}
-// COMMENT: {7/12/2004 9:21:26 PM}
-// COMMENT: {7/12/2004 9:21:26 PM}#ifdef _DEBUG
-// COMMENT: {7/12/2004 9:21:26 PM}			int* xy = this->m_pView->GetRenderWindowInteractor()->GetEventPosition();
-// COMMENT: {7/12/2004 9:21:26 PM}			TRACE("EventPosition(%d, %d)\n", xy[0], xy[1]);
-// COMMENT: {7/12/2004 9:21:26 PM}#endif
-// COMMENT: {7/12/2004 9:21:26 PM}		}
 		else
 		{
 			// Hide BoxWidget
 			//
-			this->m_pView->GetBoxWidget()->SetEnabled(0);
+			//this->m_pView->GetBoxWidget()->SetEnabled(0);
+			//this->m_pView->GetDocument()->ClearSelection();
 		}
-
 
 		// render
 		//
