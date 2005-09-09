@@ -53,7 +53,6 @@
 #include "Grid.h"
 #include "FlowOnly.h"
 
-#include "GridElementsSelector.h"
 #include <vtkImplicitPlaneWidget.h>
 
 
@@ -125,7 +124,6 @@ CWPhastView::CWPhastView()
 , PointWidget(0)
 , m_pRiverActor(0)
 , RiverCallbackCommand(0)
-, GridElementsSelector(0)
 , m_bMovingGridLine(false)
 {
 	// Create the renderer, window and interactor objects.
@@ -251,13 +249,6 @@ CWPhastView::~CWPhastView()
 	{
 		this->EndNewZone();
 	}
-
-	if (this->GridElementsSelector)
-	{
-		this->GridElementsSelector->Delete();
-		this->GridElementsSelector = 0;
-	}
-
 
 	// Delete the the renderer, window and interactor objects.
 	//
@@ -646,14 +637,7 @@ void CWPhastView::OnToolsNewZone()
 	}
 	else
 	{
-		if (this->CreatingNewRiver())
-		{
-			this->CancelNewRiver();
-		}
-		if (this->CreatingNewWell())
-		{
-			this->CancelNewWell();
-		}
+		this->CancelMode();
 		this->StartNewZone();
 	}
 }
@@ -1170,12 +1154,12 @@ void CWPhastView::StartNewWell(void)
 		style->SetInteractor(0);
 	}
 
-	// hide BoxWidget
-	//
-	// Note: This is reqd because the widget will 
-	// recieve all the mouse input
-	this->BoxWidget->Off();
-	this->PointWidget->Off();
+// COMMENT: {9/9/2005 4:45:27 PM}	// hide BoxWidget
+// COMMENT: {9/9/2005 4:45:27 PM}	//
+// COMMENT: {9/9/2005 4:45:27 PM}	// Note: This is reqd because the widget will 
+// COMMENT: {9/9/2005 4:45:27 PM}	// recieve all the mouse input
+// COMMENT: {9/9/2005 4:45:27 PM}	this->BoxWidget->Off();
+// COMMENT: {9/9/2005 4:45:27 PM}	this->PointWidget->Off();
 }
 
 void CWPhastView::CancelNewWell(void)
@@ -1223,14 +1207,7 @@ void CWPhastView::OnToolsNewWell()
 	}
 	else
 	{
-		if (this->CreatingNewRiver())
-		{
-			this->CancelNewRiver();
-		}
-		if (this->CreatingNewZone())
-		{
-			this->CancelNewZone();
-		}
+		this->CancelMode();
 		this->StartNewWell();
 	}
 }
@@ -1370,6 +1347,12 @@ void CWPhastView::Update(IObserver* pSender, LPARAM lHint, CObject* /*pHint*/, v
 				this->PointWidget->On();
 			}
 		}
+		//{{
+		if (this->CreatingNewRiver())
+		{
+			this->m_pRiverActor->SetScale(this->GetDocument()->GetScale());
+		}
+		//}}
 		break;
 	default:
 		ASSERT(FALSE);
@@ -1397,14 +1380,7 @@ void CWPhastView::OnToolsNewRiver()
 	}
 	else
 	{
-		if (this->CreatingNewZone())
-		{
-			this->CancelNewZone();
-		}
-		if (this->CreatingNewWell())
-		{
-			this->CancelNewWell();
-		}
+		this->CancelMode();
 		this->StartNewRiver();
 	}
 }
@@ -1433,6 +1409,7 @@ void CWPhastView::StartNewRiver(void)
 		this->m_pRiverActor->SetRiver(river, this->GetDocument()->GetUnits());
 
 		this->m_pRiverActor->AddObserver(CRiverActor::EndNewRiverEvent, RiverCallbackCommand);
+		this->m_pRiverActor->AddObserver(CRiverActor::CancelNewRiverEvent, RiverCallbackCommand);
 
 		vtkFloatingPointType* scale = this->GetDocument()->GetScale();
 		this->m_pRiverActor->SetScale(scale[0], scale[1], scale[2]);
@@ -1506,7 +1483,6 @@ void CWPhastView::CancelNewRiver(void)
 	if (this->CreatingNewRiver())
 	{
 		this->EndNewRiver();
-		this->GetDocument()->UpdateAllViews(0);
 	}
 }
 
@@ -1521,18 +1497,17 @@ void CWPhastView::RiverListener(vtkObject* caller, unsigned long eid, void* clie
 		ASSERT(pRiverActor == self->m_pRiverActor);
 		switch (eid)
 		{
-		case CRiverActor::StartNewRiverEvent:
-			break;
 		case CRiverActor::CancelNewRiverEvent:
+			self->OnEndNewRiver(true);
 			break;
 		case CRiverActor::EndNewRiverEvent:
-			self->OnEndNewRiver();
+			self->OnEndNewRiver(false);
 			break;
 		}
 	}
 }
 
-void CWPhastView::OnEndNewRiver(void)
+void CWPhastView::OnEndNewRiver(bool bCancel)
 {
 	// reattach interactor
 	//
@@ -1553,27 +1528,30 @@ void CWPhastView::OnEndNewRiver(void)
 	ASSERT(this->m_pRiverActor != 0);
 	if (this->m_pRiverActor)
 	{
-		if (this->m_pRiverActor->GetPointCount() > 1)
+		if (!bCancel)
 		{
-			CPropertySheet sheet;
-			CRiverPropertyPage2 page;
-			page.SetProperties(this->m_pRiverActor->GetRiver());
-			page.SetUnits(this->GetDocument()->GetUnits());
-			page.SetFlowOnly(bool(this->GetDocument()->GetFlowOnly()));
-			std::set<int> riverNums;
-			this->GetDocument()->GetUsedRiverNumbers(riverNums);
-			page.SetUsedRiverNumbers(riverNums);
-			sheet.AddPage(&page);
-			if (sheet.DoModal() == IDOK)
+			if (this->m_pRiverActor->GetPointCount() > 1)
 			{
-				CRiver river;
-				page.GetProperties(river);
-				this->GetDocument()->Execute(new CRiverCreateAction(this->GetDocument(), river));
+				CPropertySheet sheet;
+				CRiverPropertyPage2 page;
+				page.SetProperties(this->m_pRiverActor->GetRiver());
+				page.SetUnits(this->GetDocument()->GetUnits());
+				page.SetFlowOnly(bool(this->GetDocument()->GetFlowOnly()));
+				std::set<int> riverNums;
+				this->GetDocument()->GetUsedRiverNumbers(riverNums);
+				page.SetUsedRiverNumbers(riverNums);
+				sheet.AddPage(&page);
+				if (sheet.DoModal() == IDOK)
+				{
+					CRiver river;
+					page.GetProperties(river);
+					this->GetDocument()->Execute(new CRiverCreateAction(this->GetDocument(), river));
+				}
 			}
-		}
-		else
-		{
-			::AfxMessageBox("Rivers must contain at least two points");
+			else
+			{
+				::AfxMessageBox("Rivers must contain at least two points");
+			}
 		}
 		this->m_Renderer->RemoveProp(this->m_pRiverActor);
 	}
@@ -1617,6 +1595,8 @@ void CWPhastView::OnToolsMoveVerLine()
 	}
 	else
 	{
+		this->CancelMode();
+
 		this->m_bMovingGridLine = true;
 		////this->GetDocument()->GetGridActor()->StartMoveGridLine(this->m_RenderWindowInteractor);
 		if (CGridActor* pGridActor = CGridActor::SafeDownCast(this->GetDocument()->GetGridActor()))
@@ -1982,71 +1962,59 @@ HCURSOR Test()
 	return hcurFinal;
 }
 
-void CWPhastView::OnUpdateToolsModifyGrid(CCmdUI *pCmdUI)
-{
-	if (CGridActor* pGridActor = CGridActor::SafeDownCast(this->GetDocument()->GetGridActor()))
-	{
-		if (pGridActor->GetVisibility())
-		{
-			pCmdUI->Enable(TRUE);
-		}
-		else
-		{
-			pCmdUI->Enable(FALSE);
-		}
-	}
-	else
-	{
-		pCmdUI->Enable(FALSE);
-	}
-
-	if (this->GridElementsSelector)
-	{
-		pCmdUI->SetCheck(1);
-	}
-	else
-	{
-		pCmdUI->SetCheck(0);
-	}
-}
-
-void CWPhastView::OnToolsModifyGrid()
-{
-	if (this->GridElementsSelector)
-	{
-		this->GridElementsSelector->Delete();
-		this->GridElementsSelector = 0;
-	}
-	else
-	{
-		this->GridElementsSelector = CGridElementsSelector::New();
-		this->GridElementsSelector->SetInteractor(this->m_RenderWindowInteractor);
-		this->GridElementsSelector->SetGridActor(reinterpret_cast<CGridActor *>(this->GetDocument()->GetGridActor()));
-		this->GridElementsSelector->SetDocument(this->GetDocument());
-		this->GridElementsSelector->SetEnabled(1);
-	}
-}
-
 void CWPhastView::CancelMode(void)
 {
+	// New River
+	//
 	if (this->CreatingNewRiver())
 	{
 		this->CancelNewRiver();
 	}
+
+	// New Well
+	//
 	if (this->CreatingNewWell())
 	{
 		this->CancelNewWell();
 	}
+
+	// New Zone
+	//
 	if (this->CreatingNewZone())
 	{
 		this->CancelNewZone();
+	}
+
+	// Move Grid Lines
+	//
+	if (this->m_bMovingGridLine)
+	{
+		if (CGridActor* pGridActor = CGridActor::SafeDownCast(this->GetDocument()->GetGridActor()))
+		{
+			// pGridLODActor->SetInteractor(0);
+			pGridActor->SetEnabled(0);
+		}
+		this->m_bMovingGridLine = false;
+	}
+
+	// Modify Grid
+	//
+	if (this->GetDocument())
+	{
+		this->GetDocument()->EndModifyGrid();
+	}
+
+	// Select Object
+	//
+	if (vtkInteractorStyleTrackballCameraEx *style = vtkInteractorStyleTrackballCameraEx::SafeDownCast(this->InteractorStyle))
+	{
+		style->SetPickWithMouse(0);
 	}
 }
 
 
 void CWPhastView::OnUpdateToolsSelectObject(CCmdUI *pCmdUI)
 {
-
 	if (vtkInteractorStyleTrackballCameraEx *style = vtkInteractorStyleTrackballCameraEx::SafeDownCast(this->InteractorStyle))
 	{
 		if (style->GetPickWithMouse())
@@ -2070,10 +2038,11 @@ void CWPhastView::OnToolsSelectObject()
 	{
 		if (style->GetPickWithMouse())
 		{
-			style->SetPickWithMouse(0);
+			this->CancelMode();
 		}
 		else
 		{
+			this->CancelMode();
 			style->SetPickWithMouse(1);
 		}
 	}

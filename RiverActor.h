@@ -38,6 +38,7 @@ public:
 	void SetUnits(const CUnits &units);
 	void SetScale(float x, float y, float z);
 	void SetScale(double x, double y, double z);
+	void SetScale(vtkFloatingPointType scale[3]) { this->SetScale(scale[0], scale[1], scale[2]); }
 
 	void SetRadius(vtkFloatingPointType radius);
 	vtkFloatingPointType GetRadius(void)const;
@@ -79,12 +80,12 @@ public:
 
 	void Update(CTreeCtrlNode node);
 
-	enum EventIds {
+	enum EventIds
+	{
 		StartMovePointEvent = vtkCommand::UserEvent + 500,
 		MovingPointEvent,
 		EndMovePointEvent,
 
-		StartNewRiverEvent,
 		CancelNewRiverEvent,
 		EndNewRiverEvent,
 

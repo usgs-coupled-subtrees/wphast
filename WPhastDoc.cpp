@@ -1844,11 +1844,6 @@ void CWPhastDoc::SetScale(vtkFloatingPointType x, vtkFloatingPointType y, vtkFlo
 			{
 				pZone->SetScale(scale);
 			}
-// COMMENT: {8/9/2005 8:04:44 PM}			if (vtkAssembly *pAssembly = vtkAssembly::SafeDownCast(prop))
-// COMMENT: {8/9/2005 8:04:44 PM}			{
-// COMMENT: {8/9/2005 8:04:44 PM}				ASSERT(FALSE); // no longer using vtkAssembly ???
-// COMMENT: {8/9/2005 8:04:44 PM}				pAssembly->SetScale(scale);
-// COMMENT: {8/9/2005 8:04:44 PM}			}
 			if (vtkPropAssembly *pPropAssembly = vtkPropAssembly::SafeDownCast(prop))
 			{
 				if (vtkPropCollection *pPropCollection = pPropAssembly->GetParts())
@@ -1862,9 +1857,7 @@ void CWPhastDoc::SetScale(vtkFloatingPointType x, vtkFloatingPointType y, vtkFlo
 							prop3D->SetScale(scale);
 							if (CWellActor *pWellActor = CWellActor::SafeDownCast(prop3D))
 							{
-// COMMENT: {7/12/2005 3:21:11 PM}								pWellActor->SetDefaultTubeDiameter(defaultAxesSize * 0.17 / sqrt(scale[0] * scale[1]));
 								pWellActor->SetDefaultTubeDiameter(defaultAxesSize * 0.17);
-								// pWellActor->SetRadius(defaultAxesSize * 0.085);
 							}
 							if (CRiverActor *pRiverActor = CRiverActor::SafeDownCast(prop3D))
 							{
@@ -1877,47 +1870,51 @@ void CWPhastDoc::SetScale(vtkFloatingPointType x, vtkFloatingPointType y, vtkFlo
 		}
 	}
 
-	// for all views
-	//
-	POSITION pos = this->GetFirstViewPosition();
-	while (pos != NULL)
-	{
-		CWPhastView *pView = (CWPhastView*) GetNextView(pos);
+// COMMENT: {9/8/2005 2:45:19 PM}	// for all views
+// COMMENT: {9/8/2005 2:45:19 PM}	//
+// COMMENT: {9/8/2005 2:45:19 PM}	POSITION pos = this->GetFirstViewPosition();
+// COMMENT: {9/8/2005 2:45:19 PM}	while (pos != NULL)
+// COMMENT: {9/8/2005 2:45:19 PM}	{
+// COMMENT: {9/8/2005 2:45:19 PM}		CWPhastView *pView = (CWPhastView*) GetNextView(pos);
+// COMMENT: {9/8/2005 2:45:19 PM}
+// COMMENT: {9/8/2005 2:45:19 PM}		// resize the selection bounding box
+// COMMENT: {9/8/2005 2:45:19 PM}		//
+// COMMENT: {9/8/2005 2:45:19 PM}		if (vtkAbstractPropPicker *picker = vtkAbstractPropPicker::SafeDownCast( pView->GetRenderWindowInteractor()->GetPicker() ))
+// COMMENT: {9/8/2005 2:45:19 PM}		{
+// COMMENT: {9/8/2005 2:45:19 PM}			if (vtkProp3D* prop = picker->GetProp3D())
+// COMMENT: {9/8/2005 2:45:19 PM}			{
+// COMMENT: {9/8/2005 2:45:19 PM}				if (CZoneActor *pZone = CZoneActor::SafeDownCast(prop))
+// COMMENT: {9/8/2005 2:45:19 PM}				{
+// COMMENT: {9/8/2005 2:45:19 PM}					pZone->Select(pView);
+// COMMENT: {9/8/2005 2:45:19 PM}				}
+// COMMENT: {9/8/2005 2:45:19 PM}				else
+// COMMENT: {9/8/2005 2:45:19 PM}				{
+// COMMENT: {9/8/2005 2:45:19 PM}					pView->HighlightProp3D(prop); // doesn't immediately render
+// COMMENT: {9/8/2005 2:45:19 PM}				}
+// COMMENT: {9/8/2005 2:45:19 PM}			}
+// COMMENT: {9/8/2005 2:45:19 PM}		}
+// COMMENT: {9/8/2005 2:45:19 PM}
+// COMMENT: {9/8/2005 2:45:19 PM}// COMMENT: {9/8/2005 2:42:32 PM}		// resize the Box Widget
+// COMMENT: {9/8/2005 2:45:19 PM}// COMMENT: {9/8/2005 2:42:32 PM}		//
+// COMMENT: {9/8/2005 2:45:19 PM}// COMMENT: {9/8/2005 2:42:32 PM}		if (pView->GetBoxWidget()->GetProp3D())
+// COMMENT: {9/8/2005 2:45:19 PM}// COMMENT: {9/8/2005 2:42:32 PM}		{
+// COMMENT: {9/8/2005 2:45:19 PM}// COMMENT: {9/8/2005 2:42:32 PM}			pView->GetBoxWidget()->PlaceWidget();
+// COMMENT: {9/8/2005 2:45:19 PM}// COMMENT: {9/8/2005 2:42:32 PM}		}
+// COMMENT: {9/8/2005 2:45:19 PM}
+// COMMENT: {9/8/2005 2:45:19 PM}		// reset the camera
+// COMMENT: {9/8/2005 2:45:19 PM}		//
+// COMMENT: {9/8/2005 2:45:19 PM}		pView->ResetCamera();
+// COMMENT: {9/8/2005 2:45:19 PM}	}
 
-		// resize the selection bounding box
-		//
-		if (vtkAbstractPropPicker *picker = vtkAbstractPropPicker::SafeDownCast( pView->GetRenderWindowInteractor()->GetPicker() ))
-		{
-			if (vtkProp3D* prop = picker->GetProp3D())
-			{
-				if (CZoneActor *pZone = CZoneActor::SafeDownCast(prop))
-				{
-					pZone->Select(pView);
-				}
-				else
-				{
-					pView->HighlightProp3D(prop); // doesn't immediately render
-				}
-			}
-		}
-
-		// resize the well interactor
-		//
-
-		// resize the Box Widget
-		//
-		if (pView->GetBoxWidget()->GetProp3D())
-		{
-			pView->GetBoxWidget()->PlaceWidget();
-		}
-
-		// reset the camera
-		//
-		pView->ResetCamera();
-	}
 	//{{
-	this->Notify(0, WPN_SCALE_CHANGED, 0, 0);
+	if (this->GridElementsSelector)
+	{
+		int ibounds[6];
+		this->GridElementsSelector->GetIBounds(ibounds);
+		this->GridElementsSelector->SetIBounds(ibounds);
+	}
 	//}}
+	this->Notify(0, WPN_SCALE_CHANGED, 0, 0);
 	this->UpdateAllViews(0);
 }
 
@@ -5121,6 +5118,8 @@ void CWPhastDoc::OnToolsModifyGrid()
 			ASSERT(pView->GetRenderWindowInteractor());
 			if (pView->GetRenderWindowInteractor())
 			{
+				pView->CancelMode();
+
 				this->GridElementsSelector = CGridElementsSelector::New();
 				this->GridElementsSelector->SetInteractor(pView->GetRenderWindowInteractor());
 				this->GridElementsSelector->SetGridActor(reinterpret_cast<CGridActor *>(this->GetGridActor()));

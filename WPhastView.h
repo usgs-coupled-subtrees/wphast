@@ -27,7 +27,6 @@ class CWellActor;
 
 class CModifyGridCommand;
 class vtkImplicitPlaneWidget;
-class CGridElementsSelector;
 
 class CWPhastView : public CView, public IObserver
 {
@@ -98,12 +97,8 @@ protected:
 	// new well
 	CWellActor                     *m_pWellActor;
 
-	// new rier
+	// new river
 	CRiverActor                    *m_pRiverActor;
-
-	//
-	//
-	CGridElementsSelector          *GridElementsSelector;
 
 	friend class CViewVTKCommand;
 
@@ -183,7 +178,7 @@ public:
 	//
 	vtkCallbackCommand    *RiverCallbackCommand;
 	static void RiverListener(vtkObject* caller, unsigned long eid, void* clientdata, void *calldata);
-	void OnEndNewRiver(void);
+	void OnEndNewRiver(bool bCancel = false);
 	bool CreatingNewRiver(void)const;
 	void StartNewRiver(void);
 	void CancelNewRiver(void);

@@ -125,6 +125,9 @@ CRiverPoint::CRiverPoint(void)
 , k_defined(0)
 , width_defined(0)
 , thickness_defined(0)
+, x(0.0)
+, y(0.0)
+, z(0.0)
 {
 }
 

@@ -794,8 +794,9 @@ void CViewVTKCommand::OnKeyPressEvent(vtkObject* caller, void* callData)
 {
 	char* keysym = this->m_pView->m_RenderWindowInteractor->GetKeySym();
 	
-	if (this->m_pView->CreatingNewZone() && ::strcmp(keysym, "Escape") == 0) {
-		this->m_pView->CancelNewZone();
+	if (::strcmp(keysym, "Escape") == 0)
+	{
+		this->m_pView->CancelMode();
 	}
 }
 

@@ -19,7 +19,6 @@ vtkStandardNewMacro(CRiverActor);
 
 const bool bShowGhostPoint = true;
 
-
 CRiverActor::CRiverActor(void)
 : m_Radius(1.0)
 , m_Z(0.0)
@@ -46,6 +45,8 @@ CRiverActor::CRiverActor(void)
 , GhostPolyDataMapper(0)
 , GhostActor(0)
 {
+// COMMENT: {9/9/2005 2:40:06 PM}	::InitializeCriticalSection(&CRiverActor::csInsertNextPoint);
+
 	this->m_pPoints         = vtkPoints::New();
 	this->m_pTransformUnits = vtkTransform::New();
 	this->m_pTransformScale = vtkTransform::New();
@@ -175,6 +176,8 @@ CRiverActor::~CRiverActor(void)
 
 }
 
+#pragma optimize( "g", off )	// Seems that the compiler skips the sNext[] calculation
+								// assuming that the values aren't used within vtkMath::Normalize
 vtkIdType CRiverActor::InsertNextPoint(double x, double y, double z)
 {
 	// only insert point if different enough from previous
@@ -186,7 +189,7 @@ vtkIdType CRiverActor::InsertNextPoint(double x, double y, double z)
 		vtkFloatingPointType pNext[3];
 		vtkFloatingPointType sNext[3];
 		this->m_pPoints->GetPoint(np - 1, p);
-		pNext[0] = x, pNext[1] = y, pNext[2] = z;
+		pNext[0] = x; pNext[1] = y; pNext[2] = z;
 		for (int i = 0; i < 3; ++i) 
 		{
 			sNext[i] = pNext[i] - p[i];
@@ -216,6 +219,7 @@ vtkIdType CRiverActor::InsertNextPoint(double x, double y, double z)
 
 	return id;
 }
+#pragma optimize( "", on )
 
 void CRiverActor::SetUnits(const CUnits &units)
 {
@@ -251,8 +255,26 @@ double CRiverActor::GetZ(void)const
 
 void CRiverActor::SetScale(double x, double y, double z)
 {
+	vtkFloatingPointType point[3];
+	if (this->State == CRiverActor::CreatingRiver)
+	{
+		if (this->m_pPoints->GetNumberOfPoints())
+		{
+			this->ConnectingLineSource->GetPoint1(point);
+			this->m_pTransformScale->GetInverse()->TransformPoint(point, point);
+		}
+	}
 	this->m_pTransformScale->Identity();
 	this->m_pTransformScale->Scale(x, y, z);
+	if (this->State == CRiverActor::CreatingRiver)
+	{
+		if (this->m_pPoints->GetNumberOfPoints())
+		{
+			this->m_pTransformScale->TransformPoint(point, point);
+			this->ConnectingLineSource->SetPoint1(point);
+		}
+		this->Interactor->Render();
+	}
 	this->UpdatePoints();
 }
 
@@ -365,7 +387,8 @@ void CRiverActor::SetRiver(const CRiver &river, const CUnits &units)
 	std::list<CRiverPoint>::iterator iter = this->m_river.m_listPoints.begin();
 	for (; iter != this->m_river.m_listPoints.end(); ++iter)
 	{
-		this->InsertNextPoint((*iter).x, (*iter).y, (*iter).z);
+// COMMENT: {9/8/2005 6:13:51 PM}		this->InsertNextPoint((*iter).x, (*iter).y, (*iter).z);
+		this->InsertNextPoint((*iter).x, (*iter).y, 0.0);
 	}
 	this->SetUnits(units);
 	TRACE("CRiverActor::SetRiver OUT\n");
@@ -717,10 +740,15 @@ void CRiverActor::OnKeyPress()
 	if (this->State == CRiverActor::CreatingRiver)
 	{
 		char* keysym = this->Interactor->GetKeySym();		
-		// if (::strcmp(keysym, "Escape") == 0)
+		if (::strcmp(keysym, "Escape") == 0)
+		{
+			this->CancelNewRiver();
+		}
+		else
 		{
 			this->EndNewRiver();
 		}
+		this->EventCallbackCommand->SetAbortFlag(1);
 		this->Interactor->Render();
 	}
 }
@@ -857,6 +885,8 @@ void CRiverActor::Update()
 {
 	if (!this->CurrentRenderer) return;
 
+	// May want to replace with ::GetWorldPointAtFixedPlane
+
 	int i;
 
 	// get the position of the mouse cursor in screen/window coordinates
@@ -892,13 +922,7 @@ void CRiverActor::Update()
 		PickPosition[i] = worldCoords[i] / worldCoords[3];
 	}
 
-	double pt[3];
-	pt[2] = this->m_Z;
-
-	this->m_pTransformScale->TransformPoint(pt, pt);
-	this->m_pTransformUnits->TransformPoint(pt, pt);
-
-	double zPos = pt[2];
+	double zPos = this->m_Z * this->m_pTransformScale->GetMatrix()->GetElement(2, 2) * this->m_pTransformUnits->GetMatrix()->GetElement(2, 2);
 
 	if ( camera->GetParallelProjection() )
 	{
@@ -930,7 +954,7 @@ void CRiverActor::Update()
 	this->m_pTransformUnits->GetInverse()->TransformPoint(this->WorldSIPoint, this->WorldScaledUnitPoint);
 
 	this->m_WorldPointXYPlane[2] = this->m_Z;
-	this->WorldSIPoint[2] = pt[2];
+	this->WorldSIPoint[2] = zPos;
 }
 
 void CRiverActor::Add(CPropertyTreeControlBar *pTree)
@@ -1291,14 +1315,12 @@ CRiverActor* CRiverActor::StartNewRiver(vtkRenderWindowInteractor* pRenderWindow
 	pRiverActor->ConnectingMapper = vtkPolyDataMapper::New();
 	pRiverActor->ConnectingMapper->SetInput(pRiverActor->ConnectingLineSource->GetOutput());
 
-// COMMENT: {8/15/2005 5:51:26 PM}	pRiverActor->ConnectingActor = vtkActor::New();
 	pRiverActor->ConnectingActor = vtkLODActor::New();
 	pRiverActor->ConnectingActor->SetMapper(pRiverActor->ConnectingMapper);
 	pRiverActor->ConnectingActor->GetProperty()->SetColor(0., 1., 1.);
 	pRiverActor->ConnectingActor->VisibilityOff();
 
 	pRiverActor->AddPart(pRiverActor->ConnectingActor);
-	pRiverActor->InvokeEvent(CRiverActor::StartNewRiverEvent, NULL);
 
 	return pRiverActor;
 }
@@ -1465,7 +1487,6 @@ void CRiverActor::AddGraphicPoint(void)
 	pPolyDataMapper->SetInput(pSphereSource->GetOutput());
 	this->m_listPolyDataMapper.push_back(pPolyDataMapper);
 
-// COMMENT: {7/14/2005 3:19:25 PM}	vtkActor *pActor = vtkActor::New();
 	vtkLODActor *pActor = vtkLODActor::New();
 	pActor->SetMapper(pPolyDataMapper);
 	if (this->Enabled)
@@ -1497,7 +1518,6 @@ void CRiverActor::AddGraphicPoint(void)
 		pPolyDataMapper->SetInput(pTubeFilter->GetOutput());
 		this->m_listLinePolyDataMapper.push_back(pPolyDataMapper);
 		
-// COMMENT: {7/14/2005 3:19:58 PM}		vtkActor *pActor = vtkActor::New();
 		vtkLODActor *pActor = vtkLODActor::New();		
 		pActor->SetMapper(pPolyDataMapper);
 		pActor->GetProperty()->SetColor(0., 1., 1.);
