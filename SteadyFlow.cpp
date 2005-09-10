@@ -33,16 +33,18 @@ void CSteadyFlow::Insert(CTreeCtrl* pTreeCtrl, HTREEITEM htiSteadyFlow)const
 {
 	// remove all previous items
 	//
-	while (HTREEITEM hChild = pTreeCtrl->GetChildItem(htiSteadyFlow)) {
+	while (HTREEITEM hChild = pTreeCtrl->GetChildItem(htiSteadyFlow))
+	{
 		pTreeCtrl->DeleteItem(hChild);
 	}
 
-	if (this->m_bSteadyFlow) {
+	if (this->m_bSteadyFlow)
+	{
 		pTreeCtrl->SetItemText(htiSteadyFlow, "STEADY_FLOW true");
 	}
-	else {
-		///pTreeCtrl->SetItemText(htiSteadyFlow, "TRANSIENT_FLOW true");
-		pTreeCtrl->SetItemText(htiSteadyFlow, "Transient flow true");
+	else
+	{
+		pTreeCtrl->SetItemText(htiSteadyFlow, "STEADY_FLOW false");
 	}
 	pTreeCtrl->SetItemData(htiSteadyFlow, (DWORD_PTR)this);
 }
@@ -93,7 +95,8 @@ void CSteadyFlow::Edit(CTreeCtrl* pTreeCtrl)
 	CPropertySheet propSheet(_T("Steady Flow Properties"), ::AfxGetMainWnd());
 	propSheet.AddPage(&steadyFlowPage);
 
-	switch (propSheet.DoModal()) {
+	switch (propSheet.DoModal())
+	{
 		case IDOK: case ID_WIZFINISH:
 			{
 				CSteadyFlow steadyFlow = steadyFlowPage.GetSteadyFlow();
@@ -109,10 +112,12 @@ void CSteadyFlow::Edit(CTreeCtrl* pTreeCtrl)
 
 std::ostream& operator<< (std::ostream &os, const CSteadyFlow &a)
 {
-	if (a.m_bSteadyFlow) {
+	if (a.m_bSteadyFlow)
+	{
 		os << "STEADY_FLOW true\n";
 	}
-	else {
+	else
+	{
 		os << "STEADY_FLOW false\n";
 	}
 	return os;
