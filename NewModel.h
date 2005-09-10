@@ -13,6 +13,7 @@
 #include "PrintFreq.h"
 #include "ChemIC.h"
 #include "Snap.h"
+#include "SolutionMethod.h"
 
 class CNewModel
 {
@@ -30,16 +31,13 @@ public:
 	CSteadyFlow      m_steadyFlow;
 	CFreeSurface     m_freeSurface;
 	CUnits           m_units;
-	//CGrid            m_grid[3];
-	//int              m_axes[3];
-	//CSnap            m_snap;
-	//bool             m_print_input_xy;
 	CGridKeyword     m_gridKeyword;
 	CGridElt         m_media;
 	CHeadIC          m_headIC;
 	CChemIC          m_chemIC;
 	CPrintFreq	     m_printFreq;
 	CTimeControl2    m_timeControl2;
+	CSolutionMethod  m_solutionMethod;
 
 protected:
 	CSiteMap         m_siteMap;

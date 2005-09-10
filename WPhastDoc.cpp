@@ -1870,50 +1870,15 @@ void CWPhastDoc::SetScale(vtkFloatingPointType x, vtkFloatingPointType y, vtkFlo
 		}
 	}
 
-// COMMENT: {9/8/2005 2:45:19 PM}	// for all views
-// COMMENT: {9/8/2005 2:45:19 PM}	//
-// COMMENT: {9/8/2005 2:45:19 PM}	POSITION pos = this->GetFirstViewPosition();
-// COMMENT: {9/8/2005 2:45:19 PM}	while (pos != NULL)
-// COMMENT: {9/8/2005 2:45:19 PM}	{
-// COMMENT: {9/8/2005 2:45:19 PM}		CWPhastView *pView = (CWPhastView*) GetNextView(pos);
-// COMMENT: {9/8/2005 2:45:19 PM}
-// COMMENT: {9/8/2005 2:45:19 PM}		// resize the selection bounding box
-// COMMENT: {9/8/2005 2:45:19 PM}		//
-// COMMENT: {9/8/2005 2:45:19 PM}		if (vtkAbstractPropPicker *picker = vtkAbstractPropPicker::SafeDownCast( pView->GetRenderWindowInteractor()->GetPicker() ))
-// COMMENT: {9/8/2005 2:45:19 PM}		{
-// COMMENT: {9/8/2005 2:45:19 PM}			if (vtkProp3D* prop = picker->GetProp3D())
-// COMMENT: {9/8/2005 2:45:19 PM}			{
-// COMMENT: {9/8/2005 2:45:19 PM}				if (CZoneActor *pZone = CZoneActor::SafeDownCast(prop))
-// COMMENT: {9/8/2005 2:45:19 PM}				{
-// COMMENT: {9/8/2005 2:45:19 PM}					pZone->Select(pView);
-// COMMENT: {9/8/2005 2:45:19 PM}				}
-// COMMENT: {9/8/2005 2:45:19 PM}				else
-// COMMENT: {9/8/2005 2:45:19 PM}				{
-// COMMENT: {9/8/2005 2:45:19 PM}					pView->HighlightProp3D(prop); // doesn't immediately render
-// COMMENT: {9/8/2005 2:45:19 PM}				}
-// COMMENT: {9/8/2005 2:45:19 PM}			}
-// COMMENT: {9/8/2005 2:45:19 PM}		}
-// COMMENT: {9/8/2005 2:45:19 PM}
-// COMMENT: {9/8/2005 2:45:19 PM}// COMMENT: {9/8/2005 2:42:32 PM}		// resize the Box Widget
-// COMMENT: {9/8/2005 2:45:19 PM}// COMMENT: {9/8/2005 2:42:32 PM}		//
-// COMMENT: {9/8/2005 2:45:19 PM}// COMMENT: {9/8/2005 2:42:32 PM}		if (pView->GetBoxWidget()->GetProp3D())
-// COMMENT: {9/8/2005 2:45:19 PM}// COMMENT: {9/8/2005 2:42:32 PM}		{
-// COMMENT: {9/8/2005 2:45:19 PM}// COMMENT: {9/8/2005 2:42:32 PM}			pView->GetBoxWidget()->PlaceWidget();
-// COMMENT: {9/8/2005 2:45:19 PM}// COMMENT: {9/8/2005 2:42:32 PM}		}
-// COMMENT: {9/8/2005 2:45:19 PM}
-// COMMENT: {9/8/2005 2:45:19 PM}		// reset the camera
-// COMMENT: {9/8/2005 2:45:19 PM}		//
-// COMMENT: {9/8/2005 2:45:19 PM}		pView->ResetCamera();
-// COMMENT: {9/8/2005 2:45:19 PM}	}
-
-	//{{
+	// if modifying grid update GridElementsSelector
+	//
 	if (this->GridElementsSelector)
 	{
 		int ibounds[6];
 		this->GridElementsSelector->GetIBounds(ibounds);
 		this->GridElementsSelector->SetIBounds(ibounds);
 	}
-	//}}
+
 	this->Notify(0, WPN_SCALE_CHANGED, 0, 0);
 	this->UpdateAllViews(0);
 }
@@ -2403,17 +2368,12 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 		// PRINT_FREQUENCY
 		//
 		printFreq.SyncWithSrcInput();
-#ifdef _DEBUG
-		std::ostringstream oss;
-		oss << printFreq;
-		TRACE("%s\n", oss.str().c_str());
-#endif
 
-// COMMENT: {2/23/2005 1:07:32 PM}		// TIME_CONTROL
-// COMMENT: {2/23/2005 1:07:32 PM}		//
-// COMMENT: {2/23/2005 1:07:32 PM}		CTimeControl timeControl(time_step, time_end);
-// COMMENT: {2/23/2005 1:07:32 PM}		Ctime timeBegin(time_end);
-// COMMENT: {2/23/2005 1:07:32 PM}		timeBegin.SetValue(0.0);
+		// SOLUTION_METHOD
+		//
+		CSolutionMethod solutionMethod;
+		solutionMethod.SyncWithSrcInput();
+
 		// TIME_CONTROL
 		//
 		CTimeControl2 timeControl2(::time_step, ::time_end, ::count_time_end);
@@ -2426,20 +2386,13 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 		model.m_freeSurface    = (::free_surface != 0);
 		model.m_steadyFlow     = (::steady_flow != 0);  // TODO later there'll be additional member vars
 		model.m_units          = ::units;
-		//model.m_grid[0]        = ::grid[0];
-		//model.m_grid[1]        = ::grid[1];
-		//model.m_grid[2]        = ::grid[2];
-		//model.m_snap           = ::snap;
-		//model.m_print_input_xy = (::print_input_xy != 0);
-		//model.m_axes[0]        = ::axes[0];
-		//model.m_axes[1]        = ::axes[1];
-		//model.m_axes[2]        = ::axes[2];
 		model.m_gridKeyword    = CGridKeyword(::grid, ::snap, ::axes, ::print_input_xy);
 		model.m_media          = gridElt;
 		model.m_headIC         = headIC;
 		model.m_chemIC         = chemIC;
 		model.m_printFreq      = printFreq;
 		model.m_timeControl2   = timeControl2;
+		model.m_solutionMethod = solutionMethod;
 
 		this->New(model);
 
@@ -2580,6 +2533,19 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 			pAction->GetZoneActor()->SetChemIC(*chem_ic_ptr);
 			pAction->Execute();
 			delete pAction;
+		}
+
+		// reset tree control
+		//
+		if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar())
+		{
+			pTree->GetGridNode().Expand(TVE_COLLAPSE);
+			pTree->GetMediaNode().Expand(TVE_COLLAPSE);
+			pTree->GetICNode().Expand(TVE_COLLAPSE);
+			pTree->GetBCNode().Expand(TVE_COLLAPSE);
+			pTree->GetWellsNode().Expand(TVE_COLLAPSE);
+			pTree->GetRiversNode().Expand(TVE_COLLAPSE);
+			pTree->ClearSelection();
 		}
 
 		// load the rest of the stress periods
@@ -3195,12 +3161,20 @@ void CWPhastDoc::New(const CNewModel& model)
 	ASSERT(this->m_pimpl);
 	ASSERT(this->m_pUnits);
 
+	// delay redrawing treectrl
+	//
+	CWnd *pWnd = 0;
+	if (CPropertyTreeControlBar *pPropertyTreeControlBar = this->GetPropertyTreeControlBar())
+	{
+		pWnd = pPropertyTreeControlBar->GetTreeCtrl();
+	}
+	CDelayRedraw delayTree(pWnd);
+
 	// set FlowOnly
 	// set SteadyFlow
 	// set FreeSurface
 	// set PrintFreq
 	this->SetModel(model);
-	///this->SetFlowOnly(model.m_flowOnly);
 
 	// set the units
 	//
@@ -3208,7 +3182,8 @@ void CWPhastDoc::New(const CNewModel& model)
 	*this->m_pUnits = model.m_units;
 	// update properties bar
 	//
-	if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar()) {
+	if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar())
+	{
 		pTree->SetUnits(this->m_pUnits);
 	}
 
@@ -3289,14 +3264,6 @@ void CWPhastDoc::New(const CNewModel& model)
 	pChemICAction->Execute();
 	delete pChemICAction;
 
-	// PRINT_FREQUENCY
-	//
-	// update properties bar
-	if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar())
-	{
-		pTree->SetPrintFrequency(&this->m_pModel->m_printFreq);
-	}
-
 	// update properties bar
 	//
 	if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar())
@@ -3311,6 +3278,19 @@ void CWPhastDoc::New(const CNewModel& model)
 		this->m_pMapActor->SetSiteMap(model.GetSiteMap());
 		this->m_pMapActor->SetPickable(0);
 		this->GetPropCollection()->AddItem(this->m_pMapActor);
+	}
+
+	// reset tree control
+	//
+	if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar())
+	{
+		pTree->GetGridNode().Expand(TVE_COLLAPSE);
+		pTree->GetMediaNode().Expand(TVE_COLLAPSE);
+		pTree->GetICNode().Expand(TVE_COLLAPSE);
+		pTree->GetBCNode().Expand(TVE_COLLAPSE);
+		pTree->GetWellsNode().Expand(TVE_COLLAPSE);
+		pTree->GetRiversNode().Expand(TVE_COLLAPSE);
+		pTree->ClearSelection();
 	}
 
 	// refresh screen
@@ -3920,17 +3900,19 @@ void CWPhastDoc::OnBCZonesUnselectAll()
 
 void CWPhastDoc::ClearSelection(void)
 {
-	// foreach view
-	//
-	POSITION pos = this->GetFirstViewPosition();
-	while (pos != NULL) {
-		CView *pView = this->GetNextView(pos);
-		if (CWPhastView *pWPhastView = static_cast<CWPhastView*>(pView)) {
-			ASSERT_KINDOF(CWPhastView, pWPhastView);
-			ASSERT_VALID(pWPhastView);
-			pWPhastView->ClearSelection();
-		}
-	}
+// COMMENT: {9/9/2005 7:30:46 PM}	// foreach view
+// COMMENT: {9/9/2005 7:30:46 PM}	//
+// COMMENT: {9/9/2005 7:30:46 PM}	POSITION pos = this->GetFirstViewPosition();
+// COMMENT: {9/9/2005 7:30:46 PM}	while (pos != NULL)
+// COMMENT: {9/9/2005 7:30:46 PM}	{
+// COMMENT: {9/9/2005 7:30:46 PM}		CView *pView = this->GetNextView(pos);
+// COMMENT: {9/9/2005 7:30:46 PM}		if (CWPhastView *pWPhastView = static_cast<CWPhastView*>(pView))
+// COMMENT: {9/9/2005 7:30:46 PM}		{
+// COMMENT: {9/9/2005 7:30:46 PM}			ASSERT_KINDOF(CWPhastView, pWPhastView);
+// COMMENT: {9/9/2005 7:30:46 PM}			ASSERT_VALID(pWPhastView);
+// COMMENT: {9/9/2005 7:30:46 PM}			pWPhastView->ClearSelection();
+// COMMENT: {9/9/2005 7:30:46 PM}		}
+// COMMENT: {9/9/2005 7:30:46 PM}	}
 
 	// clear selected river points
 	//
@@ -3945,6 +3927,10 @@ void CWPhastDoc::ClearSelection(void)
 			pActor->SetEnabled(0);
 		}
 	}
+
+	// Notify
+	//
+	this->Notify(0, WPN_SELCHANGED, 0, 0);
 }
 
 void CWPhastDoc::Add(CZoneActor *pZoneActor)

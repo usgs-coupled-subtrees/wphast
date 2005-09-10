@@ -563,26 +563,12 @@ void CWPhastView::OnActivateView(BOOL bActivate, CView* pActivateView, CView* pD
 
 void CWPhastView::ResetCamera(void)
 {
-	///this->m_Renderer->ResetCamera();
-	///this->m_RenderWindowInteractor->Render();
 	this->m_bResetCamera = true;
 }
 
 void CWPhastView::OnInitialUpdate()
 {
 	CView::OnInitialUpdate();
-
-// COMMENT: {8/17/2004 8:34:13 PM}	CWPhastDoc *pDoc = this->GetDocument();
-// COMMENT: {8/17/2004 8:34:13 PM}	ASSERT(pDoc);
-// COMMENT: {8/17/2004 8:34:13 PM}	ASSERT(pDoc->GetPropertyTreeControlBar());
-// COMMENT: {8/17/2004 8:34:13 PM}	ASSERT(pDoc->GetBoxPropertiesDialogBar());
-// COMMENT: {8/17/2004 8:34:13 PM}
-// COMMENT: {8/17/2004 8:34:13 PM}	if (pDoc)
-// COMMENT: {8/17/2004 8:34:13 PM}	{
-// COMMENT: {8/17/2004 8:34:13 PM}		pDoc->Attach(this);
-// COMMENT: {8/17/2004 8:34:13 PM}		pDoc->Attach(pDoc->GetPropertyTreeControlBar());
-// COMMENT: {8/17/2004 8:34:13 PM}		pDoc->Attach(pDoc->GetBoxPropertiesDialogBar());
-// COMMENT: {8/17/2004 8:34:13 PM}	}
 }
 
 void CWPhastView::DeleteContents(void)
@@ -590,15 +576,6 @@ void CWPhastView::DeleteContents(void)
 	// clear the selection
 	//
 	this->ClearSelection();
-// COMMENT: {7/12/2004 3:00:18 PM}	if (vtkInteractorStyle *pStyle = vtkInteractorStyle::SafeDownCast(this->GetRenderWindowInteractor()->GetInteractorStyle())) {
-// COMMENT: {7/12/2004 3:00:18 PM}		pStyle->HighlightProp(0);
-// COMMENT: {7/12/2004 3:00:18 PM}	}
-// COMMENT: {7/12/2004 3:00:18 PM}	if (vtkAbstractPropPicker *pPicker = vtkAbstractPropPicker::SafeDownCast( this->GetRenderWindowInteractor()->GetPicker() )) {
-// COMMENT: {7/12/2004 3:00:18 PM}		pPicker->SetPath(0);
-// COMMENT: {7/12/2004 3:00:18 PM}	}
-// COMMENT: {7/12/2004 3:00:18 PM}	if (vtkBoxWidget *pBoxWidget = this->GetBoxWidget()) {
-// COMMENT: {7/12/2004 3:00:18 PM}		pBoxWidget->Off();
-// COMMENT: {7/12/2004 3:00:18 PM}	}
 
 	// reset the camera
 	//
@@ -607,13 +584,9 @@ void CWPhastView::DeleteContents(void)
 	pCamera->SetPosition(0, 0, 1);
 	pCamera->SetViewUp(0, 1, 0);
 
-	//{{
-	this->CancelNewZone();
-	this->CancelNewWell();
-	this->CancelNewRiver();  // TODO check this out
-	//}}
-
-	this->m_bMovingGridLine = false;
+	// cancel all modes
+	//
+	this->CancelMode();
 }
 
 void CWPhastView::OnUpdateToolsNewZone(CCmdUI *pCmdUI)
@@ -709,7 +682,6 @@ void CWPhastView::CancelNewZone(void)
 	if (this->CreatingNewZone())
 	{
 		this->EndNewZone();
-		this->GetDocument()->UpdateAllViews(0);
 	}
 }
 
@@ -746,6 +718,9 @@ void CWPhastView::EndNewZone(void)
 	this->m_pNewCubeActor  = 0;
 	this->m_pNewCubeMapper = 0;
 	this->m_pNewCube       = 0;
+
+	// render
+	this->GetDocument()->UpdateAllViews(0);
 }
 
 BOOL CWPhastView::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
@@ -1164,9 +1139,9 @@ void CWPhastView::StartNewWell(void)
 
 void CWPhastView::CancelNewWell(void)
 {
-	if (this->CreatingNewWell()) {
+	if (this->CreatingNewWell())
+	{
 		this->EndNewWell();
-		this->GetDocument()->UpdateAllViews(0);
 	}
 }
 
@@ -1178,8 +1153,10 @@ void CWPhastView::EndNewWell(void)
 
 	// reattach interactor
 	//
-	if (vtkInteractorStyle* style = vtkInteractorStyle::SafeDownCast(this->InteractorStyle)) {
-		if (vtkInteractorStyleSwitch* switcher = vtkInteractorStyleSwitch::SafeDownCast(style)) {
+	if (vtkInteractorStyle* style = vtkInteractorStyle::SafeDownCast(this->InteractorStyle))
+	{
+		if (vtkInteractorStyleSwitch* switcher = vtkInteractorStyleSwitch::SafeDownCast(style))
+		{
 			style = switcher->GetCurrentStyle();
 		}
 		style->SetInteractor(this->m_RenderWindowInteractor);
@@ -1192,7 +1169,8 @@ void CWPhastView::EndNewWell(void)
 	// clean-up
 	//
 	ASSERT(this->m_pWellActor != 0);
-	if (this->m_pWellActor) {
+	if (this->m_pWellActor)
+	{
 		this->m_pWellActor->Delete();
 		this->m_pWellActor = 0;
 	}
@@ -1215,10 +1193,12 @@ void CWPhastView::OnToolsNewWell()
 void CWPhastView::OnUpdateToolsNewWell(CCmdUI *pCmdUI)
 {
 	pCmdUI->Enable(TRUE);
-	if (this->CreatingNewWell()) {
+	if (this->CreatingNewWell())
+	{
 		pCmdUI->SetCheck(1);
 	}
-	else {
+	else
+	{
 		pCmdUI->SetCheck(0);
 	}
 }
@@ -1303,6 +1283,10 @@ void CWPhastView::Update(IObserver* pSender, LPARAM lHint, CObject* /*pHint*/, v
 		if (vtkProp* pProp = vtkProp::SafeDownCast(pObject))
 		{
 			this->Select(pProp);
+		}
+		else if (pObject == 0)
+		{
+			this->ClearSelection();
 		}
 		break;
 	case WPN_VISCHANGED:
@@ -1579,31 +1563,47 @@ void CWPhastView::OnDestroy()
 	// TODO: Add your message handler code here
 }
 
+bool CWPhastView::MovingGridLine()const
+{
+	return this->m_bMovingGridLine;
+}
+
+void CWPhastView::EndMoveGridLine()
+{
+	if (CGridActor* pGridActor = CGridActor::SafeDownCast(this->GetDocument()->GetGridActor()))
+	{
+		pGridActor->SetEnabled(0);
+	}
+	this->m_bMovingGridLine = false;
+}
+
+void CWPhastView::CancelMoveGridLine()
+{
+	if (this->MovingGridLine())
+	{
+		this->EndMoveGridLine();
+	}
+}
+
+void CWPhastView::StartMoveGridLine()
+{
+	if (CGridActor* pGridActor = CGridActor::SafeDownCast(this->GetDocument()->GetGridActor()))
+	{
+		pGridActor->SetInteractor(this->m_RenderWindowInteractor);
+		this->m_bMovingGridLine = true;
+	}
+}
+
 void CWPhastView::OnToolsMoveVerLine()
 {
-	// TODO: Add your command handler code here
-	if (this->m_bMovingGridLine)
+	if (this->MovingGridLine())
 	{
-		////this->GetDocument()->GetGridActor()->CancelMoveGridLine();
-		///if (CGridLODActor* pGridLODActor = CGridLODActor::SafeDownCast(this->GetDocument()->GetGridActor()))
-		if (CGridActor* pGridActor = CGridActor::SafeDownCast(this->GetDocument()->GetGridActor()))
-		{
-			// pGridLODActor->SetInteractor(0);
-			pGridActor->SetEnabled(0);
-		}
-		this->m_bMovingGridLine = false;
+		this->CancelMoveGridLine();
 	}
 	else
 	{
 		this->CancelMode();
-
-		this->m_bMovingGridLine = true;
-		////this->GetDocument()->GetGridActor()->StartMoveGridLine(this->m_RenderWindowInteractor);
-		if (CGridActor* pGridActor = CGridActor::SafeDownCast(this->GetDocument()->GetGridActor()))
-		{
-			pGridActor->SetInteractor(this->m_RenderWindowInteractor);
-			// pGridLODActor->SetEnabled(1);
-		}
+		this->StartMoveGridLine();
 	}
 }
 
@@ -1619,19 +1619,19 @@ void CWPhastView::OnUpdateToolsMoveVerLine(CCmdUI *pCmdUI)
 		{
 			pCmdUI->Enable(FALSE);
 		}
+
+		if (this->MovingGridLine())
+		{
+			pCmdUI->SetCheck(1);
+		}
+		else
+		{
+			pCmdUI->SetCheck(0);
+		}
 	}
 	else
 	{
 		pCmdUI->Enable(FALSE);
-	}
-
-	if (this->m_bMovingGridLine)
-	{
-		pCmdUI->SetCheck(1);
-	}
-	else
-	{
-		pCmdUI->SetCheck(0);
 	}
 }
 
@@ -1964,38 +1964,22 @@ HCURSOR Test()
 
 void CWPhastView::CancelMode(void)
 {
-	// New River
+	// River
 	//
-	if (this->CreatingNewRiver())
-	{
-		this->CancelNewRiver();
-	}
+	this->CancelNewRiver();
 
-	// New Well
+	// Well
 	//
-	if (this->CreatingNewWell())
-	{
-		this->CancelNewWell();
-	}
+	this->CancelNewWell();
+
 
 	// New Zone
 	//
-	if (this->CreatingNewZone())
-	{
-		this->CancelNewZone();
-	}
+	this->CancelNewZone();
 
 	// Move Grid Lines
 	//
-	if (this->m_bMovingGridLine)
-	{
-		if (CGridActor* pGridActor = CGridActor::SafeDownCast(this->GetDocument()->GetGridActor()))
-		{
-			// pGridLODActor->SetInteractor(0);
-			pGridActor->SetEnabled(0);
-		}
-		this->m_bMovingGridLine = false;
-	}
+	this->CancelMoveGridLine();
 
 	// Modify Grid
 	//
@@ -2012,23 +1996,28 @@ void CWPhastView::CancelMode(void)
 	}
 }
 
-
-void CWPhastView::OnUpdateToolsSelectObject(CCmdUI *pCmdUI)
+bool CWPhastView::SelectingObject()const
 {
 	if (vtkInteractorStyleTrackballCameraEx *style = vtkInteractorStyleTrackballCameraEx::SafeDownCast(this->InteractorStyle))
 	{
-		if (style->GetPickWithMouse())
-		{
-			pCmdUI->SetCheck(1);
-		}
-		else
-		{
-			pCmdUI->SetCheck(0);
-		}
+		if (style->GetPickWithMouse()) return true;
+	}
+	return false;
+}
+
+void CWPhastView::OnUpdateToolsSelectObject(CCmdUI *pCmdUI)
+{
+	if (this->InteractorStyle)
+	{
+		pCmdUI->Enable(TRUE);
+	}
+	if (this->SelectingObject())
+	{
+		pCmdUI->SetCheck(1);
 	}
 	else
 	{
-		pCmdUI->Enable(FALSE);
+		pCmdUI->SetCheck(0);
 	}
 }
 
@@ -2036,7 +2025,7 @@ void CWPhastView::OnToolsSelectObject()
 {
 	if (vtkInteractorStyleTrackballCameraEx *style = vtkInteractorStyleTrackballCameraEx::SafeDownCast(this->InteractorStyle))
 	{
-		if (style->GetPickWithMouse())
+		if (this->SelectingObject())
 		{
 			this->CancelMode();
 		}

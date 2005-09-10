@@ -239,7 +239,7 @@ void CViewVTKCommand::OnEndPickEvent(vtkObject* caller, void* callData)
 			// Hide BoxWidget
 			//
 			//this->m_pView->GetBoxWidget()->SetEnabled(0);
-			//this->m_pView->GetDocument()->ClearSelection();
+			this->m_pView->GetDocument()->ClearSelection();
 		}
 
 		// render

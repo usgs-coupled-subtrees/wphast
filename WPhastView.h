@@ -130,22 +130,36 @@ public:
 	afx_msg void OnUpdateToolsNewZone(CCmdUI *pCmdUI);
 	afx_msg void OnToolsNewZone();
 
+	// New Zone
+	//
 	void CancelNewZone(void);
 	bool CreatingNewZone(void)const;
 	void StartNewZone(void);
 	void EndNewZone(void);
 
-	void CancelMode(void);
+	// Moving/Copying grid lines
+	//
+	void CancelMoveGridLine(void);
+	bool MovingGridLine(void)const;
+	void StartMoveGridLine(void);
+	void EndMoveGridLine(void);
 
+	void CancelMode(void);
 
 public:
 	afx_msg void OnToolsNewWell();
 	afx_msg void OnUpdateToolsNewWell(CCmdUI *pCmdUI);
 
+	// New Well
+	//
 	bool CreatingNewWell(void)const;
 	void StartNewWell(void);
 	void CancelNewWell(void);
 	void EndNewWell(void);
+
+	// Select Object
+	//
+	bool SelectingObject(void)const;
 
 public:
 
@@ -188,7 +202,7 @@ public:
 	afx_msg void OnDestroy();
 	afx_msg void OnToolsMoveVerLine();
 	afx_msg void OnUpdateToolsMoveVerLine(CCmdUI *pCmdUI);
-	afx_msg void OnUpdateToolsModifyGrid(CCmdUI *pCmdUI);
+// COMMENT: {9/9/2005 6:14:50 PM}	afx_msg void OnUpdateToolsModifyGrid(CCmdUI *pCmdUI);
 	afx_msg void OnToolsModifyGrid();
 	afx_msg void OnViewFromPrevDirection();
 	afx_msg void OnUpdateToolsSelectObject(CCmdUI *pCmdUI);

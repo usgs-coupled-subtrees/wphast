@@ -31,6 +31,7 @@
 #include "Units.h"
 #include "NewModel.h"
 #include "FlowOnly.h"
+#include "SolutionMethod.h"
 #include "TimeControl2.h"
 #include "Units1PropertyPage.h"
 #include "Units2PropertyPage.h"
@@ -55,28 +56,26 @@
 #include <vtkBoxWidget.h>
 #include <vtkPropAssembly.h>
 
-static const TCHAR szPeriodFormat[]        = _T("Simulation Period %d");
+//static const TCHAR szPeriodFormat[]        = _T("Simulation Period %d");
 static const TCHAR szFLOW_ONLY[]           = _T("FLOW_ONLY");
 static const TCHAR szSTEADY_FLOW[]         = _T("STEADY_FLOW");
 static const TCHAR szFREE_SURFACE_BC[]     = _T("FREE_SURFACE_BC");
+static const TCHAR szSOLUTION_METHOD[]     = _T("SOLUTION_METHOD");
 static const TCHAR szUNITS[]               = _T("UNITS");
 static const TCHAR szGRID[]                = _T("GRID");
 static const TCHAR szMEDIA[]               = _T("MEDIA");
-static const TCHAR szBOUNDARY_CONDITIONS[] = _T("BOUNDARY_CONDITIONS");
 static const TCHAR szINITIAL_CONDITIONS[]  = _T("INITIAL_CONDITIONS");
-static const TCHAR szTIME_CONTROL[]        = _T("TIME_CONTROL");
-static const TCHAR szPRINT_FREQUENCY[]     = _T("PRINT_FREQUENCY");
-
+static const TCHAR szBOUNDARY_CONDITIONS[] = _T("BOUNDARY_CONDITIONS");
 static const TCHAR szWELLS[]               = _T("WELLS");
 static const TCHAR szRIVERS[]              = _T("RIVERS");
+static const TCHAR szPRINT_FREQUENCY[]     = _T("PRINT_FREQUENCY");
+static const TCHAR szTIME_CONTROL[]        = _T("TIME_CONTROL");
 
 static const TCHAR szZoneFormat[]          = _T("Zone %d");
-
 
 static const int BC_INDEX              = 0;
 static const int PRINT_FREQUENCY_INDEX = 1;
 static const int TIME_CONTROL_INDEX    = 2;
-
 
 // vtkProp3D
 
@@ -153,103 +152,20 @@ void CPropertyTreeControlBar::OnSelChanged(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 	NMTREEVIEW *pNMTREEVIEW = (LPNMTREEVIEW)pNMHDR;
 	CTreeCtrlNode item(pNMTREEVIEW->itemNew.hItem, this->GetTreeCtrlEx());
 
-// COMMENT: {9/7/2005 2:50:52 PM}	// MEDIA
-// COMMENT: {9/7/2005 2:50:52 PM}	//
-// COMMENT: {9/7/2005 2:50:52 PM}	if (item.IsNodeAncestor(this->m_nodeMedia))
-// COMMENT: {9/7/2005 2:50:52 PM}	{
-// COMMENT: {9/7/2005 2:50:52 PM}		if (item != this->m_nodeMedia)
-// COMMENT: {9/7/2005 2:50:52 PM}		{
-// COMMENT: {9/7/2005 2:50:52 PM}			while (item.GetParent() != this->m_nodeMedia)
-// COMMENT: {9/7/2005 2:50:52 PM}			{
-// COMMENT: {9/7/2005 2:50:52 PM}				item = item.GetParent();
-// COMMENT: {9/7/2005 2:50:52 PM}				if (!item) break;
-// COMMENT: {9/7/2005 2:50:52 PM}			}
-// COMMENT: {9/7/2005 2:50:52 PM}			if (item.GetData())
-// COMMENT: {9/7/2005 2:50:52 PM}			{
-// COMMENT: {9/7/2005 2:50:52 PM}				if (CZoneActor* pZone = CZoneActor::SafeDownCast((vtkObject*)item.GetData()))
-// COMMENT: {9/7/2005 2:50:52 PM}				{
-// COMMENT: {9/7/2005 2:50:52 PM}
-// COMMENT: {9/7/2005 2:50:52 PM}					CFrameWnd *pFrame = reinterpret_cast<CFrameWnd*>(AfxGetApp()->m_pMainWnd);
-// COMMENT: {9/7/2005 2:50:52 PM}					ASSERT_KINDOF(CFrameWnd, pFrame);
-// COMMENT: {9/7/2005 2:50:52 PM}					ASSERT_VALID(pFrame);
-// COMMENT: {9/7/2005 2:50:52 PM}
-// COMMENT: {9/7/2005 2:50:52 PM}					CWPhastView* pView = reinterpret_cast<CWPhastView*>(pFrame->GetActiveView());
-// COMMENT: {9/7/2005 2:50:52 PM}					ASSERT_KINDOF(CWPhastView, pView);
-// COMMENT: {9/7/2005 2:50:52 PM}					ASSERT_VALID(pView);
-// COMMENT: {9/7/2005 2:50:52 PM}
-// COMMENT: {9/7/2005 2:50:52 PM}					pZone->Select(pView);
-// COMMENT: {9/7/2005 2:50:52 PM}				}
-// COMMENT: {9/7/2005 2:50:52 PM}			}
-// COMMENT: {9/7/2005 2:50:52 PM}		}
-// COMMENT: {9/7/2005 2:50:52 PM}		//{{
-// COMMENT: {9/7/2005 2:50:52 PM}		else
-// COMMENT: {9/7/2005 2:50:52 PM}		{
-// COMMENT: {9/7/2005 2:50:52 PM}            if (CWPhastDoc *pDoc = this->GetDocument())
-// COMMENT: {9/7/2005 2:50:52 PM}			{
-// COMMENT: {9/7/2005 2:50:52 PM}				pDoc->ClearSelection();
-// COMMENT: {9/7/2005 2:50:52 PM}			}
-// COMMENT: {9/7/2005 2:50:52 PM}		}
-// COMMENT: {9/7/2005 2:50:52 PM}		//}}
-// COMMENT: {9/7/2005 2:50:52 PM}		return;
-// COMMENT: {9/7/2005 2:50:52 PM}	}
-
-	// Rivers
-	//
-	if (item.IsNodeAncestor(this->GetRiversNode()) && item != this->GetRiversNode())
-	{
-		if ((item != this->GetRiversNode()) && (item.GetParent() != this->GetRiversNode()))
-		{
-			CTreeCtrlNode riverNode = item.GetParent();
-			if (riverNode.GetData())
-			{
-				if (CRiverActor *pRiverActor = CRiverActor::SafeDownCast(reinterpret_cast<vtkObject*>(riverNode.GetData())))
-				{
-					pRiverActor->SelectPoint(riverNode.GetIndex(item));
-				}
-				else
-				{
-					ASSERT(FALSE);
-				}
-			}
-		}
-	}
-
-
 	if (m_wndTree.GetItemData(pNMTREEVIEW->itemNew.hItem))
 	{
 		HTREEITEM hParent = m_wndTree.GetParentItem(pNMTREEVIEW->itemNew.hItem);
-		// if (pNMTREEVIEW->itemNew.hItem == m_htiGrid || hParent == m_htiGrid) {
-		// if (pNMTREEVIEW->itemNew.hItem == m_nodeGrid || hParent == m_nodeGrid) {
-// COMMENT: {7/15/2004 1:28:10 PM}		if (this->m_nodeGrid.IsNodeAncestor(CTreeCtrlNode(pNMTREEVIEW->itemNew.hItem, &this->m_wndTree))) {
-// COMMENT: {7/15/2004 1:28:10 PM}			//CGridActor* pZone = reinterpret_cast<CGridActor*>(m_wndTree.GetItemData(pNMTREEVIEW->itemNew.hItem));
-// COMMENT: {7/15/2004 1:28:10 PM}		}
-
 
 		if (hParent == m_nodeMedia || hParent == this->m_nodeBC || hParent == this->m_nodeIC)
 		{
 
 			CZoneActor* pZone = reinterpret_cast<CZoneActor*>(m_wndTree.GetItemData(pNMTREEVIEW->itemNew.hItem));
-
-// COMMENT: {9/7/2005 2:23:14 PM}			CFrameWnd *pFrame = reinterpret_cast<CFrameWnd*>(AfxGetApp()->m_pMainWnd);
-// COMMENT: {9/7/2005 2:23:14 PM}			ASSERT_KINDOF(CFrameWnd, pFrame);
-// COMMENT: {9/7/2005 2:23:14 PM}			ASSERT_VALID(pFrame);
-// COMMENT: {9/7/2005 2:23:14 PM}
-// COMMENT: {9/7/2005 2:23:14 PM}			CWPhastDoc* pDoc = reinterpret_cast<CWPhastDoc*>(pFrame->GetActiveDocument());
-// COMMENT: {9/7/2005 2:23:14 PM}			ASSERT_KINDOF(CWPhastDoc, pDoc);
-// COMMENT: {9/7/2005 2:23:14 PM}			ASSERT_VALID(pDoc);
-// COMMENT: {9/7/2005 2:23:14 PM}
-// COMMENT: {9/7/2005 2:23:14 PM}			CWPhastView* pView = reinterpret_cast<CWPhastView*>(pFrame->GetActiveView());
-// COMMENT: {9/7/2005 2:23:14 PM}			ASSERT_KINDOF(CWPhastView, pView);
-// COMMENT: {9/7/2005 2:23:14 PM}			ASSERT_VALID(pView);
-// COMMENT: {9/7/2005 2:23:14 PM}
-// COMMENT: {9/7/2005 2:23:14 PM}			pZone->Select(pView);
-
-			//{{
 			if (CWPhastDoc* pDoc = this->GetDocument())
 			{
+				// Notify listeners
+				//
 				pDoc->Notify(this, WPN_SELCHANGED, 0, pZone);
 			}
-			//}}
 		}
 		else if (hParent == this->m_nodeWells)
 		{
@@ -258,6 +174,8 @@ void CPropertyTreeControlBar::OnSelChanged(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 			{
 				if (vtkProp* pProp = vtkProp::SafeDownCast(reinterpret_cast<vtkObject*>(item.GetData())))
 				{
+					// Notify listeners
+					//
 					if (CWPhastDoc* pDoc = this->GetDocument())
 					{
 						pDoc->Notify(this, WPN_SELCHANGED, 0, pProp);
@@ -271,6 +189,8 @@ void CPropertyTreeControlBar::OnSelChanged(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 			{
 				if (vtkProp* pProp = vtkProp::SafeDownCast(reinterpret_cast<vtkObject*>(item.GetData())))
 				{
+					// Notify listeners
+					//
 					if (CWPhastDoc* pDoc = this->GetDocument())
 					{
 						pDoc->Notify(this, WPN_SELCHANGED, 0, pProp);
@@ -280,15 +200,17 @@ void CPropertyTreeControlBar::OnSelChanged(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 		}
 		else
 		{
+			// Notify listeners
+			//
 			if (CWPhastDoc *pDoc = this->GetDocument())
 			{
-				pDoc->ClearSelection();
+				pDoc->Notify(this, WPN_SELCHANGED, 0, 0);
 			}
 
-			// ASSERT(FALSE);
 			// Update StatusBar
 			//
-			if (CWnd* pWnd = ((CFrameWnd*)::AfxGetMainWnd())->GetMessageBar()) {
+			if (CWnd* pWnd = ((CFrameWnd*)::AfxGetMainWnd())->GetMessageBar())
+			{
 				CString status;
 				status.LoadString(AFX_IDS_IDLEMESSAGE);
 				pWnd->SetWindowText(status);
@@ -297,12 +219,44 @@ void CPropertyTreeControlBar::OnSelChanged(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 	}
 	else
 	{
-		//if (pNMTREEVIEW->itemNew.hItem == this->m_nodeMedia || pNMTREEVIEW->itemNew.hItem == this->m_nodeBC || pNMTREEVIEW->itemNew.hItem == this->m_nodeIC) {
-            if (CWPhastDoc *pDoc = this->GetDocument())
+		// Notify listeners
+		//
+		if (CWPhastDoc *pDoc = this->GetDocument())
+		{
+			pDoc->Notify(this, WPN_SELCHANGED, 0, 0);
+		}
+
+		// Note: MessageBar should be a listener for WPN_SELCHANGED
+		// Update StatusBar
+		//
+		if (CWnd* pWnd = ((CFrameWnd*)::AfxGetMainWnd())->GetMessageBar())
+		{
+			CString status;
+			status.LoadString(AFX_IDS_IDLEMESSAGE);
+			pWnd->SetWindowText(status);
+		}
+
+		// River point selection
+		//
+		if (item.IsNodeAncestor(this->GetRiversNode()) && item != this->GetRiversNode())
+		{
+			if ((item != this->GetRiversNode()) && (item.GetParent() != this->GetRiversNode()))
 			{
-				pDoc->ClearSelection();
+				CTreeCtrlNode riverNode = item.GetParent();
+				if (riverNode.GetData())
+				{
+					if (CRiverActor *pRiverActor = CRiverActor::SafeDownCast(reinterpret_cast<vtkObject*>(riverNode.GetData())))
+					{
+						pRiverActor->SelectPoint(riverNode.GetIndex(item));
+					}
+					else
+					{
+						ASSERT(FALSE);
+					}
+				}
 			}
-		//}
+		}
+
 	}
 }
 
@@ -524,9 +478,6 @@ void CPropertyTreeControlBar::OnNMDblClk(NMHDR* pNMHDR, LRESULT* pResult)
 	TRACE("OnNMDblClk\n");
 
 	//{{HACK
-	// If creating a new zone cancel now 
-	// if this isn't here a leak occurs iff the
-	// item double-clicked is already selected
 	{
 		CFrameWnd *pFrame = (CFrameWnd*)AfxGetApp()->m_pMainWnd;
 		ASSERT_VALID(pFrame);
@@ -535,12 +486,11 @@ void CPropertyTreeControlBar::OnNMDblClk(NMHDR* pNMHDR, LRESULT* pResult)
 		ASSERT_VALID(pDoc);
 
 		POSITION pos = pDoc->GetFirstViewPosition();
-		while (pos != NULL) {
+		while (pos != NULL)
+		{
 			CWPhastView *pView = (CWPhastView*) pDoc->GetNextView(pos);
 			ASSERT_VALID(pView);
-			if (pView->CreatingNewZone()) {
-				pView->CancelNewZone();
-			}
+			pView->CancelMode();
 		}
 	}
 	//}}HACK
@@ -620,34 +570,30 @@ void CPropertyTreeControlBar::OnNMDblClk(NMHDR* pNMHDR, LRESULT* pResult)
 
 	// FREE_SURFACE
 	//
-	if (item.IsNodeAncestor(this->m_nodeFreeSurface)) {
+	if (item.IsNodeAncestor(this->m_nodeFreeSurface))
+	{
 		CFreeSurface *pFreeSurface = reinterpret_cast<CFreeSurface*>(this->m_nodeFreeSurface.GetData());
 		ASSERT(pFreeSurface);
-#if defined(_DEBUG)
-		CFrameWnd *pFrame = (CFrameWnd*)AfxGetApp()->m_pMainWnd;
-		ASSERT_VALID(pFrame);
-		// CWPhastDoc* pDoc = dynamic_cast<CWPhastDoc*>(pFrame->GetActiveDocument()); // needs /GR
-		CWPhastDoc* pDoc = reinterpret_cast<CWPhastDoc*>(pFrame->GetActiveDocument());
-		ASSERT_VALID(pDoc);
-		ASSERT(pFreeSurface == &pDoc->GetModel()->m_freeSurface);
-#endif
 		pFreeSurface->Edit(&this->m_wndTree);
+		*pResult = TRUE;
+		return;
+	}
+
+	// SOLUTION_METHOD
+	//
+	if (item.IsNodeAncestor(this->m_nodeSolutionMethod))
+	{
+		::AfxMessageBox("SOLUTION_METHOD not yet editable");
 		*pResult = TRUE;
 		return;
 	}
 
 	// STEADY_FLOW
 	//
-	if (item.IsNodeAncestor(this->m_nodeSteadyFlow)) {
+	if (item.IsNodeAncestor(this->m_nodeSteadyFlow))
+	{
 		CSteadyFlow* pSteadyFlow = reinterpret_cast<CSteadyFlow*>(this->m_nodeSteadyFlow.GetData());
 		ASSERT(pSteadyFlow);
-#if defined(_DEBUG)
-		CFrameWnd *pFrame = (CFrameWnd*)AfxGetApp()->m_pMainWnd;
-		ASSERT_VALID(pFrame);
-		CWPhastDoc* pDoc = reinterpret_cast<CWPhastDoc*>(pFrame->GetActiveDocument());
-		ASSERT_VALID(pDoc);
-		ASSERT(pSteadyFlow == &pDoc->GetModel()->m_steadyFlow);
-#endif
 		pSteadyFlow->Edit(&this->m_wndTree);
 		*pResult = TRUE;
 		return;
@@ -1255,6 +1201,11 @@ void CPropertyTreeControlBar::SetFreeSurface(CFreeSurface *pFreeSurface)
 	pFreeSurface->Insert(&this->m_wndTree, this->m_nodeFreeSurface);
 }
 
+void CPropertyTreeControlBar::SetSolutionMethod(CSolutionMethod *pSolutionMethod)
+{
+	pSolutionMethod->Insert(&this->m_wndTree, this->m_nodeSolutionMethod);
+}
+
 void CPropertyTreeControlBar::SetSteadyFlow(CSteadyFlow *pSteadyFlow)
 {
 	pSteadyFlow->Insert(&this->m_wndTree, this->m_nodeSteadyFlow);
@@ -1265,6 +1216,8 @@ void CPropertyTreeControlBar::SetModel(CNewModel* pModel)
 	this->SetFlowOnly(&pModel->m_flowOnly);
 	this->SetFreeSurface(&pModel->m_freeSurface);
 	this->SetSteadyFlow(&pModel->m_steadyFlow);
+	this->SetPrintFrequency(&pModel->m_printFreq);
+	this->SetSolutionMethod(&pModel->m_solutionMethod);
 }
 
 void CPropertyTreeControlBar::SetTimeControl2(CTimeControl2* pTimeControl2)
@@ -1645,13 +1598,14 @@ void CPropertyTreeControlBar::DeleteContents()
 	this->m_nNextZone = 0;
 
 	// populate static properties
-	this->m_nodeFlowOnly    = this->m_wndTree.InsertItem(szFLOW_ONLY          );
-	this->m_nodeSteadyFlow  = this->m_wndTree.InsertItem(szSTEADY_FLOW        );
-	this->m_nodeFreeSurface = this->m_wndTree.InsertItem(szFREE_SURFACE_BC    );
-	this->m_nodeUnits       = this->m_wndTree.InsertItem(szUNITS              );
-	this->m_nodeGrid        = this->m_wndTree.InsertItem(szGRID               );
-	this->m_nodeMedia       = this->m_wndTree.InsertItem(szMEDIA              );
-	this->m_nodeIC          = this->m_wndTree.InsertItem(szINITIAL_CONDITIONS );
+	this->m_nodeFlowOnly       = this->m_wndTree.InsertItem(szFLOW_ONLY          );
+	this->m_nodeSteadyFlow     = this->m_wndTree.InsertItem(szSTEADY_FLOW        );
+	this->m_nodeFreeSurface    = this->m_wndTree.InsertItem(szFREE_SURFACE_BC    );
+	this->m_nodeSolutionMethod = this->m_wndTree.InsertItem(szSOLUTION_METHOD    );
+	this->m_nodeUnits          = this->m_wndTree.InsertItem(szUNITS              );
+	this->m_nodeGrid           = this->m_wndTree.InsertItem(szGRID               );
+	this->m_nodeMedia          = this->m_wndTree.InsertItem(szMEDIA              );
+	this->m_nodeIC             = this->m_wndTree.InsertItem(szINITIAL_CONDITIONS );
 
 
 // COMMENT: {4/11/2005 7:50:38 PM}	// add first simulation period
@@ -1694,22 +1648,9 @@ void CPropertyTreeControlBar::Update(IObserver* pSender, LPARAM lHint, CObject* 
 		TRACE("WARNING unexpected\n");
 		break;
 	case WPN_SELCHANGED:
-		this->m_bSelectingProp = TRUE;
 		if (vtkProp* pProp = vtkProp::SafeDownCast(pObject))
 		{
-// COMMENT: {9/7/2005 3:31:04 PM}			//{{
-// COMMENT: {9/7/2005 3:31:04 PM}			// Clear river selections
-// COMMENT: {9/7/2005 3:31:04 PM}			//
-// COMMENT: {9/7/2005 3:31:04 PM}			CTreeCtrlNode child = this->GetRiversNode().GetChild();
-// COMMENT: {9/7/2005 3:31:04 PM}			for (; child; child = child.GetNextSibling())
-// COMMENT: {9/7/2005 3:31:04 PM}			{
-// COMMENT: {9/7/2005 3:31:04 PM}				if (CRiverActor *pActor = CRiverActor::SafeDownCast(reinterpret_cast<vtkObject*>(child.GetData())))
-// COMMENT: {9/7/2005 3:31:04 PM}				{
-// COMMENT: {9/7/2005 3:31:04 PM}					pActor->ClearSelection();
-// COMMENT: {9/7/2005 3:31:04 PM}					pActor->SetEnabled(0);
-// COMMENT: {9/7/2005 3:31:04 PM}				}
-// COMMENT: {9/7/2005 3:31:04 PM}			}
-// COMMENT: {9/7/2005 3:31:04 PM}			//}}
+			this->m_bSelectingProp = TRUE;
 			if (CZoneActor* pZoneActor = CZoneActor::SafeDownCast(pProp))
 			{
 				bool bFound = false;
@@ -1806,8 +1747,13 @@ void CPropertyTreeControlBar::Update(IObserver* pSender, LPARAM lHint, CObject* 
 			{
 				ASSERT(FALSE); // untested
 			}
+			this->m_bSelectingProp = FALSE;
 		}
-		this->m_bSelectingProp = FALSE;
+		else if (pObject == 0)
+		{
+			this->m_bSelectingProp = FALSE;
+			this->ClearSelection();
+		}
 		break;
 
 	case WPN_VISCHANGED:
@@ -2291,4 +2237,9 @@ void CPropertyTreeControlBar::OnLButtonDown(UINT nFlags, CPoint point)
 void CPropertyTreeControlBar::OnContextMenu(CWnd* /*pWnd*/, CPoint /*point*/)
 {
 	// TODO: Add your message handler code here
+}
+
+void CPropertyTreeControlBar::ClearSelection(void)
+{
+	this->SelectWithoutNotification(0);
 }

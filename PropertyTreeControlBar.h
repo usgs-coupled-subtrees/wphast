@@ -11,6 +11,7 @@ class CUnits;
 class CFlowOnly;
 class CSteadyFlow;
 class CFreeSurface;
+class CSolutionMethod;
 class CNewModel;
 class CTimeControl2;
 class CPrintFreq;
@@ -68,6 +69,7 @@ protected:
 	CTreeCtrlNode   m_nodeSP1;
 	CTreeCtrlNode   m_nodePF;
 	CTreeCtrlNode   m_nodeFreeSurface;
+	CTreeCtrlNode   m_nodeSolutionMethod;
 	CTreeCtrlNode   m_nodeSteadyFlow;
 	CTreeCtrlNode   m_nodeWells;
 	CTreeCtrlNode   m_nodeRivers;
@@ -104,6 +106,8 @@ public:
 	void SetFlowOnly(CFlowOnly *pFlowOnly);
 	void SetFreeSurface(CFreeSurface *pFreeSurface);
 	void SetSteadyFlow(CSteadyFlow *pSteadyFlow);
+	void SetSolutionMethod(CSolutionMethod *pSolutionMethod);
+
 
 	void SetTimeControl2(CTimeControl2* pTimeControl2);
 	CTimeControl2* GetTimeControl2(void);
@@ -145,6 +149,7 @@ public:
 
 
 	BOOL SelectWithoutNotification(HTREEITEM htItem);
+	void ClearSelection(void);
 
 #ifdef WPHAST_DEPRECATED
 // COMMENT: {10/23/2003 8:08:41 PM}	HTREEITEM SelectProp(vtkProp3D* pProp);

@@ -754,6 +754,9 @@
 				RelativePath="Snap.cpp">
 			</File>
 			<File
+				RelativePath="SolutionMethod.cpp">
+			</File>
+			<File
 				RelativePath="Startup.cpp">
 			</File>
 			<File
@@ -1305,6 +1308,9 @@
 			</File>
 			<File
 				RelativePath="Snap.h">
+			</File>
+			<File
+				RelativePath="SolutionMethod.h">
 			</File>
 			<File
 				RelativePath="Startup.h">
