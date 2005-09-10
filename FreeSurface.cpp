@@ -33,16 +33,18 @@ void CFreeSurface::Insert(CTreeCtrl* pTreeCtrl, HTREEITEM htiFreeSurface)const
 {
 	// remove all previous items
 	//
-	while (HTREEITEM hChild = pTreeCtrl->GetChildItem(htiFreeSurface)) {
+	while (HTREEITEM hChild = pTreeCtrl->GetChildItem(htiFreeSurface))
+	{
 		pTreeCtrl->DeleteItem(hChild);
 	}
 
-	if (this->m_bFreeSurface) {
-		pTreeCtrl->SetItemText(htiFreeSurface, "FREE_SURFACE true");
+	if (this->m_bFreeSurface)
+	{
+		pTreeCtrl->SetItemText(htiFreeSurface, "FREE_SURFACE_BC true");
 	}
-	else {
-		///pTreeCtrl->SetItemText(htiFreeSurface, "CONFINED_FLOW true");
-		pTreeCtrl->SetItemText(htiFreeSurface, "Confined flow true");
+	else
+	{
+		pTreeCtrl->SetItemText(htiFreeSurface, "FREE_SURFACE_BC false");
 	}
 	pTreeCtrl->SetItemData(htiFreeSurface, (DWORD_PTR)this);
 }
@@ -67,7 +69,8 @@ void CFreeSurface::Serialize(bool bStoring, hid_t loc_id)
 		if (group_id <= 0) TRACE("WARNING unable to open group %s\n", szFreeSurface);
 	}
 
-	if (group_id > 0) {
+	if (group_id > 0)
+	{
 		status = CGlobal::HDFSerializeBool(bStoring, group_id, szFreeSurface, this->m_bFreeSurface);
 		ASSERT(status >= 0);
 
@@ -93,7 +96,8 @@ void CFreeSurface::Edit(CTreeCtrl* pTreeCtrl)
 	CPropertySheet propSheet(_T("Free Surface Properties"), ::AfxGetMainWnd());
 	propSheet.AddPage(&freeSurfacePage);
 
-	switch (propSheet.DoModal()) {
+	switch (propSheet.DoModal())
+	{
 		case IDOK: case ID_WIZFINISH:
 			{
 				CFreeSurface freeSurface = freeSurfacePage.GetFreeSurface();
@@ -109,10 +113,12 @@ void CFreeSurface::Edit(CTreeCtrl* pTreeCtrl)
 
 std::ostream& operator<< (std::ostream &os, const CFreeSurface &a)
 {
-	if (a.m_bFreeSurface) {
+	if (a.m_bFreeSurface)
+	{
 		os << "FREE_SURFACE_BC true\n";
 	}
-	else {
+	else
+	{
 		os << "FREE_SURFACE_BC false\n";
 	}
 	return os;
