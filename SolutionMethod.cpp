@@ -3,6 +3,7 @@
 
 #include <sstream>
 #include "PhastInput.h"
+#include "Global.h"
 
 
 CSolutionMethod::CSolutionMethod(void)
@@ -128,4 +129,59 @@ void CSolutionMethod::Insert(CTreeCtrl* pTreeCtrl, HTREEITEM htiSolutionMethod)c
 	default:
 		ASSERT(FALSE);
 	}
+}
+
+void CSolutionMethod::Serialize(bool bStoring, hid_t loc_id)
+{
+	static const char szSolutionMethod[] = "SolutionMethod";
+	static const char szSolverMethod[]   = "SolverMethod";
+
+	hid_t group_id = 0;
+	herr_t status;
+
+	if (bStoring)
+	{
+		// Create the szSolutionMethod group
+		group_id = ::H5Gcreate(loc_id, szSolutionMethod, 0); // always created even if empty
+		ASSERT(group_id > 0);
+	}
+	else
+	{
+		// Open the szSolutionMethod group
+		group_id = ::H5Gopen(loc_id, szSolutionMethod);
+		if (group_id <= 0) TRACE("WARNING unable to open group %s\n", szSolutionMethod);
+	}
+
+	if (group_id > 0)
+	{
+		//status = CGlobal::HDFSerializeBool(bStoring, group_id, szSolverMethod, this->solver_method);
+		//ASSERT(status >= 0);
+
+		// solver_method
+		status = CGlobal::HDFSerialize(bStoring, group_id, szSolverMethod, H5T_NATIVE_INT, 1, &this->solver_method);
+		if (status < 0) TRACE("WARNING unable to Serialize %s\n", szSolverMethod);
+
+		// close the szSolutionMethod group
+		status = ::H5Gclose(group_id);
+		ASSERT(status >= 0);
+	}
+}
+
+std::ostream& operator<< (std::ostream &os, const CSolutionMethod &a)
+{
+	os << "SOLUTION_METHOD\n";
+	// iterative_solver
+	//
+	switch (a.solver_method)
+	{
+	case CSolutionMethod::SMT_ITERATIVE:
+		os << "iterative_solver true\n";
+		break;
+	case CSolutionMethod::SMT_DIRECT:
+		os << "iterative_solver false\n";
+		break;
+	default:
+		ASSERT(FALSE);
+	}
+	return os;
 }

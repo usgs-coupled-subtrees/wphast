@@ -494,6 +494,7 @@ void CWPhastDoc::Serialize(CArchive& ar)
 			this->m_pModel->m_flowOnly.Serialize(bStoring, wphast_id);
 			this->m_pModel->m_freeSurface.Serialize(bStoring, wphast_id);
 			this->m_pModel->m_steadyFlow.Serialize(bStoring, wphast_id);
+			this->m_pModel->m_solutionMethod.Serialize(bStoring, wphast_id);
 
 			// store units
 			ASSERT(this->m_pUnits);
@@ -577,6 +578,7 @@ void CWPhastDoc::Serialize(CArchive& ar)
 			this->m_pModel->m_flowOnly.Serialize(bStoring, wphast_id);
 			this->m_pModel->m_freeSurface.Serialize(bStoring, wphast_id);
 			this->m_pModel->m_steadyFlow.Serialize(bStoring, wphast_id);
+			this->m_pModel->m_solutionMethod.Serialize(bStoring, wphast_id);
 
 			// update properties bar
 			this->SetModel(*this->m_pModel);
@@ -2716,7 +2718,6 @@ BOOL CWPhastDoc::WriteTransDat(std::ostream& os)
 {
 	int nCount;
 
-// COMMENT: {4/11/2005 1:53:16 PM}#ifndef _DEBUG
 	// FLOW_ONLY
 	os << this->m_pModel->m_flowOnly;
 
@@ -2725,6 +2726,9 @@ BOOL CWPhastDoc::WriteTransDat(std::ostream& os)
 
 	// FREE_SURFACE
 	os << this->m_pModel->m_freeSurface;
+
+	// SOLUTION_METHOD
+	os << this->m_pModel->m_solutionMethod;
 
 	// UNITS
 	os << this->GetUnits();
@@ -2781,7 +2785,6 @@ BOOL CWPhastDoc::WriteTransDat(std::ostream& os)
 			}
 		}
 	}
-// COMMENT: {4/11/2005 1:53:20 PM}#endif
 
 	std::multimap<Ctime, ISerial*> series;
 

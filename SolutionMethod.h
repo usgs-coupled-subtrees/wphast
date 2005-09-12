@@ -25,6 +25,10 @@ public:
 
 	static CSolutionMethod NewDefaults(void);
 
+	void Serialize(bool bStoring, hid_t loc_id);
+
+	friend std::ostream& operator<< (std::ostream &os, const CSolutionMethod &a);
+
 public:
 	enum MethodType
 	{
