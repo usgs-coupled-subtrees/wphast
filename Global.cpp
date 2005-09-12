@@ -1999,3 +1999,25 @@ herr_t CGlobal::HDFSerializeSetOfTimes(bool bStoring, hid_t loc_id, std::set<Cti
 	}
 	return status;
 }
+
+void CGlobal::DDX_Check(CDataExchange* pDX, int nIDC, bool& value)
+{
+	pDX->PrepareCtrl(nIDC);
+	HWND hWndCtrl;
+	pDX->m_pDlgWnd->GetDlgItem(nIDC, &hWndCtrl);
+	if (pDX->m_bSaveAndValidate)
+	{
+		value = ((int)::SendMessage(hWndCtrl, BM_GETCHECK, 0, 0L) == BST_CHECKED);
+	}
+	else
+	{
+		if (value)
+		{
+			::SendMessage(hWndCtrl, BM_SETCHECK, (WPARAM)BST_CHECKED, 0L);
+		}
+		else
+		{
+			::SendMessage(hWndCtrl, BM_SETCHECK, (WPARAM)BST_UNCHECKED, 0L);
+		}
+	}
+}

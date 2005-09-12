@@ -45,6 +45,7 @@ public:
 	static bool IsValidTransform(vtkTransform* pTransform);
 	static void EnableFace(CDataExchange* pDX, BOOL bEnable);
 	static void DDX_Face(CDataExchange* pDX, CBC& r_bc);
+	static void DDX_Check(CDataExchange* pDX, int nIDC, bool& value);
 
 	// Cproperty
 	static void DDX_Property(CDataExchange* pDX, CCheckTreeCtrl* pTree, HTREEITEM hti, Cproperty* value, Cproperty* fixed, Cproperty* linear);

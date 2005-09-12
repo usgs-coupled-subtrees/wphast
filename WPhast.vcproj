@@ -733,6 +733,9 @@
 				RelativePath="SetScaleAction.cpp">
 			</File>
 			<File
+				RelativePath="SetSolutionMethodAction.cpp">
+			</File>
+			<File
 				RelativePath="SetSteadyFlowAction.cpp">
 			</File>
 			<File
@@ -755,6 +758,9 @@
 			</File>
 			<File
 				RelativePath="SolutionMethod.cpp">
+			</File>
+			<File
+				RelativePath="SolutionMethodPropertyPage.cpp">
 			</File>
 			<File
 				RelativePath="Startup.cpp">
@@ -1289,6 +1295,9 @@
 				RelativePath="SetScaleAction.h">
 			</File>
 			<File
+				RelativePath="SetSolutionMethodAction.h">
+			</File>
+			<File
 				RelativePath="SetSteadyFlowAction.h">
 			</File>
 			<File
@@ -1311,6 +1320,9 @@
 			</File>
 			<File
 				RelativePath="SolutionMethod.h">
+			</File>
+			<File
+				RelativePath="SolutionMethodPropertyPage.h">
 			</File>
 			<File
 				RelativePath="Startup.h">

@@ -29,6 +29,8 @@ public:
 
 	friend std::ostream& operator<< (std::ostream &os, const CSolutionMethod &a);
 
+	void Edit(CTreeCtrl* pTreeCtrl);
+
 public:
 	enum MethodType
 	{
@@ -42,4 +44,5 @@ public:
 	double solver_space;
 	double solver_time;
 	bool   cross_dispersion;
+	double rebalance_fraction;
 };

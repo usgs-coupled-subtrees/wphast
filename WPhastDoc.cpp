@@ -3155,7 +3155,6 @@ void CWPhastDoc::SetUnits(const CUnits& units)
 
 }
 
-// void CWPhastDoc::New(const CFlowOnly& flowOnly, const CUnits& units, const CGrid& x, const CGrid& y, const CGrid& z, const CGridElt& media, const CHeadIC& headIC, const CTimeControl& timeControl)
 void CWPhastDoc::New(const CNewModel& model)
 {
 	ASSERT(this->m_pGridActor);
@@ -5125,5 +5124,19 @@ void CWPhastDoc::EndModifyGrid()
 	{
 		this->GridElementsSelector->Delete();
 		this->GridElementsSelector = 0;
+	}
+}
+
+CSolutionMethod CWPhastDoc::GetSolutionMethod(void)const
+{
+	return this->m_pModel->m_solutionMethod;
+}
+
+void CWPhastDoc::SetSolutionMethod(const CSolutionMethod &solutionMethod)
+{
+	this->m_pModel->m_solutionMethod = solutionMethod;
+	if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar())
+	{
+		pTree->SetSolutionMethod(&this->m_pModel->m_solutionMethod);
 	}
 }

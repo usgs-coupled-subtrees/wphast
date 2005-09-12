@@ -2579,6 +2579,45 @@ BEGIN
                     15,95,21,10
 END
 
+IDD_SOLUTION_METHOD_PROPPAGE DIALOGEX 0, 0, 317, 204
+STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Solution Method Properties"
+FONT 8, "MS Sans Serif", 400, 0, 0x0
+BEGIN
+    GROUPBOX        "Solver",IDC_STATIC,7,7,303,76
+    CONTROL         "Iterative",IDC_RADIO_ITER,"Button",BS_AUTORADIOBUTTON,
+                    15,18,41,10
+    CONTROL         "Direct",IDC_RADIO_DIRECT,"Button",BS_AUTORADIOBUTTON,15,
+                    70,35,10
+    LTEXT           "Tolerance:",IDC_STATIC_TOL,33,29,35,8
+    EDITTEXT        IDC_EDIT_TOL,102,27,55,12,ES_AUTOHSCROLL
+    LTEXT           "Save directions:",IDC_STATIC_SAVE,33,44,52,8
+    EDITTEXT        IDC_EDIT_SAVE,102,42,55,12,ES_AUTOHSCROLL
+    CONTROL         "",IDC_SPIN_SAVE,"msctls_updown32",UDS_SETBUDDYINT | 
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,158,42,11,
+                    12
+    LTEXT           "Maximum iterations:",IDC_STATIC_MAX,33,59,62,8
+    EDITTEXT        IDC_EDIT_MAX,102,57,55,12,ES_AUTOHSCROLL
+    CONTROL         "",IDC_SPIN_MAX,"msctls_updown32",UDS_SETBUDDYINT | 
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,158,57,11,
+                    12
+    LTEXT           "Space differencing:",IDC_STATIC_SPACE,7,90,62,8
+    EDITTEXT        IDC_EDIT_SPACE,76,88,55,12,ES_AUTOHSCROLL
+    LTEXT           "Time differencing:",IDC_STATIC_TIME,7,106,57,8
+    EDITTEXT        IDC_EDIT_TIME,76,104,55,12,ES_AUTOHSCROLL
+    CONTROL         "Cross dispersion",IDC_CHECK_CROSS_DISP,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,121,67,10
+    CONTROL         "",IDC_DESC_RICHEDIT,"RichEdit20A",ES_MULTILINE | 
+                    ES_AUTOHSCROLL | ES_READONLY | WS_BORDER | WS_VSCROLL | 
+                    WS_HSCROLL,7,159,303,38
+    LTEXT           "(0.0 - 0.5)",IDC_STATIC,136,90,31,8
+    LTEXT           "(0.5 - 1.0)",IDC_STATIC,136,106,31,8
+    LTEXT           "Rebalance fraction:",IDC_STATIC_REBAL,7,139,63,8
+    EDITTEXT        IDC_EDIT_REBAL,76,137,55,12,ES_AUTOHSCROLL
+    LTEXT           "(0.0 - 1.0) parallel version only",IDC_STATIC,137,138,
+                    94,8
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -3360,6 +3399,21 @@ BEGIN
         HORZGUIDE, 28
         HORZGUIDE, 70
         HORZGUIDE, 113
+    END
+
+    IDD_SOLUTION_METHOD_PROPPAGE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 310
+        VERTGUIDE, 16
+        VERTGUIDE, 112
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 197
+        HORZGUIDE, 33
+        HORZGUIDE, 48
+        HORZGUIDE, 63
+        HORZGUIDE, 94
+        HORZGUIDE, 110
     END
 END
 #endif    // APSTUDIO_INVOKED

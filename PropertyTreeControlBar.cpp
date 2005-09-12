@@ -583,7 +583,9 @@ void CPropertyTreeControlBar::OnNMDblClk(NMHDR* pNMHDR, LRESULT* pResult)
 	//
 	if (item.IsNodeAncestor(this->m_nodeSolutionMethod))
 	{
-		::AfxMessageBox("SOLUTION_METHOD not yet editable");
+		CSolutionMethod *pSolutionMethod = reinterpret_cast<CSolutionMethod*>(this->m_nodeSolutionMethod.GetData());
+		ASSERT(pSolutionMethod);
+		pSolutionMethod->Edit(&this->m_wndTree);
 		*pResult = TRUE;
 		return;
 	}

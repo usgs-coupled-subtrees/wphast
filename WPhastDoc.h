@@ -32,6 +32,7 @@ class CUnits;
 class CFlowOnly;
 class CSteadyFlow;
 class CFreeSurface;
+class CSolutionMethod;
 class CGridElt;
 class CHeadIC;
 class CTimeControl;
@@ -290,8 +291,13 @@ public:
 	void SetFreeSurface(const CFreeSurface &freeSurface);
 	CFreeSurface GetFreeSurface(void)const;
 
+	void SetSolutionMethod(const CSolutionMethod &solutionMethod);
+	CSolutionMethod GetSolutionMethod(void)const;
+
 	CNewModel* GetModel(void);
 	void SetModel(const CNewModel &model);
+
+
 
 
 	// CUnits GetUnits(void);

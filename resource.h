@@ -244,6 +244,7 @@
 #define IDC_HO_SPLIT                    250
 #define IDD_GRID_COARSEN                250
 #define IDC_4WAY02                      251
+#define IDD_SOLUTION_METHOD_PROPPAGE    251
 #define IDB_PLUS_MERGE                  252
 #define IDC_3DGARROW                    255
 #define IDC_EDIT_X                      1000
@@ -550,14 +551,21 @@
 #define IDC_STATIC_MAX_UNITS            1259
 #define IDC_STATIC_MAX                  1260
 #define IDC_STATIC_U_NODES              1261
+#define IDC_STATIC_SPACE                1261
 #define IDC_STATIC_N_NODES              1262
+#define IDC_STATIC_TIME                 1262
 #define IDC_EDIT_MAX                    1263
 #define IDC_EDIT_U_NODES                1264
+#define IDC_EDIT_SPACE                  1264
 #define IDC_SPIN_U_NODES                1265
+#define IDC_EDIT_TIME                   1265
 #define IDC_SPIN_N_NODES                1266
 #define IDC_EDIT_MAX_I                  1266
+#define IDC_STATIC_REBAL                1266
 #define IDC_EDIT_SNAP                   1267
 #define IDC_SPIN_MAX_I                  1267
+#define IDC_EDIT_TIME2                  1267
+#define IDC_EDIT_REBAL                  1267
 #define IDC_EDIT_N_NODES                1268
 #define IDC_EDIT_PARTS_I                1268
 #define IDC_BUTTON_INS                  1269
@@ -605,6 +613,15 @@
 #define IDC_STATIC_ME_X                 1310
 #define IDC_STATIC_ME_Y                 1311
 #define IDC_STATIC_ME_Z                 1312
+#define IDC_STATIC_TOL                  1313
+#define IDC_EDIT_TOL                    1314
+#define IDC_STATIC_SAVE                 1315
+#define IDC_EDIT_SAVE                   1316
+#define IDC_SPIN_SAVE                   1318
+#define IDC_SPIN_MAX                    1319
+#define IDC_CHECK_CROSS_DISP            1320
+#define IDC_RADIO_ITER                  1321
+#define IDC_RADIO_DIRECT                1322
 #define IDC_RESIZE_COLUMN               28654
 #define IDC_RESIZE_ROW                  28655
 #define IDR_POPUP                       28656
@@ -619,7 +636,6 @@
 #define ID_RIVERS_SELECTALL             32809
 #define ID_RIVERS_UNSELECTALL           32810
 #define ID_VIEW_FROM_PREV_DIRECTION     32812
-#define ID_SELECT_OBJECT                32824
 #define ID_TOOLS_SELECTOBJECT           32826
 #define IDW_CONTROLBAR_TREE             59424
 #define IDW_CONTROLBAR_BOXPROPS         59425
@@ -630,7 +646,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        256
 #define _APS_NEXT_COMMAND_VALUE         32827
-#define _APS_NEXT_CONTROL_VALUE         1313
+#define _APS_NEXT_CONTROL_VALUE         1323
 #define _APS_NEXT_SYMED_VALUE           126
 #endif
 #endif
