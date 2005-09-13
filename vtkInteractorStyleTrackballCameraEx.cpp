@@ -19,6 +19,8 @@
 #include <vtkRenderer.h>
 #include <vtkTextProperty.h>
 
+#include <vtkPropAssembly.h>
+
 
 
 vtkCxxRevisionMacro(vtkInteractorStyleTrackballCameraEx, "$Revision$");
@@ -27,12 +29,29 @@ vtkStandardNewMacro(vtkInteractorStyleTrackballCameraEx);
 
 vtkInteractorStyleTrackballCameraEx::vtkInteractorStyleTrackballCameraEx(void)
 : PickWithMouse(0)
+, LastProp(0)
 {
 }
 
 vtkInteractorStyleTrackballCameraEx::~vtkInteractorStyleTrackballCameraEx(void)
 {
 }
+
+void vtkInteractorStyleTrackballCameraEx::Delete(void)
+{
+	if (this->Interactor)
+	{
+		// HACK
+		// If this isn't here a reference count proble occurs
+		//
+		vtkPropCollection *pickProps = this->Interactor->GetPicker()->GetPickList();
+		ASSERT(pickProps);
+		pickProps->RemoveAllItems();
+	}
+
+	this->Superclass::Delete();
+}
+
 
 //----------------------------------------------------------------------------
 // When pick action successfully selects a vtkProp3Dactor, this method
@@ -280,6 +299,10 @@ void vtkInteractorStyleTrackballCameraEx::OnLeftButtonDown()
 			this->FindPokedRenderer(rwi->GetEventPosition()[0],
 				rwi->GetEventPosition()[1]);
 			rwi->StartPickCallback();
+			//{{
+			this->LastEventPosition[0] = rwi->GetEventPosition()[0];
+			this->LastEventPosition[1] = rwi->GetEventPosition()[1];
+			//}}
 			rwi->GetPicker()->Pick(rwi->GetEventPosition()[0],
 				rwi->GetEventPosition()[1], 
 				0.0, 
@@ -291,12 +314,34 @@ void vtkInteractorStyleTrackballCameraEx::OnLeftButtonDown()
 			}
 			if ( path == NULL )
 			{
+				this->LastProp = NULL;
 				this->HighlightProp(NULL);
 				this->PropPicked = 0;
 			}
 			else
 			{
-				this->HighlightProp(path->GetFirstNode()->GetProp());
+				if (path->GetNumberOfItems() == 3)
+				{
+					path->InitTraversal();
+					vtkProp* pPropAssembly = path->GetNextNode()->GetProp();
+					ASSERT(pPropAssembly->IsA("vtkPropAssembly"));
+					this->LastProp = path->GetNextNode()->GetProp();
+				}
+				else
+				{
+					this->LastProp = path->GetLastNode()->GetProp();
+				}
+
+				ASSERT(
+					this->LastProp->IsA("CZoneActor")
+					||
+					this->LastProp->IsA("CWellActor")
+					||
+					this->LastProp->IsA("CRiverActor")
+					);
+
+				ASSERT(this->LastProp);
+				this->HighlightProp(this->LastProp);
 				this->PropPicked = 1;
 			}
 			rwi->EndPickCallback();
@@ -309,5 +354,114 @@ void vtkInteractorStyleTrackballCameraEx::OnLeftButtonUp()
 	if (!this->PickWithMouse)
 	{
 		this->Superclass::OnLeftButtonUp();
+	}
+}
+
+void vtkInteractorStyleTrackballCameraEx::OnKeyPress()
+{
+	if (!this->Interactor) return;
+
+	if (this->State == VTKIS_NONE) 
+	{
+		char* keysym = this->Interactor->GetKeySym();		
+		vtkRenderWindowInteractor *rwi = this->Interactor;
+		if (::strcmp(keysym, "Tab") == 0 && this->LastProp)
+		{
+			vtkAssemblyPath *path=NULL;
+			rwi->StartPickCallback();
+
+			vtkPropCollection *props = rwi->GetPicker()->GetPickList();
+			ASSERT(props);
+			if (props->GetNumberOfItems() == 0)
+			{
+				// this is the first time Tab has been pressed
+				vtkProp *prop;
+				props = this->CurrentRenderer->GetProps();
+				for ( props->InitTraversal(); (prop = props->GetNextProp()); )
+				{
+					if (vtkPropAssembly *pPropAssembly = vtkPropAssembly::SafeDownCast(prop))
+					{
+						if (vtkPropCollection *pPropCollection = pPropAssembly->GetParts())
+						{
+							pPropCollection->InitTraversal();
+							for (int i = 0; i < pPropCollection->GetNumberOfItems(); ++i)
+							{
+								if (vtkProp* p = pPropCollection->GetNextProp())
+								{
+									rwi->GetPicker()->AddPickList(p);
+									ASSERT(
+										p->IsA("CZoneActor")
+										||
+										p->IsA("CWellActor")
+										||
+										p->IsA("CRiverActor")
+										);
+								}
+							}
+						}
+					}
+				}
+				rwi->GetPicker()->PickFromListOn();
+			}
+			rwi->GetPicker()->DeletePickList(this->LastProp);
+
+			rwi->GetPicker()->Pick(this->LastEventPosition[0],
+				this->LastEventPosition[1], 
+				0.0, 
+				this->CurrentRenderer);
+			vtkAbstractPropPicker *picker;
+			if ( (picker=vtkAbstractPropPicker::SafeDownCast(rwi->GetPicker())) )
+			{
+				path = picker->GetPath();
+				if ( path == NULL )
+				{
+					vtkPropCollection *props = rwi->GetPicker()->GetPickList();
+					ASSERT(props);
+					props->RemoveAllItems();
+					rwi->GetPicker()->PickFromListOff();
+					rwi->GetPicker()->Pick(this->LastEventPosition[0],
+						this->LastEventPosition[1], 
+						0.0, 
+						this->CurrentRenderer);
+					path = picker->GetPath();
+				}
+			}
+			if ( path == NULL )
+			{
+				ASSERT(FALSE);
+				this->LastProp = NULL;
+				this->HighlightProp(NULL);
+				this->PropPicked = 0;
+			}
+			else
+			{
+				if (path->GetNumberOfItems() == 3)
+				{
+					path->InitTraversal();
+					vtkProp* pPropAssembly = path->GetNextNode()->GetProp();
+					ASSERT(pPropAssembly->IsA("vtkPropAssembly"));
+					this->LastProp = path->GetNextNode()->GetProp();
+				}
+				else
+				{
+					this->LastProp = path->GetLastNode()->GetProp();
+				}
+
+				ASSERT(
+					this->LastProp->IsA("CZoneActor")
+					||
+					this->LastProp->IsA("CWellActor")
+					||
+					this->LastProp->IsA("CRiverActor")
+					);
+
+				ASSERT(this->LastProp);
+				this->HighlightProp(this->LastProp);
+				this->PropPicked = 1;
+			}
+			rwi->EndPickCallback();
+		}
+		this->EventCallbackCommand->SetAbortFlag(1);
+		this->Interactor->Render();
 	}
 }

@@ -183,6 +183,11 @@ void CViewVTKCommand::OnEndPickEvent(vtkObject* caller, void* callData)
 				oss.rdbuf()->freeze(false); // this must be called after str() to avoid memory leak
 #endif
 
+			//{{
+			if (path->GetFirstNode()->GetProp()->IsA("vtkPropAssembly"))
+			{
+			//}}
+
 				ASSERT(path->GetFirstNode()->GetProp()->IsA("vtkPropAssembly"));
 
 				if (path->GetNumberOfItems() == 3)
@@ -227,7 +232,41 @@ void CViewVTKCommand::OnEndPickEvent(vtkObject* caller, void* callData)
 					}
 
 				}
+			//{{
 			}
+			else
+			{
+				vtkProp *prop = path->GetFirstNode()->GetProp();
+
+				// check if zone
+				//
+				if (CZoneActor *pZoneActor = CZoneActor::SafeDownCast(prop))
+				{
+					this->m_pView->GetDocument()->Select(pZoneActor);
+				}
+
+				// check if river
+				//
+				else if (CRiverActor *pRiver = CRiverActor::SafeDownCast(prop))
+				{
+					this->m_pView->GetDocument()->Select(pRiver);
+				}
+
+				// check if well
+				//
+				else if (CWellActor *pWell = CWellActor::SafeDownCast(prop))
+				{
+					this->m_pView->GetDocument()->Select(pWell);
+				}
+
+				else
+				{
+					ASSERT(FALSE);
+				}
+			}
+			//}}
+			}
+
 
 #ifdef _DEBUG
 			int* xy = this->m_pView->GetRenderWindowInteractor()->GetEventPosition();
