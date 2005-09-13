@@ -26,6 +26,7 @@ CGridRefinePage::CGridRefinePage()
 		this->MinOneBased[i] = 1;
 		this->MaxOneBased[i] = 1;
 		this->Parts[i]       = 1;
+		this->AxisEnabled[i] = TRUE;
 	}
 }
 
@@ -44,41 +45,70 @@ void CGridRefinePage::DoDataExchange(CDataExchange* pDX)
 		this->CheckDlgButton(IDC_CHECK_Z2, BST_CHECKED);
 	}
 
+	DDX_Check(pDX, IDC_CHECK_X2, this->AxisEnabled[0]);
+	DDX_Check(pDX, IDC_CHECK_Y2, this->AxisEnabled[1]);
+	DDX_Check(pDX, IDC_CHECK_Z2, this->AxisEnabled[2]);
+
 	// X
 	//
+	if (pDX->m_bSaveAndValidate && this->AxisEnabled[0])
+	{
+		DDX_Text(pDX, IDC_EDIT_MIN_I, this->MinOneBased[0]);
+		DDV_MinMaxInt(pDX, this->MinOneBased[0], 1, this->GridKeyword.m_grid[0].count_coord);
 
-	DDX_Text(pDX, IDC_EDIT_MIN_I, this->MinOneBased[0]);
-	DDV_MinMaxInt(pDX, this->MinOneBased[0], 1, this->GridKeyword.m_grid[0].count_coord);
+		DDX_Text(pDX, IDC_EDIT_MAX_I, this->MaxOneBased[0]);
+		DDV_MinMaxInt(pDX, this->MinOneBased[0], 1, this->GridKeyword.m_grid[0].count_coord);
 
-	DDX_Text(pDX, IDC_EDIT_MAX_I, this->MaxOneBased[0]);
-	DDV_MinMaxInt(pDX, this->MinOneBased[0], 1, this->GridKeyword.m_grid[0].count_coord);
-
-	DDX_Text(pDX, IDC_EDIT_PARTS_I, this->Parts[0]);
-	DDV_MinMaxInt(pDX, this->Parts[0], 1, INT_MAX);
+		DDX_Text(pDX, IDC_EDIT_PARTS_I, this->Parts[0]);
+		DDV_MinMaxInt(pDX, this->Parts[0], 1, INT_MAX);
+	}
+	else if (!pDX->m_bSaveAndValidate)
+	{
+		DDX_Text(pDX, IDC_EDIT_MIN_I, this->MinOneBased[0]);
+		DDX_Text(pDX, IDC_EDIT_MAX_I, this->MaxOneBased[0]);
+		DDX_Text(pDX, IDC_EDIT_PARTS_I, this->Parts[0]);
+	}
 
 	// Y
 	//
+	if (pDX->m_bSaveAndValidate && this->AxisEnabled[1])
+	{
+		DDX_Text(pDX, IDC_EDIT_MIN_J, this->MinOneBased[1]);
+		DDV_MinMaxInt(pDX, this->MinOneBased[1], 1, this->GridKeyword.m_grid[1].count_coord);
 
-	DDX_Text(pDX, IDC_EDIT_MIN_J, this->MinOneBased[1]);
-	DDV_MinMaxInt(pDX, this->MinOneBased[1], 1, this->GridKeyword.m_grid[1].count_coord);
+		DDX_Text(pDX, IDC_EDIT_MAX_J, this->MaxOneBased[1]);
+		DDV_MinMaxInt(pDX, this->MinOneBased[1], 1, this->GridKeyword.m_grid[1].count_coord);
 
-	DDX_Text(pDX, IDC_EDIT_MAX_J, this->MaxOneBased[1]);
-	DDV_MinMaxInt(pDX, this->MinOneBased[1], 1, this->GridKeyword.m_grid[1].count_coord);
-
-	DDX_Text(pDX, IDC_EDIT_PARTS_J, this->Parts[1]);
-	DDV_MinMaxInt(pDX, this->Parts[1], 1, INT_MAX);
+		DDX_Text(pDX, IDC_EDIT_PARTS_J, this->Parts[1]);
+		DDV_MinMaxInt(pDX, this->Parts[1], 1, INT_MAX);
+	}
+	else if (!pDX->m_bSaveAndValidate)
+	{
+		DDX_Text(pDX, IDC_EDIT_MIN_J, this->MinOneBased[1]);
+		DDX_Text(pDX, IDC_EDIT_MAX_J, this->MaxOneBased[1]);
+		DDX_Text(pDX, IDC_EDIT_PARTS_J, this->Parts[1]);
+	}
+		
 
 	// Z
 	//
+	if (pDX->m_bSaveAndValidate && this->AxisEnabled[2])
+	{
+		DDX_Text(pDX, IDC_EDIT_MIN_K, this->MinOneBased[2]);
+		DDV_MinMaxInt(pDX, this->MinOneBased[2], 1, this->GridKeyword.m_grid[2].count_coord);
 
-	DDX_Text(pDX, IDC_EDIT_MIN_K, this->MinOneBased[2]);
-	DDV_MinMaxInt(pDX, this->MinOneBased[2], 1, this->GridKeyword.m_grid[2].count_coord);
+		DDX_Text(pDX, IDC_EDIT_MAX_K, this->MaxOneBased[2]);
+		DDV_MinMaxInt(pDX, this->MinOneBased[2], 1, this->GridKeyword.m_grid[2].count_coord);
 
-	DDX_Text(pDX, IDC_EDIT_MAX_K, this->MaxOneBased[2]);
-	DDV_MinMaxInt(pDX, this->MinOneBased[2], 1, this->GridKeyword.m_grid[2].count_coord);
-
-	DDX_Text(pDX, IDC_EDIT_PARTS_K, this->Parts[2]);
-	DDV_MinMaxInt(pDX, this->Parts[2], 1, INT_MAX);
+		DDX_Text(pDX, IDC_EDIT_PARTS_K, this->Parts[2]);
+		DDV_MinMaxInt(pDX, this->Parts[2], 1, INT_MAX);
+	}
+	else if (!pDX->m_bSaveAndValidate)
+	{
+		DDX_Text(pDX, IDC_EDIT_MIN_K, this->MinOneBased[2]);
+		DDX_Text(pDX, IDC_EDIT_MAX_K, this->MaxOneBased[2]);
+		DDX_Text(pDX, IDC_EDIT_PARTS_K, this->Parts[2]);
+	}
 
 	// spinners
 	//
@@ -505,6 +535,7 @@ BOOL CGridRefinePage::OnApply()
 		{
 			int min[3];
 			int max[3];
+			int parts[3];
 			int new_ibounds[6];
 			for (int i = 0; i < 3; ++i)
 			{
@@ -512,10 +543,18 @@ BOOL CGridRefinePage::OnApply()
 				max[i] = this->MaxOneBased[i] - 1;
 				new_ibounds[2*i] = min[i];
 				new_ibounds[2*i + 1] = (max[i] - min[i]) * this->Parts[i] + min[i];
+				if (this->AxisEnabled[i])
+				{
+					parts[i] = this->Parts[i];
+				}
+				else
+				{
+					parts[i] = 1;
+				}
 			}
 
 			// Undo / Redo
-			CGridRefineAction* action = new CGridRefineAction(this->Document, this->Actor, min, max, this->Parts);
+			CGridRefineAction* action = new CGridRefineAction(this->Document, this->Actor, min, max, parts);
 			action->Apply();
 			sheet->AddAction(action);
 

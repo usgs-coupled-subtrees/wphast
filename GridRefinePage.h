@@ -58,6 +58,7 @@ protected:
 	int MinOneBased[3];
 	int MaxOneBased[3];
 	int Parts[3];
+	BOOL AxisEnabled[3];
 
 	CSpinButtonCtrl spinMin[3];
 	CSpinButtonCtrl spinMax[3];
