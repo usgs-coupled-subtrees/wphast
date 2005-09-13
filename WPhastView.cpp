@@ -13,6 +13,8 @@
 #include <vtkWin32RenderWindowInteractor.h>
 
 #include <vtkBoxWidget.h>
+#include "vtkBoxWidgetEx.h"
+
 #include <vtkPointWidget.h>
 #include "vtkPointWidget2.h"
 
@@ -134,10 +136,14 @@ CWPhastView::CWPhastView()
 
 	// Create the the BoxWidget
 	//
-	this->BoxWidget = vtkBoxWidget::New();
+	this->BoxWidget = vtkBoxWidgetEx::New();
 	this->BoxWidget->SetInteractor(this->m_RenderWindowInteractor);
 	this->BoxWidget->SetPlaceFactor(1.0);
 	this->BoxWidget->RotationEnabledOff();
+	if (vtkBoxWidgetEx *widget = vtkBoxWidgetEx::SafeDownCast(this->BoxWidget))
+	{
+		widget->HexPickerEnabledOff();
+	}
 
 	// Create the the PointWidget2
 	//
