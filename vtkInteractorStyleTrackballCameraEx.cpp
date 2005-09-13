@@ -255,6 +255,14 @@ void vtkInteractorStyleTrackballCameraEx::OnChar()
     case 'P' :
       if (this->State == VTKIS_NONE) 
         {
+#if !defined(USE_ORIGINAL)
+		vtkPropCollection *props = rwi->GetPicker()->GetPickList();
+		ASSERT(props);
+		props->RemoveAllItems();
+		rwi->GetPicker()->PickFromListOff();
+		this->LastEventPosition[0] = rwi->GetEventPosition()[0];
+		this->LastEventPosition[1] = rwi->GetEventPosition()[1];
+#endif
         vtkAssemblyPath *path=NULL;
         this->FindPokedRenderer(rwi->GetEventPosition()[0],
                                 rwi->GetEventPosition()[1]);
@@ -275,6 +283,27 @@ void vtkInteractorStyleTrackballCameraEx::OnChar()
           }
         else
           {
+#if !defined(USE_ORIGINAL)
+			if (path->GetNumberOfItems() == 3)
+			{
+				path->InitTraversal();
+				vtkProp* pPropAssembly = path->GetNextNode()->GetProp();
+				ASSERT(pPropAssembly->IsA("vtkPropAssembly"));
+				this->LastProp = path->GetNextNode()->GetProp();
+			}
+			else
+			{
+				this->LastProp = path->GetLastNode()->GetProp();
+			}
+
+			ASSERT(
+				this->LastProp->IsA("CZoneActor")
+				||
+				this->LastProp->IsA("CWellActor")
+				||
+				this->LastProp->IsA("CRiverActor")
+				);
+#endif
           this->HighlightProp(path->GetFirstNode()->GetProp());
           this->PropPicked = 1;
           }
@@ -299,10 +328,16 @@ void vtkInteractorStyleTrackballCameraEx::OnLeftButtonDown()
 			this->FindPokedRenderer(rwi->GetEventPosition()[0],
 				rwi->GetEventPosition()[1]);
 			rwi->StartPickCallback();
-			//{{
+
+			// reset pick list
+			//
+			vtkPropCollection *props = rwi->GetPicker()->GetPickList();
+			ASSERT(props);
+			props->RemoveAllItems();
+			rwi->GetPicker()->PickFromListOff();
 			this->LastEventPosition[0] = rwi->GetEventPosition()[0];
 			this->LastEventPosition[1] = rwi->GetEventPosition()[1];
-			//}}
+
 			rwi->GetPicker()->Pick(rwi->GetEventPosition()[0],
 				rwi->GetEventPosition()[1], 
 				0.0, 
@@ -460,8 +495,12 @@ void vtkInteractorStyleTrackballCameraEx::OnKeyPress()
 				this->PropPicked = 1;
 			}
 			rwi->EndPickCallback();
+			this->EventCallbackCommand->SetAbortFlag(1);
+			this->Interactor->Render();
 		}
-		this->EventCallbackCommand->SetAbortFlag(1);
-		this->Interactor->Render();
+		else
+		{
+			this->Superclass::OnKeyPress();
+		}
 	}
 }

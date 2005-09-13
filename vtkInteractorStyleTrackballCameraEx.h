@@ -1,5 +1,5 @@
 #pragma once
-#include <vtkinteractorstyletrackballcamera.h>
+#include <vtkInteractorStyleTrackballCamera.h>
 
 class vtkInteractorStyleTrackballCameraEx : public vtkInteractorStyleTrackballCamera
 {
