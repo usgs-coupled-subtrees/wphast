@@ -961,6 +961,9 @@
 				RelativePath="units_impl.cxx">
 			</File>
 			<File
+				RelativePath="vtkBoxWidgetEx.cpp">
+			</File>
+			<File
 				RelativePath="vtkInteractorStyleImage2.cpp">
 			</File>
 			<File
@@ -1449,6 +1452,9 @@
 			</File>
 			<File
 				RelativePath="time.h">
+			</File>
+			<File
+				RelativePath="vtkBoxWidgetEx.h">
 			</File>
 			<File
 				RelativePath="vtkInteractorStyleImage2.h">
