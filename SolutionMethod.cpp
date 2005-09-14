@@ -271,7 +271,7 @@ std::ostream& operator<< (std::ostream &os, const CSolutionMethod &a)
 	{
 		os << "\t" << "-cross_dispersion   false\n";
 	}
-	os << "\t" << "-rebalance_fraction " << a.rebalance_fraction;
+	os << "\t" << "-rebalance_fraction " << a.rebalance_fraction << "\n";
 
 	return os;
 }
