@@ -33,6 +33,14 @@ void CBCLeakyPropertyPage2::DoDataExchange(CDataExchange* pDX)
 	{
 		this->SetupGrids();
 
+		// thickness
+		//
+		CGlobal::DDX_Property(pDX, IDC_SINGLE_GRID, 1, this->m_bc.bc_thick, true);
+
+		// hydraulic_conductivity
+		//
+		CGlobal::DDX_Property(pDX, IDC_SINGLE_GRID, 2, this->m_bc.bc_k, true);
+
 		// head
 		//
 		CGlobal::DDX_GridTimeSeries(pDX, IDC_HEAD_GRID, this->m_bc.m_bc_head);
@@ -41,13 +49,6 @@ void CBCLeakyPropertyPage2::DoDataExchange(CDataExchange* pDX)
 		//
 		CGlobal::DDX_GridTimeSeries(pDX, IDC_SOLUTION_GRID, this->m_bc.m_bc_solution);
 
-		// thickness
-		//
-		CGlobal::DDX_Property(pDX, IDC_SINGLE_GRID, 1, this->m_bc.bc_thick, true);
-
-		// hydraulic_conductivity
-		//
-		CGlobal::DDX_Property(pDX, IDC_SINGLE_GRID, 2, this->m_bc.bc_k, true);
 
 		// face
 		//
@@ -74,18 +75,6 @@ void CBCLeakyPropertyPage2::DoDataExchange(CDataExchange* pDX)
 		// bc_type
 		bc.bc_type = LEAKY;
 
-		// head time series
-		//
-		CGlobal::DDX_GridTimeSeries(pDX, IDC_HEAD_GRID, bc.m_bc_head);
-
-		// solution time series
-		//
-		CGlobal::DDX_GridTimeSeries(pDX, IDC_SOLUTION_GRID, bc.m_bc_solution);
-		if (bc.m_bc_solution.size())
-		{
-			bc.bc_solution_type = ASSOCIATED;
-		}
-
 		// thickness
 		//
 		Cproperty thick;
@@ -101,6 +90,19 @@ void CBCLeakyPropertyPage2::DoDataExchange(CDataExchange* pDX)
 		if (k.type != UNDEFINED)
 		{
 			Cproperty::CopyProperty(&bc.bc_k, &k);
+		}
+
+
+		// head time series
+		//
+		CGlobal::DDX_GridTimeSeries(pDX, IDC_HEAD_GRID, bc.m_bc_head);
+
+		// solution time series
+		//
+		CGlobal::DDX_GridTimeSeries(pDX, IDC_SOLUTION_GRID, bc.m_bc_solution);
+		if (bc.m_bc_solution.size())
+		{
+			bc.bc_solution_type = ASSOCIATED;
 		}
 
 		// face
@@ -142,10 +144,6 @@ BOOL CBCLeakyPropertyPage2::OnInitDialog()
 
 	// Layout controls
 	this->CreateRoot(VERTICAL)
-		<< item(IDC_HEAD_GRID, GREEDY)
-		<< item(IDC_SOLUTION_GRID, GREEDY)
-		<< item(IDC_SINGLE_GRID, ABSOLUTE_VERT)
-		//<< itemFixed(VERTICAL, 3)
 		<< 	( pane(HORIZONTAL, ABSOLUTE_VERT, 0, 0, 0 )
 			<< item(IDC_FACE_STATIC, NORESIZE, 0, 0, 0, 0)
 			<< itemFixed(HORIZONTAL, 3)
@@ -153,6 +151,10 @@ BOOL CBCLeakyPropertyPage2::OnInitDialog()
 			<< item(IDC_FACE_Y_RADIO, NORESIZE, 0, 0, 0, 0)
 			<< item(IDC_FACE_Z_RADIO, NORESIZE, 0, 0, 0, 0)
 			)
+		<< item(IDC_SINGLE_GRID, ABSOLUTE_VERT)
+		<< item(IDC_HEAD_GRID, GREEDY)
+		<< item(IDC_SOLUTION_GRID, GREEDY)
+		//<< itemFixed(VERTICAL, 3)
 		<< item(IDC_DESC_RICHEDIT, ABSOLUTE_VERT)		
 		;
 	UpdateLayout();

@@ -16,6 +16,7 @@ WPhast.Import(examples & "decay\decay.trans.dat")
 WPhast.SaveAs(examples & "decay\decay.wphast")
 WScript.Sleep(delay)
 '''WPhast.Run
+'''WScript.Quit
 
 ' disp2d
 WPhast = Null

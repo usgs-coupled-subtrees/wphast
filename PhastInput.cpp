@@ -224,7 +224,7 @@ void CPhastInput::WritePhastTmp(const char* szPhastTmp)
 			::database_name = ::string_duplicate("phast.dat");
 		}
 
-		::fclose(hst_file);
+		::fclose(::hst_file);
 		if ((::hst_file = ::fopen(szPhastTmp, "w")) == NULL)
 		{
 			return;

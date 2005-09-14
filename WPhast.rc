@@ -2020,19 +2020,19 @@ STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Leaky Properties"
 FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
-    CONTROL         "Custom1",IDC_HEAD_GRID,"MFCGridCtrl",WS_BORDER | 
-                    WS_TABSTOP,7,7,404,48
-    CONTROL         "Custom1",IDC_SOLUTION_GRID,"MFCGridCtrl",WS_BORDER | 
-                    WS_TABSTOP,7,66,404,48
-    CONTROL         "Custom1",IDC_SINGLE_GRID,"MFCGridCtrl",WS_BORDER | 
-                    WS_TABSTOP,7,122,404,38
-    LTEXT           "Face:",IDC_FACE_STATIC,7,164,19,8
+    LTEXT           "Face:",IDC_FACE_STATIC,7,7,19,8
     CONTROL         "X",IDC_FACE_X_RADIO,"Button",BS_AUTORADIOBUTTON | 
-                    WS_GROUP,32,164,20,10
-    CONTROL         "Y",IDC_FACE_Y_RADIO,"Button",BS_AUTORADIOBUTTON,54,164,
-                    20,10
-    CONTROL         "Z",IDC_FACE_Z_RADIO,"Button",BS_AUTORADIOBUTTON,76,164,
-                    20,10
+                    WS_GROUP,32,7,20,10
+    CONTROL         "Y",IDC_FACE_Y_RADIO,"Button",BS_AUTORADIOBUTTON,54,7,20,
+                    10
+    CONTROL         "Z",IDC_FACE_Z_RADIO,"Button",BS_AUTORADIOBUTTON,76,7,20,
+                    10
+    CONTROL         "Custom1",IDC_SINGLE_GRID,"MFCGridCtrl",WS_BORDER | 
+                    WS_TABSTOP,7,19,404,38
+    CONTROL         "Custom1",IDC_HEAD_GRID,"MFCGridCtrl",WS_BORDER | 
+                    WS_TABSTOP,7,65,404,48
+    CONTROL         "Custom1",IDC_SOLUTION_GRID,"MFCGridCtrl",WS_BORDER | 
+                    WS_TABSTOP,7,121,404,48
     CONTROL         "",IDC_DESC_RICHEDIT,"RichEdit20A",ES_MULTILINE | 
                     ES_AUTOHSCROLL | ES_READONLY | WS_BORDER | WS_VSCROLL | 
                     WS_HSCROLL,7,177,404,38

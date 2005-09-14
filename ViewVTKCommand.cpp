@@ -24,10 +24,16 @@
 #include "ZoneResizeAction.h"
 #include "NewZonePropertyPage.h"
 #include "MediaPropertyPage.h"
+
 #include "BCFluxPropertyPage.h"
+#include "BCFluxPropertyPage2.h"
+
 #include "BCLeakyPropertyPage.h"
 #include "BCLeakyPropertyPage2.h"
+
 #include "BCSpecifiedPropertyPage.h"
+#include "BCSpecifiedHeadPropertyPage.h"
+
 #include "ICHeadPropertyPage.h"
 #include "ChemICPropertyPage.h"
 
@@ -689,18 +695,19 @@ void CViewVTKCommand::OnLeftButtonReleaseEvent(vtkObject* caller, void* callData
 		//{{
 		// get type of zone
 		//
-		CPropertySheet sheet("Zone Wizard");
-		CNewZonePropertyPage     newZone;
-		CMediaPropertyPage       mediaProps(IDS_MEDIA_PROPS_WIZ_135);
-		CBCFluxPropertyPage      fluxProps;
-		CBCLeakyPropertyPage     leakyProps;
-		CBCSpecifiedPropertyPage specifiedProps;
-		CICHeadPropertyPage      icHeadProps;
-		CChemICPropertyPage      chemICProps;
+		//CPropertySheet sheet("Zone Wizard");
+		ETSLayoutPropertySheet       sheet("Zone Wizard");
+		CNewZonePropertyPage         newZone;
+		CMediaPropertyPage           mediaProps(IDS_MEDIA_PROPS_WIZ_135);
+		CBCFluxPropertyPage2         fluxProps;
+		CBCLeakyPropertyPage2        leakyProps;
+		CBCSpecifiedHeadPropertyPage specifiedProps;
+		CICHeadPropertyPage          icHeadProps;
+		CChemICPropertyPage          chemICProps;
 
-		fluxProps.SetStressPeriod(1);
-		leakyProps.SetStressPeriod(1);
-		specifiedProps.SetStressPeriod(1);
+		///fluxProps.SetStressPeriod(1);
+		///leakyProps.SetStressPeriod(1);
+		///specifiedProps.SetStressPeriod(1);
 
 		sheet.AddPage(&newZone);
 		sheet.AddPage(&mediaProps);
