@@ -32,7 +32,7 @@
                 <File Id='F__WPhast.exe' Name='WPhast.exe' DiskId='1' src='..\AutoRelease\WPhast.exe' Vital='yes'>
                   <Shortcut Id="S__WPhast" Directory="D_PrgMenu.2FB136FF_6AAD_442A_A6EB_99511F1CDF82" Name="WPhast" Icon="WPhast.exe" IconIndex="0" Target="F__MainProgram" />
                 </File>
-                <File Id='F__phast.exe' Name='phast.exe' DiskId='1' src='C:\Program Files\USGS\phast-1.1\bin\phast-ser.exe' Vital='yes' Checksum='yes'/>
+                <File Id='F__phast.exe' Name='phast.exe' DiskId='1' src='C:\cygwin\home\charlton\programs\phast\srcphast\win32\ser\phast.exe' Vital='yes' Checksum='yes'/>
                 <Class Id="36353903-2137-43FD-9AD6-40B65A96A839" Context="LocalServer32" Description="WPhast.Document" Advertise="yes">
                   <ProgId Id="WPhast.Document" Description="WPhast.Document">
                     <Extension Id="wphast">
@@ -50,7 +50,7 @@
                 </File>
                 <!-- <Registry Id="R__phast.exe" Root="HKLM" Key="SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\WPhast.exe" Type="string" Value="[#F__WPhast.exe]" /> -->
                 <!-- <RemoveFolder Id="Shortcut0" Directory="ProgramMenuDir" On="uninstall" /> -->
-                <File Id='F__phast.exe' Name='phast.exe' DiskId='1' src='C:\Program Files\USGS\phast-1.1\bin\phast-ser.exe' Vital='yes' Checksum='yes'/>
+                <File Id='F__phast.exe' Name='phast.exe' DiskId='1' src='C:\cygwin\home\charlton\programs\phast\srcphast\win32\ser\phast.exe' Vital='yes' Checksum='yes'/>
 
                 <ProgId Id="WPhast.Document" Description="WPhast.Document" Icon='[!F__WPhast.exe]' IconIndex='1'>
                   <Extension Id="wphast">

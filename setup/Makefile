@@ -16,6 +16,8 @@ MSIVAL2=/cygdrive/c/Program\ Files/MsiVal2/msival2
 
 MSIEXEC=msiexec
 
+PHAST=/home/charlton/programs/phast/srcphast/win32/ser/phast.exe
+
 BINARIES=\
 	Binary/Banner.bmp\
 	Binary/Banner.bmp\
@@ -55,7 +57,7 @@ WPHAST_FILES=\
 	$(EXAMPLES)/unconf/unconf.wphast\
 	$(EXAMPLES)/well/well.wphast
 	
-WPhast.msi : WPhast.wixobj ../AutoRelease/WPhast.exe $(BINARIES) $(WPHAST_FILES)
+WPhast.msi : WPhast.wixobj ../AutoRelease/WPhast.exe $(BINARIES) $(WPHAST_FILES) $(PHAST)
 	$(LIGHT) $(LIGHT_FLAGS) WPhast.wixobj
 
 WPhast.wixobj : WPhast.wxs
