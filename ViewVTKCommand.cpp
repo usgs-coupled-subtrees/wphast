@@ -595,20 +595,6 @@ void CViewVTKCommand::OnLeftButtonReleaseEvent(vtkObject* caller, void* callData
 		CGrid grid[3];
 		this->m_pView->GetDocument()->GetGrid(grid[0], grid[1], grid[2]);
 		this->m_pView->m_pWellActor->SetZAxis(grid[2], this->m_pView->GetDocument()->GetUnits());
-
-
-		
-// COMMENT: {8/13/2004 6:21:43 PM}		this->m_pView->m_pWellActor->SetHeight(zMax - zMin);
-// COMMENT: {8/13/2004 6:21:43 PM}		this->m_pView->m_pWellActor->CappingOn();
-// COMMENT: {8/13/2004 6:21:43 PM}		this->m_pView->m_pWellActor->SetResolution(20);
-		
-
-// COMMENT: {8/13/2004 6:22:57 PM}		this->m_pView->m_pWellActor->SetPosition(
-// COMMENT: {8/13/2004 6:22:57 PM}			this->m_BeginPoint[0],
-// COMMENT: {8/13/2004 6:22:57 PM}			this->m_BeginPoint[1],
-// COMMENT: {8/13/2004 6:22:57 PM}			(zMax + zMin) / 2);
-
-
 		this->m_pView->m_pWellActor->VisibilityOn();
 
 		// render
@@ -645,7 +631,8 @@ void CViewVTKCommand::OnLeftButtonReleaseEvent(vtkObject* caller, void* callData
 	}
 
 
-	if (this->m_pView->CreatingNewZone()) {
+	if (this->m_pView->CreatingNewZone())
+	{
 
 		// m_pView->StartNewZone should have already been called
 		//
@@ -659,13 +646,12 @@ void CViewVTKCommand::OnLeftButtonReleaseEvent(vtkObject* caller, void* callData
 
 		// update cube
 		//
-        Update();
-		this->m_pView->m_pNewCube->SetXLength( fabs(this->m_WorldPointXYPlane[0] - this->m_BeginPoint[0]) );
-		this->m_pView->m_pNewCube->SetYLength( fabs(this->m_WorldPointXYPlane[1] - this->m_BeginPoint[1]) );
+        this->Update();
+		this->m_pView->m_pNewCube->SetXLength( ::fabs(this->m_WorldPointXYPlane[0] - this->m_BeginPoint[0]) );
+		this->m_pView->m_pNewCube->SetYLength( ::fabs(this->m_WorldPointXYPlane[1] - this->m_BeginPoint[1]) );
 		this->m_pView->m_pNewCubeActor->SetPosition(
 			(this->m_WorldPointXYPlane[0] + this->m_BeginPoint[0]) / 2.0,
 			(this->m_WorldPointXYPlane[1] + this->m_BeginPoint[1]) / 2.0,
-// COMMENT: {7/8/2004 8:04:56 PM}			this->m_pView->m_pNewCube->GetZLength() / 2.0);
 #if defined(USE_ZMAX)
 			(2 * this->m_WorldPointXYPlane[2] - this->m_pView->m_pNewCube->GetZLength()) / 2.0);
 #else
@@ -677,37 +663,18 @@ void CViewVTKCommand::OnLeftButtonReleaseEvent(vtkObject* caller, void* callData
 		//
 		vtkFloatingPointType scaled_meters[6];
 		this->m_pView->m_pNewCubeActor->GetBounds(scaled_meters);
-// COMMENT: {5/27/2004 8:36:31 PM}		this->m_pView->EndNewZone();
 
-		// Note: the Interactor must be set before Execute
-		// otherwise the selection will not be set
-		//
-#ifdef _DEBUG
-		if (vtkInteractorStyle* style = vtkInteractorStyle::SafeDownCast(this->m_pView->InteractorStyle))
-		{
-			if (vtkInteractorStyleSwitch* switcher = vtkInteractorStyleSwitch::SafeDownCast(style))
-			{
-				style = switcher->GetCurrentStyle();
-			}
-// COMMENT: {5/27/2004 8:39:28 PM}			ASSERT(style->GetInteractor() != 0);
-		}
-#endif
-		//{{
 		// get type of zone
 		//
 		//CPropertySheet sheet("Zone Wizard");
-		ETSLayoutPropertySheet       sheet("Zone Wizard");
-		CNewZonePropertyPage         newZone;
-		CMediaPropertyPage           mediaProps(IDS_MEDIA_PROPS_WIZ_135);
-		CBCFluxPropertyPage2         fluxProps;
-		CBCLeakyPropertyPage2        leakyProps;
-		CBCSpecifiedHeadPropertyPage specifiedProps;
-		CICHeadPropertyPage          icHeadProps;
-		CChemICPropertyPage          chemICProps;
-
-		///fluxProps.SetStressPeriod(1);
-		///leakyProps.SetStressPeriod(1);
-		///specifiedProps.SetStressPeriod(1);
+		ETSLayoutPropertySheet        sheet("Zone Wizard");
+		CNewZonePropertyPage          newZone;
+		CMediaPropertyPage            mediaProps(IDS_MEDIA_PROPS_WIZ_135);
+		CBCFluxPropertyPage2          fluxProps;
+		CBCLeakyPropertyPage2         leakyProps;
+		CBCSpecifiedHeadPropertyPage  specifiedProps;
+		CICHeadPropertyPage           icHeadProps;
+		CChemICPropertyPage           chemICProps;
 
 		sheet.AddPage(&newZone);
 		sheet.AddPage(&mediaProps);
@@ -718,7 +685,8 @@ void CViewVTKCommand::OnLeftButtonReleaseEvent(vtkObject* caller, void* callData
 		sheet.AddPage(&chemICProps);		
 		sheet.SetWizardMode();
 
-		if (sheet.DoModal() == ID_WIZFINISH) {
+		if (sheet.DoModal() == ID_WIZFINISH)
+		{
 			///{{{
 			this->m_pView->EndNewZone();
 			///}}}
@@ -739,45 +707,45 @@ void CViewVTKCommand::OnLeftButtonReleaseEvent(vtkObject* caller, void* callData
 
 			CWPhastDoc* pDoc = this->m_pView->GetDocument();
 
-			// ID_ZONE_TYPE_MEDIA
-			if (newZone.GetType() == ID_ZONE_TYPE_MEDIA) {
+			if (newZone.GetType() == ID_ZONE_TYPE_MEDIA)
+			{
 				CGridElt elt;
 				mediaProps.GetProperties(elt);
 				CMediaZoneActor::Create(pDoc, absZone, elt);
 			}
-			// ID_ZONE_TYPE_BC_FLUX
-			else if (newZone.GetType() == ID_ZONE_TYPE_BC_FLUX) {
+			else if (newZone.GetType() == ID_ZONE_TYPE_BC_FLUX)
+			{
 				CBC bc;
 				fluxProps.GetProperties(bc);
 				CBCZoneActor::Create(pDoc, absZone, bc);
 			}
-			// ID_ZONE_TYPE_BC_LEAKY
-			else if (newZone.GetType() == ID_ZONE_TYPE_BC_LEAKY) {
+			else if (newZone.GetType() == ID_ZONE_TYPE_BC_LEAKY)
+			{
 				CBC bc;
 				leakyProps.GetProperties(bc);
 				CBCZoneActor::Create(pDoc, absZone, bc);
 			}
-			// ID_ZONE_TYPE_BC_SPECIFIED
 			else if (newZone.GetType() == ID_ZONE_TYPE_BC_SPECIFIED)
 			{
 				CBC bc;
 				specifiedProps.GetProperties(bc);
 				CBCZoneActor::Create(pDoc, absZone, bc);
 			}
-			// ID_ZONE_TYPE_IC_HEAD
-			else if (newZone.GetType() == ID_ZONE_TYPE_IC_HEAD) {
+			else if (newZone.GetType() == ID_ZONE_TYPE_IC_HEAD)
+			{
 				CHeadIC headic;
 				icHeadProps.GetProperties(headic);
 				CICZoneActor::Create(pDoc, absZone, headic);
 			}
-			// ID_ZONE_TYPE_IC_CHEM
-			else if (newZone.GetType() == ID_ZONE_TYPE_IC_CHEM) {
+			else if (newZone.GetType() == ID_ZONE_TYPE_IC_CHEM)
+			{
 				CChemIC chemIC;
 				chemICProps.GetProperties(chemIC);
 				CICZoneActor::Create(pDoc, absZone, chemIC);
 			}
 		}
-		else {
+		else
+		{
 			this->m_pView->CancelNewZone();
 		}
 

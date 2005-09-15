@@ -8,6 +8,7 @@
 
 #ifndef baseCBCFluxPropertyPage2
 #define baseCBCFluxPropertyPage2 ETSLayoutPropertyPageXP
+//#define baseCBCFluxPropertyPage2 CPropertyPage
 #endif
 
 
@@ -41,4 +42,6 @@ protected:
 
 public:
 	virtual BOOL OnInitDialog();
+	virtual BOOL OnSetActive();
+	virtual BOOL OnKillActive();
 };

@@ -502,3 +502,26 @@ void CBCLeakyPropertyPage2::OnCheckChangedSingle(NMHDR *pNotifyStruct, LRESULT *
 	}
 }
 
+BOOL CBCLeakyPropertyPage2::OnSetActive()
+{
+	BOOL bRet = CPropertyPage::OnSetActive();
+
+	CPropertySheet* pSheet = static_cast<CPropertySheet*>(this->GetParent());
+	ASSERT_KINDOF(CPropertySheet, pSheet);
+	if (pSheet->IsWizard())
+	{
+		pSheet->SetWizardButtons(PSWIZB_BACK|PSWIZB_FINISH);
+	}
+	return bRet;
+}
+
+BOOL CBCLeakyPropertyPage2::OnKillActive()
+{
+	CPropertySheet* pSheet = static_cast<CPropertySheet*>(this->GetParent());
+	ASSERT_KINDOF(CPropertySheet, pSheet);
+	if (pSheet->IsWizard())
+	{
+		return TRUE;
+	}
+	return CPropertyPage::OnKillActive();
+}

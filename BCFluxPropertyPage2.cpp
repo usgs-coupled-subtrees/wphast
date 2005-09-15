@@ -342,3 +342,27 @@ void CBCFluxPropertyPage2::OnCheckChangedSolution(NMHDR *pNotifyStruct, LRESULT 
 		this->m_gridSolution.Invalidate();
 	}
 }
+
+BOOL CBCFluxPropertyPage2::OnSetActive()
+{
+	BOOL bRet = CPropertyPage::OnSetActive();
+
+	CPropertySheet* pSheet = static_cast<CPropertySheet*>(this->GetParent());
+	ASSERT_KINDOF(CPropertySheet, pSheet);
+	if (pSheet->IsWizard())
+	{
+		pSheet->SetWizardButtons(PSWIZB_BACK|PSWIZB_FINISH);
+	}
+	return bRet;
+}
+
+BOOL CBCFluxPropertyPage2::OnKillActive()
+{
+	CPropertySheet* pSheet = static_cast<CPropertySheet*>(this->GetParent());
+	ASSERT_KINDOF(CPropertySheet, pSheet);
+	if (pSheet->IsWizard())
+	{
+		return TRUE;
+	}
+	return CPropertyPage::OnKillActive();
+}

@@ -41,4 +41,6 @@ protected:
 	afx_msg void OnCheckChangedSingle(NMHDR *pNotifyStruct, LRESULT *result);
 public:
 	virtual BOOL OnInitDialog();
+	virtual BOOL OnSetActive();
+	virtual BOOL OnKillActive();
 };
