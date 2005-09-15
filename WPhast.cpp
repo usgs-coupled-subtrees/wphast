@@ -305,7 +305,8 @@ void CWPhastApp::OnFileNew()
 	}
 	//}}
 	// CWinApp::OnFileNew();
-	if (m_pDocManager != NULL) {
+	if (m_pDocManager != NULL)
+	{
 		POSITION pos = m_pDocManager->GetFirstDocTemplatePosition();
 		if (pos == NULL)
 		{
@@ -353,23 +354,6 @@ void CWPhastApp::OnFileNew()
 			if (wizard.DoModal() == ID_WIZFINISH)
 			{
 				CNewModel model = wizard.GetModel();
-				CNewModel deflt = CNewModel::Default();
-// COMMENT: {6/10/2004 5:04:48 PM}#if defined(__CPPUNIT__)
-// COMMENT: {6/10/2004 5:04:48 PM}				if (!model.HasSiteMap()) {
-// COMMENT: {6/10/2004 5:04:48 PM}					CSiteMap siteMap;
-// COMMENT: {6/10/2004 5:04:48 PM}					siteMap.m_fileName      = "ok1.bmp";
-// COMMENT: {6/10/2004 5:04:48 PM}					siteMap.m_angle         = 15.0;
-// COMMENT: {6/10/2004 5:04:48 PM}					siteMap.m_placement[0]  = 621099.81;
-// COMMENT: {6/10/2004 5:04:48 PM}					siteMap.m_placement[1]  = 3896414.25;
-// COMMENT: {6/10/2004 5:04:48 PM}					siteMap.m_placement[2]  = model.m_grid[2].coord[0] - .01 * (model.m_grid[2].coord[1] - model.m_grid[2].coord[0]);
-// COMMENT: {6/10/2004 5:04:48 PM}
-// COMMENT: {6/10/2004 5:04:48 PM}					CWorldTransform wtrans;
-// COMMENT: {6/10/2004 5:04:48 PM}					wtrans.LoadWorldFile("ok1.bpw");
-// COMMENT: {6/10/2004 5:04:48 PM}					siteMap.SetWorldTransform(wtrans);
-// COMMENT: {6/10/2004 5:04:48 PM}
-// COMMENT: {6/10/2004 5:04:48 PM}					model.SetSiteMap(siteMap);
-// COMMENT: {6/10/2004 5:04:48 PM}				}
-// COMMENT: {6/10/2004 5:04:48 PM}#endif
 				pDoc->New(model);
 			}
 			else

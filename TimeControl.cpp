@@ -140,40 +140,40 @@ std::ostream& operator<< (std::ostream &os, const CTimeControl &tc)
 void CTimeControl::Edit(CTreeCtrl* pTreeCtrl)
 {
 	ASSERT(FALSE); // replaced by CTimeControl2
-	ASSERT(this);
-	ASSERT(pTreeCtrl);
-
-	CFrameWnd *pFrame = (CFrameWnd*)::AfxGetApp()->m_pMainWnd;
-	ASSERT_VALID(pFrame);
-	CWPhastDoc* pDoc = reinterpret_cast<CWPhastDoc*>(pFrame->GetActiveDocument());
-	ASSERT_VALID(pDoc);
-
-	// show property sheet
-	//
-	CPropertySheet propSheet("Time Control", ::AfxGetMainWnd());
-
-	CTimeControlPropertyPage tcPage;
-	tcPage.SetProperties(*this);
-// COMMENT: {4/11/2005 1:45:28 PM}	if (nStressPeriod > 1) {
-// COMMENT: {4/11/2005 1:45:28 PM}		tcPage.SetPreviousTimeStep(pDoc->GetTimeControl(nStressPeriod - 1));
-// COMMENT: {4/11/2005 1:45:28 PM}	}
-
-	propSheet.AddPage(&tcPage);
-
-	switch (propSheet.DoModal()) {
-		case IDOK:
-			{
-				CTimeControl newTimeControl;
-				tcPage.GetProperties(newTimeControl);
-// COMMENT: {4/11/2005 1:45:40 PM}				pDoc->Execute(new CSetTimeControlAction(pDoc, newTimeControl, nStressPeriod));
-// COMMENT: {4/26/2005 8:57:13 PM}				pDoc->Execute(new CSetTimeControlAction(pDoc, newTimeControl));
-			}
-			break;
-		case IDCANCEL:
-			break;
-		default:
-			ASSERT(FALSE);
-	}
+// COMMENT: {9/14/2005 9:47:51 PM}	ASSERT(this);
+// COMMENT: {9/14/2005 9:47:51 PM}	ASSERT(pTreeCtrl);
+// COMMENT: {9/14/2005 9:47:51 PM}
+// COMMENT: {9/14/2005 9:47:51 PM}	CFrameWnd *pFrame = (CFrameWnd*)::AfxGetApp()->m_pMainWnd;
+// COMMENT: {9/14/2005 9:47:51 PM}	ASSERT_VALID(pFrame);
+// COMMENT: {9/14/2005 9:47:51 PM}	CWPhastDoc* pDoc = reinterpret_cast<CWPhastDoc*>(pFrame->GetActiveDocument());
+// COMMENT: {9/14/2005 9:47:51 PM}	ASSERT_VALID(pDoc);
+// COMMENT: {9/14/2005 9:47:51 PM}
+// COMMENT: {9/14/2005 9:47:51 PM}	// show property sheet
+// COMMENT: {9/14/2005 9:47:51 PM}	//
+// COMMENT: {9/14/2005 9:47:51 PM}	CPropertySheet propSheet("Time Control", ::AfxGetMainWnd());
+// COMMENT: {9/14/2005 9:47:51 PM}
+// COMMENT: {9/14/2005 9:47:51 PM}	CTimeControlPropertyPage tcPage;
+// COMMENT: {9/14/2005 9:47:51 PM}	tcPage.SetProperties(*this);
+// COMMENT: {9/14/2005 9:47:51 PM}// COMMENT: {4/11/2005 1:45:28 PM}	if (nStressPeriod > 1) {
+// COMMENT: {9/14/2005 9:47:51 PM}// COMMENT: {4/11/2005 1:45:28 PM}		tcPage.SetPreviousTimeStep(pDoc->GetTimeControl(nStressPeriod - 1));
+// COMMENT: {9/14/2005 9:47:51 PM}// COMMENT: {4/11/2005 1:45:28 PM}	}
+// COMMENT: {9/14/2005 9:47:51 PM}
+// COMMENT: {9/14/2005 9:47:51 PM}	propSheet.AddPage(&tcPage);
+// COMMENT: {9/14/2005 9:47:51 PM}
+// COMMENT: {9/14/2005 9:47:51 PM}	switch (propSheet.DoModal()) {
+// COMMENT: {9/14/2005 9:47:51 PM}		case IDOK:
+// COMMENT: {9/14/2005 9:47:51 PM}			{
+// COMMENT: {9/14/2005 9:47:51 PM}				CTimeControl newTimeControl;
+// COMMENT: {9/14/2005 9:47:51 PM}				tcPage.GetProperties(newTimeControl);
+// COMMENT: {9/14/2005 9:47:51 PM}// COMMENT: {4/11/2005 1:45:40 PM}				pDoc->Execute(new CSetTimeControlAction(pDoc, newTimeControl, nStressPeriod));
+// COMMENT: {9/14/2005 9:47:51 PM}// COMMENT: {4/26/2005 8:57:13 PM}				pDoc->Execute(new CSetTimeControlAction(pDoc, newTimeControl));
+// COMMENT: {9/14/2005 9:47:51 PM}			}
+// COMMENT: {9/14/2005 9:47:51 PM}			break;
+// COMMENT: {9/14/2005 9:47:51 PM}		case IDCANCEL:
+// COMMENT: {9/14/2005 9:47:51 PM}			break;
+// COMMENT: {9/14/2005 9:47:51 PM}		default:
+// COMMENT: {9/14/2005 9:47:51 PM}			ASSERT(FALSE);
+// COMMENT: {9/14/2005 9:47:51 PM}	}
 }
 
 void CTimeControl::EditMultiple(CPropertyTreeControlBar* pPropTree)

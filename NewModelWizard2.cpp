@@ -99,11 +99,11 @@ void CNewModelWizard2::SetHeadIC(const CHeadIC& rHeadIC)
 	this->m_icHeadPage.SetProperties(rHeadIC);
 }
 
-CTimeControl CNewModelWizard2::GetTimeControl(void)const
+CTimeControl2 CNewModelWizard2::GetTimeControl2(void)const
 {
-	CTimeControl timeControl;
-	this->m_tcPage.GetProperties(timeControl);
-	return timeControl;
+	CTimeControl2 timeControl2;
+	this->m_tcPage.GetProperties(timeControl2);
+	return timeControl2;
 }
 
 // CNewModelWizard2 message handlers

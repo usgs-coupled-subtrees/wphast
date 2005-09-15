@@ -20,14 +20,14 @@ public:
 		HPALETTE hpalWatermark = NULL, HBITMAP hbmHeader = NULL);
 	virtual ~CNewModelWizard2();
 
-	CFlowOnly    GetFlowOnly(void)const;
-	CUnits       GetUnits(void)const;
-	CGrid        GetGridX(void)const;
-	CGrid        GetGridY(void)const;
-	CGrid        GetGridZ(void)const;
-	CGridElt     GetGridElt(void)const;
-	CHeadIC      GetHeadIC(void)const;
-	CTimeControl GetTimeControl(void)const;
+	CFlowOnly     GetFlowOnly(void)const;
+	CUnits        GetUnits(void)const;
+	CGrid         GetGridX(void)const;
+	CGrid         GetGridY(void)const;
+	CGrid         GetGridZ(void)const;
+	CGridElt      GetGridElt(void)const;
+	CHeadIC       GetHeadIC(void)const;
+	CTimeControl2 GetTimeControl2(void)const;
 
 	void SetGridElt(const CGridElt& rGridElt);
 	void SetHeadIC(const CHeadIC& rHeadIC);

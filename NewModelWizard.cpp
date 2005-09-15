@@ -22,9 +22,7 @@ CNewModelWizard::CNewModelWizard(LPCTSTR pszCaption, CWnd* pParentWnd,
 	, m_gridPage  (IDS_GRID_CAPTION_143,    IDS_GRID_TITLE_144,    IDS_GRID_SUBTITLE_145)
 	, m_mediaPage (IDS_MEDIA_CAPTION_146,   IDS_MEDIA_TITLE_147,   IDS_MEDIA_SUBTITLE_148)
 	, m_icHeadPage(IDS_IC_HEAD_CAPTION_149, IDS_IC_HEAD_TITLE_150, IDS_IC_HEAD_SUBTITLE_151)
-
 	, m_chemICPage(CChemICPropertyPage::IDD_INTERIOR, IDS_CHEM_IC_CAPTION_158, IDS_CHEM_IC_TITLE_159, IDS_CHEM_IC_SUBTITLE_160)
-
 	, m_tcPage    (IDS_TC_CAPTION_152,      IDS_TC_TITLE_153,      IDS_TC_SUBTITLE_154)
 {
 	this->m_mediaPage.SetNewModelWizard(true);
@@ -56,25 +54,27 @@ END_MESSAGE_MAP()
 CNewModel CNewModelWizard::GetModel(void)const
 {
 	CNewModel model;
-	//this->m_introPage.GetProperties(model.m_flowOnly);
 	model.m_flowOnly = this->m_introPage.GetFlowOnly();
 	model.m_freeSurface = this->m_introPage.GetFreeSurface();
 	model.m_steadyFlow = this->m_introPage.GetSteadyFlow();
 	this->m_units1Page.GetProperties(model.m_units);
 	this->m_units2Page.GetProperties(model.m_units);
-	if (this->m_importPage.m_bImport) {
+	if (this->m_importPage.m_bImport)
+	{
 		CSiteMap site = this->m_importPage.GetSiteMap();
 		site.m_fileName = (LPCTSTR)this->m_importPage.m_strMapFileName;
 		site.m_placement[2] = this->m_gridPage.m_grid[2].coord[0] - .01 *(this->m_gridPage.m_grid[2].coord[1] - this->m_gridPage.m_grid[2].coord[0]);
 		model.SetSiteMap(site);
 	}
-	for (int i = 0; i < 3; ++i) {
+	for (int i = 0; i < 3; ++i)
+	{
 		model.m_gridKeyword.m_grid[i] = this->m_gridPage.m_grid[i];
 	}
 	this->m_mediaPage.GetProperties(model.m_media);
 	this->m_icHeadPage.GetProperties(model.m_headIC);
 	this->m_chemICPage.GetProperties(model.m_chemIC);
 // COMMENT: {4/22/2005 3:43:04 PM}	this->m_tcPage.GetProperties(model.m_timeControl);
+	this->m_tcPage.GetProperties(model.m_timeControl2);
 	return model;
 }
 
@@ -150,11 +150,11 @@ void CNewModelWizard::SetChemIC(const CChemIC& chemIC)
 	this->m_chemICPage.SetProperties(chemIC);
 }
 
-CTimeControl CNewModelWizard::GetTimeControl(void)const
+CTimeControl2 CNewModelWizard::GetTimeControl2(void)const
 {
-	CTimeControl timeControl;
-	this->m_tcPage.GetProperties(timeControl);
-	return timeControl;
+	CTimeControl2 timeControl2;
+	this->m_tcPage.GetProperties(timeControl2);
+	return timeControl2;
 }
 
 // CNewModelWizard message handlers

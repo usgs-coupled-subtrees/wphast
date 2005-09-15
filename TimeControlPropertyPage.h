@@ -4,7 +4,7 @@
 // CTimeControlPropertyPage dialog
 #include <string>
 #include "time.h"
-#include "TimeControl.h"
+#include "TimeControl2.h"
 #include "Units.h"
 
 class CTimeControlPropertyPage : public CPropertyPage
@@ -19,11 +19,8 @@ public:
 
 	void SetUnits(const CUnits& units);
 
-	void SetProperties(const CTimeControl& timeControl);
-	void GetProperties(CTimeControl& timeControl)const;
-
-	void SetPreviousTimeStep(const CTimeControl& timeControl);
-	void GetPreviousTimeStep(CTimeControl& timeControl)const;
+	void SetProperties(const CTimeControl2& timeControl2);
+	void GetProperties(CTimeControl2& timeControl2)const;
 
 // Dialog Data
 	enum { IDD = IDD_TC_INT_PROPPAGE };
@@ -35,8 +32,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 	CRichEditCtrl     m_wndRichEditCtrl;
-	CTimeControl      m_timeControl;
-	CTimeControl*     m_pLastTimeControl;
+	CTimeControl2     m_timeControl2;
 
 	struct units      m_units;
 
