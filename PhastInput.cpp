@@ -218,7 +218,7 @@ void CPhastInput::WritePhastTmp(const char* szPhastTmp)
 			::strcat(name, ".chem.dat");
 			::chemistry_name = ::string_duplicate(name);
 		}
-		assert(database_name == NULL);
+		assert(::database_name == NULL);
 		if (::database_name == NULL)
 		{
 			::database_name = ::string_duplicate("phast.dat");

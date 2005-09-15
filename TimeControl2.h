@@ -15,6 +15,8 @@ public:
 	void Serialize(bool bStoring, hid_t loc_id);
 	friend std::ostream& operator<< (std::ostream &os, const CTimeControl2& tc2);
 
+	static CTimeControl2 CTimeControl2::NewDefaults(void);
+
 public:
 	CTimeSeries<Ctime> m_timeStep;
 	std::set<Ctime> m_timeEnd;

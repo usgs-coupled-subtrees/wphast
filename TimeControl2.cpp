@@ -241,3 +241,22 @@ std::ostream& operator<< (std::ostream &os, const CTimeControl2 &tc2)
 
 	return os;
 }
+
+CTimeControl2 CTimeControl2::NewDefaults(void)
+{
+	CTimeControl2 timeControl2;
+
+	Ctime t;
+	t.type = UNITS;
+	t.SetValue(1.0);
+	timeControl2.m_timeEnd.insert(t);
+
+	t.SetValue(0.0);
+
+	Ctime t2;
+	t2.type = UNITS;
+	t2.SetValue(1.0);
+
+	timeControl2.m_timeStep.insert(CTimeSeries<Ctime>::value_type(t, t2));
+	return timeControl2;
+}

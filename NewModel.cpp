@@ -34,8 +34,7 @@ CNewModel CNewModel::Default(void)
 // COMMENT: {7/18/2005 6:39:30 PM}	model.m_grid[1].c = 'y';
 // COMMENT: {7/18/2005 6:39:30 PM}	model.m_grid[2].c = 'z';
 
-// COMMENT: {4/22/2005 3:43:39 PM}	model.m_timeControl.SetTimeStepValue(1.0);
-// COMMENT: {4/22/2005 3:43:39 PM}	model.m_timeControl.SetTimeEndValue(1.0);
+	model.m_timeControl2 = CTimeControl2::NewDefaults();
 
 	return model;
 }

@@ -3306,8 +3306,10 @@ void CWPhastDoc::OnFileRun()
 	CWaitCursor wait;
 	// this is required to get the prefix
 	//
-	if (this->GetPathName().IsEmpty()) {
-		if (!this->DoSave(NULL)) {
+	if (this->GetPathName().IsEmpty())
+	{
+		if (!this->DoSave(NULL))
+		{
 			return;
 		}
 	}
@@ -3337,7 +3339,8 @@ void CWPhastDoc::OnFileRun()
 
 	// Update StatusBar
 	//
-	if (CWnd* pWnd = ((CFrameWnd*)::AfxGetMainWnd())->GetMessageBar()) {
+	if (CWnd* pWnd = ((CFrameWnd*)::AfxGetMainWnd())->GetMessageBar())
+	{
 		CString status(_T("Writing Phast.tmp..."));
 		pWnd->SetWindowText(status);
 	}
@@ -3346,27 +3349,32 @@ void CWPhastDoc::OnFileRun()
 	try
 	{
 		pInput->WritePhastTmp(szPhastTmp);
-		if (pInput->GetErrorCount() != 0) {
+		if (pInput->GetErrorCount() != 0)
+		{
 			// goto ImportError;
 			// throw "Input file contains errors.";
 			throw pInput->GetErrorCount();
 		}
 		bWritePhastTmpOK = true;
 	}
-	catch (int) {
+	catch (int)
+	{
 		CImportErrorDialog dlg;
 		dlg.m_lpszErrorMessages = pInput->GetErrorMsg();
 		dlg.DoModal();
 	}
-	catch (const char * error) {
+	catch (const char * error)
+	{
 		::AfxMessageBox(error, MB_OK|MB_ICONEXCLAMATION);
 	}
-	catch (...) {
-		::AfxMessageBox("An unknown error occured during import", MB_OK|MB_ICONEXCLAMATION);
+	catch (...)
+	{
+		::AfxMessageBox("An unknown error occured during the run.", MB_OK|MB_ICONEXCLAMATION);
 	}
 	pInput->Delete();
 
-	if (bWritePhastTmpOK) {
+	if (bWritePhastTmpOK)
+	{
 		wait.Restore();
 
 		TCHAR szPhastTmpDir[_MAX_PATH];
@@ -3374,7 +3382,8 @@ void CWPhastDoc::OnFileRun()
 
 		// Update StatusBar
 		//
-		if (CWnd* pWnd = ((CFrameWnd*)::AfxGetMainWnd())->GetMessageBar()) {
+		if (CWnd* pWnd = ((CFrameWnd*)::AfxGetMainWnd())->GetMessageBar())
+		{
 			CString status(_T("Running..."));
 			pWnd->SetWindowText(status);
 		}
