@@ -157,7 +157,7 @@ BOOL CBCLeakyPropertyPage2::OnInitDialog()
 		//<< itemFixed(VERTICAL, 3)
 		<< item(IDC_DESC_RICHEDIT, ABSOLUTE_VERT)		
 		;
-	UpdateLayout();
+	this->UpdateLayout();
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
