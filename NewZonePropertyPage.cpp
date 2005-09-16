@@ -165,13 +165,11 @@ BOOL CNewZonePropertyPage::OnInitDialog()
 		}
 	}
 
-	//{{
 	// Layout controls
 	this->CreateRoot(VERTICAL)
 		<< item(IDC_TREE_ZONES, GREEDY)
 		;
 	this->UpdateLayout();
-	//}}
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
