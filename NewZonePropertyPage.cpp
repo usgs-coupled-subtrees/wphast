@@ -31,7 +31,8 @@ void CNewZonePropertyPage::DoDataExchange(CDataExchange* pDX)
 	CPropertyPage::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_TREE_ZONES, m_wndTree);
 
-	if (this->m_bFirstSetActive) {
+	if (this->m_bFirstSetActive)
+	{
 		this->m_htiMedia   = this->m_wndTree.InsertItem(_T("MEDIA"));
 		this->m_htiBC      = this->m_wndTree.InsertItem(_T("BOUNDARY_CONDITIONS"));
 		this->m_htiIC      = this->m_wndTree.InsertItem(_T("INITIAL_CONDITIONS"));
@@ -50,59 +51,77 @@ void CNewZonePropertyPage::DoDataExchange(CDataExchange* pDX)
 		this->m_wndTree.EnsureVisible(this->m_htiMedia);
 	}
 
-	if (pDX->m_bSaveAndValidate) {
+	if (pDX->m_bSaveAndValidate)
+	{
 		HTREEITEM hti = this->m_wndTree.GetSelectedItem();
-		if (hti == this->m_htiMedia) {
+		if (hti == this->m_htiMedia)
+		{
 			this->m_type = ID_ZONE_TYPE_MEDIA;
 		}
-		else if (hti == this->m_htiBC) {
+		else if (hti == this->m_htiBC)
+		{
 			::AfxMessageBox("Please choose the type of boundary condition.", MB_OK);
 			pDX->Fail();
 		}
-		else if (hti == this->m_htiIC) {
+		else if (hti == this->m_htiIC)
+		{
 			::AfxMessageBox("Please choose the type of initial condition.", MB_OK);
 			pDX->Fail();
 		}
-		else if (hti == this->m_htiBCFlux) {
+		else if (hti == this->m_htiBCFlux)
+		{
 			this->m_type = ID_ZONE_TYPE_BC_FLUX;
 		}
-		else if (hti == this->m_htiBCLeaky) {
+		else if (hti == this->m_htiBCLeaky)
+		{
 			this->m_type = ID_ZONE_TYPE_BC_LEAKY;
 		}
-		else if (hti == this->m_htiBCSpec) {
+		else if (hti == this->m_htiBCSpec)
+		{
 			this->m_type = ID_ZONE_TYPE_BC_SPECIFIED;
 		}
-		else if (hti == this->m_htiICHead) {
+		else if (hti == this->m_htiICHead)
+		{
 			this->m_type = ID_ZONE_TYPE_IC_HEAD;
 		}
-		else if (hti == this->m_htiChemIC) {
+		else if (hti == this->m_htiChemIC)
+		{
 			this->m_type = ID_ZONE_TYPE_IC_CHEM;
 		}
-		else {
+		else 
+		{
 			::AfxMessageBox("Please choose the type of zone to define.", MB_OK);
 			pDX->Fail();
 		}
 	}
-	else {
-		if (this->m_type == ID_ZONE_TYPE_MEDIA) {
+	else
+	{
+		if (this->m_type == ID_ZONE_TYPE_MEDIA)
+		{
 			this->m_wndTree.SelectItem(this->m_htiMedia);
 		}
-		else if (this->m_type == ID_ZONE_TYPE_BC_FLUX) {
+		else if (this->m_type == ID_ZONE_TYPE_BC_FLUX)
+		{
 			this->m_wndTree.SelectItem(this->m_htiBCFlux);
 		}
-		else if (this->m_type == ID_ZONE_TYPE_BC_LEAKY) {
+		else if (this->m_type == ID_ZONE_TYPE_BC_LEAKY)
+		{
 			this->m_wndTree.SelectItem(this->m_htiBCLeaky);
 		}
-		else if (this->m_type == ID_ZONE_TYPE_BC_SPECIFIED) {
+		else if (this->m_type == ID_ZONE_TYPE_BC_SPECIFIED)
+		{
 			this->m_wndTree.SelectItem(this->m_htiBCSpec);
 		}
-		else if (this->m_type == ID_ZONE_TYPE_IC_HEAD) {
+		else if (this->m_type == ID_ZONE_TYPE_IC_HEAD)
+		{
 			this->m_wndTree.SelectItem(this->m_htiICHead);
 		}
-		else if (this->m_type == ID_ZONE_TYPE_IC_CHEM) {
+		else if (this->m_type == ID_ZONE_TYPE_IC_CHEM)
+		{
 			this->m_wndTree.SelectItem(this->m_htiChemIC);
 		}		
-		else {
+		else
+		{
 			this->m_wndTree.SelectItem(this->m_htiMedia);
 		}
 	}
@@ -130,15 +149,18 @@ BOOL CNewZonePropertyPage::OnInitDialog()
 	// 6 : chem_ic page     CChemICPropertyPage
 	
 	CPropertySheet* pSheet = (CPropertySheet*) this->GetParent();   
-	if (pSheet->IsWizard()) {
+	if (pSheet->IsWizard())
+	{
 		int nCount = pSheet->GetPageCount();
 		ASSERT(nCount == 7);
-		for (int i = 0; i < nCount; ++i) {
+		for (int i = 0; i < nCount; ++i)
+		{
 			this->m_PropPageArray.Add(pSheet->GetPage(i));
 		}
 
 		// remove all but this page
-		for (int i = 1; i < nCount; ++i) {
+		for (int i = 1; i < nCount; ++i)
+		{
 			pSheet->RemovePage(1);
 		}
 	}
@@ -152,7 +174,8 @@ BOOL CNewZonePropertyPage::OnSetActive()
 	BOOL bRet = CPropertyPage::OnSetActive();
 	CPropertySheet* pSheet = static_cast<CPropertySheet*>(this->GetParent());
 	ASSERT_KINDOF(CPropertySheet, pSheet);
-	if (pSheet->IsWizard()) {
+	if (pSheet->IsWizard())
+	{
 		pSheet->SetWizardButtons(PSWIZB_NEXT);
 	}
 	return bRet;
@@ -178,13 +201,16 @@ LRESULT CNewZonePropertyPage::OnWizardNext()
 
 	// remove all but this page
 	int nCount = pSheet->GetPageCount();
-	for (int i = 1; i < nCount; ++i) {
+	for (int i = 1; i < nCount; ++i)
+	{
 		pSheet->RemovePage(1);
 	}
 
 	// add only the next page
-	if (this->UpdateData(TRUE)) {
-		switch (this->m_type) {
+	if (this->UpdateData(TRUE))
+	{
+		switch (this->m_type)
+		{
 			case ID_ZONE_TYPE_MEDIA:
 				pSheet->AddPage(this->m_PropPageArray[1]);
 				break;
