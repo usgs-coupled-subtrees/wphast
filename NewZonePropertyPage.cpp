@@ -8,9 +8,9 @@
 
 // CNewZonePropertyPage dialog
 
-IMPLEMENT_DYNAMIC(CNewZonePropertyPage, CPropertyPage)
+IMPLEMENT_DYNAMIC(CNewZonePropertyPage, baseCNewZonePropertyPage)
 CNewZonePropertyPage::CNewZonePropertyPage()
-: CPropertyPage(CNewZonePropertyPage::IDD)
+: baseCNewZonePropertyPage(CNewZonePropertyPage::IDD)
 , m_type(0)
 , m_htiMedia(0)
 , m_htiBC(0)
@@ -28,7 +28,7 @@ CNewZonePropertyPage::~CNewZonePropertyPage()
 
 void CNewZonePropertyPage::DoDataExchange(CDataExchange* pDX)
 {
-	CPropertyPage::DoDataExchange(pDX);
+	baseCNewZonePropertyPage::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_TREE_ZONES, m_wndTree);
 
 	if (this->m_bFirstSetActive)
@@ -127,7 +127,7 @@ void CNewZonePropertyPage::DoDataExchange(CDataExchange* pDX)
 	}
 }
 
-BEGIN_MESSAGE_MAP(CNewZonePropertyPage, CPropertyPage)
+BEGIN_MESSAGE_MAP(CNewZonePropertyPage, baseCNewZonePropertyPage)
 	ON_NOTIFY(NM_DBLCLK, IDC_TREE_ZONES, OnNMDblclkTreeZones)
 END_MESSAGE_MAP()
 
@@ -135,7 +135,7 @@ END_MESSAGE_MAP()
 
 BOOL CNewZonePropertyPage::OnInitDialog()
 {
-	CPropertyPage::OnInitDialog();
+	baseCNewZonePropertyPage::OnInitDialog();
 
 	// Add extra initialization here
 
@@ -165,13 +165,21 @@ BOOL CNewZonePropertyPage::OnInitDialog()
 		}
 	}
 
+	//{{
+	// Layout controls
+	this->CreateRoot(VERTICAL)
+		<< item(IDC_TREE_ZONES, GREEDY)
+		;
+	this->UpdateLayout();
+	//}}
+
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
 }
 
 BOOL CNewZonePropertyPage::OnSetActive()
 {
-	BOOL bRet = CPropertyPage::OnSetActive();
+	BOOL bRet = baseCNewZonePropertyPage::OnSetActive();
 	CPropertySheet* pSheet = static_cast<CPropertySheet*>(this->GetParent());
 	ASSERT_KINDOF(CPropertySheet, pSheet);
 	if (pSheet->IsWizard())
@@ -232,7 +240,7 @@ LRESULT CNewZonePropertyPage::OnWizardNext()
 		}
 	}
 
-	return CPropertyPage::OnWizardNext();
+	return baseCNewZonePropertyPage::OnWizardNext();
 }
 
 void CNewZonePropertyPage::OnNMDblclkTreeZones(NMHDR *pNMHDR, LRESULT *pResult)

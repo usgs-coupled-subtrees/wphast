@@ -1,10 +1,16 @@
 #pragma once
 #include "afxcmn.h"
 
+#include "ETSLayout/ETSLayout.h"
+#include "ETSLayoutPropertyPageXP.h"
+
+#ifndef baseCNewZonePropertyPage
+#define baseCNewZonePropertyPage ETSLayoutPropertyPageXP
+#endif
 
 // CNewZonePropertyPage dialog
 
-class CNewZonePropertyPage : public CPropertyPage
+class CNewZonePropertyPage : public baseCNewZonePropertyPage
 {
 	DECLARE_DYNAMIC(CNewZonePropertyPage)
 
