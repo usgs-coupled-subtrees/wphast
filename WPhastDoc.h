@@ -405,6 +405,7 @@ protected:
 	VARIANT Run(void);
 public:
 	afx_msg void OnViewHideAll();
+	afx_msg void OnViewShowAll();
 
 	// ID_RIVERS_HIDEALL handlers
 	afx_msg void OnUpdateRiversHideAll(CCmdUI *pCmdUI);

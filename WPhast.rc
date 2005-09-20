@@ -286,6 +286,7 @@ BEGIN
             MENUITEM "Unselect All",                ID_WELLS_UNSELECTALL
         END
         MENUITEM "&Hide All\tCtrl+H",           ID_VIEW_HIDEALL
+        MENUITEM "Show &All\tCtrl+Shift+H",     ID_VIEW_SHOWALL
         MENUITEM SEPARATOR
         MENUITEM "View From &Next Direction\tCtrl+D", 
                                                 ID_VIEW_FROM_NEXT_DIRECTION
@@ -396,18 +397,20 @@ BEGIN
     "S",            ID_FILE_SAVE,           VIRTKEY, CONTROL, NOINVERT
     VK_F6,          ID_NEXT_PANE,           VIRTKEY, NOINVERT
     VK_F6,          ID_PREV_PANE,           VIRTKEY, SHIFT, NOINVERT
-    "D",            ID_VIEW_FROM_NEXT_DIRECTION, VIRTKEY, CONTROL, NOINVERT
-    "D",            ID_VIEW_FROM_PREV_DIRECTION, VIRTKEY, SHIFT, CONTROL, 
-                                                    NOINVERT
-    "H",            ID_VIEW_HIDEALL,        VIRTKEY, CONTROL, NOINVERT
     "L",            ID_SETPROJECTIONTO_PARALLEL, VIRTKEY, CONTROL, NOINVERT
     "L",            ID_SETPROJECTIONTO_PERSPECTIVE, VIRTKEY, SHIFT, CONTROL, 
                                                     NOINVERT
-    VK_HOME,        ID_VIEW_FROM_PZ,        VIRTKEY, NOINVERT
-    VK_UP,          ID_VIEW_FROM_NY,        VIRTKEY, CONTROL, NOINVERT
-    VK_RIGHT,       ID_VIEW_FROM_NX,        VIRTKEY, CONTROL, NOINVERT
+    "D",            ID_VIEW_FROM_NEXT_DIRECTION, VIRTKEY, CONTROL, NOINVERT
     VK_NEXT,        ID_VIEW_FROM_NEXT_DIRECTION, VIRTKEY, NOINVERT
+    VK_RIGHT,       ID_VIEW_FROM_NX,        VIRTKEY, CONTROL, NOINVERT
+    VK_UP,          ID_VIEW_FROM_NY,        VIRTKEY, CONTROL, NOINVERT
+    "D",            ID_VIEW_FROM_PREV_DIRECTION, VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
     VK_PRIOR,       ID_VIEW_FROM_PREV_DIRECTION, VIRTKEY, NOINVERT
+    VK_HOME,        ID_VIEW_FROM_PZ,        VIRTKEY, NOINVERT
+    "H",            ID_VIEW_HIDEALL,        VIRTKEY, CONTROL, NOINVERT
+    "H",            ID_VIEW_SHOWALL,        VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
 END
 
 

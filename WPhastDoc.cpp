@@ -191,6 +191,7 @@ BEGIN_MESSAGE_MAP(CWPhastDoc, CDocument)
 	ON_COMMAND(ID_RIVERS_UNSELECTALL, OnRiversUnselectAll)
 
 	ON_COMMAND(ID_VIEW_HIDEALL, OnViewHideAll)
+	ON_COMMAND(ID_VIEW_SHOWALL, OnViewShowAll)
 
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_MODIFYGRID, OnUpdateToolsModifyGrid)
 	ON_COMMAND(ID_TOOLS_MODIFYGRID, OnToolsModifyGrid)
@@ -5003,6 +5004,7 @@ void CWPhastDoc::OnUpdateRiversHideAll(CCmdUI *pCmdUI)
 		}
 	}
 }
+
 void CWPhastDoc::OnRiversHideAll()
 {
 	if (CPropertyTreeControlBar *pTree = this->GetPropertyTreeControlBar())
@@ -5148,4 +5150,18 @@ void CWPhastDoc::SetSolutionMethod(const CSolutionMethod &solutionMethod)
 	{
 		pTree->SetSolutionMethod(&this->m_pModel->m_solutionMethod);
 	}
+}
+
+void CWPhastDoc::OnViewShowAll()
+{
+	if (CPropertyTreeControlBar *pTree = this->GetPropertyTreeControlBar())
+	{	
+		pTree->SetMediaCheck(BST_CHECKED);
+		pTree->SetBCCheck(BST_CHECKED);
+		pTree->SetICCheck(BST_CHECKED);
+		pTree->SetNodeCheck(pTree->GetWellsNode(), BST_CHECKED);
+		pTree->SetNodeCheck(pTree->GetRiversNode(), BST_CHECKED);
+		pTree->GetGridNode().Select();
+	}
+	this->UpdateAllViews(0);
 }

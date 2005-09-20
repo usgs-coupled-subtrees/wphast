@@ -24,6 +24,7 @@
 #include "ZoneResizeAction.h"
 #include "NewZonePropertyPage.h"
 #include "MediaPropertyPage.h"
+#include "TMediaPropertyPage.h"
 
 #include "BCFluxPropertyPage.h"
 #include "BCFluxPropertyPage2.h"
@@ -666,10 +667,15 @@ void CViewVTKCommand::OnLeftButtonReleaseEvent(vtkObject* caller, void* callData
 
 		// get type of zone
 		//
-		//CPropertySheet sheet("Zone Wizard");
-		ETSLayoutPropertySheet        sheet("Zone Wizard");
+		ETSLayoutPropertySheet        sheet("Zone Wizard", NULL, 0, NULL, false);
+
 		CNewZonePropertyPage          newZone;
+#if defined(__CPPUNIT__)
+		///TMediaPropertyPage<CPropertyPage> mediaProps(IDS_MEDIA_PROPS_WIZ_135);
 		CMediaPropertyPage            mediaProps(IDS_MEDIA_PROPS_WIZ_135);
+#else
+		CMediaPropertyPage            mediaProps(IDS_MEDIA_PROPS_WIZ_135);
+#endif
 		CBCFluxPropertyPage2          fluxProps;
 		CBCLeakyPropertyPage2         leakyProps;
 		CBCSpecifiedHeadPropertyPage  specifiedProps;
@@ -678,11 +684,11 @@ void CViewVTKCommand::OnLeftButtonReleaseEvent(vtkObject* caller, void* callData
 
 		sheet.AddPage(&newZone);
 		sheet.AddPage(&mediaProps);
-		sheet.AddPage(&fluxProps);		
-		sheet.AddPage(&leakyProps);		
-		sheet.AddPage(&specifiedProps);		
-		sheet.AddPage(&icHeadProps);		
-		sheet.AddPage(&chemICProps);		
+		sheet.AddPage(&fluxProps);
+		sheet.AddPage(&leakyProps);
+		sheet.AddPage(&specifiedProps);
+		sheet.AddPage(&icHeadProps);
+		sheet.AddPage(&chemICProps);
 		sheet.SetWizardMode();
 
 		if (sheet.DoModal() == ID_WIZFINISH)

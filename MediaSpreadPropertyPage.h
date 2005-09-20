@@ -23,6 +23,9 @@ public:
 	void SetFlowOnly(bool bFlowOnly)     { m_bFlowOnly = bFlowOnly; }
 	bool GetFlowOnly(void)const          { return m_bFlowOnly; }
 
+	void SetDefault(bool bDefault)       { m_bDefault = bDefault; }
+	bool GetDefault(void)const           { return m_bDefault; }
+
 // Dialog Data
 	enum { IDD = IDD_MEDIASPREAD_EXT_PROPPAGE };
 
@@ -41,6 +44,7 @@ protected:
 	CGridElt m_gridElt;
 
 	bool m_bFlowOnly;
+	bool m_bDefault;
 
 	//std::string m_sActiveRTF;          // ACTIVE
 	//std::string m_sKxRTF;              // KX 

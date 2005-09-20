@@ -40,6 +40,7 @@ CMediaSpreadPropertyPage::CMediaSpreadPropertyPage()
 void CMediaSpreadPropertyPage::CommonConstruct(void)
 {
 	this->SetFlowOnly(false);
+	this->SetDefault(false);
 
 	// init properties
 	//
@@ -86,22 +87,100 @@ void CMediaSpreadPropertyPage::DoDataExchange(CDataExchange* pDX)
 
 	// ACTIVE
 	CGlobal::DDX_Property(pDX, IDC_MEDIA_GRID, ++nRow, this->m_gridElt.active, false);
+	if (this->m_bDefault && pDX->m_bSaveAndValidate && this->m_gridElt.active->type == UNDEFINED)
+	{
+		CString str;
+		str.Format("A default \"%s\" must be defined.", ACTIVE);
+		if (this->m_gridMedia.GetCheck(nRow, COL_INTERPOLATE) == BST_CHECKED)
+		{
+			::DDX_GridControlFail(pDX, IDC_MEDIA_GRID, nRow, COL_INTERPOLATE, str);
+		}
+		else
+		{
+			::DDX_GridControlFail(pDX, IDC_MEDIA_GRID, nRow, COL_VALUE, str);
+		}
+	}
 
 	// KX
 	CGlobal::DDX_Property(pDX, IDC_MEDIA_GRID, ++nRow, this->m_gridElt.kx, false);
+	if (this->m_bDefault && pDX->m_bSaveAndValidate && this->m_gridElt.kx->type == UNDEFINED)
+	{
+		CString str;
+		str.Format("A default \"%s\" must be defined.", KX);
+		if (this->m_gridMedia.GetCheck(nRow, COL_INTERPOLATE) == BST_CHECKED)
+		{
+			::DDX_GridControlFail(pDX, IDC_MEDIA_GRID, nRow, COL_INTERPOLATE, str);
+		}
+		else
+		{
+			::DDX_GridControlFail(pDX, IDC_MEDIA_GRID, nRow, COL_VALUE, str);
+		}
+	}
+
 
 	// KY
 	CGlobal::DDX_Property(pDX, IDC_MEDIA_GRID, ++nRow, this->m_gridElt.ky, false);
+	if (this->m_bDefault && pDX->m_bSaveAndValidate && this->m_gridElt.ky->type == UNDEFINED)
+	{
+		CString str;
+		str.Format("A default \"%s\" must be defined.", KY);
+		if (this->m_gridMedia.GetCheck(nRow, COL_INTERPOLATE) == BST_CHECKED)
+		{
+			::DDX_GridControlFail(pDX, IDC_MEDIA_GRID, nRow, COL_INTERPOLATE, str);
+		}
+		else
+		{
+			::DDX_GridControlFail(pDX, IDC_MEDIA_GRID, nRow, COL_VALUE, str);
+		}
+	}
 
 	// KZ
 	CGlobal::DDX_Property(pDX, IDC_MEDIA_GRID, ++nRow, this->m_gridElt.kz, false);
+	if (this->m_bDefault && pDX->m_bSaveAndValidate && this->m_gridElt.kz->type == UNDEFINED)
+	{
+		CString str;
+		str.Format("A default \"%s\" must be defined.", KZ);
+		if (this->m_gridMedia.GetCheck(nRow, COL_INTERPOLATE) == BST_CHECKED)
+		{
+			::DDX_GridControlFail(pDX, IDC_MEDIA_GRID, nRow, COL_INTERPOLATE, str);
+		}
+		else
+		{
+			::DDX_GridControlFail(pDX, IDC_MEDIA_GRID, nRow, COL_VALUE, str);
+		}
+	}
 
 	// POROSITY
 	CGlobal::DDX_Property(pDX, IDC_MEDIA_GRID, ++nRow, this->m_gridElt.porosity, false);
+	if (this->m_bDefault && pDX->m_bSaveAndValidate && this->m_gridElt.porosity->type == UNDEFINED)
+	{
+		CString str;
+		str.Format("A default \"%s\" must be defined.", POROSITY);
+		if (this->m_gridMedia.GetCheck(nRow, COL_INTERPOLATE) == BST_CHECKED)
+		{
+			::DDX_GridControlFail(pDX, IDC_MEDIA_GRID, nRow, COL_INTERPOLATE, str);
+		}
+		else
+		{
+			::DDX_GridControlFail(pDX, IDC_MEDIA_GRID, nRow, COL_VALUE, str);
+		}
+	}
 
 	// STORAGE
 	CGlobal::DDX_Property(pDX, IDC_MEDIA_GRID, ++nRow, this->m_gridElt.storage, false);
-
+	if (this->m_bDefault && pDX->m_bSaveAndValidate && this->m_gridElt.storage->type == UNDEFINED)
+	{
+		CString str;
+		str.Format("A default \"%s\" must be defined.", STORAGE);
+		if (this->m_gridMedia.GetCheck(nRow, COL_INTERPOLATE) == BST_CHECKED)
+		{
+			::DDX_GridControlFail(pDX, IDC_MEDIA_GRID, nRow, COL_INTERPOLATE, str);
+		}
+		else
+		{
+			::DDX_GridControlFail(pDX, IDC_MEDIA_GRID, nRow, COL_VALUE, str);
+		}
+	}
 	// ALPHA_LONG
 	CGlobal::DDX_Property(pDX, IDC_MEDIA_GRID, ++nRow, this->m_gridElt.alpha_long, false);
 	if (!this->m_bFlowOnly && pDX->m_bSaveAndValidate && this->m_gridElt.alpha_long->type == UNDEFINED)

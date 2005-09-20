@@ -30,6 +30,7 @@ Cproperty::Cproperty(int value)
 	ASSERT(this->v);
 	this->v[0] = value;
 	this->type = FIXED;
+	this->count_v = 1;
 }
 
 Cproperty::Cproperty(double value)
@@ -41,6 +42,7 @@ Cproperty::Cproperty(double value)
 	ASSERT(this->v);
 	this->v[0] = value;
 	this->type = FIXED;
+	this->count_v = 1;
 }
 
 Cproperty::~Cproperty()

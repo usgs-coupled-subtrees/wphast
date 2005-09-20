@@ -128,6 +128,11 @@ void CMediaZoneActor::Update(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent)
 	{
 		static_cast<Cproperty*>(this->m_grid_elt.active)->Insert(pTreeCtrl, htiParent, "active");
 	}
+	else if (this->GetDefault())
+	{
+		Cproperty prop(1);
+		prop.Insert(pTreeCtrl, htiParent, "active");
+	}
 
 	// kx
 	if (this->m_grid_elt.kx)
@@ -189,10 +194,23 @@ void CMediaZoneActor::Edit(CTreeCtrl* pTreeCtrl)
 	CWPhastDoc* pDoc = reinterpret_cast<CWPhastDoc*>(pFrame->GetActiveDocument());
 	ASSERT_VALID(pDoc);
 
-	CMediaSpreadPropertyPage mediaSpreadProps;
-	mediaSpreadProps.SetProperties(this->m_grid_elt);
+	// set default as active
+	//
+	CGridElt elt(this->m_grid_elt);
 	if (this->GetDefault())
 	{
+		if (!elt.active || elt.active->type == UNDEFINED)
+		{
+			Cproperty prop(1);
+			Cproperty::CopyProperty(&elt.active, &prop);
+		}
+	}
+
+	CMediaSpreadPropertyPage mediaSpreadProps;
+	mediaSpreadProps.SetProperties(elt);
+	if (this->GetDefault())
+	{
+		mediaSpreadProps.SetDefault(true);
 		mediaSpreadProps.SetFlowOnly(bool(pDoc->GetFlowOnly()));
 	}
 	props.AddPage(&mediaSpreadProps);

@@ -778,6 +778,9 @@
 				RelativePath="Subject.cpp">
 			</File>
 			<File
+				RelativePath="TMediaPropertyPage.cpp">
+			</File>
+			<File
 				RelativePath="TempPropertyPage.cpp">
 			</File>
 			<File
@@ -1341,6 +1344,9 @@
 			</File>
 			<File
 				RelativePath="Subject.h">
+			</File>
+			<File
+				RelativePath="TMediaPropertyPage.h">
 			</File>
 			<File
 				RelativePath="TempPropertyPage.h">
@@ -3839,15 +3845,15 @@
 			Name="Build Logs"
 			Filter="">
 			<File
+				RelativePath="Release\BuildLog.htm"
+				DeploymentContent="TRUE">
+			</File>
+			<File
 				RelativePath="cppunit\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 			<File
 				RelativePath="Debug\BuildLog.htm"
-				DeploymentContent="TRUE">
-			</File>
-			<File
-				RelativePath="Release\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 		</Filter>
