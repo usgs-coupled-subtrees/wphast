@@ -56,9 +56,7 @@ void CRiverPropertyPage2::DoDataExchange(CDataExchange* pDX)
 
 		// set default focus cells
 		//
-		CCellID cell;
-		cell.row = 1;
-		cell.col = 2;
+		CCellID cell(1, 2);
 
 		CString str;
 		std::list<CRiverPoint>::iterator iter = this->m_river.m_listPoints.begin();
@@ -201,23 +199,6 @@ void CRiverPropertyPage2::DoDataExchange(CDataExchange* pDX)
 	//
 	CRiverPoint* pPt = (CRiverPoint*)this->m_wndTreeCtrl.GetSelectedItem().GetData();
 	ASSERT(pPt);
-
-	// dump
-	if (pPt)
-	{
-		std::ostringstream oss;
-		if (pDX->m_bSaveAndValidate)
-		{
-			oss << "In m_bSaveAndValidate == true\n";
-		}
-		else
-		{
-			oss << "In m_bSaveAndValidate == false\n";
-		}
-		oss << "Point " << this->m_pointIndex + 1 << "\n";
-		oss << (*pPt) << "\n";
-		TRACE("%s\n", oss.str().c_str());
-	}
 
 	bool bFirstOrLastPoint = false;
 	if (pPt == &this->m_river.m_listPoints.front() || pPt == &this->m_river.m_listPoints.back())
@@ -532,7 +513,6 @@ void CRiverPropertyPage2::DoDataExchange(CDataExchange* pDX)
 		//
 		const CTimeSeries<CRiverState>& map = pPt->GetRiverSched();
 		CTimeSeries<CRiverState>::const_iterator iter = map.begin();
-		////int i = 1;
 		for (Item.row = 1; iter != map.end(); ++iter, ++Item.row)
 		{
 			// start time
@@ -543,8 +523,6 @@ void CRiverPropertyPage2::DoDataExchange(CDataExchange* pDX)
 			// start time units
 			if ((*iter).first.type == UNDEFINED)
 			{
-				///ASSERT(this->m_units.time.input && ::strlen(this->m_units.time.input));
-				///Item.strText = CGlobal::GetStdTimeUnits(this->m_units.time.input).c_str();
 				Item.strText.Empty();
 			}
 			else if ((*iter).first.type == STEP)
@@ -560,8 +538,6 @@ void CRiverPropertyPage2::DoDataExchange(CDataExchange* pDX)
 				}
 				else
 				{
-					///ASSERT(this->m_units.time.input && ::strlen(this->m_units.time.input));
-					///Item.strText = CGlobal::GetStdTimeUnits(this->m_units.time.input).c_str();
 					Item.strText.Empty();
 				}
 			}
@@ -691,34 +667,6 @@ void CRiverPropertyPage2::DoDataExchange(CDataExchange* pDX)
 		}
 	}
 
-	if (pPt)
-	{
-		std::ostringstream oss;
-
-		// select given point index
-		//
-		CTreeCtrlNode item = this->m_wndTreeCtrl.GetRootItem();
-		for (UINT i = 0; item; ++i)
-		{
-			if (pPt == (CRiverPoint*)item.GetData())
-			{
-				if (pDX->m_bSaveAndValidate)
-				{
-					oss << "In m_bSaveAndValidate == true\n";
-				}
-				else
-				{
-					oss << "In m_bSaveAndValidate == false\n";
-				}
-				oss << "Point " << i + 1 << "\n";
-				break;
-			}
-			item = item.GetNextSibling();
-		}
-		oss << (*pPt) << "\n";
-		TRACE("%s\n", oss.str().c_str());
-	}
-
 	// set current focus cell
 	//
 	if (!pDX->m_bSaveAndValidate)
@@ -769,6 +717,7 @@ void CRiverPropertyPage2::SetUnits(const CUnits& units)
 void CRiverPropertyPage2::SetProperties(const CRiver& river)
 {
 	this->m_river = river;
+
 #if defined(_DEBUG)
 	if (!this->m_river.m_listPoints.front().depth_defined && !this->m_river.m_listPoints.front().z_defined)
 	{
@@ -833,15 +782,11 @@ void CRiverPropertyPage2::OnTvnSelchangingPropTree(NMHDR *pNMHDR, LRESULT *pResu
 	CTreeCtrlNode item = this->m_wndTreeCtrl.GetRootItem();
 	for (UINT i = 0; item; ++i)
 	{
-		CTreeCtrlNode oldNode(pNMTreeView->itemOld.hItem, &this->m_wndTreeCtrl);
-		TRACE("oldNode = %s\n", oldNode.GetText());
-		CTreeCtrlNode newNode(pNMTreeView->itemNew.hItem, &this->m_wndTreeCtrl);
-		TRACE("newNode = %s\n", newNode.GetText());
 		if (item == pNMTreeView->itemOld.hItem)
 		{
 			CCellID cell = this->m_wndScheduleGrid.GetFocusCell();
 			this->m_mapCurrentFocusCell[i] = cell;
-			TRACE("In OnTvnSelchangingPropTree point %d = cell(%d, %d)\n", i, cell.row, cell.col);
+			TRACE("OnTvnSelchangingPropTree point %d = cell(%d, %d)\n", i, cell.row, cell.col);
 			break;
 		}
 		item = item.GetNextSibling();
