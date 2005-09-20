@@ -8,6 +8,8 @@
 #include "Global.h"
 #include "DelayRedraw.h"
 
+#include <sstream>
+
 #define strText szText
 
 // CRiverPropertyPage2 dialog
@@ -52,6 +54,12 @@ void CRiverPropertyPage2::DoDataExchange(CDataExchange* pDX)
 		CDelayRedraw delay(&this->m_wndTreeCtrl);
 		this->m_wndTreeCtrl.DeleteAllItems();
 
+		// set default focus cells
+		//
+		CCellID cell;
+		cell.row = 1;
+		cell.col = 2;
+
 		CString str;
 		std::list<CRiverPoint>::iterator iter = this->m_river.m_listPoints.begin();
 		for (size_t i = 0; iter != this->m_river.m_listPoints.end(); ++i, ++iter)
@@ -59,6 +67,8 @@ void CRiverPropertyPage2::DoDataExchange(CDataExchange* pDX)
 			str.Format("Point %d", i + 1);
 			CTreeCtrlNode node = this->m_wndTreeCtrl.InsertItem(str);
 			node.SetData((DWORD_PTR)&(*iter));
+
+			this->m_mapCurrentFocusCell.insert(std::map<UINT, CCellID>::value_type(i, cell));
 		}
 	}
 
@@ -170,11 +180,44 @@ void CRiverPropertyPage2::DoDataExchange(CDataExchange* pDX)
 			item = item.GetNextSibling();
 		}
 	}
+	else
+	{
+		// determine selected point
+		//
+		CTreeCtrlNode item = this->m_wndTreeCtrl.GetRootItem();
+		CTreeCtrlNode sel = this->m_wndTreeCtrl.GetSelectedItem();
+		for (UINT i = 0; item; ++i)
+		{
+			if (item == sel)
+			{
+				this->m_pointIndex = i;
+				break;
+			}
+			item = item.GetNextSibling();
+		}
+	}
 
 	// point
 	//
 	CRiverPoint* pPt = (CRiverPoint*)this->m_wndTreeCtrl.GetSelectedItem().GetData();
 	ASSERT(pPt);
+
+	// dump
+	if (pPt)
+	{
+		std::ostringstream oss;
+		if (pDX->m_bSaveAndValidate)
+		{
+			oss << "In m_bSaveAndValidate == true\n";
+		}
+		else
+		{
+			oss << "In m_bSaveAndValidate == false\n";
+		}
+		oss << "Point " << this->m_pointIndex + 1 << "\n";
+		oss << (*pPt) << "\n";
+		TRACE("%s\n", oss.str().c_str());
+	}
 
 	bool bFirstOrLastPoint = false;
 	if (pPt == &this->m_river.m_listPoints.front() || pPt == &this->m_river.m_listPoints.back())
@@ -489,11 +532,9 @@ void CRiverPropertyPage2::DoDataExchange(CDataExchange* pDX)
 		//
 		const CTimeSeries<CRiverState>& map = pPt->GetRiverSched();
 		CTimeSeries<CRiverState>::const_iterator iter = map.begin();
-		int i = 1;
-		for (; iter != map.end(); ++iter, ++i)
+		////int i = 1;
+		for (Item.row = 1; iter != map.end(); ++iter, ++Item.row)
 		{
-			Item.row = i;
-
 			// start time
 			Item.col = 0;
 			Item.strText.Format(_T("%g"), (*iter).first.value);
@@ -534,6 +575,13 @@ void CRiverPropertyPage2::DoDataExchange(CDataExchange* pDX)
 				Item.strText.Format(_T("%g"), (*iter).second.head);
 				this->m_wndScheduleGrid.SetItem(&Item);
 			}
+			else
+			{
+				Item.col = 2;
+				Item.strText = _T("");
+				this->m_wndScheduleGrid.SetItem(&Item);
+			}
+
 			// solution
 			if ((*iter).second.solution_defined)
 			{
@@ -541,29 +589,33 @@ void CRiverPropertyPage2::DoDataExchange(CDataExchange* pDX)
 				Item.strText.Format(_T("%d"), (*iter).second.solution);
 				this->m_wndScheduleGrid.SetItem(&Item);
 			}
+			else
+			{
+				Item.col = 3;
+				Item.strText = _T("");
+				this->m_wndScheduleGrid.SetItem(&Item);
+			}
+
 		}
 		// clear remaining rows
-		for (int j = i; j < this->m_wndScheduleGrid.GetRowCount(); ++j)
+		for (; Item.row < this->m_wndScheduleGrid.GetRowCount(); ++Item.row)		
 		{
-			if (j == 1)
+			if (Item.row == 1)
 			{
 				// start
 				Item.strText.Format(_T("%g"), 0.0);
-				this->m_wndScheduleGrid.SetItemText(j, 0, Item.strText);
+				this->m_wndScheduleGrid.SetItemText(Item.row, 0, Item.strText);
 
 				// start units
-				///ASSERT(this->m_units.time.input && ::strlen(this->m_units.time.input));
-				///Item.strText = CGlobal::GetStdTimeUnits(this->m_units.time.input).c_str();
-				///this->m_wndScheduleGrid.SetItemText(j, 1, Item.strText);
-				this->m_wndScheduleGrid.SetItemText(j, 1, _T(""));
+				this->m_wndScheduleGrid.SetItemText(Item.row, 1, _T(""));
 			}
 			else
 			{
-				this->m_wndScheduleGrid.SetItemText(j, 0, _T(""));
-                this->m_wndScheduleGrid.SetItemText(j, 1, _T(""));
+				this->m_wndScheduleGrid.SetItemText(Item.row, 0, _T(""));
+                this->m_wndScheduleGrid.SetItemText(Item.row, 1, _T(""));
 			}
-			this->m_wndScheduleGrid.SetItemText(j, 2, _T(""));
-			this->m_wndScheduleGrid.SetItemText(j, 3, _T(""));
+			this->m_wndScheduleGrid.SetItemText(Item.row, 2, _T(""));
+			this->m_wndScheduleGrid.SetItemText(Item.row, 3, _T(""));
 		}
 	}
 
@@ -636,6 +688,47 @@ void CRiverPropertyPage2::DoDataExchange(CDataExchange* pDX)
 			}			
 			::PostMessage(this->GetSafeHwnd(), UM_DDX_FAILURE, (WPARAM)0, (LPARAM)(HTREEITEM)last);
 			pDX->Fail();
+		}
+	}
+
+	if (pPt)
+	{
+		std::ostringstream oss;
+
+		// select given point index
+		//
+		CTreeCtrlNode item = this->m_wndTreeCtrl.GetRootItem();
+		for (UINT i = 0; item; ++i)
+		{
+			if (pPt == (CRiverPoint*)item.GetData())
+			{
+				if (pDX->m_bSaveAndValidate)
+				{
+					oss << "In m_bSaveAndValidate == true\n";
+				}
+				else
+				{
+					oss << "In m_bSaveAndValidate == false\n";
+				}
+				oss << "Point " << i + 1 << "\n";
+				break;
+			}
+			item = item.GetNextSibling();
+		}
+		oss << (*pPt) << "\n";
+		TRACE("%s\n", oss.str().c_str());
+	}
+
+	// set current focus cell
+	//
+	if (!pDX->m_bSaveAndValidate)
+	{
+		std::map<UINT, CCellID>::iterator c = this->m_mapCurrentFocusCell.find(this->m_pointIndex);
+		if (c != this->m_mapCurrentFocusCell.end())
+		{
+			CCellID cell(c->second);
+			this->m_wndScheduleGrid.SetCurrentFocusCell(cell.row, cell.col);
+			TRACE("SetCurrentFocusCell point %d to  cell(%d, %d)\n", this->m_pointIndex, cell.row, cell.col);
 		}
 	}
 }
@@ -734,6 +827,32 @@ void CRiverPropertyPage2::SetPoint(int index)
 void CRiverPropertyPage2::OnTvnSelchangingPropTree(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	LPNMTREEVIEW pNMTreeView = reinterpret_cast<LPNMTREEVIEW>(pNMHDR);
+
+	// save current focus cells
+	//
+	CTreeCtrlNode item = this->m_wndTreeCtrl.GetRootItem();
+	for (UINT i = 0; item; ++i)
+	{
+		CTreeCtrlNode oldNode(pNMTreeView->itemOld.hItem, &this->m_wndTreeCtrl);
+		TRACE("oldNode = %s\n", oldNode.GetText());
+		CTreeCtrlNode newNode(pNMTreeView->itemNew.hItem, &this->m_wndTreeCtrl);
+		TRACE("newNode = %s\n", newNode.GetText());
+		if (item == pNMTreeView->itemOld.hItem)
+		{
+			CCellID cell = this->m_wndScheduleGrid.GetFocusCell();
+			this->m_mapCurrentFocusCell[i] = cell;
+			TRACE("In OnTvnSelchangingPropTree point %d = cell(%d, %d)\n", i, cell.row, cell.col);
+			break;
+		}
+		item = item.GetNextSibling();
+	}
+
+	// ensure edit is finished
+	//
+	if (CWnd *pWnd = this->GetFocus())
+	{
+		this->m_wndTreeCtrl.SetFocus();
+	}
 
 	// validate itemOld
 	//

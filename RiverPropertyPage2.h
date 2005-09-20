@@ -54,6 +54,8 @@ protected:
 	bool             m_bFlowOnly;
 	std::set<int>    m_usedRiverNumbers;
 
+	std::map<UINT, CCellID > m_mapCurrentFocusCell;
+
 public:
 	afx_msg void OnTvnSelchangingPropTree(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnTvnSelchangedPropTree(NMHDR *pNMHDR, LRESULT *pResult);
