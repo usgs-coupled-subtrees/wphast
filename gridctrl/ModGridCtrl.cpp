@@ -526,6 +526,7 @@ void CModGridCtrl::SetCurrentFocusCell(int nRow, int nCol)
 {
 	CGridCtrl::ResetSelectedRange();
 	CGridCtrl::SetFocusCell(nRow, nCol);
+	CGridCtrl::SetSelectedRange(nRow, nCol, nRow, nCol);
 	CGridCtrl::EnsureVisible(nRow, nCol);
 }
 
