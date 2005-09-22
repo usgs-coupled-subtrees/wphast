@@ -29,7 +29,8 @@ CGridPropertyPage::CGridPropertyPage(UINT nIDCaption, UINT nIDHeaderTitle, UINT 
 
 void CGridPropertyPage::CommonConstruct(void)
 {
-	for(int i = 0; i < 3; ++i) {
+	for(int i = 0; i < 3; ++i)
+	{
 		this->m_grid[i].count_coord = 2;
 		this->m_grid[i].uniform = TRUE;
 		this->m_grid[i].coord[0] = 0;
@@ -78,7 +79,8 @@ void CGridPropertyPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_XMIN_EDIT, m_grid[0].coord[0]);
 	DDX_Text(pDX, IDC_XMAX_EDIT, m_grid[0].coord[1]);
 	// DDV_MinMaxDouble(pDX, m_grid[0].coord[1], m_grid[0].coord[0], DBL_MAX);
-	if (pDX->m_bSaveAndValidate && (m_grid[0].coord[1] <= m_grid[0].coord[0])) {
+	if (pDX->m_bSaveAndValidate && (m_grid[0].coord[1] <= m_grid[0].coord[0]))
+	{
 		::AfxMessageBox("Coordinate values must be in ascending order for X grid definition");
 		pDX->Fail();
 	}
@@ -88,7 +90,8 @@ void CGridPropertyPage::DoDataExchange(CDataExchange* pDX)
 	// UNIFORM Y
 	DDX_Text(pDX, IDC_YMIN_EDIT, m_grid[1].coord[0]);
 	DDX_Text(pDX, IDC_YMAX_EDIT, m_grid[1].coord[1]);
-	if (pDX->m_bSaveAndValidate && (m_grid[1].coord[1] <= m_grid[1].coord[0])) {
+	if (pDX->m_bSaveAndValidate && (m_grid[1].coord[1] <= m_grid[1].coord[0]))
+	{
 		::AfxMessageBox("Coordinate values must be in ascending order for Y grid definition");
 		pDX->Fail();
 	}
@@ -98,7 +101,8 @@ void CGridPropertyPage::DoDataExchange(CDataExchange* pDX)
 	// UNIFORM Z
 	DDX_Text(pDX, IDC_ZMIN_EDIT, m_grid[2].coord[0]);
 	DDX_Text(pDX, IDC_ZMAX_EDIT, m_grid[2].coord[1]);
-	if (pDX->m_bSaveAndValidate && (m_grid[2].coord[1] <= m_grid[2].coord[0])) {
+	if (pDX->m_bSaveAndValidate && (m_grid[2].coord[1] <= m_grid[2].coord[0]))
+	{
 		::AfxMessageBox("Coordinate values must be in ascending order for Z grid definition");
 		pDX->Fail();
 	}
@@ -131,15 +135,6 @@ BOOL CGridPropertyPage::OnInitDialog()
 	m_spinY.SetRange32(2, INT_MAX);
 	m_spinZ.SetRange32(2, INT_MAX);
 
-// COMMENT: {6/2/2004 9:41:36 PM}	// Disable cancel if no apply button
-// COMMENT: {6/2/2004 9:41:36 PM}	//
-// COMMENT: {6/2/2004 9:41:36 PM}	CPropertySheet* pSheet = static_cast<CPropertySheet*>(this->GetParent());
-// COMMENT: {6/2/2004 9:41:36 PM}	ASSERT_KINDOF(CPropertySheet, pSheet);
-// COMMENT: {6/2/2004 9:41:36 PM}	if (pSheet->m_psh.dwFlags & PSH_NOAPPLYNOW) {
-// COMMENT: {6/2/2004 9:41:36 PM}		pSheet->GetDlgItem(2)->EnableWindow(FALSE);
-// COMMENT: {6/2/2004 9:41:36 PM}		pSheet->ModifyStyle(WS_SYSMENU, 0);
-// COMMENT: {6/2/2004 9:41:36 PM}	}
-
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
 }
@@ -148,23 +143,25 @@ void CGridPropertyPage::SetApply(CWPhastDoc* pDoc)
 {
 	this->m_pDoc = pDoc;
 
-	//{{
 	const CUnits& units = this->m_pDoc->GetUnits();;
-	if (units.horizontal.defined) {
+	if (units.horizontal.defined)
+	{
 		this->m_strHorizontalUnits.Format("[%s]", units.horizontal.input);
 		CGlobal::MinimizeLengthUnits(this->m_strHorizontalUnits);
 	}
-	else {
+	else
+	{
 		this->m_strHorizontalUnits.Format("[%s]", units.horizontal.si);
 	}
-	if (units.vertical.defined) {
+	if (units.vertical.defined)
+	{
 		this->m_strVerticalUnits.Format("[%s]", units.vertical.input);
 		CGlobal::MinimizeLengthUnits(this->m_strVerticalUnits);
 	}
-	else {
+	else
+	{
 		this->m_strVerticalUnits.Format("[%s]", units.vertical.si);
 	}
-	//}}
 }
 
 
@@ -173,12 +170,15 @@ BOOL CGridPropertyPage::OnApply()
 	// Add your specialized code here and/or call the base class
 	CPropertySheet* pSheet = static_cast<CPropertySheet*>(this->GetParent());
 	ASSERT_KINDOF(CPropertySheet, pSheet);
-	if (pSheet->m_psh.dwFlags & PSH_NOAPPLYNOW) {
+	if (pSheet->m_psh.dwFlags & PSH_NOAPPLYNOW)
+	{
 		TRACE("NO APPLY NOW BUTTON\n");
 	}
-	else {
+	else
+	{
 		// do we know if ok or apply was pressed
-		if (this->UpdateData(TRUE) && this->m_pDoc) {
+		if (this->UpdateData(TRUE) && this->m_pDoc)
+		{
 			// unrecorded undo
 			CResizeGridAction action(this->m_pDoc, this->m_grid);
 			action.Execute();
@@ -200,24 +200,31 @@ BOOL CGridPropertyPage::OnSetActive()
 
 	CPropertySheet* pSheet = static_cast<CPropertySheet*>(this->GetParent());
 	ASSERT_KINDOF(CPropertySheet, pSheet);
-	if (pSheet->IsWizard()) {
+	if (pSheet->IsWizard())
+	{
 		// get units
-		for (int i = 0; i < pSheet->GetPageCount(); ++i) {
-			if (pSheet->GetPage(i)->IsKindOf(RUNTIME_CLASS(CUnits1PropertyPage))) {
+		for (int i = 0; i < pSheet->GetPageCount(); ++i)
+		{
+			if (pSheet->GetPage(i)->IsKindOf(RUNTIME_CLASS(CUnits1PropertyPage)))
+			{
 				CUnits units;
 				static_cast<CUnits1PropertyPage*>(pSheet->GetPage(i))->GetProperties(units);
-				if (units.horizontal.defined) {
+				if (units.horizontal.defined)
+				{
 					this->m_strHorizontalUnits.Format("[%s]", units.horizontal.input);
 					CGlobal::MinimizeLengthUnits(this->m_strHorizontalUnits);
 				}
-				else {
+				else
+				{
 					this->m_strHorizontalUnits.Format("[%s]", units.horizontal.si);
 				}
-				if (units.vertical.defined) {
+				if (units.vertical.defined)
+				{
 					this->m_strVerticalUnits.Format("[%s]", units.vertical.input);
 					CGlobal::MinimizeLengthUnits(this->m_strVerticalUnits);
 				}
-				else {
+				else
+				{
 					this->m_strVerticalUnits.Format("[%s]", units.vertical.si);
 				}
 				this->UpdateData(FALSE);
