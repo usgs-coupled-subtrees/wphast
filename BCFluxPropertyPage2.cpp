@@ -15,6 +15,7 @@ IMPLEMENT_DYNAMIC(CBCFluxPropertyPage2, baseCBCFluxPropertyPage2)
 CBCFluxPropertyPage2::CBCFluxPropertyPage2()
 	: baseCBCFluxPropertyPage2(CBCFluxPropertyPage2::IDD)
 {
+	this->SetFlowOnly(false);
 }
 
 CBCFluxPropertyPage2::~CBCFluxPropertyPage2()
@@ -71,7 +72,7 @@ void CBCFluxPropertyPage2::DoDataExchange(CDataExchange* pDX)
 
 		// solution time series
 		//
-		CGlobal::DDX_GridTimeSeries(pDX, IDC_SOLUTION_GRID, bc.m_bc_solution);
+		CGlobal::DDX_GridTimeSeries(pDX, IDC_SOLUTION_GRID, bc.m_bc_solution, !this->m_bFlowOnly);
 		if (bc.m_bc_solution.size())
 		{
 			bc.bc_solution_type = ASSOCIATED;

@@ -66,8 +66,7 @@ protected:
 };
 
 
-class CModGridCtrlEx :
-	public CModGridCtrl
+class CModGridCtrlEx : public CModGridCtrl
 {
 public:
 	CModGridCtrlEx(int nRows = 0, int nCols = 0, int nFixedRows = 0, int nFixedCols = 0);
@@ -117,18 +116,12 @@ protected:
 	void ShowDropDown(BOOL bShowIt);
 
 protected:
-// COMMENT: {4/28/2005 8:21:11 PM}	std::map<int, std::vector<LPCTSTR> > m_mapColToOptions;
-// COMMENT: {4/28/2005 8:21:11 PM}	std::map<int, CListBox*>             m_mapColToList;
 	BOOL                                 m_bButtonDown;
 	BOOL                                 m_bButtonCaptured;
 	CRect                                m_rcButton;
 	CRect                                m_rcListBox;
 	CCellID m_idLastHotCell;
-
-	//{{
 	std::map< std::vector<LPCTSTR>, CListBox* > m_mapVectorToList;
-	//}}
-
 
 	static CTheme s_themeButton;
 	static CTheme s_themeCombo;

@@ -661,6 +661,9 @@
 				RelativePath="ProtoPropertyPage.cpp">
 			</File>
 			<File
+				RelativePath="RedrawOnDtor.cpp">
+			</File>
+			<File
 				RelativePath="ResizeGridAction.cpp">
 			</File>
 			<File
@@ -1226,6 +1229,9 @@
 				RelativePath="ProtoPropertyPage.h">
 			</File>
 			<File
+				RelativePath="RedrawOnDtor.h">
+			</File>
+			<File
 				RelativePath="ResizeGridAction.h">
 			</File>
 			<File
@@ -1557,6 +1563,9 @@
 				RelativePath="res\IDR_TC_TIME_STEP.rtf">
 			</File>
 			<File
+				RelativePath="res\IDR_WELL_RATE.rtf">
+			</File>
+			<File
 				RelativePath="res\LongToolBar.bmp">
 			</File>
 			<File
@@ -1585,6 +1594,15 @@
 			</File>
 			<File
 				RelativePath="res\Toolbar.bmp">
+			</File>
+			<File
+				RelativePath="res\WELL_SOLUTION.rtf">
+			</File>
+			<File
+				RelativePath="res\WELL_TIME.rtf">
+			</File>
+			<File
+				RelativePath="res\WELL_UNITS.rtf">
 			</File>
 			<File
 				RelativePath="res\WPhast.ico">
@@ -3845,15 +3863,15 @@
 			Name="Build Logs"
 			Filter="">
 			<File
+				RelativePath="Debug\BuildLog.htm"
+				DeploymentContent="TRUE">
+			</File>
+			<File
 				RelativePath="Release\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 			<File
 				RelativePath="cppunit\BuildLog.htm"
-				DeploymentContent="TRUE">
-			</File>
-			<File
-				RelativePath="Debug\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 		</Filter>

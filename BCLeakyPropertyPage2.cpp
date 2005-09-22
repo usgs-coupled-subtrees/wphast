@@ -15,6 +15,7 @@ IMPLEMENT_DYNAMIC(CBCLeakyPropertyPage2, baseCBCLeakyPropertyPage2)
 CBCLeakyPropertyPage2::CBCLeakyPropertyPage2()
 	: baseCBCLeakyPropertyPage2(CBCLeakyPropertyPage2::IDD)
 {
+	this->SetFlowOnly(false);
 }
 
 CBCLeakyPropertyPage2::~CBCLeakyPropertyPage2()
@@ -99,7 +100,7 @@ void CBCLeakyPropertyPage2::DoDataExchange(CDataExchange* pDX)
 
 		// solution time series
 		//
-		CGlobal::DDX_GridTimeSeries(pDX, IDC_SOLUTION_GRID, bc.m_bc_solution);
+		CGlobal::DDX_GridTimeSeries(pDX, IDC_SOLUTION_GRID, bc.m_bc_solution, !this->m_bFlowOnly);
 		if (bc.m_bc_solution.size())
 		{
 			bc.bc_solution_type = ASSOCIATED;

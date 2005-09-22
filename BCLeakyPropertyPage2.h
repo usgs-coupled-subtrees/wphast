@@ -23,6 +23,9 @@ public:
 	void SetProperties(const CBC& r_bc);
 	void GetProperties(CBC& r_bc);
 
+	void SetFlowOnly(bool bFlowOnly)     { m_bFlowOnly = bFlowOnly; }
+	bool GetFlowOnly(void)const          { return m_bFlowOnly; }
+
 // Dialog Data
 	enum { IDD = IDD_BC_LEAKY_PROPPAGE3 };
 
@@ -34,6 +37,8 @@ protected:
 	CModGridCtrlEx   m_gridHead;     // IDC_HEAD_GRID
 	CModGridCtrlEx   m_gridSolution; // IDC_SOLUTION_GRID
 	CModGridCtrlEx   m_gridSingle;   // IDC_SINGLE_GRID
+	bool             m_bFlowOnly;
+
 
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnCheckChangedHead(NMHDR *pNotifyStruct, LRESULT *result);

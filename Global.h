@@ -77,7 +77,7 @@ public:
 	static herr_t HDFSerializeAllocate(bool bStoring, hid_t loc_id, const char* szName, hsize_t& count, int** buffer);
 
 public:
-	static void DDX_GridTimeSeries(CDataExchange* pDX, int nIDC, CTimeSeries<Cproperty> &r_ts);
+	static void DDX_GridTimeSeries(CDataExchange* pDX, int nIDC, CTimeSeries<Cproperty> &r_ts, bool bTimeZeroRequired = true);
 
 private:
 	template<typename T> static herr_t HDFSerializeAllocate(bool bStoring, hid_t loc_id, const char* szName, hid_t mem_type_id, hsize_t& count, T** buffer);

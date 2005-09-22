@@ -79,6 +79,7 @@
 #include "FlowOnly.h"
 #include "SteadyFlow.h"
 #include "FreeSurface.h"
+#include "RedrawOnDtor.h"
 
 #include "HeadIC.h"
 #include "TimeControl2.h"
@@ -2287,6 +2288,13 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 	// Nonzero if the file was successfully loaded; otherwise 0.
 	CWaitCursor wait;
 
+	CWnd *pTree = 0;
+	if (CPropertyTreeControlBar *pPropertyTreeControlBar = this->GetPropertyTreeControlBar())
+	{
+		pTree = pPropertyTreeControlBar->GetTreeCtrl();
+	}
+	CRedrawOnDtor redraw(pTree);
+
 	TCHAR szDrive[_MAX_DRIVE];
 	TCHAR szDir[_MAX_DIR];
 	TCHAR szFName[_MAX_FNAME];
@@ -2307,35 +2315,24 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 		return FALSE;
 	}
 
-
 	CPhastInput* pInput = CPhastInput::New(ifs, strPrefix);
 	if (!pInput) return FALSE;
 
-
-	// delay redrawing treectrl
-	//
-	CWnd *pWnd = 0;
-	if (CPropertyTreeControlBar *pPropertyTreeControlBar = this->GetPropertyTreeControlBar())
-	{
-		pWnd = pPropertyTreeControlBar->GetTreeCtrl();
-	}
-	CDelayRedraw delayTree(pWnd);
-
 	try
 	{
+		// delay redrawing treectrl
+		//
+		CWnd *pWnd = 0;
+		if (CPropertyTreeControlBar *pPropertyTreeControlBar = this->GetPropertyTreeControlBar())
+		{
+			pWnd = pPropertyTreeControlBar;
+		}
+		CDelayRedraw delayTreeControl(pWnd);
+
 		CPrintFreq printFreq;
 		printFreq.InitSync(pInput); // must be called before Load()
 
 		pInput->Load();
-// COMMENT: {7/14/2005 7:44:09 PM}		// check for errors
-// COMMENT: {7/14/2005 7:44:09 PM}		for (int i = 0; i < 3; ++i)
-// COMMENT: {7/14/2005 7:44:09 PM}		{
-// COMMENT: {7/14/2005 7:44:09 PM}			if (grid[i].uniform != TRUE)
-// COMMENT: {7/14/2005 7:44:09 PM}			{
-// COMMENT: {7/14/2005 7:44:09 PM}				::error_msg("Currently only uniform grids are supported.", CONTINUE);
-// COMMENT: {7/14/2005 7:44:09 PM}				++input_error;
-// COMMENT: {7/14/2005 7:44:09 PM}			}
-// COMMENT: {7/14/2005 7:44:09 PM}		}
 		if (pInput->GetErrorCount() != 0)
 		{
 			// goto ImportError;
@@ -2548,77 +2545,8 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 			pTree->GetBCNode().Expand(TVE_COLLAPSE);
 			pTree->GetWellsNode().Expand(TVE_COLLAPSE);
 			pTree->GetRiversNode().Expand(TVE_COLLAPSE);
-			pTree->ClearSelection();
+			this->ClearSelection();
 		}
-
-		// load the rest of the stress periods
-		//
-		
-		int last_count_bc = ::count_bc;
-		int nStressPeriod = 2;
-// COMMENT: {2/23/2005 1:08:05 PM}		timeBegin = time_end;
-// COMMENT: {3/31/2005 6:23:23 PM}		while(pInput->LoadNextStressPeriod())
-// COMMENT: {3/31/2005 6:23:23 PM}		{
-// COMMENT: {3/31/2005 6:23:23 PM}			if (pInput->GetErrorCount() != 0)
-// COMMENT: {3/31/2005 6:23:23 PM}			{
-// COMMENT: {3/31/2005 6:23:23 PM}				throw pInput->GetErrorCount();
-// COMMENT: {3/31/2005 6:23:23 PM}			}
-// COMMENT: {3/31/2005 6:23:23 PM}// COMMENT: {2/23/2005 1:09:36 PM}			CTreeCtrlNode spNode = this->AddStressPeriod(CTimeControl(::time_step, ::time_end));
-// COMMENT: {3/31/2005 6:23:23 PM}
-// COMMENT: {3/31/2005 6:23:23 PM}			// Wells
-// COMMENT: {3/31/2005 6:23:23 PM}			//
-// COMMENT: {3/31/2005 6:23:23 PM}			CTreeCtrlNode nodeWells = this->GetPropertyTreeControlBar()->GetWellsNode();
-// COMMENT: {3/31/2005 6:23:23 PM}			ASSERT(nodeWells.GetChildCount() == ::count_wells);
-// COMMENT: {3/31/2005 6:23:23 PM}			for (int i = 0; i < count_wells; ++i)
-// COMMENT: {3/31/2005 6:23:23 PM}			{
-// COMMENT: {3/31/2005 6:23:23 PM}				const Well* well_ptr = &::wells[i];			
-// COMMENT: {3/31/2005 6:23:23 PM}				if (CWellActor *pWellActor = CWellActor::SafeDownCast((vtkObject*)nodeWells.GetChildAt(i).GetData()))
-// COMMENT: {3/31/2005 6:23:23 PM}				{
-// COMMENT: {3/31/2005 6:23:23 PM}// COMMENT: {2/23/2005 1:09:25 PM}					ASSERT(well_ptr->n_user == pWellActor->GetWell().n_user);
-// COMMENT: {3/31/2005 6:23:23 PM}// COMMENT: {2/23/2005 1:09:25 PM}					CWellRate rate(*well_ptr);
-// COMMENT: {3/31/2005 6:23:23 PM}// COMMENT: {2/23/2005 1:09:25 PM}					pWellActor->Insert(timeBegin, rate);
-// COMMENT: {3/31/2005 6:23:23 PM}				}
-// COMMENT: {3/31/2005 6:23:23 PM}				else ASSERT(FALSE);
-// COMMENT: {3/31/2005 6:23:23 PM}			}
-// COMMENT: {3/31/2005 6:23:23 PM}
-// COMMENT: {3/31/2005 6:23:23 PM}			// search for matching bcs
-// COMMENT: {3/31/2005 6:23:23 PM}			// for (int nbc = count_bc - 1; nbc >= last_count_bc; --nbc) {
-// COMMENT: {3/31/2005 6:23:23 PM}			for (int nbc = last_count_bc; nbc < ::count_bc; ++nbc)
-// COMMENT: {3/31/2005 6:23:23 PM}			{
-// COMMENT: {3/31/2005 6:23:23 PM}				const struct bc* bc_ptr = ::bc[nbc];
-// COMMENT: {3/31/2005 6:23:23 PM}				std::list<CBCZoneActor*>::reverse_iterator rIterBC = listBCZoneActors.rbegin();
-// COMMENT: {3/31/2005 6:23:23 PM}				for (; rIterBC != listBCZoneActors.rend(); ++rIterBC)
-// COMMENT: {3/31/2005 6:23:23 PM}				{
-// COMMENT: {3/31/2005 6:23:23 PM}					CZone zone(*(*rIterBC)->GetBC().zone);
-// COMMENT: {3/31/2005 6:23:23 PM}					if (zone == *(bc_ptr->zone))
-// COMMENT: {3/31/2005 6:23:23 PM}					{
-// COMMENT: {3/31/2005 6:23:23 PM}						CBC bc((*rIterBC)->GetBC());
-// COMMENT: {3/31/2005 6:23:23 PM}						if (bc.bc_type == bc_ptr->bc_type)
-// COMMENT: {3/31/2005 6:23:23 PM}						{
-// COMMENT: {3/31/2005 6:23:23 PM}							ASSERT((*rIterBC)->GetStressPeriodCount() == nStressPeriod);
-// COMMENT: {3/31/2005 6:23:23 PM}							(*rIterBC)->SetBC(*bc_ptr, nStressPeriod);
-// COMMENT: {3/31/2005 6:23:23 PM}							break;
-// COMMENT: {3/31/2005 6:23:23 PM}						}
-// COMMENT: {3/31/2005 6:23:23 PM}					}
-// COMMENT: {3/31/2005 6:23:23 PM}				}
-// COMMENT: {3/31/2005 6:23:23 PM}			}
-// COMMENT: {3/31/2005 6:23:23 PM}
-// COMMENT: {3/31/2005 6:23:23 PM}			// TODO PRINT_FREQUENCY
-// COMMENT: {3/31/2005 6:23:23 PM}
-// COMMENT: {3/31/2005 6:23:23 PM}			if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar())
-// COMMENT: {3/31/2005 6:23:23 PM}			{
-// COMMENT: {3/31/2005 6:23:23 PM}				// update stress period
-// COMMENT: {3/31/2005 6:23:23 PM}				std::list<CBCZoneActor*>::iterator iterBC = listBCZoneActors.begin();
-// COMMENT: {3/31/2005 6:23:23 PM}				for (; iterBC != listBCZoneActors.end(); ++iterBC)
-// COMMENT: {3/31/2005 6:23:23 PM}				{
-// COMMENT: {3/31/2005 6:23:23 PM}					(*iterBC)->UpdateTree(pTree, nStressPeriod);
-// COMMENT: {3/31/2005 6:23:23 PM}				}
-// COMMENT: {3/31/2005 6:23:23 PM}			}
-// COMMENT: {3/31/2005 6:23:23 PM}
-// COMMENT: {3/31/2005 6:23:23 PM}			++nStressPeriod;
-// COMMENT: {3/31/2005 6:23:23 PM}			last_count_bc = ::count_bc;
-// COMMENT: {3/31/2005 6:23:23 PM}// COMMENT: {2/23/2005 1:09:44 PM}			timeBegin = time_end;
-// COMMENT: {3/31/2005 6:23:23 PM}		}
 	}
 	catch (int)
 	{
@@ -3038,10 +2966,6 @@ void CWPhastDoc::SetUnits(const CUnits& units)
 			{
 				ASSERT(FALSE);
 				pZone->SetUnits(units);
-			}
-			if (vtkAssembly *pAssembly = vtkAssembly::SafeDownCast(prop))
-			{
-				ASSERT(FALSE); // no longer using vtkAssembly ???
 			}
 			if (vtkPropAssembly *pPropAssembly = vtkPropAssembly::SafeDownCast(prop))
 			{
@@ -3975,12 +3899,12 @@ void CWPhastDoc::InternalAdd(CZoneActor *pZoneActor, bool bAdd)
 	vtkFloatingPointType *scale = this->GetScale();
 	pZoneActor->SetScale(scale[0], scale[1], scale[2]);
 
-
 	// add to document
 	//
 	pZoneActor->Add(this);
 
-	if (!bAdd) {
+	if (!bAdd)
+	{
 		// see InternalDelete
 		//
 		ASSERT(this->m_pRemovedPropCollection);
@@ -3990,11 +3914,14 @@ void CWPhastDoc::InternalAdd(CZoneActor *pZoneActor, bool bAdd)
 
 	// add to property tree
 	//
-	if (CPropertyTreeControlBar *pPropertyTreeControlBar = this->GetPropertyTreeControlBar()) {
-		if (bAdd) {
+	if (CPropertyTreeControlBar *pPropertyTreeControlBar = this->GetPropertyTreeControlBar())
+	{
+		if (bAdd)
+		{
 			pPropertyTreeControlBar->AddZone(pZoneActor);
 		}
-		else {
+		else
+		{
 			pZoneActor->UnRemove(pPropertyTreeControlBar);
 		}
 	}
@@ -4016,7 +3943,8 @@ void CWPhastDoc::InternalAdd(CZoneActor *pZoneActor, bool bAdd)
 
 			// Update BoxPropertiesDialogBar
 			//
-			if (CBoxPropertiesDialogBar* pBar = static_cast<CBoxPropertiesDialogBar*>(  ((CFrameWnd*)::AfxGetMainWnd())->GetControlBar(IDW_CONTROLBAR_BOXPROPS) ) ) {
+			if (CBoxPropertiesDialogBar* pBar = static_cast<CBoxPropertiesDialogBar*>(  ((CFrameWnd*)::AfxGetMainWnd())->GetControlBar(IDW_CONTROLBAR_BOXPROPS) ) )
+			{
 				pBar->Set(pWPhastView, pZoneActor, this->GetUnits());
 			}
 		}

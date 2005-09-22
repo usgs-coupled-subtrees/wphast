@@ -2,6 +2,10 @@
 #include "gridctrl.h"
 #include "../resource.h" // IDC_RESIZE_COLUMN, IDC_RESIZE_ROW
 
+#define GVN_SETFOCUS              (LVN_FIRST-110)
+#define GVN_KILLFOCUS             (LVN_FIRST-111)
+
+
 #define GVIS_DISABLED             0x00800000
 
 #define GV_HIGHLIGHT_NEVER        0x0000
@@ -19,8 +23,7 @@ void AFXAPI DDX_GridDisableCell(CDataExchange* pDX, int nIDC, int nRow, int nCol
 void AFXAPI DDX_GridEnableCell(CDataExchange* pDX, int nIDC, int nRow, int nCol);
 
 
-class CModGridCtrl :
-	public CGridCtrl
+class CModGridCtrl : public CGridCtrl
 {
 public:
 	CModGridCtrl(int nRows = 0, int nCols = 0, int nFixedRows = 0, int nFixedCols = 0);

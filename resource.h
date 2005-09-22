@@ -247,6 +247,11 @@
 #define IDD_SOLUTION_METHOD_PROPPAGE    251
 #define IDB_PLUS_MERGE                  252
 #define IDC_3DGARROW                    255
+#define IDR_WELL_RATE_RTF               256
+#define IDR_WELL_SOLUTION_RTF           257
+#define IDR_WELL_TIME_RTF               258
+#define IDR_WELL_UNITS2_RTF             259
+#define IDR_WELL_UNITS_RTF              259
 #define IDC_EDIT_X                      1000
 #define IDC_PROPERTIES                  1000
 #define IDC_TITLE                       1000
@@ -644,8 +649,8 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        256
-#define _APS_NEXT_COMMAND_VALUE         32828
+#define _APS_NEXT_RESOURCE_VALUE        260
+#define _APS_NEXT_COMMAND_VALUE         32830
 #define _APS_NEXT_CONTROL_VALUE         1323
 #define _APS_NEXT_SYMED_VALUE           126
 #endif

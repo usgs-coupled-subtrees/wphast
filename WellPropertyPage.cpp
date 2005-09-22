@@ -12,15 +12,27 @@
 // CWellPropertyPage dialog
 
 IMPLEMENT_DYNAMIC(CWellPropertyPage, CPropertyPage)
+
 CWellPropertyPage::CWellPropertyPage()
 	: CPropertyPage(CWellPropertyPage::IDD)
 	, m_bByDepth(FALSE)
 	, m_bConvertBetweenDepthsAndElevation(FALSE)
 	, m_allocate(FALSE)
+	, m_bFlowOnly(true)
 {
 	this->m_well.n_user = 1;
 	this->m_grid.SetUniformRange(0.0, 1.0, 2);
 	this->m_grid.Setup();
+
+	// RTF -- Change font to 8 and single-spaced
+	// Open user.transport.format.final.rtf
+	// Ctrl+A -> Right-Click -> Font... -> Size = 8
+	// Ctrl+A -> Right-Click -> Paragraph... -> Line Spacing = Single
+	CGlobal::LoadRTFString(this->m_sWellTimeRTF,     IDR_WELL_TIME_RTF);
+	CGlobal::LoadRTFString(this->m_sWellUnitsRTF,    IDR_WELL_UNITS_RTF);
+	CGlobal::LoadRTFString(this->m_sWellRateRTF,     IDR_WELL_RATE_RTF);
+	CGlobal::LoadRTFString(this->m_sWellSolutionRTF, IDR_WELL_SOLUTION_RTF);
+
 }
 
 CWellPropertyPage::~CWellPropertyPage()
@@ -32,6 +44,14 @@ void CWellPropertyPage::DoDataExchange(CDataExchange* pDX)
 	CPropertyPage::DoDataExchange(pDX);
 	DDX_GridControl(pDX, IDC_GRID_SCREENS, m_wndScreensGrid);
 	DDX_GridControl(pDX, IDC_GRID_SCHEDULES, m_wndPumpSchedGrid);
+	DDX_Control(pDX, IDC_DESC_RICHEDIT, m_wndRichEditCtrl);
+
+	if (this->m_bFirstSetActive)
+	{
+		// wrap richedit to window
+		this->m_wndRichEditCtrl.SetTargetDevice(NULL, 0);
+	}
+
 
 	CWellSchedule well;
 	if (!pDX->m_bSaveAndValidate)
@@ -307,6 +327,9 @@ void CWellPropertyPage::DoDataExchange(CDataExchange* pDX)
 		if (listIntervals.empty())
 		{
 			well.count_depth = well.count_elevation = 0;
+			CString string("At least one screened interval must be defined.");
+			pDX->PrepareCtrl(IDC_GRID_SCREENS);
+			::DDX_GridControlFail(pDX, IDC_GRID_SCREENS, 1, 0, string);
 		}
 		else
 		{
@@ -360,8 +383,6 @@ void CWellPropertyPage::DoDataExchange(CDataExchange* pDX)
 			Item.col = 1;
 			Item.strText.Format(_T("%g"), this->m_well.elevation[i].top);
 			this->m_wndScreensGrid.SetItem(&Item);
-
-// COMMENT: {8/25/2004 4:37:02 PM}			this->m_wndScreensGrid.RedrawWindow();
 
 			// add screen
 			this->m_wndWellCtrl.AddScreen(this->m_well.elevation[i].bottom, this->m_well.elevation[i].top);
@@ -448,6 +469,30 @@ void CWellPropertyPage::DoDataExchange(CDataExchange* pDX)
 					DDX_TextGridControl(pDX, IDC_GRID_SCHEDULES, row, 3, solution);
 					rate.SetSolution(solution);
 				}
+
+				// time at zero
+				// solution @ t=0.0
+				if (time.value == 0.0)
+				{
+					ASSERT(row == 1);
+
+					// rate
+					if (!rate.q_defined)
+					{
+						CString string("A rate must be defined for time zero.");
+						::DDX_GridControlFail(pDX, IDC_GRID_SCHEDULES, row, 2, string);
+					}
+					// solution
+					if (!rate.solution_defined && !this->m_bFlowOnly)
+					{
+						ASSERT(row == 1);
+						if (rate.q > 0.0)
+						{							
+							CString string("Injection wells require a solution definition for time zero.");
+							::DDX_GridControlFail(pDX, IDC_GRID_SCHEDULES, row, 3, string);
+						}
+					}
+				}
 				well.Insert(time, rate);
 			}
 		}
@@ -455,14 +500,10 @@ void CWellPropertyPage::DoDataExchange(CDataExchange* pDX)
 	else
 	{
 		GV_ITEM Item;
-		Item.mask = GVIF_TEXT;
-
-		
+		Item.mask = GVIF_TEXT;		
 
 		// CWellRates
 		//
-// COMMENT: {4/19/2005 1:58:25 PM}		std::map<Ctime, CWellRate> map = this->m_well.GetMap();
-// COMMENT: {4/19/2005 1:58:25 PM}		std::map<Ctime, CWellRate>::const_iterator iter = map.begin();
 		const CTimeSeries<CWellRate>& map = this->m_well.GetPumpSched();
 		CTimeSeries<CWellRate>::const_iterator iter = map.begin();
 		for (int i = 0; iter != map.end(); ++iter, ++i)
@@ -501,10 +542,6 @@ void CWellPropertyPage::DoDataExchange(CDataExchange* pDX)
 			Item.col = 1;
 			this->m_wndPumpSchedGrid.SetItem(&Item);
 
-
-			// Item.szText = (*iter).first.input;
-			Item.strText = (*iter).first.input ? "" : "";
-
 			// rate
 			if ((*iter).second.q_defined)
 			{
@@ -512,6 +549,7 @@ void CWellPropertyPage::DoDataExchange(CDataExchange* pDX)
 				Item.strText.Format(_T("%g"), (*iter).second.q);
 				this->m_wndPumpSchedGrid.SetItem(&Item);
 			}
+
 			// solution
 			if ((*iter).second.solution_defined)
 			{
@@ -541,6 +579,8 @@ BEGIN_MESSAGE_MAP(CWellPropertyPage, CPropertyPage)
 	ON_NOTIFY(GVN_SELCHANGED, IDC_GRID_SCREENS, OnSelChangedScreen)
 	ON_NOTIFY(GVN_SELCHANGED, IDC_GRID_SCHEDULES, OnSelChangedSchedules)
 	ON_EN_CHANGE(IDC_LSD_EDIT, OnEnChangeLsdEdit)
+	ON_NOTIFY(GVN_SETFOCUS, IDC_GRID_SCREENS, OnSelChangedScreen)
+	ON_NOTIFY(GVN_SETFOCUS, IDC_GRID_SCHEDULES, OnSelChangedSchedules)
 END_MESSAGE_MAP()
 
 
@@ -569,7 +609,8 @@ void CWellPropertyPage::SetScreenHeadings(BOOL bByDepth)
 	Item.mask = GVIF_TEXT;
 	Item.row = 0;
 
-	if (bByDepth) {
+	if (bByDepth)
+	{
 		Item.col = 0;
 		Item.strText.Format(_T("Bottom depth %s"), this->m_strVerticalUnits);
 		this->m_wndScreensGrid.SetItem(&Item);
@@ -578,7 +619,8 @@ void CWellPropertyPage::SetScreenHeadings(BOOL bByDepth)
 		Item.strText.Format(_T("Top depth %s"), this->m_strVerticalUnits);
 		this->m_wndScreensGrid.SetItem(&Item);
 	}
-	else {
+	else
+	{
 		Item.col = 0;
 		Item.strText.Format(_T("Bottom elevation %s"), this->m_strVerticalUnits);
 		this->m_wndScreensGrid.SetItem(&Item);
@@ -619,7 +661,7 @@ void CWellPropertyPage::SetPumpSchedHeadings(void)
 	CString str;
 	str.Format(_T("Rate %s"), this->m_strWellPumpageUnits);
 
-	VERIFY(this->m_wndPumpSchedGrid.SetItemText(0, 0, _T("Start")));
+	VERIFY(this->m_wndPumpSchedGrid.SetItemText(0, 0, _T("Start time")));
 	VERIFY(this->m_wndPumpSchedGrid.SetItemText(0, 1, _T("Units")));
 	VERIFY(this->m_wndPumpSchedGrid.SetItemText(0, 2, str));
 	VERIFY(this->m_wndPumpSchedGrid.SetItemText(0, 3, _T("Solution")));
@@ -793,6 +835,29 @@ void CWellPropertyPage::OnSelChangedScreen(NMHDR *pNotifyStruct, LRESULT *result
 void CWellPropertyPage::OnSelChangedSchedules(NMHDR *pNotifyStruct, LRESULT *result)
 {
 	TRACE("OnSelChangedSchedules\n");
+	CCellID focus = this->m_wndPumpSchedGrid.GetFocusCell();
+
+	if (!this->m_wndPumpSchedGrid.IsValid(focus)) return;
+
+	switch (focus.col)
+	{
+	case 0:
+		this->m_wndRichEditCtrl.SetWindowText(this->m_sWellTimeRTF.c_str());
+		break;
+	case 1:
+		this->m_wndRichEditCtrl.SetWindowText(this->m_sWellUnitsRTF.c_str());
+		break;
+	case 2:
+		this->m_wndRichEditCtrl.SetWindowText(this->m_sWellRateRTF.c_str());
+		break;
+	case 3:
+		this->m_wndRichEditCtrl.SetWindowText(this->m_sWellSolutionRTF.c_str());
+		break;
+	default:
+		ASSERT(FALSE);
+		this->m_wndRichEditCtrl.SetWindowText(_T(""));
+		break;
+	}
 }
 
 void CWellPropertyPage::OnEnChangeLsdEdit()
@@ -824,18 +889,21 @@ void CWellPropertyPage::UpdateScreens(BOOL bByDepth)
 					bool valid_top = false;
 
 					CString strBottom = this->m_wndScreensGrid.GetItemText(row, 0);
-					if (!strBottom.IsEmpty() && CGlobal::SimpleFloatParse(strBottom, elevation.bottom)) {
+					if (!strBottom.IsEmpty() && CGlobal::SimpleFloatParse(strBottom, elevation.bottom))
+					{
 						valid_bottom = true;
 						elevation.bottom = dLSD - elevation.bottom;
 					}
 
 					CString strTop = this->m_wndScreensGrid.GetItemText(row, 1);
-					if (!strTop.IsEmpty() && CGlobal::SimpleFloatParse(strTop, elevation.top)) {
+					if (!strTop.IsEmpty() && CGlobal::SimpleFloatParse(strTop, elevation.top))
+					{
 						valid_top = true;
 						elevation.top = dLSD - elevation.top;
 					}
 
-					if (valid_bottom && valid_top) {
+					if (valid_bottom && valid_top)
+					{
 						listElevations.push_back(elevation);
 					}
 				}
@@ -845,7 +913,8 @@ void CWellPropertyPage::UpdateScreens(BOOL bByDepth)
 				this->m_wndWellCtrl.SetLSD(dLSD);
 				this->m_wndWellCtrl.RemoveAllScreens();
 				std::list<Well_Interval>::iterator iter = listElevations.begin();
-				for (; iter !=  listElevations.end(); ++iter) {
+				for (; iter !=  listElevations.end(); ++iter)
+				{
 					this->m_wndWellCtrl.AddScreen((*iter).bottom, (*iter).top);
 				}
 			}
@@ -861,16 +930,19 @@ void CWellPropertyPage::UpdateScreens(BOOL bByDepth)
 			bool valid_top = false;
 
 			CString strBottom = this->m_wndScreensGrid.GetItemText(row, 0);
-			if (!strBottom.IsEmpty() && CGlobal::SimpleFloatParse(strBottom, elevation.bottom)) {
+			if (!strBottom.IsEmpty() && CGlobal::SimpleFloatParse(strBottom, elevation.bottom))
+			{
 				valid_bottom = true;
 			}
 
 			CString strTop = this->m_wndScreensGrid.GetItemText(row, 1);
-			if (!strTop.IsEmpty() && CGlobal::SimpleFloatParse(strTop, elevation.top)) {
+			if (!strTop.IsEmpty() && CGlobal::SimpleFloatParse(strTop, elevation.top))
+			{
 				valid_top = true;
 			}
 
-			if (valid_bottom && valid_top) {
+			if (valid_bottom && valid_top)
+			{
 				listElevations.push_back(elevation);
 			}
 		}
@@ -879,7 +951,8 @@ void CWellPropertyPage::UpdateScreens(BOOL bByDepth)
 		//
 		this->m_wndWellCtrl.RemoveAllScreens();
 		std::list<Well_Interval>::iterator iter = listElevations.begin();
-		for (; iter !=  listElevations.end(); ++iter) {
+		for (; iter !=  listElevations.end(); ++iter)
+		{
 			this->m_wndWellCtrl.AddScreen((*iter).bottom, (*iter).top);
 		}
 	}

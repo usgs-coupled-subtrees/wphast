@@ -65,6 +65,7 @@
 #include <vtkRenderer.h>
 #include <vtkCylinderSource.h>
 #include "Global.h"
+#include "FlowOnly.h"
 
 #include "MainFrm.h"
 
@@ -615,6 +616,7 @@ void CViewVTKCommand::OnLeftButtonReleaseEvent(vtkObject* caller, void* callData
 		page.SetGrid(grid[2]);
 		page.SetUnits(this->m_pView->GetDocument()->GetUnits());
 		page.SetUsedWellNumbers(wellNums);
+		page.SetFlowOnly(this->m_pView->GetDocument()->GetFlowOnly());
 
 		sheet.AddPage(&page);
 
@@ -682,6 +684,12 @@ void CViewVTKCommand::OnLeftButtonReleaseEvent(vtkObject* caller, void* callData
 		CICHeadPropertyPage           icHeadProps;
 		CChemICPropertyPage           chemICProps;
 
+		bool bFlowOnly = this->m_pView->GetDocument()->GetFlowOnly();
+
+		fluxProps.SetFlowOnly(bFlowOnly);
+		leakyProps.SetFlowOnly(bFlowOnly);
+		specifiedProps.SetFlowOnly(bFlowOnly);
+
 		sheet.AddPage(&newZone);
 		sheet.AddPage(&mediaProps);
 		sheet.AddPage(&fluxProps);
@@ -689,13 +697,12 @@ void CViewVTKCommand::OnLeftButtonReleaseEvent(vtkObject* caller, void* callData
 		sheet.AddPage(&specifiedProps);
 		sheet.AddPage(&icHeadProps);
 		sheet.AddPage(&chemICProps);
+
 		sheet.SetWizardMode();
 
 		if (sheet.DoModal() == ID_WIZFINISH)
 		{
-			///{{{
 			this->m_pView->EndNewZone();
-			///}}}
 
 			// create new zone
 			//

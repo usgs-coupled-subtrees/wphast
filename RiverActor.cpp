@@ -13,6 +13,7 @@
 #include "PropertyTreeControlBar.h"
 #include "DelayRedraw.h"
 #include "TreeMemento.h"
+#include "MainFrm.h"
 
 vtkCxxRevisionMacro(CRiverActor, "$Revision: 244 $");
 vtkStandardNewMacro(CRiverActor);
@@ -225,6 +226,8 @@ void CRiverActor::SetUnits(const CUnits &units)
 {
 	this->m_pTransformUnits->Identity();
 	this->m_pTransformUnits->Scale(units.horizontal.input_to_si, units.horizontal.input_to_si, units.vertical.input_to_si);
+	this->HorizonalUnits = units.horizontal.defined ? units.horizontal.input : units.horizontal.si;
+	this->VerticalUnits = units.horizontal.defined ? units.horizontal.input : units.horizontal.si;
 	this->UpdatePoints();
 }
 
@@ -952,6 +955,17 @@ void CRiverActor::Update()
 
 	this->m_pTransformScale->GetInverse()->TransformPoint(this->WorldSIPoint, this->WorldScaledUnitPoint);
 	this->m_pTransformUnits->GetInverse()->TransformPoint(this->WorldSIPoint, this->WorldScaledUnitPoint);
+
+	//{{
+	// update status bar
+	((CMainFrame*)::AfxGetMainWnd())->UpdateXYZ(
+		this->m_WorldPointXYPlane[0],
+		this->m_WorldPointXYPlane[1],
+		this->m_WorldPointXYPlane[2],
+		this->HorizonalUnits,
+		this->VerticalUnits
+		);
+	//}}
 
 	this->m_WorldPointXYPlane[2] = this->m_Z;
 	this->WorldSIPoint[2] = zPos;

@@ -14,7 +14,7 @@
 #include "Global.h"
 #include "Units.h"
 #include "TreeMemento.h"
-
+#include "FlowOnly.h"
 
 #include <vtkObjectFactory.h> // reqd by vtkStandardNewMacro
 vtkCxxRevisionMacro(CWellActor, "$Revision$");
@@ -166,6 +166,7 @@ void CWellActor::Edit(CWPhastDoc *pWPhastDoc)
 	wellProps.SetProperties(this->GetWell());
 	wellProps.SetUnits(pWPhastDoc->GetUnits());
 	wellProps.SetUsedWellNumbers(wellNums);
+	wellProps.SetFlowOnly(pWPhastDoc->GetFlowOnly());
 	
 	CGrid x, y, z;
 	pWPhastDoc->GetGrid(x, y, z);

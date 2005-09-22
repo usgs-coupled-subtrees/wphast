@@ -19,6 +19,7 @@
 #include "WPhastDoc.h"
 #include "SetBCAction.h"
 #include "ZoneCreateAction.h"
+#include "FlowOnly.h"
 
 
 vtkCxxRevisionMacro(CBCZoneActor, "$Revision$");
@@ -241,6 +242,7 @@ void CBCZoneActor::Edit(CTreeCtrl* pTreeCtrl, int nStressPeriod)
 		CBCFluxPropertyPage2 fluxProps;
 		props.AddPage(&fluxProps);
 		fluxProps.SetProperties(this->GetBC());
+		fluxProps.SetFlowOnly(pDoc->GetFlowOnly());
 		if (props.DoModal() == IDOK)
 		{
 			CBC bc;
@@ -253,6 +255,7 @@ void CBCZoneActor::Edit(CTreeCtrl* pTreeCtrl, int nStressPeriod)
 		CBCLeakyPropertyPage2 leakyProps;
 		props.AddPage(&leakyProps);
 		leakyProps.SetProperties(this->GetBC());		
+		leakyProps.SetFlowOnly(pDoc->GetFlowOnly());
 		if (props.DoModal() == IDOK)
 		{
 			CBC bc;
@@ -265,6 +268,7 @@ void CBCZoneActor::Edit(CTreeCtrl* pTreeCtrl, int nStressPeriod)
 		CBCSpecifiedHeadPropertyPage specified;
 		props.AddPage(&specified);
 		specified.SetProperties(this->GetBC());		
+		specified.SetFlowOnly(pDoc->GetFlowOnly());
 		if (props.DoModal() == IDOK)
 		{
 			CBC bc;

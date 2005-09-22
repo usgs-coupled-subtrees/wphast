@@ -1535,9 +1535,9 @@ ErrorHDFSerializeBinaryFile:
 	return status;
 }
 
-void CGlobal::DDX_GridTimeSeries(CDataExchange* pDX, int nIDC, CTimeSeries<Cproperty> &r_ts)
+void CGlobal::DDX_GridTimeSeries(CDataExchange* pDX, int nIDC, CTimeSeries<Cproperty> &r_ts, bool bTimeZeroRequired)
 {
-	const bool bTimeZeroRequired = true;
+	///const bool bTimeZeroRequired = true;
 	CModGridCtrlEx* pGrid = static_cast<CModGridCtrlEx*>(pDX->m_pDlgWnd->GetDlgItem(nIDC));
 	if (!pGrid) return;
 

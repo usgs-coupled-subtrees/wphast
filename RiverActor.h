@@ -219,4 +219,9 @@ protected:
 	vtkCursor3D                    *m_pCursor3D;
 	vtkPolyDataMapper              *m_pCursor3DMapper;
 	vtkActor                       *m_pCursor3DActor;
+
+
+	// for updating status bar
+	CString HorizonalUnits;
+	CString VerticalUnits;
 };

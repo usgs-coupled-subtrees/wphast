@@ -23,10 +23,12 @@ public:
 	void SetProperties(const CBC& r_bc);
 	void GetProperties(CBC& r_bc);
 
+	void SetFlowOnly(bool bFlowOnly)     { m_bFlowOnly = bFlowOnly; }
+	bool GetFlowOnly(void)const          { return m_bFlowOnly; }
+
 // Dialog Data
 	enum { IDD = IDD_BC_SPECIFIED_HEAD_PROPPAGE };
 	DECLARE_LAYOUT();
-
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
@@ -35,6 +37,7 @@ protected:
 	CBC m_bc;
 	CModGridCtrlEx   m_gridHead;     // IDC_HEAD_GRID
 	CModGridCtrlEx   m_gridSolution; // IDC_SOLUTION_GRID
+	bool             m_bFlowOnly;
 
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnCheckChangedHead(NMHDR *pNotifyStruct, LRESULT *result);

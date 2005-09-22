@@ -1805,8 +1805,8 @@ BEGIN
     LTEXT           "1. Chemistry initial conditions (CHEMISTRY_IC)",
                     IDC_STATIC,41,46,149,8
     LTEXT           "2. Dispersivities (MEDIA)",IDC_STATIC,41,65,86,8
-    LTEXT           "3. Solutions associated with boundary conditions (FLUX, LEAKY and SPECIFIED_VALUE)",
-                    IDC_STATIC,41,84,232,26
+    LTEXT           "3. Solutions associated with boundary conditions (FLUX, LEAKY, SPECIFIED_HEAD, WELLS and RIVERS)",
+                    IDC_STATIC,41,84,241,26
 END
 
 IDD_PROPS_CUBE2 DIALOGEX 0, 0, 127, 132
@@ -3473,6 +3473,10 @@ IDR_CHEM_IC_EXCHANGE_RTF RTF                     "res\\CHEM_IC_EXCHANGE.rtf"
 IDR_CHEM_IC_GAS_PHASE_RTF RTF                     "res\\CHEM_IC_GAS_PHASE.rtf"
 IDR_CHEM_IC_SOLID_SOLUTIONS_RTF RTF                     "res\\CHEM_IC_SOLID_SOLUTIONS.rtf"
 IDR_CHEM_IC_KINETICS_RTF RTF                     "res\\CHEM_IC_KINETICS.rtf"
+IDR_WELL_RATE_RTF       RTF                     "res\\WELL_RATE.rtf"
+IDR_WELL_SOLUTION_RTF   RTF                     "res\\WELL_SOLUTION.rtf"
+IDR_WELL_TIME_RTF       RTF                     "res\\WELL_TIME.rtf"
+IDR_WELL_UNITS_RTF      RTF                     "res\\WELL_UNITS.rtf"
 
 /////////////////////////////////////////////////////////////////////////////
 //

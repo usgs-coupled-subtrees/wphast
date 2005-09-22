@@ -15,6 +15,7 @@ IMPLEMENT_DYNAMIC(CBCSpecifiedHeadPropertyPage, baseCBCSpecifiedHeadPropertyPage
 CBCSpecifiedHeadPropertyPage::CBCSpecifiedHeadPropertyPage()
 	: baseCBCSpecifiedHeadPropertyPage(CBCSpecifiedHeadPropertyPage::IDD)
 {
+	this->SetFlowOnly(false);
 }
 
 CBCSpecifiedHeadPropertyPage::~CBCSpecifiedHeadPropertyPage()
@@ -65,7 +66,7 @@ void CBCSpecifiedHeadPropertyPage::DoDataExchange(CDataExchange* pDX)
 
 		// solution time series
 		//
-		CGlobal::DDX_GridTimeSeries(pDX, IDC_SOLUTION_GRID, bc.m_bc_solution);
+		CGlobal::DDX_GridTimeSeries(pDX, IDC_SOLUTION_GRID, bc.m_bc_solution, !this->m_bFlowOnly);
 
 		// solution type
 		//

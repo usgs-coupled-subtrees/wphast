@@ -28,6 +28,9 @@ public:
 
 	BOOL SetGrid(const struct grid &g);
 
+	void SetFlowOnly(bool bFlowOnly)     { m_bFlowOnly = bFlowOnly; }
+	bool GetFlowOnly(void)const          { return m_bFlowOnly; }
+
 // Dialog Data
 	enum { IDD = IDD_WELL_PROPPAGE1 };
 
@@ -51,6 +54,15 @@ protected:
 	CModGridCtrlEx   m_wndScreensGrid;      // IDC_GRID_SCREENS
 	CModGridCtrlEx   m_wndPumpSchedGrid;    // IDC_GRID_SCHEDULES
 	std::set<int>    m_usedWellNumbers;
+
+	std::string      m_sWellTimeRTF;        // IDR_WELL_TIME_RTF
+	std::string      m_sWellUnitsRTF;       // IDR_WELL_UNITS_RTF
+	std::string      m_sWellRateRTF;        // IDR_WELL_RATE_RTF
+	std::string      m_sWellSolutionRTF;    // IDR_WELL_SOLUTION_RTF
+
+	bool             m_bFlowOnly;
+
+	CRichEditCtrl m_wndRichEditCtrl;
 
 	DECLARE_MESSAGE_MAP()
 public:

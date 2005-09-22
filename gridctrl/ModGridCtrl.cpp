@@ -510,7 +510,8 @@ void CModGridCtrl::OnRButtonDown(UINT nFlags, CPoint point)
 	////this->ScreenToClient(&ptClient);
 	CCellID cell = this->GetCellFromPt(point);
 
-	if (cell != m_idCurrentCell) {
+	if (cell != m_idCurrentCell)
+	{
 		// simulate LeftMouseClick
 		::mouse_event(MOUSEEVENTF_LEFTDOWN, point.x, point.y, 0, 0);
 		::mouse_event(MOUSEEVENTF_LEFTUP, point.x, point.y, 0, 0);
@@ -680,6 +681,7 @@ void CModGridCtrl::OnKillFocus(CWnd* pNewWnd)
 
 	// TODO: Add your message handler code here
 	this->Invalidate(TRUE);
+	this->SendMessageToParent(this->m_idCurrentCell.row, this->m_idCurrentCell.col, GVN_KILLFOCUS);
 }
 
 void CModGridCtrl::OnSetFocus(CWnd* pOldWnd)
@@ -688,6 +690,7 @@ void CModGridCtrl::OnSetFocus(CWnd* pOldWnd)
 
 	// TODO: Add your message handler code here
 	this->Invalidate(TRUE);
+	this->SendMessageToParent(this->m_idCurrentCell.row, this->m_idCurrentCell.col, GVN_SETFOCUS);
 }
 
 void CModGridCtrl::SetHighLight(long nNewValue)

@@ -79,7 +79,7 @@ void CMediaZoneActor::InsertAt(CTreeCtrl* pTreeCtrl, HTREEITEM hParent, HTREEITE
 {
 	this->m_hti = pTreeCtrl->InsertItem(this->GetName(), hParent, hInsertAfter);
 	pTreeCtrl->SetItemData(this->m_hti, (DWORD_PTR)this);
-	pTreeCtrl->SelectItem(this->m_hti); // might want to move this
+	pTreeCtrl->SelectItem(this->m_hti); // might want to move this -- this causes the tree control to redraw
 	this->Update(pTreeCtrl, this->m_hti);
 }
 
