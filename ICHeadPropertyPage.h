@@ -55,4 +55,7 @@ protected:
 public:
 	virtual BOOL OnSetActive();
 	virtual BOOL OnInitDialog();
+	virtual BOOL OnKillActive();
+//	virtual LRESULT OnWizardBack();
+	virtual LRESULT OnWizardNext();
 };

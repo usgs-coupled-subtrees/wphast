@@ -48,4 +48,6 @@ public:
 	afx_msg void OnEnSetfocusTimeChangeEdit();
 	afx_msg void OnCbnSetfocusTimeStepCombo();
 	afx_msg void OnCbnSetfocusTimeChangeCombo();
+	virtual BOOL OnKillActive();
+	virtual LRESULT OnWizardNext();
 };

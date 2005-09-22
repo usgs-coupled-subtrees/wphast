@@ -43,5 +43,6 @@ public:
 	virtual BOOL OnSetActive();
 	CString m_strHorizontalUnits;
 	CString m_strVerticalUnits;
+	virtual BOOL OnKillActive();
 	virtual LRESULT OnWizardNext();
 };

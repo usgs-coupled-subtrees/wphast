@@ -237,15 +237,27 @@ BOOL CGridPropertyPage::OnSetActive()
 	return bRet;
 }
 
+BOOL CGridPropertyPage::OnKillActive()
+{
+	CPropertySheet* pSheet = static_cast<CPropertySheet*>(this->GetParent());
+	ASSERT_KINDOF(CPropertySheet, pSheet);
+	if (pSheet->IsWizard())
+	{
+		return TRUE;
+	}
+	return CPropertyPage::OnKillActive();
+}
+
 LRESULT CGridPropertyPage::OnWizardNext()
 {
-	// Add your specialized code here and/or call the base class
-	/*
-	Return Value
-	0 to automatically advance to the next page;
-	–1 to prevent the page from changing.
-	To jump to a page other than the next one, 
-	return the identifier of the dialog to be displayed.
-	*/
+	CPropertySheet* pSheet = static_cast<CPropertySheet*>(this->GetParent());
+	ASSERT_KINDOF(CPropertySheet, pSheet);
+	if (pSheet->IsWizard())
+	{
+		if (!this->UpdateData(TRUE))
+		{
+			return -1; // return –1 to prevent the page from changing 
+		}
+	}
 	return CPropertyPage::OnWizardNext();
 }

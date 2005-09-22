@@ -80,4 +80,6 @@ public:
 	virtual BOOL OnSetActive();
 	virtual BOOL OnInitDialog();
 	afx_msg void OnPaint();
+	virtual BOOL OnKillActive();
+	virtual LRESULT OnWizardNext();
 };

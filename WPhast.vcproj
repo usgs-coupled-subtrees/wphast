@@ -1596,6 +1596,9 @@
 				RelativePath="res\Toolbar.bmp">
 			</File>
 			<File
+				RelativePath="res\WELL_RATE.rtf">
+			</File>
+			<File
 				RelativePath="res\WELL_SOLUTION.rtf">
 			</File>
 			<File

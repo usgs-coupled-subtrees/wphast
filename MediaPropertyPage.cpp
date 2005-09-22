@@ -598,3 +598,28 @@ void CMediaPropertyPage::OnPaint()
 		}
 	}
 }
+
+BOOL CMediaPropertyPage::OnKillActive()
+{
+	CPropertySheet* pSheet = static_cast<CPropertySheet*>(this->GetParent());
+	ASSERT_KINDOF(CPropertySheet, pSheet);
+	if (pSheet->IsWizard())
+	{
+		return TRUE;
+	}
+	return CPropertyPage::OnKillActive();
+}
+
+LRESULT CMediaPropertyPage::OnWizardNext()
+{
+	CPropertySheet* pSheet = static_cast<CPropertySheet*>(this->GetParent());
+	ASSERT_KINDOF(CPropertySheet, pSheet);
+	if (pSheet->IsWizard())
+	{
+		if (!this->UpdateData(TRUE))
+		{
+			return -1; // return –1 to prevent the page from changing 
+		}
+	}
+	return CPropertyPage::OnWizardNext();
+}

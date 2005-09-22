@@ -268,3 +268,28 @@ BOOL CICHeadPropertyPage::OnInitDialog()
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
 }
+
+BOOL CICHeadPropertyPage::OnKillActive()
+{
+	CPropertySheet* pSheet = static_cast<CPropertySheet*>(this->GetParent());
+	ASSERT_KINDOF(CPropertySheet, pSheet);
+	if (pSheet->IsWizard())
+	{
+		return TRUE;
+	}
+	return CPropertyPage::OnKillActive();
+}
+
+LRESULT CICHeadPropertyPage::OnWizardNext()
+{
+	CPropertySheet* pSheet = static_cast<CPropertySheet*>(this->GetParent());
+	ASSERT_KINDOF(CPropertySheet, pSheet);
+	if (pSheet->IsWizard())
+	{
+		if (!this->UpdateData(TRUE))
+		{
+			return -1; // return –1 to prevent the page from changing 
+		}
+	}
+	return CPropertyPage::OnWizardNext();
+}
