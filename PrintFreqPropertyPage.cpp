@@ -455,7 +455,7 @@ void CPrintFreqPropertyPage::DDX_PRINT(CDataExchange* pDX, int nRow, int nCol, C
 			if (str.IsEmpty())
 			{
 				time = Ctime();
-				return;
+				time.type = STEP;
 			}
 			else
 			{
