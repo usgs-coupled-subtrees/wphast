@@ -175,6 +175,7 @@ BOOL CModGridCtrlEx::SetColumnOptions(int nCol, const std::vector<LPCTSTR>& vecO
 		std::map< std::vector<LPCTSTR>, CListBox* >::const_iterator item = this->m_mapVectorToList.find(vecOptions);
 		if (item == this->m_mapVectorToList.end())
 		{
+			// this insert is ok
 			item = (this->m_mapVectorToList.insert(std::map< std::vector<LPCTSTR>, CListBox* >::value_type(vecOptions, new CListBoxDrop()))).first;
 
 			ASSERT(item == this->m_mapVectorToList.find(vecOptions));
@@ -250,6 +251,7 @@ BOOL CModGridCtrlEx::SetCellOptions(int nRow, int nCol, const std::vector<LPCTST
 		std::map< std::vector<LPCTSTR>, CListBox* >::const_iterator item = this->m_mapVectorToList.find(vecOptions);
 		if (item == this->m_mapVectorToList.end())
 		{
+			// this insert is ok
 			item = (this->m_mapVectorToList.insert(std::map< std::vector<LPCTSTR>, CListBox* >::value_type(vecOptions, new CListBoxDrop()))).first;
 
 			ASSERT(item == this->m_mapVectorToList.find(vecOptions));

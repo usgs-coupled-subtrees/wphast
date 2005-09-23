@@ -109,7 +109,7 @@ void CTimeControlPropertyPage::DoDataExchange(CDataExchange* pDX)
 				VERIFY(timeStep.SetInput(sVal) == OK);
 			}
 		}
-		tc2.m_timeStep.insert(CTimeSeries<Ctime>::value_type(time, timeStep));
+		tc2.m_timeStep[time] = timeStep;
 
 		// timeEnd value
 		//

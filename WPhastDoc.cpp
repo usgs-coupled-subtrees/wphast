@@ -638,7 +638,32 @@ void CWPhastDoc::Serialize(CArchive& ar)
 			this->SerializeRivers(bStoring, wphast_id);
 
 			// load PRINT_FREQUENCY
+#ifdef _DEBUG
+			CTimeSeries<Ctime>::iterator it0 = this->m_pModel->m_printFreq.print_force_chem.begin();
+			ASSERT(it0 != this->m_pModel->m_printFreq.print_force_chem.end());
+			TRACE("first force_chem type = %d\n", it0->first.type);
+			TRACE("first force_chem type = %d\n", it0->first.value_defined);
+			TRACE("first force_chem type = %g\n", it0->first.value);
+
+			TRACE("force_chem type = %d\n", it0->second.type);
+			TRACE("force_chem type = %d\n", it0->second.value_defined);
+			TRACE("force_chem type = %g\n", it0->second.value);
+
+#endif
 			this->m_pModel->m_printFreq.Serialize(bStoring, wphast_id);
+#ifdef _DEBUG
+			CTimeSeries<Ctime>::iterator it = this->m_pModel->m_printFreq.print_force_chem.begin();
+			ASSERT(it != this->m_pModel->m_printFreq.print_force_chem.end());
+
+			TRACE("first force_chem type = %d\n", it->first.type);
+			TRACE("first force_chem type = %d\n", it->first.value_defined);
+			TRACE("first force_chem type = %g\n", it->first.value);
+
+			TRACE("force_chem type = %d\n", it->second.type);
+			TRACE("force_chem type = %d\n", it->second.value_defined);
+			TRACE("force_chem type = %g\n", it->second.value);
+#endif
+
 			// update properties bar
 			if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar())
 			{
@@ -2350,6 +2375,11 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 			flowOnly.SetDiffusivity(::fluid_diffusivity);
 		}
 
+		// STEADY_FLOW
+		//
+		CSteadyFlow steadyFlow;
+		steadyFlow.SyncWithSrcInput();
+
 		// MEDIA
 		//
 		CGridElt gridElt = CGridElt::Full();
@@ -2384,7 +2414,7 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 		CNewModel model;
 		model.m_flowOnly       = flowOnly;
 		model.m_freeSurface    = (::free_surface != 0);
-		model.m_steadyFlow     = (::steady_flow != 0);  // TODO later there'll be additional member vars
+		model.m_steadyFlow     = steadyFlow;
 		model.m_units          = ::units;
 		model.m_gridKeyword    = CGridKeyword(::grid, ::snap, ::axes, ::print_input_xy);
 		model.m_media          = gridElt;
@@ -2715,27 +2745,6 @@ BOOL CWPhastDoc::WriteTransDat(std::ostream& os)
 		}
 	}
 
-	std::multimap<Ctime, ISerial*> series;
-
-// COMMENT: {4/19/2005 2:09:54 PM}	// Wells
-// COMMENT: {4/19/2005 2:09:54 PM}	CTreeCtrlNode nodeWells = this->GetPropertyTreeControlBar()->GetWellsNode();
-// COMMENT: {4/19/2005 2:09:54 PM}	nCount = nodeWells.GetChildCount();
-// COMMENT: {4/19/2005 2:09:54 PM}	for (int i = 0; i < nCount; ++i)
-// COMMENT: {4/19/2005 2:09:54 PM}	{
-// COMMENT: {4/19/2005 2:09:54 PM}		if (CWellActor *pWellActor = CWellActor::SafeDownCast((vtkObject*)nodeWells.GetChildAt(i).GetData()))
-// COMMENT: {4/19/2005 2:09:54 PM}		{
-// COMMENT: {4/19/2005 2:09:54 PM}			std::map<Ctime, CWellRate> map = pWellActor->GetWell().GetMap();
-// COMMENT: {4/19/2005 2:09:54 PM}			ASSERT(map.size() > 0);
-// COMMENT: {4/19/2005 2:09:54 PM}			if (map.size() > 0)
-// COMMENT: {4/19/2005 2:09:54 PM}			{
-// COMMENT: {4/19/2005 2:09:54 PM}				std::map<Ctime, CWellRate>::const_iterator iter = map.begin();
-// COMMENT: {4/19/2005 2:09:54 PM}				for (; iter != map.end(); ++iter)
-// COMMENT: {4/19/2005 2:09:54 PM}				{
-// COMMENT: {4/19/2005 2:09:54 PM}					series.insert(std::multimap<Ctime, ISerial*>::value_type((*iter).first, pWellActor));
-// COMMENT: {4/19/2005 2:09:54 PM}				}
-// COMMENT: {4/19/2005 2:09:54 PM}			}
-// COMMENT: {4/19/2005 2:09:54 PM}		}
-// COMMENT: {4/19/2005 2:09:54 PM}	}
 	// Wells
 	CTreeCtrlNode nodeWells = this->GetPropertyTreeControlBar()->GetWellsNode();
 	nCount = nodeWells.GetChildCount();
@@ -2761,86 +2770,6 @@ BOOL CWPhastDoc::WriteTransDat(std::ostream& os)
 	os << this->GetPrintFrequency();
 
 	os << this->GetTimeControl2();
-
-
-// COMMENT: {4/8/2005 6:57:04 PM}	// Additional stress periods
-// COMMENT: {4/8/2005 6:57:04 PM}	int nStressPeriods = this->GetPropertyTreeControlBar()->GetStressPeriodCount();
-// COMMENT: {4/8/2005 6:57:04 PM}	int nSimulation = 2;
-// COMMENT: {4/8/2005 6:57:04 PM}	{
-// COMMENT: {4/8/2005 6:57:04 PM}		int i = 1;
-// COMMENT: {4/8/2005 6:57:04 PM}		std::multimap<Ctime, ISerial*>::iterator seriesIter = series.begin();
-// COMMENT: {4/8/2005 6:57:04 PM}		CTimeControl* pTimeControl = 0;
-// COMMENT: {4/8/2005 6:57:04 PM}		while (i <= nStressPeriods)
-// COMMENT: {4/8/2005 6:57:04 PM}		{
-// COMMENT: {4/8/2005 6:57:04 PM}			// TIME_CONTROL 
-// COMMENT: {4/8/2005 6:57:04 PM}			CTreeCtrlNode nodeTC = this->GetPropertyTreeControlBar()->GetTimeControlNode(i);
-// COMMENT: {4/8/2005 6:57:04 PM}			ASSERT(nodeTC.GetData());
-// COMMENT: {4/8/2005 6:57:04 PM}			pTimeControl = (CTimeControl*)(nodeTC.GetData());
-// COMMENT: {4/8/2005 6:57:04 PM}			ASSERT(pTimeControl);
-// COMMENT: {4/8/2005 6:57:04 PM}
-// COMMENT: {4/8/2005 6:57:04 PM}			if (((*seriesIter).first < pTimeControl->GetTimeEnd()))
-// COMMENT: {4/8/2005 6:57:04 PM}			{
-// COMMENT: {4/8/2005 6:57:04 PM}				Ctime timeToOutput((*seriesIter).first);
-// COMMENT: {4/8/2005 6:57:04 PM}				for (; seriesIter != series.end(); ++seriesIter)
-// COMMENT: {4/8/2005 6:57:04 PM}				{
-// COMMENT: {4/8/2005 6:57:04 PM}					if (timeToOutput < (*seriesIter).first)
-// COMMENT: {4/8/2005 6:57:04 PM}					{
-// COMMENT: {4/8/2005 6:57:04 PM}						if ((*seriesIter).first < pTimeControl->GetTimeEnd())
-// COMMENT: {4/8/2005 6:57:04 PM}						{
-// COMMENT: {4/8/2005 6:57:04 PM}							CTimeControl tc(pTimeControl->GetTimeStep(), (*seriesIter).first);
-// COMMENT: {4/8/2005 6:57:04 PM}							os << tc;
-// COMMENT: {4/8/2005 6:57:04 PM}							os << "END\n";
-// COMMENT: {4/8/2005 6:57:04 PM}							os.flush();
-// COMMENT: {4/8/2005 6:57:04 PM}						}
-// COMMENT: {4/8/2005 6:57:04 PM}						else
-// COMMENT: {4/8/2005 6:57:04 PM}						{
-// COMMENT: {4/8/2005 6:57:04 PM}							os << (*pTimeControl);
-// COMMENT: {4/8/2005 6:57:04 PM}							os << "END\n";
-// COMMENT: {4/8/2005 6:57:04 PM}							os.flush();
-// COMMENT: {4/8/2005 6:57:04 PM}							++i;
-// COMMENT: {4/8/2005 6:57:04 PM}						}
-// COMMENT: {4/8/2005 6:57:04 PM}						break;
-// COMMENT: {4/8/2005 6:57:04 PM}					}
-// COMMENT: {4/8/2005 6:57:04 PM}#ifdef _DEBUG
-// COMMENT: {4/8/2005 6:57:04 PM}					os << "#### for " << (*seriesIter).first.value << " " << (*seriesIter).first.input << "\n";
-// COMMENT: {4/8/2005 6:57:04 PM}#endif
-// COMMENT: {4/8/2005 6:57:04 PM}					(*seriesIter).second->Output(os, (*seriesIter).first);
-// COMMENT: {4/8/2005 6:57:04 PM}					os.flush();
-// COMMENT: {4/8/2005 6:57:04 PM}				}
-// COMMENT: {4/8/2005 6:57:04 PM}			}
-// COMMENT: {4/8/2005 6:57:04 PM}			else
-// COMMENT: {4/8/2005 6:57:04 PM}			{
-// COMMENT: {4/8/2005 6:57:04 PM}				// TIME_CONTROL 
-// COMMENT: {4/8/2005 6:57:04 PM}				if (pTimeControl) {
-// COMMENT: {4/8/2005 6:57:04 PM}					os << (*pTimeControl);
-// COMMENT: {4/8/2005 6:57:04 PM}				}
-// COMMENT: {4/8/2005 6:57:04 PM}
-// COMMENT: {4/8/2005 6:57:04 PM}				// END
-// COMMENT: {4/8/2005 6:57:04 PM}				os << "END\n";
-// COMMENT: {4/8/2005 6:57:04 PM}				++i;
-// COMMENT: {4/8/2005 6:57:04 PM}			}
-// COMMENT: {4/8/2005 6:57:04 PM}		}
-// COMMENT: {4/8/2005 6:57:04 PM}
-// COMMENT: {4/8/2005 6:57:04 PM}		// Warn about any remaining time series beyond
-// COMMENT: {4/8/2005 6:57:04 PM}		// the final time control
-// COMMENT: {4/8/2005 6:57:04 PM}		//
-// COMMENT: {4/8/2005 6:57:04 PM}		if (seriesIter != series.end())
-// COMMENT: {4/8/2005 6:57:04 PM}		{
-// COMMENT: {4/8/2005 6:57:04 PM}			// create set of unique ISerial's in order to 
-// COMMENT: {4/8/2005 6:57:04 PM}			// only display warning once from each ISerial
-// COMMENT: {4/8/2005 6:57:04 PM}			std::set<ISerial*> setSerial;
-// COMMENT: {4/8/2005 6:57:04 PM}			for (; seriesIter != series.end(); ++seriesIter)
-// COMMENT: {4/8/2005 6:57:04 PM}			{
-// COMMENT: {4/8/2005 6:57:04 PM}				setSerial.insert((*seriesIter).second);
-// COMMENT: {4/8/2005 6:57:04 PM}			}
-// COMMENT: {4/8/2005 6:57:04 PM}			std::set<ISerial*>::iterator setIter = setSerial.begin();
-// COMMENT: {4/8/2005 6:57:04 PM}			for (; setIter != setSerial.end(); ++setIter)
-// COMMENT: {4/8/2005 6:57:04 PM}			{
-// COMMENT: {4/8/2005 6:57:04 PM}				CString warning = (*setIter)->GetWarning(pTimeControl);
-// COMMENT: {4/8/2005 6:57:04 PM}				::AfxMessageBox(warning, MB_OK);
-// COMMENT: {4/8/2005 6:57:04 PM}			}
-// COMMENT: {4/8/2005 6:57:04 PM}		}
-// COMMENT: {4/8/2005 6:57:04 PM}	}
 
 	return TRUE;
 }

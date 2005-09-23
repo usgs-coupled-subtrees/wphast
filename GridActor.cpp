@@ -530,14 +530,17 @@ void CGridActor::Setup(const CUnits& units)
 				this->ScaleTransform->TransformPoint(x, t);
 				if (i == 0 && j == 0)
 				{
+					// this insert is ok
 					VERIFY(this->ValueToIndex[2].insert(std::map<vtkFloatingPointType, int>::value_type(t[2], k)).second);
 				}
 				if (i == 0 && k == 0)
 				{
+					// this insert is ok
 					VERIFY(this->ValueToIndex[1].insert(std::map<vtkFloatingPointType, int>::value_type(t[1], j)).second);
 				}
 				if (j == 0 && k == 0)
 				{
+					// this insert is ok
 					VERIFY(this->ValueToIndex[0].insert(std::map<vtkFloatingPointType, int>::value_type(t[0], i)).second);
 				}
 				points->InsertPoint(offset, t);

@@ -66,6 +66,8 @@ void CRiverPropertyPage2::DoDataExchange(CDataExchange* pDX)
 			CTreeCtrlNode node = this->m_wndTreeCtrl.InsertItem(str);
 			node.SetData((DWORD_PTR)&(*iter));
 
+			// this insert is ok (ie only done the first time)
+			//
 			this->m_mapCurrentFocusCell.insert(std::map<UINT, CCellID>::value_type(i, cell));
 		}
 	}

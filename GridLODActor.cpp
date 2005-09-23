@@ -446,9 +446,8 @@ void CGridLODActor::Setup(const CUnits& units)
 			x[2] = this->m_gridKeyword.m_grid[2].coord[k] * units.vertical.input_to_si;
 		}
 		kOffset = k * this->m_gridKeyword.m_grid[0].count_coord * this->m_gridKeyword.m_grid[1].count_coord;
-		//{{
+		// this insert is ok
 		VERIFY(this->ValueToIndex[2].insert(std::map<vtkFloatingPointType, int>::value_type(x[2], k)).second);
-		//}}
 		for (j = 0; j < this->m_gridKeyword.m_grid[1].count_coord; ++j)
 		{
 			if (this->m_gridKeyword.m_grid[1].uniform)
@@ -460,12 +459,11 @@ void CGridLODActor::Setup(const CUnits& units)
 				x[1] = this->m_gridKeyword.m_grid[1].coord[j] * units.horizontal.input_to_si;
 			}
 			jOffset = j * this->m_gridKeyword.m_grid[0].count_coord;
-			//{{
 			if (k == 0)
 			{
+				// this insert is ok
 				VERIFY(this->ValueToIndex[1].insert(std::map<vtkFloatingPointType, int>::value_type(x[1], j)).second);
 			}
-			//}}
 			for (i = 0; i < this->m_gridKeyword.m_grid[0].count_coord; ++i)
 			{
 				if (this->m_gridKeyword.m_grid[0].uniform)
@@ -477,12 +475,11 @@ void CGridLODActor::Setup(const CUnits& units)
 					x[0] = this->m_gridKeyword.m_grid[0].coord[i] * units.horizontal.input_to_si;
 				}
 				offset = i + jOffset + kOffset;
-				//{{
 				if (k == 0 && j == 0)
 				{
+					// this insert is ok
 					VERIFY(this->ValueToIndex[0].insert(std::map<vtkFloatingPointType, int>::value_type(x[0], i)).second);
 				}
-				//}}
 				points->InsertPoint(offset, x);
 			}
 		}

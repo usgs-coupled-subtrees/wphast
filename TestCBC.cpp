@@ -60,10 +60,12 @@ void TestCBC::testOperatorEqual2(void)
 	p.v[0]    = 2.0;
 	p.count_v = 1;
 
+	// this insert is ok
 	bc.m_bc_head.insert(CTimeSeries<Cproperty>::value_type(t, p));
 
 	t.SetValue(10.0);
 	p.v[0] = 4.0;
+	// this insert is ok
 	bc.m_bc_head.insert(CTimeSeries<Cproperty>::value_type(t, p));
 
 	CPPUNIT_ASSERT(bc.m_bc_head.size() == 2);

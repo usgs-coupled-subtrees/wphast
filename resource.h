@@ -250,7 +250,6 @@
 #define IDR_WELL_RATE_RTF               256
 #define IDR_WELL_SOLUTION_RTF           257
 #define IDR_WELL_TIME_RTF               258
-#define IDR_WELL_UNITS2_RTF             259
 #define IDR_WELL_UNITS_RTF              259
 #define IDC_EDIT_X                      1000
 #define IDC_PROPERTIES                  1000
@@ -626,6 +625,13 @@
 #define IDC_CHECK_CROSS_DISP            1320
 #define IDC_RADIO_ITER                  1321
 #define IDC_RADIO_DIRECT                1322
+#define IDC_HEAD_TOL_STATIC             1323
+#define IDC_HEAD_TOL_EDIT               1324
+#define IDC_HEAD_TOL_UNITS_STATIC       1325
+#define IDC_FB_TOL_STATIC               1326
+#define IDC_FB_TOL_EDIT                 1327
+#define IDC_FB_TOL_STATIC2              1329
+#define IDC_FB_TOL_EDIT2                1330
 #define IDC_RESIZE_COLUMN               28654
 #define IDC_RESIZE_ROW                  28655
 #define IDR_POPUP                       28656
@@ -651,7 +657,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        260
 #define _APS_NEXT_COMMAND_VALUE         32830
-#define _APS_NEXT_CONTROL_VALUE         1323
+#define _APS_NEXT_CONTROL_VALUE         1326
 #define _APS_NEXT_SYMED_VALUE           126
 #endif
 #endif

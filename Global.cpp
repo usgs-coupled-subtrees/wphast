@@ -1592,7 +1592,7 @@ void CGlobal::DDX_GridTimeSeries(CDataExchange* pDX, int nIDC, CTimeSeries<Cprop
 
 				p.type    = FIXED;
 				p.count_v = 1;
-				ts.insert(CTimeSeries<Cproperty>::value_type(t, p));
+				ts[t] = p;
 			}
 			else
 			{
@@ -1658,7 +1658,7 @@ void CGlobal::DDX_GridTimeSeries(CDataExchange* pDX, int nIDC, CTimeSeries<Cprop
 
 				p.type    = LINEAR;
 				p.count_v = 2;
-				ts.insert(CTimeSeries<Cproperty>::value_type(t, p));
+				ts[t] = p;
 			}
 		}
 		r_ts = ts;

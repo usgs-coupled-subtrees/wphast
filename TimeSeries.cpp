@@ -13,6 +13,8 @@ CTimeSeries<Ctime>& CTimeSeries<Ctime>::operator=(const struct time_series& rhs)
 	this->clear();
 	for (int i = 0; i < rhs.count_properties; ++i)
 	{
+		// this insert is ok (ie only done the first time)
+		//
 		this->insert(std::map<Ctime, Ctime>::value_type(rhs.properties[i]->time, rhs.properties[i]->time_value));
 	}
 	return *this;
@@ -36,6 +38,8 @@ CTimeSeries<Cproperty>& CTimeSeries<Cproperty>::operator=(const struct time_seri
 	this->clear();
 	for (int i = 0; i < rhs.count_properties; ++i)
 	{
+		// this insert is ok (ie only done the first time)
+		//
 		this->insert(std::map<Ctime, Cproperty>::value_type(rhs.properties[i]->time, *rhs.properties[i]->property));
 	}
 	return *this;
@@ -60,6 +64,8 @@ CTimeSeries<int>& CTimeSeries<int>::operator=(const struct time_series& rhs)
 	this->clear();
 	for (int i = 0; i < rhs.count_properties; ++i)
 	{
+		// this insert is ok (ie only done the first time)
+		//
 		this->insert(std::map<Ctime, int>::value_type(rhs.properties[i]->time, rhs.properties[i]->int_value));
 	}
 	return *this;
@@ -273,7 +279,7 @@ void CTimeSeries<CWellRate>::Serialize(bool bStoring, hid_t loc_id)
 				status = ::H5Gclose(step_id);
 				ASSERT(status >= 0);
 
-				this->insert(CTimeSeries<CWellRate>::value_type(t, r));
+				(*this)[t] = r;
 			}
 		}
 	}
@@ -401,7 +407,7 @@ void CTimeSeries<T>::Serialize(bool bStoring, hid_t loc_id)
 				status = ::H5Gclose(step_id);
 				ASSERT(status >= 0);
 
-				this->insert(CTimeSeries<T>::value_type(t, p));
+				(*this)[t] = p;
 			}
 		}
 	}
@@ -558,7 +564,7 @@ void CTimeSeries<int>::Serialize(bool bStoring, hid_t loc_id)
 				status = ::H5Gclose(step_id);
 				ASSERT(status >= 0);
 
-				this->insert(CTimeSeries<int>::value_type(t, i));
+				(*this)[t] = i;
 			}
 		}
 	}

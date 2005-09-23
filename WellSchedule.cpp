@@ -58,22 +58,9 @@ CWellSchedule::CWellSchedule(const CWellSchedule& src)
 // COMMENT: {4/19/2005 1:54:03 PM}		this->InsertRate((*iter).first, (*iter).second);
 // COMMENT: {4/19/2005 1:54:03 PM}	}
 }
-/* std::pair<std::map<Ctime, CWellRate>::iterator, bool>  */
 void CWellSchedule::Insert(const Ctime& time, const CWellRate& rate)
 {
-// COMMENT: {4/19/2005 1:45:38 PM}	if (!this->m_map.empty()) {
-// COMMENT: {4/19/2005 1:45:38 PM}		// make sure this is actually a new rate
-// COMMENT: {4/19/2005 1:45:38 PM}		std::map<Ctime, CWellRate>::const_reverse_iterator last = this->m_map.rbegin();
-// COMMENT: {4/19/2005 1:45:38 PM}		CWellRate lastRate((*last).second);
-// COMMENT: {4/19/2005 1:45:38 PM}		if (lastRate == rate) {
-// COMMENT: {4/19/2005 1:45:38 PM}			return;  // rate is the same as last entered :: no need to insert		
-// COMMENT: {4/19/2005 1:45:38 PM}		}
-// COMMENT: {4/19/2005 1:45:38 PM}	}
-// COMMENT: {4/19/2005 1:45:38 PM}
-// COMMENT: {4/19/2005 1:45:38 PM}	/* return this->m_map.insert(std::map<Ctime, CWellRate>::value_type(time, rate)); */
-// COMMENT: {4/19/2005 1:45:38 PM}	this->m_map.insert(std::map<Ctime, CWellRate>::value_type(time, rate));
 	CWellRate& r = this->m_pumpingSchedule[time];
-	////r = rate;
 	if (rate.q_defined)
 	{
 		r.SetRate(rate.q);

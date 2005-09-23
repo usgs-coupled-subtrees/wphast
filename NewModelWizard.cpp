@@ -53,7 +53,7 @@ END_MESSAGE_MAP()
 
 CNewModel CNewModelWizard::GetModel(void)const
 {
-	CNewModel model;
+	CNewModel model = CNewModel::Default();
 	model.m_flowOnly = this->m_introPage.GetFlowOnly();
 	model.m_freeSurface = this->m_introPage.GetFreeSurface();
 	model.m_steadyFlow = this->m_introPage.GetSteadyFlow();

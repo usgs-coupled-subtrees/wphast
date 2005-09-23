@@ -145,7 +145,7 @@ void CTimeControlMultiPropertyPage2::DoDataExchange(CDataExchange* pDX)
 			{
 				t2.SetInput(start);
 			}
-			tc2.m_timeStep.insert(CTimeSeries<Ctime>::value_type(t, t2));
+			tc2.m_timeStep[t] = t2;
 		}
 		this->m_tc2 = tc2;
 	}

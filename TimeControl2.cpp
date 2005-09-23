@@ -244,15 +244,6 @@ std::ostream& operator<< (std::ostream &os, const CTimeControl2 &tc2)
 
 CTimeControl2 CTimeControl2::NewDefaults(void)
 {
-	//{{
-	/**
-	this->m_timeControl.m_timeStep.SetValue(1.0);
-
-	this->m_timeControl.m_timeEnd.SetValue(1.0);
-	**/
-	//}}
-
-
 	CTimeControl2 timeControl2;
 
 	Ctime t;
@@ -267,6 +258,8 @@ CTimeControl2 CTimeControl2::NewDefaults(void)
 	t2.type = UNITS;
 	t2.SetValue(1.0);
 
+	// this insert is ok (ie only done the first time)
+	//
 	timeControl2.m_timeStep.insert(CTimeSeries<Ctime>::value_type(t, t2));
 	return timeControl2;
 }
