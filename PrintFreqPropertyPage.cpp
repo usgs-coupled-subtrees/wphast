@@ -193,7 +193,6 @@ void CPrintFreqPropertyPage::DoDataExchange(CDataExchange* pDX)
 		this->m_Grid.DisableCell(1, 3);
 	}
 
-	//{{
 	if (pDX->m_bSaveAndValidate)
 	{
 		this->m_printFreq.print_bc_flow.clear();
@@ -215,8 +214,6 @@ void CPrintFreqPropertyPage::DoDataExchange(CDataExchange* pDX)
 		this->m_printFreq.print_xyz_wells.clear();
 		this->m_printFreq.print_bc.clear();
 	}
-	//}}
-
 
 	Ctime zero;
 	zero.SetValue(0.0);
@@ -318,17 +315,9 @@ void CPrintFreqPropertyPage::DoDataExchange(CDataExchange* pDX)
 			CString str;
 
 			// time
-			DDX_TextGridControl(pDX, IDC_GRID, 1, nCol, str);
-			if (str.IsEmpty())
-			{
-				continue;
-			}
-			else
-			{
-				double dVal;
-				DDX_TextGridControl(pDX, IDC_GRID, 1, nCol, dVal);
-				time.SetValue(dVal);
-			}
+			double dVal;
+			DDX_TextGridControl(pDX, IDC_GRID, 1, nCol, dVal);
+			time.SetValue(dVal);
 
 			// units
 			DDX_TextGridControl(pDX, IDC_GRID, 1, nCol + 1, str);			
