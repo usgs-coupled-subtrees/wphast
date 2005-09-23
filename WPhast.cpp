@@ -298,13 +298,10 @@ void CWPhastApp::OnAppAbout()
 
 void CWPhastApp::OnFileNew()
 {
-	//{{
 	if (this->m_pMainWnd && ::IsWindow(this->m_pMainWnd->m_hWnd))
 	{
 		this->m_pMainWnd->Invalidate(TRUE);
 	}
-	//}}
-	// CWinApp::OnFileNew();
 	if (m_pDocManager != NULL)
 	{
 		POSITION pos = m_pDocManager->GetFirstDocTemplatePosition();
@@ -346,7 +343,7 @@ void CWPhastApp::OnFileNew()
 			VERIFY(bmpHeader.LoadBitmap(IDB_BANNER));
 
 			CNewModelWizard wizard("New Model Wizard", this->m_pMainWnd, 0, bmpWatermark, 0, bmpHeader);
-			// TODO DELETE NEXT LINE
+
 			wizard.SetGridElt(CGridElt::NewDefaults(false));
 			wizard.SetHeadIC(CHeadIC::NewDefaults());
 			wizard.SetChemIC(CChemIC::NewDefaults());
@@ -362,68 +359,5 @@ void CWPhastApp::OnFileNew()
 				pDoc->SetModifiedFlag(FALSE);
 			}
 		}
-		return;
-	}
-
-#ifdef RUN_AS_MDI
-	if (::AfxMessageBox("TODO: Enter starting dimensions for the grid. Default: (0, 0, 0) - (20, 10, 2)", MB_OKCANCEL) == IDOK) {
-		if (m_pDocManager != NULL) {
-			// m_pDocManager->OnFileNew();
-			//
-			POSITION pos = m_pDocManager->GetFirstDocTemplatePosition();
-			if (pos == NULL)
-			{
-				TRACE(traceAppMsg, 0, "Error: no document templates registered with CWinApp.\n");
-				AfxMessageBox(AFX_IDP_FAILED_TO_CREATE_DOC);
-				return;
-			}
-			CDocTemplate* pTemplate = m_pDocManager->GetNextDocTemplate(pos);
-			ASSERT(pTemplate != NULL);
-			ASSERT_KINDOF(CDocTemplate, pTemplate);
-
-			CWPhastDoc* pDoc = static_cast<CWPhastDoc*> (pTemplate->OpenDocumentFile(NULL));
-
-			float xMin = 0;
-			float yMin = 0;
-			float zMin = 0;
-
-			float xMax = 20;
-			float yMax = 10;
-			float zMax = 2;
-
-			pDoc->SetGridDims(xMin, xMax, yMin, yMax, zMin, zMax);
-		}
-	}
-#endif // RUN_AS_MDI
-}
-
-void CWPhastApp::OpenDefault()
-{
-	if (m_pDocManager != NULL)
-	{
-		POSITION pos = m_pDocManager->GetFirstDocTemplatePosition();
-		if (pos == NULL)
-		{
-			TRACE(traceAppMsg, 0, "Error: no document templates registered with CWinApp.\n");
-			AfxMessageBox(AFX_IDP_FAILED_TO_CREATE_DOC);
-			return;
-		}
-		CDocTemplate* pTemplate = m_pDocManager->GetNextDocTemplate(pos);
-		ASSERT(pTemplate != NULL);
-		ASSERT_KINDOF(CDocTemplate, pTemplate);
-
-		CWPhastDoc* pDoc = static_cast<CWPhastDoc*> (pTemplate->OpenDocumentFile(NULL));
-
-		// The main window has been initialized, so show and update it
-		////m_pMainWnd->ShowWindow(SW_SHOW);
-		////m_pMainWnd->UpdateWindow();
-
-		if (pDoc)
-		{
-			///pDoc->New(CNewModel::Default());
-			pDoc->DoImport("C:\\cygwin\\home\\charlton\\programs\\WPhast\\setup\\tree\\USGS\\WPhast 0.0\\examples\\ex1\\ex1.trans.dat");
-			pDoc->SetModifiedFlag(FALSE);
-		}
-		return;
 	}
 }

@@ -22,7 +22,6 @@ public:
 // Overrides
 public:
 	virtual BOOL InitInstance();
-	void OpenDefault();
 
 // Implementation
 #if defined(WPHAST_AUTOMATION)
