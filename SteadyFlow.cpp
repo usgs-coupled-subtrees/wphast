@@ -48,6 +48,7 @@ void CSteadyFlow::Insert(CTreeCtrl* pTreeCtrl, HTREEITEM htiSteadyFlow)const
 
 	if (this->steady_flow)
 	{
+		// STEADY_FLOW
 		pTreeCtrl->SetItemText(htiSteadyFlow, "STEADY_FLOW true");
 
 		CString str;
@@ -56,9 +57,53 @@ void CSteadyFlow::Insert(CTreeCtrl* pTreeCtrl, HTREEITEM htiSteadyFlow)const
 		str.Format("head_tolerance %g", this->head_tolerance);
 		pTreeCtrl->InsertItem(str, htiSteadyFlow);
 
+		// flow_balance_tolerance
+		str.Format("flow_balance_tolerance %g", this->flow_balance_tolerance);
+		pTreeCtrl->InsertItem(str, htiSteadyFlow);
+
+		// minimum_time_step
+		if (this->minimum_time_step.value_defined != FALSE)
+		{
+			if (this->minimum_time_step.input)
+			{
+				str.Format("minimum_time_step %g %s", this->minimum_time_step.value, this->minimum_time_step.input);
+			}
+			else
+			{
+				str.Format("minimum_time_step %g", this->minimum_time_step.value);
+			}
+			pTreeCtrl->InsertItem(str, htiSteadyFlow);
+		}
+
+		// maximum_time_step
+		if (this->maximum_time_step.value_defined != FALSE)
+		{
+			if (this->maximum_time_step.input)
+			{
+				str.Format("maximum_time_step %g %s", this->maximum_time_step.value, this->maximum_time_step.input);
+			}
+			else
+			{
+				str.Format("maximum_time_step %g", this->maximum_time_step.value);
+			}
+			pTreeCtrl->InsertItem(str, htiSteadyFlow);
+		}
+
+		// head_change_target
+		if (this->head_change_target > 0.0)
+		{
+			str.Format("head_change_target %g", this->head_change_target);
+			pTreeCtrl->InsertItem(str, htiSteadyFlow);
+		}
+
+		// iterations
+		str.Format("iterations %d", this->iterations);
+		pTreeCtrl->InsertItem(str, htiSteadyFlow);
+
 	}
 	else
 	{
+		// STEADY_FLOW
 		pTreeCtrl->SetItemText(htiSteadyFlow, "STEADY_FLOW false");
 	}
 	pTreeCtrl->SetItemData(htiSteadyFlow, (DWORD_PTR)this);
@@ -66,23 +111,54 @@ void CSteadyFlow::Insert(CTreeCtrl* pTreeCtrl, HTREEITEM htiSteadyFlow)const
 
 void CSteadyFlow::Serialize(bool bStoring, hid_t loc_id)
 {
-	static const char szSteadyFlow[]    = "SteadyFlow";
-	static const char szHeadTolerance[] = "head_tolerance";
+	static const char szSteadyFlow[]           = "SteadyFlow";
+	static const char szHeadTolerance[]        = "head_tolerance";
+	static const char szFlowBalanceTolerance[] = "flow_balance_tolerance";
+	static const char szMinimumTimeStep[]      = "minimum_time_step";
+	static const char szMaximumTimeStep[]      = "maximum_time_step";
+	static const char szHeadChangeTarget[]     = "head_change_target";
+	static const char szIterations[]           = "iterations";
 
 	hid_t group_id = 0;
 	herr_t status;
+
+	hid_t min_timestep_id = 0;
+	hid_t max_timestep_id = 0;
 
 	if (bStoring)
 	{
 		// Create the szSteadyFlow group
 		group_id = ::H5Gcreate(loc_id, szSteadyFlow, 0); // always created even if empty
 		ASSERT(group_id > 0);
+
+		if (this->minimum_time_step.value_defined != FALSE)
+		{
+			// Create the szMinimumTimeStep group
+			min_timestep_id = ::H5Gcreate(group_id, szMinimumTimeStep, 0);
+			ASSERT(min_timestep_id > 0);
+		}
+
+		if (this->maximum_time_step.value_defined != FALSE)
+		{
+			// Create the szMinimumTimeStep group
+			max_timestep_id = ::H5Gcreate(group_id, szMaximumTimeStep, 0);
+			ASSERT(max_timestep_id > 0);
+		}
 	}
 	else
 	{
 		// Open the szSteadyFlow group
 		group_id = ::H5Gopen(loc_id, szSteadyFlow);
 		if (group_id <= 0) TRACE("WARNING unable to open group %s\n", szSteadyFlow);
+
+		if (group_id > 0)
+		{
+			// Create the szMinimumTimeStep group
+			min_timestep_id = ::H5Gopen(group_id, szMinimumTimeStep);
+
+			// Create the szMinimumTimeStep group
+			max_timestep_id = ::H5Gopen(group_id, szMaximumTimeStep);
+		}
 	}
 
 	if (group_id > 0)
@@ -94,7 +170,35 @@ void CSteadyFlow::Serialize(bool bStoring, hid_t loc_id)
 		status = CGlobal::HDFSerialize(bStoring, loc_id, szHeadTolerance, H5T_NATIVE_DOUBLE, 1, &this->head_tolerance);
 		ASSERT(status >= 0);
 
-		// close the szFlowOnly group
+		// flow_balance_tolerance
+		status = CGlobal::HDFSerialize(bStoring, loc_id, szFlowBalanceTolerance, H5T_NATIVE_DOUBLE, 1, &this->flow_balance_tolerance);
+		ASSERT(status >= 0);
+
+		// minimum_time_step
+		if (min_timestep_id > 0)
+		{
+			this->minimum_time_step.Serialize(bStoring, min_timestep_id);
+			status = ::H5Gclose(min_timestep_id);
+			ASSERT(status >= 0);
+		}
+
+		// maximum_time_step
+		if (max_timestep_id > 0)
+		{
+			this->maximum_time_step.Serialize(bStoring, max_timestep_id);
+			status = ::H5Gclose(max_timestep_id);
+			ASSERT(status >= 0);
+		}
+
+		// head_change_target
+		status = CGlobal::HDFSerialize(bStoring, loc_id, szHeadChangeTarget, H5T_NATIVE_DOUBLE, 1, &this->head_change_target);
+		ASSERT(status >= 0);
+
+		// iterations
+		status = CGlobal::HDFSerialize(bStoring, loc_id, szIterations, H5T_NATIVE_INT, 1, &this->iterations);
+		ASSERT(status >= 0);
+
+		// close the szSteadyFlow group
 		status = ::H5Gclose(group_id);
 		ASSERT(status >= 0);
 	}
@@ -164,7 +268,7 @@ std::ostream& operator<< (std::ostream &os, const CSteadyFlow &a)
 		}
 
 		// -head_change_target
-		if (a.head_change_target != def.head_change_target)
+		if (a.head_change_target > 0)
 		{
 			os << "\t" << "-head_change_target " << a.head_change_target << "\n";
 		}

@@ -1733,27 +1733,45 @@ BEGIN
     EDITTEXT        IDC_MOL_DIFF_EDIT,113,37,79,12,ES_AUTOHSCROLL
 END
 
-IDD_STEADY_FLOW_INT_PROPPAGE DIALOGEX 0, 0, 317, 172
+IDD_STEADY_FLOW_INT_PROPPAGE DIALOGEX 0, 0, 337, 198
 STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Steady Flow Properties"
 FONT 8, "MS Sans Serif", 400, 0, 0x0
 BEGIN
+    CONTROL         "Transient flow",IDC_TRANSIENT_FLOW_RADIO,"Button",
+                    BS_AUTORADIOBUTTON | BS_NOTIFY | WS_GROUP,7,7,86,8
+    CONTROL         "Steady flow",IDC_STEADY_FLOW_RADIO,"Button",
+                    BS_AUTORADIOBUTTON | BS_NOTIFY,7,26,91,8
+    LTEXT           "Head tolerance:",IDC_HEAD_TOL_STATIC,22,41,76,8
+    EDITTEXT        IDC_HEAD_TOL_EDIT,102,39,50,12,ES_AUTOHSCROLL
+    LTEXT           "[HEAD_UNITS]",IDC_HEAD_TOL_UNITS_STATIC,157,41,51,8
+    LTEXT           "Flow balance tolerance:",IDC_FB_TOL_STATIC,22,57,76,8
+    EDITTEXT        IDC_FB_TOL_EDIT,102,55,50,12,ES_AUTOHSCROLL
+    LTEXT           "Minimum time step:",IDC_MIN_TS_STATIC,22,73,76,8
+    EDITTEXT        IDC_MIN_TS_EDIT,102,71,50,12,ES_AUTOHSCROLL
+    COMBOBOX        IDC_MIN_TS_COMBO,157,71,62,30,CBS_DROPDOWN | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    CONTROL         "Use default",IDC_MIN_TS_CHECK,"Button",BS_AUTOCHECKBOX | 
+                    BS_NOTIFY | WS_TABSTOP,226,72,52,10
+    LTEXT           "Maximum time step:",IDC_MAX_TS_STATIC,22,89,76,8
+    EDITTEXT        IDC_MAX_TS_EDIT,102,87,50,12,ES_AUTOHSCROLL
+    COMBOBOX        IDC_MAX_TS_COMBO,157,87,62,30,CBS_DROPDOWN | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    CONTROL         "Use default",IDC_MAX_TS_CHECK,"Button",BS_AUTOCHECKBOX | 
+                    BS_NOTIFY | WS_TABSTOP,226,88,52,10
+    LTEXT           "Head change target:",IDC_HCT_STATIC,22,105,76,8
+    EDITTEXT        IDC_HCT_EDIT,102,103,50,12,ES_AUTOHSCROLL
+    LTEXT           "[HEAD_UNITS]",IDC_HCT_UNITS_STATIC,157,105,51,8
+    CONTROL         "Use default",IDC_HCT_CHECK,"Button",BS_AUTOCHECKBOX | 
+                    BS_NOTIFY | WS_TABSTOP,216,105,52,10
+    LTEXT           "Iterations:",IDC_ITER_STATIC,22,121,76,8
+    EDITTEXT        IDC_ITER_EDIT,102,119,50,12,ES_AUTOHSCROLL
+    CONTROL         "",IDC_ITER_SPIN,"msctls_updown32",UDS_SETBUDDYINT | 
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,157,119,
+                    11,12
     CONTROL         "",IDC_DESC_RICHEDIT,"RichEdit20A",ES_MULTILINE | 
                     ES_AUTOHSCROLL | ES_READONLY | WS_BORDER | WS_VSCROLL | 
-                    WS_HSCROLL,7,127,303,38
-    CONTROL         "Transient flow",IDC_TRANSIENT_FLOW_RADIO,"Button",
-                    BS_AUTORADIOBUTTON | WS_GROUP,7,7,86,8
-    CONTROL         "Steady flow",IDC_STEADY_FLOW_RADIO,"Button",
-                    BS_AUTORADIOBUTTON,7,22,91,8
-    LTEXT           "Head tolerance:",IDC_HEAD_TOL_STATIC,22,38,52,8
-    EDITTEXT        IDC_HEAD_TOL_EDIT,106,36,50,12,ES_AUTOHSCROLL
-    LTEXT           "[HEAD_UNITS]",IDC_HEAD_TOL_UNITS_STATIC,161,38,51,8
-    LTEXT           "Flow balance tolerance:",IDC_FB_TOL_STATIC,22,55,76,8
-    EDITTEXT        IDC_FB_TOL_EDIT,106,53,50,12,ES_AUTOHSCROLL
-    LTEXT           "Minimum time step:",IDC_FB_TOL_STATIC2,22,72,60,8
-    EDITTEXT        IDC_FB_TOL_EDIT2,106,69,50,12,ES_AUTOHSCROLL
-    COMBOBOX        IDC_COMBO1,163,68,48,30,CBS_DROPDOWN | CBS_SORT | 
-                    WS_VSCROLL | WS_TABSTOP
+                    WS_HSCROLL,7,140,323,51
 END
 
 IDD_FREE_SURFACE_INT_PROPPAGE DIALOGEX 0, 0, 317, 143
@@ -3131,9 +3149,9 @@ BEGIN
     IDD_STEADY_FLOW_INT_PROPPAGE, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 310
+        RIGHTMARGIN, 330
         TOPMARGIN, 7
-        BOTTOMMARGIN, 165
+        BOTTOMMARGIN, 191
     END
 
     IDD_FREE_SURFACE_INT_PROPPAGE, DIALOG
@@ -3485,6 +3503,14 @@ IDR_WELL_RATE_RTF       RTF                     "res\\WELL_RATE.rtf"
 IDR_WELL_SOLUTION_RTF   RTF                     "res\\WELL_SOLUTION.rtf"
 IDR_WELL_TIME_RTF       RTF                     "res\\WELL_TIME.rtf"
 IDR_WELL_UNITS_RTF      RTF                     "res\\WELL_UNITS.rtf"
+IDR_STEADY_FLOW_RTF     RTF                     "res\\STEADY_FLOW.rtf"
+IDR_TRANSIENT_RTF       RTF                     "res\\TRANSIENT.rtf"
+IDR_HEAD_TOLERANCE_RTF  RTF                     "res\\HEAD_TOLERANCE.rtf"
+IDR_FLOW_BALANCE_TOLERANCE_RTF RTF                     "res\\FLOW_BALANCE_TOLERANCE.rtf"
+IDR_MINIMUM_TIME_STEP_RTF RTF                     "res\\MINIMUM_TIME_STEP.rtf"
+IDR_MAXIMUM_TIME_STEP_RTF RTF                     "res\\MAXIMUM_TIME_STEP.rtf"
+IDR_HEAD_CHANGE_TARGET_RTF RTF                     "res\\HEAD_CHANGE_TARGET.rtf"
+IDR_ITERATIONS_RTF      RTF                     "res\\ITERATIONS.rtf"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -3664,6 +3690,7 @@ BEGIN
     IDS_CHEM_IC_SUBTITLE_160 
                             "Set the default initial condition chemistry properties"
     IDS_CHEM_IC_CAPTION161  "Chemistry IC Properties"
+    IDS_GREATER_THAN_ZERO   "Please enter a number greater than 0.0."
     ID_FILE_EXPORT          "Export to trans.dat file"
     ID_FILE_RUN             "Runs the current simulation\nRun simulation"
 END

@@ -102,6 +102,7 @@
 #define IDD_END                         161
 #define IDS_CHEM_IC_CAPTION161          161
 #define IDD_INTERIOR1                   162
+#define IDS_GREATER_THAN_ZERO           162
 #define IDD_INTERIOR2                   163
 #define ID_FILE_EXPORT                  163
 #define IDD_MEDIA2_PROPPAGE             164
@@ -251,6 +252,15 @@
 #define IDR_WELL_SOLUTION_RTF           257
 #define IDR_WELL_TIME_RTF               258
 #define IDR_WELL_UNITS_RTF              259
+#define IDR_STEADY_FLOW_RTF             260
+#define IDR_TRANSIENT_RTF               261
+#define IDR_HEAD_TOLERANCE_RTF          262
+#define IDR_FLOW_BALANCE_TOLERANCE_RTF  263
+#define IDR_MINIMUM_TIME_STEP_RTF       264
+#define IDR_MAXIMUM_TIME_STEP_RTF       265
+#define IDR_HEAD_CHANGE_TARGET_RTF      266
+#define IDR_RTF2                        267
+#define IDR_ITERATIONS_RTF              267
 #define IDC_EDIT_X                      1000
 #define IDC_PROPERTIES                  1000
 #define IDC_TITLE                       1000
@@ -630,8 +640,21 @@
 #define IDC_HEAD_TOL_UNITS_STATIC       1325
 #define IDC_FB_TOL_STATIC               1326
 #define IDC_FB_TOL_EDIT                 1327
-#define IDC_FB_TOL_STATIC2              1329
-#define IDC_FB_TOL_EDIT2                1330
+#define IDC_MIN_TS_COMBO                1328
+#define IDC_MIN_TS_STATIC               1329
+#define IDC_MIN_TS_EDIT                 1330
+#define IDC_MAX_TS_STATIC               1331
+#define IDC_MAX_TS_EDIT                 1332
+#define IDC_MAX_TS_COMBO                1333
+#define IDC_HCT_STATIC                  1334
+#define IDC_HCT_EDIT                    1335
+#define IDC_ITER_EDIT                   1336
+#define IDC_ITER_STATIC                 1337
+#define IDC_ITER_SPIN                   1338
+#define IDC_HCT_UNITS_STATIC            1339
+#define IDC_HCT_CHECK                   1340
+#define IDC_MAX_TS_CHECK                1341
+#define IDC_MIN_TS_CHECK                1342
 #define IDC_RESIZE_COLUMN               28654
 #define IDC_RESIZE_ROW                  28655
 #define IDR_POPUP                       28656
@@ -655,9 +678,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        260
+#define _APS_NEXT_RESOURCE_VALUE        268
 #define _APS_NEXT_COMMAND_VALUE         32830
-#define _APS_NEXT_CONTROL_VALUE         1326
+#define _APS_NEXT_CONTROL_VALUE         1341
 #define _APS_NEXT_SYMED_VALUE           126
 #endif
 #endif
