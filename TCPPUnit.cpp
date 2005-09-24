@@ -44,17 +44,17 @@ void TCPPUnit::RunUnitTests(void)
 	{
 		CppUnit::TextUi::TestRunner runner;
 
-// COMMENT: {9/19/2005 2:59:37 PM}		runner.addTest(TestCPhastInput::suite());
-// COMMENT: {9/19/2005 2:59:37 PM}		runner.addTest(TestCZone::suite());
-// COMMENT: {9/19/2005 2:59:37 PM}		runner.addTest(TestCGrid::suite());
-// COMMENT: {9/19/2005 2:59:37 PM}		runner.addTest(TestCtime::suite());
-// COMMENT: {9/19/2005 2:59:37 PM}		runner.addTest(TestCBC::suite());
-// COMMENT: {9/19/2005 2:59:37 PM}		runner.addTest(TestCTimeControl::suite());
-// COMMENT: {9/19/2005 2:59:37 PM}		runner.addTest(TestCWPhastDoc::suite());
-// COMMENT: {9/19/2005 2:59:37 PM}		runner.addTest(TestCParser::suite());
-// COMMENT: {9/19/2005 2:59:37 PM}		runner.addTest(TestCPropertyTreeControlBar::suite());
-// COMMENT: {9/19/2005 2:59:37 PM}		runner.addTest(TestCUnits::suite());
-// COMMENT: {9/19/2005 2:59:37 PM}		runner.addTest(TestCPhastInput::suite());
+		runner.addTest(TestCPhastInput::suite());
+		runner.addTest(TestCZone::suite());
+		runner.addTest(TestCGrid::suite());
+		runner.addTest(TestCtime::suite());
+		runner.addTest(TestCBC::suite());
+		runner.addTest(TestCTimeControl::suite());
+		runner.addTest(TestCWPhastDoc::suite());
+		runner.addTest(TestCParser::suite());
+		runner.addTest(TestCPropertyTreeControlBar::suite());
+		runner.addTest(TestCUnits::suite());
+		runner.addTest(TestCPhastInput::suite());
 
 #ifdef __DEPRECATED__
 		runner.addTest(TestCBCZone::suite());

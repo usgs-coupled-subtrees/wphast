@@ -238,22 +238,15 @@ void CSteadyFlow::Edit(CTreeCtrl* pTreeCtrl)
 
 std::ostream& operator<< (std::ostream &os, const CSteadyFlow &a)
 {
-	CSteadyFlow def;
 	if (a.steady_flow)
 	{
 		os << "STEADY_FLOW true\n";
 
 		// -head_tolerance
-		if (a.head_tolerance != def.head_tolerance)
-		{
-			os << "\t" << "-head_tolerance " << a.head_tolerance << "\n";
-		}
+		os << "\t" << "-head_tolerance " << a.head_tolerance << "\n";
 
 		// -flow_balance_tolerance
-		if (a.flow_balance_tolerance != def.flow_balance_tolerance)
-		{
-			os << "\t" << "-flow_balance_tolerance " << a.flow_balance_tolerance << "\n";
-		}
+		os << "\t" << "-flow_balance_tolerance " << a.flow_balance_tolerance << "\n";
 
 		// -minimum_time_step
 		if (a.minimum_time_step.value_defined)
@@ -274,10 +267,7 @@ std::ostream& operator<< (std::ostream &os, const CSteadyFlow &a)
 		}
 
 		// -iterations
-		if (a.iterations != def.iterations)
-		{
-			os << "\t" << "-iterations " << a.iterations << "\n";
-		}
+		os << "\t" << "-iterations " << a.iterations << "\n";
 	}
 	else
 	{

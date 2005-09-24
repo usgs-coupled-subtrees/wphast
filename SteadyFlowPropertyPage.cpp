@@ -115,6 +115,7 @@ void CSteadyFlowPropertyPage::DoDataExchange(CDataExchange* pDX)
 				// value
 				//
 				::DDX_Text(pDX, IDC_MIN_TS_EDIT, minTime.value);
+				minTime.value_defined = TRUE;
 				minTime.type = UNITS;
 
 				// units
@@ -142,6 +143,7 @@ void CSteadyFlowPropertyPage::DoDataExchange(CDataExchange* pDX)
 				// value
 				//
 				::DDX_Text(pDX, IDC_MAX_TS_EDIT, maxTime.value);
+				maxTime.value_defined = TRUE;
 				maxTime.type = UNITS;
 
 				// units
@@ -230,7 +232,7 @@ void CSteadyFlowPropertyPage::DoDataExchange(CDataExchange* pDX)
 
 		// maximum_time_step value
 		//
-		if (this->m_steadyFlow.minimum_time_step.value_defined)
+		if (this->m_steadyFlow.maximum_time_step.value_defined)
 		{
 			::DDX_Text(pDX, IDC_MAX_TS_EDIT, this->m_steadyFlow.maximum_time_step.value);
 		}
@@ -240,7 +242,7 @@ void CSteadyFlowPropertyPage::DoDataExchange(CDataExchange* pDX)
 			::DDX_Text(pDX, IDC_MAX_TS_EDIT, empty);
 		}
 
-		// minimum_time_step units
+		// maximum_time_step units
 		//
 		if (this->m_steadyFlow.maximum_time_step.input)
 		{
