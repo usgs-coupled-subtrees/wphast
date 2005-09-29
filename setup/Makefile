@@ -40,10 +40,8 @@ WPHAST_FILES=\
 	$(EXAMPLES)/disp2d/disp2d.wphast\
 	$(EXAMPLES)/ex1/ex1.wphast\
 	$(EXAMPLES)/ex2/ex2.wphast\
-	$(EXAMPLES)/ex3/decay.wphast\
 	$(EXAMPLES)/ex3/ex3.wphast\
 	$(EXAMPLES)/ex4/ex4.wphast\
-	$(EXAMPLES)/ex4/test.wphast\
 	$(EXAMPLES)/free/free.wphast\
 	$(EXAMPLES)/kindred4.4/kindred4.4.wphast\
 	$(EXAMPLES)/leaky/leaky.wphast\
@@ -52,7 +50,6 @@ WPHAST_FILES=\
 	$(EXAMPLES)/linear_bc/linear_bc.wphast\
 	$(EXAMPLES)/linear_ic/linear_ic.wphast\
 	$(EXAMPLES)/phrqex11/phrqex11.wphast\
-	$(EXAMPLES)/radial/radial.wphast\
 	$(EXAMPLES)/river/river.wphast\
 	$(EXAMPLES)/unconf/unconf.wphast\
 	$(EXAMPLES)/well/well.wphast
