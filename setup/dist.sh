@@ -103,7 +103,7 @@ elif [ -n "$RC" ] ; then
   VER_NUMTAG="-rc$RC"
 else
   VER_TAG="r$REVISION_SVN"
-  VER_NUMTAG=""
+  VER_NUMTAG="-$REVISION"
 fi
   
 if [ -n "$ZIP" ] ; then
@@ -146,7 +146,7 @@ echo "Removed and recreated $DIST_SANDBOX"
 echo "Exporting revision $REVISION of WPHAST into sandbox..."
 (cd "$DIST_SANDBOX" && \
  	${SVN:-svn} export -q $EXTRA_EXPORT_OPTIONS -r "$REVISION" \
-	     "http://internalbrr/svn_GW/phreeqci/$REPOS_PATH" \
+	     "http://internalbrr.cr.usgs.gov/svn_GW/WPhast/$REPOS_PATH" \
 	     "$DISTNAME")
 
 ver_major=`echo $VERSION | cut -d '.' -f 1`

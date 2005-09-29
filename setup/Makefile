@@ -1,3 +1,13 @@
+NAME := wphast
+
+RELEASE := $(shell svn st -v dist.sh | cut -b 10- | ( read one two ; echo $$one ) )
+
+DATE_STAMP := $(shell echo $(DATE) | sed -e "y^/^-^" )
+
+TARBALL := $(NAME)-$(VERSION)-$(RELEASE).tar.gz
+
+PHAST_TARBALL := phast-$(PHAST_VERSION)-$(RELEASE).tar.gz
+
 CANDLE = candle
 CANDLE_FLAGS=\
 	-nologo \
@@ -53,6 +63,54 @@ WPHAST_FILES=\
 	$(EXAMPLES)/river/river.wphast\
 	$(EXAMPLES)/unconf/unconf.wphast\
 	$(EXAMPLES)/well/well.wphast
+	
+all : check_release $(TARBALL) $(PHAST_TARBALL)
+
+$(TARBALL) : dist.sh $(DATE_STAMP).tstamp
+	@echo "Creating $(TARBALL)"
+	time ./dist.sh -v $(VERSION) -r $(RELEASE) -d $(DATE) -pr trunk 2>&1 | tee dist-$(RELEASE).log
+	
+$(PHAST_TARBALL) : $(DATE_STAMP).tstamp
+	@echo "Creating $(PHAST_TARBALL)"
+	svn export --force -r $(RELEASE) http://internalbrr.cr.usgs.gov/svn_GW/phast/trunk/packages/RPM
+	time RPM/dist.sh -v $(PHAST_VERSION) -r $(RELEASE) -d $(DATE) -pr trunk 2>&1 | tee dist-phast-$(RELEASE).log
+	mv phast-$(PHAST_VERSION).tar.gz $(PHAST_TARBALL)	
+	rm -rf phast-$(PHAST_VERSION).tar.bz2	
+
+$(DATE_STAMP).tstamp : 
+	rm -rf *.tstamp
+	touch $(DATE_STAMP).tstamp
+	
+check_release :
+	@if [ "$(VERSION)"x = "x" ]; \
+	  then \
+		echo "Please specifiy VERSION with 'make VERSION=<number>'"; \
+		exit 1; \
+	    else \
+		exit 0; \
+	fi
+	@if [ "$(PHAST_VERSION)"x = "x" ]; \
+	  then \
+		echo "Please specifiy PHAST_VERSION with 'make PHAST_VERSION=<number>'"; \
+		exit 1; \
+	    else \
+		exit 0; \
+	fi
+	@if [ "$(RELEASE)"x = "x" ]; \
+	   then \
+		echo "Please specifiy RELEASE with 'make RELEASE=<number>'"; \
+		exit 1; \
+	    else \
+		exit 0; \
+	fi
+	@if [ "$(DATE)"x = "x" ]; \
+	   then \
+		echo "Please specifiy DATE with 'make DATE=<number>'"; \
+		exit 1; \
+	    else \
+		exit 0; \
+	fi
+
 	
 WPhast.msi : WPhast.wixobj ../AutoRelease/WPhast.exe $(BINARIES) $(WPHAST_FILES) $(PHAST)
 	$(LIGHT) $(LIGHT_FLAGS) WPhast.wixobj
