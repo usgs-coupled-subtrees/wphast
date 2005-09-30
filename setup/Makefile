@@ -64,7 +64,8 @@ WPHAST_FILES=\
 	$(EXAMPLES)/unconf/unconf.wphast\
 	$(EXAMPLES)/well/well.wphast
 	
-all : check_release $(TARBALL) $(PHAST_TARBALL)
+#####all : check_release $(TARBALL) $(PHAST_TARBALL)
+all : WPhast.msi
 
 $(TARBALL) : dist.sh $(DATE_STAMP).tstamp
 	@echo "Creating $(TARBALL)"
