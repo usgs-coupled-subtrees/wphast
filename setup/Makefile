@@ -8,6 +8,11 @@ TARBALL := $(NAME)-$(VERSION)-$(RELEASE).tar.gz
 
 PHAST_TARBALL := phast-$(PHAST_VERSION)-$(RELEASE).tar.gz
 
+DEVENV := /cygdrive/c/Program\ Files/Microsoft\ Visual\ Studio\ .NET/Common7/IDE/devenv
+
+SLN := ../WPhast.sln
+
+
 CANDLE = candle
 CANDLE_FLAGS=\
 	-nologo \
@@ -119,6 +124,11 @@ WPhast.msi : WPhast.wixobj ../AutoRelease/WPhast.exe $(BINARIES) $(WPHAST_FILES)
 WPhast.wixobj : WPhast.wxs
 	$(CANDLE) $(CANDLE_FLAGS) -out $@ WPhast.wxs
 	
+../AutoRelease/WPhast.exe : $(SLN)
+	@rm AutoRelease.log
+	$(DEVENV) /out AutoRelease.log /build AutoRelease $(SLN)
+	@cat AutoRelease.log
+
 install :
 	$(MSIEXEC) /i WPhast.msi /qn+ INSTALLLOCATION=C:\DOCUME~1\charlton\PROGRA~1\WPhast /log WPhast.log
 	
