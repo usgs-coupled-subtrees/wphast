@@ -121,7 +121,7 @@ check_release :
 WPhast.msi : WPhast.wixobj ../AutoRelease/WPhast.exe $(BINARIES) $(WPHAST_FILES) $(PHAST)
 	$(LIGHT) $(LIGHT_FLAGS) WPhast.wixobj
 
-WPhast.wixobj : WPhast.wxs
+WPhast.wixobj : WPhast.wxs Version.wxs
 	$(CANDLE) $(CANDLE_FLAGS) -out $@ WPhast.wxs
 	
 ../AutoRelease/WPhast.exe : $(SLN)

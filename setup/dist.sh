@@ -159,29 +159,29 @@ fi
 
 VERSION_LONG="$ver_major.$ver_minor.$ver_patch.$REVISION_SVN"
 
-###SED_FILES="$DISTPATH/build/phreeqci_version.h \
-###           $DISTPATH/setup/setup.ipr \
-###           $DISTPATH/setup/STRING~1/0009-English/value.shl"
-###
-###for vsn_file in $SED_FILES
-###do
-###  sed \
-###   -e "/#define *PHREEQCI_VER_MAJOR/s/[0-9]\+/$ver_major/" \
-###   -e "/#define *PHREEQCI_VER_MINOR/s/[0-9]\+/$ver_minor/" \
-###   -e "/#define *PHREEQCI_VER_PATCH/s/[0-9]\+/$ver_patch/" \
-###   -e "/#define *PHREEQCI_VER_TAG/s/\".*\"/\" ($VER_TAG)\"/" \
-###   -e "/#define *PHREEQCI_VER_NUMTAG/s/\".*\"/\"$VER_NUMTAG\"/" \
-###   -e "/#define *PHREEQCI_VER_REVISION/s/[0-9]\+/$REVISION_SVN/" \
-###   -e "s/@RELEASE_DATE@/$RELEASE_DATE/g" \
-###   -e "s/@VER@/$VER/g" \
-###   -e "s/@VER_UC@/$VER_UC/g" \
-###   -e "s/@REL@/$REL/g" \
-###   -e "s/@VERSION_LONG@/$VERSION_LONG/g" \
-###    < "$vsn_file" > "$vsn_file.tmp"
-###  unix2dos "$vsn_file.tmp" 2> /dev/null
-###  mv -f "$vsn_file.tmp" "$vsn_file"
-###  cp "$vsn_file" "$vsn_file.dist"
-###done
+SED_FILES="$DISTPATH/setup/Version.wxs"
+
+for vsn_file in $SED_FILES
+do
+  sed \
+   -e "/#define *WPHAST_VER_MAJOR/s/[0-9]\+/$ver_major/" \
+   -e "/#define *WPHAST_VER_MINOR/s/[0-9]\+/$ver_minor/" \
+   -e "/#define *WPHAST_VER_PATCH/s/[0-9]\+/$ver_patch/" \
+   -e "/#define *WPHAST_VER_TAG/s/\".*\"/\" ($VER_TAG)\"/" \
+   -e "/#define *WPHAST_VER_NUMTAG/s/\".*\"/\"$VER_NUMTAG\"/" \
+   -e "/#define *WPHAST_VER_REVISION/s/[0-9]\+/$REVISION_SVN/" \
+   -e "s/@RELEASE_DATE@/$RELEASE_DATE/g" \
+   -e "s/@VER@/$VER/g" \
+   -e "s/@VER_UC@/$VER_UC/g" \
+   -e "s/@MAJOR@/$ver_major/g" \
+   -e "s/@MINOR@/$ver_minor/g" \
+   -e "s/@REL@/$REL/g" \   
+   -e "s/@VERSION_LONG@/$VERSION_LONG/g" \
+    < "$vsn_file" > "$vsn_file.tmp"
+  unix2dos "$vsn_file.tmp" 2> /dev/null
+  mv -f "$vsn_file.tmp" "$vsn_file"
+  cp "$vsn_file" "$vsn_file.dist"
+done
 
 if [ -z "$ZIP" ]; then
   echo "Rolling $DISTNAME.tar ..."
