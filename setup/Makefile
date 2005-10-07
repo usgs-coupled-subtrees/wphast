@@ -69,8 +69,8 @@ WPHAST_FILES=\
 	$(EXAMPLES)/unconf/unconf.wphast\
 	$(EXAMPLES)/well/well.wphast
 	
-#####all : check_release $(TARBALL) $(PHAST_TARBALL)
-all : WPhast.msi
+all : check_release $(TARBALL) $(PHAST_TARBALL)
+###all : WPhast.msi
 
 $(TARBALL) : dist.sh $(DATE_STAMP).tstamp
 	@echo "Creating $(TARBALL)"
@@ -90,29 +90,30 @@ $(DATE_STAMP).tstamp :
 check_release :
 	@if [ "$(VERSION)"x = "x" ]; \
 	  then \
-		echo "Please specifiy VERSION with 'make VERSION=<number>'"; \
+		echo "usage: make VERSION=<number> PHAST_VERSION=<number> DATE=<xx/xx/xxxx>"; \
+		echo "    ie make VERSION=0.1 PHAST_VERSION=1.2 DATE=10/6/2005"; \
 		exit 1; \
 	    else \
 		exit 0; \
 	fi
 	@if [ "$(PHAST_VERSION)"x = "x" ]; \
 	  then \
-		echo "Please specifiy PHAST_VERSION with 'make PHAST_VERSION=<number>'"; \
-		exit 1; \
+		echo "usage: make VERSION=<number> PHAST_VERSION=<number> DATE=<xx/xx/xxxx>"; \
+		echo "    ie make VERSION=0.1 PHAST_VERSION=1.2 DATE=10/6/2005"; \
 	    else \
 		exit 0; \
 	fi
 	@if [ "$(RELEASE)"x = "x" ]; \
 	   then \
-		echo "Please specifiy RELEASE with 'make RELEASE=<number>'"; \
-		exit 1; \
+		echo "usage: make VERSION=<number> PHAST_VERSION=<number> DATE=<xx/xx/xxxx>"; \
+		echo "    ie make VERSION=0.1 PHAST_VERSION=1.2 DATE=10/6/2005"; \
 	    else \
 		exit 0; \
 	fi
 	@if [ "$(DATE)"x = "x" ]; \
 	   then \
-		echo "Please specifiy DATE with 'make DATE=<number>'"; \
-		exit 1; \
+		echo "usage: make VERSION=<number> PHAST_VERSION=<number> DATE=<xx/xx/xxxx>"; \
+		echo "ie make VERSION=0.1 PHAST_VERSION=1.2 DATE=10/6/2005"; \
 	    else \
 		exit 0; \
 	fi

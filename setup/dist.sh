@@ -160,11 +160,12 @@ fi
 VERSION_LONG="$ver_major.$ver_minor.$ver_patch.$REVISION_SVN"
 
 SED_FILES="$DISTPATH/setup/Version.wxs \
-           $DISTPATH/Version.h"
+           $DISTPATH/Version.h \
            $DISTPATH/WPhast.rc"
 
 for vsn_file in $SED_FILES
 do
+  echo "vsn_file = $vsn_file"
   sed \
    -e "/#define *VER_MAJOR/s/[0-9]\+/$ver_major/" \
    -e "/#define *VER_MINOR/s/[0-9]\+/$ver_minor/" \
@@ -175,7 +176,7 @@ do
    -e "s/@VER_UC@/$VER_UC/g" \
    -e "s/@MAJOR@/$ver_major/g" \
    -e "s/@MINOR@/$ver_minor/g" \
-   -e "s/@REL@/$REL/g" \   
+   -e "s/@REL@/$REL/g" \
    -e "s/@VERSION_LONG@/$VERSION_LONG/g" \
     < "$vsn_file" > "$vsn_file.tmp"
   unix2dos "$vsn_file.tmp" 2> /dev/null
