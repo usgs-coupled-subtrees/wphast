@@ -549,6 +549,7 @@ void CWPhastDoc::Serialize(CArchive& ar)
 			pWnd->SetWindowText(status);
 		}
 
+#ifdef THIS_IS_BROKEN
 		// delay redrawing treectrl
 		//
 		CWnd *pWndTreeCtrl = 0;
@@ -561,6 +562,7 @@ void CWPhastDoc::Serialize(CArchive& ar)
 		// delay redrawing render window
 		//
 		CDelayRedraw delayRender(::AfxGetMainWnd()->GetActiveWindow());
+#endif
 
 		CHDFMirrorFile* pFile = (CHDFMirrorFile*)ar.GetFile();
 		ASSERT(pFile->GetHID() > 0);

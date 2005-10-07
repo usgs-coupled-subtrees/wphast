@@ -10,4 +10,47 @@
 /////////////////////////////////////////////////////////////////////////////
 // Add manually edited resources here...
 
+#include "../Version.h"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION VER_MAJOR,VER_MINOR,VER_PATCH,VER_REVISION
+ PRODUCTVERSION VER_MAJOR,VER_MINOR,VER_PATCH,VER_REVISION
+ FILEFLAGSMASK 0x37L
+#ifdef _DEBUG
+ FILEFLAGS 0x21L
+#else
+ FILEFLAGS 0x20L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904e4"
+        BEGIN
+            VALUE "Comments", "Released: " RELEASE_DATE "\0"
+            VALUE "CompanyName", "U.S. Geological Survey"
+            VALUE "FileDescription", "WPhast executable"
+            VALUE "FileVersion", VER_NUM "\0"
+            VALUE "InternalName", "WPhast.exe"
+            VALUE "LegalCopyright", "public domain"
+            VALUE "OriginalFilename", "WPhast.exe"
+            VALUE "ProductName", PRODUCT_NAME "\0"
+            VALUE "ProductVersion", VER_NUM "\0"
+            VALUE "SpecialBuild", "\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1252
+    END
+END
+
+
 /////////////////////////////////////////////////////////////////////////////

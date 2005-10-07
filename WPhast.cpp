@@ -7,6 +7,7 @@
 
 #include "WPhastDoc.h"
 #include "WPhastView.h"
+
 #include "GridPropertyPage.h"
 #include "Units1PropertyPage.h"
 #include "Units2PropertyPage.h"

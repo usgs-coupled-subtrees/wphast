@@ -127,6 +127,15 @@ CWPhastView::CWPhastView()
 , m_pRiverActor(0)
 , RiverCallbackCommand(0)
 , m_bMovingGridLine(false)
+, BoxWidget(0)
+, m_RenderWindow(0)
+, m_Renderer(0)
+, m_RenderWindowInteractor(0)
+, InteractorStyle(0)
+, m_pViewVTKCommand(0)
+, m_pCursor3D(0)
+, m_pCursor3DMapper(0)
+, m_pCursor3DActor(0)
 {
 	// Create the renderer, window and interactor objects.
 	//

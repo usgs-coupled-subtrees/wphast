@@ -259,7 +259,6 @@
 #define IDR_MINIMUM_TIME_STEP_RTF       264
 #define IDR_MAXIMUM_TIME_STEP_RTF       265
 #define IDR_HEAD_CHANGE_TARGET_RTF      266
-#define IDR_RTF2                        267
 #define IDR_ITERATIONS_RTF              267
 #define IDC_EDIT_X                      1000
 #define IDC_PROPERTIES                  1000
@@ -678,7 +677,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        268
+#define _APS_NEXT_RESOURCE_VALUE        269
 #define _APS_NEXT_COMMAND_VALUE         32830
 #define _APS_NEXT_CONTROL_VALUE         1341
 #define _APS_NEXT_SYMED_VALUE           126

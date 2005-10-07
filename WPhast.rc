@@ -425,12 +425,11 @@ STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CLIPSIBLINGS |
 CAPTION "About WPhast"
 FONT 8, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
-    ICON            IDR_MAINFRAME,IDC_STATIC,11,17,20,20
-    LTEXT           "WPhast Version 0.1.0.577",IDC_STATIC,40,10,119,8,
+    ICON            IDR_MAINFRAME,IDC_STATIC,7,14,21,20
+    LTEXT           "WPhast Version @VERSION_LONG@",IDC_STATIC,37,13,128,8,
                     SS_NOPREFIX
-    LTEXT           "Copyright (C) 2003",IDC_STATIC,40,25,119,8,NOT 
-                    WS_VISIBLE
     DEFPUSHBUTTON   "OK",IDOK,178,7,50,16,WS_GROUP
+    LTEXT           "Released: @RELEASE_DATE@",IDC_STATIC,37,30,98,8
 END
 
 IDD_PROPS_CUBE DIALOGEX 0, 0, 127, 132
@@ -2647,47 +2646,6 @@ BEGIN
     EDITTEXT        IDC_EDIT_REBAL,76,137,55,12,ES_AUTOHSCROLL
     LTEXT           "(0.0 - 1.0) parallel version only",IDC_STATIC,137,138,
                     94,8
-END
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Version
-//
-
-VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,0,0,7
- PRODUCTVERSION 1,0,0,7
- FILEFLAGSMASK 0x37L
-#ifdef _DEBUG
- FILEFLAGS 0x21L
-#else
- FILEFLAGS 0x20L
-#endif
- FILEOS 0x4L
- FILETYPE 0x1L
- FILESUBTYPE 0x0L
-BEGIN
-    BLOCK "StringFileInfo"
-    BEGIN
-        BLOCK "040904e4"
-        BEGIN
-            VALUE "Comments", "$Name:  $"
-            VALUE "CompanyName", "U.S. Geological Survey"
-            VALUE "FileDescription", "WPhast executable"
-            VALUE "FileVersion", "1.0.0.7"
-            VALUE "InternalName", "WPhast.exe"
-            VALUE "LegalCopyright", "public domain"
-            VALUE "OriginalFilename", "WPhast.exe"
-            VALUE "ProductName", "WPhast"
-            VALUE "ProductVersion", "1.0.0.7"
-            VALUE "SpecialBuild", "$Date: 2005/04/01 02:08:12 $"
-        END
-    END
-    BLOCK "VarFileInfo"
-    BEGIN
-        VALUE "Translation", 0x409, 1252
-    END
 END
 
 
