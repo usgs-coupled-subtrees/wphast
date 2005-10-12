@@ -1,3 +1,5 @@
+# $Id$
+
 NAME := wphast
 
 RELEASE := $(shell svn st -v dist.sh | cut -b 10- | ( read one two ; echo $$one ) )

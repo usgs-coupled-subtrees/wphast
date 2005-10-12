@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: dist.sh 146 2005-02-11 05:24:56Z charlton $
+# $Id$
 
 #
 # USAGE: ./dist.sh -v VERSION -r REVISION -d RELEASE_DATE 
