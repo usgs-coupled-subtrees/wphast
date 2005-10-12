@@ -8,6 +8,8 @@ TARBALL := $(NAME)-$(VERSION)-$(RELEASE).tar.gz
 
 PHAST_TARBALL := phast-$(PHAST_VERSION)-$(RELEASE).tar.gz
 
+BUILD_SCRIPT := $(NAME)-$(VERSION)-$(RELEASE).sh
+
 DEVENV := /cygdrive/c/Program\ Files/Microsoft\ Visual\ Studio\ .NET/Common7/IDE/devenv
 
 SLN := ../WPhast.sln
@@ -69,7 +71,7 @@ WPHAST_FILES=\
 	$(EXAMPLES)/unconf/unconf.wphast\
 	$(EXAMPLES)/well/well.wphast
 	
-all : check_release $(TARBALL) $(PHAST_TARBALL)
+all : check_release $(TARBALL) $(PHAST_TARBALL) $(BUILD_SCRIPT)
 ###all : WPhast.msi
 
 $(TARBALL) : dist.sh $(DATE_STAMP).tstamp
@@ -82,6 +84,9 @@ $(PHAST_TARBALL) : $(DATE_STAMP).tstamp
 	time RPM/dist.sh -v $(PHAST_VERSION) -r $(RELEASE) -d $(DATE) -pr trunk 2>&1 | tee dist-phast-$(RELEASE).log
 	mv phast-$(PHAST_VERSION).tar.gz $(PHAST_TARBALL)	
 	rm -rf phast-$(PHAST_VERSION).tar.bz2	
+
+$(BUILD_SCRIPT) : build.sh
+	ln build.sh $(BUILD_SCRIPT)
 
 $(DATE_STAMP).tstamp : 
 	rm -rf *.tstamp
@@ -98,22 +103,22 @@ check_release :
 	fi
 	@if [ "$(PHAST_VERSION)"x = "x" ]; \
 	  then \
-		echo "usage: make VERSION=<number> PHAST_VERSION=<number> DATE=<xx/xx/xxxx>"; \
-		echo "    ie make VERSION=0.1 PHAST_VERSION=1.2 DATE=10/6/2005"; \
+		echo "usage: make VERSION=<number> PHAST_VERSION=<number> DATE=<xx/xx/xxxx> [RELEASE=<number>]"; \
+		echo "    ie make VERSION=0.1 PHAST_VERSION=1.2 DATE=10/6/2005 RELEASE=584"; \
 	    else \
 		exit 0; \
 	fi
 	@if [ "$(RELEASE)"x = "x" ]; \
 	   then \
-		echo "usage: make VERSION=<number> PHAST_VERSION=<number> DATE=<xx/xx/xxxx>"; \
-		echo "    ie make VERSION=0.1 PHAST_VERSION=1.2 DATE=10/6/2005"; \
+		echo "usage: make VERSION=<number> PHAST_VERSION=<number> DATE=<xx/xx/xxxx> [RELEASE=<number>]"; \
+		echo "    ie make VERSION=0.1 PHAST_VERSION=1.2 DATE=10/6/2005 RELEASE=584"; \
 	    else \
 		exit 0; \
 	fi
 	@if [ "$(DATE)"x = "x" ]; \
 	   then \
-		echo "usage: make VERSION=<number> PHAST_VERSION=<number> DATE=<xx/xx/xxxx>"; \
-		echo "ie make VERSION=0.1 PHAST_VERSION=1.2 DATE=10/6/2005"; \
+		echo "usage: make VERSION=<number> PHAST_VERSION=<number> DATE=<xx/xx/xxxx> [RELEASE=<number>]"; \
+		echo "    ie make VERSION=0.1 PHAST_VERSION=1.2 DATE=10/6/2005 RELEASE=584"; \
 	    else \
 		exit 0; \
 	fi

@@ -165,7 +165,8 @@ SED_FILES="$DISTPATH/setup/Version.wxs \
 
 for vsn_file in $SED_FILES
 do
-  echo "vsn_file = $vsn_file"
+  filename="`echo $vsn_file | sed "s^$DIST_SANDBOX/^^"`"
+  echo "Versioning file $filename"
   sed \
    -e "/#define *VER_MAJOR/s/[0-9]\+/$ver_major/" \
    -e "/#define *VER_MINOR/s/[0-9]\+/$ver_minor/" \
