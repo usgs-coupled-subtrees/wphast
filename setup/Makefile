@@ -10,6 +10,8 @@ TARBALL := $(NAME)-$(VERSION)-$(RELEASE).tar.gz
 
 PHAST_TARBALL := phast-$(PHAST_VERSION)-$(RELEASE).tar.gz
 
+DIST_MSI := $(NAME)-$(VERSION)-$(RELEASE).msi
+
 BUILD_SCRIPT := $(NAME)-$(VERSION)-$(RELEASE).sh
 
 DEVENV := /cygdrive/c/Program\ Files/Microsoft\ Visual\ Studio\ .NET/Common7/IDE/devenv
@@ -35,7 +37,8 @@ MSIVAL2=/cygdrive/c/Program\ Files/MsiVal2/msival2
 
 MSIEXEC=msiexec
 
-PHAST=/home/charlton/programs/phast/srcphast/win32/ser/phast.exe
+###PHAST=/home/charlton/programs/phast/srcphast/win32/ser/phast.exe
+###PHAST_BUILD=phast-1.2-577.tar.bz2
 
 BINARIES=\
 	Binary/Banner.bmp\
@@ -73,54 +76,63 @@ WPHAST_FILES=\
 	$(EXAMPLES)/unconf/unconf.wphast\
 	$(EXAMPLES)/well/well.wphast
 	
-all : check_release $(TARBALL) $(PHAST_TARBALL) $(BUILD_SCRIPT)
+all : check_release $(TARBALL) $(BUILD_SCRIPT) $(PHAST_BUILD)
 ###all : WPhast.msi
 
 $(TARBALL) : dist.sh $(DATE_STAMP).tstamp
 	@echo "Creating $(TARBALL)"
 	time ./dist.sh -v $(VERSION) -r $(RELEASE) -d $(DATE) -pr trunk 2>&1 | tee dist-$(RELEASE).log
 	
-$(PHAST_TARBALL) : $(DATE_STAMP).tstamp
-	@echo "Creating $(PHAST_TARBALL)"
-	svn export --force -r $(RELEASE) http://internalbrr.cr.usgs.gov/svn_GW/phast/trunk/packages/RPM
-	time RPM/dist.sh -v $(PHAST_VERSION) -r $(RELEASE) -d $(DATE) -pr trunk 2>&1 | tee dist-phast-$(RELEASE).log
-	mv phast-$(PHAST_VERSION).tar.gz $(PHAST_TARBALL)	
-	rm -rf phast-$(PHAST_VERSION).tar.bz2	
-
 $(BUILD_SCRIPT) : build.sh
+	rm -rf  $(BUILD_SCRIPT)
 	ln build.sh $(BUILD_SCRIPT)
 
 $(DATE_STAMP).tstamp : 
 	rm -rf *.tstamp
 	touch $(DATE_STAMP).tstamp
 	
+msi : $(DIST_MSI) build_msi_file
+	
+$(DIST_MSI) : $(TARBALL) $(PHAST_TARBALL) $(BUILD_SCRIPT)
+	touch $(DIST_MSI)
+	
+build_msi_file :  $(BUILD_SCRIPT) $(TARBALL) $(PHAST_TARBALL)
+	time $(BUILD_SCRIPT) all 2>&1 | tee build-$(RELEASE).log
+
 check_release :
 	@if [ "$(VERSION)"x = "x" ]; \
 	  then \
-		echo "usage: make VERSION=<number> PHAST_VERSION=<number> DATE=<xx/xx/xxxx>"; \
-		echo "    ie make VERSION=0.1 PHAST_VERSION=1.2 DATE=10/6/2005"; \
+		echo "usage: make VERSION=<number> DATE=<xx/xx/xxxx> PHAST_BUILD=<filename> [RELEASE=<number>]"; \
+		echo "    ie make VERSION=0.1 DATE=10/6/2005 PHAST_BUILD=phast-1.2-577.tar.bz2"; \
+		echo "       make VERSION=0.1 DATE=10/6/2005 PHAST_BUILD=phast-1.2-577.tar.bz2 RELEASE=584"; \
 		exit 1; \
 	    else \
 		exit 0; \
 	fi
-	@if [ "$(PHAST_VERSION)"x = "x" ]; \
+	@if [ "$(PHAST_BUILD)"x = "x" ]; \
 	  then \
-		echo "usage: make VERSION=<number> PHAST_VERSION=<number> DATE=<xx/xx/xxxx> [RELEASE=<number>]"; \
-		echo "    ie make VERSION=0.1 PHAST_VERSION=1.2 DATE=10/6/2005 RELEASE=584"; \
+		echo "usage: make VERSION=<number> DATE=<xx/xx/xxxx> PHAST_BUILD=<filename> [RELEASE=<number>]"; \
+		echo "    ie make VERSION=0.1 DATE=10/6/2005 PHAST_BUILD=phast-1.2-577.tar.bz2"; \
+		echo "       make VERSION=0.1 DATE=10/6/2005 PHAST_BUILD=phast-1.2-577.tar.bz2 RELEASE=584"; \
+		exit 1; \
 	    else \
 		exit 0; \
 	fi
 	@if [ "$(RELEASE)"x = "x" ]; \
-	   then \
-		echo "usage: make VERSION=<number> PHAST_VERSION=<number> DATE=<xx/xx/xxxx> [RELEASE=<number>]"; \
-		echo "    ie make VERSION=0.1 PHAST_VERSION=1.2 DATE=10/6/2005 RELEASE=584"; \
+	  then \
+		echo "usage: make VERSION=<number> DATE=<xx/xx/xxxx> PHAST_BUILD=<filename> [RELEASE=<number>]"; \
+		echo "    ie make VERSION=0.1 DATE=10/6/2005 PHAST_BUILD=phast-1.2-577.tar.bz2"; \
+		echo "       make VERSION=0.1 DATE=10/6/2005 PHAST_BUILD=phast-1.2-577.tar.bz2 RELEASE=584"; \
+		exit 1; \
 	    else \
 		exit 0; \
 	fi
 	@if [ "$(DATE)"x = "x" ]; \
-	   then \
-		echo "usage: make VERSION=<number> PHAST_VERSION=<number> DATE=<xx/xx/xxxx> [RELEASE=<number>]"; \
-		echo "    ie make VERSION=0.1 PHAST_VERSION=1.2 DATE=10/6/2005 RELEASE=584"; \
+	  then \
+		echo "usage: make VERSION=<number> DATE=<xx/xx/xxxx> PHAST_BUILD=<filename> [RELEASE=<number>]"; \
+		echo "    ie make VERSION=0.1 DATE=10/6/2005 PHAST_BUILD=phast-1.2-577.tar.bz2"; \
+		echo "       make VERSION=0.1 DATE=10/6/2005 PHAST_BUILD=phast-1.2-577.tar.bz2 RELEASE=584"; \
+		exit 1; \
 	    else \
 		exit 0; \
 	fi
