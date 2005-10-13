@@ -781,9 +781,6 @@
 				RelativePath="Subject.cpp">
 			</File>
 			<File
-				RelativePath="TMediaPropertyPage.cpp">
-			</File>
-			<File
 				RelativePath="TempPropertyPage.cpp">
 			</File>
 			<File
@@ -1350,9 +1347,6 @@
 			</File>
 			<File
 				RelativePath="Subject.h">
-			</File>
-			<File
-				RelativePath="TMediaPropertyPage.h">
 			</File>
 			<File
 				RelativePath="TempPropertyPage.h">

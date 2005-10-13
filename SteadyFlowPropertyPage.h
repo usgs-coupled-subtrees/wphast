@@ -2,6 +2,7 @@
 
 
 // CSteadyFlowPropertyPage dialog
+#include <string>
 #include "SteadyFlow.h"
 
 class CUnits;

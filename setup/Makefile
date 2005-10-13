@@ -2,18 +2,6 @@
 
 NAME := wphast
 
-RELEASE := $(shell svn st -v dist.sh | cut -b 10- | ( read one two ; echo $$one ) )
-
-DATE_STAMP := $(shell echo $(DATE) | sed -e "y^/^-^" )
-
-TARBALL := $(NAME)-$(VERSION)-$(RELEASE).tar.gz
-
-PHAST_TARBALL := phast-$(PHAST_VERSION)-$(RELEASE).tar.gz
-
-DIST_MSI := $(NAME)-$(VERSION)-$(RELEASE).msi
-
-BUILD_SCRIPT := $(NAME)-$(VERSION)-$(RELEASE).sh
-
 DEVENV := /cygdrive/c/Program\ Files/Microsoft\ Visual\ Studio\ .NET/Common7/IDE/devenv
 
 SLN := ../WPhast.sln
@@ -37,7 +25,7 @@ MSIVAL2=/cygdrive/c/Program\ Files/MsiVal2/msival2
 
 MSIEXEC=msiexec
 
-###PHAST=/home/charlton/programs/phast/srcphast/win32/ser/phast.exe
+PHAST=/home/charlton/programs/phast/srcphast/win32/ser/phast.exe
 ###PHAST_BUILD=phast-1.2-577.tar.bz2
 
 BINARIES=\
@@ -76,8 +64,7 @@ WPHAST_FILES=\
 	$(EXAMPLES)/unconf/unconf.wphast\
 	$(EXAMPLES)/well/well.wphast
 	
-all : check_release $(TARBALL) $(BUILD_SCRIPT) $(PHAST_BUILD)
-###all : WPhast.msi
+all : WPhast.msi
 
 $(TARBALL) : dist.sh $(DATE_STAMP).tstamp
 	@echo "Creating $(TARBALL)"
@@ -90,54 +77,7 @@ $(BUILD_SCRIPT) : build.sh
 $(DATE_STAMP).tstamp : 
 	rm -rf *.tstamp
 	touch $(DATE_STAMP).tstamp
-	
-msi : $(DIST_MSI) build_msi_file
-	
-$(DIST_MSI) : $(TARBALL) $(PHAST_TARBALL) $(BUILD_SCRIPT)
-	touch $(DIST_MSI)
-	
-build_msi_file :  $(BUILD_SCRIPT) $(TARBALL) $(PHAST_TARBALL)
-	time $(BUILD_SCRIPT) all 2>&1 | tee build-$(RELEASE).log
 
-check_release :
-	@if [ "$(VERSION)"x = "x" ]; \
-	  then \
-		echo "usage: make VERSION=<number> DATE=<xx/xx/xxxx> PHAST_BUILD=<filename> [RELEASE=<number>]"; \
-		echo "    ie make VERSION=0.1 DATE=10/6/2005 PHAST_BUILD=phast-1.2-577.tar.bz2"; \
-		echo "       make VERSION=0.1 DATE=10/6/2005 PHAST_BUILD=phast-1.2-577.tar.bz2 RELEASE=584"; \
-		exit 1; \
-	    else \
-		exit 0; \
-	fi
-	@if [ "$(PHAST_BUILD)"x = "x" ]; \
-	  then \
-		echo "usage: make VERSION=<number> DATE=<xx/xx/xxxx> PHAST_BUILD=<filename> [RELEASE=<number>]"; \
-		echo "    ie make VERSION=0.1 DATE=10/6/2005 PHAST_BUILD=phast-1.2-577.tar.bz2"; \
-		echo "       make VERSION=0.1 DATE=10/6/2005 PHAST_BUILD=phast-1.2-577.tar.bz2 RELEASE=584"; \
-		exit 1; \
-	    else \
-		exit 0; \
-	fi
-	@if [ "$(RELEASE)"x = "x" ]; \
-	  then \
-		echo "usage: make VERSION=<number> DATE=<xx/xx/xxxx> PHAST_BUILD=<filename> [RELEASE=<number>]"; \
-		echo "    ie make VERSION=0.1 DATE=10/6/2005 PHAST_BUILD=phast-1.2-577.tar.bz2"; \
-		echo "       make VERSION=0.1 DATE=10/6/2005 PHAST_BUILD=phast-1.2-577.tar.bz2 RELEASE=584"; \
-		exit 1; \
-	    else \
-		exit 0; \
-	fi
-	@if [ "$(DATE)"x = "x" ]; \
-	  then \
-		echo "usage: make VERSION=<number> DATE=<xx/xx/xxxx> PHAST_BUILD=<filename> [RELEASE=<number>]"; \
-		echo "    ie make VERSION=0.1 DATE=10/6/2005 PHAST_BUILD=phast-1.2-577.tar.bz2"; \
-		echo "       make VERSION=0.1 DATE=10/6/2005 PHAST_BUILD=phast-1.2-577.tar.bz2 RELEASE=584"; \
-		exit 1; \
-	    else \
-		exit 0; \
-	fi
-
-	
 WPhast.msi : WPhast.wixobj ../AutoRelease/WPhast.exe $(BINARIES) $(WPHAST_FILES) $(PHAST)
 	$(LIGHT) $(LIGHT_FLAGS) WPhast.wixobj
 
@@ -145,7 +85,7 @@ WPhast.wixobj : WPhast.wxs Version.wxs
 	$(CANDLE) $(CANDLE_FLAGS) -out $@ WPhast.wxs
 	
 ../AutoRelease/WPhast.exe : $(SLN)
-	@rm AutoRelease.log
+	@rm -rf AutoRelease.log
 	$(DEVENV) /out AutoRelease.log /build AutoRelease $(SLN)
 	@cat AutoRelease.log
 

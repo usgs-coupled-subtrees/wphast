@@ -5,6 +5,8 @@
 <?define Build=581?>
 <?define Manufacturer="U.S. Geological Survey"?>
 <?define UpgradeCode=BB03D5EE-DB02-463D-8CE4-F7724B006ACF?>
+<?define vtkDllPath="$(env.DEV_VTK42_VS7_DLL_LIB)"?>
+<?define hdfDllPath="$(env.DEV_HDF5_LIBDLL)"?>
 
 <?define Version=$(var.Major).$(var.Minor).$(var.Build)?>
 <?define Description="USGS $(var.Name) $(var.Major).$(var.Minor).$(var.Build) Installer"?>

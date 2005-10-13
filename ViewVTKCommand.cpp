@@ -24,7 +24,6 @@
 #include "ZoneResizeAction.h"
 #include "NewZonePropertyPage.h"
 #include "MediaPropertyPage.h"
-#include "TMediaPropertyPage.h"
 
 #include "BCFluxPropertyPage.h"
 #include "BCFluxPropertyPage2.h"

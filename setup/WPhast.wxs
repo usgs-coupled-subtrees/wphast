@@ -76,26 +76,26 @@
               <Merge Id="VC_STL.12121212-FF27-4ff8-911C-03CD09DDB3E5" Language="1033" src="$(var.MergeDir)\VC_STL.msm" DiskId="1" />
 
               <Component Id='C__hdf5Library' Guid='BF8F23F9-8A71-441c-9EA3-2CF8A4860F60' >
-                <File Id="F__hdf5dll.dll" Name="hdf5dll.dll" Vital="yes" DiskId='1' src="..\Release\hdf5dll.dll" />
-                <File Id="F__zlib.dll"    Name="zlib.dll" Vital="yes" DiskId='1' src="..\Release\zlib.dll" />
+                <File Id="F__hdf5dll.dll" Name="hdf5dll.dll" Vital="yes" DiskId='1' src="$(var.hdfDllPath)\hdf5dll.dll" />
+                <File Id="F__zlib.dll"    Name="zlib.dll" Vital="yes" DiskId='1' src="$(var.hdfDllPath)\zlib.dll" />
               </Component>
 
               <Component Id='C__vtkLibrary' Guid='17CA7172-23E7-4b41-8890-09D4373E57DD'>
-                <File Id="F__vtkCommon.dll"    Name="VTKCOM~1.DLL" LongName="vtkCommon.dll" Vital="yes" DiskId='1' src="..\Release\vtkCommon.dll" />
-                <File Id="F__vtkexpat.dll"     Name="vtkexpat.dll" Vital="yes" DiskId='1' src="..\Release\vtkexpat.dll" />
-                <File Id="F__vtkFiltering.dll" Name="VTKFIL~1.DLL" LongName="vtkFiltering.dll" Vital="yes" DiskId='1' src="..\Release\vtkFiltering.dll" />
-                <File Id="F__vtkfreetype.dll"  Name="VTKFRE~1.DLL" LongName="vtkfreetype.dll" Vital="yes" DiskId='1' src="..\Release\vtkfreetype.dll" />
-                <File Id="F__vtkftgl.dll"      Name="vtkftgl.dll" Vital="yes" DiskId='1' src="..\Release\vtkftgl.dll" />
-                <File Id="F__vtkGraphics.dll"  Name="VTKGRA~1.DLL" LongName="vtkGraphics.dll" Vital="yes" DiskId='1' src="..\Release\vtkGraphics.dll" />
-                <File Id="F__vtkHybrid.dll"    Name="VTKHYB~1.DLL" LongName="vtkHybrid.dll" Vital="yes" DiskId='1' src="..\Release\vtkHybrid.dll" />
-                <File Id="F__vtkImaging.dll"   Name="VTKIMA~1.DLL" LongName="vtkImaging.dll" Vital="yes" DiskId='1' src="..\Release\vtkImaging.dll" />
-                <File Id="F__vtkIO.dll"        Name="vtkIO.dll" Vital="yes" DiskId='1' src="..\Release\vtkIO.dll" />
-                <File Id="F__vtkjpeg.dll"      Name="vtkjpeg.dll" Vital="yes" DiskId='1' src="..\Release\vtkjpeg.dll" />
-                <File Id="F__vtkParallel.dll"  Name="VTKPAR~1.DLL" LongName="vtkParallel.dll" Vital="yes" DiskId='1' src="..\Release\vtkParallel.dll" />
-                <File Id="F__vtkpng.dll"       Name="vtkpng.dll" Vital="yes" DiskId='1' src="..\Release\vtkpng.dll" />
-                <File Id="F__vtkRendering.dll" Name="VTKREN~1.DLL" LongName="vtkRendering.dll" Vital="yes" DiskId='1' src="..\Release\vtkRendering.dll" />
-                <File Id="F__vtktiff.dll"      Name="vtktiff.dll" Vital="yes" DiskId='1' src="..\Release\vtktiff.dll" />
-                <File Id="F__vtkzlib.dll"      Name="vtkzlib.dll" Vital="yes" DiskId='1' src="..\Release\vtkzlib.dll" />
+                <File Id="F__vtkCommon.dll"    Name="VTKCOM~1.DLL" LongName="vtkCommon.dll" Vital="yes" DiskId='1' src="$(var.vtkDllPath)\vtkCommon.dll" />
+                <File Id="F__vtkexpat.dll"     Name="vtkexpat.dll" Vital="yes" DiskId='1' src="$(var.vtkDllPath)\vtkexpat.dll" />
+                <File Id="F__vtkFiltering.dll" Name="VTKFIL~1.DLL" LongName="vtkFiltering.dll" Vital="yes" DiskId='1' src="$(var.vtkDllPath)\vtkFiltering.dll" />
+                <File Id="F__vtkfreetype.dll"  Name="VTKFRE~1.DLL" LongName="vtkfreetype.dll" Vital="yes" DiskId='1' src="$(var.vtkDllPath)\vtkfreetype.dll" />
+                <File Id="F__vtkftgl.dll"      Name="vtkftgl.dll" Vital="yes" DiskId='1' src="$(var.vtkDllPath)\vtkftgl.dll" />
+                <File Id="F__vtkGraphics.dll"  Name="VTKGRA~1.DLL" LongName="vtkGraphics.dll" Vital="yes" DiskId='1' src="$(var.vtkDllPath)\vtkGraphics.dll" />
+                <File Id="F__vtkHybrid.dll"    Name="VTKHYB~1.DLL" LongName="vtkHybrid.dll" Vital="yes" DiskId='1' src="$(var.vtkDllPath)\vtkHybrid.dll" />
+                <File Id="F__vtkImaging.dll"   Name="VTKIMA~1.DLL" LongName="vtkImaging.dll" Vital="yes" DiskId='1' src="$(var.vtkDllPath)\vtkImaging.dll" />
+                <File Id="F__vtkIO.dll"        Name="vtkIO.dll" Vital="yes" DiskId='1' src="$(var.vtkDllPath)\vtkIO.dll" />
+                <File Id="F__vtkjpeg.dll"      Name="vtkjpeg.dll" Vital="yes" DiskId='1' src="$(var.vtkDllPath)\vtkjpeg.dll" />
+                <File Id="F__vtkParallel.dll"  Name="VTKPAR~1.DLL" LongName="vtkParallel.dll" Vital="yes" DiskId='1' src="$(var.vtkDllPath)\vtkParallel.dll" />
+                <File Id="F__vtkpng.dll"       Name="vtkpng.dll" Vital="yes" DiskId='1' src="$(var.vtkDllPath)\vtkpng.dll" />
+                <File Id="F__vtkRendering.dll" Name="VTKREN~1.DLL" LongName="vtkRendering.dll" Vital="yes" DiskId='1' src="$(var.vtkDllPath)\vtkRendering.dll" />
+                <File Id="F__vtktiff.dll"      Name="vtktiff.dll" Vital="yes" DiskId='1' src="$(var.vtkDllPath)\vtktiff.dll" />
+                <File Id="F__vtkzlib.dll"      Name="vtkzlib.dll" Vital="yes" DiskId='1' src="$(var.vtkDllPath)\vtkzlib.dll" />
               </Component>
             </Directory>
 
@@ -1461,6 +1461,6 @@
     <Binary Id="info" src="Binary\Info.ico" />
     <Binary Id="bannrbmp" src="Binary\Banner.bmp" />
     <Binary Id="dlgbmp" src="Binary\Dialog.bmp" />
-    <Icon Id="WPhast.exe" src="..\Release\WPhast.exe" />
+    <Icon Id="WPhast.exe" src='..\AutoRelease\WPhast.exe' />
   </Product>
 </Wix>
