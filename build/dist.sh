@@ -173,7 +173,7 @@ do
    -e "/#define *VER_PATCH/s/[0-9]\+/$ver_patch/" \
    -e "/#define *VER_REVISION/s/[0-9]\+/$REVISION_SVN/" \
    -e "/define *Major=/s/[0-9]\+/$ver_major/" \
-   -e "/define *Minor=/s/[0-9]\+/$ver_major/" \
+   -e "/define *Minor=/s/[0-9]\+/$ver_minor/" \
    -e "/define *Build=/s/[0-9]\+/$REVISION_SVN/" \
    -e "s/@RELEASE_DATE@/$RELEASE_DATE/g" \
    -e "s/@VER@/$VER/g" \
