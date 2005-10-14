@@ -6,6 +6,9 @@ SLN := ../WPhast.sln
 
 WPHAST_EXE := ../AutoRelease/WPhast.exe
 
+VTK_DLL_DIR := ../AutoRelease
+HDF_DLL_DIR := ../AutoRelease
+
 CANDLE = candle
 CANDLE_FLAGS=\
 	-nologo \
@@ -63,6 +66,28 @@ WPHAST_FILES=\
 	$(EXAMPLES)/unconf/unconf.wphast\
 	$(EXAMPLES)/well/well.wphast
 	
+VTK_DLLS=\
+	$(VTK_DLL_DIR)/vtkCommon.dll\
+	$(VTK_DLL_DIR)/vtkexpat.dll\
+	$(VTK_DLL_DIR)/vtkFiltering.dll\
+	$(VTK_DLL_DIR)/vtkfreetype.dll\
+	$(VTK_DLL_DIR)/vtkftgl.dll\
+	$(VTK_DLL_DIR)/vtkGraphics.dll\
+	$(VTK_DLL_DIR)/vtkHybrid.dll\
+	$(VTK_DLL_DIR)/vtkImaging.dll\
+	$(VTK_DLL_DIR)/vtkIO.dll\
+	$(VTK_DLL_DIR)/vtkjpeg.dll\
+	$(VTK_DLL_DIR)/vtkParallel.dll\
+	$(VTK_DLL_DIR)/vtkpng.dll\
+	$(VTK_DLL_DIR)/vtkRendering.dll\
+	$(VTK_DLL_DIR)/vtktiff.dll\
+	$(VTK_DLL_DIR)/vtkzlib.dll
+	
+HDF_DLLS=\
+	$(HDF_DLL_DIR)/hdf5dll.dll\
+	$(HDF_DLL_DIR)/zlib.dll
+
+
 all : WPhast.msi
 
 WPhast.msi : WPhast.wixobj $(WPHAST_EXE) $(BINARIES) $(WPHAST_FILES) $(PHAST)
@@ -76,7 +101,7 @@ $(WPHAST_EXE) : $(SLN)
 	$(DEVENV) /out AutoRelease.log /build AutoRelease $(SLN)
 	@cat AutoRelease.log
 	
-%.wphast : %.trans.dat $(WPHAST_EXE)
+%.wphast : %.trans.dat $(WPHAST_EXE) $(HDF_DLLS) $(VTK_DLLS)
 	$(CSCRIPT) /NOLOGO import.vbs $<	
 
 install :
@@ -88,9 +113,19 @@ uninstall :
 check : WPhast.msi
 	$(MSIVAL2) WPhast.msi 'C:\Program Files\MsiVal2\logo.cub' -f
 
-import : $(WPHAST_EXE)
+import : $(WPHAST_EXE) $(HDF_DLLS) $(VTK_DLLS)
 	$(CSCRIPT) /NOLOGO import_files.vbs
 
 import_clean :
 	rm -rf $(WPHAST_FILES)
 
+.SECONDARY : $(VTK_DLLS) $(HDF_DLLS)
+
+$(VTK_DLL_DIR)% :: $(DEV_VTK42_VS7_DLL_LIB)/%
+	install -m 755 $^ $@
+
+$(HDF_DLL_DIR)% :: $(DEV_HDF5_LIBDLL)/%
+	install -m 755 $^ $@
+
+dll_clean :
+	rm -rf $(HDF_DLLS) $(VTK_DLLS)

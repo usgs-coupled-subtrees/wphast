@@ -217,6 +217,8 @@ spkg() {
     name=${srcinstdir}/${src_patch_name} text="PATCH" sigfile ; \
   fi && \
   cp ${src_orig_pkg} ${srcinstdir}/${src_orig_pkg_name} && \
+  cp dist.sh ${srcinstdir}/ && \
+  cp Makefile ${srcinstdir}/ && \
   if [ -e ${src_orig_pkg}.sig ] ; then \
     cp ${src_orig_pkg}.sig ${srcinstdir}/ ; \
   fi && \
