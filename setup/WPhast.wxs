@@ -113,8 +113,6 @@
 
 
             <Directory Id="D__examples" Name="examples">
-
-<?ifdef SKIP ?>
               <Directory Id="D__decay" Name="decay">
                 <Component Id='C__decay' Guid='C37C0FE8-9FE3-43d3-93D1-578923AB9285' DiskId="1">
                   <File Id="F__decay.chem.dat"  Name="DECAYC~1.DAT" LongName="decay.chem.dat" src="phast\examples\decay\decay.chem.dat" />
@@ -250,8 +248,6 @@
                   <File Id="F__well.wphast5"   Name="WELL~1.WPH" LongName="well.wphast" src="phast\examples\well\well.wphast" />
                 </Component>
               </Directory>
-<?endif?>
-
             </Directory>
           </Directory>
         </Directory>
