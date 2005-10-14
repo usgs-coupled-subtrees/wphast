@@ -149,7 +149,7 @@ reconf() {
 }
 build() {
   (cd ${objdir}/setup && \
-  make && \
+  make PHAST_EXE_PATH='C:\cygwin\home\charlton\programs\phast\srcphast\win32\ser\phast.exe'&& \
   )
 }
 check() {

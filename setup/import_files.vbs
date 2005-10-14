@@ -1,5 +1,45 @@
 ' VBScript source code
 
+curdir = Mid(WScript.ScriptFullName, 1, Len(Wscript.ScriptFullName) - Len(Wscript.ScriptName ))
+
+' set up registry
+'
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+clsid = "{36353903-2137-43FD-9AD6-40B65A96A839}"
+classes = "HKEY_CURRENT_USER\Software\Classes\"
+doc = "WPhast.Document"
+exepath = curdir & "..\AutoRelease\WPhast.exe"
+
+Set Sh = CreateObject("WScript.Shell")
+
+' [HKEY_CURRENT_USER\Software\Classes\WPhast.Document]
+' @="WPhast.Document"
+'
+Sh.RegWrite classes & doc & "\", doc
+
+' [HKEY_CURRENT_USER\Software\Classes\WPhast.Document\CLSID]
+' @="{36353903-2137-43FD-9AD6-40B65A96A839}"
+'
+Sh.RegWrite classes & doc & "\CLSID\", clsid
+
+' [HKEY_CURRENT_USER\Software\Classes\CLSID\{36353903-2137-43FD-9AD6-40B65A96A839}]
+' @="WPhast.Document"
+'
+Sh.RegWrite classes & "\CLSID\" & clsid & "\", doc
+
+' [HKEY_CURRENT_USER\Software\Classes\CLSID\{36353903-2137-43FD-9AD6-40B65A96A839}\LocalServer32]
+' @="<curdir>..\AutoRelease\WPhast.exe
+'
+Sh.RegWrite classes & "\CLSID\" & clsid & "\LocalServer32\", exepath
+
+' [HKEY_CURRENT_USER\Software\Classes\CLSID\{36353903-2137-43FD-9AD6-40B65A96A839}\ProgID]
+' @="WPhast.Document"
+'
+Sh.RegWrite classes & "\CLSID\" & clsid & "\ProgID\", doc
+
+' 
+'
 Set WPhast = WScript.CreateObject("WPhast.Document")
 
 ' If visible takes ~5x longer
@@ -7,7 +47,8 @@ Set WPhast = WScript.CreateObject("WPhast.Document")
 
 delay = 0 ' milliseconds
 
-examples = "C:\cygwin\home\charlton\programs\WPhast\setup\tree\USGS\WPhast 0.0\examples\"
+examples = curdir & "phast\examples\"
+
 
 ' decay
 WPhast = Null
@@ -136,3 +177,28 @@ Set WPhast = WScript.CreateObject("WPhast.Document")
 WPhast.Import(examples & "well\well.trans.dat")
 WPhast.SaveAs(examples & "well\well.wphast")
 WScript.Sleep(delay)
+
+
+' clean up reg
+'
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+' [-HKEY_CURRENT_USER\Software\Classes\CLSID\{36353903-2137-43FD-9AD6-40B65A96A839}\LocalServer32]
+'
+Sh.RegDelete classes & "\CLSID\" & clsid & "\LocalServer32\"
+
+' [-HKEY_CURRENT_USER\Software\Classes\CLSID\{36353903-2137-43FD-9AD6-40B65A96A839}\ProgID]
+'
+Sh.RegDelete classes & "\CLSID\" & clsid & "\ProgID\"
+
+' [-HKEY_CURRENT_USER\Software\Classes\CLSID\{36353903-2137-43FD-9AD6-40B65A96A839}]
+'
+Sh.RegDelete classes & "\CLSID\" & clsid & "\"
+
+' [-HKEY_CURRENT_USER\Software\Classes\WPhast.Document\CLSID]
+'
+Sh.RegDelete classes & doc & "\CLSID\"
+
+' [-HKEY_CURRENT_USER\Software\Classes\WPhast.Document]
+'
+Sh.RegDelete classes & doc & "\"

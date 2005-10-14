@@ -1,11 +1,10 @@
 # $Id$
 
-NAME := wphast
-
 DEVENV := /cygdrive/c/Program\ Files/Microsoft\ Visual\ Studio\ .NET/Common7/IDE/devenv
 
 SLN := ../WPhast.sln
 
+WPHAST_EXE := ../AutoRelease/WPhast.exe
 
 CANDLE = candle
 CANDLE_FLAGS=\
@@ -19,13 +18,13 @@ LIGHT_FLAGS=\
 
 CSCRIPT = cscript
 
-MERGE_DIR="C:\Program Files\Common Files\Merge Modules"
+MERGE_DIR := "C:\Program Files\Common Files\Merge Modules"
 
-MSIVAL2=/cygdrive/c/Program\ Files/MsiVal2/msival2
+MSIVAL2 := /cygdrive/c/Program\ Files/MsiVal2/msival2
 
-MSIEXEC=msiexec
+MSIEXEC := msiexec
 
-PHAST=/home/charlton/programs/phast/srcphast/win32/ser/phast.exe
+PHAST := /home/charlton/programs/phast/srcphast/win32/ser/phast.exe
 ###PHAST_BUILD=phast-1.2-577.tar.bz2
 
 BINARIES=\
@@ -43,7 +42,7 @@ BINARIES=\
 	Binary/Typical.ico\
 	Binary/Up.ico
 	
-EXAMPLES = tree/USGS/WPhast\ 0.0/examples
+EXAMPLES = phast/examples
 	
 WPHAST_FILES=\
 	$(EXAMPLES)/decay/decay.wphast\
@@ -66,28 +65,19 @@ WPHAST_FILES=\
 	
 all : WPhast.msi
 
-$(TARBALL) : dist.sh $(DATE_STAMP).tstamp
-	@echo "Creating $(TARBALL)"
-	time ./dist.sh -v $(VERSION) -r $(RELEASE) -d $(DATE) -pr trunk 2>&1 | tee dist-$(RELEASE).log
-	
-$(BUILD_SCRIPT) : build.sh
-	rm -rf  $(BUILD_SCRIPT)
-	ln build.sh $(BUILD_SCRIPT)
-
-$(DATE_STAMP).tstamp : 
-	rm -rf *.tstamp
-	touch $(DATE_STAMP).tstamp
-
-WPhast.msi : WPhast.wixobj ../AutoRelease/WPhast.exe $(BINARIES) $(WPHAST_FILES) $(PHAST)
+WPhast.msi : WPhast.wixobj $(WPHAST_EXE) $(BINARIES) $(WPHAST_FILES) $(PHAST)
 	$(LIGHT) $(LIGHT_FLAGS) WPhast.wixobj
 
 WPhast.wixobj : WPhast.wxs Version.wxs
 	$(CANDLE) $(CANDLE_FLAGS) -out $@ WPhast.wxs
 	
-../AutoRelease/WPhast.exe : $(SLN)
+$(WPHAST_EXE) : $(SLN)
 	@rm -rf AutoRelease.log
 	$(DEVENV) /out AutoRelease.log /build AutoRelease $(SLN)
 	@cat AutoRelease.log
+	
+%.wphast : %.trans.dat $(WPHAST_EXE)
+	$(CSCRIPT) /NOLOGO import.vbs $<	
 
 install :
 	$(MSIEXEC) /i WPhast.msi /qn+ INSTALLLOCATION=C:\DOCUME~1\charlton\PROGRA~1\WPhast /log WPhast.log
@@ -98,5 +88,9 @@ uninstall :
 check : WPhast.msi
 	$(MSIVAL2) WPhast.msi 'C:\Program Files\MsiVal2\logo.cub' -f
 
-import : ../AutoRelease/WPhast.exe
+import : $(WPHAST_EXE)
 	$(CSCRIPT) /NOLOGO import_files.vbs
+
+import_clean :
+	rm -rf $(WPHAST_FILES)
+
