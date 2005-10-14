@@ -277,7 +277,6 @@
       </Feature>
 
       <Feature Id='F__Examples' Title='Examples' Description='Example input files' TypicalDefault='install' Level='1' AllowAdvertise='no'>
-<?ifdef SKIP ?>
         <ComponentRef Id='C__decay' />
         <ComponentRef Id='C__disp2d' />
         <ComponentRef Id='C__ex1' />
@@ -296,7 +295,6 @@
         <ComponentRef Id='C__river' />
         <ComponentRef Id='C__unconf' />
         <ComponentRef Id='C__well' />
-<?endif?>
       </Feature>
 
     </Feature>
