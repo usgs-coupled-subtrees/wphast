@@ -48,8 +48,11 @@ Set trans_dat_file = Fso.GetFile(WScript.Arguments(0))
 wphast_file = Mid(trans_dat_file, 1, Len(trans_dat_file) - Len(".trans.dat")) & ".wphast"
 
 Set WPhast = WScript.CreateObject("WPhast.Document")
-WPhast.Import(trans_dat_file)
-WPhast.SaveAs(wphast_file)
+If WPhast.Import(trans_dat_file.Path) Then
+	WPhast.SaveAs(wphast_file)
+Else
+	WScript.Echo "An error occured during import: " & trans_dat_file.Path
+End If
 
 ' clean up reg
 '

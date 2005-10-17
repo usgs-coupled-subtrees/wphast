@@ -23,7 +23,7 @@
 <?ifdef WPHAST_AUTOMATION ?>
               <Component Id='C__MainExecutable' Guid='154A8C11-2222-47cb-968A-28012FEAFA34'>
                 <File Id='F__WPhast.exe' Name='WPhast.exe' DiskId='1' src='..\AutoRelease\WPhast.exe' Vital='yes'>
-                  <Shortcut Id="S__WPhast" Directory="D_PrgMenu.2FB136FF_6AAD_442A_A6EB_99511F1CDF82" Name="WPhast" Icon="WPhast.exe" IconIndex="0" Target="F__MainProgram" />
+                  <Shortcut Id="S__WPhast" Directory="D_PrgMenu.2FB136FF_6AAD_442A_A6EB_99511F1CDF82" Name='$(var.Shortcut)' Icon="WPhast.exe" IconIndex="0" Target="F__MainProgram" />
                 </File>
                 <File Id='F__phast.exe' Name='phast.exe' DiskId='1' src='$(var.phastExePath)' Vital='yes' Checksum='yes'/>
                 <Class Id="36353903-2137-43FD-9AD6-40B65A96A839" Context="LocalServer32" Description="WPhast.Document" Advertise="yes">
