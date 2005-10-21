@@ -5,8 +5,12 @@
 #include "PrintFreq.h"
 #include "PrintFreqPropertyPage.h"
 
-#include <windowsx.h>                            // GET_X_LPARAM GET_Y_LPARAM
-#undef GetNextSibling                            // defined in windowsx.h
+#include <sstream>
+#include <windowsx.h>       // GET_X_LPARAM GET_Y_LPARAM
+#undef GetNextSibling       // defined in windowsx.h
+#undef GetPrevSibling       // defined in windowsx.h
+
+
 
 //// #include "ZoneLODActor.h"
 #include "GridActor.h"
@@ -18,6 +22,8 @@
 #include "SetRiverAction.h"
 #include "RiverDeleteAction.h"
 #include "RiverDeletePointAction.h"
+#include "DragDropAction.h"
+
 
 #include "ModelessPropertySheet.h"
 #include "GridPropertyPage2.h"
@@ -84,9 +90,10 @@ IMPLEMENT_DYNAMIC(CPropertyTreeControlBar, baseCPropertyTreeControlBar);
 BEGIN_MESSAGE_MAP(CPropertyTreeControlBar, CSizingControlBarCFVS7)
 	ON_WM_CREATE()
 	ON_NOTIFY(TVN_SELCHANGED, IDC_PROPERTY_TREE, OnSelChanged)
-	ON_NOTIFY(NM_CLICK, IDC_PROPERTY_TREE, OnNMClk)	
-	ON_NOTIFY(NM_DBLCLK, IDC_PROPERTY_TREE, OnNMDblClk)	
-	ON_NOTIFY(TVN_KEYDOWN, IDC_PROPERTY_TREE, OnKeyDown)		
+	ON_NOTIFY(NM_CLICK, IDC_PROPERTY_TREE, OnNMClk)
+	ON_NOTIFY(NM_DBLCLK, IDC_PROPERTY_TREE, OnNMDblClk)
+	ON_NOTIFY(TVN_KEYDOWN, IDC_PROPERTY_TREE, OnKeyDown)
+	ON_NOTIFY(TVN_BEGINDRAG, IDC_PROPERTY_TREE, OnBeginDrag)
 	ON_WM_DESTROY()
 	ON_WM_LBUTTONDOWN()
 	ON_WM_CONTEXTMENU()
@@ -122,7 +129,14 @@ CPropertyTreeControlBar::CPropertyTreeControlBar(void)
 : m_bSelectingProp(false)
 , m_nNextZone(0)
 , m_pImageList(NULL)
+// COMMENT: {10/20/2005 5:07:36 PM}, m_hAfterCut(0)
+// COMMENT: {10/20/2005 5:07:36 PM}, m_hAfterPaste(0)
 {
+	CString str;
+	str.Format("WPhast:%d", _getpid());
+
+	this->m_cfPID   = (CLIPFORMAT)::RegisterClipboardFormat(str);
+	this->m_cfMedia = (CLIPFORMAT)::RegisterClipboardFormat(_T("CMediaZoneActor"));
 }
 
 CPropertyTreeControlBar::~CPropertyTreeControlBar(void)
@@ -1027,7 +1041,9 @@ HIMAGELIST CreateCheckBoxImagelist(HIMAGELIST himl, BOOL fTree, BOOL fUseColorKe
 		cyImage = /*SRC g_cySmIcon SRC*/::GetSystemMetrics(SM_CYSMICON);
     }
 
-	himl = ::ImageList_Create(cxImage, cyImage, ILC_MASK, 0, nImages);
+	//himl = ::ImageList_Create(cxImage, cyImage, ILC_MASK, 0, nImages);
+	//himl = ::ImageList_Create(cxImage, cyImage, ILC_COLOR16 | ILC_MASK, 0, nImages);	
+	himl = ::ImageList_Create(cxImage, cyImage, ILC_COLORDDB | ILC_MASK, 0, nImages);
 	hbm = ::CreateColorBitmap(cxImage * nImages, cyImage);
 
     if (fUseColorKey)
@@ -1102,16 +1118,16 @@ HIMAGELIST CreateCheckBoxImagelist(HIMAGELIST himl, BOOL fTree, BOOL fUseColorKe
         OffsetRect(&rc, -1, 0);  
     }
 
-// COMMENT: {4/6/2005 6:59:30 PM}	if (hTheme)
-// COMMENT: {4/6/2005 6:59:30 PM}	{
-// COMMENT: {4/6/2005 6:59:30 PM}		::DrawThemeBackground(hTheme,
-// COMMENT: {4/6/2005 6:59:30 PM}			hdc,
-// COMMENT: {4/6/2005 6:59:30 PM}			BP_CHECKBOX,
-// COMMENT: {4/6/2005 6:59:30 PM}			CBS_CHECKEDNORMAL,
-// COMMENT: {4/6/2005 6:59:30 PM}			&rc,
-// COMMENT: {4/6/2005 6:59:30 PM}			NULL);
-// COMMENT: {4/6/2005 6:59:30 PM}	}
-// COMMENT: {4/6/2005 6:59:30 PM}	else
+	if (hTheme)
+	{
+		::DrawThemeBackground(hTheme,
+			hdc,
+			BP_CHECKBOX,
+			CBS_CHECKEDNORMAL,
+			&rc,
+			NULL);
+	}
+	else
 	{
 		::DrawFrameControl(hdc, &rc, DFC_BUTTON, DFCS_BUTTONCHECK | DFCS_FLAT | DFCS_CHECKED | 
 			(fUseColorKey? 0 : /*SRC DFCS_TRANSPARENT SRC*/0));
@@ -1135,9 +1151,10 @@ HIMAGELIST CreateCheckBoxImagelist(HIMAGELIST himl, BOOL fTree, BOOL fUseColorKe
 // COMMENT: {9/8/2004 8:40:16 PM}        ImageList_ReplaceIcon(himl, nImages-1, hIcon);
 // COMMENT: {9/8/2004 8:40:16 PM}    }
 
-	//{{
-	::CloseThemeData(hTheme);
-	//}}
+	if (hTheme)
+	{
+        ::CloseThemeData(hTheme);
+	}
 
 	::DeleteDC(hdc);
 	::DeleteObject( hbm );
@@ -1150,14 +1167,17 @@ int CPropertyTreeControlBar::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (CSizingControlBarCFVS7::OnCreate(lpCreateStruct) == -1)
 		return -1;
 
-	if (!m_wndTree.Create(WS_CHILD|WS_VISIBLE|
+	if (!this->m_wndTree.Create(WS_CHILD|WS_VISIBLE|
 		TVS_HASLINES|TVS_HASBUTTONS|TVS_LINESATROOT|TVS_SHOWSELALWAYS,
 		CRect(0, 0, 0, 0), this, IDC_PROPERTY_TREE))
 	{
 		TRACE0("Failed to create instant bar child\n");
 		return -1;		// fail to create
 	}
-	m_wndTree.ModifyStyleEx(0, WS_EX_CLIENTEDGE);
+	this->m_wndTree.ModifyStyleEx(0, WS_EX_CLIENTEDGE);
+	this->m_OleDropTarget.Register(&this->m_wndTree);
+	this->m_OleDropTarget.SetHandler(this);
+
 
 // COMMENT: {4/6/2005 6:49:11 PM}	// setup image list
 // COMMENT: {4/6/2005 6:49:11 PM}	//
@@ -1176,6 +1196,11 @@ int CPropertyTreeControlBar::OnCreate(LPCREATESTRUCT lpCreateStruct)
 // COMMENT: {4/6/2005 6:49:14 PM}#endif
 
 	this->m_wndTree.SetImageList(this->m_pImageList, LVSIL_STATE);
+	//{{TESTING
+// COMMENT: {10/18/2005 11:09:43 PM}	CImageList* ImageList = new CImageList();
+// COMMENT: {10/18/2005 11:09:43 PM}	ImageList->Create(IDB_NULL_TREE, 16, 0, RGB(255,0,255));
+// COMMENT: {10/18/2005 11:09:43 PM}	this->m_wndTree.SetImageList(ImageList, TVSIL_NORMAL);
+	//}}TESTING
 
 	
 	// bring the tooltips to front
@@ -2245,3 +2270,452 @@ void CPropertyTreeControlBar::ClearSelection(void)
 {
 	this->SelectWithoutNotification(0);
 }
+
+bool CPropertyTreeControlBar::IsNodeDraggable(CTreeCtrlNode dragNode, COleDataSource &oleDataSource)
+{
+	std::ostringstream oss;
+
+	if (dragNode.GetParent() == this->m_nodeMedia)
+	{
+		if (dragNode.GetData())
+		{
+			if (CMediaZoneActor* pZone = CMediaZoneActor::SafeDownCast((vtkObject*)dragNode.GetData()))
+			{
+// COMMENT: {10/20/2005 6:49:41 PM}				if (!pZone->GetDefault())
+				{
+					CGridElt elt = pZone->GetGridElt();
+					oss << "MEDIA\n";
+					oss << elt;
+					oss << "\n";
+
+					std::string s = oss.str();
+					HGLOBAL hGlobal = ::GlobalAlloc(GMEM_MOVEABLE, s.length() + 1);
+					LPTSTR pData = (LPTSTR)::GlobalLock(hGlobal);
+
+					::lstrcpy(pData, s.c_str());
+					::GlobalUnlock(hGlobal);
+
+					oleDataSource.CacheGlobalData(this->m_cfPID, hGlobal);
+					oleDataSource.CacheGlobalData(CF_TEXT, hGlobal);
+
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+
+bool CPropertyTreeControlBar::IsNodeDroppable(CTreeCtrlNode dropNode)
+{
+	if (!this->m_dragNode) return false;
+	return true;
+
+// COMMENT: {10/20/2005 9:21:18 PM}	CTreeCtrlNode parent = this->m_dragNode.GetParent();
+// COMMENT: {10/20/2005 9:21:18 PM}	if (dropNode.IsNodeDescendant(parent))
+// COMMENT: {10/20/2005 9:21:18 PM}	{
+// COMMENT: {10/20/2005 9:21:18 PM}		if (dragNode.GetData())
+// COMMENT: {10/20/2005 9:21:18 PM}		{
+// COMMENT: {10/20/2005 9:21:18 PM}			if (CMediaZoneActor* pZone = CMediaZoneActor::SafeDownCast((vtkObject*)dragNode.GetData()))
+// COMMENT: {10/20/2005 9:21:18 PM}			{
+// COMMENT: {10/20/2005 9:21:18 PM}// COMMENT: {10/20/2005 6:49:41 PM}				if (!pZone->GetDefault())
+// COMMENT: {10/20/2005 9:21:18 PM}				{
+// COMMENT: {10/20/2005 9:21:18 PM}					CGridElt elt = pZone->GetGridElt();
+// COMMENT: {10/20/2005 9:21:18 PM}					oss << "MEDIA\n";
+// COMMENT: {10/20/2005 9:21:18 PM}					oss << elt;
+// COMMENT: {10/20/2005 9:21:18 PM}					oss << "\n";
+// COMMENT: {10/20/2005 9:21:18 PM}
+// COMMENT: {10/20/2005 9:21:18 PM}					std::string s = oss.str();
+// COMMENT: {10/20/2005 9:21:18 PM}					HGLOBAL hGlobal = ::GlobalAlloc(GMEM_MOVEABLE, s.length() + 1);
+// COMMENT: {10/20/2005 9:21:18 PM}					LPTSTR pData = (LPTSTR)::GlobalLock(hGlobal);
+// COMMENT: {10/20/2005 9:21:18 PM}
+// COMMENT: {10/20/2005 9:21:18 PM}					::lstrcpy(pData, s.c_str());
+// COMMENT: {10/20/2005 9:21:18 PM}					::GlobalUnlock(hGlobal);
+// COMMENT: {10/20/2005 9:21:18 PM}
+// COMMENT: {10/20/2005 9:21:18 PM}					oleDataSource.CacheGlobalData(this->m_cfPID, hGlobal);
+// COMMENT: {10/20/2005 9:21:18 PM}					oleDataSource.CacheGlobalData(CF_TEXT, hGlobal);
+// COMMENT: {10/20/2005 9:21:18 PM}
+// COMMENT: {10/20/2005 9:21:18 PM}					return true;
+// COMMENT: {10/20/2005 9:21:18 PM}				}
+// COMMENT: {10/20/2005 9:21:18 PM}			}
+// COMMENT: {10/20/2005 9:21:18 PM}		}
+// COMMENT: {10/20/2005 9:21:18 PM}	}
+// COMMENT: {10/20/2005 9:21:18 PM}	return false;
+}
+
+void CPropertyTreeControlBar::OnBeginDrag(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	TRACE("OnBeginDrag\n");
+
+	NMTREEVIEW* pNMTreeView = (NMTREEVIEW*)pNMHDR;
+
+	CTreeCtrlNode dragNode(pNMTreeView->itemNew.hItem, &this->m_wndTree);
+	dragNode.Select();
+
+	COleDataSource oleDataSource;
+
+	if (!this->IsNodeDraggable(dragNode, oleDataSource))
+	{
+		return;
+	}
+
+	this->m_dragNode = dragNode;
+
+	DROPEFFECT dwDropEffect = oleDataSource.DoDragDrop(DROPEFFECT_MOVE);
+
+	if ((dwDropEffect & DROPEFFECT_MOVE) == DROPEFFECT_MOVE)
+	{
+		// see PasteString
+		// remove the node being dragged ???
+	}
+	else
+	{
+		TRACE("WARNING: Unexpected DropEffect\n");
+	}
+
+	this->m_dragNode = CTreeCtrlNode();
+	this->m_wndTree.SetInsertMark(0);
+
+}
+
+DROPEFFECT CPropertyTreeControlBar::OnDragEnter(CWnd* pWnd, COleDataObject* pDataObject, DWORD dwKeyState, CPoint point)
+{
+	TRACE("CPropertyTreeControlBar::OnDragEnter\n");
+	ASSERT_VALID(this);
+
+	if (pDataObject->IsDataAvailable(this->m_cfPID) == TRUE)
+	{
+		return DROPEFFECT_MOVE;
+	}
+
+	return DROPEFFECT_NONE;
+
+	/***
+	return COleDropTarget::OnDragEnter(pWnd, pDataObject, dwKeyState, point);
+
+	if (!pWnd->IsKindOf(RUNTIME_CLASS(CView)))
+		return DROPEFFECT_NONE;
+
+	// default delegates to view
+	CView* pView = (CView*)pWnd;
+	ASSERT_VALID(pView);
+	return pView->OnDragEnter(pDataObject, dwKeyState, point);
+	***/
+}
+
+DROPEFFECT CPropertyTreeControlBar::OnDragOver(CWnd* pWnd, COleDataObject* pDataObject, DWORD dwKeyState, CPoint point)
+{
+	TRACE("CPropertyTreeControlBar::OnDragOver\n");
+	ASSERT_VALID(this);
+
+	if (pDataObject->IsDataAvailable(this->m_cfPID) == TRUE)
+	{
+		bool bHasDefault = false;
+		CTreeCtrlNode parentNode = this->m_dragNode.GetParent();
+		if (parentNode == this->GetMediaNode())
+		{
+			bHasDefault = true;
+		}
+
+		CTreeCtrlNode hitNode = this->m_wndTree.HitTest(point);
+		if ( hitNode && hitNode.IsNodeAncestor(parentNode) && (!bHasDefault || hitNode != parentNode) )
+		{
+			if (hitNode == parentNode)
+			{
+				// drop location will be the first position under the heading
+				//
+				ASSERT(!bHasDefault);
+				this->m_wndTree.SetInsertMark(hitNode);
+			}
+			else if (hitNode.GetParent() == parentNode)
+			{
+// COMMENT: {10/20/2005 10:25:28 PM}				// the hitNode is a sibling (or is) of the dragNode
+// COMMENT: {10/20/2005 10:25:28 PM}				//
+// COMMENT: {10/20/2005 10:25:28 PM}				if ((hitNode.GetState(TVIS_EXPANDED) & TVIS_EXPANDED) != 0)
+// COMMENT: {10/20/2005 10:25:28 PM}				{
+// COMMENT: {10/20/2005 10:25:28 PM}					// find last visible node
+// COMMENT: {10/20/2005 10:25:28 PM}					//
+// COMMENT: {10/20/2005 10:25:28 PM}					CTreeCtrlNode last_visible = hitNode.GetLastChild();
+// COMMENT: {10/20/2005 10:25:28 PM}					while (last_visible.HasChildren() && (last_visible.GetState(TVIS_EXPANDED) & TVIS_EXPANDED) != 0)
+// COMMENT: {10/20/2005 10:25:28 PM}					{
+// COMMENT: {10/20/2005 10:25:28 PM}						last_visible = last_visible.GetLastChild();
+// COMMENT: {10/20/2005 10:25:28 PM}					}
+// COMMENT: {10/20/2005 10:25:28 PM}					ASSERT(last_visible);
+// COMMENT: {10/20/2005 10:25:28 PM}					this->m_wndTree.SetInsertMark(last_visible);
+// COMMENT: {10/20/2005 10:25:28 PM}				}
+// COMMENT: {10/20/2005 10:25:28 PM}				else
+// COMMENT: {10/20/2005 10:25:28 PM}				{
+// COMMENT: {10/20/2005 10:25:28 PM}					// this->m_wndTree.SetInsertMark(hitNode, hitNode != this->m_dragNode);
+// COMMENT: {10/20/2005 10:25:28 PM}					this->m_wndTree.SetInsertMark(hitNode);
+// COMMENT: {10/20/2005 10:25:28 PM}				}
+
+				// the hitNode is a descendant of a sibling of the dragNode
+				//
+				CTreeCtrlNode sibling = hitNode;
+				while (sibling)
+				{
+					if (sibling.GetParent() == parentNode) break;
+					sibling = sibling.GetParent();
+				}
+				ASSERT(sibling);
+
+				// find last visible node
+				//
+				CTreeCtrlNode last_visible = sibling;
+				while (last_visible.HasChildren() && (last_visible.GetState(TVIS_EXPANDED) & TVIS_EXPANDED) != 0)
+				{
+					last_visible = last_visible.GetLastChild();
+				}
+				ASSERT(last_visible);
+				this->m_wndTree.SetInsertMark(last_visible);
+
+			}
+			else
+			{
+				// the hitNode is a descendant of a sibling of the dragNode
+				//
+				CTreeCtrlNode sibling = hitNode;
+				while (sibling)
+				{
+					if (sibling.GetParent() == parentNode) break;
+					sibling = sibling.GetParent();
+				}
+				ASSERT(sibling);
+
+				// find last visible node
+				//
+				CTreeCtrlNode last_visible = sibling;
+				while (last_visible.HasChildren() && (last_visible.GetState(TVIS_EXPANDED) & TVIS_EXPANDED) != 0)
+				{
+					last_visible = last_visible.GetLastChild();
+				}
+				ASSERT(last_visible);
+				this->m_wndTree.SetInsertMark(last_visible);
+
+// COMMENT: {10/20/2005 10:31:20 PM}				// the hitNode is a descendant of a sibling of the dragNode
+// COMMENT: {10/20/2005 10:31:20 PM}				//
+// COMMENT: {10/20/2005 10:31:20 PM}				CTreeCtrlNode sibling = hitNode.GetParent();
+// COMMENT: {10/20/2005 10:31:20 PM}				while (sibling)
+// COMMENT: {10/20/2005 10:31:20 PM}				{
+// COMMENT: {10/20/2005 10:31:20 PM}					if (sibling.GetParent() == parentNode) break;
+// COMMENT: {10/20/2005 10:31:20 PM}					sibling = sibling.GetParent();
+// COMMENT: {10/20/2005 10:31:20 PM}				}
+// COMMENT: {10/20/2005 10:31:20 PM}				ASSERT(sibling);
+// COMMENT: {10/20/2005 10:31:20 PM}
+// COMMENT: {10/20/2005 10:31:20 PM}				// find last visible node
+// COMMENT: {10/20/2005 10:31:20 PM}				//
+// COMMENT: {10/20/2005 10:31:20 PM}				CTreeCtrlNode last_visible = sibling.GetLastChild();
+// COMMENT: {10/20/2005 10:31:20 PM}				while (last_visible.HasChildren() && (last_visible.GetState(TVIS_EXPANDED) & TVIS_EXPANDED) != 0)
+// COMMENT: {10/20/2005 10:31:20 PM}				{
+// COMMENT: {10/20/2005 10:31:20 PM}					last_visible = last_visible.GetLastChild();
+// COMMENT: {10/20/2005 10:31:20 PM}				}
+// COMMENT: {10/20/2005 10:31:20 PM}				ASSERT(last_visible);
+// COMMENT: {10/20/2005 10:31:20 PM}				this->m_wndTree.SetInsertMark(last_visible);
+			}
+			return DROPEFFECT_MOVE;
+		}
+		else
+		{
+			// erase insertion mark
+			//
+			this->m_wndTree.SetInsertMark(0);
+		}
+	}
+	return DROPEFFECT_NONE;
+
+
+
+// COMMENT: {10/20/2005 9:05:00 PM}	if (pDataObject->IsDataAvailable(this->m_cfPID) == TRUE)
+// COMMENT: {10/20/2005 9:05:00 PM}	{
+// COMMENT: {10/20/2005 9:05:00 PM}		if (this->m_dragNode.IsNodeAncestor(this->GetMediaNode()))
+// COMMENT: {10/20/2005 9:05:00 PM}		{
+// COMMENT: {10/20/2005 9:05:00 PM}			// a media node is being dragged
+// COMMENT: {10/20/2005 9:05:00 PM}			//
+// COMMENT: {10/20/2005 9:05:00 PM}			CTreeCtrlNode hitNode = this->m_wndTree.HitTest(point);
+// COMMENT: {10/20/2005 9:05:00 PM}			if (hitNode && hitNode.IsNodeAncestor(this->GetMediaNode()) /***ALLOW DEFAULT && hitNode != this->GetMediaNode() ALLOW DEFAULT***/)
+// COMMENT: {10/20/2005 9:05:00 PM}			{
+// COMMENT: {10/20/2005 9:05:00 PM}				if (hitNode.GetParent() == this->GetMediaNode())
+// COMMENT: {10/20/2005 9:05:00 PM}				{
+// COMMENT: {10/20/2005 9:05:00 PM}					if ((hitNode.GetState(TVIS_EXPANDED) & TVIS_EXPANDED) != 0)
+// COMMENT: {10/20/2005 9:05:00 PM}					{
+// COMMENT: {10/20/2005 9:05:00 PM}						int count = hitNode.GetChildCount();
+// COMMENT: {10/20/2005 9:05:00 PM}						if (count)
+// COMMENT: {10/20/2005 9:05:00 PM}						{
+// COMMENT: {10/20/2005 9:05:00 PM}							CTreeCtrlNode last_child = hitNode.GetChildAt(count - 1);
+// COMMENT: {10/20/2005 9:05:00 PM}							ASSERT(last_child);
+// COMMENT: {10/20/2005 9:05:00 PM}							this->m_wndTree.SetInsertMark(last_child);
+// COMMENT: {10/20/2005 9:05:00 PM}						}
+// COMMENT: {10/20/2005 9:05:00 PM}					}
+// COMMENT: {10/20/2005 9:05:00 PM}					else
+// COMMENT: {10/20/2005 9:05:00 PM}					{
+// COMMENT: {10/20/2005 9:05:00 PM}						this->m_wndTree.SetInsertMark(hitNode, hitNode != this->m_dragNode);
+// COMMENT: {10/20/2005 9:05:00 PM}					}
+// COMMENT: {10/20/2005 9:05:00 PM}				}
+// COMMENT: {10/20/2005 9:05:00 PM}				//{{ ALLOW DEFAULT
+// COMMENT: {10/20/2005 9:05:00 PM}				else if(hitNode == this->GetMediaNode())
+// COMMENT: {10/20/2005 9:05:00 PM}				{
+// COMMENT: {10/20/2005 9:05:00 PM}					this->m_wndTree.SetInsertMark(hitNode);
+// COMMENT: {10/20/2005 9:05:00 PM}				}
+// COMMENT: {10/20/2005 9:05:00 PM}				//}} ALLOW DEFAULT
+// COMMENT: {10/20/2005 9:05:00 PM}				else
+// COMMENT: {10/20/2005 9:05:00 PM}				{
+// COMMENT: {10/20/2005 9:05:00 PM}					int count = hitNode.GetParent().GetChildCount();
+// COMMENT: {10/20/2005 9:05:00 PM}					if (count)
+// COMMENT: {10/20/2005 9:05:00 PM}					{
+// COMMENT: {10/20/2005 9:05:00 PM}						CTreeCtrlNode last_child = hitNode.GetParent().GetChildAt(count - 1);
+// COMMENT: {10/20/2005 9:05:00 PM}						ASSERT(last_child);
+// COMMENT: {10/20/2005 9:05:00 PM}						this->m_wndTree.SetInsertMark(last_child);
+// COMMENT: {10/20/2005 9:05:00 PM}					}
+// COMMENT: {10/20/2005 9:05:00 PM}					else
+// COMMENT: {10/20/2005 9:05:00 PM}					{
+// COMMENT: {10/20/2005 9:05:00 PM}						// check this--\/
+// COMMENT: {10/20/2005 9:05:00 PM}						this->m_wndTree.SetInsertMark(hitNode.GetParent(), hitNode.GetParent() != this->m_dragNode);
+// COMMENT: {10/20/2005 9:05:00 PM}					}
+// COMMENT: {10/20/2005 9:05:00 PM}				}
+// COMMENT: {10/20/2005 9:05:00 PM}				return DROPEFFECT_MOVE;
+// COMMENT: {10/20/2005 9:05:00 PM}			}
+// COMMENT: {10/20/2005 9:05:00 PM}			else
+// COMMENT: {10/20/2005 9:05:00 PM}			{
+// COMMENT: {10/20/2005 9:05:00 PM}				this->m_wndTree.SetInsertMark(0);
+// COMMENT: {10/20/2005 9:05:00 PM}				return DROPEFFECT_NONE;
+// COMMENT: {10/20/2005 9:05:00 PM}			}
+// COMMENT: {10/20/2005 9:05:00 PM}		}
+// COMMENT: {10/20/2005 9:05:00 PM}	}
+// COMMENT: {10/20/2005 9:05:00 PM}	return DROPEFFECT_NONE;
+
+	/***
+	return COleDropTarget::OnDragOver(pWnd, pDataObject, dwKeyState, point);
+
+	if (!pWnd->IsKindOf(RUNTIME_CLASS(CView)))
+		return DROPEFFECT_NONE;
+
+	// default delegates to view
+	CView* pView = (CView*)pWnd;
+	ASSERT_VALID(pView);
+	return pView->OnDragOver(pDataObject, dwKeyState, point);
+	***/
+}
+
+BOOL CPropertyTreeControlBar::OnDrop(CWnd* pWnd, COleDataObject* pDataObject, DROPEFFECT dropEffect, CPoint point)
+{
+	TRACE("CPropertyTreeControlBar::OnDrop\n");
+
+	if (pDataObject->IsDataAvailable(this->m_cfPID) == TRUE)
+	{
+		CTreeCtrlNode hitNode = this->m_wndTree.HitTest(point);
+		CTreeCtrlNode parentNode = this->m_dragNode.GetParent();
+		ASSERT(parentNode == this->GetMediaNode());
+		if (hitNode && hitNode.IsNodeAncestor(parentNode))
+		{
+			CTreeCtrlNode dropNode = hitNode;
+			if (hitNode == parentNode)
+			{
+				dropNode = CTreeCtrlNode(TVI_FIRST, this->GetTreeCtrlEx());
+			}
+			else
+			{
+				dropNode = hitNode;
+				while (dropNode.GetParent() != parentNode)
+				{
+					dropNode = dropNode.GetParent();
+				}
+			}
+			if (dropNode && dropNode != this->m_dragNode && this->m_dragNode.GetPrevSibling() != dropNode)
+			{
+				ASSERT(dropNode == TVI_FIRST || dropNode.GetParent() == parentNode);
+				if (CZoneActor* pZone = CZoneActor::SafeDownCast((vtkObject*)this->m_dragNode.GetData()))
+				{
+					if (CWPhastDoc* pDoc = this->GetDocument())
+					{
+						CAction* pAction = new CDragDropAction(this, this->m_dragNode, dropNode);
+						if (pAction)
+						{
+							pDoc->Execute(pAction);
+						}
+					}
+				}
+			}
+		}
+	}
+
+
+// COMMENT: {10/20/2005 8:45:13 PM}	if (pDataObject->IsDataAvailable(this->m_cfPID) == TRUE)
+// COMMENT: {10/20/2005 8:45:13 PM}	{
+// COMMENT: {10/20/2005 8:45:13 PM}		CTreeCtrlNode hitNode = this->m_wndTree.HitTest(point);
+// COMMENT: {10/20/2005 8:45:13 PM}		CTreeCtrlNode parentNode = this->m_dragNode.GetParent();
+// COMMENT: {10/20/2005 8:45:13 PM}		if (hitNode && hitNode.IsNodeAncestor(this->GetMediaNode()) /*** && hitNode != this->GetMediaNode() ***/ )
+// COMMENT: {10/20/2005 8:45:13 PM}		{
+// COMMENT: {10/20/2005 8:45:13 PM}			CTreeCtrlNode dropNode = hitNode;
+// COMMENT: {10/20/2005 8:45:13 PM}			//{{
+// COMMENT: {10/20/2005 8:45:13 PM}			if (hitNode == this->GetMediaNode())
+// COMMENT: {10/20/2005 8:45:13 PM}			{
+// COMMENT: {10/20/2005 8:45:13 PM}				dropNode = CTreeCtrlNode(TVI_FIRST, this->GetTreeCtrlEx());
+// COMMENT: {10/20/2005 8:45:13 PM}			}
+// COMMENT: {10/20/2005 8:45:13 PM}			else
+// COMMENT: {10/20/2005 8:45:13 PM}			//}}
+// COMMENT: {10/20/2005 8:45:13 PM}			{
+// COMMENT: {10/20/2005 8:45:13 PM}				dropNode = hitNode;
+// COMMENT: {10/20/2005 8:45:13 PM}				while (dropNode.GetParent() != this->GetMediaNode())
+// COMMENT: {10/20/2005 8:45:13 PM}				{
+// COMMENT: {10/20/2005 8:45:13 PM}					dropNode = dropNode.GetParent();
+// COMMENT: {10/20/2005 8:45:13 PM}				}
+// COMMENT: {10/20/2005 8:45:13 PM}			}
+// COMMENT: {10/20/2005 8:45:13 PM}			if (dropNode /*** && dropNode.GetParent() == this->GetMediaNode() ***/ && dropNode != this->m_dragNode)
+// COMMENT: {10/20/2005 8:45:13 PM}			{
+// COMMENT: {10/20/2005 8:45:13 PM}				ASSERT(dropNode == TVI_FIRST || dropNode.GetParent() == this->GetMediaNode());
+// COMMENT: {10/20/2005 8:45:13 PM}
+// COMMENT: {10/20/2005 8:45:13 PM}				if (CZoneActor* pZone = CZoneActor::SafeDownCast((vtkObject*)this->m_dragNode.GetData()))
+// COMMENT: {10/20/2005 8:45:13 PM}				{
+// COMMENT: {10/20/2005 8:45:13 PM}					//{{TESTING
+// COMMENT: {10/20/2005 8:45:13 PM}					if (this->m_dragNode.GetPrevSibling() == dropNode) return DROPEFFECT_NONE; // NO-OP
+// COMMENT: {10/20/2005 8:45:13 PM}					//}}TESTING
+// COMMENT: {10/20/2005 8:45:13 PM}					if (CWPhastDoc* pDoc = this->GetDocument())
+// COMMENT: {10/20/2005 8:45:13 PM}					{
+// COMMENT: {10/20/2005 8:45:13 PM}						CAction* pAction = new CDragDropAction(this, this->m_dragNode, dropNode);
+// COMMENT: {10/20/2005 8:45:13 PM}						if (pAction)
+// COMMENT: {10/20/2005 8:45:13 PM}						{
+// COMMENT: {10/20/2005 8:45:13 PM}							pDoc->Execute(pAction);
+// COMMENT: {10/20/2005 8:45:13 PM}						}
+// COMMENT: {10/20/2005 8:45:13 PM}					}
+// COMMENT: {10/20/2005 8:45:13 PM}				}
+// COMMENT: {10/20/2005 8:45:13 PM}			}
+// COMMENT: {10/20/2005 8:45:13 PM}		}
+// COMMENT: {10/20/2005 8:45:13 PM}	}
+	//}}
+
+	return DROPEFFECT_NONE;
+
+	/***
+	return COleDropTarget::OnDrop(pWnd, pDataObject, dropEffect, point);
+
+	if (!pWnd->IsKindOf(RUNTIME_CLASS(CView)))
+		return DROPEFFECT_NONE;
+
+	// default delegates to view
+	CView* pView = (CView*)pWnd;
+	ASSERT_VALID(pView);
+	return pView->OnDrop(pDataObject, dropEffect, point);
+	***/
+}
+
+void CPropertyTreeControlBar::OnDragLeave(CWnd* pWnd)
+{
+	TRACE("CPropertyTreeControlBar::OnDragLeave\n");
+
+// COMMENT: {10/19/2005 8:10:43 PM}	this->m_wndTree.SetInsertMark(0);
+// COMMENT: {10/19/2005 8:10:43 PM}	this->m_dragNode = CTreeCtrlNode();
+
+	/***
+	COleDropTarget::OnDragLeave(pWnd);
+
+	if (!pWnd->IsKindOf(RUNTIME_CLASS(CView)))
+		return;
+
+	// default delegates to view
+	CView* pView = (CView*)pWnd;
+	ASSERT_VALID(pView);
+	pView->OnDragLeave();
+	return;
+	***/
+}
+

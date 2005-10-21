@@ -7,8 +7,7 @@ class CPropertyTreeControlBar;
 class CUnits;
 class CWPhastDoc;
 
-class CICZoneActor :
-	public CZoneActor
+class CICZoneActor : public CZoneActor
 {
 public:
 	vtkTypeRevisionMacro(CICZoneActor,CZoneActor);
@@ -21,7 +20,7 @@ public:
 		IC_CHEM
 	};
 
-	virtual void Insert(CPropertyTreeControlBar* pTreeControlBar);
+	virtual void Insert(CPropertyTreeControlBar* pTreeControlBar, HTREEITEM hInsertAfter = TVI_LAST);
 	virtual void InsertAt(CTreeCtrl* pTreeCtrl, HTREEITEM hParent, HTREEITEM hInsertAfter);
 	virtual void Update(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent);
 	virtual void Edit(CTreeCtrl* pTreeCtrl);

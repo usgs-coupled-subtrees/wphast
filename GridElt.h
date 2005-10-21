@@ -34,7 +34,10 @@ public:
 	void Dump(CDumpContext& dc)const;
 #endif
 	void Serialize(bool bStoring, hid_t loc_id);
+	void Serialize(CArchive& ar);
+
 	friend std::ostream& operator<< (std::ostream &os, const CGridElt &a);
+
 private:
 	void InternalCopy(const grid_elt& src);
 	void InternalDelete(void);

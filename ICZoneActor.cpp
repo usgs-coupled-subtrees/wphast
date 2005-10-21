@@ -167,11 +167,11 @@ void CICZoneActor::Serialize(bool bStoring, hid_t loc_id, const CUnits& units)
 	//}
 }
 
-void CICZoneActor::Insert(CPropertyTreeControlBar* pTreeControlBar)
+void CICZoneActor::Insert(CPropertyTreeControlBar* pTreeControlBar, HTREEITEM hInsertAfter)
 {
 	CTreeCtrl* pTreeCtrl = pTreeControlBar->GetTreeCtrl();
 	HTREEITEM htiIC = pTreeControlBar->GetICNode();
-	this->InsertAt(pTreeCtrl, htiIC, TVI_LAST);
+	this->InsertAt(pTreeCtrl, htiIC, hInsertAfter);
 	//{{HACK
 	CTreeCtrlNode node(this->m_hti, pTreeControlBar->GetTreeCtrlEx());
 	pTreeControlBar->SetNodeCheck(node, BST_CHECKED);

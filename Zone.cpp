@@ -86,6 +86,88 @@ void CZone::Serialize(bool bStoring, hid_t loc_id)
 	}
 }
 
+void CZone::Serialize(CArchive& ar)
+{
+	static const char szZone[] = "zone";
+	static int version = 1;
+
+	CString type;
+	int ver;
+
+	if (ar.IsStoring())
+	{
+		// store type as string
+		//
+		type = szZone;
+		ar << type;
+
+		// store version in case changes need to be made
+		ar << version;
+	}
+	else
+	{
+		// read type as string
+		//
+		ar >> type;
+		ASSERT(type.Compare(szZone) == 0);
+
+		// read version in case changes need to be made
+		ar >> ver;
+		ASSERT(ver == version);
+	}
+
+
+	if (ar.IsStoring())
+	{
+		// zone_defined
+        ASSERT(this->zone_defined == TRUE);
+		ar << this->zone_defined;
+
+		// x1
+		ar << this->x1;
+
+		// y1
+		ar << this->y1;
+
+		// z1
+		ar << this->z1;
+
+		// x2
+		ar << this->x2;
+
+		// y2
+		ar << this->y2;
+
+		// z2
+		ar << this->z2;
+	}
+	else
+	{
+		// zone_defined
+        ASSERT(this->zone_defined == TRUE);
+		ar >> this->zone_defined;
+
+		// x1
+		ar >> this->x1;
+
+		// y1
+		ar >> this->y1;
+
+		// z1
+		ar >> this->z1;
+
+		// x2
+		ar >> this->x2;
+
+		// y2
+		ar >> this->y2;
+
+		// z2
+		ar >> this->z2;
+	}
+}
+
+
 #ifdef _DEBUG
 void CZone::AssertValid() const
 {

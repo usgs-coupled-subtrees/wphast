@@ -36,7 +36,7 @@ void SrcTimeToFileTime(const CTime& time, LPFILETIME pFileTime)
 }
 
 // Modified from CMirrorFile::Open 
-// BUGBUG: This obliterates hard links no NTFS
+// BUGBUG: This obliterates hard links on NTFS
 BOOL CHDFMirrorFile::Open(LPCTSTR lpszFileName, UINT nOpenFlags,
 	CFileException* pError)
 {

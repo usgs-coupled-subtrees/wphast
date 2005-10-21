@@ -87,6 +87,7 @@ IDB_EYES_TREE           BITMAP                  "res\\eyes_tree.bmp"
 IDB_EYES_TREE2          BITMAP                  "res\\eyes_tree2.bmp"
 IDB_EYES_TREE3          BITMAP                  "res\\eyes_tree3.bmp"
 IDB_PLUS_MERGE          BITMAP                  "res\\plusmrge.bmp"
+IDB_NULL_TREE           BITMAP                  "res\\null_tree.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //

@@ -64,11 +64,11 @@ void CMediaZoneActor::Serialize(bool bStoring, hid_t loc_id, const CUnits& units
 	}
 }
 
-void CMediaZoneActor::Insert(CPropertyTreeControlBar* pTreeControlBar)
+void CMediaZoneActor::Insert(CPropertyTreeControlBar* pTreeControlBar, HTREEITEM hInsertAfter)
 {
 	CTreeCtrl* pTreeCtrl = pTreeControlBar->GetTreeCtrl();
 	HTREEITEM htiMedia = pTreeControlBar->GetMediaNode();
-	this->InsertAt(pTreeCtrl, htiMedia, TVI_LAST);
+	this->InsertAt(pTreeCtrl, htiMedia, hInsertAfter);
 	//{{HACK
 	CTreeCtrlNode node(this->m_hti, pTreeControlBar->GetTreeCtrlEx());
 	pTreeControlBar->SetNodeCheck(node, BST_CHECKED);
@@ -181,6 +181,19 @@ void CMediaZoneActor::Update(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent)
 	{
 		static_cast<Cproperty*>(this->m_grid_elt.alpha_vertical)->Insert(pTreeCtrl, htiParent, "vertical_dispersivity");
 	}
+
+#ifdef _DEBUG
+	//{{TEST DRAG DROP
+	HTREEITEM hLastItem = pTreeCtrl->GetChildItem(htiParent);
+	while (pTreeCtrl->GetNextSiblingItem(hLastItem))
+	{
+		hLastItem = pTreeCtrl->GetNextSiblingItem(hLastItem);
+	}
+	hLastItem = pTreeCtrl->InsertItem("TEST", hLastItem);
+	hLastItem = pTreeCtrl->InsertItem("TEST", hLastItem);
+	hLastItem = pTreeCtrl->InsertItem("TEST", hLastItem);
+	//}}TEST DRAG DROP
+#endif
 }
 
 void CMediaZoneActor::Edit(CTreeCtrl* pTreeCtrl)

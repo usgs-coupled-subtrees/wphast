@@ -31,10 +31,13 @@ public:
 	// operations
 	void Insert(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent, LPCTSTR heading)const;
 	void Serialize(bool bStoring, hid_t loc_id);
+	void Serialize(CArchive& ar);
 #ifdef _DEBUG
 	void AssertValid() const;
 	void Dump(CDumpContext& dc)const;
 #endif
+	static void Serial(CArchive& ar, const char *heading, property** prop);
+
 	static void SerializeCreate(const char *heading, Cproperty* prop, hid_t loc_id);
 	static void SerializeOpen(const char *heading, Cproperty** prop, hid_t loc_id);
 	static void CopyProperty(struct property** dest, const struct property* src);
@@ -68,6 +71,50 @@ inline void Cproperty::SerializeOpen(const char *heading, Cproperty** prop, hid_
 		::H5Gclose(group_id);
 	}
 }
+
+inline void Cproperty::Serial(CArchive& ar, const char *heading, property** prop)
+{
+	CString head;
+	BOOL defd;
+
+	if (ar.IsStoring())
+	{
+		head = heading;
+		ar << head;
+
+		if (*prop)
+		{
+			defd = TRUE;
+		}
+		else
+		{
+			defd = FALSE;
+		}
+		ar << defd;
+		if (defd)
+		{
+			static_cast<Cproperty*>(*prop)->Serialize(ar);
+		}
+	}
+	else
+	{
+		ar >> head;
+		ASSERT(head.Compare(heading) == 0);
+
+		ar >> defd;
+		if (defd)
+		{
+			if (*prop == 0) *prop = new Cproperty();
+			static_cast<Cproperty*>(*prop)->Serialize(ar);
+		}
+		else
+		{
+			//if (*prop) delete *prop;
+			*prop = 0;
+		}
+	}
+}
+
 
 inline void Cproperty::CopyProperty(struct property** dest, const struct property* src)
 {

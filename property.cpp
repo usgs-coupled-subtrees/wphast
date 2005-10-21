@@ -260,7 +260,8 @@ void Cproperty::Serialize(bool bStoring, hid_t loc_id)
 		ASSERT(status >= 0);
 
 
-		switch (this->type) {
+		switch (this->type)
+		{
 			case FIXED:
 				ASSERT(this->count_v == 1);
 				break;
@@ -288,6 +289,143 @@ void Cproperty::Serialize(bool bStoring, hid_t loc_id)
 		}
 	}
 }
+
+void Cproperty::Serialize(CArchive& ar)
+{
+	static const char szCproperty[] = "Cproperty";
+	static int version = 1;
+
+	CString typeName;
+	int ver;
+
+	// type and version header
+	//
+	if (ar.IsStoring())
+	{
+		// store type as string
+		//
+		typeName = szCproperty;
+		ar << typeName;
+
+		// store version in case changes need to be made
+		ar << version;
+	}
+	else
+	{
+		// read type as string
+		//
+		ar >> typeName;
+		ASSERT(typeName.Compare(szCproperty) == 0);
+
+		// read version in case changes need to be made
+		ar >> ver;
+		ASSERT(ver == version);
+	}
+
+	// type
+	//
+	if (ar.IsStoring())
+	{
+  		ASSERT(this->type == FIXED || this->type == LINEAR);
+		ar << this->type;
+	}
+	else
+	{
+		ar >> this->type;
+  		ASSERT(this->type == FIXED || this->type == LINEAR);
+	}
+
+	// count_v
+	//
+	if (ar.IsStoring())
+	{
+		ar << this->count_v;
+	}
+	else
+	{
+		ar >> this->count_v;
+	}
+
+	// v
+	//
+	if (ar.IsStoring())
+	{
+		for (int i = 0; i < this->count_v; ++i)
+		{
+			ar << this->v[i];
+		}
+	}
+	else
+	{
+		for (int i = 0; i < this->count_v; ++i)
+		{
+			ar >> this->v[i];
+		}
+	}
+
+	// coord
+	//
+	if (ar.IsStoring())
+	{
+		if (this->type == LINEAR)
+		{
+			ASSERT(this->coord == 'x' || this->coord == 'y' || this->coord == 'z');
+			ar << this->coord;
+		}
+	}
+	else
+	{
+		if (this->type == LINEAR)
+		{
+			ar >> this->coord;
+			ASSERT(this->coord == 'x' || this->coord == 'y' || this->coord == 'z');
+		}
+	}
+
+	// dist1 and dist2
+	//
+	if (ar.IsStoring())
+	{
+		if (this->type == LINEAR)
+		{
+			ar << this->dist1;
+			ar << this->dist2;
+		}
+	}
+	else
+	{
+		if (this->type == LINEAR)
+		{
+			ar >> this->dist1;
+			ar >> this->dist2;
+		}
+	}
+
+	// type and version footer
+	//
+	if (ar.IsStoring())
+	{
+		// store type as string
+		//
+		typeName = szCproperty;
+		ar << typeName;
+
+		// store version in case changes need to be made
+		ar << version;
+	}
+	else
+	{
+		// read type as string
+		//
+		ar >> typeName;
+		ASSERT(typeName.Compare(szCproperty) == 0);
+
+		// read version in case changes need to be made
+		ar >> ver;
+		ASSERT(ver == version);
+	}
+}
+
 
 void Cproperty::Insert(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent, LPCTSTR heading)const
 {

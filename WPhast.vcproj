@@ -451,6 +451,9 @@
 				RelativePath="DelayRedraw.cpp">
 			</File>
 			<File
+				RelativePath="DragDropAction.cpp">
+			</File>
+			<File
 				RelativePath="ETSLayoutPropertyPageXP.cpp">
 			</File>
 			<File
@@ -647,6 +650,9 @@
 			</File>
 			<File
 				RelativePath="PrintFreqPropertyPage.cpp">
+			</File>
+			<File
+				RelativePath="PropTreeOleDropTarget.cpp">
 			</File>
 			<File
 				RelativePath="PropertyTreeControlBar.cpp">
@@ -1052,6 +1058,9 @@
 				RelativePath="DelayRedraw.h">
 			</File>
 			<File
+				RelativePath="DragDropAction.h">
+			</File>
+			<File
 				RelativePath="ETSLayoutPropertyPageXP.h">
 			</File>
 			<File
@@ -1212,6 +1221,9 @@
 			</File>
 			<File
 				RelativePath="PrintFreqPropertyPage.h">
+			</File>
+			<File
+				RelativePath="PropTreeOleDropTarget.h">
 			</File>
 			<File
 				RelativePath="PropertyTreeControlBar.h">
@@ -1678,6 +1690,9 @@
 			</File>
 			<File
 				RelativePath="res\null.cur">
+			</File>
+			<File
+				RelativePath="res\null_tree.bmp">
 			</File>
 			<File
 				RelativePath="res\obj_scale.cur">
@@ -3887,15 +3902,15 @@
 			Name="Build Logs"
 			Filter="">
 			<File
-				RelativePath="cppunit\BuildLog.htm"
-				DeploymentContent="TRUE">
-			</File>
-			<File
 				RelativePath="Debug\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 			<File
 				RelativePath="Release\BuildLog.htm"
+				DeploymentContent="TRUE">
+			</File>
+			<File
+				RelativePath="cppunit\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 		</Filter>

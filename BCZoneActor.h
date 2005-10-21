@@ -13,7 +13,7 @@ public:
 	static CBCZoneActor *New();
 	static void Create(CWPhastDoc* pWPhastDoc, const CZone& zone, const CBC& bc);
 
-	virtual void Insert(CPropertyTreeControlBar* pTreeControlBar);
+	virtual void Insert(CPropertyTreeControlBar* pTreeControlBar, HTREEITEM hInsertAfter = TVI_LAST);
 	virtual void InsertAt(CTreeCtrl* pTreeCtrl, HTREEITEM hParent, HTREEITEM hInsertAfter);
 	virtual void Update(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent);
 	virtual void Edit(CTreeCtrl* pTreeCtrl);

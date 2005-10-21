@@ -130,3 +130,4 @@
 #include <vtkUnstructuredGrid.h>
 #include <vtkWin32OpenGLRenderWindow.h>
 #include <vtkWin32RenderWindowInteractor.h>
+#include <afxole.h>

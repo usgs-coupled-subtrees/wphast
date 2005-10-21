@@ -60,11 +60,11 @@ void CBCZoneActor::Create(CWPhastDoc* pWPhastDoc, const CZone& zone, const CBC& 
 	pWPhastDoc->Execute(pAction);
 }
 
-void CBCZoneActor::Insert(CPropertyTreeControlBar* pTreeControlBar)
+void CBCZoneActor::Insert(CPropertyTreeControlBar* pTreeControlBar, HTREEITEM hInsertAfter)
 {
 	CTreeCtrl* pTreeCtrl = pTreeControlBar->GetTreeCtrl();
 	HTREEITEM htiBC = pTreeControlBar->GetBCNode();
-	this->InsertAt(pTreeCtrl, htiBC, TVI_LAST);
+	this->InsertAt(pTreeCtrl, htiBC, hInsertAfter);
 
 	// set visible checkmark
 	CTreeCtrlNode node(this->m_hti, pTreeControlBar->GetTreeCtrlEx());

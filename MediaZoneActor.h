@@ -14,7 +14,8 @@ public:
 	static void Create(CWPhastDoc* pWPhastDoc, const CZone& zone, const CGridElt& gridElt);
 
 	virtual void InsertAt(CTreeCtrl* pTreeCtrl, HTREEITEM hParent, HTREEITEM hInsertAfter);
-	virtual void Insert(CPropertyTreeControlBar* pTreeControlBar);
+	virtual void Insert(CPropertyTreeControlBar* pTreeControlBar, HTREEITEM hInsertAfter);
+
 	virtual void Update(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent);
 	virtual void Edit(CTreeCtrl* pTreeCtrl);
 	virtual void Remove(CPropertyTreeControlBar* pTreeControlBar);

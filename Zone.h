@@ -30,6 +30,7 @@ public:
 	void Dump(CDumpContext& dc)const;
 #endif
 	void Serialize(bool bStoring, hid_t loc_id);
+	void Serialize(CArchive& ar);
 	friend std::ostream& operator<< (std::ostream &os, const CZone &a);
 protected:
 	void InternalCopy(const zone& src);

@@ -4,6 +4,8 @@
 
 
 #include "Tree.h"
+#include "PropTreeOleDropTarget.h"
+
 //#include "structs.h"
 class vtkObject;
 
@@ -57,7 +59,6 @@ protected:
 	CTreeCtrlEx     m_wndTree;
 	CImageList     *m_pImageList;
 
-
 	CTreeCtrlNode   m_nodeBC;
 	CTreeCtrlNode   m_nodeGrid;
 	CTreeCtrlNode   m_nodeIC;	
@@ -86,6 +87,7 @@ protected:
 	afx_msg void OnNMClk(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnNMDblClk(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnKeyDown(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnBeginDrag(NMHDR* pNMHDR, LRESULT* pResult);
 
 public:
 	CWPhastDoc* GetDocument(void)const;
@@ -158,4 +160,22 @@ public:
 	void SetGridActor(CGridActor* pGridActor);
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnContextMenu(CWnd* /*pWnd*/, CPoint /*point*/);
+
+protected:
+	friend CPropTreeOleDropTarget;
+	CPropTreeOleDropTarget m_OleDropTarget;
+	CTreeCtrlNode m_dragNode;
+// COMMENT: {10/20/2005 5:07:08 PM}	HTREEITEM m_hAfterCut;
+// COMMENT: {10/20/2005 5:07:08 PM}	HTREEITEM m_hAfterPaste;
+
+	CLIPFORMAT m_cfMedia;
+	CLIPFORMAT m_cfPID;
+
+	bool IsNodeDraggable(CTreeCtrlNode dragNode, COleDataSource &oleDataSource);
+	bool IsNodeDroppable(CTreeCtrlNode dropNode);
+
+	virtual DROPEFFECT OnDragEnter(CWnd* pWnd, COleDataObject* pDataObject, DWORD dwKeyState, CPoint point);
+	virtual DROPEFFECT OnDragOver(CWnd* pWnd, COleDataObject* pDataObject, DWORD dwKeyState, CPoint point);
+	virtual BOOL OnDrop(CWnd* pWnd, COleDataObject* pDataObject, DROPEFFECT dropEffect, CPoint point);
+	virtual void OnDragLeave(CWnd* pWnd);
 };

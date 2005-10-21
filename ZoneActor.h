@@ -47,7 +47,9 @@ public:
 	LPCTSTR GetName(void)const;
 
 	/// virtual void Insert(CTreeCtrl* pTreeCtrl, HTREEITEM htiGrid);
-	virtual void Insert(CPropertyTreeControlBar* pTreeControlBar) = 0;
+	///virtual void Insert(CPropertyTreeControlBar* pTreeControlBar) = 0;
+	virtual void Insert(CPropertyTreeControlBar* pTreeControlBar, HTREEITEM hInsertAfter = TVI_LAST) = 0;
+
 	virtual void Update(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent) = 0;  // I don't think this needs to be virtual
 	virtual void Edit(CTreeCtrl* pTreeCtrl) = 0;
 	virtual void InsertAt(CTreeCtrl* pTreeCtrl, HTREEITEM hParent, HTREEITEM hInsertAfter) = 0;

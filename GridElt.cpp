@@ -437,3 +437,86 @@ std::ostream& operator<< (std::ostream &os, const CGridElt &a)
 	}
 	return os;
 }
+
+void CGridElt::Serialize(CArchive& ar)
+{
+	static const char szCGridElt[] = "CGridElt";
+	static int version = 1;
+
+	CString type;
+	int ver;
+
+	// type and version header
+	//
+	if (ar.IsStoring())
+	{
+		// store type as string
+		//
+		type = szCGridElt;
+		ar << type;
+
+		// store version in case changes need to be made
+		ar << version;
+	}
+	else
+	{
+		// read type as string
+		//
+		ar >> type;
+		ASSERT(type.Compare(szCGridElt) == 0);
+
+		// read version in case changes need to be made
+		ar >> ver;
+		ASSERT(ver == version);
+	}
+
+	// zone
+	ASSERT(this->zone);
+	static_cast<CZone*>(this->zone)->Serialize(ar);
+
+
+	static const char szActive[]          = "active";
+	static const char szPorosity[]        = "porosity";
+	static const char szKx[]              = "kx";
+	static const char szKy[]              = "ky";
+	static const char szKz[]              = "kz";
+	static const char szStorage[]         = "storage";
+	static const char szAlphaLong[]       = "alpha_long";
+	static const char szAlphaHorizontal[] = "alpha_horizontal";
+	static const char szAlphaVertical[]   = "alpha_vertical";
+
+	Cproperty::Serial(ar, szActive,          &this->active);
+	Cproperty::Serial(ar, szPorosity,        &this->porosity);
+	Cproperty::Serial(ar, szKx,              &this->kx);
+	Cproperty::Serial(ar, szKy,              &this->ky);
+	Cproperty::Serial(ar, szKz,              &this->kz);
+	Cproperty::Serial(ar, szStorage,         &this->storage);
+	Cproperty::Serial(ar, szAlphaLong,       &this->alpha_long);
+	Cproperty::Serial(ar, szAlphaHorizontal, &this->alpha_horizontal);
+	Cproperty::Serial(ar, szAlphaVertical,   &this->alpha_vertical);
+
+	// type and version footer
+	//
+	if (ar.IsStoring())
+	{
+		// store type as string
+		//
+		type = szCGridElt;
+		ar << type;
+
+		// store version in case changes need to be made
+		ar << version;
+	}
+	else
+	{
+		// read type as string
+		//
+		ar >> type;
+		ASSERT(type.Compare(szCGridElt) == 0);
+
+		// read version in case changes need to be made
+		ar >> ver;
+		ASSERT(ver == version);
+	}
+}
+
