@@ -165,14 +165,11 @@ protected:
 	friend CPropTreeOleDropTarget;
 	CPropTreeOleDropTarget m_OleDropTarget;
 	CTreeCtrlNode m_dragNode;
-// COMMENT: {10/20/2005 5:07:08 PM}	HTREEITEM m_hAfterCut;
-// COMMENT: {10/20/2005 5:07:08 PM}	HTREEITEM m_hAfterPaste;
 
 	CLIPFORMAT m_cfMedia;
 	CLIPFORMAT m_cfPID;
 
 	bool IsNodeDraggable(CTreeCtrlNode dragNode, COleDataSource &oleDataSource);
-	bool IsNodeDroppable(CTreeCtrlNode dropNode);
 
 	virtual DROPEFFECT OnDragEnter(CWnd* pWnd, COleDataObject* pDataObject, DWORD dwKeyState, CPoint point);
 	virtual DROPEFFECT OnDragOver(CWnd* pWnd, COleDataObject* pDataObject, DWORD dwKeyState, CPoint point);
