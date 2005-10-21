@@ -11,7 +11,6 @@
 
 // CPropTreeOleDropTarget
 
-IMPLEMENT_DYNAMIC(CPropTreeOleDropTarget, COleDropTarget)
 CPropTreeOleDropTarget::CPropTreeOleDropTarget()
 : Handler(NULL)
 {

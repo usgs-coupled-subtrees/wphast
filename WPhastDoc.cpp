@@ -1238,13 +1238,30 @@ void CWPhastDoc::SerializeIC(bool bStoring, hid_t loc_id)
 		ASSERT(ic_id > 0);
 		if (ic_id > 0)
 		{
-			CTreeCtrlNode nodeIC = this->GetPropertyTreeControlBar()->GetICNode();
-			int nCount = nodeIC.GetChildCount();
+			int nCount;
 			std::list<LPCTSTR> listNames;
 			std::list<CICZoneActor*> listZones;
+
+			// get head zones
+			CTreeCtrlNode nodeICHead = this->GetPropertyTreeControlBar()->GetICHeadNode();
+			nCount = nodeICHead.GetChildCount();
 			for (int i = 0; i < nCount; ++i)
 			{
-				if (CICZoneActor *pZone = CICZoneActor::SafeDownCast((vtkObject*)nodeIC.GetChildAt(i).GetData()))
+				if (CICZoneActor *pZone = CICZoneActor::SafeDownCast((vtkObject*)nodeICHead.GetChildAt(i).GetData()))
+				{
+					listZones.push_back(pZone);
+					ASSERT(pZone->GetName());
+					listNames.push_back(pZone->GetSerialName());
+				}
+				else ASSERT(FALSE);
+			}
+
+			// get chem zones
+			CTreeCtrlNode nodeICChem = this->GetPropertyTreeControlBar()->GetICChemNode();
+			nCount = nodeICChem.GetChildCount();
+			for (int i = 0; i < nCount; ++i)
+			{
+				if (CICZoneActor *pZone = CICZoneActor::SafeDownCast((vtkObject*)nodeICChem.GetChildAt(i).GetData()))
 				{
 					listZones.push_back(pZone);
 					ASSERT(pZone->GetName());
@@ -2728,21 +2745,31 @@ BOOL CWPhastDoc::WriteTransDat(std::ostream& os)
 	}
 
 	// HEAD_IC 
-	CTreeCtrlNode nodeIC = this->GetPropertyTreeControlBar()->GetICNode();
-	nCount = nodeIC.GetChildCount();
-	for (int i = 0; i < nCount; ++i) {
-		if (CICZoneActor *pZone = CICZoneActor::SafeDownCast((vtkObject*)nodeIC.GetChildAt(i).GetData())) {
-			// TODO would be better to have CBCZoneActor write itself
-			switch (pZone->GetType())
+	CTreeCtrlNode nodeICHead = this->GetPropertyTreeControlBar()->GetICHeadNode();
+	nCount = nodeICHead.GetChildCount();
+	for (int i = 0; i < nCount; ++i)
+	{
+		if (CICZoneActor *pZone = CICZoneActor::SafeDownCast((vtkObject*)nodeICHead.GetChildAt(i).GetData()))
+		{
+			ASSERT(pZone->GetType() == CICZoneActor::IC_HEAD);
+			if (pZone->GetType() == CICZoneActor::IC_HEAD)
 			{
-			case CICZoneActor::IC_HEAD:
 				os << pZone->GetHeadIC();
-				break;
-			case CICZoneActor::IC_CHEM:
+			}
+		}
+	}
+
+	// CHEMISTRY_IC 
+	CTreeCtrlNode nodeICChem = this->GetPropertyTreeControlBar()->GetICChemNode();
+	nCount = nodeICChem.GetChildCount();
+	for (int i = 0; i < nCount; ++i)
+	{
+		if (CICZoneActor *pZone = CICZoneActor::SafeDownCast((vtkObject*)nodeICChem.GetChildAt(i).GetData()))
+		{
+			ASSERT(pZone->GetType() == CICZoneActor::IC_CHEM);
+			if (pZone->GetType() == CICZoneActor::IC_CHEM)
+			{
 				os << pZone->GetChemIC();
-				break;
-			default:
-				ASSERT(FALSE);
 			}
 		}
 	}
@@ -3713,11 +3740,22 @@ void CWPhastDoc::OnICZonesSelectAll()
 {
 	if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar())
 	{
-		CTreeCtrlNode node = pTree->GetICNode();
-		int nCount = node.GetChildCount();
+		int nCount;
+
+		// head
+		CTreeCtrlNode nodeICHead = pTree->GetICHeadNode();
+		nCount = nodeICHead.GetChildCount();
 		for (int i = 0; i < nCount; ++i)
 		{
-			pTree->SetNodeCheck(node.GetChildAt(i), BST_CHECKED);
+			pTree->SetNodeCheck(nodeICHead.GetChildAt(i), BST_CHECKED);
+		}
+
+		// chem
+		CTreeCtrlNode nodeICChem = pTree->GetICChemNode();
+		nCount = nodeICChem.GetChildCount();
+		for (int i = 0; i < nCount; ++i)
+		{
+			pTree->SetNodeCheck(nodeICChem.GetChildAt(i), BST_CHECKED);
 		}
 	}
 	this->UpdateAllViews(0);
@@ -3727,11 +3765,22 @@ void CWPhastDoc::OnICZonesUnselectAll()
 {
 	if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar())
 	{
-		CTreeCtrlNode node = pTree->GetICNode();
-		int nCount = node.GetChildCount();
+		int nCount;
+
+		// head
+		CTreeCtrlNode nodeICHead = pTree->GetICHeadNode();
+		nCount = nodeICHead.GetChildCount();
 		for (int i = 0; i < nCount; ++i)
 		{
-			pTree->SetNodeCheck(node.GetChildAt(i), BST_UNCHECKED);
+			pTree->SetNodeCheck(nodeICHead.GetChildAt(i), BST_UNCHECKED);
+		}
+
+		// chem
+		CTreeCtrlNode nodeICChem = pTree->GetICChemNode();
+		nCount = nodeICChem.GetChildCount();
+		for (int i = 0; i < nCount; ++i)
+		{
+			pTree->SetNodeCheck(nodeICChem.GetChildAt(i), BST_UNCHECKED);
 		}
 	}
 	this->UpdateAllViews(0);

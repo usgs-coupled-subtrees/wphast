@@ -16,9 +16,6 @@ CNewModelIntro::CNewModelIntro()
 	: CPropertyPage(CNewModelIntro::IDD)
 {
 	this->m_psp.dwFlags |= PSP_HIDEHEADER;
-#if defined(ONLY_FLOW_ONLY_SUPPORTED)
-	this->m_flowOnly.SetFlowOnly(true);
-#endif
 }
 
 CNewModelIntro::~CNewModelIntro()
@@ -36,12 +33,6 @@ void CNewModelIntro::DoDataExchange(CDataExchange* pDX)
 			this->m_flowOnly.SetFlowOnly(true);
 		}
 		else {
-#if defined(ONLY_FLOW_ONLY_SUPPORTED)
-			this->CheckRadioButton(IDC_FLOW_ONLY_RADIO, IDC_SOLUTE_TRANSPORT_RADIO, IDC_FLOW_ONLY_RADIO);
-			this->OnBnClickedFlowOnlyRadio();
-			::AfxMessageBox("At this time only flow only simulations are supported", MB_OK);
-			pDX->Fail();
-#endif
 			this->m_flowOnly.SetFlowOnly(false);
 
 			double dDiffusivity;

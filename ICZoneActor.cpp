@@ -170,7 +170,21 @@ void CICZoneActor::Serialize(bool bStoring, hid_t loc_id, const CUnits& units)
 void CICZoneActor::Insert(CPropertyTreeControlBar* pTreeControlBar, HTREEITEM hInsertAfter)
 {
 	CTreeCtrl* pTreeCtrl = pTreeControlBar->GetTreeCtrl();
-	HTREEITEM htiIC = pTreeControlBar->GetICNode();
+
+	HTREEITEM htiIC;
+	switch (this->GetType())
+	{
+	case CICZoneActor::IC_HEAD:
+		htiIC = pTreeControlBar->GetICHeadNode();
+		break;
+	case CICZoneActor::IC_CHEM:
+		htiIC = pTreeControlBar->GetICChemNode();
+		break;
+	default:
+		ASSERT(FALSE);
+	}
+
+
 	this->InsertAt(pTreeCtrl, htiIC, hInsertAfter);
 	//{{HACK
 	CTreeCtrlNode node(this->m_hti, pTreeControlBar->GetTreeCtrlEx());
@@ -181,12 +195,13 @@ void CICZoneActor::Insert(CPropertyTreeControlBar* pTreeControlBar, HTREEITEM hI
 void CICZoneActor::InsertAt(CTreeCtrl* pTreeCtrl, HTREEITEM hParent, HTREEITEM hInsertAfter)
 {
 	CString str;
-	switch (this->GetType()) {
+	switch (this->GetType())
+	{
 		case CICZoneActor::IC_HEAD:
-			str.Format("HEAD_IC %s", this->GetName());
+			str.Format("%s", this->GetName());
 			break;
 		case CICZoneActor::IC_CHEM:
-			str.Format("CHEMISTRY_IC %s", this->GetName());
+			str.Format("%s", this->GetName());
 			break;
 		default:
 			ASSERT(FALSE);

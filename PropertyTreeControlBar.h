@@ -62,6 +62,8 @@ protected:
 	CTreeCtrlNode   m_nodeBC;
 	CTreeCtrlNode   m_nodeGrid;
 	CTreeCtrlNode   m_nodeIC;	
+		CTreeCtrlNode   m_nodeICHead;	
+		CTreeCtrlNode   m_nodeICChem;	
 	CTreeCtrlNode   m_nodeMedia;
 	CTreeCtrlNode   m_nodeUnits;
 	CTreeCtrlNode   m_nodeFlowOnly;
@@ -129,6 +131,9 @@ public:
 	CTreeCtrlNode GetMediaNode(void)        {return m_nodeMedia;}
 	CTreeCtrlNode GetUnitsNode(void)        {return m_nodeUnits;}
 	CTreeCtrlNode GetICNode(void)           {return m_nodeIC;}
+		CTreeCtrlNode GetICHeadNode(void)   {return m_nodeICHead;}
+		CTreeCtrlNode GetICChemNode(void)   {return m_nodeICChem;}
+
 	CTreeCtrlNode GetWellsNode(void)const   {return m_nodeWells;}
 	CTreeCtrlNode GetRiversNode(void)const  {return m_nodeRivers;}
 // COMMENT: {4/8/2005 7:01:33 PM}	CTreeCtrlNode GetBCNode(int nStressPeriod = 1);

@@ -71,6 +71,8 @@ static const TCHAR szUNITS[]               = _T("UNITS");
 static const TCHAR szGRID[]                = _T("GRID");
 static const TCHAR szMEDIA[]               = _T("MEDIA");
 static const TCHAR szINITIAL_CONDITIONS[]  = _T("INITIAL_CONDITIONS");
+static const TCHAR szIC_HEAD[]             = _T("HEAD_IC");
+static const TCHAR szIC_CHEM[]             = _T("CHEMISTRY_IC");
 static const TCHAR szBOUNDARY_CONDITIONS[] = _T("BOUNDARY_CONDITIONS");
 static const TCHAR szWELLS[]               = _T("WELLS");
 static const TCHAR szRIVERS[]              = _T("RIVERS");
@@ -170,7 +172,7 @@ void CPropertyTreeControlBar::OnSelChanged(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 	{
 		HTREEITEM hParent = m_wndTree.GetParentItem(pNMTREEVIEW->itemNew.hItem);
 
-		if (hParent == m_nodeMedia || hParent == this->m_nodeBC || hParent == this->m_nodeIC)
+		if (hParent == m_nodeMedia || hParent == this->m_nodeBC || hParent == this->m_nodeICHead || hParent == this->m_nodeICChem)
 		{
 
 			CZoneActor* pZone = reinterpret_cast<CZoneActor*>(m_wndTree.GetItemData(pNMTREEVIEW->itemNew.hItem));
@@ -491,7 +493,9 @@ void CPropertyTreeControlBar::OnNMDblClk(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	TRACE("OnNMDblClk\n");
 
-	//{{HACK
+	// Cancel any modes currenly running
+	//
+	if (true)
 	{
 		CFrameWnd *pFrame = (CFrameWnd*)AfxGetApp()->m_pMainWnd;
 		ASSERT_VALID(pFrame);
@@ -507,7 +511,6 @@ void CPropertyTreeControlBar::OnNMDblClk(NMHDR* pNMHDR, LRESULT* pResult)
 			pView->CancelMode();
 		}
 	}
-	//}}HACK
 
 	TVHITTESTINFO ht = {0};
 
@@ -519,6 +522,14 @@ void CPropertyTreeControlBar::OnNMDblClk(NMHDR* pNMHDR, LRESULT* pResult)
 	this->m_wndTree.HitTest(&ht);
 
 	if (!ht.hItem) return;
+	if ((TVHT_ONITEMSTATEICON & ht.flags))
+	{
+		// user double-clicked on checkmark
+		//
+		this->OnNMClk(pNMHDR, pResult);
+		*pResult = TRUE;
+		return;
+	}
 	if (!(TVHT_ONITEM & ht.flags)) return;
 
 	CTreeCtrlNode item = this->GetTreeCtrlEx()->GetSelectedItem();
@@ -532,15 +543,7 @@ void CPropertyTreeControlBar::OnNMDblClk(NMHDR* pNMHDR, LRESULT* pResult)
 	{
 		CFlowOnly *pFlowOnly = reinterpret_cast<CFlowOnly*>(this->m_nodeFlowOnly.GetData());
 		ASSERT(pFlowOnly);
-#if defined(_DEBUG)
-		CFrameWnd *pFrame = (CFrameWnd*)AfxGetApp()->m_pMainWnd;
-		ASSERT_VALID(pFrame);
-		// CWPhastDoc* pDoc = dynamic_cast<CWPhastDoc*>(pFrame->GetActiveDocument()); // needs /GR
-		CWPhastDoc* pDoc = reinterpret_cast<CWPhastDoc*>(pFrame->GetActiveDocument());
-		ASSERT_VALID(pDoc);
-		CNewModel *pModel = pDoc->GetModel();
-		ASSERT(pFlowOnly == &pDoc->GetModel()->m_flowOnly);
-#endif
+
 		//{{ HACK
 		CTreeCtrlNode nodeMedia = this->GetMediaNode();
 		int nCount = nodeMedia.GetChildCount();
@@ -558,7 +561,7 @@ void CPropertyTreeControlBar::OnNMDblClk(NMHDR* pNMHDR, LRESULT* pResult)
 			}
 		}
 
-		CTreeCtrlNode nodeIC = this->GetICNode();
+		CTreeCtrlNode nodeIC = this->GetICChemNode();
 		nCount = nodeIC.GetChildCount();
 
 		CICZoneActor *pICZoneActor = NULL;
@@ -710,15 +713,6 @@ void CPropertyTreeControlBar::OnNMDblClk(NMHDR* pNMHDR, LRESULT* pResult)
 						}
 						page.SetUsedRiverNumbers(riverNums);
 
-// COMMENT: {7/14/2005 2:43:57 PM}                        //{{
-// COMMENT: {7/14/2005 2:43:57 PM}						POSITION pos = pWPhastDoc->GetFirstViewPosition();
-// COMMENT: {7/14/2005 2:43:57 PM}						while (pos != NULL)
-// COMMENT: {7/14/2005 2:43:57 PM}						{
-// COMMENT: {7/14/2005 2:43:57 PM}							CView* pView = pWPhastDoc->GetNextView(pos);
-// COMMENT: {7/14/2005 2:43:57 PM}							pView->UpdateWindow();
-// COMMENT: {7/14/2005 2:43:57 PM}							pView->EnableWindow(FALSE);
-// COMMENT: {7/14/2005 2:43:57 PM}						}
-// COMMENT: {7/14/2005 2:43:57 PM}						//}}
 						if (sheet.DoModal() == IDOK)
 						{
 							CRiver river;
@@ -739,48 +733,6 @@ void CPropertyTreeControlBar::OnNMDblClk(NMHDR* pNMHDR, LRESULT* pResult)
 	//
 	if (item.IsNodeAncestor(this->m_nodeGrid))
 	{
-// COMMENT: {7/15/2005 3:32:08 PM}		if (CGridActor* pGrid = CGridActor::SafeDownCast((vtkObject*)m_nodeGrid.GetData()))
-// COMMENT: {7/15/2005 3:32:08 PM}		{
-// COMMENT: {7/15/2005 3:32:08 PM}			CFrameWnd *pFrame = (CFrameWnd*)AfxGetApp()->m_pMainWnd;
-// COMMENT: {7/15/2005 3:32:08 PM}			ASSERT_VALID(pFrame);
-// COMMENT: {7/15/2005 3:32:08 PM}			CWPhastDoc* pDoc = reinterpret_cast<CWPhastDoc*>(pFrame->GetActiveDocument());
-// COMMENT: {7/15/2005 3:32:08 PM}			ASSERT_VALID(pDoc);
-// COMMENT: {7/15/2005 3:32:08 PM}
-// COMMENT: {7/15/2005 3:32:08 PM}			// show property sheet
-// COMMENT: {7/15/2005 3:32:08 PM}			//
-// COMMENT: {7/15/2005 3:32:08 PM}			CPropertySheet propSheet("Define grid", ::AfxGetMainWnd());
-// COMMENT: {7/15/2005 3:32:08 PM}			CGridPropertyPage gridPage;
-// COMMENT: {7/15/2005 3:32:08 PM}
-// COMMENT: {7/15/2005 3:32:08 PM}			CGrid gridx, gridy, gridz;
-// COMMENT: {7/15/2005 3:32:08 PM}			pGrid->GetGrid(gridx, gridy, gridz);
-// COMMENT: {7/15/2005 3:32:08 PM}			gridPage.m_grid[0] = gridx;
-// COMMENT: {7/15/2005 3:32:08 PM}			gridPage.m_grid[1] = gridy;
-// COMMENT: {7/15/2005 3:32:08 PM}			gridPage.m_grid[2] = gridz;
-// COMMENT: {7/15/2005 3:32:08 PM}
-// COMMENT: {7/15/2005 3:32:08 PM}			gridPage.SetApply(pDoc);
-// COMMENT: {7/15/2005 3:32:08 PM}			propSheet.AddPage(&gridPage);
-// COMMENT: {7/15/2005 3:32:08 PM}			
-// COMMENT: {7/15/2005 3:32:08 PM}			// support undo
-// COMMENT: {7/15/2005 3:32:08 PM}			//
-// COMMENT: {7/15/2005 3:32:08 PM}			CResizeGridAction* pAction = new CResizeGridAction(pDoc, gridPage.m_grid, pGrid);
-// COMMENT: {7/15/2005 3:32:08 PM}
-// COMMENT: {7/15/2005 3:32:08 PM}			switch (propSheet.DoModal()) {
-// COMMENT: {7/15/2005 3:32:08 PM}				case IDOK:
-// COMMENT: {7/15/2005 3:32:08 PM}					////pDoc->SetFlowOnly(gridPage.m_bFlowOnly); // TODO: make undoable
-// COMMENT: {7/15/2005 3:32:08 PM}					pAction->Reset(gridPage.m_grid);
-// COMMENT: {7/15/2005 3:32:08 PM}					pDoc->Execute(pAction);
-// COMMENT: {7/15/2005 3:32:08 PM}					break;
-// COMMENT: {7/15/2005 3:32:08 PM}				case IDCANCEL:
-// COMMENT: {7/15/2005 3:32:08 PM}					pAction->UnExecute();
-// COMMENT: {7/15/2005 3:32:08 PM}					delete pAction;
-// COMMENT: {7/15/2005 3:32:08 PM}					break;
-// COMMENT: {7/15/2005 3:32:08 PM}				default:
-// COMMENT: {7/15/2005 3:32:08 PM}					ASSERT(FALSE);
-// COMMENT: {7/15/2005 3:32:08 PM}			}
-// COMMENT: {7/15/2005 3:32:08 PM}			*pResult = TRUE;
-// COMMENT: {7/15/2005 3:32:08 PM}			return;
-// COMMENT: {7/15/2005 3:32:08 PM}		}
-		//{{
 		if (CGridActor* pGridActor = CGridActor::SafeDownCast((vtkObject*)m_nodeGrid.GetData()))
 		{
 			CFrameWnd *pFrame = (CFrameWnd*)AfxGetApp()->m_pMainWnd;
@@ -791,19 +743,7 @@ void CPropertyTreeControlBar::OnNMDblClk(NMHDR* pNMHDR, LRESULT* pResult)
 			pWPhastDoc->Edit(pGridActor);
 			*pResult = TRUE;
 			return;
-
-// COMMENT: {7/15/2005 3:35:24 PM}			// show property sheet
-// COMMENT: {7/15/2005 3:35:24 PM}			//
-// COMMENT: {7/15/2005 3:35:24 PM}			CPropertySheet propSheet("Define grid", ::AfxGetMainWnd());
-// COMMENT: {7/15/2005 3:35:24 PM}			CGridPropertyPage gridPage;
-// COMMENT: {7/15/2005 3:35:24 PM}
-// COMMENT: {7/15/2005 3:35:24 PM}			CGrid gridx, gridy, gridz;
-// COMMENT: {7/15/2005 3:35:24 PM}			pGridActor->GetGrid(gridx, gridy, gridz);
-// COMMENT: {7/15/2005 3:35:24 PM}			gridPage.m_grid[0] = gridx;
-// COMMENT: {7/15/2005 3:35:24 PM}			gridPage.m_grid[1] = gridy;
-// COMMENT: {7/15/2005 3:35:24 PM}			gridPage.m_grid[2] = gridz;
 		}
-		//}}
 	}
 
 	// MEDIA
@@ -847,14 +787,19 @@ void CPropertyTreeControlBar::OnNMDblClk(NMHDR* pNMHDR, LRESULT* pResult)
 
 	// INITIAL_CONDITIONS
 	//
-	if (item.IsNodeAncestor(this->m_nodeIC)) {
-		if (item != this->m_nodeIC) {
-			while (item.GetParent() != this->m_nodeIC) {
+	if (item.IsNodeAncestor(this->m_nodeIC))
+	{
+		if (item != this->m_nodeIC && item != this->m_nodeICHead && item != this->m_nodeICChem)
+		{
+			while (item.GetParent() != this->m_nodeICHead && item.GetParent() != this->m_nodeICChem)
+			{
 				item = item.GetParent();
 				if (!item) break;
 			}
-			if (item.GetData()) {
-				if (CZoneActor* pZone = CZoneActor::SafeDownCast((vtkObject*)item.GetData())) {
+			if (item.GetData())
+			{
+				if (CZoneActor* pZone = CZoneActor::SafeDownCast((vtkObject*)item.GetData()))
+				{
 					pZone->Edit(&this->m_wndTree);
 					*pResult = TRUE;
 					return;
@@ -1633,6 +1578,9 @@ void CPropertyTreeControlBar::DeleteContents()
 	this->m_nodeGrid           = this->m_wndTree.InsertItem(szGRID               );
 	this->m_nodeMedia          = this->m_wndTree.InsertItem(szMEDIA              );
 	this->m_nodeIC             = this->m_wndTree.InsertItem(szINITIAL_CONDITIONS );
+	this->m_nodeICHead         = this->m_nodeIC.AddTail(szIC_HEAD);
+	this->m_nodeICChem         = this->m_nodeIC.AddTail(szIC_CHEM);
+
 
 
 // COMMENT: {4/11/2005 7:50:38 PM}	// add first simulation period
@@ -1711,7 +1659,22 @@ void CPropertyTreeControlBar::Update(IObserver* pSender, LPARAM lHint, CObject* 
 						}
 					}
 				}
-				parent = this->GetICNode();
+				parent = this->GetICHeadNode();
+				for (int i = 0; !bFound && i < parent.GetChildCount(); ++i)
+				{
+					CTreeCtrlNode node = parent.GetChildAt(i);
+					if (node.GetData())
+					{
+						CZoneActor *pZoneActor = (CZoneActor*)node.GetData();
+						if (pZoneActor == pObject)
+						{
+							node.Select();
+							bFound = true;
+							break;
+						}
+					}
+				}
+				parent = this->GetICChemNode();
 				for (int i = 0; !bFound && i < parent.GetChildCount(); ++i)
 				{
 					CTreeCtrlNode node = parent.GetChildAt(i);
@@ -2091,9 +2054,9 @@ void CPropertyTreeControlBar::OnKeyDown(NMHDR* pNMHDR, LRESULT* pResult)
 		//
 		if (sel.IsNodeAncestor(this->m_nodeIC))
 		{
-			if (sel != this->m_nodeIC)
+			if (sel != this->m_nodeIC && sel != this->m_nodeICHead && sel != this->m_nodeICChem)
 			{
-				while (sel.GetParent() != this->m_nodeIC)
+				while (sel.GetParent() != this->m_nodeICHead && sel.GetParent() != this->m_nodeICChem)
 				{
 					sel = sel.GetParent();
 					if (!sel) break;
@@ -2331,6 +2294,78 @@ bool CPropertyTreeControlBar::IsNodeDraggable(CTreeCtrlNode dragNode, COleDataSo
 		}
 	}
 
+	if (dragNode.GetParent() == this->GetICHeadNode())
+	{
+		if (dragNode.GetData())
+		{
+			if (CICZoneActor *pZone = CICZoneActor::SafeDownCast((vtkObject*)dragNode.GetData()))
+			{
+				ASSERT(pZone->GetType() == CICZoneActor::IC_HEAD);
+				if (pZone->GetType() == CICZoneActor::IC_HEAD)
+				{
+					oss << pZone->GetHeadIC();
+					oss << "\n";
+
+					std::string s = oss.str();
+					HGLOBAL hGlobal = ::GlobalAlloc(GMEM_MOVEABLE, s.length() + 1);
+					LPTSTR pData = (LPTSTR)::GlobalLock(hGlobal);
+
+					::lstrcpy(pData, s.c_str());
+					::GlobalUnlock(hGlobal);
+
+					oleDataSource.CacheGlobalData(this->m_cfPID, hGlobal);
+					oleDataSource.CacheGlobalData(CF_TEXT, hGlobal);
+
+					return true;
+				}
+			}
+			else
+			{
+				ASSERT(FALSE);
+			}
+		}
+		else
+		{
+			ASSERT(FALSE);
+		}
+	}
+
+	if (dragNode.GetParent() == this->GetICChemNode())
+	{
+		if (dragNode.GetData())
+		{
+			if (CICZoneActor *pZone = CICZoneActor::SafeDownCast((vtkObject*)dragNode.GetData()))
+			{
+				ASSERT(pZone->GetType() == CICZoneActor::IC_CHEM);
+				if (pZone->GetType() == CICZoneActor::IC_CHEM)
+				{
+					oss << pZone->GetChemIC();
+					oss << "\n";
+
+					std::string s = oss.str();
+					HGLOBAL hGlobal = ::GlobalAlloc(GMEM_MOVEABLE, s.length() + 1);
+					LPTSTR pData = (LPTSTR)::GlobalLock(hGlobal);
+
+					::lstrcpy(pData, s.c_str());
+					::GlobalUnlock(hGlobal);
+
+					oleDataSource.CacheGlobalData(this->m_cfPID, hGlobal);
+					oleDataSource.CacheGlobalData(CF_TEXT, hGlobal);
+
+					return true;
+				}
+			}
+			else
+			{
+				ASSERT(FALSE);
+			}
+		}
+		else
+		{
+			ASSERT(FALSE);
+		}
+	}
+
 	return false;
 }
 
@@ -2398,6 +2433,14 @@ DROPEFFECT CPropertyTreeControlBar::OnDragOver(CWnd* pWnd, COleDataObject* pData
 		{
 			bHasDefault = true;
 		}
+		if (parentNode == this->GetICHeadNode())
+		{
+			bHasDefault = true;
+		}
+		if (parentNode == this->GetICChemNode())
+		{
+			bHasDefault = true;
+		}
 
 		CTreeCtrlNode hitNode = this->m_wndTree.HitTest(point);
 		if ( hitNode && hitNode.IsNodeAncestor(parentNode) && (!bHasDefault || hitNode != parentNode) )
@@ -2452,6 +2495,14 @@ BOOL CPropertyTreeControlBar::OnDrop(CWnd* pWnd, COleDataObject* pDataObject, DR
 		bool bHasDefault = false;
 		CTreeCtrlNode parentNode = this->m_dragNode.GetParent();
 		if (parentNode == this->GetMediaNode())
+		{
+			bHasDefault = true;
+		}
+		if (parentNode == this->GetICHeadNode())
+		{
+			bHasDefault = true;
+		}
+		if (parentNode == this->GetICChemNode())
 		{
 			bHasDefault = true;
 		}

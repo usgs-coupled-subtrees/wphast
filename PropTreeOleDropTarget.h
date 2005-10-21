@@ -1,6 +1,5 @@
 
 #pragma once
-#include <afxole.h>
 
 class CPropertyTreeControlBar;
 
@@ -8,7 +7,6 @@ class CPropertyTreeControlBar;
 
 class CPropTreeOleDropTarget : public COleDropTarget
 {
-	DECLARE_DYNAMIC(CPropTreeOleDropTarget)
 
 public:
 	CPropTreeOleDropTarget();
