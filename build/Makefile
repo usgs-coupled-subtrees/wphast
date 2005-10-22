@@ -92,7 +92,6 @@ $(BIN_PACKAGE) : $(TARBALL) $(BUILD_SCRIPT)
 $(TARBALL) : dist.sh $(DATE_STAMP).tstamp
 	@echo "Creating $(TARBALL)"
 	time ./dist.sh -v $(VERSION) -r $(RELEASE) -d $(DATE) -pr trunk 2>&1 | tee dist-$(RELEASE).log
-	gpg --detach-sign $(TARBALL)
 	
 $(BUILD_SCRIPT) : build.sh
 	rm -rf  $(BUILD_SCRIPT)
