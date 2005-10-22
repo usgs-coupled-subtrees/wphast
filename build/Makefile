@@ -113,9 +113,9 @@ build_msi_file :  $(BUILD_SCRIPT) $(TARBALL) $(PHAST_TARBALL)
 check_release :
 	@if [ "$(VERSION)"x = "x" ]; \
 	  then \
-		echo "usage: make VERSION=<number> DATE=<xx/xx/xxxx> PHAST_BUILD=<filename> [RELEASE=<number>]"; \
+		echo "usage: make VERSION=<number> DATE=<xx/xx/xxxx> PHAST_BUILD=<filename> [RELEASE=<number>] [SIG=<0|1>]"; \
 		echo "    ie make VERSION=0.1 DATE=10/6/2005 PHAST_BUILD=phast-1.2-577.tar.bz2"; \
-		echo "       make VERSION=0.1 DATE=10/6/2005 PHAST_BUILD=phast-1.2-577.tar.bz2 RELEASE=584"; \
+		echo "       make VERSION=0.1 DATE=10/6/2005 PHAST_BUILD=phast-1.2-577.tar.bz2 RELEASE=584 SIG=1"; \
 		exit 1; \
 	    else \
 		exit 0; \

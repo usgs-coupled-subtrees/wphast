@@ -260,8 +260,6 @@
 #define IDR_MAXIMUM_TIME_STEP_RTF       265
 #define IDR_HEAD_CHANGE_TARGET_RTF      266
 #define IDR_ITERATIONS_RTF              267
-#define IDB_BITMAP1                     269
-#define IDB_NULL_TREE                   269
 #define IDC_EDIT_X                      1000
 #define IDC_PROPERTIES                  1000
 #define IDC_TITLE                       1000

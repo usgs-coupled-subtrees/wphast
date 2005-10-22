@@ -108,7 +108,7 @@ export install_docs="\
 export install_docs="`for i in ${install_docs}; do echo $i; done | sort -u`"
 export test_rule=test
 if [ -z "$SIG" ]; then
-  export SIG=1	# set to 1 to turn on signing by default
+  export SIG=0	# set to 1 to turn on signing by default
 fi
 
 # helper function
