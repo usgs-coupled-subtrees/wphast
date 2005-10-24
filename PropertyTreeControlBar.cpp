@@ -393,11 +393,6 @@ void CPropertyTreeControlBar::SetNodeCheck(CTreeCtrlNode node, UINT nCheckState)
 	}
 	else if (node == this->GetWellsNode())
 	{
-// COMMENT: {9/8/2004 5:11:03 PM}		// HACK {{
-// COMMENT: {9/8/2004 5:11:03 PM}		// set check mark
-// COMMENT: {9/8/2004 5:11:03 PM}		node.SetState(INDEXTOSTATEIMAGEMASK(nCheckState + 1), TVIS_STATEIMAGEMASK);
-// COMMENT: {9/8/2004 5:11:03 PM}		return;
-// COMMENT: {9/8/2004 5:11:03 PM}		// HACK }}
 		if (!((pDoc = this->GetDocument()) && (pPropAssembly = pDoc->GetPropAssemblyWells())))
 		{
 			return;
@@ -422,7 +417,11 @@ void CPropertyTreeControlBar::SetNodeCheck(CTreeCtrlNode node, UINT nCheckState)
 	{
 		ASSERT(
 			node.GetParent() == this->GetMediaNode()  ||
-            node.GetParent() == this->GetICNode()     ||
+// COMMENT: {10/24/2005 3:22:20 PM}            node.GetParent() == this->GetICNode()     ||
+			//{{
+            node.GetParent() == this->GetICHeadNode() ||
+			node.GetParent() == this->GetICChemNode() ||
+			//}}
             node.GetParent() == this->GetBCNode()     ||
             node.GetParent() == this->GetWellsNode()  ||
             node.GetParent() == this->GetRiversNode()
@@ -443,14 +442,6 @@ void CPropertyTreeControlBar::SetNodeCheck(CTreeCtrlNode node, UINT nCheckState)
 		ASSERT(node.GetData());
 		if (node.GetData())
 		{
-// COMMENT: {6/15/2005 1:49:44 PM}			if (vtkActor* pActor = vtkActor::SafeDownCast((vtkObject*)node.GetData()))
-// COMMENT: {6/15/2005 1:49:44 PM}			{
-// COMMENT: {6/15/2005 1:49:44 PM}				pActor->SetVisibility(nCheckState == BST_CHECKED);
-// COMMENT: {6/15/2005 1:49:44 PM}			}
-// COMMENT: {6/15/2005 1:49:44 PM}			if (CRiverActor* pActor = CRiverActor::SafeDownCast((vtkObject*)node.GetData()))
-// COMMENT: {6/15/2005 1:49:44 PM}			{
-// COMMENT: {6/15/2005 1:49:44 PM}				pActor->SetVisibility(nCheckState == BST_CHECKED);
-// COMMENT: {6/15/2005 1:49:44 PM}			}
 			if (vtkProp3D* pProp3D = vtkProp3D::SafeDownCast((vtkObject*)node.GetData()))
 			{
 				pProp3D->SetVisibility(nCheckState == BST_CHECKED);
