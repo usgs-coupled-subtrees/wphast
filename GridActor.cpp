@@ -428,7 +428,8 @@ void CGridActor::SetGrid(const CGrid& x, const CGrid& y, const CGrid& z, const C
 	this->m_gridKeyword.m_grid[1] = y;
 	this->m_gridKeyword.m_grid[2] = z;
 
-	this->Setup(units);
+	this->m_units = units;
+	this->Setup(this->m_units);
 }
 
 void CGridActor::GetGrid(CGrid& x, CGrid& y, CGrid& z)const
@@ -447,7 +448,7 @@ void CGridActor::SetGridKeyword(const CGridKeyword& gridKeyword, const CUnits& u
 {
 	this->m_gridKeyword = gridKeyword;
 	this->m_units = units;
-	this->Setup(units);
+	this->Setup(this->m_units);
 }
 
 void CGridActor::Setup(const CUnits& units)
