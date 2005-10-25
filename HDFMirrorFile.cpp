@@ -43,6 +43,7 @@ BOOL CHDFMirrorFile::Open(LPCTSTR lpszFileName, UINT nOpenFlags,
 	ASSERT(lpszFileName != NULL);
 	m_strMirrorName.Empty();
 
+#if defined(BREAK_HARD_LINKS)
 	CFileStatus status;
 	if (nOpenFlags & CFile::modeCreate) //opened for writing
 	{
@@ -70,13 +71,15 @@ BOOL CHDFMirrorFile::Open(LPCTSTR lpszFileName, UINT nOpenFlags,
 				GetTempFileName(szPath, _T("WPH"), 0,
 					m_strMirrorName.GetBuffer(_MAX_PATH+1));
 				m_strMirrorName.ReleaseBuffer();
+
+				// Note: m_strMirrorName will be empty if the user doesn't have write access
+				// to the szPath directory
 			}
 		}
 	}
 
 	if (!m_strMirrorName.IsEmpty() &&
 		(m_hidFile = ::H5Fcreate(m_strMirrorName, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)))
-//		CFile::Open(m_strMirrorName, nOpenFlags, pError))
 	{
 		m_strFileName = lpszFileName;
 		FILETIME ftCreate, ftAccess, ftModify;
@@ -101,26 +104,36 @@ BOOL CHDFMirrorFile::Open(LPCTSTR lpszFileName, UINT nOpenFlags,
 		}
 		return TRUE;
 	}
+#endif // defined(BREAK_HARD_LINKS)
+
 	m_strMirrorName.Empty();
 	if (nOpenFlags & CFile::modeCreate) //opened for writing
 	{
-		m_hidFile = ::H5Fcreate(lpszFileName, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-		if (m_hidFile > 0) return TRUE;
-		return FALSE;
-	}
-	if (nOpenFlags == (CFile::modeRead|CFile::shareDenyWrite))
-	{
-		//{{NEW 08/06/2003
 		BOOL b = CFile::Open(lpszFileName, nOpenFlags, pError);
 		if (!b) return b;
 		CFile::Close();
-		//}}NEW 08/06/2003
-		m_hidFile = ::H5Fopen(lpszFileName, H5F_ACC_RDWR, H5P_DEFAULT);
+
+		m_hidFile = ::H5Fcreate(lpszFileName, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 		if (m_hidFile > 0) return TRUE;
+
+		ASSERT(FALSE);
+		pError->m_cause = CFileException::generic;
+		return FALSE;
+	}
+	if (nOpenFlags == (CFile::modeRead|CFile::shareDenyWrite)) // opened for reading
+	{
+		BOOL b = CFile::Open(lpszFileName, nOpenFlags, pError);
+		if (!b) return b;
+		CFile::Close();
+
+		m_hidFile = ::H5Fopen(lpszFileName, H5F_ACC_RDONLY, H5P_DEFAULT);		
+		if (m_hidFile > 0) return TRUE;
+
 		pError->m_cause = CFileException::generic;
 		return FALSE;
 	}
 	ASSERT(FALSE); // TODO
+	pError->m_cause = CFileException::generic;
 	return FALSE;
 	//return CFile::Open(lpszFileName, nOpenFlags, pError);
 }
