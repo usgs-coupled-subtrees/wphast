@@ -61,9 +61,9 @@ protected:
 
 	CTreeCtrlNode   m_nodeBC;
 	CTreeCtrlNode   m_nodeGrid;
-	CTreeCtrlNode   m_nodeIC;	
-		CTreeCtrlNode   m_nodeICHead;	
-		CTreeCtrlNode   m_nodeICChem;	
+	CTreeCtrlNode   m_nodeIC;
+	CTreeCtrlNode   m_nodeICHead;
+	CTreeCtrlNode   m_nodeICChem;
 	CTreeCtrlNode   m_nodeMedia;
 	CTreeCtrlNode   m_nodeUnits;
 	CTreeCtrlNode   m_nodeFlowOnly;
@@ -94,17 +94,9 @@ protected:
 public:
 	CWPhastDoc* GetDocument(void)const;
 
-	void AddZone(CZoneActor* pZone);
+	void AddZone(CZoneActor* pZone, HTREEITEM hInsertAfter = TVI_LAST);
 	void RemoveZone(CZoneActor* pZone);
 	CString GetNextZoneName(void)const;
-	int GetNextWellNumber(void)const;
-
-
-// COMMENT: {4/8/2005 6:50:23 PM}	CTreeCtrlNode AddStressPeriod(const CTimeControl& timeControl);
-// COMMENT: {4/8/2005 6:50:23 PM}	void RemoveStressPeriod(int nStressPeriod);
-
-// COMMENT: {4/8/2005 6:50:29 PM}	int GetStressPeriodCount(void);
-// COMMENT: {4/8/2005 6:50:29 PM}	CTreeCtrlNode GetStressPeriodNode(int nStressPeriod);
 
 	void SetUnits(CUnits *pUnits);
 	void SetFlowOnly(CFlowOnly *pFlowOnly);
@@ -112,13 +104,10 @@ public:
 	void SetSteadyFlow(CSteadyFlow *pSteadyFlow);
 	void SetSolutionMethod(CSolutionMethod *pSolutionMethod);
 
-
 	void SetTimeControl2(CTimeControl2* pTimeControl2);
 	CTimeControl2* GetTimeControl2(void);
 
 	void SetPrintFrequency(CPrintFreq* pPrintFreq);
-// COMMENT: {4/8/2005 7:06:02 PM}	void SetPrintFrequency(const CPrintFreq& printFreq, int nStressPeriod = 1);
-// COMMENT: {4/8/2005 7:06:02 PM}	CPrintFreq* GetPrintFrequency(int nStressPeriod);
 	void SetPrintFrequency(const CPrintFreq& printFreq);
 	CPrintFreq* GetPrintFrequency(void);
 
@@ -127,22 +116,18 @@ public:
 	CTreeCtrl* GetTreeCtrl(void)       {return &m_wndTree;}
 	CTreeCtrlEx* GetTreeCtrlEx(void)   {return &m_wndTree;}
 
-	CTreeCtrlNode GetGridNode(void)         {return m_nodeGrid;}
-	CTreeCtrlNode GetMediaNode(void)        {return m_nodeMedia;}
-	CTreeCtrlNode GetUnitsNode(void)        {return m_nodeUnits;}
-	CTreeCtrlNode GetICNode(void)           {return m_nodeIC;}
-		CTreeCtrlNode GetICHeadNode(void)   {return m_nodeICHead;}
-		CTreeCtrlNode GetICChemNode(void)   {return m_nodeICChem;}
-
-	CTreeCtrlNode GetWellsNode(void)const   {return m_nodeWells;}
-	CTreeCtrlNode GetRiversNode(void)const  {return m_nodeRivers;}
-// COMMENT: {4/8/2005 7:01:33 PM}	CTreeCtrlNode GetBCNode(int nStressPeriod = 1);
-// COMMENT: {4/8/2005 7:01:33 PM}	CTreeCtrlNode GetTimeControlNode(int nStressPeriod = 1);
-// COMMENT: {4/8/2005 7:01:33 PM}	CTreeCtrlNode GetPrintFrequencyNode(int nStressPeriod = 1);
-	CTreeCtrlNode GetBCNode(void);
-	CTreeCtrlNode GetTimeControlNode(void);
-	CTreeCtrlNode GetTimeControl2Node(void);
-	CTreeCtrlNode GetPrintFrequencyNode(void);
+	CTreeCtrlNode GetGridNode(void)           {return m_nodeGrid;}
+	CTreeCtrlNode GetMediaNode(void)          {return m_nodeMedia;}
+	CTreeCtrlNode GetUnitsNode(void)          {return m_nodeUnits;}
+	CTreeCtrlNode GetICNode(void)             {return m_nodeIC;}
+	CTreeCtrlNode GetICHeadNode(void)         {return m_nodeICHead;}
+	CTreeCtrlNode GetICChemNode(void)         {return m_nodeICChem;}
+	CTreeCtrlNode GetWellsNode(void)          {return m_nodeWells;}
+	CTreeCtrlNode GetRiversNode(void)         {return m_nodeRivers;}
+	CTreeCtrlNode GetBCNode(void)             {return m_nodeBC;}
+	CTreeCtrlNode GetTimeControlNode(void)    {return m_nodeTimeControl;}
+	CTreeCtrlNode GetTimeControl2Node(void)   {return m_nodeTimeControl2;}
+	CTreeCtrlNode GetPrintFrequencyNode(void) {return m_nodePF;}
 
 	void SetNodeCheck(CTreeCtrlNode node, UINT nCheckState);
 	void SetBCCheck(UINT nCheckState);
@@ -158,9 +143,6 @@ public:
 	BOOL SelectWithoutNotification(HTREEITEM htItem);
 	void ClearSelection(void);
 
-#ifdef WPHAST_DEPRECATED
-// COMMENT: {10/23/2003 8:08:41 PM}	HTREEITEM SelectProp(vtkProp3D* pProp);
-#endif
 	void SelectGridNode(void);
 	void SetGridActor(CGridActor* pGridActor);
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);

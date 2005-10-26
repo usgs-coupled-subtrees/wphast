@@ -115,7 +115,7 @@ public:
 	//
 	virtual void Update(IObserver* pSender = 0, LPARAM lHint = 0L, CObject* pHint = 0, vtkObject* pObject = 0);
 
-	void Add(CZoneActor *pZoneActor);
+	void Add(CZoneActor *pZoneActor, HTREEITEM hInsertAfter = TVI_LAST);
 	void UnAdd(CZoneActor *pZoneActor);
 	void Delete(CZoneActor *pZoneActor);
 	void UnDelete(CZoneActor *pZoneActor);
@@ -158,7 +158,7 @@ public:
 
 
 protected:
-	void InternalAdd(CZoneActor *pZoneActor, bool bAdd);
+	void InternalAdd(CZoneActor *pZoneActor, bool bAdd, HTREEITEM hInsertAfter = TVI_LAST);
 	void InternalDelete(CZoneActor *pZoneActor, bool bDelete);
 
 public:

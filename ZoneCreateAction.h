@@ -15,7 +15,7 @@ template<typename T>
 class CZoneCreateAction : public CAction
 {
 public:
-	CZoneCreateAction(CWPhastDoc* pDoc, const char* name, float xMin, float xMax, float yMin, float yMax, float zMin, float zMax);
+	CZoneCreateAction(CWPhastDoc* pDoc, const char* name, float xMin, float xMax, float yMin, float yMax, float zMin, float zMax, CTreeCtrlNode nodeInsertAfter = CTreeCtrlNode(TVI_LAST, NULL));
 	~CZoneCreateAction(void);
 
 	virtual void Execute();
@@ -33,11 +33,13 @@ protected:
 	float m_zMin;
 	float m_zMax;
 	T* m_pZoneActor;
-	vtkFloatingPointType m_color[3];
+	HTREEITEM m_hInsertAfter;
+	DWORD_PTR m_dwInsertAfter;
+	CTreeCtrlNode m_nodeParent;
 };
 
 template<typename T>
-CZoneCreateAction<T>::CZoneCreateAction(CWPhastDoc* pDoc, const char* name, float xMin, float xMax, float yMin, float yMax, float zMin, float zMax)
+CZoneCreateAction<T>::CZoneCreateAction(CWPhastDoc* pDoc, const char* name, float xMin, float xMax, float yMin, float yMax, float zMin, float zMax, CTreeCtrlNode nodeInsertAfter)
 : m_pDoc(pDoc)
 , m_sName(name)
 , m_xMin(xMin)
@@ -46,6 +48,8 @@ CZoneCreateAction<T>::CZoneCreateAction(CWPhastDoc* pDoc, const char* name, floa
 , m_yMax(yMax)
 , m_zMin(zMin)
 , m_zMax(zMax)
+, m_hInsertAfter(0)
+, m_dwInsertAfter(0)
 , m_pZoneActor(0)
 {
 	this->m_pZoneActor = T::New();
@@ -69,15 +73,30 @@ CZoneCreateAction<T>::CZoneCreateAction(CWPhastDoc* pDoc, const char* name, floa
 
 	// create random color
 	// ::rand() returns 0 - RAND_MAX
-	this->m_color[0] = (double)::rand() / (double)RAND_MAX;
-	this->m_color[1] = (double)::rand() / (double)RAND_MAX;
-	this->m_color[2] = (double)::rand() / (double)RAND_MAX;
+	vtkFloatingPointType color[3];
+	color[0] = (double)::rand() / (double)RAND_MAX;
+	color[1] = (double)::rand() / (double)RAND_MAX;
+	color[2] = (double)::rand() / (double)RAND_MAX;
 
 	// set color and transparency
 	//
-	this->m_pZoneActor->GetProperty()->SetColor(this->m_color);
+	this->m_pZoneActor->GetProperty()->SetColor(color);
 	this->m_pZoneActor->GetProperty()->SetOpacity(0.3);
 
+	if (nodeInsertAfter == TVI_LAST)
+	{
+		this->m_hInsertAfter = TVI_LAST;
+	}
+	else if (nodeInsertAfter == TVI_FIRST)
+	{
+		this->m_hInsertAfter = TVI_FIRST;
+	}
+	else
+	{
+		this->m_nodeParent = nodeInsertAfter.GetParent();
+		this->m_dwInsertAfter = nodeInsertAfter.GetData();
+		ASSERT(this->m_nodeParent && this->m_dwInsertAfter);
+	}
 }
 
 template<typename T>
@@ -96,7 +115,27 @@ template<typename T>
 void CZoneCreateAction<T>::Execute()
 {
 	ASSERT_VALID(this->m_pDoc);
-	this->m_pDoc->Add(this->m_pZoneActor);
+	HTREEITEM hInsertAfter = TVI_LAST;
+	if (this->m_nodeParent)
+	{
+		// search for hInsertAfter (by data)
+		CTreeCtrlNode node = this->m_nodeParent.GetChild();
+		while (node)
+		{
+			if (node.GetData() == this->m_dwInsertAfter)
+			{
+				hInsertAfter = node;
+				break;
+			}
+			node = node.GetNextSibling();
+		}
+		ASSERT(node);
+	}
+	else
+	{
+		hInsertAfter = this->m_hInsertAfter;
+	}
+	this->m_pDoc->Add(this->m_pZoneActor, hInsertAfter);
 }
 
 template<typename T>

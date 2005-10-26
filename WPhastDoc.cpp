@@ -2163,21 +2163,6 @@ CString CWPhastDoc::GetNextZoneName(void)
 
 int CWPhastDoc::GetNextWellNumber(void)
 {
-// COMMENT: {6/14/2005 9:06:36 PM}	int nMax = 0;
-// COMMENT: {6/14/2005 9:06:36 PM}	if (vtkPropCollection *pPropCollection = this->GetPropAssemblyWells()->GetParts())
-// COMMENT: {6/14/2005 9:06:36 PM}	{
-// COMMENT: {6/14/2005 9:06:36 PM}		vtkProp *pProp = 0;
-// COMMENT: {6/14/2005 9:06:36 PM}		pPropCollection->InitTraversal();
-// COMMENT: {6/14/2005 9:06:36 PM}		for (; (pProp = pPropCollection->GetNextProp()); )
-// COMMENT: {6/14/2005 9:06:36 PM}		{
-// COMMENT: {6/14/2005 9:06:36 PM}			if (CWellActor *pWellActor = CWellActor::SafeDownCast(pProp))
-// COMMENT: {6/14/2005 9:06:36 PM}			{
-// COMMENT: {6/14/2005 9:06:36 PM}				CWellSchedule well = pWellActor->GetWell();
-// COMMENT: {6/14/2005 9:06:36 PM}				nMax = max(nMax, well.n_user);
-// COMMENT: {6/14/2005 9:06:36 PM}			}
-// COMMENT: {6/14/2005 9:06:36 PM}		}
-// COMMENT: {6/14/2005 9:06:36 PM}	}
-// COMMENT: {6/14/2005 9:06:36 PM}	return (nMax + 1);
 	std::set<int> wellNums;
 	this->GetUsedWellNumbers(wellNums);
 	if (wellNums.rbegin() != wellNums.rend())
@@ -2192,7 +2177,6 @@ int CWPhastDoc::GetNextWellNumber(void)
 
 void CWPhastDoc::GetUsedWellNumbers(std::set<int>& usedNums)
 {
-	//std::set<int> usedWellNumbers;
 	usedNums.clear();
 	if (vtkPropCollection *pPropCollection = this->GetPropAssemblyWells()->GetParts())
 	{
@@ -3849,9 +3833,9 @@ void CWPhastDoc::ClearSelection(void)
 	this->Notify(0, WPN_SELCHANGED, 0, 0);
 }
 
-void CWPhastDoc::Add(CZoneActor *pZoneActor)
+void CWPhastDoc::Add(CZoneActor *pZoneActor, HTREEITEM hInsertAfter)
 {
-	this->InternalAdd(pZoneActor, true);
+	this->InternalAdd(pZoneActor, true, hInsertAfter);
 }
 
 void CWPhastDoc::UnAdd(CZoneActor *pZoneActor)
@@ -3869,7 +3853,7 @@ void CWPhastDoc::UnDelete(CZoneActor *pZoneActor)
 	this->InternalAdd(pZoneActor, false);
 }
 
-void CWPhastDoc::InternalAdd(CZoneActor *pZoneActor, bool bAdd)
+void CWPhastDoc::InternalAdd(CZoneActor *pZoneActor, bool bAdd, HTREEITEM hInsertAfter)
 {
 	ASSERT(pZoneActor);
 	if (pZoneActor == NULL) return;
@@ -3898,7 +3882,7 @@ void CWPhastDoc::InternalAdd(CZoneActor *pZoneActor, bool bAdd)
 	{
 		if (bAdd)
 		{
-			pPropertyTreeControlBar->AddZone(pZoneActor);
+			pPropertyTreeControlBar->AddZone(pZoneActor, hInsertAfter);
 		}
 		else
 		{
