@@ -395,25 +395,25 @@ std::ostream& operator<< (std::ostream &os, const CGridElt &a)
 	if (property_ptr && property_ptr->type != UNDEFINED) {
 		os << "\t\t-mask                     " << (*property_ptr);
 	}
-	property_ptr = static_cast<Cproperty*>(a.active);
+    property_ptr = static_cast<Cproperty*>(a.active);
 	if (property_ptr && property_ptr->type != UNDEFINED) {
 		os << "\t\t-active                   " << (*property_ptr);
+	}
+	property_ptr = static_cast<Cproperty*>(a.kx);
+	if (property_ptr && property_ptr->type != UNDEFINED) {
+		os << "\t\t-Kx                       " << (*property_ptr);
+	}
+	property_ptr = static_cast<Cproperty*>(a.ky);
+	if (property_ptr && property_ptr->type != UNDEFINED) {
+		os << "\t\t-Ky                       " << (*property_ptr);
+	}
+	property_ptr = static_cast<Cproperty*>(a.kz);
+	if (property_ptr && property_ptr->type != UNDEFINED) {
+		os << "\t\t-Kz                       " << (*property_ptr);
 	}
 	property_ptr = static_cast<Cproperty*>(a.porosity);
 	if (property_ptr && property_ptr->type != UNDEFINED) {
 		os << "\t\t-porosity                 " << (*property_ptr);
-	}
-	property_ptr = static_cast<Cproperty*>(a.kx);
-	if (property_ptr && property_ptr->type != UNDEFINED) {
-		os << "\t\t-kx                       " << (*property_ptr);
-	}
-	property_ptr = static_cast<Cproperty*>(a.ky);
-	if (property_ptr && property_ptr->type != UNDEFINED) {
-		os << "\t\t-ky                       " << (*property_ptr);
-	}
-	property_ptr = static_cast<Cproperty*>(a.kz);
-	if (property_ptr && property_ptr->type != UNDEFINED) {
-		os << "\t\t-kz                       " << (*property_ptr);
 	}
 	property_ptr = static_cast<Cproperty*>(a.storage);
 	if (property_ptr && property_ptr->type != UNDEFINED) {

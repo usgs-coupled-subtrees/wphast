@@ -43,7 +43,83 @@ CMainFrame::CMainFrame()
 
 CMainFrame::~CMainFrame()
 {
+#if defined(_DEBUG)
+   if (m_CheckBitmap.m_hObject)
+      m_CheckBitmap.DeleteObject();
+
+   if (m_UnCheckBitmap.m_hObject)
+      m_UnCheckBitmap.DeleteObject();
+#endif
 }
+
+//{{
+HBITMAP IconToBitmap(UINT uIcon, COLORREF transparentColor)
+{
+	// HICON hIcon = (HICON)LoadImage(g_hResInst, MAKEINTRESOURCE(uIcon), IMAGE_ICON, 10, 10, LR_DEFAULTCOLOR);
+	HICON hIcon = (HICON)LoadImage(::AfxGetInstanceHandle(), MAKEINTRESOURCE(uIcon), IMAGE_ICON, 10, 10, LR_DEFAULTCOLOR);
+	if (!hIcon)
+		return NULL;
+
+	RECT     rect;
+
+	rect.right = ::GetSystemMetrics(SM_CXMENUCHECK);
+	rect.bottom = ::GetSystemMetrics(SM_CYMENUCHECK);
+
+	rect.left =
+		rect.top  = 0;
+
+	HWND desktop    = ::GetDesktopWindow();
+	if (desktop == NULL)
+		return NULL;
+
+	HDC  screen_dev = ::GetDC(desktop);
+	if (screen_dev == NULL)
+		return NULL;
+
+	// Create a compatible DC
+	HDC dst_hdc = ::CreateCompatibleDC(screen_dev);
+	if (dst_hdc == NULL)
+	{
+		::ReleaseDC(desktop, screen_dev); 
+		return NULL;
+	}
+
+	// Create a new bitmap of icon size
+	HBITMAP bmp = ::CreateCompatibleBitmap(screen_dev, rect.right, rect.bottom);
+	if (bmp == NULL)
+	{
+		::DeleteDC(dst_hdc);
+		::ReleaseDC(desktop, screen_dev); 
+		return NULL;
+	}
+
+	// Select it into the compatible DC
+	HBITMAP old_dst_bmp = (HBITMAP)::SelectObject(dst_hdc, bmp);
+	if (old_dst_bmp == NULL)
+		return NULL;
+
+	// Fill the background of the compatible DC with the given colour
+	HBRUSH brush = ::CreateSolidBrush(transparentColor);
+	if (brush == NULL)
+	{
+		::DeleteDC(dst_hdc);
+		::ReleaseDC(desktop, screen_dev); 
+		return NULL;
+	}
+	::FillRect(dst_hdc, &rect, brush);
+	::DeleteObject(brush);
+
+	// Draw the icon into the compatible DC
+	::DrawIconEx(dst_hdc, 0, 0, hIcon, rect.right, rect.bottom, 0, NULL, DI_NORMAL);
+
+	// Restore settings
+	::SelectObject(dst_hdc, old_dst_bmp);
+	::DeleteDC(dst_hdc);
+	::ReleaseDC(desktop, screen_dev); 
+	DestroyIcon(hIcon);
+	return bmp;
+}
+//}}
 
 
 int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
@@ -135,7 +211,21 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_wndTreeControlBar.SetFocus();
 #endif
 
+#if defined(_DEBUG)
+   // Load bitmaps from resource. Both m_CheckBitmap and m_UnCheckBitmap
+   // are member variables of CMainFrame class of type CBitmap.
+   ASSERT(m_CheckBitmap.LoadBitmap(IDB_CHECKBITMAP));
+   ASSERT(m_UnCheckBitmap.LoadBitmap(IDB_FILE_NEW));
 
+   CBitmap* pBitmap = CBitmap::FromHandle(::IconToBitmap(IDI_ICON1, (COLORREF)GetSysColor(COLOR_MENU)));
+
+   // Associate bitmaps with the "Test" menu item. 
+   CMenu* mmenu = GetMenu();
+   CMenu* submenu = mmenu->GetSubMenu(0);
+   ///ASSERT(submenu->SetMenuItemBitmaps(ID_VIEW_AXES, MF_BYCOMMAND, &m_UnCheckBitmap, &m_CheckBitmap));
+   ///ASSERT(submenu->SetMenuItemBitmaps(ID_FILE_NEW, MF_BYCOMMAND, &m_UnCheckBitmap, &m_UnCheckBitmap));   
+   ASSERT(submenu->SetMenuItemBitmaps(ID_FILE_OPEN, MF_BYCOMMAND, pBitmap, pBitmap));   
+#endif
 	return 0;
 }
 

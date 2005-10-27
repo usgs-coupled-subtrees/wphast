@@ -1659,6 +1659,9 @@
 				RelativePath="res\bitmap1.bmp">
 			</File>
 			<File
+				RelativePath="res\bmp00001.bmp">
+			</File>
+			<File
 				RelativePath="res\checks.bmp">
 			</File>
 			<File
@@ -1680,13 +1683,22 @@
 				RelativePath="res\eyes_tree3.bmp">
 			</File>
 			<File
+				RelativePath="res\file_open.bmp">
+			</File>
+			<File
 				RelativePath="res\header.bmp">
+			</File>
+			<File
+				RelativePath="res\icon1.ico">
 			</File>
 			<File
 				RelativePath="res\idr_main.ico">
 			</File>
 			<File
 				RelativePath="res\manifest.bin">
+			</File>
+			<File
+				RelativePath="res\menurepobrowse.ico">
 			</File>
 			<File
 				RelativePath="res\null.cur">
@@ -3902,15 +3914,15 @@
 			Name="Build Logs"
 			Filter="">
 			<File
-				RelativePath="Debug\BuildLog.htm"
-				DeploymentContent="TRUE">
-			</File>
-			<File
 				RelativePath="Release\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 			<File
 				RelativePath="cppunit\BuildLog.htm"
+				DeploymentContent="TRUE">
+			</File>
+			<File
+				RelativePath="Debug\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 		</Filter>

@@ -41,6 +41,11 @@ protected:  // control bar embedded members
 	CBoxPropertiesDialogBar   m_wndDialogBarBoxProperties;
 	//CReBar      m_wndReBar;
 	//}}SRC
+#if defined(_DEBUG)
+	CBitmap m_CheckBitmap;
+	CBitmap m_UnCheckBitmap;
+#endif
+
 #endif
 
 

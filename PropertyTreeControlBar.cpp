@@ -23,6 +23,7 @@
 #include "RiverDeleteAction.h"
 #include "RiverDeletePointAction.h"
 #include "DragDropAction.h"
+#include "ZoneCreateAction.h"
 
 
 #include "ModelessPropertySheet.h"
@@ -99,6 +100,10 @@ BEGIN_MESSAGE_MAP(CPropertyTreeControlBar, CSizingControlBarCFVS7)
 	ON_WM_DESTROY()
 	ON_WM_LBUTTONDOWN()
 	ON_WM_CONTEXTMENU()
+	ON_UPDATE_COMMAND_UI(ID_EDIT_COPY, OnUpdateEditCopy)
+	ON_COMMAND(ID_EDIT_COPY, OnEditCopy)
+	ON_UPDATE_COMMAND_UI(ID_EDIT_PASTE, OnUpdateEditPaste)
+	ON_COMMAND(ID_EDIT_PASTE, OnEditPaste)
 END_MESSAGE_MAP()
 /**
 NM_CLICK
@@ -136,7 +141,7 @@ CPropertyTreeControlBar::CPropertyTreeControlBar(void)
 	str.Format("WPhast:%d", _getpid());
 
 	this->m_cfPID   = (CLIPFORMAT)::RegisterClipboardFormat(str);
-	this->m_cfMedia = (CLIPFORMAT)::RegisterClipboardFormat(_T("CMediaZoneActor"));
+	this->m_cfMedia = (CLIPFORMAT)::RegisterClipboardFormat(_T("WPhast:CMediaZoneActor"));
 }
 
 CPropertyTreeControlBar::~CPropertyTreeControlBar(void)
@@ -1771,7 +1776,7 @@ bool CPropertyTreeControlBar::IsNodeDraggable(CTreeCtrlNode dragNode, COleDataSo
 			if (CICZoneActor *pZone = CICZoneActor::SafeDownCast((vtkObject*)dragNode.GetData()))
 			{
 				ASSERT(pZone->GetType() == CICZoneActor::IC_HEAD);
-				if (pZone->GetType() == CICZoneActor::IC_HEAD)
+				if (pZone->GetType() == CICZoneActor::IC_HEAD && !pZone->GetDefault())
 				{
 					oss << pZone->GetHeadIC();
 					oss << "\n";
@@ -1807,7 +1812,7 @@ bool CPropertyTreeControlBar::IsNodeDraggable(CTreeCtrlNode dragNode, COleDataSo
 			if (CICZoneActor *pZone = CICZoneActor::SafeDownCast((vtkObject*)dragNode.GetData()))
 			{
 				ASSERT(pZone->GetType() == CICZoneActor::IC_CHEM);
-				if (pZone->GetType() == CICZoneActor::IC_CHEM)
+				if (pZone->GetType() == CICZoneActor::IC_CHEM && !pZone->GetDefault())
 				{
 					oss << pZone->GetChemIC();
 					oss << "\n";
@@ -2028,3 +2033,169 @@ void CPropertyTreeControlBar::OnDragLeave(CWnd* pWnd)
 	TRACE("CPropertyTreeControlBar::OnDragLeave\n");
 }
 
+bool CPropertyTreeControlBar::IsNodeCopyable(CTreeCtrlNode copyNode, COleDataSource *pOleDataSource)
+{
+	std::ostringstream oss;
+
+	if (copyNode.GetParent() == this->GetMediaNode())
+	{
+		if (copyNode.GetData())
+		{
+			if (CMediaZoneActor* pZone = CMediaZoneActor::SafeDownCast((vtkObject*)copyNode.GetData()))
+			{
+				if (pOleDataSource)
+				{
+					CGridElt elt = pZone->GetGridElt();
+
+					if (pZone->GetDefault() && elt.active == NULL)
+					{
+						elt.active = new Cproperty(1);
+					}
+
+					// CF_TEXT
+					//
+
+					oss << "MEDIA\n";
+					oss << elt;
+					oss << "\n";
+
+					std::string s = oss.str();
+					HGLOBAL hGlobal = ::GlobalAlloc(GMEM_MOVEABLE, s.length() + 1);
+					LPTSTR pData = (LPTSTR)::GlobalLock(hGlobal);
+
+					::lstrcpy(pData, s.c_str());
+					::GlobalUnlock(hGlobal);
+
+					pOleDataSource->CacheGlobalData(CF_TEXT, hGlobal);
+
+					// copy Media clip format
+					//
+					CSharedFile globFile;
+					CArchive ar(&globFile, CArchive::store);
+
+					CGridElt elt2 = pZone->GetGridElt();
+					elt.Serialize(ar);
+
+					ar.Close(); // this is? req'd
+
+					pOleDataSource->CacheGlobalData(this->m_cfMedia, globFile.Detach());
+				}
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+bool CPropertyTreeControlBar::IsNodePasteable(CTreeCtrlNode pasteNode, bool bDoPaste)
+{
+	if (pasteNode.IsNodeAncestor(this->GetMediaNode()))
+	{
+		COleDataObject dataObject;
+		if (dataObject.AttachClipboard() && dataObject.IsDataAvailable(this->m_cfMedia))
+		{
+			if (bDoPaste)
+			{
+				HGLOBAL hGlob = dataObject.GetGlobalData(this->m_cfMedia);
+				if (hGlob != NULL)
+				{
+					CSharedFile globFile;
+					globFile.SetHandle(hGlob, FALSE);
+					CArchive ar(&globFile, CArchive::load);
+					CGridElt elt;
+					elt.Serialize(ar);
+					ar.Close();
+
+					if (CWPhastDoc *pWPhastDoc = this->GetDocument())
+					{
+						CZoneCreateAction<CMediaZoneActor>* pAction = new CZoneCreateAction<CMediaZoneActor>(
+							pWPhastDoc,
+							pWPhastDoc->GetNextZoneName(),
+							elt.zone->x1,
+							elt.zone->x2,
+							elt.zone->y1,
+							elt.zone->y2,
+							elt.zone->z1,
+							elt.zone->z2
+							);
+						pAction->GetZoneActor()->SetGridElt(elt);
+						pWPhastDoc->Execute(pAction);
+						return true; // success
+					}
+				}
+				return false; // unable to paste
+			}
+			return true; // success
+		}
+	}
+	return false;
+}
+
+void CPropertyTreeControlBar::OnUpdateEditCopy(CCmdUI *pCmdUI)
+{
+	if (CTreeCtrlEx *pTreeCtrlEx = this->GetTreeCtrlEx())
+	{
+		CTreeCtrlNode dragNode = pTreeCtrlEx->GetSelectedItem();
+		if (this->IsNodeCopyable(dragNode, NULL))
+		{
+			pCmdUI->Enable(TRUE);
+			return;
+		}
+	}
+	pCmdUI->Enable(FALSE);
+}
+
+void CPropertyTreeControlBar::OnEditCopy()
+{
+	if (CTreeCtrlEx *pTreeCtrlEx = this->GetTreeCtrlEx())
+	{
+		CWaitCursor wait;
+
+		CTreeCtrlNode dragNode = pTreeCtrlEx->GetSelectedItem();
+		COleDataSource* pSrcItem = new COleDataSource();
+
+		if (pSrcItem && this->IsNodeCopyable(dragNode, pSrcItem))
+		{
+			pSrcItem->SetClipboard();
+		}
+		else
+		{
+			delete pSrcItem;
+			// sound warning message
+			::MessageBeep(MB_ICONEXCLAMATION);
+		}
+	}
+}
+
+void CPropertyTreeControlBar::OnUpdateEditPaste(CCmdUI *pCmdUI)
+{
+	if (CTreeCtrlEx *pTreeCtrlEx = this->GetTreeCtrlEx())
+	{
+		CTreeCtrlNode pasteNode = pTreeCtrlEx->GetSelectedItem();
+		if (pasteNode)
+		{
+			if (this->IsNodePasteable(pasteNode, false))
+			{
+				pCmdUI->Enable(TRUE);
+				return;
+			}
+		}
+	}
+	pCmdUI->Enable(FALSE);
+}
+
+void CPropertyTreeControlBar::OnEditPaste()
+{
+	if (CTreeCtrlEx *pTreeCtrlEx = this->GetTreeCtrlEx())
+	{
+		CTreeCtrlNode pasteNode = pTreeCtrlEx->GetSelectedItem();
+		if (pasteNode)
+		{
+			if (!(this->IsNodePasteable(pasteNode, true)))
+			{
+				// sound warning message
+				::MessageBeep(MB_ICONEXCLAMATION);
+			}
+		}
+	}
+}

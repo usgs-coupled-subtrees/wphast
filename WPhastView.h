@@ -207,6 +207,7 @@ public:
 	afx_msg void OnViewFromPrevDirection();
 	afx_msg void OnUpdateToolsSelectObject(CCmdUI *pCmdUI);
 	afx_msg void OnToolsSelectObject();
+	virtual BOOL OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo);
 };
 
 #ifndef _DEBUG  // debug version in WPhastView.cpp

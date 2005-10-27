@@ -2051,3 +2051,22 @@ void CWPhastView::OnToolsSelectObject()
 		}
 	}
 }
+
+BOOL CWPhastView::OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo)
+{
+	// TODO: Add your specialized code here and/or call the base class
+	if (CWPhastDoc* pDoc = this->GetDocument())
+	{
+		if (CPropertyTreeControlBar *pPropertyTreeControlBar = pDoc->GetPropertyTreeControlBar())
+		{
+			if (nCode == CN_COMMAND || nCode == CN_UPDATE_COMMAND_UI)
+			{
+				if (pPropertyTreeControlBar->OnCmdMsg(nID, nCode, pExtra, pHandlerInfo))
+				{
+					return TRUE;
+				}
+			}
+		}
+	}
+	return __super::OnCmdMsg(nID, nCode, pExtra, pHandlerInfo);
+}

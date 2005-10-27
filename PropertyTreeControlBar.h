@@ -157,9 +157,16 @@ protected:
 	CLIPFORMAT m_cfPID;
 
 	bool IsNodeDraggable(CTreeCtrlNode dragNode, COleDataSource &oleDataSource);
+	bool IsNodeCopyable(CTreeCtrlNode copyNode, COleDataSource *pOleDataSource);
+	bool IsNodePasteable(CTreeCtrlNode pasteNode, bool bDoPaste);
 
 	virtual DROPEFFECT OnDragEnter(CWnd* pWnd, COleDataObject* pDataObject, DWORD dwKeyState, CPoint point);
 	virtual DROPEFFECT OnDragOver(CWnd* pWnd, COleDataObject* pDataObject, DWORD dwKeyState, CPoint point);
 	virtual BOOL OnDrop(CWnd* pWnd, COleDataObject* pDataObject, DROPEFFECT dropEffect, CPoint point);
 	virtual void OnDragLeave(CWnd* pWnd);
+public:
+	afx_msg void OnUpdateEditCopy(CCmdUI *pCmdUI);
+	afx_msg void OnEditCopy();
+	afx_msg void OnUpdateEditPaste(CCmdUI *pCmdUI);
+	afx_msg void OnEditPaste();
 };

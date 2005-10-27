@@ -1487,7 +1487,7 @@ CPropertyTreeControlBar* CWPhastDoc::GetPropertyTreeControlBar() const
 		ASSERT_VALID(pTree);
 		return pTree;
 	}
-	ASSERT(FALSE);
+	///ASSERT(FALSE);
 	return 0;
 }
 
