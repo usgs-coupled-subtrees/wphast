@@ -153,8 +153,11 @@ protected:
 	CPropTreeOleDropTarget m_OleDropTarget;
 	CTreeCtrlNode m_dragNode;
 
-	CLIPFORMAT m_cfMedia;
 	CLIPFORMAT m_cfPID;
+	CLIPFORMAT m_cfGridElt;
+	CLIPFORMAT m_cfHeadIC;
+	CLIPFORMAT m_cfChemIC;
+	CLIPFORMAT m_cfBC;
 
 	bool IsNodeDraggable(CTreeCtrlNode dragNode, COleDataSource &oleDataSource);
 	bool IsNodeCopyable(CTreeCtrlNode copyNode, COleDataSource *pOleDataSource);
@@ -169,4 +172,6 @@ public:
 	afx_msg void OnEditCopy();
 	afx_msg void OnUpdateEditPaste(CCmdUI *pCmdUI);
 	afx_msg void OnEditPaste();
+	afx_msg void OnUpdateEditCut(CCmdUI *pCmdUI);
+	afx_msg void OnEditCut();
 };

@@ -144,7 +144,6 @@ void CZone::Serialize(CArchive& ar)
 	else
 	{
 		// zone_defined
-        ASSERT(this->zone_defined == TRUE);
 		ar >> this->zone_defined;
 
 		// x1

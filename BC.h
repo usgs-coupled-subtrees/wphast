@@ -33,6 +33,7 @@ public:
 	void Dump(CDumpContext& dc)const;
 #endif
 	void Serialize(bool bStoring, hid_t loc_id);
+	void Serialize(CArchive& ar);
 	void Merge(const CBC& src);
 	void ClearProperties(void);
 	bool ContainsProperties(void)const;

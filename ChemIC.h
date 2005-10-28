@@ -12,8 +12,8 @@ extern "C" {
 }
 
 #include <iosfwd> // std::ostream
-class CChemIC :
-	public chem_ic
+
+class CChemIC : public chem_ic
 {
 public:
 	// ctor
@@ -30,6 +30,7 @@ public:
 	static CChemIC Full(void);
 
 	void Serialize(bool bStoring, hid_t loc_id);
+	void Serialize(CArchive& ar);
 	friend std::ostream& operator<< (std::ostream &os, const CChemIC &a);
 
 private:

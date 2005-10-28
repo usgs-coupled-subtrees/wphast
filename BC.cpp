@@ -520,6 +520,120 @@ void CBC::Serialize(bool bStoring, hid_t loc_id)
 	}
 }
 
+void CBC::Serialize(CArchive& ar)
+{
+	static const char szCBC[] = "CBC";
+	static int version = 1;
+
+	CString type;
+	int ver;
+
+	// type and version header
+	//
+	if (ar.IsStoring())
+	{
+		// store type as string
+		//
+		type = szCBC;
+		ar << type;
+
+		// store version in case changes need to be made
+		ar << version;
+	}
+	else
+	{
+		// read type as string
+		//
+		ar >> type;
+		ASSERT(type.Compare(szCBC) == 0);
+
+		// read version in case changes need to be made
+		ar >> ver;
+		ASSERT(ver == version);
+	}
+
+	// zone
+	if (!this->zone)
+	{
+		this->zone = new CZone();
+	}
+	static_cast<CZone*>(this->zone)->Serialize(ar);
+
+	// properties
+	static const char szType[]     = "bc_type";
+	static const char szFace[]     = "face";
+	static const char szSolType[]  = "bc_solution_type";
+	static const char szK[]        = "bc_k";
+	static const char szThick[]    = "bc_thick";
+	static const char szFlux[]     = "bc_flux";
+	static const char szHead[]     = "bc_head";
+	static const char szSolution[] = "bc_solution";
+
+
+	// bc_type
+	if (ar.IsStoring())
+	{
+		ar << this->bc_type;
+	}
+	else
+	{
+		ar >> this->bc_type;
+	}
+
+	// face
+	if (ar.IsStoring())
+	{
+		ar << this->face;
+	}
+	else
+	{
+		ar >> this->face;
+	}
+
+	// bc_solution_type
+	if (ar.IsStoring())
+	{
+		ar << this->bc_solution_type;
+	}
+	else
+	{
+		ar >> this->bc_solution_type;
+	}
+
+	// properties
+	Cproperty::Serial(ar, szK,     &this->bc_k);
+	Cproperty::Serial(ar, szThick, &this->bc_thick);
+
+	// CTimeSeries<> properties
+	this->m_bc_flux.Serialize(ar);
+	this->m_bc_head.Serialize(ar);
+	this->m_bc_solution.Serialize(ar);
+
+	// type and version footer
+	//
+	if (ar.IsStoring())
+	{
+		// store type as string
+		//
+		type = szCBC;
+		ar << type;
+
+		// store version in case changes need to be made
+		ar << version;
+	}
+	else
+	{
+		// read type as string
+		//
+		ar >> type;
+		ASSERT(type.Compare(szCBC) == 0);
+
+		// read version in case changes need to be made
+		ar >> ver;
+		ASSERT(ver == version);
+	}
+}
+
 std::ostream& operator<< (std::ostream &os, const CBC &a)
 {
 	if (!a.ContainsProperties()) {

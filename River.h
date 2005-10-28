@@ -82,6 +82,7 @@ public:
 	}
 
 	void Serialize(bool bStoring, hid_t loc_id);
+	void Serialize(CArchive& ar) { ASSERT(FALSE); } // not implemented
 
 	friend std::ostream& operator<< (std::ostream &os, const CRiverState &a);
 

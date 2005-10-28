@@ -208,3 +208,94 @@ void Ctime::Serialize(bool bStoring, hid_t loc_id)
 		}
 	}
 }
+
+void Ctime::Serialize(CArchive& ar)
+{
+	static const char szValue[]        = "value";
+	static const char szType[]         = "type";
+	static const char szInput[]        = "input";
+	static const char szValueDefined[] = "value_defined";
+
+	// value_defined
+	if (ar.IsStoring())
+	{
+		ar << this->value_defined;
+	}
+	else
+	{
+		ar >> this->value_defined;
+	}
+
+	// value
+	if (ar.IsStoring())
+	{
+		ar << this->value;
+	}
+	else
+	{
+		ar >> this->value;
+	}
+
+	// type
+	if (ar.IsStoring())
+	{
+		ar << this->type;
+	}
+	else
+	{
+		ar >> this->type;
+	}
+
+	CString temp;
+	switch (this->type)
+	{
+		case UNITS:	case STEP:
+			if (ar.IsStoring())
+			{
+				ASSERT(this->input); // NEEDS TO BE TESTED
+				temp = this->input;
+				ar << temp;
+			}
+			else
+			{
+				ar >> temp;
+				if (this->input) delete[] this->input;
+				if (temp.IsEmpty())
+				{
+					this->input = NULL;
+				}
+				else
+				{
+					this->input = new char[temp.GetLength() + 1];
+					::strcpy(this->input, temp);
+				}
+			}
+			break;
+		case UNDEFINED:
+			ASSERT(this->input == NULL);
+			break;
+		default:
+			ASSERT(FALSE);
+	}
+
+	if (ar.IsStoring())
+	{
+		// nothing else to do
+	}
+	else 
+	{
+		switch (this->type)
+		{
+			case UNITS:
+				this->SetInput(this->input);
+				break;
+			case STEP:
+				// nothing to do ???
+				break;
+			case UNDEFINED:
+				break;
+			default:
+				ASSERT(FALSE);
+		}
+	}
+}

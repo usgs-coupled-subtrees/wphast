@@ -21,6 +21,7 @@ public:
 	void AssertValid(void)const;
 #endif
 	void Serialize(bool bStoring, hid_t loc_id);
+	void Serialize(CArchive& ar);
 
 	static void SerializeCreate(const char *heading, CTimeSeries& series, hid_t loc_id);
 	static void SerializeOpen(const char *heading, CTimeSeries& series, hid_t loc_id);

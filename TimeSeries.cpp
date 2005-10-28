@@ -413,6 +413,47 @@ void CTimeSeries<T>::Serialize(bool bStoring, hid_t loc_id)
 	}
 }
 
+template<typename T>
+void CTimeSeries<T>::Serialize(CArchive& ar)
+{
+	unsigned int count;
+
+	if (ar.IsStoring())
+	{
+		count = (unsigned int)this->size();
+		ar << count;
+	}
+	else
+	{
+		ar >> count;
+	}
+
+	if (ar.IsStoring())
+	{
+		CTimeSeries<T>::iterator iter = this->begin();
+		for (; iter != this->end(); ++iter)
+		{
+			Ctime time = (*iter).first; // key is const
+			time.Serialize(ar);
+
+			(*iter).second.Serialize(ar);
+		}
+	}
+	else
+	{
+		(*this).clear();
+		for (unsigned int i = 0; i < count; ++i)
+		{
+			Ctime time;
+			time.Serialize(ar);
+
+			T t;
+			t.Serialize(ar);
+			(*this)[time] = t;
+		}
+	}
+}
+
 // specialization for CRiverState
 template<>
 CTimeSeries<CRiverState>& CTimeSeries<CRiverState>::operator=(const struct time_series& rhs)

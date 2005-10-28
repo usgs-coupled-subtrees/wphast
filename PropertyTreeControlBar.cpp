@@ -104,6 +104,8 @@ BEGIN_MESSAGE_MAP(CPropertyTreeControlBar, CSizingControlBarCFVS7)
 	ON_COMMAND(ID_EDIT_COPY, OnEditCopy)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_PASTE, OnUpdateEditPaste)
 	ON_COMMAND(ID_EDIT_PASTE, OnEditPaste)
+	ON_UPDATE_COMMAND_UI(ID_EDIT_CUT, OnUpdateEditCut)
+	ON_COMMAND(ID_EDIT_CUT, OnEditCut)
 END_MESSAGE_MAP()
 /**
 NM_CLICK
@@ -140,8 +142,11 @@ CPropertyTreeControlBar::CPropertyTreeControlBar(void)
 	CString str;
 	str.Format("WPhast:%d", _getpid());
 
-	this->m_cfPID   = (CLIPFORMAT)::RegisterClipboardFormat(str);
-	this->m_cfMedia = (CLIPFORMAT)::RegisterClipboardFormat(_T("WPhast:CMediaZoneActor"));
+	this->m_cfPID     = (CLIPFORMAT)::RegisterClipboardFormat(str);
+	this->m_cfGridElt = (CLIPFORMAT)::RegisterClipboardFormat(_T("WPhast:CGridElt"));
+	this->m_cfHeadIC  = (CLIPFORMAT)::RegisterClipboardFormat(_T("WPhast:CHeadIC"));
+	this->m_cfChemIC  = (CLIPFORMAT)::RegisterClipboardFormat(_T("WPhast:CChemIC"));
+	this->m_cfBC      = (CLIPFORMAT)::RegisterClipboardFormat(_T("WPhast:CBC"));	
 }
 
 CPropertyTreeControlBar::~CPropertyTreeControlBar(void)
@@ -2054,7 +2059,6 @@ bool CPropertyTreeControlBar::IsNodeCopyable(CTreeCtrlNode copyNode, COleDataSou
 
 					// CF_TEXT
 					//
-
 					oss << "MEDIA\n";
 					oss << elt;
 					oss << "\n";
@@ -2072,18 +2076,132 @@ bool CPropertyTreeControlBar::IsNodeCopyable(CTreeCtrlNode copyNode, COleDataSou
 					//
 					CSharedFile globFile;
 					CArchive ar(&globFile, CArchive::store);
-
 					CGridElt elt2 = pZone->GetGridElt();
 					elt.Serialize(ar);
 
-					ar.Close(); // this is? req'd
+					ar.Close();
 
-					pOleDataSource->CacheGlobalData(this->m_cfMedia, globFile.Detach());
+					pOleDataSource->CacheGlobalData(this->m_cfGridElt, globFile.Detach());
 				}
 				return true;
 			}
 		}
 	}
+
+	if (copyNode.GetParent() == this->GetICHeadNode())
+	{
+		if (copyNode.GetData())
+		{
+			if (CICZoneActor* pZone = CICZoneActor::SafeDownCast((vtkObject*)copyNode.GetData()))
+			{
+				if (pOleDataSource)
+				{
+					CHeadIC headIC = pZone->GetHeadIC();
+
+					// CF_TEXT
+					//
+					oss << headIC;
+					oss << "\n";
+
+					std::string s = oss.str();
+					HGLOBAL hGlobal = ::GlobalAlloc(GMEM_MOVEABLE, s.length() + 1);
+					LPTSTR pData = (LPTSTR)::GlobalLock(hGlobal);
+
+					::lstrcpy(pData, s.c_str());
+					::GlobalUnlock(hGlobal);
+
+					pOleDataSource->CacheGlobalData(CF_TEXT, hGlobal);
+
+					// copy HeadIC clip format
+					//
+					CSharedFile globFile;
+					CArchive ar(&globFile, CArchive::store);
+					headIC.Serialize(ar);
+					ar.Close();
+
+					pOleDataSource->CacheGlobalData(this->m_cfHeadIC, globFile.Detach());
+				}
+				return true;
+			}
+		}
+	}
+
+	if (copyNode.GetParent() == this->GetICChemNode())
+	{
+		if (copyNode.GetData())
+		{
+			if (CICZoneActor* pZone = CICZoneActor::SafeDownCast((vtkObject*)copyNode.GetData()))
+			{
+				if (pOleDataSource)
+				{
+					CChemIC chemIC = pZone->GetChemIC();
+
+					// CF_TEXT
+					//
+					oss << chemIC;
+					oss << "\n";
+
+					std::string s = oss.str();
+					HGLOBAL hGlobal = ::GlobalAlloc(GMEM_MOVEABLE, s.length() + 1);
+					LPTSTR pData = (LPTSTR)::GlobalLock(hGlobal);
+
+					::lstrcpy(pData, s.c_str());
+					::GlobalUnlock(hGlobal);
+
+					pOleDataSource->CacheGlobalData(CF_TEXT, hGlobal);
+
+					// copy ChemIC clip format
+					//
+					CSharedFile globFile;
+					CArchive ar(&globFile, CArchive::store);
+					chemIC.Serialize(ar);
+					ar.Close();
+
+					pOleDataSource->CacheGlobalData(this->m_cfChemIC, globFile.Detach());
+				}
+				return true;
+			}
+		}
+	}
+
+	if (copyNode.GetParent() == this->GetBCNode())
+	{
+		if (copyNode.GetData())
+		{
+			if (CBCZoneActor* pZone = CBCZoneActor::SafeDownCast((vtkObject*)copyNode.GetData()))
+			{
+				if (pOleDataSource)
+				{
+					CBC bc = pZone->GetBC();
+
+					// CF_TEXT
+					//
+					oss << bc;
+					oss << "\n";
+
+					std::string s = oss.str();
+					HGLOBAL hGlobal = ::GlobalAlloc(GMEM_MOVEABLE, s.length() + 1);
+					LPTSTR pData = (LPTSTR)::GlobalLock(hGlobal);
+
+					::lstrcpy(pData, s.c_str());
+					::GlobalUnlock(hGlobal);
+
+					pOleDataSource->CacheGlobalData(CF_TEXT, hGlobal);
+
+					// copy BC clip format
+					//
+					CSharedFile globFile;
+					CArchive ar(&globFile, CArchive::store);
+					bc.Serialize(ar);
+					ar.Close();
+
+					pOleDataSource->CacheGlobalData(this->m_cfBC, globFile.Detach());
+				}
+				return true;
+			}
+		}
+	}
+
 	return false;
 }
 
@@ -2092,11 +2210,11 @@ bool CPropertyTreeControlBar::IsNodePasteable(CTreeCtrlNode pasteNode, bool bDoP
 	if (pasteNode.IsNodeAncestor(this->GetMediaNode()))
 	{
 		COleDataObject dataObject;
-		if (dataObject.AttachClipboard() && dataObject.IsDataAvailable(this->m_cfMedia))
+		if (dataObject.AttachClipboard() && dataObject.IsDataAvailable(this->m_cfGridElt))
 		{
 			if (bDoPaste)
 			{
-				HGLOBAL hGlob = dataObject.GetGlobalData(this->m_cfMedia);
+				HGLOBAL hGlob = dataObject.GetGlobalData(this->m_cfGridElt);
 				if (hGlob != NULL)
 				{
 					CSharedFile globFile;
@@ -2128,6 +2246,132 @@ bool CPropertyTreeControlBar::IsNodePasteable(CTreeCtrlNode pasteNode, bool bDoP
 			return true; // success
 		}
 	}
+
+	if (pasteNode.IsNodeAncestor(this->GetICHeadNode()))
+	{
+		COleDataObject dataObject;
+		if (dataObject.AttachClipboard() && dataObject.IsDataAvailable(this->m_cfHeadIC))
+		{
+			if (bDoPaste)
+			{
+				HGLOBAL hGlob = dataObject.GetGlobalData(this->m_cfHeadIC);
+				if (hGlob != NULL)
+				{
+					CSharedFile globFile;
+					globFile.SetHandle(hGlob, FALSE);
+					CArchive ar(&globFile, CArchive::load);
+					CHeadIC headIC;
+					headIC.zone = new CZone();
+
+					headIC.Serialize(ar);
+					ar.Close();
+
+					if (CWPhastDoc *pWPhastDoc = this->GetDocument())
+					{
+						CZoneCreateAction<CICZoneActor>* pAction = new CZoneCreateAction<CICZoneActor>(
+							pWPhastDoc,
+							pWPhastDoc->GetNextZoneName(),
+							headIC.zone->x1,
+							headIC.zone->x2,
+							headIC.zone->y1,
+							headIC.zone->y2,
+							headIC.zone->z1,
+							headIC.zone->z2
+							);
+						pAction->GetZoneActor()->SetHeadIC(headIC);
+						pWPhastDoc->Execute(pAction);
+						return true; // success
+					}
+				}
+				return false; // unable to paste
+			}
+			return true;
+		}
+	}
+
+	if (pasteNode.IsNodeAncestor(this->GetICChemNode()))
+	{
+		COleDataObject dataObject;
+		if (dataObject.AttachClipboard() && dataObject.IsDataAvailable(this->m_cfChemIC))
+		{
+			if (bDoPaste)
+			{
+				HGLOBAL hGlob = dataObject.GetGlobalData(this->m_cfChemIC);
+				if (hGlob != NULL)
+				{
+					CSharedFile globFile;
+					globFile.SetHandle(hGlob, FALSE);
+					CArchive ar(&globFile, CArchive::load);
+					CChemIC chemIC;
+					chemIC.zone = new CZone();
+
+					chemIC.Serialize(ar);
+					ar.Close();
+
+					if (CWPhastDoc *pWPhastDoc = this->GetDocument())
+					{
+						CZoneCreateAction<CICZoneActor>* pAction = new CZoneCreateAction<CICZoneActor>(
+							pWPhastDoc,
+							pWPhastDoc->GetNextZoneName(),
+							chemIC.zone->x1,
+							chemIC.zone->x2,
+							chemIC.zone->y1,
+							chemIC.zone->y2,
+							chemIC.zone->z1,
+							chemIC.zone->z2
+							);
+						pAction->GetZoneActor()->SetChemIC(chemIC);
+						pWPhastDoc->Execute(pAction);
+						return true; // success
+					}
+				}
+				return false; // unable to paste
+			}
+			return true;
+		}
+	}
+	if (pasteNode.IsNodeAncestor(this->GetBCNode()))
+	{
+		COleDataObject dataObject;
+		if (dataObject.AttachClipboard() && dataObject.IsDataAvailable(this->m_cfBC))
+		{
+			if (bDoPaste)
+			{
+				HGLOBAL hGlob = dataObject.GetGlobalData(this->m_cfBC);
+				if (hGlob != NULL)
+				{
+					CSharedFile globFile;
+					globFile.SetHandle(hGlob, FALSE);
+					CArchive ar(&globFile, CArchive::load);
+
+					CBC bc;
+					bc.Serialize(ar);
+					ar.Close();
+
+					if (CWPhastDoc *pWPhastDoc = this->GetDocument())
+					{
+						CZoneCreateAction<CBCZoneActor>* pAction = new CZoneCreateAction<CBCZoneActor>(
+							pWPhastDoc,
+							pWPhastDoc->GetNextZoneName(),
+							bc.zone->x1,
+							bc.zone->x2,
+							bc.zone->y1,
+							bc.zone->y2,
+							bc.zone->z1,
+							bc.zone->z2
+							);
+						pAction->GetZoneActor()->SetBC(bc);
+						pWPhastDoc->Execute(pAction);
+						return true; // success
+					}
+				}
+				return false; // unable to paste
+			}
+			return true;
+		}
+	}
+
+
 	return false;
 }
 
@@ -2196,6 +2440,74 @@ void CPropertyTreeControlBar::OnEditPaste()
 				// sound warning message
 				::MessageBeep(MB_ICONEXCLAMATION);
 			}
+		}
+	}
+}
+
+void CPropertyTreeControlBar::OnUpdateEditCut(CCmdUI *pCmdUI)
+{
+	if (CTreeCtrlEx *pTreeCtrlEx = this->GetTreeCtrlEx())
+	{
+		CTreeCtrlNode dragNode = pTreeCtrlEx->GetSelectedItem();
+		COleDataSource source;
+		if (this->IsNodeDraggable(dragNode, source))
+		{
+			pCmdUI->Enable(TRUE);
+			return;
+		}
+	}
+	pCmdUI->Enable(FALSE);
+}
+
+void CPropertyTreeControlBar::OnEditCut()
+{
+	if (CTreeCtrlEx *pTreeCtrlEx = this->GetTreeCtrlEx())
+	{
+		CWaitCursor wait;
+		CTreeCtrlNode cutNode = pTreeCtrlEx->GetSelectedItem();
+
+		COleDataSource source;
+		if (this->IsNodeDraggable(cutNode, source))
+		{
+			COleDataSource* pOleDataSource = new COleDataSource();
+			if (pOleDataSource && this->IsNodeCopyable(cutNode, pOleDataSource))
+			{
+// COMMENT: {10/27/2005 11:59:29 PM}				//{{
+// COMMENT: {10/27/2005 11:59:29 PM}				// store node name for pasting into same process
+// COMMENT: {10/27/2005 11:59:29 PM}				if (cutNode.GetData())
+// COMMENT: {10/27/2005 11:59:29 PM}				{
+// COMMENT: {10/27/2005 11:59:29 PM}					if (CZoneActor* pZone = CZoneActor::SafeDownCast((vtkObject*)cutNode.GetData()))
+// COMMENT: {10/27/2005 11:59:29 PM}					{
+// COMMENT: {10/27/2005 11:59:29 PM}						CString name(pZone->GetName());
+// COMMENT: {10/27/2005 11:59:29 PM}						CSharedFile globFile;
+// COMMENT: {10/27/2005 11:59:29 PM}						CArchive ar(&globFile, CArchive::store);
+// COMMENT: {10/27/2005 11:59:29 PM}						ar << name
+// COMMENT: {10/27/2005 11:59:29 PM}						ar.Close();
+// COMMENT: {10/27/2005 11:59:29 PM}						pOleDataSource->CacheGlobalData(this->m_cfPID, globFile.Detach());
+// COMMENT: {10/27/2005 11:59:29 PM}					}
+// COMMENT: {10/27/2005 11:59:29 PM}				}
+// COMMENT: {10/27/2005 11:59:29 PM}				//}}
+
+				pOleDataSource->SetClipboard();
+
+				//{{
+				NMTVKEYDOWN keydown;
+				keydown.wVKey = VK_DELETE;
+				LRESULT result;
+				this->OnKeyDown((NMHDR*)&keydown, &result);
+				//}}
+			}
+			else
+			{
+				delete pOleDataSource;
+				// sound warning message
+				::MessageBeep(MB_ICONEXCLAMATION);
+			}
+		}
+		else
+		{
+			// sound warning message
+			::MessageBeep(MB_ICONEXCLAMATION);
 		}
 	}
 }

@@ -32,6 +32,7 @@ public:
 	static CHeadIC Full(void);
 
 	void Serialize(bool bStoring, hid_t loc_id);
+	void Serialize(CArchive& ar);
 	friend std::ostream& operator<< (std::ostream &os, const CHeadIC &a);
 
 

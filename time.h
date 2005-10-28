@@ -34,4 +34,5 @@ public:
 	void SetValue(double dValue);
 
 	void Serialize(bool bStoring, hid_t loc_id);
+	void Serialize(CArchive& ar);
 };

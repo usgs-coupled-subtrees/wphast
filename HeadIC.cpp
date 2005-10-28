@@ -111,6 +111,71 @@ void CHeadIC::Serialize(bool bStoring, hid_t loc_id)
 	}
 }
 
+void CHeadIC::Serialize(CArchive& ar)
+{
+	static const char szCHeadIC[] = "CHeadIC";
+	static int version = 1;
+
+	CString type;
+	int ver;
+
+	// type and version header
+	//
+	if (ar.IsStoring())
+	{
+		// store type as string
+		//
+		type = szCHeadIC;
+		ar << type;
+
+		// store version in case changes need to be made
+		ar << version;
+	}
+	else
+	{
+		// read type as string
+		//
+		ar >> type;
+		ASSERT(type.Compare(szCHeadIC) == 0);
+
+		// read version in case changes need to be made
+		ar >> ver;
+		ASSERT(ver == version);
+	}
+
+	// zone
+	ASSERT(this->zone);
+	static_cast<CZone*>(this->zone)->Serialize(ar);
+
+
+	// properties
+	static const char szHead[] = "head";
+	Cproperty::Serial(ar, szHead, &this->head);
+
+	// type and version footer
+	//
+	if (ar.IsStoring())
+	{
+		// store type as string
+		//
+		type = szCHeadIC;
+		ar << type;
+
+		// store version in case changes need to be made
+		ar << version;
+	}
+	else
+	{
+		// read type as string
+		//
+		ar >> type;
+		ASSERT(type.Compare(szCHeadIC) == 0);
+
+		// read version in case changes need to be made
+		ar >> ver;
+		ASSERT(ver == version);
+	}
+}
 
 std::ostream& operator<< (std::ostream &os, const CHeadIC &a)
 {

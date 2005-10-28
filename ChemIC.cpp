@@ -193,8 +193,6 @@ std::ostream& operator<< (std::ostream &os, const CChemIC &a)
 
 void CChemIC::Serialize(bool bStoring, hid_t loc_id)
 {
-	static const char szMask[]              = "mask";
-
 	static const char szSolution[]          = "solution";
 	static const char szEquilibriumPhases[] = "equilibrium_phases";
 	static const char szExchange[]          = "exchange";
@@ -226,6 +224,85 @@ void CChemIC::Serialize(bool bStoring, hid_t loc_id)
 		Cproperty::SerializeOpen(szGasPhase,          (Cproperty**)&this->gas_phase,          loc_id);
 		Cproperty::SerializeOpen(szSolidSolutions,    (Cproperty**)&this->solid_solutions,    loc_id);
 		Cproperty::SerializeOpen(szKinetics,          (Cproperty**)&this->kinetics,           loc_id);
+	}
+}
+
+void CChemIC::Serialize(CArchive& ar)
+{
+	static const char szCChemIC[] = "CChemIC";
+	static int version = 1;
+
+	CString type;
+	int ver;
+
+	// type and version header
+	//
+	if (ar.IsStoring())
+	{
+		// store type as string
+		//
+		type = szCChemIC;
+		ar << type;
+
+		// store version in case changes need to be made
+		ar << version;
+	}
+	else
+	{
+		// read type as string
+		//
+		ar >> type;
+		ASSERT(type.Compare(szCChemIC) == 0);
+
+		// read version in case changes need to be made
+		ar >> ver;
+		ASSERT(ver == version);
+	}
+
+	// zone
+	ASSERT(this->zone);
+	static_cast<CZone*>(this->zone)->Serialize(ar);
+
+
+	// properties
+	static const char szSolution[]          = "solution";
+	static const char szEquilibriumPhases[] = "equilibrium_phases";
+	static const char szExchange[]          = "exchange";
+	static const char szSurface[]           = "surface";
+	static const char szGasPhase[]          = "gas_phase";
+	static const char szSolidSolutions[]    = "solid_solutions";
+	static const char szKinetics[]          = "kinetics";
+
+	Cproperty::Serial(ar, szSolution,          &this->solution);
+	Cproperty::Serial(ar, szEquilibriumPhases, &this->equilibrium_phases);
+	Cproperty::Serial(ar, szExchange,          &this->exchange);
+	Cproperty::Serial(ar, szSurface,           &this->surface);
+	Cproperty::Serial(ar, szGasPhase,          &this->gas_phase);
+	Cproperty::Serial(ar, szSolidSolutions,    &this->solid_solutions);
+	Cproperty::Serial(ar, szKinetics,          &this->kinetics);
+
+	// type and version footer
+	//
+	if (ar.IsStoring())
+	{
+		// store type as string
+		//
+		type = szCChemIC;
+		ar << type;
+
+		// store version in case changes need to be made
+		ar << version;
+	}
+	else
+	{
+		// read type as string
+		//
+		ar >> type;
+		ASSERT(type.Compare(szCChemIC) == 0);
+
+		// read version in case changes need to be made
+		ar >> ver;
+		ASSERT(ver == version);
 	}
 }
 
