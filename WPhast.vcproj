@@ -34,7 +34,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="UxTheme.lib $(DEV_VTK42_LINK) vtkParallel.lib hdf5ddll.lib"
+				AdditionalDependencies="$(DEV_VTK42_LINK) vtkParallel.lib hdf5ddll.lib"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="$(DEV_VTK42_LIB);$(DEV_HDF5_LIBDLL_D)"
 				GenerateDebugInformation="TRUE"
@@ -87,7 +87,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="UxTheme.lib $(DEV_VTK42_LINK) vtkParallel.lib hdf5dll.lib"
+				AdditionalDependencies="$(DEV_VTK42_LINK) vtkParallel.lib hdf5dll.lib"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="$(DEV_VTK42_VS7_DLL_LIB);$(DEV_HDF5_LIBDLL)"
 				GenerateDebugInformation="TRUE"
@@ -140,7 +140,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="UxTheme.lib OpenGL32.Lib hdf5ddll.lib $(DEV_VTK42_LINK)"
+				AdditionalDependencies="OpenGL32.Lib hdf5ddll.lib $(DEV_VTK42_LINK)"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="$(DEV_VTK44_MEM_LIB_D);$(DEV_HDF5_LIBDLL_D)"
 				GenerateDebugInformation="TRUE"
@@ -192,7 +192,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="UxTheme.lib cppunitdVS7.lib OpenGL32.Lib hdf5ddll.lib $(DEV_VTK42_LINK)"
+				AdditionalDependencies="cppunitdVS7.lib OpenGL32.Lib hdf5ddll.lib $(DEV_VTK42_LINK)"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="$(DEV_CPPUNIT_LIB);$(DEV_VTK42_MEM_LIB_D);$(DEV_HDF5_LIBDLL_D)"
 				DelayLoadDLLs=""
@@ -246,7 +246,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="UxTheme.lib $(DEV_VTK42_LINK) vtkParallel.lib hdf5dll.lib"
+				AdditionalDependencies="$(DEV_VTK42_LINK) vtkParallel.lib hdf5dll.lib"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="$(DEV_VTK42_VS7_DLL_LIB);$(DEV_HDF5_LIBDLL)"
 				GenerateDebugInformation="TRUE"
@@ -300,7 +300,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="UxTheme.lib $(DEV_VTK42_LINK) vtkParallel.lib hdf5ddll.lib"
+				AdditionalDependencies="$(DEV_VTK42_LINK) vtkParallel.lib hdf5ddll.lib"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="$(DEV_VTK42_LIB);$(DEV_HDF5_LIBDLL_D)"
 				GenerateDebugInformation="TRUE"
@@ -352,7 +352,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="UxTheme.lib cppunitdVS7.lib OpenGL32.Lib hdf5ddll.lib $(DEV_VTK42_LINK)"
+				AdditionalDependencies="cppunitdVS7.lib OpenGL32.Lib hdf5ddll.lib $(DEV_VTK42_LINK)"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="$(DEV_CPPUNIT_LIB);$(DEV_VTK44_MEM_LIB_D);$(DEV_HDF5_LIBDLL_D)"
 				DelayLoadDLLs=""
@@ -3914,15 +3914,15 @@
 			Name="Build Logs"
 			Filter="">
 			<File
-				RelativePath="Release\BuildLog.htm"
-				DeploymentContent="TRUE">
-			</File>
-			<File
 				RelativePath="cppunit\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 			<File
 				RelativePath="Debug\BuildLog.htm"
+				DeploymentContent="TRUE">
+			</File>
+			<File
+				RelativePath="Release\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 		</Filter>

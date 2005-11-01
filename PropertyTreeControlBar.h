@@ -2,11 +2,9 @@
 #include "sizecbar/scbarcfvs7.h"
 #include "IObserver.h"
 
-
 #include "Tree.h"
 #include "PropTreeOleDropTarget.h"
 
-//#include "structs.h"
 class vtkObject;
 
 class CUnits;
@@ -19,21 +17,9 @@ class CTimeControl2;
 class CPrintFreq;
 class CZoneActor;
 class CWPhastDoc;
-
-////class CZoneLODActor;
-class vtkProp3D;
 class CGridActor;
-
 class CModelessPropertySheet;
-class CGridPropertyPage2;
 
-//class vtkPropCollection;
-
-//// axes
-//class vtkAxes;
-//class vtkTubeFilter;
-//class vtkPolyDataMapper;
-//class vtkActor;
 
 #ifndef baseCPropertyTreeControlBar
 #define baseCPropertyTreeControlBar CSizingControlBarCFVS7

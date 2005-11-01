@@ -298,12 +298,12 @@ void CPropertyTreeControlBar::OnNMClk(NMHDR* pNMHDR, LRESULT* pResult)
 	if (!ht.hItem) return;
 	if (!(TVHT_ONITEMSTATEICON & ht.flags)) return;
 
-
 	// determine next state
 	//
-	CTreeCtrlNode item(ht.hItem, &this->m_wndTree);
+	CTreeCtrlNode item(ht.hItem, this->GetTreeCtrlEx());
 	UINT nNewState;
-	switch (this->GetNodeCheck(item)) {
+	switch (this->GetNodeCheck(item))
+	{
 		case BST_UNCHECKED:
 			// currently unchecked
 			nNewState = BST_CHECKED;
@@ -326,31 +326,8 @@ void CPropertyTreeControlBar::OnNMClk(NMHDR* pNMHDR, LRESULT* pResult)
 	//
 	if (CWPhastDoc *pDoc = this->GetDocument())
 	{
-// COMMENT: {9/8/2004 5:10:45 PM}		// HACK {{
-// COMMENT: {9/8/2004 5:10:45 PM}		if (item == this->GetWellsNode())
-// COMMENT: {9/8/2004 5:10:45 PM}		{
-// COMMENT: {9/8/2004 5:10:45 PM}			pDoc->GetPropAssemblyWells()->SetVisibility(nNewState == BST_CHECKED);
-// COMMENT: {9/8/2004 5:10:45 PM}			pDoc->Notify(this, WPN_VISCHANGED, 0, pDoc->GetPropAssemblyWells());
-// COMMENT: {9/8/2004 5:10:45 PM}		}
-// COMMENT: {9/8/2004 5:10:45 PM}		// HACK }}
-
 		pDoc->UpdateAllViews(0);
 	}
-
-// COMMENT: {7/13/2004 4:08:16 PM}	if (CWPhastDoc *pDoc = this->GetDocument()) {
-// COMMENT: {7/13/2004 4:08:16 PM}		if (item == this->m_nodeMedia) {
-// COMMENT: {7/13/2004 4:08:16 PM}			vtkPropAssembly *pPropAssembly = pDoc->GetPropAssemblyMedia();
-// COMMENT: {7/13/2004 4:08:16 PM}			if (nNewState == BST_CHECKED) {
-// COMMENT: {7/13/2004 4:08:16 PM}				pPropAssembly->SetVisibility(1);
-// COMMENT: {7/13/2004 4:08:16 PM}			}
-// COMMENT: {7/13/2004 4:08:16 PM}			else {
-// COMMENT: {7/13/2004 4:08:16 PM}				pPropAssembly->SetVisibility(0);
-// COMMENT: {7/13/2004 4:08:16 PM}			}
-// COMMENT: {7/13/2004 4:08:16 PM}			// set check mark
-// COMMENT: {7/13/2004 4:08:16 PM}			item.SetState(INDEXTOSTATEIMAGEMASK(nNewState + 1), TVIS_STATEIMAGEMASK);
-// COMMENT: {7/13/2004 4:08:16 PM}		}
-// COMMENT: {7/13/2004 4:08:16 PM}		pDoc->UpdateAllViews(0);
-// COMMENT: {7/13/2004 4:08:16 PM}	}
 }
 
 UINT CPropertyTreeControlBar::GetNodeCheck(CTreeCtrlNode node)const
@@ -492,20 +469,20 @@ void CPropertyTreeControlBar::OnNMDblClk(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	TRACE("OnNMDblClk\n");
 
-	// Cancel any modes currenly running
+	// Cancel any modes currently running
 	//
 	if (true)
 	{
 		CFrameWnd *pFrame = (CFrameWnd*)AfxGetApp()->m_pMainWnd;
 		ASSERT_VALID(pFrame);
 
-		CWPhastDoc* pDoc = reinterpret_cast<CWPhastDoc*>(pFrame->GetActiveDocument());
+		CWPhastDoc* pDoc = this->GetDocument();
 		ASSERT_VALID(pDoc);
 
 		POSITION pos = pDoc->GetFirstViewPosition();
 		while (pos != NULL)
 		{
-			CWPhastView *pView = (CWPhastView*) pDoc->GetNextView(pos);
+			CWPhastView *pView = reinterpret_cast<CWPhastView*>(pDoc->GetNextView(pos));
 			ASSERT_VALID(pView);
 			pView->CancelMode();
 		}
@@ -553,9 +530,6 @@ void CPropertyTreeControlBar::OnNMDblClk(NMHDR* pNMHDR, LRESULT* pResult)
 			if (CMediaZoneActor *pZone = CMediaZoneActor::SafeDownCast((vtkObject*)nodeMedia.GetChildAt(i).GetData()))
 			{
 				pMediaZoneActor = pZone;
-				///pFlowOnly->Edit(&this->m_wndTree, pZone);
-				///*pResult = TRUE;
-				///return;
 				break;
 			}
 		}
@@ -578,7 +552,6 @@ void CPropertyTreeControlBar::OnNMDblClk(NMHDR* pNMHDR, LRESULT* pResult)
 		ASSERT(pMediaZoneActor && pICZoneActor);
 		pFlowOnly->Edit(&this->m_wndTree, pMediaZoneActor, pICZoneActor);
 		//}} HACK
-		///pFlowOnly->Edit(&this->m_wndTree);
 		*pResult = TRUE;
 		return;
 	}
@@ -620,8 +593,10 @@ void CPropertyTreeControlBar::OnNMDblClk(NMHDR* pNMHDR, LRESULT* pResult)
 
 	// UNITS
 	//
-	if (item.IsNodeAncestor(this->m_nodeUnits)) {
-		if (this->m_nodeUnits.GetData()) {
+	if (item.IsNodeAncestor(this->m_nodeUnits))
+	{
+		if (this->m_nodeUnits.GetData())
+		{
 			CUnits* pUnits = (CUnits*)this->m_nodeUnits.GetData();
 			pUnits->Edit(&this->m_wndTree);
 			*pResult = TRUE;
@@ -747,14 +722,19 @@ void CPropertyTreeControlBar::OnNMDblClk(NMHDR* pNMHDR, LRESULT* pResult)
 
 	// MEDIA
 	//
-	if (item.IsNodeAncestor(this->m_nodeMedia)) {
-		if (item != this->m_nodeMedia) {
-			while (item.GetParent() != this->m_nodeMedia) {
+	if (item.IsNodeAncestor(this->m_nodeMedia))
+	{
+		if (item != this->m_nodeMedia)
+		{
+			while (item.GetParent() != this->m_nodeMedia)
+			{
 				item = item.GetParent();
 				if (!item) break;
 			}
-			if (item.GetData()) {
-				if (CZoneActor* pZone = CZoneActor::SafeDownCast((vtkObject*)item.GetData())) {
+			if (item.GetData())
+			{
+				if (CZoneActor* pZone = CZoneActor::SafeDownCast((vtkObject*)item.GetData()))
+				{
 					pZone->Edit(&this->m_wndTree);
 					*pResult = TRUE;
 					return;
@@ -764,17 +744,21 @@ void CPropertyTreeControlBar::OnNMDblClk(NMHDR* pNMHDR, LRESULT* pResult)
 		return;
 	}
 
-
-	// BOUNDARY_CONDITIONS (first stress period)
+	// BOUNDARY_CONDITIONS
 	//
-	if (item.IsNodeAncestor(this->m_nodeBC)) {
-		if (item != this->m_nodeBC) {
-			while (item.GetParent() != this->m_nodeBC) {
+	if (item.IsNodeAncestor(this->m_nodeBC))
+	{
+		if (item != this->m_nodeBC)
+		{
+			while (item.GetParent() != this->m_nodeBC)
+			{
 				item = item.GetParent();
 				if (!item) break;
 			}
-			if (item.GetData()) {
-				if (CZoneActor* pZone = CZoneActor::SafeDownCast((vtkObject*)item.GetData())) {
+			if (item.GetData())
+			{
+				if (CZoneActor* pZone = CZoneActor::SafeDownCast((vtkObject*)item.GetData()))
+				{
 					pZone->Edit(&this->m_wndTree);
 					*pResult = TRUE;
 					return;
@@ -810,8 +794,10 @@ void CPropertyTreeControlBar::OnNMDblClk(NMHDR* pNMHDR, LRESULT* pResult)
 
 	// PRINT_FREQUENCY
 	//
-	if (item.IsNodeAncestor(this->m_nodePF)) {
-		if (this->m_nodePF.GetData()) {
+	if (item.IsNodeAncestor(this->m_nodePF))
+	{
+		if (this->m_nodePF.GetData())
+		{
 			CPrintFreq* pPF = (CPrintFreq*)this->m_nodePF.GetData();
 			pPF->Edit(&this->m_wndTree);
 			*pResult = TRUE;
@@ -836,68 +822,18 @@ void CPropertyTreeControlBar::OnNMDblClk(NMHDR* pNMHDR, LRESULT* pResult)
 	}
 }
 
-//vtkPropCollection* CPropertyTreeControlBar::GetPropCollection() const
-//{
-//	/// ASSERT(this->m_pPropCollection != 0);
-//	return this->m_pPropCollection;
-//}
-
-//float* CPropertyTreeControlBar::GetGridBounds()
-//{
-//	if (this->m_pGridActor) {
-//		return this->m_pGridActor->GetBounds();
-//	}
-//	else {
-//		ASSERT(FALSE);
-//	}
-//	return 0;
-//}
-
-///{{{
-
 HBITMAP FAR PASCAL CreateColorBitmap(int cx, int cy)
 {
     HBITMAP hbm;
     HDC hdc;
 
     hdc = GetDC(NULL);
-
-    //
-    // on a multimonitor system with mixed bitdepths
-    // always use a 32bit bitmap for our work buffer
-    // this will prevent us from losing colors when
-    // blting to and from the screen.  this is mainly
-    // important for the drag & drop offscreen buffers.
-    //
-// COMMENT: {9/8/2004 10:48:49 PM}    if (!(GetDeviceCaps(hdc, RASTERCAPS) & RC_PALETTE) &&
-// COMMENT: {9/8/2004 10:48:49 PM}		TRUE &&
-// COMMENT: {9/8/2004 10:48:49 PM}		TRUE)
-// COMMENT: {9/8/2004 10:48:49 PM}// COMMENT: {9/8/2004 8:42:09 PM}        GetSystemMetrics(SM_CMONITORS) > 1 &&
-// COMMENT: {9/8/2004 10:48:49 PM}// COMMENT: {9/8/2004 8:42:09 PM}        GetSystemMetrics(SM_SAMEDISPLAYFORMAT) == 0)
-// COMMENT: {9/8/2004 10:48:49 PM}    {
-// COMMENT: {9/8/2004 10:48:49 PM}        LPVOID p;
-// COMMENT: {9/8/2004 10:48:49 PM}#ifndef UNIX
-// COMMENT: {9/8/2004 10:48:49 PM}        BITMAPINFO bi = {sizeof(BITMAPINFOHEADER), cx, cy, 1, 32};
-// COMMENT: {9/8/2004 10:48:49 PM}#else
-// COMMENT: {9/8/2004 10:48:49 PM}        BITMAPINFO bi;
-// COMMENT: {9/8/2004 10:48:49 PM}        bi.bmiHeader.biSize     = sizeof(BITMAPINFOHEADER); 
-// COMMENT: {9/8/2004 10:48:49 PM}        bi.bmiHeader.biWidth    = cx;
-// COMMENT: {9/8/2004 10:48:49 PM}        bi.bmiHeader.biHeight   = cy;
-// COMMENT: {9/8/2004 10:48:49 PM}        bi.bmiHeader.biPlanes   = 1 ;
-// COMMENT: {9/8/2004 10:48:49 PM}        bi.bmiHeader.biBitCount = 32;
-// COMMENT: {9/8/2004 10:48:49 PM}#endif
-// COMMENT: {9/8/2004 10:48:49 PM}        hbm = CreateDIBSection(hdc, &bi, DIB_RGB_COLORS, &p, NULL, 0);
-// COMMENT: {9/8/2004 10:48:49 PM}    }
-// COMMENT: {9/8/2004 10:48:49 PM}    else
-    {
-        hbm = CreateCompatibleBitmap(hdc, cx, cy);
-    }
+    hbm = CreateCompatibleBitmap(hdc, cx, cy);
 
     ReleaseDC(NULL, hdc);
     return hbm;
 }
-#include <uxtheme.h>
-#include <tmschema.h>
+
 HIMAGELIST CreateCheckBoxImagelist(HIMAGELIST himl, BOOL fTree, BOOL fUseColorKey, BOOL fMirror)
 {
     int cxImage, cyImage;
@@ -910,7 +846,9 @@ HIMAGELIST CreateCheckBoxImagelist(HIMAGELIST himl, BOOL fTree, BOOL fUseColorKe
     int nImages = fTree ? 3 : 2;
 
     if (!hdcDesk)
+	{
         return NULL;
+	}
 
 	hdc = ::CreateCompatibleDC(hdcDesk);
 	::ReleaseDC(NULL, hdcDesk);
@@ -918,105 +856,91 @@ HIMAGELIST CreateCheckBoxImagelist(HIMAGELIST himl, BOOL fTree, BOOL fUseColorKe
     if (!hdc)
         return NULL;
 
-    // Must protect against ImageList_GetIconSize failing in case app
-    // gave us a bad himl
-	if (himl && ::ImageList_GetIconSize(himl, &cxImage, &cyImage)) {
+	if (himl && ::ImageList_GetIconSize(himl, &cxImage, &cyImage))
+	{
         // cxImage and cyImage are okay
-    } else {
-		cxImage = /*SRC g_cxSmIcon SRC*/::GetSystemMetrics(SM_CXSMICON);
-		cyImage = /*SRC g_cySmIcon SRC*/::GetSystemMetrics(SM_CYSMICON);
+    }
+	else
+	{
+		cxImage = ::GetSystemMetrics(SM_CXSMICON);
+		cyImage = ::GetSystemMetrics(SM_CYSMICON);
     }
 
-	//himl = ::ImageList_Create(cxImage, cyImage, ILC_MASK, 0, nImages);
-	//himl = ::ImageList_Create(cxImage, cyImage, ILC_COLOR16 | ILC_MASK, 0, nImages);	
 	himl = ::ImageList_Create(cxImage, cyImage, ILC_COLORDDB | ILC_MASK, 0, nImages);
 	hbm = ::CreateColorBitmap(cxImage * nImages, cyImage);
 
     if (fUseColorKey)
     {
         clrMask = RGB(255,000,255); // magenta
-		if (clrMask == /*SRC g_clrWindow SRC*/::GetSysColor(COLOR_WINDOW))
+		if (clrMask == ::GetSysColor(COLOR_WINDOW))
+		{
             clrMask = RGB(000,000,255); // blue
+		}
     }
     else
     {
-        clrMask = /*SRC g_clrWindow SRC*/::GetSysColor(COLOR_WINDOW);
+        clrMask = ::GetSysColor(COLOR_WINDOW);
     }
 
     // fill
-// COMMENT: {9/8/2004 8:42:56 PM}    hbmTemp = SelectObject(hdc, hbm);
 	hbmTemp = (HBITMAP)::SelectObject(hdc, hbm);
 
     rc.left = rc.top = 0;
     rc.bottom = cyImage;
     rc.right = cxImage * nImages;
-    // SRC FillRectClr(hdc, &rc, clrMask);
 	::FillRect(hdc, &rc, ::CreateSolidBrush(clrMask));
 
     rc.right = cxImage;
-    // now draw the real controls on
-	::InflateRect(&rc, -/*SRC g_cxEdge SRC*/::GetSystemMetrics(SM_CXEDGE), -/*SRC g_cyEdge SRC*/::GetSystemMetrics(SM_CYEDGE));
+
+	::InflateRect(&rc, -::GetSystemMetrics(SM_CXEDGE), -::GetSystemMetrics(SM_CYEDGE));
     rc.right++;
     rc.bottom++;
 
     if (fTree)
+	{
 		::OffsetRect(&rc, cxImage, 0);
+	}
 
-//{{
-	HTHEME hTheme = ::OpenThemeData(NULL, L"Button");
+	HTHEME hTheme = ::g_xpStyle.IsAppThemed() ? ::g_xpStyle.OpenThemeData(NULL, L"Button") : NULL;
 	if (hTheme)
 	{
-		VERIFY(::DrawThemeBackground(hTheme,
+		VERIFY(::g_xpStyle.DrawThemeBackground(hTheme,
 			hdc,
 			BP_CHECKBOX,
 			CBS_UNCHECKEDNORMAL,
 			&rc,
 			NULL) == S_OK);
-
-// COMMENT: {9/8/2004 10:42:49 PM}		//{{
-// COMMENT: {9/8/2004 10:42:49 PM}		RECT rc2;
-// COMMENT: {9/8/2004 10:42:49 PM}		rc2.left = rc2.top = 0;
-// COMMENT: {9/8/2004 10:42:49 PM}		rc2.bottom = cyImage;
-// COMMENT: {9/8/2004 10:42:49 PM}		rc2.right = cxImage * nImages;
-// COMMENT: {9/8/2004 10:42:49 PM}
-// COMMENT: {9/8/2004 10:42:49 PM}		VERIFY(::DrawThemeIcon(hTheme,
-// COMMENT: {9/8/2004 10:42:49 PM}			hdc,
-// COMMENT: {9/8/2004 10:42:49 PM}			BP_CHECKBOX,
-// COMMENT: {9/8/2004 10:42:49 PM}			CBS_UNCHECKEDNORMAL,
-// COMMENT: {9/8/2004 10:42:49 PM}			&rc2,
-// COMMENT: {9/8/2004 10:42:49 PM}			himl,
-// COMMENT: {9/8/2004 10:42:49 PM}			1) == S_OK);
-// COMMENT: {9/8/2004 10:42:49 PM}		//}}
 	}
 	else
 	{
-		::DrawFrameControl(hdc, &rc, DFC_BUTTON, DFCS_BUTTONCHECK | DFCS_FLAT | 
-			(fUseColorKey? 0 : /*SRC DFCS_TRANSPARENT SRC*/0));
+		VERIFY(::DrawFrameControl(hdc,
+			&rc,
+			DFC_BUTTON, DFCS_BUTTONCHECK | DFCS_FLAT 
+			));
 	}
-//}}
 
 	::OffsetRect(&rc, cxImage, 0);
-    // [msadek]; For the mirrored case, there is an off-by-one somewhere in MirrorIcon() or System API.
-    // Since I will not be touching MirrorIcon() by any mean and no chance to fix a system API,
-    // let's compensate for it here.
-    if(fMirror)
+    if (fMirror)
     {
-        OffsetRect(&rc, -1, 0);  
+		// MirrorIcon has off by one bug
+		::OffsetRect(&rc, -1, 0);  
     }
 
 	if (hTheme)
 	{
-		::DrawThemeBackground(hTheme,
+		VERIFY(::g_xpStyle.DrawThemeBackground(hTheme,
 			hdc,
 			BP_CHECKBOX,
 			CBS_CHECKEDNORMAL,
 			&rc,
-			NULL);
+			NULL) == S_OK);
 	}
 	else
 	{
-		::DrawFrameControl(hdc, &rc, DFC_BUTTON, DFCS_BUTTONCHECK | DFCS_FLAT | DFCS_CHECKED | 
-			(fUseColorKey? 0 : /*SRC DFCS_TRANSPARENT SRC*/0));
+		VERIFY(::DrawFrameControl(hdc,
+			&rc,
+			DFC_BUTTON, DFCS_BUTTONCHECK | DFCS_FLAT | DFCS_CHECKED
+			));
 	}
 
 	::SelectObject(hdc, hbmTemp);
@@ -1030,31 +954,24 @@ HIMAGELIST CreateCheckBoxImagelist(HIMAGELIST himl, BOOL fTree, BOOL fUseColorKe
 		::ImageList_Add(himl, hbm, NULL);
     }
 
-// COMMENT: {9/8/2004 8:40:16 PM}    if(fMirror)
-// COMMENT: {9/8/2004 8:40:16 PM}    {
-// COMMENT: {9/8/2004 8:40:16 PM}        HICON hIcon = ImageList_ExtractIcon(0, himl, nImages-1);
-// COMMENT: {9/8/2004 8:40:16 PM}        MirrorIcon(&hIcon, NULL);
-// COMMENT: {9/8/2004 8:40:16 PM}        ImageList_ReplaceIcon(himl, nImages-1, hIcon);
-// COMMENT: {9/8/2004 8:40:16 PM}    }
-
 	if (hTheme)
 	{
-        ::CloseThemeData(hTheme);
+		VERIFY(::g_xpStyle.CloseThemeData(hTheme) == S_OK);
 	}
 
 	::DeleteDC(hdc);
-	::DeleteObject( hbm );
+	::DeleteObject(hbm);
     return himl;
 }
-///}}}
 
 int CPropertyTreeControlBar::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
 	if (CSizingControlBarCFVS7::OnCreate(lpCreateStruct) == -1)
+	{
 		return -1;
+	}
 
-	if (!this->m_wndTree.Create(WS_CHILD|WS_VISIBLE|
-		TVS_HASLINES|TVS_HASBUTTONS|TVS_LINESATROOT|TVS_SHOWSELALWAYS,
+	if (!this->m_wndTree.Create(WS_CHILD | WS_VISIBLE | TVS_HASLINES | TVS_HASBUTTONS | TVS_LINESATROOT | TVS_SHOWSELALWAYS,
 		CRect(0, 0, 0, 0), this, IDC_PROPERTY_TREE))
 	{
 		TRACE0("Failed to create instant bar child\n");
@@ -1065,35 +982,16 @@ int CPropertyTreeControlBar::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	this->m_OleDropTarget.SetHandler(this);
 
 
-// COMMENT: {4/6/2005 6:49:11 PM}	// setup image list
-// COMMENT: {4/6/2005 6:49:11 PM}	//
-// COMMENT: {4/6/2005 6:49:11 PM}	this->m_pImageList = new CImageList();
-// COMMENT: {4/6/2005 6:49:11 PM}	ASSERT_VALID(this->m_pImageList);
-// COMMENT: {4/6/2005 6:49:11 PM}#if defined(_DEBUG)
-// COMMENT: {4/6/2005 6:49:11 PM}	this->m_pImageList->Create(IDB_CHECKS_TREE, 14, 0, RGB(255, 0, 255));
-// COMMENT: {4/6/2005 6:49:11 PM}#else
-// COMMENT: {4/6/2005 6:49:11 PM}	// this->m_pImageList->Create(IDB_EYES_TREE3, 16, 0, RGB(255, 0, 255));
-// COMMENT: {4/6/2005 6:49:11 PM}	this->m_pImageList->Create(IDB_CHECKS_TREE, 14, 0, RGB(255, 0, 255));
-// COMMENT: {4/6/2005 6:49:11 PM}#endif
-// COMMENT: {4/6/2005 6:49:11 PM}
-// COMMENT: {4/6/2005 6:49:11 PM}#if 0
 	this->m_pImageList = new CImageList();
 	this->m_pImageList->Attach(CreateCheckBoxImagelist(this->m_pImageList->GetSafeHandle(), TRUE, FALSE, FALSE));
-// COMMENT: {4/6/2005 6:49:14 PM}#endif
 
 	this->m_wndTree.SetImageList(this->m_pImageList, LVSIL_STATE);
-	//{{TESTING
-// COMMENT: {10/18/2005 11:09:43 PM}	CImageList* ImageList = new CImageList();
-// COMMENT: {10/18/2005 11:09:43 PM}	ImageList->Create(IDB_NULL_TREE, 16, 0, RGB(255,0,255));
-// COMMENT: {10/18/2005 11:09:43 PM}	this->m_wndTree.SetImageList(ImageList, TVSIL_NORMAL);
-	//}}TESTING
-
 	
 	// bring the tooltips to front
 	CWnd* pTT = FromHandle((HWND) m_wndTree.SendMessage(TVM_GETTOOLTIPS));
-	if (pTT != NULL) {
-		pTT->SetWindowPos(&wndTopMost, 0, 0, 0, 0,
-		SWP_NOMOVE|SWP_NOSIZE|SWP_NOACTIVATE);
+	if (pTT != NULL)
+	{
+		pTT->SetWindowPos(&wndTopMost, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
 	}
 	return 0;
 }
