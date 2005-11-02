@@ -260,10 +260,6 @@
 #define IDR_MAXIMUM_TIME_STEP_RTF       265
 #define IDR_HEAD_CHANGE_TARGET_RTF      266
 #define IDR_ITERATIONS_RTF              267
-#define IDB_CHECKBITMAP                 270
-#define IDB_FILE_NEW                    271
-#define IDB_FILE_OPEN                   272
-#define IDI_ICON1                       272
 #define IDC_EDIT_X                      1000
 #define IDC_PROPERTIES                  1000
 #define IDC_TITLE                       1000
@@ -658,7 +654,6 @@
 #define IDC_HCT_CHECK                   1340
 #define IDC_MAX_TS_CHECK                1341
 #define IDC_MIN_TS_CHECK                1342
-#define IDI_REPOBROWSE                  5145
 #define IDC_RESIZE_COLUMN               28654
 #define IDC_RESIZE_ROW                  28655
 #define IDR_POPUP                       28656
