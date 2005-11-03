@@ -1,18 +1,21 @@
 # $Id$
 
+#
+# To run step by step
+# 1. make source
+# 2. make script
+# 3. make build_all
+#
+
 NAME := wphast
 
 FORCE_UPDATE := $(shell svn up ..)
 
-RELEASE := $(shell svn st -v dist.sh | cut -b 10- | ( read one two ; echo $$one ) )
+RELEASE ?= $(shell svn st -v dist.sh | cut -b 10- | ( read one two ; echo $$one ) )
 
 DATE_STAMP := $(shell echo $(DATE) | sed -e "y^/^-^" )
 
 TARBALL := $(NAME)-$(VERSION)-$(RELEASE).tar.gz
-
-PHAST_TARBALL := phast-$(PHAST_VERSION)-$(RELEASE).tar.gz
-
-DIST_MSI := $(NAME)-$(VERSION)-$(RELEASE).msi
 
 BUILD_SCRIPT := $(NAME)-$(VERSION)-$(RELEASE).sh
 
@@ -26,58 +29,67 @@ SRC_PACKAGE := $(NAME)-$(VERSION)-$(RELEASE)-src.tar.bz2
 # (ie wphast-0.1-584.tar.bz2)
 BIN_PACKAGE := $(NAME)-$(VERSION)-$(RELEASE).tar.bz2
 
-all : check_release $(BIN_PACKAGE)
+all : check_args $(BIN_PACKAGE)
 
-$(BIN_PACKAGE) : $(TARBALL) $(BUILD_SCRIPT)
+build_all : check_args $(BIN_PACKAGE)
+
+prep : check_args
+	time $(BUILD_SCRIPT) prep 2>&1 | tee prep-$(RELEASE).log
+
+$(BIN_PACKAGE) : $(TARBALL) $(BUILD_SCRIPT) $(PHAST_BUILD)
 	@echo "Building package $(BIN_PACKAGE) / $(SRC_PACKAGE)"	
 	time $(BUILD_SCRIPT) all 2>&1 | tee build-$(RELEASE).log
+	
+source : check_version check_date check_release $(TARBALL)
+	@echo "created $(TARBALL)"
 
 $(TARBALL) : dist.sh $(DATE_STAMP).tstamp
 	@echo "Creating $(TARBALL)"
 	time ./dist.sh -v $(VERSION) -r $(RELEASE) -d $(DATE) -pr trunk 2>&1 | tee dist-$(RELEASE).log
 	
+script : check_version $(BUILD_SCRIPT)	
+	@echo "created $(BUILD_SCRIPT)"
+	
 $(BUILD_SCRIPT) : build.sh
-	rm -rf  $(BUILD_SCRIPT)
-	ln build.sh $(BUILD_SCRIPT)
-
+	ln -f build.sh $(BUILD_SCRIPT)
+	
 $(DATE_STAMP).tstamp : 
 	rm -rf *.tstamp
 	touch $(DATE_STAMP).tstamp
 	
+check_args : check_version check_phast_build check_date
+	
+check_version :
+ifeq ($(strip $(VERSION)),)
+	@echo "No version specified"
+	@make -s usage
+	@exit 1
+endif	
+
+check_phast_build :
+ifeq ($(strip $(PHAST_BUILD)),)
+	@echo "No PHAST_BUILD specified"
+	make usage
+	exit 1
+endif
+
 check_release :
-	@if [ "$(VERSION)"x = "x" ]; \
-	  then \
-		echo "usage: make VERSION=<number> DATE=<xx/xx/xxxx> PHAST_BUILD=<filename> [RELEASE=<number>] [SIG=<0|1>]"; \
-		echo "    ie make VERSION=0.1 DATE=10/24/2005 PHAST_BUILD=phast-1.2-577.tar.bz2"; \
-		echo "       make VERSION=0.1 DATE=10/24/2005 PHAST_BUILD=phast-1.2-577.tar.bz2 RELEASE=620 SIG=1"; \
-		exit 1; \
-	    else \
-		exit 0; \
-	fi
-	@if [ "$(PHAST_BUILD)"x = "x" ]; \
-	  then \
-		echo "usage: make VERSION=<number> DATE=<xx/xx/xxxx> PHAST_BUILD=<filename> [RELEASE=<number>] [SIG=<0|1>]"; \
-		echo "    ie make VERSION=0.1 DATE=10/24/2005 PHAST_BUILD=phast-1.2-577.tar.bz2"; \
-		echo "       make VERSION=0.1 DATE=10/24/2005 PHAST_BUILD=phast-1.2-577.tar.bz2 RELEASE=620 SIG=1"; \
-		exit 1; \
-	    else \
-		exit 0; \
-	fi
-	@if [ "$(RELEASE)"x = "x" ]; \
-	  then \
-		echo "usage: make VERSION=<number> DATE=<xx/xx/xxxx> PHAST_BUILD=<filename> [RELEASE=<number>] [SIG=<0|1>]"; \
-		echo "    ie make VERSION=0.1 DATE=10/24/2005 PHAST_BUILD=phast-1.2-577.tar.bz2"; \
-		echo "       make VERSION=0.1 DATE=10/24/2005 PHAST_BUILD=phast-1.2-577.tar.bz2 RELEASE=620 SIG=1"; \
-		exit 1; \
-	    else \
-		exit 0; \
-	fi
-	@if [ "$(DATE)"x = "x" ]; \
-	  then \
-		echo "usage: make VERSION=<number> DATE=<xx/xx/xxxx> PHAST_BUILD=<filename> [RELEASE=<number>] [SIG=<0|1>]"; \
-		echo "    ie make VERSION=0.1 DATE=10/24/2005 PHAST_BUILD=phast-1.2-577.tar.bz2"; \
-		echo "       make VERSION=0.1 DATE=10/24/2005 PHAST_BUILD=phast-1.2-577.tar.bz2 RELEASE=620 SIG=1"; \
-		exit 1; \
-	    else \
-		exit 0; \
-	fi
+ifeq ($(strip $(DATE)),)
+	@echo "No release specified"
+	make usage
+	exit 1
+endif
+
+check_date :
+ifeq ($(strip $(DATE)),)
+	@echo "No date specified"
+	make usage
+	exit 1
+endif
+
+usage:
+	@echo ""
+	@echo "usage: make VERSION=<number> DATE=<xx/xx/xxxx> PHAST_BUILD=<file> [RELEASE=<number>] [SIG=<0|1>]"
+	@echo "    ie make VERSION=0.1 DATE=10/24/2005 PHAST_BUILD=phast-1.2-577.tar.bz2"
+	@echo "       make VERSION=0.1 DATE=10/24/2005 PHAST_BUILD=phast-1.2-577.tar.bz2 RELEASE=620 SIG=1"
+	@echo ""

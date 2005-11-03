@@ -133,6 +133,12 @@ prep() {
   if [ -f ${src_patch} ] ; then \
     patch -p0 --binary < ${src_patch} ;\
   fi && \
+  if [ -z "$PHAST_BUILD" ]; then \
+    echo "Error: PHAST_BUILD is not set" ; exit 1
+  fi && \
+  export phast_ser="`tar tvjf ${PHAST_BUILD} | egrep phast-ser.exe | sed 's/.* //'`" && \
+  tar xvjf ${PHAST_BUILD} $phast_ser && \
+  export PHAST_EXE_PATH="`cygpath -aw "$phast_ser"`" && \
   mkdirs )
 }
 conf() {
@@ -149,8 +155,7 @@ reconf() {
 }
 build() {
   (cd ${objdir}/setup && \
-  make PHAST_EXE_PATH='C:\cygwin\home\charlton\programs\phast\srcphast\win32\ser\phast.exe'&& \
-  )
+  make )
 }
 check() {
   (cd ${objdir} && \
@@ -234,6 +239,7 @@ spkg() {
   tar cvjf ${src_pkg} * )
 }
 finish() {
+  rm -rf `echo $phast_ser | sed "s^/.*^^"` && \
   rm -rf ${srcdir}
 }
 sigfile() {
