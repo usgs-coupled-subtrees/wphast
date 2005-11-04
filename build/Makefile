@@ -5,6 +5,14 @@
 # 1. make source
 # 2. make script
 # 3. make build_all
+# and step 3 may be broken using the following
+# 3a. make prep
+# 3b. make conf
+# 3c. make build
+# 3d. make install
+# 3e. make pkg
+# 3f. make spkg
+# 3g. make finish
 #
 
 NAME := wphast
@@ -36,9 +44,27 @@ build_all : check_args $(BIN_PACKAGE)
 prep : check_args
 	time ./$(BUILD_SCRIPT) prep 2>&1 | tee prep-$(RELEASE).log
 
+conf : check_args
+	time ./$(BUILD_SCRIPT) conf 2>&1 | tee conf-$(RELEASE).log
+
+build : check_args
+	time ./$(BUILD_SCRIPT) build 2>&1 | tee build-$(RELEASE).log
+
+install : check_args
+	time ./$(BUILD_SCRIPT) install 2>&1 | tee install-$(RELEASE).log
+
+pkg : check_args
+	time ./$(BUILD_SCRIPT) pkg 2>&1 | tee pkg-$(RELEASE).log
+
+spkg : check_args
+	time ./$(BUILD_SCRIPT) spkg 2>&1 | tee spkg-$(RELEASE).log
+
+finish : check_args
+	time ./$(BUILD_SCRIPT) finish 2>&1 | tee finish-$(RELEASE).log
+
 $(BIN_PACKAGE) : $(TARBALL) $(BUILD_SCRIPT) $(PHAST_BUILD)
 	@echo "Building package $(BIN_PACKAGE) / $(SRC_PACKAGE)"	
-	time ./$(BUILD_SCRIPT) all 2>&1 | tee build-$(RELEASE).log
+	time ./$(BUILD_SCRIPT) all 2>&1 | tee all-$(RELEASE).log
 	
 source : check_version check_date check_release $(TARBALL)
 	@echo "created $(TARBALL)"

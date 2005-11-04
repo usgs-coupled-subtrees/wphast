@@ -27,8 +27,7 @@ MSIVAL2 := /cygdrive/c/Program\ Files/MsiVal2/msival2
 
 MSIEXEC := msiexec
 
-PHAST := /home/charlton/programs/phast/srcphast/win32/ser/phast.exe
-###PHAST_BUILD=phast-1.2-577.tar.bz2
+PHAST := $(PHAST_EXE_PATH)
 
 BINARIES=\
 	Binary/Banner.bmp\
