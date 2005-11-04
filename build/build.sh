@@ -133,12 +133,6 @@ prep() {
   if [ -f ${src_patch} ] ; then \
     patch -p0 --binary < ${src_patch} ;\
   fi && \
-  if [ -z "$PHAST_BUILD" ]; then \
-    echo "Error: PHAST_BUILD is not set" ; exit 1
-  fi && \
-  export phast_ser="`tar tvjf ${PHAST_BUILD} | egrep phast-ser.exe | sed 's/.* //'`" && \
-  tar xvjf ${PHAST_BUILD} $phast_ser && \
-  export PHAST_EXE_PATH="`cygpath -aw "$phast_ser"`" && \
   mkdirs )
 }
 conf() {
@@ -154,7 +148,15 @@ reconf() {
   conf )
 }
 build() {
-  (cd ${objdir}/setup && \
+  (cd ${topdir} && \
+  if [ -z "$PHAST_BUILD" ]; then \
+    echo "Error: PHAST_BUILD is not set"; \
+    exit 1; \
+  fi && \
+  export phast_ser="`tar tvjf ${PHAST_BUILD} | egrep phast-ser.exe | sed 's/.* //'`" && \
+  tar xvjf ${PHAST_BUILD} $phast_ser && \
+  export PHAST_EXE_PATH="`cygpath -aw "$phast_ser"`" && \
+  cd ${objdir}/setup && \
   make )
 }
 check() {
