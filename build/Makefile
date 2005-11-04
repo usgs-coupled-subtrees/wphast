@@ -34,11 +34,11 @@ all : check_args $(BIN_PACKAGE)
 build_all : check_args $(BIN_PACKAGE)
 
 prep : check_args
-	time $(BUILD_SCRIPT) prep 2>&1 | tee prep-$(RELEASE).log
+	time ./$(BUILD_SCRIPT) prep 2>&1 | tee prep-$(RELEASE).log
 
 $(BIN_PACKAGE) : $(TARBALL) $(BUILD_SCRIPT) $(PHAST_BUILD)
 	@echo "Building package $(BIN_PACKAGE) / $(SRC_PACKAGE)"	
-	time $(BUILD_SCRIPT) all 2>&1 | tee build-$(RELEASE).log
+	time ./$(BUILD_SCRIPT) all 2>&1 | tee build-$(RELEASE).log
 	
 source : check_version check_date check_release $(TARBALL)
 	@echo "created $(TARBALL)"

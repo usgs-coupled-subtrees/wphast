@@ -243,7 +243,27 @@
 				Detect64BitPortabilityProblems="TRUE"
 				DebugInformationFormat="3"/>
 			<Tool
-				Name="VCCustomBuildTool"/>
+				Name="VCCustomBuildTool"
+				Description="Copying dlls"
+				CommandLine="copy &quot;$(DEV_HDF5_LIBDLL)\hdf5dll.dll&quot; &quot;$(TargetDir)hdf5dll.dll&quot;
+copy &quot;$(DEV_HDF5_LIBDLL)\zlib.dll&quot; &quot;$(TargetDir)zlib.dll&quot;
+copy &quot;$(DEV_VTK42_VS7_DLL_LIB)\vtkCommon.dll&quot; &quot;$(TargetDir)vtkCommon.dll&quot;
+copy &quot;$(DEV_VTK42_VS7_DLL_LIB)\vtkFiltering.dll&quot; &quot;$(TargetDir)vtkFiltering.dll&quot;
+copy &quot;$(DEV_VTK42_VS7_DLL_LIB)\vtkGraphics.dll&quot; &quot;$(TargetDir)vtkGraphics.dll&quot;
+copy &quot;$(DEV_VTK42_VS7_DLL_LIB)\vtkHybrid.dll&quot; &quot;$(TargetDir)vtkHybrid.dll&quot;
+copy &quot;$(DEV_VTK42_VS7_DLL_LIB)\vtkIO.dll&quot; &quot;$(TargetDir)vtkIO.dll&quot;
+copy &quot;$(DEV_VTK42_VS7_DLL_LIB)\vtkImaging.dll&quot; &quot;$(TargetDir)vtkImaging.dll&quot;
+copy &quot;$(DEV_VTK42_VS7_DLL_LIB)\vtkParallel.dll&quot; &quot;$(TargetDir)vtkParallel.dll&quot;
+copy &quot;$(DEV_VTK42_VS7_DLL_LIB)\vtkRendering.dll&quot; &quot;$(TargetDir)vtkRendering.dll&quot;
+copy &quot;$(DEV_VTK42_VS7_DLL_LIB)\vtkexpat.dll&quot; &quot;$(TargetDir)vtkexpat.dll&quot;
+copy &quot;$(DEV_VTK42_VS7_DLL_LIB)\vtkfreetype.dll&quot; &quot;$(TargetDir)vtkfreetype.dll&quot;
+copy &quot;$(DEV_VTK42_VS7_DLL_LIB)\vtkftgl.dll&quot; &quot;$(TargetDir)vtkftgl.dll&quot;
+copy &quot;$(DEV_VTK42_VS7_DLL_LIB)\vtkjpeg.dll&quot; &quot;$(TargetDir)vtkjpeg.dll&quot;
+copy &quot;$(DEV_VTK42_VS7_DLL_LIB)\vtkpng.dll&quot; &quot;$(TargetDir)vtkpng.dll&quot;
+copy &quot;$(DEV_VTK42_VS7_DLL_LIB)\vtktiff.dll&quot; &quot;$(TargetDir)vtktiff.dll&quot;
+copy &quot;$(DEV_VTK42_VS7_DLL_LIB)\vtkzlib.dll&quot; &quot;$(TargetDir)vtkzlib.dll&quot;
+"
+				Outputs="$(TargetDir)hdf5dll.dll;$(TargetDir)zlib.dll;$(OutDir)\vtkCommon.dll;$(OutDir)\vtkFiltering.dll;$(OutDir)\vtkGraphics.dll;$(OutDir)\vtkHybrid.dll;$(OutDir)\vtkIO.dll;$(OutDir)\vtkImaging.dll;$(OutDir)\vtkParallel.dll;$(OutDir)\vtkRendering.dll;$(OutDir)\vtkexpat.dll;$(OutDir)\vtkfreetype.dll;$(OutDir)\vtkftgl.dll;$(OutDir)\vtkjpeg.dll;$(OutDir)\vtkpng.dll;$(OutDir)\vtktiff.dll;$(OutDir)\vtkzlib.dll;;$(OutDir)vtkzlib.dll;"/>
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="$(DEV_VTK42_LINK) vtkParallel.lib hdf5dll.lib"
@@ -3899,15 +3919,15 @@
 			Name="Build Logs"
 			Filter="">
 			<File
-				RelativePath="Debug\BuildLog.htm"
-				DeploymentContent="TRUE">
-			</File>
-			<File
 				RelativePath="Release\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 			<File
 				RelativePath="cppunit\BuildLog.htm"
+				DeploymentContent="TRUE">
+			</File>
+			<File
+				RelativePath="Debug\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 		</Filter>
