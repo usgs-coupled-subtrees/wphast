@@ -432,6 +432,9 @@ copy &quot;$(DEV_VTK42_VS7_DLL_LIB)\vtkzlib.dll&quot; &quot;$(TargetDir)vtkzlib.
 				RelativePath="BCLeakyPropertyPage2.cpp">
 			</File>
 			<File
+				RelativePath="BCMenu\BCMenu.cpp">
+			</File>
+			<File
 				RelativePath="BCSpecifiedHeadPropertyPage.cpp">
 			</File>
 			<File
@@ -1037,6 +1040,9 @@ copy &quot;$(DEV_VTK42_VS7_DLL_LIB)\vtkzlib.dll&quot; &quot;$(TargetDir)vtkzlib.
 			</File>
 			<File
 				RelativePath="BCLeakyPropertyPage2.h">
+			</File>
+			<File
+				RelativePath="BCMenu\BCMenu.h">
 			</File>
 			<File
 				RelativePath="BCSpecifiedHeadPropertyPage.h">
@@ -3919,15 +3925,15 @@ copy &quot;$(DEV_VTK42_VS7_DLL_LIB)\vtkzlib.dll&quot; &quot;$(TargetDir)vtkzlib.
 			Name="Build Logs"
 			Filter="">
 			<File
-				RelativePath="Release\BuildLog.htm"
-				DeploymentContent="TRUE">
-			</File>
-			<File
 				RelativePath="cppunit\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 			<File
 				RelativePath="Debug\BuildLog.htm"
+				DeploymentContent="TRUE">
+			</File>
+			<File
+				RelativePath="Release\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 		</Filter>

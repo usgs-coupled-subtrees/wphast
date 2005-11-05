@@ -22,6 +22,11 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
 	ON_WM_CREATE()
 	ON_COMMAND(ID_VIEW_RESETDEFAULTLAYOUT, OnViewResetDefaultLayout)
 	// ON_UPDATE_COMMAND_UI(ID_INDICATOR_XYZ, OnUpdateXYZ)
+#if !defined(_USE_DEFAULT_MENUS_)
+	ON_WM_MEASUREITEM()
+	ON_WM_MENUCHAR()
+	ON_WM_INITMENUPOPUP()
+#endif
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -272,3 +277,87 @@ void CMainFrame::UpdateXYZ(float x, float y, float z, const char* xy_units, cons
 	::_sntprintf(buffer, 80, _T("%6.2f %s, %6.2f %s, %6.2f %s"), x, xy_units, y, xy_units, z, z_units);
 	m_wndStatusBar.SetPaneText(1, buffer);
 }
+
+#if !defined(_USE_DEFAULT_MENUS_)
+
+HMENU CMainFrame::NewMenu()
+{
+	// Load the menu from the resources
+	m_menu.LoadMenu(IDR_MAINFRAME_SDI);
+
+	// Use ModifyODMenu to add a bitmap to a menu options.The first parameter
+	// is the menu option text string.If it's NULL, keep the current text
+	// string.The second option is the ID of the menu option to change.
+	// The third option is the resource ID of the bitmap.This can also be a
+	// toolbar ID in which case the class searches the toolbar for the
+	// appropriate bitmap.Only Bitmap and Toolbar resources are supported.
+	// m_menu.ModifyODMenu(NULL,ID_ZOOM,IDB_ZOOM);
+
+	// Another method for adding bitmaps to menu options is through the
+	// LoadToolbar member function.This method allows you to add all
+	// the bitmaps in a toolbar object to menu options (if they exist).
+	// The function parameter is an the toolbar id.
+	// There is also a function called LoadToolbars that takes an
+	// array of id's.
+	m_menu.SetIconSize(17, 19);
+	m_menu.LoadToolbar(IDR_MAINFRAME);
+
+	//{{
+	//m_menu.SetIconSize(15, 17);
+	//m_menu.SetIconSize(17, 17);
+	m_menu.SetIconSize(16, 16);  // this just slightly cuts off the bottom of the select object cursor but looks ok
+	//}}
+
+	return(m_menu.Detach());
+}
+
+void CMainFrame::OnMeasureItem(int nIDCtl, LPMEASUREITEMSTRUCT lpMeasureItemStruct)
+{
+	// TODO: Add your message handler code here and/or call default
+
+	///CFrameWnd::OnMeasureItem(nIDCtl, lpMeasureItemStruct);
+
+	BOOL setflag=FALSE;
+	if (lpMeasureItemStruct->CtlType == ODT_MENU)
+	{
+		if (::IsMenu((HMENU)lpMeasureItemStruct->itemID))
+		{
+			CMenu* cmenu = CMenu::FromHandle((HMENU)lpMeasureItemStruct->itemID);
+			if (BCMenu::IsMenu(cmenu))
+			{
+				m_menu.MeasureItem(lpMeasureItemStruct);
+				setflag = TRUE;
+			}
+		}
+	}
+	if (!setflag) CFrameWnd::OnMeasureItem(nIDCtl, lpMeasureItemStruct);
+
+}
+
+LRESULT CMainFrame::OnMenuChar(UINT nChar, UINT nFlags, CMenu* pMenu)
+{
+	// TODO: Add your message handler code here and/or call default
+
+	///return CFrameWnd::OnMenuChar(nChar, nFlags, pMenu);
+
+	LRESULT lresult;
+	if (BCMenu::IsMenu(pMenu))
+		lresult = BCMenu::FindKeyboardShortcut(nChar, nFlags, pMenu);
+	else
+		lresult = CFrameWnd::OnMenuChar(nChar, nFlags, pMenu);
+	return (lresult);
+}
+
+void CMainFrame::OnInitMenuPopup(CMenu* pPopupMenu, UINT nIndex, BOOL bSysMenu)
+{
+	///CFrameWnd::OnInitMenuPopup(pPopupMenu, nIndex, bSysMenu);
+
+	// TODO: Add your message handler code here
+	CFrameWnd::OnInitMenuPopup(pPopupMenu, nIndex, bSysMenu);
+	if (!bSysMenu)
+	{
+		if (BCMenu::IsMenu(pPopupMenu))BCMenu::UpdateMenu(pPopupMenu);
+	}
+}
+
+#endif // !defined(_USE_DEFAULT_MENUS_)

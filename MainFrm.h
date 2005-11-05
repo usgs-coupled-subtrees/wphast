@@ -4,6 +4,10 @@
 #include "PropertyTreeControlBar.h"
 #include "BoxPropertiesDialogBar.h"
 
+#if !defined(_USE_DEFAULT_MENUS_)
+#include "BCMenu/BCMenu.h"
+#endif
+
 #pragma once
 class CMainFrame : public CFrameWnd
 {
@@ -17,6 +21,11 @@ public:
 
 // Operations
 public:
+
+#if !defined(_USE_DEFAULT_MENUS_)
+	HMENU NewMenu();
+	BCMenu m_menu;
+#endif
 
 // Overrides
 public:
@@ -56,6 +65,11 @@ protected:
 public:
 	afx_msg void OnViewResetDefaultLayout();
 	void UpdateXYZ(float x, float y, float z, const char* xy_units, const char* z_units);
+#if !defined(_USE_DEFAULT_MENUS_)
+	afx_msg void OnMeasureItem(int nIDCtl, LPMEASUREITEMSTRUCT lpMeasureItemStruct);
+	afx_msg LRESULT OnMenuChar(UINT nChar, UINT nFlags, CMenu* pMenu);
+	afx_msg void OnInitMenuPopup(CMenu* pPopupMenu, UINT nIndex, BOOL bSysMenu);
+#endif
 };
 
 

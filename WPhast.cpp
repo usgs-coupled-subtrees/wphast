@@ -244,6 +244,16 @@ BOOL CWPhastApp::InitInstance()
 			return FALSE;
 	//{{SRC
 	}
+
+#if !defined(_USE_DEFAULT_MENUS_)
+	CMenu* pMenu = m_pMainWnd->GetMenu();
+	if (pMenu) pMenu->DestroyMenu();
+	HMENU hMenu = ((CMainFrame*)m_pMainWnd)->NewMenu();
+	pMenu = CMenu::FromHandle(hMenu);
+	m_pMainWnd->SetMenu(pMenu);
+	((CMainFrame*)m_pMainWnd)->m_hMenuDefault = hMenu;
+#endif
+
 	//}}SRC
 	// The one and only window has been initialized, so show and update it
 	m_pMainWnd->ShowWindow(SW_SHOW);
