@@ -47,4 +47,6 @@ public:
 	virtual BOOL OnInitDialog();
 	virtual BOOL OnSetActive();
 	virtual BOOL OnKillActive();
+	afx_msg void OnBnClickedFixedRadio();
+	afx_msg void OnBnClickedAssocRadio();
 };

@@ -122,6 +122,8 @@ protected:
 	CRect                                m_rcListBox;
 	CCellID m_idLastHotCell;
 	std::map< std::vector<LPCTSTR>, CListBox* > m_mapVectorToList;
+	std::map< std::vector<LPCTSTR>, CListBox* >::const_iterator 
+		FindOrCreateListBox(const std::vector<LPCTSTR>& vecOptions, LPCTSTR lpszWindowName = NULL);
 
 	static CTheme s_themeButton;
 	static CTheme s_themeCombo;

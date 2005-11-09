@@ -35,7 +35,9 @@
 #include "BCSpecifiedHeadPropertyPage.h"
 
 #include "ICHeadPropertyPage.h"
+#include "ICHeadSpreadPropertyPage.h"
 #include "ChemICPropertyPage.h"
+#include "ChemICSpreadPropertyPage.h"
 
 #include "WellCreateAction.h"
 #include "WellSetPositionAction.h"
@@ -680,9 +682,12 @@ void CViewVTKCommand::OnLeftButtonReleaseEvent(vtkObject* caller, void* callData
 		CBCFluxPropertyPage2          fluxProps;
 		CBCLeakyPropertyPage2         leakyProps;
 		CBCSpecifiedHeadPropertyPage  specifiedProps;
-		CICHeadPropertyPage           icHeadProps;
-		CChemICPropertyPage           chemICProps;
+		CICHeadSpreadPropertyPage     icHeadProps;
+		CChemICSpreadPropertyPage     chemICProps;
 
+		// CChemICSpreadPropertyPage only needs the flowonly flag when the zone is a
+		// default zone
+		//
 		bool bFlowOnly = this->m_pView->GetDocument()->GetFlowOnly();
 
 		fluxProps.SetFlowOnly(bFlowOnly);

@@ -40,7 +40,7 @@ void CNewZonePropertyPage::DoDataExchange(CDataExchange* pDX)
 		// BC
 		this->m_htiBCFlux  = this->m_wndTree.InsertItem(_T("FLUX_BC"), this->m_htiBC);
 		this->m_htiBCLeaky = this->m_wndTree.InsertItem(_T("LEAKY_BC"), this->m_htiBC);
-		this->m_htiBCSpec  = this->m_wndTree.InsertItem(_T("SPECIFIED_VALUE_BC"), this->m_htiBC);
+		this->m_htiBCSpec  = this->m_wndTree.InsertItem(_T("SPECIFIED_HEAD_BC"), this->m_htiBC);
 
 		// IC
 		this->m_htiICHead  = this->m_wndTree.InsertItem(_T("HEAD_IC"), this->m_htiIC);
@@ -142,11 +142,11 @@ BOOL CNewZonePropertyPage::OnInitDialog()
 	// Store pointers to all the pages in m_PropPageArray.
 	// 0 : this page        CNewZonePropertyPage
 	// 1 : media page       CMediaPropertyPage
-	// 2 : flux page        CBCFluxPropertyPage
-	// 3 : leaky page       CBCLeakyPropertyPage
-	// 4 : specified page   CBCSpecifiedPropertyPage
+	// 2 : flux page        CBCFluxPropertyPage/CBCFluxPropertyPage2
+	// 3 : leaky page       CBCLeakyPropertyPage/CBCLeakyPropertyPage2
+	// 4 : specified page   CBCSpecifiedPropertyPage/CBCSpecifiedHeadPropertyPage
 	// 5 : head_ic page     CICHeadPropertyPage
-	// 6 : chem_ic page     CChemICPropertyPage
+	// 6 : chem_ic page     CChemICPropertyPage/CChemICSpreadPropertyPage
 	
 	CPropertySheet* pSheet = (CPropertySheet*) this->GetParent();   
 	if (pSheet->IsWizard())
@@ -199,11 +199,11 @@ LRESULT CNewZonePropertyPage::OnWizardNext()
 
 	// 0 : this page        CNewZonePropertyPage
 	// 1 : media page       CMediaPropertyPage
-	// 2 : flux page        CBCFluxPropertyPage
-	// 3 : leaky page       CBCLeakyPropertyPage
-	// 4 : specified page   CBCSpecifiedPropertyPage
+	// 2 : flux page        CBCFluxPropertyPage/CBCFluxPropertyPage2
+	// 3 : leaky page       CBCLeakyPropertyPage/CBCLeakyPropertyPage2
+	// 4 : specified page   CBCSpecifiedPropertyPage/CBCSpecifiedHeadPropertyPage
 	// 5 : head_ic page     CICHeadPropertyPage
-	// 6 : chem_ic page     CChemICPropertyPage
+	// 6 : chem_ic page     CChemICPropertyPage/CChemICSpreadPropertyPage
 
 	// remove all but this page
 	int nCount = pSheet->GetPageCount();

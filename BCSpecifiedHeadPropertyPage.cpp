@@ -37,17 +37,6 @@ void CBCSpecifiedHeadPropertyPage::DoDataExchange(CDataExchange* pDX)
 		//
 		CGlobal::DDX_GridTimeSeries(pDX, IDC_HEAD_GRID, this->m_bc.m_bc_head);
 
-		// solution type
-		//
-		if (this->m_bc.bc_solution_type == FIXED)
-		{
-			this->CheckRadioButton(IDC_ASSOC_RADIO, IDC_FIXED_RADIO, IDC_FIXED_RADIO);
-		}
-		else
-		{
-			this->CheckRadioButton(IDC_ASSOC_RADIO, IDC_FIXED_RADIO, IDC_ASSOC_RADIO);
-		}
-
 		// solution
 		//
 		CGlobal::DDX_GridTimeSeries(pDX, IDC_SOLUTION_GRID, this->m_bc.m_bc_solution);
@@ -84,12 +73,27 @@ void CBCSpecifiedHeadPropertyPage::DoDataExchange(CDataExchange* pDX)
 		}
 		this->m_bc = bc;
 	}
+	else
+	{
+		// solution type
+		//
+		if (this->m_bc.bc_solution_type == FIXED)
+		{
+			this->CheckRadioButton(IDC_ASSOC_RADIO, IDC_FIXED_RADIO, IDC_FIXED_RADIO);
+		}
+		else
+		{
+			this->CheckRadioButton(IDC_ASSOC_RADIO, IDC_FIXED_RADIO, IDC_ASSOC_RADIO);
+		}
+	}
 }
 
 
 BEGIN_MESSAGE_MAP(CBCSpecifiedHeadPropertyPage, baseCBCSpecifiedHeadPropertyPage)
 	ON_NOTIFY(GVN_CHECKCHANGED, IDC_HEAD_GRID, OnCheckChangedHead)
 	ON_NOTIFY(GVN_CHECKCHANGED, IDC_SOLUTION_GRID, OnCheckChangedSolution)
+	ON_BN_CLICKED(IDC_FIXED_RADIO, OnBnClickedFixedRadio)
+	ON_BN_CLICKED(IDC_ASSOC_RADIO, OnBnClickedAssocRadio)
 END_MESSAGE_MAP()
 
 
@@ -352,4 +356,28 @@ BOOL CBCSpecifiedHeadPropertyPage::OnKillActive()
 		return TRUE;
 	}
 	return CPropertyPage::OnKillActive();
+}
+
+void CBCSpecifiedHeadPropertyPage::OnBnClickedFixedRadio()
+{
+	if (this->IsDlgButtonChecked(IDC_FIXED_RADIO))
+	{
+		this->m_bc.bc_solution_type = FIXED;
+	}
+	if (this->IsDlgButtonChecked(IDC_ASSOC_RADIO))
+	{
+		this->m_bc.bc_solution_type = ASSOCIATED;
+	}
+}
+
+void CBCSpecifiedHeadPropertyPage::OnBnClickedAssocRadio()
+{
+	if (this->IsDlgButtonChecked(IDC_FIXED_RADIO))
+	{
+		this->m_bc.bc_solution_type = FIXED;
+	}
+	if (this->IsDlgButtonChecked(IDC_ASSOC_RADIO))
+	{
+		this->m_bc.bc_solution_type = ASSOCIATED;
+	}
 }

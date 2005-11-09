@@ -54,4 +54,7 @@ protected:
 public:
 	virtual BOOL OnInitDialog();
 	CRichEditCtrl m_wndRichEditCtrl;
+	virtual BOOL OnSetActive();
+	virtual BOOL OnKillActive();
+	virtual LRESULT OnWizardNext();
 };

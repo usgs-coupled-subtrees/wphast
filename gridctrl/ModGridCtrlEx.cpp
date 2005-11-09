@@ -171,64 +171,14 @@ BOOL CModGridCtrlEx::SetColumnOptions(int nCol, const std::vector<LPCTSTR>& vecO
 #ifdef _DEBUG
 		strWindowName.Format(_T("Col %d"), nCol);
 #endif
-
-		std::map< std::vector<LPCTSTR>, CListBox* >::const_iterator item = this->m_mapVectorToList.find(vecOptions);
-		if (item == this->m_mapVectorToList.end())
+		std::map< std::vector<LPCTSTR>, CListBox* >::const_iterator item = this->FindOrCreateListBox(vecOptions, strWindowName);
+		if (item != this->m_mapVectorToList.end())
 		{
-			// this insert is ok
-			item = (this->m_mapVectorToList.insert(std::map< std::vector<LPCTSTR>, CListBox* >::value_type(vecOptions, new CListBoxDrop()))).first;
-
-			ASSERT(item == this->m_mapVectorToList.find(vecOptions));
-			ASSERT(item != this->m_mapVectorToList.end());
-			ASSERT(item->first.size() == vecOptions.size());
-			ASSERT(&item->first != &vecOptions);
-
-			CListBox* pListBox = item->second;
-
-			CRect rect(0, 0, 0, 0);
-			VERIFY(pListBox->CreateEx(
-				WS_EX_TOPMOST|WS_EX_TOOLWINDOW,
-				_T("LISTBOX"),
-				strWindowName,
-				WS_CHILDWINDOW|WS_CLIPSIBLINGS|WS_BORDER,
-				rect,
-				CWnd::GetDesktopWindow(),
-				IDC_INPLACE_CONTROL,
-				NULL
-				));
-
-			pListBox->SetFont(this->GetParent()->GetFont());
-			pListBox->SetOwner(this);
-
-			ASSERT(this->m_mapVectorToList[vecOptions]->GetOwner() == this);
-			ASSERT(this->m_mapVectorToList[vecOptions]->GetParent() == CWnd::GetDesktopWindow());
-
-			std::vector<LPCTSTR>::const_iterator opt = vecOptions.begin();
-			for (; opt != vecOptions.end(); ++opt)
+			for (int nRow = this->GetFixedRowCount(); nRow < this->GetRowCount(); ++nRow)
 			{
-				pListBox->AddString(*opt);
+				this->SetItemData(nRow, nCol, (LPARAM)&item->first);
+				this->SetItemState(nRow, nCol, this->GetItemState(nRow, nCol) | GVIS_DROPDOWN);
 			}
-			ASSERT(pListBox->GetCount() == (int)vecOptions.size());
-		}
-		else
-		{
-#ifdef _DEBUG
-			CString str;
-			CListBox *pListBox = item->second;
-			pListBox->GetWindowText(str);
-			strWindowName.Format(_T("%s, Col %d"), str, nCol);
-			pListBox->SetWindowText(strWindowName);
-#endif
-		}
-
-		for (int nRow = this->GetFixedRowCount(); nRow < this->GetRowCount(); ++nRow)
-		{
-			this->SetItemData(nRow, nCol, (LPARAM)&item->first);
-// COMMENT: {4/28/2005 10:16:16 PM}			//{{HACK
-// COMMENT: {4/28/2005 10:16:16 PM}			// don't allow paste
-// COMMENT: {4/28/2005 10:16:16 PM}			this->SetItemState(nRow, nCol, this->GetItemState(nRow, nCol) | GVIS_READONLY | GVIS_DROPDOWN);
-// COMMENT: {4/28/2005 10:16:16 PM}			//}}HACK
-			this->SetItemState(nRow, nCol, this->GetItemState(nRow, nCol) | GVIS_DROPDOWN);
 		}
 	}
 	catch(...)
@@ -247,58 +197,12 @@ BOOL CModGridCtrlEx::SetCellOptions(int nRow, int nCol, const std::vector<LPCTST
 #ifdef _DEBUG
 		strWindowName.Format(_T("Cell (%d,%d)"), nRow, nCol);
 #endif
-
-		std::map< std::vector<LPCTSTR>, CListBox* >::const_iterator item = this->m_mapVectorToList.find(vecOptions);
-		if (item == this->m_mapVectorToList.end())
+		std::map< std::vector<LPCTSTR>, CListBox* >::const_iterator item = this->FindOrCreateListBox(vecOptions, strWindowName);
+		if (item != this->m_mapVectorToList.end())
 		{
-			// this insert is ok
-			item = (this->m_mapVectorToList.insert(std::map< std::vector<LPCTSTR>, CListBox* >::value_type(vecOptions, new CListBoxDrop()))).first;
-
-			ASSERT(item == this->m_mapVectorToList.find(vecOptions));
-			ASSERT(item != this->m_mapVectorToList.end());
-			ASSERT(item->first.size() == vecOptions.size());
-			ASSERT(&item->first != &vecOptions);
-
-			CListBox* pListBox = item->second;
-
-			CRect rect(0, 0, 0, 0);
-			VERIFY(pListBox->CreateEx(
-				WS_EX_TOPMOST|WS_EX_TOOLWINDOW,
-				_T("LISTBOX"),
-				strWindowName,
-				WS_CHILDWINDOW|WS_CLIPSIBLINGS|WS_BORDER,
-				rect,
-				CWnd::GetDesktopWindow(),
-				IDC_INPLACE_CONTROL,
-				NULL
-				));
-
-			pListBox->SetFont(this->GetParent()->GetFont());
-			pListBox->SetOwner(this);
-
-			ASSERT(this->m_mapVectorToList[vecOptions]->GetOwner() == this);
-			ASSERT(this->m_mapVectorToList[vecOptions]->GetParent() == CWnd::GetDesktopWindow());
-
-			std::vector<LPCTSTR>::const_iterator opt = vecOptions.begin();
-			for (; opt != vecOptions.end(); ++opt)
-			{
-				pListBox->AddString(*opt);
-			}
-			ASSERT(pListBox->GetCount() == (int)vecOptions.size());
+			this->SetItemData(nRow, nCol, (LPARAM)&item->first);
+			this->SetItemState(nRow, nCol, this->GetItemState(nRow, nCol) | GVIS_DROPDOWN);
 		}
-		else
-		{
-#ifdef _DEBUG
-			CString str;
-			CListBox *pListBox = item->second;
-			pListBox->GetWindowText(str);
-			strWindowName.Format(_T("%s, Cell (%d,%d)"), str, nRow, nCol);
-			pListBox->SetWindowText(strWindowName);
-#endif
-		}
-
-		this->SetItemData(nRow, nCol, (LPARAM)&item->first);
-		this->SetItemState(nRow, nCol, this->GetItemState(nRow, nCol) | GVIS_DROPDOWN);
 	}
 	catch(...)
 	{
@@ -307,7 +211,6 @@ BOOL CModGridCtrlEx::SetCellOptions(int nRow, int nCol, const std::vector<LPCTST
 	}
 	return TRUE;
 }
-
 
 bool CModGridCtrlEx::IsDropDownCell(const CCellID& cell)const
 {
@@ -445,6 +348,12 @@ CListBox* CModGridCtrlEx::GetListBox(int nRow, int nCol)
 		std::map< std::vector<LPCTSTR>, CListBox* >::iterator iter = this->m_mapVectorToList.find(*pVector);
 		if (iter != this->m_mapVectorToList.end())
 		{
+			// set owner and font everytime
+			// this is necessary in case the grid's OS window's 
+			// handle is no longer valid
+			//
+			iter->second->SetFont(&this->m_Font);
+			iter->second->SetOwner(this);
 			return (CListBox*)(iter->second);
 		}
 	}
@@ -1516,3 +1425,66 @@ BOOL CModGridCtrlEx::ValidateEdit(int nRow, int nCol, LPCTSTR str)
 	return TRUE;
 }
 
+std::map< std::vector<LPCTSTR>, CListBox* >::const_iterator CModGridCtrlEx::FindOrCreateListBox(const std::vector<LPCTSTR>& vecOptions, LPCTSTR lpszWindowName)
+{
+	CString strWindowName;
+#ifdef _DEBUG
+	if (lpszWindowName != NULL)
+	{
+		strWindowName.Format(_T("%s"), lpszWindowName);
+	}
+#endif
+
+	std::map< std::vector<LPCTSTR>, CListBox* >::const_iterator item = this->m_mapVectorToList.find(vecOptions);
+	if (item == this->m_mapVectorToList.end())
+	{
+		// this insert is ok
+		item = (this->m_mapVectorToList.insert(std::map< std::vector<LPCTSTR>, CListBox* >::value_type(vecOptions, new CListBoxDrop()))).first;
+
+		ASSERT(item == this->m_mapVectorToList.find(vecOptions));
+		ASSERT(item != this->m_mapVectorToList.end());
+		ASSERT(item->first.size() == vecOptions.size());
+		ASSERT(&item->first != &vecOptions);
+
+		CListBox* pListBox = item->second;
+
+		CRect rect(0, 0, 0, 0);
+		VERIFY(pListBox->CreateEx(
+			WS_EX_TOPMOST|WS_EX_TOOLWINDOW,
+			_T("LISTBOX"),
+			strWindowName,
+			WS_CHILDWINDOW|WS_CLIPSIBLINGS|WS_BORDER,
+			rect,
+			CWnd::GetDesktopWindow(),
+			IDC_INPLACE_CONTROL,
+			NULL
+			));
+
+		pListBox->SetFont(&this->m_Font);
+		pListBox->SetOwner(this);
+
+		ASSERT(this->m_mapVectorToList[vecOptions]->GetOwner() == this);
+		ASSERT(this->m_mapVectorToList[vecOptions]->GetParent() == CWnd::GetDesktopWindow());
+
+		std::vector<LPCTSTR>::const_iterator opt = vecOptions.begin();
+		for (; opt != vecOptions.end(); ++opt)
+		{
+			pListBox->AddString(*opt);
+		}
+		ASSERT(pListBox->GetCount() == (int)vecOptions.size());
+	}
+#ifdef _DEBUG
+	else
+	{
+		if (lpszWindowName != NULL)
+		{
+			CString str;
+			CListBox *pListBox = item->second;
+			pListBox->GetWindowText(str);
+			strWindowName.Format(_T("%s, %s"), str, lpszWindowName);
+			pListBox->SetWindowText(strWindowName);
+		}
+	}
+#endif
+	return item;
+}

@@ -44,6 +44,8 @@ protected:
 	afx_msg void OnCheckChangedHead(NMHDR *pNotifyStruct, LRESULT *result);
 	afx_msg void OnCheckChangedSolution(NMHDR *pNotifyStruct, LRESULT *result);
 	afx_msg void OnCheckChangedSingle(NMHDR *pNotifyStruct, LRESULT *result);
+
+	afx_msg void OnBnClickedFace();
 public:
 	virtual BOOL OnInitDialog();
 	virtual BOOL OnSetActive();

@@ -40,23 +40,6 @@ void CBCFluxPropertyPage2::DoDataExchange(CDataExchange* pDX)
 		// solution
 		//
 		CGlobal::DDX_GridTimeSeries(pDX, IDC_SOLUTION_GRID, this->m_bc.m_bc_solution);
-
-		// face
-		//
-		switch(this->m_bc.face)
-		{
-		case 0: // x
-			this->CheckRadioButton(IDC_FACE_X_RADIO, IDC_FACE_Z_RADIO, IDC_FACE_X_RADIO);
-			break;
-		case 1: // y
-			this->CheckRadioButton(IDC_FACE_X_RADIO, IDC_FACE_Z_RADIO, IDC_FACE_Y_RADIO);
-			break;
-		case 2: // z
-			this->CheckRadioButton(IDC_FACE_X_RADIO, IDC_FACE_Z_RADIO, IDC_FACE_Z_RADIO);
-			break;
-		default: // x
-			this->CheckRadioButton(IDC_FACE_X_RADIO, IDC_FACE_Z_RADIO, IDC_FACE_X_RADIO);
-		}
 	}
 
 	if (pDX->m_bSaveAndValidate)
@@ -96,6 +79,25 @@ void CBCFluxPropertyPage2::DoDataExchange(CDataExchange* pDX)
 			bc.face         = 2;
 		}
 		this->m_bc = bc;
+	}
+	else
+	{
+		// face
+		//
+		switch(this->m_bc.face)
+		{
+		case 0: // x
+			this->CheckRadioButton(IDC_FACE_X_RADIO, IDC_FACE_Z_RADIO, IDC_FACE_X_RADIO);
+			break;
+		case 1: // y
+			this->CheckRadioButton(IDC_FACE_X_RADIO, IDC_FACE_Z_RADIO, IDC_FACE_Y_RADIO);
+			break;
+		case 2: // z
+			this->CheckRadioButton(IDC_FACE_X_RADIO, IDC_FACE_Z_RADIO, IDC_FACE_Z_RADIO);
+			break;
+		default: // x
+			this->CheckRadioButton(IDC_FACE_X_RADIO, IDC_FACE_Z_RADIO, IDC_FACE_X_RADIO);
+		}
 	}
 }
 
@@ -251,6 +253,9 @@ BOOL CBCFluxPropertyPage2::SetupGrids(void)
 BEGIN_MESSAGE_MAP(CBCFluxPropertyPage2, baseCBCFluxPropertyPage2)
 	ON_NOTIFY(GVN_CHECKCHANGED, IDC_FLUX_GRID, OnCheckChangedFlux)
 	ON_NOTIFY(GVN_CHECKCHANGED, IDC_SOLUTION_GRID, OnCheckChangedSolution)
+	ON_BN_CLICKED(IDC_FACE_X_RADIO, OnBnClickedFace)
+	ON_BN_CLICKED(IDC_FACE_Y_RADIO, OnBnClickedFace)
+	ON_BN_CLICKED(IDC_FACE_Z_RADIO, OnBnClickedFace)
 END_MESSAGE_MAP()
 
 
@@ -366,4 +371,23 @@ BOOL CBCFluxPropertyPage2::OnKillActive()
 		return TRUE;
 	}
 	return CPropertyPage::OnKillActive();
+}
+
+void CBCFluxPropertyPage2::OnBnClickedFace()
+{
+	if (this->IsDlgButtonChecked(IDC_FACE_X_RADIO))
+	{
+		this->m_bc.face_defined = TRUE;
+		this->m_bc.face         = 0;
+	}
+	if (this->IsDlgButtonChecked(IDC_FACE_Y_RADIO))
+	{
+		this->m_bc.face_defined = TRUE;
+		this->m_bc.face         = 1;
+	}
+	if (this->IsDlgButtonChecked(IDC_FACE_Z_RADIO))
+	{
+		this->m_bc.face_defined = TRUE;
+		this->m_bc.face         = 2;
+	}
 }

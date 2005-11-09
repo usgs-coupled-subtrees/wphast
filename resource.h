@@ -306,7 +306,6 @@
 #define IDC_VALUE2_EDIT                 1011
 #define IDC_GROUP1                      1011
 #define IDC_RADIO10                     1011
-#define IDC_FACE_X_RADIO                1012
 #define IDC_RADIO11                     1012
 #define IDC_RICHEDIT22                  1013
 #define IDC_RADIO12                     1013
@@ -321,8 +320,6 @@
 #define IDC_DISTANCE2_STATIC            1017
 #define IDC_RADIO14                     1017
 #define IDC_VALUE2_STATIC               1018
-#define IDC_FACE_Y_RADIO                1019
-#define IDC_FACE_Z_RADIO                1020
 #define IDC_CHECK1                      1021
 #define IDC_CHECK2                      1022
 #define IDC_CHECK3                      1023
@@ -654,6 +651,9 @@
 #define IDC_HCT_CHECK                   1340
 #define IDC_MAX_TS_CHECK                1341
 #define IDC_MIN_TS_CHECK                1342
+#define IDC_FACE_X_RADIO                1343
+#define IDC_FACE_Y_RADIO                1344
+#define IDC_FACE_Z_RADIO                1345
 #define IDC_RESIZE_COLUMN               28654
 #define IDC_RESIZE_ROW                  28655
 #define IDR_POPUP                       28656
@@ -679,7 +679,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        273
 #define _APS_NEXT_COMMAND_VALUE         32830
-#define _APS_NEXT_CONTROL_VALUE         1341
+#define _APS_NEXT_CONTROL_VALUE         1347
 #define _APS_NEXT_SYMED_VALUE           126
 #endif
 #endif

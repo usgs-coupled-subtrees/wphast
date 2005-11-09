@@ -5,6 +5,8 @@
 #include "WPhast.h"
 #include "ICHeadSpreadPropertyPage.h"
 
+#include "NewModelWizard.h"
+
 #include "property.h"
 #include "Global.h"
 
@@ -220,4 +222,48 @@ void CICHeadSpreadPropertyPage::OnSelChangedHeadIC(NMHDR *pNotifyStruct, LRESULT
 	{
 		this->m_wndRichEditCtrl.SetWindowText(this->m_sHeadRTF.c_str());
 	}
+}
+
+BOOL CICHeadSpreadPropertyPage::OnSetActive()
+{
+	BOOL bRet = CPropertyPage::OnSetActive();
+	CPropertySheet* pSheet = static_cast<CPropertySheet*>(this->GetParent());
+	ASSERT_KINDOF(CPropertySheet, pSheet);
+	if (pSheet->IsWizard())
+	{
+		if (pSheet->IsKindOf(RUNTIME_CLASS(CNewModelWizard)))
+		{
+			pSheet->SetWizardButtons(PSWIZB_BACK|PSWIZB_NEXT);
+		}
+		else
+		{
+			pSheet->SetWizardButtons(PSWIZB_BACK|PSWIZB_FINISH);
+		}
+	}
+	return bRet;
+}
+
+BOOL CICHeadSpreadPropertyPage::OnKillActive()
+{
+	CPropertySheet* pSheet = static_cast<CPropertySheet*>(this->GetParent());
+	ASSERT_KINDOF(CPropertySheet, pSheet);
+	if (pSheet->IsWizard())
+	{
+		return TRUE;
+	}
+	return CPropertyPage::OnKillActive();
+}
+
+LRESULT CICHeadSpreadPropertyPage::OnWizardNext()
+{
+	CPropertySheet* pSheet = static_cast<CPropertySheet*>(this->GetParent());
+	ASSERT_KINDOF(CPropertySheet, pSheet);
+	if (pSheet->IsWizard())
+	{
+		if (!this->UpdateData(TRUE))
+		{
+			return -1; // return –1 to prevent the page from changing 
+		}
+	}
+	return CPropertyPage::OnWizardNext();
 }

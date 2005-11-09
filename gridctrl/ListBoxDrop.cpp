@@ -140,8 +140,11 @@ void CListBoxDrop::EndEdit(BOOL bCancel)
 		dispinfo.item.lParam  = (LPARAM) this->m_nLastChar; 
 	 
 		CWnd* pOwner = GetOwner();
-		if (IsWindow(pOwner->GetSafeHwnd()))
+		ASSERT(::IsWindow(pOwner->GetSafeHwnd())); // this should no longer fail in wizard mode on back -> next
+		if (::IsWindow(pOwner->GetSafeHwnd()))
+		{
 			pOwner->SendMessage(WM_NOTIFY, GetDlgCtrlID(), (LPARAM)&dispinfo ); 
+		}
 	}
 	ASSERT(CWnd::GetCapture() != this);
 }

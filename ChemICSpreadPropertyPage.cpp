@@ -5,6 +5,8 @@
 #include "WPhast.h"
 #include "ChemICSpreadPropertyPage.h"
 
+#include "NewModelWizard.h"
+
 #include "property.h"
 #include "Global.h"
 
@@ -41,7 +43,7 @@ void CChemICSpreadPropertyPage::CommonConstruct(void)
 
 	// set
 	//
-	this->SetFlowOnly(false);
+	this->SetFlowOnly(true);
 
 	// load property descriptions
 	//
@@ -356,4 +358,48 @@ void CChemICSpreadPropertyPage::OnSelChangedChemIC(NMHDR *pNotifyStruct, LRESULT
 		ASSERT(FALSE);
 		this->m_wndRichEditCtrl.SetWindowText("");
 	}
+}
+
+BOOL CChemICSpreadPropertyPage::OnSetActive()
+{
+	BOOL bRet = CPropertyPage::OnSetActive();
+	CPropertySheet* pSheet = static_cast<CPropertySheet*>(this->GetParent());
+	ASSERT_KINDOF(CPropertySheet, pSheet);
+	if (pSheet->IsWizard())
+	{
+		if (pSheet->IsKindOf(RUNTIME_CLASS(CNewModelWizard)))
+		{
+			pSheet->SetWizardButtons(PSWIZB_BACK|PSWIZB_NEXT);
+		}
+		else
+		{
+			pSheet->SetWizardButtons(PSWIZB_BACK|PSWIZB_FINISH);
+		}
+	}
+	return bRet;
+}
+
+BOOL CChemICSpreadPropertyPage::OnKillActive()
+{
+	CPropertySheet* pSheet = static_cast<CPropertySheet*>(this->GetParent());
+	ASSERT_KINDOF(CPropertySheet, pSheet);
+	if (pSheet->IsWizard())
+	{
+		return TRUE;
+	}
+	return CPropertyPage::OnKillActive();
+}
+
+LRESULT CChemICSpreadPropertyPage::OnWizardNext()
+{
+	CPropertySheet* pSheet = static_cast<CPropertySheet*>(this->GetParent());
+	ASSERT_KINDOF(CPropertySheet, pSheet);
+	if (pSheet->IsWizard())
+	{
+		if (!this->UpdateData(TRUE))
+		{
+			return -1; // return –1 to prevent the page from changing 
+		}
+	}
+	return CPropertyPage::OnWizardNext();
 }
