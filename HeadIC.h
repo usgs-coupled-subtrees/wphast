@@ -14,8 +14,7 @@ extern "C" {
 #include <iosfwd> // std::ostream
 
 
-class CHeadIC :
-	public head_ic
+class CHeadIC : public head_ic
 {
 public:
 	// ctor
@@ -35,6 +34,7 @@ public:
 	void Serialize(CArchive& ar);
 	friend std::ostream& operator<< (std::ostream &os, const CHeadIC &a);
 
+	static CLIPFORMAT clipFormat;
 
 private:
 	void InternalCopy(const struct head_ic& src);

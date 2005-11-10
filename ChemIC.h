@@ -33,6 +33,8 @@ public:
 	void Serialize(CArchive& ar);
 	friend std::ostream& operator<< (std::ostream &os, const CChemIC &a);
 
+	static CLIPFORMAT clipFormat;
+
 private:
 	void InternalCopy(const struct chem_ic& src);
 	void InternalDelete(void);

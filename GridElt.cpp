@@ -10,6 +10,9 @@
 #define new DEBUG_NEW
 #endif
 
+CLIPFORMAT CGridElt::clipFormat = (CLIPFORMAT)::RegisterClipboardFormat(_T("WPhast:CGridElt"));
+
+
 /* ---------------------------------------------------------------------- 
  *   Grid Elements
  * ---------------------------------------------------------------------- */

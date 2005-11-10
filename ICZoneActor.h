@@ -50,8 +50,14 @@ public:
 	CHeadIC GetHeadIC(void)const;
 	void SetHeadIC(const CHeadIC& rHeadIC);
 
+	void GetData(CHeadIC& rHeadIC)const;
+	void SetData(const CHeadIC& rHeadIC);
+
 	CChemIC GetChemIC(void)const;
 	void SetChemIC(const CChemIC& chemIC);
+
+	void GetData(CChemIC& chemIC)const;
+	void SetData(const CChemIC& chemIC);
 
 	HTREEITEM GetHTreeItem(void)const;
 };

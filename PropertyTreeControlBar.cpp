@@ -143,10 +143,11 @@ CPropertyTreeControlBar::CPropertyTreeControlBar(void)
 	str.Format("WPhast:%d", _getpid());
 
 	this->m_cfPID     = (CLIPFORMAT)::RegisterClipboardFormat(str);
-	this->m_cfGridElt = (CLIPFORMAT)::RegisterClipboardFormat(_T("WPhast:CGridElt"));
-	this->m_cfHeadIC  = (CLIPFORMAT)::RegisterClipboardFormat(_T("WPhast:CHeadIC"));
-	this->m_cfChemIC  = (CLIPFORMAT)::RegisterClipboardFormat(_T("WPhast:CChemIC"));
-	this->m_cfBC      = (CLIPFORMAT)::RegisterClipboardFormat(_T("WPhast:CBC"));	
+
+	ASSERT(CGridElt::clipFormat >= 0xC000);
+	ASSERT(CHeadIC::clipFormat >= 0xC000);
+	ASSERT(CChemIC::clipFormat >= 0xC000);
+	ASSERT(CBC::clipFormat >= 0xC000);
 }
 
 CPropertyTreeControlBar::~CPropertyTreeControlBar(void)
@@ -1979,7 +1980,7 @@ bool CPropertyTreeControlBar::IsNodeCopyable(CTreeCtrlNode copyNode, COleDataSou
 
 					ar.Close();
 
-					pOleDataSource->CacheGlobalData(this->m_cfGridElt, globFile.Detach());
+					pOleDataSource->CacheGlobalData(CGridElt::clipFormat, globFile.Detach());
 				}
 				return true;
 			}
@@ -2017,7 +2018,7 @@ bool CPropertyTreeControlBar::IsNodeCopyable(CTreeCtrlNode copyNode, COleDataSou
 					headIC.Serialize(ar);
 					ar.Close();
 
-					pOleDataSource->CacheGlobalData(this->m_cfHeadIC, globFile.Detach());
+					pOleDataSource->CacheGlobalData(CHeadIC::clipFormat, globFile.Detach());
 				}
 				return true;
 			}
@@ -2055,7 +2056,7 @@ bool CPropertyTreeControlBar::IsNodeCopyable(CTreeCtrlNode copyNode, COleDataSou
 					chemIC.Serialize(ar);
 					ar.Close();
 
-					pOleDataSource->CacheGlobalData(this->m_cfChemIC, globFile.Detach());
+					pOleDataSource->CacheGlobalData(CChemIC::clipFormat, globFile.Detach());
 				}
 				return true;
 			}
@@ -2093,7 +2094,7 @@ bool CPropertyTreeControlBar::IsNodeCopyable(CTreeCtrlNode copyNode, COleDataSou
 					bc.Serialize(ar);
 					ar.Close();
 
-					pOleDataSource->CacheGlobalData(this->m_cfBC, globFile.Detach());
+					pOleDataSource->CacheGlobalData(CBC::clipFormat, globFile.Detach());
 				}
 				return true;
 			}
@@ -2103,174 +2104,762 @@ bool CPropertyTreeControlBar::IsNodeCopyable(CTreeCtrlNode copyNode, COleDataSou
 	return false;
 }
 
+CLIPFORMAT CPropertyTreeControlBar::GetNativeClipFormat(void)const
+{
+	CLIPFORMAT type = 0;
+	type = this->GetZoneClipFormat();
+	if (type)
+	{
+		return type;
+	}
+	return type;
+}
+
+CLIPFORMAT CPropertyTreeControlBar::GetZoneClipFormat(void)const
+{
+	CLIPFORMAT type = 0;
+
+	COleDataObject dataObject;
+	if (dataObject.AttachClipboard())
+	{
+		if (dataObject.IsDataAvailable(CGridElt::clipFormat))
+		{
+			type = CGridElt::clipFormat;
+		}
+		else if (dataObject.IsDataAvailable(CHeadIC::clipFormat))
+		{
+			type = CHeadIC::clipFormat;
+		}
+		else if (dataObject.IsDataAvailable(CChemIC::clipFormat))
+		{
+			type = CChemIC::clipFormat;
+		}
+		else if (dataObject.IsDataAvailable(CBC::clipFormat))
+		{
+			type = CBC::clipFormat;
+		}
+	}
+	return type;
+}
+
 bool CPropertyTreeControlBar::IsNodePasteable(CTreeCtrlNode pasteNode, bool bDoPaste)
 {
+	if (!this->GetNativeClipFormat())
+	{
+		return false;
+	}
+
 	if (pasteNode.IsNodeAncestor(this->GetMediaNode()))
 	{
-		COleDataObject dataObject;
-		if (dataObject.AttachClipboard() && dataObject.IsDataAvailable(this->m_cfGridElt))
-		{
-			if (bDoPaste)
-			{
-				HGLOBAL hGlob = dataObject.GetGlobalData(this->m_cfGridElt);
-				if (hGlob != NULL)
-				{
-					CSharedFile globFile;
-					globFile.SetHandle(hGlob, FALSE);
-					CArchive ar(&globFile, CArchive::load);
-					CGridElt elt;
-					elt.Serialize(ar);
-					ar.Close();
-
-					if (CWPhastDoc *pWPhastDoc = this->GetDocument())
-					{
-						CZoneCreateAction<CMediaZoneActor>* pAction = new CZoneCreateAction<CMediaZoneActor>(
-							pWPhastDoc,
-							pWPhastDoc->GetNextZoneName(),
-							elt.zone->x1,
-							elt.zone->x2,
-							elt.zone->y1,
-							elt.zone->y2,
-							elt.zone->z1,
-							elt.zone->z2
-							);
-						pAction->GetZoneActor()->SetGridElt(elt);
-						pWPhastDoc->Execute(pAction);
-						return true; // success
-					}
-				}
-				return false; // unable to paste
-			}
-			return true; // success
-		}
+		return this->IsNodePasteable<CMediaZoneActor, CGridElt>(this->GetMediaNode(), pasteNode, bDoPaste);
 	}
-
-	if (pasteNode.IsNodeAncestor(this->GetICHeadNode()))
+	else if (pasteNode.IsNodeAncestor(this->GetICHeadNode()))
 	{
-		COleDataObject dataObject;
-		if (dataObject.AttachClipboard() && dataObject.IsDataAvailable(this->m_cfHeadIC))
-		{
-			if (bDoPaste)
-			{
-				HGLOBAL hGlob = dataObject.GetGlobalData(this->m_cfHeadIC);
-				if (hGlob != NULL)
-				{
-					CSharedFile globFile;
-					globFile.SetHandle(hGlob, FALSE);
-					CArchive ar(&globFile, CArchive::load);
-					CHeadIC headIC;
-					headIC.zone = new CZone();
-
-					headIC.Serialize(ar);
-					ar.Close();
-
-					if (CWPhastDoc *pWPhastDoc = this->GetDocument())
-					{
-						CZoneCreateAction<CICZoneActor>* pAction = new CZoneCreateAction<CICZoneActor>(
-							pWPhastDoc,
-							pWPhastDoc->GetNextZoneName(),
-							headIC.zone->x1,
-							headIC.zone->x2,
-							headIC.zone->y1,
-							headIC.zone->y2,
-							headIC.zone->z1,
-							headIC.zone->z2
-							);
-						pAction->GetZoneActor()->SetHeadIC(headIC);
-						pWPhastDoc->Execute(pAction);
-						return true; // success
-					}
-				}
-				return false; // unable to paste
-			}
-			return true;
-		}
+		return this->IsNodePasteable<CICZoneActor, CHeadIC>(this->GetICHeadNode(), pasteNode, bDoPaste);
 	}
-
-	if (pasteNode.IsNodeAncestor(this->GetICChemNode()))
+	else if (pasteNode.IsNodeAncestor(this->GetICChemNode()))
 	{
-		COleDataObject dataObject;
-		if (dataObject.AttachClipboard() && dataObject.IsDataAvailable(this->m_cfChemIC))
-		{
-			if (bDoPaste)
-			{
-				HGLOBAL hGlob = dataObject.GetGlobalData(this->m_cfChemIC);
-				if (hGlob != NULL)
-				{
-					CSharedFile globFile;
-					globFile.SetHandle(hGlob, FALSE);
-					CArchive ar(&globFile, CArchive::load);
-					CChemIC chemIC;
-					chemIC.zone = new CZone();
-
-					chemIC.Serialize(ar);
-					ar.Close();
-
-					if (CWPhastDoc *pWPhastDoc = this->GetDocument())
-					{
-						CZoneCreateAction<CICZoneActor>* pAction = new CZoneCreateAction<CICZoneActor>(
-							pWPhastDoc,
-							pWPhastDoc->GetNextZoneName(),
-							chemIC.zone->x1,
-							chemIC.zone->x2,
-							chemIC.zone->y1,
-							chemIC.zone->y2,
-							chemIC.zone->z1,
-							chemIC.zone->z2
-							);
-						pAction->GetZoneActor()->SetChemIC(chemIC);
-						pWPhastDoc->Execute(pAction);
-						return true; // success
-					}
-				}
-				return false; // unable to paste
-			}
-			return true;
-		}
+		return this->IsNodePasteable<CICZoneActor, CChemIC>(this->GetICChemNode(), pasteNode, bDoPaste);
 	}
-	if (pasteNode.IsNodeAncestor(this->GetBCNode()))
+	else if (pasteNode.IsNodeAncestor(this->GetBCNode()))
 	{
-		COleDataObject dataObject;
-		if (dataObject.AttachClipboard() && dataObject.IsDataAvailable(this->m_cfBC))
-		{
-			if (bDoPaste)
-			{
-				HGLOBAL hGlob = dataObject.GetGlobalData(this->m_cfBC);
-				if (hGlob != NULL)
-				{
-					CSharedFile globFile;
-					globFile.SetHandle(hGlob, FALSE);
-					CArchive ar(&globFile, CArchive::load);
-
-					CBC bc;
-					bc.Serialize(ar);
-					ar.Close();
-
-					if (CWPhastDoc *pWPhastDoc = this->GetDocument())
-					{
-						CZoneCreateAction<CBCZoneActor>* pAction = new CZoneCreateAction<CBCZoneActor>(
-							pWPhastDoc,
-							pWPhastDoc->GetNextZoneName(),
-							bc.zone->x1,
-							bc.zone->x2,
-							bc.zone->y1,
-							bc.zone->y2,
-							bc.zone->z1,
-							bc.zone->z2
-							);
-						pAction->GetZoneActor()->SetBC(bc);
-						pWPhastDoc->Execute(pAction);
-						return true; // success
-					}
-				}
-				return false; // unable to paste
-			}
-			return true;
-		}
+		return this->IsNodePasteable<CBCZoneActor, CBC>(this->GetBCNode(), pasteNode, bDoPaste);
 	}
-
-
 	return false;
+
+// COMMENT: {11/8/2005 9:28:16 PM}	if (!(
+// COMMENT: {11/8/2005 9:28:16 PM}		pasteNode.IsNodeAncestor(this->GetMediaNode()) || 
+// COMMENT: {11/8/2005 9:28:16 PM}		pasteNode.IsNodeAncestor(this->GetICHeadNode()) || 
+// COMMENT: {11/8/2005 9:28:16 PM}		pasteNode.IsNodeAncestor(this->GetICChemNode()) || 
+// COMMENT: {11/8/2005 9:28:16 PM}		pasteNode.IsNodeAncestor(this->GetBCNode()) || 		
+// COMMENT: {11/8/2005 9:28:16 PM}		))
+// COMMENT: {11/8/2005 9:28:16 PM}	{
+// COMMENT: {11/8/2005 9:28:16 PM}		return false;
+// COMMENT: {11/8/2005 9:28:16 PM}	}
+
+
+// COMMENT: {11/8/2005 8:44:18 PM}	COleDataObject dataObject;
+// COMMENT: {11/8/2005 8:44:18 PM}	if (!dataObject.AttachClipboard())
+// COMMENT: {11/8/2005 8:44:18 PM}	{
+// COMMENT: {11/8/2005 8:44:18 PM}		return false;
+// COMMENT: {11/8/2005 8:44:18 PM}	}
+// COMMENT: {11/8/2005 8:44:18 PM}
+// COMMENT: {11/8/2005 8:44:18 PM}	CGridElt elt;
+// COMMENT: {11/8/2005 8:44:18 PM}
+// COMMENT: {11/8/2005 8:44:18 PM}	CLIPFORMAT type = 0;
+// COMMENT: {11/8/2005 8:44:18 PM}	if (dataObject.IsDataAvailable(CGridElt::clipFormat))
+// COMMENT: {11/8/2005 8:44:18 PM}	{
+// COMMENT: {11/8/2005 8:44:18 PM}		type = CGridElt::clipFormat;
+// COMMENT: {11/8/2005 8:44:18 PM}		if (bDoPaste)
+// COMMENT: {11/8/2005 8:44:18 PM}		{
+// COMMENT: {11/8/2005 8:44:18 PM}			HGLOBAL hGlob = dataObject.GetGlobalData(CGridElt::clipFormat);
+// COMMENT: {11/8/2005 8:44:18 PM}			if (hGlob != NULL)
+// COMMENT: {11/8/2005 8:44:18 PM}			{
+// COMMENT: {11/8/2005 8:44:18 PM}				CSharedFile globFile;
+// COMMENT: {11/8/2005 8:44:18 PM}				globFile.SetHandle(hGlob, FALSE);
+// COMMENT: {11/8/2005 8:44:18 PM}				CArchive ar(&globFile, CArchive::load);
+// COMMENT: {11/8/2005 8:44:18 PM}				elt.Serialize(ar);
+// COMMENT: {11/8/2005 8:44:18 PM}				ar.Close();
+// COMMENT: {11/8/2005 8:44:18 PM}			}
+// COMMENT: {11/8/2005 8:44:18 PM}		}
+// COMMENT: {11/8/2005 8:44:18 PM}	}
+// COMMENT: {11/8/2005 8:44:18 PM}	else if (dataObject.IsDataAvailable(CBC::clipFormat))
+// COMMENT: {11/8/2005 8:44:18 PM}	{
+// COMMENT: {11/8/2005 8:44:18 PM}		type = CGridElt::clipFormat;
+// COMMENT: {11/8/2005 8:44:18 PM}	}
+// COMMENT: {11/8/2005 8:44:18 PM}
+// COMMENT: {11/8/2005 8:44:18 PM}	if (pasteNode.IsNodeAncestor(this->GetMediaNode()))
+// COMMENT: {11/8/2005 8:44:18 PM}	{
+// COMMENT: {11/8/2005 8:44:18 PM}		if (bDoPaste)
+// COMMENT: {11/8/2005 8:44:18 PM}		{
+// COMMENT: {11/8/2005 8:44:18 PM}			HGLOBAL hGlob = dataObject.GetGlobalData(CGridElt::clipFormat);
+// COMMENT: {11/8/2005 8:44:18 PM}			if (hGlob != NULL)
+// COMMENT: {11/8/2005 8:44:18 PM}			{
+// COMMENT: {11/8/2005 8:44:18 PM}				CSharedFile globFile;
+// COMMENT: {11/8/2005 8:44:18 PM}				globFile.SetHandle(hGlob, FALSE);
+// COMMENT: {11/8/2005 8:44:18 PM}				CArchive ar(&globFile, CArchive::load);
+// COMMENT: {11/8/2005 8:44:18 PM}				CGridElt elt;
+// COMMENT: {11/8/2005 8:44:18 PM}				elt.Serialize(ar);
+// COMMENT: {11/8/2005 8:44:18 PM}				ar.Close();
+// COMMENT: {11/8/2005 8:44:18 PM}
+// COMMENT: {11/8/2005 8:44:18 PM}				if (CWPhastDoc *pWPhastDoc = this->GetDocument())
+// COMMENT: {11/8/2005 8:44:18 PM}				{
+// COMMENT: {11/8/2005 8:44:18 PM}					CTreeCtrlNode after(TVI_LAST, this->GetTreeCtrlEx());
+// COMMENT: {11/8/2005 8:44:18 PM}					if (pasteNode.GetParent() == this->GetMediaNode())
+// COMMENT: {11/8/2005 8:44:18 PM}					{
+// COMMENT: {11/8/2005 8:44:18 PM}						after = pasteNode;
+// COMMENT: {11/8/2005 8:44:18 PM}					}
+// COMMENT: {11/8/2005 8:44:18 PM}					CZoneCreateAction<CMediaZoneActor>* pAction = new CZoneCreateAction<CMediaZoneActor>(
+// COMMENT: {11/8/2005 8:44:18 PM}						pWPhastDoc,
+// COMMENT: {11/8/2005 8:44:18 PM}						pWPhastDoc->GetNextZoneName(),
+// COMMENT: {11/8/2005 8:44:18 PM}						elt.zone->x1,
+// COMMENT: {11/8/2005 8:44:18 PM}						elt.zone->x2,
+// COMMENT: {11/8/2005 8:44:18 PM}						elt.zone->y1,
+// COMMENT: {11/8/2005 8:44:18 PM}						elt.zone->y2,
+// COMMENT: {11/8/2005 8:44:18 PM}						elt.zone->z1,
+// COMMENT: {11/8/2005 8:44:18 PM}						elt.zone->z2,
+// COMMENT: {11/8/2005 8:44:18 PM}						after
+// COMMENT: {11/8/2005 8:44:18 PM}						);
+// COMMENT: {11/8/2005 8:44:18 PM}					pAction->GetZoneActor()->SetGridElt(elt);
+// COMMENT: {11/8/2005 8:44:18 PM}					pWPhastDoc->Execute(pAction);
+// COMMENT: {11/8/2005 8:44:18 PM}					return true; // success
+// COMMENT: {11/8/2005 8:44:18 PM}				}
+// COMMENT: {11/8/2005 8:44:18 PM}			}
+// COMMENT: {11/8/2005 8:44:18 PM}			return false; // unable to paste
+// COMMENT: {11/8/2005 8:44:18 PM}		}
+// COMMENT: {11/8/2005 8:44:18 PM}		return true; // success
+// COMMENT: {11/8/2005 8:44:18 PM}	}
+// COMMENT: {11/8/2005 8:44:18 PM}	//}}
+// COMMENT: {11/8/2005 8:44:18 PM}
+// COMMENT: {11/8/2005 8:44:18 PM}// COMMENT: {11/8/2005 8:29:38 PM}	if (pasteNode.IsNodeAncestor(this->GetMediaNode()))
+// COMMENT: {11/8/2005 8:44:18 PM}// COMMENT: {11/8/2005 8:29:38 PM}	{
+// COMMENT: {11/8/2005 8:44:18 PM}// COMMENT: {11/8/2005 8:29:38 PM}		COleDataObject dataObject;
+// COMMENT: {11/8/2005 8:44:18 PM}// COMMENT: {11/8/2005 8:29:38 PM}		if (dataObject.AttachClipboard() && dataObject.IsDataAvailable(CGridElt::clipFormat))
+// COMMENT: {11/8/2005 8:44:18 PM}// COMMENT: {11/8/2005 8:29:38 PM}		{
+// COMMENT: {11/8/2005 8:44:18 PM}// COMMENT: {11/8/2005 8:29:38 PM}			CLIPFORMAT type = 0;
+// COMMENT: {11/8/2005 8:44:18 PM}// COMMENT: {11/8/2005 8:29:38 PM}			if (dataObject.IsDataAvailable(CGridElt::clipFormat))
+// COMMENT: {11/8/2005 8:44:18 PM}// COMMENT: {11/8/2005 8:29:38 PM}			{
+// COMMENT: {11/8/2005 8:44:18 PM}// COMMENT: {11/8/2005 8:29:38 PM}			}
+// COMMENT: {11/8/2005 8:44:18 PM}// COMMENT: {11/8/2005 8:29:38 PM}			else if (dataObject.IsDataAvailable(CBC::clipFormat))
+// COMMENT: {11/8/2005 8:44:18 PM}// COMMENT: {11/8/2005 8:29:38 PM}			{
+// COMMENT: {11/8/2005 8:44:18 PM}// COMMENT: {11/8/2005 8:29:38 PM}			}
+// COMMENT: {11/8/2005 8:44:18 PM}// COMMENT: {11/8/2005 8:29:38 PM}
+// COMMENT: {11/8/2005 8:44:18 PM}// COMMENT: {11/8/2005 8:29:38 PM}			if (bDoPaste)
+// COMMENT: {11/8/2005 8:44:18 PM}// COMMENT: {11/8/2005 8:29:38 PM}			{
+// COMMENT: {11/8/2005 8:44:18 PM}// COMMENT: {11/8/2005 8:29:38 PM}				HGLOBAL hGlob = dataObject.GetGlobalData(CGridElt::clipFormat);
+// COMMENT: {11/8/2005 8:44:18 PM}// COMMENT: {11/8/2005 8:29:38 PM}				if (hGlob != NULL)
+// COMMENT: {11/8/2005 8:44:18 PM}// COMMENT: {11/8/2005 8:29:38 PM}				{
+// COMMENT: {11/8/2005 8:44:18 PM}// COMMENT: {11/8/2005 8:29:38 PM}					CSharedFile globFile;
+// COMMENT: {11/8/2005 8:44:18 PM}// COMMENT: {11/8/2005 8:29:38 PM}					globFile.SetHandle(hGlob, FALSE);
+// COMMENT: {11/8/2005 8:44:18 PM}// COMMENT: {11/8/2005 8:29:38 PM}					CArchive ar(&globFile, CArchive::load);
+// COMMENT: {11/8/2005 8:44:18 PM}// COMMENT: {11/8/2005 8:29:38 PM}					CGridElt elt;
+// COMMENT: {11/8/2005 8:44:18 PM}// COMMENT: {11/8/2005 8:29:38 PM}					elt.Serialize(ar);
+// COMMENT: {11/8/2005 8:44:18 PM}// COMMENT: {11/8/2005 8:29:38 PM}					ar.Close();
+// COMMENT: {11/8/2005 8:44:18 PM}// COMMENT: {11/8/2005 8:29:38 PM}
+// COMMENT: {11/8/2005 8:44:18 PM}// COMMENT: {11/8/2005 8:29:38 PM}					if (CWPhastDoc *pWPhastDoc = this->GetDocument())
+// COMMENT: {11/8/2005 8:44:18 PM}// COMMENT: {11/8/2005 8:29:38 PM}					{
+// COMMENT: {11/8/2005 8:44:18 PM}// COMMENT: {11/8/2005 8:29:38 PM}						CTreeCtrlNode after(TVI_LAST, this->GetTreeCtrlEx());
+// COMMENT: {11/8/2005 8:44:18 PM}// COMMENT: {11/8/2005 8:29:38 PM}						if (pasteNode.GetParent() == this->GetMediaNode())
+// COMMENT: {11/8/2005 8:44:18 PM}// COMMENT: {11/8/2005 8:29:38 PM}						{
+// COMMENT: {11/8/2005 8:44:18 PM}// COMMENT: {11/8/2005 8:29:38 PM}							after = pasteNode;
+// COMMENT: {11/8/2005 8:44:18 PM}// COMMENT: {11/8/2005 8:29:38 PM}						}
+// COMMENT: {11/8/2005 8:44:18 PM}// COMMENT: {11/8/2005 8:29:38 PM}						CZoneCreateAction<CMediaZoneActor>* pAction = new CZoneCreateAction<CMediaZoneActor>(
+// COMMENT: {11/8/2005 8:44:18 PM}// COMMENT: {11/8/2005 8:29:38 PM}							pWPhastDoc,
+// COMMENT: {11/8/2005 8:44:18 PM}// COMMENT: {11/8/2005 8:29:38 PM}							pWPhastDoc->GetNextZoneName(),
+// COMMENT: {11/8/2005 8:44:18 PM}// COMMENT: {11/8/2005 8:29:38 PM}							elt.zone->x1,
+// COMMENT: {11/8/2005 8:44:18 PM}// COMMENT: {11/8/2005 8:29:38 PM}							elt.zone->x2,
+// COMMENT: {11/8/2005 8:44:18 PM}// COMMENT: {11/8/2005 8:29:38 PM}							elt.zone->y1,
+// COMMENT: {11/8/2005 8:44:18 PM}// COMMENT: {11/8/2005 8:29:38 PM}							elt.zone->y2,
+// COMMENT: {11/8/2005 8:44:18 PM}// COMMENT: {11/8/2005 8:29:38 PM}							elt.zone->z1,
+// COMMENT: {11/8/2005 8:44:18 PM}// COMMENT: {11/8/2005 8:29:38 PM}							elt.zone->z2,
+// COMMENT: {11/8/2005 8:44:18 PM}// COMMENT: {11/8/2005 8:29:38 PM}							after
+// COMMENT: {11/8/2005 8:44:18 PM}// COMMENT: {11/8/2005 8:29:38 PM}							);
+// COMMENT: {11/8/2005 8:44:18 PM}// COMMENT: {11/8/2005 8:29:38 PM}						pAction->GetZoneActor()->SetGridElt(elt);
+// COMMENT: {11/8/2005 8:44:18 PM}// COMMENT: {11/8/2005 8:29:38 PM}						pWPhastDoc->Execute(pAction);
+// COMMENT: {11/8/2005 8:44:18 PM}// COMMENT: {11/8/2005 8:29:38 PM}						return true; // success
+// COMMENT: {11/8/2005 8:44:18 PM}// COMMENT: {11/8/2005 8:29:38 PM}					}
+// COMMENT: {11/8/2005 8:44:18 PM}// COMMENT: {11/8/2005 8:29:38 PM}				}
+// COMMENT: {11/8/2005 8:44:18 PM}// COMMENT: {11/8/2005 8:29:38 PM}				return false; // unable to paste
+// COMMENT: {11/8/2005 8:44:18 PM}// COMMENT: {11/8/2005 8:29:38 PM}			}
+// COMMENT: {11/8/2005 8:44:18 PM}// COMMENT: {11/8/2005 8:29:38 PM}			return true; // success
+// COMMENT: {11/8/2005 8:44:18 PM}// COMMENT: {11/8/2005 8:29:38 PM}		}
+// COMMENT: {11/8/2005 8:44:18 PM}// COMMENT: {11/8/2005 8:29:38 PM}	}
+// COMMENT: {11/8/2005 8:44:18 PM}
+// COMMENT: {11/8/2005 8:44:18 PM}	if (pasteNode.IsNodeAncestor(this->GetICHeadNode()))
+// COMMENT: {11/8/2005 8:44:18 PM}	{
+// COMMENT: {11/8/2005 8:44:18 PM}		COleDataObject dataObject;
+// COMMENT: {11/8/2005 8:44:18 PM}		if (dataObject.AttachClipboard() && dataObject.IsDataAvailable(CHeadIC::clipFormat))
+// COMMENT: {11/8/2005 8:44:18 PM}		{
+// COMMENT: {11/8/2005 8:44:18 PM}			if (bDoPaste)
+// COMMENT: {11/8/2005 8:44:18 PM}			{
+// COMMENT: {11/8/2005 8:44:18 PM}				HGLOBAL hGlob = dataObject.GetGlobalData(CHeadIC::clipFormat);
+// COMMENT: {11/8/2005 8:44:18 PM}				if (hGlob != NULL)
+// COMMENT: {11/8/2005 8:44:18 PM}				{
+// COMMENT: {11/8/2005 8:44:18 PM}					CSharedFile globFile;
+// COMMENT: {11/8/2005 8:44:18 PM}					globFile.SetHandle(hGlob, FALSE);
+// COMMENT: {11/8/2005 8:44:18 PM}					CArchive ar(&globFile, CArchive::load);
+// COMMENT: {11/8/2005 8:44:18 PM}					CHeadIC headIC;
+// COMMENT: {11/8/2005 8:44:18 PM}					headIC.zone = new CZone();
+// COMMENT: {11/8/2005 8:44:18 PM}
+// COMMENT: {11/8/2005 8:44:18 PM}					headIC.Serialize(ar);
+// COMMENT: {11/8/2005 8:44:18 PM}					ar.Close();
+// COMMENT: {11/8/2005 8:44:18 PM}
+// COMMENT: {11/8/2005 8:44:18 PM}					if (CWPhastDoc *pWPhastDoc = this->GetDocument())
+// COMMENT: {11/8/2005 8:44:18 PM}					{
+// COMMENT: {11/8/2005 8:44:18 PM}						CZoneCreateAction<CICZoneActor>* pAction = new CZoneCreateAction<CICZoneActor>(
+// COMMENT: {11/8/2005 8:44:18 PM}							pWPhastDoc,
+// COMMENT: {11/8/2005 8:44:18 PM}							pWPhastDoc->GetNextZoneName(),
+// COMMENT: {11/8/2005 8:44:18 PM}							headIC.zone->x1,
+// COMMENT: {11/8/2005 8:44:18 PM}							headIC.zone->x2,
+// COMMENT: {11/8/2005 8:44:18 PM}							headIC.zone->y1,
+// COMMENT: {11/8/2005 8:44:18 PM}							headIC.zone->y2,
+// COMMENT: {11/8/2005 8:44:18 PM}							headIC.zone->z1,
+// COMMENT: {11/8/2005 8:44:18 PM}							headIC.zone->z2
+// COMMENT: {11/8/2005 8:44:18 PM}							);
+// COMMENT: {11/8/2005 8:44:18 PM}						pAction->GetZoneActor()->SetHeadIC(headIC);
+// COMMENT: {11/8/2005 8:44:18 PM}						pWPhastDoc->Execute(pAction);
+// COMMENT: {11/8/2005 8:44:18 PM}						return true; // success
+// COMMENT: {11/8/2005 8:44:18 PM}					}
+// COMMENT: {11/8/2005 8:44:18 PM}				}
+// COMMENT: {11/8/2005 8:44:18 PM}				return false; // unable to paste
+// COMMENT: {11/8/2005 8:44:18 PM}			}
+// COMMENT: {11/8/2005 8:44:18 PM}			return true;
+// COMMENT: {11/8/2005 8:44:18 PM}		}
+// COMMENT: {11/8/2005 8:44:18 PM}	}
+// COMMENT: {11/8/2005 8:44:18 PM}
+// COMMENT: {11/8/2005 8:44:18 PM}	if (pasteNode.IsNodeAncestor(this->GetICChemNode()))
+// COMMENT: {11/8/2005 8:44:18 PM}	{
+// COMMENT: {11/8/2005 8:44:18 PM}		COleDataObject dataObject;
+// COMMENT: {11/8/2005 8:44:18 PM}		if (dataObject.AttachClipboard() && dataObject.IsDataAvailable(CChemIC::clipFormat))
+// COMMENT: {11/8/2005 8:44:18 PM}		{
+// COMMENT: {11/8/2005 8:44:18 PM}			if (bDoPaste)
+// COMMENT: {11/8/2005 8:44:18 PM}			{
+// COMMENT: {11/8/2005 8:44:18 PM}				HGLOBAL hGlob = dataObject.GetGlobalData(CChemIC::clipFormat);
+// COMMENT: {11/8/2005 8:44:18 PM}				if (hGlob != NULL)
+// COMMENT: {11/8/2005 8:44:18 PM}				{
+// COMMENT: {11/8/2005 8:44:18 PM}					CSharedFile globFile;
+// COMMENT: {11/8/2005 8:44:18 PM}					globFile.SetHandle(hGlob, FALSE);
+// COMMENT: {11/8/2005 8:44:18 PM}					CArchive ar(&globFile, CArchive::load);
+// COMMENT: {11/8/2005 8:44:18 PM}					CChemIC chemIC;
+// COMMENT: {11/8/2005 8:44:18 PM}					chemIC.zone = new CZone();
+// COMMENT: {11/8/2005 8:44:18 PM}
+// COMMENT: {11/8/2005 8:44:18 PM}					chemIC.Serialize(ar);
+// COMMENT: {11/8/2005 8:44:18 PM}					ar.Close();
+// COMMENT: {11/8/2005 8:44:18 PM}
+// COMMENT: {11/8/2005 8:44:18 PM}					if (CWPhastDoc *pWPhastDoc = this->GetDocument())
+// COMMENT: {11/8/2005 8:44:18 PM}					{
+// COMMENT: {11/8/2005 8:44:18 PM}						CZoneCreateAction<CICZoneActor>* pAction = new CZoneCreateAction<CICZoneActor>(
+// COMMENT: {11/8/2005 8:44:18 PM}							pWPhastDoc,
+// COMMENT: {11/8/2005 8:44:18 PM}							pWPhastDoc->GetNextZoneName(),
+// COMMENT: {11/8/2005 8:44:18 PM}							chemIC.zone->x1,
+// COMMENT: {11/8/2005 8:44:18 PM}							chemIC.zone->x2,
+// COMMENT: {11/8/2005 8:44:18 PM}							chemIC.zone->y1,
+// COMMENT: {11/8/2005 8:44:18 PM}							chemIC.zone->y2,
+// COMMENT: {11/8/2005 8:44:18 PM}							chemIC.zone->z1,
+// COMMENT: {11/8/2005 8:44:18 PM}							chemIC.zone->z2
+// COMMENT: {11/8/2005 8:44:18 PM}							);
+// COMMENT: {11/8/2005 8:44:18 PM}						pAction->GetZoneActor()->SetChemIC(chemIC);
+// COMMENT: {11/8/2005 8:44:18 PM}						pWPhastDoc->Execute(pAction);
+// COMMENT: {11/8/2005 8:44:18 PM}						return true; // success
+// COMMENT: {11/8/2005 8:44:18 PM}					}
+// COMMENT: {11/8/2005 8:44:18 PM}				}
+// COMMENT: {11/8/2005 8:44:18 PM}				return false; // unable to paste
+// COMMENT: {11/8/2005 8:44:18 PM}			}
+// COMMENT: {11/8/2005 8:44:18 PM}			return true;
+// COMMENT: {11/8/2005 8:44:18 PM}		}
+// COMMENT: {11/8/2005 8:44:18 PM}	}
+// COMMENT: {11/8/2005 8:44:18 PM}	if (pasteNode.IsNodeAncestor(this->GetBCNode()))
+// COMMENT: {11/8/2005 8:44:18 PM}	{
+// COMMENT: {11/8/2005 8:44:18 PM}		COleDataObject dataObject;
+// COMMENT: {11/8/2005 8:44:18 PM}		if (dataObject.AttachClipboard() && dataObject.IsDataAvailable(CBC::clipFormat))
+// COMMENT: {11/8/2005 8:44:18 PM}		{
+// COMMENT: {11/8/2005 8:44:18 PM}			if (bDoPaste)
+// COMMENT: {11/8/2005 8:44:18 PM}			{
+// COMMENT: {11/8/2005 8:44:18 PM}				HGLOBAL hGlob = dataObject.GetGlobalData(CBC::clipFormat);
+// COMMENT: {11/8/2005 8:44:18 PM}				if (hGlob != NULL)
+// COMMENT: {11/8/2005 8:44:18 PM}				{
+// COMMENT: {11/8/2005 8:44:18 PM}					CSharedFile globFile;
+// COMMENT: {11/8/2005 8:44:18 PM}					globFile.SetHandle(hGlob, FALSE);
+// COMMENT: {11/8/2005 8:44:18 PM}					CArchive ar(&globFile, CArchive::load);
+// COMMENT: {11/8/2005 8:44:18 PM}
+// COMMENT: {11/8/2005 8:44:18 PM}					CBC bc;
+// COMMENT: {11/8/2005 8:44:18 PM}					bc.Serialize(ar);
+// COMMENT: {11/8/2005 8:44:18 PM}					ar.Close();
+// COMMENT: {11/8/2005 8:44:18 PM}
+// COMMENT: {11/8/2005 8:44:18 PM}					if (CWPhastDoc *pWPhastDoc = this->GetDocument())
+// COMMENT: {11/8/2005 8:44:18 PM}					{
+// COMMENT: {11/8/2005 8:44:18 PM}						CZoneCreateAction<CBCZoneActor>* pAction = new CZoneCreateAction<CBCZoneActor>(
+// COMMENT: {11/8/2005 8:44:18 PM}							pWPhastDoc,
+// COMMENT: {11/8/2005 8:44:18 PM}							pWPhastDoc->GetNextZoneName(),
+// COMMENT: {11/8/2005 8:44:18 PM}							bc.zone->x1,
+// COMMENT: {11/8/2005 8:44:18 PM}							bc.zone->x2,
+// COMMENT: {11/8/2005 8:44:18 PM}							bc.zone->y1,
+// COMMENT: {11/8/2005 8:44:18 PM}							bc.zone->y2,
+// COMMENT: {11/8/2005 8:44:18 PM}							bc.zone->z1,
+// COMMENT: {11/8/2005 8:44:18 PM}							bc.zone->z2
+// COMMENT: {11/8/2005 8:44:18 PM}							);
+// COMMENT: {11/8/2005 8:44:18 PM}						pAction->GetZoneActor()->SetBC(bc);
+// COMMENT: {11/8/2005 8:44:18 PM}						pWPhastDoc->Execute(pAction);
+// COMMENT: {11/8/2005 8:44:18 PM}						return true; // success
+// COMMENT: {11/8/2005 8:44:18 PM}					}
+// COMMENT: {11/8/2005 8:44:18 PM}				}
+// COMMENT: {11/8/2005 8:44:18 PM}				return false; // unable to paste
+// COMMENT: {11/8/2005 8:44:18 PM}			}
+// COMMENT: {11/8/2005 8:44:18 PM}			return true;
+// COMMENT: {11/8/2005 8:44:18 PM}		}
+// COMMENT: {11/8/2005 8:44:18 PM}	}
+// COMMENT: {11/8/2005 8:44:18 PM}
+// COMMENT: {11/8/2005 8:44:18 PM}
+// COMMENT: {11/8/2005 8:44:18 PM}	return false;
+}
+
+bool CPropertyTreeControlBar::IsNodePasteableMedia(CTreeCtrlNode pasteNode, bool bDoPaste)
+{
+	CLIPFORMAT type = this->GetZoneClipFormat();
+	if (type && pasteNode.IsNodeAncestor(this->GetMediaNode()))
+	{
+		if (bDoPaste)
+		{
+			COleDataObject dataObject;
+			VERIFY(dataObject.AttachClipboard());
+			HGLOBAL hGlob = dataObject.GetGlobalData(type);
+			if (hGlob == NULL) return false;
+
+			CSharedFile globFile;
+			globFile.SetHandle(hGlob, FALSE);
+			CArchive ar(&globFile, CArchive::load);
+
+			CGridElt elt;
+			CZone zone;
+			if (type == CGridElt::clipFormat)
+			{
+				elt.Serialize(ar);
+				zone = *elt.zone;
+			}
+			else if (type == CHeadIC::clipFormat)
+			{
+				CHeadIC headIC;
+				headIC.zone = new CZone();
+				headIC.Serialize(ar);
+				zone = *headIC.zone;
+			}
+			else if (type == CChemIC::clipFormat)
+			{
+				CChemIC chemIC;
+				chemIC.zone = new CZone();
+				chemIC.Serialize(ar);
+				zone = *chemIC.zone;
+			}
+			else if (type == CBC::clipFormat)
+			{
+				CBC bc;
+				bc.Serialize(ar);
+				zone = *bc.zone;
+			}
+			else
+			{
+				ASSERT(FALSE);
+			}
+			ar.Close();
+
+			if (CWPhastDoc *pWPhastDoc = this->GetDocument())
+			{
+				CTreeCtrlNode after(TVI_LAST, this->GetTreeCtrlEx());
+				if (pasteNode.GetParent() == this->GetMediaNode())
+				{
+					after = pasteNode;
+				}
+				CZoneCreateAction<CMediaZoneActor>* pAction = new CZoneCreateAction<CMediaZoneActor>(
+					pWPhastDoc,
+					pWPhastDoc->GetNextZoneName(),
+					zone.x1,
+					zone.x2,
+					zone.y1,
+					zone.y2,
+					zone.z1,
+					zone.z2,
+					after
+					);
+				if (type == CGridElt::clipFormat)
+				{
+					pAction->GetZoneActor()->SetGridElt(elt);
+				}
+				pWPhastDoc->Execute(pAction);
+			}
+		}
+		return true;
+	}
+	return false;
+}
+
+bool CPropertyTreeControlBar::IsNodePasteableICHead(CTreeCtrlNode pasteNode, bool bDoPaste)
+{
+	CLIPFORMAT type = this->GetZoneClipFormat();
+	if (type && pasteNode.IsNodeAncestor(this->GetICHeadNode()))
+	{
+		if (bDoPaste)
+		{
+			COleDataObject dataObject;
+			VERIFY(dataObject.AttachClipboard());
+			HGLOBAL hGlob = dataObject.GetGlobalData(type);
+			if (hGlob == NULL) return false;
+
+			CSharedFile globFile;
+			globFile.SetHandle(hGlob, FALSE);
+			CArchive ar(&globFile, CArchive::load);
+
+			CHeadIC headIC;
+			CZone zone;
+			if (type == CGridElt::clipFormat)
+			{
+				CGridElt elt;
+				elt.Serialize(ar);
+				zone = *elt.zone;
+			}
+			else if (type == CHeadIC::clipFormat)
+			{
+				headIC.zone = new CZone();
+				headIC.Serialize(ar);
+				zone = *headIC.zone;
+			}
+			else if (type == CChemIC::clipFormat)
+			{
+				CChemIC chemIC;
+				chemIC.zone = new CZone();
+				chemIC.Serialize(ar);
+				zone = *chemIC.zone;
+			}
+			else if (type == CBC::clipFormat)
+			{
+				CBC bc;
+				bc.Serialize(ar);
+				zone = *bc.zone;
+			}
+			else
+			{
+				ASSERT(FALSE);
+			}
+			ar.Close();
+
+			if (CWPhastDoc *pWPhastDoc = this->GetDocument())
+			{
+				CTreeCtrlNode after(TVI_LAST, this->GetTreeCtrlEx());
+				if (pasteNode.GetParent() == this->GetICHeadNode())
+				{
+					after = pasteNode;
+				}
+				CZoneCreateAction<CICZoneActor>* pAction = new CZoneCreateAction<CICZoneActor>(
+					pWPhastDoc,
+					pWPhastDoc->GetNextZoneName(),
+					zone.x1,
+					zone.x2,
+					zone.y1,
+					zone.y2,
+					zone.z1,
+					zone.z2,
+					after
+					);
+				if (type == CHeadIC::clipFormat)
+				{
+					pAction->GetZoneActor()->SetHeadIC(headIC);
+				}
+				pWPhastDoc->Execute(pAction);
+			}
+		}
+		return true;
+	}
+	return false;
+}
+
+bool CPropertyTreeControlBar::IsNodePasteableICChem(CTreeCtrlNode pasteNode, bool bDoPaste)
+{
+	CLIPFORMAT type = this->GetZoneClipFormat();
+	if (type && pasteNode.IsNodeAncestor(this->GetICChemNode()))
+	{
+		if (bDoPaste)
+		{
+			COleDataObject dataObject;
+			VERIFY(dataObject.AttachClipboard());
+			HGLOBAL hGlob = dataObject.GetGlobalData(type);
+			if (hGlob == NULL) return false;
+
+			CSharedFile globFile;
+			globFile.SetHandle(hGlob, FALSE);
+			CArchive ar(&globFile, CArchive::load);
+
+			CChemIC chemIC;
+			CZone zone;
+			if (type == CGridElt::clipFormat)
+			{
+				CGridElt elt;
+				elt.Serialize(ar);
+				zone = *elt.zone;
+			}
+			else if (type == CHeadIC::clipFormat)
+			{
+				CHeadIC headIC;
+				headIC.zone = new CZone();
+				headIC.Serialize(ar);
+				zone = *headIC.zone;
+			}
+			else if (type == CChemIC::clipFormat)
+			{
+				chemIC.zone = new CZone();
+				chemIC.Serialize(ar);
+				zone = *chemIC.zone;
+			}
+			else if (type == CBC::clipFormat)
+			{
+				CBC bc;
+				bc.Serialize(ar);
+				zone = *bc.zone;
+			}
+			else
+			{
+				ASSERT(FALSE);
+			}
+			ar.Close();
+
+			if (CWPhastDoc *pWPhastDoc = this->GetDocument())
+			{
+				CTreeCtrlNode after(TVI_LAST, this->GetTreeCtrlEx());
+				if (pasteNode.GetParent() == this->GetICChemNode())
+				{
+					after = pasteNode;
+				}
+				CZoneCreateAction<CICZoneActor>* pAction = new CZoneCreateAction<CICZoneActor>(
+					pWPhastDoc,
+					pWPhastDoc->GetNextZoneName(),
+					zone.x1,
+					zone.x2,
+					zone.y1,
+					zone.y2,
+					zone.z1,
+					zone.z2,
+					after
+					);
+				if (type == CChemIC::clipFormat)
+				{
+					pAction->GetZoneActor()->SetChemIC(chemIC);
+				}
+				pWPhastDoc->Execute(pAction);
+			}
+		}
+		return true;
+	}
+	return false;
+}
+
+template<typename ZT, typename DT>
+bool CPropertyTreeControlBar::IsNodePasteable(CTreeCtrlNode headNode, CTreeCtrlNode pasteNode, bool bDoPaste)
+{
+	CLIPFORMAT type = this->GetZoneClipFormat();
+	if (type && pasteNode.IsNodeAncestor(headNode))
+	{
+		if (bDoPaste)
+		{
+			COleDataObject dataObject;
+			VERIFY(dataObject.AttachClipboard());
+			HGLOBAL hGlob = dataObject.GetGlobalData(type);
+			if (hGlob == NULL) return false;
+
+			CSharedFile globFile;
+			globFile.SetHandle(hGlob, FALSE);
+			CArchive ar(&globFile, CArchive::load);
+
+			DT data;
+			CZone zone;
+			if (type == DT::clipFormat)
+			{
+				data.Serialize(ar);
+				zone = *data.zone;
+			}
+			else if (type == CGridElt::clipFormat)
+			{
+				CGridElt elt;
+				elt.Serialize(ar);
+				zone = *elt.zone;
+			}
+			else if (type == CHeadIC::clipFormat)
+			{
+				CHeadIC headIC;
+				headIC.zone = new CZone();
+				headIC.Serialize(ar);
+				zone = *headIC.zone;
+			}
+			else if (type == CChemIC::clipFormat)
+			{
+				CChemIC chemIC;
+				chemIC.zone = new CZone();
+				chemIC.Serialize(ar);
+				zone = *chemIC.zone;
+			}
+			else if (type == CBC::clipFormat)
+			{
+				CBC bc;
+				bc.Serialize(ar);
+				zone = *bc.zone;
+			}
+			else
+			{
+				ASSERT(FALSE);
+			}
+			ar.Close();
+
+			if (CWPhastDoc *pWPhastDoc = this->GetDocument())
+			{
+				CTreeCtrlNode after(TVI_LAST, this->GetTreeCtrlEx());
+				if (pasteNode != headNode)
+				{
+					while (pasteNode.GetParent() != headNode)
+					{
+						pasteNode = pasteNode.GetParent();
+						if (!pasteNode) break;
+					}
+					if (pasteNode && pasteNode.GetParent() == headNode)
+					{
+						after = pasteNode;
+					}
+				}
+				CZoneCreateAction<ZT>* pAction = new CZoneCreateAction<ZT>(
+					pWPhastDoc,
+					pWPhastDoc->GetNextZoneName(),
+					zone.x1,
+					zone.x2,
+					zone.y1,
+					zone.y2,
+					zone.z1,
+					zone.z2,
+					after
+					);
+				if (type == DT::clipFormat)
+				{
+					pAction->GetZoneActor()->SetData(data);
+				}
+				pWPhastDoc->Execute(pAction);
+			}
+		}
+		return true;
+	}
+	return false;
+}
+
+bool CPropertyTreeControlBar::IsNodePasteableBC(CTreeCtrlNode pasteNode, bool bDoPaste)
+{
+	//{{
+	return this->IsNodePasteable<CBCZoneActor, CBC>(this->GetBCNode(), pasteNode, bDoPaste);
+	//}}
+
+// COMMENT: {11/9/2005 3:16:36 PM}	CLIPFORMAT type = this->GetZoneClipFormat();
+// COMMENT: {11/9/2005 3:16:36 PM}	if (type && pasteNode.IsNodeAncestor(this->GetBCNode()))
+// COMMENT: {11/9/2005 3:16:36 PM}	{
+// COMMENT: {11/9/2005 3:16:36 PM}		if (bDoPaste)
+// COMMENT: {11/9/2005 3:16:36 PM}		{
+// COMMENT: {11/9/2005 3:16:36 PM}			COleDataObject dataObject;
+// COMMENT: {11/9/2005 3:16:36 PM}			VERIFY(dataObject.AttachClipboard());
+// COMMENT: {11/9/2005 3:16:36 PM}			HGLOBAL hGlob = dataObject.GetGlobalData(type);
+// COMMENT: {11/9/2005 3:16:36 PM}			if (hGlob == NULL) return false;
+// COMMENT: {11/9/2005 3:16:36 PM}
+// COMMENT: {11/9/2005 3:16:36 PM}			CSharedFile globFile;
+// COMMENT: {11/9/2005 3:16:36 PM}			globFile.SetHandle(hGlob, FALSE);
+// COMMENT: {11/9/2005 3:16:36 PM}			CArchive ar(&globFile, CArchive::load);
+// COMMENT: {11/9/2005 3:16:36 PM}
+// COMMENT: {11/9/2005 3:16:36 PM}			CBC bc;
+// COMMENT: {11/9/2005 3:16:36 PM}			CZone zone;
+// COMMENT: {11/9/2005 3:16:36 PM}			if (type == CGridElt::clipFormat)
+// COMMENT: {11/9/2005 3:16:36 PM}			{
+// COMMENT: {11/9/2005 3:16:36 PM}				CGridElt elt;
+// COMMENT: {11/9/2005 3:16:36 PM}				elt.Serialize(ar);
+// COMMENT: {11/9/2005 3:16:36 PM}				zone = *elt.zone;
+// COMMENT: {11/9/2005 3:16:36 PM}			}
+// COMMENT: {11/9/2005 3:16:36 PM}			else if (type == CHeadIC::clipFormat)
+// COMMENT: {11/9/2005 3:16:36 PM}			{
+// COMMENT: {11/9/2005 3:16:36 PM}				CHeadIC headIC;
+// COMMENT: {11/9/2005 3:16:36 PM}				headIC.zone = new CZone();
+// COMMENT: {11/9/2005 3:16:36 PM}				headIC.Serialize(ar);
+// COMMENT: {11/9/2005 3:16:36 PM}				zone = *headIC.zone;
+// COMMENT: {11/9/2005 3:16:36 PM}			}
+// COMMENT: {11/9/2005 3:16:36 PM}			else if (type == CChemIC::clipFormat)
+// COMMENT: {11/9/2005 3:16:36 PM}			{
+// COMMENT: {11/9/2005 3:16:36 PM}				CChemIC chemIC;
+// COMMENT: {11/9/2005 3:16:36 PM}				chemIC.zone = new CZone();
+// COMMENT: {11/9/2005 3:16:36 PM}				chemIC.Serialize(ar);
+// COMMENT: {11/9/2005 3:16:36 PM}				zone = *chemIC.zone;
+// COMMENT: {11/9/2005 3:16:36 PM}			}
+// COMMENT: {11/9/2005 3:16:36 PM}			else if (type == CBC::clipFormat)
+// COMMENT: {11/9/2005 3:16:36 PM}			{
+// COMMENT: {11/9/2005 3:16:36 PM}				bc.Serialize(ar);
+// COMMENT: {11/9/2005 3:16:36 PM}				zone = *bc.zone;
+// COMMENT: {11/9/2005 3:16:36 PM}			}
+// COMMENT: {11/9/2005 3:16:36 PM}			else
+// COMMENT: {11/9/2005 3:16:36 PM}			{
+// COMMENT: {11/9/2005 3:16:36 PM}				ASSERT(FALSE);
+// COMMENT: {11/9/2005 3:16:36 PM}			}
+// COMMENT: {11/9/2005 3:16:36 PM}			ar.Close();
+// COMMENT: {11/9/2005 3:16:36 PM}
+// COMMENT: {11/9/2005 3:16:36 PM}			if (CWPhastDoc *pWPhastDoc = this->GetDocument())
+// COMMENT: {11/9/2005 3:16:36 PM}			{
+// COMMENT: {11/9/2005 3:16:36 PM}				CTreeCtrlNode after(TVI_LAST, this->GetTreeCtrlEx());
+// COMMENT: {11/9/2005 3:16:36 PM}				//{{
+// COMMENT: {11/9/2005 3:16:36 PM}				if (pasteNode != this->GetBCNode())
+// COMMENT: {11/9/2005 3:16:36 PM}				{
+// COMMENT: {11/9/2005 3:16:36 PM}					while (pasteNode.GetParent() != this->GetBCNode())
+// COMMENT: {11/9/2005 3:16:36 PM}					{
+// COMMENT: {11/9/2005 3:16:36 PM}						pasteNode = pasteNode.GetParent();
+// COMMENT: {11/9/2005 3:16:36 PM}						if (!pasteNode) break;
+// COMMENT: {11/9/2005 3:16:36 PM}					}
+// COMMENT: {11/9/2005 3:16:36 PM}					if (pasteNode && pasteNode.GetParent() == this->GetBCNode())
+// COMMENT: {11/9/2005 3:16:36 PM}					{
+// COMMENT: {11/9/2005 3:16:36 PM}						after = pasteNode;
+// COMMENT: {11/9/2005 3:16:36 PM}					}
+// COMMENT: {11/9/2005 3:16:36 PM}				}
+// COMMENT: {11/9/2005 3:16:36 PM}				//}}
+// COMMENT: {11/9/2005 3:16:36 PM}
+// COMMENT: {11/9/2005 3:16:36 PM}				if (pasteNode.GetParent() == this->GetBCNode())
+// COMMENT: {11/9/2005 3:16:36 PM}				{
+// COMMENT: {11/9/2005 3:16:36 PM}					after = pasteNode;
+// COMMENT: {11/9/2005 3:16:36 PM}				}
+// COMMENT: {11/9/2005 3:16:36 PM}				CZoneCreateAction<CBCZoneActor>* pAction = new CZoneCreateAction<CBCZoneActor>(
+// COMMENT: {11/9/2005 3:16:36 PM}					pWPhastDoc,
+// COMMENT: {11/9/2005 3:16:36 PM}					pWPhastDoc->GetNextZoneName(),
+// COMMENT: {11/9/2005 3:16:36 PM}					zone.x1,
+// COMMENT: {11/9/2005 3:16:36 PM}					zone.x2,
+// COMMENT: {11/9/2005 3:16:36 PM}					zone.y1,
+// COMMENT: {11/9/2005 3:16:36 PM}					zone.y2,
+// COMMENT: {11/9/2005 3:16:36 PM}					zone.z1,
+// COMMENT: {11/9/2005 3:16:36 PM}					zone.z2,
+// COMMENT: {11/9/2005 3:16:36 PM}					after
+// COMMENT: {11/9/2005 3:16:36 PM}					);
+// COMMENT: {11/9/2005 3:16:36 PM}				if (type == CBC::clipFormat)
+// COMMENT: {11/9/2005 3:16:36 PM}				{
+// COMMENT: {11/9/2005 3:16:36 PM}					pAction->GetZoneActor()->SetBC(bc);
+// COMMENT: {11/9/2005 3:16:36 PM}				}
+// COMMENT: {11/9/2005 3:16:36 PM}				pWPhastDoc->Execute(pAction);
+// COMMENT: {11/9/2005 3:16:36 PM}			}
+// COMMENT: {11/9/2005 3:16:36 PM}		}
+// COMMENT: {11/9/2005 3:16:36 PM}		return true;
+// COMMENT: {11/9/2005 3:16:36 PM}	}
+// COMMENT: {11/9/2005 3:16:36 PM}	return false;
 }
 
 void CPropertyTreeControlBar::OnUpdateEditCopy(CCmdUI *pCmdUI)

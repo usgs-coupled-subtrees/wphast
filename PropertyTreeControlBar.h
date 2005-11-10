@@ -140,14 +140,21 @@ protected:
 	CTreeCtrlNode m_dragNode;
 
 	CLIPFORMAT m_cfPID;
-	CLIPFORMAT m_cfGridElt;
-	CLIPFORMAT m_cfHeadIC;
-	CLIPFORMAT m_cfChemIC;
-	CLIPFORMAT m_cfBC;
 
 	bool IsNodeDraggable(CTreeCtrlNode dragNode, COleDataSource &oleDataSource);
 	bool IsNodeCopyable(CTreeCtrlNode copyNode, COleDataSource *pOleDataSource);
 	bool IsNodePasteable(CTreeCtrlNode pasteNode, bool bDoPaste);
+	bool IsNodePasteableMedia(CTreeCtrlNode pasteNode, bool bDoPaste);
+	bool IsNodePasteableICHead(CTreeCtrlNode pasteNode, bool bDoPaste);
+	bool IsNodePasteableICChem(CTreeCtrlNode pasteNode, bool bDoPaste);
+	bool IsNodePasteableBC(CTreeCtrlNode pasteNode, bool bDoPaste);
+
+	template<typename ZT, typename DT>
+	bool IsNodePasteable(CTreeCtrlNode headNode, CTreeCtrlNode pasteNode, bool bDoPaste);
+	//bool IsNodePasteable(CTreeCtrlNode headNode, CLIPFORMAT headType, CTreeCtrlNode pasteNode, bool bDoPaste);
+
+	CLIPFORMAT GetZoneClipFormat(void)const;
+	CLIPFORMAT GetNativeClipFormat(void)const;
 
 	virtual DROPEFFECT OnDragEnter(CWnd* pWnd, COleDataObject* pDataObject, DWORD dwKeyState, CPoint point);
 	virtual DROPEFFECT OnDragOver(CWnd* pWnd, COleDataObject* pDataObject, DWORD dwKeyState, CPoint point);

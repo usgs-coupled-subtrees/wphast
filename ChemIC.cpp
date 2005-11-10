@@ -10,13 +10,14 @@
 #define new DEBUG_NEW
 #endif
 
+CLIPFORMAT CChemIC::clipFormat = (CLIPFORMAT)::RegisterClipboardFormat(_T("WPhast:CChemIC"));
+
 /* ---------------------------------------------------------------------- 
  *   chemistry initial conditions
  * ---------------------------------------------------------------------- */
 CChemIC::CChemIC(void)
 {
 	this->InternalInit();
-// COMMENT: {6/2/2004 8:47:08 PM}	this->zone = new CZone();
 }
 
 CChemIC::~CChemIC(void)

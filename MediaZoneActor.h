@@ -40,5 +40,8 @@ public:
 	////void SetGridElt(const CGridElt& rGridElt, const CUnits& rUnits);
 	void SetGridElt(const CGridElt& rGridElt);
 
+	CGridElt GetData(void)const;
+	void SetData(const CGridElt& rGridElt);	
+
 	HTREEITEM GetHTreeItem(void)const;
 };

@@ -287,6 +287,11 @@ CBC CBCZoneActor::GetBC(void)const
 	return this->m_bc;
 }
 
+CBC CBCZoneActor::GetData(void)const
+{
+	return this->GetBC();
+}
+
 void CBCZoneActor::SetBC(const CBC& rBC)
 {
 	ASSERT(this->m_bc.zone);
@@ -299,6 +304,11 @@ void CBCZoneActor::SetBC(const CBC& rBC)
 	}
 	(*this->m_bc.zone) = zoneSave;
 	this->m_pZone = this->m_bc.zone;
+}
+
+void CBCZoneActor::SetData(const CBC& rBC)
+{
+	this->SetBC(rBC);
 }
 
 HTREEITEM CBCZoneActor::GetHTreeItem(void)const

@@ -335,6 +335,11 @@ CHeadIC CICZoneActor::GetHeadIC(void)const
 	return headIC;
 }
 
+void CICZoneActor::GetData(CHeadIC& rHeadIC)const
+{
+	rHeadIC = this->GetHeadIC();
+}
+
 void CICZoneActor::SetHeadIC(const CHeadIC& rHeadIC)
 {
 	ASSERT(this->GetType() == CICZoneActor::IC_UNDEF || this->GetType() == CICZoneActor::IC_HEAD);
@@ -348,6 +353,11 @@ void CICZoneActor::SetHeadIC(const CHeadIC& rHeadIC)
 		delete this->m_headIC.zone;
 		this->m_headIC.zone = 0;
 	}
+}
+
+void CICZoneActor::SetData(const CHeadIC& rHeadIC)
+{
+	this->SetHeadIC(rHeadIC);
 }
 
 CChemIC CICZoneActor::GetChemIC(void)const
@@ -364,6 +374,11 @@ CChemIC CICZoneActor::GetChemIC(void)const
 	return chemIC;
 }
 
+void CICZoneActor::GetData(CChemIC& chemIC)const
+{
+	chemIC = this->GetChemIC();
+}
+
 void CICZoneActor::SetChemIC(const CChemIC& chemIC)
 {
 	ASSERT(this->GetType() == CICZoneActor::IC_UNDEF || this->GetType() == CICZoneActor::IC_CHEM);
@@ -377,6 +392,11 @@ void CICZoneActor::SetChemIC(const CChemIC& chemIC)
 		delete this->m_chemIC.zone;
 		this->m_chemIC.zone = 0;
 	}
+}
+
+void CICZoneActor::SetData(const CChemIC& chemIC)
+{
+	return this->SetChemIC(chemIC);
 }
 
 HTREEITEM CICZoneActor::GetHTreeItem(void)const

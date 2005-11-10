@@ -5,6 +5,8 @@
 #include "property.h"
 #include <ostream> // std::ostream
 
+CLIPFORMAT CHeadIC::clipFormat = (CLIPFORMAT)::RegisterClipboardFormat(_T("WPhast:CHeadIC"));
+
 CHeadIC::CHeadIC(void)
 {
 	this->InternalInit();

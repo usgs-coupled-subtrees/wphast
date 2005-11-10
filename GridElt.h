@@ -30,6 +30,8 @@ public:
 	static CGridElt NewDefaults(bool bFlowOnly = false);
 	static CGridElt Full(void);
 
+	static CLIPFORMAT clipFormat;
+
 #ifdef _DEBUG
 	void Dump(CDumpContext& dc)const;
 #endif

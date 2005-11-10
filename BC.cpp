@@ -11,6 +11,7 @@
 #define new DEBUG_NEW
 #endif
 
+CLIPFORMAT CBC::clipFormat = (CLIPFORMAT)::RegisterClipboardFormat(_T("WPhast:CBC"));
 
 CBC::CBC() // ctor
 {

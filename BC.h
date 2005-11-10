@@ -49,6 +49,7 @@ private:
 public:
 	CTimeSeries<Cproperty> m_bc_head;
 	CTimeSeries<Cproperty> m_bc_flux;	
-	CTimeSeries<Cproperty> m_bc_solution;	
-	
+	CTimeSeries<Cproperty> m_bc_solution;
+
+	static CLIPFORMAT clipFormat;	
 };

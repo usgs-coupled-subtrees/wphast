@@ -242,6 +242,11 @@ CGridElt CMediaZoneActor::GetGridElt(void)const
 	return this->m_grid_elt;
 }
 
+CGridElt CMediaZoneActor::GetData(void)const
+{
+	return this->GetGridElt();
+}
+
 //void CMediaZoneActor::SetGridElt(const CGridElt& rGridElt, const CUnits& rUnits)
 //{
 //	// NOTE: use set bounds to set the zone
@@ -277,6 +282,11 @@ void CMediaZoneActor::SetGridElt(const CGridElt& rGridElt)
 	this->m_grid_elt = rGridElt;
 	(*this->m_grid_elt.zone) = zoneSave;
 	this->m_pZone = this->m_grid_elt.zone;
+}
+
+void CMediaZoneActor::SetData(const CGridElt& rGridElt)
+{
+	this->SetGridElt(rGridElt);
 }
 
 HTREEITEM CMediaZoneActor::GetHTreeItem(void)const

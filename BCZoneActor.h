@@ -49,6 +49,9 @@ public:
 	CBC GetBC(void)const;
 	void SetBC(const CBC& rBC);
 
+	CBC GetData(void)const;
+	void SetData(const CBC& rBC);
+
 	HTREEITEM GetHTreeItem(void)const;
 	void SetHTreeItem(HTREEITEM htItem);
 };
