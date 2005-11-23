@@ -20,6 +20,7 @@
 vtkCxxRevisionMacro(CWellActor, "$Revision$");
 vtkStandardNewMacro(CWellActor);
 
+const char CWellActor::szHeading[] = "Wells";
 
 CWellActor::CWellActor(void)
 : m_pLineSource(0)
@@ -112,7 +113,7 @@ void CWellActor::SetWell(const CWellSchedule &well, const CUnits &units)
 
 	char buffer[40];
 	::sprintf(buffer, "Well %d", this->m_well.n_user);
-	this->m_serialName = buffer;
+	this->m_name = buffer;
 
 	this->SetUnits(units);
 }
@@ -434,9 +435,9 @@ void CWellActor::UnRemove(CPropertyTreeControlBar* pTree)
 // COMMENT: {8/16/2004 4:37:32 PM}	VERIFY(this->m_node.Select());
 // COMMENT: {8/16/2004 4:37:32 PM}}
 
-LPCTSTR CWellActor::GetSerialName(void)const
+LPCTSTR CWellActor::GetName(void)const
 {
-	return this->m_serialName.c_str();
+	return this->m_name.c_str();
 }
 
 void CWellActor::Serialize(bool bStoring, hid_t loc_id, const CUnits &units)

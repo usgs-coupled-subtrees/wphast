@@ -58,7 +58,9 @@ public:
 
 	CTreeCtrlNode GetTreeCtrlNode(void)      { return m_node; }
 
-	LPCTSTR GetSerialName(void)const;
+	void SetName(LPCTSTR name)               {/* no-op */};
+	LPCTSTR GetName(void)const;
+
 	void Serialize(bool bStoring, hid_t loc_id, const CUnits &units);
 
 	std::ostream& Output(std::ostream& os, const Ctime& time)const;
@@ -67,6 +69,7 @@ public:
 	virtual void SetScale(vtkFloatingPointType x, vtkFloatingPointType y, vtkFloatingPointType z);
 	virtual void SetScale(vtkFloatingPointType scale[3]);
 
+	static const char szHeading[];
 
 protected:
 	friend std::ostream& operator<< (std::ostream &os, const CWellActor &a);
@@ -93,7 +96,7 @@ protected:
 
 	CTreeMemento       *m_pTreeMemento;
 
-	std::string         m_serialName;
+	std::string         m_name;
 
 	vtkTransform       *m_pTransformUnits;
 	vtkTransform       *m_pTransformScale;

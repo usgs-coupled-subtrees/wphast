@@ -4,24 +4,23 @@
 
 #include "ChemIC.h"
 
-class CICZoneActor;
+class CICChemZoneActor;
 
-class CSetChemICAction :
-	public CAction
+class CSetChemICAction : public CAction
 {
 public:
-	CSetChemICAction(CICZoneActor* pICZoneActor, CTreeCtrl* pTreeCtrl, const CChemIC& newChemIC);
+	CSetChemICAction(CICChemZoneActor* pICChemZoneActor, CTreeCtrl* pTreeCtrl, const CChemIC& newChemIC);
 	virtual ~CSetChemICAction(void);
 
 	virtual void Execute();
 	virtual void UnExecute();
 
 protected:
-	void SetChemIC(const CChemIC& chemIC);
+	void SetData(const CChemIC& chemIC);
 
 protected:
-	CICZoneActor* m_pICZoneActor;
-	CTreeCtrl*    m_pTreeCtrl;
-	CChemIC       m_oldChemIC;
-	CChemIC       m_newChemIC;
+	CICChemZoneActor* m_pICChemZoneActor;
+	CTreeCtrl*        m_pTreeCtrl;
+	CChemIC           m_oldChemIC;
+	CChemIC           m_newChemIC;
 };

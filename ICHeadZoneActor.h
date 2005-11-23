@@ -1,32 +1,30 @@
 #pragma once
-#include "ZoneActor.h"
-#include "HeadIC.h"
+#include "ICZoneActor.h"
 
-class CPropertyTreeControlBar;
-class CUnits;
-
-class CICHeadZoneActor :
-	public CZoneActor
+class CICHeadZoneActor : public CICZoneActor
 {
 public:
-	vtkTypeRevisionMacro(CICHeadZoneActor,CZoneActor);
+	vtkTypeRevisionMacro(CICHeadZoneActor,CICZoneActor);
 	static CICHeadZoneActor *New();
+	static void Create(CWPhastDoc* pWPhastDoc, const CZone& zone, const CHeadIC& headIC);
 
-	virtual void Insert(CPropertyTreeControlBar* pTreeControlBar);
+	CHeadIC GetData(void)const;
+	void SetData(const CHeadIC& rHeadIC);
+
+	virtual void Insert(CPropertyTreeControlBar* pTreeControlBar, HTREEITEM hInsertAfter = TVI_LAST);
 	virtual void Update(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent);
 	virtual void Edit(CTreeCtrl* pTreeCtrl);
-	void Serialize(bool bStoring, hid_t loc_id, const CUnits& units);
 
+	static const char szHeading[];
+
+	void Serialize(bool bStoring, hid_t loc_id, const CUnits& units);
 
 protected:
 	CICHeadZoneActor(void);
 	virtual ~CICHeadZoneActor(void);
-protected:
 	CHeadIC m_headIC;
+
 private:
 	CICHeadZoneActor(const CICHeadZoneActor&);  // Not implemented.
 	void operator=(const CICHeadZoneActor&);  // Not implemented.
-public:
-	CHeadIC GetHeadIC(void)const;
-	void SetHeadIC(const CHeadIC& rHeadIC);
 };

@@ -12,6 +12,8 @@
 #include "MediaZoneActor.h"
 #include "BCZoneActor.h"
 #include "ICZoneActor.h"
+#include "ICHeadZoneActor.h"
+#include "ICChemZoneActor.h"
 
 #include "WellActor.h"
 #include "Well.h"
@@ -752,13 +754,15 @@ void CViewVTKCommand::OnLeftButtonReleaseEvent(vtkObject* caller, void* callData
 			{
 				CHeadIC headic;
 				icHeadProps.GetProperties(headic);
-				CICZoneActor::Create(pDoc, absZone, headic);
+				///CICZoneActor::Create(pDoc, absZone, headic);
+				CICHeadZoneActor::Create(pDoc, absZone, headic);
 			}
 			else if (newZone.GetType() == ID_ZONE_TYPE_IC_CHEM)
 			{
 				CChemIC chemIC;
 				chemICProps.GetProperties(chemIC);
-				CICZoneActor::Create(pDoc, absZone, chemIC);
+				///CICZoneActor::Create(pDoc, absZone, chemIC);
+				CICChemZoneActor::Create(pDoc, absZone, chemIC);
 			}
 		}
 		else

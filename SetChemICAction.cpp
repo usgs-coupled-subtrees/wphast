@@ -1,12 +1,12 @@
 #include "StdAfx.h"
 #include "SetChemICAction.h"
 
-#include "ICZoneActor.h"
+#include "ICChemZoneActor.h"
 
-CSetChemICAction::CSetChemICAction(CICZoneActor* pICZoneActor, CTreeCtrl* pTreeCtrl, const CChemIC& newChemIC)
-	: m_pICZoneActor(pICZoneActor)
+CSetChemICAction::CSetChemICAction(CICChemZoneActor* pICChemZoneActor, CTreeCtrl* pTreeCtrl, const CChemIC& newChemIC)
+	: m_pICChemZoneActor(pICChemZoneActor)
 	, m_pTreeCtrl(pTreeCtrl)
-	, m_oldChemIC(pICZoneActor->GetChemIC())
+	, m_oldChemIC(pICChemZoneActor->GetData())
 	, m_newChemIC(newChemIC)
 {
 }
@@ -17,16 +17,16 @@ CSetChemICAction::~CSetChemICAction(void)
 
 void CSetChemICAction::Execute(void)
 {
-	this->SetChemIC(this->m_newChemIC);
+	this->SetData(this->m_newChemIC);
 }
 
 void CSetChemICAction::UnExecute(void)
 {
-	this->SetChemIC(this->m_oldChemIC);
+	this->SetData(this->m_oldChemIC);
 }
 
-void CSetChemICAction::SetChemIC(const CChemIC& chemIC)
+void CSetChemICAction::SetData(const CChemIC& chemIC)
 {
-	this->m_pICZoneActor->SetChemIC(chemIC);
-	this->m_pICZoneActor->Update(this->m_pTreeCtrl, this->m_pICZoneActor->GetHTreeItem());
+	this->m_pICChemZoneActor->SetData(chemIC);
+	this->m_pICChemZoneActor->Update(this->m_pTreeCtrl, this->m_pICChemZoneActor->GetHTreeItem());
 }

@@ -34,6 +34,8 @@
 #include "RiverActor.h"
 #include "MediaZoneActor.h"
 #include "ICZoneActor.h"
+#include "ICHeadZoneActor.h"
+#include "ICChemZoneActor.h"
 #include "BCZoneActor.h"
 #include "Units.h"
 #include "NewModel.h"
@@ -535,23 +537,24 @@ void CPropertyTreeControlBar::OnNMDblClk(NMHDR* pNMHDR, LRESULT* pResult)
 			}
 		}
 
-		CTreeCtrlNode nodeIC = this->GetICChemNode();
-		nCount = nodeIC.GetChildCount();
-
-		CICZoneActor *pICZoneActor = NULL;
-		for (int i = 0; i < nCount; ++i)
-		{
-			if (CICZoneActor *pZone = CICZoneActor::SafeDownCast((vtkObject*)nodeIC.GetChildAt(i).GetData()))
-			{
-				if (pZone->GetType() == CICZoneActor::IC_CHEM)
-				{
-					pICZoneActor = pZone;
-					break;
-				}
-			}
-		}
-		ASSERT(pMediaZoneActor && pICZoneActor);
-		pFlowOnly->Edit(&this->m_wndTree, pMediaZoneActor, pICZoneActor);
+// COMMENT: {11/23/2005 12:56:52 AM}		CTreeCtrlNode nodeIC = this->GetICChemNode();
+// COMMENT: {11/23/2005 12:56:52 AM}		nCount = nodeIC.GetChildCount();
+// COMMENT: {11/23/2005 12:56:52 AM}
+// COMMENT: {11/23/2005 12:56:52 AM}		CICZoneActor *pICZoneActor = NULL;
+// COMMENT: {11/23/2005 12:56:52 AM}		for (int i = 0; i < nCount; ++i)
+// COMMENT: {11/23/2005 12:56:52 AM}		{
+// COMMENT: {11/23/2005 12:56:52 AM}			if (CICZoneActor *pZone = CICZoneActor::SafeDownCast((vtkObject*)nodeIC.GetChildAt(i).GetData()))
+// COMMENT: {11/23/2005 12:56:52 AM}			{
+// COMMENT: {11/23/2005 12:56:52 AM}				if (pZone->GetType() == CICZoneActor::IC_CHEM)
+// COMMENT: {11/23/2005 12:56:52 AM}				{
+// COMMENT: {11/23/2005 12:56:52 AM}					pICZoneActor = pZone;
+// COMMENT: {11/23/2005 12:56:52 AM}					break;
+// COMMENT: {11/23/2005 12:56:52 AM}				}
+// COMMENT: {11/23/2005 12:56:52 AM}			}
+// COMMENT: {11/23/2005 12:56:52 AM}		}
+// COMMENT: {11/23/2005 12:56:52 AM}		ASSERT(pMediaZoneActor && pICZoneActor);
+// COMMENT: {11/23/2005 12:56:52 AM}		pFlowOnly->Edit(&this->m_wndTree, pMediaZoneActor, pICZoneActor);
+		pFlowOnly->Edit(&this->m_wndTree, pMediaZoneActor, 0);
 		//}} HACK
 		*pResult = TRUE;
 		return;
@@ -1429,31 +1432,60 @@ void CPropertyTreeControlBar::OnKeyDown(NMHDR* pNMHDR, LRESULT* pResult)
 			return;
 		}
 
-		// INITIAL_CONDITIONS
+		// HEAD_IC
 		//
-		if (sel.IsNodeAncestor(this->m_nodeIC))
+		if (sel.IsNodeAncestor(this->m_nodeICHead))
 		{
-			if (sel != this->m_nodeIC && sel != this->m_nodeICHead && sel != this->m_nodeICChem)
+			if (sel != this->m_nodeICHead)
 			{
-				while (sel.GetParent() != this->m_nodeICHead && sel.GetParent() != this->m_nodeICChem)
+				while (sel.GetParent() != this->m_nodeICHead)
 				{
 					sel = sel.GetParent();
 					if (!sel) break;
 				}
 				if (sel.GetData())
 				{
-					if (CICZoneActor* pZone = CICZoneActor::SafeDownCast((vtkObject*)sel.GetData()))
+					if (CICHeadZoneActor* pZone = CICHeadZoneActor::SafeDownCast((vtkObject*)sel.GetData()))
 					{
 						if (pZone->GetDefault())
 						{
-							if (pZone->GetType() == CICZoneActor::IC_HEAD)
+							::AfxMessageBox(_T("The default HEAD_IC zone cannot be deleted."));
+						}
+						else
+						{
+							CTreeCtrlNode parent = sel.GetParent();
+							if (CWPhastDoc* pDoc = this->GetDocument())
 							{
-								::AfxMessageBox(_T("The default HEAD_IC zone cannot be deleted."));
+								parent.Select();
+								pDoc->Execute(new CZoneRemoveAction(pDoc, pZone, this));
 							}
-							else if (pZone->GetType() == CICZoneActor::IC_CHEM)
-							{
-								::AfxMessageBox(_T("The default CHEMISTRY_IC zone cannot be deleted."));
-							}
+						}
+						*pResult = TRUE;
+						return;
+					}
+				}
+			}
+			return;
+		}
+
+		// CHEMISTRY_IC
+		//
+		if (sel.IsNodeAncestor(this->m_nodeICChem))
+		{
+			if (sel != this->m_nodeICChem)
+			{
+				while (sel.GetParent() != this->m_nodeICChem)
+				{
+					sel = sel.GetParent();
+					if (!sel) break;
+				}
+				if (sel.GetData())
+				{
+					if (CICChemZoneActor* pZone = CICChemZoneActor::SafeDownCast((vtkObject*)sel.GetData()))
+					{
+						if (pZone->GetDefault())
+						{
+							::AfxMessageBox(_T("The default CHEMISTRY_IC zone cannot be deleted."));
 						}
 						else
 						{
@@ -1677,12 +1709,11 @@ bool CPropertyTreeControlBar::IsNodeDraggable(CTreeCtrlNode dragNode, COleDataSo
 	{
 		if (dragNode.GetData())
 		{
-			if (CICZoneActor *pZone = CICZoneActor::SafeDownCast((vtkObject*)dragNode.GetData()))
+			if (CICHeadZoneActor *pZone = CICHeadZoneActor::SafeDownCast((vtkObject*)dragNode.GetData()))
 			{
-				ASSERT(pZone->GetType() == CICZoneActor::IC_HEAD);
-				if (pZone->GetType() == CICZoneActor::IC_HEAD && !pZone->GetDefault())
+				if (!pZone->GetDefault())
 				{
-					oss << pZone->GetHeadIC();
+					oss << pZone->GetData();
 					oss << "\n";
 
 					std::string s = oss.str();
@@ -1713,12 +1744,11 @@ bool CPropertyTreeControlBar::IsNodeDraggable(CTreeCtrlNode dragNode, COleDataSo
 	{
 		if (dragNode.GetData())
 		{
-			if (CICZoneActor *pZone = CICZoneActor::SafeDownCast((vtkObject*)dragNode.GetData()))
+			if (CICChemZoneActor *pZone = CICChemZoneActor::SafeDownCast((vtkObject*)dragNode.GetData()))
 			{
-				ASSERT(pZone->GetType() == CICZoneActor::IC_CHEM);
-				if (pZone->GetType() == CICZoneActor::IC_CHEM && !pZone->GetDefault())
+				if (!pZone->GetDefault())
 				{
-					oss << pZone->GetChemIC();
+					oss << pZone->GetData();
 					oss << "\n";
 
 					std::string s = oss.str();
@@ -1991,15 +2021,13 @@ bool CPropertyTreeControlBar::IsNodeCopyable(CTreeCtrlNode copyNode, COleDataSou
 	{
 		if (copyNode.GetData())
 		{
-			if (CICZoneActor* pZone = CICZoneActor::SafeDownCast((vtkObject*)copyNode.GetData()))
+			if (CICHeadZoneActor* pZone = CICHeadZoneActor::SafeDownCast((vtkObject*)copyNode.GetData()))
 			{
 				if (pOleDataSource)
 				{
-					CHeadIC headIC = pZone->GetHeadIC();
-
 					// CF_TEXT
 					//
-					oss << headIC;
+					oss << pZone->GetData();
 					oss << "\n";
 
 					std::string s = oss.str();
@@ -2015,7 +2043,7 @@ bool CPropertyTreeControlBar::IsNodeCopyable(CTreeCtrlNode copyNode, COleDataSou
 					//
 					CSharedFile globFile;
 					CArchive ar(&globFile, CArchive::store);
-					headIC.Serialize(ar);
+					pZone->GetData().Serialize(ar);
 					ar.Close();
 
 					pOleDataSource->CacheGlobalData(CHeadIC::clipFormat, globFile.Detach());
@@ -2029,15 +2057,13 @@ bool CPropertyTreeControlBar::IsNodeCopyable(CTreeCtrlNode copyNode, COleDataSou
 	{
 		if (copyNode.GetData())
 		{
-			if (CICZoneActor* pZone = CICZoneActor::SafeDownCast((vtkObject*)copyNode.GetData()))
+			if (CICChemZoneActor* pZone = CICChemZoneActor::SafeDownCast((vtkObject*)copyNode.GetData()))
 			{
 				if (pOleDataSource)
 				{
-					CChemIC chemIC = pZone->GetChemIC();
-
 					// CF_TEXT
 					//
-					oss << chemIC;
+					oss << pZone->GetData();
 					oss << "\n";
 
 					std::string s = oss.str();
@@ -2053,7 +2079,7 @@ bool CPropertyTreeControlBar::IsNodeCopyable(CTreeCtrlNode copyNode, COleDataSou
 					//
 					CSharedFile globFile;
 					CArchive ar(&globFile, CArchive::store);
-					chemIC.Serialize(ar);
+					pZone->GetData().Serialize(ar);
 					ar.Close();
 
 					pOleDataSource->CacheGlobalData(CChemIC::clipFormat, globFile.Detach());
@@ -2155,13 +2181,11 @@ bool CPropertyTreeControlBar::IsNodePasteable(CTreeCtrlNode pasteNode, bool bDoP
 	}
 	else if (pasteNode.IsNodeAncestor(this->GetICHeadNode()))
 	{
-		ASSERT(FALSE); // needs work to paste hetero zones
-		return this->IsNodePasteable<CICZoneActor, CHeadIC>(this->GetICHeadNode(), pasteNode, bDoPaste);
+		return this->IsNodePasteable<CICHeadZoneActor, CHeadIC>(this->GetICHeadNode(), pasteNode, bDoPaste);
 	}
 	else if (pasteNode.IsNodeAncestor(this->GetICChemNode()))
 	{
-		ASSERT(FALSE); // needs work to paste hetero zones
-		return this->IsNodePasteable<CICZoneActor, CChemIC>(this->GetICChemNode(), pasteNode, bDoPaste);
+		return this->IsNodePasteable<CICChemZoneActor, CChemIC>(this->GetICChemNode(), pasteNode, bDoPaste);
 	}
 	else if (pasteNode.IsNodeAncestor(this->GetBCNode()))
 	{
@@ -2191,6 +2215,13 @@ bool CPropertyTreeControlBar::IsNodePasteable(CTreeCtrlNode headNode, CTreeCtrlN
 			CZone zone;
 			if (type == DT::clipFormat)
 			{
+				//{{HACK
+				// all should be null or non-null
+				if (data.zone == NULL)
+				{
+					data.zone = new CZone();
+				}
+				//}}HACK
 				data.Serialize(ar);
 				zone = *data.zone;
 			}

@@ -248,16 +248,15 @@ protected:
 
 protected:
 	void InitDocument();
-// COMMENT: {4/11/2005 1:28:13 PM}	void SerializeBC(bool bStoring, hid_t loc_id, int nStressPeriod = 1);
-// COMMENT: {4/11/2005 1:28:13 PM}	void SerializeTimeControl(bool bStoring, hid_t loc_id, int nStressPeriod = 1);
-	void SerializeBC(bool bStoring, hid_t loc_id);
-// COMMENT: {4/11/2005 1:34:34 PM}	void SerializeTimeControl(bool bStoring, hid_t loc_id);
-	void SerializeIC(bool bStoring, hid_t loc_id);
+	
+	template<typename ACTOR>
+	void SerializeActors(bool bStoring, hid_t loc_id, CTreeCtrlNode parentNode, const char* szNamesListHeading);
+
 	void SerializeMedia(bool bStoring, hid_t loc_id);
-	void SerializeStressPeriods(bool bStoring, hid_t loc_id);
+	void SerializeIC(bool bStoring, hid_t loc_id);
+	void SerializeBC(bool bStoring, hid_t loc_id);
 	void SerializeWells(bool bStoring, hid_t loc_id);
 	void SerializeRivers(bool bStoring, hid_t loc_id);
-
 
 // Generated message map functions
 protected:

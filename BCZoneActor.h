@@ -27,6 +27,8 @@ public:
 	void Edit(CTreeCtrl* pTreeCtrl, int nStressPeriod = 1);
 	void Serialize(bool bStoring, hid_t loc_id, const CUnits& units);
 
+	static const char szHeading[];
+
 	CString GetTreeHeading(void)const;
 
 	void Update(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent, const CBC& crBC);

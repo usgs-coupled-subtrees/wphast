@@ -101,7 +101,9 @@ public:
 
 	size_t GetPointCount(void)const;
 
-	LPCTSTR GetSerialName(void)const;
+	void SetName(LPCTSTR name)       {/* no-op */};
+	LPCTSTR GetName(void)const;
+
 	void Serialize(bool bStoring, hid_t loc_id, const CUnits &units);
 
 	void SetVisibility(int visibility);
@@ -121,6 +123,8 @@ public:
 	void EndNewRiver(void);
 
 	CTreeCtrlNode GetTreeCtrlNode(void)      { return m_node; }
+
+	static const char szHeading[];
 
 protected:
 	CRiverActor(void);
@@ -177,7 +181,7 @@ protected:
 	// Internal ivars for processing events
 	vtkRenderer *CurrentRenderer;
 
-	std::string          m_serialName;
+	std::string          m_name;
 	CRiver               m_river;
 	vtkFloatingPointType m_Radius;
 	double               m_Z;

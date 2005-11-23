@@ -26,6 +26,8 @@ public:
 
 	void Serialize(bool bStoring, hid_t loc_id, const CUnits& units);
 
+	static const char szHeading[];
+
 protected:
 	CMediaZoneActor(void);
 	virtual ~CMediaZoneActor(void);

@@ -18,6 +18,7 @@
 vtkCxxRevisionMacro(CRiverActor, "$Revision: 244 $");
 vtkStandardNewMacro(CRiverActor);
 
+const char CRiverActor::szHeading[] = "Rivers";
 const bool bShowGhostPoint = true;
 
 CRiverActor::CRiverActor(void)
@@ -383,7 +384,7 @@ void CRiverActor::SetRiver(const CRiver &river, const CUnits &units)
 
 	char buffer[40];
 	::sprintf(buffer, "River %d", this->m_river.n_user);
-	this->m_serialName = buffer;
+	this->m_name = buffer;
 	TRACE("CRiverActor::SetRiver IN\n");
 
 	this->ClearPoints();
@@ -1227,9 +1228,9 @@ void CRiverActor::MovePoint(vtkIdType id, double x, double y)
 	this->Update(this->m_node);
 }
 
-LPCTSTR CRiverActor::GetSerialName(void)const
+LPCTSTR CRiverActor::GetName(void)const
 {
-	return this->m_serialName.c_str();
+	return this->m_name.c_str();
 }
 
 void CRiverActor::Serialize(bool bStoring, hid_t loc_id, const CUnits &units)

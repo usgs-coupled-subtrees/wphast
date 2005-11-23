@@ -597,10 +597,16 @@ copy &quot;$(DEV_VTK42_VS7_DLL_LIB)\vtkzlib.dll&quot; &quot;$(TargetDir)vtkzlib.
 				RelativePath="HeadIC.cpp">
 			</File>
 			<File
+				RelativePath="ICChemZoneActor.cpp">
+			</File>
+			<File
 				RelativePath="ICHeadPropertyPage.cpp">
 			</File>
 			<File
 				RelativePath="ICHeadSpreadPropertyPage.cpp">
+			</File>
+			<File
+				RelativePath="ICHeadZoneActor.cpp">
 			</File>
 			<File
 				RelativePath="ICZoneActor.cpp">
@@ -1168,10 +1174,16 @@ copy &quot;$(DEV_VTK42_VS7_DLL_LIB)\vtkzlib.dll&quot; &quot;$(TargetDir)vtkzlib.
 				RelativePath="HeadIC.h">
 			</File>
 			<File
+				RelativePath="ICChemZoneActor.h">
+			</File>
+			<File
 				RelativePath="ICHeadPropertyPage.h">
 			</File>
 			<File
 				RelativePath="ICHeadSpreadPropertyPage.h">
+			</File>
+			<File
+				RelativePath="ICHeadZoneActor.h">
 			</File>
 			<File
 				RelativePath="ICZoneActor.h">
@@ -3925,15 +3937,15 @@ copy &quot;$(DEV_VTK42_VS7_DLL_LIB)\vtkzlib.dll&quot; &quot;$(TargetDir)vtkzlib.
 			Name="Build Logs"
 			Filter="">
 			<File
-				RelativePath="cppunit\BuildLog.htm"
-				DeploymentContent="TRUE">
-			</File>
-			<File
 				RelativePath="Debug\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 			<File
 				RelativePath="Release\BuildLog.htm"
+				DeploymentContent="TRUE">
+			</File>
+			<File
+				RelativePath="cppunit\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 		</Filter>

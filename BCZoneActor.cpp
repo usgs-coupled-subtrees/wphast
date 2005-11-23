@@ -30,6 +30,8 @@ vtkStandardNewMacro(CBCZoneActor);
 #define new DEBUG_NEW
 #endif
 
+const char CBCZoneActor::szHeading[] = "BC";
+
 CBCZoneActor::CBCZoneActor(void)
 {
 	// must always have a zone for CZoneActor::SetBounds

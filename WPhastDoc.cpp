@@ -33,6 +33,8 @@
 #include "MediaZoneActor.h"
 #include "BCZoneActor.h"
 #include "ICZoneActor.h"
+#include "ICHeadZoneActor.h"
+#include "ICChemZoneActor.h"
 
 #include "ISerial.h"
 #include "DelayRedraw.h"
@@ -706,524 +708,101 @@ void CWPhastDoc::Serialize(CArchive& ar)
 
 void CWPhastDoc::SerializeMedia(bool bStoring, hid_t loc_id)
 {
-	static const char szMedia[] = "Media";
-	static const char szZones[] = "Zones";
-
-	hid_t media_id;
-	hid_t zone_id;
-	herr_t status;
-
-	if (bStoring)
+	if (CPropertyTreeControlBar *pBar = this->GetPropertyTreeControlBar())
 	{
-		// Create the szMedia group
-		media_id = ::H5Gcreate(loc_id, szMedia, 0); // always created even if empty
-		ASSERT(media_id > 0);
-		if (media_id > 0)
-		{
-			CTreeCtrlNode nodeMedia = this->GetPropertyTreeControlBar()->GetMediaNode();
-			int nCount = nodeMedia.GetChildCount();
-			std::list<LPCTSTR> listNames;
-			std::list<CMediaZoneActor*> listZones;
-			for (int i = 0; i < nCount; ++i)
-			{
-				if (CMediaZoneActor *pZone = CMediaZoneActor::SafeDownCast((vtkObject*)nodeMedia.GetChildAt(i).GetData()))
-				{
-					listZones.push_back(pZone);
-					ASSERT(pZone->GetName());
-					listNames.push_back(pZone->GetName());
-				}
-			}
-
-			if (listNames.size() > 0)
-			{
-				CGlobal::WriteList(media_id, szZones, listNames);
-				std::list<CMediaZoneActor*>::iterator iter = listZones.begin();
-				for (; iter != listZones.end(); ++iter)
-				{
-					// create zone group
-					zone_id = ::H5Gcreate(media_id, (*iter)->GetName(), 0);
-					ASSERT(zone_id > 0);
-					if (zone_id > 0)
-					{
-						// serialize grid_elt
-						(*iter)->Serialize(true, zone_id, this->GetUnits());
-
-						// close the szZones group
-						status = ::H5Gclose(zone_id);
-						ASSERT(status >= 0);
-					}
-				}
-			}
-			// close the szMedia group
-			status = ::H5Gclose(media_id);
-			ASSERT(status >= 0);
-		}
-	}
-	else
-	{
-		// Loading
-		//
-
-		// Open the szMedia group
-		//
-		media_id = ::H5Gopen(loc_id, szMedia);
-		ASSERT(media_id > 0);
-		if (media_id > 0)
-		{
-			std::list<std::string> listNames;
-			CGlobal::ReadList(media_id, szZones, listNames);
-			std::list<std::string>::iterator iter = listNames.begin();
-			for (; iter != listNames.end(); ++iter)
-			{
-				// open zone group
-				zone_id = ::H5Gopen(media_id, (*iter).c_str());
-				ASSERT(zone_id > 0);
-				if (zone_id > 0)
-				{
-					CMediaZoneActor* pZone = CMediaZoneActor::New();
-
-					// load grid_elt
-					pZone->SetName((*iter).c_str());
-					pZone->Serialize(false, zone_id, this->GetUnits());
-					this->Add(pZone);
-					pZone->Delete(); // ok ref counted
-
-					// close the szZones group
-					status = ::H5Gclose(zone_id);
-					ASSERT(status >= 0);
-				}
-			}
-
-			// close the szMedia group
-			status = ::H5Gclose(media_id);
-			ASSERT(status >= 0);
-		}
+		this->SerializeActors<CMediaZoneActor>(bStoring, loc_id, pBar->GetMediaNode(), "Zones");
 	}
 }
 
-// COMMENT: {4/11/2005 1:31:43 PM}void CWPhastDoc::SerializeBC(bool bStoring, hid_t loc_id, int nStressPeriod)
-// COMMENT: {4/11/2005 1:30:56 PM}{
-// COMMENT: {4/11/2005 1:30:56 PM}	static const char szBC[]    = "BC";
-// COMMENT: {4/11/2005 1:30:56 PM}	static const char szZones[] = "Zones";
-// COMMENT: {4/11/2005 1:30:56 PM}
-// COMMENT: {4/11/2005 1:30:56 PM}	hid_t bc_id;
-// COMMENT: {4/11/2005 1:30:56 PM}	hid_t zone_id;
-// COMMENT: {4/11/2005 1:30:56 PM}	herr_t status;
-// COMMENT: {4/11/2005 1:30:56 PM}
-// COMMENT: {4/11/2005 1:30:56 PM}	if (bStoring)
-// COMMENT: {4/11/2005 1:30:56 PM}	{
-// COMMENT: {4/11/2005 1:30:56 PM}		// add storing code here
-// COMMENT: {4/11/2005 1:30:56 PM}
-// COMMENT: {4/11/2005 1:30:56 PM}		// Create the szBC group
-// COMMENT: {4/11/2005 1:30:56 PM}		bc_id = ::H5Gcreate(loc_id, szBC, 0); // always created even if empty
-// COMMENT: {4/11/2005 1:30:56 PM}		ASSERT(bc_id > 0);
-// COMMENT: {4/11/2005 1:30:56 PM}		if (bc_id > 0)
-// COMMENT: {4/11/2005 1:30:56 PM}		{
-// COMMENT: {4/11/2005 1:30:56 PM}// COMMENT: {4/11/2005 1:13:28 PM}			CTreeCtrlNode nodeBC = this->GetPropertyTreeControlBar()->GetBCNode(nStressPeriod);
-// COMMENT: {4/11/2005 1:30:56 PM}			CTreeCtrlNode nodeBC = this->GetPropertyTreeControlBar()->GetBCNode(nStressPeriod);
-// COMMENT: {4/11/2005 1:30:56 PM}			int nCount = nodeBC.GetChildCount();
-// COMMENT: {4/11/2005 1:30:56 PM}			std::list<LPCTSTR> listNames;
-// COMMENT: {4/11/2005 1:30:56 PM}			std::list<CBCZoneActor*> listZones;
-// COMMENT: {4/11/2005 1:30:56 PM}			for (int i = 0; i < nCount; ++i)
-// COMMENT: {4/11/2005 1:30:56 PM}			{
-// COMMENT: {4/11/2005 1:30:56 PM}				if (CBCZoneActor *pZone = CBCZoneActor::SafeDownCast((vtkObject*)nodeBC.GetChildAt(i).GetData()))
-// COMMENT: {4/11/2005 1:30:56 PM}				{
-// COMMENT: {4/11/2005 1:30:56 PM}					listZones.push_back(pZone);
-// COMMENT: {4/11/2005 1:30:56 PM}					ASSERT(pZone->GetName());
-// COMMENT: {4/11/2005 1:30:56 PM}					listNames.push_back(pZone->GetName());
-// COMMENT: {4/11/2005 1:30:56 PM}				}
-// COMMENT: {4/11/2005 1:30:56 PM}				else ASSERT(FALSE);
-// COMMENT: {4/11/2005 1:30:56 PM}			}
-// COMMENT: {4/11/2005 1:30:56 PM}			if (listNames.size() > 0)
-// COMMENT: {4/11/2005 1:30:56 PM}			{
-// COMMENT: {4/11/2005 1:30:56 PM}				CGlobal::WriteList(bc_id, szZones, listNames);
-// COMMENT: {4/11/2005 1:30:56 PM}				std::list<CBCZoneActor*>::iterator iter = listZones.begin();
-// COMMENT: {4/11/2005 1:30:56 PM}				for (; iter != listZones.end(); ++iter)
-// COMMENT: {4/11/2005 1:30:56 PM}				{
-// COMMENT: {4/11/2005 1:30:56 PM}					// create zone group
-// COMMENT: {4/11/2005 1:30:56 PM}					zone_id = ::H5Gcreate(bc_id, (*iter)->GetName(), 0);
-// COMMENT: {4/11/2005 1:30:56 PM}					ASSERT(zone_id > 0);
-// COMMENT: {4/11/2005 1:30:56 PM}					if (zone_id > 0)
-// COMMENT: {4/11/2005 1:30:56 PM}					{
-// COMMENT: {4/11/2005 1:30:56 PM}						// serialize bc
-// COMMENT: {4/11/2005 1:30:56 PM}						if (nStressPeriod == 1)
-// COMMENT: {4/11/2005 1:30:56 PM}						{
-// COMMENT: {4/11/2005 1:30:56 PM}							(*iter)->Serialize(bStoring, zone_id, this->GetUnits());
-// COMMENT: {4/11/2005 1:30:56 PM}						}
-// COMMENT: {4/11/2005 1:30:56 PM}						else
-// COMMENT: {4/11/2005 1:30:56 PM}						{
-// COMMENT: {4/11/2005 1:30:56 PM}							(*iter)->SerializeStressPeriod(nStressPeriod, bStoring, zone_id);
-// COMMENT: {4/11/2005 1:30:56 PM}						}
-// COMMENT: {4/11/2005 1:30:56 PM}
-// COMMENT: {4/11/2005 1:30:56 PM}						// close the szZones group
-// COMMENT: {4/11/2005 1:30:56 PM}						status = ::H5Gclose(zone_id);
-// COMMENT: {4/11/2005 1:30:56 PM}						ASSERT(status >= 0);
-// COMMENT: {4/11/2005 1:30:56 PM}					}
-// COMMENT: {4/11/2005 1:30:56 PM}				}
-// COMMENT: {4/11/2005 1:30:56 PM}			}
-// COMMENT: {4/11/2005 1:30:56 PM}			// close the szMedia group
-// COMMENT: {4/11/2005 1:30:56 PM}			status = ::H5Gclose(bc_id);
-// COMMENT: {4/11/2005 1:30:56 PM}			ASSERT(status >= 0);
-// COMMENT: {4/11/2005 1:30:56 PM}		}
-// COMMENT: {4/11/2005 1:30:56 PM}	}
-// COMMENT: {4/11/2005 1:30:56 PM}	else
-// COMMENT: {4/11/2005 1:30:56 PM}	{
-// COMMENT: {4/11/2005 1:30:56 PM}		// add loading code here
-// COMMENT: {4/11/2005 1:30:56 PM}
-// COMMENT: {4/11/2005 1:30:56 PM}		// Open the szBC group
-// COMMENT: {4/11/2005 1:30:56 PM}		bc_id = ::H5Gopen(loc_id, szBC);
-// COMMENT: {4/11/2005 1:30:56 PM}		ASSERT(bc_id > 0);
-// COMMENT: {4/11/2005 1:30:56 PM}		if (bc_id > 0)
-// COMMENT: {4/11/2005 1:30:56 PM}		{
-// COMMENT: {4/11/2005 1:30:56 PM}			std::list<std::string> listNames;
-// COMMENT: {4/11/2005 1:30:56 PM}			CGlobal::ReadList(bc_id, szZones, listNames);
-// COMMENT: {4/11/2005 1:30:56 PM}			std::list<std::string>::iterator iter = listNames.begin();
-// COMMENT: {4/11/2005 1:30:56 PM}			for (; iter != listNames.end(); ++iter)
-// COMMENT: {4/11/2005 1:30:56 PM}			{
-// COMMENT: {4/11/2005 1:30:56 PM}				// open zone group
-// COMMENT: {4/11/2005 1:30:56 PM}				zone_id = ::H5Gopen(bc_id, (*iter).c_str());
-// COMMENT: {4/11/2005 1:30:56 PM}				ASSERT(zone_id > 0);
-// COMMENT: {4/11/2005 1:30:56 PM}				if (zone_id > 0)
-// COMMENT: {4/11/2005 1:30:56 PM}				{
-// COMMENT: {4/11/2005 1:30:56 PM}// COMMENT: {4/11/2005 1:13:50 PM}					if (nStressPeriod == 1)
-// COMMENT: {4/11/2005 1:30:56 PM}// COMMENT: {4/11/2005 1:13:50 PM}					{
-// COMMENT: {4/11/2005 1:30:56 PM}						CBCZoneActor* pZone = CBCZoneActor::New();
-// COMMENT: {4/11/2005 1:30:56 PM}
-// COMMENT: {4/11/2005 1:30:56 PM}						// load bc
-// COMMENT: {4/11/2005 1:30:56 PM}						pZone->SetName((*iter).c_str());
-// COMMENT: {4/11/2005 1:30:56 PM}						pZone->Serialize(bStoring, zone_id, this->GetUnits());
-// COMMENT: {4/11/2005 1:30:56 PM}						this->Add(pZone);
-// COMMENT: {4/11/2005 1:30:56 PM}						pZone->Delete(); // ok ref counted
-// COMMENT: {4/11/2005 1:30:56 PM}// COMMENT: {4/11/2005 1:13:57 PM}					}
-// COMMENT: {4/11/2005 1:30:56 PM}// COMMENT: {4/11/2005 1:13:57 PM}					else
-// COMMENT: {4/11/2005 1:30:56 PM}// COMMENT: {4/11/2005 1:13:57 PM}					{
-// COMMENT: {4/11/2005 1:30:56 PM}// COMMENT: {4/11/2005 1:13:57 PM}						CTreeCtrlNode nodeBC = this->GetPropertyTreeControlBar()->GetBCNode(1);
-// COMMENT: {4/11/2005 1:30:56 PM}// COMMENT: {4/11/2005 1:13:57 PM}						int nCount = nodeBC.GetChildCount();
-// COMMENT: {4/11/2005 1:30:56 PM}// COMMENT: {4/11/2005 1:13:57 PM}						for (int i = 0; i < nCount; ++i)
-// COMMENT: {4/11/2005 1:30:56 PM}// COMMENT: {4/11/2005 1:13:57 PM}						{
-// COMMENT: {4/11/2005 1:30:56 PM}// COMMENT: {4/11/2005 1:13:57 PM}							if (CBCZoneActor *pZone = CBCZoneActor::SafeDownCast((vtkObject*)nodeBC.GetChildAt(i).GetData()))
-// COMMENT: {4/11/2005 1:30:56 PM}// COMMENT: {4/11/2005 1:13:57 PM}							{
-// COMMENT: {4/11/2005 1:30:56 PM}// COMMENT: {4/11/2005 1:13:57 PM}								if (::strcmp(pZone->GetName(), (*iter).c_str()) == 0)
-// COMMENT: {4/11/2005 1:30:56 PM}// COMMENT: {4/11/2005 1:13:57 PM}								{
-// COMMENT: {4/11/2005 1:30:56 PM}// COMMENT: {4/11/2005 1:13:57 PM}									// load bc for stress period
-// COMMENT: {4/11/2005 1:30:56 PM}// COMMENT: {4/11/2005 1:13:57 PM}									pZone->SerializeStressPeriod(nStressPeriod, bStoring, zone_id);
-// COMMENT: {4/11/2005 1:30:56 PM}// COMMENT: {4/11/2005 1:13:57 PM}									pZone->UpdateTree(this->GetPropertyTreeControlBar(), nStressPeriod);
-// COMMENT: {4/11/2005 1:30:56 PM}// COMMENT: {4/11/2005 1:13:57 PM}									break;
-// COMMENT: {4/11/2005 1:30:56 PM}// COMMENT: {4/11/2005 1:13:57 PM}								}
-// COMMENT: {4/11/2005 1:30:56 PM}// COMMENT: {4/11/2005 1:13:57 PM}							}
-// COMMENT: {4/11/2005 1:30:56 PM}// COMMENT: {4/11/2005 1:13:57 PM}						}
-// COMMENT: {4/11/2005 1:30:56 PM}// COMMENT: {4/11/2005 1:13:57 PM}					}
-// COMMENT: {4/11/2005 1:30:56 PM}
-// COMMENT: {4/11/2005 1:30:56 PM}					// close the szZones group
-// COMMENT: {4/11/2005 1:30:56 PM}					status = ::H5Gclose(zone_id);
-// COMMENT: {4/11/2005 1:30:56 PM}					ASSERT(status >= 0);
-// COMMENT: {4/11/2005 1:30:56 PM}				}
-// COMMENT: {4/11/2005 1:30:56 PM}			}
-// COMMENT: {4/11/2005 1:30:56 PM}
-// COMMENT: {4/11/2005 1:30:56 PM}			// close the szBC group
-// COMMENT: {4/11/2005 1:30:56 PM}			status = ::H5Gclose(bc_id);
-// COMMENT: {4/11/2005 1:30:56 PM}			ASSERT(status >= 0);
-// COMMENT: {4/11/2005 1:30:56 PM}		}
-// COMMENT: {4/11/2005 1:30:56 PM}	}
-// COMMENT: {4/11/2005 1:30:56 PM}}
 void CWPhastDoc::SerializeBC(bool bStoring, hid_t loc_id)
 {
-	static const char szBC[]    = "BC";
-	static const char szZones[] = "Zones";
-
-	hid_t bc_id;
-	hid_t zone_id;
-	herr_t status;
-
-	if (bStoring)
+	if (CPropertyTreeControlBar *pBar = this->GetPropertyTreeControlBar())
 	{
-		// add storing code here
-
-		// Create the szBC group
-		bc_id = ::H5Gcreate(loc_id, szBC, 0); // always created even if empty
-		ASSERT(bc_id > 0);
-		if (bc_id > 0)
-		{
-			CTreeCtrlNode nodeBC = this->GetPropertyTreeControlBar()->GetBCNode();
-			int nCount = nodeBC.GetChildCount();
-			std::list<LPCTSTR> listNames;
-			std::list<CBCZoneActor*> listZones;
-			for (int i = 0; i < nCount; ++i)
-			{
-				if (CBCZoneActor *pZone = CBCZoneActor::SafeDownCast((vtkObject*)nodeBC.GetChildAt(i).GetData()))
-				{
-					listZones.push_back(pZone);
-					ASSERT(pZone->GetName());
-					listNames.push_back(pZone->GetName());
-				}
-				else ASSERT(FALSE);
-			}
-			if (listNames.size() > 0)
-			{
-				CGlobal::WriteList(bc_id, szZones, listNames);
-				std::list<CBCZoneActor*>::iterator iter = listZones.begin();
-				for (; iter != listZones.end(); ++iter)
-				{
-					// create zone group
-					zone_id = ::H5Gcreate(bc_id, (*iter)->GetName(), 0);
-					ASSERT(zone_id > 0);
-					if (zone_id > 0)
-					{
-						(*iter)->Serialize(bStoring, zone_id, this->GetUnits());
-
-						// close the szZones group
-						status = ::H5Gclose(zone_id);
-						ASSERT(status >= 0);
-					}
-				}
-			}
-			// close the szMedia group
-			status = ::H5Gclose(bc_id);
-			ASSERT(status >= 0);
-		}
-	}
-	else
-	{
-		// add loading code here
-
-		// Open the szBC group
-		bc_id = ::H5Gopen(loc_id, szBC);
-		ASSERT(bc_id > 0);
-		if (bc_id > 0)
-		{
-			std::list<std::string> listNames;
-			CGlobal::ReadList(bc_id, szZones, listNames);
-			std::list<std::string>::iterator iter = listNames.begin();
-			for (; iter != listNames.end(); ++iter)
-			{
-				// open zone group
-				zone_id = ::H5Gopen(bc_id, (*iter).c_str());
-				ASSERT(zone_id > 0);
-				if (zone_id > 0)
-				{
-					CBCZoneActor* pZone = CBCZoneActor::New();
-
-					// load bc
-					pZone->SetName((*iter).c_str());
-					pZone->Serialize(bStoring, zone_id, this->GetUnits());
-					this->Add(pZone);
-					pZone->Delete(); // ok ref counted
-
-					// close the szZones group
-					status = ::H5Gclose(zone_id);
-					ASSERT(status >= 0);
-				}
-			}
-
-			// close the szBC group
-			status = ::H5Gclose(bc_id);
-			ASSERT(status >= 0);
-		}
+		this->SerializeActors<CBCZoneActor>(bStoring, loc_id, pBar->GetBCNode(), "Zones");
 	}
 }
 
 void CWPhastDoc::SerializeWells(bool bStoring, hid_t loc_id)
 {
-	static const char szWells[] = "Wells";
-
-	hid_t wells_id;
-	herr_t status;
-
-	if (bStoring)
+	if (CPropertyTreeControlBar *pBar = this->GetPropertyTreeControlBar())
 	{
-		// Create the wells group
-		wells_id = ::H5Gcreate(loc_id, szWells, 0); // always created even if empty
-		ASSERT(wells_id > 0);
-		if (wells_id > 0)
-		{
-			// create list of wells and well names
-			//
-			CTreeCtrlNode nodeWells = this->GetPropertyTreeControlBar()->GetWellsNode();
-			int nCount = nodeWells.GetChildCount();
-			std::list<LPCTSTR> listSerialNames;
-			std::list<CWellActor*> listWells;
-			for (int i = 0; i < nCount; ++i)
-			{
-				if (CWellActor *pWellActor = CWellActor::SafeDownCast((vtkObject*)nodeWells.GetChildAt(i).GetData()))
-				{
-					listWells.push_back(pWellActor);
-					listSerialNames.push_back(pWellActor->GetSerialName());
-				}
-				else ASSERT(FALSE);
-			}
-
-			if (listSerialNames.size() > 0)
-			{
-				// store well names
-				//
-				CGlobal::WriteList(wells_id, szWells, listSerialNames);
-
-				// store each well
-				//
-				std::list<CWellActor*>::iterator iter = listWells.begin();
-				for (; iter != listWells.end(); ++iter)
-				{
-					hid_t well_id = ::H5Gcreate(wells_id, (*iter)->GetSerialName(), 0);
-					ASSERT(well_id > 0);
-					if (well_id > 0)
-					{
-						// store well
-						(*iter)->Serialize(true, well_id, this->GetUnits());
-
-						// close the well group
-						status = ::H5Gclose(well_id);
-						ASSERT(status >= 0);
-					}
-				}
-			}
-
-			// close the wells group
-			//
-			status = ::H5Gclose(wells_id);
-			ASSERT(status >= 0);
-		}
-	}
-	else
-	{
-		// Open the wells group
-		//
-		wells_id = ::H5Gopen(loc_id, szWells);
-		/// ASSERT(wells_id > 0);
-		if (wells_id > 0)
-		{
-			// read in the list of well names
-			//
-			std::list<std::string> listSerialNames;
-			CGlobal::ReadList(wells_id, szWells, listSerialNames);
-			std::list<std::string>::iterator iter = listSerialNames.begin();
-			for (; iter != listSerialNames.end(); ++iter)
-			{
-				hid_t well_id = ::H5Gopen(wells_id, (*iter).c_str());
-				ASSERT(well_id > 0);
-				if (well_id > 0)
-				{
-					CWellActor *pWellActor = CWellActor::New();
-					pWellActor->Serialize(bStoring, well_id, this->GetUnits());
-
-					this->Add(pWellActor);
-					pWellActor->Delete(); // ok ref counted
-
-					// close the well group
-					//
-					status = ::H5Gclose(well_id);
-					ASSERT(status >= 0);
-				}
-			}
-			// close the wells group
-			// 
-			status = ::H5Gclose(wells_id);
-			ASSERT(status >= 0);
-		}
+		this->SerializeActors<CWellActor>(bStoring, loc_id, pBar->GetWellsNode(), "Wells");
 	}
 }
 
 void CWPhastDoc::SerializeRivers(bool bStoring, hid_t loc_id)
 {
-	static const char szRivers[] = "Rivers";
-
-	hid_t rivers_id;
-	herr_t status;
-
-	if (bStoring)
+	if (CPropertyTreeControlBar *pBar = this->GetPropertyTreeControlBar())
 	{
-		// Create the rivers group
-		rivers_id = ::H5Gcreate(loc_id, szRivers, 0); // always created even if empty
-		ASSERT(rivers_id > 0);
-		if (rivers_id > 0)
-		{
-			// create list of rivers and river names
-			//
-			CTreeCtrlNode nodeRivers = this->GetPropertyTreeControlBar()->GetRiversNode();
-			int nCount = nodeRivers.GetChildCount();
-			std::list<LPCTSTR> listSerialNames;
-			std::list<CRiverActor*> listRivers;
-			for (int i = 0; i < nCount; ++i)
-			{
-				if (CRiverActor *pRiverActor = CRiverActor::SafeDownCast((vtkObject*)nodeRivers.GetChildAt(i).GetData()))
-				{
-					listRivers.push_back(pRiverActor);
-					listSerialNames.push_back(pRiverActor->GetSerialName());
-				}
-				else ASSERT(FALSE);
-			}
-
-			if (listSerialNames.size() > 0)
-			{
-				// store river names
-				//
-				CGlobal::WriteList(rivers_id, szRivers, listSerialNames);
-
-				// store each river
-				//
-				std::list<CRiverActor*>::iterator iter = listRivers.begin();
-				for (; iter != listRivers.end(); ++iter)
-				{
-					hid_t riv_id = ::H5Gcreate(rivers_id, (*iter)->GetSerialName(), 0);
-					ASSERT(riv_id > 0);
-					if (riv_id > 0)
-					{
-						// store river
-						(*iter)->Serialize(true, riv_id, this->GetUnits());
-
-						// close the river group
-						status = ::H5Gclose(riv_id);
-						ASSERT(status >= 0);
-					}
-				}
-			}
-
-			// close the rivers group
-			//
-			status = ::H5Gclose(rivers_id);
-			ASSERT(status >= 0);
-		}
-	}
-	else
-	{
-		// Open the rivers group
-		//
-		rivers_id = ::H5Gopen(loc_id, szRivers);
-		/// ASSERT(rivers_id > 0);
-		if (rivers_id > 0)
-		{
-			// read in the list of river names
-			//
-			std::list<std::string> listSerialNames;
-			CGlobal::ReadList(rivers_id, szRivers, listSerialNames);
-			std::list<std::string>::iterator iter = listSerialNames.begin();
-			for (; iter != listSerialNames.end(); ++iter)
-			{
-				hid_t riv_id = ::H5Gopen(rivers_id, (*iter).c_str());
-				ASSERT(riv_id > 0);
-				if (riv_id > 0)
-				{
-					CRiverActor *pRiverActor = CRiverActor::New();
-					pRiverActor->Serialize(bStoring, riv_id, this->GetUnits());
-
-					this->Add(pRiverActor);
-					pRiverActor->Delete(); // ok ref counted
-
-					// close the river group
-					//
-					status = ::H5Gclose(riv_id);
-					ASSERT(status >= 0);
-				}
-			}
-			// close the rivers group
-			// 
-			status = ::H5Gclose(rivers_id);
-			ASSERT(status >= 0);
-		}
+		this->SerializeActors<CRiverActor>(bStoring, loc_id, pBar->GetRiversNode(), "Rivers");
 	}
 }
 
 void CWPhastDoc::SerializeIC(bool bStoring, hid_t loc_id)
 {
+	// Revisions prior to and including r669 stored ALL the IC zones 
+	// in the IC group.  Now each IC zone type has its own group heading.
+	// This code should be backwards compatible for reading of .wphast
+	// files.
+	//
+	// through r669:
+	//
+	//      GROUP "IC" {
+	//         GROUP "Default:IC_CHEM" {
+	//            ...
+	//         } 
+	//         GROUP "Default:IC_HEAD" {
+	//            ...
+	//         } 
+	//         GROUP "Zone 10:IC_CHEM" {
+	//            ...
+	//         } 
+	//         GROUP "Zone 9:IC_HEAD" {
+	//            ...
+	//         } 
+	//         DATASET "Zones" {
+	//            ...
+	//            DATA {
+	//               "Default:IC_HEAD", "Default:IC_CHEM", "Zone 9:IC_HEAD",
+	//               "Zone 10:IC_CHEM"
+	//            } 
+	//         } 
+	//      } 
+	//	
+	// from now on this is the layout:
+	//
+	//      GROUP "IC" {
+	//         GROUP "ICChem" {
+	//            GROUP "Default" {
+	//               ...
+	//            } 
+	//            GROUP "Zone 10" {
+	//               ...
+	//            } 
+	//            DATASET "Zones" {
+	//               ...
+	//               DATA {
+	//                  "Default", "Zone 10"
+	//               } 
+	//            } 
+	//         } 
+	//         GROUP "ICHead" {
+	//            GROUP "Default" {
+	//               ...
+	//            } 
+	//            GROUP "Zone 9" {
+	//               ...
+	//            } 
+	//            DATASET "Zones" {
+	//               ...
+	//               DATA {
+	//                  "Default", "Zone 9"
+	//               } 
+	//            } 
+	//         } 
+	//      } 
+	//
+
 	static const char szIC[]    = "IC";
 	static const char szZones[] = "Zones";
 
@@ -1238,57 +817,14 @@ void CWPhastDoc::SerializeIC(bool bStoring, hid_t loc_id)
 		ASSERT(ic_id > 0);
 		if (ic_id > 0)
 		{
-			int nCount;
-			std::list<LPCTSTR> listNames;
-			std::list<CICZoneActor*> listZones;
-
-			// get head zones
-			CTreeCtrlNode nodeICHead = this->GetPropertyTreeControlBar()->GetICHeadNode();
-			nCount = nodeICHead.GetChildCount();
-			for (int i = 0; i < nCount; ++i)
+			// write new formats
+			//
+			if (CPropertyTreeControlBar *pBar = this->GetPropertyTreeControlBar())
 			{
-				if (CICZoneActor *pZone = CICZoneActor::SafeDownCast((vtkObject*)nodeICHead.GetChildAt(i).GetData()))
-				{
-					listZones.push_back(pZone);
-					ASSERT(pZone->GetName());
-					listNames.push_back(pZone->GetSerialName());
-				}
-				else ASSERT(FALSE);
+				this->SerializeActors<CICHeadZoneActor>(bStoring, ic_id, pBar->GetICHeadNode(), szZones);
+				this->SerializeActors<CICChemZoneActor>(bStoring, ic_id, pBar->GetICChemNode(), szZones);
 			}
 
-			// get chem zones
-			CTreeCtrlNode nodeICChem = this->GetPropertyTreeControlBar()->GetICChemNode();
-			nCount = nodeICChem.GetChildCount();
-			for (int i = 0; i < nCount; ++i)
-			{
-				if (CICZoneActor *pZone = CICZoneActor::SafeDownCast((vtkObject*)nodeICChem.GetChildAt(i).GetData()))
-				{
-					listZones.push_back(pZone);
-					ASSERT(pZone->GetName());
-					listNames.push_back(pZone->GetSerialName());
-				}
-				else ASSERT(FALSE);
-			}
-			if (listNames.size() > 0)
-			{
-				CGlobal::WriteList(ic_id, szZones, listNames);
-				std::list<CICZoneActor*>::iterator iter = listZones.begin();
-				for (; iter != listZones.end(); ++iter)
-				{
-					// create zone group
-					zone_id = ::H5Gcreate(ic_id, (*iter)->GetSerialName(), 0);
-					ASSERT(zone_id > 0);
-					if (zone_id > 0)
-					{
-						// store head_ic
-						(*iter)->Serialize(true, zone_id, this->GetUnits());
-
-						// close the szZones group
-						status = ::H5Gclose(zone_id);
-						ASSERT(status >= 0);
-					}
-				}
-			}
 			// close the szIC group
 			status = ::H5Gclose(ic_id);
 			ASSERT(status >= 0);
@@ -1303,30 +839,68 @@ void CWPhastDoc::SerializeIC(bool bStoring, hid_t loc_id)
 		ASSERT(ic_id > 0);
 		if (ic_id > 0)
 		{
-			std::list<std::string> listNames;
-			CGlobal::ReadList(ic_id, szZones, listNames);
-			std::list<std::string>::iterator iter = listNames.begin();
-			for (; iter != listNames.end(); ++iter)
+			hid_t old_id = ::H5Dopen(ic_id, szZones);
+			if (old_id <= 0)
 			{
-				// open zone group
-				zone_id = ::H5Gopen(ic_id, (*iter).c_str());
-				ASSERT(zone_id > 0);
-				if (zone_id > 0)
+				// read new format
+				//
+				if (CPropertyTreeControlBar *pBar = this->GetPropertyTreeControlBar())
 				{
-					CICZoneActor* pZone = CICZoneActor::New();
-
-					// load head_ic/chem_ic
-					pZone->SetSerialName((*iter).c_str());
-					pZone->Serialize(false, zone_id, this->GetUnits());
-					this->Add(pZone);
-					pZone->Delete(); // ok ref counted
-
-					// close the szZones group
-					status = ::H5Gclose(zone_id);
-					ASSERT(status >= 0);
+					this->SerializeActors<CICHeadZoneActor>(bStoring, ic_id, pBar->GetICHeadNode(), szZones);
+					this->SerializeActors<CICChemZoneActor>(bStoring, ic_id, pBar->GetICChemNode(), szZones);
 				}
 			}
+			else
+			{
+				// read old format (this .wphast file was written by a version older than
+				// or equal to 669)
+				//
+				status = ::H5Dclose(old_id);
+				ASSERT(status >= 0);
 
+				std::list<std::string> listNames;
+				CGlobal::ReadList(ic_id, szZones, listNames);
+				std::list<std::string>::iterator iter = listNames.begin();
+				for (; iter != listNames.end(); ++iter)
+				{
+					// open zone group
+					zone_id = ::H5Gopen(ic_id, (*iter).c_str());
+					ASSERT(zone_id > 0);
+					if (zone_id > 0)
+					{
+						std::string name = (*iter);
+						std::string::size_type pos;
+
+						if ((pos = name.find(":IC_HEAD")) != std::string::npos)
+						{
+							CICHeadZoneActor* pZone = CICHeadZoneActor::New();
+							name.resize(pos);
+							pZone->Serialize(false, zone_id, this->GetUnits());
+							pZone->SetName(name.c_str());
+							this->Add(pZone);
+							pZone->Delete(); // ok ref counted
+						}
+						else if ((pos = name.find(":IC_CHEM")) != std::string::npos)
+						{
+							CICChemZoneActor* pZone = CICChemZoneActor::New();
+							name.resize(pos);
+							pZone->Serialize(false, zone_id, this->GetUnits());
+							pZone->SetName(name.c_str());
+							this->Add(pZone);
+							pZone->Delete(); // ok ref counted
+						}
+						else
+						{
+							ASSERT(FALSE);
+						}
+
+						// close the szZones group
+						status = ::H5Gclose(zone_id);
+						ASSERT(status >= 0);
+					}
+				}
+
+			}
 			// close the szIC group
 			status = ::H5Gclose(ic_id);
 			ASSERT(status >= 0);
@@ -1334,126 +908,121 @@ void CWPhastDoc::SerializeIC(bool bStoring, hid_t loc_id)
 	}
 }
 
-void CWPhastDoc::SerializeStressPeriods(bool bStoring, hid_t loc_id)
+template<typename ACTOR>
+void CWPhastDoc::SerializeActors(bool bStoring, hid_t loc_id, CTreeCtrlNode parentNode, const char* szNamesListHeading)
 {
-	ASSERT(FALSE);
-// COMMENT: {4/8/2005 6:56:13 PM}	static const char szStressPeriods[]      = "StressPeriods";
-// COMMENT: {4/8/2005 6:56:13 PM}	static const char szStressPeriodFormat[] = "Stress Period %d";
-// COMMENT: {4/8/2005 6:56:13 PM}
-// COMMENT: {4/8/2005 6:56:13 PM}	hid_t sp_id;
-// COMMENT: {4/8/2005 6:56:13 PM}	hid_t period_id;
-// COMMENT: {4/8/2005 6:56:13 PM}	herr_t status;
-// COMMENT: {4/8/2005 6:56:13 PM}	int nStressPeriodCount;
-// COMMENT: {4/8/2005 6:56:13 PM}	CString str;
-// COMMENT: {4/8/2005 6:56:13 PM}
-// COMMENT: {4/8/2005 6:56:13 PM}	if (bStoring)
-// COMMENT: {4/8/2005 6:56:13 PM}	{
-// COMMENT: {4/8/2005 6:56:13 PM}		// add storing code here
-// COMMENT: {4/8/2005 6:56:13 PM}
-// COMMENT: {4/8/2005 6:56:13 PM}		// Create the szStressPeriods group
-// COMMENT: {4/8/2005 6:56:13 PM}		sp_id = ::H5Gcreate(loc_id, szStressPeriods, 0); // always created even if empty
-// COMMENT: {4/8/2005 6:56:13 PM}		ASSERT(sp_id > 0);
-// COMMENT: {4/8/2005 6:56:13 PM}		if (sp_id > 0)
-// COMMENT: {4/8/2005 6:56:13 PM}		{
-// COMMENT: {4/8/2005 6:56:13 PM}			nStressPeriodCount = this->GetPropertyTreeControlBar()->GetStressPeriodCount();
-// COMMENT: {4/8/2005 6:56:13 PM}
-// COMMENT: {4/8/2005 6:56:13 PM}			std::vector<std::string> vec_strings;
-// COMMENT: {4/8/2005 6:56:13 PM}			vec_strings.reserve(nStressPeriodCount);
-// COMMENT: {4/8/2005 6:56:13 PM}			std::list<LPCTSTR> listNames;
-// COMMENT: {4/8/2005 6:56:13 PM}			for (int i = 2; i <= nStressPeriodCount; ++i)
-// COMMENT: {4/8/2005 6:56:13 PM}			{
-// COMMENT: {4/8/2005 6:56:13 PM}				str.Format(szStressPeriodFormat, i);
-// COMMENT: {4/8/2005 6:56:13 PM}				vec_strings.push_back((LPCTSTR)str);
-// COMMENT: {4/8/2005 6:56:13 PM}				listNames.push_back(vec_strings.back().c_str());
-// COMMENT: {4/8/2005 6:56:13 PM}			}
-// COMMENT: {4/8/2005 6:56:13 PM}			if (listNames.size() > 0)
-// COMMENT: {4/8/2005 6:56:13 PM}			{
-// COMMENT: {4/8/2005 6:56:13 PM}				// store list of stress periods
-// COMMENT: {4/8/2005 6:56:13 PM}				CGlobal::WriteList(sp_id, szStressPeriods, listNames);
-// COMMENT: {4/8/2005 6:56:13 PM}
-// COMMENT: {4/8/2005 6:56:13 PM}				// store each stress period
-// COMMENT: {4/8/2005 6:56:13 PM}				std::list<LPCTSTR>::iterator iter = listNames.begin();
-// COMMENT: {4/8/2005 6:56:13 PM}				for (int i = 2; iter != listNames.end(); ++iter, ++i)
-// COMMENT: {4/8/2005 6:56:13 PM}				{
-// COMMENT: {4/8/2005 6:56:13 PM}					// create stress period group
-// COMMENT: {4/8/2005 6:56:13 PM}					period_id = ::H5Gcreate(sp_id, (*iter), 0);
-// COMMENT: {4/8/2005 6:56:13 PM}					ASSERT(period_id > 0);
-// COMMENT: {4/8/2005 6:56:13 PM}					if (period_id > 0)
-// COMMENT: {4/8/2005 6:56:13 PM}					{
-// COMMENT: {4/8/2005 6:56:13 PM}						// store BCs
-// COMMENT: {4/8/2005 6:56:13 PM}						this->SerializeBC(bStoring, period_id, i);
-// COMMENT: {4/8/2005 6:56:13 PM}
-// COMMENT: {4/8/2005 6:56:13 PM}						// store time_control 
-// COMMENT: {4/8/2005 6:56:13 PM}						this->SerializeTimeControl(bStoring, period_id, i);
-// COMMENT: {4/8/2005 6:56:13 PM}
-// COMMENT: {4/8/2005 6:56:13 PM}						// close the stress period group group
-// COMMENT: {4/8/2005 6:56:13 PM}						status = ::H5Gclose(period_id);
-// COMMENT: {4/8/2005 6:56:13 PM}						ASSERT(status >= 0);
-// COMMENT: {4/8/2005 6:56:13 PM}					}
-// COMMENT: {4/8/2005 6:56:13 PM}				}
-// COMMENT: {4/8/2005 6:56:13 PM}			}
-// COMMENT: {4/8/2005 6:56:13 PM}			// close the szStressPeriods group
-// COMMENT: {4/8/2005 6:56:13 PM}			status = ::H5Gclose(sp_id);
-// COMMENT: {4/8/2005 6:56:13 PM}			ASSERT(status >= 0);
-// COMMENT: {4/8/2005 6:56:13 PM}		}
-// COMMENT: {4/8/2005 6:56:13 PM}	}
-// COMMENT: {4/8/2005 6:56:13 PM}	else
-// COMMENT: {4/8/2005 6:56:13 PM}	{
-// COMMENT: {4/8/2005 6:56:13 PM}		// add loading code here
-// COMMENT: {4/8/2005 6:56:13 PM}
-// COMMENT: {4/8/2005 6:56:13 PM}		// Open the szStressPeriods group
-// COMMENT: {4/8/2005 6:56:13 PM}		sp_id = ::H5Gopen(loc_id, szStressPeriods);
-// COMMENT: {4/8/2005 6:56:13 PM}		ASSERT(sp_id > 0);
-// COMMENT: {4/8/2005 6:56:13 PM}		if (sp_id > 0)
-// COMMENT: {4/8/2005 6:56:13 PM}		{
-// COMMENT: {4/8/2005 6:56:13 PM}			std::list<std::string> listNames;
-// COMMENT: {4/8/2005 6:56:13 PM}			CGlobal::ReadList(sp_id, szStressPeriods, listNames);
-// COMMENT: {4/8/2005 6:56:13 PM}			std::list<std::string>::iterator iter = listNames.begin();
-// COMMENT: {4/8/2005 6:56:13 PM}			for (int i = 2; iter != listNames.end(); ++iter, ++i)
-// COMMENT: {4/8/2005 6:56:13 PM}			{
-// COMMENT: {4/8/2005 6:56:13 PM}				// open zone group
-// COMMENT: {4/8/2005 6:56:13 PM}				period_id = ::H5Gopen(sp_id, (*iter).c_str());
-// COMMENT: {4/8/2005 6:56:13 PM}				ASSERT(period_id > 0);
-// COMMENT: {4/8/2005 6:56:13 PM}				if (period_id > 0)
-// COMMENT: {4/8/2005 6:56:13 PM}				{
-// COMMENT: {4/8/2005 6:56:13 PM}					// load time_control 
-// COMMENT: {4/8/2005 6:56:13 PM}					this->SerializeTimeControl(bStoring, period_id, i);
-// COMMENT: {4/8/2005 6:56:13 PM}
-// COMMENT: {4/8/2005 6:56:13 PM}					// load BCs
-// COMMENT: {4/8/2005 6:56:13 PM}					this->SerializeBC(bStoring, period_id, i);
-// COMMENT: {4/8/2005 6:56:13 PM}
-// COMMENT: {4/8/2005 6:56:13 PM}					// close the stress period group group
-// COMMENT: {4/8/2005 6:56:13 PM}					status = ::H5Gclose(period_id);
-// COMMENT: {4/8/2005 6:56:13 PM}					ASSERT(status >= 0);
-// COMMENT: {4/8/2005 6:56:13 PM}				}
-// COMMENT: {4/8/2005 6:56:13 PM}			}
-// COMMENT: {4/8/2005 6:56:13 PM}			// close the szStressPeriods group
-// COMMENT: {4/8/2005 6:56:13 PM}			status = ::H5Gclose(sp_id);
-// COMMENT: {4/8/2005 6:56:13 PM}			ASSERT(status >= 0);
-// COMMENT: {4/8/2005 6:56:13 PM}		}
-// COMMENT: {4/8/2005 6:56:13 PM}	}
-}
+	hid_t group_id;
+	hid_t actor_id;
+	herr_t status;
 
-// COMMENT: {4/11/2005 1:34:09 PM}void CWPhastDoc::SerializeTimeControl(bool bStoring, hid_t loc_id, int nStressPeriod)
-// COMMENT: {4/11/2005 1:34:09 PM}{
-// COMMENT: {4/11/2005 1:34:09 PM}	ASSERT(nStressPeriod > 1); // use this->m_pTimeControl->Serialize instead
-// COMMENT: {4/11/2005 1:34:09 PM}	if (bStoring)
-// COMMENT: {4/11/2005 1:34:09 PM}	{
-// COMMENT: {4/11/2005 1:34:09 PM}		// store time_control 
-// COMMENT: {4/11/2005 1:34:09 PM}		CTreeCtrlNode nodeTC = this->GetPropertyTreeControlBar()->GetTimeControlNode(nStressPeriod);
-// COMMENT: {4/11/2005 1:34:09 PM}		ASSERT(nodeTC.GetData());
-// COMMENT: {4/11/2005 1:34:09 PM}		if (CTimeControl* pTimeControl = (CTimeControl*)(nodeTC.GetData())) {
-// COMMENT: {4/11/2005 1:34:09 PM}			pTimeControl->Serialize(bStoring, loc_id);
-// COMMENT: {4/11/2005 1:34:09 PM}		}
-// COMMENT: {4/11/2005 1:34:09 PM}	}
-// COMMENT: {4/11/2005 1:34:09 PM}	else
-// COMMENT: {4/11/2005 1:34:09 PM}	{
-// COMMENT: {4/11/2005 1:34:09 PM}		// load time_control 
-// COMMENT: {4/11/2005 1:34:09 PM}		CTimeControl tc;
-// COMMENT: {4/11/2005 1:34:09 PM}		tc.Serialize(bStoring, loc_id);
-// COMMENT: {4/11/2005 1:34:09 PM}// COMMENT: {4/8/2005 6:52:58 PM}		this->AddStressPeriod(tc);
-// COMMENT: {4/11/2005 1:34:09 PM}	}
-// COMMENT: {4/11/2005 1:34:09 PM}}
+	if (bStoring)
+	{
+		// STORING
+
+		// create the ACTOR::szHeading group
+		group_id = ::H5Gcreate(loc_id, ACTOR::szHeading, 0); // always created even if empty
+		ASSERT(group_id > 0);
+		if (group_id > 0)
+		{
+			int nCount;
+			std::list<LPCTSTR> listNames;
+			std::list<ACTOR*> listActors;
+
+			// get actors and actors names
+			//
+			nCount = parentNode.GetChildCount();
+			for (int i = 0; i < nCount; ++i)
+			{
+				if (ACTOR *pActor = ACTOR::SafeDownCast((vtkObject*)parentNode.GetChildAt(i).GetData()))
+				{
+					listActors.push_back(pActor);
+					ASSERT(pActor->GetName() && ::strlen(pActor->GetName()));
+					listNames.push_back(pActor->GetName());
+				}
+				else ASSERT(FALSE);
+			}
+
+			if (listNames.size() > 0)
+			{
+				// store actor names
+				//
+				CGlobal::WriteList(group_id, szNamesListHeading, listNames);
+
+				// store each actor
+				//
+				std::list<ACTOR*>::iterator iter = listActors.begin();
+				for (; iter != listActors.end(); ++iter)
+				{
+					// create actor group
+					//
+					actor_id = ::H5Gcreate(group_id, (*iter)->GetName(), 0);
+					ASSERT(actor_id > 0);
+					if (actor_id > 0)
+					{
+						// store actor
+						//
+						(*iter)->Serialize(true, actor_id, this->GetUnits());
+
+						// close the actor group
+						//
+						status = ::H5Gclose(actor_id);
+						ASSERT(status >= 0);
+					}
+				}
+			}
+
+			// close the ACTOR::szHeading group
+			//
+			status = ::H5Gclose(group_id);
+			ASSERT(status >= 0);
+		}
+	}
+	else
+	{
+		// LOADING
+
+		// open the ACTOR::szHeading group
+		//
+		group_id = ::H5Gopen(loc_id, ACTOR::szHeading);
+		ASSERT(group_id > 0);
+		if (group_id > 0)
+		{
+			std::list<std::string> listNames;
+			CGlobal::ReadList(group_id, szNamesListHeading, listNames);
+			std::list<std::string>::iterator iter = listNames.begin();
+			for (; iter != listNames.end(); ++iter)
+			{
+				// open actor group
+				//
+				actor_id = ::H5Gopen(group_id, (*iter).c_str());
+				ASSERT(actor_id > 0);
+				if (actor_id > 0)
+				{
+					ACTOR* pActor = ACTOR::New();
+					if (pActor)
+					{
+						// load actor
+						//
+						pActor->Serialize(false, actor_id, this->GetUnits());
+						pActor->SetName((*iter).c_str());
+						this->Add(pActor);
+						pActor->Delete(); // ok ref counted
+					}
+
+					// close the actor group
+					//
+					status = ::H5Gclose(actor_id);
+					ASSERT(status >= 0);
+				}
+			}
+
+			// close the ACTOR::szHeading group
+			//
+			status = ::H5Gclose(group_id);
+			ASSERT(status >= 0);
+		}
+	}
+}
 
 // CWPhastDoc diagnostics
 
@@ -1462,12 +1031,9 @@ void CWPhastDoc::AssertValid() const
 {
 	CDocument::AssertValid();
 	ASSERT(this->m_pAxesActor != 0);
-// COMMENT: {7/15/2004 1:15:38 PM}	ASSERT(this->m_pGeometrySheet != 0);
-// COMMENT: {7/28/2005 2:55:59 PM}	ASSERT(this->m_pGridActor != 0);
 	ASSERT(this->m_pimpl != 0);
 	ASSERT(this->m_pPropCollection != 0);
 	ASSERT(this->m_pRemovedPropCollection != 0);
-// COMMENT: {7/15/2004 1:15:34 PM}	ASSERT(this->m_pScalePage != 0);
 }
 
 void CWPhastDoc::Dump(CDumpContext& dc) const
@@ -1940,11 +1506,6 @@ void CWPhastDoc::SetFlowOnly(const CFlowOnly& flowOnly)
 	}
 }
 
-// COMMENT: {6/3/2004 5:10:37 PM}const CFlowOnly& CWPhastDoc::GetFlowOnly(void)const
-// COMMENT: {6/3/2004 5:10:37 PM}{
-// COMMENT: {6/3/2004 5:10:37 PM}	return this->m_pModel->m_flowOnly;
-// COMMENT: {6/3/2004 5:10:37 PM}}
-
 CFlowOnly CWPhastDoc::GetFlowOnly(void)const
 {
 	return this->m_pModel->m_flowOnly;
@@ -1992,50 +1553,6 @@ void CWPhastDoc::SetModel(const CNewModel& model)
 		pTree->SetModel(this->m_pModel);
 	}
 }
-
-//void CWPhastDoc::SetGrid(CGrid* x, CGrid* y, CGrid* z)
-//{
-//	ASSERT(this->m_pGridActor);
-//	ASSERT(this->m_pAxes);
-//	ASSERT(this->m_pAxesTubeFilter);
-//	ASSERT(this->m_pAxesActor);
-//	ASSERT(this->m_pPropCollection);
-//	ASSERT(this->m_pimpl);
-//	ASSERT(this->m_pUnits);
-//	ASSERT(this->m_pFlowOnly);
-//
-//	// set flowonly
-//	if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar()) {
-//		pTree->SetFlowOnly(this->m_pFlowOnly);
-//	}
-//
-//	// set the units
-//	//
-//	if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar()) {
-//		pTree->SetUnits(this->m_pUnits);
-//	}
-//
-//	// set the grid
-//	//
-//	this->m_pGridActor->SetGrid(x, y, z, this->m_pUnits);
-//	this->m_pGridActor->SetPickable(0);
-//	this->m_pPropCollection->AddItem(this->m_pGridActor);
-//	if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar()) {
-//		pTree->SetGridActor(this->m_pGridActor);
-//	}
-//
-//	// set the axes
-//	//
-//	float bounds[6];
-//	this->m_pGridActor->GetBounds(bounds);
-//	this->m_pAxes->SetScaleFactor((bounds[1] - bounds[0])/5);
-//	this->m_pAxesTubeFilter->SetRadius(this->m_pAxes->GetScaleFactor()/25.0);
-//	this->m_pPropCollection->AddItem(this->m_pAxesActor);
-//
-//	// refresh screen
-//	//
-//	this->UpdateAllViews(0);
-//}
 
 void CWPhastDoc::ResizeGrid(const CGrid& x, const CGrid&  y, const CGrid&  z)
 {
@@ -2105,30 +1622,6 @@ void CWPhastDoc::OnUpdateToolsGeometry(CCmdUI *pCmdUI)
 
 void CWPhastDoc::OnToolsGeometry()
 {
-// COMMENT: {3/9/2004 8:21:04 PM}	CPropertySheet sheet;
-// COMMENT: {3/9/2004 8:21:04 PM}	CScalePropertyPage page;
-// COMMENT: {3/9/2004 8:21:04 PM}	page.m_pDoc = this;
-// COMMENT: {3/9/2004 8:21:04 PM}	sheet.AddPage(&page);
-// COMMENT: {3/9/2004 8:21:04 PM}
-// COMMENT: {3/9/2004 8:21:04 PM}	CTimeControlPropertyPage page2;
-// COMMENT: {3/9/2004 8:21:04 PM}	sheet.AddPage(&page2);
-// COMMENT: {3/9/2004 8:21:04 PM}
-// COMMENT: {3/9/2004 8:21:04 PM}
-// COMMENT: {3/9/2004 8:21:04 PM}	INT_PTR id = sheet.DoModal();
-// COMMENT: {3/9/2004 8:21:04 PM}#ifdef _DEBUG
-// COMMENT: {3/9/2004 8:21:04 PM}	switch(id) {
-// COMMENT: {3/9/2004 8:21:04 PM}		case IDOK:
-// COMMENT: {3/9/2004 8:21:04 PM}			::AfxMessageBox("Ok pressed");
-// COMMENT: {3/9/2004 8:21:04 PM}			break;
-// COMMENT: {3/9/2004 8:21:04 PM}		case IDCANCEL:
-// COMMENT: {3/9/2004 8:21:04 PM}			::AfxMessageBox("Cancel pressed");
-// COMMENT: {3/9/2004 8:21:04 PM}			break;
-// COMMENT: {3/9/2004 8:21:04 PM}		default:
-// COMMENT: {3/9/2004 8:21:04 PM}			::AfxMessageBox("Unknown pressed");
-// COMMENT: {3/9/2004 8:21:04 PM}			break;
-// COMMENT: {3/9/2004 8:21:04 PM}	}
-// COMMENT: {3/9/2004 8:21:04 PM}#endif
-
 	if (this->m_pGeometrySheet->GetSafeHwnd())
 	{
 		this->m_pGeometrySheet->DestroyWindow();
@@ -2524,7 +2017,7 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 				// TODO: check for equivalance to default headIC
 			}
 
-			CZoneCreateAction<CICZoneActor>* pAction = new CZoneCreateAction<CICZoneActor>(
+			CZoneCreateAction<CICHeadZoneActor>* pAction = new CZoneCreateAction<CICHeadZoneActor>(
 				this,
 				this->GetNextZoneName(),
 				head_ic_ptr->zone->x1,
@@ -2534,7 +2027,7 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 				head_ic_ptr->zone->z1,
 				head_ic_ptr->zone->z2
 				);
-			pAction->GetZoneActor()->SetHeadIC(*head_ic_ptr);
+			pAction->GetZoneActor()->SetData(*head_ic_ptr);
 			pAction->Execute();
 			delete pAction;
 		}
@@ -2553,7 +2046,7 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 				// TODO: check for equivalance to default chemIC
 			}
 
-			CZoneCreateAction<CICZoneActor>* pAction = new CZoneCreateAction<CICZoneActor>(
+			CZoneCreateAction<CICChemZoneActor>* pAction = new CZoneCreateAction<CICChemZoneActor>(
 				this,
 				this->GetNextZoneName(),
 				chem_ic_ptr->zone->x1,
@@ -2563,7 +2056,7 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 				chem_ic_ptr->zone->z1,
 				chem_ic_ptr->zone->z2
 				);
-			pAction->GetZoneActor()->SetChemIC(*chem_ic_ptr);
+			pAction->GetZoneActor()->SetData(*chem_ic_ptr);
 			pAction->Execute();
 			delete pAction;
 		}
@@ -2733,13 +2226,9 @@ BOOL CWPhastDoc::WriteTransDat(std::ostream& os)
 	nCount = nodeICHead.GetChildCount();
 	for (int i = 0; i < nCount; ++i)
 	{
-		if (CICZoneActor *pZone = CICZoneActor::SafeDownCast((vtkObject*)nodeICHead.GetChildAt(i).GetData()))
+		if (CICHeadZoneActor *pZone = CICHeadZoneActor::SafeDownCast((vtkObject*)nodeICHead.GetChildAt(i).GetData()))
 		{
-			ASSERT(pZone->GetType() == CICZoneActor::IC_HEAD);
-			if (pZone->GetType() == CICZoneActor::IC_HEAD)
-			{
-				os << pZone->GetHeadIC();
-			}
+			os << pZone->GetData();
 		}
 	}
 
@@ -2748,13 +2237,9 @@ BOOL CWPhastDoc::WriteTransDat(std::ostream& os)
 	nCount = nodeICChem.GetChildCount();
 	for (int i = 0; i < nCount; ++i)
 	{
-		if (CICZoneActor *pZone = CICZoneActor::SafeDownCast((vtkObject*)nodeICChem.GetChildAt(i).GetData()))
+		if (CICChemZoneActor *pZone = CICChemZoneActor::SafeDownCast((vtkObject*)nodeICChem.GetChildAt(i).GetData()))
 		{
-			ASSERT(pZone->GetType() == CICZoneActor::IC_CHEM);
-			if (pZone->GetType() == CICZoneActor::IC_CHEM)
-			{
-				os << pZone->GetChemIC();
-			}
+			os << pZone->GetData();
 		}
 	}
 
@@ -2989,15 +2474,18 @@ void CWPhastDoc::SetUnits(const CUnits& units)
 	// for all views
 	//
 	POSITION pos = this->GetFirstViewPosition();
-	while (pos != NULL) {
+	while (pos != NULL)
+	{
 		CWPhastView *pView = (CWPhastView*) GetNextView(pos);
 
 		// resize the selection bounding box
 		//
-		if (vtkAbstractPropPicker *picker = vtkAbstractPropPicker::SafeDownCast( pView->GetRenderWindowInteractor()->GetPicker() )) {
-			if (vtkProp3D* prop = picker->GetProp3D()) {
-				if (CZoneActor *pZone = CZoneActor::SafeDownCast(prop)) {
-// COMMENT: {6/10/2004 4:14:49 PM}					pZone->Pick(pView->GetRenderer(), pView->GetRenderWindowInteractor());
+		if (vtkAbstractPropPicker *picker = vtkAbstractPropPicker::SafeDownCast( pView->GetRenderWindowInteractor()->GetPicker() ))
+		{
+			if (vtkProp3D* prop = picker->GetProp3D())
+			{
+				if (CZoneActor *pZone = CZoneActor::SafeDownCast(prop))
+				{
 					pZone->Select(pView);
 				}
 			}
@@ -3005,7 +2493,8 @@ void CWPhastDoc::SetUnits(const CUnits& units)
 
 		// resize the Box Widget
 		//
-		if (pView->GetBoxWidget()->GetProp3D()) {
+		if (pView->GetBoxWidget()->GetProp3D())
+		{
 			pView->GetBoxWidget()->PlaceWidget();
 		}
 	}
@@ -3014,12 +2503,12 @@ void CWPhastDoc::SetUnits(const CUnits& units)
 
 	// Update BoxPropertiesDialogBar
 	//
-	if (CBoxPropertiesDialogBar* pBar = this->GetBoxPropertiesDialogBar()) {
+	if (CBoxPropertiesDialogBar* pBar = this->GetBoxPropertiesDialogBar())
+	{
 		POSITION pos = this->GetFirstViewPosition();
 		CWPhastView *pView = (CWPhastView*) GetNextView(pos);
 		pBar->Set(pView, pBar->GetProp3D(), this->GetUnits());
 	}
-
 }
 
 void CWPhastDoc::New(const CNewModel& model)
@@ -3102,7 +2591,7 @@ void CWPhastDoc::New(const CNewModel& model)
 
 
 	// default head_ic
-	CZoneCreateAction<CICZoneActor>* pICHeadAction = new CZoneCreateAction<CICZoneActor>(
+	CZoneCreateAction<CICHeadZoneActor>* pICHeadAction = new CZoneCreateAction<CICHeadZoneActor>(
 		this,
 		"Default",
 		zone.x1,
@@ -3112,13 +2601,13 @@ void CWPhastDoc::New(const CNewModel& model)
 		zone.z1,
 		zone.z2
 		);
-	pICHeadAction->GetZoneActor()->SetHeadIC(model.m_headIC);
+	pICHeadAction->GetZoneActor()->SetData(model.m_headIC);
 	pICHeadAction->GetZoneActor()->SetDefault(true);
 	pICHeadAction->Execute();
 	delete pICHeadAction;
 
 	// CHEMISTRY_IC (default)
-	CZoneCreateAction<CICZoneActor>* pChemICAction = new CZoneCreateAction<CICZoneActor>(
+	CZoneCreateAction<CICChemZoneActor>* pChemICAction = new CZoneCreateAction<CICChemZoneActor>(
 		this,
 		"Default",
 		zone.x1,
@@ -3128,7 +2617,7 @@ void CWPhastDoc::New(const CNewModel& model)
 		zone.z1,
 		zone.z2
 		);
-	pChemICAction->GetZoneActor()->SetChemIC(model.m_chemIC);
+	pChemICAction->GetZoneActor()->SetData(model.m_chemIC);
 	pChemICAction->GetZoneActor()->SetDefault(true);
 	pChemICAction->Execute();
 	delete pChemICAction;

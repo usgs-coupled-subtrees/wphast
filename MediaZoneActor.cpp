@@ -19,6 +19,8 @@
 vtkCxxRevisionMacro(CMediaZoneActor, "$Revision$");
 vtkStandardNewMacro(CMediaZoneActor);
 
+const char CMediaZoneActor::szHeading[] = "Media";
+
 CMediaZoneActor::CMediaZoneActor(void)
 {
 	ASSERT(this->m_grid_elt.zone);
@@ -47,8 +49,6 @@ void CMediaZoneActor::Create(CWPhastDoc* pWPhastDoc, const CZone& zone, const CG
 
 void CMediaZoneActor::Serialize(bool bStoring, hid_t loc_id, const CUnits& units)
 {
-	ASSERT(this->GetName()); // must have name
-
 	CZoneActor::Serialize(bStoring, loc_id);
 
 	if (bStoring)
