@@ -281,11 +281,15 @@ CWPhastDoc::CWPhastDoc()
 	//
 	this->m_pPropAssemblyMedia  = vtkPropAssembly::New();
 	this->m_pPropAssemblyIC     = vtkPropAssembly::New();
+	this->m_pPropAssemblyICHead = vtkPropAssembly::New();
+	this->m_pPropAssemblyICChem = vtkPropAssembly::New();
 	this->m_pPropAssemblyBC     = vtkPropAssembly::New();
 	this->m_pPropAssemblyWells  = vtkPropAssembly::New();
 	this->m_pPropAssemblyRivers = vtkPropAssembly::New();
 	this->m_pPropCollection->AddItem(this->m_pPropAssemblyMedia);
 	this->m_pPropCollection->AddItem(this->m_pPropAssemblyIC);
+	this->m_pPropAssemblyIC->AddPart(this->m_pPropAssemblyICHead);
+	this->m_pPropAssemblyIC->AddPart(this->m_pPropAssemblyICChem);
 	this->m_pPropCollection->AddItem(this->m_pPropAssemblyBC);
 	this->m_pPropCollection->AddItem(this->m_pPropAssemblyWells);
 	this->m_pPropCollection->AddItem(this->m_pPropAssemblyRivers);
@@ -380,6 +384,8 @@ CWPhastDoc::~CWPhastDoc()
 
 	CLEANUP_ASSEMBLY_MACRO(this->m_pPropAssemblyMedia);
 	CLEANUP_ASSEMBLY_MACRO(this->m_pPropAssemblyIC);
+	CLEANUP_ASSEMBLY_MACRO(this->m_pPropAssemblyICHead);
+	CLEANUP_ASSEMBLY_MACRO(this->m_pPropAssemblyICChem);
 	CLEANUP_ASSEMBLY_MACRO(this->m_pPropAssemblyBC);
 	CLEANUP_ASSEMBLY_MACRO(this->m_pPropAssemblyWells);
 	CLEANUP_ASSEMBLY_MACRO(this->m_pPropAssemblyRivers);	
@@ -1298,6 +1304,8 @@ void CWPhastDoc::DeleteContents()
 	//
 	CLEAR_PROP_ASSEMBLY_MACRO(this->m_pPropAssemblyMedia);
 	CLEAR_PROP_ASSEMBLY_MACRO(this->m_pPropAssemblyIC);
+	CLEAR_PROP_ASSEMBLY_MACRO(this->m_pPropAssemblyICHead);
+	CLEAR_PROP_ASSEMBLY_MACRO(this->m_pPropAssemblyICChem);
 	CLEAR_PROP_ASSEMBLY_MACRO(this->m_pPropAssemblyBC);
 	CLEAR_PROP_ASSEMBLY_MACRO(this->m_pPropAssemblyWells);
 	CLEAR_PROP_ASSEMBLY_MACRO(this->m_pPropAssemblyRivers);
@@ -1306,6 +1314,8 @@ void CWPhastDoc::DeleteContents()
 	//
 	this->m_pPropAssemblyMedia->SetVisibility(1);
 	this->m_pPropAssemblyIC->SetVisibility(1);
+	this->m_pPropAssemblyICHead->SetVisibility(1);
+	this->m_pPropAssemblyICChem->SetVisibility(1);
 	this->m_pPropAssemblyBC->SetVisibility(1);
 	this->m_pPropAssemblyWells->SetVisibility(1);
 	this->m_pPropAssemblyRivers->SetVisibility(1);

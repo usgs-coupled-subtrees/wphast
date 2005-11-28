@@ -188,12 +188,12 @@ void CICChemZoneActor::Edit(CTreeCtrl* pTreeCtrl)
 void CICChemZoneActor::Add(CWPhastDoc *pWPhastDoc)
 {
 	if (!pWPhastDoc) { ASSERT(FALSE); return; }
-	if (vtkPropAssembly *pPropAssembly = pWPhastDoc->GetPropAssemblyIC())
+	if (vtkPropAssembly *pPropAssembly = pWPhastDoc->GetPropAssemblyICChem())
 	{
 		pPropAssembly->AddPart(this);
 		if (!pWPhastDoc->GetPropCollection()->IsItemPresent(pPropAssembly))
 		{
-			pWPhastDoc->GetPropCollection()->AddItem(pPropAssembly);
+			////pWPhastDoc->GetPropCollection()->AddItem(pPropAssembly);
 		}
 	}
 #ifdef _DEBUG
@@ -204,7 +204,7 @@ void CICChemZoneActor::Add(CWPhastDoc *pWPhastDoc)
 void CICChemZoneActor::Remove(CWPhastDoc *pWPhastDoc)
 {
 	if (!pWPhastDoc) { ASSERT(FALSE); return; }
-	if (vtkPropAssembly *pPropAssembly = pWPhastDoc->GetPropAssemblyIC())
+	if (vtkPropAssembly *pPropAssembly = pWPhastDoc->GetPropAssemblyICChem())
 	{
 		pPropAssembly->RemovePart(this);
 		// VTK HACK
