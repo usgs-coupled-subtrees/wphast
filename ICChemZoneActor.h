@@ -14,6 +14,8 @@ public:
 	virtual void Insert(CPropertyTreeControlBar* pTreeControlBar, HTREEITEM hInsertAfter = TVI_LAST);
 	virtual void Update(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent);
 	virtual void Edit(CTreeCtrl* pTreeCtrl);
+	virtual void Add(CWPhastDoc *pWPhastDoc);
+	virtual void Remove(CWPhastDoc *pWPhastDoc);
 
 	static const char szHeading[];
 

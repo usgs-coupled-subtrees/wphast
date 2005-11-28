@@ -16,8 +16,8 @@ public:
 	virtual void InsertAt(CTreeCtrl* pTreeCtrl, HTREEITEM hParent, HTREEITEM hInsertAfter);
 	virtual void Update(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent) = 0;
 	virtual void Edit(CTreeCtrl* pTreeCtrl) = 0;
-	virtual void Add(CWPhastDoc *pWPhastDoc);
-	virtual void Remove(CWPhastDoc *pWPhastDoc);
+	virtual void Add(CWPhastDoc *pWPhastDoc) = 0;
+	virtual void Remove(CWPhastDoc *pWPhastDoc) = 0;
 
 protected:
 	CICZoneActor(void);

@@ -372,6 +372,20 @@ void CPropertyTreeControlBar::SetNodeCheck(CTreeCtrlNode node, UINT nCheckState)
 			return;
 		}
 	}
+	else if (node == this->GetICHeadNode())
+	{
+		if (!((pDoc = this->GetDocument()) && (pPropAssembly = pDoc->GetPropAssemblyIC())))
+		{
+			return;
+		}
+	}
+	else if (node == this->GetICChemNode())
+	{
+		if (!((pDoc = this->GetDocument()) && (pPropAssembly = pDoc->GetPropAssemblyIC())))
+		{
+			return;
+		}
+	}
 	else if (node == this->GetBCNode())
 	{
 		if (!((pDoc = this->GetDocument()) && (pPropAssembly = pDoc->GetPropAssemblyBC())))
