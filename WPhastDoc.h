@@ -203,8 +203,6 @@ protected:
 	vtkPropAssembly   *m_pPropAssemblyMedia;
 	vtkPropAssembly   *m_pPropAssemblyBC;
 	vtkPropAssembly   *m_pPropAssemblyIC;
-	vtkPropAssembly   *m_pPropAssemblyICHead;
-	vtkPropAssembly   *m_pPropAssemblyICChem;
 	vtkPropAssembly   *m_pPropAssemblyWells;
 	vtkPropAssembly   *m_pPropAssemblyRivers;
 
@@ -298,6 +296,9 @@ public:
 	CNewModel* GetModel(void);
 	void SetModel(const CNewModel &model);
 
+
+
+
 	// CUnits GetUnits(void);
 	const CUnits& GetUnits(void)const;
 	void GetUnits(CUnits& units)const;
@@ -368,8 +369,6 @@ public:
 
 	vtkPropAssembly* GetPropAssemblyMedia(void)const;
 	vtkPropAssembly* GetPropAssemblyIC(void)const;
-	vtkPropAssembly* GetPropAssemblyICHead(void)const;
-	vtkPropAssembly* GetPropAssemblyICChem(void)const;
 	vtkPropAssembly* GetPropAssemblyBC(void)const;
 	vtkPropAssembly* GetPropAssemblyWells(void)const;
 	vtkPropAssembly* GetPropAssemblyRivers(void)const;
@@ -427,23 +426,17 @@ public:
 	void EndModifyGrid();
 };
 
-inline vtkPropAssembly* CWPhastDoc::GetPropAssemblyMedia(void) const
+inline vtkPropAssembly* CWPhastDoc::GetPropAssemblyMedia() const
 { return this->m_pPropAssemblyMedia; }
 
-inline vtkPropAssembly* CWPhastDoc::GetPropAssemblyIC(void) const
+inline vtkPropAssembly* CWPhastDoc::GetPropAssemblyIC() const
 { return this->m_pPropAssemblyIC; }
 
-inline vtkPropAssembly* CWPhastDoc::GetPropAssemblyICHead(void) const
-{ return this->m_pPropAssemblyICHead; }
-
-inline vtkPropAssembly* CWPhastDoc::GetPropAssemblyICChem(void) const
-{ return this->m_pPropAssemblyICChem; }
-
-inline vtkPropAssembly* CWPhastDoc::GetPropAssemblyBC(void) const
+inline vtkPropAssembly* CWPhastDoc::GetPropAssemblyBC() const
 { return this->m_pPropAssemblyBC; }
 
-inline vtkPropAssembly* CWPhastDoc::GetPropAssemblyWells(void) const
+inline vtkPropAssembly* CWPhastDoc::GetPropAssemblyWells() const
 { return this->m_pPropAssemblyWells; }
 
-inline vtkPropAssembly* CWPhastDoc::GetPropAssemblyRivers(void) const
+inline vtkPropAssembly* CWPhastDoc::GetPropAssemblyRivers() const
 { return this->m_pPropAssemblyRivers; }

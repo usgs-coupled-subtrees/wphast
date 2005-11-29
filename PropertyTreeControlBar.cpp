@@ -372,21 +372,6 @@ void CPropertyTreeControlBar::SetNodeCheck(CTreeCtrlNode node, UINT nCheckState)
 			return;
 		}
 	}
-	else if (node == this->GetICHeadNode())
-	{
-		if (!((pDoc = this->GetDocument()) && (pPropAssembly = pDoc->GetPropAssemblyICHead())))
-		{
-			return;
-		}
-	}
-	else if (node == this->GetICChemNode())
-	{
-		this->GetDocument()->GetPropAssemblyIC()->Modified();
-		if (!((pDoc = this->GetDocument()) && (pPropAssembly = pDoc->GetPropAssemblyICChem())))
-		{
-			return;
-		}
-	}
 	else if (node == this->GetBCNode())
 	{
 		if (!((pDoc = this->GetDocument()) && (pPropAssembly = pDoc->GetPropAssemblyBC())))
@@ -438,9 +423,6 @@ void CPropertyTreeControlBar::SetNodeCheck(CTreeCtrlNode node, UINT nCheckState)
 	{
 		// set assembly visibility
 		pPropAssembly->SetVisibility(nCheckState == BST_CHECKED);
-		//{{
-		this->GetDocument()->GetPropAssemblyIC()->Modified();
-		//}}
 	}
 	else
 	{
@@ -1150,8 +1132,6 @@ void CPropertyTreeControlBar::DeleteContents()
 	this->m_wndTree.SetItemState(this->m_nodeMedia,  INDEXTOSTATEIMAGEMASK(BST_CHECKED + 1), TVIS_STATEIMAGEMASK);
 	this->m_wndTree.SetItemState(this->m_nodeGrid,   INDEXTOSTATEIMAGEMASK(BST_CHECKED + 1), TVIS_STATEIMAGEMASK);
 	this->m_wndTree.SetItemState(this->m_nodeIC,     INDEXTOSTATEIMAGEMASK(BST_CHECKED + 1), TVIS_STATEIMAGEMASK);
-	this->m_wndTree.SetItemState(this->m_nodeICHead, INDEXTOSTATEIMAGEMASK(BST_CHECKED + 1), TVIS_STATEIMAGEMASK);
-	this->m_wndTree.SetItemState(this->m_nodeICChem, INDEXTOSTATEIMAGEMASK(BST_CHECKED + 1), TVIS_STATEIMAGEMASK);
 	this->m_wndTree.SetItemState(this->m_nodeBC,     INDEXTOSTATEIMAGEMASK(BST_CHECKED + 1), TVIS_STATEIMAGEMASK);
 	this->m_wndTree.SetItemState(this->m_nodeWells,  INDEXTOSTATEIMAGEMASK(BST_CHECKED + 1), TVIS_STATEIMAGEMASK);
 	this->m_wndTree.SetItemState(this->m_nodeRivers, INDEXTOSTATEIMAGEMASK(BST_CHECKED + 1), TVIS_STATEIMAGEMASK);

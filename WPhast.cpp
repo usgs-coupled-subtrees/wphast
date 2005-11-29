@@ -96,19 +96,19 @@ const WORD _wVerMinor = 0;
 
 BOOL CWPhastApp::InitInstance()
 {
-// COMMENT: {11/28/2005 2:36:25 PM}#if defined(__CPPUNIT__)
-// COMMENT: {11/28/2005 2:36:25 PM}	{
-// COMMENT: {11/28/2005 2:36:25 PM}		TCPPUnit theTests;  // TCPPUnit must be constructed after/within theApp.InitInstance()
-// COMMENT: {11/28/2005 2:36:25 PM}		// CWPhastApp anotherApp; // this will ASSERT
-// COMMENT: {11/28/2005 2:36:25 PM}		/***
-// COMMENT: {11/28/2005 2:36:25 PM}		CMapDialog dlg;
-// COMMENT: {11/28/2005 2:36:25 PM}		dlg.SetFileName("ok1.bmp");
-// COMMENT: {11/28/2005 2:36:25 PM}		dlg.SetWorldFileName("ok1.bpw");
-// COMMENT: {11/28/2005 2:36:25 PM}		dlg.DoModal();
-// COMMENT: {11/28/2005 2:36:25 PM}		return FALSE;
-// COMMENT: {11/28/2005 2:36:25 PM}		***/
-// COMMENT: {11/28/2005 2:36:25 PM}	}
-// COMMENT: {11/28/2005 2:36:25 PM}#endif
+#if defined(__CPPUNIT__)
+	{
+		TCPPUnit theTests;  // TCPPUnit must be constructed after/within theApp.InitInstance()
+		// CWPhastApp anotherApp; // this will ASSERT
+		/***
+		CMapDialog dlg;
+		dlg.SetFileName("ok1.bmp");
+		dlg.SetWorldFileName("ok1.bpw");
+		dlg.DoModal();
+		return FALSE;
+		***/
+	}
+#endif
 #if defined(_DEBUG)
 	// this treats
 	// TRACE("CWPhastDoc::DeleteContents()\n");

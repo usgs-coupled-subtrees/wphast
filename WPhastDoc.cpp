@@ -236,8 +236,6 @@ CWPhastDoc::CWPhastDoc()
 , m_pPropAssemblyMedia(0)
 , m_pPropAssemblyBC(0)
 , m_pPropAssemblyIC(0)
-, m_pPropAssemblyICHead(0)
-, m_pPropAssemblyICChem(0)
 , m_pPropAssemblyWells(0)
 , m_pPropAssemblyRivers(0)
 , RiverCallbackCommand(0)
@@ -281,19 +279,11 @@ CWPhastDoc::CWPhastDoc()
 	//
 	this->m_pPropAssemblyMedia  = vtkPropAssembly::New();
 	this->m_pPropAssemblyIC     = vtkPropAssembly::New();
-	this->m_pPropAssemblyICHead = vtkPropAssembly::New();
-	this->m_pPropAssemblyICChem = vtkPropAssembly::New();
 	this->m_pPropAssemblyBC     = vtkPropAssembly::New();
 	this->m_pPropAssemblyWells  = vtkPropAssembly::New();
 	this->m_pPropAssemblyRivers = vtkPropAssembly::New();
 	this->m_pPropCollection->AddItem(this->m_pPropAssemblyMedia);
-	//{{
-	//this->m_pPropCollection->AddItem(this->m_pPropAssemblyICHead);
-	//this->m_pPropCollection->AddItem(this->m_pPropAssemblyICChem);
-	//}}
-// COMMENT: {11/28/2005 2:38:50 PM}	this->m_pPropAssemblyIC->AddPart(this->m_pPropAssemblyICHead);
-// COMMENT: {11/28/2005 2:38:50 PM}	this->m_pPropAssemblyIC->AddPart(this->m_pPropAssemblyICChem);
-// COMMENT: {11/28/2005 2:38:50 PM}	this->m_pPropCollection->AddItem(this->m_pPropAssemblyIC);
+	this->m_pPropCollection->AddItem(this->m_pPropAssemblyIC);
 	this->m_pPropCollection->AddItem(this->m_pPropAssemblyBC);
 	this->m_pPropCollection->AddItem(this->m_pPropAssemblyWells);
 	this->m_pPropCollection->AddItem(this->m_pPropAssemblyRivers);
@@ -363,12 +353,6 @@ CWPhastDoc::~CWPhastDoc()
 		this->m_pimpl = 0;
 	}
 
-	//{{
-// COMMENT: {11/28/2005 2:39:08 PM}	this->m_pPropAssemblyIC->RemovePart(this->m_pPropAssemblyICHead);
-// COMMENT: {11/28/2005 2:39:08 PM}	this->m_pPropAssemblyIC->RemovePart(this->m_pPropAssemblyICChem);
-// COMMENT: {11/28/2005 2:39:08 PM}	this->m_pPropCollection->RemoveItem(this->m_pPropAssemblyIC);
-	//}}
-
 	ASSERT(this->m_pPropCollection);
 	if (this->m_pPropCollection)
 	{
@@ -392,13 +376,8 @@ CWPhastDoc::~CWPhastDoc()
 		this->m_pGridActor = 0;
 	}
 
-	this->m_pPropAssemblyIC->RemovePart(this->m_pPropAssemblyICHead);
-	this->m_pPropAssemblyIC->RemovePart(this->m_pPropAssemblyICChem);
-
 	CLEANUP_ASSEMBLY_MACRO(this->m_pPropAssemblyMedia);
 	CLEANUP_ASSEMBLY_MACRO(this->m_pPropAssemblyIC);
-	CLEANUP_ASSEMBLY_MACRO(this->m_pPropAssemblyICHead);
-	CLEANUP_ASSEMBLY_MACRO(this->m_pPropAssemblyICChem);
 	CLEANUP_ASSEMBLY_MACRO(this->m_pPropAssemblyBC);
 	CLEANUP_ASSEMBLY_MACRO(this->m_pPropAssemblyWells);
 	CLEANUP_ASSEMBLY_MACRO(this->m_pPropAssemblyRivers);	
@@ -1317,36 +1296,17 @@ void CWPhastDoc::DeleteContents()
 	//
 	CLEAR_PROP_ASSEMBLY_MACRO(this->m_pPropAssemblyMedia);
 	CLEAR_PROP_ASSEMBLY_MACRO(this->m_pPropAssemblyIC);
-	CLEAR_PROP_ASSEMBLY_MACRO(this->m_pPropAssemblyICHead);
-	CLEAR_PROP_ASSEMBLY_MACRO(this->m_pPropAssemblyICChem);
 	CLEAR_PROP_ASSEMBLY_MACRO(this->m_pPropAssemblyBC);
 	CLEAR_PROP_ASSEMBLY_MACRO(this->m_pPropAssemblyWells);
 	CLEAR_PROP_ASSEMBLY_MACRO(this->m_pPropAssemblyRivers);
-
-	//{{
-	this->m_pPropAssemblyIC->Delete();
-	this->m_pPropAssemblyIC = vtkPropAssembly::New();
-
-	this->m_pPropAssemblyICHead->Delete();
-	this->m_pPropAssemblyICHead = vtkPropAssembly::New();
-
-	this->m_pPropAssemblyICChem->Delete();
-	this->m_pPropAssemblyICChem = vtkPropAssembly::New();
-	//}}
 
 	// Turn-all on by default
 	//
 	this->m_pPropAssemblyMedia->SetVisibility(1);
 	this->m_pPropAssemblyIC->SetVisibility(1);
-	this->m_pPropAssemblyICHead->SetVisibility(1);
-	this->m_pPropAssemblyICChem->SetVisibility(1);
 	this->m_pPropAssemblyBC->SetVisibility(1);
 	this->m_pPropAssemblyWells->SetVisibility(1);
 	this->m_pPropAssemblyRivers->SetVisibility(1);
-
-// COMMENT: {11/28/2005 2:39:53 PM}	this->m_pPropAssemblyIC->AddPart(this->m_pPropAssemblyICHead);
-// COMMENT: {11/28/2005 2:39:53 PM}	this->m_pPropAssemblyIC->AddPart(this->m_pPropAssemblyICChem);
-// COMMENT: {11/28/2005 2:39:53 PM}	this->m_pPropCollection->AddItem(this->m_pPropAssemblyIC);
 
 	// reset scale
 	//
@@ -1384,6 +1344,8 @@ void CWPhastDoc::DeleteContents()
 			this->m_pScalePage->UpdateData(FALSE);
 		}
 	}
+
+
 
 	// Update BoxPropertiesDialogBar
 	//

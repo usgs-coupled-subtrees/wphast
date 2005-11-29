@@ -188,21 +188,13 @@ void CICChemZoneActor::Edit(CTreeCtrl* pTreeCtrl)
 void CICChemZoneActor::Add(CWPhastDoc *pWPhastDoc)
 {
 	if (!pWPhastDoc) { ASSERT(FALSE); return; }
-	if (vtkPropAssembly *pPropAssembly = pWPhastDoc->GetPropAssemblyICChem())
+	if (vtkPropAssembly *pPropAssembly = pWPhastDoc->GetPropAssemblyIC())
 	{
-		vtkMatrix4x4* matrix = vtkMatrix4x4::New();
-		this->PokeMatrix(matrix);
-		this->PokeMatrix(0);
-		matrix->Delete();
-
-		pWPhastDoc->GetPropCollection()->AddItem(pWPhastDoc->GetPropAssemblyIC());
-		pWPhastDoc->GetPropAssemblyIC()->AddPart(pPropAssembly);
 		pPropAssembly->AddPart(this);
-
-// COMMENT: {11/28/2005 3:15:19 PM}		if (!pWPhastDoc->GetPropCollection()->IsItemPresent(pPropAssembly))
-// COMMENT: {11/28/2005 3:15:19 PM}		{
-// COMMENT: {11/28/2005 3:15:19 PM}			pWPhastDoc->GetPropCollection()->AddItem(pPropAssembly);
-// COMMENT: {11/28/2005 3:15:19 PM}		}
+		if (!pWPhastDoc->GetPropCollection()->IsItemPresent(pPropAssembly))
+		{
+			pWPhastDoc->GetPropCollection()->AddItem(pPropAssembly);
+		}
 	}
 #ifdef _DEBUG
 	else ASSERT(FALSE);
@@ -212,7 +204,7 @@ void CICChemZoneActor::Add(CWPhastDoc *pWPhastDoc)
 void CICChemZoneActor::Remove(CWPhastDoc *pWPhastDoc)
 {
 	if (!pWPhastDoc) { ASSERT(FALSE); return; }
-	if (vtkPropAssembly *pPropAssembly = pWPhastDoc->GetPropAssemblyICChem())
+	if (vtkPropAssembly *pPropAssembly = pWPhastDoc->GetPropAssemblyIC())
 	{
 		pPropAssembly->RemovePart(this);
 		// VTK HACK
