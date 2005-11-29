@@ -381,6 +381,7 @@ void CPropertyTreeControlBar::SetNodeCheck(CTreeCtrlNode node, UINT nCheckState)
 	}
 	else if (node == this->GetICChemNode())
 	{
+		this->GetDocument()->GetPropAssemblyIC()->Modified();
 		if (!((pDoc = this->GetDocument()) && (pPropAssembly = pDoc->GetPropAssemblyICChem())))
 		{
 			return;
@@ -437,6 +438,9 @@ void CPropertyTreeControlBar::SetNodeCheck(CTreeCtrlNode node, UINT nCheckState)
 	{
 		// set assembly visibility
 		pPropAssembly->SetVisibility(nCheckState == BST_CHECKED);
+		//{{
+		this->GetDocument()->GetPropAssemblyIC()->Modified();
+		//}}
 	}
 	else
 	{

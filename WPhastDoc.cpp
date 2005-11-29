@@ -287,9 +287,13 @@ CWPhastDoc::CWPhastDoc()
 	this->m_pPropAssemblyWells  = vtkPropAssembly::New();
 	this->m_pPropAssemblyRivers = vtkPropAssembly::New();
 	this->m_pPropCollection->AddItem(this->m_pPropAssemblyMedia);
-	this->m_pPropCollection->AddItem(this->m_pPropAssemblyIC);
-	this->m_pPropAssemblyIC->AddPart(this->m_pPropAssemblyICHead);
-	this->m_pPropAssemblyIC->AddPart(this->m_pPropAssemblyICChem);
+	//{{
+	//this->m_pPropCollection->AddItem(this->m_pPropAssemblyICHead);
+	//this->m_pPropCollection->AddItem(this->m_pPropAssemblyICChem);
+	//}}
+// COMMENT: {11/28/2005 2:38:50 PM}	this->m_pPropAssemblyIC->AddPart(this->m_pPropAssemblyICHead);
+// COMMENT: {11/28/2005 2:38:50 PM}	this->m_pPropAssemblyIC->AddPart(this->m_pPropAssemblyICChem);
+// COMMENT: {11/28/2005 2:38:50 PM}	this->m_pPropCollection->AddItem(this->m_pPropAssemblyIC);
 	this->m_pPropCollection->AddItem(this->m_pPropAssemblyBC);
 	this->m_pPropCollection->AddItem(this->m_pPropAssemblyWells);
 	this->m_pPropCollection->AddItem(this->m_pPropAssemblyRivers);
@@ -359,6 +363,12 @@ CWPhastDoc::~CWPhastDoc()
 		this->m_pimpl = 0;
 	}
 
+	//{{
+// COMMENT: {11/28/2005 2:39:08 PM}	this->m_pPropAssemblyIC->RemovePart(this->m_pPropAssemblyICHead);
+// COMMENT: {11/28/2005 2:39:08 PM}	this->m_pPropAssemblyIC->RemovePart(this->m_pPropAssemblyICChem);
+// COMMENT: {11/28/2005 2:39:08 PM}	this->m_pPropCollection->RemoveItem(this->m_pPropAssemblyIC);
+	//}}
+
 	ASSERT(this->m_pPropCollection);
 	if (this->m_pPropCollection)
 	{
@@ -381,6 +391,9 @@ CWPhastDoc::~CWPhastDoc()
 		this->m_pGridActor->Delete();
 		this->m_pGridActor = 0;
 	}
+
+	this->m_pPropAssemblyIC->RemovePart(this->m_pPropAssemblyICHead);
+	this->m_pPropAssemblyIC->RemovePart(this->m_pPropAssemblyICChem);
 
 	CLEANUP_ASSEMBLY_MACRO(this->m_pPropAssemblyMedia);
 	CLEANUP_ASSEMBLY_MACRO(this->m_pPropAssemblyIC);
@@ -1310,6 +1323,17 @@ void CWPhastDoc::DeleteContents()
 	CLEAR_PROP_ASSEMBLY_MACRO(this->m_pPropAssemblyWells);
 	CLEAR_PROP_ASSEMBLY_MACRO(this->m_pPropAssemblyRivers);
 
+	//{{
+	this->m_pPropAssemblyIC->Delete();
+	this->m_pPropAssemblyIC = vtkPropAssembly::New();
+
+	this->m_pPropAssemblyICHead->Delete();
+	this->m_pPropAssemblyICHead = vtkPropAssembly::New();
+
+	this->m_pPropAssemblyICChem->Delete();
+	this->m_pPropAssemblyICChem = vtkPropAssembly::New();
+	//}}
+
 	// Turn-all on by default
 	//
 	this->m_pPropAssemblyMedia->SetVisibility(1);
@@ -1319,6 +1343,10 @@ void CWPhastDoc::DeleteContents()
 	this->m_pPropAssemblyBC->SetVisibility(1);
 	this->m_pPropAssemblyWells->SetVisibility(1);
 	this->m_pPropAssemblyRivers->SetVisibility(1);
+
+// COMMENT: {11/28/2005 2:39:53 PM}	this->m_pPropAssemblyIC->AddPart(this->m_pPropAssemblyICHead);
+// COMMENT: {11/28/2005 2:39:53 PM}	this->m_pPropAssemblyIC->AddPart(this->m_pPropAssemblyICChem);
+// COMMENT: {11/28/2005 2:39:53 PM}	this->m_pPropCollection->AddItem(this->m_pPropAssemblyIC);
 
 	// reset scale
 	//
@@ -1356,8 +1384,6 @@ void CWPhastDoc::DeleteContents()
 			this->m_pScalePage->UpdateData(FALSE);
 		}
 	}
-
-
 
 	// Update BoxPropertiesDialogBar
 	//

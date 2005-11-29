@@ -190,11 +190,19 @@ void CICChemZoneActor::Add(CWPhastDoc *pWPhastDoc)
 	if (!pWPhastDoc) { ASSERT(FALSE); return; }
 	if (vtkPropAssembly *pPropAssembly = pWPhastDoc->GetPropAssemblyICChem())
 	{
+		vtkMatrix4x4* matrix = vtkMatrix4x4::New();
+		this->PokeMatrix(matrix);
+		this->PokeMatrix(0);
+		matrix->Delete();
+
+		pWPhastDoc->GetPropCollection()->AddItem(pWPhastDoc->GetPropAssemblyIC());
+		pWPhastDoc->GetPropAssemblyIC()->AddPart(pPropAssembly);
 		pPropAssembly->AddPart(this);
-		if (!pWPhastDoc->GetPropCollection()->IsItemPresent(pPropAssembly))
-		{
-			////pWPhastDoc->GetPropCollection()->AddItem(pPropAssembly);
-		}
+
+// COMMENT: {11/28/2005 3:15:19 PM}		if (!pWPhastDoc->GetPropCollection()->IsItemPresent(pPropAssembly))
+// COMMENT: {11/28/2005 3:15:19 PM}		{
+// COMMENT: {11/28/2005 3:15:19 PM}			pWPhastDoc->GetPropCollection()->AddItem(pPropAssembly);
+// COMMENT: {11/28/2005 3:15:19 PM}		}
 	}
 #ifdef _DEBUG
 	else ASSERT(FALSE);
