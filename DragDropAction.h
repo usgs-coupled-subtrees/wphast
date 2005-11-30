@@ -4,8 +4,9 @@
 #include "Tree.h"
 
 class CPropertyTreeControlBar;
-class CZoneActor;
+//class CZoneActor;
 
+template<typename T>
 class CDragDropAction :	public CAction
 {
 public:
@@ -18,7 +19,7 @@ public:
 protected:
 	CPropertyTreeControlBar* Bar;
 	CTreeCtrlNode NodeParent;
-	CZoneActor* ZoneActor;
+	T* Actor;
 
 	DWORD_PTR dwPrevCutData;
 	DWORD_PTR dwDropData;

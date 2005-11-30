@@ -8,8 +8,8 @@
 class CRiverCreateAction : public CAction
 {
 public:
-	CRiverCreateAction(CWPhastDoc* pDoc, const CRiver &river);
-	CRiverCreateAction(CWPhastDoc* pDoc, CRiverActor *pRiverActor);
+	CRiverCreateAction(CWPhastDoc* pDoc, const CRiver &river, CTreeCtrlNode nodeInsertAfter = CTreeCtrlNode(TVI_LAST, NULL));
+	CRiverCreateAction(CWPhastDoc* pDoc, CRiverActor *pRiverActor, CTreeCtrlNode nodeInsertAfter = CTreeCtrlNode(TVI_LAST, NULL));
 	~CRiverCreateAction(void);
 
 	virtual void Execute();
@@ -19,4 +19,8 @@ protected:
 	CWPhastDoc  *m_pDoc;
 	CRiverActor *m_pRiverActor;
 	CRiver       m_river;
+
+	HTREEITEM m_hInsertAfter;
+	DWORD_PTR m_dwInsertAfter;
+	CTreeCtrlNode m_nodeParent;
 };

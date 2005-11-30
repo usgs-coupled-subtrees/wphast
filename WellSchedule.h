@@ -90,7 +90,7 @@ public:
 	}
 
 	void Serialize(bool bStoring, hid_t loc_id);
-	void Serialize(CArchive& ar) { ASSERT(FALSE); } // not implemented
+	void Serialize(CArchive& ar);
 
 	friend std::ostream& operator<< (std::ostream &os, const CWellRate &a);
 
@@ -121,8 +121,12 @@ public:
 	void InsertSolution(const Ctime& time, const Cproperty& solution);
 
 	void Serialize(bool bStoring, hid_t loc_id);
+	void Serialize(CArchive& ar);
+
 // COMMENT: {4/19/2005 1:51:32 PM}	std::map<Ctime, CWellRate> GetMap(void)const;
 	const CTimeSeries<CWellRate>& GetPumpSched(void)const;
+
+	static CLIPFORMAT clipFormat;
 
 protected:
 	friend class CWellActor;

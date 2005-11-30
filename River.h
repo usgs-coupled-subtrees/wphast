@@ -82,7 +82,7 @@ public:
 	}
 
 	void Serialize(bool bStoring, hid_t loc_id);
-	void Serialize(CArchive& ar) { ASSERT(FALSE); } // not implemented
+	void Serialize(CArchive& ar);
 
 	friend std::ostream& operator<< (std::ostream &os, const CRiverState &a);
 
@@ -147,6 +147,7 @@ public:
 	CTimeSeries<CRiverState> m_riverSchedule;
 public:
 	void Serialize(bool bStoring, hid_t loc_id);
+	void Serialize(CArchive& ar);
 protected:
 	friend std::ostream& operator<< (std::ostream &os, const CRiverPoint &a);
 };
@@ -158,7 +159,10 @@ public:
 	CRiver(const River &r);
 	~CRiver(void);
 
-	void Serialize(bool bStoring, hid_t loc_id);	
+	void Serialize(bool bStoring, hid_t loc_id);
+	void Serialize(CArchive& ar);
+
+	static CLIPFORMAT clipFormat;
 
 public:
 	int n_user;

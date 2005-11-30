@@ -33,6 +33,7 @@ protected:
 	float m_zMin;
 	float m_zMax;
 	T* m_pZoneActor;
+
 	HTREEITEM m_hInsertAfter;
 	DWORD_PTR m_dwInsertAfter;
 	CTreeCtrlNode m_nodeParent;

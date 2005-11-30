@@ -72,11 +72,16 @@ public:
 
 	// CPropertyTreeControlBar operations
 	//
-	void Add(CPropertyTreeControlBar *pTree);
+	void Add(CPropertyTreeControlBar *pTree, HTREEITEM hInsertAfter = TVI_LAST);
 	void UnAdd(CPropertyTreeControlBar *pTree);
 
 	void Remove(CPropertyTreeControlBar *pTree);
 	void UnRemove(CPropertyTreeControlBar *pTree);
+
+	// may want to change CZoneActor's methods to be more compatible
+	// ie Insert -> Add
+	// req'd for CDragDropAction<>
+	void Insert(CPropertyTreeControlBar *pTree, HTREEITEM hInsertAfter = TVI_LAST) { this->Add(pTree, hInsertAfter); }
 
 	void Update(CTreeCtrlNode node);
 

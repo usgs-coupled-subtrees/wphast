@@ -29,6 +29,7 @@ public:
 	CWell& operator=(const CWell& rhs);
 	// serialize
 	void Serialize(bool bStoring, hid_t loc_id);
+	void Serialize(CArchive& ar);
 	void Reduce(void);
 private:
 	// helper functions

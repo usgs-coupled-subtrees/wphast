@@ -2,10 +2,21 @@
 #include "DragDropAction.h"
 
 #include "PropertyTreeControlBar.h"
+
 #include "ZoneActor.h"
+#include "WellActor.h"
+#include "RiverActor.h"
+
+//
+// explicit template instantiations
+//
+template class CDragDropAction<CZoneActor>;
+template class CDragDropAction<CWellActor>;
+template class CDragDropAction<CRiverActor>;
 
 
-CDragDropAction::CDragDropAction(CPropertyTreeControlBar* pBar, CTreeCtrlNode dragNode, CTreeCtrlNode dropNode)
+template<typename T>
+CDragDropAction<T>::CDragDropAction(CPropertyTreeControlBar* pBar, CTreeCtrlNode dragNode, CTreeCtrlNode dropNode)
 : Bar(pBar)
 , NodeParent(dragNode.GetParent())
 , DropNodeIsFirst(dropNode == TVI_FIRST)
@@ -34,23 +45,25 @@ CDragDropAction::CDragDropAction(CPropertyTreeControlBar* pBar, CTreeCtrlNode dr
 		ASSERT(this->dwDropData);
 	}
 
-	this->ZoneActor = CZoneActor::SafeDownCast((vtkObject*)dragNode.GetData());
-	ASSERT(this->ZoneActor);
+	this->Actor = T::SafeDownCast((vtkObject*)dragNode.GetData());
+	ASSERT(this->Actor);
 }
 
-CDragDropAction::~CDragDropAction(void)
+template<typename T>
+CDragDropAction<T>::~CDragDropAction(void)
 {
 }
 
-void CDragDropAction::Execute(void)
+template<typename T>
+void CDragDropAction<T>::Execute(void)
 {
-	if (this->ZoneActor && this->NodeParent)
+	if (this->Actor && this->NodeParent)
 	{
 		// search for drag node (by data)
 		CTreeCtrlNode nodeDrag = this->NodeParent.GetChild();
 		while (nodeDrag)
 		{
-			if ((vtkObject*)nodeDrag.GetData() == this->ZoneActor)
+			if ((vtkObject*)nodeDrag.GetData() == this->Actor)
 			{
 				break;
 			}
@@ -78,21 +91,22 @@ void CDragDropAction::Execute(void)
 
 		if (nodeDrag && nodeDrop)
 		{
-			this->ZoneActor->Insert(this->Bar, nodeDrop);
+			this->Actor->Insert(this->Bar, nodeDrop);
 			VERIFY(nodeDrag.Delete());
 		}
 	}
 }
 
-void CDragDropAction::UnExecute(void)
+template<typename T>
+void CDragDropAction<T>::UnExecute(void)
 {
-	if (this->ZoneActor && this->NodeParent)
+	if (this->Actor && this->NodeParent)
 	{
 		// search for drag node (by data)
 		CTreeCtrlNode nodeDrag = this->NodeParent.GetChild();
 		while (nodeDrag)
 		{
-			if ((vtkObject*)nodeDrag.GetData() == this->ZoneActor)
+			if ((vtkObject*)nodeDrag.GetData() == this->Actor)
 			{
 				break;
 			}
@@ -120,7 +134,7 @@ void CDragDropAction::UnExecute(void)
 
 		if (nodeDrag && nodePrevCut)
 		{
-			this->ZoneActor->Insert(this->Bar, nodePrevCut);
+			this->Actor->Insert(this->Bar, nodePrevCut);
 			VERIFY(nodeDrag.Delete());
 		}
 	}

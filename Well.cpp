@@ -2,6 +2,8 @@
 #include "Well.h"
 #include "Global.h"
 
+#include "WPhastMacros.h"
+
 // Note: No header files should follow the following three lines
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -243,58 +245,16 @@ CWell& CWell::operator=(const Well& rhs) // copy assignment
 	return *this;
 }
 
-#define DECL_SZ_MACRO(name) \
-	static const char sz_##name[] = #name
-
-#define DECL_SZ_DEFINED_MACRO(name) \
-	DECL_SZ_MACRO(name); \
-	DECL_SZ_MACRO(name##_defined)
-
-
-#define HDF_GETSET_MACRO(name, h5_type) \
-	do { \
-		DECL_SZ_MACRO(name); \
-		VERIFY(0 <= CGlobal::HDFSerialize(bStoring, loc_id, sz_##name, h5_type, 1, &this->name)); \
-	} while(0)
-
-
-// COMMENT: {8/23/2004 9:18:38 PM}#define HDF_GET_IF_DEFINED_MACRO(name, h5_type) \
-// COMMENT: {8/23/2004 9:18:38 PM}    do { \
-// COMMENT: {8/23/2004 9:18:38 PM}		if (bStoring) \
-// COMMENT: {8/23/2004 9:18:38 PM}		{ \
-// COMMENT: {8/23/2004 9:18:38 PM}			if (this->name##_defined) \
-// COMMENT: {8/23/2004 9:18:38 PM}			{ \
-// COMMENT: {8/23/2004 9:18:38 PM}				herr_t status = CGlobal::HDFSerialize(bStoring, loc_id, sz_##name, h5_type, 1, &this->name); \
-// COMMENT: {8/23/2004 9:18:38 PM}				ASSERT(status >= 0); \
-// COMMENT: {8/23/2004 9:18:38 PM}			} \
-// COMMENT: {8/23/2004 9:18:38 PM}		} \
-// COMMENT: {8/23/2004 9:18:38 PM}		else \
-// COMMENT: {8/23/2004 9:18:38 PM}		{ \
-// COMMENT: {8/23/2004 9:18:38 PM}			herr_t status = CGlobal::HDFSerialize(bStoring, loc_id, sz_##name, h5_type, 1, &this->name); \
-// COMMENT: {8/23/2004 9:18:38 PM}			name##_defined = (status >= 0) ? TRUE : FALSE; \
-// COMMENT: {8/23/2004 9:18:38 PM}		} \
-// COMMENT: {8/23/2004 9:18:38 PM}	} while (0)
-
-#define HDF_GETSET_DEFINED_MACRO(name, h5_type) \
-	do { \
-		DECL_SZ_DEFINED_MACRO(name); \
-		HDF_GETSET_MACRO(name##_defined, H5T_NATIVE_INT); \
-		HDF_GETSET_MACRO(name, h5_type); \
-	} while (0)
-
-
-#define HDF_GET_CHAR_STAR_MACRO(name) \
-	do { \
-		DECL_SZ_MACRO(name); \
-		herr_t status = CGlobal::HDFSerializeStringOrNull(bStoring, loc_id, sz_##name, &this->name); \
-		ASSERT(status >= 0 || this->name == NULL); \
-	} while(0)
-
 #define HDF_WELL_INTERVAL_MACRO(name) \
 	do { \
 		DECL_SZ_MACRO(name); \
 		herr_t status = SerializeWellInterval(bStoring, loc_id, sz_##name, this->count_##name, &this->name); \
 		ASSERT(status >= 0 || this->count_##name == 0); \
+	} while(0)
+
+#define ARC_WELL_INTERVAL_MACRO(archive, name) \
+	do { \
+		SerializeWellInterval(archive, this->count_##name, &this->name); \
 	} while(0)
 
 herr_t SerializeWellInterval(bool bStoring, hid_t loc_id, const char *szName, int &interval_count, Well_Interval** intervals)
@@ -339,6 +299,32 @@ herr_t SerializeWellInterval(bool bStoring, hid_t loc_id, const char *szName, in
 	return status;
 }
 
+void SerializeWellInterval(CArchive& ar, int &interval_count, Well_Interval** intervals)
+{
+	if (ar.IsStoring())
+	{
+		ar << interval_count;
+		for (int i = 0; i < interval_count; ++i)
+		{
+			ar << (*intervals)[i].bottom;
+			ar << (*intervals)[i].top;
+		}
+	}
+	else
+	{
+		ar >> interval_count;
+
+		ASSERT(*intervals);
+		delete[] (*intervals);
+		*intervals = new Well_Interval[interval_count + 1];
+
+		for (int i = 0; i < interval_count; ++i)
+		{
+			ar >> (*intervals)[i].bottom;
+			ar >> (*intervals)[i].top;
+		}
+	}
+}
 
 void CWell::Serialize(bool bStoring, hid_t loc_id)
 {
@@ -358,3 +344,26 @@ void CWell::Serialize(bool bStoring, hid_t loc_id)
 	HDF_WELL_INTERVAL_MACRO(depth);
 }
 
+void CWell::Serialize(CArchive& ar)
+{
+	int nVersion = 1;
+
+	ARC_VERSION(ar, CWell, nVersion);
+
+	ARC_GETSET_MACRO(ar, n_user);
+	ARC_GETSET_MACRO(ar, new_def);
+	ARC_GETSET_MACRO(ar, mobility_and_pressure);
+
+	ARC_GET_CHAR_STAR_MACRO(ar, description);
+
+	ARC_GETSET_DEFINED_MACRO(ar, x);
+	ARC_GETSET_DEFINED_MACRO(ar, y);
+	ARC_GETSET_DEFINED_MACRO(ar, radius);
+	ARC_GETSET_DEFINED_MACRO(ar, diameter);
+	ARC_GETSET_DEFINED_MACRO(ar, lsd);
+
+	ARC_WELL_INTERVAL_MACRO(ar, elevation);
+	ARC_WELL_INTERVAL_MACRO(ar, depth);
+
+	ARC_VERSION(ar, CWell, nVersion);
+}

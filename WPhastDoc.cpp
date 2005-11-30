@@ -3459,7 +3459,7 @@ void CWPhastDoc::InternalDelete(CZoneActor *pZoneActor, bool bDelete)
 	this->UpdateAllViews(0);
 }
 
-void CWPhastDoc::Add(CWellActor *pWellActor)
+void CWPhastDoc::Add(CWellActor *pWellActor, HTREEITEM hInsertAfter)
 {
 	ASSERT(pWellActor);
 	if (!pWellActor) return;
@@ -3482,7 +3482,6 @@ void CWPhastDoc::Add(CWellActor *pWellActor)
 	float defaultAxesSize = (bounds[1]-bounds[0] + bounds[3]-bounds[2] + bounds[5]-bounds[4])/12;
 	pWellActor->SetDefaultTubeDiameter(defaultAxesSize * 0.17 / sqrt(scale[0] * scale[1]));
 
-
 	// add to well assembly
 	//
 	if (vtkPropAssembly *pPropAssembly = this->GetPropAssemblyWells())
@@ -3499,7 +3498,7 @@ void CWPhastDoc::Add(CWellActor *pWellActor)
 	//
 	if (CPropertyTreeControlBar *pTree = this->GetPropertyTreeControlBar())
 	{
-		pWellActor->Add(pTree);
+		pWellActor->Add(pTree, hInsertAfter);
 	}
 
 	// render
@@ -3864,7 +3863,7 @@ VARIANT CWPhastDoc::Run(void)
 	return vaResult;
 }
 
-void CWPhastDoc::Add(CRiverActor *pRiverActor)
+void CWPhastDoc::Add(CRiverActor *pRiverActor, HTREEITEM hInsertAfter)
 {
 	ASSERT(pRiverActor);
 	if (!pRiverActor) return;
@@ -3913,7 +3912,7 @@ void CWPhastDoc::Add(CRiverActor *pRiverActor)
 	//
 	if (CPropertyTreeControlBar *pTree = this->GetPropertyTreeControlBar())
 	{
-		pRiverActor->Add(pTree);
+		pRiverActor->Add(pTree, hInsertAfter);
 	}
 
 	// add listeners

@@ -972,10 +972,10 @@ void CRiverActor::Update()
 	this->WorldSIPoint[2] = zPos;
 }
 
-void CRiverActor::Add(CPropertyTreeControlBar *pTree)
+void CRiverActor::Add(CPropertyTreeControlBar *pTree, HTREEITEM hInsertAfter)
 {
 	CTreeCtrlNode node = pTree->GetRiversNode();
-	this->m_node = node.InsertAfter(_T(""), TVI_LAST);
+	this->m_node = node.InsertAfter(_T(""), hInsertAfter);
 	this->Update(this->m_node);
 	this->m_node.SetData((DWORD_PTR)this);
 	if (this->GetVisibility())

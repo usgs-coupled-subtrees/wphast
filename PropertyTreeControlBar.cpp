@@ -53,7 +53,8 @@
 #include "SetUnitsAction.h"
 #include "ZoneRemoveAction.h"
 #include "WellDeleteAction.h"
-
+#include "WellCreateAction.h"
+#include "RiverCreateAction.h"
 
 #include <vtkWin32RenderWindowInteractor.h>
 #include <vtkProperty.h>
@@ -1775,6 +1776,68 @@ bool CPropertyTreeControlBar::IsNodeDraggable(CTreeCtrlNode dragNode, COleDataSo
 		}
 	}
 
+	if (dragNode.GetParent() == this->GetWellsNode())
+	{
+		if (dragNode.GetData())
+		{
+			if (CWellActor *pWellActor = CWellActor::SafeDownCast((vtkObject*)dragNode.GetData()))
+			{
+				oss << pWellActor->GetWell();
+
+				std::string s = oss.str();
+				HGLOBAL hGlobal = ::GlobalAlloc(GMEM_MOVEABLE, s.length() + 1);
+				LPTSTR pData = (LPTSTR)::GlobalLock(hGlobal);
+
+				::lstrcpy(pData, s.c_str());
+				::GlobalUnlock(hGlobal);
+
+				oleDataSource.CacheGlobalData(this->m_cfPID, hGlobal);
+				oleDataSource.CacheGlobalData(CF_TEXT, hGlobal);
+
+				return true;
+			}
+			else
+			{
+				ASSERT(FALSE);
+			}
+		}
+		else
+		{
+			ASSERT(FALSE);
+		}
+	}
+
+	if (dragNode.GetParent() == this->GetRiversNode())
+	{
+		if (dragNode.GetData())
+		{
+			if (CRiverActor *pRiverActor = CRiverActor::SafeDownCast((vtkObject*)dragNode.GetData()))
+			{
+				oss << pRiverActor->GetRiver();
+
+				std::string s = oss.str();
+				HGLOBAL hGlobal = ::GlobalAlloc(GMEM_MOVEABLE, s.length() + 1);
+				LPTSTR pData = (LPTSTR)::GlobalLock(hGlobal);
+
+				::lstrcpy(pData, s.c_str());
+				::GlobalUnlock(hGlobal);
+
+				oleDataSource.CacheGlobalData(this->m_cfPID, hGlobal);
+				oleDataSource.CacheGlobalData(CF_TEXT, hGlobal);
+
+				return true;
+			}
+			else
+			{
+				ASSERT(FALSE);
+			}
+		}
+		else
+		{
+			ASSERT(FALSE);
+		}
+	}
+
 	return false;
 }
 
@@ -1944,11 +2007,35 @@ BOOL CPropertyTreeControlBar::OnDrop(CWnd* pWnd, COleDataObject* pDataObject, DR
 			if (dropNode && dropNode != this->m_dragNode && this->m_dragNode.GetPrevSibling() != dropNode)
 			{
 				ASSERT(dropNode == TVI_FIRST || dropNode.GetParent() == parentNode);
-				if (CZoneActor* pZone = CZoneActor::SafeDownCast((vtkObject*)this->m_dragNode.GetData()))
+				if (CZoneActor::SafeDownCast((vtkObject*)this->m_dragNode.GetData()))
 				{
 					if (CWPhastDoc* pDoc = this->GetDocument())
 					{
-						CAction* pAction = new CDragDropAction(this, this->m_dragNode, dropNode);
+						CAction* pAction = new CDragDropAction<CZoneActor>(this, this->m_dragNode, dropNode);
+						if (pAction)
+						{
+							pDoc->Execute(pAction);
+							return DROPEFFECT_NONE;
+						}
+					}
+				}
+				if (CWellActor::SafeDownCast((vtkObject*)this->m_dragNode.GetData()))
+				{
+					if (CWPhastDoc* pDoc = this->GetDocument())
+					{
+						CAction* pAction = new CDragDropAction<CWellActor>(this, this->m_dragNode, dropNode);
+						if (pAction)
+						{
+							pDoc->Execute(pAction);
+							return DROPEFFECT_NONE;
+						}
+					}
+				}
+				if (CRiverActor::SafeDownCast((vtkObject*)this->m_dragNode.GetData()))
+				{
+					if (CWPhastDoc* pDoc = this->GetDocument())
+					{
+						CAction* pAction = new CDragDropAction<CRiverActor>(this, this->m_dragNode, dropNode);
 						if (pAction)
 						{
 							pDoc->Execute(pAction);
@@ -2127,6 +2214,80 @@ bool CPropertyTreeControlBar::IsNodeCopyable(CTreeCtrlNode copyNode, COleDataSou
 		}
 	}
 
+	if (copyNode.GetParent() == this->GetWellsNode())
+	{
+		if (copyNode.GetData())
+		{
+			if (CWellActor* pWellActor = CWellActor::SafeDownCast((vtkObject*)copyNode.GetData()))
+			{
+				if (pOleDataSource)
+				{
+					CWellSchedule well = pWellActor->GetWell();
+
+					// CF_TEXT
+					//
+					oss << well;
+
+					std::string s = oss.str();
+					HGLOBAL hGlobal = ::GlobalAlloc(GMEM_MOVEABLE, s.length() + 1);
+					LPTSTR pData = (LPTSTR)::GlobalLock(hGlobal);
+
+					::lstrcpy(pData, s.c_str());
+					::GlobalUnlock(hGlobal);
+
+					pOleDataSource->CacheGlobalData(CF_TEXT, hGlobal);
+
+					// copy BC clip format
+					//
+					CSharedFile globFile;
+					CArchive ar(&globFile, CArchive::store);
+					well.Serialize(ar);
+					ar.Close();
+
+					pOleDataSource->CacheGlobalData(CWellSchedule::clipFormat, globFile.Detach());
+				}
+				return true;
+			}
+		}
+	}
+
+	if (copyNode.GetParent() == this->GetRiversNode())
+	{
+		if (copyNode.GetData())
+		{
+			if (CRiverActor* pRiverActor = CRiverActor::SafeDownCast((vtkObject*)copyNode.GetData()))
+			{
+				if (pOleDataSource)
+				{
+					CRiver river = pRiverActor->GetRiver();
+
+					// CF_TEXT
+					//
+					oss << river;
+
+					std::string s = oss.str();
+					HGLOBAL hGlobal = ::GlobalAlloc(GMEM_MOVEABLE, s.length() + 1);
+					LPTSTR pData = (LPTSTR)::GlobalLock(hGlobal);
+
+					::lstrcpy(pData, s.c_str());
+					::GlobalUnlock(hGlobal);
+
+					pOleDataSource->CacheGlobalData(CF_TEXT, hGlobal);
+
+					// copy BC clip format
+					//
+					CSharedFile globFile;
+					CArchive ar(&globFile, CArchive::store);
+					river.Serialize(ar);
+					ar.Close();
+
+					pOleDataSource->CacheGlobalData(CRiver::clipFormat, globFile.Detach());
+				}
+				return true;
+			}
+		}
+	}
+
 	return false;
 }
 
@@ -2137,6 +2298,19 @@ CLIPFORMAT CPropertyTreeControlBar::GetNativeClipFormat(void)const
 	if (type)
 	{
 		return type;
+	}
+
+	COleDataObject dataObject;
+	if (dataObject.AttachClipboard())
+	{
+		if (dataObject.IsDataAvailable(CWellSchedule::clipFormat))
+		{
+			type = CWellSchedule::clipFormat;
+		}
+		if (dataObject.IsDataAvailable(CRiver::clipFormat))
+		{
+			type = CRiver::clipFormat;
+		}
 	}
 	return type;
 }
@@ -2190,6 +2364,108 @@ bool CPropertyTreeControlBar::IsNodePasteable(CTreeCtrlNode pasteNode, bool bDoP
 	else if (pasteNode.IsNodeAncestor(this->GetBCNode()))
 	{
 		return this->IsNodePasteable<CBCZoneActor, CBC>(this->GetBCNode(), pasteNode, bDoPaste);
+	}
+	else if (pasteNode.IsNodeAncestor(this->GetWellsNode()))
+	{
+		return this->IsNodePasteableWell(pasteNode, bDoPaste);
+	}
+	else if (pasteNode.IsNodeAncestor(this->GetRiversNode()))
+	{
+		return this->IsNodePasteableRiver(pasteNode, bDoPaste);
+	}
+	return false;
+}
+
+bool CPropertyTreeControlBar::IsNodePasteableWell(CTreeCtrlNode pasteNode, bool bDoPaste)
+{
+	CTreeCtrlNode headNode = this->GetWellsNode();
+
+	CLIPFORMAT type = this->GetNativeClipFormat();
+	if (type == CWellSchedule::clipFormat && pasteNode.IsNodeAncestor(headNode))
+	{
+		if (bDoPaste)
+		{
+			COleDataObject dataObject;
+			VERIFY(dataObject.AttachClipboard());
+			HGLOBAL hGlob = dataObject.GetGlobalData(type);
+			if (hGlob == NULL) return false;
+
+			CSharedFile globFile;
+			globFile.SetHandle(hGlob, FALSE);
+			CArchive ar(&globFile, CArchive::load);
+
+			CWellSchedule well;
+			well.Serialize(ar);
+			ar.Close();
+
+			if (CWPhastDoc *pWPhastDoc = this->GetDocument())
+			{
+				CTreeCtrlNode after(TVI_LAST, this->GetTreeCtrlEx());
+				if (pasteNode != headNode)
+				{
+					while (pasteNode.GetParent() != headNode)
+					{
+						pasteNode = pasteNode.GetParent();
+						if (!pasteNode) break;
+					}
+					if (pasteNode && pasteNode.GetParent() == headNode)
+					{
+						after = pasteNode;
+					}
+				}
+				well.n_user = pWPhastDoc->GetNextWellNumber();
+				CWellCreateAction* pAction = new CWellCreateAction(pWPhastDoc, well, after);
+				pWPhastDoc->Execute(pAction);
+			}
+		}
+		return true;
+	}
+	return false;
+}
+
+bool CPropertyTreeControlBar::IsNodePasteableRiver(CTreeCtrlNode pasteNode, bool bDoPaste)
+{
+	CTreeCtrlNode headNode = this->GetRiversNode();
+
+	CLIPFORMAT type = this->GetNativeClipFormat();
+	if (type == CRiver::clipFormat && pasteNode.IsNodeAncestor(headNode))
+	{
+		if (bDoPaste)
+		{
+			COleDataObject dataObject;
+			VERIFY(dataObject.AttachClipboard());
+			HGLOBAL hGlob = dataObject.GetGlobalData(type);
+			if (hGlob == NULL) return false;
+
+			CSharedFile globFile;
+			globFile.SetHandle(hGlob, FALSE);
+			CArchive ar(&globFile, CArchive::load);
+
+			CRiver river;
+			river.Serialize(ar);
+			ar.Close();
+
+			if (CWPhastDoc *pWPhastDoc = this->GetDocument())
+			{
+				CTreeCtrlNode after(TVI_LAST, this->GetTreeCtrlEx());
+				if (pasteNode != headNode)
+				{
+					while (pasteNode.GetParent() != headNode)
+					{
+						pasteNode = pasteNode.GetParent();
+						if (!pasteNode) break;
+					}
+					if (pasteNode && pasteNode.GetParent() == headNode)
+					{
+						after = pasteNode;
+					}
+				}
+				river.n_user = pWPhastDoc->GetNextRiverNumber();
+				CRiverCreateAction* pAction = new CRiverCreateAction(pWPhastDoc, river, after);
+				pWPhastDoc->Execute(pAction);
+			}
+		}
+		return true;
 	}
 	return false;
 }
@@ -2370,7 +2646,7 @@ void CPropertyTreeControlBar::OnUpdateEditCut(CCmdUI *pCmdUI)
 	{
 		CTreeCtrlNode dragNode = pTreeCtrlEx->GetSelectedItem();
 		COleDataSource source;
-		if (this->IsNodeDraggable(dragNode, source))
+		if (this->IsNodeDraggable(dragNode, source) && this->IsNodeCopyable(dragNode, NULL))
 		{
 			pCmdUI->Enable(TRUE);
 			return;

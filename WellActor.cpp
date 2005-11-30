@@ -181,13 +181,14 @@ void CWellActor::Edit(CWPhastDoc *pWPhastDoc)
 	}
 }
 
-void CWellActor::Add(CPropertyTreeControlBar *pTree)
+void CWellActor::Add(CPropertyTreeControlBar *pTree, HTREEITEM hInsertAfter)
 {
 	CTreeCtrlNode node = pTree->GetWellsNode();
-	this->m_node = node.InsertAfter(_T(""), TVI_LAST);
+	this->m_node = node.InsertAfter(_T(""), hInsertAfter);
 	this->Update(this->m_node);
 	this->m_node.SetData((DWORD_PTR)this);
-	//{{
+
+	// set checkmark
 	if (this->GetVisibility())
 	{
 		this->m_node.SetState(INDEXTOSTATEIMAGEMASK(BST_CHECKED + 1), TVIS_STATEIMAGEMASK);
@@ -196,7 +197,6 @@ void CWellActor::Add(CPropertyTreeControlBar *pTree)
 	{
 		this->m_node.SetState(INDEXTOSTATEIMAGEMASK(BST_UNCHECKED + 1), TVIS_STATEIMAGEMASK);
 	}
-	//}}
 	VERIFY(this->m_node.Select());
 }
 

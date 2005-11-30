@@ -4,6 +4,10 @@
 #include <list>
 #include "Global.h"
 
+#include "WPhastMacros.h"
+
+CLIPFORMAT CWellSchedule::clipFormat = (CLIPFORMAT)::RegisterClipboardFormat(_T("WPhast:CWellSchedule"));
+
 CWellSchedule::CWellSchedule(void)
 : CWell()
 {
@@ -45,19 +49,8 @@ CWellSchedule::CWellSchedule(const CWellSchedule& src)
 : CWell(src) // Note: if this weren't here CWell() would be called instead
 , m_pumpingSchedule(src.m_pumpingSchedule)
 {
-// COMMENT: {4/19/2005 1:54:03 PM}// COMMENT: {2/22/2005 4:00:10 PM}	this->m_map.clear();
-// COMMENT: {4/19/2005 1:54:03 PM}// COMMENT: {2/22/2005 4:00:10 PM}	std::map<Ctime, CWellRate>::const_iterator iter = src.m_map.begin();
-// COMMENT: {4/19/2005 1:54:03 PM}// COMMENT: {2/22/2005 4:00:10 PM}	for (; iter != src.m_map.end(); ++iter)
-// COMMENT: {4/19/2005 1:54:03 PM}// COMMENT: {2/22/2005 4:00:10 PM}	{
-// COMMENT: {4/19/2005 1:54:03 PM}// COMMENT: {2/22/2005 4:00:10 PM}		this->Insert((*iter).first, (*iter).second);
-// COMMENT: {4/19/2005 1:54:03 PM}// COMMENT: {2/22/2005 4:00:10 PM}	}
-// COMMENT: {4/19/2005 1:54:03 PM}	this->m_q_map.clear();
-// COMMENT: {4/19/2005 1:54:03 PM}	std::map<Ctime, Cproperty>::const_iterator iter = src.m_q_map.begin();
-// COMMENT: {4/19/2005 1:54:03 PM}	for (; iter != src.m_q_map.end(); ++iter)
-// COMMENT: {4/19/2005 1:54:03 PM}	{
-// COMMENT: {4/19/2005 1:54:03 PM}		this->InsertRate((*iter).first, (*iter).second);
-// COMMENT: {4/19/2005 1:54:03 PM}	}
 }
+
 void CWellSchedule::Insert(const Ctime& time, const CWellRate& rate)
 {
 	CWellRate& r = this->m_pumpingSchedule[time];
@@ -73,61 +66,26 @@ void CWellSchedule::Insert(const Ctime& time, const CWellRate& rate)
 
 void CWellSchedule::InsertRate(const Ctime& time, const Cproperty& rate)
 {
-// COMMENT: {4/19/2005 1:40:20 PM}	// TODO is this nec? if so write Cproperty::operator==
-// COMMENT: {4/19/2005 1:40:20 PM}// COMMENT: {2/22/2005 4:07:21 PM}	if (!this->m_q_map.empty()) {
-// COMMENT: {4/19/2005 1:40:20 PM}// COMMENT: {2/22/2005 4:07:21 PM}		// make sure this is actually a new rate
-// COMMENT: {4/19/2005 1:40:20 PM}// COMMENT: {2/22/2005 4:07:21 PM}		std::map<Ctime, Cproperty>::const_reverse_iterator last = this->m_q_map.rbegin();
-// COMMENT: {4/19/2005 1:40:20 PM}// COMMENT: {2/22/2005 4:07:21 PM}		Cproperty lastRate((*last).second);
-// COMMENT: {4/19/2005 1:40:20 PM}// COMMENT: {2/22/2005 4:07:21 PM}		if (lastRate == rate) {
-// COMMENT: {4/19/2005 1:40:20 PM}// COMMENT: {2/22/2005 4:07:21 PM}			return;  // rate is the same as last entered :: no need to insert		
-// COMMENT: {4/19/2005 1:40:20 PM}// COMMENT: {2/22/2005 4:07:21 PM}		}
-// COMMENT: {4/19/2005 1:40:20 PM}// COMMENT: {2/22/2005 4:07:21 PM}	}
-// COMMENT: {4/19/2005 1:40:20 PM}	this->m_q_map.insert(std::map<Ctime, Cproperty>::value_type(time, rate));
 	CWellRate& r = this->m_pumpingSchedule[time];
 	r.SetRate(rate.v[0]);
 }
 
 void CWellSchedule::InsertSolution(const Ctime& time, const Cproperty& solution)
 {
-// COMMENT: {4/19/2005 1:44:24 PM}	// TODO is this nec? if so write Cproperty::operator==
-// COMMENT: {4/19/2005 1:44:24 PM}// COMMENT: {2/22/2005 4:07:21 PM}	if (!this->m_q_map.empty()) {
-// COMMENT: {4/19/2005 1:44:24 PM}// COMMENT: {2/22/2005 4:07:21 PM}		// make sure this is actually a new rate
-// COMMENT: {4/19/2005 1:44:24 PM}// COMMENT: {2/22/2005 4:07:21 PM}		std::map<Ctime, Cproperty>::const_reverse_iterator last = this->m_q_map.rbegin();
-// COMMENT: {4/19/2005 1:44:24 PM}// COMMENT: {2/22/2005 4:07:21 PM}		Cproperty lastRate((*last).second);
-// COMMENT: {4/19/2005 1:44:24 PM}// COMMENT: {2/22/2005 4:07:21 PM}		if (lastRate == rate) {
-// COMMENT: {4/19/2005 1:44:24 PM}// COMMENT: {2/22/2005 4:07:21 PM}			return;  // rate is the same as last entered :: no need to insert		
-// COMMENT: {4/19/2005 1:44:24 PM}// COMMENT: {2/22/2005 4:07:21 PM}		}
-// COMMENT: {4/19/2005 1:44:24 PM}// COMMENT: {2/22/2005 4:07:21 PM}	}
-// COMMENT: {4/19/2005 1:44:24 PM}	this->m_solution_map.insert(std::map<Ctime, Cproperty>::value_type(time, solution));
 	CWellRate& r = this->m_pumpingSchedule[time];
 	r.SetSolution(solution.v[0]);
 }
-
-
-#define DECL_SZ_MACRO(name) \
-	static const char sz_##name[] = #name
-
-#define DECL_SZ_DEFINED_MACRO(name) \
-	DECL_SZ_MACRO(name); \
-	DECL_SZ_MACRO(name##_defined)
-
-#define HDF_GETSET_MACRO(name, h5_type) \
-	do { \
-		DECL_SZ_MACRO(name); \
-		VERIFY(0 <= CGlobal::HDFSerialize(bStoring, loc_id, sz_##name, h5_type, 1, &this->name)); \
-	} while(0)
-
-#define HDF_GETSET_DEFINED_MACRO(name, h5_type) \
-	do { \
-		DECL_SZ_DEFINED_MACRO(name); \
-		HDF_GETSET_MACRO(name##_defined, H5T_NATIVE_INT); \
-		HDF_GETSET_MACRO(name, h5_type); \
-	} while (0)
 
 void CWellRate::Serialize(bool bStoring, hid_t loc_id)
 {
 	HDF_GETSET_DEFINED_MACRO(q,        H5T_NATIVE_DOUBLE);
 	HDF_GETSET_DEFINED_MACRO(solution, H5T_NATIVE_INT   );
+}
+
+void CWellRate::Serialize(CArchive& ar)
+{
+	ARC_GETSET_DEFINED_MACRO(ar, q);
+	ARC_GETSET_DEFINED_MACRO(ar, solution);
 }
 
 void CWellSchedule::Serialize(bool bStoring, hid_t loc_id)
@@ -146,11 +104,11 @@ void CWellSchedule::Serialize(bool bStoring, hid_t loc_id)
 	}
 }
 
-// COMMENT: {4/19/2005 1:51:12 PM}std::map<Ctime, CWellRate> CWellSchedule::GetMap(void)const
-// COMMENT: {4/19/2005 1:51:12 PM}{
-// COMMENT: {4/19/2005 1:51:12 PM}	return this->m_map;
-// COMMENT: {4/19/2005 1:51:12 PM}}
-
+void CWellSchedule::Serialize(CArchive& ar)
+{
+	this->CWell::Serialize(ar);
+	this->m_pumpingSchedule.Serialize(ar);
+}
 
 std::ostream& operator<< (std::ostream &os, const CWellSchedule &a)
 {
@@ -175,6 +133,7 @@ std::ostream& operator<< (std::ostream &os, const CWellSchedule &a)
 	{
 		ASSERT(FALSE);
 	}
+
 	for (int i = 0; i < a.count_elevation; ++i)
 	{
 		os << "\t" << "-elevation " << a.elevation[i].bottom << " " << a.elevation[i].top << "\n";

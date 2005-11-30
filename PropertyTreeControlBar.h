@@ -144,6 +144,8 @@ protected:
 	bool IsNodeDraggable(CTreeCtrlNode dragNode, COleDataSource &oleDataSource);
 	bool IsNodeCopyable(CTreeCtrlNode copyNode, COleDataSource *pOleDataSource);
 	bool IsNodePasteable(CTreeCtrlNode pasteNode, bool bDoPaste);
+	bool IsNodePasteableWell(CTreeCtrlNode pasteNode, bool bDoPaste);
+	bool IsNodePasteableRiver(CTreeCtrlNode pasteNode, bool bDoPaste);	
 
 	template<typename ZT, typename DT>
 	bool IsNodePasteable(CTreeCtrlNode headNode, CTreeCtrlNode pasteNode, bool bDoPaste);

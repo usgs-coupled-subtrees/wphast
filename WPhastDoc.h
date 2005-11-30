@@ -129,7 +129,7 @@ public:
 	vtkProp3D* GetGridActor(void);
 
 	// Well actions
-	void Add(CWellActor *pWellActor);
+	void Add(CWellActor *pWellActor, HTREEITEM hInsertAfter = TVI_LAST);
 	void UnAdd(CWellActor *pWellActor);
 	void Remove(CWellActor *pWellActor);
 	void UnRemove(CWellActor *pWellActor);
@@ -140,7 +140,7 @@ public:
 
 	// River actions
 	//
-	void Add(CRiverActor *pRiverActor);
+	void Add(CRiverActor *pRiverActor, HTREEITEM hInsertAfter = TVI_LAST);
 	void UnAdd(CRiverActor *pRiverActor);
 	void Remove(CRiverActor *pRiverActor);
 	void UnRemove(CRiverActor *pRiverActor);

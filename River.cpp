@@ -3,6 +3,10 @@
 
 #include "Global.h"
 
+#include "WPhastMacros.h"
+
+CLIPFORMAT CRiver::clipFormat = (CLIPFORMAT)::RegisterClipboardFormat(_T("WPhast:CRiver"));
+
 CRiver::CRiver(void)
 {
 }
@@ -26,32 +30,6 @@ CRiver::~CRiver(void)
 {
 }
 
-#define DECL_SZ_MACRO(name) \
-	static const char sz_##name[] = #name
-
-#define DECL_SZ_DEFINED_MACRO(name) \
-	DECL_SZ_MACRO(name); \
-	DECL_SZ_MACRO(name##_defined)
-
-#define HDF_GETSET_MACRO(name, h5_type) \
-	do { \
-		DECL_SZ_MACRO(name); \
-		VERIFY(0 <= CGlobal::HDFSerialize(bStoring, loc_id, sz_##name, h5_type, 1, &this->name)); \
-	} while(0)
-
-#define HDF_GETSET_DEFINED_MACRO(name, h5_type) \
-	do { \
-		DECL_SZ_DEFINED_MACRO(name); \
-		HDF_GETSET_MACRO(name##_defined, H5T_NATIVE_INT); \
-		HDF_GETSET_MACRO(name, h5_type); \
-	} while (0)
-
-#define HDF_STD_STRING_MACRO(name) \
-	do { \
-		DECL_SZ_MACRO(name); \
-		CGlobal::HDFSerializeString(bStoring, loc_id, sz_##name, this->name); \
-	} while(0)
-
 void CRiver::Serialize(bool bStoring, hid_t loc_id)
 {
 	static const char szPoints[]        = "Points";
@@ -68,7 +46,7 @@ void CRiver::Serialize(bool bStoring, hid_t loc_id)
 
 	if (bStoring)
 	{
-		size_t count_points = count_points = this->m_listPoints.size();
+		size_t count_points = this->m_listPoints.size();
 		VERIFY(0 <= CGlobal::HDFSerialize(bStoring, loc_id, sz_count_points, H5T_NATIVE_INT, 1, &count_points));
 
 		std::list<CRiverPoint>::iterator iter = this->m_listPoints.begin();
@@ -115,6 +93,44 @@ void CRiver::Serialize(bool bStoring, hid_t loc_id)
 			}
 		}
 	}
+}
+
+void CRiver::Serialize(CArchive& ar)
+{
+	int nVersion = 1;
+	ARC_VERSION(ar, CRiver, nVersion);
+
+	ARC_GETSET_MACRO(ar, n_user);
+	ARC_STD_STRING_MACRO(ar, description);
+
+	if (ar.IsStoring())
+	{
+		ASSERT(sizeof(ULONGLONG) >= sizeof(std::list<CRiverPoint>::size_type));
+		ULONGLONG count_points = this->m_listPoints.size();
+		ar << count_points;
+
+		std::list<CRiverPoint>::iterator iter = this->m_listPoints.begin();
+		for (; iter != this->m_listPoints.end(); ++iter)
+		{
+			iter->Serialize(ar);
+		}
+	}
+	else
+	{
+		ASSERT(sizeof(ULONGLONG) >= sizeof(std::list<CRiverPoint>::size_type));
+		ULONGLONG count_points;
+		ar >> count_points;
+
+		this->m_listPoints.clear();
+		for (ULONGLONG i = 0; i < count_points; ++i)
+		{
+			CRiverPoint pt;
+			pt.Serialize(ar);
+			this->m_listPoints.push_back(pt);
+		}
+	}
+
+	ARC_VERSION(ar, CRiver, nVersion);
 }
 
 CRiverPoint::CRiverPoint(void)
@@ -209,10 +225,29 @@ void CRiverPoint::Serialize(bool bStoring, hid_t loc_id)
 	}
 }
 
+void CRiverPoint::Serialize(CArchive& ar)
+{
+	ARC_GETSET_DEFINED_MACRO(ar, x);
+	ARC_GETSET_DEFINED_MACRO(ar, y);
+	ARC_GETSET_DEFINED_MACRO(ar, z);
+	ARC_GETSET_DEFINED_MACRO(ar, depth);
+	ARC_GETSET_DEFINED_MACRO(ar, k);
+	ARC_GETSET_DEFINED_MACRO(ar, width);
+	ARC_GETSET_DEFINED_MACRO(ar, thickness);
+
+	this->m_riverSchedule.Serialize(ar);
+}
+
 void CRiverState::Serialize(bool bStoring, hid_t loc_id)
 {
 	HDF_GETSET_DEFINED_MACRO(head,     H5T_NATIVE_DOUBLE);
 	HDF_GETSET_DEFINED_MACRO(solution, H5T_NATIVE_INT   );
+}
+
+void CRiverState::Serialize(CArchive& ar)
+{
+	ARC_GETSET_DEFINED_MACRO(ar, head);
+	ARC_GETSET_DEFINED_MACRO(ar, solution);
 }
 
 std::ostream& operator<< (std::ostream &os, const CRiver &a)
