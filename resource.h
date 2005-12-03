@@ -247,6 +247,8 @@
 #define IDC_4WAY02                      251
 #define IDD_SOLUTION_METHOD_PROPPAGE    251
 #define IDB_PLUS_MERGE                  252
+#define IDD_PRINT_INITIAL_EXT_PROPPAGE  252
+#define IDD_PRINT_INITIAL_PROPPAGE      253
 #define IDC_3DGARROW                    255
 #define IDR_WELL_RATE_RTF               256
 #define IDR_WELL_SOLUTION_RTF           257
@@ -404,6 +406,8 @@
 #define IDC_BOTTOM                      1113
 #define IDC_GRID_SCHEDULES              1113
 #define IDC_SOLUTION_GRID               1113
+#define IDC_GRID2                       1113
+#define IDC_GRID_LEFT                   1113
 #define IDC_SINGLE_GRID                 1114
 #define IDC_EDIT_MO_X                   1115
 #define IDC_STATIC_MODEL_ORIGIN         1116
@@ -654,6 +658,7 @@
 #define IDC_FACE_X_RADIO                1343
 #define IDC_FACE_Y_RADIO                1344
 #define IDC_FACE_Z_RADIO                1345
+#define IDC_GRID_RIGHT                  1347
 #define IDC_RESIZE_COLUMN               28654
 #define IDC_RESIZE_ROW                  28655
 #define IDR_POPUP                       28656
@@ -678,8 +683,8 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        273
-#define _APS_NEXT_COMMAND_VALUE         32830
-#define _APS_NEXT_CONTROL_VALUE         1347
+#define _APS_NEXT_COMMAND_VALUE         32832
+#define _APS_NEXT_CONTROL_VALUE         1348
 #define _APS_NEXT_SYMED_VALUE           126
 #endif
 #endif

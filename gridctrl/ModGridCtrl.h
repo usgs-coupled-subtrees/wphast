@@ -40,10 +40,13 @@ public:
 	void SetHighLight(long nNewValue);
 	long GetHighLight(void)const;
 
+	virtual void PreSubclassWindow();
+
 protected:
 	// Virtual overrides
 	virtual BOOL  DrawFixedCell(CDC* pDC, int nRow, int nCol, CRect rect, BOOL bEraseBk=FALSE);
 	virtual BOOL  DrawCell(CDC* pDC, int nRow, int nCol, CRect rect, BOOL bEraseBk=FALSE);
+
 
 #ifndef GRIDCONTROL_NO_CLIPBOARD
 	virtual void CutSelectedText();
@@ -65,4 +68,6 @@ public:
 	afx_msg void OnKillFocus(CWnd* pNewWnd);
 	afx_msg void OnSetFocus(CWnd* pOldWnd);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
+	afx_msg LRESULT OnSetFont(WPARAM hFont, LPARAM /*lParam */);
+
 };

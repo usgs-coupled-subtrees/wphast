@@ -164,4 +164,6 @@ public:
 	afx_msg void OnEditPaste();
 	afx_msg void OnUpdateEditCut(CCmdUI *pCmdUI);
 	afx_msg void OnEditCut();
+	afx_msg void OnUpdateEditClear(CCmdUI *pCmdUI);
+	afx_msg void OnEditClear();
 };

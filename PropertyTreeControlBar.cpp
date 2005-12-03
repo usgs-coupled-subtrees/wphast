@@ -109,6 +109,8 @@ BEGIN_MESSAGE_MAP(CPropertyTreeControlBar, CSizingControlBarCFVS7)
 	ON_COMMAND(ID_EDIT_PASTE, OnEditPaste)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_CUT, OnUpdateEditCut)
 	ON_COMMAND(ID_EDIT_CUT, OnEditCut)
+	ON_UPDATE_COMMAND_UI(ID_EDIT_CLEAR, OnUpdateEditClear)
+	ON_COMMAND(ID_EDIT_CLEAR, OnEditClear)
 END_MESSAGE_MAP()
 /**
 NM_CLICK
@@ -1548,63 +1550,6 @@ void CPropertyTreeControlBar::OnKeyDown(NMHDR* pNMHDR, LRESULT* pResult)
 			}
 			return;
 		}
-
-
-// COMMENT: {4/11/2005 1:06:40 PM}		// Handle stress periods greater than 1
-// COMMENT: {4/11/2005 1:06:40 PM}		int nStressPeriodCount = this->GetStressPeriodCount();
-// COMMENT: {4/11/2005 1:06:40 PM}		int nStressPeriod = 0;
-// COMMENT: {4/11/2005 1:06:40 PM}		for (int i = 2; i <= nStressPeriodCount; ++i) {
-// COMMENT: {4/11/2005 1:06:40 PM}			if (sel.IsNodeAncestor(this->GetStressPeriodNode(i))) {
-// COMMENT: {4/11/2005 1:06:40 PM}				if (sel != this->GetStressPeriodNode(i)) {
-// COMMENT: {4/11/2005 1:06:40 PM}					// TODO: May want to implement deleting stressperiods
-// COMMENT: {4/11/2005 1:06:40 PM}					nStressPeriod = i;
-// COMMENT: {4/11/2005 1:06:40 PM}				}
-// COMMENT: {4/11/2005 1:06:40 PM}				break;
-// COMMENT: {4/11/2005 1:06:40 PM}			}
-// COMMENT: {4/11/2005 1:06:40 PM}		}
-// COMMENT: {4/11/2005 1:06:40 PM}		if (nStressPeriod > 1) {
-// COMMENT: {4/11/2005 1:06:40 PM}			// BOUNDARY_CONDITIONS
-// COMMENT: {4/11/2005 1:06:40 PM}			//
-// COMMENT: {4/11/2005 1:06:40 PM}			if (sel.IsNodeAncestor(this->GetBCNode(nStressPeriod))) {
-// COMMENT: {4/11/2005 1:06:40 PM}				if (sel != this->GetBCNode(nStressPeriod)) {
-// COMMENT: {4/11/2005 1:06:40 PM}					while (sel.GetParent() != this->GetBCNode(nStressPeriod)) {
-// COMMENT: {4/11/2005 1:06:40 PM}						sel = sel.GetParent();
-// COMMENT: {4/11/2005 1:06:40 PM}						if (!sel) break;
-// COMMENT: {4/11/2005 1:06:40 PM}					}
-// COMMENT: {4/11/2005 1:06:40 PM}					if (sel && sel.GetData()) {
-// COMMENT: {4/11/2005 1:06:40 PM}						if (CBCZoneActor* pZone = CBCZoneActor::SafeDownCast((vtkObject*)sel.GetData())) {
-// COMMENT: {4/11/2005 1:06:40 PM}							::AfxMessageBox(_T("Boundary conditions can only be deleted from the first simulation period."));
-// COMMENT: {4/11/2005 1:06:40 PM}							//CTreeCtrlNode parent = sel.GetParent();
-// COMMENT: {4/11/2005 1:06:40 PM}							//ASSERT(!pZone->GetDefault()); // no default BCs
-// COMMENT: {4/11/2005 1:06:40 PM}							//if (CWPhastDoc* pDoc = this->GetDocument()) {
-// COMMENT: {4/11/2005 1:06:40 PM}							//	pDoc->Execute(new CZoneRemoveAction(pDoc, pZone, this));
-// COMMENT: {4/11/2005 1:06:40 PM}							//	parent.Select();
-// COMMENT: {4/11/2005 1:06:40 PM}							//}
-// COMMENT: {4/11/2005 1:06:40 PM}							*pResult = TRUE;
-// COMMENT: {4/11/2005 1:06:40 PM}							return;
-// COMMENT: {4/11/2005 1:06:40 PM}						}
-// COMMENT: {4/11/2005 1:06:40 PM}					}
-// COMMENT: {4/11/2005 1:06:40 PM}				}
-// COMMENT: {4/11/2005 1:06:40 PM}				ASSERT(FALSE);
-// COMMENT: {4/11/2005 1:06:40 PM}				TRACE("BC not found\n");
-// COMMENT: {4/11/2005 1:06:40 PM}				return;
-// COMMENT: {4/11/2005 1:06:40 PM}			}
-// COMMENT: {4/11/2005 1:06:40 PM}
-// COMMENT: {4/11/2005 1:06:40 PM}			// TIME_CONTROL
-// COMMENT: {4/11/2005 1:06:40 PM}			//
-// COMMENT: {4/11/2005 1:06:40 PM}			if (sel.IsNodeAncestor(this->GetTimeControlNode(nStressPeriod))) {
-// COMMENT: {4/11/2005 1:06:40 PM}				if (this->GetTimeControlNode(nStressPeriod).GetData()) {
-// COMMENT: {4/11/2005 1:06:40 PM}					CTimeControl* pTC = (CTimeControl*)this->GetTimeControlNode(nStressPeriod).GetData();
-// COMMENT: {4/11/2005 1:06:40 PM}					::AfxMessageBox("Deleting TIME_CONTROL not currently implemented");
-// COMMENT: {4/11/2005 1:06:40 PM}					*pResult = TRUE;
-// COMMENT: {4/11/2005 1:06:40 PM}					return;
-// COMMENT: {4/11/2005 1:06:40 PM}				}
-// COMMENT: {4/11/2005 1:06:40 PM}				return;
-// COMMENT: {4/11/2005 1:06:40 PM}			}
-// COMMENT: {4/11/2005 1:06:40 PM}			::AfxMessageBox("Delete Node Greater than simulation 1 BUT NOT FOUND(time_control, bc)");
-// COMMENT: {4/11/2005 1:06:40 PM}			*pResult = TRUE;
-// COMMENT: {4/11/2005 1:06:40 PM}			return;
-// COMMENT: {4/11/2005 1:06:40 PM}		}
 	}
 }
 
@@ -2066,12 +2011,14 @@ bool CPropertyTreeControlBar::IsNodeCopyable(CTreeCtrlNode copyNode, COleDataSou
 			{
 				if (pOleDataSource)
 				{
-					CGridElt elt = pZone->GetGridElt();
+					CGridElt elt = pZone->GetData();
 
+					//{{ Why?
 					if (pZone->GetDefault() && elt.active == NULL)
 					{
 						elt.active = new Cproperty(1);
 					}
+					//}} Why?
 
 					// CF_TEXT
 					//
@@ -2092,7 +2039,7 @@ bool CPropertyTreeControlBar::IsNodeCopyable(CTreeCtrlNode copyNode, COleDataSou
 					//
 					CSharedFile globFile;
 					CArchive ar(&globFile, CArchive::store);
-					CGridElt elt2 = pZone->GetGridElt();
+					CGridElt elt2 = pZone->GetData();
 					elt.Serialize(ar);
 
 					ar.Close();
@@ -2706,4 +2653,16 @@ void CPropertyTreeControlBar::OnEditCut()
 			::MessageBeep(MB_ICONEXCLAMATION);
 		}
 	}
+}
+
+void CPropertyTreeControlBar::OnUpdateEditClear(CCmdUI *pCmdUI)
+{
+	// TODO: Add your command update UI handler code here
+	pCmdUI->Enable(FALSE);
+}
+
+void CPropertyTreeControlBar::OnEditClear()
+{
+	// TODO: Add your command handler code here
+	TRACE("OnEditClear");
 }

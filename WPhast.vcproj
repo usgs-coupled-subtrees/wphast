@@ -681,6 +681,12 @@ copy &quot;$(DEV_VTK42_VS7_DLL_LIB)\vtkzlib.dll&quot; &quot;$(TargetDir)vtkzlib.
 				RelativePath="PrintFreqPropertyPage.cpp">
 			</File>
 			<File
+				RelativePath="PrintInitialPropertyPage.cpp">
+			</File>
+			<File
+				RelativePath="PrintInput.cpp">
+			</File>
+			<File
 				RelativePath="PropTreeOleDropTarget.cpp">
 			</File>
 			<File
@@ -817,6 +823,9 @@ copy &quot;$(DEV_VTK42_VS7_DLL_LIB)\vtkzlib.dll&quot; &quot;$(TargetDir)vtkzlib.
 			</File>
 			<File
 				RelativePath="TempPropertyPage.cpp">
+			</File>
+			<File
+				RelativePath="TestCPrintInitialPropertyPage.cpp">
 			</File>
 			<File
 				RelativePath="TimeControl.cpp">
@@ -1261,6 +1270,12 @@ copy &quot;$(DEV_VTK42_VS7_DLL_LIB)\vtkzlib.dll&quot; &quot;$(TargetDir)vtkzlib.
 				RelativePath="PrintFreqPropertyPage.h">
 			</File>
 			<File
+				RelativePath="PrintInitialPropertyPage.h">
+			</File>
+			<File
+				RelativePath="PrintInput.h">
+			</File>
+			<File
 				RelativePath="PropTreeOleDropTarget.h">
 			</File>
 			<File
@@ -1400,6 +1415,9 @@ copy &quot;$(DEV_VTK42_VS7_DLL_LIB)\vtkzlib.dll&quot; &quot;$(TargetDir)vtkzlib.
 			</File>
 			<File
 				RelativePath="TempPropertyPage.h">
+			</File>
+			<File
+				RelativePath="TestCPrintInitialPropertyPage.h">
 			</File>
 			<File
 				RelativePath="TestCTimeControlMultiPropertyPage2.h">
@@ -3937,15 +3955,15 @@ copy &quot;$(DEV_VTK42_VS7_DLL_LIB)\vtkzlib.dll&quot; &quot;$(TargetDir)vtkzlib.
 			Name="Build Logs"
 			Filter="">
 			<File
-				RelativePath="Debug\BuildLog.htm"
-				DeploymentContent="TRUE">
-			</File>
-			<File
 				RelativePath="Release\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 			<File
 				RelativePath="cppunit\BuildLog.htm"
+				DeploymentContent="TRUE">
+			</File>
+			<File
+				RelativePath="Debug\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 		</Filter>

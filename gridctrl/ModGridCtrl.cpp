@@ -135,6 +135,7 @@ BEGIN_MESSAGE_MAP(CModGridCtrl, CGridCtrl)
 	ON_WM_KILLFOCUS()
 	ON_WM_SETFOCUS()
 	ON_WM_SIZE()
+    ON_MESSAGE(WM_SETFONT, OnSetFont)
 END_MESSAGE_MAP()
 
 // MODIFICATIONS:
@@ -726,4 +727,64 @@ void CModGridCtrl::OnSize(UINT nType, int cx, int cy)
 
 	// End re-entry blocking
 	bAlreadyInsideThisProcedure = FALSE;
+}
+
+void CModGridCtrl::PreSubclassWindow() 
+{    
+    CWnd::PreSubclassWindow();
+
+    HFONT hFont = ::CreateFontIndirect(&m_Logfont);
+    this->OnSetFont((LPARAM)hFont, 0);
+	::DeleteObject(hFont);
+    
+    this->ResetScrollBars();   
+}
+
+LRESULT CModGridCtrl::OnSetFont(WPARAM hFont, LPARAM /*lParam */)
+{
+    LRESULT result = Default();
+
+    // Get the logical font
+    LOGFONT lf;
+    if (!GetObject((HFONT) hFont, sizeof(LOGFONT), &lf))
+        return result;
+    
+    // Store font as the global default
+    memcpy(&m_Logfont, &lf, sizeof(LOGFONT));
+
+	// force normal font size
+	const int NORMAL_FONT_HEIGHT       = -11;
+	const int LARGE_FONT_HEIGHT        = -13;
+	const int EXTRA_LARGE_FONT_HEIGHT  = -16;
+
+	this->m_Logfont.lfHeight = NORMAL_FONT_HEIGHT;
+    
+    // reset all cells' fonts
+    for (int row = 0; row < GetRowCount(); row++)
+        for (int col = 0; col < GetColumnCount(); col++)
+            SetItemFont(row, col, &lf);
+
+    // Get the font size and hence the default cell size
+    CDC* pDC = GetDC();
+    if (pDC) 
+    {
+        m_Font.DeleteObject();
+        m_Font.CreateFontIndirect(&m_Logfont);
+        CFont* pOldFont = pDC->SelectObject(&m_Font);
+        
+        TEXTMETRIC tm;
+        pDC->GetTextMetrics(&tm);
+        
+        m_nMargin = pDC->GetTextExtent(_T(" "),1).cx;
+        pDC->SelectObject(pOldFont);
+        ReleaseDC(pDC);
+
+        m_nDefCellHeight = tm.tmHeight+tm.tmExternalLeading + 2*m_nMargin;
+        m_nDefCellWidth  = tm.tmAveCharWidth*12 + 2*m_nMargin;
+    }
+
+    if (::IsWindow(GetSafeHwnd())) 
+        Invalidate();
+
+    return result;
 }

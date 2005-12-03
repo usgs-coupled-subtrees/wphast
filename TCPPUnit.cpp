@@ -26,6 +26,7 @@
 #include "TestCtime.h"
 #include "TestCBCSpecifiedHeadPropertyPage.h"
 #include "TestCTimeControlMultiPropertyPage2.h"
+#include "TestCPrintInitialPropertyPage.h"
 
 
 TCPPUnit::TCPPUnit(void)
@@ -44,17 +45,17 @@ void TCPPUnit::RunUnitTests(void)
 	{
 		CppUnit::TextUi::TestRunner runner;
 
-		runner.addTest(TestCPhastInput::suite());
-		runner.addTest(TestCZone::suite());
-		runner.addTest(TestCGrid::suite());
-		runner.addTest(TestCtime::suite());
-		runner.addTest(TestCBC::suite());
-		runner.addTest(TestCTimeControl::suite());
-		runner.addTest(TestCWPhastDoc::suite());
-		runner.addTest(TestCParser::suite());
-		runner.addTest(TestCPropertyTreeControlBar::suite());
-		runner.addTest(TestCUnits::suite());
-		runner.addTest(TestCPhastInput::suite());
+// COMMENT: {12/1/2005 2:38:52 PM}		runner.addTest(TestCPhastInput::suite());
+// COMMENT: {12/1/2005 2:38:52 PM}		runner.addTest(TestCZone::suite());
+// COMMENT: {12/1/2005 2:38:52 PM}		runner.addTest(TestCGrid::suite());
+// COMMENT: {12/1/2005 2:38:52 PM}		runner.addTest(TestCtime::suite());
+// COMMENT: {12/1/2005 2:38:52 PM}		runner.addTest(TestCBC::suite());
+// COMMENT: {12/1/2005 2:38:52 PM}		runner.addTest(TestCTimeControl::suite());
+// COMMENT: {12/1/2005 2:38:52 PM}		runner.addTest(TestCWPhastDoc::suite());
+// COMMENT: {12/1/2005 2:38:52 PM}		runner.addTest(TestCParser::suite());
+// COMMENT: {12/1/2005 2:38:52 PM}		runner.addTest(TestCPropertyTreeControlBar::suite());
+// COMMENT: {12/1/2005 2:38:52 PM}		runner.addTest(TestCUnits::suite());
+// COMMENT: {12/1/2005 2:38:52 PM}		runner.addTest(TestCPhastInput::suite());
 
 #ifdef __DEPRECATED__
 		runner.addTest(TestCBCZone::suite());
@@ -74,6 +75,7 @@ void TCPPUnit::RunUnitTests(void)
 		runner.addTest(TestCPrintFreqPropertyPage::suite());
 		runner.addTest(TestCWellPropertyPage::suite());
 		***********************************************************/
+		runner.addTest(TestCPrintInitialPropertyPage::suite());
 
 		//runner.addTest(TestCModGridCtrlEx::suite());
 		//runner.addTest(TestCBCSpecifiedHeadPropertyPage::suite());
@@ -91,5 +93,5 @@ void TCPPUnit::RunUnitTests(void)
 	}
 
 	CPPUNIT_ASSERT(::fcloseall() == 0);
-// COMMENT: {8/18/2005 3:12:55 PM}	exit(0);
+	exit(0);
 }
