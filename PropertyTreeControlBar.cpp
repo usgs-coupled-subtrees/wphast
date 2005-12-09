@@ -1318,238 +1318,8 @@ void CPropertyTreeControlBar::OnKeyDown(NMHDR* pNMHDR, LRESULT* pResult)
 
 	if (pNMTVKEYDOWN->wVKey == VK_DELETE)
 	{
-		CTreeCtrlNode sel = this->m_wndTree.GetSelectedItem();
-
-		// MEDIA
-		//
-		if (sel.IsNodeAncestor(this->m_nodeMedia))
-		{
-			if (sel != this->m_nodeMedia)
-			{
-				while (sel.GetParent() != this->m_nodeMedia)
-				{
-					sel = sel.GetParent();
-					if (!sel) break;
-				}
-				if (sel.GetData())
-				{
-					if (CZoneActor* pZone = CZoneActor::SafeDownCast((vtkObject*)sel.GetData()))
-					{
-						if (pZone->GetDefault())
-						{
-							::AfxMessageBox(_T("The default MEDIA zone cannot be deleted."));
-						}
-						else
-						{
-							CTreeCtrlNode parent = sel.GetParent();
-							if (CWPhastDoc* pDoc = this->GetDocument())
-							{
-								parent.Select();
-								pDoc->Execute(new CZoneRemoveAction(pDoc, pZone, this));
-							}
-						}
-						*pResult = TRUE;
-						return;
-					}
-				}
-			}
-			return;
-		}
-
-		// WELLS
-		//
-		if (sel.IsNodeAncestor(this->GetWellsNode()))
-		{
-			if (sel != this->GetWellsNode())
-			{
-				while (sel.GetParent() != this->GetWellsNode())
-				{
-					sel = sel.GetParent();
-					if (!sel) break;
-				}
-				if (sel && sel.GetData())
-				{
-					if (CWellActor* pWell = CWellActor::SafeDownCast((vtkObject*)sel.GetData()))
-					{
-						CTreeCtrlNode parent = sel.GetParent();
-						if (CWPhastDoc* pDoc = this->GetDocument())
-						{
-							VERIFY(parent.Select());
-							pDoc->Execute(new CWellDeleteAction(pDoc, pWell));
-						}
-						*pResult = TRUE;
-						return;
-					}
-				}
-			}
-			return;
-		}
-
-		// RIVERS
-		//
-		if (sel.IsNodeAncestor(this->GetRiversNode()))
-		{
-			if (sel != this->GetRiversNode())
-			{
-				CTreeCtrlNode ptNode = sel;
-				while (sel.GetParent() != this->GetRiversNode())
-				{
-					sel = sel.GetParent();
-					if (!sel) break;
-				}
-
-				// determine if point is being deleted
-				//
-				int point = sel.GetIndex(ptNode);
-
-				if (sel && sel.GetData())
-				{
-					if (CRiverActor* pRiverActor = CRiverActor::SafeDownCast((vtkObject*)sel.GetData()))
-					{
-						CTreeCtrlNode parent = sel.GetParent();
-						if (CWPhastDoc* pDoc = this->GetDocument())
-						{
-							if (point >= 0)
-							{
-								if (point == 0 || point == pRiverActor->GetPointCount() - 1)
-								{
-									::AfxMessageBox("The first and the last river points cannot be deleted.");
-								}
-								else
-								{
-									VERIFY(ptNode.GetParent().Select());
-									pDoc->Execute(new CRiverDeletePointAction(pRiverActor, point));
-								}
-							}
-							else
-							{
-								VERIFY(parent.Select());
-								pDoc->Execute(new CRiverDeleteAction(pDoc, pRiverActor));
-							}							
-						}
-						*pResult = TRUE;
-						return;
-					}
-				}
-			}
-			return;
-		}
-
-		// HEAD_IC
-		//
-		if (sel.IsNodeAncestor(this->m_nodeICHead))
-		{
-			if (sel != this->m_nodeICHead)
-			{
-				while (sel.GetParent() != this->m_nodeICHead)
-				{
-					sel = sel.GetParent();
-					if (!sel) break;
-				}
-				if (sel.GetData())
-				{
-					if (CICHeadZoneActor* pZone = CICHeadZoneActor::SafeDownCast((vtkObject*)sel.GetData()))
-					{
-						if (pZone->GetDefault())
-						{
-							::AfxMessageBox(_T("The default HEAD_IC zone cannot be deleted."));
-						}
-						else
-						{
-							CTreeCtrlNode parent = sel.GetParent();
-							if (CWPhastDoc* pDoc = this->GetDocument())
-							{
-								parent.Select();
-								pDoc->Execute(new CZoneRemoveAction(pDoc, pZone, this));
-							}
-						}
-						*pResult = TRUE;
-						return;
-					}
-				}
-			}
-			return;
-		}
-
-		// CHEMISTRY_IC
-		//
-		if (sel.IsNodeAncestor(this->m_nodeICChem))
-		{
-			if (sel != this->m_nodeICChem)
-			{
-				while (sel.GetParent() != this->m_nodeICChem)
-				{
-					sel = sel.GetParent();
-					if (!sel) break;
-				}
-				if (sel.GetData())
-				{
-					if (CICChemZoneActor* pZone = CICChemZoneActor::SafeDownCast((vtkObject*)sel.GetData()))
-					{
-						if (pZone->GetDefault())
-						{
-							::AfxMessageBox(_T("The default CHEMISTRY_IC zone cannot be deleted."));
-						}
-						else
-						{
-							CTreeCtrlNode parent = sel.GetParent();
-							if (CWPhastDoc* pDoc = this->GetDocument())
-							{
-								parent.Select();
-								pDoc->Execute(new CZoneRemoveAction(pDoc, pZone, this));
-							}
-						}
-						*pResult = TRUE;
-						return;
-					}
-				}
-			}
-			return;
-		}
-
-		// BOUNDARY_CONDITIONS (first stress period)
-		//
-		if (sel.IsNodeAncestor(this->m_nodeBC))
-		{
-			if (sel != this->m_nodeBC)
-			{
-				while (sel.GetParent() != this->m_nodeBC)
-				{
-					sel = sel.GetParent();
-					if (!sel) break;
-				}
-				if (sel.GetData())
-				{
-					if (CZoneActor* pZone = CZoneActor::SafeDownCast((vtkObject*)sel.GetData()))
-					{
-						ASSERT(!pZone->GetDefault()); // no default BCs
-						CTreeCtrlNode parent = sel.GetParent();
-						if (CWPhastDoc* pDoc = this->GetDocument())
-						{
-							parent.Select();
-							pDoc->Execute(new CZoneRemoveAction(pDoc, pZone, this));
-						}
-						*pResult = TRUE;
-						return;
-					}
-				}
-			}
-			return;
-		}
-
-		// TIME_CONTROL
-		//
-		if (sel.IsNodeAncestor(this->m_nodeTimeControl))
-		{
-			if (this->m_nodeTimeControl.GetData())
-			{
-				CTimeControl* pTC = (CTimeControl*)this->m_nodeTimeControl.GetData();
-				::AfxMessageBox("Deleting TIME_CONTROL not currently implemented");
-				*pResult = TRUE;
-				return;
-			}
-			return;
-		}
+		// code moved to OnEditClear
+		ASSERT(FALSE);
 	}
 }
 
@@ -2615,30 +2385,9 @@ void CPropertyTreeControlBar::OnEditCut()
 			COleDataSource* pOleDataSource = new COleDataSource();
 			if (pOleDataSource && this->IsNodeCopyable(cutNode, pOleDataSource))
 			{
-// COMMENT: {10/27/2005 11:59:29 PM}				//{{
-// COMMENT: {10/27/2005 11:59:29 PM}				// store node name for pasting into same process
-// COMMENT: {10/27/2005 11:59:29 PM}				if (cutNode.GetData())
-// COMMENT: {10/27/2005 11:59:29 PM}				{
-// COMMENT: {10/27/2005 11:59:29 PM}					if (CZoneActor* pZone = CZoneActor::SafeDownCast((vtkObject*)cutNode.GetData()))
-// COMMENT: {10/27/2005 11:59:29 PM}					{
-// COMMENT: {10/27/2005 11:59:29 PM}						CString name(pZone->GetName());
-// COMMENT: {10/27/2005 11:59:29 PM}						CSharedFile globFile;
-// COMMENT: {10/27/2005 11:59:29 PM}						CArchive ar(&globFile, CArchive::store);
-// COMMENT: {10/27/2005 11:59:29 PM}						ar << name
-// COMMENT: {10/27/2005 11:59:29 PM}						ar.Close();
-// COMMENT: {10/27/2005 11:59:29 PM}						pOleDataSource->CacheGlobalData(this->m_cfPID, globFile.Detach());
-// COMMENT: {10/27/2005 11:59:29 PM}					}
-// COMMENT: {10/27/2005 11:59:29 PM}				}
-// COMMENT: {10/27/2005 11:59:29 PM}				//}}
-
 				pOleDataSource->SetClipboard();
 
-				//{{
-				NMTVKEYDOWN keydown;
-				keydown.wVKey = VK_DELETE;
-				LRESULT result;
-				this->OnKeyDown((NMHDR*)&keydown, &result);
-				//}}
+				this->OnEditClear();
 			}
 			else
 			{
@@ -2658,11 +2407,234 @@ void CPropertyTreeControlBar::OnEditCut()
 void CPropertyTreeControlBar::OnUpdateEditClear(CCmdUI *pCmdUI)
 {
 	// TODO: Add your command update UI handler code here
-	pCmdUI->Enable(FALSE);
+	pCmdUI->Enable(TRUE);
 }
 
 void CPropertyTreeControlBar::OnEditClear()
 {
-	// TODO: Add your command handler code here
-	TRACE("OnEditClear");
+	CTreeCtrlNode sel = this->m_wndTree.GetSelectedItem();
+
+	// MEDIA
+	//
+	if (sel.IsNodeAncestor(this->m_nodeMedia))
+	{
+		if (sel != this->m_nodeMedia)
+		{
+			while (sel.GetParent() != this->m_nodeMedia)
+			{
+				sel = sel.GetParent();
+				if (!sel) break;
+			}
+			if (sel.GetData())
+			{
+				if (CZoneActor* pZone = CZoneActor::SafeDownCast((vtkObject*)sel.GetData()))
+				{
+					if (pZone->GetDefault())
+					{
+						::AfxMessageBox(_T("The default MEDIA zone cannot be deleted."));
+					}
+					else
+					{
+						CTreeCtrlNode parent = sel.GetParent();
+						if (CWPhastDoc* pDoc = this->GetDocument())
+						{
+							parent.Select();
+							pDoc->Execute(new CZoneRemoveAction(pDoc, pZone, this));
+						}
+					}
+					return;
+				}
+			}
+		}
+		return;
+	}
+
+	// WELLS
+	//
+	if (sel.IsNodeAncestor(this->GetWellsNode()))
+	{
+		if (sel != this->GetWellsNode())
+		{
+			while (sel.GetParent() != this->GetWellsNode())
+			{
+				sel = sel.GetParent();
+				if (!sel) break;
+			}
+			if (sel && sel.GetData())
+			{
+				if (CWellActor* pWell = CWellActor::SafeDownCast((vtkObject*)sel.GetData()))
+				{
+					CTreeCtrlNode parent = sel.GetParent();
+					if (CWPhastDoc* pDoc = this->GetDocument())
+					{
+						VERIFY(parent.Select());
+						pDoc->Execute(new CWellDeleteAction(pDoc, pWell));
+					}
+					return;
+				}
+			}
+		}
+		return;
+	}
+
+	// RIVERS
+	//
+	if (sel.IsNodeAncestor(this->GetRiversNode()))
+	{
+		if (sel != this->GetRiversNode())
+		{
+			CTreeCtrlNode ptNode = sel;
+			while (sel.GetParent() != this->GetRiversNode())
+			{
+				sel = sel.GetParent();
+				if (!sel) break;
+			}
+
+			// determine if point is being deleted
+			//
+			int point = sel.GetIndex(ptNode);
+
+			if (sel && sel.GetData())
+			{
+				if (CRiverActor* pRiverActor = CRiverActor::SafeDownCast((vtkObject*)sel.GetData()))
+				{
+					CTreeCtrlNode parent = sel.GetParent();
+					if (CWPhastDoc* pDoc = this->GetDocument())
+					{
+						if (point >= 0)
+						{
+							if (point == 0 || point == pRiverActor->GetPointCount() - 1)
+							{
+								::AfxMessageBox("The first and the last river points cannot be deleted.");
+							}
+							else
+							{
+								VERIFY(ptNode.GetParent().Select());
+								pDoc->Execute(new CRiverDeletePointAction(pRiverActor, point));
+							}
+						}
+						else
+						{
+							VERIFY(parent.Select());
+							pDoc->Execute(new CRiverDeleteAction(pDoc, pRiverActor));
+						}							
+					}
+					return;
+				}
+			}
+		}
+		return;
+	}
+
+	// HEAD_IC
+	//
+	if (sel.IsNodeAncestor(this->m_nodeICHead))
+	{
+		if (sel != this->m_nodeICHead)
+		{
+			while (sel.GetParent() != this->m_nodeICHead)
+			{
+				sel = sel.GetParent();
+				if (!sel) break;
+			}
+			if (sel.GetData())
+			{
+				if (CICHeadZoneActor* pZone = CICHeadZoneActor::SafeDownCast((vtkObject*)sel.GetData()))
+				{
+					if (pZone->GetDefault())
+					{
+						::AfxMessageBox(_T("The default HEAD_IC zone cannot be deleted."));
+					}
+					else
+					{
+						CTreeCtrlNode parent = sel.GetParent();
+						if (CWPhastDoc* pDoc = this->GetDocument())
+						{
+							parent.Select();
+							pDoc->Execute(new CZoneRemoveAction(pDoc, pZone, this));
+						}
+					}
+					return;
+				}
+			}
+		}
+		return;
+	}
+
+	// CHEMISTRY_IC
+	//
+	if (sel.IsNodeAncestor(this->m_nodeICChem))
+	{
+		if (sel != this->m_nodeICChem)
+		{
+			while (sel.GetParent() != this->m_nodeICChem)
+			{
+				sel = sel.GetParent();
+				if (!sel) break;
+			}
+			if (sel.GetData())
+			{
+				if (CICChemZoneActor* pZone = CICChemZoneActor::SafeDownCast((vtkObject*)sel.GetData()))
+				{
+					if (pZone->GetDefault())
+					{
+						::AfxMessageBox(_T("The default CHEMISTRY_IC zone cannot be deleted."));
+					}
+					else
+					{
+						CTreeCtrlNode parent = sel.GetParent();
+						if (CWPhastDoc* pDoc = this->GetDocument())
+						{
+							parent.Select();
+							pDoc->Execute(new CZoneRemoveAction(pDoc, pZone, this));
+						}
+					}
+					return;
+				}
+			}
+		}
+		return;
+	}
+
+	// BOUNDARY_CONDITIONS (first stress period)
+	//
+	if (sel.IsNodeAncestor(this->m_nodeBC))
+	{
+		if (sel != this->m_nodeBC)
+		{
+			while (sel.GetParent() != this->m_nodeBC)
+			{
+				sel = sel.GetParent();
+				if (!sel) break;
+			}
+			if (sel.GetData())
+			{
+				if (CZoneActor* pZone = CZoneActor::SafeDownCast((vtkObject*)sel.GetData()))
+				{
+					ASSERT(!pZone->GetDefault()); // no default BCs
+					CTreeCtrlNode parent = sel.GetParent();
+					if (CWPhastDoc* pDoc = this->GetDocument())
+					{
+						parent.Select();
+						pDoc->Execute(new CZoneRemoveAction(pDoc, pZone, this));
+					}
+					return;
+				}
+			}
+		}
+		return;
+	}
+
+	// TIME_CONTROL
+	//
+	if (sel.IsNodeAncestor(this->m_nodeTimeControl))
+	{
+		if (this->m_nodeTimeControl.GetData())
+		{
+			CTimeControl* pTC = (CTimeControl*)this->m_nodeTimeControl.GetData();
+			::AfxMessageBox("Deleting TIME_CONTROL not currently implemented");
+			return;
+		}
+		return;
+	}
 }

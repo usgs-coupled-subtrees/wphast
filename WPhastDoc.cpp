@@ -2188,15 +2188,10 @@ BOOL CWPhastDoc::WriteTransDat(std::ostream& os)
 	// UNITS
 	os << this->GetUnits();
 
-	CGrid xyz[3];
-	this->m_pGridActor->GetGrid(xyz[0], xyz[1], xyz[2]);
-
 	// GRID
-	os << "GRID\n";
-	for (int i = 0; i < 3; ++i)
-	{
-		os << xyz[i];
-	}
+	CGridKeyword gridKeyword;
+	this->m_pGridActor->GetGridKeyword(gridKeyword);
+	os << gridKeyword;
 
 	// MEDIA
 	CTreeCtrlNode nodeMedia = this->GetPropertyTreeControlBar()->GetMediaNode();

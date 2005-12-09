@@ -16,6 +16,9 @@ public:
 	CGridKeyword(void);
 	CGridKeyword(struct grid arrGrid[3], double snap[3], int axes[3], int print_input_xy);
 	~CGridKeyword(void);
+
+	friend std::ostream& operator<< (std::ostream &os, const CGridKeyword &a);
+
 public:
 	CGrid  m_grid[3];
 	CSnap  m_snap;

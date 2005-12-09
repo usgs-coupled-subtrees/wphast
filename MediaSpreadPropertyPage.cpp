@@ -183,7 +183,7 @@ void CMediaSpreadPropertyPage::DoDataExchange(CDataExchange* pDX)
 	}
 	// ALPHA_LONG
 	CGlobal::DDX_Property(pDX, IDC_MEDIA_GRID, ++nRow, this->m_gridElt.alpha_long, false);
-	if (!this->m_bFlowOnly && pDX->m_bSaveAndValidate && this->m_gridElt.alpha_long->type == UNDEFINED)
+	if (this->m_bDefault && !this->m_bFlowOnly && pDX->m_bSaveAndValidate && this->m_gridElt.alpha_long->type == UNDEFINED)
 	{
 		CString str;
 		str.Format("A default \"%s\" must be defined.", ALPHA_LONG);
@@ -199,7 +199,7 @@ void CMediaSpreadPropertyPage::DoDataExchange(CDataExchange* pDX)
 
 	// ALPHA_HORIZONTAL
 	CGlobal::DDX_Property(pDX, IDC_MEDIA_GRID, ++nRow, this->m_gridElt.alpha_horizontal, false);
-	if (!this->m_bFlowOnly && pDX->m_bSaveAndValidate && this->m_gridElt.alpha_horizontal->type == UNDEFINED)
+	if (this->m_bDefault && !this->m_bFlowOnly && pDX->m_bSaveAndValidate && this->m_gridElt.alpha_horizontal->type == UNDEFINED)
 	{
 		CString str;
 		str.Format("A default \"%s\" must be defined.", ALPHA_HORIZONTAL);
@@ -215,7 +215,7 @@ void CMediaSpreadPropertyPage::DoDataExchange(CDataExchange* pDX)
 
 	// ALPHA_VERTICAL
 	CGlobal::DDX_Property(pDX, IDC_MEDIA_GRID, ++nRow, this->m_gridElt.alpha_vertical, false);
-	if (!this->m_bFlowOnly && pDX->m_bSaveAndValidate && this->m_gridElt.alpha_vertical->type == UNDEFINED)
+	if (this->m_bDefault && !this->m_bFlowOnly && pDX->m_bSaveAndValidate && this->m_gridElt.alpha_vertical->type == UNDEFINED)
 	{
 		CString str;
 		str.Format("A default \"%s\" must be defined.", ALPHA_VERTICAL);

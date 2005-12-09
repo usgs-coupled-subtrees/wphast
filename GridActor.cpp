@@ -417,6 +417,15 @@ void CGridActor::Insert(CTreeCtrl* pTreeCtrl, HTREEITEM htiGrid)
 		pTreeCtrl->InsertItem(str, htiGrid);
 	}
 
+	if (this->m_gridKeyword.m_print_input_xy)
+	{
+		pTreeCtrl->InsertItem("print_orientation XY", htiGrid);
+	}
+	else
+	{
+		pTreeCtrl->InsertItem("print_orientation XZ", htiGrid);
+	}
+
 	// set data
 	pTreeCtrl->SetItemData(htiGrid, (DWORD_PTR)this);
 	this->m_node = CTreeCtrlNode(htiGrid, (CTreeCtrlEx*)pTreeCtrl);
