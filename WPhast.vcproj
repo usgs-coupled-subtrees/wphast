@@ -825,9 +825,6 @@ copy &quot;$(DEV_VTK42_VS7_DLL_LIB)\vtkzlib.dll&quot; &quot;$(TargetDir)vtkzlib.
 				RelativePath="TempPropertyPage.cpp">
 			</File>
 			<File
-				RelativePath="TestCPrintInitialPropertyPage.cpp">
-			</File>
-			<File
 				RelativePath="TimeControl.cpp">
 			</File>
 			<File
@@ -1415,12 +1412,6 @@ copy &quot;$(DEV_VTK42_VS7_DLL_LIB)\vtkzlib.dll&quot; &quot;$(TargetDir)vtkzlib.
 			</File>
 			<File
 				RelativePath="TempPropertyPage.h">
-			</File>
-			<File
-				RelativePath="TestCPrintInitialPropertyPage.h">
-			</File>
-			<File
-				RelativePath="TestCTimeControlMultiPropertyPage2.h">
 			</File>
 			<File
 				RelativePath="TimeControl.h">
@@ -2286,6 +2277,39 @@ copy &quot;$(DEV_VTK42_VS7_DLL_LIB)\vtkzlib.dll&quot; &quot;$(TargetDir)vtkzlib.
 					</FileConfiguration>
 				</File>
 				<File
+					RelativePath="TestCPrintInitialPropertyPage.cpp">
+					<FileConfiguration
+						Name="Debug|Win32"
+						ExcludedFromBuild="TRUE">
+						<Tool
+							Name="VCCLCompilerTool"/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						ExcludedFromBuild="TRUE">
+						<Tool
+							Name="VCCLCompilerTool"/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkMemDebug|Win32"
+						ExcludedFromBuild="TRUE">
+						<Tool
+							Name="VCCLCompilerTool"/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="AutoRelease|Win32"
+						ExcludedFromBuild="TRUE">
+						<Tool
+							Name="VCCLCompilerTool"/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="AutoDebug|Win32"
+						ExcludedFromBuild="TRUE">
+						<Tool
+							Name="VCCLCompilerTool"/>
+					</FileConfiguration>
+				</File>
+				<File
 					RelativePath="TestCPropertyTreeControlBar.cpp">
 					<FileConfiguration
 						Name="Debug|Win32"
@@ -2698,6 +2722,9 @@ copy &quot;$(DEV_VTK42_VS7_DLL_LIB)\vtkzlib.dll&quot; &quot;$(TargetDir)vtkzlib.
 					RelativePath="TestCPrintFreqPropertyPage.h">
 				</File>
 				<File
+					RelativePath="TestCPrintInitialPropertyPage.h">
+				</File>
+				<File
 					RelativePath="TestCPropertyTreeControlBar.h">
 				</File>
 				<File
@@ -2705,6 +2732,9 @@ copy &quot;$(DEV_VTK42_VS7_DLL_LIB)\vtkzlib.dll&quot; &quot;$(TargetDir)vtkzlib.
 				</File>
 				<File
 					RelativePath="TestCTimeControlMultiPropertyPage.h">
+				</File>
+				<File
+					RelativePath="TestCTimeControlMultiPropertyPage2.h">
 				</File>
 				<File
 					RelativePath="TestCUnits.h">
@@ -3955,15 +3985,15 @@ copy &quot;$(DEV_VTK42_VS7_DLL_LIB)\vtkzlib.dll&quot; &quot;$(TargetDir)vtkzlib.
 			Name="Build Logs"
 			Filter="">
 			<File
-				RelativePath="Release\BuildLog.htm"
-				DeploymentContent="TRUE">
-			</File>
-			<File
 				RelativePath="cppunit\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 			<File
 				RelativePath="Debug\BuildLog.htm"
+				DeploymentContent="TRUE">
+			</File>
+			<File
+				RelativePath="Release\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 		</Filter>
