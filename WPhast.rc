@@ -1808,7 +1808,7 @@ BEGIN
                     BS_AUTOCHECKBOX | WS_TABSTOP,342,243,69,10
 END
 
-IDD_STARTUP_INTRO DIALOGEX 0, 0, 254, 71
+IDD_STARTUP_INTRO DIALOGEX 0, 0, 254, 86
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
     WS_SYSMENU
 CAPTION "Startup"
@@ -1820,7 +1820,10 @@ BEGIN
     CONTROL         "Use the new file wizard to create a new model.",
                     IDC_NEW_WIZARD,"Button",BS_AUTORADIOBUTTON | 
                     BS_MULTILINE,20,41,163,10
-    GROUPBOX        "Choose an action to perform",IDC_STATIC,7,7,185,57
+    GROUPBOX        "Choose an action to perform",IDC_STATIC,7,7,185,71
+    PUSHBUTTON      "Cancel",IDCANCEL,197,26,50,14
+    CONTROL         "Import a PHAST trans.dat file.",IDC_IMPORT_TRANS,"Button",
+                    BS_AUTORADIOBUTTON | BS_MULTILINE,20,59,163,10
 END
 
 IDD_FLOW_ONLY_INT_PROPPAGE2 DIALOGEX 0, 0, 317, 143
@@ -3167,7 +3170,7 @@ BEGIN
         RIGHTMARGIN, 247
         VERTGUIDE, 20
         TOPMARGIN, 7
-        BOTTOMMARGIN, 64
+        BOTTOMMARGIN, 79
     END
 
     IDD_FLOW_ONLY_INT_PROPPAGE2, DIALOG

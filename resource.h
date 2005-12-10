@@ -406,7 +406,6 @@
 #define IDC_BOTTOM                      1113
 #define IDC_GRID_SCHEDULES              1113
 #define IDC_SOLUTION_GRID               1113
-#define IDC_GRID2                       1113
 #define IDC_GRID_LEFT                   1113
 #define IDC_SINGLE_GRID                 1114
 #define IDC_EDIT_MO_X                   1115
@@ -498,6 +497,8 @@
 #define IDC_OPEN_FILE                   1195
 #define IDC_NEW_WIZARD                  1196
 #define IDC_EDIT_XMIN                   1197
+#define IDC_NEW_WIZARD2                 1197
+#define IDC_IMPORT_TRANS                1197
 #define IDC_EDIT_YMIN                   1198
 #define IDC_EDIT_ZMIN                   1199
 #define IDC_EDIT_XMAX                   1200

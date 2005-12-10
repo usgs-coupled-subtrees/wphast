@@ -346,6 +346,19 @@ void CWPhastApp::OnFileNew()
 					pDoc = static_cast<CWPhastDoc*> (pTemplate->OpenDocumentFile(dlg.GetFileName()));
 					return;
 				}
+				else if (dlg.GetAction() == CStartupDialog::SDA_CREATE_DEFAULT)
+				{
+					pDoc->New(CNewModel::Default());
+					pDoc->SetModifiedFlag(FALSE);
+					return;
+				}
+				else if (dlg.GetAction() == CStartupDialog::SDA_IMPORT_FILE)
+				{
+
+					pDoc->DoImport(dlg.GetFileName());
+					pDoc->SetModifiedFlag(FALSE);
+					return;
+				}
 			}
 
 			CBitmap bmpWatermark;

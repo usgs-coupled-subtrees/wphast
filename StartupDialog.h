@@ -14,7 +14,7 @@ public:
 // Dialog Data
 	enum { IDD = IDD_STARTUP_INTRO };
 
-	enum SDA_ACTION_TYPE { SDA_NEW_WIZARD, SDA_OPEN_FILE };
+	enum SDA_ACTION_TYPE { SDA_NEW_WIZARD, SDA_OPEN_FILE, SDA_CREATE_DEFAULT, SDA_IMPORT_FILE };
 
 	SDA_ACTION_TYPE GetAction(void)          {  return m_nAction;    }
 	void SetAction(SDA_ACTION_TYPE nAction)  {  m_nAction = nAction; }
@@ -32,4 +32,6 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 	virtual BOOL OnInitDialog();
+protected:
+	virtual void OnCancel();
 };

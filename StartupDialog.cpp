@@ -28,7 +28,7 @@ void CStartupDialog::DoDataExchange(CDataExchange* pDX)
 	{
 
 		// m_nAction
-		switch (this->GetCheckedRadioButton(IDC_OPEN_FILE, IDC_NEW_WIZARD))
+		switch (this->GetCheckedRadioButton(IDC_OPEN_FILE, IDC_IMPORT_TRANS))
 		{
 		case IDC_OPEN_FILE:
 			this->m_nAction = CStartupDialog::SDA_OPEN_FILE;
@@ -48,6 +48,27 @@ void CStartupDialog::DoDataExchange(CDataExchange* pDX)
 				this->m_strFileName = fileDlg.GetFileName();
 			}
 			break;
+
+		case IDC_IMPORT_TRANS:
+			this->m_nAction = CStartupDialog::SDA_IMPORT_FILE;
+			{
+				char szFilters[] = "Phast Transport Files (*.trans.dat)|*.trans.dat||";
+
+				CFileDialog fileDlg(TRUE, "trans.dat", "*.trans.dat",
+					OFN_FILEMUSTEXIST | OFN_HIDEREADONLY, szFilters, this, 0);
+
+				if (fileDlg.DoModal() != IDOK)
+				{
+					// TODO check if file is valid
+					pDX->Fail();
+				}
+
+				// m_strFileName
+				//
+				this->m_strFileName = fileDlg.GetFileName();
+			}
+			break;
+
 		case IDC_NEW_WIZARD:
 		default:
 			this->m_nAction = CStartupDialog::SDA_NEW_WIZARD;
@@ -89,4 +110,12 @@ BOOL CStartupDialog::OnInitDialog()
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
+}
+
+void CStartupDialog::OnCancel()
+{
+	// Add your specialized code here and/or call the base class
+	this->m_nAction = CStartupDialog::SDA_CREATE_DEFAULT;
+
+	CDialog::OnCancel();
 }
