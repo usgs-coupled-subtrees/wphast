@@ -7,6 +7,12 @@ public:
 	~CPrintInput(void);
 public:
 	void SyncWithSrcInput(void);
+
+	void Serialize(bool bStoring, hid_t loc_id);
+	friend std::ostream& operator<< (std::ostream &os, const CPrintInput& pi);
+	void Insert(CTreeCtrl* pTreeCtrl, HTREEITEM htiPrintInput);
+	void Edit(CTreeCtrl* pTreeCtrl);
+
 public:
 	int media;
 	int conductances;

@@ -80,6 +80,7 @@ static const TCHAR szIC_CHEM[]             = _T("CHEMISTRY_IC");
 static const TCHAR szBOUNDARY_CONDITIONS[] = _T("BOUNDARY_CONDITIONS");
 static const TCHAR szWELLS[]               = _T("WELLS");
 static const TCHAR szRIVERS[]              = _T("RIVERS");
+static const TCHAR szPRINT_INITIAL[]       = _T("PRINT_INITIAL");
 static const TCHAR szPRINT_FREQUENCY[]     = _T("PRINT_FREQUENCY");
 static const TCHAR szTIME_CONTROL[]        = _T("TIME_CONTROL");
 
@@ -799,6 +800,20 @@ void CPropertyTreeControlBar::OnNMDblClk(NMHDR* pNMHDR, LRESULT* pResult)
 		return;
 	}
 
+	// PRINT_INITIAL
+	//
+	if (item.IsNodeAncestor(this->m_nodePrintInput))
+	{
+		if (this->m_nodePrintInput.GetData())
+		{
+			CPrintInput* pPI = (CPrintInput*)this->m_nodePrintInput.GetData();
+			pPI->Edit(&this->m_wndTree);
+			*pResult = TRUE;
+			return;
+		}
+		return;
+	}
+
 	// PRINT_FREQUENCY
 	//
 	if (item.IsNodeAncestor(this->m_nodePF))
@@ -1034,18 +1049,33 @@ void CPropertyTreeControlBar::SetModel(CNewModel* pModel)
 	this->SetFlowOnly(&pModel->m_flowOnly);
 	this->SetFreeSurface(&pModel->m_freeSurface);
 	this->SetSteadyFlow(&pModel->m_steadyFlow);
+	this->SetPrintInput(&pModel->m_printInput);
 	this->SetPrintFrequency(&pModel->m_printFreq);
 	this->SetSolutionMethod(&pModel->m_solutionMethod);
 }
 
 void CPropertyTreeControlBar::SetTimeControl2(CTimeControl2* pTimeControl2)
 {
-	pTimeControl2->Insert(&this->m_wndTree, this->m_nodeTimeControl2);
+	if (pTimeControl2)
+	{
+		pTimeControl2->Insert(&this->m_wndTree, this->m_nodeTimeControl2);
+	}
 }
 
 void CPropertyTreeControlBar::SetPrintFrequency(CPrintFreq* pPrintFreq)
 {
-	pPrintFreq->Insert(&this->m_wndTree, this->m_nodePF);
+	if (pPrintFreq)
+	{
+		pPrintFreq->Insert(&this->m_wndTree, this->m_nodePF);
+	}
+}
+
+void CPropertyTreeControlBar::SetPrintInput(CPrintInput* pPrintInput)
+{
+	if (pPrintInput)
+	{
+		pPrintInput->Insert(&this->m_wndTree, this->m_nodePrintInput);
+	}
 }
 
 void CPropertyTreeControlBar::AddZone(CZoneActor* pZone, HTREEITEM hInsertAfter)
@@ -1128,6 +1158,7 @@ void CPropertyTreeControlBar::DeleteContents()
 	this->m_nodeBC           = this->m_wndTree.InsertItem(szBOUNDARY_CONDITIONS );
 	this->m_nodeWells        = this->m_wndTree.InsertItem(szWELLS               );
 	this->m_nodeRivers       = this->m_wndTree.InsertItem(szRIVERS              );
+	this->m_nodePrintInput   = this->m_wndTree.InsertItem(szPRINT_INITIAL       );
 	this->m_nodePF           = this->m_wndTree.InsertItem(szPRINT_FREQUENCY     );
 	this->m_nodeTimeControl2 = this->m_wndTree.InsertItem(szTIME_CONTROL        );
 

@@ -45,6 +45,15 @@ void TCPPUnit::RunUnitTests(void)
 	{
 		CppUnit::TextUi::TestRunner runner;
 
+		//{{
+		{
+			CPrintInput pi;
+			std::ostringstream oss_out;
+			oss_out << pi;
+			TRACE("%s\n", oss_out.str().c_str());
+		}
+		//}}
+
 // COMMENT: {12/1/2005 2:38:52 PM}		runner.addTest(TestCPhastInput::suite());
 // COMMENT: {12/1/2005 2:38:52 PM}		runner.addTest(TestCZone::suite());
 // COMMENT: {12/1/2005 2:38:52 PM}		runner.addTest(TestCGrid::suite());

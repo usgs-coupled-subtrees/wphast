@@ -37,6 +37,7 @@ class CGridElt;
 class CHeadIC;
 class CTimeControl;
 class CTimeControl2;
+class CPrintInput;
 class CPrintFreq;
 class CNewModel;
 
@@ -221,7 +222,6 @@ protected:
 
 	// properties
 	CUnits        *m_pUnits;
-// COMMENT: {5/5/2005 3:51:04 PM}	CPrintFreq    *m_pPrintFreq;
 
 	CNewModel     *m_pModel;
 
@@ -296,9 +296,6 @@ public:
 	CNewModel* GetModel(void);
 	void SetModel(const CNewModel &model);
 
-
-
-
 	// CUnits GetUnits(void);
 	const CUnits& GetUnits(void)const;
 	void GetUnits(CUnits& units)const;
@@ -307,12 +304,11 @@ public:
 	void SetTimeControl2(const CTimeControl2& timeControl2);
 	const CTimeControl2& GetTimeControl2(void)const;
 
-
-// COMMENT: {4/11/2005 1:21:22 PM}	void SetPrintFrequency(const CPrintFreq& printFreq, int nStressPeriod = 1);
-// COMMENT: {4/11/2005 1:21:22 PM}	const CPrintFreq& GetPrintFrequency(int nStressPeriod = 1)const;
 	void SetPrintFrequency(const CPrintFreq& printFreq);
 	const CPrintFreq& GetPrintFrequency(void)const;
 
+	void SetPrintInput(const CPrintInput& printInput);
+	const CPrintInput& GetPrintInput(void)const;
 
 	vtkFloatingPointType* GetGridBounds();
 	void SetScale(vtkFloatingPointType x, vtkFloatingPointType y, vtkFloatingPointType z);

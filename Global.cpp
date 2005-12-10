@@ -2021,3 +2021,31 @@ void CGlobal::DDX_Check(CDataExchange* pDX, int nIDC, bool& value)
 		}
 	}
 }
+
+void CGlobal::WriteBool(std::ostream &os, int width, int value, const char *heading)
+{
+	CGlobal::WriteBool(os, width, (value != 0), heading);
+}
+
+void CGlobal::WriteBool(std::ostream &os, int width, bool value, const char *heading)
+{
+	// save original format
+	std::ios_base::fmtflags format;
+
+	os << "\t";
+	os.width(width - 1);
+	format = os.setf(std::ios_base::left, std::ios_base::adjustfield);
+	os << heading;
+
+	if (value)
+	{
+		os << " true\n";
+	}
+	else
+	{
+		os << " false\n";
+	}
+
+	// restore original format
+	os.setf(format);
+}

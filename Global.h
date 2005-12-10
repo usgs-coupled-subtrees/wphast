@@ -47,6 +47,9 @@ public:
 	static void DDX_Face(CDataExchange* pDX, CBC& r_bc);
 	static void DDX_Check(CDataExchange* pDX, int nIDC, bool& value);
 
+	static void WriteBool(std::ostream &os, int width, int value, const char *heading);
+	static void WriteBool(std::ostream &os, int width, bool value, const char *heading);
+
 	// Cproperty
 	static void DDX_Property(CDataExchange* pDX, CCheckTreeCtrl* pTree, HTREEITEM hti, Cproperty* value, Cproperty* fixed, Cproperty* linear);
 	static void DDX_Property(CDataExchange* pDX, int nIDC, int nRow, struct property* pProperty, bool bRequired);

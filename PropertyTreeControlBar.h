@@ -14,6 +14,7 @@ class CFreeSurface;
 class CSolutionMethod;
 class CNewModel;
 class CTimeControl2;
+class CPrintInput;
 class CPrintFreq;
 class CZoneActor;
 class CWPhastDoc;
@@ -56,6 +57,7 @@ protected:
 	CTreeCtrlNode   m_nodeTimeControl;
 	CTreeCtrlNode   m_nodeTimeControl2;
 	CTreeCtrlNode   m_nodeSP1;
+	CTreeCtrlNode   m_nodePrintInput;
 	CTreeCtrlNode   m_nodePF;
 	CTreeCtrlNode   m_nodeFreeSurface;
 	CTreeCtrlNode   m_nodeSolutionMethod;
@@ -97,6 +99,8 @@ public:
 	void SetPrintFrequency(const CPrintFreq& printFreq);
 	CPrintFreq* GetPrintFrequency(void);
 
+	void SetPrintInput(CPrintInput* pPrintInput);
+
 	void SetModel(CNewModel* pModel);
 
 	CTreeCtrl* GetTreeCtrl(void)       {return &m_wndTree;}
@@ -113,6 +117,7 @@ public:
 	CTreeCtrlNode GetBCNode(void)             {return m_nodeBC;}
 	CTreeCtrlNode GetTimeControlNode(void)    {return m_nodeTimeControl;}
 	CTreeCtrlNode GetTimeControl2Node(void)   {return m_nodeTimeControl2;}
+	CTreeCtrlNode GetPrintInitialNode(void)   {return m_nodePrintInput;}
 	CTreeCtrlNode GetPrintFrequencyNode(void) {return m_nodePF;}
 
 	void SetNodeCheck(CTreeCtrlNode node, UINT nCheckState);

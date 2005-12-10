@@ -528,6 +528,9 @@ void CWPhastDoc::Serialize(CArchive& ar)
 			// store rivers
 			this->SerializeRivers(bStoring, wphast_id);
 
+			// store PRINT_INITIAL
+			this->m_pModel->m_printInput.Serialize(bStoring, wphast_id);
+
 			// store PRINT_FREQUENCY
 			this->m_pModel->m_printFreq.Serialize(bStoring, wphast_id);
 
@@ -640,6 +643,9 @@ void CWPhastDoc::Serialize(CArchive& ar)
 
 			// load rivers
 			this->SerializeRivers(bStoring, wphast_id);
+
+			// load PRINT_INITIAL
+			this->m_pModel->m_printInput.Serialize(bStoring, wphast_id);
 
 			// load PRINT_FREQUENCY
 #ifdef _DEBUG
@@ -1891,9 +1897,14 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 		CChemIC chemIC = CChemIC::Full();
 		::GetDefaultChemIC(&chemIC);
 
-		// PRINT_FREQUENCY
+		// PRINT_INITIAL
 		//
 		printFreq.SyncWithSrcInput();
+
+		// PRINT_FREQUENCY
+		//
+		CPrintInput printInput;
+		printInput.SyncWithSrcInput();
 
 		// SOLUTION_METHOD
 		//
@@ -1903,7 +1914,6 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 		// TIME_CONTROL
 		//
 		CTimeControl2 timeControl2(::time_step, ::time_end, ::count_time_end);
-
 
 		// create new document
 		//
@@ -1916,6 +1926,7 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 		model.m_media          = gridElt;
 		model.m_headIC         = headIC;
 		model.m_chemIC         = chemIC;
+		model.m_printInput     = printInput;
 		model.m_printFreq      = printFreq;
 		model.m_timeControl2   = timeControl2;
 		model.m_solutionMethod = solutionMethod;
@@ -2260,6 +2271,8 @@ BOOL CWPhastDoc::WriteTransDat(std::ostream& os)
 		}
 	}
 
+	os << this->GetPrintInput();
+
 	os << this->GetPrintFrequency();
 
 	os << this->GetTimeControl2();
@@ -2526,6 +2539,7 @@ void CWPhastDoc::New(const CNewModel& model)
 	// set FlowOnly
 	// set SteadyFlow
 	// set FreeSurface
+	// set PrintInput
 	// set PrintFreq
 	this->SetModel(model);
 
@@ -2828,6 +2842,23 @@ void CWPhastDoc::SetPrintFrequency(const CPrintFreq& printFreq)
 const CPrintFreq& CWPhastDoc::GetPrintFrequency(void)const
 {
 	return this->m_pModel->m_printFreq;
+}
+
+void CWPhastDoc::SetPrintInput(const CPrintInput& printInput)
+{
+	this->m_pModel->m_printInput = printInput;
+
+	// update properties bar
+	//
+	if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar())
+	{
+		pTree->SetPrintInput(&this->m_pModel->m_printInput);
+	}
+}
+
+const CPrintInput& CWPhastDoc::GetPrintInput(void)const
+{
+	return this->m_pModel->m_printInput;
 }
 
 void CWPhastDoc::OnToolsNewStressPeriod(void)

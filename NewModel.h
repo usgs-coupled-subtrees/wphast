@@ -10,6 +10,7 @@
 #include "SiteMap.h"
 #include "SteadyFlow.h"
 #include "FreeSurface.h"
+#include "PrintInput.h"
 #include "PrintFreq.h"
 #include "ChemIC.h"
 #include "Snap.h"
@@ -35,6 +36,7 @@ public:
 	CGridElt         m_media;
 	CHeadIC          m_headIC;
 	CChemIC          m_chemIC;
+	CPrintInput      m_printInput;
 	CPrintFreq	     m_printFreq;
 	CTimeControl2    m_timeControl2;
 	CSolutionMethod  m_solutionMethod;

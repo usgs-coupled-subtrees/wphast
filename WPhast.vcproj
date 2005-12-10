@@ -771,6 +771,9 @@ copy &quot;$(DEV_VTK42_VS7_DLL_LIB)\vtkzlib.dll&quot; &quot;$(TargetDir)vtkzlib.
 				RelativePath="SetPrintFreqAction.cpp">
 			</File>
 			<File
+				RelativePath="SetPrintInputAction.cpp">
+			</File>
+			<File
 				RelativePath="SetRiverAction.cpp">
 			</File>
 			<File
@@ -1358,6 +1361,9 @@ copy &quot;$(DEV_VTK42_VS7_DLL_LIB)\vtkzlib.dll&quot; &quot;$(TargetDir)vtkzlib.
 			</File>
 			<File
 				RelativePath="SetPrintFreqAction.h">
+			</File>
+			<File
+				RelativePath="SetPrintInputAction.h">
 			</File>
 			<File
 				RelativePath="SetRiverAction.h">
@@ -3985,15 +3991,15 @@ copy &quot;$(DEV_VTK42_VS7_DLL_LIB)\vtkzlib.dll&quot; &quot;$(TargetDir)vtkzlib.
 			Name="Build Logs"
 			Filter="">
 			<File
-				RelativePath="cppunit\BuildLog.htm"
-				DeploymentContent="TRUE">
-			</File>
-			<File
 				RelativePath="Debug\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 			<File
 				RelativePath="Release\BuildLog.htm"
+				DeploymentContent="TRUE">
+			</File>
+			<File
+				RelativePath="cppunit\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 		</Filter>
