@@ -2682,6 +2682,29 @@ BEGIN
                     WS_HSCROLL,7,260,293,53
 END
 
+IDD_SERIES_DIALOG2 DIALOGEX 0, 0, 187, 106
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "Series"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    GROUPBOX        "Type",IDC_STATIC,7,7,56,64
+    CONTROL         "&Linear",IDC_RADIO_LINEAR,"Button",BS_AUTORADIOBUTTON,
+                    13,24,35,10
+    CONTROL         "&Growth",IDC_RADIO_GROWTH,"Button",BS_AUTORADIOBUTTON,
+                    13,45,39,10
+    LTEXT           "St&art value:",IDC_STATIC,85,12,39,8
+    EDITTEXT        IDC_EDIT_START,128,11,52,12,ES_AUTOHSCROLL
+    LTEXT           "Start &increment:",IDC_STATIC,71,28,53,8
+    EDITTEXT        IDC_EDIT_INCR,128,27,52,12,ES_AUTOHSCROLL
+    LTEXT           "&Factor:",IDC_STATIC_FACTOR,100,45,24,8
+    EDITTEXT        IDC_EDIT_FACTOR,128,43,52,12,ES_AUTOHSCROLL
+    LTEXT           "&End value:",IDC_STATIC,89,61,35,8
+    EDITTEXT        IDC_EDIT_END,128,59,52,12,ES_AUTOHSCROLL
+    DEFPUSHBUTTON   "OK",IDOK,35,85,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,101,85,50,14
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -3452,6 +3475,14 @@ BEGIN
         RIGHTMARGIN, 300
         TOPMARGIN, 7
         BOTTOMMARGIN, 314
+    END
+
+    IDD_SERIES_DIALOG2, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 180
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 99
     END
 END
 #endif    // APSTUDIO_INVOKED

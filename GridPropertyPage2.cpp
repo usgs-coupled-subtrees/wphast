@@ -9,6 +9,7 @@
 #include "GridSetAction.h"
 #include "ModelessPropertySheet.h"
 #include "SeriesDialog.h"
+#include "SeriesDialog2.h"
 
 // CGridPropertyPage2 dialog
 
@@ -617,19 +618,19 @@ void CGridPropertyPage2::OnBnClickedButtonSeries()
 		}
 	}
 
-	CSeriesDialog dlg;
-	dlg.m_dStartValue = start;
-	if (dlg.DoModal() == IDOK)
+	CSeriesDialog2 dlg2;
+	dlg2.m_dStartValue = start;
+	if (dlg2.DoModal() == IDOK)
 	{
-		if (dlg.m_nType == CSeriesDialog::SD_LINEAR)
+		if (dlg2.m_nType == CSeriesDialog2::SD_LINEAR)
 		{
 			double value;
 			for (int row = range.GetMinRow(), i = 0; row <= range.GetMaxRow(); ++row, ++i)
 			{
 				if (row > 0)
 				{
-					value = dlg.m_dStartValue + i * dlg.m_dStepValue;
-					if ( !dlg.m_bStopValueDefined || (value <= dlg.m_dStopValue) )
+					value = dlg2.m_dStartValue + i * dlg2.m_dStartIncrement;
+					if ( !dlg2.m_bEndValueDefined || (value <= dlg2.m_dEndValue) )
 					{
 						str.Format(_T("%g"), value);
 						VERIFY(this->m_wndNonuniformGrid.SetItemText(row, 1, str));
@@ -638,17 +639,20 @@ void CGridPropertyPage2::OnBnClickedButtonSeries()
 			}
 
 		}
-		else if (dlg.m_nType == CSeriesDialog::SD_GROWTH)
+		else if (dlg2.m_nType == CSeriesDialog2::SD_GROWTH)
 		{
-			double value;
-			for (int row = range.GetMinRow(), i = 0; row <= range.GetMaxRow(); ++row, ++i)
+			double value = dlg2.m_dStartValue;
+			str.Format(_T("%.*g"), DBL_DIG, value);
+			VERIFY(this->m_wndNonuniformGrid.SetItemText(range.GetMinRow(), 1, str));
+
+			for (int row = range.GetMinRow() + 1, i = 0; row <= range.GetMaxRow(); ++row, ++i)
 			{
 				if (row > 0)
 				{
-					value = dlg.m_dStartValue * ::pow(dlg.m_dStepValue, i);
-					if ( !dlg.m_bStopValueDefined || (value <= dlg.m_dStopValue) )
+					// value = prev_value + dlg2.m_dStartIncrement * ::pow(dlg2.m_dFactor, i);
+					value += dlg2.m_dStartIncrement * ::pow(dlg2.m_dFactor, i);
+					if ( !dlg2.m_bEndValueDefined || (value <= dlg2.m_dEndValue) )
 					{
-						// str.Format(_T("%g"), value);						
 						str.Format(_T("%.*g"), DBL_DIG, value);
 						VERIFY(this->m_wndNonuniformGrid.SetItemText(row, 1, str));
 					}
@@ -664,6 +668,7 @@ void CGridPropertyPage2::OnBnClickedButtonSeries()
 		this->m_wndNonuniformGrid.SetSelectedRange(range);
 		this->m_wndNonuniformGrid.RedrawWindow();
 	}	
+
 }
 
 

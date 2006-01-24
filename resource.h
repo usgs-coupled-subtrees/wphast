@@ -249,6 +249,7 @@
 #define IDB_PLUS_MERGE                  252
 #define IDD_PRINT_INITIAL_EXT_PROPPAGE  252
 #define IDD_PRINT_INITIAL_PROPPAGE      253
+#define IDD_SERIES_DIALOG2              254
 #define IDC_3DGARROW                    255
 #define IDR_WELL_RATE_RTF               256
 #define IDR_WELL_SOLUTION_RTF           257
@@ -604,6 +605,7 @@
 #define IDC_RADIO_LINEAR                1279
 #define IDC_RADIO_GROWTH                1280
 #define IDC_EDIT_MIN_I                  1281
+#define IDC_EDIT_END                    1281
 #define IDC_SPIN_MIN_I                  1282
 #define IDC_EDIT_MIN_J                  1283
 #define IDC_SPIN_MIN_J                  1284
@@ -660,6 +662,9 @@
 #define IDC_FACE_Y_RADIO                1344
 #define IDC_FACE_Z_RADIO                1345
 #define IDC_GRID_RIGHT                  1347
+#define IDC_EDIT_INCR                   1348
+#define IDC_EDIT_FACTOR                 1349
+#define IDC_STATIC_FACTOR               1350
 #define IDC_RESIZE_COLUMN               28654
 #define IDC_RESIZE_ROW                  28655
 #define IDR_POPUP                       28656
@@ -685,7 +690,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        273
 #define _APS_NEXT_COMMAND_VALUE         32832
-#define _APS_NEXT_CONTROL_VALUE         1348
+#define _APS_NEXT_CONTROL_VALUE         1351
 #define _APS_NEXT_SYMED_VALUE           126
 #endif
 #endif

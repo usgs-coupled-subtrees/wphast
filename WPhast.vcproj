@@ -750,6 +750,9 @@ copy &quot;$(DEV_VTK42_VS7_DLL_LIB)\vtkzlib.dll&quot; &quot;$(TargetDir)vtkzlib.
 				RelativePath="SeriesDialog.cpp">
 			</File>
 			<File
+				RelativePath="SeriesDialog2.cpp">
+			</File>
+			<File
 				RelativePath="SetBCAction.cpp">
 			</File>
 			<File
@@ -1340,6 +1343,9 @@ copy &quot;$(DEV_VTK42_VS7_DLL_LIB)\vtkzlib.dll&quot; &quot;$(TargetDir)vtkzlib.
 			</File>
 			<File
 				RelativePath="SeriesDialog.h">
+			</File>
+			<File
+				RelativePath="SeriesDialog2.h">
 			</File>
 			<File
 				RelativePath="SetBCAction.h">
@@ -3991,15 +3997,15 @@ copy &quot;$(DEV_VTK42_VS7_DLL_LIB)\vtkzlib.dll&quot; &quot;$(TargetDir)vtkzlib.
 			Name="Build Logs"
 			Filter="">
 			<File
-				RelativePath="Debug\BuildLog.htm"
-				DeploymentContent="TRUE">
-			</File>
-			<File
 				RelativePath="Release\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 			<File
 				RelativePath="cppunit\BuildLog.htm"
+				DeploymentContent="TRUE">
+			</File>
+			<File
+				RelativePath="Debug\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 		</Filter>
