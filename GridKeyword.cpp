@@ -62,7 +62,10 @@ std::ostream& operator<< (std::ostream &os, const CGridKeyword &a)
 	os << "\t" << "-chemistry_dimensions ";
 	for (int i = 0; i < 3; ++i)
 	{
-		os << dim[i];
+		if (a.m_axes[i])
+		{
+			os << dim[i];
+		}
 	}
 	os << "\n";
 
