@@ -252,8 +252,14 @@ void Ctime::Serialize(CArchive& ar)
 		case UNITS:	case STEP:
 			if (ar.IsStoring())
 			{
-				ASSERT(this->input); // NEEDS TO BE TESTED
-				temp = this->input;
+				if (this->input)
+				{
+					temp = this->input;
+				}
+				else
+				{
+					temp.Empty();
+				}
 				ar << temp;
 			}
 			else
