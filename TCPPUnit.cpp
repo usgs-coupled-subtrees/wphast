@@ -84,7 +84,7 @@ void TCPPUnit::RunUnitTests(void)
 		runner.addTest(TestCPrintFreqPropertyPage::suite());
 		runner.addTest(TestCWellPropertyPage::suite());
 		***********************************************************/
-		runner.addTest(TestCPrintInitialPropertyPage::suite());
+		//runner.addTest(TestCPrintInitialPropertyPage::suite());
 
 		//runner.addTest(TestCModGridCtrlEx::suite());
 		//runner.addTest(TestCBCSpecifiedHeadPropertyPage::suite());
@@ -102,5 +102,5 @@ void TCPPUnit::RunUnitTests(void)
 	}
 
 	CPPUNIT_ASSERT(::fcloseall() == 0);
-// COMMENT: {12/9/2005 7:18:32 PM}	exit(0);
+// COMMENT: {3/28/2006 9:12:56 PM}	exit(0);
 }

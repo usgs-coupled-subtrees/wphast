@@ -98,6 +98,10 @@ extern void GetDefaultMedia(struct grid_elt* p_grid_elt);
 extern void GetDefaultHeadIC(struct head_ic* p_head_ic);
 extern void GetDefaultChemIC(struct chem_ic* p_chem_ic);
 
+static const TCHAR szZoneFormat[]    = _T("Zone %d");
+static const TCHAR szZoneFind[]      = _T("Zone ");
+
+
 extern "C" {
 int error_msg (const char *err_str, const int stop);
 }
@@ -1174,9 +1178,6 @@ void CWPhastDoc::InitDocument()
 	}
 	****/
 
-	// properties
-	//
-	this->m_nNextZone = 1;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -1197,9 +1198,6 @@ void CWPhastDoc::DeleteContents()
 	TRACE("CWPhastDoc::DeleteContents()\n");
 
 	ASSERT(this->m_pAxesActor);
-
-	// init next zone number
-	this->m_nNextZone = 1;
 
 	// reset model
 	ASSERT(this->m_pModel);
@@ -1657,7 +1655,9 @@ void CWPhastDoc::ResetCamera(void)
 
 CString CWPhastDoc::GetNextZoneName(void)
 {
-	return this->GetPropertyTreeControlBar()->GetNextZoneName();
+	static CString str;
+	str.Format(szZoneFormat, this->GetNextZoneNumber());
+	return str;
 }
 
 int CWPhastDoc::GetNextWellNumber(void)
@@ -1725,6 +1725,56 @@ void CWPhastDoc::GetUsedRiverNumbers(std::set<int>& usedNums)
 				std::pair< std::set<int>::iterator, bool > pr;
 				pr = usedNums.insert( pRiverActor->GetRiver().n_user );
 				ASSERT(pr.second); // duplicate?
+			}
+		}
+	}
+}
+
+int CWPhastDoc::GetNextZoneNumber(void)const
+{
+	std::set<int> zoneNums;
+	this->GetUsedZoneNumbers(zoneNums);
+	if (zoneNums.rbegin() != zoneNums.rend())
+	{
+		return (*zoneNums.rbegin()) + 1;
+	}
+	else
+	{
+		return 1;
+	}
+}
+
+void CWPhastDoc::GetUsedZoneNumbers(std::set<int>& usedNums)const
+{
+	char *ptr;
+	usedNums.clear();
+
+	std::list<vtkPropCollection*> collections;
+	collections.push_back(this->GetPropAssemblyMedia()->GetParts());
+	collections.push_back(this->GetPropAssemblyBC()->GetParts());
+	collections.push_back(this->GetPropAssemblyIC()->GetParts());
+
+	std::list<vtkPropCollection*>::iterator iter = collections.begin();
+	for (; iter != collections.end(); ++iter)
+	{
+		if (vtkPropCollection *pPropCollection = (*iter))
+		{
+			vtkProp *pProp = 0;
+			pPropCollection->InitTraversal();
+			for (; (pProp = pPropCollection->GetNextProp()); )
+			{
+				if (CZoneActor *pZoneActor = CZoneActor::SafeDownCast(pProp))
+				{
+					// store used n_user numbers
+					//
+					std::pair< std::set<int>::iterator, bool > pr;
+					CString str = pZoneActor->GetName();
+					if (str.Find(szZoneFind) == 0) {
+						int n = ::strtol((const char*)str + 4, &ptr, 10);
+						pr = usedNums.insert(n);
+						ASSERT(pr.second); // duplicate?
+					}
+				}
 			}
 		}
 	}

@@ -121,6 +121,8 @@ public:
 	void Delete(CZoneActor *pZoneActor);
 	void UnDelete(CZoneActor *pZoneActor);
 	void Select(CZoneActor *pZoneActor);
+	void GetUsedZoneNumbers(std::set<int>& usedNums)const;
+	int GetNextZoneNumber(void)const;
 
 	void Edit(CGridActor* pGridActor);
 	void ModifyGrid(CGridActor* gridActor, CGridElementsSelector* gridElementsSelector);
@@ -232,7 +234,6 @@ protected:
 
 
 	// properties
-	int m_nNextZone;
 	enum ProjectionType m_ProjectionMode;
 
 	// grid

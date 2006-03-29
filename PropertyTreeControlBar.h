@@ -66,7 +66,6 @@ protected:
 	CTreeCtrlNode   m_nodeRivers;
 	
 	bool            m_bSelectingProp;
-	int             m_nNextZone;
 
 protected:
 	DECLARE_MESSAGE_MAP()
@@ -84,7 +83,6 @@ public:
 
 	void AddZone(CZoneActor* pZone, HTREEITEM hInsertAfter = TVI_LAST);
 	void RemoveZone(CZoneActor* pZone);
-	CString GetNextZoneName(void)const;
 
 	void SetUnits(CUnits *pUnits);
 	void SetFlowOnly(CFlowOnly *pFlowOnly);

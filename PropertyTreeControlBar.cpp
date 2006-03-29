@@ -84,8 +84,6 @@ static const TCHAR szPRINT_INITIAL[]       = _T("PRINT_INITIAL");
 static const TCHAR szPRINT_FREQUENCY[]     = _T("PRINT_FREQUENCY");
 static const TCHAR szTIME_CONTROL[]        = _T("TIME_CONTROL");
 
-static const TCHAR szZoneFormat[]          = _T("Zone %d");
-
 static const int BC_INDEX              = 0;
 static const int PRINT_FREQUENCY_INDEX = 1;
 static const int TIME_CONTROL_INDEX    = 2;
@@ -142,7 +140,6 @@ TVN_SINGLEEXPAND
 
 CPropertyTreeControlBar::CPropertyTreeControlBar(void)
 : m_bSelectingProp(false)
-, m_nNextZone(0)
 , m_pImageList(NULL)
 {
 	CString str;
@@ -1084,7 +1081,6 @@ void CPropertyTreeControlBar::AddZone(CZoneActor* pZone, HTREEITEM hInsertAfter)
 	ASSERT(pZone);
 	pZone->Insert(this, hInsertAfter);
 	this->m_wndTree.RedrawWindow();
-	++this->m_nNextZone;
 	this->m_bSelectingProp = FALSE; // HACK
 }
 
@@ -1137,9 +1133,6 @@ void CPropertyTreeControlBar::SetGridActor(CGridActor* pGridActor)
 void CPropertyTreeControlBar::DeleteContents()
 {
 	this->m_wndTree.DeleteAllItems();
-
-	// reset next zone
-	this->m_nNextZone = 0;
 
 	// populate static properties
 	this->m_nodeFlowOnly       = this->m_wndTree.InsertItem(szFLOW_ONLY          );
@@ -1333,13 +1326,6 @@ void CPropertyTreeControlBar::OnDestroy()
 
 	// free image list
 	delete this->m_pImageList;
-}
-
-CString CPropertyTreeControlBar::GetNextZoneName(void)const
-{
-	static CString str;
-	str.Format(szZoneFormat, this->m_nNextZone);
-	return str;
 }
 
 void CPropertyTreeControlBar::OnKeyDown(NMHDR* pNMHDR, LRESULT* pResult)
