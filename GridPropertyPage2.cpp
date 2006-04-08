@@ -715,7 +715,6 @@ void CGridPropertyPage2::OnBnClickedButtonSubdivide()
 
 	if (dlg.DoModal() == IDOK) 
 	{
-		/////////////////{{{{{{{{{{{{{{{{{
 		std::vector<double> values;
 		CUtilities::Subdivide(values, dlg.start, dlg.end,  dlg.numSubInterval, dlg.multiplier);
 
@@ -791,125 +790,10 @@ void CGridPropertyPage2::OnBnClickedButtonSubdivide()
 		// force grid update
 		//
 		this->m_wndNonuniformGrid.Invalidate(TRUE);
-		this->SetModified(TRUE);
-		/////////////////}}}}}}}}}}}}}}}}}
 
-// COMMENT: {4/7/2006 11:58:26 PM}		std::vector<double> values;
-// COMMENT: {4/7/2006 11:58:26 PM}		CUtilities::Subdivide(values, dlg.start, dlg.end,  dlg.numSubInterval, dlg.multiplier);
-// COMMENT: {4/7/2006 11:58:26 PM}		if (dlg.numSubInterval < (range.GetRowSpan() - 1))
-// COMMENT: {4/7/2006 11:58:26 PM}		{
-// COMMENT: {4/7/2006 11:58:26 PM}			// Delete rows
-// COMMENT: {4/7/2006 11:58:26 PM}			//
-// COMMENT: {4/7/2006 11:58:26 PM}			int count = (range.GetRowSpan() - 1) - dlg.numSubInterval;
-// COMMENT: {4/7/2006 11:58:26 PM}			for (int i = 0; i < count; ++i)
-// COMMENT: {4/7/2006 11:58:26 PM}			{
-// COMMENT: {4/7/2006 11:58:26 PM}				this->m_wndNonuniformGrid.DeleteRow(range.GetMinRow() + 1);
-// COMMENT: {4/7/2006 11:58:26 PM}			}
-// COMMENT: {4/7/2006 11:58:26 PM}			//{{
-// COMMENT: {4/7/2006 11:58:26 PM}			// Add rows
-// COMMENT: {4/7/2006 11:58:26 PM}			//
-// COMMENT: {4/7/2006 11:58:26 PM}			for (int i = count; i < 0; ++i)
-// COMMENT: {4/7/2006 11:58:26 PM}			{
-// COMMENT: {4/7/2006 11:58:26 PM}				int row = this->m_wndNonuniformGrid.InsertRow("", range.GetMinRow() + 1);
-// COMMENT: {4/7/2006 11:58:26 PM}				this->m_wndNonuniformGrid.SetRowHeight(row, this->m_wndNonuniformGrid.GetRowHeight(1));
-// COMMENT: {4/7/2006 11:58:26 PM}			}
-// COMMENT: {4/7/2006 11:58:26 PM}			//}}
-// COMMENT: {4/7/2006 11:58:26 PM}			this->SetDlgItemInt(IDC_EDIT_N_NODES, this->m_wndNonuniformGrid.GetRowCount() - 1);
-// COMMENT: {4/7/2006 11:58:26 PM}
-// COMMENT: {4/7/2006 11:58:26 PM}			CString str;
-// COMMENT: {4/7/2006 11:58:26 PM}			for (int row = range.GetMinRow() + 1; row < this->m_wndNonuniformGrid.GetRowCount(); ++row)
-// COMMENT: {4/7/2006 11:58:26 PM}			{
-// COMMENT: {4/7/2006 11:58:26 PM}				if (count != 0)
-// COMMENT: {4/7/2006 11:58:26 PM}				{
-// COMMENT: {4/7/2006 11:58:26 PM}					// Reset column headings
-// COMMENT: {4/7/2006 11:58:26 PM}					//
-// COMMENT: {4/7/2006 11:58:26 PM}					str.Format(_T("%d"), row);
-// COMMENT: {4/7/2006 11:58:26 PM}					VERIFY(this->m_wndNonuniformGrid.SetItemText(row, 0, str));
-// COMMENT: {4/7/2006 11:58:26 PM}					VERIFY(this->m_wndNonuniformGrid.SetItemFormat(row, 0, DT_CENTER|DT_BOTTOM|DT_END_ELLIPSIS));
-// COMMENT: {4/7/2006 11:58:26 PM}				}
-// COMMENT: {4/7/2006 11:58:26 PM}
-// COMMENT: {4/7/2006 11:58:26 PM}				if ((row - range.GetMinRow()) < (int)values.size())
-// COMMENT: {4/7/2006 11:58:26 PM}				{
-// COMMENT: {4/7/2006 11:58:26 PM}					str.Format(_T("%g"), values[row - range.GetMinRow()]);
-// COMMENT: {4/7/2006 11:58:26 PM}					VERIFY(this->m_wndNonuniformGrid.SetItemText(row, 1, str));
-// COMMENT: {4/7/2006 11:58:26 PM}					VERIFY(this->m_wndNonuniformGrid.SetItemFormat(row, 1, DT_RIGHT|DT_BOTTOM|DT_END_ELLIPSIS));
-// COMMENT: {4/7/2006 11:58:26 PM}				}
-// COMMENT: {4/7/2006 11:58:26 PM}			}
-// COMMENT: {4/7/2006 11:58:26 PM}			range.SetMaxRow(range.GetMaxRow() - count);
-// COMMENT: {4/7/2006 11:58:26 PM}			if (cellID.row == range.GetMinRow())
-// COMMENT: {4/7/2006 11:58:26 PM}			{
-// COMMENT: {4/7/2006 11:58:26 PM}				this->m_wndNonuniformGrid.SetCurrentFocusCell(cellID.row, cellID.col);
-// COMMENT: {4/7/2006 11:58:26 PM}			}
-// COMMENT: {4/7/2006 11:58:26 PM}			else
-// COMMENT: {4/7/2006 11:58:26 PM}			{
-// COMMENT: {4/7/2006 11:58:26 PM}				this->m_wndNonuniformGrid.SetCurrentFocusCell(range.GetMaxRow(), cellID.col);
-// COMMENT: {4/7/2006 11:58:26 PM}			}
-// COMMENT: {4/7/2006 11:58:26 PM}			this->m_wndNonuniformGrid.SetSelectedRange(range);
-// COMMENT: {4/7/2006 11:58:26 PM}			this->m_wndNonuniformGrid.Invalidate(TRUE);
-// COMMENT: {4/7/2006 11:58:26 PM}		}
-// COMMENT: {4/7/2006 11:58:26 PM}		else if ((dlg.numSubInterval + 1) > range.GetRowSpan())
-// COMMENT: {4/7/2006 11:58:26 PM}		{
-// COMMENT: {4/7/2006 11:58:26 PM}			// Add rows
-// COMMENT: {4/7/2006 11:58:26 PM}			//
-// COMMENT: {4/7/2006 11:58:26 PM}			int count = dlg.numSubInterval - (range.GetRowSpan() - 1);
-// COMMENT: {4/7/2006 11:58:26 PM}			for (int i = 0; i < count; ++i)
-// COMMENT: {4/7/2006 11:58:26 PM}			{
-// COMMENT: {4/7/2006 11:58:26 PM}				int row = this->m_wndNonuniformGrid.InsertRow("", range.GetMinRow() + 1);
-// COMMENT: {4/7/2006 11:58:26 PM}				this->m_wndNonuniformGrid.SetRowHeight(row, this->m_wndNonuniformGrid.GetRowHeight(1));
-// COMMENT: {4/7/2006 11:58:26 PM}			}
-// COMMENT: {4/7/2006 11:58:26 PM}			this->SetDlgItemInt(IDC_EDIT_N_NODES, this->m_wndNonuniformGrid.GetRowCount() - 1);
-// COMMENT: {4/7/2006 11:58:26 PM}
-// COMMENT: {4/7/2006 11:58:26 PM}			CString str;
-// COMMENT: {4/7/2006 11:58:26 PM}			for (int row = range.GetMinRow() + 1; row < this->m_wndNonuniformGrid.GetRowCount(); ++row)
-// COMMENT: {4/7/2006 11:58:26 PM}			{
-// COMMENT: {4/7/2006 11:58:26 PM}				// Reset column headings
-// COMMENT: {4/7/2006 11:58:26 PM}				//
-// COMMENT: {4/7/2006 11:58:26 PM}				str.Format(_T("%d"), row);
-// COMMENT: {4/7/2006 11:58:26 PM}				VERIFY(this->m_wndNonuniformGrid.SetItemText(row, 0, str));
-// COMMENT: {4/7/2006 11:58:26 PM}				VERIFY(this->m_wndNonuniformGrid.SetItemFormat(row, 0, DT_CENTER|DT_BOTTOM|DT_END_ELLIPSIS));
-// COMMENT: {4/7/2006 11:58:26 PM}
-// COMMENT: {4/7/2006 11:58:26 PM}				if ((row - range.GetMinRow()) < (int)values.size())
-// COMMENT: {4/7/2006 11:58:26 PM}				{
-// COMMENT: {4/7/2006 11:58:26 PM}					str.Format(_T("%g"), values[row - range.GetMinRow()]);
-// COMMENT: {4/7/2006 11:58:26 PM}					VERIFY(this->m_wndNonuniformGrid.SetItemText(row, 1, str));
-// COMMENT: {4/7/2006 11:58:26 PM}					VERIFY(this->m_wndNonuniformGrid.SetItemFormat(row, 1, DT_RIGHT|DT_BOTTOM|DT_END_ELLIPSIS));
-// COMMENT: {4/7/2006 11:58:26 PM}				}
-// COMMENT: {4/7/2006 11:58:26 PM}			}
-// COMMENT: {4/7/2006 11:58:26 PM}			range.SetMaxRow(range.GetMaxRow() + count);
-// COMMENT: {4/7/2006 11:58:26 PM}			if (cellID.row == range.GetMinRow())
-// COMMENT: {4/7/2006 11:58:26 PM}			{
-// COMMENT: {4/7/2006 11:58:26 PM}				this->m_wndNonuniformGrid.SetCurrentFocusCell(cellID.row, cellID.col);
-// COMMENT: {4/7/2006 11:58:26 PM}			}
-// COMMENT: {4/7/2006 11:58:26 PM}			else
-// COMMENT: {4/7/2006 11:58:26 PM}			{
-// COMMENT: {4/7/2006 11:58:26 PM}				this->m_wndNonuniformGrid.SetCurrentFocusCell(range.GetMaxRow(), cellID.col);
-// COMMENT: {4/7/2006 11:58:26 PM}			}
-// COMMENT: {4/7/2006 11:58:26 PM}			this->m_wndNonuniformGrid.SetSelectedRange(range);
-// COMMENT: {4/7/2006 11:58:26 PM}
-// COMMENT: {4/7/2006 11:58:26 PM}			//{{HACK
-// COMMENT: {4/7/2006 11:58:26 PM}			// this fixes the scrollbar not being set correctly
-// COMMENT: {4/7/2006 11:58:26 PM}			//
-// COMMENT: {4/7/2006 11:58:26 PM}			int rows = this->m_wndNonuniformGrid.GetRowCount();
-// COMMENT: {4/7/2006 11:58:26 PM}			VERIFY(this->m_wndNonuniformGrid.SetRowCount(rows + 1));
-// COMMENT: {4/7/2006 11:58:26 PM}			VERIFY(this->m_wndNonuniformGrid.SetRowCount(rows));
-// COMMENT: {4/7/2006 11:58:26 PM}			//}}HACK
-// COMMENT: {4/7/2006 11:58:26 PM}			this->m_wndNonuniformGrid.Invalidate(TRUE);
-// COMMENT: {4/7/2006 11:58:26 PM}		}
-// COMMENT: {4/7/2006 11:58:26 PM}		else
-// COMMENT: {4/7/2006 11:58:26 PM}		{
-// COMMENT: {4/7/2006 11:58:26 PM}			CString str;
-// COMMENT: {4/7/2006 11:58:26 PM}			for (int row = range.GetMinRow() + 1; row < this->m_wndNonuniformGrid.GetRowCount(); ++row)
-// COMMENT: {4/7/2006 11:58:26 PM}			{
-// COMMENT: {4/7/2006 11:58:26 PM}				if ((row - range.GetMinRow()) < (int)values.size())
-// COMMENT: {4/7/2006 11:58:26 PM}				{
-// COMMENT: {4/7/2006 11:58:26 PM}					str.Format(_T("%g"), values[row - range.GetMinRow()]);
-// COMMENT: {4/7/2006 11:58:26 PM}					VERIFY(this->m_wndNonuniformGrid.SetItemText(row, 1, str));
-// COMMENT: {4/7/2006 11:58:26 PM}					VERIFY(this->m_wndNonuniformGrid.SetItemFormat(row, 1, DT_RIGHT|DT_BOTTOM|DT_END_ELLIPSIS));
-// COMMENT: {4/7/2006 11:58:26 PM}				}
-// COMMENT: {4/7/2006 11:58:26 PM}			}
-// COMMENT: {4/7/2006 11:58:26 PM}		}
-// COMMENT: {4/7/2006 11:58:26 PM}		this->m_wndNonuniformGrid.Invalidate(TRUE);
-// COMMENT: {4/7/2006 11:58:26 PM}		this->SetModified(TRUE);
+		// enable apply button
+		//
+		this->SetModified(TRUE);
 	}
 }
 

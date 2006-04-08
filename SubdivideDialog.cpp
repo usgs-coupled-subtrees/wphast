@@ -92,6 +92,10 @@ void CSubdivideDialog::DoDataExchange(CDataExchange* pDX)
 	if (pDX->m_bSaveAndValidate)
 	{
 		this->factorType = this->GetFactorType();
+		if (this->factorType == CSubdivideDialog::FACTOR_DIVIDE)
+		{
+			this->multiplier = 1 / this->multiplier;
+		}
 	}
 	else
 	{

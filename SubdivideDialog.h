@@ -15,6 +15,8 @@ public:
 
 // Dialog Data
 	enum { IDD = IDD_SUBDIVIDE_DIALOG };
+
+protected:
 	enum FactorType { FACTOR_MULTIPLY = 0, FACTOR_DIVIDE = 1 } factorType;
 
 protected:
