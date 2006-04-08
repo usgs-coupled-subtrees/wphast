@@ -35,6 +35,8 @@
 vtkCxxRevisionMacro(CZoneActor, "$Revision$");
 // vtkStandardNewMacro(CZoneActor); // not used for abstract class
 
+CLIPFORMAT CZoneActor::clipFormat = (CLIPFORMAT)::RegisterClipboardFormat(_T("WPhast:CZoneActor"));
+
 CZoneActor::CZoneActor(void)
 	: m_pSource(0)
 	, m_pMapper(0)
@@ -390,6 +392,17 @@ LPCTSTR CZoneActor::GetName(void)const
 	return this->m_name.c_str();
 }
 
+void CZoneActor::SetDesc(LPCTSTR desc)
+{
+	this->m_desc = desc;
+}
+
+LPCTSTR CZoneActor::GetDesc(void)const
+{
+	return this->m_desc.c_str();
+}
+
+
 // COMMENT: {6/3/2004 3:46:20 PM}LPCTSTR CZoneActor::GetSerialName(void)//const
 // COMMENT: {6/3/2004 3:46:20 PM}{
 // COMMENT: {6/3/2004 3:46:20 PM}	return GetName();
@@ -639,6 +652,7 @@ void CZoneActor::Serialize(bool bStoring, hid_t loc_id)
 {
 	static const char szColor[]   = "Color";
 	static const char szDefault[] = "Default";
+	static const char szDesc[]    = "Description";
 
 	herr_t status;
 	vtkFloatingPointType color[3];
@@ -656,6 +670,11 @@ void CZoneActor::Serialize(bool bStoring, hid_t loc_id)
 		double_color[0] = color[0];  double_color[1] = color[1];  double_color[2] = color[2];
 		status = CGlobal::HDFSerialize(bStoring, loc_id, szColor, H5T_NATIVE_DOUBLE, 3, double_color);
 		ASSERT(status >= 0);
+
+		// store desc
+		//
+		status = CGlobal::HDFSerializeString(bStoring, loc_id, szDesc, this->m_desc);
+		ASSERT(status >= 0 || this->m_desc.empty());
 
 		// TODO store opacity 
 
@@ -675,6 +694,10 @@ void CZoneActor::Serialize(bool bStoring, hid_t loc_id)
 			color[0] = double_color[0];  color[1] = double_color[1];  color[2] = double_color[2];
 			this->GetProperty()->SetColor(color);
 		}
+
+		// load desc
+		//
+		status = CGlobal::HDFSerializeString(bStoring, loc_id, szDesc, this->m_desc);
 
 		// TODO load opacity
 		this->GetProperty()->SetOpacity(0.3);

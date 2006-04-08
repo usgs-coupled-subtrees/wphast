@@ -48,6 +48,9 @@ BOOL ETSLayoutPropertyPageXP::OnEraseBkgnd(CDC* pDC)
 			if(_tcscmp(szClassName, _T("Button")) == 0)
 			{
 			}
+			else if(_tcscmp(szClassName, WC_TABCONTROL) == 0)
+			{
+			}
 			else
 			{
 				pWndChild->GetWindowRect(rcChild);

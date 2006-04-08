@@ -238,7 +238,7 @@ protected:
 
 	// grid
 	//
-	CModelessPropertySheet     *m_pGridSheet;
+	CPropertySheet             *m_pGridSheet;
 	CGridPropertyPage2         *m_pGridPage;
 
 	CModelessPropertySheet     *ModifyGridSheet;

@@ -725,6 +725,7 @@ void CGridCtrl::OnTimer(UINT nIDEvent)
     {
         //SendMessage(WM_VSCROLL, SB_LINEDOWN, 0);
         SendMessage(WM_KEYDOWN, VK_DOWN, 0);
+// COMMENT: {4/5/2006 8:16:45 PM}        SendMessage(WM_VSCROLL, SB_LINEDOWN, 0);
 
         if (pt.x < rect.left)  
             pt.x = rect.left;
@@ -736,7 +737,15 @@ void CGridCtrl::OnTimer(UINT nIDEvent)
     else if (pt.y < nFixedRowHeight)
     {
         //SendMessage(WM_VSCROLL, SB_LINEUP, 0);
-        SendMessage(WM_KEYDOWN, VK_UP, 0);
+		//{{
+		CCellID next = m_idCurrentCell;
+        if (next.row > m_nFixedRows)           
+            next.row--; 
+		if (next != m_idCurrentCell)
+		{
+			SendMessage(WM_VSCROLL, SB_LINEUP, 0);
+		}
+		//}}
 
         if (pt.x < rect.left)  
             pt.x = rect.left;
@@ -751,6 +760,7 @@ void CGridCtrl::OnTimer(UINT nIDEvent)
     {
         // SendMessage(WM_HSCROLL, SB_LINERIGHT, 0);
         SendMessage(WM_KEYDOWN, VK_RIGHT, 0);
+// COMMENT: {4/5/2006 8:16:59 PM}        SendMessage(WM_HSCROLL, SB_LINERIGHT, 0);
 
         if (pt.y < rect.top)    
             pt.y = rect.top;
@@ -763,6 +773,7 @@ void CGridCtrl::OnTimer(UINT nIDEvent)
     {
         //SendMessage(WM_HSCROLL, SB_LINELEFT, 0);
         SendMessage(WM_KEYDOWN, VK_LEFT, 0);
+// COMMENT: {4/5/2006 8:17:04 PM}        SendMessage(WM_HSCROLL, SB_LINELEFT, 0);
 
         if (pt.y < rect.top)    
             pt.y = rect.top;
@@ -784,6 +795,13 @@ void CGridCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 
     CCellID next = m_idCurrentCell;
     BOOL bChangeLine = FALSE;
+
+	//{{ {4/5/2006 10:45:55 PM}
+	if (IsSHIFTpressed())
+	{
+		next = m_SelectionEndCell;
+	}
+	//}} {4/5/2006 10:45:55 PM}
 
     if (IsCTRLpressed())
     {
@@ -907,9 +925,25 @@ void CGridCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
                 
         default:
             CWnd::OnKeyDown(nChar, nRepCnt, nFlags);
+			//{{ {4/6/2006 6:47:52 PM}
+			return;
+			//}} {4/6/2006 6:47:52 PM}
     }
+
+
+    CCellID compare;
+	if (IsSHIFTpressed())
+	{
+		compare = m_SelectionEndCell;
+	}
+	else
+	{
+		compare = m_idCurrentCell;
+	}
   
-    if (next != m_idCurrentCell) 
+// COMMENT: {4/5/2006 10:47:27 PM}    if (next != m_idCurrentCell) 
+// COMMENT: {4/6/2006 3:54:04 PM}    if (next != m_SelectionEndCell) 
+	if (next != compare)
     {
         // While moving with the Cursorkeys the current ROW/CELL will get selected
         // OR Selection will get expanded when SHIFT is pressed
@@ -922,10 +956,19 @@ void CGridCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
             if (!IsSHIFTpressed() || nChar == VK_TAB)
                 m_SelectionStartCell = next;
             OnSelecting(next);
+			//{{ {4/5/2006 11:13:22 PM}
+			SendMessageToParent(m_idCurrentCell.row, m_idCurrentCell.col, GVN_SELCHANGED); 
+			//}} {4/5/2006 11:13:22 PM}
             m_MouseMode = MOUSE_NOTHING;
         }
 
-        SetFocusCell(next);
+		//{{ {4/5/2006 10:24:44 PM}
+// COMMENT: {4/5/2006 10:24:44 PM}        SetFocusCell(next);
+		if (!IsSHIFTpressed())
+		{
+			SetFocusCell(next);
+		}
+		//}} {4/5/2006 10:24:44 PM}
 
         if (!IsCellVisible(next))
         {   
@@ -976,7 +1019,24 @@ void CGridCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
             }
             Invalidate();
         }
-    }
+	}
+	//{{ {4/6/2006 4:18:44 PM}
+	else if (!IsCTRLpressed() && !IsSHIFTpressed() && this->m_SelectedCellMap.GetCount() != 1)
+	{
+        if (m_MouseMode == MOUSE_NOTHING)
+        {
+            m_PrevSelectedCellMap.RemoveAll();
+            m_MouseMode = m_bListMode? MOUSE_SELECT_ROW : MOUSE_SELECT_CELLS;
+            if (nChar == VK_TAB)
+                m_SelectionStartCell = next;
+            OnSelecting(next);
+			SendMessageToParent(m_idCurrentCell.row, m_idCurrentCell.col, GVN_SELCHANGED); 
+            m_MouseMode = MOUSE_NOTHING;
+        }
+
+		SetFocusCell(next);
+	}
+	//}} {4/6/2006 4:18:44 PM}
 }
 
 // Instant editing of cells when keys are pressed
@@ -1573,7 +1633,7 @@ CCellID CGridCtrl::SetFocusCell(CCellID cell)
             for (int col = 0; col < m_nFixedCols; col++) 
                 RedrawCell(m_idCurrentCell.row, col);
 
-        SendMessageToParent(m_idCurrentCell.row, m_idCurrentCell.col, GVN_SELCHANGED); 
+// COMMENT: {4/5/2006 5:23:36 PM}        SendMessageToParent(m_idCurrentCell.row, m_idCurrentCell.col, GVN_SELCHANGED); 
     }
 
     return idPrev;
@@ -1738,6 +1798,11 @@ void CGridCtrl::SelectCells(CCellID currentCell)
         return;
     if (!IsValid(currentCell))
         return;
+
+	//{{ {4/5/2006 10:45:55 PM}
+	m_SelectionEndCell = currentCell;
+	//}} {4/5/2006 10:45:55 PM}
+
 
     // Prevent unnecessary redraws
     //if (currentCell == m_LeftClickDownCell)  return;
@@ -2105,6 +2170,12 @@ void CGridCtrl::OnEditPaste()
 void CGridCtrl::OnEditSelectAll() 
 {
     SelectAllCells();
+	//{{
+	if (m_bEnableSelection)
+	{
+		SendMessageToParent(m_idCurrentCell.row, m_idCurrentCell.col, GVN_SELCHANGED); 
+	}
+	//}}
 }
 
 #ifndef GRIDCONTROL_NO_CLIPBOARD
@@ -4101,16 +4172,16 @@ void CGridCtrl::OnMouseMove(UINT nFlags, CPoint point)
                     if (!IsValid(idCurrentCell)) 
                         return;
 
-                    if (idCurrentCell != GetFocusCell())
+// COMMENT: {4/5/2006 6:00:19 PM}                    if (idCurrentCell != GetFocusCell())
                     {
                         OnSelecting(idCurrentCell);
                         //SetFocusCell(max(idCurrentCell.row, m_nFixedRows),
                         //             max(idCurrentCell.col, m_nFixedCols));
-                        if (idCurrentCell.row >= m_nFixedRows &&
-                            idCurrentCell.col >= m_nFixedCols)
-                        {
-                            SetFocusCell(idCurrentCell);
-                        }
+// COMMENT: {4/5/2006 6:00:39 PM}                        if (idCurrentCell.row >= m_nFixedRows &&
+// COMMENT: {4/5/2006 6:00:39 PM}                            idCurrentCell.col >= m_nFixedCols)
+// COMMENT: {4/5/2006 6:00:39 PM}                        {
+// COMMENT: {4/5/2006 6:00:39 PM}                            SetFocusCell(idCurrentCell);
+// COMMENT: {4/5/2006 6:00:39 PM}                        }
                     }
                     break;
                 }
@@ -4212,6 +4283,7 @@ void CGridCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 
     m_LeftClickDownPoint = point;
     m_LeftClickDownCell = GetCellFromPt(point);
+	TRACE("m_LeftClickDownCell %d %d\n", this->m_LeftClickDownCell.row, this->m_LeftClickDownCell.col);
     if (!IsValid(m_LeftClickDownCell)) return;
 
     m_SelectionStartCell = (nFlags & MK_SHIFT)? m_idCurrentCell : m_LeftClickDownCell;
@@ -4371,6 +4443,9 @@ void CGridCtrl::OnLButtonUp(UINT nFlags, CPoint point)
     // and then didn't move mouse before clicking up (releasing button)
     if (m_MouseMode == MOUSE_PREPARE_EDIT)    
     {
+		//{{ {4/5/2006 11:13:22 PM}
+		ASSERT(FALSE); 
+		//}} {4/5/2006 11:13:22 PM}
         OnEditCell(m_idCurrentCell.row, m_idCurrentCell.col, VK_LBUTTON);
     }
 #ifndef GRIDCONTROL_NO_DRAGDROP
@@ -4424,6 +4499,15 @@ void CGridCtrl::OnLButtonUp(UINT nFlags, CPoint point)
             Invalidate();
         }
     } 
+	//{{ {4/5/2006 11:20:22 PM}
+	else if (m_MouseMode == MOUSE_SELECT_CELLS
+		//{{ {4/6/2006 6:26:05 PM}
+		|| m_MouseMode == MOUSE_SELECT_ALL || m_MouseMode == MOUSE_SELECT_COL
+		|| m_MouseMode == MOUSE_SELECT_ROW)
+		//}} {4/6/2006 6:26:05 PM}
+	{
+		SendMessageToParent(m_idCurrentCell.row, m_idCurrentCell.col, GVN_SELCHANGED);
+	}
 
     m_MouseMode = MOUSE_NOTHING;
 

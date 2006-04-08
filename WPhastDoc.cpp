@@ -52,6 +52,7 @@
 #include "TimeControlPropertyPage.h"
 
 #include "ModelessPropertySheet.h"
+#include "ETSLayoutModelessPropertySheet.h"
 #include "ScalePropertyPage.h"
 
 #include "GridPropertyPage2.h"
@@ -1378,12 +1379,18 @@ void CWPhastDoc::Execute(CAction* pAction)
 
 void CWPhastDoc::OnUpdateEditUndo(CCmdUI *pCmdUI)
 {
-	pCmdUI->Enable(this->m_pimpl->m_vectorActionsIndex > 0);
+	BOOL b = (this->m_pimpl->m_vectorActionsIndex > 0);
+	b = b && (this->m_pGridSheet->GetSafeHwnd() == 0);
+	b = b && (this->m_pGeometrySheet->GetSafeHwnd() == 0);
+	pCmdUI->Enable(b);
 }
 
 void CWPhastDoc::OnUpdateEditRedo(CCmdUI *pCmdUI)
 {
-	pCmdUI->Enable(this->m_pimpl->m_vectorActionsIndex < this->m_pimpl->m_vectorActions.size());
+	BOOL b = (this->m_pimpl->m_vectorActionsIndex < this->m_pimpl->m_vectorActions.size());
+	b = b && (this->m_pGridSheet->GetSafeHwnd() == 0);
+	b = b && (this->m_pGeometrySheet->GetSafeHwnd() == 0);
+	pCmdUI->Enable(b);
 }
 
 void CWPhastDoc::OnEditUndo()
@@ -4196,6 +4203,9 @@ void CWPhastDoc::Edit(CGridActor* pGridActor)
 	if (!this->m_pGridSheet)
 	{
 		this->m_pGridSheet = new CModelessPropertySheet("Grid");
+		///this->m_pGridSheet = new ETSLayoutModelessPropertySheet("Time Control", ::AfxGetMainWnd());
+		///((ETSLayoutPropertySheet*)this->m_pGridSheet)->ModelessWithButtons();
+
 	}
 	if (!this->m_pGridPage)
 	{

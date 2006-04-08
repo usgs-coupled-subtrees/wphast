@@ -23,6 +23,8 @@ class CZoneActor : public vtkLODActor
 public:
 	vtkTypeRevisionMacro(CZoneActor,vtkLODActor);
 
+	static CLIPFORMAT clipFormat;
+
 	// Description:
 	// Creates a CZoneActor with the following defaults: origin(0,0,0) 
 	// position=(0,0,0) scale=(1,1,1) visibility=1 pickable=1 dragable=1
@@ -45,6 +47,9 @@ public:
 
 	void SetName(LPCTSTR name);
 	LPCTSTR GetName(void)const;
+
+	void SetDesc(LPCTSTR name);
+	LPCTSTR GetDesc(void)const;
 
 	/// virtual void Insert(CTreeCtrl* pTreeCtrl, HTREEITEM htiGrid);
 	///virtual void Insert(CPropertyTreeControlBar* pTreeControlBar) = 0;
@@ -75,6 +80,7 @@ protected:
 	vtkCubeSource     *m_pSource;
 	vtkPolyDataMapper *m_pMapper;
 	std::string        m_name;
+	std::string        m_desc;
 
 	struct zone       *m_pZone;
 

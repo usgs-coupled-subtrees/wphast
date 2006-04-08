@@ -368,6 +368,7 @@ BEGIN_MESSAGE_MAP(CModGridCtrlEx, CModGridCtrl)
 	ON_WM_LBUTTONUP()
 	ON_WM_KEYDOWN()
 	ON_WM_CHAR()
+	ON_WM_TIMER()
 	//ON_WM_THEMECHANGED()
 	{ WM_THEMECHANGED, 0, 0, 0, AfxSig_l, \
 		(AFX_PMSG)(AFX_PMSGW) \
@@ -438,6 +439,55 @@ void CModGridCtrlEx::OnLButtonDown(UINT nFlags, CPoint point)
 			this->m_MouseMode = MOUSE_NOTHING;
 			//}}
 		}
+		//{{ {4/5/2006 6:17:31 PM}
+		else
+		{
+			// overide default behavior
+			// normally a mouse down in a cell that already has the focus
+			// causes an edit to begin
+			//
+			// this new behavior is more consistant
+			// with excel -- Note: double-clicking an already focused cell
+			// still causes an edit to begin
+			if (this->m_LeftClickDownCell == this->m_idCurrentCell)
+			{
+				// this code mimics the state that a new cell received a mouse-down
+				// event (see CGridCtrl::OnLButtonDown)
+
+				ASSERT(CWnd::GetCapture() != this);
+				SetCapture();
+
+				// If Ctrl pressed, save the current cell selection. This will get added
+				// to the new cell selection at the end of the cell selection process
+				m_PrevSelectedCellMap.RemoveAll();
+				if (nFlags & MK_CONTROL)
+				{
+					for (POSITION pos = m_SelectedCellMap.GetStartPosition(); pos != NULL; )
+					{
+						DWORD key;
+						CCellID cell;
+						m_SelectedCellMap.GetNextAssoc(pos, key, (CCellID&)cell);
+						m_PrevSelectedCellMap.SetAt(key, cell);
+					}
+				}
+		        
+				if (m_LeftClickDownCell.row < GetFixedRowCount())
+					OnFixedRowClick(m_LeftClickDownCell);
+				else if (m_LeftClickDownCell.col < GetFixedColumnCount())
+					OnFixedColumnClick(m_LeftClickDownCell);
+				else
+				{
+					m_MouseMode = m_bListMode? MOUSE_SELECT_ROW : MOUSE_SELECT_CELLS;
+					OnSelecting(m_LeftClickDownCell);
+				}
+
+				ASSERT(m_nTimerID == 0);
+				m_nTimerID = SetTimer(WM_LBUTTONDOWN, m_nTimerInterval, 0);
+
+				m_LastMousePoint = point;
+			}
+		}
+		//}} {4/5/2006 6:17:31 PM}
 	}
 	else if (this->m_MouseMode == MOUSE_SELECT_CELLS)
 	{
@@ -891,12 +941,12 @@ void CModGridCtrlEx::DrawButton2(CDC* pDC, int nRow, int nCol, CRect rcCell, BOO
 		rc.OffsetRect(max(this->GetColumnWidth(nCol) - nButtonWidth, 0), 0);
 		rc.DeflateRect(-1, 1, 1, 1);
 		this->m_rcButton = rc;
-		if (this->s_themeCombo)
-		{
-			rc.DeflateRect(0, 0, 0, 1);
-			g_xpStyle.DrawThemeBackground(this->s_themeCombo, *pDC, CP_DROPDOWNBUTTON, CBXS_PRESSED, &rc, NULL);			
-		}
-		else
+// COMMENT: {4/3/2006 6:33:30 PM}		if (this->s_themeCombo)
+// COMMENT: {4/3/2006 6:33:30 PM}		{
+// COMMENT: {4/3/2006 6:33:30 PM}			rc.DeflateRect(0, 0, 0, 1);
+// COMMENT: {4/3/2006 6:33:30 PM}			g_xpStyle.DrawThemeBackground(this->s_themeCombo, *pDC, CP_DROPDOWNBUTTON, CBXS_PRESSED, &rc, NULL);			
+// COMMENT: {4/3/2006 6:33:30 PM}		}
+// COMMENT: {4/3/2006 6:33:30 PM}		else
 		{
 			pDC->DrawFrameControl(&rc, DFC_SCROLL, DFCS_SCROLLCOMBOBOX | DFCS_PUSHED);
 		}
@@ -908,23 +958,23 @@ void CModGridCtrlEx::DrawButton2(CDC* pDC, int nRow, int nCol, CRect rcCell, BOO
 		rc.OffsetRect(max(this->GetColumnWidth(nCol) - nButtonWidth, 0), 0);
 		rc.DeflateRect(-1, 1, 1, 1);
 		this->m_rcButton = rc;
-		if (this->s_themeCombo)
-		{
-			rc.DeflateRect(0, 0, 0, 1);
-			CPoint point;
-			::GetCursorPos(&point);
-			this->ScreenToClient(&point);
-			if (rc.PtInRect(point))
-			{
-				g_xpStyle.DrawThemeBackground(this->s_themeCombo, *pDC, CP_DROPDOWNBUTTON, CBXS_HOT, &rc, NULL);
-				return;
-			}
-			else
-			{
-				g_xpStyle.DrawThemeBackground(this->s_themeCombo, *pDC, CP_DROPDOWNBUTTON, CBXS_NORMAL, &rc, NULL);			
-			}
-		}
-		else
+// COMMENT: {4/3/2006 6:33:46 PM}		if (this->s_themeCombo)
+// COMMENT: {4/3/2006 6:33:46 PM}		{
+// COMMENT: {4/3/2006 6:33:46 PM}			rc.DeflateRect(0, 0, 0, 1);
+// COMMENT: {4/3/2006 6:33:46 PM}			CPoint point;
+// COMMENT: {4/3/2006 6:33:46 PM}			::GetCursorPos(&point);
+// COMMENT: {4/3/2006 6:33:46 PM}			this->ScreenToClient(&point);
+// COMMENT: {4/3/2006 6:33:46 PM}			if (rc.PtInRect(point))
+// COMMENT: {4/3/2006 6:33:46 PM}			{
+// COMMENT: {4/3/2006 6:33:46 PM}				g_xpStyle.DrawThemeBackground(this->s_themeCombo, *pDC, CP_DROPDOWNBUTTON, CBXS_HOT, &rc, NULL);
+// COMMENT: {4/3/2006 6:33:46 PM}				return;
+// COMMENT: {4/3/2006 6:33:46 PM}			}
+// COMMENT: {4/3/2006 6:33:46 PM}			else
+// COMMENT: {4/3/2006 6:33:46 PM}			{
+// COMMENT: {4/3/2006 6:33:46 PM}				g_xpStyle.DrawThemeBackground(this->s_themeCombo, *pDC, CP_DROPDOWNBUTTON, CBXS_NORMAL, &rc, NULL);			
+// COMMENT: {4/3/2006 6:33:46 PM}			}
+// COMMENT: {4/3/2006 6:33:46 PM}		}
+// COMMENT: {4/3/2006 6:33:46 PM}		else
 		{
 			pDC->DrawFrameControl(&rc, DFC_SCROLL, DFCS_SCROLLCOMBOBOX);
 		}
@@ -1487,4 +1537,95 @@ std::map< std::vector<LPCTSTR>, CListBox* >::const_iterator CModGridCtrlEx::Find
 	}
 #endif
 	return item;
+}
+
+//
+// Modified: SetFocusCell is not called therefore fixing bug that sometimes caused
+// the focus cell to move when the mouse was held down on a fixed row or col
+// Note: this is mostly just a combined CGridCtrl::OnTimer and CGridCtrl::OnKeyDown
+//
+void CModGridCtrlEx::OnTimer(UINT nIDEvent)
+{
+    ASSERT(nIDEvent == WM_LBUTTONDOWN);
+    if (nIDEvent != WM_LBUTTONDOWN)
+        return;
+
+    CPoint pt, origPt;
+
+#ifdef _WIN32_WCE
+    if (m_MouseMode == MOUSE_NOTHING)
+        return;
+    origPt = GetMessagePos();
+#else
+    if (!GetCursorPos(&origPt))
+        return;
+#endif
+
+    ScreenToClient(&origPt);
+
+    CRect rect;
+    GetClientRect(rect);
+
+    int nFixedRowHeight = GetFixedRowHeight();
+    int nFixedColWidth = GetFixedColumnWidth();
+
+    pt = origPt;
+    if (pt.y > rect.bottom)
+    {
+        if (m_idCurrentCell.row < (GetRowCount() - 1))
+		{
+			SendMessage(WM_VSCROLL, SB_LINEDOWN, 0);
+		}
+
+        if (pt.x < rect.left)  
+            pt.x = rect.left;
+        if (pt.x > rect.right) 
+            pt.x = rect.right;
+        pt.y = rect.bottom;
+        OnSelecting(GetCellFromPt(pt));
+    }
+    else if (pt.y < nFixedRowHeight)
+    {
+        if (m_idCurrentCell.row > m_nFixedRows)           
+		{
+			SendMessage(WM_VSCROLL, SB_LINEUP, 0);
+		}
+
+        if (pt.x < rect.left)  
+            pt.x = rect.left;
+        if (pt.x > rect.right) 
+            pt.x = rect.right;
+        pt.y = nFixedRowHeight + 1;
+        OnSelecting(GetCellFromPt(pt));
+    }
+
+    pt = origPt;
+    if (pt.x > rect.right)
+    {
+        if (m_idCurrentCell.col < (GetColumnCount() - 1))
+		{
+			SendMessage(WM_HSCROLL, SB_LINERIGHT, 0);
+		}
+
+        if (pt.y < rect.top)    
+            pt.y = rect.top;
+        if (pt.y > rect.bottom) 
+            pt.y = rect.bottom;
+        pt.x = rect.right;
+        OnSelecting(GetCellFromPt(pt));
+    } 
+    else if (pt.x < nFixedColWidth)
+    {
+        if (m_idCurrentCell.col > m_nFixedCols)
+		{
+			SendMessage(WM_HSCROLL, SB_LINELEFT, 0);
+		}
+
+        if (pt.y < rect.top)    
+            pt.y = rect.top;
+        if (pt.y > rect.bottom)
+            pt.y = rect.bottom;
+        pt.x = nFixedColWidth + 1;
+        OnSelecting(GetCellFromPt(pt));
+    }
 }

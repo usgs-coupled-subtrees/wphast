@@ -35,6 +35,7 @@ protected:
 
 	CTimeControl2 m_tc2;
 
+	afx_msg void OnSelChangedTimeStep(NMHDR *pNotifyStruct, LRESULT *result);
 	DECLARE_MESSAGE_MAP()
 public:
 	virtual BOOL OnInitDialog();

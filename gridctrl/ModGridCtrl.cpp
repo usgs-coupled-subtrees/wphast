@@ -269,6 +269,9 @@ BOOL CModGridCtrl::DrawCell(CDC* pDC, int nRow, int nCol, CRect rect, BOOL bEras
 		break;
 	}
 
+	// show selection only if enabled
+	bDrawHighLight = bDrawHighLight && this->IsWindowEnabled();
+
     if (Item.state & GVIS_FOCUSED && bDrawHighLight) 
     {
 		rect.right++; rect.bottom++;    // FillRect doesn't draw RHS or bottom
@@ -788,3 +791,4 @@ LRESULT CModGridCtrl::OnSetFont(WPARAM hFont, LPARAM /*lParam */)
 
     return result;
 }
+

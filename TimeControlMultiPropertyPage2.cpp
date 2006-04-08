@@ -153,6 +153,7 @@ void CTimeControlMultiPropertyPage2::DoDataExchange(CDataExchange* pDX)
 
 
 BEGIN_MESSAGE_MAP(CTimeControlMultiPropertyPage2, baseCTimeControlMultiPropertyPage2)
+	ON_NOTIFY(GVN_SELCHANGED, IDC_TIMESTEP_GRID, OnSelChangedTimeStep)
 END_MESSAGE_MAP()
 
 
@@ -162,7 +163,6 @@ BOOL CTimeControlMultiPropertyPage2::OnInitDialog()
 {
 	baseCTimeControlMultiPropertyPage2::OnInitDialog();
 
-	// Layout controls
 	// Layout controls
 	this->CreateRoot(VERTICAL)
 		<< 	( pane(HORIZONTAL, GREEDY, 0, 0, 0 )
@@ -174,6 +174,24 @@ BOOL CTimeControlMultiPropertyPage2::OnInitDialog()
 		<< item(IDC_DESC_RICHEDIT, ABSOLUTE_VERT)		
 		;
 	UpdateLayout();
+
+	/*** TESTING {{
+	CWnd* pWnd = this->GetDlgItem(IDC_DESC_STATIC);
+	pWnd->ShowWindow(SW_SHOW);
+	// Layout controls
+	this->CreateRoot(VERTICAL)
+		<< 	( pane(HORIZONTAL, GREEDY, 0, 0, 0 )
+			<< item(IDC_TIMEEND_GRID, GREEDY)
+			<< itemFixed(HORIZONTAL, 20)
+			<< item(IDC_TIMESTEP_GRID, GREEDY)
+			)
+		<< itemFixed(VERTICAL, 10)
+		<< (paneCtrl(IDC_DESC_STATIC, HORIZONTAL, GREEDY, nDefaultBorder, 10, 10)
+			<< item(IDC_DESC_RICHEDIT, ABSOLUTE_VERT)
+			)
+		;
+	UpdateLayout();
+	}} TESTING ***/
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
@@ -252,4 +270,20 @@ void CTimeControlMultiPropertyPage2::SetProperties(const CTimeControl2& r_tc2)
 void CTimeControlMultiPropertyPage2::GetProperties(CTimeControl2& r_tc2)
 {
 	r_tc2 = this->m_tc2;
+}
+
+void CTimeControlMultiPropertyPage2::OnSelChangedTimeStep(NMHDR *pNotifyStruct, LRESULT *result)
+{
+#ifdef _DEBUG
+	this->m_gridTimeStep.SetHighLight(GV_HIGHLIGHT_ALWAYS);
+
+	CCellRange range = this->m_gridTimeStep.GetSelectedCellRange();
+
+	TRACE("range.GetMinRow() = %d\n", range.GetMinRow());
+	TRACE("range.GetMaxRow() = %d\n", range.GetMaxRow());
+	TRACE("range.GetMinCol() = %d\n", range.GetMinCol());
+	TRACE("range.GetMaxCol() = %d\n", range.GetMaxCol());
+
+	::AfxMessageBox("Worksheet_SelectionChange");
+#endif
 }

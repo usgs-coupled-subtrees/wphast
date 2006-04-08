@@ -13,8 +13,7 @@ extern "C" {
 
 #include <iosfwd> // std::ostream
 
-class CGridElt :
-	public grid_elt
+class CGridElt : public grid_elt
 {
 public:
 	// ctor

@@ -10,12 +10,14 @@
 #include "ModelessPropertySheet.h"
 #include "SeriesDialog.h"
 #include "SeriesDialog2.h"
+#include "SubdivideDialog.h"
+#include "Utilities.h"
 
 // CGridPropertyPage2 dialog
 
-IMPLEMENT_DYNAMIC(CGridPropertyPage2, CPropertyPage)
+IMPLEMENT_DYNAMIC(CGridPropertyPage2, baseCGridPropertyPage2)
 CGridPropertyPage2::CGridPropertyPage2()
-: CPropertyPage(CGridPropertyPage2::IDD)
+: baseCGridPropertyPage2(CGridPropertyPage2::IDD)
 , m_nIndex(0)
 , m_bNeedAction(false)
 , m_pDoc(0)
@@ -31,7 +33,7 @@ CGridPropertyPage2::~CGridPropertyPage2()
 
 void CGridPropertyPage2::DoDataExchange(CDataExchange* pDX)
 {
-	CPropertyPage::DoDataExchange(pDX);
+	baseCGridPropertyPage2::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_TAB_COOR, this->m_tabCtrl);
 	DDX_Control(pDX, IDC_SPIN_U_NODES, this->m_spinUnified);
 	DDX_Control(pDX, IDC_SPIN_N_NODES, this->m_spinNonunified);
@@ -294,7 +296,7 @@ void CGridPropertyPage2::DoDataExchange(CDataExchange* pDX)
 }
 
 
-BEGIN_MESSAGE_MAP(CGridPropertyPage2, CPropertyPage)
+BEGIN_MESSAGE_MAP(CGridPropertyPage2, baseCGridPropertyPage2)
 	ON_BN_CLICKED(IDC_RADIO_UNIFORM, OnBnClickedRadioUniform)
 	ON_BN_CLICKED(IDC_RADIO_NONUNIFORM, OnBnClickedRadioNonuniform)
 	ON_NOTIFY(TCN_SELCHANGING, IDC_TAB_COOR, OnTcnSelchangingTabCoor)
@@ -307,6 +309,9 @@ BEGIN_MESSAGE_MAP(CGridPropertyPage2, CPropertyPage)
 	ON_BN_CLICKED(IDC_BUTTON_DEL, OnBnClickedButtonDel)
 	ON_BN_CLICKED(IDC_BUTTON_SERIES, OnBnClickedButtonSeries)
 	ON_NOTIFY(GVN_ENDLABELEDIT, IDC_GRID_NONUNIFORM, OnEndLabelEditGrid)
+	ON_BN_CLICKED(IDC_BUTTON_SUBDIVIDE, OnBnClickedButtonSubdivide)
+	ON_NOTIFY(GVN_SELCHANGED, IDC_GRID_NONUNIFORM, OnSelChangedNonuniform)
+	ON_WM_SHOWWINDOW()
 END_MESSAGE_MAP()
 
 
@@ -314,11 +319,22 @@ END_MESSAGE_MAP()
 
 BOOL CGridPropertyPage2::OnInitDialog()
 {
-	CPropertyPage::OnInitDialog();
+	baseCGridPropertyPage2::OnInitDialog();
 
 	// Add extra initialization here
 	this->m_spinUnified.SetRange32(2, INT_MAX);
 	this->m_spinNonunified.SetRange32(2, INT_MAX);
+
+// COMMENT: {3/31/2006 5:16:45 PM}	// Layout controls
+// COMMENT: {3/31/2006 5:16:45 PM}	this->CreateRoot(VERTICAL)
+// COMMENT: {3/31/2006 5:16:45 PM}		<< (paneTab(&this->m_tabCtrl, VERTICAL, GREEDY, nDefaultBorder, 10, 10)
+// COMMENT: {3/31/2006 5:16:45 PM}			<< (paneCtrl(IDC_UNIFORM_GB, HORIZONTAL, NORESIZE)
+// COMMENT: {3/31/2006 5:16:45 PM}				<< item(IDC_STATIC_MIN, GREEDY)
+// COMMENT: {3/31/2006 5:16:45 PM}				)
+// COMMENT: {3/31/2006 5:16:45 PM}			)
+// COMMENT: {3/31/2006 5:16:45 PM}		;
+// COMMENT: {3/31/2006 5:16:45 PM}	UpdateLayout();
+
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
@@ -386,6 +402,7 @@ void CGridPropertyPage2::EnableNonuniform(BOOL bEnable)
 		IDC_BUTTON_INS,
 		IDC_BUTTON_DEL,
 		IDC_BUTTON_SERIES,
+		IDC_BUTTON_SUBDIVIDE,
 	};
 	for (int i = 0; i < sizeof(arrNonuniform)/sizeof(arrNonuniform[0]); ++i)
 	{
@@ -416,7 +433,9 @@ void CGridPropertyPage2::EnableNonuniform(BOOL bEnable)
 		}
 		this->m_wndNonuniformGrid.SetFixedTextColor(::GetSysColor(COLOR_GRAYTEXT));
 	}
-	this->m_wndNonuniformGrid.RedrawWindow();
+// COMMENT: {4/7/2006 9:50:24 PM}	this->m_wndNonuniformGrid.RedrawWindow();
+	this->m_wndNonuniformGrid.Invalidate(TRUE);
+	this->OnSelChangedNonuniform(NULL, NULL);
 }
 
 void CGridPropertyPage2::OnTcnSelchangingTabCoor(NMHDR *pNMHDR, LRESULT *pResult)
@@ -490,7 +509,7 @@ BOOL CGridPropertyPage2::OnApply()
 		}
 		this->m_bNeedAction = false;
 	}
-	return CPropertyPage::OnApply();
+	return baseCGridPropertyPage2::OnApply();
 }
 
 void CGridPropertyPage2::OnCancel()
@@ -499,13 +518,13 @@ void CGridPropertyPage2::OnCancel()
 	{
 		this->m_pAction->UnExecute();
 	}
-	CPropertyPage::OnCancel();
+	baseCGridPropertyPage2::OnCancel();
 }
 
 void CGridPropertyPage2::PostNcDestroy()
 {
 	this->m_pAction = 0;
-	CPropertyPage::PostNcDestroy();
+	baseCGridPropertyPage2::PostNcDestroy();
 }
 
 void CGridPropertyPage2::OnEnChange()
@@ -569,7 +588,8 @@ void CGridPropertyPage2::OnBnClickedButtonIns()
 	this->m_wndNonuniformGrid.SetCurrentFocusCell(cell.row, cell.col);
 	this->m_wndNonuniformGrid.SetSelectedRange(range);
 	this->SetDlgItemInt(IDC_EDIT_N_NODES, (UINT)this->m_wndNonuniformGrid.GetRowCount() - 1, FALSE);
-	this->m_wndNonuniformGrid.RedrawWindow();
+// COMMENT: {4/5/2006 6:10:00 PM}	this->m_wndNonuniformGrid.RedrawWindow();
+	this->m_wndNonuniformGrid.Invalidate(TRUE);
 }
 
 void CGridPropertyPage2::OnBnClickedButtonDel()
@@ -597,9 +617,13 @@ void CGridPropertyPage2::OnBnClickedButtonDel()
 			VERIFY(this->m_wndNonuniformGrid.SetItemText(row, 0, str));
 		}
 	}
-	this->m_wndNonuniformGrid.SetSelectedRange(-1, -1, -1, -1);
+// COMMENT: {4/5/2006 4:08:52 PM}	this->m_wndNonuniformGrid.SetSelectedRange(-1, -1, -1, -1);
+	this->m_wndNonuniformGrid.SetCurrentFocusCell(cell.row, cell.col);
+	this->m_wndNonuniformGrid.SetSelectedRange(range);
+	
 	this->SetDlgItemInt(IDC_EDIT_N_NODES, (UINT)this->m_wndNonuniformGrid.GetRowCount() - 1, FALSE);
-	this->m_wndNonuniformGrid.RedrawWindow();
+// COMMENT: {4/5/2006 6:10:00 PM}	this->m_wndNonuniformGrid.RedrawWindow();
+	this->m_wndNonuniformGrid.Invalidate(TRUE);
 }
 
 void CGridPropertyPage2::OnBnClickedButtonSeries()
@@ -666,15 +690,253 @@ void CGridPropertyPage2::OnBnClickedButtonSeries()
 
 		this->m_wndNonuniformGrid.SetCurrentFocusCell(cell.row, cell.col);
 		this->m_wndNonuniformGrid.SetSelectedRange(range);
-		this->m_wndNonuniformGrid.RedrawWindow();
+// COMMENT: {4/7/2006 9:50:11 PM}		this->m_wndNonuniformGrid.RedrawWindow();
+		this->m_wndNonuniformGrid.Invalidate(TRUE);
 	}	
 
 }
-
 
 void CGridPropertyPage2::OnEndLabelEditGrid(NMHDR *pNotifyStruct, LRESULT *result)
 {
 	NM_GRIDVIEW *pnmgv = (NM_GRIDVIEW*)pNotifyStruct;
 	TRACE("OnEndLabelEditGrid row=%d col=%d\n", pnmgv->iRow, pnmgv->iColumn);
 	this->SetModified(TRUE);
+}
+
+void CGridPropertyPage2::OnBnClickedButtonSubdivide()
+{
+	CCellRange range = this->m_wndNonuniformGrid.GetSelectedCellRange();
+	CCellID cellID =  this->m_wndNonuniformGrid.GetFocusCell();
+
+	CSubdivideDialog dlg;
+	dlg.strStart = this->m_wndNonuniformGrid.GetItemText(range.GetMinRow(), 1);
+	dlg.strEnd = this->m_wndNonuniformGrid.GetItemText(range.GetMaxRow(), 1);
+	dlg.numSubInterval = range.GetMaxRow() - range.GetMinRow();
+
+	if (dlg.DoModal() == IDOK) 
+	{
+		/////////////////{{{{{{{{{{{{{{{{{
+		std::vector<double> values;
+		CUtilities::Subdivide(values, dlg.start, dlg.end,  dlg.numSubInterval, dlg.multiplier);
+
+		int count = (range.GetRowSpan() - 1) - dlg.numSubInterval;
+
+		// Delete rows
+		//
+		for (int i = 0; i < count; ++i)
+		{
+			this->m_wndNonuniformGrid.DeleteRow(range.GetMinRow() + 1);
+		}
+
+		// Add rows
+		//
+		for (int i = count; i < 0; ++i)
+		{
+			int row = this->m_wndNonuniformGrid.InsertRow("", range.GetMinRow() + 1);
+			this->m_wndNonuniformGrid.SetRowHeight(row, this->m_wndNonuniformGrid.GetRowHeight(1));
+		}
+
+		if (count != 0)
+		{
+			// update node count
+			//
+			this->SetDlgItemInt(IDC_EDIT_N_NODES, this->m_wndNonuniformGrid.GetRowCount() - 1);
+		}
+
+		CString str;
+		for (int row = range.GetMinRow() + 1; row < this->m_wndNonuniformGrid.GetRowCount(); ++row)
+		{
+			if (count != 0)
+			{
+				// update column headings
+				//
+				str.Format(_T("%d"), row);
+				VERIFY(this->m_wndNonuniformGrid.SetItemText(row, 0, str));
+				VERIFY(this->m_wndNonuniformGrid.SetItemFormat(row, 0, DT_CENTER|DT_BOTTOM|DT_END_ELLIPSIS));
+			}
+
+			if ((row - range.GetMinRow()) < (int)values.size())
+			{
+				// update numbers
+				//
+				str.Format(_T("%g"), values[row - range.GetMinRow()]);
+				VERIFY(this->m_wndNonuniformGrid.SetItemText(row, 1, str));
+				VERIFY(this->m_wndNonuniformGrid.SetItemFormat(row, 1, DT_RIGHT|DT_BOTTOM|DT_END_ELLIPSIS));
+			}
+		}
+
+		// reset range
+		//
+		range.SetMaxRow(range.GetMaxRow() - count);
+		if (cellID.row == range.GetMinRow())
+		{
+			this->m_wndNonuniformGrid.SetCurrentFocusCell(cellID.row, cellID.col);
+		}
+		else
+		{
+			this->m_wndNonuniformGrid.SetCurrentFocusCell(range.GetMaxRow(), cellID.col);
+		}
+		this->m_wndNonuniformGrid.SetSelectedRange(range);
+
+		if (count < 0)
+		{
+			// this fixes the scrollbar not being set correctly
+			// when rows are added
+			//
+			int rows = this->m_wndNonuniformGrid.GetRowCount();
+			VERIFY(this->m_wndNonuniformGrid.SetRowCount(rows + 1));
+			VERIFY(this->m_wndNonuniformGrid.SetRowCount(rows));
+		}
+
+		// force grid update
+		//
+		this->m_wndNonuniformGrid.Invalidate(TRUE);
+		this->SetModified(TRUE);
+		/////////////////}}}}}}}}}}}}}}}}}
+
+// COMMENT: {4/7/2006 11:58:26 PM}		std::vector<double> values;
+// COMMENT: {4/7/2006 11:58:26 PM}		CUtilities::Subdivide(values, dlg.start, dlg.end,  dlg.numSubInterval, dlg.multiplier);
+// COMMENT: {4/7/2006 11:58:26 PM}		if (dlg.numSubInterval < (range.GetRowSpan() - 1))
+// COMMENT: {4/7/2006 11:58:26 PM}		{
+// COMMENT: {4/7/2006 11:58:26 PM}			// Delete rows
+// COMMENT: {4/7/2006 11:58:26 PM}			//
+// COMMENT: {4/7/2006 11:58:26 PM}			int count = (range.GetRowSpan() - 1) - dlg.numSubInterval;
+// COMMENT: {4/7/2006 11:58:26 PM}			for (int i = 0; i < count; ++i)
+// COMMENT: {4/7/2006 11:58:26 PM}			{
+// COMMENT: {4/7/2006 11:58:26 PM}				this->m_wndNonuniformGrid.DeleteRow(range.GetMinRow() + 1);
+// COMMENT: {4/7/2006 11:58:26 PM}			}
+// COMMENT: {4/7/2006 11:58:26 PM}			//{{
+// COMMENT: {4/7/2006 11:58:26 PM}			// Add rows
+// COMMENT: {4/7/2006 11:58:26 PM}			//
+// COMMENT: {4/7/2006 11:58:26 PM}			for (int i = count; i < 0; ++i)
+// COMMENT: {4/7/2006 11:58:26 PM}			{
+// COMMENT: {4/7/2006 11:58:26 PM}				int row = this->m_wndNonuniformGrid.InsertRow("", range.GetMinRow() + 1);
+// COMMENT: {4/7/2006 11:58:26 PM}				this->m_wndNonuniformGrid.SetRowHeight(row, this->m_wndNonuniformGrid.GetRowHeight(1));
+// COMMENT: {4/7/2006 11:58:26 PM}			}
+// COMMENT: {4/7/2006 11:58:26 PM}			//}}
+// COMMENT: {4/7/2006 11:58:26 PM}			this->SetDlgItemInt(IDC_EDIT_N_NODES, this->m_wndNonuniformGrid.GetRowCount() - 1);
+// COMMENT: {4/7/2006 11:58:26 PM}
+// COMMENT: {4/7/2006 11:58:26 PM}			CString str;
+// COMMENT: {4/7/2006 11:58:26 PM}			for (int row = range.GetMinRow() + 1; row < this->m_wndNonuniformGrid.GetRowCount(); ++row)
+// COMMENT: {4/7/2006 11:58:26 PM}			{
+// COMMENT: {4/7/2006 11:58:26 PM}				if (count != 0)
+// COMMENT: {4/7/2006 11:58:26 PM}				{
+// COMMENT: {4/7/2006 11:58:26 PM}					// Reset column headings
+// COMMENT: {4/7/2006 11:58:26 PM}					//
+// COMMENT: {4/7/2006 11:58:26 PM}					str.Format(_T("%d"), row);
+// COMMENT: {4/7/2006 11:58:26 PM}					VERIFY(this->m_wndNonuniformGrid.SetItemText(row, 0, str));
+// COMMENT: {4/7/2006 11:58:26 PM}					VERIFY(this->m_wndNonuniformGrid.SetItemFormat(row, 0, DT_CENTER|DT_BOTTOM|DT_END_ELLIPSIS));
+// COMMENT: {4/7/2006 11:58:26 PM}				}
+// COMMENT: {4/7/2006 11:58:26 PM}
+// COMMENT: {4/7/2006 11:58:26 PM}				if ((row - range.GetMinRow()) < (int)values.size())
+// COMMENT: {4/7/2006 11:58:26 PM}				{
+// COMMENT: {4/7/2006 11:58:26 PM}					str.Format(_T("%g"), values[row - range.GetMinRow()]);
+// COMMENT: {4/7/2006 11:58:26 PM}					VERIFY(this->m_wndNonuniformGrid.SetItemText(row, 1, str));
+// COMMENT: {4/7/2006 11:58:26 PM}					VERIFY(this->m_wndNonuniformGrid.SetItemFormat(row, 1, DT_RIGHT|DT_BOTTOM|DT_END_ELLIPSIS));
+// COMMENT: {4/7/2006 11:58:26 PM}				}
+// COMMENT: {4/7/2006 11:58:26 PM}			}
+// COMMENT: {4/7/2006 11:58:26 PM}			range.SetMaxRow(range.GetMaxRow() - count);
+// COMMENT: {4/7/2006 11:58:26 PM}			if (cellID.row == range.GetMinRow())
+// COMMENT: {4/7/2006 11:58:26 PM}			{
+// COMMENT: {4/7/2006 11:58:26 PM}				this->m_wndNonuniformGrid.SetCurrentFocusCell(cellID.row, cellID.col);
+// COMMENT: {4/7/2006 11:58:26 PM}			}
+// COMMENT: {4/7/2006 11:58:26 PM}			else
+// COMMENT: {4/7/2006 11:58:26 PM}			{
+// COMMENT: {4/7/2006 11:58:26 PM}				this->m_wndNonuniformGrid.SetCurrentFocusCell(range.GetMaxRow(), cellID.col);
+// COMMENT: {4/7/2006 11:58:26 PM}			}
+// COMMENT: {4/7/2006 11:58:26 PM}			this->m_wndNonuniformGrid.SetSelectedRange(range);
+// COMMENT: {4/7/2006 11:58:26 PM}			this->m_wndNonuniformGrid.Invalidate(TRUE);
+// COMMENT: {4/7/2006 11:58:26 PM}		}
+// COMMENT: {4/7/2006 11:58:26 PM}		else if ((dlg.numSubInterval + 1) > range.GetRowSpan())
+// COMMENT: {4/7/2006 11:58:26 PM}		{
+// COMMENT: {4/7/2006 11:58:26 PM}			// Add rows
+// COMMENT: {4/7/2006 11:58:26 PM}			//
+// COMMENT: {4/7/2006 11:58:26 PM}			int count = dlg.numSubInterval - (range.GetRowSpan() - 1);
+// COMMENT: {4/7/2006 11:58:26 PM}			for (int i = 0; i < count; ++i)
+// COMMENT: {4/7/2006 11:58:26 PM}			{
+// COMMENT: {4/7/2006 11:58:26 PM}				int row = this->m_wndNonuniformGrid.InsertRow("", range.GetMinRow() + 1);
+// COMMENT: {4/7/2006 11:58:26 PM}				this->m_wndNonuniformGrid.SetRowHeight(row, this->m_wndNonuniformGrid.GetRowHeight(1));
+// COMMENT: {4/7/2006 11:58:26 PM}			}
+// COMMENT: {4/7/2006 11:58:26 PM}			this->SetDlgItemInt(IDC_EDIT_N_NODES, this->m_wndNonuniformGrid.GetRowCount() - 1);
+// COMMENT: {4/7/2006 11:58:26 PM}
+// COMMENT: {4/7/2006 11:58:26 PM}			CString str;
+// COMMENT: {4/7/2006 11:58:26 PM}			for (int row = range.GetMinRow() + 1; row < this->m_wndNonuniformGrid.GetRowCount(); ++row)
+// COMMENT: {4/7/2006 11:58:26 PM}			{
+// COMMENT: {4/7/2006 11:58:26 PM}				// Reset column headings
+// COMMENT: {4/7/2006 11:58:26 PM}				//
+// COMMENT: {4/7/2006 11:58:26 PM}				str.Format(_T("%d"), row);
+// COMMENT: {4/7/2006 11:58:26 PM}				VERIFY(this->m_wndNonuniformGrid.SetItemText(row, 0, str));
+// COMMENT: {4/7/2006 11:58:26 PM}				VERIFY(this->m_wndNonuniformGrid.SetItemFormat(row, 0, DT_CENTER|DT_BOTTOM|DT_END_ELLIPSIS));
+// COMMENT: {4/7/2006 11:58:26 PM}
+// COMMENT: {4/7/2006 11:58:26 PM}				if ((row - range.GetMinRow()) < (int)values.size())
+// COMMENT: {4/7/2006 11:58:26 PM}				{
+// COMMENT: {4/7/2006 11:58:26 PM}					str.Format(_T("%g"), values[row - range.GetMinRow()]);
+// COMMENT: {4/7/2006 11:58:26 PM}					VERIFY(this->m_wndNonuniformGrid.SetItemText(row, 1, str));
+// COMMENT: {4/7/2006 11:58:26 PM}					VERIFY(this->m_wndNonuniformGrid.SetItemFormat(row, 1, DT_RIGHT|DT_BOTTOM|DT_END_ELLIPSIS));
+// COMMENT: {4/7/2006 11:58:26 PM}				}
+// COMMENT: {4/7/2006 11:58:26 PM}			}
+// COMMENT: {4/7/2006 11:58:26 PM}			range.SetMaxRow(range.GetMaxRow() + count);
+// COMMENT: {4/7/2006 11:58:26 PM}			if (cellID.row == range.GetMinRow())
+// COMMENT: {4/7/2006 11:58:26 PM}			{
+// COMMENT: {4/7/2006 11:58:26 PM}				this->m_wndNonuniformGrid.SetCurrentFocusCell(cellID.row, cellID.col);
+// COMMENT: {4/7/2006 11:58:26 PM}			}
+// COMMENT: {4/7/2006 11:58:26 PM}			else
+// COMMENT: {4/7/2006 11:58:26 PM}			{
+// COMMENT: {4/7/2006 11:58:26 PM}				this->m_wndNonuniformGrid.SetCurrentFocusCell(range.GetMaxRow(), cellID.col);
+// COMMENT: {4/7/2006 11:58:26 PM}			}
+// COMMENT: {4/7/2006 11:58:26 PM}			this->m_wndNonuniformGrid.SetSelectedRange(range);
+// COMMENT: {4/7/2006 11:58:26 PM}
+// COMMENT: {4/7/2006 11:58:26 PM}			//{{HACK
+// COMMENT: {4/7/2006 11:58:26 PM}			// this fixes the scrollbar not being set correctly
+// COMMENT: {4/7/2006 11:58:26 PM}			//
+// COMMENT: {4/7/2006 11:58:26 PM}			int rows = this->m_wndNonuniformGrid.GetRowCount();
+// COMMENT: {4/7/2006 11:58:26 PM}			VERIFY(this->m_wndNonuniformGrid.SetRowCount(rows + 1));
+// COMMENT: {4/7/2006 11:58:26 PM}			VERIFY(this->m_wndNonuniformGrid.SetRowCount(rows));
+// COMMENT: {4/7/2006 11:58:26 PM}			//}}HACK
+// COMMENT: {4/7/2006 11:58:26 PM}			this->m_wndNonuniformGrid.Invalidate(TRUE);
+// COMMENT: {4/7/2006 11:58:26 PM}		}
+// COMMENT: {4/7/2006 11:58:26 PM}		else
+// COMMENT: {4/7/2006 11:58:26 PM}		{
+// COMMENT: {4/7/2006 11:58:26 PM}			CString str;
+// COMMENT: {4/7/2006 11:58:26 PM}			for (int row = range.GetMinRow() + 1; row < this->m_wndNonuniformGrid.GetRowCount(); ++row)
+// COMMENT: {4/7/2006 11:58:26 PM}			{
+// COMMENT: {4/7/2006 11:58:26 PM}				if ((row - range.GetMinRow()) < (int)values.size())
+// COMMENT: {4/7/2006 11:58:26 PM}				{
+// COMMENT: {4/7/2006 11:58:26 PM}					str.Format(_T("%g"), values[row - range.GetMinRow()]);
+// COMMENT: {4/7/2006 11:58:26 PM}					VERIFY(this->m_wndNonuniformGrid.SetItemText(row, 1, str));
+// COMMENT: {4/7/2006 11:58:26 PM}					VERIFY(this->m_wndNonuniformGrid.SetItemFormat(row, 1, DT_RIGHT|DT_BOTTOM|DT_END_ELLIPSIS));
+// COMMENT: {4/7/2006 11:58:26 PM}				}
+// COMMENT: {4/7/2006 11:58:26 PM}			}
+// COMMENT: {4/7/2006 11:58:26 PM}		}
+// COMMENT: {4/7/2006 11:58:26 PM}		this->m_wndNonuniformGrid.Invalidate(TRUE);
+// COMMENT: {4/7/2006 11:58:26 PM}		this->SetModified(TRUE);
+	}
+}
+
+void CGridPropertyPage2::OnSelChangedNonuniform(NMHDR *pNotifyStruct, LRESULT *result)
+{
+	CCellRange range = this->m_wndNonuniformGrid.GetSelectedCellRange();
+
+	TRACE("range.GetMinRow() = %d\n", range.GetMinRow());
+	TRACE("range.GetMaxRow() = %d\n", range.GetMaxRow());
+	TRACE("range.GetMinCol() = %d\n", range.GetMinCol());
+	TRACE("range.GetMaxCol() = %d\n", range.GetMaxCol());
+
+	if (CWnd* pWnd = this->GetDlgItem(IDC_BUTTON_SUBDIVIDE))
+	{
+		pWnd->EnableWindow(range.Count() > 1);
+	}
+}
+
+void CGridPropertyPage2::OnShowWindow(BOOL bShow, UINT nStatus)
+{
+	CPropertyPage::OnShowWindow(bShow, nStatus);
+
+	// TODO: Add your message handler code here
+	if (bShow)
+	{
+		// reset selection
+		this->m_wndNonuniformGrid.SetSelectedRange(-1, -1, -1, -1);
+		this->m_wndNonuniformGrid.SetCurrentFocusCell(1, 1);
+	}
 }

@@ -2083,9 +2083,10 @@ BEGIN
                     WS_TABSTOP,169,7,242,149
     CONTROL         "",IDC_DESC_RICHEDIT,"RichEdit20A",ES_MULTILINE | 
                     ES_AUTOHSCROLL | ES_READONLY | WS_BORDER | WS_VSCROLL | 
-                    WS_HSCROLL,7,165,404,49
+                    WS_HSCROLL,16,173,385,34
     LTEXT           "NOTE: This invisible control is needed so that the background of the dialog is painted correctly.",
                     IDC_STATIC,75,77,159,22,NOT WS_VISIBLE
+    GROUPBOX        "Static",IDC_DESC_STATIC,7,162,404,53,NOT WS_VISIBLE
 END
 
 IDD_MEDIASPREAD_EXT_PROPPAGE DIALOGEX 0, 0, 418, 222
@@ -2407,11 +2408,11 @@ STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_CAPTION
 CAPTION "Grid Properties"
 FONT 8, "MS Shell Dlg", 400, 0, 0x0
 BEGIN
-    CONTROL         "",IDC_TAB_COOR,"SysTabControl32",0x0,7,7,391,136
-    GROUPBOX        "",-1,15,25,142,75
+    CONTROL         "",IDC_TAB_COOR,"SysTabControl32",0x0,7,7,392,136
+    GROUPBOX        "",IDC_UNIFORM_GB,15,25,142,75
     CONTROL         "&Uniform",IDC_RADIO_UNIFORM,"Button",BS_AUTORADIOBUTTON,
                     20,25,41,10
-    GROUPBOX        "",-1,164,25,226,111
+    GROUPBOX        "",IDC_NON_UNIFORM_GB,164,25,226,111
     CONTROL         "&Nonuniform",IDC_RADIO_NONUNIFORM,"Button",
                     BS_AUTORADIOBUTTON | BS_TOP,168,25,53,10
     LTEXT           "Minimum:",IDC_STATIC_MIN,24,42,40,8,0,WS_EX_RIGHT
@@ -2435,12 +2436,13 @@ BEGIN
                     UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,374,43,11,
                     12
     PUSHBUTTON      "&Insert",IDC_BUTTON_INS,325,64,50,14
-    PUSHBUTTON      "&Delete",IDC_BUTTON_DEL,325,84,50,14
-    PUSHBUTTON      "&Series...",IDC_BUTTON_SERIES,325,103,50,14
+    PUSHBUTTON      "&Delete",IDC_BUTTON_DEL,325,85,50,14
+    PUSHBUTTON      "&Series...",IDC_BUTTON_SERIES,213,73,50,14,NOT 
+                    WS_VISIBLE | WS_DISABLED
     CONTROL         "",IDC_DESC_RICHEDIT,"RichEdit20A",ES_MULTILINE | 
                     ES_AUTOHSCROLL | ES_READONLY | WS_BORDER | WS_VSCROLL | 
                     WS_HSCROLL,7,181,392,44
-    GROUPBOX        "Print orientation",-1,7,149,185,24
+    GROUPBOX        "Print orientation",IDC_PRINT_GB,7,149,185,24
     CONTROL         "XY",IDC_RADIO_XY,"Button",BS_AUTORADIOBUTTON,35,159,24,
                     10
     CONTROL         "XZ",IDC_RADIO_XZ,"Button",BS_AUTORADIOBUTTON,86,159,24,
@@ -2451,11 +2453,13 @@ BEGIN
                     277,159,20,10
     CONTROL         "Z",IDC_CHECK_Z,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
                     316,159,20,10
-    GROUPBOX        "Chemistry dimensions",-1,214,149,185,24
+    GROUPBOX        "Chemistry dimensions",IDC_CHEM_GB,214,149,185,24
     EDITTEXT        IDC_EDIT_SNAP,45,117,47,12,ES_AUTOHSCROLL
-    GROUPBOX        "Snap",-1,15,105,141,31
+    GROUPBOX        "Snap",IDC_SNAP_GB,15,105,141,31
     CONTROL         "[mile]",IDC_STATIC_SNAP_UNITS,"Static",
                     SS_LEFTNOWORDWRAP | WS_GROUP,100,119,18,8
+    PUSHBUTTON      "&Subdivide...",IDC_BUTTON_SUBDIVIDE,325,106,50,14,
+                    WS_DISABLED
 END
 
 IDD_SERIES_DIALOG DIALOGEX 0, 0, 172, 89
@@ -2703,6 +2707,40 @@ BEGIN
     EDITTEXT        IDC_EDIT_END,128,59,52,12,ES_AUTOHSCROLL
     DEFPUSHBUTTON   "OK",IDOK,35,85,50,14
     PUSHBUTTON      "Cancel",IDCANCEL,101,85,50,14
+END
+
+IDD_SUBDIVIDE_DIALOG DIALOGEX 0, 0, 203, 217
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "Subdivide"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,47,196,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,113,196,50,14
+    LTEXT           "Divide the selected interval into ",IDC_STATIC,16,71,
+                    104,8
+    EDITTEXT        IDC_SECTIONS_EDIT,121,70,40,12,ES_AUTOHSCROLL
+    CONTROL         "",IDC_SECTIONS_SPIN,"msctls_updown32",UDS_SETBUDDYINT | 
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,135,70,11,
+                    14
+    LTEXT           "sections",IDC_STATIC,164,71,27,8
+    COMBOBOX        IDC_MULT_DIV_COMBO,16,92,52,56,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "successive widths by ",IDC_STATIC,74,94,70,8
+    EDITTEXT        IDC_FACTOR_EDIT,145,92,40,12,ES_AUTOHSCROLL
+    GROUPBOX        "",IDC_STATIC,7,59,189,57
+    GROUPBOX        "",IDC_STATIC,7,121,189,62
+    RTEXT           "interval length =",IDC_STATIC,50,132,56,8
+    RTEXT           "starting width =",IDC_STATIC,54,149,52,8
+    RTEXT           "ending width =",IDC_STATIC,57,166,49,8
+    LTEXT           " 0.08",IDC_INTERVAL_STATIC,108,132,55,8
+    LTEXT           " 0.08",IDC_START_WIDTH_STATIC,108,149,55,8
+    LTEXT           " 0.08",IDC_END_WIDTH_STATIC,108,166,55,8
+    LTEXT           "Starting value",IDC_STATIC,41,20,46,8
+    EDITTEXT        IDC_START_EDIT,105,18,46,12,ES_AUTOHSCROLL
+    LTEXT           "Ending value",IDC_STATIC,41,38,42,8
+    EDITTEXT        IDC_END_EDIT,105,36,46,12,ES_AUTOHSCROLL
+    GROUPBOX        "Interval",IDC_STATIC,7,7,189,48
 END
 
 
@@ -3484,6 +3522,14 @@ BEGIN
         TOPMARGIN, 7
         BOTTOMMARGIN, 99
     END
+
+    IDD_SUBDIVIDE_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 196
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 210
+    END
 END
 #endif    // APSTUDIO_INVOKED
 
@@ -3576,6 +3622,15 @@ BEGIN
 0x6164, 0x7379, "\000" 
     IDC_COMBO1, 0x403, 6, 0
 0x6579, 0x7261, 0x0073, 
+    0
+END
+
+IDD_SUBDIVIDE_DIALOG DLGINIT
+BEGIN
+    IDC_MULT_DIV_COMBO, 0x403, 9, 0
+0x754d, 0x746c, 0x7069, 0x796c, "\000" 
+    IDC_MULT_DIV_COMBO, 0x403, 7, 0
+0x6944, 0x6976, 0x6564, "\000" 
     0
 END
 

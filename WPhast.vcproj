@@ -184,7 +184,6 @@
 				TreatWChar_tAsBuiltInType="TRUE"
 				UsePrecompiledHeader="3"
 				BrowseInformation="1"
-				BrowseInformationFile="$(IntDir)/"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="TRUE"
 				DebugInformationFormat="4"/>
@@ -475,6 +474,9 @@ copy &quot;$(DEV_VTK42_VS7_DLL_LIB)\vtkzlib.dll&quot; &quot;$(TargetDir)vtkzlib.
 			</File>
 			<File
 				RelativePath="DragDropAction.cpp">
+			</File>
+			<File
+				RelativePath="ETSLayoutModelessPropertySheet.cpp">
 			</File>
 			<File
 				RelativePath="ETSLayoutPropertyPageXP.cpp">
@@ -825,6 +827,9 @@ copy &quot;$(DEV_VTK42_VS7_DLL_LIB)\vtkzlib.dll&quot; &quot;$(TargetDir)vtkzlib.
 				RelativePath="SteadyFlowPropertyPage.cpp">
 			</File>
 			<File
+				RelativePath="SubdivideDialog.cpp">
+			</File>
+			<File
 				RelativePath="Subject.cpp">
 			</File>
 			<File
@@ -865,6 +870,21 @@ copy &quot;$(DEV_VTK42_VS7_DLL_LIB)\vtkzlib.dll&quot; &quot;$(TargetDir)vtkzlib.
 			</File>
 			<File
 				RelativePath="Units2PropertyPage.cpp">
+			</File>
+			<File
+				RelativePath="Utilities.cpp">
+				<FileConfiguration
+					Name="cppunit|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="AutoRelease|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="ViewVTKCommand.cpp">
@@ -1103,6 +1123,9 @@ copy &quot;$(DEV_VTK42_VS7_DLL_LIB)\vtkzlib.dll&quot; &quot;$(TargetDir)vtkzlib.
 			</File>
 			<File
 				RelativePath="DragDropAction.h">
+			</File>
+			<File
+				RelativePath="ETSLayoutModelessPropertySheet.h">
 			</File>
 			<File
 				RelativePath="ETSLayoutPropertyPageXP.h">
@@ -1420,6 +1443,9 @@ copy &quot;$(DEV_VTK42_VS7_DLL_LIB)\vtkzlib.dll&quot; &quot;$(TargetDir)vtkzlib.
 				RelativePath="SteadyFlowPropertyPage.h">
 			</File>
 			<File
+				RelativePath="SubdivideDialog.h">
+			</File>
+			<File
 				RelativePath="Subject.h">
 			</File>
 			<File
@@ -1463,6 +1489,9 @@ copy &quot;$(DEV_VTK42_VS7_DLL_LIB)\vtkzlib.dll&quot; &quot;$(TargetDir)vtkzlib.
 			</File>
 			<File
 				RelativePath="Units2PropertyPage.h">
+			</File>
+			<File
+				RelativePath="Utilities.h">
 			</File>
 			<File
 				RelativePath="Version.h">
@@ -3997,15 +4026,15 @@ copy &quot;$(DEV_VTK42_VS7_DLL_LIB)\vtkzlib.dll&quot; &quot;$(TargetDir)vtkzlib.
 			Name="Build Logs"
 			Filter="">
 			<File
-				RelativePath="Release\BuildLog.htm"
-				DeploymentContent="TRUE">
-			</File>
-			<File
 				RelativePath="cppunit\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 			<File
 				RelativePath="Debug\BuildLog.htm"
+				DeploymentContent="TRUE">
+			</File>
+			<File
+				RelativePath="Release\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 		</Filter>

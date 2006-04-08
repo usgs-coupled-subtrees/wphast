@@ -69,5 +69,4 @@ public:
 	afx_msg void OnSetFocus(CWnd* pOldWnd);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg LRESULT OnSetFont(WPARAM hFont, LPARAM /*lParam */);
-
 };

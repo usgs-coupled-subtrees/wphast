@@ -542,6 +542,9 @@ protected:
     CPoint      m_LeftClickDownPoint, m_LastMousePoint;
     CCellID     m_LeftClickDownCell, m_SelectionStartCell;
     CCellID     m_idCurrentCell;
+	//{{ {4/5/2006 10:45:01 PM}
+	CCellID     m_SelectionEndCell;
+	//}} {4/5/2006 10:45:01 PM}
     int         m_nTimerID;
     int         m_nTimerInterval;
     int         m_nResizeCaptureRange;

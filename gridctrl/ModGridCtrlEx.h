@@ -138,4 +138,5 @@ public:
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	afx_msg void OnChar(UINT nChar, UINT nRepCnt, UINT nFlags);
 	LRESULT OnThemeChanged();
+	afx_msg void OnTimer(UINT nIDEvent);
 };

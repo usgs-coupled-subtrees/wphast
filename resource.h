@@ -263,6 +263,7 @@
 #define IDR_MAXIMUM_TIME_STEP_RTF       265
 #define IDR_HEAD_CHANGE_TARGET_RTF      266
 #define IDR_ITERATIONS_RTF              267
+#define IDD_SUBDIVIDE_DIALOG            273
 #define IDC_EDIT_X                      1000
 #define IDC_PROPERTIES                  1000
 #define IDC_TITLE                       1000
@@ -423,6 +424,7 @@
 #define IDC_STATIC_DEPTH                1129
 #define IDC_WORLD_EDIT                  1130
 #define IDC_EDIT_START                  1130
+#define IDC_FACTOR_EDIT                 1130
 #define IDC_STATIC_Y2                   1131
 #define IDC_STATIC_YC3                  1131
 #define IDC_EDIT_YC3                    1132
@@ -601,6 +603,7 @@
 #define IDC_EDIT_PARTS_K                1276
 #define IDC_EDIT_STEP                   1277
 #define IDC_SPIN_PARTS_K                1277
+#define IDC_BUTTON_SUBDIVIDE            1277
 #define IDC_EDIT_STOP                   1278
 #define IDC_RADIO_LINEAR                1279
 #define IDC_RADIO_GROWTH                1280
@@ -665,6 +668,20 @@
 #define IDC_EDIT_INCR                   1348
 #define IDC_EDIT_FACTOR                 1349
 #define IDC_STATIC_FACTOR               1350
+#define IDC_DESC_STATIC                 1351
+#define IDC_SNAP_GB                     1352
+#define IDC_UNIFORM_GB                  1353
+#define IDC_NON_UNIFORM_GB              1354
+#define IDC_PRINT_GB                    1355
+#define IDC_CHEM_GB                     1356
+#define IDC_SECTIONS_SPIN               1357
+#define IDC_SECTIONS_EDIT               1358
+#define IDC_MULT_DIV_COMBO              1359
+#define IDC_START_EDIT                  1360
+#define IDC_END_EDIT                    1361
+#define IDC_INTERVAL_STATIC             1362
+#define IDC_START_WIDTH_STATIC          1363
+#define IDC_END_WIDTH_STATIC            1364
 #define IDC_RESIZE_COLUMN               28654
 #define IDC_RESIZE_ROW                  28655
 #define IDR_POPUP                       28656
@@ -688,9 +705,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        273
+#define _APS_NEXT_RESOURCE_VALUE        275
 #define _APS_NEXT_COMMAND_VALUE         32832
-#define _APS_NEXT_CONTROL_VALUE         1351
+#define _APS_NEXT_CONTROL_VALUE         1365
 #define _APS_NEXT_SYMED_VALUE           126
 #endif
 #endif

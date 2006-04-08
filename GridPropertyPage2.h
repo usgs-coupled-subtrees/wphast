@@ -6,6 +6,7 @@
 #include "Units.h"
 #include "Snap.h"
 #include "gridctrl/ModGridCtrlEx.h"
+#include "ETSLayoutPropertyPageXP.h"
 
 class CGridSetAction;
 class CWPhastDoc;
@@ -13,9 +14,14 @@ class CGridActor;
 class CGridSetAction;
 
 
+#ifndef baseCGridPropertyPage2
+///#define baseCGridPropertyPage2 ETSLayoutPropertyPageXP
+#define baseCGridPropertyPage2 CPropertyPage
+#endif
+
 // CGridPropertyPage2 dialog
 
-class CGridPropertyPage2 : public CPropertyPage
+class CGridPropertyPage2 : public baseCGridPropertyPage2
 {
 	DECLARE_DYNAMIC(CGridPropertyPage2)
 
@@ -43,6 +49,7 @@ protected:
 	afx_msg void OnBnClickedRadioUniform();
 	afx_msg void OnBnClickedRadioNonuniform();
 	afx_msg void OnTcnSelchangingTabCoor(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnSelChangedNonuniform(NMHDR *pNotifyStruct, LRESULT *result);
 
 	void EnableUniform(BOOL bEnable = TRUE);
 	void EnableNonuniform(BOOL bEnable = TRUE);
@@ -81,4 +88,6 @@ public:
 	afx_msg void OnBnClickedButtonDel();
 	afx_msg void OnBnClickedButtonSeries();
 	afx_msg void OnEndLabelEditGrid(NMHDR *pNotifyStruct, LRESULT *result);
+	afx_msg void OnBnClickedButtonSubdivide();
+	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
 };

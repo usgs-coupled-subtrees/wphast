@@ -151,6 +151,7 @@ CPropertyTreeControlBar::CPropertyTreeControlBar(void)
 	ASSERT(CHeadIC::clipFormat >= 0xC000);
 	ASSERT(CChemIC::clipFormat >= 0xC000);
 	ASSERT(CBC::clipFormat >= 0xC000);
+	ASSERT(CZoneActor::clipFormat >= 0xC000);
 }
 
 CPropertyTreeControlBar::~CPropertyTreeControlBar(void)
