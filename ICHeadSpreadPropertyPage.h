@@ -20,6 +20,8 @@ public:
 	void SetProperties(const CHeadIC& headIC);
 	void GetProperties(CHeadIC& headIC)const;
 
+	void SetDesc(LPCTSTR desc) { m_desc = desc; }
+	LPCTSTR GetDesc() { return m_desc.c_str(); }
 
 // Dialog Data
 	enum { IDD = IDD_IC_HEAD_SPREAD_PROPPAGE };
@@ -29,7 +31,8 @@ protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	BOOL SetupGrids(void);
 
-	CHeadIC m_headIC;
+	CHeadIC      m_headIC;
+	std::string  m_desc;
 
 	CModGridCtrlEx m_gridHeadIC;  // IDC_HEADIC_GRID
 

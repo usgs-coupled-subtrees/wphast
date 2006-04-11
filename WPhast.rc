@@ -1994,23 +1994,25 @@ BEGIN
     CONTROL         "",IDC_WELL_STATIC,"Static",SS_BLACKFRAME,201,26,112,169
 END
 
-IDD_BC_SPECIFIED_HEAD_PROPPAGE DIALOGEX 0, 0, 418, 222
+IDD_BC_SPECIFIED_HEAD_PROPPAGE DIALOGEX 0, 0, 418, 234
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Specified Head Properties"
 FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
+    LTEXT           "De&scription",IDC_DESC_STATIC,7,8,36,8
+    EDITTEXT        IDC_DESC_EDIT,55,7,356,12,ES_AUTOHSCROLL
     CONTROL         "Custom1",IDC_HEAD_GRID,"MFCGridCtrl",WS_BORDER | 
-                    WS_TABSTOP,7,7,404,60
-    LTEXT           "Solution type:",IDC_SOL_TYPE_STATIC,7,79,46,8
+                    WS_TABSTOP,7,26,404,60
+    LTEXT           "Solution type:",IDC_SOL_TYPE_STATIC,7,96,46,8
     CONTROL         "Associated",IDC_ASSOC_RADIO,"Button",BS_AUTORADIOBUTTON,
-                    61,79,51,10
+                    61,96,51,10
     CONTROL         "Fixed",IDC_FIXED_RADIO,"Button",BS_AUTORADIOBUTTON,127,
-                    79,33,10
+                    96,33,10
     CONTROL         "Custom1",IDC_SOLUTION_GRID,"MFCGridCtrl",WS_BORDER | 
-                    WS_TABSTOP,7,93,404,60
+                    WS_TABSTOP,7,109,404,60
     CONTROL         "",IDC_DESC_RICHEDIT,"RichEdit20A",ES_MULTILINE | 
                     ES_AUTOHSCROLL | ES_READONLY | WS_BORDER | WS_VSCROLL | 
-                    WS_HSCROLL,7,166,404,49
+                    WS_HSCROLL,7,178,404,49
 END
 
 IDD_TEST_CMODGRIDCTRLEX DIALOGEX 0, 0, 317, 143
@@ -2028,48 +2030,52 @@ BEGIN
                     WS_TABSTOP,7,126,39,10
 END
 
-IDD_BC_FLUX_PROPPAGE3 DIALOGEX 0, 0, 418, 222
+IDD_BC_FLUX_PROPPAGE3 DIALOGEX 0, 0, 418, 234
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Flux Properties"
 FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
     CONTROL         "Custom1",IDC_FLUX_GRID,"MFCGridCtrl",WS_BORDER | 
-                    WS_TABSTOP,7,7,404,60
+                    WS_TABSTOP,7,26,404,60
     CONTROL         "Custom1",IDC_SOLUTION_GRID,"MFCGridCtrl",WS_BORDER | 
-                    WS_TABSTOP,7,82,404,60
-    LTEXT           "Face:",IDC_FACE_STATIC,7,148,19,8
+                    WS_TABSTOP,7,96,404,60
+    LTEXT           "Face:",IDC_FACE_STATIC,7,164,19,8
     CONTROL         "X",IDC_FACE_X_RADIO,"Button",BS_AUTORADIOBUTTON | 
-                    WS_GROUP,32,148,20,10
-    CONTROL         "Y",IDC_FACE_Y_RADIO,"Button",BS_AUTORADIOBUTTON,54,148,
+                    WS_GROUP,32,164,20,10
+    CONTROL         "Y",IDC_FACE_Y_RADIO,"Button",BS_AUTORADIOBUTTON,54,164,
                     20,10
-    CONTROL         "Z",IDC_FACE_Z_RADIO,"Button",BS_AUTORADIOBUTTON,76,148,
+    CONTROL         "Z",IDC_FACE_Z_RADIO,"Button",BS_AUTORADIOBUTTON,76,164,
                     20,10
     CONTROL         "",IDC_DESC_RICHEDIT,"RichEdit20A",ES_MULTILINE | 
                     ES_AUTOHSCROLL | ES_READONLY | WS_BORDER | WS_VSCROLL | 
-                    WS_HSCROLL,7,166,404,49
+                    WS_HSCROLL,7,177,404,49
+    LTEXT           "De&scription",IDC_DESC_STATIC,7,8,36,8
+    EDITTEXT        IDC_DESC_EDIT,55,7,356,12,ES_AUTOHSCROLL
 END
 
-IDD_BC_LEAKY_PROPPAGE3 DIALOGEX 0, 0, 418, 222
+IDD_BC_LEAKY_PROPPAGE3 DIALOGEX 0, 0, 418, 234
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Leaky Properties"
 FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
-    LTEXT           "Face:",IDC_FACE_STATIC,7,7,19,8
+    LTEXT           "De&scription",IDC_DESC_STATIC,7,8,36,8
+    EDITTEXT        IDC_DESC_EDIT,55,7,356,12,ES_AUTOHSCROLL
+    LTEXT           "Face:",IDC_FACE_STATIC,7,24,19,8
     CONTROL         "X",IDC_FACE_X_RADIO,"Button",BS_AUTORADIOBUTTON | 
-                    WS_GROUP,32,7,20,10
-    CONTROL         "Y",IDC_FACE_Y_RADIO,"Button",BS_AUTORADIOBUTTON,54,7,20,
-                    10
-    CONTROL         "Z",IDC_FACE_Z_RADIO,"Button",BS_AUTORADIOBUTTON,76,7,20,
-                    10
+                    WS_GROUP,32,24,20,10
+    CONTROL         "Y",IDC_FACE_Y_RADIO,"Button",BS_AUTORADIOBUTTON,54,24,
+                    20,10
+    CONTROL         "Z",IDC_FACE_Z_RADIO,"Button",BS_AUTORADIOBUTTON,76,24,
+                    20,10
     CONTROL         "Custom1",IDC_SINGLE_GRID,"MFCGridCtrl",WS_BORDER | 
-                    WS_TABSTOP,7,19,404,38
+                    WS_TABSTOP,7,36,404,38
     CONTROL         "Custom1",IDC_HEAD_GRID,"MFCGridCtrl",WS_BORDER | 
-                    WS_TABSTOP,7,65,404,48
+                    WS_TABSTOP,7,80,404,48
     CONTROL         "Custom1",IDC_SOLUTION_GRID,"MFCGridCtrl",WS_BORDER | 
-                    WS_TABSTOP,7,121,404,48
+                    WS_TABSTOP,7,134,404,48
     CONTROL         "",IDC_DESC_RICHEDIT,"RichEdit20A",ES_MULTILINE | 
                     ES_AUTOHSCROLL | ES_READONLY | WS_BORDER | WS_VSCROLL | 
-                    WS_HSCROLL,7,177,404,38
+                    WS_HSCROLL,7,189,404,38
 END
 
 IDD_TC_INT_M_PROPPAGE2 DIALOGEX 0, 0, 418, 222
@@ -2089,46 +2095,46 @@ BEGIN
     GROUPBOX        "Static",IDC_DESC_STATIC,7,162,404,53,NOT WS_VISIBLE
 END
 
-IDD_MEDIASPREAD_EXT_PROPPAGE DIALOGEX 0, 0, 418, 222
+IDD_MEDIASPREAD_EXT_PROPPAGE DIALOGEX 0, 0, 418, 234
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Media Properties"
 FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
+    LTEXT           "De&scription",IDC_DESC_STATIC,7,8,36,8
+    EDITTEXT        IDC_DESC_EDIT,55,7,356,12,ES_AUTOHSCROLL
+    CONTROL         "Custom1",IDC_MEDIA_GRID,"MFCGridCtrl",WS_BORDER | 
+                    WS_TABSTOP,7,26,404,120
     CONTROL         "",IDC_DESC_RICHEDIT,"RichEdit20A",ES_MULTILINE | 
                     ES_AUTOHSCROLL | ES_READONLY | WS_BORDER | WS_VSCROLL | 
-                    WS_HSCROLL,7,142,404,73
-    CONTROL         "Custom1",IDC_MEDIA_GRID,"MFCGridCtrl",WS_BORDER | 
-                    WS_TABSTOP,7,7,404,120
-    LTEXT           "NOTE: This invisible control is needed so that the background of the dialog is painted correctly.",
-                    IDC_STATIC,75,77,159,22,NOT WS_VISIBLE
+                    WS_HSCROLL,7,154,404,73
 END
 
-IDD_CHEMICSPREAD_PROPPAGE DIALOGEX 0, 0, 418, 222
+IDD_CHEMICSPREAD_PROPPAGE DIALOGEX 0, 0, 418, 234
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Chemistry Initial Condition Properties"
 FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
     CONTROL         "",IDC_DESC_RICHEDIT,"RichEdit20A",ES_MULTILINE | 
                     ES_AUTOHSCROLL | ES_READONLY | WS_BORDER | WS_VSCROLL | 
-                    WS_HSCROLL,7,142,404,73
+                    WS_HSCROLL,7,153,404,73
     CONTROL         "Custom1",IDC_CHEMIC_GRID,"MFCGridCtrl",WS_BORDER | 
-                    WS_TABSTOP,7,7,404,120
-    LTEXT           "NOTE: This invisible control is needed so that the background of the dialog is painted correctly.",
-                    IDC_STATIC,75,77,159,22,NOT WS_VISIBLE
+                    WS_TABSTOP,7,26,404,120
+    LTEXT           "De&scription",IDC_DESC_STATIC,7,8,36,8
+    EDITTEXT        IDC_DESC_EDIT,55,7,356,12,ES_AUTOHSCROLL
 END
 
-IDD_IC_HEAD_SPREAD_PROPPAGE DIALOGEX 0, 0, 418, 222
+IDD_IC_HEAD_SPREAD_PROPPAGE DIALOGEX 0, 0, 418, 234
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Head IC Properties"
 FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
     CONTROL         "",IDC_DESC_RICHEDIT,"RichEdit20A",ES_MULTILINE | 
                     ES_AUTOHSCROLL | ES_READONLY | WS_BORDER | WS_VSCROLL | 
-                    WS_HSCROLL,7,142,404,73
+                    WS_HSCROLL,7,153,404,73
     CONTROL         "Custom1",IDC_HEADIC_GRID,"MFCGridCtrl",WS_BORDER | 
-                    WS_TABSTOP,7,7,404,120
-    LTEXT           "NOTE: This invisible control is needed so that the background of the dialog is painted correctly.",
-                    IDC_STATIC,75,77,159,22,NOT WS_VISIBLE
+                    WS_TABSTOP,7,27,404,120
+    LTEXT           "De&scription",IDC_DESC_STATIC,7,8,36,8
+    EDITTEXT        IDC_DESC_EDIT,55,7,356,12,ES_AUTOHSCROLL
 END
 
 IDD_RIVERPT_PROPPAGE DIALOGEX 0, 0, 289, 174
@@ -2715,8 +2721,12 @@ STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION |
 CAPTION "Subdivide"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,47,196,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,113,196,50,14
+    GROUPBOX        "Interval",IDC_STATIC,7,7,189,48
+    LTEXT           "Starting value",IDC_STATIC,41,20,46,8
+    EDITTEXT        IDC_START_EDIT,105,18,46,12,ES_AUTOHSCROLL
+    LTEXT           "Ending value",IDC_STATIC,41,38,42,8
+    EDITTEXT        IDC_END_EDIT,105,36,46,12,ES_AUTOHSCROLL
+    GROUPBOX        "",IDC_STATIC,7,59,189,57
     LTEXT           "Divide the selected interval into ",IDC_STATIC,16,71,
                     104,8
     EDITTEXT        IDC_SECTIONS_EDIT,121,70,40,12,ES_AUTOHSCROLL
@@ -2728,19 +2738,15 @@ BEGIN
                     WS_VSCROLL | WS_TABSTOP
     LTEXT           "successive widths by ",IDC_STATIC,74,94,70,8
     EDITTEXT        IDC_FACTOR_EDIT,145,92,40,12,ES_AUTOHSCROLL
-    GROUPBOX        "",IDC_STATIC,7,59,189,57
     GROUPBOX        "",IDC_STATIC,7,121,189,62
     RTEXT           "interval length =",IDC_STATIC,50,132,56,8
-    RTEXT           "starting width =",IDC_STATIC,54,149,52,8
-    RTEXT           "ending width =",IDC_STATIC,57,166,49,8
     LTEXT           " 0.08",IDC_INTERVAL_STATIC,108,132,55,8
+    RTEXT           "starting width =",IDC_STATIC,54,149,52,8
     LTEXT           " 0.08",IDC_START_WIDTH_STATIC,108,149,55,8
+    RTEXT           "ending width =",IDC_STATIC,57,166,49,8
     LTEXT           " 0.08",IDC_END_WIDTH_STATIC,108,166,55,8
-    LTEXT           "Starting value",IDC_STATIC,41,20,46,8
-    EDITTEXT        IDC_START_EDIT,105,18,46,12,ES_AUTOHSCROLL
-    LTEXT           "Ending value",IDC_STATIC,41,38,42,8
-    EDITTEXT        IDC_END_EDIT,105,36,46,12,ES_AUTOHSCROLL
-    GROUPBOX        "Interval",IDC_STATIC,7,7,189,48
+    DEFPUSHBUTTON   "OK",IDOK,47,196,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,113,196,50,14
 END
 
 
@@ -3298,7 +3304,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 411
         TOPMARGIN, 7
-        BOTTOMMARGIN, 215
+        BOTTOMMARGIN, 227
     END
 
     IDD_TEST_CMODGRIDCTRLEX, DIALOG
@@ -3314,7 +3320,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 411
         TOPMARGIN, 7
-        BOTTOMMARGIN, 215
+        BOTTOMMARGIN, 227
     END
 
     IDD_BC_LEAKY_PROPPAGE3, DIALOG
@@ -3322,7 +3328,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 411
         TOPMARGIN, 7
-        BOTTOMMARGIN, 215
+        BOTTOMMARGIN, 227
     END
 
     IDD_TC_INT_M_PROPPAGE2, DIALOG
@@ -3338,7 +3344,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 411
         TOPMARGIN, 7
-        BOTTOMMARGIN, 215
+        BOTTOMMARGIN, 227
     END
 
     IDD_CHEMICSPREAD_PROPPAGE, DIALOG
@@ -3346,7 +3352,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 411
         TOPMARGIN, 7
-        BOTTOMMARGIN, 215
+        BOTTOMMARGIN, 227
     END
 
     IDD_IC_HEAD_SPREAD_PROPPAGE, DIALOG
@@ -3354,7 +3360,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 411
         TOPMARGIN, 7
-        BOTTOMMARGIN, 215
+        BOTTOMMARGIN, 227
     END
 
     IDD_RIVERPT_PROPPAGE, DIALOG

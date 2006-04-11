@@ -15,7 +15,7 @@ template<typename T>
 class CZoneCreateAction : public CAction
 {
 public:
-	CZoneCreateAction(CWPhastDoc* pDoc, const char* name, float xMin, float xMax, float yMin, float yMax, float zMin, float zMax, CTreeCtrlNode nodeInsertAfter = CTreeCtrlNode(TVI_LAST, NULL));
+	CZoneCreateAction(CWPhastDoc* pDoc, const char* name, float xMin, float xMax, float yMin, float yMax, float zMin, float zMax, const char* desc, CTreeCtrlNode nodeInsertAfter = CTreeCtrlNode(TVI_LAST, NULL));
 	~CZoneCreateAction(void);
 
 	virtual void Execute();
@@ -25,7 +25,6 @@ public:
 
 protected:
 	CWPhastDoc *m_pDoc;
-	std::string m_sName;
 	float m_xMin;
 	float m_xMax;
 	float m_yMin;
@@ -40,9 +39,8 @@ protected:
 };
 
 template<typename T>
-CZoneCreateAction<T>::CZoneCreateAction(CWPhastDoc* pDoc, const char* name, float xMin, float xMax, float yMin, float yMax, float zMin, float zMax, CTreeCtrlNode nodeInsertAfter)
+CZoneCreateAction<T>::CZoneCreateAction(CWPhastDoc* pDoc, const char* name, float xMin, float xMax, float yMin, float yMax, float zMin, float zMax, const char* desc, CTreeCtrlNode nodeInsertAfter)
 : m_pDoc(pDoc)
-, m_sName(name)
 , m_xMin(xMin)
 , m_xMax(xMax)
 , m_yMin(yMin)
@@ -70,7 +68,11 @@ CZoneCreateAction<T>::CZoneCreateAction(CWPhastDoc* pDoc, const char* name, floa
 
 	// set name
 	//
-	this->m_pZoneActor->SetName(this->m_sName.c_str());
+	this->m_pZoneActor->SetName(name);
+
+	// set desc
+	//
+	this->m_pZoneActor->SetDesc(desc);
 
 	// create random color
 	// ::rand() returns 0 - RAND_MAX

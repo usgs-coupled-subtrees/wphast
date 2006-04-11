@@ -26,6 +26,9 @@ public:
 	void SetDefault(bool bDefault)       { m_bDefault = bDefault; }
 	bool GetDefault(void)const           { return m_bDefault; }
 
+	void SetDesc(LPCTSTR desc) { m_desc = desc; }
+	LPCTSTR GetDesc() { return m_desc.c_str(); }
+
 // Dialog Data
 	enum { IDD = IDD_MEDIASPREAD_EXT_PROPPAGE };
 
@@ -67,8 +70,12 @@ protected:
 	std::string m_sAlphaHorizontalRTF;   // IDR_MEDIA_ALPHA_HORZ_RTF
 	std::string m_sAlphaVerticalRTF;     // IDR_MEDIA_ALPHA_VERT_RTF
 
+	std::string m_desc;
 
 public:
 	virtual BOOL OnInitDialog();
 	CRichEditCtrl m_wndRichEditCtrl;
+	virtual BOOL OnSetActive();
+	virtual BOOL OnKillActive();
+	virtual LRESULT OnWizardNext();
 };

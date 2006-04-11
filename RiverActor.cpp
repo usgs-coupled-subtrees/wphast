@@ -796,12 +796,15 @@ void CRiverActor::CreateDefaultProperties()
 {
   // Handle properties
   this->HandleProperty = vtkProperty::New();
+  this->HandleProperty->SetOpacity(0.7);
   this->HandleProperty->SetColor(0, 0, 1);
 
   this->SelectedHandleProperty = vtkProperty::New();
+  this->SelectedHandleProperty->SetOpacity(0.7);
   this->SelectedHandleProperty->SetColor(1, 0, 0);
 
   this->EnabledHandleProperty = vtkProperty::New();
+  this->EnabledHandleProperty->SetOpacity(0.7);
   this->EnabledHandleProperty->SetColor(1, 1, 1);
 }
 
@@ -1536,6 +1539,7 @@ void CRiverActor::AddGraphicPoint(void)
 		vtkLODActor *pActor = vtkLODActor::New();		
 		pActor->SetMapper(pPolyDataMapper);
 		pActor->GetProperty()->SetColor(0., 1., 1.);
+		pActor->GetProperty()->SetOpacity(0.4);
 		this->m_listLineActor.push_back(pActor);
 		this->m_pLineCellPicker->AddPickList(pActor);
 		this->AddPart(pActor);

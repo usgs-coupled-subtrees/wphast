@@ -26,6 +26,9 @@ public:
 	void SetFlowOnly(bool bFlowOnly)     { m_bFlowOnly = bFlowOnly; }
 	bool GetFlowOnly(void)const          { return m_bFlowOnly; }
 
+	void SetDesc(LPCTSTR desc) { m_desc = desc; }
+	LPCTSTR GetDesc() { return m_desc.c_str(); }
+
 // Dialog Data
 	enum { IDD = IDD_BC_LEAKY_PROPPAGE3 };
 
@@ -38,6 +41,7 @@ protected:
 	CModGridCtrlEx   m_gridSolution; // IDC_SOLUTION_GRID
 	CModGridCtrlEx   m_gridSingle;   // IDC_SINGLE_GRID
 	bool             m_bFlowOnly;
+	std::string      m_desc;
 
 
 	DECLARE_MESSAGE_MAP()

@@ -384,7 +384,9 @@ void CZoneActor::Select(CWPhastView* pView, bool bReselect)
 
 void CZoneActor::SetName(LPCTSTR name)
 {
+	ASSERT(name != NULL);
 	this->m_name = name;
+	this->UpdateNameDesc();
 }
 
 LPCTSTR CZoneActor::GetName(void)const
@@ -394,7 +396,15 @@ LPCTSTR CZoneActor::GetName(void)const
 
 void CZoneActor::SetDesc(LPCTSTR desc)
 {
-	this->m_desc = desc;
+	if (desc)
+	{
+		this->m_desc = desc;
+	}
+	else
+	{
+		this->m_desc.clear();
+	}
+	this->UpdateNameDesc();
 }
 
 LPCTSTR CZoneActor::GetDesc(void)const
@@ -402,6 +412,20 @@ LPCTSTR CZoneActor::GetDesc(void)const
 	return this->m_desc.c_str();
 }
 
+LPCTSTR CZoneActor::GetNameDesc(void)const
+{
+	return this->m_name_desc.c_str();
+}
+
+void CZoneActor::UpdateNameDesc()
+{
+	this->m_name_desc = this->GetName();
+	if (this->GetDesc() && strlen(this->GetDesc()))
+	{
+		this->m_name_desc += _T(" - ");
+		this->m_name_desc += this->GetDesc();
+	}
+}
 
 // COMMENT: {6/3/2004 3:46:20 PM}LPCTSTR CZoneActor::GetSerialName(void)//const
 // COMMENT: {6/3/2004 3:46:20 PM}{

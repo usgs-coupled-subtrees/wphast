@@ -50,7 +50,7 @@ CWellActor::CWellActor(void)
 	this->m_pPolyDataMapper->SetInput(this->m_pTubeFilter->GetOutput());
 
 	this->SetMapper(this->m_pPolyDataMapper);
-	this->GetProperty()->SetOpacity(0.6);
+	this->GetProperty()->SetOpacity(0.4);
 	this->GetProperty()->SetColor(1, 1, 0); // Yellow
 }
 

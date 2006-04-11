@@ -31,7 +31,7 @@ CMediaZoneActor::~CMediaZoneActor(void)
 {
 }
 
-void CMediaZoneActor::Create(CWPhastDoc* pWPhastDoc, const CZone& zone, const CGridElt& gridElt)
+void CMediaZoneActor::Create(CWPhastDoc* pWPhastDoc, const CZone& zone, const CGridElt& gridElt, LPCTSTR desc)
 {
 	CZoneCreateAction<CMediaZoneActor>* pAction = new CZoneCreateAction<CMediaZoneActor>(
 		pWPhastDoc,
@@ -41,7 +41,8 @@ void CMediaZoneActor::Create(CWPhastDoc* pWPhastDoc, const CZone& zone, const CG
 		zone.y1,
 		zone.y2,
 		zone.z1,
-		zone.z2
+		zone.z2,
+		desc
 		);
 	pAction->GetZoneActor()->SetGridElt(gridElt);
 	pWPhastDoc->Execute(pAction);
@@ -77,7 +78,7 @@ void CMediaZoneActor::Insert(CPropertyTreeControlBar* pTreeControlBar, HTREEITEM
 
 void CMediaZoneActor::InsertAt(CTreeCtrl* pTreeCtrl, HTREEITEM hParent, HTREEITEM hInsertAfter)
 {
-	this->m_hti = pTreeCtrl->InsertItem(this->GetName(), hParent, hInsertAfter);
+	this->m_hti = pTreeCtrl->InsertItem(this->GetNameDesc(), hParent, hInsertAfter);
 	pTreeCtrl->SetItemData(this->m_hti, (DWORD_PTR)this);
 	pTreeCtrl->SelectItem(this->m_hti); // might want to move this -- this causes the tree control to redraw
 	this->Update(pTreeCtrl, this->m_hti);
@@ -85,18 +86,6 @@ void CMediaZoneActor::InsertAt(CTreeCtrl* pTreeCtrl, HTREEITEM hParent, HTREEITE
 
 void CMediaZoneActor::Remove(CPropertyTreeControlBar* pTreeControlBar)
 {
-// COMMENT: {7/15/2004 3:36:40 PM}	if (CWPhastDoc *pDoc = pTreeControlBar->GetDocument()) {
-// COMMENT: {7/15/2004 3:36:40 PM}		pDoc->RemoveProp3D(this);
-// COMMENT: {7/15/2004 3:36:40 PM}		if (vtkPropAssembly *pPropAssembly = pDoc->GetPropAssemblyMedia()) {
-// COMMENT: {7/15/2004 3:36:40 PM}			pPropAssembly->RemovePart(this);
-// COMMENT: {7/15/2004 3:36:40 PM}			//{{ VTK HACK
-// COMMENT: {7/15/2004 3:36:40 PM}			// This is req'd because ReleaseGraphicsResources is not called when
-// COMMENT: {7/15/2004 3:36:40 PM}			// vtkPropAssembly::RemovePart(vtkProp *prop) is called
-// COMMENT: {7/15/2004 3:36:40 PM}			pDoc->ReleaseGraphicsResources(this);
-// COMMENT: {7/15/2004 3:36:40 PM}			//}} VTK HACK
-// COMMENT: {7/15/2004 3:36:40 PM}		}
-// COMMENT: {7/15/2004 3:36:40 PM}		pDoc->UpdateAllViews(0);
-// COMMENT: {7/15/2004 3:36:40 PM}	}
 	CZoneActor::Remove(pTreeControlBar);
 }
 
@@ -122,6 +111,10 @@ void CMediaZoneActor::Update(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent)
 	{
 		pTreeCtrl->DeleteItem(hChild);
 	}
+
+	// update description
+	//
+	pTreeCtrl->SetItemText(htiParent, this->GetNameDesc());
 
 	// active
 	if (this->m_grid_elt.active)
@@ -181,19 +174,6 @@ void CMediaZoneActor::Update(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent)
 	{
 		static_cast<Cproperty*>(this->m_grid_elt.alpha_vertical)->Insert(pTreeCtrl, htiParent, "vertical_dispersivity");
 	}
-
-#ifdef _DEBUG
-	//{{TEST DRAG DROP
-	HTREEITEM hLastItem = pTreeCtrl->GetChildItem(htiParent);
-	while (pTreeCtrl->GetNextSiblingItem(hLastItem))
-	{
-		hLastItem = pTreeCtrl->GetNextSiblingItem(hLastItem);
-	}
-	hLastItem = pTreeCtrl->InsertItem("TEST", hLastItem);
-	hLastItem = pTreeCtrl->InsertItem("TEST", hLastItem);
-	hLastItem = pTreeCtrl->InsertItem("TEST", hLastItem);
-	//}}TEST DRAG DROP
-#endif
 }
 
 void CMediaZoneActor::Edit(CTreeCtrl* pTreeCtrl)
@@ -221,6 +201,7 @@ void CMediaZoneActor::Edit(CTreeCtrl* pTreeCtrl)
 
 	CMediaSpreadPropertyPage mediaSpreadProps;
 	mediaSpreadProps.SetProperties(elt);
+	mediaSpreadProps.SetDesc(this->GetDesc());
 	if (this->GetDefault())
 	{
 		mediaSpreadProps.SetDefault(true);
@@ -232,7 +213,7 @@ void CMediaZoneActor::Edit(CTreeCtrl* pTreeCtrl)
 	{
 		CGridElt grid_elt;
 		mediaSpreadProps.GetProperties(grid_elt);
-		pDoc->Execute(new CSetMediaAction(this, pTreeCtrl, grid_elt));
+		pDoc->Execute(new CSetMediaAction(this, pTreeCtrl, grid_elt, mediaSpreadProps.GetDesc()));
 	}
 }
 
@@ -246,30 +227,6 @@ CGridElt CMediaZoneActor::GetData(void)const
 {
 	return this->GetGridElt();
 }
-
-//void CMediaZoneActor::SetGridElt(const CGridElt& rGridElt, const CUnits& rUnits)
-//{
-//	// NOTE: use set bounds to set the zone
-//	//
-//
-//	ASSERT(this->m_grid_elt.zone);
-//	CZone zoneSave(*this->m_grid_elt.zone);
-//
-//	this->m_grid_elt = rGridElt;
-//	(*this->m_grid_elt.zone) = zoneSave;
-//
-//	/** REMOVED SEPT 10
-//	this->SetBounds(
-//		this->m_grid_elt.zone->x1,
-//		this->m_grid_elt.zone->x2,
-//		this->m_grid_elt.zone->y1,
-//		this->m_grid_elt.zone->y2,
-//		this->m_grid_elt.zone->z1,
-//		this->m_grid_elt.zone->z2,
-//		rUnits
-//		);
-//	REMOVED SEPT 10 **/
-//}
 
 void CMediaZoneActor::SetGridElt(const CGridElt& rGridElt)
 {

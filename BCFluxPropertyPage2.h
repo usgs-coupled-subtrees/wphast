@@ -28,6 +28,9 @@ public:
 	void SetFlowOnly(bool bFlowOnly)     { m_bFlowOnly = bFlowOnly; }
 	bool GetFlowOnly(void)const          { return m_bFlowOnly; }
 
+	void SetDesc(LPCTSTR desc) { m_desc = desc; }
+	LPCTSTR GetDesc() { return m_desc.c_str(); }
+
 // Dialog Data
 	enum { IDD = IDD_BC_FLUX_PROPPAGE3 };
 
@@ -39,6 +42,7 @@ protected:
 	CModGridCtrlEx   m_gridFlux;     // IDC_FLUX_GRID
 	CModGridCtrlEx   m_gridSolution; // IDC_SOLUTION_GRID
 	bool             m_bFlowOnly;
+	std::string      m_desc;
 
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnCheckChangedFlux(NMHDR *pNotifyStruct, LRESULT *result);

@@ -6,7 +6,7 @@ class CICChemZoneActor : public CICZoneActor
 public:
 	vtkTypeRevisionMacro(CICChemZoneActor,CICZoneActor);
 	static CICChemZoneActor *New();
-	static void Create(CWPhastDoc* pWPhastDoc, const CZone& zone, const CChemIC& chemIC);
+	static void Create(CWPhastDoc* pWPhastDoc, const CZone& zone, const CChemIC& chemIC, LPCTSTR desc);
 
 	CChemIC GetData(void)const;
 	void SetData(const CChemIC& rChemIC);

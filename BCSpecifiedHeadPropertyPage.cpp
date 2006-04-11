@@ -42,6 +42,20 @@ void CBCSpecifiedHeadPropertyPage::DoDataExchange(CDataExchange* pDX)
 		CGlobal::DDX_GridTimeSeries(pDX, IDC_SOLUTION_GRID, this->m_bc.m_bc_solution);
 	}
 
+	// description
+	//
+	if (pDX->m_bSaveAndValidate)
+	{
+		CString str;
+		::DDX_Text(pDX, IDC_DESC_EDIT, str);
+		this->m_desc = str;
+	}
+	else
+	{
+		CString str(this->m_desc.c_str());
+		::DDX_Text(pDX, IDC_DESC_EDIT, str);
+	}
+
 	if (pDX->m_bSaveAndValidate)
 	{
 		CBC bc;
@@ -107,6 +121,11 @@ BOOL CBCSpecifiedHeadPropertyPage::OnInitDialog()
 
 	// Layout controls
 	this->CreateRoot(VERTICAL)
+		<< 	( pane(HORIZONTAL, ABSOLUTE_VERT, 0, 0, 0 )
+			<< item(IDC_DESC_STATIC, NORESIZE | ALIGN_VCENTER, 0, 0, 0, 0)
+			<< itemFixed(HORIZONTAL, 8)
+			<< item(IDC_DESC_EDIT, ABSOLUTE_VERT | ALIGN_VCENTER, 0, 0, 0, 0)
+			)
 		<< item(IDC_HEAD_GRID, GREEDY)
 		<< itemFixed(VERTICAL, 3)
 		<< 	( pane(HORIZONTAL, ABSOLUTE_VERT, 0, 0, 0 )

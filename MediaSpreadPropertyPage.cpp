@@ -5,6 +5,8 @@
 #include "WPhast.h"
 #include "MediaSpreadPropertyPage.h"
 
+#include "NewModelWizard.h"
+
 #include "Global.h"
 #include "property.h"
 
@@ -81,6 +83,20 @@ void CMediaSpreadPropertyPage::DoDataExchange(CDataExchange* pDX)
 		// wrap richedit to window
 		this->m_wndRichEditCtrl.SetTargetDevice(NULL, 0);
 		this->m_wndRichEditCtrl.SetWindowText(this->m_sActiveRTF.c_str());
+	}
+
+	// description
+	//
+	if (pDX->m_bSaveAndValidate)
+	{
+		CString str;
+		::DDX_Text(pDX, IDC_DESC_EDIT, str);
+		this->m_desc = str;
+	}
+	else
+	{
+		CString str(this->m_desc.c_str());
+		::DDX_Text(pDX, IDC_DESC_EDIT, str);
 	}
 
 	int nRow = 0;
@@ -507,4 +523,57 @@ void CMediaSpreadPropertyPage::OnSelChangedMedia(NMHDR *pNotifyStruct, LRESULT *
 		this->m_wndRichEditCtrl.SetWindowText("");
 	}
 
+}
+
+BOOL CMediaSpreadPropertyPage::OnSetActive()
+{
+// COMMENT: {4/10/2006 9:40:04 PM}	// TODO: Add your specialized code here and/or call the base class
+// COMMENT: {4/10/2006 9:40:04 PM}
+// COMMENT: {4/10/2006 9:40:04 PM}	return CPropertyPage::OnSetActive();
+	BOOL bRet = CPropertyPage::OnSetActive();
+	CPropertySheet* pSheet = static_cast<CPropertySheet*>(this->GetParent());
+	ASSERT_KINDOF(CPropertySheet, pSheet);
+	if (pSheet->IsWizard())
+	{
+		if (pSheet->IsKindOf(RUNTIME_CLASS(CNewModelWizard)))
+		{
+			pSheet->SetWizardButtons(PSWIZB_BACK|PSWIZB_NEXT);
+		}
+		else
+		{
+			pSheet->SetWizardButtons(PSWIZB_BACK|PSWIZB_FINISH);
+		}
+	}
+	return bRet;
+}
+
+BOOL CMediaSpreadPropertyPage::OnKillActive()
+{
+// COMMENT: {4/10/2006 9:41:33 PM}	// TODO: Add your specialized code here and/or call the base class
+// COMMENT: {4/10/2006 9:41:33 PM}
+// COMMENT: {4/10/2006 9:41:33 PM}	return CPropertyPage::OnKillActive();
+	CPropertySheet* pSheet = static_cast<CPropertySheet*>(this->GetParent());
+	ASSERT_KINDOF(CPropertySheet, pSheet);
+	if (pSheet->IsWizard())
+	{
+		return TRUE;
+	}
+	return CPropertyPage::OnKillActive();
+}
+
+LRESULT CMediaSpreadPropertyPage::OnWizardNext()
+{
+// COMMENT: {4/10/2006 9:41:51 PM}	// TODO: Add your specialized code here and/or call the base class
+// COMMENT: {4/10/2006 9:41:51 PM}
+// COMMENT: {4/10/2006 9:41:51 PM}	return CPropertyPage::OnWizardNext();
+	CPropertySheet* pSheet = static_cast<CPropertySheet*>(this->GetParent());
+	ASSERT_KINDOF(CPropertySheet, pSheet);
+	if (pSheet->IsWizard())
+	{
+		if (!this->UpdateData(TRUE))
+		{
+			return -1; // return –1 to prevent the page from changing 
+		}
+	}
+	return CPropertyPage::OnWizardNext();
 }

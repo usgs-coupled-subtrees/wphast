@@ -10,6 +10,7 @@
 #include "BoxPropertiesDialogBar.h"
 #include "ZoneActor.h"
 #include "MediaZoneActor.h"
+#include "MediaSpreadPropertyPage.h"
 #include "BCZoneActor.h"
 #include "ICZoneActor.h"
 #include "ICHeadZoneActor.h"
@@ -677,9 +678,11 @@ void CViewVTKCommand::OnLeftButtonReleaseEvent(vtkObject* caller, void* callData
 		CNewZonePropertyPage          newZone;
 #if defined(__CPPUNIT__)
 		///TMediaPropertyPage<CPropertyPage> mediaProps(IDS_MEDIA_PROPS_WIZ_135);
-		CMediaPropertyPage            mediaProps(IDS_MEDIA_PROPS_WIZ_135);
+		///CMediaPropertyPage            mediaProps(IDS_MEDIA_PROPS_WIZ_135);
+		CMediaSpreadPropertyPage      mediaProps;
 #else
-		CMediaPropertyPage            mediaProps(IDS_MEDIA_PROPS_WIZ_135);
+		///CMediaPropertyPage            mediaProps(IDS_MEDIA_PROPS_WIZ_135);
+		CMediaSpreadPropertyPage      mediaProps;
 #endif
 		CBCFluxPropertyPage2          fluxProps;
 		CBCLeakyPropertyPage2         leakyProps;
@@ -730,39 +733,37 @@ void CViewVTKCommand::OnLeftButtonReleaseEvent(vtkObject* caller, void* callData
 			{
 				CGridElt elt;
 				mediaProps.GetProperties(elt);
-				CMediaZoneActor::Create(pDoc, absZone, elt);
+				CMediaZoneActor::Create(pDoc, absZone, elt, mediaProps.GetDesc());
 			}
 			else if (newZone.GetType() == ID_ZONE_TYPE_BC_FLUX)
 			{
 				CBC bc;
 				fluxProps.GetProperties(bc);
-				CBCZoneActor::Create(pDoc, absZone, bc);
+				CBCZoneActor::Create(pDoc, absZone, bc, fluxProps.GetDesc());
 			}
 			else if (newZone.GetType() == ID_ZONE_TYPE_BC_LEAKY)
 			{
 				CBC bc;
 				leakyProps.GetProperties(bc);
-				CBCZoneActor::Create(pDoc, absZone, bc);
+				CBCZoneActor::Create(pDoc, absZone, bc, leakyProps.GetDesc());
 			}
 			else if (newZone.GetType() == ID_ZONE_TYPE_BC_SPECIFIED)
 			{
 				CBC bc;
 				specifiedProps.GetProperties(bc);
-				CBCZoneActor::Create(pDoc, absZone, bc);
+				CBCZoneActor::Create(pDoc, absZone, bc, specifiedProps.GetDesc());
 			}
 			else if (newZone.GetType() == ID_ZONE_TYPE_IC_HEAD)
 			{
 				CHeadIC headic;
 				icHeadProps.GetProperties(headic);
-				///CICZoneActor::Create(pDoc, absZone, headic);
-				CICHeadZoneActor::Create(pDoc, absZone, headic);
+				CICHeadZoneActor::Create(pDoc, absZone, headic, icHeadProps.GetDesc());
 			}
 			else if (newZone.GetType() == ID_ZONE_TYPE_IC_CHEM)
 			{
 				CChemIC chemIC;
 				chemICProps.GetProperties(chemIC);
-				///CICZoneActor::Create(pDoc, absZone, chemIC);
-				CICChemZoneActor::Create(pDoc, absZone, chemIC);
+				CICChemZoneActor::Create(pDoc, absZone, chemIC, chemICProps.GetDesc());
 			}
 		}
 		else

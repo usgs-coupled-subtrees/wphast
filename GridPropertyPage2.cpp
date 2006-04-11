@@ -619,11 +619,24 @@ void CGridPropertyPage2::OnBnClickedButtonDel()
 	}
 // COMMENT: {4/5/2006 4:08:52 PM}	this->m_wndNonuniformGrid.SetSelectedRange(-1, -1, -1, -1);
 	this->m_wndNonuniformGrid.SetCurrentFocusCell(cell.row, cell.col);
-	this->m_wndNonuniformGrid.SetSelectedRange(range);
+// COMMENT: {4/10/2006 3:00:14 PM}	this->m_wndNonuniformGrid.SetSelectedRange(range);
+	range.SetMinRow(max(range.GetMinRow(), this->m_wndNonuniformGrid.GetFixedRowCount()));
+	range.SetMaxRow(min(range.GetMaxRow(), this->m_wndNonuniformGrid.GetRowCount() - 1));
+	range.SetMinCol(max(range.GetMinCol(), this->m_wndNonuniformGrid.GetFixedColumnCount()));
+	range.SetMaxCol(min(range.GetMaxCol(), this->m_wndNonuniformGrid.GetColumnCount() - 1));
+	if (range.IsValid())
+	{
+		this->m_wndNonuniformGrid.SetSelectedRange(range);
+	}
+	else
+	{
+		this->m_wndNonuniformGrid.SetSelectedRange(-1, -1, -1, -1);
+	}
 	
 	this->SetDlgItemInt(IDC_EDIT_N_NODES, (UINT)this->m_wndNonuniformGrid.GetRowCount() - 1, FALSE);
 // COMMENT: {4/5/2006 6:10:00 PM}	this->m_wndNonuniformGrid.RedrawWindow();
 	this->m_wndNonuniformGrid.Invalidate(TRUE);
+	this->OnSelChangedNonuniform(NULL, NULL);
 }
 
 void CGridPropertyPage2::OnBnClickedButtonSeries()
@@ -743,7 +756,8 @@ void CGridPropertyPage2::OnBnClickedButtonSubdivide()
 		}
 
 		CString str;
-		for (int row = range.GetMinRow() + 1; row < this->m_wndNonuniformGrid.GetRowCount(); ++row)
+		///for (int row = range.GetMinRow() + 1; row < this->m_wndNonuniformGrid.GetRowCount(); ++row)
+		for (int row = range.GetMinRow(); row < this->m_wndNonuniformGrid.GetRowCount(); ++row)
 		{
 			if (count != 0)
 			{
@@ -808,7 +822,7 @@ void CGridPropertyPage2::OnSelChangedNonuniform(NMHDR *pNotifyStruct, LRESULT *r
 
 	if (CWnd* pWnd = this->GetDlgItem(IDC_BUTTON_SUBDIVIDE))
 	{
-		pWnd->EnableWindow(range.Count() > 1);
+		pWnd->EnableWindow(range.IsValid() && (range.Count() > 1));
 	}
 }
 

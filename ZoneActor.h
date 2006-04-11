@@ -51,6 +51,8 @@ public:
 	void SetDesc(LPCTSTR name);
 	LPCTSTR GetDesc(void)const;
 
+	LPCTSTR GetNameDesc(void)const;
+
 	/// virtual void Insert(CTreeCtrl* pTreeCtrl, HTREEITEM htiGrid);
 	///virtual void Insert(CPropertyTreeControlBar* pTreeControlBar) = 0;
 	virtual void Insert(CPropertyTreeControlBar* pTreeControlBar, HTREEITEM hInsertAfter = TVI_LAST) = 0;
@@ -77,10 +79,13 @@ protected:
 	CZoneActor(void);
 	virtual ~CZoneActor(void);
 
+	void UpdateNameDesc();
+
 	vtkCubeSource     *m_pSource;
 	vtkPolyDataMapper *m_pMapper;
 	std::string        m_name;
 	std::string        m_desc;
+	std::string        m_name_desc;
 
 	struct zone       *m_pZone;
 

@@ -2292,6 +2292,7 @@ bool CPropertyTreeControlBar::IsNodePasteable(CTreeCtrlNode headNode, CTreeCtrlN
 					zone.y2,
 					zone.z1,
 					zone.z2,
+					NULL,
 					after
 					);
 				if (type == DT::clipFormat)

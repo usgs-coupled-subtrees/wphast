@@ -29,7 +29,7 @@ CICHeadZoneActor::~CICHeadZoneActor(void)
 {
 }
 
-void CICHeadZoneActor::Create(CWPhastDoc* pWPhastDoc, const CZone& zone, const CHeadIC& headIC)
+void CICHeadZoneActor::Create(CWPhastDoc* pWPhastDoc, const CZone& zone, const CHeadIC& headIC, LPCTSTR desc)
 {
 	CZoneCreateAction<CICHeadZoneActor>* pAction = new CZoneCreateAction<CICHeadZoneActor>(
 		pWPhastDoc,
@@ -39,7 +39,8 @@ void CICHeadZoneActor::Create(CWPhastDoc* pWPhastDoc, const CZone& zone, const C
 		zone.y1,
 		zone.y2,
 		zone.z1,
-		zone.z2
+		zone.z2,
+		desc
 		);
 	pAction->GetZoneActor()->SetData(headIC);
 	pWPhastDoc->Execute(pAction);
@@ -90,6 +91,8 @@ void CICHeadZoneActor::Update(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent)
 		pTreeCtrl->DeleteItem(hChild);
 	}
 
+	pTreeCtrl->SetItemText(htiParent, this->GetNameDesc());
+
 	// head
 	if (this->m_headIC.head)
 	{
@@ -137,13 +140,14 @@ void CICHeadZoneActor::Edit(CTreeCtrl* pTreeCtrl)
 
 	CICHeadSpreadPropertyPage icHeadProps;
 	icHeadProps.SetProperties(this->GetData());		
+	icHeadProps.SetDesc(this->GetDesc());		
 
 	props.AddPage(&icHeadProps);
 	if (props.DoModal() == IDOK)
 	{
 		CHeadIC headIC;
 		icHeadProps.GetProperties(headIC);
-		pDoc->Execute(new CSetHeadICAction(this, pTreeCtrl, headIC));
+		pDoc->Execute(new CSetHeadICAction(this, pTreeCtrl, headIC, icHeadProps.GetDesc()));
 	}
 }
 

@@ -29,7 +29,7 @@ CICChemZoneActor::~CICChemZoneActor(void)
 {
 }
 
-void CICChemZoneActor::Create(CWPhastDoc* pWPhastDoc, const CZone& zone, const CChemIC& chemIC)
+void CICChemZoneActor::Create(CWPhastDoc* pWPhastDoc, const CZone& zone, const CChemIC& chemIC, LPCTSTR desc)
 {
 	CZoneCreateAction<CICChemZoneActor>* pAction = new CZoneCreateAction<CICChemZoneActor>(
 		pWPhastDoc,
@@ -39,7 +39,8 @@ void CICChemZoneActor::Create(CWPhastDoc* pWPhastDoc, const CZone& zone, const C
 		zone.y1,
 		zone.y2,
 		zone.z1,
-		zone.z2
+		zone.z2,
+		desc
 		);
 	pAction->GetZoneActor()->SetData(chemIC);
 	pWPhastDoc->Execute(pAction);
@@ -87,6 +88,8 @@ void CICChemZoneActor::Update(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent)
 	{
 		pTreeCtrl->DeleteItem(hChild);
 	}
+
+	pTreeCtrl->SetItemText(htiParent, this->GetNameDesc());
 
 	// solution
 	if (this->m_chemIC.solution)
@@ -171,6 +174,7 @@ void CICChemZoneActor::Edit(CTreeCtrl* pTreeCtrl)
 
 	CChemICSpreadPropertyPage chemICProps;
 	chemICProps.SetProperties(this->GetData());
+	chemICProps.SetDesc(this->GetDesc());
 	if (this->GetDefault())
 	{
 		chemICProps.SetFlowOnly(bool(pDoc->GetFlowOnly()));
@@ -181,7 +185,7 @@ void CICChemZoneActor::Edit(CTreeCtrl* pTreeCtrl)
 	{
 		CChemIC chemIC;
 		chemICProps.GetProperties(chemIC);
-		pDoc->Execute(new CSetChemICAction(this, pTreeCtrl, chemIC));
+		pDoc->Execute(new CSetChemICAction(this, pTreeCtrl, chemIC, chemICProps.GetDesc()));
 	}
 }
 

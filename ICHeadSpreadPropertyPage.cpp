@@ -60,6 +60,20 @@ void CICHeadSpreadPropertyPage::DoDataExchange(CDataExchange* pDX)
 		this->m_wndRichEditCtrl.SetWindowText(this->m_sHeadRTF.c_str());
 	}
 
+	// description
+	//
+	if (pDX->m_bSaveAndValidate)
+	{
+		CString str;
+		::DDX_Text(pDX, IDC_DESC_EDIT, str);
+		this->m_desc = str;
+	}
+	else
+	{
+		CString str(this->m_desc.c_str());
+		::DDX_Text(pDX, IDC_DESC_EDIT, str);
+	}
+
 	int nRow = 0;
 
 	// PSZ_SOLUTION

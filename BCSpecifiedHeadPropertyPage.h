@@ -26,6 +26,9 @@ public:
 	void SetFlowOnly(bool bFlowOnly)     { m_bFlowOnly = bFlowOnly; }
 	bool GetFlowOnly(void)const          { return m_bFlowOnly; }
 
+	void SetDesc(LPCTSTR desc) { m_desc = desc; }
+	LPCTSTR GetDesc() { return m_desc.c_str(); }
+
 // Dialog Data
 	enum { IDD = IDD_BC_SPECIFIED_HEAD_PROPPAGE };
 	DECLARE_LAYOUT();
@@ -38,6 +41,7 @@ protected:
 	CModGridCtrlEx   m_gridHead;     // IDC_HEAD_GRID
 	CModGridCtrlEx   m_gridSolution; // IDC_SOLUTION_GRID
 	bool             m_bFlowOnly;
+	std::string      m_desc;
 
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnCheckChangedHead(NMHDR *pNotifyStruct, LRESULT *result);

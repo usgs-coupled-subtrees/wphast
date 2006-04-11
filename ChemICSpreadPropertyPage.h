@@ -24,6 +24,9 @@ public:
 	void SetFlowOnly(bool bFlowOnly)     { m_bFlowOnly = bFlowOnly; }
 	bool GetFlowOnly(void)const          { return m_bFlowOnly; }
 
+	void SetDesc(LPCTSTR desc) { m_desc = desc; }
+	LPCTSTR GetDesc() { return m_desc.c_str(); }
+
 // Dialog Data
 	enum { IDD = IDD_CHEMICSPREAD_PROPPAGE };
 
@@ -32,7 +35,8 @@ protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	BOOL SetupGrids(void);
 
-	CChemIC m_chemIC;
+	CChemIC     m_chemIC;
+	std::string m_desc;
 
 	CModGridCtrlEx m_gridChemIC;  // IDC_CHECMIC_GRID
 

@@ -11,7 +11,7 @@ class CBCZoneActor : public CZoneActor
 public:
 	vtkTypeRevisionMacro(CBCZoneActor,CZoneActor);
 	static CBCZoneActor *New();
-	static void Create(CWPhastDoc* pWPhastDoc, const CZone& zone, const CBC& bc);
+	static void Create(CWPhastDoc* pWPhastDoc, const CZone& zone, const CBC& bc, LPCTSTR desc);
 
 	virtual void Insert(CPropertyTreeControlBar* pTreeControlBar, HTREEITEM hInsertAfter = TVI_LAST);
 	virtual void InsertAt(CTreeCtrl* pTreeCtrl, HTREEITEM hParent, HTREEITEM hInsertAfter);

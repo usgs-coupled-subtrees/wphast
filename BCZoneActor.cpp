@@ -46,7 +46,7 @@ CBCZoneActor::~CBCZoneActor(void)
 {
 }
 
-void CBCZoneActor::Create(CWPhastDoc* pWPhastDoc, const CZone& zone, const CBC& bc)
+void CBCZoneActor::Create(CWPhastDoc* pWPhastDoc, const CZone& zone, const CBC& bc, LPCTSTR desc)
 {
 	CZoneCreateAction<CBCZoneActor>* pAction = new CZoneCreateAction<CBCZoneActor>(
 		pWPhastDoc,
@@ -56,7 +56,8 @@ void CBCZoneActor::Create(CWPhastDoc* pWPhastDoc, const CZone& zone, const CBC& 
 		zone.y1,
 		zone.y2,
 		zone.z1,
-		zone.z2
+		zone.z2,
+		desc
 		);
 	pAction->GetZoneActor()->SetBC(bc);
 	pWPhastDoc->Execute(pAction);
@@ -89,19 +90,19 @@ CString CBCZoneActor::GetTreeHeading(void)const
 	switch (this->m_bc.bc_type)
 	{
 		case UNDEFINED:
-			str.Format(_T("UNDEFINED %s"), this->GetName());
+			str.Format(_T("UNDEFINED %s"), this->GetNameDesc());
 			break;
 		case SPECIFIED:
-			str.Format(_T("SPECIFIED_HEAD %s"), this->GetName());
+			str.Format(_T("SPECIFIED_HEAD %s"), this->GetNameDesc());
 			break;
 		case FLUX:
-			str.Format(_T("FLUX %s"), this->GetName());
+			str.Format(_T("FLUX %s"), this->GetNameDesc());
 			break;
 		case LEAKY:
-			str.Format(_T("LEAKY %s"), this->GetName());
+			str.Format(_T("LEAKY %s"), this->GetNameDesc());
 			break;
 		default:
-			str.Format(_T("UNKNOWN_BC %s"), this->GetName());
+			str.Format(_T("UNKNOWN_BC %s"), this->GetNameDesc());
 			break;
 	}
 	return str;
@@ -131,6 +132,10 @@ void CBCZoneActor::Update(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent, const CBC& 
 	{
 		pTreeCtrl->DeleteItem(hChild);
 	}
+
+	// update description
+	//
+	pTreeCtrl->SetItemText(htiParent, this->GetTreeHeading());
 
 	switch (crBC.bc_type)
 	{
@@ -245,11 +250,12 @@ void CBCZoneActor::Edit(CTreeCtrl* pTreeCtrl, int nStressPeriod)
 		props.AddPage(&fluxProps);
 		fluxProps.SetProperties(this->GetBC());
 		fluxProps.SetFlowOnly(pDoc->GetFlowOnly());
+		fluxProps.SetDesc(this->GetDesc());
 		if (props.DoModal() == IDOK)
 		{
 			CBC bc;
 			fluxProps.GetProperties(bc);
-			pDoc->Execute(new CSetBCAction(this, pTreeCtrl, bc));
+			pDoc->Execute(new CSetBCAction(this, pTreeCtrl, bc, fluxProps.GetDesc()));
 		}
 	}
 	else if (this->m_bc.bc_type == LEAKY)
@@ -258,11 +264,12 @@ void CBCZoneActor::Edit(CTreeCtrl* pTreeCtrl, int nStressPeriod)
 		props.AddPage(&leakyProps);
 		leakyProps.SetProperties(this->GetBC());		
 		leakyProps.SetFlowOnly(pDoc->GetFlowOnly());
+		leakyProps.SetDesc(this->GetDesc());
 		if (props.DoModal() == IDOK)
 		{
 			CBC bc;
 			leakyProps.GetProperties(bc);
-			pDoc->Execute(new CSetBCAction(this, pTreeCtrl, bc));
+			pDoc->Execute(new CSetBCAction(this, pTreeCtrl, bc, leakyProps.GetDesc()));
 		}
 	}
 	else if (this->m_bc.bc_type == SPECIFIED)
@@ -271,11 +278,12 @@ void CBCZoneActor::Edit(CTreeCtrl* pTreeCtrl, int nStressPeriod)
 		props.AddPage(&specified);
 		specified.SetProperties(this->GetBC());		
 		specified.SetFlowOnly(pDoc->GetFlowOnly());
+		specified.SetDesc(this->GetDesc());
 		if (props.DoModal() == IDOK)
 		{
 			CBC bc;
 			specified.GetProperties(bc);
-			pDoc->Execute(new CSetBCAction(this, pTreeCtrl, bc));
+			pDoc->Execute(new CSetBCAction(this, pTreeCtrl, bc, specified.GetDesc()));
 		}		
 	}
 	else 

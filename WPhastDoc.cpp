@@ -2013,7 +2013,8 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 				grid_elt_ptr->zone->y1,
 				grid_elt_ptr->zone->y2,
 				grid_elt_ptr->zone->z1,
-				grid_elt_ptr->zone->z2
+				grid_elt_ptr->zone->z2,
+				NULL
 				);
 			pAction->GetZoneActor()->SetGridElt(*grid_elt_ptr);
 			pAction->Execute();
@@ -2037,7 +2038,8 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 				bc_ptr->zone->y1,
 				bc_ptr->zone->y2,
 				bc_ptr->zone->z1,
-				bc_ptr->zone->z2
+				bc_ptr->zone->z2,
+				NULL
 				);
 			pAction->GetZoneActor()->SetBC(*bc_ptr);
 			pAction->Execute();
@@ -2093,7 +2095,8 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 				head_ic_ptr->zone->y1,
 				head_ic_ptr->zone->y2,
 				head_ic_ptr->zone->z1,
-				head_ic_ptr->zone->z2
+				head_ic_ptr->zone->z2,
+				NULL
 				);
 			pAction->GetZoneActor()->SetData(*head_ic_ptr);
 			pAction->Execute();
@@ -2122,7 +2125,8 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 				chem_ic_ptr->zone->y1,
 				chem_ic_ptr->zone->y2,
 				chem_ic_ptr->zone->z1,
-				chem_ic_ptr->zone->z2
+				chem_ic_ptr->zone->z2,
+				NULL
 				);
 			pAction->GetZoneActor()->SetData(*chem_ic_ptr);
 			pAction->Execute();
@@ -2648,7 +2652,8 @@ void CWPhastDoc::New(const CNewModel& model)
 		zone.y1,
 		zone.y2,
 		zone.z1,
-		zone.z2
+		zone.z2,
+		NULL
 		);
 	pMediaAction->GetZoneActor()->SetGridElt(model.m_media);
 	pMediaAction->GetZoneActor()->SetDefault(true);
@@ -2665,7 +2670,8 @@ void CWPhastDoc::New(const CNewModel& model)
 		zone.y1,
 		zone.y2,
 		zone.z1,
-		zone.z2
+		zone.z2,
+		NULL
 		);
 	pICHeadAction->GetZoneActor()->SetData(model.m_headIC);
 	pICHeadAction->GetZoneActor()->SetDefault(true);
@@ -2681,7 +2687,8 @@ void CWPhastDoc::New(const CNewModel& model)
 		zone.y1,
 		zone.y2,
 		zone.z1,
-		zone.z2
+		zone.z2,
+		NULL
 		);
 	pChemICAction->GetZoneActor()->SetData(model.m_chemIC);
 	pChemICAction->GetZoneActor()->SetDefault(true);

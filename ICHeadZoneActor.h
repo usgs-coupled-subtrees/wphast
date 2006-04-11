@@ -6,7 +6,7 @@ class CICHeadZoneActor : public CICZoneActor
 public:
 	vtkTypeRevisionMacro(CICHeadZoneActor,CICZoneActor);
 	static CICHeadZoneActor *New();
-	static void Create(CWPhastDoc* pWPhastDoc, const CZone& zone, const CHeadIC& headIC);
+	static void Create(CWPhastDoc* pWPhastDoc, const CZone& zone, const CHeadIC& headIC, LPCTSTR desc);
 
 	CHeadIC GetData(void)const;
 	void SetData(const CHeadIC& rHeadIC);

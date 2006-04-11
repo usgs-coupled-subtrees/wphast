@@ -11,7 +11,7 @@ class CMediaZoneActor : public CZoneActor
 public:
 	vtkTypeRevisionMacro(CMediaZoneActor,CZoneActor);
 	static CMediaZoneActor *New();
-	static void Create(CWPhastDoc* pWPhastDoc, const CZone& zone, const CGridElt& gridElt);
+	static void Create(CWPhastDoc* pWPhastDoc, const CZone& zone, const CGridElt& gridElt, LPCTSTR desc);
 
 	virtual void InsertAt(CTreeCtrl* pTreeCtrl, HTREEITEM hParent, HTREEITEM hInsertAfter);
 	virtual void Insert(CPropertyTreeControlBar* pTreeControlBar, HTREEITEM hInsertAfter);
