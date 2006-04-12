@@ -513,3 +513,17 @@ void CWellActor::SetScale(vtkFloatingPointType scale[3])
 {
 	this->SetScale(scale[0], scale[1], scale[2]);
 }
+
+vtkFloatingPointType* CWellActor::GetScale()
+{
+	return this->m_pTransformScale->GetScale();
+}
+
+void CWellActor::GetScale(vtkFloatingPointType scale[3])
+{
+	double d[3];
+	this->m_pTransformScale->GetScale(d);
+	scale[0] = d[0];
+	scale[1] = d[1];
+	scale[2] = d[3];
+}

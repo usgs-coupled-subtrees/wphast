@@ -153,6 +153,7 @@ protected:
 	template<typename ZT, typename DT>
 	bool IsNodePasteable(CTreeCtrlNode headNode, CTreeCtrlNode pasteNode, bool bDoPaste);
 
+
 	CLIPFORMAT GetZoneClipFormat(void)const;
 	CLIPFORMAT GetNativeClipFormat(void)const;
 

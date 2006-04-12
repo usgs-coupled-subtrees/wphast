@@ -440,6 +440,9 @@ copy &quot;$(DEV_VTK42_VS7_DLL_LIB)\vtkzlib.dll&quot; &quot;$(TargetDir)vtkzlib.
 				RelativePath="BCSpecifiedPropertyPage.cpp">
 			</File>
 			<File
+				RelativePath="BCTypeDialog.cpp">
+			</File>
+			<File
 				RelativePath="BCZoneActor.cpp">
 			</File>
 			<File
@@ -1087,6 +1090,9 @@ copy &quot;$(DEV_VTK42_VS7_DLL_LIB)\vtkzlib.dll&quot; &quot;$(TargetDir)vtkzlib.
 			</File>
 			<File
 				RelativePath="BCSpecifiedPropertyPage.h">
+			</File>
+			<File
+				RelativePath="BCTypeDialog.h">
 			</File>
 			<File
 				RelativePath="BCZoneActor.h">
@@ -4026,15 +4032,15 @@ copy &quot;$(DEV_VTK42_VS7_DLL_LIB)\vtkzlib.dll&quot; &quot;$(TargetDir)vtkzlib.
 			Name="Build Logs"
 			Filter="">
 			<File
-				RelativePath="cppunit\BuildLog.htm"
-				DeploymentContent="TRUE">
-			</File>
-			<File
 				RelativePath="Debug\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 			<File
 				RelativePath="Release\BuildLog.htm"
+				DeploymentContent="TRUE">
+			</File>
+			<File
+				RelativePath="cppunit\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 		</Filter>

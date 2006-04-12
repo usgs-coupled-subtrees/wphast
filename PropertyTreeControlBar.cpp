@@ -28,6 +28,7 @@
 
 #include "ModelessPropertySheet.h"
 #include "GridPropertyPage2.h"
+#include "BCTypeDialog.h"
 
 #include "ZoneActor.h"
 #include "WellActor.h"
@@ -1833,6 +1834,18 @@ bool CPropertyTreeControlBar::IsNodeCopyable(CTreeCtrlNode copyNode, COleDataSou
 					ar.Close();
 
 					pOleDataSource->CacheGlobalData(CGridElt::clipFormat, globFile.Detach());
+
+					// Description (CZoneActor::clipFormat)
+					//
+					if (pZone->GetDesc())
+					{
+						CSharedFile sf;
+						CArchive arch(&sf, CArchive::store);
+						CString desc(pZone->GetDesc());
+						arch << desc;
+						arch.Close();
+						pOleDataSource->CacheGlobalData(CZoneActor::clipFormat, sf.Detach());
+					}
 				}
 				return true;
 			}
@@ -1869,6 +1882,18 @@ bool CPropertyTreeControlBar::IsNodeCopyable(CTreeCtrlNode copyNode, COleDataSou
 					ar.Close();
 
 					pOleDataSource->CacheGlobalData(CHeadIC::clipFormat, globFile.Detach());
+
+					// Description (CZoneActor::clipFormat)
+					//
+					if (pZone->GetDesc())
+					{
+						CSharedFile sf;
+						CArchive arch(&sf, CArchive::store);
+						CString desc(pZone->GetDesc());
+						arch << desc;
+						arch.Close();
+						pOleDataSource->CacheGlobalData(CZoneActor::clipFormat, sf.Detach());
+					}
 				}
 				return true;
 			}
@@ -1905,6 +1930,18 @@ bool CPropertyTreeControlBar::IsNodeCopyable(CTreeCtrlNode copyNode, COleDataSou
 					ar.Close();
 
 					pOleDataSource->CacheGlobalData(CChemIC::clipFormat, globFile.Detach());
+
+					// Description (CZoneActor::clipFormat)
+					//
+					if (pZone->GetDesc())
+					{
+						CSharedFile sf;
+						CArchive arch(&sf, CArchive::store);
+						CString desc(pZone->GetDesc());
+						arch << desc;
+						arch.Close();
+						pOleDataSource->CacheGlobalData(CZoneActor::clipFormat, sf.Detach());
+					}
 				}
 				return true;
 			}
@@ -1943,6 +1980,18 @@ bool CPropertyTreeControlBar::IsNodeCopyable(CTreeCtrlNode copyNode, COleDataSou
 					ar.Close();
 
 					pOleDataSource->CacheGlobalData(CBC::clipFormat, globFile.Detach());
+
+					// Description (CZoneActor::clipFormat)
+					//
+					if (pZone->GetDesc())
+					{
+						CSharedFile sf;
+						CArchive arch(&sf, CArchive::store);
+						CString desc(pZone->GetDesc());
+						arch << desc;
+						arch.Close();
+						pOleDataSource->CacheGlobalData(CZoneActor::clipFormat, sf.Detach());
+					}
 				}
 				return true;
 			}
@@ -2205,6 +2254,9 @@ bool CPropertyTreeControlBar::IsNodePasteableRiver(CTreeCtrlNode pasteNode, bool
 	return false;
 }
 
+// COMMENT: {4/11/2006 6:55:07 PM}template<typename ZT, typename DT>
+// COMMENT: {4/11/2006 6:55:07 PM}bool GetBCType(CWPhastDoc *pWPhastDoc, CZoneCreateAction<ZT>* pAction);
+
 template<typename ZT, typename DT>
 bool CPropertyTreeControlBar::IsNodePasteable(CTreeCtrlNode headNode, CTreeCtrlNode pasteNode, bool bDoPaste)
 {
@@ -2283,6 +2335,16 @@ bool CPropertyTreeControlBar::IsNodePasteable(CTreeCtrlNode headNode, CTreeCtrlN
 						after = pasteNode;
 					}
 				}
+				// Description (CZoneActor::clipFormat)
+				//
+				CString strDesc;
+				if (HGLOBAL hDesc = dataObject.GetGlobalData(CZoneActor::clipFormat))
+				{
+					CSharedFile descFile;
+					descFile.SetHandle(hDesc, FALSE);
+					CArchive descArch(&descFile, CArchive::load);
+					descArch >> strDesc;
+				}
 				CZoneCreateAction<ZT>* pAction = new CZoneCreateAction<ZT>(
 					pWPhastDoc,
 					pWPhastDoc->GetNextZoneName(),
@@ -2292,9 +2354,13 @@ bool CPropertyTreeControlBar::IsNodePasteable(CTreeCtrlNode headNode, CTreeCtrlN
 					zone.y2,
 					zone.z1,
 					zone.z2,
-					NULL,
+					strDesc.IsEmpty() ? NULL : strDesc,
 					after
 					);
+				if (headNode == this->GetBCNode())
+				{
+					return GetBCType<ZT, DT>(pWPhastDoc, pAction, type, data);
+				}
 				if (type == DT::clipFormat)
 				{
 					pAction->GetZoneActor()->SetData(data);
@@ -2306,6 +2372,95 @@ bool CPropertyTreeControlBar::IsNodePasteable(CTreeCtrlNode headNode, CTreeCtrlN
 	}
 	return false;
 }
+
+template<typename ZT, typename DT>
+bool GetBCType(CWPhastDoc *pWPhastDoc, CZoneCreateAction<ZT>* pAction, CLIPFORMAT type, DT& data)
+{
+	ASSERT(FALSE); // this should never be called; only needed to compile
+	delete pAction;
+	return false;
+}
+
+// specialization for CBCZoneActor, CBC
+template<>
+bool GetBCType<CBCZoneActor, CBC>(CWPhastDoc *pWPhastDoc, CZoneCreateAction<CBCZoneActor>* pAction, CLIPFORMAT cb_type, CBC& data)
+{
+	// get type of boundary condition
+	CBCTypeDialog dlg;
+	if (cb_type == CBC::clipFormat)
+	{
+		dlg.bc_type = data.bc_type;
+	}
+// COMMENT: {4/11/2006 9:53:05 PM}	::MessageBeep(-1);
+// COMMENT: {4/11/2006 9:53:05 PM}	::Sleep(500);
+// COMMENT: {4/11/2006 9:53:05 PM}	::MessageBeep(MB_ICONASTERISK);
+// COMMENT: {4/11/2006 9:53:05 PM}	::Sleep(500);
+	::MessageBeep(MB_ICONEXCLAMATION);
+// COMMENT: {4/11/2006 9:53:09 PM}	::Sleep(500);
+// COMMENT: {4/11/2006 9:53:09 PM}	::MessageBeep(MB_ICONHAND);
+// COMMENT: {4/11/2006 9:53:09 PM}	::Sleep(500);
+// COMMENT: {4/11/2006 9:53:09 PM}	::MessageBeep(MB_ICONQUESTION);
+// COMMENT: {4/11/2006 9:53:09 PM}	::Sleep(500);
+// COMMENT: {4/11/2006 9:53:09 PM}	::MessageBeep(MB_OK);	
+// COMMENT: {4/11/2006 9:53:09 PM}	::Sleep(500);
+	if (dlg.DoModal() != IDOK)
+	{
+		delete pAction;
+		return true;
+	}
+
+	CBC bc;
+	bc.bc_type = dlg.bc_type;    // SPECIFIED, FLUX, LEAKY
+	if (cb_type == CBC::clipFormat)
+	{
+		if (bc.bc_type == data.bc_type)
+		{
+			// copied type is the same as pasted type
+			bc = data;
+		}
+	}
+	ASSERT(bc.bc_type == SPECIFIED || bc.bc_type == FLUX || bc.bc_type == LEAKY);
+	pAction->GetZoneActor()->SetData(bc);
+	pWPhastDoc->Execute(pAction);
+	return true;
+}
+
+
+// COMMENT: {4/11/2006 6:36:10 PM}template<typename ZT, typename DT>
+// COMMENT: {4/11/2006 6:36:10 PM}void CTimeSeries<ZT, DT>::ForceBC(DT data, int bc_type)
+// COMMENT: {4/11/2006 6:36:10 PM}{
+// COMMENT: {4/11/2006 6:36:10 PM}	CBC bc;
+// COMMENT: {4/11/2006 6:36:10 PM}	bc.bc_type = bc_type;
+// COMMENT: {4/11/2006 6:36:10 PM}
+// COMMENT: {4/11/2006 6:36:10 PM}}
+// COMMENT: {4/11/2006 6:36:10 PM}
+// COMMENT: {4/11/2006 6:36:10 PM}// specialization for CBCZoneActor
+// COMMENT: {4/11/2006 6:36:10 PM}template<>
+// COMMENT: {4/11/2006 6:36:10 PM}HTREEITEM CTimeSeries<CBCZoneActor>::InsertItem(CTreeCtrl* pTreeCtrl, LPCTSTR lpszHeading, HTREEITEM hParent /* = TVI_ROOT*/, HTREEITEM hInsertAfter /* = TVI_LAST*/)const
+// COMMENT: {4/11/2006 6:36:10 PM}{
+// COMMENT: {4/11/2006 6:36:10 PM}	HTREEITEM item = 0;
+// COMMENT: {4/11/2006 6:36:10 PM}	if (!pTreeCtrl || this->size() == 0) return item;
+// COMMENT: {4/11/2006 6:36:10 PM}
+// COMMENT: {4/11/2006 6:36:10 PM}	item = pTreeCtrl->InsertItem(lpszHeading, hParent, hInsertAfter);
+// COMMENT: {4/11/2006 6:36:10 PM}	CTimeSeries<Cproperty>::const_iterator iter = this->begin();
+// COMMENT: {4/11/2006 6:36:10 PM}	for (; iter != this->end(); ++iter)
+// COMMENT: {4/11/2006 6:36:10 PM}	{
+// COMMENT: {4/11/2006 6:36:10 PM}		ASSERT((*iter).second.type != UNDEFINED);
+// COMMENT: {4/11/2006 6:36:10 PM}		if ((*iter).second.type == UNDEFINED) continue;
+// COMMENT: {4/11/2006 6:36:10 PM}
+// COMMENT: {4/11/2006 6:36:10 PM}		CString str;
+// COMMENT: {4/11/2006 6:36:10 PM}		if ((*iter).first.input)
+// COMMENT: {4/11/2006 6:36:10 PM}		{
+// COMMENT: {4/11/2006 6:36:10 PM}			str.Format("%g %s", (*iter).first.value, (*iter).first.input);
+// COMMENT: {4/11/2006 6:36:10 PM}		}
+// COMMENT: {4/11/2006 6:36:10 PM}		else
+// COMMENT: {4/11/2006 6:36:10 PM}		{
+// COMMENT: {4/11/2006 6:36:10 PM}			str.Format("%g", (*iter).first.value);
+// COMMENT: {4/11/2006 6:36:10 PM}		}
+// COMMENT: {4/11/2006 6:36:10 PM}		iter->second.Insert(pTreeCtrl, item, str);
+// COMMENT: {4/11/2006 6:36:10 PM}	}
+// COMMENT: {4/11/2006 6:36:10 PM}	return item;
+// COMMENT: {4/11/2006 6:36:10 PM}}
 
 void CPropertyTreeControlBar::OnUpdateEditCopy(CCmdUI *pCmdUI)
 {

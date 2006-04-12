@@ -264,6 +264,7 @@
 #define IDR_HEAD_CHANGE_TARGET_RTF      266
 #define IDR_ITERATIONS_RTF              267
 #define IDD_SUBDIVIDE_DIALOG            273
+#define IDD_BC_TYPE_DIALOG              275
 #define IDC_EDIT_X                      1000
 #define IDC_PROPERTIES                  1000
 #define IDC_TITLE                       1000
@@ -682,6 +683,10 @@
 #define IDC_INTERVAL_STATIC             1362
 #define IDC_START_WIDTH_STATIC          1363
 #define IDC_END_WIDTH_STATIC            1364
+#define IDC_RADIO_                      1365
+#define IDC_RADIO_LEAKY                 1365
+#define IDC_RADIO_HEAD                  1366
+#define IDC_RADIO_FLUX                  1367
 #define IDC_RESIZE_COLUMN               28654
 #define IDC_RESIZE_ROW                  28655
 #define IDR_POPUP                       28656
@@ -705,9 +710,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        275
+#define _APS_NEXT_RESOURCE_VALUE        276
 #define _APS_NEXT_COMMAND_VALUE         32832
-#define _APS_NEXT_CONTROL_VALUE         1365
+#define _APS_NEXT_CONTROL_VALUE         1368
 #define _APS_NEXT_SYMED_VALUE           126
 #endif
 #endif

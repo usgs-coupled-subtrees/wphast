@@ -74,6 +74,9 @@ public:
 	virtual void SetScale(vtkFloatingPointType x, vtkFloatingPointType y, vtkFloatingPointType z);
 	virtual void SetScale(vtkFloatingPointType scale[3]);
 
+	virtual vtkFloatingPointType* GetScale();
+	virtual void GetScale(vtkFloatingPointType scale[3]);
+
 	static const char szHeading[];
 
 protected:
