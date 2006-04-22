@@ -68,7 +68,7 @@
 #include <vtkPropAssembly.h>
 
 //static const TCHAR szPeriodFormat[]        = _T("Simulation Period %d");
-static const TCHAR szFLOW_ONLY[]           = _T("FLOW_ONLY");
+static const TCHAR szFLOW_ONLY[]           = _T("SOLUTE_TRANSPORT");
 static const TCHAR szSTEADY_FLOW[]         = _T("STEADY_FLOW");
 static const TCHAR szFREE_SURFACE_BC[]     = _T("FREE_SURFACE_BC");
 static const TCHAR szSOLUTION_METHOD[]     = _T("SOLUTION_METHOD");

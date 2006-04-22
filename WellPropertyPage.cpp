@@ -28,11 +28,19 @@ CWellPropertyPage::CWellPropertyPage()
 	// Open user.transport.format.final.rtf
 	// Ctrl+A -> Right-Click -> Font... -> Size = 8
 	// Ctrl+A -> Right-Click -> Paragraph... -> Line Spacing = Single
-	CGlobal::LoadRTFString(this->m_sWellTimeRTF,     IDR_WELL_TIME_RTF);
-	CGlobal::LoadRTFString(this->m_sWellUnitsRTF,    IDR_WELL_UNITS_RTF);
-	CGlobal::LoadRTFString(this->m_sWellRateRTF,     IDR_WELL_RATE_RTF);
-	CGlobal::LoadRTFString(this->m_sWellSolutionRTF, IDR_WELL_SOLUTION_RTF);
-
+	CGlobal::LoadRTFString(this->m_sWellTimeRTF,      IDR_WELL_TIME_RTF);
+	CGlobal::LoadRTFString(this->m_sWellUnitsRTF,     IDR_WELL_UNITS_RTF);
+	CGlobal::LoadRTFString(this->m_sWellRateRTF,      IDR_WELL_RATE_RTF);
+	CGlobal::LoadRTFString(this->m_sWellSolutionRTF,  IDR_WELL_SOLUTION_RTF);
+	CGlobal::LoadRTFString(this->m_sWellAllocateRTF,  IDR_WELL_ALLOCATE_RTF);
+	CGlobal::LoadRTFString(this->m_sWellDepthRTF,     IDR_WELL_DEPTH_RTF);
+	CGlobal::LoadRTFString(this->m_sWellDescRTF,      IDR_WELL_DESC_RTF);
+	CGlobal::LoadRTFString(this->m_sWellDiamRTF,      IDR_WELL_DIAM_RTF);
+	CGlobal::LoadRTFString(this->m_sWellElevationRTF, IDR_WELL_ELEVATION_RTF);
+	CGlobal::LoadRTFString(this->m_sWellLocationRTF,  IDR_WELL_LOCATION_RTF);
+	CGlobal::LoadRTFString(this->m_sWellLSDRTF,       IDR_WELL_LSD_RTF);
+	CGlobal::LoadRTFString(this->m_sWellNumberRTF,    IDR_WELL_NUMBER_RTF);
+	CGlobal::LoadRTFString(this->m_sWellRadiusRTF,    IDR_WELL_RADIUS_RTF);
 }
 
 CWellPropertyPage::~CWellPropertyPage()
@@ -50,8 +58,8 @@ void CWellPropertyPage::DoDataExchange(CDataExchange* pDX)
 	{
 		// wrap richedit to window
 		this->m_wndRichEditCtrl.SetTargetDevice(NULL, 0);
+		this->m_wndRichEditCtrl.SetWindowText(this->m_sWellNumberRTF.c_str());
 	}
-
 
 	CWellSchedule well;
 	if (!pDX->m_bSaveAndValidate)
@@ -581,6 +589,19 @@ BEGIN_MESSAGE_MAP(CWellPropertyPage, CPropertyPage)
 	ON_EN_CHANGE(IDC_LSD_EDIT, OnEnChangeLsdEdit)
 	ON_NOTIFY(GVN_SETFOCUS, IDC_GRID_SCREENS, OnSelChangedScreen)
 	ON_NOTIFY(GVN_SETFOCUS, IDC_GRID_SCHEDULES, OnSelChangedSchedules)
+	ON_EN_SETFOCUS(IDC_NUSER_EDIT, OnEnSetfocusNuserEdit)
+	ON_EN_SETFOCUS(IDC_DESC_EDIT, OnEnSetfocusDescEdit)
+	ON_EN_SETFOCUS(IDC_X_EDIT, OnEnSetfocusXEdit)
+	ON_EN_SETFOCUS(IDC_Y_EDIT, OnEnSetfocusYEdit)
+	ON_BN_CLICKED(IDC_DIAM_RADIO, OnBnClickedDiamRadio)
+	ON_BN_CLICKED(IDC_RADIUS_RADIO, OnBnClickedRadiusRadio)
+	ON_EN_SETFOCUS(IDC_DIAM_EDIT, OnEnSetfocusDiamEdit)
+	ON_BN_SETFOCUS(IDC_ALLOCATE_BY_HEAD, OnBnSetfocusAllocateByHead)
+	ON_EN_SETFOCUS(IDC_LSD_EDIT, OnEnSetfocusLsdEdit)
+	ON_BN_SETFOCUS(IDC_ELEVATION_RADIO, OnBnSetfocusElevationRadio)
+	ON_BN_SETFOCUS(IDC_DEPTH_RADIO, OnBnSetfocusDepthRadio)
+	ON_BN_SETFOCUS(IDC_DIAM_RADIO, OnBnSetfocusDiamRadio)
+	ON_BN_SETFOCUS(IDC_RADIUS_RADIO, OnBnSetfocusRadiusRadio)
 END_MESSAGE_MAP()
 
 
@@ -961,4 +982,80 @@ void CWellPropertyPage::UpdateScreens(BOOL bByDepth)
 void CWellPropertyPage::SetUsedWellNumbers(const std::set<int>& used)
 {
 	this->m_usedWellNumbers = used;
+}
+
+void CWellPropertyPage::OnEnSetfocusNuserEdit()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sWellNumberRTF.c_str());
+}
+
+void CWellPropertyPage::OnEnSetfocusDescEdit()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sWellDescRTF.c_str());
+}
+
+void CWellPropertyPage::OnEnSetfocusXEdit()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sWellLocationRTF.c_str());
+}
+
+void CWellPropertyPage::OnEnSetfocusYEdit()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sWellLocationRTF.c_str());
+}
+
+void CWellPropertyPage::OnBnClickedDiamRadio()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sWellDiamRTF.c_str());
+}
+
+void CWellPropertyPage::OnBnClickedRadiusRadio()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sWellRadiusRTF.c_str());
+}
+
+void CWellPropertyPage::OnEnSetfocusDiamEdit()
+{
+	if (this->GetCheckedRadioButton(IDC_DIAM_RADIO, IDC_RADIUS_RADIO) == IDC_DIAM_RADIO)
+	{
+		this->m_wndRichEditCtrl.SetWindowText(this->m_sWellDiamRTF.c_str());
+	}
+	else if (this->GetCheckedRadioButton(IDC_DIAM_RADIO, IDC_RADIUS_RADIO) == IDC_RADIUS_RADIO)
+	{
+		this->m_wndRichEditCtrl.SetWindowText(this->m_sWellRadiusRTF.c_str());
+	}
+	else
+	{
+		ASSERT(FALSE);
+	}
+}
+
+void CWellPropertyPage::OnBnSetfocusAllocateByHead()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sWellAllocateRTF.c_str());
+}
+
+void CWellPropertyPage::OnEnSetfocusLsdEdit()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sWellLSDRTF.c_str());
+}
+
+void CWellPropertyPage::OnBnSetfocusElevationRadio()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sWellElevationRTF.c_str());
+}
+
+void CWellPropertyPage::OnBnSetfocusDepthRadio()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sWellDepthRTF.c_str());
+}
+
+void CWellPropertyPage::OnBnSetfocusDiamRadio()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sWellDiamRTF.c_str());
+}
+
+void CWellPropertyPage::OnBnSetfocusRadiusRadio()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sWellRadiusRTF.c_str());
 }

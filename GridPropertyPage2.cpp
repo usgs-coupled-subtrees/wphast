@@ -24,6 +24,16 @@ CGridPropertyPage2::CGridPropertyPage2()
 , m_pActor(0)
 , m_pAction(0)
 {
+	// load property descriptions
+	//
+	CGlobal::LoadRTFString(this->m_sGridUni,       IDR_GRID_UNI_RTF);
+	CGlobal::LoadRTFString(this->m_sGridNonUni,    IDR_GRID_NONUNI_RTF);
+	CGlobal::LoadRTFString(this->m_sGridMin,       IDR_GRID_MIN_RTF);
+	CGlobal::LoadRTFString(this->m_sGridMax,       IDR_GRID_MAX_RTF);
+	CGlobal::LoadRTFString(this->m_sGridNodes,     IDR_GRID_NODES_RTF);
+	CGlobal::LoadRTFString(this->m_sGridSnap,      IDR_GRID_SNAP_RTF);
+	CGlobal::LoadRTFString(this->m_sGridOrient,    IDR_GRID_ORIENT_RTF);
+	CGlobal::LoadRTFString(this->m_sGridChemDims,  IDR_GRID_CHEM_DIMS_RTF);
 }
 
 CGridPropertyPage2::~CGridPropertyPage2()
@@ -34,6 +44,15 @@ CGridPropertyPage2::~CGridPropertyPage2()
 void CGridPropertyPage2::DoDataExchange(CDataExchange* pDX)
 {
 	baseCGridPropertyPage2::DoDataExchange(pDX);
+
+	DDX_Control(pDX, IDC_DESC_RICHEDIT, m_wndRichEditCtrl);
+	if (this->m_bFirstSetActive)
+	{
+		// wrap richedit to window
+		this->m_wndRichEditCtrl.SetTargetDevice(NULL, 0);
+		this->m_wndRichEditCtrl.SetWindowText(this->m_sGridUni.c_str());
+	}
+
 	DDX_Control(pDX, IDC_TAB_COOR, this->m_tabCtrl);
 	DDX_Control(pDX, IDC_SPIN_U_NODES, this->m_spinUnified);
 	DDX_Control(pDX, IDC_SPIN_N_NODES, this->m_spinNonunified);
@@ -312,6 +331,18 @@ BEGIN_MESSAGE_MAP(CGridPropertyPage2, baseCGridPropertyPage2)
 	ON_BN_CLICKED(IDC_BUTTON_SUBDIVIDE, OnBnClickedButtonSubdivide)
 	ON_NOTIFY(GVN_SELCHANGED, IDC_GRID_NONUNIFORM, OnSelChangedNonuniform)
 	ON_WM_SHOWWINDOW()
+	ON_BN_SETFOCUS(IDC_RADIO_UNIFORM, OnBnSetfocusRadioUniform)
+	ON_BN_SETFOCUS(IDC_RADIO_NONUNIFORM, OnBnSetfocusRadioNonuniform)
+	ON_EN_SETFOCUS(IDC_EDIT_MIN, OnEnSetfocusEditMin)
+	ON_EN_SETFOCUS(IDC_EDIT_MAX, OnEnSetfocusEditMax)
+	ON_EN_SETFOCUS(IDC_EDIT_U_NODES, OnEnSetfocusEditUNodes)
+	ON_EN_SETFOCUS(IDC_EDIT_SNAP, OnEnSetfocusEditSnap)
+	ON_EN_SETFOCUS(IDC_EDIT_N_NODES, OnEnSetfocusEditNNodes)
+	ON_BN_SETFOCUS(IDC_CHECK_X, OnBnSetfocusCheckX)
+	ON_BN_SETFOCUS(IDC_CHECK_Y, OnBnSetfocusCheckY)
+	ON_BN_SETFOCUS(IDC_CHECK_Z, OnBnSetfocusCheckZ)
+	ON_BN_SETFOCUS(IDC_RADIO_XY, OnBnSetfocusRadioXy)
+	ON_BN_SETFOCUS(IDC_RADIO_XZ, OnBnSetfocusRadioXz)
 END_MESSAGE_MAP()
 
 
@@ -837,4 +868,64 @@ void CGridPropertyPage2::OnShowWindow(BOOL bShow, UINT nStatus)
 		this->m_wndNonuniformGrid.SetSelectedRange(-1, -1, -1, -1);
 		this->m_wndNonuniformGrid.SetCurrentFocusCell(1, 1);
 	}
+}
+
+void CGridPropertyPage2::OnBnSetfocusRadioUniform()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sGridUni.c_str());
+}
+
+void CGridPropertyPage2::OnBnSetfocusRadioNonuniform()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sGridNonUni.c_str());
+}
+
+void CGridPropertyPage2::OnEnSetfocusEditMin()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sGridMin.c_str());
+}
+
+void CGridPropertyPage2::OnEnSetfocusEditMax()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sGridMax.c_str());
+}
+
+void CGridPropertyPage2::OnEnSetfocusEditUNodes()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sGridNodes.c_str());
+}
+
+void CGridPropertyPage2::OnEnSetfocusEditSnap()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sGridSnap.c_str());
+}
+
+void CGridPropertyPage2::OnEnSetfocusEditNNodes()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sGridNodes.c_str());
+}
+
+void CGridPropertyPage2::OnBnSetfocusCheckX()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sGridChemDims.c_str());
+}
+
+void CGridPropertyPage2::OnBnSetfocusCheckY()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sGridChemDims.c_str());
+}
+
+void CGridPropertyPage2::OnBnSetfocusCheckZ()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sGridChemDims.c_str());
+}
+
+void CGridPropertyPage2::OnBnSetfocusRadioXy()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sGridOrient.c_str());
+}
+
+void CGridPropertyPage2::OnBnSetfocusRadioXz()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sGridOrient.c_str());
 }

@@ -59,6 +59,15 @@ protected:
 	std::string      m_sWellUnitsRTF;       // IDR_WELL_UNITS_RTF
 	std::string      m_sWellRateRTF;        // IDR_WELL_RATE_RTF
 	std::string      m_sWellSolutionRTF;    // IDR_WELL_SOLUTION_RTF
+	std::string      m_sWellAllocateRTF;    // IDR_WELL_ALLOCATE_RTF
+	std::string      m_sWellDepthRTF;       // IDR_WELL_DEPTH_RTF
+	std::string      m_sWellDescRTF;        // IDR_WELL_DESC_RTF
+	std::string      m_sWellDiamRTF;        // IDR_WELL_DIAM_RTF
+	std::string      m_sWellElevationRTF;   // IDR_WELL_ELEVATION_RTF
+	std::string      m_sWellLocationRTF;    // IDR_WELL_LOCATION_RTF
+	std::string      m_sWellLSDRTF;         // IDR_WELL_LSD_RTF
+	std::string      m_sWellNumberRTF;      // IDR_WELL_NUMBER_RTF
+	std::string      m_sWellRadiusRTF;      // IDR_WELL_RADIUS_RTF
 
 	bool             m_bFlowOnly;
 
@@ -79,5 +88,18 @@ public:
 	CWellCtrl m_wndWellCtrl;
 	afx_msg void OnEnChangeLsdEdit();
 	BOOL m_allocate;
+	afx_msg void OnEnSetfocusNuserEdit();
+	afx_msg void OnEnSetfocusDescEdit();
+	afx_msg void OnEnSetfocusXEdit();
+	afx_msg void OnEnSetfocusYEdit();
+	afx_msg void OnBnClickedDiamRadio();
+	afx_msg void OnBnClickedRadiusRadio();
+	afx_msg void OnEnSetfocusDiamEdit();
+	afx_msg void OnBnSetfocusAllocateByHead();
+	afx_msg void OnEnSetfocusLsdEdit();
+	afx_msg void OnBnSetfocusElevationRadio();
+	afx_msg void OnBnSetfocusDepthRadio();
+	afx_msg void OnBnSetfocusDiamRadio();
+	afx_msg void OnBnSetfocusRadiusRadio();
 };
 

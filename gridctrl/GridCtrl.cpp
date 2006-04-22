@@ -956,19 +956,26 @@ void CGridCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
             if (!IsSHIFTpressed() || nChar == VK_TAB)
                 m_SelectionStartCell = next;
             OnSelecting(next);
-			//{{ {4/5/2006 11:13:22 PM}
-			SendMessageToParent(m_idCurrentCell.row, m_idCurrentCell.col, GVN_SELCHANGED); 
-			//}} {4/5/2006 11:13:22 PM}
+// COMMENT: {4/21/2006 5:17:36 PM}			//{{ {4/5/2006 11:13:22 PM}
+// COMMENT: {4/21/2006 5:17:36 PM}			SendMessageToParent(m_idCurrentCell.row, m_idCurrentCell.col, GVN_SELCHANGED); 
+// COMMENT: {4/21/2006 5:17:36 PM}			//}} {4/5/2006 11:13:22 PM}
             m_MouseMode = MOUSE_NOTHING;
         }
 
 		//{{ {4/5/2006 10:24:44 PM}
-// COMMENT: {4/5/2006 10:24:44 PM}        SetFocusCell(next);
-		if (!IsSHIFTpressed())
+// COMMENT: {4/21/2006 5:41:18 PM}		if (!IsSHIFTpressed())
+		if (!IsSHIFTpressed() || nChar == VK_TAB)
 		{
 			SetFocusCell(next);
+			ASSERT(m_idCurrentCell == next);
 		}
 		//}} {4/5/2006 10:24:44 PM}
+		//{{ {4/21/2006 5:17:36 PM}
+        if (m_MouseMode == MOUSE_NOTHING)
+        {
+			SendMessageToParent(m_idCurrentCell.row, m_idCurrentCell.col, GVN_SELCHANGED); 
+		}
+		//}} {4/21/2006 5:17:36 PM}
 
         if (!IsCellVisible(next))
         {   

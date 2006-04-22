@@ -41,11 +41,13 @@ CMarker::~CMarker(void)
 
 void CMarker::Modified()
 {
-	this->m_vertLine->SetPoint1(this->Point[0], -1e30, this->Point[2]);
-	this->m_vertLine->SetPoint2(this->Point[0], +1e30, this->Point[2]);
+	const float INF = 1e5;
 
-	this->m_horzLine->SetPoint1(-1e30, this->Point[1], this->Point[2]);
-	this->m_horzLine->SetPoint2(+1e30, this->Point[1], this->Point[2]);
+	this->m_vertLine->SetPoint1(this->Point[0], -INF, this->Point[2]);
+	this->m_vertLine->SetPoint2(this->Point[0], +INF, this->Point[2]);
+
+	this->m_horzLine->SetPoint1(-INF, this->Point[1], this->Point[2]);
+	this->m_horzLine->SetPoint2(+INF, this->Point[1], this->Point[2]);
 
 	this->Superclass::Modified();
 }

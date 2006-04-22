@@ -1606,10 +1606,16 @@ copy &quot;$(DEV_VTK42_VS7_DLL_LIB)\vtkzlib.dll&quot; &quot;$(TargetDir)vtkzlib.
 				RelativePath="res\BC_FLUX_ASSOC_SOL.rtf">
 			</File>
 			<File
+				RelativePath="res\BC_FLUX_FACE.rtf">
+			</File>
+			<File
 				RelativePath="res\BC_FLUX_FLUX.rtf">
 			</File>
 			<File
 				RelativePath="res\BC_LEAKY_ASSOC_SOL.rtf">
+			</File>
+			<File
+				RelativePath="res\BC_LEAKY_FACE.rtf">
 			</File>
 			<File
 				RelativePath="res\BC_LEAKY_HEAD.rtf">
@@ -1621,10 +1627,19 @@ copy &quot;$(DEV_VTK42_VS7_DLL_LIB)\vtkzlib.dll&quot; &quot;$(TargetDir)vtkzlib.
 				RelativePath="res\BC_LEAKY_THICKNESS.rtf">
 			</File>
 			<File
+				RelativePath="res\BC_SOL_TYPE.rtf">
+			</File>
+			<File
 				RelativePath="res\BC_SPECIFIED_HEAD.rtf">
 			</File>
 			<File
 				RelativePath="res\BC_SPECIFIED_SOL.rtf">
+			</File>
+			<File
+				RelativePath="res\BC_SPECIFIED_SOL_ASSOC.rtf">
+			</File>
+			<File
+				RelativePath="res\BC_SPECIFIED_SOL_FIX.rtf">
 			</File>
 			<File
 				RelativePath="res\CHEM_IC_EQUILIBRIUM_PHASES.rtf">
@@ -1648,7 +1663,43 @@ copy &quot;$(DEV_VTK42_VS7_DLL_LIB)\vtkzlib.dll&quot; &quot;$(TargetDir)vtkzlib.
 				RelativePath="res\CHEM_IC_SURFACE.rtf">
 			</File>
 			<File
+				RelativePath="res\DESCRIPTION.rtf">
+			</File>
+			<File
+				RelativePath="res\DIFFUSIVITY.rtf">
+			</File>
+			<File
 				RelativePath="res\FLOW_BALANCE_TOLERANCE.rtf">
+			</File>
+			<File
+				RelativePath="res\FREE_SURFACE_FALSE.rtf">
+			</File>
+			<File
+				RelativePath="res\FREE_SURFACE_TRUE.rtf">
+			</File>
+			<File
+				RelativePath="res\GRID_CHEM_DIMS.rtf">
+			</File>
+			<File
+				RelativePath="res\GRID_MAX.rtf">
+			</File>
+			<File
+				RelativePath="res\GRID_MIN.rtf">
+			</File>
+			<File
+				RelativePath="res\GRID_NODES.rtf">
+			</File>
+			<File
+				RelativePath="res\GRID_NONUNI.rtf">
+			</File>
+			<File
+				RelativePath="res\GRID_ORIENT.rtf">
+			</File>
+			<File
+				RelativePath="res\GRID_SNAP.rtf">
+			</File>
+			<File
+				RelativePath="res\GRID_UNI.rtf">
 			</File>
 			<File
 				RelativePath="res\HEAD_CHANGE_TARGET.rtf">
@@ -1714,6 +1765,42 @@ copy &quot;$(DEV_VTK42_VS7_DLL_LIB)\vtkzlib.dll&quot; &quot;$(TargetDir)vtkzlib.
 				RelativePath="res\MINIMUM_TIME_STEP.rtf">
 			</File>
 			<File
+				RelativePath="res\SM_CROSS_DISP.rtf">
+			</File>
+			<File
+				RelativePath="res\SM_ITERATIVE_FALSE.rtf">
+			</File>
+			<File
+				RelativePath="res\SM_ITERATIVE_TRUE.rtf">
+			</File>
+			<File
+				RelativePath="res\SM_MAX_ITER.rtf">
+			</File>
+			<File
+				RelativePath="res\SM_REBALANCE.rtf">
+			</File>
+			<File
+				RelativePath="res\SM_SAVE_DIR.rtf">
+			</File>
+			<File
+				RelativePath="res\SM_SPACE.rtf">
+			</File>
+			<File
+				RelativePath="res\SM_TIME_DIFF.rtf">
+			</File>
+			<File
+				RelativePath="res\SM_TOLERANCE.rtf">
+			</File>
+			<File
+				RelativePath="res\SOLUTE_FALSE.rtf">
+			</File>
+			<File
+				RelativePath="res\SOLUTE_TRUE.rtf">
+			</File>
+			<File
+				RelativePath="SOLUTE_TRUE.rtf">
+			</File>
+			<File
 				RelativePath="res\STEADY_FLOW.rtf">
 			</File>
 			<File
@@ -1721,6 +1808,33 @@ copy &quot;$(DEV_VTK42_VS7_DLL_LIB)\vtkzlib.dll&quot; &quot;$(TargetDir)vtkzlib.
 			</File>
 			<File
 				RelativePath="res\Toolbar.bmp">
+			</File>
+			<File
+				RelativePath="res\WELL_ALLOCATE.rtf">
+			</File>
+			<File
+				RelativePath="res\WELL_DEPTH.rtf">
+			</File>
+			<File
+				RelativePath="res\WELL_DESC.rtf">
+			</File>
+			<File
+				RelativePath="res\WELL_DIAM.rtf">
+			</File>
+			<File
+				RelativePath="res\WELL_ELEVATION.rtf">
+			</File>
+			<File
+				RelativePath="res\WELL_LOCATION.rtf">
+			</File>
+			<File
+				RelativePath="res\WELL_LSD.rtf">
+			</File>
+			<File
+				RelativePath="res\WELL_NUMBER.rtf">
+			</File>
+			<File
+				RelativePath="res\WELL_RADIUS.rtf">
 			</File>
 			<File
 				RelativePath="res\WELL_RATE.rtf">
@@ -1750,6 +1864,12 @@ copy &quot;$(DEV_VTK42_VS7_DLL_LIB)\vtkzlib.dll&quot; &quot;$(TargetDir)vtkzlib.
 				RelativePath="res\WPhastDoc.ico">
 			</File>
 			<File
+				RelativePath="res\bc_speci.bin">
+			</File>
+			<File
+				RelativePath="res\bin00001.bin">
+			</File>
+			<File
 				RelativePath="res\checks.bmp">
 			</File>
 			<File
@@ -1772,6 +1892,9 @@ copy &quot;$(DEV_VTK42_VS7_DLL_LIB)\vtkzlib.dll&quot; &quot;$(TargetDir)vtkzlib.
 			</File>
 			<File
 				RelativePath="res\header.bmp">
+			</File>
+			<File
+				RelativePath="res\icon1.ico">
 			</File>
 			<File
 				RelativePath="res\idr_main.ico">
@@ -1808,6 +1931,9 @@ copy &quot;$(DEV_VTK42_VS7_DLL_LIB)\vtkzlib.dll&quot; &quot;$(TargetDir)vtkzlib.
 			</File>
 			<File
 				RelativePath="res\rtf2.bin">
+			</File>
+			<File
+				RelativePath="res\rtf2.rtf">
 			</File>
 			<File
 				RelativePath="res\scale_obj.cur">

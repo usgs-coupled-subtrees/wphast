@@ -3,6 +3,7 @@
 
 // CFreeSurfacePropertyPage dialog
 #include "FreeSurface.h"
+#include "afxcmn.h"
 
 class CFreeSurfacePropertyPage : public CPropertyPage
 {
@@ -24,4 +25,12 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 	CFreeSurface m_freeSurface;
+
+	std::string m_sFreeSurfaceTrueRTF;  // IDR_FREE_SURFACE_TRUE_RTF
+	std::string m_sFreeSurfaceFalseRTF; // IDR_FREE_SURFACE_FALSE_RTF
+
+	CRichEditCtrl m_wndRichEditCtrl;
+public:
+	afx_msg void OnBnSetfocusFreeSurfaceRadio();
+	afx_msg void OnBnSetfocusConfinedFlowRadio();
 };

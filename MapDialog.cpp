@@ -10,25 +10,20 @@
 #include <vtkWin32OpenGLRenderWindow.h>
 #include <vtkRenderer.h>
 #include <vtkWin32RenderWindowInteractor.h>
-
-// COMMENT: {3/12/2004 1:47:35 PM}#include <vtkImageReader2Factory.h>
-// COMMENT: {3/12/2004 1:47:35 PM}#include <vtkImageReader2.h>
 #include <vtkDataSetMapper.h>
-// COMMENT: {3/12/2004 1:47:28 PM}#include <vtkImageShiftScale.h>
 #include <vtkImageData.h>
-// COMMENT: {3/12/2004 1:47:20 PM}#include <vtkImageActor.h> 
 #include <vtkCallbackCommand.h>
 #include <vtkProperty.h>
-//{{
 #include <vtkLineSource.h>
 #include <vtkPolyDataMapper.h>
 #include <vtkPolyData.h>
-//}}
+
 #include "CoorDialog.h"
 #include "Global.h"
 #include "MapImageActor.h"
 #include "vtkInteractorStyleImage2.h"
 #include "vtkPlaneWidget2.h"
+#include "Marker.h"
 
 #if !defined(IDC_HEADER_BORDER)
 #define IDC_HEADER_BORDER 1133
@@ -59,16 +54,6 @@ static UINT s_PointsIDs[] =
 		IDC_EDIT_XC2,
 		IDC_STATIC_YC2,
 		IDC_EDIT_YC2,
-// COMMENT: {5/13/2004 1:07:49 PM}	IDC_STATIC_WORLD_GB,
-// COMMENT: {5/13/2004 1:07:49 PM}	IDC_MODIFY_CHECK,
-// COMMENT: {5/13/2004 1:07:49 PM}	IDC_STATIC_WXP,
-// COMMENT: {5/13/2004 1:07:49 PM}	IDC_EDIT_WXP,
-// COMMENT: {5/13/2004 1:07:49 PM}	IDC_STATIC_WYP,
-// COMMENT: {5/13/2004 1:07:49 PM}	IDC_EDIT_WYP,
-// COMMENT: {5/13/2004 1:07:49 PM}	IDC_STATIC_WXC,
-// COMMENT: {5/13/2004 1:07:49 PM}	IDC_EDIT_WXC,
-// COMMENT: {5/13/2004 1:07:49 PM}	IDC_STATIC_WYC,
-// COMMENT: {5/13/2004 1:07:49 PM}	IDC_EDIT_WYC
 };
 
 static UINT s_Point1IDs[] =
@@ -152,6 +137,13 @@ static UINT s_GridIDs[] =
 typedef float vtkFloatingPointType;
 #endif
 
+#define TITLEX                 22
+#define TITLEY                 10
+#define SUBTITLEX              44
+#define SUBTITLEY              25
+#define DEFAULTHEADERHEIGHT    58   // in pixels
+#define DRAWTEXT_WIZARD97FLAGS (DT_LEFT | DT_WORDBREAK | DT_NOPREFIX | DT_EDITCONTROL)
+
 
 const UINT FIRST_NODE_ID = IDC_X_NODES_EDIT;
 
@@ -162,9 +154,6 @@ CGridPoint::CGridPoint(void)
 , y_val_defined(false)
 {
 }
-
-// COMMENT: {5/3/2004 9:38:02 PM}IMPLEMENT_DYNAMIC(CMapDialog, CMapDialogBase)
-#include "Marker.h"
 
 CMapDialog::CMapDialog(CWnd* pParent /*=NULL*/)
 	: CMapDialogBase(CMapDialog::IDD, pParent)
@@ -188,7 +177,8 @@ CMapDialog::CMapDialog(CWnd* pParent /*=NULL*/)
 	ASSERT(IDC_X_NODES_EDIT + 2 == IDC_Z_NODES_EDIT);
 
 	// initialize grid
-	for (int i = 0; i < 3; ++i) {
+	for (int i = 0; i < 3; ++i)
+	{
 		this->m_grid[i].coord[0]    = 0.0;
 		this->m_grid[i].coord[1]    = 0.0;
 		this->m_grid[i].count_coord = 2;
@@ -204,18 +194,20 @@ CMapDialog::CMapDialog(CWnd* pParent /*=NULL*/)
 	this->m_RenderWindow           = vtkWin32OpenGLRenderWindow::New();
 	this->m_Renderer               = vtkRenderer::New();
 	this->m_RenderWindowInteractor = vtkWin32RenderWindowInteractor::New();
-	//{{
-	/// this->m_RenderWindowInteractor->InstallMessageProcOff();
-	//}}
+
 	this->m_Style                  = vtkInteractorStyleImage2::New();
 
 	this->m_Widget = vtkPlaneWidget2::New();
 	this->m_Widget->NormalToZAxisOn();
 	this->m_Widget->SetInteractor(this->m_RenderWindowInteractor);
 	this->m_Widget->SetEnabled(0);
-// COMMENT: {5/4/2004 2:41:35 PM}	this->m_Widget->SetResolution(1);
 	this->m_Widget->GetHandleProperty()->SetOpacity(0.75);
 	this->m_Widget->GetSelectedHandleProperty()->SetOpacity(0.75);
+	for (int i = 0; i < 3; ++i)
+	{
+		this->m_Widget->SetResolution(i, this->m_grid[i].count_coord - 1);
+	}
+	this->m_Widget->SizeHandles();
 
 	this->m_CallbackCommand = vtkCallbackCommand::New();
 	this->m_CallbackCommand->SetClientData(this); 
@@ -229,11 +221,12 @@ CMapDialog::CMapDialog(CWnd* pParent /*=NULL*/)
 	this->m_RenderWindowInteractor->AddObserver(vtkCommand::LeftButtonPressEvent, this->m_CallbackCommand);
 	this->m_RenderWindowInteractor->AddObserver(vtkCommand::LeftButtonReleaseEvent, this->m_CallbackCommand);
 
+	//{{ {4/18/2006 10:05:59 PM}
+	this->m_RenderWindowInteractor->AddObserver(vtkCommand::ModifiedEvent, this->m_CallbackCommand);
+	//}} {4/18/2006 10:05:59 PM}
 
 	if (this->m_Style) this->m_RenderWindowInteractor->SetInteractorStyle(this->m_Style);
 
-// COMMENT: {3/12/2004 1:48:49 PM}	this->m_MapImageReader2 = NULL;
-// COMMENT: {3/12/2004 1:48:49 PM}	this->m_MapShiftScale = vtkImageShiftScale::New();
 	this->m_MapImageActor = CMapImageActor::New();
 
 	this->m_Point1Actor = CMarker::New();
@@ -248,12 +241,10 @@ CMapDialog::~CMapDialog()
 	this->m_Renderer->Delete();
 	this->m_RenderWindowInteractor->Delete();
 
-// COMMENT: {3/12/2004 1:49:08 PM}	if (this->m_MapImageReader2) this->m_MapImageReader2->Delete();
 	if (this->m_Style) this->m_Style->Delete();
 	if (this->m_Widget) this->m_Widget->Delete();
 	if (this->m_CallbackCommand) this->m_CallbackCommand->Delete();
 
-// COMMENT: {3/12/2004 1:49:16 PM}	this->m_MapShiftScale->Delete();
 	this->m_MapImageActor->Delete();
 	this->m_Point1Actor->Delete();
 	this->m_Point2Actor->Delete();
@@ -271,6 +262,10 @@ void CMapDialog::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_SPIN_XP2, m_udXP2);
 	DDX_Control(pDX, IDC_SPIN_YP2, m_udYP2);
 
+// COMMENT: {4/13/2006 5:24:24 PM}	//{{
+// COMMENT: {4/13/2006 5:24:24 PM}	DDX_Control(pDX, IDC_ZOOM_BUTTON, m_btnZoom);	
+// COMMENT: {4/13/2006 5:24:24 PM}	//}}
+
 	switch (this->m_CurrentState)
 	{
 	case MDS_Point1:
@@ -284,10 +279,6 @@ void CMapDialog::DoDataExchange(CDataExchange* pDX)
 		break;
 	default:
 		ASSERT(FALSE);
-	}
-
-	if (pDX->m_bSaveAndValidate)
-	{
 	}
 }
 
@@ -318,7 +309,7 @@ void CMapDialog::DDX_Point2(CDataExchange* pDX)
 {
 	if (pDX->m_bSaveAndValidate)
 	{
-		// these aren't used just make sure there valid integers
+		// these aren't used just make sure they're valid integers
 		// see OnEnUpdateEditXp2 & OnEnUpdateEditYp2
 		int pixelx;
 		int pixely;
@@ -335,7 +326,6 @@ void CMapDialog::DDX_Point2(CDataExchange* pDX)
 		this->m_point2.x_val_defined = true;
 		this->m_point2.y_val_defined = true;
 
-		///////{{
 		{
 			vtkFloatingPointType *dataSpacing = this->m_MapImageActor->GetImageReader2()->GetDataSpacing();
 			vtkFloatingPointType *dataOrigin  = this->m_MapImageActor->GetImageReader2()->GetDataOrigin();
@@ -363,11 +353,6 @@ void CMapDialog::DDX_Point2(CDataExchange* pDX)
 			spacing[0] = (this->m_point2.x_val - this->m_point1.x_val) / (xpix[1] - xpix[0]);
 			spacing[1] = (this->m_point2.y_val - this->m_point1.y_val) / (ypix[1] - ypix[0]);;
 			spacing[2] = 1.0;
-// COMMENT: {5/24/2004 1:34:05 PM}#ifdef __CPPUNIT__
-// COMMENT: {5/24/2004 1:34:05 PM}			//TEST{{
-// COMMENT: {5/24/2004 1:34:05 PM}			spacing[0] = 0;
-// COMMENT: {5/24/2004 1:34:05 PM}			//TEST}}
-// COMMENT: {5/24/2004 1:34:05 PM}#endif
 			this->m_worldTransform.SetDataSpacing(spacing);
 
 			double upperleft[3];
@@ -378,114 +363,7 @@ void CMapDialog::DDX_Point2(CDataExchange* pDX)
 
 			// TODO validate site map
 			this->m_siteMap.SetWorldTransform(this->m_worldTransform);
-
-			//{{
-			/***************************
-			// VALIDATE
-			// this->Origin [=] ???
-			// this->Point1 [=] ???
-			// this->Point2 [=] ???
-
-			//{{{{{
-			float bounds[6]
-
-			this->m_MapImageActor->SetWorldTransform(this->m_worldTransform);
-			this->m_MapImageActor->GetInput()->Update();
-			this->m_MapImageActor->GetInput()->GetBounds(bounds);
-			this->m_Widget->PlaceWidget(bounds);
-
-			void vtkPlaneWidget::PlaceWidget(float bds[6])
-			{
-			int i;
-			float bounds[6], center[3];
-
-			this->AdjustBounds(bds, bounds, center);
-
-			if (true)
-			{
-				this->PlaneSource->SetOrigin(bounds[0],bounds[2],center[2]);
-				this->PlaneSource->SetPoint1(bounds[1],bounds[2],center[2]); // this causes problems
-				this->PlaneSource->SetPoint2(bounds[0],bounds[3],center[2]);
-			}
-
-			void vtk3DWidget::AdjustBounds(float bounds[6], float newBounds[6], float center[3])
-			{
-			center[0] = (bounds[0] + bounds[1])/2.0;
-			center[1] = (bounds[2] + bounds[3])/2.0;
-			center[2] = (bounds[4] + bounds[5])/2.0;
-			  
-			newBounds[0] = center[0] + 0.5*(bounds[0]-center[0]);
-			newBounds[1] = center[0] + 0.5*(bounds[1]-center[0]);
-			newBounds[2] = center[1] + 0.5*(bounds[2]-center[1]);
-			newBounds[3] = center[1] + 0.5*(bounds[3]-center[1]);
-			newBounds[4] = center[2] + 0.5*(bounds[4]-center[2]);
-			newBounds[5] = center[2] + 0.5*(bounds[5]-center[2]);
-			}
-
-			//}}}}}
-
-			void vtkPlaneSource::SetPoint1(float pnt[3])
-			{
-				int i;
-				float v1[3], v2[3];
-
-				for ( i=0; i < 3; i++ )
-				{
-				this->Point1[i] = pnt[i];
-				v1[i] = this->Point1[i] - this->Origin[i];
-				v2[i] = this->Point2[i] - this->Origin[i];
-				}
-
-				// set plane normal
-				this->UpdatePlane(v1,v2);
-				this->Modified();
-			}
-// modifies the normal and origin
-			void vtkPlaneSource::SetPoint2(float pnt[3])
-			{
-				int i;
-				float v1[3], v2[3];
-
-				for ( i=0; i < 3; i++ )
-				{
-				this->Point2[i] = pnt[i];
-				v1[i] = this->Point1[i] - this->Origin[i];
-				v2[i] = this->Point2[i] - this->Origin[i];
-				}
-				// set plane normal
-				this->UpdatePlane(v1,v2);
-				this->Modified();
-			}
-
-			// Protected method updates normals and plane center from two axes.
-			int vtkPlaneSource::UpdatePlane(float v1[3], float v2[3])
-			{
-			// set plane center
-			for ( int i=0; i < 3; i++ )
-				{
-				this->Center[i] = this->Origin[i] + 0.5*(v1[i] + v2[i]);
-				}
-
-			// set plane normal
-			vtkMath::Cross(v1,v2,this->Normal);
-			if ( vtkMath::Normalize(this->Normal) == 0.0 )
-				{
-				vtkErrorMacro(<<"Bad plane coordinate system");
-				return 0;
-				}
-			else
-				{
-				return 1;
-				}
-			}
-
-			***************************/
-			//}}
 		}
-		///////}}
-	}
-	else
-	{
 	}
 }
 
@@ -500,15 +378,15 @@ void CMapDialog::DDX_Grid(CDataExchange* pDX)
 
 	if (pDX->m_bSaveAndValidate)
 	{
-		// this->m_grid[0].SetUniformRange(m_xMin, m_xMin + m_xLength, m_xNodes);
-		// DDX_Text(pDX, IDC_EDIT_X, m_xMin)
 		int nodes[3];
 		double minimum[3];
 		double length[3];
-		for (int i = 0; i < 3; ++i) {
+		for (int i = 0; i < 3; ++i)
+		{
 			// nodes
 			DDX_Text(pDX, FIRST_NODE_ID + i, nodes[i]);
-			if (nodes[i] < 2) {
+			if (nodes[i] < 2)
+			{
 				::AfxMessageBox("Each direction must have at least two nodes.");
 				pDX->Fail();
 			}
@@ -517,19 +395,23 @@ void CMapDialog::DDX_Grid(CDataExchange* pDX)
 
 			// lengths
 			DDX_Text(pDX, IDC_EDIT_LENGTH + i, length[i]);
-			if (length[i] == 0) {
+			if (length[i] == 0)
+			{
 				::AfxMessageBox("Length must be non-zero.");
 				pDX->Fail();
 			}
 		}
 
-		for (int i = 0; i < 3; ++i) {
+		for (int i = 0; i < 3; ++i)
+		{
 			this->m_grid[i].count_coord = nodes[i];
-			if (length[i] < 0) {
+			if (length[i] < 0)
+			{
 				this->m_grid[i].coord[0] = minimum[i] + length[i];
 				this->m_grid[i].coord[1] = minimum[i];
 			}
-			else {
+			else
+			{
 				this->m_grid[i].coord[0] = minimum[i];
 				this->m_grid[i].coord[1] = minimum[i] + length[i];
 			}
@@ -538,22 +420,14 @@ void CMapDialog::DDX_Grid(CDataExchange* pDX)
 	}
 	else
 	{
-		for (int i = 0; i < 3; ++i) {
+		for (int i = 0; i < 3; ++i)
+		{
 			// nodes
 			this->m_Widget->SetResolution(i, this->m_grid[i].count_coord - 1);
 			this->UpdateNodes(i);
 
 			// minimums
 			DDX_Text(pDX, IDC_EDIT_X + i, this->m_grid[i].coord[0]);
-
-// COMMENT: {5/17/2004 2:00:47 PM}			// lengths are automatic unless negative
-// COMMENT: {5/17/2004 2:00:47 PM}			double length;
-// COMMENT: {5/17/2004 2:00:47 PM}			if (this->m_grid[i].coord[1] < 0) {
-// COMMENT: {5/17/2004 2:00:47 PM}				length = fabs(this->m_grid[i].coord[1]) - this->m_grid[i].coord[0];
-// COMMENT: {5/17/2004 2:00:47 PM}				DDX_Text(pDX, IDC_EDIT_LENGTH + i, length);
-// COMMENT: {5/17/2004 2:00:47 PM}				if (i == 0) this->m_Widget->SetDeltaX(length);
-// COMMENT: {5/17/2004 2:00:47 PM}				if (i == 1) this->m_Widget->SetDeltaY(length);
-// COMMENT: {5/17/2004 2:00:47 PM}			}
 		}
 
 		double defaultZ = 1.0;
@@ -567,37 +441,19 @@ void CMapDialog::DDX_Grid(CDataExchange* pDX)
 		this->UpdateModelOriginY();
 		this->UpdateModelOriginAngle();
 		//}}
-// COMMENT: {6/3/2004 4:42:20 PM}		}
 	}
 }
 
 CRect CMapDialog::GetRect() 
 { 
-	//{{ORIGINAL
 	return CMapDialogBase::GetRect();
-	//}}ORIGINAL
-	CRect r; 
-	GetClientRect(r);
-
-	if( this->m_bGripper ) 
-	{
-		if( ::IsWindow(m_StatusBar.GetSafeHwnd()) ) 
-		{
-			CRect rcSizeIcon;
-			this->m_StatusBar.GetWindowRect( rcSizeIcon);
-			r.bottom -= rcSizeIcon.Height();
-		}
-	}
-	return r; 
 }
 
 BEGIN_MESSAGE_MAP(CMapDialog, CMapDialogBase)
-// BEGIN_MESSAGE_MAP(CMapDialog, CDialog)
 	ON_WM_CREATE()
 	ON_WM_PAINT()
 	ON_WM_SETCURSOR()
 	ON_WM_HELPINFO()
-
 	ON_EN_KILLFOCUS(IDC_EDIT_MO_ANGLE, OnEnKillfocusEditMoAngle)
 	ON_EN_KILLFOCUS(IDC_EDIT_MO_Y, OnEnKillfocusEditMoY)
 	ON_EN_KILLFOCUS(IDC_EDIT_MO_X, OnEnKillfocusEditMoX)
@@ -606,28 +462,17 @@ BEGIN_MESSAGE_MAP(CMapDialog, CMapDialogBase)
 	ON_EN_KILLFOCUS(IDC_X_NODES_EDIT, OnEnKillfocusXNodesEdit)
 	ON_EN_KILLFOCUS(IDC_Y_NODES_EDIT, OnEnKillfocusYNodesEdit)
 	ON_EN_KILLFOCUS(IDC_Z_NODES_EDIT, OnEnKillfocusZNodesEdit)
-
 	ON_EN_UPDATE(IDC_X_NODES_EDIT, OnEnUpdateXNodesEdit)
 	ON_EN_UPDATE(IDC_Y_NODES_EDIT, OnEnUpdateYNodesEdit)
 	ON_EN_UPDATE(IDC_EDIT_XP1, OnEnUpdateEditXp1)
 	ON_EN_UPDATE(IDC_EDIT_YP1, OnEnUpdateEditYp1)
 	ON_EN_UPDATE(IDC_EDIT_XP2, OnEnUpdateEditXp2)
 	ON_EN_UPDATE(IDC_EDIT_YP2, OnEnUpdateEditYp2)
-
-// COMMENT: {5/21/2004 7:23:56 PM}	ON_EN_CHANGE(IDC_EDIT_XP1, OnEnChangeEditXp1)
-
 	ON_BN_CLICKED(IDC_BUTTON1, OnBnClickedButton1)
 	ON_BN_CLICKED(IDC_BACK_BUTTON, OnWizardBack)
-
-// COMMENT: {5/21/2004 7:21:53 PM}	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_XP1, OnDeltaposSpinXp1)
-
 	ON_MESSAGE(WM_SHOWCOORDLG, OnShowCoorDlg)
-
-	// ON_EN_CHANGE(IDC_EDIT_XC2, OnEnChangeEditXc2)
-	// ON_EN_CHANGE(IDC_EDIT_YC2, OnEnChangeEditYc2)
 	ON_CONTROL_RANGE(EN_CHANGE, IDC_EDIT_XP1, IDC_EDIT_YC1, OnEnChangeRange)
-	//ON_CONTROL_RANGE(EN_CHANGE, IDC_EDIT_XP2, IDC_EDIT_YC2, OnEnChangeRange)
-	//ON_CONTROL_RANGE(EN_CHANGE, IDC_EDIT_MO_X, IDC_Z_NODES_EDIT, OnEnChangeRange)
+	ON_WM_SIZE()
 END_MESSAGE_MAP()
 
 
@@ -687,47 +532,12 @@ BOOL CMapDialog::OnInitDialog()
 	this->m_szMinimumRender.cx = rect.Width();
 	this->m_szMinimumRender.cy = rect.Height();
 
-	//{{
 	this->SetState(this->m_CurrentState);
-	/**
-	switch (this->m_CurrentState)
-	{
-	case MDS_Point1:
-		this->m_Widget->SetEnabled(0);
-		this->GetDlgItem(IDC_BACK_BUTTON)->EnableWindow(FALSE);
-		this->GetDlgItem(IDOK)->SetWindowText(_T("&Next >"));
-		this->LayoutPointsPage();
-		break;
-	case MDS_Point2:
-		this->m_Widget->SetEnabled(0);
-		this->GetDlgItem(IDC_BACK_BUTTON)->EnableWindow(TRUE);
-		this->GetDlgItem(IDOK)->SetWindowText(_T("&Next >"));
-		this->LayoutPointsPage();
-		break;
-	case MDS_Grid:
-		this->m_Point1Actor->VisibilityOff();
-		this->m_Point2Actor->VisibilityOff();
-		this->m_Widget->SetInput( this->m_MapImageActor->GetInput() );
-		this->m_Widget->PlaceWidget();
-		this->m_Widget->SetEnabled(1);
-		//{{
-		this->UpdateLength();
-		this->UpdateWidth();
-		this->UpdateModelOriginX();
-		this->UpdateModelOriginY();
-		this->UpdateModelOriginAngle();
-		//}}
-		this->GetDlgItem(IDC_BACK_BUTTON)->EnableWindow(TRUE);
-		this->GetDlgItem(IDOK)->SetWindowText(_T("Finish"));
-		this->LayoutGridPage();
-		break;
-	default:
-		ASSERT(FALSE); // unhandled state
-	}
-	this->LayoutPointsPage();
-	**/
-	//}}
 
+// COMMENT: {4/13/2006 5:24:08 PM}	//{{
+// COMMENT: {4/13/2006 5:24:08 PM}	HICON h = ::LoadIcon(::AfxGetInstanceHandle(), MAKEINTRESOURCE(IDI_ZOOM_REAL));
+// COMMENT: {4/13/2006 5:24:08 PM}	m_btnZoom.SetIcon(h);
+// COMMENT: {4/13/2006 5:24:08 PM}	//}}
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
@@ -782,9 +592,11 @@ int CMapDialog::SetWorldFileName(const char *filename)
 	int nreturn = 0;
 	CWorldTransform wtrans;
 
-	if (CGlobal::LoadWorldFile(filename, wtrans) == 0) {
+	if (CGlobal::LoadWorldFile(filename, wtrans) == 0)
+	{
 		nreturn = this->m_MapImageActor->SetWorldTransform(wtrans);
-		if (nreturn == 1) {
+		if (nreturn == 1)
+		{
 			// TODO get rid of this->m_worldTransform
 			this->m_worldTransform = wtrans;
 			this->m_siteMap.SetWorldTransform(wtrans);
@@ -801,7 +613,8 @@ void CMapDialog::OnPaint()
 {
 	CPaintDC dc(this); // device context for painting
 
-	if (CWnd *pWnd = this->GetDlgItem(IDC_HEADER_BORDER)) {
+	if (CWnd *pWnd = this->GetDlgItem(IDC_HEADER_BORDER))
+	{
 		CRect rect;
 		this->GetClientRect(&rect);
 
@@ -813,21 +626,12 @@ void CMapDialog::OnPaint()
 		CBrush fill;
 		fill.CreateSysColorBrush(COLOR_WINDOW);
 		dc.FillRect(&rect, &fill);
-
-//{{
-// COMMENT: {5/17/2004 8:51:12 PM}		g_clrWindow = ::GetSysColor(COLOR_WINDOW);
-// COMMENT: {5/17/2004 8:51:12 PM}		g_clrWindowText = GetSysColor(COLOR_WINDOWTEXT);
-// COMMENT: {5/17/2004 8:51:12 PM}		g_clrWindowFrame = GetSysColor(COLOR_WINDOWFRAME);
-
         dc.SetBkColor(::GetSysColor(COLOR_WINDOW));
 		dc.SetTextColor(::GetSysColor(COLOR_WINDOWTEXT));
-//}}
 
 		LOGFONT lf;
 		this->GetFont()->GetLogFont(&lf);
 
-// COMMENT: {5/5/2004 2:35:59 PM}		CString strHeaderTitle(_T("Import/Export Selection"));
-// COMMENT: {5/5/2004 2:35:59 PM}		CString strHeaderSubTitle(_T("You can select what you want to import or export."));
 		CString strTitle;
 		CString strSubTitle;
 
@@ -849,19 +653,10 @@ void CMapDialog::OnPaint()
 			ASSERT(FALSE); // unhandled state
 		}
 
-//{{
-#define TITLEX                 22
-#define TITLEY                 10
-#define SUBTITLEX              44
-#define SUBTITLEY              25
-#define DEFAULTHEADERHEIGHT    58   // in pixels
-#define DRAWTEXT_WIZARD97FLAGS (DT_LEFT | DT_WORDBREAK | DT_NOPREFIX | DT_EDITCONTROL)
-//}}
-
-
 		CFont fntBold;
 		lf.lfWeight = FW_BOLD;
-		if (fntBold.CreateFontIndirect(&lf)) {
+		if (fntBold.CreateFontIndirect(&lf))
+		{
 			RECT rectHeader;
 			this->GetClientRect(&rectHeader);
 			rectHeader.bottom = DEFAULTHEADERHEIGHT;
@@ -874,20 +669,13 @@ void CMapDialog::OnPaint()
 
 		CFont fntNormal;
 		lf.lfWeight = FW_NORMAL;
-		if (fntNormal.CreateFontIndirect(&lf)) {
+		if (fntNormal.CreateFontIndirect(&lf))
+		{
 			RECT rcWrap;
 			this->GetClientRect(&rcWrap);
 			rcWrap.left = SUBTITLEX;
 			rcWrap.top  = SUBTITLEY;
 			CFont *pOrigFont = dc.SelectObject(&fntNormal);
-			// dc.TextOut(40, 25, strSubTitle);
-			//// CRect txtRect(40, 25, rect.Width() - 60, 55);
-			/**
-            dc.Draw3dRect(&rect, ::GetSysColor(COLOR_BTNHIGHLIGHT),
-                ::GetSysColor(COLOR_BTNSHADOW));
-				**/
-			//dc.DrawText(strSubTitle, &rect, DT_LEFT /*DT_EDITCONTROL DT_END_ELLIPSIS*/);
-			///dc.DrawText(strSubTitle, &txtRect, DT_LEFT | DT_EDITCONTROL | DT_WORDBREAK | DT_NOPREFIX);
 			dc.DrawText(strSubTitle, &rcWrap, DT_LEFT | DT_EDITCONTROL | DT_WORDBREAK | DT_NOPREFIX);
 			if (pOrigFont) dc.SelectObject(pOrigFont);			
 		}
@@ -898,9 +686,6 @@ void CMapDialog::OnPaint()
 	if (this->m_bFirstPaint)
 	{
 		this->m_bFirstPaint = false;
-// COMMENT: {5/5/2004 9:09:12 PM}		this->m_Widget->On();
-// COMMENT: {5/5/2004 9:09:12 PM}		this->ProcessEvents(this->m_Widget, vtkCommand::InteractionEvent, this, NULL);
-		///{{
 		switch(this->m_CurrentState)
 		{
 		case MDS_Point1:
@@ -910,14 +695,15 @@ void CMapDialog::OnPaint()
 			this->m_Widget->Off();
 			break;
 		case MDS_Grid:
+			this->m_Widget->SizeHandles();
 			this->m_Widget->On();
+			this->m_Widget->SizeHandles();
 			this->ProcessEvents(this->m_Widget, vtkCommand::InteractionEvent, this, NULL);
 			break;
 		default:
 			ASSERT(FALSE);
 			break;
 		}
-		///}}
 	}
 }
 
@@ -932,76 +718,79 @@ void CMapDialog::ProcessEvents(vtkObject* caller,
 	CMapDialog* self 
 		= reinterpret_cast<CMapDialog *>( clientdata );
 
-	if (caller && caller == self->m_Widget) {
-
-		//look for char and delete events
+	if (caller && caller == self->m_Widget)
+	{
+		// look for char and delete events
 		switch(event)
 		{
 		case vtkCommand::InteractionEvent:
-			if (vtkPlaneWidget2 *widget = vtkPlaneWidget2::SafeDownCast(caller)) {
+			if (vtkPlaneWidget2 *widget = vtkPlaneWidget2::SafeDownCast(caller))
+			{
 				int state = self->m_Widget->GetState();
-				switch(state) {
-					case vtkPlaneWidget2::Start:
-						TRACE("Start\n");
-						break;
-					case vtkPlaneWidget2::Moving:
-						TRACE("Moving\n");
-						switch (self->m_Widget->GetSubstate()) {
-							case vtkPlaneWidget2::MovingMoveOrigin:
-								TRACE("MovingMoveOrigin\n");
-								self->UpdateModelOriginX();
-								self->UpdateModelOriginY();
-								self->UpdateLength();
-								self->UpdateWidth();
-								break;
-							case vtkPlaneWidget2::MovingMovePoint1:
-								TRACE("MovingMovePoint1\n");
-								self->UpdateModelOriginY();
-								self->UpdateLength();
-								self->UpdateWidth();
-								break;
-							case vtkPlaneWidget2::MovingMovePoint2:
-								TRACE("MovingMovePoint2\n");
-								self->UpdateModelOriginX();
-								self->UpdateLength();
-								self->UpdateWidth();
-								break;
-							case vtkPlaneWidget2::MovingMovePoint3:
-								TRACE("MovingMovePoint3\n");
-								self->UpdateLength();
-								self->UpdateWidth();
-								break;
-							case vtkPlaneWidget2::MovingTranslate:
-								TRACE("MovingTranslate\n");
-								self->UpdateModelOriginX();
-								self->UpdateModelOriginY();
-								break;
-						}
-						break;
-					case vtkPlaneWidget2::Scaling:
-						TRACE("Scaling\n");
+				switch(state)
+				{
+				case vtkPlaneWidget2::Start:
+					TRACE("Start\n");
+					break;
+				case vtkPlaneWidget2::Moving:
+					TRACE("Moving\n");
+					switch (self->m_Widget->GetSubstate())
+					{
+					case vtkPlaneWidget2::MovingMoveOrigin:
+						TRACE("MovingMoveOrigin\n");
 						self->UpdateModelOriginX();
 						self->UpdateModelOriginY();
 						self->UpdateLength();
 						self->UpdateWidth();
 						break;
-					case vtkPlaneWidget2::Pushing:
-						TRACE("Pushing\n");
+					case vtkPlaneWidget2::MovingMovePoint1:
+						TRACE("MovingMovePoint1\n");
+						self->UpdateModelOriginY();
+						self->UpdateLength();
+						self->UpdateWidth();
 						break;
-					case vtkPlaneWidget2::Rotating:
-						TRACE("Rotating\n");
+					case vtkPlaneWidget2::MovingMovePoint2:
+						TRACE("MovingMovePoint2\n");
+						self->UpdateModelOriginX();
+						self->UpdateLength();
+						self->UpdateWidth();
 						break;
-					case vtkPlaneWidget2::Outside:
-						TRACE("Outside\n");
+					case vtkPlaneWidget2::MovingMovePoint3:
+						TRACE("MovingMovePoint3\n");
+						self->UpdateLength();
+						self->UpdateWidth();
 						break;
-					case vtkPlaneWidget2::Spinning:
-						TRACE("Spinning\n");
+					case vtkPlaneWidget2::MovingTranslate:
+						TRACE("MovingTranslate\n");
 						self->UpdateModelOriginX();
 						self->UpdateModelOriginY();
-						self->UpdateModelOriginAngle();
 						break;
-					default:
-						TRACE("UNKNOWN\n");
+					}
+					break;
+				case vtkPlaneWidget2::Scaling:
+					TRACE("Scaling\n");
+					self->UpdateModelOriginX();
+					self->UpdateModelOriginY();
+					self->UpdateLength();
+					self->UpdateWidth();
+					break;
+				case vtkPlaneWidget2::Pushing:
+					TRACE("Pushing\n");
+					break;
+				case vtkPlaneWidget2::Rotating:
+					TRACE("Rotating\n");
+					break;
+				case vtkPlaneWidget2::Outside:
+					TRACE("Outside\n");
+					break;
+				case vtkPlaneWidget2::Spinning:
+					TRACE("Spinning\n");
+					self->UpdateModelOriginX();
+					self->UpdateModelOriginY();
+					self->UpdateModelOriginAngle();
+					break;
+				default:
+					TRACE("UNKNOWN\n");
 				}
 			}
 			break;
@@ -1009,7 +798,8 @@ void CMapDialog::ProcessEvents(vtkObject* caller,
 
 	}
 
-	if (caller && caller == self->m_RenderWindowInteractor) {
+	if (caller && caller == self->m_RenderWindowInteractor)
+	{
 		int* pos;
 		static int x;
 		static int y;
@@ -1019,6 +809,7 @@ void CMapDialog::ProcessEvents(vtkObject* caller,
 			switch (self->m_CurrentState)
 			{
 			case MDS_Point1:
+				if (self->m_mouseDownPoint.x_defined && self->m_mouseDownPoint.y_defined)
 				{
 					self->m_point1 = self->m_mouseDownPoint;
 					self->UpdatePoint1();
@@ -1026,6 +817,7 @@ void CMapDialog::ProcessEvents(vtkObject* caller,
 				}
 				break;
 			case MDS_Point2:
+				if (self->m_mouseDownPoint.x_defined && self->m_mouseDownPoint.y_defined)
 				{
 					self->m_point2 = self->m_mouseDownPoint;
 					self->UpdatePoint2();
@@ -1069,12 +861,14 @@ void CMapDialog::ProcessEvents(vtkObject* caller,
 				renderer->SetDisplayPoint(pos[0], pos[1], displayCoords[2]);
 				renderer->DisplayToWorld();
 				vtkFloatingPointType *worldCoords = renderer->GetWorldPoint();
-				if ( worldCoords[3] == 0.0 ) {
+				if ( worldCoords[3] == 0.0 )
+				{
 					ASSERT(FALSE);
 					return;
 				}
 				vtkFloatingPointType PickPosition[3];
-				for (i = 0; i < 3; ++i) {
+				for (i = 0; i < 3; ++i)
+				{
 					PickPosition[i] = worldCoords[i] / worldCoords[3];
 				}
 
@@ -1082,7 +876,8 @@ void CMapDialog::ProcessEvents(vtkObject* caller,
 				{
 					double* cameraDOP = camera->GetDirectionOfProjection();
 					double t = -PickPosition[2] / cameraDOP[2];
-					for (i = 0; i < 2; ++i) {
+					for (i = 0; i < 2; ++i)
+					{
 						worldPointXYPlane[i] = PickPosition[i] + t * cameraDOP[i];
 					}
 				}
@@ -1090,7 +885,8 @@ void CMapDialog::ProcessEvents(vtkObject* caller,
 				{
 					double *cameraPos = camera->GetPosition();
 					double t = -cameraPos[2] / ( PickPosition[2] - cameraPos[2] );
-					for (i = 0; i < 2; ++i) {
+					for (i = 0; i < 2; ++i)
+					{
 						worldPointXYPlane[i] = cameraPos[i] + t * ( PickPosition[i] - cameraPos[i] );
 					}
 				}
@@ -1120,6 +916,7 @@ void CMapDialog::ProcessEvents(vtkObject* caller,
 
 		default:
 			TRACE("m_RenderWindowInteractor Unknown Event \n");
+			self->m_Widget->SizeHandles();
 			break;
 		}
 	}
@@ -1128,12 +925,15 @@ void CMapDialog::ProcessEvents(vtkObject* caller,
 void CMapDialog::OnEnKillfocusEditMoAngle()
 {
 	double value;
-	if (CGlobal::GetEditValue(this, IDC_EDIT_MO_ANGLE, value)) {
+	if (CGlobal::GetEditValue(this, IDC_EDIT_MO_ANGLE, value))
+	{
 		this->m_Widget->SetAngle(value);
 		this->m_RenderWindowInteractor->Render();
 	}
-	else {
-		if (::IsWindowVisible(this->GetDlgItem(IDC_EDIT_MO_ANGLE)->GetSafeHwnd())) {
+	else
+	{
+		if (::IsWindowVisible(this->GetDlgItem(IDC_EDIT_MO_ANGLE)->GetSafeHwnd()))
+		{
 			this->UpdateModelOriginAngle();
 			::MessageBeep(-1);
 		}
@@ -1144,12 +944,15 @@ void CMapDialog::OnEnKillfocusEditMoY()
 {
 	double value;
 	vtkFloatingPointType* origin = this->m_Widget->GetModelOrigin();
-	if (CGlobal::GetEditValue(this, IDC_EDIT_MO_Y, value)) {
+	if (CGlobal::GetEditValue(this, IDC_EDIT_MO_Y, value))
+	{
 		this->m_Widget->SetModelOrigin(origin[0], value);
 		this->m_RenderWindowInteractor->Render();
 	}
-	else {
-		if (::IsWindowVisible(this->GetDlgItem(IDC_EDIT_MO_Y)->GetSafeHwnd())) {
+	else
+	{
+		if (::IsWindowVisible(this->GetDlgItem(IDC_EDIT_MO_Y)->GetSafeHwnd()))
+		{
 			this->UpdateModelOriginY();
 			::MessageBeep(-1);
 		}
@@ -1160,12 +963,15 @@ void CMapDialog::OnEnKillfocusEditMoX()
 {
 	double value;
 	vtkFloatingPointType* origin = this->m_Widget->GetModelOrigin();
-	if (CGlobal::GetEditValue(this, IDC_EDIT_MO_X, value)) {
+	if (CGlobal::GetEditValue(this, IDC_EDIT_MO_X, value))
+	{
 		this->m_Widget->SetModelOrigin(value, origin[1]);
 		this->m_RenderWindowInteractor->Render();
 	}
-	else {
-		if (::IsWindowVisible(this->GetDlgItem(IDC_EDIT_MO_X)->GetSafeHwnd())) {
+	else
+	{
+		if (::IsWindowVisible(this->GetDlgItem(IDC_EDIT_MO_X)->GetSafeHwnd()))
+		{
 			this->UpdateModelOriginX();
 			::MessageBeep(-1);
 		}
@@ -1175,12 +981,15 @@ void CMapDialog::OnEnKillfocusEditMoX()
 void CMapDialog::OnEnKillfocusEditLength()
 {
 	double dx;
-	if (CGlobal::GetEditValue(this, IDC_EDIT_LENGTH, dx)) {
+	if (CGlobal::GetEditValue(this, IDC_EDIT_LENGTH, dx))
+	{
 		this->m_Widget->SetDeltaX(dx);
 		this->m_RenderWindowInteractor->Render();
 	}
-	else {
-		if (::IsWindowVisible(this->GetDlgItem(IDC_EDIT_LENGTH)->GetSafeHwnd())) {
+	else
+	{
+		if (::IsWindowVisible(this->GetDlgItem(IDC_EDIT_LENGTH)->GetSafeHwnd()))
+		{
 			this->UpdateLength();
 			::MessageBeep(-1);
 		}
@@ -1190,12 +999,15 @@ void CMapDialog::OnEnKillfocusEditLength()
 void CMapDialog::OnEnKillfocusEditWidth()
 {
 	double dy;
-	if (CGlobal::GetEditValue(this, IDC_EDIT_WIDTH, dy)) {
+	if (CGlobal::GetEditValue(this, IDC_EDIT_WIDTH, dy))
+	{
 		this->m_Widget->SetDeltaY(dy);
 		this->m_RenderWindowInteractor->Render();
 	}
-	else {
-		if (::IsWindowVisible(this->GetDlgItem(IDC_EDIT_WIDTH)->GetSafeHwnd())) {
+	else 
+	{
+		if (::IsWindowVisible(this->GetDlgItem(IDC_EDIT_WIDTH)->GetSafeHwnd()))
+		{
 			this->UpdateWidth();
 			::MessageBeep(-1);
 		}
@@ -1247,10 +1059,6 @@ void CMapDialog::UpdateLength(void)const
 
 void CMapDialog::UpdateWidth(void)const
 {
-// COMMENT: {5/10/2004 9:34:34 PM}	const TCHAR format[] = "%.2f";
-// COMMENT: {5/10/2004 9:34:34 PM}	static TCHAR buffer[40];
-// COMMENT: {5/10/2004 9:34:34 PM}	sprintf(buffer, format, this->m_Widget->GetDeltaY());
-// COMMENT: {5/10/2004 9:34:34 PM}	this->GetDlgItem(IDC_EDIT_WIDTH)->SetWindowText(buffer);
 	static TCHAR buffer[40];
 	double value = this->m_Widget->GetDeltaY();
 	if (value == 0.0)
@@ -1264,8 +1072,6 @@ void CMapDialog::UpdateWidth(void)const
 	this->GetDlgItem(IDC_EDIT_WIDTH)->SetWindowText(buffer);
 }
 
-#include <vtkAppendPolyData.h>
-
 void CMapDialog::UpdatePoint1(void)
 {
 	const TCHAR format[] = "%d";
@@ -1275,12 +1081,7 @@ void CMapDialog::UpdatePoint1(void)
 	static TCHAR buffer[40];
 
 	this->m_udXP1.SetPos32(this->m_point1.x);
-	// _stprintf(buffer, format, this->m_point1.x);
-	// this->GetDlgItem(IDC_EDIT_XP1)->SetWindowText(buffer);
-
 	this->m_udYP1.SetPos32(this->m_point1.y);
-	// _stprintf(buffer, format, this->m_point1.y);
-	// this->GetDlgItem(IDC_EDIT_YP1)->SetWindowText(buffer);
 
 	if (this->m_point1.x_val_defined)
 	{
@@ -1319,12 +1120,7 @@ void CMapDialog::UpdatePoint2(void)
 	static TCHAR buffer[40];
 
 	this->m_udXP2.SetPos32(this->m_point2.x);
-// COMMENT: {5/11/2004 3:18:38 PM}	_stprintf(buffer, format, this->m_point2.x);
-// COMMENT: {5/11/2004 3:18:38 PM}	this->GetDlgItem(IDC_EDIT_XP2)->SetWindowText(buffer);
-
 	this->m_udYP2.SetPos32(this->m_point2.y);
-// COMMENT: {5/11/2004 3:18:29 PM}	_stprintf(buffer, format, this->m_point2.y);
-// COMMENT: {5/11/2004 3:18:29 PM}	this->GetDlgItem(IDC_EDIT_YP2)->SetWindowText(buffer);
 
 	if (this->m_point2.x_val_defined)
 	{
@@ -1355,7 +1151,6 @@ void CMapDialog::UpdatePoint2(void)
 	this->m_Renderer->AddActor(this->m_Point2Actor);
 	this->m_RenderWindow->Render();
 }
-
 
 void CMapDialog::UpdateNodes(int idx)const
 {
@@ -1461,11 +1256,6 @@ BOOL CMapDialog::PreTranslateMessage(MSG* pMsg)
 		}
 	}
 
-// COMMENT: {5/17/2004 10:48:42 PM}	if (pMsg->message == WM_ERASEBKGND) {
-// COMMENT: {5/17/2004 10:48:42 PM}		Default();
-// COMMENT: {5/17/2004 10:48:42 PM}		return FALSE;
-// COMMENT: {5/17/2004 10:48:42 PM}	}	
-
 	return CMapDialogBase::PreTranslateMessage(pMsg);
 }
 
@@ -1515,12 +1305,7 @@ BOOL CMapDialog::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 					TRACE("UNKNOWN\n");
 			}
 #endif
-// COMMENT: {4/22/2004 10:21:32 PM}			if (this->m_Widget->GetState() == vtkPlaneWidget2::Start) {
-// COMMENT: {4/22/2004 10:21:32 PM}				::SetCursor(AfxGetApp()->LoadCursor(IDC_SCALE_OBJ));
-// COMMENT: {4/22/2004 10:21:32 PM}			}
-// COMMENT: {4/22/2004 10:21:32 PM}			else {
-				::SetCursor(AfxGetApp()->LoadCursor(IDC_ZOOM_REAL));
-// COMMENT: {4/22/2004 10:21:35 PM}			}
+			::SetCursor(AfxGetApp()->LoadCursor(IDC_ZOOM_REAL));
 			return TRUE;
 		}
 		if (this->m_CurrentState == CMapDialog::MDS_Point1 || this->m_CurrentState == CMapDialog::MDS_Point2)
@@ -1552,11 +1337,8 @@ void CMapDialog::OnBnClickedButton1()
 		ASSERT(FALSE); // unhandled state
 	}
 
-	//{{
 	this->m_Widget->SetInput( this->m_MapImageActor->GetInput() );
 	this->m_Widget->PlaceWidget();
-	//}}
-
 
 	switch (this->m_CurrentState)
 	{
@@ -1578,393 +1360,17 @@ void CMapDialog::OnBnClickedButton1()
 
 	// update controls
 	this->UpdateData(FALSE);
-
-
-// COMMENT: {5/6/2004 7:20:38 PM}	//{{
-// COMMENT: {5/6/2004 7:20:38 PM}	/* if (this->m_CurrentState != MDS_Grid) */
-// COMMENT: {5/6/2004 7:20:38 PM}	{
-// COMMENT: {5/6/2004 7:20:38 PM}		BOOL bEnable = (this->m_CurrentState == MDS_Grid);
-// COMMENT: {5/6/2004 7:20:38 PM}
-// COMMENT: {5/6/2004 7:20:38 PM}		this->GetDlgItem(IDC_STATIC_MO_GB)->EnableWindow(bEnable);
-// COMMENT: {5/6/2004 7:20:38 PM}		this->GetDlgItem(IDC_STATIC_MO_X)->EnableWindow(bEnable);
-// COMMENT: {5/6/2004 7:20:38 PM}		this->GetDlgItem(IDC_EDIT_MO_X)->EnableWindow(bEnable);
-// COMMENT: {5/6/2004 7:20:38 PM}		this->GetDlgItem(IDC_STATIC_MO_Y)->EnableWindow(bEnable);
-// COMMENT: {5/6/2004 7:20:38 PM}		this->GetDlgItem(IDC_EDIT_MO_Y)->EnableWindow(bEnable);
-// COMMENT: {5/6/2004 7:20:38 PM}		this->GetDlgItem(IDC_STATIC_MO_ANGLE)->EnableWindow(bEnable);
-// COMMENT: {5/6/2004 7:20:38 PM}		this->GetDlgItem(IDC_EDIT_MO_ANGLE)->EnableWindow(bEnable);
-// COMMENT: {5/6/2004 7:20:38 PM}		this->GetDlgItem(IDC_STATIC_XY)->EnableWindow(bEnable);
-// COMMENT: {5/6/2004 7:20:38 PM}		this->GetDlgItem(IDC_STATIC_X)->EnableWindow(bEnable);
-// COMMENT: {5/6/2004 7:20:38 PM}		this->GetDlgItem(IDC_EDIT_X)->EnableWindow(bEnable);
-// COMMENT: {5/6/2004 7:20:38 PM}		this->GetDlgItem(IDC_STATIC_Y)->EnableWindow(bEnable);
-// COMMENT: {5/6/2004 7:20:38 PM}		this->GetDlgItem(IDC_EDIT_Y)->EnableWindow(bEnable);
-// COMMENT: {5/6/2004 7:20:38 PM}		this->GetDlgItem(IDC_STATIC_Z)->EnableWindow(bEnable);
-// COMMENT: {5/6/2004 7:20:38 PM}		this->GetDlgItem(IDC_EDIT_Z)->EnableWindow(bEnable);
-// COMMENT: {5/6/2004 7:20:38 PM}		this->GetDlgItem(IDC_STATIC_GD)->EnableWindow(bEnable);
-// COMMENT: {5/6/2004 7:20:38 PM}		this->GetDlgItem(IDC_STATIC_LENGTH)->EnableWindow(bEnable);
-// COMMENT: {5/6/2004 7:20:38 PM}		this->GetDlgItem(IDC_EDIT_LENGTH)->EnableWindow(bEnable);
-// COMMENT: {5/6/2004 7:20:38 PM}		this->GetDlgItem(IDC_STATIC_WIDTH)->EnableWindow(bEnable);
-// COMMENT: {5/6/2004 7:20:38 PM}		this->GetDlgItem(IDC_EDIT_WIDTH)->EnableWindow(bEnable);
-// COMMENT: {5/6/2004 7:20:38 PM}		this->GetDlgItem(IDC_STATIC_DEPTH)->EnableWindow(bEnable);
-// COMMENT: {5/6/2004 7:20:38 PM}		this->GetDlgItem(IDC_EDIT_DEPTH)->EnableWindow(bEnable);
-// COMMENT: {5/6/2004 7:20:38 PM}		this->GetDlgItem(IDC_X_NODES_STATIC)->EnableWindow(bEnable);
-// COMMENT: {5/6/2004 7:20:38 PM}		this->GetDlgItem(IDC_X_NODES_EDIT)->EnableWindow(bEnable);
-// COMMENT: {5/6/2004 7:20:38 PM}		this->GetDlgItem(IDC_X_SPIN)->EnableWindow(bEnable);
-// COMMENT: {5/6/2004 7:20:38 PM}		this->GetDlgItem(IDC_Y_NODES_STATIC)->EnableWindow(bEnable);
-// COMMENT: {5/6/2004 7:20:38 PM}		this->GetDlgItem(IDC_Y_NODES_EDIT)->EnableWindow(bEnable);
-// COMMENT: {5/6/2004 7:20:38 PM}		this->GetDlgItem(IDC_Y_SPIN)->EnableWindow(bEnable);
-// COMMENT: {5/6/2004 7:20:38 PM}		this->GetDlgItem(IDC_Z_NODES_STATIC)->EnableWindow(bEnable);
-// COMMENT: {5/6/2004 7:20:38 PM}		this->GetDlgItem(IDC_Z_NODES_EDIT)->EnableWindow(bEnable);
-// COMMENT: {5/6/2004 7:20:38 PM}		this->GetDlgItem(IDC_Z_SPIN)->EnableWindow(bEnable);
-// COMMENT: {5/6/2004 7:20:38 PM}	}
-// COMMENT: {5/6/2004 7:20:38 PM}	//}}
-
-// COMMENT: {5/6/2004 7:21:52 PM}	//{{
-// COMMENT: {5/6/2004 7:21:52 PM}	this->UpdateData(FALSE);
-// COMMENT: {5/6/2004 7:21:52 PM}	//}}
-
-// COMMENT: {5/6/2004 7:21:05 PM}	CWnd* pWnd = CWnd::FromHandle(this->m_RenderWindow->GetWindowId());
-// COMMENT: {5/6/2004 7:21:05 PM}	ASSERT(pWnd);
-// COMMENT: {5/6/2004 7:21:05 PM}	if (this->GetDlgItem(IDC_STATIC_MO_ANGLE)->IsWindowVisible())
-// COMMENT: {5/6/2004 7:21:05 PM}	{
-// COMMENT: {5/6/2004 7:21:05 PM}		this->CreateRoot(VERTICAL, 0, 0) 
-// COMMENT: {5/6/2004 7:21:05 PM}
-// COMMENT: {5/6/2004 7:21:05 PM}			//{{
-// COMMENT: {5/6/2004 7:21:05 PM}			<< 	( pane(VERTICAL, ABSOLUTE_VERT, 0, 0, 0 )
-// COMMENT: {5/6/2004 7:21:05 PM}				<< itemFixed(VERTICAL, 60)
-// COMMENT: {5/6/2004 7:21:05 PM}				// << item ( IDC_HEADER_BORDER, ABSOLUTE_VERT )
-// COMMENT: {5/6/2004 7:21:05 PM}				<< item ( &this->m_headerBorder, ABSOLUTE_VERT )
-// COMMENT: {5/6/2004 7:21:05 PM}				)
-// COMMENT: {5/6/2004 7:21:05 PM}			//}}
-// COMMENT: {5/6/2004 7:21:05 PM}			
-// COMMENT: {5/6/2004 7:21:05 PM}			<< 	( pane(HORIZONTAL, GREEDY, 7, 7 )
-// COMMENT: {5/6/2004 7:21:05 PM}
-// COMMENT: {5/6/2004 7:21:05 PM}				<< item ( pWnd, GREEDY /*{{ , 0, 0, 100, 100 }}*/)
-// COMMENT: {5/6/2004 7:21:05 PM}
-// COMMENT: {5/6/2004 7:21:05 PM}				<< 	( pane(VERTICAL, ABSOLUTE_HORZ, 3, 3 )
-// COMMENT: {5/6/2004 7:21:05 PM}
-// COMMENT: {5/6/2004 7:21:05 PM}					<< 	( paneCtrl(IDC_STATIC_MO_GB, VERTICAL, ABSOLUTE_VERT, nDefaultBorder, 10, 10 )
-// COMMENT: {5/6/2004 7:21:05 PM}
-// COMMENT: {5/6/2004 7:21:05 PM}						<< 	( pane(HORIZONTAL, ABSOLUTE_VERT, 0, 0, 0 )
-// COMMENT: {5/6/2004 7:21:05 PM}							<< item( IDC_STATIC_MO_X, NORESIZE | ALIGN_VCENTER )
-// COMMENT: {5/6/2004 7:21:05 PM}							<< item( IDC_EDIT_MO_X, NORESIZE )
-// COMMENT: {5/6/2004 7:21:05 PM}							)
-// COMMENT: {5/6/2004 7:21:05 PM}
-// COMMENT: {5/6/2004 7:21:05 PM}						<< 	( pane(HORIZONTAL, ABSOLUTE_VERT, 0, 0, 0 )
-// COMMENT: {5/6/2004 7:21:05 PM}							<< item( IDC_STATIC_MO_Y, NORESIZE | ALIGN_VCENTER )
-// COMMENT: {5/6/2004 7:21:05 PM}							<< item( IDC_EDIT_MO_Y, NORESIZE )
-// COMMENT: {5/6/2004 7:21:05 PM}							)
-// COMMENT: {5/6/2004 7:21:05 PM}
-// COMMENT: {5/6/2004 7:21:05 PM}						<< 	( pane(HORIZONTAL, ABSOLUTE_VERT, 0, 0, 0 )
-// COMMENT: {5/6/2004 7:21:05 PM}							<< item( IDC_STATIC_MO_ANGLE, NORESIZE | ALIGN_VCENTER )
-// COMMENT: {5/6/2004 7:21:05 PM}							<< item( IDC_EDIT_MO_ANGLE, NORESIZE )
-// COMMENT: {5/6/2004 7:21:05 PM}							)
-// COMMENT: {5/6/2004 7:21:05 PM}					)
-// COMMENT: {5/6/2004 7:21:05 PM}					<< 	( paneCtrl(IDC_STATIC_XY, VERTICAL, ABSOLUTE_VERT, nDefaultBorder, 10, 10 )
-// COMMENT: {5/6/2004 7:21:05 PM}
-// COMMENT: {5/6/2004 7:21:05 PM}						<< 	( pane(HORIZONTAL, ABSOLUTE_VERT, 0, 0, 0 )
-// COMMENT: {5/6/2004 7:21:05 PM}							<< item( IDC_STATIC_X, NORESIZE | ALIGN_VCENTER )
-// COMMENT: {5/6/2004 7:21:05 PM}							<< item( IDC_EDIT_X, NORESIZE )
-// COMMENT: {5/6/2004 7:21:05 PM}							)
-// COMMENT: {5/6/2004 7:21:05 PM}
-// COMMENT: {5/6/2004 7:21:05 PM}						<< 	( pane(HORIZONTAL, ABSOLUTE_VERT, 0, 0, 0 )
-// COMMENT: {5/6/2004 7:21:05 PM}							<< item( IDC_STATIC_Y, NORESIZE | ALIGN_VCENTER )
-// COMMENT: {5/6/2004 7:21:05 PM}							<< item( IDC_EDIT_Y, NORESIZE )
-// COMMENT: {5/6/2004 7:21:05 PM}							)
-// COMMENT: {5/6/2004 7:21:05 PM}
-// COMMENT: {5/6/2004 7:21:05 PM}						<< 	( pane(HORIZONTAL, ABSOLUTE_VERT, 0, 0, 0 )
-// COMMENT: {5/6/2004 7:21:05 PM}							<< item( IDC_STATIC_Z, NORESIZE | ALIGN_VCENTER )
-// COMMENT: {5/6/2004 7:21:05 PM}							<< item( IDC_EDIT_Z, NORESIZE )
-// COMMENT: {5/6/2004 7:21:05 PM}							)
-// COMMENT: {5/6/2004 7:21:05 PM}					)
-// COMMENT: {5/6/2004 7:21:05 PM}
-// COMMENT: {5/6/2004 7:21:05 PM}					<< 	( paneCtrl(IDC_STATIC_GD, VERTICAL, ABSOLUTE_VERT, nDefaultBorder, 10, 10 )
-// COMMENT: {5/6/2004 7:21:05 PM}
-// COMMENT: {5/6/2004 7:21:05 PM}						<< 	( pane(HORIZONTAL, ABSOLUTE_VERT, 0, 0, 0 )
-// COMMENT: {5/6/2004 7:21:05 PM}							<< item( IDC_STATIC_LENGTH, NORESIZE | ALIGN_VCENTER )
-// COMMENT: {5/6/2004 7:21:05 PM}							<< item( IDC_EDIT_LENGTH, NORESIZE )
-// COMMENT: {5/6/2004 7:21:05 PM}							)
-// COMMENT: {5/6/2004 7:21:05 PM}
-// COMMENT: {5/6/2004 7:21:05 PM}						<< 	( pane(HORIZONTAL, ABSOLUTE_VERT, 0, 0, 0 )
-// COMMENT: {5/6/2004 7:21:05 PM}							<< item( IDC_STATIC_WIDTH, NORESIZE | ALIGN_VCENTER )
-// COMMENT: {5/6/2004 7:21:05 PM}							<< item( IDC_EDIT_WIDTH, NORESIZE )
-// COMMENT: {5/6/2004 7:21:05 PM}							)
-// COMMENT: {5/6/2004 7:21:05 PM}
-// COMMENT: {5/6/2004 7:21:05 PM}						<< 	( pane(HORIZONTAL, ABSOLUTE_VERT, 0, 0, 0 )
-// COMMENT: {5/6/2004 7:21:05 PM}							<< item( IDC_STATIC_DEPTH, NORESIZE | ALIGN_VCENTER )
-// COMMENT: {5/6/2004 7:21:05 PM}							<< item( IDC_EDIT_DEPTH, NORESIZE )
-// COMMENT: {5/6/2004 7:21:05 PM}							)
-// COMMENT: {5/6/2004 7:21:05 PM}
-// COMMENT: {5/6/2004 7:21:05 PM}						<< 	( pane(HORIZONTAL, ABSOLUTE_VERT, 0, 0, 0 )
-// COMMENT: {5/6/2004 7:21:05 PM}							<< item( IDC_X_NODES_STATIC, NORESIZE | ALIGN_VCENTER )
-// COMMENT: {5/6/2004 7:21:05 PM}							<< item( IDC_X_NODES_EDIT, NORESIZE )
-// COMMENT: {5/6/2004 7:21:05 PM}							<< item( IDC_X_SPIN, NORESIZE )
-// COMMENT: {5/6/2004 7:21:05 PM}							)
-// COMMENT: {5/6/2004 7:21:05 PM}
-// COMMENT: {5/6/2004 7:21:05 PM}						<< 	( pane(HORIZONTAL, ABSOLUTE_VERT, 0, 0, 0 )
-// COMMENT: {5/6/2004 7:21:05 PM}							<< item( IDC_Y_NODES_STATIC, NORESIZE | ALIGN_VCENTER )
-// COMMENT: {5/6/2004 7:21:05 PM}							<< item( IDC_Y_NODES_EDIT, NORESIZE )
-// COMMENT: {5/6/2004 7:21:05 PM}							<< item( IDC_Y_SPIN, NORESIZE )
-// COMMENT: {5/6/2004 7:21:05 PM}							)
-// COMMENT: {5/6/2004 7:21:05 PM}
-// COMMENT: {5/6/2004 7:21:05 PM}						<< 	( pane(HORIZONTAL, ABSOLUTE_VERT, 0, 0, 0 )
-// COMMENT: {5/6/2004 7:21:05 PM}							<< item( IDC_Z_NODES_STATIC, NORESIZE | ALIGN_VCENTER )
-// COMMENT: {5/6/2004 7:21:05 PM}							<< item( IDC_Z_NODES_EDIT, NORESIZE )
-// COMMENT: {5/6/2004 7:21:05 PM}							<< item( IDC_Z_SPIN, NORESIZE )
-// COMMENT: {5/6/2004 7:21:05 PM}							)
-// COMMENT: {5/6/2004 7:21:05 PM}					)
-// COMMENT: {5/6/2004 7:21:05 PM}				)
-// COMMENT: {5/6/2004 7:21:05 PM}			)
-// COMMENT: {5/6/2004 7:21:05 PM}			
-// COMMENT: {5/6/2004 7:21:05 PM}			<< 	( pane(HORIZONTAL, ABSOLUTE_VERT, 7, 7, 0 )
-// COMMENT: {5/6/2004 7:21:05 PM}				<< itemGrowing(HORIZONTAL)
-// COMMENT: {5/6/2004 7:21:05 PM}				<< item( IDC_BUTTON1, NORESIZE )			
-// COMMENT: {5/6/2004 7:21:05 PM}				<< item( IDOK, NORESIZE )
-// COMMENT: {5/6/2004 7:21:05 PM}				<< item( IDCANCEL, NORESIZE )
-// COMMENT: {5/6/2004 7:21:05 PM}				)
-// COMMENT: {5/6/2004 7:21:05 PM}			;
-// COMMENT: {5/6/2004 7:21:05 PM}		this->GetDlgItem(IDC_EDIT_MO_ANGLE)->ShowWindow(SW_HIDE);
-// COMMENT: {5/6/2004 7:21:05 PM}		this->GetDlgItem(IDC_STATIC_MO_ANGLE)->ShowWindow(SW_HIDE);
-// COMMENT: {5/6/2004 7:21:05 PM}	}
-// COMMENT: {5/6/2004 7:21:05 PM}	else
-// COMMENT: {5/6/2004 7:21:05 PM}	{
-// COMMENT: {5/6/2004 7:21:05 PM}		this->CreateRoot(VERTICAL, 0, 0) 
-// COMMENT: {5/6/2004 7:21:05 PM}
-// COMMENT: {5/6/2004 7:21:05 PM}			//{{
-// COMMENT: {5/6/2004 7:21:05 PM}			<< 	( pane(VERTICAL, ABSOLUTE_VERT, 0, 0, 0 )
-// COMMENT: {5/6/2004 7:21:05 PM}				<< itemFixed(VERTICAL, 60)
-// COMMENT: {5/6/2004 7:21:05 PM}				// << item ( IDC_HEADER_BORDER, ABSOLUTE_VERT )
-// COMMENT: {5/6/2004 7:21:05 PM}				<< item ( &this->m_headerBorder, ABSOLUTE_VERT )
-// COMMENT: {5/6/2004 7:21:05 PM}				)
-// COMMENT: {5/6/2004 7:21:05 PM}			//}}
-// COMMENT: {5/6/2004 7:21:05 PM}			
-// COMMENT: {5/6/2004 7:21:05 PM}			<< 	( pane(HORIZONTAL, GREEDY, 7, 7 )
-// COMMENT: {5/6/2004 7:21:05 PM}
-// COMMENT: {5/6/2004 7:21:05 PM}				<< item ( pWnd, GREEDY /*{{ , 0, 0, 100, 100 }}*/)
-// COMMENT: {5/6/2004 7:21:05 PM}
-// COMMENT: {5/6/2004 7:21:05 PM}				<< 	( pane(VERTICAL, ABSOLUTE_HORZ, 3, 3 )
-// COMMENT: {5/6/2004 7:21:05 PM}
-// COMMENT: {5/6/2004 7:21:05 PM}					<< 	( paneCtrl(IDC_STATIC_MO_GB, VERTICAL, ABSOLUTE_VERT, nDefaultBorder, 10, 10 )
-// COMMENT: {5/6/2004 7:21:05 PM}
-// COMMENT: {5/6/2004 7:21:05 PM}						<< 	( pane(HORIZONTAL, ABSOLUTE_VERT, 0, 0, 0 )
-// COMMENT: {5/6/2004 7:21:05 PM}							<< item( IDC_STATIC_MO_X, NORESIZE | ALIGN_VCENTER )
-// COMMENT: {5/6/2004 7:21:05 PM}							<< item( IDC_EDIT_MO_X, NORESIZE )
-// COMMENT: {5/6/2004 7:21:05 PM}							)
-// COMMENT: {5/6/2004 7:21:05 PM}
-// COMMENT: {5/6/2004 7:21:05 PM}						<< 	( pane(HORIZONTAL, ABSOLUTE_VERT, 0, 0, 0 )
-// COMMENT: {5/6/2004 7:21:05 PM}							<< item( IDC_STATIC_MO_Y, NORESIZE | ALIGN_VCENTER )
-// COMMENT: {5/6/2004 7:21:05 PM}							<< item( IDC_EDIT_MO_Y, NORESIZE )
-// COMMENT: {5/6/2004 7:21:05 PM}							)
-// COMMENT: {5/6/2004 7:21:05 PM}
-// COMMENT: {5/6/2004 7:21:05 PM}						<< 	( pane(HORIZONTAL, ABSOLUTE_VERT, 0, 0, 0 )
-// COMMENT: {5/6/2004 7:21:05 PM}							<< item( IDC_STATIC_MO_ANGLE, NORESIZE | ALIGN_VCENTER )
-// COMMENT: {5/6/2004 7:21:05 PM}							<< item( IDC_EDIT_MO_ANGLE, NORESIZE )
-// COMMENT: {5/6/2004 7:21:05 PM}							)
-// COMMENT: {5/6/2004 7:21:05 PM}						)
-// COMMENT: {5/6/2004 7:21:05 PM}					<< 	( paneCtrl(IDC_STATIC_XY, VERTICAL, ABSOLUTE_VERT, nDefaultBorder, 10, 10 )
-// COMMENT: {5/6/2004 7:21:05 PM}
-// COMMENT: {5/6/2004 7:21:05 PM}						<< 	( pane(HORIZONTAL, ABSOLUTE_VERT, 0, 0, 0 )
-// COMMENT: {5/6/2004 7:21:05 PM}							<< item( IDC_STATIC_X, NORESIZE | ALIGN_VCENTER )
-// COMMENT: {5/6/2004 7:21:05 PM}							<< item( IDC_EDIT_X, NORESIZE )
-// COMMENT: {5/6/2004 7:21:05 PM}							)
-// COMMENT: {5/6/2004 7:21:05 PM}
-// COMMENT: {5/6/2004 7:21:05 PM}						<< 	( pane(HORIZONTAL, ABSOLUTE_VERT, 0, 0, 0 )
-// COMMENT: {5/6/2004 7:21:05 PM}							<< item( IDC_STATIC_Y, NORESIZE | ALIGN_VCENTER )
-// COMMENT: {5/6/2004 7:21:05 PM}							<< item( IDC_EDIT_Y, NORESIZE )
-// COMMENT: {5/6/2004 7:21:05 PM}							)
-// COMMENT: {5/6/2004 7:21:05 PM}
-// COMMENT: {5/6/2004 7:21:05 PM}						<< 	( pane(HORIZONTAL, ABSOLUTE_VERT, 0, 0, 0 )
-// COMMENT: {5/6/2004 7:21:05 PM}							<< item( IDC_STATIC_Z, NORESIZE | ALIGN_VCENTER )
-// COMMENT: {5/6/2004 7:21:05 PM}							<< item( IDC_EDIT_Z, NORESIZE )
-// COMMENT: {5/6/2004 7:21:05 PM}							)
-// COMMENT: {5/6/2004 7:21:05 PM}					)
-// COMMENT: {5/6/2004 7:21:05 PM}
-// COMMENT: {5/6/2004 7:21:05 PM}					<< 	( paneCtrl(IDC_STATIC_GD, VERTICAL, ABSOLUTE_VERT, nDefaultBorder, 10, 10 )
-// COMMENT: {5/6/2004 7:21:05 PM}
-// COMMENT: {5/6/2004 7:21:05 PM}						<< 	( pane(HORIZONTAL, ABSOLUTE_VERT, 0, 0, 0 )
-// COMMENT: {5/6/2004 7:21:05 PM}							<< item( IDC_STATIC_LENGTH, NORESIZE | ALIGN_VCENTER )
-// COMMENT: {5/6/2004 7:21:05 PM}							<< item( IDC_EDIT_LENGTH, NORESIZE )
-// COMMENT: {5/6/2004 7:21:05 PM}							)
-// COMMENT: {5/6/2004 7:21:05 PM}
-// COMMENT: {5/6/2004 7:21:05 PM}						<< 	( pane(HORIZONTAL, ABSOLUTE_VERT, 0, 0, 0 )
-// COMMENT: {5/6/2004 7:21:05 PM}							<< item( IDC_STATIC_WIDTH, NORESIZE | ALIGN_VCENTER )
-// COMMENT: {5/6/2004 7:21:05 PM}							<< item( IDC_EDIT_WIDTH, NORESIZE )
-// COMMENT: {5/6/2004 7:21:05 PM}							)
-// COMMENT: {5/6/2004 7:21:05 PM}
-// COMMENT: {5/6/2004 7:21:05 PM}						<< 	( pane(HORIZONTAL, ABSOLUTE_VERT, 0, 0, 0 )
-// COMMENT: {5/6/2004 7:21:05 PM}							<< item( IDC_STATIC_DEPTH, NORESIZE | ALIGN_VCENTER )
-// COMMENT: {5/6/2004 7:21:05 PM}							<< item( IDC_EDIT_DEPTH, NORESIZE )
-// COMMENT: {5/6/2004 7:21:05 PM}							)
-// COMMENT: {5/6/2004 7:21:05 PM}
-// COMMENT: {5/6/2004 7:21:05 PM}						<< 	( pane(HORIZONTAL, ABSOLUTE_VERT, 0, 0, 0 )
-// COMMENT: {5/6/2004 7:21:05 PM}							<< item( IDC_X_NODES_STATIC, NORESIZE | ALIGN_VCENTER )
-// COMMENT: {5/6/2004 7:21:05 PM}							<< item( IDC_X_NODES_EDIT, NORESIZE )
-// COMMENT: {5/6/2004 7:21:05 PM}							<< item( IDC_X_SPIN, NORESIZE )
-// COMMENT: {5/6/2004 7:21:05 PM}							)
-// COMMENT: {5/6/2004 7:21:05 PM}
-// COMMENT: {5/6/2004 7:21:05 PM}						<< 	( pane(HORIZONTAL, ABSOLUTE_VERT, 0, 0, 0 )
-// COMMENT: {5/6/2004 7:21:05 PM}							<< item( IDC_Y_NODES_STATIC, NORESIZE | ALIGN_VCENTER )
-// COMMENT: {5/6/2004 7:21:05 PM}							<< item( IDC_Y_NODES_EDIT, NORESIZE )
-// COMMENT: {5/6/2004 7:21:05 PM}							<< item( IDC_Y_SPIN, NORESIZE )
-// COMMENT: {5/6/2004 7:21:05 PM}							)
-// COMMENT: {5/6/2004 7:21:05 PM}
-// COMMENT: {5/6/2004 7:21:05 PM}						<< 	( pane(HORIZONTAL, ABSOLUTE_VERT, 0, 0, 0 )
-// COMMENT: {5/6/2004 7:21:05 PM}							<< item( IDC_Z_NODES_STATIC, NORESIZE | ALIGN_VCENTER )
-// COMMENT: {5/6/2004 7:21:05 PM}							<< item( IDC_Z_NODES_EDIT, NORESIZE )
-// COMMENT: {5/6/2004 7:21:05 PM}							<< item( IDC_Z_SPIN, NORESIZE )
-// COMMENT: {5/6/2004 7:21:05 PM}							)
-// COMMENT: {5/6/2004 7:21:05 PM}					)
-// COMMENT: {5/6/2004 7:21:05 PM}				)
-// COMMENT: {5/6/2004 7:21:05 PM}			)
-// COMMENT: {5/6/2004 7:21:05 PM}			
-// COMMENT: {5/6/2004 7:21:05 PM}			<< 	( pane(HORIZONTAL, ABSOLUTE_VERT, 7, 7, 0 )
-// COMMENT: {5/6/2004 7:21:05 PM}				<< itemGrowing(HORIZONTAL)
-// COMMENT: {5/6/2004 7:21:05 PM}				<< item( IDC_BUTTON1, NORESIZE )			
-// COMMENT: {5/6/2004 7:21:05 PM}				<< item( IDOK, NORESIZE )
-// COMMENT: {5/6/2004 7:21:05 PM}				<< item( IDCANCEL, NORESIZE )
-// COMMENT: {5/6/2004 7:21:05 PM}				)
-// COMMENT: {5/6/2004 7:21:05 PM}			;
-// COMMENT: {5/6/2004 7:21:05 PM}		this->GetDlgItem(IDC_EDIT_MO_ANGLE)->ShowWindow(SW_SHOW);
-// COMMENT: {5/6/2004 7:21:05 PM}		this->GetDlgItem(IDC_STATIC_MO_ANGLE)->ShowWindow(SW_SHOW);
-// COMMENT: {5/6/2004 7:21:05 PM}
-// COMMENT: {5/6/2004 7:21:05 PM}	}
-// COMMENT: {5/6/2004 7:21:05 PM}
-// COMMENT: {5/6/2004 7:21:05 PM}	this->UpdateLayout();
-// COMMENT: {5/6/2004 7:21:05 PM}
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}	if (this->GetDlgItem(IDC_STATIC_MO_ANGLE)->IsWindowVisible())
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}	{
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}		this->CreateRoot(VERTICAL, 0, 0) 			
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}			//{{
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}			<< 	( pane(VERTICAL, ABSOLUTE_VERT, 0, 0, 0 )
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}				<< itemFixed(VERTICAL, 60)
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}				// << item ( IDC_HEADER_BORDER, ABSOLUTE_VERT )
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}				<< item ( &this->m_headerBorder, ABSOLUTE_VERT )
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}				)
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}			//}}
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}			<< 	( pane(HORIZONTAL, GREEDY, 7, 7 )
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}				<< item ( pWnd, GREEDY, 0, 0, this->m_szMinimumRender.cx, this->m_szMinimumRender.cy )
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}				<< 	( pane(VERTICAL, ABSOLUTE_HORZ, 3, 3 )
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}					<< 	( paneCtrl(IDC_STATIC_MO_GB, VERTICAL, ABSOLUTE_VERT, nDefaultBorder, 10, 10 )
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}						<< 	( pane(HORIZONTAL, ABSOLUTE_VERT, 0, 0, 0 )
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}							<< item( IDC_STATIC_MO_X, NORESIZE | ALIGN_VCENTER )
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}							<< item( IDC_EDIT_MO_X, NORESIZE )
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}							)
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}						<< 	( pane(HORIZONTAL, ABSOLUTE_VERT, 0, 0, 0 )
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}							<< item( IDC_STATIC_MO_Y, NORESIZE | ALIGN_VCENTER )
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}							<< item( IDC_EDIT_MO_Y, NORESIZE )
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}							)
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}	// COMMENT: {4/27/2004 1:24:14 PM}					<< 	( pane(HORIZONTAL, ABSOLUTE_VERT, 0, 0, 0 )
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}	// COMMENT: {4/27/2004 1:24:14 PM}						<< item( IDC_STATIC_MO_ANGLE, NORESIZE | ALIGN_VCENTER )
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}	// COMMENT: {4/27/2004 1:24:14 PM}						<< item( IDC_EDIT_MO_ANGLE, NORESIZE )
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}	// COMMENT: {4/27/2004 1:24:14 PM}						)
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}					)
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}					<< 	( paneCtrl(IDC_STATIC_XY, VERTICAL, ABSOLUTE_VERT, nDefaultBorder, 10, 10 )
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}						<< 	( pane(HORIZONTAL, ABSOLUTE_VERT, 0, 0, 0 )
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}							<< item( IDC_STATIC_X, NORESIZE | ALIGN_VCENTER )
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}							<< item( IDC_EDIT_X, NORESIZE )
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}							)
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}						<< 	( pane(HORIZONTAL, ABSOLUTE_VERT, 0, 0, 0 )
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}							<< item( IDC_STATIC_Y, NORESIZE | ALIGN_VCENTER )
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}							<< item( IDC_EDIT_Y, NORESIZE )
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}							)
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}					)
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}					<< 	( paneCtrl(IDC_STATIC_GD, VERTICAL, ABSOLUTE_VERT, nDefaultBorder, 10, 10 )
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}						<< 	( pane(HORIZONTAL, ABSOLUTE_VERT, 0, 0, 0 )
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}							<< item( IDC_STATIC_LENGTH, NORESIZE | ALIGN_VCENTER )
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}							<< item( IDC_EDIT_LENGTH, NORESIZE )
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}							)
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}						<< 	( pane(HORIZONTAL, ABSOLUTE_VERT, 0, 0, 0 )
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}							<< item( IDC_STATIC_WIDTH, NORESIZE | ALIGN_VCENTER )
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}							<< item( IDC_EDIT_WIDTH, NORESIZE )
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}							)
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}					)
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}				)
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}			)			
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}			<< 	( pane(HORIZONTAL, ABSOLUTE_VERT, 7, 7, 0 )
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}				<< itemGrowing(HORIZONTAL)
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}				<< item( IDC_BUTTON1, NORESIZE )			
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}				<< item( IDOK, NORESIZE )
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}				<< item( IDCANCEL, NORESIZE )
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}				)
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}			;
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}		this->GetDlgItem(IDC_EDIT_MO_ANGLE)->ShowWindow(SW_HIDE);
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}		this->GetDlgItem(IDC_STATIC_MO_ANGLE)->ShowWindow(SW_HIDE);
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}	}
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}	else
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}	{
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}		this->CreateRoot(VERTICAL, 0, 0) 			
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}			//{{
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}			<< 	( pane(VERTICAL, ABSOLUTE_VERT, 0, 0, 0 )
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}				<< itemFixed(VERTICAL, 60)
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}				// << item ( IDC_HEADER_BORDER, ABSOLUTE_VERT )
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}				<< item ( &this->m_headerBorder, ABSOLUTE_VERT )
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}				)
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}			//}}
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}			<< 	( pane(HORIZONTAL, GREEDY, 7, 7 )
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}				<< item ( pWnd, GREEDY, 0, 0, this->m_szMinimumRender.cx, this->m_szMinimumRender.cy )
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}				<< 	( pane(VERTICAL, ABSOLUTE_HORZ, 3, 3 )
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}					<< 	( paneCtrl(IDC_STATIC_MO_GB, VERTICAL, ABSOLUTE_VERT, nDefaultBorder, 10, 10 )
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}						<< 	( pane(HORIZONTAL, ABSOLUTE_VERT, 0, 0, 0 )
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}							<< item( IDC_STATIC_MO_X, NORESIZE | ALIGN_VCENTER )
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}							<< item( IDC_EDIT_MO_X, NORESIZE )
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}							)
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}						<< 	( pane(HORIZONTAL, ABSOLUTE_VERT, 0, 0, 0 )
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}							<< item( IDC_STATIC_MO_Y, NORESIZE | ALIGN_VCENTER )
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}							<< item( IDC_EDIT_MO_Y, NORESIZE )
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}							)
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}						<< 	( pane(HORIZONTAL, ABSOLUTE_VERT, 0, 0, 0 )
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}							<< item( IDC_STATIC_MO_ANGLE, NORESIZE | ALIGN_VCENTER )
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}							<< item( IDC_EDIT_MO_ANGLE, NORESIZE )
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}							)
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}					)
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}					<< 	( paneCtrl(IDC_STATIC_XY, VERTICAL, ABSOLUTE_VERT, nDefaultBorder, 10, 10 )
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}						<< 	( pane(HORIZONTAL, ABSOLUTE_VERT, 0, 0, 0 )
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}							<< item( IDC_STATIC_X, NORESIZE | ALIGN_VCENTER )
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}							<< item( IDC_EDIT_X, NORESIZE )
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}							)
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}						<< 	( pane(HORIZONTAL, ABSOLUTE_VERT, 0, 0, 0 )
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}							<< item( IDC_STATIC_Y, NORESIZE | ALIGN_VCENTER )
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}							<< item( IDC_EDIT_Y, NORESIZE )
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}							)
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}					)
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}					<< 	( paneCtrl(IDC_STATIC_GD, VERTICAL, ABSOLUTE_VERT, nDefaultBorder, 10, 10 )
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}						<< 	( pane(HORIZONTAL, ABSOLUTE_VERT, 0, 0, 0 )
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}							<< item( IDC_STATIC_LENGTH, NORESIZE | ALIGN_VCENTER )
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}							<< item( IDC_EDIT_LENGTH, NORESIZE )
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}							)
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}						<< 	( pane(HORIZONTAL, ABSOLUTE_VERT, 0, 0, 0 )
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}							<< item( IDC_STATIC_WIDTH, NORESIZE | ALIGN_VCENTER )
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}							<< item( IDC_EDIT_WIDTH, NORESIZE )
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}							)
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}					)
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}				)
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}			)			
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}			<< 	( pane(HORIZONTAL, ABSOLUTE_VERT, 7, 7, 0 )
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}				<< itemGrowing(HORIZONTAL)
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}				<< item( IDC_BUTTON1, NORESIZE )			
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}				<< item( IDOK, NORESIZE )
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}				<< item( IDCANCEL, NORESIZE )
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}				)
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}			;
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}		this->GetDlgItem(IDC_EDIT_MO_ANGLE)->ShowWindow(SW_SHOW);
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}		this->GetDlgItem(IDC_STATIC_MO_ANGLE)->ShowWindow(SW_SHOW);
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}	}
-// COMMENT: {5/6/2004 7:21:05 PM}// COMMENT: {5/5/2004 2:13:07 PM}	UpdateLayout();
 }
 
 void CMapDialog::OnEnUpdateNodes(int idx)
 {
 	BOOL bTranslated;
 	UINT nodes = this->GetDlgItemInt(FIRST_NODE_ID + idx, &bTranslated, FALSE);
-	if (bTranslated && nodes > 1) {
+	if (bTranslated && nodes > 1)
+	{
 		--nodes;
 		this->m_Widget->SetResolution(idx, nodes);
 		this->m_RenderWindowInteractor->Render();
-	}
-	else {
-// COMMENT: {5/4/2004 10:32:41 PM}		if (::IsWindowVisible(this->GetDlgItem(FIRST_NODE_ID + idx)->GetSafeHwnd())) {
-// COMMENT: {5/4/2004 10:32:41 PM}			this->UpdateNodes(idx);
-// COMMENT: {5/4/2004 10:32:41 PM}			::MessageBeep(-1);
-// COMMENT: {5/4/2004 10:32:41 PM}		}
 	}
 }
 
@@ -1982,18 +1388,20 @@ void CMapDialog::OnEnKillfocusNodesEdit(int idx)
 {
 	BOOL bTranslated;
 	UINT nNodes = this->GetDlgItemInt(FIRST_NODE_ID + idx, &bTranslated, FALSE);
-	if (bTranslated && nNodes > 1) {
+	if (bTranslated && nNodes > 1)
+	{
 		this->m_grid[idx].count_coord = nNodes;
 		this->m_Widget->SetResolution(idx, nNodes - 1);
 		this->m_RenderWindowInteractor->Render();
 	}
-	else {
-		if (::IsWindowVisible(this->GetDlgItem(FIRST_NODE_ID + idx)->GetSafeHwnd())) {
+	else
+	{
+		if (::IsWindowVisible(this->GetDlgItem(FIRST_NODE_ID + idx)->GetSafeHwnd()))
+		{
 			this->UpdateNodes(idx);
 			::MessageBeep(-1);
 		}
 	}
-
 }
 
 void CMapDialog::OnEnKillfocusXNodesEdit()
@@ -2020,7 +1428,8 @@ void CMapDialog::EnablePoint1(BOOL bEnable)
 	{
 		pWnd = this->GetDlgItem(s_PointsIDs[i]);
 		ASSERT(pWnd && pWnd->GetSafeHwnd());
-		if (pWnd) {
+		if (pWnd)
+		{
 			pWnd->EnableWindow(bEnable);
 		}
 	}
@@ -2035,7 +1444,8 @@ void CMapDialog::EnablePoint2(BOOL bEnable)
 	{
 		pWnd = this->GetDlgItem(s_Point2IDs[i]);
 		ASSERT(pWnd && pWnd->GetSafeHwnd());
-		if (pWnd) {
+		if (pWnd)
+		{
 			pWnd->EnableWindow(bEnable);
 		}
 	}
@@ -2052,13 +1462,13 @@ void CMapDialog::VisiblePointsPage(BOOL bVisible)
 	{
 		pWnd = this->GetDlgItem(s_PointsIDs[i]);
 		ASSERT(pWnd && pWnd->GetSafeHwnd());
-		if (pWnd) {
+		if (pWnd)
+		{
 			pWnd->ShowWindow(nCmdShow);
 		}
 
 	}
 }
-
 
 void CMapDialog::VisibleGridPage(BOOL bVisible)
 {
@@ -2071,7 +1481,8 @@ void CMapDialog::VisibleGridPage(BOOL bVisible)
 	{
 		pWnd = this->GetDlgItem(s_GridIDs[i]);
 		ASSERT(pWnd && pWnd->GetSafeHwnd());
-		if (pWnd) {
+		if (pWnd)
+		{
 			pWnd->ShowWindow(nCmdShow);
 		}
 
@@ -2325,12 +1736,9 @@ LRESULT CMapDialog::OnShowCoorDlg(WPARAM wParam, LPARAM lParam)
 			//
 			this->m_point1.x_world = this->m_mouseDownPoint.x_world;
 			this->m_point1.y_world = this->m_mouseDownPoint.y_world;
-// COMMENT: {5/21/2004 6:27:10 PM}			this->OnOK();
-// COMMENT: {5/21/2004 6:27:19 PM}			ASSERT( this->m_CurrentState == MDS_Point2 );
-			// don't need to validate therefore unnecessary
-			// to call OnOK
-			//
-			this->SetState(MDS_Point2);
+
+			this->OnOK();
+			ASSERT( this->m_CurrentState == MDS_Point2 );
 		}
 		else if (this->m_CurrentState == MDS_Point2)
 		{
@@ -2344,12 +1752,9 @@ LRESULT CMapDialog::OnShowCoorDlg(WPARAM wParam, LPARAM lParam)
 			//
 			this->m_point2.x_world = this->m_mouseDownPoint.x_world;
 			this->m_point2.y_world = this->m_mouseDownPoint.y_world;
-// COMMENT: {5/21/2004 6:30:13 PM}			this->OnOK();
-// COMMENT: {5/21/2004 6:30:13 PM}			ASSERT( this->m_CurrentState == MDS_Grid );
-			// don't need to validate therefore unnecessary
-			// to call OnOK
-			//
-			this->SetState(MDS_Grid);
+
+			this->OnOK();
+			ASSERT( this->m_CurrentState == MDS_Grid );
 		}
 	}
 	return 0;
@@ -2373,57 +1778,6 @@ void CMapDialog::OnWizardBack()
 	default:
 		ASSERT(FALSE); // unhandled state
 	}
-
-
-// COMMENT: {5/11/2004 9:29:55 PM}	// set prev state
-// COMMENT: {5/11/2004 9:29:55 PM}	switch (this->m_CurrentState)
-// COMMENT: {5/11/2004 9:29:55 PM}	{
-// COMMENT: {5/11/2004 9:29:55 PM}	case MDS_Point1:
-// COMMENT: {5/11/2004 9:29:55 PM}		ASSERT(FALSE);
-// COMMENT: {5/11/2004 9:29:55 PM}		this->m_CurrentState = MDS_Point1;
-// COMMENT: {5/11/2004 9:29:55 PM}		break;
-// COMMENT: {5/11/2004 9:29:55 PM}	case MDS_Point2:
-// COMMENT: {5/11/2004 9:29:55 PM}		this->m_CurrentState = MDS_Point1;
-// COMMENT: {5/11/2004 9:29:55 PM}		break;
-// COMMENT: {5/11/2004 9:29:55 PM}	case MDS_Grid:
-// COMMENT: {5/11/2004 9:29:55 PM}		this->m_CurrentState = MDS_Point2;
-// COMMENT: {5/11/2004 9:29:55 PM}		break;
-// COMMENT: {5/11/2004 9:29:55 PM}	default:
-// COMMENT: {5/11/2004 9:29:55 PM}		ASSERT(FALSE); // unhandled state
-// COMMENT: {5/11/2004 9:29:55 PM}	}
-// COMMENT: {5/11/2004 9:29:55 PM}
-// COMMENT: {5/11/2004 9:29:55 PM}
-// COMMENT: {5/11/2004 9:29:55 PM}	switch (this->m_CurrentState)
-// COMMENT: {5/11/2004 9:29:55 PM}	{
-// COMMENT: {5/11/2004 9:29:55 PM}	case MDS_Point1:
-// COMMENT: {5/11/2004 9:29:55 PM}		this->m_Point1Actor->VisibilityOn();
-// COMMENT: {5/11/2004 9:29:55 PM}		this->m_Point2Actor->VisibilityOff();
-// COMMENT: {5/11/2004 9:29:55 PM}		this->m_Widget->SetEnabled(0);
-// COMMENT: {5/11/2004 9:29:55 PM}		this->GetDlgItem(IDC_BACK_BUTTON)->EnableWindow(FALSE);
-// COMMENT: {5/11/2004 9:29:55 PM}		this->GetDlgItem(IDOK)->SetWindowText(_T("&Next >"));
-// COMMENT: {5/11/2004 9:29:55 PM}		this->LayoutPointsPage();
-// COMMENT: {5/11/2004 9:29:55 PM}		break;
-// COMMENT: {5/11/2004 9:29:55 PM}	case MDS_Point2:
-// COMMENT: {5/11/2004 9:29:55 PM}		this->m_Point1Actor->VisibilityOn();
-// COMMENT: {5/11/2004 9:29:55 PM}		this->m_Point2Actor->VisibilityOn();
-// COMMENT: {5/11/2004 9:29:55 PM}		this->m_Widget->SetEnabled(0);
-// COMMENT: {5/11/2004 9:29:55 PM}		this->GetDlgItem(IDC_BACK_BUTTON)->EnableWindow(TRUE);
-// COMMENT: {5/11/2004 9:29:55 PM}		this->GetDlgItem(IDOK)->SetWindowText(_T("&Next >"));
-// COMMENT: {5/11/2004 9:29:55 PM}		this->LayoutPointsPage();
-// COMMENT: {5/11/2004 9:29:55 PM}		break;
-// COMMENT: {5/11/2004 9:29:55 PM}	case MDS_Grid:
-// COMMENT: {5/11/2004 9:29:55 PM}		this->m_Point1Actor->VisibilityOff();
-// COMMENT: {5/11/2004 9:29:55 PM}		this->m_Point2Actor->VisibilityOff();
-// COMMENT: {5/11/2004 9:29:55 PM}		this->m_Widget->SetInput( this->m_MapImageActor->GetInput() );
-// COMMENT: {5/11/2004 9:29:55 PM}		this->m_Widget->PlaceWidget();
-// COMMENT: {5/11/2004 9:29:55 PM}		this->m_Widget->SetEnabled(1);
-// COMMENT: {5/11/2004 9:29:55 PM}		this->GetDlgItem(IDC_BACK_BUTTON)->EnableWindow(TRUE);
-// COMMENT: {5/11/2004 9:29:55 PM}		this->GetDlgItem(IDOK)->SetWindowText(_T("Finish"));
-// COMMENT: {5/11/2004 9:29:55 PM}		this->LayoutGridPage();
-// COMMENT: {5/11/2004 9:29:55 PM}		break;
-// COMMENT: {5/11/2004 9:29:55 PM}	default:
-// COMMENT: {5/11/2004 9:29:55 PM}		ASSERT(FALSE); // unhandled state
-// COMMENT: {5/11/2004 9:29:55 PM}	}
 }
 
 void CMapDialog::OnOK()
@@ -2488,9 +1842,6 @@ void CMapDialog::OnEnUpdateEditYp1()
 		this->m_Point1Actor->VisibilityOn();
 		this->m_RenderWindow->Render();
 	}
-	else
-	{
-	}
 }
 
 void CMapDialog::OnEnUpdateEditXp2()
@@ -2509,9 +1860,6 @@ void CMapDialog::OnEnUpdateEditXp2()
 		this->m_Point2Actor->VisibilityOn();
 		this->m_RenderWindow->Render();
 	}
-	else
-	{
-	}
 }
 
 void CMapDialog::OnEnUpdateEditYp2()
@@ -2529,9 +1877,6 @@ void CMapDialog::OnEnUpdateEditYp2()
 		this->m_Point2Actor->GetProperty()->SetColor(1, 1, 0);
 		this->m_Point2Actor->VisibilityOn();
 		this->m_RenderWindow->Render();
-	}
-	else
-	{
 	}
 }
 
@@ -2556,18 +1901,14 @@ void CMapDialog::OnEnChangeEditXp1()
 	// TODO:  Add your control notification handler code here
 }
 
-/*
-void CMapDialog::UpdateWorld()
-{
-}
-*/
-
 void CMapDialog::SetState(State state)
 {
-	if (this->m_bHaveWorld) {
+	if (this->m_bHaveWorld)
+	{
 		this->m_CurrentState = MDS_Grid;
 	}
-	else {
+	else
+	{
 		this->m_CurrentState = state;
 	}
 
@@ -2602,7 +1943,7 @@ void CMapDialog::SetState(State state)
 		this->m_MapImageActor->GetImageReader2()->SetDataSpacing(1, 1, 1);
 		this->m_Point1Actor->VisibilityOff();
 		this->m_Point2Actor->VisibilityOff();
-		this->m_Renderer->ResetCamera();
+		///this->m_Renderer->ResetCamera();
 		this->m_Point1Actor->VisibilityOn();
 		this->m_Point2Actor->VisibilityOn();
 		this->m_Renderer->Render();
@@ -2610,30 +1951,21 @@ void CMapDialog::SetState(State state)
 	case MDS_Grid:
 		this->m_Point1Actor->VisibilityOff();
 		this->m_Point2Actor->VisibilityOff();
-// COMMENT: {5/13/2004 9:47:57 PM}		{
-// COMMENT: {5/13/2004 9:47:57 PM}		}
 		this->m_MapImageActor->SetWorldTransform(this->m_worldTransform);
 		this->m_Renderer->ResetCamera();
 		this->m_Widget->SetInput( this->m_MapImageActor->GetInput() );
 		this->m_Widget->PlaceWidget();
 		this->m_Widget->SetEnabled(1);
-// COMMENT: {5/17/2004 1:58:27 PM}		this->UpdateLength();
-// COMMENT: {5/17/2004 1:58:27 PM}		this->UpdateWidth();
-// COMMENT: {5/17/2004 1:58:27 PM}		this->UpdateModelOriginX();
-// COMMENT: {5/17/2004 1:58:27 PM}		this->UpdateModelOriginY();
-// COMMENT: {5/17/2004 1:58:27 PM}		this->UpdateModelOriginAngle();
-		if (this->m_bHaveWorld) {
+		if (this->m_bHaveWorld)
+		{
 			this->GetDlgItem(IDC_BACK_BUTTON)->EnableWindow(FALSE);
 		}
-		else {
+		else
+		{
 			this->GetDlgItem(IDC_BACK_BUTTON)->EnableWindow(TRUE);
 		}
-// COMMENT: {6/2/2004 4:36:31 PM}		this->GetDlgItem(IDOK)->SetWindowText(_T("Finish"));
 		this->GetDlgItem(IDOK)->SetWindowText(_T("&Next >"));
-
-		//{{
 		this->UpdateData(FALSE);
-		//}}
 		this->LayoutGridPage();
 		break;
 	default:
@@ -2651,4 +1983,12 @@ BOOL CMapDialog::OnEraseBkgnd(CDC* pDC)
 void CMapDialog::OnEnChangeRange(UINT nID)
 {
 	// this->m_needsExchange[nID] = true;
+}
+
+void CMapDialog::OnSize(UINT nType, int cx, int cy)
+{
+	CMapDialogBase::OnSize(nType, cx, cy);
+
+	// TODO: Add your message handler code here
+	this->m_Widget->SizeHandles();
 }

@@ -40,6 +40,7 @@ protected:
 
 	CModGridCtrlEx m_gridChemIC;  // IDC_CHECMIC_GRID
 
+	std::string m_sDescriptionRTF;        // IDR_DESCRIPTION_RTF
 	std::string m_sSolutionRTF;           // IDR_CHEM_IC_SOLUTION_RTF
 	std::string m_sEquilibriumPhasesRTF;  // IDR_CHEM_IC_EQUILIBRIUM_PHASES_RTF
 	std::string m_sSurfaceRTF;            // IDR_CHEM_IC_SURFACE_RTF
@@ -61,4 +62,5 @@ public:
 	virtual BOOL OnSetActive();
 	virtual BOOL OnKillActive();
 	virtual LRESULT OnWizardNext();
+	afx_msg void OnEnSetfocusDescEdit();
 };

@@ -71,6 +71,7 @@ END
 IDR_MAINFRAME           ICON                    "res\\WPhast.ico"
 IDR_WPhastTYPE          ICON                    "res\\WPhastDoc.ico"
 IDR_MAINFRAME_SDI       ICON                    "res\\idr_main.ico"
+IDI_ZOOM_REAL           ICON                    "res\\icon1.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -1472,7 +1473,7 @@ BEGIN
     EDITTEXT        IDC_EDIT_MO_ANGLE,261,43,42,12,ES_AUTOHSCROLL
 END
 
-IDD_MAP_DIALOG DIALOGEX 0, 0, 382, 278
+IDD_MAP_DIALOG DIALOGEX 0, 0, 382, 302
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | 
     WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
 CAPTION "Arrange Grid"
@@ -1567,11 +1568,19 @@ BEGIN
     CONTROL         "",IDC_Z_SPIN,"msctls_updown32",UDS_SETBUDDYINT | 
                     UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,357,211,
                     11,12
-    DEFPUSHBUTTON   "OK",IDOK,256,257,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,321,257,50,14
-    PUSHBUTTON      "< &Back",IDC_BACK_BUTTON,172,257,50,14,WS_DISABLED
+    DEFPUSHBUTTON   "OK",IDOK,256,281,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,321,281,50,14
+    PUSHBUTTON      "< &Back",IDC_BACK_BUTTON,172,281,50,14,WS_DISABLED
     CONTROL         "Modify",IDC_MODIFY_CHECK,"Button",BS_AUTOCHECKBOX | NOT 
                     WS_VISIBLE | WS_TABSTOP,15,159,85,10
+    CONTROL         "Normal",IDC_RADIO5,"Button",BS_AUTORADIOBUTTON | 
+                    BS_PUSHLIKE | NOT WS_VISIBLE,227,234,38,10
+    CONTROL         "Zoom",IDC_RADIO6,"Button",BS_AUTORADIOBUTTON | 
+                    BS_PUSHLIKE | NOT WS_VISIBLE,269,234,33,10
+    CONTROL         "Pan",IDC_RADIO7,"Button",BS_AUTORADIOBUTTON | 
+                    BS_PUSHLIKE | NOT WS_VISIBLE,306,234,28,10
+    CONTROL         "Grow",IDC_RADIO8,"Button",BS_AUTORADIOBUTTON | 
+                    BS_PUSHLIKE | NOT WS_VISIBLE,338,234,33,10
 END
 
 IDD_AXES_PROPPAGE DIALOGEX 0, 0, 140, 86
@@ -1719,17 +1728,17 @@ END
 
 IDD_FLOW_ONLY_INT_PROPPAGE DIALOGEX 0, 0, 317, 143
 STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
-CAPTION "Flow Only Properties"
+CAPTION "Solute Transport Properties"
 FONT 8, "MS Sans Serif", 400, 0, 0x0
 BEGIN
     CONTROL         "",IDC_DESC_RICHEDIT,"RichEdit20A",ES_MULTILINE | 
                     ES_AUTOHSCROLL | ES_READONLY | WS_BORDER | WS_VSCROLL | 
                     WS_HSCROLL,7,83,303,53
     CONTROL         "Solute transport and chemistry",
-                    IDC_SOLUTE_TRANSPORT_RADIO,"Button",BS_AUTORADIOBUTTON,7,
-                    21,142,11
+                    IDC_SOLUTE_TRANSPORT_RADIO,"Button",BS_AUTORADIOBUTTON | 
+                    BS_NOTIFY,7,21,142,11
     CONTROL         "Flow Only",IDC_FLOW_ONLY_RADIO,"Button",
-                    BS_AUTORADIOBUTTON,7,54,47,10
+                    BS_AUTORADIOBUTTON | BS_NOTIFY,7,54,47,10
     LTEXT           "Molecular Diffusivity",IDC_MOL_DIFF_STATIC,43,38,73,8
     EDITTEXT        IDC_MOL_DIFF_EDIT,113,37,79,12,ES_AUTOHSCROLL
 END
@@ -1784,9 +1793,9 @@ BEGIN
                     ES_AUTOHSCROLL | ES_READONLY | WS_BORDER | WS_VSCROLL | 
                     WS_HSCROLL,7,83,303,53
     CONTROL         "Free surface",IDC_FREE_SURFACE_RADIO,"Button",
-                    BS_AUTORADIOBUTTON | WS_GROUP,38,25,131,10
+                    BS_AUTORADIOBUTTON | BS_NOTIFY | WS_GROUP,38,25,131,10
     CONTROL         "Confined flow",IDC_CONFINED_FLOW_RADIO,"Button",
-                    BS_AUTORADIOBUTTON,38,49,119,10
+                    BS_AUTORADIOBUTTON | BS_NOTIFY,38,49,119,10
 END
 
 IDD_PRINT_FREQUENCY_EXT_PROPPAGE DIALOGEX 0, 0, 418, 319
@@ -1905,46 +1914,47 @@ STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Well Properties"
 FONT 8, "MS Sans Serif", 400, 0, 0x0
 BEGIN
-    GROUPBOX        "Location",IDC_STATIC,7,22,241,27
-    GROUPBOX        "Dimension",IDC_STATIC,7,50,241,27
-    GROUPBOX        "Open intervals",IDC_STATIC,7,104,241,91
-    GROUPBOX        "Pumping schedule",IDC_STATIC,7,195,241,63,0,
-                    WS_EX_TRANSPARENT
     LTEXT           "&Well Number",IDC_STATIC,7,8,42,8
     EDITTEXT        IDC_NUSER_EDIT,54,7,34,12,ES_AUTOHSCROLL
     LTEXT           "De&scription",IDC_STATIC,98,8,36,8
     EDITTEXT        IDC_DESC_EDIT,139,7,233,12,ES_AUTOHSCROLL
+    GROUPBOX        "Location",IDC_STATIC,7,22,241,27
     LTEXT           "&X:",IDC_STATIC,15,35,8,8
     EDITTEXT        IDC_X_EDIT,25,33,43,12,ES_AUTOHSCROLL
     LTEXT           "(ft)",IDC_X_UNITS_STATIC,71,35,17,8
     LTEXT           "&Y:",IDC_STATIC,98,35,8,8
     EDITTEXT        IDC_Y_EDIT,110,33,43,12,ES_AUTOHSCROLL
     LTEXT           "(ft)",IDC_Y_UNITS_STATIC,156,35,17,8
-    CONTROL         "&Diameter",IDC_DIAM_RADIO,"Button",BS_AUTORADIOBUTTON,
-                    15,61,44,10
-    CONTROL         "&Radius",IDC_RADIUS_RADIO,"Button",BS_AUTORADIOBUTTON,
-                    66,61,38,10
+    GROUPBOX        "Dimension",IDC_STATIC,7,50,241,27
+    CONTROL         "&Diameter",IDC_DIAM_RADIO,"Button",BS_AUTORADIOBUTTON | 
+                    BS_NOTIFY,15,61,44,10
+    CONTROL         "&Radius",IDC_RADIUS_RADIO,"Button",BS_AUTORADIOBUTTON | 
+                    BS_NOTIFY,66,61,38,10
     EDITTEXT        IDC_DIAM_EDIT,109,60,43,12,ES_AUTOHSCROLL
     LTEXT           "(ft)",IDC_DIAMETER_UNITS_STATIC,155,62,17,8
+    GROUPBOX        "Options",IDC_STATIC,7,77,241,27
+    CONTROL         "Allocate by pressure and mobility",IDC_ALLOCATE_BY_HEAD,
+                    "Button",BS_AUTOCHECKBOX | BS_NOTIFY | WS_TABSTOP,15,88,
+                    118,10
+    GROUPBOX        "Open intervals",IDC_STATIC,7,104,241,91
     LTEXT           "Specify by",IDC_STATIC,15,115,34,8
     CONTROL         "&Elevation",IDC_ELEVATION_RADIO,"Button",
-                    BS_AUTORADIOBUTTON,53,115,45,10
-    CONTROL         "De&pth",IDC_DEPTH_RADIO,"Button",BS_AUTORADIOBUTTON,99,
-                    115,35,10
+                    BS_AUTORADIOBUTTON | BS_NOTIFY,53,115,45,10
+    CONTROL         "De&pth",IDC_DEPTH_RADIO,"Button",BS_AUTORADIOBUTTON | 
+                    BS_NOTIFY,99,115,35,10
     LTEXT           "&Land surface datum",IDC_LSD_STATIC,15,130,64,8
     EDITTEXT        IDC_LSD_EDIT,83,128,43,12,ES_AUTOHSCROLL
     LTEXT           "(ft)",IDC_LSD_UNITS_STATIC,129,130,17,8
     CONTROL         "Custom1",IDC_GRID_SCREENS,"MFCGridCtrl",WS_BORDER | 
                     WS_TABSTOP,13,146,228,43
+    GROUPBOX        "Pumping schedule",IDC_STATIC,7,195,241,63,0,
+                    WS_EX_TRANSPARENT
     CONTROL         "Custom1",IDC_GRID_SCHEDULES,"MFCGridCtrl",WS_BORDER | 
                     WS_TABSTOP,14,205,227,47
     CONTROL         "",IDC_DESC_RICHEDIT,"RichEdit20A",ES_MULTILINE | 
                     ES_AUTOHSCROLL | ES_READONLY | WS_BORDER | WS_VSCROLL | 
                     WS_HSCROLL,7,266,365,42
     CONTROL         "",IDC_WELL_STATIC,"Static",SS_BLACKFRAME,260,26,112,231
-    CONTROL         "Allocate by pressure and mobility",IDC_ALLOCATE_BY_HEAD,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,88,118,10
-    GROUPBOX        "Options",IDC_STATIC,7,77,241,27
 END
 
 IDD_WELL_PROPPAGE2 DIALOGEX 0, 0, 320, 315
@@ -2004,10 +2014,10 @@ BEGIN
     CONTROL         "Custom1",IDC_HEAD_GRID,"MFCGridCtrl",WS_BORDER | 
                     WS_TABSTOP,7,26,404,60
     LTEXT           "Solution type:",IDC_SOL_TYPE_STATIC,7,96,46,8
-    CONTROL         "Associated",IDC_ASSOC_RADIO,"Button",BS_AUTORADIOBUTTON,
-                    61,96,51,10
-    CONTROL         "Fixed",IDC_FIXED_RADIO,"Button",BS_AUTORADIOBUTTON,127,
-                    96,33,10
+    CONTROL         "Associated",IDC_ASSOC_RADIO,"Button",BS_AUTORADIOBUTTON | 
+                    BS_NOTIFY,61,96,51,10
+    CONTROL         "Fixed",IDC_FIXED_RADIO,"Button",BS_AUTORADIOBUTTON | 
+                    BS_NOTIFY,127,96,33,10
     CONTROL         "Custom1",IDC_SOLUTION_GRID,"MFCGridCtrl",WS_BORDER | 
                     WS_TABSTOP,7,109,404,60
     CONTROL         "",IDC_DESC_RICHEDIT,"RichEdit20A",ES_MULTILINE | 
@@ -2035,22 +2045,22 @@ STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Flux Properties"
 FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
+    LTEXT           "De&scription",IDC_DESC_STATIC,7,8,36,8
+    EDITTEXT        IDC_DESC_EDIT,55,7,356,12,ES_AUTOHSCROLL
     CONTROL         "Custom1",IDC_FLUX_GRID,"MFCGridCtrl",WS_BORDER | 
                     WS_TABSTOP,7,26,404,60
     CONTROL         "Custom1",IDC_SOLUTION_GRID,"MFCGridCtrl",WS_BORDER | 
                     WS_TABSTOP,7,96,404,60
     LTEXT           "Face:",IDC_FACE_STATIC,7,164,19,8
     CONTROL         "X",IDC_FACE_X_RADIO,"Button",BS_AUTORADIOBUTTON | 
-                    WS_GROUP,32,164,20,10
-    CONTROL         "Y",IDC_FACE_Y_RADIO,"Button",BS_AUTORADIOBUTTON,54,164,
-                    20,10
-    CONTROL         "Z",IDC_FACE_Z_RADIO,"Button",BS_AUTORADIOBUTTON,76,164,
-                    20,10
+                    BS_NOTIFY | WS_GROUP,32,164,20,10
+    CONTROL         "Y",IDC_FACE_Y_RADIO,"Button",BS_AUTORADIOBUTTON | 
+                    BS_NOTIFY,54,164,20,10
+    CONTROL         "Z",IDC_FACE_Z_RADIO,"Button",BS_AUTORADIOBUTTON | 
+                    BS_NOTIFY,76,164,20,10
     CONTROL         "",IDC_DESC_RICHEDIT,"RichEdit20A",ES_MULTILINE | 
                     ES_AUTOHSCROLL | ES_READONLY | WS_BORDER | WS_VSCROLL | 
                     WS_HSCROLL,7,177,404,49
-    LTEXT           "De&scription",IDC_DESC_STATIC,7,8,36,8
-    EDITTEXT        IDC_DESC_EDIT,55,7,356,12,ES_AUTOHSCROLL
 END
 
 IDD_BC_LEAKY_PROPPAGE3 DIALOGEX 0, 0, 418, 234
@@ -2062,11 +2072,11 @@ BEGIN
     EDITTEXT        IDC_DESC_EDIT,55,7,356,12,ES_AUTOHSCROLL
     LTEXT           "Face:",IDC_FACE_STATIC,7,24,19,8
     CONTROL         "X",IDC_FACE_X_RADIO,"Button",BS_AUTORADIOBUTTON | 
-                    WS_GROUP,32,24,20,10
-    CONTROL         "Y",IDC_FACE_Y_RADIO,"Button",BS_AUTORADIOBUTTON,54,24,
-                    20,10
-    CONTROL         "Z",IDC_FACE_Z_RADIO,"Button",BS_AUTORADIOBUTTON,76,24,
-                    20,10
+                    BS_NOTIFY | WS_GROUP,32,24,20,10
+    CONTROL         "Y",IDC_FACE_Y_RADIO,"Button",BS_AUTORADIOBUTTON | 
+                    BS_NOTIFY,54,24,20,10
+    CONTROL         "Z",IDC_FACE_Z_RADIO,"Button",BS_AUTORADIOBUTTON | 
+                    BS_NOTIFY,76,24,20,10
     CONTROL         "Custom1",IDC_SINGLE_GRID,"MFCGridCtrl",WS_BORDER | 
                     WS_TABSTOP,7,36,404,38
     CONTROL         "Custom1",IDC_HEAD_GRID,"MFCGridCtrl",WS_BORDER | 
@@ -2114,13 +2124,13 @@ STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Chemistry Initial Condition Properties"
 FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
+    LTEXT           "De&scription",IDC_DESC_STATIC,7,8,36,8
+    EDITTEXT        IDC_DESC_EDIT,55,7,356,12,ES_AUTOHSCROLL
+    CONTROL         "Custom1",IDC_CHEMIC_GRID,"MFCGridCtrl",WS_BORDER | 
+                    WS_TABSTOP,7,26,404,120
     CONTROL         "",IDC_DESC_RICHEDIT,"RichEdit20A",ES_MULTILINE | 
                     ES_AUTOHSCROLL | ES_READONLY | WS_BORDER | WS_VSCROLL | 
                     WS_HSCROLL,7,153,404,73
-    CONTROL         "Custom1",IDC_CHEMIC_GRID,"MFCGridCtrl",WS_BORDER | 
-                    WS_TABSTOP,7,26,404,120
-    LTEXT           "De&scription",IDC_DESC_STATIC,7,8,36,8
-    EDITTEXT        IDC_DESC_EDIT,55,7,356,12,ES_AUTOHSCROLL
 END
 
 IDD_IC_HEAD_SPREAD_PROPPAGE DIALOGEX 0, 0, 418, 234
@@ -2128,13 +2138,13 @@ STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Head IC Properties"
 FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
+    LTEXT           "De&scription",IDC_DESC_STATIC,7,8,36,8
+    EDITTEXT        IDC_DESC_EDIT,55,7,356,12,ES_AUTOHSCROLL
+    CONTROL         "Custom1",IDC_HEADIC_GRID,"MFCGridCtrl",WS_BORDER | 
+                    WS_TABSTOP,7,27,404,120
     CONTROL         "",IDC_DESC_RICHEDIT,"RichEdit20A",ES_MULTILINE | 
                     ES_AUTOHSCROLL | ES_READONLY | WS_BORDER | WS_VSCROLL | 
                     WS_HSCROLL,7,153,404,73
-    CONTROL         "Custom1",IDC_HEADIC_GRID,"MFCGridCtrl",WS_BORDER | 
-                    WS_TABSTOP,7,27,404,120
-    LTEXT           "De&scription",IDC_DESC_STATIC,7,8,36,8
-    EDITTEXT        IDC_DESC_EDIT,55,7,356,12,ES_AUTOHSCROLL
 END
 
 IDD_RIVERPT_PROPPAGE DIALOGEX 0, 0, 289, 174
@@ -2416,11 +2426,11 @@ FONT 8, "MS Shell Dlg", 400, 0, 0x0
 BEGIN
     CONTROL         "",IDC_TAB_COOR,"SysTabControl32",0x0,7,7,392,136
     GROUPBOX        "",IDC_UNIFORM_GB,15,25,142,75
-    CONTROL         "&Uniform",IDC_RADIO_UNIFORM,"Button",BS_AUTORADIOBUTTON,
-                    20,25,41,10
+    CONTROL         "&Uniform",IDC_RADIO_UNIFORM,"Button",BS_AUTORADIOBUTTON | 
+                    BS_NOTIFY,20,25,41,10
     GROUPBOX        "",IDC_NON_UNIFORM_GB,164,25,226,111
     CONTROL         "&Nonuniform",IDC_RADIO_NONUNIFORM,"Button",
-                    BS_AUTORADIOBUTTON | BS_TOP,168,25,53,10
+                    BS_AUTORADIOBUTTON | BS_TOP | BS_NOTIFY,168,25,53,10
     LTEXT           "Minimum:",IDC_STATIC_MIN,24,42,40,8,0,WS_EX_RIGHT
     EDITTEXT        IDC_EDIT_MIN,68,40,47,12,ES_AUTOHSCROLL | ES_WANTRETURN
     LTEXT           "Maximum:",IDC_STATIC_MAX,23,62,40,8,0,WS_EX_RIGHT
@@ -2449,16 +2459,16 @@ BEGIN
                     ES_AUTOHSCROLL | ES_READONLY | WS_BORDER | WS_VSCROLL | 
                     WS_HSCROLL,7,181,392,44
     GROUPBOX        "Print orientation",IDC_PRINT_GB,7,149,185,24
-    CONTROL         "XY",IDC_RADIO_XY,"Button",BS_AUTORADIOBUTTON,35,159,24,
-                    10
-    CONTROL         "XZ",IDC_RADIO_XZ,"Button",BS_AUTORADIOBUTTON,86,159,24,
-                    10
-    CONTROL         "X",IDC_CHECK_X,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
-                    238,159,20,10
-    CONTROL         "Y",IDC_CHECK_Y,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
-                    277,159,20,10
-    CONTROL         "Z",IDC_CHECK_Z,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
-                    316,159,20,10
+    CONTROL         "XY",IDC_RADIO_XY,"Button",BS_AUTORADIOBUTTON | 
+                    BS_NOTIFY,35,159,24,10
+    CONTROL         "XZ",IDC_RADIO_XZ,"Button",BS_AUTORADIOBUTTON | 
+                    BS_NOTIFY,86,159,24,10
+    CONTROL         "X",IDC_CHECK_X,"Button",BS_AUTOCHECKBOX | BS_NOTIFY | 
+                    WS_TABSTOP,238,159,20,10
+    CONTROL         "Y",IDC_CHECK_Y,"Button",BS_AUTOCHECKBOX | BS_NOTIFY | 
+                    WS_TABSTOP,277,159,20,10
+    CONTROL         "Z",IDC_CHECK_Z,"Button",BS_AUTOCHECKBOX | BS_NOTIFY | 
+                    WS_TABSTOP,316,159,20,10
     GROUPBOX        "Chemistry dimensions",IDC_CHEM_GB,214,149,185,24
     EDITTEXT        IDC_EDIT_SNAP,45,117,47,12,ES_AUTOHSCROLL
     GROUPBOX        "Snap",IDC_SNAP_GB,15,105,141,31
@@ -2629,10 +2639,10 @@ CAPTION "Solution Method Properties"
 FONT 8, "MS Sans Serif", 400, 0, 0x0
 BEGIN
     GROUPBOX        "Solver",IDC_STATIC,7,7,303,76
-    CONTROL         "Iterative",IDC_RADIO_ITER,"Button",BS_AUTORADIOBUTTON,
-                    15,18,41,10
-    CONTROL         "Direct",IDC_RADIO_DIRECT,"Button",BS_AUTORADIOBUTTON,15,
-                    70,35,10
+    CONTROL         "Iterative",IDC_RADIO_ITER,"Button",BS_AUTORADIOBUTTON | 
+                    BS_NOTIFY,15,18,41,10
+    CONTROL         "Direct",IDC_RADIO_DIRECT,"Button",BS_AUTORADIOBUTTON | 
+                    BS_NOTIFY,15,70,35,10
     LTEXT           "Tolerance:",IDC_STATIC_TOL,33,29,35,8
     EDITTEXT        IDC_EDIT_TOL,102,27,55,12,ES_AUTOHSCROLL
     LTEXT           "Save directions:",IDC_STATIC_SAVE,33,44,52,8
@@ -2650,7 +2660,7 @@ BEGIN
     LTEXT           "Time differencing:",IDC_STATIC_TIME,7,106,57,8
     EDITTEXT        IDC_EDIT_TIME,76,104,55,12,ES_AUTOHSCROLL
     CONTROL         "Cross dispersion",IDC_CHECK_CROSS_DISP,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,121,67,10
+                    BS_AUTOCHECKBOX | BS_NOTIFY | WS_TABSTOP,7,121,67,10
     CONTROL         "",IDC_DESC_RICHEDIT,"RichEdit20A",ES_MULTILINE | 
                     ES_AUTOHSCROLL | ES_READONLY | WS_BORDER | WS_VSCROLL | 
                     WS_HSCROLL,7,159,303,38
@@ -3132,7 +3142,7 @@ BEGIN
         VERTGUIDE, 256
         VERTGUIDE, 302
         TOPMARGIN, 6
-        BOTTOMMARGIN, 271
+        BOTTOMMARGIN, 295
         HORZGUIDE, 20
         HORZGUIDE, 33
         HORZGUIDE, 47
@@ -3630,6 +3640,44 @@ IDR_MINIMUM_TIME_STEP_RTF RTF                     "res\\MINIMUM_TIME_STEP.rtf"
 IDR_MAXIMUM_TIME_STEP_RTF RTF                     "res\\MAXIMUM_TIME_STEP.rtf"
 IDR_HEAD_CHANGE_TARGET_RTF RTF                     "res\\HEAD_CHANGE_TARGET.rtf"
 IDR_ITERATIONS_RTF      RTF                     "res\\ITERATIONS.rtf"
+IDR_RTF2                RTF                     "res\\rtf2.rtf"
+IDR_DESCRIPTION_RTF     RTF                     "res\\DESCRIPTION.rtf"
+IDR_SOLUTE_TRUE_RTF     RTF                     "res\\SOLUTE_TRUE.rtf"
+IDR_SOLUTE_FALSE_RTF    RTF                     "res\\SOLUTE_FALSE.rtf"
+IDR_DIFFUSIVITY_RTF     RTF                     "res\\DIFFUSIVITY.rtf"
+IDR_FREE_SURFACE_TRUE_RTF RTF                     "res\\FREE_SURFACE_TRUE.rtf"
+IDR_FREE_SURFACE_FALSE_RTF RTF                     "res\\FREE_SURFACE_FALSE.rtf"
+IDR_SM_ITERATIVE_TRUE_RTF RTF                     "res\\SM_ITERATIVE_TRUE.rtf"
+IDR_SM_ITERATIVE_FALSE_RTF RTF                     "res\\SM_ITERATIVE_FALSE.rtf"
+IDR_SM_TOLERANCE_RTF    RTF                     "res\\SM_TOLERANCE.rtf"
+IDR_SM_SAVE_DIR_RTF     RTF                     "res\\SM_SAVE_DIR.rtf"
+IDR_SM_MAX_ITER_RTF     RTF                     "res\\SM_MAX_ITER.rtf"
+IDR_SM_SPACE_RTF        RTF                     "res\\SM_SPACE.rtf"
+IDR_SM_TIME_DIFF_RTF    RTF                     "res\\SM_TIME_DIFF.rtf"
+IDR_SM_CROSS_DISP_RTF   RTF                     "res\\SM_CROSS_DISP.rtf"
+IDR_SM_REBALANCE_RTF    RTF                     "res\\SM_REBALANCE.rtf"
+IDR_GRID_UNI_RTF        RTF                     "res\\GRID_UNI.rtf"
+IDR_GRID_NONUNI_RTF     RTF                     "res\\GRID_NONUNI.rtf"
+IDR_GRID_MIN_RTF        RTF                     "res\\GRID_MIN.rtf"
+IDR_GRID_MAX_RTF        RTF                     "res\\GRID_MAX.rtf"
+IDR_GRID_NODES_RTF      RTF                     "res\\GRID_NODES.rtf"
+IDR_GRID_SNAP_RTF       RTF                     "res\\GRID_SNAP.rtf"
+IDR_GRID_ORIENT_RTF     RTF                     "res\\GRID_ORIENT.rtf"
+IDR_GRID_CHEM_DIMS_RTF  RTF                     "res\\GRID_CHEM_DIMS.rtf"
+IDR_BC_LEAKY_FACE_RTF   RTF                     "res\\BC_LEAKY_FACE.rtf"
+IDR_BC_FLUX_FACE_RTF    RTF                     "res\\BC_FLUX_FACE.rtf"
+IDR_BC_SOL_TYPE_RTF     RTF                     "res\\BC_SOL_TYPE.rtf"
+IDR_BC_SPECIFIED_SOL_FIX_RTF RTF                     "res\\BC_SPECIFIED_SOL_FIX.rtf"
+IDR_BC_SPECIFIED_SOL_ASSOC_RTF RTF                     "res\\BC_SPECIFIED_SOL_ASSOC.rtf"
+IDR_WELL_ALLOCATE_RTF   RTF                     "res\\WELL_ALLOCATE.rtf"
+IDR_WELL_DEPTH_RTF      RTF                     "res\\WELL_DEPTH.rtf"
+IDR_WELL_DESC_RTF       RTF                     "res\\WELL_DESC.rtf"
+IDR_WELL_DIAM_RTF       RTF                     "res\\WELL_DIAM.rtf"
+IDR_WELL_ELEVATION_RTF  RTF                     "res\\WELL_ELEVATION.rtf"
+IDR_WELL_LOCATION_RTF   RTF                     "res\\WELL_LOCATION.rtf"
+IDR_WELL_LSD_RTF        RTF                     "res\\WELL_LSD.rtf"
+IDR_WELL_NUMBER_RTF     RTF                     "res\\WELL_NUMBER.rtf"
+IDR_WELL_RADIUS_RTF     RTF                     "res\\WELL_RADIUS.rtf"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -3856,7 +3904,7 @@ BEGIN
     IDS_MDS_GRID_179        "Place the grid"
     IDS_MDS_POINT1_SUB_180  "Click a point on the image with known coordinates"
     IDS_MDS_POINT2_SUB_181  "Click a different point on the image with known coordinates"
-    IDS_MDS_GRID_SUB_182    "Size/Move/Rotate the grid.  Rotate the grid using the right-mouse button while pressing the control key."
+    IDS_MDS_GRID_SUB_182    "Size/Move/Rotate the grid.  Rotate the grid using the left-mouse button while pressing the control key."
 END
 
 STRINGTABLE 

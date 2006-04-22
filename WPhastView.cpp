@@ -1531,9 +1531,13 @@ void CWPhastView::OnEndNewRiver(bool bCancel)
 		{
 			if (this->m_pRiverActor->GetPointCount() > 1)
 			{
-				CPropertySheet sheet;
+				CRiver river = this->m_pRiverActor->GetRiver();
+				CString title;
+				title.Format("River %d Properties", river.n_user);
+
+				CPropertySheet sheet(title);
 				CRiverPropertyPage2 page;
-				page.SetProperties(this->m_pRiverActor->GetRiver());
+				page.SetProperties(river);
 				page.SetUnits(this->GetDocument()->GetUnits());
 				page.SetFlowOnly(bool(this->GetDocument()->GetFlowOnly()));
 				std::set<int> riverNums;

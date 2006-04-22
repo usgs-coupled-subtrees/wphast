@@ -47,6 +47,7 @@ void CChemICSpreadPropertyPage::CommonConstruct(void)
 
 	// load property descriptions
 	//
+	CGlobal::LoadRTFString(this->m_sDescriptionRTF,       IDR_DESCRIPTION_RTF);
 	CGlobal::LoadRTFString(this->m_sSolutionRTF,          IDR_CHEM_IC_SOLUTION_RTF);
 	CGlobal::LoadRTFString(this->m_sEquilibriumPhasesRTF, IDR_CHEM_IC_EQUILIBRIUM_PHASES_RTF);
 	CGlobal::LoadRTFString(this->m_sSurfaceRTF,           IDR_CHEM_IC_SURFACE_RTF);
@@ -134,6 +135,8 @@ void CChemICSpreadPropertyPage::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CChemICSpreadPropertyPage, CPropertyPage)
 	ON_NOTIFY(GVN_CHECKCHANGED, IDC_CHEMIC_GRID, OnCheckChangedChemIC)
 	ON_NOTIFY(GVN_SELCHANGED, IDC_CHEMIC_GRID, OnSelChangedChemIC)
+	ON_EN_SETFOCUS(IDC_DESC_EDIT, OnEnSetfocusDescEdit)
+	ON_NOTIFY(GVN_SETFOCUS, IDC_CHEMIC_GRID, OnSelChangedChemIC)
 END_MESSAGE_MAP()
 
 
@@ -416,4 +419,10 @@ LRESULT CChemICSpreadPropertyPage::OnWizardNext()
 		}
 	}
 	return CPropertyPage::OnWizardNext();
+}
+
+void CChemICSpreadPropertyPage::OnEnSetfocusDescEdit()
+{
+	TRACE("OnEnSetfocusDescEdit\n");
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sDescriptionRTF.c_str());
 }

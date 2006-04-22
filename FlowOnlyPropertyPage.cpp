@@ -5,6 +5,8 @@
 #include "WPhast.h"
 #include "FlowOnlyPropertyPage.h"
 
+#include "Global.h"
+
 
 // CFlowOnlyPropertyPage dialog
 
@@ -13,6 +15,11 @@ CFlowOnlyPropertyPage::CFlowOnlyPropertyPage()
 	: CPropertyPage(CFlowOnlyPropertyPage::IDD)
 	, m_bDidFlowOnlyComeInAsTrue(false)
 {
+	// load property descriptions
+	//
+	CGlobal::LoadRTFString(this->m_sSoluteTrueRTF,  IDR_SOLUTE_TRUE_RTF);
+	CGlobal::LoadRTFString(this->m_sSoluteFalseRTF, IDR_SOLUTE_FALSE_RTF);
+	CGlobal::LoadRTFString(this->m_sDiffusivityRTF, IDR_DIFFUSIVITY_RTF);
 }
 
 CFlowOnlyPropertyPage::~CFlowOnlyPropertyPage()
@@ -51,6 +58,14 @@ void CFlowOnlyPropertyPage::DoDataExchange(CDataExchange* pDX)
 		double dDiffusivity = this->m_flowOnly.GetDiffusivity();
 		DDX_Text(pDX, IDC_MOL_DIFF_EDIT, dDiffusivity);
 	}
+
+	DDX_Control(pDX, IDC_DESC_RICHEDIT, m_wndRichEditCtrl);
+	if (this->m_bFirstSetActive)
+	{
+		// wrap richedit to window
+		this->m_wndRichEditCtrl.SetTargetDevice(NULL, 0);
+		this->m_wndRichEditCtrl.SetWindowText(this->m_sSoluteTrueRTF.c_str());
+	}
 }
 
 void CFlowOnlyPropertyPage::SetFlowOnly(const CFlowOnly& flowOnly)
@@ -68,6 +83,9 @@ CFlowOnly CFlowOnlyPropertyPage::GetFlowOnly(void)const
 BEGIN_MESSAGE_MAP(CFlowOnlyPropertyPage, CPropertyPage)
 	ON_BN_CLICKED(IDC_SOLUTE_TRANSPORT_RADIO, OnBnClickedSoluteTransportRadio)
 	ON_BN_CLICKED(IDC_FLOW_ONLY_RADIO, OnBnClickedFlowOnlyRadio)
+	ON_BN_SETFOCUS(IDC_SOLUTE_TRANSPORT_RADIO, OnBnSetfocusSoluteTransportRadio)
+	ON_BN_SETFOCUS(IDC_FLOW_ONLY_RADIO, OnBnSetfocusFlowOnlyRadio)
+	ON_EN_SETFOCUS(IDC_MOL_DIFF_EDIT, OnEnSetfocusMolDiffEdit)
 END_MESSAGE_MAP()
 
 
@@ -102,4 +120,19 @@ void CFlowOnlyPropertyPage::OnBnClickedFlowOnlyRadio()
 		pSheet->SetWizardButtons(PSWIZB_FINISH);
 	}
 	//}}
+}
+
+void CFlowOnlyPropertyPage::OnBnSetfocusSoluteTransportRadio()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sSoluteTrueRTF.c_str());
+}
+
+void CFlowOnlyPropertyPage::OnBnSetfocusFlowOnlyRadio()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sSoluteFalseRTF.c_str());
+}
+
+void CFlowOnlyPropertyPage::OnEnSetfocusMolDiffEdit()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sDiffusivityRTF.c_str());
 }

@@ -8,6 +8,7 @@
 
 #ifndef baseCBCSpecifiedHeadPropertyPage
 #define baseCBCSpecifiedHeadPropertyPage ETSLayoutPropertyPageXP
+//#define baseCBCSpecifiedHeadPropertyPage CPropertyPage
 #endif
 
 // CBCSpecifiedHeadPropertyPage dialog
@@ -43,9 +44,20 @@ protected:
 	bool             m_bFlowOnly;
 	std::string      m_desc;
 
+	CRichEditCtrl m_wndRichEditCtrl;
+
+	std::string m_sDescriptionRTF;    // IDR_DESCRIPTION_RTF
+	std::string m_sHeadRTF;           // IDR_BC_SPECIFIED_HEAD_RTF
+	//std::string m_sSolutionRTF;     // IDR_BC_SPECIFIED_SOL_RTF
+	std::string m_sSolTypeRTF;        // IDR_BC_SOL_TYPE_RTF
+	std::string m_sSolutionAssocRTF;  // IDR_BC_SPECIFIED_SOL_ASSOC_RTF
+	std::string m_sSolutionFixRTF;    // IDR_BC_SPECIFIED_SOL_FIX_RTF
+
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnCheckChangedHead(NMHDR *pNotifyStruct, LRESULT *result);
 	afx_msg void OnCheckChangedSolution(NMHDR *pNotifyStruct, LRESULT *result);
+	afx_msg void OnSelChangedHead(NMHDR *pNotifyStruct, LRESULT *result);
+	afx_msg void OnSelChangedSolution(NMHDR *pNotifyStruct, LRESULT *result);
 
 public:
 	virtual BOOL OnInitDialog();
@@ -53,4 +65,7 @@ public:
 	virtual BOOL OnKillActive();
 	afx_msg void OnBnClickedFixedRadio();
 	afx_msg void OnBnClickedAssocRadio();
+	afx_msg void OnEnSetfocusDescEdit();
+	afx_msg void OnBnSetfocusAssocRadio();
+	afx_msg void OnBnSetfocusFixedRadio();
 };

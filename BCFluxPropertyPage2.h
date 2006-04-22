@@ -44,13 +44,26 @@ protected:
 	bool             m_bFlowOnly;
 	std::string      m_desc;
 
+	CRichEditCtrl m_wndRichEditCtrl;
+
+	std::string m_sDescriptionRTF;   // IDR_DESCRIPTION_RTF
+	std::string m_sAssocSolutionRTF; // IDR_BC_FLUX_ASSOC_SOL_RTF
+	std::string m_sFluxRTF;          // IDR_BC_FLUX_FLUX_RTF
+	std::string m_sFaceRTF;          // IDR_BC_FLUX_FACE_RTF
+
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnCheckChangedFlux(NMHDR *pNotifyStruct, LRESULT *result);
 	afx_msg void OnCheckChangedSolution(NMHDR *pNotifyStruct, LRESULT *result);
+	afx_msg void OnSelChangedFlux(NMHDR *pNotifyStruct, LRESULT *result);
+	afx_msg void OnSelChangedSolution(NMHDR *pNotifyStruct, LRESULT *result);
 
 public:
 	virtual BOOL OnInitDialog();
 	virtual BOOL OnSetActive();
 	virtual BOOL OnKillActive();
 	afx_msg void OnBnClickedFace();
+	afx_msg void OnEnSetfocusDescEdit();
+	afx_msg void OnBnSetfocusFaceXRadio();
+	afx_msg void OnBnSetfocusFaceYRadio();
+	afx_msg void OnBnSetfocusFaceZRadio();
 };

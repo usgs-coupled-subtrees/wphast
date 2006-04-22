@@ -19,9 +19,9 @@ const TCHAR KY[]                = _T("Ky");
 const TCHAR KZ[]                = _T("Kz");
 const TCHAR POROSITY[]          = _T("Porosity");
 const TCHAR STORAGE[]           = _T("Specific storage");
-const TCHAR ALPHA_LONG[]        = _T("Long dispersivity");
-const TCHAR ALPHA_HORIZONTAL[]  = _T("Horizonal trans dispersivity");
-const TCHAR ALPHA_VERTICAL[]    = _T("Vertical trans dispersivity");
+const TCHAR ALPHA_LONG[]        = _T("Longitudinal dispersivity");
+const TCHAR ALPHA_HORIZONTAL[]  = _T("Horizonal dispersivity");
+const TCHAR ALPHA_VERTICAL[]    = _T("Vertical dispersivity");
 
 const TCHAR HEADING_VALUE[]          = _T("Value");
 const TCHAR HEADING_INTERPOLATE[]    = _T("Interpolate");
@@ -50,6 +50,7 @@ void CMediaSpreadPropertyPage::CommonConstruct(void)
 
 	// load property descriptions
 	//
+	CGlobal::LoadRTFString(this->m_sDescriptionRTF,     IDR_DESCRIPTION_RTF);
 	CGlobal::LoadRTFString(this->m_sActiveRTF,          IDR_MEDIA_ACTIVE_RTF);
 	CGlobal::LoadRTFString(this->m_sKxRTF,              IDR_MEDIA_KX_RTF);
 	CGlobal::LoadRTFString(this->m_sKyRTF,              IDR_MEDIA_KY_RTF);
@@ -250,6 +251,7 @@ void CMediaSpreadPropertyPage::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CMediaSpreadPropertyPage, CPropertyPage)
 	ON_NOTIFY(GVN_CHECKCHANGED, IDC_MEDIA_GRID, OnCheckChangedMedia)
 	ON_NOTIFY(GVN_SELCHANGED, IDC_MEDIA_GRID, OnSelChangedMedia)
+	ON_EN_SETFOCUS(IDC_DESC_EDIT, OnEnSetfocusDescEdit)
 END_MESSAGE_MAP()
 
 
@@ -576,4 +578,9 @@ LRESULT CMediaSpreadPropertyPage::OnWizardNext()
 		}
 	}
 	return CPropertyPage::OnWizardNext();
+}
+
+void CMediaSpreadPropertyPage::OnEnSetfocusDescEdit()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sDescriptionRTF.c_str());
 }

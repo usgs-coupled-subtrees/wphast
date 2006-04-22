@@ -16,6 +16,15 @@ CBCLeakyPropertyPage2::CBCLeakyPropertyPage2()
 	: baseCBCLeakyPropertyPage2(CBCLeakyPropertyPage2::IDD)
 {
 	this->SetFlowOnly(false);
+
+	// load property descriptions
+	//
+	CGlobal::LoadRTFString(this->m_sDescriptionRTF,   IDR_DESCRIPTION_RTF);
+	CGlobal::LoadRTFString(this->m_sHeadRTF,          IDR_BC_LEAKY_HEAD_RTF);
+	CGlobal::LoadRTFString(this->m_sThicknessRTF,     IDR_BC_LEAKY_THICKNESS_RTF);
+	CGlobal::LoadRTFString(this->m_sHydCondRTF,       IDR_BC_LEAKY_HYD_COND_RTF);
+	CGlobal::LoadRTFString(this->m_sAssocSolutionRTF, IDR_BC_LEAKY_ASSOC_SOL_RTF);
+	CGlobal::LoadRTFString(this->m_sFaceRTF,          IDR_BC_LEAKY_FACE_RTF);
 }
 
 CBCLeakyPropertyPage2::~CBCLeakyPropertyPage2()
@@ -25,6 +34,14 @@ CBCLeakyPropertyPage2::~CBCLeakyPropertyPage2()
 void CBCLeakyPropertyPage2::DoDataExchange(CDataExchange* pDX)
 {
 	baseCBCLeakyPropertyPage2::DoDataExchange(pDX);
+
+	DDX_Control(pDX, IDC_DESC_RICHEDIT, m_wndRichEditCtrl);
+	if (this->m_bFirstSetActive)
+	{
+		// wrap richedit to window
+		this->m_wndRichEditCtrl.SetTargetDevice(NULL, 0);
+		this->m_wndRichEditCtrl.SetWindowText(this->m_sDescriptionRTF.c_str());
+	}
 
 	DDX_GridControl(pDX, IDC_HEAD_GRID, m_gridHead);
 	DDX_GridControl(pDX, IDC_SOLUTION_GRID, m_gridSolution);
@@ -151,6 +168,16 @@ BEGIN_MESSAGE_MAP(CBCLeakyPropertyPage2, baseCBCLeakyPropertyPage2)
 	ON_BN_CLICKED(IDC_FACE_X_RADIO, OnBnClickedFace)
 	ON_BN_CLICKED(IDC_FACE_Y_RADIO, OnBnClickedFace)
 	ON_BN_CLICKED(IDC_FACE_Z_RADIO, OnBnClickedFace)
+	ON_EN_SETFOCUS(IDC_DESC_EDIT, OnEnSetfocusDescEdit)
+	ON_NOTIFY(GVN_SELCHANGED, IDC_HEAD_GRID, OnSelChangedHead)
+	ON_NOTIFY(GVN_SETFOCUS, IDC_HEAD_GRID, OnSelChangedHead)
+	ON_NOTIFY(GVN_SELCHANGED, IDC_SOLUTION_GRID, OnSelChangedSolution)
+	ON_NOTIFY(GVN_SETFOCUS, IDC_SOLUTION_GRID, OnSelChangedSolution)
+	ON_NOTIFY(GVN_SELCHANGED, IDC_SINGLE_GRID, OnSelChangedSingle)
+	ON_NOTIFY(GVN_SETFOCUS, IDC_SINGLE_GRID, OnSelChangedSingle)
+	ON_BN_SETFOCUS(IDC_FACE_X_RADIO, OnBnSetfocusFaceXRadio)
+	ON_BN_SETFOCUS(IDC_FACE_Y_RADIO, OnBnSetfocusFaceYRadio)
+	ON_BN_SETFOCUS(IDC_FACE_Z_RADIO, OnBnSetfocusFaceZRadio)
 END_MESSAGE_MAP()
 
 
@@ -568,4 +595,64 @@ void CBCLeakyPropertyPage2::OnBnClickedFace()
 		this->m_bc.face_defined = TRUE;
 		this->m_bc.face         = 2;
 	}
+}
+
+void CBCLeakyPropertyPage2::OnEnSetfocusDescEdit()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sDescriptionRTF.c_str());
+}
+
+void CBCLeakyPropertyPage2::OnSelChangedHead(NMHDR *pNotifyStruct, LRESULT *result)
+{
+	CCellID focus = this->m_gridHead.GetFocusCell();
+
+	if (!this->m_gridHead.IsValid(focus)) return;
+	
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sHeadRTF.c_str());
+}
+
+void CBCLeakyPropertyPage2::OnSelChangedSolution(NMHDR *pNotifyStruct, LRESULT *result)
+{
+	CCellID focus = this->m_gridSolution.GetFocusCell();
+
+	if (!this->m_gridSolution.IsValid(focus)) return;
+	
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sAssocSolutionRTF.c_str());
+}
+
+void CBCLeakyPropertyPage2::OnSelChangedSingle(NMHDR *pNotifyStruct, LRESULT *result)
+{
+	CCellID focus = this->m_gridSingle.GetFocusCell();
+
+	if (!this->m_gridSingle.IsValid(focus)) return;
+	
+	CString strItem = this->m_gridSingle.GetItemText(focus.row, 0);
+
+	if (strItem.Compare(_T("Thickness")) == 0)
+	{
+		this->m_wndRichEditCtrl.SetWindowText(this->m_sThicknessRTF.c_str());
+	}
+	else if (strItem.Compare(_T("Hydraulic conductivity")) == 0)
+	{
+		this->m_wndRichEditCtrl.SetWindowText(this->m_sHydCondRTF.c_str());
+	}
+	else
+	{
+		ASSERT(FALSE);
+	}
+}
+
+void CBCLeakyPropertyPage2::OnBnSetfocusFaceXRadio()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sFaceRTF.c_str());
+}
+
+void CBCLeakyPropertyPage2::OnBnSetfocusFaceYRadio()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sFaceRTF.c_str());
+}
+
+void CBCLeakyPropertyPage2::OnBnSetfocusFaceZRadio()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sFaceRTF.c_str());
 }

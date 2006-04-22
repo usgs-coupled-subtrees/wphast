@@ -265,6 +265,46 @@
 #define IDR_ITERATIONS_RTF              267
 #define IDD_SUBDIVIDE_DIALOG            273
 #define IDD_BC_TYPE_DIALOG              275
+#define IDI_ZOOM_REAL                   276
+#define IDR_RTF2                        278
+#define IDR_DESCRIPTION_RTF             279
+#define IDR_SOLUTE_TRUE_RTF             280
+#define IDR_SOLUTE_FALSE_RTF            281
+#define IDR_DIFFUSIVITY_RTF             282
+#define IDR_FREE_SURFACE_TRUE_RTF       283
+#define IDR_FREE_SURFACE_FALSE_RTF      284
+#define IDR_SM_ITERATIVE_TRUE_RTF       285
+#define IDR_SM_ITERATIVE_FALSE_RTF      286
+#define IDR_SM_TOLERANCE_RTF            287
+#define IDR_SM_SAVE_DIR_RTF             288
+#define IDR_SM_MAX_ITER_RTF             289
+#define IDR_SM_SPACE_RTF                290
+#define IDR_SM_TIME_DIFF_RTF            291
+#define IDR_SM_CROSS_DISP_RTF           292
+#define IDR_SM_REBALANCE_RTF            293
+#define IDR_GRID_UNI_RTF                294
+#define IDR_GRID_NONUNI_RTF             295
+#define IDR_GRID_MIN_RTF                296
+#define IDR_GRID_MAX_RTF                297
+#define IDR_GRID_NODES_RTF              298
+#define IDR_GRID_SNAP_RTF               299
+#define IDR_GRID_ORIENT_RTF             300
+#define IDR_GRID_CHEM_DIMS_RTF          301
+#define IDR_BC_LEAKY_FACE_RTF           302
+#define IDR_BC_FLUX_FACE_RTF            303
+#define IDR_BC_SOL_TYPE_RTF             304
+#define IDR_BC_SPECIFIED_SOL_FIX_RTF    305
+#define IDR_BC_SPECIFIED_SOL_ASSOC_RTF  306
+#define IDR_WELL_ALLOCATE_RTF           307
+#define IDR_WELL_DEPTH_RTF              308
+#define IDR_WELL_DESC_RTF               309
+#define IDR_WELL_DIAM_RTF               310
+#define IDR_WELL_ELEVATION_RTF          311
+#define IDR_WELL_LOCATION_RTF           312
+#define IDR_WELL_LSD_RTF                313
+#define IDR_WELL_NUMBER_RTF             314
+#define IDR_RTF3                        315
+#define IDR_WELL_RADIUS_RTF             315
 #define IDC_EDIT_X                      1000
 #define IDC_PROPERTIES                  1000
 #define IDC_TITLE                       1000
@@ -683,7 +723,6 @@
 #define IDC_INTERVAL_STATIC             1362
 #define IDC_START_WIDTH_STATIC          1363
 #define IDC_END_WIDTH_STATIC            1364
-#define IDC_RADIO_                      1365
 #define IDC_RADIO_LEAKY                 1365
 #define IDC_RADIO_HEAD                  1366
 #define IDC_RADIO_FLUX                  1367
@@ -710,9 +749,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        276
+#define _APS_NEXT_RESOURCE_VALUE        316
 #define _APS_NEXT_COMMAND_VALUE         32832
-#define _APS_NEXT_CONTROL_VALUE         1368
+#define _APS_NEXT_CONTROL_VALUE         1373
 #define _APS_NEXT_SYMED_VALUE           126
 #endif
 #endif

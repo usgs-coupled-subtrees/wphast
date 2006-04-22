@@ -49,17 +49,7 @@ protected:
 	bool m_bFlowOnly;
 	bool m_bDefault;
 
-	//std::string m_sActiveRTF;          // ACTIVE
-	//std::string m_sKxRTF;              // KX 
-	//std::string m_sKyRTF;              // KY
-	//std::string m_sKzRTF;              // KZ
-	//std::string m_sAlphaLongRTF;       // ALPHA_LONG
-	//std::string m_sPorosityRTF;        // POROSITY
-	//std::string m_sStorageRTF;         // STORAGE
-	//std::string m_sAlphaHorizontalRTF; // ALPHA_HORIZONTAL
-	//std::string m_sAlphaVerticalRTF;   // ALPHA_VERTICAL
-
-
+	std::string m_sDescriptionRTF;       // IDR_DESCRIPTION_RTF
 	std::string m_sActiveRTF;            // IDR_MEDIA_ACTIVE_RTF
 	std::string m_sKxRTF;                // IDR_MEDIA_KX_RTF
 	std::string m_sKyRTF;                // IDR_MEDIA_KY_RTF
@@ -78,4 +68,5 @@ public:
 	virtual BOOL OnSetActive();
 	virtual BOOL OnKillActive();
 	virtual LRESULT OnWizardNext();
+	afx_msg void OnEnSetfocusDescEdit();
 };

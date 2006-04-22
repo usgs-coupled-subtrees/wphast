@@ -435,11 +435,8 @@ void CModGridCtrlEx::OnLButtonDown(UINT nFlags, CPoint point)
 				this->m_bButtonDown = TRUE;
 				this->RedrawCell(this->m_LeftClickDownCell);
 			}
-			//{{
 			this->m_MouseMode = MOUSE_NOTHING;
-			//}}
 		}
-		//{{ {4/5/2006 6:17:31 PM}
 		else
 		{
 			// overide default behavior
@@ -487,7 +484,6 @@ void CModGridCtrlEx::OnLButtonDown(UINT nFlags, CPoint point)
 				m_LastMousePoint = point;
 			}
 		}
-		//}} {4/5/2006 6:17:31 PM}
 	}
 	else if (this->m_MouseMode == MOUSE_SELECT_CELLS)
 	{
@@ -920,9 +916,7 @@ void CModGridCtrlEx::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
 		}
 	}
 
-	//{{
 	if (this->IsCheckMarkCell(this->m_idCurrentCell)) return;
-	//}}
 
 	CModGridCtrl::OnChar(nChar, nRepCnt, nFlags);
 }
@@ -941,12 +935,12 @@ void CModGridCtrlEx::DrawButton2(CDC* pDC, int nRow, int nCol, CRect rcCell, BOO
 		rc.OffsetRect(max(this->GetColumnWidth(nCol) - nButtonWidth, 0), 0);
 		rc.DeflateRect(-1, 1, 1, 1);
 		this->m_rcButton = rc;
-// COMMENT: {4/3/2006 6:33:30 PM}		if (this->s_themeCombo)
-// COMMENT: {4/3/2006 6:33:30 PM}		{
-// COMMENT: {4/3/2006 6:33:30 PM}			rc.DeflateRect(0, 0, 0, 1);
-// COMMENT: {4/3/2006 6:33:30 PM}			g_xpStyle.DrawThemeBackground(this->s_themeCombo, *pDC, CP_DROPDOWNBUTTON, CBXS_PRESSED, &rc, NULL);			
-// COMMENT: {4/3/2006 6:33:30 PM}		}
-// COMMENT: {4/3/2006 6:33:30 PM}		else
+		if (this->s_themeCombo)
+		{
+			rc.DeflateRect(0, 0, 0, 1);
+			g_xpStyle.DrawThemeBackground(this->s_themeCombo, *pDC, CP_DROPDOWNBUTTON, CBXS_PRESSED, &rc, NULL);			
+		}
+		else
 		{
 			pDC->DrawFrameControl(&rc, DFC_SCROLL, DFCS_SCROLLCOMBOBOX | DFCS_PUSHED);
 		}
@@ -958,23 +952,23 @@ void CModGridCtrlEx::DrawButton2(CDC* pDC, int nRow, int nCol, CRect rcCell, BOO
 		rc.OffsetRect(max(this->GetColumnWidth(nCol) - nButtonWidth, 0), 0);
 		rc.DeflateRect(-1, 1, 1, 1);
 		this->m_rcButton = rc;
-// COMMENT: {4/3/2006 6:33:46 PM}		if (this->s_themeCombo)
-// COMMENT: {4/3/2006 6:33:46 PM}		{
-// COMMENT: {4/3/2006 6:33:46 PM}			rc.DeflateRect(0, 0, 0, 1);
-// COMMENT: {4/3/2006 6:33:46 PM}			CPoint point;
-// COMMENT: {4/3/2006 6:33:46 PM}			::GetCursorPos(&point);
-// COMMENT: {4/3/2006 6:33:46 PM}			this->ScreenToClient(&point);
-// COMMENT: {4/3/2006 6:33:46 PM}			if (rc.PtInRect(point))
-// COMMENT: {4/3/2006 6:33:46 PM}			{
-// COMMENT: {4/3/2006 6:33:46 PM}				g_xpStyle.DrawThemeBackground(this->s_themeCombo, *pDC, CP_DROPDOWNBUTTON, CBXS_HOT, &rc, NULL);
-// COMMENT: {4/3/2006 6:33:46 PM}				return;
-// COMMENT: {4/3/2006 6:33:46 PM}			}
-// COMMENT: {4/3/2006 6:33:46 PM}			else
-// COMMENT: {4/3/2006 6:33:46 PM}			{
-// COMMENT: {4/3/2006 6:33:46 PM}				g_xpStyle.DrawThemeBackground(this->s_themeCombo, *pDC, CP_DROPDOWNBUTTON, CBXS_NORMAL, &rc, NULL);			
-// COMMENT: {4/3/2006 6:33:46 PM}			}
-// COMMENT: {4/3/2006 6:33:46 PM}		}
-// COMMENT: {4/3/2006 6:33:46 PM}		else
+		if (this->s_themeCombo)
+		{
+			rc.DeflateRect(0, 0, 0, 1);
+			CPoint point;
+			::GetCursorPos(&point);
+			this->ScreenToClient(&point);
+			if (rc.PtInRect(point))
+			{
+				g_xpStyle.DrawThemeBackground(this->s_themeCombo, *pDC, CP_DROPDOWNBUTTON, CBXS_HOT, &rc, NULL);
+				return;
+			}
+			else
+			{
+				g_xpStyle.DrawThemeBackground(this->s_themeCombo, *pDC, CP_DROPDOWNBUTTON, CBXS_NORMAL, &rc, NULL);			
+			}
+		}
+		else
 		{
 			pDC->DrawFrameControl(&rc, DFC_SCROLL, DFCS_SCROLLCOMBOBOX);
 		}

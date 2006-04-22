@@ -44,7 +44,7 @@ public:
 
 #define WM_SHOWCOORDLG      WM_USER + 100
 #define CMapDialogBase ETSLayoutDialog
-// COMMENT: {5/21/2004 7:04:38 PM}#define CMapDialogBase CDialog
+// COMMENT: {4/17/2006 9:54:18 PM}#define CMapDialogBase CDialog
 
 // CMapDialog dialog
 
@@ -175,6 +175,10 @@ public:
 	CSpinButtonCtrl m_udXP2; // IDC_SPIN_XP2
 	CSpinButtonCtrl m_udYP2; // IDC_SPIN_YP2
 
+	//{{
+	CButton m_btnZoom; // IDI_ZOOM_REAL
+	//}}
+
 	afx_msg void OnWizardBack();
 
 	afx_msg void OnEnUpdateNodes(int idx);
@@ -222,4 +226,5 @@ public:
 	// ON_EN_CHANGE(IDC_EDIT_YC2, OnEnChangeEditYc2)
 	afx_msg void OnEnChangeRange(UINT nID);
 	std::map<UINT, bool> m_needsExchange;
+	afx_msg void OnSize(UINT nType, int cx, int cy);
 };

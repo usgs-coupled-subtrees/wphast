@@ -16,6 +16,14 @@ CBCSpecifiedHeadPropertyPage::CBCSpecifiedHeadPropertyPage()
 	: baseCBCSpecifiedHeadPropertyPage(CBCSpecifiedHeadPropertyPage::IDD)
 {
 	this->SetFlowOnly(false);
+
+	// load property descriptions
+	//
+	CGlobal::LoadRTFString(this->m_sDescriptionRTF,   IDR_DESCRIPTION_RTF);
+	CGlobal::LoadRTFString(this->m_sHeadRTF,          IDR_BC_SPECIFIED_HEAD_RTF);
+	CGlobal::LoadRTFString(this->m_sSolutionAssocRTF, IDR_BC_SPECIFIED_SOL_ASSOC_RTF);
+	CGlobal::LoadRTFString(this->m_sSolutionFixRTF,   IDR_BC_SPECIFIED_SOL_FIX_RTF);	
+	CGlobal::LoadRTFString(this->m_sSolTypeRTF,       IDR_BC_SOL_TYPE_RTF);
 }
 
 CBCSpecifiedHeadPropertyPage::~CBCSpecifiedHeadPropertyPage()
@@ -26,6 +34,7 @@ void CBCSpecifiedHeadPropertyPage::DoDataExchange(CDataExchange* pDX)
 {
 	baseCBCSpecifiedHeadPropertyPage::DoDataExchange(pDX);
 
+	DDX_Control(pDX, IDC_DESC_RICHEDIT, m_wndRichEditCtrl);
 	DDX_GridControl(pDX, IDC_HEAD_GRID, m_gridHead);
 	DDX_GridControl(pDX, IDC_SOLUTION_GRID, m_gridSolution);
 
@@ -40,6 +49,10 @@ void CBCSpecifiedHeadPropertyPage::DoDataExchange(CDataExchange* pDX)
 		// solution
 		//
 		CGlobal::DDX_GridTimeSeries(pDX, IDC_SOLUTION_GRID, this->m_bc.m_bc_solution);
+
+		// wrap richedit to window
+		this->m_wndRichEditCtrl.SetTargetDevice(NULL, 0);
+		this->m_wndRichEditCtrl.SetWindowText(this->m_sDescriptionRTF.c_str());
 	}
 
 	// description
@@ -108,6 +121,13 @@ BEGIN_MESSAGE_MAP(CBCSpecifiedHeadPropertyPage, baseCBCSpecifiedHeadPropertyPage
 	ON_NOTIFY(GVN_CHECKCHANGED, IDC_SOLUTION_GRID, OnCheckChangedSolution)
 	ON_BN_CLICKED(IDC_FIXED_RADIO, OnBnClickedFixedRadio)
 	ON_BN_CLICKED(IDC_ASSOC_RADIO, OnBnClickedAssocRadio)
+	ON_EN_SETFOCUS(IDC_DESC_EDIT, OnEnSetfocusDescEdit)
+	ON_BN_SETFOCUS(IDC_ASSOC_RADIO, OnBnSetfocusAssocRadio)
+	ON_BN_SETFOCUS(IDC_FIXED_RADIO, OnBnSetfocusFixedRadio)
+	ON_NOTIFY(GVN_SELCHANGED, IDC_HEAD_GRID, OnSelChangedHead)
+	ON_NOTIFY(GVN_SETFOCUS, IDC_HEAD_GRID, OnSelChangedHead)
+	ON_NOTIFY(GVN_SELCHANGED, IDC_SOLUTION_GRID, OnSelChangedSolution)
+	ON_NOTIFY(GVN_SETFOCUS, IDC_SOLUTION_GRID, OnSelChangedSolution)
 END_MESSAGE_MAP()
 
 
@@ -387,6 +407,7 @@ void CBCSpecifiedHeadPropertyPage::OnBnClickedFixedRadio()
 	{
 		this->m_bc.bc_solution_type = ASSOCIATED;
 	}
+	this->OnSelChangedSolution(NULL, NULL);
 }
 
 void CBCSpecifiedHeadPropertyPage::OnBnClickedAssocRadio()
@@ -398,5 +419,42 @@ void CBCSpecifiedHeadPropertyPage::OnBnClickedAssocRadio()
 	if (this->IsDlgButtonChecked(IDC_ASSOC_RADIO))
 	{
 		this->m_bc.bc_solution_type = ASSOCIATED;
+	}
+	this->OnSelChangedSolution(NULL, NULL);
+}
+
+void CBCSpecifiedHeadPropertyPage::OnEnSetfocusDescEdit()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sDescriptionRTF.c_str());
+}
+
+void CBCSpecifiedHeadPropertyPage::OnBnSetfocusAssocRadio()
+{
+	///this->m_wndRichEditCtrl.SetWindowText(this->m_sSolTypeRTF.c_str());
+}
+
+void CBCSpecifiedHeadPropertyPage::OnBnSetfocusFixedRadio()
+{
+	///this->m_wndRichEditCtrl.SetWindowText(this->m_sSolTypeRTF.c_str());
+}
+
+void CBCSpecifiedHeadPropertyPage::OnSelChangedHead(NMHDR *pNotifyStruct, LRESULT *result)
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sHeadRTF.c_str());
+}
+
+void CBCSpecifiedHeadPropertyPage::OnSelChangedSolution(NMHDR *pNotifyStruct, LRESULT *result)
+{
+	if (this->GetCheckedRadioButton(IDC_ASSOC_RADIO, IDC_FIXED_RADIO) == IDC_ASSOC_RADIO)
+	{
+		this->m_wndRichEditCtrl.SetWindowText(this->m_sSolutionAssocRTF.c_str());
+	}
+	else if (this->GetCheckedRadioButton(IDC_ASSOC_RADIO, IDC_FIXED_RADIO) == IDC_FIXED_RADIO)
+	{
+		this->m_wndRichEditCtrl.SetWindowText(this->m_sSolutionFixRTF.c_str());
+	}
+	else
+	{
+		ASSERT(FALSE);
 	}
 }

@@ -36,7 +36,8 @@ void CICHeadSpreadPropertyPage::CommonConstruct(void)
 
 	// load property descriptions
 	//
-	CGlobal::LoadRTFString(this->m_sHeadRTF, IDR_IC_HEAD_HEAD_RTF);
+	CGlobal::LoadRTFString(this->m_sDescriptionRTF, IDR_DESCRIPTION_RTF);
+	CGlobal::LoadRTFString(this->m_sHeadRTF,        IDR_IC_HEAD_HEAD_RTF);
 }
 
 
@@ -84,6 +85,8 @@ void CICHeadSpreadPropertyPage::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CICHeadSpreadPropertyPage, CPropertyPage)
 	ON_NOTIFY(GVN_CHECKCHANGED, IDC_HEADIC_GRID, OnCheckChangedHeadIC)
 	ON_NOTIFY(GVN_SELCHANGED, IDC_HEADIC_GRID, OnSelChangedHeadIC)
+	ON_EN_SETFOCUS(IDC_DESC_EDIT, OnEnSetfocusDescEdit)
+	ON_NOTIFY(GVN_SETFOCUS, IDC_HEADIC_GRID, OnSelChangedHeadIC)
 END_MESSAGE_MAP()
 
 
@@ -280,4 +283,9 @@ LRESULT CICHeadSpreadPropertyPage::OnWizardNext()
 		}
 	}
 	return CPropertyPage::OnWizardNext();
+}
+
+void CICHeadSpreadPropertyPage::OnEnSetfocusDescEdit()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sDescriptionRTF.c_str());
 }

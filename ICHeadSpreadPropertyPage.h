@@ -36,7 +36,8 @@ protected:
 
 	CModGridCtrlEx m_gridHeadIC;  // IDC_HEADIC_GRID
 
-	std::string m_sHeadRTF;       // IDR_IC_HEAD_HEAD_RTF
+	std::string m_sDescriptionRTF;  // IDR_DESCRIPTION_RTF
+	std::string m_sHeadRTF;         // IDR_IC_HEAD_HEAD_RTF
 
 	DECLARE_MESSAGE_MAP()
 
@@ -49,4 +50,5 @@ public:
 	virtual BOOL OnSetActive();
 	virtual BOOL OnKillActive();
 	virtual LRESULT OnWizardNext();
+	afx_msg void OnEnSetfocusDescEdit();
 };

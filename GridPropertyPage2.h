@@ -67,6 +67,18 @@ protected:
 	CGridKeyword     m_gridKeyword;
 
 	CGridSetAction  *m_pAction;
+
+	CRichEditCtrl m_wndRichEditCtrl;
+
+	std::string m_sGridUni;       // IDR_GRID_UNI_RTF
+	std::string m_sGridNonUni;    // IDR_GRID_NONUNI_RTF
+	std::string m_sGridMin;       // IDR_GRID_MIN_RTF
+	std::string m_sGridMax;       // IDR_GRID_MAX_RTF
+	std::string m_sGridNodes;     // IDR_GRID_NODES_RTF
+	std::string m_sGridSnap;      // IDR_GRID_SNAP_RTF
+	std::string m_sGridOrient;    // IDR_GRID_ORIENT_RTF
+	std::string m_sGridChemDims;  // IDR_GRID_CHEM_DIMS_RTF
+
 public:
 // COMMENT: {7/20/2005 3:11:28 PM}	CGrid            m_grid[3];
 // COMMENT: {7/20/2005 3:29:05 PM}	int              m_axes[3];
@@ -90,4 +102,16 @@ public:
 	afx_msg void OnEndLabelEditGrid(NMHDR *pNotifyStruct, LRESULT *result);
 	afx_msg void OnBnClickedButtonSubdivide();
 	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
+	afx_msg void OnBnSetfocusRadioUniform();
+	afx_msg void OnBnSetfocusRadioNonuniform();
+	afx_msg void OnEnSetfocusEditMin();
+	afx_msg void OnEnSetfocusEditMax();
+	afx_msg void OnEnSetfocusEditUNodes();
+	afx_msg void OnEnSetfocusEditSnap();
+	afx_msg void OnEnSetfocusEditNNodes();
+	afx_msg void OnBnSetfocusCheckX();
+	afx_msg void OnBnSetfocusCheckY();
+	afx_msg void OnBnSetfocusCheckZ();
+	afx_msg void OnBnSetfocusRadioXy();
+	afx_msg void OnBnSetfocusRadioXz();
 };

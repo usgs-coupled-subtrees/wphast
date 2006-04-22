@@ -16,6 +16,13 @@ CBCFluxPropertyPage2::CBCFluxPropertyPage2()
 	: baseCBCFluxPropertyPage2(CBCFluxPropertyPage2::IDD)
 {
 	this->SetFlowOnly(false);
+
+	// load property descriptions
+	//
+	CGlobal::LoadRTFString(this->m_sDescriptionRTF,   IDR_DESCRIPTION_RTF);
+	CGlobal::LoadRTFString(this->m_sAssocSolutionRTF, IDR_BC_FLUX_ASSOC_SOL_RTF);
+	CGlobal::LoadRTFString(this->m_sFluxRTF,          IDR_BC_FLUX_FLUX_RTF);
+	CGlobal::LoadRTFString(this->m_sFaceRTF,          IDR_BC_FLUX_FACE_RTF);
 }
 
 CBCFluxPropertyPage2::~CBCFluxPropertyPage2()
@@ -25,6 +32,14 @@ CBCFluxPropertyPage2::~CBCFluxPropertyPage2()
 void CBCFluxPropertyPage2::DoDataExchange(CDataExchange* pDX)
 {
 	baseCBCFluxPropertyPage2::DoDataExchange(pDX);
+
+	DDX_Control(pDX, IDC_DESC_RICHEDIT, m_wndRichEditCtrl);
+	if (this->m_bFirstSetActive)
+	{
+		// wrap richedit to window
+		this->m_wndRichEditCtrl.SetTargetDevice(NULL, 0);
+		this->m_wndRichEditCtrl.SetWindowText(this->m_sDescriptionRTF.c_str());
+	}
 
 	DDX_GridControl(pDX, IDC_FLUX_GRID, m_gridFlux);
 	DDX_GridControl(pDX, IDC_SOLUTION_GRID, m_gridSolution);
@@ -270,6 +285,14 @@ BEGIN_MESSAGE_MAP(CBCFluxPropertyPage2, baseCBCFluxPropertyPage2)
 	ON_BN_CLICKED(IDC_FACE_X_RADIO, OnBnClickedFace)
 	ON_BN_CLICKED(IDC_FACE_Y_RADIO, OnBnClickedFace)
 	ON_BN_CLICKED(IDC_FACE_Z_RADIO, OnBnClickedFace)
+	ON_EN_SETFOCUS(IDC_DESC_EDIT, OnEnSetfocusDescEdit)
+	ON_BN_SETFOCUS(IDC_FACE_X_RADIO, OnBnSetfocusFaceXRadio)
+	ON_BN_SETFOCUS(IDC_FACE_Y_RADIO, OnBnSetfocusFaceYRadio)
+	ON_BN_SETFOCUS(IDC_FACE_Z_RADIO, OnBnSetfocusFaceZRadio)
+	ON_NOTIFY(GVN_SELCHANGED, IDC_FLUX_GRID, OnSelChangedFlux)
+	ON_NOTIFY(GVN_SETFOCUS, IDC_FLUX_GRID, OnSelChangedFlux)
+	ON_NOTIFY(GVN_SELCHANGED, IDC_SOLUTION_GRID, OnSelChangedSolution)
+	ON_NOTIFY(GVN_SETFOCUS, IDC_SOLUTION_GRID, OnSelChangedSolution)
 END_MESSAGE_MAP()
 
 
@@ -410,3 +433,34 @@ void CBCFluxPropertyPage2::OnBnClickedFace()
 		this->m_bc.face         = 2;
 	}
 }
+
+void CBCFluxPropertyPage2::OnEnSetfocusDescEdit()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sDescriptionRTF.c_str());
+}
+
+void CBCFluxPropertyPage2::OnBnSetfocusFaceXRadio()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sFaceRTF.c_str());
+}
+
+void CBCFluxPropertyPage2::OnBnSetfocusFaceYRadio()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sFaceRTF.c_str());
+}
+
+void CBCFluxPropertyPage2::OnBnSetfocusFaceZRadio()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sFaceRTF.c_str());
+}
+
+void CBCFluxPropertyPage2::OnSelChangedFlux(NMHDR *pNotifyStruct, LRESULT *result)
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sFluxRTF.c_str());
+}
+
+void CBCFluxPropertyPage2::OnSelChangedSolution(NMHDR *pNotifyStruct, LRESULT *result)
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sAssocSolutionRTF.c_str());
+}
+

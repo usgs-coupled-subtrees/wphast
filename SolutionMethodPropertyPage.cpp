@@ -14,6 +14,17 @@ IMPLEMENT_DYNAMIC(CSolutionMethodPropertyPage, CPropertyPage)
 CSolutionMethodPropertyPage::CSolutionMethodPropertyPage()
 	: CPropertyPage(CSolutionMethodPropertyPage::IDD)
 {
+	// load property descriptions
+	//
+	CGlobal::LoadRTFString(this->m_sSM_IterativeTrue,  IDR_SM_ITERATIVE_TRUE_RTF);
+	CGlobal::LoadRTFString(this->m_sSM_IterativeFalse, IDR_SM_ITERATIVE_FALSE_RTF);
+	CGlobal::LoadRTFString(this->m_sSM_Tolerance,      IDR_SM_TOLERANCE_RTF);
+	CGlobal::LoadRTFString(this->m_sSM_SaveDir,        IDR_SM_SAVE_DIR_RTF);
+	CGlobal::LoadRTFString(this->m_sSM_MaxIter,        IDR_SM_MAX_ITER_RTF);
+	CGlobal::LoadRTFString(this->m_sSM_Space,          IDR_SM_SPACE_RTF);
+	CGlobal::LoadRTFString(this->m_sSM_TimeDiff,       IDR_SM_TIME_DIFF_RTF);
+	CGlobal::LoadRTFString(this->m_sSM_CrossDisp,      IDR_SM_CROSS_DISP_RTF);
+	CGlobal::LoadRTFString(this->m_sSM_Rebalance,      IDR_SM_REBALANCE_RTF);
 }
 
 CSolutionMethodPropertyPage::~CSolutionMethodPropertyPage()
@@ -23,6 +34,14 @@ CSolutionMethodPropertyPage::~CSolutionMethodPropertyPage()
 void CSolutionMethodPropertyPage::DoDataExchange(CDataExchange* pDX)
 {
 	CPropertyPage::DoDataExchange(pDX);
+
+	DDX_Control(pDX, IDC_DESC_RICHEDIT, m_wndRichEditCtrl);
+	if (this->m_bFirstSetActive)
+	{
+		// wrap richedit to window
+		this->m_wndRichEditCtrl.SetTargetDevice(NULL, 0);
+		this->m_wndRichEditCtrl.SetWindowText(this->m_sSM_IterativeTrue.c_str());
+	}
 
 	if (pDX->m_bSaveAndValidate)
 	{
@@ -88,6 +107,15 @@ void CSolutionMethodPropertyPage::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CSolutionMethodPropertyPage, CPropertyPage)
 	ON_BN_CLICKED(IDC_RADIO_ITER, OnBnClickedRadioIter)
 	ON_BN_CLICKED(IDC_RADIO_DIRECT, OnBnClickedRadioDirect)
+	ON_EN_SETFOCUS(IDC_EDIT_TOL, OnEnSetfocusEditTol)
+	ON_EN_SETFOCUS(IDC_EDIT_SAVE, OnEnSetfocusEditSave)
+	ON_EN_SETFOCUS(IDC_EDIT_MAX, OnEnSetfocusEditMax)
+	ON_EN_SETFOCUS(IDC_EDIT_SPACE, OnEnSetfocusEditSpace)
+	ON_EN_SETFOCUS(IDC_EDIT_TIME, OnEnSetfocusEditTime)
+	ON_BN_SETFOCUS(IDC_CHECK_CROSS_DISP, OnBnSetfocusCheckCrossDisp)
+	ON_EN_SETFOCUS(IDC_EDIT_REBAL, OnEnSetfocusEditRebal)
+	ON_BN_SETFOCUS(IDC_RADIO_DIRECT, OnBnSetfocusRadioDirect)
+	ON_BN_SETFOCUS(IDC_RADIO_ITER, OnBnSetfocusRadioIter)
 END_MESSAGE_MAP()
 
 // CSolutionMethodPropertyPage message handlers
@@ -154,4 +182,49 @@ BOOL CSolutionMethodPropertyPage::OnInitDialog()
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
+}
+
+void CSolutionMethodPropertyPage::OnEnSetfocusEditTol()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sSM_Tolerance.c_str());
+}
+
+void CSolutionMethodPropertyPage::OnEnSetfocusEditSave()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sSM_SaveDir.c_str());
+}
+
+void CSolutionMethodPropertyPage::OnEnSetfocusEditMax()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sSM_MaxIter.c_str());
+}
+
+void CSolutionMethodPropertyPage::OnEnSetfocusEditSpace()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sSM_Space.c_str());
+}
+
+void CSolutionMethodPropertyPage::OnEnSetfocusEditTime()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sSM_TimeDiff.c_str());
+}
+
+void CSolutionMethodPropertyPage::OnBnSetfocusCheckCrossDisp()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sSM_CrossDisp.c_str());
+}
+
+void CSolutionMethodPropertyPage::OnEnSetfocusEditRebal()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sSM_Rebalance.c_str());
+}
+
+void CSolutionMethodPropertyPage::OnBnSetfocusRadioDirect()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sSM_IterativeFalse.c_str());
+}
+
+void CSolutionMethodPropertyPage::OnBnSetfocusRadioIter()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sSM_IterativeTrue.c_str());
 }

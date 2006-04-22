@@ -449,6 +449,14 @@ void CModGridCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 				m_MouseMode = MOUSE_NOTHING;
 			}
 			SetFocusCell(next);
+			//{{ {4/21/2006 5:23:39 PM}
+			if (m_MouseMode == MOUSE_NOTHING)
+			{
+				ASSERT(m_idCurrentCell == next);
+				SendMessageToParent(m_idCurrentCell.row, m_idCurrentCell.col, GVN_SELCHANGED); 
+			}
+			//}} {4/21/2006 5:23:39 PM}
+
 			if (!IsCellVisible(next))
 			{   
 				EnsureVisible(next); // Make sure cell is visible

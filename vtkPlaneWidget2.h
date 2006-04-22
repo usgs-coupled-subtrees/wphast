@@ -24,6 +24,9 @@ public:
 
 	double GetAngle(void); // degrees
 	void SetAngle(double angle); // degrees
+
+	double GetRadians(void);
+	void SetRadians(double radians);
 	
 	vtkFloatingPointType* GetModelOrigin(void); // degrees
 	void SetModelOrigin(float x, float y);
@@ -93,6 +96,21 @@ protected:
 	vtkActor          *YAxisActor;
 	double            Angle;
 	vtkFloatingPointType   m_InvisablePosX[3];
+
+// COMMENT: {4/18/2006 11:11:02 PM}	// axes triangle
+// COMMENT: {4/18/2006 11:11:02 PM}	vtkPoints         *TrianglePoints;
+// COMMENT: {4/18/2006 11:11:02 PM}	vtkCellArray      *TriangleCellArray;
+// COMMENT: {4/18/2006 11:11:02 PM}	vtkPolyData       *TrianglePolyData;
+// COMMENT: {4/18/2006 11:11:02 PM}	vtkPolyDataMapper *TriangleMapper;
+// COMMENT: {4/18/2006 11:11:02 PM}	vtkActor          *TriangleActor;
+
+	// active plane
+	vtkPlaneSource      *ActivePlaneSource;
+	vtkPolyData         *ActivePlaneOutline;
+	vtkPolyDataMapper   *ActivePlaneMapper;
+	vtkActor            *ActivePlaneActor;
+
+
 #if defined(_DEBUG)
 	vtkActor          *m_VisHandle;
 	vtkPolyDataMapper *m_VisHandleMapper;
