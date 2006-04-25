@@ -5,6 +5,7 @@
 #include "WPhast.h"
 #include "TimeControlMultiPropertyPage2.h"
 
+#include "Global.h"
 
 // CTimeControlMultiPropertyPage2 dialog
 
@@ -12,6 +13,15 @@ IMPLEMENT_DYNAMIC(CTimeControlMultiPropertyPage2, baseCTimeControlMultiPropertyP
 CTimeControlMultiPropertyPage2::CTimeControlMultiPropertyPage2()
 	: baseCTimeControlMultiPropertyPage2(CTimeControlMultiPropertyPage2::IDD)
 {
+	// load property descriptions
+	//
+	CGlobal::LoadRTFString(this->m_sTimeEndRTF,         IDR_TC_TE_TIME_END_RTF);
+	CGlobal::LoadRTFString(this->m_sTimeEndUnitsRTF,    IDR_TC_TE_TIME_END_UNITS_RTF);
+
+	CGlobal::LoadRTFString(this->m_sTSTimeRTF,          IDR_TC_TS_TIME_RTF);
+	CGlobal::LoadRTFString(this->m_sTSUnitsRTF,         IDR_TC_TS_UNITS_RTF);
+	CGlobal::LoadRTFString(this->m_sTSTimeStepRTF,      IDR_TC_TS_TIME_STEP_RTF);
+	CGlobal::LoadRTFString(this->m_sTSTimeStepUnitsRTF, IDR_TC_TS_TIME_STEP_UNITS_RTF);
 }
 
 CTimeControlMultiPropertyPage2::~CTimeControlMultiPropertyPage2()
@@ -24,6 +34,14 @@ void CTimeControlMultiPropertyPage2::DoDataExchange(CDataExchange* pDX)
 
 	DDX_GridControl(pDX, IDC_TIMEEND_GRID, m_gridTimeEnd);
 	DDX_GridControl(pDX, IDC_TIMESTEP_GRID, m_gridTimeStep);
+
+	DDX_Control(pDX, IDC_DESC_RICHEDIT, m_wndRichEditCtrl);
+	if (this->m_bFirstSetActive)
+	{
+		// wrap richedit to window
+		this->m_wndRichEditCtrl.SetTargetDevice(NULL, 0);
+		this->m_wndRichEditCtrl.SetWindowText(this->m_sTimeEndRTF.c_str());
+	}
 
 	if (this->m_bFirstSetActive)
 	{
@@ -154,6 +172,10 @@ void CTimeControlMultiPropertyPage2::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(CTimeControlMultiPropertyPage2, baseCTimeControlMultiPropertyPage2)
 	ON_NOTIFY(GVN_SELCHANGED, IDC_TIMESTEP_GRID, OnSelChangedTimeStep)
+	ON_NOTIFY(GVN_SETFOCUS, IDC_TIMESTEP_GRID, OnSelChangedTimeStep)
+
+	ON_NOTIFY(GVN_SELCHANGED, IDC_TIMEEND_GRID, OnSelChangedTimeEnd)
+	ON_NOTIFY(GVN_SETFOCUS, IDC_TIMEEND_GRID, OnSelChangedTimeEnd)
 END_MESSAGE_MAP()
 
 
@@ -272,18 +294,46 @@ void CTimeControlMultiPropertyPage2::GetProperties(CTimeControl2& r_tc2)
 	r_tc2 = this->m_tc2;
 }
 
+void CTimeControlMultiPropertyPage2::OnSelChangedTimeEnd(NMHDR *pNotifyStruct, LRESULT *result)
+{
+	CCellID focus = this->m_gridTimeEnd.GetFocusCell();
+
+	if (!this->m_gridTimeEnd.IsValid(focus)) return;
+
+	switch (focus.col)
+	{
+	case 0:
+		this->m_wndRichEditCtrl.SetWindowText(this->m_sTimeEndRTF.c_str());
+		break;
+	case 1:
+		this->m_wndRichEditCtrl.SetWindowText(this->m_sTimeEndUnitsRTF.c_str());
+		break;
+	default:
+		ASSERT(FALSE);
+	}
+}
+
 void CTimeControlMultiPropertyPage2::OnSelChangedTimeStep(NMHDR *pNotifyStruct, LRESULT *result)
 {
-#ifdef _DEBUG
-	this->m_gridTimeStep.SetHighLight(GV_HIGHLIGHT_ALWAYS);
+	CCellID focus = this->m_gridTimeStep.GetFocusCell();
 
-	CCellRange range = this->m_gridTimeStep.GetSelectedCellRange();
+	if (!this->m_gridTimeStep.IsValid(focus)) return;
 
-	TRACE("range.GetMinRow() = %d\n", range.GetMinRow());
-	TRACE("range.GetMaxRow() = %d\n", range.GetMaxRow());
-	TRACE("range.GetMinCol() = %d\n", range.GetMinCol());
-	TRACE("range.GetMaxCol() = %d\n", range.GetMaxCol());
-
-	::AfxMessageBox("Worksheet_SelectionChange");
-#endif
+	switch (focus.col)
+	{
+	case 0:
+		this->m_wndRichEditCtrl.SetWindowText(this->m_sTSTimeRTF.c_str());
+		break;
+	case 1:
+		this->m_wndRichEditCtrl.SetWindowText(this->m_sTSUnitsRTF.c_str());
+		break;
+	case 2:
+		this->m_wndRichEditCtrl.SetWindowText(this->m_sTSTimeStepRTF.c_str());
+		break;
+	case 3:
+		this->m_wndRichEditCtrl.SetWindowText(this->m_sTSTimeStepUnitsRTF.c_str());
+		break;
+	default:
+		ASSERT(FALSE);
+	}
 }

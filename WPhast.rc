@@ -71,7 +71,6 @@ END
 IDR_MAINFRAME           ICON                    "res\\WPhast.ico"
 IDR_WPhastTYPE          ICON                    "res\\WPhastDoc.ico"
 IDR_MAINFRAME_SDI       ICON                    "res\\idr_main.ico"
-IDI_ZOOM_REAL           ICON                    "res\\icon1.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -1814,7 +1813,7 @@ BEGIN
     PUSHBUTTON      "Insert",IDC_BUTTON_INSERT,61,239,50,14
     PUSHBUTTON      "Delete",IDC_BUTTON_DELETE,117,239,50,14
     CONTROL         "Save final heads",IDC_CHECK_SAVE_HEADS,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,342,243,69,10
+                    BS_AUTOCHECKBOX | BS_NOTIFY | WS_TABSTOP,342,243,69,10
 END
 
 IDD_STARTUP_INTRO DIALOGEX 0, 0, 254, 86
@@ -2094,15 +2093,14 @@ CAPTION "Time Control Properties"
 FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
     CONTROL         "Custom1",IDC_TIMEEND_GRID,"MFCGridCtrl",WS_BORDER | 
-                    WS_TABSTOP,7,7,144,149
+                    WS_TABSTOP,7,7,144,137
     CONTROL         "Custom1",IDC_TIMESTEP_GRID,"MFCGridCtrl",WS_BORDER | 
-                    WS_TABSTOP,169,7,242,149
+                    WS_TABSTOP,169,7,242,137
     CONTROL         "",IDC_DESC_RICHEDIT,"RichEdit20A",ES_MULTILINE | 
                     ES_AUTOHSCROLL | ES_READONLY | WS_BORDER | WS_VSCROLL | 
-                    WS_HSCROLL,16,173,385,34
+                    WS_HSCROLL,7,163,404,52
     LTEXT           "NOTE: This invisible control is needed so that the background of the dialog is painted correctly.",
                     IDC_STATIC,75,77,159,22,NOT WS_VISIBLE
-    GROUPBOX        "Static",IDC_DESC_STATIC,7,162,404,53,NOT WS_VISIBLE
 END
 
 IDD_MEDIASPREAD_EXT_PROPPAGE DIALOGEX 0, 0, 418, 234
@@ -2311,10 +2309,10 @@ BEGIN
     EDITTEXT        IDC_RIVER_THICK_EDIT,170,96,43,12,ES_AUTOHSCROLL
     LTEXT           "(ft)",IDC_RIVER_THICK_UNITS_STATIC,218,98,17,8
     GROUPBOX        "Elevation",IDC_STATIC,260,51,121,61
-    CONTROL         "&Depth",IDC_RADIO_DEPTH,"Button",BS_AUTORADIOBUTTON,270,
-                    68,35,10
-    CONTROL         "&Bottom",IDC_RADIO_BOTTOM,"Button",BS_AUTORADIOBUTTON,
-                    270,92,38,10
+    CONTROL         "&Depth",IDC_RADIO_DEPTH,"Button",BS_AUTORADIOBUTTON | 
+                    BS_NOTIFY,270,68,35,10
+    CONTROL         "&Bottom",IDC_RADIO_BOTTOM,"Button",BS_AUTORADIOBUTTON | 
+                    BS_NOTIFY,270,92,38,10
     EDITTEXT        IDC_DEPTH_EDIT,312,67,43,12,ES_AUTOHSCROLL
     LTEXT           "(ft)",IDC_DEPTH_UNITS_STATIC,359,69,17,8
     EDITTEXT        IDC_BOTTOM_EDIT,312,91,43,12,ES_AUTOHSCROLL
@@ -3640,7 +3638,6 @@ IDR_MINIMUM_TIME_STEP_RTF RTF                     "res\\MINIMUM_TIME_STEP.rtf"
 IDR_MAXIMUM_TIME_STEP_RTF RTF                     "res\\MAXIMUM_TIME_STEP.rtf"
 IDR_HEAD_CHANGE_TARGET_RTF RTF                     "res\\HEAD_CHANGE_TARGET.rtf"
 IDR_ITERATIONS_RTF      RTF                     "res\\ITERATIONS.rtf"
-IDR_RTF2                RTF                     "res\\rtf2.rtf"
 IDR_DESCRIPTION_RTF     RTF                     "res\\DESCRIPTION.rtf"
 IDR_SOLUTE_TRUE_RTF     RTF                     "res\\SOLUTE_TRUE.rtf"
 IDR_SOLUTE_FALSE_RTF    RTF                     "res\\SOLUTE_FALSE.rtf"
@@ -3678,6 +3675,63 @@ IDR_WELL_LOCATION_RTF   RTF                     "res\\WELL_LOCATION.rtf"
 IDR_WELL_LSD_RTF        RTF                     "res\\WELL_LSD.rtf"
 IDR_WELL_NUMBER_RTF     RTF                     "res\\WELL_NUMBER.rtf"
 IDR_WELL_RADIUS_RTF     RTF                     "res\\WELL_RADIUS.rtf"
+IDR_RIVER_NUM_RTF       RTF                     "res\\RIVER_NUM.rtf"
+IDR_RIVER_DESC_RTF      RTF                     "res\\RIVER_DESC.rtf"
+IDR_RIVER_LOC_RTF       RTF                     "res\\RIVER_LOC.rtf"
+IDR_RIVER_WIDTH_RTF     RTF                     "res\\RIVER_WIDTH.rtf"
+IDR_RIVER_HYD_COND_RTF  RTF                     "res\\RIVER_HYD_COND.rtf"
+IDR_RIVER_THICK_RTF     RTF                     "res\\RIVER_THICK.rtf"
+IDR_RIVER_DEPTH_RTF     RTF                     "res\\RIVER_DEPTH.rtf"
+IDR_RIVER_BOTTOM_RTF    RTF                     "res\\RIVER_BOTTOM.rtf"
+IDR_RIVER_START_RTF     RTF                     "res\\RIVER_START.rtf"
+IDR_RIVER_UNITS_RTF     RTF                     "res\\RIVER_UNITS.rtf"
+IDR_RIVER_HEAD_RTF      RTF                     "res\\RIVER_HEAD.rtf"
+IDR_RIVER_SOLUTION_RTF  RTF                     "res\\RIVER_SOLUTION.rtf"
+IDR_PR_INIT_BC_RTF      RTF                     "res\\PR_INIT_BC.rtf"
+IDR_PR_INIT_COMPS_RTF   RTF                     "res\\PR_INIT_COMPS.rtf"
+IDR_PR_INIT_COND_RTF    RTF                     "res\\PR_INIT_COND.rtf"
+IDR_PR_INIT_ECHO_RTF    RTF                     "res\\PR_INIT_ECHO.rtf"
+IDR_PR_INIT_FLUID_RTF   RTF                     "res\\PR_INIT_FLUID.rtf"
+IDR_PR_INIT_FORCE_RTF   RTF                     "res\\PR_INIT_FORCE.rtf"
+IDR_PR_INIT_HDF_CHEM_RTF RTF                     "res\\PR_INIT_HDF_CHEM.rtf"
+IDR_PR_INIT_HDF_HEAD_RTF RTF                     "res\\PR_INIT_HDF_HEAD.rtf"
+IDR_PR_INIT_HDF_VEL_RTF RTF                     "res\\PR_INIT_HDF_VEL.rtf"
+IDR_PR_INIT_HEADS_RTF   RTF                     "res\\PR_INIT_HEADS.rtf"
+IDR_PR_INIT_MEDIA_RTF   RTF                     "res\\PR_INIT_MEDIA.rtf"
+IDR_PR_INIT_SOL_METH_RTF RTF                     "res\\PR_INIT_SOL_METH.rtf"
+IDR_PR_INIT_SSFLOW_RTF  RTF                     "res\\PR_INIT_SSFLOW.rtf"
+IDR_PR_INIT_WELLS_RTF   RTF                     "res\\PR_INIT_WELLS.rtf"
+IDR_PR_INIT_XYZ_CHEM_RTF RTF                     "res\\PR_INIT_XYZ_CHEM.rtf"
+IDR_PR_INIT_XYZ_COMPS_RTF RTF                     "res\\PR_INIT_XYZ_COMPS.rtf"
+IDR_PR_INIT_XYZ_HEADS_RTF RTF                     "res\\PR_INIT_XYZ_HEADS.rtf"
+IDR_PR_INIT_XYZ_SSVEL_RTF RTF                     "res\\PR_INIT_XYZ_SSVEL.rtf"
+IDR_PR_INIT_XYZ_WELLS_RTF RTF                     "res\\PR_INIT_XYZ_WELLS.rtf"
+IDR_PR_FREQ_FR_BC_RTF   RTF                     "res\\PR_FREQ_FR_BC.rtf"
+IDR_PR_FREQ_COMPS_RTF   RTF                     "res\\PR_FREQ_COMPS.rtf"
+IDR_PR_FREQ_COND_RTF    RTF                     "res\\PR_FREQ_COND.rtf"
+IDR_PR_FREQ_FLOW_BAL_RTF RTF                     "res\\PR_FREQ_FLOW_BAL.rtf"
+IDR_PR_FREQ_FORCE_RTF   RTF                     "res\\PR_FREQ_FORCE.rtf"
+IDR_PR_FREQ_HDF_CHEM_RTF RTF                     "res\\PR_FREQ_HDF_CHEM.rtf"
+IDR_PR_FREQ_HDF_HEAD_RTF RTF                     "res\\PR_FREQ_HDF_HEAD.rtf"
+IDR_PR_FREQ_HDF_VEL_RTF RTF                     "res\\PR_FREQ_HDF_VEL.rtf"
+IDR_PR_FREQ_PROG_RTF    RTF                     "res\\PR_FREQ_PROG.rtf"
+IDR_PR_FREQ_VEL_RTF     RTF                     "res\\PR_FREQ_VEL.rtf"
+IDR_PR_FREQ_WELLS_RTF   RTF                     "res\\PR_FREQ_WELLS.rtf"
+IDR_PR_FREQ_XYZ_CHEM_RTF RTF                     "res\\PR_FREQ_XYZ_CHEM.rtf"
+IDR_PR_FREQ_XYZ_COMPS_RTF RTF                     "res\\PR_FREQ_XYZ_COMPS.rtf"
+IDR_PR_FREQ_XYZ_HEADS_RTF RTF                     "res\\PR_FREQ_XYZ_HEADS.rtf"
+IDR_PR_FREQ_XYZ_VEL_RTF RTF                     "res\\PR_FREQ_XYZ_VEL.rtf"
+IDR_PR_FREQ_XYZ_WELLS_RTF RTF                     "res\\PR_FREQ_XYZ_WELLS.rtf"
+IDR_PR_FREQ_BC_RTF      RTF                     "res\\PR_FREQ_BC.rtf"
+IDR_PR_FREQ_HEADS_RTF   RTF                     "res\\PR_FREQ_HEADS.rtf"
+IDR_PR_FREQ_SAVE_HEADS_RTF RTF                     "res\\PR_FREQ_SAVE_HEADS.rtf"
+IDR_PR_FREQ_TIME_RTF    RTF                     "res\\PR_FREQ_TIME.rtf"
+IDR_TC_TS_TIME_RTF      RTF                     "res\\TC_TS_TIME.rtf"
+IDR_TC_TS_UNITS_RTF     RTF                     "res\\TC_TS_UNITS.rtf"
+IDR_TC_TS_TIME_STEP_RTF RTF                     "res\\TC_TS_TIME_STEP.rtf"
+IDR_TC_TS_TIME_STEP_UNITS_RTF RTF                     "res\\TC_TS_TIME_STEP_UNITS.rtf"
+IDR_TC_TE_TIME_END_RTF  RTF                     "res\\TC_TE_TIME_END.rtf"
+IDR_TC_TE_TIME_END_UNITS_RTF RTF                     "res\\TC_TE_TIME_END_UNITS.rtf"
 
 /////////////////////////////////////////////////////////////////////////////
 //

@@ -33,8 +33,18 @@ protected:
 	CModGridCtrlEx   m_gridTimeEnd;     // IDC_TIMEEND_GRID
 	CModGridCtrlEx   m_gridTimeStep;    // IDC_TIMESTEP_GRID
 
+	CRichEditCtrl m_wndRichEditCtrl;
 	CTimeControl2 m_tc2;
 
+	std::string m_sTimeEndRTF;         // IDR_TC_TE_TIME_END_RTF
+	std::string m_sTimeEndUnitsRTF;    // IDR_TC_TE_TIME_END_UNITS_RTF
+
+	std::string m_sTSTimeRTF;          // IDR_TC_TS_TIME_RTF
+	std::string m_sTSUnitsRTF;         // IDR_TC_TS_UNITS_RTF
+	std::string m_sTSTimeStepRTF;      // IDR_TC_TS_TIME_STEP_RTF
+	std::string m_sTSTimeStepUnitsRTF; // IDR_TC_TS_TIME_STEP_UNITS_RTF
+
+	afx_msg void OnSelChangedTimeEnd(NMHDR *pNotifyStruct, LRESULT *result);
 	afx_msg void OnSelChangedTimeStep(NMHDR *pNotifyStruct, LRESULT *result);
 	DECLARE_MESSAGE_MAP()
 public:

@@ -9,6 +9,7 @@
 
 #ifndef baseCPrintFreqPropertyPage
 #define baseCPrintFreqPropertyPage ETSLayoutPropertyPageXP
+//#define baseCPrintFreqPropertyPage CPropertyPage
 #endif
 
 // CPrintFreqPropertyPage dialog
@@ -38,6 +39,10 @@ protected:
 
 	CModGridCtrlEx   m_Grid;              // IDC_GRID
 
+	CRichEditCtrl m_wndRichEditCtrl;
+
+	afx_msg void OnSelChangedGrid(NMHDR *pNotifyStruct, LRESULT *result);
+
 	DECLARE_MESSAGE_MAP()
 public:
 	afx_msg void OnBnClickedButtonAdd();
@@ -46,4 +51,5 @@ public:
 
 	afx_msg void OnEndLabelEditGrid(NMHDR *pNotifyStruct, LRESULT *result);
 	virtual BOOL OnInitDialog();
+	afx_msg void OnBnSetfocusCheckSaveHeads();
 };

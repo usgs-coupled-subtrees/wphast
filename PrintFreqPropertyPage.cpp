@@ -30,6 +30,13 @@ void CPrintFreqPropertyPage::DoDataExchange(CDataExchange* pDX)
 {
 	baseCPrintFreqPropertyPage::DoDataExchange(pDX);
 	DDX_GridControl(pDX, IDC_GRID, m_Grid);
+
+	DDX_Control(pDX, IDC_DESC_RICHEDIT, m_wndRichEditCtrl);
+	if (this->m_bFirstSetActive)
+	{
+		// wrap richedit to window
+		this->m_wndRichEditCtrl.SetTargetDevice(NULL, 0);
+	}
 	
 	int nState;
 	if (!pDX->m_bSaveAndValidate)
@@ -562,8 +569,11 @@ BEGIN_MESSAGE_MAP(CPrintFreqPropertyPage, baseCPrintFreqPropertyPage)
 	ON_BN_CLICKED(IDC_BUTTON_DELETE, OnBnClickedButtonDelete)
 
 	ON_NOTIFY(GVN_ENDLABELEDIT, IDC_GRID, OnEndLabelEditGrid)
-END_MESSAGE_MAP()
+	ON_BN_SETFOCUS(IDC_CHECK_SAVE_HEADS, OnBnSetfocusCheckSaveHeads)
 
+	ON_NOTIFY(GVN_SELCHANGED, IDC_GRID, OnSelChangedGrid)
+	ON_NOTIFY(GVN_SETFOCUS, IDC_GRID, OnSelChangedGrid)
+END_MESSAGE_MAP()
 
 // CPrintFreqPropertyPage message handlers
 
@@ -776,4 +786,83 @@ void CPrintFreqPropertyPage::OnEndLabelEditGrid(NMHDR *pNotifyStruct, LRESULT *r
 			this->m_Grid.RedrawCell(pnmgv->iRow, pnmgv->iColumn - 1);
 		}
 	}
+}
+
+void CPrintFreqPropertyPage::OnBnSetfocusCheckSaveHeads()
+{
+	static std::string s;
+	CGlobal::LoadRTFString(s, IDR_PR_FREQ_SAVE_HEADS_RTF);
+	this->m_wndRichEditCtrl.SetWindowText(s.c_str());
+}
+
+
+void CPrintFreqPropertyPage::OnSelChangedGrid(NMHDR *pNotifyStruct, LRESULT *result)
+{
+	CCellID focus = this->m_Grid.GetFocusCell();
+
+	if (!this->m_Grid.IsValid(focus)) return;
+	
+	static std::string s;
+
+	switch (focus.row)
+	{
+	case 1:
+		CGlobal::LoadRTFString(s, IDR_PR_FREQ_TIME_RTF);
+		break;
+	case 2:
+		CGlobal::LoadRTFString(s, IDR_PR_FREQ_FR_BC_RTF);
+		break;
+	case 3:
+		CGlobal::LoadRTFString(s, IDR_PR_FREQ_COMPS_RTF);
+		break;
+	case 4:
+		CGlobal::LoadRTFString(s, IDR_PR_FREQ_COND_RTF);
+		break;
+	case 5:
+		CGlobal::LoadRTFString(s, IDR_PR_FREQ_FLOW_BAL_RTF);
+		break;
+	case 6:
+		CGlobal::LoadRTFString(s, IDR_PR_FREQ_FORCE_RTF);
+		break;
+	case 7:
+		CGlobal::LoadRTFString(s, IDR_PR_FREQ_HDF_CHEM_RTF);
+		break;
+	case 8:
+		CGlobal::LoadRTFString(s, IDR_PR_FREQ_HDF_HEAD_RTF);
+		break;
+	case 9:
+		CGlobal::LoadRTFString(s, IDR_PR_FREQ_HDF_VEL_RTF);
+		break;
+	case 10:
+		CGlobal::LoadRTFString(s, IDR_PR_FREQ_HEADS_RTF);
+		break;
+	case 11:
+		CGlobal::LoadRTFString(s, IDR_PR_FREQ_PROG_RTF);
+		break;
+	case 12:
+		CGlobal::LoadRTFString(s, IDR_PR_FREQ_VEL_RTF);
+		break;
+	case 13:
+		CGlobal::LoadRTFString(s, IDR_PR_FREQ_WELLS_RTF);
+		break;
+	case 14:
+		CGlobal::LoadRTFString(s, IDR_PR_FREQ_XYZ_CHEM_RTF);
+		break;
+	case 15:
+		CGlobal::LoadRTFString(s, IDR_PR_FREQ_XYZ_COMPS_RTF);
+		break;
+	case 16:
+		CGlobal::LoadRTFString(s, IDR_PR_FREQ_XYZ_HEADS_RTF);
+		break;
+	case 17:
+		CGlobal::LoadRTFString(s, IDR_PR_FREQ_XYZ_VEL_RTF);
+		break;
+	case 18:
+		CGlobal::LoadRTFString(s, IDR_PR_FREQ_XYZ_WELLS_RTF);
+		break;
+	case 19:
+		CGlobal::LoadRTFString(s, IDR_PR_FREQ_BC_RTF);
+		break;
+	}
+	this->m_wndRichEditCtrl.SetWindowText(s.c_str());
 }

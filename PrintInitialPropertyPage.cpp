@@ -7,7 +7,6 @@
 
 #include "Global.h"
 
-
 // CPrintInitialPropertyPage dialog
 
 IMPLEMENT_DYNAMIC(CPrintInitialPropertyPage, CPropertyPage)
@@ -20,51 +19,63 @@ CPrintInitialPropertyPage::~CPrintInitialPropertyPage()
 {
 }
 
-#define SET_ROW_MACRO1(GRID, TITLE, SUFFIX, DATA) \
+#define SET_ROW_MACRO1(GRID, TITLE, SUFFIX, DATA, ID) \
 	do { \
 		++nRow; \
 		this->GRID.SetItemText(nRow, 0, TITLE); \
 		this->GRID.SetItemText(nRow, 1, SUFFIX); \
 	} while(0)
 
-#define SET_ROW_MACRO2(GRID, TITLE, SUFFIX, DATA) \
+#define SET_ROW_MACRO2(GRID, TITLE, SUFFIX, DATA, ID) \
 	do { \
 		++nRow; \
 		this->GRID.SetCheck(nRow, 2, this->m_PrintInput.DATA); \
 	} while(0)
 
-#define GET_ROW_MACRO(GRID, TITLE, SUFFIX, DATA) \
+#define GET_ROW_MACRO(GRID, TITLE, SUFFIX, DATA, ID) \
 	do { \
 		++nRow; \
 		this->m_PrintInput.DATA = this->GRID.GetCheck(nRow, 2); \
 	} while(0)
 
+
 #define EXPAND_LEFT_MACRO(GRID, MACRO) \
-	MACRO(GRID, _T("Boundary conditions"),        _T("*.O.probdef"), bc); \
-	MACRO(GRID, _T("Components"),                 _T("*.O.comps"),   comp); \
-	MACRO(GRID, _T("Conductance"),                _T("*.O.kd"),      conductances); \
-	MACRO(GRID, _T("Echo input"),                 _T("*.log"),       echo_input); \
-	MACRO(GRID, _T("Fluid properties"),           _T("*.O.probdef"), fluid); \
-	MACRO(GRID, _T("Force chemistry print"),      _T("*.O.chem"),    force_chem); \
-	MACRO(GRID, _T("HDF chemistry"),              _T("*.h5"),        hdf_chem); \
-	MACRO(GRID, _T("HDF heads"),                  _T("*.h5"),        hdf_head); \
-	MACRO(GRID, _T("HDF steady flow velocities"), _T("*.h5"),        hdf_ss_vel); \
-	MACRO(GRID, _T("Heads"),                      _T("*.O.head"),    head); \
+	MACRO(GRID, _T("Boundary conditions"),        _T("*.O.probdef"), bc,            IDR_PR_INIT_BC_RTF); \
+	MACRO(GRID, _T("Components"),                 _T("*.O.comps"),   comp,          IDR_PR_INIT_COMPS_RTF); \
+	MACRO(GRID, _T("Conductance"),                _T("*.O.kd"),      conductances,  IDR_PR_INIT_COND_RTF); \
+	MACRO(GRID, _T("Echo input"),                 _T("*.log"),       echo_input,    IDR_PR_INIT_ECHO_RTF); \
+	MACRO(GRID, _T("Fluid properties"),           _T("*.O.probdef"), fluid,         IDR_PR_INIT_FLUID_RTF); \
+	MACRO(GRID, _T("Force chemistry print"),      _T("*.O.chem"),    force_chem,    IDR_PR_INIT_FORCE_RTF); \
+	MACRO(GRID, _T("HDF chemistry"),              _T("*.h5"),        hdf_chem,      IDR_PR_INIT_HDF_CHEM_RTF); \
+	MACRO(GRID, _T("HDF heads"),                  _T("*.h5"),        hdf_head,      IDR_PR_INIT_HDF_HEAD_RTF); \
+	MACRO(GRID, _T("HDF steady flow velocities"), _T("*.h5"),        hdf_ss_vel,    IDR_PR_INIT_HDF_VEL_RTF); \
+	MACRO(GRID, _T("Heads"),                      _T("*.O.head"),    head,          IDR_PR_INIT_HEADS_RTF); \
 
 #define EXPAND_RIGHT_MACRO(GRID, MACRO) \
-	MACRO(GRID, _T("Media properties"),           _T("*.O.probdef"), media); \
-	MACRO(GRID, _T("Solution method"),            _T("*.O.probdef"), method); \
-	MACRO(GRID, _T("Steady flow velocities"),     _T("*.O.vel"),     ss_vel); \
-	MACRO(GRID, _T("Wells"),                      _T("*.O.wel"),     wells); \
-	MACRO(GRID, _T("XYZ chemistry"),              _T("*.xyz.chem"),  xyz_chem); \
-	MACRO(GRID, _T("XYZ components"),             _T("*.xyz.comps"), xyz_comp); \
-	MACRO(GRID, _T("XYZ heads"),                  _T("*.xyz.head"),  xyz_head); \
-	MACRO(GRID, _T("XYZ steady flow velocities"), _T("*.xyz.vel"),   xyz_ss_vel); \
-	MACRO(GRID, _T("XYZ wells"),                  _T("*.xyz.wel"),   xyz_wells); \
+	MACRO(GRID, _T("Media properties"),           _T("*.O.probdef"), media,         IDR_PR_INIT_MEDIA_RTF); \
+	MACRO(GRID, _T("Solution method"),            _T("*.O.probdef"), method,        IDR_PR_INIT_SOL_METH_RTF); \
+	MACRO(GRID, _T("Steady flow velocities"),     _T("*.O.vel"),     ss_vel,        IDR_PR_INIT_SSFLOW_RTF); \
+	MACRO(GRID, _T("Wells"),                      _T("*.O.wel"),     wells,         IDR_PR_INIT_WELLS_RTF); \
+	MACRO(GRID, _T("XYZ chemistry"),              _T("*.xyz.chem"),  xyz_chem,      IDR_PR_INIT_XYZ_CHEM_RTF); \
+	MACRO(GRID, _T("XYZ components"),             _T("*.xyz.comps"), xyz_comp,      IDR_PR_INIT_XYZ_COMPS_RTF); \
+	MACRO(GRID, _T("XYZ heads"),                  _T("*.xyz.head"),  xyz_head,      IDR_PR_INIT_XYZ_HEADS_RTF); \
+	MACRO(GRID, _T("XYZ steady flow velocities"), _T("*.xyz.vel"),   xyz_ss_vel,    IDR_PR_INIT_XYZ_SSVEL_RTF); \
+	MACRO(GRID, _T("XYZ wells"),                  _T("*.xyz.wel"),   xyz_wells,     IDR_PR_INIT_XYZ_WELLS_RTF); \
 
 #define START_EXPAND_MACRO()  { int nRow = 0
 #define END_EXPAND_MACRO() }
 
+#define RTF_MACRO(GRID, TITLE, SUFFIX, DATA, ID) \
+	do { \
+		++nRow; \
+		if (nRow == this->GRID.GetFocusCell().row) { \
+			CGlobal::LoadRTFString(s, ID); \
+			this->m_wndRichEditCtrl.SetWindowText(s.c_str()); \
+		} \
+	} while(0)
+
+#define START_RTF_MACRO()  { int nRow = 0; static std::string s
+#define END_RTF_MACRO() }
 
 void CPrintInitialPropertyPage::DoDataExchange(CDataExchange* pDX)
 {
@@ -72,6 +83,13 @@ void CPrintInitialPropertyPage::DoDataExchange(CDataExchange* pDX)
 
 	DDX_GridControl(pDX, IDC_GRID_LEFT, this->m_GridLeft);
 	DDX_GridControl(pDX, IDC_GRID_RIGHT, this->m_GridRight);
+
+	DDX_Control(pDX, IDC_DESC_RICHEDIT, m_wndRichEditCtrl);
+	if (this->m_bFirstSetActive)
+	{
+		// wrap richedit to window
+		this->m_wndRichEditCtrl.SetTargetDevice(NULL, 0);
+	}
 
 	if (this->m_GridLeft.GetColumnCount() == 0)
 	{
@@ -200,9 +218,25 @@ void CPrintInitialPropertyPage::DoDataExchange(CDataExchange* pDX)
 	}
 }
 
-
 BEGIN_MESSAGE_MAP(CPrintInitialPropertyPage, CPropertyPage)
+	ON_NOTIFY(GVN_SELCHANGED, IDC_GRID_LEFT, OnSelChangedLeft)
+	ON_NOTIFY(GVN_SETFOCUS, IDC_GRID_LEFT, OnSelChangedLeft)
+	ON_NOTIFY(GVN_SELCHANGED, IDC_GRID_RIGHT, OnSelChangedRight)
+	ON_NOTIFY(GVN_SETFOCUS, IDC_GRID_RIGHT, OnSelChangedRight)
 END_MESSAGE_MAP()
 
-
 // CPrintInitialPropertyPage message handlers
+
+void CPrintInitialPropertyPage::OnSelChangedLeft(NMHDR *pNotifyStruct, LRESULT *result)
+{
+	START_RTF_MACRO();
+	EXPAND_LEFT_MACRO(m_GridLeft, RTF_MACRO);
+	END_RTF_MACRO();
+}
+
+void CPrintInitialPropertyPage::OnSelChangedRight(NMHDR *pNotifyStruct, LRESULT *result)
+{
+	START_RTF_MACRO();
+	EXPAND_RIGHT_MACRO(m_GridRight, RTF_MACRO);
+	END_RTF_MACRO();
+}

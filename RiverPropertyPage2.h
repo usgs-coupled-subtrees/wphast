@@ -56,11 +56,37 @@ protected:
 
 	std::map<UINT, CCellID > m_mapCurrentFocusCell;
 
+	std::string m_sNumRTF;      // IDR_RIVER_NUM_RTF
+	std::string m_sDescRTF;     // IDR_RIVER_DESC_RTF
+	std::string m_sLocRTF;      // IDR_RIVER_LOC_RTF
+	std::string m_sWidthRTF;    // IDR_RIVER_WIDTH_RTF
+	std::string m_sHydCondRTF;  // IDR_RIVER_HYD_COND_RTF
+	std::string m_sThickRTF;    // IDR_RIVER_THICK_RTF
+	std::string m_sDepthRTF;    // IDR_RIVER_DEPTH_RTF
+	std::string m_sBottomRTF;   // IDR_RIVER_BOTTOM_RTF
+	std::string m_sStartRTF;    // IDR_RIVER_START_RTF
+	std::string m_sUnitsRTF;    // IDR_RIVER_UNITS_RTF
+	std::string m_sHeadRTF;     // IDR_RIVER_HEAD_RTF
+	std::string m_sSolutionRTF; // IDR_RIVER_SOLUTION_RTF
+
 public:
 	afx_msg void OnTvnSelchangingPropTree(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnTvnSelchangedPropTree(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg LRESULT OnUM_DDXFailure(WPARAM wParam, LPARAM lParam);
 
+	afx_msg void OnSelChangedSchedule(NMHDR *pNotifyStruct, LRESULT *result);
+
 	afx_msg void OnBnClickedRadioDepth();
 	afx_msg void OnBnClickedRadioBottom();
+	afx_msg void OnEnSetfocusNuserEdit();
+	afx_msg void OnEnSetfocusDescEdit();
+	afx_msg void OnEnSetfocusXEdit();
+	afx_msg void OnEnSetfocusYEdit();
+	afx_msg void OnEnSetfocusWidthEdit();
+	afx_msg void OnEnSetfocusRiverKEdit();
+	afx_msg void OnEnSetfocusRiverThickEdit();
+	afx_msg void OnBnSetfocusRadioDepth();
+	afx_msg void OnBnSetfocusRadioBottom();
+	afx_msg void OnEnSetfocusDepthEdit();
+	afx_msg void OnEnSetfocusBottomEdit();
 };

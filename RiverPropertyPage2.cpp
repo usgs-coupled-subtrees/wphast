@@ -27,6 +27,22 @@ CRiverPropertyPage2::CRiverPropertyPage2()
 	this->m_strRiverBedKUnits.Format("(%s)", this->m_units.river_bed_k.si);
 	CGlobal::MinimizeTimeUnits(this->m_strRiverBedKUnits);
 	this->m_strRiverBedThicknessUnits.Format("(%s)", this->m_units.river_bed_thickness.si);
+
+	// load property descriptions
+	//
+	CGlobal::LoadRTFString(this->m_sNumRTF,      IDR_RIVER_NUM_RTF);
+	CGlobal::LoadRTFString(this->m_sDescRTF,     IDR_RIVER_DESC_RTF);
+	CGlobal::LoadRTFString(this->m_sLocRTF,      IDR_RIVER_LOC_RTF);
+	CGlobal::LoadRTFString(this->m_sWidthRTF,    IDR_RIVER_WIDTH_RTF);
+	CGlobal::LoadRTFString(this->m_sHydCondRTF,  IDR_RIVER_HYD_COND_RTF);
+	CGlobal::LoadRTFString(this->m_sThickRTF,    IDR_RIVER_THICK_RTF);
+	CGlobal::LoadRTFString(this->m_sDepthRTF,    IDR_RIVER_DEPTH_RTF);
+	CGlobal::LoadRTFString(this->m_sBottomRTF,   IDR_RIVER_BOTTOM_RTF);
+	CGlobal::LoadRTFString(this->m_sStartRTF,    IDR_RIVER_START_RTF);
+	CGlobal::LoadRTFString(this->m_sUnitsRTF,    IDR_RIVER_UNITS_RTF);
+	CGlobal::LoadRTFString(this->m_sHeadRTF,     IDR_RIVER_HEAD_RTF);
+	CGlobal::LoadRTFString(this->m_sSolutionRTF, IDR_RIVER_SOLUTION_RTF);
+
 }
 
 CRiverPropertyPage2::~CRiverPropertyPage2()
@@ -40,6 +56,12 @@ void CRiverPropertyPage2::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_PROP_TREE, this->m_wndTreeCtrl);
 	DDX_GridControl(pDX, IDC_GRID_SCHEDULES, this->m_wndScheduleGrid);
 	DDX_Control(pDX, IDC_DESC_RICHEDIT, this->m_wndRichEditCtrl);
+	if (this->m_bFirstSetActive)
+	{
+		// wrap richedit to window
+		this->m_wndRichEditCtrl.SetTargetDevice(NULL, 0);
+		this->m_wndRichEditCtrl.SetWindowText(this->m_sNumRTF.c_str());
+	}
 
 	DDX_Text(pDX, IDC_X_UNITS_STATIC, this->m_strHorizontalUnits);
 	DDX_Text(pDX, IDC_Y_UNITS_STATIC, this->m_strHorizontalUnits);
@@ -690,6 +712,19 @@ BEGIN_MESSAGE_MAP(CRiverPropertyPage2, CPropertyPage)
 	ON_MESSAGE(UM_DDX_FAILURE, OnUM_DDXFailure)
 	ON_BN_CLICKED(IDC_RADIO_DEPTH, OnBnClickedRadioDepth)
 	ON_BN_CLICKED(IDC_RADIO_BOTTOM, OnBnClickedRadioBottom)
+	ON_EN_SETFOCUS(IDC_NUSER_EDIT, OnEnSetfocusNuserEdit)
+	ON_EN_SETFOCUS(IDC_DESC_EDIT, OnEnSetfocusDescEdit)
+	ON_EN_SETFOCUS(IDC_X_EDIT, OnEnSetfocusXEdit)
+	ON_EN_SETFOCUS(IDC_Y_EDIT, OnEnSetfocusYEdit)
+	ON_EN_SETFOCUS(IDC_WIDTH_EDIT, OnEnSetfocusWidthEdit)
+	ON_EN_SETFOCUS(IDC_RIVER_K_EDIT, OnEnSetfocusRiverKEdit)
+	ON_EN_SETFOCUS(IDC_RIVER_THICK_EDIT, OnEnSetfocusRiverThickEdit)
+	ON_BN_SETFOCUS(IDC_RADIO_DEPTH, OnBnSetfocusRadioDepth)
+	ON_BN_SETFOCUS(IDC_RADIO_BOTTOM, OnBnSetfocusRadioBottom)
+	ON_EN_SETFOCUS(IDC_DEPTH_EDIT, OnEnSetfocusDepthEdit)
+	ON_EN_SETFOCUS(IDC_BOTTOM_EDIT, OnEnSetfocusBottomEdit)
+	ON_NOTIFY(GVN_SELCHANGED, IDC_GRID_SCHEDULES, OnSelChangedSchedule)
+	ON_NOTIFY(GVN_SETFOCUS, IDC_GRID_SCHEDULES, OnSelChangedSchedule)
 END_MESSAGE_MAP()
 
 
@@ -893,4 +928,82 @@ void CRiverPropertyPage2::OnBnClickedRadioBottom()
 void CRiverPropertyPage2::SetUsedRiverNumbers(const std::set<int>& used)
 {
 	this->m_usedRiverNumbers = used;
+}
+
+void CRiverPropertyPage2::OnEnSetfocusNuserEdit()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sNumRTF.c_str());
+}
+
+void CRiverPropertyPage2::OnEnSetfocusDescEdit()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sDescRTF.c_str());
+}
+
+void CRiverPropertyPage2::OnEnSetfocusXEdit()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sLocRTF.c_str());
+}
+
+void CRiverPropertyPage2::OnEnSetfocusYEdit()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sLocRTF.c_str());
+}
+
+void CRiverPropertyPage2::OnEnSetfocusWidthEdit()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sWidthRTF.c_str());
+}
+
+void CRiverPropertyPage2::OnEnSetfocusRiverKEdit()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sHydCondRTF.c_str());
+}
+
+void CRiverPropertyPage2::OnEnSetfocusRiverThickEdit()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sThickRTF.c_str());
+}
+
+void CRiverPropertyPage2::OnBnSetfocusRadioDepth()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sDepthRTF.c_str());
+}
+
+void CRiverPropertyPage2::OnBnSetfocusRadioBottom()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sBottomRTF.c_str());
+}
+
+void CRiverPropertyPage2::OnEnSetfocusDepthEdit()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sDepthRTF.c_str());
+}
+
+void CRiverPropertyPage2::OnEnSetfocusBottomEdit()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sBottomRTF.c_str());
+}
+
+void CRiverPropertyPage2::OnSelChangedSchedule(NMHDR *pNotifyStruct, LRESULT *result)
+{
+	CCellID focus = this->m_wndScheduleGrid.GetFocusCell();
+
+	if (!this->m_wndScheduleGrid.IsValid(focus)) return;
+
+	switch (focus.col)
+	{
+	case 0:
+		this->m_wndRichEditCtrl.SetWindowText(this->m_sStartRTF.c_str());
+		break;
+	case 1:
+		this->m_wndRichEditCtrl.SetWindowText(this->m_sUnitsRTF.c_str());
+		break;
+	case 2:
+		this->m_wndRichEditCtrl.SetWindowText(this->m_sHeadRTF.c_str());
+		break;
+	case 3:
+		this->m_wndRichEditCtrl.SetWindowText(this->m_sSolutionRTF.c_str());
+		break;
+	}
 }

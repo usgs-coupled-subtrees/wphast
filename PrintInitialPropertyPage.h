@@ -32,6 +32,11 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 
+	CRichEditCtrl m_wndRichEditCtrl;
+
+	afx_msg void OnSelChangedLeft(NMHDR *pNotifyStruct, LRESULT *result);
+	afx_msg void OnSelChangedRight(NMHDR *pNotifyStruct, LRESULT *result);
+
 protected:
 	CModGridCtrlEx  m_GridLeft;   // IDC_GRID_LEFT
 	CModGridCtrlEx  m_GridRight;  // IDC_GRID_RIGHT
