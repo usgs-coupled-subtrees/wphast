@@ -275,7 +275,8 @@ void CMainFrame::UpdateXYZ(float x, float y, float z, const char* xy_units, cons
 {
 	TCHAR buffer[80];
 	::_sntprintf(buffer, 80, _T("%6.2f %s, %6.2f %s, %6.2f %s"), x, xy_units, y, xy_units, z, z_units);
-	m_wndStatusBar.SetPaneText(1, buffer);
+	if (::_tcsstr(buffer, _T("#")) == NULL)
+		m_wndStatusBar.SetPaneText(1, buffer);
 }
 
 #if !defined(_USE_DEFAULT_MENUS_)

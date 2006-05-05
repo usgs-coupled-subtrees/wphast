@@ -51,4 +51,8 @@ protected:
 	double m_BeginPoint[4];
 
 	CAction* m_pAction;
+
+	vtkFloatingPointType FixedPlanePoint[3];
+	int                  FixedPlane;  // [0-5]
+	int                  FixedCoord;  // [0-2]
 };

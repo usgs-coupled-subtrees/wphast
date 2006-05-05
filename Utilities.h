@@ -2,6 +2,11 @@
 
 #include <vector>
 
+#ifndef vtkFloatingPointType
+#define vtkFloatingPointType vtkFloatingPointType
+typedef float vtkFloatingPointType;
+#endif
+
 class CUtilities
 {
 public:
@@ -11,6 +16,7 @@ public:
 
 	static double ParseDouble(LPCSTR lpszString);
 
+	static void GetWorldPointAtFixedPlane(vtkRenderWindowInteractor *interactor, vtkRenderer *renderer, int fixed, vtkFloatingPointType value, vtkFloatingPointType point[3]);
 
 public:
 	class ParseException

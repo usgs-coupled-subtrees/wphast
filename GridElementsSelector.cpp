@@ -3,6 +3,8 @@
 
 #include "GridActor.h"
 #include "WPhastDoc.h"
+#include "Utilities.h"
+
 
 #if defined(USE_INTRINSIC)
 #pragma intrinsic(fabs) // using this inlines fabs and is ~ 4x faster
@@ -151,77 +153,77 @@ void CGridElementsSelector::PlaceWidget(vtkFloatingPointType bounds[6])
 	this->Actor->SetVisibility(1);
 }
 
-void GetWorldPointAtFixedPlane(vtkRenderWindowInteractor *interactor, vtkRenderer *renderer, int fixed, vtkFloatingPointType value, vtkFloatingPointType point[3])
-{
-	// fixed 
-	//   0 => X
-	//   1 => Y
-	//   2 => Z
-	//
-	ASSERT(0 <= fixed && fixed < 3);
-
-	int i;
-
-	// get the position of the mouse cursor in screen/window coordinates
-	// (pixel)
-	int* pos = interactor->GetEventPosition();
-
-	//vtkRenderer *Renderer = this->m_pView->GetRenderer();
-
-	// get the focal point in world coordinates
-	//
-	vtkCamera *camera = renderer->GetActiveCamera();	
-	vtkFloatingPointType cameraFP[4];
-	camera->GetFocalPoint((vtkFloatingPointType*)cameraFP); cameraFP[3] = 1.0;
-
-	// Convert the focal point coordinates to display (or screen) coordinates.
-	//
-	renderer->SetWorldPoint(cameraFP);
-	renderer->WorldToDisplay();
-	vtkFloatingPointType *displayCoords = renderer->GetDisplayPoint();
-
-	// Convert the selection point into world coordinates.
-	//
-	renderer->SetDisplayPoint(pos[0], pos[1], displayCoords[2]);
-	renderer->DisplayToWorld();
-	vtkFloatingPointType *worldCoords = renderer->GetWorldPoint();
-	if ( worldCoords[3] == 0.0 )
-	{
-		ASSERT(FALSE);
-		return;
-	}
-	vtkFloatingPointType pickPosition[3];
-	for (i = 0; i < 3; ++i)
-	{
-		pickPosition[i] = worldCoords[i] / worldCoords[3];
-	}
-
-	if ( camera->GetParallelProjection() )
-	{
-		double* cameraDOP = camera->GetDirectionOfProjection();
-		double t = (value - pickPosition[fixed]) / cameraDOP[fixed];
-		for (i = 0; i < 3; ++i)
-		{
-			if ( i != fixed )
-			{
-				point[i] = pickPosition[i] + t * cameraDOP[i];
-			}
-		}
-	}
-	else
-	{
-		double *cameraPos = camera->GetPosition();
-		double t = (value - cameraPos[fixed]) / ( pickPosition[fixed] - cameraPos[fixed] );
-		for (i = 0; i < 3; ++i)
-		{
-			if ( i != fixed )
-			{
-				point[i] = cameraPos[i] + t * ( pickPosition[i] - cameraPos[i] );
-			}
-		}
-	}
-	point[fixed] = value;
-}
+// COMMENT: {5/4/2006 8:48:49 PM}void GetWorldPointAtFixedPlane(vtkRenderWindowInteractor *interactor, vtkRenderer *renderer, int fixed, vtkFloatingPointType value, vtkFloatingPointType point[3])
+// COMMENT: {5/4/2006 8:48:49 PM}{
+// COMMENT: {5/4/2006 8:48:49 PM}	// fixed 
+// COMMENT: {5/4/2006 8:48:49 PM}	//   0 => X
+// COMMENT: {5/4/2006 8:48:49 PM}	//   1 => Y
+// COMMENT: {5/4/2006 8:48:49 PM}	//   2 => Z
+// COMMENT: {5/4/2006 8:48:49 PM}	//
+// COMMENT: {5/4/2006 8:48:49 PM}	ASSERT(0 <= fixed && fixed < 3);
+// COMMENT: {5/4/2006 8:48:49 PM}
+// COMMENT: {5/4/2006 8:48:49 PM}	int i;
+// COMMENT: {5/4/2006 8:48:49 PM}
+// COMMENT: {5/4/2006 8:48:49 PM}	// get the position of the mouse cursor in screen/window coordinates
+// COMMENT: {5/4/2006 8:48:49 PM}	// (pixel)
+// COMMENT: {5/4/2006 8:48:49 PM}	int* pos = interactor->GetEventPosition();
+// COMMENT: {5/4/2006 8:48:49 PM}
+// COMMENT: {5/4/2006 8:48:49 PM}	//vtkRenderer *Renderer = this->m_pView->GetRenderer();
+// COMMENT: {5/4/2006 8:48:49 PM}
+// COMMENT: {5/4/2006 8:48:49 PM}	// get the focal point in world coordinates
+// COMMENT: {5/4/2006 8:48:49 PM}	//
+// COMMENT: {5/4/2006 8:48:49 PM}	vtkCamera *camera = renderer->GetActiveCamera();	
+// COMMENT: {5/4/2006 8:48:49 PM}	vtkFloatingPointType cameraFP[4];
+// COMMENT: {5/4/2006 8:48:49 PM}	camera->GetFocalPoint((vtkFloatingPointType*)cameraFP); cameraFP[3] = 1.0;
+// COMMENT: {5/4/2006 8:48:49 PM}
+// COMMENT: {5/4/2006 8:48:49 PM}	// Convert the focal point coordinates to display (or screen) coordinates.
+// COMMENT: {5/4/2006 8:48:49 PM}	//
+// COMMENT: {5/4/2006 8:48:49 PM}	renderer->SetWorldPoint(cameraFP);
+// COMMENT: {5/4/2006 8:48:49 PM}	renderer->WorldToDisplay();
+// COMMENT: {5/4/2006 8:48:49 PM}	vtkFloatingPointType *displayCoords = renderer->GetDisplayPoint();
+// COMMENT: {5/4/2006 8:48:49 PM}
+// COMMENT: {5/4/2006 8:48:49 PM}	// Convert the selection point into world coordinates.
+// COMMENT: {5/4/2006 8:48:49 PM}	//
+// COMMENT: {5/4/2006 8:48:49 PM}	renderer->SetDisplayPoint(pos[0], pos[1], displayCoords[2]);
+// COMMENT: {5/4/2006 8:48:49 PM}	renderer->DisplayToWorld();
+// COMMENT: {5/4/2006 8:48:49 PM}	vtkFloatingPointType *worldCoords = renderer->GetWorldPoint();
+// COMMENT: {5/4/2006 8:48:49 PM}	if ( worldCoords[3] == 0.0 )
+// COMMENT: {5/4/2006 8:48:49 PM}	{
+// COMMENT: {5/4/2006 8:48:49 PM}		ASSERT(FALSE);
+// COMMENT: {5/4/2006 8:48:49 PM}		return;
+// COMMENT: {5/4/2006 8:48:49 PM}	}
+// COMMENT: {5/4/2006 8:48:49 PM}	vtkFloatingPointType pickPosition[3];
+// COMMENT: {5/4/2006 8:48:49 PM}	for (i = 0; i < 3; ++i)
+// COMMENT: {5/4/2006 8:48:49 PM}	{
+// COMMENT: {5/4/2006 8:48:49 PM}		pickPosition[i] = worldCoords[i] / worldCoords[3];
+// COMMENT: {5/4/2006 8:48:49 PM}	}
+// COMMENT: {5/4/2006 8:48:49 PM}
+// COMMENT: {5/4/2006 8:48:49 PM}	if ( camera->GetParallelProjection() )
+// COMMENT: {5/4/2006 8:48:49 PM}	{
+// COMMENT: {5/4/2006 8:48:49 PM}		double* cameraDOP = camera->GetDirectionOfProjection();
+// COMMENT: {5/4/2006 8:48:49 PM}		double t = (value - pickPosition[fixed]) / cameraDOP[fixed];
+// COMMENT: {5/4/2006 8:48:49 PM}		for (i = 0; i < 3; ++i)
+// COMMENT: {5/4/2006 8:48:49 PM}		{
+// COMMENT: {5/4/2006 8:48:49 PM}			if ( i != fixed )
+// COMMENT: {5/4/2006 8:48:49 PM}			{
+// COMMENT: {5/4/2006 8:48:49 PM}				point[i] = pickPosition[i] + t * cameraDOP[i];
+// COMMENT: {5/4/2006 8:48:49 PM}			}
+// COMMENT: {5/4/2006 8:48:49 PM}		}
+// COMMENT: {5/4/2006 8:48:49 PM}	}
+// COMMENT: {5/4/2006 8:48:49 PM}	else
+// COMMENT: {5/4/2006 8:48:49 PM}	{
+// COMMENT: {5/4/2006 8:48:49 PM}		double *cameraPos = camera->GetPosition();
+// COMMENT: {5/4/2006 8:48:49 PM}		double t = (value - cameraPos[fixed]) / ( pickPosition[fixed] - cameraPos[fixed] );
+// COMMENT: {5/4/2006 8:48:49 PM}		for (i = 0; i < 3; ++i)
+// COMMENT: {5/4/2006 8:48:49 PM}		{
+// COMMENT: {5/4/2006 8:48:49 PM}			if ( i != fixed )
+// COMMENT: {5/4/2006 8:48:49 PM}			{
+// COMMENT: {5/4/2006 8:48:49 PM}				point[i] = cameraPos[i] + t * ( pickPosition[i] - cameraPos[i] );
+// COMMENT: {5/4/2006 8:48:49 PM}			}
+// COMMENT: {5/4/2006 8:48:49 PM}		}
+// COMMENT: {5/4/2006 8:48:49 PM}	}
+// COMMENT: {5/4/2006 8:48:49 PM}	point[fixed] = value;
+// COMMENT: {5/4/2006 8:48:49 PM}}
 
 void CGridElementsSelector::ProcessEvents(vtkObject* vtkNotUsed(object), 
 								 unsigned long event,
@@ -265,7 +267,7 @@ void CGridElementsSelector::OnMouseMove(void)
 		this->GridActor->GetBounds(bounds);
 
 		vtkFloatingPointType endPoint[3];
-		::GetWorldPointAtFixedPlane(this->Interactor, this->CurrentRenderer, this->FixedCoord, bounds[this->FixedPlane], endPoint);
+		CUtilities::GetWorldPointAtFixedPlane(this->Interactor, this->CurrentRenderer, this->FixedCoord, bounds[this->FixedPlane], endPoint);
 
 		for (int i = 0; i < 3; ++i)
 		{
@@ -380,7 +382,7 @@ void CGridElementsSelector::OnLeftButtonDown(void)
 	//    5 => zmax
 	//
 	vtkFloatingPointType* bounds = this->GridActor->GetBounds();
-	::GetWorldPointAtFixedPlane(this->Interactor, this->CurrentRenderer, this->FixedCoord, bounds[this->FixedPlane], this->StartPoint);
+	CUtilities::GetWorldPointAtFixedPlane(this->Interactor, this->CurrentRenderer, this->FixedCoord, bounds[this->FixedPlane], this->StartPoint);
 
 	// set bounds for the outline
 	//

@@ -73,8 +73,17 @@
 
 #include "MainFrm.h"
 
+#include "Utilities.h"
+
 #include <afxmt.h>
 static CCriticalSection  critSect;
+
+#if defined(USE_INTRINSIC)
+#pragma intrinsic(fabs) // using this inlines fabs and is ~ 4x faster
+#define FABS(x) fabs(x)
+#else
+#define FABS(x) ((x < 0) ? -x : x) // this is slightly slower than the intrinsic
+#endif
 
 CViewVTKCommand::CViewVTKCommand(CWPhastView* pView)
 : m_pView(pView)
@@ -477,7 +486,54 @@ void CViewVTKCommand::Update()
 	const char* xy = units.horizontal.defined ? units.horizontal.input : units.horizontal.si;
 	const char* z = units.vertical.defined ? units.vertical.input : units.vertical.si;
 
-	// TODO this->m_WorldPointMinZPlane;
+//{{
+	// determine most likely plane by finding
+	// largest component vector
+	//
+	double max = 0.0;
+	vtkFloatingPointType viewPlaneNormal[3];
+	camera->GetViewPlaneNormal(viewPlaneNormal);
+	for (int i = 0; i < 3; ++i)
+	{
+		// Note: fabs() is ~4x slower
+		//
+		if ( max < FABS(viewPlaneNormal[i]) )
+		{
+			this->FixedCoord = i;
+			if ( viewPlaneNormal[i] < 0.0 )
+			{
+				max = -viewPlaneNormal[i];
+				this->FixedPlane = 2 * i;
+			}
+			else
+			{
+				max = viewPlaneNormal[i];
+				this->FixedPlane = 2 * i + 1;
+			}
+		}
+	}
+	ASSERT( 0 <= this->FixedPlane && this->FixedPlane < 6 );
+	ASSERT( 0 <= this->FixedCoord && this->FixedCoord < 3 );
+
+	// get point of intersection of axis=this->FixedCoord with a value of bounds[this->this->FixedPlane]
+	// this->FixedPlane       this->FixedCoord
+	//    0 => xmin        0 => x
+	//    1 => xmax        1 => y
+	//    2 => ymin        2 => z
+	//    3 => ymax
+	//    4 => zmin
+	//    5 => zmax
+	//
+	CUtilities::GetWorldPointAtFixedPlane(this->m_pView->GetRenderWindowInteractor(), renderer, this->FixedCoord, bounds[this->FixedPlane], this->FixedPlanePoint);
+
+	((CMainFrame*)::AfxGetMainWnd())->UpdateXYZ(
+		this->FixedPlanePoint[0]/scale[0]/units.horizontal.input_to_si,
+		this->FixedPlanePoint[1]/scale[1]/units.horizontal.input_to_si,
+		this->FixedPlanePoint[2]/scale[2]/units.vertical.input_to_si,
+		xy,
+		z);
+	return;
+//}}
 
 	((CMainFrame*)::AfxGetMainWnd())->UpdateXYZ(
 		this->m_WorldPointXYPlane[0]/scale[0]/units.horizontal.input_to_si,
@@ -907,19 +963,63 @@ void CViewVTKCommand::OnModifiedEvent(vtkObject* caller, void* callData)
 		int *winSize = renderer->GetRenderWindow()->GetSize();
 		double focalPoint[4];
 
-		this->ComputeWorldToDisplay(this->m_WorldPointXYPlane[0],
-									this->m_WorldPointXYPlane[1],
-									this->m_WorldPointXYPlane[2], focalPoint);
+// COMMENT: {5/5/2006 5:33:00 PM}		this->ComputeWorldToDisplay(this->m_WorldPointXYPlane[0],
+// COMMENT: {5/5/2006 5:33:00 PM}									this->m_WorldPointXYPlane[1],
+// COMMENT: {5/5/2006 5:33:00 PM}									this->m_WorldPointXYPlane[2], focalPoint);
 
+		// get the focal point in world coordinates
+		//
+		vtkCamera *camera = renderer->GetActiveCamera();	
+		vtkFloatingPointType cameraFP[4];
+		camera->GetFocalPoint((vtkFloatingPointType*)cameraFP); cameraFP[3] = 1.0;
+
+
+		this->ComputeWorldToDisplay(cameraFP[0],
+									cameraFP[1],
+									cameraFP[2], focalPoint);
+
+		/****
+		this->ComputeWorldToDisplay(this->FixedPlanePoint[0],
+									this->FixedPlanePoint[1],
+									this->FixedPlanePoint[2], focalPoint);
+		****/
+
+// COMMENT: {5/4/2006 10:08:45 PM}		//{{
+// COMMENT: {5/4/2006 10:08:45 PM}		double xyz[3];
+// COMMENT: {5/4/2006 10:08:45 PM}		xyz[this->FixedCoord] = focalPoint[this->FixedCoord];
+// COMMENT: {5/4/2006 10:08:45 PM}
+// COMMENT: {5/4/2006 10:08:45 PM}		switch(this->FixedCoord)
+// COMMENT: {5/4/2006 10:08:45 PM}		{
+// COMMENT: {5/4/2006 10:08:45 PM}		case 0:
+// COMMENT: {5/4/2006 10:08:45 PM}			xyz[0] = winSize[0] * viewport[0];
+// COMMENT: {5/4/2006 10:08:45 PM}			xyz[1] = winSize[1] * viewport[1];
+// COMMENT: {5/4/2006 10:08:45 PM}			break;
+// COMMENT: {5/4/2006 10:08:45 PM}		case 1:
+// COMMENT: {5/4/2006 10:08:45 PM}			break;
+// COMMENT: {5/4/2006 10:08:45 PM}		case 2:
+// COMMENT: {5/4/2006 10:08:45 PM}			xyz[0] = winSize[0] * viewport[0];
+// COMMENT: {5/4/2006 10:08:45 PM}			xyz[1] = winSize[1] * viewport[1];
+// COMMENT: {5/4/2006 10:08:45 PM}			break;
+// COMMENT: {5/4/2006 10:08:45 PM}		}
+// COMMENT: {5/4/2006 10:08:45 PM}		//}}
 		z = focalPoint[2];
 
 		double x = winSize[0] * viewport[0];
 		double y = winSize[1] * viewport[1];
 		this->ComputeDisplayToWorld(x,y,z,windowLowerLeft);
+#ifdef _DEBUG
+		TRACE("windowLowerLeft = %g, %g, %g\n", windowLowerLeft[0], windowLowerLeft[1], windowLowerLeft[2]);
+#endif
 
 		x = winSize[0] * viewport[2];
 		y = winSize[1] * viewport[3];
 		this->ComputeDisplayToWorld(x,y,z,windowUpperRight);
+#ifdef _DEBUG
+		TRACE("windowUpperRight = %g, %g, %g\n", windowUpperRight[0], windowUpperRight[1], windowUpperRight[2]);
+		TRACE("dx^2 = %g\n", ::pow(windowUpperRight[0] - windowLowerLeft[0] , 2.0));
+		TRACE("dy^2 = %g\n", ::pow(windowUpperRight[1] - windowLowerLeft[1] , 2.0));
+		TRACE("dz^2 = %g\n", ::pow(windowUpperRight[2] - windowLowerLeft[2] , 2.0));
+#endif
 
 		for (radius=0.0, i=0; i<3; i++)
 		{

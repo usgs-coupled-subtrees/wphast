@@ -4656,17 +4656,6 @@ void CWPhastDoc::OnViewShowAll()
 
 void CWPhastDoc::SizeHandles(double size)
 {
-	return;
-
-// COMMENT: {4/25/2006 10:34:41 PM}	vtkFloatingPointType bounds[6];
-// COMMENT: {4/25/2006 10:34:41 PM}	this->m_pGridActor->GetBounds(bounds);
-// COMMENT: {4/25/2006 10:34:41 PM}	float defaultAxesSize = (bounds[1]-bounds[0] + bounds[3]-bounds[2] + bounds[5]-bounds[4])/12;
-// COMMENT: {4/25/2006 10:34:41 PM}
-
-// COMMENT: {5/3/2006 4:39:17 PM}	//{{
-// COMMENT: {5/3/2006 4:39:17 PM}	vtkFloatingPointType scale[3];
-// COMMENT: {5/3/2006 4:39:17 PM}	this->m_pGridActor->GetScale(scale);
-// COMMENT: {5/3/2006 4:39:17 PM}	//}}
 	if (size != size) return;
 	TRACE("SizeHandles = %g\n", size);
 
@@ -4688,10 +4677,8 @@ void CWPhastDoc::SizeHandles(double size)
 					{
 						if (vtkProp3D *prop3D = vtkProp3D::SafeDownCast(pProp))
 						{
-// COMMENT: {5/3/2006 4:39:14 PM}							prop3D->SetScale(scale);
 							if (CWellActor *pWellActor = CWellActor::SafeDownCast(prop3D))
 							{
-								//pWellActor->SetDefaultTubeDiameter(0.014 * size);
 								pWellActor->SetRadius(0.008 * size);
 							}
 							if (CRiverActor *pRiverActor = CRiverActor::SafeDownCast(prop3D))
@@ -4704,5 +4691,4 @@ void CWPhastDoc::SizeHandles(double size)
 			}
 		}
 	}
-// COMMENT: {4/25/2006 11:18:56 PM}	this->UpdateAllViews(0);
 }
