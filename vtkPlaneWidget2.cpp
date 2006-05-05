@@ -47,7 +47,8 @@ vtkPlaneWidget2::vtkPlaneWidget2(void)
 	this->LineActor2->PickableOff();
 	this->PlaneActor->PickableOff();
 
-	this->PlaneProperty->SetColor(0, 0, 0);
+	//this->PlaneProperty->SetColor(0, 0, 0);
+	this->PlaneProperty->SetColor(0, 0, 1);
 	this->PlaneProperty->SetLineWidth(1);
 
 	this->SelectedPlaneProperty->SetAmbient(1.0);
@@ -103,8 +104,8 @@ vtkPlaneWidget2::vtkPlaneWidget2(void)
 
 	this->ActivePlaneActor = vtkActor::New();
 	this->ActivePlaneActor->SetMapper(this->ActivePlaneMapper);
-	this->ActivePlaneActor->GetProperty()->SetColor(.7, .7, .7);
-	this->ActivePlaneActor->GetProperty()->SetOpacity(.5);
+	this->ActivePlaneActor->GetProperty()->SetColor(1, 1, 0);
+	this->ActivePlaneActor->GetProperty()->SetOpacity(.7);
 
 	this->PlanePicker->AddPickList(this->ActivePlaneActor);
 

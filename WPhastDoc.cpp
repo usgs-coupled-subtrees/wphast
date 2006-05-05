@@ -705,6 +705,21 @@ void CWPhastDoc::Serialize(CArchive& ar)
 
 		// TODO: eventually the camera position will be stored in the HDF file
 		this->ResetCamera();
+
+		//{{ {5/4/2006 5:52:31 PM}
+		// Added to refresh view (can't see rivers/wells)
+		POSITION pos = this->GetFirstViewPosition();
+		while (pos != NULL)
+		{
+			CWPhastView *pView = (CWPhastView*) this->GetNextView(pos);
+			ASSERT_VALID(pView);
+			pView->RedrawWindow();
+		}
+		// TODO: eventually the camera position will be stored in the HDF file
+		this->ResetCamera();
+
+		////this->UpdateAllViews(NULL);
+		//}} {5/4/2006 5:52:31 PM}
 	}
 
 	// Update StatusBar
@@ -4637,4 +4652,57 @@ void CWPhastDoc::OnViewShowAll()
 		pTree->GetGridNode().Select();
 	}
 	this->UpdateAllViews(0);
+}
+
+void CWPhastDoc::SizeHandles(double size)
+{
+	return;
+
+// COMMENT: {4/25/2006 10:34:41 PM}	vtkFloatingPointType bounds[6];
+// COMMENT: {4/25/2006 10:34:41 PM}	this->m_pGridActor->GetBounds(bounds);
+// COMMENT: {4/25/2006 10:34:41 PM}	float defaultAxesSize = (bounds[1]-bounds[0] + bounds[3]-bounds[2] + bounds[5]-bounds[4])/12;
+// COMMENT: {4/25/2006 10:34:41 PM}
+
+// COMMENT: {5/3/2006 4:39:17 PM}	//{{
+// COMMENT: {5/3/2006 4:39:17 PM}	vtkFloatingPointType scale[3];
+// COMMENT: {5/3/2006 4:39:17 PM}	this->m_pGridActor->GetScale(scale);
+// COMMENT: {5/3/2006 4:39:17 PM}	//}}
+	if (size != size) return;
+	TRACE("SizeHandles = %g\n", size);
+
+	// set scale for all zones
+	//
+	if (vtkPropCollection* pCollection = this->GetPropCollection())
+	{
+		pCollection->InitTraversal();
+		for (int i = 0; i < pCollection->GetNumberOfItems(); ++i)
+		{
+			vtkProp* prop = pCollection->GetNextProp();
+			if (vtkPropAssembly *pPropAssembly = vtkPropAssembly::SafeDownCast(prop))
+			{
+				if (vtkPropCollection *pPropCollection = pPropAssembly->GetParts())
+				{
+					vtkProp *pProp;
+					pPropCollection->InitTraversal();
+					for (; (pProp = pPropCollection->GetNextProp()); )
+					{
+						if (vtkProp3D *prop3D = vtkProp3D::SafeDownCast(pProp))
+						{
+// COMMENT: {5/3/2006 4:39:14 PM}							prop3D->SetScale(scale);
+							if (CWellActor *pWellActor = CWellActor::SafeDownCast(prop3D))
+							{
+								//pWellActor->SetDefaultTubeDiameter(0.014 * size);
+								pWellActor->SetRadius(0.008 * size);
+							}
+							if (CRiverActor *pRiverActor = CRiverActor::SafeDownCast(prop3D))
+							{
+								pRiverActor->SetRadius(0.008 * size);
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+// COMMENT: {4/25/2006 11:18:56 PM}	this->UpdateAllViews(0);
 }

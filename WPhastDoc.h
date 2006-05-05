@@ -159,6 +159,7 @@ public:
 	
 	void UpdateGridDomain(void);
 
+	void SizeHandles(double size);
 
 protected:
 	void InternalAdd(CZoneActor *pZoneActor, bool bAdd, HTREEITEM hInsertAfter = TVI_LAST);

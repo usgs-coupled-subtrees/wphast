@@ -497,7 +497,12 @@ void CWPhastView::Pipeline()
 		props->InitTraversal();
 		for (int i = 0; i < props->GetNumberOfItems(); ++i) {
 			vtkProp* prop = props->GetNextProp();
-			this->m_Renderer->AddProp(prop);
+			//{{ {4/25/2006 10:15:10 PM}
+			if (prop)
+			{
+				this->m_Renderer->AddProp(prop);
+			}
+			//}} {4/25/2006 10:15:10 PM}
 
 			if (this->m_bResetCamera) {
 				this->m_Renderer->ResetCamera();
@@ -521,6 +526,10 @@ void CWPhastView::OnActivateView(BOOL bActivate, CView* pActivateView, CView* pD
 {
 	//{{FIXME
 	CView::OnActivateView(bActivate, pActivateView, pDeactiveView);
+	//{{ {5/4/2006 5:38:44 PM}
+	///this->Invalidate();
+	///this->Pipeline();
+	//}} {5/4/2006 5:38:44 PM}
 	return;
 
 	// Note: The code below causes the Zone dimensions to be disabled
@@ -1023,9 +1032,9 @@ void CWPhastView::Select(vtkProp *pProp)
 		}
 	}
 
-	// Highlight Prop
+	// Highlight Prop (clear selection)
 	//
-	this->HighlightProp(pProp);
+	if (!pProp) this->HighlightProp(pProp);
 
 	// Set Picker
 	//
@@ -1054,6 +1063,14 @@ void CWPhastView::Select(vtkProp *pProp)
 			this->BoxWidget->PlaceWidget();
 			this->BoxWidget->On();
 		}
+		//{{ {5/3/2006 5:35:09 PM}
+		else if (pZoneActor->GetDefault())
+		{
+			// Highlight Prop
+			//
+			this->HighlightProp(pProp);
+		}
+		//}} {5/3/2006 5:35:09 PM}
 	}
 	else if (CWellActor *pWellActor = CWellActor::SafeDownCast(pProp))
 	{
@@ -1071,6 +1088,10 @@ void CWPhastView::Select(vtkProp *pProp)
 	}
 	else if (CRiverActor *pRiverActor = CRiverActor::SafeDownCast(pProp))
 	{
+		// Highlight river
+		//
+		this->HighlightProp(pProp);
+
 		pRiverActor->On();
 	}
 	else if (pProp)
@@ -1346,12 +1367,13 @@ void CWPhastView::Update(IObserver* pSender, LPARAM lHint, CObject* /*pHint*/, v
 				this->PointWidget->On();
 			}
 		}
-		//{{
 		if (this->CreatingNewRiver())
 		{
 			this->m_pRiverActor->SetScale(this->GetDocument()->GetScale());
 		}
-		//}}
+		//{{ {4/25/2006 4:41:58 PM}
+		this->ResetCamera();
+		//}} {4/25/2006 4:41:58 PM}
 		break;
 	default:
 		ASSERT(FALSE);
@@ -2073,4 +2095,21 @@ BOOL CWPhastView::OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO
 		}
 	}
 	return __super::OnCmdMsg(nID, nCode, pExtra, pHandlerInfo);
+}
+
+void CWPhastView::SizeHandles(double size)
+{
+	if (CWPhastDoc* pDoc = this->GetDocument())
+	{
+		pDoc->SizeHandles(size);
+
+		// update well widget
+		//
+		if (this->PointWidget && this->PointWidget->GetProp3D())
+		{
+// COMMENT: {5/3/2006 5:24:47 PM}			this->HighlightProp(this->PointWidget->GetProp3D());
+// COMMENT: {5/3/2006 5:30:39 PM}			this->HighlightProp(NULL);
+			this->PointWidget->PlaceWidget();
+		}
+	}
 }

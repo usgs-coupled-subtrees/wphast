@@ -94,7 +94,7 @@ CViewVTKCommand *CViewVTKCommand::New(CWPhastView *pView)
 
 void CViewVTKCommand::Execute(vtkObject *caller, unsigned long eventId, void *callData)
 {
-	switch ( eventId ) 
+	switch ( eventId )
 	{
 		case vtkCommand::StartInteractionEvent:
 			this->OnStartInteractionEvent(caller, callData);
@@ -130,6 +130,7 @@ void CViewVTKCommand::Execute(vtkObject *caller, unsigned long eventId, void *ca
 
 		case vtkCommand::ModifiedEvent:
 			this->OnModifiedEvent(caller, callData);
+			ASSERT(callData == NULL);
 			break;
 
 		default:
@@ -145,7 +146,7 @@ void CViewVTKCommand::OnStartInteractionEvent(vtkObject* caller, void* callData)
 		if (CWellActor *pWellActor = CWellActor::SafeDownCast(widget->GetProp3D()))
 		{
 			ASSERT(this->m_pAction == 0);
-			this->m_pAction = 
+			this->m_pAction =
 				new CWellSetPositionAction(pWellActor, this->m_pView->GetDocument(), 0.0, 0.0);
 		}
 	}
@@ -402,7 +403,7 @@ void CViewVTKCommand::OnInteractionEvent(vtkObject* caller, void* callData)
 
 void CViewVTKCommand::Update()
 {
-	// Modified from 
+	// Modified from
 	// int vtkPicker::Pick(float selectionX, float selectionY, float selectionZ,
 	//                     vtkRenderer *renderer)
 	int i;
@@ -414,7 +415,7 @@ void CViewVTKCommand::Update()
 
 	// get the focal point in world coordinates
 	//
-	vtkCamera *camera = renderer->GetActiveCamera();	
+	vtkCamera *camera = renderer->GetActiveCamera();
 	vtkFloatingPointType cameraFP[4];
 	camera->GetFocalPoint((vtkFloatingPointType*)cameraFP); cameraFP[3] = 1.0;
 
@@ -485,6 +486,39 @@ void CViewVTKCommand::Update()
 		this->m_WorldPointXYPlane[2]/scale[2]/units.vertical.input_to_si,
 		xy,
 		z);
+}
+
+void CViewVTKCommand::ComputeDisplayToWorld(double x, double y, double z, double worldPt[4])
+{
+	vtkRenderer *renderer = this->m_pView->GetRenderer();
+	if (!renderer)
+	{
+		return;
+	}
+
+	renderer->SetDisplayPoint(x, y, z);
+	renderer->DisplayToWorld();
+	renderer->GetWorldPoint(worldPt);
+	if (worldPt[3])
+	{
+		worldPt[0] /= worldPt[3];
+		worldPt[1] /= worldPt[3];
+		worldPt[2] /= worldPt[3];
+		worldPt[3] = 1.0;
+	}
+}
+
+void CViewVTKCommand::ComputeWorldToDisplay(double x, double y, double z, double displayPt[4])
+{
+	vtkRenderer *renderer = this->m_pView->GetRenderer();
+	if (!renderer)
+	{
+		return;
+	}
+
+	renderer->SetWorldPoint(x, y, z, 1.0);
+	renderer->WorldToDisplay();
+	renderer->GetDisplayPoint(displayPt);
 }
 
 void CViewVTKCommand::OnLeftButtonPressEvent(vtkObject* caller, void* callData)
@@ -665,7 +699,7 @@ void CViewVTKCommand::OnLeftButtonReleaseEvent(vtkObject* caller, void* callData
 			(2 * this->m_WorldPointXYPlane[2] + this->m_pView->m_pNewCube->GetZLength()) / 2.0);
 #endif
 
-		
+
 		// get bounds before calling EndNewZone
 		//
 		vtkFloatingPointType scaled_meters[6];
@@ -829,7 +863,7 @@ void CViewVTKCommand::OnMouseMoveEvent(vtkObject* caller, void* callData)
 void CViewVTKCommand::OnKeyPressEvent(vtkObject* caller, void* callData)
 {
 	char* keysym = this->m_pView->m_RenderWindowInteractor->GetKeySym();
-	
+
 	if (::strcmp(keysym, "Escape") == 0)
 	{
 		this->m_pView->CancelMode();
@@ -838,13 +872,16 @@ void CViewVTKCommand::OnKeyPressEvent(vtkObject* caller, void* callData)
 
 void CViewVTKCommand::OnModifiedEvent(vtkObject* caller, void* callData)
 {
+	if (!this->m_pView) return;
+
 #if defined(_DEBUG)
 	if (caller)
 	{
 		ostrstream oss;
 		caller->PrintSelf(oss, 4);
 		oss << ends;
-		afxDump << oss.str() << "\n";
+		///afxDump << oss.str() << "\n";
+		TRACE("%s\n", oss.str());
 		oss.rdbuf()->freeze(false); // this must be called after str() to avoid memory leak
 	}
 #endif
@@ -859,4 +896,38 @@ void CViewVTKCommand::OnModifiedEvent(vtkObject* caller, void* callData)
 			pWidget->Modified();
 		}
 	}
+
+	///{{{
+	if (vtkRenderer *renderer =  this->m_pView->GetRenderer())
+	{
+		int i;
+		double radius, z;
+		double windowLowerLeft[4], windowUpperRight[4];
+		float *viewport = renderer->GetViewport();
+		int *winSize = renderer->GetRenderWindow()->GetSize();
+		double focalPoint[4];
+
+		this->ComputeWorldToDisplay(this->m_WorldPointXYPlane[0],
+									this->m_WorldPointXYPlane[1],
+									this->m_WorldPointXYPlane[2], focalPoint);
+
+		z = focalPoint[2];
+
+		double x = winSize[0] * viewport[0];
+		double y = winSize[1] * viewport[1];
+		this->ComputeDisplayToWorld(x,y,z,windowLowerLeft);
+
+		x = winSize[0] * viewport[2];
+		y = winSize[1] * viewport[3];
+		this->ComputeDisplayToWorld(x,y,z,windowUpperRight);
+
+		for (radius=0.0, i=0; i<3; i++)
+		{
+			radius += (windowUpperRight[i] - windowLowerLeft[i]) *
+				(windowUpperRight[i] - windowLowerLeft[i]);
+		}
+
+		this->m_pView->SizeHandles(::sqrt(radius));
+	}
+	///}}}
 }

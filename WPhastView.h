@@ -125,6 +125,7 @@ public:
 	void ClearSelection(void);
 	void Select(vtkProp *pProp);
 
+	void SizeHandles(double size);
 
 	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
 	afx_msg void OnUpdateToolsNewZone(CCmdUI *pCmdUI);

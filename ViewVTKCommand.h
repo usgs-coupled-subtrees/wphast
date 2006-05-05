@@ -37,6 +37,9 @@ protected:
 	// misc events
 	void OnModifiedEvent(vtkObject* caller, void* callData);
 
+	//
+	void ComputeDisplayToWorld(double x, double y, double z, double worldPt[4]);
+	void ComputeWorldToDisplay(double x, double y, double z, double displayPt[4]);
 
 protected:
 	CViewVTKCommand(CWPhastView* pView);
