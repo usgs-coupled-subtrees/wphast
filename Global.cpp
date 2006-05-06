@@ -1186,16 +1186,16 @@ int CGlobal::AddTimeUnits(CComboBox* pCombo)
 	return 0;
 }
 
-std::string CGlobal::GetStdTimeUnits(const char* unit)
+std::string CGlobal::GetStdTimeUnits(const char* sz_unit)
 {
-	CUnits units_std;
+	unit std("s");
 	CUnits units_usr;
 
-	VERIFY(units_usr.time.set_input(unit) == OK);
+	VERIFY(units_usr.time.set_input(sz_unit) == OK);
 	for (size_t i = 0; i < sizeof(s_time_units) / sizeof(s_time_units[0]); ++i)
 	{
-		units_std.time.set_input(s_time_units[i]);
-		if (units_usr.time.input_to_si == units_std.time.input_to_si)
+		std.set_input(s_time_units[i]);
+		if (units_usr.time.input_to_si == std.input_to_si)
 		{
 			return s_time_units[i];
 		}
@@ -1203,7 +1203,6 @@ std::string CGlobal::GetStdTimeUnits(const char* unit)
 	ASSERT(FALSE);
 	return s_time_units[0];
 }
-
 
 static const char* s_volume_units[] = {"gallon", "liter", "ft^3", "meters^3"};
 

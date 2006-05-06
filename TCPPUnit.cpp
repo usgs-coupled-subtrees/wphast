@@ -54,17 +54,17 @@ void TCPPUnit::RunUnitTests(void)
 		}
 		//}}
 
-// COMMENT: {12/1/2005 2:38:52 PM}		runner.addTest(TestCPhastInput::suite());
-// COMMENT: {12/1/2005 2:38:52 PM}		runner.addTest(TestCZone::suite());
-// COMMENT: {12/1/2005 2:38:52 PM}		runner.addTest(TestCGrid::suite());
-// COMMENT: {12/1/2005 2:38:52 PM}		runner.addTest(TestCtime::suite());
-// COMMENT: {12/1/2005 2:38:52 PM}		runner.addTest(TestCBC::suite());
-// COMMENT: {12/1/2005 2:38:52 PM}		runner.addTest(TestCTimeControl::suite());
-// COMMENT: {12/1/2005 2:38:52 PM}		runner.addTest(TestCWPhastDoc::suite());
-// COMMENT: {12/1/2005 2:38:52 PM}		runner.addTest(TestCParser::suite());
-// COMMENT: {12/1/2005 2:38:52 PM}		runner.addTest(TestCPropertyTreeControlBar::suite());
-// COMMENT: {12/1/2005 2:38:52 PM}		runner.addTest(TestCUnits::suite());
-// COMMENT: {12/1/2005 2:38:52 PM}		runner.addTest(TestCPhastInput::suite());
+// COMMENT: {5/5/2006 6:34:06 PM}		runner.addTest(TestCPhastInput::suite());
+// COMMENT: {5/5/2006 6:34:06 PM}		runner.addTest(TestCZone::suite());
+// COMMENT: {5/5/2006 6:34:06 PM}		runner.addTest(TestCGrid::suite());
+// COMMENT: {5/5/2006 6:34:06 PM}		runner.addTest(TestCtime::suite());
+// COMMENT: {5/5/2006 6:34:06 PM}		runner.addTest(TestCBC::suite());
+// COMMENT: {5/5/2006 6:34:06 PM}		runner.addTest(TestCTimeControl::suite());
+// COMMENT: {5/5/2006 6:34:06 PM}		runner.addTest(TestCWPhastDoc::suite());
+// COMMENT: {5/5/2006 6:34:06 PM}		runner.addTest(TestCParser::suite());
+// COMMENT: {5/5/2006 6:34:06 PM}		runner.addTest(TestCPropertyTreeControlBar::suite());
+		runner.addTest(TestCUnits::suite());
+// COMMENT: {5/5/2006 6:34:06 PM}		runner.addTest(TestCPhastInput::suite());
 
 #ifdef __DEPRECATED__
 		runner.addTest(TestCBCZone::suite());

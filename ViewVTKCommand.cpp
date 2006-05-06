@@ -953,7 +953,6 @@ void CViewVTKCommand::OnModifiedEvent(vtkObject* caller, void* callData)
 		}
 	}
 
-	///{{{
 	if (vtkRenderer *renderer =  this->m_pView->GetRenderer())
 	{
 		int i;
@@ -963,63 +962,25 @@ void CViewVTKCommand::OnModifiedEvent(vtkObject* caller, void* callData)
 		int *winSize = renderer->GetRenderWindow()->GetSize();
 		double focalPoint[4];
 
-// COMMENT: {5/5/2006 5:33:00 PM}		this->ComputeWorldToDisplay(this->m_WorldPointXYPlane[0],
-// COMMENT: {5/5/2006 5:33:00 PM}									this->m_WorldPointXYPlane[1],
-// COMMENT: {5/5/2006 5:33:00 PM}									this->m_WorldPointXYPlane[2], focalPoint);
-
 		// get the focal point in world coordinates
 		//
 		vtkCamera *camera = renderer->GetActiveCamera();	
 		vtkFloatingPointType cameraFP[4];
 		camera->GetFocalPoint((vtkFloatingPointType*)cameraFP); cameraFP[3] = 1.0;
 
-
 		this->ComputeWorldToDisplay(cameraFP[0],
 									cameraFP[1],
 									cameraFP[2], focalPoint);
 
-		/****
-		this->ComputeWorldToDisplay(this->FixedPlanePoint[0],
-									this->FixedPlanePoint[1],
-									this->FixedPlanePoint[2], focalPoint);
-		****/
-
-// COMMENT: {5/4/2006 10:08:45 PM}		//{{
-// COMMENT: {5/4/2006 10:08:45 PM}		double xyz[3];
-// COMMENT: {5/4/2006 10:08:45 PM}		xyz[this->FixedCoord] = focalPoint[this->FixedCoord];
-// COMMENT: {5/4/2006 10:08:45 PM}
-// COMMENT: {5/4/2006 10:08:45 PM}		switch(this->FixedCoord)
-// COMMENT: {5/4/2006 10:08:45 PM}		{
-// COMMENT: {5/4/2006 10:08:45 PM}		case 0:
-// COMMENT: {5/4/2006 10:08:45 PM}			xyz[0] = winSize[0] * viewport[0];
-// COMMENT: {5/4/2006 10:08:45 PM}			xyz[1] = winSize[1] * viewport[1];
-// COMMENT: {5/4/2006 10:08:45 PM}			break;
-// COMMENT: {5/4/2006 10:08:45 PM}		case 1:
-// COMMENT: {5/4/2006 10:08:45 PM}			break;
-// COMMENT: {5/4/2006 10:08:45 PM}		case 2:
-// COMMENT: {5/4/2006 10:08:45 PM}			xyz[0] = winSize[0] * viewport[0];
-// COMMENT: {5/4/2006 10:08:45 PM}			xyz[1] = winSize[1] * viewport[1];
-// COMMENT: {5/4/2006 10:08:45 PM}			break;
-// COMMENT: {5/4/2006 10:08:45 PM}		}
-// COMMENT: {5/4/2006 10:08:45 PM}		//}}
 		z = focalPoint[2];
 
 		double x = winSize[0] * viewport[0];
 		double y = winSize[1] * viewport[1];
 		this->ComputeDisplayToWorld(x,y,z,windowLowerLeft);
-#ifdef _DEBUG
-		TRACE("windowLowerLeft = %g, %g, %g\n", windowLowerLeft[0], windowLowerLeft[1], windowLowerLeft[2]);
-#endif
 
 		x = winSize[0] * viewport[2];
 		y = winSize[1] * viewport[3];
 		this->ComputeDisplayToWorld(x,y,z,windowUpperRight);
-#ifdef _DEBUG
-		TRACE("windowUpperRight = %g, %g, %g\n", windowUpperRight[0], windowUpperRight[1], windowUpperRight[2]);
-		TRACE("dx^2 = %g\n", ::pow(windowUpperRight[0] - windowLowerLeft[0] , 2.0));
-		TRACE("dy^2 = %g\n", ::pow(windowUpperRight[1] - windowLowerLeft[1] , 2.0));
-		TRACE("dz^2 = %g\n", ::pow(windowUpperRight[2] - windowLowerLeft[2] , 2.0));
-#endif
 
 		for (radius=0.0, i=0; i<3; i++)
 		{
@@ -1029,5 +990,4 @@ void CViewVTKCommand::OnModifiedEvent(vtkObject* caller, void* callData)
 
 		this->m_pView->SizeHandles(::sqrt(radius));
 	}
-	///}}}
 }
