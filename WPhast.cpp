@@ -335,6 +335,13 @@ void CWPhastApp::OnFileNew()
 
 		if (pDoc)
 		{
+			CWnd *pWndTreeCtrl = 0;
+			if (CPropertyTreeControlBar *pPropertyTreeControlBar = pDoc->GetPropertyTreeControlBar())
+			{
+				pWndTreeCtrl = pPropertyTreeControlBar->GetTreeCtrl();
+			}
+			CDelayRedraw tree(pWndTreeCtrl);
+
 			if (this->m_bShellFileNew)
 			{
 				this->m_bShellFileNew = FALSE;

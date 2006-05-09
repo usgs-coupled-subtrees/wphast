@@ -1906,28 +1906,6 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 	// Nonzero if the file was successfully loaded; otherwise 0.
 	CWaitCursor wait;
 
-// COMMENT: {5/9/2006 3:31:20 PM}	CWnd *pTree = 0;
-// COMMENT: {5/9/2006 3:31:20 PM}	if (CPropertyTreeControlBar *pPropertyTreeControlBar = this->GetPropertyTreeControlBar())
-// COMMENT: {5/9/2006 3:31:20 PM}	{
-// COMMENT: {5/9/2006 3:31:20 PM}		pTree = pPropertyTreeControlBar->GetTreeCtrl();
-// COMMENT: {5/9/2006 3:31:20 PM}	}
-// COMMENT: {5/9/2006 3:31:20 PM}	CRedrawOnDtor redraw(pTree);
-
-// COMMENT: {5/8/2006 10:08:47 PM}	//{{
-// COMMENT: {5/8/2006 10:08:47 PM}	// delay redrawing treectrl
-// COMMENT: {5/8/2006 10:08:47 PM}	//
-// COMMENT: {5/8/2006 10:08:47 PM}	CWnd *pWndTreeCtrl = 0;
-// COMMENT: {5/8/2006 10:08:47 PM}	if (CPropertyTreeControlBar *pPropertyTreeControlBar = this->GetPropertyTreeControlBar())
-// COMMENT: {5/8/2006 10:08:47 PM}	{
-// COMMENT: {5/8/2006 10:08:47 PM}		pWndTreeCtrl = pPropertyTreeControlBar->GetTreeCtrl();
-// COMMENT: {5/8/2006 10:08:47 PM}	}
-// COMMENT: {5/8/2006 10:08:47 PM}	CDelayRedraw delayTree(pWndTreeCtrl);
-// COMMENT: {5/8/2006 10:08:47 PM}
-// COMMENT: {5/8/2006 10:08:47 PM}	// delay redrawing render window
-// COMMENT: {5/8/2006 10:08:47 PM}	//
-// COMMENT: {5/8/2006 10:08:47 PM}	CDelayRedraw delayRender(::AfxGetMainWnd()->GetActiveWindow());
-// COMMENT: {5/8/2006 10:08:47 PM}	//}}
-
 	TCHAR szDrive[_MAX_DRIVE];
 	TCHAR szDir[_MAX_DIR];
 	TCHAR szFName[_MAX_FNAME];
@@ -1954,19 +1932,6 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 	BOOL bReturnValue = TRUE;
 	try
 	{
-// COMMENT: {5/9/2006 12:45:02 AM}		// delay redrawing treectrl
-// COMMENT: {5/9/2006 12:45:02 AM}		//
-// COMMENT: {5/9/2006 12:45:02 AM}		CWnd *pWnd = 0;
-// COMMENT: {5/9/2006 12:45:02 AM}		if (CPropertyTreeControlBar *pPropertyTreeControlBar = this->GetPropertyTreeControlBar())
-// COMMENT: {5/9/2006 12:45:02 AM}		{
-// COMMENT: {5/9/2006 12:45:02 AM}			pWnd = pPropertyTreeControlBar;
-// COMMENT: {5/9/2006 12:45:02 AM}		}
-// COMMENT: {5/9/2006 12:45:02 AM}		CDelayRedraw delayTreeControl(pWnd);
-
-// COMMENT: {5/9/2006 3:31:37 PM}		// delay redrawing render window
-// COMMENT: {5/9/2006 3:31:37 PM}		//
-// COMMENT: {5/9/2006 3:31:37 PM}		CDelayRedraw delayRender(::AfxGetMainWnd()->GetActiveWindow());
-
 		CPrintFreq printFreq;
 		printFreq.InitSync(pInput); // must be called before Load()
 
@@ -2186,41 +2151,22 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 			pAction->Execute();
 			delete pAction;
 		}
-
-// COMMENT: {5/9/2006 4:28:55 PM}		// reset tree control
-// COMMENT: {5/9/2006 4:28:55 PM}		//
-// COMMENT: {5/9/2006 4:28:55 PM}		if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar())
-// COMMENT: {5/9/2006 4:28:55 PM}		{
-// COMMENT: {5/9/2006 4:28:55 PM}			pTree->GetGridNode().Expand(TVE_COLLAPSE);
-// COMMENT: {5/9/2006 4:28:55 PM}			pTree->GetMediaNode().Expand(TVE_COLLAPSE);
-// COMMENT: {5/9/2006 4:28:55 PM}			pTree->GetICNode().Expand(TVE_COLLAPSE);
-// COMMENT: {5/9/2006 4:28:55 PM}			pTree->GetBCNode().Expand(TVE_COLLAPSE);
-// COMMENT: {5/9/2006 4:28:55 PM}			pTree->GetWellsNode().Expand(TVE_COLLAPSE);
-// COMMENT: {5/9/2006 4:28:55 PM}			pTree->GetRiversNode().Expand(TVE_COLLAPSE);
-// COMMENT: {5/9/2006 4:28:55 PM}			this->ClearSelection();
-// COMMENT: {5/9/2006 4:28:55 PM}		}
 	}
 	catch (int)
 	{
 		CImportErrorDialog dlg;
 		dlg.m_lpszErrorMessages = pInput->GetErrorMsg();
 		dlg.DoModal();
-		///pInput->Delete();
-		///return FALSE;
 		bReturnValue = FALSE;
 	}
 	catch (const char * error)
 	{
 		::AfxMessageBox(error, MB_OK|MB_ICONEXCLAMATION);
-		///pInput->Delete();
-		///return FALSE;
 		bReturnValue = FALSE;
 	}
 	catch (...)
 	{
 		::AfxMessageBox("An unknown error occured during import", MB_OK|MB_ICONEXCLAMATION);
-		///pInput->Delete();
-		///return FALSE;
 		bReturnValue = FALSE;
 	}
 
@@ -2240,11 +2186,6 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 	pInput->Delete();
 	this->SetTitle(strPrefix);
 	this->SetModifiedFlag(TRUE);
-
-// COMMENT: {5/9/2006 4:31:28 PM}	// refresh screen
-// COMMENT: {5/9/2006 4:31:28 PM}	//
-// COMMENT: {5/9/2006 4:31:28 PM}	this->ResetCamera();
-// COMMENT: {5/9/2006 4:31:28 PM}	this->UpdateAllViews(0);
 
 	return bReturnValue;
 
@@ -2685,15 +2626,15 @@ void CWPhastDoc::New(const CNewModel& model)
 		pWndTreeCtrl = pPropertyTreeControlBar->GetTreeCtrl();
 	}
 	CDelayRedraw delayTree(pWndTreeCtrl);
-
-// COMMENT: {5/9/2006 12:12:59 AM}	// delay redrawing render window
-// COMMENT: {5/9/2006 12:12:59 AM}	//
-// COMMENT: {5/9/2006 12:12:59 AM}	CDelayRedraw delayRender(::AfxGetMainWnd()->GetActiveWindow());
-
-	POSITION pos = this->GetFirstViewPosition();
-	CWPhastView *pView = (CWPhastView*) GetNextView(pos);
-	CDelayRedraw delayRender(pView);
-	//}}
+// COMMENT: {5/9/2006 5:08:59 PM}
+// COMMENT: {5/9/2006 5:08:59 PM}// COMMENT: {5/9/2006 12:12:59 AM}	// delay redrawing render window
+// COMMENT: {5/9/2006 5:08:59 PM}// COMMENT: {5/9/2006 12:12:59 AM}	//
+// COMMENT: {5/9/2006 5:08:59 PM}// COMMENT: {5/9/2006 12:12:59 AM}	CDelayRedraw delayRender(::AfxGetMainWnd()->GetActiveWindow());
+// COMMENT: {5/9/2006 5:08:59 PM}
+// COMMENT: {5/9/2006 5:08:59 PM}	POSITION pos = this->GetFirstViewPosition();
+// COMMENT: {5/9/2006 5:08:59 PM}	CWPhastView *pView = (CWPhastView*) GetNextView(pos);
+// COMMENT: {5/9/2006 5:08:59 PM}	CDelayRedraw delayRender(pView);
+// COMMENT: {5/9/2006 5:08:59 PM}	//}}
 
 	// set FlowOnly
 	// set SteadyFlow
