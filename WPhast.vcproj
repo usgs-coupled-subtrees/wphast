@@ -680,6 +680,9 @@ copy &quot;$(DEV_VTK42_VS7_DLL_LIB)\vtkzlib.dll&quot; &quot;$(TargetDir)vtkzlib.
 				RelativePath="NewZonePropertyPage.cpp">
 			</File>
 			<File
+				RelativePath="NewZoneWidget.cpp">
+			</File>
+			<File
 				RelativePath="PrintFreq.cpp">
 			</File>
 			<File
@@ -1291,6 +1294,9 @@ copy &quot;$(DEV_VTK42_VS7_DLL_LIB)\vtkzlib.dll&quot; &quot;$(TargetDir)vtkzlib.
 			</File>
 			<File
 				RelativePath="NewZonePropertyPage.h">
+			</File>
+			<File
+				RelativePath="NewZoneWidget.h">
 			</File>
 			<File
 				RelativePath="PhastInput.h">
@@ -1948,10 +1954,10 @@ copy &quot;$(DEV_VTK42_VS7_DLL_LIB)\vtkzlib.dll&quot; &quot;$(TargetDir)vtkzlib.
 				RelativePath="res\SOLUTE_FALSE.rtf">
 			</File>
 			<File
-				RelativePath="res\SOLUTE_TRUE.rtf">
+				RelativePath="SOLUTE_TRUE.rtf">
 			</File>
 			<File
-				RelativePath="SOLUTE_TRUE.rtf">
+				RelativePath="res\SOLUTE_TRUE.rtf">
 			</File>
 			<File
 				RelativePath="res\STEADY_FLOW.rtf">
@@ -4329,15 +4335,15 @@ copy &quot;$(DEV_VTK42_VS7_DLL_LIB)\vtkzlib.dll&quot; &quot;$(TargetDir)vtkzlib.
 			Name="Build Logs"
 			Filter="">
 			<File
-				RelativePath="Debug\BuildLog.htm"
-				DeploymentContent="TRUE">
-			</File>
-			<File
 				RelativePath="Release\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 			<File
 				RelativePath="cppunit\BuildLog.htm"
+				DeploymentContent="TRUE">
+			</File>
+			<File
+				RelativePath="Debug\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 		</Filter>

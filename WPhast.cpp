@@ -23,6 +23,7 @@
 #include "ModelessPropertySheet.h"
 
 #include "NewModel.h"
+#include "DelayRedraw.h"
 
 #ifdef _DEBUG
 #include "ProtoPropertyPage.h"
@@ -348,13 +349,14 @@ void CWPhastApp::OnFileNew()
 				}
 				else if (dlg.GetAction() == CStartupDialog::SDA_CREATE_DEFAULT)
 				{
+					CDelayRedraw delay(this->m_pMainWnd, pDoc);
 					pDoc->New(CNewModel::Default());
 					pDoc->SetModifiedFlag(FALSE);
 					return;
 				}
 				else if (dlg.GetAction() == CStartupDialog::SDA_IMPORT_FILE)
 				{
-
+					CDelayRedraw delay(this->m_pMainWnd, pDoc);
 					pDoc->DoImport(dlg.GetFileName());
 					pDoc->SetModifiedFlag(FALSE);
 					return;
@@ -374,11 +376,13 @@ void CWPhastApp::OnFileNew()
 
 			if (wizard.DoModal() == ID_WIZFINISH)
 			{
+				CDelayRedraw delay(this->m_pMainWnd, pDoc);
 				CNewModel model = wizard.GetModel();
 				pDoc->New(model);
 			}
 			else
 			{
+				CDelayRedraw delay(this->m_pMainWnd, pDoc);
 				pDoc->New(CNewModel::Default());
 				pDoc->SetModifiedFlag(FALSE);
 			}

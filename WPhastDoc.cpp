@@ -60,6 +60,8 @@
 #include "GridCoarsenPage.h"
 #include "GridElementsSelector.h"
 
+#include "NewZoneWidget.h"
+
 #include <vtkBoxWidget.h>
 
 #include <vtkAbstractPropPicker.h>
@@ -201,8 +203,13 @@ BEGIN_MESSAGE_MAP(CWPhastDoc, CDocument)
 	ON_COMMAND(ID_VIEW_HIDEALL, OnViewHideAll)
 	ON_COMMAND(ID_VIEW_SHOWALL, OnViewShowAll)
 
+	// ID_TOOLS_MODIFYGRID
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_MODIFYGRID, OnUpdateToolsModifyGrid)
 	ON_COMMAND(ID_TOOLS_MODIFYGRID, OnToolsModifyGrid)
+
+	// ID_TOOLS_NEWZONE
+	ON_UPDATE_COMMAND_UI(ID_TOOLS_NEWZONE, OnUpdateToolsNewZone)
+	ON_COMMAND(ID_TOOLS_NEWZONE, OnToolsNewZone)
 END_MESSAGE_MAP()
 
 #if defined(WPHAST_AUTOMATION)
@@ -252,6 +259,7 @@ CWPhastDoc::CWPhastDoc()
 , GridRefinePage(0)
 , GridCoarsenPage(0)
 , GridElementsSelector(0)
+, NewZoneWidget(0)
 {
 #if defined(WPHAST_AUTOMATION)
 	EnableAutomation();
@@ -453,6 +461,11 @@ CWPhastDoc::~CWPhastDoc()
 		delete this->GridCoarsenPage;
 		this->GridCoarsenPage = 0;
 	}
+	if (this->NewZoneWidget)
+	{
+		this->NewZoneWidget->Delete();
+		this->NewZoneWidget = 0;
+	}
 }
 
 BOOL CWPhastDoc::OnNewDocument()
@@ -474,6 +487,8 @@ void CWPhastDoc::Serialize(CArchive& ar)
 {
 	static const char szWPhast[] = "WPhast";
 	herr_t status;
+
+	CWaitCursor wait;
 
 	bool bStoring = (ar.IsStoring() == TRUE);
 
@@ -559,7 +574,6 @@ void CWPhastDoc::Serialize(CArchive& ar)
 			pWnd->SetWindowText(status);
 		}
 
-#ifdef THIS_IS_BROKEN
 		// delay redrawing treectrl
 		//
 		CWnd *pWndTreeCtrl = 0;
@@ -571,8 +585,7 @@ void CWPhastDoc::Serialize(CArchive& ar)
 
 		// delay redrawing render window
 		//
-		CDelayRedraw delayRender(::AfxGetMainWnd()->GetActiveWindow());
-#endif
+		CDelayRedraw delayRender(::AfxGetMainWnd()->GetActiveWindow(), this);
 
 		CHDFMirrorFile* pFile = (CHDFMirrorFile*)ar.GetFile();
 		ASSERT(pFile->GetHID() > 0);
@@ -703,23 +716,19 @@ void CWPhastDoc::Serialize(CArchive& ar)
 		vtkFloatingPointType* scale = this->m_pGridActor->GetScale();
 		this->SetScale(scale[0], scale[1], scale[2]);
 
-		// TODO: eventually the camera position will be stored in the HDF file
 		this->ResetCamera();
 
-		//{{ {5/4/2006 5:52:31 PM}
-		// Added to refresh view (can't see rivers/wells)
-		POSITION pos = this->GetFirstViewPosition();
-		while (pos != NULL)
+		// update properties bar
+		if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar())
 		{
-			CWPhastView *pView = (CWPhastView*) this->GetNextView(pos);
-			ASSERT_VALID(pView);
-			pView->RedrawWindow();
+			pTree->GetGridNode().Expand(TVE_COLLAPSE);
+			pTree->GetMediaNode().Expand(TVE_COLLAPSE);
+			pTree->GetICNode().Expand(TVE_COLLAPSE);
+			pTree->GetBCNode().Expand(TVE_COLLAPSE);
+			pTree->GetWellsNode().Expand(TVE_COLLAPSE);
+			pTree->GetRiversNode().Expand(TVE_COLLAPSE);
+			this->ClearSelection();
 		}
-		// TODO: eventually the camera position will be stored in the HDF file
-		this->ResetCamera();
-
-		////this->UpdateAllViews(NULL);
-		//}} {5/4/2006 5:52:31 PM}
 	}
 
 	// Update StatusBar
@@ -1520,7 +1529,7 @@ void CWPhastDoc::SetScale(vtkFloatingPointType x, vtkFloatingPointType y, vtkFlo
 	}
 
 	this->Notify(0, WPN_SCALE_CHANGED, 0, 0);
-	this->UpdateAllViews(0);
+// COMMENT: {5/8/2006 4:32:55 PM}	this->UpdateAllViews(0);
 }
 
 void CWPhastDoc::SetFlowOnly(const CFlowOnly& flowOnly)
@@ -1871,14 +1880,24 @@ void CWPhastDoc::OnFileImport()
 		lstrcpy(szPath, szLinkName);
 
 	CDocument* pDoc = this->GetDocTemplate()->OpenDocumentFile(NULL);
-	if (pDoc) {
+	if (pDoc)
+	{
 		ASSERT(pDoc == this);
-		if (!this->DoImport(szPath)) {
+		CDelayRedraw delay(::AfxGetMainWnd(), pDoc);
+		if (!this->DoImport(szPath))
+		{
 			::AfxMessageBox("An error occured during the import", MB_OK);
 			this->SetModifiedFlag(FALSE);
 		}
+		this->ResetCamera();
 	}
-	this->ResetCamera();
+	if (CPropertyTreeControlBar *pPropertyTreeControlBar = this->GetPropertyTreeControlBar())
+	{
+		if (CWnd *pTree = pPropertyTreeControlBar->GetTreeCtrl())
+		{
+			pTree->RedrawWindow();
+		}
+	}
 }
 
 BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
@@ -1887,12 +1906,27 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 	// Nonzero if the file was successfully loaded; otherwise 0.
 	CWaitCursor wait;
 
-	CWnd *pTree = 0;
-	if (CPropertyTreeControlBar *pPropertyTreeControlBar = this->GetPropertyTreeControlBar())
-	{
-		pTree = pPropertyTreeControlBar->GetTreeCtrl();
-	}
-	CRedrawOnDtor redraw(pTree);
+// COMMENT: {5/9/2006 3:31:20 PM}	CWnd *pTree = 0;
+// COMMENT: {5/9/2006 3:31:20 PM}	if (CPropertyTreeControlBar *pPropertyTreeControlBar = this->GetPropertyTreeControlBar())
+// COMMENT: {5/9/2006 3:31:20 PM}	{
+// COMMENT: {5/9/2006 3:31:20 PM}		pTree = pPropertyTreeControlBar->GetTreeCtrl();
+// COMMENT: {5/9/2006 3:31:20 PM}	}
+// COMMENT: {5/9/2006 3:31:20 PM}	CRedrawOnDtor redraw(pTree);
+
+// COMMENT: {5/8/2006 10:08:47 PM}	//{{
+// COMMENT: {5/8/2006 10:08:47 PM}	// delay redrawing treectrl
+// COMMENT: {5/8/2006 10:08:47 PM}	//
+// COMMENT: {5/8/2006 10:08:47 PM}	CWnd *pWndTreeCtrl = 0;
+// COMMENT: {5/8/2006 10:08:47 PM}	if (CPropertyTreeControlBar *pPropertyTreeControlBar = this->GetPropertyTreeControlBar())
+// COMMENT: {5/8/2006 10:08:47 PM}	{
+// COMMENT: {5/8/2006 10:08:47 PM}		pWndTreeCtrl = pPropertyTreeControlBar->GetTreeCtrl();
+// COMMENT: {5/8/2006 10:08:47 PM}	}
+// COMMENT: {5/8/2006 10:08:47 PM}	CDelayRedraw delayTree(pWndTreeCtrl);
+// COMMENT: {5/8/2006 10:08:47 PM}
+// COMMENT: {5/8/2006 10:08:47 PM}	// delay redrawing render window
+// COMMENT: {5/8/2006 10:08:47 PM}	//
+// COMMENT: {5/8/2006 10:08:47 PM}	CDelayRedraw delayRender(::AfxGetMainWnd()->GetActiveWindow());
+// COMMENT: {5/8/2006 10:08:47 PM}	//}}
 
 	TCHAR szDrive[_MAX_DRIVE];
 	TCHAR szDir[_MAX_DIR];
@@ -1917,16 +1951,21 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 	CPhastInput* pInput = CPhastInput::New(ifs, strPrefix);
 	if (!pInput) return FALSE;
 
+	BOOL bReturnValue = TRUE;
 	try
 	{
-		// delay redrawing treectrl
-		//
-		CWnd *pWnd = 0;
-		if (CPropertyTreeControlBar *pPropertyTreeControlBar = this->GetPropertyTreeControlBar())
-		{
-			pWnd = pPropertyTreeControlBar;
-		}
-		CDelayRedraw delayTreeControl(pWnd);
+// COMMENT: {5/9/2006 12:45:02 AM}		// delay redrawing treectrl
+// COMMENT: {5/9/2006 12:45:02 AM}		//
+// COMMENT: {5/9/2006 12:45:02 AM}		CWnd *pWnd = 0;
+// COMMENT: {5/9/2006 12:45:02 AM}		if (CPropertyTreeControlBar *pPropertyTreeControlBar = this->GetPropertyTreeControlBar())
+// COMMENT: {5/9/2006 12:45:02 AM}		{
+// COMMENT: {5/9/2006 12:45:02 AM}			pWnd = pPropertyTreeControlBar;
+// COMMENT: {5/9/2006 12:45:02 AM}		}
+// COMMENT: {5/9/2006 12:45:02 AM}		CDelayRedraw delayTreeControl(pWnd);
+
+// COMMENT: {5/9/2006 3:31:37 PM}		// delay redrawing render window
+// COMMENT: {5/9/2006 3:31:37 PM}		//
+// COMMENT: {5/9/2006 3:31:37 PM}		CDelayRedraw delayRender(::AfxGetMainWnd()->GetActiveWindow());
 
 		CPrintFreq printFreq;
 		printFreq.InitSync(pInput); // must be called before Load()
@@ -2148,44 +2187,66 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 			delete pAction;
 		}
 
-		// reset tree control
-		//
-		if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar())
-		{
-			pTree->GetGridNode().Expand(TVE_COLLAPSE);
-			pTree->GetMediaNode().Expand(TVE_COLLAPSE);
-			pTree->GetICNode().Expand(TVE_COLLAPSE);
-			pTree->GetBCNode().Expand(TVE_COLLAPSE);
-			pTree->GetWellsNode().Expand(TVE_COLLAPSE);
-			pTree->GetRiversNode().Expand(TVE_COLLAPSE);
-			this->ClearSelection();
-		}
+// COMMENT: {5/9/2006 4:28:55 PM}		// reset tree control
+// COMMENT: {5/9/2006 4:28:55 PM}		//
+// COMMENT: {5/9/2006 4:28:55 PM}		if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar())
+// COMMENT: {5/9/2006 4:28:55 PM}		{
+// COMMENT: {5/9/2006 4:28:55 PM}			pTree->GetGridNode().Expand(TVE_COLLAPSE);
+// COMMENT: {5/9/2006 4:28:55 PM}			pTree->GetMediaNode().Expand(TVE_COLLAPSE);
+// COMMENT: {5/9/2006 4:28:55 PM}			pTree->GetICNode().Expand(TVE_COLLAPSE);
+// COMMENT: {5/9/2006 4:28:55 PM}			pTree->GetBCNode().Expand(TVE_COLLAPSE);
+// COMMENT: {5/9/2006 4:28:55 PM}			pTree->GetWellsNode().Expand(TVE_COLLAPSE);
+// COMMENT: {5/9/2006 4:28:55 PM}			pTree->GetRiversNode().Expand(TVE_COLLAPSE);
+// COMMENT: {5/9/2006 4:28:55 PM}			this->ClearSelection();
+// COMMENT: {5/9/2006 4:28:55 PM}		}
 	}
 	catch (int)
 	{
 		CImportErrorDialog dlg;
 		dlg.m_lpszErrorMessages = pInput->GetErrorMsg();
 		dlg.DoModal();
-		pInput->Delete();
-		return FALSE;
+		///pInput->Delete();
+		///return FALSE;
+		bReturnValue = FALSE;
 	}
 	catch (const char * error)
 	{
 		::AfxMessageBox(error, MB_OK|MB_ICONEXCLAMATION);
-		pInput->Delete();
-		return FALSE;
+		///pInput->Delete();
+		///return FALSE;
+		bReturnValue = FALSE;
 	}
 	catch (...)
 	{
 		::AfxMessageBox("An unknown error occured during import", MB_OK|MB_ICONEXCLAMATION);
-		pInput->Delete();
-		return FALSE;
+		///pInput->Delete();
+		///return FALSE;
+		bReturnValue = FALSE;
+	}
+
+	// reset tree control
+	//
+	if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar())
+	{
+		pTree->GetGridNode().Expand(TVE_COLLAPSE);
+		pTree->GetMediaNode().Expand(TVE_COLLAPSE);
+		pTree->GetICNode().Expand(TVE_COLLAPSE);
+		pTree->GetBCNode().Expand(TVE_COLLAPSE);
+		pTree->GetWellsNode().Expand(TVE_COLLAPSE);
+		pTree->GetRiversNode().Expand(TVE_COLLAPSE);
+		this->ClearSelection();
 	}
 
 	pInput->Delete();
 	this->SetTitle(strPrefix);
 	this->SetModifiedFlag(TRUE);
-	return TRUE;
+
+// COMMENT: {5/9/2006 4:31:28 PM}	// refresh screen
+// COMMENT: {5/9/2006 4:31:28 PM}	//
+// COMMENT: {5/9/2006 4:31:28 PM}	this->ResetCamera();
+// COMMENT: {5/9/2006 4:31:28 PM}	this->UpdateAllViews(0);
+
+	return bReturnValue;
 
 //ImportError:
 //	CImportErrorDialog dlg;
@@ -2597,20 +2658,42 @@ void CWPhastDoc::SetUnits(const CUnits& units)
 
 void CWPhastDoc::New(const CNewModel& model)
 {
+//{{
+{
+//}}
 	ASSERT(this->m_pGridActor);
 	ASSERT(this->m_pAxesActor);
 	ASSERT(this->m_pPropCollection);
 	ASSERT(this->m_pimpl);
 	ASSERT(this->m_pUnits);
 
+// COMMENT: {5/8/2006 11:20:47 PM}	// delay redrawing treectrl
+// COMMENT: {5/8/2006 11:20:47 PM}	//
+// COMMENT: {5/8/2006 11:20:47 PM}	CWnd *pWnd = 0;
+// COMMENT: {5/8/2006 11:20:47 PM}	if (CPropertyTreeControlBar *pPropertyTreeControlBar = this->GetPropertyTreeControlBar())
+// COMMENT: {5/8/2006 11:20:47 PM}	{
+// COMMENT: {5/8/2006 11:20:47 PM}		pWnd = pPropertyTreeControlBar->GetTreeCtrl();
+// COMMENT: {5/8/2006 11:20:47 PM}	}
+// COMMENT: {5/8/2006 11:20:47 PM}	CDelayRedraw delayTree(pWnd);
+
+	//{{
 	// delay redrawing treectrl
 	//
-	CWnd *pWnd = 0;
+	CWnd *pWndTreeCtrl = 0;
 	if (CPropertyTreeControlBar *pPropertyTreeControlBar = this->GetPropertyTreeControlBar())
 	{
-		pWnd = pPropertyTreeControlBar->GetTreeCtrl();
+		pWndTreeCtrl = pPropertyTreeControlBar->GetTreeCtrl();
 	}
-	CDelayRedraw delayTree(pWnd);
+	CDelayRedraw delayTree(pWndTreeCtrl);
+
+// COMMENT: {5/9/2006 12:12:59 AM}	// delay redrawing render window
+// COMMENT: {5/9/2006 12:12:59 AM}	//
+// COMMENT: {5/9/2006 12:12:59 AM}	CDelayRedraw delayRender(::AfxGetMainWnd()->GetActiveWindow());
+
+	POSITION pos = this->GetFirstViewPosition();
+	CWPhastView *pView = (CWPhastView*) GetNextView(pos);
+	CDelayRedraw delayRender(pView);
+	//}}
 
 	// set FlowOnly
 	// set SteadyFlow
@@ -2738,6 +2821,10 @@ void CWPhastDoc::New(const CNewModel& model)
 		pTree->GetRiversNode().Expand(TVE_COLLAPSE);
 		pTree->ClearSelection();
 	}
+
+//{{
+}
+//}}
 
 	// refresh screen
 	//
@@ -3871,11 +3958,11 @@ void CWPhastDoc::SetVisible(const VARIANT& newVal)
 
 	if (newVal.boolVal)
 	{
-		::AfxGetApp()->m_pMainWnd->ShowWindow(SW_SHOW);
+		::AfxGetMainWnd()->ShowWindow(SW_SHOW);
 	}
 	else
 	{
-		::AfxGetApp()->m_pMainWnd->ShowWindow(SW_HIDE);
+		::AfxGetMainWnd()->ShowWindow(SW_HIDE);
 	}
 }
 
@@ -4688,6 +4775,47 @@ void CWPhastDoc::SizeHandles(double size)
 						}
 					}
 				}
+			}
+		}
+	}
+}
+
+void CWPhastDoc::OnUpdateToolsNewZone(CCmdUI *pCmdUI)
+{
+	if (this->NewZoneWidget)
+	{
+		pCmdUI->SetCheck(1);
+	}
+	else
+	{
+		pCmdUI->SetCheck(0);
+	}
+}
+
+void CWPhastDoc::OnToolsNewZone()
+{
+	if (this->NewZoneWidget)
+	{
+		this->NewZoneWidget->Delete();
+		this->NewZoneWidget = 0;
+	}
+	else
+	{
+		POSITION pos = this->GetFirstViewPosition();
+		if (pos != NULL)
+		{
+			CWPhastView *pView = (CWPhastView*) GetNextView(pos);
+			ASSERT_VALID(pView);
+			ASSERT(pView->GetRenderWindowInteractor());
+			if (pView->GetRenderWindowInteractor())
+			{
+				pView->CancelMode();
+
+				this->NewZoneWidget = CNewZoneWidget::New();
+				this->NewZoneWidget->SetInteractor(pView->GetRenderWindowInteractor());
+// COMMENT: {5/8/2006 7:12:30 PM}				this->NewZoneWidget->SetGridActor(reinterpret_cast<CGridActor *>(this->GetGridActor()));
+// COMMENT: {5/8/2006 7:12:30 PM}				this->NewZoneWidget->SetDocument(this);
+				this->NewZoneWidget->SetEnabled(1);
 			}
 		}
 	}

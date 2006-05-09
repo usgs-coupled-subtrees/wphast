@@ -47,6 +47,7 @@ class CGridPropertyPage2;
 class CGridRefinePage;
 class CGridCoarsenPage;
 class CGridElementsSelector;
+class CNewZoneWidget;
 
 class vtkAxes;
 class vtkTubeFilter;
@@ -247,6 +248,7 @@ protected:
 	CGridCoarsenPage           *GridCoarsenPage;
 	CGridElementsSelector      *GridElementsSelector;
 
+	CNewZoneWidget             *NewZoneWidget;
 
 protected:
 	void InitDocument();
@@ -422,6 +424,8 @@ public:
 	afx_msg void OnUpdateToolsModifyGrid(CCmdUI *pCmdUI);
 	afx_msg void OnToolsModifyGrid();
 	void EndModifyGrid();
+	afx_msg void OnUpdateToolsNewZone(CCmdUI *pCmdUI);
+	afx_msg void OnToolsNewZone();
 };
 
 inline vtkPropAssembly* CWPhastDoc::GetPropAssemblyMedia() const

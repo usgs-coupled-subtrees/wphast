@@ -84,8 +84,8 @@ BEGIN_MESSAGE_MAP(CWPhastView, CView)
 	ON_WM_SIZE()
 	ON_WM_ERASEBKGND()
 	ON_WM_SETCURSOR()
-	ON_UPDATE_COMMAND_UI(ID_TOOLS_NEWZONE, OnUpdateToolsNewZone)
-	ON_COMMAND(ID_TOOLS_NEWZONE, OnToolsNewZone)
+// COMMENT: {5/8/2006 5:28:40 PM}	ON_UPDATE_COMMAND_UI(ID_TOOLS_NEWZONE, OnUpdateToolsNewZone)
+// COMMENT: {5/8/2006 5:28:40 PM}	ON_COMMAND(ID_TOOLS_NEWZONE, OnToolsNewZone)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_FROM_NX, OnUpdateViewFromNx)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_FROM_NY, OnUpdateViewFromNy)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_FROM_NZ, OnUpdateViewFromNz)
@@ -136,6 +136,7 @@ CWPhastView::CWPhastView()
 , m_pCursor3D(0)
 , m_pCursor3DMapper(0)
 , m_pCursor3DActor(0)
+, CurrentProp(0)
 {
 	// Create the renderer, window and interactor objects.
 	//
@@ -1057,6 +1058,10 @@ void CWPhastView::Select(vtkProp *pProp)
 	{
 		if (!pZoneActor->GetDefault() && this->BoxWidget)
 		{
+			//{{ {5/8/2006 4:25:45 PM}
+			this->HighlightProp(this->CurrentProp = NULL);
+			//}} {5/8/2006 4:25:45 PM}
+
 			// Reset BoxWidget
 			//
 			this->BoxWidget->SetProp3D(pZoneActor);
@@ -1304,7 +1309,10 @@ void CWPhastView::HighlightProp3D(vtkProp3D *pProp3D)
 void CWPhastView::OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint)
 {
 	CView::OnUpdate(pSender, lHint, pHint);
-	// TODO: Add your specialized code here and/or call the base class
+
+	// Add your specialized code here and/or call the base class
+	this->Invalidate();
+	this->RedrawWindow();
 }
 
 void CWPhastView::Update(IObserver* pSender, LPARAM lHint, CObject* /*pHint*/, vtkObject* pObject)
@@ -1316,12 +1324,13 @@ void CWPhastView::Update(IObserver* pSender, LPARAM lHint, CObject* /*pHint*/, v
 	case WPN_NONE:
 		break;
 	case WPN_SELCHANGED:
-		if (vtkProp* pProp = vtkProp::SafeDownCast(pObject))
+		if (this->CurrentProp = vtkProp::SafeDownCast(pObject))
 		{
-			this->Select(pProp);
+			this->Select(this->CurrentProp);
 		}
 		else if (pObject == 0)
 		{
+			this->CurrentProp = NULL;
 			this->ClearSelection();
 		}
 		break;
@@ -1371,9 +1380,21 @@ void CWPhastView::Update(IObserver* pSender, LPARAM lHint, CObject* /*pHint*/, v
 		{
 			this->m_pRiverActor->SetScale(this->GetDocument()->GetScale());
 		}
-		//{{ {4/25/2006 4:41:58 PM}
-		this->ResetCamera();
-		//}} {4/25/2006 4:41:58 PM}
+		//{{ {5/8/2006 4:00:51 PM}
+		if (this->BoxWidget->GetEnabled())
+		{
+			if (vtkProp3D* pProp3D = this->BoxWidget->GetProp3D())
+			{
+				this->BoxWidget->PlaceWidget();
+			}
+		}
+		if (this->CurrentProp) this->Select(this->CurrentProp);
+		//}} {5/8/2006 4:00:51 PM}
+
+// COMMENT: {5/8/2006 4:35:15 PM}		//{{ {4/25/2006 4:41:58 PM}
+// COMMENT: {5/8/2006 4:35:15 PM}		this->ResetCamera();
+		this->RedrawWindow();
+// COMMENT: {5/8/2006 4:35:15 PM}		//}} {4/25/2006 4:41:58 PM}
 		break;
 	default:
 		ASSERT(FALSE);

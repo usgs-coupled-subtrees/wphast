@@ -100,8 +100,9 @@ protected:
 	// new river
 	CRiverActor                    *m_pRiverActor;
 
-	friend class CViewVTKCommand;
+	vtkProp                        *CurrentProp;   // currently selected prop
 
+	friend class CViewVTKCommand;
 
 // Generated message map functions
 protected:

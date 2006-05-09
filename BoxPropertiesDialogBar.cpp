@@ -131,6 +131,37 @@ void CBoxPropertiesDialogBar::Update(IObserver* pSender, LPARAM lHint, CObject* 
 				this->Set(0, 0, units);
 			}
 		}
+		else if (pObject == 0)
+		{
+			if (CWnd *pWnd = this->GetDlgItem(IDC_EDIT_XMIN))
+			{
+				pWnd->SetWindowText(_T(""));
+			}
+			if (CWnd *pWnd = this->GetDlgItem(IDC_EDIT_YMIN))
+			{
+				pWnd->SetWindowText(_T(""));
+			}
+			if (CWnd *pWnd = this->GetDlgItem(IDC_EDIT_ZMIN))
+			{
+				pWnd->SetWindowText(_T(""));
+			}
+
+			if (CWnd *pWnd = this->GetDlgItem(IDC_EDIT_XMAX))
+			{
+				pWnd->SetWindowText(_T(""));
+			}
+			if (CWnd *pWnd = this->GetDlgItem(IDC_EDIT_YMAX))
+			{
+				pWnd->SetWindowText(_T(""));
+			}
+			if (CWnd *pWnd = this->GetDlgItem(IDC_EDIT_ZMAX))
+			{
+				pWnd->SetWindowText(_T(""));
+			}
+
+			this->Enable(FALSE);
+			this->SetWindowText(_T("Zone dimensions"));
+		}
 		break;
 	case WPN_VISCHANGED:
 		// TODO ??  ASSERT(FALSE);
