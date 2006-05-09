@@ -2599,42 +2599,11 @@ void CWPhastDoc::SetUnits(const CUnits& units)
 
 void CWPhastDoc::New(const CNewModel& model)
 {
-//{{
-{
-//}}
 	ASSERT(this->m_pGridActor);
 	ASSERT(this->m_pAxesActor);
 	ASSERT(this->m_pPropCollection);
 	ASSERT(this->m_pimpl);
 	ASSERT(this->m_pUnits);
-
-// COMMENT: {5/8/2006 11:20:47 PM}	// delay redrawing treectrl
-// COMMENT: {5/8/2006 11:20:47 PM}	//
-// COMMENT: {5/8/2006 11:20:47 PM}	CWnd *pWnd = 0;
-// COMMENT: {5/8/2006 11:20:47 PM}	if (CPropertyTreeControlBar *pPropertyTreeControlBar = this->GetPropertyTreeControlBar())
-// COMMENT: {5/8/2006 11:20:47 PM}	{
-// COMMENT: {5/8/2006 11:20:47 PM}		pWnd = pPropertyTreeControlBar->GetTreeCtrl();
-// COMMENT: {5/8/2006 11:20:47 PM}	}
-// COMMENT: {5/8/2006 11:20:47 PM}	CDelayRedraw delayTree(pWnd);
-
-// COMMENT: {5/9/2006 5:24:12 PM}	//{{
-// COMMENT: {5/9/2006 5:24:12 PM}	// delay redrawing treectrl
-// COMMENT: {5/9/2006 5:24:12 PM}	//
-// COMMENT: {5/9/2006 5:24:12 PM}	CWnd *pWndTreeCtrl = 0;
-// COMMENT: {5/9/2006 5:24:12 PM}	if (CPropertyTreeControlBar *pPropertyTreeControlBar = this->GetPropertyTreeControlBar())
-// COMMENT: {5/9/2006 5:24:12 PM}	{
-// COMMENT: {5/9/2006 5:24:12 PM}		pWndTreeCtrl = pPropertyTreeControlBar->GetTreeCtrl();
-// COMMENT: {5/9/2006 5:24:12 PM}	}
-// COMMENT: {5/9/2006 5:24:12 PM}	CDelayRedraw delayTree(pWndTreeCtrl);
-// COMMENT: {5/9/2006 5:24:12 PM}// COMMENT: {5/9/2006 5:08:59 PM}
-// COMMENT: {5/9/2006 5:24:12 PM}// COMMENT: {5/9/2006 5:08:59 PM}// COMMENT: {5/9/2006 12:12:59 AM}	// delay redrawing render window
-// COMMENT: {5/9/2006 5:24:12 PM}// COMMENT: {5/9/2006 5:08:59 PM}// COMMENT: {5/9/2006 12:12:59 AM}	//
-// COMMENT: {5/9/2006 5:24:12 PM}// COMMENT: {5/9/2006 5:08:59 PM}// COMMENT: {5/9/2006 12:12:59 AM}	CDelayRedraw delayRender(::AfxGetMainWnd()->GetActiveWindow());
-// COMMENT: {5/9/2006 5:24:12 PM}// COMMENT: {5/9/2006 5:08:59 PM}
-// COMMENT: {5/9/2006 5:24:12 PM}// COMMENT: {5/9/2006 5:08:59 PM}	POSITION pos = this->GetFirstViewPosition();
-// COMMENT: {5/9/2006 5:24:12 PM}// COMMENT: {5/9/2006 5:08:59 PM}	CWPhastView *pView = (CWPhastView*) GetNextView(pos);
-// COMMENT: {5/9/2006 5:24:12 PM}// COMMENT: {5/9/2006 5:08:59 PM}	CDelayRedraw delayRender(pView);
-// COMMENT: {5/9/2006 5:24:12 PM}// COMMENT: {5/9/2006 5:08:59 PM}	//}}
 
 	// set FlowOnly
 	// set SteadyFlow
@@ -2656,8 +2625,6 @@ void CWPhastDoc::New(const CNewModel& model)
 
 	// set the grid
 	//
-// COMMENT: {7/18/2005 8:45:06 PM}	this->m_pGridActor->SetGrid(model.m_gridKeyword.m_grid[0], model.m_gridKeyword.m_grid[1], model.m_gridKeyword.m_grid[2], *this->m_pUnits);
-// COMMENT: {7/18/2005 8:45:06 PM}	this->m_pGridActor->SetSnap(model.m_gridKeyword.m_snap);
 	this->m_pGridActor->SetGridKeyword(model.m_gridKeyword, this->GetUnits());
 	this->m_pGridActor->SetPickable(0);
 	this->m_pPropCollection->AddItem(this->m_pGridActor);
@@ -2667,8 +2634,6 @@ void CWPhastDoc::New(const CNewModel& model)
 
 	// set the axes
 	//
-	///float bounds[6];
-	///this->m_pGridActor->GetBounds(bounds);
 	vtkFloatingPointType *bounds = this->GetGridBounds();
 	vtkFloatingPointType defaultAxesSize = (bounds[1]-bounds[0] + bounds[3]-bounds[2] + bounds[5]-bounds[4])/12;
 	this->m_pAxesActor->SetDefaultPositions(bounds);
@@ -2762,10 +2727,6 @@ void CWPhastDoc::New(const CNewModel& model)
 		pTree->GetRiversNode().Expand(TVE_COLLAPSE);
 		pTree->ClearSelection();
 	}
-
-//{{
-}
-//}}
 
 	// refresh screen
 	//
