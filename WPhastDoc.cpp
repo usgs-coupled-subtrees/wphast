@@ -2617,24 +2617,24 @@ void CWPhastDoc::New(const CNewModel& model)
 // COMMENT: {5/8/2006 11:20:47 PM}	}
 // COMMENT: {5/8/2006 11:20:47 PM}	CDelayRedraw delayTree(pWnd);
 
-	//{{
-	// delay redrawing treectrl
-	//
-	CWnd *pWndTreeCtrl = 0;
-	if (CPropertyTreeControlBar *pPropertyTreeControlBar = this->GetPropertyTreeControlBar())
-	{
-		pWndTreeCtrl = pPropertyTreeControlBar->GetTreeCtrl();
-	}
-	CDelayRedraw delayTree(pWndTreeCtrl);
-// COMMENT: {5/9/2006 5:08:59 PM}
-// COMMENT: {5/9/2006 5:08:59 PM}// COMMENT: {5/9/2006 12:12:59 AM}	// delay redrawing render window
-// COMMENT: {5/9/2006 5:08:59 PM}// COMMENT: {5/9/2006 12:12:59 AM}	//
-// COMMENT: {5/9/2006 5:08:59 PM}// COMMENT: {5/9/2006 12:12:59 AM}	CDelayRedraw delayRender(::AfxGetMainWnd()->GetActiveWindow());
-// COMMENT: {5/9/2006 5:08:59 PM}
-// COMMENT: {5/9/2006 5:08:59 PM}	POSITION pos = this->GetFirstViewPosition();
-// COMMENT: {5/9/2006 5:08:59 PM}	CWPhastView *pView = (CWPhastView*) GetNextView(pos);
-// COMMENT: {5/9/2006 5:08:59 PM}	CDelayRedraw delayRender(pView);
-// COMMENT: {5/9/2006 5:08:59 PM}	//}}
+// COMMENT: {5/9/2006 5:24:12 PM}	//{{
+// COMMENT: {5/9/2006 5:24:12 PM}	// delay redrawing treectrl
+// COMMENT: {5/9/2006 5:24:12 PM}	//
+// COMMENT: {5/9/2006 5:24:12 PM}	CWnd *pWndTreeCtrl = 0;
+// COMMENT: {5/9/2006 5:24:12 PM}	if (CPropertyTreeControlBar *pPropertyTreeControlBar = this->GetPropertyTreeControlBar())
+// COMMENT: {5/9/2006 5:24:12 PM}	{
+// COMMENT: {5/9/2006 5:24:12 PM}		pWndTreeCtrl = pPropertyTreeControlBar->GetTreeCtrl();
+// COMMENT: {5/9/2006 5:24:12 PM}	}
+// COMMENT: {5/9/2006 5:24:12 PM}	CDelayRedraw delayTree(pWndTreeCtrl);
+// COMMENT: {5/9/2006 5:24:12 PM}// COMMENT: {5/9/2006 5:08:59 PM}
+// COMMENT: {5/9/2006 5:24:12 PM}// COMMENT: {5/9/2006 5:08:59 PM}// COMMENT: {5/9/2006 12:12:59 AM}	// delay redrawing render window
+// COMMENT: {5/9/2006 5:24:12 PM}// COMMENT: {5/9/2006 5:08:59 PM}// COMMENT: {5/9/2006 12:12:59 AM}	//
+// COMMENT: {5/9/2006 5:24:12 PM}// COMMENT: {5/9/2006 5:08:59 PM}// COMMENT: {5/9/2006 12:12:59 AM}	CDelayRedraw delayRender(::AfxGetMainWnd()->GetActiveWindow());
+// COMMENT: {5/9/2006 5:24:12 PM}// COMMENT: {5/9/2006 5:08:59 PM}
+// COMMENT: {5/9/2006 5:24:12 PM}// COMMENT: {5/9/2006 5:08:59 PM}	POSITION pos = this->GetFirstViewPosition();
+// COMMENT: {5/9/2006 5:24:12 PM}// COMMENT: {5/9/2006 5:08:59 PM}	CWPhastView *pView = (CWPhastView*) GetNextView(pos);
+// COMMENT: {5/9/2006 5:24:12 PM}// COMMENT: {5/9/2006 5:08:59 PM}	CDelayRedraw delayRender(pView);
+// COMMENT: {5/9/2006 5:24:12 PM}// COMMENT: {5/9/2006 5:08:59 PM}	//}}
 
 	// set FlowOnly
 	// set SteadyFlow
