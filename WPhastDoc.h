@@ -373,6 +373,8 @@ public:
 	vtkPropAssembly* GetPropAssemblyWells(void)const;
 	vtkPropAssembly* GetPropAssemblyRivers(void)const;
 
+	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
+
 public:
 	void GetGrid(CGrid& x, CGrid& y, CGrid& z)const;
 
@@ -424,8 +426,11 @@ public:
 	afx_msg void OnUpdateToolsModifyGrid(CCmdUI *pCmdUI);
 	afx_msg void OnToolsModifyGrid();
 	void EndModifyGrid();
+
+	// ID_TOOLS_NEWZONE
 	afx_msg void OnUpdateToolsNewZone(CCmdUI *pCmdUI);
 	afx_msg void OnToolsNewZone();
+	void EndNewZone();
 };
 
 inline vtkPropAssembly* CWPhastDoc::GetPropAssemblyMedia() const

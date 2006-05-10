@@ -461,11 +461,8 @@ CWPhastDoc::~CWPhastDoc()
 		delete this->GridCoarsenPage;
 		this->GridCoarsenPage = 0;
 	}
-	if (this->NewZoneWidget)
-	{
-		this->NewZoneWidget->Delete();
-		this->NewZoneWidget = 0;
-	}
+	ASSERT(this->NewZoneWidget == 0);         // should be deleted in pView->CancelMode
+	ASSERT(this->GridElementsSelector == 0);  // should be deleted in pView->CancelMode
 }
 
 BOOL CWPhastDoc::OnNewDocument()
@@ -1374,8 +1371,6 @@ void CWPhastDoc::DeleteContents()
 		}
 	}
 
-
-
 	// Update BoxPropertiesDialogBar
 	//
 	if (CBoxPropertiesDialogBar* pBar = this->GetBoxPropertiesDialogBar())
@@ -1504,14 +1499,6 @@ void CWPhastDoc::SetScale(vtkFloatingPointType x, vtkFloatingPointType y, vtkFlo
 						if (vtkProp3D *prop3D = vtkProp3D::SafeDownCast(pProp))
 						{
 							prop3D->SetScale(scale);
-							if (CWellActor *pWellActor = CWellActor::SafeDownCast(prop3D))
-							{
-								pWellActor->SetDefaultTubeDiameter(defaultAxesSize * 0.17);
-							}
-							if (CRiverActor *pRiverActor = CRiverActor::SafeDownCast(prop3D))
-							{
-								pRiverActor->SetRadius(defaultAxesSize * 0.085);
-							}
 						}
 					}
 				}
@@ -2425,7 +2412,7 @@ void CWPhastDoc::SetUnits(const CUnits& units)
 	{
 		CString strLength(this->m_pUnits->vertical.input);
 		CGlobal::MinimizeLengthUnits(strLength);
-		this->m_pUnits->horizontal.set_input(strLength);
+		this->m_pUnits->vertical.set_input(strLength);
 	}
 
 	// update properties bar
@@ -2461,16 +2448,10 @@ void CWPhastDoc::SetUnits(const CUnits& units)
 		}
 	}
 
-	//{{{{
 	// set scale for all zones
 	//
 	if (vtkPropCollection* pCollection = this->GetPropCollection())
 	{
-		//{{
-		vtkFloatingPointType *scale = this->GetScale();
-		vtkFloatingPointType *bounds = this->GetGridBounds();
-		vtkFloatingPointType defaultAxesSize = (bounds[1]-bounds[0] + bounds[3]-bounds[2] + bounds[5]-bounds[4])/12;
-		//}}
 		pCollection->InitTraversal();
 		for (int i = 0; i < pCollection->GetNumberOfItems(); ++i)
 		{
@@ -2497,13 +2478,10 @@ void CWPhastDoc::SetUnits(const CUnits& units)
 							if (CWellActor *pWellActor = CWellActor::SafeDownCast(prop3D))
 							{
 								pWellActor->SetUnits(units);
-								pWellActor->SetDefaultTubeDiameter(defaultAxesSize * 0.17 / sqrt(scale[0] * scale[1]));
-								// pWellActor->SetRadius(defaultAxesSize * 0.085);
 							}
 							if (CRiverActor *pRiverActor = CRiverActor::SafeDownCast(prop3D))
 							{
 								pRiverActor->SetUnits(units);
-								pRiverActor->SetRadius(defaultAxesSize * 0.085);
 							}
 						}
 					}
@@ -2511,51 +2489,6 @@ void CWPhastDoc::SetUnits(const CUnits& units)
 			}
 		}
 	}
-	//}}}}
-
-// COMMENT: {6/7/2005 6:11:55 PM}	// Update wells
-// COMMENT: {6/7/2005 6:11:55 PM}	if (vtkPropCollection *pPropCollection = this->GetPropAssemblyWells()->GetParts())
-// COMMENT: {6/7/2005 6:11:55 PM}	{
-// COMMENT: {6/7/2005 6:11:55 PM}		// determine well diameter for displaying
-// COMMENT: {6/7/2005 6:11:55 PM}		//
-// COMMENT: {6/7/2005 6:11:55 PM}		float *scale = this->GetScale();
-// COMMENT: {6/7/2005 6:11:55 PM}		float *bounds = this->GetGridBounds();
-// COMMENT: {6/7/2005 6:11:55 PM}		float defaultAxesSize = (bounds[1]-bounds[0] + bounds[3]-bounds[2] + bounds[5]-bounds[4])/12;
-// COMMENT: {6/7/2005 6:11:55 PM}		float defaultTubeDiameter = defaultAxesSize * 0.17 / sqrt(scale[0] * scale[1]);
-// COMMENT: {6/7/2005 6:11:55 PM}
-// COMMENT: {6/7/2005 6:11:55 PM}		vtkProp *pProp = 0;
-// COMMENT: {6/7/2005 6:11:55 PM}		pPropCollection->InitTraversal();
-// COMMENT: {6/7/2005 6:11:55 PM}		for (; (pProp = pPropCollection->GetNextProp()); )
-// COMMENT: {6/7/2005 6:11:55 PM}		{
-// COMMENT: {6/7/2005 6:11:55 PM}			if (CWellActor *pWellActor = CWellActor::SafeDownCast(pProp))
-// COMMENT: {6/7/2005 6:11:55 PM}			{
-// COMMENT: {6/7/2005 6:11:55 PM}				pWellActor->SetUnits(units);
-// COMMENT: {6/7/2005 6:11:55 PM}				pWellActor->SetDefaultTubeDiameter(defaultTubeDiameter);
-// COMMENT: {6/7/2005 6:11:55 PM}			}
-// COMMENT: {6/7/2005 6:11:55 PM}		}
-// COMMENT: {6/7/2005 6:11:55 PM}	}
-// COMMENT: {6/7/2005 6:11:55 PM}
-// COMMENT: {6/7/2005 6:11:55 PM}	// Update rivers
-// COMMENT: {6/7/2005 6:11:55 PM}	if (vtkPropCollection *pPropCollection = this->GetPropAssemblyRivers()->GetParts())
-// COMMENT: {6/7/2005 6:11:55 PM}	{
-// COMMENT: {6/7/2005 6:11:55 PM}		// determine well diameter for displaying
-// COMMENT: {6/7/2005 6:11:55 PM}		//
-// COMMENT: {6/7/2005 6:11:55 PM}		float *bounds = this->GetGridBounds();
-// COMMENT: {6/7/2005 6:11:55 PM}		float defaultAxesSize = (bounds[1]-bounds[0] + bounds[3]-bounds[2] + bounds[5]-bounds[4])/12;
-// COMMENT: {6/7/2005 6:11:55 PM}
-// COMMENT: {6/7/2005 6:11:55 PM}		vtkProp *pProp = 0;
-// COMMENT: {6/7/2005 6:11:55 PM}		pPropCollection->InitTraversal();
-// COMMENT: {6/7/2005 6:11:55 PM}		for (; (pProp = pPropCollection->GetNextProp()); )
-// COMMENT: {6/7/2005 6:11:55 PM}		{
-// COMMENT: {6/7/2005 6:11:55 PM}			if (CRiverActor *pRiverActor = CRiverActor::SafeDownCast(pProp))
-// COMMENT: {6/7/2005 6:11:55 PM}			{
-// COMMENT: {6/7/2005 6:11:55 PM}				pRiverActor->SetUnits(units);
-// COMMENT: {6/7/2005 6:11:55 PM}				pRiverActor->SetRadius(defaultAxesSize * 0.085);
-// COMMENT: {6/7/2005 6:11:55 PM}			}
-// COMMENT: {6/7/2005 6:11:55 PM}		}
-// COMMENT: {6/7/2005 6:11:55 PM}	}
-
-
 
 	// for all views
 	//
@@ -4698,8 +4631,12 @@ void CWPhastDoc::OnToolsNewZone()
 {
 	if (this->NewZoneWidget)
 	{
-		this->NewZoneWidget->Delete();
-		this->NewZoneWidget = 0;
+		this->EndNewZone();
+		if (CWnd* pWnd = ::AfxGetMainWnd())
+		{
+			pWnd->RedrawWindow();
+			this->UpdateAllViews(0);
+		}
 	}
 	else
 	{
@@ -4715,10 +4652,28 @@ void CWPhastDoc::OnToolsNewZone()
 
 				this->NewZoneWidget = CNewZoneWidget::New();
 				this->NewZoneWidget->SetInteractor(pView->GetRenderWindowInteractor());
-// COMMENT: {5/8/2006 7:12:30 PM}				this->NewZoneWidget->SetGridActor(reinterpret_cast<CGridActor *>(this->GetGridActor()));
+				this->NewZoneWidget->SetGridActor(reinterpret_cast<CGridActor *>(this->GetGridActor()));
 // COMMENT: {5/8/2006 7:12:30 PM}				this->NewZoneWidget->SetDocument(this);
 				this->NewZoneWidget->SetEnabled(1);
 			}
 		}
 	}
+}
+
+void CWPhastDoc::EndNewZone()
+{
+	if (this->NewZoneWidget)
+	{
+		this->NewZoneWidget->Delete();
+		this->NewZoneWidget = 0;
+	}
+}
+
+BOOL CWPhastDoc::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
+{
+	if (this->NewZoneWidget)
+	{
+		return this->NewZoneWidget->OnSetCursor(pWnd, nHitTest, message);
+	}
+	return FALSE;
 }

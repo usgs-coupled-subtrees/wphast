@@ -220,6 +220,10 @@ CWPhastView::CWPhastView()
 
 CWPhastView::~CWPhastView()
 {
+	//{{
+	this->CancelMode();
+	//}}
+
 	this->InteractorStyle->Delete();
 	this->BoxWidget->Delete();
 	this->PointWidget->Delete();
@@ -813,6 +817,14 @@ BOOL CWPhastView::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 			{
 				return TRUE;
 			}
+		}
+	}
+
+	if (CWPhastDoc* pDoc = this->GetDocument())
+	{
+		if (pDoc->OnSetCursor(pWnd, nHitTest, message))
+		{
+			return TRUE;
 		}
 	}
 
@@ -2034,10 +2046,11 @@ void CWPhastView::CancelMode(void)
 	//
 	this->CancelNewWell();
 
-
+#ifdef DEPRECATED
 	// New Zone
 	//
 	this->CancelNewZone();
+#endif
 
 	// Move Grid Lines
 	//
@@ -2048,6 +2061,13 @@ void CWPhastView::CancelMode(void)
 	if (this->GetDocument())
 	{
 		this->GetDocument()->EndModifyGrid();
+	}
+
+	// New Zone
+	//
+	if (this->GetDocument())
+	{
+		this->GetDocument()->EndNewZone();
 	}
 
 	// Select Object
