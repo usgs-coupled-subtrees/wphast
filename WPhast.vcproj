@@ -4335,15 +4335,15 @@ copy &quot;$(DEV_VTK42_VS7_DLL_LIB)\vtkzlib.dll&quot; &quot;$(TargetDir)vtkzlib.
 			Name="Build Logs"
 			Filter="">
 			<File
+				RelativePath="Debug\BuildLog.htm"
+				DeploymentContent="TRUE">
+			</File>
+			<File
 				RelativePath="Release\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 			<File
 				RelativePath="cppunit\BuildLog.htm"
-				DeploymentContent="TRUE">
-			</File>
-			<File
-				RelativePath="Debug\BuildLog.htm"
 				DeploymentContent="TRUE">
 			</File>
 		</Filter>
@@ -4512,49 +4512,135 @@ copy &quot;$(DEV_VTK42_VS7_DLL_LIB)\vtkzlib.dll&quot; &quot;$(TargetDir)vtkzlib.
 			RelativePath="WPhast.reg">
 		</File>
 		<File
-			RelativePath="..\..\..\..\..\3RDPARTY\VTK-4.4-bin-mem\bin\debug\vtkCommon.bsc">
+			RelativePath="..\..\..\..\..\3RDPARTY\vtk-4-2-1-bin-mem\Common\Debug\vtkCommon.bsc">
+			<FileConfiguration
+				Name="cppunit4.4|Win32"
+				ExcludedFromBuild="TRUE">
+				<Tool
+					Name="VCCustomBuildTool"/>
+			</FileConfiguration>
 		</File>
 		<File
-			RelativePath="..\..\..\..\..\3RDPARTY\VTK-4.4-bin-mem\bin\debug\vtkDICOMParser.bsc">
+			RelativePath="..\..\..\..\..\3RDPARTY\vtk-4-2-1-bin-mem\Filtering\Debug\vtkFiltering.bsc">
+			<FileConfiguration
+				Name="cppunit4.4|Win32"
+				ExcludedFromBuild="TRUE">
+				<Tool
+					Name="VCCustomBuildTool"/>
+			</FileConfiguration>
 		</File>
 		<File
-			RelativePath="..\..\..\..\..\3RDPARTY\VTK-4.4-bin-mem\bin\debug\vtkFiltering.bsc">
+			RelativePath="..\..\..\..\..\3RDPARTY\vtk-4-2-1-bin-mem\Graphics\Debug\vtkGraphics.bsc">
+			<FileConfiguration
+				Name="cppunit4.4|Win32"
+				ExcludedFromBuild="TRUE">
+				<Tool
+					Name="VCCustomBuildTool"/>
+			</FileConfiguration>
 		</File>
 		<File
-			RelativePath="..\..\..\..\..\3RDPARTY\VTK-4.4-bin-mem\bin\debug\vtkGraphics.bsc">
+			RelativePath="..\..\..\..\..\3RDPARTY\vtk-4-2-1-bin-mem\Hybrid\Debug\vtkHybrid.bsc">
+			<FileConfiguration
+				Name="cppunit|Win32">
+				<Tool
+					Name="VCCustomBuildTool"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="cppunit4.4|Win32"
+				ExcludedFromBuild="TRUE">
+				<Tool
+					Name="VCCustomBuildTool"/>
+			</FileConfiguration>
 		</File>
 		<File
-			RelativePath="..\..\..\..\..\3RDPARTY\VTK-4.4-bin-mem\bin\debug\vtkHybrid.bsc">
+			RelativePath="..\..\..\..\..\3RDPARTY\vtk-4-2-1-bin-mem\IO\Debug\vtkIO.bsc">
+			<FileConfiguration
+				Name="cppunit4.4|Win32"
+				ExcludedFromBuild="TRUE">
+				<Tool
+					Name="VCCustomBuildTool"/>
+			</FileConfiguration>
 		</File>
 		<File
-			RelativePath="..\..\..\..\..\3RDPARTY\VTK-4.4-bin-mem\bin\debug\vtkIO.bsc">
+			RelativePath="..\..\..\..\..\3RDPARTY\vtk-4-2-1-bin-mem\Imaging\Debug\vtkImaging.bsc">
+			<FileConfiguration
+				Name="cppunit4.4|Win32"
+				ExcludedFromBuild="TRUE">
+				<Tool
+					Name="VCCustomBuildTool"/>
+			</FileConfiguration>
 		</File>
 		<File
-			RelativePath="..\..\..\..\..\3RDPARTY\VTK-4.4-bin-mem\bin\debug\vtkImaging.bsc">
+			RelativePath="..\..\..\..\..\3RDPARTY\vtk-4-2-1-bin-mem\Rendering\Debug\vtkRendering.bsc">
+			<FileConfiguration
+				Name="cppunit4.4|Win32"
+				ExcludedFromBuild="TRUE">
+				<Tool
+					Name="VCCustomBuildTool"/>
+			</FileConfiguration>
 		</File>
 		<File
-			RelativePath="..\..\..\..\..\3RDPARTY\VTK-4.4-bin-mem\bin\debug\vtkRendering.bsc">
+			RelativePath="..\..\..\..\..\3RDPARTY\vtk-4-2-1-bin-mem\Utilities\expat\Debug\vtkexpat.bsc">
+			<FileConfiguration
+				Name="cppunit4.4|Win32"
+				ExcludedFromBuild="TRUE">
+				<Tool
+					Name="VCCustomBuildTool"/>
+			</FileConfiguration>
 		</File>
 		<File
-			RelativePath="..\..\..\..\..\3RDPARTY\VTK-4.4-bin-mem\bin\debug\vtkexpat.bsc">
+			RelativePath="..\..\..\..\..\3RDPARTY\vtk-4-2-1-bin-mem\Utilities\freetype\Debug\vtkfreetype.bsc">
+			<FileConfiguration
+				Name="cppunit4.4|Win32"
+				ExcludedFromBuild="TRUE">
+				<Tool
+					Name="VCCustomBuildTool"/>
+			</FileConfiguration>
 		</File>
 		<File
-			RelativePath="..\..\..\..\..\3RDPARTY\VTK-4.4-bin-mem\bin\debug\vtkfreetype.bsc">
+			RelativePath="..\..\..\..\..\3RDPARTY\vtk-4-2-1-bin-mem\Utilities\ftgl\Debug\vtkftgl.bsc">
+			<FileConfiguration
+				Name="cppunit4.4|Win32"
+				ExcludedFromBuild="TRUE">
+				<Tool
+					Name="VCCustomBuildTool"/>
+			</FileConfiguration>
 		</File>
 		<File
-			RelativePath="..\..\..\..\..\3RDPARTY\VTK-4.4-bin-mem\bin\debug\vtkftgl.bsc">
+			RelativePath="..\..\..\..\..\3RDPARTY\vtk-4-2-1-bin-mem\Utilities\jpeg\Debug\vtkjpeg.bsc">
+			<FileConfiguration
+				Name="cppunit4.4|Win32"
+				ExcludedFromBuild="TRUE">
+				<Tool
+					Name="VCCustomBuildTool"/>
+			</FileConfiguration>
 		</File>
 		<File
-			RelativePath="..\..\..\..\..\3RDPARTY\VTK-4.4-bin-mem\bin\debug\vtkjpeg.bsc">
+			RelativePath="..\..\..\..\..\3RDPARTY\vtk-4-2-1-bin-mem\Utilities\png\Debug\vtkpng.bsc">
+			<FileConfiguration
+				Name="cppunit4.4|Win32"
+				ExcludedFromBuild="TRUE">
+				<Tool
+					Name="VCCustomBuildTool"/>
+			</FileConfiguration>
 		</File>
 		<File
-			RelativePath="..\..\..\..\..\3RDPARTY\VTK-4.4-bin-mem\bin\debug\vtkpng.bsc">
+			RelativePath="..\..\..\..\..\3RDPARTY\vtk-4-2-1-bin-mem\Utilities\tiff\Debug\vtktiff.bsc">
+			<FileConfiguration
+				Name="cppunit4.4|Win32"
+				ExcludedFromBuild="TRUE">
+				<Tool
+					Name="VCCustomBuildTool"/>
+			</FileConfiguration>
 		</File>
 		<File
-			RelativePath="..\..\..\..\..\3RDPARTY\VTK-4.4-bin-mem\bin\debug\vtktiff.bsc">
-		</File>
-		<File
-			RelativePath="..\..\..\..\..\3RDPARTY\VTK-4.4-bin-mem\bin\debug\vtkzlib.bsc">
+			RelativePath="..\..\..\..\..\3RDPARTY\vtk-4-2-1-bin-mem\Utilities\zlib\Debug\vtkzlib.bsc">
+			<FileConfiguration
+				Name="cppunit4.4|Win32"
+				ExcludedFromBuild="TRUE">
+				<Tool
+					Name="VCCustomBuildTool"/>
+			</FileConfiguration>
 		</File>
 	</Files>
 	<Globals>

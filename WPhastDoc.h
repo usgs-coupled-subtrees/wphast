@@ -248,8 +248,6 @@ protected:
 	CGridCoarsenPage           *GridCoarsenPage;
 	CGridElementsSelector      *GridElementsSelector;
 
-	CNewZoneWidget             *NewZoneWidget;
-
 protected:
 	void InitDocument();
 	
@@ -430,7 +428,11 @@ public:
 	// ID_TOOLS_NEWZONE
 	afx_msg void OnUpdateToolsNewZone(CCmdUI *pCmdUI);
 	afx_msg void OnToolsNewZone();
+	void BeginNewZone();
 	void EndNewZone();
+	static void NewZoneListener(vtkObject *caller, unsigned long eid, void *clientdata, void *calldata);
+	vtkCallbackCommand *NewZoneCallbackCommand;
+	CNewZoneWidget     *NewZoneWidget;
 };
 
 inline vtkPropAssembly* CWPhastDoc::GetPropAssemblyMedia() const

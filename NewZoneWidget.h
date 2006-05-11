@@ -26,7 +26,10 @@ public:
 	virtual void SetEnabled(int);
 	virtual void PlaceWidget(vtkFloatingPointType bounds[6]);
 
-	vtkSetMacro(GridActor,CGridActor*);
+	vtkFloatingPointType* GetBounds(void) { return this->OutlineActor->GetBounds(); }
+	void GetBounds(vtkFloatingPointType bounds[6]) { this->OutlineActor->GetBounds(bounds); }
+
+// COMMENT: {5/10/2006 4:23:30 PM}	vtkSetMacro(GridActor,CGridActor*);
 
 #ifdef WIN32
 	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
@@ -70,7 +73,7 @@ protected:
 
 
 	//
-	CGridActor  *GridActor;
+// COMMENT: {5/10/2006 4:23:08 PM}	CGridActor  *GridActor;
 
 // COMMENT: {5/8/2006 7:11:45 PM}	// 
 // COMMENT: {5/8/2006 7:11:45 PM}	CWPhastDoc  *Document;

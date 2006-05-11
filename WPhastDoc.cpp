@@ -260,6 +260,7 @@ CWPhastDoc::CWPhastDoc()
 , GridCoarsenPage(0)
 , GridElementsSelector(0)
 , NewZoneWidget(0)
+, NewZoneCallbackCommand(0)
 {
 #if defined(WPHAST_AUTOMATION)
 	EnableAutomation();
@@ -461,8 +462,9 @@ CWPhastDoc::~CWPhastDoc()
 		delete this->GridCoarsenPage;
 		this->GridCoarsenPage = 0;
 	}
-	ASSERT(this->NewZoneWidget == 0);         // should be deleted in pView->CancelMode
-	ASSERT(this->GridElementsSelector == 0);  // should be deleted in pView->CancelMode
+	ASSERT(this->NewZoneWidget == 0);           // should be deleted in pView->CancelMode
+	ASSERT(this->NewZoneCallbackCommand == 0);  // should be deleted in pView->CancelMode
+	ASSERT(this->GridElementsSelector == 0);    // should be deleted in pView->CancelMode
 }
 
 BOOL CWPhastDoc::OnNewDocument()
@@ -4617,7 +4619,7 @@ void CWPhastDoc::SizeHandles(double size)
 
 void CWPhastDoc::OnUpdateToolsNewZone(CCmdUI *pCmdUI)
 {
-	if (this->NewZoneWidget)
+	if (this->NewZoneWidget && this->NewZoneWidget->GetEnabled())
 	{
 		pCmdUI->SetCheck(1);
 	}
@@ -4629,49 +4631,180 @@ void CWPhastDoc::OnUpdateToolsNewZone(CCmdUI *pCmdUI)
 
 void CWPhastDoc::OnToolsNewZone()
 {
-	if (this->NewZoneWidget)
+	if (this->NewZoneWidget && this->NewZoneWidget->GetEnabled())
 	{
 		this->EndNewZone();
-		if (CWnd* pWnd = ::AfxGetMainWnd())
-		{
-			pWnd->RedrawWindow();
-			this->UpdateAllViews(0);
-		}
 	}
 	else
 	{
-		POSITION pos = this->GetFirstViewPosition();
-		if (pos != NULL)
-		{
-			CWPhastView *pView = (CWPhastView*) GetNextView(pos);
-			ASSERT_VALID(pView);
-			ASSERT(pView->GetRenderWindowInteractor());
-			if (pView->GetRenderWindowInteractor())
-			{
-				pView->CancelMode();
+		if (this->NewZoneWidget) this->EndNewZone();
+		this->BeginNewZone();
+	}
+}
 
-				this->NewZoneWidget = CNewZoneWidget::New();
-				this->NewZoneWidget->SetInteractor(pView->GetRenderWindowInteractor());
-				this->NewZoneWidget->SetGridActor(reinterpret_cast<CGridActor *>(this->GetGridActor()));
-// COMMENT: {5/8/2006 7:12:30 PM}				this->NewZoneWidget->SetDocument(this);
-				this->NewZoneWidget->SetEnabled(1);
-			}
+void CWPhastDoc::BeginNewZone()
+{
+	ASSERT(this->NewZoneWidget == 0);
+	ASSERT(this->NewZoneCallbackCommand == 0);
+
+	POSITION pos = this->GetFirstViewPosition();
+	if (pos != NULL)
+	{
+		CWPhastView *pView = (CWPhastView*) GetNextView(pos);
+		ASSERT_VALID(pView);
+		ASSERT(pView->GetRenderWindowInteractor());
+		if (pView->GetRenderWindowInteractor())
+		{
+			pView->CancelMode();
+
+			// create widget
+			this->NewZoneWidget = CNewZoneWidget::New();
+			this->NewZoneWidget->SetInteractor(pView->GetRenderWindowInteractor());
+			this->NewZoneWidget->SetProp3D(this->GetGridActor());
+
+			// add listener callback
+			this->NewZoneCallbackCommand = vtkCallbackCommand::New();
+			this->NewZoneCallbackCommand->SetClientData(this);
+			this->NewZoneCallbackCommand->SetCallback(CWPhastDoc::NewZoneListener);
+			this->NewZoneWidget->AddObserver(vtkCommand::EndInteractionEvent, this->NewZoneCallbackCommand);
+
+			// enable widget
+			this->NewZoneWidget->SetEnabled(1);
 		}
 	}
 }
 
 void CWPhastDoc::EndNewZone()
 {
+	if (this->NewZoneCallbackCommand)
+	{
+		ASSERT(this->NewZoneCallbackCommand->IsA("vtkObjectBase"));
+		this->NewZoneCallbackCommand->Delete();
+		this->NewZoneCallbackCommand = 0;
+	}
 	if (this->NewZoneWidget)
 	{
+		ASSERT(this->NewZoneWidget->IsA("CNewZoneWidget"));
 		this->NewZoneWidget->Delete();
 		this->NewZoneWidget = 0;
 	}
 }
 
+#include "NewZonePropertyPage.h"
+#include "MediaSpreadPropertyPage.h"
+#include "BCFluxPropertyPage2.h"
+#include "BCLeakyPropertyPage2.h"
+#include "BCSpecifiedHeadPropertyPage.h"
+#include "ICHeadSpreadPropertyPage.h"
+#include "ChemICSpreadPropertyPage.h"
+
+void CWPhastDoc::NewZoneListener(vtkObject *caller, unsigned long eid, void *clientdata, void *calldata) 
+{
+	ASSERT(caller->IsA("CNewZoneWidget"));
+	ASSERT(clientdata);
+
+	if (clientdata)
+	{
+		CWPhastDoc* self = reinterpret_cast<CWPhastDoc*>(clientdata);
+		if (eid == vtkCommand::EndInteractionEvent)
+		{
+			vtkFloatingPointType scaled_meters[6];
+			self->NewZoneWidget->GetBounds(scaled_meters);
+
+			// calc zone
+			CZone zone;
+			vtkFloatingPointType* scale = self->GetScale();
+			const CUnits& units = self->GetUnits();
+			zone.x1 = scaled_meters[0] / scale[0] / units.horizontal.input_to_si;
+			zone.x2 = scaled_meters[1] / scale[0] / units.horizontal.input_to_si;
+			zone.y1 = scaled_meters[2] / scale[1] / units.horizontal.input_to_si;
+			zone.y2 = scaled_meters[3] / scale[1] / units.horizontal.input_to_si;
+			zone.z1 = scaled_meters[4] / scale[2] / units.vertical.input_to_si;
+			zone.z2 = scaled_meters[5] / scale[2] / units.vertical.input_to_si;
+
+			TRACE("x(%g-%g) y(%g-%g) z(%g-%g)\n", zone.x1, zone.x2, zone.y1, zone.y2, zone.z1, zone.z2);
+
+			// get type of zone
+			//
+			ETSLayoutPropertySheet        sheet("Zone Wizard", NULL, 0, NULL, false);
+
+			CNewZonePropertyPage          newZone;
+			CMediaSpreadPropertyPage      mediaProps;
+			CBCFluxPropertyPage2          fluxProps;
+			CBCLeakyPropertyPage2         leakyProps;
+			CBCSpecifiedHeadPropertyPage  specifiedProps;
+			CICHeadSpreadPropertyPage     icHeadProps;
+			CChemICSpreadPropertyPage     chemICProps;
+
+			// CChemICSpreadPropertyPage only needs the flowonly flag when the zone is a
+			// default zone
+			//
+			bool bFlowOnly = self->GetFlowOnly();
+
+			fluxProps.SetFlowOnly(bFlowOnly);
+			leakyProps.SetFlowOnly(bFlowOnly);
+			specifiedProps.SetFlowOnly(bFlowOnly);
+
+			sheet.AddPage(&newZone);
+			sheet.AddPage(&mediaProps);
+			sheet.AddPage(&fluxProps);
+			sheet.AddPage(&leakyProps);
+			sheet.AddPage(&specifiedProps);
+			sheet.AddPage(&icHeadProps);
+			sheet.AddPage(&chemICProps);
+
+			sheet.SetWizardMode();
+
+			if (sheet.DoModal() == ID_WIZFINISH)
+			{
+				if (newZone.GetType() == ID_ZONE_TYPE_MEDIA)
+				{
+					CGridElt elt;
+					mediaProps.GetProperties(elt);
+					CMediaZoneActor::Create(self, zone, elt, mediaProps.GetDesc());
+				}
+				else if (newZone.GetType() == ID_ZONE_TYPE_BC_FLUX)
+				{
+					CBC bc;
+					fluxProps.GetProperties(bc);
+					CBCZoneActor::Create(self, zone, bc, fluxProps.GetDesc());
+				}
+				else if (newZone.GetType() == ID_ZONE_TYPE_BC_LEAKY)
+				{
+					CBC bc;
+					leakyProps.GetProperties(bc);
+					CBCZoneActor::Create(self, zone, bc, leakyProps.GetDesc());
+				}
+				else if (newZone.GetType() == ID_ZONE_TYPE_BC_SPECIFIED)
+				{
+					CBC bc;
+					specifiedProps.GetProperties(bc);
+					CBCZoneActor::Create(self, zone, bc, specifiedProps.GetDesc());
+				}
+				else if (newZone.GetType() == ID_ZONE_TYPE_IC_HEAD)
+				{
+					CHeadIC headic;
+					icHeadProps.GetProperties(headic);
+					CICHeadZoneActor::Create(self, zone, headic, icHeadProps.GetDesc());
+				}
+				else if (newZone.GetType() == ID_ZONE_TYPE_IC_CHEM)
+				{
+					CChemIC chemIC;
+					chemICProps.GetProperties(chemIC);
+					CICChemZoneActor::Create(self, zone, chemIC, chemICProps.GetDesc());
+				}
+			}
+
+			// Note: cannot call EndNewZone here
+			self->NewZoneWidget->SetEnabled(0);
+		}
+	}
+
+}
+
 BOOL CWPhastDoc::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 {
-	if (this->NewZoneWidget)
+	if (this->NewZoneWidget && this->NewZoneWidget->GetEnabled())
 	{
 		return this->NewZoneWidget->OnSetCursor(pWnd, nHitTest, message);
 	}

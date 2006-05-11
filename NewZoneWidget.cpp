@@ -2,6 +2,7 @@
 #include "NewZoneWidget.h"
 
 #include "GridActor.h"
+#include "Utilities.h"
 #include "Resource.h"  // IDC_NULL
 
 #if defined(USE_INTRINSIC)
@@ -154,31 +155,23 @@ void CNewZoneWidget::SetEnabled(int enabling)
 
 void CNewZoneWidget::PlaceWidget(vtkFloatingPointType bounds[6])
 {
-// COMMENT: {5/8/2006 5:42:11 PM}	// set bounds for the outline
-// COMMENT: {5/8/2006 5:42:11 PM}	//
-// COMMENT: {5/8/2006 5:42:11 PM}	this->OutlineSource->SetBounds(bounds);
-// COMMENT: {5/8/2006 5:42:11 PM}	this->OutlineActor->SetVisibility(1);
-// COMMENT: {5/8/2006 5:42:11 PM}
-// COMMENT: {5/8/2006 5:42:11 PM}	// set bounds for the highlighted elements
-// COMMENT: {5/8/2006 5:42:11 PM}	//
-// COMMENT: {5/8/2006 5:42:11 PM}	this->Source->SetBounds(bounds);
-// COMMENT: {5/8/2006 5:42:11 PM}	this->Actor->SetVisibility(1);
+	// set bounds for the outline
+	//
+	this->OutlineSource->SetBounds(bounds);
+	this->OutlineActor->SetVisibility(1);
 }
 
 void CNewZoneWidget::ProcessEvents(vtkObject* object, unsigned long event, void* clientdata, void* calldata)
 {
-	CNewZoneWidget* self = reinterpret_cast<CNewZoneWidget *>( clientdata );
+	CNewZoneWidget* self = reinterpret_cast<CNewZoneWidget *>(clientdata);
 
-// COMMENT: {5/8/2006 7:12:01 PM}	if ( !self || !self->GridActor ) return;
-	if ( !self ) return;
-
-	if ( !self->Interactor ) return;
+	if (!self || !self->Prop3D || !self->Interactor) return;
 
 	int X = self->Interactor->GetEventPosition()[0];
 	int Y = self->Interactor->GetEventPosition()[1];
 
-	vtkRenderer *ren = self->Interactor->FindPokedRenderer( X, Y );
-	if ( ren != self->CurrentRenderer )
+	vtkRenderer *ren = self->Interactor->FindPokedRenderer(X, Y);
+	if (ren != self->CurrentRenderer)
 	{
 		return;
 	}
@@ -197,16 +190,13 @@ void CNewZoneWidget::ProcessEvents(vtkObject* object, unsigned long event, void*
 	}
 }
 
-#include "Utilities.h"
-
 void CNewZoneWidget::OnMouseMove()
 {
 	TRACE("CNewZoneWidget::OnMouseMove\n");
 
 	if (!this->CurrentRenderer) return;
-	if (!this->GridActor) return;
+	if (!this->Prop3D) return;
 
-//{{
 	// determine most likely plane by finding
 	// largest component vector
 	//
@@ -218,10 +208,10 @@ void CNewZoneWidget::OnMouseMove()
 	{
 		// Note: fabs() is ~4x slower
 		//
-		if ( max < FABS(viewPlaneNormal[i]) )
+		if (max < FABS(viewPlaneNormal[i]))
 		{
 			this->FixedCoord = i;
-			if ( viewPlaneNormal[i] < 0.0 )
+			if (viewPlaneNormal[i] < 0.0)
 			{
 				max = -viewPlaneNormal[i];
 				this->FixedPlane = 2 * i;
@@ -245,10 +235,10 @@ void CNewZoneWidget::OnMouseMove()
 	//    4 => zmin
 	//    5 => zmax
 	//
-	vtkFloatingPointType* bounds = this->GridActor->GetBounds();
-	CUtilities::GetWorldPointAtFixedPlane(this->Interactor, this->CurrentRenderer, this->FixedCoord, bounds[this->FixedPlane], this->FixedPlanePoint);
 
-	//}}
+	///vtkFloatingPointType* bounds = this->GridActor->GetBounds();
+	vtkFloatingPointType* bounds = this->Prop3D->GetBounds();
+	CUtilities::GetWorldPointAtFixedPlane(this->Interactor, this->CurrentRenderer, this->FixedCoord, bounds[this->FixedPlane], this->FixedPlanePoint);
 
 	vtkFloatingPointType dim = (bounds[1] - bounds[0]) / 20.0;
 	this->Cursor3D->SetModelBounds(-dim, dim, -dim, dim, -dim, dim);
@@ -256,7 +246,7 @@ void CNewZoneWidget::OnMouseMove()
 	this->Cursor3DActor->SetPosition(this->FixedPlanePoint);
 	this->CurrentRenderer->ResetCameraClippingRange();
 
-	if ( this->State == CNewZoneWidget::Selecting )
+	if (this->State == CNewZoneWidget::Selecting)
 	{
 		for (int i = 0; i < 3; ++i)
 		{
@@ -267,6 +257,7 @@ void CNewZoneWidget::OnMouseMove()
 			}
 		}
 		this->OutlineSource->SetBounds(bounds);
+		this->InvokeEvent(vtkCommand::InteractionEvent, NULL);
 	}
 
 	this->Interactor->Render();
@@ -276,7 +267,7 @@ void CNewZoneWidget::OnLeftButtonDown()
 {
 	TRACE("CNewZoneWidget::OnLeftButtonDown\n");
 
-	ASSERT ( this->State == CNewZoneWidget::Start );
+	ASSERT(this->State == CNewZoneWidget::Start);
 
 	// set state
 	//
@@ -291,7 +282,7 @@ void CNewZoneWidget::OnLeftButtonDown()
 	//    4 => zmin
 	//    5 => zmax
 	//
-	vtkFloatingPointType* bounds = this->GridActor->GetBounds();
+	vtkFloatingPointType* bounds = this->Prop3D->GetBounds();
 	CUtilities::GetWorldPointAtFixedPlane(this->Interactor, this->CurrentRenderer, this->FixedCoord, bounds[this->FixedPlane], this->StartPoint);
 
 	// set bounds for the outline
@@ -311,6 +302,8 @@ void CNewZoneWidget::OnLeftButtonDown()
 	// stop forwarding event
 	//
 	this->EventCallbackCommand->SetAbortFlag(1);
+	this->StartInteraction();
+	this->InvokeEvent(vtkCommand::StartInteractionEvent, NULL);
 	this->Interactor->Render();
 }
 
@@ -319,11 +312,25 @@ void CNewZoneWidget::OnLeftButtonUp()
 	TRACE("CNewZoneWidget::OnLeftButtonUp\n");
 	if ( this->State == CNewZoneWidget::Selecting )
 	{
+		vtkFloatingPointType* bounds = this->Prop3D->GetBounds();
+		CUtilities::GetWorldPointAtFixedPlane(this->Interactor, this->CurrentRenderer, this->FixedCoord, bounds[this->FixedPlane], this->FixedPlanePoint);
+		for (int i = 0; i < 3; ++i)
+		{
+			if (i != this->FixedCoord)
+			{
+				bounds[2 * i]     = min(this->StartPoint[i], this->FixedPlanePoint[i]);
+				bounds[2 * i + 1] = max(this->StartPoint[i], this->FixedPlanePoint[i]);
+			}
+		}
+		this->OutlineSource->SetBounds(bounds);
 
 		// stop forwarding event
 		//
 		this->State = CNewZoneWidget::Start;
 		this->EventCallbackCommand->SetAbortFlag(1);
+		this->EndInteraction();
+		this->InvokeEvent(vtkCommand::EndInteractionEvent, NULL);
+		this->Interactor->Render();
 	}
 }
 
@@ -332,7 +339,7 @@ BOOL CNewZoneWidget::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 {
 	if (this->Enabled)
 	{
-		::SetCursor(AfxGetApp()->LoadCursor(IDC_NULL));
+		::SetCursor(::AfxGetApp()->LoadCursor(IDC_NULL));
 		return TRUE;
 	}
 	return FALSE;

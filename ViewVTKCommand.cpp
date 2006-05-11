@@ -988,6 +988,7 @@ void CViewVTKCommand::OnModifiedEvent(vtkObject* caller, void* callData)
 				(windowUpperRight[i] - windowLowerLeft[i]);
 		}
 
+		TRACE("CViewVTKCommand::OnModifiedEvent radius = %g\n", ::sqrt(radius));
 		this->m_pView->SizeHandles(::sqrt(radius));
 	}
 }
