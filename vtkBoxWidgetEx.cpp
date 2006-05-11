@@ -105,7 +105,6 @@ void vtkBoxWidgetEx::OnLeftButtonDown()
 			this->State = vtkBoxWidget::Outside;
 			return;
 		}
-// COMMENT: {9/13/2005 3:19:19 PM}		return;
 	}
 
 	this->EventCallbackCommand->SetAbortFlag(1);
@@ -114,103 +113,41 @@ void vtkBoxWidgetEx::OnLeftButtonDown()
 	this->Interactor->Render();
 }
 
+//
+// Modifications from vtkBoxWidget::SizeHandles()
+// 1. Determine CurrentRenderer if NULL
+// 2. Use vtkBoxWidgetEx::SizeHandles(double factor) instead
+//    of vtk3DWidget::SizeHandles(float factor)
+//
 void vtkBoxWidgetEx::SizeHandles()
 {
-#ifdef USE_ORIGINAL
-	float radius = this->vtk3DWidget::SizeHandles(1.5);
-	for(int i=0; i<7; i++)
-	{
-		this->HandleGeometry[i]->SetRadius(radius);
-	}
-#else
 	if (!this->Interactor) return;
-	int X = this->Interactor->GetEventPosition()[0];
-	int Y = this->Interactor->GetEventPosition()[1];
-	this->CurrentRenderer = this->Interactor->FindPokedRenderer(X, Y);
+
+	if (!this->CurrentRenderer)
+	{
+		int X = this->Interactor->GetEventPosition()[0];
+		int Y = this->Interactor->GetEventPosition()[1];
+		this->CurrentRenderer = this->Interactor->FindPokedRenderer(X, Y);
+	}
 
 	double radius = this->SizeHandles(1.5);
-	TRACE("xxx vtkBoxWidgetEx::SizeHandles radius = %g\n", radius);
 	for(int i=0; i<7; i++)
 	{
 		this->HandleGeometry[i]->SetRadius(radius);
 	}
-#endif
-// COMMENT: {5/10/2006 10:59:10 PM}	//{{{
-// COMMENT: {5/10/2006 10:59:10 PM}
-// COMMENT: {5/10/2006 10:59:10 PM}// COMMENT: {5/10/2006 10:54:31 PM}	//{{
-// COMMENT: {5/10/2006 10:59:10 PM}// COMMENT: {5/10/2006 10:54:31 PM}	if (!this->Interactor) return;
-// COMMENT: {5/10/2006 10:59:10 PM}// COMMENT: {5/10/2006 10:54:31 PM}	int X = this->Interactor->GetEventPosition()[0];
-// COMMENT: {5/10/2006 10:59:10 PM}// COMMENT: {5/10/2006 10:54:31 PM}	int Y = this->Interactor->GetEventPosition()[1];
-// COMMENT: {5/10/2006 10:59:10 PM}// COMMENT: {5/10/2006 10:54:31 PM}
-// COMMENT: {5/10/2006 10:59:10 PM}// COMMENT: {5/10/2006 10:54:31 PM}	this->CurrentRenderer = this->Interactor->FindPokedRenderer(X, Y);
-// COMMENT: {5/10/2006 10:59:10 PM}// COMMENT: {5/10/2006 10:54:31 PM}	//}}
-// COMMENT: {5/10/2006 10:59:10 PM}
-// COMMENT: {5/10/2006 10:59:10 PM}	if (this->CurrentRenderer)
-// COMMENT: {5/10/2006 10:59:10 PM}	{
-// COMMENT: {5/10/2006 10:59:10 PM}		int i;
-// COMMENT: {5/10/2006 10:59:10 PM}		double radius, z;
-// COMMENT: {5/10/2006 10:59:10 PM}		double windowLowerLeft[4], windowUpperRight[4];
-// COMMENT: {5/10/2006 10:59:10 PM}		float *viewport = this->CurrentRenderer->GetViewport();
-// COMMENT: {5/10/2006 10:59:10 PM}		int *winSize = this->CurrentRenderer->GetRenderWindow()->GetSize();
-// COMMENT: {5/10/2006 10:59:10 PM}		double focalPoint[4];
-// COMMENT: {5/10/2006 10:59:10 PM}
-// COMMENT: {5/10/2006 10:59:10 PM}		// get the focal point in world coordinates
-// COMMENT: {5/10/2006 10:59:10 PM}		//
-// COMMENT: {5/10/2006 10:59:10 PM}		vtkCamera *camera = this->CurrentRenderer->GetActiveCamera();
-// COMMENT: {5/10/2006 10:59:10 PM}		vtkFloatingPointType cameraFP[4];
-// COMMENT: {5/10/2006 10:59:10 PM}		camera->GetFocalPoint((vtkFloatingPointType*)cameraFP); cameraFP[3] = 1.0;
-// COMMENT: {5/10/2006 10:59:10 PM}
-// COMMENT: {5/10/2006 10:59:10 PM}		this->ComputeWorldToDisplay(cameraFP[0],
-// COMMENT: {5/10/2006 10:59:10 PM}									cameraFP[1],
-// COMMENT: {5/10/2006 10:59:10 PM}									cameraFP[2], focalPoint);
-// COMMENT: {5/10/2006 10:59:10 PM}
-// COMMENT: {5/10/2006 10:59:10 PM}		z = focalPoint[2];
-// COMMENT: {5/10/2006 10:59:10 PM}
-// COMMENT: {5/10/2006 10:59:10 PM}		double x = winSize[0] * viewport[0];
-// COMMENT: {5/10/2006 10:59:10 PM}		double y = winSize[1] * viewport[1];
-// COMMENT: {5/10/2006 10:59:10 PM}		this->ComputeDisplayToWorld(x,y,z,windowLowerLeft);
-// COMMENT: {5/10/2006 10:59:10 PM}
-// COMMENT: {5/10/2006 10:59:10 PM}		x = winSize[0] * viewport[2];
-// COMMENT: {5/10/2006 10:59:10 PM}		y = winSize[1] * viewport[3];
-// COMMENT: {5/10/2006 10:59:10 PM}		this->ComputeDisplayToWorld(x,y,z,windowUpperRight);
-// COMMENT: {5/10/2006 10:59:10 PM}
-// COMMENT: {5/10/2006 10:59:10 PM}		for (radius=0.0, i=0; i<3; i++)
-// COMMENT: {5/10/2006 10:59:10 PM}		{
-// COMMENT: {5/10/2006 10:59:10 PM}			radius += (windowUpperRight[i] - windowLowerLeft[i]) *
-// COMMENT: {5/10/2006 10:59:10 PM}				(windowUpperRight[i] - windowLowerLeft[i]);
-// COMMENT: {5/10/2006 10:59:10 PM}		}
-// COMMENT: {5/10/2006 10:59:10 PM}
-// COMMENT: {5/10/2006 10:59:10 PM}		//radius = ::sqrt(radius) * 0.008;
-// COMMENT: {5/10/2006 10:59:10 PM}		radius = ::sqrt(radius) * 0.0149999997;
-// COMMENT: {5/10/2006 10:59:10 PM}
-// COMMENT: {5/10/2006 10:59:10 PM}		for(int i=0; i<7; i++)
-// COMMENT: {5/10/2006 10:59:10 PM}		{
-// COMMENT: {5/10/2006 10:59:10 PM}			this->HandleGeometry[i]->SetRadius(radius);
-// COMMENT: {5/10/2006 10:59:10 PM}		}
-// COMMENT: {5/10/2006 10:59:10 PM}		TRACE("vtkBoxWidgetEx::SizeHandles radius = %g\n", radius);
-// COMMENT: {5/10/2006 10:59:10 PM}	}
-// COMMENT: {5/10/2006 10:59:10 PM}	//}}}
-// COMMENT: {5/10/2006 10:59:10 PM}
-// COMMENT: {5/10/2006 10:59:10 PM}// COMMENT: {5/10/2006 9:47:38 PM}	for(int i=0; i<7; i++)
-// COMMENT: {5/10/2006 10:59:10 PM}// COMMENT: {5/10/2006 9:47:38 PM}	{
-// COMMENT: {5/10/2006 10:59:10 PM}// COMMENT: {5/10/2006 9:47:38 PM}		this->HandleGeometry[i]->SetRadius(radius);
-// COMMENT: {5/10/2006 10:59:10 PM}// COMMENT: {5/10/2006 9:47:38 PM}	}
-// COMMENT: {5/10/2006 10:59:10 PM}// COMMENT: {5/10/2006 9:47:38 PM}	TRACE("vtkBoxWidgetEx::SizeHandles radius = %g\n", radius);
-// COMMENT: {5/10/2006 10:59:10 PM}
-// COMMENT: {5/10/2006 10:59:10 PM}// COMMENT: {5/10/2006 9:37:55 PM}	if (this->Interactor) this->Interactor->Render();
 }
 
+//
+// Modifications from vtk3DWidget::SizeHandles(float)
+// 1. Use ActiveCamera's FocalPoint instead of last pick location
+// 2. Some variables were changed from float to double
+//
 double vtkBoxWidgetEx::SizeHandles(double factor)
 {
 	int i;
 	vtkRenderer *renderer;
 
-#ifdef SKIP_ORIGINAL
-	if ( !this->ValidPick || !(renderer=this->CurrentRenderer) ||
-		!renderer->GetActiveCamera() )
-#else
 	if (!(renderer = this->CurrentRenderer) || !renderer->GetActiveCamera())
-#endif
 	{
 		return (this->HandleSize * factor * this->InitialLength);
 	}
@@ -222,11 +159,6 @@ double vtkBoxWidgetEx::SizeHandles(double factor)
 		int *winSize = renderer->GetRenderWindow()->GetSize();
 		double focalPoint[4];
 
-#ifdef SKIP_ORIGINAL
-		this->ComputeWorldToDisplay(this->LastPickPosition[0],
-			this->LastPickPosition[1],
-			this->LastPickPosition[2], focalPoint);
-#else
 		// get the focal point in world coordinates
 		//
 		vtkCamera *camera = this->CurrentRenderer->GetActiveCamera();
@@ -236,7 +168,7 @@ double vtkBoxWidgetEx::SizeHandles(double factor)
 		this->ComputeWorldToDisplay(cameraFP[0],
 			cameraFP[1],
 			cameraFP[2], focalPoint);
-#endif
+
 		z = focalPoint[2];
 
 		double x = winSize[0] * viewport[0];
