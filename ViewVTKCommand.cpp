@@ -930,7 +930,7 @@ void CViewVTKCommand::OnModifiedEvent(vtkObject* caller, void* callData)
 {
 	if (!this->m_pView) return;
 
-#if defined(_DEBUG)
+#if defined(_DEBUG) && defined(SKIP)
 	if (caller)
 	{
 		ostrstream oss;

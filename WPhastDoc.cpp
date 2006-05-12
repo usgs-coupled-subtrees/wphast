@@ -78,6 +78,15 @@
 #include "GridInsertLineAction.h"
 #include "GridMoveLineAction.h"
 
+// zone property pages
+#include "NewZonePropertyPage.h"
+#include "MediaSpreadPropertyPage.h"
+#include "BCFluxPropertyPage2.h"
+#include "BCLeakyPropertyPage2.h"
+#include "BCSpecifiedHeadPropertyPage.h"
+#include "ICHeadSpreadPropertyPage.h"
+#include "ChemICSpreadPropertyPage.h"
+
 #include "Unit.h"
 #include "Units.h"
 #include "NewModel.h"
@@ -4517,6 +4526,7 @@ void CWPhastDoc::OnToolsModifyGrid()
 {
 	if (this->GridElementsSelector)
 	{
+		ASSERT(this->ModifyGridSheet && this->ModifyGridSheet->GetSafeHwnd());
 		this->EndModifyGrid();
 	}
 	else
@@ -4547,6 +4557,10 @@ void CWPhastDoc::EndModifyGrid()
 	{
 		this->GridElementsSelector->Delete();
 		this->GridElementsSelector = 0;
+	}
+	if (this->ModifyGridSheet->GetSafeHwnd())
+	{
+		this->ModifyGridSheet->DestroyWindow();
 	}
 }
 
@@ -4689,14 +4703,6 @@ void CWPhastDoc::EndNewZone()
 		this->NewZoneWidget = 0;
 	}
 }
-
-#include "NewZonePropertyPage.h"
-#include "MediaSpreadPropertyPage.h"
-#include "BCFluxPropertyPage2.h"
-#include "BCLeakyPropertyPage2.h"
-#include "BCSpecifiedHeadPropertyPage.h"
-#include "ICHeadSpreadPropertyPage.h"
-#include "ChemICSpreadPropertyPage.h"
 
 void CWPhastDoc::NewZoneListener(vtkObject *caller, unsigned long eid, void *clientdata, void *calldata) 
 {

@@ -596,9 +596,9 @@ void CGridRefinePage::OnCancel()
 
 void CGridRefinePage::PostNcDestroy()
 {
-	// TODO: Add your specialized code here and/or call the base class
 	this->Document->EndModifyGrid();
 	this->Document->UpdateAllViews(0);
+	// Add your specialized code here and/or call the base class
 	CPropertyPage::PostNcDestroy();
 }
 
