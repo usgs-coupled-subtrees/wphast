@@ -287,6 +287,7 @@
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC70.vsprops"
 			UseOfMFC="2"
 			CharacterSet="2"
+			DeleteExtensionsOnClean="*.obj;*.ilk;*.tlb;*.tli;*.tlh;*.tmp;*.rsp;*.pgc;*.pgd;*.dll;$(TargetPath)"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -366,7 +367,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="copying dlls"
-				CommandLine="if not exist &quot;$(TargetDir)hdf5ddll.dll&quot;  copy &quot;$(DEV_HDF5_LIBDLL_D)\hdf5ddll.dll&quot;  &quot;$(TargetDir)hdf5ddll.dll&quot;"
+				CommandLine="copy /Y &quot;$(DEV_HDF5_LIBDLL_D)\hdf5ddll.dll&quot;           &quot;$(TargetDir)hdf5ddll.dll&quot;&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
@@ -465,7 +466,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Copying dlls"
-				CommandLine="if not exist &quot;$(TargetDir)hdf5dll.dll&quot;      copy &quot;$(DEV_HDF5_LIBDLL)\hdf5dll.dll&quot;            &quot;$(TargetDir)hdf5dll.dll&quot;&#x0D;&#x0A;if not exist &quot;$(TargetDir)zlib.dll&quot;         copy &quot;$(DEV_HDF5_LIBDLL)\zlib.dll&quot;               &quot;$(TargetDir)zlib.dll&quot;&#x0D;&#x0A;if not exist &quot;$(TargetDir)vtkCommon.dll&quot;    copy &quot;$(DEV_VTK42_VS8_DLL_LIB)\vtkCommon.dll&quot;    &quot;$(TargetDir)vtkCommon.dll&quot;&#x0D;&#x0A;if not exist &quot;$(TargetDir)vtkFiltering.dll&quot; copy &quot;$(DEV_VTK42_VS8_DLL_LIB)\vtkFiltering.dll&quot; &quot;$(TargetDir)vtkFiltering.dll&quot;&#x0D;&#x0A;if not exist &quot;$(TargetDir)vtkGraphics.dll&quot;  copy &quot;$(DEV_VTK42_VS8_DLL_LIB)\vtkGraphics.dll&quot;  &quot;$(TargetDir)vtkGraphics.dll&quot;&#x0D;&#x0A;if not exist &quot;$(TargetDir)vtkHybrid.dll&quot;    copy &quot;$(DEV_VTK42_VS8_DLL_LIB)\vtkHybrid.dll&quot;    &quot;$(TargetDir)vtkHybrid.dll&quot;&#x0D;&#x0A;if not exist &quot;$(TargetDir)vtkIO.dll&quot;        copy &quot;$(DEV_VTK42_VS8_DLL_LIB)\vtkIO.dll&quot;        &quot;$(TargetDir)vtkIO.dll&quot;&#x0D;&#x0A;if not exist &quot;$(TargetDir)vtkImaging.dll&quot;   copy &quot;$(DEV_VTK42_VS8_DLL_LIB)\vtkImaging.dll&quot;   &quot;$(TargetDir)vtkImaging.dll&quot;&#x0D;&#x0A;if not exist &quot;$(TargetDir)vtkRendering.dll&quot; copy &quot;$(DEV_VTK42_VS8_DLL_LIB)\vtkRendering.dll&quot; &quot;$(TargetDir)vtkRendering.dll&quot;&#x0D;&#x0A;if not exist &quot;$(TargetDir)vtkexpat.dll&quot;     copy &quot;$(DEV_VTK42_VS8_DLL_LIB)\vtkexpat.dll&quot;     &quot;$(TargetDir)vtkexpat.dll&quot;&#x0D;&#x0A;if not exist &quot;$(TargetDir)vtkfreetype.dll&quot;  copy &quot;$(DEV_VTK42_VS8_DLL_LIB)\vtkfreetype.dll&quot;  &quot;$(TargetDir)vtkfreetype.dll&quot;&#x0D;&#x0A;if not exist &quot;$(TargetDir)vtkftgl.dll&quot;      copy &quot;$(DEV_VTK42_VS8_DLL_LIB)\vtkftgl.dll&quot;      &quot;$(TargetDir)vtkftgl.dll&quot;&#x0D;&#x0A;if not exist &quot;$(TargetDir)vtkjpeg.dll&quot;      copy &quot;$(DEV_VTK42_VS8_DLL_LIB)\vtkjpeg.dll&quot;      &quot;$(TargetDir)vtkjpeg.dll&quot;&#x0D;&#x0A;if not exist &quot;$(TargetDir)vtkpng.dll&quot;       copy &quot;$(DEV_VTK42_VS8_DLL_LIB)\vtkpng.dll&quot;       &quot;$(TargetDir)vtkpng.dll&quot;&#x0D;&#x0A;if not exist &quot;$(TargetDir)vtktiff.dll&quot;      copy &quot;$(DEV_VTK42_VS8_DLL_LIB)\vtktiff.dll&quot;      &quot;$(TargetDir)vtktiff.dll&quot;&#x0D;&#x0A;if not exist &quot;$(TargetDir)vtkzlib.dll&quot;      copy &quot;$(DEV_VTK42_VS8_DLL_LIB)\vtkzlib.dll&quot;      &quot;$(TargetDir)vtkzlib.dll&quot;&#x0D;&#x0A;"
+				CommandLine="copy /Y &quot;$(DEV_HDF5_LIBDLL)\hdf5dll.dll&quot;            &quot;$(TargetDir)hdf5dll.dll&quot;      &gt; null&#x0D;&#x0A;copy /Y &quot;$(DEV_HDF5_LIBDLL)\zlib.dll&quot;               &quot;$(TargetDir)zlib.dll&quot;         &gt; null&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkCommon.dll&quot;    &quot;$(TargetDir)vtkCommon.dll&quot;    &gt; null&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkFiltering.dll&quot; &quot;$(TargetDir)vtkFiltering.dll&quot; &gt; null&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkGraphics.dll&quot;  &quot;$(TargetDir)vtkGraphics.dll&quot;  &gt; null&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkHybrid.dll&quot;    &quot;$(TargetDir)vtkHybrid.dll&quot;    &gt; null&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkIO.dll&quot;        &quot;$(TargetDir)vtkIO.dll&quot;        &gt; null&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkImaging.dll&quot;   &quot;$(TargetDir)vtkImaging.dll&quot;   &gt; null&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkRendering.dll&quot; &quot;$(TargetDir)vtkRendering.dll&quot; &gt; null&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkexpat.dll&quot;     &quot;$(TargetDir)vtkexpat.dll&quot;     &gt; null&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkfreetype.dll&quot;  &quot;$(TargetDir)vtkfreetype.dll&quot;  &gt; null&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkftgl.dll&quot;      &quot;$(TargetDir)vtkftgl.dll&quot;      &gt; null&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkjpeg.dll&quot;      &quot;$(TargetDir)vtkjpeg.dll&quot;      &gt; null&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkpng.dll&quot;       &quot;$(TargetDir)vtkpng.dll&quot;       &gt; null&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtktiff.dll&quot;      &quot;$(TargetDir)vtktiff.dll&quot;      &gt; null&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkzlib.dll&quot;      &quot;$(TargetDir)vtkzlib.dll&quot;      &gt; null&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
@@ -2818,11 +2819,11 @@
 				>
 			</File>
 			<File
-				RelativePath="res\SOLUTE_TRUE.rtf"
+				RelativePath="SOLUTE_TRUE.rtf"
 				>
 			</File>
 			<File
-				RelativePath="SOLUTE_TRUE.rtf"
+				RelativePath="res\SOLUTE_TRUE.rtf"
 				>
 			</File>
 			<File
@@ -5938,17 +5939,17 @@
 			Name="Build Logs"
 			>
 			<File
-				RelativePath="Release\BuildLog.htm"
-				DeploymentContent="true"
-				>
-			</File>
-			<File
 				RelativePath="cppunit\BuildLog.htm"
 				DeploymentContent="true"
 				>
 			</File>
 			<File
 				RelativePath="Debug\BuildLog.htm"
+				DeploymentContent="true"
+				>
+			</File>
+			<File
+				RelativePath="Release\BuildLog.htm"
 				DeploymentContent="true"
 				>
 			</File>

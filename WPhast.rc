@@ -7,6 +7,11 @@
 //
 // Generated from the TEXTINCLUDE 2 resource.
 //
+#if defined(_VC80_UPGRADE) && (_VC80_UPGRADE >= 0x0700) && (_VC80_UPGRADE < 0x0800) && defined(IDR_MANIFEST)
+#undef IDR_MANIFEST
+#define IDR_MANIFEST 1024
+#endif
+
 #include "afxres.h"
 
 /////////////////////////////////////////////////////////////////////////////
@@ -34,8 +39,12 @@ END
 
 2 TEXTINCLUDE 
 BEGIN
+    "#if defined(_VC80_UPGRADE) && (_VC80_UPGRADE >= 0x0700) && (_VC80_UPGRADE < 0x0800) && defined(IDR_MANIFEST)\r\n"
+    "#undef IDR_MANIFEST\r\n"
+    "#define IDR_MANIFEST 1024\r\n"
+    "#endif\r\n"
+    "\r\n"
     "#include ""afxres.h""\r\n"
-    "\0"
 END
 
 3 TEXTINCLUDE 
@@ -55,7 +64,6 @@ BEGIN
     "#if defined(WPHAST_AUTOMATION)\r\n"
     "1 TYPELIB ""WPhast.tlb""\r\n"
     "#endif\r\n"
-    "\0"
 END
 
 #endif    // APSTUDIO_INVOKED
