@@ -120,7 +120,7 @@ import_clean :
 
 .SECONDARY : $(VTK_DLLS) $(HDF_DLLS)
 
-$(VTK_DLL_DIR)% :: $(DEV_VTK42_VS7_DLL_BIN)/%
+$(VTK_DLL_DIR)% :: $(DEV_VTK42_VS8_DLL_BIN)/%
 	install -m 755 $^ $@
 
 $(HDF_DLL_DIR)% :: $(DEV_HDF5_LIBDLL)/%
