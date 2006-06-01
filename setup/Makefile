@@ -77,7 +77,6 @@ VTK_DLLS=\
 	$(VTK_DLL_DIR)/vtkImaging.dll\
 	$(VTK_DLL_DIR)/vtkIO.dll\
 	$(VTK_DLL_DIR)/vtkjpeg.dll\
-	$(VTK_DLL_DIR)/vtkParallel.dll\
 	$(VTK_DLL_DIR)/vtkpng.dll\
 	$(VTK_DLL_DIR)/vtkRendering.dll\
 	$(VTK_DLL_DIR)/vtktiff.dll\
@@ -121,7 +120,7 @@ import_clean :
 
 .SECONDARY : $(VTK_DLLS) $(HDF_DLLS)
 
-$(VTK_DLL_DIR)% :: $(DEV_VTK42_VS7_DLL_LIB)/%
+$(VTK_DLL_DIR)% :: $(DEV_VTK42_VS7_DLL_BIN)/%
 	install -m 755 $^ $@
 
 $(HDF_DLL_DIR)% :: $(DEV_HDF5_LIBDLL)/%
