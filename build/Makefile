@@ -27,9 +27,11 @@ TARBALL := $(NAME)-$(VERSION)-$(RELEASE).tar.gz
 
 BUILD_SCRIPT := $(NAME)-$(VERSION)-$(RELEASE).sh
 
-DEVENV := /cygdrive/c/Program\ Files/Microsoft\ Visual\ Studio\ .NET/Common7/IDE/devenv
+DEVENV := /cygdrive/c/Program\ Files/Microsoft\ Visual\ Studio\ 8/Common7/IDE/devenv
 
 SLN := ../WPhast.sln
+
+REPOS_PATH ?= trunk
 
 # (ie wphast-0.1-584-src.tar.bz2)
 SRC_PACKAGE := $(NAME)-$(VERSION)-$(RELEASE)-src.tar.bz2
@@ -71,7 +73,7 @@ source : check_version check_date check_release $(TARBALL)
 
 $(TARBALL) : dist.sh $(DATE_STAMP).tstamp
 	@echo "Creating $(TARBALL)"
-	time ./dist.sh -v $(VERSION) -r $(RELEASE) -d $(DATE) -pr trunk 2>&1 | tee dist-$(RELEASE).log
+	time ./dist.sh -v $(VERSION) -r $(RELEASE) -d $(DATE) -pr $(REPOS_PATH) 2>&1 | tee dist-$(RELEASE).log
 	
 script : check_version $(BUILD_SCRIPT)	
 	@echo "created $(BUILD_SCRIPT)"

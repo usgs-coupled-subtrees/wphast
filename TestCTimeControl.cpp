@@ -7,8 +7,8 @@
 
 void TestCTimeControl::testOperatorEqualsValue(void)
 {
-	CPPUNIT_ASSERT_DOUBLES_EQUAL(m_pTimeControl->GetTimeStepValue(), m_pTimeControlEquals->GetTimeStepValue(), ::pow(10, -DBL_DIG));
-	CPPUNIT_ASSERT_DOUBLES_EQUAL(m_pTimeControl->GetTimeEndValue(), m_pTimeControlEquals->GetTimeEndValue(), ::pow(10, -DBL_DIG));
+	CPPUNIT_ASSERT_DOUBLES_EQUAL(m_pTimeControl->GetTimeStepValue(), m_pTimeControlEquals->GetTimeStepValue(), ::pow((double)10, (double)-DBL_DIG));
+	CPPUNIT_ASSERT_DOUBLES_EQUAL(m_pTimeControl->GetTimeEndValue(), m_pTimeControlEquals->GetTimeEndValue(), ::pow((double)10, (double)-DBL_DIG));
 }
 
 void TestCTimeControl::testOperatorEqualsInput(void)
@@ -22,8 +22,8 @@ void TestCTimeControl::testOperatorEqualsInput(void)
 
 void TestCTimeControl::testCopyCtorValue(void)
 {
-	CPPUNIT_ASSERT_DOUBLES_EQUAL(m_pTimeControl->GetTimeStepValue(), m_pTimeControlCopyCtor->GetTimeStepValue(), ::pow(10, -DBL_DIG));
-	CPPUNIT_ASSERT_DOUBLES_EQUAL(m_pTimeControl->GetTimeEndValue(), m_pTimeControlCopyCtor->GetTimeEndValue(), ::pow(10, -DBL_DIG));
+	CPPUNIT_ASSERT_DOUBLES_EQUAL(m_pTimeControl->GetTimeStepValue(), m_pTimeControlCopyCtor->GetTimeStepValue(), ::pow((double)10, (double)-DBL_DIG));
+	CPPUNIT_ASSERT_DOUBLES_EQUAL(m_pTimeControl->GetTimeEndValue(), m_pTimeControlCopyCtor->GetTimeEndValue(), ::pow((double)10, (double)-DBL_DIG));
 }
 
 void TestCTimeControl::testCopyCtorInput(void)

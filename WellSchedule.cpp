@@ -45,11 +45,13 @@ CWellSchedule::CWellSchedule(const CWell& src)
 {
 }
 
+/***
 CWellSchedule::CWellSchedule(const CWellSchedule& src)
 : CWell(src) // Note: if this weren't here CWell() would be called instead
 , m_pumpingSchedule(src.m_pumpingSchedule)
 {
 }
+***/
 
 void CWellSchedule::Insert(const Ctime& time, const CWellRate& rate)
 {

@@ -41,34 +41,34 @@ void TestCtime::testReadTimeControl(void)
 		::check_time_units(&(time_step.properties[1]->time_value), TRUE, "time_step in TIME_CONTROL data block.");
 
 		Ctime timeStep(::time_step.properties[1]->time);
-		CPPUNIT_ASSERT_DOUBLES_EQUAL(timeStep.value, ::time_step.properties[1]->time.value, ::pow(10, -DBL_DIG));
+		CPPUNIT_ASSERT_DOUBLES_EQUAL(timeStep.value, ::time_step.properties[1]->time.value, ::pow((double)10, (double)-DBL_DIG));
 		CPPUNIT_ASSERT(timeStep.value_defined == ::time_step.properties[1]->time.value_defined);
 		CPPUNIT_ASSERT(timeStep.type == ::time_step.properties[1]->time.type);
-		CPPUNIT_ASSERT_DOUBLES_EQUAL(timeStep.input_to_si, ::time_step.properties[1]->time.input_to_si, ::pow(10, -DBL_DIG));
+		CPPUNIT_ASSERT_DOUBLES_EQUAL(timeStep.input_to_si, ::time_step.properties[1]->time.input_to_si, ::pow((double)10, (double)-DBL_DIG));
 
 		Ctime compTimeStep;
 		compTimeStep.SetValue(10.0);
 		compTimeStep.SetInput("day");
-		CPPUNIT_ASSERT_DOUBLES_EQUAL(compTimeStep.value, timeStep.value, ::pow(10, -DBL_DIG));
+		CPPUNIT_ASSERT_DOUBLES_EQUAL(compTimeStep.value, timeStep.value, ::pow((double)10, (double)-DBL_DIG));
 		CPPUNIT_ASSERT(compTimeStep.value_defined == timeStep.value_defined);
 		CPPUNIT_ASSERT(compTimeStep.type          == timeStep.type);
 		CPPUNIT_ASSERT(::strcmp(compTimeStep.input, timeStep.input) == 0);
-		CPPUNIT_ASSERT_DOUBLES_EQUAL(compTimeStep.input_to_si, timeStep.input_to_si, ::pow(10, -DBL_DIG));
+		CPPUNIT_ASSERT_DOUBLES_EQUAL(compTimeStep.input_to_si, timeStep.input_to_si, ::pow((double)10, (double)-DBL_DIG));
 
 		Ctime timeEnd(*::time_end);
-		CPPUNIT_ASSERT_DOUBLES_EQUAL(timeEnd.value, ::time_end->value, ::pow(10, -DBL_DIG));
+		CPPUNIT_ASSERT_DOUBLES_EQUAL(timeEnd.value, ::time_end->value, ::pow((double)10, (double)-DBL_DIG));
 		CPPUNIT_ASSERT(timeEnd.value_defined == ::time_end->value_defined);
 		CPPUNIT_ASSERT(timeEnd.type          == ::time_end->type);
-		CPPUNIT_ASSERT_DOUBLES_EQUAL(timeEnd.input_to_si, ::time_end->input_to_si, ::pow(10, -DBL_DIG));
+		CPPUNIT_ASSERT_DOUBLES_EQUAL(timeEnd.input_to_si, ::time_end->input_to_si, ::pow((double)10, (double)-DBL_DIG));
 
 		Ctime compTimeEnd;
 		compTimeEnd.SetValue(1.0);
 		compTimeEnd.SetInput("yr");
-		CPPUNIT_ASSERT_DOUBLES_EQUAL(timeEnd.value, compTimeEnd.value, ::pow(10, -DBL_DIG));
+		CPPUNIT_ASSERT_DOUBLES_EQUAL(timeEnd.value, compTimeEnd.value, ::pow((double)10, (double)-DBL_DIG));
 		CPPUNIT_ASSERT(compTimeEnd.value_defined == timeEnd.value_defined);
 		CPPUNIT_ASSERT(compTimeEnd.type          == timeEnd.type);
 		CPPUNIT_ASSERT(::strcmp(compTimeEnd.input, timeEnd.input) == 0);
-		CPPUNIT_ASSERT_DOUBLES_EQUAL(timeEnd.input_to_si, compTimeEnd.input_to_si, ::pow(10, -DBL_DIG));
+		CPPUNIT_ASSERT_DOUBLES_EQUAL(timeEnd.input_to_si, compTimeEnd.input_to_si, ::pow((double)10, (double)-DBL_DIG));
 
 		pPhastInput->Delete();
 		pPhastInput = NULL;

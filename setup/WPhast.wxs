@@ -1,8 +1,13 @@
 <?xml version='1.0' encoding='windows-1252'?>
 <?include Version.wxs ?>
 <Wix xmlns='http://schemas.microsoft.com/wix/2003/01/wi'>
-  <Product UpgradeCode='$(var.UpgradeCode)' Manufacturer='$(var.Manufacturer)' Id="????????-????-????-????-????????????" Language="1033" Name='$(var.Name)' Version='$(var.Version)'>
-    <Package Id="????????-????-????-????-????????????" Keywords="Installer" Description='$(var.Description)' Manufacturer='$(var.Manufacturer)' InstallerVersion="200" Languages="1033" Compressed="yes" SummaryCodepage="1252" />
+  <Product UpgradeCode='$(var.UpgradeCode)' Manufacturer='$(var.Manufacturer)' Id='????????-????-????-????-????????????' Language='1033' Name='$(var.Name)' Version='$(var.Version)'>
+
+<?ifdef VS2005 ?>
+    <Package Id='????????-????-????-????-????????????' Keywords='Installer' Description='$(var.Description)' Manufacturer='$(var.Manufacturer)' InstallerVersion='300' InstallPrivileges='elevated' Languages='1033' Compressed='yes' SummaryCodepage='1252' />
+<?else?>
+    <Package Id='????????-????-????-????-????????????' Keywords='Installer' Description='$(var.Description)' Manufacturer='$(var.Manufacturer)' InstallerVersion='200' InstallPrivileges='limited' Languages='1033' Compressed='yes' SummaryCodepage='1252' />
+<?endif?>
 
     <Upgrade Id='$(var.UpgradeCode)' >
       <UpgradeVersion Minimum='$(var.Version)' Property="NEWERPRODUCTFOUND" OnlyDetect="yes" IncludeMinimum="yes" />
@@ -10,6 +15,10 @@
       <UpgradeVersion Minimum="0.1.0" Maximum='$(var.Version)' Property="PREVIOUSVERSIONSINSTALLED" IncludeMinimum="yes" />
       <Property Id="PREVIOUSVERSIONSINSTALLED" Secure="yes" />
     </Upgrade>
+
+<?ifdef VS2005 ?>
+    <Condition Message="This setup requires administrator privileges."><![CDATA[AdminUser OR ProductState=1]]></Condition>
+<?endif?>
 
     <Media Id='1' Cabinet='$(var.Cabinet)' EmbedCab='yes' DiskPrompt="CD-ROM #1" />
     <Property Id='DiskPrompt' Value='$(var.DiskPrompt)' />
@@ -72,8 +81,15 @@
               </Component>
               -->
 
+<?ifdef VS2005 ?>
+              <Merge Id="CRT" Language="1033" src="$(var.MergeDir)\microsoft_vc80_crt_x86.msm" DiskId="1" />
+              <Merge Id="CRT Policy" Language="1033" src="$(var.MergeDir)\policy_8_0_Microsoft_VC80_CRT_x86.msm" DiskId="1" />
+              <Merge Id='MFC' Language='0' src='$(var.MergeDir)\Microsoft_VC80_MFC_x86.msm' DiskId='1' />
+              <Merge Id='MFC Policy' Language='0' src='$(var.MergeDir)\policy_8_0_Microsoft_VC80_MFC_x86.msm' DiskId='1' />
+<?else?>
               <Merge Id="VC_CRT.12121212-6C3B-4C70-8DFF-B3749533716E" Language="1033" src="$(var.MergeDir)\VC_CRT.msm" DiskId="1" />
               <Merge Id="VC_STL.12121212-FF27-4ff8-911C-03CD09DDB3E5" Language="1033" src="$(var.MergeDir)\VC_STL.msm" DiskId="1" />
+<?endif?>
 
               <Component Id='C__hdf5Library' Guid='BF8F23F9-8A71-441c-9EA3-2CF8A4860F60' >
                 <File Id="F__hdf5dll.dll" Name="hdf5dll.dll" Vital="yes" DiskId='1' src="$(var.hdfDllPath)\hdf5dll.dll" />
@@ -81,19 +97,21 @@
               </Component>
 
               <Component Id='C__vtkLibrary' Guid='17CA7172-23E7-4b41-8890-09D4373E57DD'>
-                <File Id="F__vtkCommon.dll"    Name="VTKCOM~1.DLL" LongName="vtkCommon.dll" Vital="yes" DiskId='1' src="$(var.vtkDllPath)\vtkCommon.dll" />
+                <File Id="F__vtkCommon.dll"    Name="VTKCOM_1.DLL" LongName="vtkCommon.dll" Vital="yes" DiskId='1' src="$(var.vtkDllPath)\vtkCommon.dll" />
                 <File Id="F__vtkexpat.dll"     Name="vtkexpat.dll" Vital="yes" DiskId='1' src="$(var.vtkDllPath)\vtkexpat.dll" />
-                <File Id="F__vtkFiltering.dll" Name="VTKFIL~1.DLL" LongName="vtkFiltering.dll" Vital="yes" DiskId='1' src="$(var.vtkDllPath)\vtkFiltering.dll" />
-                <File Id="F__vtkfreetype.dll"  Name="VTKFRE~1.DLL" LongName="vtkfreetype.dll" Vital="yes" DiskId='1' src="$(var.vtkDllPath)\vtkfreetype.dll" />
+                <File Id="F__vtkFiltering.dll" Name="VTKFIL_1.DLL" LongName="vtkFiltering.dll" Vital="yes" DiskId='1' src="$(var.vtkDllPath)\vtkFiltering.dll" />
+                <File Id="F__vtkfreetype.dll"  Name="VTKFRE_1.DLL" LongName="vtkfreetype.dll" Vital="yes" DiskId='1' src="$(var.vtkDllPath)\vtkfreetype.dll" />
                 <File Id="F__vtkftgl.dll"      Name="vtkftgl.dll" Vital="yes" DiskId='1' src="$(var.vtkDllPath)\vtkftgl.dll" />
-                <File Id="F__vtkGraphics.dll"  Name="VTKGRA~1.DLL" LongName="vtkGraphics.dll" Vital="yes" DiskId='1' src="$(var.vtkDllPath)\vtkGraphics.dll" />
-                <File Id="F__vtkHybrid.dll"    Name="VTKHYB~1.DLL" LongName="vtkHybrid.dll" Vital="yes" DiskId='1' src="$(var.vtkDllPath)\vtkHybrid.dll" />
-                <File Id="F__vtkImaging.dll"   Name="VTKIMA~1.DLL" LongName="vtkImaging.dll" Vital="yes" DiskId='1' src="$(var.vtkDllPath)\vtkImaging.dll" />
+                <File Id="F__vtkGraphics.dll"  Name="VTKGRA_1.DLL" LongName="vtkGraphics.dll" Vital="yes" DiskId='1' src="$(var.vtkDllPath)\vtkGraphics.dll" />
+                <File Id="F__vtkHybrid.dll"    Name="VTKHYB_1.DLL" LongName="vtkHybrid.dll" Vital="yes" DiskId='1' src="$(var.vtkDllPath)\vtkHybrid.dll" />
+                <File Id="F__vtkImaging.dll"   Name="VTKIMA_1.DLL" LongName="vtkImaging.dll" Vital="yes" DiskId='1' src="$(var.vtkDllPath)\vtkImaging.dll" />
                 <File Id="F__vtkIO.dll"        Name="vtkIO.dll" Vital="yes" DiskId='1' src="$(var.vtkDllPath)\vtkIO.dll" />
                 <File Id="F__vtkjpeg.dll"      Name="vtkjpeg.dll" Vital="yes" DiskId='1' src="$(var.vtkDllPath)\vtkjpeg.dll" />
-                <File Id="F__vtkParallel.dll"  Name="VTKPAR~1.DLL" LongName="vtkParallel.dll" Vital="yes" DiskId='1' src="$(var.vtkDllPath)\vtkParallel.dll" />
+<?ifndef VS2005 ?>
+                <File Id="F__vtkParallel.dll"  Name="VTKPAR_1.DLL" LongName="vtkParallel.dll" Vital="yes" DiskId='1' src="$(var.vtkDllPath)\vtkParallel.dll" />
+<?endif?>
                 <File Id="F__vtkpng.dll"       Name="vtkpng.dll" Vital="yes" DiskId='1' src="$(var.vtkDllPath)\vtkpng.dll" />
-                <File Id="F__vtkRendering.dll" Name="VTKREN~1.DLL" LongName="vtkRendering.dll" Vital="yes" DiskId='1' src="$(var.vtkDllPath)\vtkRendering.dll" />
+                <File Id="F__vtkRendering.dll" Name="VTKREN_1.DLL" LongName="vtkRendering.dll" Vital="yes" DiskId='1' src="$(var.vtkDllPath)\vtkRendering.dll" />
                 <File Id="F__vtktiff.dll"      Name="vtktiff.dll" Vital="yes" DiskId='1' src="$(var.vtkDllPath)\vtktiff.dll" />
                 <File Id="F__vtkzlib.dll"      Name="vtkzlib.dll" Vital="yes" DiskId='1' src="$(var.vtkDllPath)\vtkzlib.dll" />
               </Component>
@@ -115,137 +133,137 @@
             <Directory Id="D__examples" Name="examples">
               <Directory Id="D__decay" Name="decay">
                 <Component Id='C__decay' Guid='C37C0FE8-9FE3-43d3-93D1-578923AB9285' DiskId="1">
-                  <File Id="F__decay.chem.dat"  Name="DECAYC~1.DAT" LongName="decay.chem.dat" src="phast\examples\decay\decay.chem.dat" />
-                  <File Id="F__decay.trans.dat" Name="DECAYT~1.DAT" LongName="decay.trans.dat" src="phast\examples\decay\decay.trans.dat" />
-                  <File Id="F__decay.wphast"    Name="DECAY~1.WPH" LongName="decay.wphast" src="phast\examples\decay\decay.wphast" />
+                  <File Id="F__decay.chem.dat"  Name="DECAYC_1.DAT" LongName="decay.chem.dat" src="phast\examples\decay\decay.chem.dat" />
+                  <File Id="F__decay.trans.dat" Name="DECAYT_1.DAT" LongName="decay.trans.dat" src="phast\examples\decay\decay.trans.dat" />
+                  <File Id="F__decay.wphast"    Name="DECAY_1.WPH" LongName="decay.wphast" src="phast\examples\decay\decay.wphast" />
                   <File Id="F__phast.dat.decay" Name="phast.dat" src="phast\examples\decay\phast.dat" />
                 </Component>
               </Directory>
               <Directory Id="D__disp2d" Name="disp2d">
                 <Component Id='C__disp2d' Guid='6D9D633F-DA50-4831-8527-8F0E442D43C4' DiskId="1">
-                  <File Id="F__disp2d.chem.dat"  Name="DISP2D~1.DAT" LongName="disp2d.chem.dat" src="phast\examples\disp2d\disp2d.chem.dat" />
-                  <File Id="F__disp2d.trans.dat" Name="DISP2D~2.DAT" LongName="disp2d.trans.dat" src="phast\examples\disp2d\disp2d.trans.dat" />
-                  <File Id="F__disp2d.wphast"    Name="DISP2D~1.WPH" LongName="disp2d.wphast" src="phast\examples\disp2d\disp2d.wphast" />
+                  <File Id="F__disp2d.chem.dat"  Name="DISP2D_1.DAT" LongName="disp2d.chem.dat" src="phast\examples\disp2d\disp2d.chem.dat" />
+                  <File Id="F__disp2d.trans.dat" Name="DISP2D_2.DAT" LongName="disp2d.trans.dat" src="phast\examples\disp2d\disp2d.trans.dat" />
+                  <File Id="F__disp2d.wphast"    Name="DISP2D_1.WPH" LongName="disp2d.wphast" src="phast\examples\disp2d\disp2d.wphast" />
                   <File Id="F__phast.dat.disp2d" Name="phast.dat" src="phast\examples\disp2d\phast.dat" />
                 </Component>
               </Directory>
 
               <Directory Id="D__ex1" Name="ex1">
                 <Component Id='C__ex1' Guid='8FD4C404-9A57-4457-83A5-329296A74479' DiskId="1">
-                  <File Id="F__ex1.chem.dat"  Name="EX1CHE~1.DAT" LongName="ex1.chem.dat" src="phast\examples\ex1\ex1.chem.dat" />
-                  <File Id="F__ex1.trans.dat" Name="EX1TRA~1.DAT" LongName="ex1.trans.dat" src="phast\examples\ex1\ex1.trans.dat" />
-                  <File Id="F__ex1.wphast"    Name="EX1~1.WPH" LongName="ex1.wphast" src="phast\examples\ex1\ex1.wphast" />
+                  <File Id="F__ex1.chem.dat"  Name="EX1CHE_1.DAT" LongName="ex1.chem.dat" src="phast\examples\ex1\ex1.chem.dat" />
+                  <File Id="F__ex1.trans.dat" Name="EX1TRA_1.DAT" LongName="ex1.trans.dat" src="phast\examples\ex1\ex1.trans.dat" />
+                  <File Id="F__ex1.wphast"    Name="EX1_1.WPH" LongName="ex1.wphast" src="phast\examples\ex1\ex1.wphast" />
                   <File Id="F__phast.dat.ex1" Name="phast.dat" src="phast\examples\ex1\phast.dat" />
                 </Component>
               </Directory>
               <Directory Id="D__ex2" Name="ex2">
                 <Component Id='C__ex2' Guid='81D8FC72-1E6E-4545-9DB3-4F234D220B91' DiskId="1">
-                  <File Id="F__ex2.chem.dat"  Name="EX2CHE~1.DAT" LongName="ex2.chem.dat" src="phast\examples\ex2\ex2.chem.dat" />
-                  <File Id="F__ex2.trans.dat" Name="EX2TRA~1.DAT" LongName="ex2.trans.dat" src="phast\examples\ex2\ex2.trans.dat" />
-                  <File Id="F__ex2.wphast" Name="EX2~1.WPH" LongName="ex2.wphast" src="phast\examples\ex2\ex2.wphast" />
+                  <File Id="F__ex2.chem.dat"  Name="EX2CHE_1.DAT" LongName="ex2.chem.dat" src="phast\examples\ex2\ex2.chem.dat" />
+                  <File Id="F__ex2.trans.dat" Name="EX2TRA_1.DAT" LongName="ex2.trans.dat" src="phast\examples\ex2\ex2.trans.dat" />
+                  <File Id="F__ex2.wphast" Name="EX2_1.WPH" LongName="ex2.wphast" src="phast\examples\ex2\ex2.wphast" />
                   <File Id="F__phast.dat.ex2" Name="phast.dat" src="phast\examples\ex2\phast.dat" />
                 </Component>
               </Directory>
               <Directory Id="D__ex3" Name="ex3">
                 <Component Id='C__ex3' Guid='79C20B9C-17F2-4f13-8C1A-1FBD514A6B25' DiskId="1">
-                  <File Id="F__ex3.chem.dat"  Name="EX3CHE~1.DAT" LongName="ex3.chem.dat" src="phast\examples\ex3\ex3.chem.dat" />
-                  <File Id="F__ex3.trans.dat" Name="EX3TRA~1.DAT" LongName="ex3.trans.dat" src="phast\examples\ex3\ex3.trans.dat" />
-                  <File Id="F__ex3.wphast"    Name="EX3~1.WPH" LongName="ex3.wphast" src="phast\examples\ex3\ex3.wphast" />
+                  <File Id="F__ex3.chem.dat"  Name="EX3CHE_1.DAT" LongName="ex3.chem.dat" src="phast\examples\ex3\ex3.chem.dat" />
+                  <File Id="F__ex3.trans.dat" Name="EX3TRA_1.DAT" LongName="ex3.trans.dat" src="phast\examples\ex3\ex3.trans.dat" />
+                  <File Id="F__ex3.wphast"    Name="EX3_1.WPH" LongName="ex3.wphast" src="phast\examples\ex3\ex3.wphast" />
                   <File Id="F__phast.dat.ex3" Name="phast.dat" src="phast\examples\ex3\phast.dat" />
                 </Component>
               </Directory>
               <Directory Id="D__ex4" Name="ex4">
                 <Component Id='C__ex4' Guid='F594BE7A-F0D2-4f61-9AF3-8FA906393E38' DiskId="1">
-                  <File Id="F__ex4.chem.dat"  Name="EX4CHE~1.DAT" LongName="ex4.chem.dat" src="phast\examples\ex4\ex4.chem.dat" />
-                  <File Id="F__ex4.trans.dat" Name="EX4TRA~1.DAT" LongName="ex4.trans.dat" src="phast\examples\ex4\ex4.trans.dat" />
-                  <File Id="F__ex4.wphast"    Name="EX4~1.WPH" LongName="ex4.wphast" src="phast\examples\ex4\ex4.wphast" />
+                  <File Id="F__ex4.chem.dat"  Name="EX4CHE_1.DAT" LongName="ex4.chem.dat" src="phast\examples\ex4\ex4.chem.dat" />
+                  <File Id="F__ex4.trans.dat" Name="EX4TRA_1.DAT" LongName="ex4.trans.dat" src="phast\examples\ex4\ex4.trans.dat" />
+                  <File Id="F__ex4.wphast"    Name="EX4_1.WPH" LongName="ex4.wphast" src="phast\examples\ex4\ex4.wphast" />
                   <File Id="F__phast.dat.ex4" Name="phast.dat" src="phast\examples\ex4\phast.dat" />
                 </Component>
               </Directory>
               <Directory Id="D__free" Name="free">
                 <Component Id="C__free" Guid='D075DFAD-E9A5-4a88-BD6D-3DBFB1BC137C' DiskId="1">
-                  <File Id="F__free.chem.dat"  Name="FREECH~1.DAT" LongName="free.chem.dat" src="phast\examples\free\free.chem.dat" />
-                  <File Id="F__free.head.dat"  Name="FREEHE~1.DAT" LongName="free.head.dat" src="phast\examples\free\free.head.dat" />
-                  <File Id="F__free.trans.dat" Name="FREETR~1.DAT" LongName="free.trans.dat" src="phast\examples\free\free.trans.dat" />
-                  <File Id="F__free.wphast"    Name="FREE~1.WPH" LongName="free.wphast" src="phast\examples\free\free.wphast" />
+                  <File Id="F__free.chem.dat"  Name="FREECH_1.DAT" LongName="free.chem.dat" src="phast\examples\free\free.chem.dat" />
+                  <File Id="F__free.head.dat"  Name="FREEHE_1.DAT" LongName="free.head.dat" src="phast\examples\free\free.head.dat" />
+                  <File Id="F__free.trans.dat" Name="FREETR_1.DAT" LongName="free.trans.dat" src="phast\examples\free\free.trans.dat" />
+                  <File Id="F__free.wphast"    Name="FREE_1.WPH" LongName="free.wphast" src="phast\examples\free\free.wphast" />
                   <File Id="F__phast.dat.free" Name="phast.dat" src="phast\examples\free\phast.dat" />
                 </Component>
               </Directory>
               <Directory Id="D__kindred4.4" Name="kindred4.4">
                 <Component Id="C__kindred4.4" Guid='3BEF4DD7-F272-4d7e-9B42-A64C56FA802D' DiskId="1">
-                  <File Id="F__kindred4.4.chem.dat"  Name="KINDRE~1.DAT" LongName="kindred4.4.chem.dat" src="phast\examples\kindred4.4\kindred4.4.chem.dat" />
-                  <File Id="F__kindred4.4.trans.dat" Name="KINDRE~2.DAT" LongName="kindred4.4.trans.dat" src="phast\examples\kindred4.4\kindred4.4.trans.dat" />
-                  <File Id="F__kindred4.4.wphast"    Name="KINDRE~1.WPH" LongName="kindred4.4.wphast" src="phast\examples\kindred4.4\kindred4.4.wphast" />
+                  <File Id="F__kindred4.4.chem.dat"  Name="KINDRE_1.DAT" LongName="kindred4.4.chem.dat" src="phast\examples\kindred4.4\kindred4.4.chem.dat" />
+                  <File Id="F__kindred4.4.trans.dat" Name="KINDRE_2.DAT" LongName="kindred4.4.trans.dat" src="phast\examples\kindred4.4\kindred4.4.trans.dat" />
+                  <File Id="F__kindred4.4.wphast"    Name="KINDRE_1.WPH" LongName="kindred4.4.wphast" src="phast\examples\kindred4.4\kindred4.4.wphast" />
                   <File Id="F__phast.dat.kindred4.4" Name="phast.dat" src="phast\examples\kindred4.4\phast.dat" />
                 </Component>
               </Directory>
               <Directory Id="D__leaky" Name="leaky">
                 <Component Id="C__leaky" Guid='CDCE84F8-00DA-478c-AA8C-16EF30C660E5' DiskId="1">
-                  <File Id="F__leaky.trans.dat" Name="LEAKYT~1.DAT" LongName="leaky.trans.dat" src="phast\examples\leaky\leaky.trans.dat" />
-                  <File Id="F__leaky.wphast" Name="LEAKY~1.WPH" LongName="leaky.wphast" src="phast\examples\leaky\leaky.wphast" />
+                  <File Id="F__leaky.trans.dat" Name="LEAKYT_1.DAT" LongName="leaky.trans.dat" src="phast\examples\leaky\leaky.trans.dat" />
+                  <File Id="F__leaky.wphast" Name="LEAKY_1.WPH" LongName="leaky.wphast" src="phast\examples\leaky\leaky.wphast" />
                 </Component>
               </Directory>
               <Directory Id="D__leakyx" Name="leakyx">
                 <Component Id="C__leakyx" Guid='0E14472B-6697-49ee-AFBA-71DA19A2E93D' DiskId="1">
-                  <File Id="F__leakyx.trans.dat" Name="LEAKYX~1.DAT" LongName="leakyx.trans.dat" src="phast\examples\leakyx\leakyx.trans.dat" />
-                  <File Id="F__leakyx.wphast"    Name="LEAKYX~1.WPH" LongName="leakyx.wphast" src="phast\examples\leakyx\leakyx.wphast" />
+                  <File Id="F__leakyx.trans.dat" Name="LEAKYX_1.DAT" LongName="leakyx.trans.dat" src="phast\examples\leakyx\leakyx.trans.dat" />
+                  <File Id="F__leakyx.wphast"    Name="LEAKYX_1.WPH" LongName="leakyx.wphast" src="phast\examples\leakyx\leakyx.wphast" />
                 </Component>
               </Directory>
               <Directory Id="D__leakyz" Name="leakyz">
                 <Component Id="C__leakyz" Guid='345CF3B3-7E4D-40db-A19F-9972340509B0' DiskId="1">
-                  <File Id="F__leakyz.trans.dat" Name="LEAKYZ~1.DAT" LongName="leakyz.trans.dat" src="phast\examples\leakyz\leakyz.trans.dat" />
-                  <File Id="F__leakyz.wphast"    Name="LEAKYZ~1.WPH" LongName="leakyz.wphast" src="phast\examples\leakyz\leakyz.wphast" />
+                  <File Id="F__leakyz.trans.dat" Name="LEAKYZ_1.DAT" LongName="leakyz.trans.dat" src="phast\examples\leakyz\leakyz.trans.dat" />
+                  <File Id="F__leakyz.wphast"    Name="LEAKYZ_1.WPH" LongName="leakyz.wphast" src="phast\examples\leakyz\leakyz.wphast" />
                 </Component>
               </Directory>
-              <Directory Id="D__linear_bc" Name="LINEAR~1" LongName="linear_bc">
+              <Directory Id="D__linear_bc" Name="LINEAR_1" LongName="linear_bc">
                 <Component Id="C__linear_bc" Guid='8D91EB68-6617-435f-8B3F-40538A8D48CE' DiskId="1">
-                  <File Id="F__linear_bc.chem.dat"  Name="LINEAR~1.DAT" LongName="linear_bc.chem.dat" src="phast\examples\linear_bc\linear_bc.chem.dat" />
-                  <File Id="F__linear_bc.trans.dat" Name="LINEAR~2.DAT" LongName="linear_bc.trans.dat" src="phast\examples\linear_bc\linear_bc.trans.dat" />
-                  <File Id="F__linear_bc.wphast"    Name="LINEAR~1.WPH" LongName="linear_bc.wphast" src="phast\examples\linear_bc\linear_bc.wphast" />
+                  <File Id="F__linear_bc.chem.dat"  Name="LINEAR_1.DAT" LongName="linear_bc.chem.dat" src="phast\examples\linear_bc\linear_bc.chem.dat" />
+                  <File Id="F__linear_bc.trans.dat" Name="LINEAR_2.DAT" LongName="linear_bc.trans.dat" src="phast\examples\linear_bc\linear_bc.trans.dat" />
+                  <File Id="F__linear_bc.wphast"    Name="LINEAR_1.WPH" LongName="linear_bc.wphast" src="phast\examples\linear_bc\linear_bc.wphast" />
                   <File Id="F__phast.dat"           Name="phast.dat" src="phast\examples\linear_bc\phast.dat" />
                 </Component>
               </Directory>
-              <Directory Id="D__linear_ic" Name="LINEAR~2" LongName="linear_ic">
+              <Directory Id="D__linear_ic" Name="LINEAR_2" LongName="linear_ic">
                 <Component Id="C__linear_ic" Guid='26713FBE-84AE-4d0e-B83B-F7C34A8AF71B' DiskId="1">
-                  <File Id="F__linear_ic.chem.dat"  Name="LINEAR~1.DAT" LongName="linear_ic.chem.dat" src="phast\examples\linear_ic\linear_ic.chem.dat" />
-                  <File Id="F__linear_ic.trans.dat" Name="LINEAR~2.DAT" LongName="linear_ic.trans.dat" src="phast\examples\linear_ic\linear_ic.trans.dat" />
-                  <File Id="F__linear_ic.wphast"    Name="LINEAR~1.WPH" LongName="linear_ic.wphast" src="phast\examples\linear_ic\linear_ic.wphast" />
+                  <File Id="F__linear_ic.chem.dat"  Name="LINEAR_1.DAT" LongName="linear_ic.chem.dat" src="phast\examples\linear_ic\linear_ic.chem.dat" />
+                  <File Id="F__linear_ic.trans.dat" Name="LINEAR_2.DAT" LongName="linear_ic.trans.dat" src="phast\examples\linear_ic\linear_ic.trans.dat" />
+                  <File Id="F__linear_ic.wphast"    Name="LINEAR_1.WPH" LongName="linear_ic.wphast" src="phast\examples\linear_ic\linear_ic.wphast" />
                   <File Id="F__phast.dat.linear_ic" Name="phast.dat" src="phast\examples\linear_ic\phast.dat" />
                 </Component>
               </Directory>
               <Directory Id="D__phrqex11" Name="phrqex11">
                 <Component Id="C__phrqex11" Guid='3AD6458E-E539-4954-B867-3C31F62D49DD' DiskId="1">
                   <File Id="F__phast.dat.phrqex11" Name="phast.dat" src="phast\examples\phrqex11\phast.dat" />
-                  <File Id="F__phrqex11.chem.dat"  Name="PHRQEX~1.DAT" LongName="phrqex11.chem.dat" src="phast\examples\phrqex11\phrqex11.chem.dat" />
-                  <File Id="F__phrqex11.trans.dat" Name="PHRQEX~2.DAT" LongName="phrqex11.trans.dat" src="phast\examples\phrqex11\phrqex11.trans.dat" />
-                  <File Id="F__phrqex11.wphast"    Name="PHRQEX~1.WPH" LongName="phrqex11.wphast" src="phast\examples\phrqex11\phrqex11.wphast" />
+                  <File Id="F__phrqex11.chem.dat"  Name="PHRQEX_1.DAT" LongName="phrqex11.chem.dat" src="phast\examples\phrqex11\phrqex11.chem.dat" />
+                  <File Id="F__phrqex11.trans.dat" Name="PHRQEX_2.DAT" LongName="phrqex11.trans.dat" src="phast\examples\phrqex11\phrqex11.trans.dat" />
+                  <File Id="F__phrqex11.wphast"    Name="PHRQEX_1.WPH" LongName="phrqex11.wphast" src="phast\examples\phrqex11\phrqex11.wphast" />
                 </Component>
               </Directory>
               <Directory Id="D__radial" Name="radial">
                 <Component Id="C__radial" Guid='DA74D6A6-76AA-49db-9B66-82B6DA6AA822' DiskId="1">
                   <File Id="F__phast.dat.radial" Name="phast.dat" src="phast\examples\radial\phast.dat" />
-                  <File Id="F__radial.chem.dat"  Name="RADIAL~1.DAT" LongName="radial.chem.dat" src="phast\examples\radial\radial.chem.dat" />
-                  <File Id="F__radial.head.dat"  Name="RADIAL~2.DAT" LongName="radial.head.dat" src="phast\examples\radial\radial.head.dat" />
-                  <File Id="F__radial.trans.dat" Name="RADIAL~3.DAT" LongName="radial.trans.dat" src="phast\examples\radial\radial.trans.dat" />
+                  <File Id="F__radial.chem.dat"  Name="RADIAL_1.DAT" LongName="radial.chem.dat" src="phast\examples\radial\radial.chem.dat" />
+                  <File Id="F__radial.head.dat"  Name="RADIAL_2.DAT" LongName="radial.head.dat" src="phast\examples\radial\radial.head.dat" />
+                  <File Id="F__radial.trans.dat" Name="RADIAL_3.DAT" LongName="radial.trans.dat" src="phast\examples\radial\radial.trans.dat" />
                 </Component>
               </Directory>
               <Directory Id="D__river" Name="river">
                 <Component Id="C__river" Guid='C5571CC0-10C5-4482-8C0A-9ABFB3B14CC8' DiskId="1">
-                  <File Id="F__river.trans.dat" Name="RIVERT~1.DAT" LongName="river.trans.dat" src="phast\examples\river\river.trans.dat" />
-                  <File Id="F__river.wphast"    Name="RIVER~1.WPH" LongName="river.wphast" src="phast\examples\river\river.wphast" />
+                  <File Id="F__river.trans.dat" Name="RIVERT_1.DAT" LongName="river.trans.dat" src="phast\examples\river\river.trans.dat" />
+                  <File Id="F__river.wphast"    Name="RIVER_1.WPH" LongName="river.wphast" src="phast\examples\river\river.wphast" />
                 </Component>
               </Directory>
               <Directory Id="D__unconf" Name="unconf">
                 <Component Id="C__unconf" Guid='B3B22691-7648-448f-AB01-080BD83FF512' DiskId="1">
-                  <File Id="F__unconf.trans.dat" Name="UNCONF~1.DAT" LongName="unconf.trans.dat" src="phast\examples\unconf\unconf.trans.dat" />
-                  <File Id="F__unconf.wphast"    Name="UNCONF~1.WPH" LongName="unconf.wphast" src="phast\examples\unconf\unconf.wphast" />
+                  <File Id="F__unconf.trans.dat" Name="UNCONF_1.DAT" LongName="unconf.trans.dat" src="phast\examples\unconf\unconf.trans.dat" />
+                  <File Id="F__unconf.wphast"    Name="UNCONF_1.WPH" LongName="unconf.wphast" src="phast\examples\unconf\unconf.wphast" />
                 </Component>
               </Directory>
               <Directory Id="D__well" Name="well">
                 <Component Id="C__well" Guid='5782C52F-724C-4ded-A292-21A568BA6C64' DiskId="1">
                   <File Id="F__phast.dat.well" Name="phast.dat" src="phast\examples\well\phast.dat" />
-                  <File Id="F__well.trans.dat" Name="WELLTR~1.DAT" LongName="well.trans.dat" src="phast\examples\well\well.trans.dat" />
-                  <File Id="F__well.wphast5"   Name="WELL~1.WPH" LongName="well.wphast" src="phast\examples\well\well.wphast" />
+                  <File Id="F__well.trans.dat" Name="WELLTR_1.DAT" LongName="well.trans.dat" src="phast\examples\well\well.trans.dat" />
+                  <File Id="F__well.wphast5"   Name="WELL_1.WPH" LongName="well.wphast" src="phast\examples\well\well.wphast" />
                 </Component>
               </Directory>
             </Directory>
@@ -268,8 +286,15 @@
         <ComponentRef Id='C__MainExecutable' />
         <ComponentRef Id='C__hdf5Library' />
         <ComponentRef Id='C__vtkLibrary' />
+<?ifdef VS2005 ?>
+        <MergeRef Id='CRT' />
+        <MergeRef Id='CRT Policy' />
+        <MergeRef Id='MFC'/>
+        <MergeRef Id='MFC Policy' />
+<?else?>
         <MergeRef Id="VC_CRT.12121212-6C3B-4C70-8DFF-B3749533716E" />
         <MergeRef Id="VC_STL.12121212-FF27-4ff8-911C-03CD09DDB3E5" />
+<?endif?>
       </Feature>
 
       <Feature Id='F__Documentation' Title='Documentation' Description='The PHAST manual.' TypicalDefault='install' Level='1'>
@@ -1385,7 +1410,9 @@
       </InstallUISequence>
     </UI>
 
+<?ifndef VS2005 ?>
     <Property Id="ALLUSERS">2</Property>
+<?endif?>
     <Property Id="ButtonText_No">&amp;No</Property>
     <Property Id="ButtonText_Install">&amp;Install</Property>
     <Property Id="Setup">Setup</Property>

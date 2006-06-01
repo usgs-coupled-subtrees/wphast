@@ -1,6 +1,6 @@
 # $Id$
 
-DEVENV := /cygdrive/c/Program\ Files/Microsoft\ Visual\ Studio\ .NET/Common7/IDE/devenv
+DEVENV := /cygdrive/c/Program\ Files/Microsoft\ Visual\ Studio\ 8/Common7/IDE/devenv
 
 SLN := ../WPhast.sln
 
@@ -14,6 +14,7 @@ CANDLE_FLAGS=\
 	-nologo \
 	-dWPHAST_AUTOMATION \
 	-dMergeDir=$(MERGE_DIR) \
+	-dVS2005
 
 LIGHT = light
 LIGHT_FLAGS=\

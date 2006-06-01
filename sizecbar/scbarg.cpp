@@ -142,7 +142,11 @@ void CSizingControlBarG::NcPaintGripper(CDC* pDC, CRect rcClient)
     m_biHide.Paint(pDC);
 }
 
+#if _MSC_VER >= 1400
+LRESULT CSizingControlBarG::OnNcHitTest(CPoint point)
+#else
 UINT CSizingControlBarG::OnNcHitTest(CPoint point)
+#endif 
 {
     CRect rcBar;
     GetWindowRect(rcBar);

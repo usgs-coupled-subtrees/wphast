@@ -2068,7 +2068,7 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 		//
 		for (int i = 0; i < ::count_wells; ++i)
 		{
-			const Well* well_ptr = &::wells[i];			
+			const Well *well_ptr = &::wells[i];
 			CWellSchedule well(*well_ptr);
 
 			// not undoable

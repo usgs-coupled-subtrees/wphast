@@ -28,8 +28,6 @@ CChemICPropertyPage::CChemICPropertyPage()
 	this->CommonConstruct();
 }
 
-	CChemICPropertyPage(UINT nIDTemplate, UINT nIDCaption, UINT nIDHeaderTitle, UINT nIDHeaderSubTitle = 0);
-
 CChemICPropertyPage::CChemICPropertyPage(UINT nIDTemplate, UINT nIDCaption)
 	: CPropertyPage(nIDTemplate, nIDCaption)
 {

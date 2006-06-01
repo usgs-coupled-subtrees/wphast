@@ -3,6 +3,11 @@
 // #include <afximpl.h>
 #include <Shlwapi.h> // PathStripToRoot
 
+#if _MSC_VER < 1400
+#define genericException generic
+#endif
+
+
 void SrcGetRoot(LPCTSTR lpszPath, CString& strRoot)
 {
 	ASSERT(lpszPath != NULL);
@@ -117,7 +122,7 @@ BOOL CHDFMirrorFile::Open(LPCTSTR lpszFileName, UINT nOpenFlags,
 		if (m_hidFile > 0) return TRUE;
 
 		ASSERT(FALSE);
-		pError->m_cause = CFileException::generic;
+		pError->m_cause = CFileException::genericException;
 		return FALSE;
 	}
 	if (nOpenFlags == (CFile::modeRead|CFile::shareDenyWrite)) // opened for reading
@@ -129,11 +134,11 @@ BOOL CHDFMirrorFile::Open(LPCTSTR lpszFileName, UINT nOpenFlags,
 		m_hidFile = ::H5Fopen(lpszFileName, H5F_ACC_RDONLY, H5P_DEFAULT);		
 		if (m_hidFile > 0) return TRUE;
 
-		pError->m_cause = CFileException::generic;
+		pError->m_cause = CFileException::genericException;
 		return FALSE;
 	}
 	ASSERT(FALSE); // TODO
-	pError->m_cause = CFileException::generic;
+	pError->m_cause = CFileException::genericException;
 	return FALSE;
 	//return CFile::Open(lpszFileName, nOpenFlags, pError);
 }

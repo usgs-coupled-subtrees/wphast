@@ -45,26 +45,26 @@ void TCPPUnit::RunUnitTests(void)
 	{
 		CppUnit::TextUi::TestRunner runner;
 
-		//{{
-		{
-			CPrintInput pi;
-			std::ostringstream oss_out;
-			oss_out << pi;
-			TRACE("%s\n", oss_out.str().c_str());
-		}
-		//}}
+// COMMENT: {5/22/2006 6:20:43 PM}		//{{
+// COMMENT: {5/22/2006 6:20:43 PM}		{
+// COMMENT: {5/22/2006 6:20:43 PM}			CPrintInput pi;
+// COMMENT: {5/22/2006 6:20:43 PM}			std::ostringstream oss_out;
+// COMMENT: {5/22/2006 6:20:43 PM}			oss_out << pi;
+// COMMENT: {5/22/2006 6:20:43 PM}			TRACE("%s\n", oss_out.str().c_str());
+// COMMENT: {5/22/2006 6:20:43 PM}		}
+// COMMENT: {5/22/2006 6:20:43 PM}		//}}
 
-// COMMENT: {5/5/2006 6:34:06 PM}		runner.addTest(TestCPhastInput::suite());
-// COMMENT: {5/5/2006 6:34:06 PM}		runner.addTest(TestCZone::suite());
-// COMMENT: {5/5/2006 6:34:06 PM}		runner.addTest(TestCGrid::suite());
-// COMMENT: {5/5/2006 6:34:06 PM}		runner.addTest(TestCtime::suite());
-// COMMENT: {5/5/2006 6:34:06 PM}		runner.addTest(TestCBC::suite());
-// COMMENT: {5/5/2006 6:34:06 PM}		runner.addTest(TestCTimeControl::suite());
-// COMMENT: {5/5/2006 6:34:06 PM}		runner.addTest(TestCWPhastDoc::suite());
-// COMMENT: {5/5/2006 6:34:06 PM}		runner.addTest(TestCParser::suite());
-// COMMENT: {5/5/2006 6:34:06 PM}		runner.addTest(TestCPropertyTreeControlBar::suite());
+// COMMENT: {5/22/2006 6:44:32 PM}		runner.addTest(TestCPhastInput::suite());
+		runner.addTest(TestCZone::suite());
+		runner.addTest(TestCGrid::suite());
+		runner.addTest(TestCtime::suite());
+		runner.addTest(TestCBC::suite());
+		runner.addTest(TestCTimeControl::suite());
+		runner.addTest(TestCWPhastDoc::suite());
+		runner.addTest(TestCParser::suite());
+		runner.addTest(TestCPropertyTreeControlBar::suite());
 		runner.addTest(TestCUnits::suite());
-// COMMENT: {5/5/2006 6:34:06 PM}		runner.addTest(TestCPhastInput::suite());
+// COMMENT: {5/22/2006 6:46:37 PM}		runner.addTest(TestCPhastInput::suite());
 
 #ifdef __DEPRECATED__
 		runner.addTest(TestCBCZone::suite());
@@ -101,6 +101,6 @@ void TCPPUnit::RunUnitTests(void)
 		}
 	}
 
-	CPPUNIT_ASSERT(::fcloseall() == 0);
+	CPPUNIT_ASSERT(::_fcloseall() == 0);
 // COMMENT: {3/28/2006 9:12:56 PM}	exit(0);
 }

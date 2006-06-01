@@ -113,8 +113,8 @@ void TestCPhastInput::testWritePulse(void)
 		{
 			std::getline(expected, str_expected, '\n');
 			std::getline(actual,   str_actual,   '\n');
-			// ::OutputDebugString(str_actual.c_str());
-			// ::OutputDebugString("\n");
+// COMMENT: {5/22/2006 6:45:07 PM}			::OutputDebugString(str_actual.c_str());
+// COMMENT: {5/22/2006 6:45:07 PM}			::OutputDebugString("\n");
 			CPPUNIT_ASSERT( str_expected == str_actual );
 		}
 		CPPUNIT_ASSERT( expected.eof() && actual.eof() );
