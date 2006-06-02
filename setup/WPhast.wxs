@@ -31,7 +31,7 @@
 
 <?ifdef WPHAST_AUTOMATION ?>
               <Component Id='C__MainExecutable' Guid='154A8C11-2222-47cb-968A-28012FEAFA34'>
-                <File Id='F__WPhast.exe' Name='WPhast.exe' DiskId='1' src='..\AutoRelease\WPhast.exe' Vital='yes'>
+                <File Id='F__WPhast.exe' Name='WPhast.exe' DiskId='1' src='..\src\AutoRelease\WPhast.exe' Vital='yes'>
                   <Shortcut Id="S__WPhast" Directory="D_PrgMenu.2FB136FF_6AAD_442A_A6EB_99511F1CDF82" Name="WPhast" LongName='$(var.Shortcut)' Icon="WPhast.exe" IconIndex="0" Target="F__MainProgram" />
                 </File>
                 <File Id='F__phast.exe' Name='phast.exe' DiskId='1' src='$(var.phastExePath)' Vital='yes' Checksum='yes'/>
@@ -47,7 +47,7 @@
               </Component>
 <?else?>
               <Component Id='C__MainExecutable' Guid='154A8C11-2222-47cb-968A-28012FEAFA34'>
-                <File Id='F__WPhast.exe' Name='WPhast.exe' DiskId='1' src='..\Release\WPhast.exe' Vital='yes'>
+                <File Id='F__WPhast.exe' Name='WPhast.exe' DiskId='1' src='..\src\Release\WPhast.exe' Vital='yes'>
                   <Shortcut Id="S__WPhast" Directory="D_PrgMenu.2FB136FF_6AAD_442A_A6EB_99511F1CDF82" Name="WPhast" Icon="WPhast.exe" IconIndex="0" Target="F__MainProgram" />
                 </File>
                 <!-- <Registry Id="R__phast.exe" Root="HKLM" Key="SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\WPhast.exe" Type="string" Value="[#F__WPhast.exe]" /> -->
@@ -1482,6 +1482,6 @@
     <Binary Id="info" src="Binary\Info.ico" />
     <Binary Id="bannrbmp" src="Binary\Banner.bmp" />
     <Binary Id="dlgbmp" src="Binary\Dialog.bmp" />
-    <Icon Id="WPhast.exe" src='..\AutoRelease\WPhast.exe' />
+    <Icon Id="WPhast.exe" src='..\src\AutoRelease\WPhast.exe' />
   </Product>
 </Wix>
