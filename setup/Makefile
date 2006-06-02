@@ -4,10 +4,10 @@ DEVENV := /cygdrive/c/Program\ Files/Microsoft\ Visual\ Studio\ 8/Common7/IDE/de
 
 SLN := ../WPhast.sln
 
-WPHAST_EXE := ../AutoRelease/WPhast.exe
+WPHAST_EXE := ../src/AutoRelease/WPhast.exe
 
-VTK_DLL_DIR := ../AutoRelease
-HDF_DLL_DIR := ../AutoRelease
+VTK_DLL_DIR := ../src/AutoRelease
+HDF_DLL_DIR := ../src/AutoRelease
 
 CANDLE = candle
 CANDLE_FLAGS=\
