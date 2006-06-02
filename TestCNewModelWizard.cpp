@@ -3,7 +3,6 @@
 
 #include "resource.h"
 #include "NewModelWizard.h"
-#include "NewModelWizard2.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

@@ -367,7 +367,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="copying dlls"
-				CommandLine="copy /Y &quot;$(DEV_HDF5_LIBDLL_D)\hdf5ddll.dll&quot;           &quot;$(TargetDir)hdf5ddll.dll&quot;&#x0D;&#x0A;"
+				CommandLine="copy /Y &quot;$(DEV_HDF5_LIBDLL_D)\hdf5ddll.dll&quot;           &quot;$(TargetDir)hdf5ddll.dll&quot;   &gt; NUL"
 			/>
 		</Configuration>
 		<Configuration
@@ -466,7 +466,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Copying dlls"
-				CommandLine="copy /Y &quot;$(DEV_HDF5_LIBDLL)\hdf5dll.dll&quot;            &quot;$(TargetDir)hdf5dll.dll&quot;      &gt; null&#x0D;&#x0A;copy /Y &quot;$(DEV_HDF5_LIBDLL)\zlib.dll&quot;               &quot;$(TargetDir)zlib.dll&quot;         &gt; null&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkCommon.dll&quot;    &quot;$(TargetDir)vtkCommon.dll&quot;    &gt; null&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkFiltering.dll&quot; &quot;$(TargetDir)vtkFiltering.dll&quot; &gt; null&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkGraphics.dll&quot;  &quot;$(TargetDir)vtkGraphics.dll&quot;  &gt; null&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkHybrid.dll&quot;    &quot;$(TargetDir)vtkHybrid.dll&quot;    &gt; null&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkIO.dll&quot;        &quot;$(TargetDir)vtkIO.dll&quot;        &gt; null&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkImaging.dll&quot;   &quot;$(TargetDir)vtkImaging.dll&quot;   &gt; null&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkRendering.dll&quot; &quot;$(TargetDir)vtkRendering.dll&quot; &gt; null&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkexpat.dll&quot;     &quot;$(TargetDir)vtkexpat.dll&quot;     &gt; null&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkfreetype.dll&quot;  &quot;$(TargetDir)vtkfreetype.dll&quot;  &gt; null&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkftgl.dll&quot;      &quot;$(TargetDir)vtkftgl.dll&quot;      &gt; null&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkjpeg.dll&quot;      &quot;$(TargetDir)vtkjpeg.dll&quot;      &gt; null&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkpng.dll&quot;       &quot;$(TargetDir)vtkpng.dll&quot;       &gt; null&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtktiff.dll&quot;      &quot;$(TargetDir)vtktiff.dll&quot;      &gt; null&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkzlib.dll&quot;      &quot;$(TargetDir)vtkzlib.dll&quot;      &gt; null&#x0D;&#x0A;"
+				CommandLine="copy /Y &quot;$(DEV_HDF5_LIBDLL)\hdf5dll.dll&quot;            &quot;$(TargetDir)hdf5dll.dll&quot;      &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_HDF5_LIBDLL)\zlib.dll&quot;               &quot;$(TargetDir)zlib.dll&quot;         &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkCommon.dll&quot;    &quot;$(TargetDir)vtkCommon.dll&quot;    &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkFiltering.dll&quot; &quot;$(TargetDir)vtkFiltering.dll&quot; &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkGraphics.dll&quot;  &quot;$(TargetDir)vtkGraphics.dll&quot;  &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkHybrid.dll&quot;    &quot;$(TargetDir)vtkHybrid.dll&quot;    &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkIO.dll&quot;        &quot;$(TargetDir)vtkIO.dll&quot;        &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkImaging.dll&quot;   &quot;$(TargetDir)vtkImaging.dll&quot;   &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkRendering.dll&quot; &quot;$(TargetDir)vtkRendering.dll&quot; &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkexpat.dll&quot;     &quot;$(TargetDir)vtkexpat.dll&quot;     &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkfreetype.dll&quot;  &quot;$(TargetDir)vtkfreetype.dll&quot;  &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkftgl.dll&quot;      &quot;$(TargetDir)vtkftgl.dll&quot;      &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkjpeg.dll&quot;      &quot;$(TargetDir)vtkjpeg.dll&quot;      &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkpng.dll&quot;       &quot;$(TargetDir)vtkpng.dll&quot;       &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtktiff.dll&quot;      &quot;$(TargetDir)vtktiff.dll&quot;      &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkzlib.dll&quot;      &quot;$(TargetDir)vtkzlib.dll&quot;      &gt; NUL"
 			/>
 		</Configuration>
 		<Configuration
@@ -673,15 +673,7 @@
 				>
 			</File>
 			<File
-				RelativePath="BCFluxPropertyPage.cpp"
-				>
-			</File>
-			<File
 				RelativePath="BCFluxPropertyPage2.cpp"
-				>
-			</File>
-			<File
-				RelativePath="BCLeakyPropertyPage.cpp"
 				>
 			</File>
 			<File
@@ -694,10 +686,6 @@
 			</File>
 			<File
 				RelativePath="BCSpecifiedHeadPropertyPage.cpp"
-				>
-			</File>
-			<File
-				RelativePath="BCSpecifiedPropertyPage.cpp"
 				>
 			</File>
 			<File
@@ -725,7 +713,7 @@
 				>
 			</File>
 			<File
-				RelativePath="ChemICPropertyPage.cpp"
+				RelativePath=".\ChemICPropertyPage.cpp"
 				>
 			</File>
 			<File
@@ -889,7 +877,7 @@
 				>
 			</File>
 			<File
-				RelativePath="GridPropertyPage.cpp"
+				RelativePath=".\GridPropertyPage.cpp"
 				>
 			</File>
 			<File
@@ -921,7 +909,7 @@
 				>
 			</File>
 			<File
-				RelativePath="ICHeadPropertyPage.cpp"
+				RelativePath=".\ICHeadPropertyPage.cpp"
 				>
 			</File>
 			<File
@@ -985,7 +973,7 @@
 				>
 			</File>
 			<File
-				RelativePath="MediaPropertyPage.cpp"
+				RelativePath=".\MediaPropertyPage.cpp"
 				>
 			</File>
 			<File
@@ -1050,18 +1038,6 @@
 			</File>
 			<File
 				RelativePath="PropTreeOleDropTarget.cpp"
-				>
-			</File>
-			<File
-				RelativePath="Proto2PropertyPage.cpp"
-				>
-			</File>
-			<File
-				RelativePath="Proto3PropertyPage.cpp"
-				>
-			</File>
-			<File
-				RelativePath="ProtoPropertyPage.cpp"
 				>
 			</File>
 			<File
@@ -1546,15 +1522,7 @@
 				>
 			</File>
 			<File
-				RelativePath="BCFluxPropertyPage.h"
-				>
-			</File>
-			<File
 				RelativePath="BCFluxPropertyPage2.h"
-				>
-			</File>
-			<File
-				RelativePath="BCLeakyPropertyPage.h"
 				>
 			</File>
 			<File
@@ -1567,10 +1535,6 @@
 			</File>
 			<File
 				RelativePath="BCSpecifiedHeadPropertyPage.h"
-				>
-			</File>
-			<File
-				RelativePath="BCSpecifiedPropertyPage.h"
 				>
 			</File>
 			<File
@@ -1598,7 +1562,7 @@
 				>
 			</File>
 			<File
-				RelativePath="ChemICPropertyPage.h"
+				RelativePath=".\ChemICPropertyPage.h"
 				>
 			</File>
 			<File
@@ -1710,7 +1674,7 @@
 				>
 			</File>
 			<File
-				RelativePath="GridPropertyPage.h"
+				RelativePath=".\GridPropertyPage.h"
 				>
 			</File>
 			<File
@@ -1742,7 +1706,7 @@
 				>
 			</File>
 			<File
-				RelativePath="ICHeadPropertyPage.h"
+				RelativePath=".\ICHeadPropertyPage.h"
 				>
 			</File>
 			<File
@@ -1806,7 +1770,7 @@
 				>
 			</File>
 			<File
-				RelativePath="MediaPropertyPage.h"
+				RelativePath=".\MediaPropertyPage.h"
 				>
 			</File>
 			<File
@@ -1875,18 +1839,6 @@
 			</File>
 			<File
 				RelativePath="PropTreeOleDropTarget.h"
-				>
-			</File>
-			<File
-				RelativePath="Proto2PropertyPage.h"
-				>
-			</File>
-			<File
-				RelativePath="Proto3PropertyPage.h"
-				>
-			</File>
-			<File
-				RelativePath="ProtoPropertyPage.h"
 				>
 			</File>
 			<File
@@ -3012,34 +2964,6 @@
 				Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm"
 				>
 				<File
-					RelativePath="NewModelWizard2.cpp"
-					>
-					<FileConfiguration
-						Name="Release|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="vtkMemDebug|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="AutoRelease|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-				</File>
-				<File
 					RelativePath="TCPPUnit.cpp"
 					>
 					<FileConfiguration
@@ -3129,50 +3053,6 @@
 				</File>
 				<File
 					RelativePath="TestCBCSpecifiedHeadPropertyPage.cpp"
-					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="vtkMemDebug|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="AutoRelease|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="AutoDebug|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath="TestCBCSpecifiedPropertyPage.cpp"
 					>
 					<FileConfiguration
 						Name="Debug|Win32"
@@ -4205,10 +4085,6 @@
 				Filter="h;hpp;hxx;hm;inl;inc"
 				>
 				<File
-					RelativePath="NewModelWizard2.h"
-					>
-				</File>
-				<File
 					RelativePath="TCPPUnit.h"
 					>
 				</File>
@@ -4218,10 +4094,6 @@
 				</File>
 				<File
 					RelativePath="TestCBCSpecifiedHeadPropertyPage.h"
-					>
-				</File>
-				<File
-					RelativePath="TestCBCSpecifiedPropertyPage.h"
 					>
 				</File>
 				<File
@@ -5704,222 +5576,6 @@
 			</File>
 		</Filter>
 		<Filter
-			Name="gridctrl"
-			>
-			<File
-				RelativePath="gridctrl\CellRange.h"
-				>
-			</File>
-			<File
-				RelativePath="gridctrl\DropDownButton.cpp"
-				>
-			</File>
-			<File
-				RelativePath="gridctrl\DropDownButton.h"
-				>
-			</File>
-			<File
-				RelativePath="gridctrl\GridCtrl.cpp"
-				>
-			</File>
-			<File
-				RelativePath="gridctrl\GridCtrl.h"
-				>
-			</File>
-			<File
-				RelativePath="gridctrl\GridDropTarget.cpp"
-				>
-			</File>
-			<File
-				RelativePath="gridctrl\GridDropTarget.h"
-				>
-			</File>
-			<File
-				RelativePath="gridctrl\InPlaceEdit.cpp"
-				>
-			</File>
-			<File
-				RelativePath="gridctrl\InPlaceEdit.h"
-				>
-			</File>
-			<File
-				RelativePath="gridctrl\InPlaceList.cpp"
-				>
-			</File>
-			<File
-				RelativePath="gridctrl\InPlaceList.h"
-				>
-			</File>
-			<File
-				RelativePath="gridctrl\ListBoxDrop.cpp"
-				>
-			</File>
-			<File
-				RelativePath="gridctrl\ListBoxDrop.h"
-				>
-			</File>
-			<File
-				RelativePath="gridctrl\MemDC.h"
-				>
-			</File>
-			<File
-				RelativePath="gridctrl\ModGridCtrl.cpp"
-				>
-			</File>
-			<File
-				RelativePath="gridctrl\ModGridCtrl.h"
-				>
-			</File>
-			<File
-				RelativePath="gridctrl\ModGridCtrlEx.cpp"
-				>
-			</File>
-			<File
-				RelativePath="gridctrl\ModGridCtrlEx.h"
-				>
-			</File>
-			<File
-				RelativePath="gridctrl\TitleTip.cpp"
-				>
-			</File>
-			<File
-				RelativePath="gridctrl\TitleTip.h"
-				>
-			</File>
-			<Filter
-				Name="New"
-				>
-				<File
-					RelativePath="gridctrl\GridCell.cpp"
-					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="vtkMemDebug|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="cppunit|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="AutoRelease|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="AutoDebug|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="cppunit4.4|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath="gridctrl\GridCell.h"
-					>
-				</File>
-				<File
-					RelativePath="gridctrl\GridCellBase.cpp"
-					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="vtkMemDebug|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="cppunit|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="AutoRelease|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="AutoDebug|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="cppunit4.4|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath="gridctrl\GridCellBase.h"
-					>
-				</File>
-			</Filter>
-		</Filter>
-		<Filter
 			Name="ETSLayout"
 			>
 			<File
@@ -6149,6 +5805,222 @@
 				RelativePath="VisualStylesXP\VisualStylesXP.h"
 				>
 			</File>
+		</Filter>
+		<Filter
+			Name="gridctrl"
+			>
+			<File
+				RelativePath="gridctrl\CellRange.h"
+				>
+			</File>
+			<File
+				RelativePath="gridctrl\DropDownButton.cpp"
+				>
+			</File>
+			<File
+				RelativePath="gridctrl\DropDownButton.h"
+				>
+			</File>
+			<File
+				RelativePath="gridctrl\GridCtrl.cpp"
+				>
+			</File>
+			<File
+				RelativePath="gridctrl\GridCtrl.h"
+				>
+			</File>
+			<File
+				RelativePath="gridctrl\GridDropTarget.cpp"
+				>
+			</File>
+			<File
+				RelativePath="gridctrl\GridDropTarget.h"
+				>
+			</File>
+			<File
+				RelativePath="gridctrl\InPlaceEdit.cpp"
+				>
+			</File>
+			<File
+				RelativePath="gridctrl\InPlaceEdit.h"
+				>
+			</File>
+			<File
+				RelativePath="gridctrl\InPlaceList.cpp"
+				>
+			</File>
+			<File
+				RelativePath="gridctrl\InPlaceList.h"
+				>
+			</File>
+			<File
+				RelativePath="gridctrl\ListBoxDrop.cpp"
+				>
+			</File>
+			<File
+				RelativePath="gridctrl\ListBoxDrop.h"
+				>
+			</File>
+			<File
+				RelativePath="gridctrl\MemDC.h"
+				>
+			</File>
+			<File
+				RelativePath="gridctrl\ModGridCtrl.cpp"
+				>
+			</File>
+			<File
+				RelativePath="gridctrl\ModGridCtrl.h"
+				>
+			</File>
+			<File
+				RelativePath="gridctrl\ModGridCtrlEx.cpp"
+				>
+			</File>
+			<File
+				RelativePath="gridctrl\ModGridCtrlEx.h"
+				>
+			</File>
+			<File
+				RelativePath="gridctrl\TitleTip.cpp"
+				>
+			</File>
+			<File
+				RelativePath="gridctrl\TitleTip.h"
+				>
+			</File>
+			<Filter
+				Name="New"
+				>
+				<File
+					RelativePath="gridctrl\GridCell.cpp"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkMemDebug|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="cppunit|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="AutoRelease|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="AutoDebug|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="cppunit4.4|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="gridctrl\GridCell.h"
+					>
+				</File>
+				<File
+					RelativePath="gridctrl\GridCellBase.cpp"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkMemDebug|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="cppunit|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="AutoRelease|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="AutoDebug|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="cppunit4.4|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="gridctrl\GridCellBase.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<File
 			RelativePath="Bugs.txt"

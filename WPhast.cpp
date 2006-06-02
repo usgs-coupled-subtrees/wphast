@@ -8,12 +8,9 @@
 #include "WPhastDoc.h"
 #include "WPhastView.h"
 
-#include "GridPropertyPage.h"
 #include "Units1PropertyPage.h"
 #include "Units2PropertyPage.h"
-#include "MediaPropertyPage.h"
 #include "NewModelIntro.h"
-#include "ICHeadPropertyPage.h"
 #include "GridElt.h"
 #include "HeadIC.h"
 
@@ -24,16 +21,6 @@
 
 #include "NewModel.h"
 #include "DelayRedraw.h"
-
-#ifdef _DEBUG
-#include "ProtoPropertyPage.h"
-#include "Proto2PropertyPage.h"
-#include "Proto3PropertyPage.h"
-#include "property.h"
-
-#include "IntroPropertyPage.h"
-#endif
-
 
 #if defined(_DEBUG)
 // see CWPhastApp::InitInstance()

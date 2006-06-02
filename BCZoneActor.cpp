@@ -8,9 +8,7 @@
 #include <vtkPropAssembly.h>
 
 #include "PropertyTreeControlBar.h"
-#include "BCFluxPropertyPage.h"
 #include "BCFluxPropertyPage2.h"
-#include "BCLeakyPropertyPage.h"
 #include "BCLeakyPropertyPage2.h"
 // COMMENT: {4/11/2005 2:14:18 PM}#include "BCSpecifiedPropertyPage.h"
 #include "BCSpecifiedHeadPropertyPage.h"
