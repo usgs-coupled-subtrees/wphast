@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 9.00
 # Visual Studio 2005
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WPhast", "WPhast.vcproj", "{A7CB3EF2-FCFD-4E6C-98A8-C6EFCD35955C}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WPhast", "src\WPhast.vcproj", "{A7CB3EF2-FCFD-4E6C-98A8-C6EFCD35955C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
