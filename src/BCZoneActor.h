@@ -17,8 +17,7 @@ public:
 	virtual void InsertAt(CTreeCtrl* pTreeCtrl, HTREEITEM hParent, HTREEITEM hInsertAfter);
 	virtual void Update(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent);
 	virtual void Edit(CTreeCtrl* pTreeCtrl);
-	//virtual void Remove(CPropertyTreeControlBar* pTreeControlBar);
-	//virtual void UnRemove(CPropertyTreeControlBar* pTreeControlBar);
+
 	virtual void Add(CWPhastDoc *pWPhastDoc);
 	virtual void Remove(CWPhastDoc *pWPhastDoc);
 
@@ -27,12 +26,17 @@ public:
 	void Edit(CTreeCtrl* pTreeCtrl, int nStressPeriod = 1);
 	void Serialize(bool bStoring, hid_t loc_id, const CUnits& units);
 
+
 	static const char szHeading[];
+
+	static void SetStaticColor(int bc_type,COLORREF cr); 
 
 	CString GetTreeHeading(void)const;
 
 	void Update(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent, const CBC& crBC);
 	void Update(CTreeCtrl* pTreeCtrl);
+
+	void UpdateProperty();
 
 protected:
 	CBCZoneActor(void);
@@ -40,13 +44,13 @@ protected:
 
 protected:
 	CBC m_bc;
-// COMMENT: {4/13/2005 5:20:04 PM}	std::vector<HTREEITEM> m_vecHTI;
-// COMMENT: {4/13/2005 5:20:04 PM}	std::vector<HTREEITEM> m_vecHParent;
-// COMMENT: {4/13/2005 5:20:04 PM}	std::vector<HTREEITEM> m_vecHInsertAfter;
+	static float s_color[3][3];
+	static vtkProperty* s_Property[3];
 
 private:
 	CBCZoneActor(const CBCZoneActor&);  // Not implemented.
 	void operator=(const CBCZoneActor&);  // Not implemented.
+
 public:
 	CBC GetBC(void)const;
 	void SetBC(const CBC& rBC);
@@ -56,4 +60,27 @@ public:
 
 	HTREEITEM GetHTreeItem(void)const;
 	void SetHTreeItem(HTREEITEM htItem);
+
+private:
+	class StaticInit
+	{
+	public:
+		StaticInit() {
+			for (int i = 0; i < 3; ++i) {
+				if (CBCZoneActor::s_Property[i] == 0) {
+					CBCZoneActor::s_Property[i] = vtkProperty::New();
+					CBCZoneActor::s_Property[i]->SetColor(CBCZoneActor::s_color[i]);
+					CBCZoneActor::s_Property[i]->SetOpacity(0.3);
+				}
+			}
+		}
+		~StaticInit() {
+			for (int i = 0; i < 3; ++i) {
+				if (CBCZoneActor::s_Property[i] != 0) {
+					CBCZoneActor::s_Property[i]->Delete();
+					CBCZoneActor::s_Property[i] = 0;
+				}
+			}
+		}
+	};
 };

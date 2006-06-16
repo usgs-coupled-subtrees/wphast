@@ -241,6 +241,7 @@
 #define IDR_ITERATIONS_RTF              267
 #define IDD_SUBDIVIDE_DIALOG            273
 #define IDD_BC_TYPE_DIALOG              275
+#define IDD_COLORS                      276
 #define IDR_DESCRIPTION_RTF             279
 #define IDR_SOLUTE_TRUE_RTF             280
 #define IDR_SOLUTE_FALSE_RTF            281
@@ -729,6 +730,15 @@
 #define IDC_RADIO_LEAKY                 1365
 #define IDC_RADIO_HEAD                  1366
 #define IDC_RADIO_FLUX                  1367
+#define IDC_MEDIA_BTN                   1373
+#define IDC_FLUX_BTN                    1374
+#define IDC_LEAKY_BTN                   1375
+#define IDC_HEAD_IC_BTN                 1376
+#define IDC_CHEM_IC_BTN                 1377
+#define IDC_SPEC_HEAD_BTN               1378
+#define IDC_RIVER_BTN                   1379
+#define IDC_RIVER_BTN2                  1380
+#define IDC_WELL_BTN                    1380
 #define IDC_RESIZE_COLUMN               28654
 #define IDC_RESIZE_ROW                  28655
 #define IDR_POPUP                       28656
@@ -745,6 +755,7 @@
 #define ID_VIEW_FROM_PREV_DIRECTION     32812
 #define ID_TOOLS_SELECTOBJECT           32826
 #define ID_VIEW_SHOWALL                 32827
+#define ID_TOOLS_COLORS                 32832
 #define IDW_CONTROLBAR_TREE             59424
 #define IDW_CONTROLBAR_BOXPROPS         59425
 
@@ -753,8 +764,8 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        390
-#define _APS_NEXT_COMMAND_VALUE         32832
-#define _APS_NEXT_CONTROL_VALUE         1373
+#define _APS_NEXT_COMMAND_VALUE         32833
+#define _APS_NEXT_CONTROL_VALUE         1381
 #define _APS_NEXT_SYMED_VALUE           126
 #endif
 #endif

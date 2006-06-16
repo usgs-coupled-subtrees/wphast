@@ -20,6 +20,7 @@ vtkCxxRevisionMacro(CMediaZoneActor, "$Revision$");
 vtkStandardNewMacro(CMediaZoneActor);
 
 const char CMediaZoneActor::szHeading[] = "Media";
+float CMediaZoneActor::s_color[3];
 
 CMediaZoneActor::CMediaZoneActor(void)
 {
@@ -62,6 +63,10 @@ void CMediaZoneActor::Serialize(bool bStoring, hid_t loc_id, const CUnits& units
 		// load grid_elt
 		this->m_grid_elt.Serialize(bStoring, loc_id);
 		this->SetUnits(units);
+
+		// color
+		//
+		this->GetProperty()->SetColor(s_color);
 	}
 }
 
@@ -278,4 +283,17 @@ void CMediaZoneActor::Remove(CWPhastDoc *pWPhastDoc)
 #ifdef _DEBUG
 	else ASSERT(FALSE);
 #endif
+}
+
+void CMediaZoneActor::SetStaticColor(COLORREF cr)
+{
+	CMediaZoneActor::s_color[0] = (double)GetRValue(cr)/255.;
+	CMediaZoneActor::s_color[1] = (double)GetGValue(cr)/255.;
+	CMediaZoneActor::s_color[2] = (double)GetBValue(cr)/255.;	
+}
+
+void CMediaZoneActor::Modified() // virtual
+{
+	this->GetProperty()->SetColor(CMediaZoneActor::s_color);
+	this->Superclass::Modified();
 }

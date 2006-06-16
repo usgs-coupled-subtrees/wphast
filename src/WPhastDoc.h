@@ -13,6 +13,7 @@
 #include <iosfwd> // std::ostream
 #include "Subject.h"
 #include "IObserver.h"
+#include "DisplayColors.h"
 
 class vtkProp;
 class vtkPropCollection;
@@ -162,6 +163,9 @@ public:
 
 	void SizeHandles(double size);
 
+	void SetDisplayColors(const CDisplayColors& dc);
+	CDisplayColors GetDisplayColors()const;
+
 protected:
 	void InternalAdd(CZoneActor *pZoneActor, bool bAdd, HTREEITEM hInsertAfter = TVI_LAST);
 	void InternalDelete(CZoneActor *pZoneActor, bool bDelete);
@@ -247,6 +251,9 @@ protected:
 	CGridRefinePage            *GridRefinePage;
 	CGridCoarsenPage           *GridCoarsenPage;
 	CGridElementsSelector      *GridElementsSelector;
+
+	// colors
+	CDisplayColors DisplayColors;
 
 protected:
 	void InitDocument();
@@ -433,6 +440,8 @@ public:
 	static void NewZoneListener(vtkObject *caller, unsigned long eid, void *clientdata, void *calldata);
 	vtkCallbackCommand *NewZoneCallbackCommand;
 	CNewZoneWidget     *NewZoneWidget;
+public:
+	afx_msg void OnToolsColors();
 };
 
 inline vtkPropAssembly* CWPhastDoc::GetPropAssemblyMedia() const

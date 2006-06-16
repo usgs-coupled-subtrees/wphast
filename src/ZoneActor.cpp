@@ -21,6 +21,9 @@
 //}}HACK
 #include <vtkInteractorStyle.h>
 
+#include <vtkOutlineFilter.h>
+#include <vtkAppendPolyData.h>
+
 
 #include "Global.h"
 #include "PropertyTreeControlBar.h"
@@ -52,13 +55,77 @@ CZoneActor::CZoneActor(void)
 	this->m_pMapper->SetResolveCoincidentTopologyToPolygonOffset();
 
 	this->m_pMapper->SetInput( this->m_pSource->GetOutput() );
-	this->SetMapper( this->m_pMapper );
+	this->CubeActor = vtkActor::New();
+	this->CubeActor->SetMapper( this->m_pMapper );
+	this->AddPart(this->CubeActor);
+
+
+// COMMENT: {6/15/2006 4:13:38 PM}// COMMENT: {6/13/2006 4:36:36 PM}	this->m_pMapper->SetInput( this->m_pSource->GetOutput() );
+// COMMENT: {6/15/2006 4:13:38 PM}// COMMENT: {6/13/2006 3:04:40 PM}	this->SetMapper( this->m_pMapper );
+// COMMENT: {6/15/2006 4:13:38 PM}
+// COMMENT: {6/15/2006 4:13:38 PM}	this->appendPolyData = vtkAppendPolyData::New();
+// COMMENT: {6/15/2006 4:13:38 PM}	this->appendPolyData->AddInput( this->m_pSource->GetOutput() );
+// COMMENT: {6/15/2006 4:13:38 PM}
+// COMMENT: {6/15/2006 4:13:38 PM}
+// COMMENT: {6/15/2006 4:13:38 PM}	//{{
+// COMMENT: {6/15/2006 4:13:38 PM}	this->outlineData = vtkOutlineFilter::New();
+// COMMENT: {6/15/2006 4:13:38 PM}	this->outlineData->SetInput(this->m_pSource->GetOutput());
+// COMMENT: {6/15/2006 4:13:38 PM}	/////
+// COMMENT: {6/15/2006 4:13:38 PM}	this->appendPolyData->AddInput( this->outlineData->GetOutput() );
+// COMMENT: {6/15/2006 4:13:38 PM}	/////
+// COMMENT: {6/15/2006 4:13:38 PM}	this->mapOutline = vtkPolyDataMapper::New();
+// COMMENT: {6/15/2006 4:13:38 PM}	/////////this->mapOutline->SetInput(this->outlineData->GetOutput());
+// COMMENT: {6/15/2006 4:13:38 PM}	this->mapOutline->SetInput(this->appendPolyData->GetOutput());
+// COMMENT: {6/15/2006 4:13:38 PM}	///this->outline = vtkActor::New();
+// COMMENT: {6/15/2006 4:13:38 PM}	///this->outline->SetMapper(mapOutline);
+// COMMENT: {6/15/2006 4:13:38 PM}	///this->outline->GetProperty()->SetColor(0,0,0);
+// COMMENT: {6/15/2006 4:13:38 PM}
+// COMMENT: {6/15/2006 4:13:38 PM}	this->SetMapper( this->mapOutline );
+// COMMENT: {6/15/2006 4:13:38 PM}	//}}
+
+// COMMENT: {6/15/2006 4:12:35 PM}	this->m_pSource = vtkCubeSource::New();
+// COMMENT: {6/15/2006 4:12:35 PM}	this->m_pMapper = vtkPolyDataMapper::New();
+// COMMENT: {6/15/2006 4:12:35 PM}	this->m_pMapper->SetResolveCoincidentTopologyToPolygonOffset();
+// COMMENT: {6/15/2006 4:12:35 PM}
+// COMMENT: {6/15/2006 4:12:35 PM}	this->m_pMapper->SetInput( this->m_pSource->GetOutput() );
+// COMMENT: {6/15/2006 4:12:35 PM}
+// COMMENT: {6/15/2006 4:12:35 PM}	this->CubeActor = vtkActor::New();
+// COMMENT: {6/15/2006 4:12:35 PM}	this->CubeActor->SetMapper( this->m_pMapper );
+// COMMENT: {6/15/2006 4:12:35 PM}	this->AddPart(this->CubeActor);
+// COMMENT: {6/15/2006 4:12:35 PM}
+	this->outlineData = vtkOutlineFilter::New();
+	this->outlineData->SetInput(this->m_pSource->GetOutput());
+
+	this->mapOutline = vtkPolyDataMapper::New();
+	this->mapOutline->SetInput(this->outlineData->GetOutput());
+// COMMENT: {6/15/2006 4:03:57 PM}	this->mapOutline->SetResolveCoincidentTopologyToPolygonOffset();
+// COMMENT: {6/15/2006 4:11:09 PM}	float factor, units;
+// COMMENT: {6/15/2006 4:11:09 PM}	this->mapOutline->GetResolveCoincidentTopologyPolygonOffsetParameters(factor, units);
+// COMMENT: {6/15/2006 4:11:09 PM}	TRACE("factor = %g, units = %g\n", factor, units);
+// COMMENT: {6/15/2006 4:01:30 PM}	this->mapOutline->SetResolveCoincidentTopologyPolygonOffsetParameters(10., 10.);
+
+	///this->mapOutline->SetResolveCoincidentTopologyToShiftZBuffer();
+
+
+	this->outline = vtkActor::New();
+	this->outline->SetMapper(mapOutline);
+	////this->outline->GetProperty()->SetColor(0,0,0);
+// COMMENT: {6/15/2006 7:36:46 PM}	this->outline->SetProperty(this->CubeActor->GetProperty());
+
+	this->AddPart(this->outline);
+	//}}
+
 }
 
 CZoneActor::~CZoneActor(void)
 {
 	this->m_pSource->Delete();
 	this->m_pMapper->Delete();
+
+	this->CubeActor->Delete();
+	this->outline->Delete();
+	this->outlineData->Delete();
+	this->mapOutline->Delete();
 }
 
 void CZoneActor::Remove(CPropertyTreeControlBar* pTreeControlBar)
@@ -748,4 +815,109 @@ void CZoneActor::Remove(CWPhastDoc *pWPhastDoc)
 	while(pWPhastDoc->GetPropCollection()->IsItemPresent(this)) {
 		pWPhastDoc->GetPropCollection()->RemoveItem(this);
 	}
+}
+
+void CZoneActor::SetVisibility(int visibility)
+{
+	vtkDebugMacro(<< this->GetClassName() << " (" << this << "): setting Visibility to " << visibility);
+	if (this->Visibility != visibility)
+	{
+		//{{
+		TRACE("Before\n");
+		vtkFloatingPointType *bounds = this->GetBounds();
+		TRACE("bounds[0] = %g\n", bounds[0]);
+		TRACE("bounds[1] = %g\n", bounds[1]);
+		TRACE("bounds[2] = %g\n", bounds[2]);
+		TRACE("bounds[3] = %g\n", bounds[3]);
+		TRACE("bounds[4] = %g\n", bounds[4]);
+		TRACE("bounds[5] = %g\n", bounds[5]);
+		//}}
+
+		this->CubeActor->SetVisibility(visibility);
+		this->outline->SetVisibility(visibility);
+
+		this->Visibility = visibility;
+		this->Modified();
+
+		//{{
+		TRACE("After\n");
+		bounds = this->GetBounds();
+		TRACE("bounds[0] = %g\n", bounds[0]);
+		TRACE("bounds[1] = %g\n", bounds[1]);
+		TRACE("bounds[2] = %g\n", bounds[2]);
+		TRACE("bounds[3] = %g\n", bounds[3]);
+		TRACE("bounds[4] = %g\n", bounds[4]);
+		TRACE("bounds[5] = %g\n", bounds[5]);
+		//}}
+	}
+}
+
+#include <vtkAssemblyPaths.h>
+
+float *CZoneActor::GetBounds() // virtual
+{
+	// from vtkAssembly.cxx
+	//
+	// Modified to return the same bounds regardless of visibility
+	//
+	// Note: For unknown reasons can't just
+	// return this->CubeActor->GetBounds();
+	//
+
+	vtkProp3D *prop3D;
+	vtkAssemblyPath *path;
+	int i, n;
+	float *bounds, bbox[24];
+	int propVisible=0;
+
+	this->UpdatePaths();
+
+	// now calculate the new bounds
+	this->Bounds[0] = this->Bounds[2] = this->Bounds[4] = VTK_LARGE_FLOAT;
+	this->Bounds[1] = this->Bounds[3] = this->Bounds[5] = -VTK_LARGE_FLOAT;
+
+	for ( this->Paths->InitTraversal(); (path = this->Paths->GetNextItem()); )
+	{
+		prop3D = (vtkProp3D *)path->GetLastNode()->GetProp();
+		//if ( prop3D->GetVisibility() )
+		{
+			propVisible = 1;
+			prop3D->PokeMatrix(path->GetLastNode()->GetMatrix());
+			bounds = prop3D->GetBounds();
+			prop3D->PokeMatrix(NULL);
+
+			// fill out vertices of a bounding box
+			bbox[ 0] = bounds[1]; bbox[ 1] = bounds[3]; bbox[ 2] = bounds[5];
+			bbox[ 3] = bounds[1]; bbox[ 4] = bounds[2]; bbox[ 5] = bounds[5];
+			bbox[ 6] = bounds[0]; bbox[ 7] = bounds[2]; bbox[ 8] = bounds[5];
+			bbox[ 9] = bounds[0]; bbox[10] = bounds[3]; bbox[11] = bounds[5];
+			bbox[12] = bounds[1]; bbox[13] = bounds[3]; bbox[14] = bounds[4];
+			bbox[15] = bounds[1]; bbox[16] = bounds[2]; bbox[17] = bounds[4];
+			bbox[18] = bounds[0]; bbox[19] = bounds[2]; bbox[20] = bounds[4];
+			bbox[21] = bounds[0]; bbox[22] = bounds[3]; bbox[23] = bounds[4];
+
+			for (i = 0; i < 8; i++)
+			{
+				for (n = 0; n < 3; n++)
+				{
+					if (bbox[i*3+n] < this->Bounds[n*2])
+					{
+						this->Bounds[n*2] = bbox[i*3+n];
+					}
+					if (bbox[i*3+n] > this->Bounds[n*2+1])
+					{
+						this->Bounds[n*2+1] = bbox[i*3+n];
+					}
+				}//for each coordinate axis
+			}//for each point of box
+		}//if visible && prop3d
+	}//for each path
+
+	if ( ! propVisible )
+	{
+		this->Bounds[0] = this->Bounds[2] = this->Bounds[4] = -1.0;
+		this->Bounds[1] = this->Bounds[3] = this->Bounds[5] =  1.0;
+	}
+
+	return this->Bounds;
 }

@@ -111,7 +111,7 @@ public:
 
 	void Serialize(bool bStoring, hid_t loc_id, const CUnits &units);
 
-	void SetVisibility(int visibility);
+	virtual void SetVisibility(int visibility);
 	int GetVisibility(void);
 
 	// Description:

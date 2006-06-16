@@ -24,15 +24,20 @@ public:
 	virtual void Add(CWPhastDoc *pWPhastDoc);
 	virtual void Remove(CWPhastDoc *pWPhastDoc);
 
+	virtual void Modified();
+
 	void Serialize(bool bStoring, hid_t loc_id, const CUnits& units);
 
 	static const char szHeading[];
+
+	static void SetStaticColor(COLORREF cr);
 
 protected:
 	CMediaZoneActor(void);
 	virtual ~CMediaZoneActor(void);
 protected:
 	CGridElt m_grid_elt;
+	static float s_color[3];
 
 private:
 	CMediaZoneActor(const CMediaZoneActor&);  // Not implemented.

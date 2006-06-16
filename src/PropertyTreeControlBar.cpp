@@ -1340,6 +1340,41 @@ void CPropertyTreeControlBar::OnKeyDown(NMHDR* pNMHDR, LRESULT* pResult)
 		// code moved to OnEditClear
 		ASSERT(FALSE);
 	}
+	else if (pNMTVKEYDOWN->wVKey == VK_SPACE)
+	{
+		CTreeCtrlNode item = this->GetTreeCtrlEx()->GetSelectedItem();
+		if (!item) return;
+
+		// determine next state
+		//
+		UINT nNewState;
+		switch (this->GetNodeCheck(item))
+		{
+			case BST_UNCHECKED:
+				// currently unchecked
+				nNewState = BST_CHECKED;
+				break;
+			case BST_CHECKED:
+				// currently checked
+				nNewState = BST_UNCHECKED;
+				break;
+			default:
+				return;
+				break;
+		}
+
+		// set new state
+		//
+		this->SetNodeCheck(item, nNewState);
+
+		// re-render
+		//
+		if (CWPhastDoc *pDoc = this->GetDocument())
+		{
+			pDoc->UpdateAllViews(0);
+		}
+
+	}
 }
 
 void CPropertyTreeControlBar::OnLButtonDown(UINT nFlags, CPoint point)

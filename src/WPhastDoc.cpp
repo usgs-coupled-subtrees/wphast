@@ -29,6 +29,7 @@
 #include <sstream>  // std::ostringstream std::istringstream
 
 #include "Action.h"
+#include "SetDisplayColorsAction.h"
 #include "ZoneActor.h"
 #include "MediaZoneActor.h"
 #include "BCZoneActor.h"
@@ -47,9 +48,11 @@
 #include "ImportErrorDialog.h"
 #include "RunDialog.h"
 
+#include "DisplayColors.h"
 #include "PropertyTreeControlBar.h"
 #include "BoxPropertiesDialogBar.h"
 #include "TimeControlPropertyPage.h"
+#include "ColorsPropertyPage.h"
 
 #include "ModelessPropertySheet.h"
 #include "ETSLayoutModelessPropertySheet.h"
@@ -219,6 +222,7 @@ BEGIN_MESSAGE_MAP(CWPhastDoc, CDocument)
 	// ID_TOOLS_NEWZONE
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_NEWZONE, OnUpdateToolsNewZone)
 	ON_COMMAND(ID_TOOLS_NEWZONE, OnToolsNewZone)
+	ON_COMMAND(ID_TOOLS_COLORS, &CWPhastDoc::OnToolsColors)
 END_MESSAGE_MAP()
 
 #if defined(WPHAST_AUTOMATION)
@@ -343,6 +347,17 @@ CWPhastDoc::CWPhastDoc()
 	this->GridCallbackCommand = vtkCallbackCommand::New();
 	this->GridCallbackCommand->SetClientData(this);
 	this->GridCallbackCommand->SetCallback(CWPhastDoc::GridListener);
+
+	// colors
+	//
+	CICChemZoneActor::SetStaticColor(this->DisplayColors.crChemIC);
+	CBCZoneActor::SetStaticColor(FLUX, this->DisplayColors.crFlux);
+	CICHeadZoneActor::SetStaticColor(this->DisplayColors.crHeadIC);
+	CBCZoneActor::SetStaticColor(LEAKY, this->DisplayColors.crLeaky);
+	CMediaZoneActor::SetStaticColor(this->DisplayColors.crMedia);
+	this->DisplayColors.crRiver;
+	CBCZoneActor::SetStaticColor(SPECIFIED, this->DisplayColors.crSpecHead);
+	this->DisplayColors.crWell;
 }
 
 #define CLEANUP_ASSEMBLY_MACRO(PTR_ASSEMBLY) \
@@ -4337,6 +4352,7 @@ void CWPhastDoc::UpdateGridDomain(void)
 		}
 	}
 
+#ifdef SKIP
 	// update rivers
 	//
 	if (vtkPropAssembly *pPropAssembly = this->GetPropAssemblyRivers())
@@ -4352,6 +4368,7 @@ void CWPhastDoc::UpdateGridDomain(void)
 					// update radius
 					//
 					pRiverActor->ScaleFromBounds(this->GetGridBounds());
+					TRACE("pRiverActor->ScaleFromBounds\n");
 
 					//
 					//
@@ -4386,11 +4403,12 @@ void CWPhastDoc::UpdateGridDomain(void)
 					//
 // COMMENT: {8/16/2005 6:59:13 PM}					pWellActor->SetDefaultTubeDiameter(defaultAxesSize * 0.17 / sqrt(scale[0] * scale[1]));
 					pWellActor->SetDefaultTubeDiameter(defaultAxesSize * 0.17);
+					TRACE("pWellActor->SetDefaultTubeDiameter = %g\n", defaultAxesSize * 0.17);
 				}
 			}
 		}
 	}
-
+#endif
 
 	// refresh screen
 	//
@@ -4815,4 +4833,51 @@ BOOL CWPhastDoc::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 		return this->NewZoneWidget->OnSetCursor(pWnd, nHitTest, message);
 	}
 	return FALSE;
+}
+
+void CWPhastDoc::OnToolsColors()
+{
+	CPropertySheet sheet;
+	CColorsPropertyPage page;
+	sheet.AddPage(&page);
+	page.m_colors = this->DisplayColors;
+
+	if (sheet.DoModal() == IDOK)
+	{
+		CAction *pAction = new CSetDisplayColorsAction(this, page.m_colors);
+		this->Execute(pAction);
+	}
+}
+
+void CWPhastDoc::SetDisplayColors(const CDisplayColors& dc)
+{
+	this->DisplayColors = dc;
+
+	CICChemZoneActor::SetStaticColor(this->DisplayColors.crChemIC);
+	CBCZoneActor::SetStaticColor(FLUX, this->DisplayColors.crFlux);
+	CICHeadZoneActor::SetStaticColor(this->DisplayColors.crHeadIC);
+	CBCZoneActor::SetStaticColor(LEAKY, this->DisplayColors.crLeaky);
+	CMediaZoneActor::SetStaticColor(this->DisplayColors.crMedia);
+	////this->DisplayColors.crRiver;
+	CBCZoneActor::SetStaticColor(SPECIFIED, this->DisplayColors.crSpecHead);
+	////this->DisplayColors.crWell;
+
+	// for all zones
+	// update default zones
+	//
+	if (vtkPropCollection* pCollection = this->GetPropCollection())
+	{
+		pCollection->InitTraversal();
+		for (int i = 0; i < pCollection->GetNumberOfItems(); ++i)
+		{
+			vtkProp* prop = pCollection->GetNextProp();
+			prop->Modified();
+		}
+	}
+
+}
+
+CDisplayColors CWPhastDoc::GetDisplayColors()const
+{
+	return this->DisplayColors;
 }

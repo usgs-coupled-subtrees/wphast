@@ -18,6 +18,8 @@ public:
 
 	static void GetWorldPointAtFixedPlane(vtkRenderWindowInteractor *interactor, vtkRenderer *renderer, int fixed, vtkFloatingPointType value, vtkFloatingPointType point[3]);
 
+	static void VTK_dump(vtkObject* obj);
+
 public:
 	class ParseException
 	{

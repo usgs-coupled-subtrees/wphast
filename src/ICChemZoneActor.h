@@ -17,7 +17,11 @@ public:
 	virtual void Add(CWPhastDoc *pWPhastDoc);
 	virtual void Remove(CWPhastDoc *pWPhastDoc);
 
+	virtual void Modified();
+
 	static const char szHeading[];
+
+	static void SetStaticColor(COLORREF cr);
 
 	void Serialize(bool bStoring, hid_t loc_id, const CUnits& units);
 
@@ -25,6 +29,7 @@ protected:
 	CICChemZoneActor(void);
 	virtual ~CICChemZoneActor(void);
 	CChemIC m_chemIC;
+	static float s_color[3];
 
 private:
 	CICChemZoneActor(const CICChemZoneActor&);  // Not implemented.

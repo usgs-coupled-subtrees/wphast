@@ -10,7 +10,6 @@
 #include "PropertyTreeControlBar.h"
 #include "BCFluxPropertyPage2.h"
 #include "BCLeakyPropertyPage2.h"
-// COMMENT: {4/11/2005 2:14:18 PM}#include "BCSpecifiedPropertyPage.h"
 #include "BCSpecifiedHeadPropertyPage.h"
 #include "ETSLayout/ETSLayout.h"
 
@@ -18,6 +17,9 @@
 #include "SetBCAction.h"
 #include "ZoneCreateAction.h"
 #include "FlowOnly.h"
+
+#include "Global.h"
+#include "Utilities.h"
 
 
 vtkCxxRevisionMacro(CBCZoneActor, "$Revision$");
@@ -30,12 +32,17 @@ vtkStandardNewMacro(CBCZoneActor);
 
 const char CBCZoneActor::szHeading[] = "BC";
 
+float CBCZoneActor::s_color[3][3];
+vtkProperty* CBCZoneActor::s_Property[3] = {0, 0, 0};
+
 CBCZoneActor::CBCZoneActor(void)
 {
+	static StaticInit init; // constructs/destructs s_Property[]
+
 	// must always have a zone for CZoneActor::SetBounds
 	if (this->m_bc.zone == 0)
 	{
-		this->m_bc.zone = new struct zone();
+		this->m_bc.zone = new struct zone;
 	}
 	this->m_pZone = this->m_bc.zone;
 }
@@ -312,6 +319,9 @@ void CBCZoneActor::SetBC(const CBC& rBC)
 	}
 	(*this->m_bc.zone) = zoneSave;
 	this->m_pZone = this->m_bc.zone;
+
+	// set color etc.
+	this->UpdateProperty();
 }
 
 void CBCZoneActor::SetData(const CBC& rBC)
@@ -345,6 +355,9 @@ void CBCZoneActor::Serialize(bool bStoring, hid_t loc_id, const CUnits& units)
 		// serialize bc
 		this->m_bc.Serialize(bStoring, loc_id);
 		this->SetUnits(units);
+
+		// set color etc
+		this->UpdateProperty();
 	}
 }
 
@@ -386,3 +399,70 @@ void CBCZoneActor::Remove(CWPhastDoc *pWPhastDoc)
 #endif
 }
 
+void CBCZoneActor::SetStaticColor(int bc_type, COLORREF cr)
+{
+	switch (bc_type)
+	{
+		case SPECIFIED:
+			CBCZoneActor::s_color[0][0] = (double)GetRValue(cr)/255.;
+			CBCZoneActor::s_color[0][1] = (double)GetGValue(cr)/255.;
+			CBCZoneActor::s_color[0][2] = (double)GetBValue(cr)/255.;
+			if (CBCZoneActor::s_Property[0])
+			{
+				CBCZoneActor::s_Property[0]->SetColor(CBCZoneActor::s_color[0]);
+			}
+			break;
+		case FLUX:
+			CBCZoneActor::s_color[1][0] = (double)GetRValue(cr)/255.;
+			CBCZoneActor::s_color[1][1] = (double)GetGValue(cr)/255.;
+			CBCZoneActor::s_color[1][2] = (double)GetBValue(cr)/255.;
+			if (CBCZoneActor::s_Property[1])
+			{
+				CBCZoneActor::s_Property[1]->SetColor(CBCZoneActor::s_color[1]);
+			}
+			break;
+		case LEAKY:
+			CBCZoneActor::s_color[2][0] = (double)GetRValue(cr)/255.;
+			CBCZoneActor::s_color[2][1] = (double)GetGValue(cr)/255.;
+			CBCZoneActor::s_color[2][2] = (double)GetBValue(cr)/255.;
+			if (CBCZoneActor::s_Property[2])
+			{
+				CBCZoneActor::s_Property[2]->SetColor(CBCZoneActor::s_color[2]);
+			}
+			break;
+		default:
+			ASSERT(FALSE);
+			break;
+	}
+}
+
+void CBCZoneActor::UpdateProperty()
+{
+	switch (this->m_bc.bc_type)
+	{
+		case SPECIFIED:
+			ASSERT(CBCZoneActor::s_Property[0]);
+			if (CBCZoneActor::s_Property[0])
+			{
+				this->CubeActor->SetProperty(CBCZoneActor::s_Property[0]);
+			}
+			break;
+		case FLUX:
+			ASSERT(CBCZoneActor::s_Property[1]);
+			if (CBCZoneActor::s_Property[1])
+			{
+				this->CubeActor->SetProperty(CBCZoneActor::s_Property[1]);
+			}
+			break;
+		case LEAKY:
+			ASSERT(CBCZoneActor::s_Property[2]);
+			if (CBCZoneActor::s_Property[2])
+			{
+				this->CubeActor->SetProperty(CBCZoneActor::s_Property[2]);
+			}
+			break;
+		default:
+			ASSERT(FALSE);
+			break;
+	}
+}

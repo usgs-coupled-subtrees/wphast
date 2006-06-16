@@ -1,5 +1,6 @@
 #include "StdAfx.h"
 #include "Utilities.h"
+#include <sstream>
 
 double CUtilities::GetDlgItemDouble(CWnd* pWnd, UINT nID)
 {
@@ -149,4 +150,13 @@ void CUtilities::GetWorldPointAtFixedPlane(vtkRenderWindowInteractor *interactor
 		}
 	}
 	point[fixed] = value;
+}
+
+void CUtilities::VTK_dump(vtkObject* obj)
+{
+#if defined(_DEBUG)
+	std::ostringstream oss;
+	obj->PrintSelf(oss, 4);
+	TRACE("%s\n", oss.str().c_str());
+#endif
 }

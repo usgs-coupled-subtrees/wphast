@@ -1,5 +1,6 @@
 #pragma once
-#include "vtkLODActor.h"
+#include <vtkLODActor.h>
+#include <vtkAssembly.h>
 
 #include <string>
 // #include "structs.h"
@@ -18,10 +19,12 @@ class CUnits;
 typedef float vtkFloatingPointType;
 #endif 
 
-class CZoneActor : public vtkLODActor
+///class CZoneActor : public vtkLODActor
+class CZoneActor : public vtkAssembly
 {
 public:
-	vtkTypeRevisionMacro(CZoneActor,vtkLODActor);
+	///vtkTypeRevisionMacro(CZoneActor,vtkLODActor);
+	vtkTypeRevisionMacro(CZoneActor,vtkAssembly);
 
 	static CLIPFORMAT clipFormat;
 
@@ -66,6 +69,8 @@ public:
 	virtual void Add(CWPhastDoc *pWPhastDoc);
 	virtual void Remove(CWPhastDoc *pWPhastDoc);
 
+	virtual void SetVisibility(int visibility);
+
 	void UnSelect(CWPhastView* pView);
 	void Select(CWPhastView* pView, bool bReselect = false);
 	void Resize(CWPhastView* pView);
@@ -75,6 +80,14 @@ public:
 	void Pick(vtkRenderer* pRenderer, vtkRenderWindowInteractor* pRenderWindowInteractor);
 	void UnPick(vtkRenderer* pRenderer, vtkRenderWindowInteractor* pRenderWindowInteractor);
 
+	//{{
+	vtkProperty* GetProperty() { return this->CubeActor->GetProperty(); }
+	virtual float* GetBounds(); //  { return this->vtkAssembly::GetBounds(); }
+// COMMENT: {6/15/2006 11:37:06 PM}	void GetBounds(float bounds[6]) {this->CubeActor->GetBounds(bounds); }
+	//}}
+
+// COMMENT: {6/13/2006 5:44:43 PM}	virtual void UpdateDisplay();
+
 protected:
 	CZoneActor(void);
 	virtual ~CZoneActor(void);
@@ -83,6 +96,18 @@ protected:
 
 	vtkCubeSource     *m_pSource;
 	vtkPolyDataMapper *m_pMapper;
+
+	vtkActor *CubeActor;
+
+	// the outline
+	//
+	vtkOutlineFilter *outlineData;
+	vtkPolyDataMapper *mapOutline;
+	vtkActor *outline;
+
+	//
+	vtkAppendPolyData *appendPolyData;
+
 	std::string        m_name;
 	std::string        m_desc;
 	std::string        m_name_desc;

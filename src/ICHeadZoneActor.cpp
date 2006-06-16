@@ -20,6 +20,7 @@ vtkCxxRevisionMacro(CICHeadZoneActor, "$Revision$");
 vtkStandardNewMacro(CICHeadZoneActor);
 
 const char CICHeadZoneActor::szHeading[] = "ICHead";
+float CICHeadZoneActor::s_color[3];
 
 CICHeadZoneActor::CICHeadZoneActor(void)
 {
@@ -182,3 +183,17 @@ void CICHeadZoneActor::Remove(CWPhastDoc *pWPhastDoc)
 	else ASSERT(FALSE);
 #endif
 }
+
+void CICHeadZoneActor::SetStaticColor(COLORREF cr)
+{
+	CICHeadZoneActor::s_color[0] = (double)GetRValue(cr)/255.;
+	CICHeadZoneActor::s_color[1] = (double)GetGValue(cr)/255.;
+	CICHeadZoneActor::s_color[2] = (double)GetBValue(cr)/255.;	
+}
+
+void CICHeadZoneActor::Modified() // virtual
+{
+	this->GetProperty()->SetColor(CICHeadZoneActor::s_color);
+	this->Superclass::Modified();
+}
+
