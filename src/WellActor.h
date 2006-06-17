@@ -79,7 +79,12 @@ public:
 
 	static const char szHeading[];
 
+	static void SetStaticColor(COLORREF cr);
+
 protected:
+	static float s_color[3];
+	static vtkProperty* s_Property;
+
 	friend std::ostream& operator<< (std::ostream &os, const CWellActor &a);
 
 	void UpdatePoints(void);
@@ -112,5 +117,23 @@ protected:
 private:
 	CWellActor(const CWellActor&);  // Not implemented.
 	void operator=(const CWellActor&);  // Not implemented.
+private:
+	class StaticInit
+	{
+	public:
+		StaticInit() {
+			if (CWellActor::s_Property == 0) {
+				CWellActor::s_Property = vtkProperty::New();
+				CWellActor::s_Property->SetColor(CWellActor::s_color);
+				CWellActor::s_Property->SetOpacity(0.4);
+			}
+		}
+		~StaticInit() {
+			if (CWellActor::s_Property != 0) {
+				CWellActor::s_Property->Delete();
+				CWellActor::s_Property = 0;
+			}
+		}
+	};
 };
 

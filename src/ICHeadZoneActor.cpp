@@ -20,10 +20,13 @@ vtkCxxRevisionMacro(CICHeadZoneActor, "$Revision$");
 vtkStandardNewMacro(CICHeadZoneActor);
 
 const char CICHeadZoneActor::szHeading[] = "ICHead";
-float CICHeadZoneActor::s_color[3];
+float CICHeadZoneActor::s_color[3] = {0., 0., 0};
+vtkProperty* CICHeadZoneActor::s_Property = 0;
 
 CICHeadZoneActor::CICHeadZoneActor(void)
 {
+	static StaticInit init; // constructs/destructs s_Property
+	this->CubeActor->SetProperty(CICHeadZoneActor::s_Property);
 }
 
 CICHeadZoneActor::~CICHeadZoneActor(void)
@@ -125,6 +128,13 @@ void CICHeadZoneActor::Serialize(bool bStoring, hid_t loc_id, const CUnits& unit
 		this->m_headIC.zone = 0;
 
 		this->SetUnits(units);
+
+		// color
+		//
+		if (CICHeadZoneActor::s_Property)
+		{
+			this->CubeActor->SetProperty(CICHeadZoneActor::s_Property);
+		}
 	}
 }
 
@@ -189,11 +199,8 @@ void CICHeadZoneActor::SetStaticColor(COLORREF cr)
 	CICHeadZoneActor::s_color[0] = (double)GetRValue(cr)/255.;
 	CICHeadZoneActor::s_color[1] = (double)GetGValue(cr)/255.;
 	CICHeadZoneActor::s_color[2] = (double)GetBValue(cr)/255.;	
+	if (CICHeadZoneActor::s_Property)
+	{
+		CICHeadZoneActor::s_Property->SetColor(CICHeadZoneActor::s_color);
+	}
 }
-
-void CICHeadZoneActor::Modified() // virtual
-{
-	this->GetProperty()->SetColor(CICHeadZoneActor::s_color);
-	this->Superclass::Modified();
-}
-

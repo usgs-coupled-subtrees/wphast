@@ -17,8 +17,6 @@ public:
 	virtual void Add(CWPhastDoc *pWPhastDoc);
 	virtual void Remove(CWPhastDoc *pWPhastDoc);
 
-	virtual void Modified();
-
 	static const char szHeading[];
 
 	static void SetStaticColor(COLORREF cr);
@@ -30,8 +28,27 @@ protected:
 	virtual ~CICHeadZoneActor(void);
 	CHeadIC m_headIC;
 	static float s_color[3];
+	static vtkProperty* s_Property;
 
 private:
 	CICHeadZoneActor(const CICHeadZoneActor&);  // Not implemented.
 	void operator=(const CICHeadZoneActor&);  // Not implemented.
+private:
+	class StaticInit
+	{
+	public:
+		StaticInit() {
+			if (CICHeadZoneActor::s_Property == 0) {
+				CICHeadZoneActor::s_Property = vtkProperty::New();
+				CICHeadZoneActor::s_Property->SetColor(CICHeadZoneActor::s_color);
+				CICHeadZoneActor::s_Property->SetOpacity(0.3);
+			}
+		}
+		~StaticInit() {
+			if (CICHeadZoneActor::s_Property != 0) {
+				CICHeadZoneActor::s_Property->Delete();
+				CICHeadZoneActor::s_Property = 0;
+			}
+		}
+	};
 };

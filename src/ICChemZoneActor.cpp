@@ -20,10 +20,13 @@ vtkCxxRevisionMacro(CICChemZoneActor, "$Revision$");
 vtkStandardNewMacro(CICChemZoneActor);
 
 const char CICChemZoneActor::szHeading[] = "ICChem";
-float CICChemZoneActor::s_color[3];
+float CICChemZoneActor::s_color[3] = {0., 0., 0.};
+vtkProperty* CICChemZoneActor::s_Property = 0;
 
 CICChemZoneActor::CICChemZoneActor(void)
 {
+	static StaticInit init; // constructs/destructs s_Property
+	this->CubeActor->SetProperty(CICChemZoneActor::s_Property);
 }
 
 CICChemZoneActor::~CICChemZoneActor(void)
@@ -159,6 +162,13 @@ void CICChemZoneActor::Serialize(bool bStoring, hid_t loc_id, const CUnits& unit
 		this->m_chemIC.zone = 0;
 
 		this->SetUnits(units);
+
+		// color
+		//
+		if (CICChemZoneActor::s_Property)
+		{
+			this->CubeActor->SetProperty(CICChemZoneActor::s_Property);
+		}
 	}
 }
 
@@ -227,10 +237,8 @@ void CICChemZoneActor::SetStaticColor(COLORREF cr)
 	CICChemZoneActor::s_color[0] = (double)GetRValue(cr)/255.;
 	CICChemZoneActor::s_color[1] = (double)GetGValue(cr)/255.;
 	CICChemZoneActor::s_color[2] = (double)GetBValue(cr)/255.;	
-}
-
-void CICChemZoneActor::Modified() // virtual
-{
-	this->GetProperty()->SetColor(CICChemZoneActor::s_color);
-	this->Superclass::Modified();
+	if (CICChemZoneActor::s_Property)
+	{
+		CICChemZoneActor::s_Property->SetColor(CICChemZoneActor::s_color);
+	}
 }

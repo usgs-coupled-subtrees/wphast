@@ -31,7 +31,6 @@ vtkStandardNewMacro(CBCZoneActor);
 #endif
 
 const char CBCZoneActor::szHeading[] = "BC";
-
 float CBCZoneActor::s_color[3][3];
 vtkProperty* CBCZoneActor::s_Property[3] = {0, 0, 0};
 

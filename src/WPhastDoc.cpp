@@ -350,14 +350,7 @@ CWPhastDoc::CWPhastDoc()
 
 	// colors
 	//
-	CICChemZoneActor::SetStaticColor(this->DisplayColors.crChemIC);
-	CBCZoneActor::SetStaticColor(FLUX, this->DisplayColors.crFlux);
-	CICHeadZoneActor::SetStaticColor(this->DisplayColors.crHeadIC);
-	CBCZoneActor::SetStaticColor(LEAKY, this->DisplayColors.crLeaky);
-	CMediaZoneActor::SetStaticColor(this->DisplayColors.crMedia);
-	this->DisplayColors.crRiver;
-	CBCZoneActor::SetStaticColor(SPECIFIED, this->DisplayColors.crSpecHead);
-	this->DisplayColors.crWell;
+	this->SetDisplayColors(this->DisplayColors);
 }
 
 #define CLEANUP_ASSEMBLY_MACRO(PTR_ASSEMBLY) \
@@ -4858,23 +4851,9 @@ void CWPhastDoc::SetDisplayColors(const CDisplayColors& dc)
 	CICHeadZoneActor::SetStaticColor(this->DisplayColors.crHeadIC);
 	CBCZoneActor::SetStaticColor(LEAKY, this->DisplayColors.crLeaky);
 	CMediaZoneActor::SetStaticColor(this->DisplayColors.crMedia);
-	////this->DisplayColors.crRiver;
+	CRiverActor::SetStaticColor(this->DisplayColors.crRiver);
 	CBCZoneActor::SetStaticColor(SPECIFIED, this->DisplayColors.crSpecHead);
-	////this->DisplayColors.crWell;
-
-	// for all zones
-	// update default zones
-	//
-	if (vtkPropCollection* pCollection = this->GetPropCollection())
-	{
-		pCollection->InitTraversal();
-		for (int i = 0; i < pCollection->GetNumberOfItems(); ++i)
-		{
-			vtkProp* prop = pCollection->GetNextProp();
-			prop->Modified();
-		}
-	}
-
+	CWellActor::SetStaticColor(this->DisplayColors.crWell);
 }
 
 CDisplayColors CWPhastDoc::GetDisplayColors()const

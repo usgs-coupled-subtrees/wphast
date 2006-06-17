@@ -20,12 +20,18 @@ vtkCxxRevisionMacro(CMediaZoneActor, "$Revision$");
 vtkStandardNewMacro(CMediaZoneActor);
 
 const char CMediaZoneActor::szHeading[] = "Media";
-float CMediaZoneActor::s_color[3];
+float CMediaZoneActor::s_color[3] = {0., 0., 0.};
+vtkProperty* CMediaZoneActor::s_Property = 0;
 
 CMediaZoneActor::CMediaZoneActor(void)
 {
+	static StaticInit init; // constructs/destructs s_Property
+
 	ASSERT(this->m_grid_elt.zone);
 	this->m_pZone = this->m_grid_elt.zone;
+
+	// color
+	this->CubeActor->SetProperty(CMediaZoneActor::s_Property);
 }
 
 CMediaZoneActor::~CMediaZoneActor(void)
@@ -66,7 +72,10 @@ void CMediaZoneActor::Serialize(bool bStoring, hid_t loc_id, const CUnits& units
 
 		// color
 		//
-		this->GetProperty()->SetColor(s_color);
+		if (CMediaZoneActor::s_Property)
+		{
+			this->CubeActor->SetProperty(CMediaZoneActor::s_Property);
+		}
 	}
 }
 
@@ -290,10 +299,9 @@ void CMediaZoneActor::SetStaticColor(COLORREF cr)
 	CMediaZoneActor::s_color[0] = (double)GetRValue(cr)/255.;
 	CMediaZoneActor::s_color[1] = (double)GetGValue(cr)/255.;
 	CMediaZoneActor::s_color[2] = (double)GetBValue(cr)/255.;	
+	if (CMediaZoneActor::s_Property)
+	{
+		CMediaZoneActor::s_Property->SetColor(CMediaZoneActor::s_color);
+	}
 }
 
-void CMediaZoneActor::Modified() // virtual
-{
-	this->GetProperty()->SetColor(CMediaZoneActor::s_color);
-	this->Superclass::Modified();
-}

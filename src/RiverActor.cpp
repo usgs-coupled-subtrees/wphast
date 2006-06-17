@@ -20,6 +20,10 @@ vtkStandardNewMacro(CRiverActor);
 
 const char CRiverActor::szHeading[] = "Rivers";
 const bool bShowGhostPoint = true;
+float CRiverActor::s_color[3];
+vtkProperty* CRiverActor::s_HandleProperty = 0;
+vtkProperty* CRiverActor::s_ConnectorProperty = 0;
+
 
 CRiverActor::CRiverActor(void)
 : m_Radius(1.0)
@@ -30,7 +34,6 @@ CRiverActor::CRiverActor(void)
 , CurrentHandle(0)
 , CurrentSource(0)
 , CurrentId(-1)
-, HandleProperty(0)
 , SelectedHandleProperty(0)
 , EnabledHandleProperty(0)
 , State(CRiverActor::None)
@@ -47,7 +50,7 @@ CRiverActor::CRiverActor(void)
 , GhostPolyDataMapper(0)
 , GhostActor(0)
 {
-// COMMENT: {9/9/2005 2:40:06 PM}	::InitializeCriticalSection(&CRiverActor::csInsertNextPoint);
+	static StaticInit init; // constructs/destructs s_HandleProperty s_ConnectorProperty
 
 	this->m_pPoints         = vtkPoints::New();
 	this->m_pTransformUnits = vtkTransform::New();
@@ -117,7 +120,6 @@ CRiverActor::~CRiverActor(void)
 	this->m_pCellPicker->Delete();           this->m_pCellPicker          = 0;
 	this->m_pLineCellPicker->Delete();       this->m_pLineCellPicker      = 0;	
 
-	this->HandleProperty->Delete();          this->HandleProperty         = 0;
 	this->SelectedHandleProperty->Delete();  this->SelectedHandleProperty = 0;
 	this->EnabledHandleProperty->Delete();   this->EnabledHandleProperty  = 0;
 
@@ -391,7 +393,6 @@ void CRiverActor::SetRiver(const CRiver &river, const CUnits &units)
 	std::list<CRiverPoint>::iterator iter = this->m_river.m_listPoints.begin();
 	for (; iter != this->m_river.m_listPoints.end(); ++iter)
 	{
-// COMMENT: {9/8/2005 6:13:51 PM}		this->InsertNextPoint((*iter).x, (*iter).y, (*iter).z);
 		this->InsertNextPoint((*iter).x, (*iter).y, 0.0);
 	}
 	this->SetUnits(units);
@@ -453,20 +454,6 @@ void CRiverActor::SetInteractor(vtkRenderWindowInteractor* i)
 		this->SetEnabled(1);
 	}
 
-// COMMENT: {6/13/2005 3:54:53 PM}	if (i)
-// COMMENT: {6/13/2005 3:54:53 PM}	{
-// COMMENT: {6/13/2005 3:54:53 PM}		i->AddObserver(vtkCommand::LeftButtonPressEvent, 
-// COMMENT: {6/13/2005 3:54:53 PM}			this->EventCallbackCommand, 
-// COMMENT: {6/13/2005 3:54:53 PM}			1);
-// COMMENT: {6/13/2005 3:54:53 PM}
-// COMMENT: {6/13/2005 3:54:53 PM}		i->AddObserver(vtkCommand::LeftButtonReleaseEvent, 
-// COMMENT: {6/13/2005 3:54:53 PM}			this->EventCallbackCommand, 
-// COMMENT: {6/13/2005 3:54:53 PM}			1);
-// COMMENT: {6/13/2005 3:54:53 PM}
-// COMMENT: {6/13/2005 3:54:53 PM}		i->AddObserver(vtkCommand::MouseMoveEvent, 
-// COMMENT: {6/13/2005 3:54:53 PM}			this->EventCallbackCommand, 
-// COMMENT: {6/13/2005 3:54:53 PM}			1);
-// COMMENT: {6/13/2005 3:54:53 PM}	}
 	this->Modified();
 }
 
@@ -768,7 +755,7 @@ int CRiverActor::HighlightHandle(vtkProp *prop)
 		}
 		else
 		{
-			this->CurrentHandle->SetProperty(this->HandleProperty);
+			this->CurrentHandle->SetProperty(this->s_HandleProperty);
 		}
 	}
 
@@ -794,11 +781,6 @@ int CRiverActor::HighlightHandle(vtkProp *prop)
 
 void CRiverActor::CreateDefaultProperties()
 {
-  // Handle properties
-  this->HandleProperty = vtkProperty::New();
-  this->HandleProperty->SetOpacity(0.7);
-  this->HandleProperty->SetColor(0, 0, 1);
-
   this->SelectedHandleProperty = vtkProperty::New();
   this->SelectedHandleProperty->SetOpacity(0.7);
   this->SelectedHandleProperty->SetColor(1, 0, 0);
@@ -881,7 +863,7 @@ void CRiverActor::SetEnabled(int enabling)
 		std::list<vtkActor*>::iterator iterActor = this->m_listActor.begin();
 		for(; iterActor != this->m_listActor.end(); ++iterActor)
 		{
-			(*iterActor)->SetProperty(this->HandleProperty);
+			(*iterActor)->SetProperty(this->s_HandleProperty);
 		}
 	}
 
@@ -960,7 +942,6 @@ void CRiverActor::Update()
 	this->m_pTransformScale->GetInverse()->TransformPoint(this->WorldSIPoint, this->WorldScaledUnitPoint);
 	this->m_pTransformUnits->GetInverse()->TransformPoint(this->WorldSIPoint, this->WorldScaledUnitPoint);
 
-	//{{
 	// update status bar
 	((CMainFrame*)::AfxGetMainWnd())->UpdateXYZ(
 		this->m_WorldPointXYPlane[0],
@@ -969,7 +950,6 @@ void CRiverActor::Update()
 		this->HorizonalUnits,
 		this->VerticalUnits
 		);
-	//}}
 
 	this->m_WorldPointXYPlane[2] = this->m_Z;
 	this->WorldSIPoint[2] = zPos;
@@ -1513,7 +1493,7 @@ void CRiverActor::AddGraphicPoint(void)
 	}
 	else
 	{
-		pActor->SetProperty(this->HandleProperty);
+		pActor->SetProperty(this->s_HandleProperty);
 	}	
 	this->m_listActor.push_back(pActor);
 	this->m_pCellPicker->AddPickList(pActor);
@@ -1538,8 +1518,7 @@ void CRiverActor::AddGraphicPoint(void)
 		
 		vtkLODActor *pActor = vtkLODActor::New();		
 		pActor->SetMapper(pPolyDataMapper);
-		pActor->GetProperty()->SetColor(0., 1., 1.);
-		pActor->GetProperty()->SetOpacity(0.4);
+		pActor->SetProperty(this->s_ConnectorProperty);
 		this->m_listLineActor.push_back(pActor);
 		this->m_pLineCellPicker->AddPickList(pActor);
 		this->AddPart(pActor);
@@ -1560,7 +1539,7 @@ void CRiverActor::DeletePoint(vtkIdType id)
 	}
 	else
 	{
-		pActor->SetProperty(this->HandleProperty);
+		pActor->SetProperty(this->s_HandleProperty);
 	}
 
 	// update data
@@ -1638,4 +1617,19 @@ std::ostream& operator<< (std::ostream &os, const CRiverActor &a)
 {
 	os << a.m_river;
 	return os;
+}
+
+void CRiverActor::SetStaticColor(COLORREF cr)
+{
+	CRiverActor::s_color[0] = (double)GetRValue(cr)/255.;
+	CRiverActor::s_color[1] = (double)GetGValue(cr)/255.;
+	CRiverActor::s_color[2] = (double)GetBValue(cr)/255.;
+	if (CRiverActor::s_HandleProperty)
+	{
+		CRiverActor::s_HandleProperty->SetColor(CRiverActor::s_color);
+	}
+	if (CRiverActor::s_ConnectorProperty)
+	{
+		CRiverActor::s_ConnectorProperty->SetColor(CRiverActor::s_color);
+	}	
 }

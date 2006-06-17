@@ -24,8 +24,6 @@ public:
 	virtual void Add(CWPhastDoc *pWPhastDoc);
 	virtual void Remove(CWPhastDoc *pWPhastDoc);
 
-	virtual void Modified();
-
 	void Serialize(bool bStoring, hid_t loc_id, const CUnits& units);
 
 	static const char szHeading[];
@@ -38,6 +36,7 @@ protected:
 protected:
 	CGridElt m_grid_elt;
 	static float s_color[3];
+	static vtkProperty* s_Property;
 
 private:
 	CMediaZoneActor(const CMediaZoneActor&);  // Not implemented.
@@ -51,4 +50,23 @@ public:
 	void SetData(const CGridElt& rGridElt);	
 
 	HTREEITEM GetHTreeItem(void)const;
+
+private:
+	class StaticInit
+	{
+	public:
+		StaticInit() {
+			if (CMediaZoneActor::s_Property == 0) {
+				CMediaZoneActor::s_Property = vtkProperty::New();
+				CMediaZoneActor::s_Property->SetColor(CMediaZoneActor::s_color);
+				CMediaZoneActor::s_Property->SetOpacity(0.3);
+			}
+		}
+		~StaticInit() {
+			if (CMediaZoneActor::s_Property != 0) {
+				CMediaZoneActor::s_Property->Delete();
+				CMediaZoneActor::s_Property = 0;
+			}
+		}
+	};
 };

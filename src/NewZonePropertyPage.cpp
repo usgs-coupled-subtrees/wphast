@@ -34,17 +34,17 @@ void CNewZonePropertyPage::DoDataExchange(CDataExchange* pDX)
 	if (this->m_bFirstSetActive)
 	{
 		this->m_htiMedia   = this->m_wndTree.InsertItem(_T("MEDIA"));
-		this->m_htiBC      = this->m_wndTree.InsertItem(_T("BOUNDARY_CONDITIONS"));
 		this->m_htiIC      = this->m_wndTree.InsertItem(_T("INITIAL_CONDITIONS"));
+		this->m_htiBC      = this->m_wndTree.InsertItem(_T("BOUNDARY_CONDITIONS"));
+
+		// IC
+		this->m_htiICHead  = this->m_wndTree.InsertItem(_T("HEAD_IC"), this->m_htiIC);
+		this->m_htiChemIC  = this->m_wndTree.InsertItem(_T("CHEMISTRY_IC"), this->m_htiIC);
 
 		// BC
 		this->m_htiBCFlux  = this->m_wndTree.InsertItem(_T("FLUX_BC"), this->m_htiBC);
 		this->m_htiBCLeaky = this->m_wndTree.InsertItem(_T("LEAKY_BC"), this->m_htiBC);
 		this->m_htiBCSpec  = this->m_wndTree.InsertItem(_T("SPECIFIED_HEAD_BC"), this->m_htiBC);
-
-		// IC
-		this->m_htiICHead  = this->m_wndTree.InsertItem(_T("HEAD_IC"), this->m_htiIC);
-		this->m_htiChemIC  = this->m_wndTree.InsertItem(_T("CHEMISTRY_IC"), this->m_htiIC);		
 
 		this->m_wndTree.EnsureVisible(this->m_htiBCFlux);
 		this->m_wndTree.EnsureVisible(this->m_htiICHead);

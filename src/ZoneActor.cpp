@@ -23,7 +23,7 @@
 
 #include <vtkOutlineFilter.h>
 #include <vtkAppendPolyData.h>
-
+#include <vtkAssemblyPaths.h>
 
 #include "Global.h"
 #include "PropertyTreeControlBar.h"
@@ -755,12 +755,12 @@ void CZoneActor::Serialize(bool bStoring, hid_t loc_id)
 		status = CGlobal::HDFSerializeBool(bStoring, loc_id, szDefault, this->m_bDefault);
 		ASSERT(status >= 0);
 
-		// store color
-		//
-		this->GetProperty()->GetColor(color);
-		double_color[0] = color[0];  double_color[1] = color[1];  double_color[2] = color[2];
-		status = CGlobal::HDFSerialize(bStoring, loc_id, szColor, H5T_NATIVE_DOUBLE, 3, double_color);
-		ASSERT(status >= 0);
+// COMMENT: {6/16/2006 7:22:31 PM}		// store color
+// COMMENT: {6/16/2006 7:22:31 PM}		//
+// COMMENT: {6/16/2006 7:22:31 PM}		this->GetProperty()->GetColor(color);
+// COMMENT: {6/16/2006 7:22:31 PM}		double_color[0] = color[0];  double_color[1] = color[1];  double_color[2] = color[2];
+// COMMENT: {6/16/2006 7:22:31 PM}		status = CGlobal::HDFSerialize(bStoring, loc_id, szColor, H5T_NATIVE_DOUBLE, 3, double_color);
+// COMMENT: {6/16/2006 7:22:31 PM}		ASSERT(status >= 0);
 
 		// store desc
 		//
@@ -776,15 +776,15 @@ void CZoneActor::Serialize(bool bStoring, hid_t loc_id)
 		herr_t status = CGlobal::HDFSerializeBool(bStoring, loc_id, szDefault, this->m_bDefault);
 		ASSERT(status >= 0);
 
-		// load color
-		//
-		status = CGlobal::HDFSerialize(bStoring, loc_id, szColor, H5T_NATIVE_DOUBLE, 3, double_color);
-		ASSERT(status >= 0);
-		if (status >= 0)
-		{
-			color[0] = double_color[0];  color[1] = double_color[1];  color[2] = double_color[2];
-			this->GetProperty()->SetColor(color);
-		}
+// COMMENT: {6/16/2006 7:22:37 PM}		// load color
+// COMMENT: {6/16/2006 7:22:37 PM}		//
+// COMMENT: {6/16/2006 7:22:37 PM}		status = CGlobal::HDFSerialize(bStoring, loc_id, szColor, H5T_NATIVE_DOUBLE, 3, double_color);
+// COMMENT: {6/16/2006 7:22:37 PM}		ASSERT(status >= 0);
+// COMMENT: {6/16/2006 7:22:37 PM}		if (status >= 0)
+// COMMENT: {6/16/2006 7:22:37 PM}		{
+// COMMENT: {6/16/2006 7:22:37 PM}			color[0] = double_color[0];  color[1] = double_color[1];  color[2] = double_color[2];
+// COMMENT: {6/16/2006 7:22:37 PM}			this->GetProperty()->SetColor(color);
+// COMMENT: {6/16/2006 7:22:37 PM}		}
 
 		// load desc
 		//
@@ -851,8 +851,6 @@ void CZoneActor::SetVisibility(int visibility)
 		//}}
 	}
 }
-
-#include <vtkAssemblyPaths.h>
 
 float *CZoneActor::GetBounds() // virtual
 {

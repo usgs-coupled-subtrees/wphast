@@ -29,7 +29,7 @@ public:
 
 	static const char szHeading[];
 
-	static void SetStaticColor(int bc_type,COLORREF cr); 
+	static void SetStaticColor(int bc_type, COLORREF cr); 
 
 	CString GetTreeHeading(void)const;
 

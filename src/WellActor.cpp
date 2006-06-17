@@ -21,6 +21,8 @@ vtkCxxRevisionMacro(CWellActor, "$Revision$");
 vtkStandardNewMacro(CWellActor);
 
 const char CWellActor::szHeading[] = "Wells";
+float CWellActor::s_color[3] = {0., 0., 0};
+vtkProperty* CWellActor::s_Property = 0;
 
 CWellActor::CWellActor(void)
 : m_pLineSource(0)
@@ -33,6 +35,8 @@ CWellActor::CWellActor(void)
 , m_pTransformUnits(0)
 , m_pTransformScale(0)
 {
+	static StaticInit init; // constructs/destructs s_Property
+
 	this->m_pTransformUnits = vtkTransform::New();
 	this->m_pTransformScale = vtkTransform::New();
 	this->m_pTransformUnits->Identity();
@@ -50,8 +54,8 @@ CWellActor::CWellActor(void)
 	this->m_pPolyDataMapper->SetInput(this->m_pTubeFilter->GetOutput());
 
 	this->SetMapper(this->m_pPolyDataMapper);
-	this->GetProperty()->SetOpacity(0.4);
-	this->GetProperty()->SetColor(1, 1, 0); // Yellow
+
+	this->SetProperty(CWellActor::s_Property);
 }
 
 CWellActor::~CWellActor(void)
@@ -76,13 +80,6 @@ CWellActor::~CWellActor(void)
 
 void CWellActor::SetUnits(const CUnits &units)
 {
-	//double x = this->m_well.x * units.horizontal.input_to_si;
-	//double y = this->m_well.y * units.horizontal.input_to_si;
-	//double zMin = this->m_zMin * units.vertical.input_to_si;
-	//double zMax = this->m_zMax * units.vertical.input_to_si;
-	//this->m_pLineSource->SetPoint1(x, y, zMin);
-	//this->m_pLineSource->SetPoint2(x, y, zMax);
-
 	this->m_pTransformUnits->Identity();
 	this->m_pTransformUnits->Scale(units.horizontal.input_to_si, units.horizontal.input_to_si, units.vertical.input_to_si);
 	this->UpdatePoints();
@@ -216,7 +213,6 @@ void CWellActor::Update(CTreeCtrlNode node)
 	//
 	CDelayRedraw redraw(node.GetWnd());
 
-	//{{
 	// store expanded states
 	bool bMainExpanded = false;
 	bool bRatesExpanded = false;
@@ -226,12 +222,6 @@ void CWellActor::Update(CTreeCtrlNode node)
 		bMainExpanded = ((node.GetState(TVIS_EXPANDED) & TVIS_EXPANDED) != 0);
 		if (bMainExpanded)
 		{
-// COMMENT: {4/19/2005 4:33:23 PM}			// CTreeCtrlNode nodeRates = node.GetLastChild();
-// COMMENT: {4/19/2005 4:33:23 PM}			if (node.GetLastChild().HasChildren())
-// COMMENT: {4/19/2005 4:33:23 PM}			{
-// COMMENT: {4/19/2005 4:33:23 PM}				bRatesExpanded = ((node.GetLastChild().GetState(TVIS_EXPANDED) & TVIS_EXPANDED) != 0);
-// COMMENT: {4/19/2005 4:33:23 PM}			}
-			//{{
 			if (this->m_nodeRates)
 			{
 				bRatesExpanded = ((this->m_nodeRates.GetState(TVIS_EXPANDED) & TVIS_EXPANDED) != 0);
@@ -240,10 +230,8 @@ void CWellActor::Update(CTreeCtrlNode node)
 			{
 				bSolnsExpanded = ((this->m_nodeSolutions.GetState(TVIS_EXPANDED) & TVIS_EXPANDED) != 0);
 			}
-			//}}
 		}		
 	}
-	//}}
 
 	// remove all previous items
 	//
@@ -405,35 +393,12 @@ void CWellActor::UnRemove(CPropertyTreeControlBar* pTree)
 {
 	ASSERT(this->m_pTreeMemento != 0);
 	this->m_node = this->m_pTreeMemento->Restore();
-// COMMENT: {8/23/2004 3:45:24 PM}	this->Update(this->m_node);
-// COMMENT: {8/23/2004 3:45:00 PM}	//{{
-// COMMENT: {8/23/2004 3:45:00 PM}	this->m_node.SetState(this->m_pTreeMemento->GetState(), this->m_pTreeMemento->GetStateMask());
-// COMMENT: {8/23/2004 3:45:00 PM}	//}}
 	delete this->m_pTreeMemento;
 	this->m_pTreeMemento = 0;
 
 	this->m_node.SetData((DWORD_PTR)this);
 	VERIFY(this->m_node.Select());
-
-	//{{
-	//pTree->GetTreeCtrlEx()->RedrawWindow();
-	// pTree->RedrawWindow();
-	//}}
 }
-
-// COMMENT: {8/16/2004 4:37:32 PM}void CWellActor::Select(CPropertyTreeControlBar *pTree)
-// COMMENT: {8/16/2004 4:37:32 PM}{
-// COMMENT: {8/16/2004 4:37:32 PM}	CTreeCtrlNode node = pTree->GetWellsNode();
-// COMMENT: {8/16/2004 4:37:32 PM}	CString strItem;
-// COMMENT: {8/16/2004 4:37:32 PM}	if ( this->m_well.description && ::strlen(this->m_well.description) ) {
-// COMMENT: {8/16/2004 4:37:32 PM}		strItem.Format("Well %d %s", this->m_well.n_user, this->m_well.description);
-// COMMENT: {8/16/2004 4:37:32 PM}	}
-// COMMENT: {8/16/2004 4:37:32 PM}	else {
-// COMMENT: {8/16/2004 4:37:32 PM}		strItem.Format("Well %d", this->m_well.n_user);
-// COMMENT: {8/16/2004 4:37:32 PM}	}
-// COMMENT: {8/16/2004 4:37:32 PM}	this->m_node = node.InsertAfter(strItem, TVI_LAST);
-// COMMENT: {8/16/2004 4:37:32 PM}	VERIFY(this->m_node.Select());
-// COMMENT: {8/16/2004 4:37:32 PM}}
 
 LPCTSTR CWellActor::GetName(void)const
 {
@@ -451,6 +416,8 @@ void CWellActor::Serialize(bool bStoring, hid_t loc_id, const CUnits &units)
 		CWellSchedule well;
 		well.Serialize(bStoring, loc_id);
 		this->SetWell(well, units);
+
+		this->SetProperty(CWellActor::s_Property);
 	}
 }
 
@@ -471,7 +438,6 @@ std::ostream& CWellActor::Output(std::ostream& os, const Ctime& time)const
 {
 	os << (*this);
 
-	//std::map<Ctime, CWellRate> map = this->m_well.GetMap();
 	const CTimeSeries<CWellRate>& map = this->m_well.GetPumpSched();
 	if (map.size() > 0)
 	{
@@ -503,7 +469,6 @@ void CWellActor::SetRadius(float r)
 
 void CWellActor::SetScale(vtkFloatingPointType x, vtkFloatingPointType y, vtkFloatingPointType z)
 {
-	//this->vtkProp3D::SetScale(x, y, z);
 	this->m_pTransformScale->Identity();
 	this->m_pTransformScale->Scale(x, y, z);
 	this->UpdatePoints();
@@ -526,4 +491,15 @@ void CWellActor::GetScale(vtkFloatingPointType scale[3])
 	scale[0] = d[0];
 	scale[1] = d[1];
 	scale[2] = d[3];
+}
+
+void CWellActor::SetStaticColor(COLORREF cr)
+{
+	CWellActor::s_color[0] = (double)GetRValue(cr)/255.;
+	CWellActor::s_color[1] = (double)GetGValue(cr)/255.;
+	CWellActor::s_color[2] = (double)GetBValue(cr)/255.;	
+	if (CWellActor::s_Property)
+	{
+		CWellActor::s_Property->SetColor(CWellActor::s_color);
+	}
 }

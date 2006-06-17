@@ -18,11 +18,9 @@ typedef float vtkFloatingPointType;
 #endif
 
 class CRiverActor : public vtkAssembly
-///class CRiverActor : public vtkPropAssembly
 {
 public:
 	vtkTypeRevisionMacro(CRiverActor,vtkAssembly);
-	///vtkTypeRevisionMacro(CRiverActor,vtkPropAssembly);
 	static CRiverActor *New();
 	void PrintSelf(ostream& os, vtkIndent indent);
 
@@ -131,6 +129,8 @@ public:
 
 	static const char szHeading[];
 
+	static void SetStaticColor(COLORREF cr); 
+
 protected:
 	CRiverActor(void);
 	~CRiverActor(void);
@@ -158,10 +158,13 @@ protected:
 
 	// Properties used to control the appearance of selected objects and
 	// the manipulator in general.
-	vtkProperty *HandleProperty;
 	vtkProperty *SelectedHandleProperty;
 	vtkProperty *EnabledHandleProperty;
 	void CreateDefaultProperties(void);
+
+	static vtkProperty *s_HandleProperty;
+	static vtkProperty *s_ConnectorProperty;
+	static float s_color[3];
 
 	int HighlightHandle(vtkProp *prop);
 
@@ -233,4 +236,31 @@ protected:
 	// for updating status bar
 	CString HorizonalUnits;
 	CString VerticalUnits;
+
+private:
+	class StaticInit
+	{
+	public:
+		StaticInit() {
+			if (CRiverActor::s_HandleProperty == 0) {
+				CRiverActor::s_HandleProperty = vtkProperty::New();
+				CRiverActor::s_HandleProperty->SetColor(CRiverActor::s_color);
+				CRiverActor::s_HandleProperty->SetOpacity(0.7);
+
+				CRiverActor::s_ConnectorProperty = vtkProperty::New();
+				CRiverActor::s_ConnectorProperty->SetColor(CRiverActor::s_color);
+				CRiverActor::s_ConnectorProperty->SetOpacity(0.3);
+			}
+		}
+		~StaticInit() {
+			if (CRiverActor::s_HandleProperty != 0) {
+				CRiverActor::s_HandleProperty->Delete();
+				CRiverActor::s_HandleProperty = 0;
+			}
+			if (CRiverActor::s_ConnectorProperty != 0) {
+				CRiverActor::s_ConnectorProperty->Delete();
+				CRiverActor::s_ConnectorProperty = 0;
+			}
+		}
+	};
 };
