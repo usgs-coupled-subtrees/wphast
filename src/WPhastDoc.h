@@ -256,8 +256,6 @@ protected:
 	CDisplayColors DisplayColors;
 
 protected:
-	void InitDocument();
-	
 	template<typename ACTOR>
 	void SerializeActors(bool bStoring, hid_t loc_id, CTreeCtrlNode parentNode, const char* szNamesListHeading);
 

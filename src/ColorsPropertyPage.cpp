@@ -60,11 +60,11 @@ void CColorsPropertyPage::DoDataExchange(CDataExchange* pDX)
 
 	// Head IC
     DDX_Control(pDX, IDC_HEAD_IC_BTN, m_headICColorPicker);
-    DDX_ColourPicker(pDX, IDC_HEAD_IC_BTN, m_colors.crHeadIC);
+    DDX_ColourPicker(pDX, IDC_HEAD_IC_BTN, m_colors.crICHead);
 
 	// Chem IC
     DDX_Control(pDX, IDC_CHEM_IC_BTN, m_chemICColorPicker);
-    DDX_ColourPicker(pDX, IDC_CHEM_IC_BTN, m_colors.crChemIC);
+    DDX_ColourPicker(pDX, IDC_CHEM_IC_BTN, m_colors.crICChem);
 
 	// Flux
     DDX_Control(pDX, IDC_FLUX_BTN, m_fluxColorPicker);

@@ -549,6 +549,9 @@ void CWPhastDoc::Serialize(CArchive& ar)
 			// store site map
 			if (this->m_pMapActor) this->m_pMapActor->Serialize(bStoring, wphast_id);
 
+			// store display colors
+			this->DisplayColors.Serialize(bStoring, wphast_id);
+
 			// store media
 			this->SerializeMedia(bStoring, wphast_id);
 
@@ -662,6 +665,10 @@ void CWPhastDoc::Serialize(CArchive& ar)
 				this->m_pMapActor->SetPickable(0);
 				this->GetPropCollection()->AddItem(this->m_pMapActor);
 			}
+
+			// load display colors
+			this->DisplayColors.Serialize(bStoring, wphast_id);
+			this->SetDisplayColors(this->DisplayColors);
 
 			// load media
 			this->SerializeMedia(bStoring, wphast_id);
@@ -1157,70 +1164,6 @@ CFile* CWPhastDoc::GetFile(LPCTSTR lpszFileName, UINT nOpenFlags,
 	return pFile;
 }
 
-void CWPhastDoc::InitDocument()
-{
-	TRACE("CWPhastDoc::InitDocument()\n");
-
-	//// create pimpl
-	////
-	//ASSERT(this->m_pimpl == 0);
-	//this->m_pimpl = new WPhastDocImpl();
-	//this->m_pimpl->m_vectorActionsIndex = 0;
-
-	// create the list
-	//
-	// ASSERT(this->m_pPropCollection == 0);
-	// this->m_pPropCollection = vtkPropCollection::New();
-
-	////// create the grid
-	//////
-	////ASSERT(this->m_pGridActor == 0);
-	////this->m_pGridActor = CGridActor::New();
-	////this->m_pGridActor->GetProperty()->SetColor(1.0, 0.8, 0.6);
-
-	//////// create the axes
-	////////
-	//////ASSERT(this->m_pAxes == 0);
-	//////ASSERT(this->m_pAxesTubeFilter == 0);
-	//////ASSERT(this->m_pAxesPolyDataMapper == 0);
-	//////ASSERT(this->m_pAxesActor == 0);
-	//////this->m_pAxes = vtkAxes::New();
-	//////this->m_pAxes->SetOrigin(0, 0, 0);
-	//////this->m_pAxesTubeFilter = vtkTubeFilter::New();
-	//////this->m_pAxesTubeFilter->SetInput(this->m_pAxes->GetOutput());
-	//////this->m_pAxesTubeFilter->SetNumberOfSides(10);
-	//////this->m_pAxesPolyDataMapper = vtkPolyDataMapper::New();
-	//////this->m_pAxesPolyDataMapper->SetInput(this->m_pAxesTubeFilter->GetOutput());
-	//////this->m_pAxesActor = vtkActor::New();
-	//////this->m_pAxesActor->SetMapper(this->m_pAxesPolyDataMapper);
-	//////this->m_pAxesActor->SetPickable(0);
-
-	//if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar()) {
-	//	pTree->InitDocument();
-	//}
-	//else {
-	//	ASSERT(FALSE);
-	//}
-
-	/****
-	// set scale
-	//
-	for (int i = 0; i < 3; ++i) {
-		this->m_Scale[i] = 1.0;
-	}
-
-	// Update scale page
-	//
-	this->m_pScalePage->m_XScale = m_Scale[0];
-	this->m_pScalePage->m_YScale = m_Scale[1];
-	this->m_pScalePage->m_ZScale = m_Scale[2];
-	if (this->m_pScalePage->GetSafeHwnd()) {
-		this->m_pScalePage->UpdateData(FALSE);
-	}
-	****/
-
-}
-
 ///////////////////////////////////////////////////////////////////////////////////////
 #define CLEAR_PROP_ASSEMBLY_MACRO(PROP_ASSEMBLY_PTR) \
 do { \
@@ -1250,6 +1193,10 @@ void CWPhastDoc::DeleteContents()
 	ASSERT(this->m_pUnits);
 	delete this->m_pUnits;
 	this->m_pUnits = new CUnits();
+
+	// reset colors
+	CDisplayColors colors;
+	this->SetDisplayColors(colors);
 
 	// clear undo/redo
 	//
@@ -4846,9 +4793,9 @@ void CWPhastDoc::SetDisplayColors(const CDisplayColors& dc)
 {
 	this->DisplayColors = dc;
 
-	CICChemZoneActor::SetStaticColor(this->DisplayColors.crChemIC);
+	CICChemZoneActor::SetStaticColor(this->DisplayColors.crICChem);
 	CBCZoneActor::SetStaticColor(FLUX, this->DisplayColors.crFlux);
-	CICHeadZoneActor::SetStaticColor(this->DisplayColors.crHeadIC);
+	CICHeadZoneActor::SetStaticColor(this->DisplayColors.crICHead);
 	CBCZoneActor::SetStaticColor(LEAKY, this->DisplayColors.crLeaky);
 	CMediaZoneActor::SetStaticColor(this->DisplayColors.crMedia);
 	CRiverActor::SetStaticColor(this->DisplayColors.crRiver);

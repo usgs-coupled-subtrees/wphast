@@ -75,6 +75,8 @@ public:
 
 	static herr_t HDFSerializeSetOfTimes(bool bStoring, hid_t loc_id, std::set<Ctime>& setOfTimes);
 
+	static herr_t HDFSerializeCOLORREF(bool bStoring, hid_t loc_id, const char* szName, COLORREF& clr);
+
 public:
 	static herr_t HDFSerializeAllocate(bool bStoring, hid_t loc_id, const char* szName, hsize_t& count, double** buffer);
 	static herr_t HDFSerializeAllocate(bool bStoring, hid_t loc_id, const char* szName, hsize_t& count, int** buffer);

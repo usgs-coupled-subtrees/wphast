@@ -2048,3 +2048,10 @@ void CGlobal::WriteBool(std::ostream &os, int width, bool value, const char *hea
 	// restore original format
 	os.setf(format);
 }
+
+herr_t CGlobal::HDFSerializeCOLORREF(bool bStoring, hid_t loc_id, const char* szName, COLORREF& clr)
+{
+	ASSERT(sizeof(COLORREF) <= sizeof(unsigned long));
+	herr_t status = CGlobal::HDFSerialize(bStoring, loc_id, szName, H5T_NATIVE_ULONG, 1, &clr);
+	return status;
+}
