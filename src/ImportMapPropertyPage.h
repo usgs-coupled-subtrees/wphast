@@ -37,6 +37,7 @@ protected:
 	int m_idxGridPage;
 
 	CSiteMap m_siteMap;
+	CString m_sExt;
 
 	DECLARE_MESSAGE_MAP()
 public:

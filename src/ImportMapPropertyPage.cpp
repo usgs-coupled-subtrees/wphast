@@ -59,31 +59,38 @@ void CImportMapPropertyPage::DoDataExchange(CDataExchange* pDX)
 			// validate image file
 			//
 			pDX->PrepareEditCtrl(IDC_MAP_EDIT);
-			if (this->m_strMapFileName.IsEmpty()) {
+			if (this->m_strMapFileName.IsEmpty())
+			{
 				::AfxMessageBox(_T("Please enter the complete path and filename."));
 				pDX->Fail();
 			}
-			if (this->m_pDlg->SetFileName(this->m_strMapFileName) == 0) {
+			if (this->m_pDlg->SetFileName(this->m_strMapFileName) == 0)
+			{
 				::AfxMessageBox(_T("Unable to load the selected file."));
 				pDX->Fail();
 			}
 
-			if (this->m_bWorld) {
+			if (this->m_bWorld)
+			{
 				// validate world file
 				//
 				pDX->PrepareEditCtrl(IDC_WORLD_EDIT);
-				if (this->m_strWorldFileName.IsEmpty()) {
+				if (this->m_strWorldFileName.IsEmpty())
+				{
 					::AfxMessageBox(_T("Please enter the complete path and filename."));
 					pDX->Fail();
 				}
 				// BUGBUG: check if world file exists
-				try {
-					if (this->m_pDlg->SetWorldFileName(this->m_strWorldFileName) == 0) {
+				try
+				{
+					if (this->m_pDlg->SetWorldFileName(this->m_strWorldFileName) == 0)
+					{
 						::AfxMessageBox(_T("Unable to load the selected file."));
 						pDX->Fail();
 					}
 				}
-				catch (LPCTSTR str) {
+				catch (LPCTSTR str)
+				{
 					::AfxMessageBox(str);
 					pDX->Fail();
 				}
@@ -159,17 +166,19 @@ void CImportMapPropertyPage::OnBnClickedUseWorldCheck()
 
 void CImportMapPropertyPage::OnBnClickedBrowseMapButton()
 {
-	// szFilters is a text string that includes two file name filters:
-	// "*.my" for "MyType Files" and "*.*' for "All Files."
-	char szFilters[] =
-		"Bitmap Files (*.bmp)|*.bmp|All Files (*.*)|*.*||";
+	static char szFilters[] =
+		"Image Files (*.bmp,*.jpg,*.jpeg,*.png,*.tif,*.tiff)|*.bmp;*.jpg;*.jpeg;*.png;*.tif;*.tiff|"
+		"Bitmap Files (*.bmp)|*.bmp|"
+		"JPEG Files (*.jpg,*.jpeg)|*.jpg;*.jpeg|"
+		"PNG Files (*.png)|*.png|"
+		"TIFF Files (*.tif,*.tiff)|*.tif;*.tiff|"
+		"All Files (*.*)|*.*|"
+		"|";
 
-	// Create an Open dialog; the default file name extension is ".my".
-	CFileDialog fileDlg(TRUE, "bmp", "*.bmp",
-		OFN_FILEMUSTEXIST| OFN_HIDEREADONLY, szFilters, this);
+	// Create an Open dialog; the default file name extension is ".bmp".
+	CFileDialog fileDlg(TRUE, "bmp", NULL,
+		OFN_FILEMUSTEXIST | OFN_HIDEREADONLY, szFilters, this);
 
-	// Display the file dialog. When user clicks OK, fileDlg.DoModal() 
-	// returns IDOK.
 	if( fileDlg.DoModal() == IDOK )
 	{
 		CString pathName = fileDlg.GetPathName();
@@ -183,11 +192,24 @@ void CImportMapPropertyPage::OnBnClickedBrowseMapButton()
 
 		this->GetDlgItem(IDC_MAP_EDIT)->SetWindowText(pathName);
 
-		//{{
 		if (this->GetDlgItem(IDC_WORLD_EDIT) && this->GetDlgItem(IDC_WORLD_EDIT)->GetWindowTextLength() == 0)
 		{
 			// create default world file name
 			//
+			// BIL (band interleaved by line): world file extension = (.blw) 
+			// BIP (band interleaved by pixel): world file extension = (.bpw) 
+			// BMP (Windows bitmap image file): world file extension = (.bpw) 
+			// BSQ (band sequential): world file extension = (.bqw) 
+			// GIF (CompuServe Graphics Interchange Format): world file extension = (.gfw) 
+			// IMG (ERDAS Imagine image file): world file extension = (.igw) 
+			// JPEG (Joint Photographic Experts Group): world file extension = (.jgw) 
+			// MCP (MacPaint): world file extension = (.mpw) 
+			// RLC (IMPELL Bitmaps Run-length compressed files): world file extension = (.rcw) 
+			// RS (raster snapshot | Sun rasterfile): world file extension = (.rsw) 
+			// SID (MrSID image file): world file extension = (.sdw) 
+			// TIFF (Tag Image Format file): world file extension = (.tfw) 
+			// WMF (Windows Metafile): world file extension = (.wfw) 
+			// XBM (X Bitmap): world file extension = (.xmw) 
 
 			TCHAR szDrive[_MAX_DRIVE];
 			TCHAR szDir[_MAX_DIR];
@@ -199,41 +221,53 @@ void CImportMapPropertyPage::OnBnClickedBrowseMapButton()
 
 			CString strExt(szExt);
 			CString strWorldFileName;
-			if (strExt.CompareNoCase(_T(".bmp")) == 0) {
+			if (strExt.CompareNoCase(_T(".bmp")) == 0)
+			{
 				::_tmakepath(szWorldFileName, szDrive, szDir, szFName, _T(".bpw"));
 				strWorldFileName = szWorldFileName;
 			}
-			else if (strExt.CompareNoCase(_T(".gif")) == 0) {
-				::_tmakepath(szWorldFileName, szDrive, szDir, szFName, _T(".gfw"));
+			else if (strExt.CompareNoCase(_T(".jpg")) == 0 || strExt.CompareNoCase(_T(".jpeg")) == 0)
+			{
+				::_tmakepath(szWorldFileName, szDrive, szDir, szFName, _T(".jgw"));
 				strWorldFileName = szWorldFileName;
 			}
-			else if (strExt.CompareNoCase(_T(".tif")) == 0) {
+			else if (strExt.CompareNoCase(_T(".png")) == 0)
+			{
+				::_tmakepath(szWorldFileName, szDrive, szDir, szFName, _T(".pgw"));
+				strWorldFileName = szWorldFileName;
+			}
+			else if (strExt.CompareNoCase(_T(".tif")) == 0 || strExt.CompareNoCase(_T(".tiff")) == 0)
+			{
 				::_tmakepath(szWorldFileName, szDrive, szDir, szFName, _T(".tfw"));
 				strWorldFileName = szWorldFileName;
 			}
-			if (!strWorldFileName.IsEmpty()) {
+
+			if (!strWorldFileName.IsEmpty())
+			{
 				this->GetDlgItem(IDC_WORLD_EDIT)->SetWindowText(strWorldFileName);
 			}
 		}
-		//}}
 	}
 }
 
 void CImportMapPropertyPage::OnBnClickedBrowseWorldButton()
 {
-	//TODO add additional filters
-	// szFilters is a text string that includes two file name filters:
-	// "*.my" for "MyType Files" and "*.*' for "All Files."
-	char szFilters[] =
-		"Bitmap World Files (*.bpw)|*.bpw|All Files (*.*)|*.*||";
+	static char szFilters[] =
+		"World Files (*.bpw,*.jgw,*.pgw,*.tfw)|*.bpw;*.jgw;*.pgw;*.tfw|"
+		"Bitmap World Files (*.bpw)|*.bpw|"
+		"JPEG World Files (*.jgw)|*.jgw|"
+		"PNG World Files (*.pgw)|*.pgw|"
+		"TIFF World Files (*.tfw)|*.tfw|"
+		"All Files (*.*)|*.*|"
+		"|";
 
-	// Create an Open dialog; the default file name extension is ".my".
-	CFileDialog fileDlg(TRUE, "bpw", "*.bpw",
+	CFileDialog fileDlg(TRUE, "bpw", NULL,
 		OFN_FILEMUSTEXIST | OFN_HIDEREADONLY, szFilters, this);
 
 	// Display the file dialog. When user clicks OK, fileDlg.DoModal() 
 	// returns IDOK.
-	if( fileDlg.DoModal() == IDOK ) {
+	if( fileDlg.DoModal() == IDOK )
+	{
 		this->GetDlgItem(IDC_WORLD_EDIT)->SetWindowText(fileDlg.GetPathName());
 	}
 }
@@ -358,20 +392,6 @@ LRESULT CImportMapPropertyPage::OnWizardNext()
 			}
 			ASSERT(sheet->GetPageCount() == arr_size);
 
-// COMMENT: {4/28/2004 7:58:41 PM}			// Since CPropertySheet() always adds new pages to the end of 
-// COMMENT: {4/28/2004 7:58:41 PM}			// its propertypage list, we have to remove all pages starting 
-// COMMENT: {4/28/2004 7:58:41 PM}			// at index 1 (original location for the second page).  Then, 
-// COMMENT: {4/28/2004 7:58:41 PM}			// add them back one at a time.
-// COMMENT: {4/28/2004 7:58:41 PM}			int i;
-// COMMENT: {4/28/2004 7:58:41 PM}			for (i = this->m_idxPage + 1; i < count; ++i) {
-// COMMENT: {4/28/2004 7:58:41 PM}				CPropertyPage* pPage = this->m_PropPageArray[i];
-// COMMENT: {4/28/2004 7:58:41 PM}				ASSERT(sheet->GetPageIndex(this->m_PropPageArray[i]) != -1);
-// COMMENT: {4/28/2004 7:58:41 PM}				sheet->RemovePage(this->m_PropPageArray[i]);
-// COMMENT: {4/28/2004 7:58:41 PM}			}
-// COMMENT: {4/28/2004 7:58:41 PM}			for (i = this->m_idxPage + 1; i < arr_size; ++i) {
-// COMMENT: {4/28/2004 7:58:41 PM}				ASSERT(sheet->GetPageIndex(this->m_PropPageArray[i]) == -1);
-// COMMENT: {4/28/2004 7:58:41 PM}				sheet->AddPage(this->m_PropPageArray[i]);
-// COMMENT: {4/28/2004 7:58:41 PM}			}
 		}
 		ASSERT(sheet->GetPageIndex(this->m_pGridPage) == this->m_idxGridPage);
 	}
@@ -392,9 +412,8 @@ BOOL CImportMapPropertyPage::OnKillActive()
 
 LRESULT CImportMapPropertyPage::OnWizardBack()
 {
-	// TODO: Add your specialized code here and/or call the base class
+	// Add your specialized code here and/or call the base class
 
-	//{{6/2/2004 4:42:50 PM
 	CPropertySheet* sheet = static_cast<CPropertySheet*>(this->GetParent());
 	int count = sheet->GetPageCount();
 	int arr_size = this->m_PropPageArray.GetSize();
@@ -425,32 +444,15 @@ LRESULT CImportMapPropertyPage::OnWizardBack()
 	}
 	ASSERT(sheet->GetPageCount() == arr_size);
 	ASSERT(sheet->GetPageIndex(this->m_pGridPage) == this->m_idxGridPage);
-	//}}6/2/2004 4:42:50 PM
 
 	return CPropertyPage::OnWizardBack();
 }
 
 BOOL CImportMapPropertyPage::OnSetActive()
 {
-	// TODO: Add your specialized code here and/or call the base class
+	// Add your specialized code here and/or call the base class
 	ASSERT_VALID(this);
 	if (m_bFirstSetActive)
 		m_bFirstSetActive = FALSE;
-	// else
-		// UpdateData(FALSE);
 	return TRUE;
-
-	return CPropertyPage::OnSetActive();
-	/*
-	BOOL CPropertyPage::OnSetActive()
-	{
-		ASSERT_VALID(this);
-
-		if (m_bFirstSetActive)
-			m_bFirstSetActive = FALSE;
-		else
-			UpdateData(FALSE);
-		return TRUE;
-	}
-	*/
 }
