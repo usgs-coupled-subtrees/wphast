@@ -370,7 +370,6 @@ void CMapActor::Serialize(bool bStoring, hid_t loc_id)
 	{
 		// Open the szSiteMap group
 		sitemap_id = ::H5Gopen(loc_id, szSiteMap);
-		TRACE("CMapActor::Serialize -- No SiteMap\n");
 	}
 
 	if (sitemap_id > 0)
@@ -384,8 +383,10 @@ void CMapActor::Serialize(bool bStoring, hid_t loc_id)
 		status = ::H5Gclose(sitemap_id);
 		ASSERT(status >= 0);
 
-		if (!bStoring) {
-			if (this->SetFileName(this->m_szTempFileName) == 1) {
+		if (!bStoring)
+		{
+			if (this->SetFileName(this->m_szTempFileName) == 1)
+			{
 				this->SetWorldTransform(this->m_siteMap.GetWorldTransform());
 				this->PlaceMap(
 					this->m_siteMap.m_placement[0],

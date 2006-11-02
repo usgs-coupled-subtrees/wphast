@@ -82,7 +82,7 @@ public:
 
 	//{{
 	vtkProperty* GetProperty() { return this->CubeActor->GetProperty(); }
-	virtual float* GetBounds(); //  { return this->vtkAssembly::GetBounds(); }
+	virtual vtkFloatingPointType* GetBounds(); //  { return this->vtkAssembly::GetBounds(); }
 // COMMENT: {6/15/2006 11:37:06 PM}	void GetBounds(float bounds[6]) {this->CubeActor->GetBounds(bounds); }
 	//}}
 

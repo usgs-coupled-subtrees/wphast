@@ -488,7 +488,7 @@ void CBC::Serialize(bool bStoring, hid_t loc_id)
 	{
 		// zone
 		if (!this->zone) {
-			this->zone = new struct zone();
+			this->zone = new struct zone;
 		}
 		static_cast<CZone*>(this->zone)->Serialize(bStoring, loc_id);
 

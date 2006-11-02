@@ -40,6 +40,10 @@ public:
 	int LoadWorldFile(const char *filename)
 	{ return CGlobal::LoadWorldFile(filename, *this); }
 
+	int WriteWorldFile(const char *filename)
+	{ return CGlobal::WriteWorldFile(filename, *this); }
+
+
 protected:
 // COMMENT: {5/21/2004 7:45:43 PM}	double x_dimension;
 // COMMENT: {5/21/2004 7:45:43 PM}	double y_dimension;

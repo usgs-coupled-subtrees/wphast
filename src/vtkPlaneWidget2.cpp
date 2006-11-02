@@ -725,8 +725,8 @@ void vtkPlaneWidget2::SizeHandles(void)
 		}
 		if (this->ActivePlaneSource)
 		{
-			float *pt1 = this->PlaneSource->GetPoint1();
-			float *pt2 = this->PlaneSource->GetPoint2();
+			vtkFloatingPointType *pt1 = this->PlaneSource->GetPoint1();
+			vtkFloatingPointType *pt2 = this->PlaneSource->GetPoint2();
 			double rad = this->GetRadians();
 
 			float npt1[3];

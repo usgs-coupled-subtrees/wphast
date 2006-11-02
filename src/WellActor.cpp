@@ -21,7 +21,7 @@ vtkCxxRevisionMacro(CWellActor, "$Revision$");
 vtkStandardNewMacro(CWellActor);
 
 const char CWellActor::szHeading[] = "Wells";
-float CWellActor::s_color[3] = {0., 0., 0};
+vtkFloatingPointType CWellActor::s_color[3] = {0., 0., 0};
 vtkProperty* CWellActor::s_Property = 0;
 
 CWellActor::CWellActor(void)

@@ -24,6 +24,9 @@ public:
 	CSiteMap GetSiteMap(void)const { return m_siteMap; }
 
 	void Serialize(bool bStoring, hid_t loc_id);
+// COMMENT: {7/12/2006 11:37:17 PM}	//xercesc_2_7::DOMElement* Export(const char * prefix, xercesc_2_7::DOMDocument* doc);
+// COMMENT: {7/12/2006 11:37:17 PM}	int Export(const char* prefix, xercesc_2_7::DOMElement* element);
+	friend class CXMLSerializer;
 
 protected:
 	CMapActor(void);

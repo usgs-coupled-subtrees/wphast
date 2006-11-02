@@ -155,7 +155,7 @@ double vtkBoxWidgetEx::SizeHandles(double factor)
 	{
 		double radius, z;
 		double windowLowerLeft[4], windowUpperRight[4];
-		float *viewport = renderer->GetViewport();
+		vtkFloatingPointType *viewport = renderer->GetViewport();
 		int *winSize = renderer->GetRenderWindow()->GetSize();
 		double focalPoint[4];
 

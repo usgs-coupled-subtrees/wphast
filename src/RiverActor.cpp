@@ -20,7 +20,7 @@ vtkStandardNewMacro(CRiverActor);
 
 const char CRiverActor::szHeading[] = "Rivers";
 const bool bShowGhostPoint = true;
-float CRiverActor::s_color[3];
+vtkFloatingPointType CRiverActor::s_color[3];
 vtkProperty* CRiverActor::s_HandleProperty = 0;
 vtkProperty* CRiverActor::s_ConnectorProperty = 0;
 

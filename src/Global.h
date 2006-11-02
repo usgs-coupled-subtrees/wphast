@@ -9,6 +9,7 @@ class vtkProp3D;
 #endif
 #include <hdf5.h>        /* HDF routines */
 
+#include <iosfwd>
 #include <list>
 #include <set>
 #include <string>
@@ -72,6 +73,8 @@ public:
 	static bool SimpleFloatParse(LPCTSTR lpszText, double& d);
 
 	static int LoadWorldFile(const char *filename, CWorldTransform &wtrans);
+	static int WriteWorldFile(const char *filename, const CWorldTransform &wtrans);
+
 
 	static herr_t HDFSerializeSetOfTimes(bool bStoring, hid_t loc_id, std::set<Ctime>& setOfTimes);
 
@@ -106,6 +109,7 @@ public:
 	static int AddLengthUnitsDenom(CComboBox* pCombo);
 	static std::string GetStdLengthUnitsDenom(const char* unit);
 
+	static int ExtractXMLStream(std::istream &is, std::iostream &ios);
 };
 
 template<typename T>

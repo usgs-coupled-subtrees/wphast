@@ -746,8 +746,8 @@ void CZoneActor::Serialize(bool bStoring, hid_t loc_id)
 	static const char szDesc[]    = "Description";
 
 	herr_t status;
-	vtkFloatingPointType color[3];
-	double double_color[3];
+// COMMENT: {7/19/2006 5:17:11 PM}	vtkFloatingPointType color[3];
+// COMMENT: {7/19/2006 5:17:11 PM}	double double_color[3];
 
 	if (bStoring)
 	{
@@ -852,7 +852,7 @@ void CZoneActor::SetVisibility(int visibility)
 	}
 }
 
-float *CZoneActor::GetBounds() // virtual
+vtkFloatingPointType *CZoneActor::GetBounds() // virtual
 {
 	// from vtkAssembly.cxx
 	//
@@ -865,7 +865,7 @@ float *CZoneActor::GetBounds() // virtual
 	vtkProp3D *prop3D;
 	vtkAssemblyPath *path;
 	int i, n;
-	float *bounds, bbox[24];
+	vtkFloatingPointType *bounds, bbox[24];
 	int propVisible=0;
 
 	this->UpdatePaths();

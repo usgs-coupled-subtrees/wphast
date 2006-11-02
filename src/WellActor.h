@@ -82,7 +82,7 @@ public:
 	static void SetStaticColor(COLORREF cr);
 
 protected:
-	static float s_color[3];
+	static vtkFloatingPointType s_color[3];
 	static vtkProperty* s_Property;
 
 	friend std::ostream& operator<< (std::ostream &os, const CWellActor &a);

@@ -27,7 +27,7 @@ protected:
 	CICHeadZoneActor(void);
 	virtual ~CICHeadZoneActor(void);
 	CHeadIC m_headIC;
-	static float s_color[3];
+	static vtkFloatingPointType s_color[3];
 	static vtkProperty* s_Property;
 
 private:

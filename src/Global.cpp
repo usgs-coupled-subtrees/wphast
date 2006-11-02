@@ -1439,6 +1439,30 @@ int CGlobal::LoadWorldFile(const char *filename, CWorldTransform &wtrans)
 	return 0; // success
 }
 
+int CGlobal::WriteWorldFile(const char *filename, const CWorldTransform &wtrans)
+{
+	std::ofstream ofs;
+	ofs.open(filename);
+
+	if (!ofs.is_open())
+	{
+		throw "Unable to open world file";
+	};
+
+	const double *dataSpacing = wtrans.GetDataSpacing();
+	const double *upperLeft = wtrans.GetUpperLeft();
+
+	ofs.precision(DBL_DIG);
+	ofs << dataSpacing[0] << std::endl;
+	ofs << "0.000000" << std::endl;
+	ofs << "0.000000" << std::endl;
+	ofs << -dataSpacing[1] << std::endl;
+	ofs << upperLeft[0] << std::endl;
+	ofs << upperLeft[1] << std::endl;
+
+	return 0; // success
+}
+
 herr_t CGlobal::HDFSerializeBinaryFile(bool bStoring, hid_t loc_id, const char* szName, const char* szFileName)
 {
 	hsize_t dims[1];
@@ -2054,4 +2078,30 @@ herr_t CGlobal::HDFSerializeCOLORREF(bool bStoring, hid_t loc_id, const char* sz
 	ASSERT(sizeof(COLORREF) <= sizeof(unsigned long));
 	herr_t status = CGlobal::HDFSerialize(bStoring, loc_id, szName, H5T_NATIVE_ULONG, 1, &clr);
 	return status;
+}
+
+int CGlobal::ExtractXMLStream(std::istream &is, std::iostream &ios)
+{
+	std::string line;
+	while(is)
+	{
+		std::getline(is, line);
+		std::string::size_type f = line.find('#');
+		if (f == std::string::npos)
+		{
+			break;
+		}
+		else
+		{
+			// skip whitespace
+			std::string::size_type l = line.size();
+			for(f = f+1; f < l; ++f)
+			{
+				if (!::isspace(line[f])) break;
+			}
+			std::string comment = line.substr(f);
+			ios << comment.c_str();
+		}
+	}
+	return 0;
 }

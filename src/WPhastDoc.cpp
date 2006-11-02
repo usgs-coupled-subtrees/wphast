@@ -109,6 +109,17 @@
 #include "WellActor.h"
 #include "RiverActor.h"
 
+#include <xercesc/dom/DOM.hpp>
+#include <xercesc/dom/DOMImplementation.hpp>
+#include <xercesc/dom/DOMWriter.hpp>
+#include <xercesc/framework/MemBufFormatTarget.hpp>
+#include <xercesc/util/OutOfMemoryException.hpp>
+
+#include "xml/StrX.h"
+#include "xml/XStr.h"
+#include "SaveCurrentDirectory.h"
+#include "XMLSerializer.h"
+
 extern void GetDefaultMedia(struct grid_elt* p_grid_elt);
 extern void GetDefaultHeadIC(struct head_ic* p_head_ic);
 extern void GetDefaultChemIC(struct chem_ic* p_chem_ic);
@@ -286,12 +297,6 @@ CWPhastDoc::CWPhastDoc()
 	this->m_pimpl->m_vectorActionsIndex = 0;
 	this->m_pimpl->m_lastSaveIndex = -1;
 
-// COMMENT: {7/28/2005 2:48:16 PM}	// create the grid
-// COMMENT: {7/28/2005 2:48:16 PM}	//
-// COMMENT: {7/28/2005 2:48:16 PM}	ASSERT(this->m_pGridActor == 0);
-// COMMENT: {7/28/2005 2:48:16 PM}	this->m_pGridActor = CGridActor::New();
-// COMMENT: {7/28/2005 2:48:16 PM}	this->m_pGridActor->GetProperty()->SetColor(1.0, 0.8, 0.6);
-
 	// create the prop list
 	//
 	ASSERT(this->m_pPropCollection == 0);
@@ -334,7 +339,6 @@ CWPhastDoc::CWPhastDoc()
 	//
 	this->m_pModel = new CNewModel;
 	this->m_pModel->m_printFreq = CPrintFreq::NewDefaults();
-// COMMENT: {7/28/2005 2:54:07 PM}	this->New(CNewModel::Default());
 
 	// river event listener
 	//
@@ -425,7 +429,6 @@ CWPhastDoc::~CWPhastDoc()
 
 	ASSERT_DELETE_SET_NULL_MACRO(this->m_pUnits);
 	ASSERT_DELETE_SET_NULL_MACRO(this->m_pModel);
-// COMMENT: {5/5/2005 3:51:23 PM}	ASSERT_DELETE_SET_NULL_MACRO(this->m_pPrintFreq);
 
 	if (this->m_pMapActor)
 	{
@@ -1858,6 +1861,7 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 	// Return Value
 	// Nonzero if the file was successfully loaded; otherwise 0.
 	CWaitCursor wait;
+	CSaveCurrentDirectory save;
 
 	TCHAR szDrive[_MAX_DRIVE];
 	TCHAR szDir[_MAX_DIR];
@@ -1866,7 +1870,13 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 
 	::_tsplitpath(lpszPathName, szDrive, szDir, szFName, szExt);
 
-	// remove .trans if exists
+	// change directory in case there's a sitemap
+	//
+	TCHAR szNewDir[MAX_PATH];
+	::_tmakepath(szNewDir, szDrive, szDir, NULL, NULL);
+	save.SetCurrentDirectory(szNewDir);
+
+	// remove .trans if it exists
 	//
 	CString strPrefix(szFName);
 	strPrefix.MakeLower();
@@ -1878,6 +1888,14 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 	{
 		return FALSE;
 	}
+
+	// xml
+	//
+	std::stringbuf buf;
+	std::iostream xml(&buf);
+	CGlobal::ExtractXMLStream(ifs, xml);
+	ifs.seekg(0, std::ios_base::beg);
+	xml.seekg(0, std::ios_base::beg);
 
 	CPhastInput* pInput = CPhastInput::New(ifs, strPrefix);
 	if (!pInput) return FALSE;
@@ -1959,6 +1977,11 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 		model.m_printFreq      = printFreq;
 		model.m_timeControl2   = timeControl2;
 		model.m_solutionMethod = solutionMethod;
+
+		// load xml data
+		//
+		CXMLSerializer xmls;
+		xmls.load(xml, model);
 
 		this->New(model);
 
@@ -2153,7 +2176,17 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 void CWPhastDoc::OnFileExport()
 {
 	CString newName;
-	newName = this->GetTitle() + ".trans.dat";
+	newName = this->GetTitle();
+
+	TCHAR szDrive[_MAX_DRIVE];
+	TCHAR szDir[_MAX_DIR];
+	TCHAR szFName[_MAX_FNAME];
+	TCHAR szExt[_MAX_EXT];
+
+	::_tsplitpath_s(newName.GetBuffer(), szDrive, _MAX_DRIVE, szDir, _MAX_DIR, szFName, _MAX_FNAME, szExt, _MAX_EXT);
+	newName = szFName;
+	newName += ".trans.dat";
+
 	if (!DoPromptFileName(newName, IDS_EXPORT_PHAST_TRANS_136,
 	  OFN_HIDEREADONLY, FALSE))
 		return; // save cancelled
@@ -2174,11 +2207,14 @@ void CWPhastDoc::OnFileExport()
 		lstrcpy(szPath, szLinkName);
 
 	CString strPath(szPath);
-	if (strPath.Find(_T(".trans.dat")) == -1) {
+// COMMENT: {7/12/2006 8:11:24 PM}	if (strPath.Find(_T(".trans.dat")) == -1)
+	if (strPath.Right(10).CompareNoCase(".trans.dat") != 0)
+	{
 		strPath += ".trans.dat";
 	}
 
-	if (!this->DoExport(strPath)) {
+	if (!this->DoExport(strPath))
+	{
 		::AfxMessageBox("An error occured during the export", MB_OK);
 		this->SetModifiedFlag(FALSE);
 	}
@@ -2198,18 +2234,56 @@ BOOL CWPhastDoc::DoExport(LPCTSTR lpszPathName)
 		return FALSE;
 	}
 
-	CString path = this->GetPathName();
-	if (path.IsEmpty())
+	// preserve cd
+	CSaveCurrentDirectory save;
+
+	TCHAR szDrive[_MAX_DRIVE];
+	TCHAR szDir[_MAX_DIR];
+	TCHAR szFName[_MAX_FNAME];
+	TCHAR szExt[_MAX_EXT];
+	::_tsplitpath_s(lpszPathName, szDrive, _MAX_DRIVE, szDir, _MAX_DIR, szFName, _MAX_FNAME, szExt, _MAX_EXT);
+
+	TCHAR szDirectory[_MAX_DIR];
+	::_tmakepath_s(szDirectory, _MAX_DIR, szDrive, szDir, NULL, NULL);
+	save.SetCurrentDirectory(szDirectory);
+
+	CString strPrefix(szFName);
+	if (strPrefix.Right(6).CompareNoCase(".trans") == 0)
 	{
-		ofs << "# Exported from WPhast(Unsaved File)\n";
-	}
-	else
-	{
-		ofs << "# Exported from WPhast(" << (LPCTSTR)path <<  ")\n";
+		strPrefix = strPrefix.Left(strPrefix.GetLength() - 6);
 	}
 
+	this->XMLExport(ofs, strPrefix);
 	return this->WriteTransDat(ofs);
 }
+
+BOOL CWPhastDoc::XMLExport(std::ostream& os, const char *prefix)
+{
+	CXMLSerializer x;
+
+	const char* xml = x.writeDOM(this, prefix);
+	std::string str(xml);
+	std::istringstream iss(str);
+
+	while(iss)
+	{
+		std::string s;
+		std::getline(iss, s);
+
+		// skip over empty lines
+		//
+		if (!s.empty()) 
+		{
+			os << "# " << s << std::endl;
+		}
+	}
+
+	// add empty comment line
+	os << "# " << std::endl;
+
+	return TRUE;
+}
+
 
 BOOL CWPhastDoc::WriteTransDat(std::ostream& os)
 {

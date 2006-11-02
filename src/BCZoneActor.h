@@ -44,7 +44,7 @@ protected:
 
 protected:
 	CBC m_bc;
-	static float s_color[3][3];
+	static vtkFloatingPointType s_color[3][3];
 	static vtkProperty* s_Property[3];
 
 private:

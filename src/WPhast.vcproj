@@ -44,8 +44,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="$(DEV_VTK42_INC);$(DEV_HDF5_INC)"
-				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;__WPHAST__"
+				AdditionalIncludeDirectories="$(DEV_VTK42_VS8_DLL_INC);$(DEV_HDF5_INC);$(DEV_XERCES)/include"
+				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;__WPHAST__;_CRT_SECURE_NO_DEPRECATE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -69,9 +69,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(DEV_VTK42_LINK) vtkParallel.lib hdf5ddll.lib"
+				AdditionalDependencies="$(DEV_VTK42_LINK) hdf5ddll.lib xerces-c_2.lib"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="$(DEV_VTK42_LIB);$(DEV_HDF5_LIBDLL_D)"
+				AdditionalLibraryDirectories="$(DEV_VTK42_VS8_DLL_LIB);$(DEV_HDF5_LIBDLL_D);$(DEV_XERCES)/lib"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				TargetMachine="1"
@@ -132,8 +132,8 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				OmitFramePointers="true"
-				AdditionalIncludeDirectories="$(DEV_VTK42_VS7_DLL_INC);$(DEV_HDF5_INC)"
-				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;__WPHAST__"
+				AdditionalIncludeDirectories="$(DEV_VTK42_VS7_DLL_INC);$(DEV_HDF5_INC);$(DEV_XERCES)/include"
+				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;__WPHAST__;_CRT_SECURE_NO_DEPRECATE"
 				StringPooling="true"
 				MinimalRebuild="false"
 				RuntimeLibrary="0"
@@ -158,9 +158,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(DEV_VTK42_LINK) vtkParallel.lib hdf5dll.lib"
+				AdditionalDependencies="$(DEV_VTK42_LINK) vtkParallel.lib hdf5dll.lib xerces-c_2.lib"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="$(DEV_VTK42_VS7_DLL_LIB);$(DEV_HDF5_LIBDLL)"
+				AdditionalLibraryDirectories="$(DEV_VTK42_VS7_DLL_LIB);$(DEV_HDF5_LIBDLL);$(DEV_XERCES)/lib"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				OptimizeReferences="2"
@@ -222,8 +222,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="$(DEV_VTK44_MEM_INC);$(DEV_HDF5_INC)"
-				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;__WPHAST__"
+				AdditionalIncludeDirectories="C:\Program Files\vtk-4.4-vs8-mem\include\vtk;$(DEV_HDF5_INC);$(DEV_XERCES)/include"
+				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;__WPHAST__;_CRT_SECURE_NO_DEPRECATE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -247,9 +247,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="OpenGL32.Lib hdf5ddll.lib $(DEV_VTK42_LINK)"
+				AdditionalDependencies="OpenGL32.Lib hdf5ddll.lib $(DEV_VTK42_LINK) xerces-c_2.lib"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="$(DEV_VTK44_MEM_LIB_D);$(DEV_HDF5_LIBDLL_D)"
+				AdditionalLibraryDirectories="C:\Program Files\vtk-4.4-vs8-mem\lib\vtk;$(DEV_HDF5_LIBDLL_D);$(DEV_XERCES)/lib"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				TargetMachine="1"
@@ -277,6 +277,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				CommandLine="copy /Y &quot;$(DEV_HDF5_LIBDLL_D)\hdf5ddll.dll&quot;           &quot;$(TargetDir)hdf5ddll.dll&quot;   &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_XERCES)\bin\xerces-c_2_7.dll&quot;        &quot;$(TargetDir)xerces-c_2_7.dll&quot; &gt; NUL&#x0D;&#x0A;&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
@@ -309,7 +310,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(DEV_CPPUNIT_INC)&quot;;&quot;C:\3RDPARTY\vtk-4-2-1-bin-mem-VS8\include&quot;;&quot;$(DEV_HDF5_INC)&quot;"
+				AdditionalIncludeDirectories="&quot;$(DEV_CPPUNIT_INC)&quot;;&quot;$(DEV_VTK_421_MEM_VS8_INC)&quot;;&quot;$(DEV_HDF5_INC)&quot;;&quot;$(DEV_XERCES)/include&quot;"
 				PreprocessorDefinitions="__CPPUNIT__;WIN32;_WINDOWS;_DEBUG;__WPHAST__;_CRT_SECURE_NO_DEPRECATE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -335,9 +336,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="cppunitdVS8.lib OpenGL32.Lib hdf5ddll.lib $(DEV_VTK42_LINK)"
+				AdditionalDependencies="cppunitdVS8.lib OpenGL32.Lib hdf5ddll.lib $(DEV_VTK42_LINK) xerces-c_2.lib"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="&quot;C:\cygwin\home\charlton\programs\tmp\cppunit-1.8.0\lib&quot;;&quot;C:\3RDPARTY\vtk-4-2-1-bin-mem-VS8\bin\debug&quot;;&quot;$(DEV_HDF5_LIBDLL_D)&quot;"
+				AdditionalLibraryDirectories="&quot;C:\cygwin\home\charlton\programs\tmp\cppunit-1.8.0\lib&quot;;&quot;$(DEV_VTK_421_MEM_VS8_LIB)&quot;;&quot;$(DEV_HDF5_LIBDLL_D)&quot;;&quot;$(DEV_XERCES)/lib&quot;"
 				DelayLoadDLLs=""
 				GenerateDebugInformation="true"
 				SubSystem="2"
@@ -367,7 +368,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="copying dlls"
-				CommandLine="copy /Y &quot;$(DEV_HDF5_LIBDLL_D)\hdf5ddll.dll&quot;           &quot;$(TargetDir)hdf5ddll.dll&quot;   &gt; NUL"
+				CommandLine="copy /Y &quot;$(DEV_HDF5_LIBDLL_D)\hdf5ddll.dll&quot;           &quot;$(TargetDir)hdf5ddll.dll&quot;   &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_XERCES)\bin\xerces-c_2_7.dll&quot;        &quot;$(TargetDir)xerces-c_2_7.dll&quot; &gt; NUL&#x0D;&#x0A;&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
@@ -406,7 +407,7 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				OmitFramePointers="true"
-				AdditionalIncludeDirectories="$(DEV_VTK42_VS8_DLL_INC);$(DEV_HDF5_INC)"
+				AdditionalIncludeDirectories="$(DEV_VTK42_VS8_DLL_INC);$(DEV_HDF5_INC);$(DEV_XERCES)/include"
 				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;__WPHAST__;WPHAST_AUTOMATION;_CRT_SECURE_NO_DEPRECATE"
 				StringPooling="true"
 				MinimalRebuild="false"
@@ -432,9 +433,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(DEV_VTK42_LINK) hdf5dll.lib"
+				AdditionalDependencies="$(DEV_VTK42_LINK) hdf5dll.lib xerces-c_2.lib"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="$(DEV_VTK42_VS8_DLL_LIB);$(DEV_HDF5_LIBDLL)"
+				AdditionalLibraryDirectories="$(DEV_VTK42_VS8_DLL_LIB);$(DEV_HDF5_LIBDLL);$(DEV_XERCES)/lib"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				OptimizeReferences="2"
@@ -466,7 +467,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Copying dlls"
-				CommandLine="copy /Y &quot;$(DEV_HDF5_LIBDLL)\hdf5dll.dll&quot;            &quot;$(TargetDir)hdf5dll.dll&quot;      &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_HDF5_LIBDLL)\zlib.dll&quot;               &quot;$(TargetDir)zlib.dll&quot;         &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkCommon.dll&quot;    &quot;$(TargetDir)vtkCommon.dll&quot;    &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkFiltering.dll&quot; &quot;$(TargetDir)vtkFiltering.dll&quot; &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkGraphics.dll&quot;  &quot;$(TargetDir)vtkGraphics.dll&quot;  &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkHybrid.dll&quot;    &quot;$(TargetDir)vtkHybrid.dll&quot;    &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkIO.dll&quot;        &quot;$(TargetDir)vtkIO.dll&quot;        &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkImaging.dll&quot;   &quot;$(TargetDir)vtkImaging.dll&quot;   &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkRendering.dll&quot; &quot;$(TargetDir)vtkRendering.dll&quot; &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkexpat.dll&quot;     &quot;$(TargetDir)vtkexpat.dll&quot;     &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkfreetype.dll&quot;  &quot;$(TargetDir)vtkfreetype.dll&quot;  &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkftgl.dll&quot;      &quot;$(TargetDir)vtkftgl.dll&quot;      &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkjpeg.dll&quot;      &quot;$(TargetDir)vtkjpeg.dll&quot;      &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkpng.dll&quot;       &quot;$(TargetDir)vtkpng.dll&quot;       &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtktiff.dll&quot;      &quot;$(TargetDir)vtktiff.dll&quot;      &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkzlib.dll&quot;      &quot;$(TargetDir)vtkzlib.dll&quot;      &gt; NUL&#x0D;&#x0A;"
+				CommandLine="copy /Y &quot;$(DEV_HDF5_LIBDLL)\hdf5dll.dll&quot;            &quot;$(TargetDir)hdf5dll.dll&quot;      &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_HDF5_LIBDLL)\zlib.dll&quot;               &quot;$(TargetDir)zlib.dll&quot;         &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkCommon.dll&quot;    &quot;$(TargetDir)vtkCommon.dll&quot;    &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkFiltering.dll&quot; &quot;$(TargetDir)vtkFiltering.dll&quot; &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkGraphics.dll&quot;  &quot;$(TargetDir)vtkGraphics.dll&quot;  &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkHybrid.dll&quot;    &quot;$(TargetDir)vtkHybrid.dll&quot;    &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkIO.dll&quot;        &quot;$(TargetDir)vtkIO.dll&quot;        &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkImaging.dll&quot;   &quot;$(TargetDir)vtkImaging.dll&quot;   &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkRendering.dll&quot; &quot;$(TargetDir)vtkRendering.dll&quot; &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkexpat.dll&quot;     &quot;$(TargetDir)vtkexpat.dll&quot;     &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkfreetype.dll&quot;  &quot;$(TargetDir)vtkfreetype.dll&quot;  &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkftgl.dll&quot;      &quot;$(TargetDir)vtkftgl.dll&quot;      &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkjpeg.dll&quot;      &quot;$(TargetDir)vtkjpeg.dll&quot;      &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkpng.dll&quot;       &quot;$(TargetDir)vtkpng.dll&quot;       &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtktiff.dll&quot;      &quot;$(TargetDir)vtktiff.dll&quot;      &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkzlib.dll&quot;      &quot;$(TargetDir)vtkzlib.dll&quot;      &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_XERCES)\bin\xerces-c_2_7.dll&quot;        &quot;$(TargetDir)xerces-c_2_7.dll&quot; &gt; NUL&#x0D;&#x0A;&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
@@ -498,8 +499,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="$(DEV_VTK42_INC);$(DEV_HDF5_INC)"
-				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;__WPHAST__;WPHAST_AUTOMATION"
+				AdditionalIncludeDirectories="$(DEV_VTK42_VS8_DLL_INC);$(DEV_HDF5_INC);$(DEV_XERCES)/include"
+				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;__WPHAST__;WPHAST_AUTOMATION;_CRT_SECURE_NO_DEPRECATE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -523,9 +524,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(DEV_VTK42_LINK) vtkParallel.lib hdf5ddll.lib"
+				AdditionalDependencies="$(DEV_VTK42_LINK) hdf5ddll.lib xerces-c_2.lib"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="$(DEV_VTK42_LIB);$(DEV_HDF5_LIBDLL_D)"
+				AdditionalLibraryDirectories="$(DEV_VTK42_VS8_DLL_LIB);$(DEV_HDF5_LIBDLL_D);$(DEV_XERCES)/lib"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				TargetMachine="1"
@@ -553,95 +554,8 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-			/>
-		</Configuration>
-		<Configuration
-			Name="cppunit4.4|Win32"
-			OutputDirectory="cppunit4.4"
-			IntermediateDirectory="cppunit4.4"
-			ConfigurationType="1"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC70.vsprops"
-			UseOfMFC="2"
-			CharacterSet="2"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-				PreprocessorDefinitions="_DEBUG"
-				MkTypLibCompatible="false"
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				Optimization="0"
-				AdditionalIncludeDirectories="$(DEV_CPPUNIT_INC);$(DEV_VTK44_MEM_INC);$(DEV_HDF5_INC)"
-				PreprocessorDefinitions="__CPPUNIT__;WIN32;_WINDOWS;_DEBUG;__WPHAST__"
-				MinimalRebuild="true"
-				BasicRuntimeChecks="3"
-				RuntimeLibrary="3"
-				TreatWChar_tAsBuiltInType="true"
-				UsePrecompiledHeader="2"
-				BrowseInformation="1"
-				BrowseInformationFile="$(IntDir)/"
-				WarningLevel="3"
-				Detect64BitPortabilityProblems="true"
-				DebugInformationFormat="4"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="_DEBUG"
-				Culture="1033"
-				AdditionalIncludeDirectories="$(IntDir)"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLinkerTool"
-				AdditionalDependencies="cppunitdVS7.lib OpenGL32.Lib hdf5ddll.lib $(DEV_VTK42_LINK)"
-				LinkIncremental="2"
-				AdditionalLibraryDirectories="$(DEV_CPPUNIT_LIB);$(DEV_VTK44_MEM_LIB_D);$(DEV_HDF5_LIBDLL_D)"
-				DelayLoadDLLs=""
-				GenerateDebugInformation="true"
-				SubSystem="2"
-				TargetMachine="1"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
+				Description="Copying dlls"
+				CommandLine="copy /Y &quot;$(DEV_HDF5_LIBDLL_D)\hdf5ddll.dll&quot;           &quot;$(TargetDir)hdf5ddll.dll&quot;   &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkCommon.dll&quot;    &quot;$(TargetDir)vtkCommon.dll&quot;    &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkFiltering.dll&quot; &quot;$(TargetDir)vtkFiltering.dll&quot; &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkGraphics.dll&quot;  &quot;$(TargetDir)vtkGraphics.dll&quot;  &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkHybrid.dll&quot;    &quot;$(TargetDir)vtkHybrid.dll&quot;    &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkIO.dll&quot;        &quot;$(TargetDir)vtkIO.dll&quot;        &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkImaging.dll&quot;   &quot;$(TargetDir)vtkImaging.dll&quot;   &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkRendering.dll&quot; &quot;$(TargetDir)vtkRendering.dll&quot; &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkexpat.dll&quot;     &quot;$(TargetDir)vtkexpat.dll&quot;     &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkfreetype.dll&quot;  &quot;$(TargetDir)vtkfreetype.dll&quot;  &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkftgl.dll&quot;      &quot;$(TargetDir)vtkftgl.dll&quot;      &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkjpeg.dll&quot;      &quot;$(TargetDir)vtkjpeg.dll&quot;      &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkpng.dll&quot;       &quot;$(TargetDir)vtkpng.dll&quot;       &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtktiff.dll&quot;      &quot;$(TargetDir)vtktiff.dll&quot;      &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkzlib.dll&quot;      &quot;$(TargetDir)vtkzlib.dll&quot;      &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_XERCES)\bin\xerces-c_2_7.dll&quot;        &quot;$(TargetDir)xerces-c_2_7.dll&quot; &gt; NUL&#x0D;&#x0A;&#x0D;&#x0A;"
 			/>
 		</Configuration>
 	</Configurations>
@@ -833,14 +747,6 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="AutoDebug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="cppunit4.4|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1113,6 +1019,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\SaveCurrentDirectory.cpp"
+				>
+			</File>
+			<File
 				RelativePath="ScalePropertyPage.cpp"
 				>
 			</File>
@@ -1271,14 +1181,6 @@
 						UsePrecompiledHeader="1"
 					/>
 				</FileConfiguration>
-				<FileConfiguration
-					Name="cppunit4.4|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="1"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="SteadyFlow.cpp"
@@ -1364,6 +1266,30 @@
 				RelativePath="Utilities.cpp"
 				>
 				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="vtkMemDebug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
 					Name="cppunit|Win32"
 					>
 					<Tool
@@ -1373,6 +1299,14 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="AutoRelease|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="AutoDebug|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1483,14 +1417,6 @@
 						Name="VCMIDLTool"
 					/>
 				</FileConfiguration>
-				<FileConfiguration
-					Name="cppunit4.4|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCMIDLTool"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="WPhastDoc.cpp"
@@ -1498,6 +1424,10 @@
 			</File>
 			<File
 				RelativePath="WPhastView.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\XMLSerializer.cpp"
 				>
 			</File>
 			<File
@@ -1938,6 +1868,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\SaveCurrentDirectory.h"
+				>
+			</File>
+			<File
 				RelativePath="ScalePropertyPage.h"
 				>
 			</File>
@@ -2207,6 +2141,10 @@
 			</File>
 			<File
 				RelativePath="WPhastView.h"
+				>
+			</File>
+			<File
+				RelativePath=".\XMLSerializer.h"
 				>
 			</File>
 			<File
@@ -2811,11 +2749,11 @@
 				>
 			</File>
 			<File
-				RelativePath="SOLUTE_TRUE.rtf"
+				RelativePath="res\SOLUTE_TRUE.rtf"
 				>
 			</File>
 			<File
-				RelativePath="res\SOLUTE_TRUE.rtf"
+				RelativePath="SOLUTE_TRUE.rtf"
 				>
 			</File>
 			<File
@@ -2963,14 +2901,6 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="AutoDebug|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCustomBuildTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="cppunit4.4|Win32"
 					ExcludedFromBuild="true"
 					>
 					<Tool
@@ -3184,14 +3114,6 @@
 						>
 						<Tool
 							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="cppunit4.4|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="2"
 						/>
 					</FileConfiguration>
 				</File>
@@ -4281,14 +4203,6 @@
 						UsePrecompiledHeader="0"
 					/>
 				</FileConfiguration>
-				<FileConfiguration
-					Name="cppunit4.4|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="srcinput\check.c"
@@ -4335,14 +4249,6 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="AutoDebug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="cppunit4.4|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -4401,14 +4307,6 @@
 						UsePrecompiledHeader="0"
 					/>
 				</FileConfiguration>
-				<FileConfiguration
-					Name="cppunit4.4|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="srcinput\getopt.h"
@@ -4459,14 +4357,6 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="AutoDebug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="cppunit4.4|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -4537,14 +4427,6 @@
 						UsePrecompiledHeader="0"
 					/>
 				</FileConfiguration>
-				<FileConfiguration
-					Name="cppunit4.4|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="srcinput\message.c"
@@ -4591,14 +4473,6 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="AutoDebug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="cppunit4.4|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -4657,14 +4531,6 @@
 						UsePrecompiledHeader="0"
 					/>
 				</FileConfiguration>
-				<FileConfiguration
-					Name="cppunit4.4|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="Parser.cpp"
@@ -4711,14 +4577,6 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="AutoDebug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="cppunit4.4|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -4781,14 +4639,6 @@
 						UsePrecompiledHeader="0"
 					/>
 				</FileConfiguration>
-				<FileConfiguration
-					Name="cppunit4.4|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="phqalloc.c"
@@ -4835,14 +4685,6 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="AutoDebug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="cppunit4.4|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -4905,14 +4747,6 @@
 						UsePrecompiledHeader="0"
 					/>
 				</FileConfiguration>
-				<FileConfiguration
-					Name="cppunit4.4|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="srcinput\rivers.c"
@@ -4965,14 +4799,6 @@
 						UsePrecompiledHeader="0"
 					/>
 				</FileConfiguration>
-				<FileConfiguration
-					Name="cppunit4.4|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="srcinput\structures.c"
@@ -5019,14 +4845,6 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="AutoDebug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="cppunit4.4|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -5095,15 +4913,6 @@
 						ObjectFile="$(IntDir)/$(InputName)1.obj"
 					/>
 				</FileConfiguration>
-				<FileConfiguration
-					Name="cppunit4.4|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-						ObjectFile="$(IntDir)/$(InputName)1.obj"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="srcinput\time.h"
@@ -5154,14 +4963,6 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="AutoDebug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="cppunit4.4|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -5220,14 +5021,6 @@
 						UsePrecompiledHeader="0"
 					/>
 				</FileConfiguration>
-				<FileConfiguration
-					Name="cppunit4.4|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="srcinput\write.c"
@@ -5274,14 +5067,6 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="AutoDebug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="cppunit4.4|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -5345,14 +5130,6 @@
 						ObjectFile="$(IntDir)/$(InputName)1.obj"
 					/>
 				</FileConfiguration>
-				<FileConfiguration
-					Name="cppunit4.4|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)/$(InputName)1.obj"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="sizecbar\scbarcf.h"
@@ -5403,14 +5180,6 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="AutoDebug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)/$(InputName)1.obj"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="cppunit4.4|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -5473,14 +5242,6 @@
 						ObjectFile="$(IntDir)/$(InputName)1.obj"
 					/>
 				</FileConfiguration>
-				<FileConfiguration
-					Name="cppunit4.4|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)/$(InputName)1.obj"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="sizecbar\scbarg.h"
@@ -5531,14 +5292,6 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="AutoDebug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)/$(InputName)1.obj"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="cppunit4.4|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -5601,14 +5354,6 @@
 						ObjectFile="$(IntDir)/$(InputName)1.obj"
 					/>
 				</FileConfiguration>
-				<FileConfiguration
-					Name="cppunit4.4|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)/$(InputName)1.obj"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="sizecbar\sizecbar.h"
@@ -5635,17 +5380,17 @@
 			Name="Build Logs"
 			>
 			<File
+				RelativePath="Debug\BuildLog.htm"
+				DeploymentContent="true"
+				>
+			</File>
+			<File
 				RelativePath="Release\BuildLog.htm"
 				DeploymentContent="true"
 				>
 			</File>
 			<File
 				RelativePath="cppunit\BuildLog.htm"
-				DeploymentContent="true"
-				>
-			</File>
-			<File
-				RelativePath="Debug\BuildLog.htm"
 				DeploymentContent="true"
 				>
 			</File>
@@ -5704,14 +5449,6 @@
 						Name="VCCLCompilerTool"
 					/>
 				</FileConfiguration>
-				<FileConfiguration
-					Name="cppunit4.4|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\..\..\..\3RDPARTY\vtk-4-2-1\Graphics\vtkPlaneSource.cxx"
@@ -5764,14 +5501,6 @@
 						Name="VCCLCompilerTool"
 					/>
 				</FileConfiguration>
-				<FileConfiguration
-					Name="cppunit4.4|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\..\..\..\3RDPARTY\vtk-4-2-1\Rendering\vtkPropPicker.cxx"
@@ -5818,14 +5547,6 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="AutoDebug|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="cppunit4.4|Win32"
 					ExcludedFromBuild="true"
 					>
 					<Tool
@@ -5983,14 +5704,6 @@
 							Name="VCCLCompilerTool"
 						/>
 					</FileConfiguration>
-					<FileConfiguration
-						Name="cppunit4.4|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="gridctrl\GridCell.h"
@@ -6047,20 +5760,24 @@
 							Name="VCCLCompilerTool"
 						/>
 					</FileConfiguration>
-					<FileConfiguration
-						Name="cppunit4.4|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="gridctrl\GridCellBase.h"
 					>
 				</File>
 			</Filter>
+		</Filter>
+		<Filter
+			Name="xml"
+			>
+			<File
+				RelativePath=".\xml\StrX.h"
+				>
+			</File>
+			<File
+				RelativePath=".\xml\XStr.h"
+				>
+			</File>
 		</Filter>
 		<File
 			RelativePath="Bugs.txt"

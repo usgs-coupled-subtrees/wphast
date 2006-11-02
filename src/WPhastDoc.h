@@ -279,6 +279,8 @@ public:
 	BOOL DoImport(LPCTSTR lpszPathName);
 	BOOL DoExport(LPCTSTR lpszPathName);
 	BOOL WriteTransDat(std::ostream& os);
+	BOOL XMLExport(std::ostream& os, const char *prefix);
+	friend class CXMLSerializer;
 
 	afx_msg void OnUpdateEditUndo(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateEditRedo(CCmdUI *pCmdUI);

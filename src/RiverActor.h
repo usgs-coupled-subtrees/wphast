@@ -164,7 +164,7 @@ protected:
 
 	static vtkProperty *s_HandleProperty;
 	static vtkProperty *s_ConnectorProperty;
-	static float s_color[3];
+	static vtkFloatingPointType s_color[3];
 
 	int HighlightHandle(vtkProp *prop);
 
