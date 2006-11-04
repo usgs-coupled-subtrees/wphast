@@ -145,9 +145,14 @@ echo "Removed and recreated $DIST_SANDBOX"
 
 echo "Exporting revision $REVISION of WPHAST into sandbox..."
 (cd "$DIST_SANDBOX" && \
- 	${SVN:-svn} export -q $EXTRA_EXPORT_OPTIONS -r "$REVISION" \
+ 	${SVN:-svn} export -q $EXTRA_EXPORT_OPTIONS --ignore-externals -r "$REVISION" \
 	     "http://internalbrr.cr.usgs.gov/svn_GW/WPhast/$REPOS_PATH" \
 	     "$DISTNAME")
+
+(cd "$DIST_SANDBOX" && \
+ 	${SVN:-svn} export -q $EXTRA_EXPORT_OPTIONS --ignore-externals -r "$REVISION" \
+	     "http://internalbrr.cr.usgs.gov/svn_GW/phast/trunk/srcinput" \
+	     "$DISTNAME/src/srcinput")
 
 ver_major=`echo $VERSION | cut -d '.' -f 1`
 ver_minor=`echo $VERSION | cut -d '.' -f 2`
@@ -160,8 +165,8 @@ fi
 VERSION_LONG="$ver_major.$ver_minor.$ver_patch.$REVISION_SVN"
 
 SED_FILES="$DISTPATH/setup/Version.wxs \
-           $DISTPATH/Version.h \
-           $DISTPATH/WPhast.rc"
+           $DISTPATH/src/Version.h \
+           $DISTPATH/src/WPhast.rc"
 
 for vsn_file in $SED_FILES
 do
@@ -193,9 +198,6 @@ if [ -z "$ZIP" ]; then
   (cd "$DIST_SANDBOX" > /dev/null && tar c "$DISTNAME") > \
     "$DISTNAME.tar"
 
-##  echo "Compressing to $DISTNAME.tar.bz2 ..."
-##  bzip2 -9fk "$DISTNAME.tar"
-
   echo "Compressing to $DISTNAME.tar.gz ..."
   gzip -9f "$DISTNAME.tar"
 else
@@ -209,17 +211,14 @@ rm -rf "$DIST_SANDBOX"
 echo ""
 echo "Done:"
 if [ -z "$ZIP" ]; then
-##  ls -l "$DISTNAME.tar.gz" "$DISTNAME.tar.bz2"
   ls -l "$DISTNAME.tar.gz"
   echo ""
   echo "md5sums:"
-##  md5sum "$DISTNAME.tar.gz" "$DISTNAME.tar.bz2"
   md5sum "$DISTNAME.tar.gz"
   type sha1sum > /dev/null 2>&1
   if [ $? -eq 0 ]; then
     echo ""
     echo "sha1sums:"
-##    sha1sum "$DISTNAME.tar.gz" "$DISTNAME.tar.bz2"
     sha1sum "$DISTNAME.tar.gz"
   fi
 else
