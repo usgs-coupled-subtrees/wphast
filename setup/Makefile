@@ -30,6 +30,10 @@ MSIEXEC := msiexec
 
 PHAST := $(PHAST_EXE_PATH)
 
+DEV_VTK42_VS8_DLL_BIN_CYG = /cygdrive/c/PROGRA~1/VTK-4-~1/bin
+
+DEV_HDF5_LIBDLL_CYG = /cygdrive/c/3RDPARTY/HDF5/5-143-~1/c/release/dll
+
 BINARIES=\
 	Binary/Banner.bmp\
 	Binary/Banner.bmp\
@@ -120,11 +124,13 @@ import_clean :
 
 .SECONDARY : $(VTK_DLLS) $(HDF_DLLS)
 
-$(VTK_DLL_DIR)% :: $(DEV_VTK42_VS8_DLL_BIN)/%
+$(VTK_DLL_DIR)/%.dll :: $(DEV_VTK42_VS8_DLL_BIN_CYG)/%.dll
 	install -m 755 $^ $@
 
-$(HDF_DLL_DIR)% :: $(DEV_HDF5_LIBDLL)/%
+$(HDF_DLL_DIR)/%.dll :: $(DEV_HDF5_LIBDLL_CYG)/%.dll
 	install -m 755 $^ $@
+
+dlls : $(HDF_DLLS) $(VTK_DLLS)
 
 dll_clean :
 	rm -rf $(HDF_DLLS) $(VTK_DLLS)
