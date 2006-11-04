@@ -93,7 +93,7 @@ HDF_DLLS=\
 
 all : WPhast.msi
 
-WPhast.msi : WPhast.wixobj $(WPHAST_EXE) $(BINARIES) $(WPHAST_FILES) $(PHAST)
+WPhast.msi : WPhast.wixobj $(WPHAST_EXE) $(BINARIES) $(WPHAST_FILES) # $(PHAST)
 	$(LIGHT) $(LIGHT_FLAGS) WPhast.wixobj
 
 WPhast.wixobj : WPhast.wxs Version.wxs
