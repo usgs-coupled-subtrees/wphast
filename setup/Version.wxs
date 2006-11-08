@@ -12,6 +12,8 @@
 <?endif?>
 <?define hdfDllPath="$(env.DEV_HDF5_LIBDLL)"?>
 <?define phastExePath="$(env.PHAST_EXE_PATH)"?>
+<?define xercesDllPath="$(env.DEV_XERCES)\bin"?>
+
 
 <?define Version=$(var.Major).$(var.Minor).$(var.Build)?>
 <?define Description="USGS $(var.Name) $(var.Major).$(var.Minor).$(var.Build) Installer"?>

@@ -96,6 +96,10 @@
                 <File Id="F__zlib.dll"    Name="zlib.dll" Vital="yes" DiskId='1' src="$(var.hdfDllPath)\zlib.dll" />
               </Component>
 
+              <Component Id='C__xercesLibrary' Guid='{35506FB9-2592-4f94-97E2-4B69C2D2DAE2}'>
+                <File Id="F__xerces_c_2_7.dll" Name="XERCES_1.DLL" LongName="xerces-c_2_7.dll" Vital="yes" DiskId='1' src="$(var.xercesDllPath)\xerces-c_2_7.dll" />
+              </Component>
+
               <Component Id='C__vtkLibrary' Guid='17CA7172-23E7-4b41-8890-09D4373E57DD'>
                 <File Id="F__vtkCommon.dll"    Name="VTKCOM_1.DLL" LongName="vtkCommon.dll" Vital="yes" DiskId='1' src="$(var.vtkDllPath)\vtkCommon.dll" />
                 <File Id="F__vtkexpat.dll"     Name="vtkexpat.dll" Vital="yes" DiskId='1' src="$(var.vtkDllPath)\vtkexpat.dll" />
@@ -285,6 +289,7 @@
       <Feature Id='F__MainProgram' Title='Program' Description='The main executable.' TypicalDefault='install' Level='1'>
         <ComponentRef Id='C__MainExecutable' />
         <ComponentRef Id='C__hdf5Library' />
+        <ComponentRef Id='C__xercesLibrary' />
         <ComponentRef Id='C__vtkLibrary' />
 <?ifdef VS2005 ?>
         <MergeRef Id='CRT' />
