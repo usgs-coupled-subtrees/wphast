@@ -1243,10 +1243,6 @@
 				>
 			</File>
 			<File
-				RelativePath="unit_impl.cxx"
-				>
-			</File>
-			<File
 				RelativePath="Units.cpp"
 				>
 			</File>
@@ -1256,10 +1252,6 @@
 			</File>
 			<File
 				RelativePath="Units2PropertyPage.cpp"
-				>
-			</File>
-			<File
-				RelativePath="units_impl.cxx"
 				>
 			</File>
 			<File
@@ -4952,6 +4944,30 @@
 				>
 			</File>
 			<File
+				RelativePath=".\srcinput\unit_impl.cxx"
+				>
+				<FileConfiguration
+					Name="AutoRelease|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\srcinput\units_impl.cxx"
+				>
+				<FileConfiguration
+					Name="AutoRelease|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath="srcinput\utilities.c"
 				>
 				<FileConfiguration
@@ -5422,17 +5438,17 @@
 			Name="Build Logs"
 			>
 			<File
+				RelativePath="Release\BuildLog.htm"
+				DeploymentContent="true"
+				>
+			</File>
+			<File
 				RelativePath="cppunit\BuildLog.htm"
 				DeploymentContent="true"
 				>
 			</File>
 			<File
 				RelativePath="Debug\BuildLog.htm"
-				DeploymentContent="true"
-				>
-			</File>
-			<File
-				RelativePath="Release\BuildLog.htm"
 				DeploymentContent="true"
 				>
 			</File>
