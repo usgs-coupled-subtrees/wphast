@@ -3,10 +3,8 @@
 
 #include "PhastInput.h"
 
-extern "C" {
 int read_time_control(void);
 int check_time_units(struct time *time_ptr, int required, char *errstr);
-}
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

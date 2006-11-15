@@ -5,12 +5,7 @@
 #include "TimeSeries.h"
 #include "TimeControl2.h"
 
-extern "C" {
 int read_time_control(void);
-struct time_series time_step;
-struct time *time_end;
-int count_time_end;
-}
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

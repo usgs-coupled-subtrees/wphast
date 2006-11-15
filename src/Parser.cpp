@@ -1,25 +1,21 @@
 #include <windows.h>
 #include "Parser.h"
 
-extern "C" {
 
 extern int   max_line;
 extern char  *line;
 extern char  *line_save;
 extern int   next_keyword;
 
-extern int malloc_error(void);
+extern void malloc_error(void);
 extern int check_key (char *str);
 extern int copy_token (char *token_ptr, char **ptr, int *length);
 
-}
 
 // COMMENT: {3/31/2005 4:07:31 PM}#define _CRTDBG_MAP_ALLOC
 // COMMENT: {3/31/2005 4:07:31 PM}#include <stdlib.h>  // ::realloc
 // COMMENT: {3/31/2005 4:07:31 PM}#include <crtdbg.h>  // memory debug routines
-extern "C" {
 #include "phqalloc.h"
-}
 
 #include <cassert>   // assert macro
 #include <iostream>  // std::cerr std::cin std::cout

@@ -3,14 +3,11 @@
 
 #include <fstream>
 
-extern "C"
-{
- int read_specified_value_bc(void);
- int read_flux_bc(void);
- int read_leaky_bc(void);
- int read_river(void);
- int read_well(void);
-}
+int read_specified_value_bc(void);
+int read_flux_bc(void);
+int read_leaky_bc(void);
+int read_river(void);
+int read_well(void);
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -113,8 +110,10 @@ void TestCPhastInput::testWritePulse(void)
 		{
 			std::getline(expected, str_expected, '\n');
 			std::getline(actual,   str_actual,   '\n');
-// COMMENT: {5/22/2006 6:45:07 PM}			::OutputDebugString(str_actual.c_str());
-// COMMENT: {5/22/2006 6:45:07 PM}			::OutputDebugString("\n");
+// COMMENT: {11/14/2006 4:25:35 PM}			::OutputDebugString(str_actual.c_str());
+// COMMENT: {11/14/2006 4:25:35 PM}			::OutputDebugString("\n");
+// COMMENT: {11/14/2006 4:25:35 PM}			::OutputDebugString(str_expected.c_str());
+// COMMENT: {11/14/2006 4:25:35 PM}			::OutputDebugString("\n");
 			CPPUNIT_ASSERT( str_expected == str_actual );
 		}
 		CPPUNIT_ASSERT( expected.eof() && actual.eof() );
@@ -238,11 +237,17 @@ void TestCPhastInput::testCannotChangeBCSolutionType(void)
 				CPPUNIT_ASSERT(pInput != NULL);
 
 				pInput->Load();
+
 				CPPUNIT_ASSERT(pInput->GetErrorCount()   == 0);
 				CPPUNIT_ASSERT(pInput->GetWarningCount() == 1);
 				std::string str_expected("Warning: Solution has been redefined in SPECIFIED_HEAD_BC, definition 1.\n");
 				std::string str_actual(pInput->GetWarningMsg());
 				CPPUNIT_ASSERT(str_expected == str_actual);
+
+// COMMENT: {11/14/2006 8:32:27 PM}				CPPUNIT_ASSERT(pInput->GetErrorCount()   == 1);
+// COMMENT: {11/14/2006 8:32:27 PM}				std::string str_error_expected("ERROR: Data not defined for end of simulation, TIME_CONTROL\n");
+// COMMENT: {11/14/2006 8:32:27 PM}				std::string str_error_actual(pInput->GetErrorMsg());
+// COMMENT: {11/14/2006 8:32:27 PM}				CPPUNIT_ASSERT_EQUAL(str_error_expected, str_error_actual);
 
 				pInput->Delete();
 				pInput = NULL;

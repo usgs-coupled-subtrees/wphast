@@ -5,7 +5,6 @@
 #include "Parser.h"
 #include "PhastInput.h"
 
-extern "C" {
 #define EXTERNAL extern
 #include "srcinput/hstinpt.h"
 #include "srcinput/message.h"
@@ -39,9 +38,7 @@ extern char * string_duplicate (const char *token);
 extern int well_free (Well *well_ptr);
 extern int write_hst(void);
 extern int write_thru(int thru);
-}
 
-extern "C" {
 extern int copy_token (char *token_ptr, char **ptr, int *length);
 ///extern int error_msg (const char *err_str, const int stop);
 extern int read_line_doubles(char *next_char, double **d, int *count_d, int *count_alloc);
@@ -51,9 +48,7 @@ extern char  error_string[10*MAX_LENGTH];
 extern char  *prefix, *transport_name, *chemistry_name, *database_name;
 extern int   head_ic_file_warning;
 extern char  *line;
-}
  
-extern "C" {
 int get_logical_line(FILE *fp, int *l);
 int get_line(FILE *fp);
 int read_file_doubles(char *next_char, double **d, int *count_d, int *count_alloc);
@@ -62,7 +57,6 @@ int load(bool bWritePhastTmp);
 int load_first_sim(bool bWritePhastTmp);
 int load_next_sim(bool bWritePhastTmp);
 int error_msg (const char *err_str, const int stop);
-}
 
 #if !defined(__WPHAST__)
 #error __WPHAST__ must be set

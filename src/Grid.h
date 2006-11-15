@@ -4,11 +4,9 @@
 #endif
 #include <hdf5.h>        /* HDF routines */
 
-extern "C" {
 #define EXTERNAL extern
 #include "srcinput/hstinpt.h"
 #undef EXTERNAL
-}
 
 #include <vector>
 #include <iosfwd>  // std::ostream

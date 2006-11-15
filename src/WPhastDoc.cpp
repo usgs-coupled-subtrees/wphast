@@ -128,9 +128,7 @@ static const TCHAR szZoneFormat[]    = _T("Zone %d");
 static const TCHAR szZoneFind[]      = _T("Zone ");
 
 
-extern "C" {
 int error_msg (const char *err_str, const int stop);
-}
 
 // Note: No header files should follow the following three lines
 #ifdef _DEBUG

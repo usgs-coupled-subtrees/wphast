@@ -5,8 +5,7 @@
 
 #include "PhastInput.h"
 
-class TestCPhastInput :
-	public CppUnit::TestFixture
+class TestCPhastInput : public CppUnit::TestFixture
 {
 	CPPUNIT_TEST_SUITE( TestCPhastInput );
 	CPPUNIT_TEST( test );

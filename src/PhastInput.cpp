@@ -2,8 +2,6 @@
 
 #include <cassert> // assert macro
 
-extern "C"
-{
 #include "phqalloc.h"  // PHRQ_free_all
 #include "srcinput/message.h"
 
@@ -33,7 +31,6 @@ extern int phast_input(bool bWritePhastTmp);
 
 extern int write_hst(void);
 char * string_duplicate (const char *token);
-}
 
 CPhastInput* CPhastInput::s_instance = 0;
 

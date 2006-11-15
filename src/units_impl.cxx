@@ -2,17 +2,15 @@
 
 #include <cassert>
 
-extern "C" {
 #define EXTERNAL extern
 #include "srcinput/hstinpt.h"
 #undef EXTERNAL
-}
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
-units::units(void)
+cunits::cunits(void)
 : time("s")
 , horizontal("m")
 , vertical("m")
@@ -30,11 +28,11 @@ units::units(void)
 {
 }
 
-units::~units(void)
+cunits::~cunits(void)
 {
 }
 
-struct units& units::operator=(const struct units& rhs)
+struct cunits& cunits::operator=(const struct cunits& rhs)
 {
 	assert(::strcmp(this->horizontal.si,           rhs.horizontal.si)          == 0);
 	assert(::strcmp(this->vertical.si,             rhs.vertical.si)            == 0);
@@ -66,4 +64,22 @@ struct units& units::operator=(const struct units& rhs)
 		this->river_bed_thickness = rhs.river_bed_thickness;
 	}
 	return *this;
+}
+
+void cunits::undefine(void)
+{
+	this->time.undefine();
+	this->horizontal.undefine();
+	this->vertical.undefine();
+	this->head.undefine();
+	this->k.undefine();	
+	this->s.undefine();	
+	this->alpha.undefine();	
+	this->leaky_k.undefine();	
+	this->leaky_thick.undefine();	
+	this->flux.undefine();	
+	this->well_diameter.undefine();	
+	this->well_pumpage.undefine();	
+	this->river_bed_k.undefine();	
+	this->river_bed_thickness.undefine();	
 }

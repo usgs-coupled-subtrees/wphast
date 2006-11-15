@@ -2,11 +2,9 @@
 
 #include <iosfwd> // std::ostream
 
-extern "C" {
 #define EXTERNAL extern
 #include "srcinput/hstinpt.h"  // DIRECT ITERATIVE
 #undef EXTERNAL
-}
 
 class CPhastInput;
 

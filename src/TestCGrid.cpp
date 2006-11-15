@@ -3,10 +3,8 @@
 
 #include "PhastInput.h"
 
-extern "C" {
 int read_grid(void);
 int read_input(void);
-}
 
 
 #ifdef _DEBUG

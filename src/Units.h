@@ -5,27 +5,25 @@
 #endif
 #include <hdf5.h>        /* HDF routines */
 
-extern "C" {
 #define EXTERNAL extern
 #include "srcinput/hstinpt.h"
 #undef EXTERNAL
-}
 
 #include <iosfwd> // std::ostream
 
 class CUnits :
-	public units
+	public cunits
 {
 public:
 	// ctor
 	CUnits(void);
 
 	// copy ctor
-	CUnits(const struct units& src);
+	CUnits(const struct cunits& src);
 
 	// copy assignment
 	CUnits& operator=(const CUnits& rhs);
-	CUnits& CUnits::operator=(const struct units& rhs);
+	CUnits& CUnits::operator=(const struct cunits& rhs);
 
 	void Insert(CTreeCtrl* pTreeCtrl, HTREEITEM htiUnits);
 	void Serialize(bool bStoring, hid_t loc_id);

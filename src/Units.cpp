@@ -19,7 +19,7 @@
 
 
 CUnits::CUnits(void)
-	: units()
+	: cunits()
 	, m_htiUnits(0)
 {
 }
@@ -158,8 +158,8 @@ CUnits::CUnits(void)
 //
 //	VERIFY(pTreeCtrl->SetItemData(htiUnits, (DWORD_PTR)this));
 //}
-CUnits::CUnits(const struct units& src) // copy ctor
-	: units(src)
+CUnits::CUnits(const struct cunits& src) // copy ctor
+	: cunits(src)
 	, m_htiUnits(0)
 {
 	// => implicit call to units::units()
@@ -168,14 +168,14 @@ CUnits::CUnits(const struct units& src) // copy ctor
 
 CUnits& CUnits::operator=(const CUnits& rhs)
 {
-	this->units::operator=(rhs);
+	this->cunits::operator=(rhs);
 	this->m_htiUnits = rhs.m_htiUnits;
 	return *this;
 }
 
-CUnits& CUnits::operator=(const struct units& rhs)
+CUnits& CUnits::operator=(const struct cunits& rhs)
 {
-	this->units::operator=(rhs);
+	this->cunits::operator=(rhs);
 	this->m_htiUnits = 0;
 	return *this;
 }

@@ -4,11 +4,9 @@
 
 #include "PhastInput.h"
 
-extern "C" {
 int read_specified_value_bc(void);
 int read_flux_bc(void);
 int read_leaky_bc(void);
-}
 
 
 #ifdef _DEBUG

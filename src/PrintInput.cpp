@@ -11,11 +11,9 @@
 //#include "ETSLayout/ETSLayout.h"
 
 
-extern "C" {
 #define EXTERNAL extern
 #include "srcinput/hstinpt.h"
 #undef EXTERNAL
-}
 
 #include "Global.h"
 

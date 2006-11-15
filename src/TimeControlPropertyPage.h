@@ -34,7 +34,7 @@ protected:
 	CRichEditCtrl     m_wndRichEditCtrl;
 	CTimeControl2     m_timeControl2;
 
-	struct units      m_units;
+	struct cunits     m_units;
 
 	std::string       m_sTimeStepRTF;    // IDR_TC_TIME_STEP_RTF
 	std::string       m_sTimeChangeRTF;  // IDR_TC_TIME_CHANGE_RTF

@@ -6,10 +6,7 @@
 #include "PhastInput.h"
 #include "BC.h"
 
-extern "C"
-{
- int read_specified_value_bc(void);
-}
+int read_specified_value_bc(void);
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

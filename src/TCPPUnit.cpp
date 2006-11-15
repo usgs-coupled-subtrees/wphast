@@ -53,7 +53,7 @@ void TCPPUnit::RunUnitTests(void)
 // COMMENT: {5/22/2006 6:20:43 PM}		}
 // COMMENT: {5/22/2006 6:20:43 PM}		//}}
 
-// COMMENT: {5/22/2006 6:44:32 PM}		runner.addTest(TestCPhastInput::suite());
+		runner.addTest(TestCPhastInput::suite());
 		runner.addTest(TestCZone::suite());
 		runner.addTest(TestCGrid::suite());
 		runner.addTest(TestCtime::suite());
@@ -63,7 +63,7 @@ void TCPPUnit::RunUnitTests(void)
 		runner.addTest(TestCParser::suite());
 		runner.addTest(TestCPropertyTreeControlBar::suite());
 		runner.addTest(TestCUnits::suite());
-// COMMENT: {5/22/2006 6:46:37 PM}		runner.addTest(TestCPhastInput::suite());
+		runner.addTest(TestCPhastInput::suite());
 
 #ifdef __DEPRECATED__
 		runner.addTest(TestCBCZone::suite());

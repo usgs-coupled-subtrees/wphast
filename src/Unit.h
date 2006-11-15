@@ -5,14 +5,12 @@
 #endif
 #include <hdf5.h>        /* HDF routines */
 
-extern "C" {
 #define EXTERNAL extern
 #include "srcinput/hstinpt.h"
 #undef EXTERNAL
-}
 
 class CUnit :
-	public unit
+	public cunit
 {
 public:
 	// utilities

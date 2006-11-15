@@ -1,10 +1,8 @@
 #include "StdAfx.h"
 
-extern "C" {
 #define EXTERNAL extern
 #include "srcinput/hstinpt.h"
 #undef EXTERNAL
-}
 
 #include <cassert>
 
@@ -12,7 +10,7 @@ extern "C" {
 #define new DEBUG_NEW
 #endif
 
-unit::unit(void)
+cunit::cunit(void)
 : input(0)
 , si(0)
 , input_to_si(1.0)
@@ -21,7 +19,7 @@ unit::unit(void)
 {
 }
 
-unit::unit(const char* si)
+cunit::cunit(const char* si)
 : input(0)
 , si(0)
 , input_to_si(1.0)
@@ -32,13 +30,13 @@ unit::unit(const char* si)
 	::strcpy(this->si, si);
 }
 
-unit::~unit(void)
+cunit::~cunit(void)
 {
 	delete si;
 	delete input;
 }
 
-unit::unit(const unit& src)
+cunit::cunit(const cunit& src)
 : input(0)
 , si(0)
 , input_to_si(src.input_to_si)
@@ -55,7 +53,7 @@ unit::unit(const unit& src)
 	}
 }
 
-unit& unit::operator=(const unit& rhs)
+cunit& cunit::operator=(const cunit& rhs)
 {
 	if (this != &rhs) {
 		delete this->input;
@@ -79,7 +77,7 @@ unit& unit::operator=(const unit& rhs)
 	return *this;
 }
 
-int unit::set_input(const char* input)
+int cunit::set_input(const char* input)
 {
 	if (!input) return ERROR;
 
@@ -108,7 +106,7 @@ int unit::set_input(const char* input)
 	return n;
 }
 
-const char* unit::c_str(void)const
+const char* cunit::c_str(void)const
 {
 	if (this->defined == TRUE) {
 		assert(this->input);
@@ -118,4 +116,29 @@ const char* unit::c_str(void)const
 		assert(this->si);
 		return this->si;
 	}
+}
+
+void cunit::define(const char* input)
+{
+	assert(input);
+	if (!input) return;
+	if (this->defined == TRUE)
+	{
+		assert(this->input);
+		delete this->input;
+	}
+	this->defined = TRUE;
+	this->input = new char[::strlen(input) + 1];
+	::strcpy(this->input, input);
+}
+
+void cunit::undefine(void)
+{
+	if (this->defined == TRUE)
+	{
+		assert(this->input);
+	}
+	delete this->input;
+	this->input = 0;
+	this->defined = FALSE;
 }

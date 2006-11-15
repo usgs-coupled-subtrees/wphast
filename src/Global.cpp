@@ -1153,8 +1153,8 @@ int CGlobal::AddLengthUnits(CComboBox* pCombo)
 
 std::string CGlobal::GetStdLengthUnits(const char* unit)
 {
-	CUnits units_std;
-	CUnits units_usr;
+	static CUnits units_std;
+	static CUnits units_usr;
 
 	VERIFY(units_usr.horizontal.set_input(unit) == OK);
 	for (size_t i = 0; i < sizeof(s_length_units) / sizeof(s_length_units[0]); ++i)
@@ -1188,8 +1188,8 @@ int CGlobal::AddTimeUnits(CComboBox* pCombo)
 
 std::string CGlobal::GetStdTimeUnits(const char* sz_unit)
 {
-	unit std("s");
-	CUnits units_usr;
+	cunit std("s");
+	static CUnits units_usr;
 
 	VERIFY(units_usr.time.set_input(sz_unit) == OK);
 	for (size_t i = 0; i < sizeof(s_time_units) / sizeof(s_time_units[0]); ++i)
@@ -1265,8 +1265,8 @@ int CGlobal::AddTimeUnitsDenom(CComboBox* pCombo)
 
 std::string CGlobal::GetStdTimeUnitsDenom(const char* unit)
 {
-	CUnits units_std;
-	CUnits units_usr;
+	static CUnits units_std;
+	static CUnits units_usr;
 
 	VERIFY(units_usr.time.set_input(unit) == OK);
 	for (size_t i = 0; i < sizeof(s_time_units_denom) / sizeof(s_time_units_denom[0]); ++i)
@@ -1301,8 +1301,8 @@ int CGlobal::AddLengthUnitsDenom(CComboBox* pCombo)
 
 std::string CGlobal::GetStdLengthUnitsDenom(const char* unit)
 {
-	CUnits units_std;
-	CUnits units_usr;
+	static CUnits units_std;
+	static CUnits units_usr;
 
 	VERIFY(units_usr.horizontal.set_input(unit) == OK);
 	for (size_t i = 0; i < sizeof(s_length_units_denom) / sizeof(s_length_units_denom[0]); ++i)

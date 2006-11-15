@@ -1,6 +1,7 @@
 pulse.chem.dat
 phast.dat
 pulse
+0
 C.....PHAST Data-Input Form
 C.....UNRELEASE 1.0
 C...   Notes:
@@ -496,11 +497,11 @@ C.3.7.3.B .. DPTAS{5E4},DCTAS{.25},DTIMMN{1.E4},DTIMMX{1.E7};
      29.42 1 0.0004 400
 C..           (O) - RDCALC [3.7.1] and AUTOTS [3.7.2]
 C.3.7.4 .. TIMCHG
-     60.000000
+     60
 C------------------------------------------------------------------------------
 C.....Output information
 C.3.8.1 .. PRISLM,PRIKD,PRIP,PRIC,PRICPHRQ,PRIFORCE_CHEM_PHRQ,PRIVEL,PRIGFB,PRIBCF,PRIWEL; all [I]
-     -60.000000 0.000000 -60.000000 0.000000 0.000000 0.000000 0.000000 -60.000000 0.000000 -60.000000
+     -60.000000 -0.000000 -60.000000 -0.000000 -0.000000 -0.000000 -0.000000 -60.000000 -0.000000 -60.000000
 C.3.8.1.1 .. PRT_BC; [T/F]
      F
 C.3.8.2 .. PRIHDF_CONC, PRIHDF_HEAD, PRIHDF_VEL
@@ -511,10 +512,10 @@ C.3.8.3 .. CHKPTD[T/F],PRICPD,SAVLDO[T/F]
 f 0 f
 C------------------------------------------------------------------------------
 C.....Contour and vector map information
-C.3.9.1 .. CNTMAP[T/F], PRIMAPHEAD, COMPMAP[T/F], PRIMAPCOMP,VECMAP[T/F], PRIMAPV
-     f 0.000000     f 0.000000     f 0.000000
-C.3.9.2 .. PRIXYZ_WELL
-     0.000000
+C.3.9.1 .. CNTMAP[T/F], PRIMAPHEAD, COMPMAP[T/F], PRINT_XYZ_COMP, VECMAP[T/F], PRIMAPV
+     f -0.000000     f -0.000000     f -0.000000
+C.3.10.2 .. PRIXYZ_WELL, PRINT_RESTART, PRINT_END_OF_PERIOD [t/t]
+     -0.000000 -0.000000     T
 C...Cell print information for .O.chem file, transient chemistry
  0.0000000e+000  1.2000000e-001  0.0000000e+000  1.0000000e-002  0.0000000e+000  1.0000000e-002
      0 4
@@ -612,11 +613,11 @@ C.3.7.3.B .. DPTAS{5E4},DCTAS{.25},DTIMMN{1.E4},DTIMMX{1.E7};
      29.42 1 0.0004 400
 C..           (O) - RDCALC [3.7.1] and AUTOTS [3.7.2]
 C.3.7.4 .. TIMCHG
-     120.000000
+     120
 C------------------------------------------------------------------------------
 C.....Output information
 C.3.8.1 .. PRISLM,PRIKD,PRIP,PRIC,PRICPHRQ,PRIFORCE_CHEM_PHRQ,PRIVEL,PRIGFB,PRIBCF,PRIWEL; all [I]
-     -120.000000 0.000000 -120.000000 0.000000 -60.000000 -60.000000 -60.000000 -120.000000 0.000000 -120.000000
+     -120.000000 -0.000000 -120.000000 -0.000000 -60.000000 -60.000000 -60.000000 -120.000000 -0.000000 -120.000000
 C.3.8.1.1 .. PRT_BC; [T/F]
      F
 C.3.8.2 .. PRIHDF_CONC, PRIHDF_HEAD, PRIHDF_VEL
@@ -627,10 +628,10 @@ C.3.8.3 .. CHKPTD[T/F],PRICPD,SAVLDO[T/F]
 f 0 f
 C------------------------------------------------------------------------------
 C.....Contour and vector map information
-C.3.9.1 .. CNTMAP[T/F], PRIMAPHEAD, COMPMAP[T/F], PRIMAPCOMP,VECMAP[T/F], PRIMAPV
-     f 0.000000     f 0.000000     f 0.000000
-C.3.9.2 .. PRIXYZ_WELL
-     0.000000
+C.3.9.1 .. CNTMAP[T/F], PRIMAPHEAD, COMPMAP[T/F], PRINT_XYZ_COMP, VECMAP[T/F], PRIMAPV
+     f -0.000000     f -0.000000     f -0.000000
+C.3.10.2 .. PRIXYZ_WELL, PRINT_RESTART, PRINT_END_OF_PERIOD [t/t]
+     -0.000000 -0.000000     T
 C...Cell print information for .O.chem file, transient chemistry
  0.0000000e+000  1.2000000e-001  0.0000000e+000  1.0000000e-002  0.0000000e+000  1.0000000e-002
      0 4

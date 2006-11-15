@@ -3,9 +3,7 @@
 
 #include "Zone.h"
 
-extern "C" {
 int read_zone(char **next_char, struct zone *zone_ptr);
-}
 
 
 #ifdef _DEBUG
