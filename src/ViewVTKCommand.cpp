@@ -991,65 +991,116 @@ void CViewVTKCommand::OnModifiedEvent(vtkObject* caller, void* callData)
 		this->m_pView->SizeHandles(::sqrt(radius));
 	}
 }
-////////////{{{{{{{{
+
 void CViewVTKCommand::OnEndPickEvent(vtkObject* caller, void* callData)
 {
-	if (vtkAbstractPropPicker *picker = vtkAbstractPropPicker::SafeDownCast( this->m_pView->GetRenderWindowInteractor()->GetPicker() ))	{
-		if (vtkAssemblyPath *path = picker->GetPath()) {
-			if (path->GetFirstNode()->GetProp()->IsA("vtkPropAssembly")) {
+	if (vtkAbstractPropPicker *picker = vtkAbstractPropPicker::SafeDownCast( this->m_pView->GetRenderWindowInteractor()->GetPicker() ))
+	{
+		if (vtkAssemblyPath *path = picker->GetPath())
+		{
+#if defined(_DEBUG)
+			ostrstream oss;
+			path->PrintSelf(oss, 4);
+			oss << ends;
+			TRACE("\n");
+			afxDump << "vtkAssemblyPath{{\n" << oss.str() << "vtkAssemblyPath}}\n";
+			oss.rdbuf()->freeze(false); // this must be called after str() to avoid memory leak
+#endif
+			if (path->GetFirstNode()->GetProp()->IsA("vtkPropAssembly"))
+			{
 				TRACE("path->GetNumberOfItems() = %d\n", path->GetNumberOfItems());
-				if (path->GetNumberOfItems() == 3) {
+				if (path->GetNumberOfItems() == 3)
+				{
+					// should be river Or CZoneActor
+					//
 					path->InitTraversal();
 					vtkProp* pPropAssembly = path->GetNextNode()->GetProp();
 					ASSERT(pPropAssembly->IsA("vtkPropAssembly"));
 
-					//{{
 					vtkProp* pActor = path->GetNextNode()->GetProp();
-					if (CZoneActor *pZoneActor = CZoneActor::SafeDownCast(pActor)) {
+					if (CZoneActor *pZoneActor = CZoneActor::SafeDownCast(pActor))
+					{
 						this->m_pView->GetDocument()->Select(pZoneActor);
 					}
-					if (CWellActor *pWell = CWellActor::SafeDownCast(pActor)) {
-						this->m_pView->GetDocument()->Select(pWell);
-					}
-					if (CRiverActor *pRiver = CRiverActor::SafeDownCast(pActor)) {
+					if (CRiverActor *pRiver = CRiverActor::SafeDownCast(pActor))
+					{
 						this->m_pView->GetDocument()->Select(pRiver);
 					}
-					//}}
-
-					/*
-					vtkProp* pRiverActor = path->GetNextNode()->GetProp();
-					ASSERT(pRiverActor->IsA("CRiverActor"));
-					if (CRiverActor *pRiver = CRiverActor::SafeDownCast(pRiverActor)) {
-						this->m_pView->GetDocument()->Select(pRiver);
-					}
-					*/
-				} else {
-					ASSERT( path->GetNumberOfItems() == 2 ); // the vtkPropAssembly and the CZoneActor or CWellActor
-					ASSERT( path->GetLastNode()->GetProp()->IsA("CZoneActor") || path->GetLastNode()->GetProp()->IsA("CWellActor") );
-					if (CZoneActor *pZoneActor = CZoneActor::SafeDownCast(path->GetLastNode()->GetProp())) {
-						this->m_pView->GetDocument()->Select(pZoneActor);
-					}
-					if (CWellActor *pWell = CWellActor::SafeDownCast(path->GetLastNode()->GetProp())) {
+					if (CWellActor *pWell = CWellActor::SafeDownCast(pActor))
+					{
+						ASSERT(FALSE);  //	NEVER???
 						this->m_pView->GetDocument()->Select(pWell);
 					}
 				}
-			} else {
+				else
+				{
+					ASSERT( path->GetNumberOfItems() == 2 ); // the vtkPropAssembly and the CZoneActor or CWellActor
+
+					// this will change as additional pickable types are added
+					//
+					ASSERT(
+						path->GetLastNode()->GetProp()->IsA("CZoneActor")
+						||
+						path->GetLastNode()->GetProp()->IsA("CWellActor")
+						);
+
+					// check if zone
+					//
+					if (CZoneActor *pZoneActor = CZoneActor::SafeDownCast(path->GetLastNode()->GetProp()))
+					{
+						this->m_pView->GetDocument()->Select(pZoneActor);
+					}
+
+					// check if well
+					//
+					if (CWellActor *pWell = CWellActor::SafeDownCast(path->GetLastNode()->GetProp()))
+					{
+						this->m_pView->GetDocument()->Select(pWell);
+					}
+				}
+			}
+			else
+			{
 				vtkProp *prop = path->GetFirstNode()->GetProp();
-				if (CZoneActor *pZoneActor = CZoneActor::SafeDownCast(prop)) {
+
+				// check if zone
+				//
+				if (CZoneActor *pZoneActor = CZoneActor::SafeDownCast(prop))
+				{
 					this->m_pView->GetDocument()->Select(pZoneActor);
-				} else if (CRiverActor *pRiver = CRiverActor::SafeDownCast(prop)) {
+				}
+				// check if river
+				//
+				else if (CRiverActor *pRiver = CRiverActor::SafeDownCast(prop))
+				{
 					this->m_pView->GetDocument()->Select(pRiver);
-				} else if (CWellActor *pWell = CWellActor::SafeDownCast(prop)) {
+				}
+				// check if well
+				//
+				else if (CWellActor *pWell = CWellActor::SafeDownCast(prop))
+				{
 					this->m_pView->GetDocument()->Select(pWell);
-				} else {
+				}
+				else
+				{
 					ASSERT(FALSE);
 				}
 			}
-		} else {
+
+#ifdef _DEBUG
+			int* xy = this->m_pView->GetRenderWindowInteractor()->GetEventPosition();
+			TRACE("EventPosition(%d, %d)\n", xy[0], xy[1]);
+#endif
+		}
+		else
+		{
+			// Hide BoxWidget
+			//
 			this->m_pView->GetDocument()->ClearSelection();
 		}
+
+		// render
+		//
 		this->m_pView->GetDocument()->UpdateAllViews(0);
 	}
 }
-
-////////////}}}}}}}}

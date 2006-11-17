@@ -470,73 +470,22 @@ void vtkInteractorStyleTrackballCameraEx::OnKeyPress()
 			}
 			else
 			{
-// COMMENT: {11/16/2006 6:29:13 PM}				if (path->GetFirstNode()->GetProp()->IsA("vtkPropAssembly"))
+				path->InitTraversal();
+				this->LastProp = path->GetNextNode()->GetProp();
+				if (this->LastProp && this->LastProp->IsA("vtkPropAssembly"))
 				{
-					path->InitTraversal();
 					this->LastProp = path->GetNextNode()->GetProp();
-					if (this->LastProp && this->LastProp->IsA("vtkPropAssembly"))
-					{
-						this->LastProp = path->GetNextNode()->GetProp();
-					}
-					else
-					{
-						ASSERT(
-							this->LastProp->IsA("CZoneActor")
-							||
-							this->LastProp->IsA("CWellActor")
-							||
-							this->LastProp->IsA("CRiverActor")
-							);
-					}
-
-// COMMENT: {11/16/2006 7:27:59 PM}					if (path->GetNumberOfItems() == 3)
-// COMMENT: {11/16/2006 7:27:59 PM}					{
-// COMMENT: {11/16/2006 7:27:59 PM}						path->InitTraversal();
-// COMMENT: {11/16/2006 7:27:59 PM}						vtkProp* pPropAssembly = path->GetNextNode()->GetProp();
-// COMMENT: {11/16/2006 7:27:59 PM}						ASSERT(pPropAssembly->IsA("vtkPropAssembly"));
-// COMMENT: {11/16/2006 7:27:59 PM}						this->LastProp = path->GetNextNode()->GetProp();
-// COMMENT: {11/16/2006 7:27:59 PM}						ASSERT( this->LastProp->IsA("CZoneActor") || this->LastProp->IsA("CRiverActor"));
-// COMMENT: {11/16/2006 7:27:59 PM}#if defined(_DEBUG)
-// COMMENT: {11/16/2006 7:27:59 PM}						ostrstream oss;
-// COMMENT: {11/16/2006 7:27:59 PM}						path->PrintSelf(oss, 4);
-// COMMENT: {11/16/2006 7:27:59 PM}						oss << ends;
-// COMMENT: {11/16/2006 7:27:59 PM}						TRACE("\n");
-// COMMENT: {11/16/2006 7:27:59 PM}						afxDump << "vtkAssemblyPath{{\n" << oss.str() << "vtkAssemblyPath}}\n";
-// COMMENT: {11/16/2006 7:27:59 PM}						oss.rdbuf()->freeze(false); // this must be called after str() to avoid memory leak
-// COMMENT: {11/16/2006 7:27:59 PM}#endif
-// COMMENT: {11/16/2006 7:27:59 PM}					}
-// COMMENT: {11/16/2006 7:27:59 PM}					else
-// COMMENT: {11/16/2006 7:27:59 PM}					{
-// COMMENT: {11/16/2006 7:27:59 PM}// COMMENT: {11/16/2006 7:06:05 PM}						vtkProp* next = path->GetNextNode()->GetProp();
-// COMMENT: {11/16/2006 7:27:59 PM}// COMMENT: {11/16/2006 7:06:05 PM}						vtkProp* last = path->GetLastNode()->GetProp();
-// COMMENT: {11/16/2006 7:27:59 PM}
-// COMMENT: {11/16/2006 7:27:59 PM}						this->LastProp = path->GetLastNode()->GetProp();
-// COMMENT: {11/16/2006 7:27:59 PM}						ASSERT( this->LastProp->IsA("CWellActor") );
-// COMMENT: {11/16/2006 7:27:59 PM}					}
 				}
-
-// COMMENT: {11/16/2006 3:13:10 PM}				if (path->GetNumberOfItems() == 3)
-// COMMENT: {11/16/2006 3:13:10 PM}				{
-// COMMENT: {11/16/2006 3:13:10 PM}					path->InitTraversal();
-// COMMENT: {11/16/2006 3:13:10 PM}					vtkProp* pPropAssembly = path->GetNextNode()->GetProp();
-// COMMENT: {11/16/2006 3:13:10 PM}					ASSERT(pPropAssembly->IsA("vtkPropAssembly"));
-// COMMENT: {11/16/2006 3:13:10 PM}					this->LastProp = path->GetNextNode()->GetProp();
-// COMMENT: {11/16/2006 3:13:10 PM}				}
-// COMMENT: {11/16/2006 3:13:10 PM}				else
-// COMMENT: {11/16/2006 3:13:10 PM}				{
-// COMMENT: {11/16/2006 3:13:10 PM}					this->LastProp = path->GetLastNode()->GetProp();
-// COMMENT: {11/16/2006 3:13:10 PM}				}
-
-// COMMENT: {11/16/2006 7:32:49 PM}				ASSERT(
-// COMMENT: {11/16/2006 7:32:49 PM}					this->LastProp->IsA("CZoneActor")
-// COMMENT: {11/16/2006 7:32:49 PM}					||
-// COMMENT: {11/16/2006 7:32:49 PM}					this->LastProp->IsA("CWellActor")
-// COMMENT: {11/16/2006 7:32:49 PM}					||
-// COMMENT: {11/16/2006 7:32:49 PM}					this->LastProp->IsA("CRiverActor")
-// COMMENT: {11/16/2006 7:32:49 PM}					);
-
-				TRACE("OnKeyPress this->LastProp = %s\n", this->LastProp->GetClassName());
-
+				else
+				{
+					ASSERT(
+						this->LastProp->IsA("CZoneActor")
+						||
+						this->LastProp->IsA("CWellActor")
+						||
+						this->LastProp->IsA("CRiverActor")
+						);
+				}
 				ASSERT(this->LastProp);
 				this->HighlightProp(this->LastProp);
 				this->PropPicked = 1;
