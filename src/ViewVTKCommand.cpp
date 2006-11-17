@@ -185,6 +185,7 @@ void CViewVTKCommand::OnEndInteractionEvent(vtkObject* caller, void* callData)
 	}
 }
 
+#ifdef SKIP
 void CViewVTKCommand::OnEndPickEvent(vtkObject* caller, void* callData)
 {
 	TRACE("vtkCommand::EndPickEvent\n");
@@ -305,6 +306,7 @@ void CViewVTKCommand::OnEndPickEvent(vtkObject* caller, void* callData)
 		this->m_pView->GetDocument()->UpdateAllViews(0);
 	}
 }
+#endif
 
 void CViewVTKCommand::OnInteractionEvent(vtkObject* caller, void* callData)
 {
@@ -989,3 +991,65 @@ void CViewVTKCommand::OnModifiedEvent(vtkObject* caller, void* callData)
 		this->m_pView->SizeHandles(::sqrt(radius));
 	}
 }
+////////////{{{{{{{{
+void CViewVTKCommand::OnEndPickEvent(vtkObject* caller, void* callData)
+{
+	if (vtkAbstractPropPicker *picker = vtkAbstractPropPicker::SafeDownCast( this->m_pView->GetRenderWindowInteractor()->GetPicker() ))	{
+		if (vtkAssemblyPath *path = picker->GetPath()) {
+			if (path->GetFirstNode()->GetProp()->IsA("vtkPropAssembly")) {
+				TRACE("path->GetNumberOfItems() = %d\n", path->GetNumberOfItems());
+				if (path->GetNumberOfItems() == 3) {
+					path->InitTraversal();
+					vtkProp* pPropAssembly = path->GetNextNode()->GetProp();
+					ASSERT(pPropAssembly->IsA("vtkPropAssembly"));
+
+					//{{
+					vtkProp* pActor = path->GetNextNode()->GetProp();
+					if (CZoneActor *pZoneActor = CZoneActor::SafeDownCast(pActor)) {
+						this->m_pView->GetDocument()->Select(pZoneActor);
+					}
+					if (CWellActor *pWell = CWellActor::SafeDownCast(pActor)) {
+						this->m_pView->GetDocument()->Select(pWell);
+					}
+					if (CRiverActor *pRiver = CRiverActor::SafeDownCast(pActor)) {
+						this->m_pView->GetDocument()->Select(pRiver);
+					}
+					//}}
+
+					/*
+					vtkProp* pRiverActor = path->GetNextNode()->GetProp();
+					ASSERT(pRiverActor->IsA("CRiverActor"));
+					if (CRiverActor *pRiver = CRiverActor::SafeDownCast(pRiverActor)) {
+						this->m_pView->GetDocument()->Select(pRiver);
+					}
+					*/
+				} else {
+					ASSERT( path->GetNumberOfItems() == 2 ); // the vtkPropAssembly and the CZoneActor or CWellActor
+					ASSERT( path->GetLastNode()->GetProp()->IsA("CZoneActor") || path->GetLastNode()->GetProp()->IsA("CWellActor") );
+					if (CZoneActor *pZoneActor = CZoneActor::SafeDownCast(path->GetLastNode()->GetProp())) {
+						this->m_pView->GetDocument()->Select(pZoneActor);
+					}
+					if (CWellActor *pWell = CWellActor::SafeDownCast(path->GetLastNode()->GetProp())) {
+						this->m_pView->GetDocument()->Select(pWell);
+					}
+				}
+			} else {
+				vtkProp *prop = path->GetFirstNode()->GetProp();
+				if (CZoneActor *pZoneActor = CZoneActor::SafeDownCast(prop)) {
+					this->m_pView->GetDocument()->Select(pZoneActor);
+				} else if (CRiverActor *pRiver = CRiverActor::SafeDownCast(prop)) {
+					this->m_pView->GetDocument()->Select(pRiver);
+				} else if (CWellActor *pWell = CWellActor::SafeDownCast(prop)) {
+					this->m_pView->GetDocument()->Select(pWell);
+				} else {
+					ASSERT(FALSE);
+				}
+			}
+		} else {
+			this->m_pView->GetDocument()->ClearSelection();
+		}
+		this->m_pView->GetDocument()->UpdateAllViews(0);
+	}
+}
+
+////////////}}}}}}}}
