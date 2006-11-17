@@ -151,17 +151,17 @@ echo "Exporting revision $REVISION of WPHAST into sandbox..."
 
 (cd "$DIST_SANDBOX" && \
  	${SVN:-svn} export -q $EXTRA_EXPORT_OPTIONS --ignore-externals -r "$REVISION" \
-	     "http://internalbrr.cr.usgs.gov/svn_GW/phast/trunk/srcinput" \
+	     "http://internalbrr.cr.usgs.gov/svn_GW/phastpp/trunk/srcinput" \
 	     "$DISTNAME/src/srcinput")
 
 (cd "$DIST_SANDBOX" && \
  	${SVN:-svn} export -q $EXTRA_EXPORT_OPTIONS --ignore-externals -r "$REVISION" \
-	     "http://internalbrr.cr.usgs.gov/svn_GW/phast/trunk/examples" \
+	     "http://internalbrr.cr.usgs.gov/svn_GW/phastpp/trunk/examples" \
 	     "$DISTNAME/setup/phast/examples")
 
 (cd "$DIST_SANDBOX" && \
  	${SVN:-svn} export -q $EXTRA_EXPORT_OPTIONS --ignore-externals -r "$REVISION" \
-	     "http://internalbrr.cr.usgs.gov/svn_GW/phast/trunk/doc" \
+	     "http://internalbrr.cr.usgs.gov/svn_GW/phastpp/trunk/doc" \
 	     "$DISTNAME/setup/phast/doc")
 
 ver_major=`echo $VERSION | cut -d '.' -f 1`
