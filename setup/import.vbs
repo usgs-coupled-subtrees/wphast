@@ -7,7 +7,7 @@ If WScript.Arguments.Count <> 1 Then
 	WScript.Quit 1
 End If
 
-curdir = Mid(WScript.ScriptFullName, 1, Len(Wscript.ScriptFullName) - Len(Wscript.ScriptName ))
+scriptdir = Mid(WScript.ScriptFullName, 1, Len(Wscript.ScriptFullName) - Len(Wscript.ScriptName ))
 
 ' set up registry
 '
@@ -15,8 +15,16 @@ curdir = Mid(WScript.ScriptFullName, 1, Len(Wscript.ScriptFullName) - Len(Wscrip
 
 clsid = "{36353903-2137-43FD-9AD6-40B65A96A839}"
 classes = "HKEY_CURRENT_USER\Software\Classes\"
-doc = "WPhast.Document"
-exepath = curdir & "..\AutoRelease\WPhast.exe"
+doc = "Testing.WPhast.Document"
+exepath = scriptdir & "..\src\AutoRelease\WPhast.exe"
+
+Set Fso = CreateObject("Scripting.FileSystemObject")
+exepath  = Fso.GetAbsolutePathName(exepath)
+
+If (Not Fso.FileExists(exepath)) Then
+	WScript.Echo "Can't find " & exepath & "."
+	WScript.Quit 1
+End If
 
 Set Sh = CreateObject("WScript.Shell")
 
@@ -27,8 +35,8 @@ If Err <> 0 Then
 End if
 
 If bCreateDoc Then
-	' [HKEY_CURRENT_USER\Software\Classes\WPhast.Document]
-	' @="WPhast.Document"
+	' [HKEY_CURRENT_USER\Software\Classes\Testing.WPhast.Document]
+	' @="Testing.WPhast.Document"
 	'
 	Sh.RegWrite classes & doc & "\", doc
 End If
@@ -40,7 +48,7 @@ If Err <> 0 Then
 End if
 
 If bCreateDocCLSID Then
-	' [HKEY_CURRENT_USER\Software\Classes\WPhast.Document\CLSID]
+	' [HKEY_CURRENT_USER\Software\Classes\Testing.WPhast.Document\CLSID]
 	' @="{36353903-2137-43FD-9AD6-40B65A96A839}"
 	'
 	Sh.RegWrite classes & doc & "\CLSID\", clsid
@@ -54,7 +62,7 @@ If Err <> 0 Then
 End if
 If bCreateClassCLSID Then
 	' [HKEY_CURRENT_USER\Software\Classes\CLSID\{36353903-2137-43FD-9AD6-40B65A96A839}]
-	' @="WPhast.Document"
+	' @="Testing.WPhast.Document"
 	'
 	Sh.RegWrite classes & "\CLSID\" & clsid & "\", doc
 End If
@@ -67,7 +75,7 @@ If Err <> 0 Then
 End if
 If bCreateLocalServer32 Then
 	' [HKEY_CURRENT_USER\Software\Classes\CLSID\{36353903-2137-43FD-9AD6-40B65A96A839}\LocalServer32]
-	' @="<curdir>..\AutoRelease\WPhast.exe
+	' @="<scriptdir>..\src\AutoRelease\WPhast.exe
 	'
 	Sh.RegWrite classes & "\CLSID\" & clsid & "\LocalServer32\", exepath
 End If
@@ -86,20 +94,27 @@ If bCreateProgID Then
 End If
 
 
-Set Fso = CreateObject("Scripting.FileSystemObject")
+' import/save files
+'
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+On Error GoTo 0
+
 Set trans_dat_file = Fso.GetFile(WScript.Arguments(0))
 wphast_file = Mid(trans_dat_file, 1, Len(trans_dat_file) - Len(".trans.dat")) & ".wphast"
 
-Set WPhast = WScript.CreateObject("WPhast.Document")
+Set WPhast = WScript.CreateObject("Testing.WPhast.Document")
+
 If WPhast.Import(trans_dat_file.Path) Then
 	WPhast.SaveAs(wphast_file)
 Else
 	WScript.Echo "An error occured during import: " & trans_dat_file.Path
 End If
 
+
 ' clean up reg
 '
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+On Error resume next
 
 If bCreateProgID Then
 	' [-HKEY_CURRENT_USER\Software\Classes\CLSID\{36353903-2137-43FD-9AD6-40B65A96A839}\ProgID]
@@ -121,13 +136,13 @@ If bCreateClassCLSID Then
 End If
 
 If bCreateDocCLSID Then
-	' [-HKEY_CURRENT_USER\Software\Classes\WPhast.Document\CLSID]
+	' [-HKEY_CURRENT_USER\Software\Classes\Testing.WPhast.Document\CLSID]
 	'
 	Sh.RegDelete classes & doc & "\CLSID\"
 End If
 
 If bCreateDoc Then
-	' [-HKEY_CURRENT_USER\Software\Classes\WPhast.Document]
+	' [-HKEY_CURRENT_USER\Software\Classes\Testing.WPhast.Document]
 	'
 	Sh.RegDelete classes & doc & "\"
 End If
