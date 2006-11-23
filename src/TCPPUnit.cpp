@@ -5,7 +5,6 @@
 #include <cppunit/CompilerOutputter.h>
 
 #include "TestCBC.h"
-#include "TestCBCZone.h"
 #include "TestCGrid.h"
 #include "TestCGridLODActor.h"
 #include "TestCMapActor.h"
@@ -65,9 +64,6 @@ void TCPPUnit::RunUnitTests(void)
 		runner.addTest(TestCUnits::suite());
 		runner.addTest(TestCPhastInput::suite());
 
-#ifdef __DEPRECATED__
-		runner.addTest(TestCBCZone::suite());
-#endif
 // COMMENT: {8/17/2005 3:52:59 PM}		runner.addTest(TestCTimeControlMultiPropertyPage2::suite());
 
 		/**********************************************************
