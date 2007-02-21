@@ -137,6 +137,7 @@ CWPhastView::CWPhastView()
 , m_pCursor3DMapper(0)
 , m_pCursor3DActor(0)
 , CurrentProp(0)
+, m_bRiverModal(false)
 {
 	// Create the renderer, window and interactor objects.
 	//
@@ -466,7 +467,18 @@ LRESULT CWPhastView::WindowProc(UINT message, WPARAM wParam, LPARAM lParam)
 					break;
 				}
 			}
-			return vtkHandleMessage2(this->m_hWnd, message, wParam, lParam, this->m_RenderWindowInteractor);
+			// HACK This temporarily fixes the bug that causes a GPF when
+			// the following actions are taken:
+			//
+			// Start WPhast
+			// cancel initial screen to get default grid, 
+			// draw a zone, enter, enter (media, next, finish)
+			// draw two river points, enter.
+			//
+			if(!this->m_bRiverModal)
+			{
+				return vtkHandleMessage2(this->m_hWnd, message, wParam, lParam, this->m_RenderWindowInteractor);
+			}
 		}
 		break;
 	}
@@ -1320,11 +1332,17 @@ void CWPhastView::HighlightProp3D(vtkProp3D *pProp3D)
 
 void CWPhastView::OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint)
 {
-	CView::OnUpdate(pSender, lHint, pHint);
+	// Added GetSaveHwnd in order to avoid assertion that occurs when
+	// the user is in the middle of creating a new river and selects
+	// file->exit
+	if (this->GetSafeHwnd())
+	{
+		CView::OnUpdate(pSender, lHint, pHint);
 
-	// Add your specialized code here and/or call the base class
-	this->Invalidate();
-	this->RedrawWindow();
+		// Add your specialized code here and/or call the base class
+		this->Invalidate();
+		this->RedrawWindow();
+	}
 }
 
 void CWPhastView::Update(IObserver* pSender, LPARAM lHint, CObject* /*pHint*/, vtkObject* pObject)
@@ -1599,12 +1617,14 @@ void CWPhastView::OnEndNewRiver(bool bCancel)
 				this->GetDocument()->GetUsedRiverNumbers(riverNums);
 				page.SetUsedRiverNumbers(riverNums);
 				sheet.AddPage(&page);
+				this->m_bRiverModal = true; // see CWPhastView::WindowProc
 				if (sheet.DoModal() == IDOK)
 				{
 					CRiver river;
 					page.GetProperties(river);
 					this->GetDocument()->Execute(new CRiverCreateAction(this->GetDocument(), river));
 				}
+				this->m_bRiverModal = false; // see CWPhastView::WindowProc
 			}
 			else
 			{

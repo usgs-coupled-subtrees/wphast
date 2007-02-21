@@ -81,6 +81,7 @@ protected:
 
 	bool                            m_bResetCamera;
 	bool                            m_bMovingGridLine;
+	bool                            m_bRiverModal;  // see CWPhastView::WindowProc
 
 	// 3D Cursor
 	vtkCursor3D                    *m_pCursor3D;
