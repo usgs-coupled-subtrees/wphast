@@ -330,7 +330,10 @@ void CNewZoneWidget::OnLeftButtonUp()
 		this->EventCallbackCommand->SetAbortFlag(1);
 		this->EndInteraction();
 		this->InvokeEvent(vtkCommand::EndInteractionEvent, NULL);
-		this->Interactor->Render();
+		if (this->Interactor)
+		{
+			this->Interactor->Render();
+		}
 	}
 }
 

@@ -4729,6 +4729,7 @@ void CWPhastDoc::EndNewZone()
 	if (this->NewZoneWidget)
 	{
 		ASSERT(this->NewZoneWidget->IsA("CNewZoneWidget"));
+		this->NewZoneWidget->SetInteractor(0);
 		this->NewZoneWidget->Delete();
 		this->NewZoneWidget = 0;
 	}
@@ -4832,7 +4833,7 @@ void CWPhastDoc::NewZoneListener(vtkObject *caller, unsigned long eid, void *cli
 			}
 
 			// Note: cannot call EndNewZone here
-			self->NewZoneWidget->SetEnabled(0);
+			self->NewZoneWidget->SetInteractor(0);
 		}
 	}
 
