@@ -225,7 +225,9 @@ CWPhastView::~CWPhastView()
 	//}}
 
 	this->InteractorStyle->Delete();
+	this->BoxWidget->SetInteractor(0);
 	this->BoxWidget->Delete();
+	this->PointWidget->SetInteractor(0);
 	this->PointWidget->Delete();
 
 	this->m_pViewVTKCommand->Delete();

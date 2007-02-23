@@ -4585,6 +4585,7 @@ void CWPhastDoc::EndModifyGrid()
 {
 	if (this->GridElementsSelector)
 	{
+		this->GridElementsSelector->SetInteractor(0);
 		this->GridElementsSelector->Delete();
 		this->GridElementsSelector = 0;
 	}

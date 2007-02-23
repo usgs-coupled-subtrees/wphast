@@ -89,10 +89,7 @@ CGridLODActor::~CGridLODActor(void)
 
 	if (this->PlaneWidget)
 	{
-		if (this->PlaneWidget->GetEnabled())
-		{
-			this->PlaneWidget->SetEnabled(0);
-		}
+		this->PlaneWidget->SetInteractor(0);
 		this->PlaneWidget->Delete();
 	}
 	if (this->Interactor)
