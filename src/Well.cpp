@@ -179,8 +179,9 @@ void CWell::Reduce(void)
 			delete[] this->elevation;
 
 			this->count_elevation = 0;
-			this->count_depth = this->count_depth + this->count_elevation;
+			this->elevation = 0;
 
+			this->count_depth = this->count_depth + this->count_elevation;
 			this->depth = new_depths;
 		}
 		else

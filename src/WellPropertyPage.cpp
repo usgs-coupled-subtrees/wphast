@@ -412,7 +412,7 @@ void CWellPropertyPage::DoDataExchange(CDataExchange* pDX)
 			this->m_wndScreensGrid.SetItem(&Item);
 
 			// add screen
-			this->m_wndWellCtrl.AddScreen(this->m_well.depth[i].bottom - this->m_well.lsd, this->m_well.depth[i].top - this->m_well.lsd);
+			this->m_wndWellCtrl.AddScreen(this->m_well.lsd - this->m_well.depth[i].bottom, this->m_well.lsd - this->m_well.depth[i].top);
 		}
 
 	}
