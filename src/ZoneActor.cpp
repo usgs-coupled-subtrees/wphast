@@ -141,7 +141,15 @@ void CZoneActor::Remove(CPropertyTreeControlBar* pTreeControlBar)
 			this->m_dwPrevSiblingItemData = pTreeCtrl->GetItemData(this->m_hInsertAfter);
 		}
 		ASSERT(this->m_hParent && this->m_hInsertAfter);
-		if (this->m_hParent) pTreeCtrl->SelectItem(this->m_hParent);
+		HTREEITEM next;
+		if (next = pTreeCtrl->GetNextSiblingItem(this->m_hti))
+		{
+			pTreeCtrl->SelectItem(next);
+		}
+		else 
+		{
+			if (this->m_hParent) pTreeCtrl->SelectItem(this->m_hParent);
+		}
 		VERIFY(pTreeCtrl->DeleteItem(this->m_hti));
 	}
 }
