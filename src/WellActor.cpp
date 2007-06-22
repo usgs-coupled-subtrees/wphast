@@ -386,7 +386,9 @@ void CWellActor::Remove(CPropertyTreeControlBar* /*pTree*/)
 {
 	ASSERT(this->m_pTreeMemento == 0);
 	this->m_pTreeMemento = new CTreeMemento(this->m_node);
+	CTreeCtrlNode next = m_node.GetNextSibling();
 	this->m_node.Delete();
+	if (next) next.Select();
 }
 
 void CWellActor::UnRemove(CPropertyTreeControlBar* pTree)
