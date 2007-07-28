@@ -2,11 +2,11 @@
 #include "RiverDeletePointAction.h"
 
 #include "RiverActor.h"
+#include "WPhastDoc.h"
 
-
-
-CRiverDeletePointAction::CRiverDeletePointAction(CRiverActor* pRiverActor, vtkIdType id)
+CRiverDeletePointAction::CRiverDeletePointAction(CRiverActor *pRiverActor, CWPhastDoc *pWPhastDoc, vtkIdType id)
 : m_pRiverActor(pRiverActor)
+, m_pWPhastDoc(pWPhastDoc)
 , m_id(id)
 {
 	ASSERT(this->m_pRiverActor && this->m_pRiverActor->IsA("CRiverActor"));
@@ -27,10 +27,12 @@ CRiverDeletePointAction::~CRiverDeletePointAction(void)
 void CRiverDeletePointAction::Execute()
 {
 	this->m_pRiverActor->DeletePoint(this->m_id);
+	this->m_pWPhastDoc->Select(this->m_pRiverActor);
 }
 
 void CRiverDeletePointAction::UnExecute()
 {
 	this->m_pRiverActor->InsertPoint(this->m_id - 1, this->m_riverPoint);
+	this->m_pWPhastDoc->Select(this->m_pRiverActor);
 }
 
