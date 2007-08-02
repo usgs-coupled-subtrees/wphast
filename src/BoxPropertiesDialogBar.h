@@ -1,6 +1,8 @@
 #pragma once
 #include "sizecbar/sdbarcfvs7.h"
 #include "IObserver.h"
+#include "gridctrl/ModGridCtrlEx.h"
+#include <vector>
 
 class vtkObject;
 class CWPhastView;
@@ -21,18 +23,38 @@ public:
 	vtkProp3D* GetProp3D(void);
 
 	enum BP_TYPE {
+		BP_NONE,
 		BP_POS_PLUS_LENGTH,
 		BP_MIN_MAX,
+		BP_WELL,
+		BP_RIVER,
 	};
 
 	virtual BOOL Create(UINT nIDTemplate, LPCTSTR lpszWindowName,
 		CWnd* pParentWnd, UINT nID, DWORD dwStyle = WS_CHILD | WS_VISIBLE | CBRS_TOP);
+
+	void HideZoneControls(void);
+	void ShowZoneControls(void);
+
+	void HideWellControls(void);
+	void ShowWellControls(void);
+
+	void ShowRiverControls(void);
+	void HideRiverControls(void);
+
+	void ShowApply();
+	void HideApply();
+
+	void UpdateApply();
 
 protected:
 	CWPhastView   *m_pView;
 	vtkProp3D     *m_pProp3D;
 	vtkCubeSource *m_CubeSource;
 	CTabCtrl m_wndMethodTab;
+	CModGridCtrlEx   m_wndRiverGrid;
+	//CGridCtrl   m_wndRiverGrid;
+
 
 	enum BP_TYPE m_nType;
 
@@ -51,6 +73,11 @@ protected:
 	float m_ZMin;
 	float m_ZMax;
 
+	float m_XWell;
+	float m_YWell;
+
+	std::vector< std::pair<double, double> > m_vectorPoints;
+
 	CString m_strHorizontalUnits;
 	CString m_strVerticalUnits;
 
@@ -68,4 +95,22 @@ protected:
 	afx_msg void OnBnClickedApply();
 	//afx_msg void OnEnKillfocusEditY();
 	//afx_msg void OnEnKillfocusEditZ();
+public:
+	afx_msg void OnUpdateEditCut(CCmdUI *pCmdUI);
+	afx_msg void OnEditCut();
+	afx_msg void OnUpdateEditCopy(CCmdUI *pCmdUI);
+	afx_msg void OnEditCopy();
+	afx_msg void OnUpdateEditPaste(CCmdUI *pCmdUI);
+	afx_msg void OnEditPaste();
+	afx_msg void OnUpdateEditClear(CCmdUI *pCmdUI);
+	afx_msg void OnEditClear();
+	afx_msg void OnUpdateEditUndo(CCmdUI *pCmdUI);
+	afx_msg void OnEditUndo();
+	afx_msg void OnUpdateEditRedo(CCmdUI *pCmdUI);
+	afx_msg void OnEditRedo();
+	afx_msg void OnEndLabelEditGrid(NMHDR *pNotifyStruct, LRESULT *result);
+
+	//
+	///afx_msg void OnEnKillfocusYMAXEdit();
+	afx_msg void OnEnKillfocusRange(UINT nID);
 };
