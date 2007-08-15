@@ -75,7 +75,7 @@ CGridActor::CGridActor(void)
 	this->m_pPolyDataMapper->SetInput(this->m_pFeatureEdges->GetOutput());
 	this->m_pPolyDataMapper->SetResolveCoincidentTopologyToPolygonOffset();
 
-	this->Actor = vtkLODActor::New();
+	this->Actor = vtkActor::New();
 	this->Actor->SetMapper(this->m_pPolyDataMapper);
 	this->Actor->GetProperty()->SetColor(1.0, 0.8, 0.6);
 	this->AddPart(this->Actor);

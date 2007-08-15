@@ -138,7 +138,7 @@ protected:
 	void UpdatePoints(void);
 
 
-	vtkLODActor*        Actor;
+	vtkActor*           Actor;
 
 	vtkGeometryFilter*  m_pGeometryFilter;
 	vtkFeatureEdges*    m_pFeatureEdges;
