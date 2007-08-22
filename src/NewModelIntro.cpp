@@ -172,14 +172,26 @@ BOOL CNewModelIntro::OnInitDialog()
 
 void CNewModelIntro::OnBnClickedSoluteTransportRadio()
 {
-	this->GetDlgItem(IDC_MOL_DIFF_STATIC)->EnableWindow(TRUE);
-	this->GetDlgItem(IDC_MOL_DIFF_EDIT)->EnableWindow(TRUE);
+	static int nIds[] = {IDC_MOL_DIFF_STATIC, IDC_MOL_DIFF_EDIT, IDC_UNITS_STATIC};
+	for (int i = 0; i < sizeof(nIds)/sizeof(nIds[0]); ++i)
+	{
+		if (CWnd* pWnd = this->GetDlgItem(nIds[i]))
+		{
+			pWnd->EnableWindow(TRUE);
+		}
+	}
 }
 
 void CNewModelIntro::OnBnClickedFlowOnlyRadio()
 {
-	this->GetDlgItem(IDC_MOL_DIFF_STATIC)->EnableWindow(FALSE);
-	this->GetDlgItem(IDC_MOL_DIFF_EDIT)->EnableWindow(FALSE);
+	static int nIds[] = {IDC_MOL_DIFF_STATIC, IDC_MOL_DIFF_EDIT, IDC_UNITS_STATIC};
+	for (int i = 0; i < sizeof(nIds)/sizeof(nIds[0]); ++i)
+	{
+		if (CWnd* pWnd = this->GetDlgItem(nIds[i]))
+		{
+			pWnd->EnableWindow(FALSE);
+		}
+	}
 }
 
 BOOL CNewModelIntro::OnSetActive()
