@@ -54,7 +54,7 @@ protected:
 	CTreeCtrlNode   m_nodeMedia;
 	CTreeCtrlNode   m_nodeUnits;
 	CTreeCtrlNode   m_nodeFlowOnly;
-	CTreeCtrlNode   m_nodeTimeControl;
+// COMMENT: {6/22/2007 4:26:13 PM}	CTreeCtrlNode   m_nodeTimeControl;
 	CTreeCtrlNode   m_nodeTimeControl2;
 	CTreeCtrlNode   m_nodeSP1;
 	CTreeCtrlNode   m_nodePrintInput;
@@ -113,7 +113,7 @@ public:
 	CTreeCtrlNode GetWellsNode(void)          {return m_nodeWells;}
 	CTreeCtrlNode GetRiversNode(void)         {return m_nodeRivers;}
 	CTreeCtrlNode GetBCNode(void)             {return m_nodeBC;}
-	CTreeCtrlNode GetTimeControlNode(void)    {return m_nodeTimeControl;}
+// COMMENT: {6/22/2007 5:09:02 PM}	CTreeCtrlNode GetTimeControlNode(void)    {return m_nodeTimeControl;}
 	CTreeCtrlNode GetTimeControl2Node(void)   {return m_nodeTimeControl2;}
 	CTreeCtrlNode GetPrintInitialNode(void)   {return m_nodePrintInput;}
 	CTreeCtrlNode GetPrintFrequencyNode(void) {return m_nodePF;}
@@ -137,6 +137,8 @@ public:
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnContextMenu(CWnd* /*pWnd*/, CPoint /*point*/);
 
+// COMMENT: {6/22/2007 3:06:41 PM}	void EditSelection(LRESULT* pResult, BOOL bJustCheckIfEditable = FALSE);
+
 protected:
 	friend CPropTreeOleDropTarget;
 	CPropTreeOleDropTarget m_OleDropTarget;
@@ -144,6 +146,7 @@ protected:
 
 	CLIPFORMAT m_cfPID;
 
+	bool IsNodeEditable(CTreeCtrlNode editNode, bool bDoEdit);
 	bool IsNodeDraggable(CTreeCtrlNode dragNode, COleDataSource &oleDataSource);
 	bool IsNodeCopyable(CTreeCtrlNode copyNode, COleDataSource *pOleDataSource);
 	bool IsNodePasteable(CTreeCtrlNode pasteNode, bool bDoPaste);
@@ -170,4 +173,6 @@ public:
 	afx_msg void OnEditCut();
 	afx_msg void OnUpdateEditClear(CCmdUI *pCmdUI);
 	afx_msg void OnEditClear();
+	afx_msg void OnUpdateEditProperties(CCmdUI *pCmdUI);
+	afx_msg void OnEditProperties();
 };

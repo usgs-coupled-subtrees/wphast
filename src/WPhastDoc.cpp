@@ -1365,6 +1365,15 @@ void CWPhastDoc::Execute(CAction* pAction)
 
 void CWPhastDoc::OnUpdateEditUndo(CCmdUI *pCmdUI)
 {
+// COMMENT: {8/1/2007 1:51:50 PM}	if (CBoxPropertiesDialogBar *pBar = this->GetBoxPropertiesDialogBar())
+// COMMENT: {8/1/2007 1:51:50 PM}	{
+// COMMENT: {8/1/2007 1:51:50 PM}		if (pBar->IsChild(CWnd::GetFocus()))
+// COMMENT: {8/1/2007 1:51:50 PM}		{
+// COMMENT: {8/1/2007 1:51:50 PM}			pBar->OnUpdateEditUndo(pCmdUI);
+// COMMENT: {8/1/2007 1:51:50 PM}			return;
+// COMMENT: {8/1/2007 1:51:50 PM}		}
+// COMMENT: {8/1/2007 1:51:50 PM}	}
+
 	BOOL b = (this->m_pimpl->m_vectorActionsIndex > 0);
 	b = b && (this->m_pGridSheet->GetSafeHwnd() == 0);
 	b = b && (this->m_pGeometrySheet->GetSafeHwnd() == 0);
@@ -1373,6 +1382,15 @@ void CWPhastDoc::OnUpdateEditUndo(CCmdUI *pCmdUI)
 
 void CWPhastDoc::OnUpdateEditRedo(CCmdUI *pCmdUI)
 {
+// COMMENT: {8/1/2007 1:51:59 PM}	if (CBoxPropertiesDialogBar *pBar = this->GetBoxPropertiesDialogBar())
+// COMMENT: {8/1/2007 1:51:59 PM}	{
+// COMMENT: {8/1/2007 1:51:59 PM}		if (pBar->IsChild(CWnd::GetFocus()))
+// COMMENT: {8/1/2007 1:51:59 PM}		{
+// COMMENT: {8/1/2007 1:51:59 PM}			pBar->OnUpdateEditRedo(pCmdUI);
+// COMMENT: {8/1/2007 1:51:59 PM}			return;
+// COMMENT: {8/1/2007 1:51:59 PM}		}
+// COMMENT: {8/1/2007 1:51:59 PM}	}
+
 	BOOL b = (this->m_pimpl->m_vectorActionsIndex < this->m_pimpl->m_vectorActions.size());
 	b = b && (this->m_pGridSheet->GetSafeHwnd() == 0);
 	b = b && (this->m_pGeometrySheet->GetSafeHwnd() == 0);
@@ -1381,6 +1399,15 @@ void CWPhastDoc::OnUpdateEditRedo(CCmdUI *pCmdUI)
 
 void CWPhastDoc::OnEditUndo()
 {
+// COMMENT: {8/1/2007 1:52:07 PM}	if (CBoxPropertiesDialogBar *pBar = this->GetBoxPropertiesDialogBar())
+// COMMENT: {8/1/2007 1:52:07 PM}	{
+// COMMENT: {8/1/2007 1:52:07 PM}		if (pBar->IsChild(CWnd::GetFocus()))
+// COMMENT: {8/1/2007 1:52:07 PM}		{
+// COMMENT: {8/1/2007 1:52:07 PM}			pBar->OnEditUndo();
+// COMMENT: {8/1/2007 1:52:07 PM}			return;
+// COMMENT: {8/1/2007 1:52:07 PM}		}
+// COMMENT: {8/1/2007 1:52:07 PM}	}
+
 	CWaitCursor wait;
 	--(this->m_pimpl->m_vectorActionsIndex);
 	ASSERT(this->m_pimpl->m_vectorActionsIndex >= 0);
@@ -1390,6 +1417,14 @@ void CWPhastDoc::OnEditUndo()
 
 void CWPhastDoc::OnEditRedo() // 57644
 {
+// COMMENT: {8/1/2007 1:52:19 PM}	if (CBoxPropertiesDialogBar *pBar = this->GetBoxPropertiesDialogBar())
+// COMMENT: {8/1/2007 1:52:19 PM}	{
+// COMMENT: {8/1/2007 1:52:19 PM}		if (pBar->IsChild(CWnd::GetFocus()))
+// COMMENT: {8/1/2007 1:52:19 PM}		{
+// COMMENT: {8/1/2007 1:52:19 PM}			pBar->OnEditRedo();
+// COMMENT: {8/1/2007 1:52:19 PM}			return;
+// COMMENT: {8/1/2007 1:52:19 PM}		}
+// COMMENT: {8/1/2007 1:52:19 PM}	}
 	CWaitCursor wait;
 	ASSERT(this->m_pimpl->m_vectorActionsIndex < this->m_pimpl->m_vectorActions.size());
 	this->m_pimpl->m_vectorActions.at(this->m_pimpl->m_vectorActionsIndex)->Execute();

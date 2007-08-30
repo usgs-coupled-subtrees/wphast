@@ -22,6 +22,7 @@ class vtkPolyDataMapper;
 class vtkActor;
 
 class vtkCubeSource;
+class MyCubeSource;
 class vtkCylinderSource;
 class CWellActor;
 
@@ -88,7 +89,8 @@ protected:
 	vtkActor                       *m_pCursor3DActor;
 
 	// new zone
-	vtkCubeSource                  *m_pNewCube;
+// COMMENT: {8/23/2007 10:01:23 PM}	vtkCubeSource                  *m_pNewCube;
+	MyCubeSource                   *m_pNewCube;
 	vtkPolyDataMapper              *m_pNewCubeMapper;
 	vtkActor                       *m_pNewCubeActor;
 

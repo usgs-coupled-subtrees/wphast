@@ -31,8 +31,7 @@
 
 #include "Units.h"
 #include "Global.h"
-//// #include "Zone.h"
-//// #include "ZoneLODActor.h"
+
 BOOL IsEditCtrl(HWND hWnd);
 BOOL IsEditCtrl(CWnd* pWnd);
 
@@ -56,6 +55,7 @@ BEGIN_MESSAGE_MAP(CBoxPropertiesDialogBar, CSizingDialogBarCFVS7)
 	ON_EN_CHANGE(IDC_EDIT_LENGTH, OnEnChange)
 	ON_EN_CHANGE(IDC_EDIT_WIDTH, OnEnChange)
 	ON_EN_CHANGE(IDC_EDIT_HEIGHT, OnEnChange)
+
 	ON_EN_CHANGE(IDC_EDIT_XMIN, OnEnChange)
 	ON_EN_CHANGE(IDC_EDIT_YMIN, OnEnChange)
 	ON_EN_CHANGE(IDC_EDIT_ZMIN, OnEnChange)
@@ -76,13 +76,9 @@ BEGIN_MESSAGE_MAP(CBoxPropertiesDialogBar, CSizingDialogBarCFVS7)
 // COMMENT: {7/31/2007 5:47:43 PM}	ON_COMMAND(ID_EDIT_UNDO, OnEditUndo)
 // COMMENT: {7/31/2007 5:47:43 PM}	ON_UPDATE_COMMAND_UI(ID_EDIT_REDO, OnUpdateEditRedo)
 // COMMENT: {7/31/2007 5:47:43 PM}	ON_COMMAND(ID_EDIT_REDO, OnEditRedo)
-	//
 	ON_EN_CHANGE(IDC_EDIT_WELL_X, OnEnChange)
 	ON_EN_CHANGE(IDC_EDIT_WELL_Y, OnEnChange)
-
 	ON_NOTIFY(GVN_ENDLABELEDIT, IDC_GRID_RIVER, OnEndLabelEditGrid)
-	//
-	//ON_EN_KILLFOCUS(IDC_EDIT_YMAX, OnEnKillfocusYMAXEdit)
 	ON_CONTROL_RANGE(EN_KILLFOCUS, IDC_EDIT_XMIN, IDC_EDIT_ZMAX, OnEnKillfocusRange)
 	ON_CONTROL_RANGE(EN_KILLFOCUS, IDC_EDIT_WELL_X, IDC_EDIT_WELL_Y, OnEnKillfocusRange)
 	//}}
@@ -107,19 +103,6 @@ CBoxPropertiesDialogBar::~CBoxPropertiesDialogBar()
 BOOL CBoxPropertiesDialogBar::Create(UINT nIDTemplate, LPCTSTR lpszWindowName,
 	CWnd* pParentWnd, UINT nID, DWORD dwStyle)
 {
-	/***
-	switch (nIDTemplate) {
-		case IDD_PROPS_CUBE:
-			this->m_nType = CBoxPropertiesDialogBar::BP_POS_PLUS_LENGTH;
-			break;
-		case IDD_PROPS_CUBE2:
-			this->m_nType = CBoxPropertiesDialogBar::BP_MIN_MAX;
-			break;
-		default:
-			ASSERT(FALSE);
-			break;
-	}
-	***/
 	TRACE("%s\n", __FUNCTION__);
 	return this->CSizingDialogBarCFVS7::Create(nIDTemplate, lpszWindowName, pParentWnd, nID, dwStyle);
 }
@@ -201,7 +184,6 @@ void CBoxPropertiesDialogBar::Update(IObserver* pSender, LPARAM lHint, CObject* 
 		}
 		break;
 	case WPN_VISCHANGED:
-		// TODO ??  ASSERT(FALSE);
 		break;
 	case WPN_SCALE_CHANGED:
 		break;
@@ -301,7 +283,6 @@ void CBoxPropertiesDialogBar::Set(CWPhastView* pView, vtkProp3D* pProp3D, const 
 	{
 		this->m_nType = CBoxPropertiesDialogBar::BP_NONE;		
 		this->Enable(FALSE);
-		//this->SetWindowText(_T("Zone dimensions"));
 		this->SetWindowText(_T(""));
 	}
 
@@ -311,7 +292,9 @@ void CBoxPropertiesDialogBar::Set(CWPhastView* pView, vtkProp3D* pProp3D, const 
 void CBoxPropertiesDialogBar::DoDataExchange(CDataExchange* pDX)
 {
 	TRACE("%s, in\n", __FUNCTION__);
+	
 	DDX_GridControl(pDX, IDC_GRID_RIVER, this->m_wndRiverGrid);
+
 	// Prepare Pump Sched. Grid
 	//
 	if (!pDX->m_bSaveAndValidate && this->m_wndRiverGrid.GetColumnCount() == 0)
@@ -323,7 +306,6 @@ void CBoxPropertiesDialogBar::DoDataExchange(CDataExchange* pDX)
 			this->m_wndRiverGrid.SetFixedRowCount(1);
 			this->m_wndRiverGrid.SetFixedColumnCount(0);
 			this->m_wndRiverGrid.EnableTitleTips(FALSE);
-			///this->m_wndRiverGrid.SetCurrentFocusCell(1, 2);
 		}
 		CATCH (CMemoryException, e)
 		{
@@ -334,7 +316,6 @@ void CBoxPropertiesDialogBar::DoDataExchange(CDataExchange* pDX)
 
 		VERIFY(this->m_wndRiverGrid.SetItemText(0, 0, _T("X")));
 		VERIFY(this->m_wndRiverGrid.SetItemText(0, 1, _T("Y")));
-		///VERIFY(this->m_wndRiverGrid.SetItemText(0, 2, _T("Y")));
 
 		this->m_wndRiverGrid.RedrawWindow();
 		this->m_wndRiverGrid.ExpandColumnsToFit();
@@ -392,7 +373,6 @@ void CBoxPropertiesDialogBar::DoDataExchange(CDataExchange* pDX)
 		}
 		END_CATCH
 
-		///CString str;
 		if (pDX->m_bSaveAndValidate)
 		{
 			this->m_vectorPoints.clear();
@@ -416,13 +396,11 @@ void CBoxPropertiesDialogBar::DoDataExchange(CDataExchange* pDX)
 				this->m_wndRiverGrid.RedrawCell(row, 1);
 			}
 			this->m_wndRiverGrid.SetModified(FALSE);
-			//{{
 			for (int r = 1; r < this->m_wndRiverGrid.GetRowCount(); ++r)
 			{
 				ASSERT(!this->m_wndRiverGrid.GetModified(r, 0));
 				ASSERT(!this->m_wndRiverGrid.GetModified(r, 1));
 			}
-			//}}
 		}
 	}
 
@@ -430,7 +408,9 @@ void CBoxPropertiesDialogBar::DoDataExchange(CDataExchange* pDX)
 	if (!pDX->m_bSaveAndValidate) 
 	{
 		this->m_bNeedsUpdate = false;
+#ifdef SHOW_APPLY_BUTTON
 		this->GetDlgItem(IDC_APPLY)->EnableWindow(FALSE);
+#endif
 	}
 	TRACE("%s, out\n", __FUNCTION__);
 }
@@ -445,34 +425,35 @@ void CBoxPropertiesDialogBar::OnBnClickedApply()
 		{
             ASSERT(this->m_pView);
 			CAction* pAction = NULL;
-			CRiverPoint* riverPt = NULL;
-			CRiverMovePointAction* pRVPA = NULL;
-			CMacroAction* pMacroAction = NULL;
 
 			switch (this->m_nType)
 			{
 			case CBoxPropertiesDialogBar::BP_POS_PLUS_LENGTH:
-				pAction = new CZoneResizeAction(
-					this->m_pView,
-					reinterpret_cast<CZoneActor*>(pProp3D), // (this->m_pProp3D),
-					(this->m_XLength >= 0) ? this->m_X                   : this->m_X + this->m_XLength,
-					(this->m_XLength >= 0) ? this->m_X + this->m_XLength : this->m_X,
-					(this->m_YLength >= 0) ? this->m_Y                   : this->m_Y + this->m_YLength,
-					(this->m_YLength >= 0) ? this->m_Y + this->m_YLength : this->m_Y,
-					(this->m_ZLength >= 0) ? this->m_Z                   : this->m_Z + this->m_ZLength,
-					(this->m_ZLength >= 0) ? this->m_Z + this->m_ZLength : this->m_Z
-					);
+				if (CZoneActor* pZoneActor = this->m_pProp3D ? CZoneActor::SafeDownCast(this->m_pProp3D) : NULL)
+				{
+					pAction = new CZoneResizeAction(
+						this->m_pView,
+						pZoneActor,
+						(this->m_XLength >= 0) ? this->m_X                   : this->m_X + this->m_XLength,
+						(this->m_XLength >= 0) ? this->m_X + this->m_XLength : this->m_X,
+						(this->m_YLength >= 0) ? this->m_Y                   : this->m_Y + this->m_YLength,
+						(this->m_YLength >= 0) ? this->m_Y + this->m_YLength : this->m_Y,
+						(this->m_ZLength >= 0) ? this->m_Z                   : this->m_Z + this->m_ZLength,
+						(this->m_ZLength >= 0) ? this->m_Z + this->m_ZLength : this->m_Z
+						);
+				}
 				break;
 			case CBoxPropertiesDialogBar::BP_MIN_MAX:
+				if (CZoneActor* pZoneActor = this->m_pProp3D ? CZoneActor::SafeDownCast(this->m_pProp3D) : NULL)
 				{
 					float bounds[6];					
-					reinterpret_cast<CZoneActor*>(pProp3D)->GetUserBounds(bounds);
+					pZoneActor->GetUserBounds(bounds);
 					if (bounds[0] != this->m_XMin || bounds[1] != this->m_XMax || bounds[2] != this->m_YMin || 
 						bounds[3] != this->m_YMax || bounds[4] != this->m_ZMin || bounds[5] != this->m_ZMax)
 					{
 						pAction = new CZoneResizeAction(
 							this->m_pView,
-							reinterpret_cast<CZoneActor*>(pProp3D),
+							pZoneActor,
 							(this->m_XMin <= this->m_XMax) ? this->m_XMin : this->m_XMax,
 							(this->m_XMin <= this->m_XMax) ? this->m_XMax : this->m_XMin,
 							(this->m_YMin <= this->m_YMax) ? this->m_YMin : this->m_YMax,
@@ -487,57 +468,48 @@ void CBoxPropertiesDialogBar::OnBnClickedApply()
 						if (this->m_bNeedsUpdate)
 						{
 							this->m_bNeedsUpdate = false;
+#ifdef SHOW_APPLY_BUTTON
 							this->GetDlgItem(IDC_APPLY)->EnableWindow(FALSE);
+#endif
 						}
 					}
 				}
 				break;
 			case CBoxPropertiesDialogBar::BP_WELL:
-				pAction = new CWellSetPositionAction(
-					reinterpret_cast<CWellActor*>(pProp3D),
-					this->m_pView->GetDocument(),
-					this->m_XWell,
-					this->m_YWell
-					);
+				if (CWellActor* pWellActor = this->m_pProp3D ? CWellActor::SafeDownCast(this->m_pProp3D) : NULL)
+				{
+					pAction = new CWellSetPositionAction(
+						pWellActor,
+						this->m_pView->GetDocument(),
+						this->m_XWell,
+						this->m_YWell
+						);
+				}
 				break;
 			case CBoxPropertiesDialogBar::BP_RIVER:
+				if (CRiverActor* pRiverActor = this->m_pProp3D ? CRiverActor::SafeDownCast(this->m_pProp3D) : NULL)
 				{
-					CRiver river = reinterpret_cast<CRiverActor*>(pProp3D)->GetRiver();
-// COMMENT: {8/2/2007 2:07:47 PM}					river.m_listPoints.size();
-					pMacroAction = new CMacroAction();
+					CRiver river = pRiverActor->GetRiver();
+					CMacroAction* pMacroAction = new CMacroAction();
 					for (int r = 1; r < this->m_wndRiverGrid.GetRowCount(); ++r)
 					{
-// COMMENT: {8/2/2007 2:12:17 PM}						bool bRowChange = false;
-// COMMENT: {8/2/2007 2:12:17 PM}						if (this->m_wndRiverGrid.GetModified(r, 0))
-// COMMENT: {8/2/2007 2:12:17 PM}						{
-// COMMENT: {8/2/2007 2:12:17 PM}							bRowChange = true;
-// COMMENT: {8/2/2007 2:12:17 PM}						}
-// COMMENT: {8/2/2007 2:12:17 PM}						if (this->m_wndRiverGrid.GetModified(r, 1))
-// COMMENT: {8/2/2007 2:12:17 PM}						{
-// COMMENT: {8/2/2007 2:12:17 PM}							bRowChange = true;
-// COMMENT: {8/2/2007 2:12:17 PM}						}
-// COMMENT: {8/2/2007 2:12:17 PM}						if (bRowChange)
-						//{{
-						riverPt = reinterpret_cast<CRiverActor*>(pProp3D)->GetRiverPoint(r-1);
+						CRiverPoint* riverPt = pRiverActor->GetRiverPoint(r-1);
 						std::pair<double, double> pt = this->m_vectorPoints[r-1];
 						if (riverPt->x != pt.first || riverPt->y != pt.second)
-						//}}
 						{
-							////riverPt = reinterpret_cast<CRiverActor*>(pProp3D)->GetRiverPoint(r-1);
-							pRVPA = new CRiverMovePointAction(
-								reinterpret_cast<CRiverActor*>(pProp3D),
+							CRiverMovePointAction* pRMPA = new CRiverMovePointAction(
+								pRiverActor,
 								this->m_pView->GetDocument(),
 								r-1,
 								riverPt->x,
 								riverPt->y
 							);
-							////std::pair<double, double> pt = this->m_vectorPoints[r-1];
-							pRVPA->SetPoint(pt.first, pt.second);
-							pMacroAction->Add(pRVPA);
+							pRMPA->SetPoint(pt.first, pt.second);
+							pMacroAction->Add(pRMPA);
 						}
 					}
+					pAction = pMacroAction;
 				}
-				pAction = pMacroAction;
 				break;
 			default:
 				ASSERT(FALSE);
@@ -556,8 +528,10 @@ void CBoxPropertiesDialogBar::OnBnClickedApply()
 void CBoxPropertiesDialogBar::Enable(bool bEnable)
 {
 	TRACE("%s, in\n", __FUNCTION__);
-	/// this->EnableWindow(bEnable);
+
+#ifdef SHOW_APPLY_BUTTON
 	this->GetDlgItem(IDC_APPLY)->EnableWindow(bEnable);
+#endif
 
 	if (this->m_nType == CBoxPropertiesDialogBar::BP_POS_PLUS_LENGTH)
 	{
@@ -581,7 +555,7 @@ void CBoxPropertiesDialogBar::Enable(bool bEnable)
 			pEdit->SetReadOnly(!bEnable);
 		}
 	}
-	else
+	else if (this->m_nType == CBoxPropertiesDialogBar::BP_MIN_MAX)
 	{
 		if (CEdit* pEdit = (CEdit*)this->GetDlgItem(IDC_EDIT_XMIN)) {
 			pEdit->SetReadOnly(!bEnable);
@@ -602,7 +576,33 @@ void CBoxPropertiesDialogBar::Enable(bool bEnable)
 		if (CEdit* pEdit = (CEdit*)this->GetDlgItem(IDC_EDIT_ZMAX)) {
 			pEdit->SetReadOnly(!bEnable);
 		}
-
+	}
+	else if (this->m_nType == CBoxPropertiesDialogBar::BP_WELL)
+	{
+		if (CEdit* pEdit = (CEdit*)this->GetDlgItem(IDC_EDIT_WELL_X)) {
+			pEdit->SetReadOnly(!bEnable);
+		}
+		if (CEdit* pEdit = (CEdit*)this->GetDlgItem(IDC_EDIT_WELL_Y)) {
+			pEdit->SetReadOnly(!bEnable);
+		}
+	}
+	else if (this->m_nType == CBoxPropertiesDialogBar::BP_RIVER)
+	{
+		for (int row = 1; row < this->m_wndRiverGrid.GetRowCount(); ++row)
+		{
+			if (bEnable)
+			{
+				this->m_wndRiverGrid.EnableCell(row, 0);
+				this->m_wndRiverGrid.EnableCell(row, 1);
+			}
+			else
+			{
+				this->m_wndRiverGrid.DisableCell(row, 0);
+				this->m_wndRiverGrid.DisableCell(row, 1);
+			}
+			this->m_wndRiverGrid.RedrawCell(row, 0);
+			this->m_wndRiverGrid.RedrawCell(row, 1);
+		}
 	}
 	TRACE("%s, out\n", __FUNCTION__);
 }
@@ -615,55 +615,6 @@ BOOL CBoxPropertiesDialogBar::PreTranslateMessage(MSG* pMsg)
 		TRACE("%s, in\n", __FUNCTION__);
 		if (pMsg->wParam == VK_RETURN)
 		{
-			// Handle returns within dialog bar
-			//
-			if (pMsg->hwnd == this->GetDlgItem(IDC_EDIT_X)->GetSafeHwnd()) {
-				//OnEnKillfocusEdit();
-				OnBnClickedApply();
-			}
-			if (pMsg->hwnd == this->GetDlgItem(IDC_EDIT_Y)->GetSafeHwnd()) {
-				//OnEnKillfocusEdit();
-				OnBnClickedApply();
-			}
-			if (pMsg->hwnd == this->GetDlgItem(IDC_EDIT_Z)->GetSafeHwnd()) {
-				//OnEnKillfocusEdit();
-				OnBnClickedApply();
-			}
-			if (pMsg->hwnd == this->GetDlgItem(IDC_EDIT_LENGTH)->GetSafeHwnd()) {
-				//OnEnKillfocusEdit();
-				OnBnClickedApply();
-			}
-			if (pMsg->hwnd == this->GetDlgItem(IDC_EDIT_WIDTH)->GetSafeHwnd()) {
-				//OnEnKillfocusEdit();
-				OnBnClickedApply();
-			}
-			if (pMsg->hwnd == this->GetDlgItem(IDC_EDIT_HEIGHT)->GetSafeHwnd()) {
-				//OnEnKillfocusEdit();
-				OnBnClickedApply();
-			}
-// COMMENT: {8/1/2007 1:57:13 PM}			//{{
-// COMMENT: {8/1/2007 1:57:13 PM}			if (pMsg->hwnd == this->GetDlgItem(IDC_EDIT_WELL_X)->GetSafeHwnd()) {
-// COMMENT: {8/1/2007 1:57:13 PM}				OnBnClickedApply();
-// COMMENT: {8/1/2007 1:57:13 PM}			}
-// COMMENT: {8/1/2007 1:57:13 PM}			if (pMsg->hwnd == this->GetDlgItem(IDC_EDIT_WELL_Y)->GetSafeHwnd()) {
-// COMMENT: {8/1/2007 1:57:13 PM}				OnBnClickedApply();
-// COMMENT: {8/1/2007 1:57:13 PM}			}
-// COMMENT: {8/1/2007 1:57:13 PM}			//}}
-// COMMENT: {8/1/2007 1:57:13 PM}			//{{
-// COMMENT: {8/1/2007 1:57:13 PM}			if (pMsg->hwnd == this->GetDlgItem(IDC_EDIT_YMAX)->GetSafeHwnd())
-// COMMENT: {8/1/2007 1:57:13 PM}			{
-// COMMENT: {8/1/2007 1:57:13 PM}				if (IsValidFloatFormat(this, pMsg->hwnd))
-// COMMENT: {8/1/2007 1:57:13 PM}				{
-// COMMENT: {8/1/2007 1:57:13 PM}					this->OnBnClickedApply();
-// COMMENT: {8/1/2007 1:57:13 PM}				}
-// COMMENT: {8/1/2007 1:57:13 PM}				else
-// COMMENT: {8/1/2007 1:57:13 PM}				{
-// COMMENT: {8/1/2007 1:57:13 PM}					this->UpdateData(FALSE);
-// COMMENT: {8/1/2007 1:57:13 PM}				}
-// COMMENT: {8/1/2007 1:57:13 PM}				::SendMessage(pMsg->hwnd, EM_SETSEL, 0, -1);
-// COMMENT: {8/1/2007 1:57:13 PM}			}
-// COMMENT: {8/1/2007 1:57:13 PM}			//}}
-
 			if (this->m_nType != CBoxPropertiesDialogBar::BP_RIVER)
 			{
 				if (::IsEditCtrl(pMsg->hwnd))
@@ -777,64 +728,34 @@ BOOL CBoxPropertiesDialogBar::PreTranslateMessage(MSG* pMsg)
 
 void CBoxPropertiesDialogBar::OnEnKillfocusEdit()
 {
-	////if (this->m_pProp3D) {
-	////	if (this->m_bNeedsUpdate) {
-	////		if (UpdateData(TRUE)) {
-	////			this->m_bNeedsUpdate = false;
- ////               ASSERT(this->m_pView);
-	////			////////CBoxResizeAction* pAction = new CBoxResizeAction(
-	////			////////	this->m_pView,
-	////			////////	this->m_pProp3D,
-	////			////////	this->m_XLength,
-	////			////////	this->m_YLength,
-	////			////////	this->m_ZLength,
-	////			////////	(float)((2*this->m_X + this->m_XLength)/2),
-	////			////////	(float)((2*this->m_Y + this->m_YLength)/2),
-	////			////////	(float)((2*this->m_Z + this->m_ZLength)/2)
-	////			////////	);
-	////			////////this->m_pView->GetDocument()->Execute(pAction);
-	////			// delete pAction;	
-	////		}
-	////	}
-	////}
-	TRACE("%s, out\n", __FUNCTION__);
+	TRACE("%s\n", __FUNCTION__);
 }
 
 void CBoxPropertiesDialogBar::OnEnChange()
 {
 	TRACE("%s, in\n", __FUNCTION__);
-
-	// COMMENT: {8/1/2007 4:33:13 PM}	this->m_bNeedsUpdate = true;
-// COMMENT: {8/1/2007 4:33:13 PM}	this->GetDlgItem(IDC_APPLY)->EnableWindow(TRUE);
-	//{{
 	this->UpdateApply();
-	//}}
 	TRACE("%s, out\n", __FUNCTION__);
 }
 
 BOOL IsEditCtrl(CWnd* pWnd)
 {
 	TRACE("%s, in\n", __FUNCTION__);
-
 	if (pWnd == NULL)
-		return NULL;
+	{
+		TRACE("%s, out\n", __FUNCTION__);
+		return FALSE;
+	}
 	return IsEditCtrl(pWnd->GetSafeHwnd());
-// COMMENT: {7/31/2007 8:50:49 PM}
-// COMMENT: {7/31/2007 8:50:49 PM}	HWND hWnd = pWnd->GetSafeHwnd();
-// COMMENT: {7/31/2007 8:50:49 PM}	if (hWnd == NULL)
-// COMMENT: {7/31/2007 8:50:49 PM}		return FALSE;
-// COMMENT: {7/31/2007 8:50:49 PM}
-// COMMENT: {7/31/2007 8:50:49 PM}	static TCHAR szCompare[6];
-// COMMENT: {7/31/2007 8:50:49 PM}	::GetClassName(hWnd, szCompare, 6);
-// COMMENT: {7/31/2007 8:50:49 PM}	return lstrcmpi(szCompare, _T("edit")) == 0;
-	TRACE("%s, out\n", __FUNCTION__);
 }
 
 BOOL IsEditCtrl(HWND hWnd)
 {
 	TRACE("%s, in\n", __FUNCTION__);
 	if (hWnd == NULL)
+	{
 		return FALSE;
+	}
 
 	static TCHAR szCompare[6];
 	::GetClassName(hWnd, szCompare, 6);
@@ -1051,14 +972,11 @@ static int ZoneIDs[] = {
 void CBoxPropertiesDialogBar::ShowZoneControls()
 {
 	TRACE("%s, in\n", __FUNCTION__);
-	//if (this->m_nType == BP_MIN_MAX)
+	for (int i = 0; i < sizeof(ZoneIDs)/sizeof(ZoneIDs[0]); ++i)
 	{
-		for (int i = 0; i < sizeof(ZoneIDs)/sizeof(ZoneIDs[0]); ++i)
+		if (CWnd *pWnd = this->GetDlgItem(ZoneIDs[i]))
 		{
-			if (CWnd *pWnd = this->GetDlgItem(ZoneIDs[i]))
-			{
-				pWnd->ShowWindow(SW_SHOW);
-			}
+			pWnd->ShowWindow(SW_SHOW);
 		}
 	}
 	TRACE("%s, out\n", __FUNCTION__);
@@ -1158,16 +1076,19 @@ void CBoxPropertiesDialogBar::HideRiverControls()
 
 void CBoxPropertiesDialogBar::ShowApply()
 {
+#ifdef SHOW_APPLY_BUTTON
 	TRACE("%s, in\n", __FUNCTION__);
 	if (CWnd *pWnd = this->GetDlgItem(IDC_APPLY))
 	{
 			pWnd->ShowWindow(SW_SHOW);
 	}
 	TRACE("%s, out\n", __FUNCTION__);
+#endif
 }
 
 void CBoxPropertiesDialogBar::HideApply()
 {
+#ifdef SHOW_APPLY_BUTTON
 	TRACE("%s, in\n", __FUNCTION__);
 	if (CWnd *pWnd = this->GetDlgItem(IDC_APPLY))
 	{
@@ -1178,30 +1099,25 @@ void CBoxPropertiesDialogBar::HideApply()
 		this->InvalidateRect(&rc, TRUE);
 	}
 	TRACE("%s, out\n", __FUNCTION__);
+#endif
 }
 
 void CBoxPropertiesDialogBar::OnEndLabelEditGrid(NMHDR *pNotifyStruct, LRESULT *result)
 {
 	TRACE("%s, in\n", __FUNCTION__);
 	NM_GRIDVIEW *pnmgv = (NM_GRIDVIEW*)pNotifyStruct;
-	this->OnEnChange();
+	double d;
+	if (IsValidFloatFormat(this, IDC_GRID_RIVER, pnmgv->iRow, pnmgv->iColumn, d))
+	{
+		this->OnBnClickedApply();
+	}
+	else
+	{
+		this->UpdateData(FALSE);
+	}
+
 	TRACE("%s, out\n", __FUNCTION__);
 }
-
-// COMMENT: {8/1/2007 3:52:03 PM}void CBoxPropertiesDialogBar::OnEnKillfocusYMAXEdit()
-// COMMENT: {8/1/2007 3:52:03 PM}{
-// COMMENT: {8/1/2007 3:52:03 PM}	if (this->m_bNeedsUpdate)
-// COMMENT: {8/1/2007 3:52:03 PM}	{
-// COMMENT: {8/1/2007 3:52:03 PM}		if (IsValidFloatFormat(this, IDC_EDIT_YMAX))
-// COMMENT: {8/1/2007 3:52:03 PM}		{
-// COMMENT: {8/1/2007 3:52:03 PM}			this->OnBnClickedApply();
-// COMMENT: {8/1/2007 3:52:03 PM}		}
-// COMMENT: {8/1/2007 3:52:03 PM}		else
-// COMMENT: {8/1/2007 3:52:03 PM}		{
-// COMMENT: {8/1/2007 3:52:03 PM}			this->UpdateData(FALSE);
-// COMMENT: {8/1/2007 3:52:03 PM}		}
-// COMMENT: {8/1/2007 3:52:03 PM}	}
-// COMMENT: {8/1/2007 3:52:03 PM}}
 
 BOOL IsValidFloatFormat(CWnd* pWnd, int nIDC, double& d)
 {
@@ -1219,7 +1135,6 @@ BOOL IsValidFloatFormat(CWnd* pWnd, HWND hWndCtrl, double& d)
 	TCHAR szBuffer[TEXT_BUFFER_SIZE];
 
 	::GetWindowText(hWndCtrl, szBuffer, _countof(szBuffer));
-	//double d;
 	if (_sntscanf_s(szBuffer, _countof(szBuffer), _T("%lf"), &d) != 1)
 	{
 		return FALSE;
@@ -1228,14 +1143,12 @@ BOOL IsValidFloatFormat(CWnd* pWnd, HWND hWndCtrl, double& d)
 	TRACE("%s, out\n", __FUNCTION__);
 }
 
-BOOL IsValidFloatFormat(CWnd* pWnd, int nIDC, int nRow, int nCol, double& value)
+BOOL IsValidFloatFormat(CWnd* pWnd, int nIDC, int nRow, int nCol, double& d)
 {
 	TRACE("%s, in\n", __FUNCTION__);
 	CGridCtrl* pGrid = static_cast<CGridCtrl*>(pWnd->GetDlgItem(nIDC));
 	ASSERT_KINDOF(CModGridCtrl, pGrid);
-	CString str;
-	str = pGrid->GetItemText(nRow, nCol);
-	double d;
+	CString str = pGrid->GetItemText(nRow, nCol);
 	if (_stscanf(str, _T("%lf"), &d) != 1)
 	{
 		return FALSE;
@@ -1243,7 +1156,6 @@ BOOL IsValidFloatFormat(CWnd* pWnd, int nIDC, int nRow, int nCol, double& value)
 	return TRUE;
 	TRACE("%s, out\n", __FUNCTION__);
 }
-
 
 void CBoxPropertiesDialogBar::OnEnKillfocusRange(UINT nID)
 {
@@ -1300,12 +1212,16 @@ void CBoxPropertiesDialogBar::UpdateApply()
 				if (bNeedsUpdate)
 				{
 					this->m_bNeedsUpdate = true;
+#ifdef SHOW_APPLY_BUTTON
 					this->GetDlgItem(IDC_APPLY)->EnableWindow(TRUE);
+#endif
 				}
 				else
 				{
 					this->m_bNeedsUpdate = false;
+#ifdef SHOW_APPLY_BUTTON
 					this->GetDlgItem(IDC_APPLY)->EnableWindow(FALSE);
+#endif
 				}
 			}
 			break;
@@ -1330,12 +1246,16 @@ void CBoxPropertiesDialogBar::UpdateApply()
 				if (bNeedsUpdate)
 				{
 					this->m_bNeedsUpdate = true;
+#ifdef SHOW_APPLY_BUTTON
 					this->GetDlgItem(IDC_APPLY)->EnableWindow(TRUE);
+#endif
 				}
 				else
 				{
 					this->m_bNeedsUpdate = false;
+#ifdef SHOW_APPLY_BUTTON
 					this->GetDlgItem(IDC_APPLY)->EnableWindow(FALSE);
+#endif
 				}
 			}
 			break;
@@ -1362,12 +1282,16 @@ void CBoxPropertiesDialogBar::UpdateApply()
 				if (bNeedsUpdate)
 				{
 					this->m_bNeedsUpdate = true;
+#ifdef SHOW_APPLY_BUTTON
 					this->GetDlgItem(IDC_APPLY)->EnableWindow(TRUE);
+#endif
 				}
 				else
 				{
 					this->m_bNeedsUpdate = false;
+#ifdef SHOW_APPLY_BUTTON
 					this->GetDlgItem(IDC_APPLY)->EnableWindow(FALSE);
+#endif
 				}
 			}
 			break;

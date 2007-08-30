@@ -74,16 +74,16 @@ CZoneCreateAction<T>::CZoneCreateAction(CWPhastDoc* pDoc, const char* name, floa
 	//
 	this->m_pZoneActor->SetDesc(desc);
 
-	// create random color
-	// ::rand() returns 0 - RAND_MAX
-	vtkFloatingPointType color[3];
-	color[0] = (double)::rand() / (double)RAND_MAX;
-	color[1] = (double)::rand() / (double)RAND_MAX;
-	color[2] = (double)::rand() / (double)RAND_MAX;
-
-	// set color and transparency
-	//
-	this->m_pZoneActor->GetProperty()->SetColor(color);
+// COMMENT: {8/30/2007 4:51:25 PM}	// create random color
+// COMMENT: {8/30/2007 4:51:25 PM}	// ::rand() returns 0 - RAND_MAX
+// COMMENT: {8/30/2007 4:51:25 PM}	vtkFloatingPointType color[3];
+// COMMENT: {8/30/2007 4:51:25 PM}	color[0] = (double)::rand() / (double)RAND_MAX;
+// COMMENT: {8/30/2007 4:51:25 PM}	color[1] = (double)::rand() / (double)RAND_MAX;
+// COMMENT: {8/30/2007 4:51:25 PM}	color[2] = (double)::rand() / (double)RAND_MAX;
+// COMMENT: {8/30/2007 4:51:25 PM}
+// COMMENT: {8/30/2007 4:51:25 PM}	// set color and transparency
+// COMMENT: {8/30/2007 4:51:25 PM}	//
+// COMMENT: {8/30/2007 4:51:25 PM}	this->m_pZoneActor->GetProperty()->SetColor(color);
 	this->m_pZoneActor->GetProperty()->SetOpacity(0.3);
 
 	if (nodeInsertAfter == TVI_LAST)

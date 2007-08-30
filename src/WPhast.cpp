@@ -104,7 +104,7 @@ BOOL CWPhastApp::InitInstance()
 	// TRACE("%s(%d) : CWPhastDoc::DeleteContents()\n", THIS_FILE, __LINE__);
 	//
 	// CHECKOUT => TRACE(traceAppMsg, 0, _T("Warning: could not parse the path '%s'.\n"), "TESTING");
-	g_Allocator.GetProcess()->m_bFileNameAndLineNo = true;
+	///g_Allocator.GetProcess()->m_bFileNameAndLineNo = true;
 #endif
 
 	// Check requirements

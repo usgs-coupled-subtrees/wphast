@@ -111,6 +111,8 @@ BEGIN_MESSAGE_MAP(CPropertyTreeControlBar, CSizingControlBarCFVS7)
 	ON_COMMAND(ID_EDIT_CUT, OnEditCut)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_CLEAR, OnUpdateEditClear)
 	ON_COMMAND(ID_EDIT_CLEAR, OnEditClear)
+	ON_UPDATE_COMMAND_UI(ID_EDIT_PROPERTIES, &CPropertyTreeControlBar::OnUpdateEditProperties)
+	ON_COMMAND(ID_EDIT_PROPERTIES, &CPropertyTreeControlBar::OnEditProperties)
 END_MESSAGE_MAP()
 /**
 NM_CLICK
@@ -514,10 +516,26 @@ void CPropertyTreeControlBar::OnNMDblClk(NMHDR* pNMHDR, LRESULT* pResult)
 	}
 	if (!(TVHT_ONITEM & ht.flags)) return;
 
-	CTreeCtrlNode item = this->GetTreeCtrlEx()->GetSelectedItem();
+	///this->EditSelection(pResult);
+	//{{
+	if (this->IsNodeEditable(this->GetTreeCtrlEx()->GetSelectedItem(), true)) {
+		*pResult = TRUE;
+	}
+	//}}
+}
+
+//void CPropertyTreeControlBar::EditSelection(LRESULT* pResult, BOOL bJustCheckIfEditable/*=FALSE*/)
+bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode editNode, bool bDoEdit)
+{
+// COMMENT: {6/22/2007 3:05:25 PM}	CTreeCtrlNode item = this->GetTreeCtrlEx()->GetSelectedItem();
+// COMMENT: {6/22/2007 3:05:25 PM}	CTreeCtrlNode parent = item.GetParent();
+// COMMENT: {6/22/2007 3:05:25 PM}	HTREEITEM hItem = item;
+// COMMENT: {6/22/2007 3:05:25 PM}	HTREEITEM hParent = parent;
+	CTreeCtrlNode item = editNode;
 	CTreeCtrlNode parent = item.GetParent();
 	HTREEITEM hItem = item;
 	HTREEITEM hParent = parent;
+
 
 	// FLOW_ONLY
 	//
@@ -539,28 +557,12 @@ void CPropertyTreeControlBar::OnNMDblClk(NMHDR* pNMHDR, LRESULT* pResult)
 				break;
 			}
 		}
-
-// COMMENT: {11/23/2005 12:56:52 AM}		CTreeCtrlNode nodeIC = this->GetICChemNode();
-// COMMENT: {11/23/2005 12:56:52 AM}		nCount = nodeIC.GetChildCount();
-// COMMENT: {11/23/2005 12:56:52 AM}
-// COMMENT: {11/23/2005 12:56:52 AM}		CICZoneActor *pICZoneActor = NULL;
-// COMMENT: {11/23/2005 12:56:52 AM}		for (int i = 0; i < nCount; ++i)
-// COMMENT: {11/23/2005 12:56:52 AM}		{
-// COMMENT: {11/23/2005 12:56:52 AM}			if (CICZoneActor *pZone = CICZoneActor::SafeDownCast((vtkObject*)nodeIC.GetChildAt(i).GetData()))
-// COMMENT: {11/23/2005 12:56:52 AM}			{
-// COMMENT: {11/23/2005 12:56:52 AM}				if (pZone->GetType() == CICZoneActor::IC_CHEM)
-// COMMENT: {11/23/2005 12:56:52 AM}				{
-// COMMENT: {11/23/2005 12:56:52 AM}					pICZoneActor = pZone;
-// COMMENT: {11/23/2005 12:56:52 AM}					break;
-// COMMENT: {11/23/2005 12:56:52 AM}				}
-// COMMENT: {11/23/2005 12:56:52 AM}			}
-// COMMENT: {11/23/2005 12:56:52 AM}		}
-// COMMENT: {11/23/2005 12:56:52 AM}		ASSERT(pMediaZoneActor && pICZoneActor);
-// COMMENT: {11/23/2005 12:56:52 AM}		pFlowOnly->Edit(&this->m_wndTree, pMediaZoneActor, pICZoneActor);
-		pFlowOnly->Edit(&this->m_wndTree, pMediaZoneActor, 0);
+		if (bDoEdit)
+		{
+			pFlowOnly->Edit(&this->m_wndTree, pMediaZoneActor, 0);
+		}
 		//}} HACK
-		*pResult = TRUE;
-		return;
+		return true;
 	}
 
 
@@ -570,9 +572,11 @@ void CPropertyTreeControlBar::OnNMDblClk(NMHDR* pNMHDR, LRESULT* pResult)
 	{
 		CFreeSurface *pFreeSurface = reinterpret_cast<CFreeSurface*>(this->m_nodeFreeSurface.GetData());
 		ASSERT(pFreeSurface);
-		pFreeSurface->Edit(&this->m_wndTree);
-		*pResult = TRUE;
-		return;
+		if (bDoEdit)
+		{
+			pFreeSurface->Edit(&this->m_wndTree);
+		}
+		return true;
 	}
 
 	// SOLUTION_METHOD
@@ -581,9 +585,11 @@ void CPropertyTreeControlBar::OnNMDblClk(NMHDR* pNMHDR, LRESULT* pResult)
 	{
 		CSolutionMethod *pSolutionMethod = reinterpret_cast<CSolutionMethod*>(this->m_nodeSolutionMethod.GetData());
 		ASSERT(pSolutionMethod);
-		pSolutionMethod->Edit(&this->m_wndTree);
-		*pResult = TRUE;
-		return;
+		if (bDoEdit)
+		{
+			pSolutionMethod->Edit(&this->m_wndTree);
+		}
+		return true;
 	}
 
 	// STEADY_FLOW
@@ -592,9 +598,11 @@ void CPropertyTreeControlBar::OnNMDblClk(NMHDR* pNMHDR, LRESULT* pResult)
 	{
 		CSteadyFlow* pSteadyFlow = reinterpret_cast<CSteadyFlow*>(this->m_nodeSteadyFlow.GetData());
 		ASSERT(pSteadyFlow);
-		pSteadyFlow->Edit(&this->m_wndTree);
-		*pResult = TRUE;
-		return;
+		if (bDoEdit)
+		{
+			pSteadyFlow->Edit(&this->m_wndTree);
+		}
+		return true;
 	}
 
 
@@ -605,11 +613,13 @@ void CPropertyTreeControlBar::OnNMDblClk(NMHDR* pNMHDR, LRESULT* pResult)
 		if (this->m_nodeUnits.GetData())
 		{
 			CUnits* pUnits = (CUnits*)this->m_nodeUnits.GetData();
-			pUnits->Edit(&this->m_wndTree);
-			*pResult = TRUE;
-			return;
+			if (bDoEdit)
+			{
+				pUnits->Edit(&this->m_wndTree);
+			}
+			return true;
 		}
-		return;
+		return false;
 	}
 
 	// WELLS
@@ -627,13 +637,15 @@ void CPropertyTreeControlBar::OnNMDblClk(NMHDR* pNMHDR, LRESULT* pResult)
 			{
 				if (CWellActor* pWellActor = CWellActor::SafeDownCast((vtkObject*)item.GetData()))
 				{
-					pWellActor->Edit(this->GetDocument());
-					*pResult = TRUE;
-					return;
+					if (bDoEdit)
+					{
+						pWellActor->Edit(this->GetDocument());
+					}
+					return true;
 				}
 			}
 		}
-		return;
+		return false;
 	}
 
 	// RIVERS
@@ -666,47 +678,49 @@ void CPropertyTreeControlBar::OnNMDblClk(NMHDR* pNMHDR, LRESULT* pResult)
 			{
 				if (CRiverActor* pRiverActor = CRiverActor::SafeDownCast((vtkObject*)item.GetData()))
 				{
-					CRiver river = pRiverActor->GetRiver();
-
-					CString str;
-					str.Format(_T("River %d Properties"), river.n_user);
-					CPropertySheet sheet(str);
-					
-					CRiverPropertyPage2 page;
-					sheet.AddPage(&page);
-
-					if (CWPhastDoc* pWPhastDoc = this->GetDocument())
+					if (bDoEdit)
 					{
-						page.SetProperties(river);
-						page.SetFlowOnly(bool(pWPhastDoc->GetFlowOnly()));
-						page.SetUnits(pWPhastDoc->GetUnits());
-						if (point) page.SetPoint(point);
+						CRiver river = pRiverActor->GetRiver();
 
-						std::set<int> riverNums;
-						pWPhastDoc->GetUsedRiverNumbers(riverNums);
+						CString str;
+						str.Format(_T("River %d Properties"), river.n_user);
+						CPropertySheet sheet(str);
+						
+						CRiverPropertyPage2 page;
+						sheet.AddPage(&page);
 
-						// remove this river number from used list
-						std::set<int>::iterator iter = riverNums.find(river.n_user);
-						ASSERT(iter != riverNums.end());
-						if (iter != riverNums.end())
+						if (CWPhastDoc* pWPhastDoc = this->GetDocument())
 						{
-							riverNums.erase(iter);
-						}
-						page.SetUsedRiverNumbers(riverNums);
+							page.SetProperties(river);
+							page.SetFlowOnly(bool(pWPhastDoc->GetFlowOnly()));
+							page.SetUnits(pWPhastDoc->GetUnits());
+							if (point) page.SetPoint(point);
 
-						if (sheet.DoModal() == IDOK)
-						{
-							CRiver river;
-							page.GetProperties(river);
-							pWPhastDoc->Execute(new CSetRiverAction(pRiverActor, river, pWPhastDoc));
+							std::set<int> riverNums;
+							pWPhastDoc->GetUsedRiverNumbers(riverNums);
+
+							// remove this river number from used list
+							std::set<int>::iterator iter = riverNums.find(river.n_user);
+							ASSERT(iter != riverNums.end());
+							if (iter != riverNums.end())
+							{
+								riverNums.erase(iter);
+							}
+							page.SetUsedRiverNumbers(riverNums);
+
+							if (sheet.DoModal() == IDOK)
+							{
+								CRiver river;
+								page.GetProperties(river);
+								pWPhastDoc->Execute(new CSetRiverAction(pRiverActor, river, pWPhastDoc));
+							}
 						}
-						*pResult = TRUE;
-						return;
 					}
+					return true;
 				}
 			}
 		}
-		return;
+		return false;
 	}
 
 
@@ -721,10 +735,13 @@ void CPropertyTreeControlBar::OnNMDblClk(NMHDR* pNMHDR, LRESULT* pResult)
 			CWPhastDoc* pWPhastDoc = reinterpret_cast<CWPhastDoc*>(pFrame->GetActiveDocument());
 			ASSERT_VALID(pWPhastDoc);
 
-			pWPhastDoc->Edit(pGridActor);
-			*pResult = TRUE;
-			return;
+			if (bDoEdit)
+			{
+				pWPhastDoc->Edit(pGridActor);
+			}
+			return true;
 		}
+		return false;
 	}
 
 	// MEDIA
@@ -742,13 +759,15 @@ void CPropertyTreeControlBar::OnNMDblClk(NMHDR* pNMHDR, LRESULT* pResult)
 			{
 				if (CZoneActor* pZone = CZoneActor::SafeDownCast((vtkObject*)item.GetData()))
 				{
-					pZone->Edit(&this->m_wndTree);
-					*pResult = TRUE;
-					return;
+					if (bDoEdit)
+					{
+						pZone->Edit(&this->m_wndTree);
+					}
+					return true;
 				}
 			}
 		}
-		return;
+		return false;
 	}
 
 	// BOUNDARY_CONDITIONS
@@ -766,13 +785,15 @@ void CPropertyTreeControlBar::OnNMDblClk(NMHDR* pNMHDR, LRESULT* pResult)
 			{
 				if (CZoneActor* pZone = CZoneActor::SafeDownCast((vtkObject*)item.GetData()))
 				{
-					pZone->Edit(&this->m_wndTree);
-					*pResult = TRUE;
-					return;
+					if (bDoEdit)
+					{
+						pZone->Edit(&this->m_wndTree);
+					}
+					return true;
 				}
 			}
 		}
-		return;
+		return false;
 	}
 
 	// INITIAL_CONDITIONS
@@ -790,13 +811,15 @@ void CPropertyTreeControlBar::OnNMDblClk(NMHDR* pNMHDR, LRESULT* pResult)
 			{
 				if (CZoneActor* pZone = CZoneActor::SafeDownCast((vtkObject*)item.GetData()))
 				{
-					pZone->Edit(&this->m_wndTree);
-					*pResult = TRUE;
-					return;
+					if (bDoEdit)
+					{
+						pZone->Edit(&this->m_wndTree);
+					}
+					return true;
 				}
 			}
 		}
-		return;
+		return false;
 	}
 
 	// PRINT_INITIAL
@@ -806,11 +829,13 @@ void CPropertyTreeControlBar::OnNMDblClk(NMHDR* pNMHDR, LRESULT* pResult)
 		if (this->m_nodePrintInput.GetData())
 		{
 			CPrintInput* pPI = (CPrintInput*)this->m_nodePrintInput.GetData();
-			pPI->Edit(&this->m_wndTree);
-			*pResult = TRUE;
-			return;
+			if (bDoEdit)
+			{
+				pPI->Edit(&this->m_wndTree);
+			}
+			return true;
 		}
-		return;
+		return false;
 	}
 
 	// PRINT_FREQUENCY
@@ -820,11 +845,13 @@ void CPropertyTreeControlBar::OnNMDblClk(NMHDR* pNMHDR, LRESULT* pResult)
 		if (this->m_nodePF.GetData())
 		{
 			CPrintFreq* pPF = (CPrintFreq*)this->m_nodePF.GetData();
-			pPF->Edit(&this->m_wndTree);
-			*pResult = TRUE;
-			return;
+			if (bDoEdit)
+			{
+				pPF->Edit(&this->m_wndTree);
+			}
+			return true;
 		}
-		return;
+		return false;
 	}
 
 
@@ -835,13 +862,18 @@ void CPropertyTreeControlBar::OnNMDblClk(NMHDR* pNMHDR, LRESULT* pResult)
 		if (this->m_nodeTimeControl2.GetData())
 		{
 			CTimeControl2* pTC = (CTimeControl2*)this->m_nodeTimeControl2.GetData();
-			pTC->Edit(&this->m_wndTree);
-			*pResult = TRUE;
-			return;
+			if (bDoEdit)
+			{
+				pTC->Edit(&this->m_wndTree);
+			}
+			return true;
 		}
-		return;
+		return false;
 	}
+
+	return false;
 }
+
 
 HBITMAP FAR PASCAL CreateColorBitmap(int cx, int cy)
 {
@@ -2647,7 +2679,7 @@ void CPropertyTreeControlBar::OnEditClear()
 						CTreeCtrlNode parent = sel.GetParent();
 						if (CWPhastDoc* pDoc = this->GetDocument())
 						{
-							parent.Select();
+// COMMENT: {5/29/2007 6:47:02 PM}							parent.Select();
 							pDoc->Execute(new CZoneRemoveAction(pDoc, pZone, this));
 						}
 					}
@@ -2676,7 +2708,7 @@ void CPropertyTreeControlBar::OnEditClear()
 					CTreeCtrlNode parent = sel.GetParent();
 					if (CWPhastDoc* pDoc = this->GetDocument())
 					{
-						VERIFY(parent.Select());
+// COMMENT: {5/29/2007 6:49:02 PM}						VERIFY(parent.Select());
 						pDoc->Execute(new CWellDeleteAction(pDoc, pWell));
 					}
 					return;
@@ -2719,7 +2751,7 @@ void CPropertyTreeControlBar::OnEditClear()
 							else
 							{
 								VERIFY(ptNode.GetParent().Select());
-								pDoc->Execute(new CRiverDeletePointAction(pRiverActor, point));
+								pDoc->Execute(new CRiverDeletePointAction(pRiverActor, pDoc, point));
 							}
 						}
 						else
@@ -2836,14 +2868,32 @@ void CPropertyTreeControlBar::OnEditClear()
 
 	// TIME_CONTROL
 	//
-	if (sel.IsNodeAncestor(this->m_nodeTimeControl))
+	if (sel.IsNodeAncestor(this->m_nodeTimeControl2))
 	{
-		if (this->m_nodeTimeControl.GetData())
+		::AfxMessageBox("TIME_CONTROL cannot be deleted.");
+		return;
+	}
+}
+
+void CPropertyTreeControlBar::OnUpdateEditProperties(CCmdUI *pCmdUI)
+{
+	if (CTreeCtrlEx *pTreeCtrlEx = this->GetTreeCtrlEx())
+	{
+		CTreeCtrlNode node = pTreeCtrlEx->GetSelectedItem();
+		if (this->IsNodeEditable(node, false))
 		{
-			CTimeControl* pTC = (CTimeControl*)this->m_nodeTimeControl.GetData();
-			::AfxMessageBox("Deleting TIME_CONTROL not currently implemented");
+			pCmdUI->Enable(TRUE);
 			return;
 		}
-		return;
+	}
+	pCmdUI->Enable(FALSE);
+}
+
+void CPropertyTreeControlBar::OnEditProperties()
+{
+	if (CTreeCtrlEx *pTreeCtrlEx = this->GetTreeCtrlEx())
+	{
+		CTreeCtrlNode node = pTreeCtrlEx->GetSelectedItem();
+		this->IsNodeEditable(node, true);
 	}
 }

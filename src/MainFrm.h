@@ -70,6 +70,8 @@ public:
 	afx_msg LRESULT OnMenuChar(UINT nChar, UINT nFlags, CMenu* pMenu);
 	afx_msg void OnInitMenuPopup(CMenu* pPopupMenu, UINT nIndex, BOOL bSysMenu);
 #endif
+	afx_msg void OnUpdateViewProperiesview(CCmdUI *pCmdUI);
+	afx_msg void OnViewProperiesview();
 };
 
 

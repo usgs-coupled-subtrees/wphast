@@ -59,6 +59,7 @@
 #include <vtkMapper.h>
 #include <vtkDataSet.h>
 #include <vtkCubeSource.h>
+#include "MyCubeSource.h"
 #include <vtkInteractorStyle.h>
 #include <vtkInteractorStyleSwitch.h>
 #include <vtkPolyDataMapper.h>
@@ -883,17 +884,17 @@ void CViewVTKCommand::OnMouseMoveEvent(vtkObject* caller, void* callData)
 
 		if (this->m_pView->m_pCursor3DActor->GetVisibility() && this->m_pView->m_pNewCubeActor->GetVisibility()) {
 			TRACE("OnMouseMoveEvent\n");
-			this->m_pView->m_pNewCube->SetXLength( fabs(this->m_WorldPointXYPlane[0] - this->m_BeginPoint[0]) );
-			this->m_pView->m_pNewCube->SetYLength( fabs(this->m_WorldPointXYPlane[1] - this->m_BeginPoint[1]) );
-
-			this->m_pView->m_pNewCubeActor->SetPosition((this->m_WorldPointXYPlane[0] + this->m_BeginPoint[0]) / 2.0,
-				(this->m_WorldPointXYPlane[1] + this->m_BeginPoint[1]) / 2.0,
-// COMMENT: {7/8/2004 7:15:02 PM}				this->m_pView->m_pNewCube->GetZLength() / 2.0);
-#ifdef USE_ZMAX
-				(2 * this->m_WorldPointXYPlane[2] - this->m_pView->m_pNewCube->GetZLength()) / 2.0);
-#else
-				(2 * this->m_WorldPointXYPlane[2] + this->m_pView->m_pNewCube->GetZLength()) / 2.0);
-#endif
+// COMMENT: {8/23/2007 10:31:40 PM}			this->m_pView->m_pNewCube->SetXLength( fabs(this->m_WorldPointXYPlane[0] - this->m_BeginPoint[0]) );
+// COMMENT: {8/23/2007 10:31:40 PM}			this->m_pView->m_pNewCube->SetYLength( fabs(this->m_WorldPointXYPlane[1] - this->m_BeginPoint[1]) );
+// COMMENT: {8/23/2007 10:31:40 PM}
+// COMMENT: {8/23/2007 10:31:40 PM}			this->m_pView->m_pNewCubeActor->SetPosition((this->m_WorldPointXYPlane[0] + this->m_BeginPoint[0]) / 2.0,
+// COMMENT: {8/23/2007 10:31:40 PM}				(this->m_WorldPointXYPlane[1] + this->m_BeginPoint[1]) / 2.0,
+// COMMENT: {8/23/2007 10:31:40 PM}// COMMENT: {7/8/2004 7:15:02 PM}				this->m_pView->m_pNewCube->GetZLength() / 2.0);
+// COMMENT: {8/23/2007 10:31:40 PM}#ifdef USE_ZMAX
+// COMMENT: {8/23/2007 10:31:40 PM}				(2 * this->m_WorldPointXYPlane[2] - this->m_pView->m_pNewCube->GetZLength()) / 2.0);
+// COMMENT: {8/23/2007 10:31:40 PM}#else
+// COMMENT: {8/23/2007 10:31:40 PM}				(2 * this->m_WorldPointXYPlane[2] + this->m_pView->m_pNewCube->GetZLength()) / 2.0);
+// COMMENT: {8/23/2007 10:31:40 PM}#endif
 
 
 			vtkFloatingPointType* scale = this->m_pView->GetDocument()->GetScale();

@@ -311,7 +311,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="&quot;$(DEV_CPPUNIT_1.10)\include&quot;;&quot;$(DEV_VTK_421_MEM_VS8_INC)&quot;;&quot;$(DEV_HDF5_INC)&quot;;&quot;$(DEV_XERCES)/include&quot;"
-				PreprocessorDefinitions="__CPPUNIT__;WIN32;_WINDOWS;_DEBUG;__WPHAST__;_CRT_SECURE_NO_DEPRECATE"
+				PreprocessorDefinitions="USE_WEDGE;__CPPUNIT__;WIN32;_WINDOWS;_DEBUG;__WPHAST__;_CRT_SECURE_NO_DEPRECATE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -336,9 +336,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="cppunitd.lib OpenGL32.Lib hdf5ddll.lib $(DEV_VTK42_LINK) xerces-c_2.lib"
+				AdditionalDependencies="cppunitd.lib OpenGL32.Lib hdf5dll.lib $(DEV_VTK42_LINK) xerces-c_2.lib"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="&quot;$(DEV_CPPUNIT_1.10)/lib&quot;;&quot;$(DEV_VTK_421_MEM_VS8_LIB)&quot;;&quot;$(DEV_HDF5_LIBDLL_D)&quot;;&quot;$(DEV_XERCES)/lib&quot;"
+				AdditionalLibraryDirectories="&quot;$(DEV_CPPUNIT_1.10)/lib&quot;;&quot;$(DEV_VTK_421_MEM_VS8_LIB)&quot;;&quot;$(DEV_HDF5_LIBDLL)&quot;;&quot;$(DEV_XERCES)/lib&quot;"
 				DelayLoadDLLs=""
 				GenerateDebugInformation="true"
 				SubSystem="2"
@@ -368,7 +368,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="copying dlls"
-				CommandLine="copy /Y &quot;$(DEV_HDF5_LIBDLL_D)\hdf5ddll.dll&quot;           &quot;$(TargetDir)hdf5ddll.dll&quot;   &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_XERCES)\bin\xerces-c_2_7.dll&quot;        &quot;$(TargetDir)xerces-c_2_7.dll&quot; &gt; NUL&#x0D;&#x0A;&#x0D;&#x0A;"
+				CommandLine="copy /Y &quot;$(DEV_HDF5_LIBDLL)\hdf5dll.dll&quot;           &quot;$(TargetDir)hdf5dll.dll&quot;   &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_XERCES)\bin\xerces-c_2_7.dll&quot;        &quot;$(TargetDir)xerces-c_2_7.dll&quot; &gt; NUL&#x0D;&#x0A;&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
@@ -912,6 +912,10 @@
 			</File>
 			<File
 				RelativePath="ModelessPropertySheet.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\MyCubeSource.cpp"
 				>
 			</File>
 			<File
@@ -1748,6 +1752,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\MyCubeSource.h"
+				>
+			</File>
+			<File
 				RelativePath="NewModel.h"
 				>
 			</File>
@@ -2402,6 +2410,10 @@
 			</File>
 			<File
 				RelativePath="res\LongToolBar.bmp"
+				>
+			</File>
+			<File
+				RelativePath=".\res\mainfram.bmp"
 				>
 			</File>
 			<File
@@ -5518,17 +5530,17 @@
 			Name="Build Logs"
 			>
 			<File
-				RelativePath="cppunit\BuildLog.htm"
-				DeploymentContent="true"
-				>
-			</File>
-			<File
 				RelativePath="Debug\BuildLog.htm"
 				DeploymentContent="true"
 				>
 			</File>
 			<File
 				RelativePath="Release\BuildLog.htm"
+				DeploymentContent="true"
+				>
+			</File>
+			<File
+				RelativePath="cppunit\BuildLog.htm"
 				DeploymentContent="true"
 				>
 			</File>
@@ -5771,62 +5783,6 @@
 		</File>
 		<File
 			RelativePath="ReadMe.txt"
-			>
-		</File>
-		<File
-			RelativePath="..\..\..\..\..\3RDPARTY\vtk-4-2-1-bin-mem-VS8\Common\debug\vtkCommon.bsc"
-			>
-		</File>
-		<File
-			RelativePath="..\..\..\..\..\3RDPARTY\vtk-4-2-1-bin-mem-VS8\Utilities\expat\debug\vtkexpat.bsc"
-			>
-		</File>
-		<File
-			RelativePath="..\..\..\..\..\3RDPARTY\vtk-4-2-1-bin-mem-VS8\Filtering\debug\vtkFiltering.bsc"
-			>
-		</File>
-		<File
-			RelativePath="..\..\..\..\..\3RDPARTY\vtk-4-2-1-bin-mem-VS8\Utilities\freetype\debug\vtkfreetype.bsc"
-			>
-		</File>
-		<File
-			RelativePath="..\..\..\..\..\3RDPARTY\vtk-4-2-1-bin-mem-VS8\Utilities\ftgl\debug\vtkftgl.bsc"
-			>
-		</File>
-		<File
-			RelativePath="..\..\..\..\..\3RDPARTY\vtk-4-2-1-bin-mem-VS8\Graphics\debug\vtkGraphics.bsc"
-			>
-		</File>
-		<File
-			RelativePath="..\..\..\..\..\3RDPARTY\vtk-4-2-1-bin-mem-VS8\Hybrid\debug\vtkHybrid.bsc"
-			>
-		</File>
-		<File
-			RelativePath="..\..\..\..\..\3RDPARTY\vtk-4-2-1-bin-mem-VS8\Imaging\debug\vtkImaging.bsc"
-			>
-		</File>
-		<File
-			RelativePath="..\..\..\..\..\3RDPARTY\vtk-4-2-1-bin-mem-VS8\IO\debug\vtkIO.bsc"
-			>
-		</File>
-		<File
-			RelativePath="..\..\..\..\..\3RDPARTY\vtk-4-2-1-bin-mem-VS8\Utilities\jpeg\debug\vtkjpeg.bsc"
-			>
-		</File>
-		<File
-			RelativePath="..\..\..\..\..\3RDPARTY\vtk-4-2-1-bin-mem-VS8\Utilities\png\debug\vtkpng.bsc"
-			>
-		</File>
-		<File
-			RelativePath="..\..\..\..\..\3RDPARTY\vtk-4-2-1-bin-mem-VS8\Rendering\debug\vtkRendering.bsc"
-			>
-		</File>
-		<File
-			RelativePath="..\..\..\..\..\3RDPARTY\vtk-4-2-1-bin-mem-VS8\Utilities\tiff\debug\vtktiff.bsc"
-			>
-		</File>
-		<File
-			RelativePath="..\..\..\..\..\3RDPARTY\vtk-4-2-1-bin-mem-VS8\Utilities\zlib\debug\vtkzlib.bsc"
 			>
 		</File>
 		<File

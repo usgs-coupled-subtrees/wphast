@@ -39,6 +39,7 @@
 #include <vtkActor.h>
 
 #include <vtkCubeSource.h>
+#include "MyCubeSource.h"
 #include <vtkProperty.h>
 #include <vtkCylinderSource.h>
 
@@ -669,7 +670,8 @@ void CWPhastView::StartNewZone(void)
 
 	// create cube source
 	//
-	this->m_pNewCube = vtkCubeSource::New();
+// COMMENT: {8/23/2007 10:03:19 PM}	this->m_pNewCube = vtkCubeSource::New();
+	this->m_pNewCube = MyCubeSource::New();
 	this->m_pNewCube->SetXLength( 0.0 );
 	this->m_pNewCube->SetYLength( 0.0 );
 	this->m_pNewCube->SetZLength( bounds[5] - bounds[4] );
@@ -684,7 +686,8 @@ void CWPhastView::StartNewZone(void)
 	this->m_pNewCubeActor = vtkActor::New();
 	this->m_pNewCubeActor->SetMapper( this->m_pNewCubeMapper );
 	this->m_pNewCubeActor->GetProperty()->SetColor(0.71, 0.71, 0.71);
-	this->m_pNewCubeActor->GetProperty()->SetOpacity(0.5);
+// COMMENT: {8/23/2007 10:09:31 PM}	this->m_pNewCubeActor->GetProperty()->SetOpacity(0.5);
+	this->m_pNewCubeActor->GetProperty()->SetOpacity(1.0);
 	this->m_pNewCubeActor->VisibilityOff();
 
 	// Disable Interactor
@@ -2134,6 +2137,22 @@ BOOL CWPhastView::OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO
 	{
 		if (CPropertyTreeControlBar *pPropertyTreeControlBar = pDoc->GetPropertyTreeControlBar())
 		{
+// COMMENT: {8/1/2007 1:52:50 PM}			//{{
+// COMMENT: {8/1/2007 1:52:50 PM}			if (CBoxPropertiesDialogBar *pBar = pDoc->GetBoxPropertiesDialogBar())
+// COMMENT: {8/1/2007 1:52:50 PM}			{
+// COMMENT: {8/1/2007 1:52:50 PM}				if (pBar->IsChild(CWnd::GetFocus()))
+// COMMENT: {8/1/2007 1:52:50 PM}				{
+// COMMENT: {8/1/2007 1:52:50 PM}					if (nCode == CN_COMMAND || nCode == CN_UPDATE_COMMAND_UI)
+// COMMENT: {8/1/2007 1:52:50 PM}					{
+// COMMENT: {8/1/2007 1:52:50 PM}						if (pBar->OnCmdMsg(nID, nCode, pExtra, pHandlerInfo))
+// COMMENT: {8/1/2007 1:52:50 PM}						{
+// COMMENT: {8/1/2007 1:52:50 PM}							return TRUE;
+// COMMENT: {8/1/2007 1:52:50 PM}						}
+// COMMENT: {8/1/2007 1:52:50 PM}					}
+// COMMENT: {8/1/2007 1:52:50 PM}					return __super::OnCmdMsg(nID, nCode, pExtra, pHandlerInfo);
+// COMMENT: {8/1/2007 1:52:50 PM}				}
+// COMMENT: {8/1/2007 1:52:50 PM}			}
+// COMMENT: {8/1/2007 1:52:50 PM}			//}}
 			if (nCode == CN_COMMAND || nCode == CN_UPDATE_COMMAND_UI)
 			{
 				if (pPropertyTreeControlBar->OnCmdMsg(nID, nCode, pExtra, pHandlerInfo))

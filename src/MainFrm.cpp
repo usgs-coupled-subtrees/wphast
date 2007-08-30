@@ -27,6 +27,10 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
 	ON_WM_MENUCHAR()
 	ON_WM_INITMENUPOPUP()
 #endif
+	///ON_UPDATE_COMMAND_UI(ID_VIEW_PROPERIESVIEW, &CFrameWnd::OnUpdateControlBarMenu)
+	//ON_COMMAND_EX(ID_VIEW_PROPERIESVIEW, &CFrameWnd::OnBarCheck)
+	ON_UPDATE_COMMAND_UI(ID_VIEW_PROPERIESVIEW, &CMainFrame::OnUpdateViewProperiesview)
+	ON_COMMAND(ID_VIEW_PROPERIESVIEW, &CMainFrame::OnViewProperiesview)
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -132,6 +136,15 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	ASSERT_VALID(pDoc);
 
 	
+#ifdef USE_WEDGE
+	if (!m_wndToolBar.CreateEx(this, TBSTYLE_FLAT, WS_CHILD | WS_VISIBLE | CBRS_TOP
+		| CBRS_GRIPPER | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC) ||
+		!m_wndToolBar.LoadToolBar(IDR_MAINFRAME2))
+	{
+		TRACE0("Failed to create toolbar\n");
+		return -1;      // fail to create
+	}
+#else
 	if (!m_wndToolBar.CreateEx(this, TBSTYLE_FLAT, WS_CHILD | WS_VISIBLE | CBRS_TOP
 		| CBRS_GRIPPER | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC) ||
 		!m_wndToolBar.LoadToolBar(IDR_MAINFRAME))
@@ -139,6 +152,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		TRACE0("Failed to create toolbar\n");
 		return -1;      // fail to create
 	}
+#endif
 
 	if (!m_wndStatusBar.Create(this) ||
 		!m_wndStatusBar.SetIndicators(indicators,
@@ -161,11 +175,17 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC);
 	pDoc->Attach(&this->m_wndTreeControlBar);
 
+	//{{
+	///ASSERT(IDW_CONTROLBAR_TREE == ID_VIEW_PROPERIESVIEW);
+	///ASSERT(GetControlBar(IDW_CONTROLBAR_TREE) != NULL);
+	//ShowControlBar(&m_wndTreeControlBar, FALSE, FALSE);
+	//}}
+
 	// Box properties Bar
 	//
 	if (!m_wndDialogBarBoxProperties.Create(IDD_PROPS_CUBE2, _T("Zone Properties"), this, IDW_CONTROLBAR_BOXPROPS))
 	{
-		TRACE0("Failed to create m_wndDialogBar\n");
+		TRACE0("Failed to create m_wndDialogBarBoxProperties\n");
 		return -1;
 	}
 	m_wndDialogBarBoxProperties.SetBarStyle(m_wndDialogBarBoxProperties.GetBarStyle() |
@@ -206,6 +226,9 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_wndTreeControlBar.SetFocus();
 #endif
 
+	//{{
+	///ShowControlBar(&m_wndTreeControlBar, FALSE, FALSE);
+	//}}
 	return 0;
 }
 
@@ -362,3 +385,68 @@ void CMainFrame::OnInitMenuPopup(CMenu* pPopupMenu, UINT nIndex, BOOL bSysMenu)
 }
 
 #endif // !defined(_USE_DEFAULT_MENUS_)
+
+/**
+void CFrameWnd::OnUpdateControlBarMenu(CCmdUI* pCmdUI)
+{
+	ASSERT(ID_VIEW_STATUS_BAR == AFX_IDW_STATUS_BAR);
+	ASSERT(ID_VIEW_TOOLBAR == AFX_IDW_TOOLBAR);
+	ASSERT(ID_VIEW_REBAR == AFX_IDW_REBAR);
+	ENSURE_ARG(pCmdUI != NULL);
+
+	CControlBar* pBar = GetControlBar(pCmdUI->m_nID);
+	if (pBar != NULL)
+	{
+		pCmdUI->SetCheck((pBar->GetStyle() & WS_VISIBLE) != 0);
+		return;
+	}
+	pCmdUI->ContinueRouting();
+}
+**/
+
+void CMainFrame::OnUpdateViewProperiesview(CCmdUI *pCmdUI)
+{
+	CControlBar* pBar = GetControlBar(IDW_CONTROLBAR_TREE);
+	if (pBar != NULL)
+	{
+		pCmdUI->SetCheck((pBar->GetStyle() & WS_VISIBLE) != 0);
+		return;
+	}
+	pCmdUI->ContinueRouting();
+}
+
+void CMainFrame::OnViewProperiesview()
+{
+	CControlBar* pBar = GetControlBar(IDW_CONTROLBAR_TREE);
+	if (pBar != NULL)
+	{
+#if defined(TOGGLE_VIEW)
+		// this toggles the view so that if the view is visible
+		// then the view is hidden
+		BOOL bShow = (pBar->GetStyle() & WS_VISIBLE) == 0;
+		this->ShowControlBar(pBar, bShow, FALSE);
+		if (bShow)
+		{
+			if (CWPhastDoc* pDoc = static_cast<CWPhastDoc*>(this->GetActiveDocument()))
+			{
+				if (CTreeCtrl* pTree = pDoc->GetPropertyTreeControlBar()->GetTreeCtrl())
+				{
+					pTree->SetFocus();
+				}
+			}
+		}
+#else
+		// this always displays the view and sets the focus
+		// just like the "view->class view" and "view->solution explorer" does in
+		// visual studio 2005
+		this->ShowControlBar(pBar, TRUE, FALSE);
+		if (CWPhastDoc* pDoc = static_cast<CWPhastDoc*>(this->GetActiveDocument()))
+		{
+			if (CTreeCtrl* pTree = pDoc->GetPropertyTreeControlBar()->GetTreeCtrl())
+			{
+				pTree->SetFocus();
+			}
+		}
+#endif
+	}
+}
