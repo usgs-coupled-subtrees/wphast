@@ -95,6 +95,7 @@ IDB_EYES_TREE           BITMAP                  "res\\eyes_tree.bmp"
 IDB_EYES_TREE2          BITMAP                  "res\\eyes_tree2.bmp"
 IDB_EYES_TREE3          BITMAP                  "res\\eyes_tree3.bmp"
 IDB_PLUS_MERGE          BITMAP                  "res\\plusmrge.bmp"
+IDR_MAINFRAME2          BITMAP                  "res\\mainfram.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -129,6 +130,29 @@ BEGIN
     BUTTON      ID_TOOLS_NEWSTRESSPERIOD
     BUTTON      ID_FILE_RUN
     BUTTON      ID_BUTTON32795
+END
+
+IDR_MAINFRAME2 TOOLBAR  17, 19
+BEGIN
+    BUTTON      ID_FILE_NEW
+    BUTTON      ID_FILE_OPEN
+    BUTTON      ID_FILE_SAVE
+    SEPARATOR
+    BUTTON      ID_EDIT_CUT
+    BUTTON      ID_EDIT_COPY
+    BUTTON      ID_EDIT_PASTE
+    SEPARATOR
+    BUTTON      ID_FILE_PRINT
+    BUTTON      ID_APP_ABOUT
+    SEPARATOR
+    BUTTON      ID_TOOLS_NEWZONE
+    BUTTON      ID_BUTTON32841
+    BUTTON      ID_TOOLS_NEWWELL
+    BUTTON      ID_TOOLS_NEWRIVER
+    BUTTON      ID_FILE_RUN
+    BUTTON      ID_TOOLS_MOVE_VER_LINE
+    BUTTON      ID_TOOLS_MODIFYGRID
+    BUTTON      ID_TOOLS_SELECTOBJECT
 END
 
 

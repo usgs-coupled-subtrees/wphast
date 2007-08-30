@@ -131,6 +131,7 @@
 #define IDS_MDS_STEP2_SUB_181           181
 #define IDS_MDS_POINT2_SUB_181          181
 #define IDD_TC_INT_M_PROPPAGE           181
+#define IDR_MAINFRAME2                  181
 #define IDS_MDS_STEP3_SUB_182           182
 #define IDS_MDS_GRID_SUB_182            182
 #define ID_VIEW_FROM_PX                 183
@@ -242,7 +243,10 @@
 #define IDD_SUBDIVIDE_DIALOG            273
 #define IDD_BC_TYPE_DIALOG              275
 #define IDD_COLORS                      276
+#define IDD_PROPS_WELL                  277
+#define IDD_PROPS_RIVER                 278
 #define IDR_DESCRIPTION_RTF             279
+#define IDD_PROPS_CUBE3                 279
 #define IDR_SOLUTE_TRUE_RTF             280
 #define IDR_SOLUTE_FALSE_RTF            281
 #define IDR_DIFFUSIVITY_RTF             282
@@ -739,6 +743,13 @@
 #define IDC_RIVER_BTN                   1379
 #define IDC_RIVER_BTN2                  1380
 #define IDC_WELL_BTN                    1380
+#define IDC_STATIC_WELL_X               1381
+#define IDC_STATIC_WELL_Y               1382
+#define IDC_EDIT_WELL_X                 1383
+#define IDC_EDIT_WELL_Y                 1384
+#define IDC_STATIC_LOC                  1385
+#define IDC_GRID_RIVER                  1386
+#define IDC_UNITS_STATIC                1387
 #define IDC_RESIZE_COLUMN               28654
 #define IDC_RESIZE_ROW                  28655
 #define IDR_POPUP                       28656
@@ -756,6 +767,11 @@
 #define ID_TOOLS_SELECTOBJECT           32826
 #define ID_VIEW_SHOWALL                 32827
 #define ID_TOOLS_COLORS                 32832
+#define ID_VIEW_PROPERIESVIEW           32833
+#define ID_VIEW_PROPERIESVIEW32834      32834
+#define ID_VIEW_PROPERIESVIEW32835      32835
+#define ID_EDIT_PROPERTIES              32837
+#define ID_BUTTON32841                  32841
 #define IDW_CONTROLBAR_TREE             59424
 #define IDW_CONTROLBAR_BOXPROPS         59425
 
@@ -764,8 +780,8 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        390
-#define _APS_NEXT_COMMAND_VALUE         32833
-#define _APS_NEXT_CONTROL_VALUE         1381
+#define _APS_NEXT_COMMAND_VALUE         32842
+#define _APS_NEXT_CONTROL_VALUE         1388
 #define _APS_NEXT_SYMED_VALUE           126
 #endif
 #endif
