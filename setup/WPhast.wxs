@@ -91,9 +91,10 @@
               <Merge Id="VC_STL.12121212-FF27-4ff8-911C-03CD09DDB3E5" Language="1033" src="$(var.MergeDir)\VC_STL.msm" DiskId="1" />
 <?endif?>
 
-              <Component Id='C__hdf5Library' Guid='BF8F23F9-8A71-441c-9EA3-2CF8A4860F60' >
+              <Component Id='C__hdf5Library' Guid='BF8F23F9-8A71-441c-9EA3-2C860F60F8A4' >
                 <File Id="F__hdf5dll.dll" Name="hdf5dll.dll" Vital="yes" DiskId='1' src="$(var.hdfDllPath)\hdf5dll.dll" />
-                <File Id="F__zlib.dll"    Name="zlib.dll" Vital="yes" DiskId='1' src="$(var.hdfDllPath)\zlib.dll" />
+                <File Id="F__zlib1.dll"    Name="zlib1.dll" Vital="yes" DiskId='1' src="$(var.hdfDllPath)\..\bin\zlib1.dll" />
+                <File Id="F__szlibdll.dll"    Name="szlibdll.dll" Vital="yes" DiskId='1' src="$(var.hdfDllPath)\..\bin\szlibdll.dll" />
               </Component>
 
               <Component Id='C__xercesLibrary' Guid='{35506FB9-2592-4f94-97E2-4B69C2D2DAE2}'>
