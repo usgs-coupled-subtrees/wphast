@@ -524,9 +524,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(DEV_VTK42_LINK) hdf5ddll.lib xerces-c_2.lib"
+				AdditionalDependencies="$(DEV_VTK42_LINK) hdf5dll.lib xerces-c_2.lib"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="$(DEV_VTK42_VS8_DLL_LIB);$(DEV_HDF5_LIBDLL_D);$(DEV_XERCES)/lib"
+				AdditionalLibraryDirectories="$(DEV_VTK42_VS8_DLL_LIB);$(DEV_HDF5_LIBDLL);$(DEV_XERCES)/lib"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				TargetMachine="1"
@@ -555,7 +555,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Copying dlls"
-				CommandLine="copy /Y &quot;$(DEV_HDF5_LIBDLL_D)\hdf5ddll.dll&quot;           &quot;$(TargetDir)hdf5ddll.dll&quot;   &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkCommon.dll&quot;    &quot;$(TargetDir)vtkCommon.dll&quot;    &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkFiltering.dll&quot; &quot;$(TargetDir)vtkFiltering.dll&quot; &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkGraphics.dll&quot;  &quot;$(TargetDir)vtkGraphics.dll&quot;  &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkHybrid.dll&quot;    &quot;$(TargetDir)vtkHybrid.dll&quot;    &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkIO.dll&quot;        &quot;$(TargetDir)vtkIO.dll&quot;        &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkImaging.dll&quot;   &quot;$(TargetDir)vtkImaging.dll&quot;   &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkRendering.dll&quot; &quot;$(TargetDir)vtkRendering.dll&quot; &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkexpat.dll&quot;     &quot;$(TargetDir)vtkexpat.dll&quot;     &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkfreetype.dll&quot;  &quot;$(TargetDir)vtkfreetype.dll&quot;  &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkftgl.dll&quot;      &quot;$(TargetDir)vtkftgl.dll&quot;      &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkjpeg.dll&quot;      &quot;$(TargetDir)vtkjpeg.dll&quot;      &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkpng.dll&quot;       &quot;$(TargetDir)vtkpng.dll&quot;       &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtktiff.dll&quot;      &quot;$(TargetDir)vtktiff.dll&quot;      &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkzlib.dll&quot;      &quot;$(TargetDir)vtkzlib.dll&quot;      &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_XERCES)\bin\xerces-c_2_7.dll&quot;        &quot;$(TargetDir)xerces-c_2_7.dll&quot; &gt; NUL&#x0D;&#x0A;&#x0D;&#x0A;"
+				CommandLine="copy /Y &quot;$(DEV_HDF5_LIBDLL)\hdf5dll.dll&quot;           &quot;$(TargetDir)hdf5dll.dll&quot;   &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkCommon.dll&quot;    &quot;$(TargetDir)vtkCommon.dll&quot;    &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkFiltering.dll&quot; &quot;$(TargetDir)vtkFiltering.dll&quot; &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkGraphics.dll&quot;  &quot;$(TargetDir)vtkGraphics.dll&quot;  &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkHybrid.dll&quot;    &quot;$(TargetDir)vtkHybrid.dll&quot;    &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkIO.dll&quot;        &quot;$(TargetDir)vtkIO.dll&quot;        &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkImaging.dll&quot;   &quot;$(TargetDir)vtkImaging.dll&quot;   &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkRendering.dll&quot; &quot;$(TargetDir)vtkRendering.dll&quot; &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkexpat.dll&quot;     &quot;$(TargetDir)vtkexpat.dll&quot;     &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkfreetype.dll&quot;  &quot;$(TargetDir)vtkfreetype.dll&quot;  &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkftgl.dll&quot;      &quot;$(TargetDir)vtkftgl.dll&quot;      &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkjpeg.dll&quot;      &quot;$(TargetDir)vtkjpeg.dll&quot;      &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkpng.dll&quot;       &quot;$(TargetDir)vtkpng.dll&quot;       &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtktiff.dll&quot;      &quot;$(TargetDir)vtktiff.dll&quot;      &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkzlib.dll&quot;      &quot;$(TargetDir)vtkzlib.dll&quot;      &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_XERCES)\bin\xerces-c_2_7.dll&quot;        &quot;$(TargetDir)xerces-c_2_7.dll&quot; &gt; NUL&#x0D;&#x0A;&#x0D;&#x0A;"
 			/>
 		</Configuration>
 	</Configurations>
@@ -1762,6 +1762,14 @@
 			<File
 				RelativePath=".\MyCubeSource.h"
 				>
+				<FileConfiguration
+					Name="AutoRelease|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="NewModel.h"
