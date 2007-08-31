@@ -11,7 +11,6 @@ class CGridActor;
 class vtkCursor3D;
 class vtkPolyDataMapper;
 class vtkActor;
-class MyCubeSource;
 
 class CNewZoneWidget : public vtk3DWidget
 {
@@ -64,8 +63,7 @@ protected:
 	// wireframe outline
 	vtkActor             *OutlineActor;
 	vtkPolyDataMapper    *OutlineMapper;
-// COMMENT: {8/23/2007 10:39:17 PM}	vtkOutlineSource     *OutlineSource;
-	MyCubeSource         *OutlineSource;
+	vtkOutlineSource     *OutlineSource;
 	vtkFloatingPointType  StartPoint[3];
 
 	// Mouse state

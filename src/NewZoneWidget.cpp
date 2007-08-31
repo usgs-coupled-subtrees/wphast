@@ -4,7 +4,6 @@
 #include "GridActor.h"
 #include "Utilities.h"
 #include "Resource.h"  // IDC_NULL
-#include "MyCubeSource.h"
 
 #if defined(USE_INTRINSIC)
 #pragma intrinsic(fabs) // using this inlines fabs and is ~ 4x faster
@@ -47,10 +46,7 @@ CNewZoneWidget::CNewZoneWidget(void)
 
 	// Outline
 	//
-// COMMENT: {8/23/2007 10:40:23 PM}	this->OutlineSource = vtkOutlineSource::New();
-	//{{
-	this->OutlineSource = MyCubeSource::New();
-	//}}
+	this->OutlineSource = vtkOutlineSource::New();
 
 	this->OutlineMapper = vtkPolyDataMapper::New();
 	this->OutlineMapper->SetInput( this->OutlineSource->GetOutput() );
@@ -59,10 +55,6 @@ CNewZoneWidget::CNewZoneWidget(void)
 	this->OutlineActor->SetMapper( this->OutlineMapper );
 	this->OutlineActor->SetVisibility(0);
     this->OutlineActor->GetProperty()->SetColor(1, 0, 0);
-
-	//{{
-    this->OutlineActor->GetProperty()->SetRepresentationToWireframe();
-	//}}
 }
 
 CNewZoneWidget::~CNewZoneWidget(void)

@@ -917,6 +917,14 @@
 			<File
 				RelativePath=".\MyCubeSource.cpp"
 				>
+				<FileConfiguration
+					Name="AutoRelease|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="NewModel.cpp"
@@ -2753,11 +2761,11 @@
 				>
 			</File>
 			<File
-				RelativePath="res\SOLUTE_TRUE.rtf"
+				RelativePath="SOLUTE_TRUE.rtf"
 				>
 			</File>
 			<File
-				RelativePath="SOLUTE_TRUE.rtf"
+				RelativePath="res\SOLUTE_TRUE.rtf"
 				>
 			</File>
 			<File
@@ -5530,17 +5538,17 @@
 			Name="Build Logs"
 			>
 			<File
-				RelativePath="Debug\BuildLog.htm"
-				DeploymentContent="true"
-				>
-			</File>
-			<File
 				RelativePath="Release\BuildLog.htm"
 				DeploymentContent="true"
 				>
 			</File>
 			<File
 				RelativePath="cppunit\BuildLog.htm"
+				DeploymentContent="true"
+				>
+			</File>
+			<File
+				RelativePath="Debug\BuildLog.htm"
 				DeploymentContent="true"
 				>
 			</File>

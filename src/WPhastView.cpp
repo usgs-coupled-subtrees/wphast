@@ -39,7 +39,9 @@
 #include <vtkActor.h>
 
 #include <vtkCubeSource.h>
+#ifdef USE_WEDGE
 #include "MyCubeSource.h"
+#endif
 #include <vtkProperty.h>
 #include <vtkCylinderSource.h>
 
@@ -670,8 +672,7 @@ void CWPhastView::StartNewZone(void)
 
 	// create cube source
 	//
-// COMMENT: {8/23/2007 10:03:19 PM}	this->m_pNewCube = vtkCubeSource::New();
-	this->m_pNewCube = MyCubeSource::New();
+	this->m_pNewCube = vtkCubeSource::New();
 	this->m_pNewCube->SetXLength( 0.0 );
 	this->m_pNewCube->SetYLength( 0.0 );
 	this->m_pNewCube->SetZLength( bounds[5] - bounds[4] );
