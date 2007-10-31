@@ -21,7 +21,7 @@ FORCE_UPDATE := $(shell svn up ..)
 
 RELEASE ?= $(shell svn st -v dist.sh | cut -b 10- | ( read one two ; echo $$one ) )
 
-DATE_STAMP := $(shell echo $(DATE) | sed -e "y^/^-^" )
+DATE_STAMP := $(shell date -d $(DATE) "+%m-%d-%Y")
 
 TARBALL := $(NAME)-$(VERSION)-$(RELEASE).tar.gz
 
@@ -68,7 +68,7 @@ $(BIN_PACKAGE) : $(TARBALL) $(BUILD_SCRIPT) $(PHAST_BUILD)
 	@echo "Building package $(BIN_PACKAGE) / $(SRC_PACKAGE)"	
 	time ./$(BUILD_SCRIPT) all 2>&1 | tee all-$(RELEASE).log
 	
-source : check_version check_date check_release $(TARBALL)
+source : check_args $(TARBALL)
 	@echo "created $(TARBALL)"
 
 $(TARBALL) : dist.sh $(DATE_STAMP).tstamp
