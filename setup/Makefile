@@ -53,6 +53,8 @@ EXAMPLES = phast/examples
 	
 WPHAST_FILES=\
 	$(EXAMPLES)/decay/decay.wphast\
+	$(EXAMPLES)/diffusion1d/diffusion1d.wphast\
+	$(EXAMPLES)/diffusion2d/diffusion2d.wphast\
 	$(EXAMPLES)/disp2d/disp2d.wphast\
 	$(EXAMPLES)/ex1/ex1.wphast\
 	$(EXAMPLES)/ex2/ex2.wphast\
@@ -65,8 +67,12 @@ WPHAST_FILES=\
 	$(EXAMPLES)/leakyz/leakyz.wphast\
 	$(EXAMPLES)/linear_bc/linear_bc.wphast\
 	$(EXAMPLES)/linear_ic/linear_ic.wphast\
+	$(EXAMPLES)/mass_balance/mass_balance.wphast\
+	$(EXAMPLES)/notch/notch.wphast\
 	$(EXAMPLES)/phrqex11/phrqex11.wphast\
+	$(EXAMPLES)/print_check_ss/print_check_ss.wphast\
 	$(EXAMPLES)/river/river.wphast\
+	$(EXAMPLES)/simple/simple.wphast\
 	$(EXAMPLES)/unconf/unconf.wphast\
 	$(EXAMPLES)/well/well.wphast
 	

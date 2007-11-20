@@ -144,6 +144,22 @@
                   <File Id="F__phast.dat.decay" Name="phast.dat" src="phast\examples\decay\phast.dat" />
                 </Component>
               </Directory>
+              <Directory Id="D__diffusion1d" Name="diffus1d" LongName="diffusion1d">
+                <Component Id='C__diffusion1d' Guid='4BE2D5BF-DBB7-4484-BD75-6D191B0F35DC' DiskId="1">
+                  <File Id="F__diffusion1d.chem.dat" Name="DIFFUS_3.DAT" LongName="diffusion1d.chem.dat" Source="phast\examples\diffusion1d\diffusion1d.chem.dat" />
+                  <File Id="F__diffusion1d.head.dat" Name="DIFFUS_1.DAT" LongName="diffusion1d.head.dat" Source="phast\examples\diffusion1d\diffusion1d.head.dat" />
+                  <File Id="F__diffusion1d.trans.dat" Name="DIFFUS_2.DAT" LongName="diffusion1d.trans.dat" Source="phast\examples\diffusion1d\diffusion1d.trans.dat" />
+                  <File Id="F__phast.dat.diffustion1d" Name="phast.dat" Source="phast\examples\diffusion1d\phast.dat" />
+                </Component>
+              </Directory>
+              <Directory Id="D__diffusion2d" Name="diffus2d" LongName="diffusion2d">
+                <Component Id='C__diffusion2d' Guid='DE889ADF-1ED4-4981-AFCB-8F35EDC70DB6' DiskId="1">
+                  <File Id="F__diffusion2d.chem.dat" Name="DIFFUS_3.DAT" LongName="diffusion2d.chem.dat" Source="phast\examples\diffusion2d\diffusion2d.chem.dat" />
+                  <File Id="F__diffusion2d.head.dat" Name="DIFFUS_1.DAT" LongName="diffusion2d.head.dat" Source="phast\examples\diffusion2d\diffusion2d.head.dat" />
+                  <File Id="F__diffusion2d.trans.dat" Name="DIFFUS_2.DAT" LongName="diffusion2d.trans.dat" Source="phast\examples\diffusion2d\diffusion2d.trans.dat" />
+                  <File Id="F__phast.dat.diffustion2d" Name="phast.dat" Source="phast\examples\diffusion2d\phast.dat" />
+                </Component>
+              </Directory>
               <Directory Id="D__disp2d" Name="disp2d">
                 <Component Id='C__disp2d' Guid='6D9D633F-DA50-4831-8527-8F0E442D43C4' DiskId="1">
                   <File Id="F__disp2d.chem.dat"  Name="DISP2D_1.DAT" LongName="disp2d.chem.dat" src="phast\examples\disp2d\disp2d.chem.dat" />
@@ -152,7 +168,6 @@
                   <File Id="F__phast.dat.disp2d" Name="phast.dat" src="phast\examples\disp2d\phast.dat" />
                 </Component>
               </Directory>
-
               <Directory Id="D__ex1" Name="ex1">
                 <Component Id='C__ex1' Guid='8FD4C404-9A57-4457-83A5-329296A74479' DiskId="1">
                   <File Id="F__ex1.chem.dat"  Name="EX1CHE_1.DAT" LongName="ex1.chem.dat" src="phast\examples\ex1\ex1.chem.dat" />
@@ -236,6 +251,28 @@
                   <File Id="F__phast.dat.linear_ic" Name="phast.dat" src="phast\examples\linear_ic\phast.dat" />
                 </Component>
               </Directory>
+              <Directory Id="D__mass_balance" Name="notch">
+                <Component Id='C__mass_balance' Guid='55392F33-2B91-4159-8850-D3E73946D89E' DiskId="1">
+                  <File Id="F__mass_balance.chem.dat" Name="MASS_B_2.DAT" LongName="mass_balance.chem.dat" Source="phast\examples\mass_balance\mass_balance.chem.dat" />
+                  <File Id="F__mass_balance.trans.dat" Name="MASS_B_1.DAT" LongName="mass_balance.trans.dat" Source="phast\examples\mass_balance\mass_balance.trans.dat" />
+                  <File Id="F__mass_balance.wphast" Name="MASS_B_1.WPH" LongName="mass_balance.wphast" Source="phast\examples\mass_balance\mass_balance.wphast" />
+                  <File Id="F__phast.dat.mass_balance" Name="phast.dat" Source="phast\examples\mass_balance\phast.dat" />
+                </Component>
+              </Directory>
+              <Directory Id="D__notch" Name="notch">
+                <Component Id='C__notch' Guid='2CA76C8C-3982-4d44-B0AE-EEC5158AE970' DiskId="1">
+                  <File Id="F__notch.trans.dat" Name="NOTCHT_1.DAT" LongName="notch.trans.dat" Source="phast\examples\notch\notch.trans.dat" />
+                  <File Id="F__notch.wphast" Name="NOTCH_1.WPH" LongName="notch.wphast" Source="phast\examples\notch\notch.wphast" />
+                </Component>
+              </Directory>
+              <Directory Id="D__print_check_ss" Name="print_ch" LongName="print_check_ss">
+                <Component Id='C__print_check_ss' Guid='2BC9400E-07AB-4dce-A3B1-F89373B79608' DiskId="1">
+                  <File Id="F__phast.dat.print_check_ss" Name="phast.dat" Source="phast\examples\print_check_ss\phast.dat" />
+                  <File Id="F__print_check_ss.chem.dat" Name="PRINT__1.DAT" LongName="print_check_ss.chem.dat" Source="phast\examples\print_check_ss\print_check_ss.chem.dat" />
+                  <File Id="F__print_check_ss.trans.dat" Name="PRINT__2.DAT" LongName="print_check_ss.trans.dat" Source="phast\examples\print_check_ss\print_check_ss.trans.dat" />
+                  <File Id="F__print_check_ss.wphast" Name="PRINT__1.WPH" LongName="print_check_ss.wphast" Source="phast\examples\print_check_ss\print_check_ss.wphast" />
+                </Component>
+              </Directory>
               <Directory Id="D__phrqex11" Name="phrqex11">
                 <Component Id="C__phrqex11" Guid='3AD6458E-E539-4954-B867-3C31F62D49DD' DiskId="1">
                   <File Id="F__phast.dat.phrqex11" Name="phast.dat" src="phast\examples\phrqex11\phast.dat" />
@@ -256,6 +293,14 @@
                 <Component Id="C__river" Guid='C5571CC0-10C5-4482-8C0A-9ABFB3B14CC8' DiskId="1">
                   <File Id="F__river.trans.dat" Name="RIVERT_1.DAT" LongName="river.trans.dat" src="phast\examples\river\river.trans.dat" />
                   <File Id="F__river.wphast"    Name="RIVER_1.WPH" LongName="river.wphast" src="phast\examples\river\river.wphast" />
+                </Component>
+              </Directory>
+              <Directory Id="D__simple" Name="simple">
+                <Component Id='C__simple' Guid='72923F62-A949-47a4-8CFC-5C1E3208687E' DiskId="1">
+                  <File Id="F__phast.dat.simple" Name="phast.dat" Source="phast\examples\simple\phast.dat" />
+                  <File Id="F__simple.chem.dat" Name="SIMPLE_2.DAT" LongName="simple.chem.dat" Source="phast\examples\simple\simple.chem.dat" />
+                  <File Id="F__simple.trans.dat" Name="SIMPLE_1.DAT" LongName="simple.trans.dat" Source="phast\examples\simple\simple.trans.dat" />
+                  <File Id="F__simple.wphast" Name="SIMPLE_1.WPH" LongName="simple.wphast" Source="phast\examples\simple\simple.wphast" />
                 </Component>
               </Directory>
               <Directory Id="D__unconf" Name="unconf">
@@ -309,6 +354,8 @@
 
       <Feature Id='F__Examples' Title='Examples' Description='Example input files' TypicalDefault='install' Level='1' AllowAdvertise='no'>
         <ComponentRef Id='C__decay' />
+        <ComponentRef Id='C__diffusion1d' />
+        <ComponentRef Id='C__diffusion2d' />
         <ComponentRef Id='C__disp2d' />
         <ComponentRef Id='C__ex1' />
         <ComponentRef Id='C__ex2' />
@@ -321,9 +368,13 @@
         <ComponentRef Id='C__leakyz' />
         <ComponentRef Id='C__linear_bc' />
         <ComponentRef Id='C__linear_ic' />
+        <ComponentRef Id='C__mass_balance' />
+        <ComponentRef Id='C__notch' />
         <ComponentRef Id='C__phrqex11' />
+        <ComponentRef Id='C__print_check_ss' />
         <ComponentRef Id='C__radial' />
         <ComponentRef Id='C__river' />
+        <ComponentRef Id='C__simple' />
         <ComponentRef Id='C__unconf' />
         <ComponentRef Id='C__well' />
       </Feature>
