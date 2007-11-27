@@ -1993,7 +1993,7 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 
 		// TIME_CONTROL
 		//
-		CTimeControl2 timeControl2(::time_step, ::time_end, ::count_time_end);
+		CTimeControl2 timeControl2(::time_step, ::time_end, ::count_time_end, ::time_start);
 
 		// create new document
 		//

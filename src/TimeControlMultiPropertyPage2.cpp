@@ -5,6 +5,7 @@
 #include "WPhast.h"
 #include "TimeControlMultiPropertyPage2.h"
 
+#include "Units.h"
 #include "Global.h"
 
 // CTimeControlMultiPropertyPage2 dialog
@@ -13,6 +14,9 @@ IMPLEMENT_DYNAMIC(CTimeControlMultiPropertyPage2, baseCTimeControlMultiPropertyP
 CTimeControlMultiPropertyPage2::CTimeControlMultiPropertyPage2()
 	: baseCTimeControlMultiPropertyPage2(CTimeControlMultiPropertyPage2::IDD)
 {
+	CUnits units;
+	this->m_strTimeUnits = CGlobal::GetStdTimeUnits(units.time.defined ? units.time.input : units.time.si).c_str();	
+
 	// load property descriptions
 	//
 	CGlobal::LoadRTFString(this->m_sTimeEndRTF,         IDR_TC_TE_TIME_END_RTF);
@@ -35,9 +39,14 @@ void CTimeControlMultiPropertyPage2::DoDataExchange(CDataExchange* pDX)
 	DDX_GridControl(pDX, IDC_TIMEEND_GRID, m_gridTimeEnd);
 	DDX_GridControl(pDX, IDC_TIMESTEP_GRID, m_gridTimeStep);
 
+	DDX_Control(pDX, IDC_STARTTIME_COMBO, m_cboStartTime);
+
 	DDX_Control(pDX, IDC_DESC_RICHEDIT, m_wndRichEditCtrl);
 	if (this->m_bFirstSetActive)
 	{
+		// add items to combo
+		CGlobal::AddTimeUnits(&this->m_cboStartTime);
+
 		// wrap richedit to window
 		this->m_wndRichEditCtrl.SetTargetDevice(NULL, 0);
 		this->m_wndRichEditCtrl.SetWindowText(this->m_sTimeEndRTF.c_str());
@@ -83,6 +92,31 @@ void CTimeControlMultiPropertyPage2::DoDataExchange(CDataExchange* pDX)
 				::DDX_TextGridControl(pDX, IDC_TIMESTEP_GRID, nRow, 3, str);
 			}
 		}
+
+		// start_time
+		//
+		if (this->m_tc2.m_timeStart.value_defined)
+		{
+			::DDX_Text(pDX, IDC_STARTTIME_EDIT, this->m_tc2.m_timeStart.value);
+		}
+		else
+		{
+			double d = 0;
+			::DDX_Text(pDX, IDC_STARTTIME_EDIT, d);
+		}
+
+		if (this->m_tc2.m_timeStart.input)
+		{
+			VERIFY(this->m_cboStartTime.SelectString(0,
+				CGlobal::GetStdTimeUnits(this->m_tc2.m_timeStart.input).c_str()) != CB_ERR);
+		}
+		/***
+		else
+		{
+			VERIFY(this->m_cboStartTime.SelectString(0,
+				CGlobal::GetStdTimeUnits(this->m_strTimeUnits).c_str()) != CB_ERR);
+		}
+		***/
 	}
 
 	if (pDX->m_bSaveAndValidate)
@@ -165,6 +199,29 @@ void CTimeControlMultiPropertyPage2::DoDataExchange(CDataExchange* pDX)
 			}
 			tc2.m_timeStep[t] = t2;
 		}
+
+		// start time
+		//
+
+		// value
+		//
+		::DDX_Text(pDX, IDC_STARTTIME_EDIT, tc2.m_timeStart.value);
+		tc2.m_timeStart.value_defined = TRUE;
+		tc2.m_timeStart.type = UNITS;
+
+		// units
+		//
+		int nCurSel = this->m_cboStartTime.GetCurSel();
+		if (nCurSel != CB_ERR)
+		{
+			CString sVal;
+			this->m_cboStartTime.GetLBText(nCurSel, sVal);
+			///if (sVal.Compare(this->m_strTimeUnits) != 0)
+			{
+				VERIFY(tc2.m_timeStart.SetInput(sVal) == OK);
+			}
+		}
+
 		this->m_tc2 = tc2;
 	}
 }
@@ -192,7 +249,12 @@ BOOL CTimeControlMultiPropertyPage2::OnInitDialog()
 			<< itemFixed(HORIZONTAL, 20)
 			<< item(IDC_TIMESTEP_GRID, GREEDY)
 			)
-		<< itemFixed(VERTICAL, 10)
+		<< 	( pane(HORIZONTAL, GREEDY, 0, 0, 0 )
+			<< item(IDC_STARTTIME_STATIC, NORESIZE|ALIGN_VCENTER)
+			<< item(IDC_STARTTIME_EDIT, NORESIZE|ALIGN_VCENTER)
+			<< itemFixed(HORIZONTAL, 10)
+			<< item(IDC_STARTTIME_COMBO, NORESIZE|ALIGN_VCENTER)
+			)
 		<< item(IDC_DESC_RICHEDIT, ABSOLUTE_VERT)		
 		;
 	UpdateLayout();
@@ -294,6 +356,11 @@ void CTimeControlMultiPropertyPage2::GetProperties(CTimeControl2& r_tc2)
 	r_tc2 = this->m_tc2;
 }
 
+void CTimeControlMultiPropertyPage2::SetUnits(const CUnits& units)
+{
+	this->m_strTimeUnits = CGlobal::GetStdTimeUnits(units.time.defined ? units.time.input : units.time.si).c_str();
+}
+
 void CTimeControlMultiPropertyPage2::OnSelChangedTimeEnd(NMHDR *pNotifyStruct, LRESULT *result)
 {
 	CCellID focus = this->m_gridTimeEnd.GetFocusCell();
@@ -336,4 +403,20 @@ void CTimeControlMultiPropertyPage2::OnSelChangedTimeStep(NMHDR *pNotifyStruct, 
 	default:
 		ASSERT(FALSE);
 	}
+}
+
+BOOL CTimeControlMultiPropertyPage2::PreTranslateMessage(MSG* pMsg)
+{
+	// Add your specialized code here and/or call the base class
+	if (pMsg->hwnd == this->m_cboStartTime.GetSafeHwnd())
+	{
+		if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_DELETE)
+		{
+			// allow clearing of combo
+			//
+			TRACE("cbo recd delete\n");
+			this->m_cboStartTime.SetCurSel(-1);
+		}
+	}
+	return ETSLayoutPropertyPageXP::PreTranslateMessage(pMsg);
 }

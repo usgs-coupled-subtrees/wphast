@@ -8,6 +8,8 @@ class CTimeControl2
 public:
 	CTimeControl2(void);
 	CTimeControl2(const struct time_series& timeStep, const struct time *timeEnd, int nTimeEnd);
+	CTimeControl2(const struct time_series& timeStep, const struct time *timeEnd, int nTimeEnd, const struct time& timeStart);
+
 	~CTimeControl2(void);
 
 	void Edit(CTreeCtrl* pTreeCtrl);
@@ -20,6 +22,7 @@ public:
 public:
 	CTimeSeries<Ctime> m_timeStep;
 	std::set<Ctime> m_timeEnd;
+	Ctime m_timeStart;
 protected:
 	HTREEITEM m_htiTimeControl;
 };

@@ -750,6 +750,9 @@
 #define IDC_STATIC_LOC                  1385
 #define IDC_GRID_RIVER                  1386
 #define IDC_UNITS_STATIC                1387
+#define IDC_STARTTIME_EDIT              1388
+#define IDC_STARTTIME_STATIC            1389
+#define IDC_STARTTIME_COMBO             1390
 #define IDC_RESIZE_COLUMN               28654
 #define IDC_RESIZE_ROW                  28655
 #define IDR_POPUP                       28656
@@ -781,7 +784,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        390
 #define _APS_NEXT_COMMAND_VALUE         32842
-#define _APS_NEXT_CONTROL_VALUE         1388
+#define _APS_NEXT_CONTROL_VALUE         1391
 #define _APS_NEXT_SYMED_VALUE           126
 #endif
 #endif

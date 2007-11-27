@@ -23,6 +23,20 @@ CTimeControl2::CTimeControl2(const struct time_series& timeStep, const struct ti
 	ASSERT(this->m_timeEnd.size() == (size_t)nTimeEnd);
 }
 
+CTimeControl2::CTimeControl2(const struct time_series& timeStep, const struct time *timeEnd, int nTimeEnd, const struct time& timeStart)
+: m_timeStart(timeStart)
+{
+	this->m_timeStep = timeStep;
+	ASSERT(this->m_timeStep.size() == (size_t)timeStep.count_properties);
+
+	for (int i = 0; i < nTimeEnd; ++i)
+	{
+		Ctime t(timeEnd[i]);
+		this->m_timeEnd.insert(t);
+	}
+	ASSERT(this->m_timeEnd.size() == (size_t)nTimeEnd);
+}
+
 CTimeControl2::~CTimeControl2(void)
 {
 }
@@ -43,6 +57,7 @@ void CTimeControl2::Edit(CTreeCtrl* pTreeCtrl)
 
 	CTimeControlMultiPropertyPage2 tcPage;
 	tcPage.SetProperties(*this);
+	tcPage.SetUnits(pDoc->GetUnits());
 
 	propSheet.AddPage(&tcPage);
 
@@ -119,6 +134,23 @@ void CTimeControl2::Insert(CTreeCtrl* pTreeCtrl, HTREEITEM htiTimeControl)
 		}
 		pTreeCtrl->InsertItem(str, hTimeEnd);
 	}
+
+	// start_time
+	//
+	if (this->m_timeStart.value_defined)
+	{
+		str.Format("start_time %g", this->m_timeStart.value);
+	}
+	else
+	{
+		str.Format("start_time 0");
+	}
+	if (this->m_timeStart.input && strlen(this->m_timeStart.input))
+	{
+		str += " ";
+		str += this->m_timeStart.input;
+	}
+	pTreeCtrl->InsertItem(str, htiTimeControl);
 }
 
 void CTimeControl2::Serialize(bool bStoring, hid_t loc_id)
@@ -126,11 +158,13 @@ void CTimeControl2::Serialize(bool bStoring, hid_t loc_id)
 	static const char szTimeControl2[] = "TimeControl2";
 	static const char szTimeStep[]     = "time_step";
 	static const char szTimeEnd[]      = "time_end";
+	static const char szStartTime[]    = "start_time";
 	
 
 	hid_t timecontrol_id = 0;
 	hid_t timestep_id    = 0;
 	hid_t timeend_id     = 0;
+	hid_t starttime_id   = 0;
 
 	herr_t status;
 
@@ -148,6 +182,12 @@ void CTimeControl2::Serialize(bool bStoring, hid_t loc_id)
 		timeend_id = ::H5Gcreate(timecontrol_id, szTimeEnd, 0);
 		ASSERT(timeend_id > 0);
 
+		if (this->m_timeStart.value_defined)
+		{
+			// Create the szStartTime group
+			starttime_id = ::H5Gcreate(timecontrol_id, szStartTime, 0);
+			ASSERT(starttime_id > 0);
+		}
 	}
 	else
 	{
@@ -162,6 +202,9 @@ void CTimeControl2::Serialize(bool bStoring, hid_t loc_id)
 		// Open the szTimeEnd group
 		timeend_id = ::H5Gopen(timecontrol_id, szTimeEnd);
 		ASSERT(timeend_id > 0);
+
+		// Open the szTimeEnd group
+		starttime_id = ::H5Gopen(timecontrol_id, szStartTime);
 	}
 
 	if (timecontrol_id > 0)
@@ -181,6 +224,14 @@ void CTimeControl2::Serialize(bool bStoring, hid_t loc_id)
 			status = ::H5Gclose(timeend_id);
 			ASSERT(status >= 0);
 		}
+		if (starttime_id > 0)
+		{
+			// serialize this->m_timeStart
+			this->m_timeStart.Serialize(bStoring, starttime_id);
+			status = ::H5Gclose(starttime_id);
+			ASSERT(status >= 0);
+		}
+
 		// close the szTimeControl2 group
 		status = ::H5Gclose(timecontrol_id);
 		ASSERT(status >= 0);
@@ -194,6 +245,7 @@ std::ostream& operator<< (std::ostream &os, const CTimeControl2 &tc2)
 	static const char szTimeControl[] = "TIME_CONTROL";
 	static const char szTimeStep[]    = "-time_step";
 	static const char szTimeChange[]  = "-time_change";
+	static const char szStartTime[]   = "-start_time";
 
 	os << szTimeControl << "\n";
 	os << "\t" << szTimeStep << "\n";
@@ -235,6 +287,18 @@ std::ostream& operator<< (std::ostream &os, const CTimeControl2 &tc2)
 		if (sIter->type == UNITS && sIter->input && ::strlen(sIter->input))
 		{
 			os << szSpace << sIter->input;
+		}
+		os << "\n";
+	}
+
+	// start_time
+	if (tc2.m_timeStart.value_defined)
+	{
+		os << "\t" << szStartTime;
+		os << szSpace << tc2.m_timeStart.value;
+		if (tc2.m_timeStart.input && strlen(tc2.m_timeStart.input))
+		{
+			os << szSpace << tc2.m_timeStart.input;
 		}
 		os << "\n";
 	}
