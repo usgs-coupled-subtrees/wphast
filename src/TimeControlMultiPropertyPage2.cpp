@@ -410,7 +410,7 @@ BOOL CTimeControlMultiPropertyPage2::PreTranslateMessage(MSG* pMsg)
 	// Add your specialized code here and/or call the base class
 	if (pMsg->hwnd == this->m_cboStartTime.GetSafeHwnd())
 	{
-		if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_DELETE)
+		if (pMsg->message == WM_KEYDOWN && (pMsg->wParam == VK_DELETE || pMsg->wParam == VK_BACK))
 		{
 			// allow clearing of combo
 			//

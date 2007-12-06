@@ -524,13 +524,8 @@ void CPropertyTreeControlBar::OnNMDblClk(NMHDR* pNMHDR, LRESULT* pResult)
 	//}}
 }
 
-//void CPropertyTreeControlBar::EditSelection(LRESULT* pResult, BOOL bJustCheckIfEditable/*=FALSE*/)
 bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode editNode, bool bDoEdit)
 {
-// COMMENT: {6/22/2007 3:05:25 PM}	CTreeCtrlNode item = this->GetTreeCtrlEx()->GetSelectedItem();
-// COMMENT: {6/22/2007 3:05:25 PM}	CTreeCtrlNode parent = item.GetParent();
-// COMMENT: {6/22/2007 3:05:25 PM}	HTREEITEM hItem = item;
-// COMMENT: {6/22/2007 3:05:25 PM}	HTREEITEM hParent = parent;
 	CTreeCtrlNode item = editNode;
 	CTreeCtrlNode parent = item.GetParent();
 	HTREEITEM hItem = item;
@@ -542,7 +537,7 @@ bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode editNode, bool bDoEdi
 	if (item.IsNodeAncestor(this->m_nodeFlowOnly))
 	{
 		CFlowOnly *pFlowOnly = reinterpret_cast<CFlowOnly*>(this->m_nodeFlowOnly.GetData());
-		ASSERT(pFlowOnly);
+		if (!pFlowOnly) return false;  // can occur on failed import
 
 		//{{ HACK
 		CTreeCtrlNode nodeMedia = this->GetMediaNode();
@@ -571,7 +566,8 @@ bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode editNode, bool bDoEdi
 	if (item.IsNodeAncestor(this->m_nodeFreeSurface))
 	{
 		CFreeSurface *pFreeSurface = reinterpret_cast<CFreeSurface*>(this->m_nodeFreeSurface.GetData());
-		ASSERT(pFreeSurface);
+		if (!pFreeSurface) return false;  // can occur on failed import
+
 		if (bDoEdit)
 		{
 			pFreeSurface->Edit(&this->m_wndTree);
@@ -584,7 +580,8 @@ bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode editNode, bool bDoEdi
 	if (item.IsNodeAncestor(this->m_nodeSolutionMethod))
 	{
 		CSolutionMethod *pSolutionMethod = reinterpret_cast<CSolutionMethod*>(this->m_nodeSolutionMethod.GetData());
-		ASSERT(pSolutionMethod);
+		if (!pSolutionMethod) return false;  // can occur on failed import
+
 		if (bDoEdit)
 		{
 			pSolutionMethod->Edit(&this->m_wndTree);
@@ -597,7 +594,8 @@ bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode editNode, bool bDoEdi
 	if (item.IsNodeAncestor(this->m_nodeSteadyFlow))
 	{
 		CSteadyFlow* pSteadyFlow = reinterpret_cast<CSteadyFlow*>(this->m_nodeSteadyFlow.GetData());
-		ASSERT(pSteadyFlow);
+		if (!pSteadyFlow) return false;  // can occur on failed import
+
 		if (bDoEdit)
 		{
 			pSteadyFlow->Edit(&this->m_wndTree);
@@ -612,7 +610,7 @@ bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode editNode, bool bDoEdi
 	{
 		if (this->m_nodeUnits.GetData())
 		{
-			CUnits* pUnits = (CUnits*)this->m_nodeUnits.GetData();
+			CUnits* pUnits = reinterpret_cast<CUnits*>(this->m_nodeUnits.GetData());
 			if (bDoEdit)
 			{
 				pUnits->Edit(&this->m_wndTree);
@@ -730,7 +728,7 @@ bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode editNode, bool bDoEdi
 	{
 		if (CGridActor* pGridActor = CGridActor::SafeDownCast((vtkObject*)m_nodeGrid.GetData()))
 		{
-			CFrameWnd *pFrame = (CFrameWnd*)AfxGetApp()->m_pMainWnd;
+			CFrameWnd *pFrame = reinterpret_cast<CFrameWnd*>(AfxGetApp()->m_pMainWnd);
 			ASSERT_VALID(pFrame);
 			CWPhastDoc* pWPhastDoc = reinterpret_cast<CWPhastDoc*>(pFrame->GetActiveDocument());
 			ASSERT_VALID(pWPhastDoc);
