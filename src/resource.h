@@ -569,7 +569,11 @@
 #define IDC_X_UNITS_STATIC              1204
 #define IDC_Y_UNITS_STATIC              1205
 #define IDC_LSD_UNITS_STATIC            1206
+#define IDC_X_UNITS_STATIC2             1206
+#define IDC_Y_UNITS_STATIC2             1207
 #define IDC_LSD_STATIC                  1208
+#define IDC_Z_UNITS_STATIC              1208
+#define IDC_Z_UNITS_STATIC2             1208
 #define IDC_LSD_EDIT                    1209
 #define IDC_LSD_EDIT3                   1211
 #define IDC_LSD_UNITS_STATIC3           1213

@@ -47,6 +47,8 @@ public:
 
 	void UpdateApply();
 
+	void UpdateUnits(const CUnits& units);
+
 protected:
 	CWPhastView   *m_pView;
 	vtkProp3D     *m_pProp3D;

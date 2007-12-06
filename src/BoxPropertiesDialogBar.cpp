@@ -199,6 +199,9 @@ void CBoxPropertiesDialogBar::Set(CWPhastView* pView, vtkProp3D* pProp3D, const 
 	this->m_pView = pView;
 	this->m_pProp3D = pProp3D;
 
+	// always update units
+	this->UpdateUnits(units);
+
 	if (CZoneActor* pZone = this->m_pProp3D ? CZoneActor::SafeDownCast(this->m_pProp3D) : NULL)
 	{
 		this->m_nType = CBoxPropertiesDialogBar::BP_MIN_MAX;
@@ -219,26 +222,6 @@ void CBoxPropertiesDialogBar::Set(CWPhastView* pView, vtkProp3D* pProp3D, const 
 		this->m_X = bounds[0];
 		this->m_Y = bounds[2];
 		this->m_Z = bounds[4];
-
-		if (units.horizontal.defined)
-		{
-			this->m_strHorizontalUnits.Format("[%s]", units.horizontal.input);
-			CGlobal::MinimizeLengthUnits(this->m_strHorizontalUnits);
-		}
-		else
-		{
-			this->m_strHorizontalUnits.Format("[%s]", units.horizontal.si);
-		}
-		if (units.vertical.defined)
-		{
-			this->m_strVerticalUnits.Format("[%s]", units.vertical.input);
-			CGlobal::MinimizeLengthUnits(this->m_strVerticalUnits);
-
-		}
-		else
-		{
-			this->m_strVerticalUnits.Format("[%s]", units.vertical.si);
-		}
 
 		if (pZone->GetDefault())
 		{
@@ -314,9 +297,6 @@ void CBoxPropertiesDialogBar::DoDataExchange(CDataExchange* pDX)
 		}
 		END_CATCH
 
-		VERIFY(this->m_wndRiverGrid.SetItemText(0, 0, _T("X")));
-		VERIFY(this->m_wndRiverGrid.SetItemText(0, 1, _T("Y")));
-
 		this->m_wndRiverGrid.RedrawWindow();
 		this->m_wndRiverGrid.ExpandColumnsToFit();
 	}
@@ -349,6 +329,10 @@ void CBoxPropertiesDialogBar::DoDataExchange(CDataExchange* pDX)
 		DDX_Text(pDX, IDC_EDIT_XMAX, m_XMax);
 		DDX_Text(pDX, IDC_EDIT_YMAX, m_YMax);
 		DDX_Text(pDX, IDC_EDIT_ZMAX, m_ZMax);
+
+		DDX_Text(pDX, IDC_X_UNITS_STATIC2, m_strHorizontalUnits);
+		DDX_Text(pDX, IDC_Y_UNITS_STATIC2, m_strHorizontalUnits);
+		DDX_Text(pDX, IDC_Z_UNITS_STATIC2, m_strVerticalUnits);
 	}
 	else if (this->m_nType == CBoxPropertiesDialogBar::BP_WELL)
 	{
@@ -387,6 +371,14 @@ void CBoxPropertiesDialogBar::DoDataExchange(CDataExchange* pDX)
 		}
 		else
 		{
+			CString title_x(_T("X "));
+			title_x += this->m_strHorizontalUnits;
+			DDX_TextGridControl(pDX, IDC_GRID_RIVER, 0, 0, title_x);
+
+			CString title_y(_T("Y "));
+			title_y += this->m_strHorizontalUnits;
+			DDX_TextGridControl(pDX, IDC_GRID_RIVER, 0, 1, title_y);
+
 			std::list<CRiverPoint>::iterator iter = river.m_listPoints.begin();
 			for (int row = 1; row < this->m_wndRiverGrid.GetRowCount(); ++row, ++iter)
 			{
@@ -967,6 +959,9 @@ static int ZoneIDs[] = {
 	IDC_EDIT_XMAX,
 	IDC_EDIT_YMAX,
 	IDC_EDIT_ZMAX,
+	IDC_X_UNITS_STATIC2,
+	IDC_Y_UNITS_STATIC2,
+	IDC_Z_UNITS_STATIC2,
 };
 
 void CBoxPropertiesDialogBar::ShowZoneControls()
@@ -1302,4 +1297,27 @@ void CBoxPropertiesDialogBar::UpdateApply()
 	}
 			
 	TRACE("%s, out\n", __FUNCTION__);
+}
+
+void CBoxPropertiesDialogBar::UpdateUnits(const CUnits& units)
+{
+	if (units.horizontal.defined)
+	{
+		this->m_strHorizontalUnits.Format("(%s)", units.horizontal.input);
+		CGlobal::MinimizeLengthUnits(this->m_strHorizontalUnits);
+	}
+	else
+	{
+		this->m_strHorizontalUnits.Format("(%s)", units.horizontal.si);
+	}
+
+	if (units.vertical.defined)
+	{
+		this->m_strVerticalUnits.Format("(%s)", units.vertical.input);
+		CGlobal::MinimizeLengthUnits(this->m_strVerticalUnits);
+	}
+	else
+	{
+		this->m_strVerticalUnits.Format("(%s)", units.vertical.si);
+	}
 }
