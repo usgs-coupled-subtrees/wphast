@@ -4195,7 +4195,7 @@ void CWPhastDoc::RiverListener(vtkObject* caller, unsigned long eid, void* clien
 			{
 				double* pos = river->GetCurrentPointPosition();
 				vtkIdType id = river->GetCurrentPointId() - 1;
-				CRiverInsertPointAction* pRiverInsertPointAction = new CRiverInsertPointAction(river, id, pos[0], pos[1], pos[2], true);
+				CRiverInsertPointAction* pRiverInsertPointAction = new CRiverInsertPointAction(river, self, id, pos[0], pos[1], pos[2], true);
 				self->Execute(pRiverInsertPointAction);
 			}
 			break;

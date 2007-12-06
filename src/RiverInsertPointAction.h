@@ -10,13 +10,14 @@ class CRiverActor;
 class CRiverInsertPointAction : public CAction
 {
 public:
-	CRiverInsertPointAction(CRiverActor* pRiverActor, vtkIdType id, double x, double y, double z, bool bSkipFirstExecute = false);
+	CRiverInsertPointAction(CRiverActor *pRiverActor, CWPhastDoc *pWPhastDoc, vtkIdType id, double x, double y, double z, bool bSkipFirstExecute = false);
 	~CRiverInsertPointAction(void);
 	virtual void Execute();
 	virtual void UnExecute();
 
 protected:
 	CRiverActor *m_pRiverActor;
+	CWPhastDoc  *m_pWPhastDoc;
 	vtkIdType    m_id;
 	double       m_x;
 	double       m_y;

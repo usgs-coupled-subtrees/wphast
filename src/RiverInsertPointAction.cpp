@@ -5,8 +5,9 @@
 #include "RiverActor.h"
 
 
-CRiverInsertPointAction::CRiverInsertPointAction(CRiverActor* pRiverActor, vtkIdType id, double x, double y, double z, bool bSkipFirstExecute)
+CRiverInsertPointAction::CRiverInsertPointAction(CRiverActor *pRiverActor, CWPhastDoc *pWPhastDoc, vtkIdType id, double x, double y, double z, bool bSkipFirstExecute)
 : m_pRiverActor(pRiverActor)
+, m_pWPhastDoc(pWPhastDoc)
 , m_id(id)
 , m_x(x)
 , m_y(y)
@@ -28,10 +29,12 @@ void CRiverInsertPointAction::Execute()
 		this->m_pRiverActor->InsertPoint(this->m_id, this->m_x, this->m_y, this->m_z);
 	}
 	this->m_bSkipFirstExecute = false;
+	this->m_pWPhastDoc->Select(this->m_pRiverActor);
 }
 
 void CRiverInsertPointAction::UnExecute()
 {
 	this->m_pRiverActor->DeletePoint(this->m_id + 1);
+	this->m_pWPhastDoc->Select(this->m_pRiverActor);
 }
 
