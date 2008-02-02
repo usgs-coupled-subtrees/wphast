@@ -43,4 +43,5 @@ public:
 	double solver_time;
 	bool   cross_dispersion;
 	double rebalance_fraction;
+	bool   rebalance_by_cell;
 };

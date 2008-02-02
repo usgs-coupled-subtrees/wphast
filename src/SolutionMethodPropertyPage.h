@@ -37,6 +37,7 @@ protected:
 	std::string m_sSM_TimeDiff;         // IDR_SM_TIME_DIFF_RTF
 	std::string m_sSM_CrossDisp;        // IDR_SM_CROSS_DISP_RTF
 	std::string m_sSM_Rebalance;        // IDR_SM_REBALANCE_RTF
+	std::string m_sSM_RebalanceByCell;  // IDR_SM_REBALANCE_BY_CELL_RTF
 
 public:
 	CSolutionMethod solutionMethod;
@@ -51,6 +52,7 @@ public:
 	afx_msg void OnEnSetfocusEditSpace();
 	afx_msg void OnEnSetfocusEditTime();
 	afx_msg void OnBnSetfocusCheckCrossDisp();
+	afx_msg void OnBnSetfocusCheckRebalanceByCell();
 	afx_msg void OnEnSetfocusEditRebal();
 	afx_msg void OnBnSetfocusRadioDirect();
 	afx_msg void OnBnSetfocusRadioIter();

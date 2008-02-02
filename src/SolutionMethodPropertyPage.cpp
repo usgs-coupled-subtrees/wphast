@@ -25,6 +25,7 @@ CSolutionMethodPropertyPage::CSolutionMethodPropertyPage()
 	CGlobal::LoadRTFString(this->m_sSM_TimeDiff,       IDR_SM_TIME_DIFF_RTF);
 	CGlobal::LoadRTFString(this->m_sSM_CrossDisp,      IDR_SM_CROSS_DISP_RTF);
 	CGlobal::LoadRTFString(this->m_sSM_Rebalance,      IDR_SM_REBALANCE_RTF);
+	// TODO: m_sSM_RebalanceByCell
 }
 
 CSolutionMethodPropertyPage::~CSolutionMethodPropertyPage()
@@ -101,6 +102,7 @@ void CSolutionMethodPropertyPage::DoDataExchange(CDataExchange* pDX)
 		pDX->Fail();
 	}
 
+	CGlobal::DDX_Check(pDX, IDC_CHECK_REBALANCE_BY_CELL, this->solutionMethod.rebalance_by_cell);
 }
 
 
@@ -113,6 +115,7 @@ BEGIN_MESSAGE_MAP(CSolutionMethodPropertyPage, CPropertyPage)
 	ON_EN_SETFOCUS(IDC_EDIT_SPACE, OnEnSetfocusEditSpace)
 	ON_EN_SETFOCUS(IDC_EDIT_TIME, OnEnSetfocusEditTime)
 	ON_BN_SETFOCUS(IDC_CHECK_CROSS_DISP, OnBnSetfocusCheckCrossDisp)
+	ON_BN_SETFOCUS(IDC_CHECK_REBALANCE_BY_CELL, OnBnSetfocusCheckRebalanceByCell)
 	ON_EN_SETFOCUS(IDC_EDIT_REBAL, OnEnSetfocusEditRebal)
 	ON_BN_SETFOCUS(IDC_RADIO_DIRECT, OnBnSetfocusRadioDirect)
 	ON_BN_SETFOCUS(IDC_RADIO_ITER, OnBnSetfocusRadioIter)
@@ -212,6 +215,11 @@ void CSolutionMethodPropertyPage::OnEnSetfocusEditTime()
 void CSolutionMethodPropertyPage::OnBnSetfocusCheckCrossDisp()
 {
 	this->m_wndRichEditCtrl.SetWindowText(this->m_sSM_CrossDisp.c_str());
+}
+
+void CSolutionMethodPropertyPage::OnBnSetfocusCheckRebalanceByCell()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sSM_RebalanceByCell.c_str());
 }
 
 void CSolutionMethodPropertyPage::OnEnSetfocusEditRebal()

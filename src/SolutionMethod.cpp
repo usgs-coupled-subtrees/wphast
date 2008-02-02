@@ -19,6 +19,7 @@ CSolutionMethod::CSolutionMethod(void)
 , solver_time(1.0)
 , cross_dispersion(false)
 , rebalance_fraction(0.5)
+, rebalance_by_cell(false)
 {
 }
 
@@ -69,6 +70,10 @@ void CSolutionMethod::SyncWithSrcInput(void)
 	// rebalance_fraction
 	//
 	this->rebalance_fraction = ::rebalance_fraction;	
+
+	// rebalance_by_cell
+	//
+	this->rebalance_by_cell = (::rebalance_by_cell != FALSE);
 }
 
 void CSolutionMethod::InitSync(CPhastInput* input/*= NULL*/)
@@ -170,6 +175,15 @@ void CSolutionMethod::Insert(CTreeCtrl* pTreeCtrl, HTREEITEM htiSolutionMethod)c
 	
 	s.Format("rebalance_fraction  %g", this->rebalance_fraction);
 	pTreeCtrl->InsertItem(s, htiSolutionMethod);
+
+	if (this->rebalance_by_cell)
+	{
+		pTreeCtrl->InsertItem("rebalance_by_cell   true", htiSolutionMethod);
+	}
+	else
+	{
+		pTreeCtrl->InsertItem("rebalance_by_cell   false", htiSolutionMethod);
+	}
 }
 
 void CSolutionMethod::Serialize(bool bStoring, hid_t loc_id)
@@ -183,6 +197,7 @@ void CSolutionMethod::Serialize(bool bStoring, hid_t loc_id)
 	static const char szSolverTime[]           = "SolverTime";
 	static const char szCrossDispersion[]      = "CrossDispersion";
 	static const char szRebalanceFraction[]    = "RebalanceFraction";
+	static const char szRebalanceByCell[]      = "RebalanceByCell";
 
 	hid_t group_id = 0;
 	herr_t status;
@@ -235,6 +250,9 @@ void CSolutionMethod::Serialize(bool bStoring, hid_t loc_id)
 		status = CGlobal::HDFSerialize(bStoring, group_id, szRebalanceFraction, H5T_NATIVE_DOUBLE, 1, &this->rebalance_fraction);
 		if (status < 0) TRACE("WARNING unable to Serialize %s\n", szRebalanceFraction);
 
+		// rebalance_by_cell
+		status = CGlobal::HDFSerializeBool(bStoring, group_id, szRebalanceByCell, this->rebalance_by_cell);
+		if (status < 0) TRACE("WARNING unable to Serialize %s\n", szRebalanceByCell);
 
 		// close the szSolutionMethod group
 		status = ::H5Gclose(group_id);
@@ -272,6 +290,14 @@ std::ostream& operator<< (std::ostream &os, const CSolutionMethod &a)
 		os << "\t" << "-cross_dispersion   false\n";
 	}
 	os << "\t" << "-rebalance_fraction " << a.rebalance_fraction << "\n";
+	if (a.rebalance_by_cell)
+	{
+		os << "\t" << "-rebalance_by_cell   true\n";
+	}
+	else
+	{
+		os << "\t" << "-rebalance_by_cell   false\n";
+	}
 
 	return os;
 }

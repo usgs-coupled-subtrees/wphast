@@ -572,7 +572,6 @@
 #define IDC_X_UNITS_STATIC2             1206
 #define IDC_Y_UNITS_STATIC2             1207
 #define IDC_LSD_STATIC                  1208
-#define IDC_Z_UNITS_STATIC              1208
 #define IDC_Z_UNITS_STATIC2             1208
 #define IDC_LSD_EDIT                    1209
 #define IDC_LSD_EDIT3                   1211
@@ -695,6 +694,8 @@
 #define IDC_RADIO_ITER                  1321
 #define IDC_RADIO_DIRECT                1322
 #define IDC_HEAD_TOL_STATIC             1323
+#define IDC_CHECK_CROSS_DISP2           1323
+#define IDC_CHECK_REBALANCE_BY_CELL     1323
 #define IDC_HEAD_TOL_EDIT               1324
 #define IDC_HEAD_TOL_UNITS_STATIC       1325
 #define IDC_FB_TOL_STATIC               1326

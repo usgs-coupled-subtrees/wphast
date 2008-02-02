@@ -11,7 +11,7 @@ extern int   simulation;
 extern int   count_warnings;
 
 extern FILE  *input_file;
-extern FILE  *input;                        
+extern FILE  *input;
 extern FILE  *database_file;
 extern FILE  *log_file;
 extern FILE  *echo_file;
@@ -64,7 +64,7 @@ void CPhastInput::DoInitialize(void)
 		::count_warnings = 0;
 		::simulation     = 0;
 
-		::add_message_callback(::default_handler, NULL); 
+		::add_message_callback(::default_handler, NULL);
 		::add_message_callback(CPhastInput::Output, this);
 
 		::initialize();
@@ -252,7 +252,7 @@ long ExceptionFilter(unsigned long dwExceptionCode)
 		break;
 	default :
 		// a hardware exception has occured
-		switch (dwExceptionCode) 
+		switch (dwExceptionCode)
 		{
 		case EXCEPTION_ACCESS_VIOLATION :
 #ifdef _DEBUG
@@ -305,17 +305,15 @@ int CPhastInput::Output(const int type, const char *err_str, const int stop, voi
 		switch(type)
 		{
 		case OUTPUT_ERROR:
-			assert(args == NULL);
 			pThis->m_s_error += "ERROR: ";
 			pThis->m_s_error += err_str;
 			pThis->m_s_error += "\n";
 			break;
 		case OUTPUT_WARNING:
-			assert(args == NULL);
 			pThis->m_s_warning += "Warning: ";
 			pThis->m_s_warning += err_str;
 			pThis->m_s_warning += "\n";
-			break;			
+			break;
 		}
 	}
 	if (stop == STOP)
