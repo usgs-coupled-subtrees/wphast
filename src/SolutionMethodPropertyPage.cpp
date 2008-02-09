@@ -16,16 +16,16 @@ CSolutionMethodPropertyPage::CSolutionMethodPropertyPage()
 {
 	// load property descriptions
 	//
-	CGlobal::LoadRTFString(this->m_sSM_IterativeTrue,  IDR_SM_ITERATIVE_TRUE_RTF);
-	CGlobal::LoadRTFString(this->m_sSM_IterativeFalse, IDR_SM_ITERATIVE_FALSE_RTF);
-	CGlobal::LoadRTFString(this->m_sSM_Tolerance,      IDR_SM_TOLERANCE_RTF);
-	CGlobal::LoadRTFString(this->m_sSM_SaveDir,        IDR_SM_SAVE_DIR_RTF);
-	CGlobal::LoadRTFString(this->m_sSM_MaxIter,        IDR_SM_MAX_ITER_RTF);
-	CGlobal::LoadRTFString(this->m_sSM_Space,          IDR_SM_SPACE_RTF);
-	CGlobal::LoadRTFString(this->m_sSM_TimeDiff,       IDR_SM_TIME_DIFF_RTF);
-	CGlobal::LoadRTFString(this->m_sSM_CrossDisp,      IDR_SM_CROSS_DISP_RTF);
-	CGlobal::LoadRTFString(this->m_sSM_Rebalance,      IDR_SM_REBALANCE_RTF);
-	// TODO: m_sSM_RebalanceByCell
+	CGlobal::LoadRTFString(this->m_sSM_IterativeTrue,   IDR_SM_ITERATIVE_TRUE_RTF);
+	CGlobal::LoadRTFString(this->m_sSM_IterativeFalse,  IDR_SM_ITERATIVE_FALSE_RTF);
+	CGlobal::LoadRTFString(this->m_sSM_Tolerance,       IDR_SM_TOLERANCE_RTF);
+	CGlobal::LoadRTFString(this->m_sSM_SaveDir,         IDR_SM_SAVE_DIR_RTF);
+	CGlobal::LoadRTFString(this->m_sSM_MaxIter,         IDR_SM_MAX_ITER_RTF);
+	CGlobal::LoadRTFString(this->m_sSM_Space,           IDR_SM_SPACE_RTF);
+	CGlobal::LoadRTFString(this->m_sSM_TimeDiff,        IDR_SM_TIME_DIFF_RTF);
+	CGlobal::LoadRTFString(this->m_sSM_CrossDisp,       IDR_SM_CROSS_DISP_RTF);
+	CGlobal::LoadRTFString(this->m_sSM_Rebalance,       IDR_SM_REBALANCE_RTF);
+	CGlobal::LoadRTFString(this->m_sSM_RebalanceByCell, IDR_SM_REBALANCE_BY_CELL_RTF);
 }
 
 CSolutionMethodPropertyPage::~CSolutionMethodPropertyPage()
