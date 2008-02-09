@@ -2445,6 +2445,7 @@ IDR_TC_TS_TIME_STEP_RTF RTF                     "res\\TC_TS_TIME_STEP.rtf"
 IDR_TC_TS_TIME_STEP_UNITS_RTF RTF                     "res\\TC_TS_TIME_STEP_UNITS.rtf"
 IDR_TC_TE_TIME_END_RTF  RTF                     "res\\TC_TE_TIME_END.rtf"
 IDR_TC_TE_TIME_END_UNITS_RTF RTF                     "res\\TC_TE_TIME_END_UNITS.rtf"
+IDR_SM_REBALANCE_BY_CELL_RTF RTF                     "res\\SM_REBALANCE_BY_CELL.rtf"
 
 /////////////////////////////////////////////////////////////////////////////
 //

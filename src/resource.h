@@ -342,6 +342,8 @@
 #define IDR_TC_TE_TIME_END_RTF          388
 #define IDR_RTF3                        389
 #define IDR_TC_TE_TIME_END_UNITS_RTF    389
+#define IDR_SM_REBALANCEXXX_RTF         390
+#define IDR_SM_REBALANCE_BY_CELL_RTF    390
 #define IDC_EDIT_X                      1000
 #define IDC_PROPERTIES                  1000
 #define IDC_TITLE                       1000
@@ -787,7 +789,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        390
+#define _APS_NEXT_RESOURCE_VALUE        391
 #define _APS_NEXT_COMMAND_VALUE         32842
 #define _APS_NEXT_CONTROL_VALUE         1391
 #define _APS_NEXT_SYMED_VALUE           126

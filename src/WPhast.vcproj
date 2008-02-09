@@ -2725,6 +2725,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\res\rtf4.bin"
+				>
+			</File>
+			<File
 				RelativePath="res\scale_obj.cur"
 				>
 			</File>
@@ -2749,6 +2753,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\res\SM_REBALANCE_BY_CELL.rtf"
+				>
+			</File>
+			<File
 				RelativePath="res\SM_SAVE_DIR.rtf"
 				>
 			</File>
@@ -2769,11 +2777,11 @@
 				>
 			</File>
 			<File
-				RelativePath="SOLUTE_TRUE.rtf"
+				RelativePath="res\SOLUTE_TRUE.rtf"
 				>
 			</File>
 			<File
-				RelativePath="res\SOLUTE_TRUE.rtf"
+				RelativePath="SOLUTE_TRUE.rtf"
 				>
 			</File>
 			<File
@@ -5546,17 +5554,17 @@
 			Name="Build Logs"
 			>
 			<File
-				RelativePath="Release\BuildLog.htm"
-				DeploymentContent="true"
-				>
-			</File>
-			<File
 				RelativePath="cppunit\BuildLog.htm"
 				DeploymentContent="true"
 				>
 			</File>
 			<File
 				RelativePath="Debug\BuildLog.htm"
+				DeploymentContent="true"
+				>
+			</File>
+			<File
+				RelativePath="Release\BuildLog.htm"
 				DeploymentContent="true"
 				>
 			</File>
