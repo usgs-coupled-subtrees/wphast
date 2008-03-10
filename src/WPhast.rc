@@ -145,7 +145,7 @@ BEGIN
     BUTTON      ID_APP_ABOUT
     SEPARATOR
     BUTTON      ID_TOOLS_NEWZONE
-    BUTTON      ID_BUTTON32841
+    BUTTON      ID_TOOLS_NEWWEDGE
     BUTTON      ID_TOOLS_NEWWELL
     BUTTON      ID_TOOLS_NEWRIVER
     BUTTON      ID_FILE_RUN
@@ -2694,6 +2694,11 @@ END
 STRINGTABLE 
 BEGIN
     ID_TOOLS_MOVE_VER_LINE  "TODO:\nTODO:"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_TOOLS_NEWWEDGE       "Creates a new wedge\nCreate new wedge"
 END
 
 #endif    // English (U.S.) resources

@@ -49,6 +49,7 @@ class CGridRefinePage;
 class CGridCoarsenPage;
 class CGridElementsSelector;
 class CNewZoneWidget;
+class CNewWedgeWidget;
 
 class vtkAxes;
 class vtkTubeFilter;
@@ -440,6 +441,16 @@ public:
 	static void NewZoneListener(vtkObject *caller, unsigned long eid, void *clientdata, void *calldata);
 	vtkCallbackCommand *NewZoneCallbackCommand;
 	CNewZoneWidget     *NewZoneWidget;
+
+	// ID_TOOLS_NEWWEDGE
+	afx_msg void OnUpdateToolsNewWedge(CCmdUI *pCmdUI);
+	afx_msg void OnToolsNewWedge();
+	void BeginNewWedge();
+	void EndNewWedge();
+	static void NewWedgeListener(vtkObject *caller, unsigned long eid, void *clientdata, void *calldata);
+	vtkCallbackCommand *NewWedgeCallbackCommand;
+	CNewWedgeWidget    *NewWedgeWidget;
+
 public:
 	afx_msg void OnToolsColors();
 };

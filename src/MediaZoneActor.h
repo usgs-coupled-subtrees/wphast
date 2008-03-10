@@ -60,11 +60,11 @@ private:
 				CMediaZoneActor::s_Property = vtkProperty::New();
 				CMediaZoneActor::s_Property->SetColor(CMediaZoneActor::s_color);
 				CMediaZoneActor::s_Property->SetOpacity(0.3);
-#ifdef USE_WEDGE
-				CMediaZoneActor::s_Property->SetRepresentationToWireframe();
-				CMediaZoneActor::s_Property->SetColor(1.f, 1.f, 1.f);
-				CMediaZoneActor::s_Property->SetOpacity(1.0);
-#endif
+// COMMENT: {2/27/2008 8:14:45 PM}#ifdef USE_WEDGE
+// COMMENT: {2/27/2008 8:14:45 PM}				CMediaZoneActor::s_Property->SetRepresentationToWireframe();
+// COMMENT: {2/27/2008 8:14:45 PM}				CMediaZoneActor::s_Property->SetColor(1.f, 1.f, 1.f);
+// COMMENT: {2/27/2008 8:14:45 PM}				CMediaZoneActor::s_Property->SetOpacity(1.0);
+// COMMENT: {2/27/2008 8:14:45 PM}#endif
 			}
 		}
 		~StaticInit() {

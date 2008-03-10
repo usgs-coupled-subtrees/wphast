@@ -342,7 +342,6 @@
 #define IDR_TC_TE_TIME_END_RTF          388
 #define IDR_RTF3                        389
 #define IDR_TC_TE_TIME_END_UNITS_RTF    389
-#define IDR_SM_REBALANCEXXX_RTF         390
 #define IDR_SM_REBALANCE_BY_CELL_RTF    390
 #define IDC_EDIT_X                      1000
 #define IDC_PROPERTIES                  1000
@@ -782,6 +781,7 @@
 #define ID_VIEW_PROPERIESVIEW32835      32835
 #define ID_EDIT_PROPERTIES              32837
 #define ID_BUTTON32841                  32841
+#define ID_TOOLS_NEWWEDGE               32841
 #define IDW_CONTROLBAR_TREE             59424
 #define IDW_CONTROLBAR_BOXPROPS         59425
 

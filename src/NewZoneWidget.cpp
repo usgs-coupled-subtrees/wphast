@@ -267,6 +267,13 @@ void CNewZoneWidget::OnLeftButtonDown()
 {
 	TRACE("CNewZoneWidget::OnLeftButtonDown\n");
 
+	if (this->State != CNewZoneWidget::Start)
+	{
+		// sticky keys hack
+		TRACE("Warning: (this->State != CNewZoneWidget::Start) in CNewZoneWidget::OnLeftButtonDown\n");
+		this->EventCallbackCommand->SetAbortFlag(1);
+		return; 
+	}
 	ASSERT(this->State == CNewZoneWidget::Start);
 
 	// set state

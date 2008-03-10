@@ -1,14 +1,12 @@
 #include "StdAfx.h"
 #include "resource.h"
-#include "ZoneActor.h"
+#include "WedgeActor.h"
 
 #include "WPhastDoc.h"
 #include "WPhastView.h"
 
-#include <vtkCubeSource.h>
-// COMMENT: {3/7/2008 4:07:59 PM}#ifdef USE_WEDGE
-// COMMENT: {3/7/2008 4:07:59 PM}#include "MyCubeSource.h"
-// COMMENT: {3/7/2008 4:07:59 PM}#endif
+///#include <vtkCubeSource.h>
+#include "srcWedgeSource.h"
 #include <vtkPolyDataMapper.h>
 #include <vtkObjectFactory.h> // reqd by vtkStandardNewMacro
 
@@ -37,13 +35,12 @@
 #include <strstream>
 #include <float.h>
 
+vtkCxxRevisionMacro(CWedgeActor, "$Revision: 2102 $");
+// vtkStandardNewMacro(CWedgeActor); // not used for abstract class
 
-vtkCxxRevisionMacro(CZoneActor, "$Revision$");
-// vtkStandardNewMacro(CZoneActor); // not used for abstract class
+CLIPFORMAT CWedgeActor::clipFormat = (CLIPFORMAT)::RegisterClipboardFormat(_T("WPhast:CWedgeActor"));
 
-CLIPFORMAT CZoneActor::clipFormat = (CLIPFORMAT)::RegisterClipboardFormat(_T("WPhast:CZoneActor"));
-
-CZoneActor::CZoneActor(void)
+CWedgeActor::CWedgeActor(void)
 	: m_pSource(0)
 	, m_pMapper(0)
 	, m_hti(0)
@@ -53,11 +50,7 @@ CZoneActor::CZoneActor(void)
 	, m_pZone(0)
 	, m_bDefault(false)
 {
-// COMMENT: {3/5/2008 4:34:46 PM}#ifdef USE_WEDGE
-// COMMENT: {3/5/2008 4:34:46 PM}	this->m_pSource = MyCubeSource::New();
-// COMMENT: {3/5/2008 4:34:46 PM}#else
-	this->m_pSource = vtkCubeSource::New();
-// COMMENT: {3/5/2008 4:34:48 PM}#endif
+	this->m_pSource = srcWedgeSource::New();
 	this->m_pMapper = vtkPolyDataMapper::New();
 	this->m_pMapper->SetResolveCoincidentTopologyToPolygonOffset();
 
@@ -101,8 +94,8 @@ CZoneActor::CZoneActor(void)
 // COMMENT: {6/15/2006 4:12:35 PM}	this->AddPart(this->CubeActor);
 // COMMENT: {6/15/2006 4:12:35 PM}
 #ifdef USE_WEDGE
-	//this->outlineData = MyCubeSource::New();
-	this->outlineData = vtkOutlineFilter::New(); // just so it can be deleted
+	this->outlineData = srcWedgeSource::New();
+// COMMENT: {3/6/2008 8:45:25 PM}	this->outlineData = vtkOutlineFilter::New(); // just so it can be deleted
 	this->mapOutline = vtkPolyDataMapper::New();
 	this->mapOutline->SetInput(this->m_pSource->GetOutput());
 #else
@@ -144,7 +137,7 @@ CZoneActor::CZoneActor(void)
 
 }
 
-CZoneActor::~CZoneActor(void)
+CWedgeActor::~CWedgeActor(void)
 {
 	this->m_pSource->Delete();
 	this->m_pMapper->Delete();
@@ -155,7 +148,7 @@ CZoneActor::~CZoneActor(void)
 	this->mapOutline->Delete();
 }
 
-void CZoneActor::Remove(CPropertyTreeControlBar* pTreeControlBar)
+void CWedgeActor::Remove(CPropertyTreeControlBar* pTreeControlBar)
 {
 	if (this->m_hti) {
 		CTreeCtrl* pTreeCtrl = pTreeControlBar->GetTreeCtrl();
@@ -181,7 +174,7 @@ void CZoneActor::Remove(CPropertyTreeControlBar* pTreeControlBar)
 	}
 }
 
-void CZoneActor::UnRemove(CPropertyTreeControlBar* pTreeControlBar)
+void CWedgeActor::UnRemove(CPropertyTreeControlBar* pTreeControlBar)
 {
 	ASSERT(this->m_hParent);
 	ASSERT(this->m_hInsertAfter);
@@ -222,139 +215,141 @@ void CZoneActor::UnRemove(CPropertyTreeControlBar* pTreeControlBar)
 	pTreeCtrl->RedrawWindow(&rc);
 }
 
-void CZoneActor::Resize(CWPhastView* pView)
+void CWedgeActor::Resize(CWPhastView* pView)
 {
-	//{{11/3/2004 2:52:11 PM
-// COMMENT: {11/3/2004 2:54:38 PM}	return;
-	//}}11/3/2004 2:52:11 PM
+	ASSERT(FALSE); // TODO
 
-	vtkBoxWidget *widget = pView->GetBoxWidget();
-	ASSERT(widget);
-	ASSERT(widget->GetProp3D() == this);
-
-	if (vtkPolyData* pPD = vtkPolyData::New())
-	{
-		// {{ temp
-		vtkTransform *t = vtkTransform::New();
-		widget->GetTransform(t);
-		// }} temp
-
-		widget->GetPolyData(pPD);
-		// pPD->ComputeBounds();
-		vtkFloatingPointType bounds[6];
-		pPD->GetBounds(bounds);
-		TRACE("bounds[0] = %g\n", bounds[0]);
-		TRACE("bounds[1] = %g\n", bounds[1]);
-		TRACE("bounds[2] = %g\n", bounds[2]);
-		TRACE("bounds[3] = %g\n", bounds[3]);
-		TRACE("bounds[4] = %g\n", bounds[4]);
-		TRACE("bounds[5] = %g\n", bounds[5]);
-
-		TRACE("pPD\n");
-		pPD->Delete();
-
-		// {{ temp
-		t->Delete();
-		this->SetUserTransform(0);
-///{{{TESTING
-		// Scale
-		vtkFloatingPointType* scale = this->GetScale();
-
-		// Units
-		//
-		const CUnits& units = pView->GetDocument()->GetUnits();
-
-		// Resize Box
-		//
-		CAction *pAction = new CZoneResizeAction(
-			pView,
-			this,
-			bounds[0] / scale[0] / units.horizontal.input_to_si,
-			bounds[1] / scale[0] / units.horizontal.input_to_si,
-			bounds[2] / scale[1] / units.horizontal.input_to_si,
-			bounds[3] / scale[1] / units.horizontal.input_to_si,
-			bounds[4] / scale[2] / units.vertical.input_to_si,
-			bounds[5] / scale[2] / units.vertical.input_to_si
-			);
-		pView->GetDocument()->Execute(pAction);
-///}}}TESTING
-
-		this->Select(pView, true);
-		// }} temp
-	}
-
-
-#ifdef SAVE_RESIZE_USING_TRANSFORM
-	vtkTransform *t = vtkTransform::New();
-	vtkBoxWidget *widget = pView->GetBoxWidget();
-	ASSERT(widget);
-	ASSERT(widget->GetProp3D() == this);
-
-	widget->GetTransform(t);
-	if (!CGlobal::IsValidTransform(t)) {
-		::AfxMessageBox("Unable to perform requested action: Invalid transform", MB_OK);
-		t->Delete();
-		this->SetUserTransform(0);
-		this->Select(pView);
-		return;
-	}
-#ifdef _DEBUG
-	float* pos = widget->GetProp3D()->GetPosition();
-	ASSERT(pos[0] == 0.0);
-	ASSERT(pos[1] == 0.0);
-	ASSERT(pos[2] == 0.0);
-#endif
-	float* scale = this->GetScale();
-	float* center = this->GetCenter();
-	this->SetPosition(center[0]*scale[0], center[1]*scale[1], center[2]*scale[2]);
-	widget->GetTransform(t);
-	this->SetPosition(0, 0, 0);
-	this->SetUserTransform(t);
-	t->Delete();
-
-	float bounds[6];
-	this->GetBounds(bounds);
-	this->SetUserTransform(0);
-
-#ifdef USE_GET_LENGTHS_CENTER
-	// Resize Box
-	//
-	CAction *pAction = new CZoneResizeAction(
-		pView,
-		this,
-		(bounds[1] - bounds[0]) / scale[0],
-		(bounds[3] - bounds[2]) / scale[1],
-		(bounds[5] - bounds[4]) / scale[2],
-		(bounds[1] + bounds[0]) / scale[0] / 2,
-		(bounds[3] + bounds[2]) / scale[1] / 2,
-		(bounds[5] + bounds[4]) / scale[2] / 2
-		);
-	pView->GetDocument()->Execute(pAction);
-#endif
-	// Units
-	//
-	const CUnits& units = pView->GetDocument()->GetUnits();
-
-	// Resize Box
-	//
-	CAction *pAction = new CZoneResizeAction(
-		pView,
-		this,
-		bounds[0] / scale[0] / units.horizontal.input_to_si,
-		bounds[1] / scale[0] / units.horizontal.input_to_si,
-		bounds[2] / scale[1] / units.horizontal.input_to_si,
-		bounds[3] / scale[1] / units.horizontal.input_to_si,
-		bounds[4] / scale[2] / units.vertical.input_to_si,
-		bounds[5] / scale[2] / units.vertical.input_to_si
-		);
-	pView->GetDocument()->Execute(pAction);
-#endif
+// COMMENT: {3/6/2008 8:46:36 PM}	//{{11/3/2004 2:52:11 PM
+// COMMENT: {3/6/2008 8:46:36 PM}// COMMENT: {11/3/2004 2:54:38 PM}	return;
+// COMMENT: {3/6/2008 8:46:36 PM}	//}}11/3/2004 2:52:11 PM
+// COMMENT: {3/6/2008 8:46:36 PM}
+// COMMENT: {3/6/2008 8:46:36 PM}	vtkBoxWidget *widget = pView->GetBoxWidget();
+// COMMENT: {3/6/2008 8:46:36 PM}	ASSERT(widget);
+// COMMENT: {3/6/2008 8:46:36 PM}	ASSERT(widget->GetProp3D() == this);
+// COMMENT: {3/6/2008 8:46:36 PM}
+// COMMENT: {3/6/2008 8:46:36 PM}	if (vtkPolyData* pPD = vtkPolyData::New())
+// COMMENT: {3/6/2008 8:46:36 PM}	{
+// COMMENT: {3/6/2008 8:46:36 PM}		// {{ temp
+// COMMENT: {3/6/2008 8:46:36 PM}		vtkTransform *t = vtkTransform::New();
+// COMMENT: {3/6/2008 8:46:36 PM}		widget->GetTransform(t);
+// COMMENT: {3/6/2008 8:46:36 PM}		// }} temp
+// COMMENT: {3/6/2008 8:46:36 PM}
+// COMMENT: {3/6/2008 8:46:36 PM}		widget->GetPolyData(pPD);
+// COMMENT: {3/6/2008 8:46:36 PM}		// pPD->ComputeBounds();
+// COMMENT: {3/6/2008 8:46:36 PM}		vtkFloatingPointType bounds[6];
+// COMMENT: {3/6/2008 8:46:36 PM}		pPD->GetBounds(bounds);
+// COMMENT: {3/6/2008 8:46:36 PM}		TRACE("bounds[0] = %g\n", bounds[0]);
+// COMMENT: {3/6/2008 8:46:36 PM}		TRACE("bounds[1] = %g\n", bounds[1]);
+// COMMENT: {3/6/2008 8:46:36 PM}		TRACE("bounds[2] = %g\n", bounds[2]);
+// COMMENT: {3/6/2008 8:46:36 PM}		TRACE("bounds[3] = %g\n", bounds[3]);
+// COMMENT: {3/6/2008 8:46:36 PM}		TRACE("bounds[4] = %g\n", bounds[4]);
+// COMMENT: {3/6/2008 8:46:36 PM}		TRACE("bounds[5] = %g\n", bounds[5]);
+// COMMENT: {3/6/2008 8:46:36 PM}
+// COMMENT: {3/6/2008 8:46:36 PM}		TRACE("pPD\n");
+// COMMENT: {3/6/2008 8:46:36 PM}		pPD->Delete();
+// COMMENT: {3/6/2008 8:46:36 PM}
+// COMMENT: {3/6/2008 8:46:36 PM}		// {{ temp
+// COMMENT: {3/6/2008 8:46:36 PM}		t->Delete();
+// COMMENT: {3/6/2008 8:46:36 PM}		this->SetUserTransform(0);
+// COMMENT: {3/6/2008 8:46:36 PM}///{{{TESTING
+// COMMENT: {3/6/2008 8:46:36 PM}		// Scale
+// COMMENT: {3/6/2008 8:46:36 PM}		vtkFloatingPointType* scale = this->GetScale();
+// COMMENT: {3/6/2008 8:46:36 PM}
+// COMMENT: {3/6/2008 8:46:36 PM}		// Units
+// COMMENT: {3/6/2008 8:46:36 PM}		//
+// COMMENT: {3/6/2008 8:46:36 PM}		const CUnits& units = pView->GetDocument()->GetUnits();
+// COMMENT: {3/6/2008 8:46:36 PM}
+// COMMENT: {3/6/2008 8:46:36 PM}		// Resize Box
+// COMMENT: {3/6/2008 8:46:36 PM}		//
+// COMMENT: {3/6/2008 8:46:36 PM}		CAction *pAction = new CZoneResizeAction(
+// COMMENT: {3/6/2008 8:46:36 PM}			pView,
+// COMMENT: {3/6/2008 8:46:36 PM}			this,
+// COMMENT: {3/6/2008 8:46:36 PM}			bounds[0] / scale[0] / units.horizontal.input_to_si,
+// COMMENT: {3/6/2008 8:46:36 PM}			bounds[1] / scale[0] / units.horizontal.input_to_si,
+// COMMENT: {3/6/2008 8:46:36 PM}			bounds[2] / scale[1] / units.horizontal.input_to_si,
+// COMMENT: {3/6/2008 8:46:36 PM}			bounds[3] / scale[1] / units.horizontal.input_to_si,
+// COMMENT: {3/6/2008 8:46:36 PM}			bounds[4] / scale[2] / units.vertical.input_to_si,
+// COMMENT: {3/6/2008 8:46:36 PM}			bounds[5] / scale[2] / units.vertical.input_to_si
+// COMMENT: {3/6/2008 8:46:36 PM}			);
+// COMMENT: {3/6/2008 8:46:36 PM}		pView->GetDocument()->Execute(pAction);
+// COMMENT: {3/6/2008 8:46:36 PM}///}}}TESTING
+// COMMENT: {3/6/2008 8:46:36 PM}
+// COMMENT: {3/6/2008 8:46:36 PM}		this->Select(pView, true);
+// COMMENT: {3/6/2008 8:46:36 PM}		// }} temp
+// COMMENT: {3/6/2008 8:46:36 PM}	}
+// COMMENT: {3/6/2008 8:46:36 PM}
+// COMMENT: {3/6/2008 8:46:36 PM}
+// COMMENT: {3/6/2008 8:46:36 PM}#ifdef SAVE_RESIZE_USING_TRANSFORM
+// COMMENT: {3/6/2008 8:46:36 PM}	vtkTransform *t = vtkTransform::New();
+// COMMENT: {3/6/2008 8:46:36 PM}	vtkBoxWidget *widget = pView->GetBoxWidget();
+// COMMENT: {3/6/2008 8:46:36 PM}	ASSERT(widget);
+// COMMENT: {3/6/2008 8:46:36 PM}	ASSERT(widget->GetProp3D() == this);
+// COMMENT: {3/6/2008 8:46:36 PM}
+// COMMENT: {3/6/2008 8:46:36 PM}	widget->GetTransform(t);
+// COMMENT: {3/6/2008 8:46:36 PM}	if (!CGlobal::IsValidTransform(t)) {
+// COMMENT: {3/6/2008 8:46:36 PM}		::AfxMessageBox("Unable to perform requested action: Invalid transform", MB_OK);
+// COMMENT: {3/6/2008 8:46:36 PM}		t->Delete();
+// COMMENT: {3/6/2008 8:46:36 PM}		this->SetUserTransform(0);
+// COMMENT: {3/6/2008 8:46:36 PM}		this->Select(pView);
+// COMMENT: {3/6/2008 8:46:36 PM}		return;
+// COMMENT: {3/6/2008 8:46:36 PM}	}
+// COMMENT: {3/6/2008 8:46:36 PM}#ifdef _DEBUG
+// COMMENT: {3/6/2008 8:46:36 PM}	float* pos = widget->GetProp3D()->GetPosition();
+// COMMENT: {3/6/2008 8:46:36 PM}	ASSERT(pos[0] == 0.0);
+// COMMENT: {3/6/2008 8:46:36 PM}	ASSERT(pos[1] == 0.0);
+// COMMENT: {3/6/2008 8:46:36 PM}	ASSERT(pos[2] == 0.0);
+// COMMENT: {3/6/2008 8:46:36 PM}#endif
+// COMMENT: {3/6/2008 8:46:36 PM}	float* scale = this->GetScale();
+// COMMENT: {3/6/2008 8:46:36 PM}	float* center = this->GetCenter();
+// COMMENT: {3/6/2008 8:46:36 PM}	this->SetPosition(center[0]*scale[0], center[1]*scale[1], center[2]*scale[2]);
+// COMMENT: {3/6/2008 8:46:36 PM}	widget->GetTransform(t);
+// COMMENT: {3/6/2008 8:46:36 PM}	this->SetPosition(0, 0, 0);
+// COMMENT: {3/6/2008 8:46:36 PM}	this->SetUserTransform(t);
+// COMMENT: {3/6/2008 8:46:36 PM}	t->Delete();
+// COMMENT: {3/6/2008 8:46:36 PM}
+// COMMENT: {3/6/2008 8:46:36 PM}	float bounds[6];
+// COMMENT: {3/6/2008 8:46:36 PM}	this->GetBounds(bounds);
+// COMMENT: {3/6/2008 8:46:36 PM}	this->SetUserTransform(0);
+// COMMENT: {3/6/2008 8:46:36 PM}
+// COMMENT: {3/6/2008 8:46:36 PM}#ifdef USE_GET_LENGTHS_CENTER
+// COMMENT: {3/6/2008 8:46:36 PM}	// Resize Box
+// COMMENT: {3/6/2008 8:46:36 PM}	//
+// COMMENT: {3/6/2008 8:46:36 PM}	CAction *pAction = new CZoneResizeAction(
+// COMMENT: {3/6/2008 8:46:36 PM}		pView,
+// COMMENT: {3/6/2008 8:46:36 PM}		this,
+// COMMENT: {3/6/2008 8:46:36 PM}		(bounds[1] - bounds[0]) / scale[0],
+// COMMENT: {3/6/2008 8:46:36 PM}		(bounds[3] - bounds[2]) / scale[1],
+// COMMENT: {3/6/2008 8:46:36 PM}		(bounds[5] - bounds[4]) / scale[2],
+// COMMENT: {3/6/2008 8:46:36 PM}		(bounds[1] + bounds[0]) / scale[0] / 2,
+// COMMENT: {3/6/2008 8:46:36 PM}		(bounds[3] + bounds[2]) / scale[1] / 2,
+// COMMENT: {3/6/2008 8:46:36 PM}		(bounds[5] + bounds[4]) / scale[2] / 2
+// COMMENT: {3/6/2008 8:46:36 PM}		);
+// COMMENT: {3/6/2008 8:46:36 PM}	pView->GetDocument()->Execute(pAction);
+// COMMENT: {3/6/2008 8:46:36 PM}#endif
+// COMMENT: {3/6/2008 8:46:36 PM}	// Units
+// COMMENT: {3/6/2008 8:46:36 PM}	//
+// COMMENT: {3/6/2008 8:46:36 PM}	const CUnits& units = pView->GetDocument()->GetUnits();
+// COMMENT: {3/6/2008 8:46:36 PM}
+// COMMENT: {3/6/2008 8:46:36 PM}	// Resize Box
+// COMMENT: {3/6/2008 8:46:36 PM}	//
+// COMMENT: {3/6/2008 8:46:36 PM}	CAction *pAction = new CZoneResizeAction(
+// COMMENT: {3/6/2008 8:46:36 PM}		pView,
+// COMMENT: {3/6/2008 8:46:36 PM}		this,
+// COMMENT: {3/6/2008 8:46:36 PM}		bounds[0] / scale[0] / units.horizontal.input_to_si,
+// COMMENT: {3/6/2008 8:46:36 PM}		bounds[1] / scale[0] / units.horizontal.input_to_si,
+// COMMENT: {3/6/2008 8:46:36 PM}		bounds[2] / scale[1] / units.horizontal.input_to_si,
+// COMMENT: {3/6/2008 8:46:36 PM}		bounds[3] / scale[1] / units.horizontal.input_to_si,
+// COMMENT: {3/6/2008 8:46:36 PM}		bounds[4] / scale[2] / units.vertical.input_to_si,
+// COMMENT: {3/6/2008 8:46:36 PM}		bounds[5] / scale[2] / units.vertical.input_to_si
+// COMMENT: {3/6/2008 8:46:36 PM}		);
+// COMMENT: {3/6/2008 8:46:36 PM}	pView->GetDocument()->Execute(pAction);
+// COMMENT: {3/6/2008 8:46:36 PM}#endif
 }
 
 #include <vtkAssemblyPath.h>
 #include <vtkAbstractPropPicker.h>
 
-void CZoneActor::UnSelect(CWPhastView* pView)
+void CWedgeActor::UnSelect(CWPhastView* pView)
 {
 // COMMENT: {7/14/2004 2:46:08 PM}	if (vtkInteractorStyle* pStyle = vtkInteractorStyle::SafeDownCast(pView->GetRenderWindowInteractor()->GetInteractorStyle())) {
 // COMMENT: {7/14/2004 2:46:08 PM}		pStyle->HighlightProp(0);
@@ -368,7 +363,7 @@ void CZoneActor::UnSelect(CWPhastView* pView)
 	pView->ClearSelection();
 }
 
-void CZoneActor::Select(CWPhastView* pView, bool bReselect)
+void CWedgeActor::Select(CWPhastView* pView, bool bReselect)
 {
 // COMMENT: {3/5/2008 4:39:13 PM}	//{{HACK
 // COMMENT: {3/5/2008 4:39:13 PM}	// If creating a new zone cancel now 
@@ -473,30 +468,30 @@ void CZoneActor::Select(CWPhastView* pView, bool bReselect)
 	}
 }
 
-//void CZoneActor::Insert(CPropertyTreeControlBar* pTreeControlBar)
+//void CWedgeActor::Insert(CPropertyTreeControlBar* pTreeControlBar)
 //{
 //	// no-op
 //}
 //
-//void CZoneActor::Update(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent)
+//void CWedgeActor::Update(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent)
 //{
 //	// no-op
 //}
 
 
-void CZoneActor::SetName(LPCTSTR name)
+void CWedgeActor::SetName(LPCTSTR name)
 {
 	ASSERT(name != NULL);
 	this->m_name = name;
 	this->UpdateNameDesc();
 }
 
-LPCTSTR CZoneActor::GetName(void)const
+LPCTSTR CWedgeActor::GetName(void)const
 {
 	return this->m_name.c_str();
 }
 
-void CZoneActor::SetDesc(LPCTSTR desc)
+void CWedgeActor::SetDesc(LPCTSTR desc)
 {
 	if (desc)
 	{
@@ -509,17 +504,17 @@ void CZoneActor::SetDesc(LPCTSTR desc)
 	this->UpdateNameDesc();
 }
 
-LPCTSTR CZoneActor::GetDesc(void)const
+LPCTSTR CWedgeActor::GetDesc(void)const
 {
 	return this->m_desc.c_str();
 }
 
-LPCTSTR CZoneActor::GetNameDesc(void)const
+LPCTSTR CWedgeActor::GetNameDesc(void)const
 {
 	return this->m_name_desc.c_str();
 }
 
-void CZoneActor::UpdateNameDesc()
+void CWedgeActor::UpdateNameDesc()
 {
 	this->m_name_desc = this->GetName();
 	if (this->GetDesc() && strlen(this->GetDesc()))
@@ -529,62 +524,62 @@ void CZoneActor::UpdateNameDesc()
 	}
 }
 
-// COMMENT: {6/3/2004 3:46:20 PM}LPCTSTR CZoneActor::GetSerialName(void)//const
+// COMMENT: {6/3/2004 3:46:20 PM}LPCTSTR CWedgeActor::GetSerialName(void)//const
 // COMMENT: {6/3/2004 3:46:20 PM}{
 // COMMENT: {6/3/2004 3:46:20 PM}	return GetName();
 // COMMENT: {6/3/2004 3:46:20 PM}}
 
-void CZoneActor::SetXLength(float x)
+void CWedgeActor::SetXLength(float x)
 {
 	this->m_pSource->SetXLength(x);
 }
 
-void CZoneActor::SetYLength(float y)
+void CWedgeActor::SetYLength(float y)
 {
 	this->m_pSource->SetYLength(y);
 }
 
-void CZoneActor::SetZLength(float z)
+void CWedgeActor::SetZLength(float z)
 {
 	this->m_pSource->SetZLength(z);
 }
 
-float CZoneActor::GetXLength()
+float CWedgeActor::GetXLength()
 {
 	return this->m_pSource->GetXLength();
 }
 
-float CZoneActor::GetYLength()
+float CWedgeActor::GetYLength()
 {
 	return this->m_pSource->GetYLength();
 }
 
-float CZoneActor::GetZLength()
+float CWedgeActor::GetZLength()
 {
 	return this->m_pSource->GetZLength();
 }
 
-void CZoneActor::SetCenter(vtkFloatingPointType x, vtkFloatingPointType y, vtkFloatingPointType z)
+void CWedgeActor::SetCenter(vtkFloatingPointType x, vtkFloatingPointType y, vtkFloatingPointType z)
 {
 	this->m_pSource->SetCenter(x, y, z);
 }
 
-void CZoneActor::SetCenter(vtkFloatingPointType pos[3])
+void CWedgeActor::SetCenter(vtkFloatingPointType pos[3])
 {
 	this->m_pSource->SetCenter(pos);
 }
 
-vtkFloatingPointType* CZoneActor::GetCenter()
+vtkFloatingPointType* CWedgeActor::GetCenter()
 {
 	return this->m_pSource->GetCenter();
 }
 
-void CZoneActor::GetCenter(vtkFloatingPointType data[3])
+void CWedgeActor::GetCenter(vtkFloatingPointType data[3])
 {
 	this->m_pSource->GetCenter(data);
 }
 
-void CZoneActor::SetBounds(float xMin, float xMax, float yMin, float yMax, float zMin, float zMax, const CUnits& rUnits)
+void CWedgeActor::SetBounds(float xMin, float xMax, float yMin, float yMax, float zMin, float zMax, const CUnits& rUnits)
 {
 	ASSERT(xMin <= xMax);
 	ASSERT(yMin <= yMax);
@@ -612,12 +607,12 @@ void CZoneActor::SetBounds(float xMin, float xMax, float yMin, float yMax, float
 	}
 }
 
-void CZoneActor::SetBounds(const CZone& rZone, const CUnits& rUnits)
+void CWedgeActor::SetBounds(const CZone& rZone, const CUnits& rUnits)
 {
 	this->SetBounds(rZone.x1, rZone.x2, rZone.y1, rZone.y2, rZone.z1, rZone.z2, rUnits);
 }
 
-void CZoneActor::SetUnits(const CUnits& rUnits)
+void CWedgeActor::SetUnits(const CUnits& rUnits)
 {
 	this->m_pSource->SetBounds(
 		this->m_pZone->x1 * rUnits.horizontal.input_to_si,
@@ -629,7 +624,7 @@ void CZoneActor::SetUnits(const CUnits& rUnits)
 		);
 }
 
-void CZoneActor::SetBounds(float xMin, float xMax,
+void CWedgeActor::SetBounds(float xMin, float xMax,
 					  float yMin, float yMax,
 					  float zMin, float zMax)
 {
@@ -726,18 +721,18 @@ void CZoneActor::SetBounds(float xMin, float xMax,
 	}
 }
 
-void CZoneActor::SetBounds(float bounds[6], const CUnits& units)
+void CWedgeActor::SetBounds(float bounds[6], const CUnits& units)
 {
 	this->SetBounds(bounds[0], bounds[1], bounds[2], bounds[3], bounds[4], bounds[5], units);
 }
 
-void CZoneActor::SetBounds(float bounds[6])
+void CWedgeActor::SetBounds(float bounds[6])
 {
 	ASSERT(FALSE); // DEPRECATED use SetBounds(float bounds[6], const CUnits& units) instead
 	this->SetBounds(bounds[0], bounds[1], bounds[2], bounds[3], bounds[4], bounds[5]);
 }
 
-void CZoneActor::GetUserBounds(float bounds[6])
+void CWedgeActor::GetUserBounds(float bounds[6])
 {
 	ASSERT(this->m_pZone && this->m_pZone->zone_defined == TRUE);
 	bounds[0] = this->m_pZone->x1;
@@ -748,7 +743,7 @@ void CZoneActor::GetUserBounds(float bounds[6])
 	bounds[5] = this->m_pZone->z2;
 }
 
-float* CZoneActor::GetUserBounds()
+float* CWedgeActor::GetUserBounds()
 {
 	ASSERT(this->m_pZone && this->m_pZone->zone_defined == TRUE);
 	this->m_ActualBounds[0] = this->m_pZone->x1;
@@ -760,7 +755,7 @@ float* CZoneActor::GetUserBounds()
 	return this->m_ActualBounds;
 }
 
-void CZoneActor::Pick(vtkRenderer* pRenderer, vtkRenderWindowInteractor* pRenderWindowInteractor)
+void CWedgeActor::Pick(vtkRenderer* pRenderer, vtkRenderWindowInteractor* pRenderWindowInteractor)
 {
 	if (!this || !pRenderer || !pRenderWindowInteractor) ::AfxMessageBox("BUG");
 	ASSERT(this);
@@ -769,12 +764,12 @@ void CZoneActor::Pick(vtkRenderer* pRenderer, vtkRenderWindowInteractor* pRender
 	CGlobal::PickProp(this, pRenderer, pRenderWindowInteractor);
 }
 
-void CZoneActor::UnPick(vtkRenderer* pRenderer, vtkRenderWindowInteractor* pRenderWindowInteractor)
+void CWedgeActor::UnPick(vtkRenderer* pRenderer, vtkRenderWindowInteractor* pRenderWindowInteractor)
 {
 	CGlobal::UnPickProp(this, pRenderer, pRenderWindowInteractor);
 }
 
-void CZoneActor::Serialize(bool bStoring, hid_t loc_id)
+void CWedgeActor::Serialize(bool bStoring, hid_t loc_id)
 {
 	static const char szColor[]   = "Color";
 	static const char szDefault[] = "Default";
@@ -830,29 +825,29 @@ void CZoneActor::Serialize(bool bStoring, hid_t loc_id)
 	}
 }
 
-void CZoneActor::SetDefault(bool bDefault)
+void CWedgeActor::SetDefault(bool bDefault)
 {
 	this->m_bDefault = bDefault;
 }
 
-bool CZoneActor::GetDefault(void)const
+bool CWedgeActor::GetDefault(void)const
 {
 	return this->m_bDefault;
 }
 
-void CZoneActor::Add(CWPhastDoc *pWPhastDoc)
+void CWedgeActor::Add(CWPhastDoc *pWPhastDoc)
 {
 	pWPhastDoc->GetPropCollection()->AddItem(this);
 }
 
-void CZoneActor::Remove(CWPhastDoc *pWPhastDoc)
+void CWedgeActor::Remove(CWPhastDoc *pWPhastDoc)
 {
 	while(pWPhastDoc->GetPropCollection()->IsItemPresent(this)) {
 		pWPhastDoc->GetPropCollection()->RemoveItem(this);
 	}
 }
 
-void CZoneActor::SetVisibility(int visibility)
+void CWedgeActor::SetVisibility(int visibility)
 {
 	vtkDebugMacro(<< this->GetClassName() << " (" << this << "): setting Visibility to " << visibility);
 	if (this->Visibility != visibility)
@@ -887,7 +882,7 @@ void CZoneActor::SetVisibility(int visibility)
 	}
 }
 
-vtkFloatingPointType *CZoneActor::GetBounds() // virtual
+vtkFloatingPointType *CWedgeActor::GetBounds() // virtual
 {
 	// from vtkAssembly.cxx
 	//

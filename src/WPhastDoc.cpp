@@ -64,6 +64,7 @@
 #include "GridElementsSelector.h"
 
 #include "NewZoneWidget.h"
+#include "NewWedgeWidget.h"
 
 #include <vtkBoxWidget.h>
 
@@ -231,6 +232,11 @@ BEGIN_MESSAGE_MAP(CWPhastDoc, CDocument)
 	// ID_TOOLS_NEWZONE
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_NEWZONE, OnUpdateToolsNewZone)
 	ON_COMMAND(ID_TOOLS_NEWZONE, OnToolsNewZone)
+
+	// ID_TOOLS_NEWWEDGE
+	ON_UPDATE_COMMAND_UI(ID_TOOLS_NEWWEDGE, OnUpdateToolsNewWedge)
+	ON_COMMAND(ID_TOOLS_NEWWEDGE, OnToolsNewWedge)
+
 	ON_COMMAND(ID_TOOLS_COLORS, &CWPhastDoc::OnToolsColors)
 END_MESSAGE_MAP()
 
@@ -283,6 +289,8 @@ CWPhastDoc::CWPhastDoc()
 , GridElementsSelector(0)
 , NewZoneWidget(0)
 , NewZoneCallbackCommand(0)
+, NewWedgeWidget(0)
+, NewWedgeCallbackCommand(0)
 {
 #if defined(WPHAST_AUTOMATION)
 	EnableAutomation();
@@ -4881,6 +4889,10 @@ BOOL CWPhastDoc::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 	{
 		return this->NewZoneWidget->OnSetCursor(pWnd, nHitTest, message);
 	}
+	if (this->NewWedgeWidget && this->NewWedgeWidget->GetEnabled())
+	{
+		return this->NewWedgeWidget->OnSetCursor(pWnd, nHitTest, message);
+	}
 	return FALSE;
 }
 
@@ -4915,4 +4927,182 @@ void CWPhastDoc::SetDisplayColors(const CDisplayColors& dc)
 CDisplayColors CWPhastDoc::GetDisplayColors()const
 {
 	return this->DisplayColors;
+}
+
+void CWPhastDoc::OnUpdateToolsNewWedge(CCmdUI *pCmdUI)
+{
+	if (this->NewWedgeWidget && this->NewWedgeWidget->GetEnabled())
+	{
+		pCmdUI->SetCheck(1);
+	}
+	else
+	{
+		pCmdUI->SetCheck(0);
+	}
+}
+
+void CWPhastDoc::OnToolsNewWedge()
+{
+	if (this->NewWedgeWidget && this->NewWedgeWidget->GetEnabled())
+	{
+		this->EndNewWedge();
+	}
+	else
+	{
+		if (this->NewWedgeWidget) this->EndNewWedge();
+		this->BeginNewWedge();
+	}
+}
+
+void CWPhastDoc::BeginNewWedge()
+{
+	ASSERT(this->NewWedgeWidget == 0);
+	ASSERT(this->NewWedgeCallbackCommand == 0);
+
+	POSITION pos = this->GetFirstViewPosition();
+	if (pos != NULL)
+	{
+		CWPhastView *pView = (CWPhastView*) GetNextView(pos);
+		ASSERT_VALID(pView);
+		ASSERT(pView->GetRenderWindowInteractor());
+		if (pView->GetRenderWindowInteractor())
+		{
+			pView->CancelMode();
+
+			// create widget
+			this->NewWedgeWidget = CNewWedgeWidget::New();
+			this->NewWedgeWidget->SetInteractor(pView->GetRenderWindowInteractor());
+			this->NewWedgeWidget->SetProp3D(this->GetGridActor());
+
+			// add listener callback
+			this->NewWedgeCallbackCommand = vtkCallbackCommand::New();
+			this->NewWedgeCallbackCommand->SetClientData(this);
+			this->NewWedgeCallbackCommand->SetCallback(CWPhastDoc::NewWedgeListener);
+			this->NewWedgeWidget->AddObserver(vtkCommand::EndInteractionEvent, this->NewWedgeCallbackCommand);
+
+			// enable widget
+			this->NewWedgeWidget->SetEnabled(1);
+		}
+	}
+}
+
+void CWPhastDoc::EndNewWedge()
+{
+	if (this->NewWedgeCallbackCommand)
+	{
+		ASSERT(this->NewWedgeCallbackCommand->IsA("vtkObjectBase"));
+		this->NewWedgeCallbackCommand->Delete();
+		this->NewWedgeCallbackCommand = 0;
+	}
+	if (this->NewWedgeWidget)
+	{
+		ASSERT(this->NewWedgeWidget->IsA("CNewWedgeWidget"));
+		this->NewWedgeWidget->SetInteractor(0);
+		this->NewWedgeWidget->Delete();
+		this->NewWedgeWidget = 0;
+	}
+}
+
+void CWPhastDoc::NewWedgeListener(vtkObject *caller, unsigned long eid, void *clientdata, void *calldata) 
+{
+	ASSERT(caller->IsA("CNewWedgeWidget"));
+	ASSERT(clientdata);
+
+	if (clientdata)
+	{
+		CWPhastDoc* self = reinterpret_cast<CWPhastDoc*>(clientdata);
+		if (eid == vtkCommand::EndInteractionEvent)
+		{
+			vtkFloatingPointType scaled_meters[6];
+			self->NewWedgeWidget->GetBounds(scaled_meters);
+
+			// calc zone
+			CZone zone;
+			vtkFloatingPointType* scale = self->GetScale();
+			const CUnits& units = self->GetUnits();
+			zone.x1 = scaled_meters[0] / scale[0] / units.horizontal.input_to_si;
+			zone.x2 = scaled_meters[1] / scale[0] / units.horizontal.input_to_si;
+			zone.y1 = scaled_meters[2] / scale[1] / units.horizontal.input_to_si;
+			zone.y2 = scaled_meters[3] / scale[1] / units.horizontal.input_to_si;
+			zone.z1 = scaled_meters[4] / scale[2] / units.vertical.input_to_si;
+			zone.z2 = scaled_meters[5] / scale[2] / units.vertical.input_to_si;
+
+			TRACE("x(%g-%g) y(%g-%g) z(%g-%g)\n", zone.x1, zone.x2, zone.y1, zone.y2, zone.z1, zone.z2);
+
+			// get type of zone
+			//
+			ETSLayoutPropertySheet        sheet("Zone Wizard", NULL, 0, NULL, false);
+
+			CNewZonePropertyPage          newZone;
+			CMediaSpreadPropertyPage      mediaProps;
+			CBCFluxPropertyPage2          fluxProps;
+			CBCLeakyPropertyPage2         leakyProps;
+			CBCSpecifiedHeadPropertyPage  specifiedProps;
+			CICHeadSpreadPropertyPage     icHeadProps;
+			CChemICSpreadPropertyPage     chemICProps;
+
+			// CChemICSpreadPropertyPage only needs the flowonly flag when the zone is a
+			// default zone
+			//
+			bool bFlowOnly = self->GetFlowOnly();
+
+			fluxProps.SetFlowOnly(bFlowOnly);
+			leakyProps.SetFlowOnly(bFlowOnly);
+			specifiedProps.SetFlowOnly(bFlowOnly);
+
+			sheet.AddPage(&newZone);
+			sheet.AddPage(&mediaProps);
+			sheet.AddPage(&fluxProps);
+			sheet.AddPage(&leakyProps);
+			sheet.AddPage(&specifiedProps);
+			sheet.AddPage(&icHeadProps);
+			sheet.AddPage(&chemICProps);
+
+			sheet.SetWizardMode();
+
+			if (sheet.DoModal() == ID_WIZFINISH)
+			{
+				if (newZone.GetType() == ID_ZONE_TYPE_MEDIA)
+				{
+					CGridElt elt;
+					mediaProps.GetProperties(elt);
+					CMediaZoneActor::Create(self, zone, elt, mediaProps.GetDesc());
+				}
+				else if (newZone.GetType() == ID_ZONE_TYPE_BC_FLUX)
+				{
+					CBC bc;
+					fluxProps.GetProperties(bc);
+					CBCZoneActor::Create(self, zone, bc, fluxProps.GetDesc());
+				}
+				else if (newZone.GetType() == ID_ZONE_TYPE_BC_LEAKY)
+				{
+					CBC bc;
+					leakyProps.GetProperties(bc);
+					CBCZoneActor::Create(self, zone, bc, leakyProps.GetDesc());
+				}
+				else if (newZone.GetType() == ID_ZONE_TYPE_BC_SPECIFIED)
+				{
+					CBC bc;
+					specifiedProps.GetProperties(bc);
+					CBCZoneActor::Create(self, zone, bc, specifiedProps.GetDesc());
+				}
+				else if (newZone.GetType() == ID_ZONE_TYPE_IC_HEAD)
+				{
+					CHeadIC headic;
+					icHeadProps.GetProperties(headic);
+					CICHeadZoneActor::Create(self, zone, headic, icHeadProps.GetDesc());
+				}
+				else if (newZone.GetType() == ID_ZONE_TYPE_IC_CHEM)
+				{
+					CChemIC chemIC;
+					chemICProps.GetProperties(chemIC);
+					CICChemZoneActor::Create(self, zone, chemIC, chemICProps.GetDesc());
+				}
+			}
+
+			// Note: cannot call EndNewWedge here
+			self->NewWedgeWidget->SetInteractor(0);
+		}
+	}
+
 }

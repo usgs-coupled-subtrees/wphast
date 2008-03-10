@@ -19,3 +19,12 @@ NewModelWizard
 		CPropertyTreeControlBar::OnLButtonDown(UINT nFlags, CPoint point)
 		void CWPhastView::EndNewZone(void)
 		CViewVTKCommand::OnMouseMoveEvent
+		
+02/27/2008
+	F2 Keyboard
+	1. With any branch of the property tree selected press f2
+	2. Cancel/OK the dialog
+	3. The property tree no longer has focus
+
+	MSI installer
+	The license agreement is not formatted correctly

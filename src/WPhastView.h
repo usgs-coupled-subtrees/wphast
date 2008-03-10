@@ -22,9 +22,9 @@ class vtkPolyDataMapper;
 class vtkActor;
 
 class vtkCubeSource;
-#ifdef USE_WEDGE
-class MyCubeSource;
-#endif
+// COMMENT: {3/5/2008 4:25:06 PM}#ifdef USE_WEDGE
+// COMMENT: {3/5/2008 4:25:06 PM}class MyCubeSource;
+// COMMENT: {3/5/2008 4:25:06 PM}#endif
 class vtkCylinderSource;
 class CWellActor;
 
@@ -90,10 +90,14 @@ protected:
 	vtkPolyDataMapper              *m_pCursor3DMapper;
 	vtkActor                       *m_pCursor3DActor;
 
-	// new zone
-	vtkCubeSource                  *m_pNewCube;
-	vtkPolyDataMapper              *m_pNewCubeMapper;
-	vtkActor                       *m_pNewCubeActor;
+// COMMENT: {3/5/2008 4:25:27 PM}	// new zone
+// COMMENT: {3/5/2008 4:25:27 PM}#ifdef USE_WEDGE
+// COMMENT: {3/5/2008 4:25:27 PM}	MyCubeSource                   *m_pNewCube;
+// COMMENT: {3/5/2008 4:25:27 PM}#else
+// COMMENT: {3/5/2008 4:25:27 PM}	vtkCubeSource                  *m_pNewCube;
+// COMMENT: {3/5/2008 4:25:27 PM}#endif
+// COMMENT: {3/5/2008 4:25:27 PM}	vtkPolyDataMapper              *m_pNewCubeMapper;
+// COMMENT: {3/5/2008 4:25:27 PM}	vtkActor                       *m_pNewCubeActor;
 
 	int                             m_ViewFromDirection;
 

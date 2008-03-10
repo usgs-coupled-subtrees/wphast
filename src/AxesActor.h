@@ -18,12 +18,12 @@ typedef float vtkFloatingPointType;
 // 6/20/05 Why is this inherited from vtkOpenGLActor and not vtkActor?
 // It isn't visible if vtkActor is used
 
-// class CAxesActor : public vtkOpenGLActor
-class CAxesActor : public vtkLODActor
+class CAxesActor : public vtkOpenGLActor
+// COMMENT: {2/29/2008 4:02:30 PM}class CAxesActor : public vtkLODActor
 {
 public:
-	// vtkTypeRevisionMacro(CAxesActor,vtkOpenGLActor);
-	vtkTypeRevisionMacro(CAxesActor,vtkLODActor);
+	vtkTypeRevisionMacro(CAxesActor,vtkOpenGLActor);
+// COMMENT: {2/29/2008 4:04:20 PM}	vtkTypeRevisionMacro(CAxesActor,vtkLODActor);
 	static CAxesActor *New();
 
 	void SetDefaultPositions(const vtkFloatingPointType p[6]);

@@ -6,10 +6,7 @@
 // #include "structs.h"
 #include "Zone.h"
 
-class vtkCubeSource;
-// COMMENT: {3/5/2008 4:25:43 PM}#if USE_WEDGE
-// COMMENT: {3/5/2008 4:25:43 PM}class MyCubeSource;
-// COMMENT: {3/5/2008 4:25:43 PM}#endif
+class srcWedgeSource;
 class vtkPolyDataMapper;
 class CWPhastView;
 class CWPhastDoc;
@@ -22,20 +19,20 @@ class CUnits;
 typedef float vtkFloatingPointType;
 #endif 
 
-///class CZoneActor : public vtkLODActor
-class CZoneActor : public vtkAssembly
+///class CWedgeActor : public vtkLODActor
+class CWedgeActor : public vtkAssembly
 {
 public:
-	///vtkTypeRevisionMacro(CZoneActor,vtkLODActor);
-	vtkTypeRevisionMacro(CZoneActor,vtkAssembly);
+	///vtkTypeRevisionMacro(CWedgeActor,vtkLODActor);
+	vtkTypeRevisionMacro(CWedgeActor,vtkAssembly);
 
 	static CLIPFORMAT clipFormat;
 
 	// Description:
-	// Creates a CZoneActor with the following defaults: origin(0,0,0) 
+	// Creates a CWedgeActor with the following defaults: origin(0,0,0) 
 	// position=(0,0,0) scale=(1,1,1) visibility=1 pickable=1 dragable=1
 	// orientation=(0,0,0). NumberOfCloudPoints is set to 150.
-	// static CZoneActor *New();
+	// static CWedgeActor *New();
 
 	void SetBounds(float xMin, float xMax, float yMin, float yMax, float zMin, float zMax);
 	void SetBounds(float xMin, float xMax, float yMin, float yMax, float zMin, float zMax, const CUnits& units);
@@ -92,16 +89,12 @@ public:
 // COMMENT: {6/13/2006 5:44:43 PM}	virtual void UpdateDisplay();
 
 protected:
-	CZoneActor(void);
-	virtual ~CZoneActor(void);
+	CWedgeActor(void);
+	virtual ~CWedgeActor(void);
 
 	void UpdateNameDesc();
 
-// COMMENT: {3/5/2008 4:25:49 PM}#ifdef USE_WEDGE
-// COMMENT: {3/5/2008 4:25:49 PM}	MyCubeSource      *m_pSource;
-// COMMENT: {3/5/2008 4:25:49 PM}#else
-	vtkCubeSource     *m_pSource;
-// COMMENT: {3/5/2008 4:25:53 PM}#endif
+	srcWedgeSource     *m_pSource;
 
 	vtkPolyDataMapper *m_pMapper;
 
@@ -110,14 +103,14 @@ protected:
 	// the outline
 	//
 // COMMENT: {2/28/2008 1:31:11 PM}#ifdef USE_WEDGE
-// COMMENT: {2/28/2008 1:31:11 PM}	MyCubeSource *outlineData;
-// COMMENT: {2/28/2008 1:31:11 PM}	vtkPolyDataMapper *mapOutline;
-// COMMENT: {2/28/2008 1:31:11 PM}	vtkActor *outline;
-// COMMENT: {2/28/2008 1:31:11 PM}#else
-	vtkOutlineFilter *outlineData;
+	srcWedgeSource *outlineData;
 	vtkPolyDataMapper *mapOutline;
 	vtkActor *outline;
-// COMMENT: {2/28/2008 1:31:14 PM}#endif
+// COMMENT: {2/28/2008 1:31:11 PM}#else
+// COMMENT: {3/6/2008 8:43:21 PM}	vtkOutlineFilter *outlineData;
+// COMMENT: {3/6/2008 8:43:21 PM}	vtkPolyDataMapper *mapOutline;
+// COMMENT: {3/6/2008 8:43:21 PM}	vtkActor *outline;
+// COMMENT: {3/6/2008 8:43:21 PM}// COMMENT: {2/28/2008 1:31:14 PM}#endif
 
 	//
 	vtkAppendPolyData *appendPolyData;
@@ -138,8 +131,8 @@ protected:
 	bool               m_bDefault;
 
 private:
-	CZoneActor(const CZoneActor&);  // Not implemented.
-	void operator=(const CZoneActor&);  // Not implemented.
+	CWedgeActor(const CWedgeActor&);  // Not implemented.
+	void operator=(const CWedgeActor&);  // Not implemented.
 
 	void SetXLength(float x); // use SetBounds instead.
 	void SetYLength(float y); // use SetBounds instead.

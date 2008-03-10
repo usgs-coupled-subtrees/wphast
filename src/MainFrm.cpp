@@ -136,7 +136,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	ASSERT_VALID(pDoc);
 
 	
-#ifdef USE_WEDGE
+// COMMENT: {3/5/2008 4:26:46 PM}#ifdef USE_WEDGE
 	if (!m_wndToolBar.CreateEx(this, TBSTYLE_FLAT, WS_CHILD | WS_VISIBLE | CBRS_TOP
 		| CBRS_GRIPPER | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC) ||
 		!m_wndToolBar.LoadToolBar(IDR_MAINFRAME2))
@@ -144,15 +144,15 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		TRACE0("Failed to create toolbar\n");
 		return -1;      // fail to create
 	}
-#else
-	if (!m_wndToolBar.CreateEx(this, TBSTYLE_FLAT, WS_CHILD | WS_VISIBLE | CBRS_TOP
-		| CBRS_GRIPPER | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC) ||
-		!m_wndToolBar.LoadToolBar(IDR_MAINFRAME))
-	{
-		TRACE0("Failed to create toolbar\n");
-		return -1;      // fail to create
-	}
-#endif
+// COMMENT: {3/5/2008 4:26:52 PM}#else
+// COMMENT: {3/5/2008 4:26:52 PM}	if (!m_wndToolBar.CreateEx(this, TBSTYLE_FLAT, WS_CHILD | WS_VISIBLE | CBRS_TOP
+// COMMENT: {3/5/2008 4:26:52 PM}		| CBRS_GRIPPER | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC) ||
+// COMMENT: {3/5/2008 4:26:52 PM}		!m_wndToolBar.LoadToolBar(IDR_MAINFRAME))
+// COMMENT: {3/5/2008 4:26:52 PM}	{
+// COMMENT: {3/5/2008 4:26:52 PM}		TRACE0("Failed to create toolbar\n");
+// COMMENT: {3/5/2008 4:26:52 PM}		return -1;      // fail to create
+// COMMENT: {3/5/2008 4:26:52 PM}	}
+// COMMENT: {3/5/2008 4:26:52 PM}#endif
 
 	if (!m_wndStatusBar.Create(this) ||
 		!m_wndStatusBar.SetIndicators(indicators,
