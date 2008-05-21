@@ -27,6 +27,9 @@ public:
 	static CChemIC NewDefaults(void);
 	static CChemIC Full(void);
 
+	bool operator==(const struct chem_ic& rhs)const;
+
+
 	void Serialize(bool bStoring, hid_t loc_id);
 	void Serialize(CArchive& ar);
 	friend std::ostream& operator<< (std::ostream &os, const CChemIC &a);

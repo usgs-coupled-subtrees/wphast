@@ -10,8 +10,7 @@
 
 #include <iosfwd> // std::ostream
 
-class Cproperty :
-	public property
+class Cproperty : public property
 {
 public:
 	// ctor
@@ -41,6 +40,7 @@ public:
 	static void CopyProperty(struct property** dest, const struct property* src);
 
 	friend std::ostream& operator<< (std::ostream &os, const Cproperty &a);
+	friend inline bool operator==(const property& lhs, const property& rhs);
 
 private:
 	void InternalCopy(const property& src);
@@ -131,3 +131,60 @@ inline void Cproperty::CopyProperty(struct property** dest, const struct propert
 		(*dest) = 0;
 	}
 }
+
+inline bool operator==(const property& lhs, const property& rhs)
+{
+	if (lhs.type == rhs.type)
+	{
+		switch (lhs.type)
+		{
+		case UNDEFINED:
+			return true;
+			break;
+		case FIXED:
+			return (lhs.v[0] == rhs.v[0]);
+			break;
+		case LINEAR:
+			return (lhs.coord == rhs.coord &&
+				lhs.v[0] == rhs.v[0] &&
+				lhs.dist1 == rhs.dist1 &&
+				lhs.v[1] == rhs.v[1] &&
+				lhs.dist2 == rhs.dist2);
+			break;
+		case MIXTURE:
+			if (lhs.count_v == rhs.count_v)
+			{
+				for (int i = 0; i < lhs.count_v; ++i)
+				{
+					if (lhs.v[i] != rhs.v[i]) return false;
+				}
+				return true;
+			}
+			break;
+		default:
+			ASSERT(FALSE);
+			return false;
+			break;
+		}
+	}
+	return false;
+}
+
+inline bool operator!=(const property& lhs, const property& rhs)
+{
+	return !(lhs==rhs);
+}
+
+#define COMPARE_PROPERTY_MACRO(P) \
+	do { \
+		if (this->P) { \
+			if (rhs.P) { \
+				if (*this->P != *rhs.P) return false; \
+			} else { \
+				if (this->P->type != UNDEFINED) return false; \
+			} \
+		} else { \
+			if (rhs.P && rhs.P->type != UNDEFINED) return false; \
+		} \
+	} while(0)
+

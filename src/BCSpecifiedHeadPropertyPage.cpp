@@ -74,7 +74,7 @@ void CBCSpecifiedHeadPropertyPage::DoDataExchange(CDataExchange* pDX)
 		CBC bc;
 
 		// bc_type
-		bc.bc_type = SPECIFIED;
+		bc.bc_type = BC_info::BC_SPECIFIED;
 
 		// head time series
 		//

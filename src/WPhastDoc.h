@@ -126,6 +126,11 @@ public:
 	void Select(CZoneActor *pZoneActor);
 	void GetUsedZoneNumbers(std::set<int>& usedNums)const;
 	int GetNextZoneNumber(void)const;
+	void GetUsedWedgeNumbers(std::set<int>& usedNums)const;
+	int GetNextWedgeNumber(void)const;
+	CString GetNextZoneName(void);
+	CString GetNextWedgeName(void);
+
 
 	void Edit(CGridActor* pGridActor);
 	void ModifyGrid(CGridActor* gridActor, CGridElementsSelector* gridElementsSelector);
@@ -328,7 +333,6 @@ public:
 	afx_msg void OnToolsGeometry();
 	virtual void DeleteContents();
 	void ResetCamera(void);
-	CString GetNextZoneName(void);
 private:
 	void AddDefaultZone(CZone* pZone);
 public:

@@ -2,6 +2,7 @@
 #include "sizecbar/sdbarcfvs7.h"
 #include "IObserver.h"
 #include "gridctrl/ModGridCtrlEx.h"
+#include "srcWedgeSource.h"
 #include <vector>
 
 class vtkObject;
@@ -22,13 +23,14 @@ public:
 	void Set(CWPhastView* pView, vtkProp3D* pProp3D, const CUnits& units);
 	vtkProp3D* GetProp3D(void);
 
-	enum BP_TYPE {
+	typedef enum tagBP_TYPE {
 		BP_NONE,
 		BP_POS_PLUS_LENGTH,
 		BP_MIN_MAX,
 		BP_WELL,
 		BP_RIVER,
-	};
+		BP_WEDGE,
+	} BP_TYPE;
 
 	virtual BOOL Create(UINT nIDTemplate, LPCTSTR lpszWindowName,
 		CWnd* pParentWnd, UINT nID, DWORD dwStyle = WS_CHILD | WS_VISIBLE | CBRS_TOP);
@@ -41,6 +43,9 @@ public:
 
 	void ShowRiverControls(void);
 	void HideRiverControls(void);
+
+	void ShowWedgeControls(void);
+	void HideWedgeControls(void);
 
 	void ShowApply();
 	void HideApply();
@@ -58,7 +63,8 @@ protected:
 	//CGridCtrl   m_wndRiverGrid;
 
 
-	enum BP_TYPE m_nType;
+	BP_TYPE m_nType;
+	Wedge::WEDGE_ORIENTATION m_nOrientation;
 
 	float m_X;
 	float m_Y;
@@ -115,4 +121,7 @@ public:
 	//
 	///afx_msg void OnEnKillfocusYMAXEdit();
 	afx_msg void OnEnKillfocusRange(UINT nID);
+
+	// update wedge controls
+	afx_msg void OnBnClickedUpdateWedge();
 };

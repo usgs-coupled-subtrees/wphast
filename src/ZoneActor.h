@@ -1,32 +1,29 @@
 #pragma once
 #include <vtkLODActor.h>
 #include <vtkAssembly.h>
+#include "srcWedgeSource.h"
 
 #include <string>
 // #include "structs.h"
 #include "Zone.h"
 
 class vtkCubeSource;
-// COMMENT: {3/5/2008 4:25:43 PM}#if USE_WEDGE
-// COMMENT: {3/5/2008 4:25:43 PM}class MyCubeSource;
-// COMMENT: {3/5/2008 4:25:43 PM}#endif
 class vtkPolyDataMapper;
 class CWPhastView;
 class CWPhastDoc;
 class vtkRenderWindowInteractor;
 class CPropertyTreeControlBar;
 class CUnits;
+class ISerializable;
 
 #ifndef vtkFloatingPointType
 #define vtkFloatingPointType vtkFloatingPointType
 typedef float vtkFloatingPointType;
 #endif 
 
-///class CZoneActor : public vtkLODActor
 class CZoneActor : public vtkAssembly
 {
 public:
-	///vtkTypeRevisionMacro(CZoneActor,vtkLODActor);
 	vtkTypeRevisionMacro(CZoneActor,vtkAssembly);
 
 	static CLIPFORMAT clipFormat;
@@ -42,6 +39,12 @@ public:
 	void SetBounds(float bounds[6]);
 	void SetBounds(float bounds[6], const CUnits& rUnits);
 	void SetBounds(const CZone& rZone, const CUnits& rUnits);
+
+	virtual void SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits);
+	virtual Polyhedron*& GetPolyhedron(void) = 0;
+
+	enum srcWedgeSource::tagChopType GetChopType()const;
+	void SetChopType(enum srcWedgeSource::tagChopType t);
 
 	void SetUnits(const CUnits& rUnits);
 
@@ -59,8 +62,6 @@ public:
 
 	LPCTSTR GetNameDesc(void)const;
 
-	/// virtual void Insert(CTreeCtrl* pTreeCtrl, HTREEITEM htiGrid);
-	///virtual void Insert(CPropertyTreeControlBar* pTreeControlBar) = 0;
 	virtual void Insert(CPropertyTreeControlBar* pTreeControlBar, HTREEITEM hInsertAfter = TVI_LAST) = 0;
 
 	virtual void Update(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent) = 0;  // I don't think this needs to be virtual
@@ -83,13 +84,8 @@ public:
 	void Pick(vtkRenderer* pRenderer, vtkRenderWindowInteractor* pRenderWindowInteractor);
 	void UnPick(vtkRenderer* pRenderer, vtkRenderWindowInteractor* pRenderWindowInteractor);
 
-	//{{
 	vtkProperty* GetProperty() { return this->CubeActor->GetProperty(); }
 	virtual vtkFloatingPointType* GetBounds(); //  { return this->vtkAssembly::GetBounds(); }
-// COMMENT: {6/15/2006 11:37:06 PM}	void GetBounds(float bounds[6]) {this->CubeActor->GetBounds(bounds); }
-	//}}
-
-// COMMENT: {6/13/2006 5:44:43 PM}	virtual void UpdateDisplay();
 
 protected:
 	CZoneActor(void);
@@ -97,11 +93,7 @@ protected:
 
 	void UpdateNameDesc();
 
-// COMMENT: {3/5/2008 4:25:49 PM}#ifdef USE_WEDGE
-// COMMENT: {3/5/2008 4:25:49 PM}	MyCubeSource      *m_pSource;
-// COMMENT: {3/5/2008 4:25:49 PM}#else
-	vtkCubeSource     *m_pSource;
-// COMMENT: {3/5/2008 4:25:53 PM}#endif
+	srcWedgeSource     *m_pSource;
 
 	vtkPolyDataMapper *m_pMapper;
 
@@ -109,15 +101,8 @@ protected:
 
 	// the outline
 	//
-// COMMENT: {2/28/2008 1:31:11 PM}#ifdef USE_WEDGE
-// COMMENT: {2/28/2008 1:31:11 PM}	MyCubeSource *outlineData;
-// COMMENT: {2/28/2008 1:31:11 PM}	vtkPolyDataMapper *mapOutline;
-// COMMENT: {2/28/2008 1:31:11 PM}	vtkActor *outline;
-// COMMENT: {2/28/2008 1:31:11 PM}#else
-	vtkOutlineFilter *outlineData;
 	vtkPolyDataMapper *mapOutline;
-	vtkActor *outline;
-// COMMENT: {2/28/2008 1:31:14 PM}#endif
+	vtkActor *OutlineActor;
 
 	//
 	vtkAppendPolyData *appendPolyData;
@@ -125,8 +110,6 @@ protected:
 	std::string        m_name;
 	std::string        m_desc;
 	std::string        m_name_desc;
-
-	struct zone       *m_pZone;
 
 	HTREEITEM          m_hti;
 	HTREEITEM          m_hParent;

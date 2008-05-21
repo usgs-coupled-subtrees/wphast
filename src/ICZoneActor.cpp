@@ -23,12 +23,10 @@ vtkCxxRevisionMacro(CICZoneActor, "$Revision$");
 
 CICZoneActor::CICZoneActor(void)
 {
-	this->m_pZone = new CZone();
 }
 
 CICZoneActor::~CICZoneActor(void)
 {
-	delete this->m_pZone;
 }
 
 void CICZoneActor::InsertAt(CTreeCtrl* pTreeCtrl, HTREEITEM hParent, HTREEITEM hInsertAfter)

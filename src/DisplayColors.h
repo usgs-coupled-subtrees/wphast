@@ -15,6 +15,7 @@ public:
     COLORREF crSpecHead;
     COLORREF crRiver;
     COLORREF crWell;
+    COLORREF crBackground;
 
 	virtual void Serialize(bool bStoring, hid_t loc_id);
 

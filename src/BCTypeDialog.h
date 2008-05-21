@@ -1,5 +1,6 @@
 #pragma once
 
+#include "srcinput/BC_info.h"
 
 // CBCTypeDialog dialog
 
@@ -14,7 +15,7 @@ public:
 // Dialog Data
 	enum { IDD = IDD_BC_TYPE_DIALOG };
 
-	int bc_type; // SPECIFIED, FLUX, LEAKY
+	BC_info::BC_TYPE bc_type;
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support

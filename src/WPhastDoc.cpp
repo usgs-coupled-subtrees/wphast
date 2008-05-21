@@ -13,6 +13,7 @@
 
 // #include <vtkPropCollection.h>
 #include <vtkCubeSource.h>
+#include "srcWedgeSource.h"
 #include <vtkPolyDataMapper.h>
 #include <vtkLODActor.h>
 #include <vtkProperty.h>
@@ -81,6 +82,8 @@
 #include "GridDeleteLineAction.h"
 #include "GridInsertLineAction.h"
 #include "GridMoveLineAction.h"
+#include "SetChemICAction.h"
+
 
 // zone property pages
 #include "NewZonePropertyPage.h"
@@ -122,11 +125,13 @@
 #include "XMLSerializer.h"
 
 extern void GetDefaultMedia(struct grid_elt* p_grid_elt);
-extern void GetDefaultHeadIC(struct head_ic* p_head_ic);
+extern void GetDefaultHeadIC(struct Head_ic* p_head_ic);
 extern void GetDefaultChemIC(struct chem_ic* p_chem_ic);
 
 static const TCHAR szZoneFormat[]    = _T("Zone %d");
+static const TCHAR szWedgeFormat[]   = _T("Wedge %d");
 static const TCHAR szZoneFind[]      = _T("Zone ");
+static const TCHAR szWedgeFind[]     = _T("Wedge ");
 
 
 int error_msg (const char *err_str, const int stop);
@@ -1688,6 +1693,14 @@ CString CWPhastDoc::GetNextZoneName(void)
 	return str;
 }
 
+CString CWPhastDoc::GetNextWedgeName(void)
+{
+	static CString str;
+	str.Format(szWedgeFormat, this->GetNextWedgeNumber());
+	return str;
+}
+
+
 int CWPhastDoc::GetNextWellNumber(void)
 {
 	std::set<int> wellNums;
@@ -1772,9 +1785,24 @@ int CWPhastDoc::GetNextZoneNumber(void)const
 	}
 }
 
+int CWPhastDoc::GetNextWedgeNumber(void)const
+{
+	std::set<int> wedgeNums;
+	this->GetUsedWedgeNumbers(wedgeNums);
+	if (wedgeNums.rbegin() != wedgeNums.rend())
+	{
+		return (*wedgeNums.rbegin()) + 1;
+	}
+	else
+	{
+		return 1;
+	}
+}
+
 void CWPhastDoc::GetUsedZoneNumbers(std::set<int>& usedNums)const
 {
 	char *ptr;
+	CZoneActor *pZoneActor;
 	usedNums.clear();
 
 	std::list<vtkPropCollection*> collections;
@@ -1791,7 +1819,7 @@ void CWPhastDoc::GetUsedZoneNumbers(std::set<int>& usedNums)const
 			pPropCollection->InitTraversal();
 			for (; (pProp = pPropCollection->GetNextProp()); )
 			{
-				if (CZoneActor *pZoneActor = CZoneActor::SafeDownCast(pProp))
+				if ((pZoneActor = CZoneActor::SafeDownCast(pProp)) && (pZoneActor->GetChopType() == srcWedgeSource::CHOP_NONE))
 				{
 					// store used n_user numbers
 					//
@@ -1807,6 +1835,44 @@ void CWPhastDoc::GetUsedZoneNumbers(std::set<int>& usedNums)const
 		}
 	}
 }
+
+void CWPhastDoc::GetUsedWedgeNumbers(std::set<int>& usedNums)const
+{
+	char *ptr;
+	CZoneActor *pZoneActor;
+	usedNums.clear();
+
+	std::list<vtkPropCollection*> collections;
+	collections.push_back(this->GetPropAssemblyMedia()->GetParts());
+	collections.push_back(this->GetPropAssemblyBC()->GetParts());
+	collections.push_back(this->GetPropAssemblyIC()->GetParts());
+
+	std::list<vtkPropCollection*>::iterator iter = collections.begin();
+	for (; iter != collections.end(); ++iter)
+	{
+		if (vtkPropCollection *pPropCollection = (*iter))
+		{
+			vtkProp *pProp = 0;
+			pPropCollection->InitTraversal();
+			for (; (pProp = pPropCollection->GetNextProp()); )
+			{
+				if ((pZoneActor = CZoneActor::SafeDownCast(pProp)) && (pZoneActor->GetChopType() != srcWedgeSource::CHOP_NONE))
+				{
+					// store used n_user numbers
+					//
+					std::pair< std::set<int>::iterator, bool > pr;
+					CString str = pZoneActor->GetName();
+					if (str.Find(szWedgeFind) == 0) {
+						int n = ::strtol((const char*)str + 5, &ptr, 10);
+						pr = usedNums.insert(n);
+						ASSERT(pr.second); // duplicate?
+					}
+				}
+			}
+		}
+	}
+}
+
 
 BOOL CWPhastDoc::OnSaveDocument(LPCTSTR lpszPathName)
 {
@@ -2026,33 +2092,41 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 
 		this->New(model);
 
+		// default zone
+		CZone defaultZone;
+		this->m_pGridActor->GetDefaultZone(defaultZone);
+
 		// MEDIA zones
 		//
 		for (int i = 0; i < ::count_grid_elt_zones; ++i)
 		{
 			// not undoable
 			const struct grid_elt* grid_elt_ptr = ::grid_elt_zones[i];
-
-			if (i == 0)
+			ASSERT(grid_elt_ptr->polyh && ::AfxIsValidAddress(grid_elt_ptr->polyh, sizeof(Polyhedron)));
+			if (i == 0 && defaultZone == *grid_elt_ptr->polyh->Get_box())
 			{
 				// if the first zone is equivalent to the default gridElt
 				// don't add it
-
-				// TODO: check for equivalance to default gridElt
+				if (model.m_media == *grid_elt_ptr)
+				{
+					continue;
+				}
+				// special case for active property
+				// it's assumed that the default media zone
+				// is always active
+				CGridElt alt(*grid_elt_ptr);
+				alt.active = new Cproperty(1);
+				if (model.m_media == alt)
+				{
+					continue;
+				}
 			}
-
 			CZoneCreateAction<CMediaZoneActor>* pAction = new CZoneCreateAction<CMediaZoneActor>(
 				this,
-				this->GetNextZoneName(),
-				grid_elt_ptr->zone->x1,
-				grid_elt_ptr->zone->x2,
-				grid_elt_ptr->zone->y1,
-				grid_elt_ptr->zone->y2,
-				grid_elt_ptr->zone->z1,
-				grid_elt_ptr->zone->z2,
+				grid_elt_ptr->polyh,
 				NULL
 				);
-			pAction->GetZoneActor()->SetGridElt(*grid_elt_ptr);
+			pAction->GetZoneActor()->SetData(*grid_elt_ptr);
 			pAction->Execute();
 			delete pAction;
 		}
@@ -2062,22 +2136,16 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 		std::list<CBCZoneActor*> listBCZoneActors;
 		for (int i = 0; i < ::count_bc; ++i)
 		{
-			const struct bc* bc_ptr = ::bc[i];
-
+			const struct BC* bc_ptr = ::bc[i];
+			ASSERT(bc_ptr->polyh && ::AfxIsValidAddress(bc_ptr->polyh, sizeof(Polyhedron)));
 			// not undoable
 			//
 			CZoneCreateAction<CBCZoneActor>* pAction = new CZoneCreateAction<CBCZoneActor>(
 				this,
-				this->GetNextZoneName(),
-				bc_ptr->zone->x1,
-				bc_ptr->zone->x2,
-				bc_ptr->zone->y1,
-				bc_ptr->zone->y2,
-				bc_ptr->zone->z1,
-				bc_ptr->zone->z2,
+				bc_ptr->polyh,
 				NULL
 				);
-			pAction->GetZoneActor()->SetBC(*bc_ptr);
+			pAction->GetZoneActor()->SetData(*bc_ptr);
 			pAction->Execute();
 			listBCZoneActors.push_back(pAction->GetZoneActor());
 			delete pAction;
@@ -2113,25 +2181,20 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 		//
 		for (int i = 0; i < ::count_head_ic; ++i)
 		{
-			const struct head_ic* head_ic_ptr = ::head_ic[i];
-
-			if (i == 0)
+			const struct Head_ic* head_ic_ptr = ::head_ic[i];
+			ASSERT(head_ic_ptr->polyh && ::AfxIsValidAddress(head_ic_ptr->polyh, sizeof(Polyhedron)));
+			if (i == 0 && defaultZone == *head_ic_ptr->polyh->Get_box())
 			{
 				// if the first zone is equivalent to the default headIC
 				// don't add it
-
-				// TODO: check for equivalance to default headIC
+				if (model.m_headIC == *head_ic_ptr)
+				{
+					continue;
+				}
 			}
-
 			CZoneCreateAction<CICHeadZoneActor>* pAction = new CZoneCreateAction<CICHeadZoneActor>(
 				this,
-				this->GetNextZoneName(),
-				head_ic_ptr->zone->x1,
-				head_ic_ptr->zone->x2,
-				head_ic_ptr->zone->y1,
-				head_ic_ptr->zone->y2,
-				head_ic_ptr->zone->z1,
-				head_ic_ptr->zone->z2,
+				head_ic_ptr->polyh,
 				NULL
 				);
 			pAction->GetZoneActor()->SetData(*head_ic_ptr);
@@ -2144,24 +2207,38 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 		for (int i = 0; i < ::count_chem_ic; ++i)
 		{
 			const struct chem_ic* chem_ic_ptr = ::chem_ic[i];
-
-			if (i == 0)
+			ASSERT(chem_ic_ptr->polyh && ::AfxIsValidAddress(chem_ic_ptr->polyh, sizeof(Polyhedron)));
+			if (i == 0 && defaultZone == *chem_ic_ptr->polyh->Get_box())
 			{
-				// if the first zone is equivalent to the default hechemICadIC
+				// if the first zone is equivalent to the default chemIC
 				// don't add it
-
-				// TODO: check for equivalance to default chemIC
+				if (model.m_chemIC == *chem_ic_ptr)
+				{
+					continue;
+				}
+				// check special case
+				//
+				CChemIC ic;
+				Cproperty::CopyProperty(&ic.solution, chem_ic_ptr->solution);
+				if (model.m_chemIC == ic)
+				{
+					CTreeCtrlNode nodeICChem = this->GetPropertyTreeControlBar()->GetICChemNode();
+					if (CICChemZoneActor *pZone = CICChemZoneActor::SafeDownCast((vtkObject*)nodeICChem.GetChildAt(0).GetData()))
+					{
+						if (CTreeCtrl *pTreeCtrl = this->GetPropertyTreeControlBar()->GetTreeCtrl())
+						{
+							CChemIC chemIC(*chem_ic_ptr);
+							CSetChemICAction* a = new CSetChemICAction(pZone, pTreeCtrl, chemIC, pZone->GetDesc());
+							a->Execute();
+							delete a;
+							continue;
+						}
+					}
+				}
 			}
-
 			CZoneCreateAction<CICChemZoneActor>* pAction = new CZoneCreateAction<CICChemZoneActor>(
 				this,
-				this->GetNextZoneName(),
-				chem_ic_ptr->zone->x1,
-				chem_ic_ptr->zone->x2,
-				chem_ic_ptr->zone->y1,
-				chem_ic_ptr->zone->y2,
-				chem_ic_ptr->zone->z1,
-				chem_ic_ptr->zone->z2,
+				chem_ic_ptr->polyh,
 				NULL
 				);
 			pAction->GetZoneActor()->SetData(*chem_ic_ptr);
@@ -2659,21 +2736,17 @@ void CWPhastDoc::New(const CNewModel& model)
 	//
 	CZone zone;
 	this->m_pGridActor->GetDefaultZone(zone);
+	Cube cube(&zone);
 
 	// default media
 	//
 	CZoneCreateAction<CMediaZoneActor>* pMediaAction = new CZoneCreateAction<CMediaZoneActor>(
 		this,
 		"Default",
-		zone.x1,
-		zone.x2,
-		zone.y1,
-		zone.y2,
-		zone.z1,
-		zone.z2,
+		&cube,
 		NULL
 		);
-	pMediaAction->GetZoneActor()->SetGridElt(model.m_media);
+	pMediaAction->GetZoneActor()->SetData(model.m_media);
 	pMediaAction->GetZoneActor()->SetDefault(true);
 	pMediaAction->Execute();
 	delete pMediaAction;
@@ -2683,12 +2756,7 @@ void CWPhastDoc::New(const CNewModel& model)
 	CZoneCreateAction<CICHeadZoneActor>* pICHeadAction = new CZoneCreateAction<CICHeadZoneActor>(
 		this,
 		"Default",
-		zone.x1,
-		zone.x2,
-		zone.y1,
-		zone.y2,
-		zone.z1,
-		zone.z2,
+		&cube,
 		NULL
 		);
 	pICHeadAction->GetZoneActor()->SetData(model.m_headIC);
@@ -2700,12 +2768,7 @@ void CWPhastDoc::New(const CNewModel& model)
 	CZoneCreateAction<CICChemZoneActor>* pChemICAction = new CZoneCreateAction<CICChemZoneActor>(
 		this,
 		"Default",
-		zone.x1,
-		zone.x2,
-		zone.y1,
-		zone.y2,
-		zone.z1,
-		zone.z2,
+		&cube,
 		NULL
 		);
 	pChemICAction->GetZoneActor()->SetData(model.m_chemIC);
@@ -3487,29 +3550,38 @@ void CWPhastDoc::InternalAdd(CZoneActor *pZoneActor, bool bAdd, HTREEITEM hInser
 		}
 	}
 
-	// foreach view
-	//
-	POSITION pos = this->GetFirstViewPosition();
-	while (pos != NULL)
+// COMMENT: {3/20/2008 4:07:21 PM}	// foreach view
+// COMMENT: {3/20/2008 4:07:21 PM}	//
+// COMMENT: {3/20/2008 4:07:21 PM}	POSITION pos = this->GetFirstViewPosition();
+// COMMENT: {3/20/2008 4:07:21 PM}	while (pos != NULL)
+// COMMENT: {3/20/2008 4:07:21 PM}	{
+// COMMENT: {3/20/2008 4:07:21 PM}		CView *pView = this->GetNextView(pos);
+// COMMENT: {3/20/2008 4:07:21 PM}		if (CWPhastView *pWPhastView = static_cast<CWPhastView*>(pView))
+// COMMENT: {3/20/2008 4:07:21 PM}		{
+// COMMENT: {3/20/2008 4:07:21 PM}			ASSERT_KINDOF(CWPhastView, pWPhastView);
+// COMMENT: {3/20/2008 4:07:21 PM}			ASSERT_VALID(pWPhastView);
+// COMMENT: {3/20/2008 4:07:21 PM}
+// COMMENT: {3/20/2008 4:07:21 PM}			// set selection bounding box
+// COMMENT: {3/20/2008 4:07:21 PM}			//
+// COMMENT: {3/20/2008 4:07:21 PM}			pZoneActor->Select(pWPhastView);
+// COMMENT: {3/20/2008 4:07:21 PM}
+// COMMENT: {3/20/2008 4:07:21 PM}			// Update BoxPropertiesDialogBar
+// COMMENT: {3/20/2008 4:07:21 PM}			//
+// COMMENT: {3/20/2008 4:07:21 PM}			if (CBoxPropertiesDialogBar* pBar = static_cast<CBoxPropertiesDialogBar*>(  ((CFrameWnd*)::AfxGetMainWnd())->GetControlBar(IDW_CONTROLBAR_BOXPROPS) ) )
+// COMMENT: {3/20/2008 4:07:21 PM}			{
+// COMMENT: {3/20/2008 4:07:21 PM}				pBar->Set(pWPhastView, pZoneActor, this->GetUnits());
+// COMMENT: {3/20/2008 4:07:21 PM}			}
+// COMMENT: {3/20/2008 4:07:21 PM}		}
+// COMMENT: {3/20/2008 4:07:21 PM}	}
+	if (bAdd)
 	{
-		CView *pView = this->GetNextView(pos);
-		if (CWPhastView *pWPhastView = static_cast<CWPhastView*>(pView))
-		{
-			ASSERT_KINDOF(CWPhastView, pWPhastView);
-			ASSERT_VALID(pWPhastView);
-
-			// set selection bounding box
-			//
-			pZoneActor->Select(pWPhastView);
-
-			// Update BoxPropertiesDialogBar
-			//
-			if (CBoxPropertiesDialogBar* pBar = static_cast<CBoxPropertiesDialogBar*>(  ((CFrameWnd*)::AfxGetMainWnd())->GetControlBar(IDW_CONTROLBAR_BOXPROPS) ) )
-			{
-				pBar->Set(pWPhastView, pZoneActor, this->GetUnits());
-			}
-		}
+		this->Notify(0, WPN_SELCHANGED, 0, pZoneActor);
 	}
+	else
+	{
+		this->Notify(0, WPN_SELCHANGED, 0, 0);
+	}
+
 
 	// render
 	//
@@ -3738,8 +3810,10 @@ void CWPhastDoc::UnRemove(CWellActor *pWellActor)
 
 void CWPhastDoc::Select(CZoneActor *pZoneActor)
 {	
+	TRACE("%s, in\n", __FUNCTION__);
 	ASSERT(pZoneActor && pZoneActor->IsA("CZoneActor"));
 	this->Notify(0, WPN_SELCHANGED, 0, pZoneActor);
+	TRACE("%s, out\n", __FUNCTION__);
 }
 
 void CWPhastDoc::Select(CWellActor *pWellActor)
@@ -4842,37 +4916,43 @@ void CWPhastDoc::NewZoneListener(vtkObject *caller, unsigned long eid, void *cli
 				{
 					CGridElt elt;
 					mediaProps.GetProperties(elt);
-					CMediaZoneActor::Create(self, zone, elt, mediaProps.GetDesc());
+					elt.polyh = new Cube(&zone);
+					CMediaZoneActor::Create(self, elt, mediaProps.GetDesc());
 				}
 				else if (newZone.GetType() == ID_ZONE_TYPE_BC_FLUX)
 				{
 					CBC bc;
 					fluxProps.GetProperties(bc);
-					CBCZoneActor::Create(self, zone, bc, fluxProps.GetDesc());
+					bc.polyh = new Cube(&zone);
+					CBCZoneActor::Create(self, bc, fluxProps.GetDesc());
 				}
 				else if (newZone.GetType() == ID_ZONE_TYPE_BC_LEAKY)
 				{
 					CBC bc;
 					leakyProps.GetProperties(bc);
-					CBCZoneActor::Create(self, zone, bc, leakyProps.GetDesc());
+					bc.polyh = new Cube(&zone);
+					CBCZoneActor::Create(self, bc, leakyProps.GetDesc());
 				}
 				else if (newZone.GetType() == ID_ZONE_TYPE_BC_SPECIFIED)
 				{
 					CBC bc;
 					specifiedProps.GetProperties(bc);
-					CBCZoneActor::Create(self, zone, bc, specifiedProps.GetDesc());
+					bc.polyh = new Cube(&zone);
+					CBCZoneActor::Create(self, bc, specifiedProps.GetDesc());
 				}
 				else if (newZone.GetType() == ID_ZONE_TYPE_IC_HEAD)
 				{
 					CHeadIC headic;
 					icHeadProps.GetProperties(headic);
-					CICHeadZoneActor::Create(self, zone, headic, icHeadProps.GetDesc());
+					headic.polyh = new Cube(&zone);
+					CICHeadZoneActor::Create(self, headic, icHeadProps.GetDesc());
 				}
 				else if (newZone.GetType() == ID_ZONE_TYPE_IC_CHEM)
 				{
 					CChemIC chemIC;
 					chemICProps.GetProperties(chemIC);
-					CICChemZoneActor::Create(self, zone, chemIC, chemICProps.GetDesc());
+					chemIC.polyh = new Cube(&zone);
+					CICChemZoneActor::Create(self, chemIC, chemICProps.GetDesc());
 				}
 			}
 
@@ -4915,13 +4995,21 @@ void CWPhastDoc::SetDisplayColors(const CDisplayColors& dc)
 	this->DisplayColors = dc;
 
 	CICChemZoneActor::SetStaticColor(this->DisplayColors.crICChem);
-	CBCZoneActor::SetStaticColor(FLUX, this->DisplayColors.crFlux);
+	CBCZoneActor::SetStaticColor(BC_info::BC_FLUX, this->DisplayColors.crFlux);
 	CICHeadZoneActor::SetStaticColor(this->DisplayColors.crICHead);
-	CBCZoneActor::SetStaticColor(LEAKY, this->DisplayColors.crLeaky);
+	CBCZoneActor::SetStaticColor(BC_info::BC_LEAKY, this->DisplayColors.crLeaky);
 	CMediaZoneActor::SetStaticColor(this->DisplayColors.crMedia);
 	CRiverActor::SetStaticColor(this->DisplayColors.crRiver);
-	CBCZoneActor::SetStaticColor(SPECIFIED, this->DisplayColors.crSpecHead);
+	CBCZoneActor::SetStaticColor(BC_info::BC_SPECIFIED, this->DisplayColors.crSpecHead);
 	CWellActor::SetStaticColor(this->DisplayColors.crWell);
+
+	POSITION pos = this->GetFirstViewPosition();
+	if (pos != NULL)
+	{
+		CWPhastView *pView = (CWPhastView*) GetNextView(pos);
+		ASSERT_VALID(pView);
+		pView->SetBackground(this->DisplayColors.crBackground);
+	}
 }
 
 CDisplayColors CWPhastDoc::GetDisplayColors()const
@@ -5029,9 +5117,11 @@ void CWPhastDoc::NewWedgeListener(vtkObject *caller, unsigned long eid, void *cl
 
 			TRACE("x(%g-%g) y(%g-%g) z(%g-%g)\n", zone.x1, zone.x2, zone.y1, zone.y2, zone.z1, zone.z2);
 
+			srcWedgeSource::ChopType ct = self->NewWedgeWidget->GetChopType();
+
 			// get type of zone
 			//
-			ETSLayoutPropertySheet        sheet("Zone Wizard", NULL, 0, NULL, false);
+			ETSLayoutPropertySheet        sheet("Wedge Wizard", NULL, 0, NULL, false);
 
 			CNewZonePropertyPage          newZone;
 			CMediaSpreadPropertyPage      mediaProps;
@@ -5066,37 +5156,43 @@ void CWPhastDoc::NewWedgeListener(vtkObject *caller, unsigned long eid, void *cl
 				{
 					CGridElt elt;
 					mediaProps.GetProperties(elt);
-					CMediaZoneActor::Create(self, zone, elt, mediaProps.GetDesc());
+					elt.polyh = new Wedge(&zone, srcWedgeSource::GetWedgeOrientationString(ct));
+					CMediaZoneActor::Create(self, elt, mediaProps.GetDesc());
 				}
 				else if (newZone.GetType() == ID_ZONE_TYPE_BC_FLUX)
 				{
 					CBC bc;
 					fluxProps.GetProperties(bc);
-					CBCZoneActor::Create(self, zone, bc, fluxProps.GetDesc());
+					bc.polyh = new Wedge(&zone, srcWedgeSource::GetWedgeOrientationString(ct));
+					CBCZoneActor::Create(self, bc, fluxProps.GetDesc());
 				}
 				else if (newZone.GetType() == ID_ZONE_TYPE_BC_LEAKY)
 				{
 					CBC bc;
 					leakyProps.GetProperties(bc);
-					CBCZoneActor::Create(self, zone, bc, leakyProps.GetDesc());
+					bc.polyh = new Wedge(&zone, srcWedgeSource::GetWedgeOrientationString(ct));
+					CBCZoneActor::Create(self, bc, leakyProps.GetDesc());
 				}
 				else if (newZone.GetType() == ID_ZONE_TYPE_BC_SPECIFIED)
 				{
 					CBC bc;
 					specifiedProps.GetProperties(bc);
-					CBCZoneActor::Create(self, zone, bc, specifiedProps.GetDesc());
+					bc.polyh = new Wedge(&zone, srcWedgeSource::GetWedgeOrientationString(ct));
+					CBCZoneActor::Create(self, bc, specifiedProps.GetDesc());
 				}
 				else if (newZone.GetType() == ID_ZONE_TYPE_IC_HEAD)
 				{
 					CHeadIC headic;
 					icHeadProps.GetProperties(headic);
-					CICHeadZoneActor::Create(self, zone, headic, icHeadProps.GetDesc());
+					headic.polyh = new Wedge(&zone, srcWedgeSource::GetWedgeOrientationString(ct));
+					CICHeadZoneActor::Create(self, headic, icHeadProps.GetDesc());
 				}
 				else if (newZone.GetType() == ID_ZONE_TYPE_IC_CHEM)
 				{
 					CChemIC chemIC;
 					chemICProps.GetProperties(chemIC);
-					CICChemZoneActor::Create(self, zone, chemIC, chemICProps.GetDesc());
+					chemIC.polyh = new Wedge(&zone, srcWedgeSource::GetWedgeOrientationString(ct));
+					CICChemZoneActor::Create(self, chemIC, chemICProps.GetDesc());
 				}
 			}
 

@@ -42,6 +42,8 @@ public:
 	static void ReadList(hid_t loc_id, const char *name, std::list<std::string> &rlist);
 	static void WriteList(hid_t loc_id, const char *name, std::list<LPCTSTR> &rlist);
 	static herr_t HDFSerialize(bool bStoring, hid_t loc_id, const char* szName, hid_t mem_type_id, hsize_t count, void* buf);
+	static herr_t HDFSerializeSafe(bool bStoring, hid_t loc_id, const char* szName, hid_t mem_type_id, hsize_t count, void* buf);
+
 	static herr_t HDFSerializeWithSize(bool bStoring, hid_t loc_id, const char* szName, hid_t mem_type_id, hsize_t& count, void* buf);
 	static bool IsValidTransform(vtkTransform* pTransform);
 	static void EnableFace(CDataExchange* pDX, BOOL bEnable);
@@ -110,6 +112,11 @@ public:
 	static std::string GetStdLengthUnitsDenom(const char* unit);
 
 	static int ExtractXMLStream(std::istream &is, std::iostream &ios);
+
+	static void Serialize(Polyhedron **p, CArchive &ar);
+#ifdef _DEBUG
+	static void Dump(CDumpContext& dc, Polyhedron& p);
+#endif
 };
 
 template<typename T>

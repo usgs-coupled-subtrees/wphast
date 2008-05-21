@@ -11,29 +11,14 @@
 
 #include <math.h>
 
-// COMMENT: {2/29/2008 8:04:04 PM}#define CHOP_MIN_X_MAX_Y
-// COMMENT: {3/3/2008 2:42:26 PM}#define CHOP_MAX_X_MAX_Y
-// COMMENT: {3/5/2008 9:44:58 PM}#define CHOP_MAX_X_MIN_Y
-// COMMENT: {3/4/2008 8:58:29 PM}#define CHOP_MIN_X_MIN_Y
-
-// COMMENT: {2/29/2008 9:17:56 PM}#define CHOP_MIN_X_MAX_Z
-// COMMENT: {2/29/2008 9:29:38 PM}#define CHOP_MAX_X_MAX_Z
-// COMMENT: {2/29/2008 9:39:14 PM}#define CHOP_MAX_X_MIN_Z
-// COMMENT: {2/29/2008 10:23:55 PM}#define CHOP_MIN_X_MIN_Z
-
-// COMMENT: {2/29/2008 10:33:34 PM}#define CHOP_MAX_Y_MIN_Z
-// COMMENT: {2/29/2008 10:46:47 PM}#define CHOP_MAX_Y_MAX_Z
-// COMMENT: {2/29/2008 11:16:27 PM}#define CHOP_MIN_Y_MAX_Z
-// COMMENT: {3/3/2008 2:20:46 PM}#define CHOP_MIN_Y_MIN_Z
-
 #define SKIP_NORMALS
 #define SKIP_TCOORDS
 
 vtkCxxRevisionMacro(srcWedgeSource, "$Revision: 1.48 $");
 vtkStandardNewMacro(srcWedgeSource);
 
-srcWedgeSource::srcWedgeSource(float xL, float yL, float zL)
-: ChopType(CHOP_NONE)
+srcWedgeSource::srcWedgeSource(float xL, float yL, float zL, enum srcWedgeSource::tagChopType n /*=srcWedgeSource::CHOP_NONE*/ )
+: chopType(n)
 {
   this->XLength = fabs(xL);
   this->YLength = fabs(yL);
@@ -42,6 +27,8 @@ srcWedgeSource::srcWedgeSource(float xL, float yL, float zL)
   this->Center[0] = 0.0;
   this->Center[1] = 0.0;
   this->Center[2] = 0.0;
+
+  ASSERT(srcWedgeSource::CHOP_NONE <= chopType && chopType <= srcWedgeSource::CHOP_MIN_Y_MIN_Z);
 }
 
 void srcWedgeSource::Execute()
@@ -68,9 +55,6 @@ void srcWedgeSource::Execute()
 //
   newPoints = vtkPoints::New();
   newPoints->Allocate(numPts);
-// COMMENT: {2/28/2008 7:53:39 PM}  //{{
-// COMMENT: {2/28/2008 7:53:39 PM}  newPoints->Allocate(8);
-// COMMENT: {2/28/2008 7:53:39 PM}  //}}
 #ifdef SKIP_NORMALS
   newNormals = vtkFloatArray::New();
   newNormals->SetNumberOfComponents(3);
@@ -130,7 +114,7 @@ void srcWedgeSource::Execute()
 		*/
 
 		float save;
-		switch (this->ChopType)
+		switch (this->chopType)
 		{
 		case CHOP_NONE:
 			// do nothing
@@ -266,7 +250,7 @@ void srcWedgeSource::Execute()
         newNormals->InsertNextTuple(n);
 #endif // SKIP_NORMALS
 
-		switch (this->ChopType)
+		switch (this->chopType)
 		{
 		case CHOP_NONE:
 			// do nothing
@@ -388,7 +372,7 @@ void srcWedgeSource::Execute()
 		*/
 
 		float save;
-		switch (this->ChopType)
+		switch (this->chopType)
 		{
 		case CHOP_NONE:
 			// do nothing
@@ -524,7 +508,7 @@ void srcWedgeSource::Execute()
         newNormals->InsertNextTuple(n);
 #endif // SKIP_NORMALS
 
-		switch (this->ChopType)
+		switch (this->chopType)
 		{
 		case CHOP_NONE:
 			// do nothing
@@ -645,7 +629,7 @@ void srcWedgeSource::Execute()
 		*/
 		// x=k y=j z=i 
 		float save;
-		switch (this->ChopType)
+		switch (this->chopType)
 		{
 		case CHOP_NONE:
 			// do nothing
@@ -781,7 +765,7 @@ void srcWedgeSource::Execute()
         newNormals->InsertNextTuple(n);
 #endif // SKIP_NORMALS
 
-		switch (this->ChopType)
+		switch (this->chopType)
 		{
 		case CHOP_NONE:
 			// do nothing
@@ -934,7 +918,7 @@ void srcWedgeSource::PrintSelf(ostream& os, vtkIndent indent)
   os << indent << "Z Length: " << this->ZLength << "\n";
   os << indent << "Center: (" << this->Center[0] << ", " 
                << this->Center[1] << ", " << this->Center[2] << ")\n";
-  switch (this->ChopType)
+  switch (this->chopType)
   {
   case srcWedgeSource::CHOP_NONE:
 	  os << indent << "CHOP_NONE" << "\n";
@@ -982,16 +966,191 @@ void srcWedgeSource::PrintSelf(ostream& os, vtkIndent indent)
   }
 }
 
-enum srcWedgeSource::ChopType srcWedgeSource::GetChopType()const
+srcWedgeSource::ChopType srcWedgeSource::GetChopType()const
 {
-	return this->ChopType;
+	ASSERT((srcWedgeSource::CHOP_NONE <= this->chopType) && (this->chopType <= srcWedgeSource::CHOP_MIN_Y_MIN_Z));
+	return this->chopType;
 }
 
-void srcWedgeSource::SetChopType(enum srcWedgeSource::ChopType t)
+void srcWedgeSource::SetChopType(srcWedgeSource::ChopType t)
 {
-	if (this->ChopType != t)
+	ASSERT(srcWedgeSource::CHOP_NONE <= t && t <= srcWedgeSource::CHOP_MIN_Y_MIN_Z);
+	if (this->chopType != t)
 	{
-		this->ChopType = t;
+		this->chopType = t;
 		this->Modified();
 	}
+}
+
+Wedge::WEDGE_ORIENTATION srcWedgeSource::ConvertChopType(srcWedgeSource::ChopType t)
+{
+	Wedge::WEDGE_ORIENTATION o;
+	switch (t)
+	{
+	case CHOP_NONE:
+		o = Wedge::WEDGE_ERROR;
+		break;
+
+	// fixed z
+	case CHOP_MIN_X_MAX_Y:
+		//o = Z2;
+		o = Wedge::Z4;
+		break;
+	case CHOP_MAX_X_MAX_Y:
+		o = Wedge::Z1;
+		break;
+	case CHOP_MAX_X_MIN_Y:  
+		//o = Z4;
+		o = Wedge::Z2;
+		break;
+	case CHOP_MIN_X_MIN_Y:
+		o = Wedge::Z3;
+		break;
+
+	// fixed y
+	case CHOP_MIN_X_MAX_Z:
+		o = Wedge::Y2;
+		break;
+	case CHOP_MAX_X_MAX_Z:
+		o = Wedge::Y1;
+		break;
+	case CHOP_MAX_X_MIN_Z:
+		o = Wedge::Y4;
+		break;
+	case CHOP_MIN_X_MIN_Z:
+		o = Wedge::Y3;
+		break;
+
+	// fixed x
+	case CHOP_MAX_Y_MIN_Z:
+		o = Wedge::X2;
+		break;
+	case CHOP_MAX_Y_MAX_Z:
+		o = Wedge::X1;
+		break;
+	case CHOP_MIN_Y_MAX_Z:
+		o = Wedge::X4;
+		break;
+	case CHOP_MIN_Y_MIN_Z:
+		o = Wedge::X3;
+		break;
+	default:
+		ASSERT(FALSE);
+ 	}
+	return o;
+}
+
+srcWedgeSource::ChopType srcWedgeSource::ConvertWedgeOrientation(Wedge::WEDGE_ORIENTATION o)
+{
+	srcWedgeSource::ChopType t;
+	switch (o)
+	{
+	case Wedge::WEDGE_ERROR:
+		t = CHOP_NONE;
+		break;
+
+	// fixed z
+	case Wedge::Z4:
+		t = CHOP_MIN_X_MAX_Y;
+		break;
+	case Wedge::Z1:
+		t = CHOP_MAX_X_MAX_Y;
+		break;
+	case Wedge::Z2:  
+		t = CHOP_MAX_X_MIN_Y;
+		break;
+	case Wedge::Z3:
+		t = CHOP_MIN_X_MIN_Y;
+		break;
+
+	// fixed y
+	case Wedge::Y2:
+		t = CHOP_MIN_X_MAX_Z;
+		break;
+	case Wedge::Y1:
+		t = CHOP_MAX_X_MAX_Z;
+		break;
+	case Wedge::Y4:
+		t = CHOP_MAX_X_MIN_Z;
+		break;
+	case Wedge::Y3:
+		t = CHOP_MIN_X_MIN_Z;
+		break;
+
+	// fixed x
+	case Wedge::X2:
+		t = CHOP_MAX_Y_MIN_Z;
+		break;
+	case Wedge::X1:
+		t = CHOP_MAX_Y_MAX_Z;
+		break;
+	case Wedge::X4:
+		t = CHOP_MIN_Y_MAX_Z;
+		break;
+	case Wedge::X3:
+		t = CHOP_MIN_Y_MIN_Z;
+		break;
+
+	default:
+		ASSERT(FALSE);
+ 	}
+	return t;
+}
+
+std::string srcWedgeSource::GetWedgeOrientationString(Wedge::WEDGE_ORIENTATION o)
+{
+	std::string t;
+	switch (o)
+	{
+	// fixed z
+	case Wedge::Z4:		
+		t = "Z4";
+		break;
+	case Wedge::Z1:
+		t = "Z1";
+		break;
+	case Wedge::Z2:  
+		t = "Z2";
+		break;
+	case Wedge::Z3:
+		t = "Z3";
+		break;
+
+	// fixed y
+	case Wedge::Y2:
+		t = "Y2";
+		break;
+	case Wedge::Y1:
+		t = "Y1";
+		break;
+	case Wedge::Y4:
+		t = "Y4";
+		break;
+	case Wedge::Y3:
+		t = "Y3";
+		break;
+
+	// fixed x
+	case Wedge::X2:
+		t = "X2";
+		break;
+	case Wedge::X1:
+		t = "X1";
+		break;
+	case Wedge::X4:
+		t = "X4";
+		break;
+	case Wedge::X3:
+		t = "X3";
+		break;
+
+	default:
+		ASSERT(FALSE);
+ 	}
+	return t;
+}
+
+std::string srcWedgeSource::GetWedgeOrientationString(srcWedgeSource::ChopType ct)
+{
+	return srcWedgeSource::GetWedgeOrientationString(srcWedgeSource::ConvertChopType(ct));
 }

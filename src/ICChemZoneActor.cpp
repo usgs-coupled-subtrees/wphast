@@ -12,6 +12,7 @@
 #include "SetChemICAction.h"
 #include "ZoneCreateAction.h"
 #include "FlowOnly.h"
+#include "Protect.h"
 
 #include <vtkObjectFactory.h> // reqd by vtkStandardNewMacro
 #include <vtkPropAssembly.h>
@@ -22,28 +23,34 @@ vtkStandardNewMacro(CICChemZoneActor);
 const char CICChemZoneActor::szHeading[] = "ICChem";
 vtkFloatingPointType CICChemZoneActor::s_color[3] = {0., 0., 0.};
 vtkProperty* CICChemZoneActor::s_Property = 0;
+vtkProperty* CICChemZoneActor::s_OutlineProperty = 0;
+
+// Note: No header files should follow the following three lines
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#endif
 
 CICChemZoneActor::CICChemZoneActor(void)
 {
-	static StaticInit init; // constructs/destructs s_Property
+	static StaticInit init; // constructs/destructs s_Property/s_OutlineProperty
+
+	// cube
 	this->CubeActor->SetProperty(CICChemZoneActor::s_Property);
+
+	// outline
+	this->OutlineActor->SetProperty(CICChemZoneActor::s_OutlineProperty);
 }
 
 CICChemZoneActor::~CICChemZoneActor(void)
 {
 }
 
-void CICChemZoneActor::Create(CWPhastDoc* pWPhastDoc, const CZone& zone, const CChemIC& chemIC, LPCTSTR desc)
+void CICChemZoneActor::Create(CWPhastDoc* pWPhastDoc, const CChemIC& chemIC, LPCTSTR desc)
 {
+	ASSERT(chemIC.polyh && ::AfxIsValidAddress(chemIC.polyh, sizeof(Polyhedron)));
 	CZoneCreateAction<CICChemZoneActor>* pAction = new CZoneCreateAction<CICChemZoneActor>(
 		pWPhastDoc,
-		pWPhastDoc->GetNextZoneName(),
-		zone.x1,
-		zone.x2,
-		zone.y1,
-		zone.y2,
-		zone.z1,
-		zone.z2,
+		chemIC.polyh,
 		desc
 		);
 	pAction->GetZoneActor()->SetData(chemIC);
@@ -52,23 +59,13 @@ void CICChemZoneActor::Create(CWPhastDoc* pWPhastDoc, const CZone& zone, const C
 
 CChemIC CICChemZoneActor::GetData(void)const
 {
-	CChemIC chemIC(this->m_chemIC);
-
-	ASSERT(this->m_pZone != 0);
-	ASSERT(this->m_chemIC.zone == 0);
-	chemIC.zone = new CZone(*this->m_pZone);
-
-	return chemIC;
+	return this->m_chemIC;
 }
 
 void CICChemZoneActor::SetData(const CChemIC& chemIC)
 {
+	CProtect p(this->m_chemIC.polyh);
 	this->m_chemIC = chemIC;
-	if (this->m_chemIC.zone != 0)
-	{
-		delete this->m_chemIC.zone;
-		this->m_chemIC.zone = 0;
-	}
 }
 
 void CICChemZoneActor::Insert(CPropertyTreeControlBar* pTreeControlBar, HTREEITEM hInsertAfter)
@@ -145,30 +142,14 @@ void CICChemZoneActor::Serialize(bool bStoring, hid_t loc_id, const CUnits& unit
 	if (bStoring)
 	{
 		// store chem_ic
-		ASSERT(this->m_chemIC.zone == 0);
-		ASSERT(this->m_pZone != 0);
-		this->m_chemIC.zone = this->m_pZone;
 		this->m_chemIC.Serialize(bStoring, loc_id);
-		this->m_chemIC.zone = 0;
 	}
 	else
 	{
 		// load chem_ic
-		ASSERT(this->m_chemIC.zone == 0);
-		ASSERT(this->m_pZone != 0);
-		this->m_chemIC.zone = this->m_pZone;
 		this->m_chemIC.Serialize(bStoring, loc_id);
-		this->m_pZone = this->m_chemIC.zone;
-		this->m_chemIC.zone = 0;
 
 		this->SetUnits(units);
-
-		// color
-		//
-		if (CICChemZoneActor::s_Property)
-		{
-			this->CubeActor->SetProperty(CICChemZoneActor::s_Property);
-		}
 	}
 }
 
@@ -240,5 +221,16 @@ void CICChemZoneActor::SetStaticColor(COLORREF cr)
 	if (CICChemZoneActor::s_Property)
 	{
 		CICChemZoneActor::s_Property->SetColor(CICChemZoneActor::s_color);
+	}	
+	if (CICChemZoneActor::s_OutlineProperty)
+	{
+		CICChemZoneActor::s_OutlineProperty->SetColor(CICChemZoneActor::s_color);
+		CICChemZoneActor::s_OutlineProperty->SetEdgeColor(CICChemZoneActor::s_color);	
+		CICChemZoneActor::s_OutlineProperty->SetAmbientColor(CICChemZoneActor::s_color);
 	}
+}
+
+Polyhedron*& CICChemZoneActor::GetPolyhedron(void)
+{
+	return this->m_chemIC.polyh;
 }

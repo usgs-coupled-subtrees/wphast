@@ -67,6 +67,12 @@
 #include <vtkBoxWidget.h>
 #include <vtkPropAssembly.h>
 
+// Note: No header files should follow the following three lines
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#endif
+
+
 //static const TCHAR szPeriodFormat[]        = _T("Simulation Period %d");
 static const TCHAR szFLOW_ONLY[]           = _T("SOLUTE_TRANSPORT");
 static const TCHAR szSTEADY_FLOW[]         = _T("STEADY_FLOW");
@@ -101,7 +107,7 @@ BEGIN_MESSAGE_MAP(CPropertyTreeControlBar, CSizingControlBarCFVS7)
 	ON_NOTIFY(TVN_KEYDOWN, IDC_PROPERTY_TREE, OnKeyDown)
 	ON_NOTIFY(TVN_BEGINDRAG, IDC_PROPERTY_TREE, OnBeginDrag)
 	ON_WM_DESTROY()
-	ON_WM_LBUTTONDOWN()
+// COMMENT: {4/7/2008 10:30:33 PM}	ON_WM_LBUTTONDOWN()
 	ON_WM_CONTEXTMENU()
 	ON_UPDATE_COMMAND_UI(ID_EDIT_COPY, OnUpdateEditCopy)
 	ON_COMMAND(ID_EDIT_COPY, OnEditCopy)
@@ -150,10 +156,10 @@ CPropertyTreeControlBar::CPropertyTreeControlBar(void)
 
 	this->m_cfPID     = (CLIPFORMAT)::RegisterClipboardFormat(str);
 
-	ASSERT(CGridElt::clipFormat >= 0xC000);
-	ASSERT(CHeadIC::clipFormat >= 0xC000);
-	ASSERT(CChemIC::clipFormat >= 0xC000);
-	ASSERT(CBC::clipFormat >= 0xC000);
+	ASSERT(CGridElt::clipFormat   >= 0xC000);
+	ASSERT(CHeadIC::clipFormat    >= 0xC000);
+	ASSERT(CChemIC::clipFormat    >= 0xC000);
+	ASSERT(CBC::clipFormat        >= 0xC000);
 	ASSERT(CZoneActor::clipFormat >= 0xC000);
 }
 
@@ -1410,34 +1416,14 @@ void CPropertyTreeControlBar::OnKeyDown(NMHDR* pNMHDR, LRESULT* pResult)
 void CPropertyTreeControlBar::OnLButtonDown(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
-
-	// Note: NOT called when mouse down occurs inside treectrl
-	//{{HACK
-	// If creating a new zone cancel now 
-	{
-		CFrameWnd *pFrame = (CFrameWnd*)AfxGetApp()->m_pMainWnd;
-		ASSERT_VALID(pFrame);
-
-		CWPhastDoc* pDoc = reinterpret_cast<CWPhastDoc*>(pFrame->GetActiveDocument());
-		ASSERT_VALID(pDoc);
-
-		POSITION pos = pDoc->GetFirstViewPosition();
-		while (pos != NULL) {
-			CWPhastView *pView = (CWPhastView*) pDoc->GetNextView(pos);
-			ASSERT_VALID(pView);
-			if (pView->CreatingNewZone()) {
-				pView->CancelNewZone();
-			}
-		}
-	}
-	//}}HACK
-
+	TRACE("CPropertyTreeControlBar::OnLButtonDown\n");
 	CSizingControlBarCFVS7::OnLButtonDown(nFlags, point);
 }
 
 void CPropertyTreeControlBar::OnContextMenu(CWnd* /*pWnd*/, CPoint /*point*/)
 {
 	// TODO: Add your message handler code here
+	TRACE("CPropertyTreeControlBar::OnContextMenu\n");
 }
 
 void CPropertyTreeControlBar::ClearSelection(void)
@@ -2319,9 +2305,6 @@ bool CPropertyTreeControlBar::IsNodePasteableRiver(CTreeCtrlNode pasteNode, bool
 	return false;
 }
 
-// COMMENT: {4/11/2006 6:55:07 PM}template<typename ZT, typename DT>
-// COMMENT: {4/11/2006 6:55:07 PM}bool GetBCType(CWPhastDoc *pWPhastDoc, CZoneCreateAction<ZT>* pAction);
-
 template<typename ZT, typename DT>
 bool CPropertyTreeControlBar::IsNodePasteable(CTreeCtrlNode headNode, CTreeCtrlNode pasteNode, bool bDoPaste)
 {
@@ -2340,50 +2323,40 @@ bool CPropertyTreeControlBar::IsNodePasteable(CTreeCtrlNode headNode, CTreeCtrlN
 			CArchive ar(&globFile, CArchive::load);
 
 			DT data;
-			CZone zone;
 			if (type == DT::clipFormat)
 			{
-				//{{HACK
-				// all should be null or non-null
-				if (data.zone == NULL)
-				{
-					data.zone = new CZone();
-				}
-				//}}HACK
 				data.Serialize(ar);
-				zone = *data.zone;
 			}
 			else if (type == CGridElt::clipFormat)
 			{
 				CGridElt elt;
 				elt.Serialize(ar);
-				zone = *elt.zone;
+				data.polyh = elt.polyh->clone();
 			}
 			else if (type == CHeadIC::clipFormat)
 			{
 				CHeadIC headIC;
-				headIC.zone = new CZone();
 				headIC.Serialize(ar);
-				zone = *headIC.zone;
+				data.polyh = headIC.polyh->clone();
 			}
 			else if (type == CChemIC::clipFormat)
 			{
 				CChemIC chemIC;
-				chemIC.zone = new CZone();
 				chemIC.Serialize(ar);
-				zone = *chemIC.zone;
+				data.polyh = chemIC.polyh->clone();
 			}
 			else if (type == CBC::clipFormat)
 			{
 				CBC bc;
 				bc.Serialize(ar);
-				zone = *bc.zone;
+				data.polyh = bc.polyh->clone();
 			}
 			else
 			{
 				ASSERT(FALSE);
 			}
 			ar.Close();
+			ASSERT(data.polyh && ::AfxIsValidAddress(data.polyh, sizeof(Polyhedron)));
 
 			if (CWPhastDoc *pWPhastDoc = this->GetDocument())
 			{
@@ -2410,15 +2383,10 @@ bool CPropertyTreeControlBar::IsNodePasteable(CTreeCtrlNode headNode, CTreeCtrlN
 					CArchive descArch(&descFile, CArchive::load);
 					descArch >> strDesc;
 				}
+				ASSERT(data.polyh && ::AfxIsValidAddress(data.polyh, sizeof(Polyhedron)));
 				CZoneCreateAction<ZT>* pAction = new CZoneCreateAction<ZT>(
 					pWPhastDoc,
-					pWPhastDoc->GetNextZoneName(),
-					zone.x1,
-					zone.x2,
-					zone.y1,
-					zone.y2,
-					zone.z1,
-					zone.z2,
+					data.polyh,
 					strDesc.IsEmpty() ? NULL : strDesc,
 					after
 					);
@@ -2456,18 +2424,7 @@ bool GetBCType<CBCZoneActor, CBC>(CWPhastDoc *pWPhastDoc, CZoneCreateAction<CBCZ
 	{
 		dlg.bc_type = data.bc_type;
 	}
-// COMMENT: {4/11/2006 9:53:05 PM}	::MessageBeep(-1);
-// COMMENT: {4/11/2006 9:53:05 PM}	::Sleep(500);
-// COMMENT: {4/11/2006 9:53:05 PM}	::MessageBeep(MB_ICONASTERISK);
-// COMMENT: {4/11/2006 9:53:05 PM}	::Sleep(500);
 	::MessageBeep(MB_ICONEXCLAMATION);
-// COMMENT: {4/11/2006 9:53:09 PM}	::Sleep(500);
-// COMMENT: {4/11/2006 9:53:09 PM}	::MessageBeep(MB_ICONHAND);
-// COMMENT: {4/11/2006 9:53:09 PM}	::Sleep(500);
-// COMMENT: {4/11/2006 9:53:09 PM}	::MessageBeep(MB_ICONQUESTION);
-// COMMENT: {4/11/2006 9:53:09 PM}	::Sleep(500);
-// COMMENT: {4/11/2006 9:53:09 PM}	::MessageBeep(MB_OK);	
-// COMMENT: {4/11/2006 9:53:09 PM}	::Sleep(500);
 	if (dlg.DoModal() != IDOK)
 	{
 		delete pAction;
@@ -2476,6 +2433,7 @@ bool GetBCType<CBCZoneActor, CBC>(CWPhastDoc *pWPhastDoc, CZoneCreateAction<CBCZ
 
 	CBC bc;
 	bc.bc_type = dlg.bc_type;    // SPECIFIED, FLUX, LEAKY
+	bc.polyh = data.polyh->clone();
 	if (cb_type == CBC::clipFormat)
 	{
 		if (bc.bc_type == data.bc_type)
@@ -2484,7 +2442,8 @@ bool GetBCType<CBCZoneActor, CBC>(CWPhastDoc *pWPhastDoc, CZoneCreateAction<CBCZ
 			bc = data;
 		}
 	}
-	ASSERT(bc.bc_type == SPECIFIED || bc.bc_type == FLUX || bc.bc_type == LEAKY);
+	ASSERT(bc.bc_type == BC_info::BC_SPECIFIED || bc.bc_type == BC_info::BC_FLUX || bc.bc_type == BC_info::BC_LEAKY);
+	ASSERT(bc.polyh && ::AfxIsValidAddress(bc.polyh, sizeof(Polyhedron)));
 	pAction->GetZoneActor()->SetData(bc);
 	pWPhastDoc->Execute(pAction);
 	return true;

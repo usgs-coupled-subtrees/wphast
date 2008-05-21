@@ -13,7 +13,7 @@
 IMPLEMENT_DYNAMIC(CBCTypeDialog, CDialog)
 CBCTypeDialog::CBCTypeDialog(CWnd* pParent /*=NULL*/)
 	: CDialog(CBCTypeDialog::IDD, pParent)
-	, bc_type(LEAKY)
+	, bc_type(BC_info::BC_LEAKY)
 {
 }
 
@@ -34,17 +34,17 @@ void CBCTypeDialog::DoDataExchange(CDataExchange* pDX)
 		switch (id)
 		{
 		case IDC_RADIO_LEAKY:
-			this->bc_type = LEAKY;
+			this->bc_type = BC_info::BC_LEAKY;
 			break;
 		case IDC_RADIO_HEAD:
-			this->bc_type = SPECIFIED;
+			this->bc_type = BC_info::BC_SPECIFIED;
 			break;
 		case IDC_RADIO_FLUX:
-			this->bc_type = FLUX;
+			this->bc_type = BC_info::BC_FLUX;
 			break;
 		default:
 			ASSERT(FALSE);
-			this->bc_type = LEAKY;
+			this->bc_type = BC_info::BC_LEAKY;
 		}
 	}
 	else
@@ -52,13 +52,13 @@ void CBCTypeDialog::DoDataExchange(CDataExchange* pDX)
 		int id;
 		switch (this->bc_type)
 		{
-		case LEAKY:
+		case BC_info::BC_LEAKY:
 			id = IDC_RADIO_LEAKY;
 			break;
-		case SPECIFIED:
+		case BC_info::BC_SPECIFIED:
 			id = IDC_RADIO_HEAD;
 			break;
-		case FLUX:
+		case BC_info::BC_FLUX:
 			id = IDC_RADIO_FLUX;
 			break;
 		default:

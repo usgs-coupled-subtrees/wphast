@@ -25,13 +25,13 @@ extern int dup_print(const char *ptr, int emphasis);
 extern int getopt (int argc, char * const *argv, const char *optstring);
 extern int get_option (const char **opt_list, int count_opt_list, char **next_char);
 // extern int error_msg (const char *err_str, const int stop);
-extern int free_check_null(void *ptr);
+extern void free_check_null(void *ptr);
 extern int grid_elt_free(struct grid_elt *grid_elt_ptr);
 extern int head_ic_free(struct head_ic *head_ic_ptr);
 // COMMENT: {2/23/2005 1:25:53 PM}extern int malloc_error(void);
 extern int property_free(struct property *property_ptr);
 extern int read_input(void);
-extern int replace(const char *str1, const char *str2, char *str);
+extern bool replace(const char *to_remove, const char *replacement, char *string_to_search);
 extern int river_free (River *river_ptr);
 extern int status(int count);
 extern char * string_duplicate (const char *token);
@@ -421,6 +421,7 @@ void GetDefaultMedia(struct grid_elt* p_grid_elt)
 	int i;
 
 	assert(p_grid_elt);
+	assert(p_grid_elt->active);
 	assert(p_grid_elt->porosity);
 	assert(p_grid_elt->kx);
 	assert(p_grid_elt->ky);
@@ -429,6 +430,13 @@ void GetDefaultMedia(struct grid_elt* p_grid_elt)
 	assert(p_grid_elt->alpha_long);
 	assert(p_grid_elt->alpha_horizontal);
 	assert(p_grid_elt->alpha_vertical);
+
+	/*
+	 * Active
+	 */
+	p_grid_elt->active->type = FIXED;
+	p_grid_elt->active->count_v = 1;
+	p_grid_elt->active->v[0] = 1;
 
 	for (i = 0; i < nxyz; i++) {
 		if (cells[i].is_element == FALSE) continue;
@@ -490,7 +498,7 @@ void GetDefaultMedia(struct grid_elt* p_grid_elt)
 }
 
 /* ---------------------------------------------------------------------- */
-void GetDefaultHeadIC(struct head_ic* p_head_ic)
+void GetDefaultHeadIC(struct Head_ic* p_head_ic)
 /* ---------------------------------------------------------------------- */
 {
 	extern struct cell *cells;
@@ -504,6 +512,7 @@ void GetDefaultHeadIC(struct head_ic* p_head_ic)
 	for (i = 0; i < nxyz; i++) {
 		if (cells[i].cell_active == FALSE) continue;
 
+		p_head_ic->ic_type = ZONE;
 /* 
  *   Head initial condition
  */
@@ -538,6 +547,56 @@ void GetDefaultChemIC(struct chem_ic* p_chem_ic)
 */
 			if (cells[i].ic_solution_defined == TRUE) {
 				p_chem_ic->solution->v[0] = cells[i].ic_solution.i1;
+#ifdef SAVE
+				if (cells[i].ic_equilibrium_phases_defined == TRUE)
+				{
+					p_chem_ic->equilibrium_phases->type = FIXED;
+					p_chem_ic->equilibrium_phases->count_v = 1;
+					p_chem_ic->equilibrium_phases->v[0] = cells[i].ic_equilibrium_phases.i1;
+				}
+				if (cells[i].ic_exchange_defined == TRUE)
+				{
+					p_chem_ic->exchange->type = FIXED;
+					p_chem_ic->exchange->count_v = 1;
+					p_chem_ic->exchange->v[0] = cells[i].ic_exchange.i1;
+				}
+				if (cells[i].ic_equilibrium_phases_defined == TRUE)
+				{
+					p_chem_ic->equilibrium_phases->type = FIXED;
+					p_chem_ic->equilibrium_phases->count_v = 1;
+					p_chem_ic->equilibrium_phases->v[0] = cells[i].ic_equilibrium_phases.i1;
+				}
+				if (cells[i].ic_exchange_defined == TRUE)
+				{
+					p_chem_ic->exchange->type = FIXED;
+					p_chem_ic->exchange->count_v = 1;
+					p_chem_ic->exchange->v[0] = cells[i].ic_exchange.i1;
+				}
+				if (cells[i].ic_surface_defined == TRUE)
+				{
+					p_chem_ic->surface->type = FIXED;
+					p_chem_ic->surface->count_v = 1;
+					p_chem_ic->surface->v[0] = cells[i].ic_surface.i1;
+				}
+				if (cells[i].ic_gas_phase_defined == TRUE)
+				{
+					p_chem_ic->gas_phase->type = FIXED;
+					p_chem_ic->gas_phase->count_v = 1;
+					p_chem_ic->gas_phase->v[0] = cells[i].ic_gas_phase.i1;
+				}
+				if (cells[i].ic_solid_solutions_defined == TRUE)
+				{
+					p_chem_ic->solid_solutions->type = FIXED;
+					p_chem_ic->solid_solutions->count_v = 1;
+					p_chem_ic->solid_solutions->v[0] = cells[i].ic_solid_solutions.i1;
+				}
+				if (cells[i].ic_kinetics_defined == TRUE)
+				{
+					p_chem_ic->kinetics->type = FIXED;
+					p_chem_ic->kinetics->count_v = 1;
+					p_chem_ic->kinetics->v[0] = cells[i].ic_kinetics.i1;
+				}
+#endif
 				break;
 			}
 		}

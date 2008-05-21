@@ -3,6 +3,7 @@
 
 #include "Zone.h"
 #include "property.h"
+#include "Global.h"
 #include <ostream> // std::ostream
 
 // Note: No header files should follow the following three lines
@@ -10,7 +11,7 @@
 #define new DEBUG_NEW
 #endif
 
-CLIPFORMAT CChemIC::clipFormat = (CLIPFORMAT)::RegisterClipboardFormat(_T("WPhast:CChemIC"));
+CLIPFORMAT CChemIC::clipFormat = (CLIPFORMAT)::RegisterClipboardFormat(_T("WPhast:CChemIC:2"));
 
 /* ---------------------------------------------------------------------- 
  *   chemistry initial conditions
@@ -27,7 +28,7 @@ CChemIC::~CChemIC(void)
 
 void CChemIC::InternalInit(void)
 {
-	this->zone               = 0;
+	this->polyh              = 0;
 	this->mask               = 0;
 
 	// cell chemistry ic
@@ -42,7 +43,7 @@ void CChemIC::InternalInit(void)
 
 void CChemIC::InternalDelete(void)
 {
-	delete static_cast<CZone*>(this->zone);
+	delete this->polyh;
 	delete static_cast<Cproperty*>(this->mask);
 
 	delete static_cast<Cproperty*>(this->solution);
@@ -61,18 +62,17 @@ CChemIC::CChemIC(const CChemIC& src) // copy ctor
 
 CChemIC::CChemIC(const struct chem_ic& src) // copy ctor
 {
+	ASSERT(src.polyh && ::AfxIsValidAddress(src.polyh, sizeof(Polyhedron)));
 	this->InternalCopy(src);
 }
 
 void CChemIC::InternalCopy(const struct chem_ic& src)
 {
-// COMMENT: {6/2/2004 8:50:14 PM}	ASSERT(src.zone != 0);
-// COMMENT: {6/2/2004 8:50:14 PM}	this->zone = new CZone(*src.zone);
-
-	// zone
-	this->zone = 0;
-	if (src.zone) {
-		this->zone = new CZone(*src.zone);
+	// polyh
+	this->polyh = 0;
+	if (src.polyh)
+	{
+		this->polyh = src.polyh->clone();
 	}
 
 	// mask
@@ -136,10 +136,10 @@ std::ostream& operator<< (std::ostream &os, const CChemIC &a)
 	os << "CHEMISTRY_IC\n";
 
 	// zone
-	os << static_cast<CZone>(*a.zone);
+	ASSERT(a.polyh && ::AfxIsValidAddress(a.polyh, sizeof(Polyhedron)));
+	os << (*a.polyh);
 
 	Cproperty* property_ptr;
-
 
 	// solution
 	property_ptr = static_cast<Cproperty*>(a.solution);
@@ -202,10 +202,6 @@ void CChemIC::Serialize(bool bStoring, hid_t loc_id)
 	static const char szSolidSolutions[]    = "solid_solutions";
 	static const char szKinetics[]          = "kinetics";
 
-	// zone
-	ASSERT(this->zone);
-	static_cast<CZone*>(this->zone)->Serialize(bStoring, loc_id);
-
 	if (bStoring)
 	{
 		Cproperty::SerializeCreate(szSolution,          static_cast<Cproperty*>(this->solution),           loc_id);
@@ -231,10 +227,10 @@ void CChemIC::Serialize(bool bStoring, hid_t loc_id)
 void CChemIC::Serialize(CArchive& ar)
 {
 	static const char szCChemIC[] = "CChemIC";
-	static int version = 1;
+	static int version = 2;
 
 	CString type;
-	int ver;
+	int ver = version;
 
 	// type and version header
 	//
@@ -261,9 +257,7 @@ void CChemIC::Serialize(CArchive& ar)
 	}
 
 	// zone
-	ASSERT(this->zone);
-	static_cast<CZone*>(this->zone)->Serialize(ar);
-
+	CGlobal::Serialize(&(this->polyh), ar);
 
 	// properties
 	static const char szSolution[]          = "solution";
@@ -324,8 +318,30 @@ CChemIC CChemIC::Full(void)
 {
 	CChemIC chemIC;
 
-	// solution (for now leave the remaining empty
-	chemIC.solution = new Cproperty();
+	chemIC.solution           = new Cproperty();
+	chemIC.equilibrium_phases = new Cproperty();
+	chemIC.exchange           = new Cproperty();
+	chemIC.surface            = new Cproperty();
+	chemIC.gas_phase          = new Cproperty();
+	chemIC.solid_solutions    = new Cproperty();
+	chemIC.kinetics           = new Cproperty();
 
 	return chemIC;
+}
+
+bool CChemIC::operator==(const struct chem_ic& rhs)const
+{
+	size_t s = sizeof(chem_ic);
+	ASSERT(sizeof(chem_ic) == 4); // need to modify if this changes
+
+	COMPARE_PROPERTY_MACRO(mask);
+	COMPARE_PROPERTY_MACRO(solution);
+	COMPARE_PROPERTY_MACRO(equilibrium_phases);
+	COMPARE_PROPERTY_MACRO(exchange);
+	COMPARE_PROPERTY_MACRO(surface);
+	COMPARE_PROPERTY_MACRO(gas_phase);
+	COMPARE_PROPERTY_MACRO(solid_solutions);
+	COMPARE_PROPERTY_MACRO(kinetics);
+
+	return true;
 }

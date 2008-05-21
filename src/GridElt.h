@@ -24,6 +24,8 @@ public:
 	// copy assignment
 	CGridElt& operator=(const CGridElt& rhs); 
 
+	bool operator==(const grid_elt& rhs)const;
+
 	static CGridElt NewDefaults(bool bFlowOnly = false);
 	static CGridElt Full(void);
 

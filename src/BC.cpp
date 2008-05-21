@@ -4,6 +4,8 @@
 #include "Zone.h"
 #include "property.h"
 #include "Global.h"
+#include "srcinput/Cube.h"
+#include "srcinput/BC_info.h"
 #include <ostream> // std::ostream
 
 // Note: No header files should follow the following three lines
@@ -11,7 +13,7 @@
 #define new DEBUG_NEW
 #endif
 
-CLIPFORMAT CBC::clipFormat = (CLIPFORMAT)::RegisterClipboardFormat(_T("WPhast:CBC"));
+CLIPFORMAT CBC::clipFormat = (CLIPFORMAT)::RegisterClipboardFormat(_T("WPhast:CBC:2"));
 
 CBC::CBC() // ctor
 {
@@ -23,14 +25,13 @@ CBC::~CBC() // dtor
 	this->InternalDelete();
 }
 
-void CBC::InternalCopy(const struct bc& src)
+void CBC::InternalCopy(const struct BC& src)
 {
-	// zone
-	if (src.zone) {
-		this->zone = new CZone(*src.zone);
-	}
-	else {
-		this->zone = 0;
+	this->polyh = 0;
+	if (src.polyh)
+	{
+		ASSERT(::AfxIsValidAddress(src.polyh, sizeof(Polyhedron)));
+		this->polyh = src.polyh->clone();
 	}
 
 	// mask
@@ -68,7 +69,7 @@ void CBC::InternalCopy(const struct bc& src)
 
 void CBC::InternalDelete(void)
 {
-	delete static_cast<CZone*>(this->zone);
+	delete this->polyh;
 	delete static_cast<Cproperty*>(this->mask);
 	this->m_bc_head.clear();
 	this->m_bc_flux.clear();
@@ -79,11 +80,11 @@ void CBC::InternalDelete(void)
 
 void CBC::InternalInit(void)
 {
-	this->zone             = 0;
+	this->polyh            = 0;
 
 	// boundary conditions
 	this->mask             = 0;
-	this->bc_type          = UNDEFINED;
+	this->bc_type          = BC_info::BC_UNDEFINED;
 	this->bc_head          = 0;
 	this->bc_flux          = 0;
 	this->bc_k             = 0;
@@ -97,7 +98,7 @@ void CBC::InternalInit(void)
 	ASSERT(this->m_bc_solution.empty());
 }
 
-CBC::CBC(const struct bc& src) // copy ctor
+CBC::CBC(const struct BC& src) // copy ctor
 {
 	this->InternalCopy(src);
 
@@ -151,9 +152,7 @@ CBC& CBC::operator=(const CBC& rhs) // copy assignment
 {
 	if (this != &rhs) {
 		this->InternalDelete();
-// COMMENT: {8/12/2004 7:45:57 PM}		this->InternalInit();
 		this->InternalCopy(rhs);
-		//{{
 		//
 		// copy time series
 		//
@@ -168,7 +167,6 @@ CBC& CBC::operator=(const CBC& rhs) // copy assignment
 		this->m_bc_head     = rhs.m_bc_head;
 		this->m_bc_flux     = rhs.m_bc_flux;
 		this->m_bc_solution = rhs.m_bc_solution;
-		//}}
 	}
 	return *this;
 }
@@ -183,18 +181,11 @@ void CBC::AssertValid(int nSim)const
 	ASSERT(this->bc_head     == NULL);
 	ASSERT(this->bc_solution == NULL);
 
-
-	// zone
-	if (this->zone)
-	{
-		static_cast<CZone*>(this->zone)->AssertValid();
-	}
-
 	// face_defined face
 
 	switch (this->bc_type)
 	{
-	case FLUX: // bc_solution bc_flux
+	case BC_info::BC_FLUX: // bc_solution bc_flux
 		ASSERT(this->face_defined == TRUE);
 		ASSERT(this->face == 0 || this->face == 1 || this->face == 2);
 		ASSERT(this->bc_head == 0);
@@ -227,7 +218,7 @@ void CBC::AssertValid(int nSim)const
 			}
 		}
 		break;
-	case LEAKY: // bc_thick bc_head bc_k bc_solution
+	case BC_info::BC_LEAKY: // bc_thick bc_head bc_k bc_solution
 		ASSERT(this->face_defined == TRUE);
 		ASSERT(this->face == 0 || this->face == 1 || this->face == 2);
 		ASSERT(this->bc_flux == 0);
@@ -268,7 +259,7 @@ void CBC::AssertValid(int nSim)const
 		}
 		break;
 
-	case SPECIFIED: // bc_head bc_solution
+	case BC_info::BC_SPECIFIED: // bc_head bc_solution
 		ASSERT(this->face_defined == FALSE);
 		ASSERT(this->bc_flux == 0);
 		ASSERT(this->bc_thick == 0);
@@ -298,7 +289,7 @@ void CBC::AssertValid(int nSim)const
 
 		break;
 
-	case UNDEFINED:
+	case BC_info::BC_UNDEFINED:
 		break;
 
 	default:
@@ -311,55 +302,51 @@ void CBC::Dump(CDumpContext& dc)const
 {
 	dc << "<CBC>\n";
 
-	// zone
-	//
-	if (this->zone) {
-		static_cast<CZone*>(this->zone)->Dump(dc);
-	}
-	else {
-		dc << "<zone>NULL</zone>\n";
-	}
-
 	// bc_type (UNDEFINED, SPECIFIED, FLUX, LEAKY)
 	//
 	dc << "<bc_type>\n";
-	switch (this->bc_type) {
-		case UNDEFINED:
-			dc << "UNDEFINED\n";
-			break;
-		case SPECIFIED:
-			dc << "SPECIFIED\n";
-			break;
-		case FLUX:
-			dc << "FLUX\n";
-			break;
-		case LEAKY:
-			dc << "LEAKY\n";
-			break;
-		default:
-			dc << "(bad type)\n";
-			break;
+	switch (this->bc_type)
+	{
+	case BC_info::BC_UNDEFINED:
+		dc << "UNDEFINED\n";
+		break;
+	case BC_info::BC_SPECIFIED:
+		dc << "SPECIFIED\n";
+		break;
+	case BC_info::BC_FLUX:
+		dc << "FLUX\n";
+		break;
+	case BC_info::BC_LEAKY:
+		dc << "LEAKY\n";
+		break;
+	default:
+		dc << "(bad type)\n";
+		break;
 	}
 	dc << "</bc_type>\n";
 
 	// face
 	//
-	if (this->face_defined) {
+	if (this->face_defined)
+	{
 		dc << "<face>";
 		dc << this->face;
 		dc << "</face>\n";
 	}
-	else {
+	else
+	{
 		dc << "<face>UNDEFINED</face>\n";
 	}
 
 	// bc_flux
 	//
 	dc << "<bc_flux>\n";
-	if (this->bc_flux) {
-// COMMENT: {2/23/2005 1:22:06 PM}		static_cast<Cproperty*>(this->bc_flux)->Dump(dc);
+	if (this->bc_flux)
+	{
+		///static_cast<Cproperty*>(this->bc_flux)->Dump(dc);
 	}
-	else {
+	else
+	{
 		dc << "(NULL)\n";
 	}
 	dc << "</bc_flux>\n";
@@ -367,10 +354,12 @@ void CBC::Dump(CDumpContext& dc)const
 	// bc_head
 	//
 	dc << "<bc_head>\n";
-	if (this->bc_head) {
-// COMMENT: {2/23/2005 1:22:12 PM}		static_cast<Cproperty*>(this->bc_head)->Dump(dc);
+	if (this->bc_head)
+	{
+		///static_cast<Cproperty*>(this->bc_head)->Dump(dc);
 	}
-	else {
+	else
+	{
 		dc << "(NULL)\n";
 	}
 	dc << "</bc_head>\n";
@@ -378,10 +367,12 @@ void CBC::Dump(CDumpContext& dc)const
 	// bc_k
 	//
 	dc << "<bc_k>\n";
-	if (this->bc_k) {
+	if (this->bc_k)
+	{
 		static_cast<Cproperty*>(this->bc_k)->Dump(dc);
 	}
-	else {
+	else
+	{
 		dc << "(NULL)\n";
 	}
 	dc << "</bc_k>\n";
@@ -389,7 +380,8 @@ void CBC::Dump(CDumpContext& dc)const
 	// bc_solution_type (UNDEFINED, FIXED, ASSOCIATED)
 	//
 	dc << "<bc_solution_type>\n";
-	switch (this->bc_solution_type) {
+	switch (this->bc_solution_type)
+	{
 		case UNDEFINED:
 			dc << "UNDEFINED\n";
 			break;
@@ -408,10 +400,12 @@ void CBC::Dump(CDumpContext& dc)const
 	// bc_solution
 	//
 	dc << "<bc_solution>\n";
-	if (this->bc_solution) {
-// COMMENT: {2/23/2005 1:22:17 PM}		static_cast<Cproperty*>(this->bc_solution)->Dump(dc);
+	if (this->bc_solution)
+	{
+		///static_cast<Cproperty*>(this->bc_solution)->Dump(dc);
 	}
-	else {
+	else
+	{
 		dc << "(NULL)\n";
 	}
 	dc << "</bc_solution>\n";
@@ -419,10 +413,12 @@ void CBC::Dump(CDumpContext& dc)const
 	// bc_thick
 	//
 	dc << "<bc_thick>\n";
-	if (this->bc_thick) {
+	if (this->bc_thick)
+	{
 		static_cast<Cproperty*>(this->bc_thick)->Dump(dc);
 	}
-	else {
+	else
+	{
 		dc << "(NULL)\n";
 	}
 	dc << "</bc_thick>\n";
@@ -430,10 +426,12 @@ void CBC::Dump(CDumpContext& dc)const
 	// bc_thick
 	//
 	dc << "<bc_k>\n";
-	if (this->bc_k) {
+	if (this->bc_k)
+	{
 		static_cast<Cproperty*>(this->bc_k)->Dump(dc);
 	}
-	else {
+	else
+	{
 		dc << "(NULL)\n";
 	}
 	dc << "</bc_k>\n";
@@ -457,14 +455,6 @@ void CBC::Serialize(bool bStoring, hid_t loc_id)
 
 	if (bStoring)
 	{
-#ifdef _DEBUG
-		static_cast<CZone*>(this->zone)->AssertValid();
-		// this->AssertValid();
-#endif
-
-		// zone
-		static_cast<CZone*>(this->zone)->Serialize(bStoring, loc_id);
-
 		// bc_type
 		status = CGlobal::HDFSerialize(bStoring, loc_id, szType, H5T_NATIVE_INT, 1, &this->bc_type);
 
@@ -486,19 +476,14 @@ void CBC::Serialize(bool bStoring, hid_t loc_id)
 	}
 	else
 	{
-		// zone
-		if (!this->zone) {
-			this->zone = new struct zone;
-		}
-		static_cast<CZone*>(this->zone)->Serialize(bStoring, loc_id);
-
 		// bc_type
 		status = CGlobal::HDFSerialize(bStoring, loc_id, szType, H5T_NATIVE_INT, 1, &this->bc_type);
 
 		// face
 		this->face_defined = FALSE;
 		status = CGlobal::HDFSerialize(bStoring, loc_id, szFace, H5T_NATIVE_INT, 1, &this->face);
-		if (this->face != -1) {
+		if (this->face != -1)
+		{
 			this->face_defined = TRUE;
 		}
 
@@ -513,21 +498,16 @@ void CBC::Serialize(bool bStoring, hid_t loc_id)
 		CTimeSeries<Cproperty>::SerializeOpen(szFlux,     this->m_bc_flux,     loc_id);
 		CTimeSeries<Cproperty>::SerializeOpen(szHead,     this->m_bc_head,     loc_id);
 		CTimeSeries<Cproperty>::SerializeOpen(szSolution, this->m_bc_solution, loc_id);
-
-#ifdef _DEBUG
-		static_cast<CZone*>(this->zone)->AssertValid();
-		// this->AssertValid();
-#endif
 	}
 }
 
 void CBC::Serialize(CArchive& ar)
 {
 	static const char szCBC[] = "CBC";
-	static int version = 1;
+	static int version = 2;
 
 	CString type;
-	int ver;
+	int ver = version;
 
 	// type and version header
 	//
@@ -550,15 +530,9 @@ void CBC::Serialize(CArchive& ar)
 
 		// read version in case changes need to be made
 		ar >> ver;
-		ASSERT(ver == version);
 	}
 
-	// zone
-	if (!this->zone)
-	{
-		this->zone = new CZone();
-	}
-	static_cast<CZone*>(this->zone)->Serialize(ar);
+	CGlobal::Serialize(&(this->polyh), ar);
 
 	// properties
 	static const char szType[]     = "bc_type";
@@ -574,11 +548,27 @@ void CBC::Serialize(CArchive& ar)
 	// bc_type
 	if (ar.IsStoring())
 	{
-		ar << this->bc_type;
+		int n = this->bc_type;
+		ar << n;
 	}
 	else
 	{
-		ar >> this->bc_type;
+		int n;
+		ar >> n;
+		this->bc_type = static_cast<BC_info::BC_TYPE>(n);
+	}
+
+	if(ver == 2)
+	{
+		// face_defined
+		if (ar.IsStoring())
+		{
+			ar << this->face_defined;
+		}
+		else
+		{
+			ar >> this->face_defined;
+		}
 	}
 
 	// face
@@ -631,31 +621,33 @@ void CBC::Serialize(CArchive& ar)
 
 		// read version in case changes need to be made
 		ar >> ver;
-		ASSERT(ver == version);
 	}
 }
 
 std::ostream& operator<< (std::ostream &os, const CBC &a)
 {
-	if (!a.ContainsProperties()) {
+	if (!a.ContainsProperties())
+	{
 #if defined(_DEBUG)
-		switch (a.bc_type) {
-			case SPECIFIED:
-				os << "#SPECIFIED_VALUE_BC\n";
-				break;
-			case FLUX:
-				os << "#FLUX_BC\n";
-				break;
-			case LEAKY:
-				os << "#LEAKY_BC\n";
-				break;
-			default:
-				os << "#BAD BC\n";
-				return os;
-				break;
+		switch (a.bc_type)
+		{
+		case BC_info::BC_SPECIFIED:
+			os << "#SPECIFIED_VALUE_BC\n";
+			break;
+		case BC_info::BC_FLUX:
+			os << "#FLUX_BC\n";
+			break;
+		case BC_info::BC_LEAKY:
+			os << "#LEAKY_BC\n";
+			break;
+		default:
+			os << "#BAD BC\n";
+			return os;
+			break;
 		}
 		os << "#";
-		os << static_cast<CZone>(*a.zone);
+		ASSERT(a.polyh && ::AfxIsValidAddress(a.polyh, sizeof(Polyhedron)));
+		os << (*a.polyh);
 		os << "#(EMPTY)\n";
 #endif
 		return os;
@@ -663,246 +655,250 @@ std::ostream& operator<< (std::ostream &os, const CBC &a)
 
 	switch (a.bc_type)
 	{
-		case SPECIFIED:
-			os << "SPECIFIED_HEAD_BC\n";
-			break;
-		case FLUX:
-			os << "FLUX_BC\n";
-			break;
-		case LEAKY:
-			os << "LEAKY_BC\n";
-			break;
-		default:
-			os << "#BAD BC\n";
-			return os;
-			break;
+	case BC_info::BC_SPECIFIED:
+		os << "SPECIFIED_HEAD_BC\n";
+		break;
+	case BC_info::BC_FLUX:
+		os << "FLUX_BC\n";
+		break;
+	case BC_info::BC_LEAKY:
+		os << "LEAKY_BC\n";
+		break;
+	default:
+		os << "#BAD BC Type\n";
+		return os;
+		break;
 	}
 
-	os << static_cast<CZone>(*a.zone);
+	ASSERT(a.polyh && ::AfxIsValidAddress(a.polyh, sizeof(Polyhedron)));
+	os << (*a.polyh);
 
-	//{{
 	switch (a.bc_type)
 	{
-		case SPECIFIED:
-			// head
-			if (a.m_bc_head.size())
+	case BC_info::BC_SPECIFIED:
+		// head
+		if (a.m_bc_head.size())
+		{
+			os << "\t\t-head\n";
+			CTimeSeries<Cproperty>::const_iterator iter = a.m_bc_head.begin();
+			for (; iter != a.m_bc_head.end(); ++iter)
 			{
-				os << "\t\t-head\n";
-				CTimeSeries<Cproperty>::const_iterator iter = a.m_bc_head.begin();
-				for (; iter != a.m_bc_head.end(); ++iter)
+				ASSERT((*iter).second.type != UNDEFINED);
+				if ((*iter).second.type == UNDEFINED) continue;
+
+				os << "\t\t\t";
+				if ((*iter).first.input)
 				{
-					ASSERT((*iter).second.type != UNDEFINED);
-					if ((*iter).second.type == UNDEFINED) continue;
-
-					os << "\t\t\t";
-					if ((*iter).first.input)
-					{
-						os << (*iter).first.value << " " << (*iter).first.input;
-					}
-					else
-					{
-						os << (*iter).first.value;
-					}
-					os << "\t";
-					os << (*iter).second;
+					os << (*iter).first.value << " " << (*iter).first.input;
 				}
+				else
+				{
+					os << (*iter).first.value;
+				}
+				os << "\t";
+				os << (*iter).second;
 			}
+		}
 
-			// associated_solution
-			if (a.m_bc_solution.size() && a.bc_solution_type == ASSOCIATED)
+		// associated_solution
+		if (a.m_bc_solution.size() && a.bc_solution_type == ASSOCIATED)
+		{
+			os << "\t\t-associated_solution\n";
+			CTimeSeries<Cproperty>::const_iterator iter = a.m_bc_solution.begin();
+			for (; iter != a.m_bc_solution.end(); ++iter)
 			{
-				os << "\t\t-associated_solution\n";
-				CTimeSeries<Cproperty>::const_iterator iter = a.m_bc_solution.begin();
-				for (; iter != a.m_bc_solution.end(); ++iter)
-				{
-					ASSERT((*iter).second.type != UNDEFINED);
-					if ((*iter).second.type == UNDEFINED) continue;
+				ASSERT((*iter).second.type != UNDEFINED);
+				if ((*iter).second.type == UNDEFINED) continue;
 
-					os << "\t\t\t";
-					if ((*iter).first.input)
-					{
-						os << (*iter).first.value << " " << (*iter).first.input;
-					}
-					else
-					{
-						os << (*iter).first.value;
-					}
-					os << "\t";
-					os << (*iter).second;
+				os << "\t\t\t";
+				if ((*iter).first.input)
+				{
+					os << (*iter).first.value << " " << (*iter).first.input;
 				}
+				else
+				{
+					os << (*iter).first.value;
+				}
+				os << "\t";
+				os << (*iter).second;
 			}
-			// fixed_solution
-			if (a.m_bc_solution.size() && a.bc_solution_type == FIXED)
+		}
+		// fixed_solution
+		if (a.m_bc_solution.size() && a.bc_solution_type == FIXED)
+		{
+			os << "\t\t-fixed_solution\n";
+			CTimeSeries<Cproperty>::const_iterator iter = a.m_bc_solution.begin();
+			for (; iter != a.m_bc_solution.end(); ++iter)
 			{
-				os << "\t\t-fixed_solution\n";
-				CTimeSeries<Cproperty>::const_iterator iter = a.m_bc_solution.begin();
-				for (; iter != a.m_bc_solution.end(); ++iter)
+				ASSERT((*iter).second.type != UNDEFINED);
+				if ((*iter).second.type == UNDEFINED) continue;
+
+				os << "\t\t\t";
+				if ((*iter).first.input)
 				{
-					ASSERT((*iter).second.type != UNDEFINED);
-					if ((*iter).second.type == UNDEFINED) continue;
-
-					os << "\t\t\t";
-					if ((*iter).first.input)
-					{
-						os << (*iter).first.value << " " << (*iter).first.input;
-					}
-					else
-					{
-						os << (*iter).first.value;
-					}
-					os << "\t";
-					os << (*iter).second;
+					os << (*iter).first.value << " " << (*iter).first.input;
 				}
-			}
-
-			break;
-
-		case FLUX:
-			// face
-			if (a.face_defined == TRUE) {
-				switch (a.face) {
-					case 0:
-						os << "\t\t-face X\n";
-						break;
-					case 1:
-						os << "\t\t-face Y\n";
-						break;
-					case 2:
-						os << "\t\t-face Z\n";
-						break;
-					default:
-						ASSERT(FALSE);
-						break;
+				else
+				{
+					os << (*iter).first.value;
 				}
+				os << "\t";
+				os << (*iter).second;
 			}
-			// associated_solution
-			if (a.m_bc_solution.size() && a.bc_solution_type == ASSOCIATED)
+		}
+
+		break;
+
+	case BC_info::BC_FLUX:
+		// face
+		if (a.face_defined == TRUE)
+		{
+			switch (a.face)
 			{
-				os << "\t\t-associated_solution\n";
-				CTimeSeries<Cproperty>::const_iterator iter = a.m_bc_solution.begin();
-				for (; iter != a.m_bc_solution.end(); ++iter)
-				{
-					ASSERT((*iter).second.type != UNDEFINED);
-					if ((*iter).second.type == UNDEFINED) continue;
-
-					os << "\t\t\t";
-					if ((*iter).first.input)
-					{
-						os << (*iter).first.value << " " << (*iter).first.input;
-					}
-					else
-					{
-						os << (*iter).first.value;
-					}
-					os << "\t";
-					os << (*iter).second;
-				}
+			case 0:
+				os << "\t\t-face X\n";
+				break;
+			case 1:
+				os << "\t\t-face Y\n";
+				break;
+			case 2:
+				os << "\t\t-face Z\n";
+				break;
+			default:
+				ASSERT(FALSE);
+				break;
 			}
-
-			// flux
-			if (a.m_bc_flux.size())
+		}
+		// associated_solution
+		if (a.m_bc_solution.size() && a.bc_solution_type == ASSOCIATED)
+		{
+			os << "\t\t-associated_solution\n";
+			CTimeSeries<Cproperty>::const_iterator iter = a.m_bc_solution.begin();
+			for (; iter != a.m_bc_solution.end(); ++iter)
 			{
-				os << "\t\t-flux\n";
-				CTimeSeries<Cproperty>::const_iterator iter = a.m_bc_flux.begin();
-				for (; iter != a.m_bc_flux.end(); ++iter)
+				ASSERT((*iter).second.type != UNDEFINED);
+				if ((*iter).second.type == UNDEFINED) continue;
+
+				os << "\t\t\t";
+				if ((*iter).first.input)
 				{
-					ASSERT((*iter).second.type != UNDEFINED);
-					if ((*iter).second.type == UNDEFINED) continue;
-
-					os << "\t\t\t";
-					if ((*iter).first.input)
-					{
-						os << (*iter).first.value << " " << (*iter).first.input;
-					}
-					else
-					{
-						os << (*iter).first.value;
-					}
-					os << "\t";
-					os << (*iter).second;
+					os << (*iter).first.value << " " << (*iter).first.input;
 				}
-			}
-
-			break;
-
-		case LEAKY:
-			// face
-			if (a.face_defined == TRUE) {
-				switch (a.face) {
-					case 0:
-						os << "\t\t-face X\n";
-						break;
-					case 1:
-						os << "\t\t-face Y\n";
-						break;
-					case 2:
-						os << "\t\t-face Z\n";
-						break;
-					default:
-						ASSERT(FALSE);
-						break;
+				else
+				{
+					os << (*iter).first.value;
 				}
+				os << "\t";
+				os << (*iter).second;
 			}
-			// associated_solution
-			if (a.m_bc_solution.size() && a.bc_solution_type == ASSOCIATED)
+		}
+
+		// flux
+		if (a.m_bc_flux.size())
+		{
+			os << "\t\t-flux\n";
+			CTimeSeries<Cproperty>::const_iterator iter = a.m_bc_flux.begin();
+			for (; iter != a.m_bc_flux.end(); ++iter)
 			{
-				os << "\t\t-associated_solution\n";
-				CTimeSeries<Cproperty>::const_iterator iter = a.m_bc_solution.begin();
-				for (; iter != a.m_bc_solution.end(); ++iter)
-				{
-					ASSERT((*iter).second.type != UNDEFINED);
-					if ((*iter).second.type == UNDEFINED) continue;
+				ASSERT((*iter).second.type != UNDEFINED);
+				if ((*iter).second.type == UNDEFINED) continue;
 
-					os << "\t\t\t";
-					if ((*iter).first.input)
-					{
-						os << (*iter).first.value << " " << (*iter).first.input;
-					}
-					else
-					{
-						os << (*iter).first.value;
-					}
-					os << "\t";
-					os << (*iter).second;
+				os << "\t\t\t";
+				if ((*iter).first.input)
+				{
+					os << (*iter).first.value << " " << (*iter).first.input;
 				}
+				else
+				{
+					os << (*iter).first.value;
+				}
+				os << "\t";
+				os << (*iter).second;
 			}
-			// head
-			if (a.m_bc_head.size())
+		}
+
+		break;
+
+	case BC_info::BC_LEAKY:
+		// face
+		if (a.face_defined == TRUE) {
+			switch (a.face) {
+	case 0:
+		os << "\t\t-face X\n";
+		break;
+	case 1:
+		os << "\t\t-face Y\n";
+		break;
+	case 2:
+		os << "\t\t-face Z\n";
+		break;
+	default:
+		ASSERT(FALSE);
+		break;
+			}
+		}
+		// associated_solution
+		if (a.m_bc_solution.size() && a.bc_solution_type == ASSOCIATED)
+		{
+			os << "\t\t-associated_solution\n";
+			CTimeSeries<Cproperty>::const_iterator iter = a.m_bc_solution.begin();
+			for (; iter != a.m_bc_solution.end(); ++iter)
 			{
-				os << "\t\t-head\n";
-				CTimeSeries<Cproperty>::const_iterator iter = a.m_bc_head.begin();
-				for (; iter != a.m_bc_head.end(); ++iter)
+				ASSERT((*iter).second.type != UNDEFINED);
+				if ((*iter).second.type == UNDEFINED) continue;
+
+				os << "\t\t\t";
+				if ((*iter).first.input)
 				{
-					ASSERT((*iter).second.type != UNDEFINED);
-					if ((*iter).second.type == UNDEFINED) continue;
-
-					os << "\t\t\t";
-					if ((*iter).first.input)
-					{
-						os << (*iter).first.value << " " << (*iter).first.input;
-					}
-					else
-					{
-						os << (*iter).first.value;
-					}
-					os << "\t";
-					os << (*iter).second;
+					os << (*iter).first.value << " " << (*iter).first.input;
 				}
+				else
+				{
+					os << (*iter).first.value;
+				}
+				os << "\t";
+				os << (*iter).second;
 			}
+		}
+		// head
+		if (a.m_bc_head.size())
+		{
+			os << "\t\t-head\n";
+			CTimeSeries<Cproperty>::const_iterator iter = a.m_bc_head.begin();
+			for (; iter != a.m_bc_head.end(); ++iter)
+			{
+				ASSERT((*iter).second.type != UNDEFINED);
+				if ((*iter).second.type == UNDEFINED) continue;
 
-			// hydraulic_conductivity
-			if (a.bc_k && a.bc_k->type != UNDEFINED) {
-				os << "\t\t-hydraulic_conductivity  " << static_cast<Cproperty>(*a.bc_k);
+				os << "\t\t\t";
+				if ((*iter).first.input)
+				{
+					os << (*iter).first.value << " " << (*iter).first.input;
+				}
+				else
+				{
+					os << (*iter).first.value;
+				}
+				os << "\t";
+				os << (*iter).second;
 			}
-			// thickness
-			if (a.bc_thick && a.bc_thick->type != UNDEFINED) {
-				os << "\t\t-thickness               " << static_cast<Cproperty>(*a.bc_thick);
-			}
-			break;
+		}
 
-		default:
-			ASSERT(FALSE);
-			break;
+		// hydraulic_conductivity
+		if (a.bc_k && a.bc_k->type != UNDEFINED)
+		{
+			os << "\t\t-hydraulic_conductivity  " << static_cast<Cproperty>(*a.bc_k);
+		}
+		// thickness
+		if (a.bc_thick && a.bc_thick->type != UNDEFINED)
+		{
+			os << "\t\t-thickness               " << static_cast<Cproperty>(*a.bc_thick);
+		}
+		break;
+
+	default:
+		ASSERT(FALSE);
+		break;
 	}
 
 	return os;
@@ -979,8 +975,9 @@ void CBC::ClearProperties(void)
 
 bool CBC::ContainsProperties(void)const
 {
-	switch (this->bc_type) {
-		case FLUX: // bc_solution bc_flux
+	switch (this->bc_type)
+	{
+		case BC_info::BC_FLUX: // bc_solution bc_flux
 			if (!this->m_bc_solution.empty() || !this->m_bc_flux.empty())
 			{
 				return true;
@@ -991,7 +988,7 @@ bool CBC::ContainsProperties(void)const
 			}
 			break;
 
-		case LEAKY: // bc_thick bc_head bc_k bc_solution
+		case BC_info::BC_LEAKY: // bc_thick bc_head bc_k bc_solution
 			if (this->bc_thick || !this->m_bc_head.empty() || this->bc_k || !this->m_bc_solution.empty())
 			{
 				return true;
@@ -1002,7 +999,7 @@ bool CBC::ContainsProperties(void)const
 			}
 			break;
 
-		case SPECIFIED: // bc_head bc_solution
+		case BC_info::BC_SPECIFIED: // bc_head bc_solution
 			if (!this->m_bc_head.empty() || !this->m_bc_solution.empty())
 			{
 				return true;

@@ -59,9 +59,6 @@
 #include <vtkMapper.h>
 #include <vtkDataSet.h>
 #include <vtkCubeSource.h>
-// COMMENT: {3/5/2008 4:27:04 PM}#ifdef USE_WEDGE
-// COMMENT: {3/5/2008 4:27:04 PM}#include "MyCubeSource.h"
-// COMMENT: {3/5/2008 4:27:04 PM}#endif
 #include <vtkInteractorStyle.h>
 #include <vtkInteractorStyleSwitch.h>
 #include <vtkPolyDataMapper.h>
@@ -583,21 +580,8 @@ void CViewVTKCommand::OnLeftButtonPressEvent(vtkObject* caller, void* callData)
 {
 	TRACE("OnLeftButtonPressEvent\n");
 
-// COMMENT: {6/22/2005 7:34:29 PM}	if (this->m_pView->CreatingNewRiver())
-// COMMENT: {6/22/2005 7:34:29 PM}	{
-// COMMENT: {6/22/2005 7:34:29 PM}		this->m_pView->m_pCursor3DActor->SetPosition(this->m_WorldPointXYPlane[0], this->m_WorldPointXYPlane[1], this->m_WorldPointXYPlane[2]);
-// COMMENT: {6/22/2005 7:34:29 PM}		this->m_pView->m_Renderer->ResetCameraClippingRange();
-// COMMENT: {6/22/2005 7:34:29 PM}		this->m_pView->m_RenderWindowInteractor->Render();
-// COMMENT: {6/22/2005 7:34:29 PM}
-// COMMENT: {6/22/2005 7:34:29 PM}		// update m_WorldPointXYPlane and save starting point
-// COMMENT: {6/22/2005 7:34:29 PM}		//
-// COMMENT: {6/22/2005 7:34:29 PM}		Update();
-// COMMENT: {6/22/2005 7:34:29 PM}		for (int i = 0; i < 3; ++i) {
-// COMMENT: {6/22/2005 7:34:29 PM}			this->m_BeginPoint[i] = this->m_WorldPointXYPlane[i];
-// COMMENT: {6/22/2005 7:34:29 PM}		}
-// COMMENT: {6/22/2005 7:34:29 PM}	}
-
-	if (this->m_pView->CreatingNewWell()) {
+	if (this->m_pView->CreatingNewWell())
+	{
 		this->m_pView->m_pCursor3DActor->SetPosition(this->m_WorldPointXYPlane[0], this->m_WorldPointXYPlane[1], this->m_WorldPointXYPlane[2]);
 		this->m_pView->m_Renderer->ResetCameraClippingRange();
 		this->m_pView->m_RenderWindowInteractor->Render();
@@ -605,41 +589,11 @@ void CViewVTKCommand::OnLeftButtonPressEvent(vtkObject* caller, void* callData)
 		// update m_WorldPointXYPlane and save starting point
 		//
 		Update();
-		for (int i = 0; i < 3; ++i) {
+		for (int i = 0; i < 3; ++i)
+		{
 			this->m_BeginPoint[i] = this->m_WorldPointXYPlane[i];
 		}
 	}
-
-// COMMENT: {3/5/2008 4:41:27 PM}	if (this->m_pView->CreatingNewZone()) {
-// COMMENT: {3/5/2008 4:41:27 PM}		ASSERT(FALSE); // DEAD ???
-// COMMENT: {3/5/2008 4:41:27 PM}
-// COMMENT: {3/5/2008 4:41:27 PM}// COMMENT: {3/5/2008 4:32:01 PM}		// m_pView->StartNewZone should have already been called
-// COMMENT: {3/5/2008 4:41:27 PM}// COMMENT: {3/5/2008 4:32:01 PM}		//
-// COMMENT: {3/5/2008 4:41:27 PM}// COMMENT: {3/5/2008 4:32:01 PM}		ASSERT(this->m_pView->m_pNewCube);
-// COMMENT: {3/5/2008 4:41:27 PM}// COMMENT: {3/5/2008 4:32:01 PM}		ASSERT(this->m_pView->m_pNewCubeMapper);
-// COMMENT: {3/5/2008 4:41:27 PM}// COMMENT: {3/5/2008 4:32:01 PM}		ASSERT(this->m_pView->m_pNewCubeActor);
-// COMMENT: {3/5/2008 4:41:27 PM}// COMMENT: {3/5/2008 4:32:01 PM}
-// COMMENT: {3/5/2008 4:41:27 PM}// COMMENT: {3/5/2008 4:32:01 PM}		// update m_WorldPointXYPlane and save starting point
-// COMMENT: {3/5/2008 4:41:27 PM}// COMMENT: {3/5/2008 4:32:01 PM}		//
-// COMMENT: {3/5/2008 4:41:27 PM}// COMMENT: {3/5/2008 4:32:01 PM}		Update();
-// COMMENT: {3/5/2008 4:41:27 PM}// COMMENT: {3/5/2008 4:32:01 PM}		for (int i = 0; i < 3; ++i) {
-// COMMENT: {3/5/2008 4:41:27 PM}// COMMENT: {3/5/2008 4:32:01 PM}			this->m_BeginPoint[i] = this->m_WorldPointXYPlane[i];
-// COMMENT: {3/5/2008 4:41:27 PM}// COMMENT: {3/5/2008 4:32:01 PM}		}
-// COMMENT: {3/5/2008 4:41:27 PM}// COMMENT: {3/5/2008 4:32:01 PM}
-// COMMENT: {3/5/2008 4:41:27 PM}// COMMENT: {3/5/2008 4:32:01 PM}		// place cube actor
-// COMMENT: {3/5/2008 4:41:27 PM}// COMMENT: {3/5/2008 4:32:01 PM}		//
-// COMMENT: {3/5/2008 4:41:27 PM}// COMMENT: {3/5/2008 4:32:01 PM}		// this->m_pView->m_pNewCubeActor->SetPosition(this->m_BeginPoint[0], this->m_BeginPoint[1], 0);
-// COMMENT: {3/5/2008 4:41:27 PM}// COMMENT: {3/5/2008 4:32:01 PM}		this->m_pView->m_pNewCubeActor->SetPosition(this->m_BeginPoint[0], this->m_BeginPoint[1], this->m_BeginPoint[2]);
-// COMMENT: {3/5/2008 4:41:27 PM}// COMMENT: {3/5/2008 4:32:01 PM}
-// COMMENT: {3/5/2008 4:41:27 PM}// COMMENT: {3/5/2008 4:32:01 PM}		// turn on cube actor
-// COMMENT: {3/5/2008 4:41:27 PM}// COMMENT: {3/5/2008 4:32:01 PM}		//
-// COMMENT: {3/5/2008 4:41:27 PM}// COMMENT: {3/5/2008 4:32:01 PM}		ASSERT(this->m_pView->m_pNewCubeActor->GetVisibility() == 0);
-// COMMENT: {3/5/2008 4:41:27 PM}// COMMENT: {3/5/2008 4:32:01 PM}		this->m_pView->m_pNewCubeActor->VisibilityOn();
-// COMMENT: {3/5/2008 4:41:27 PM}// COMMENT: {3/5/2008 4:32:01 PM}
-// COMMENT: {3/5/2008 4:41:27 PM}// COMMENT: {3/5/2008 4:32:01 PM}		// render
-// COMMENT: {3/5/2008 4:41:27 PM}// COMMENT: {3/5/2008 4:32:01 PM}		//
-// COMMENT: {3/5/2008 4:41:27 PM}// COMMENT: {3/5/2008 4:32:01 PM}		this->m_pView->GetDocument()->UpdateAllViews(NULL);
-// COMMENT: {3/5/2008 4:41:27 PM}	}
 }
 
 void CViewVTKCommand::OnLeftButtonReleaseEvent(vtkObject* caller, void* callData)
@@ -729,145 +683,6 @@ void CViewVTKCommand::OnLeftButtonReleaseEvent(vtkObject* caller, void* callData
 			this->m_pView->CancelNewWell();
 		}
 	}
-
-
-// COMMENT: {3/5/2008 4:42:08 PM}	if (this->m_pView->CreatingNewZone())
-// COMMENT: {3/5/2008 4:42:08 PM}	{
-// COMMENT: {3/5/2008 4:42:08 PM}		ASSERT(FALSE);
-// COMMENT: {3/5/2008 4:42:08 PM}
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}		// m_pView->StartNewZone should have already been called
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}		//
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}		ASSERT(this->m_pView->m_pNewCube);
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}		ASSERT(this->m_pView->m_pNewCubeMapper);
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}		ASSERT(this->m_pView->m_pNewCubeActor);
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}		// OnLeftButtonPressEvent called?
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}		//
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}		ASSERT(this->m_pView->m_pNewCubeActor->GetVisibility() != 0);
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}		// update cube
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}		//
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}        this->Update();
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}		this->m_pView->m_pNewCube->SetXLength( ::fabs(this->m_WorldPointXYPlane[0] - this->m_BeginPoint[0]) );
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}		this->m_pView->m_pNewCube->SetYLength( ::fabs(this->m_WorldPointXYPlane[1] - this->m_BeginPoint[1]) );
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}		this->m_pView->m_pNewCubeActor->SetPosition(
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}			(this->m_WorldPointXYPlane[0] + this->m_BeginPoint[0]) / 2.0,
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}			(this->m_WorldPointXYPlane[1] + this->m_BeginPoint[1]) / 2.0,
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}#if defined(USE_ZMAX)
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}			(2 * this->m_WorldPointXYPlane[2] - this->m_pView->m_pNewCube->GetZLength()) / 2.0);
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}#else
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}			(2 * this->m_WorldPointXYPlane[2] + this->m_pView->m_pNewCube->GetZLength()) / 2.0);
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}#endif
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}		// get bounds before calling EndNewZone
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}		//
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}		vtkFloatingPointType scaled_meters[6];
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}		this->m_pView->m_pNewCubeActor->GetBounds(scaled_meters);
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}		// get type of zone
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}		//
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}		ETSLayoutPropertySheet        sheet("Zone Wizard", NULL, 0, NULL, false);
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}		CNewZonePropertyPage          newZone;
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}#if defined(__CPPUNIT__)
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}		///TMediaPropertyPage<CPropertyPage> mediaProps(IDS_MEDIA_PROPS_WIZ_135);
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}		///CMediaPropertyPage            mediaProps(IDS_MEDIA_PROPS_WIZ_135);
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}		CMediaSpreadPropertyPage      mediaProps;
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}#else
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}		///CMediaPropertyPage            mediaProps(IDS_MEDIA_PROPS_WIZ_135);
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}		CMediaSpreadPropertyPage      mediaProps;
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}#endif
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}		CBCFluxPropertyPage2          fluxProps;
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}		CBCLeakyPropertyPage2         leakyProps;
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}		CBCSpecifiedHeadPropertyPage  specifiedProps;
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}		CICHeadSpreadPropertyPage     icHeadProps;
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}		CChemICSpreadPropertyPage     chemICProps;
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}		// CChemICSpreadPropertyPage only needs the flowonly flag when the zone is a
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}		// default zone
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}		//
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}		bool bFlowOnly = this->m_pView->GetDocument()->GetFlowOnly();
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}		fluxProps.SetFlowOnly(bFlowOnly);
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}		leakyProps.SetFlowOnly(bFlowOnly);
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}		specifiedProps.SetFlowOnly(bFlowOnly);
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}		sheet.AddPage(&newZone);
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}		sheet.AddPage(&mediaProps);
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}		sheet.AddPage(&fluxProps);
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}		sheet.AddPage(&leakyProps);
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}		sheet.AddPage(&specifiedProps);
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}		sheet.AddPage(&icHeadProps);
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}		sheet.AddPage(&chemICProps);
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}		sheet.SetWizardMode();
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}		if (sheet.DoModal() == ID_WIZFINISH)
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}		{
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}			this->m_pView->EndNewZone();
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}			// create new zone
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}			//
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}			// determine absolute zone
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}			vtkFloatingPointType* scale = this->m_pView->GetDocument()->GetScale();
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}			CZone absZone;
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}			const CUnits& units = this->m_pView->GetDocument()->GetUnits();
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}			absZone.x1 = scaled_meters[0] / scale[0] / units.horizontal.input_to_si;
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}			absZone.x2 = scaled_meters[1] / scale[0] / units.horizontal.input_to_si;
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}			absZone.y1 = scaled_meters[2] / scale[1] / units.horizontal.input_to_si;
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}			absZone.y2 = scaled_meters[3] / scale[1] / units.horizontal.input_to_si;
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}			absZone.z1 = scaled_meters[4] / scale[2] / units.vertical.input_to_si;
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}			absZone.z2 = scaled_meters[5] / scale[2] / units.vertical.input_to_si;
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}			CWPhastDoc* pDoc = this->m_pView->GetDocument();
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}			if (newZone.GetType() == ID_ZONE_TYPE_MEDIA)
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}			{
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}				CGridElt elt;
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}				mediaProps.GetProperties(elt);
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}				CMediaZoneActor::Create(pDoc, absZone, elt, mediaProps.GetDesc());
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}			}
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}			else if (newZone.GetType() == ID_ZONE_TYPE_BC_FLUX)
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}			{
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}				CBC bc;
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}				fluxProps.GetProperties(bc);
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}				CBCZoneActor::Create(pDoc, absZone, bc, fluxProps.GetDesc());
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}			}
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}			else if (newZone.GetType() == ID_ZONE_TYPE_BC_LEAKY)
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}			{
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}				CBC bc;
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}				leakyProps.GetProperties(bc);
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}				CBCZoneActor::Create(pDoc, absZone, bc, leakyProps.GetDesc());
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}			}
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}			else if (newZone.GetType() == ID_ZONE_TYPE_BC_SPECIFIED)
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}			{
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}				CBC bc;
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}				specifiedProps.GetProperties(bc);
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}				CBCZoneActor::Create(pDoc, absZone, bc, specifiedProps.GetDesc());
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}			}
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}			else if (newZone.GetType() == ID_ZONE_TYPE_IC_HEAD)
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}			{
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}				CHeadIC headic;
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}				icHeadProps.GetProperties(headic);
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}				CICHeadZoneActor::Create(pDoc, absZone, headic, icHeadProps.GetDesc());
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}			}
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}			else if (newZone.GetType() == ID_ZONE_TYPE_IC_CHEM)
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}			{
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}				CChemIC chemIC;
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}				chemICProps.GetProperties(chemIC);
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}				CICChemZoneActor::Create(pDoc, absZone, chemIC, chemICProps.GetDesc());
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}			}
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}		}
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}		else
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}		{
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}			this->m_pView->CancelNewZone();
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}		}
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}		// render
-// COMMENT: {3/5/2008 4:42:08 PM}// COMMENT: {3/5/2008 4:33:01 PM}		this->m_pView->GetDocument()->UpdateAllViews(NULL);
-// COMMENT: {3/5/2008 4:42:08 PM}	}
 }
 
 void CViewVTKCommand::OnMouseMoveEvent(vtkObject* caller, void* callData)
@@ -880,47 +695,6 @@ void CViewVTKCommand::OnMouseMoveEvent(vtkObject* caller, void* callData)
 		this->m_pView->m_Renderer->ResetCameraClippingRange();
 		this->m_pView->m_RenderWindowInteractor->Render();
 	}
-
-
-// COMMENT: {3/5/2008 4:40:06 PM}	if (this->m_pView->CreatingNewZone()) {
-// COMMENT: {3/5/2008 4:40:06 PM}		ASSERT(FALSE);
-// COMMENT: {3/5/2008 4:40:06 PM}// COMMENT: {3/5/2008 4:33:30 PM}// COMMENT: {7/8/2004 7:10:31 PM}		this->m_pView->m_pCursor3DActor->SetPosition(this->m_WorldPointXYPlane[0], this->m_WorldPointXYPlane[1], 0.0);
-// COMMENT: {3/5/2008 4:40:06 PM}// COMMENT: {3/5/2008 4:33:30 PM}		this->m_pView->m_pCursor3DActor->SetPosition(this->m_WorldPointXYPlane[0], this->m_WorldPointXYPlane[1], this->m_WorldPointXYPlane[2]);
-// COMMENT: {3/5/2008 4:40:06 PM}// COMMENT: {3/5/2008 4:33:30 PM}
-// COMMENT: {3/5/2008 4:40:06 PM}// COMMENT: {3/5/2008 4:33:30 PM}		if (this->m_pView->m_pCursor3DActor->GetVisibility() && this->m_pView->m_pNewCubeActor->GetVisibility()) {
-// COMMENT: {3/5/2008 4:40:06 PM}// COMMENT: {3/5/2008 4:33:30 PM}			TRACE("OnMouseMoveEvent\n");
-// COMMENT: {3/5/2008 4:40:06 PM}// COMMENT: {3/5/2008 4:33:30 PM}			ASSERT(FALSE); // {{ DEAD CODE ???
-// COMMENT: {3/5/2008 4:40:06 PM}// COMMENT: {3/5/2008 4:33:30 PM}			this->m_pView->m_pNewCube->SetXLength( fabs(this->m_WorldPointXYPlane[0] - this->m_BeginPoint[0]) );
-// COMMENT: {3/5/2008 4:40:06 PM}// COMMENT: {3/5/2008 4:33:30 PM}			this->m_pView->m_pNewCube->SetYLength( fabs(this->m_WorldPointXYPlane[1] - this->m_BeginPoint[1]) );
-// COMMENT: {3/5/2008 4:40:06 PM}// COMMENT: {3/5/2008 4:33:30 PM}
-// COMMENT: {3/5/2008 4:40:06 PM}// COMMENT: {3/5/2008 4:33:30 PM}			this->m_pView->m_pNewCubeActor->SetPosition((this->m_WorldPointXYPlane[0] + this->m_BeginPoint[0]) / 2.0,
-// COMMENT: {3/5/2008 4:40:06 PM}// COMMENT: {3/5/2008 4:33:30 PM}				(this->m_WorldPointXYPlane[1] + this->m_BeginPoint[1]) / 2.0,
-// COMMENT: {3/5/2008 4:40:06 PM}// COMMENT: {3/5/2008 4:33:30 PM}// COMMENT: {7/8/2004 7:15:02 PM}				this->m_pView->m_pNewCube->GetZLength() / 2.0);
-// COMMENT: {3/5/2008 4:40:06 PM}// COMMENT: {3/5/2008 4:33:30 PM}#ifdef USE_ZMAX
-// COMMENT: {3/5/2008 4:40:06 PM}// COMMENT: {3/5/2008 4:33:30 PM}				(2 * this->m_WorldPointXYPlane[2] - this->m_pView->m_pNewCube->GetZLength()) / 2.0);
-// COMMENT: {3/5/2008 4:40:06 PM}// COMMENT: {3/5/2008 4:33:30 PM}#else
-// COMMENT: {3/5/2008 4:40:06 PM}// COMMENT: {3/5/2008 4:33:30 PM}				(2 * this->m_WorldPointXYPlane[2] + this->m_pView->m_pNewCube->GetZLength()) / 2.0);
-// COMMENT: {3/5/2008 4:40:06 PM}// COMMENT: {3/5/2008 4:33:30 PM}#endif
-// COMMENT: {3/5/2008 4:40:06 PM}// COMMENT: {3/5/2008 4:33:30 PM}			ASSERT(FALSE); // }} DEAD CODE ???
-// COMMENT: {3/5/2008 4:40:06 PM}// COMMENT: {3/5/2008 4:33:30 PM}
-// COMMENT: {3/5/2008 4:40:06 PM}// COMMENT: {3/5/2008 4:33:30 PM}
-// COMMENT: {3/5/2008 4:40:06 PM}// COMMENT: {3/5/2008 4:33:30 PM}			vtkFloatingPointType* scale = this->m_pView->GetDocument()->GetScale();
-// COMMENT: {3/5/2008 4:40:06 PM}// COMMENT: {3/5/2008 4:33:30 PM}			if (CWnd* pWnd = ((CFrameWnd*)::AfxGetMainWnd())->GetMessageBar()) {
-// COMMENT: {3/5/2008 4:40:06 PM}// COMMENT: {3/5/2008 4:33:30 PM}				static TCHAR buffer[80];
-// COMMENT: {3/5/2008 4:40:06 PM}// COMMENT: {3/5/2008 4:33:30 PM}				const CUnits& units = this->m_pView->GetDocument()->GetUnits();
-// COMMENT: {3/5/2008 4:40:06 PM}// COMMENT: {3/5/2008 4:33:30 PM}				::_sntprintf(buffer, 80, "%g[%s] x %g[%s]",
-// COMMENT: {3/5/2008 4:40:06 PM}// COMMENT: {3/5/2008 4:33:30 PM}					fabs(this->m_WorldPointXYPlane[0] - this->m_BeginPoint[0]) / scale[0] / units.horizontal.input_to_si,
-// COMMENT: {3/5/2008 4:40:06 PM}// COMMENT: {3/5/2008 4:33:30 PM}					units.horizontal.defined ? units.horizontal.input : units.horizontal.si,
-// COMMENT: {3/5/2008 4:40:06 PM}// COMMENT: {3/5/2008 4:33:30 PM}					fabs(this->m_WorldPointXYPlane[1] - this->m_BeginPoint[1]) / scale[1] / units.horizontal.input_to_si,
-// COMMENT: {3/5/2008 4:40:06 PM}// COMMENT: {3/5/2008 4:33:30 PM}					units.horizontal.defined ? units.horizontal.input : units.horizontal.si
-// COMMENT: {3/5/2008 4:40:06 PM}// COMMENT: {3/5/2008 4:33:30 PM}					);
-// COMMENT: {3/5/2008 4:40:06 PM}// COMMENT: {3/5/2008 4:33:30 PM}				pWnd->SetWindowText(buffer);
-// COMMENT: {3/5/2008 4:40:06 PM}// COMMENT: {3/5/2008 4:33:30 PM}			}
-// COMMENT: {3/5/2008 4:40:06 PM}// COMMENT: {3/5/2008 4:33:30 PM}		}
-// COMMENT: {3/5/2008 4:40:06 PM}// COMMENT: {3/5/2008 4:33:30 PM}
-// COMMENT: {3/5/2008 4:40:06 PM}// COMMENT: {3/5/2008 4:33:30 PM}		this->m_pView->m_Renderer->ResetCameraClippingRange();
-// COMMENT: {3/5/2008 4:40:06 PM}// COMMENT: {3/5/2008 4:33:30 PM}		this->m_pView->m_RenderWindowInteractor->Render();
-// COMMENT: {3/5/2008 4:40:06 PM}	}
 }
 
 void CViewVTKCommand::OnKeyPressEvent(vtkObject* caller, void* callData)

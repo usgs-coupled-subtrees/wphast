@@ -134,9 +134,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	ASSERT(pContext);
 	CWPhastDoc *pDoc = static_cast<CWPhastDoc*>(pContext->m_pCurrentDoc);
 	ASSERT_VALID(pDoc);
-
 	
-// COMMENT: {3/5/2008 4:26:46 PM}#ifdef USE_WEDGE
 	if (!m_wndToolBar.CreateEx(this, TBSTYLE_FLAT, WS_CHILD | WS_VISIBLE | CBRS_TOP
 		| CBRS_GRIPPER | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC) ||
 		!m_wndToolBar.LoadToolBar(IDR_MAINFRAME2))
@@ -144,15 +142,6 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		TRACE0("Failed to create toolbar\n");
 		return -1;      // fail to create
 	}
-// COMMENT: {3/5/2008 4:26:52 PM}#else
-// COMMENT: {3/5/2008 4:26:52 PM}	if (!m_wndToolBar.CreateEx(this, TBSTYLE_FLAT, WS_CHILD | WS_VISIBLE | CBRS_TOP
-// COMMENT: {3/5/2008 4:26:52 PM}		| CBRS_GRIPPER | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC) ||
-// COMMENT: {3/5/2008 4:26:52 PM}		!m_wndToolBar.LoadToolBar(IDR_MAINFRAME))
-// COMMENT: {3/5/2008 4:26:52 PM}	{
-// COMMENT: {3/5/2008 4:26:52 PM}		TRACE0("Failed to create toolbar\n");
-// COMMENT: {3/5/2008 4:26:52 PM}		return -1;      // fail to create
-// COMMENT: {3/5/2008 4:26:52 PM}	}
-// COMMENT: {3/5/2008 4:26:52 PM}#endif
 
 	if (!m_wndStatusBar.Create(this) ||
 		!m_wndStatusBar.SetIndicators(indicators,
@@ -324,23 +313,15 @@ HMENU CMainFrame::NewMenu()
 	// There is also a function called LoadToolbars that takes an
 	// array of id's.
 	m_menu.SetIconSize(17, 19);
-	m_menu.LoadToolbar(IDR_MAINFRAME);
-
-	//{{
-	//m_menu.SetIconSize(15, 17);
-	//m_menu.SetIconSize(17, 17);
+	m_menu.LoadToolbar(IDR_MAINFRAME2);
 	m_menu.SetIconSize(16, 16);  // this just slightly cuts off the bottom of the select object cursor but looks ok
-	//}}
 
 	return(m_menu.Detach());
 }
 
 void CMainFrame::OnMeasureItem(int nIDCtl, LPMEASUREITEMSTRUCT lpMeasureItemStruct)
 {
-	// TODO: Add your message handler code here and/or call default
-
-	///CFrameWnd::OnMeasureItem(nIDCtl, lpMeasureItemStruct);
-
+	// Add your message handler code here and/or call default
 	BOOL setflag=FALSE;
 	if (lpMeasureItemStruct->CtlType == ODT_MENU)
 	{
@@ -355,15 +336,11 @@ void CMainFrame::OnMeasureItem(int nIDCtl, LPMEASUREITEMSTRUCT lpMeasureItemStru
 		}
 	}
 	if (!setflag) CFrameWnd::OnMeasureItem(nIDCtl, lpMeasureItemStruct);
-
 }
 
 LRESULT CMainFrame::OnMenuChar(UINT nChar, UINT nFlags, CMenu* pMenu)
 {
-	// TODO: Add your message handler code here and/or call default
-
-	///return CFrameWnd::OnMenuChar(nChar, nFlags, pMenu);
-
+	// Add your message handler code here and/or call default
 	LRESULT lresult;
 	if (BCMenu::IsMenu(pMenu))
 		lresult = BCMenu::FindKeyboardShortcut(nChar, nFlags, pMenu);
@@ -374,9 +351,7 @@ LRESULT CMainFrame::OnMenuChar(UINT nChar, UINT nFlags, CMenu* pMenu)
 
 void CMainFrame::OnInitMenuPopup(CMenu* pPopupMenu, UINT nIndex, BOOL bSysMenu)
 {
-	///CFrameWnd::OnInitMenuPopup(pPopupMenu, nIndex, bSysMenu);
-
-	// TODO: Add your message handler code here
+	// Add your message handler code here
 	CFrameWnd::OnInitMenuPopup(pPopupMenu, nIndex, bSysMenu);
 	if (!bSysMenu)
 	{

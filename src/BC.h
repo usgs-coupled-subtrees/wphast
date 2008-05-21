@@ -12,8 +12,7 @@
 #include "property.h"
 #include "TimeSeries.h"
 
-class CBC :
-	public bc
+class CBC :	public BC
 {
 public:
 	// ctor
@@ -21,7 +20,7 @@ public:
 	// dtor
 	~CBC(void);
 	// copy ctor
-	CBC(const struct bc& src);
+	CBC(const struct BC& src);
 	CBC(const CBC& src);
 	// copy assignment
 	CBC& operator=(const CBC& rhs); 
@@ -40,7 +39,7 @@ public:
 	friend std::ostream& operator<< (std::ostream &os, const CBC &a);
 
 private:
-	void InternalCopy(const struct bc& src);
+	void InternalCopy(const struct BC& src);
 	void InternalDelete(void);
 	void InternalInit(void);
 

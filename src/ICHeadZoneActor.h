@@ -6,10 +6,11 @@ class CICHeadZoneActor : public CICZoneActor
 public:
 	vtkTypeRevisionMacro(CICHeadZoneActor,CICZoneActor);
 	static CICHeadZoneActor *New();
-	static void Create(CWPhastDoc* pWPhastDoc, const CZone& zone, const CHeadIC& headIC, LPCTSTR desc);
+	static void Create(CWPhastDoc* pWPhastDoc, const CHeadIC& headIC, LPCTSTR desc);
 
 	CHeadIC GetData(void)const;
 	void SetData(const CHeadIC& rHeadIC);
+	Polyhedron*& GetPolyhedron(void);
 
 	virtual void Insert(CPropertyTreeControlBar* pTreeControlBar, HTREEITEM hInsertAfter = TVI_LAST);
 	virtual void Update(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent);
@@ -29,6 +30,7 @@ protected:
 	CHeadIC m_headIC;
 	static vtkFloatingPointType s_color[3];
 	static vtkProperty* s_Property;
+	static vtkProperty* s_OutlineProperty;	
 
 private:
 	CICHeadZoneActor(const CICHeadZoneActor&);  // Not implemented.
@@ -37,17 +39,35 @@ private:
 	class StaticInit
 	{
 	public:
-		StaticInit() {
-			if (CICHeadZoneActor::s_Property == 0) {
+		StaticInit()
+		{
+			if (CICHeadZoneActor::s_Property == 0)
+			{
 				CICHeadZoneActor::s_Property = vtkProperty::New();
 				CICHeadZoneActor::s_Property->SetColor(CICHeadZoneActor::s_color);
 				CICHeadZoneActor::s_Property->SetOpacity(0.3);
 			}
+			if (CICHeadZoneActor::s_OutlineProperty == 0)
+			{
+				CICHeadZoneActor::s_OutlineProperty = vtkProperty::New();
+				CICHeadZoneActor::s_OutlineProperty->SetAmbient(1.0);
+				CICHeadZoneActor::s_OutlineProperty->SetColor(CICHeadZoneActor::s_color);
+				CICHeadZoneActor::s_OutlineProperty->SetEdgeColor(CICHeadZoneActor::s_color);	
+				CICHeadZoneActor::s_OutlineProperty->SetAmbientColor(CICHeadZoneActor::s_color);
+				CICHeadZoneActor::s_OutlineProperty->SetRepresentationToWireframe();
+			}
 		}
-		~StaticInit() {
-			if (CICHeadZoneActor::s_Property != 0) {
+		~StaticInit()
+		{
+			if (CICHeadZoneActor::s_Property != 0)
+			{
 				CICHeadZoneActor::s_Property->Delete();
 				CICHeadZoneActor::s_Property = 0;
+			}
+			if (CICHeadZoneActor::s_OutlineProperty != 0)
+			{
+				CICHeadZoneActor::s_OutlineProperty->Delete();
+				CICHeadZoneActor::s_OutlineProperty = 0;
 			}
 		}
 	};

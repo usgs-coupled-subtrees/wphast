@@ -12,7 +12,7 @@
 #include <iosfwd> // std::ostream
 
 
-class CHeadIC : public head_ic
+class CHeadIC : public Head_ic
 {
 public:
 	// ctor
@@ -20,10 +20,12 @@ public:
 	// dtor
 	virtual ~CHeadIC(void);
 	// copy ctor
-	CHeadIC(const struct head_ic& src);
+	CHeadIC(const struct Head_ic& src);
 	CHeadIC(const CHeadIC& src);
 	// copy assignment
 	CHeadIC& operator=(const CHeadIC& rhs); 
+
+	bool operator==(const Head_ic& rhs)const;
 
 	static CHeadIC NewDefaults(void);
 	static CHeadIC Full(void);
@@ -35,7 +37,7 @@ public:
 	static CLIPFORMAT clipFormat;
 
 private:
-	void InternalCopy(const struct head_ic& src);
+	void InternalCopy(const struct Head_ic& src);
 	void InternalDelete(void);
 	void InternalInit(void);
 };

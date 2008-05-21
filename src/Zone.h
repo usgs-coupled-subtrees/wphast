@@ -14,6 +14,7 @@ class CZone : public zone {
 public:
 	// ctor
 	CZone(void);
+	CZone(double x1, double x2, double y1, double y2, double z1, double z2);
 	// dtor
 	~CZone(void);
 	// copy ctor

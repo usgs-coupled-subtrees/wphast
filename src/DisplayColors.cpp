@@ -4,14 +4,15 @@
 #include "Global.h"
 
 CDisplayColors::CDisplayColors(void)
-: crMedia(    RGB(   0, 128,   0) )  // green
-, crICHead(   RGB(   0, 255, 255) )  // turquoise
-, crICChem(   RGB( 204, 153, 255) )  // light purple
-, crFlux(     RGB( 255, 102,   0) )  // orange
-, crLeaky(    RGB( 255,   0,   0) )  // red
-, crSpecHead( RGB( 153,  51,   0) )  // brown
-, crRiver(    RGB(   0,   0, 255) )  // blue
-, crWell(     RGB( 255, 255,   0) )  // yellow
+: crMedia(      RGB(   0, 128,   0) )  // green
+, crICHead(     RGB(   0, 255, 255) )  // turquoise
+, crICChem(     RGB( 204, 153, 255) )  // light purple
+, crFlux(       RGB( 255, 102,   0) )  // orange
+, crLeaky(      RGB( 255,   0,   0) )  // red
+, crSpecHead(   RGB( 153,  51,   0) )  // brown
+, crRiver(      RGB(   0,   0, 255) )  // blue
+, crWell(       RGB( 255, 255,   0) )  // yellow
+, crBackground( RGB(   0,   0,   0) )  // black
 {
 }
 
@@ -21,17 +22,18 @@ CDisplayColors::~CDisplayColors(void)
 
 void CDisplayColors::Serialize(bool bStoring, hid_t loc_id)
 {
-	static const char szDisplay[]  = "Display";
-	static const char szColors[]   = "Colors";
+	static const char szDisplay[]    = "Display";
+	static const char szColors[]     = "Colors";
 
-	static const char szICChem[]   = "ICChem";
-	static const char szFlux[]     = "Flux";
-	static const char szICHead[]   = "ICHead";
-	static const char szLeaky[]    = "Leaky";
-	static const char szMedia[]    = "Media";
-	static const char szRiver[]    = "River";
-	static const char szSpecHead[] = "SpecHead";
-	static const char szWell[]     = "Well";
+	static const char szICChem[]     = "ICChem";
+	static const char szFlux[]       = "Flux";
+	static const char szICHead[]     = "ICHead";
+	static const char szLeaky[]      = "Leaky";
+	static const char szMedia[]      = "Media";
+	static const char szRiver[]      = "River";
+	static const char szSpecHead[]   = "SpecHead";
+	static const char szWell[]       = "Well";
+	static const char szBackground[] = "Background";
 
 	herr_t status;
 	hid_t display_id = 0;
@@ -73,6 +75,8 @@ void CDisplayColors::Serialize(bool bStoring, hid_t loc_id)
 		status = CGlobal::HDFSerializeCOLORREF(bStoring, colors_id, szRiver,    this->crRiver);     ASSERT(status >= 0);
 		status = CGlobal::HDFSerializeCOLORREF(bStoring, colors_id, szSpecHead, this->crSpecHead);  ASSERT(status >= 0);
 		status = CGlobal::HDFSerializeCOLORREF(bStoring, colors_id, szWell,     this->crWell);      ASSERT(status >= 0);
+
+		status = CGlobal::HDFSerializeCOLORREF(bStoring, colors_id, szBackground,     this->crBackground);
 
 		status = ::H5Gclose(colors_id); ASSERT(status >= 0);
 	}

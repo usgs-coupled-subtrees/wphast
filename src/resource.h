@@ -248,6 +248,7 @@
 #define IDR_DESCRIPTION_RTF             279
 #define IDD_PROPS_CUBE3                 279
 #define IDR_SOLUTE_TRUE_RTF             280
+#define IDD_PROPS_WEDGE                 280
 #define IDR_SOLUTE_FALSE_RTF            281
 #define IDR_DIFFUSIVITY_RTF             282
 #define IDR_FREE_SURFACE_TRUE_RTF       283
@@ -750,6 +751,8 @@
 #define IDC_RIVER_BTN2                  1380
 #define IDC_WELL_BTN                    1380
 #define IDC_STATIC_WELL_X               1381
+#define IDC_WELL_BTN2                   1381
+#define IDC_BG_BTN                      1381
 #define IDC_STATIC_WELL_Y               1382
 #define IDC_EDIT_WELL_X                 1383
 #define IDC_EDIT_WELL_Y                 1384
@@ -759,6 +762,29 @@
 #define IDC_STARTTIME_EDIT              1388
 #define IDC_STARTTIME_STATIC            1389
 #define IDC_STARTTIME_COMBO             1390
+#define IDC_STATIC_MIN_WEDGE            1391
+#define IDC_STATIC_MAX_WEDGE            1392
+#define IDC_STATIC_X_WEDGE              1393
+#define IDC_EDIT_XMIN_WEDGE             1394
+#define IDC_EDIT_XMAX_WEDGE             1395
+#define IDC_STATIC_Y_WEDGE              1396
+#define IDC_EDIT_YMIN_WEDGE             1397
+#define IDC_EDIT_YMAX_WEDGE             1398
+#define IDC_STATIC_Z_WEDGE              1399
+#define IDC_EDIT_ZMIN_WEDGE             1400
+#define IDC_EDIT_ZMAX_WEDGE             1401
+#define IDC_RADIO_X                     1402
+#define IDC_RADIO_Y                     1403
+#define IDC_RADIO_Z                     1404
+#define IDC_RADIO_1                     1405
+#define IDC_RADIO_2                     1406
+#define IDC_RADIO_3                     1407
+#define IDC_RADIO_4                     1408
+#define IDC_X_UNITS_STATIC_WEDGE        1409
+#define IDC_Y_UNITS_STATIC_WEDGE        1410
+#define IDC_Z_UNITS_STATIC_WEDGE        1411
+#define IDC_GB_AXIS                     1412
+#define IDC_GB_CORNER                   1413
 #define IDC_RESIZE_COLUMN               28654
 #define IDC_RESIZE_ROW                  28655
 #define IDR_POPUP                       28656
@@ -791,7 +817,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        391
 #define _APS_NEXT_COMMAND_VALUE         32842
-#define _APS_NEXT_CONTROL_VALUE         1391
+#define _APS_NEXT_CONTROL_VALUE         1414
 #define _APS_NEXT_SYMED_VALUE           126
 #endif
 #endif

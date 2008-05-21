@@ -140,8 +140,8 @@ void TestCBC::testMerge(void)
 			bc0.AssertValid(1);
 			bc1.AssertValid(1);
 
-			CPPUNIT_ASSERT(bc0.zone != 0);
-			CPPUNIT_ASSERT(bc1.zone != 0);
+			CPPUNIT_ASSERT(bc0.polyh != 0);
+			CPPUNIT_ASSERT(bc1.polyh != 0);
 
 			CPPUNIT_ASSERT(bc0.m_bc_head.size() == 1);
 			CPPUNIT_ASSERT(bc1.m_bc_head.size() == 0);
@@ -215,8 +215,8 @@ void TestCBC::testMergeDifferentSolutionTypes(void)
 			bc0.AssertValid(1);
 			bc1.AssertValid(1);
 
-			CPPUNIT_ASSERT(bc0.zone != 0);
-			CPPUNIT_ASSERT(bc1.zone != 0);
+			CPPUNIT_ASSERT(bc0.polyh != 0);
+			CPPUNIT_ASSERT(bc1.polyh != 0);
 
 			CPPUNIT_ASSERT(bc0.m_bc_head.size() == 1);
 			CPPUNIT_ASSERT(bc1.m_bc_head.size() == 0);
@@ -291,8 +291,8 @@ void TestCBC::testAssertValid(void)
 			CPPUNIT_ASSERT(::count_bc == 1);
 
 			CBC bc0(*::bc[0]);
-			CPPUNIT_ASSERT(bc0.zone              != 0);
-			CPPUNIT_ASSERT(bc0.zone              != 0);
+			CPPUNIT_ASSERT(bc0.polyh             != 0);
+			CPPUNIT_ASSERT(bc0.polyh             != 0);
 			CPPUNIT_ASSERT(bc0.m_bc_head.size() == 1);
 			Ctime zero;
 			zero.SetValue(0);
@@ -345,7 +345,7 @@ void TestCBC::testAssertValidSimGreaterThan1(void)
 			CPPUNIT_ASSERT(::count_bc == 1);
 
 			CBC bc0(*::bc[0]);
-			CPPUNIT_ASSERT(bc0.zone              != 0);
+			CPPUNIT_ASSERT(bc0.polyh             != 0);
 			CPPUNIT_ASSERT(bc0.m_bc_head.size() == 1);
 			Ctime zero;
 			zero.SetValue(0);
@@ -405,12 +405,12 @@ void TestCBC::testAssertValidFluxBC(void)
 
 			CBC bc0(*::bc[0]);
 
-			CPPUNIT_ASSERT(bc0.zone              != 0);
+			CPPUNIT_ASSERT(bc0.polyh             != 0);
 			CPPUNIT_ASSERT(bc0.mask              == 0);
 
 			// boundary condition information
 			// UNDEFINED, SPECIFIED, FLUX, LEAKY
-			CPPUNIT_ASSERT(bc0.bc_type           == FLUX);
+			CPPUNIT_ASSERT(bc0.bc_type           == BC_info::BC_FLUX);
 
 			// head for SPECIFIED and LEAKY
 			CPPUNIT_ASSERT(bc0.bc_head           == 0);
@@ -485,12 +485,12 @@ void TestCBC::testAssertValidLeakyBC(void)
 
 			CBC bc0(*::bc[0]);
 
-			CPPUNIT_ASSERT(bc0.zone              != 0);
+			CPPUNIT_ASSERT(bc0.polyh             != 0);
 			CPPUNIT_ASSERT(bc0.mask              == 0);
 
 			// boundary condition information
 			// UNDEFINED, SPECIFIED, FLUX, LEAKY
-			CPPUNIT_ASSERT(bc0.bc_type           == LEAKY);
+			CPPUNIT_ASSERT(bc0.bc_type           == BC_info::BC_LEAKY);
 
 			// head for SPECIFIED and LEAKY
 			CPPUNIT_ASSERT(bc0.bc_head           == NULL);
@@ -571,12 +571,12 @@ void TestCBC::testAssertValidSpecifiedValueBC(void)
 
 				CBC bc0(*::bc[0]);
 
-				CPPUNIT_ASSERT(bc0.zone              != 0);
+				CPPUNIT_ASSERT(bc0.polyh             != 0);
 				CPPUNIT_ASSERT(bc0.mask              == 0);
 
 				// boundary condition information
 				// UNDEFINED, SPECIFIED, FLUX, LEAKY
-				CPPUNIT_ASSERT(bc0.bc_type           == SPECIFIED);
+				CPPUNIT_ASSERT(bc0.bc_type           == BC_info::BC_SPECIFIED);
 
 				// head for SPECIFIED and LEAKY
 				CPPUNIT_ASSERT(bc0.bc_head           == 0);
@@ -618,12 +618,12 @@ void TestCBC::testAssertValidSpecifiedValueBC(void)
 
 				CBC bc1(*::bc[1]);
 
-				CPPUNIT_ASSERT(bc1.zone                 != 0);
+				CPPUNIT_ASSERT(bc1.polyh                != 0);
 				CPPUNIT_ASSERT(bc1.mask                 == 0);
 
 				// boundary condition information
 				// UNDEFINED, SPECIFIED, FLUX, LEAKY
-				CPPUNIT_ASSERT(bc1.bc_type              == SPECIFIED);
+				CPPUNIT_ASSERT(bc1.bc_type              == BC_info::BC_SPECIFIED);
 
 				// head for SPECIFIED and LEAKY
 				CPPUNIT_ASSERT(bc1.bc_head              == 0);		

@@ -4,6 +4,7 @@
 #include <string>
 
 #include "WPhastDoc.h"
+#include "srcWedgeSource.h"
 #include <vtkProperty.h>
 
 #ifndef vtkFloatingPointType
@@ -15,7 +16,9 @@ template<typename T>
 class CZoneCreateAction : public CAction
 {
 public:
-	CZoneCreateAction(CWPhastDoc* pDoc, const char* name, float xMin, float xMax, float yMin, float yMax, float zMin, float zMax, const char* desc, CTreeCtrlNode nodeInsertAfter = CTreeCtrlNode(TVI_LAST, NULL));
+	CZoneCreateAction(CWPhastDoc* pDoc, const char* name, Polyhedron* polyh, const char* desc, CTreeCtrlNode nodeInsertAfter = CTreeCtrlNode(TVI_LAST, NULL));
+	CZoneCreateAction(CWPhastDoc* pDoc, Polyhedron* polyh, const char* desc, CTreeCtrlNode nodeInsertAfter = CTreeCtrlNode(TVI_LAST, NULL));
+
 	~CZoneCreateAction(void);
 
 	virtual void Execute();
@@ -24,13 +27,10 @@ public:
 	T* GetZoneActor();
 
 protected:
+	void Create(CWPhastDoc* pDoc, const char* name, Polyhedron* polyh, const char* desc, CTreeCtrlNode nodeInsertAfter);
+
+protected:
 	CWPhastDoc *m_pDoc;
-	float m_xMin;
-	float m_xMax;
-	float m_yMin;
-	float m_yMax;
-	float m_zMin;
-	float m_zMax;
 	T* m_pZoneActor;
 
 	HTREEITEM m_hInsertAfter;
@@ -39,32 +39,49 @@ protected:
 };
 
 template<typename T>
-CZoneCreateAction<T>::CZoneCreateAction(CWPhastDoc* pDoc, const char* name, float xMin, float xMax, float yMin, float yMax, float zMin, float zMax, const char* desc, CTreeCtrlNode nodeInsertAfter)
+CZoneCreateAction<T>::CZoneCreateAction(CWPhastDoc* pDoc, const char* name, Polyhedron* polyh, const char* desc, CTreeCtrlNode nodeInsertAfter)
 : m_pDoc(pDoc)
-, m_xMin(xMin)
-, m_xMax(xMax)
-, m_yMin(yMin)
-, m_yMax(yMax)
-, m_zMin(zMin)
-, m_zMax(zMax)
 , m_hInsertAfter(0)
 , m_dwInsertAfter(0)
 , m_pZoneActor(0)
 {
+	this->Create(pDoc, name, polyh, desc, nodeInsertAfter);
+}
+
+template<typename T>
+CZoneCreateAction<T>::CZoneCreateAction(CWPhastDoc* pDoc, Polyhedron* polyh, const char* desc, CTreeCtrlNode nodeInsertAfter)
+: m_pDoc(pDoc)
+, m_hInsertAfter(0)
+, m_dwInsertAfter(0)
+, m_pZoneActor(0)
+{
+	// set name
+	//
+	CString name;
+	if (Wedge *w = dynamic_cast<Wedge*>(polyh))
+	{
+		name = pDoc->GetNextWedgeName();
+	}
+	else if (Cube *c = dynamic_cast<Cube*>(polyh))
+	{
+		name = pDoc->GetNextZoneName();
+	}
+	else
+	{
+		ASSERT(FALSE);
+	}
+	this->Create(pDoc, name, polyh, desc, nodeInsertAfter);
+}
+
+template<typename T>
+void CZoneCreateAction<T>::Create(CWPhastDoc* pDoc, const char* name, Polyhedron* polyh, const char* desc, CTreeCtrlNode nodeInsertAfter)
+{
+	ASSERT(polyh && ::AfxIsValidAddress(polyh, sizeof(Polyhedron)));
+
 	this->m_pZoneActor = T::New();
 	ASSERT(this->m_pZoneActor->IsA("CZoneActor"));
 
-	// size
-	// TODO : this may need to be inside the Execute method
-	this->m_pZoneActor->SetBounds(
-		this->m_xMin,
-		this->m_xMax,
-		this->m_yMin,
-		this->m_yMax,
-		this->m_zMin,
-		this->m_zMax,
-		this->m_pDoc->GetUnits()
-		);
+	this->m_pZoneActor->SetPolyhedron(polyh, m_pDoc->GetUnits());
 
 	// set name
 	//
@@ -137,4 +154,3 @@ void CZoneCreateAction<T>::UnExecute()
 	ASSERT_VALID(this->m_pDoc);
 	this->m_pDoc->UnAdd(this->m_pZoneActor);
 }
-

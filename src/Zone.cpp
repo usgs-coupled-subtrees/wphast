@@ -17,6 +17,41 @@ CZone::CZone()
 	this->zone_defined = UNDEFINED;
 }
 
+CZone::CZone(double x1, double x2, double y1, double y2, double z1, double z2)
+{
+	this->zone_defined = TRUE;
+	if (x1 <= x2)
+	{
+		this->x1 = x1;
+		this->x2 = x2;
+	}
+	else
+	{
+		this->x1 = x2;
+		this->x2 = x1;
+	}
+	if (y1 <= y2)
+	{
+		this->y1 = y1;
+		this->y2 = y2;
+	}
+	else
+	{
+		this->y1 = y2;
+		this->y2 = y1;
+	}
+	if (z1 <= z2)
+	{
+		this->z1 = z1;
+		this->z2 = z2;
+	}
+	else
+	{
+		this->z1 = z2;
+		this->z2 = z1;
+	}
+}
+
 CZone::~CZone()
 {
 }

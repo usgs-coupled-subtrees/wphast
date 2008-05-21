@@ -39,9 +39,6 @@
 #include <vtkActor.h>
 
 #include <vtkCubeSource.h>
-// COMMENT: {3/5/2008 4:27:16 PM}#ifdef USE_WEDGE
-// COMMENT: {3/5/2008 4:27:16 PM}#include "MyCubeSource.h"
-// COMMENT: {3/5/2008 4:27:16 PM}#endif
 #include <vtkProperty.h>
 #include <vtkCylinderSource.h>
 
@@ -87,8 +84,6 @@ BEGIN_MESSAGE_MAP(CWPhastView, CView)
 	ON_WM_SIZE()
 	ON_WM_ERASEBKGND()
 	ON_WM_SETCURSOR()
-// COMMENT: {5/8/2006 5:28:40 PM}	ON_UPDATE_COMMAND_UI(ID_TOOLS_NEWZONE, OnUpdateToolsNewZone)
-// COMMENT: {5/8/2006 5:28:40 PM}	ON_COMMAND(ID_TOOLS_NEWZONE, OnToolsNewZone)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_FROM_NX, OnUpdateViewFromNx)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_FROM_NY, OnUpdateViewFromNy)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_FROM_NZ, OnUpdateViewFromNz)
@@ -121,9 +116,6 @@ END_MESSAGE_MAP()
 
 CWPhastView::CWPhastView()
 : m_bResetCamera(false)
-// COMMENT: {3/5/2008 4:33:57 PM}, m_pNewCube(0)
-// COMMENT: {3/5/2008 4:33:57 PM}, m_pNewCubeMapper(0)
-// COMMENT: {3/5/2008 4:33:57 PM}, m_pNewCubeActor(0)
 , m_ViewFromDirection(ID_VIEW_FROM_PZ)
 , m_pWellActor(0)
 , PointWidget(0)
@@ -219,13 +211,16 @@ CWPhastView::CWPhastView()
 	//
 	this->m_RenderWindowInteractor->AddObserver(vtkCommand::KeyPressEvent, this->m_pViewVTKCommand);
 
+	// background color
+	//
+	this->BackgroundColor[0] = 0.0;
+	this->BackgroundColor[1] = 0.0;
+	this->BackgroundColor[2] = 0.0;
 }
 
 CWPhastView::~CWPhastView()
 {
-	//{{
 	this->CancelMode();
-	//}}
 
 	this->InteractorStyle->Delete();
 	this->BoxWidget->SetInteractor(0);
@@ -269,11 +264,6 @@ CWPhastView::~CWPhastView()
 			pGridLODActor->SetEnabled(0);
 		}
 	}
-
-// COMMENT: {3/5/2008 4:43:20 PM}	if (this->CreatingNewZone())
-// COMMENT: {3/5/2008 4:43:20 PM}	{
-// COMMENT: {3/5/2008 4:43:20 PM}		this->EndNewZone();
-// COMMENT: {3/5/2008 4:43:20 PM}	}
 
 	// Delete the the renderer, window and interactor objects.
 	//
@@ -483,7 +473,7 @@ void CWPhastView::Pipeline()
 {
 	// set background color
 	ASSERT(this->m_Renderer);
-	this->m_Renderer->SetBackground(0.0, 0.0, 0.0);
+	this->m_Renderer->SetBackground(this->BackgroundColor);
 
 	/* TODO:
 	if (this->m_pNewCubeActor && this->m_pNewCubeActor->GetVisibility()) {
@@ -496,11 +486,6 @@ void CWPhastView::Pipeline()
 	//}}
 
 	this->m_Renderer->AddProp(this->m_pCursor3DActor);
-
-// COMMENT: {3/5/2008 4:34:14 PM}	if (this->m_pNewCubeActor) {
-// COMMENT: {3/5/2008 4:34:14 PM}		this->m_Renderer->AddProp(this->m_pNewCubeActor);
-// COMMENT: {3/5/2008 4:34:14 PM}	}
-
 
 	// add props to renderer
 	if ( vtkPropCollection *props = this->GetDocument()->GetPropCollection() ) {
@@ -621,153 +606,6 @@ void CWPhastView::DeleteContents(void)
 	// cancel all modes
 	//
 	this->CancelMode();
-}
-
-void CWPhastView::OnUpdateToolsNewZone(CCmdUI *pCmdUI)
-{
-	pCmdUI->Enable(TRUE);
-	if (!this->CreatingNewZone())
-	{
-		pCmdUI->SetCheck(0);
-	}
-	else
-	{
-		pCmdUI->SetCheck(1);
-	}
-}
-
-void CWPhastView::OnToolsNewZone()
-{
-	if (this->CreatingNewZone())
-	{
-		this->CancelNewZone();
-	}
-	else
-	{
-		this->CancelMode();
-		this->StartNewZone();
-	}
-}
-
-bool CWPhastView::CreatingNewZone(void)const
-{
-	ASSERT(FALSE); // DEAD ??
-	return false;
-// COMMENT: {3/5/2008 4:30:34 PM}	return (this->m_pNewCubeActor != 0);
-}
-
-void CWPhastView::StartNewZone(void)
-{
-	ASSERT(FALSE); // DEAD ??
-
-// COMMENT: {3/5/2008 4:27:44 PM}	// set size of 3D cursor
-// COMMENT: {3/5/2008 4:27:44 PM}	//
-// COMMENT: {3/5/2008 4:27:44 PM}	vtkFloatingPointType* bounds = this->GetDocument()->GetGridBounds();
-// COMMENT: {3/5/2008 4:27:44 PM}	vtkFloatingPointType dim = (bounds[1] - bounds[0]) / 20.0;
-// COMMENT: {3/5/2008 4:27:44 PM}	this->m_pCursor3D->SetModelBounds(-dim, dim, -dim, dim, -dim, dim);
-// COMMENT: {3/5/2008 4:27:44 PM}	this->m_pCursor3DActor->VisibilityOn();
-// COMMENT: {3/5/2008 4:27:44 PM}
-// COMMENT: {3/5/2008 4:27:44 PM}	// set white cursor
-// COMMENT: {3/5/2008 4:27:44 PM}	this->m_pCursor3DActor->GetProperty()->SetColor(1, 1, 1);
-// COMMENT: {3/5/2008 4:27:44 PM}
-// COMMENT: {3/5/2008 4:27:44 PM}	ASSERT(this->m_pNewCube == 0);
-// COMMENT: {3/5/2008 4:27:44 PM}	ASSERT(this->m_pNewCubeMapper == 0);
-// COMMENT: {3/5/2008 4:27:44 PM}	ASSERT(this->m_pNewCubeActor == 0);
-// COMMENT: {3/5/2008 4:27:44 PM}
-// COMMENT: {3/5/2008 4:27:44 PM}	// create cube source
-// COMMENT: {3/5/2008 4:27:44 PM}	//
-// COMMENT: {3/5/2008 4:27:44 PM}#ifdef USE_WEDGE
-// COMMENT: {3/5/2008 4:27:44 PM}	this->m_pNewCube = MyCubeSource::New();
-// COMMENT: {3/5/2008 4:27:44 PM}#else
-// COMMENT: {3/5/2008 4:27:44 PM}	this->m_pNewCube = vtkCubeSource::New();
-// COMMENT: {3/5/2008 4:27:44 PM}#endif
-// COMMENT: {3/5/2008 4:27:44 PM}	this->m_pNewCube->SetXLength( 0.0 );
-// COMMENT: {3/5/2008 4:27:44 PM}	this->m_pNewCube->SetYLength( 0.0 );
-// COMMENT: {3/5/2008 4:27:44 PM}	this->m_pNewCube->SetZLength( bounds[5] - bounds[4] );
-// COMMENT: {3/5/2008 4:27:44 PM}
-// COMMENT: {3/5/2008 4:27:44 PM}	// create cube mapper
-// COMMENT: {3/5/2008 4:27:44 PM}	//
-// COMMENT: {3/5/2008 4:27:44 PM}	this->m_pNewCubeMapper = vtkPolyDataMapper::New();
-// COMMENT: {3/5/2008 4:27:44 PM}	this->m_pNewCubeMapper->SetInput( this->m_pNewCube->GetOutput() );
-// COMMENT: {3/5/2008 4:27:44 PM}
-// COMMENT: {3/5/2008 4:27:44 PM}	// create cube actor
-// COMMENT: {3/5/2008 4:27:44 PM}	//
-// COMMENT: {3/5/2008 4:27:44 PM}	this->m_pNewCubeActor = vtkActor::New();
-// COMMENT: {3/5/2008 4:27:44 PM}	this->m_pNewCubeActor->SetMapper( this->m_pNewCubeMapper );
-// COMMENT: {3/5/2008 4:27:44 PM}	this->m_pNewCubeActor->GetProperty()->SetColor(0.71, 0.71, 0.71);
-// COMMENT: {3/5/2008 4:27:44 PM}// COMMENT: {8/23/2007 10:09:31 PM}	this->m_pNewCubeActor->GetProperty()->SetOpacity(0.5);
-// COMMENT: {3/5/2008 4:27:44 PM}	this->m_pNewCubeActor->GetProperty()->SetOpacity(1.0);
-// COMMENT: {3/5/2008 4:27:44 PM}	this->m_pNewCubeActor->GetProperty()->SetAmbient(1.0);
-// COMMENT: {3/5/2008 4:27:44 PM}	this->m_pNewCubeActor->VisibilityOff();
-// COMMENT: {3/5/2008 4:27:44 PM}
-// COMMENT: {3/5/2008 4:27:44 PM}	// Disable Interactor
-// COMMENT: {3/5/2008 4:27:44 PM}	//
-// COMMENT: {3/5/2008 4:27:44 PM}	if (vtkInteractorStyle* style = vtkInteractorStyle::SafeDownCast(this->InteractorStyle))
-// COMMENT: {3/5/2008 4:27:44 PM}	{
-// COMMENT: {3/5/2008 4:27:44 PM}		if (vtkInteractorStyleSwitch* switcher = vtkInteractorStyleSwitch::SafeDownCast(style))
-// COMMENT: {3/5/2008 4:27:44 PM}		{
-// COMMENT: {3/5/2008 4:27:44 PM}			style = switcher->GetCurrentStyle();
-// COMMENT: {3/5/2008 4:27:44 PM}		}
-// COMMENT: {3/5/2008 4:27:44 PM}		style->SetInteractor(0);
-// COMMENT: {3/5/2008 4:27:44 PM}	}
-// COMMENT: {3/5/2008 4:27:44 PM}
-// COMMENT: {3/5/2008 4:27:44 PM}	// hide BoxWidget
-// COMMENT: {3/5/2008 4:27:44 PM}	//
-// COMMENT: {3/5/2008 4:27:44 PM}	this->BoxWidget->Off();
-// COMMENT: {3/5/2008 4:27:44 PM}
-// COMMENT: {3/5/2008 4:27:44 PM}	// render
-// COMMENT: {3/5/2008 4:27:44 PM}	//
-// COMMENT: {3/5/2008 4:27:44 PM}	this->m_Renderer->AddProp(this->m_pNewCubeActor);
-// COMMENT: {3/5/2008 4:27:44 PM}    this->m_Renderer->Render();
-}
-
-void CWPhastView::CancelNewZone(void)
-{
-	ASSERT(FALSE); // DEAD ??
-// COMMENT: {3/5/2008 4:30:47 PM}	if (this->CreatingNewZone())
-// COMMENT: {3/5/2008 4:30:47 PM}	{
-// COMMENT: {3/5/2008 4:30:47 PM}		this->EndNewZone();
-// COMMENT: {3/5/2008 4:30:47 PM}	}
-}
-
-void CWPhastView::EndNewZone(void)
-{
-	ASSERT(FALSE); // DEAD ??
-
-// COMMENT: {3/5/2008 4:30:56 PM}	ASSERT(this->m_pNewCube != 0);
-// COMMENT: {3/5/2008 4:30:56 PM}	ASSERT(this->m_pNewCubeMapper != 0);
-// COMMENT: {3/5/2008 4:30:56 PM}	ASSERT(this->m_pNewCubeActor != 0);
-// COMMENT: {3/5/2008 4:30:56 PM}
-// COMMENT: {3/5/2008 4:30:56 PM}	// reset cursor
-// COMMENT: {3/5/2008 4:30:56 PM}	//
-// COMMENT: {3/5/2008 4:30:56 PM}	this->m_pCursor3DActor->VisibilityOff();
-// COMMENT: {3/5/2008 4:30:56 PM}
-// COMMENT: {3/5/2008 4:30:56 PM}	// reattach interactor
-// COMMENT: {3/5/2008 4:30:56 PM}	//
-// COMMENT: {3/5/2008 4:30:56 PM}	if (vtkInteractorStyle* style = vtkInteractorStyle::SafeDownCast(this->InteractorStyle))
-// COMMENT: {3/5/2008 4:30:56 PM}	{
-// COMMENT: {3/5/2008 4:30:56 PM}		if (vtkInteractorStyleSwitch* switcher = vtkInteractorStyleSwitch::SafeDownCast(style))
-// COMMENT: {3/5/2008 4:30:56 PM}		{
-// COMMENT: {3/5/2008 4:30:56 PM}			style = switcher->GetCurrentStyle();
-// COMMENT: {3/5/2008 4:30:56 PM}		}
-// COMMENT: {3/5/2008 4:30:56 PM}		style->SetInteractor(this->m_RenderWindowInteractor);
-// COMMENT: {3/5/2008 4:30:56 PM}	}
-// COMMENT: {3/5/2008 4:30:56 PM}
-// COMMENT: {3/5/2008 4:30:56 PM}	// stop rendering the cube actor
-// COMMENT: {3/5/2008 4:30:56 PM}	//
-// COMMENT: {3/5/2008 4:30:56 PM}	this->m_Renderer->RemoveProp(this->m_pNewCubeActor);
-// COMMENT: {3/5/2008 4:30:56 PM}
-// COMMENT: {3/5/2008 4:30:56 PM}	// clean-up
-// COMMENT: {3/5/2008 4:30:56 PM}	//
-// COMMENT: {3/5/2008 4:30:56 PM}	this->m_pNewCubeActor->Delete();
-// COMMENT: {3/5/2008 4:30:56 PM}	this->m_pNewCubeMapper->Delete();
-// COMMENT: {3/5/2008 4:30:56 PM}	this->m_pNewCube->Delete();
-// COMMENT: {3/5/2008 4:30:56 PM}	this->m_pNewCubeActor  = 0;
-// COMMENT: {3/5/2008 4:30:56 PM}	this->m_pNewCubeMapper = 0;
-// COMMENT: {3/5/2008 4:30:56 PM}	this->m_pNewCube       = 0;
-// COMMENT: {3/5/2008 4:30:56 PM}
-// COMMENT: {3/5/2008 4:30:56 PM}	// render
-// COMMENT: {3/5/2008 4:30:56 PM}	this->GetDocument()->UpdateAllViews(0);
 }
 
 BOOL CWPhastView::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
@@ -2201,4 +2039,15 @@ void CWPhastView::SizeHandles(double size)
 			this->PointWidget->PlaceWidget();
 		}
 	}
+}
+
+void CWPhastView::SetBackground(COLORREF cr)
+{
+	this->BackgroundColor[0] = (double)GetRValue(cr)/255.;
+	this->BackgroundColor[1] = (double)GetGValue(cr)/255.;
+	this->BackgroundColor[2] = (double)GetBValue(cr)/255.;	
+	if (this->m_Renderer)
+	{
+		this->m_Renderer->SetBackground(this->BackgroundColor);
+	}	
 }

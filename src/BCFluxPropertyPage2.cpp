@@ -76,7 +76,7 @@ void CBCFluxPropertyPage2::DoDataExchange(CDataExchange* pDX)
 		CBC bc;
 
 		// bc_type
-		bc.bc_type = FLUX;
+		bc.bc_type = BC_info::BC_FLUX;
 
 		// flux time series
 		//

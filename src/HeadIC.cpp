@@ -3,9 +3,15 @@
 
 #include "Zone.h"
 #include "property.h"
+#include "Global.h"
 #include <ostream> // std::ostream
 
-CLIPFORMAT CHeadIC::clipFormat = (CLIPFORMAT)::RegisterClipboardFormat(_T("WPhast:CHeadIC"));
+// Note: No header files should follow the following three lines
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#endif
+
+CLIPFORMAT CHeadIC::clipFormat = (CLIPFORMAT)::RegisterClipboardFormat(_T("WPhast:CHeadIC:2"));
 
 CHeadIC::CHeadIC(void)
 {
@@ -42,7 +48,7 @@ CHeadIC CHeadIC::Full(void)
 
 void CHeadIC::InternalInit(void)
 {
-	this->zone    = 0;
+	this->polyh   = 0;
 	this->mask    = 0;
 	this->ic_type = UNDEFINED;
 	this->head    = 0;
@@ -50,22 +56,25 @@ void CHeadIC::InternalInit(void)
 
 void CHeadIC::InternalDelete(void)
 {
-	delete static_cast<CZone*>(this->zone);
+	delete this->polyh;
 	delete static_cast<Cproperty*>(this->mask);
 	delete static_cast<Cproperty*>(this->head);
 }
 
-void CHeadIC::InternalCopy(const struct head_ic& src)
+void CHeadIC::InternalCopy(const struct Head_ic& src)
 {
-	// zone
-	this->zone = 0;
-	if (src.zone) {
-		this->zone = new CZone(*src.zone);
+	// polyh
+	this->polyh = 0;
+	if (src.polyh)
+	{
+		this->polyh = src.polyh->clone();
 	}
 
 	// mask
 	this->mask = 0;
 	Cproperty::CopyProperty(&this->mask, src.mask);
+
+	this->ic_type = src.ic_type;
 
 	// head
 	this->head = 0;
@@ -77,8 +86,9 @@ CHeadIC::CHeadIC(const CHeadIC& src) // copy ctor
 	this->InternalCopy(src);
 }
 
-CHeadIC::CHeadIC(const struct head_ic& src) // copy ctor
+CHeadIC::CHeadIC(const struct Head_ic& src) // copy ctor
 {
+	ASSERT(src.polyh && ::AfxIsValidAddress(src.polyh, sizeof(Polyhedron)));
 	this->InternalCopy(src);
 }
 
@@ -97,10 +107,6 @@ void CHeadIC::Serialize(bool bStoring, hid_t loc_id)
 	//static const char szMask[] = "mask";
 	static const char szHead[] = "head";
 
-	// zone
-	ASSERT(this->zone);
-	static_cast<CZone*>(this->zone)->Serialize(bStoring, loc_id);
-
 	if (bStoring)
 	{
 		//Cproperty::SerializeCreate(szMask, static_cast<Cproperty*>(this->mask), loc_id);
@@ -116,7 +122,7 @@ void CHeadIC::Serialize(bool bStoring, hid_t loc_id)
 void CHeadIC::Serialize(CArchive& ar)
 {
 	static const char szCHeadIC[] = "CHeadIC";
-	static int version = 1;
+	static int version = 2;
 
 	CString type;
 	int ver;
@@ -146,9 +152,7 @@ void CHeadIC::Serialize(CArchive& ar)
 	}
 
 	// zone
-	ASSERT(this->zone);
-	static_cast<CZone*>(this->zone)->Serialize(ar);
-
+	CGlobal::Serialize(&(this->polyh), ar);
 
 	// properties
 	static const char szHead[] = "head";
@@ -183,7 +187,8 @@ std::ostream& operator<< (std::ostream &os, const CHeadIC &a)
 {
 	os << "HEAD_IC\n";
 
-	os << static_cast<CZone>(*a.zone);
+	ASSERT(a.polyh && ::AfxIsValidAddress(a.polyh, sizeof(Polyhedron)));
+	os << (*a.polyh);
 
 	Cproperty* property_ptr;
 
@@ -196,4 +201,16 @@ std::ostream& operator<< (std::ostream &os, const CHeadIC &a)
 		os << "\t\t-head                     " << (*property_ptr);
 	}
 	return os;
+}
+
+bool CHeadIC::operator==(const Head_ic& rhs)const
+{
+	size_t s = sizeof(Head_ic);
+	ASSERT(sizeof(Head_ic) == 16); // need to modify if this changes
+
+	COMPARE_PROPERTY_MACRO(mask);
+	if (this->ic_type != rhs.ic_type) return false;
+	COMPARE_PROPERTY_MACRO(head);
+
+	return true;
 }

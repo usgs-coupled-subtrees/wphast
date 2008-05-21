@@ -22,9 +22,6 @@ class vtkPolyDataMapper;
 class vtkActor;
 
 class vtkCubeSource;
-// COMMENT: {3/5/2008 4:25:06 PM}#ifdef USE_WEDGE
-// COMMENT: {3/5/2008 4:25:06 PM}class MyCubeSource;
-// COMMENT: {3/5/2008 4:25:06 PM}#endif
 class vtkCylinderSource;
 class CWellActor;
 
@@ -82,6 +79,8 @@ protected:
 
 	vtkInteractorStyle             *InteractorStyle;
 
+	vtkFloatingPointType            BackgroundColor[3];
+
 	bool                            m_bResetCamera;
 	bool                            m_bMovingGridLine;
 
@@ -90,14 +89,6 @@ protected:
 	vtkPolyDataMapper              *m_pCursor3DMapper;
 	vtkActor                       *m_pCursor3DActor;
 
-// COMMENT: {3/5/2008 4:25:27 PM}	// new zone
-// COMMENT: {3/5/2008 4:25:27 PM}#ifdef USE_WEDGE
-// COMMENT: {3/5/2008 4:25:27 PM}	MyCubeSource                   *m_pNewCube;
-// COMMENT: {3/5/2008 4:25:27 PM}#else
-// COMMENT: {3/5/2008 4:25:27 PM}	vtkCubeSource                  *m_pNewCube;
-// COMMENT: {3/5/2008 4:25:27 PM}#endif
-// COMMENT: {3/5/2008 4:25:27 PM}	vtkPolyDataMapper              *m_pNewCubeMapper;
-// COMMENT: {3/5/2008 4:25:27 PM}	vtkActor                       *m_pNewCubeActor;
 
 	int                             m_ViewFromDirection;
 
@@ -139,13 +130,6 @@ public:
 	afx_msg void OnUpdateToolsNewZone(CCmdUI *pCmdUI);
 	afx_msg void OnToolsNewZone();
 
-	// New Zone
-	//
-	void CancelNewZone(void);
-	bool CreatingNewZone(void)const;
-	void StartNewZone(void);
-	void EndNewZone(void);
-
 	// Moving/Copying grid lines
 	//
 	void CancelMoveGridLine(void);
@@ -154,6 +138,8 @@ public:
 	void EndMoveGridLine(void);
 
 	void CancelMode(void);
+
+	void SetBackground(COLORREF cr);
 
 public:
 	afx_msg void OnToolsNewWell();

@@ -2,8 +2,9 @@
 #include "TestCZone.h"
 
 #include "Zone.h"
+#include "srcinput/Cube.h"
 
-int read_zone(char **next_char, struct zone *zone_ptr);
+Cube *read_cube(char **next_char);
 
 
 #ifdef _DEBUG
@@ -125,9 +126,10 @@ void TestCZone::testOperatorEqualsEquals(void)
 void TestCZone::testSerialize(void)
 {
 	const char FILENAME[] = "TestCZone.h5";
-	struct zone z1;
 	char *input = "1 3 5 2 4 6";
-	CPPUNIT_ASSERT(::read_zone(&input, &z1) == OK);
+
+	Cube* pCube = ::read_cube(&input);
+	CPPUNIT_ASSERT(pCube != 0);
 
 	struct zone z2;
 	z2.zone_defined = TRUE;
@@ -138,7 +140,7 @@ void TestCZone::testSerialize(void)
 	z2.z1 = 5;
 	z2.z2 = 6;
 
-    CZone Z1(z1);
+    CZone Z1(*pCube->Get_box());
 	CZone Z2(z2);
 	CPPUNIT_ASSERT(Z1 == Z2);
 
@@ -160,4 +162,6 @@ void TestCZone::testSerialize(void)
 
 	CPPUNIT_ASSERT(H5Fclose(file) >= 0);
 	CPPUNIT_ASSERT(::remove(FILENAME) == 0);
+
+	delete pCube;
 }

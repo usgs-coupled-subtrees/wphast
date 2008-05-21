@@ -4,13 +4,15 @@
 #include "Zone.h"
 #include "property.h"
 #include <ostream> // std::ostream
+#include "Global.h"
+#include "srcinput/Cube.h"
 
 // Note: No header files should follow the following three lines
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
-CLIPFORMAT CGridElt::clipFormat = (CLIPFORMAT)::RegisterClipboardFormat(_T("WPhast:CGridElt"));
+CLIPFORMAT CGridElt::clipFormat = (CLIPFORMAT)::RegisterClipboardFormat(_T("WPhast:CGridElt:2"));
 
 
 /* ---------------------------------------------------------------------- 
@@ -19,7 +21,6 @@ CLIPFORMAT CGridElt::clipFormat = (CLIPFORMAT)::RegisterClipboardFormat(_T("WPha
 CGridElt::CGridElt()
 {
 	this->InternalInit();
-	this->zone = new CZone();
 }
 
 CGridElt::~CGridElt()
@@ -29,7 +30,7 @@ CGridElt::~CGridElt()
 
 void CGridElt::InternalInit(void)
 {
-	this->zone              = 0;
+	this->polyh             = 0;
 	this->mask              = 0;
 	this->active            = 0;
 	this->porosity          = 0;
@@ -45,7 +46,7 @@ void CGridElt::InternalInit(void)
 
 void CGridElt::InternalDelete(void)
 {
-	delete static_cast<CZone*>(this->zone);
+	delete this->polyh;
 	delete static_cast<Cproperty*>(this->mask);
 	delete static_cast<Cproperty*>(this->active);
 	delete static_cast<Cproperty*>(this->porosity);
@@ -129,7 +130,6 @@ CGridElt CGridElt::Full(void)
 	return elt;
 }
 
-
 void CGridElt::Serialize(bool bStoring, hid_t loc_id)
 {
 	static const char szActive[]          = "active";
@@ -143,10 +143,6 @@ void CGridElt::Serialize(bool bStoring, hid_t loc_id)
 	static const char szAlphaTrans[]      = "alpha_trans";
 	static const char szAlphaHorizontal[] = "alpha_horizontal";
 	static const char szAlphaVertical[]   = "alpha_vertical";
-
-	// zone
-	ASSERT(this->zone);
-	static_cast<CZone*>(this->zone)->Serialize(bStoring, loc_id);
 
 	if (bStoring)
 	{
@@ -182,8 +178,9 @@ void CGridElt::Serialize(bool bStoring, hid_t loc_id)
 void CGridElt::Dump(CDumpContext& dc)const
 {
 	dc << "<CGridElt>\n";
-	ASSERT(this->zone);
-	static_cast<CZone*>(this->zone)->Dump(dc);
+
+	ASSERT(this->polyh && ::AfxIsValidAddress(this->polyh, sizeof(Polyhedron)));
+	CGlobal::Dump(dc, *this->polyh);
 
 	dc << "<mask>\n";
 	if (this->mask)
@@ -275,19 +272,18 @@ CGridElt::CGridElt(const CGridElt& src) // copy ctor
 
 CGridElt::CGridElt(const grid_elt& src) // copy ctor
 {
+	ASSERT(src.polyh && ::AfxIsValidAddress(src.polyh, sizeof(Polyhedron)));
 	this->InternalCopy(src);
 }
 
 void CGridElt::InternalCopy(const grid_elt& src)
 {
-	//{{
-	ASSERT(src.zone != 0);
-	this->zone = new CZone(*src.zone);
-
-	//this->zone = new CZone();
-	//ASSERT(src.zone != 0);
-	//(*this->zone) = (*src.zone);
-	//}}
+	// polyh
+	this->polyh = 0;
+	if (src.polyh)
+	{
+		this->polyh = src.polyh->clone();
+	}
 
 	// mask
 	this->mask = 0;
@@ -342,55 +338,12 @@ CGridElt& CGridElt::operator=(const CGridElt& rhs) // copy assignment
 		this->InternalCopy(rhs);
 	}
 	return *this;
-
-
-	//// check for assignment to self
-	//if (this != &rhs) {
-	//	ASSERT(this->zone != 0);
-	//	ASSERT(rhs.zone != 0);
-	//	// zone
-	//	(*this->zone) = (*rhs.zone);
-
-	//	// mask
-	//	Cproperty::CopyProperty(&this->mask, rhs.mask);
-
-	//	// active
-	//	Cproperty::CopyProperty(&this->active, rhs.active);
-
-	//	// porosity
-	//	Cproperty::CopyProperty(&this->porosity, rhs.porosity);
-
-	//	// kx
-	//	Cproperty::CopyProperty(&this->kx, rhs.kx);
-
-	//	// ky
-	//	Cproperty::CopyProperty(&this->ky, rhs.ky);
-
-	//	// kz
-	//	Cproperty::CopyProperty(&this->kz, rhs.kz);
-
-	//	// storage
-	//	Cproperty::CopyProperty(&this->storage, rhs.storage);
-	//	
-	//	// alpha_long
-	//	Cproperty::CopyProperty(&this->alpha_long, rhs.alpha_long);
-
-	//	// alpha_trans
-	//	Cproperty::CopyProperty(&this->alpha_trans, rhs.alpha_trans);
-
-	//	// alpha_horizontal
-	//	Cproperty::CopyProperty(&this->alpha_horizontal, rhs.alpha_horizontal);
-
-	//	// alpha_vertical
-	//	Cproperty::CopyProperty(&this->alpha_vertical, rhs.alpha_vertical);
-	//}
-
-	//return *this;
 }
 
 std::ostream& operator<< (std::ostream &os, const CGridElt &a)
 {
-	os << static_cast<CZone>(*a.zone);
+	ASSERT(a.polyh && ::AfxIsValidAddress(a.polyh, sizeof(Polyhedron)));
+	os << (*a.polyh);
 
 	Cproperty* property_ptr;
 
@@ -444,10 +397,10 @@ std::ostream& operator<< (std::ostream &os, const CGridElt &a)
 void CGridElt::Serialize(CArchive& ar)
 {
 	static const char szCGridElt[] = "CGridElt";
-	static int version = 1;
+	static int version = 2;
 
 	CString type;
-	int ver;
+	int ver = version;
 
 	// type and version header
 	//
@@ -470,12 +423,30 @@ void CGridElt::Serialize(CArchive& ar)
 
 		// read version in case changes need to be made
 		ar >> ver;
-		ASSERT(ver == version);
 	}
 
-	// zone
-	ASSERT(this->zone);
-	static_cast<CZone*>(this->zone)->Serialize(ar);
+	if (ver == 1)
+	{
+		CZone z;
+		z.Serialize(ar);
+		if (ar.IsStoring())
+		{
+			ASSERT(FALSE); // can't happen
+		}
+		else
+		{
+			ASSERT(this->polyh == 0);
+			this->polyh = new Cube(&z);
+		}		
+	}
+	else if(ver == 2)
+	{
+		CGlobal::Serialize(&(this->polyh), ar);
+	}
+	else
+	{
+		ASSERT(FALSE);
+	}
 
 
 	static const char szActive[]          = "active";
@@ -519,7 +490,38 @@ void CGridElt::Serialize(CArchive& ar)
 
 		// read version in case changes need to be made
 		ar >> ver;
-		ASSERT(ver == version);
 	}
 }
 
+#define COMPARE_PROPERTY_MACRO(P) \
+	do { \
+		if (this->P) { \
+			if (rhs.P) { \
+				if (*this->P != *rhs.P) return false; \
+			} else { \
+				if (this->P->type != UNDEFINED) return false; \
+			} \
+		} else { \
+			if (rhs.P && rhs.P->type != UNDEFINED) return false; \
+		} \
+	} while(0)
+
+bool CGridElt::operator==(const grid_elt& rhs)const
+{
+	size_t s = sizeof(grid_elt);
+	ASSERT(sizeof(grid_elt) == 48); // need to modify if this changes
+
+	COMPARE_PROPERTY_MACRO(mask);
+	COMPARE_PROPERTY_MACRO(active);
+	COMPARE_PROPERTY_MACRO(porosity);
+	COMPARE_PROPERTY_MACRO(kx);
+	COMPARE_PROPERTY_MACRO(ky);
+	COMPARE_PROPERTY_MACRO(kz);
+	COMPARE_PROPERTY_MACRO(storage);
+	COMPARE_PROPERTY_MACRO(alpha_long);
+	COMPARE_PROPERTY_MACRO(alpha_trans);
+	COMPARE_PROPERTY_MACRO(alpha_horizontal);
+	COMPARE_PROPERTY_MACRO(alpha_vertical);
+
+	return true;
+}

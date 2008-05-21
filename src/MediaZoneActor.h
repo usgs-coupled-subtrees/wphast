@@ -1,6 +1,7 @@
 #pragma once
 #include "ZoneActor.h"
 #include "GridElt.h"
+#include "srcWedgeSource.h"
 
 class CPropertyTreeControlBar;
 class CUnits;
@@ -11,7 +12,7 @@ class CMediaZoneActor : public CZoneActor
 public:
 	vtkTypeRevisionMacro(CMediaZoneActor,CZoneActor);
 	static CMediaZoneActor *New();
-	static void Create(CWPhastDoc* pWPhastDoc, const CZone& zone, const CGridElt& gridElt, LPCTSTR desc);
+	static void Create(CWPhastDoc* pWPhastDoc, const CGridElt& gridElt, LPCTSTR desc);
 
 	virtual void InsertAt(CTreeCtrl* pTreeCtrl, HTREEITEM hParent, HTREEITEM hInsertAfter);
 	virtual void Insert(CPropertyTreeControlBar* pTreeControlBar, HTREEITEM hInsertAfter);
@@ -37,17 +38,19 @@ protected:
 	CGridElt m_grid_elt;
 	static vtkFloatingPointType s_color[3];
 	static vtkProperty* s_Property;
+	static vtkProperty* s_OutlineProperty;
 
 private:
 	CMediaZoneActor(const CMediaZoneActor&);  // Not implemented.
 	void operator=(const CMediaZoneActor&);  // Not implemented.
 public:
 	CGridElt GetGridElt(void)const;
-	////void SetGridElt(const CGridElt& rGridElt, const CUnits& rUnits);
 	void SetGridElt(const CGridElt& rGridElt);
 
 	CGridElt GetData(void)const;
-	void SetData(const CGridElt& rGridElt);	
+	void SetData(const CGridElt& rGridElt);
+
+	virtual Polyhedron*& GetPolyhedron(void);
 
 	HTREEITEM GetHTreeItem(void)const;
 
@@ -55,22 +58,35 @@ private:
 	class StaticInit
 	{
 	public:
-		StaticInit() {
-			if (CMediaZoneActor::s_Property == 0) {
+		StaticInit()
+		{
+			if (CMediaZoneActor::s_Property == 0)
+			{
 				CMediaZoneActor::s_Property = vtkProperty::New();
 				CMediaZoneActor::s_Property->SetColor(CMediaZoneActor::s_color);
 				CMediaZoneActor::s_Property->SetOpacity(0.3);
-// COMMENT: {2/27/2008 8:14:45 PM}#ifdef USE_WEDGE
-// COMMENT: {2/27/2008 8:14:45 PM}				CMediaZoneActor::s_Property->SetRepresentationToWireframe();
-// COMMENT: {2/27/2008 8:14:45 PM}				CMediaZoneActor::s_Property->SetColor(1.f, 1.f, 1.f);
-// COMMENT: {2/27/2008 8:14:45 PM}				CMediaZoneActor::s_Property->SetOpacity(1.0);
-// COMMENT: {2/27/2008 8:14:45 PM}#endif
+			}
+			if (CMediaZoneActor::s_OutlineProperty == 0)
+			{
+				CMediaZoneActor::s_OutlineProperty = vtkProperty::New();
+				CMediaZoneActor::s_OutlineProperty->SetAmbient(1.0);
+				CMediaZoneActor::s_OutlineProperty->SetColor(CMediaZoneActor::s_color);
+				CMediaZoneActor::s_OutlineProperty->SetEdgeColor(CMediaZoneActor::s_color);	
+				CMediaZoneActor::s_OutlineProperty->SetAmbientColor(CMediaZoneActor::s_color);
+				CMediaZoneActor::s_OutlineProperty->SetRepresentationToWireframe();
 			}
 		}
-		~StaticInit() {
-			if (CMediaZoneActor::s_Property != 0) {
+		~StaticInit()
+		{
+			if (CMediaZoneActor::s_Property != 0)
+			{
 				CMediaZoneActor::s_Property->Delete();
 				CMediaZoneActor::s_Property = 0;
+			}
+			if (CMediaZoneActor::s_OutlineProperty != 0)
+			{
+				CMediaZoneActor::s_OutlineProperty->Delete();
+				CMediaZoneActor::s_OutlineProperty = 0;
 			}
 		}
 	};

@@ -87,7 +87,7 @@ void CBCLeakyPropertyPage2::DoDataExchange(CDataExchange* pDX)
 		CBC bc;
 
 		// bc_type
-		bc.bc_type = LEAKY;
+		bc.bc_type = BC_info::BC_LEAKY;
 
 		// thickness
 		//

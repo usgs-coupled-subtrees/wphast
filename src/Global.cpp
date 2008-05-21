@@ -2076,7 +2076,7 @@ void CGlobal::WriteBool(std::ostream &os, int width, bool value, const char *hea
 herr_t CGlobal::HDFSerializeCOLORREF(bool bStoring, hid_t loc_id, const char* szName, COLORREF& clr)
 {
 	ASSERT(sizeof(COLORREF) <= sizeof(unsigned long));
-	herr_t status = CGlobal::HDFSerialize(bStoring, loc_id, szName, H5T_NATIVE_ULONG, 1, &clr);
+	herr_t status = CGlobal::HDFSerializeSafe(bStoring, loc_id, szName, H5T_NATIVE_ULONG, 1, &clr);
 	return status;
 }
 
@@ -2104,4 +2104,272 @@ int CGlobal::ExtractXMLStream(std::istream &is, std::iostream &ios)
 		}
 	}
 	return 0;
+}
+
+void CGlobal::Serialize(Polyhedron **p, CArchive &ar)
+{
+	static const char szPolyhedron[] = "Polyhedron";
+	static int version = 1;
+
+	CString type;
+	int ver;
+
+	// type and version header
+	//
+	if (ar.IsStoring())
+	{
+		// store type as string
+		//
+		type = szPolyhedron;
+		ar << type;
+
+		// store version in case changes need to be made
+		ar << version;
+	}
+	else
+	{
+		// read type as string
+		//
+		ar >> type;
+		ASSERT(type.Compare(szPolyhedron) == 0);
+
+		// read version in case changes need to be made
+		ar >> ver;
+	}
+
+	int t;
+	if (ar.IsStoring())
+	{
+		ASSERT(*p && ::AfxIsValidAddress(*p, sizeof(Polyhedron *)));
+
+		t = (*p)->get_type();
+		ar << t;
+
+		CZone z(*(*p)->Get_box());
+		z.Serialize(ar);
+
+		if (t == Polyhedron::WEDGE)
+		{
+			Wedge *w = static_cast<Wedge*>(*p);
+			CString c(srcWedgeSource::GetWedgeOrientationString(w->orientation).c_str());
+			ar << c;
+		}
+
+	}
+	else
+	{
+		ASSERT(*p == 0);
+
+		ar >> t;
+
+		CZone z;
+		z.Serialize(ar);
+
+		CString c;
+		if (t == Polyhedron::WEDGE)
+		{
+			ar >> c;
+		}
+
+		switch (t)
+		{
+		case Polyhedron::CUBE:
+			(*p) = new Cube(&z);
+			break;
+		case Polyhedron::WEDGE:
+			(*p) = new Wedge(&z, std::string(c));
+			break;
+		}
+	}
+
+
+	// type and version footer
+	//
+	if (ar.IsStoring())
+	{
+		// store type as string
+		//
+		type = szPolyhedron;
+		ar << type;
+
+		// store version in case changes need to be made
+		ar << version;
+	}
+	else
+	{
+		// read type as string
+		//
+		ar >> type;
+		ASSERT(type.Compare(szPolyhedron) == 0);
+
+		// read version in case changes need to be made
+		ar >> ver;
+	}
+
+}
+
+#ifdef _DEBUG
+void CGlobal::Dump(CDumpContext& dc, Polyhedron& p)
+{
+	dc << "<Polyhedron>\n";
+
+	Polyhedron::POLYHEDRON_TYPE t = p.get_type();
+	switch (t)
+	{
+	case Polyhedron::CUBE:
+		dc << "<CUBE>\n";
+		break;
+	case Polyhedron::WEDGE:
+		dc << "<WEDGE>\n";
+		break;
+	}
+
+	CZone z(*p.Get_box());
+	z.Dump(dc);
+
+	switch (t)
+	{
+	case Polyhedron::CUBE:
+		dc << "</CUBE>\n";
+		break;
+	case Polyhedron::WEDGE:
+		dc << "</WEDGE>\n";
+		break;
+	}
+
+	dc << "</Polyhedron>\n";
+}
+#endif // _DEBUG
+
+herr_t CGlobal::HDFSerializeSafe(bool bStoring, hid_t loc_id, const char* szName, hid_t mem_type_id, hsize_t count, void* buf)
+{
+	hsize_t dims[1], maxdims[1];
+	hid_t dspace_id = 0;
+	hid_t dset_id = 0;
+	herr_t status;
+	herr_t return_val;
+
+	ASSERT(count > 0); // bad count
+
+	if (bStoring)
+	{
+		// Create the szName dataspace
+		dims[0] = maxdims[0] = count;
+		dspace_id = ::H5Screate_simple(1, dims, maxdims);
+		if (dspace_id > 0)
+		{
+			// Create the szName dataset
+			dset_id = ::H5Dcreate(loc_id, szName, mem_type_id, dspace_id, H5P_DEFAULT);
+			if (dset_id > 0)
+			{
+				// Write the szName dataset
+				status = ::H5Dwrite(dset_id, mem_type_id, dspace_id, H5S_ALL, H5P_DEFAULT, buf);
+				if (status < 0)
+				{
+					ASSERT(FALSE); // unable to write dataset
+					return_val = status;
+					goto HDFSerializeError;
+				}
+				// Close the szName dataset
+				status = ::H5Dclose(dset_id);
+				if (status < 0)
+				{
+					ASSERT(FALSE); // unable to close dataset
+					return_val = status;
+					goto HDFSerializeError;
+				}
+			}
+			else
+			{
+				ASSERT(FALSE); // unable to create dataspace
+				return_val = dset_id;
+				goto HDFSerializeError;
+			}
+			// Close the szName dataspace
+			status = ::H5Sclose(dspace_id);
+			if (status < 0)
+			{
+				ASSERT(FALSE); // unable to close dataspace
+				return_val = status;
+				goto HDFSerializeError;
+			}
+		}
+		else
+		{
+			ASSERT(FALSE); // unable to create dataspace
+			return_val = dspace_id;
+			goto HDFSerializeError;
+		}
+	}
+	else
+	{
+		// Open the szName dataset
+		dset_id = ::H5Dopen(loc_id, szName);
+		if (dset_id > 0)
+		{
+			// get the szName dataspace
+			dspace_id = ::H5Dget_space(dset_id);
+			if (dspace_id > 0)
+			{
+				int n_dims = ::H5Sget_simple_extent_dims(dspace_id, dims, maxdims);
+				if (n_dims == 1)
+				{
+					ASSERT(dims[0] == count); // count mismatch
+					if (dims[0] == count)
+					{
+						// read the szName dataset
+						status = ::H5Dread(dset_id, mem_type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
+						if (status < 0)
+						{
+							return_val = status;
+							goto HDFSerializeError;
+						}
+						// Close the szName dataspace
+						status = ::H5Sclose(dspace_id);
+						ASSERT(status >= 0); // unable to close dataspace
+					}
+					else
+					{
+						return_val = -1;
+						goto HDFSerializeError;
+					}
+				}
+				else
+				{
+					return_val = n_dims;
+					goto HDFSerializeError;
+				}
+				// Close the szName dataset
+				status = ::H5Dclose(dset_id);
+				ASSERT(status >= 0); // unable to close dataset
+			}
+			else
+			{
+				return_val = dspace_id;
+				goto HDFSerializeError;
+			}
+		}
+		else
+		{
+			return_val = dset_id;
+			goto HDFSerializeError;
+		}
+	}
+
+	// ok if here
+	return 0; // no errors
+
+HDFSerializeError:
+
+	if (dset_id > 0)
+	{
+		status = ::H5Dclose(dset_id);
+		ASSERT(status >= 0); // unable to close dataset
+	}
+	if (dspace_id > 0)
+	{
+		status = ::H5Sclose(dspace_id);
+		ASSERT(status >= 0); // unable to close dataspace
+	}
+	return return_val;
 }

@@ -10,10 +10,9 @@
 #include "SetMediaAction.h"
 #include "ZoneCreateAction.h"
 #include "FlowOnly.h"
+#include "Protect.h"
 
 #include <vtkPropAssembly.h>
-
-
 #include <vtkObjectFactory.h> // reqd by vtkStandardNewMacro
 
 vtkCxxRevisionMacro(CMediaZoneActor, "$Revision$");
@@ -22,33 +21,35 @@ vtkStandardNewMacro(CMediaZoneActor);
 const char CMediaZoneActor::szHeading[] = "Media";
 vtkFloatingPointType CMediaZoneActor::s_color[3] = {0., 0., 0.};
 vtkProperty* CMediaZoneActor::s_Property = 0;
+vtkProperty* CMediaZoneActor::s_OutlineProperty = 0;
+
+
+// Note: No header files should follow the following three lines
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#endif
 
 CMediaZoneActor::CMediaZoneActor(void)
 {
-	static StaticInit init; // constructs/destructs s_Property
+	static StaticInit init; // constructs/destructs s_Property/s_OutlineProperty
 
-	ASSERT(this->m_grid_elt.zone);
-	this->m_pZone = this->m_grid_elt.zone;
-
-	// color
+	// cube
 	this->CubeActor->SetProperty(CMediaZoneActor::s_Property);
+
+	// outline
+	this->OutlineActor->SetProperty(CMediaZoneActor::s_OutlineProperty);
 }
 
 CMediaZoneActor::~CMediaZoneActor(void)
 {
 }
 
-void CMediaZoneActor::Create(CWPhastDoc* pWPhastDoc, const CZone& zone, const CGridElt& gridElt, LPCTSTR desc)
+void CMediaZoneActor::Create(CWPhastDoc* pWPhastDoc, const CGridElt& gridElt, LPCTSTR desc)
 {
+	ASSERT(gridElt.polyh && ::AfxIsValidAddress(gridElt.polyh, sizeof(Polyhedron)));
 	CZoneCreateAction<CMediaZoneActor>* pAction = new CZoneCreateAction<CMediaZoneActor>(
 		pWPhastDoc,
-		pWPhastDoc->GetNextZoneName(),
-		zone.x1,
-		zone.x2,
-		zone.y1,
-		zone.y2,
-		zone.z1,
-		zone.z2,
+		gridElt.polyh,
 		desc
 		);
 	pAction->GetZoneActor()->SetGridElt(gridElt);
@@ -71,7 +72,6 @@ void CMediaZoneActor::Serialize(bool bStoring, hid_t loc_id, const CUnits& units
 		this->SetUnits(units);
 
 		// color
-		//
 		if (CMediaZoneActor::s_Property)
 		{
 			this->CubeActor->SetProperty(CMediaZoneActor::s_Property);
@@ -231,7 +231,6 @@ void CMediaZoneActor::Edit(CTreeCtrl* pTreeCtrl)
 	}
 }
 
-
 CGridElt CMediaZoneActor::GetGridElt(void)const
 {
 	return this->m_grid_elt;
@@ -246,14 +245,10 @@ void CMediaZoneActor::SetGridElt(const CGridElt& rGridElt)
 {
 	// NOTE: Use SetBounds to set the zone
 	//
-
-	ASSERT(this->m_grid_elt.zone);
-	CZone zoneSave(*this->m_grid_elt.zone);
-
+	CProtect p(this->m_grid_elt.polyh);
 	this->m_grid_elt = rGridElt;
-	(*this->m_grid_elt.zone) = zoneSave;
-	this->m_pZone = this->m_grid_elt.zone;
 }
+
 
 void CMediaZoneActor::SetData(const CGridElt& rGridElt)
 {
@@ -303,5 +298,15 @@ void CMediaZoneActor::SetStaticColor(COLORREF cr)
 	{
 		CMediaZoneActor::s_Property->SetColor(CMediaZoneActor::s_color);
 	}
+	if (CMediaZoneActor::s_OutlineProperty)
+	{
+		CMediaZoneActor::s_OutlineProperty->SetColor(CMediaZoneActor::s_color);
+		CMediaZoneActor::s_OutlineProperty->SetEdgeColor(CMediaZoneActor::s_color);
+		CMediaZoneActor::s_OutlineProperty->SetAmbientColor(CMediaZoneActor::s_color);
+	}
 }
 
+Polyhedron*& CMediaZoneActor::GetPolyhedron(void)
+{
+	return this->m_grid_elt.polyh;
+}

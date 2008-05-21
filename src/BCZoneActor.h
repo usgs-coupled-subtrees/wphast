@@ -11,7 +11,7 @@ class CBCZoneActor : public CZoneActor
 public:
 	vtkTypeRevisionMacro(CBCZoneActor,CZoneActor);
 	static CBCZoneActor *New();
-	static void Create(CWPhastDoc* pWPhastDoc, const CZone& zone, const CBC& bc, LPCTSTR desc);
+	static void Create(CWPhastDoc* pWPhastDoc, const CBC& bc, LPCTSTR desc);
 
 	virtual void Insert(CPropertyTreeControlBar* pTreeControlBar, HTREEITEM hInsertAfter = TVI_LAST);
 	virtual void InsertAt(CTreeCtrl* pTreeCtrl, HTREEITEM hParent, HTREEITEM hInsertAfter);
@@ -46,6 +46,7 @@ protected:
 	CBC m_bc;
 	static vtkFloatingPointType s_color[3][3];
 	static vtkProperty* s_Property[3];
+	static vtkProperty* s_OutlineProperty[3];
 
 private:
 	CBCZoneActor(const CBCZoneActor&);  // Not implemented.
@@ -58,6 +59,8 @@ public:
 	CBC GetData(void)const;
 	void SetData(const CBC& rBC);
 
+	virtual Polyhedron*& GetPolyhedron(void);
+
 	HTREEITEM GetHTreeItem(void)const;
 	void SetHTreeItem(HTREEITEM htItem);
 
@@ -65,20 +68,41 @@ private:
 	class StaticInit
 	{
 	public:
-		StaticInit() {
-			for (int i = 0; i < 3; ++i) {
-				if (CBCZoneActor::s_Property[i] == 0) {
+		StaticInit()
+		{
+			for (int i = 0; i < 3; ++i)
+			{
+				if (CBCZoneActor::s_Property[i] == 0)
+				{
 					CBCZoneActor::s_Property[i] = vtkProperty::New();
 					CBCZoneActor::s_Property[i]->SetColor(CBCZoneActor::s_color[i]);
 					CBCZoneActor::s_Property[i]->SetOpacity(0.3);
 				}
+				if (CBCZoneActor::s_OutlineProperty[i] == 0)
+				{
+					CBCZoneActor::s_OutlineProperty[i] = vtkProperty::New();
+					CBCZoneActor::s_OutlineProperty[i]->SetAmbient(1.0);
+					CBCZoneActor::s_OutlineProperty[i]->SetColor(CBCZoneActor::s_color[i]);
+					CBCZoneActor::s_OutlineProperty[i]->SetEdgeColor(CBCZoneActor::s_color[i]);	
+					CBCZoneActor::s_OutlineProperty[i]->SetAmbientColor(CBCZoneActor::s_color[i]);
+					CBCZoneActor::s_OutlineProperty[i]->SetRepresentationToWireframe();
+				}
+
 			}
 		}
-		~StaticInit() {
-			for (int i = 0; i < 3; ++i) {
-				if (CBCZoneActor::s_Property[i] != 0) {
+		~StaticInit()
+		{
+			for (int i = 0; i < 3; ++i)
+			{
+				if (CBCZoneActor::s_Property[i] != 0)
+				{
 					CBCZoneActor::s_Property[i]->Delete();
 					CBCZoneActor::s_Property[i] = 0;
+				}
+				if (CBCZoneActor::s_OutlineProperty[i] != 0)
+				{
+					CBCZoneActor::s_OutlineProperty[i]->Delete();
+					CBCZoneActor::s_OutlineProperty[i] = 0;
 				}
 			}
 		}

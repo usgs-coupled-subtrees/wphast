@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vtkPolyDataSource.h>
+#include "srcinput/wedge.h"
 
 class srcWedgeSource : public vtkPolyDataSource 
 {
@@ -38,7 +39,7 @@ public:
 
   //
   //
-  enum ChopType {
+  typedef enum tagChopType {
 	  CHOP_NONE,
 	  // fixed z
 	  CHOP_MIN_X_MAX_Y,
@@ -57,11 +58,37 @@ public:
 	  CHOP_MIN_Y_MIN_Z,
   } ChopType;
 
-  enum ChopType GetChopType()const;
-  void SetChopType(enum ChopType t);
+  /*
+	typedef enum tagWedgeOrientation {
+		X1,
+		X2,
+		X3,
+		X4,
+		Y1,
+		Y2,
+		Y3,
+		Y4,
+		Z1,
+		Z2,
+		Z3,
+		Z4,
+		WEDGE_ERROR,
+	} WedgeOrientation;
+	*/
+
+
+  ChopType GetChopType()const;
+  void SetChopType(ChopType t);
+
+  static Wedge::WEDGE_ORIENTATION ConvertChopType(srcWedgeSource::ChopType t);
+  static ChopType ConvertWedgeOrientation(Wedge::WEDGE_ORIENTATION o);
+  static std::string GetWedgeOrientationString(Wedge::WEDGE_ORIENTATION o);
+  static std::string GetWedgeOrientationString(srcWedgeSource::ChopType ct);
+
 
 protected:
-  srcWedgeSource(float xL=1.0, float yL=1.0, float zL=1.0);
+  srcWedgeSource(float xL=1.0, float yL=1.0, float zL=1.0, srcWedgeSource::ChopType n = srcWedgeSource::CHOP_NONE);
+
   ~srcWedgeSource() {};
 
   void Execute();
@@ -69,21 +96,8 @@ protected:
   float YLength;
   float ZLength;
   float Center[3];
-  
 
-// COMMENT: {3/5/2008 9:12:34 PM}#define CHOP_MAX_X_MAX_Y
-// COMMENT: {3/5/2008 9:12:34 PM}#define CHOP_MAX_X_MIN_Y
-// COMMENT: {3/5/2008 9:12:34 PM}#define CHOP_MIN_X_MIN_Y
-// COMMENT: {3/5/2008 9:12:34 PM}
-// COMMENT: {3/5/2008 9:12:34 PM}#define CHOP_MIN_X_MAX_Z
-// COMMENT: {3/5/2008 9:12:34 PM}#define CHOP_MAX_X_MAX_Z
-// COMMENT: {3/5/2008 9:12:34 PM}#define CHOP_MAX_X_MIN_Z
-// COMMENT: {3/5/2008 9:12:34 PM}#define CHOP_MIN_X_MIN_Z
-// COMMENT: {3/5/2008 9:12:34 PM}
-// COMMENT: {3/5/2008 9:12:34 PM}#define CHOP_MAX_Y_MIN_Z
-// COMMENT: {3/5/2008 9:12:34 PM}#define CHOP_MAX_Y_MAX_Z
-// COMMENT: {3/5/2008 9:12:34 PM}#define CHOP_MIN_Y_MAX_Z
-// COMMENT: {3/5/2008 9:12:34 PM}#define CHOP_MIN_Y_MIN_Z
+  ChopType chopType;
 
 private:
   srcWedgeSource(const srcWedgeSource&);  // Not implemented.
