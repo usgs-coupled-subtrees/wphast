@@ -37,6 +37,7 @@ protected:
 	HTREEITEM m_htiBCSpec;
 	HTREEITEM m_htiICHead;
 	HTREEITEM m_htiChemIC;
+	HTREEITEM m_htiFlowRate;
 	
 	UINT m_type;
 	CArray<CPropertyPage*, CPropertyPage*> m_PropPageArray;
@@ -44,5 +45,7 @@ public:
 	virtual BOOL OnSetActive();
 	UINT GetType(void);
 	virtual LRESULT OnWizardNext();
+	virtual BOOL OnWizardFinish();
 	afx_msg void OnNMDblclkTreeZones(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnTVNSelChanged(NMHDR *pNMHDR, LRESULT *pResult);
 };

@@ -8,6 +8,7 @@
 #define EXTERNAL extern
 #include "srcinput/hstinpt.h"
 #undef EXTERNAL
+#include "enum_fix.h"
 
 #include <iosfwd> // std::ostream
 

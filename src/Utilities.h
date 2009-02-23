@@ -16,7 +16,8 @@ public:
 
 	static double ParseDouble(LPCSTR lpszString);
 
-	static void GetWorldPointAtFixedPlane(vtkRenderWindowInteractor *interactor, vtkRenderer *renderer, int fixed, vtkFloatingPointType value, vtkFloatingPointType point[3]);
+	static void GetWorldPointAtFixedPlane(vtkRenderWindowInteractor *interactor, vtkRenderer *renderer, int fixed, float value, float point[3]);
+	static void GetWorldPointAtFixedPlane(vtkRenderWindowInteractor *interactor, vtkRenderer *renderer, int fixed, double value, double point[3]);
 
 	static void VTK_dump(vtkObject* obj);
 

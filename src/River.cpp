@@ -5,17 +5,30 @@
 
 #include "WPhastMacros.h"
 
+// COMMENT: {12/19/2008 3:46:00 PM}#define x             x_user
+// COMMENT: {12/19/2008 3:48:12 PM}#define x_defined     x_user_defined
+// COMMENT: {12/19/2008 3:47:08 PM}#define y             y_user
+// COMMENT: {12/19/2008 3:48:15 PM}#define y_defined     y_user_defined
+// COMMENT: {12/19/2008 3:49:44 PM}#define width         width_user
+// COMMENT: {12/19/2008 3:49:44 PM}#define width_defined width_user_defined
+#define depth         depth_user
+#define depth_defined depth_user_defined
+#define z             z_user
+#define z_defined     z_user_defined
+
+
 CLIPFORMAT CRiver::clipFormat = (CLIPFORMAT)::RegisterClipboardFormat(_T("WPhast:CRiver"));
 
 CRiver::CRiver(void)
+: coordinate_system(PHAST_Transform::MAP)
 {
 }
 
 CRiver::CRiver(const River &r)
+: n_user(r.n_user)
+, description(r.description)
+, coordinate_system(r.coordinate_system)
 {
-	this->n_user      = r.n_user;
-	this->description = r.description;
-
 	// points
 	//
 	for (int ip = 0; ip < r.count_points; ++ip)
@@ -38,6 +51,9 @@ void CRiver::Serialize(bool bStoring, hid_t loc_id)
 
 	HDF_GETSET_MACRO(n_user, H5T_NATIVE_INT);
 	HDF_STD_STRING_MACRO(description);
+
+	CGlobal::HDFSerializeXYCoordinateSystem(bStoring, loc_id, this->coordinate_system);
+	CGlobal::HDFSerializeZCoordinateSystem(bStoring, loc_id, this->z_coordinate_system_user);
 
 	hid_t point_id;
 	herr_t status;
@@ -103,6 +119,9 @@ void CRiver::Serialize(CArchive& ar)
 	ARC_GETSET_MACRO(ar, n_user);
 	ARC_STD_STRING_MACRO(ar, description);
 
+	ARC_GETSET_COORD_SYS_MACRO(ar, coordinate_system);
+	ARC_GETSET_COORD_SYS_MACRO(ar, z_coordinate_system_user);
+
 	if (ar.IsStoring())
 	{
 		ASSERT(sizeof(ULONGLONG) >= sizeof(std::list<CRiverPoint>::size_type));
@@ -134,34 +153,44 @@ void CRiver::Serialize(CArchive& ar)
 }
 
 CRiverPoint::CRiverPoint(void)
-: x_defined(0)
-, y_defined(0)
+: x_user_defined(0)
+, y_user_defined(0)
 , z_defined(0)
 , depth_defined(0)
 , k_defined(0)
-, width_defined(0)
+, width_user_defined(0)
 , thickness_defined(0)
-, x(0.0)
-, y(0.0)
+, x_user(0.0)
+, y_user(0.0)
 , z(0.0)
+, x_grid(0.0)
+, y_grid(0.0)
+, z_grid(0.0)
 {
 }
 
 CRiverPoint::CRiverPoint(const River_Point& rp)
-: x_defined(rp.x_defined)
-, y_defined(rp.y_defined)
-, z_defined(rp.z_input_defined)
+: x_user_defined(rp.x_user_defined)
+, y_user_defined(rp.y_user_defined)
+// COMMENT: {12/19/2008 3:41:15 PM}, z_defined(rp.z_input_defined)
+, z_user_defined(rp.z_user_defined)
 , depth_defined(rp.depth_defined)
 , k_defined(rp.k_defined)
-, width_defined(rp.width_defined)
+, width_user_defined(rp.width_user_defined)
 , thickness_defined(rp.thickness_defined)
+// COMMENT: {12/19/2008 3:44:08 PM}, z_input_defined(rp.z_input_defined)
+, x_grid(rp.x_grid)
+, y_grid(rp.y_grid)
+, width_grid(rp.width_grid)
+, z_grid(rp.z_grid)
+
 {
-	if (this->x_defined)         this->x         = rp.x;
-	if (this->y_defined)         this->y         = rp.y;
-	if (this->z_defined)         this->z         = rp.z;
-	if (this->depth_defined)     this->depth     = rp.depth;
-	if (this->k_defined)         this->k         = rp.k;
-	if (this->width_defined)     this->width     = rp.width;
+	if (this->x_user_defined)     this->x_user     = rp.x_user;
+	if (this->y_user_defined)     this->y_user     = rp.y_user;
+	if (this->z_defined)          this->z          = rp.z;
+	if (this->depth_defined)      this->depth      = rp.depth;
+	if (this->k_defined)          this->k          = rp.k;
+	if (this->width_user_defined) this->width_user = rp.width_user;
 	if (this->thickness_defined) this->thickness = rp.thickness;
 
 	if (rp.head_defined && rp.head)
@@ -200,18 +229,18 @@ void CRiverPoint::Insert(const Ctime& time, const CRiverState& state)
 
 bool CRiverPoint::IsAnyThingDefined(void)const
 {
-	return (this->depth_defined || this->k_defined || this->width_defined || this->thickness_defined || !this->m_riverSchedule.empty());
+	return (this->depth_defined || this->k_defined || this->width_user_defined || this->thickness_defined || !this->m_riverSchedule.empty());
 }
 
 void CRiverPoint::Serialize(bool bStoring, hid_t loc_id)
 {
-	HDF_GETSET_DEFINED_MACRO(x,         H5T_NATIVE_DOUBLE);
-	HDF_GETSET_DEFINED_MACRO(y,         H5T_NATIVE_DOUBLE);
-	HDF_GETSET_DEFINED_MACRO(z,         H5T_NATIVE_DOUBLE);
-	HDF_GETSET_DEFINED_MACRO(depth,     H5T_NATIVE_DOUBLE);
-	HDF_GETSET_DEFINED_MACRO(k,         H5T_NATIVE_DOUBLE);
-	HDF_GETSET_DEFINED_MACRO(width,     H5T_NATIVE_DOUBLE);
-	HDF_GETSET_DEFINED_MACRO(thickness, H5T_NATIVE_DOUBLE);
+	HDF_GETSET_DEFINED_MACRO(x_user,         H5T_NATIVE_DOUBLE);
+	HDF_GETSET_DEFINED_MACRO(y_user,         H5T_NATIVE_DOUBLE);
+	HDF_GETSET_DEFINED_MACRO(z_user,         H5T_NATIVE_DOUBLE);
+	HDF_GETSET_DEFINED_MACRO(depth_user,     H5T_NATIVE_DOUBLE);
+	HDF_GETSET_DEFINED_MACRO(k,              H5T_NATIVE_DOUBLE);
+	HDF_GETSET_DEFINED_MACRO(width_user,     H5T_NATIVE_DOUBLE);
+	HDF_GETSET_DEFINED_MACRO(thickness,      H5T_NATIVE_DOUBLE);
 
 	static const char sz_schedule[] = "Schedule";
 
@@ -227,12 +256,12 @@ void CRiverPoint::Serialize(bool bStoring, hid_t loc_id)
 
 void CRiverPoint::Serialize(CArchive& ar)
 {
-	ARC_GETSET_DEFINED_MACRO(ar, x);
-	ARC_GETSET_DEFINED_MACRO(ar, y);
+	ARC_GETSET_DEFINED_MACRO(ar, x_user);
+	ARC_GETSET_DEFINED_MACRO(ar, y_user);
 	ARC_GETSET_DEFINED_MACRO(ar, z);
 	ARC_GETSET_DEFINED_MACRO(ar, depth);
 	ARC_GETSET_DEFINED_MACRO(ar, k);
-	ARC_GETSET_DEFINED_MACRO(ar, width);
+	ARC_GETSET_DEFINED_MACRO(ar, width_user);
 	ARC_GETSET_DEFINED_MACRO(ar, thickness);
 
 	this->m_riverSchedule.Serialize(ar);
@@ -252,12 +281,16 @@ void CRiverState::Serialize(CArchive& ar)
 
 std::ostream& operator<< (std::ostream &os, const CRiver &a)
 {
+	const char* coor_name[] = {"MAP", "GRID", "NONE"};
+
 	os << "RIVER " << a.n_user;
 	if (!a.description.empty())
 	{
 		os << " " << a.description;
 	}
 	os << "\n";
+
+	os << "\t-coordinate_system" << " " << coor_name[a.coordinate_system] << "\n";
 
 	std::list<CRiverPoint>::const_iterator it = a.m_listPoints.begin();
 	for(; it != a.m_listPoints.end(); ++it)
@@ -270,7 +303,7 @@ std::ostream& operator<< (std::ostream &os, const CRiver &a)
 
 std::ostream& operator<< (std::ostream &os, const CRiverPoint &a)
 {
-	os << "\t-point " << a.x << " " << a.y << "\n";
+	os << "\t-point " << a.x_user << " " << a.y_user << "\n";
 
 	size_t nSolutions = 0;
 	size_t nHeads     = 0;
@@ -301,7 +334,7 @@ std::ostream& operator<< (std::ostream &os, const CRiverPoint &a)
 			if (state.head_defined)
 			{
 				os << "\t\t\t" << time.value;
-				if (time.type == UNITS && time.input && ::strlen(time.input))
+				if (time.type == TT_UNITS && time.input && ::strlen(time.input))
 				{
 					os << " " << time.input;
 				}
@@ -323,7 +356,7 @@ std::ostream& operator<< (std::ostream &os, const CRiverPoint &a)
 			if (state.solution_defined)
 			{
 				os << "\t\t\t" << time.value;
-				if (time.type == UNITS && time.input && ::strlen(time.input))
+				if (time.type == TT_UNITS && time.input && ::strlen(time.input))
 				{
 					os << " " << time.input;
 				}
@@ -334,9 +367,9 @@ std::ostream& operator<< (std::ostream &os, const CRiverPoint &a)
 
 	// width
 	//
-	if (a.width_defined)
+	if (a.width_user_defined)
 	{
-		os << "\t\t-width                       " << a.width << "\n";
+		os << "\t\t-width                       " << a.width_user << "\n";
 	}
 
 	// bed_hydraulic_conductivity

@@ -92,13 +92,24 @@ public:
 	static herr_t HDFSerializeCells(bool bStoring, hid_t loc_id, const char* szName, vtkCellArray *&pCells);
 
 	static herr_t HDFSerializeData_source(bool bStoring, hid_t loc_id, const char* szName, Data_source &rData_source);
-	static herr_t HDFSerializePerimeterOption(bool bStoring, hid_t loc_id, Prism::PERIMETER_OPTION &perimeter_option);
+// COMMENT: {10/21/2008 3:15:49 PM}	static herr_t HDFSerializePerimeterOption(bool bStoring, hid_t loc_id, Prism::PERIMETER_OPTION &perimeter_option);
+	static herr_t HDFSerializeCoordinateSystem(bool bStoring, hid_t loc_id, PHAST_Transform::COORDINATE_SYSTEM &coor_sys);
+	static herr_t HDFSerializeCoordinateSystemUser(bool bStoring, hid_t loc_id, PHAST_Transform::COORDINATE_SYSTEM &coor_sys);
+	static herr_t HDFSerializeXYCoordinateSystem(bool bStoring, hid_t loc_id, PHAST_Transform::COORDINATE_SYSTEM &coor_sys);
+	static herr_t HDFSerializeZCoordinateSystem(bool bStoring, hid_t loc_id, PHAST_Transform::COORDINATE_SYSTEM &coor_sys);
+
+
 
 
 	static hid_t HDFCreatePolyhedronDataType(void);
 	static hid_t HDFCreateWidgetOrientationDataType(void);
 	static hid_t HDFCreateDataSourceType(void);
-	static hid_t HDFCreatePerimeterOptionType(void);
+// COMMENT: {10/21/2008 3:16:17 PM}	static hid_t HDFCreatePerimeterOptionType(void);
+	static hid_t HDFCreateCoordinateSystemType(void);	
+	static hid_t HDFCreatePropType(void);
+	static hid_t HDFCreateCellFace(void);
+
+
 
 
 	static std::string FullPath(std::string filename);
@@ -145,6 +156,19 @@ public:
 #ifdef _DEBUG
 	static void Dump(CDumpContext& dc, Polyhedron& p);
 #endif
+
+public:
+	static void ComputeDisplayToWorld(vtkRenderer *renderer, double x, double y, double z, double worldPt[4]);
+	static void ComputeWorldToDisplay(vtkRenderer *renderer, double x, double y, double z, double displayPt[4]);
+	static double ComputeRadius(vtkRenderer *renderer);
+	static double ComputeHandleRadius(vtkRenderer *renderer);
+
+	static void SetRadiusFactor(double factor);
+	static double GetRadiusFactor(void);
+
+protected:
+	static double CGlobal::RadiusFactor;
+
 };
 
 template<typename T>

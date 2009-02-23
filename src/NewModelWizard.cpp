@@ -18,6 +18,8 @@ CNewModelWizard::CNewModelWizard(LPCTSTR pszCaption, CWnd* pParentWnd,
 	, m_introPage()
 	, m_units1Page(IDS_UNITS1_CAPTION_137,  IDS_UNITS1_TITLE_138,  IDS_UNITS1_SUBTITLE_139)
 	, m_units2Page(IDS_UNITS2_CAPTION_140,  IDS_UNITS2_TITLE_141,  IDS_UNITS2_SUBTITLE_142)
+	, m_units3Page(IDS_UNITS2_CAPTION_140,  IDS_UNITS2_TITLE_141,  IDS_UNITS2_SUBTITLE_142)
+	, m_units4Page(IDS_UNITS2_CAPTION_140,  IDS_UNITS2_TITLE_141,  IDS_UNITS2_SUBTITLE_142)
 	, m_importPage(IDS_IMPMAP_CAPTION_155,  IDS_IMPMAP_TITLE_156,  IDS_IMPMAP_SUBTITLE_157)
 	, m_gridPage  (IDS_GRID_CAPTION_143,    IDS_GRID_TITLE_144,    IDS_GRID_SUBTITLE_145)
 	, m_mediaPage (IDS_MEDIA_CAPTION_146,   IDS_MEDIA_TITLE_147,   IDS_MEDIA_SUBTITLE_148)
@@ -32,6 +34,8 @@ CNewModelWizard::CNewModelWizard(LPCTSTR pszCaption, CWnd* pParentWnd,
 	AddPage(&this->m_introPage);
 	AddPage(&this->m_units1Page);
 	AddPage(&this->m_units2Page);
+	AddPage(&this->m_units3Page);
+	AddPage(&this->m_units4Page);
 	AddPage(&this->m_importPage);
 	AddPage(&this->m_gridPage);
 	AddPage(&this->m_mediaPage);
@@ -59,6 +63,8 @@ CNewModel CNewModelWizard::GetModel(void)const
 	model.m_steadyFlow = this->m_introPage.GetSteadyFlow();
 	this->m_units1Page.GetProperties(model.m_units);
 	this->m_units2Page.GetProperties(model.m_units);
+	this->m_units3Page.GetProperties(model.m_units);
+	this->m_units4Page.GetProperties(model.m_units);
 	if (this->m_importPage.m_bImport)
 	{
 		CSiteMap site = this->m_importPage.GetSiteMap();
@@ -73,7 +79,6 @@ CNewModel CNewModelWizard::GetModel(void)const
 	this->m_mediaPage.GetProperties(model.m_media);
 	this->m_icHeadPage.GetProperties(model.m_headIC);
 	this->m_chemICPage.GetProperties(model.m_chemIC);
-// COMMENT: {4/22/2005 3:43:04 PM}	this->m_tcPage.GetProperties(model.m_timeControl);
 	this->m_tcPage.GetProperties(model.m_timeControl2);
 	return model;
 }
@@ -83,23 +88,13 @@ CFlowOnly CNewModelWizard::GetFlowOnly(void)const
 	return this->m_introPage.GetFlowOnly();
 }
 
-// COMMENT: {6/1/2004 1:48:56 PM}void CNewModelWizard::SetFlowOnly(const CFlowOnly &flowOnly)
-// COMMENT: {6/1/2004 1:48:56 PM}{
-// COMMENT: {6/1/2004 1:48:56 PM}	this->m_introPage.SetFlowOnly(flowOnly);
-// COMMENT: {6/1/2004 1:48:56 PM}// COMMENT: {6/1/2004 1:40:18 PM}	if (!flowOnly) {
-// COMMENT: {6/1/2004 1:48:56 PM}// COMMENT: {6/1/2004 1:40:18 PM}		CGridElt gridElt;
-// COMMENT: {6/1/2004 1:48:56 PM}// COMMENT: {6/1/2004 1:40:18 PM}		this->m_mediaPage.GetProperties(gridElt);
-// COMMENT: {6/1/2004 1:48:56 PM}// COMMENT: {6/1/2004 1:40:18 PM}		if (!gridElt.alpha_horizontal) {
-// COMMENT: {6/1/2004 1:48:56 PM}// COMMENT: {6/1/2004 1:40:18 PM}			gridElt.alpha_horizontal = new Property();
-// COMMENT: {6/1/2004 1:48:56 PM}// COMMENT: {6/1/2004 1:40:18 PM}		}
-// COMMENT: {6/1/2004 1:48:56 PM}// COMMENT: {6/1/2004 1:40:18 PM}	}
-// COMMENT: {6/1/2004 1:48:56 PM}}
-
 CUnits CNewModelWizard::GetUnits(void)const
 {
 	CUnits units;
 	this->m_units1Page.GetProperties(units);
 	this->m_units2Page.GetProperties(units);
+	this->m_units3Page.GetProperties(units);
+	this->m_units4Page.GetProperties(units);
 	return units;
 }
 
@@ -156,12 +151,3 @@ CTimeControl2 CNewModelWizard::GetTimeControl2(void)const
 	this->m_tcPage.GetProperties(timeControl2);
 	return timeControl2;
 }
-
-// CNewModelWizard message handlers
-
-//INT_PTR CNewModelWizard::DoModal()
-//{
-//	// TODO: Add your specialized code here and/or call the base class
-//
-//	return CPropertySheet::DoModal();
-//}

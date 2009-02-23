@@ -24,7 +24,7 @@ public:
 	void UpdateTree(CPropertyTreeControlBar* pTreeControlBar);
 
 	void Edit(CTreeCtrl* pTreeCtrl, int nStressPeriod = 1);
-	void Serialize(bool bStoring, hid_t loc_id, const CUnits& units);
+	void Serialize(bool bStoring, hid_t loc_id, const CWPhastDoc* pWPhastDoc);
 
 
 	static const char szHeading[];

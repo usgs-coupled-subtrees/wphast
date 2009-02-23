@@ -23,14 +23,21 @@
 #include <vtkLine.h>
 
 #include "MacroAction.h"
-#include "RiverMovePointAction.h"
+#include "PointConnectorMovePointAction.h"
 #include "ZoneResizeAction.h"
+#include "ZonePrismResetAction.h"
 #include "WedgeChangeChopTypeAction.h"
 #include "WellSetPositionAction.h"
+#include "ZoneSetPolyAction.h"
+#include "SetAction.h"
+
 #include "ZoneActor.h"
 #include "WellActor.h"
 #include "RiverActor.h"
+#include "DrainActor.h"
 #include "SaveCurrentDirectory.h"
+#include "GridKeyword.h"
+#include "srcinput/Polyhedron.h"
 #include "srcinput/Prism.h"
 #include "srcinput/Data_source.h"
 #include "srcinput/Shapefiles/shapefile.h"
@@ -67,12 +74,8 @@ IMPLEMENT_DYNAMIC(CBoxPropertiesDialogBar, CSizingDialogBarCFVS7);
 
 
 BEGIN_MESSAGE_MAP(CBoxPropertiesDialogBar, CSizingDialogBarCFVS7)
-// COMMENT: {8/1/2007 2:30:26 PM}	ON_EN_KILLFOCUS(IDC_EDIT_X, OnEnKillfocusEdit)
-// COMMENT: {8/1/2007 2:30:26 PM}	ON_EN_KILLFOCUS(IDC_EDIT_Y, OnEnKillfocusEdit)
-// COMMENT: {8/1/2007 2:30:26 PM}	ON_EN_KILLFOCUS(IDC_EDIT_Z, OnEnKillfocusEdit)
-// COMMENT: {8/1/2007 2:30:26 PM}	ON_EN_KILLFOCUS(IDC_EDIT_LENGTH, OnEnKillfocusEdit)
-// COMMENT: {8/1/2007 2:30:26 PM}	ON_EN_KILLFOCUS(IDC_EDIT_WIDTH, OnEnKillfocusEdit)
-// COMMENT: {8/1/2007 2:30:26 PM}	ON_EN_KILLFOCUS(IDC_EDIT_HEIGHT, OnEnKillfocusEdit)
+
+	// Cube Notifications (BP_POS_PLUS_LENGTH) -- NOT USED
 	ON_EN_CHANGE(IDC_EDIT_X, OnEnChange)
 	ON_EN_CHANGE(IDC_EDIT_Y, OnEnChange)
 	ON_EN_CHANGE(IDC_EDIT_Z, OnEnChange)
@@ -80,35 +83,16 @@ BEGIN_MESSAGE_MAP(CBoxPropertiesDialogBar, CSizingDialogBarCFVS7)
 	ON_EN_CHANGE(IDC_EDIT_WIDTH, OnEnChange)
 	ON_EN_CHANGE(IDC_EDIT_HEIGHT, OnEnChange)
 
+	// Cube Notifications (BP_MIN_MAX and BP_WEDGE)
 	ON_EN_CHANGE(IDC_EDIT_XMIN, OnEnChange)
 	ON_EN_CHANGE(IDC_EDIT_YMIN, OnEnChange)
 	ON_EN_CHANGE(IDC_EDIT_ZMIN, OnEnChange)
 	ON_EN_CHANGE(IDC_EDIT_XMAX, OnEnChange)
 	ON_EN_CHANGE(IDC_EDIT_YMAX, OnEnChange)
 	ON_EN_CHANGE(IDC_EDIT_ZMAX, OnEnChange)
-	ON_BN_CLICKED(IDC_APPLY, OnApply)
-	//{{
-// COMMENT: {7/31/2007 5:47:43 PM}	ON_UPDATE_COMMAND_UI(ID_EDIT_CUT, OnUpdateEditCut)
-// COMMENT: {7/31/2007 5:47:43 PM}	ON_COMMAND(ID_EDIT_CUT, OnEditCut)
-// COMMENT: {7/31/2007 5:47:43 PM}	ON_UPDATE_COMMAND_UI(ID_EDIT_COPY, OnUpdateEditCopy)
-// COMMENT: {7/31/2007 5:47:43 PM}	ON_COMMAND(ID_EDIT_COPY, OnEditCopy)
-// COMMENT: {7/31/2007 5:47:43 PM}	ON_UPDATE_COMMAND_UI(ID_EDIT_PASTE, OnUpdateEditPaste)
-// COMMENT: {7/31/2007 5:47:43 PM}	ON_COMMAND(ID_EDIT_PASTE, OnEditPaste)
-// COMMENT: {7/31/2007 5:47:43 PM}	ON_UPDATE_COMMAND_UI(ID_EDIT_CLEAR, OnUpdateEditClear)
-// COMMENT: {7/31/2007 5:47:43 PM}	ON_COMMAND(ID_EDIT_CLEAR, OnEditClear)
-// COMMENT: {7/31/2007 5:47:43 PM}	ON_UPDATE_COMMAND_UI(ID_EDIT_UNDO, OnUpdateEditUndo)
-// COMMENT: {7/31/2007 5:47:43 PM}	ON_COMMAND(ID_EDIT_UNDO, OnEditUndo)
-// COMMENT: {7/31/2007 5:47:43 PM}	ON_UPDATE_COMMAND_UI(ID_EDIT_REDO, OnUpdateEditRedo)
-// COMMENT: {7/31/2007 5:47:43 PM}	ON_COMMAND(ID_EDIT_REDO, OnEditRedo)
-	ON_EN_CHANGE(IDC_EDIT_WELL_X, OnEnChange)
-	ON_EN_CHANGE(IDC_EDIT_WELL_Y, OnEnChange)
-	ON_NOTIFY(GVN_ENDLABELEDIT, IDC_GRID_RIVER, OnEndLabelEditGrid)
-	ON_NOTIFY(GVN_ENDLABELEDIT, IDC_GRID_POINTS, OnEndLabelEditPointsGrid)
-
 	ON_CONTROL_RANGE(EN_KILLFOCUS, IDC_EDIT_XMIN, IDC_EDIT_ZMAX, OnEnKillfocusRange)
-	ON_CONTROL_RANGE(EN_KILLFOCUS, IDC_EDIT_WELL_X, IDC_EDIT_WELL_Y, OnEnKillfocusRange)
-	//}}
 
+	// Wedge Notifications (BP_WEDGE)
 	ON_BN_CLICKED(IDC_RADIO_X, OnBnClickedUpdateWedge)
 	ON_BN_CLICKED(IDC_RADIO_Y, OnBnClickedUpdateWedge)
 	ON_BN_CLICKED(IDC_RADIO_Z, OnBnClickedUpdateWedge)
@@ -116,9 +100,25 @@ BEGIN_MESSAGE_MAP(CBoxPropertiesDialogBar, CSizingDialogBarCFVS7)
 	ON_BN_CLICKED(IDC_RADIO_2, OnBnClickedUpdateWedge)
 	ON_BN_CLICKED(IDC_RADIO_3, OnBnClickedUpdateWedge)
 	ON_BN_CLICKED(IDC_RADIO_4, OnBnClickedUpdateWedge)
+
+	// Apply button -- NOT USED
+	ON_BN_CLICKED(IDC_APPLY, OnApply)
+
+	// Well Notifications (BP_WELL)
+	ON_EN_CHANGE(IDC_EDIT_WELL_X, OnEnChange)
+	ON_EN_CHANGE(IDC_EDIT_WELL_Y, OnEnChange)
+	ON_BN_CLICKED(IDC_CHECK_USE_MAP, OnBnClickedUseMap)
+	ON_CONTROL_RANGE(EN_KILLFOCUS, IDC_EDIT_WELL_X, IDC_EDIT_WELL_Y, OnEnKillfocusRange)
+
+	// River Notifications (BP_RIVER)
+	ON_NOTIFY(GVN_ENDLABELEDIT, IDC_GRID_RIVER, OnEndLabelEditGrid)
+	ON_BN_CLICKED(IDC_CHECK_USE_MAP2, OnBnClickedUseMap)
+
+	// General
 	ON_WM_CTLCOLOR()
 	ON_WM_SIZE()
-	// PRISM Notifications
+
+	// Prism Notifications (BP_PRISM)
 	ON_NOTIFY(TCN_SELCHANGE, IDC_TAB, &CBoxPropertiesDialogBar::OnTcnSelchangeTab)
 	ON_NOTIFY(TCN_SELCHANGING, IDC_TAB, &CBoxPropertiesDialogBar::OnTcnSelchangingTab)
 	ON_BN_CLICKED(IDC_RADIO_CONSTANT, OnBnClickedData_source)
@@ -131,6 +131,9 @@ BEGIN_MESSAGE_MAP(CBoxPropertiesDialogBar, CSizingDialogBarCFVS7)
 	ON_CBN_SELCHANGE(IDC_COMBO_SHAPE, OnCbnSelChangeShape)
 	ON_EN_CHANGE(IDC_EDIT_CONSTANT, OnEnChangeConstant)
 	ON_EN_KILLFOCUS(IDC_EDIT_CONSTANT, OnEnKillfocusConstant)
+	ON_NOTIFY(GVN_ENDLABELEDIT, IDC_GRID_POINTS, OnEndLabelEditPointsGrid)
+	ON_NOTIFY(GVN_BEGINLABELEDIT, IDC_GRID_POINTS, OnBeginLabelEditPointsGrid)	
+
 END_MESSAGE_MAP()
 
 CBoxPropertiesDialogBar::CBoxPropertiesDialogBar()
@@ -208,7 +211,7 @@ void CBoxPropertiesDialogBar::Update(IObserver* pSender, LPARAM lHint, CObject* 
 		{
 			if (CZoneActor* pZoneActor = CZoneActor::SafeDownCast(pProp))
 			{
-				if (pObject != this->m_pProp3D)
+				if (true) // in case zone has morphed // if (pObject != this->m_pProp3D)
 				{
 					this->HideRiverControls();
 					this->HideWellControls();
@@ -243,6 +246,7 @@ void CBoxPropertiesDialogBar::Update(IObserver* pSender, LPARAM lHint, CObject* 
 				{
 					this->HideRiverControls();
 					this->HideWedgeControls();
+					this->HidePrismControls();
 					this->ShowWellControls();
 					this->ShowApply();
 				}
@@ -257,11 +261,27 @@ void CBoxPropertiesDialogBar::Update(IObserver* pSender, LPARAM lHint, CObject* 
 				{
 					this->HideWedgeControls();
 					this->HideWellControls();
+					this->HidePrismControls();
 					this->ShowRiverControls();
 					this->ShowApply();
 				}
 
 				this->Set(pView, pRiverActor, pView->GetDocument()->GetUnits());
+			}
+			else if (CDrainActor* pDrainActor = CDrainActor::SafeDownCast(pProp))
+			{
+				this->m_nType = CBoxPropertiesDialogBar::BP_DRAIN;
+
+				if (pObject != this->m_pProp3D)
+				{
+					this->HideWedgeControls();
+					this->HideWellControls();
+					this->HidePrismControls();
+					this->ShowRiverControls();
+					this->ShowApply();
+				}
+
+				this->Set(pView, pDrainActor, pView->GetDocument()->GetUnits());
 			}
 			else
 			{
@@ -337,6 +357,10 @@ void CBoxPropertiesDialogBar::Set(CWPhastView* pView, vtkProp3D* pProp3D, const 
 			break;
 		case Polyhedron::CUBE:
 			this->m_nType = CBoxPropertiesDialogBar::BP_MIN_MAX;
+			if (Cube *cube = dynamic_cast<Cube*>(pZone->GetPolyhedron()))
+			{
+				this->m_xy_coordinate_system_user = cube->Get_user_coordinate_system();
+			}
 			if (pZone->GetDefault())
 			{
 				// default zones cannot be changed
@@ -366,8 +390,10 @@ void CBoxPropertiesDialogBar::Set(CWPhastView* pView, vtkProp3D* pProp3D, const 
 	{
 		this->m_nType = CBoxPropertiesDialogBar::BP_WELL;
 
-		this->m_XWell = pWell->GetWell().x;
-		this->m_YWell = pWell->GetWell().y;
+		this->m_XWell = pWell->GetWell().x_user;
+		this->m_YWell = pWell->GetWell().y_user;
+
+		this->m_xy_coordinate_system_user = pWell->GetWell().xy_coordinate_system_user;
 
 		this->UpdateData(FALSE);
 
@@ -383,6 +409,16 @@ void CBoxPropertiesDialogBar::Set(CWPhastView* pView, vtkProp3D* pProp3D, const 
 
 		CString caption;
 		caption.Format(_T("River points (%s)"), pRiverActor->GetName());
+		this->SetWindowText(caption);
+	}
+	else if (CDrainActor* pDrainActor = this->m_pProp3D ? CDrainActor::SafeDownCast(this->m_pProp3D) : NULL)
+	{
+		this->m_nType = CBoxPropertiesDialogBar::BP_DRAIN;
+
+		this->UpdateData(FALSE);
+
+		CString caption;
+		caption.Format(_T("Drain points (%s)"), pDrainActor->GetName());
 		this->SetWindowText(caption);
 	}
 	else
@@ -464,15 +500,71 @@ void CBoxPropertiesDialogBar::DoDataExchange(CDataExchange* pDX)
 		DDX_Text(pDX, IDC_EDIT_YMAX, m_YMax);
 		DDX_Text(pDX, IDC_EDIT_ZMAX, m_ZMax);
 
-		DDX_Text(pDX, IDC_X_UNITS_STATIC2, m_strHorizontalUnits);
-		DDX_Text(pDX, IDC_Y_UNITS_STATIC2, m_strHorizontalUnits);
-		DDX_Text(pDX, IDC_Z_UNITS_STATIC2, m_strVerticalUnits);
+		// Use map coordinates
+		int state = BST_UNCHECKED;
+		switch (this->m_xy_coordinate_system_user)
+		{
+		case PHAST_Transform::MAP:
+			state = BST_CHECKED;
+			DDX_Text(pDX, IDC_X_UNITS_STATIC2, m_strMapHorizontalUnits);
+			DDX_Text(pDX, IDC_Y_UNITS_STATIC2, m_strMapHorizontalUnits);
+			DDX_Text(pDX, IDC_Z_UNITS_STATIC2, m_strMapVerticalUnits);
+			break;
+		case PHAST_Transform::GRID:
+			DDX_Text(pDX, IDC_X_UNITS_STATIC2, m_strHorizontalUnits);
+			DDX_Text(pDX, IDC_Y_UNITS_STATIC2, m_strHorizontalUnits);
+			DDX_Text(pDX, IDC_Z_UNITS_STATIC2, m_strVerticalUnits);
+			break;
+		default:
+			ASSERT(FALSE);
+			break;
+		}
+		DDX_Check(pDX, IDC_CHECK_USE_MAP, state);
+		if (pDX->m_bSaveAndValidate)
+		{
+			switch (state)
+			{
+			case BST_CHECKED:
+				this->m_xy_coordinate_system_user = PHAST_Transform::MAP;
+				break;
+			default:
+				this->m_xy_coordinate_system_user = PHAST_Transform::GRID;
+				break;
+			}
+		}
 	}
 	else if (this->m_nType == CBoxPropertiesDialogBar::BP_WELL)
 	{
 		// wells
-		DDX_Text(pDX, IDC_X_UNITS_STATIC, m_strHorizontalUnits);
-		DDX_Text(pDX, IDC_Y_UNITS_STATIC, m_strHorizontalUnits);
+		int state = BST_UNCHECKED;
+		switch (this->m_xy_coordinate_system_user)
+		{
+		case PHAST_Transform::MAP:
+			state = BST_CHECKED;
+			DDX_Text(pDX, IDC_X_UNITS_STATIC, m_strMapHorizontalUnits);
+			DDX_Text(pDX, IDC_Y_UNITS_STATIC, m_strMapHorizontalUnits);
+			break;
+		case PHAST_Transform::GRID:
+			DDX_Text(pDX, IDC_X_UNITS_STATIC, m_strHorizontalUnits);
+			DDX_Text(pDX, IDC_Y_UNITS_STATIC, m_strHorizontalUnits);
+			break;
+		default:
+			ASSERT(FALSE);
+			break;
+		}
+		DDX_Check(pDX, IDC_CHECK_USE_MAP, state);
+		if (pDX->m_bSaveAndValidate)
+		{
+			switch (state)
+			{
+			case BST_CHECKED:
+				this->m_xy_coordinate_system_user = PHAST_Transform::MAP;
+				break;
+			default:
+				this->m_xy_coordinate_system_user = PHAST_Transform::GRID;
+				break;
+			}
+		}
 
 		DDX_Text(pDX, IDC_EDIT_WELL_X, m_XWell);
 		DDX_Text(pDX, IDC_EDIT_WELL_Y, m_YWell);
@@ -480,52 +572,64 @@ void CBoxPropertiesDialogBar::DoDataExchange(CDataExchange* pDX)
 	else if (this->m_nType == CBoxPropertiesDialogBar::BP_RIVER)
 	{
 		CRiver river = reinterpret_cast<CRiverActor*>(this->m_pProp3D)->GetRiver();
-		TRY
-		{
-			this->m_wndRiverGrid.SetRowCount(1 + (int)river.m_listPoints.size());
-		}
-		CATCH (CMemoryException, e)
-		{
-			e->ReportError();
-			e->Delete();
-		}
-		END_CATCH
+		this->DoDataExchangePoints<CRiver>(pDX, river);
 
+		// Use map coordinates
+		int state = BST_UNCHECKED;
+		switch (river.coordinate_system)
+		{
+		case PHAST_Transform::MAP:
+			state = BST_CHECKED;
+			break;
+		case PHAST_Transform::GRID:
+			break;
+		default:
+			ASSERT(FALSE);
+			break;
+		}
+		DDX_Check(pDX, IDC_CHECK_USE_MAP2, state);
 		if (pDX->m_bSaveAndValidate)
 		{
-			this->m_vectorPoints.clear();
-			double x, y;
-			for (int row = 1; row < this->m_wndRiverGrid.GetRowCount(); ++row)
+			switch (state)
 			{
-				DDX_TextGridControl(pDX, IDC_GRID_RIVER, row, 0, x);
-				DDX_TextGridControl(pDX, IDC_GRID_RIVER, row, 1, y);
-				std::pair<double, double> pt(x, y);
-				this->m_vectorPoints.push_back(pt);
+			case BST_CHECKED:
+				river.coordinate_system =  PHAST_Transform::MAP;
+				break;
+			default:
+				river.coordinate_system =  PHAST_Transform::GRID;
+				break;
 			}
 		}
-		else
+	}
+	else if (this->m_nType == CBoxPropertiesDialogBar::BP_DRAIN)
+	{
+		CDrain drain = reinterpret_cast<CDrainActor*>(this->m_pProp3D)->GetDrain();
+		this->DoDataExchangePoints<CDrain>(pDX, drain);
+
+		// Use map coordinates
+		int state = BST_UNCHECKED;
+		switch (drain.coordinate_system)
 		{
-			CString title_x(_T("X "));
-			title_x += this->m_strHorizontalUnits;
-			DDX_TextGridControl(pDX, IDC_GRID_RIVER, 0, 0, title_x);
-
-			CString title_y(_T("Y "));
-			title_y += this->m_strHorizontalUnits;
-			DDX_TextGridControl(pDX, IDC_GRID_RIVER, 0, 1, title_y);
-
-			std::list<CRiverPoint>::iterator iter = river.m_listPoints.begin();
-			for (int row = 1; row < this->m_wndRiverGrid.GetRowCount(); ++row, ++iter)
+		case PHAST_Transform::MAP:
+			state = BST_CHECKED;
+			break;
+		case PHAST_Transform::GRID:
+			break;
+		default:
+			ASSERT(FALSE);
+			break;
+		}
+		DDX_Check(pDX, IDC_CHECK_USE_MAP2, state);
+		if (pDX->m_bSaveAndValidate)
+		{
+			switch (state)
 			{
-				DDX_TextGridControl(pDX, IDC_GRID_RIVER, row, 0, iter->x);
-				DDX_TextGridControl(pDX, IDC_GRID_RIVER, row, 1, iter->y);
-				this->m_wndRiverGrid.RedrawCell(row, 0);
-				this->m_wndRiverGrid.RedrawCell(row, 1);
-			}
-			this->m_wndRiverGrid.SetModified(FALSE);
-			for (int r = 1; r < this->m_wndRiverGrid.GetRowCount(); ++r)
-			{
-				ASSERT(!this->m_wndRiverGrid.GetModified(r, 0));
-				ASSERT(!this->m_wndRiverGrid.GetModified(r, 1));
+			case BST_CHECKED:
+				drain.coordinate_system =  PHAST_Transform::MAP;
+				break;
+			default:
+				drain.coordinate_system =  PHAST_Transform::GRID;
+				break;
 			}
 		}
 	}
@@ -624,6 +728,59 @@ void CBoxPropertiesDialogBar::DoDataExchange(CDataExchange* pDX)
 	TRACE("%s, out\n", __FUNCTION__);
 }
 
+template<class T>
+void CBoxPropertiesDialogBar::DoDataExchangePoints(CDataExchange* pDX, T &type)
+{
+	TRY
+	{
+		this->m_wndRiverGrid.SetRowCount(1 + (int)type.m_listPoints.size());
+	}
+	CATCH (CMemoryException, e)
+	{
+		e->ReportError();
+		e->Delete();
+	}
+	END_CATCH
+
+	if (pDX->m_bSaveAndValidate)
+	{
+		this->m_vectorPoints.clear();
+		double x, y;
+		for (int row = 1; row < this->m_wndRiverGrid.GetRowCount(); ++row)
+		{
+			DDX_TextGridControl(pDX, IDC_GRID_RIVER, row, 0, x);
+			DDX_TextGridControl(pDX, IDC_GRID_RIVER, row, 1, y);
+			std::pair<double, double> pt(x, y);
+			this->m_vectorPoints.push_back(pt);
+		}
+	}
+	else
+	{
+		CString title_x(_T("X "));
+		title_x += this->m_strHorizontalUnits;
+		DDX_TextGridControl(pDX, IDC_GRID_RIVER, 0, 0, title_x);
+
+		CString title_y(_T("Y "));
+		title_y += this->m_strHorizontalUnits;
+		DDX_TextGridControl(pDX, IDC_GRID_RIVER, 0, 1, title_y);
+
+		std::list<CRiverPoint>::iterator iter = type.m_listPoints.begin();
+		for (int row = 1; row < this->m_wndRiverGrid.GetRowCount(); ++row, ++iter)
+		{
+			DDX_TextGridControl(pDX, IDC_GRID_RIVER, row, 0, iter->x_user);
+			DDX_TextGridControl(pDX, IDC_GRID_RIVER, row, 1, iter->y_user);
+			this->m_wndRiverGrid.RedrawCell(row, 0);
+			this->m_wndRiverGrid.RedrawCell(row, 1);
+		}
+		this->m_wndRiverGrid.SetModified(FALSE);
+		for (int r = 1; r < this->m_wndRiverGrid.GetRowCount(); ++r)
+		{
+			ASSERT(!this->m_wndRiverGrid.GetModified(r, 0));
+			ASSERT(!this->m_wndRiverGrid.GetModified(r, 1));
+		}
+	}
+}
+
 void CBoxPropertiesDialogBar::OnApply()
 {
 	TRACE("%s, in\n", __FUNCTION__);
@@ -691,7 +848,8 @@ void CBoxPropertiesDialogBar::OnApply()
 						pWellActor,
 						this->m_pView->GetDocument(),
 						this->m_XWell,
-						this->m_YWell
+						this->m_YWell,
+						this->m_xy_coordinate_system_user
 						);
 				}
 				break;
@@ -704,14 +862,39 @@ void CBoxPropertiesDialogBar::OnApply()
 					{
 						CRiverPoint* riverPt = pRiverActor->GetRiverPoint(r-1);
 						std::pair<double, double> pt = this->m_vectorPoints[r-1];
-						if (riverPt->x != pt.first || riverPt->y != pt.second)
+						if (riverPt->x_user != pt.first || riverPt->y_user != pt.second)
 						{
-							CRiverMovePointAction* pRMPA = new CRiverMovePointAction(
+							CPointConnectorMovePointAction<CRiverActor>* pRMPA = new CPointConnectorMovePointAction<CRiverActor>(
 								pRiverActor,
 								this->m_pView->GetDocument(),
 								r-1,
-								riverPt->x,
-								riverPt->y
+								riverPt->x_user,
+								riverPt->y_user
+							);
+							pRMPA->SetPoint(pt.first, pt.second);
+							pMacroAction->Add(pRMPA);
+						}
+					}
+					pAction = pMacroAction;
+				}
+				break;
+			case CBoxPropertiesDialogBar::BP_DRAIN:
+				if (CDrainActor* pDrainActor = this->m_pProp3D ? CDrainActor::SafeDownCast(this->m_pProp3D) : NULL)
+				{
+					CDrain drain = pDrainActor->GetDrain();
+					CMacroAction* pMacroAction = new CMacroAction();
+					for (int r = 1; r < this->m_wndRiverGrid.GetRowCount(); ++r)
+					{
+						CRiverPoint* riverPt = pDrainActor->GetRiverPoint(r-1);
+						std::pair<double, double> pt = this->m_vectorPoints[r-1];
+						if (riverPt->x_user != pt.first || riverPt->y_user != pt.second)
+						{
+							CPointConnectorMovePointAction<CDrainActor>* pRMPA = new CPointConnectorMovePointAction<CDrainActor>(
+								pDrainActor,
+								this->m_pView->GetDocument(),
+								r-1,
+								riverPt->x_user,
+								riverPt->y_user
 							);
 							pRMPA->SetPoint(pt.first, pt.second);
 							pMacroAction->Add(pRMPA);
@@ -773,9 +956,13 @@ void CBoxPropertiesDialogBar::OnApply()
 void CBoxPropertiesDialogBar::Enable(bool bEnable)
 {
 	if (bEnable)
+	{
 		TRACE("%s, true in\n", __FUNCTION__);
+	}
 	else
+	{
 		TRACE("%s, false in\n", __FUNCTION__);
+	}
 
 
 #ifdef SHOW_APPLY_BUTTON
@@ -784,58 +971,76 @@ void CBoxPropertiesDialogBar::Enable(bool bEnable)
 
 	if (this->m_nType == CBoxPropertiesDialogBar::BP_POS_PLUS_LENGTH)
 	{
-		if (CEdit* pEdit = (CEdit*)this->GetDlgItem(IDC_EDIT_X)) {
+		if (CEdit* pEdit = (CEdit*)this->GetDlgItem(IDC_EDIT_X))
+		{
 			pEdit->SetReadOnly(!bEnable);
 		}
-		if (CEdit* pEdit = (CEdit*)this->GetDlgItem(IDC_EDIT_Y)) {
+		if (CEdit* pEdit = (CEdit*)this->GetDlgItem(IDC_EDIT_Y))
+		{
 			pEdit->SetReadOnly(!bEnable);
 		}
-		if (CEdit* pEdit = (CEdit*)this->GetDlgItem(IDC_EDIT_Z)) {
+		if (CEdit* pEdit = (CEdit*)this->GetDlgItem(IDC_EDIT_Z))
+		{
 			pEdit->SetReadOnly(!bEnable);
 		}
 
-		if (CEdit* pEdit = (CEdit*)this->GetDlgItem(IDC_EDIT_LENGTH)) {
+		if (CEdit* pEdit = (CEdit*)this->GetDlgItem(IDC_EDIT_LENGTH))
+		{
 			pEdit->SetReadOnly(!bEnable);
 		}
-		if (CEdit* pEdit = (CEdit*)this->GetDlgItem(IDC_EDIT_WIDTH)) {
+		if (CEdit* pEdit = (CEdit*)this->GetDlgItem(IDC_EDIT_WIDTH))
+		{
 			pEdit->SetReadOnly(!bEnable);
 		}
-		if (CEdit* pEdit = (CEdit*)this->GetDlgItem(IDC_EDIT_HEIGHT)) {
+		if (CEdit* pEdit = (CEdit*)this->GetDlgItem(IDC_EDIT_HEIGHT))
+		{
 			pEdit->SetReadOnly(!bEnable);
 		}
 	}
 	else if (this->m_nType == CBoxPropertiesDialogBar::BP_MIN_MAX)
 	{
-		if (CEdit* pEdit = (CEdit*)this->GetDlgItem(IDC_EDIT_XMIN)) {
+		if (CEdit* pEdit = (CEdit*)this->GetDlgItem(IDC_EDIT_XMIN))
+		{
 			pEdit->SetReadOnly(!bEnable);
 		}
-		if (CEdit* pEdit = (CEdit*)this->GetDlgItem(IDC_EDIT_YMIN)) {
+		if (CEdit* pEdit = (CEdit*)this->GetDlgItem(IDC_EDIT_YMIN))
+		{
 			pEdit->SetReadOnly(!bEnable);
 		}
-		if (CEdit* pEdit = (CEdit*)this->GetDlgItem(IDC_EDIT_ZMIN)) {
+		if (CEdit* pEdit = (CEdit*)this->GetDlgItem(IDC_EDIT_ZMIN))
+		{
 			pEdit->SetReadOnly(!bEnable);
 		}
 
-		if (CEdit* pEdit = (CEdit*)this->GetDlgItem(IDC_EDIT_XMAX)) {
+		if (CEdit* pEdit = (CEdit*)this->GetDlgItem(IDC_EDIT_XMAX))
+		{
 			pEdit->SetReadOnly(!bEnable);
 		}
-		if (CEdit* pEdit = (CEdit*)this->GetDlgItem(IDC_EDIT_YMAX)) {
+		if (CEdit* pEdit = (CEdit*)this->GetDlgItem(IDC_EDIT_YMAX))
+		{
 			pEdit->SetReadOnly(!bEnable);
 		}
-		if (CEdit* pEdit = (CEdit*)this->GetDlgItem(IDC_EDIT_ZMAX)) {
+		if (CEdit* pEdit = (CEdit*)this->GetDlgItem(IDC_EDIT_ZMAX))
+		{
 			pEdit->SetReadOnly(!bEnable);
+		}
+		if (CWnd *pWnd = this->GetDlgItem(IDC_CHECK_USE_MAP))
+		{
+			pWnd->EnableWindow(bEnable);
 		}
 	}
 	else if (this->m_nType == CBoxPropertiesDialogBar::BP_WELL)
 	{
-		if (CEdit* pEdit = (CEdit*)this->GetDlgItem(IDC_EDIT_WELL_X)) {
+		if (CEdit* pEdit = (CEdit*)this->GetDlgItem(IDC_EDIT_WELL_X))
+		{
 			pEdit->SetReadOnly(!bEnable);
 		}
-		if (CEdit* pEdit = (CEdit*)this->GetDlgItem(IDC_EDIT_WELL_Y)) {
+		if (CEdit* pEdit = (CEdit*)this->GetDlgItem(IDC_EDIT_WELL_Y))
+		{
 			pEdit->SetReadOnly(!bEnable);
 		}
 	}
-	else if (this->m_nType == CBoxPropertiesDialogBar::BP_RIVER)
+	else if (this->m_nType == CBoxPropertiesDialogBar::BP_RIVER || this->m_nType == CBoxPropertiesDialogBar::BP_DRAIN)
 	{
 		for (int row = 1; row < this->m_wndRiverGrid.GetRowCount(); ++row)
 		{
@@ -855,23 +1060,29 @@ void CBoxPropertiesDialogBar::Enable(bool bEnable)
 	}
 	else if (this->m_nType == CBoxPropertiesDialogBar::BP_WEDGE)
 	{
-		if (CEdit* pEdit = (CEdit*)this->GetDlgItem(IDC_EDIT_XMIN)) {
+		if (CEdit* pEdit = (CEdit*)this->GetDlgItem(IDC_EDIT_XMIN))
+		{
 			pEdit->SetReadOnly(!bEnable);
 		}
-		if (CEdit* pEdit = (CEdit*)this->GetDlgItem(IDC_EDIT_YMIN)) {
+		if (CEdit* pEdit = (CEdit*)this->GetDlgItem(IDC_EDIT_YMIN))
+		{
 			pEdit->SetReadOnly(!bEnable);
 		}
-		if (CEdit* pEdit = (CEdit*)this->GetDlgItem(IDC_EDIT_ZMIN)) {
+		if (CEdit* pEdit = (CEdit*)this->GetDlgItem(IDC_EDIT_ZMIN))
+		{
 			pEdit->SetReadOnly(!bEnable);
 		}
 
-		if (CEdit* pEdit = (CEdit*)this->GetDlgItem(IDC_EDIT_XMAX)) {
+		if (CEdit* pEdit = (CEdit*)this->GetDlgItem(IDC_EDIT_XMAX))
+		{
 			pEdit->SetReadOnly(!bEnable);
 		}
-		if (CEdit* pEdit = (CEdit*)this->GetDlgItem(IDC_EDIT_YMAX)) {
+		if (CEdit* pEdit = (CEdit*)this->GetDlgItem(IDC_EDIT_YMAX))
+		{
 			pEdit->SetReadOnly(!bEnable);
 		}
-		if (CEdit* pEdit = (CEdit*)this->GetDlgItem(IDC_EDIT_ZMAX)) {
+		if (CEdit* pEdit = (CEdit*)this->GetDlgItem(IDC_EDIT_ZMAX))
+		{
 			pEdit->SetReadOnly(!bEnable);
 		}
 	}
@@ -995,7 +1206,7 @@ BOOL CBoxPropertiesDialogBar::PreTranslateMessage(MSG* pMsg)
 					}
 				}
 			}
-			if (this->m_nType != CBoxPropertiesDialogBar::BP_RIVER && this->m_nType != CBoxPropertiesDialogBar::BP_PRISM)
+			if (this->m_nType != CBoxPropertiesDialogBar::BP_RIVER && this->m_nType != CBoxPropertiesDialogBar::BP_DRAIN && this->m_nType != CBoxPropertiesDialogBar::BP_PRISM)
 			{
 				if (::IsEditCtrl(pMsg->hwnd))
 				{
@@ -1350,6 +1561,7 @@ static int ZoneIDs[] = {
 	IDC_X_UNITS_STATIC2,
 	IDC_Y_UNITS_STATIC2,
 	IDC_Z_UNITS_STATIC2,
+	IDC_CHECK_USE_MAP,
 };
 
 void CBoxPropertiesDialogBar::ShowZoneControls()
@@ -1425,6 +1637,10 @@ void CBoxPropertiesDialogBar::ShowZoneControls()
 		pWnd->MoveWindow(186, 117, 30, 13, TRUE);
 		pWnd->ShowWindow(SW_SHOW);
 	}
+	if (CWnd *pWnd = this->GetDlgItem(IDC_CHECK_USE_MAP))
+	{
+		pWnd->ShowWindow(SW_SHOW);
+	}
 	TRACE("%s, out\n", __FUNCTION__);
 }
 
@@ -1453,6 +1669,7 @@ static int WellIDs[] = {
 	IDC_EDIT_WELL_Y,
 	IDC_X_UNITS_STATIC,
 	IDC_Y_UNITS_STATIC,
+	IDC_CHECK_USE_MAP,
 };
 
 void CBoxPropertiesDialogBar::ShowWellControls()
@@ -1487,6 +1704,7 @@ void CBoxPropertiesDialogBar::HideWellControls()
 
 static int RiverIDs[] = {
 	IDC_GRID_RIVER,
+	IDC_CHECK_USE_MAP2,
 };
 
 void CBoxPropertiesDialogBar::ShowRiverControls()
@@ -1742,144 +1960,7 @@ void CBoxPropertiesDialogBar::OnEndLabelEditGrid(NMHDR *pNotifyStruct, LRESULT *
 void CBoxPropertiesDialogBar::OnEndLabelEditPointsGrid(NMHDR *pNotifyStruct, LRESULT *result)
 {
 	TRACE("%s, in\n", __FUNCTION__);
-	NM_GRIDVIEW *pnmgv = (NM_GRIDVIEW*)pNotifyStruct;
-	double dCell;
-	coord c;
-	TCHAR szBuffer[40];
-	if (IsValidFloatFormat(this, IDC_GRID_POINTS, pnmgv->iRow, pnmgv->iColumn, dCell))
-	{
-		if (this->m_nPrismPart == this->PRISM_PERIMETER)
-		{
-			std::vector<coord> vect;
-			std::list<coord>::iterator li = this->m_listCoord[PRISM_PERIMETER].begin();
-			for (; li != this->m_listCoord[PRISM_PERIMETER].end(); ++li)
-			{
-				vect.push_back(*li);
-			}
-			for (size_t i = 0; i < vect.size(); ++i)
-			{
-				TRACE("Points %d=%g, %g, %g\n", i, vect[i].c[0], vect[i].c[1], vect[i].c[2]);
-			}
-
-			// check original
-			ASSERT(vect.size() > 3);
-
-			double *a, *b, *c, *d;
-			double rn, sn, den, r, s;
-			a = vect[0].c;
-			for (size_t i = 0; i < vect.size(); ++i)
-			{
-				b = vect[(i + 1) % vect.size()].c;
-				c = vect[(i + 2) % vect.size()].c;
-				for (size_t j = i+2; j < i+vect.size()-2; ++j)
-				{
-					d = vect[(j + 1) % vect.size()].c;
-					rn = (a[1]-c[1])*(d[0]-c[0])-(a[0]-c[0])*(d[1]-c[1]);
-					sn = (a[1]-c[1])*(b[0]-a[0])-(a[0]-c[0])*(b[1]-a[1]);
-					den = (b[0]-a[0])*(d[1]-c[1])-(b[1]-a[1])*(d[0]-c[0]);
-					if (den != 0)
-					{
-						r = rn/den;
-						s = sn/den;
-						if (r >= 0 && r <= 1 && s >= 0 && s <= 1)
-						{
-							ASSERT(FALSE);
-							*result = 1;
-							return; // return true;
-						}
-					}
-					else if (rn == 0)
-					{
-						// both AB and CD are collinear (coincident)
-						// project values to each axis to check for overlap
-						for (i = 0; i < 2; ++i)
-						{
-							double minab = (a[i] < b[i]) ? a[i] : b[i]; // Math.min(a[i], b[i]);
-							double maxab = (a[i] > b[i]) ? a[i] : b[i]; // Math.max(a[i], b[i]);
-							if (minab <= c[i] && c[i] <= maxab)
-							{
-								ASSERT(FALSE);
-								*result = 1;
-								return; // return true;
-							}
-							if (minab <= d[i] && d[i] <= maxab)
-							{
-								ASSERT(FALSE);
-								*result = 1;
-								return; // return true;
-							}
-						}
-					}
-					c = d;
-				}
-				a = b;
-			}
-
-			_stprintf(szBuffer, _T("%.*g"), DBL_DIG, vect[pnmgv->iRow - 1].c[pnmgv->iColumn]);
-			vect[pnmgv->iRow - 1].c[pnmgv->iColumn] = dCell;
-			{
-
-				double *a, *b, *c, *d;
-				double rn, sn, den, r, s;
-				a = vect[0].c;
-				for (size_t i = 0; i < vect.size(); ++i)
-				{
-					b = vect[(i + 1) % vect.size()].c;
-					c = vect[(i + 2) % vect.size()].c;
-					for (size_t j = i+2; j < i+vect.size()-2; ++j)
-					{
-						d = vect[(j + 1) % vect.size()].c;
-						rn = (a[1]-c[1])*(d[0]-c[0])-(a[0]-c[0])*(d[1]-c[1]);
-						sn = (a[1]-c[1])*(b[0]-a[0])-(a[0]-c[0])*(b[1]-a[1]);
-						den = (b[0]-a[0])*(d[1]-c[1])-(b[1]-a[1])*(d[0]-c[0]);
-						if (den != 0)
-						{
-							r = rn/den;
-							s = sn/den;
-							if (r >= 0 && r <= 1 && s >= 0 && s <= 1)
-							{
-								::AfxMessageBox("Perimeter cannot cross itself. Resetting original coordinates.");
-								VERIFY(this->m_wndPointsGrid.SetItemText(pnmgv->iRow, pnmgv->iColumn, szBuffer));
-								return;
-							}
-						}
-						else if (rn == 0)
-						{
-							// both AB and CD are collinear (coincident)
-							// project values to each axis to check for overlap
-							for (i = 0; i < 2; ++i)
-							{
-								double minab = (a[i] < b[i]) ? a[i] : b[i]; // Math.min(a[i], b[i]);
-								double maxab = (a[i] > b[i]) ? a[i] : b[i]; // Math.max(a[i], b[i]);
-								if (minab <= c[i] && c[i] <= maxab)
-								{
-									::AfxMessageBox("Perimeter cannot cross itself. Resetting original coordinates.");
-									VERIFY(this->m_wndPointsGrid.SetItemText(pnmgv->iRow, pnmgv->iColumn, szBuffer));
-									return;
-								}
-								if (minab <= d[i] && d[i] <= maxab)
-								{
-									::AfxMessageBox("Perimeter cannot cross itself. Resetting original coordinates.");
-									VERIFY(this->m_wndPointsGrid.SetItemText(pnmgv->iRow, pnmgv->iColumn, szBuffer));
-									return;
-								}
-							}
-						}
-						c = d;
-					}
-					a = b;
-				}
-			}
-		}
-		_stprintf(szBuffer, _T("%.*g"), DBL_DIG, dCell);
-		VERIFY(this->m_wndPointsGrid.SetItemText(pnmgv->iRow, pnmgv->iColumn, szBuffer));
-		this->OnApply();
-	}
-	else
-	{
-		this->UpdateData(FALSE);
-	}
-
+	this->TestPointsGrid(pNotifyStruct, result, TRUE);
 	TRACE("%s, out\n", __FUNCTION__);
 }
 
@@ -1999,12 +2080,12 @@ void CBoxPropertiesDialogBar::UpdateApply()
 				bool bNeedsUpdate = false;
 				do
 				{
-					if (!(IsValidFloatFormat(this, IDC_EDIT_WELL_X, d) && pWell->GetWell().x == (float)d))
+					if (!(IsValidFloatFormat(this, IDC_EDIT_WELL_X, d) && pWell->GetWell().x_user == (float)d))
 					{
 						bNeedsUpdate = true;
 						break;
 					}
-					if (!(IsValidFloatFormat(this, IDC_EDIT_WELL_Y, d) && pWell->GetWell().y == (float)d))
+					if (!(IsValidFloatFormat(this, IDC_EDIT_WELL_Y, d) && pWell->GetWell().y_user == (float)d))
 					{
 						bNeedsUpdate = true;
 						break;
@@ -2035,12 +2116,48 @@ void CBoxPropertiesDialogBar::UpdateApply()
 				std::list<CRiverPoint>::iterator iter = river.m_listPoints.begin();
 				for (int r = 1; r < this->m_wndRiverGrid.GetRowCount() && iter != river.m_listPoints.end(); ++r, ++iter)
 				{
-					if (!(IsValidFloatFormat(this, IDC_GRID_RIVER, r, 0, d) && iter->x == d))
+					if (!(IsValidFloatFormat(this, IDC_GRID_RIVER, r, 0, d) && iter->x_user == d))
 					{
 						bNeedsUpdate = true;
 						break;
 					}
-					if (!(IsValidFloatFormat(this, IDC_GRID_RIVER, r, 1, d) && iter->y == d))
+					if (!(IsValidFloatFormat(this, IDC_GRID_RIVER, r, 1, d) && iter->y_user == d))
+					{
+						bNeedsUpdate = true;
+						break;
+					}
+				}
+				if (bNeedsUpdate)
+				{
+					this->m_bNeedsUpdate = true;
+#ifdef SHOW_APPLY_BUTTON
+					this->GetDlgItem(IDC_APPLY)->EnableWindow(TRUE);
+#endif
+				}
+				else
+				{
+					this->m_bNeedsUpdate = false;
+#ifdef SHOW_APPLY_BUTTON
+					this->GetDlgItem(IDC_APPLY)->EnableWindow(FALSE);
+#endif
+				}
+			}
+			break;
+		case CBoxPropertiesDialogBar::BP_DRAIN:
+			if (CDrainActor* pDrainActor = this->m_pProp3D ? CDrainActor::SafeDownCast(this->m_pProp3D) : NULL)
+			{
+				double d;
+				bool bNeedsUpdate = false;
+				CDrain drain = pDrainActor->GetDrain();
+				std::list<CRiverPoint>::iterator iter = drain.m_listPoints.begin();
+				for (int r = 1; r < this->m_wndRiverGrid.GetRowCount() && iter != drain.m_listPoints.end(); ++r, ++iter)
+				{
+					if (!(IsValidFloatFormat(this, IDC_GRID_RIVER, r, 0, d) && iter->x_user == d))
+					{
+						bNeedsUpdate = true;
+						break;
+					}
+					if (!(IsValidFloatFormat(this, IDC_GRID_RIVER, r, 1, d) && iter->y_user == d))
 					{
 						bNeedsUpdate = true;
 						break;
@@ -2125,6 +2242,26 @@ void CBoxPropertiesDialogBar::UpdateUnits(const CUnits& units)
 	else
 	{
 		this->m_strVerticalUnits.Format("(%s)", units.vertical.si);
+	}
+
+	if (units.map_horizontal.defined)
+	{
+		this->m_strMapHorizontalUnits.Format("(%s)", units.map_horizontal.input);
+		CGlobal::MinimizeLengthUnits(this->m_strMapHorizontalUnits);
+	}
+	else
+	{
+		this->m_strMapHorizontalUnits.Format("(%s)", units.horizontal.si);
+	}
+
+	if (units.map_vertical.defined)
+	{
+		this->m_strMapVerticalUnits.Format("(%s)", units.map_vertical.input);
+		CGlobal::MinimizeLengthUnits(this->m_strMapVerticalUnits);
+	}
+	else
+	{
+		this->m_strMapVerticalUnits.Format("(%s)", units.vertical.si);
 	}
 }
 
@@ -2569,10 +2706,25 @@ void CBoxPropertiesDialogBar::UpdatePrism(CZoneActor *pZoneActor, bool bForceUpd
 				std::vector<Point>::iterator it = this->m_pds[i]->Get_points().begin();
 				coord c;
 				for (; it != this->m_pds[i]->Get_points().end(); ++it)
-				{					
-					c.c[0] = (*it).x();
-					c.c[1] = (*it).y();
-					c.c[2] = (*it).z();
+				{
+#if 999
+					if (this->m_pds[i]->Get_user_coordinate_system() == PHAST_Transform::MAP)
+					{
+						Point pt((*it).x(), (*it).y(), (*it).z());
+						pZoneActor->GetPhastTransform().Inverse_transform(pt);
+						c.c[0] = pt.x();
+						c.c[1] = pt.y();
+						c.c[2] = pt.z();
+					}
+					else
+					{
+#endif
+						c.c[0] = (*it).x();
+						c.c[1] = (*it).y();
+						c.c[2] = (*it).z();
+#if 999
+					}
+#endif
 					this->m_listCoord[i].push_back(c);
 				}
 			}
@@ -2955,7 +3107,7 @@ void CBoxPropertiesDialogBar::DoDataExchangePrism(CDataExchange *pDX, Data_sourc
 				this->m_wndShapeCombo.ResetContent();
 
 				std::string s = this->m_sShapefile[this->m_nPrismPart];
-				Shapefile sf(s);
+				Shapefile sf(s, PHAST_Transform::MAP);
 				std::vector< std::string > headings = sf.Get_headers();
 
 				CGlobal::InsertHeadings(this->m_wndShapeCombo, headings);
@@ -3085,44 +3237,90 @@ void CBoxPropertiesDialogBar::ApplyNewPrism(CZoneActor *pZoneActor)
 		else
 		{
 			std::ostringstream oss;
+			oss.precision(DBL_DIG);
 			if (this->m_nDataSourceType == Data_source::CONSTANT)
 			{
 				ASSERT(this->m_nPrismPart != CBoxPropertiesDialogBar::PRISM_PERIMETER);
-				oss << "CONSTANT " << this->m_dConstant[this->m_nPrismPart] << std::endl;
+				Data_source ds;
+				switch(this->m_nPrismPart)
+				{
+				case CBoxPropertiesDialogBar::PRISM_TOP:
+					ds = prism->top;
+					break;
+				case CBoxPropertiesDialogBar::PRISM_PERIMETER:
+					ds = prism->perimeter;
+					break;
+				case CBoxPropertiesDialogBar::PRISM_BOTTOM:
+					ds = prism->bottom;
+					break;
+				}
+				std::vector<Point> &pts = ds.Get_points();
+				pts.clear();
+				pts.push_back(Point(0.0, 0.0, this->m_dConstant[this->m_nPrismPart], this->m_dConstant[this->m_nPrismPart]));
+				oss << ds << std::endl;
 			}
 			else if (this->m_nDataSourceType == Data_source::ARCRASTER)
 			{
 				ASSERT(this->m_nPrismPart != CBoxPropertiesDialogBar::PRISM_PERIMETER);
 				if (CGlobal::FileExists(this->m_sArcraster[this->m_nPrismPart]))
 				{
-					oss << "ARCRASTER " << this->m_sArcraster[this->m_nPrismPart] << std::endl;
+					Data_source ds;
+					ds.Set_source_type(Data_source::ARCRASTER);
+					std::string file_name(this->m_sArcraster[this->m_nPrismPart]);
+					ds.Set_file_name(file_name);
+					oss << ds << std::endl;
 				}
 			}
 			else if (this->m_nDataSourceType == Data_source::SHAPE)
 			{
 				if (this->m_nPrismPart == CBoxPropertiesDialogBar::PRISM_PERIMETER)
 				{
-					oss << "SHAPE " << this->m_sShapefile[this->m_nPrismPart] << std::endl;
+					Data_source ds;
+					ds.Set_source_type(Data_source::SHAPE);
+					std::string file_name(this->m_sShapefile[this->m_nPrismPart]);
+					ds.Set_file_name(file_name);
+					oss << ds << std::endl;
 				}
 				else
 				{
-					oss << "SHAPE " << this->m_sShapefile[this->m_nPrismPart];
-					oss << " " << this->m_nShapeAttribute[this->m_nPrismPart];
+					const char* coor_name[] = {" MAP ", " GRID ", " NONE "};
+					PHAST_Transform::COORDINATE_SYSTEM c = PHAST_Transform::MAP;
+					oss << "SHAPE" << coor_name[c] << this->m_sShapefile[this->m_nPrismPart];
+					if (this->m_nShapeAttribute[this->m_nPrismPart] != -1)
+					{
+						oss << " " << this->m_nShapeAttribute[this->m_nPrismPart];
+					}
 					oss << std::endl;
 				}
 			}
 			else if (this->m_nDataSourceType == Data_source::POINTS)
 			{
-				// write out new points
-				//
-				oss << "POINTS" << std::endl;
+				Data_source ds;
+				switch(this->m_nPrismPart)
+				{
+				case CBoxPropertiesDialogBar::PRISM_TOP:
+					ds = prism->top;
+					break;
+				case CBoxPropertiesDialogBar::PRISM_PERIMETER:
+					ds = prism->perimeter;
+					break;
+				case CBoxPropertiesDialogBar::PRISM_BOTTOM:
+					ds = prism->bottom;
+					break;
+				}
+				ASSERT(ds.Get_points().size() > 2);
+				std::vector<Point> &pts = ds.Get_points();
+				pts.clear();
 				std::list<coord>::iterator cit = this->m_listCoord[this->m_nPrismPart].begin();
 				for (; cit != this->m_listCoord[this->m_nPrismPart].end(); ++cit)
 				{
-					oss << cit->c[0] << " ";
-					oss << cit->c[1] << " ";
-					oss << cit->c[2] << std::endl;
+					pts.push_back(Point(cit->c[0], cit->c[1], cit->c[2], cit->c[2]));
 				}
+// COMMENT: {11/20/2008 2:35:23 PM}				//{{
+// COMMENT: {11/20/2008 2:35:23 PM}				ds.Set_original_points(pts);
+// COMMENT: {11/20/2008 2:35:23 PM}				//}}
+				ds.Tidy(this->m_nPrismPart != CBoxPropertiesDialogBar::PRISM_PERIMETER);
+				oss << ds << std::endl;
 			}
 
 			TRACE(oss.str().c_str());
@@ -3132,6 +3330,7 @@ void CBoxPropertiesDialogBar::ApplyNewPrism(CZoneActor *pZoneActor)
 			//
 			bool read_number = (this->m_nPrismPart != PRISM_PERIMETER) && (this->m_nDataSourceType == Data_source::SHAPE);
 			new_data_source.Read(iss, read_number);
+			new_data_source.Tidy(true);
 		}
 
 		// set new data_source
@@ -3149,8 +3348,11 @@ void CBoxPropertiesDialogBar::ApplyNewPrism(CZoneActor *pZoneActor)
 			break;
 		}
 
+		copy.Tidy();
+
 		// dump new prism
 		std::ostringstream prism_oss;
+		prism_oss.precision(DBL_DIG);
 		prism_oss << copy;
 		TRACE(prism_oss.str().c_str());
 		std::istringstream prism_iss(prism_oss.str());
@@ -3158,6 +3360,7 @@ void CBoxPropertiesDialogBar::ApplyNewPrism(CZoneActor *pZoneActor)
 		// remove first line (-prism)
 		std::string line;
 		std::getline(prism_iss, line);
+		ASSERT(line.find("-prism") != std::string::npos);
 
 		// read new prism
 		Prism new_prism;
@@ -3171,21 +3374,26 @@ void CBoxPropertiesDialogBar::ApplyNewPrism(CZoneActor *pZoneActor)
 		this->m_pView->GetDocument()->GetDefaultZone(::domain);
 
 		new_prism.Tidy();
+		new_prism.Convert_coordinates(PHAST_Transform::GRID, &pZoneActor->GetPhastTransform());
 
-		pZoneActor->SetPolyhedron(&new_prism, this->m_pView->GetDocument()->GetUnits());
-		this->m_pView->GetDocument()->Notify(this, WPN_SELCHANGED, 0, pZoneActor);
-		this->m_pView->GetDocument()->UpdateAllViews(0);
+		CZonePrismResetAction *pAction = new CZonePrismResetAction(
+			this->m_pView,
+			pZoneActor,
+			&new_prism
+			);
+
+		this->m_pView->GetDocument()->Execute(pAction);
+
 
 		// save points
 		std::list<coord> save = this->m_listCoord[this->m_nPrismPart];
 		this->UpdatePrism(pZoneActor);
+
 		// restore points
 		this->m_listCoord[this->m_nPrismPart] = save;
 
-		//{{HACK
-		this->m_pView->GetDocument()->SetModifiedFlag(TRUE);
-		//}}HACK
 	}
+
 	// Update StatusBar
 	//
 	if (CWnd* pWnd = ((CFrameWnd*)::AfxGetMainWnd())->GetMessageBar())
@@ -3361,7 +3569,7 @@ void CBoxPropertiesDialogBar::OnBnClickedShape(void)
 			if (this->m_nPrismPart != CBoxPropertiesDialogBar::PRISM_PERIMETER)
 			{
 				std::string s = this->m_sShapefile[this->m_nPrismPart];
-				Shapefile sf(s);
+				Shapefile sf(s, PHAST_Transform::MAP);
 				std::vector< std::string > headings = sf.Get_headers();
 
 				CGlobal::InsertHeadings(this->m_wndShapeCombo, headings);
@@ -3480,17 +3688,20 @@ void CBoxPropertiesDialogBar::OnCbnSelChangeShape(void)
 void CBoxPropertiesDialogBar::OnEnKillfocusConstant()
 {
 	TRACE("%s, in\n", __FUNCTION__);
-	ASSERT(this->m_nType == CBoxPropertiesDialogBar::BP_PRISM);
-	if (this->m_bNeedsUpdate)
+// COMMENT: {2/19/2009 9:56:17 PM}	ASSERT(this->m_nType == CBoxPropertiesDialogBar::BP_PRISM);
+	if (this->m_nType == CBoxPropertiesDialogBar::BP_PRISM)
 	{
-		double d;
-		if (IsValidFloatFormat(this, IDC_EDIT_CONSTANT, d))
+		if (this->m_bNeedsUpdate)
 		{
-			this->OnApply();
-		}
-		else
-		{
-			this->UpdateData(FALSE);
+			double d;
+			if (IsValidFloatFormat(this, IDC_EDIT_CONSTANT, d))
+			{
+				this->OnApply();
+			}
+			else
+			{
+				this->UpdateData(FALSE);
+			}
 		}
 	}
 	TRACE("%s, out\n", __FUNCTION__);
@@ -3507,4 +3718,438 @@ void CBoxPropertiesDialogBar::OnEnChangeConstant()
 		this->m_bNeedsUpdate = true;
 	}
 	TRACE("%s, out\n", __FUNCTION__);
+}
+
+void CBoxPropertiesDialogBar::TestPointsGrid(NMHDR *pNotifyStruct, LRESULT *result, BOOL bShowErrors)
+{
+	TRACE("%s, in\n", __FUNCTION__);
+	NM_GRIDVIEW *pnmgv = (NM_GRIDVIEW*)pNotifyStruct;
+	double dCell;
+	coord c;
+	TCHAR szBuffer[40];
+	if (IsValidFloatFormat(this, IDC_GRID_POINTS, pnmgv->iRow, pnmgv->iColumn, dCell))
+	{
+		if (this->m_nPrismPart == this->PRISM_PERIMETER)
+		{
+			std::vector<coord> vect;
+			std::list<coord>::iterator li = this->m_listCoord[PRISM_PERIMETER].begin();
+			for (; li != this->m_listCoord[PRISM_PERIMETER].end(); ++li)
+			{
+				vect.push_back(*li);
+			}
+			for (size_t i = 0; i < vect.size(); ++i)
+			{
+				TRACE("Points %d=%g, %g, %g\n", i, vect[i].c[0], vect[i].c[1], vect[i].c[2]);
+			}
+
+			// check original
+			ASSERT(vect.size() > 2);
+
+			double *a, *b, *c, *d;
+			double rn, sn, den, r, s;
+			a = vect[0].c;
+			for (size_t i = 0; i < vect.size(); ++i)
+			{
+				b = vect[(i + 1) % vect.size()].c;
+				c = vect[(i + 2) % vect.size()].c;
+				for (size_t j = i+2; j < i+vect.size()-2; ++j)
+				{
+					d = vect[(j + 1) % vect.size()].c;
+					rn = (a[1]-c[1])*(d[0]-c[0])-(a[0]-c[0])*(d[1]-c[1]);
+					sn = (a[1]-c[1])*(b[0]-a[0])-(a[0]-c[0])*(b[1]-a[1]);
+					den = (b[0]-a[0])*(d[1]-c[1])-(b[1]-a[1])*(d[0]-c[0]);
+					if (den != 0)
+					{
+						r = rn/den;
+						s = sn/den;
+						if (r >= 0 && r <= 1 && s >= 0 && s <= 1)
+						{
+							ASSERT(FALSE);
+							*result = 1;
+							return; // return true;
+						}
+					}
+					else if (rn == 0)
+					{
+						// both AB and CD are collinear (coincident)
+						// project values to each axis to check for overlap
+						for (i = 0; i < 2; ++i)
+						{
+							double minab = (a[i] < b[i]) ? a[i] : b[i]; // Math.min(a[i], b[i]);
+							double maxab = (a[i] > b[i]) ? a[i] : b[i]; // Math.max(a[i], b[i]);
+							if (minab <= c[i] && c[i] <= maxab)
+							{
+								ASSERT(FALSE);
+								*result = 1;
+								return; // return true;
+							}
+							if (minab <= d[i] && d[i] <= maxab)
+							{
+								ASSERT(FALSE);
+								*result = 1;
+								return; // return true;
+							}
+						}
+					}
+					c = d;
+				}
+				a = b;
+			}
+
+			_stprintf(szBuffer, _T("%.*g"), DBL_DIG, vect[pnmgv->iRow - 1].c[pnmgv->iColumn]);
+			vect[pnmgv->iRow - 1].c[pnmgv->iColumn] = dCell;
+			{
+
+				double *a, *b, *c, *d;
+				double rn, sn, den, r, s;
+				a = vect[0].c;
+				for (size_t i = 0; i < vect.size(); ++i)
+				{
+					b = vect[(i + 1) % vect.size()].c;
+					c = vect[(i + 2) % vect.size()].c;
+					for (size_t j = i+2; j < i+vect.size()-2; ++j)
+					{
+						d = vect[(j + 1) % vect.size()].c;
+						rn = (a[1]-c[1])*(d[0]-c[0])-(a[0]-c[0])*(d[1]-c[1]);
+						sn = (a[1]-c[1])*(b[0]-a[0])-(a[0]-c[0])*(b[1]-a[1]);
+						den = (b[0]-a[0])*(d[1]-c[1])-(b[1]-a[1])*(d[0]-c[0]);
+						if (den != 0)
+						{
+							r = rn/den;
+							s = sn/den;
+							if (r >= 0 && r <= 1 && s >= 0 && s <= 1)
+							{
+								if (bShowErrors)
+								{
+									::AfxMessageBox("Perimeter cannot cross itself. Resetting original coordinates.");
+								}
+								VERIFY(this->m_wndPointsGrid.SetItemText(pnmgv->iRow, pnmgv->iColumn, szBuffer));
+								return;
+							}
+						}
+						else if (rn == 0)
+						{
+							// both AB and CD are collinear (coincident)
+							// project values to each axis to check for overlap
+							for (i = 0; i < 2; ++i)
+							{
+								double minab = (a[i] < b[i]) ? a[i] : b[i]; // Math.min(a[i], b[i]);
+								double maxab = (a[i] > b[i]) ? a[i] : b[i]; // Math.max(a[i], b[i]);
+								if (minab <= c[i] && c[i] <= maxab)
+								{
+									if (bShowErrors)
+									{
+										::AfxMessageBox("Perimeter cannot cross itself. Resetting original coordinates.");
+									}
+									VERIFY(this->m_wndPointsGrid.SetItemText(pnmgv->iRow, pnmgv->iColumn, szBuffer));
+									return;
+								}
+								if (minab <= d[i] && d[i] <= maxab)
+								{
+									if (bShowErrors)
+									{
+										::AfxMessageBox("Perimeter cannot cross itself. Resetting original coordinates.");
+									}
+									VERIFY(this->m_wndPointsGrid.SetItemText(pnmgv->iRow, pnmgv->iColumn, szBuffer));
+									return;
+								}
+							}
+						}
+						c = d;
+					}
+					a = b;
+				}
+			}
+		}
+		_stprintf(szBuffer, _T("%.*g"), DBL_DIG, dCell);
+		VERIFY(this->m_wndPointsGrid.SetItemText(pnmgv->iRow, pnmgv->iColumn, szBuffer));
+		this->OnApply();
+	}
+	else
+	{
+		this->UpdateData(FALSE);
+	}
+
+	TRACE("%s, out\n", __FUNCTION__);
+}
+
+void CBoxPropertiesDialogBar::OnBeginLabelEditPointsGrid(NMHDR *pNotifyStruct, LRESULT *result)
+{
+	TRACE("%s, in\n", __FUNCTION__);
+	this->m_bNeedsUpdate = true;
+	TRACE("%s, out\n", __FUNCTION__);
+}
+
+void CBoxPropertiesDialogBar::OnBnClickedUseMap(void)
+{
+	switch (this->m_nType)
+	{
+	case CBoxPropertiesDialogBar::BP_MIN_MAX:
+		this->OnUseMapBox();
+		break;
+	case CBoxPropertiesDialogBar::BP_WELL:
+		this->OnUseMapWell();
+		break;
+	case CBoxPropertiesDialogBar::BP_DRAIN:
+		this->OnUseMapDrain();
+		break;
+	case CBoxPropertiesDialogBar::BP_RIVER:
+		this->OnUseMapRiver();
+		break;		
+	}
+}
+
+void CBoxPropertiesDialogBar::OnUseMapWell(void)
+{
+	const CUnits& units = this->m_pView->GetDocument()->GetUnits();
+	const CGridKeyword& gridKeyword = this->m_pView->GetDocument()->GetGridKeyword();
+	PHAST_Transform t(
+		gridKeyword.m_grid_origin[0],
+		gridKeyword.m_grid_origin[1],
+		gridKeyword.m_grid_origin[2],
+		gridKeyword.m_grid_angle,
+		units.map_horizontal.input_to_si/units.horizontal.input_to_si,
+		units.map_horizontal.input_to_si/units.horizontal.input_to_si,
+		units.map_vertical.input_to_si/units.vertical.input_to_si
+		);
+
+	Point p(
+		this->m_XWell,
+		this->m_YWell,
+		0.0
+		);
+
+	if (this->IsDlgButtonChecked(IDC_CHECK_USE_MAP) == BST_CHECKED)
+	{
+		t.Inverse_transform(p);
+		this->m_XWell = p.x();
+		this->m_YWell = p.y();
+		this->m_xy_coordinate_system_user = PHAST_Transform::MAP;
+	}
+	else
+	{
+		t.Transform(p);
+		this->m_XWell = p.x();
+		this->m_YWell = p.y();
+		this->m_xy_coordinate_system_user = PHAST_Transform::GRID;
+	}
+
+	if (CWellActor* pWellActor = this->m_pProp3D ? CWellActor::SafeDownCast(this->m_pProp3D) : NULL)
+	{
+		CAction *pAction = new CWellSetPositionAction(
+			pWellActor,
+			this->m_pView->GetDocument(),
+			this->m_XWell,
+			this->m_YWell,
+			this->m_xy_coordinate_system_user
+			);
+		if (pAction)
+		{
+			this->m_pView->GetDocument()->Execute(pAction);
+		}
+	}
+}
+
+void CBoxPropertiesDialogBar::OnUseMapBox(void)
+{
+	const CUnits& units = this->m_pView->GetDocument()->GetUnits();
+	const CGridKeyword& gridKeyword = this->m_pView->GetDocument()->GetGridKeyword();
+	PHAST_Transform map2grid(
+		gridKeyword.m_grid_origin[0],
+		gridKeyword.m_grid_origin[1],
+		gridKeyword.m_grid_origin[2],
+		gridKeyword.m_grid_angle,
+		units.map_horizontal.input_to_si/units.horizontal.input_to_si,
+		units.map_horizontal.input_to_si/units.horizontal.input_to_si,
+		units.map_vertical.input_to_si/units.vertical.input_to_si
+		);
+
+	if (this->IsDlgButtonChecked(IDC_CHECK_USE_MAP) == BST_CHECKED)
+	{
+		// Grid => Map
+		// Box => Prism
+		//
+		if (CZoneActor* pZoneActor = this->m_pProp3D ? CZoneActor::SafeDownCast(this->m_pProp3D) : NULL)
+		{
+			ASSERT(pZoneActor->GetPolyhedronType() == Polyhedron::CUBE);
+			if (Cube *pc = dynamic_cast<Cube*>(pZoneActor->GetPolyhedron()))
+			{
+				ASSERT(pc->Get_coordinate_system() == PHAST_Transform::GRID);
+				Prism p1(*pc);
+				Prism p2(*pc);
+
+				ASSERT(p1.perimeter.Get_coordinate_system() == PHAST_Transform::GRID);
+				ASSERT(p1.perimeter.Get_user_coordinate_system() == PHAST_Transform::GRID);
+				ASSERT(p2.perimeter.Get_coordinate_system() == PHAST_Transform::GRID);
+				ASSERT(p2.perimeter.Get_user_coordinate_system() == PHAST_Transform::GRID);
+
+				p2.Convert_coordinates(PHAST_Transform::MAP, &map2grid);
+				p1.perimeter.Set_user_points(p2.perimeter.Get_points());
+				p1.top.Set_user_points(p2.top.Get_points());
+				p1.bottom.Set_user_points(p2.bottom.Get_points());
+
+				p1.perimeter.Set_user_coordinate_system(PHAST_Transform::MAP);
+				p1.Tidy();
+
+				CAction *pAction = new CZoneSetPolyAction(
+					this->m_pView,
+					pZoneActor,
+					&p1
+					);
+				if (pAction)
+				{
+					this->m_pView->GetDocument()->Execute(pAction);
+				}
+			}
+			return;
+		}
+	}
+	else
+	{
+		// Map => Grid
+		// Box => Prism
+		//
+		if (CZoneActor* pZoneActor = this->m_pProp3D ? CZoneActor::SafeDownCast(this->m_pProp3D) : NULL)
+		{
+			ASSERT(pZoneActor->GetPolyhedronType() == Polyhedron::CUBE);
+			if (Cube *pc = dynamic_cast<Cube*>(pZoneActor->GetPolyhedron()))
+			{
+				ASSERT(pc->Get_coordinate_system() == PHAST_Transform::MAP);
+				Prism p(*pc);
+				ASSERT(p.perimeter.Get_coordinate_system() == PHAST_Transform::MAP);
+				ASSERT(p.perimeter.Get_user_coordinate_system() == PHAST_Transform::MAP);
+
+				p.Convert_coordinates(PHAST_Transform::GRID, &map2grid);
+
+				p.perimeter.Set_user_coordinate_system(PHAST_Transform::GRID);
+				p.top.Set_user_coordinate_system(PHAST_Transform::GRID);
+				p.bottom.Set_user_coordinate_system(PHAST_Transform::GRID);
+				p.perimeter.Set_user_points(p.perimeter.Get_points());
+
+				CAction *pAction = new CZoneSetPolyAction(
+					this->m_pView,
+					pZoneActor,
+					&p
+					);
+				if (pAction)
+				{
+					this->m_pView->GetDocument()->Execute(pAction);
+				}
+			}
+		}
+	}
+}
+
+void CBoxPropertiesDialogBar::OnUseMapDrain(void)
+{
+	if (CDrainActor* pDrainActor = this->m_pProp3D ? CDrainActor::SafeDownCast(this->m_pProp3D) : NULL)
+	{
+		if (CWPhastDoc *pWPhastDoc = this->m_pView->GetDocument())
+		{
+			const CUnits& units = this->m_pView->GetDocument()->GetUnits();
+			const CGridKeyword& gridKeyword = this->m_pView->GetDocument()->GetGridKeyword();
+			PHAST_Transform map2grid(
+				gridKeyword.m_grid_origin[0],
+				gridKeyword.m_grid_origin[1],
+				gridKeyword.m_grid_origin[2],
+				gridKeyword.m_grid_angle,
+				units.map_horizontal.input_to_si/units.horizontal.input_to_si,
+				units.map_horizontal.input_to_si/units.horizontal.input_to_si,
+				units.map_vertical.input_to_si/units.vertical.input_to_si
+				);
+
+			bool bChecked = (this->IsDlgButtonChecked(IDC_CHECK_USE_MAP2) == BST_CHECKED);
+			CDrain drain = pDrainActor->GetData();
+			if (bChecked)
+			{
+				drain.coordinate_system = PHAST_Transform::MAP;
+			}
+			else
+			{
+				drain.coordinate_system = PHAST_Transform::GRID;
+			}
+
+			std::list<CRiverPoint>::iterator it = drain.m_listPoints.begin();
+			for (; it != drain.m_listPoints.end(); ++it)
+			{
+				Point p(
+					it->x_user,
+					it->y_user,
+					0.0
+					);
+
+				if (bChecked)
+				{
+					map2grid.Inverse_transform(p);
+					it->x_user = p.x();
+					it->y_user = p.y();
+				}
+				else
+				{
+					map2grid.Transform(p);
+					it->x_user = p.x();
+					it->y_user = p.y();
+				}
+			}
+			CAction *pAction = new CSetAction<CDrainActor, CDrain>(pDrainActor, drain, pWPhastDoc);
+			pWPhastDoc->Execute(pAction);
+		}
+	}
+}
+
+void CBoxPropertiesDialogBar::OnUseMapRiver(void)
+{
+	if (CRiverActor* pRiverActor = this->m_pProp3D ? CRiverActor::SafeDownCast(this->m_pProp3D) : NULL)
+	{
+		if (CWPhastDoc *pWPhastDoc = this->m_pView->GetDocument())
+		{
+			const CUnits& units = this->m_pView->GetDocument()->GetUnits();
+			const CGridKeyword& gridKeyword = this->m_pView->GetDocument()->GetGridKeyword();
+			PHAST_Transform map2grid(
+				gridKeyword.m_grid_origin[0],
+				gridKeyword.m_grid_origin[1],
+				gridKeyword.m_grid_origin[2],
+				gridKeyword.m_grid_angle,
+				units.map_horizontal.input_to_si/units.horizontal.input_to_si,
+				units.map_horizontal.input_to_si/units.horizontal.input_to_si,
+				units.map_vertical.input_to_si/units.vertical.input_to_si
+				);
+
+			bool bChecked = (this->IsDlgButtonChecked(IDC_CHECK_USE_MAP2) == BST_CHECKED);
+			CRiver river = pRiverActor->GetData();
+			if (bChecked)
+			{
+				river.coordinate_system = PHAST_Transform::MAP;
+			}
+			else
+			{
+				river.coordinate_system = PHAST_Transform::GRID;
+			}
+
+			std::list<CRiverPoint>::iterator it = river.m_listPoints.begin();
+			for (; it != river.m_listPoints.end(); ++it)
+			{
+				Point p(
+					it->x_user,
+					it->y_user,
+					0.0
+					);
+
+				if (bChecked)
+				{
+					map2grid.Inverse_transform(p);
+					it->x_user = p.x();
+					it->y_user = p.y();
+				}
+				else
+				{
+					map2grid.Transform(p);
+					it->x_user = p.x();
+					it->y_user = p.y();
+				}
+			}
+			CAction *pAction = new CSetAction<CRiverActor, CRiver>(pRiverActor, river, pWPhastDoc);
+			pWPhastDoc->Execute(pAction);
+		}
+	}
 }

@@ -207,6 +207,10 @@ public:
   // point widget's bounding box.
   vtkSetClampMacro(HotSpotSize,vtkFloatingPointType,0.0,1.0);
   vtkGetMacro(HotSpotSize,vtkFloatingPointType);
+
+#if 9991 // well w/ grid rotation
+  void SetOrientation(float x, float y, float z);
+#endif // 9991 well w/ grid rotation
   
 protected:
   vtkPointWidget2();

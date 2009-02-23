@@ -46,6 +46,9 @@ void CBC::InternalCopy(const struct BC& src)
 	// bc_flux
 	this->bc_flux = 0;
 
+	// current_bc_flux
+	// this->current_bc_flux = 0;
+
 	// bc_k
 	this->bc_k = 0;
 	Cproperty::CopyProperty(&this->bc_k, src.bc_k);
@@ -54,17 +57,26 @@ void CBC::InternalCopy(const struct BC& src)
 	this->bc_thick = 0;
 	Cproperty::CopyProperty(&this->bc_thick, src.bc_thick);
 
+	// face
+	this->face = src.face;
+
+	// cell_face
+	this->cell_face = src.cell_face;
+
+	// face_defined
+	this->face_defined = src.face_defined;
+
 	// bc_solution_type
 	this->bc_solution_type = src.bc_solution_type;
 
 	// bc_solution
 	this->bc_solution = 0;
 
-	// face
-	this->face = src.face;
+	// current_bc_solution
+	//this->current_bc_solution = 0;
 
-	// face_defined
-	this->face_defined = src.face_defined;
+	// current_bc_head
+	//this->current_bc_head = 0;
 }
 
 void CBC::InternalDelete(void)
@@ -81,18 +93,22 @@ void CBC::InternalDelete(void)
 void CBC::InternalInit(void)
 {
 	this->polyh            = 0;
+	this->mask             = 0;
 
 	// boundary conditions
-	this->mask             = 0;
 	this->bc_type          = BC_info::BC_UNDEFINED;
 	this->bc_head          = 0;
 	this->bc_flux          = 0;
+	this->current_bc_flux  = 0;
 	this->bc_k             = 0;
 	this->bc_thick         = 0;
-	this->bc_solution_type = UNDEFINED;
-	this->bc_solution      = 0;
 	this->face             = -1;
+	this->cell_face        = CF_UNKNOWN;
 	this->face_defined     = FALSE;
+	this->bc_solution_type = ST_UNDEFINED;
+	this->bc_solution      = 0;
+	this->current_bc_solution = 0;
+	this->current_bc_head     = 0;
 	ASSERT(this->m_bc_head.empty());
 	ASSERT(this->m_bc_flux.empty());
 	ASSERT(this->m_bc_solution.empty());
@@ -194,7 +210,7 @@ void CBC::AssertValid(int nSim)const
 		ASSERT(this->bc_solution == NULL);
 		if (this->m_bc_solution.size())
 		{
-			ASSERT(this->bc_solution_type == ASSOCIATED);
+			ASSERT(this->bc_solution_type == ST_ASSOCIATED);
 			CTimeSeries<Cproperty>::const_iterator iter = this->m_bc_solution.begin();
 			for (; iter != this->m_bc_solution.end(); ++iter)
 			{
@@ -205,7 +221,7 @@ void CBC::AssertValid(int nSim)const
 		{
 			if (nSim == 1)
 			{
-				ASSERT(this->bc_solution_type == UNDEFINED);
+				ASSERT(this->bc_solution_type == ST_UNDEFINED);
 			}
 		}
 		ASSERT(this->bc_flux == NULL);
@@ -243,7 +259,7 @@ void CBC::AssertValid(int nSim)const
 		ASSERT(this->bc_solution == NULL);
 		if (this->m_bc_solution.size())
 		{
-			ASSERT(this->bc_solution_type == ASSOCIATED);
+			ASSERT(this->bc_solution_type == ST_ASSOCIATED);
 			CTimeSeries<Cproperty>::const_iterator iter = this->m_bc_solution.begin();
 			for (; iter != this->m_bc_solution.end(); ++iter)
 			{
@@ -254,13 +270,22 @@ void CBC::AssertValid(int nSim)const
 		{
 			if (nSim == 1)
 			{
-				ASSERT(this->bc_solution_type == UNDEFINED);
+				ASSERT(this->bc_solution_type == ST_UNDEFINED);
 			}
 		}
 		break;
 
 	case BC_info::BC_SPECIFIED: // bc_head bc_solution
-		ASSERT(this->face_defined == FALSE);
+		if (this->face_defined)
+		{
+			ASSERT(this->cell_face == CF_X || this->cell_face == CF_Y || this->cell_face == CF_Z || this->cell_face == CF_ALL);
+			ASSERT(this->face == 0 || this->face == 1 || this->face == 2 || this->face == 11);
+		}
+		else
+		{
+			ASSERT(this->cell_face == CF_UNKNOWN);
+			ASSERT(this->face == -1);
+		}
 		ASSERT(this->bc_flux == 0);
 		ASSERT(this->bc_thick == 0);
 		ASSERT(this->bc_k == 0);
@@ -275,7 +300,7 @@ void CBC::AssertValid(int nSim)const
 
 		if (this->m_bc_solution.size())
 		{
-			ASSERT(this->bc_solution_type == ASSOCIATED || this->bc_solution_type == FIXED);
+			ASSERT(this->bc_solution_type == ST_ASSOCIATED || this->bc_solution_type == ST_FIXED);
 			CTimeSeries<Cproperty>::const_iterator iter = this->m_bc_solution.begin();
 			for (; iter != this->m_bc_solution.end(); ++iter)
 			{
@@ -284,7 +309,7 @@ void CBC::AssertValid(int nSim)const
 		}
 		else
 		{
-			ASSERT(this->bc_solution_type == ASSOCIATED || this->bc_solution_type == FIXED || this->bc_solution_type == UNDEFINED || nSim > 1 );
+			ASSERT(this->bc_solution_type == ST_ASSOCIATED || this->bc_solution_type == ST_FIXED || this->bc_solution_type == ST_UNDEFINED || nSim > 1 );
 		}
 
 		break;
@@ -382,13 +407,13 @@ void CBC::Dump(CDumpContext& dc)const
 	dc << "<bc_solution_type>\n";
 	switch (this->bc_solution_type)
 	{
-		case UNDEFINED:
+		case ST_UNDEFINED:
 			dc << "UNDEFINED\n";
 			break;
-		case FIXED:
+		case ST_FIXED:
 			dc << "FIXED\n";
 			break;
-		case ASSOCIATED:
+		case ST_ASSOCIATED:
 			dc << "ASSOCIATED\n";
 			break;
 		default:
@@ -442,14 +467,16 @@ void CBC::Dump(CDumpContext& dc)const
 
 void CBC::Serialize(bool bStoring, hid_t loc_id)
 {
-	static const char szFace[]     = "face";
-	static const char szType[]     = "bc_type";
-	static const char szFlux[]     = "bc_flux";
-	static const char szHead[]     = "bc_head";
-	static const char szK[]        = "bc_k";
-	static const char szSolution[] = "bc_solution";
-	static const char szThick[]    = "bc_thick";
-	static const char szSolType[]  = "bc_solution_type";
+	static const char szFace[]        = "face";
+	static const char szType[]        = "bc_type";
+	static const char szFlux[]        = "bc_flux";
+	static const char szHead[]        = "bc_head";
+	static const char szK[]           = "bc_k";
+	static const char szSolution[]    = "bc_solution";
+	static const char szThick[]       = "bc_thick";
+	static const char szSolType[]     = "bc_solution_type";	
+	static const char szCellFace[]    = "cell_face";
+	static const char szFaceDefined[] = "face_defined";
 	
 	herr_t status;
 
@@ -458,8 +485,18 @@ void CBC::Serialize(bool bStoring, hid_t loc_id)
 		// bc_type
 		status = CGlobal::HDFSerialize(bStoring, loc_id, szType, H5T_NATIVE_INT, 1, &this->bc_type);
 
+		// face_defined
+		status = CGlobal::HDFSerialize(bStoring, loc_id, szFaceDefined, H5T_NATIVE_INT, 1, &this->face_defined);
+
 		// face
 		status = CGlobal::HDFSerialize(bStoring, loc_id, szFace, H5T_NATIVE_INT, 1, &this->face);
+
+		// cell_face
+		hid_t cellface = CGlobal::HDFCreateCellFace();
+		status = CGlobal::HDFSerialize(bStoring, loc_id, szCellFace, cellface, 1, &this->cell_face);
+		ASSERT(status >= 0);
+		status = H5Tclose(cellface);
+		ASSERT(status >= 0);
 
 		// bc_solution_type
 		status = CGlobal::HDFSerialize(bStoring, loc_id, szSolType, H5T_NATIVE_INT, 1, &this->bc_solution_type);
@@ -479,13 +516,18 @@ void CBC::Serialize(bool bStoring, hid_t loc_id)
 		// bc_type
 		status = CGlobal::HDFSerialize(bStoring, loc_id, szType, H5T_NATIVE_INT, 1, &this->bc_type);
 
+		// face_defined
+		status = CGlobal::HDFSerialize(bStoring, loc_id, szFaceDefined, H5T_NATIVE_INT, 1, &this->face_defined);
+
 		// face
-		this->face_defined = FALSE;
 		status = CGlobal::HDFSerialize(bStoring, loc_id, szFace, H5T_NATIVE_INT, 1, &this->face);
-		if (this->face != -1)
-		{
-			this->face_defined = TRUE;
-		}
+
+		// cell_face
+		hid_t cellface = CGlobal::HDFCreateCellFace();
+		status = CGlobal::HDFSerialize(bStoring, loc_id, szCellFace, cellface, 1, &this->cell_face);
+		ASSERT(status >= 0);
+		status = H5Tclose(cellface);
+		ASSERT(status >= 0);
 
 		// bc_solution_type
 		status = CGlobal::HDFSerialize(bStoring, loc_id, szSolType, H5T_NATIVE_INT, 1, &this->bc_solution_type);
@@ -558,7 +600,7 @@ void CBC::Serialize(CArchive& ar)
 		this->bc_type = static_cast<BC_info::BC_TYPE>(n);
 	}
 
-	if(ver == 2)
+	if (ver == 2)
 	{
 		// face_defined
 		if (ar.IsStoring())
@@ -579,6 +621,22 @@ void CBC::Serialize(CArchive& ar)
 	else
 	{
 		ar >> this->face;
+	}
+
+	if (ver == 2)
+	{
+		// cell_face
+		if (ar.IsStoring())
+		{
+			int n = this->cell_face;
+			ar << n;
+		}
+		else
+		{
+			int n;
+			ar >> n;
+			this->cell_face = static_cast<Cell_Face>(n);
+		}
 	}
 
 	// bc_solution_type
@@ -676,6 +734,29 @@ std::ostream& operator<< (std::ostream &os, const CBC &a)
 	switch (a.bc_type)
 	{
 	case BC_info::BC_SPECIFIED:
+		// exterior_cells_only
+		if (a.face_defined)
+		{
+			switch(a.cell_face)
+			{
+			case CF_X:
+				os << "\t\t-exterior_cells_only    X\n";
+				break;
+			case CF_Y:
+				os << "\t\t-exterior_cells_only    Y\n";
+				break;
+			case CF_Z:
+				os << "\t\t-exterior_cells_only    Z\n";
+				break;
+			case CF_ALL:
+				os << "\t\t-exterior_cells_only    ALL\n";
+				break;
+			default:
+				ASSERT(FALSE);
+				break;
+			}
+		}
+
 		// head
 		if (a.m_bc_head.size())
 		{
@@ -683,8 +764,8 @@ std::ostream& operator<< (std::ostream &os, const CBC &a)
 			CTimeSeries<Cproperty>::const_iterator iter = a.m_bc_head.begin();
 			for (; iter != a.m_bc_head.end(); ++iter)
 			{
-				ASSERT((*iter).second.type != UNDEFINED);
-				if ((*iter).second.type == UNDEFINED) continue;
+				ASSERT((*iter).second.type != PROP_UNDEFINED);
+				if ((*iter).second.type == PROP_UNDEFINED) continue;
 
 				os << "\t\t\t";
 				if ((*iter).first.input)
@@ -701,14 +782,14 @@ std::ostream& operator<< (std::ostream &os, const CBC &a)
 		}
 
 		// associated_solution
-		if (a.m_bc_solution.size() && a.bc_solution_type == ASSOCIATED)
+		if (a.m_bc_solution.size() && a.bc_solution_type == ST_ASSOCIATED)
 		{
 			os << "\t\t-associated_solution\n";
 			CTimeSeries<Cproperty>::const_iterator iter = a.m_bc_solution.begin();
 			for (; iter != a.m_bc_solution.end(); ++iter)
 			{
-				ASSERT((*iter).second.type != UNDEFINED);
-				if ((*iter).second.type == UNDEFINED) continue;
+				ASSERT((*iter).second.type != PROP_UNDEFINED);
+				if ((*iter).second.type == PROP_UNDEFINED) continue;
 
 				os << "\t\t\t";
 				if ((*iter).first.input)
@@ -723,15 +804,16 @@ std::ostream& operator<< (std::ostream &os, const CBC &a)
 				os << (*iter).second;
 			}
 		}
+
 		// fixed_solution
-		if (a.m_bc_solution.size() && a.bc_solution_type == FIXED)
+		if (a.m_bc_solution.size() && a.bc_solution_type == ST_FIXED)
 		{
 			os << "\t\t-fixed_solution\n";
 			CTimeSeries<Cproperty>::const_iterator iter = a.m_bc_solution.begin();
 			for (; iter != a.m_bc_solution.end(); ++iter)
 			{
-				ASSERT((*iter).second.type != UNDEFINED);
-				if ((*iter).second.type == UNDEFINED) continue;
+				ASSERT((*iter).second.type != PROP_UNDEFINED);
+				if ((*iter).second.type == PROP_UNDEFINED) continue;
 
 				os << "\t\t\t";
 				if ((*iter).first.input)
@@ -769,15 +851,16 @@ std::ostream& operator<< (std::ostream &os, const CBC &a)
 				break;
 			}
 		}
+
 		// associated_solution
-		if (a.m_bc_solution.size() && a.bc_solution_type == ASSOCIATED)
+		if (a.m_bc_solution.size() && a.bc_solution_type == ST_ASSOCIATED)
 		{
 			os << "\t\t-associated_solution\n";
 			CTimeSeries<Cproperty>::const_iterator iter = a.m_bc_solution.begin();
 			for (; iter != a.m_bc_solution.end(); ++iter)
 			{
-				ASSERT((*iter).second.type != UNDEFINED);
-				if ((*iter).second.type == UNDEFINED) continue;
+				ASSERT((*iter).second.type != PROP_UNDEFINED);
+				if ((*iter).second.type == PROP_UNDEFINED) continue;
 
 				os << "\t\t\t";
 				if ((*iter).first.input)
@@ -800,8 +883,8 @@ std::ostream& operator<< (std::ostream &os, const CBC &a)
 			CTimeSeries<Cproperty>::const_iterator iter = a.m_bc_flux.begin();
 			for (; iter != a.m_bc_flux.end(); ++iter)
 			{
-				ASSERT((*iter).second.type != UNDEFINED);
-				if ((*iter).second.type == UNDEFINED) continue;
+				ASSERT((*iter).second.type != PROP_UNDEFINED);
+				if ((*iter).second.type == PROP_UNDEFINED) continue;
 
 				os << "\t\t\t";
 				if ((*iter).first.input)
@@ -821,31 +904,34 @@ std::ostream& operator<< (std::ostream &os, const CBC &a)
 
 	case BC_info::BC_LEAKY:
 		// face
-		if (a.face_defined == TRUE) {
-			switch (a.face) {
-	case 0:
-		os << "\t\t-face X\n";
-		break;
-	case 1:
-		os << "\t\t-face Y\n";
-		break;
-	case 2:
-		os << "\t\t-face Z\n";
-		break;
-	default:
-		ASSERT(FALSE);
-		break;
+		if (a.face_defined == TRUE)
+		{
+			switch (a.face)
+			{
+			case 0:
+				os << "\t\t-face X\n";
+				break;
+			case 1:
+				os << "\t\t-face Y\n";
+				break;
+			case 2:
+				os << "\t\t-face Z\n";
+				break;
+			default:
+				ASSERT(FALSE);
+				break;
 			}
 		}
+
 		// associated_solution
-		if (a.m_bc_solution.size() && a.bc_solution_type == ASSOCIATED)
+		if (a.m_bc_solution.size() && a.bc_solution_type == ST_ASSOCIATED)
 		{
 			os << "\t\t-associated_solution\n";
 			CTimeSeries<Cproperty>::const_iterator iter = a.m_bc_solution.begin();
 			for (; iter != a.m_bc_solution.end(); ++iter)
 			{
-				ASSERT((*iter).second.type != UNDEFINED);
-				if ((*iter).second.type == UNDEFINED) continue;
+				ASSERT((*iter).second.type != PROP_UNDEFINED);
+				if ((*iter).second.type == PROP_UNDEFINED) continue;
 
 				os << "\t\t\t";
 				if ((*iter).first.input)
@@ -860,6 +946,7 @@ std::ostream& operator<< (std::ostream &os, const CBC &a)
 				os << (*iter).second;
 			}
 		}
+
 		// head
 		if (a.m_bc_head.size())
 		{
@@ -867,8 +954,8 @@ std::ostream& operator<< (std::ostream &os, const CBC &a)
 			CTimeSeries<Cproperty>::const_iterator iter = a.m_bc_head.begin();
 			for (; iter != a.m_bc_head.end(); ++iter)
 			{
-				ASSERT((*iter).second.type != UNDEFINED);
-				if ((*iter).second.type == UNDEFINED) continue;
+				ASSERT((*iter).second.type != PROP_UNDEFINED);
+				if ((*iter).second.type == PROP_UNDEFINED) continue;
 
 				os << "\t\t\t";
 				if ((*iter).first.input)
@@ -885,12 +972,13 @@ std::ostream& operator<< (std::ostream &os, const CBC &a)
 		}
 
 		// hydraulic_conductivity
-		if (a.bc_k && a.bc_k->type != UNDEFINED)
+		if (a.bc_k && a.bc_k->type != PROP_UNDEFINED)
 		{
 			os << "\t\t-hydraulic_conductivity  " << static_cast<Cproperty>(*a.bc_k);
 		}
+
 		// thickness
-		if (a.bc_thick && a.bc_thick->type != UNDEFINED)
+		if (a.bc_thick && a.bc_thick->type != PROP_UNDEFINED)
 		{
 			os << "\t\t-thickness               " << static_cast<Cproperty>(*a.bc_thick);
 		}

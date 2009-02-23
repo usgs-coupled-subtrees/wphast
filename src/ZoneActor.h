@@ -16,6 +16,7 @@ class CPropertyTreeControlBar;
 class CUnits;
 class ISerializable;
 class vtkTransformPolyDataFilter;
+class CWPhastDoc;
 
 #ifndef vtkFloatingPointType
 #define vtkFloatingPointType vtkFloatingPointType
@@ -42,7 +43,14 @@ public:
 	void SetBounds(const CZone& rZone, const CUnits& rUnits);
 
 	virtual void SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits);
+	virtual void SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, double origin[3], double angle);
 	virtual Polyhedron*& GetPolyhedron(void) = 0;
+
+	void SetGridOrigin(double origin[3]);
+	void SetGridAngle(double angle);
+
+	double* GetGridOrigin(void)const;
+	double GetGridAngle(void)const;
 
 	enum srcWedgeSource::tagChopType GetChopType()const;
 	void SetChopType(enum srcWedgeSource::tagChopType t);
@@ -54,7 +62,7 @@ public:
 
 	enum Polyhedron::POLYHEDRON_TYPE GetPolyhedronType()const;
 
-	void SetUnits(const CUnits& rUnits);
+	void SetUnits(const CUnits& rUnits, bool bSetPolyhedron = true);
 
 	void SetDefault(bool bDefault);
 	bool GetDefault(void)const;
@@ -96,13 +104,18 @@ public:
 	void Select(CWPhastView* pView, bool bReselect = false);
 	void Resize(CWPhastView* pView);
 
-	void Serialize(bool bStoring, hid_t loc_id);
+	void Serialize(bool bStoring, hid_t loc_id, const CWPhastDoc* pWPhastDoc);
 
 	void Pick(vtkRenderer* pRenderer, vtkRenderWindowInteractor* pRenderWindowInteractor);
 	void UnPick(vtkRenderer* pRenderer, vtkRenderWindowInteractor* pRenderWindowInteractor);
 
 	vtkProperty* GetProperty() { return this->CubeActor->GetProperty(); }
 	virtual vtkFloatingPointType* GetBounds(); //  { return this->vtkAssembly::GetBounds(); }
+
+	PHAST_Transform& GetPhastTransform() { return this->Map2GridPhastTransform; }
+
+	HTREEITEM GetTreeItem(void)const;
+	HTREEITEM GetParentTreeItem(void)const;
 
 protected:
 	CZoneActor(void);
@@ -135,6 +148,7 @@ protected:
 	std::vector<vtkActor*>                    TopOutlineActors;            /* was TopOutlineActor */
 	std::vector<vtkTransformPolyDataFilter*>  TopFilters;
 	std::vector<vtkTransformPolyDataFilter*>  TopOutlineFilters;
+	vtkTransform                             *TopUnitsTransform;
 	int                                       TopVisibility;
 
 	// prims bottoms
@@ -142,13 +156,14 @@ protected:
 	std::vector<vtkActor*>                    BottomOutlineActors;         /* was BottomOutlineActor */
 	std::vector<vtkTransformPolyDataFilter*>  BottomFilters;
 	std::vector<vtkTransformPolyDataFilter*>  BottomOutlineFilters;
+	vtkTransform                             *BottomUnitsTransform;
 	int                                       BottomVisibility;
 
 	vtkTransform      *UnitsTransform;
 	vtkTransformPolyDataFilter *UnitsTransformPolyDataFilter;
 
 	std::string        m_name;
-	std::string        m_desc;
+// COMMENT: {8/14/2008 8:36:36 PM}	std::string        m_desc;
 	std::string        m_name_desc;
 
 	HTREEITEM          m_hti;
@@ -159,6 +174,14 @@ protected:
 	float              m_ActualBounds[6];
 
 	bool               m_bDefault;
+
+	//{{
+	double             m_grid_origin[3];
+	double             m_grid_angle;
+	PHAST_Transform    Map2GridPhastTransform;
+	//}}
+
+	friend class CPrismWidget;
 
 private:
 	CZoneActor(const CZoneActor&);  // Not implemented.

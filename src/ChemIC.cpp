@@ -143,49 +143,49 @@ std::ostream& operator<< (std::ostream &os, const CChemIC &a)
 
 	// solution
 	property_ptr = static_cast<Cproperty*>(a.solution);
-	if (property_ptr && property_ptr->type != UNDEFINED) {
+	if (property_ptr && property_ptr->type != PROP_UNDEFINED) {
 		os << "\t\t-solution            " << (*property_ptr);
 	}
 
 	// equilibrium_phases
 	property_ptr = static_cast<Cproperty*>(a.equilibrium_phases);
-	if (property_ptr && property_ptr->type != UNDEFINED) {
+	if (property_ptr && property_ptr->type != PROP_UNDEFINED) {
 		os << "\t\t-equilibrium_phases  " << (*property_ptr);
 	}
 
 	// exchange
 	property_ptr = static_cast<Cproperty*>(a.exchange);
-	if (property_ptr && property_ptr->type != UNDEFINED) {
+	if (property_ptr && property_ptr->type != PROP_UNDEFINED) {
 		os << "\t\t-exchange            " << (*property_ptr);
 	}
 
 	// surface
 	property_ptr = static_cast<Cproperty*>(a.surface);
-	if (property_ptr && property_ptr->type != UNDEFINED) {
+	if (property_ptr && property_ptr->type != PROP_UNDEFINED) {
 		os << "\t\t-surface             " << (*property_ptr);
 	}
 
 	// gas_phase
 	property_ptr = static_cast<Cproperty*>(a.gas_phase);
-	if (property_ptr && property_ptr->type != UNDEFINED) {
+	if (property_ptr && property_ptr->type != PROP_UNDEFINED) {
 		os << "\t\t-gas_phase           " << (*property_ptr);
 	}
 
 	// solid_solutions
 	property_ptr = static_cast<Cproperty*>(a.solid_solutions);
-	if (property_ptr && property_ptr->type != UNDEFINED) {
+	if (property_ptr && property_ptr->type != PROP_UNDEFINED) {
 		os << "\t\t-solid_solutions     " << (*property_ptr);
 	}
 
 	// kinetics
 	property_ptr = static_cast<Cproperty*>(a.kinetics);
-	if (property_ptr && property_ptr->type != UNDEFINED) {
+	if (property_ptr && property_ptr->type != PROP_UNDEFINED) {
 		os << "\t\t-kinetics            " << (*property_ptr);
 	}
 
 	// mask
 	property_ptr = static_cast<Cproperty*>(a.mask);
-	if (property_ptr && property_ptr->type != UNDEFINED) {
+	if (property_ptr && property_ptr->type != PROP_UNDEFINED) {
 		os << "\t\t-mask                " << (*property_ptr);
 	}
 
@@ -307,7 +307,7 @@ CChemIC CChemIC::NewDefaults(void)
 
 	// solution
 	chemIC.solution          = new Cproperty();
-	chemIC.solution->type    = FIXED;
+	chemIC.solution->type    = PROP_FIXED;
 	chemIC.solution->count_v = 1;
 	chemIC.solution->v[0]    = 1;
 

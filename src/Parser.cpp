@@ -11,17 +11,9 @@ extern void malloc_error(void);
 extern int check_key (char *str);
 extern int copy_token (char *token_ptr, char **ptr, int *length);
 
-#if defined(__WPHAST__) && !defined(_DEBUG)
-#include "phqalloc.h"
-#else
-#ifdef _DEBUG
-#define _CRTDBG_MAP_ALLOC
-#include <crtdbg.h>
-#endif
-#endif
-
 #include <cassert>   // assert macro
 #include <iostream>  // std::cerr std::cin std::cout
+#include "srcinput/wphast.h"
 
 int add_char_to_line(int *i, char c);
 

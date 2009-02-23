@@ -41,7 +41,7 @@ void TestCGrid::testCopyCtorFromStruct(void)
 	x.coord            = NULL;
 	x.count_coord      = 0;
 	x.min              = 0.0;
-	x.uniform          = UNDEFINED;
+	x.uniform          = GU_UNDEFINED;
 	x.uniform_expanded = FALSE;
 	x.direction        = 0;
 	x.c                = 'X';
@@ -97,7 +97,7 @@ void TestCGrid::testOperatorEqual(void)
 	x.coord[1]         = 1.0;
 	x.count_coord      = 2;
 	x.min              = 0.0;
-	x.uniform          = UNDEFINED;
+	x.uniform          = GU_UNDEFINED;
 	x.uniform_expanded = FALSE;
 	x.direction        = 0;
 	x.c                = 'X';

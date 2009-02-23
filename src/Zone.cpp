@@ -14,7 +14,7 @@
  * ---------------------------------------------------------------------- */
 CZone::CZone()
 {
-	this->zone_defined = UNDEFINED;
+	this->zone_defined = ZD_UNDEFINED;
 }
 
 CZone::CZone(double x1, double x2, double y1, double y2, double z1, double z2)
@@ -216,7 +216,7 @@ void CZone::Dump(CDumpContext& dc)const
 {
 	dc << "<CZone>\n";
 	switch (zone_defined) {
-		case UNDEFINED:
+		case ZD_UNDEFINED:
 			dc << "\tUNDEFINED\n";
 			break;
 		case TRUE:
@@ -235,7 +235,7 @@ void CZone::Dump(CDumpContext& dc)const
 
 std::ostream& operator<< (std::ostream &os, const CZone &a)
 {
-	ASSERT(a.zone_defined != UNDEFINED);
+	ASSERT(a.zone_defined != ZD_UNDEFINED);
 	os << "\t" << "-zone"
 		<< " " << a.x1
 		<< " " << a.y1
@@ -247,16 +247,16 @@ std::ostream& operator<< (std::ostream &os, const CZone &a)
 	return os;
 }
 
-bool CZone::operator==(const struct zone& rhs)const throw()
-{
-	if (this->zone_defined == UNDEFINED || rhs.zone_defined == UNDEFINED) return false;
-	if (this->zone_defined == FALSE || rhs.zone_defined == FALSE) return false;
-	return (
-		this->x1 == rhs.x1 &&
-		this->x2 == rhs.x2 &&
-		this->y1 == rhs.y1 &&
-		this->y2 == rhs.y2 &&
-		this->z1 == rhs.z1 &&
-		this->z2 == rhs.z2
-		);
-}
+// COMMENT: {12/8/2008 4:58:23 PM}bool CZone::operator==(const struct zone& rhs)const throw()
+// COMMENT: {12/8/2008 4:58:23 PM}{
+// COMMENT: {12/8/2008 4:58:23 PM}	if (this->zone_defined == ZD_UNDEFINED || rhs.zone_defined == ZD_UNDEFINED) return false;
+// COMMENT: {12/8/2008 4:58:23 PM}	if (this->zone_defined == FALSE || rhs.zone_defined == FALSE) return false;
+// COMMENT: {12/8/2008 4:58:23 PM}	return (
+// COMMENT: {12/8/2008 4:58:23 PM}		this->x1 == rhs.x1 &&
+// COMMENT: {12/8/2008 4:58:23 PM}		this->x2 == rhs.x2 &&
+// COMMENT: {12/8/2008 4:58:23 PM}		this->y1 == rhs.y1 &&
+// COMMENT: {12/8/2008 4:58:23 PM}		this->y2 == rhs.y2 &&
+// COMMENT: {12/8/2008 4:58:23 PM}		this->z1 == rhs.z1 &&
+// COMMENT: {12/8/2008 4:58:23 PM}		this->z2 == rhs.z2
+// COMMENT: {12/8/2008 4:58:23 PM}		);
+// COMMENT: {12/8/2008 4:58:23 PM}}

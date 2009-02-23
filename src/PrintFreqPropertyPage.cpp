@@ -10,6 +10,36 @@
 
 // CPrintFreqPropertyPage dialog
 
+
+const int NR_CHH =  0; // heading
+const int NR_TIM =  1; // time
+
+const int NR_BCF =  2; // print_bc_flow
+const int NR_PRO =  3; // print_bc
+const int NR_COM =  4; // print_comp
+const int NR_CON =  5; // print_conductances
+const int NR_EPD =  6; // print_end_of_period      NEW
+const int NR_BAL =  7; // print_flow_balance
+const int NR_CHE =  8; // print_force_chem
+const int NR_H5C =  9; // print_hdf_chem
+const int NR_H5H = 10; // print_hdf_head
+const int NR_H5V = 11; // print_hdf_velocity
+const int NR_HEA = 12; // print_head
+const int NR_LOG = 13; // print_statistics
+const int NR_RES = 14; // print_restart            NEW
+const int NR_ZFT = 15; // print_zone_budget_tsv    NEW
+const int NR_VEL = 16; // print_velocity
+const int NR_WEL = 17; // print_wells
+const int NR_XYC = 18; // print_xyz_chem
+const int NR_XYO = 19; // print_xyz_comp
+const int NR_XYH = 20; // print_xyz_head
+const int NR_XYV = 21; // print_xyz_velocity
+const int NR_XYW = 22; // print_xyz_wells
+const int NR_ZFX = 23; // print_zone_budget        NEW
+
+const int NROWS  = 24;
+
+
 IMPLEMENT_DYNAMIC(CPrintFreqPropertyPage, baseCPrintFreqPropertyPage)
 CPrintFreqPropertyPage::CPrintFreqPropertyPage()
 	: baseCPrintFreqPropertyPage(CPrintFreqPropertyPage::IDD)
@@ -24,6 +54,12 @@ CPrintFreqPropertyPage::~CPrintFreqPropertyPage()
 	do { \
 		pSeries = &name; \
 		for (iter = pSeries->begin(); iter != pSeries->end(); ++iter) times.insert(iter->first); \
+	} while(0)
+
+#define COLLECT_INTS_MACRO(name) \
+	do { \
+		pTSI = &name; \
+		for (ti = pTSI->begin(); ti != pTSI->end(); ++ti) times.insert(ti->first); \
 	} while(0)
 
 void CPrintFreqPropertyPage::DoDataExchange(CDataExchange* pDX)
@@ -67,7 +103,7 @@ void CPrintFreqPropertyPage::DoDataExchange(CDataExchange* pDX)
 	{
 		try
 		{
-			this->m_Grid.SetRowCount(20);
+			this->m_Grid.SetRowCount(NROWS);
 			this->m_Grid.SetColumnCount(4);
 			this->m_Grid.SetFixedRowCount(1);
 			this->m_Grid.SetFixedColumnCount(2);
@@ -122,69 +158,83 @@ void CPrintFreqPropertyPage::DoDataExchange(CDataExchange* pDX)
 			}
 		}
 
-		this->m_Grid.SetItemText(0, 0, _T("Output"));
-		this->m_Grid.SetItemText(0, 1, _T("Output file"));
+		this->m_Grid.SetItemText(NR_CHH, 0, _T("Output"));
+		this->m_Grid.SetItemText(NR_CHH, 1, _T("Output file"));
 
-		this->m_Grid.SetItemText(0, 2, _T("Print every"));
-		this->m_Grid.SetItemText(0, 3, _T("Units"));
+		this->m_Grid.SetItemText(NR_CHH, 2, _T("Print every"));
+		this->m_Grid.SetItemText(NR_CHH, 3, _T("Units"));
 
-		this->m_Grid.SetItemText(1, 0, _T("Time"));
+		this->m_Grid.SetItemText(NR_TIM, 0, _T("Time"));
 		
-		this->m_Grid.SetItemText(2, 0, _T("Flow rates in boundary condition cells"));		
-		this->m_Grid.SetItemText(2, 1, _T("*.O.bcf"));
-		
-		this->m_Grid.SetItemText(3, 0, _T("Components"));
-		this->m_Grid.SetItemText(3, 1, _T("*.O.comps"));
-		
-		this->m_Grid.SetItemText(4, 0, _T("Conductance"));
-		this->m_Grid.SetItemText(4, 1, _T("*.O.kd"));
-		
-		this->m_Grid.SetItemText(5, 0, _T("Flow balance"));
-		this->m_Grid.SetItemText(5, 1, _T("*.O.bal"));
-		
-		this->m_Grid.SetItemText(6, 0, _T("Force chemistry print"));
-		this->m_Grid.SetItemText(6, 1, _T("*.O.chem"));
-		
-		this->m_Grid.SetItemText(7, 0, _T("HDF chemistry"));
-		this->m_Grid.SetItemText(7, 1, _T("*.h5"));
-		
-		this->m_Grid.SetItemText(8, 0, _T("HDF heads"));
-		this->m_Grid.SetItemText(8, 1, _T("*.h5"));
-		
-		this->m_Grid.SetItemText(9, 0, _T("HDF velocities"));
-		this->m_Grid.SetItemText(9, 1, _T("*.h5"));
-		
-		this->m_Grid.SetItemText(10, 0, _T("Heads"));
-		this->m_Grid.SetItemText(10, 1, _T("*.O.head"));
-		
-		this->m_Grid.SetItemText(11, 0, _T("Progress statistics"));
-		this->m_Grid.SetItemText(11, 1, _T("*.log"));
-		
-		this->m_Grid.SetItemText(12, 0, _T("Velocities"));
-		this->m_Grid.SetItemText(12, 1, _T("*.O.vel"));
-		
-		this->m_Grid.SetItemText(13, 0, _T("Wells"));
-		this->m_Grid.SetItemText(13, 1, _T("*.O.wel"));
-		
-		this->m_Grid.SetItemText(14, 0, _T("XYZ chemistry"));
-		this->m_Grid.SetItemText(14, 1, _T("*.xyz.chem"));
-		
-		this->m_Grid.SetItemText(15, 0, _T("XYZ components"));
-		this->m_Grid.SetItemText(15, 1, _T("*.xyz.comps"));
-		
-		this->m_Grid.SetItemText(16, 0, _T("XYZ heads"));
-		this->m_Grid.SetItemText(16, 1, _T("*.xyz.head"));
-		
-		this->m_Grid.SetItemText(17, 0, _T("XYZ velocities"));
-		this->m_Grid.SetItemText(17, 1, _T("*.xyz.vel"));
-		
-		this->m_Grid.SetItemText(18, 0, _T("XYZ wells"));
-		this->m_Grid.SetItemText(18, 1, _T("*.xyz.wel"));
+		this->m_Grid.SetItemText(NR_BCF, 0, _T("Flow rates in boundary condition cells"));		
+		this->m_Grid.SetItemText(NR_BCF, 1, _T("*.bcf.txt"));
 
-		this->m_Grid.SetItemText(19, 0, _T("Boundary conditions"));
-		this->m_Grid.SetItemText(19, 1, _T("*.O.probdef"));
-		this->m_Grid.SetCheck(19, 2, BST_UNCHECKED);
-		this->m_Grid.DisableCell(19, 3);
+		this->m_Grid.SetItemText(NR_PRO, 0, _T("Boundary conditions"));
+		this->m_Grid.SetItemText(NR_PRO, 1, _T("*.probdef.txt"));
+		this->m_Grid.SetCheck(NR_PRO, 2, BST_UNCHECKED);
+		this->m_Grid.DisableCell(NR_PRO, 3);
+		
+		this->m_Grid.SetItemText(NR_COM, 0, _T("Components"));
+		this->m_Grid.SetItemText(NR_COM, 1, _T("*.comps.txt"));
+		
+		this->m_Grid.SetItemText(NR_CON, 0, _T("Conductance"));
+		this->m_Grid.SetItemText(NR_CON, 1, _T("*.kd.txt"));
+
+		this->m_Grid.SetItemText(NR_EPD, 0, _T("End of period default"));
+		this->m_Grid.SetItemText(NR_EPD, 1, _T("(multiple)"));
+		this->m_Grid.SetCheck(NR_EPD, 2, BST_CHECKED);
+		this->m_Grid.DisableCell(NR_EPD, 3);
+		
+		this->m_Grid.SetItemText(NR_BAL, 0, _T("Flow balance"));
+		this->m_Grid.SetItemText(NR_BAL, 1, _T("*.bal.txt"));
+		
+		this->m_Grid.SetItemText(NR_CHE, 0, _T("Force chemistry print"));
+		this->m_Grid.SetItemText(NR_CHE, 1, _T("*.chem.txt"));
+		
+		this->m_Grid.SetItemText(NR_H5C, 0, _T("HDF chemistry"));
+		this->m_Grid.SetItemText(NR_H5C, 1, _T("*.h5"));
+		
+		this->m_Grid.SetItemText(NR_H5H, 0, _T("HDF heads"));
+		this->m_Grid.SetItemText(NR_H5H, 1, _T("*.h5"));
+		
+		this->m_Grid.SetItemText(NR_H5V, 0, _T("HDF velocities"));
+		this->m_Grid.SetItemText(NR_H5V, 1, _T("*.h5"));
+		
+		this->m_Grid.SetItemText(NR_HEA, 0, _T("Heads"));
+		this->m_Grid.SetItemText(NR_HEA, 1, _T("*.head.txt"));
+		
+		this->m_Grid.SetItemText(NR_LOG, 0, _T("Progress statistics"));
+		this->m_Grid.SetItemText(NR_LOG, 1, _T("*.log.txt"));
+
+		this->m_Grid.SetItemText(NR_RES, 0, _T("Restart file"));
+		this->m_Grid.SetItemText(NR_RES, 1, _T("*.restart.tgz"));
+
+		this->m_Grid.SetItemText(NR_ZFT, 0, _T("Zone flow information tsv"));
+		this->m_Grid.SetItemText(NR_ZFT, 1, _T("*.zf.tsv"));
+		
+		this->m_Grid.SetItemText(NR_VEL, 0, _T("Velocities"));
+		this->m_Grid.SetItemText(NR_VEL, 1, _T("*.vel.txt"));
+		
+		this->m_Grid.SetItemText(NR_WEL, 0, _T("Wells"));
+		this->m_Grid.SetItemText(NR_WEL, 1, _T("*.wel.txt"));
+		
+		this->m_Grid.SetItemText(NR_XYC, 0, _T("XYZ chemistry"));
+		this->m_Grid.SetItemText(NR_XYC, 1, _T("*.chem.xyz.tsv"));
+		
+		this->m_Grid.SetItemText(NR_XYO, 0, _T("XYZ components"));
+		this->m_Grid.SetItemText(NR_XYO, 1, _T("*.comps.xyz.tsv"));
+		
+		this->m_Grid.SetItemText(NR_XYH, 0, _T("XYZ heads"));
+		this->m_Grid.SetItemText(NR_XYH, 1, _T("*.head.xyz.tsv"));
+		
+		this->m_Grid.SetItemText(NR_XYV, 0, _T("XYZ velocities"));
+		this->m_Grid.SetItemText(NR_XYV, 1, _T("*.vel.xyz.tsv"));
+		
+		this->m_Grid.SetItemText(NR_XYW, 0, _T("XYZ wells"));
+		this->m_Grid.SetItemText(NR_XYW, 1, _T("*.wel.xyz.tsv"));
+
+		this->m_Grid.SetItemText(NR_ZFX, 0, _T("Zone flow information"));
+		this->m_Grid.SetItemText(NR_ZFX, 1, _T("*.zf.txt"));
 
 		// this->m_Grid.ExpandColumnsToFit();
 		this->m_Grid.AutoSizeColumns();
@@ -203,8 +253,10 @@ void CPrintFreqPropertyPage::DoDataExchange(CDataExchange* pDX)
 	if (pDX->m_bSaveAndValidate)
 	{
 		this->m_printFreq.print_bc_flow.clear();
+		this->m_printFreq.print_bc.clear();
 		this->m_printFreq.print_comp.clear();
 		this->m_printFreq.print_conductances.clear();
+		this->m_printFreq.print_end_of_period.clear();    // new
 		this->m_printFreq.print_flow_balance.clear();
 		this->m_printFreq.print_force_chem.clear();
 		this->m_printFreq.print_hdf_chem.clear();
@@ -212,6 +264,8 @@ void CPrintFreqPropertyPage::DoDataExchange(CDataExchange* pDX)
 		this->m_printFreq.print_hdf_velocity.clear();
 		this->m_printFreq.print_head.clear();
 		this->m_printFreq.print_statistics.clear();
+		this->m_printFreq.print_restart.clear();          // new		
+		this->m_printFreq.print_zone_budget_tsv.clear();  // new		
 		this->m_printFreq.print_velocity.clear();
 		this->m_printFreq.print_wells.clear();
 		this->m_printFreq.print_xyz_chem.clear();
@@ -219,29 +273,33 @@ void CPrintFreqPropertyPage::DoDataExchange(CDataExchange* pDX)
 		this->m_printFreq.print_xyz_head.clear();
 		this->m_printFreq.print_xyz_velocity.clear();
 		this->m_printFreq.print_xyz_wells.clear();
-		this->m_printFreq.print_bc.clear();
+		this->m_printFreq.print_zone_budget.clear();      // new		
 	}
 
 	Ctime zero;
 	zero.SetValue(0.0);
-	this->DDX_PRINT(pDX,  2, 2, this->m_printFreq.print_bc_flow[zero]);
-	this->DDX_PRINT(pDX,  3, 2, this->m_printFreq.print_comp[zero]);
-	this->DDX_PRINT(pDX,  4, 2, this->m_printFreq.print_conductances[zero]);
-	this->DDX_PRINT(pDX,  5, 2, this->m_printFreq.print_flow_balance[zero]);
-	this->DDX_PRINT(pDX,  6, 2, this->m_printFreq.print_force_chem[zero]);
-	this->DDX_PRINT(pDX,  7, 2, this->m_printFreq.print_hdf_chem[zero]);
-	this->DDX_PRINT(pDX,  8, 2, this->m_printFreq.print_hdf_head[zero]);
-	this->DDX_PRINT(pDX,  9, 2, this->m_printFreq.print_hdf_velocity[zero]);
-	this->DDX_PRINT(pDX, 10, 2, this->m_printFreq.print_head[zero]);
-	this->DDX_PRINT(pDX, 11, 2, this->m_printFreq.print_statistics[zero]);
-	this->DDX_PRINT(pDX, 12, 2, this->m_printFreq.print_velocity[zero]);
-	this->DDX_PRINT(pDX, 13, 2, this->m_printFreq.print_wells[zero]);
-	this->DDX_PRINT(pDX, 14, 2, this->m_printFreq.print_xyz_chem[zero]);
-	this->DDX_PRINT(pDX, 15, 2, this->m_printFreq.print_xyz_comp[zero]);
-	this->DDX_PRINT(pDX, 16, 2, this->m_printFreq.print_xyz_head[zero]);
-	this->DDX_PRINT(pDX, 17, 2, this->m_printFreq.print_xyz_velocity[zero]);
-	this->DDX_PRINT(pDX, 18, 2, this->m_printFreq.print_xyz_wells[zero]);
-	this->DDX_PRINT(pDX, 19, 2, this->m_printFreq.print_bc[zero]);
+	this->DDX_PRINT(pDX, NR_BCF, 2, this->m_printFreq.print_bc_flow[zero]);
+	this->DDX_PRINT(pDX, NR_PRO, 2, this->m_printFreq.print_bc[zero]);
+	this->DDX_PRINT(pDX, NR_COM, 2, this->m_printFreq.print_comp[zero]);
+	this->DDX_PRINT(pDX, NR_CON, 2, this->m_printFreq.print_conductances[zero]);
+	this->DDX_PRINT(pDX, NR_EPD, 2, this->m_printFreq.print_end_of_period[zero]);     // new
+	this->DDX_PRINT(pDX, NR_BAL, 2, this->m_printFreq.print_flow_balance[zero]);
+	this->DDX_PRINT(pDX, NR_CHE, 2, this->m_printFreq.print_force_chem[zero]);
+	this->DDX_PRINT(pDX, NR_H5C, 2, this->m_printFreq.print_hdf_chem[zero]);
+	this->DDX_PRINT(pDX, NR_H5H, 2, this->m_printFreq.print_hdf_head[zero]);
+	this->DDX_PRINT(pDX, NR_H5V, 2, this->m_printFreq.print_hdf_velocity[zero]);
+	this->DDX_PRINT(pDX, NR_HEA, 2, this->m_printFreq.print_head[zero]);
+	this->DDX_PRINT(pDX, NR_LOG, 2, this->m_printFreq.print_statistics[zero]);
+	this->DDX_PRINT(pDX, NR_RES, 2, this->m_printFreq.print_restart[zero]);	         // new
+	this->DDX_PRINT(pDX, NR_ZFT, 2, this->m_printFreq.print_zone_budget_tsv[zero]);	 // new
+	this->DDX_PRINT(pDX, NR_VEL, 2, this->m_printFreq.print_velocity[zero]);
+	this->DDX_PRINT(pDX, NR_WEL, 2, this->m_printFreq.print_wells[zero]);
+	this->DDX_PRINT(pDX, NR_XYC, 2, this->m_printFreq.print_xyz_chem[zero]);
+	this->DDX_PRINT(pDX, NR_XYO, 2, this->m_printFreq.print_xyz_comp[zero]);
+	this->DDX_PRINT(pDX, NR_XYH, 2, this->m_printFreq.print_xyz_head[zero]);
+	this->DDX_PRINT(pDX, NR_XYV, 2, this->m_printFreq.print_xyz_velocity[zero]);
+	this->DDX_PRINT(pDX, NR_XYW, 2, this->m_printFreq.print_xyz_wells[zero]);
+	this->DDX_PRINT(pDX, NR_ZFX, 2, this->m_printFreq.print_zone_budget[zero]);	     // new
 
 	if (this->m_bFirstSetActive)
 	{
@@ -250,9 +308,14 @@ void CPrintFreqPropertyPage::DoDataExchange(CDataExchange* pDX)
 		CTimeSeries<Ctime> *pSeries;
 		CTimeSeries<Ctime>::const_iterator iter;
 
+		CTimeSeries<int> *pTSI;
+		CTimeSeries<int>::const_iterator ti;
+
 		COLLECT_TIMES_MACRO(this->m_printFreq.print_bc_flow);
+		COLLECT_INTS_MACRO(this->m_printFreq.print_bc);
 		COLLECT_TIMES_MACRO(this->m_printFreq.print_comp);
 		COLLECT_TIMES_MACRO(this->m_printFreq.print_conductances);
+		COLLECT_INTS_MACRO(this->m_printFreq.print_end_of_period);       // new
 		COLLECT_TIMES_MACRO(this->m_printFreq.print_flow_balance);
 		COLLECT_TIMES_MACRO(this->m_printFreq.print_force_chem);
 		COLLECT_TIMES_MACRO(this->m_printFreq.print_hdf_chem);
@@ -260,6 +323,8 @@ void CPrintFreqPropertyPage::DoDataExchange(CDataExchange* pDX)
 		COLLECT_TIMES_MACRO(this->m_printFreq.print_hdf_velocity);
 		COLLECT_TIMES_MACRO(this->m_printFreq.print_head);
 		COLLECT_TIMES_MACRO(this->m_printFreq.print_statistics);
+		COLLECT_TIMES_MACRO(this->m_printFreq.print_restart);            // new
+		COLLECT_TIMES_MACRO(this->m_printFreq.print_zone_budget_tsv);    // new
 		COLLECT_TIMES_MACRO(this->m_printFreq.print_velocity);
 		COLLECT_TIMES_MACRO(this->m_printFreq.print_wells);
 		COLLECT_TIMES_MACRO(this->m_printFreq.print_xyz_chem);
@@ -267,13 +332,14 @@ void CPrintFreqPropertyPage::DoDataExchange(CDataExchange* pDX)
 		COLLECT_TIMES_MACRO(this->m_printFreq.print_xyz_head);
 		COLLECT_TIMES_MACRO(this->m_printFreq.print_xyz_velocity);
 		COLLECT_TIMES_MACRO(this->m_printFreq.print_xyz_wells);
+		COLLECT_TIMES_MACRO(this->m_printFreq.print_zone_budget);        // new
 
-		CTimeSeries<int> *pTSI = &this->m_printFreq.print_bc;
-		CTimeSeries<int>::const_iterator ti = pTSI->begin();
-		for (ti = pTSI->begin(); ti != pTSI->end(); ++ti)
-		{
-			times.insert(ti->first);
-		}
+// COMMENT: {2/11/2009 5:47:57 PM}		CTimeSeries<int> *pTSI = &this->m_printFreq.print_bc;
+// COMMENT: {2/11/2009 5:47:57 PM}		CTimeSeries<int>::const_iterator ti = pTSI->begin();
+// COMMENT: {2/11/2009 5:47:57 PM}		for (ti = pTSI->begin(); ti != pTSI->end(); ++ti)
+// COMMENT: {2/11/2009 5:47:57 PM}		{
+// COMMENT: {2/11/2009 5:47:57 PM}			times.insert(ti->first);
+// COMMENT: {2/11/2009 5:47:57 PM}		}
 
 		std::set<Ctime>::const_iterator s = times.begin();
 		for (++s; s != times.end(); ++s)
@@ -292,24 +358,28 @@ void CPrintFreqPropertyPage::DoDataExchange(CDataExchange* pDX)
 				this->m_Grid.SetItemText(1, nCols + 1, s->input);
 			}
 
-			this->DDX_PRINT(pDX,  2, nCols, this->m_printFreq.print_bc_flow, *s);
-			this->DDX_PRINT(pDX,  3, nCols, this->m_printFreq.print_comp, *s);
-			this->DDX_PRINT(pDX,  4, nCols, this->m_printFreq.print_conductances, *s);
-			this->DDX_PRINT(pDX,  5, nCols, this->m_printFreq.print_flow_balance, *s);
-			this->DDX_PRINT(pDX,  6, nCols, this->m_printFreq.print_force_chem, *s);
-			this->DDX_PRINT(pDX,  7, nCols, this->m_printFreq.print_hdf_chem, *s);
-			this->DDX_PRINT(pDX,  8, nCols, this->m_printFreq.print_hdf_head, *s);
-			this->DDX_PRINT(pDX,  9, nCols, this->m_printFreq.print_hdf_velocity, *s);
-			this->DDX_PRINT(pDX, 10, nCols, this->m_printFreq.print_head, *s);
-			this->DDX_PRINT(pDX, 11, nCols, this->m_printFreq.print_statistics, *s);
-			this->DDX_PRINT(pDX, 12, nCols, this->m_printFreq.print_velocity, *s);
-			this->DDX_PRINT(pDX, 13, nCols, this->m_printFreq.print_wells, *s);
-			this->DDX_PRINT(pDX, 14, nCols, this->m_printFreq.print_xyz_chem, *s);
-			this->DDX_PRINT(pDX, 15, nCols, this->m_printFreq.print_xyz_comp, *s);
-			this->DDX_PRINT(pDX, 16, nCols, this->m_printFreq.print_xyz_head, *s);
-			this->DDX_PRINT(pDX, 17, nCols, this->m_printFreq.print_xyz_velocity, *s);
-			this->DDX_PRINT(pDX, 18, nCols, this->m_printFreq.print_xyz_wells, *s);
-			this->DDX_PRINT(pDX, 19, nCols, this->m_printFreq.print_bc, *s);
+			this->DDX_PRINT(pDX, NR_BCF, nCols, this->m_printFreq.print_bc_flow, *s);
+			this->DDX_PRINT(pDX, NR_PRO, nCols, this->m_printFreq.print_bc, *s);
+			this->DDX_PRINT(pDX, NR_COM, nCols, this->m_printFreq.print_comp, *s);
+			this->DDX_PRINT(pDX, NR_CON, nCols, this->m_printFreq.print_conductances, *s);
+			this->DDX_PRINT(pDX, NR_EPD, nCols, this->m_printFreq.print_end_of_period, *s);     // new
+			this->DDX_PRINT(pDX, NR_BAL, nCols, this->m_printFreq.print_flow_balance, *s);
+			this->DDX_PRINT(pDX, NR_CHE, nCols, this->m_printFreq.print_force_chem, *s);
+			this->DDX_PRINT(pDX, NR_H5C, nCols, this->m_printFreq.print_hdf_chem, *s);
+			this->DDX_PRINT(pDX, NR_H5H, nCols, this->m_printFreq.print_hdf_head, *s);
+			this->DDX_PRINT(pDX, NR_H5V, nCols, this->m_printFreq.print_hdf_velocity, *s);
+			this->DDX_PRINT(pDX, NR_HEA, nCols, this->m_printFreq.print_head, *s);
+			this->DDX_PRINT(pDX, NR_LOG, nCols, this->m_printFreq.print_statistics, *s);
+			this->DDX_PRINT(pDX, NR_RES, nCols, this->m_printFreq.print_restart, *s);           // new
+			this->DDX_PRINT(pDX, NR_ZFT, nCols, this->m_printFreq.print_zone_budget_tsv, *s);   // new
+			this->DDX_PRINT(pDX, NR_VEL, nCols, this->m_printFreq.print_velocity, *s);
+			this->DDX_PRINT(pDX, NR_WEL, nCols, this->m_printFreq.print_wells, *s);
+			this->DDX_PRINT(pDX, NR_XYC, nCols, this->m_printFreq.print_xyz_chem, *s);
+			this->DDX_PRINT(pDX, NR_XYO, nCols, this->m_printFreq.print_xyz_comp, *s);
+			this->DDX_PRINT(pDX, NR_XYH, nCols, this->m_printFreq.print_xyz_head, *s);
+			this->DDX_PRINT(pDX, NR_XYV, nCols, this->m_printFreq.print_xyz_velocity, *s);
+			this->DDX_PRINT(pDX, NR_XYW, nCols, this->m_printFreq.print_xyz_wells, *s);
+			this->DDX_PRINT(pDX, NR_ZFX, nCols, this->m_printFreq.print_zone_budget, *s);       // new
 		}	
 	}
 
@@ -330,34 +400,38 @@ void CPrintFreqPropertyPage::DoDataExchange(CDataExchange* pDX)
 			DDX_TextGridControl(pDX, IDC_GRID, 1, nCol + 1, str);			
 			if (str.IsEmpty() || str.Compare("default") == 0)
 			{
-				time.type = UNITS;
+				time.type = TT_UNITS;
 				if (time.input) delete[] time.input;
 				time.input = NULL;
 			}
 			else
 			{
 				time.SetInput(str.GetString());
-				ASSERT(time.type == UNITS);
+				ASSERT(time.type == TT_UNITS);
 			}
 
-			this->DDX_PRINT(pDX,  2, nCol, this->m_printFreq.print_bc_flow, time);
-			this->DDX_PRINT(pDX,  3, nCol, this->m_printFreq.print_comp, time);
-			this->DDX_PRINT(pDX,  4, nCol, this->m_printFreq.print_conductances, time);
-			this->DDX_PRINT(pDX,  5, nCol, this->m_printFreq.print_flow_balance, time);
-			this->DDX_PRINT(pDX,  6, nCol, this->m_printFreq.print_force_chem, time);
-			this->DDX_PRINT(pDX,  7, nCol, this->m_printFreq.print_hdf_chem, time);
-			this->DDX_PRINT(pDX,  8, nCol, this->m_printFreq.print_hdf_head, time);
-			this->DDX_PRINT(pDX,  9, nCol, this->m_printFreq.print_hdf_velocity, time);
-			this->DDX_PRINT(pDX, 10, nCol, this->m_printFreq.print_head, time);
-			this->DDX_PRINT(pDX, 11, nCol, this->m_printFreq.print_statistics, time);
-			this->DDX_PRINT(pDX, 12, nCol, this->m_printFreq.print_velocity, time);
-			this->DDX_PRINT(pDX, 13, nCol, this->m_printFreq.print_wells, time);
-			this->DDX_PRINT(pDX, 14, nCol, this->m_printFreq.print_xyz_chem, time);
-			this->DDX_PRINT(pDX, 15, nCol, this->m_printFreq.print_xyz_comp, time);
-			this->DDX_PRINT(pDX, 16, nCol, this->m_printFreq.print_xyz_head, time);
-			this->DDX_PRINT(pDX, 17, nCol, this->m_printFreq.print_xyz_velocity, time);
-			this->DDX_PRINT(pDX, 18, nCol, this->m_printFreq.print_xyz_wells, time);
-			this->DDX_PRINT(pDX, 19, nCol, this->m_printFreq.print_bc, time);
+			this->DDX_PRINT(pDX, NR_BCF, nCol, this->m_printFreq.print_bc_flow, time);
+			this->DDX_PRINT(pDX, NR_COM, nCol, this->m_printFreq.print_comp, time);
+			this->DDX_PRINT(pDX, NR_CON, nCol, this->m_printFreq.print_conductances, time);
+			this->DDX_PRINT(pDX, NR_EPD, nCol, this->m_printFreq.print_end_of_period, time);         // new
+			this->DDX_PRINT(pDX, NR_BAL, nCol, this->m_printFreq.print_flow_balance, time);
+			this->DDX_PRINT(pDX, NR_CHE, nCol, this->m_printFreq.print_force_chem, time);
+			this->DDX_PRINT(pDX, NR_H5C, nCol, this->m_printFreq.print_hdf_chem, time);
+			this->DDX_PRINT(pDX, NR_H5H, nCol, this->m_printFreq.print_hdf_head, time);
+			this->DDX_PRINT(pDX, NR_H5V, nCol, this->m_printFreq.print_hdf_velocity, time);
+			this->DDX_PRINT(pDX, NR_HEA, nCol, this->m_printFreq.print_head, time);
+			this->DDX_PRINT(pDX, NR_LOG, nCol, this->m_printFreq.print_statistics, time);
+			this->DDX_PRINT(pDX, NR_RES, nCol, this->m_printFreq.print_restart, time);               // new
+			this->DDX_PRINT(pDX, NR_ZFT, nCol, this->m_printFreq.print_zone_budget_tsv, time);       // new
+			this->DDX_PRINT(pDX, NR_VEL, nCol, this->m_printFreq.print_velocity, time);
+			this->DDX_PRINT(pDX, NR_WEL, nCol, this->m_printFreq.print_wells, time);
+			this->DDX_PRINT(pDX, NR_XYC, nCol, this->m_printFreq.print_xyz_chem, time);
+			this->DDX_PRINT(pDX, NR_XYO, nCol, this->m_printFreq.print_xyz_comp, time);
+			this->DDX_PRINT(pDX, NR_XYH, nCol, this->m_printFreq.print_xyz_head, time);
+			this->DDX_PRINT(pDX, NR_XYV, nCol, this->m_printFreq.print_xyz_velocity, time);
+			this->DDX_PRINT(pDX, NR_XYW, nCol, this->m_printFreq.print_xyz_wells, time);
+			this->DDX_PRINT(pDX, NR_PRO, nCol, this->m_printFreq.print_bc, time);
+			this->DDX_PRINT(pDX, NR_ZFX, nCol, this->m_printFreq.print_zone_budget, time);           // new
 		}
 		//this->m_printFreq.print_bc_flow.Minimize();
 	}
@@ -451,7 +525,7 @@ void CPrintFreqPropertyPage::DDX_PRINT(CDataExchange* pDX, int nRow, int nCol, C
 			if (str.IsEmpty())
 			{
 				time = Ctime();
-				time.type = STEP;
+				time.type = TT_STEP;
 			}
 			else
 			{
@@ -464,41 +538,41 @@ void CPrintFreqPropertyPage::DDX_PRINT(CDataExchange* pDX, int nRow, int nCol, C
 		DDX_TextGridControl(pDX, IDC_GRID, nRow, nCol + 1, str);			
 		if (str.IsEmpty() || str.Compare("default") == 0)
 		{
-			time.type = UNITS;
+			time.type = TT_UNITS;
 			if (time.input) delete[] time.input;
 			time.input = NULL;
 		}
 		else if (str.Compare("seconds") == 0)
 		{
 			time.SetInput(str.GetString());
-			ASSERT(time.type == UNITS);
+			ASSERT(time.type == TT_UNITS);
 		}
 		else if (str.Compare("minutes") == 0)
 		{
 			time.SetInput(str.GetString());
-			ASSERT(time.type == UNITS);
+			ASSERT(time.type == TT_UNITS);
 		}
 		else if (str.Compare("hours") == 0)
 		{
 			time.SetInput(str.GetString());
-			ASSERT(time.type == UNITS);
+			ASSERT(time.type == TT_UNITS);
 		}
 		else if (str.Compare("days") == 0)
 		{
 			time.SetInput(str.GetString());
-			ASSERT(time.type == UNITS);
+			ASSERT(time.type == TT_UNITS);
 		}
 		else if (str.Compare("years") == 0)
 		{
 			time.SetInput(str.GetString());
-			ASSERT(time.type == UNITS);
+			ASSERT(time.type == TT_UNITS);
 		}
 		else if (str.Compare("step") == 0)
 		{
 			if (time.value_defined != FALSE)
 			{
 				VERIFY(time.SetInput("step") == OK);
-				ASSERT(time.type == STEP);
+				ASSERT(time.type == TT_STEP);
 			}
 			else
 			{
@@ -507,7 +581,7 @@ void CPrintFreqPropertyPage::DDX_PRINT(CDataExchange* pDX, int nRow, int nCol, C
 		}
 		else if (str.Compare("end") == 0)
 		{
-			time.type = UNDEFINED;
+			time.type = TT_UNDEFINED;
 			time.value_defined = FALSE;
 			if (time.input) delete[] time.input;
 			time.input = NULL;
@@ -522,7 +596,7 @@ void CPrintFreqPropertyPage::DDX_PRINT(CDataExchange* pDX, int nRow, int nCol, C
 	{
 		switch (time.type)
 		{
-		case UNDEFINED:
+		case TT_UNDEFINED:
 			if (time.value_defined)
 			{
 				DDX_TextGridControl(pDX, IDC_GRID, nRow, nCol, empty);
@@ -536,13 +610,13 @@ void CPrintFreqPropertyPage::DDX_PRINT(CDataExchange* pDX, int nRow, int nCol, C
 				DDX_TextGridControl(pDX, IDC_GRID, nRow, nCol + 1, end);
 			}
 			break;
-		case STEP:
+		case TT_STEP:
 			dVal = time.value;
 			DDX_TextGridControl(pDX, IDC_GRID, nRow, nCol,     dVal);
 			DDX_GridEnableCell(pDX,  IDC_GRID, nRow, nCol);
 			DDX_TextGridControl(pDX, IDC_GRID, nRow, nCol + 1, step);
 			break;
-		case UNITS:
+		case TT_UNITS:
 			dVal = time.value;
 			if (time.input != NULL)
 			{
@@ -639,25 +713,6 @@ void CPrintFreqPropertyPage::OnBnClickedButtonInsert()
 		this->m_Grid.InsertColumn(_T("Units"), DT_LEFT|DT_BOTTOM|DT_END_ELLIPSIS, nColumn + 1);
 	}
 
-// COMMENT: {5/3/2005 5:25:37 PM}	std::vector<LPCTSTR> options;
-// COMMENT: {5/3/2005 5:25:37 PM}	options.push_back(_T("default"));
-// COMMENT: {5/3/2005 5:25:37 PM}	options.push_back(_T("seconds"));
-// COMMENT: {5/3/2005 5:25:37 PM}	options.push_back(_T("minutes"));
-// COMMENT: {5/3/2005 5:25:37 PM}	options.push_back(_T("hours"));
-// COMMENT: {5/3/2005 5:25:37 PM}	options.push_back(_T("days"));
-// COMMENT: {5/3/2005 5:25:37 PM}	options.push_back(_T("years"));
-// COMMENT: {5/3/2005 5:25:37 PM}	options.push_back(_T("step"));
-// COMMENT: {5/3/2005 5:25:37 PM}	this->m_Grid.SetColumnOptions(nColumn + 1, options);
-// COMMENT: {5/3/2005 5:25:37 PM}
-// COMMENT: {5/3/2005 5:25:37 PM}	std::vector<LPCTSTR> times;
-// COMMENT: {5/3/2005 5:25:37 PM}	times.push_back(_T("default"));
-// COMMENT: {5/3/2005 5:25:37 PM}	times.push_back(_T("seconds"));
-// COMMENT: {5/3/2005 5:25:37 PM}	times.push_back(_T("minutes"));
-// COMMENT: {5/3/2005 5:25:37 PM}	times.push_back(_T("hours"));
-// COMMENT: {5/3/2005 5:25:37 PM}	times.push_back(_T("days"));
-// COMMENT: {5/3/2005 5:25:37 PM}	times.push_back(_T("years"));
-// COMMENT: {5/3/2005 5:25:37 PM}	this->m_Grid.SetCellOptions(1, nColumn + 1, times);
-
 	GV_ITEM item;
 	item.mask = GVIF_TEXT | GVIF_STATE | GVIF_PARAM;
 	for (item.row = 1; item.row < this->m_Grid.GetRowCount(); ++item.row)
@@ -701,42 +756,6 @@ void CPrintFreqPropertyPage::OnBnClickedButtonDelete()
 	else
 	{
 		nColumn = focusCell.col - (focusCell.col % 2);
-
-// COMMENT: {7/12/2005 2:21:36 PM}		CTime time;
-// COMMENT: {7/12/2005 2:21:36 PM}		this->DoDataExchange()
-// COMMENT: {7/12/2005 2:21:36 PM}		this->UpdateData()
-// COMMENT: {7/12/2005 2:21:36 PM}
-// COMMENT: {7/12/2005 2:21:36 PM}		// time
-// COMMENT: {7/12/2005 2:21:36 PM}		CString str;
-// COMMENT: {7/12/2005 2:21:36 PM}		str = this->m_Grid.GetItemText(1, nColumn);
-// COMMENT: {7/12/2005 2:21:36 PM}
-// COMMENT: {7/12/2005 2:21:36 PM}		DDX_TextGridControl(pDX, IDC_GRID, 1, nCol, str);
-// COMMENT: {7/12/2005 2:21:36 PM}		if (str.IsEmpty())
-// COMMENT: {7/12/2005 2:21:36 PM}		{
-// COMMENT: {7/12/2005 2:21:36 PM}			continue;
-// COMMENT: {7/12/2005 2:21:36 PM}		}
-// COMMENT: {7/12/2005 2:21:36 PM}		else
-// COMMENT: {7/12/2005 2:21:36 PM}		{
-// COMMENT: {7/12/2005 2:21:36 PM}			double dVal;
-// COMMENT: {7/12/2005 2:21:36 PM}			DDX_TextGridControl(pDX, IDC_GRID, 1, nCol, dVal);
-// COMMENT: {7/12/2005 2:21:36 PM}			time.SetValue(dVal);
-// COMMENT: {7/12/2005 2:21:36 PM}		}
-// COMMENT: {7/12/2005 2:21:36 PM}
-// COMMENT: {7/12/2005 2:21:36 PM}		// units
-// COMMENT: {7/12/2005 2:21:36 PM}		DDX_TextGridControl(pDX, IDC_GRID, 1, nCol + 1, str);			
-// COMMENT: {7/12/2005 2:21:36 PM}		if (str.IsEmpty() || str.Compare("default") == 0)
-// COMMENT: {7/12/2005 2:21:36 PM}		{
-// COMMENT: {7/12/2005 2:21:36 PM}			time.type = UNITS;
-// COMMENT: {7/12/2005 2:21:36 PM}			if (time.input) delete[] time.input;
-// COMMENT: {7/12/2005 2:21:36 PM}			time.input = NULL;
-// COMMENT: {7/12/2005 2:21:36 PM}		}
-// COMMENT: {7/12/2005 2:21:36 PM}		else
-// COMMENT: {7/12/2005 2:21:36 PM}		{
-// COMMENT: {7/12/2005 2:21:36 PM}			time.SetInput(str.GetString());
-// COMMENT: {7/12/2005 2:21:36 PM}			ASSERT(time.type == UNITS);
-// COMMENT: {7/12/2005 2:21:36 PM}		}
-
-
 		VERIFY(this->m_Grid.DeleteColumn(nColumn));
 		VERIFY(this->m_Grid.DeleteColumn(nColumn));
 		this->m_Grid.RedrawWindow();		
@@ -806,62 +825,74 @@ void CPrintFreqPropertyPage::OnSelChangedGrid(NMHDR *pNotifyStruct, LRESULT *res
 
 	switch (focus.row)
 	{
-	case 1:
+	case NR_TIM:
 		CGlobal::LoadRTFString(s, IDR_PR_FREQ_TIME_RTF);
 		break;
-	case 2:
+	case NR_BCF:
 		CGlobal::LoadRTFString(s, IDR_PR_FREQ_FR_BC_RTF);
 		break;
-	case 3:
+	case NR_PRO:
+		CGlobal::LoadRTFString(s, IDR_PR_FREQ_BC_RTF);
+		break;
+	case NR_COM:
 		CGlobal::LoadRTFString(s, IDR_PR_FREQ_COMPS_RTF);
 		break;
-	case 4:
+	case NR_CON:
 		CGlobal::LoadRTFString(s, IDR_PR_FREQ_COND_RTF);
 		break;
-	case 5:
+	case NR_EPD:
+		// TODO
+		break;
+	case NR_BAL:
 		CGlobal::LoadRTFString(s, IDR_PR_FREQ_FLOW_BAL_RTF);
 		break;
-	case 6:
+	case NR_CHE:
 		CGlobal::LoadRTFString(s, IDR_PR_FREQ_FORCE_RTF);
 		break;
-	case 7:
+	case NR_H5C:
 		CGlobal::LoadRTFString(s, IDR_PR_FREQ_HDF_CHEM_RTF);
 		break;
-	case 8:
+	case NR_H5H:
 		CGlobal::LoadRTFString(s, IDR_PR_FREQ_HDF_HEAD_RTF);
 		break;
-	case 9:
+	case NR_H5V:
 		CGlobal::LoadRTFString(s, IDR_PR_FREQ_HDF_VEL_RTF);
 		break;
-	case 10:
+	case NR_HEA:
 		CGlobal::LoadRTFString(s, IDR_PR_FREQ_HEADS_RTF);
 		break;
-	case 11:
+	case NR_LOG:
 		CGlobal::LoadRTFString(s, IDR_PR_FREQ_PROG_RTF);
 		break;
-	case 12:
+	case NR_RES:
+		// TODO
+		break;
+	case NR_ZFT:
+		// TODO
+		break;
+	case NR_VEL:
 		CGlobal::LoadRTFString(s, IDR_PR_FREQ_VEL_RTF);
 		break;
-	case 13:
+	case NR_WEL:
 		CGlobal::LoadRTFString(s, IDR_PR_FREQ_WELLS_RTF);
 		break;
-	case 14:
+	case NR_XYC:
 		CGlobal::LoadRTFString(s, IDR_PR_FREQ_XYZ_CHEM_RTF);
 		break;
-	case 15:
+	case NR_XYO:
 		CGlobal::LoadRTFString(s, IDR_PR_FREQ_XYZ_COMPS_RTF);
 		break;
-	case 16:
+	case NR_XYH:
 		CGlobal::LoadRTFString(s, IDR_PR_FREQ_XYZ_HEADS_RTF);
 		break;
-	case 17:
+	case NR_XYV:
 		CGlobal::LoadRTFString(s, IDR_PR_FREQ_XYZ_VEL_RTF);
 		break;
-	case 18:
+	case NR_XYW:
 		CGlobal::LoadRTFString(s, IDR_PR_FREQ_XYZ_WELLS_RTF);
 		break;
-	case 19:
-		CGlobal::LoadRTFString(s, IDR_PR_FREQ_BC_RTF);
+	case NR_ZFX:
+		// TODO
 		break;
 	}
 	this->m_wndRichEditCtrl.SetWindowText(s.c_str());

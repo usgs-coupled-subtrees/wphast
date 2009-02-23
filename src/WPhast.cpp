@@ -8,16 +8,8 @@
 #include "WPhastDoc.h"
 #include "WPhastView.h"
 
-#include "Units1PropertyPage.h"
-#include "Units2PropertyPage.h"
-#include "NewModelIntro.h"
-#include "GridElt.h"
-#include "HeadIC.h"
-
 #include "NewModelWizard.h"
 #include "StartupDialog.h"
-
-#include "ModelessPropertySheet.h"
 
 #include "NewModel.h"
 #include "DelayRedraw.h"
@@ -31,7 +23,6 @@
 
 #if defined(__CPPUNIT__)
 #include "TCPPUnit.h"
-#include "MapDialog.h"
 #endif
 
 #include "afxcmn.h"
@@ -95,6 +86,10 @@ BOOL CWPhastApp::InitInstance()
 		dlg.DoModal();
 		return FALSE;
 		***/
+// COMMENT: {11/26/2008 4:44:28 PM}		int tmpDbgFlag = _CrtSetDbgFlag(_CRTDBG_REPORT_FLAG);
+// COMMENT: {11/26/2008 4:44:28 PM}		tmpDbgFlag |= _CRTDBG_CHECK_ALWAYS_DF;
+// COMMENT: {11/26/2008 4:44:28 PM}		_CrtSetDbgFlag(tmpDbgFlag);
+
 	}
 #endif
 #if defined(_DEBUG)

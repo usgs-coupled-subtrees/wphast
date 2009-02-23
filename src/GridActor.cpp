@@ -170,14 +170,17 @@ void CGridActor::Dump(CDumpContext& dc) const
 
 void CGridActor::Serialize(bool bStoring, hid_t loc_id)
 {
-	static const char szGrid[]     = "Grid";
-	static const char szX[]        = "X";
-	static const char szY[]        = "Y";
-	static const char szZ[]        = "Z";
-	static const char szScale[]    = "Scale";
-	static const char szSnap[]     = "Snap";
-	static const char szPrintXY[]  = "PrintXYOrient";
-	static const char szChemDims[] = "ChemDims";
+	static const char szGrid[]       = "Grid";
+	static const char szX[]          = "X";
+	static const char szY[]          = "Y";
+	static const char szZ[]          = "Z";
+	static const char szScale[]      = "Scale";
+	static const char szSnap[]       = "Snap";
+	static const char szPrintXY[]    = "PrintXYOrient";
+	static const char szChemDims[]   = "ChemDims";
+	static const char szGridAngle[]  = "GridAngle";
+	static const char szGridOrigin[] = "GridOrigin";
+
 	
 	vtkFloatingPointType scale[3];
 	double double_scale[3];
@@ -242,6 +245,16 @@ void CGridActor::Serialize(bool bStoring, hid_t loc_id)
 				ASSERT(this->m_gridKeyword.m_axes[1] == 0 || this->m_gridKeyword.m_axes[1] == 1);
 				ASSERT(this->m_gridKeyword.m_axes[2] == 0 || this->m_gridKeyword.m_axes[2] == 1);
 				status = CGlobal::HDFSerialize(bStoring, grid_gr_id, szChemDims, H5T_NATIVE_INT, 3, this->m_gridKeyword.m_axes);
+				ASSERT(status >= 0);
+
+				// grid_angle
+				//
+				status = CGlobal::HDFSerialize(bStoring, grid_gr_id, szGridAngle, H5T_NATIVE_DOUBLE, 1, &this->m_gridKeyword.m_grid_angle);
+				ASSERT(status >= 0);
+
+				// grid_origin
+				//
+				status = CGlobal::HDFSerialize(bStoring, grid_gr_id, szGridOrigin, H5T_NATIVE_DOUBLE, 3, this->m_gridKeyword.m_grid_origin);
 				ASSERT(status >= 0);
 
 				// close grid group
@@ -320,6 +333,24 @@ void CGridActor::Serialize(bool bStoring, hid_t loc_id)
 				//
 				status = CGlobal::HDFSerialize(bStoring, grid_gr_id, szChemDims, H5T_NATIVE_INT, 3, this->m_gridKeyword.m_axes);
 				ASSERT(status >= 0);
+
+				// grid_angle
+				//
+				status = CGlobal::HDFSerialize(bStoring, grid_gr_id, szGridAngle, H5T_NATIVE_DOUBLE, 1, &this->m_gridKeyword.m_grid_angle);
+				if (status < 0)
+				{
+					this->m_gridKeyword.m_grid_angle = 0.0;
+				}
+
+				// grid_origin
+				//
+				status = CGlobal::HDFSerialize(bStoring, grid_gr_id, szGridOrigin, H5T_NATIVE_DOUBLE, 3, this->m_gridKeyword.m_grid_origin);
+				if (status < 0)
+				{
+					this->m_gridKeyword.m_grid_origin[0] = 0.0;
+					this->m_gridKeyword.m_grid_origin[1] = 0.0;
+					this->m_gridKeyword.m_grid_origin[2] = 0.0;
+				}
 
 				ASSERT(this->m_gridKeyword.m_axes[0] == 0 || this->m_gridKeyword.m_axes[0] == 1);
 				ASSERT(this->m_gridKeyword.m_axes[1] == 0 || this->m_gridKeyword.m_axes[1] == 1);

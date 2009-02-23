@@ -100,16 +100,16 @@ void CTimeControl2::Insert(CTreeCtrl* pTreeCtrl, HTREEITEM htiTimeControl)
 	for(; tsIter != this->m_timeStep.end(); ++tsIter)
 	{
 		str.Format("%g", tsIter->first.value);
-		ASSERT(tsIter->first.type == UNITS);
-		if (tsIter->first.type == UNITS)
+		ASSERT(tsIter->first.type == TT_UNITS);
+		if (tsIter->first.type == TT_UNITS)
 		{
 			str += " ";
 			str += tsIter->first.input;
 		}
 		str2.Format(" %g", tsIter->second.value);
 		str += str2;
-		ASSERT(tsIter->second.type == UNITS);
-		if (tsIter->second.type == UNITS)
+		ASSERT(tsIter->second.type == TT_UNITS);
+		if (tsIter->second.type == TT_UNITS)
 		{
 			str += " ";
 			str += tsIter->second.input;
@@ -126,8 +126,8 @@ void CTimeControl2::Insert(CTreeCtrl* pTreeCtrl, HTREEITEM htiTimeControl)
 	for(; tIter != this->m_timeEnd.end(); ++tIter)
 	{
 		str.Format("%g", tIter->value);
-		ASSERT(tIter->type == UNITS);
-		if (tIter->type == UNITS)
+		ASSERT(tIter->type == TT_UNITS);
+		if (tIter->type == TT_UNITS)
 		{
 			str += " ";
 			str += tIter->input;
@@ -257,8 +257,8 @@ std::ostream& operator<< (std::ostream &os, const CTimeControl2 &tc2)
 		os << "\t\t" << tsIter->first.value;
 
 		// [units]
-		ASSERT(tsIter->first.type == UNITS);
-		if (tsIter->first.type == UNITS && tsIter->first.input && ::strlen(tsIter->first.input))
+		ASSERT(tsIter->first.type == TT_UNITS);
+		if (tsIter->first.type == TT_UNITS && tsIter->first.input && ::strlen(tsIter->first.input))
 		{
 			os << szSpace << tsIter->first.input;
 		}
@@ -267,7 +267,7 @@ std::ostream& operator<< (std::ostream &os, const CTimeControl2 &tc2)
 		os  << szSpace << tsIter->second.value;
 
 		// [units]
-		if (tsIter->second.type == UNITS && tsIter->second.input && ::strlen(tsIter->second.input))
+		if (tsIter->second.type == TT_UNITS && tsIter->second.input && ::strlen(tsIter->second.input))
 		{
 			os << szSpace << tsIter->second.input;
 		}
@@ -283,8 +283,8 @@ std::ostream& operator<< (std::ostream &os, const CTimeControl2 &tc2)
 		os << "\t\t" << sIter->value;
 
 		// [units]
-		ASSERT(sIter->type == UNITS);
-		if (sIter->type == UNITS && sIter->input && ::strlen(sIter->input))
+		ASSERT(sIter->type == TT_UNITS);
+		if (sIter->type == TT_UNITS && sIter->input && ::strlen(sIter->input))
 		{
 			os << szSpace << sIter->input;
 		}
@@ -311,15 +311,15 @@ CTimeControl2 CTimeControl2::NewDefaults(void)
 	CTimeControl2 timeControl2;
 
 	Ctime t;
-	t.type = UNITS;
+	t.type = TT_UNITS;
 	t.SetValue(1.0);
 	timeControl2.m_timeEnd.insert(t);
 
-	t.type = UNITS;
+	t.type = TT_UNITS;
 	t.SetValue(0.0);
 
 	Ctime t2;
-	t2.type = UNITS;
+	t2.type = TT_UNITS;
 	t2.SetValue(1.0);
 
 	// this insert is ok (ie only done the first time)

@@ -12,6 +12,8 @@ class vtkWin32RenderWindowInteractor;
 class vtkBoxWidget;
 class vtkPointWidget;
 class vtkPointWidget2;
+class CPrismWidget;
+class CRiverActor;
 
 class CViewVTKCommand;
 
@@ -74,6 +76,7 @@ protected:
 
 	vtkBoxWidget                   *BoxWidget;
 	vtkPointWidget2                *PointWidget;
+	CPrismWidget                   *PrismWidget;
 
 	CViewVTKCommand                *m_pViewVTKCommand;
 
@@ -100,6 +103,17 @@ protected:
 
 	vtkProp                        *CurrentProp;   // currently selected prop
 
+	vtkCallbackCommand             *RiverCallbackCommand;
+	vtkCallbackCommand             *PrismWidgetCallbackCommand;
+
+	//
+	// coordinate mode
+	enum CoordinateState
+	{
+		GridMode    = 0,
+		MapMode     = 1,
+	} CoordinateMode;
+
 	friend class CViewVTKCommand;
 
 // Generated message map functions
@@ -112,7 +126,9 @@ public:
 
 	vtkRenderer* GetRenderer(void) const {return this->m_Renderer;}
 	vtkWin32RenderWindowInteractor* GetRenderWindowInteractor(void) const {return this->m_RenderWindowInteractor;}
-	vtkBoxWidget *GetBoxWidget (void)const {return this->BoxWidget;}
+	vtkBoxWidget    *GetBoxWidget(void)const {return this->BoxWidget;}
+	vtkPointWidget2 *GetPointWidget(void)const {return this->PointWidget;}
+	CPrismWidget    *GetPrismWidget(void)const {return this->PrismWidget;}
 
 protected:
 	virtual LRESULT WindowProc(UINT message, WPARAM wParam, LPARAM lParam);
@@ -156,6 +172,13 @@ public:
 	//
 	bool SelectingObject(void)const;
 
+	// Coordinate mode
+	// 
+	void SetMapMode(void);
+	void SetGridMode(void);
+	void SetCoordinateMode(CoordinateState mode);
+	CWPhastView::CoordinateState GetCoordinateMode(void)const;
+
 public:
 
 	afx_msg void OnUpdateViewFromNx(CCmdUI *pCmdUI);
@@ -171,6 +194,8 @@ public:
 	afx_msg void OnViewFromPx();
 	afx_msg void OnViewFromPy();
 	afx_msg void OnViewFromPz();
+	afx_msg void OnViewFromMapNz();
+	afx_msg void OnViewFromMapPz();
 	afx_msg void OnViewFromNextDirection();
 
 	void ParallelProjectionOff(void);
@@ -185,13 +210,21 @@ public:
 
 	// Rivers
 	//
-	vtkCallbackCommand    *RiverCallbackCommand;
 	static void RiverListener(vtkObject* caller, unsigned long eid, void* clientdata, void *calldata);
 	void OnEndNewRiver(bool bCancel = false);
 	bool CreatingNewRiver(void)const;
 	void StartNewRiver(void);
 	void CancelNewRiver(void);
 	void EndNewRiver(void);
+
+	// Prisms
+	//
+	static void PrismWidgetListener(vtkObject *caller, unsigned long eid, void *clientdata, void *calldata);
+
+	// Wells
+	//
+	void UpdateWellMode(void);
+
 
 	afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
 	afx_msg void OnDestroy();

@@ -30,18 +30,18 @@ void vtkBoxWidgetEx::ProcessEvents(vtkObject* object, unsigned long event, void*
 	case vtkCommand::LeftButtonReleaseEvent:
 		self->OnLeftButtonUp();
 		break;
-	case vtkCommand::MiddleButtonPressEvent:
-		self->OnMiddleButtonDown();
-		break;
-	case vtkCommand::MiddleButtonReleaseEvent:
-		self->OnMiddleButtonUp();
-		break;
-	case vtkCommand::RightButtonPressEvent:
-		self->OnRightButtonDown();
-		break;
-	case vtkCommand::RightButtonReleaseEvent:
-		self->OnRightButtonUp();
-		break;
+// COMMENT: {8/13/2008 5:47:41 PM}	case vtkCommand::MiddleButtonPressEvent:
+// COMMENT: {8/13/2008 5:47:41 PM}		self->OnMiddleButtonDown();
+// COMMENT: {8/13/2008 5:47:41 PM}		break;
+// COMMENT: {8/13/2008 5:47:41 PM}	case vtkCommand::MiddleButtonReleaseEvent:
+// COMMENT: {8/13/2008 5:47:41 PM}		self->OnMiddleButtonUp();
+// COMMENT: {8/13/2008 5:47:41 PM}		break;
+// COMMENT: {8/13/2008 5:47:48 PM}	case vtkCommand::RightButtonPressEvent:
+// COMMENT: {8/13/2008 5:47:48 PM}		self->OnRightButtonDown();
+// COMMENT: {8/13/2008 5:47:48 PM}		break;
+// COMMENT: {8/13/2008 5:47:48 PM}	case vtkCommand::RightButtonReleaseEvent:
+// COMMENT: {8/13/2008 5:47:48 PM}		self->OnRightButtonUp();
+// COMMENT: {8/13/2008 5:47:48 PM}		break;
 	case vtkCommand::MouseMoveEvent:
 		self->OnMouseMove();
 		break;
@@ -144,6 +144,8 @@ void vtkBoxWidgetEx::SizeHandles()
 //
 double vtkBoxWidgetEx::SizeHandles(double factor)
 {
+	TRACE("%s, in\n", __FUNCTION__);
+
 	int i;
 	vtkRenderer *renderer;
 
@@ -189,3 +191,46 @@ double vtkBoxWidgetEx::SizeHandles(double factor)
 	}
 }
 
+void vtkBoxWidgetEx::RotateZ(float angle)
+{
+// COMMENT: {11/6/2008 2:08:25 PM}	double *pts = ((vtkDoubleArray *)this->Points->GetData())->GetPointer(0);
+// COMMENT: {11/6/2008 2:08:25 PM}	double *center = ((vtkDoubleArray *)this->Points->GetData())->GetPointer(3*14);
+	int i;
+
+	//Manipulate the transform to reflect the rotation
+	this->Transform->Identity();
+	this->Transform->RotateZ(angle);
+
+	//Set the corners
+	vtkPoints *newPts = vtkPoints::New(VTK_DOUBLE);
+	this->Transform->TransformPoints(this->Points,newPts);
+
+	for (i = 0; i < 8; ++i)
+	{
+		this->Points->SetPoint(i, newPts->GetPoint(i));
+	}
+	newPts->Delete();
+	this->PositionHandles();
+} 
+
+void vtkBoxWidgetEx::SetOrientation(float x, float y, float z)
+{
+	//Manipulate the transform to reflect the rotation
+
+	this->Transform->Identity();
+	this->Transform->PreMultiply();
+	this->Transform->RotateZ(z);
+	this->Transform->RotateX(x);
+	this->Transform->RotateY(y);
+
+	// Set the corners
+	vtkPoints *newPts = vtkPoints::New(VTK_DOUBLE);
+	this->Transform->TransformPoints(this->Points, newPts);
+
+	for (int i = 0; i < 8; ++i)
+	{
+		this->Points->SetPoint(i, newPts->GetPoint(i));
+	}
+	newPts->Delete();
+	this->PositionHandles();
+} 

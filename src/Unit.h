@@ -8,6 +8,7 @@
 #define EXTERNAL extern
 #include "srcinput/hstinpt.h"
 #undef EXTERNAL
+#include "enum_fix.h"
 
 class CUnit :
 	public cunit
@@ -53,7 +54,7 @@ inline void CUnit::SerializeOpen(CUnit* src, const char *heading, hid_t loc_id)
 			::AfxDebugBreak(); // untested
 #endif
 			ASSERT(src->input);
-			delete src->input;
+			delete[] src->input;
 			src->input = 0;
 			src->defined = FALSE;
 		}

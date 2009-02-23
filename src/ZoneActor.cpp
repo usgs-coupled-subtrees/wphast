@@ -49,6 +49,7 @@
 #include "WedgeChangeChopTypeAction.h"
 #include "MacroAction.h"
 #include "Units.h"
+#include "GridKeyword.h"
 
 #include <strstream>
 #include <float.h>
@@ -72,12 +73,19 @@ CZoneActor::CZoneActor(void)
 	, m_dwPrevSiblingItemData(0)
 	, m_bDefault(false)
 	, UnitsTransform(0)
+	, TopUnitsTransform(0)
+	, BottomUnitsTransform(0)
 	, UnitsTransformPolyDataFilter(0)
 	, TopVisibility(1)
 	, BottomVisibility(1)
 	, PerimeterVisibility(1)
-
+	, m_grid_angle(0.0)
 {
+	for (size_t i = 0; i < 3; ++i)
+	{
+		this->m_grid_origin[i] = 0.0;
+	}
+
 	this->m_pSource = srcWedgeSource::New();
 	this->m_pMapper = vtkPolyDataMapper::New();
 	this->m_pMapper->SetResolveCoincidentTopologyToPolygonOffset();
@@ -88,6 +96,9 @@ CZoneActor::CZoneActor(void)
 	this->UnitsTransformPolyDataFilter = vtkTransformPolyDataFilter::New();
 	this->UnitsTransformPolyDataFilter->SetTransform(this->UnitsTransform);
 	this->UnitsTransformPolyDataFilter->SetInput(this->PolyData);
+
+	this->TopUnitsTransform = vtkTransform::New();
+	this->BottomUnitsTransform = vtkTransform::New();
 
 	this->m_pMapper->SetInput( this->UnitsTransformPolyDataFilter->GetOutput() );
 	this->CubeActor = vtkActor::New();
@@ -112,6 +123,7 @@ CZoneActor::CZoneActor(void)
 
 CZoneActor::~CZoneActor(void)
 {
+	TRACE("%s, in this=%p\n", __FUNCTION__, this);
 	this->CleanupPrisms();
 
 	this->m_pSource->Delete();
@@ -123,18 +135,13 @@ CZoneActor::~CZoneActor(void)
 
 	this->UnitsTransform->Delete();
 	this->UnitsTransformPolyDataFilter->Delete();
+
+	this->TopUnitsTransform->Delete();
+	this->BottomUnitsTransform->Delete();
 }
 
 void CZoneActor::CleanupPrisms(void)
 {
-	//{{
-	this->CubeActor->SetVisibility(0);
-	this->AddPart(this->CubeActor);
-
-	this->OutlineActor->SetVisibility(0);
-	this->AddPart(this->OutlineActor);
-	//}}
-
 	std::vector<vtkPolyData*>::iterator pd_iter = this->PrismSidesPolyData.begin();
 	for (; pd_iter != this->PrismSidesPolyData.end(); ++pd_iter)
 	{
@@ -335,6 +342,11 @@ void CZoneActor::UnSelect(CWPhastView* pView)
 
 void CZoneActor::Select(CWPhastView* pView, bool bReselect)
 {
+	//{{ {8/22/2008 2:50:48 PM}
+	pView->GetDocument()->Select(this);
+	return;
+	//}} {8/22/2008 2:50:48 PM}
+
 // COMMENT: {3/5/2008 4:39:13 PM}	//{{HACK
 // COMMENT: {3/5/2008 4:39:13 PM}	// If creating a new zone cancel now 
 // COMMENT: {3/5/2008 4:39:13 PM}	{
@@ -363,7 +375,9 @@ void CZoneActor::Select(CWPhastView* pView, bool bReselect)
 
 		// TODO May want to highlight the zone some other way
 		// ie (set selection color to white; change the translucency)
-		pView->GetBoxWidget()->SetEnabled(0);
+		pView->GetBoxWidget()->Off();
+		//pView->GetPointWidget()->Off();
+		//pView->GetPrismWidget()->Off();
 	}
 	else
 	{
@@ -430,20 +444,21 @@ LPCTSTR CZoneActor::GetName(void)const
 
 void CZoneActor::SetDesc(LPCTSTR desc)
 {
-	if (desc)
+	ASSERT(this->GetPolyhedron() && ::AfxIsValidAddress(this->GetPolyhedron(), sizeof(Polyhedron)));
+	if (desc && ::strlen(desc))
 	{
-		this->m_desc = desc;
+		(*this->GetPolyhedron()->Get_description()) = desc;
 	}
 	else
 	{
-		this->m_desc.clear();
+		(*this->GetPolyhedron()->Get_description()) = "";
 	}
 	this->UpdateNameDesc();
 }
 
 LPCTSTR CZoneActor::GetDesc(void)const
 {
-	return this->m_desc.c_str();
+	return const_cast<CZoneActor*>(this)->GetPolyhedron()->Get_description()->c_str();
 }
 
 LPCTSTR CZoneActor::GetNameDesc(void)const
@@ -469,6 +484,7 @@ void CZoneActor::SetBounds(float xMin, float xMax, float yMin, float yMax, float
 
 	ASSERT(this->m_pSource);
 	ASSERT(this->GetPolyhedronType() != Polyhedron::PRISM);
+#if !999
 	this->m_pSource->SetBounds(
 		xMin,
 		xMax,
@@ -477,25 +493,66 @@ void CZoneActor::SetBounds(float xMin, float xMax, float yMin, float yMax, float
 		zMin,
 		zMax
 		);
+#endif
+
+#if 999
+	if (Cube *c = dynamic_cast<Cube*>(this->GetPolyhedron()))
+	{
+		if (c->Get_user_coordinate_system() == PHAST_Transform::MAP)
+		{
+			this->m_pSource->SetBounds(
+				xMin - this->m_grid_origin[0],
+				xMax - this->m_grid_origin[0],
+				yMin - this->m_grid_origin[1],
+				yMax - this->m_grid_origin[1],
+				zMin - this->m_grid_origin[2],
+				zMax - this->m_grid_origin[2]
+				);
+		}
+		else
+		{
+			this->m_pSource->SetBounds(
+				xMin,
+				xMax,
+				yMin,
+				yMax,
+				zMin,
+				zMax
+				);
+		}
+	}
+#endif
+
 	this->SetUnits(rUnits);
 
+// COMMENT: {12/9/2008 3:24:22 PM}	CZone zone(xMin, xMax, yMin, yMax, zMin, zMax);
+	PHAST_Transform::COORDINATE_SYSTEM cs = PHAST_Transform::GRID;
+	if (this->GetPolyhedron())
+	{
+		if (Cube *c = dynamic_cast<Cube*>(this->GetPolyhedron()))
+		{
+			cs = c->Get_coordinate_system();
+// COMMENT: {11/12/2008 9:36:49 PM}			if (cs == PHAST_Transform::MAP)
+// COMMENT: {11/12/2008 9:36:49 PM}			{
+// COMMENT: {11/12/2008 9:36:49 PM}				zone.x1 += this->m_grid_origin[0];
+// COMMENT: {11/12/2008 9:36:49 PM}				zone.x2 += this->m_grid_origin[0];
+// COMMENT: {11/12/2008 9:36:49 PM}				zone.y1 += this->m_grid_origin[1];
+// COMMENT: {11/12/2008 9:36:49 PM}				zone.y2 += this->m_grid_origin[1];
+// COMMENT: {11/12/2008 9:36:49 PM}				zone.z1 += this->m_grid_origin[2];
+// COMMENT: {11/12/2008 9:36:49 PM}				zone.z2 += this->m_grid_origin[2];
+// COMMENT: {11/12/2008 9:36:49 PM}			}
+		}
+		delete this->GetPolyhedron();
+	}
 
 	CZone zone(xMin, xMax, yMin, yMax, zMin, zMax);
 	if (this->GetChopType() == srcWedgeSource::CHOP_NONE)
 	{
-		if (this->GetPolyhedron())
-		{
-			delete this->GetPolyhedron();
-		}
-		this->GetPolyhedron() = new Cube(&zone);
+		this->GetPolyhedron() = new Cube(&zone, cs);
 	}
 	else
 	{
-		if (this->GetPolyhedron())
-		{
-			delete this->GetPolyhedron();
-		}
-		this->GetPolyhedron() = new Wedge(&zone, srcWedgeSource::GetWedgeOrientationString(this->GetChopType()));
+		this->GetPolyhedron() = new Wedge(&zone, srcWedgeSource::GetWedgeOrientationString(this->GetChopType()), cs);
 	}
 }
 
@@ -504,11 +561,88 @@ void CZoneActor::SetBounds(const CZone& rZone, const CUnits& rUnits)
 	this->SetBounds(rZone.x1, rZone.x2, rZone.y1, rZone.y2, rZone.z1, rZone.z2, rUnits);
 }
 
-void CZoneActor::SetUnits(const CUnits& rUnits)
+void CZoneActor::SetUnits(const CUnits& rUnits, bool bSetPolyhedron)
 {
 	ASSERT(this->GetPolyhedron() && ::AfxIsValidAddress(this->GetPolyhedron(), sizeof(Polyhedron)));
-	this->UnitsTransform->Identity();
-	this->UnitsTransform->Scale(rUnits.horizontal.input_to_si, rUnits.horizontal.input_to_si, rUnits.vertical.input_to_si);
+	
+	if (Cube *c = dynamic_cast<Cube*>(this->GetPolyhedron()))
+	{
+		ASSERT(this->UnitsTransform);
+
+		double scale_h = rUnits.horizontal.input_to_si;
+		double scale_v = rUnits.vertical.input_to_si;
+		if (c->Get_user_coordinate_system() == PHAST_Transform::MAP)
+		{
+			scale_h = rUnits.map_horizontal.input_to_si;
+		}
+		if (c->Get_user_coordinate_system() == PHAST_Transform::MAP)
+		{
+			scale_v = rUnits.map_vertical.input_to_si;
+		}
+		this->UnitsTransform->Identity();
+		this->UnitsTransform->Scale(scale_h, scale_h, scale_v);
+	}
+	else if (Prism *p = dynamic_cast<Prism*>(this->GetPolyhedron()))
+	{
+		ASSERT(this->TopUnitsTransform);
+		ASSERT(this->BottomUnitsTransform);
+		ASSERT(this->UnitsTransform);
+
+		// top
+		double scale_h = rUnits.horizontal.input_to_si;
+		double scale_v = rUnits.vertical.input_to_si;
+		if (p->perimeter.Get_user_coordinate_system() == PHAST_Transform::MAP)
+		{
+			scale_h = rUnits.map_horizontal.input_to_si;
+		}
+		if (p->top.Get_user_coordinate_system() == PHAST_Transform::MAP)
+		{
+			scale_v = rUnits.map_vertical.input_to_si;
+		}
+		this->TopUnitsTransform->Identity();
+		this->TopUnitsTransform->Scale(scale_h, scale_h, scale_v);
+
+		// bottom
+		scale_h = rUnits.horizontal.input_to_si;
+		scale_v = rUnits.vertical.input_to_si;
+		if (p->perimeter.Get_user_coordinate_system() == PHAST_Transform::MAP)
+		{
+			scale_h = rUnits.map_horizontal.input_to_si;
+		}
+		if (p->bottom.Get_user_coordinate_system() == PHAST_Transform::MAP)
+		{
+			scale_v = rUnits.map_vertical.input_to_si;
+		}
+		this->BottomUnitsTransform->Identity();
+		this->BottomUnitsTransform->Scale(scale_h, scale_h, scale_v);
+
+		// sides
+		scale_h = rUnits.horizontal.input_to_si;
+		scale_v = rUnits.vertical.input_to_si;
+		if (p->perimeter.Get_user_coordinate_system() == PHAST_Transform::MAP)
+		{
+			scale_h = rUnits.map_horizontal.input_to_si;
+		}
+		if (p->perimeter.Get_user_coordinate_system() == PHAST_Transform::MAP)
+		{
+			scale_v = rUnits.map_vertical.input_to_si;
+		}
+		this->UnitsTransform->Identity();
+		this->UnitsTransform->Scale(scale_h, scale_h, scale_v);
+
+		if (bSetPolyhedron)
+		{
+			// TODO may need to rebuild prisms
+			if (p->top.Get_source_type() != Data_source::CONSTANT || p->bottom.Get_source_type() != Data_source::CONSTANT)
+			{
+				this->SetPolyhedron(this->GetPolyhedron(), rUnits);
+			}
+		}
+	}
+	else
+	{
+		ASSERT(FALSE);
+	}
 }
 
 void CZoneActor::SetBounds(float bounds[6], const CUnits& units)
@@ -527,6 +661,21 @@ void CZoneActor::GetUserBounds(float bounds[6])
 	bounds[3] = pzone->y2;
 	bounds[4] = pzone->z1;
 	bounds[5] = pzone->z2;
+
+// COMMENT: {11/12/2008 8:35:44 PM}	if (Cube* c = dynamic_cast<Cube*>(this->GetPolyhedron()))
+// COMMENT: {11/12/2008 8:35:44 PM}	{
+// COMMENT: {11/12/2008 8:35:44 PM}		double* o = this->GetGridOrigin();
+// COMMENT: {11/12/2008 8:35:44 PM}		PHAST_Transform::COORDINATE_SYSTEM cs = c->Get_coordinate_system();
+// COMMENT: {11/12/2008 8:35:44 PM}		if (cs == PHAST_Transform::MAP)
+// COMMENT: {11/12/2008 8:35:44 PM}		{
+// COMMENT: {11/12/2008 8:35:44 PM}			bounds[0] += o[0];
+// COMMENT: {11/12/2008 8:35:44 PM}			bounds[1] += o[0];
+// COMMENT: {11/12/2008 8:35:44 PM}			bounds[2] += o[1];
+// COMMENT: {11/12/2008 8:35:44 PM}			bounds[3] += o[1];
+// COMMENT: {11/12/2008 8:35:44 PM}			bounds[4] += o[2];
+// COMMENT: {11/12/2008 8:35:44 PM}			bounds[5] += o[2];
+// COMMENT: {11/12/2008 8:35:44 PM}		}
+// COMMENT: {11/12/2008 8:35:44 PM}	}
 }
 
 float* CZoneActor::GetUserBounds()
@@ -557,7 +706,7 @@ void CZoneActor::UnPick(vtkRenderer* pRenderer, vtkRenderWindowInteractor* pRend
 	CGlobal::UnPickProp(this, pRenderer, pRenderWindowInteractor);
 }
 
-void CZoneActor::Serialize(bool bStoring, hid_t loc_id)
+void CZoneActor::Serialize(bool bStoring, hid_t loc_id, const CWPhastDoc* pWPhastDoc)
 {
 	static const char szColor[]   = "Color";
 	static const char szDefault[] = "Default";
@@ -598,7 +747,6 @@ void CZoneActor::Serialize(bool bStoring, hid_t loc_id)
 			status = H5Tclose(polytype);
 			ASSERT(status >= 0);
 
-
 			// Polyhedron box
 			//
 			ASSERT(this->GetPolyhedron() && ::AfxIsValidAddress(this->GetPolyhedron(), sizeof(Polyhedron)));
@@ -613,8 +761,36 @@ void CZoneActor::Serialize(bool bStoring, hid_t loc_id)
 			status = CGlobal::HDFSerialize(bStoring, polyh_id, szBox, H5T_NATIVE_DOUBLE, 6, xyz);
 			ASSERT(status >= 0);
 
-			if (nValue == Polyhedron::WEDGE)
+			if (nValue == Polyhedron::CUBE)
 			{
+				// coor_sys_type
+				//
+				if (Cube *cube = dynamic_cast<Cube*>(this->GetPolyhedron()))
+				{
+					PHAST_Transform::COORDINATE_SYSTEM nValue = cube->Get_coordinate_system();
+					herr_t val = CGlobal::HDFSerializeCoordinateSystem(bStoring, polyh_id, nValue);
+					ASSERT(val >= 0);
+
+					nValue = cube->Get_user_coordinate_system();
+					val = CGlobal::HDFSerializeCoordinateSystemUser(bStoring, polyh_id, nValue);
+					ASSERT(val >= 0);
+				}
+			}
+			else if (nValue == Polyhedron::WEDGE)
+			{
+				// coor_sys_type
+				//
+				if (Wedge *wedge = dynamic_cast<Wedge*>(this->GetPolyhedron()))
+				{
+					PHAST_Transform::COORDINATE_SYSTEM nValue = wedge->Get_coordinate_system();
+					herr_t val = CGlobal::HDFSerializeCoordinateSystem(bStoring, polyh_id, nValue);
+					ASSERT(val >= 0);
+
+					nValue = wedge->Get_user_coordinate_system();
+					val = CGlobal::HDFSerializeCoordinateSystemUser(bStoring, polyh_id, nValue);
+					ASSERT(val >= 0);
+				}
+
 				// WEDGE_ORIENTATION
 				//
 				Wedge::WEDGE_ORIENTATION o = srcWedgeSource::ConvertChopType(this->GetChopType());
@@ -732,8 +908,9 @@ void CZoneActor::Serialize(bool bStoring, hid_t loc_id)
 
 		// store desc
 		//
-		status = CGlobal::HDFSerializeString(bStoring, loc_id, szDesc, this->m_desc);
-		ASSERT(status >= 0 || this->m_desc.empty());
+		std::string desc(*this->GetPolyhedron()->Get_description());
+		status = CGlobal::HDFSerializeString(bStoring, loc_id, szDesc, desc);
+		ASSERT(status >= 0 || desc.empty());
 
 		// TODO store opacity 
 
@@ -770,19 +947,10 @@ void CZoneActor::Serialize(bool bStoring, hid_t loc_id)
 				zone.z2 = xyz[5];
 			}
 
-			this->m_pSource->SetBounds(
-				zone.x1,
-				zone.x2,
-				zone.y1,
-				zone.y2,
-				zone.z1,
-				zone.z2
-				);
-
-			// WEDGE_ORIENTATION
-			//
 			if (nValue == Polyhedron::WEDGE)
 			{
+				// WEDGE_ORIENTATION
+				//
 				Wedge::WEDGE_ORIENTATION o;
 				hid_t wotype = CGlobal::HDFCreateWidgetOrientationDataType();
 				status = CGlobal::HDFSerialize(bStoring, polyh_id, szOrient, wotype, 1, &o);
@@ -791,8 +959,22 @@ void CZoneActor::Serialize(bool bStoring, hid_t loc_id)
 					::AfxIsValidAddress(this->GetPolyhedron(), sizeof(Polyhedron));
 					delete this->GetPolyhedron();
 				}
-				this->GetPolyhedron() = new Wedge(&zone, srcWedgeSource::GetWedgeOrientationString(o));
-				this->SetChopType(srcWedgeSource::ConvertWedgeOrientation(o));
+
+				// coor_sys_type
+				//
+				if (Wedge *wedge = new Wedge(&zone, srcWedgeSource::GetWedgeOrientationString(o)))
+				{
+					PHAST_Transform::COORDINATE_SYSTEM nValue;
+					herr_t val = CGlobal::HDFSerializeCoordinateSystem(bStoring, polyh_id, nValue);
+					wedge->Set_coordinate_system(nValue);
+
+					val = CGlobal::HDFSerializeCoordinateSystemUser(bStoring, polyh_id, nValue);
+					wedge->Set_user_coordinate_system(nValue);
+
+					CGridKeyword gridKeyword = pWPhastDoc->GetGridKeyword();
+					this->SetPolyhedron(wedge, pWPhastDoc->GetUnits(), gridKeyword.m_grid_origin, gridKeyword.m_grid_angle);
+					delete wedge;
+				}
 
 				status = H5Tclose(wotype);
 				ASSERT(status >= 0);
@@ -814,6 +996,10 @@ void CZoneActor::Serialize(bool bStoring, hid_t loc_id)
 				this->RemovePart(this->CubeActor);
 				this->OutlineActor->SetVisibility(0);
 				this->RemovePart(this->OutlineActor);
+
+				// set up unit transforms
+				prism->Tidy();  // reqd to set units for datasources(shape)
+				this->SetUnits(pWPhastDoc->GetUnits());
 
 				// open PolyData group
 				//
@@ -909,7 +1095,7 @@ void CZoneActor::Serialize(bool bStoring, hid_t loc_id)
 							// solid filters
 							ASSERT(this->BottomFilters[poly] == 0);
 							this->BottomFilters[poly] = vtkTransformPolyDataFilter::New();
-							this->BottomFilters[poly]->SetTransform(this->UnitsTransform);			
+							this->BottomFilters[poly]->SetTransform(this->BottomUnitsTransform);			
 							this->BottomFilters[poly]->SetInput(spolyData);
 
 							// solid mapper
@@ -940,7 +1126,7 @@ void CZoneActor::Serialize(bool bStoring, hid_t loc_id)
 								// outline filters
 								ASSERT(this->BottomOutlineFilters[poly] == 0);
 								this->BottomOutlineFilters[poly] = vtkTransformPolyDataFilter::New();
-								this->BottomOutlineFilters[poly]->SetTransform(this->UnitsTransform);			
+								this->BottomOutlineFilters[poly]->SetTransform(this->BottomUnitsTransform);			
 								this->BottomOutlineFilters[poly]->SetInput(opolyData);
 
 								// outline mapper
@@ -1023,7 +1209,7 @@ void CZoneActor::Serialize(bool bStoring, hid_t loc_id)
 							// solid filters
 							ASSERT(this->TopFilters[poly] == 0);
 							this->TopFilters[poly] = vtkTransformPolyDataFilter::New();
-							this->TopFilters[poly]->SetTransform(this->UnitsTransform);			
+							this->TopFilters[poly]->SetTransform(this->TopUnitsTransform);			
 							this->TopFilters[poly]->SetInput(spolyData);
 
 							// solid mapper
@@ -1054,7 +1240,7 @@ void CZoneActor::Serialize(bool bStoring, hid_t loc_id)
 								// outline filters
 								ASSERT(this->TopOutlineFilters[poly] == 0);
 								this->TopOutlineFilters[poly] = vtkTransformPolyDataFilter::New();
-								this->TopOutlineFilters[poly]->SetTransform(this->UnitsTransform);			
+								this->TopOutlineFilters[poly]->SetTransform(this->TopUnitsTransform);			
 								this->TopOutlineFilters[poly]->SetInput(opolyData);
 
 								// outline mapper
@@ -1077,9 +1263,8 @@ void CZoneActor::Serialize(bool bStoring, hid_t loc_id)
 							}
 							else
 							{
-								ASSERT(top_type == Data_source::ARCRASTER || top_type == Data_source::CONSTANT
-									|| top_type == Data_source::POINTS || top_type == Data_source::SHAPE
-									|| top_type == Data_source::XYZ);
+								ASSERT(top_type == Data_source::ARCRASTER || top_type == Data_source::POINTS
+									|| top_type == Data_source::SHAPE || top_type == Data_source::XYZ);
 
 								ASSERT(this->TopFilters[poly]);
 
@@ -1110,90 +1295,6 @@ void CZoneActor::Serialize(bool bStoring, hid_t loc_id)
 						status = ::H5Gclose(top_id);
 						ASSERT(status >= 0);
 					}
-//}}
-
-
-// COMMENT: {7/10/2008 11:03:44 PM}					// top
-// COMMENT: {7/10/2008 11:03:44 PM}					vtkPolyData *tpolyData = 0;
-// COMMENT: {7/10/2008 11:03:44 PM}					CGlobal::HDFSerializePolyData(bStoring, pd_id, szTop, tpolyData);
-// COMMENT: {7/10/2008 11:03:44 PM}
-// COMMENT: {7/10/2008 11:03:44 PM}					// bottom
-// COMMENT: {7/10/2008 11:03:44 PM}					vtkPolyData *bpolyData = 0;
-// COMMENT: {7/10/2008 11:03:44 PM}					CGlobal::HDFSerializePolyData(bStoring, pd_id, szBottom, bpolyData);
-// COMMENT: {7/10/2008 11:03:44 PM}
-// COMMENT: {7/10/2008 11:03:44 PM}					// perimeter solid actor
-// COMMENT: {7/10/2008 11:03:44 PM}					this->m_pMapper->SetInput(this->PrismSidesPolyData[0]);
-// COMMENT: {7/10/2008 11:03:44 PM}
-// COMMENT: {7/10/2008 11:03:44 PM}					// perimeter outline actor
-// COMMENT: {7/10/2008 11:03:44 PM}					this->mapOutline->SetInput(this->PrismSidesPolyData[0]);
-// COMMENT: {7/10/2008 11:03:44 PM}
-// COMMENT: {7/10/2008 11:03:44 PM}					// top solid actor
-// COMMENT: {7/10/2008 11:03:44 PM}					vtkPolyDataMapper *tmapper = vtkPolyDataMapper::New();
-// COMMENT: {7/10/2008 11:03:44 PM}					tmapper->SetInput(tpolyData);
-// COMMENT: {7/10/2008 11:03:44 PM}
-// COMMENT: {7/10/2008 11:03:44 PM}					ASSERT(this->TopActors == 0);
-// COMMENT: {7/10/2008 11:03:44 PM}					this->TopActors = vtkLODActor::New();
-// COMMENT: {7/10/2008 11:03:44 PM}					if (vtkLODActor *pLOD = vtkLODActor::SafeDownCast(this->TopActors))
-// COMMENT: {7/10/2008 11:03:44 PM}					{
-// COMMENT: {7/10/2008 11:03:44 PM}						pLOD->SetNumberOfCloudPoints(20000);
-// COMMENT: {7/10/2008 11:03:44 PM}					}
-// COMMENT: {7/10/2008 11:03:44 PM}					this->TopActors->SetMapper(tmapper);
-// COMMENT: {7/10/2008 11:03:44 PM}					this->TopActors->SetProperty(this->CubeActor->GetProperty());
-// COMMENT: {7/10/2008 11:03:44 PM}					this->AddPart(this->TopActors);
-// COMMENT: {7/10/2008 11:03:44 PM}
-// COMMENT: {7/10/2008 11:03:44 PM}					// top outline actor
-// COMMENT: {7/10/2008 11:03:44 PM}					vtkPolyDataMapper *tmapperOutline = vtkPolyDataMapper::New();
-// COMMENT: {7/10/2008 11:03:44 PM}					tmapperOutline->SetInput(tpolyData);
-// COMMENT: {7/10/2008 11:03:44 PM}
-// COMMENT: {7/10/2008 11:03:44 PM}					ASSERT(this->TopOutlineActors == 0);
-// COMMENT: {7/10/2008 11:03:44 PM}					this->TopOutlineActors = vtkLODActor::New();
-// COMMENT: {7/10/2008 11:03:44 PM}					if (vtkLODActor *pLOD = vtkLODActor::SafeDownCast(this->TopOutlineActors))
-// COMMENT: {7/10/2008 11:03:44 PM}					{
-// COMMENT: {7/10/2008 11:03:44 PM}						pLOD->SetNumberOfCloudPoints(20000);
-// COMMENT: {7/10/2008 11:03:44 PM}					}
-// COMMENT: {7/10/2008 11:03:44 PM}					this->TopOutlineActors->SetMapper(tmapperOutline);
-// COMMENT: {7/10/2008 11:03:44 PM}					this->TopOutlineActors->SetProperty(this->OutlineActor->GetProperty());
-// COMMENT: {7/10/2008 11:03:44 PM}					this->AddPart(this->TopOutlineActors);
-// COMMENT: {7/10/2008 11:03:44 PM}
-// COMMENT: {7/10/2008 11:03:44 PM}					// top cleanup
-// COMMENT: {7/10/2008 11:03:44 PM}					tpolyData->Delete();
-// COMMENT: {7/10/2008 11:03:44 PM}					tmapperOutline->Delete();
-// COMMENT: {7/10/2008 11:03:44 PM}					tmapper->Delete();
-// COMMENT: {7/10/2008 11:03:44 PM}
-// COMMENT: {7/10/2008 11:03:44 PM}
-// COMMENT: {7/10/2008 11:03:44 PM}					// bottom solid actor
-// COMMENT: {7/10/2008 11:03:44 PM}					vtkPolyDataMapper *bmapper = vtkPolyDataMapper::New();
-// COMMENT: {7/10/2008 11:03:44 PM}					bmapper->SetInput(bpolyData);
-// COMMENT: {7/10/2008 11:03:44 PM}
-// COMMENT: {7/10/2008 11:03:44 PM}					ASSERT(this->BottomActors == 0);
-// COMMENT: {7/10/2008 11:03:44 PM}					this->BottomActors = vtkLODActor::New();
-// COMMENT: {7/10/2008 11:03:44 PM}					if (vtkLODActor *pLOD = vtkLODActor::SafeDownCast(this->BottomActors))
-// COMMENT: {7/10/2008 11:03:44 PM}					{
-// COMMENT: {7/10/2008 11:03:44 PM}						pLOD->SetNumberOfCloudPoints(20000);
-// COMMENT: {7/10/2008 11:03:44 PM}					}
-// COMMENT: {7/10/2008 11:03:44 PM}					this->BottomActors->SetMapper(bmapper);
-// COMMENT: {7/10/2008 11:03:44 PM}					this->BottomActors->SetProperty(this->CubeActor->GetProperty());
-// COMMENT: {7/10/2008 11:03:44 PM}					this->AddPart(this->BottomActors);
-// COMMENT: {7/10/2008 11:03:44 PM}
-// COMMENT: {7/10/2008 11:03:44 PM}					// bottom outline actor
-// COMMENT: {7/10/2008 11:03:44 PM}					vtkPolyDataMapper *bmapperOutline = vtkPolyDataMapper::New();
-// COMMENT: {7/10/2008 11:03:44 PM}					bmapperOutline->SetInput(bpolyData);
-// COMMENT: {7/10/2008 11:03:44 PM}
-// COMMENT: {7/10/2008 11:03:44 PM}					ASSERT(this->BottomOutlineActors == 0);
-// COMMENT: {7/10/2008 11:03:44 PM}					this->BottomOutlineActors = vtkLODActor::New();
-// COMMENT: {7/10/2008 11:03:44 PM}					if (vtkLODActor *pLOD = vtkLODActor::SafeDownCast(this->BottomOutlineActors))
-// COMMENT: {7/10/2008 11:03:44 PM}					{
-// COMMENT: {7/10/2008 11:03:44 PM}						pLOD->SetNumberOfCloudPoints(20000);
-// COMMENT: {7/10/2008 11:03:44 PM}					}
-// COMMENT: {7/10/2008 11:03:44 PM}					this->BottomOutlineActors->SetMapper(bmapperOutline);
-// COMMENT: {7/10/2008 11:03:44 PM}					this->BottomOutlineActors->SetProperty(this->OutlineActor->GetProperty());
-// COMMENT: {7/10/2008 11:03:44 PM}					this->AddPart(this->BottomOutlineActors);
-// COMMENT: {7/10/2008 11:03:44 PM}
-// COMMENT: {7/10/2008 11:03:44 PM}					// bottom cleanup
-// COMMENT: {7/10/2008 11:03:44 PM}					bpolyData->Delete();
-// COMMENT: {7/10/2008 11:03:44 PM}					bmapperOutline->Delete();
-// COMMENT: {7/10/2008 11:03:44 PM}					bmapper->Delete();
-///}}}
 
 					// close the PolyData group
 					//
@@ -1208,8 +1309,23 @@ void CZoneActor::Serialize(bool bStoring, hid_t loc_id)
 					::AfxIsValidAddress(this->GetPolyhedron(), sizeof(Polyhedron));
 					delete this->GetPolyhedron();
 				}
-				this->GetPolyhedron() = new Cube(&zone);
-				ASSERT(this->GetChopType() == srcWedgeSource::CHOP_NONE);
+
+				// coor_sys_type
+				//
+				if (Cube *cube = new Cube(&zone))
+				{
+					PHAST_Transform::COORDINATE_SYSTEM nValue;
+					herr_t val = CGlobal::HDFSerializeCoordinateSystem(bStoring, polyh_id, nValue);
+					cube->Set_coordinate_system(nValue);
+
+					val = CGlobal::HDFSerializeCoordinateSystemUser(bStoring, polyh_id, nValue);
+					cube->Set_user_coordinate_system(nValue);
+
+					CGridKeyword gridKeyword = pWPhastDoc->GetGridKeyword();
+					this->SetPolyhedron(cube, pWPhastDoc->GetUnits(), gridKeyword.m_grid_origin, gridKeyword.m_grid_angle);
+					ASSERT(this->GetChopType() == srcWedgeSource::CHOP_NONE);
+					delete cube;
+				}
 			}
 
 			// close the polyh group
@@ -1223,8 +1339,12 @@ void CZoneActor::Serialize(bool bStoring, hid_t loc_id)
 			//
 			CZone z;
 			z.Serialize(bStoring, loc_id);
-			this->GetPolyhedron() = new Cube(&z);
-			ASSERT(this->GetChopType() == srcWedgeSource::CHOP_NONE);
+			if (Cube *cube = new Cube(&z))
+			{
+				CGridKeyword gridKeyword = pWPhastDoc->GetGridKeyword();
+				this->SetPolyhedron(cube, pWPhastDoc->GetUnits(), gridKeyword.m_grid_origin, gridKeyword.m_grid_angle);
+				delete cube;
+			}
 		}
 
 		// store default
@@ -1233,7 +1353,9 @@ void CZoneActor::Serialize(bool bStoring, hid_t loc_id)
 
 		// load desc
 		//
-		status = CGlobal::HDFSerializeString(bStoring, loc_id, szDesc, this->m_desc);
+		std::string desc;
+		status = CGlobal::HDFSerializeString(bStoring, loc_id, szDesc, desc);
+		this->SetDesc(desc.c_str());
 
 		// TODO load opacity
 		this->GetProperty()->SetOpacity(0.3);
@@ -1267,7 +1389,7 @@ void CZoneActor::SetVisibility(int visibility)
 	vtkDebugMacro(<< this->GetClassName() << " (" << this << "): setting Visibility to " << visibility);
 	if (this->Visibility != visibility)
 	{
-		if (this->GetPolyhedronType() == Polyhedron::PRISM)
+		if (this->GetPolyhedronType() == Polyhedron::PRISM || this->TopActors.size() > 0)
 		{
 			ASSERT(this->TopActors.size() > 0);
 			ASSERT(this->TopOutlineActors.size() > 0);
@@ -1330,13 +1452,11 @@ void CZoneActor::SetVisibility(int visibility)
 			else
 			{
 				// perimeter
-// COMMENT: {7/8/2008 6:53:35 PM}				this->CubeActor->SetVisibility(visibility);
 				std::vector<vtkActor*>::iterator actor_iter = this->SolidPerimeterActors.begin();
 				for (; actor_iter != this->SolidPerimeterActors.end(); ++actor_iter)
 				{
 					(*actor_iter)->SetVisibility(visibility);
 				}
-// COMMENT: {7/8/2008 8:29:46 PM}				this->OutlineActor->SetVisibility(visibility);
 				actor_iter = this->OutlinePerimeterActors.begin();
 				for (; actor_iter != this->OutlinePerimeterActors.end(); ++actor_iter)
 				{
@@ -1490,14 +1610,19 @@ void CZoneActor::SetChopType(enum srcWedgeSource::tagChopType t)
 		this->m_pSource->SetChopType(t);
 
 		CZone z(*this->GetPolyhedron()->Get_bounding_box());
-		delete this->GetPolyhedron();
-		this->GetPolyhedron() = new Wedge(&z, srcWedgeSource::GetWedgeOrientationString(
-			srcWedgeSource::ConvertChopType(t)));
+		Polyhedron *p = this->GetPolyhedron();
+		Cube *c = dynamic_cast<Cube*>(p);
+		this->GetPolyhedron() = new Wedge(&z, 
+			srcWedgeSource::GetWedgeOrientationString(srcWedgeSource::ConvertChopType(t)),
+			c ? c->Get_coordinate_system() : PHAST_Transform::GRID
+			);
+		delete p;
 	}
 }
 
 enum Polyhedron::POLYHEDRON_TYPE CZoneActor::GetPolyhedronType()const
 {
+	ASSERT(const_cast<CZoneActor*>(this)->GetPolyhedron());
 	return const_cast<CZoneActor*>(this)->GetPolyhedron()->get_type();	
 }
 
@@ -1640,18 +1765,60 @@ void CZoneActor::SetBottomVisibility(int visibility)
 	}
 }
 
+void CZoneActor::SetGridOrigin(double origin[3])
+{
+	for (int i = 0; i < 3; ++i)
+	{
+		this->m_grid_origin[i] = origin[i];
+	}
+}
+
+double* CZoneActor::GetGridOrigin(void)const
+{
+	return (double*)this->m_grid_origin;
+}
+
+
+void CZoneActor::SetGridAngle(double angle)
+{
+	this->m_grid_angle = angle;
+}
+
+double CZoneActor::GetGridAngle(void)const
+{
+	return this->m_grid_angle;
+}
+
 void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits)
 {
+	this->SetPolyhedron(polyh, rUnits, this->m_grid_origin, this->m_grid_angle);
+}
+
+void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, double origin[3], double angle)
+{
+	TRACE("%s, in\n", __FUNCTION__);
 	ASSERT(polyh && ::AfxIsValidAddress(polyh, sizeof(Polyhedron)));
 
+	// set up for transform
+	this->SetGridAngle(angle);
+	this->SetGridOrigin(origin);
+	double scale_h = rUnits.map_horizontal.input_to_si / rUnits.horizontal.input_to_si;
+	double scale_v = rUnits.map_vertical.input_to_si / rUnits.vertical.input_to_si;
+	this->Map2GridPhastTransform = PHAST_Transform(origin[0], origin[1], origin[2], angle, scale_h, scale_h, scale_v);
+
+	Polyhedron *clone = polyh->clone();
 	if (this->GetPolyhedron())
 	{
+		if (this->GetPolyhedronType() == Polyhedron::PRISM)
+		{
+			this->CleanupPrisms();
+		}
 		delete this->GetPolyhedron();
 	}
-	this->GetPolyhedron() = polyh->clone();
+	this->GetPolyhedron() = clone;
 
 	Polyhedron::POLYHEDRON_TYPE n = polyh->get_type();
-	if (n == Polyhedron::WEDGE || n == Polyhedron::CUBE)
+	if (Cube *c = dynamic_cast<Cube*>(this->GetPolyhedron()))
 	{
 		enum srcWedgeSource::tagChopType ct = srcWedgeSource::CHOP_NONE;
 		if (Wedge *w = dynamic_cast<Wedge*>(this->GetPolyhedron()))
@@ -1678,19 +1845,46 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits)
 		// (until SetBounds/SetChopType is replaced by
 		// SetPolyhedron or similar)
 		this->SetChopType(ct);
+
+#if 999
+		if (Cube *c = dynamic_cast<Cube*>(this->GetPolyhedron()))
+		{
+			if (c->Get_coordinate_system() == PHAST_Transform::MAP)
+			{
+				if (angle)
+				{
+					this->SetOrientation(0, 0, -angle);
+				}
+			}
+		}
+#endif
+		this->CubeActor->SetVisibility(this->Visibility);
+		this->AddPart(this->CubeActor);
+
+		this->OutlineActor->SetVisibility(this->Visibility);
+		this->AddPart(this->OutlineActor);
 	}
 	else if (Prism *prism = dynamic_cast<Prism*>(this->GetPolyhedron()))
 	{
+		prism->perimeter.Convert_coordinates(PHAST_Transform::GRID, &this->Map2GridPhastTransform);
+		prism->top.Convert_coordinates(PHAST_Transform::GRID, &this->Map2GridPhastTransform);
+		prism->bottom.Convert_coordinates(PHAST_Transform::GRID, &this->Map2GridPhastTransform);
+
+		ASSERT(prism->perimeter.Get_coordinate_system() == PHAST_Transform::GRID);
+		ASSERT(prism->top.Get_coordinate_system()       == PHAST_Transform::GRID);
+		ASSERT(prism->bottom.Get_coordinate_system()    == PHAST_Transform::GRID);
+
 		// cleanup 
 		this->CleanupPrisms();
+		this->SetOrientation(0, 0, 0);
 
-		this->CubeActor->SetVisibility(0);
+// COMMENT: {2/3/2009 6:03:44 PM}		this->CubeActor->SetVisibility(0);
 		this->RemovePart(this->CubeActor);
 
-		this->OutlineActor->SetVisibility(0);
+// COMMENT: {2/3/2009 6:03:47 PM}		this->OutlineActor->SetVisibility(0);
 		this->RemovePart(this->OutlineActor);
 
-		PHST_polygon &phst_polygons = prism->perimeter.Get_phst_polygons();
+		PHAST_polygon &phst_polygons = prism->perimeter.Get_phast_polygons();
 		size_t npolys = phst_polygons.Get_begin().size();
 
 		this->PrismSidesPolyData.resize(npolys);
@@ -1744,7 +1938,11 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits)
 				}
 			}
 
-			vtkPoints *pointsSide = vtkPoints::New();
+#if 999
+// COMMENT: {11/19/2008 6:50:39 PM}			this->Map2GridPhastTransform.Transform(pts);
+#endif
+
+			vtkPoints *pointsSide = vtkPoints::New(VTK_DOUBLE);
 			vtkCellArray *facesSide = vtkCellArray::New();
 
 			Point &back = pts.back();
@@ -1774,8 +1972,8 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits)
 			vtkPolyData *profileBottom = vtkPolyData::New();
 			vtkPolyData *constrainBottom = vtkPolyData::New();
 
-			vtkPoints *pointsBottom = vtkPoints::New();
-			vtkPoints *pointsTop = vtkPoints::New();
+			vtkPoints *pointsBottom = vtkPoints::New(VTK_DOUBLE);
+			vtkPoints *pointsTop = vtkPoints::New(VTK_DOUBLE);
 
 			Data_source::DATA_SOURCE_TYPE top_type = prism->top.Get_source_type();
 			Data_source::DATA_SOURCE_TYPE bot_type = prism->bottom.Get_source_type();
@@ -1871,23 +2069,37 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits)
 
 				// nni for bottom interpolation
 				//
-				NNInterpolator* nniBottom;
-				zone zbottom = *prism->bottom.Get_bounding_box();
-				bool bDestroy_nniBottom;
-				if (prism->bottom.Get_filedata()
-					&&
-					prism->bottom.Get_filedata()->Get_nni_map().find(prism->bottom.Get_attribute()) != prism->bottom.Get_filedata()->Get_nni_map().end()
-					)
-				{
-					nniBottom = prism->bottom.Get_filedata()->Get_nni_map()[prism->bottom.Get_attribute()];
-					bDestroy_nniBottom = false;
-				}
-				else
-				{
-					nniBottom = new NNInterpolator();
-					nniBottom->preprocess(prism->bottom.Get_points());
-					bDestroy_nniBottom = true;
-				}
+// COMMENT: {10/21/2008 3:57:20 PM}				NNInterpolator* nniBottom;
+// COMMENT: {10/21/2008 3:57:20 PM}				zone zbottom = *prism->bottom.Get_bounding_box();
+// COMMENT: {10/21/2008 3:57:20 PM}				bool bDestroy_nniBottom = false;
+// COMMENT: {10/21/2008 3:57:20 PM}				nniBottom = prism->bottom.Get_filedata()->Get_data_source(prism->bottom.Get_attribute())->Make_nni();
+// COMMENT: {10/21/2008 3:57:20 PM}
+// COMMENT: {10/21/2008 3:57:20 PM}				if (prism->bottom.Get_filedata()
+// COMMENT: {10/21/2008 3:57:20 PM}					//&&
+// COMMENT: {10/21/2008 3:57:20 PM}					//prism->bottom.Get_filedata()->Get_nni_map().find(prism->bottom.Get_attribute()) != prism->bottom.Get_filedata()->Get_nni_map().end()
+// COMMENT: {10/21/2008 3:57:20 PM}					&&
+// COMMENT: {10/21/2008 3:57:20 PM}					prism->bottom.Get_filedata()->Get_data_source(prism->bottom.Get_attribute()) != NULL
+// COMMENT: {10/21/2008 3:57:20 PM}					&&
+// COMMENT: {10/21/2008 3:57:20 PM}					prism->bottom.Get_filedata()->Get_data_source(prism->bottom.Get_attribute())->Get_nni() != NULL
+// COMMENT: {10/21/2008 3:57:20 PM}					)
+// COMMENT: {10/21/2008 3:57:20 PM}				{
+// COMMENT: {10/21/2008 3:57:20 PM}					//nniBottom = prism->bottom.Get_filedata()->Get_nni_map()[prism->bottom.Get_attribute()];
+// COMMENT: {10/21/2008 3:57:20 PM}					nniBottom = prism->bottom.Get_filedata()->Get_data_source(prism->bottom.Get_attribute())->Get_nni();
+// COMMENT: {10/21/2008 3:57:20 PM}					bDestroy_nniBottom = false;
+// COMMENT: {10/21/2008 3:57:20 PM}				}
+// COMMENT: {10/21/2008 3:57:20 PM}				else
+// COMMENT: {10/21/2008 3:57:20 PM}				{
+// COMMENT: {10/21/2008 3:57:20 PM}					//nniBottom = new NNInterpolator();
+// COMMENT: {10/21/2008 3:57:20 PM}					//nniBottom->preprocess(prism->bottom.Get_points());
+// COMMENT: {10/21/2008 3:57:20 PM}					nniBottom = prism->bottom.Get_filedata()->Get_data_source(prism->bottom.Get_attribute())->Make_nni();
+// COMMENT: {10/21/2008 3:57:20 PM}					bDestroy_nniBottom = true;
+// COMMENT: {10/21/2008 3:57:20 PM}				}
+
+				//{{
+				bool bDestroy_nniBottom = false;
+				prism->bottom.Make_nni();
+				NNInterpolator* nniBottom = prism->bottom.Get_nni();
+				//}}
 
 				double* xd;
 
@@ -1939,10 +2151,10 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits)
 				std::vector<Point> &bottom_pts = prism->bottom.Get_points();
 				std::vector<Point>::iterator iterBottom = bottom_pts.begin();
 
-				PHST_polygon *bot_poly = NULL;
+				PHAST_polygon *bot_poly = NULL;
 				if (npolys > 1)
 				{
-					bot_poly = new PHST_polygon(pts);
+					bot_poly = new PHAST_polygon(pts, prism->bottom.Get_coordinate_system());
 				}				
 				for (vtkIdType k = i; iterBottom != bottom_pts.end(); ++iterBottom)
 				{
@@ -2010,27 +2222,32 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits)
 
 				std::vector<Point> empty;
 
-				// nni for top interpolation
-				//
-				// nni for top interpolation
-				//
-				NNInterpolator* nniTop;
-				zone ztop = *prism->top.Get_bounding_box();
-				bool bDestroy_nniTop;
-				if (prism->top.Get_filedata()
-					&&
-					prism->top.Get_filedata()->Get_nni_map().find(prism->top.Get_attribute()) != prism->top.Get_filedata()->Get_nni_map().end()
-					)
-				{
-					nniTop = prism->top.Get_filedata()->Get_nni_map()[prism->top.Get_attribute()];
-					bDestroy_nniTop = false;
-				}
-				else
-				{
-					nniTop = new NNInterpolator();
-					nniTop->preprocess(prism->top.Get_points());
-					bDestroy_nniTop = true;
-				}
+// COMMENT: {10/21/2008 4:01:12 PM}				// nni for top interpolation
+// COMMENT: {10/21/2008 4:01:12 PM}				//
+// COMMENT: {10/21/2008 4:01:12 PM}				NNInterpolator* nniTop;
+// COMMENT: {10/21/2008 4:01:12 PM}				zone ztop = *prism->top.Get_bounding_box();
+// COMMENT: {10/21/2008 4:01:12 PM}				bool bDestroy_nniTop;
+// COMMENT: {10/21/2008 4:01:12 PM}				if (prism->top.Get_filedata()
+// COMMENT: {10/21/2008 4:01:12 PM}					&&
+// COMMENT: {10/21/2008 4:01:12 PM}					prism->top.Get_filedata()->Get_nni_map().find(prism->top.Get_attribute()) != prism->top.Get_filedata()->Get_nni_map().end()
+// COMMENT: {10/21/2008 4:01:12 PM}					)
+// COMMENT: {10/21/2008 4:01:12 PM}				{
+// COMMENT: {10/21/2008 4:01:12 PM}					nniTop = prism->top.Get_filedata()->Get_nni_map()[prism->top.Get_attribute()];
+// COMMENT: {10/21/2008 4:01:12 PM}					bDestroy_nniTop = false;
+// COMMENT: {10/21/2008 4:01:12 PM}				}
+// COMMENT: {10/21/2008 4:01:12 PM}				else
+// COMMENT: {10/21/2008 4:01:12 PM}				{
+// COMMENT: {10/21/2008 4:01:12 PM}					nniTop = new NNInterpolator();
+// COMMENT: {10/21/2008 4:01:12 PM}					nniTop->preprocess(prism->top.Get_points());
+// COMMENT: {10/21/2008 4:01:12 PM}					bDestroy_nniTop = true;
+// COMMENT: {10/21/2008 4:01:12 PM}				}
+
+				//{{
+				bool bDestroy_nniTop = false;
+				prism->top.Make_nni();
+				NNInterpolator* nniTop = prism->top.Get_nni();
+				//}}
+
 
 				// foreach perimeter point determine top and bottom points
 				//
@@ -2080,10 +2297,10 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits)
 				double* xd;
 				std::vector<Point> &top_pts = prism->top.Get_points();
 				std::vector<Point>::iterator iterTop = top_pts.begin();
-				PHST_polygon *top_poly = NULL;
+				PHAST_polygon *top_poly = NULL;
 				if (npolys > 1)
 				{
-					top_poly = new PHST_polygon(pts);
+					top_poly = new PHAST_polygon(pts, prism->top.Get_coordinate_system());
 				}				
 				for (vtkIdType k = i; iterTop != top_pts.end(); ++iterTop)
 				{
@@ -2143,45 +2360,59 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits)
 
 				std::vector<Point> empty;
 
-				// nni for top interpolation
-				//
-				NNInterpolator* nniTop;
-				zone ztop = *prism->top.Get_bounding_box();
-				bool bDestroy_nniTop;
-				if (prism->top.Get_filedata()
-					&&
-					prism->top.Get_filedata()->Get_nni_map().find(prism->top.Get_attribute()) != prism->top.Get_filedata()->Get_nni_map().end()
-					)
-				{
-					nniTop = prism->top.Get_filedata()->Get_nni_map()[prism->top.Get_attribute()];
-					bDestroy_nniTop = false;
-				}
-				else
-				{
-					nniTop = new NNInterpolator();
-					nniTop->preprocess(prism->top.Get_points());
-					bDestroy_nniTop = true;
-				}
+// COMMENT: {10/21/2008 4:02:02 PM}				// nni for top interpolation
+// COMMENT: {10/21/2008 4:02:02 PM}				//
+// COMMENT: {10/21/2008 4:02:02 PM}				NNInterpolator* nniTop;
+// COMMENT: {10/21/2008 4:02:02 PM}				zone ztop = *prism->top.Get_bounding_box();
+// COMMENT: {10/21/2008 4:02:02 PM}				bool bDestroy_nniTop;
+// COMMENT: {10/21/2008 4:02:02 PM}				if (prism->top.Get_filedata()
+// COMMENT: {10/21/2008 4:02:02 PM}					&&
+// COMMENT: {10/21/2008 4:02:02 PM}					prism->top.Get_filedata()->Get_nni_map().find(prism->top.Get_attribute()) != prism->top.Get_filedata()->Get_nni_map().end()
+// COMMENT: {10/21/2008 4:02:02 PM}					)
+// COMMENT: {10/21/2008 4:02:02 PM}				{
+// COMMENT: {10/21/2008 4:02:02 PM}					nniTop = prism->top.Get_filedata()->Get_nni_map()[prism->top.Get_attribute()];
+// COMMENT: {10/21/2008 4:02:02 PM}					bDestroy_nniTop = false;
+// COMMENT: {10/21/2008 4:02:02 PM}				}
+// COMMENT: {10/21/2008 4:02:02 PM}				else
+// COMMENT: {10/21/2008 4:02:02 PM}				{
+// COMMENT: {10/21/2008 4:02:02 PM}					nniTop = new NNInterpolator();
+// COMMENT: {10/21/2008 4:02:02 PM}					nniTop->preprocess(prism->top.Get_points());
+// COMMENT: {10/21/2008 4:02:02 PM}					bDestroy_nniTop = true;
+// COMMENT: {10/21/2008 4:02:02 PM}				}
 
-				// nni for bottom interpolation
-				//
-				NNInterpolator* nniBottom;
-				zone zbottom = *prism->bottom.Get_bounding_box();
-				bool bDestroy_nniBottom;
-				if (prism->bottom.Get_filedata()
-					&&
-					prism->bottom.Get_filedata()->Get_nni_map().find(prism->bottom.Get_attribute()) != prism->bottom.Get_filedata()->Get_nni_map().end()
-					)
-				{
-					nniBottom = prism->bottom.Get_filedata()->Get_nni_map()[prism->bottom.Get_attribute()];
-					bDestroy_nniBottom = false;
-				}
-				else
-				{
-					nniBottom = new NNInterpolator();
-					nniBottom->preprocess(prism->bottom.Get_points());
-					bDestroy_nniBottom = true;
-				}
+				//{{
+				bool bDestroy_nniTop = false;
+				prism->top.Make_nni();
+				NNInterpolator* nniTop = prism->top.Get_nni();
+				//}}
+
+
+// COMMENT: {10/21/2008 4:02:42 PM}				// nni for bottom interpolation
+// COMMENT: {10/21/2008 4:02:42 PM}				//
+// COMMENT: {10/21/2008 4:02:42 PM}				NNInterpolator* nniBottom;
+// COMMENT: {10/21/2008 4:02:42 PM}				zone zbottom = *prism->bottom.Get_bounding_box();
+// COMMENT: {10/21/2008 4:02:42 PM}				bool bDestroy_nniBottom;
+// COMMENT: {10/21/2008 4:02:42 PM}				if (prism->bottom.Get_filedata()
+// COMMENT: {10/21/2008 4:02:42 PM}					&&
+// COMMENT: {10/21/2008 4:02:42 PM}					prism->bottom.Get_filedata()->Get_nni_map().find(prism->bottom.Get_attribute()) != prism->bottom.Get_filedata()->Get_nni_map().end()
+// COMMENT: {10/21/2008 4:02:42 PM}					)
+// COMMENT: {10/21/2008 4:02:42 PM}				{
+// COMMENT: {10/21/2008 4:02:42 PM}					nniBottom = prism->bottom.Get_filedata()->Get_nni_map()[prism->bottom.Get_attribute()];
+// COMMENT: {10/21/2008 4:02:42 PM}					bDestroy_nniBottom = false;
+// COMMENT: {10/21/2008 4:02:42 PM}				}
+// COMMENT: {10/21/2008 4:02:42 PM}				else
+// COMMENT: {10/21/2008 4:02:42 PM}				{
+// COMMENT: {10/21/2008 4:02:42 PM}					nniBottom = new NNInterpolator();
+// COMMENT: {10/21/2008 4:02:42 PM}					nniBottom->preprocess(prism->bottom.Get_points());
+// COMMENT: {10/21/2008 4:02:42 PM}					bDestroy_nniBottom = true;
+// COMMENT: {10/21/2008 4:02:42 PM}				}
+
+				//{{
+				bool bDestroy_nniBottom = false;
+				prism->bottom.Make_nni();
+				NNInterpolator* nniBottom = prism->bottom.Get_nni();
+				//}}
+
 
 				// foreach perimeter point determine top and bottom points
 				//
@@ -2231,10 +2462,10 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits)
 				double* xd;
 				std::vector<Point> &top_pts = prism->top.Get_points();
 				std::vector<Point>::iterator iterTop = top_pts.begin();
-				PHST_polygon *top_poly = NULL;
+				PHAST_polygon *top_poly = NULL;
 				if (npolys > 1)
 				{
-					top_poly = new PHST_polygon(pts);
+					top_poly = new PHAST_polygon(pts, prism->top.Get_coordinate_system());
 				}				
 				for (vtkIdType k = i; iterTop != top_pts.end(); ++iterTop)
 				{
@@ -2267,10 +2498,10 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits)
 				std::vector<Point> &bottom_pts = prism->bottom.Get_points();
 				std::vector<Point>::iterator iterBottom = bottom_pts.begin();
 
-				PHST_polygon *bot_poly = NULL;
+				PHAST_polygon *bot_poly = NULL;
 				if (npolys > 1)
 				{
-					bot_poly = new PHST_polygon(pts);
+					bot_poly = new PHAST_polygon(pts, prism->bottom.Get_coordinate_system());
 				}				
 				for (vtkIdType k = i; iterBottom != bottom_pts.end(); ++iterBottom)
 				{
@@ -2319,6 +2550,7 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits)
 				// triangulate top
 				//
 				delaunay2DTop->SetInput(profileTop);
+				TRACE("profileTop= %d\n", profileTop->GetNumberOfPoints());
 				delaunay2DTop->SetSource(constrainTop);
 				delaunay2DTop->Update();
 
@@ -2373,7 +2605,7 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits)
 
 				ASSERT(this->TopFilters[poly] == 0);
 				this->TopFilters[poly] = vtkTransformPolyDataFilter::New();
-				this->TopFilters[poly]->SetTransform(this->UnitsTransform);			
+				this->TopFilters[poly]->SetTransform(this->TopUnitsTransform);
 				this->TopFilters[poly]->SetInput(triangleFilter->GetOutput());
 
 				vtkPolyDataMapper *mapper = vtkPolyDataMapper::New();
@@ -2386,7 +2618,7 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits)
 				//
 				ASSERT(this->TopOutlineFilters[poly] == 0);
 				this->TopOutlineFilters[poly] = vtkTransformPolyDataFilter::New();
-				this->TopOutlineFilters[poly]->SetTransform(this->UnitsTransform);			
+				this->TopOutlineFilters[poly]->SetTransform(this->TopUnitsTransform);
 				this->TopOutlineFilters[poly]->SetInput(polyData);
 
 				vtkPolyDataMapper *mapperOutline = vtkPolyDataMapper::New();
@@ -2408,7 +2640,7 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits)
 				ASSERT(this->TopFilters[poly] == 0);
 				ASSERT(this->TopOutlineFilters[poly] == 0);
 				this->TopFilters[poly] = vtkTransformPolyDataFilter::New();
-				this->TopFilters[poly]->SetTransform(this->UnitsTransform);			
+				this->TopFilters[poly]->SetTransform(this->TopUnitsTransform);
 				this->TopFilters[poly]->SetInput(delaunay2DTop->GetOutput());
 
 				vtkPolyDataMapper *mapper = vtkPolyDataMapper::New();
@@ -2470,7 +2702,7 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits)
 
 				ASSERT(this->BottomFilters[poly] == 0);
 				this->BottomFilters[poly] = vtkTransformPolyDataFilter::New();
-				this->BottomFilters[poly]->SetTransform(this->UnitsTransform);			
+				this->BottomFilters[poly]->SetTransform(this->BottomUnitsTransform);
 				this->BottomFilters[poly]->SetInput(triangleFilter->GetOutput());
 
 				vtkPolyDataMapper *mapper = vtkPolyDataMapper::New();
@@ -2483,7 +2715,7 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits)
 				//
 				ASSERT(this->BottomOutlineFilters[poly] == 0);
 				this->BottomOutlineFilters[poly] = vtkTransformPolyDataFilter::New();
-				this->BottomOutlineFilters[poly]->SetTransform(this->UnitsTransform);			
+				this->BottomOutlineFilters[poly]->SetTransform(this->BottomUnitsTransform);
 				this->BottomOutlineFilters[poly]->SetInput(polyData);
 
 				vtkPolyDataMapper *mapperOutline = vtkPolyDataMapper::New();
@@ -2505,7 +2737,7 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits)
 				ASSERT(this->BottomFilters[poly] == 0);
 				ASSERT(this->BottomOutlineFilters[poly] == 0);
 				this->BottomFilters[poly] = vtkTransformPolyDataFilter::New();
-				this->BottomFilters[poly]->SetTransform(this->UnitsTransform);			
+				this->BottomFilters[poly]->SetTransform(this->BottomUnitsTransform);
 				this->BottomFilters[poly]->SetInput(delaunay2DBottom->GetOutput());
 
 				vtkPolyDataMapper *mapper = vtkPolyDataMapper::New();
@@ -2533,7 +2765,7 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits)
 
 			ASSERT(this->UnitsTransform);
 			vtkTransformPolyDataFilter *transformPolyDataFilter = vtkTransformPolyDataFilter::New();
-			transformPolyDataFilter->SetTransform(this->UnitsTransform);			
+			transformPolyDataFilter->SetTransform(this->UnitsTransform);
 			transformPolyDataFilter->SetInput(this->PrismSidesPolyData[poly]);
 
 			// perimeter solid actor
@@ -2558,6 +2790,16 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits)
 			this->AddPart(this->OutlinePerimeterActors[poly]);
 			this->OutlinePerimeterActors[poly]->SetProperty(this->OutlineActor->GetProperty());
 
+			if (!this->Visibility)
+			{
+				// sync visibility
+				// should only occur when a box is converted
+				// to a prism
+				this->Visibility = 1;
+				this->SetVisibility(0);
+				ASSERT(this->Visibility == 0);
+			}
+
 			// cleanup top
 			topCellArray->Delete();
 			profileTop->Delete();
@@ -2578,9 +2820,10 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits)
 			transformPolyDataFilter->Delete();
 
 			// finally scale for units
-			this->SetUnits(rUnits);
+			this->SetUnits(rUnits, false);
 		}
 	}
+	TRACE("%s, out\n", __FUNCTION__);
 }
 
 void CZoneActor::Update(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent)
@@ -2678,3 +2921,13 @@ void CZoneActor::SetColor(float r, float g, float b)
 	outlineProperty->Delete();
 }
 #endif
+
+HTREEITEM CZoneActor::GetTreeItem(void)const
+{
+	return this->m_hti;
+}
+
+HTREEITEM CZoneActor::GetParentTreeItem(void)const
+{
+	return this->m_hParent;
+}

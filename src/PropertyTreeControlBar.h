@@ -64,6 +64,8 @@ protected:
 	CTreeCtrlNode   m_nodeSteadyFlow;
 	CTreeCtrlNode   m_nodeWells;
 	CTreeCtrlNode   m_nodeRivers;
+	CTreeCtrlNode   m_nodeDrains;
+	CTreeCtrlNode   m_nodeZFRates;
 	
 	bool            m_bSelectingProp;
 
@@ -113,8 +115,9 @@ public:
 	CTreeCtrlNode GetICChemNode(void)         {return m_nodeICChem;}
 	CTreeCtrlNode GetWellsNode(void)          {return m_nodeWells;}
 	CTreeCtrlNode GetRiversNode(void)         {return m_nodeRivers;}
+	CTreeCtrlNode GetDrainsNode(void)         {return m_nodeDrains;}
+	CTreeCtrlNode GetZoneFlowRatesNode(void)  {return m_nodeZFRates;}
 	CTreeCtrlNode GetBCNode(void)             {return m_nodeBC;}
-// COMMENT: {6/22/2007 5:09:02 PM}	CTreeCtrlNode GetTimeControlNode(void)    {return m_nodeTimeControl;}
 	CTreeCtrlNode GetTimeControl2Node(void)   {return m_nodeTimeControl2;}
 	CTreeCtrlNode GetPrintInitialNode(void)   {return m_nodePrintInput;}
 	CTreeCtrlNode GetPrintFrequencyNode(void) {return m_nodePF;}
@@ -128,7 +131,7 @@ public:
 	UINT GetBCCheck(void);
 	UINT GetICCheck(void);
 	UINT GetMediaCheck(void);
-
+	UINT GetZoneFlowRatesCheck(void);
 
 	BOOL SelectWithoutNotification(HTREEITEM htItem);
 	void ClearSelection(void);
@@ -148,7 +151,8 @@ protected:
 	CLIPFORMAT m_cfPID;
 
 	bool IsNodeEditable(CTreeCtrlNode editNode, bool bDoEdit);
-	bool IsNodeDraggable(CTreeCtrlNode dragNode, COleDataSource &oleDataSource);
+// COMMENT: {8/14/2008 7:07:05 PM}	bool IsNodeDraggable(CTreeCtrlNode dragNode, COleDataSource &oleDataSource);
+	bool IsNodeDraggable(CTreeCtrlNode dragNode, COleDataSource *pOleDataSource);
 	bool IsNodeCopyable(CTreeCtrlNode copyNode, COleDataSource *pOleDataSource);
 	bool IsNodePasteable(CTreeCtrlNode pasteNode, bool bDoPaste);
 	bool IsNodePasteableWell(CTreeCtrlNode pasteNode, bool bDoPaste);

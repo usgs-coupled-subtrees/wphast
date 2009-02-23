@@ -19,6 +19,7 @@ class TestCBC :
 	CPPUNIT_TEST( testAssertValidFluxBC );
 	CPPUNIT_TEST( testAssertValidLeakyBC );
 	CPPUNIT_TEST( testAssertValidSpecifiedValueBC );
+	CPPUNIT_TEST( testAssertValidSpecifiedValueBC2 );
 	CPPUNIT_TEST_SUITE_END();
 protected:
 	void testCopyCtor(void);
@@ -31,4 +32,5 @@ protected:
 	void testAssertValidFluxBC(void);
 	void testAssertValidLeakyBC(void);
 	void testAssertValidSpecifiedValueBC(void);
+	void testAssertValidSpecifiedValueBC2(void);
 };

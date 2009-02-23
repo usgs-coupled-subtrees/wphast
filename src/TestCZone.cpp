@@ -105,7 +105,7 @@ void TestCZone::testOperatorEqualsEquals(void)
 	z.zone_defined = TRUE;
 	CPPUNIT_ASSERT(!(Z == z));
 
-	Z.zone_defined = UNDEFINED;
+	Z.zone_defined = ZD_UNDEFINED;
 	z.zone_defined = TRUE;
 	CPPUNIT_ASSERT(!(Z == z));
 
@@ -114,7 +114,7 @@ void TestCZone::testOperatorEqualsEquals(void)
 	CPPUNIT_ASSERT(!(Z == z));
 
 	Z.zone_defined = TRUE;
-	z.zone_defined = UNDEFINED;
+	z.zone_defined = ZD_UNDEFINED;
 	CPPUNIT_ASSERT(!(Z == z));
 
 	Z.zone_defined = TRUE;
@@ -127,6 +127,49 @@ void TestCZone::testSerialize(void)
 {
 	const char FILENAME[] = "TestCZone.h5";
 	char *input = "1 3 5 2 4 6";
+
+	Cube* pCube = ::read_cube(&input);
+	CPPUNIT_ASSERT(pCube != 0);
+
+	struct zone z2;
+	z2.zone_defined = TRUE;
+	z2.x1 = 1;
+	z2.x2 = 2;
+	z2.y1 = 3;
+	z2.y2 = 4;
+	z2.z1 = 5;
+	z2.z2 = 6;
+
+    CZone Z1(*pCube->Get_bounding_box());
+	CZone Z2(z2);
+	CPPUNIT_ASSERT(Z1 == Z2);
+
+	// Create the file.
+    hid_t file = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+	CPPUNIT_ASSERT(file >= 0);
+	Z1.Serialize(true, file);
+
+	// Close file
+	CPPUNIT_ASSERT(H5Fclose(file) >= 0);
+
+	// Open file
+	file = H5Fopen(FILENAME, H5F_ACC_RDONLY, H5P_DEFAULT);
+
+	CZone Z3;
+	CPPUNIT_ASSERT(!(Z3 == Z1));
+	Z3.Serialize(false, file);
+	CPPUNIT_ASSERT(Z3 == Z1);
+
+	CPPUNIT_ASSERT(H5Fclose(file) >= 0);
+	CPPUNIT_ASSERT(::remove(FILENAME) == 0);
+
+	delete pCube;
+}
+
+void TestCZone::testSerializeMap(void)
+{
+	const char FILENAME[] = "TestCZoneMap.h5";
+	char *input = "1 3 5 2 4 6 map";
 
 	Cube* pCube = ::read_cube(&input);
 	CPPUNIT_ASSERT(pCube != 0);

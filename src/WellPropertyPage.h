@@ -3,6 +3,7 @@
 
 #include "gridctrl/ModGridCtrlEx.h"
 #include "Units.h"
+#include "GridKeyword.h"
 #include "Well.h"
 #include "WellSchedule.h"
 #include "wellctrl.h"
@@ -26,13 +27,13 @@ public:
 
 	void SetUsedWellNumbers(const std::set<int>& used);
 
-	BOOL SetGrid(const struct grid &g);
+	void SetGridKeyword(const CGridKeyword& gridKeyword);
 
 	void SetFlowOnly(bool bFlowOnly)     { m_bFlowOnly = bFlowOnly; }
 	bool GetFlowOnly(void)const          { return m_bFlowOnly; }
 
 // Dialog Data
-	enum { IDD = IDD_WELL_PROPPAGE1 };
+	enum { IDD = IDD_WELL_PROPPAGE2 };
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
@@ -43,14 +44,18 @@ protected:
 	void EnableByDepth(BOOL bByDepth);
 	void UpdateScreens(BOOL bByDepth);
 
+	BOOL             m_bUpdatePositionOnly;
+	BOOL             m_bUpdateZOnly;
 	CUnits           m_units;
 	CWellSchedule    m_well;
 	CString          m_strHorizontalUnits;
 	CString          m_strVerticalUnits;
+	CString          m_strMapHorizontalUnits;
+	CString          m_strMapVerticalUnits;
 	CString          m_strWellDiameterUnits;
 	CString          m_strTimeUnits;
 	CString          m_strWellPumpageUnits;
-	CGrid            m_grid;
+	CGridKeyword     m_gridKeyword;
 	CModGridCtrlEx   m_wndScreensGrid;      // IDC_GRID_SCREENS
 	CModGridCtrlEx   m_wndPumpSchedGrid;    // IDC_GRID_SCHEDULES
 	std::set<int>    m_usedWellNumbers;
@@ -101,5 +106,7 @@ public:
 	afx_msg void OnBnSetfocusDepthRadio();
 	afx_msg void OnBnSetfocusDiamRadio();
 	afx_msg void OnBnSetfocusRadiusRadio();
+	afx_msg void OnBnClickedUseMap();
+	afx_msg void OnBnClickedUseMapZ();
 };
 

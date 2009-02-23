@@ -25,7 +25,7 @@ public:
 	virtual void Add(CWPhastDoc *pWPhastDoc);
 	virtual void Remove(CWPhastDoc *pWPhastDoc);
 
-	void Serialize(bool bStoring, hid_t loc_id, const CUnits& units);
+	void Serialize(bool bStoring, hid_t loc_id, const CWPhastDoc* pWPhastDoc);
 
 	static const char szHeading[];
 

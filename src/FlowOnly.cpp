@@ -110,7 +110,7 @@ std::ostream& operator<< (std::ostream &os, const CFlowOnly &a)
 	else
 	{
 		os << "SOLUTE_TRANSPORT true\n";
-		os << "    -diffusivity  " << a.m_dFluidDiffusivity << "\n";
+		os << "\t" << "-diffusivity  " << a.m_dFluidDiffusivity << "\n";
 	}
 	return os;
 }

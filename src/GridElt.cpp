@@ -12,7 +12,7 @@
 #define new DEBUG_NEW
 #endif
 
-CLIPFORMAT CGridElt::clipFormat = (CLIPFORMAT)::RegisterClipboardFormat(_T("WPhast:CGridElt:2"));
+CLIPFORMAT CGridElt::clipFormat = (CLIPFORMAT)::RegisterClipboardFormat(_T("WPhast:CGridElt:3"));
 
 
 /* ---------------------------------------------------------------------- 
@@ -42,6 +42,10 @@ void CGridElt::InternalInit(void)
 	this->alpha_trans       = 0;
 	this->alpha_horizontal  = 0;
 	this->alpha_vertical    = 0;
+	this->shell             = false;
+	this->shell_width[0]    = 0;
+	this->shell_width[1]    = 0;
+	this->shell_width[2]    = 0;
 }
 
 void CGridElt::InternalDelete(void)
@@ -65,48 +69,49 @@ CGridElt CGridElt::NewDefaults(bool bFlowOnly)
 	CGridElt elt;
 	// Active
 	elt.active          = new Cproperty();
-	elt.active->type    = FIXED;
+	elt.active->type    = PROP_FIXED;
 	elt.active->count_v = 1;
 	elt.active->v[0]    = 1;
 	// Kx
 	elt.kx          = new Cproperty();
-	elt.kx->type    = FIXED;
+	elt.kx->type    = PROP_FIXED;
 	elt.kx->count_v = 1;
 	elt.kx->v[0]    = 1e-4;
 	// Ky
 	elt.ky          = new Cproperty();
-	elt.ky->type    = FIXED;
+	elt.ky->type    = PROP_FIXED;
 	elt.ky->count_v = 1;
 	elt.ky->v[0]    = 1e-4;
 	// Kz
 	elt.kz          = new Cproperty();
-	elt.kz->type    = FIXED;
+	elt.kz->type    = PROP_FIXED;
 	elt.kz->count_v = 1;
 	elt.kz->v[0]    = 1e-5;
 	// porosity
 	elt.porosity          = new Cproperty();
-	elt.porosity->type    = FIXED;
+	elt.porosity->type    = PROP_FIXED;
 	elt.porosity->count_v = 1;
 	elt.porosity->v[0]    = 0.2;
 	// storage
 	elt.storage          = new Cproperty();
-	elt.storage->type    = FIXED;
+	elt.storage->type    = PROP_FIXED;
 	elt.storage->count_v = 1;
 	elt.storage->v[0]    = 1e-4;
 
-	if (!bFlowOnly) {
+	if (!bFlowOnly)
+	{
 		elt.alpha_long                = new Cproperty();
-		elt.alpha_long->type          = FIXED;
+		elt.alpha_long->type          = PROP_FIXED;
 		elt.alpha_long->count_v       = 1;
 		elt.alpha_long->v[0]          = 1.0;
 
 		elt.alpha_horizontal          = new Cproperty();
-		elt.alpha_horizontal->type    = FIXED;
+		elt.alpha_horizontal->type    = PROP_FIXED;
 		elt.alpha_horizontal->count_v = 1;
 		elt.alpha_horizontal->v[0]    = 1.0;
 
 		elt.alpha_vertical            = new Cproperty();
-		elt.alpha_vertical->type      = FIXED;
+		elt.alpha_vertical->type      = PROP_FIXED;
 		elt.alpha_vertical->count_v   = 1;
 		elt.alpha_vertical->v[0]      = 1.0;
 	}
@@ -143,6 +148,8 @@ void CGridElt::Serialize(bool bStoring, hid_t loc_id)
 	static const char szAlphaTrans[]      = "alpha_trans";
 	static const char szAlphaHorizontal[] = "alpha_horizontal";
 	static const char szAlphaVertical[]   = "alpha_vertical";
+	static const char szShell[]           = "shell";
+	static const char szShellWidth[]      = "shell_width";
 
 	if (bStoring)
 	{
@@ -171,6 +178,15 @@ void CGridElt::Serialize(bool bStoring, hid_t loc_id)
 		//Cproperty::SerializeOpen(szAlphaTrans,      (Cproperty**)&this->alpha_trans,      loc_id);
 		Cproperty::SerializeOpen(szAlphaHorizontal, (Cproperty**)&this->alpha_horizontal, loc_id);
 		Cproperty::SerializeOpen(szAlphaVertical,   (Cproperty**)&this->alpha_vertical,   loc_id);
+	}
+
+	CGlobal::HDFSerializeBool(bStoring, loc_id, szShell, this->shell);
+	herr_t status = CGlobal::HDFSerializeSafe(bStoring, loc_id, szShellWidth, H5T_NATIVE_DOUBLE, 3, this->shell_width);
+	if (!bStoring && status < 0)
+	{
+		this->shell_width[0] = 0;
+		this->shell_width[1] = 0;
+		this->shell_width[2] = 0;
 	}
 }
 
@@ -260,6 +276,13 @@ void CGridElt::Dump(CDumpContext& dc)const
 		dc << "(NULL)\n";
 	dc << "</alpha_vertical>\n";
 
+	dc << "<shell>\n";
+	dc << this->shell << "\n";
+	dc << this->shell_width[0] << "\n";
+	dc << this->shell_width[1] << "\n";
+	dc << this->shell_width[2] << "\n";
+	dc << "</shell>\n";
+
 	dc << "</CGridElt>\n";
 
 }
@@ -328,11 +351,18 @@ void CGridElt::InternalCopy(const grid_elt& src)
 	// alpha_vertical
 	this->alpha_vertical = 0;
 	Cproperty::CopyProperty(&this->alpha_vertical, src.alpha_vertical);
+
+	// shell
+	this->shell             = src.shell;
+	this->shell_width[0]    = src.shell_width[0];
+	this->shell_width[1]    = src.shell_width[1];
+	this->shell_width[2]    = src.shell_width[2];
 }
 
 CGridElt& CGridElt::operator=(const CGridElt& rhs) // copy assignment
 {
-	if (this != &rhs) {
+	if (this != &rhs)
+	{
 		this->InternalDelete();
 		this->InternalInit();
 		this->InternalCopy(rhs);
@@ -348,48 +378,63 @@ std::ostream& operator<< (std::ostream &os, const CGridElt &a)
 	Cproperty* property_ptr;
 
 	property_ptr = static_cast<Cproperty*>(a.mask);
-	if (property_ptr && property_ptr->type != UNDEFINED) {
+	if (property_ptr && property_ptr->type != PROP_UNDEFINED)
+	{
 		os << "\t\t-mask                     " << (*property_ptr);
 	}
     property_ptr = static_cast<Cproperty*>(a.active);
-	if (property_ptr && property_ptr->type != UNDEFINED) {
+	if (property_ptr && property_ptr->type != PROP_UNDEFINED)
+	{
 		os << "\t\t-active                   " << (*property_ptr);
 	}
 	property_ptr = static_cast<Cproperty*>(a.kx);
-	if (property_ptr && property_ptr->type != UNDEFINED) {
+	if (property_ptr && property_ptr->type != PROP_UNDEFINED)
+	{
 		os << "\t\t-Kx                       " << (*property_ptr);
 	}
 	property_ptr = static_cast<Cproperty*>(a.ky);
-	if (property_ptr && property_ptr->type != UNDEFINED) {
+	if (property_ptr && property_ptr->type != PROP_UNDEFINED)
+	{
 		os << "\t\t-Ky                       " << (*property_ptr);
 	}
 	property_ptr = static_cast<Cproperty*>(a.kz);
-	if (property_ptr && property_ptr->type != UNDEFINED) {
+	if (property_ptr && property_ptr->type != PROP_UNDEFINED)
+	{
 		os << "\t\t-Kz                       " << (*property_ptr);
 	}
 	property_ptr = static_cast<Cproperty*>(a.porosity);
-	if (property_ptr && property_ptr->type != UNDEFINED) {
+	if (property_ptr && property_ptr->type != PROP_UNDEFINED)
+	{
 		os << "\t\t-porosity                 " << (*property_ptr);
 	}
 	property_ptr = static_cast<Cproperty*>(a.storage);
-	if (property_ptr && property_ptr->type != UNDEFINED) {
+	if (property_ptr && property_ptr->type != PROP_UNDEFINED)
+	{
 		os << "\t\t-specific_storage         " << (*property_ptr);
 	}
 	property_ptr = static_cast<Cproperty*>(a.alpha_long);
-	if (property_ptr && property_ptr->type != UNDEFINED) {
+	if (property_ptr && property_ptr->type != PROP_UNDEFINED)
+	{
 		os << "\t\t-long_dispersivity        " << (*property_ptr);
 	}
 	property_ptr = static_cast<Cproperty*>(a.alpha_trans);
-	if (property_ptr && property_ptr->type != UNDEFINED) {
+	if (property_ptr && property_ptr->type != PROP_UNDEFINED)
+	{
 		os << "\t\t-trans_dispersivity       " << (*property_ptr);
 	}
 	property_ptr = static_cast<Cproperty*>(a.alpha_horizontal);
-	if (property_ptr && property_ptr->type != UNDEFINED) {
+	if (property_ptr && property_ptr->type != PROP_UNDEFINED)
+	{
 		os << "\t\t-horizontal_dispersivity  " << (*property_ptr);
 	}
 	property_ptr = static_cast<Cproperty*>(a.alpha_vertical);
-	if (property_ptr && property_ptr->type != UNDEFINED) {
+	if (property_ptr && property_ptr->type != PROP_UNDEFINED)
+	{
 		os << "\t\t-vertical_dispersivity    " << (*property_ptr);
+	}
+	if (a.shell)
+	{
+		os << "\t\t-shell " << a.shell_width[0] << " " <<  a.shell_width[1] << " " << a.shell_width[2] << "\n";
 	}
 	return os;
 }
@@ -397,7 +442,7 @@ std::ostream& operator<< (std::ostream &os, const CGridElt &a)
 void CGridElt::Serialize(CArchive& ar)
 {
 	static const char szCGridElt[] = "CGridElt";
-	static int version = 2;
+	static int version = 3;
 
 	CString type;
 	int ver = version;
@@ -442,6 +487,25 @@ void CGridElt::Serialize(CArchive& ar)
 	else if(ver == 2)
 	{
 		CGlobal::Serialize(&(this->polyh), ar);
+	}
+	else if(ver == 3)
+	{
+		CGlobal::Serialize(&(this->polyh), ar);
+
+		if (ar.IsStoring())
+		{
+			ar << this->shell;
+			ar << this->shell_width[0];
+			ar << this->shell_width[1];
+			ar << this->shell_width[2];
+		}
+		else
+		{
+			ar >> this->shell;
+			ar >> this->shell_width[0];
+			ar >> this->shell_width[1];
+			ar >> this->shell_width[2];
+		}
 	}
 	else
 	{
@@ -493,23 +557,10 @@ void CGridElt::Serialize(CArchive& ar)
 	}
 }
 
-#define COMPARE_PROPERTY_MACRO(P) \
-	do { \
-		if (this->P) { \
-			if (rhs.P) { \
-				if (*this->P != *rhs.P) return false; \
-			} else { \
-				if (this->P->type != UNDEFINED) return false; \
-			} \
-		} else { \
-			if (rhs.P && rhs.P->type != UNDEFINED) return false; \
-		} \
-	} while(0)
-
 bool CGridElt::operator==(const grid_elt& rhs)const
 {
 	size_t s = sizeof(grid_elt);
-	ASSERT(sizeof(grid_elt) == 48); // need to modify if this changes
+	ASSERT(s == 80); // need to modify if this changes
 
 	COMPARE_PROPERTY_MACRO(mask);
 	COMPARE_PROPERTY_MACRO(active);
@@ -522,6 +573,11 @@ bool CGridElt::operator==(const grid_elt& rhs)const
 	COMPARE_PROPERTY_MACRO(alpha_trans);
 	COMPARE_PROPERTY_MACRO(alpha_horizontal);
 	COMPARE_PROPERTY_MACRO(alpha_vertical);
+
+	if (this->shell          != rhs.shell)          return false;
+	if (this->shell_width[0] != rhs.shell_width[0]) return false;
+	if (this->shell_width[1] != rhs.shell_width[1]) return false;
+	if (this->shell_width[2] != rhs.shell_width[2]) return false;
 
 	return true;
 }

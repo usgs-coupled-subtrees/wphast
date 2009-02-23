@@ -1,6 +1,8 @@
 #pragma once
 #include "ICZoneActor.h"
 
+class CWPhastDoc;
+
 class CICHeadZoneActor : public CICZoneActor
 {
 public:
@@ -22,7 +24,7 @@ public:
 
 	static void SetStaticColor(COLORREF cr);
 
-	void Serialize(bool bStoring, hid_t loc_id, const CUnits& units);
+	void Serialize(bool bStoring, hid_t loc_id, const CWPhastDoc* pDoc);
 
 protected:
 	CICHeadZoneActor(void);

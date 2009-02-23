@@ -102,26 +102,26 @@ void CRiverPointPropertyPage::DoDataExchange(CDataExchange* pDX)
 	//
 	if (pDX->m_bSaveAndValidate)
 	{
-		DDX_Text(pDX, IDC_X_EDIT, this->m_riverPt.x);
-		this->m_riverPt.x_defined = TRUE;
+		DDX_Text(pDX, IDC_X_EDIT, this->m_riverPt.x_user);
+		this->m_riverPt.x_user_defined = TRUE;
 	}
 	else
 	{
-		ASSERT(this->m_riverPt.x_defined);
-		DDX_Text(pDX, IDC_X_EDIT, this->m_riverPt.x);
+		ASSERT(this->m_riverPt.x_user_defined);
+		DDX_Text(pDX, IDC_X_EDIT, this->m_riverPt.x_user);
 	}
 
 	// Y
 	//
 	if (pDX->m_bSaveAndValidate)
 	{
-		DDX_Text(pDX, IDC_Y_EDIT, this->m_riverPt.y);
-		this->m_riverPt.y_defined = TRUE;
+		DDX_Text(pDX, IDC_Y_EDIT, this->m_riverPt.y_user);
+		this->m_riverPt.y_user_defined = TRUE;
 	}
 	else
 	{
-		ASSERT(this->m_riverPt.y_defined);
-		DDX_Text(pDX, IDC_Y_EDIT, this->m_riverPt.y);
+		ASSERT(this->m_riverPt.y_user_defined);
+		DDX_Text(pDX, IDC_Y_EDIT, this->m_riverPt.y_user);
 	}
 
 	// Depth
@@ -130,7 +130,7 @@ void CRiverPointPropertyPage::DoDataExchange(CDataExchange* pDX)
 	{
 		CString str;
 		DDX_Text(pDX, IDC_DEPTH_EDIT, str);
-		this->m_riverPt.depth_defined = FALSE;
+		this->m_riverPt.depth_user_defined = FALSE;
 		if (str.IsEmpty())
 		{
 			if (this->m_bFirstOrLastPoint)
@@ -141,15 +141,15 @@ void CRiverPointPropertyPage::DoDataExchange(CDataExchange* pDX)
 		}
 		else
 		{
-			DDX_Text(pDX, IDC_DEPTH_EDIT, this->m_riverPt.depth);
-			this->m_riverPt.depth_defined = TRUE;
+			DDX_Text(pDX, IDC_DEPTH_EDIT, this->m_riverPt.depth_user);
+			this->m_riverPt.depth_user_defined = TRUE;
 		}
 	}
 	else
 	{
-		if (this->m_riverPt.depth_defined)
+		if (this->m_riverPt.depth_user_defined)
 		{
-			DDX_Text(pDX, IDC_DEPTH_EDIT, this->m_riverPt.depth);
+			DDX_Text(pDX, IDC_DEPTH_EDIT, this->m_riverPt.depth_user);
 		}
 		else
 		{
@@ -198,7 +198,7 @@ void CRiverPointPropertyPage::DoDataExchange(CDataExchange* pDX)
 	{
 		CString str;
 		DDX_Text(pDX, IDC_WIDTH_EDIT, str);
-		this->m_riverPt.width_defined = FALSE;
+		this->m_riverPt.width_user_defined = FALSE;
 		if (str.IsEmpty())
 		{
 			if (this->m_bFirstOrLastPoint)
@@ -209,15 +209,15 @@ void CRiverPointPropertyPage::DoDataExchange(CDataExchange* pDX)
 		}
 		else
 		{
-			DDX_Text(pDX, IDC_WIDTH_EDIT, this->m_riverPt.width);
-			m_riverPt.width_defined = TRUE;
+			DDX_Text(pDX, IDC_WIDTH_EDIT, this->m_riverPt.width_user);
+			m_riverPt.width_user_defined = TRUE;
 		}
 	}
 	else
 	{
-		if (m_riverPt.width_defined)
+		if (m_riverPt.width_user_defined)
 		{
-			DDX_Text(pDX, IDC_WIDTH_EDIT, this->m_riverPt.width);
+			DDX_Text(pDX, IDC_WIDTH_EDIT, this->m_riverPt.width_user);
 		}
 		else
 		{
@@ -344,16 +344,16 @@ void CRiverPointPropertyPage::DoDataExchange(CDataExchange* pDX)
 			this->m_wndScheduleGrid.SetItem(&Item);
 
 			// start time units
-			if ((*iter).first.type == UNDEFINED)
+			if ((*iter).first.type == TT_UNDEFINED)
 			{
 				ASSERT(this->m_units.time.input && ::strlen(this->m_units.time.input));
 				Item.strText = CGlobal::GetStdTimeUnits(this->m_units.time.input).c_str();
 			}
-			else if ((*iter).first.type == STEP)
+			else if ((*iter).first.type == TT_STEP)
 			{
 				ASSERT(FALSE);
 			}
-			else if ((*iter).first.type == UNITS)
+			else if ((*iter).first.type == TT_UNITS)
 			{
 				ASSERT((*iter).first.input && ::strlen((*iter).first.input));
 				if ((*iter).first.input)

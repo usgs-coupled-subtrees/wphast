@@ -63,20 +63,18 @@ private :
 	mutable std::istream* pis;
 };
 
-//}}
-
 class CXMLSerializer
 {
 public:
 	CXMLSerializer(void);
 	~CXMLSerializer(void);
 	
-	const char* writeDOM(CWPhastDoc* doc, const char* prefix);
+	const char* writeDOM(CWPhastDoc* doc, const char* prefix, LPCTSTR lpszPathName);
 	
 	int load(std::istream& is, CNewModel& model);
 
 protected:
-	void AddCommentNode(xercesc_2_7::DOMDocument* doc, CWPhastDoc* wphastDoc);
+	void AddCommentNode(xercesc_2_7::DOMDocument* doc, CWPhastDoc* wphastDoc, LPCTSTR lpszPathName);
 	int AddSiteMapNode(CMapActor* actor, const char* prefix, xercesc_2_7::DOMElement* element);
 	void AddSiteMapNode(xercesc_2_7::DOMDocument* doc, CWPhastDoc* wphastDoc, const char* prefix);
 

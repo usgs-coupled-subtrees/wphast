@@ -24,17 +24,22 @@ CGridKeyword::CGridKeyword(void)
 	this->m_grid[0].c = 'x';
 	this->m_grid[1].c = 'y';
 	this->m_grid[2].c = 'z';
+
+	this->m_grid_origin[0] = this->m_grid_origin[1] = this->m_grid_origin[2] = 0.0;
+	this->m_grid_angle = 0.0;
 }
 
-CGridKeyword::CGridKeyword(struct grid arrGrid[3], double snap[3], int axes[3], int print_input_xy)
+CGridKeyword::CGridKeyword(struct grid arrGrid[3], double snap[3], int axes[3], int print_input_xy, double grid_origin[3], double grid_angle)
 {
 	for (int i = 0; i < 3; ++i)
 	{	
-		this->m_grid[i] = arrGrid[i];
-		this->m_snap[i] = snap[i];
-		this->m_axes[i] = axes[i];
+		this->m_grid[i]        = arrGrid[i];
+		this->m_snap[i]        = snap[i];
+		this->m_axes[i]        = axes[i];
+		this->m_grid_origin[i] = grid_origin[i];
 	}
 	this->m_print_input_xy = (print_input_xy != 0);
+	this->m_grid_angle = grid_angle;
 }
 
 CGridKeyword::~CGridKeyword(void)
@@ -79,5 +84,12 @@ std::ostream& operator<< (std::ostream &os, const CGridKeyword &a)
 		os << "\t" << "-print_orientation XZ\n";
 	}
 
+	os << "\t" << "-grid_origin   "
+		<< a.m_grid_origin[0] << "  "
+		<< a.m_grid_origin[1] << "  "
+		<< a.m_grid_origin[2] << "\n";
+
+	os << "\t" << "-grid_angle    " << a.m_grid_angle << "\n";
+		
 	return os;
 }

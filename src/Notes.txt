@@ -4,7 +4,7 @@ forwarded to the dialog boxes or not.
 
 Also check how 3DSMAX handles invalid data in dialog bars
 
-Use the following regexp to retrieve control ids from RC file
+Use the following regexp to retrieve control ids from RC file (resource.h)
 Search:
 ^.*\(IDC_[^,]*\),.*$
 Replace:
@@ -27,9 +27,20 @@ to
 #define IDC_EDIT_XP1                    1158
 #define IDC_SPIN_XP1                    1159
 
-Search:
+
+Search: (Using Textpad)
 ^\(.* \)[[:digit:]]+$
 
 Replace:
 \1\i(1156)
 
+ie to change
+#define IDC_STATIC_P1_GB                1155
+#define IDC_STATIC_XP1                  1156
+#define IDC_EDIT_XP1                    1157
+#define IDC_SPIN_XP1                    1158
+to
+#define IDC_STATIC_P1_GB                1156
+#define IDC_STATIC_XP1                  1157
+#define IDC_EDIT_XP1                    1158
+#define IDC_SPIN_XP1                    1159

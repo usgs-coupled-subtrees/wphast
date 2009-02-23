@@ -36,7 +36,17 @@ END_MESSAGE_MAP()
 static UINT indicators[] =
 {
 	ID_SEPARATOR,           // status line indicator
-	ID_INDICATOR_XYZ,
+// COMMENT: {11/26/2008 3:24:58 PM}	ID_INDICATOR_XYZ,
+//{{
+// "Grid: %6.2f %s, %6.2f %s, %6.2f %s"
+// "Grid: XXXXXX.XX feet, XXXXXX.XX feet, XXXXXX.XX feet"
+// "Grid:                                               "
+	ID_INDICATOR_SPACE,     // 
+	ID_INDICATOR_GRID,      // grid units "Grid: %6.2f %s, %6.2f %s, %6.2f %s"
+	ID_INDICATOR_MAP,       // map units "Map: %6.2f %s, %6.2f %s, %6.2f %s"
+// COMMENT: {12/23/2008 6:05:20 PM}	ID_SEPARATOR,           // grid units "Grid: %6.2f %s, %6.2f %s, %6.2f %s"
+// COMMENT: {12/23/2008 6:05:20 PM}	ID_SEPARATOR,           // map units
+//}}
 	//ID_INDICATOR_CAPS,
 	//ID_INDICATOR_NUM,
 	//ID_INDICATOR_SCRL,
@@ -149,6 +159,11 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	{
 		TRACE0("Failed to create status bar\n");
 		return -1;      // fail to create
+	}
+	// clear status bar
+	for (int i = 1; i <= 3; ++i)
+	{
+		m_wndStatusBar.SetPaneText(i, "");
 	}
 
 	// TreeCtrl Bar
@@ -283,12 +298,33 @@ BOOL CMainFrame::DestroyWindow()
 	return CFrameWnd::DestroyWindow();
 }
 
-void CMainFrame::UpdateXYZ(float x, float y, float z, const char* xy_units, const char* z_units)
+void CMainFrame::UpdateGrid(float x, float y, float z, const char* xy_units, const char* z_units)
 {
 	TCHAR buffer[80];
-	::_sntprintf(buffer, 80, _T("%6.2f %s, %6.2f %s, %6.2f %s"), x, xy_units, y, xy_units, z, z_units);
+	::_sntprintf(buffer, 80, _T("Grid: %6.2f %s, %6.2f %s, %6.2f %s"), x, xy_units, y, xy_units, z, z_units);
 	if (::_tcsstr(buffer, _T("#")) == NULL)
-		m_wndStatusBar.SetPaneText(1, buffer);
+	{
+		m_wndStatusBar.SetPaneText(2, buffer);
+	}
+	this->UpdateMap(x, y, z, xy_units, z_units);
+#ifdef _DEBUG
+	/*
+	int depth = afxDump.GetDepth();
+	afxDump.SetDepth(1);
+	afxDump << this->m_wndStatusBar;
+	afxDump.SetDepth(depth);
+	*/
+#endif
+}
+
+void CMainFrame::UpdateMap(float x, float y, float z, const char* xy_units, const char* z_units)
+{
+	TCHAR buffer[80];
+	::_sntprintf(buffer, 80, _T("Map: %6.2f %s, %6.2f %s, %6.2f %s"), x, xy_units, y, xy_units, z, z_units);
+	if (::_tcsstr(buffer, _T("#")) == NULL)
+	{
+		m_wndStatusBar.SetPaneText(3, buffer);
+	}
 }
 
 #if !defined(_USE_DEFAULT_MENUS_)

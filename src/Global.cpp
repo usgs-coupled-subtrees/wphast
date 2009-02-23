@@ -685,11 +685,11 @@ void CGlobal::DDX_Property(CDataExchange* pDX, CCheckTreeCtrl* pTree, HTREEITEM 
 		//
 		if (pDX->m_pDlgWnd->IsDlgButtonChecked(IDC_SINGLE_VALUE_RADIO))
 		{
-			value->type = FIXED;
+			value->type = PROP_FIXED;
 		}
 		else if (pDX->m_pDlgWnd->IsDlgButtonChecked(IDC_LINEAR_INTERPOLATION_RADIO))
 		{
-			value->type = LINEAR;
+			value->type = PROP_LINEAR;
 		}
 		else
 		{
@@ -703,20 +703,20 @@ void CGlobal::DDX_Property(CDataExchange* pDX, CCheckTreeCtrl* pTree, HTREEITEM 
 			// save last type
 			//
 			pTree->SetItemData(hti, value->type);
-			value->type = UNDEFINED;
+			value->type = PROP_UNDEFINED;
 			return; // nothing else to do
 		}
 
 		// validate single
 		//
-		if (value->type == FIXED)
+		if (value->type == PROP_FIXED)
 		{
 			DDX_Text(pDX, IDC_SINGLE_VALUE_EDIT, value->v[0]);
 		}
 
 		// validate linear
 		//
-		if (value->type == LINEAR)
+		if (value->type == PROP_LINEAR)
 		{
 			int nDirection = pDX->m_pDlgWnd->GetCheckedRadioButton(IDC_X_RADIO, IDC_Z_RADIO);
 			value->coord = 'x';
@@ -743,12 +743,12 @@ void CGlobal::DDX_Property(CDataExchange* pDX, CCheckTreeCtrl* pTree, HTREEITEM 
 		}
 
 		// all ok so copy
-		if (value->type == FIXED)
+		if (value->type == PROP_FIXED)
 		{
 			value->count_v = 1;
 			(*fixed) = (*value);
 		}
-		else if (value->type == LINEAR)
+		else if (value->type == PROP_LINEAR)
 		{
 			value->count_v = 2;
 			(*linear) = (*value);
@@ -761,7 +761,7 @@ void CGlobal::DDX_Property(CDataExchange* pDX, CCheckTreeCtrl* pTree, HTREEITEM 
 	{
 		// fixed
 		//
-		if (fixed->type == FIXED)
+		if (fixed->type == PROP_FIXED)
 		{
 			DDX_Text(pDX, IDC_SINGLE_VALUE_EDIT, fixed->v[0]);
 		}
@@ -773,7 +773,7 @@ void CGlobal::DDX_Property(CDataExchange* pDX, CCheckTreeCtrl* pTree, HTREEITEM 
 
 		// linear
 		//
-		if (linear->type == LINEAR)
+		if (linear->type == PROP_LINEAR)
 		{
 			// set direction
 			//
@@ -814,38 +814,38 @@ void CGlobal::DDX_Property(CDataExchange* pDX, CCheckTreeCtrl* pTree, HTREEITEM 
 			DDX_Text(pDX, IDC_DISTANCE2_EDIT, strEmpty);
 		}
 
-		int type = value->type;
-		switch (type)
+// COMMENT: {8/13/2008 9:37:00 PM}		int type = value->type;
+		switch (value->type)
 		{
-		case UNDEFINED:
+		case PROP_UNDEFINED:
 			switch (pTree->GetItemData(hti))
 			{
-				case FIXED:
+				case PROP_FIXED:
 					// check fixed value radio button
 					pDX->m_pDlgWnd->CheckRadioButton(IDC_SINGLE_VALUE_RADIO, IDC_LINEAR_INTERPOLATION_RADIO, IDC_SINGLE_VALUE_RADIO);
-					type = FIXED;
+// COMMENT: {8/13/2008 9:44:07 PM}					type = PROP_FIXED;
 					break;
 
-				case LINEAR:
+				case PROP_LINEAR:
 					// check linear radio button
 					pDX->m_pDlgWnd->CheckRadioButton(IDC_SINGLE_VALUE_RADIO, IDC_LINEAR_INTERPOLATION_RADIO, IDC_LINEAR_INTERPOLATION_RADIO);
-					type = LINEAR;
+// COMMENT: {8/13/2008 9:44:11 PM}					type = PROP_LINEAR;
 					break;
 
 				default:
 					// check fixed value radio button as default
 					pDX->m_pDlgWnd->CheckRadioButton(IDC_SINGLE_VALUE_RADIO, IDC_LINEAR_INTERPOLATION_RADIO, IDC_SINGLE_VALUE_RADIO);
-					type = FIXED;
+// COMMENT: {8/13/2008 9:44:15 PM}					type = PROP_FIXED;
 					break;
 			}
 			break;
 
-		case FIXED:
+		case PROP_FIXED:
 			// check fixed value radio button
 			pDX->m_pDlgWnd->CheckRadioButton(IDC_SINGLE_VALUE_RADIO, IDC_LINEAR_INTERPOLATION_RADIO, IDC_SINGLE_VALUE_RADIO);
 			break;
 
-		case LINEAR:
+		case PROP_LINEAR:
 			// check linear radio button
 			pDX->m_pDlgWnd->CheckRadioButton(IDC_SINGLE_VALUE_RADIO, IDC_LINEAR_INTERPOLATION_RADIO, IDC_LINEAR_INTERPOLATION_RADIO);
 			break;
@@ -861,13 +861,13 @@ void CGlobal::DDX_Property(CDataExchange* pDX, CCheckTreeCtrl* pTree, HTREEITEM 
 			pDX->m_pDlgWnd->GetDlgItem(IDC_SINGLE_VALUE_RADIO)->EnableWindow(TRUE);
 			pDX->m_pDlgWnd->GetDlgItem(IDC_LINEAR_INTERPOLATION_RADIO)->EnableWindow(TRUE);
 
-			switch (type)
+			switch (value->type)
 			{
-				case FIXED:
+				case PROP_FIXED:
 					CGlobal::EnableFixed(pDX->m_pDlgWnd, TRUE);
 					CGlobal::EnableLinearInterpolation(pDX->m_pDlgWnd, FALSE);
 					break;
-				case LINEAR:
+				case PROP_LINEAR:
 					CGlobal::EnableFixed(pDX->m_pDlgWnd, FALSE);
 					CGlobal::EnableLinearInterpolation(pDX->m_pDlgWnd, TRUE);
 					break;
@@ -934,14 +934,14 @@ void CGlobal::DDX_AssocFixed(CDataExchange* pDX, CTreeCtrl* pTree, HTREEITEM hti
 		switch (pDX->m_pDlgWnd->GetCheckedRadioButton(IDC_ASSOC_RADIO, IDC_FIXED_RADIO))
 		{
 			case IDC_ASSOC_RADIO:
-				value.bc_solution_type = ASSOCIATED;
+				value.bc_solution_type = ST_ASSOCIATED;
 				break;
 			case IDC_FIXED_RADIO:
-				value.bc_solution_type = FIXED;
+				value.bc_solution_type = ST_FIXED;
 				break;
 			default:
 				ASSERT(FALSE);
-				value.bc_solution_type = ASSOCIATED;
+				value.bc_solution_type = ST_ASSOCIATED;
 				break;
 		}
 	}
@@ -949,11 +949,11 @@ void CGlobal::DDX_AssocFixed(CDataExchange* pDX, CTreeCtrl* pTree, HTREEITEM hti
 	{
 		// check radio button
 		//
-		if (value.bc_solution_type == ASSOCIATED)
+		if (value.bc_solution_type == ST_ASSOCIATED)
 		{
 			pDX->m_pDlgWnd->CheckRadioButton(IDC_ASSOC_RADIO, IDC_FIXED_RADIO, IDC_ASSOC_RADIO);
 		}
-		else if (value.bc_solution_type == FIXED)
+		else if (value.bc_solution_type == ST_FIXED)
 		{
 			pDX->m_pDlgWnd->CheckRadioButton(IDC_ASSOC_RADIO, IDC_FIXED_RADIO, IDC_FIXED_RADIO);
 		}
@@ -1201,7 +1201,7 @@ int CGlobal::AddTimeUnits(CComboBox* pCombo)
 std::string CGlobal::GetStdTimeUnits(const char* sz_unit)
 {
 	cunit std("s");
-	static CUnits units_usr;
+	/*static*/ CUnits units_usr;
 
 	VERIFY(units_usr.time.set_input(sz_unit) == OK);
 	for (size_t i = 0; i < sizeof(s_time_units) / sizeof(s_time_units[0]); ++i)
@@ -1594,7 +1594,7 @@ void CGlobal::DDX_GridTimeSeries(CDataExchange* pDX, int nIDC, CTimeSeries<Cprop
 			double d;
 			::DDX_TextGridControl(pDX, nIDC, iRow, 0, d);
 			Ctime t;
-			t.type = UNITS;
+			t.type = TT_UNITS;
 			t.SetValue(d);
 
 			// time units
@@ -1625,7 +1625,7 @@ void CGlobal::DDX_GridTimeSeries(CDataExchange* pDX, int nIDC, CTimeSeries<Cprop
 				//
 				::DDX_TextGridControl(pDX, nIDC, iRow, 2, p.v[0]);
 
-				p.type    = FIXED;
+				p.type    = PROP_FIXED;
 				p.count_v = 1;
 				ts[t] = p;
 			}
@@ -1691,7 +1691,7 @@ void CGlobal::DDX_GridTimeSeries(CDataExchange* pDX, int nIDC, CTimeSeries<Cprop
 				//
 				::DDX_TextGridControl(pDX, nIDC, iRow, 8, p.dist2);
 
-				p.type    = LINEAR;
+				p.type    = PROP_LINEAR;
 				p.count_v = 2;
 				ts[t] = p;
 			}
@@ -1716,12 +1716,12 @@ void CGlobal::DDX_GridTimeSeries(CDataExchange* pDX, int nIDC, CTimeSeries<Cprop
 				::DDX_TextGridControl(pDX, nIDC, nRow, 1, str);
 			}
 
-			if (iter->second.type == FIXED)
+			if (iter->second.type == PROP_FIXED)
 			{
 				ASSERT(iter->second.count_v == 1);
 				::DDX_TextGridControl(pDX, nIDC, nRow, 2, iter->second.v[0]);
 			}
-			else if (iter->second.type == LINEAR)
+			else if (iter->second.type == PROP_LINEAR)
 			{
 				ASSERT(iter->second.count_v == 2);
 
@@ -1781,7 +1781,7 @@ void CGlobal::DDX_Property(CDataExchange* pDX, int nIDC, int nRow, struct proper
 	if (pDX->m_bSaveAndValidate)
 	{
 		// assume failure
-		pProperty->type = UNDEFINED;
+		pProperty->type = PROP_UNDEFINED;
 
 		Cproperty p;
 
@@ -1807,7 +1807,7 @@ void CGlobal::DDX_Property(CDataExchange* pDX, int nIDC, int nRow, struct proper
 			//
 			::DDX_TextGridControl(pDX, nIDC, nRow, COL_VALUE, p.v[0]);
 
-			p.type    = FIXED;
+			p.type    = PROP_FIXED;
 			p.count_v = 1;
 		}
 		else
@@ -1862,7 +1862,7 @@ void CGlobal::DDX_Property(CDataExchange* pDX, int nIDC, int nRow, struct proper
 			//
 			::DDX_TextGridControl(pDX, nIDC, nRow, COL_DISTANCE_2, p.dist2);
 
-			p.type    = LINEAR;
+			p.type    = PROP_LINEAR;
 			p.count_v = 2;
 		}
 		// (*pProperty) = p;
@@ -1870,7 +1870,7 @@ void CGlobal::DDX_Property(CDataExchange* pDX, int nIDC, int nRow, struct proper
 	}
 	else
 	{
-		if (pProperty->type == FIXED)
+		if (pProperty->type == PROP_FIXED)
 		{
 			// value
 			//
@@ -1890,7 +1890,7 @@ void CGlobal::DDX_Property(CDataExchange* pDX, int nIDC, int nRow, struct proper
 			pGrid->DisableCell(nRow, COL_VALUE_2);
 			pGrid->DisableCell(nRow, COL_DISTANCE_2);
 		}
-		else if (pProperty->type == LINEAR)
+		else if (pProperty->type == PROP_LINEAR)
 		{
 			ASSERT(pProperty->count_v == 2);
 
@@ -1929,7 +1929,7 @@ void CGlobal::DDX_Property(CDataExchange* pDX, int nIDC, int nRow, struct proper
 			//
 			::DDX_TextGridControl(pDX, nIDC, nRow, COL_DISTANCE_2, pProperty->dist2);
 		}
-		else if (pProperty->type == UNDEFINED)
+		else if (pProperty->type == PROP_UNDEFINED)
 		{
 			// value
 			//
@@ -2150,12 +2150,23 @@ void CGlobal::Serialize(Polyhedron **p, CArchive &ar)
 	}
 
 	int t;
+	int ncs;
 	if (ar.IsStoring())
 	{
 		ASSERT(*p && ::AfxIsValidAddress(*p, sizeof(Polyhedron *)));
 
 		t = (*p)->get_type();
 		ar << t;
+
+		if (Cube *c = dynamic_cast<Cube*>(*p))
+		{
+			ncs = c->Get_user_coordinate_system();
+			ar << ncs;
+		}
+		else
+		{
+			ASSERT(FALSE);
+		}
 
 		CZone z(*(*p)->Get_bounding_box());
 		z.Serialize(ar);
@@ -2174,6 +2185,9 @@ void CGlobal::Serialize(Polyhedron **p, CArchive &ar)
 
 		ar >> t;
 
+		ar >> ncs;
+		PHAST_Transform::COORDINATE_SYSTEM cs = static_cast<PHAST_Transform::COORDINATE_SYSTEM>(ncs);
+
 		CZone z;
 		z.Serialize(ar);
 
@@ -2186,10 +2200,10 @@ void CGlobal::Serialize(Polyhedron **p, CArchive &ar)
 		switch (t)
 		{
 		case Polyhedron::CUBE:
-			(*p) = new Cube(&z);
+			(*p) = new Cube(&z, cs);
 			break;
 		case Polyhedron::WEDGE:
-			(*p) = new Wedge(&z, std::string(c));
+			(*p) = new Wedge(&z, std::string(c), cs);
 			break;
 		}
 	}
@@ -2452,7 +2466,8 @@ herr_t CGlobal::HDFSerializePolyData(bool bStoring, hid_t loc_id, const char* sz
 		if (group_id > 0)
 		{
 			// points
-			vtkPoints *points = vtkPoints::New();
+// COMMENT: {11/24/2008 11:30:45 PM}			vtkPoints *points = vtkPoints::New();
+			vtkPoints *points = 0;
 			HDFSerializePoints(bStoring, group_id, points);
 			pPolyData->SetPoints(points);
 			points->Delete();
@@ -2547,7 +2562,7 @@ herr_t CGlobal::HDFSerializePoints(bool bStoring, hid_t loc_id, vtkPoints *&pPoi
 	}
 	else
 	{
-		ASSERT(pPoints != 0);
+		ASSERT(pPoints == 0);
 
 		group_id = ::H5Gopen(loc_id, szPoints);
 		ASSERT(group_id >= 0);
@@ -2583,6 +2598,8 @@ herr_t CGlobal::HDFSerializePoints(bool bStoring, hid_t loc_id, vtkPoints *&pPoi
 			}
 			if (mem_type_id == H5T_NATIVE_FLOAT)
 			{
+				pPoints = vtkPoints::New();
+				ASSERT(pPoints->GetData()->GetDataType() == VTK_FLOAT);
 				hsize_t size = HDFGetSize(group_id, szData, H5T_NATIVE_FLOAT);
 				ASSERT(pPoints->GetData()->GetNumberOfComponents() == 3);
 				int npts = size/pPoints->GetData()->GetNumberOfComponents();
@@ -2591,6 +2608,8 @@ herr_t CGlobal::HDFSerializePoints(bool bStoring, hid_t loc_id, vtkPoints *&pPoi
 			}
 			else if (mem_type_id == H5T_NATIVE_DOUBLE)
 			{
+				pPoints = vtkPoints::New(VTK_DOUBLE);
+				ASSERT(pPoints->GetData()->GetDataType() == VTK_DOUBLE);
 				hsize_t size = HDFGetSize(group_id, szData, H5T_NATIVE_DOUBLE);
 				ASSERT(pPoints->GetData()->GetNumberOfComponents() == 3);
 				int npts = size/pPoints->GetData()->GetNumberOfComponents();
@@ -2664,7 +2683,10 @@ herr_t CGlobal::HDFSerializeCells(bool bStoring, hid_t loc_id, const char* szNam
 		if (group_id > 0)
 		{
 			vtkIdTypeArray *cellPoints = vtkIdTypeArray::New();
+			ASSERT(cellPoints);
+
 			vtkIdTypeArray *cellOffsets = vtkIdTypeArray::New();
+			ASSERT(cellOffsets);
 
 			hsize_t sizec = HDFGetSize(group_id, szConnectivity, H5T_NATIVE_INT);
 			cellPoints->SetNumberOfTuples(sizec);
@@ -2828,26 +2850,26 @@ herr_t CGlobal::HDFSerializePrism(bool bStoring, hid_t loc_id, Prism &rPrism)
 			CGlobal::HDFSerializeData_source(bStoring, group_id, szTop, rPrism.top);
 			CGlobal::HDFSerializeData_source(bStoring, group_id, szBottom, rPrism.bottom);
 
-			// perimeter_option
-			CGlobal::HDFSerializePerimeterOption(bStoring, group_id, rPrism.perimeter_option);
+// COMMENT: {10/21/2008 3:23:05 PM}			// perimeter_option
+// COMMENT: {10/21/2008 3:23:05 PM}			CGlobal::HDFSerializePerimeterOption(bStoring, group_id, rPrism.perimeter_option);
 
-			switch(rPrism.perimeter_option)
-			{
-			case Prism::CONSTANT:
-				CGlobal::HDFSerialize(bStoring, group_id, szOrig_perimeter_datum, H5T_NATIVE_DOUBLE, 1, &rPrism.orig_perimeter_datum);
-				break;
-			case Prism::ATTRIBUTE:
-				// do nothing
-				break;
-			case Prism::USE_Z:
-				// do nothing
-				break;
-			case Prism::DEFAULT:
-				// do nothing
-				break;
-			default:
-				ASSERT(FALSE);
-			}
+// COMMENT: {10/21/2008 3:23:19 PM}			switch(rPrism.perimeter_option)
+// COMMENT: {10/21/2008 3:23:19 PM}			{
+// COMMENT: {10/21/2008 3:23:19 PM}			case Prism::CONSTANT:
+// COMMENT: {10/21/2008 3:23:19 PM}				CGlobal::HDFSerialize(bStoring, group_id, szOrig_perimeter_datum, H5T_NATIVE_DOUBLE, 1, &rPrism.orig_perimeter_datum);
+// COMMENT: {10/21/2008 3:23:19 PM}				break;
+// COMMENT: {10/21/2008 3:23:19 PM}			case Prism::ATTRIBUTE:
+// COMMENT: {10/21/2008 3:23:19 PM}				// do nothing
+// COMMENT: {10/21/2008 3:23:19 PM}				break;
+// COMMENT: {10/21/2008 3:23:19 PM}			case Prism::USE_Z:
+// COMMENT: {10/21/2008 3:23:19 PM}				// do nothing
+// COMMENT: {10/21/2008 3:23:19 PM}				break;
+// COMMENT: {10/21/2008 3:23:19 PM}			case Prism::DEFAULT:
+// COMMENT: {10/21/2008 3:23:19 PM}				// do nothing
+// COMMENT: {10/21/2008 3:23:19 PM}				break;
+// COMMENT: {10/21/2008 3:23:19 PM}			default:
+// COMMENT: {10/21/2008 3:23:19 PM}				ASSERT(FALSE);
+// COMMENT: {10/21/2008 3:23:19 PM}			}
 
 			return_val = H5Gclose(group_id);
 			ASSERT(return_val >= 0);
@@ -2874,26 +2896,26 @@ herr_t CGlobal::HDFSerializePrism(bool bStoring, hid_t loc_id, Prism &rPrism)
 			CGlobal::HDFSerializeData_source(bStoring, group_id, szTop, rPrism.top);
 			CGlobal::HDFSerializeData_source(bStoring, group_id, szBottom, rPrism.bottom);
 
-			// perimeter_option
-			CGlobal::HDFSerializePerimeterOption(bStoring, group_id, rPrism.perimeter_option);
-
-			switch(rPrism.perimeter_option)
-			{
-			case Prism::CONSTANT:
-				CGlobal::HDFSerialize(bStoring, group_id, szOrig_perimeter_datum, H5T_NATIVE_DOUBLE, 1, &rPrism.orig_perimeter_datum);
-				break;
-			case Prism::ATTRIBUTE:
-				// do nothing
-				break;
-			case Prism::USE_Z:
-				// do nothing
-				break;
-			case Prism::DEFAULT:
-				// do nothing
-				break;
-			default:
-				ASSERT(FALSE);
-			}
+// COMMENT: {10/21/2008 3:23:28 PM}			// perimeter_option
+// COMMENT: {10/21/2008 3:23:28 PM}			CGlobal::HDFSerializePerimeterOption(bStoring, group_id, rPrism.perimeter_option);
+// COMMENT: {10/21/2008 3:23:28 PM}
+// COMMENT: {10/21/2008 3:23:28 PM}			switch(rPrism.perimeter_option)
+// COMMENT: {10/21/2008 3:23:28 PM}			{
+// COMMENT: {10/21/2008 3:23:28 PM}			case Prism::CONSTANT:
+// COMMENT: {10/21/2008 3:23:28 PM}				CGlobal::HDFSerialize(bStoring, group_id, szOrig_perimeter_datum, H5T_NATIVE_DOUBLE, 1, &rPrism.orig_perimeter_datum);
+// COMMENT: {10/21/2008 3:23:28 PM}				break;
+// COMMENT: {10/21/2008 3:23:28 PM}			case Prism::ATTRIBUTE:
+// COMMENT: {10/21/2008 3:23:28 PM}				// do nothing
+// COMMENT: {10/21/2008 3:23:28 PM}				break;
+// COMMENT: {10/21/2008 3:23:28 PM}			case Prism::USE_Z:
+// COMMENT: {10/21/2008 3:23:28 PM}				// do nothing
+// COMMENT: {10/21/2008 3:23:28 PM}				break;
+// COMMENT: {10/21/2008 3:23:28 PM}			case Prism::DEFAULT:
+// COMMENT: {10/21/2008 3:23:28 PM}				// do nothing
+// COMMENT: {10/21/2008 3:23:28 PM}				break;
+// COMMENT: {10/21/2008 3:23:28 PM}			default:
+// COMMENT: {10/21/2008 3:23:28 PM}				ASSERT(FALSE);
+// COMMENT: {10/21/2008 3:23:28 PM}			}
 
 			return_val = H5Gclose(group_id);
 			ASSERT(return_val >= 0);
@@ -2910,7 +2932,6 @@ herr_t CGlobal::HDFSerializeData_source(bool bStoring, hid_t loc_id, const char*
 	static const char szfile_name[]   = "file_name";
 	static const char szPoints[]      = "Points";
 	static const char szAttribute[]   = "attribute";
-	
 
 	/*
 	<polyh>
@@ -2920,6 +2941,8 @@ herr_t CGlobal::HDFSerializeData_source(bool bStoring, hid_t loc_id, const char*
 					<type>Data_source::DATA_SOURCE_TYPE</type>
 					<box/>
 					<file_name>std::string</file_name>
+					<coordinate_system>PHAST_Transform::COORDINATE_SYSTEM</coordinate_system>
+					<coordinate_system_user>PHAST_Transform::COORDINATE_SYSTEM</coordinate_system_user>
 				</Data_source>
 			</szName>
 		</Prism>
@@ -3021,6 +3044,16 @@ herr_t CGlobal::HDFSerializeData_source(bool bStoring, hid_t loc_id, const char*
 				return_val = CGlobal::HDFSerialize(bStoring, ds_gr_id, szBox, H5T_NATIVE_DOUBLE, 6, xyz);
 				ASSERT(return_val >= 0);
 
+				// coor_sys_type
+				PHAST_Transform::COORDINATE_SYSTEM nValue = rData_source.Get_coordinate_system();
+				return_val = CGlobal::HDFSerializeCoordinateSystem(bStoring, ds_gr_id, nValue);
+				ASSERT(return_val >= 0);
+
+				// coor_sys_type
+				nValue = rData_source.Get_user_coordinate_system();
+				return_val = CGlobal::HDFSerializeCoordinateSystemUser(bStoring, ds_gr_id, nValue);
+				ASSERT(return_val >= 0);
+
 				return_val = H5Gclose(ds_gr_id);
 				ASSERT(return_val >= 0);
 			}
@@ -3114,11 +3147,14 @@ herr_t CGlobal::HDFSerializeData_source(bool bStoring, hid_t loc_id, const char*
 					default:
 						ASSERT(FALSE);
 					}
+
+					rData_source.Set_defined(true);
+
 					status = H5Tclose(sourcetype);
 					ASSERT(status >= 0);
 				}
+
 				// box
-				//
 				return_val = CGlobal::HDFSerialize(bStoring, ds_gr_id, szBox, H5T_NATIVE_DOUBLE, 6, xyz);
 				ASSERT(return_val >= 0);
 				struct zone* pzone = rData_source.Get_bounding_box();
@@ -3130,8 +3166,17 @@ herr_t CGlobal::HDFSerializeData_source(bool bStoring, hid_t loc_id, const char*
 				pzone->y2 = xyz[4];
 				pzone->z2 = xyz[5];
 
+				// coor_sys_type
+				PHAST_Transform::COORDINATE_SYSTEM nValue;
+				status = CGlobal::HDFSerializeCoordinateSystem(bStoring, ds_gr_id, nValue);
+				rData_source.Set_coordinate_system(nValue);
+
+				status = CGlobal::HDFSerializeCoordinateSystemUser(bStoring, ds_gr_id, nValue);
+				rData_source.Set_user_coordinate_system(nValue);
+
 				return_val = H5Gclose(ds_gr_id);
 				ASSERT(return_val >= 0);
+
 			}
 			return_val = H5Gclose(group_id);
 			ASSERT(return_val >= 0);
@@ -3289,53 +3334,156 @@ hid_t CGlobal::HDFCreateDataSourceType(void)
 	return enum_datatype;
 }
 
-herr_t CGlobal::HDFSerializePerimeterOption(bool bStoring, hid_t loc_id, Prism::PERIMETER_OPTION &perimeter_option)
-{
-	static const char szPerimeterOption[] = "perimeter_option";
-	
-	herr_t status = -1;
-
-	// source_type
-	hid_t po_type = CGlobal::HDFCreatePerimeterOptionType();
-	if (po_type > 0)
-	{
-		status = CGlobal::HDFSerialize(bStoring, loc_id, szPerimeterOption, po_type, 1, &perimeter_option);
-	}
-	return status;
-}
-
-hid_t CGlobal::HDFCreatePerimeterOptionType(void)
+hid_t CGlobal::HDFCreateCoordinateSystemType(void)
 {
 	herr_t status;
 
 	// Create the datatype
-	hid_t enum_datatype = H5Tcreate(H5T_ENUM, sizeof(Prism::PERIMETER_OPTION));
+	hid_t enum_datatype = H5Tcreate(H5T_ENUM, sizeof(PHAST_Transform::COORDINATE_SYSTEM));
 	ASSERT(enum_datatype > 0);
 
-	Prism::PERIMETER_OPTION nValue;
+	PHAST_Transform::COORDINATE_SYSTEM nValue;
 
 	// Insert the enumerated data
-	nValue = Prism::CONSTANT;
-	status = H5Tenum_insert(enum_datatype, "CONSTANT", &nValue);
+	nValue = PHAST_Transform::MAP;
+	status = H5Tenum_insert(enum_datatype, "MAP", &nValue);
 	ASSERT(status >= 0);
 
 	// Insert the enumerated data
-	nValue = Prism::ATTRIBUTE;
-	status = H5Tenum_insert(enum_datatype, "ATTRIBUTE", &nValue);
+	nValue = PHAST_Transform::GRID;
+	status = H5Tenum_insert(enum_datatype, "GRID", &nValue);
 	ASSERT(status >= 0);
 
 	// Insert the enumerated data
-	nValue = Prism::USE_Z;
-	status = H5Tenum_insert(enum_datatype, "USE_Z", &nValue);
-	ASSERT(status >= 0);
-
-	// Insert the enumerated data
-	nValue = Prism::DEFAULT;
-	status = H5Tenum_insert(enum_datatype, "DEFAULT", &nValue);
+	nValue = PHAST_Transform::NONE;
+	status = H5Tenum_insert(enum_datatype, "NONE", &nValue);
 	ASSERT(status >= 0);
 
 	return enum_datatype;
 }
+
+herr_t CGlobal::HDFSerializeCoordinateSystem(bool bStoring, hid_t loc_id, PHAST_Transform::COORDINATE_SYSTEM &coor_sys)
+{
+	static const char szCoorSys[] = "coordinate_system";
+
+	herr_t status = -1;
+
+	// coor_sys_type
+	hid_t coor_sys_type = CGlobal::HDFCreateCoordinateSystemType();
+	if (coor_sys_type > 0)
+	{
+		if (!bStoring) coor_sys = PHAST_Transform::MAP;
+		status = CGlobal::HDFSerialize(bStoring, loc_id, szCoorSys, coor_sys_type, 1, &coor_sys);
+		ASSERT(!bStoring || status >= 0); // if storing assert status is valid
+
+		VERIFY(H5Tclose(coor_sys_type) >= 0);
+	}
+	return status;
+}
+
+herr_t CGlobal::HDFSerializeCoordinateSystemUser(bool bStoring, hid_t loc_id, PHAST_Transform::COORDINATE_SYSTEM &coor_sys_user)
+{
+	static const char szCoorSysUser[] = "coordinate_system_user";
+
+	herr_t status = -1;
+
+	// coor_sys_type
+	hid_t coor_sys_type = CGlobal::HDFCreateCoordinateSystemType();
+	if (coor_sys_type > 0)
+	{
+		status = CGlobal::HDFSerialize(bStoring, loc_id, szCoorSysUser, coor_sys_type, 1, &coor_sys_user);
+		ASSERT(!bStoring || status >= 0); // if storing assert status is valid
+
+		VERIFY(H5Tclose(coor_sys_type) >= 0);
+	}
+	return status;
+}
+
+herr_t CGlobal::HDFSerializeXYCoordinateSystem(bool bStoring, hid_t loc_id, PHAST_Transform::COORDINATE_SYSTEM &coor_sys)
+{
+	static const char szCoorSys[] = "xy_coordinate_system";
+
+	herr_t status = -1;
+
+	// coor_sys_type
+	hid_t coor_sys_type = CGlobal::HDFCreateCoordinateSystemType();
+	if (coor_sys_type > 0)
+	{
+		if (!bStoring) coor_sys = PHAST_Transform::MAP;
+		status = CGlobal::HDFSerializeSafe(bStoring, loc_id, szCoorSys, coor_sys_type, 1, &coor_sys);
+		ASSERT(!bStoring || status >= 0); // if storing assert status is valid
+
+		VERIFY(H5Tclose(coor_sys_type) >= 0);
+	}
+	return status;
+}
+
+herr_t CGlobal::HDFSerializeZCoordinateSystem(bool bStoring, hid_t loc_id, PHAST_Transform::COORDINATE_SYSTEM &coor_sys)
+{
+	static const char szCoorSys[] = "z_coordinate_system";
+
+	herr_t status = -1;
+
+	// coor_sys_type
+	hid_t coor_sys_type = CGlobal::HDFCreateCoordinateSystemType();
+	if (coor_sys_type > 0)
+	{
+		if (!bStoring) coor_sys = PHAST_Transform::MAP;
+		status = CGlobal::HDFSerializeSafe(bStoring, loc_id, szCoorSys, coor_sys_type, 1, &coor_sys);
+		ASSERT(!bStoring || status >= 0); // if storing assert status is valid
+
+		VERIFY(H5Tclose(coor_sys_type) >= 0);
+	}
+	return status;
+}
+
+// COMMENT: {10/21/2008 3:15:41 PM}herr_t CGlobal::HDFSerializePerimeterOption(bool bStoring, hid_t loc_id, Prism::PERIMETER_OPTION &perimeter_option)
+// COMMENT: {10/21/2008 3:15:41 PM}{
+// COMMENT: {10/21/2008 3:15:41 PM}	static const char szPerimeterOption[] = "perimeter_option";
+// COMMENT: {10/21/2008 3:15:41 PM}	
+// COMMENT: {10/21/2008 3:15:41 PM}	herr_t status = -1;
+// COMMENT: {10/21/2008 3:15:41 PM}
+// COMMENT: {10/21/2008 3:15:41 PM}	// source_type
+// COMMENT: {10/21/2008 3:15:41 PM}	hid_t po_type = CGlobal::HDFCreatePerimeterOptionType();
+// COMMENT: {10/21/2008 3:15:41 PM}	if (po_type > 0)
+// COMMENT: {10/21/2008 3:15:41 PM}	{
+// COMMENT: {10/21/2008 3:15:41 PM}		status = CGlobal::HDFSerialize(bStoring, loc_id, szPerimeterOption, po_type, 1, &perimeter_option);
+// COMMENT: {10/21/2008 3:15:41 PM}	}
+// COMMENT: {10/21/2008 3:15:41 PM}	return status;
+// COMMENT: {10/21/2008 3:15:41 PM}}
+
+// COMMENT: {10/21/2008 3:15:31 PM}hid_t CGlobal::HDFCreatePerimeterOptionType(void)
+// COMMENT: {10/21/2008 3:15:31 PM}{
+// COMMENT: {10/21/2008 3:15:31 PM}	herr_t status;
+// COMMENT: {10/21/2008 3:15:31 PM}
+// COMMENT: {10/21/2008 3:15:31 PM}	// Create the datatype
+// COMMENT: {10/21/2008 3:15:31 PM}	hid_t enum_datatype = H5Tcreate(H5T_ENUM, sizeof(Prism::PERIMETER_OPTION));
+// COMMENT: {10/21/2008 3:15:31 PM}	ASSERT(enum_datatype > 0);
+// COMMENT: {10/21/2008 3:15:31 PM}
+// COMMENT: {10/21/2008 3:15:31 PM}	Prism::PERIMETER_OPTION nValue;
+// COMMENT: {10/21/2008 3:15:31 PM}
+// COMMENT: {10/21/2008 3:15:31 PM}	// Insert the enumerated data
+// COMMENT: {10/21/2008 3:15:31 PM}	nValue = Prism::CONSTANT;
+// COMMENT: {10/21/2008 3:15:31 PM}	status = H5Tenum_insert(enum_datatype, "CONSTANT", &nValue);
+// COMMENT: {10/21/2008 3:15:31 PM}	ASSERT(status >= 0);
+// COMMENT: {10/21/2008 3:15:31 PM}
+// COMMENT: {10/21/2008 3:15:31 PM}	// Insert the enumerated data
+// COMMENT: {10/21/2008 3:15:31 PM}	nValue = Prism::ATTRIBUTE;
+// COMMENT: {10/21/2008 3:15:31 PM}	status = H5Tenum_insert(enum_datatype, "ATTRIBUTE", &nValue);
+// COMMENT: {10/21/2008 3:15:31 PM}	ASSERT(status >= 0);
+// COMMENT: {10/21/2008 3:15:31 PM}
+// COMMENT: {10/21/2008 3:15:31 PM}	// Insert the enumerated data
+// COMMENT: {10/21/2008 3:15:31 PM}	nValue = Prism::USE_Z;
+// COMMENT: {10/21/2008 3:15:31 PM}	status = H5Tenum_insert(enum_datatype, "USE_Z", &nValue);
+// COMMENT: {10/21/2008 3:15:31 PM}	ASSERT(status >= 0);
+// COMMENT: {10/21/2008 3:15:31 PM}
+// COMMENT: {10/21/2008 3:15:31 PM}	// Insert the enumerated data
+// COMMENT: {10/21/2008 3:15:31 PM}	nValue = Prism::DEFAULT;
+// COMMENT: {10/21/2008 3:15:31 PM}	status = H5Tenum_insert(enum_datatype, "DEFAULT", &nValue);
+// COMMENT: {10/21/2008 3:15:31 PM}	ASSERT(status >= 0);
+// COMMENT: {10/21/2008 3:15:31 PM}
+// COMMENT: {10/21/2008 3:15:31 PM}	return enum_datatype;
+// COMMENT: {10/21/2008 3:15:31 PM}}
 
 std::string CGlobal::FullPath(std::string filename)
 {
@@ -3455,3 +3603,219 @@ BOOL CGlobal::FileExists(CString filename)
 {
 	return ATL::ATLPath::FileExists(filename);
 }
+
+hid_t CGlobal::HDFCreatePropType(void)
+{
+	herr_t status;
+
+	// Create the datatype
+	hid_t enum_datatype = H5Tcreate(H5T_ENUM, sizeof(PROP_TYPE));
+	ASSERT(enum_datatype > 0);
+
+	PROP_TYPE nValue;
+
+	// Insert the enumerated data
+	nValue = PROP_UNDEFINED;
+	status = H5Tenum_insert(enum_datatype, "PROP_UNDEFINED", &nValue);
+	ASSERT(status >= 0);
+
+	// Insert the enumerated data
+	nValue = PROP_FIXED;
+	status = H5Tenum_insert(enum_datatype, "PROP_FIXED", &nValue);
+	ASSERT(status >= 0);
+
+	// Insert the enumerated data
+	nValue = PROP_LINEAR;
+	status = H5Tenum_insert(enum_datatype, "PROP_LINEAR", &nValue);
+	ASSERT(status >= 0);
+
+	// Insert the enumerated data
+	nValue = PROP_ZONE;
+	status = H5Tenum_insert(enum_datatype, "PROP_ZONE", &nValue);
+	ASSERT(status >= 0);
+
+	// Insert the enumerated data
+	nValue = PROP_MIXTURE;
+	status = H5Tenum_insert(enum_datatype, "PROP_MIXTURE", &nValue);
+	ASSERT(status >= 0);
+
+	// Insert the enumerated data
+	nValue = PROP_POINTS;
+	status = H5Tenum_insert(enum_datatype, "PROP_POINTS", &nValue);
+	ASSERT(status >= 0);
+
+	// Insert the enumerated data
+	nValue = PROP_XYZ;
+	status = H5Tenum_insert(enum_datatype, "PROP_XYZ", &nValue);
+	ASSERT(status >= 0);
+
+	return enum_datatype;
+}
+
+hid_t CGlobal::HDFCreateCellFace(void)
+{
+	herr_t status;
+
+	// Create the datatype
+	hid_t enum_datatype = H5Tcreate(H5T_ENUM, sizeof(Cell_Face));
+	ASSERT(enum_datatype > 0);
+
+	Cell_Face nValue;
+
+	// Insert the enumerated data
+	nValue = CF_X;
+	status = H5Tenum_insert(enum_datatype, "CF_X", &nValue);
+	ASSERT(status >= 0);
+
+	// Insert the enumerated data
+	nValue = CF_Y;
+	status = H5Tenum_insert(enum_datatype, "CF_Y", &nValue);
+	ASSERT(status >= 0);
+
+	// Insert the enumerated data
+	nValue = CF_Z;
+	status = H5Tenum_insert(enum_datatype, "CF_Z", &nValue);
+	ASSERT(status >= 0);
+
+	// Insert the enumerated data
+	nValue = CF_XN;
+	status = H5Tenum_insert(enum_datatype, "CF_XN", &nValue);
+	ASSERT(status >= 0);
+
+	// Insert the enumerated data
+	nValue = CF_XP;
+	status = H5Tenum_insert(enum_datatype, "CF_XP", &nValue);
+	ASSERT(status >= 0);
+
+	// Insert the enumerated data
+	nValue = CF_YN;
+	status = H5Tenum_insert(enum_datatype, "CF_YN", &nValue);
+	ASSERT(status >= 0);
+
+	// Insert the enumerated data
+	nValue = CF_YP;
+	status = H5Tenum_insert(enum_datatype, "CF_YP", &nValue);
+	ASSERT(status >= 0);
+
+	// Insert the enumerated data
+	nValue = CF_ZN;
+	status = H5Tenum_insert(enum_datatype, "CF_ZN", &nValue);
+	ASSERT(status >= 0);
+
+	// Insert the enumerated data
+	nValue = CF_ZP;
+	status = H5Tenum_insert(enum_datatype, "CF_ZP", &nValue);
+	ASSERT(status >= 0);
+
+	// Insert the enumerated data
+	nValue = CF_NONE;
+	status = H5Tenum_insert(enum_datatype, "CF_NONE", &nValue);
+	ASSERT(status >= 0);
+
+	// Insert the enumerated data
+	nValue = CF_UNKNOWN;
+	status = H5Tenum_insert(enum_datatype, "CF_UNKNOWN", &nValue);
+	ASSERT(status >= 0);
+
+	// Insert the enumerated data
+	nValue = CF_ALL;
+	status = H5Tenum_insert(enum_datatype, "CF_ALL", &nValue);
+	ASSERT(status >= 0);
+
+	return enum_datatype;
+}
+
+void CGlobal::ComputeDisplayToWorld(vtkRenderer *renderer, double x, double y, double z, double worldPt[4])
+{
+	if (!renderer)
+	{
+		return;
+	}
+
+	renderer->SetDisplayPoint(x, y, z);
+	renderer->DisplayToWorld();
+	renderer->GetWorldPoint(worldPt);
+	if (worldPt[3])
+	{
+		worldPt[0] /= worldPt[3];
+		worldPt[1] /= worldPt[3];
+		worldPt[2] /= worldPt[3];
+		worldPt[3] = 1.0;
+	}
+}
+
+void CGlobal::ComputeWorldToDisplay(vtkRenderer *renderer, double x, double y, double z, double displayPt[4])
+{
+	if (!renderer)
+	{
+		return;
+	}
+
+	renderer->SetWorldPoint(x, y, z, 1.0);
+	renderer->WorldToDisplay();
+	renderer->GetDisplayPoint(displayPt);
+}
+
+double CGlobal::ComputeRadius(vtkRenderer *renderer)
+{
+	double radius = 1.0;
+	if (renderer)
+	{
+		int i;
+		double z;
+		double windowLowerLeft[4], windowUpperRight[4];
+		vtkFloatingPointType *viewport = renderer->GetViewport();
+		int *winSize = renderer->GetRenderWindow()->GetSize();
+		double focalPoint[4];
+
+		// get the focal point in world coordinates
+		//
+		vtkCamera *camera = renderer->GetActiveCamera();	
+		vtkFloatingPointType cameraFP[4];
+		camera->GetFocalPoint((vtkFloatingPointType*)cameraFP); cameraFP[3] = 1.0;
+
+		CGlobal::ComputeWorldToDisplay(renderer, cameraFP[0], cameraFP[1], cameraFP[2], focalPoint);
+
+		z = focalPoint[2];
+
+		double x = winSize[0] * viewport[0];
+		double y = winSize[1] * viewport[1];
+		CGlobal::ComputeDisplayToWorld(renderer, x, y, z, windowLowerLeft);
+
+		x = winSize[0] * viewport[2];
+		y = winSize[1] * viewport[3];
+		CGlobal::ComputeDisplayToWorld(renderer, x, y, z, windowUpperRight);
+
+		for (radius=0.0, i=0; i<3; ++i)
+		{
+			radius += (windowUpperRight[i] - windowLowerLeft[i]) * (windowUpperRight[i] - windowLowerLeft[i]);
+		}
+		radius = ::sqrt(radius);
+	}
+	else
+	{
+		TRACE("WARNING renderer is NULL in CGlobal::ComputeRadius\n");
+	}
+	return radius;
+}
+
+double CGlobal::RadiusFactor = 0.008;
+
+void CGlobal::SetRadiusFactor(double factor)
+{
+	if (0 <= factor)
+	{
+		CGlobal::RadiusFactor = factor;
+	}
+}
+
+double CGlobal::GetRadiusFactor(void)
+{
+	return CGlobal::RadiusFactor;
+}
+
+double CGlobal::ComputeHandleRadius(vtkRenderer *renderer)
+{
+	return CGlobal::ComputeRadius(renderer) * CGlobal::GetRadiusFactor();
+}
+

@@ -3,6 +3,7 @@
 
 #include "WellActor.h"
 #include "WPhastDoc.h"
+#include "GridKeyword.h"
 
 
 CSetWellAction::CSetWellAction(CWellActor *pWellActor, const CWellSchedule& newWell, CWPhastDoc *pWPhastDoc)
@@ -31,7 +32,7 @@ void CSetWellAction::UnExecute(void)
 
 void CSetWellAction::SetWell(const CWellSchedule &well)
 {
-	this->m_pWellActor->SetWell(well, this->m_pWPhastDoc->GetUnits());
+	this->m_pWellActor->SetWell(well, this->m_pWPhastDoc->GetUnits(), this->m_pWPhastDoc->GetGridKeyword());
 	CTreeCtrlNode top = this->m_pWellActor->GetTreeCtrlNode().GetFirstVisible();
 	this->m_pWellActor->Update(this->m_pWellActor->GetTreeCtrlNode());
 	top.SelectSetFirstVisible();

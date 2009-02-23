@@ -48,10 +48,11 @@ CPrintInitialPropertyPage::~CPrintInitialPropertyPage()
 	MACRO(GRID, _T("Force chemistry print"),      _T("*.O.chem"),    force_chem,    IDR_PR_INIT_FORCE_RTF); \
 	MACRO(GRID, _T("HDF chemistry"),              _T("*.h5"),        hdf_chem,      IDR_PR_INIT_HDF_CHEM_RTF); \
 	MACRO(GRID, _T("HDF heads"),                  _T("*.h5"),        hdf_head,      IDR_PR_INIT_HDF_HEAD_RTF); \
+	MACRO(GRID, _T("HDF media"),                  _T("*.h5"),        hdf_media,     IDR_PR_INIT_HDF_VEL_RTF); \
 	MACRO(GRID, _T("HDF steady flow velocities"), _T("*.h5"),        hdf_ss_vel,    IDR_PR_INIT_HDF_VEL_RTF); \
-	MACRO(GRID, _T("Heads"),                      _T("*.O.head"),    head,          IDR_PR_INIT_HEADS_RTF); \
 
 #define EXPAND_RIGHT_MACRO(GRID, MACRO) \
+	MACRO(GRID, _T("Heads"),                      _T("*.O.head"),    head,          IDR_PR_INIT_HEADS_RTF); \
 	MACRO(GRID, _T("Media properties"),           _T("*.O.probdef"), media,         IDR_PR_INIT_MEDIA_RTF); \
 	MACRO(GRID, _T("Solution method"),            _T("*.O.probdef"), method,        IDR_PR_INIT_SOL_METH_RTF); \
 	MACRO(GRID, _T("Steady flow velocities"),     _T("*.O.vel"),     ss_vel,        IDR_PR_INIT_SSFLOW_RTF); \

@@ -41,6 +41,7 @@ public:
 		BP_MIN_MAX,
 		BP_WELL,
 		BP_RIVER,
+		BP_DRAIN,
 		BP_WEDGE,
 		BP_PRISM,
 	} BP_TYPE;
@@ -142,16 +143,24 @@ protected:
 	float m_ZMin;
 	float m_ZMax;
 
+	// wells
 	float m_XWell;
 	float m_YWell;
+	PHAST_Transform::COORDINATE_SYSTEM m_xy_coordinate_system_user;
 
 	CString m_strHorizontalUnits;
 	CString m_strVerticalUnits;
+	CString m_strMapHorizontalUnits;
+	CString m_strMapVerticalUnits;
 
 	bool m_bNeedsUpdate;
 	// float m_Position[3];
 	virtual void DoDataExchange(CDataExchange* pDX);
 	void DoDataExchangePrism(CDataExchange *pDX, Data_source *pData_source);
+
+	template<class T>
+	void DoDataExchangePoints(CDataExchange *pDX, T &type);
+
 public:
 	void Enable(bool bEnable);
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
@@ -166,12 +175,18 @@ protected:
 	afx_msg void OnBnClickedShape();
 	afx_msg void OnCbnSelChangeShape();
 	afx_msg void OnEnKillfocusConstant();
-	afx_msg void OnEnChangeConstant();
-
-
+	afx_msg void OnEnChangeConstant();	
+	afx_msg void OnBnClickedUseMap();
+	void OnUseMapBox(void);	
+	void OnUseMapWell(void);
+	void OnUseMapDrain(void);
+	void OnUseMapRiver(void);
 
 	//afx_msg void OnEnKillfocusEditY();
 	//afx_msg void OnEnKillfocusEditZ();
+
+protected:
+	void TestPointsGrid(NMHDR *pNotifyStruct, LRESULT *result, BOOL bShowErrors);
 
 public:
 	afx_msg void OnUpdateEditCut(CCmdUI *pCmdUI);
@@ -188,6 +203,7 @@ public:
 	afx_msg void OnEditRedo();
 	afx_msg void OnEndLabelEditGrid(NMHDR *pNotifyStruct, LRESULT *result);
 	afx_msg void OnEndLabelEditPointsGrid(NMHDR *pNotifyStruct, LRESULT *result);
+	afx_msg void OnBeginLabelEditPointsGrid(NMHDR *pNotifyStruct, LRESULT *result);
 
 
 	afx_msg void OnTcnSelchangeTab(NMHDR *pNMHDR, LRESULT *pResult);

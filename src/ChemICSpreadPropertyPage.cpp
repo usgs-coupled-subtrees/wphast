@@ -98,7 +98,7 @@ void CChemICSpreadPropertyPage::DoDataExchange(CDataExchange* pDX)
 
 	// PSZ_SOLUTION
 	CGlobal::DDX_Property(pDX, IDC_CHEMIC_GRID, ++nRow, this->m_chemIC.solution, false);
-	if (!this->m_bFlowOnly && pDX->m_bSaveAndValidate && this->m_chemIC.solution->type == UNDEFINED)
+	if (!this->m_bFlowOnly && pDX->m_bSaveAndValidate && this->m_chemIC.solution->type == PROP_UNDEFINED)
 	{
 		CString str;
 		str.Format("A default \"%s\" must be defined.", PSZ_SOLUTION);
@@ -158,27 +158,31 @@ void CChemICSpreadPropertyPage::GetProperties(CChemIC& chemIC)const
 
 	// delete UNDEFINED properties
 	//
-	if (chemIC.solution->type == UNDEFINED)
+	if (chemIC.solution->type == PROP_UNDEFINED)
 	{
 		Cproperty::CopyProperty(&chemIC.solution, 0);
 	}
-	if (chemIC.equilibrium_phases->type == UNDEFINED)
+	if (chemIC.equilibrium_phases->type == PROP_UNDEFINED)
 	{
 		Cproperty::CopyProperty(&chemIC.equilibrium_phases, 0);
 	}
-	if (chemIC.surface->type == UNDEFINED)
+	if (chemIC.exchange->type == PROP_UNDEFINED)
+	{
+		Cproperty::CopyProperty(&chemIC.exchange, 0);
+	}
+	if (chemIC.surface->type == PROP_UNDEFINED)
 	{
 		Cproperty::CopyProperty(&chemIC.surface, 0);
 	}
-	if (chemIC.gas_phase->type == UNDEFINED)
+	if (chemIC.gas_phase->type == PROP_UNDEFINED)
 	{
 		Cproperty::CopyProperty(&chemIC.gas_phase, 0);
 	}
-	if (chemIC.solid_solutions->type == UNDEFINED)
+	if (chemIC.solid_solutions->type == PROP_UNDEFINED)
 	{
 		Cproperty::CopyProperty(&chemIC.solid_solutions, 0);
 	}
-	if (chemIC.kinetics->type == UNDEFINED)
+	if (chemIC.kinetics->type == PROP_UNDEFINED)
 	{
 		Cproperty::CopyProperty(&chemIC.kinetics, 0);
 	}

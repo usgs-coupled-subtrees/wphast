@@ -7,6 +7,7 @@
 #define EXTERNAL extern
 #include "srcinput/hstinpt.h"
 #undef EXTERNAL
+#include "enum_fix.h"
 
 #include <iosfwd> // std::ostream
 
@@ -21,7 +22,7 @@ public:
 	CZone(const struct zone& src);
 	CZone(const CZone& src);
 
-	bool operator==(const struct zone& rhs)const throw();
+// COMMENT: {12/8/2008 4:59:20 PM}	bool operator==(const struct zone& rhs)const throw();
 
 	// helper functions
 #ifdef _DEBUG

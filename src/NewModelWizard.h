@@ -3,6 +3,8 @@
 #include "NewModelIntro.h"
 #include "Units1PropertyPage.h"
 #include "Units2PropertyPage.h"
+#include "Units3PropertyPage.h"
+#include "Units4PropertyPage.h"
 #include "ImportMapPropertyPage.h"
 #include "GridPropertyPage.h"
 #include "MediaPropertyPage.h"
@@ -45,6 +47,8 @@ public:
 	CNewModelIntro           m_introPage;
 	CUnits1PropertyPage      m_units1Page;
 	CUnits2PropertyPage      m_units2Page;
+	CUnits3PropertyPage      m_units3Page;
+	CUnits4PropertyPage      m_units4Page;
 	CImportMapPropertyPage   m_importPage;
 	CGridPropertyPage        m_gridPage;
 	CMediaPropertyPage       m_mediaPage;

@@ -15,6 +15,7 @@ class CPropertyTreeControlBar;
 class CTreeCtrlNode;
 class CWPhastDoc;
 class CUnits;
+class CGridKeyword;
 class CTreeMemento;
 
 #include <string>
@@ -39,12 +40,13 @@ public:
 
 	void SetRadius(float r);
 
-	void SetWell(const CWellSchedule &well, const CUnits &units);
+	void SetWell(const CWellSchedule &well, const CUnits &units, const CGridKeyword &gridKeyword);
 	CWellSchedule GetWell(void)const;
 
 	void Insert(const Ctime& time, const CWellRate& rate);
 
-	void SetUnits(const CUnits &units);
+	void SetUnits(const CUnits &units, bool bUpdatePoints = true);
+	void SetGridKeyword(const CGridKeyword &gridKeyword, bool bUpdatePoints = true);
 
 	void Add(CPropertyTreeControlBar *pTree, HTREEITEM hInsertAfter = TVI_LAST);
 	void UnAdd(CPropertyTreeControlBar *pTree);
@@ -66,7 +68,7 @@ public:
 	void SetName(LPCTSTR name)               {/* no-op */};
 	LPCTSTR GetName(void)const;
 
-	void Serialize(bool bStoring, hid_t loc_id, const CUnits &units);
+	void Serialize(bool bStoring, hid_t loc_id, const CWPhastDoc* pWPhastDoc);
 
 	std::ostream& Output(std::ostream& os, const Ctime& time)const;
 	CString GetWarning(CTimeControl *pTimeControl)const;
@@ -113,6 +115,10 @@ protected:
 
 	vtkTransform       *m_pTransformUnits;
 	vtkTransform       *m_pTransformScale;
+	vtkTransform       *TransformGrid;
+
+	double              GridAngle;
+	double              GridOrigin[3];
 
 private:
 	CWellActor(const CWellActor&);  // Not implemented.

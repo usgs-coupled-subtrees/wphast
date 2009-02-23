@@ -15,6 +15,8 @@
 #include "IObserver.h"
 #include "DisplayColors.h"
 
+#include "PointConnectorMovePointAction.h"
+
 class vtkProp;
 class vtkPropCollection;
 class CAction;
@@ -64,7 +66,7 @@ class vtkProp3D;
   class vtkPropAssembly;
   class CWellActor;
   class CRiverActor;
-  class CRiverMovePointAction;
+  class CDrainActor;
 
 // map
 class CMapImageActor;
@@ -131,10 +133,12 @@ public:
 	void GetUsedZoneNumbers(std::set<int>& usedNums)const;
 	void GetUsedWedgeNumbers(std::set<int>& usedNums)const;
 	void GetUsedPrismNumbers(std::set<int>& usedNums)const;
+	void GetUsedZoneFlowRates(std::set<int>& usedNums)const;
 
 	int GetNextZoneNumber(void)const;
 	int GetNextWedgeNumber(void)const;
 	int GetNextPrismNumber(void)const;
+	int GetNextZoneFlowRatesNumber(void)const;
 
 	CString GetNextZoneName(void);
 	CString GetNextWedgeName(void);
@@ -144,6 +148,7 @@ public:
 	void ModifyGrid(CGridActor* gridActor, CGridElementsSelector* gridElementsSelector);
 	void SetGridKeyword(const CGridKeyword& gridKeyword);
 	void GetGridKeyword(CGridKeyword& gridKeyword)const;
+	CGridKeyword GetGridKeyword(void)const;
 
 	vtkProp3D* GetGridActor(void);
 
@@ -169,6 +174,17 @@ public:
 
 	static void RiverListener(vtkObject* caller, unsigned long eid, void* clientdata, void *calldata);
 
+	// Drain actions
+	//
+	void Add(CDrainActor *pDrainActor, HTREEITEM hInsertAfter = TVI_LAST);
+	void UnAdd(CDrainActor *pDrainActor);
+	void Remove(CDrainActor *pDrainActor);
+	void UnRemove(CDrainActor *pDrainActor);
+	void Select(CDrainActor *pDrainActor);
+	int GetNextDrainNumber(void);
+	void GetUsedDrainNumbers(std::set<int>& usedNums);
+
+
 	// Grid actions
 	//
 	static void GridListener(vtkObject* caller, unsigned long eid, void* clientdata, void *calldata);	
@@ -181,18 +197,16 @@ public:
 	void SetDisplayColors(const CDisplayColors& dc);
 	CDisplayColors GetDisplayColors()const;
 
-	void PrismPathsRelativeToAbsolute(void);
-
+	void PrismPathsRelativeToAbsolute(LPCTSTR lpszPathName);
+	void PrismPathsAbsoluteToRelative(LPCTSTR lpszPathName);
+	std::string GetRelativePath(LPCTSTR lpszPathName, const std::string src_path)const;
+	std::string GetAbsolutePath(LPCTSTR lpszPathName, const std::string relative_path)const;
 
 protected:
 	void InternalAdd(CZoneActor *pZoneActor, bool bAdd, HTREEITEM hInsertAfter = TVI_LAST);
 	void InternalDelete(CZoneActor *pZoneActor, bool bDelete);
 
 public:
-// COMMENT: {4/8/2005 6:51:46 PM}	CTreeCtrlNode AddStressPeriod(const CTimeControl& timeControl);
-// COMMENT: {4/8/2005 6:51:46 PM}	void RemoveStressPeriod(int nStressPeriod);
-// COMMENT: {4/8/2005 6:51:46 PM}	int GetStressPeriodCount(void)const;
-
 	void ReleaseGraphicsResources(vtkProp* pProp);
 	void ClearSelection(void);
 
@@ -232,6 +246,8 @@ protected:
 	vtkPropAssembly   *m_pPropAssemblyIC;
 	vtkPropAssembly   *m_pPropAssemblyWells;
 	vtkPropAssembly   *m_pPropAssemblyRivers;
+	vtkPropAssembly   *m_pPropAssemblyDrains;
+	vtkPropAssembly   *m_pPropAssemblyZFR;
 
 	// grid
 	CGridActor *m_pGridActor;
@@ -254,8 +270,8 @@ protected:
 	// callbacks
 	vtkCallbackCommand    *RiverCallbackCommand;
 	vtkCallbackCommand    *GridCallbackCommand;
-	CRiverMovePointAction *RiverMovePointAction;
-
+	CPointConnectorMovePointAction<CRiverActor> *RiverMovePointAction;
+	CPointConnectorMovePointAction<CDrainActor> *DrainMovePointAction;
 
 	// properties
 	enum ProjectionType m_ProjectionMode;
@@ -282,6 +298,8 @@ protected:
 	void SerializeBC(bool bStoring, hid_t loc_id);
 	void SerializeWells(bool bStoring, hid_t loc_id);
 	void SerializeRivers(bool bStoring, hid_t loc_id);
+	void SerializeDrains(bool bStoring, hid_t loc_id);
+	void SerializeZoneFlowRates(bool bStoring, hid_t loc_id);
 
 // Generated message map functions
 protected:
@@ -297,7 +315,7 @@ public:
 	BOOL DoImport(LPCTSTR lpszPathName);
 	BOOL DoExport(LPCTSTR lpszPathName);
 	BOOL WriteTransDat(std::ostream& os);
-	BOOL XMLExport(std::ostream& os, const char *prefix);
+	BOOL XMLExport(std::ostream& os, const char *prefix, LPCTSTR lpszPathName);
 	friend class CXMLSerializer;
 
 	afx_msg void OnUpdateEditUndo(CCmdUI *pCmdUI);
@@ -327,6 +345,7 @@ public:
 	const CUnits& GetUnits(void)const;
 	void GetUnits(CUnits& units)const;
 	void SetUnits(const CUnits& units);
+	void StandardizeUnits(CUnits& units)const;
 
 	void SetTimeControl2(const CTimeControl2& timeControl2);
 	const CTimeControl2& GetTimeControl2(void)const;
@@ -394,6 +413,8 @@ public:
 	vtkPropAssembly* GetPropAssemblyBC(void)const;
 	vtkPropAssembly* GetPropAssemblyWells(void)const;
 	vtkPropAssembly* GetPropAssemblyRivers(void)const;
+	vtkPropAssembly* GetPropAssemblyDrains(void)const;
+	vtkPropAssembly* GetPropAssemblyZoneFlowRates(void)const;
 
 	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
 
@@ -476,6 +497,19 @@ public:
 	vtkCallbackCommand *NewPrismCallbackCommand;
 	CNewPrismWidget    *NewPrismWidget;
 
+	// ID_TOOLS_NEWDRAIN
+	afx_msg void OnUpdateToolsNewDrain(CCmdUI *pCmdUI);
+	afx_msg void OnToolsNewDrain();	
+	void BeginNewDrain();
+	void EndNewDrain();
+	static void NewDrainListener(vtkObject *caller, unsigned long eid, void *clientdata, void *calldata);
+	static void DrainListener(vtkObject *caller, unsigned long eid, void *clientdata, void *calldata);
+	void OnEndNewDrain(bool bCancel);
+	vtkCallbackCommand *NewDrainCallbackCommand;
+	CDrainActor        *NewDrainActor;
+	vtkCallbackCommand *DrainCallbackCommand;
+
+
 public:
 	afx_msg void OnToolsColors();
 };
@@ -494,3 +528,9 @@ inline vtkPropAssembly* CWPhastDoc::GetPropAssemblyWells() const
 
 inline vtkPropAssembly* CWPhastDoc::GetPropAssemblyRivers() const
 { return this->m_pPropAssemblyRivers; }
+
+inline vtkPropAssembly* CWPhastDoc::GetPropAssemblyDrains() const
+{ return this->m_pPropAssemblyDrains; }
+
+inline vtkPropAssembly* CWPhastDoc::GetPropAssemblyZoneFlowRates() const
+{ return this->m_pPropAssemblyZFR; }

@@ -108,7 +108,7 @@ void CICHeadSpreadPropertyPage::GetProperties(CHeadIC& r_headIC)const
 
 	// delete inactive properties
 	//
-	if (r_headIC.head->type == UNDEFINED)
+	if (r_headIC.head->type == PROP_UNDEFINED)
 	{
 		Cproperty::CopyProperty(&r_headIC.head, 0);
 	}

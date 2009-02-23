@@ -373,6 +373,8 @@ void vtkInteractorStyleTrackballCameraEx::OnLeftButtonDown()
 					this->LastProp->IsA("CWellActor")
 					||
 					this->LastProp->IsA("CRiverActor")
+					||
+					this->LastProp->IsA("CDrainActor")
 					);
 
 				ASSERT(this->LastProp);

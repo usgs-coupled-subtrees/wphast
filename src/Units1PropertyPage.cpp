@@ -34,43 +34,39 @@ void CUnits1PropertyPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_TIME_COMBO, m_wndTimeCombo);
 	DDX_Control(pDX, IDC_HORZ_COMBO, m_wndHorizontalCombo);
 	DDX_Control(pDX, IDC_VERT_COMBO, m_wndVerticalCombo);
+	DDX_Control(pDX, IDC_HORZ_MAP_COMBO, m_wndHorizontalMapCombo);
+	DDX_Control(pDX, IDC_VERT_MAP_COMBO, m_wndVerticalMapCombo);
 	DDX_Control(pDX, IDC_HEAD_COMBO, m_wndHeadCombo);
-	DDX_Control(pDX, IDC_HYD_COND_NUM_COMBO, m_wndKNumCombo);
-	DDX_Control(pDX, IDC_HYD_COND_DENOM_COMBO, m_wndKDenomCombo);
-	DDX_Control(pDX, IDC_STORAGE_DENOM_COMBO, m_wndSDenomCombo);
-	DDX_Control(pDX, IDC_DISP_COMBO, m_wndAlphaCombo);
 
 	// time
-	if (m_wndTimeCombo.GetCount() == 0) {
+	if (m_wndTimeCombo.GetCount() == 0)
+	{
 		CGlobal::AddTimeUnits(&m_wndTimeCombo);
 	}
 	// horizontal
-	if (m_wndHorizontalCombo.GetCount() == 0) {
+	if (m_wndHorizontalCombo.GetCount() == 0)
+	{
 		CGlobal::AddLengthUnits(&m_wndHorizontalCombo);
 	}
 	// vertical
-	if (m_wndVerticalCombo.GetCount() == 0) {
+	if (m_wndVerticalCombo.GetCount() == 0)
+	{
 		CGlobal::AddLengthUnits(&m_wndVerticalCombo);
 	}
+	// map_horizontal
+	if (m_wndHorizontalMapCombo.GetCount() == 0)
+	{
+		CGlobal::AddLengthUnits(&m_wndHorizontalMapCombo);
+	}
+	// map_vertical
+	if (m_wndVerticalMapCombo.GetCount() == 0)
+	{
+		CGlobal::AddLengthUnits(&m_wndVerticalMapCombo);
+	}
 	// head
-	if (m_wndHeadCombo.GetCount() == 0) {
+	if (m_wndHeadCombo.GetCount() == 0)
+	{
 		CGlobal::AddLengthUnits(&m_wndHeadCombo);
-	}
-	// k numerator
-	if (m_wndKNumCombo.GetCount() == 0) {
-		CGlobal::AddLengthUnits(&m_wndKNumCombo);
-	}
-	// k denominator
-	if (m_wndKDenomCombo.GetCount() == 0) {
-		CGlobal::AddTimeUnitsDenom(&m_wndKDenomCombo);
-	}
-	// s denominator
-	if (m_wndSDenomCombo.GetCount() == 0) {
-		CGlobal::AddLengthUnitsDenom(&m_wndSDenomCombo);
-	}
-	// alpha
-	if (m_wndAlphaCombo.GetCount() == 0) {
-		CGlobal::AddLengthUnits(&m_wndAlphaCombo);
 	}
 
 	if (pDX->m_bSaveAndValidate)
@@ -81,123 +77,88 @@ void CUnits1PropertyPage::DoDataExchange(CDataExchange* pDX)
 
 		// time
 		this->m_wndTimeCombo.GetLBText(this->m_wndTimeCombo.GetCurSel(), numer);
-		this->m_units.time.set_input(numer);
+		VERIFY(this->m_units.time.set_input(numer) == OK);
 
 		// horizontal
 		this->m_wndHorizontalCombo.GetLBText(this->m_wndHorizontalCombo.GetCurSel(), numer);
-		this->m_units.horizontal.set_input(numer);
+		VERIFY(this->m_units.horizontal.set_input(numer) == OK);
 
 		// vertical
 		this->m_wndVerticalCombo.GetLBText(this->m_wndVerticalCombo.GetCurSel(), numer);
-		this->m_units.vertical.set_input(numer);
+		VERIFY(this->m_units.vertical.set_input(numer) == OK);
+
+		// map_horizontal
+		this->m_wndHorizontalMapCombo.GetLBText(this->m_wndHorizontalMapCombo.GetCurSel(), numer);
+		VERIFY(this->m_units.map_horizontal.set_input(numer) == OK);
+
+		// map_vertical
+		this->m_wndVerticalMapCombo.GetLBText(this->m_wndVerticalMapCombo.GetCurSel(), numer);
+		VERIFY(this->m_units.map_vertical.set_input(numer) == OK);
 
 		// head
 		this->m_wndHeadCombo.GetLBText(this->m_wndHeadCombo.GetCurSel(), numer);
-		this->m_units.head.set_input(numer);
-
-		// k
-		this->m_wndKNumCombo.GetLBText(this->m_wndKNumCombo.GetCurSel(), numer);
-		this->m_wndKDenomCombo.GetLBText(this->m_wndKDenomCombo.GetCurSel(), denom);
-		value = numer;
-		value += "/";
-		value += denom;
-		this->m_units.k.set_input(value);
-
-		// s
-		this->m_wndSDenomCombo.GetLBText(this->m_wndSDenomCombo.GetCurSel(), denom);
-		value = "1/";
-		value += denom;
-		this->m_units.s.set_input(value);
-
-		// alpha
-		this->m_wndAlphaCombo.GetLBText(this->m_wndAlphaCombo.GetCurSel(), numer);
-		this->m_units.alpha.set_input(numer);
-
+		VERIFY(this->m_units.head.set_input(numer) == OK);
 	}
 	else
 	{
 		// time
-		if (this->m_units.time.defined) {
+		if (this->m_units.time.defined)
+		{
 			VERIFY(this->m_wndTimeCombo.SelectString(0, CGlobal::GetStdTimeUnits(this->m_units.time.input).c_str()) != CB_ERR);
 		}
-		else {
+		else
+		{
 			VERIFY(this->m_wndTimeCombo.SelectString(0, CGlobal::GetStdTimeUnits(this->m_units.time.si).c_str()) != CB_ERR);
 		}
 
 		// horizontal
-		if (this->m_units.horizontal.defined) {
+		if (this->m_units.horizontal.defined)
+		{
 			VERIFY(this->m_wndHorizontalCombo.SelectString(0, CGlobal::GetStdLengthUnits(this->m_units.horizontal.input).c_str()) != CB_ERR);
 		}
-		else {
+		else
+		{
 			VERIFY(this->m_wndHorizontalCombo.SelectString(0, CGlobal::GetStdLengthUnits(this->m_units.horizontal.si).c_str()) != CB_ERR);
 		}
 
 		// vertical
-		if (this->m_units.vertical.defined) {
+		if (this->m_units.vertical.defined)
+		{
 			VERIFY(this->m_wndVerticalCombo.SelectString(0, CGlobal::GetStdLengthUnits(this->m_units.vertical.input).c_str()) != CB_ERR);
 		}
-		else {
+		else
+		{
 			VERIFY(this->m_wndVerticalCombo.SelectString(0, CGlobal::GetStdLengthUnits(this->m_units.vertical.si).c_str()) != CB_ERR);
 		}
 
+		// map_horizontal
+		if (this->m_units.map_horizontal.defined)
+		{
+			VERIFY(this->m_wndHorizontalMapCombo.SelectString(0, CGlobal::GetStdLengthUnits(this->m_units.map_horizontal.input).c_str()) != CB_ERR);
+		}
+		else
+		{
+			VERIFY(this->m_wndHorizontalMapCombo.SelectString(0, CGlobal::GetStdLengthUnits(this->m_units.map_horizontal.si).c_str()) != CB_ERR);
+		}
+
+		// map_vertical
+		if (this->m_units.map_vertical.defined)
+		{
+			VERIFY(this->m_wndVerticalMapCombo.SelectString(0, CGlobal::GetStdLengthUnits(this->m_units.map_vertical.input).c_str()) != CB_ERR);
+		}
+		else
+		{
+			VERIFY(this->m_wndVerticalMapCombo.SelectString(0, CGlobal::GetStdLengthUnits(this->m_units.map_vertical.si).c_str()) != CB_ERR);
+		}
+
 		// head
-		if (this->m_units.head.defined) {
+		if (this->m_units.head.defined)
+		{
 			VERIFY(this->m_wndHeadCombo.SelectString(0, CGlobal::GetStdLengthUnits(this->m_units.head.input).c_str()) != CB_ERR);
 		}
-		else {
+		else
+		{
 			VERIFY(this->m_wndHeadCombo.SelectString(0, CGlobal::GetStdLengthUnits(this->m_units.head.si).c_str()) != CB_ERR);
-		}
-
-		// k
-		if (this->m_units.k.defined) {
-			std::string strK(this->m_units.k.input);
-			std::string::size_type n = strK.find('/');
-			ASSERT(n != std::string::npos);
-			std::string strKNum = strK.substr(0, n);
-			std::string strKDenom = strK.substr(n+1, std::string::npos);
-			// k numerator
-			VERIFY(this->m_wndKNumCombo.SelectString(0, CGlobal::GetStdLengthUnits(strKNum.c_str()).c_str()) != CB_ERR);
-			// k denominator
-			VERIFY(this->m_wndKDenomCombo.SelectString(0, CGlobal::GetStdTimeUnitsDenom(strKDenom.c_str()).c_str()) != CB_ERR);
-		}
-		else {
-			std::string strK(this->m_units.k.si);
-			std::string::size_type n = strK.find('/');
-			ASSERT(n != std::string::npos);
-			std::string strKNum = strK.substr(0, n);
-			std::string strKDenom = strK.substr(n+1, std::string::npos);
-			// k numerator
-			VERIFY(this->m_wndKNumCombo.SelectString(0, CGlobal::GetStdLengthUnits(strKNum.c_str()).c_str()) != CB_ERR);
-			// k denominator
-			VERIFY(this->m_wndKDenomCombo.SelectString(0, CGlobal::GetStdTimeUnitsDenom(strKDenom.c_str()).c_str()) != CB_ERR);
-		}
-
-		// s
-		if (this->m_units.s.defined) {
-			std::string strS(this->m_units.s.input);
-			std::string::size_type n = strS.find('/');
-			ASSERT(n != std::string::npos);
-			std::string strSNum = strS.substr(0, n);
-			std::string strSDenom = strS.substr(n+1, std::string::npos);
-			// s denominator
-			VERIFY(this->m_wndSDenomCombo.SelectString(0, CGlobal::GetStdLengthUnitsDenom(strSDenom.c_str()).c_str()) != CB_ERR);
-		}
-		else {
-			std::string strS(this->m_units.s.si);
-			std::string::size_type n = strS.find('/');
-			ASSERT(n != std::string::npos);
-			std::string strSNum = strS.substr(0, n);
-			std::string strSDenom = strS.substr(n+1, std::string::npos);
-			// s denominator
-			VERIFY(this->m_wndSDenomCombo.SelectString(0, CGlobal::GetStdLengthUnitsDenom(strSDenom.c_str()).c_str()) != CB_ERR);
-		}
-
-		// alpha
-		if (this->m_units.alpha.defined) {
-			VERIFY(this->m_wndAlphaCombo.SelectString(0, CGlobal::GetStdLengthUnits(this->m_units.alpha.input).c_str()) != CB_ERR);
-		}
-		else {
-			VERIFY(this->m_wndAlphaCombo.SelectString(0, CGlobal::GetStdLengthUnits(this->m_units.alpha.si).c_str()) != CB_ERR);
 		}
 	}
 }
@@ -210,19 +171,17 @@ void CUnits1PropertyPage::SetProperties(const CUnits& r_units)
 void CUnits1PropertyPage::GetProperties(CUnits& r_units)const
 {
 	// time
-	r_units.time       = this->m_units.time;
+	r_units.time           = this->m_units.time;
 	// horizontal
-	r_units.horizontal = this->m_units.horizontal;
+	r_units.horizontal     = this->m_units.horizontal;
 	// vertical
-	r_units.vertical   = this->m_units.vertical;
+	r_units.vertical       = this->m_units.vertical;
+	// map_horizontal
+	r_units.map_horizontal = this->m_units.map_horizontal;
+	// map_vertical
+	r_units.map_vertical   = this->m_units.map_vertical;
 	// head
-	r_units.head       = this->m_units.head;
-	// k
-	r_units.k          = this->m_units.k;
-	// s
-	r_units.s          = this->m_units.s;
-	// alpha
-	r_units.alpha      = this->m_units.alpha;
+	r_units.head           = this->m_units.head;
 }
 
 BEGIN_MESSAGE_MAP(CUnits1PropertyPage, CPropertyPage)
@@ -234,15 +193,14 @@ END_MESSAGE_MAP()
 
 BOOL CUnits1PropertyPage::Contains(int nID)const
 {
-	switch (nID) {
+	switch (nID)
+	{
 		case IDC_TIME_COMBO:
 		case IDC_HORZ_COMBO:
 		case IDC_VERT_COMBO:
+		case IDC_HORZ_MAP_COMBO:
+		case IDC_VERT_MAP_COMBO:
 		case IDC_HEAD_COMBO:
-		case IDC_HYD_COND_NUM_COMBO:
-		case IDC_HYD_COND_DENOM_COMBO:
-		case IDC_STORAGE_DENOM_COMBO:
-		case IDC_DISP_COMBO:
 			return TRUE;
 	}
 	return FALSE;
@@ -250,10 +208,12 @@ BOOL CUnits1PropertyPage::Contains(int nID)const
 
 void CUnits1PropertyPage::SetControlFocus(int nID)
 {
-	if (this->Contains(nID)) {
+	if (this->Contains(nID))
+	{
 		this->m_idSetFocus = nID;
 	}
-	else {
+	else
+	{
 		this->m_idSetFocus = 0;
 	}
 }
@@ -263,10 +223,12 @@ BOOL CUnits1PropertyPage::OnSetActive()
 	BOOL bRet = CPropertyPage::OnSetActive();
 
 	CPropertySheet* pSheet = (CPropertySheet*) this->GetParent();   
-	if (pSheet->IsWizard()) {
+	if (pSheet->IsWizard())
+	{
 		pSheet->SetWizardButtons(PSWIZB_BACK|PSWIZB_NEXT);
 	}
-	else {
+	else
+	{
 		this->PostMessage(WM_SETPAGEFOCUS, 0, 0L);
 	}
 	return bRet;
@@ -274,8 +236,10 @@ BOOL CUnits1PropertyPage::OnSetActive()
 
 LRESULT CUnits1PropertyPage::OnSetPageFocus(WPARAM, LPARAM)
 {
-	if (this->m_idSetFocus != 0) {
-		if (CWnd* pWnd = this->GetDlgItem(this->m_idSetFocus)) {
+	if (this->m_idSetFocus != 0)
+	{
+		if (CWnd* pWnd = this->GetDlgItem(this->m_idSetFocus))
+		{
 			pWnd->SetFocus();
 		}
 	}
@@ -285,15 +249,6 @@ LRESULT CUnits1PropertyPage::OnSetPageFocus(WPARAM, LPARAM)
 BOOL CUnits1PropertyPage::OnInitDialog()
 {
 	CPropertyPage::OnInitDialog();
-
-// COMMENT: {6/2/2004 9:42:11 PM}	// Disable cancel if no apply button
-// COMMENT: {6/2/2004 9:42:11 PM}	//
-// COMMENT: {6/2/2004 9:42:11 PM}	CPropertySheet* pSheet = static_cast<CPropertySheet*>(this->GetParent());
-// COMMENT: {6/2/2004 9:42:11 PM}	ASSERT_KINDOF(CPropertySheet, pSheet);
-// COMMENT: {6/2/2004 9:42:11 PM}	if (pSheet->m_psh.dwFlags & PSH_NOAPPLYNOW) {
-// COMMENT: {6/2/2004 9:42:11 PM}		pSheet->GetDlgItem(2)->EnableWindow(FALSE);
-// COMMENT: {6/2/2004 9:42:11 PM}		pSheet->ModifyStyle(WS_SYSMENU, 0);
-// COMMENT: {6/2/2004 9:42:11 PM}	}
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE

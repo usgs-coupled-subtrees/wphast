@@ -25,7 +25,6 @@ CNewPrismWidget::CNewPrismWidget(void)
 , Cursor3D(0)
 , Cursor3DMapper(0)
 , Cursor3DActor(0)
-// COMMENT: {5/21/2008 9:03:43 PM}, WedgeSource(0)
 , LastPointId(0)
 , LastCellId(0)
 , Points(0)
@@ -55,7 +54,6 @@ CNewPrismWidget::CNewPrismWidget(void)
 
 	// Outline
 	//
-// COMMENT: {5/21/2008 10:07:09 PM}	this->WedgeSource = srcWedgeSource::New();
 	this->Points = vtkPoints::New();
 	this->CellArray = vtkCellArray::New();
 	
@@ -94,8 +92,6 @@ CNewPrismWidget::~CNewPrismWidget(void)
 	this->Cursor3D->Delete();
 	this->Cursor3DMapper->Delete();
 	this->Cursor3DActor->Delete();
-
-// COMMENT: {5/21/2008 8:57:44 PM}	this->WedgeSource->Delete();
 
 	this->Points->Delete();
 	this->CellArray->Delete();
@@ -143,13 +139,10 @@ void CNewPrismWidget::SetEnabled(int enabling)
 			this->EventCallbackCommand, this->Priority);
 		i->AddObserver(vtkCommand::LeftButtonReleaseEvent, 
 			this->EventCallbackCommand, this->Priority);
-		//{{
 		i->AddObserver(vtkCommand::KeyPressEvent, 
 			this->EventCallbackCommand, this->Priority);
 		i->AddObserver(vtkCommand::KeyReleaseEvent, 
 			this->EventCallbackCommand, this->Priority);
-		//}}
-
 
 		this->CurrentRenderer->AddActor(this->Cursor3DActor);
 		this->CurrentRenderer->AddActor(this->OutlineActor);
@@ -185,9 +178,6 @@ void CNewPrismWidget::SetEnabled(int enabling)
 
 void CNewPrismWidget::PlaceWidget(vtkFloatingPointType bounds[6])
 {
-// COMMENT: {5/21/2008 9:01:59 PM}	// set bounds for the outline
-// COMMENT: {5/21/2008 9:01:59 PM}	//
-// COMMENT: {5/21/2008 9:01:59 PM}	this->WedgeSource->SetBounds(bounds);
 	this->OutlineActor->SetVisibility(1);
 }
 
@@ -228,42 +218,12 @@ void CNewPrismWidget::ProcessEvents(vtkObject* object, unsigned long event, void
 
 void CNewPrismWidget::OnMouseMove()
 {
-// COMMENT: {5/22/2008 3:34:27 PM}	TRACE("CNewPrismWidget::OnMouseMove\n");
-
 	if (!this->CurrentRenderer) return;
 	if (!this->Prop3D) return;
-// COMMENT: {5/21/2008 9:01:11 PM}
-// COMMENT: {5/21/2008 9:01:11 PM}	// determine most likely plane by finding
-// COMMENT: {5/21/2008 9:01:11 PM}	// largest component vector
-// COMMENT: {5/21/2008 9:01:11 PM}	//
-// COMMENT: {5/21/2008 9:01:11 PM}	double max = 0.0;
-// COMMENT: {5/21/2008 9:01:11 PM}	vtkFloatingPointType viewPlaneNormal[3];
-// COMMENT: {5/21/2008 9:01:11 PM}	vtkCamera *camera = this->CurrentRenderer->GetActiveCamera();
-// COMMENT: {5/21/2008 9:01:11 PM}	camera->GetViewPlaneNormal(viewPlaneNormal);
-// COMMENT: {5/21/2008 9:01:11 PM}	for (int i = 0; i < 3; ++i)
-// COMMENT: {5/21/2008 9:01:11 PM}	{
-// COMMENT: {5/21/2008 9:01:11 PM}		// Note: fabs() is ~4x slower
-// COMMENT: {5/21/2008 9:01:11 PM}		//
-// COMMENT: {5/21/2008 9:01:11 PM}		if (max < FABS(viewPlaneNormal[i]))
-// COMMENT: {5/21/2008 9:01:11 PM}		{
-// COMMENT: {5/21/2008 9:01:11 PM}			this->FixedCoord = i;
-// COMMENT: {5/21/2008 9:01:11 PM}			if (viewPlaneNormal[i] < 0.0)
-// COMMENT: {5/21/2008 9:01:11 PM}			{
-// COMMENT: {5/21/2008 9:01:11 PM}				max = -viewPlaneNormal[i];
-// COMMENT: {5/21/2008 9:01:11 PM}				this->FixedPlane = 2 * i;
-// COMMENT: {5/21/2008 9:01:11 PM}			}
-// COMMENT: {5/21/2008 9:01:11 PM}			else
-// COMMENT: {5/21/2008 9:01:11 PM}			{
-// COMMENT: {5/21/2008 9:01:11 PM}				max = viewPlaneNormal[i];
-// COMMENT: {5/21/2008 9:01:11 PM}				this->FixedPlane = 2 * i + 1;
-// COMMENT: {5/21/2008 9:01:11 PM}			}
-// COMMENT: {5/21/2008 9:01:11 PM}		}
-// COMMENT: {5/21/2008 9:01:11 PM}	}
 
-	//{{
 	this->FixedCoord = 2; // always z-axis
 	this->FixedPlane = 5; // always zmax
-	//}}
+
 	ASSERT( 0 <= this->FixedPlane && this->FixedPlane < 6 );
 	ASSERT( 0 <= this->FixedCoord && this->FixedCoord < 3 );
 
@@ -318,7 +278,6 @@ void CNewPrismWidget::OnLeftButtonDown()
 		GetSystemMetrics(SM_CYDOUBLECLK) / 2);
 	if (g_cClicks > 1)
 	{
-		//{{ {7/17/2008 4:43:18 PM}
 		// remove last cell
 		//
 		vtkCellArray *ca = vtkCellArray::New();
@@ -342,24 +301,19 @@ void CNewPrismWidget::OnLeftButtonDown()
 		// update points
 		//
 		this->Points->SetNumberOfPoints(this->Points->GetNumberOfPoints()-2);
-		//}} {7/17/2008 4:43:18 PM}
 
 		TRACE("double-click detected\n");
 		// stop forwarding event
 		this->EventCallbackCommand->SetAbortFlag(1);
 		this->Interactor->Render();
-		//{{
+
 		// cancel creation
 
 		this->State = CNewPrismWidget::Start;
 		this->LastPointId = 0;
 
-		//{{
 		this->EndInteraction();
 		this->InvokeEvent(vtkCommand::EndInteractionEvent, NULL);
-		//}}
-
-		//}}
 		return;
 	}
 #endif
@@ -415,10 +369,8 @@ void CNewPrismWidget::OnLeftButtonDown()
 		this->CellArray->InsertCellPoint(1);
 		this->CellArray->InsertCellPoint(0);
 
-		//{{
 		this->StartInteraction();
 		this->InvokeEvent(vtkCommand::StartInteractionEvent, NULL);
-		//}}
 	}
 	else
 	{
@@ -471,9 +423,7 @@ void CNewPrismWidget::OnLeftButtonDown()
 		{
 			sNext[i] = pt[i] - lastpt[i];
 		}
-// COMMENT: {5/28/2008 3:48:22 PM}		sNext[0] = pt[0] - lastpt[0];
-// COMMENT: {5/28/2008 3:48:22 PM}		sNext[1] = pt[1] - lastpt[1];
-// COMMENT: {5/28/2008 3:48:22 PM}		sNext[2] = pt[2] - lastpt[2];
+
 		if (vtkMath::Normalize(sNext) == 0.0)
 		{
 			TRACE("duplicate point found\n");
@@ -487,22 +437,6 @@ void CNewPrismWidget::OnLeftButtonDown()
 			this->Interactor->Render();
 			return;
 		}
-
-// COMMENT: {5/28/2008 3:42:08 PM}		vtkFloatingPointType lastpt[3];
-// COMMENT: {5/28/2008 3:42:08 PM}		this->Points->GetPoint(this->LastPointId-2, lastpt);
-// COMMENT: {5/28/2008 3:42:08 PM}		if (pt[0] == lastpt[0] && pt[1] == lastpt[1])
-// COMMENT: {5/28/2008 3:42:08 PM}		{
-// COMMENT: {5/28/2008 3:42:08 PM}			TRACE("duplicate point found\n");
-// COMMENT: {5/28/2008 3:42:08 PM}#ifdef _DEBUG
-// COMMENT: {5/28/2008 3:42:08 PM}			std::ostringstream oss;
-// COMMENT: {5/28/2008 3:42:08 PM}			this->PrintSelf(oss, 0);
-// COMMENT: {5/28/2008 3:42:08 PM}			::OutputDebugStringA(oss.str().c_str());
-// COMMENT: {5/28/2008 3:42:08 PM}#endif
-// COMMENT: {5/28/2008 3:42:08 PM}			// stop forwarding event
-// COMMENT: {5/28/2008 3:42:08 PM}			this->EventCallbackCommand->SetAbortFlag(1);
-// COMMENT: {5/28/2008 3:42:08 PM}			this->Interactor->Render();
-// COMMENT: {5/28/2008 3:42:08 PM}			return;
-// COMMENT: {5/28/2008 3:42:08 PM}		}
 
 		// update LastPtId-1 and LastPtId
 		this->Points->SetPoint(this->LastPointId-1, pt[0], pt[1], bounds[4]);
@@ -540,8 +474,6 @@ void CNewPrismWidget::OnLeftButtonDown()
 	// stop forwarding event
 	//
 	this->EventCallbackCommand->SetAbortFlag(1);
-// COMMENT: {5/21/2008 9:49:25 PM}	this->StartInteraction();
-// COMMENT: {5/21/2008 9:49:25 PM}	this->InvokeEvent(vtkCommand::StartInteractionEvent, NULL);
 	this->Interactor->Render();
 }
 
@@ -550,24 +482,7 @@ void CNewPrismWidget::OnLeftButtonUp()
 	TRACE("CNewPrismWidget::OnLeftButtonUp\n");
 	if ( this->State == CNewPrismWidget::CreatingPrism )
 	{
-// COMMENT: {5/21/2008 9:00:38 PM}		vtkFloatingPointType* bounds = this->Prop3D->GetBounds();
-// COMMENT: {5/21/2008 9:00:38 PM}		CUtilities::GetWorldPointAtFixedPlane(this->Interactor, this->CurrentRenderer, this->FixedCoord, bounds[this->FixedPlane], this->FixedPlanePoint);
-// COMMENT: {5/21/2008 9:00:38 PM}		for (int i = 0; i < 3; ++i)
-// COMMENT: {5/21/2008 9:00:38 PM}		{
-// COMMENT: {5/21/2008 9:00:38 PM}			if (i != this->FixedCoord)
-// COMMENT: {5/21/2008 9:00:38 PM}			{
-// COMMENT: {5/21/2008 9:00:38 PM}				bounds[2 * i]     = min(this->StartPoint[i], this->FixedPlanePoint[i]);
-// COMMENT: {5/21/2008 9:00:38 PM}				bounds[2 * i + 1] = max(this->StartPoint[i], this->FixedPlanePoint[i]);
-// COMMENT: {5/21/2008 9:00:38 PM}			}
-// COMMENT: {5/21/2008 9:00:38 PM}		}
-// COMMENT: {5/21/2008 9:00:38 PM}		this->WedgeSource->SetBounds(bounds);
-// COMMENT: {5/21/2008 9:00:38 PM}
-// COMMENT: {5/21/2008 9:00:38 PM}		// stop forwarding event
-// COMMENT: {5/21/2008 9:00:38 PM}		//
-// COMMENT: {5/21/2008 9:00:38 PM}		this->State = CNewPrismWidget::Start;
 		this->EventCallbackCommand->SetAbortFlag(1);
-// COMMENT: {5/21/2008 9:00:38 PM}		this->EndInteraction();
-// COMMENT: {5/21/2008 9:00:38 PM}		this->InvokeEvent(vtkCommand::EndInteractionEvent, NULL);
 		if (this->Interactor)
 		{
 			this->Interactor->Render();
@@ -627,19 +542,16 @@ void CNewPrismWidget::OnKeyPress()
 	}
 #endif
 
-
 	if (this->State == CNewPrismWidget::CreatingPrism)
 	{
 		char* keysym = this->Interactor->GetKeySym();		
 		if (::strcmp(keysym, "Escape") == 0)
 		{
 			TRACE("CancelNewPrism\n");
-// COMMENT: {5/29/2008 1:11:27 PM}			this->CancelNewRiver();
 		}
 		else
 		{
 			TRACE("EndNewPrism\n");
-// COMMENT: {5/29/2008 1:11:30 PM}			this->EndNewPrism();
 
 			// remove last cell
 			//
@@ -693,8 +605,6 @@ void CNewPrismWidget::OnKeyPress()
 		}
 	}
 
-
-
 #ifdef _DEBUG
 	{
 		std::ostringstream oss;
@@ -703,5 +613,4 @@ void CNewPrismWidget::OnKeyPress()
 		::OutputDebugStringA(oss.str().c_str());
 	}
 #endif
-
 }

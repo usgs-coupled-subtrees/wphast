@@ -34,6 +34,7 @@ public:
 	int xyz_ss_vel_defined;
 	int hdf_chem;
 	int hdf_head;
+	int hdf_media;
 	int hdf_ss_vel;
 	int hdf_ss_vel_defined;
 	int xyz_chem;

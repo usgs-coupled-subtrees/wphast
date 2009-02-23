@@ -19,10 +19,12 @@ CWellPropertyPage::CWellPropertyPage()
 	, m_bConvertBetweenDepthsAndElevation(FALSE)
 	, m_allocate(FALSE)
 	, m_bFlowOnly(true)
+	, m_bUpdatePositionOnly(FALSE)
+	, m_bUpdateZOnly(FALSE)
 {
 	this->m_well.n_user = 1;
-	this->m_grid.SetUniformRange(0.0, 1.0, 2);
-	this->m_grid.Setup();
+	this->m_gridKeyword.m_grid[2].SetUniformRange(0.0, 1.0, 2);
+	this->m_gridKeyword.m_grid[2].Setup();
 
 	// RTF -- Change font to 8 and single-spaced
 	// Open user.transport.format.final.rtf
@@ -50,6 +52,72 @@ CWellPropertyPage::~CWellPropertyPage()
 void CWellPropertyPage::DoDataExchange(CDataExchange* pDX)
 {
 	CPropertyPage::DoDataExchange(pDX);
+	if (!pDX->m_bSaveAndValidate && this->m_bUpdatePositionOnly)
+	{
+		CWellSchedule well;
+		well = this->m_well;
+
+		// well.x_user
+		//
+		DDX_Text(pDX, IDC_X_EDIT, well.x_user);
+
+		// well.y_user
+		//
+		DDX_Text(pDX, IDC_Y_EDIT, well.y_user);
+
+		// grid/map coordinates
+		//
+		int state = BST_UNCHECKED;
+		switch (well.xy_coordinate_system_user)
+		{
+		case PHAST_Transform::MAP:
+			DDX_Text(pDX, IDC_X_UNITS_STATIC, this->m_strMapHorizontalUnits);
+			DDX_Text(pDX, IDC_Y_UNITS_STATIC, this->m_strMapHorizontalUnits);
+			state = BST_CHECKED;
+			break;
+		case PHAST_Transform::GRID:
+			DDX_Text(pDX, IDC_X_UNITS_STATIC, this->m_strHorizontalUnits);
+			DDX_Text(pDX, IDC_Y_UNITS_STATIC, this->m_strHorizontalUnits);
+			break;
+		default:
+			ASSERT(FALSE);
+			break;
+		}
+		DDX_Check(pDX, IDC_CHECK_USE_MAP, state);
+		return;
+	}
+
+	if (!pDX->m_bSaveAndValidate && this->m_bUpdateZOnly)
+	{
+		CWellSchedule well;
+		well = this->m_well;
+
+		// grid/map coordinates
+		//
+		int state_z = BST_UNCHECKED;
+		switch (well.z_coordinate_system_user)
+		{
+		case PHAST_Transform::MAP:
+			DDX_Text(pDX, IDC_LSD_UNITS_STATIC, this->m_strMapHorizontalUnits);
+			state_z = BST_CHECKED;
+			break;
+		case PHAST_Transform::GRID:
+			DDX_Text(pDX, IDC_LSD_UNITS_STATIC, this->m_strHorizontalUnits);
+			break;
+		default:
+			ASSERT(FALSE);
+			break;
+		}
+		DDX_Check(pDX, IDC_CHECK_USE_MAP_Z, state_z);
+
+		// screen headers
+		this->SetScreenHeadings(this->m_bByDepth);
+
+		// lsd
+		DDX_Text(pDX, IDC_LSD_EDIT, well.lsd_user);
+		return;
+	}
+
 	DDX_GridControl(pDX, IDC_GRID_SCREENS, m_wndScreensGrid);
 	DDX_GridControl(pDX, IDC_GRID_SCHEDULES, m_wndPumpSchedGrid);
 	DDX_Control(pDX, IDC_DESC_RICHEDIT, m_wndRichEditCtrl);
@@ -74,7 +142,7 @@ void CWellPropertyPage::DoDataExchange(CDataExchange* pDX)
 		const int MIN_ROWS = 10;
 		TRY
 		{
-			this->m_wndScreensGrid.SetRowCount(MIN_ROWS + this->m_well.count_depth + this->m_well.count_elevation);
+			this->m_wndScreensGrid.SetRowCount(MIN_ROWS + this->m_well.count_depth_user + this->m_well.count_elevation_user);
 			this->m_wndScreensGrid.SetColumnCount(2);
 			this->m_wndScreensGrid.SetFixedRowCount(1);
 			this->m_wndScreensGrid.SetFixedColumnCount(0);
@@ -181,15 +249,75 @@ void CWellPropertyPage::DoDataExchange(CDataExchange* pDX)
 		DDX_Text(pDX, IDC_DESC_EDIT, description);
 	}
 
-	// well.x
+	// well.x_user
 	//
-	DDX_Text(pDX, IDC_X_EDIT, well.x);
-	well.x_defined = TRUE;
+	DDX_Text(pDX, IDC_X_EDIT, well.x_user);
+	well.x_user_defined = TRUE;
 
-	// well.y
+	// well.y_user
 	//
-	DDX_Text(pDX, IDC_Y_EDIT, well.y);
-	well.y_defined = TRUE;
+	DDX_Text(pDX, IDC_Y_EDIT, well.y_user);
+	well.y_user_defined = TRUE;
+
+	// xy grid/map coordinates
+	//
+	int state = BST_UNCHECKED;
+	switch (well.xy_coordinate_system_user)
+	{
+	case PHAST_Transform::MAP:
+		state = BST_CHECKED;
+		DDX_Text(pDX, IDC_X_UNITS_STATIC, this->m_strMapHorizontalUnits);
+		DDX_Text(pDX, IDC_Y_UNITS_STATIC, this->m_strMapHorizontalUnits);
+		break;
+	case PHAST_Transform::GRID:
+		DDX_Text(pDX, IDC_X_UNITS_STATIC, this->m_strHorizontalUnits);
+		DDX_Text(pDX, IDC_Y_UNITS_STATIC, this->m_strHorizontalUnits);
+		break;
+	default:
+		ASSERT(FALSE);
+		break;
+	}
+	DDX_Check(pDX, IDC_CHECK_USE_MAP, state);
+	if (pDX->m_bSaveAndValidate)
+	{
+		switch (state)
+		{
+		case BST_CHECKED:
+			well.xy_coordinate_system_user = PHAST_Transform::MAP;
+			break;
+		default:
+			well.xy_coordinate_system_user = PHAST_Transform::GRID;
+			break;
+		}
+	}
+
+	// z grid/map coordinates
+	//
+	int state_z = BST_UNCHECKED;
+	switch (well.z_coordinate_system_user)
+	{
+	case PHAST_Transform::MAP:
+		state_z = BST_CHECKED;
+		break;
+	case PHAST_Transform::GRID:
+		break;
+	default:
+		ASSERT(FALSE);
+		break;
+	}
+	DDX_Check(pDX, IDC_CHECK_USE_MAP_Z, state_z);
+	if (pDX->m_bSaveAndValidate)
+	{
+		switch (state_z)
+		{
+		case BST_CHECKED:
+			well.z_coordinate_system_user = PHAST_Transform::MAP;
+			break;
+		default:
+			well.z_coordinate_system_user = PHAST_Transform::GRID;
+			break;
+		}
+	}
 
 	// By depth or elevation
 	//
@@ -217,33 +345,34 @@ void CWellPropertyPage::DoDataExchange(CDataExchange* pDX)
 		this->EnableByDepth(this->m_bByDepth);
 	}
 
-	// lsd
+	// lsd_user
 	if (pDX->m_bSaveAndValidate)
 	{
 		if (this->m_bByDepth)
 		{
-			DDX_Text(pDX, IDC_LSD_EDIT, well.lsd);
-			well.lsd_defined = TRUE;
+			DDX_Text(pDX, IDC_LSD_EDIT, well.lsd_user);
+			well.lsd_user_defined = TRUE;
 		}
 		else
 		{
-			well.lsd_defined = FALSE;
+			well.lsd_user_defined = FALSE;
 		}
 	}
 	else
 	{
-		if (well.lsd_defined)
+		if (well.lsd_user_defined)
 		{
 			ASSERT(this->m_bByDepth);
-			this->m_wndWellCtrl.SetLSD(well.lsd);
-			DDX_Text(pDX, IDC_LSD_EDIT, well.lsd);
+			this->m_wndWellCtrl.SetLSD(well.lsd_user);
+			DDX_Text(pDX, IDC_LSD_EDIT, well.lsd_user);
 		}
 		else
 		{
 			ASSERT(!this->m_bByDepth);
-			this->m_grid.Setup();
-			this->m_wndWellCtrl.SetLSD(this->m_grid.coord[this->m_grid.count_coord - 1]);
-			DDX_Text(pDX, IDC_LSD_EDIT, this->m_grid.coord[this->m_grid.count_coord - 1]);
+			this->m_gridKeyword.m_grid[2].Setup();
+			this->m_well.lsd_user = this->m_gridKeyword.m_grid[2].coord[this->m_gridKeyword.m_grid[2].count_coord - 1];
+			this->m_wndWellCtrl.SetLSD(this->m_well.lsd_user);
+			DDX_Text(pDX, IDC_LSD_EDIT, this->m_well.lsd_user);
 		}
 	}
 
@@ -291,7 +420,7 @@ void CWellPropertyPage::DoDataExchange(CDataExchange* pDX)
 	}
 	else
 	{
-		this->m_wndWellCtrl.SetGrid(this->m_grid);
+		this->m_wndWellCtrl.SetGrid(this->m_gridKeyword.m_grid[2]);		
 		this->m_wndWellCtrl.SetByDepth(this->m_bByDepth);
 	}
 
@@ -334,7 +463,7 @@ void CWellPropertyPage::DoDataExchange(CDataExchange* pDX)
 		}
 		if (listIntervals.empty())
 		{
-			well.count_depth = well.count_elevation = 0;
+			well.count_depth_user = well.count_elevation_user = 0;
 			CString string("At least one screened interval must be defined.");
 			pDX->PrepareCtrl(IDC_GRID_SCREENS);
 			::DDX_GridControlFail(pDX, IDC_GRID_SCREENS, 1, 0, string);
@@ -343,26 +472,26 @@ void CWellPropertyPage::DoDataExchange(CDataExchange* pDX)
 		{
 			if (this->m_bByDepth)
 			{
-				well.count_depth = (int)listIntervals.size();
-				well.count_elevation = 0;
-				delete[] well.depth;
-				well.depth = new Well_Interval[well.count_depth + 1];
+				well.count_depth_user = (int)listIntervals.size();
+				well.count_elevation_user = 0;
+				delete[] well.depth_user;
+				well.depth_user = new Well_Interval[well.count_depth_user + 1];
 				std::list<Well_Interval>::iterator it = listIntervals.begin();
 				for (int i = 0; it != listIntervals.end(); ++it, ++i)
 				{
-					well.depth[i] = (*it);
+					well.depth_user[i] = (*it);
 				}
 			}
 			else
 			{
-				well.count_depth = 0;
-				well.count_elevation = (int)listIntervals.size();
-				delete[] well.elevation;
-				well.elevation = new Well_Interval[well.count_elevation + 1];
+				well.count_depth_user = 0;
+				well.count_elevation_user = (int)listIntervals.size();
+				delete[] well.elevation_user;
+				well.elevation_user = new Well_Interval[well.count_elevation_user + 1];
 				std::list<Well_Interval>::iterator it = listIntervals.begin();
 				for (int i = 0; it != listIntervals.end(); ++it, ++i)
 				{
-					well.elevation[i] = (*it);
+					well.elevation_user[i] = (*it);
 				}
 			}
 		}
@@ -370,7 +499,7 @@ void CWellPropertyPage::DoDataExchange(CDataExchange* pDX)
 	else
 	{
 		// this->m_well should have been Reduce()d
-		ASSERT(this->m_well.count_depth * this->m_well.count_elevation == 0);
+		ASSERT(this->m_well.count_depth_user * this->m_well.count_elevation_user == 0);
 
 		this->m_wndWellCtrl.RemoveAllScreens();
 
@@ -379,40 +508,40 @@ void CWellPropertyPage::DoDataExchange(CDataExchange* pDX)
 
 		// elevations
 		//
-		for (int i = 0; i < this->m_well.count_elevation; ++i)
+		for (int i = 0; i < this->m_well.count_elevation_user; ++i)
 		{
 			// set grid bottom
 			Item.row = i + 1;
 			Item.col = 0;
-			Item.strText.Format(_T("%g"), this->m_well.elevation[i].bottom);
+			Item.strText.Format(_T("%g"), this->m_well.elevation_user[i].bottom);
 			this->m_wndScreensGrid.SetItem(&Item);
 
 			// set grid top
 			Item.col = 1;
-			Item.strText.Format(_T("%g"), this->m_well.elevation[i].top);
+			Item.strText.Format(_T("%g"), this->m_well.elevation_user[i].top);
 			this->m_wndScreensGrid.SetItem(&Item);
 
 			// add screen
-			this->m_wndWellCtrl.AddScreen(this->m_well.elevation[i].bottom, this->m_well.elevation[i].top);
+			this->m_wndWellCtrl.AddScreen(this->m_well.elevation_user[i].bottom, this->m_well.elevation_user[i].top);
 		}
 
 		// depths
 		//
-		for (int i = 0; i < this->m_well.count_depth; ++i)
+		for (int i = 0; i < this->m_well.count_depth_user; ++i)
 		{
 			// set grid bottom
 			Item.row = i + 1;
 			Item.col = 0;
-			Item.strText.Format(_T("%g"), this->m_well.depth[i].bottom);
+			Item.strText.Format(_T("%g"), this->m_well.depth_user[i].bottom);
 			this->m_wndScreensGrid.SetItem(&Item);
 
 			// set grid top
 			Item.col = 1;
-			Item.strText.Format(_T("%g"), this->m_well.depth[i].top);
+			Item.strText.Format(_T("%g"), this->m_well.depth_user[i].top);
 			this->m_wndScreensGrid.SetItem(&Item);
 
 			// add screen
-			this->m_wndWellCtrl.AddScreen(this->m_well.lsd - this->m_well.depth[i].bottom, this->m_well.lsd - this->m_well.depth[i].top);
+			this->m_wndWellCtrl.AddScreen(this->m_well.lsd_user - this->m_well.depth_user[i].bottom, this->m_well.lsd_user - this->m_well.depth_user[i].top);
 		}
 
 	}
@@ -524,17 +653,17 @@ void CWellPropertyPage::DoDataExchange(CDataExchange* pDX)
 			this->m_wndPumpSchedGrid.SetItem(&Item);
 
 			// start time units
-			if ((*iter).first.type == UNDEFINED)
+			if ((*iter).first.type == TT_UNDEFINED)
 			{
 				ASSERT(this->m_units.time.input && ::strlen(this->m_units.time.input));
 				Item.strText = CGlobal::GetStdTimeUnits(this->m_units.time.input).c_str();
 			}
-			else if ((*iter).first.type == STEP)
+			else if ((*iter).first.type == TT_STEP)
 			{
 				ASSERT(FALSE);
 				Item.strText = CGlobal::GetStdTimeUnits(this->m_units.time.input).c_str();
 			}
-			else if ((*iter).first.type == UNITS)
+			else if ((*iter).first.type == TT_UNITS)
 			{
 				ASSERT((*iter).first.input && ::strlen((*iter).first.input));
 				if ((*iter).first.input)
@@ -602,6 +731,8 @@ BEGIN_MESSAGE_MAP(CWellPropertyPage, CPropertyPage)
 	ON_BN_SETFOCUS(IDC_DEPTH_RADIO, OnBnSetfocusDepthRadio)
 	ON_BN_SETFOCUS(IDC_DIAM_RADIO, OnBnSetfocusDiamRadio)
 	ON_BN_SETFOCUS(IDC_RADIUS_RADIO, OnBnSetfocusRadiusRadio)
+	ON_BN_CLICKED(IDC_CHECK_USE_MAP, OnBnClickedUseMap)
+	ON_BN_CLICKED(IDC_CHECK_USE_MAP_Z, OnBnClickedUseMapZ)
 END_MESSAGE_MAP()
 
 
@@ -621,7 +752,7 @@ void CWellPropertyPage::SetProperties(const CWellSchedule& well)
 {
 	this->m_well = well;
 	this->m_well.Reduce();
-	this->m_bByDepth = (this->m_well.lsd_defined);
+	this->m_bByDepth = (this->m_well.lsd_user_defined);
 }
 
 void CWellPropertyPage::SetScreenHeadings(BOOL bByDepth)
@@ -630,24 +761,31 @@ void CWellPropertyPage::SetScreenHeadings(BOOL bByDepth)
 	Item.mask = GVIF_TEXT;
 	Item.row = 0;
 
+
+	CString units = this->m_strVerticalUnits;
+	if (this->m_well.z_coordinate_system_user == PHAST_Transform::MAP)
+	{
+		units = this->m_strMapVerticalUnits;
+	}
+
 	if (bByDepth)
 	{
 		Item.col = 0;
-		Item.strText.Format(_T("Bottom depth %s"), this->m_strVerticalUnits);
+		Item.strText.Format(_T("Bottom depth %s"), units);
 		this->m_wndScreensGrid.SetItem(&Item);
 
 		Item.col = 1;
-		Item.strText.Format(_T("Top depth %s"), this->m_strVerticalUnits);
+		Item.strText.Format(_T("Top depth %s"), units);
 		this->m_wndScreensGrid.SetItem(&Item);
 	}
 	else
 	{
 		Item.col = 0;
-		Item.strText.Format(_T("Bottom elevation %s"), this->m_strVerticalUnits);
+		Item.strText.Format(_T("Bottom elevation %s"), units);
 		this->m_wndScreensGrid.SetItem(&Item);
 
 		Item.col = 1;
-		Item.strText.Format(_T("Top elevation %s"), this->m_strVerticalUnits);
+		Item.strText.Format(_T("Top elevation %s"), units);
 		this->m_wndScreensGrid.SetItem(&Item);
 	}
 	this->m_wndScreensGrid.RedrawWindow();
@@ -724,7 +862,33 @@ void CWellPropertyPage::FillUnits(void)
 			this->m_strVerticalUnits.Format("(%s)", this->m_units.vertical.si);
 		}
 		this->GetDlgItem(IDC_LSD_UNITS_STATIC)->SetWindowText(this->m_strVerticalUnits);
-	}	
+	}
+
+	if (this->m_strMapHorizontalUnits.IsEmpty())
+	{
+		if (this->m_units.map_horizontal.defined)
+		{
+			this->m_strMapHorizontalUnits.Format("(%s)", this->m_units.map_horizontal.input);
+			CGlobal::MinimizeLengthUnits(this->m_strMapHorizontalUnits);
+		}
+		else
+		{
+			this->m_strMapHorizontalUnits.Format("(%s)", this->m_units.map_horizontal.si);
+		}
+	}
+
+	if (this->m_strMapVerticalUnits.IsEmpty())
+	{
+		if (this->m_units.map_vertical.defined)
+		{
+			this->m_strMapVerticalUnits.Format("(%s)", this->m_units.map_vertical.input);
+			CGlobal::MinimizeLengthUnits(this->m_strMapVerticalUnits);
+		}
+		else
+		{
+			this->m_strMapVerticalUnits.Format("(%s)", this->m_units.map_vertical.si);
+		}
+	}
 
 	if (this->m_strWellDiameterUnits.IsEmpty())
 	{
@@ -814,27 +978,27 @@ void CWellPropertyPage::EnableByDepth(BOOL bByDepth)
 		}
 	}
 }
+
 void CWellPropertyPage::OnBnClickedElevationRadio()
 {
-	BOOL bByDepth = (this->IsDlgButtonChecked(IDC_DEPTH_RADIO) == BST_CHECKED);
-	this->UpdateScreens(bByDepth);
-	this->EnableByDepth(bByDepth);
-	this->SetScreenHeadings(bByDepth);
+	this->m_bByDepth = (this->IsDlgButtonChecked(IDC_DEPTH_RADIO) == BST_CHECKED);
+	this->UpdateScreens(this->m_bByDepth);
+	this->EnableByDepth(this->m_bByDepth);
+	this->SetScreenHeadings(this->m_bByDepth);
 }
 
 void CWellPropertyPage::OnBnClickedDepthRadio()
 {
-	BOOL bByDepth = (this->IsDlgButtonChecked(IDC_DEPTH_RADIO) == BST_CHECKED);
-	this->UpdateScreens(bByDepth);
-	this->EnableByDepth(bByDepth);
-	this->SetScreenHeadings(bByDepth);
+	this->m_bByDepth = (this->IsDlgButtonChecked(IDC_DEPTH_RADIO) == BST_CHECKED);
+	this->UpdateScreens(this->m_bByDepth);
+	this->EnableByDepth(this->m_bByDepth);
+	this->SetScreenHeadings(this->m_bByDepth);
 }
 
-BOOL CWellPropertyPage::SetGrid(const struct grid &g)
+void CWellPropertyPage::SetGridKeyword(const CGridKeyword& gridKeyword)
 {
-	this->m_grid = g;
-	this->m_grid.Setup();
-	return TRUE; // ok
+	this->m_gridKeyword = gridKeyword;
+	this->m_gridKeyword.m_grid[2].Setup();
 }
 
 void CWellPropertyPage::OnEndLabelEditScreen(NMHDR *pNotifyStruct, LRESULT *result)
@@ -1059,3 +1223,242 @@ void CWellPropertyPage::OnBnSetfocusRadiusRadio()
 {
 	this->m_wndRichEditCtrl.SetWindowText(this->m_sWellRadiusRTF.c_str());
 }
+
+void CWellPropertyPage::OnBnClickedUseMap()
+{
+	const CUnits& units = this->m_units;
+	const CGridKeyword& gridKeyword = this->m_gridKeyword;
+	PHAST_Transform map2grid(
+		gridKeyword.m_grid_origin[0],
+		gridKeyword.m_grid_origin[1],
+		gridKeyword.m_grid_origin[2],
+		gridKeyword.m_grid_angle,
+		units.map_horizontal.input_to_si/units.horizontal.input_to_si,
+		units.map_horizontal.input_to_si/units.horizontal.input_to_si,
+		units.map_vertical.input_to_si/units.vertical.input_to_si
+		);
+
+	Point p(
+		this->m_well.x_user,
+		this->m_well.y_user,
+		0.0
+		);
+
+	if (this->IsDlgButtonChecked(IDC_CHECK_USE_MAP) == BST_CHECKED)
+	{
+		map2grid.Inverse_transform(p);
+		this->m_well.x_user = p.x();
+		this->m_well.y_user = p.y();
+		this->m_well.xy_coordinate_system_user = PHAST_Transform::MAP;
+	}
+	else
+	{
+		map2grid.Transform(p);
+		this->m_well.x_user = p.x();
+		this->m_well.y_user = p.y();
+		this->m_well.xy_coordinate_system_user = PHAST_Transform::GRID;
+	}
+	ASSERT(this->m_bUpdatePositionOnly == FALSE);
+	this->m_bUpdatePositionOnly = TRUE;
+	this->UpdateData(FALSE);
+	this->m_bUpdatePositionOnly = FALSE;
+}
+
+void CWellPropertyPage::OnBnClickedUseMapZ()
+{
+	const CUnits& units = this->m_units;
+	const CGridKeyword& gridKeyword = this->m_gridKeyword;
+	PHAST_Transform map2grid(
+		gridKeyword.m_grid_origin[0],
+		gridKeyword.m_grid_origin[1],
+		gridKeyword.m_grid_origin[2],
+		gridKeyword.m_grid_angle,
+		units.map_horizontal.input_to_si/units.horizontal.input_to_si,
+		units.map_horizontal.input_to_si/units.horizontal.input_to_si,
+		units.map_vertical.input_to_si/units.vertical.input_to_si
+		);
+
+	Point p;
+
+	if (this->IsDlgButtonChecked(IDC_CHECK_USE_MAP_Z) == BST_CHECKED)
+	{
+		// convert lsd
+		//
+		this->m_well.z_coordinate_system_user = PHAST_Transform::MAP;
+		p.set_z(this->m_well.lsd_user);
+		map2grid.Inverse_transform(p);
+		this->m_well.lsd_user = p.z();
+
+		// convert grid to map units
+		//
+		CGrid g(gridKeyword.m_grid[2]);
+		g.Setup();
+		for (int j=0; j < g.count_coord; ++j)
+		{
+			p.set_z(g.coord[j]);
+			map2grid.Inverse_transform(p);
+			g.coord[j] = p.z();
+		}
+
+
+		// update open intervals
+		//
+		Well_Interval interval;
+		std::list<Well_Interval> listInterval;
+		for (int row = 1; row < this->m_wndScreensGrid.GetRowCount(); ++row)
+		{
+			bool valid_bottom = false;
+			bool valid_top = false;
+
+			GV_ITEM Item;
+			Item.mask = GVIF_TEXT;		
+
+			CString strBottom = this->m_wndScreensGrid.GetItemText(row, 0);
+			if (!strBottom.IsEmpty() && CGlobal::SimpleFloatParse(strBottom, interval.bottom))
+			{
+				valid_bottom = true;
+
+				p.set_z(interval.bottom);
+				map2grid.Inverse_transform(p);
+				interval.bottom = p.z();
+
+				Item.row = row;
+				Item.col = 0;
+				Item.strText.Format(_T("%g"), interval.bottom);
+				this->m_wndScreensGrid.SetItem(&Item);
+
+				if (this->m_bByDepth)
+				{
+					interval.bottom = this->m_well.lsd_user - interval.bottom;
+				}
+			}
+
+			CString strTop = this->m_wndScreensGrid.GetItemText(row, 1);
+			if (!strTop.IsEmpty() && CGlobal::SimpleFloatParse(strTop, interval.top))
+			{
+				valid_top = true;
+
+				p.set_z(interval.top);
+				map2grid.Inverse_transform(p);
+				interval.top = p.z();
+
+				Item.row = row;
+				Item.col = 1;
+				Item.strText.Format(_T("%g"), interval.top);
+				this->m_wndScreensGrid.SetItem(&Item);
+
+				if (this->m_bByDepth)
+				{
+					interval.top = this->m_well.lsd_user - interval.top;
+				}
+			}
+
+			if (valid_bottom && valid_top)
+			{
+				listInterval.push_back(interval);
+			}
+		}
+
+		// set grid ctrl
+		//
+		this->m_wndWellCtrl.SetGrid(g);
+		this->m_wndWellCtrl.SetByDepth(this->m_bByDepth);
+		this->m_wndWellCtrl.RemoveAllScreens();
+		this->m_wndWellCtrl.SetLSD(this->m_well.lsd_user);
+		std::list<Well_Interval>::iterator iter = listInterval.begin();
+		for (; iter !=  listInterval.end(); ++iter)
+		{
+			this->m_wndWellCtrl.AddScreen((*iter).bottom, (*iter).top);
+		}
+	}
+	else
+	{
+		// convert lsd
+		//
+		this->m_well.z_coordinate_system_user = PHAST_Transform::GRID;
+		p.set_z(this->m_well.lsd_user);
+		map2grid.Transform(p);
+		this->m_well.lsd_user = p.z();
+
+		// grid already in grid units
+		//
+		CGrid g(gridKeyword.m_grid[2]);
+		g.Setup();
+
+		// update open intervals
+		//
+		Well_Interval interval;
+		std::list<Well_Interval> listInterval;
+		for (int row = 1; row < this->m_wndScreensGrid.GetRowCount(); ++row)
+		{
+			bool valid_bottom = false;
+			bool valid_top = false;
+
+			GV_ITEM Item;
+			Item.mask = GVIF_TEXT;		
+
+			CString strBottom = this->m_wndScreensGrid.GetItemText(row, 0);
+			if (!strBottom.IsEmpty() && CGlobal::SimpleFloatParse(strBottom, interval.bottom))
+			{
+				valid_bottom = true;
+
+				p.set_z(interval.bottom);
+				map2grid.Transform(p);
+				interval.bottom = p.z();
+
+				Item.row = row;
+				Item.col = 0;
+				Item.strText.Format(_T("%g"), interval.bottom);
+				this->m_wndScreensGrid.SetItem(&Item);
+
+				if (this->m_bByDepth)
+				{
+					interval.bottom = this->m_well.lsd_user - interval.bottom;
+				}
+			}
+
+			CString strTop = this->m_wndScreensGrid.GetItemText(row, 1);
+			if (!strTop.IsEmpty() && CGlobal::SimpleFloatParse(strTop, interval.top))
+			{
+				valid_top = true;
+
+				p.set_z(interval.top);
+				map2grid.Transform(p);
+				interval.top = p.z();
+
+				Item.row = row;
+				Item.col = 1;
+				Item.strText.Format(_T("%g"), interval.top);
+				this->m_wndScreensGrid.SetItem(&Item);
+
+				if (this->m_bByDepth)
+				{
+					interval.top = this->m_well.lsd_user - interval.top;
+				}
+			}
+
+			if (valid_bottom && valid_top)
+			{
+				listInterval.push_back(interval);
+			}
+		}
+
+		// set grid ctrl
+		//
+		this->m_wndWellCtrl.SetGrid(g);
+		this->m_wndWellCtrl.SetByDepth(this->m_bByDepth);
+		this->m_wndWellCtrl.RemoveAllScreens();
+		this->m_wndWellCtrl.SetLSD(this->m_well.lsd_user);
+		std::list<Well_Interval>::iterator iter = listInterval.begin();
+		for (; iter !=  listInterval.end(); ++iter)
+		{
+			this->m_wndWellCtrl.AddScreen((*iter).bottom, (*iter).top);
+		}
+	}
+
+	ASSERT(this->m_bUpdateZOnly == FALSE);
+	this->m_bUpdateZOnly = TRUE;
+	this->UpdateData(FALSE);
+	this->m_bUpdateZOnly = FALSE;
+}
+

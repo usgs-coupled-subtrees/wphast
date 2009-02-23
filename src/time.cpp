@@ -11,7 +11,7 @@
 
 Ctime::Ctime(void)
 {
-	this->type          = UNDEFINED;
+	this->type          = TT_UNDEFINED;
 	this->value         = 0.0;
 	this->value_defined = FALSE;
 	this->input         = NULL;
@@ -33,7 +33,7 @@ Ctime::Ctime(const struct time& t)
 	//{{{4/21/2005 9:52:09 PM}
 	if (t.input && ::strlen(t.input))
 	{
-		ASSERT(t.type == UNITS || t.type == STEP);
+		ASSERT(t.type == TT_UNITS || t.type == TT_STEP);
 		this->SetInput(t.input);
 	}
 	//}}{4/21/2005 9:52:09 PM}
@@ -48,7 +48,7 @@ Ctime::Ctime(const Ctime& t)
 	//{{{4/21/2005 9:52:09 PM}
 	if (t.input && ::strlen(t.input))
 	{
-		ASSERT(t.type == UNITS || t.type == STEP);
+		ASSERT(t.type == TT_UNITS || t.type == TT_STEP);
 		this->SetInput(t.input);
 	}
 	//}}{4/21/2005 9:52:09 PM}
@@ -61,7 +61,7 @@ void Ctime::Copy(struct time& dest, const struct time& src)
 	dest.value_defined = src.value_defined;
 	if (src.input)
 	{
-		if (src.type == STEP)
+		if (src.type == TT_STEP)
 		{
 			ASSERT(dest.input == 0);
 			dest.input = new char[::strlen(src.input) + 1];
@@ -121,7 +121,7 @@ int Ctime::SetInput(const char* input)
 		delete[] this->input;
 		this->input = new char[::strlen(input) + 1];
 		::strcpy(this->input, input);
-		this->type = STEP;
+		this->type = TT_STEP;
 		n = OK;
 	}
 	else
@@ -134,7 +134,7 @@ int Ctime::SetInput(const char* input)
 		n = ::units_conversion(this->input, "s", &(this->input_to_si), FALSE);
 		if (n == OK)
 		{
-			this->type = UNITS;
+			this->type = TT_UNITS;
 		}
 		else
 		{
@@ -173,15 +173,15 @@ void Ctime::Serialize(bool bStoring, hid_t loc_id)
 	ASSERT(status >= 0);
 	switch (this->type)
 	{
-		case UNITS:
+		case TT_UNITS:
 			status = CGlobal::HDFSerializeStringOrNull(bStoring, loc_id, szInput, &this->input);
 			ASSERT(status >= 0 || this->input == NULL);
 			break;
-		case STEP:
+		case TT_STEP:
 			status = CGlobal::HDFSerializeStringOrNull(bStoring, loc_id, szInput, &this->input);
 			ASSERT(status >= 0 || this->input == NULL);
 			break;
-		case UNDEFINED:
+		case TT_UNDEFINED:
 			ASSERT(this->input == NULL);
 			break;
 		default:
@@ -195,13 +195,13 @@ void Ctime::Serialize(bool bStoring, hid_t loc_id)
 	{
 		switch (this->type)
 		{
-			case UNITS:
+			case TT_UNITS:
 				this->SetInput(this->input);
 				break;
-			case STEP:
+			case TT_STEP:
 				// nothing to do ???
 				break;
-			case UNDEFINED:
+			case TT_UNDEFINED:
 				break;
 			default:
 				ASSERT(FALSE);
@@ -243,13 +243,19 @@ void Ctime::Serialize(CArchive& ar)
 	}
 	else
 	{
+#ifdef USE_TIME_TYPE_ENUM
+		int i;
+		ar >> i;
+		this->type = static_cast<TIME_TYPE>(i);
+#else
 		ar >> this->type;
+#endif
 	}
 
 	CString temp;
 	switch (this->type)
 	{
-		case UNITS:	case STEP:
+		case TT_UNITS:	case TT_STEP:
 			if (ar.IsStoring())
 			{
 				if (this->input)
@@ -277,7 +283,7 @@ void Ctime::Serialize(CArchive& ar)
 				}
 			}
 			break;
-		case UNDEFINED:
+		case TT_UNDEFINED:
 			ASSERT(this->input == NULL);
 			break;
 		default:
@@ -292,13 +298,13 @@ void Ctime::Serialize(CArchive& ar)
 	{
 		switch (this->type)
 		{
-			case UNITS:
+			case TT_UNITS:
 				this->SetInput(this->input);
 				break;
-			case STEP:
+			case TT_STEP:
 				// nothing to do ???
 				break;
-			case UNDEFINED:
+			case TT_UNDEFINED:
 				break;
 			default:
 				ASSERT(FALSE);

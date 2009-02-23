@@ -19,6 +19,7 @@ CNewZonePropertyPage::CNewZonePropertyPage()
 , m_htiBCSpec(0)
 , m_htiICHead(0)
 , m_htiChemIC(0)
+, m_htiFlowRate(0)
 {
 }
 
@@ -33,22 +34,24 @@ void CNewZonePropertyPage::DoDataExchange(CDataExchange* pDX)
 
 	if (this->m_bFirstSetActive)
 	{
-		this->m_htiMedia   = this->m_wndTree.InsertItem(_T("MEDIA"));
-		this->m_htiIC      = this->m_wndTree.InsertItem(_T("INITIAL_CONDITIONS"));
-		this->m_htiBC      = this->m_wndTree.InsertItem(_T("BOUNDARY_CONDITIONS"));
+		this->m_htiMedia    = this->m_wndTree.InsertItem(_T("MEDIA"));
+		this->m_htiIC       = this->m_wndTree.InsertItem(_T("INITIAL_CONDITIONS"));
+		this->m_htiBC       = this->m_wndTree.InsertItem(_T("BOUNDARY_CONDITIONS"));
+		this->m_htiFlowRate = this->m_wndTree.InsertItem(_T("ZONE_FLOW_RATES"));
 
 		// IC
-		this->m_htiICHead  = this->m_wndTree.InsertItem(_T("HEAD_IC"), this->m_htiIC);
-		this->m_htiChemIC  = this->m_wndTree.InsertItem(_T("CHEMISTRY_IC"), this->m_htiIC);
+		this->m_htiICHead   = this->m_wndTree.InsertItem(_T("HEAD_IC"), this->m_htiIC);
+		this->m_htiChemIC   = this->m_wndTree.InsertItem(_T("CHEMISTRY_IC"), this->m_htiIC);
 
 		// BC
-		this->m_htiBCFlux  = this->m_wndTree.InsertItem(_T("FLUX_BC"), this->m_htiBC);
-		this->m_htiBCLeaky = this->m_wndTree.InsertItem(_T("LEAKY_BC"), this->m_htiBC);
-		this->m_htiBCSpec  = this->m_wndTree.InsertItem(_T("SPECIFIED_HEAD_BC"), this->m_htiBC);
+		this->m_htiBCFlux   = this->m_wndTree.InsertItem(_T("FLUX_BC"), this->m_htiBC);
+		this->m_htiBCLeaky  = this->m_wndTree.InsertItem(_T("LEAKY_BC"), this->m_htiBC);
+		this->m_htiBCSpec   = this->m_wndTree.InsertItem(_T("SPECIFIED_HEAD_BC"), this->m_htiBC);
 
 		this->m_wndTree.EnsureVisible(this->m_htiBCFlux);
 		this->m_wndTree.EnsureVisible(this->m_htiICHead);
 		this->m_wndTree.EnsureVisible(this->m_htiMedia);
+		this->m_wndTree.EnsureVisible(this->m_htiFlowRate);
 	}
 
 	if (pDX->m_bSaveAndValidate)
@@ -57,6 +60,10 @@ void CNewZonePropertyPage::DoDataExchange(CDataExchange* pDX)
 		if (hti == this->m_htiMedia)
 		{
 			this->m_type = ID_ZONE_TYPE_MEDIA;
+		}
+		else if (hti == this->m_htiFlowRate)
+		{
+			this->m_type = ID_ZONE_TYPE_FLOW_RATE;
 		}
 		else if (hti == this->m_htiBC)
 		{
@@ -100,6 +107,10 @@ void CNewZonePropertyPage::DoDataExchange(CDataExchange* pDX)
 		{
 			this->m_wndTree.SelectItem(this->m_htiMedia);
 		}
+		else if (this->m_type == ID_ZONE_TYPE_FLOW_RATE)
+		{
+			this->m_wndTree.SelectItem(this->m_htiFlowRate);
+		}
 		else if (this->m_type == ID_ZONE_TYPE_BC_FLUX)
 		{
 			this->m_wndTree.SelectItem(this->m_htiBCFlux);
@@ -129,6 +140,7 @@ void CNewZonePropertyPage::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(CNewZonePropertyPage, baseCNewZonePropertyPage)
 	ON_NOTIFY(NM_DBLCLK, IDC_TREE_ZONES, OnNMDblclkTreeZones)
+	ON_NOTIFY(TVN_SELCHANGED, IDC_TREE_ZONES, OnTVNSelChanged)
 END_MESSAGE_MAP()
 
 // CNewZonePropertyPage message handlers
@@ -147,12 +159,13 @@ BOOL CNewZonePropertyPage::OnInitDialog()
 	// 4 : specified page   CBCSpecifiedPropertyPage/CBCSpecifiedHeadPropertyPage
 	// 5 : head_ic page     CICHeadPropertyPage
 	// 6 : chem_ic page     CChemICPropertyPage/CChemICSpreadPropertyPage
+	// 7 : zone_flow page   CZoneFlowRatePropertyPage
 	
 	CPropertySheet* pSheet = (CPropertySheet*) this->GetParent();   
 	if (pSheet->IsWizard())
 	{
 		int nCount = pSheet->GetPageCount();
-		ASSERT(nCount == 7);
+		ASSERT(nCount == 8);
 		for (int i = 0; i < nCount; ++i)
 		{
 			this->m_PropPageArray.Add(pSheet->GetPage(i));
@@ -182,7 +195,17 @@ BOOL CNewZonePropertyPage::OnSetActive()
 	ASSERT_KINDOF(CPropertySheet, pSheet);
 	if (pSheet->IsWizard())
 	{
-		pSheet->SetWizardButtons(PSWIZB_NEXT);
+#ifdef SAVE
+		HTREEITEM hti = this->m_wndTree.GetSelectedItem();
+		if (hti == this->m_htiFlowRate)
+		{
+			pSheet->SetWizardButtons(PSWIZB_FINISH);
+		}
+		else
+#endif
+		{
+			pSheet->SetWizardButtons(PSWIZB_NEXT);
+		}
 	}
 	return bRet;
 }
@@ -204,6 +227,7 @@ LRESULT CNewZonePropertyPage::OnWizardNext()
 	// 4 : specified page   CBCSpecifiedPropertyPage/CBCSpecifiedHeadPropertyPage
 	// 5 : head_ic page     CICHeadPropertyPage
 	// 6 : chem_ic page     CChemICPropertyPage/CChemICSpreadPropertyPage
+	// 7 : zone_flow page   CZoneFlowRatePropertyPage
 
 	// remove all but this page
 	int nCount = pSheet->GetPageCount();
@@ -217,39 +241,88 @@ LRESULT CNewZonePropertyPage::OnWizardNext()
 	{
 		switch (this->m_type)
 		{
-			case ID_ZONE_TYPE_MEDIA:
-				pSheet->AddPage(this->m_PropPageArray[1]);
-				break;
-			case ID_ZONE_TYPE_BC_FLUX:
-				pSheet->AddPage(this->m_PropPageArray[2]);
-				break;
-			case ID_ZONE_TYPE_BC_LEAKY:
-				pSheet->AddPage(this->m_PropPageArray[3]);
-				break;
-			case ID_ZONE_TYPE_BC_SPECIFIED:
-				pSheet->AddPage(this->m_PropPageArray[4]);
-				break;
-			case ID_ZONE_TYPE_IC_HEAD:
-				pSheet->AddPage(this->m_PropPageArray[5]);
-				break;
-			case ID_ZONE_TYPE_IC_CHEM:
-				pSheet->AddPage(this->m_PropPageArray[6]);
-				break;
+		case ID_ZONE_TYPE_MEDIA:
+			pSheet->AddPage(this->m_PropPageArray[1]);
+			break;
+		case ID_ZONE_TYPE_BC_FLUX:
+			pSheet->AddPage(this->m_PropPageArray[2]);
+			break;
+		case ID_ZONE_TYPE_BC_LEAKY:
+			pSheet->AddPage(this->m_PropPageArray[3]);
+			break;
+		case ID_ZONE_TYPE_BC_SPECIFIED:
+			pSheet->AddPage(this->m_PropPageArray[4]);
+			break;
+		case ID_ZONE_TYPE_IC_HEAD:
+			pSheet->AddPage(this->m_PropPageArray[5]);
+			break;
+		case ID_ZONE_TYPE_IC_CHEM:
+			pSheet->AddPage(this->m_PropPageArray[6]);
+			break;
+		case ID_ZONE_TYPE_FLOW_RATE:
+			pSheet->AddPage(this->m_PropPageArray[7]);
+			break;
 		}
+		return baseCNewZonePropertyPage::OnWizardNext();
 	}
-
-	return baseCNewZonePropertyPage::OnWizardNext();
+	return 1;
 }
 
 void CNewZonePropertyPage::OnNMDblclkTreeZones(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	// TODO: Add your control notification handler code here
 	HTREEITEM hti = this->m_wndTree.GetSelectedItem();
-	if ((hti != NULL) && (hti != this->m_htiBC) && (hti != this->m_htiIC))
+	if ((hti != NULL) && (hti != this->m_htiBC) && (hti != this->m_htiIC) /* && (hti != this->m_htiFlowRate) */)
 	{	
 		// simulate user pressing next
 		CPropertySheet *pSheet = static_cast<CPropertySheet*>(this->GetParent());
 		pSheet->PressButton(PSBTN_NEXT);
 	}
+#ifdef SAVE
+	else if (hti == m_htiFlowRate)
+	{
+		// simulate user pressing finish
+		CPropertySheet *pSheet = static_cast<CPropertySheet*>(this->GetParent());
+		pSheet->PressButton(PSBTN_FINISH);
+	}
+#endif
+	*pResult = 0;
+}
+
+BOOL CNewZonePropertyPage::OnWizardFinish()
+{
+	// add only the next page
+#ifdef SAVE
+	if (this->UpdateData(TRUE))
+	{
+		ASSERT(this->m_type == ID_ZONE_TYPE_FLOW_RATE);
+	}
+#endif
+	return baseCNewZonePropertyPage::OnWizardFinish();
+}
+
+void CNewZonePropertyPage::OnTVNSelChanged(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	LPNMTREEVIEW pNMTreeView = reinterpret_cast<LPNMTREEVIEW>(pNMHDR);
+	// Add your control notification handler code here
+
+#ifdef SAVE
+	CPropertySheet* pSheet = static_cast<CPropertySheet*>(this->GetParent());
+	ASSERT_KINDOF(CPropertySheet, pSheet);
+
+	if (pSheet->IsWizard())
+	{
+		HTREEITEM hti = this->m_wndTree.GetSelectedItem();
+		if (hti == this->m_htiFlowRate)
+		{
+			pSheet->SetWizardButtons(PSWIZB_FINISH);
+		}
+		else
+		{
+			pSheet->SetWizardButtons(PSWIZB_NEXT);
+		}
+	}
+#endif
+
 	*pResult = 0;
 }

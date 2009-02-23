@@ -30,14 +30,22 @@
 #include <fstream>  // std::ifstream
 #include <sstream>  // std::ostringstream std::istringstream
 
+#include "srcinput/Filedata.h"
+
 #include "Action.h"
 #include "SetDisplayColorsAction.h"
 #include "ZoneActor.h"
+#include "DrainActor.h"
+#include "PointConnectorCreateAction.h"
+#include "RiverPropertyPage2.h"
+#include "DrainPropertyPage.h"
 #include "MediaZoneActor.h"
 #include "BCZoneActor.h"
 #include "ICZoneActor.h"
 #include "ICHeadZoneActor.h"
 #include "ICChemZoneActor.h"
+#include "ZoneFlowRateZoneActor.h"
+#include "SeException.h"
 
 #include "ISerial.h"
 #include "DelayRedraw.h"
@@ -77,13 +85,17 @@
 #include <vtkPolygon.h>
 #include <vtkTriangleFilter.h>
 
+#if defined(__CPPUNIT__)
+#include <Pdh.h>
+#endif
+
 // #include "CreateZoneAction.h"
 #include "ZoneCreateAction.h"
 #include "AddStressPeriodAction.h"
 #include "WellCreateAction.h"
-#include "RiverCreateAction.h"
-#include "RiverMovePointAction.h"
-#include "RiverInsertPointAction.h"
+#include "PointConnectorCreateAction.h"
+#include "PointConnectorMovePointAction.h"
+#include "PointConnectorInsertPointAction.h"
 #include "GridDeleteLineAction.h"
 #include "GridInsertLineAction.h"
 #include "GridMoveLineAction.h"
@@ -98,6 +110,7 @@
 #include "BCSpecifiedHeadPropertyPage.h"
 #include "ICHeadSpreadPropertyPage.h"
 #include "ChemICSpreadPropertyPage.h"
+#include "ZoneFlowRatePropertyPage.h"
 
 #include "Unit.h"
 #include "Units.h"
@@ -117,6 +130,7 @@
 
 #include "WellActor.h"
 #include "RiverActor.h"
+#include "Drain.h"
 
 #include <xercesc/dom/DOM.hpp>
 #include <xercesc/dom/DOMImplementation.hpp>
@@ -133,11 +147,11 @@ extern void GetDefaultMedia(struct grid_elt* p_grid_elt);
 extern void GetDefaultHeadIC(struct Head_ic* p_head_ic);
 extern void GetDefaultChemIC(struct chem_ic* p_chem_ic);
 
-static const TCHAR szZoneFormat[]    = _T("Zone %d");
+static const TCHAR szZoneFormat[]    = _T("Box %d");
 static const TCHAR szWedgeFormat[]   = _T("Wedge %d");
 static const TCHAR szPrismFormat[]   = _T("Prism %d");
 
-static const TCHAR szZoneFind[]      = _T("Zone ");
+static const TCHAR szZoneFind[]      = _T("Box ");
 static const TCHAR szWedgeFind[]     = _T("Wedge ");
 static const TCHAR szPrismFind[]     = _T("Prism ");
 
@@ -160,7 +174,7 @@ struct WPhastDocImpl {
 	std::vector<CAction*>::size_type m_vectorActionsIndex;
 	std::vector<CAction*>::size_type m_lastSaveIndex;
 	std::vector<CZone*> m_vectorDefaultZones;
-}; 
+};
 
 
 
@@ -191,23 +205,23 @@ BEGIN_MESSAGE_MAP(CWPhastDoc, CDocument)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_GRID, OnUpdateViewGrid)
 
 	ON_UPDATE_COMMAND_UI(ID_MEDIAZONES_HIDEALL, OnUpdateMediaZonesHideAll)
-	ON_COMMAND(ID_MEDIAZONES_HIDEALL, OnMediaZonesHideAll)	
+	ON_COMMAND(ID_MEDIAZONES_HIDEALL, OnMediaZonesHideAll)
 	ON_UPDATE_COMMAND_UI(ID_MEDIAZONES_SHOWSELECTED, OnUpdateMediaZonesShowSelected)
-	ON_COMMAND(ID_MEDIAZONES_SHOWSELECTED, OnMediaZonesShowSelected)	
+	ON_COMMAND(ID_MEDIAZONES_SHOWSELECTED, OnMediaZonesShowSelected)
 	ON_COMMAND(ID_MEDIAZONES_SELECTALL, OnMediaZonesSelectAll)
 	ON_COMMAND(ID_MEDIAZONES_UNSELECTALL, OnMediaZonesUnselectAll)
 
 	ON_UPDATE_COMMAND_UI(ID_ICZONES_HIDEALL, OnUpdateICZonesHideAll)
 	ON_COMMAND(ID_ICZONES_HIDEALL, OnICZonesHideAll)
 	ON_UPDATE_COMMAND_UI(ID_ICZONES_SHOWSELECTED, OnUpdateICZonesShowSelected)
-	ON_COMMAND(ID_ICZONES_SHOWSELECTED, OnICZonesShowSelected)	
+	ON_COMMAND(ID_ICZONES_SHOWSELECTED, OnICZonesShowSelected)
 	ON_COMMAND(ID_ICZONES_SELECTALL, OnICZonesSelectAll)
 	ON_COMMAND(ID_ICZONES_UNSELECTALL, OnICZonesUnselectAll)
 
 	ON_UPDATE_COMMAND_UI(ID_BCZONES_HIDEALL, OnUpdateBCZonesHideAll)
 	ON_COMMAND(ID_BCZONES_HIDEALL, OnBCZonesHideAll)
 	ON_UPDATE_COMMAND_UI(ID_BCZONES_SHOWSELECTED, OnUpdateBCZonesShowSelected)
-	ON_COMMAND(ID_BCZONES_SHOWSELECTED, OnBCZonesShowSelected)	
+	ON_COMMAND(ID_BCZONES_SHOWSELECTED, OnBCZonesShowSelected)
 	ON_COMMAND(ID_BCZONES_SELECTALL, OnBCZonesSelectAll)
 	ON_COMMAND(ID_BCZONES_UNSELECTALL, OnBCZonesUnselectAll)
 
@@ -258,6 +272,10 @@ BEGIN_MESSAGE_MAP(CWPhastDoc, CDocument)
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_NEWPRISM, OnUpdateToolsNewPrism)
 	ON_COMMAND(ID_TOOLS_NEWPRISM, OnToolsNewPrism)
 
+	// ID_TOOLS_NEWDRAIN
+	ON_UPDATE_COMMAND_UI(ID_TOOLS_NEWDRAIN, OnUpdateToolsNewDrain)
+	ON_COMMAND(ID_TOOLS_NEWDRAIN, OnToolsNewDrain)
+
 	ON_COMMAND(ID_TOOLS_COLORS, &CWPhastDoc::OnToolsColors)
 END_MESSAGE_MAP()
 
@@ -270,7 +288,7 @@ BEGIN_DISPATCH_MAP(CWPhastDoc, CDocument)
 END_DISPATCH_MAP()
 
 // Note: we add support for IID_IWPhast to support typesafe binding
-//  from VBA.  This IID must match the GUID that is attached to the 
+//  from VBA.  This IID must match the GUID that is attached to the
 //  dispinterface in the .IDL file.
 
 // {7AF963C5-1815-4D7A-81DC-1987723AB9CE}
@@ -299,9 +317,13 @@ CWPhastDoc::CWPhastDoc()
 , m_pPropAssemblyIC(0)
 , m_pPropAssemblyWells(0)
 , m_pPropAssemblyRivers(0)
+, m_pPropAssemblyDrains(0)
+, m_pPropAssemblyZFR(0)
 , RiverCallbackCommand(0)
 , GridCallbackCommand(0)
 , RiverMovePointAction(0)
+, DrainCallbackCommand(0)
+, DrainMovePointAction(0)
 , m_pGridSheet(0)
 , m_pGridPage(0)
 , ModifyGridSheet(0)
@@ -314,6 +336,8 @@ CWPhastDoc::CWPhastDoc()
 , NewWedgeCallbackCommand(0)
 , NewPrismWidget(0)
 , NewPrismCallbackCommand(0)
+, NewDrainActor(0)
+, NewDrainCallbackCommand(0)
 {
 #if defined(WPHAST_AUTOMATION)
 	EnableAutomation();
@@ -334,7 +358,7 @@ CWPhastDoc::CWPhastDoc()
 	// create the removed prop list
 	//
 	ASSERT(this->m_pRemovedPropCollection == 0);
-	this->m_pRemovedPropCollection = vtkPropCollection::New();	
+	this->m_pRemovedPropCollection = vtkPropCollection::New();
 
 	// create the prop-assemblies
 	//
@@ -343,11 +367,16 @@ CWPhastDoc::CWPhastDoc()
 	this->m_pPropAssemblyBC     = vtkPropAssembly::New();
 	this->m_pPropAssemblyWells  = vtkPropAssembly::New();
 	this->m_pPropAssemblyRivers = vtkPropAssembly::New();
+	this->m_pPropAssemblyDrains = vtkPropAssembly::New();	
+	this->m_pPropAssemblyZFR    = vtkPropAssembly::New();
+
 	this->m_pPropCollection->AddItem(this->m_pPropAssemblyMedia);
 	this->m_pPropCollection->AddItem(this->m_pPropAssemblyIC);
 	this->m_pPropCollection->AddItem(this->m_pPropAssemblyBC);
 	this->m_pPropCollection->AddItem(this->m_pPropAssemblyWells);
 	this->m_pPropCollection->AddItem(this->m_pPropAssemblyRivers);
+	this->m_pPropCollection->AddItem(this->m_pPropAssemblyDrains);
+	this->m_pPropCollection->AddItem(this->m_pPropAssemblyZFR);
 
 	// create the axes
 	//
@@ -375,11 +404,29 @@ CWPhastDoc::CWPhastDoc()
 	this->RiverCallbackCommand->SetClientData(this);
 	this->RiverCallbackCommand->SetCallback(CWPhastDoc::RiverListener);
 
+	// drain event listener
+	//
+	this->DrainCallbackCommand = vtkCallbackCommand::New();
+	this->DrainCallbackCommand->SetClientData(this);
+	this->DrainCallbackCommand->SetCallback(CWPhastDoc::DrainListener);
+
 	// grid event listener
 	//
 	this->GridCallbackCommand = vtkCallbackCommand::New();
 	this->GridCallbackCommand->SetClientData(this);
 	this->GridCallbackCommand->SetCallback(CWPhastDoc::GridListener);
+
+	//{{
+	// grid actor
+	//
+	this->m_pGridActor = CGridActor::New();
+	ASSERT(this->m_pGridActor);
+	this->m_pGridActor->AddObserver(CGridActor::DeleteGridLineEvent, this->GridCallbackCommand);
+	this->m_pGridActor->AddObserver(CGridActor::InsertGridLineEvent, this->GridCallbackCommand);
+	this->m_pGridActor->AddObserver(CGridActor::MoveGridLineEvent,   this->GridCallbackCommand);
+	this->m_pGridActor->SetScale(1, 1, 1);
+	this->m_pGridActor->SetPickable(0);
+	//}}
 
 	// colors
 	//
@@ -444,7 +491,10 @@ CWPhastDoc::~CWPhastDoc()
 	CLEANUP_ASSEMBLY_MACRO(this->m_pPropAssemblyIC);
 	CLEANUP_ASSEMBLY_MACRO(this->m_pPropAssemblyBC);
 	CLEANUP_ASSEMBLY_MACRO(this->m_pPropAssemblyWells);
-	CLEANUP_ASSEMBLY_MACRO(this->m_pPropAssemblyRivers);	
+	CLEANUP_ASSEMBLY_MACRO(this->m_pPropAssemblyRivers);
+	CLEANUP_ASSEMBLY_MACRO(this->m_pPropAssemblyDrains);
+	CLEANUP_ASSEMBLY_MACRO(this->m_pPropAssemblyZFR);
+	
 
 	ASSERT(this->m_pAxesActor);
 	if (this->m_pAxesActor)
@@ -470,6 +520,10 @@ CWPhastDoc::~CWPhastDoc()
 	if (this->RiverCallbackCommand)
 	{
 		this->RiverCallbackCommand->Delete();
+	}
+	if (this->DrainCallbackCommand)
+	{
+		this->DrainCallbackCommand->Delete();
 	}
 	if (this->GridCallbackCommand)
 	{
@@ -536,6 +590,31 @@ void CWPhastDoc::Serialize(CArchive& ar)
 	static const char szWPhast[] = "WPhast";
 	herr_t status;
 
+#if defined(__CPPUNIT__)
+	HQUERY hquery;
+	PDH_STATUS pdh_status = PdhOpenQuery(NULL, 0, &hquery);
+	VERIFY(pdh_status == ERROR_SUCCESS);
+
+	PDH_HCOUNTER hcounter;
+	pdh_status = PdhAddCounter(hquery, _T("\\Process(WPhast)\\Private Bytes"), 0, &hcounter);
+	if (pdh_status != ERROR_SUCCESS)
+	{
+		PdhCloseQuery(hquery);
+	}
+
+	pdh_status = PdhCollectQueryData(hquery);
+	if (pdh_status == ERROR_SUCCESS)
+	{
+		PDH_RAW_COUNTER value;
+		DWORD dwType;
+		pdh_status = PdhGetRawCounterValue(hcounter, &dwType, &value);
+		if (pdh_status == ERROR_SUCCESS)
+		{
+			TRACE("Before serialize %lld %lld\n", value.TimeStamp, value.FirstValue);
+		}
+	}
+#endif
+
 	CWaitCursor wait;
 
 	bool bStoring = (ar.IsStoring() == TRUE);
@@ -567,6 +646,9 @@ void CWPhastDoc::Serialize(CArchive& ar)
 			this->m_pModel->m_freeSurface.Serialize(bStoring, wphast_id);
 			this->m_pModel->m_steadyFlow.Serialize(bStoring, wphast_id);
 			this->m_pModel->m_solutionMethod.Serialize(bStoring, wphast_id);
+			this->m_pModel->m_printInput.Serialize(bStoring, wphast_id);
+			this->m_pModel->m_printFreq.Serialize(bStoring, wphast_id);
+			this->m_pModel->m_timeControl2.Serialize(bStoring, wphast_id);
 
 			// store units
 			ASSERT(this->m_pUnits);
@@ -599,14 +681,20 @@ void CWPhastDoc::Serialize(CArchive& ar)
 			// store rivers
 			this->SerializeRivers(bStoring, wphast_id);
 
-			// store PRINT_INITIAL
-			this->m_pModel->m_printInput.Serialize(bStoring, wphast_id);
+			// store drains
+			this->SerializeDrains(bStoring, wphast_id);
 
-			// store PRINT_FREQUENCY
-			this->m_pModel->m_printFreq.Serialize(bStoring, wphast_id);
+			// store zone flow rates
+			this->SerializeZoneFlowRates(bStoring, wphast_id);
 
-			// store time control
-			this->m_pModel->m_timeControl2.Serialize(bStoring, wphast_id);
+// COMMENT: {2/11/2009 7:05:47 PM}			// store PRINT_INITIAL
+// COMMENT: {2/11/2009 7:05:47 PM}			this->m_pModel->m_printInput.Serialize(bStoring, wphast_id);
+// COMMENT: {2/11/2009 7:05:47 PM}
+// COMMENT: {2/11/2009 7:05:47 PM}			// store PRINT_FREQUENCY
+// COMMENT: {2/11/2009 7:05:47 PM}			this->m_pModel->m_printFreq.Serialize(bStoring, wphast_id);
+// COMMENT: {2/11/2009 7:05:47 PM}
+// COMMENT: {2/11/2009 7:05:47 PM}			// store time control
+// COMMENT: {2/11/2009 7:05:47 PM}			this->m_pModel->m_timeControl2.Serialize(bStoring, wphast_id);
 
 			// close WPhast group
 			status = ::H5Gclose(wphast_id);
@@ -657,6 +745,9 @@ void CWPhastDoc::Serialize(CArchive& ar)
 			this->m_pModel->m_freeSurface.Serialize(bStoring, wphast_id);
 			this->m_pModel->m_steadyFlow.Serialize(bStoring, wphast_id);
 			this->m_pModel->m_solutionMethod.Serialize(bStoring, wphast_id);
+			this->m_pModel->m_printInput.Serialize(bStoring, wphast_id);
+			this->m_pModel->m_printFreq.Serialize(bStoring, wphast_id);
+			this->m_pModel->m_timeControl2.Serialize(bStoring, wphast_id);
 
 			// update properties bar
 			this->SetModel(*this->m_pModel);
@@ -717,35 +808,17 @@ void CWPhastDoc::Serialize(CArchive& ar)
 			// load rivers
 			this->SerializeRivers(bStoring, wphast_id);
 
-			// load PRINT_INITIAL
-			this->m_pModel->m_printInput.Serialize(bStoring, wphast_id);
+			// load drains
+			this->SerializeDrains(bStoring, wphast_id);
 
-			// load PRINT_FREQUENCY
-#ifdef _DEBUG
-			CTimeSeries<Ctime>::iterator it0 = this->m_pModel->m_printFreq.print_force_chem.begin();
-			ASSERT(it0 != this->m_pModel->m_printFreq.print_force_chem.end());
-			TRACE("first force_chem type = %d\n", it0->first.type);
-			TRACE("first force_chem type = %d\n", it0->first.value_defined);
-			TRACE("first force_chem type = %g\n", it0->first.value);
+			// load zone flow rates
+			this->SerializeZoneFlowRates(bStoring, wphast_id);
 
-			TRACE("force_chem type = %d\n", it0->second.type);
-			TRACE("force_chem type = %d\n", it0->second.value_defined);
-			TRACE("force_chem type = %g\n", it0->second.value);
+// COMMENT: {2/11/2009 7:08:25 PM}			// load PRINT_INITIAL
+// COMMENT: {2/11/2009 7:08:25 PM}			this->m_pModel->m_printInput.Serialize(bStoring, wphast_id);
 
-#endif
-			this->m_pModel->m_printFreq.Serialize(bStoring, wphast_id);
-#ifdef _DEBUG
-			CTimeSeries<Ctime>::iterator it = this->m_pModel->m_printFreq.print_force_chem.begin();
-			ASSERT(it != this->m_pModel->m_printFreq.print_force_chem.end());
-
-			TRACE("first force_chem type = %d\n", it->first.type);
-			TRACE("first force_chem type = %d\n", it->first.value_defined);
-			TRACE("first force_chem type = %g\n", it->first.value);
-
-			TRACE("force_chem type = %d\n", it->second.type);
-			TRACE("force_chem type = %d\n", it->second.value_defined);
-			TRACE("force_chem type = %g\n", it->second.value);
-#endif
+// COMMENT: {2/11/2009 7:09:10 PM}			// load PRINT_FREQUENCY
+// COMMENT: {2/11/2009 7:09:10 PM}			this->m_pModel->m_printFreq.Serialize(bStoring, wphast_id);
 
 			// update properties bar
 			if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar())
@@ -753,8 +826,8 @@ void CWPhastDoc::Serialize(CArchive& ar)
 				pTree->SetPrintFrequency(&this->m_pModel->m_printFreq);
 			}
 
-			// load time control
-			this->m_pModel->m_timeControl2.Serialize(bStoring, wphast_id);			
+// COMMENT: {2/11/2009 7:08:03 PM}			// load time control
+// COMMENT: {2/11/2009 7:08:03 PM}			this->m_pModel->m_timeControl2.Serialize(bStoring, wphast_id);
 
 			// update properties bar
 			if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar())
@@ -782,9 +855,25 @@ void CWPhastDoc::Serialize(CArchive& ar)
 			pTree->GetBCNode().Expand(TVE_COLLAPSE);
 			pTree->GetWellsNode().Expand(TVE_COLLAPSE);
 			pTree->GetRiversNode().Expand(TVE_COLLAPSE);
+			pTree->GetDrainsNode().Expand(TVE_COLLAPSE);
+			pTree->GetZoneFlowRatesNode().Expand(TVE_COLLAPSE);
 			this->ClearSelection();
 		}
 	}
+
+#if defined(__CPPUNIT__)
+	pdh_status = PdhCollectQueryData(hquery);
+	if (pdh_status == ERROR_SUCCESS)
+	{
+		PDH_RAW_COUNTER value;
+		DWORD dwType;
+		pdh_status = PdhGetRawCounterValue(hcounter, &dwType, &value);
+		if (pdh_status == ERROR_SUCCESS)
+		{
+			TRACE("After serialize %lld %lld\n", value.TimeStamp, value.FirstValue);
+		}
+	}
+#endif
 
 	// Update StatusBar
 	//
@@ -828,9 +917,25 @@ void CWPhastDoc::SerializeRivers(bool bStoring, hid_t loc_id)
 	}
 }
 
+void CWPhastDoc::SerializeDrains(bool bStoring, hid_t loc_id)
+{
+	if (CPropertyTreeControlBar *pBar = this->GetPropertyTreeControlBar())
+	{
+		this->SerializeActors<CDrainActor>(bStoring, loc_id, pBar->GetDrainsNode(), "Drains");
+	}
+}
+
+void CWPhastDoc::SerializeZoneFlowRates(bool bStoring, hid_t loc_id)
+{
+	if (CPropertyTreeControlBar *pBar = this->GetPropertyTreeControlBar())
+	{
+		this->SerializeActors<CZoneFlowRateZoneActor>(bStoring, loc_id, pBar->GetZoneFlowRatesNode(), "Zones");
+	}
+}
+
 void CWPhastDoc::SerializeIC(bool bStoring, hid_t loc_id)
 {
-	// Revisions prior to and including r669 stored ALL the IC zones 
+	// Revisions prior to and including r669 stored ALL the IC zones
 	// in the IC group.  Now each IC zone type has its own group heading.
 	// This code should be backwards compatible for reading of .wphast
 	// files.
@@ -840,57 +945,57 @@ void CWPhastDoc::SerializeIC(bool bStoring, hid_t loc_id)
 	//      GROUP "IC" {
 	//         GROUP "Default:IC_CHEM" {
 	//            ...
-	//         } 
+	//         }
 	//         GROUP "Default:IC_HEAD" {
 	//            ...
-	//         } 
+	//         }
 	//         GROUP "Zone 10:IC_CHEM" {
 	//            ...
-	//         } 
+	//         }
 	//         GROUP "Zone 9:IC_HEAD" {
 	//            ...
-	//         } 
+	//         }
 	//         DATASET "Zones" {
 	//            ...
 	//            DATA {
 	//               "Default:IC_HEAD", "Default:IC_CHEM", "Zone 9:IC_HEAD",
 	//               "Zone 10:IC_CHEM"
-	//            } 
-	//         } 
-	//      } 
-	//	
+	//            }
+	//         }
+	//      }
+	//
 	// from now on this is the layout:
 	//
 	//      GROUP "IC" {
 	//         GROUP "ICChem" {
 	//            GROUP "Default" {
 	//               ...
-	//            } 
+	//            }
 	//            GROUP "Zone 10" {
 	//               ...
-	//            } 
+	//            }
 	//            DATASET "Zones" {
 	//               ...
 	//               DATA {
 	//                  "Default", "Zone 10"
-	//               } 
-	//            } 
-	//         } 
+	//               }
+	//            }
+	//         }
 	//         GROUP "ICHead" {
 	//            GROUP "Default" {
 	//               ...
-	//            } 
+	//            }
 	//            GROUP "Zone 9" {
 	//               ...
-	//            } 
+	//            }
 	//            DATASET "Zones" {
 	//               ...
 	//               DATA {
 	//                  "Default", "Zone 9"
-	//               } 
-	//            } 
-	//         } 
-	//      } 
+	//               }
+	//            }
+	//         }
+	//      }
 	//
 
 	static const char szIC[]    = "IC";
@@ -965,7 +1070,7 @@ void CWPhastDoc::SerializeIC(bool bStoring, hid_t loc_id)
 						{
 							CICHeadZoneActor* pZone = CICHeadZoneActor::New();
 							name.resize(pos);
-							pZone->Serialize(false, zone_id, this->GetUnits());
+							pZone->Serialize(false, zone_id, this);
 							pZone->SetName(name.c_str());
 							this->Add(pZone);
 							pZone->Delete(); // ok ref counted
@@ -974,7 +1079,7 @@ void CWPhastDoc::SerializeIC(bool bStoring, hid_t loc_id)
 						{
 							CICChemZoneActor* pZone = CICChemZoneActor::New();
 							name.resize(pos);
-							pZone->Serialize(false, zone_id, this->GetUnits());
+							pZone->Serialize(false, zone_id, this);
 							pZone->SetName(name.c_str());
 							this->Add(pZone);
 							pZone->Delete(); // ok ref counted
@@ -1051,7 +1156,7 @@ void CWPhastDoc::SerializeActors(bool bStoring, hid_t loc_id, CTreeCtrlNode pare
 					{
 						// store actor
 						//
-						(*iter)->Serialize(true, actor_id, this->GetUnits());
+						(*iter)->Serialize(true, actor_id, this);
 
 						// close the actor group
 						//
@@ -1093,7 +1198,7 @@ void CWPhastDoc::SerializeActors(bool bStoring, hid_t loc_id, CTreeCtrlNode pare
 					{
 						// load actor
 						//
-						pActor->Serialize(false, actor_id, this->GetUnits());
+						pActor->Serialize(false, actor_id, this);
 						pActor->SetName((*iter).c_str());
 						this->Add(pActor);
 						pActor->Delete(); // ok ref counted
@@ -1175,10 +1280,9 @@ vtkPropCollection* CWPhastDoc::GetRemovedPropCollection() const
 
 BOOL CWPhastDoc::OnOpenDocument(LPCTSTR lpszPathName)
 {
-	if (!CDocument::OnOpenDocument(lpszPathName))
-		return FALSE;
-
-	return TRUE;
+	BOOL bOk = CDocument::OnOpenDocument(lpszPathName);
+	this->PrismPathsRelativeToAbsolute(lpszPathName);
+	return bOk;
 }
 
 CFile* CWPhastDoc::GetFile(LPCTSTR lpszFileName, UINT nOpenFlags,
@@ -1286,7 +1390,7 @@ void CWPhastDoc::DeleteContents()
 		// all vtkProps must release before the Renderer is destroyed
 		// ie when an import fails
 		this->m_pGridActor->ReleaseGraphicsResources(pView->GetRenderer()->GetVTKWindow());
-		this->m_pAxesActor->ReleaseGraphicsResources(pView->GetRenderer()->GetVTKWindow());		
+		this->m_pAxesActor->ReleaseGraphicsResources(pView->GetRenderer()->GetVTKWindow());
 
 		pView->DeleteContents();
 	}
@@ -1323,6 +1427,8 @@ void CWPhastDoc::DeleteContents()
 	CLEAR_PROP_ASSEMBLY_MACRO(this->m_pPropAssemblyBC);
 	CLEAR_PROP_ASSEMBLY_MACRO(this->m_pPropAssemblyWells);
 	CLEAR_PROP_ASSEMBLY_MACRO(this->m_pPropAssemblyRivers);
+	CLEAR_PROP_ASSEMBLY_MACRO(this->m_pPropAssemblyDrains);
+	CLEAR_PROP_ASSEMBLY_MACRO(this->m_pPropAssemblyZFR);
 
 	// Turn-all on by default
 	//
@@ -1331,10 +1437,12 @@ void CWPhastDoc::DeleteContents()
 	this->m_pPropAssemblyBC->SetVisibility(1);
 	this->m_pPropAssemblyWells->SetVisibility(1);
 	this->m_pPropAssemblyRivers->SetVisibility(1);
+	this->m_pPropAssemblyDrains->SetVisibility(1);
+	this->m_pPropAssemblyZFR->SetVisibility(1);
 
 	// reset scale
 	//
-	
+
 // COMMENT: {7/28/2005 4:38:34 PM}	//{{
 // COMMENT: {7/28/2005 4:38:34 PM}	// create the grid
 // COMMENT: {7/28/2005 4:38:34 PM}	//
@@ -1712,21 +1820,21 @@ void CWPhastDoc::ResetCamera(void)
 
 CString CWPhastDoc::GetNextZoneName(void)
 {
-	static CString str;
+	/*static*/ CString str;
 	str.Format(szZoneFormat, this->GetNextZoneNumber());
 	return str;
 }
 
 CString CWPhastDoc::GetNextWedgeName(void)
 {
-	static CString str;
+	/*static*/ CString str;
 	str.Format(szWedgeFormat, this->GetNextWedgeNumber());
 	return str;
 }
 
 CString CWPhastDoc::GetNextPrismName(void)
 {
-	static CString str;
+	/*static*/ CString str;
 	str.Format(szPrismFormat, this->GetNextPrismNumber());
 	return str;
 }
@@ -1843,6 +1951,21 @@ int CWPhastDoc::GetNextPrismNumber(void)const
 	}
 }
 
+int CWPhastDoc::GetNextZoneFlowRatesNumber(void)const
+{
+	std::set<int> nums;
+	this->GetUsedZoneFlowRates(nums);
+	if (nums.rbegin() != nums.rend())
+	{
+		return (*nums.rbegin()) + 1;
+	}
+	else
+	{
+		return 1;
+	}
+}
+
+
 void CWPhastDoc::GetUsedZoneNumbers(std::set<int>& usedNums)const
 {
 	char *ptr;
@@ -1853,6 +1976,7 @@ void CWPhastDoc::GetUsedZoneNumbers(std::set<int>& usedNums)const
 	collections.push_back(this->GetPropAssemblyMedia()->GetParts());
 	collections.push_back(this->GetPropAssemblyBC()->GetParts());
 	collections.push_back(this->GetPropAssemblyIC()->GetParts());
+	collections.push_back(this->GetPropAssemblyZoneFlowRates()->GetParts());
 
 	std::list<vtkPropCollection*>::iterator iter = collections.begin();
 	for (; iter != collections.end(); ++iter)
@@ -1869,8 +1993,9 @@ void CWPhastDoc::GetUsedZoneNumbers(std::set<int>& usedNums)const
 					//
 					std::pair< std::set<int>::iterator, bool > pr;
 					CString str = pZoneActor->GetName();
-					if (str.Find(szZoneFind) == 0) {
-						int n = ::strtol((const char*)str + 4, &ptr, 10);
+					if (str.Find(szZoneFind) == 0)
+					{
+						int n = ::strtol((const char*)str + ::strlen(szZoneFind), &ptr, 10);
 						pr = usedNums.insert(n);
 						ASSERT(pr.second); // duplicate?
 					}
@@ -1890,6 +2015,7 @@ void CWPhastDoc::GetUsedWedgeNumbers(std::set<int>& usedNums)const
 	collections.push_back(this->GetPropAssemblyMedia()->GetParts());
 	collections.push_back(this->GetPropAssemblyBC()->GetParts());
 	collections.push_back(this->GetPropAssemblyIC()->GetParts());
+	collections.push_back(this->GetPropAssemblyZoneFlowRates()->GetParts());
 
 	std::list<vtkPropCollection*>::iterator iter = collections.begin();
 	for (; iter != collections.end(); ++iter)
@@ -1927,6 +2053,7 @@ void CWPhastDoc::GetUsedPrismNumbers(std::set<int>& usedNums)const
 	collections.push_back(this->GetPropAssemblyMedia()->GetParts());
 	collections.push_back(this->GetPropAssemblyBC()->GetParts());
 	collections.push_back(this->GetPropAssemblyIC()->GetParts());
+	collections.push_back(this->GetPropAssemblyZoneFlowRates()->GetParts());
 
 	std::list<vtkPropCollection*>::iterator iter = collections.begin();
 	for (; iter != collections.end(); ++iter)
@@ -1957,7 +2084,29 @@ void CWPhastDoc::GetUsedPrismNumbers(std::set<int>& usedNums)const
 		}
 	}
 }
-void CWPhastDoc::PrismPathsRelativeToAbsolute(void)
+
+void CWPhastDoc::GetUsedZoneFlowRates(std::set<int>& usedNums)const
+{
+	usedNums.clear();
+	if (vtkPropCollection *pPropCollection = this->GetPropAssemblyZoneFlowRates()->GetParts())
+	{
+		vtkProp *pProp = 0;
+		pPropCollection->InitTraversal();
+		for (; (pProp = pPropCollection->GetNextProp()); )
+		{
+			if (CZoneFlowRateZoneActor *pActor = CZoneFlowRateZoneActor::SafeDownCast(pProp))
+			{
+				// store used n_user numbers
+				//
+				std::pair< std::set<int>::iterator, bool > pr;
+				pr = usedNums.insert( pActor->GetData().Get_n_user() );
+				ASSERT(pr.second); // duplicate?
+			}
+		}
+	}
+}
+
+void CWPhastDoc::PrismPathsRelativeToAbsolute(LPCTSTR lpszPathName)
 {
 	CZoneActor *pZoneActor;
 
@@ -1985,17 +2134,17 @@ void CWPhastDoc::PrismPathsRelativeToAbsolute(void)
 							filename = p->perimeter.Get_file_name();
 							if (filename.length() > 0)
 							{
-								p->perimeter.Set_file_name(CGlobal::FullPath(filename));
+								p->perimeter.Set_file_name(this->GetAbsolutePath(lpszPathName, filename));
 							}
 							filename = p->top.Get_file_name();
 							if (filename.length() > 0)
 							{
-								p->top.Set_file_name(CGlobal::FullPath(filename));
+								p->top.Set_file_name(this->GetAbsolutePath(lpszPathName, filename));
 							}
 							filename = p->bottom.Get_file_name();
 							if (filename.length() > 0)
 							{
-								p->bottom.Set_file_name(CGlobal::FullPath(filename));
+								p->bottom.Set_file_name(this->GetAbsolutePath(lpszPathName, filename));
 							}
 						}
 					}
@@ -2005,12 +2154,98 @@ void CWPhastDoc::PrismPathsRelativeToAbsolute(void)
 	}
 }
 
+void CWPhastDoc::PrismPathsAbsoluteToRelative(LPCTSTR lpszPathName)
+{
+	CZoneActor *pZoneActor;
+
+	std::list<vtkPropCollection*> collections;
+	collections.push_back(this->GetPropAssemblyMedia()->GetParts());
+	collections.push_back(this->GetPropAssemblyBC()->GetParts());
+	collections.push_back(this->GetPropAssemblyIC()->GetParts());
+
+	std::list<vtkPropCollection*>::iterator iter = collections.begin();
+	for (; iter != collections.end(); ++iter)
+	{
+		if (vtkPropCollection *pPropCollection = (*iter))
+		{
+			vtkProp *pProp = 0;
+			pPropCollection->InitTraversal();
+			for (; (pProp = pPropCollection->GetNextProp()); )
+			{
+				if ((pZoneActor = CZoneActor::SafeDownCast(pProp)))
+				{
+					if (pZoneActor->GetPolyhedronType() == Polyhedron::PRISM)
+					{
+						if (Prism *p = dynamic_cast<Prism*>(pZoneActor->GetPolyhedron()))
+						{
+							std::string filename;
+							filename = p->perimeter.Get_file_name();
+							if (filename.length() > 0)
+							{
+								p->perimeter.Set_file_name(this->GetRelativePath(lpszPathName, filename));
+							}
+							filename = p->top.Get_file_name();
+							if (filename.length() > 0)
+							{
+								p->top.Set_file_name(this->GetRelativePath(lpszPathName, filename));
+							}
+							filename = p->bottom.Get_file_name();
+							if (filename.length() > 0)
+							{
+								p->bottom.Set_file_name(this->GetRelativePath(lpszPathName, filename));
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+std::string CWPhastDoc::GetRelativePath(LPCTSTR lpszPathName, const std::string src_path)const
+{
+	char szOut[MAX_PATH] = "";
+	if (::PathIsSameRoot(lpszPathName, src_path.c_str()))
+	{
+		VERIFY(::PathRelativePathTo(szOut, lpszPathName, FILE_ATTRIBUTE_NORMAL, src_path.c_str(), FILE_ATTRIBUTE_NORMAL));
+		return std::string(szOut);
+	}
+	return src_path;
+}
+
+std::string CWPhastDoc::GetAbsolutePath(LPCTSTR lpszPathName, const std::string relative_path)const
+{
+	if (::PathIsRelative(relative_path.c_str()))
+	{
+		char szOut[MAX_PATH];
+
+		TCHAR szDrive[_MAX_DRIVE];
+		TCHAR szDir[_MAX_DIR];
+		TCHAR szFName[_MAX_FNAME];
+		TCHAR szExt[_MAX_EXT];
+		::_tsplitpath_s(lpszPathName, szDrive, _MAX_DRIVE, szDir, _MAX_DIR, szFName, _MAX_FNAME, szExt, _MAX_EXT);
+
+		TCHAR szDirectory[_MAX_DIR];
+		::_tmakepath_s(szDirectory, _MAX_DIR, szDrive, szDir, NULL, NULL);
+
+		CString s(szDirectory);
+		s.Append(relative_path.c_str());
+
+		VERIFY(::PathCanonicalize(szOut, s));
+		return std::string(szOut);
+	}
+	return relative_path;
+}
+
 BOOL CWPhastDoc::OnSaveDocument(LPCTSTR lpszPathName)
 {
 	// Add your specialized code here and/or call the base class
 	this->m_pimpl->m_lastSaveIndex = this->m_pimpl->m_vectorActionsIndex;
 
-	return CDocument::OnSaveDocument(lpszPathName);
+	this->PrismPathsAbsoluteToRelative(lpszPathName);
+	BOOL bOk = CDocument::OnSaveDocument(lpszPathName);
+	this->PrismPathsRelativeToAbsolute(lpszPathName);
+	return bOk;
 }
 
 void CWPhastDoc::OnCloseDocument()
@@ -2032,20 +2267,31 @@ void CWPhastDoc::OnCloseDocument()
 	delete this->m_pGeometrySheet;
 	this->m_pGeometrySheet = 0;
 
-// COMMENT: {7/19/2005 8:13:02 PM}	// Grid
-// COMMENT: {7/19/2005 8:13:02 PM}	//
-// COMMENT: {7/19/2005 8:13:02 PM}	if (this->m_pGridPage)
-// COMMENT: {7/19/2005 8:13:02 PM}	{
-// COMMENT: {7/19/2005 8:13:02 PM}		this->m_pGridPage->DestroyWindow();
-// COMMENT: {7/19/2005 8:13:02 PM}		delete this->m_pGridPage;
-// COMMENT: {7/19/2005 8:13:02 PM}		this->m_pGridPage = 0;
-// COMMENT: {7/19/2005 8:13:02 PM}	}
-// COMMENT: {7/19/2005 8:13:02 PM}	if (this->m_pGridSheet)
-// COMMENT: {7/19/2005 8:13:02 PM}	{
-// COMMENT: {7/19/2005 8:13:02 PM}		this->m_pGridSheet->DestroyWindow();
-// COMMENT: {7/19/2005 8:13:02 PM}		delete this->m_pGridSheet;
-// COMMENT: {7/19/2005 8:13:02 PM}		this->m_pGridSheet = 0;
-// COMMENT: {7/19/2005 8:13:02 PM}	}
+	//{{HACK
+	// this is used to avoid a bug that occurs when a box zone is converted
+	// to a prism and the app is closed causing a vtk referrence crash
+	if (this->GetPropertyTreeControlBar())
+	{
+		CTreeCtrlNode parentNode = this->GetPropertyTreeControlBar()->GetMediaNode();
+		if (parentNode)
+		{
+			int nCount = parentNode.GetChildCount();
+			for (int i = 0; i < nCount; ++i)
+			{
+				if (CZoneActor *pActor = CZoneActor::SafeDownCast((vtkObject*)parentNode.GetChildAt(i).GetData()))
+				{
+					if (pActor->GetPolyhedronType() == Polyhedron::PRISM)
+					{
+						struct zone z;
+						Cube c(&z);
+						CUnits u;
+						pActor->SetPolyhedron(&c, u);
+					}
+				}
+			}
+		}
+	}
+	//}}HACK
 
 	CDocument::OnCloseDocument();
 }
@@ -2073,6 +2319,32 @@ void CWPhastDoc::OnFileImport()
 	if (SrcResolveShortcut(AfxGetMainWnd(), szPath, szLinkName, _MAX_PATH))
 		lstrcpy(szPath, szLinkName);
 
+#if defined(__CPPUNIT__)
+	HQUERY hquery;
+	PDH_STATUS status = PdhOpenQuery(NULL, 0, &hquery);
+	VERIFY(status == ERROR_SUCCESS);
+
+	PDH_HCOUNTER hcounter;
+	///status = PdhAddCounter(hquery, _T("\\\\.\\Process(WPhast)\\Private Bytes"), 0, &hcounter);
+	status = PdhAddCounter(hquery, _T("\\Process(WPhast)\\Private Bytes"), 0, &hcounter);
+	if (status != ERROR_SUCCESS)
+	{
+		PdhCloseQuery(hquery);
+	}
+
+	status = PdhCollectQueryData(hquery);
+	if (status == ERROR_SUCCESS)
+	{
+		PDH_RAW_COUNTER value;
+		DWORD dwType;
+		status = PdhGetRawCounterValue(hcounter, &dwType, &value);
+		if (status == ERROR_SUCCESS)
+		{
+			TRACE("Before import %lld %lld\n", value.TimeStamp, value.FirstValue);
+		}
+	}
+#endif
+
 	CDocument* pDoc = this->GetDocTemplate()->OpenDocumentFile(NULL);
 	if (pDoc)
 	{
@@ -2096,6 +2368,19 @@ void CWPhastDoc::OnFileImport()
 			pTree->RedrawWindow();
 		}
 	}
+#if defined(__CPPUNIT__)
+	status = PdhCollectQueryData(hquery);
+	if (status == ERROR_SUCCESS)
+	{
+		PDH_RAW_COUNTER value;
+		DWORD dwType;
+		status = PdhGetRawCounterValue(hcounter, &dwType, &value);
+		if (status == ERROR_SUCCESS)
+		{
+			TRACE("After import %lld %lld\n", value.TimeStamp, value.FirstValue);
+		}
+	}
+#endif
 }
 
 BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
@@ -2107,10 +2392,13 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 	// Update StatusBar
 	//
 	this->UpdateAllViews(NULL);
-	if (CWnd* pWnd = ((CFrameWnd*)::AfxGetMainWnd())->GetMessageBar())
+	if (::AfxGetMainWnd())
 	{
-		CString status(_T("Importing..."));
-		pWnd->SetWindowText(status);
+		if (CWnd* pWnd = ((CFrameWnd*)::AfxGetMainWnd())->GetMessageBar())
+		{
+			CString status(_T("Importing..."));
+			pWnd->SetWindowText(status);
+		}
 	}
 	//::Sleep(100);
 	this->UpdateAllViews(NULL);
@@ -2126,7 +2414,7 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 	//
 	TCHAR szNewDir[MAX_PATH];
 	::_tmakepath(szNewDir, szDrive, szDir, NULL, NULL);
-	save.SetCurrentDirectory(szNewDir);
+	BOOL b = save.SetCurrentDirectory(szNewDir);
 
 	// remove .trans if it exists
 	//
@@ -2134,19 +2422,24 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 	strPrefix.MakeLower();
 	strPrefix.Replace(_T(".trans"), _T(""));
 
+	// get title
+	//
+	TCHAR szTitle[MAX_PATH];
+	::_tmakepath(szTitle, NULL, NULL, szFName, szExt);
+
+	// get fullpath
+	//
+	TCHAR szFullpath[MAX_PATH];
+	::_tfullpath(szFullpath, lpszPathName, MAX_PATH);
+
 	std::ifstream ifs;
-	ifs.open(lpszPathName);
+// COMMENT: {12/4/2008 4:10:48 PM}	ifs.open(lpszPathName);
+// COMMENT: {12/4/2008 4:04:45 PM}	ifs.open(szFullpath);
+	ifs.open(szTitle);
 	if (!ifs.is_open())
 	{
 		return FALSE;
 	}
-
-// COMMENT: {6/2/2008 5:21:46 PM}	::OutputDebugString("DoWaitCursor In\n");
-// COMMENT: {6/2/2008 5:21:46 PM}	//::AfxGetApp()->DoWaitCursor(1);	
-// COMMENT: {6/2/2008 5:21:46 PM}	::SetCursor(::AfxGetApp()->LoadCursorA(IDC_WAIT));
-// COMMENT: {6/2/2008 5:21:46 PM}	Sleep(9000);
-// COMMENT: {6/2/2008 5:21:46 PM}	//::AfxGetApp()->DoWaitCursor(-1);
-// COMMENT: {6/2/2008 5:21:46 PM}	::OutputDebugString("DoWaitCursor Out\n");
 
 	// xml
 	//
@@ -2156,8 +2449,16 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 	ifs.seekg(0, std::ios_base::beg);
 	xml.seekg(0, std::ios_base::beg);
 
-	CPhastInput* pInput = CPhastInput::New(ifs, strPrefix);
+	ASSERT(Filedata::file_data_map.size() == 0);
+	CPhastInput* pInput = CPhastInput::New(ifs, strPrefix, false);
 	if (!pInput) return FALSE;
+
+	// save
+	std::map<const struct grid_elt*, Polyhedron*> grid_elt_map;
+	std::map<const struct BC*,       Polyhedron*> bc_map;
+	std::map<const Zone_budget*,     Polyhedron*> zb_map;
+	std::map<const struct Head_ic*,  Polyhedron*> head_ic_map;
+	std::map<const struct chem_ic*,  Polyhedron*> chem_ic_map;
 
 	BOOL bReturnValue = TRUE;
 	try
@@ -2166,7 +2467,45 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 		printFreq.InitSync(pInput); // must be called before Load()
 
 		::OutputDebugString("Begin loading trans.dat file\n");
-		pInput->Load();
+
+		pInput->Read();
+
+		// store original polyhs
+
+		// MEDIA zones
+		for (int i = 0; i < ::count_grid_elt_zones; ++i)
+		{
+			const struct grid_elt* grid_elt_ptr = ::grid_elt_zones[i];
+			grid_elt_map[grid_elt_ptr] = grid_elt_ptr->polyh->clone();
+		}
+		// BC zones
+		for (int i = 0; i < ::count_bc; ++i)
+		{
+			const struct BC* bc_ptr = ::bc[i];
+			bc_map[bc_ptr] = bc_ptr->polyh->clone();
+		}
+		// Zone_budget zones
+		std::map<int, Zone_budget*>::iterator zit = Zone_budget::zone_budget_map.begin();
+		for (; zit != Zone_budget::zone_budget_map.end(); ++zit)
+		{
+			ASSERT(zit->second->Get_polyh());
+			zb_map[zit->second] = zit->second->Get_polyh()->clone();
+		}
+		// IC zones
+		for (int i = 0; i < ::count_head_ic; ++i)
+		{
+			const struct Head_ic* head_ic_ptr = ::head_ic[i];
+			head_ic_map[head_ic_ptr] = head_ic_ptr->polyh->clone();
+		}
+		// CHEMISTRY_IC
+		for (int i = 0; i < ::count_chem_ic; ++i)
+		{
+			const struct chem_ic* chem_ic_ptr = ::chem_ic[i];
+			chem_ic_map[chem_ic_ptr] = chem_ic_ptr->polyh->clone();
+		}
+		pInput->Accumulate(false);
+		///pInput->Load();
+
 		::OutputDebugString("Finished loading trans.dat file\n");
 		if (pInput->GetErrorCount() != 0)
 		{
@@ -2193,6 +2532,8 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 		// MEDIA
 		//
 		CGridElt gridElt = CGridElt::Full();
+		size_t n = sizeof(gridElt);
+		ASSERT(n == 80);
 		::GetDefaultMedia(&gridElt);
 
 		// HEAD_IC
@@ -2225,12 +2566,13 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 
 		// create new document
 		//
+		ASSERT(::map_to_grid);
 		CNewModel model;
 		model.m_flowOnly       = flowOnly;
 		model.m_freeSurface    = (::free_surface != 0);
 		model.m_steadyFlow     = steadyFlow;
-		model.m_units          = ::units;
-		model.m_gridKeyword    = CGridKeyword(::grid, ::snap, ::axes, ::print_input_xy);
+		model.m_units          = CUnits(::units, *::map_to_grid);
+		model.m_gridKeyword    = CGridKeyword(::grid, ::snap, ::axes, ::print_input_xy, ::grid_origin, ::grid_angle);
 		model.m_media          = gridElt;
 		model.m_headIC         = headIC;
 		model.m_chemIC         = chemIC;
@@ -2269,40 +2611,56 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 				// it's assumed that the default media zone
 				// is always active
 				CGridElt alt(*grid_elt_ptr);
+				if (alt.active) delete static_cast<Cproperty*>(alt.active);
 				alt.active = new Cproperty(1);
 				if (model.m_media == alt)
 				{
 					continue;
 				}
 			}
-			CZoneCreateAction<CMediaZoneActor>* pAction = new CZoneCreateAction<CMediaZoneActor>(
-				this,
-				grid_elt_ptr->polyh,
-				NULL
+			CGridElt data(*grid_elt_ptr);
+			std::auto_ptr<Polyhedron> ap(data.polyh);
+			ASSERT(grid_elt_map.find(grid_elt_ptr) != grid_elt_map.end());
+			data.polyh = grid_elt_map[grid_elt_ptr]->clone();
+			std::auto_ptr< CZoneCreateAction<CMediaZoneActor> > pAction(
+				new CZoneCreateAction<CMediaZoneActor>(
+					this,
+					data.polyh,
+					::grid_origin,
+					::grid_angle,
+					NULL
+					)
 				);
-			pAction->GetZoneActor()->SetData(*grid_elt_ptr);
+			pAction->GetZoneActor()->SetData(data);
 			pAction->Execute();
-			delete pAction;
 		}
 
 		// BC Zones
 		//
-		std::list<CBCZoneActor*> listBCZoneActors;
+		//std::list<CBCZoneActor*> listBCZoneActors;
 		for (int i = 0; i < ::count_bc; ++i)
 		{
 			const struct BC* bc_ptr = ::bc[i];
 			ASSERT(bc_ptr->polyh && ::AfxIsValidAddress(bc_ptr->polyh, sizeof(Polyhedron)));
+
+			// store pre-translated polyh
+			CBC data(*bc_ptr);
+			std::auto_ptr<Polyhedron> ap(data.polyh);
+			ASSERT(bc_map.find(bc_ptr) != bc_map.end());
+			data.polyh = bc_map[bc_ptr]->clone();
+
 			// not undoable
-			//
-			CZoneCreateAction<CBCZoneActor>* pAction = new CZoneCreateAction<CBCZoneActor>(
-				this,
-				bc_ptr->polyh,
-				NULL
+			std::auto_ptr< CZoneCreateAction<CBCZoneActor> > pAction(
+				new CZoneCreateAction<CBCZoneActor>(
+					this,
+					data.polyh,
+					::grid_origin,
+					::grid_angle,
+					NULL
+					)
 				);
-			pAction->GetZoneActor()->SetData(*bc_ptr);
+			pAction->GetZoneActor()->SetData(data);
 			pAction->Execute();
-			listBCZoneActors.push_back(pAction->GetZoneActor());
-			delete pAction;
 		}
 
 		// Wells
@@ -2324,11 +2682,48 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 		{
 			const River* river_ptr = &::rivers[i];
 			CRiver river(*river_ptr);
-			
+
 			// not undoable
-			CRiverCreateAction *pAction = new CRiverCreateAction(this, river);
+			CPointConnectorCreateAction<CRiverActor, CRiver> *pAction = new CPointConnectorCreateAction<CRiverActor, CRiver>(this, river);
 			pAction->Execute();
 			delete pAction;
+		}
+
+		// DRAIN
+		//
+		for (size_t i = 0; i < ::drains.size(); ++i)
+		{
+			const Drain* drain_ptr = ::drains[i];
+			CDrain drain(*drain_ptr);
+
+			// not undoable
+			CPointConnectorCreateAction<CDrainActor, CDrain> *pAction = new CPointConnectorCreateAction<CDrainActor, CDrain>(this, drain);
+			pAction->Execute();
+			delete pAction;
+		}
+
+		// ZONE_FLOW_RATES
+		//
+		std::map<int, Zone_budget*>::iterator it = Zone_budget::zone_budget_map.begin();
+		for (; it != Zone_budget::zone_budget_map.end(); ++it)
+		{
+			// store pre-translated polyh
+			Zone_budget data(*it->second);
+			ASSERT(zb_map.find(it->second) != zb_map.end());
+			data.Set_polyh(zb_map[it->second]->clone());
+
+			// not undoable
+			std::auto_ptr< CZoneCreateAction<CZoneFlowRateZoneActor> > pAction(
+				new CZoneCreateAction<CZoneFlowRateZoneActor>(
+					this,
+					it->second->Get_polyh(),
+					::grid_origin,
+					::grid_angle,
+					NULL
+					)
+				);
+			pAction->GetZoneActor()->SetData(data);
+			pAction->Execute();
 		}
 
 		// IC
@@ -2346,14 +2741,25 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 					continue;
 				}
 			}
-			CZoneCreateAction<CICHeadZoneActor>* pAction = new CZoneCreateAction<CICHeadZoneActor>(
-				this,
-				head_ic_ptr->polyh,
-				NULL
+
+			// store pre-translated polyh
+			CHeadIC data(*head_ic_ptr);
+			std::auto_ptr<Polyhedron> ap(data.polyh);
+			ASSERT(head_ic_map.find(head_ic_ptr) != head_ic_map.end());
+			data.polyh = head_ic_map[head_ic_ptr]->clone();
+
+			// not undoable
+			std::auto_ptr< CZoneCreateAction<CICHeadZoneActor> > pAction(
+				new CZoneCreateAction<CICHeadZoneActor>(
+					this,
+					data.polyh,
+					::grid_origin,
+					::grid_angle,
+					NULL
+					)
 				);
-			pAction->GetZoneActor()->SetData(*head_ic_ptr);
+			pAction->GetZoneActor()->SetData(data);
 			pAction->Execute();
-			delete pAction;
 		}
 
 		// CHEMISTRY_IC
@@ -2376,33 +2782,45 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 				Cproperty::CopyProperty(&ic.solution, chem_ic_ptr->solution);
 				if (model.m_chemIC == ic)
 				{
-					CTreeCtrlNode nodeICChem = this->GetPropertyTreeControlBar()->GetICChemNode();
-					if (CICChemZoneActor *pZone = CICChemZoneActor::SafeDownCast((vtkObject*)nodeICChem.GetChildAt(0).GetData()))
+					if (this->GetPropertyTreeControlBar())
 					{
-						if (CTreeCtrl *pTreeCtrl = this->GetPropertyTreeControlBar()->GetTreeCtrl())
+						CTreeCtrlNode nodeICChem = this->GetPropertyTreeControlBar()->GetICChemNode();
+						if (CICChemZoneActor *pZone = CICChemZoneActor::SafeDownCast((vtkObject*)nodeICChem.GetChildAt(0).GetData()))
 						{
-							CChemIC chemIC(*chem_ic_ptr);
-							CSetChemICAction* a = new CSetChemICAction(pZone, pTreeCtrl, chemIC, pZone->GetDesc());
-							a->Execute();
-							delete a;
-							continue;
+							if (CTreeCtrl *pTreeCtrl = this->GetPropertyTreeControlBar()->GetTreeCtrl())
+							{
+								CChemIC chemIC(*chem_ic_ptr);
+								CSetChemICAction* a = new CSetChemICAction(pZone, pTreeCtrl, chemIC, pZone->GetDesc());
+								a->Execute();
+								delete a;
+								continue;
+							}
 						}
 					}
 				}
 			}
-			CZoneCreateAction<CICChemZoneActor>* pAction = new CZoneCreateAction<CICChemZoneActor>(
-				this,
-				chem_ic_ptr->polyh,
-				NULL
+
+			// store pre-translated polyh
+			CChemIC data(*chem_ic_ptr);
+			std::auto_ptr<Polyhedron> ap(data.polyh);
+			ASSERT(chem_ic_map.find(chem_ic_ptr) != chem_ic_map.end());
+			data.polyh = chem_ic_map[chem_ic_ptr]->clone();
+
+			// not undoable
+			std::auto_ptr< CZoneCreateAction<CICChemZoneActor> > pAction(
+				new CZoneCreateAction<CICChemZoneActor>(
+					this,
+					data.polyh,
+					::grid_origin,
+					::grid_angle,
+					NULL
+					)
 				);
-			pAction->GetZoneActor()->SetData(*chem_ic_ptr);
+			pAction->GetZoneActor()->SetData(data);
 			pAction->Execute();
-			delete pAction;
 		}
-		//{{
 		// convert all relative paths to absolute paths
-		this->PrismPathsRelativeToAbsolute();
-		//}}
+		this->PrismPathsRelativeToAbsolute(lpszPathName);
 	}
 	catch (int)
 	{
@@ -2416,10 +2834,38 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 		::AfxMessageBox(error, MB_OK|MB_ICONEXCLAMATION);
 		bReturnValue = FALSE;
 	}
+#if !defined(_DEBUG)
 	catch (...)
 	{
 		::AfxMessageBox("An unknown error occured during import", MB_OK|MB_ICONEXCLAMATION);
 		bReturnValue = FALSE;
+	}
+#endif
+
+	std::map<const struct grid_elt*, Polyhedron*>::iterator gi = grid_elt_map.begin();
+	for(; gi != grid_elt_map.end(); ++gi)
+	{
+		delete gi->second;
+	}
+	std::map<const struct BC*, Polyhedron*>::iterator bi = bc_map.begin();
+	for(; bi != bc_map.end(); ++bi)
+	{
+		delete bi->second;
+	}
+	std::map<const Zone_budget*, Polyhedron*>::iterator zi = zb_map.begin();
+	for(; zi != zb_map.end(); ++zi)
+	{
+		delete zi->second;
+	}
+	std::map<const struct Head_ic*, Polyhedron*>::iterator hi = head_ic_map.begin();
+	for(; hi != head_ic_map.end(); ++hi)
+	{
+		delete hi->second;
+	}
+	std::map<const struct chem_ic*, Polyhedron*>::iterator ci = chem_ic_map.begin();
+	for(; ci != chem_ic_map.end(); ++ci)
+	{
+		delete ci->second;
 	}
 
 	// reset tree control
@@ -2432,6 +2878,8 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 		pTree->GetBCNode().Expand(TVE_COLLAPSE);
 		pTree->GetWellsNode().Expand(TVE_COLLAPSE);
 		pTree->GetRiversNode().Expand(TVE_COLLAPSE);
+		pTree->GetDrainsNode().Expand(TVE_COLLAPSE);
+		pTree->GetZoneFlowRatesNode().Expand(TVE_COLLAPSE);
 		this->ClearSelection();
 	}
 
@@ -2439,10 +2887,13 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 	this->SetTitle(strPrefix);
 	this->SetModifiedFlag(TRUE);
 
-	if (CWnd* pWnd = ((CFrameWnd*)::AfxGetMainWnd())->GetMessageBar())
+	if (::AfxGetMainWnd())
 	{
-		CString status(_T("Ready"));
-		pWnd->SetWindowText(status);
+		if (CWnd* pWnd = ((CFrameWnd*)::AfxGetMainWnd())->GetMessageBar())
+		{
+			CString status(_T("Ready"));
+			pWnd->SetWindowText(status);
+		}
 	}
 
 	return bReturnValue;
@@ -2489,18 +2940,18 @@ void CWPhastDoc::OnFileExport()
 		lstrcpy(szPath, szLinkName);
 
 	CString strPath(szPath);
-// COMMENT: {7/12/2006 8:11:24 PM}	if (strPath.Find(_T(".trans.dat")) == -1)
 	if (strPath.Right(10).CompareNoCase(".trans.dat") != 0)
 	{
 		strPath += ".trans.dat";
 	}
 
+	this->PrismPathsAbsoluteToRelative(strPath);
 	if (!this->DoExport(strPath))
 	{
 		::AfxMessageBox("An error occured during the export", MB_OK);
-		this->SetModifiedFlag(FALSE);
+// COMMENT: {8/7/2008 4:03:09 PM}		this->SetModifiedFlag(FALSE);
 	}
-
+	this->PrismPathsRelativeToAbsolute(strPath);
 }
 
 BOOL CWPhastDoc::DoExport(LPCTSTR lpszPathName)
@@ -2535,15 +2986,15 @@ BOOL CWPhastDoc::DoExport(LPCTSTR lpszPathName)
 		strPrefix = strPrefix.Left(strPrefix.GetLength() - 6);
 	}
 
-	this->XMLExport(ofs, strPrefix);
+	this->XMLExport(ofs, strPrefix, lpszPathName);
 	return this->WriteTransDat(ofs);
 }
 
-BOOL CWPhastDoc::XMLExport(std::ostream& os, const char *prefix)
+BOOL CWPhastDoc::XMLExport(std::ostream& os, const char *prefix, LPCTSTR lpszPathName)
 {
 	CXMLSerializer x;
 
-	const char* xml = x.writeDOM(this, prefix);
+	const char* xml = x.writeDOM(this, prefix, lpszPathName);
 	std::string str(xml);
 	std::istringstream iss(str);
 
@@ -2554,7 +3005,7 @@ BOOL CWPhastDoc::XMLExport(std::ostream& os, const char *prefix)
 
 		// skip over empty lines
 		//
-		if (!s.empty()) 
+		if (!s.empty())
 		{
 			os << "# " << s << std::endl;
 		}
@@ -2566,10 +3017,11 @@ BOOL CWPhastDoc::XMLExport(std::ostream& os, const char *prefix)
 	return TRUE;
 }
 
-
 BOOL CWPhastDoc::WriteTransDat(std::ostream& os)
 {
 	int nCount;
+
+	os.precision(DBL_DIG);
 
 	// FLOW_ONLY
 	os << this->m_pModel->m_flowOnly;
@@ -2617,7 +3069,7 @@ BOOL CWPhastDoc::WriteTransDat(std::ostream& os)
 		}
 	}
 
-	// HEAD_IC 
+	// HEAD_IC
 	CTreeCtrlNode nodeICHead = this->GetPropertyTreeControlBar()->GetICHeadNode();
 	nCount = nodeICHead.GetChildCount();
 	for (int i = 0; i < nCount; ++i)
@@ -2628,7 +3080,7 @@ BOOL CWPhastDoc::WriteTransDat(std::ostream& os)
 		}
 	}
 
-	// CHEMISTRY_IC 
+	// CHEMISTRY_IC
 	CTreeCtrlNode nodeICChem = this->GetPropertyTreeControlBar()->GetICChemNode();
 	nCount = nodeICChem.GetChildCount();
 	for (int i = 0; i < nCount; ++i)
@@ -2658,6 +3110,28 @@ BOOL CWPhastDoc::WriteTransDat(std::ostream& os)
 		if (CRiverActor *pRiverActor = CRiverActor::SafeDownCast((vtkObject*)nodeRivers.GetChildAt(i).GetData()))
 		{
 			os << *pRiverActor;
+		}
+	}
+
+	// DRAINS
+	CTreeCtrlNode nodeDrains = this->GetPropertyTreeControlBar()->GetDrainsNode();
+	nCount = nodeDrains.GetChildCount();
+	for (int i = 0; i < nCount; ++i)
+	{
+		if (CDrainActor *pDrainActor = CDrainActor::SafeDownCast((vtkObject*)nodeDrains.GetChildAt(i).GetData()))
+		{
+			os << *pDrainActor;
+		}
+	}
+
+	// ZONE_FLOW_RATES
+	CTreeCtrlNode nodeZoneFlowRates = this->GetPropertyTreeControlBar()->GetZoneFlowRatesNode();
+	nCount = nodeZoneFlowRates.GetChildCount();
+	for (int i = 0; i < nCount; ++i)
+	{
+		if (CZoneFlowRateZoneActor *pZone = CZoneFlowRateZoneActor::SafeDownCast((vtkObject*)nodeZoneFlowRates.GetChildAt(i).GetData()))
+		{
+			os << pZone->GetData();
 		}
 	}
 
@@ -2720,6 +3194,38 @@ void CWPhastDoc::GetUnits(CUnits& units)const
 	units = (*this->m_pUnits);
 }
 
+void CWPhastDoc::StandardizeUnits(CUnits& units)const
+{
+	// minimize length units for display purposes
+	//
+	if (units.horizontal.defined == TRUE)
+	{
+		CString strLength(units.horizontal.input);
+		CGlobal::MinimizeLengthUnits(strLength);
+		units.horizontal.set_input(strLength);
+	}
+	if (units.vertical.defined == TRUE)
+	{
+		CString strLength(units.vertical.input);
+		CGlobal::MinimizeLengthUnits(strLength);
+		units.vertical.set_input(strLength);
+	}
+
+	if (units.map_horizontal.defined == TRUE)
+	{
+		CString strLength(units.map_horizontal.input);
+		CGlobal::MinimizeLengthUnits(strLength);
+		units.map_horizontal.set_input(strLength);
+	}
+	if (units.map_vertical.defined == TRUE)
+	{
+		CString strLength(units.map_vertical.input);
+		CGlobal::MinimizeLengthUnits(strLength);
+		units.map_vertical.set_input(strLength);
+	}
+}
+
+
 void CWPhastDoc::SetUnits(const CUnits& units)
 {
 	ASSERT(this->m_pUnits);
@@ -2727,18 +3233,7 @@ void CWPhastDoc::SetUnits(const CUnits& units)
 
 	// minimize length units for display purposes
 	//
-	if (this->m_pUnits->horizontal.defined == TRUE)
-	{
-		CString strLength(this->m_pUnits->horizontal.input);
-		CGlobal::MinimizeLengthUnits(strLength);
-		this->m_pUnits->horizontal.set_input(strLength);
-	}
-	if (this->m_pUnits->vertical.defined == TRUE)
-	{
-		CString strLength(this->m_pUnits->vertical.input);
-		CGlobal::MinimizeLengthUnits(strLength);
-		this->m_pUnits->vertical.set_input(strLength);
-	}
+	this->StandardizeUnits(*this->m_pUnits);
 
 	// update properties bar
 	//
@@ -2752,26 +3247,6 @@ void CWPhastDoc::SetUnits(const CUnits& units)
 	CGrid x, y, z;
 	this->m_pGridActor->GetGrid(x, y, z);
 	this->ResizeGrid(x, y, z);
-
-	// update zones
-	//
-	if (vtkPropCollection* pCollection = this->GetPropCollection())
-	{
-		pCollection->InitTraversal();
-		for (int i = 0; i < pCollection->GetNumberOfItems(); ++i)
-		{
-			vtkProp* prop = pCollection->GetNextProp();
-			if (CZoneActor *pZone = CZoneActor::SafeDownCast(prop))
-			{
-				ASSERT(FALSE); // TODO 8/24/2004 Does this need to change (similar to SetScale)
-				pZone->SetUnits(units);
-			}
-			if (CWellActor *pWell = CWellActor::SafeDownCast(prop))
-			{
-				ASSERT(FALSE);
-			}
-		}
-	}
 
 	// set scale for all zones
 	//
@@ -2822,24 +3297,14 @@ void CWPhastDoc::SetUnits(const CUnits& units)
 	{
 		CWPhastView *pView = (CWPhastView*) GetNextView(pos);
 
-		// resize the selection bounding box
+		// resize the widgets
 		//
 		if (vtkAbstractPropPicker *picker = vtkAbstractPropPicker::SafeDownCast( pView->GetRenderWindowInteractor()->GetPicker() ))
 		{
 			if (vtkProp3D* prop = picker->GetProp3D())
 			{
-				if (CZoneActor *pZone = CZoneActor::SafeDownCast(prop))
-				{
-					pZone->Select(pView);
-				}
+				pView->Select(prop);
 			}
-		}
-
-		// resize the Box Widget
-		//
-		if (pView->GetBoxWidget()->GetProp3D())
-		{
-			pView->GetBoxWidget()->PlaceWidget();
 		}
 	}
 	this->UpdateAllViews(0);
@@ -2874,6 +3339,8 @@ void CWPhastDoc::New(const CNewModel& model)
 	//
 	ASSERT(this->m_pUnits);
 	*this->m_pUnits = model.m_units;
+	this->StandardizeUnits(*this->m_pUnits);
+
 	// update properties bar
 	//
 	if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar())
@@ -2913,7 +3380,13 @@ void CWPhastDoc::New(const CNewModel& model)
 		&cube,
 		NULL
 		);
-	pMediaAction->GetZoneActor()->SetData(model.m_media);
+	//{{
+	CGridElt media(model.m_media);
+	ASSERT(media.polyh == NULL);
+	media.polyh = cube.clone();
+	pMediaAction->GetZoneActor()->SetData(media);
+	//}}
+// COMMENT: {10/31/2008 9:00:31 PM}	pMediaAction->GetZoneActor()->SetData(model.m_media);
 	pMediaAction->GetZoneActor()->SetDefault(true);
 	pMediaAction->Execute();
 	delete pMediaAction;
@@ -3000,12 +3473,7 @@ void CWPhastDoc::OnFileRun()
 		}
 	}
 
-	std::ostringstream oss;
-	this->WriteTransDat(oss);
-
-	std::string str = oss.str();
-	std::istringstream iss(str);
-
+	CSaveCurrentDirectory scd;
 	TCHAR szDrive[_MAX_DRIVE];
 	TCHAR szDir[_MAX_DIR];
 	TCHAR szFName[_MAX_FNAME];
@@ -3014,11 +3482,22 @@ void CWPhastDoc::OnFileRun()
 	ASSERT(!this->GetPathName().IsEmpty());
 	::_tsplitpath(this->GetPathName(), szDrive, szDir, szFName, szExt);
 
+	TCHAR szOutDir[_MAX_PATH];
+	::_tmakepath(szOutDir, szDrive, szDir, NULL, NULL);
+	scd.SetCurrentDirectoryA(szOutDir);
+
 	TCHAR szPhastTmp[_MAX_PATH];
 	::_tmakepath(szPhastTmp, szDrive, szDir, "Phast", ".tmp");
 
 	CString strPrefix(szFName);
 
+	std::ostringstream oss;
+	this->PrismPathsAbsoluteToRelative(szPhastTmp);
+	this->WriteTransDat(oss);
+	this->PrismPathsRelativeToAbsolute(szPhastTmp);
+
+	std::string str = oss.str();
+	std::istringstream iss(str);
 
 	CPhastInput* pInput = CPhastInput::New(iss, strPrefix);
 	if (!pInput) return;
@@ -3090,56 +3569,6 @@ void CWPhastDoc::OnFileRun()
 	}
 }
 
-// COMMENT: {4/8/2005 6:51:09 PM}CTreeCtrlNode CWPhastDoc::AddStressPeriod(const CTimeControl& timeControl)
-// COMMENT: {4/8/2005 6:51:09 PM}{
-// COMMENT: {4/8/2005 6:51:09 PM}    CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar();
-// COMMENT: {4/8/2005 6:51:09 PM}	ASSERT(pTree);
-// COMMENT: {4/8/2005 6:51:09 PM}	CTreeCtrlNode node = pTree->AddStressPeriod(timeControl);
-// COMMENT: {4/8/2005 6:51:09 PM}	return node;
-// COMMENT: {4/8/2005 6:51:09 PM}}
-
-// COMMENT: {4/8/2005 6:51:14 PM}void CWPhastDoc::RemoveStressPeriod(int nStressPeriod)
-// COMMENT: {4/8/2005 6:51:14 PM}{
-// COMMENT: {4/8/2005 6:51:14 PM}    CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar();
-// COMMENT: {4/8/2005 6:51:14 PM}	ASSERT(pTree);
-// COMMENT: {4/8/2005 6:51:14 PM}	pTree->RemoveStressPeriod(nStressPeriod);
-// COMMENT: {4/8/2005 6:51:14 PM}}
-
-// COMMENT: {4/8/2005 6:51:20 PM}int CWPhastDoc::GetStressPeriodCount(void)const
-// COMMENT: {4/8/2005 6:51:20 PM}{
-// COMMENT: {4/8/2005 6:51:20 PM}    CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar();
-// COMMENT: {4/8/2005 6:51:20 PM}	ASSERT(pTree);
-// COMMENT: {4/8/2005 6:51:20 PM}	return pTree->GetStressPeriodCount();
-// COMMENT: {4/8/2005 6:51:20 PM}}
-
-// COMMENT: {4/11/2005 1:22:32 PM}void CWPhastDoc::SetTimeControl(const CTimeControl& timeControl, int nStressPeriod)
-// COMMENT: {4/11/2005 1:22:32 PM}{
-// COMMENT: {4/11/2005 1:22:32 PM}	if (nStressPeriod == 1) {
-// COMMENT: {4/11/2005 1:22:32 PM}		(*this->m_pTimeControl) = timeControl;
-// COMMENT: {4/11/2005 1:22:32 PM}
-// COMMENT: {4/11/2005 1:22:32 PM}		// update properties bar
-// COMMENT: {4/11/2005 1:22:32 PM}		//
-// COMMENT: {4/11/2005 1:22:32 PM}		if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar()) {
-// COMMENT: {4/11/2005 1:22:32 PM}			pTree->SetTimeControl(this->m_pTimeControl);
-// COMMENT: {4/11/2005 1:22:32 PM}		}
-// COMMENT: {4/11/2005 1:22:32 PM}	}
-// COMMENT: {4/11/2005 1:22:32 PM}	else {
-// COMMENT: {4/11/2005 1:22:32 PM}		CTimeControl copy(timeControl);
-// COMMENT: {4/11/2005 1:22:32 PM}		if (copy.GetTimeEndInput() == 0) {
-// COMMENT: {4/11/2005 1:22:32 PM}			copy.SetTimeEndInput(this->GetUnits().time.c_str());
-// COMMENT: {4/11/2005 1:22:32 PM}		}
-// COMMENT: {4/11/2005 1:22:32 PM}		if (copy.GetTimeStepInput() == 0) {
-// COMMENT: {4/11/2005 1:22:32 PM}			copy.SetTimeStepInput(this->GetUnits().time.c_str());
-// COMMENT: {4/11/2005 1:22:32 PM}		}
-// COMMENT: {4/11/2005 1:22:32 PM}
-// COMMENT: {4/11/2005 1:22:32 PM}		// update properties bar
-// COMMENT: {4/11/2005 1:22:32 PM}		//
-// COMMENT: {4/11/2005 1:22:32 PM}		if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar()) {
-// COMMENT: {4/11/2005 1:22:32 PM}			pTree->SetTimeControl(copy, nStressPeriod);
-// COMMENT: {4/11/2005 1:22:32 PM}		}
-// COMMENT: {4/11/2005 1:22:32 PM}	}
-// COMMENT: {4/11/2005 1:22:32 PM}}
-
 void CWPhastDoc::SetTimeControl2(const CTimeControl2& timeControl2)
 {
 	ASSERT(this->m_pModel);
@@ -3194,18 +3623,6 @@ const CPrintInput& CWPhastDoc::GetPrintInput(void)const
 
 void CWPhastDoc::OnToolsNewStressPeriod(void)
 {
-// COMMENT: {4/8/2005 6:57:20 PM}	if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar()) {
-// COMMENT: {4/8/2005 6:57:20 PM}		CPropertySheet props(_T("New Simulation Period"));
-// COMMENT: {4/8/2005 6:57:20 PM}		CTimeControlPropertyPage tcPage;
-// COMMENT: {4/8/2005 6:57:20 PM}		tcPage.SetPreviousTimeStep(*pTree->GetTimeControl(pTree->GetStressPeriodCount()));
-// COMMENT: {4/8/2005 6:57:20 PM}		props.AddPage(&tcPage);
-// COMMENT: {4/8/2005 6:57:20 PM}
-// COMMENT: {4/8/2005 6:57:20 PM}		if (props.DoModal() == IDOK) {
-// COMMENT: {4/8/2005 6:57:20 PM}			CTimeControl tc;
-// COMMENT: {4/8/2005 6:57:20 PM}			tcPage.GetProperties(tc);
-// COMMENT: {4/8/2005 6:57:20 PM}			this->Execute(new CAddStressPeriodAction(this, tc));
-// COMMENT: {4/8/2005 6:57:20 PM}		}
-// COMMENT: {4/8/2005 6:57:20 PM}	}
 }
 
 void CWPhastDoc::ReleaseGraphicsResources(vtkProp* pProp)
@@ -3377,7 +3794,7 @@ void CWPhastDoc::OnUpdateMediaZonesHideAll(CCmdUI *pCmdUI)
 void CWPhastDoc::OnMediaZonesHideAll()
 {
 	if (CPropertyTreeControlBar *pTree = this->GetPropertyTreeControlBar())
-	{	
+	{
 		pTree->SetMediaCheck(BST_UNCHECKED);
 	}
 	this->UpdateAllViews(0);
@@ -3386,7 +3803,7 @@ void CWPhastDoc::OnMediaZonesHideAll()
 void CWPhastDoc::OnUpdateMediaZonesShowSelected(CCmdUI *pCmdUI)
 {
 	if (CPropertyTreeControlBar *pTree = this->GetPropertyTreeControlBar())
-	{	
+	{
 		switch (pTree->GetMediaCheck())
 		{
 		case BST_UNCHECKED:
@@ -3408,7 +3825,7 @@ void CWPhastDoc::OnUpdateMediaZonesShowSelected(CCmdUI *pCmdUI)
 void CWPhastDoc::OnMediaZonesShowSelected()
 {
 	if (CPropertyTreeControlBar *pTree = this->GetPropertyTreeControlBar())
-	{	
+	{
 		pTree->SetMediaCheck(BST_CHECKED);
 	}
 	this->UpdateAllViews(0);
@@ -3467,7 +3884,7 @@ void CWPhastDoc::OnUpdateICZonesHideAll(CCmdUI *pCmdUI)
 void CWPhastDoc::OnICZonesHideAll()
 {
 	if (CPropertyTreeControlBar *pTree = this->GetPropertyTreeControlBar())
-	{	
+	{
 		pTree->SetICCheck(BST_UNCHECKED);
 	}
 	this->UpdateAllViews(0);
@@ -3498,7 +3915,7 @@ void CWPhastDoc::OnUpdateBCZonesHideAll(CCmdUI *pCmdUI)
 void CWPhastDoc::OnBCZonesHideAll()
 {
 	if (CPropertyTreeControlBar *pTree = this->GetPropertyTreeControlBar())
-	{	
+	{
 		pTree->SetBCCheck(BST_UNCHECKED);
 	}
 	this->UpdateAllViews(0);
@@ -3507,7 +3924,7 @@ void CWPhastDoc::OnBCZonesHideAll()
 void CWPhastDoc::OnUpdateICZonesShowSelected(CCmdUI *pCmdUI)
 {
 	if (CPropertyTreeControlBar *pTree = this->GetPropertyTreeControlBar())
-	{	
+	{
 		switch (pTree->GetICCheck())
 		{
 		case BST_UNCHECKED:
@@ -3529,7 +3946,7 @@ void CWPhastDoc::OnUpdateICZonesShowSelected(CCmdUI *pCmdUI)
 void CWPhastDoc::OnICZonesShowSelected()
 {
 	if (CPropertyTreeControlBar *pTree = this->GetPropertyTreeControlBar())
-	{	
+	{
 		pTree->SetICCheck(BST_CHECKED);
 	}
 	this->UpdateAllViews(0);
@@ -3538,7 +3955,7 @@ void CWPhastDoc::OnICZonesShowSelected()
 void CWPhastDoc::OnUpdateBCZonesShowSelected(CCmdUI *pCmdUI)
 {
 	if (CPropertyTreeControlBar *pTree = this->GetPropertyTreeControlBar())
-	{	
+	{
 		switch (pTree->GetBCCheck())
 		{
 		case BST_UNCHECKED:
@@ -3560,7 +3977,7 @@ void CWPhastDoc::OnUpdateBCZonesShowSelected(CCmdUI *pCmdUI)
 void CWPhastDoc::OnBCZonesShowSelected()
 {
 	if (CPropertyTreeControlBar *pTree = this->GetPropertyTreeControlBar())
-	{	
+	{
 		pTree->SetBCCheck(BST_CHECKED);
 	}
 	this->UpdateAllViews(0);
@@ -3646,33 +4063,34 @@ void CWPhastDoc::OnBCZonesUnselectAll()
 
 void CWPhastDoc::ClearSelection(void)
 {
-// COMMENT: {9/9/2005 7:30:46 PM}	// foreach view
-// COMMENT: {9/9/2005 7:30:46 PM}	//
-// COMMENT: {9/9/2005 7:30:46 PM}	POSITION pos = this->GetFirstViewPosition();
-// COMMENT: {9/9/2005 7:30:46 PM}	while (pos != NULL)
-// COMMENT: {9/9/2005 7:30:46 PM}	{
-// COMMENT: {9/9/2005 7:30:46 PM}		CView *pView = this->GetNextView(pos);
-// COMMENT: {9/9/2005 7:30:46 PM}		if (CWPhastView *pWPhastView = static_cast<CWPhastView*>(pView))
-// COMMENT: {9/9/2005 7:30:46 PM}		{
-// COMMENT: {9/9/2005 7:30:46 PM}			ASSERT_KINDOF(CWPhastView, pWPhastView);
-// COMMENT: {9/9/2005 7:30:46 PM}			ASSERT_VALID(pWPhastView);
-// COMMENT: {9/9/2005 7:30:46 PM}			pWPhastView->ClearSelection();
-// COMMENT: {9/9/2005 7:30:46 PM}		}
-// COMMENT: {9/9/2005 7:30:46 PM}	}
-
 	// clear selected river points
 	//
-	vtkPropCollection *pPropCollection = this->GetPropAssemblyRivers()->GetParts();
-	pPropCollection->InitTraversal();
-	vtkProp* pProp = pPropCollection->GetNextProp();
-	for (; pProp; pProp = pPropCollection->GetNextProp())
+	vtkPropCollection *pRiverPropCollection = this->GetPropAssemblyRivers()->GetParts();
+	pRiverPropCollection->InitTraversal();
+	vtkProp* pRiverProp = pRiverPropCollection->GetNextProp();
+	for (; pRiverProp; pRiverProp = pRiverPropCollection->GetNextProp())
 	{
-		if (CRiverActor *pActor = CRiverActor::SafeDownCast(pProp))
+		if (CRiverActor *pActor = CRiverActor::SafeDownCast(pRiverProp))
 		{
 			pActor->ClearSelection();
 			pActor->SetEnabled(0);
 		}
 	}
+
+	// clear selected drain points  -- TODO river and drain move to Notify()
+	//
+	vtkPropCollection *pDrainPropCollection = this->GetPropAssemblyDrains()->GetParts();
+	pDrainPropCollection->InitTraversal();
+	vtkProp* pDrainProp = pDrainPropCollection->GetNextProp();
+	for (; pDrainProp; pDrainProp = pDrainPropCollection->GetNextProp())
+	{
+		if (CDrainActor *pActor = CDrainActor::SafeDownCast(pDrainProp))
+		{
+			pActor->ClearSelection();
+			pActor->SetEnabled(0);
+		}
+	}
+
 
 	// Notify
 	//
@@ -3736,29 +4154,6 @@ void CWPhastDoc::InternalAdd(CZoneActor *pZoneActor, bool bAdd, HTREEITEM hInser
 		}
 	}
 
-// COMMENT: {3/20/2008 4:07:21 PM}	// foreach view
-// COMMENT: {3/20/2008 4:07:21 PM}	//
-// COMMENT: {3/20/2008 4:07:21 PM}	POSITION pos = this->GetFirstViewPosition();
-// COMMENT: {3/20/2008 4:07:21 PM}	while (pos != NULL)
-// COMMENT: {3/20/2008 4:07:21 PM}	{
-// COMMENT: {3/20/2008 4:07:21 PM}		CView *pView = this->GetNextView(pos);
-// COMMENT: {3/20/2008 4:07:21 PM}		if (CWPhastView *pWPhastView = static_cast<CWPhastView*>(pView))
-// COMMENT: {3/20/2008 4:07:21 PM}		{
-// COMMENT: {3/20/2008 4:07:21 PM}			ASSERT_KINDOF(CWPhastView, pWPhastView);
-// COMMENT: {3/20/2008 4:07:21 PM}			ASSERT_VALID(pWPhastView);
-// COMMENT: {3/20/2008 4:07:21 PM}
-// COMMENT: {3/20/2008 4:07:21 PM}			// set selection bounding box
-// COMMENT: {3/20/2008 4:07:21 PM}			//
-// COMMENT: {3/20/2008 4:07:21 PM}			pZoneActor->Select(pWPhastView);
-// COMMENT: {3/20/2008 4:07:21 PM}
-// COMMENT: {3/20/2008 4:07:21 PM}			// Update BoxPropertiesDialogBar
-// COMMENT: {3/20/2008 4:07:21 PM}			//
-// COMMENT: {3/20/2008 4:07:21 PM}			if (CBoxPropertiesDialogBar* pBar = static_cast<CBoxPropertiesDialogBar*>(  ((CFrameWnd*)::AfxGetMainWnd())->GetControlBar(IDW_CONTROLBAR_BOXPROPS) ) )
-// COMMENT: {3/20/2008 4:07:21 PM}			{
-// COMMENT: {3/20/2008 4:07:21 PM}				pBar->Set(pWPhastView, pZoneActor, this->GetUnits());
-// COMMENT: {3/20/2008 4:07:21 PM}			}
-// COMMENT: {3/20/2008 4:07:21 PM}		}
-// COMMENT: {3/20/2008 4:07:21 PM}	}
 	if (bAdd)
 	{
 		this->Notify(0, WPN_SELCHANGED, 0, pZoneActor);
@@ -3767,7 +4162,6 @@ void CWPhastDoc::InternalAdd(CZoneActor *pZoneActor, bool bAdd, HTREEITEM hInser
 	{
 		this->Notify(0, WPN_SELCHANGED, 0, 0);
 	}
-
 
 	// render
 	//
@@ -3995,7 +4389,7 @@ void CWPhastDoc::UnRemove(CWellActor *pWellActor)
 }
 
 void CWPhastDoc::Select(CZoneActor *pZoneActor)
-{	
+{
 	TRACE("%s, in\n", __FUNCTION__);
 	ASSERT(pZoneActor && pZoneActor->IsA("CZoneActor"));
 	this->Notify(0, WPN_SELCHANGED, 0, pZoneActor);
@@ -4003,7 +4397,7 @@ void CWPhastDoc::Select(CZoneActor *pZoneActor)
 }
 
 void CWPhastDoc::Select(CWellActor *pWellActor)
-{	
+{
 	ASSERT(pWellActor && pWellActor->IsA("CWellActor"));
 	this->Notify(0, WPN_SELCHANGED, 0, pWellActor);
 }
@@ -4012,6 +4406,12 @@ void CWPhastDoc::Select(CRiverActor *pRiverActor)
 {
 	ASSERT(pRiverActor && pRiverActor->IsA("CRiverActor"));
 	this->Notify(0, WPN_SELCHANGED, 0, pRiverActor);
+}
+
+void CWPhastDoc::Select(CDrainActor *pDrainActor)
+{
+	ASSERT(pDrainActor && pDrainActor->IsA("CDrainActor"));
+	this->Notify(0, WPN_SELCHANGED, 0, pDrainActor);
 }
 
 void CWPhastDoc::GetGrid(CGrid& x, CGrid& y, CGrid& z)const
@@ -4037,7 +4437,7 @@ void CWPhastDoc::OnUpdateWellsHideAll(CCmdUI *pCmdUI)
 void CWPhastDoc::OnWellsHideAll()
 {
 	if (CPropertyTreeControlBar *pTree = this->GetPropertyTreeControlBar())
-	{	
+	{
 		pTree->SetNodeCheck(pTree->GetWellsNode(), BST_UNCHECKED);
 	}
 	this->UpdateAllViews(0);
@@ -4046,7 +4446,7 @@ void CWPhastDoc::OnWellsHideAll()
 void CWPhastDoc::OnUpdateWellsShowSelected(CCmdUI *pCmdUI)
 {
 	if (CPropertyTreeControlBar *pTree = this->GetPropertyTreeControlBar())
-	{	
+	{
 		switch (pTree->GetNodeCheck(pTree->GetWellsNode()))
 		{
 		case BST_UNCHECKED:
@@ -4068,7 +4468,7 @@ void CWPhastDoc::OnUpdateWellsShowSelected(CCmdUI *pCmdUI)
 void CWPhastDoc::OnWellsShowSelected()
 {
 	if (CPropertyTreeControlBar *pTree = this->GetPropertyTreeControlBar())
-	{	
+	{
 		pTree->SetNodeCheck(pTree->GetWellsNode(), BST_CHECKED);
 	}
 	this->UpdateAllViews(0);
@@ -4112,7 +4512,7 @@ VARIANT CWPhastDoc::GetVisible(void)
 
 	if (::IsWindowVisible(::AfxGetApp()->m_pMainWnd->GetSafeHwnd()))
 	{
-		vaResult.boolVal = VARIANT_TRUE;		
+		vaResult.boolVal = VARIANT_TRUE;
 	}
 	else
 	{
@@ -4159,7 +4559,7 @@ VARIANT CWPhastDoc::SaveAs(const VARIANT& FileName)
 	CString name(FileName.bstrVal);
 	if (this->OnSaveDocument(name))
 	{
-		vaResult.boolVal = VARIANT_TRUE;		
+		vaResult.boolVal = VARIANT_TRUE;
 	}
 
 	// TODO: Add your dispatch handler code here
@@ -4209,7 +4609,7 @@ VARIANT CWPhastDoc::Import(const VARIANT& FileName)
 		ASSERT(pDoc == this);
 		if (this->DoImport(szPath))
 		{
-			vaResult.boolVal = VARIANT_TRUE;		
+			vaResult.boolVal = VARIANT_TRUE;
 			this->SetModifiedFlag(FALSE);
 		}
 		this->ResetCamera();
@@ -4262,7 +4662,7 @@ void CWPhastDoc::Add(CRiverActor *pRiverActor, HTREEITEM hInsertAfter)
 		ASSERT_VALID(pView);
 		pRiverActor->SetInteractor(pView->GetRenderWindowInteractor());
 		pRiverActor->SetEnabled(0);
-	}	
+	}
 
 	// add to river assembly
 	//
@@ -4270,6 +4670,7 @@ void CWPhastDoc::Add(CRiverActor *pRiverActor, HTREEITEM hInsertAfter)
 	{
 		ASSERT(!pPropAssembly->GetParts()->IsItemPresent(pRiverActor));
 		pPropAssembly->AddPart(pRiverActor);
+		ASSERT(pPropAssembly->GetParts()->IsItemPresent(pRiverActor));
 		if (!this->GetPropCollection()->IsItemPresent(pPropAssembly))
 		{
 			this->GetPropCollection()->AddItem(pPropAssembly);
@@ -4285,10 +4686,11 @@ void CWPhastDoc::Add(CRiverActor *pRiverActor, HTREEITEM hInsertAfter)
 
 	// add listeners
 	//
+	ASSERT(this->RiverCallbackCommand);
 	pRiverActor->AddObserver(CRiverActor::StartMovePointEvent, this->RiverCallbackCommand);
 	pRiverActor->AddObserver(CRiverActor::MovingPointEvent,    this->RiverCallbackCommand);
 	pRiverActor->AddObserver(CRiverActor::EndMovePointEvent,   this->RiverCallbackCommand);
-	pRiverActor->AddObserver(CRiverActor::InsertPointEvent,    this->RiverCallbackCommand);	
+	pRiverActor->AddObserver(CRiverActor::InsertPointEvent,    this->RiverCallbackCommand);
 
 	// render
 	//
@@ -4306,6 +4708,7 @@ void CWPhastDoc::UnAdd(CRiverActor *pRiverActor)
 	{
 		ASSERT(pPropAssembly->GetParts()->IsItemPresent(pRiverActor));
 		pPropAssembly->RemovePart(pRiverActor);
+		ASSERT(!pPropAssembly->GetParts()->IsItemPresent(pRiverActor));
 		// VTK HACK
 		// This is req'd because ReleaseGraphicsResources is not called when
 		// vtkPropAssembly::RemovePart(vtkProp *prop) is called
@@ -4318,6 +4721,11 @@ void CWPhastDoc::UnAdd(CRiverActor *pRiverActor)
 	{
 		pRiverActor->UnAdd(pTree);
 	}
+
+	// remove listeners
+	//
+	ASSERT(this->RiverCallbackCommand);
+	pRiverActor->RemoveObserver(this->RiverCallbackCommand);
 
 	// render
 	//
@@ -4333,11 +4741,11 @@ void CWPhastDoc::Remove(CRiverActor *pRiverActor)
 	//
 	vtkFloatingPointType *scale = this->GetScale();
 	vtkFloatingPointType *riverscale = pRiverActor->GetScale();
-// COMMENT: {7/12/2005 3:42:06 PM}	ASSERT(riverscale[0] == scale[0]);
-// COMMENT: {7/12/2005 3:42:06 PM}	ASSERT(riverscale[1] == scale[1]);
-// COMMENT: {7/12/2005 3:42:06 PM}	ASSERT(riverscale[2] == scale[2]);
+	ASSERT(riverscale[0] == scale[0]);
+	ASSERT(riverscale[1] == scale[1]);
+	ASSERT(riverscale[2] == scale[2]);
 
-	// make sure pWellActor ref count doesn't go to zero
+	// make sure pRiverActor ref count doesn't go to zero
 	//
 	ASSERT(this->m_pRemovedPropCollection);
 	ASSERT(!this->m_pRemovedPropCollection->IsItemPresent(pRiverActor));
@@ -4380,9 +4788,9 @@ void CWPhastDoc::UnRemove(CRiverActor *pRiverActor)
 	//
 	vtkFloatingPointType *scale = this->GetScale();
 	vtkFloatingPointType *riverscale = pRiverActor->GetScale();
-// COMMENT: {7/12/2005 3:41:44 PM}	ASSERT(riverscale[0] == scale[0]);
-// COMMENT: {7/12/2005 3:41:44 PM}	ASSERT(riverscale[1] == scale[1]);
-// COMMENT: {7/12/2005 3:41:44 PM}	ASSERT(riverscale[2] == scale[2]);
+	ASSERT(riverscale[0] == scale[0]);
+	ASSERT(riverscale[1] == scale[1]);
+	ASSERT(riverscale[2] == scale[2]);
 
 	// add to rivers assembly
 	//
@@ -4417,6 +4825,98 @@ void CWPhastDoc::UnRemove(CRiverActor *pRiverActor)
 	this->UpdateAllViews(0);
 }
 
+void CWPhastDoc::Remove(CDrainActor *pDrainActor)
+{
+	ASSERT(pDrainActor && pDrainActor->IsA("CDrainActor"));
+	if (pDrainActor == 0) return;
+
+	// validate actor
+	//
+	vtkFloatingPointType *scale = this->GetScale();
+	vtkFloatingPointType *riverscale = pDrainActor->GetScale();
+	ASSERT(riverscale[0] == scale[0]);
+	ASSERT(riverscale[1] == scale[1]);
+	ASSERT(riverscale[2] == scale[2]);
+
+	// make sure pDrainActor ref count doesn't go to zero
+	//
+	ASSERT(this->m_pRemovedPropCollection);
+	ASSERT(!this->m_pRemovedPropCollection->IsItemPresent(pDrainActor));
+	this->m_pRemovedPropCollection->AddItem(pDrainActor);
+
+	// remove from rivers assembly
+	//
+	if (vtkPropAssembly *pPropAssembly = this->GetPropAssemblyDrains())
+	{
+		ASSERT(pPropAssembly->GetParts()->IsItemPresent(pDrainActor));
+		pPropAssembly->RemovePart(pDrainActor);
+		// VTK HACK
+		// This is req'd because ReleaseGraphicsResources is not called when
+		// vtkPropAssembly::RemovePart(vtkProp *prop) is called
+		this->ReleaseGraphicsResources(pDrainActor);
+	}
+
+	// remove from property tree
+	//
+	if (CPropertyTreeControlBar *pTree = this->GetPropertyTreeControlBar())
+	{
+		pDrainActor->Remove(pTree);
+	}
+
+	// render scene
+	//
+	this->UpdateAllViews(0);
+}
+
+void CWPhastDoc::UnRemove(CDrainActor *pDrainActor)
+{
+	ASSERT(pDrainActor && pDrainActor->IsA("CDrainActor"));
+	if (pDrainActor == 0) return;
+
+	// validate pDrainActor
+	//
+	ASSERT(pDrainActor->GetReferenceCount() > 0);
+
+	// verify scale
+	//
+	vtkFloatingPointType *scale = this->GetScale();
+	vtkFloatingPointType *riverscale = pDrainActor->GetScale();
+	ASSERT(riverscale[0] == scale[0]);
+	ASSERT(riverscale[1] == scale[1]);
+	ASSERT(riverscale[2] == scale[2]);
+
+	// add to drains assembly
+	//
+	if (vtkPropAssembly *pPropAssembly = this->GetPropAssemblyDrains())
+	{
+		ASSERT(!pPropAssembly->GetParts()->IsItemPresent(pDrainActor));
+		pPropAssembly->AddPart(pDrainActor);
+		if (!this->GetPropCollection()->IsItemPresent(pPropAssembly))
+		{
+			this->GetPropCollection()->AddItem(pPropAssembly);
+			ASSERT(pDrainActor->GetReferenceCount() > 1);
+		}
+	}
+
+	// see CWPhastDoc::Delete
+	//
+	ASSERT(this->m_pRemovedPropCollection);
+	ASSERT(this->m_pRemovedPropCollection->IsItemPresent(pDrainActor));
+	this->m_pRemovedPropCollection->RemoveItem(pDrainActor);
+	ASSERT(pDrainActor->GetReferenceCount() > 0);
+
+
+	// add to property tree
+	//
+	if (CPropertyTreeControlBar *pTree = this->GetPropertyTreeControlBar())
+	{
+		pDrainActor->UnRemove(pTree);
+	}
+
+	// render scene
+	//
+	this->UpdateAllViews(0);
+}
 
 void CWPhastDoc::RiverListener(vtkObject* caller, unsigned long eid, void* clientdata, void *calldata)
 {
@@ -4431,7 +4931,7 @@ void CWPhastDoc::RiverListener(vtkObject* caller, unsigned long eid, void* clien
 		{
 		case CRiverActor::StartMovePointEvent:
 			ASSERT(self->RiverMovePointAction == 0);
-			self->RiverMovePointAction = new CRiverMovePointAction(river, self, river->GetCurrentPointId(), river->GetCurrentPointPosition()[0], river->GetCurrentPointPosition()[1]);
+			self->RiverMovePointAction = new CPointConnectorMovePointAction<CRiverActor>(river, self, river->GetCurrentPointId(), river->GetCurrentPointPosition()[0], river->GetCurrentPointPosition()[1]);
 			break;
 
 		case CRiverActor::MovingPointEvent:
@@ -4443,9 +4943,9 @@ void CWPhastDoc::RiverListener(vtkObject* caller, unsigned long eid, void* clien
 				static TCHAR buffer[80];
 				const CUnits& units = self->GetUnits();
 				::_sntprintf(buffer, 80, "%g[%s] x %g[%s]",
-					self->RiverMovePointAction->GetRiverActor()->GetCurrentPointPosition()[0] / units.horizontal.input_to_si,
+					self->RiverMovePointAction->GetActor()->GetCurrentPointPosition()[0] / units.horizontal.input_to_si,
 					units.horizontal.defined ? units.horizontal.input : units.horizontal.si,
-					self->RiverMovePointAction->GetRiverActor()->GetCurrentPointPosition()[1] / units.horizontal.input_to_si,
+					self->RiverMovePointAction->GetActor()->GetCurrentPointPosition()[1] / units.horizontal.input_to_si,
 					units.horizontal.defined ? units.horizontal.input : units.horizontal.si
 					);
 				pWnd->SetWindowText(buffer);
@@ -4463,9 +4963,14 @@ void CWPhastDoc::RiverListener(vtkObject* caller, unsigned long eid, void* clien
 			{
 				double* pos = river->GetCurrentPointPosition();
 				vtkIdType id = river->GetCurrentPointId() - 1;
-				CRiverInsertPointAction* pRiverInsertPointAction = new CRiverInsertPointAction(river, self, id, pos[0], pos[1], pos[2], true);
+				CPointConnectorInsertPointAction<CRiverActor, CRiverPoint>* pRiverInsertPointAction =
+					new CPointConnectorInsertPointAction<CRiverActor, CRiverPoint>(river, self, id, pos[0], pos[1], pos[2], true);
 				self->Execute(pRiverInsertPointAction);
 			}
+			break;
+
+		default:
+			ASSERT(FALSE);
 			break;
 		}
 	}
@@ -4476,10 +4981,54 @@ void CWPhastDoc::GetGridKeyword(CGridKeyword& gridKeyword)const
 	this->m_pGridActor->GetGridKeyword(gridKeyword);
 }
 
+CGridKeyword CWPhastDoc::GetGridKeyword(void)const
+{
+	CGridKeyword gridKeyword;
+	this->m_pGridActor->GetGridKeyword(gridKeyword);
+	return gridKeyword;
+}
+
 void CWPhastDoc::SetGridKeyword(const CGridKeyword& gridKeyword)
 {
 	this->m_pGridActor->SetGridKeyword(gridKeyword, this->GetUnits());
 	this->ResizeGrid(gridKeyword.m_grid[0], gridKeyword.m_grid[1], gridKeyword.m_grid[2]);
+
+	// set grid for all zones
+	//
+	if (vtkPropCollection* pCollection = this->GetPropCollection())
+	{
+		pCollection->InitTraversal();
+		for (int i = 0; i < pCollection->GetNumberOfItems(); ++i)
+		{
+			vtkProp* prop = pCollection->GetNextProp();
+			if (vtkPropAssembly *pPropAssembly = vtkPropAssembly::SafeDownCast(prop))
+			{
+				if (vtkPropCollection *pPropCollection = pPropAssembly->GetParts())
+				{
+					vtkProp *pProp;
+					pPropCollection->InitTraversal();
+					for (; (pProp = pPropCollection->GetNextProp()); )
+					{
+						if (vtkProp3D *prop3D = vtkProp3D::SafeDownCast(pProp))
+						{
+							if (CZoneActor *pZone = CZoneActor::SafeDownCast(prop3D))
+							{
+// COMMENT: {12/30/2008 5:39:12 PM}								pZone->SetUnits(units);
+							}
+							if (CWellActor *pWellActor = CWellActor::SafeDownCast(prop3D))
+							{
+								pWellActor->SetGridKeyword(gridKeyword);
+							}
+							if (CRiverActor *pRiverActor = CRiverActor::SafeDownCast(prop3D))
+							{
+// COMMENT: {12/30/2008 5:39:17 PM}								pRiverActor->SetUnits(units);
+							}
+						}
+					}
+				}
+			}
+		}
+	}
 }
 
 void CWPhastDoc::Edit(CGridActor* pGridActor)
@@ -4497,7 +5046,7 @@ void CWPhastDoc::Edit(CGridActor* pGridActor)
 		this->m_pGridPage  = new CGridPropertyPage2();
 		this->m_pGridSheet->AddPage(this->m_pGridPage);
 	}
-	
+
 	CGridKeyword gridKeyword;
 	pGridActor->GetGridKeyword(gridKeyword);
 	this->m_pGridPage->SetProperties(gridKeyword);
@@ -4534,7 +5083,7 @@ void CWPhastDoc::ModifyGrid(CGridActor* gridActor, CGridElementsSelector* gridEl
 	this->GridCoarsenPage = new CGridCoarsenPage();
 	this->ModifyGridSheet->AddPage(this->GridRefinePage);
 	this->ModifyGridSheet->AddPage(this->GridCoarsenPage);
-	
+
 	CGridKeyword gridKeyword;
 	gridActor->GetGridKeyword(gridKeyword);
 
@@ -4733,7 +5282,7 @@ void CWPhastDoc::UpdateGridDomain(void)
 void CWPhastDoc::OnViewHideAll()
 {
 	if (CPropertyTreeControlBar *pTree = this->GetPropertyTreeControlBar())
-	{	
+	{
 		pTree->SetMediaCheck(BST_UNCHECKED);
 		pTree->SetBCCheck(BST_UNCHECKED);
 		pTree->SetICCheck(BST_UNCHECKED);
@@ -4762,7 +5311,7 @@ void CWPhastDoc::OnUpdateRiversHideAll(CCmdUI *pCmdUI)
 void CWPhastDoc::OnRiversHideAll()
 {
 	if (CPropertyTreeControlBar *pTree = this->GetPropertyTreeControlBar())
-	{	
+	{
 		pTree->SetNodeCheck(pTree->GetRiversNode(), BST_UNCHECKED);
 	}
 	this->UpdateAllViews(0);
@@ -4771,7 +5320,7 @@ void CWPhastDoc::OnRiversHideAll()
 void CWPhastDoc::OnUpdateRiversShowSelected(CCmdUI *pCmdUI)
 {
 	if (CPropertyTreeControlBar *pTree = this->GetPropertyTreeControlBar())
-	{	
+	{
 		switch (pTree->GetNodeCheck(pTree->GetRiversNode()))
 		{
 		case BST_UNCHECKED:
@@ -4793,7 +5342,7 @@ void CWPhastDoc::OnUpdateRiversShowSelected(CCmdUI *pCmdUI)
 void CWPhastDoc::OnRiversShowSelected()
 {
 	if (CPropertyTreeControlBar *pTree = this->GetPropertyTreeControlBar())
-	{	
+	{
 		pTree->SetNodeCheck(pTree->GetRiversNode(), BST_CHECKED);
 	}
 	this->UpdateAllViews(0);
@@ -4915,7 +5464,7 @@ void CWPhastDoc::SetSolutionMethod(const CSolutionMethod &solutionMethod)
 void CWPhastDoc::OnViewShowAll()
 {
 	if (CPropertyTreeControlBar *pTree = this->GetPropertyTreeControlBar())
-	{	
+	{
 		pTree->SetMediaCheck(BST_CHECKED);
 		pTree->SetBCCheck(BST_CHECKED);
 		pTree->SetICCheck(BST_CHECKED);
@@ -4956,6 +5505,10 @@ void CWPhastDoc::SizeHandles(double size)
 							if (CRiverActor *pRiverActor = CRiverActor::SafeDownCast(prop3D))
 							{
 								pRiverActor->SetRadius(0.008 * size);
+							}
+							if (CDrainActor *pDrainActor = CDrainActor::SafeDownCast(prop3D))
+							{
+								pDrainActor->SetRadius(0.008 * size);
 							}
 						}
 					}
@@ -5039,7 +5592,7 @@ void CWPhastDoc::EndNewZone()
 	}
 }
 
-void CWPhastDoc::NewZoneListener(vtkObject *caller, unsigned long eid, void *clientdata, void *calldata) 
+void CWPhastDoc::NewZoneListener(vtkObject *caller, unsigned long eid, void *clientdata, void *calldata)
 {
 	ASSERT(caller->IsA("CNewZoneWidget"));
 	ASSERT(clientdata);
@@ -5076,6 +5629,7 @@ void CWPhastDoc::NewZoneListener(vtkObject *caller, unsigned long eid, void *cli
 			CBCSpecifiedHeadPropertyPage  specifiedProps;
 			CICHeadSpreadPropertyPage     icHeadProps;
 			CChemICSpreadPropertyPage     chemICProps;
+			CZoneFlowRatePropertyPage     zoneFlowRateProps;
 
 			// CChemICSpreadPropertyPage only needs the flowonly flag when the zone is a
 			// default zone
@@ -5086,6 +5640,11 @@ void CWPhastDoc::NewZoneListener(vtkObject *caller, unsigned long eid, void *cli
 			leakyProps.SetFlowOnly(bFlowOnly);
 			specifiedProps.SetFlowOnly(bFlowOnly);
 
+			// set used zone flow rate numbers
+			std::set<int> usedZoneFlowRatesNumbers;
+			self->GetUsedZoneFlowRates(usedZoneFlowRatesNumbers);
+			zoneFlowRateProps.SetUsedZoneFlowRates(usedZoneFlowRatesNumbers);
+
 			sheet.AddPage(&newZone);
 			sheet.AddPage(&mediaProps);
 			sheet.AddPage(&fluxProps);
@@ -5093,6 +5652,7 @@ void CWPhastDoc::NewZoneListener(vtkObject *caller, unsigned long eid, void *cli
 			sheet.AddPage(&specifiedProps);
 			sheet.AddPage(&icHeadProps);
 			sheet.AddPage(&chemICProps);
+			sheet.AddPage(&zoneFlowRateProps);
 
 			sheet.SetWizardMode();
 
@@ -5140,6 +5700,13 @@ void CWPhastDoc::NewZoneListener(vtkObject *caller, unsigned long eid, void *cli
 					chemIC.polyh = new Cube(&zone);
 					CICChemZoneActor::Create(self, chemIC, chemICProps.GetDesc());
 				}
+				else if (newZone.GetType() == ID_ZONE_TYPE_FLOW_RATE)
+				{
+					Zone_budget zone_budget;
+					zoneFlowRateProps.GetProperties(zone_budget);
+					zone_budget.Set_polyh(new Cube(&zone));
+					CZoneFlowRateZoneActor::Create(self, zone_budget);
+				}
 			}
 
 			// Note: cannot call EndNewZone here
@@ -5162,6 +5729,10 @@ BOOL CWPhastDoc::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 	if (this->NewPrismWidget && this->NewPrismWidget->GetEnabled())
 	{
 		return this->NewPrismWidget->OnSetCursor(pWnd, nHitTest, message);
+	}
+	if (this->NewDrainActor && this->NewDrainActor->GetEnabled())
+	{
+		return this->NewDrainActor->OnSetCursor(pWnd, nHitTest, message);
 	}
 	return FALSE;
 }
@@ -5190,8 +5761,10 @@ void CWPhastDoc::SetDisplayColors(const CDisplayColors& dc)
 	CBCZoneActor::SetStaticColor(BC_info::BC_LEAKY, this->DisplayColors.crLeaky);
 	CMediaZoneActor::SetStaticColor(this->DisplayColors.crMedia);
 	CRiverActor::SetStaticColor(this->DisplayColors.crRiver);
+	CDrainActor::SetStaticColor(this->DisplayColors.crDrain);
 	CBCZoneActor::SetStaticColor(BC_info::BC_SPECIFIED, this->DisplayColors.crSpecHead);
 	CWellActor::SetStaticColor(this->DisplayColors.crWell);
+	CZoneFlowRateZoneActor::SetStaticColor(this->DisplayColors.crZoneFlowRate);
 
 	POSITION pos = this->GetFirstViewPosition();
 	if (pos != NULL)
@@ -5200,6 +5773,10 @@ void CWPhastDoc::SetDisplayColors(const CDisplayColors& dc)
 		ASSERT_VALID(pView);
 		pView->SetBackground(this->DisplayColors.crBackground);
 	}
+
+	// refresh screen
+	//
+	this->UpdateAllViews(0);
 }
 
 CDisplayColors CWPhastDoc::GetDisplayColors()const
@@ -5281,7 +5858,7 @@ void CWPhastDoc::EndNewWedge()
 	}
 }
 
-void CWPhastDoc::NewWedgeListener(vtkObject *caller, unsigned long eid, void *clientdata, void *calldata) 
+void CWPhastDoc::NewWedgeListener(vtkObject *caller, unsigned long eid, void *clientdata, void *calldata)
 {
 	ASSERT(caller->IsA("CNewWedgeWidget"));
 	ASSERT(clientdata);
@@ -5320,6 +5897,7 @@ void CWPhastDoc::NewWedgeListener(vtkObject *caller, unsigned long eid, void *cl
 			CBCSpecifiedHeadPropertyPage  specifiedProps;
 			CICHeadSpreadPropertyPage     icHeadProps;
 			CChemICSpreadPropertyPage     chemICProps;
+			CZoneFlowRatePropertyPage     zoneFlowRateProps;
 
 			// CChemICSpreadPropertyPage only needs the flowonly flag when the zone is a
 			// default zone
@@ -5330,6 +5908,11 @@ void CWPhastDoc::NewWedgeListener(vtkObject *caller, unsigned long eid, void *cl
 			leakyProps.SetFlowOnly(bFlowOnly);
 			specifiedProps.SetFlowOnly(bFlowOnly);
 
+			// set used zone flow rate numbers
+			std::set<int> usedZoneFlowRatesNumbers;
+			self->GetUsedZoneFlowRates(usedZoneFlowRatesNumbers);
+			zoneFlowRateProps.SetUsedZoneFlowRates(usedZoneFlowRatesNumbers);
+
 			sheet.AddPage(&newZone);
 			sheet.AddPage(&mediaProps);
 			sheet.AddPage(&fluxProps);
@@ -5337,6 +5920,7 @@ void CWPhastDoc::NewWedgeListener(vtkObject *caller, unsigned long eid, void *cl
 			sheet.AddPage(&specifiedProps);
 			sheet.AddPage(&icHeadProps);
 			sheet.AddPage(&chemICProps);
+			sheet.AddPage(&zoneFlowRateProps);
 
 			sheet.SetWizardMode();
 
@@ -5384,6 +5968,13 @@ void CWPhastDoc::NewWedgeListener(vtkObject *caller, unsigned long eid, void *cl
 					chemIC.polyh = new Wedge(&zone, srcWedgeSource::GetWedgeOrientationString(ct));
 					CICChemZoneActor::Create(self, chemIC, chemICProps.GetDesc());
 				}
+				else if (newZone.GetType() == ID_ZONE_TYPE_FLOW_RATE)
+				{
+					Zone_budget zone_budget;
+					zoneFlowRateProps.GetProperties(zone_budget);
+					zone_budget.Set_polyh(new Wedge(&zone, srcWedgeSource::GetWedgeOrientationString(ct)));
+					CZoneFlowRateZoneActor::Create(self, zone_budget);
+				}
 			}
 
 			// Note: cannot call EndNewWedge here
@@ -5413,7 +6004,8 @@ void CWPhastDoc::OnToolsNewPrism()
 	}
 	else
 	{
-		if (this->NewPrismWidget) this->EndNewPrism();
+		// if (this->NewPrismWidget) this->EndNewPrism();
+		// Cancel Mode calls EndNewPrism
 
 		// CancelMode
 		//
@@ -5439,16 +6031,57 @@ void CWPhastDoc::OnToolsNewPrism()
 			}
 			else
 			{
+				// use an empty phastinput in case of errors
+				//
+				std::istringstream emptyiss;
+				CPhastInput* pInput = CPhastInput::New(emptyiss, "OnToolsNewPrism", false);
+
 				std::ostringstream oss;
 				oss << "-perimeter SHAPE " << dlg.m_strShapefile;
 				std::istringstream iss(oss.str());
 
-				Prism *p = new Prism();
-				if (p->Read(iss))
+				Prism *p = 0;
+				bool bOk = false;
+				try
 				{
-					p->Tidy();
+					p = new Prism();
+					if (p && p->Read(iss))
+					{
+						p->Tidy();
+					}
+					if (pInput->GetErrorCount() != 0)
+					{
+						throw pInput->GetErrorCount();
+					}
+					bOk = true;
+				}
+				catch (int)
+				{
+					CImportErrorDialog dlg;
+					dlg.m_lpszErrorMessages = pInput->GetErrorMsg();
+					dlg.DoModal();
+					delete p;
+				}
+				catch(CSeException *e)
+				{
+					TCHAR trcMsg[1024];
+					e->GetErrorMessage(trcMsg, 1024);
+					TRACE(trcMsg);
+					TRACE(_T("\n"));
+					e->ReportError(MB_OK | MB_ICONSTOP);
+					e->Delete();
+					delete p;
+				}
+				catch (...)
+				{
+					::AfxMessageBox("An unknown error occured while loading perimeter file.", MB_OK|MB_ICONEXCLAMATION);
+					delete p;
+				}
 
-					//{{
+				pInput->Delete();
+
+				if (bOk)
+				{
 					// get type of zone
 					//
 					ETSLayoutPropertySheet        sheet("Prism Wizard", NULL, 0, NULL, false);
@@ -5460,6 +6093,7 @@ void CWPhastDoc::OnToolsNewPrism()
 					CBCSpecifiedHeadPropertyPage  specifiedProps;
 					CICHeadSpreadPropertyPage     icHeadProps;
 					CChemICSpreadPropertyPage     chemICProps;
+					CZoneFlowRatePropertyPage     zoneFlowRateProps;
 
 					// CChemICSpreadPropertyPage only needs the flowonly flag when the zone is a
 					// default zone
@@ -5470,6 +6104,11 @@ void CWPhastDoc::OnToolsNewPrism()
 					leakyProps.SetFlowOnly(bFlowOnly);
 					specifiedProps.SetFlowOnly(bFlowOnly);
 
+					// set used zone flow rate numbers
+					std::set<int> usedZoneFlowRatesNumbers;
+					this->GetUsedZoneFlowRates(usedZoneFlowRatesNumbers);
+					zoneFlowRateProps.SetUsedZoneFlowRates(usedZoneFlowRatesNumbers);
+
 					sheet.AddPage(&newZone);
 					sheet.AddPage(&mediaProps);
 					sheet.AddPage(&fluxProps);
@@ -5477,6 +6116,7 @@ void CWPhastDoc::OnToolsNewPrism()
 					sheet.AddPage(&specifiedProps);
 					sheet.AddPage(&icHeadProps);
 					sheet.AddPage(&chemICProps);
+					sheet.AddPage(&zoneFlowRateProps);
 
 					sheet.SetWizardMode();
 
@@ -5533,12 +6173,27 @@ void CWPhastDoc::OnToolsNewPrism()
 							chemIC.polyh = p;
 							CICChemZoneActor::Create(this, chemIC, chemICProps.GetDesc());
 						}
+						else if (newZone.GetType() == ID_ZONE_TYPE_FLOW_RATE)
+						{
+							Zone_budget zone_budget;
+							zoneFlowRateProps.GetProperties(zone_budget);
+							zone_budget.Set_polyh(p);
+							CZoneFlowRateZoneActor::Create(this, zone_budget);
+						}
+					}
+					else
+					{
+						delete p;
 					}
 
 					// refresh screen
 					//
 					this->ResetCamera();
 					this->UpdateAllViews(0);
+				}
+				else
+				{
+					delete p;
 				}
 			}
 		}
@@ -5560,15 +6215,15 @@ void CWPhastDoc::BeginNewPrism()
 		{
 			pView->CancelMode();
 
+			// create callback
+			this->NewPrismCallbackCommand = vtkCallbackCommand::New();
+			this->NewPrismCallbackCommand->SetClientData(this);
+			this->NewPrismCallbackCommand->SetCallback(CWPhastDoc::NewPrismListener);
+
 			// create widget
 			this->NewPrismWidget = CNewPrismWidget::New();
 			this->NewPrismWidget->SetInteractor(pView->GetRenderWindowInteractor());
 			this->NewPrismWidget->SetProp3D(this->GetGridActor());
-
-			// add listener callback
-			this->NewPrismCallbackCommand = vtkCallbackCommand::New();
-			this->NewPrismCallbackCommand->SetClientData(this);
-			this->NewPrismCallbackCommand->SetCallback(CWPhastDoc::NewPrismListener);
 			this->NewPrismWidget->AddObserver(vtkCommand::EndInteractionEvent, this->NewPrismCallbackCommand);
 
 			// enable widget
@@ -5594,7 +6249,7 @@ void CWPhastDoc::EndNewPrism()
 	}
 }
 
-void CWPhastDoc::NewPrismListener(vtkObject *caller, unsigned long eid, void *clientdata, void *calldata) 
+void CWPhastDoc::NewPrismListener(vtkObject *caller, unsigned long eid, void *clientdata, void *calldata)
 {
 	ASSERT(caller->IsA("CNewPrismWidget"));
 	ASSERT(clientdata);
@@ -5620,10 +6275,13 @@ void CWPhastDoc::NewPrismListener(vtkObject *caller, unsigned long eid, void *cl
 			}
 
 			std::ostringstream oss;
-			oss << "-perimeter POINTS" << std::endl;
+			oss.precision(DBL_DIG);
+			oss << "-perimeter POINTS grid" << std::endl;
+			double pt[3];
 			for (vtkIdType i = 0; i < points->GetNumberOfPoints(); i+=2)
 			{
-				vtkFloatingPointType *pt = points->GetPoint(i);
+				//vtkFloatingPointType *pt = points->GetPoint(i);
+				points->GetPoint(i, pt);
 				oss << pt[0] / scale[0] / units.horizontal.input_to_si << " ";
 				oss << pt[1] / scale[1] / units.horizontal.input_to_si << " ";
 				oss << "0.0" << std::endl;
@@ -5650,6 +6308,7 @@ void CWPhastDoc::NewPrismListener(vtkObject *caller, unsigned long eid, void *cl
 				CBCSpecifiedHeadPropertyPage  specifiedProps;
 				CICHeadSpreadPropertyPage     icHeadProps;
 				CChemICSpreadPropertyPage     chemICProps;
+				CZoneFlowRatePropertyPage     zoneFlowRateProps;
 
 				// CChemICSpreadPropertyPage only needs the flowonly flag when the zone is a
 				// default zone
@@ -5660,6 +6319,11 @@ void CWPhastDoc::NewPrismListener(vtkObject *caller, unsigned long eid, void *cl
 				leakyProps.SetFlowOnly(bFlowOnly);
 				specifiedProps.SetFlowOnly(bFlowOnly);
 
+				// set used zone flow rate numbers
+				std::set<int> usedZoneFlowRatesNumbers;
+				self->GetUsedZoneFlowRates(usedZoneFlowRatesNumbers);
+				zoneFlowRateProps.SetUsedZoneFlowRates(usedZoneFlowRatesNumbers);
+
 				sheet.AddPage(&newZone);
 				sheet.AddPage(&mediaProps);
 				sheet.AddPage(&fluxProps);
@@ -5667,6 +6331,7 @@ void CWPhastDoc::NewPrismListener(vtkObject *caller, unsigned long eid, void *cl
 				sheet.AddPage(&specifiedProps);
 				sheet.AddPage(&icHeadProps);
 				sheet.AddPage(&chemICProps);
+				sheet.AddPage(&zoneFlowRateProps);
 
 				sheet.SetWizardMode();
 
@@ -5714,6 +6379,17 @@ void CWPhastDoc::NewPrismListener(vtkObject *caller, unsigned long eid, void *cl
 						chemIC.polyh = p;
 						CICChemZoneActor::Create(self, chemIC, chemICProps.GetDesc());
 					}
+					else if (newZone.GetType() == ID_ZONE_TYPE_FLOW_RATE)
+					{
+						Zone_budget zone_budget;
+						zoneFlowRateProps.GetProperties(zone_budget);
+						zone_budget.Set_polyh(p);
+						CZoneFlowRateZoneActor::Create(self, zone_budget);
+					}
+				}
+				else
+				{
+					delete p;
 				}
 			}
 
@@ -5728,5 +6404,427 @@ void CWPhastDoc::GetDefaultZone(zone &z)const
 	if (this->m_pGridActor)
 	{
 		this->m_pGridActor->GetDefaultZone(z);
+	}
+}
+
+void CWPhastDoc::OnUpdateToolsNewDrain(CCmdUI *pCmdUI)
+{
+	if (this->NewDrainCallbackCommand)
+	{
+		pCmdUI->SetCheck(1);
+	}
+	else
+	{
+		pCmdUI->SetCheck(0);
+	}
+}
+
+void CWPhastDoc::OnToolsNewDrain()
+{
+	TRACE("%s, in\n", __FUNCTION__);
+
+	if (this->NewDrainActor && this->NewDrainActor->GetEnabled())
+	{
+		this->EndNewDrain();
+	}
+	else
+	{
+		// CancelMode
+		//
+		POSITION pos = this->GetFirstViewPosition();
+		if (pos != NULL)
+		{
+			CWPhastView *pView = (CWPhastView*) GetNextView(pos);
+			ASSERT_VALID(pView);
+			if (pView)
+			{
+				pView->CancelMode();    // calls EndNewDrain
+			}
+			this->UpdateAllViews(0);
+		}
+
+		// Begin
+		//
+		this->BeginNewDrain();
+	}
+
+	TRACE("%s, out\n", __FUNCTION__);
+}
+
+void CWPhastDoc::BeginNewDrain()
+{
+	TRACE("%s, in\n", __FUNCTION__);
+
+	ASSERT(this->NewDrainActor == 0);
+	ASSERT(this->NewDrainCallbackCommand == 0);
+
+	POSITION pos = this->GetFirstViewPosition();
+	if (pos != NULL)
+	{
+		CWPhastView *pView = (CWPhastView*) GetNextView(pos);
+		ASSERT_VALID(pView);
+		ASSERT(pView->GetRenderWindowInteractor());
+		if (pView->GetRenderWindowInteractor())
+		{
+			pView->CancelMode();
+
+			// create callback
+			this->NewDrainCallbackCommand = vtkCallbackCommand::New();
+			this->NewDrainCallbackCommand->SetClientData(this);
+			this->NewDrainCallbackCommand->SetCallback(CWPhastDoc::NewDrainListener);
+
+			// create river
+			CDrain drain;
+			drain.coordinate_system = PHAST_Transform::GRID;
+			drain.z_coordinate_system = PHAST_Transform::GRID;
+			drain.n_user = this->GetNextDrainNumber();
+
+			// create widget
+			this->NewDrainActor = CDrainActor::StartNewDrain(pView->GetRenderWindowInteractor());
+			this->NewDrainActor->SetDrain(drain, this->GetUnits(), this->GetGridKeyword());
+			this->NewDrainActor->AddObserver(CRiverActor::EndNewEvent, this->NewDrainCallbackCommand);
+			this->NewDrainActor->AddObserver(CRiverActor::CancelNewEvent, this->NewDrainCallbackCommand);
+
+			// scale
+			vtkFloatingPointType* scale = this->GetScale();
+			this->NewDrainActor->SetScale(scale[0], scale[1], scale[2]);
+
+			this->NewDrainActor->ScaleFromBounds(this->GetGridBounds());
+
+			// TODO scale by window size
+			CGrid x, y, z;
+			this->GetGrid(x, y, z);
+			z.Setup();
+			this->NewDrainActor->SetZ(z.coord[z.count_coord - 1]);
+
+			// add prop
+			POSITION pos = this->GetFirstViewPosition();
+			if (pos != NULL)
+			{
+				CWPhastView *pView = (CWPhastView*) GetNextView(pos);
+				ASSERT_VALID(pView);
+				if (pView)
+				{
+					pView->GetRenderer()->AddProp(this->NewDrainActor);
+				}
+				this->UpdateAllViews(0);
+			}
+		}
+	}
+	TRACE("%s, out\n", __FUNCTION__);
+}
+
+void CWPhastDoc::EndNewDrain()
+{
+	TRACE("%s, in\n", __FUNCTION__);
+
+	// remove prop
+	POSITION pos = this->GetFirstViewPosition();
+	if (pos != NULL)
+	{
+		CWPhastView *pView = (CWPhastView*) GetNextView(pos);
+		ASSERT_VALID(pView);
+		ASSERT(pView->GetRenderer());
+		if (pView->GetRenderer())
+		{
+			pView->GetRenderer()->RemoveProp(this->NewDrainActor);
+		}
+	}
+
+	if (this->NewDrainCallbackCommand)
+	{
+		ASSERT(this->NewDrainCallbackCommand->IsA("vtkObjectBase"));
+		this->NewDrainCallbackCommand->Delete();
+		this->NewDrainCallbackCommand = 0;
+	}
+	if (this->NewDrainActor)
+	{
+		ASSERT(this->NewDrainActor->IsA("CDrainActor"));
+		this->NewDrainActor->SetEnabled(0);
+		this->NewDrainActor->SetInteractor(0);
+
+		this->NewDrainActor->Delete();
+		this->NewDrainActor = 0;
+	}
+	TRACE("%s, out\n", __FUNCTION__);
+}
+
+void CWPhastDoc::NewDrainListener(vtkObject* caller, unsigned long eid, void* clientdata, void *calldata)
+{
+	TRACE("%s, in\n", __FUNCTION__);
+	ASSERT(caller->IsA("CDrainActor"));
+	ASSERT(clientdata);
+
+	if (CDrainActor* pDrainActor = CDrainActor::SafeDownCast(caller))
+	{
+		CWPhastDoc* self = reinterpret_cast<CWPhastDoc*>(clientdata);
+		switch (eid)
+		{
+		case CDrainActor::CancelNewEvent:
+			self->OnEndNewDrain(true);
+			break;
+		case CDrainActor::EndNewEvent:
+			self->OnEndNewDrain(false);
+			break;
+		}
+	}
+	TRACE("%s, out\n", __FUNCTION__);
+}
+
+void CWPhastDoc::OnEndNewDrain(bool bCancel)
+{
+	//
+	// NOTE: this->m_pRiverActor->Delete() can't be called within
+	// here because the list of listeners will also be deleted
+	// *** this may be fixed in 4.4 ***
+	//
+	ASSERT(this->NewDrainActor != 0);
+	if (this->NewDrainActor)
+	{
+		if (!bCancel)
+		{
+			if (this->NewDrainActor->GetPointCount() > 1)
+			{
+				CDrain drain = this->NewDrainActor->GetDrain();
+				CString title;
+				title.Format("Drain %d Properties", drain.n_user);
+
+				CPropertySheet sheet(title);
+				CDrainPropertyPage page;
+				page.SetProperties(drain);
+				page.SetUnits(this->GetUnits());
+				page.SetGridKeyword(this->GetGridKeyword());
+				page.SetFlowOnly(bool(this->GetFlowOnly()));
+				std::set<int> drainNums;
+				this->GetUsedDrainNumbers(drainNums);
+				page.SetUsedDrainNumbers(drainNums);
+				sheet.AddPage(&page);
+				if (sheet.DoModal() == IDOK)
+				{
+					CDrain drain;
+					page.GetProperties(drain);
+					this->Execute(new CPointConnectorCreateAction<CDrainActor, CDrain>(this, drain));
+				}
+			}
+			else
+			{
+				::AfxMessageBox("Drains must contain at least two points");
+			}
+		}
+
+		POSITION pos = this->GetFirstViewPosition();
+		if (pos != NULL)
+		{
+			CWPhastView *pView = (CWPhastView*) this->GetNextView(pos);
+			ASSERT_VALID(pView);
+			if (pView)
+			{
+				pView->GetRenderer()->RemoveProp(this->NewDrainActor);
+			}
+		}
+	}
+
+	if (this->NewDrainCallbackCommand)
+	{
+		this->NewDrainCallbackCommand->Delete();
+		this->NewDrainCallbackCommand = 0;
+	}
+	this->UpdateAllViews(0);
+}
+
+void CWPhastDoc::GetUsedDrainNumbers(std::set<int>& usedNums)
+{
+	usedNums.clear();
+	if (vtkPropCollection *pPropCollection = this->GetPropAssemblyDrains()->GetParts())
+	{
+		vtkProp *pProp = 0;
+		pPropCollection->InitTraversal();
+		for (; (pProp = pPropCollection->GetNextProp()); )
+		{
+			if (CDrainActor *pDrainActor = CDrainActor::SafeDownCast(pProp))
+			{
+				// store used n_user numbers
+				//
+				std::pair< std::set<int>::iterator, bool > pr;
+				pr = usedNums.insert( pDrainActor->GetDrain().n_user );
+				ASSERT(pr.second); // duplicate?
+			}
+		}
+	}
+}
+
+int CWPhastDoc::GetNextDrainNumber(void)
+{
+	std::set<int> drainNums;
+	this->GetUsedDrainNumbers(drainNums);
+	if (drainNums.rbegin() != drainNums.rend())
+	{
+		return (*drainNums.rbegin()) + 1;
+	}
+	else
+	{
+		return 1;
+	}
+}
+
+void CWPhastDoc::Add(CDrainActor *pDrainActor, HTREEITEM hInsertAfter)
+{
+	ASSERT(pDrainActor);
+	if (!pDrainActor) return;
+
+	// set scale
+	//
+	vtkFloatingPointType *scale = this->GetScale();
+	pDrainActor->SetScale(scale[0], scale[1], scale[2]);
+
+	// set radius
+	//
+	pDrainActor->ScaleFromBounds(this->GetGridBounds());
+
+	// set z
+	//
+// COMMENT: {6/22/2005 5:50:09 PM}	vtkFloatingPointType *bounds = this->GetGridBounds();
+	CGrid x, y, z;
+	this->GetGrid(x, y, z);
+	z.Setup();
+	pDrainActor->SetZ(z.coord[z.count_coord - 1]);
+
+	// for all views disable interaction
+	//
+	POSITION pos = this->GetFirstViewPosition();
+	while (pos != NULL)
+	{
+		CWPhastView *pView = (CWPhastView*) GetNextView(pos);
+		ASSERT_VALID(pView);
+		pDrainActor->SetInteractor(pView->GetRenderWindowInteractor());
+		pDrainActor->SetEnabled(0);
+	}
+
+	// add to river assembly
+	//
+	if (vtkPropAssembly *pPropAssembly = this->GetPropAssemblyDrains())
+	{
+		ASSERT(!pPropAssembly->GetParts()->IsItemPresent(pDrainActor));
+		pPropAssembly->AddPart(pDrainActor);
+		ASSERT(pPropAssembly->GetParts()->IsItemPresent(pDrainActor));
+		if (!this->GetPropCollection()->IsItemPresent(pPropAssembly))
+		{
+			this->GetPropCollection()->AddItem(pPropAssembly);
+		}
+	}
+
+	// add to property tree
+	//
+	if (CPropertyTreeControlBar *pTree = this->GetPropertyTreeControlBar())
+	{
+		pDrainActor->Add(pTree, hInsertAfter);
+	}
+
+	// add listeners
+	//
+	ASSERT(this->DrainCallbackCommand);
+	pDrainActor->AddObserver(CDrainActor::StartMovePointEvent, this->DrainCallbackCommand);
+	pDrainActor->AddObserver(CDrainActor::MovingPointEvent,    this->DrainCallbackCommand);
+	pDrainActor->AddObserver(CDrainActor::EndMovePointEvent,   this->DrainCallbackCommand);
+	pDrainActor->AddObserver(CDrainActor::InsertPointEvent,    this->DrainCallbackCommand);
+
+	// render
+	//
+	this->UpdateAllViews(0);
+}
+
+void CWPhastDoc::UnAdd(CDrainActor *pDrainActor)
+{
+	ASSERT(pDrainActor);
+	if (!pDrainActor) return;
+
+	// remove from rivers assembly
+	//
+	if (vtkPropAssembly *pPropAssembly = this->GetPropAssemblyDrains())
+	{
+		ASSERT(pPropAssembly->GetParts()->IsItemPresent(pDrainActor));
+		pPropAssembly->RemovePart(pDrainActor);
+		ASSERT(!pPropAssembly->GetParts()->IsItemPresent(pDrainActor));
+		// VTK HACK
+		// This is req'd because ReleaseGraphicsResources is not called when
+		// vtkPropAssembly::RemovePart(vtkProp *prop) is called
+		this->ReleaseGraphicsResources(pDrainActor);
+	}
+
+	// remove from property tree
+	//
+	if (CPropertyTreeControlBar *pTree = this->GetPropertyTreeControlBar())
+	{
+		pDrainActor->UnAdd(pTree);
+	}
+
+	// remove listeners
+	//
+	ASSERT(this->DrainCallbackCommand);
+	pDrainActor->RemoveObserver(this->DrainCallbackCommand);
+
+	// render
+	//
+	this->UpdateAllViews(0);
+}
+
+void CWPhastDoc::DrainListener(vtkObject* caller, unsigned long eid, void* clientdata, void *calldata)
+{
+	ASSERT(caller->IsA("CDrainActor"));
+	ASSERT(clientdata);
+
+	if (CDrainActor* drainActor = CDrainActor::SafeDownCast(caller))
+	{
+		CWPhastDoc* self = reinterpret_cast<CWPhastDoc*>(clientdata);
+
+		switch (eid)
+		{
+		case CDrainActor::StartMovePointEvent:
+			ASSERT(self->DrainMovePointAction == 0);
+			self->DrainMovePointAction = new CPointConnectorMovePointAction<CDrainActor>(drainActor, self, drainActor->GetCurrentPointId(), drainActor->GetCurrentPointPosition()[0], drainActor->GetCurrentPointPosition()[1]);
+			break;
+
+		case CDrainActor::MovingPointEvent:
+			ASSERT(self->DrainMovePointAction != 0);
+			if (CWnd* pWnd = ((CFrameWnd*)::AfxGetMainWnd())->GetMessageBar())
+			{
+				// update message bar
+				//
+				static TCHAR buffer[80];
+				const CUnits& units = self->GetUnits();
+				::_sntprintf(buffer, 80, "%g[%s] x %g[%s]",
+					self->DrainMovePointAction->GetActor()->GetCurrentPointPosition()[0] / units.horizontal.input_to_si,
+					units.horizontal.defined ? units.horizontal.input : units.horizontal.si,
+					self->DrainMovePointAction->GetActor()->GetCurrentPointPosition()[1] / units.horizontal.input_to_si,
+					units.horizontal.defined ? units.horizontal.input : units.horizontal.si
+					);
+				pWnd->SetWindowText(buffer);
+			}
+			break;
+
+		case CDrainActor::EndMovePointEvent:
+			ASSERT(self->DrainMovePointAction != 0);
+			if (self->DrainMovePointAction)
+			{
+				self->DrainMovePointAction->SetPoint(drainActor->GetCurrentPointPosition()[0], drainActor->GetCurrentPointPosition()[1]);
+				self->Execute(self->DrainMovePointAction);
+				self->DrainMovePointAction = 0;
+			}
+			break;
+
+		case CDrainActor::InsertPointEvent:
+			{
+				double* pos = drainActor->GetCurrentPointPosition();
+				vtkIdType id = drainActor->GetCurrentPointId() - 1;
+				CPointConnectorInsertPointAction<CDrainActor, CRiverPoint>* pDrainInsertPointAction =
+					new CPointConnectorInsertPointAction<CDrainActor, CRiverPoint>(drainActor, self, id, pos[0], pos[1], pos[2], true);
+				self->Execute(pDrainInsertPointAction);
+			}
+			break;
+
+		default:
+			ASSERT(FALSE);
+			break;
+		}
 	}
 }

@@ -76,6 +76,43 @@ void CBCSpecifiedHeadPropertyPage::DoDataExchange(CDataExchange* pDX)
 		// polyh
 		if (this->m_bc.polyh) bc.polyh = this->m_bc.polyh->clone();
 
+		// exterior cells only
+		if (this->IsDlgButtonChecked(IDC_CHECK_EXTERIOR_ONLY) == BST_CHECKED)
+		{
+			switch (this->GetCheckedRadioButton(IDC_RADIO_EC_ALL, IDC_RADIO_EC_Z))
+			{
+			case IDC_RADIO_EC_ALL:
+				bc.face_defined = TRUE;
+				bc.face         = 11;
+				bc.cell_face    = CF_ALL;
+				break;
+			case IDC_RADIO_EC_X:
+				bc.face_defined = TRUE;
+				bc.face         = 0;
+				bc.cell_face    = CF_X;
+				break;
+			case IDC_RADIO_EC_Y:
+				bc.face_defined = TRUE;
+				bc.face         = 1;
+				bc.cell_face    = CF_Y;
+				break;
+			case IDC_RADIO_EC_Z:
+				bc.face_defined = TRUE;
+				bc.face         = 2;
+				bc.cell_face    = CF_Z;
+				break;
+			default:
+				ASSERT(FALSE);
+				break;
+			}
+		}
+		else
+		{
+			bc.face_defined = FALSE;
+			bc.face         = -1;
+			bc.cell_face    = CF_UNKNOWN;
+		}
+
 		// bc_type
 		bc.bc_type = BC_info::BC_SPECIFIED;
 
@@ -89,25 +126,67 @@ void CBCSpecifiedHeadPropertyPage::DoDataExchange(CDataExchange* pDX)
 
 		// solution type
 		//
-		bc.bc_solution_type = UNDEFINED;
+		bc.bc_solution_type = ST_UNDEFINED;
 		if (bc.m_bc_solution.size() != 0)
 		{
 			if (this->IsDlgButtonChecked(IDC_FIXED_RADIO))
 			{
-				bc.bc_solution_type = FIXED;
+				bc.bc_solution_type = ST_FIXED;
 			}
 			if (this->IsDlgButtonChecked(IDC_ASSOC_RADIO))
 			{
-				bc.bc_solution_type = ASSOCIATED;
+				bc.bc_solution_type = ST_ASSOCIATED;
 			}
 		}
+#if defined(_DEBUG)
+		bc.AssertValid(1);
+#endif
 		this->m_bc = bc;
 	}
 	else
 	{
+		// exterior cells only
+		switch (this->m_bc.cell_face)
+		{
+		case CF_UNKNOWN:
+			this->CheckDlgButton(IDC_CHECK_EXTERIOR_ONLY, BST_UNCHECKED);
+			this->CheckRadioButton(IDC_RADIO_EC_ALL, IDC_RADIO_EC_Z, IDC_RADIO_EC_ALL);
+			ASSERT(this->m_bc.face == -1);
+			ASSERT(this->m_bc.face_defined == FALSE);
+			break;
+		case CF_ALL:
+			this->CheckDlgButton(IDC_CHECK_EXTERIOR_ONLY, BST_CHECKED);
+			this->CheckRadioButton(IDC_RADIO_EC_ALL, IDC_RADIO_EC_Z, IDC_RADIO_EC_ALL);
+			ASSERT(this->m_bc.face == 11);
+			ASSERT(this->m_bc.face_defined == TRUE);
+			break;
+		case CF_X:
+			this->CheckDlgButton(IDC_CHECK_EXTERIOR_ONLY, BST_CHECKED);
+			this->CheckRadioButton(IDC_RADIO_EC_ALL, IDC_RADIO_EC_Z, IDC_RADIO_EC_X);
+			ASSERT(this->m_bc.face == 0);
+			ASSERT(this->m_bc.face_defined == TRUE);
+			break;
+		case CF_Y:
+			this->CheckDlgButton(IDC_CHECK_EXTERIOR_ONLY, BST_CHECKED);
+			this->CheckRadioButton(IDC_RADIO_EC_ALL, IDC_RADIO_EC_Z, IDC_RADIO_EC_Y);
+			ASSERT(this->m_bc.face == 1);
+			ASSERT(this->m_bc.face_defined == TRUE);
+			break;
+		case CF_Z:
+			this->CheckDlgButton(IDC_CHECK_EXTERIOR_ONLY, BST_CHECKED);
+			this->CheckRadioButton(IDC_RADIO_EC_ALL, IDC_RADIO_EC_Z, IDC_RADIO_EC_Z);
+			ASSERT(this->m_bc.face == 2);
+			ASSERT(this->m_bc.face_defined == TRUE);
+			break;
+		default:
+			ASSERT(FALSE);
+			break;
+		}
+		this->OnBnClickedExteriorOnly();
+
 		// solution type
 		//
-		if (this->m_bc.bc_solution_type == FIXED)
+		if (this->m_bc.bc_solution_type == ST_FIXED)
 		{
 			this->CheckRadioButton(IDC_ASSOC_RADIO, IDC_FIXED_RADIO, IDC_FIXED_RADIO);
 		}
@@ -130,7 +209,8 @@ BEGIN_MESSAGE_MAP(CBCSpecifiedHeadPropertyPage, baseCBCSpecifiedHeadPropertyPage
 	ON_NOTIFY(GVN_SELCHANGED, IDC_HEAD_GRID, OnSelChangedHead)
 	ON_NOTIFY(GVN_SETFOCUS, IDC_HEAD_GRID, OnSelChangedHead)
 	ON_NOTIFY(GVN_SELCHANGED, IDC_SOLUTION_GRID, OnSelChangedSolution)
-	ON_NOTIFY(GVN_SETFOCUS, IDC_SOLUTION_GRID, OnSelChangedSolution)
+	ON_NOTIFY(GVN_SETFOCUS, IDC_SOLUTION_GRID, OnSelChangedSolution)	
+	ON_BN_CLICKED(IDC_CHECK_EXTERIOR_ONLY, OnBnClickedExteriorOnly)
 END_MESSAGE_MAP()
 
 
@@ -148,6 +228,15 @@ BOOL CBCSpecifiedHeadPropertyPage::OnInitDialog()
 			<< item(IDC_DESC_STATIC, NORESIZE | ALIGN_VCENTER, 0, 0, 0, 0)
 			<< itemFixed(HORIZONTAL, 8)
 			<< item(IDC_DESC_EDIT, ABSOLUTE_VERT | ALIGN_VCENTER, 0, 0, 0, 0)
+			)
+		<< itemFixed(VERTICAL, 3)
+		<< 	( pane(HORIZONTAL, ABSOLUTE_VERT, 0, 0, 0 )
+			<< item(IDC_CHECK_EXTERIOR_ONLY, NORESIZE, 0, 0, 0, 0)
+			<< itemFixed(HORIZONTAL, 3)
+			<< item(IDC_RADIO_EC_ALL, NORESIZE, 0, 0, 0, 0)
+			<< item(IDC_RADIO_EC_X, NORESIZE, 0, 0, 0, 0)
+			<< item(IDC_RADIO_EC_Y, NORESIZE, 0, 0, 0, 0)
+			<< item(IDC_RADIO_EC_Z, NORESIZE, 0, 0, 0, 0)
 			)
 		<< item(IDC_HEAD_GRID, GREEDY)
 		<< itemFixed(VERTICAL, 3)
@@ -169,6 +258,9 @@ BOOL CBCSpecifiedHeadPropertyPage::OnInitDialog()
 
 void CBCSpecifiedHeadPropertyPage::SetProperties(const CBC& r_bc)
 {
+#if defined(_DEBUG)
+	r_bc.AssertValid(1);
+#endif
 	this->m_bc = r_bc;
 }
 
@@ -404,11 +496,11 @@ void CBCSpecifiedHeadPropertyPage::OnBnClickedFixedRadio()
 {
 	if (this->IsDlgButtonChecked(IDC_FIXED_RADIO))
 	{
-		this->m_bc.bc_solution_type = FIXED;
+		this->m_bc.bc_solution_type = ST_FIXED;
 	}
 	if (this->IsDlgButtonChecked(IDC_ASSOC_RADIO))
 	{
-		this->m_bc.bc_solution_type = ASSOCIATED;
+		this->m_bc.bc_solution_type = ST_ASSOCIATED;
 	}
 	this->OnSelChangedSolution(NULL, NULL);
 }
@@ -417,11 +509,11 @@ void CBCSpecifiedHeadPropertyPage::OnBnClickedAssocRadio()
 {
 	if (this->IsDlgButtonChecked(IDC_FIXED_RADIO))
 	{
-		this->m_bc.bc_solution_type = FIXED;
+		this->m_bc.bc_solution_type = ST_FIXED;
 	}
 	if (this->IsDlgButtonChecked(IDC_ASSOC_RADIO))
 	{
-		this->m_bc.bc_solution_type = ASSOCIATED;
+		this->m_bc.bc_solution_type = ST_ASSOCIATED;
 	}
 	this->OnSelChangedSolution(NULL, NULL);
 }
@@ -459,5 +551,47 @@ void CBCSpecifiedHeadPropertyPage::OnSelChangedSolution(NMHDR *pNotifyStruct, LR
 	else
 	{
 		ASSERT(FALSE);
+	}
+}
+
+void CBCSpecifiedHeadPropertyPage::OnBnClickedExteriorOnly()
+{
+	if (this->IsDlgButtonChecked(IDC_CHECK_EXTERIOR_ONLY) == BST_CHECKED)
+	{
+		if (CWnd *pWnd = this->GetDlgItem(IDC_RADIO_EC_ALL))
+		{
+			pWnd->EnableWindow(TRUE);
+		}
+		if (CWnd *pWnd = this->GetDlgItem(IDC_RADIO_EC_X))
+		{
+			pWnd->EnableWindow(TRUE);
+		}
+		if (CWnd *pWnd = this->GetDlgItem(IDC_RADIO_EC_Y))
+		{
+			pWnd->EnableWindow(TRUE);
+		}
+		if (CWnd *pWnd = this->GetDlgItem(IDC_RADIO_EC_Z))
+		{
+			pWnd->EnableWindow(TRUE);
+		}
+	}
+	else
+	{
+		if (CWnd *pWnd = this->GetDlgItem(IDC_RADIO_EC_ALL))
+		{
+			pWnd->EnableWindow(FALSE);
+		}
+		if (CWnd *pWnd = this->GetDlgItem(IDC_RADIO_EC_X))
+		{
+			pWnd->EnableWindow(FALSE);
+		}
+		if (CWnd *pWnd = this->GetDlgItem(IDC_RADIO_EC_Y))
+		{
+			pWnd->EnableWindow(FALSE);
+		}
+		if (CWnd *pWnd = this->GetDlgItem(IDC_RADIO_EC_Z))
+		{
+			pWnd->EnableWindow(FALSE);
+		}
 	}
 }

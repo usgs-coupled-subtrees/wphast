@@ -75,22 +75,22 @@ void CChemICPropertyPage::GetProperties(CChemIC& chemIC)const
 
 	// delete UNDEFINED properties
 	//
-	if (chemIC.solution->type == UNDEFINED) {
+	if (chemIC.solution->type == PROP_UNDEFINED) {
 		Cproperty::CopyProperty(&chemIC.solution, 0);
 	}
-	if (chemIC.equilibrium_phases->type == UNDEFINED) {
+	if (chemIC.equilibrium_phases->type == PROP_UNDEFINED) {
 		Cproperty::CopyProperty(&chemIC.equilibrium_phases, 0);
 	}
-	if (chemIC.surface->type == UNDEFINED) {
+	if (chemIC.surface->type == PROP_UNDEFINED) {
 		Cproperty::CopyProperty(&chemIC.surface, 0);
 	}
-	if (chemIC.gas_phase->type == UNDEFINED) {
+	if (chemIC.gas_phase->type == PROP_UNDEFINED) {
 		Cproperty::CopyProperty(&chemIC.gas_phase, 0);
 	}
-	if (chemIC.solid_solutions->type == UNDEFINED) {
+	if (chemIC.solid_solutions->type == PROP_UNDEFINED) {
 		Cproperty::CopyProperty(&chemIC.solid_solutions, 0);
 	}
-	if (chemIC.kinetics->type == UNDEFINED) {
+	if (chemIC.kinetics->type == PROP_UNDEFINED) {
 		Cproperty::CopyProperty(&chemIC.kinetics, 0);
 	}
 }
@@ -140,43 +140,43 @@ void CChemICPropertyPage::DoDataExchange(CDataExchange* pDX)
 
 		// solution
 		hti = this->m_wndTreeCtrl.InsertItem(PSZ_SOLUTION, TVI_ROOT, TVI_LAST);
-		if (this->m_chem_ic.solution->type != UNDEFINED) {
+		if (this->m_chem_ic.solution->type != PROP_UNDEFINED) {
 			this->m_wndTreeCtrl.SetCheck(hti, BST_CHECKED);
 		}
 
 		// equilibrium_phases
 		hti = this->m_wndTreeCtrl.InsertItem(PSZ_EQUILIBRIUM_PHASES, TVI_ROOT, TVI_LAST);
-		if (this->m_chem_ic.equilibrium_phases->type != UNDEFINED) {
+		if (this->m_chem_ic.equilibrium_phases->type != PROP_UNDEFINED) {
 			this->m_wndTreeCtrl.SetCheck(hti, BST_CHECKED);
 		}
 
 		// exchange
 		hti = this->m_wndTreeCtrl.InsertItem(PSZ_EXCHANGE, TVI_ROOT, TVI_LAST);
-		if (this->m_chem_ic.exchange->type != UNDEFINED) {
+		if (this->m_chem_ic.exchange->type != PROP_UNDEFINED) {
 			this->m_wndTreeCtrl.SetCheck(hti, BST_CHECKED);
 		}
 
 		// surface
 		hti = this->m_wndTreeCtrl.InsertItem(PSZ_SURFACE, TVI_ROOT, TVI_LAST);
-		if (this->m_chem_ic.surface->type != UNDEFINED) {
+		if (this->m_chem_ic.surface->type != PROP_UNDEFINED) {
 			this->m_wndTreeCtrl.SetCheck(hti, BST_CHECKED);
 		}
 
 		// gas_phase
 		hti = this->m_wndTreeCtrl.InsertItem(PSZ_GAS_PHASE, TVI_ROOT, TVI_LAST);
-		if (this->m_chem_ic.gas_phase->type != UNDEFINED) {
+		if (this->m_chem_ic.gas_phase->type != PROP_UNDEFINED) {
 			this->m_wndTreeCtrl.SetCheck(hti, BST_CHECKED);
 		}
 
 		// solid_solutions
 		hti = this->m_wndTreeCtrl.InsertItem(PSZ_SOLID_SOLUTIONS, TVI_ROOT, TVI_LAST);
-		if (this->m_chem_ic.solid_solutions->type != UNDEFINED) {
+		if (this->m_chem_ic.solid_solutions->type != PROP_UNDEFINED) {
 			this->m_wndTreeCtrl.SetCheck(hti, BST_CHECKED);
 		}
 
 		// kinetics
 		hti = this->m_wndTreeCtrl.InsertItem(PSZ_KINETICS, TVI_ROOT, TVI_LAST);
-		if (this->m_chem_ic.kinetics->type != UNDEFINED) {
+		if (this->m_chem_ic.kinetics->type != PROP_UNDEFINED) {
 			this->m_wndTreeCtrl.SetCheck(hti, BST_CHECKED);
 		}
 
@@ -201,7 +201,7 @@ void CChemICPropertyPage::DoDataExchange(CDataExchange* pDX)
 				);
 			// if ((this->m_bNewModelWizard || this->m_bFlowOnlyWizard) && !this->m_bFlowOnly) {
 			if (!this->m_bFlowOnly) {
-				if (pDX->m_bSaveAndValidate && this->m_chem_ic.solution->type == UNDEFINED) {
+				if (pDX->m_bSaveAndValidate && this->m_chem_ic.solution->type == PROP_UNDEFINED) {
 					CString str;
 					str.Format("A default \"%s\" must be defined.", PSZ_SOLUTION);
 					::AfxMessageBox(str);

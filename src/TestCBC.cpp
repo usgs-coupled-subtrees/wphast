@@ -54,7 +54,7 @@ void TestCBC::testOperatorEqual2(void)
 	Ctime t;
 	t.SetValue(0.0);
 	Cproperty p;
-	p.type    = FIXED;
+	p.type    = PROP_FIXED;
 	p.v[0]    = 2.0;
 	p.count_v = 1;
 
@@ -70,12 +70,12 @@ void TestCBC::testOperatorEqual2(void)
 
 	Ctime zero;
 	zero.SetValue(0.0);
-	CPPUNIT_ASSERT(bc.m_bc_head[zero].type == FIXED);
+	CPPUNIT_ASSERT(bc.m_bc_head[zero].type == PROP_FIXED);
 	CPPUNIT_ASSERT(bc.m_bc_head[zero].v[0] == 2.0);
 
 	Ctime ten;
 	ten.SetValue(10.0);
-	CPPUNIT_ASSERT(bc.m_bc_head[ten].type == FIXED);
+	CPPUNIT_ASSERT(bc.m_bc_head[ten].type == PROP_FIXED);
 	CPPUNIT_ASSERT(bc.m_bc_head[ten].v[0] == 4.0);
 
 
@@ -91,12 +91,12 @@ void TestCBC::testOperatorEqual2(void)
 
 		Ctime zero;
 		zero.SetValue(0.0);
-		CPPUNIT_ASSERT(bcEqual.m_bc_head[zero].type == FIXED);
+		CPPUNIT_ASSERT(bcEqual.m_bc_head[zero].type == PROP_FIXED);
 		CPPUNIT_ASSERT(bcEqual.m_bc_head[zero].v[0] == 2.0);
 
 		Ctime ten;
 		ten.SetValue(10.0);
-		CPPUNIT_ASSERT(bcEqual.m_bc_head[ten].type == FIXED);
+		CPPUNIT_ASSERT(bcEqual.m_bc_head[ten].type == PROP_FIXED);
 		CPPUNIT_ASSERT(bcEqual.m_bc_head[ten].v[0] == 4.0);
 
 		CBC empty;
@@ -233,14 +233,14 @@ void TestCBC::testMergeDifferentSolutionTypes(void)
 
 			CPPUNIT_ASSERT(bc0.m_bc_head[zero].v[0] == 1);
 
-			CPPUNIT_ASSERT(bc0.bc_solution_type == ASSOCIATED);
-			CPPUNIT_ASSERT(bc1.bc_solution_type == FIXED);
+			CPPUNIT_ASSERT(bc0.bc_solution_type == ST_ASSOCIATED);
+			CPPUNIT_ASSERT(bc1.bc_solution_type == ST_FIXED);
 
 			bc0.Merge(bc1);
 
 			// no change to bc_solution_type
-			CPPUNIT_ASSERT(bc0.bc_solution_type == ASSOCIATED);
-			CPPUNIT_ASSERT(bc1.bc_solution_type == FIXED);
+			CPPUNIT_ASSERT(bc0.bc_solution_type == ST_ASSOCIATED);
+			CPPUNIT_ASSERT(bc1.bc_solution_type == ST_FIXED);
 
 #if defined(_DEBUG)
 			bc0.AssertValid(1);
@@ -428,7 +428,7 @@ void TestCBC::testAssertValidFluxBC(void)
 
 			// solution information for bc
 			// UNDEFINED, FIXED, ASSOCIATED
-			CPPUNIT_ASSERT(bc0.bc_solution_type  == ASSOCIATED);
+			CPPUNIT_ASSERT(bc0.bc_solution_type  == ST_ASSOCIATED);
 			CPPUNIT_ASSERT(bc0.m_bc_solution.size()  != 0);
 
 			bc0.AssertValid(1);
@@ -510,7 +510,7 @@ void TestCBC::testAssertValidLeakyBC(void)
 
 			// solution information for bc
 			// UNDEFINED, FIXED, ASSOCIATED
-			CPPUNIT_ASSERT(bc0.bc_solution_type  == ASSOCIATED);
+			CPPUNIT_ASSERT(bc0.bc_solution_type  == ST_ASSOCIATED);
 			CPPUNIT_ASSERT(bc0.bc_solution       == NULL);
 			CPPUNIT_ASSERT(bc0.m_bc_solution.size() == 1);
 
@@ -595,7 +595,7 @@ void TestCBC::testAssertValidSpecifiedValueBC(void)
 
 				// solution information for bc
 				// UNDEFINED, FIXED, ASSOCIATED
-				CPPUNIT_ASSERT(bc0.bc_solution_type  == ASSOCIATED);
+				CPPUNIT_ASSERT(bc0.bc_solution_type  == ST_ASSOCIATED);
 				CPPUNIT_ASSERT(bc0.bc_solution          == 0);
 				CPPUNIT_ASSERT(bc0.m_bc_solution.size() == 2);
 
@@ -642,7 +642,7 @@ void TestCBC::testAssertValidSpecifiedValueBC(void)
 
 				// solution information for bc
 				// UNDEFINED, FIXED, ASSOCIATED
-				CPPUNIT_ASSERT(bc1.bc_solution_type     == FIXED);
+				CPPUNIT_ASSERT(bc1.bc_solution_type     == ST_FIXED);
 				CPPUNIT_ASSERT(bc1.bc_solution          == 0);
 				CPPUNIT_ASSERT(bc1.m_bc_solution.size() == 1);
 
@@ -676,3 +676,151 @@ void TestCBC::testAssertValidSpecifiedValueBC(void)
 	}
 }
 
+void TestCBC::testAssertValidSpecifiedValueBC2(void)
+{
+	CPhastInput* pPhastInput = NULL;
+	try
+	{
+		std::istringstream iss(
+			"###SPECIFIED_HEAD_BC\n"
+			"  -box 0 0 0 10 2 10\n"
+			"    -exterior_cells_only    X\n"
+			"    -head\n"
+			"       0  10\n"
+			"      10 X 101.5 0 103. 10\n"
+			"    -fixed_solution\n"
+			"          0   6\n"
+			"###          100 mixture   2   4    xyz   mixf.dat grid\n"
+			"          200 points grid\n"
+			"              0.0   5.0    0.0   1\n"
+			"              10.0  5.0    0.0   2\n"
+			"              end_points\n"
+			"  -box 0 8 0 10 10 10\n"
+			"    -exterior_cells_only    X\n"
+			"    -head\n"
+			"      0 99.0\n"
+			"    -associated_solution\n"
+			"      0 6\n"
+			);
+
+		CPhastInput* pPhastInput = CPhastInput::New(iss, "testAssertValidSpecifiedValueBC");
+		CPPUNIT_ASSERT(::read_specified_value_bc() == EOF);
+		CPPUNIT_ASSERT(pPhastInput->GetErrorCount() == 0);
+		CMemoryState oldMemState, newMemState, diffMemState;
+		oldMemState.Checkpoint();
+		{
+			CPPUNIT_ASSERT(::count_bc == 2);
+
+			{
+				// bc0
+				//
+
+				CBC bc0(*::bc[0]);
+
+				CPPUNIT_ASSERT(bc0.polyh             != 0);
+				CPPUNIT_ASSERT(bc0.mask              == 0);
+
+				// boundary condition information
+				// UNDEFINED, SPECIFIED, FLUX, LEAKY
+				CPPUNIT_ASSERT(bc0.bc_type           == BC_info::BC_SPECIFIED);
+
+				// head for SPECIFIED and LEAKY
+				CPPUNIT_ASSERT(bc0.bc_head           == 0);
+				CPPUNIT_ASSERT(bc0.m_bc_head.size()  == 2);
+
+				// flux for FLUX BC
+				CPPUNIT_ASSERT(bc0.bc_flux           == 0);
+
+				// other parameters for LEAKY
+				CPPUNIT_ASSERT(bc0.bc_k              == 0);
+				CPPUNIT_ASSERT(bc0.bc_thick          == 0);
+
+				// flux face for FLUX and LEAKY, 0, 1, or 2
+				CPPUNIT_ASSERT(bc0.face              == 0);
+				CPPUNIT_ASSERT(bc0.face_defined      == TRUE);
+				CPPUNIT_ASSERT(bc0.cell_face         == CF_X);
+
+				// solution information for bc
+				// UNDEFINED, FIXED, ASSOCIATED
+				CPPUNIT_ASSERT(bc0.bc_solution_type     == ST_FIXED);
+				CPPUNIT_ASSERT(bc0.bc_solution          == 0);
+				CPPUNIT_ASSERT(bc0.m_bc_solution.size() == 2);
+
+				// dump
+				std::ostringstream oss_out;
+				oss_out << bc0;
+				TRACE("%s\n", oss_out.str().c_str());
+
+				bc0.AssertValid(1);
+				CPPUNIT_ASSERT(bc0.ContainsProperties());
+				bc0.ClearProperties();
+				bc0.AssertValid(2);
+				CPPUNIT_ASSERT(!bc0.ContainsProperties());
+
+			}
+
+			{
+				// bc1
+				//
+
+				CBC bc1(*::bc[1]);
+
+				CPPUNIT_ASSERT(bc1.polyh                != 0);
+				CPPUNIT_ASSERT(bc1.mask                 == 0);
+
+				// boundary condition information
+				// UNDEFINED, SPECIFIED, FLUX, LEAKY
+				CPPUNIT_ASSERT(bc1.bc_type              == BC_info::BC_SPECIFIED);
+
+				// head for SPECIFIED and LEAKY
+				CPPUNIT_ASSERT(bc1.bc_head              == 0);		
+				CPPUNIT_ASSERT(bc1.m_bc_head.size()     == 1);
+
+				// flux for FLUX BC
+				CPPUNIT_ASSERT(bc1.bc_flux              == 0);
+
+				// other parameters for LEAKY
+				CPPUNIT_ASSERT(bc1.bc_k                 == 0);
+				CPPUNIT_ASSERT(bc1.bc_thick             == 0);
+
+				// flux face for FLUX and LEAKY, 0, 1, or 2
+				CPPUNIT_ASSERT(bc1.face_defined         == TRUE);
+				CPPUNIT_ASSERT(bc1.face                 == 0);
+				CPPUNIT_ASSERT(bc1.cell_face            == CF_X);
+
+
+				// solution information for bc
+				// UNDEFINED, FIXED, ASSOCIATED
+				CPPUNIT_ASSERT(bc1.bc_solution_type     == ST_ASSOCIATED);
+				CPPUNIT_ASSERT(bc1.bc_solution          == 0);
+				CPPUNIT_ASSERT(bc1.m_bc_solution.size() == 1);
+
+				// dump
+				std::ostringstream oss_out;
+				oss_out << bc1;
+				TRACE("%s\n", oss_out.str().c_str());
+
+				bc1.AssertValid(1);
+				CPPUNIT_ASSERT(bc1.ContainsProperties());
+				bc1.ClearProperties();
+				bc1.AssertValid(2);
+				CPPUNIT_ASSERT(!bc1.ContainsProperties());
+
+			}
+
+		}
+		newMemState.Checkpoint();
+		CPPUNIT_ASSERT(diffMemState.Difference( oldMemState, newMemState ) == 0);
+
+		pPhastInput->Delete();
+		pPhastInput = NULL;
+	}
+	catch(...)
+	{
+		if (pPhastInput)
+		{
+			pPhastInput->Delete();
+		}
+		throw;
+	}
+}

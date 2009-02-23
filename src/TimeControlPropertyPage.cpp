@@ -83,11 +83,11 @@ void CTimeControlPropertyPage::DoDataExchange(CDataExchange* pDX)
 		}
 
 		Ctime time;
-		time.type = UNITS;
+		time.type = TT_UNITS;
 		time.SetValue(0.0);
 
 		Ctime timeStep;
-		timeStep.type = UNITS;
+		timeStep.type = TT_UNITS;
 		timeStep.SetValue(dVal);
 
 		// timeStep units
@@ -121,7 +121,7 @@ void CTimeControlPropertyPage::DoDataExchange(CDataExchange* pDX)
 		}
 
 		Ctime timeEnd;
-		timeEnd.type = UNITS;
+		timeEnd.type = TT_UNITS;
 		timeEnd.SetValue(dVal);
 
 		// timeEnd units

@@ -142,7 +142,7 @@ void CTimeControlMultiPropertyPage2::DoDataExchange(CDataExchange* pDX)
 			double d;
 			::DDX_TextGridControl(pDX, nIDC, iRow, 0, d);
 			Ctime t;
-			t.type = UNITS;
+			t.type = TT_UNITS;
 			t.SetValue(d);
 
 			// time units
@@ -174,7 +174,7 @@ void CTimeControlMultiPropertyPage2::DoDataExchange(CDataExchange* pDX)
 			double d;
 			::DDX_TextGridControl(pDX, nIDC, iRow, 0, d);
 			Ctime t;
-			t.type = UNITS;
+			t.type = TT_UNITS;
 			t.SetValue(d);
 
 			// time units
@@ -187,7 +187,7 @@ void CTimeControlMultiPropertyPage2::DoDataExchange(CDataExchange* pDX)
 
 			::DDX_TextGridControl(pDX, nIDC, iRow, 2, d);
 			Ctime t2;
-			t2.type = UNITS;
+			t2.type = TT_UNITS;
 			t2.SetValue(d);
 
 			// time units
@@ -207,7 +207,7 @@ void CTimeControlMultiPropertyPage2::DoDataExchange(CDataExchange* pDX)
 		//
 		::DDX_Text(pDX, IDC_STARTTIME_EDIT, tc2.m_timeStart.value);
 		tc2.m_timeStart.value_defined = TRUE;
-		tc2.m_timeStart.type = UNITS;
+		tc2.m_timeStart.type = TT_UNITS;
 
 		// units
 		//

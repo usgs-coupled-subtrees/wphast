@@ -36,11 +36,15 @@ public:
 	CComboBox m_wndTimeCombo;
 	CComboBox m_wndHorizontalCombo;
 	CComboBox m_wndVerticalCombo;
+	//{{
+	CComboBox m_wndHorizontalMapCombo;
+	CComboBox m_wndVerticalMapCombo;
+	//}}
 	CComboBox m_wndHeadCombo;
-	CComboBox m_wndKNumCombo;
-	CComboBox m_wndKDenomCombo;
-	CComboBox m_wndSDenomCombo;
-	CComboBox m_wndAlphaCombo;
+// COMMENT: {11/25/2008 2:27:35 PM}	CComboBox m_wndKNumCombo;
+// COMMENT: {11/25/2008 2:27:35 PM}	CComboBox m_wndKDenomCombo;
+// COMMENT: {11/25/2008 2:27:35 PM}	CComboBox m_wndSDenomCombo;
+// COMMENT: {11/25/2008 2:27:35 PM}	CComboBox m_wndAlphaCombo;
 	CUnits m_units;
 	virtual BOOL OnSetActive();
 	virtual BOOL OnInitDialog();

@@ -1,11 +1,9 @@
 #pragma once
-#include "afxwin.h"
 
 #include "Units.h"
 
-#define WM_SETPAGEFOCUS WM_APP+2
-
 // CUnits2PropertyPage dialog
+#define WM_SETPAGEFOCUS WM_APP+2
 
 class CUnits2PropertyPage : public CPropertyPage
 {
@@ -35,18 +33,15 @@ protected:
 	int m_idSetFocus;
 
 public:
-	CComboBox m_wndFluxNumCombo;           // flux  [L/T]
-	CComboBox m_wndFluxDenomCombo;         // flux  [L/T]
-	CComboBox m_wndLeakyKNumCombo;         // leaky_hydraulic_conductivity [L/T]
-	CComboBox m_wndLeakyKDenomCombo;       // leaky_hydraulic_conductivity [L/T]
-	CComboBox m_wndLeakyThickCombo;        // leaky_thickness [L]
-	CComboBox m_wndWellDiamCombo;          // well_diameter [L]
-	CComboBox m_wndWellPumpageNumCombo;    // well_flow_rate [L^3/T]
-	CComboBox m_wndWellPumpageDenomCombo;  // well_flow_rate [L^3/T]
-	CComboBox m_wndRiverBedKNumCombo;      // river_bed_hydraulic_conductivity [L/T]
-	CComboBox m_wndRiverBedKDenomCombo;    // river_bed_hydraulic_conductivity [L/T]
-	CComboBox m_wndRiverBedThickCombo;     // river_bed_thickness [L]
+// COMMENT: {11/25/2008 3:04:58 PM}	CComboBox m_wndTimeCombo;
+// COMMENT: {11/25/2008 3:04:58 PM}	CComboBox m_wndHorizontalCombo;
+// COMMENT: {11/25/2008 3:04:58 PM}	CComboBox m_wndVerticalCombo;
+// COMMENT: {11/25/2008 3:04:58 PM}	CComboBox m_wndHeadCombo;
+	CComboBox m_wndKNumCombo;
+	CComboBox m_wndKDenomCombo;
+	CComboBox m_wndSDenomCombo;
+	CComboBox m_wndAlphaCombo;
 	CUnits m_units;
-	virtual BOOL OnInitDialog();
 	virtual BOOL OnSetActive();
+	virtual BOOL OnInitDialog();
 };

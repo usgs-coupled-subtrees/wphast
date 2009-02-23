@@ -1,5 +1,6 @@
 #include "StdAfx.h"
 #include "WellCreateAction.h"
+#include "GridKeyword.h"
 
 CWellCreateAction::CWellCreateAction(CWPhastDoc* pDoc, const CWellSchedule &well, CTreeCtrlNode nodeInsertAfter)
 : m_pDoc(pDoc)
@@ -10,7 +11,7 @@ CWellCreateAction::CWellCreateAction(CWPhastDoc* pDoc, const CWellSchedule &well
 	this->m_pWellActor = CWellActor::New();
 	ASSERT(this->m_pWellActor->IsA("CWellActor"));
 
-	this->m_pWellActor->SetWell(well, this->m_pDoc->GetUnits());
+	this->m_pWellActor->SetWell(well, this->m_pDoc->GetUnits(), this->m_pDoc->GetGridKeyword());
 
 	// tree placement
 	if (nodeInsertAfter == TVI_LAST)

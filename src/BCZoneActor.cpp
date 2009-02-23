@@ -121,13 +121,6 @@ void CBCZoneActor::Update(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent, const CBC& 
 {
 	CZoneActor::Update(pTreeCtrl, htiParent);
 
-// COMMENT: {7/25/2008 5:01:30 PM}	// remove all previous items
-// COMMENT: {7/25/2008 5:01:30 PM}	//
-// COMMENT: {7/25/2008 5:01:30 PM}	while (HTREEITEM hChild = pTreeCtrl->GetChildItem(htiParent))
-// COMMENT: {7/25/2008 5:01:30 PM}	{
-// COMMENT: {7/25/2008 5:01:30 PM}		pTreeCtrl->DeleteItem(hChild);
-// COMMENT: {7/25/2008 5:01:30 PM}	}
-
 	// update description
 	//
 	pTreeCtrl->SetItemText(htiParent, this->GetTreeHeading());
@@ -139,17 +132,39 @@ void CBCZoneActor::Update(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent, const CBC& 
 			break;
 
 		case BC_info::BC_SPECIFIED:
+			if (crBC.face_defined)
+			{
+				switch(crBC.cell_face)
+				{
+				case CF_X:
+					pTreeCtrl->InsertItem("exterior_cells_only  X", htiParent);
+					break;
+				case CF_Y:
+					pTreeCtrl->InsertItem("exterior_cells_only  Y", htiParent);
+					break;
+				case CF_Z:
+					pTreeCtrl->InsertItem("exterior_cells_only  Z", htiParent);
+					break;
+				case CF_ALL:
+					pTreeCtrl->InsertItem("exterior_cells_only  ALL", htiParent);
+					break;
+				default:
+					ASSERT(FALSE);
+					break;
+				}
+			}
+
 			// head
 			crBC.m_bc_head.InsertItem(pTreeCtrl, "head", htiParent);
 
 			// associated_solution
-			if (crBC.bc_solution_type == ASSOCIATED)
+			if (crBC.bc_solution_type == ST_ASSOCIATED)
 			{
 				crBC.m_bc_solution.InsertItem(pTreeCtrl, "associated_solution", htiParent);
 			}
 
 			// fixed_solution
-			if (crBC.bc_solution_type == FIXED)
+			if (crBC.bc_solution_type == ST_FIXED)
 			{
 				crBC.m_bc_solution.InsertItem(pTreeCtrl, "fixed_solution", htiParent);
 			}
@@ -188,13 +203,13 @@ void CBCZoneActor::Update(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent, const CBC& 
 			crBC.m_bc_solution.InsertItem(pTreeCtrl, "associated_solution", htiParent);
 
 			// thickness
-			if (crBC.bc_thick && crBC.bc_thick->type != UNDEFINED)
+			if (crBC.bc_thick && crBC.bc_thick->type != PROP_UNDEFINED)
 			{
 				static_cast<Cproperty*>(crBC.bc_thick)->Insert(pTreeCtrl, htiParent, "thickness");
 			}
 
 			// hydraulic_conductivity
-			if (crBC.bc_k && crBC.bc_k->type != UNDEFINED)
+			if (crBC.bc_k && crBC.bc_k->type != PROP_UNDEFINED)
 			{
 				static_cast<Cproperty*>(crBC.bc_k)->Insert(pTreeCtrl, htiParent, "hydraulic_conductivity");
 			}
@@ -327,12 +342,12 @@ void CBCZoneActor::SetHTreeItem(HTREEITEM htItem)
 	this->m_hti = htItem;
 }
 
-void CBCZoneActor::Serialize(bool bStoring, hid_t loc_id, const CUnits& units)
+void CBCZoneActor::Serialize(bool bStoring, hid_t loc_id, const CWPhastDoc* pWPhastDoc)
 {
 	ASSERT(this->GetName()); // must have name
 	TRACE("%s\n", this->GetName());
 
-	CZoneActor::Serialize(bStoring, loc_id);
+	CZoneActor::Serialize(bStoring, loc_id, pWPhastDoc);
 
 	if (bStoring)
 	{
@@ -343,7 +358,6 @@ void CBCZoneActor::Serialize(bool bStoring, hid_t loc_id, const CUnits& units)
 	{
 		// serialize bc
 		this->m_bc.Serialize(bStoring, loc_id);
-		this->SetUnits(units);
 
 		// set color etc
 		this->UpdateProperty();

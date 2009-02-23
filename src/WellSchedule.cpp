@@ -114,6 +114,8 @@ void CWellSchedule::Serialize(CArchive& ar)
 
 std::ostream& operator<< (std::ostream &os, const CWellSchedule &a)
 {
+	const char* coor_name[] = {"MAP", "GRID", "NONE"};
+
 	os << "WELL " << a.n_user;
 	if (a.description && ::strlen(a.description))
 	{
@@ -121,7 +123,12 @@ std::ostream& operator<< (std::ostream &os, const CWellSchedule &a)
 	}
 	os << "\n";
 
-	os << "\t" << a.x << " " << a.y << "\n";	
+	ASSERT(a.xy_coordinate_system_user == PHAST_Transform::MAP || a.xy_coordinate_system_user == PHAST_Transform::GRID);
+	ASSERT(a.z_coordinate_system_user == PHAST_Transform::MAP || a.z_coordinate_system_user == PHAST_Transform::GRID);
+
+	os << "\t-xy_coordinate_system" << " " << coor_name[a.xy_coordinate_system_user] << "\n";
+	os << "\t-z_coordinate_system" << " " << coor_name[a.z_coordinate_system_user] << "\n";
+	os << "\t-location " << a.x_user << " " << a.y_user << "\n";	
 
 	if (a.diameter_defined)
 	{
@@ -136,19 +143,19 @@ std::ostream& operator<< (std::ostream &os, const CWellSchedule &a)
 		ASSERT(FALSE);
 	}
 
-	for (int i = 0; i < a.count_elevation; ++i)
+	for (int i = 0; i < a.count_elevation_user; ++i)
 	{
-		os << "\t" << "-elevation " << a.elevation[i].bottom << " " << a.elevation[i].top << "\n";
+		os << "\t" << "-elevation " << a.elevation_user[i].bottom << " " << a.elevation_user[i].top << "\n";
 	}
 
-	if (a.lsd_defined)
+	if (a.lsd_user_defined)
 	{
-		os << "\t" << "-land_surface_datum " << a.lsd << "\n";
+		os << "\t" << "-land_surface_datum " << a.lsd_user << "\n";
 	}
 
-	for (int i = 0; i < a.count_depth; ++i)
+	for (int i = 0; i < a.count_depth_user; ++i)
 	{
-		os << "\t" << "-depth " << a.depth[i].bottom << " " << a.depth[i].top << "\n";
+		os << "\t" << "-depth " << a.depth_user[i].bottom << " " << a.depth_user[i].top << "\n";
 	}
 
 	if (a.mobility_and_pressure)
@@ -199,7 +206,7 @@ std::ostream& operator<< (std::ostream &os, const CWellSchedule &a)
 			if (rate.q_defined)
 			{
 				os << "\t\t" << time.value;
-				if (time.type == UNITS && time.input && ::strlen(time.input))
+				if (time.type == TT_UNITS && time.input && ::strlen(time.input))
 				{
 					os << " " << time.input;
 				}
@@ -229,7 +236,7 @@ std::ostream& operator<< (std::ostream &os, const CWellSchedule &a)
 			if (rate.solution_defined)
 			{
 				os << "\t\t" << time.value;
-				if (time.type == UNITS && time.input && ::strlen(time.input))
+				if (time.type == TT_UNITS && time.input && ::strlen(time.input))
 				{
 					os << " " << time.input;
 				}

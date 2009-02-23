@@ -7,6 +7,7 @@
 #define EXTERNAL extern
 #include "srcinput/hstinpt.h"
 #undef EXTERNAL
+#include "enum_fix.h"
 
 #include <iosfwd> // std::ostream
 
@@ -50,7 +51,7 @@ private:
 
 inline void Cproperty::SerializeCreate(const char *heading, Cproperty* prop, hid_t loc_id)
 {
-	if (prop && prop->type != UNDEFINED) {
+	if (prop && prop->type != PROP_UNDEFINED) {
 		hid_t group_id = ::H5Gcreate(loc_id, heading, 0);
 		ASSERT(group_id > 0);
 		if (group_id > 0) {
@@ -138,20 +139,20 @@ inline bool operator==(const property& lhs, const property& rhs)
 	{
 		switch (lhs.type)
 		{
-		case UNDEFINED:
+		case PROP_UNDEFINED:
 			return true;
 			break;
-		case FIXED:
+		case PROP_FIXED:
 			return (lhs.v[0] == rhs.v[0]);
 			break;
-		case LINEAR:
+		case PROP_LINEAR:
 			return (lhs.coord == rhs.coord &&
 				lhs.v[0] == rhs.v[0] &&
 				lhs.dist1 == rhs.dist1 &&
 				lhs.v[1] == rhs.v[1] &&
 				lhs.dist2 == rhs.dist2);
 			break;
-		case MIXTURE:
+		case PROP_MIXTURE:
 			if (lhs.count_v == rhs.count_v)
 			{
 				for (int i = 0; i < lhs.count_v; ++i)
@@ -181,10 +182,10 @@ inline bool operator!=(const property& lhs, const property& rhs)
 			if (rhs.P) { \
 				if (*this->P != *rhs.P) return false; \
 			} else { \
-				if (this->P->type != UNDEFINED) return false; \
+				if (this->P->type != PROP_UNDEFINED) return false; \
 			} \
 		} else { \
-			if (rhs.P && rhs.P->type != UNDEFINED) return false; \
+			if (rhs.P && rhs.P->type != PROP_UNDEFINED) return false; \
 		} \
 	} while(0)
 

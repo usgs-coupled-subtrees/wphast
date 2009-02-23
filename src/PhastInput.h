@@ -9,15 +9,15 @@ class Prism;
 class CPhastInput
 {
 public:
-	static CPhastInput* New(std::istream& is, const char *pcsz_prefix);
+	static CPhastInput* New(std::istream& is, const char *szPrefix, bool save_prisms = true);
 	void Delete(void);
 	static CParser* GetParser() {return (s_instance) ? &s_instance->m_parser : 0;} 
 	void Run(void);
 	void WritePhastTmp(const char* szPhastTmp);
 
 	void Load(void);
-// COMMENT: {3/31/2005 6:21:49 PM}	void LoadFirstStressPeriod(void);
-// COMMENT: {3/31/2005 6:21:49 PM}	bool LoadNextStressPeriod(void);
+	void Read(void);
+	void Accumulate(bool bWritePhastTmp);
 
 	int GetErrorCount(void)const;
 	LPCTSTR GetErrorMsg(void)const;
@@ -28,7 +28,7 @@ public:
 	static int Output(const int type, const char *err_str, const int stop, void *cookie, const char *format, va_list args);
 
 private:
-	CPhastInput(std::istream& is, const char *pcsz_prefix);
+	CPhastInput(std::istream& is, const char *pcsz_prefix, bool save_prisms);
 	~CPhastInput(void);
 	void DoInitialize(void);
 	void DoCleanUp(void);
@@ -40,4 +40,6 @@ private:
 	std::string m_s_error;
 	std::string m_s_warning;
 	std::list<Prism*> m_save_prism_list;
+	bool m_save_prisms;
 };
+

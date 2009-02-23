@@ -96,7 +96,7 @@ void CBCLeakyPropertyPage2::DoDataExchange(CDataExchange* pDX)
 		//
 		Cproperty thick;
 		CGlobal::DDX_Property(pDX, IDC_SINGLE_GRID, 1, &thick, true);
-		if (thick.type != UNDEFINED)
+		if (thick.type != PROP_UNDEFINED)
 		{
 			Cproperty::CopyProperty(&bc.bc_thick, &thick);
 		}
@@ -104,7 +104,7 @@ void CBCLeakyPropertyPage2::DoDataExchange(CDataExchange* pDX)
 		// hydraulic_conductivity
 		Cproperty k;
 		CGlobal::DDX_Property(pDX, IDC_SINGLE_GRID, 2, &k, true);
-		if (k.type != UNDEFINED)
+		if (k.type != PROP_UNDEFINED)
 		{
 			Cproperty::CopyProperty(&bc.bc_k, &k);
 		}
@@ -119,7 +119,7 @@ void CBCLeakyPropertyPage2::DoDataExchange(CDataExchange* pDX)
 		CGlobal::DDX_GridTimeSeries(pDX, IDC_SOLUTION_GRID, bc.m_bc_solution, !this->m_bFlowOnly);
 		if (bc.m_bc_solution.size())
 		{
-			bc.bc_solution_type = ASSOCIATED;
+			bc.bc_solution_type = ST_ASSOCIATED;
 		}
 
 		// face

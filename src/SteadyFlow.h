@@ -34,6 +34,7 @@ protected:
 	Ctime  maximum_time_step;      // -maximum_time_step      -> ::max_ss_time_step
 	double head_change_target;     // -head_change_target     -> ::max_ss_head_change
 	int    iterations;             // -iterations             -> ::max_ss_iterations
+	double growth_factor;          // -growth_factor          -> ::growth_factor_ss
 
 	friend class CSteadyFlowPropertyPage;
 };

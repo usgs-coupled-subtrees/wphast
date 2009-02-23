@@ -14,6 +14,7 @@
 #define EXTERNAL extern
 #include "srcinput/hstinpt.h"
 #undef EXTERNAL
+#include "enum_fix.h"
 
 #include "Global.h"
 
@@ -27,6 +28,7 @@ CPrintInput::CPrintInput(void)
 	force_chem = FALSE;
 	hdf_chem = TRUE;
 	hdf_head = TRUE;
+	hdf_media = FALSE;
 	hdf_ss_vel = TRUE;
 	hdf_ss_vel_defined = FALSE;
 	head = TRUE;
@@ -73,6 +75,7 @@ void CPrintInput::SyncWithSrcInput(void)
 	this->xyz_ss_vel_defined = ::print_input_xyz_ss_vel_defined;
 	this->hdf_chem           = ::print_input_hdf_chem;
 	this->hdf_head           = ::print_input_hdf_head;
+	this->hdf_media          = ::print_input_hdf_media;
 	this->hdf_ss_vel         = ::print_input_hdf_ss_vel;
 	this->hdf_ss_vel_defined = ::print_input_hdf_ss_vel_defined;
 	this->xyz_chem           = ::print_input_xyz_chem;
@@ -139,6 +142,7 @@ void CPrintInput::Edit(CTreeCtrl* pTreeCtrl)
  	MACRO(force_chem,   "force_chemistry_print"); \
 	MACRO(hdf_chem,     "HDF_chemistry"); \
 	MACRO(hdf_head,     "HDF_heads"); \
+	MACRO(hdf_media,    "HDF_media"); \
 	MACRO(hdf_ss_vel,   "HDF_steady_flow_velocities"); \
 	MACRO(head,         "heads"); \
 	MACRO(media,        "media_properties"); \

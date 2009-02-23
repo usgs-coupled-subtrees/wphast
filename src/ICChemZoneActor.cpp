@@ -130,9 +130,9 @@ void CICChemZoneActor::Update(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent)
 	}
 }
 
-void CICChemZoneActor::Serialize(bool bStoring, hid_t loc_id, const CUnits& units)
+void CICChemZoneActor::Serialize(bool bStoring, hid_t loc_id, const CWPhastDoc* pWPhastDoc)
 {
-	CZoneActor::Serialize(bStoring, loc_id);
+	CZoneActor::Serialize(bStoring, loc_id, pWPhastDoc);
 
 	if (bStoring)
 	{
@@ -143,8 +143,6 @@ void CICChemZoneActor::Serialize(bool bStoring, hid_t loc_id, const CUnits& unit
 	{
 		// load chem_ic
 		this->m_chemIC.Serialize(bStoring, loc_id);
-
-		this->SetUnits(units);
 	}
 }
 

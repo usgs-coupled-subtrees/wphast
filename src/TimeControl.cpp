@@ -41,16 +41,16 @@ void CTimeControl::Insert(CTreeCtrl* pTreeCtrl, HTREEITEM htiTimeControl)
 
 	CString str;
 	str.Format("time_step %g", this->m_timeStep.value);
-	ASSERT(this->m_timeStep.type == UNITS);
-	if (this->m_timeStep.type == UNITS) {
+	ASSERT(this->m_timeStep.type == TT_UNITS);
+	if (this->m_timeStep.type == TT_UNITS) {
 		str += " ";
 		str += this->m_timeStep.input;
 	}
 	pTreeCtrl->InsertItem(str, htiTimeControl);
 
 	str.Format("time_change %g", this->m_timeEnd.value);
-	ASSERT(this->m_timeEnd.type == UNITS);
-	if (this->m_timeEnd.type == UNITS) {
+	ASSERT(this->m_timeEnd.type == TT_UNITS);
+	if (this->m_timeEnd.type == TT_UNITS) {
 		str += " ";
 		str += this->m_timeEnd.input;
 	}

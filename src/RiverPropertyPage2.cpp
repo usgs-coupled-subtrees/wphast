@@ -20,6 +20,7 @@ CRiverPropertyPage2::CRiverPropertyPage2()
 	, m_bFullVerify(true)
 	, m_pointIndex(0)
 	, m_bFlowOnly(true)
+	, m_bUpdatePositionOnly(FALSE)
 {
 	this->m_strHorizontalUnits.Format("(%s)", this->m_units.horizontal.si);
 	this->m_strHeadUnits.Format("(%s)", this->m_units.head.si);
@@ -27,6 +28,8 @@ CRiverPropertyPage2::CRiverPropertyPage2()
 	this->m_strRiverBedKUnits.Format("(%s)", this->m_units.river_bed_k.si);
 	CGlobal::MinimizeTimeUnits(this->m_strRiverBedKUnits);
 	this->m_strRiverBedThicknessUnits.Format("(%s)", this->m_units.river_bed_thickness.si);
+	this->m_strMapHorizontalUnits.Format("(%s)", this->m_units.map_horizontal.si);
+	this->m_strMapVerticalUnits.Format("(%s)", this->m_units.map_vertical.si);
 
 	// load property descriptions
 	//
@@ -56,6 +59,44 @@ void CRiverPropertyPage2::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_PROP_TREE, this->m_wndTreeCtrl);
 	DDX_GridControl(pDX, IDC_GRID_SCHEDULES, this->m_wndScheduleGrid);
 	DDX_Control(pDX, IDC_DESC_RICHEDIT, this->m_wndRichEditCtrl);
+
+	if (!pDX->m_bSaveAndValidate && this->m_bUpdatePositionOnly)
+	{
+		// point
+		//
+		CRiverPoint* pPt = (CRiverPoint*)this->m_wndTreeCtrl.GetSelectedItem().GetData();
+		ASSERT(pPt);
+
+		// X
+		ASSERT(pPt->x_user_defined);
+		DDX_Text(pDX, IDC_X_EDIT, pPt->x_user);
+
+		// Y
+		ASSERT(pPt->y_user_defined);
+		DDX_Text(pDX, IDC_Y_EDIT, pPt->y_user);
+
+		// xy grid/map coordinates
+		//
+		int state = BST_UNCHECKED;
+		switch (this->m_river.coordinate_system)
+		{
+		case PHAST_Transform::MAP:
+			state = BST_CHECKED;
+			DDX_Text(pDX, IDC_X_UNITS_STATIC, this->m_strMapHorizontalUnits);
+			DDX_Text(pDX, IDC_Y_UNITS_STATIC, this->m_strMapHorizontalUnits);
+			break;
+		case PHAST_Transform::GRID:
+			DDX_Text(pDX, IDC_X_UNITS_STATIC, this->m_strHorizontalUnits);
+			DDX_Text(pDX, IDC_Y_UNITS_STATIC, this->m_strHorizontalUnits);
+			break;
+		default:
+			ASSERT(FALSE);
+			break;
+		}
+		DDX_Check(pDX, IDC_CHECK_USE_MAP, state);
+		return;
+	}
+
 	if (this->m_bFirstSetActive)
 	{
 		// wrap richedit to window
@@ -234,26 +275,58 @@ void CRiverPropertyPage2::DoDataExchange(CDataExchange* pDX)
 	//
 	if (pDX->m_bSaveAndValidate)
 	{
-		DDX_Text(pDX, IDC_X_EDIT, pPt->x);
-		pPt->x_defined = TRUE;
+		DDX_Text(pDX, IDC_X_EDIT, pPt->x_user);
+		pPt->x_user_defined = TRUE;
 	}
 	else
 	{
-		ASSERT(pPt->x_defined);
-		DDX_Text(pDX, IDC_X_EDIT, pPt->x);
+		ASSERT(pPt->x_user_defined);
+		DDX_Text(pDX, IDC_X_EDIT, pPt->x_user);
 	}
 
 	// Y
 	//
 	if (pDX->m_bSaveAndValidate)
 	{
-		DDX_Text(pDX, IDC_Y_EDIT, pPt->y);
-		pPt->y_defined = TRUE;
+		DDX_Text(pDX, IDC_Y_EDIT, pPt->y_user);
+		pPt->y_user_defined = TRUE;
 	}
 	else
 	{
-		ASSERT(pPt->y_defined);
-		DDX_Text(pDX, IDC_Y_EDIT, pPt->y);
+		ASSERT(pPt->y_user_defined);
+		DDX_Text(pDX, IDC_Y_EDIT, pPt->y_user);
+	}
+
+	// xy grid/map coordinates
+	//
+	int state = BST_UNCHECKED;
+	switch (this->m_river.coordinate_system)
+	{
+	case PHAST_Transform::MAP:
+		state = BST_CHECKED;
+		DDX_Text(pDX, IDC_X_UNITS_STATIC, this->m_strMapHorizontalUnits);
+		DDX_Text(pDX, IDC_Y_UNITS_STATIC, this->m_strMapHorizontalUnits);
+		break;
+	case PHAST_Transform::GRID:
+		DDX_Text(pDX, IDC_X_UNITS_STATIC, this->m_strHorizontalUnits);
+		DDX_Text(pDX, IDC_Y_UNITS_STATIC, this->m_strHorizontalUnits);
+		break;
+	default:
+		ASSERT(FALSE);
+		break;
+	}
+	DDX_Check(pDX, IDC_CHECK_USE_MAP, state);
+	if (pDX->m_bSaveAndValidate)
+	{
+		switch (state)
+		{
+		case BST_CHECKED:
+			this->m_river.coordinate_system = PHAST_Transform::MAP;
+			break;
+		default:
+			this->m_river.coordinate_system = PHAST_Transform::GRID;
+			break;
+		}
 	}
 
 	// Width
@@ -262,7 +335,7 @@ void CRiverPropertyPage2::DoDataExchange(CDataExchange* pDX)
 	{
 		CString str;
 		DDX_Text(pDX, IDC_WIDTH_EDIT, str);
-		pPt->width_defined = FALSE;
+		pPt->width_user_defined = FALSE;
 		if (str.IsEmpty())
 		{
 			if (bFirstOrLastPoint)
@@ -273,15 +346,15 @@ void CRiverPropertyPage2::DoDataExchange(CDataExchange* pDX)
 		}
 		else
 		{
-			DDX_Text(pDX, IDC_WIDTH_EDIT, pPt->width);
-			pPt->width_defined = TRUE;
+			DDX_Text(pDX, IDC_WIDTH_EDIT, pPt->width_user);
+			pPt->width_user_defined = TRUE;
 		}
 	}
 	else
 	{
-		if (pPt->width_defined)
+		if (pPt->width_user_defined)
 		{
-			DDX_Text(pDX, IDC_WIDTH_EDIT, pPt->width);
+			DDX_Text(pDX, IDC_WIDTH_EDIT, pPt->width_user);
 		}
 		else
 		{
@@ -300,7 +373,7 @@ void CRiverPropertyPage2::DoDataExchange(CDataExchange* pDX)
 			//
 			CString str;
 			DDX_Text(pDX, IDC_BOTTOM_EDIT, str);
-			pPt->z_defined = FALSE;
+			pPt->z_user_defined = FALSE;
 			if (str.IsEmpty())
 			{
 				if (bFirstOrLastPoint)
@@ -311,10 +384,10 @@ void CRiverPropertyPage2::DoDataExchange(CDataExchange* pDX)
 			}
 			else
 			{
-				DDX_Text(pDX, IDC_BOTTOM_EDIT, pPt->z);
-				pPt->z_defined = TRUE;
+				DDX_Text(pDX, IDC_BOTTOM_EDIT, pPt->z_user);
+				pPt->z_user_defined = TRUE;
 			}
-			pPt->depth_defined = FALSE;
+			pPt->depth_user_defined = FALSE;
 		}
 		else
 		{
@@ -322,7 +395,7 @@ void CRiverPropertyPage2::DoDataExchange(CDataExchange* pDX)
 			//
 			CString str;
 			DDX_Text(pDX, IDC_DEPTH_EDIT, str);
-			pPt->depth_defined = FALSE;
+			pPt->depth_user_defined = FALSE;
 			if (str.IsEmpty())
 			{
 				if (bFirstOrLastPoint)
@@ -333,23 +406,23 @@ void CRiverPropertyPage2::DoDataExchange(CDataExchange* pDX)
 			}
 			else
 			{
-				DDX_Text(pDX, IDC_DEPTH_EDIT, pPt->depth);
-				pPt->depth_defined = TRUE;
+				DDX_Text(pDX, IDC_DEPTH_EDIT, pPt->depth_user);
+				pPt->depth_user_defined = TRUE;
 			}
-			pPt->z_defined = FALSE;
+			pPt->z_user_defined = FALSE;
 		}
 	}
 	else
 	{
 		// Bottom
 		//
-		if (pPt->z_defined)
+		if (pPt->z_user_defined)
 		{
-			ASSERT(!pPt->depth_defined);
+			ASSERT(!pPt->depth_user_defined);
 			this->CheckRadioButton(IDC_RADIO_BOTTOM, IDC_RADIO_DEPTH, IDC_RADIO_BOTTOM);
 			this->OnBnClickedRadioBottom();
 
-			DDX_Text(pDX, IDC_BOTTOM_EDIT, pPt->z);
+			DDX_Text(pDX, IDC_BOTTOM_EDIT, pPt->z_user);
 		}
 		else
 		{
@@ -359,13 +432,13 @@ void CRiverPropertyPage2::DoDataExchange(CDataExchange* pDX)
 
 		// Depth
 		//
-		if (pPt->depth_defined)
+		if (pPt->depth_user_defined)
 		{
-			ASSERT(!pPt->z_defined);
+			ASSERT(!pPt->z_user_defined);
 			this->CheckRadioButton(IDC_RADIO_BOTTOM, IDC_RADIO_DEPTH, IDC_RADIO_DEPTH);
 			this->OnBnClickedRadioDepth();
 
-			DDX_Text(pDX, IDC_DEPTH_EDIT, pPt->depth);
+			DDX_Text(pDX, IDC_DEPTH_EDIT, pPt->depth_user);
 		}
 		else
 		{
@@ -373,9 +446,9 @@ void CRiverPropertyPage2::DoDataExchange(CDataExchange* pDX)
 			DDX_Text(pDX, IDC_DEPTH_EDIT, empty);
 		}
 
-		if (!pPt->z_defined && !pPt->depth_defined)
+		if (!pPt->z_user_defined && !pPt->depth_user_defined)
 		{
-			ASSERT(!pPt->z_defined);
+			ASSERT(!pPt->z_user_defined);
 			this->CheckRadioButton(IDC_RADIO_BOTTOM, IDC_RADIO_DEPTH, IDC_RADIO_DEPTH);
 			this->OnBnClickedRadioDepth();
 		}
@@ -545,15 +618,15 @@ void CRiverPropertyPage2::DoDataExchange(CDataExchange* pDX)
 			this->m_wndScheduleGrid.SetItem(&Item);
 
 			// start time units
-			if ((*iter).first.type == UNDEFINED)
+			if ((*iter).first.type == TT_UNDEFINED)
 			{
 				Item.strText.Empty();
 			}
-			else if ((*iter).first.type == STEP)
+			else if ((*iter).first.type == TT_STEP)
 			{
 				ASSERT(FALSE);
 			}
-			else if ((*iter).first.type == UNITS)
+			else if ((*iter).first.type == TT_UNITS)
 			{
 				ASSERT((*iter).first.input && ::strlen((*iter).first.input));
 				if ((*iter).first.input)
@@ -635,13 +708,13 @@ void CRiverPropertyPage2::DoDataExchange(CDataExchange* pDX)
 			if (it->second.head_defined)     head_defined = true;
 			if (it->second.solution_defined) solution_defined = true;
 		}
-		if ((!this->m_river.m_listPoints.front().depth_defined && !this->m_river.m_listPoints.front().z_defined)
+		if ((!this->m_river.m_listPoints.front().depth_user_defined && !this->m_river.m_listPoints.front().z_user_defined)
 			||
 			!this->m_river.m_listPoints.front().k_defined
 			||
 			!this->m_river.m_listPoints.front().thickness_defined
 			||
-			!this->m_river.m_listPoints.front().width_defined
+			!this->m_river.m_listPoints.front().width_user_defined
 			||
 			this->m_river.m_listPoints.front().m_riverSchedule.empty()
 			||
@@ -666,13 +739,13 @@ void CRiverPropertyPage2::DoDataExchange(CDataExchange* pDX)
 			if (it->second.head_defined)     head_defined = true;
 			if (it->second.solution_defined) solution_defined = true;
 		}
-		if ((!this->m_river.m_listPoints.back().depth_defined && !this->m_river.m_listPoints.back().z_defined)
+		if ((!this->m_river.m_listPoints.back().depth_user_defined && !this->m_river.m_listPoints.back().z_user_defined)
 			||
 			!this->m_river.m_listPoints.back().k_defined
 			||
 			!this->m_river.m_listPoints.back().thickness_defined
 			||
-			!this->m_river.m_listPoints.back().width_defined
+			!this->m_river.m_listPoints.back().width_user_defined
 			||
 			this->m_river.m_listPoints.back().m_riverSchedule.empty()
 			||
@@ -725,6 +798,7 @@ BEGIN_MESSAGE_MAP(CRiverPropertyPage2, CPropertyPage)
 	ON_EN_SETFOCUS(IDC_BOTTOM_EDIT, OnEnSetfocusBottomEdit)
 	ON_NOTIFY(GVN_SELCHANGED, IDC_GRID_SCHEDULES, OnSelChangedSchedule)
 	ON_NOTIFY(GVN_SETFOCUS, IDC_GRID_SCHEDULES, OnSelChangedSchedule)
+	ON_BN_CLICKED(IDC_CHECK_USE_MAP, OnBnClickedUseMap)
 END_MESSAGE_MAP()
 
 
@@ -753,13 +827,14 @@ void CRiverPropertyPage2::SetUnits(const CUnits& units)
 
 void CRiverPropertyPage2::SetProperties(const CRiver& river)
 {
+	ASSERT(river.m_listPoints.size() > 0);
 	this->m_river = river;
 
 #if defined(_DEBUG)
-	if (!this->m_river.m_listPoints.front().depth_defined && !this->m_river.m_listPoints.front().z_defined)
+	if (!this->m_river.m_listPoints.front().depth_user_defined && !this->m_river.m_listPoints.front().z_user_defined)
 	{
-		this->m_river.m_listPoints.front().depth = 1;
-		this->m_river.m_listPoints.front().depth_defined = TRUE;
+		this->m_river.m_listPoints.front().depth_user = 1;
+		this->m_river.m_listPoints.front().depth_user_defined = TRUE;
 	}
 	if (!this->m_river.m_listPoints.front().k_defined)
 	{
@@ -771,16 +846,23 @@ void CRiverPropertyPage2::SetProperties(const CRiver& river)
 		this->m_river.m_listPoints.front().thickness = 1;
 		this->m_river.m_listPoints.front().thickness_defined = TRUE;
 	}
-	if (!this->m_river.m_listPoints.front().width_defined)
+	if (!this->m_river.m_listPoints.front().width_user_defined)
 	{
-		this->m_river.m_listPoints.front().width = 1;
-		this->m_river.m_listPoints.front().width_defined = TRUE;
+		this->m_river.m_listPoints.front().width_user = 1;
+		this->m_river.m_listPoints.front().width_user_defined = TRUE;
 	}
-
-	if (!this->m_river.m_listPoints.back().depth_defined && !this->m_river.m_listPoints.back().z_defined)
+	//{{
+	if (this->m_river.m_listPoints.front().m_riverSchedule.empty())
 	{
-		this->m_river.m_listPoints.back().depth = this->m_river.m_listPoints.size();
-		this->m_river.m_listPoints.back().depth_defined = TRUE;
+		CRiverState state(1, 1);
+		this->m_river.m_listPoints.front().m_riverSchedule[Ctime()] = state;
+	}
+	//}}
+
+	if (!this->m_river.m_listPoints.back().depth_user_defined && !this->m_river.m_listPoints.back().z_user_defined)
+	{
+		this->m_river.m_listPoints.back().depth_user = this->m_river.m_listPoints.size();
+		this->m_river.m_listPoints.back().depth_user_defined = TRUE;
 	}
 	if (!this->m_river.m_listPoints.back().k_defined)
 	{
@@ -792,11 +874,18 @@ void CRiverPropertyPage2::SetProperties(const CRiver& river)
 		this->m_river.m_listPoints.back().thickness = this->m_river.m_listPoints.size();
 		this->m_river.m_listPoints.back().thickness_defined = TRUE;
 	}
-	if (!this->m_river.m_listPoints.back().width_defined)
+	if (!this->m_river.m_listPoints.back().width_user_defined)
 	{
-		this->m_river.m_listPoints.back().width = this->m_river.m_listPoints.size();
-		this->m_river.m_listPoints.back().width_defined = TRUE;
+		this->m_river.m_listPoints.back().width_user = this->m_river.m_listPoints.size();
+		this->m_river.m_listPoints.back().width_user_defined = TRUE;
 	}
+	//{{
+	if (this->m_river.m_listPoints.back().m_riverSchedule.empty())
+	{
+		CRiverState state((int)this->m_river.m_listPoints.size(), (int)this->m_river.m_listPoints.size());
+		this->m_river.m_listPoints.back().m_riverSchedule[Ctime()] = state;
+	}
+	//}}
 #endif
 }
 
@@ -1006,4 +1095,63 @@ void CRiverPropertyPage2::OnSelChangedSchedule(NMHDR *pNotifyStruct, LRESULT *re
 		this->m_wndRichEditCtrl.SetWindowText(this->m_sSolutionRTF.c_str());
 		break;
 	}
+}
+
+void CRiverPropertyPage2::OnBnClickedUseMap()
+{
+	const CUnits& units = this->m_units;
+	const CGridKeyword& gridKeyword = this->m_gridKeyword;
+	PHAST_Transform map2grid(
+		gridKeyword.m_grid_origin[0],
+		gridKeyword.m_grid_origin[1],
+		gridKeyword.m_grid_origin[2],
+		gridKeyword.m_grid_angle,
+		units.map_horizontal.input_to_si/units.horizontal.input_to_si,
+		units.map_horizontal.input_to_si/units.horizontal.input_to_si,
+		units.map_vertical.input_to_si/units.vertical.input_to_si
+		);
+
+	bool bChecked = (this->IsDlgButtonChecked(IDC_CHECK_USE_MAP) == BST_CHECKED);
+	if (bChecked)
+	{
+		this->m_river.coordinate_system = PHAST_Transform::MAP;
+	}
+	else
+	{
+		this->m_river.coordinate_system = PHAST_Transform::GRID;
+	}
+
+	std::list<CRiverPoint>::iterator it = this->m_river.m_listPoints.begin();
+	for (; it != this->m_river.m_listPoints.end(); ++it)
+	{
+		Point p(
+			it->x_user,
+			it->y_user,
+			0.0
+			);
+
+		if (bChecked)
+		{
+			map2grid.Inverse_transform(p);
+			it->x_user = p.x();
+			it->y_user = p.y();
+		}
+		else
+		{
+			map2grid.Transform(p);
+			it->x_user = p.x();
+			it->y_user = p.y();
+		}
+	}
+
+	ASSERT(this->m_bUpdatePositionOnly == FALSE);
+	this->m_bUpdatePositionOnly = TRUE;
+	this->UpdateData(FALSE);
+	this->m_bUpdatePositionOnly = FALSE;
+}
+
+void CRiverPropertyPage2::SetGridKeyword(const CGridKeyword& gridKeyword)
+{
+	this->m_gridKeyword = gridKeyword;
+	this->m_gridKeyword.m_grid[2].Setup();
 }

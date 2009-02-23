@@ -90,7 +90,7 @@ void CBCFluxPropertyPage2::DoDataExchange(CDataExchange* pDX)
 		CGlobal::DDX_GridTimeSeries(pDX, IDC_SOLUTION_GRID, bc.m_bc_solution, !this->m_bFlowOnly);
 		if (bc.m_bc_solution.size())
 		{
-			bc.bc_solution_type = ASSOCIATED;
+			bc.bc_solution_type = ST_ASSOCIATED;
 		}
 
 		// face

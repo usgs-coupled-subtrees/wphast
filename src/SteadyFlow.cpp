@@ -15,6 +15,7 @@ CSteadyFlow::CSteadyFlow(void)
 , flow_balance_tolerance(0.001) // ::eps_mass_balance
 , head_change_target(-1)        // ::max_ss_head_change
 , iterations(100)               // ::max_ss_iterations
+, growth_factor(2.0)            // ::growth_factor_ss
 {
 }
 
@@ -24,6 +25,7 @@ CSteadyFlow::CSteadyFlow(bool bSteadyFlow)
 , flow_balance_tolerance(0.001) // ::eps_mass_balance
 , head_change_target(-1)        // ::max_ss_head_change
 , iterations(100)               // ::max_ss_iterations
+, growth_factor(2.0)            // ::growth_factor_ss
 {
 }
 
@@ -100,6 +102,9 @@ void CSteadyFlow::Insert(CTreeCtrl* pTreeCtrl, HTREEITEM htiSteadyFlow)const
 		str.Format("iterations %d", this->iterations);
 		pTreeCtrl->InsertItem(str, htiSteadyFlow);
 
+		// growth_factor
+		str.Format("growth_factor %g", this->growth_factor);
+		pTreeCtrl->InsertItem(str, htiSteadyFlow);
 	}
 	else
 	{
@@ -118,6 +123,7 @@ void CSteadyFlow::Serialize(bool bStoring, hid_t loc_id)
 	static const char szMaximumTimeStep[]      = "maximum_time_step";
 	static const char szHeadChangeTarget[]     = "head_change_target";
 	static const char szIterations[]           = "iterations";
+	static const char szGrowthFactor[]         = "growth_factor";	
 
 	hid_t group_id = 0;
 	herr_t status;
@@ -218,6 +224,9 @@ void CSteadyFlow::Serialize(bool bStoring, hid_t loc_id)
 			ASSERT(status >= 0);
 		}
 
+		// growth_factor
+		status = CGlobal::HDFSerializeSafe(bStoring, group_id, szGrowthFactor, H5T_NATIVE_DOUBLE, 1, &this->growth_factor);
+
 		// close the szSteadyFlow group
 		status = ::H5Gclose(group_id);
 		ASSERT(status >= 0);
@@ -288,6 +297,9 @@ std::ostream& operator<< (std::ostream &os, const CSteadyFlow &a)
 
 		// -iterations
 		os << "\t" << "-iterations " << a.iterations << "\n";
+
+		// -growth_factor
+		os << "\t" << "-growth_factor " << a.growth_factor << "\n";
 	}
 	else
 	{
@@ -305,20 +317,21 @@ void CSteadyFlow::SyncWithSrcInput(void)
 	this->maximum_time_step      = ::max_ss_time_step;
 	this->head_change_target     = ::max_ss_head_change;
 	this->iterations             = ::max_ss_iterations;
+	this->growth_factor          = ::growth_factor_ss;
 }
 
 void CSteadyFlow::OutputCtime(std::ostream &os, const Ctime& time, LPCTSTR lpName)
 {
-	if (time.type == UNDEFINED)
+	if (time.type == TT_UNDEFINED)
 	{
 		ASSERT(!time.value_defined);
 		os << "\t-" << lpName << " " << "     end \n";
 	}
-	else if (time.type == STEP)
+	else if (time.type == TT_STEP)
 	{
 		os << "\t-" << lpName << " " << time.value << "    step \n";
 	}
-	else if (time.type == UNITS)
+	else if (time.type == TT_UNITS)
 	{
 		if (time.input != NULL)
 		{			

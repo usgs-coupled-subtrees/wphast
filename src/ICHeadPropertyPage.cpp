@@ -57,7 +57,7 @@ void CICHeadPropertyPage::GetProperties(CHeadIC& r_headIC)const
 
 	// delete inactive properties
 	//
-	if (r_headIC.head->type == UNDEFINED) {
+	if (r_headIC.head->type == PROP_UNDEFINED) {
 		Cproperty::CopyProperty(&r_headIC.head, 0);
 	}
 }
@@ -89,7 +89,7 @@ void CICHeadPropertyPage::DoDataExchange(CDataExchange* pDX)
 
 		// head
 		hti = this->m_wndTreeCtrl.InsertItem(s_szHead, TVI_ROOT, TVI_LAST);
-		if (this->m_headIC.head->type != UNDEFINED) {
+		if (this->m_headIC.head->type != PROP_UNDEFINED) {
 			this->m_wndTreeCtrl.SetCheck(hti, BST_CHECKED);
 		}
 

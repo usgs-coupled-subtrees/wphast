@@ -88,31 +88,31 @@ void CMediaPropertyPage::GetProperties(CGridElt& r_grid_elt)const
 
 	// delete inactive properties
 	//
-	if (r_grid_elt.active->type == UNDEFINED) {
+	if (r_grid_elt.active->type == PROP_UNDEFINED) {
 		Cproperty::CopyProperty(&r_grid_elt.active, 0);
 	}
-	if (r_grid_elt.alpha_long->type == UNDEFINED) {
+	if (r_grid_elt.alpha_long->type == PROP_UNDEFINED) {
 		Cproperty::CopyProperty(&r_grid_elt.alpha_long, 0);
 	}
-	if (r_grid_elt.alpha_horizontal->type == UNDEFINED) {
+	if (r_grid_elt.alpha_horizontal->type == PROP_UNDEFINED) {
 		Cproperty::CopyProperty(&r_grid_elt.alpha_horizontal, 0);
 	}
-	if (r_grid_elt.alpha_vertical->type == UNDEFINED) {
+	if (r_grid_elt.alpha_vertical->type == PROP_UNDEFINED) {
 		Cproperty::CopyProperty(&r_grid_elt.alpha_vertical, 0);
 	}
-	if (r_grid_elt.kx->type == UNDEFINED) {
+	if (r_grid_elt.kx->type == PROP_UNDEFINED) {
 		Cproperty::CopyProperty(&r_grid_elt.kx, 0);
 	}
-	if (r_grid_elt.ky->type == UNDEFINED) {
+	if (r_grid_elt.ky->type == PROP_UNDEFINED) {
 		Cproperty::CopyProperty(&r_grid_elt.ky, 0);
 	}
-	if (r_grid_elt.kz->type == UNDEFINED) {
+	if (r_grid_elt.kz->type == PROP_UNDEFINED) {
 		Cproperty::CopyProperty(&r_grid_elt.kz, 0);
 	}
-	if (r_grid_elt.porosity->type == UNDEFINED) {
+	if (r_grid_elt.porosity->type == PROP_UNDEFINED) {
 		Cproperty::CopyProperty(&r_grid_elt.porosity, 0);
 	}
-	if (r_grid_elt.storage->type == UNDEFINED) {
+	if (r_grid_elt.storage->type == PROP_UNDEFINED) {
 		Cproperty::CopyProperty(&r_grid_elt.storage, 0);
 	}
 }
@@ -168,56 +168,56 @@ void CMediaPropertyPage::DoDataExchange(CDataExchange* pDX)
 
 		// Active
 		hti = this->m_wndTreeCtrl.InsertItem(_T("Active"), TVI_ROOT, TVI_LAST);
-		if (this->m_grid_elt.active->type != UNDEFINED) {
+		if (this->m_grid_elt.active->type != PROP_UNDEFINED) {
 			this->m_wndTreeCtrl.SetCheck(hti, BST_CHECKED);
 		}
 
 		// Kx
 		hti = this->m_wndTreeCtrl.InsertItem(_T("Kx"), TVI_ROOT, TVI_LAST);
-		if (this->m_grid_elt.kx->type != UNDEFINED) {
+		if (this->m_grid_elt.kx->type != PROP_UNDEFINED) {
 			this->m_wndTreeCtrl.SetCheck(hti, BST_CHECKED);
 		}
 
 		// Ky
 		hti = this->m_wndTreeCtrl.InsertItem(_T("Ky"), TVI_ROOT, TVI_LAST);
-		if (this->m_grid_elt.ky->type != UNDEFINED) {
+		if (this->m_grid_elt.ky->type != PROP_UNDEFINED) {
 			this->m_wndTreeCtrl.SetCheck(hti, BST_CHECKED);
 		}
 
 		// Kz
 		hti = this->m_wndTreeCtrl.InsertItem(_T("Kz"), TVI_ROOT, TVI_LAST);
-		if (this->m_grid_elt.kz->type != UNDEFINED) {
+		if (this->m_grid_elt.kz->type != PROP_UNDEFINED) {
 			this->m_wndTreeCtrl.SetCheck(hti, BST_CHECKED);
 		}
 
 		// Porosity
 		hti = this->m_wndTreeCtrl.InsertItem(_T("Porosity"), TVI_ROOT, TVI_LAST);
-		if (this->m_grid_elt.porosity->type != UNDEFINED) {
+		if (this->m_grid_elt.porosity->type != PROP_UNDEFINED) {
 			this->m_wndTreeCtrl.SetCheck(hti, BST_CHECKED);
 		}
 
 		// Specific storage
 		hti = this->m_wndTreeCtrl.InsertItem(_T("Specific storage"), TVI_ROOT, TVI_LAST);
-		if (this->m_grid_elt.storage->type != UNDEFINED) {
+		if (this->m_grid_elt.storage->type != PROP_UNDEFINED) {
 			this->m_wndTreeCtrl.SetCheck(hti, BST_CHECKED);
 		}
 
 		// Long dispersivity
 		hti = this->m_wndTreeCtrl.InsertItem(_T("Long dispersivity"), TVI_ROOT, TVI_LAST);
 		this->m_htiAlpha_long = hti;
-		if (this->m_grid_elt.alpha_long->type != UNDEFINED) {
+		if (this->m_grid_elt.alpha_long->type != PROP_UNDEFINED) {
 			this->m_wndTreeCtrl.SetCheck(hti, BST_CHECKED);
 		}
 
 		hti = this->m_wndTreeCtrl.InsertItem(ALPHA_HORIZONTAL, TVI_ROOT, TVI_LAST);
 		this->m_htiAlpha_horizontal = hti;
-		if (this->m_grid_elt.alpha_horizontal->type != UNDEFINED) {
+		if (this->m_grid_elt.alpha_horizontal->type != PROP_UNDEFINED) {
 			this->m_wndTreeCtrl.SetCheck(hti, BST_CHECKED);
 		}
 
 		hti = this->m_wndTreeCtrl.InsertItem(ALPHA_VERTICAL, TVI_ROOT, TVI_LAST);
 		this->m_htiAlpha_vertical   = hti;
-		if (this->m_grid_elt.alpha_vertical->type != UNDEFINED) {
+		if (this->m_grid_elt.alpha_vertical->type != PROP_UNDEFINED) {
 			this->m_wndTreeCtrl.SetCheck(hti, BST_CHECKED);
 		}
 
@@ -272,7 +272,7 @@ void CMediaPropertyPage::DoDataExchange(CDataExchange* pDX)
 				static_cast<Cproperty*>(this->m_grid_eltLinear.alpha_long)
 				);
 			if (!this->m_bFlowOnly) {
-				if (pDX->m_bSaveAndValidate && this->m_grid_elt.alpha_long->type == UNDEFINED) {
+				if (pDX->m_bSaveAndValidate && this->m_grid_elt.alpha_long->type == PROP_UNDEFINED) {
 					CString str;
 					str.Format(_T("A default \"%s\" must be defined."), _T("Long dispersivity"));
 					::AfxMessageBox(str);
@@ -304,7 +304,7 @@ void CMediaPropertyPage::DoDataExchange(CDataExchange* pDX)
 				static_cast<Cproperty*>(this->m_grid_eltLinear.alpha_horizontal)
 				);
 			if (!this->m_bFlowOnly) {
-				if (pDX->m_bSaveAndValidate && this->m_grid_elt.alpha_horizontal->type == UNDEFINED) {
+				if (pDX->m_bSaveAndValidate && this->m_grid_elt.alpha_horizontal->type == PROP_UNDEFINED) {
 					CString str;
 					str.Format("A default \"%s\" must be defined.", ALPHA_HORIZONTAL);
 					::AfxMessageBox(str);
@@ -320,7 +320,7 @@ void CMediaPropertyPage::DoDataExchange(CDataExchange* pDX)
 				static_cast<Cproperty*>(this->m_grid_eltLinear.alpha_vertical)
 				);
 			if (!this->m_bFlowOnly) {
-				if (pDX->m_bSaveAndValidate && this->m_grid_elt.alpha_vertical->type == UNDEFINED) {
+				if (pDX->m_bSaveAndValidate && this->m_grid_elt.alpha_vertical->type == PROP_UNDEFINED) {
 					CString str;
 					str.Format("A default \"%s\" must be defined.", ALPHA_VERTICAL);
 					::AfxMessageBox(str);
@@ -518,15 +518,15 @@ BOOL CMediaPropertyPage::OnSetActive()
 			else 
 			{
 				CGridElt gridElt = CGridElt::NewDefaults(this->m_bFlowOnly);
-				if (this->m_grid_elt.alpha_long->type == UNDEFINED) {
+				if (this->m_grid_elt.alpha_long->type == PROP_UNDEFINED) {
 					Cproperty::CopyProperty(&this->m_grid_elt.alpha_long, gridElt.alpha_long);
 					this->m_wndTreeCtrl.SetCheck(this->m_htiAlpha_long, BST_CHECKED);
 				}
-				if (this->m_grid_elt.alpha_horizontal->type == UNDEFINED) {
+				if (this->m_grid_elt.alpha_horizontal->type == PROP_UNDEFINED) {
 					Cproperty::CopyProperty(&this->m_grid_elt.alpha_horizontal, gridElt.alpha_horizontal);
 					this->m_wndTreeCtrl.SetCheck(this->m_htiAlpha_horizontal, BST_CHECKED);
 				}
-				if (this->m_grid_elt.alpha_vertical->type == UNDEFINED) {
+				if (this->m_grid_elt.alpha_vertical->type == PROP_UNDEFINED) {
 					Cproperty::CopyProperty(&this->m_grid_elt.alpha_vertical, gridElt.alpha_vertical);
 					this->m_wndTreeCtrl.SetCheck(this->m_htiAlpha_vertical, BST_CHECKED);
 				}

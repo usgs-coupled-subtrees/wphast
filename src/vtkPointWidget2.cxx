@@ -649,6 +649,12 @@ void vtkPointWidget2::MoveFocus(double *p1, double *p2)
     }
   
   this->Cursor3D->SetFocalPoint(focus);
+
+#if 9991 // well w/ grid rotation
+  // added in order to allow movement of rotated
+  // cursor
+  this->Actor->SetOrigin(focus);
+#endif // 9991 well w/ grid rotation
 }
 
 // Translate everything
@@ -770,3 +776,13 @@ void vtkPointWidget2::GetPolyData(vtkPolyData *pd)
   this->Cursor3D->Update(); 
   pd->DeepCopy(this->Cursor3D->GetFocus()); 
 }
+
+#if 9991 // well w/ grid rotation
+void vtkPointWidget2::SetOrientation(float x, float y, float z)
+{
+	vtkFloatingPointType origin[3];
+	this->Cursor3D->GetFocalPoint(origin);
+	this->Actor->SetOrigin(origin);
+	this->Actor->SetOrientation(x, y, z);
+} 
+#endif // 9991 well w/ grid rotation

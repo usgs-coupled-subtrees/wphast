@@ -17,6 +17,9 @@ template<typename T>
 class CZoneCreateAction : public CAction
 {
 public:
+
+	CZoneCreateAction(CWPhastDoc* pDoc, Polyhedron* polyh, double origin[3], double angle, const char* desc, CTreeCtrlNode nodeInsertAfter = CTreeCtrlNode(TVI_LAST, NULL));
+	CZoneCreateAction(CWPhastDoc* pDoc, const char* name, Polyhedron* polyh, double origin[3], double angle, const char* desc, CTreeCtrlNode nodeInsertAfter = CTreeCtrlNode(TVI_LAST, NULL));
 	CZoneCreateAction(CWPhastDoc* pDoc, const char* name, Polyhedron* polyh, const char* desc, CTreeCtrlNode nodeInsertAfter = CTreeCtrlNode(TVI_LAST, NULL));
 	CZoneCreateAction(CWPhastDoc* pDoc, Polyhedron* polyh, const char* desc, CTreeCtrlNode nodeInsertAfter = CTreeCtrlNode(TVI_LAST, NULL));
 
@@ -28,7 +31,7 @@ public:
 	T* GetZoneActor();
 
 protected:
-	void Create(CWPhastDoc* pDoc, const char* name, Polyhedron* polyh, const char* desc, CTreeCtrlNode nodeInsertAfter);
+	void Create(CWPhastDoc* pDoc, const char* name, Polyhedron* polyh, const char* desc, CTreeCtrlNode nodeInsertAfter, double origin[3], double angle);
 
 protected:
 	CWPhastDoc *m_pDoc;
@@ -40,13 +43,53 @@ protected:
 };
 
 template<typename T>
+CZoneCreateAction<T>::CZoneCreateAction(CWPhastDoc* pDoc, Polyhedron* polyh, double origin[3], double angle, const char* desc, CTreeCtrlNode nodeInsertAfter)
+: m_pDoc(pDoc)
+, m_hInsertAfter(0)
+, m_dwInsertAfter(0)
+, m_pZoneActor(0)
+{
+	// set name
+	//
+	CString name;
+	switch (polyh->get_type())
+	{
+	case Polyhedron::CUBE:
+		name = pDoc->GetNextZoneName();
+		break;
+	case Polyhedron::WEDGE:
+		name = pDoc->GetNextWedgeName();
+		break;
+	case Polyhedron::PRISM:
+		name = pDoc->GetNextPrismName();
+		break;
+	default:
+		ASSERT(FALSE);
+		name = "Unknown Polyhedron type";
+	}
+	this->Create(pDoc, name, polyh, desc, nodeInsertAfter, origin, angle);
+}
+
+template<typename T>
+CZoneCreateAction<T>::CZoneCreateAction(CWPhastDoc* pDoc, const char* name, Polyhedron* polyh, double origin[3], double angle, const char* desc, CTreeCtrlNode nodeInsertAfter)
+: m_pDoc(pDoc)
+, m_hInsertAfter(0)
+, m_dwInsertAfter(0)
+, m_pZoneActor(0)
+{
+	this->Create(pDoc, name, polyh, desc, nodeInsertAfter, origin, angle);
+}
+
+template<typename T>
 CZoneCreateAction<T>::CZoneCreateAction(CWPhastDoc* pDoc, const char* name, Polyhedron* polyh, const char* desc, CTreeCtrlNode nodeInsertAfter)
 : m_pDoc(pDoc)
 , m_hInsertAfter(0)
 , m_dwInsertAfter(0)
 , m_pZoneActor(0)
 {
-	this->Create(pDoc, name, polyh, desc, nodeInsertAfter);
+	double angle = 0.0;
+	double origin[3] = { 0.0, 0.0, 0.0 };
+	this->Create(pDoc, name, polyh, desc, nodeInsertAfter, origin, angle);
 }
 
 template<typename T>
@@ -74,18 +117,22 @@ CZoneCreateAction<T>::CZoneCreateAction(CWPhastDoc* pDoc, Polyhedron* polyh, con
 		ASSERT(FALSE);
 		name = "Unknown Polyhedron type";
 	}
-	this->Create(pDoc, name, polyh, desc, nodeInsertAfter);
+
+	double angle = 0.0;
+	double origin[3] = { 0.0, 0.0, 0.0 };
+	this->Create(pDoc, name, polyh, desc, nodeInsertAfter, origin, angle);
 }
 
 template<typename T>
-void CZoneCreateAction<T>::Create(CWPhastDoc* pDoc, const char* name, Polyhedron* polyh, const char* desc, CTreeCtrlNode nodeInsertAfter)
+//void CZoneCreateAction<T>::Create(CWPhastDoc* pDoc, const char* name, Polyhedron* polyh, const char* desc, CTreeCtrlNode nodeInsertAfter)
+void CZoneCreateAction<T>::Create(CWPhastDoc* pDoc, const char* name, Polyhedron* polyh, const char* desc, CTreeCtrlNode nodeInsertAfter, double origin[3], double angle)
 {
 	ASSERT(polyh && ::AfxIsValidAddress(polyh, sizeof(Polyhedron)));
 
 	this->m_pZoneActor = T::New();
 	ASSERT(this->m_pZoneActor->IsA("CZoneActor"));
 
-	this->m_pZoneActor->SetPolyhedron(polyh, m_pDoc->GetUnits());
+	this->m_pZoneActor->SetPolyhedron(polyh, m_pDoc->GetUnits(), origin, angle);
 
 	// set name
 	//

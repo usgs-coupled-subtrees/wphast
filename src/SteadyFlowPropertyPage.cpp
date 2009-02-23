@@ -116,7 +116,7 @@ void CSteadyFlowPropertyPage::DoDataExchange(CDataExchange* pDX)
 				//
 				::DDX_Text(pDX, IDC_MIN_TS_EDIT, minTime.value);
 				minTime.value_defined = TRUE;
-				minTime.type = UNITS;
+				minTime.type = TT_UNITS;
 
 				// units
 				//
@@ -144,7 +144,7 @@ void CSteadyFlowPropertyPage::DoDataExchange(CDataExchange* pDX)
 				//
 				::DDX_Text(pDX, IDC_MAX_TS_EDIT, maxTime.value);
 				maxTime.value_defined = TRUE;
-				maxTime.type = UNITS;
+				maxTime.type = TT_UNITS;
 
 				// units
 				//
@@ -180,6 +180,10 @@ void CSteadyFlowPropertyPage::DoDataExchange(CDataExchange* pDX)
 			// -iterations
 			//
 			::DDX_Text(pDX, IDC_ITER_EDIT, this->m_steadyFlow.iterations);
+
+			// -growth_factor
+			//
+			::DDX_Text(pDX, IDC_GROWTH_EDIT, this->m_steadyFlow.growth_factor);
 		}
 	}
 	else
@@ -275,6 +279,10 @@ void CSteadyFlowPropertyPage::DoDataExchange(CDataExchange* pDX)
 		// -iterations
 		//
 		::DDX_Text(pDX, IDC_ITER_EDIT, this->m_steadyFlow.iterations);
+
+		// -growth_factor
+		//
+		::DDX_Text(pDX, IDC_GROWTH_EDIT, this->m_steadyFlow.growth_factor);
 	}
 }
 
@@ -331,6 +339,9 @@ void CSteadyFlowPropertyPage::SetSteadyFlowEnabled(BOOL bEnabled)
 		IDC_ITER_STATIC,
 		IDC_ITER_EDIT,
 		IDC_ITER_SPIN,
+
+		IDC_GROWTH_STATIC,
+		IDC_GROWTH_EDIT,
 	};
 
 	for (int i = 0; i < sizeof(Ids) / sizeof(Ids[0]); ++i)

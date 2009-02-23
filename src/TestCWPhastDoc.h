@@ -10,10 +10,8 @@ class TestCWPhastDoc :
 	CPPUNIT_TEST( testCreateObject );
 	CPPUNIT_TEST_SUITE_END();
 public:
+	void setUp();
 	/**
-	void setUp()
-	{
-	}
 	void tearDown() 
 	{
 	}

@@ -1,17 +1,21 @@
+#include "stdafx.h"
 #include "PhastInput.h"
 
 #include <cassert> // assert macro
 
-#if defined(__WPHAST__) && !defined(_DEBUG)
-#include "phqalloc.h"
-#else
-#ifdef _DEBUG
-#define _CRTDBG_MAP_ALLOC
-#include <crtdbg.h>
-#endif
-#endif
+// COMMENT: {12/3/2008 3:09:21 PM}#if defined(__WPHAST__) && !defined(_DEBUG)
+// COMMENT: {12/3/2008 3:09:21 PM}#include "phqalloc.h"
+// COMMENT: {12/3/2008 3:09:21 PM}#else
+// COMMENT: {12/3/2008 3:09:21 PM}#ifdef _DEBUG
+// COMMENT: {12/3/2008 3:09:21 PM}#define _CRTDBG_MAP_ALLOC
+// COMMENT: {12/3/2008 3:09:21 PM}#include <crtdbg.h>
+// COMMENT: {12/3/2008 3:09:21 PM}#endif
+// COMMENT: {12/3/2008 3:09:21 PM}#endif
 #include "srcinput/message.h"
 #include "srcinput/Prism.h"
+#include "SeException.h"
+#include "srcinput/wphast.h"  /* must be last */
+
 
 extern char  *prefix, *transport_name, *chemistry_name, *database_name;
 extern int   input_error;
@@ -33,6 +37,9 @@ extern int clean_up(void);
 extern void initialize(void);
 
 extern int load(bool bWritePhastTmp);
+extern int read(void);
+extern int accumulate(bool bWritePhastTmp);
+
 extern int load_first_sim(bool bWritePhastTmp);
 extern int load_next_sim(bool bWritePhastTmp);
 extern int phast_input(bool bWritePhastTmp);
@@ -42,71 +49,80 @@ char * string_duplicate (const char *token);
 
 CPhastInput* CPhastInput::s_instance = 0;
 
-CPhastInput::CPhastInput(std::istream& is, const char *szPrefix)
+static _se_translator_function prev_se_translator_function = 0;
+
+CPhastInput::CPhastInput(std::istream& is, const char *szPrefix, bool save_prisms)
 : m_parser(is)
 , m_prefix(szPrefix)
-, m_save_prism_list(Prism::prism_list)
+, m_save_prisms(save_prisms)
 {
-	Prism::prism_list.clear();
+	prev_se_translator_function = _set_se_translator(CSeException::SeTranslator);	
+
+	assert(this->m_save_prism_list.size() == 0);
+	if (this->m_save_prisms)
+	{
+		this->m_save_prism_list.swap(Prism::prism_list);
+		assert(Prism::prism_list.size() == 0);
+	}
 	this->DoInitialize();
 }
 
 CPhastInput::~CPhastInput(void)
 {
-	this->DoCleanUp();
-	Prism::prism_list = this->m_save_prism_list;
+	try
+	{
+		this->DoCleanUp();
+	}
+	catch (...)
+	{
+		if (this->m_save_prisms)
+		{
+			Prism::prism_list.swap(this->m_save_prism_list);
+		}
+		_set_se_translator(prev_se_translator_function);
+		throw;
+	}
+	if (this->m_save_prisms)
+	{
+		Prism::prism_list.swap(this->m_save_prism_list);
+	}
+	_set_se_translator(prev_se_translator_function);
 }
 
 void CPhastInput::DoInitialize(void)
 {
-	__try
-	{
-		::std_error = ::fopen("NUL", "w");
-		::input     = ::fopen("NUL", "w");
-		::echo_file = ::fopen("NUL", "w");
-		::hst_file  = ::fopen("NUL", "w");
+	::std_error = ::fopen("NUL", "w");
+	::input     = ::fopen("NUL", "w");
+	::echo_file = ::fopen("NUL", "w");
+	::hst_file  = ::fopen("NUL", "w");
 
-		::prefix         = NULL;
-		::transport_name = NULL;
-		::chemistry_name = NULL;
-		::database_name  = NULL;
+	::prefix         = NULL;
+	::transport_name = NULL;
+	::chemistry_name = NULL;
+	::database_name  = NULL;
 
-		::input_error    = 0;
-		::count_warnings = 0;
-		::simulation     = 0;
+	::input_error    = 0;
+	::count_warnings = 0;
+	::simulation     = 0;
 
-		::add_message_callback(::default_handler, NULL);
-		::add_message_callback(CPhastInput::Output, this);
+	::add_message_callback(::default_handler, NULL);
+	::add_message_callback(CPhastInput::Output, this);
 
-		::initialize();
+	::initialize();
 
-		::prefix = ::string_duplicate(this->m_prefix.c_str());
-	}
-	__except ( ::ExceptionFilter(::GetExceptionCode()) )
-	{
-		// An error occurred
-		assert(false);
-	}
+	::prefix = ::string_duplicate(this->m_prefix.c_str());
 }
 
 void CPhastInput::DoCleanUp(void)
 {
-	__try
-	{
-		::clean_up();
-		::clean_up_message();
-#if !defined(_DEBUG)
-		::PHRQ_free_all();
-#endif
-	}
-	__except ( ::ExceptionFilter(::GetExceptionCode()) )
-	{
-		// An error occurred
-		assert(false);
-	}
+	::clean_up();
+	::clean_up_message();
+// COMMENT: {12/2/2008 3:00:12 PM}#if !defined(_DEBUG)
+// COMMENT: {12/2/2008 3:00:12 PM}	::PHRQ_free_all();
+// COMMENT: {12/2/2008 3:00:12 PM}#endif
 }
 
-CPhastInput* CPhastInput::New(std::istream& is, const char *pcsz_prefix)
+CPhastInput* CPhastInput::New(std::istream& is, const char *pcsz_prefix, bool save_prisms /*= true*/)
 {
 	if (CPhastInput::s_instance)
 	{
@@ -114,7 +130,7 @@ CPhastInput* CPhastInput::New(std::istream& is, const char *pcsz_prefix)
 		return 0;
 	}
 
-	CPhastInput::s_instance = new CPhastInput(is, pcsz_prefix);
+	CPhastInput::s_instance = new CPhastInput(is, pcsz_prefix, save_prisms);
 	return CPhastInput::s_instance;
 }
 
@@ -129,140 +145,86 @@ void CPhastInput::Delete(void)
 
 void CPhastInput::Run(void)
 {
-	__try
-	{
-		::phast_input(false);
-	}
-	__except ( ::ExceptionFilter(::GetExceptionCode()) )
-	{
-		/* An error occurred */
-	}
-
+	::phast_input(false);
 }
 
+/*
+Load split into two routines
+Read and Accumulate
+*/
 void CPhastInput::Load(void)
 {
 	char name[MAX_LENGTH];
-	__try
+	assert(::chemistry_name == NULL);
+	if (::chemistry_name == NULL)
 	{
-		assert(::chemistry_name == NULL);
-		if (::chemistry_name == NULL)
-		{
-			::strcpy(name, prefix);
-			::strcat(name, ".chem.dat");
-			::chemistry_name = ::string_duplicate(name);
-		}
-		assert(database_name == NULL);
-		if (::database_name == NULL)
-		{
-			::database_name = ::string_duplicate("phast.dat");
-		}
-		::load(false);
+		::strcpy(name, prefix);
+		::strcat(name, ".chem.dat");
+		::chemistry_name = ::string_duplicate(name);
 	}
-	__except ( ::ExceptionFilter(::GetExceptionCode()) )
+	assert(database_name == NULL);
+	if (::database_name == NULL)
 	{
-		// An error occurred
-		assert(::input_error > 0);
+		::database_name = ::string_duplicate("phast.dat");
 	}
+	::load(false);
 }
 
-// COMMENT: {3/31/2005 6:21:12 PM}void CPhastInput::LoadFirstStressPeriod(void)
-// COMMENT: {3/31/2005 6:21:12 PM}{
-// COMMENT: {3/31/2005 6:21:12 PM}	char name[MAX_LENGTH];
-// COMMENT: {3/31/2005 6:21:12 PM}
-// COMMENT: {3/31/2005 6:21:12 PM}	__try
-// COMMENT: {3/31/2005 6:21:12 PM}	{
-// COMMENT: {3/31/2005 6:21:12 PM}		assert(::chemistry_name == NULL);
-// COMMENT: {3/31/2005 6:21:12 PM}		if (::chemistry_name == NULL)
-// COMMENT: {3/31/2005 6:21:12 PM}		{
-// COMMENT: {3/31/2005 6:21:12 PM}			::strcpy(name, prefix);
-// COMMENT: {3/31/2005 6:21:12 PM}			::strcat(name, ".chem.dat");
-// COMMENT: {3/31/2005 6:21:12 PM}			::chemistry_name = ::string_duplicate(name);
-// COMMENT: {3/31/2005 6:21:12 PM}		}
-// COMMENT: {3/31/2005 6:21:12 PM}		assert(database_name == NULL);
-// COMMENT: {3/31/2005 6:21:12 PM}		if (::database_name == NULL)
-// COMMENT: {3/31/2005 6:21:12 PM}		{
-// COMMENT: {3/31/2005 6:21:12 PM}			::database_name = ::string_duplicate("phast.dat");
-// COMMENT: {3/31/2005 6:21:12 PM}		}
-// COMMENT: {3/31/2005 6:21:12 PM}		::load_first_sim(false);
-// COMMENT: {3/31/2005 6:21:12 PM}	}
-// COMMENT: {3/31/2005 6:21:12 PM}	__except ( ::ExceptionFilter(::GetExceptionCode()) )
-// COMMENT: {3/31/2005 6:21:12 PM}	{
-// COMMENT: {3/31/2005 6:21:12 PM}		// An error occurred
-// COMMENT: {3/31/2005 6:21:12 PM}		assert(::input_error > 0);
-// COMMENT: {3/31/2005 6:21:12 PM}	}
-// COMMENT: {3/31/2005 6:21:12 PM}
-// COMMENT: {3/31/2005 6:21:12 PM}}
+/*
+Load split into two routines
+Read and Accumulate
+*/
+void CPhastInput::Read(void)
+{
+	char name[MAX_LENGTH];
+	assert(::chemistry_name == NULL);
+	if (::chemistry_name == NULL)
+	{
+		::strcpy(name, prefix);
+		::strcat(name, ".chem.dat");
+		::chemistry_name = ::string_duplicate(name);
+	}
+	assert(database_name == NULL);
+	if (::database_name == NULL)
+	{
+		::database_name = ::string_duplicate("phast.dat");
+	}
+	::read();
+}
 
-// COMMENT: {3/31/2005 6:21:18 PM}bool CPhastInput::LoadNextStressPeriod(void)
-// COMMENT: {3/31/2005 6:21:18 PM}{
-// COMMENT: {3/31/2005 6:21:18 PM}	int n;
-// COMMENT: {3/31/2005 6:21:18 PM}	__try
-// COMMENT: {3/31/2005 6:21:18 PM}	{
-// COMMENT: {3/31/2005 6:21:18 PM}		assert(::chemistry_name != NULL);
-// COMMENT: {3/31/2005 6:21:18 PM}		assert(::database_name != NULL);
-// COMMENT: {3/31/2005 6:21:18 PM}		n = ::load_next_sim(false);
-// COMMENT: {3/31/2005 6:21:18 PM}	}
-// COMMENT: {3/31/2005 6:21:18 PM}	__except ( ::ExceptionFilter(::GetExceptionCode()) )
-// COMMENT: {3/31/2005 6:21:18 PM}	{
-// COMMENT: {3/31/2005 6:21:18 PM}		// An error occurred
-// COMMENT: {3/31/2005 6:21:18 PM}		assert(::input_error > 0);
-// COMMENT: {3/31/2005 6:21:18 PM}		n = 0;
-// COMMENT: {3/31/2005 6:21:18 PM}	}
-// COMMENT: {3/31/2005 6:21:18 PM}	if (n == EOF) return false;
-// COMMENT: {3/31/2005 6:21:18 PM}	return true;
-// COMMENT: {3/31/2005 6:21:18 PM}}
+/*
+Load split into two routines
+Read and Accumulate
+*/
+void CPhastInput::Accumulate(bool bWritePhastTmp)
+{
+	::accumulate(false);
+}
 
 void CPhastInput::WritePhastTmp(const char* szPhastTmp)
 {
 	char name[MAX_LENGTH];
 
-	__try
+	assert(::chemistry_name == NULL);
+	if (::chemistry_name == NULL)
 	{
-		//{{
-		//try 
-		//{
-		//}}
-		assert(::chemistry_name == NULL);
-		if (::chemistry_name == NULL)
-		{
-			::strcpy(name, prefix);
-			::strcat(name, ".chem.dat");
-			::chemistry_name = ::string_duplicate(name);
-		}
-		assert(::database_name == NULL);
-		if (::database_name == NULL)
-		{
-			::database_name = ::string_duplicate("phast.dat");
-		}
-
-		::fclose(::hst_file);
-		if ((::hst_file = ::fopen(szPhastTmp, "w")) == NULL)
-		{
-			return;
-		}
-		::load(true);
-		//{{
-		//}
-		//catch (int) 
-		//{
-		//	// input contains errors
-		//	assert(this->GetErrorCount() > 0);
-		//}
-		//}}
-
-// COMMENT: {3/29/2005 1:38:59 PM}		::load_first_sim(true);
-// COMMENT: {3/29/2005 1:38:59 PM}		while(true)
-// COMMENT: {3/29/2005 1:38:59 PM}		{
-// COMMENT: {3/29/2005 1:38:59 PM}			if (::load_next_sim(true) == EOF) break;
-// COMMENT: {3/29/2005 1:38:59 PM}		}
+		::strcpy(name, prefix);
+		::strcat(name, ".chem.dat");
+		::chemistry_name = ::string_duplicate(name);
 	}
-	__except ( ::ExceptionFilter(::GetExceptionCode()) )
+	assert(::database_name == NULL);
+	if (::database_name == NULL)
 	{
-		/* An error occurred */
+		::database_name = ::string_duplicate("phast.dat");
 	}
+
+	::fclose(::hst_file);
+	if ((::hst_file = ::fopen(szPhastTmp, "w")) == NULL)
+	{
+		return;
+	}
+	::load(true);
 }
-
 
 long ExceptionFilter(unsigned long dwExceptionCode)
 {
@@ -342,8 +304,7 @@ int CPhastInput::Output(const int type, const char *err_str, const int stop, voi
 	}
 	if (stop == STOP)
 	{
-		::RaiseException(INPUT_CONTAINS_ERRORS, 0, 0, NULL);
-		//throw pThis->GetErrorCount();
+		throw pThis->GetErrorCount();
 	}
 	return OK;
 }

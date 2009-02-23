@@ -92,7 +92,7 @@ void CWellCtrl::OnPaint()
 	// Add your message handler code here
 	// Do not call CStatic::OnPaint() for painting messages
 
-	LPCTSTR LABEL_FORMAT = _T("%1.3g");
+	LPCTSTR LABEL_FORMAT = _T(" %1.4g");
 
 	const int top_border        = 20;
 	const int ground_height     = 15;
@@ -144,7 +144,18 @@ void CWellCtrl::OnPaint()
 		//int max_extent = 0;
 		for (int i = 0; i < this->m_grid.count_coord; ++i)
 		{
+#if 1
+			if (((this->m_grid.coord[i] - this->m_zLSD) < 1e-12) && (this->m_grid.coord[i] > 1e-4))
+			{
+				strLabel.Format(LABEL_FORMAT, 0.0);
+			}
+			else
+			{
+				strLabel.Format(LABEL_FORMAT, this->m_grid.coord[i] - this->m_zLSD);
+			}
+#else
 			strLabel.Format(LABEL_FORMAT, this->m_grid.coord[i] - this->m_zLSD);
+#endif
 			extent = pDC->GetTextExtent(strLabel);
 			max_extent.cx = __max(max_extent.cx, extent.cx);
 			max_extent.cy = __max(max_extent.cy, extent.cy);
@@ -241,7 +252,18 @@ void CWellCtrl::OnPaint()
 		CSize extent;
 
 		// top
+#if 1
+		if (((zMax - this->m_zLSD) < 1e-12) && (zMax > 1e-4))
+		{
+			strLabel.Format(LABEL_FORMAT, 0.0);
+		}
+		else
+		{
+			strLabel.Format(LABEL_FORMAT, zMax - this->m_zLSD);
+		}
+#else
 		strLabel.Format(LABEL_FORMAT, zMax - this->m_zLSD);
+#endif
 		extent = pDC->GetTextExtent(strLabel);
 		int yLast = top_border;
 

@@ -94,9 +94,9 @@ void CICHeadZoneActor::Update(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent)
 	}
 }
 
-void CICHeadZoneActor::Serialize(bool bStoring, hid_t loc_id, const CUnits& units)
+void CICHeadZoneActor::Serialize(bool bStoring, hid_t loc_id, const CWPhastDoc* pWPhastDoc)
 {
-	CZoneActor::Serialize(bStoring, loc_id);
+	CZoneActor::Serialize(bStoring, loc_id, pWPhastDoc);
 
 	if (bStoring)
 	{
@@ -107,8 +107,6 @@ void CICHeadZoneActor::Serialize(bool bStoring, hid_t loc_id, const CUnits& unit
 	{
 		// load head_ic
 		this->m_headIC.Serialize(bStoring, loc_id);
-
-		this->SetUnits(units);
 	}
 }
 

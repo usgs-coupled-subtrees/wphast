@@ -29,7 +29,7 @@ CHeadIC CHeadIC::NewDefaults(void)
 
 	// head
 	headIC.head          = new Cproperty();
-	headIC.head->type    = FIXED;
+	headIC.head->type    = PROP_FIXED;
 	headIC.head->count_v = 1;
 	headIC.head->v[0]    = 0;
 
@@ -50,7 +50,7 @@ void CHeadIC::InternalInit(void)
 {
 	this->polyh   = 0;
 	this->mask    = 0;
-	this->ic_type = UNDEFINED;
+	this->ic_type = HIC_UNDEFINED;
 	this->head    = 0;
 }
 
@@ -193,11 +193,11 @@ std::ostream& operator<< (std::ostream &os, const CHeadIC &a)
 	Cproperty* property_ptr;
 
 	property_ptr = static_cast<Cproperty*>(a.mask);
-	if (property_ptr && property_ptr->type != UNDEFINED) {
+	if (property_ptr && property_ptr->type != PROP_UNDEFINED) {
 		os << "\t\t-mask                     " << (*property_ptr);
 	}
 	property_ptr = static_cast<Cproperty*>(a.head);
-	if (property_ptr && property_ptr->type != UNDEFINED) {
+	if (property_ptr && property_ptr->type != PROP_UNDEFINED) {
 		os << "\t\t-head                     " << (*property_ptr);
 	}
 	return os;

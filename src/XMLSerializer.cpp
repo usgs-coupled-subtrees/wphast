@@ -82,7 +82,7 @@ CXMLSerializer::~CXMLSerializer(void)
 	xercesc::XMLPlatformUtils::Terminate();
 }
 
-const char* CXMLSerializer::writeDOM(CWPhastDoc* wphastDoc, const char* prefix)
+const char* CXMLSerializer::writeDOM(CWPhastDoc* wphastDoc, const char* prefix, LPCTSTR lpszPathName)
 {
 	if (!bInitialized || formatTarget == 0)
 	{
@@ -103,7 +103,7 @@ const char* CXMLSerializer::writeDOM(CWPhastDoc* wphastDoc, const char* prefix)
 
 		// Add comment node
 		//
-		this->AddCommentNode(doc, wphastDoc);
+		this->AddCommentNode(doc, wphastDoc, lpszPathName);
 
 		// TODO check for writeability of current directory
 		//
@@ -139,11 +139,13 @@ const char* CXMLSerializer::writeDOM(CWPhastDoc* wphastDoc, const char* prefix)
 	return (char*) formatTarget->getRawBuffer();
 }
 
-void CXMLSerializer::AddCommentNode(xercesc::DOMDocument* doc, CWPhastDoc* wphastDoc)
+void CXMLSerializer::AddCommentNode(xercesc::DOMDocument* doc, CWPhastDoc* wphastDoc, LPCTSTR lpszPathName)
 {
 	// Create comment node
 	//
 	std::string comment("Exported from ");
+	std::string comment2("Exported to   ");
+	comment2 += lpszPathName;
 	CString path = wphastDoc->GetPathName();
 	if (path.IsEmpty())
 	{
@@ -156,6 +158,8 @@ void CXMLSerializer::AddCommentNode(xercesc::DOMDocument* doc, CWPhastDoc* wphas
 	xercesc::DOMElement* rootElem = doc->getDocumentElement();
 	xercesc::DOMComment* com = doc->createComment(X(comment.c_str()));
 	rootElem->appendChild(com);
+	xercesc::DOMComment* com2 = doc->createComment(X(comment2.c_str()));
+	rootElem->appendChild(com2);
 }
 
 void CXMLSerializer::AddSiteMapNode(xercesc::DOMDocument* doc, CWPhastDoc* wphastDoc, const char* prefix)

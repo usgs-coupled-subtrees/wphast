@@ -43,7 +43,7 @@ void CGrid::InternalInit(void)
 	this->coord            = 0;
 	this->count_coord      = 0;
 	this->min              = 0.0;
-	this->uniform          = UNDEFINED;
+	this->uniform          = GU_UNDEFINED;
 	this->uniform_expanded = FALSE;
 	this->direction        = 0;
 	this->c                = '?';
@@ -106,7 +106,7 @@ void CGrid::InternalCopy(const struct grid& p)
 	ASSERT(this->coord            == 0);
 	ASSERT(this->count_coord      == 0);
 	ASSERT(this->min              == 0.0);
-	ASSERT(this->uniform          == UNDEFINED);
+	ASSERT(this->uniform          == GU_UNDEFINED);
 	ASSERT(this->uniform_expanded == FALSE);
 	ASSERT(this->direction        == 0);
 	ASSERT(this->c                == '?');
@@ -156,7 +156,7 @@ void CGrid::InternalCopy(const struct grid& p)
 	else
 	{
 		ASSERT(p.count_coord == 0);
-		ASSERT(p.uniform == FALSE || p.uniform == UNDEFINED);
+		ASSERT(p.uniform == FALSE || p.uniform == GU_UNDEFINED);
 	}
 
 	// count_coord
@@ -255,7 +255,7 @@ CGrid& CGrid::operator=(const CGrid& rhs) // copy assignment
 
 void CGrid::Setup(void)
 {
-	if (this->uniform == UNDEFINED)
+	if (this->uniform == GU_UNDEFINED)
 	{
 		ASSERT(false);
 	}
@@ -443,7 +443,7 @@ void CGrid::Dump(CDumpContext& dc)const
 	dc << "<CGrid>\n";
 	switch (this->uniform)
 	{
-		case UNDEFINED:
+		case GU_UNDEFINED:
 			dc << "<UNDEFINED>\n";
 			break;
 		case TRUE:
@@ -492,7 +492,7 @@ std::ostream& operator<< (std::ostream &os, const CGrid &a)
 {
 	switch (a.uniform)
 	{
-		case UNDEFINED:
+		case GU_UNDEFINED:
 			ASSERT(FALSE);
 			break;
 		case TRUE:

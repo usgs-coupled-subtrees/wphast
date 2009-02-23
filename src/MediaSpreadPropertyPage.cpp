@@ -104,7 +104,7 @@ void CMediaSpreadPropertyPage::DoDataExchange(CDataExchange* pDX)
 
 	// ACTIVE
 	CGlobal::DDX_Property(pDX, IDC_MEDIA_GRID, ++nRow, this->m_gridElt.active, false);
-	if (this->m_bDefault && pDX->m_bSaveAndValidate && this->m_gridElt.active->type == UNDEFINED)
+	if (this->m_bDefault && pDX->m_bSaveAndValidate && this->m_gridElt.active->type == PROP_UNDEFINED)
 	{
 		CString str;
 		str.Format("A default \"%s\" must be defined.", ACTIVE);
@@ -120,7 +120,7 @@ void CMediaSpreadPropertyPage::DoDataExchange(CDataExchange* pDX)
 
 	// KX
 	CGlobal::DDX_Property(pDX, IDC_MEDIA_GRID, ++nRow, this->m_gridElt.kx, false);
-	if (this->m_bDefault && pDX->m_bSaveAndValidate && this->m_gridElt.kx->type == UNDEFINED)
+	if (this->m_bDefault && pDX->m_bSaveAndValidate && this->m_gridElt.kx->type == PROP_UNDEFINED)
 	{
 		CString str;
 		str.Format("A default \"%s\" must be defined.", KX);
@@ -137,7 +137,7 @@ void CMediaSpreadPropertyPage::DoDataExchange(CDataExchange* pDX)
 
 	// KY
 	CGlobal::DDX_Property(pDX, IDC_MEDIA_GRID, ++nRow, this->m_gridElt.ky, false);
-	if (this->m_bDefault && pDX->m_bSaveAndValidate && this->m_gridElt.ky->type == UNDEFINED)
+	if (this->m_bDefault && pDX->m_bSaveAndValidate && this->m_gridElt.ky->type == PROP_UNDEFINED)
 	{
 		CString str;
 		str.Format("A default \"%s\" must be defined.", KY);
@@ -153,7 +153,7 @@ void CMediaSpreadPropertyPage::DoDataExchange(CDataExchange* pDX)
 
 	// KZ
 	CGlobal::DDX_Property(pDX, IDC_MEDIA_GRID, ++nRow, this->m_gridElt.kz, false);
-	if (this->m_bDefault && pDX->m_bSaveAndValidate && this->m_gridElt.kz->type == UNDEFINED)
+	if (this->m_bDefault && pDX->m_bSaveAndValidate && this->m_gridElt.kz->type == PROP_UNDEFINED)
 	{
 		CString str;
 		str.Format("A default \"%s\" must be defined.", KZ);
@@ -169,7 +169,7 @@ void CMediaSpreadPropertyPage::DoDataExchange(CDataExchange* pDX)
 
 	// POROSITY
 	CGlobal::DDX_Property(pDX, IDC_MEDIA_GRID, ++nRow, this->m_gridElt.porosity, false);
-	if (this->m_bDefault && pDX->m_bSaveAndValidate && this->m_gridElt.porosity->type == UNDEFINED)
+	if (this->m_bDefault && pDX->m_bSaveAndValidate && this->m_gridElt.porosity->type == PROP_UNDEFINED)
 	{
 		CString str;
 		str.Format("A default \"%s\" must be defined.", POROSITY);
@@ -185,7 +185,7 @@ void CMediaSpreadPropertyPage::DoDataExchange(CDataExchange* pDX)
 
 	// STORAGE
 	CGlobal::DDX_Property(pDX, IDC_MEDIA_GRID, ++nRow, this->m_gridElt.storage, false);
-	if (this->m_bDefault && pDX->m_bSaveAndValidate && this->m_gridElt.storage->type == UNDEFINED)
+	if (this->m_bDefault && pDX->m_bSaveAndValidate && this->m_gridElt.storage->type == PROP_UNDEFINED)
 	{
 		CString str;
 		str.Format("A default \"%s\" must be defined.", STORAGE);
@@ -200,7 +200,7 @@ void CMediaSpreadPropertyPage::DoDataExchange(CDataExchange* pDX)
 	}
 	// ALPHA_LONG
 	CGlobal::DDX_Property(pDX, IDC_MEDIA_GRID, ++nRow, this->m_gridElt.alpha_long, false);
-	if (this->m_bDefault && !this->m_bFlowOnly && pDX->m_bSaveAndValidate && this->m_gridElt.alpha_long->type == UNDEFINED)
+	if (this->m_bDefault && !this->m_bFlowOnly && pDX->m_bSaveAndValidate && this->m_gridElt.alpha_long->type == PROP_UNDEFINED)
 	{
 		CString str;
 		str.Format("A default \"%s\" must be defined.", ALPHA_LONG);
@@ -216,7 +216,7 @@ void CMediaSpreadPropertyPage::DoDataExchange(CDataExchange* pDX)
 
 	// ALPHA_HORIZONTAL
 	CGlobal::DDX_Property(pDX, IDC_MEDIA_GRID, ++nRow, this->m_gridElt.alpha_horizontal, false);
-	if (this->m_bDefault && !this->m_bFlowOnly && pDX->m_bSaveAndValidate && this->m_gridElt.alpha_horizontal->type == UNDEFINED)
+	if (this->m_bDefault && !this->m_bFlowOnly && pDX->m_bSaveAndValidate && this->m_gridElt.alpha_horizontal->type == PROP_UNDEFINED)
 	{
 		CString str;
 		str.Format("A default \"%s\" must be defined.", ALPHA_HORIZONTAL);
@@ -232,7 +232,7 @@ void CMediaSpreadPropertyPage::DoDataExchange(CDataExchange* pDX)
 
 	// ALPHA_VERTICAL
 	CGlobal::DDX_Property(pDX, IDC_MEDIA_GRID, ++nRow, this->m_gridElt.alpha_vertical, false);
-	if (this->m_bDefault && !this->m_bFlowOnly && pDX->m_bSaveAndValidate && this->m_gridElt.alpha_vertical->type == UNDEFINED)
+	if (this->m_bDefault && !this->m_bFlowOnly && pDX->m_bSaveAndValidate && this->m_gridElt.alpha_vertical->type == PROP_UNDEFINED)
 	{
 		CString str;
 		str.Format("A default \"%s\" must be defined.", ALPHA_VERTICAL);
@@ -317,39 +317,39 @@ void CMediaSpreadPropertyPage::GetProperties(CGridElt& r_gridElt)
 
 	// delete inactive properties
 	//
-	if (r_gridElt.active->type == UNDEFINED)
+	if (r_gridElt.active->type == PROP_UNDEFINED)
 	{
 		Cproperty::CopyProperty(&r_gridElt.active, 0);
 	}
-	if (r_gridElt.alpha_long->type == UNDEFINED)
+	if (r_gridElt.alpha_long->type == PROP_UNDEFINED)
 	{
 		Cproperty::CopyProperty(&r_gridElt.alpha_long, 0);
 	}
-	if (r_gridElt.alpha_horizontal->type == UNDEFINED)
+	if (r_gridElt.alpha_horizontal->type == PROP_UNDEFINED)
 	{
 		Cproperty::CopyProperty(&r_gridElt.alpha_horizontal, 0);
 	}
-	if (r_gridElt.alpha_vertical->type == UNDEFINED)
+	if (r_gridElt.alpha_vertical->type == PROP_UNDEFINED)
 	{
 		Cproperty::CopyProperty(&r_gridElt.alpha_vertical, 0);
 	}
-	if (r_gridElt.kx->type == UNDEFINED)
+	if (r_gridElt.kx->type == PROP_UNDEFINED)
 	{
 		Cproperty::CopyProperty(&r_gridElt.kx, 0);
 	}
-	if (r_gridElt.ky->type == UNDEFINED)
+	if (r_gridElt.ky->type == PROP_UNDEFINED)
 	{
 		Cproperty::CopyProperty(&r_gridElt.ky, 0);
 	}
-	if (r_gridElt.kz->type == UNDEFINED)
+	if (r_gridElt.kz->type == PROP_UNDEFINED)
 	{
 		Cproperty::CopyProperty(&r_gridElt.kz, 0);
 	}
-	if (r_gridElt.porosity->type == UNDEFINED)
+	if (r_gridElt.porosity->type == PROP_UNDEFINED)
 	{
 		Cproperty::CopyProperty(&r_gridElt.porosity, 0);
 	}
-	if (r_gridElt.storage->type == UNDEFINED)
+	if (r_gridElt.storage->type == PROP_UNDEFINED)
 	{
 		Cproperty::CopyProperty(&r_gridElt.storage, 0);
 	}

@@ -68,4 +68,5 @@ public:
 	afx_msg void OnEnSetfocusDescEdit();
 	afx_msg void OnBnSetfocusAssocRadio();
 	afx_msg void OnBnSetfocusFixedRadio();
+	afx_msg void OnBnClickedExteriorOnly();
 };

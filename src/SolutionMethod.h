@@ -5,6 +5,7 @@
 #define EXTERNAL extern
 #include "srcinput/hstinpt.h"  // DIRECT ITERATIVE
 #undef EXTERNAL
+#include "enum_fix.h"
 
 class CPhastInput;
 

@@ -15,6 +15,7 @@
 #include "Units.h"
 #include "TreeMemento.h"
 #include "FlowOnly.h"
+#include "GridKeyword.h"
 
 #include <vtkObjectFactory.h> // reqd by vtkStandardNewMacro
 vtkCxxRevisionMacro(CWellActor, "$Revision$");
@@ -34,16 +35,24 @@ CWellActor::CWellActor(void)
 , m_pTreeMemento(0)
 , m_pTransformUnits(0)
 , m_pTransformScale(0)
+, GridAngle(0.0)
 {
 	static StaticInit init; // constructs/destructs s_Property
 
+	for (size_t i = 0; i < 3; ++i)
+	{
+		this->GridOrigin[i] = 0.0;
+	}
+
 	this->m_pTransformUnits = vtkTransform::New();
 	this->m_pTransformScale = vtkTransform::New();
+	this->TransformGrid     = vtkTransform::New();
 	this->m_pTransformUnits->Identity();
 	this->m_pTransformScale->Identity();
+	this->TransformGrid->Identity();
 
 	this->m_pLineSource = vtkLineSource::New();
-	this->SetWell(this->m_well, CUnits());
+	this->SetWell(this->m_well, CUnits(), CGridKeyword());
 
 	this->m_pTubeFilter = vtkTubeFilter::New();
 	this->m_pTubeFilter->SetInput(this->m_pLineSource->GetOutput());
@@ -76,13 +85,31 @@ CWellActor::~CWellActor(void)
 		this->m_pTransformScale->Delete();
 		this->m_pTransformScale = 0;
 	}
+	if (this->TransformGrid)
+	{
+		this->TransformGrid->Delete();
+		this->TransformGrid = 0;
+	}
 }
 
-void CWellActor::SetUnits(const CUnits &units)
+void CWellActor::SetUnits(const CUnits &units, bool bUpdatePoints/*=true*/)
 {
 	this->m_pTransformUnits->Identity();
-	this->m_pTransformUnits->Scale(units.horizontal.input_to_si, units.horizontal.input_to_si, units.vertical.input_to_si);
-	this->UpdatePoints();
+	double scale_h = units.horizontal.input_to_si;
+	double scale_v = units.vertical.input_to_si;
+	if (this->m_well.xy_coordinate_system_user == PHAST_Transform::MAP)
+	{
+		scale_h = units.map_horizontal.input_to_si;
+	}
+	if (this->m_well.z_coordinate_system_user == PHAST_Transform::MAP)
+	{
+		scale_v = units.map_vertical.input_to_si;
+	}
+	this->m_pTransformUnits->Scale(scale_h, scale_h, scale_v);
+	if (bUpdatePoints)
+	{
+		this->UpdatePoints();
+	}
 }
 
 void CWellActor::UpdatePoints(void)
@@ -90,21 +117,23 @@ void CWellActor::UpdatePoints(void)
 	vtkFloatingPointType point1[3];
 	vtkFloatingPointType point2[3];
 
-	point1[0] = point2[0] = this->m_well.x;
-	point1[1] = point2[1] = this->m_well.y;
+	point1[0] = point2[0] = this->m_well.x_user;
+	point1[1] = point2[1] = this->m_well.y_user;
 	point1[2] = this->m_zMin;
 	point2[2] = this->m_zMax;
 
+	this->TransformGrid->TransformPoint(point1, point1);
 	this->m_pTransformScale->TransformPoint(point1, point1);
 	this->m_pTransformUnits->TransformPoint(point1, point1);
 	this->m_pLineSource->SetPoint1(point1);
 
+	this->TransformGrid->TransformPoint(point2, point2);
 	this->m_pTransformScale->TransformPoint(point2, point2);
 	this->m_pTransformUnits->TransformPoint(point2, point2);
 	this->m_pLineSource->SetPoint2(point2);
 }
 
-void CWellActor::SetWell(const CWellSchedule &well, const CUnits &units)
+void CWellActor::SetWell(const CWellSchedule &well, const CUnits &units, const CGridKeyword &gridKeyword)
 {
 	this->m_well = well;
 
@@ -112,12 +141,35 @@ void CWellActor::SetWell(const CWellSchedule &well, const CUnits &units)
 	::sprintf(buffer, "Well %d", this->m_well.n_user);
 	this->m_name = buffer;
 
-	this->SetUnits(units);
+	this->SetGridKeyword(gridKeyword, false);
+	this->SetUnits(units, true);
 }
 
 CWellSchedule CWellActor::GetWell(void)const
 {
 	return this->m_well;
+}
+
+void CWellActor::SetGridKeyword(const CGridKeyword &gridKeyword, bool bUpdatePoints/*=true*/)
+{
+	this->GridAngle = gridKeyword.m_grid_angle;
+
+	for (size_t i = 0; i < 3; ++i)
+	{
+		this->GridOrigin[i] = gridKeyword.m_grid_origin[i];
+	}
+
+	this->TransformGrid->Identity();
+	if (this->m_well.xy_coordinate_system_user == PHAST_Transform::MAP)
+	{
+		this->TransformGrid->RotateZ(-this->GridAngle);
+		this->TransformGrid->Translate(-this->GridOrigin[0], -this->GridOrigin[1], -this->GridOrigin[2]);
+	}
+
+	if (bUpdatePoints)
+	{
+		this->UpdatePoints();
+	}
 }
 
 void CWellActor::SetZAxis(const CGrid& zaxis, const CUnits& units)
@@ -165,10 +217,14 @@ void CWellActor::Edit(CWPhastDoc *pWPhastDoc)
 	wellProps.SetUnits(pWPhastDoc->GetUnits());
 	wellProps.SetUsedWellNumbers(wellNums);
 	wellProps.SetFlowOnly(pWPhastDoc->GetFlowOnly());
-	
+
+#if 9991 // well w/ grid rotation
+	wellProps.SetGridKeyword(pWPhastDoc->GetGridKeyword());
+#else
 	CGrid x, y, z;
 	pWPhastDoc->GetGrid(x, y, z);
 	wellProps.SetGrid(z);
+#endif // 9991 well w/ grid rotation
 
 	if (props.DoModal() == IDOK)
 	{
@@ -230,7 +286,7 @@ void CWellActor::Update(CTreeCtrlNode node)
 			{
 				bSolnsExpanded = ((this->m_nodeSolutions.GetState(TVIS_EXPANDED) & TVIS_EXPANDED) != 0);
 			}
-		}		
+		}
 	}
 
 	// remove all previous items
@@ -241,6 +297,7 @@ void CWellActor::Update(CTreeCtrlNode node)
 	}
 
 	CString strItem;
+	// Line 0
 	if (this->m_well.description && ::strlen(this->m_well.description))
 	{
 		strItem.Format("Well %d %s", this->m_well.n_user, this->m_well.description);
@@ -251,18 +308,46 @@ void CWellActor::Update(CTreeCtrlNode node)
 	}
 	node.SetText(strItem);
 
-	strItem.Format("%g   %g", this->m_well.x, this->m_well.y);
+#if 9991 // well w/ grid rotation
+	// Line 1
+	// xy_coordinate_system
+	if (this->m_well.xy_coordinate_system_user == PHAST_Transform::MAP)
+	{
+		strItem.Format("xy_coordinate_system    map");
+	}
+	else
+	{
+		strItem.Format("xy_coordinate_system    grid");
+	}
 	node.AddTail(strItem);
 
-	Well w = this->m_well;	
+	// Line 2
+	// z_coordinate_system
+	if (this->m_well.z_coordinate_system_user == PHAST_Transform::MAP)
+	{
+		strItem.Format("z_coordinate_system     map");
+	}
+	else
+	{
+		strItem.Format("z_coordinate_system     grid");
+	}
+	node.AddTail(strItem);
+#endif // 9991 well w/ grid rotation
+
+	// Line 3
+	// x, y
+	strItem.Format("location %g   %g", this->m_well.x_user, this->m_well.y_user);
+	node.AddTail(strItem);
 
 	if (this->m_well.diameter_defined)
 	{
+		// Line 8
 		strItem.Format("diameter      %g", this->m_well.diameter);
 		node.AddTail(strItem);
 	}
 	else if (this->m_well.radius_defined)
 	{
+		// Line 13
 		strItem.Format("radius      %g", this->m_well.radius);
 		node.AddTail(strItem);
 	}
@@ -271,32 +356,36 @@ void CWellActor::Update(CTreeCtrlNode node)
 		ASSERT(FALSE);
 	}
 
-	for (int i = 0; i < this->m_well.count_elevation; ++i)
+	for (int i = 0; i < this->m_well.count_elevation_user; ++i)
 	{
-		strItem.Format("elevation    %g  %g", this->m_well.elevation[i].bottom, this->m_well.elevation[i].top);
+		// Line 9
+		strItem.Format("elevation    %g  %g", this->m_well.elevation_user[i].bottom, this->m_well.elevation_user[i].top);
 		node.AddTail(strItem);
 	}
 
-	if (this->m_well.lsd_defined)
+	if (this->m_well.lsd_user_defined)
 	{
-		strItem.Format("land_surface_datum  %g", this->m_well.lsd);
+		// Line 12
+		strItem.Format("land_surface_datum  %g", this->m_well.lsd_user);
 		node.AddTail(strItem);
 	}
 
-	for (int i = 0; i < w.count_depth; ++i)
+	for (int i = 0; i < this->m_well.count_depth_user; ++i)
 	{
-		strItem.Format("depth    %g  %g", this->m_well.depth[i].bottom, this->m_well.depth[i].top);
+		// Line 14
+		strItem.Format("depth    %g  %g", this->m_well.depth_user[i].bottom, this->m_well.depth_user[i].top);
 		node.AddTail(strItem);
 	}
 
-	if (w.mobility_and_pressure)
+	// Line 15
+	if (this->m_well.mobility_and_pressure)
 	{
-		strItem.Format("allocate_by_head_and_mobility True");
+		strItem.Format("allocate_by_head_and_mobility true");
 		node.AddTail(strItem);
 	}
 	else
 	{
-		strItem.Format("allocate_by_head_and_mobility False");
+		strItem.Format("allocate_by_head_and_mobility false");
 		node.AddTail(strItem);
 	}
 
@@ -311,7 +400,7 @@ void CWellActor::Update(CTreeCtrlNode node)
 		if (rate.q_defined)
 		{
 			++nRates;
-			bPumping = (rate.q < 0);			
+			bPumping = (rate.q < 0);
 		}
 		if (rate.solution_defined)
 		{
@@ -340,7 +429,7 @@ void CWellActor::Update(CTreeCtrlNode node)
 		CWellRate rate(it->second);
 
 		strTime.Format("%g", time.value);
-		if (time.type == UNITS)
+		if (time.type == TT_UNITS)
 		{
 			strTime += " ";
 			strTime += time.input;
@@ -407,7 +496,7 @@ LPCTSTR CWellActor::GetName(void)const
 	return this->m_name.c_str();
 }
 
-void CWellActor::Serialize(bool bStoring, hid_t loc_id, const CUnits &units)
+void CWellActor::Serialize(bool bStoring, hid_t loc_id, const CWPhastDoc* pWPhastDoc)
 {
 	if (bStoring)
 	{
@@ -417,7 +506,7 @@ void CWellActor::Serialize(bool bStoring, hid_t loc_id, const CUnits &units)
 	{
 		CWellSchedule well;
 		well.Serialize(bStoring, loc_id);
-		this->SetWell(well, units);
+		this->SetWell(well, pWPhastDoc->GetUnits(), pWPhastDoc->GetGridKeyword());
 
 		this->SetProperty(CWellActor::s_Property);
 	}
@@ -499,7 +588,7 @@ void CWellActor::SetStaticColor(COLORREF cr)
 {
 	CWellActor::s_color[0] = (double)GetRValue(cr)/255.;
 	CWellActor::s_color[1] = (double)GetGValue(cr)/255.;
-	CWellActor::s_color[2] = (double)GetBValue(cr)/255.;	
+	CWellActor::s_color[2] = (double)GetBValue(cr)/255.;
 	if (CWellActor::s_Property)
 	{
 		CWellActor::s_Property->SetColor(CWellActor::s_color);

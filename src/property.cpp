@@ -29,7 +29,7 @@ Cproperty::Cproperty(int value)
 	this->v = new double[this->count_alloc];
 	ASSERT(this->v);
 	this->v[0] = value;
-	this->type = FIXED;
+	this->type = PROP_FIXED;
 	this->count_v = 1;
 }
 
@@ -41,7 +41,7 @@ Cproperty::Cproperty(double value)
 	this->v = new double[this->count_alloc];
 	ASSERT(this->v);
 	this->v[0] = value;
-	this->type = FIXED;
+	this->type = PROP_FIXED;
 	this->count_v = 1;
 }
 
@@ -56,6 +56,8 @@ void Cproperty::InternalDelete(void)
 	modified from phastinput[int property_free(struct property *property_ptr)]
 	**/
 	delete[] this->v;
+	delete this->data_source;
+	this->data_source = 0;
 }
 
 void Cproperty::InternalInit(void)
@@ -66,17 +68,18 @@ void Cproperty::InternalInit(void)
 	this->count_alloc = 0;
 	this->v           = 0;
 	this->count_v     = 0;
-	this->type        = UNDEFINED;
+	this->type        = PROP_UNDEFINED;
 	this->coord       = '\000';
 	this->icoord      = -1;
 	this->dist1       = -1;
 	this->dist2       = -1;
+	this->data_source = 0;
 }
 
 void Cproperty::InternalCopy(const property& src)
 {
-	if (src.type == FIXED) ASSERT(src.count_v == 1);
-	if (src.type == LINEAR) ASSERT(src.count_v == 2);
+	if (src.type == PROP_FIXED) ASSERT(src.count_v == 1);
+	if (src.type == PROP_LINEAR) ASSERT(src.count_v == 2);
 
 	ASSERT(this->v == 0);
 	this->v = new double[this->count_alloc = src.count_alloc];
@@ -90,6 +93,25 @@ void Cproperty::InternalCopy(const property& src)
 	this->icoord  = src.icoord;
 	this->dist1   = src.dist1;
 	this->dist2   = src.dist2;
+	if (src.data_source)
+	{
+		if (this->data_source)
+		{
+			*this->data_source = *src.data_source;
+		}
+		else
+		{
+			this->data_source = new Data_source(*src.data_source);
+		}
+	}
+	else
+	{
+		if (this->data_source)
+		{
+			delete this->data_source;
+			this->data_source = 0;
+		}
+	}
 }
 
 Cproperty::Cproperty(const Cproperty& src) // copy ctor
@@ -97,6 +119,7 @@ Cproperty::Cproperty(const Cproperty& src) // copy ctor
 #ifdef _DEBUG
 	this->v = 0;
 #endif
+	this->data_source = 0; // reqd for all ctor that don't call InternalInit
 	this->InternalCopy(src);
 }
 
@@ -105,12 +128,14 @@ Cproperty::Cproperty(const struct property& src) // copy ctor
 #ifdef _DEBUG
 	this->v = 0;
 #endif
+	this->data_source = 0; // reqd for all ctor that don't call InternalInit
 	this->InternalCopy(src);
 }
 
 Cproperty& Cproperty::operator=(const Cproperty& rhs) // copy assignment
 {
-	if (this != &rhs) {
+	if (this != &rhs)
+	{
 		this->InternalDelete();
 		this->InternalInit();
 		this->InternalCopy(rhs);
@@ -141,16 +166,22 @@ Cproperty& Cproperty::operator=(const Cproperty& rhs) // copy assignment
 void Cproperty::AssertValid() const
 {
 	ASSERT(this);
-	switch (this->type) {
-		case FIXED:
+	switch (this->type)
+	{
+		case PROP_FIXED:
 			ASSERT(this->count_v == 1);
 			break;
-		case LINEAR:
+		case PROP_LINEAR:
 			ASSERT(this->coord == 'x' || this->coord == 'y' || this->coord == 'z');
 			ASSERT(this->count_v == 2);
 			break;
-		case ZONE:
+		case PROP_ZONE:
 			ASSERT(FALSE);
+			break;
+		case PROP_POINTS:
+			ASSERT(this->data_source);
+			ASSERT(this->data_source->Get_defined());
+			ASSERT(this->data_source->Get_points().size());
 			break;
 		default:
 			ASSERT(FALSE);
@@ -161,20 +192,22 @@ void Cproperty::AssertValid() const
 void Cproperty::Dump(CDumpContext& dc)const
 {
 	char buffer[10];
-	if (this->type == LINEAR) {
+	if (this->type == PROP_LINEAR)
+	{
 		sprintf(buffer, "%c", this->coord);
 	}
 
 	dc << "<Cproperty>\n";
 	dc << "\t<type>\n";
-	switch (this->type) {
-		case UNDEFINED:
+	switch (this->type)
+	{
+		case PROP_UNDEFINED:
 			dc << "\t\t<UNDEFINED>\n";
 			break;
-		case FIXED:
+		case PROP_FIXED:
 			dc << "\t\t<FIXED value=\"" << this->v[0] << "\">\n";
 			break;
-		case LINEAR:
+		case PROP_LINEAR:
 			dc << "\t\t<LINEAR"
 				<< " direction=\"" << buffer << "\""
 				<< " value1=\"" << this->v[0] << "\""
@@ -193,10 +226,14 @@ void Cproperty::Dump(CDumpContext& dc)const
 
 void Cproperty::Serialize(bool bStoring, hid_t loc_id)
 {
-	static const char szType[]  = "type";
-	static const char szV[]     = "v";
-	static const char szCoord[] = "coord";
-	static const char szDist[]  = "dist";
+	static const char szPropType[]  = "prop_type";
+	static const char szType[]      = "type";
+	static const char szV[]         = "v";
+	static const char szCoord[]     = "coord";
+	static const char szDist[]      = "dist";
+
+	const int _LINEAR = 11;
+	const int _FIXED  = 12;
 
 	herr_t status;
 
@@ -206,10 +243,13 @@ void Cproperty::Serialize(bool bStoring, hid_t loc_id)
 
 	if (bStoring)
 	{
-		// type
+		// prop_type
 		//
-  		ASSERT(this->type == FIXED || this->type == LINEAR);
-		status = CGlobal::HDFSerialize(bStoring, loc_id, szType, H5T_NATIVE_INT, 1, &this->type);
+  		ASSERT(this->type == PROP_FIXED || this->type == PROP_LINEAR);
+		hid_t proptype = CGlobal::HDFCreatePropType();
+		status = CGlobal::HDFSerialize(bStoring, loc_id, szPropType, proptype, 1, &this->type);
+		ASSERT(status >= 0);
+		status = H5Tclose(proptype);
 		ASSERT(status >= 0);
 
 		// v and count_v
@@ -219,11 +259,12 @@ void Cproperty::Serialize(bool bStoring, hid_t loc_id)
 		ASSERT(status >= 0);
 
 
-		switch (this->type) {
-			case FIXED:
+		switch (this->type)
+		{
+			case PROP_FIXED:   // was FIXED (12)
 				ASSERT(this->count_v == 1);
 				break;
-			case LINEAR:
+			case PROP_LINEAR:  // was LINEAR (11)
 				ASSERT(this->count_v == 2);
 				ASSERT(this->coord == 'x' || this->coord == 'y' || this->coord == 'z');
 
@@ -246,11 +287,38 @@ void Cproperty::Serialize(bool bStoring, hid_t loc_id)
 	}
 	else
 	{
-		// type
+
+		// prop_type
 		//
-		status = CGlobal::HDFSerialize(bStoring, loc_id, szType, H5T_NATIVE_INT, 1, &this->type);
+		hid_t proptype = CGlobal::HDFCreatePropType();
+		if (CGlobal::HDFSerializeSafe(bStoring, loc_id, szPropType, proptype, 1, &this->type) >= 0)
+		{
+			ASSERT(this->type == PROP_FIXED || this->type == PROP_LINEAR || this->type == PROP_ZONE ||
+				this->type == PROP_MIXTURE || this->type == PROP_POINTS || this->type == PROP_XYZ);
+		}
+		else
+		{
+			// type (svn versions <= 3040)
+			//
+			int n;
+			status = CGlobal::HDFSerialize(bStoring, loc_id, szType, H5T_NATIVE_INT, 1, &n);
+			ASSERT(status >= 0);
+			switch(n)
+			{
+			case _LINEAR:
+				this->type = PROP_LINEAR;
+				break;
+			case _FIXED:
+				this->type = PROP_FIXED;
+				break;
+			default:
+				ASSERT(FALSE);
+				this->type = PROP_FIXED;
+				break;
+			}
+		}
+		status = H5Tclose(proptype);
 		ASSERT(status >= 0);
-  		ASSERT(this->type == FIXED || this->type == LINEAR);
 
 		// v and count_v
 		//
@@ -259,13 +327,12 @@ void Cproperty::Serialize(bool bStoring, hid_t loc_id)
 		this->count_v = (int)count;
 		ASSERT(status >= 0);
 
-
 		switch (this->type)
 		{
-			case FIXED:
+			case PROP_FIXED:
 				ASSERT(this->count_v == 1);
 				break;
-			case LINEAR:
+			case PROP_LINEAR:
 				ASSERT(this->count_v == 2);
 
 				// coord
@@ -326,13 +393,15 @@ void Cproperty::Serialize(CArchive& ar)
 	//
 	if (ar.IsStoring())
 	{
-  		ASSERT(this->type == FIXED || this->type == LINEAR);
+  		ASSERT(this->type == PROP_FIXED || this->type == PROP_LINEAR);
 		ar << this->type;
 	}
 	else
 	{
-		ar >> this->type;
-  		ASSERT(this->type == FIXED || this->type == LINEAR);
+		int i;
+		ar >> i;
+		this->type = static_cast<PROP_TYPE>(i);
+  		ASSERT(this->type == PROP_FIXED || this->type == PROP_LINEAR);
 	}
 
 	// count_v
@@ -367,7 +436,7 @@ void Cproperty::Serialize(CArchive& ar)
 	//
 	if (ar.IsStoring())
 	{
-		if (this->type == LINEAR)
+		if (this->type == PROP_LINEAR)
 		{
 			ASSERT(this->coord == 'x' || this->coord == 'y' || this->coord == 'z');
 			ar << this->coord;
@@ -375,7 +444,7 @@ void Cproperty::Serialize(CArchive& ar)
 	}
 	else
 	{
-		if (this->type == LINEAR)
+		if (this->type == PROP_LINEAR)
 		{
 			ar >> this->coord;
 			ASSERT(this->coord == 'x' || this->coord == 'y' || this->coord == 'z');
@@ -386,7 +455,7 @@ void Cproperty::Serialize(CArchive& ar)
 	//
 	if (ar.IsStoring())
 	{
-		if (this->type == LINEAR)
+		if (this->type == PROP_LINEAR)
 		{
 			ar << this->dist1;
 			ar << this->dist2;
@@ -394,7 +463,7 @@ void Cproperty::Serialize(CArchive& ar)
 	}
 	else
 	{
-		if (this->type == LINEAR)
+		if (this->type == PROP_LINEAR)
 		{
 			ar >> this->dist1;
 			ar >> this->dist2;
@@ -431,15 +500,16 @@ void Cproperty::Insert(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent, LPCTSTR headin
 {
 	CString format;
 
-	switch (this->type) {
-		case UNDEFINED:
+	switch (this->type)
+	{
+		case PROP_UNDEFINED:
 			TRACE("Warning attempted to insert undefined property\n");
 			return;
 			break;
-		case FIXED:
+		case PROP_FIXED:
 			format.Format("%s %g", heading,  this->v[0]);
 			break;
-		case LINEAR:
+		case PROP_LINEAR:
 			format.Format("%s %c %g %g %g %g",
 				heading,
 				::toupper(this->coord),
@@ -452,22 +522,27 @@ void Cproperty::Insert(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent, LPCTSTR headin
 		default:
 			ASSERT(FALSE);
 	}
-	if (!format.IsEmpty()) {
+	if (!format.IsEmpty())
+	{
 		pTreeCtrl->InsertItem(format, htiParent);
 	}
 }
 
 std::ostream& operator<< (std::ostream &os, const Cproperty &a)
 {
-	switch (a.type) {
-		case UNDEFINED:
+	const char *coor_name[] = { " MAP ", " GRID ", " NONE " };
+	size_t cs;
+
+	switch (a.type)
+	{
+		case PROP_UNDEFINED:
 			ASSERT(FALSE);
 			os << "#UNDEFINED property\n";
 			break;
-		case FIXED:
+		case PROP_FIXED:
 			os << a.v[0] << "\n";
 			break;
-		case LINEAR:
+		case PROP_LINEAR:
 			os << (char)::toupper(a.coord)
 				<< " " << a.v[0]
 				<< " " << a.dist1
@@ -475,7 +550,7 @@ std::ostream& operator<< (std::ostream &os, const Cproperty &a)
 				<< " " << a.dist2
 				<< "\n";
 			break;
-		case MIXTURE:
+		case PROP_MIXTURE:
 			os << "mixture " << a.v[0] << " " << a.v[1] << "\n";
 			os << "\t\t\t\t<";
 			for (int i = 2; i < a.count_v; ++i)
@@ -483,6 +558,21 @@ std::ostream& operator<< (std::ostream &os, const Cproperty &a)
 				os << " " << a.v[i];
 			}
 			os << " >\n";
+			break;
+		case PROP_POINTS:
+			ASSERT(a.data_source);
+			cs = a.data_source->Get_user_coordinate_system();
+			ASSERT(cs >= PHAST_Transform::MAP && cs <= PHAST_Transform::NONE);
+			os << "POINTS" << coor_name[cs] << std::endl;
+			{
+				std::vector < Point >::const_iterator citer = a.data_source->Get_user_points().begin();
+				for (; citer != a.data_source->Get_user_points().end(); ++citer)
+				{
+					os << "\t\t\t\t" << citer->x() << " " << citer->y()
+						<< " " << citer->z() << "    " << citer->get_v() << std::endl;
+				}
+				os << "\t\t\t\tend_points" << std::endl;
+			}
 			break;
 		default:
 			ASSERT(FALSE);

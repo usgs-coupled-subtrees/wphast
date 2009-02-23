@@ -64,7 +64,8 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 	afx_msg void OnViewResetDefaultLayout();
-	void UpdateXYZ(float x, float y, float z, const char* xy_units, const char* z_units);
+	void UpdateGrid(float x, float y, float z, const char* xy_units, const char* z_units);
+	void UpdateMap(float x, float y, float z, const char* xy_units, const char* z_units);
 #if !defined(_USE_DEFAULT_MENUS_)
 	afx_msg void OnMeasureItem(int nIDCtl, LPMEASUREITEMSTRUCT lpMeasureItemStruct);
 	afx_msg LRESULT OnMenuChar(UINT nChar, UINT nFlags, CMenu* pMenu);

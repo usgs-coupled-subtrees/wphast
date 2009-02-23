@@ -5,6 +5,7 @@
 #include "River.h"
 #include "Units.h"
 #include "Tree.h"
+#include "GridKeyword.h"
 
 // CRiverPropertyPage2 dialog
 
@@ -20,6 +21,7 @@ public:
 	void GetProperties(CRiver& river)const;
 
 	void SetUnits(const CUnits& units);
+	void SetGridKeyword(const CGridKeyword& gridKeyword);
 	void SetPoint(int index);
 
 	void SetFlowOnly(bool bFlowOnly)     { m_bFlowOnly = bFlowOnly; }
@@ -37,7 +39,9 @@ protected:
 
 protected:
 	CRiver           m_river;
+	BOOL             m_bUpdatePositionOnly;
 	CUnits           m_units;
+	CGridKeyword     m_gridKeyword;
 
 	CTreeCtrlEx      m_wndTreeCtrl;
 	CModGridCtrlEx   m_wndScheduleGrid;      // IDC_GRID_SCHEDULES
@@ -45,6 +49,8 @@ protected:
 
 	CString          m_strHorizontalUnits;
 	CString          m_strVerticalUnits;
+	CString          m_strMapHorizontalUnits;
+	CString          m_strMapVerticalUnits;
 	CString          m_strHeadUnits;
 	CString          m_strRiverBedKUnits;
 	CString          m_strRiverBedThicknessUnits;
@@ -89,4 +95,5 @@ public:
 	afx_msg void OnBnSetfocusRadioBottom();
 	afx_msg void OnEnSetfocusDepthEdit();
 	afx_msg void OnEnSetfocusBottomEdit();
+	afx_msg void OnBnClickedUseMap();
 };

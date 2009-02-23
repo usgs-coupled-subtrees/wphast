@@ -56,9 +56,9 @@ void CMediaZoneActor::Create(CWPhastDoc* pWPhastDoc, const CGridElt& gridElt, LP
 	pWPhastDoc->Execute(pAction);
 }
 
-void CMediaZoneActor::Serialize(bool bStoring, hid_t loc_id, const CUnits& units)
+void CMediaZoneActor::Serialize(bool bStoring, hid_t loc_id, const CWPhastDoc* pWPhastDoc)
 {
-	CZoneActor::Serialize(bStoring, loc_id);
+	CZoneActor::Serialize(bStoring, loc_id, pWPhastDoc);
 
 	if (bStoring)
 	{
@@ -69,7 +69,6 @@ void CMediaZoneActor::Serialize(bool bStoring, hid_t loc_id, const CUnits& units
 	{
 		// load grid_elt
 		this->m_grid_elt.Serialize(bStoring, loc_id);
-		this->SetUnits(units);
 
 		// color
 		if (CMediaZoneActor::s_Property)
@@ -225,7 +224,7 @@ void CMediaZoneActor::Edit(CTreeCtrl* pTreeCtrl)
 	CGridElt elt(this->m_grid_elt);
 	if (this->GetDefault())
 	{
-		if (!elt.active || elt.active->type == UNDEFINED)
+		if (!elt.active || elt.active->type == PROP_UNDEFINED)
 		{
 			Cproperty prop(1);
 			Cproperty::CopyProperty(&elt.active, &prop);
@@ -282,10 +281,16 @@ HTREEITEM CMediaZoneActor::GetHTreeItem(void)const
 
 void CMediaZoneActor::Add(CWPhastDoc *pWPhastDoc)
 {
-	if (!pWPhastDoc) { ASSERT(FALSE); return; }
-	if (vtkPropAssembly *pPropAssembly = pWPhastDoc->GetPropAssemblyMedia()) {
+	if (!pWPhastDoc)
+	{
+		ASSERT(FALSE);
+		return;
+	}
+	if (vtkPropAssembly *pPropAssembly = pWPhastDoc->GetPropAssemblyMedia())
+	{
 		pPropAssembly->AddPart(this);
-		if (!pWPhastDoc->GetPropCollection()->IsItemPresent(pPropAssembly)) {
+		if (!pWPhastDoc->GetPropCollection()->IsItemPresent(pPropAssembly))
+		{
 			pWPhastDoc->GetPropCollection()->AddItem(pPropAssembly);
 		}
 	}
@@ -296,8 +301,13 @@ void CMediaZoneActor::Add(CWPhastDoc *pWPhastDoc)
 
 void CMediaZoneActor::Remove(CWPhastDoc *pWPhastDoc)
 {
-	if (!pWPhastDoc) { ASSERT(FALSE); return; }
-	if (vtkPropAssembly *pPropAssembly = pWPhastDoc->GetPropAssemblyMedia()) {
+	if (!pWPhastDoc)
+	{
+		ASSERT(FALSE);
+		return;
+	}
+	if (vtkPropAssembly *pPropAssembly = pWPhastDoc->GetPropAssemblyMedia())
+	{
 		pPropAssembly->RemovePart(this);
 		// VTK HACK
 		// This is req'd because ReleaseGraphicsResources is not called when

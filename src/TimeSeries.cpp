@@ -139,8 +139,8 @@ HTREEITEM CTimeSeries<Cproperty>::InsertItem(CTreeCtrl* pTreeCtrl, LPCTSTR lpszH
 	CTimeSeries<Cproperty>::const_iterator iter = this->begin();
 	for (; iter != this->end(); ++iter)
 	{
-		ASSERT((*iter).second.type != UNDEFINED);
-		if ((*iter).second.type == UNDEFINED) continue;
+		ASSERT((*iter).second.type != PROP_UNDEFINED);
+		if ((*iter).second.type == PROP_UNDEFINED) continue;
 
 		CString str;
 		if ((*iter).first.input)

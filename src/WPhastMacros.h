@@ -114,3 +114,20 @@
 			archive >> nVersion; \
 		} \
 	} while(0)
+
+#define ARC_GETSET_COORD_SYS_MACRO(archive, name) \
+	do { \
+		int n = name; \
+		if (archive.IsStoring()) archive << n; \
+		else archive >> n; \
+		if (!archive.IsStoring()) { \
+			switch (n) { \
+			case PHAST_Transform::MAP: \
+				name = PHAST_Transform::MAP; \
+				break; \
+			default: \
+				name = PHAST_Transform::GRID; \
+				break; \
+			} \
+		} \
+	} while (0)

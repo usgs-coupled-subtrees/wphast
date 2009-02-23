@@ -45,15 +45,18 @@
 #include <vtkPropAssembly.h>
 #include <vtkPropCollection.h>
 
+#include "PrismWidget.h"
 #include "ZoneActor.h"
 #include "WellActor.h"
 #include "RiverActor.h"
+#include "DrainActor.h"
 #include "GridLODActor.h"
 #include "GridActor.h"
-#include "RiverCreateAction.h"
+#include "PointConnectorCreateAction.h"
 #include "RiverPropertyPage2.h"
 #include "Grid.h"
 #include "FlowOnly.h"
+#include "ZonePrismResetAction.h"
 
 #include <vtkImplicitPlaneWidget.h>
 
@@ -96,6 +99,8 @@ BEGIN_MESSAGE_MAP(CWPhastView, CView)
 	ON_COMMAND(ID_VIEW_FROM_PX, OnViewFromPx)
 	ON_COMMAND(ID_VIEW_FROM_PY, OnViewFromPy)
 	ON_COMMAND(ID_VIEW_FROM_PZ, OnViewFromPz)
+	ON_COMMAND(ID_VIEW_FROM_MAP_NZ, OnViewFromMapNz)
+	ON_COMMAND(ID_VIEW_FROM_MAP_PZ, OnViewFromMapPz)
 	ON_COMMAND(ID_VIEW_FROM_NEXT_DIRECTION, OnViewFromNextDirection)
 	ON_COMMAND(ID_TOOLS_NEWWELL, OnToolsNewWell)
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_NEWWELL, OnUpdateToolsNewWell)
@@ -115,23 +120,26 @@ END_MESSAGE_MAP()
 // CWPhastView construction/destruction
 
 CWPhastView::CWPhastView()
-: m_bResetCamera(false)
-, m_ViewFromDirection(ID_VIEW_FROM_PZ)
-, m_pWellActor(0)
-, PointWidget(0)
-, m_pRiverActor(0)
-, RiverCallbackCommand(0)
-, m_bMovingGridLine(false)
-, BoxWidget(0)
-, m_RenderWindow(0)
+: m_RenderWindow(0)
 , m_Renderer(0)
 , m_RenderWindowInteractor(0)
-, InteractorStyle(0)
+, BoxWidget(0)
+, PointWidget(0)
+, PrismWidget(0)
 , m_pViewVTKCommand(0)
+, InteractorStyle(0)
+, m_bResetCamera(false)
+, m_bMovingGridLine(false)
 , m_pCursor3D(0)
 , m_pCursor3DMapper(0)
 , m_pCursor3DActor(0)
+, m_ViewFromDirection(ID_VIEW_FROM_PZ)
+, m_pWellActor(0)
+, m_pRiverActor(0)
 , CurrentProp(0)
+, RiverCallbackCommand(0)
+, PrismWidgetCallbackCommand(0)
+, CoordinateMode(CWPhastView::GridMode)
 {
 	// Create the renderer, window and interactor objects.
 	//
@@ -144,7 +152,7 @@ CWPhastView::CWPhastView()
 	this->BoxWidget = vtkBoxWidgetEx::New();
 	this->BoxWidget->SetInteractor(this->m_RenderWindowInteractor);
 	this->BoxWidget->SetPlaceFactor(1.0);
-	this->BoxWidget->RotationEnabledOff();
+// COMMENT: {11/4/2008 7:52:50 PM}	this->BoxWidget->RotationEnabledOff();
 	if (vtkBoxWidgetEx *widget = vtkBoxWidgetEx::SafeDownCast(this->BoxWidget))
 	{
 		widget->HexPickerEnabledOff();
@@ -155,6 +163,20 @@ CWPhastView::CWPhastView()
 	this->PointWidget = vtkPointWidget2::New();
 	this->PointWidget->SetInteractor(this->m_RenderWindowInteractor);
 	///this->PointWidget->TranslationModeOn();
+
+	// Create the PrismWidget listener
+	//
+	this->PrismWidgetCallbackCommand = vtkCallbackCommand::New();
+	this->PrismWidgetCallbackCommand->SetClientData(this);
+	this->PrismWidgetCallbackCommand->SetCallback(CWPhastView::PrismWidgetListener);
+
+	// Create the PrismWidget
+	//
+	this->PrismWidget = CPrismWidget::New();
+	this->PrismWidget->SetInteractor(this->m_RenderWindowInteractor);
+	this->PrismWidget->AddObserver(vtkCommand::EndInteractionEvent, this->PrismWidgetCallbackCommand);
+	this->PrismWidget->AddObserver(CPrismWidget::InsertPointEvent, this->PrismWidgetCallbackCommand);
+	this->PrismWidget->AddObserver(CPrismWidget::DeletePointEvent, this->PrismWidgetCallbackCommand);
 
 	//
 	this->InteractorStyle = vtkInteractorStyleTrackballCameraEx::New();
@@ -175,7 +197,7 @@ CWPhastView::CWPhastView()
 
 	this->m_pCursor3DMapper = vtkPolyDataMapper::New();
 	this->m_pCursor3DMapper->SetInput(this->m_pCursor3D->GetOutput());
-	
+
 	this->m_pCursor3DActor = vtkActor::New();
 	this->m_pCursor3DActor->SetMapper(this->m_pCursor3DMapper);
 	this->m_pCursor3DActor->SetPosition(0, 0, 0);
@@ -227,6 +249,8 @@ CWPhastView::~CWPhastView()
 	this->BoxWidget->Delete();
 	this->PointWidget->SetInteractor(0);
 	this->PointWidget->Delete();
+	this->PrismWidget->SetInteractor(0);
+	this->PrismWidget->Delete();
 
 	this->m_pViewVTKCommand->Delete();
 
@@ -257,6 +281,13 @@ CWPhastView::~CWPhastView()
 		this->RiverCallbackCommand = 0;
 	}
 
+	// PrismWidget listener
+	if (this->PrismWidgetCallbackCommand)
+	{
+		this->PrismWidgetCallbackCommand->Delete();
+		this->PrismWidgetCallbackCommand = 0;
+	}
+
 	if (this->m_bMovingGridLine)
 	{
 		if (CGridLODActor* pGridLODActor = CGridLODActor::SafeDownCast(this->GetDocument()->GetGridActor()))
@@ -265,12 +296,41 @@ CWPhastView::~CWPhastView()
 		}
 	}
 
-	// Delete the the renderer, window and interactor objects.
+	// this allows RemoveObserver of the Interactor of CPointConnectorActor to be called for the EventCallbackCommand
+	// fixing a crash that sometimes occured during program exit
 	//
-	this->m_RenderWindowInteractor->SetRenderWindow(NULL);
+	if (CWPhastDoc *pDoc = this->GetDocument())
+	{
+		if (vtkPropCollection *pPropCollection = this->GetDocument()->GetPropAssemblyRivers()->GetParts())
+		{
+			vtkProp *pProp = 0;
+			pPropCollection->InitTraversal();
+			for (; (pProp = pPropCollection->GetNextProp()); )
+			{
+				if (CRiverActor *pRiverActor = CRiverActor::SafeDownCast(pProp))
+				{
+					pRiverActor->SetInteractor(0);
+				}
+			}
+		}
+		if (vtkPropCollection *pPropCollection = this->GetDocument()->GetPropAssemblyDrains()->GetParts())
+		{
+			vtkProp *pProp = 0;
+			pPropCollection->InitTraversal();
+			for (; (pProp = pPropCollection->GetNextProp()); )
+			{
+				if (CDrainActor *pDrainActor = CDrainActor::SafeDownCast(pProp))
+				{
+					pDrainActor->SetInteractor(0);
+				}
+			}
+		}
+	}
+
+	// Delete the the renderer, window and interactor objects.
 	this->m_Renderer->Delete();
-	this->m_RenderWindowInteractor->Delete();
 	this->m_RenderWindow->Delete();
+	this->m_RenderWindowInteractor->Delete();
 }
 
 BOOL CWPhastView::PreCreateWindow(CREATESTRUCT& cs)
@@ -431,13 +491,13 @@ LRESULT CWPhastView::WindowProc(UINT message, WPARAM wParam, LPARAM lParam)
 {
 	switch (message)
 	{
-	//case WM_PAINT: 
-	case WM_LBUTTONDOWN: 
-	case WM_LBUTTONUP: 
-	case WM_MBUTTONDOWN: 
-	case WM_MBUTTONUP: 
-	case WM_RBUTTONDOWN: 
-	case WM_RBUTTONUP: 
+	//case WM_PAINT:
+	case WM_LBUTTONDOWN:
+	case WM_LBUTTONUP:
+	case WM_MBUTTONDOWN:
+	case WM_MBUTTONUP:
+	case WM_RBUTTONDOWN:
+	case WM_RBUTTONUP:
 	case WM_MOUSEMOVE:
 	case WM_CHAR:
 	case WM_TIMER:
@@ -622,7 +682,7 @@ BOOL CWPhastView::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 			::SetCursor(AfxGetApp()->LoadCursor(IDC_3DGARROW));
 			return TRUE;
 		}
-	}	
+	}
 
 	if (this->CreatingNewWell() || this->CreatingNewRiver())
 	{
@@ -687,6 +747,10 @@ BOOL CWPhastView::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 		{
 			return TRUE;
 		}
+		if (this->PrismWidget && this->PrismWidget->GetEnabled())
+		{
+			return this->PrismWidget->OnSetCursor(pWnd, nHitTest, message);
+		}
 	}
 
 	return CView::OnSetCursor(pWnd, nHitTest, message);
@@ -704,7 +768,7 @@ void CWPhastView::OnViewFromNx(void)
 	vtkCamera *camera = this->m_Renderer->GetActiveCamera();
 	double *pos = camera->GetPosition();
 	double *fp = camera->GetFocalPoint();
-	double dist = sqrt((pos[0]-fp[0])*(pos[0]-fp[0]) + 
+	double dist = sqrt((pos[0]-fp[0])*(pos[0]-fp[0]) +
 		(pos[1]-fp[1])*(pos[1]-fp[1]) + (pos[2]-fp[2])*(pos[2]-fp[2]));
 	camera->SetPosition(fp[0] - dist, fp[1], fp[2]);
 	camera->SetViewUp(0, 0, 1);
@@ -727,7 +791,7 @@ void CWPhastView::OnViewFromPx(void)
 	vtkCamera *camera = this->m_Renderer->GetActiveCamera();
 	double *pos = camera->GetPosition();
 	double *fp = camera->GetFocalPoint();
-	double dist = sqrt((pos[0]-fp[0])*(pos[0]-fp[0]) + 
+	double dist = sqrt((pos[0]-fp[0])*(pos[0]-fp[0]) +
 		(pos[1]-fp[1])*(pos[1]-fp[1]) + (pos[2]-fp[2])*(pos[2]-fp[2]));
 	camera->SetPosition(fp[0] + dist, fp[1], fp[2]);
 	camera->SetViewUp(0, 0, 1);
@@ -750,7 +814,7 @@ void CWPhastView::OnViewFromNy(void)
 	vtkCamera *camera = this->m_Renderer->GetActiveCamera();
 	double *pos = camera->GetPosition();
 	double *fp = camera->GetFocalPoint();
-	double dist = sqrt((pos[0]-fp[0])*(pos[0]-fp[0]) + 
+	double dist = sqrt((pos[0]-fp[0])*(pos[0]-fp[0]) +
 		(pos[1]-fp[1])*(pos[1]-fp[1]) + (pos[2]-fp[2])*(pos[2]-fp[2]));
 	camera->SetPosition(fp[0], fp[1] - dist, fp[2]);
 	camera->SetViewUp(0, 0, 1);
@@ -763,17 +827,17 @@ void CWPhastView::OnViewFromNy(void)
 
 void CWPhastView::OnUpdateViewFromPy(CCmdUI *pCmdUI)
 {
-	// TODO: Add your command update UI handler code here
+	// Add your command update UI handler code here
 	pCmdUI->Enable(TRUE);
 }
 
 void CWPhastView::OnViewFromPy(void)
 {
-	// TODO: Add your command handler code here
+	// Add your command handler code here
 	vtkCamera *camera = this->m_Renderer->GetActiveCamera();
 	double *pos = camera->GetPosition();
 	double *fp = camera->GetFocalPoint();
-	double dist = sqrt((pos[0]-fp[0])*(pos[0]-fp[0]) + 
+	double dist = sqrt((pos[0]-fp[0])*(pos[0]-fp[0]) +
 		(pos[1]-fp[1])*(pos[1]-fp[1]) + (pos[2]-fp[2])*(pos[2]-fp[2]));
 	camera->SetPosition(fp[0], fp[1] + dist, fp[2]);
 	camera->SetViewUp(0, 0, 1);
@@ -786,17 +850,17 @@ void CWPhastView::OnViewFromPy(void)
 
 void CWPhastView::OnUpdateViewFromNz(CCmdUI *pCmdUI)
 {
-	// TODO: Add your command update UI handler code here
+	// Add your command update UI handler code here
 	pCmdUI->Enable(TRUE);
 }
 
 void CWPhastView::OnViewFromNz(void)
 {
-	// TODO: Add your command handler code here
+	// Add your command handler code here
 	vtkCamera *camera = this->m_Renderer->GetActiveCamera();
 	double *pos = camera->GetPosition();
 	double *fp = camera->GetFocalPoint();
-	double dist = sqrt((pos[0]-fp[0])*(pos[0]-fp[0]) + 
+	double dist = sqrt((pos[0]-fp[0])*(pos[0]-fp[0]) +
 		(pos[1]-fp[1])*(pos[1]-fp[1]) + (pos[2]-fp[2])*(pos[2]-fp[2]));
 	camera->SetPosition(fp[0], fp[1], fp[2] - dist);
 	camera->SetViewUp(0, -1, 0);
@@ -807,22 +871,64 @@ void CWPhastView::OnViewFromNz(void)
 	this->Invalidate();
 }
 
+void CWPhastView::OnViewFromMapNz(void)
+{
+	// Add your command handler code here
+	vtkCamera *camera = this->m_Renderer->GetActiveCamera();
+	double *pos = camera->GetPosition();
+	double *fp = camera->GetFocalPoint();
+	double dist = sqrt((pos[0]-fp[0])*(pos[0]-fp[0]) +
+		(pos[1]-fp[1])*(pos[1]-fp[1]) + (pos[2]-fp[2])*(pos[2]-fp[2]));
+	camera->SetPosition(fp[0], fp[1], fp[2] - dist);
+
+	CGridKeyword gridKeyword = this->GetDocument()->GetGridKeyword();
+	double angle = ((gridKeyword.m_grid_angle) / 180.) * acos(-1.0);
+	camera->SetViewUp(-sin(angle), -cos(angle), 0);
+
+	camera->ComputeViewPlaneNormal();
+	///PlaceHeadlightWithCamera();
+	this->m_Renderer->ResetCameraClippingRange();
+	this->m_ViewFromDirection = ID_VIEW_FROM_NZ;
+	this->Invalidate();
+}
+
 void CWPhastView::OnUpdateViewFromPz(CCmdUI *pCmdUI)
 {
-	// TODO: Add your command update UI handler code here
+	// Add your command update UI handler code here
 	pCmdUI->Enable(TRUE);
 }
 
 void CWPhastView::OnViewFromPz(void)
 {
-	// TODO: Add your command handler code here
+	// Add your command handler code here
 	vtkCamera *camera = this->m_Renderer->GetActiveCamera();
 	double *pos = camera->GetPosition();
 	double *fp = camera->GetFocalPoint();
-	double dist = sqrt((pos[0]-fp[0])*(pos[0]-fp[0]) + 
+	double dist = sqrt((pos[0]-fp[0])*(pos[0]-fp[0]) +
 		(pos[1]-fp[1])*(pos[1]-fp[1]) + (pos[2]-fp[2])*(pos[2]-fp[2]));
 	camera->SetPosition(fp[0], fp[1], fp[2] + dist);
 	camera->SetViewUp(0, 1, 0);
+	camera->ComputeViewPlaneNormal();
+	///PlaceHeadlightWithCamera();
+	this->m_Renderer->ResetCameraClippingRange();
+	this->m_ViewFromDirection = ID_VIEW_FROM_PZ;
+	this->Invalidate();
+}
+
+void CWPhastView::OnViewFromMapPz(void)
+{
+	// Add your command handler code here
+	vtkCamera *camera = this->m_Renderer->GetActiveCamera();
+	double *pos = camera->GetPosition();
+	double *fp = camera->GetFocalPoint();
+	double dist = sqrt((pos[0]-fp[0])*(pos[0]-fp[0]) +
+		(pos[1]-fp[1])*(pos[1]-fp[1]) + (pos[2]-fp[2])*(pos[2]-fp[2]));
+	camera->SetPosition(fp[0], fp[1], fp[2] + dist);
+
+	CGridKeyword gridKeyword = this->GetDocument()->GetGridKeyword();
+	double angle = ((gridKeyword.m_grid_angle) / 180.) * acos(-1.0);
+	camera->SetViewUp(sin(angle), cos(angle), 0);
+
 	camera->ComputeViewPlaneNormal();
 	///PlaceHeadlightWithCamera();
 	this->m_Renderer->ResetCameraClippingRange();
@@ -890,6 +996,10 @@ void CWPhastView::Select(vtkProp *pProp)
 	//
 	if (this->PointWidget) this->PointWidget->Off();
 
+	// hide prism widget
+	//
+	if (this->PrismWidget) this->PrismWidget->Off();
+
 	// disable rivers
 	//
 	if (vtkPropCollection *pPropCollection = this->GetDocument()->GetPropAssemblyRivers()->GetParts())
@@ -902,6 +1012,22 @@ void CWPhastView::Select(vtkProp *pProp)
 			{
 				pRiverActor->ClearSelection();
 				pRiverActor->Off();
+			}
+		}
+	}
+
+	// disable drains
+	//
+	if (vtkPropCollection *pPropCollection = this->GetDocument()->GetPropAssemblyDrains()->GetParts())
+	{
+		vtkProp *pProp = 0;
+		pPropCollection->InitTraversal();
+		for (; (pProp = pPropCollection->GetNextProp()); )
+		{
+			if (CDrainActor *pDrainActor = CDrainActor::SafeDownCast(pProp))
+			{
+				pDrainActor->ClearSelection();
+				pDrainActor->Off();
 			}
 		}
 	}
@@ -929,7 +1055,6 @@ void CWPhastView::Select(vtkProp *pProp)
 
 	if (CZoneActor *pZoneActor = CZoneActor::SafeDownCast(pProp))
 	{
-// COMMENT: {6/4/2008 8:19:55 PM}		if (!pZoneActor->GetDefault() && this->BoxWidget)
 		//{{ {7/10/2008 8:34:05 PM}
 		if (pZoneActor->GetVisibility() == 0)
 		{
@@ -944,31 +1069,105 @@ void CWPhastView::Select(vtkProp *pProp)
 		}
 		//}} {7/10/2008 8:34:05 PM}
 
-		if (!(pZoneActor->GetDefault() || pZoneActor->GetPolyhedron()->get_type() == Polyhedron::PRISM) && this->BoxWidget)
+		Polyhedron::POLYHEDRON_TYPE n = pZoneActor->GetPolyhedron()->get_type();
+		if (n == Polyhedron::PRISM)
 		{
-			//{{ {5/8/2006 4:25:45 PM}
-			this->HighlightProp(this->CurrentProp = NULL);
-			//}} {5/8/2006 4:25:45 PM}
+			if (Prism *p = dynamic_cast<Prism*>(pZoneActor->GetPolyhedron()))
+			{
+				Data_source::DATA_SOURCE_TYPE s = p->perimeter.Get_source_type();
+				if (s == Data_source::POINTS)
+				{
+					this->HighlightProp(this->CurrentProp = NULL);
 
-			// Reset BoxWidget
-			//
-			this->BoxWidget->SetProp3D(pZoneActor);
-			this->BoxWidget->PlaceWidget();
-			this->BoxWidget->On();
+					// Set PrismWidget
+					//
+					if (this->PrismWidget)
+					{
+						this->PrismWidget->SetProp3D(pZoneActor);
+						this->PrismWidget->On();
+					}
+				}
+				else
+				{
+					// Highlight Prop
+					//
+					this->HighlightProp(pProp);
+					ASSERT(!pZoneActor->GetDefault());
+				}
+			}
 		}
-		//{{ {5/3/2006 5:35:09 PM}
-		else if (pZoneActor->GetDefault() || pZoneActor->GetPolyhedron()->get_type() == Polyhedron::PRISM)
+// COMMENT: {11/12/2008 5:11:56 PM}		else if (n == Polyhedron::CUBE || n == Polyhedron::WEDGE)
+		else if (Cube *c = dynamic_cast<Cube*>(pZoneActor->GetPolyhedron()))
 		{
-			// Highlight Prop
-			//
-			this->HighlightProp(pProp);
+			if (pZoneActor->GetDefault())
+			{
+				// Highlight Prop
+				//
+				this->HighlightProp(pProp);
+			}
+			else
+			{
+				this->HighlightProp(this->CurrentProp = NULL);
+
+				if (this->BoxWidget)
+				{
+					const CUnits &units = this->GetDocument()->GetUnits();
+					vtkFloatingPointType* scale = this->GetDocument()->GetScale();
+
+					ostringstream oss;
+					oss << *pZoneActor;
+					TRACE("%s\n", oss.str().c_str());
+
+					// Reset BoxWidget
+					//
+					this->BoxWidget->SetProp3D(pZoneActor);
+					struct zone *z = pZoneActor->GetPolyhedron()->Get_bounding_box();
+
+					if (c->Get_user_coordinate_system() == PHAST_Transform::MAP)
+					{
+						double *o = pZoneActor->GetGridOrigin();
+						this->BoxWidget->PlaceWidget(
+							(z->x1 - o[0]) * units.map_horizontal.input_to_si * scale[0],
+							(z->x2 - o[0]) * units.map_horizontal.input_to_si * scale[0],
+							(z->y1 - o[1]) * units.map_horizontal.input_to_si * scale[1],
+							(z->y2 - o[1]) * units.map_horizontal.input_to_si * scale[1],
+							(z->z1 - o[2]) * units.map_vertical.input_to_si   * scale[2],
+							(z->z2 - o[2]) * units.map_vertical.input_to_si   * scale[2]
+							);
+
+						if (vtkBoxWidgetEx *widget = vtkBoxWidgetEx::SafeDownCast(this->BoxWidget))
+						{
+							widget->SetOrientation(0, 0, -pZoneActor->GetGridAngle());
+						}
+					}
+					else
+					{
+						this->BoxWidget->PlaceWidget(
+							z->x1 * units.horizontal.input_to_si * scale[0],
+							z->x2 * units.horizontal.input_to_si * scale[0],
+							z->y1 * units.horizontal.input_to_si * scale[1],
+							z->y2 * units.horizontal.input_to_si * scale[1],
+							z->z1 * units.vertical.input_to_si   * scale[2],
+							z->z2 * units.vertical.input_to_si   * scale[2]
+							);
+					}
+					this->m_RenderWindowInteractor->Render();
+					this->BoxWidget->On();
+				}
+			}
 		}
-		//}} {5/3/2006 5:35:09 PM}
+		else
+		{
+			ASSERT(FALSE);
+		}
 	}
 	else if (CWellActor *pWellActor = CWellActor::SafeDownCast(pProp))
 	{
 		if (this->PointWidget)
 		{
+			// clear red selection box
+			this->HighlightProp(0);
+
 			// Reset PointWidget
 			//
 			this->PointWidget->TranslationModeOff();
@@ -976,6 +1175,16 @@ void CWPhastView::Select(vtkProp *pProp)
 			this->PointWidget->PlaceWidget();
 			ASSERT(pWellActor == this->PointWidget->GetProp3D());
 			this->PointWidget->TranslationModeOn();
+#if 9991 // well w/ grid rotation
+			if (pWellActor->GetWell().xy_coordinate_system_user == PHAST_Transform::MAP)
+			{
+				this->PointWidget->SetOrientation(0, 0, -(this->GetDocument()->GetGridKeyword().m_grid_angle));
+			}
+			else
+			{
+				this->PointWidget->SetOrientation(0, 0, 0);
+			}
+#endif // 9991 well w/ grid rotation
 			this->PointWidget->On();
 		}
 	}
@@ -986,6 +1195,14 @@ void CWPhastView::Select(vtkProp *pProp)
 		this->HighlightProp(pProp);
 
 		pRiverActor->On();
+	}
+	else if (CDrainActor *pDrainActor = CDrainActor::SafeDownCast(pProp))
+	{
+		// Highlight drain
+		//
+		this->HighlightProp(pProp);
+
+		pDrainActor->On();
 	}
 	else if (pProp)
 	{
@@ -1042,6 +1259,22 @@ void CWPhastView::StartNewWell(void)
 	//
 	this->m_pCursor3DActor->GetProperty()->SetColor(1, 1, 0);
 
+#if 9991 // well w/ grid rotation
+	if (this->CoordinateMode == CWPhastView::GridMode)
+	{
+		this->m_pCursor3DActor->SetOrientation(0, 0, 0);
+	}
+	else if (this->CoordinateMode == CWPhastView::MapMode)
+	{
+		CGridKeyword gridKeyword = this->GetDocument()->GetGridKeyword();
+		this->m_pCursor3DActor->SetOrientation(0, 0, -gridKeyword.m_grid_angle);
+	}
+	else
+	{
+		ASSERT(FALSE);
+	}
+#endif // 9991 well w/ grid rotation
+
 	// create well actor
 	//
 	ASSERT(this->m_pWellActor == 0);
@@ -1060,7 +1293,7 @@ void CWPhastView::StartNewWell(void)
 
 // COMMENT: {9/9/2005 4:45:27 PM}	// hide BoxWidget
 // COMMENT: {9/9/2005 4:45:27 PM}	//
-// COMMENT: {9/9/2005 4:45:27 PM}	// Note: This is reqd because the widget will 
+// COMMENT: {9/9/2005 4:45:27 PM}	// Note: This is reqd because the widget will
 // COMMENT: {9/9/2005 4:45:27 PM}	// recieve all the mouse input
 // COMMENT: {9/9/2005 4:45:27 PM}	this->BoxWidget->Off();
 // COMMENT: {9/9/2005 4:45:27 PM}	this->PointWidget->Off();
@@ -1256,7 +1489,7 @@ void CWPhastView::Update(IObserver* pSender, LPARAM lHint, CObject* /*pHint*/, v
 					}
 				}
 			}
-		}		
+		}
 		break;
 	case WPN_SCALE_CHANGED:
 		if (this->PointWidget->GetEnabled())
@@ -1276,14 +1509,58 @@ void CWPhastView::Update(IObserver* pSender, LPARAM lHint, CObject* /*pHint*/, v
 		{
 			this->m_pRiverActor->SetScale(this->GetDocument()->GetScale());
 		}
-		//{{ {5/8/2006 4:00:51 PM}
 		if (this->BoxWidget->GetEnabled())
 		{
 			if (vtkProp3D* pProp3D = this->BoxWidget->GetProp3D())
 			{
-				this->BoxWidget->PlaceWidget();
+				if (CZoneActor *pZoneActor = CZoneActor::SafeDownCast(pProp3D))
+				{
+					const CUnits &units = this->GetDocument()->GetUnits();
+					vtkFloatingPointType* scale = this->GetDocument()->GetScale();
+					struct zone *z = pZoneActor->GetPolyhedron()->Get_bounding_box();
+
+					if (Cube *c = dynamic_cast<Cube*>(pZoneActor->GetPolyhedron()))
+					{
+						if (c->Get_user_coordinate_system() == PHAST_Transform::MAP)
+						{
+							double *o = pZoneActor->GetGridOrigin();
+							this->BoxWidget->PlaceWidget(
+								(z->x1 - o[0]) * units.map_horizontal.input_to_si * scale[0],
+								(z->x2 - o[0]) * units.map_horizontal.input_to_si * scale[0],
+								(z->y1 - o[1]) * units.map_horizontal.input_to_si * scale[1],
+								(z->y2 - o[1]) * units.map_horizontal.input_to_si * scale[1],
+								(z->z1 - o[2]) * units.map_vertical.input_to_si   * scale[2],
+								(z->z2 - o[2]) * units.map_vertical.input_to_si   * scale[2]
+								);
+
+							if (vtkBoxWidgetEx *widget = vtkBoxWidgetEx::SafeDownCast(this->BoxWidget))
+							{
+								widget->SetOrientation(0, 0, -pZoneActor->GetGridAngle());
+							}
+						}
+						else
+						{
+							this->BoxWidget->PlaceWidget(
+								z->x1 * units.horizontal.input_to_si * scale[0],
+								z->x2 * units.horizontal.input_to_si * scale[0],
+								z->y1 * units.horizontal.input_to_si * scale[1],
+								z->y2 * units.horizontal.input_to_si * scale[1],
+								z->z1 * units.vertical.input_to_si   * scale[2],
+								z->z2 * units.vertical.input_to_si   * scale[2]
+								);
+						}
+					}
+				}
 			}
 		}
+		if (this->PrismWidget->GetEnabled())
+		{
+			if (vtkProp3D* pProp3D = this->PrismWidget->GetProp3D())
+			{
+				this->PrismWidget->SetProp3D(pProp3D);
+			}
+		}
+
 		if (this->CurrentProp) this->Select(this->CurrentProp);
 		//}} {5/8/2006 4:00:51 PM}
 
@@ -1341,13 +1618,15 @@ void CWPhastView::StartNewRiver(void)
 			this->m_pRiverActor->Delete();
 		}
 		this->m_pRiverActor = CRiverActor::StartNewRiver(this->GetRenderWindowInteractor());
-		
-		CRiver river;
-		river.n_user = this->GetDocument()->GetNextRiverNumber();
-		this->m_pRiverActor->SetRiver(river, this->GetDocument()->GetUnits());
 
-		this->m_pRiverActor->AddObserver(CRiverActor::EndNewRiverEvent, RiverCallbackCommand);
-		this->m_pRiverActor->AddObserver(CRiverActor::CancelNewRiverEvent, RiverCallbackCommand);
+		CRiver river;
+		river.coordinate_system = PHAST_Transform::GRID;
+		river.z_coordinate_system_user = PHAST_Transform::GRID;
+		river.n_user = this->GetDocument()->GetNextRiverNumber();
+		this->m_pRiverActor->SetRiver(river, this->GetDocument()->GetUnits(), this->GetDocument()->GetGridKeyword());
+
+		this->m_pRiverActor->AddObserver(CRiverActor::EndNewEvent, RiverCallbackCommand);
+		this->m_pRiverActor->AddObserver(CRiverActor::CancelNewEvent, RiverCallbackCommand);
 
 		vtkFloatingPointType* scale = this->GetDocument()->GetScale();
 		this->m_pRiverActor->SetScale(scale[0], scale[1], scale[2]);
@@ -1361,20 +1640,9 @@ void CWPhastView::StartNewRiver(void)
 		this->m_Renderer->AddProp(this->m_pRiverActor);
 	}
 
-	// Disable Interactor - NOTE (This may be unnec)
-	//
-	if (vtkInteractorStyle* style = vtkInteractorStyle::SafeDownCast(this->InteractorStyle))
-	{
-		if (vtkInteractorStyleSwitch* switcher = vtkInteractorStyleSwitch::SafeDownCast(style))
-		{
-			style = switcher->GetCurrentStyle();
-		}
-		style->SetInteractor(0);
-	}
-
 	// hide Widgets
 	//
-	// Note: This is reqd because the widget will 
+	// Note: This is reqd because the widget will
 	// recieve all the mouse input
 	this->GetDocument()->ClearSelection();
 	this->BoxWidget->Off();
@@ -1435,10 +1703,10 @@ void CWPhastView::RiverListener(vtkObject* caller, unsigned long eid, void* clie
 		ASSERT(pRiverActor == self->m_pRiverActor);
 		switch (eid)
 		{
-		case CRiverActor::CancelNewRiverEvent:
+		case CRiverActor::CancelNewEvent:
 			self->OnEndNewRiver(true);
 			break;
-		case CRiverActor::EndNewRiverEvent:
+		case CRiverActor::EndNewEvent:
 			self->OnEndNewRiver(false);
 			break;
 		}
@@ -1478,6 +1746,7 @@ void CWPhastView::OnEndNewRiver(bool bCancel)
 				CRiverPropertyPage2 page;
 				page.SetProperties(river);
 				page.SetUnits(this->GetDocument()->GetUnits());
+				page.SetGridKeyword(this->GetDocument()->GetGridKeyword());
 				page.SetFlowOnly(bool(this->GetDocument()->GetFlowOnly()));
 				std::set<int> riverNums;
 				this->GetDocument()->GetUsedRiverNumbers(riverNums);
@@ -1487,7 +1756,7 @@ void CWPhastView::OnEndNewRiver(bool bCancel)
 				{
 					CRiver river;
 					page.GetProperties(river);
-					this->GetDocument()->Execute(new CRiverCreateAction(this->GetDocument(), river));
+					this->GetDocument()->Execute(new CPointConnectorCreateAction<CRiverActor, CRiver>(this->GetDocument(), river));
 				}
 			}
 			else
@@ -1605,48 +1874,6 @@ typedef WORD CURMASK;
 
 extern HBITMAP FAR PASCAL CreateColorBitmap(int cx, int cy);
 
-// COMMENT: {8/4/2005 9:28:44 PM}HBITMAP FAR PASCAL CreateColorBitmap(int cx, int cy)
-// COMMENT: {8/4/2005 9:28:44 PM}{
-// COMMENT: {8/4/2005 9:28:44 PM}    HBITMAP hbm;
-// COMMENT: {8/4/2005 9:28:44 PM}    HDC hdc;
-// COMMENT: {8/4/2005 9:28:44 PM}
-// COMMENT: {8/4/2005 9:28:44 PM}    hdc = GetDC(NULL);
-// COMMENT: {8/4/2005 9:28:44 PM}
-// COMMENT: {8/4/2005 9:28:44 PM}    //
-// COMMENT: {8/4/2005 9:28:44 PM}    // on a multimonitor system with mixed bitdepths
-// COMMENT: {8/4/2005 9:28:44 PM}    // always use a 32bit bitmap for our work buffer
-// COMMENT: {8/4/2005 9:28:44 PM}    // this will prevent us from losing colors when
-// COMMENT: {8/4/2005 9:28:44 PM}    // blting to and from the screen.  this is mainly
-// COMMENT: {8/4/2005 9:28:44 PM}    // important for the drag & drop offscreen buffers.
-// COMMENT: {8/4/2005 9:28:44 PM}    //
-// COMMENT: {8/4/2005 9:28:44 PM}// COMMENT: {9/8/2004 10:48:49 PM}    if (!(GetDeviceCaps(hdc, RASTERCAPS) & RC_PALETTE) &&
-// COMMENT: {8/4/2005 9:28:44 PM}// COMMENT: {9/8/2004 10:48:49 PM}		TRUE &&
-// COMMENT: {8/4/2005 9:28:44 PM}// COMMENT: {9/8/2004 10:48:49 PM}		TRUE)
-// COMMENT: {8/4/2005 9:28:44 PM}// COMMENT: {9/8/2004 10:48:49 PM}// COMMENT: {9/8/2004 8:42:09 PM}        GetSystemMetrics(SM_CMONITORS) > 1 &&
-// COMMENT: {8/4/2005 9:28:44 PM}// COMMENT: {9/8/2004 10:48:49 PM}// COMMENT: {9/8/2004 8:42:09 PM}        GetSystemMetrics(SM_SAMEDISPLAYFORMAT) == 0)
-// COMMENT: {8/4/2005 9:28:44 PM}// COMMENT: {9/8/2004 10:48:49 PM}    {
-// COMMENT: {8/4/2005 9:28:44 PM}// COMMENT: {9/8/2004 10:48:49 PM}        LPVOID p;
-// COMMENT: {8/4/2005 9:28:44 PM}// COMMENT: {9/8/2004 10:48:49 PM}#ifndef UNIX
-// COMMENT: {8/4/2005 9:28:44 PM}// COMMENT: {9/8/2004 10:48:49 PM}        BITMAPINFO bi = {sizeof(BITMAPINFOHEADER), cx, cy, 1, 32};
-// COMMENT: {8/4/2005 9:28:44 PM}// COMMENT: {9/8/2004 10:48:49 PM}#else
-// COMMENT: {8/4/2005 9:28:44 PM}// COMMENT: {9/8/2004 10:48:49 PM}        BITMAPINFO bi;
-// COMMENT: {8/4/2005 9:28:44 PM}// COMMENT: {9/8/2004 10:48:49 PM}        bi.bmiHeader.biSize     = sizeof(BITMAPINFOHEADER); 
-// COMMENT: {8/4/2005 9:28:44 PM}// COMMENT: {9/8/2004 10:48:49 PM}        bi.bmiHeader.biWidth    = cx;
-// COMMENT: {8/4/2005 9:28:44 PM}// COMMENT: {9/8/2004 10:48:49 PM}        bi.bmiHeader.biHeight   = cy;
-// COMMENT: {8/4/2005 9:28:44 PM}// COMMENT: {9/8/2004 10:48:49 PM}        bi.bmiHeader.biPlanes   = 1 ;
-// COMMENT: {8/4/2005 9:28:44 PM}// COMMENT: {9/8/2004 10:48:49 PM}        bi.bmiHeader.biBitCount = 32;
-// COMMENT: {8/4/2005 9:28:44 PM}// COMMENT: {9/8/2004 10:48:49 PM}#endif
-// COMMENT: {8/4/2005 9:28:44 PM}// COMMENT: {9/8/2004 10:48:49 PM}        hbm = CreateDIBSection(hdc, &bi, DIB_RGB_COLORS, &p, NULL, 0);
-// COMMENT: {8/4/2005 9:28:44 PM}// COMMENT: {9/8/2004 10:48:49 PM}    }
-// COMMENT: {8/4/2005 9:28:44 PM}// COMMENT: {9/8/2004 10:48:49 PM}    else
-// COMMENT: {8/4/2005 9:28:44 PM}    {
-// COMMENT: {8/4/2005 9:28:44 PM}        hbm = CreateCompatibleBitmap(hdc, cx, cy);
-// COMMENT: {8/4/2005 9:28:44 PM}    }
-// COMMENT: {8/4/2005 9:28:44 PM}
-// COMMENT: {8/4/2005 9:28:44 PM}    ReleaseDC(NULL, hdc);
-// COMMENT: {8/4/2005 9:28:44 PM}    return hbm;
-// COMMENT: {8/4/2005 9:28:44 PM}}
-
 void GetCursorLowerRight(HCURSOR hcursor, int * px, int * py, POINT *pptHotSpot)
 {
     ICONINFO iconinfo;
@@ -1660,16 +1887,16 @@ void GetCursorLowerRight(HCURSOR hcursor, int * px, int * py, POINT *pptHotSpot)
     GetBitmapBits(iconinfo.hbmMask, SIZEOF(CurMask), CurMask);
     pptHotSpot->x = iconinfo.xHotspot;
     pptHotSpot->y = iconinfo.yHotspot;
-    if (iconinfo.hbmColor) 
+    if (iconinfo.hbmColor)
     {
         i = (int)(bm.bmWidth * bm.bmHeight / _BitSizeOf(CURMASK) - 1);
-    } 
-    else 
+    }
+    else
     {
         i = (int)(bm.bmWidth * (bm.bmHeight/2) / _BitSizeOf(CURMASK) - 1);
     }
 
-    if ( i >= SIZEOF(CurMask)) 
+    if ( i >= SIZEOF(CurMask))
     {
         i = SIZEOF(CurMask) -1;
     }
@@ -1680,22 +1907,22 @@ void GetCursorLowerRight(HCURSOR hcursor, int * px, int * py, POINT *pptHotSpot)
 
     // also, it assumes the cursor has a good mask... not like the IBeam XOR only
     // cursor
-    for (; i >= 0; i--)   
+    for (; i >= 0; i--)
     {
-        if (CurMask[i] != 0xFFFF) 
+        if (CurMask[i] != 0xFFFF)
         {
             // this is only accurate to 16 pixels... which is a big gap..
             // so let's try to be a bit more accurate.
             int j;
             DWORD dwMask;
 
-            for (j = 0; j < 16; j++, xFine--) 
+            for (j = 0; j < 16; j++, xFine--)
             {
-                if (j < 8) 
+                if (j < 8)
                 {
                     dwMask = (1 << (8 + j));
-                } 
-                else 
+                }
+                else
                 {
                     dwMask = (1 << (j - 8));
                 }
@@ -1708,12 +1935,12 @@ void GetCursorLowerRight(HCURSOR hcursor, int * px, int * py, POINT *pptHotSpot)
         }
     }
 
-    if (iconinfo.hbmColor) 
+    if (iconinfo.hbmColor)
     {
         DeleteObject(iconinfo.hbmColor);
     }
 
-    if (iconinfo.hbmMask) 
+    if (iconinfo.hbmMask)
     {
         DeleteObject(iconinfo.hbmMask);
     }
@@ -1746,11 +1973,11 @@ BOOL MergeIcons(HCURSOR hcursor, LPCTSTR idMerge, HBITMAP *phbmImage, HBITMAP *p
     // find the lower corner of the cursor and put it there.
     // do this whether or not we have an idMerge because it will set the hotspot
     GetCursorLowerRight(hcursor, &xDraw, &yDraw, pptHotSpot);
-    if (idMerge != (LPCTSTR)-1) 
+    if (idMerge != (LPCTSTR)-1)
     {
 // COMMENT: {8/4/2005 7:50:45 PM}        hbmp = (HBITMAP)LoadImage(HINST_THISDLL, idMerge, IMAGE_BITMAP, 0, 0, 0);
-        hbmp = (HBITMAP)LoadImage(AfxGetInstanceHandle(), idMerge, IMAGE_BITMAP, 0, 0, 0);		
-        if (hbmp) 
+        hbmp = (HBITMAP)LoadImage(AfxGetInstanceHandle(), idMerge, IMAGE_BITMAP, 0, 0, 0);
+        if (hbmp)
         {
             // GetObject(hbmp, SIZEOF(bm), &bm);
             GetObject(hbmp, sizeof(bm), &bm);
@@ -1762,7 +1989,7 @@ BOOL MergeIcons(HCURSOR hcursor, LPCTSTR idMerge, HBITMAP *phbmImage, HBITMAP *p
             if (yDraw + yBitmap > yCursor)
                 yDraw = yCursor - yBitmap;
         }
-    } 
+    }
     else
         hbmp = NULL;
 
@@ -1772,13 +1999,13 @@ BOOL MergeIcons(HCURSOR hcursor, LPCTSTR idMerge, HBITMAP *phbmImage, HBITMAP *p
     hbmMask = CreateMonoBitmap(xCursor, yCursor);
     hbmImage = CreateColorBitmap(xCursor, yCursor);
 
-    if (hdcCursor && hbmMask && hbmImage) 
+    if (hdcCursor && hbmMask && hbmImage)
     {
 
         hbmTemp = (HBITMAP)SelectObject(hdcCursor, hbmImage);
         DrawIconEx(hdcCursor, 0, 0, hcursor, 0, 0, 0, NULL, DI_NORMAL);
 
-        if (hbmp) 
+        if (hbmp)
         {
             hdcBitmap = CreateCompatibleDC(NULL);
             SelectObject(hdcBitmap, hbmp);
@@ -1791,7 +2018,7 @@ BOOL MergeIcons(HCURSOR hcursor, LPCTSTR idMerge, HBITMAP *phbmImage, HBITMAP *p
 
         DrawIconEx(hdcCursor, 0, 0, hcursor, 0, 0, 0, NULL, DI_MASK);
 
-        if (hbmp) 
+        if (hbmp)
         {
             BitBlt(hdcCursor, xDraw, yDraw, xBitmap, yBitmap, hdcBitmap, 0, yBitmap, SRCCOPY);
 
@@ -1823,12 +2050,12 @@ HCURSOR SetCursorHotspot(HCURSOR hcur, POINT *ptHot)
     iconinfo.yHotspot = ptHot->y;
     iconinfo.fIcon = FALSE;
     hcurHotspot = (HCURSOR)CreateIconIndirect(&iconinfo);
-    if (iconinfo.hbmColor) 
+    if (iconinfo.hbmColor)
     {
         DeleteObject(iconinfo.hbmColor);
     }
 
-    if (iconinfo.hbmMask) 
+    if (iconinfo.hbmMask)
     {
         DeleteObject(iconinfo.hbmMask);
     }
@@ -1874,11 +2101,11 @@ HCURSOR Test()
 				HBITMAP hbmImage, hbmMask;
 
 				// merge in the plus or link arrow if it's specified
-				if (MergeIcons(hcur, idMerge, &hbmImage, &hbmMask, pptHotSpot)) 
+				if (MergeIcons(hcur, idMerge, &hbmImage, &hbmMask, pptHotSpot))
 				{
 					iIndex = ImageList_Add(_himlCursors, hbmImage, hbmMask);
-				} 
-				else 
+				}
+				else
 				{
 					iIndex = -1;
 				}
@@ -1907,7 +2134,7 @@ HCURSOR Test()
 
 	HCURSOR hcurFinal = SetCursorHotspot(hcurScreen, &ptHotSpot);
 
-	if (hcurScreen != hcurColor) 
+	if (hcurScreen != hcurColor)
 	{
 		::DestroyCursor(hcurColor);
 	}
@@ -1940,6 +2167,8 @@ void CWPhastView::CancelMode(void)
 	//
 	this->CancelMoveGridLine();
 
+	// TODO: this should be a single function
+	// ie this->GetDocument()->CancelMode()
 	if (this->GetDocument())
 	{
 		// Modify Grid
@@ -1957,6 +2186,10 @@ void CWPhastView::CancelMode(void)
 		// New Prism
 		//
 		this->GetDocument()->EndNewPrism();
+
+		// New Drain
+		//
+		this->GetDocument()->EndNewDrain();
 	}
 
 	// Select Object
@@ -2064,9 +2297,447 @@ void CWPhastView::SetBackground(COLORREF cr)
 {
 	this->BackgroundColor[0] = (double)GetRValue(cr)/255.;
 	this->BackgroundColor[1] = (double)GetGValue(cr)/255.;
-	this->BackgroundColor[2] = (double)GetBValue(cr)/255.;	
+	this->BackgroundColor[2] = (double)GetBValue(cr)/255.;
 	if (this->m_Renderer)
 	{
 		this->m_Renderer->SetBackground(this->BackgroundColor);
-	}	
+	}
+}
+
+void CWPhastView::PrismWidgetListener(vtkObject *caller, unsigned long eid, void *clientdata, void *calldata)
+{
+	ASSERT(caller->IsA("CPrismWidget"));
+	ASSERT(clientdata);
+
+	if (clientdata)
+	{
+		CWPhastView* self = reinterpret_cast<CWPhastView*>(clientdata);
+		if (eid == vtkCommand::EndInteractionEvent)
+		{
+			//{{
+			// update polyhedron
+			if (CPrismWidget *widget = CPrismWidget::SafeDownCast(caller))
+			{
+				if (CZoneActor *zoneActor = CZoneActor::SafeDownCast(widget->GetProp3D()))
+				{
+					if (Prism *prism = dynamic_cast<Prism*>(zoneActor->GetPolyhedron()))
+					{
+						Prism copy(*prism);
+						ASSERT(copy.perimeter.Get_source_type() == Data_source::POINTS);
+#if 999
+						std::vector<Point>& vect = copy.perimeter.Get_user_points();
+						const CUnits &units = self->GetDocument()->GetUnits();
+						CGridKeyword gridKeyword = self->GetDocument()->GetGridKeyword();
+						double scale_h = units.map_horizontal.input_to_si / units.horizontal.input_to_si;
+						double scale_v = units.map_vertical.input_to_si / units.vertical.input_to_si;
+						PHAST_Transform t = PHAST_Transform(
+							gridKeyword.m_grid_origin[0],
+							gridKeyword.m_grid_origin[1],
+							gridKeyword.m_grid_origin[2],
+							gridKeyword.m_grid_angle,
+							scale_h,
+							scale_h,
+							scale_v
+							);
+#else
+						std::vector<Point>& vect = copy.perimeter.Get_points();
+#endif
+						vect.clear();
+
+						// rewrite points
+						vtkPoints *points = widget->GetPoints();
+						if (points)
+						{
+							vtkIdType i = 0;
+							Point pt;
+							double *coor = pt.get_coord();
+							for (; i < points->GetNumberOfPoints(); i+=2)
+							{
+								points->GetPoint(i, coor);
+								if (copy.perimeter.Get_user_coordinate_system() == PHAST_Transform::MAP)
+								{
+									t.Inverse_transform(pt);
+								}
+								vect.push_back(Point(pt.get_coord()[0], pt.get_coord()[1], pt.get_coord()[2]));
+							}
+
+							// dump new prism
+							std::ostringstream prism_oss;
+							prism_oss.precision(DBL_DIG);
+
+							prism_oss << copy;
+							TRACE(prism_oss.str().c_str());
+							std::istringstream prism_iss(prism_oss.str());
+
+							// remove first line (-prism)
+							std::string line;
+							std::getline(prism_iss, line);
+							ASSERT(line.find("-prism") != std::string::npos);
+
+							// read new prism
+							Prism new_prism;
+							while(new_prism.Read(prism_iss))
+							{
+								if (prism_iss.rdstate() & std::ios::eofbit) break;
+								prism_iss.clear();
+							}
+
+							// setup domain
+							self->GetDocument()->GetDefaultZone(::domain);
+
+							new_prism.Tidy();
+
+							CZonePrismResetAction *pAction = new CZonePrismResetAction(
+								self,
+								zoneActor,
+								&new_prism
+								);
+
+							// TODO check for 3 coincident points
+							//
+							double *a, *b, *c, *d;
+							double rn, sn, den, r, s;
+							a = vect[0].get_coord();
+							for (size_t i = 0; i < vect.size(); ++i)
+							{
+								b = vect[(i + 1) % vect.size()].get_coord();
+								c = vect[(i + 2) % vect.size()].get_coord();
+								for (size_t j = i+2; j < i+vect.size()-2; ++j)
+								{
+									d = vect[(j + 1) % vect.size()].get_coord();
+									rn = (a[1]-c[1])*(d[0]-c[0])-(a[0]-c[0])*(d[1]-c[1]);
+									sn = (a[1]-c[1])*(b[0]-a[0])-(a[0]-c[0])*(b[1]-a[1]);
+									den = (b[0]-a[0])*(d[1]-c[1])-(b[1]-a[1])*(d[0]-c[0]);
+									if (den != 0)
+									{
+										r = rn/den;
+										s = sn/den;
+										if (r >= 0 && r <= 1 && s >= 0 && s <= 1)
+										{
+											::AfxMessageBox("Perimeter cannot cross itself. Resetting original coordinates.");
+											pAction->UnExecute();
+											delete pAction;
+											return;
+										}
+									}
+									else if (rn == 0)
+									{
+										// both AB and CD are collinear (coincident)
+										// project values to each axis to check for overlap
+										for (i = 0; i < 2; ++i)
+										{
+											double minab = (a[i] < b[i]) ? a[i] : b[i]; // Math.min(a[i], b[i]);
+											double maxab = (a[i] > b[i]) ? a[i] : b[i]; // Math.max(a[i], b[i]);
+											if (minab <= c[i] && c[i] <= maxab)
+											{
+												::AfxMessageBox("Perimeter cannot cross itself. Resetting original coordinates.");
+												pAction->UnExecute();
+												delete pAction;
+												return;
+											}
+											if (minab <= d[i] && d[i] <= maxab)
+											{
+												::AfxMessageBox("Perimeter cannot cross itself. Resetting original coordinates.");
+												pAction->UnExecute();
+												delete pAction;
+												return;
+											}
+										}
+									}
+									c = d;
+								}
+								a = b;
+							}
+							self->GetDocument()->Execute(pAction);
+						}
+					}
+				}
+			}
+		}
+		else if (eid == CPrismWidget::InsertPointEvent)
+		{
+			TRACE("CPrismWidget::InsertPointEvent recd\n");
+
+			if (CPrismWidget *widget = CPrismWidget::SafeDownCast(caller))
+			{
+				if (CZoneActor *zoneActor = CZoneActor::SafeDownCast(widget->GetProp3D()))
+				{
+					if (Prism *prism = dynamic_cast<Prism*>(zoneActor->GetPolyhedron()))
+					{
+						Prism copy(*prism);
+						ASSERT(copy.perimeter.Get_source_type() == Data_source::POINTS);
+						std::vector<Point>& vect = copy.perimeter.Get_user_points();
+						vect.clear();
+
+						const CUnits &units = self->GetDocument()->GetUnits();
+						CGridKeyword gridKeyword = self->GetDocument()->GetGridKeyword();
+						double scale_h = units.map_horizontal.input_to_si / units.horizontal.input_to_si;
+						double scale_v = units.map_vertical.input_to_si / units.vertical.input_to_si;
+						PHAST_Transform t = PHAST_Transform(
+							gridKeyword.m_grid_origin[0],
+							gridKeyword.m_grid_origin[1],
+							gridKeyword.m_grid_origin[2],
+							gridKeyword.m_grid_angle,
+							scale_h,
+							scale_h,
+							scale_v
+							);
+
+						// rewrite points
+						vtkPoints *points = widget->GetInsertPoints();
+						if (points)
+						{
+							vtkIdType i = 0;
+							Point pt;
+							double *coor = pt.get_coord();
+							for (; i < points->GetNumberOfPoints(); i+=2)
+							{
+								points->GetPoint(i, coor);
+								if (copy.perimeter.Get_user_coordinate_system() == PHAST_Transform::MAP)
+								{
+									t.Inverse_transform(pt);
+								}
+								vect.push_back(Point(pt.get_coord()[0], pt.get_coord()[1], pt.get_coord()[2]));
+							}
+							points->Delete();
+
+							// dump new prism
+							std::ostringstream prism_oss;
+							prism_oss.precision(DBL_DIG);
+
+							prism_oss << copy;
+							TRACE(prism_oss.str().c_str());
+							std::istringstream prism_iss(prism_oss.str());
+
+							// remove first line (-prism)
+							std::string line;
+							std::getline(prism_iss, line);
+							ASSERT(line.find("-prism") != std::string::npos);
+
+							// read new prism
+							Prism new_prism;
+							while(new_prism.Read(prism_iss))
+							{
+								if (prism_iss.rdstate() & std::ios::eofbit) break;
+								prism_iss.clear();
+							}
+
+							// setup domain
+							self->GetDocument()->GetDefaultZone(::domain);
+
+							new_prism.Tidy();
+
+							CZonePrismResetAction *pAction = new CZonePrismResetAction(
+								self,
+								zoneActor,
+								&new_prism
+								);
+							self->GetDocument()->Execute(pAction);
+						}
+					}
+				}
+			}
+		}
+		else if (eid == CPrismWidget::DeletePointEvent)
+		{
+			TRACE("CPrismWidget::DeletePointEvent recd\n");
+			if (CPrismWidget *widget = CPrismWidget::SafeDownCast(caller))
+			{
+				if (CZoneActor *zoneActor = CZoneActor::SafeDownCast(widget->GetProp3D()))
+				{
+					if (Prism *prism = dynamic_cast<Prism*>(zoneActor->GetPolyhedron()))
+					{
+						Prism copy(*prism);
+						ASSERT(copy.perimeter.Get_source_type() == Data_source::POINTS);
+						std::vector<Point>& vect = copy.perimeter.Get_user_points();
+						vect.clear();
+
+						const CUnits &units = self->GetDocument()->GetUnits();
+						CGridKeyword gridKeyword = self->GetDocument()->GetGridKeyword();
+						double scale_h = units.map_horizontal.input_to_si / units.horizontal.input_to_si;
+						double scale_v = units.map_vertical.input_to_si / units.vertical.input_to_si;
+						PHAST_Transform t = PHAST_Transform(
+							gridKeyword.m_grid_origin[0],
+							gridKeyword.m_grid_origin[1],
+							gridKeyword.m_grid_origin[2],
+							gridKeyword.m_grid_angle,
+							scale_h,
+							scale_h,
+							scale_v
+							);
+
+						// rewrite points
+						vtkPoints *points = widget->GetDeletePoints();
+						if (points)
+						{
+							if (points->GetNumberOfPoints() < 6)
+							{
+								::AfxMessageBox("Perimeters must contain at least three points.");
+								points->Delete();
+								return;
+							}
+
+							vtkIdType i = 0;
+							Point pt;
+							double *coor = pt.get_coord();
+							for (; i < points->GetNumberOfPoints(); i+=2)
+							{
+								points->GetPoint(i, coor);
+								if (copy.perimeter.Get_user_coordinate_system() == PHAST_Transform::MAP)
+								{
+									t.Inverse_transform(pt);
+								}
+								vect.push_back(Point(pt.get_coord()[0], pt.get_coord()[1], pt.get_coord()[2]));
+							}
+							points->Delete();
+
+							// dump new prism
+							std::ostringstream prism_oss;
+							prism_oss.precision(DBL_DIG);
+
+							prism_oss << copy;
+							TRACE(prism_oss.str().c_str());
+							std::istringstream prism_iss(prism_oss.str());
+
+							// remove first line (-prism)
+							std::string line;
+							std::getline(prism_iss, line);
+							ASSERT(line.find("-prism") != std::string::npos);
+
+							// read new prism
+							Prism new_prism;
+							while(new_prism.Read(prism_iss))
+							{
+								if (prism_iss.rdstate() & std::ios::eofbit) break;
+								prism_iss.clear();
+							}
+
+							// setup domain
+							self->GetDocument()->GetDefaultZone(::domain);
+
+							new_prism.Tidy();
+
+							CZonePrismResetAction *pAction = new CZonePrismResetAction(
+								self,
+								zoneActor,
+								&new_prism
+								);
+
+							// TODO check for 3 coincident points
+							//
+							const char szMsg[] = "Deleting this point would cause the perimeter to cross itself. Resetting original coordinates.";
+							double *a, *b, *c, *d;
+							double rn, sn, den, r, s;
+							a = vect[0].get_coord();
+							for (size_t i = 0; i < vect.size(); ++i)
+							{
+								b = vect[(i + 1) % vect.size()].get_coord();
+								c = vect[(i + 2) % vect.size()].get_coord();
+								for (size_t j = i+2; j < i+vect.size()-2; ++j)
+								{
+									d = vect[(j + 1) % vect.size()].get_coord();
+									rn = (a[1]-c[1])*(d[0]-c[0])-(a[0]-c[0])*(d[1]-c[1]);
+									sn = (a[1]-c[1])*(b[0]-a[0])-(a[0]-c[0])*(b[1]-a[1]);
+									den = (b[0]-a[0])*(d[1]-c[1])-(b[1]-a[1])*(d[0]-c[0]);
+									if (den != 0)
+									{
+										r = rn/den;
+										s = sn/den;
+										if (r >= 0 && r <= 1 && s >= 0 && s <= 1)
+										{
+											::AfxMessageBox(szMsg);
+											pAction->UnExecute();
+											delete pAction;
+											return;
+										}
+									}
+									else if (rn == 0)
+									{
+										// both AB and CD are collinear (coincident)
+										// project values to each axis to check for overlap
+										for (i = 0; i < 2; ++i)
+										{
+											double minab = (a[i] < b[i]) ? a[i] : b[i]; // Math.min(a[i], b[i]);
+											double maxab = (a[i] > b[i]) ? a[i] : b[i]; // Math.max(a[i], b[i]);
+											if (minab <= c[i] && c[i] <= maxab)
+											{
+												::AfxMessageBox(szMsg);
+												pAction->UnExecute();
+												delete pAction;
+												return;
+											}
+											if (minab <= d[i] && d[i] <= maxab)
+											{
+												::AfxMessageBox(szMsg);
+												pAction->UnExecute();
+												delete pAction;
+												return;
+											}
+										}
+									}
+									c = d;
+								}
+								a = b;
+							}
+							self->GetDocument()->Execute(pAction);
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+void CWPhastView::SetMapMode(void)
+{
+	this->SetCoordinateMode(CWPhastView::MapMode);
+}
+
+void CWPhastView::SetGridMode(void)
+{
+	this->SetCoordinateMode(CWPhastView::GridMode);
+}
+
+void CWPhastView::SetCoordinateMode(CoordinateState mode)
+{
+	if (mode == CWPhastView::GridMode)
+	{
+		this->CoordinateMode = CWPhastView::GridMode;
+		this->UpdateWellMode();
+	}
+	else if (mode == CWPhastView::MapMode)
+	{
+		this->CoordinateMode = CWPhastView::MapMode;
+		this->UpdateWellMode();
+	}
+	else
+	{
+		ASSERT(FALSE);
+	}
+}
+
+CWPhastView::CoordinateState CWPhastView::GetCoordinateMode(void)const
+{
+	return this->CoordinateMode;
+}
+
+void CWPhastView::UpdateWellMode(void)
+{
+	if (CWPhastView::CreatingNewWell())
+	{
+		if (this->CoordinateMode == CWPhastView::GridMode)
+		{
+			this->m_pCursor3DActor->SetOrientation(0, 0, 0);
+		}
+		else if (this->CoordinateMode == CWPhastView::MapMode)
+		{
+			CGridKeyword gridKeyword = this->GetDocument()->GetGridKeyword();
+			this->m_pCursor3DActor->SetOrientation(0, 0, -gridKeyword.m_grid_angle);
+		}
+		else
+		{
+			ASSERT(FALSE);
+		}
+		this->m_RenderWindow->Render();
+	}
 }

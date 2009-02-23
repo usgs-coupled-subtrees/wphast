@@ -14,7 +14,9 @@ public:
     COLORREF crLeaky;
     COLORREF crSpecHead;
     COLORREF crRiver;
+	COLORREF crDrain;
     COLORREF crWell;
+	COLORREF crZoneFlowRate;
     COLORREF crBackground;
 
 	virtual void Serialize(bool bStoring, hid_t loc_id);

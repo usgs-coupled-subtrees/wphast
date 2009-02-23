@@ -9,7 +9,9 @@
 
 #define EXTERNAL extern
 #include "srcinput/hstinpt.h"
+#include "srcinput/PHAST_Transform.h"
 #undef EXTERNAL
+#include "enum_fix.h"
 
 #include <iosfwd> // std::ostream
 #include "TimeSeries.h"
@@ -123,13 +125,21 @@ public:
 class CRiverPoint
 {
 public:
-	double x;         int x_defined;
-	double y;         int y_defined;
-	double z;         int z_defined;
-	double depth;     int depth_defined;
-	double k;         int k_defined;
-	double width;     int width_defined;
-	double thickness; int thickness_defined;
+	double x_user;         int x_user_defined;
+	double y_user;         int y_user_defined;
+	double z_user;         int z_user_defined;
+	double depth_user;     int depth_user_defined;
+	double k;              int k_defined;
+	double width_user;     int width_user_defined;
+	double thickness;      int thickness_defined;
+	//int z_input_defined;
+
+	//{{
+	double x_grid;
+	double y_grid;
+	double width_grid;
+	double z_grid;
+	//}}
 
 	CRiverPoint();
 	CRiverPoint(const River_Point& rp);
@@ -165,6 +175,8 @@ public:
 public:
 	int n_user;
 	std::string description;
+	PHAST_Transform::COORDINATE_SYSTEM coordinate_system;
+	PHAST_Transform::COORDINATE_SYSTEM z_coordinate_system_user;
 	std::list<CRiverPoint> m_listPoints;
 protected:
 	friend std::ostream& operator<< (std::ostream &os, const CRiver &a);

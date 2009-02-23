@@ -23,45 +23,48 @@ void CWell::InternalInit(void)
 {
 	// Initialize well
 	//
-	this->depth                 = new Well_Interval[1];
-	this->count_depth           = 0;
+	this->depth_user                = new Well_Interval[1];
+	this->count_depth_user          = 0;
 
-	this->elevation             = new Well_Interval[1];
-	this->count_elevation       = 0;
+	this->elevation_user            = new Well_Interval[1];
+	this->count_elevation_user      = 0;
 
-	this->cell_fraction         = new Cell_Fraction[1];
-	this->count_cell_fraction   = 0;
+	this->cell_fraction             = new Cell_Fraction[1];
+	this->count_cell_fraction       = 0;
 
-	this->new_def               = TRUE;
-	this->n_user                = 1;
-	this->description           = NULL;
+	this->new_def                   = TRUE;
+	this->n_user                    = 1;
+	this->description               = NULL;
 
-	this->x                     = 0;
-	this->x_defined             = FALSE;
+	this->x_user                    = 0;
+	this->x_user_defined            = FALSE;
 
-	this->y                     = 0;
-	this->y_defined             = FALSE;
+	this->y_user                    = 0;
+	this->y_user_defined            = FALSE;
 
-	this->solution_defined      = FALSE;
+	this->solution_defined          = FALSE;
 
-	this->lsd                   = 0;
-	this->lsd_defined           = FALSE;
+	this->lsd_user                  = 0;
+	this->lsd_user_defined          = FALSE;
 
-	this->mobility_and_pressure = FALSE;
+	this->mobility_and_pressure     = FALSE;
 
-	this->depth_defined         = FALSE;
-	this->count_depth           = 0;
+	this->depth_user_defined        = FALSE;
+	this->count_depth_user          = 0;
 
-	this->elevation_defined     = FALSE;
-	this->count_elevation       = 0;
+	this->elevation_user_defined    = FALSE;
+	this->count_elevation_user      = 0;
 
-	this->q_defined             = FALSE;
+	this->q_defined                 = FALSE;
 
-	this->diameter              = 0;
-	this->diameter_defined      = FALSE;
+	this->diameter                  = 0;
+	this->diameter_defined          = FALSE;
 
-	this->radius                = 0;
-	this->radius_defined        = FALSE;
+	this->radius                    = 0;
+	this->radius_defined            = FALSE;
+
+	this->xy_coordinate_system_user = PHAST_Transform::GRID;
+	this->z_coordinate_system_user  = PHAST_Transform::GRID;
 }
 
 void CWell::InternalDelete(void)
@@ -69,13 +72,13 @@ void CWell::InternalDelete(void)
 	delete[] this->description;
 	this->description = NULL;
 
-	this->count_depth = 0;
-	delete[] this->depth;
-	this->depth = NULL;
+	this->count_depth_user = 0;
+	delete[] this->depth_user;
+	this->depth_user = NULL;
 
-	this->count_elevation = 0;
-	delete[] this->elevation;
-	this->elevation = NULL;
+	this->count_elevation_user = 0;
+	delete[] this->elevation_user;
+	this->elevation_user = NULL;
 
 	this->count_cell_fraction = 0;
 	delete[] this->cell_fraction;
@@ -89,24 +92,24 @@ void CWell::InternalCopy(const Well& src)
 {
 	int i;
 
-	this->count_depth           = src.count_depth;
-	this->depth                 = new Well_Interval[this->count_depth + 1];
-	for (i = 0; i < this->count_depth; ++i)
+	this->count_depth_user           = src.count_depth_user;
+	this->depth_user                 = new Well_Interval[this->count_depth_user + 1];
+	for (i = 0; i < this->count_depth_user; ++i)
 	{
-		this->depth[i].bottom = src.depth[i].bottom;
-		this->depth[i].top    = src.depth[i].top;
+		this->depth_user[i].bottom = src.depth_user[i].bottom;
+		this->depth_user[i].top    = src.depth_user[i].top;
 	}
 
-	this->count_elevation       = src.count_elevation;
-	this->elevation             = new Well_Interval[this->count_elevation + 1];
-	for (i = 0; i < this->count_elevation; ++i)
+	this->count_elevation_user       = src.count_elevation_user;
+	this->elevation_user             = new Well_Interval[this->count_elevation_user + 1];
+	for (i = 0; i < this->count_elevation_user; ++i)
 	{
-		this->elevation[i].bottom = src.elevation[i].bottom;
-		this->elevation[i].top    = src.elevation[i].top;
+		this->elevation_user[i].bottom = src.elevation_user[i].bottom;
+		this->elevation_user[i].top    = src.elevation_user[i].top;
 	}
 
-	this->count_cell_fraction   = src.count_cell_fraction;
-	this->cell_fraction         = new Cell_Fraction[this->count_cell_fraction + 1];
+	this->count_cell_fraction        = src.count_cell_fraction;
+	this->cell_fraction              = new Cell_Fraction[this->count_cell_fraction + 1];
 	for (i = 0; i < this->count_cell_fraction; ++i)
 	{
 		this->cell_fraction[i].cell  = src.cell_fraction[i].cell;
@@ -115,8 +118,8 @@ void CWell::InternalCopy(const Well& src)
 		this->cell_fraction[i].lower = src.cell_fraction[i].lower;
 	}
 
-	this->new_def               = src.new_def;
-	this->n_user                = src.n_user;
+	this->new_def                    = src.new_def;
+	this->n_user                     = src.n_user;
 
 	if (src.description)
 	{
@@ -129,60 +132,66 @@ void CWell::InternalCopy(const Well& src)
 		this->description = 0;
 	}
 
-	this->x                     = src.x;
-	this->x_defined             = src.x_defined;
+	this->x_user                    = src.x_user;
+	this->x_user_defined            = src.x_user_defined;
 
-	this->y                     = src.y;
-	this->y_defined             = src.y_defined;
+	this->y_user                    = src.y_user;
+	this->y_user_defined            = src.y_user_defined;
 
-	this->solution_defined      = src.solution_defined;
+	this->x_grid                    = src.x_grid;
+	this->y_grid                    = src.y_grid;
 
-	this->lsd                   = src.lsd;
-	this->lsd_defined           = src.lsd_defined;
+	this->solution_defined          = src.solution_defined;
 
-	this->mobility_and_pressure = src.mobility_and_pressure;
+	this->lsd_user                  = src.lsd_user;
+	this->lsd_user_defined          = src.lsd_user_defined;
 
-	this->depth_defined         = src.depth_defined;
-	this->count_depth           = src.count_depth;
+	this->mobility_and_pressure     = src.mobility_and_pressure;
 
-	this->elevation_defined     = src.elevation_defined;
-	this->count_elevation       = src.count_elevation;
+	this->depth_user_defined        = src.depth_user_defined;
+	this->count_depth_user          = src.count_depth_user;
 
-	this->q_defined             = src.q_defined;
+	this->elevation_user_defined    = src.elevation_user_defined;
+	this->count_elevation_user      = src.count_elevation_user;
 
-	this->diameter              = src.diameter;
-	this->diameter_defined      = src.diameter_defined;
+	this->q_defined                 = src.q_defined;
 
-	this->radius                = src.radius;
-	this->radius_defined        = src.radius_defined;
+	this->diameter                  = src.diameter;
+	this->diameter_defined          = src.diameter_defined;
+
+	this->radius                    = src.radius;
+	this->radius_defined            = src.radius_defined;
+
+	this->xy_coordinate_system_user = src.xy_coordinate_system_user;
+	this->z_coordinate_system_user  = src.z_coordinate_system_user; 
 }
 
 void CWell::Reduce(void)
 {
-	if (this->count_depth && this->count_elevation)
+	if (this->count_depth_user && this->count_elevation_user)
 	{
-		if (this->lsd_defined)
+		if (this->lsd_user_defined)
 		{
 			// convert the elevations to depths
 			//
-			Well_Interval *new_depths = new Well_Interval[this->count_depth + this->count_elevation + 1];
-			for (int i = 0; i < this->count_depth; ++i)
+			Well_Interval *new_depths = new Well_Interval[this->count_depth_user + this->count_elevation_user + 1];
+			for (int i = 0; i < this->count_depth_user; ++i)
 			{
-				new_depths[i] = this->depth[i];
+				new_depths[i] = this->depth_user[i];
 			}
-			for (int i = 0; i < this->count_elevation; ++i)
+			for (int i = 0; i < this->count_elevation_user; ++i)
 			{
-				new_depths[i + this->count_depth].top    = this->lsd - this->elevation[i].top;
-				new_depths[i + this->count_depth].bottom = this->lsd -  this->elevation[i].bottom;
+				new_depths[i + this->count_depth_user].top    = this->lsd_user - this->elevation_user[i].top;
+				new_depths[i + this->count_depth_user].bottom = this->lsd_user -  this->elevation_user[i].bottom;
 			}
-			delete[] this->depth;
-			delete[] this->elevation;
+			delete[] this->depth_user;
+			delete[] this->elevation_user;
 
-			this->count_elevation = 0;
-			this->elevation = 0;
+			this->count_elevation_user = 0;
+			this->elevation_user = 0;
 
-			this->count_depth = this->count_depth + this->count_elevation;
-			this->depth = new_depths;
+			this->count_depth_user = this->count_depth_user + this->count_elevation_user;
+			this->depth_user = new_depths;
 		}
 		else
 		{
@@ -335,36 +344,43 @@ void CWell::Serialize(bool bStoring, hid_t loc_id)
 
 	HDF_GET_CHAR_STAR_MACRO(description);
 
-	HDF_GETSET_DEFINED_MACRO(x,        H5T_NATIVE_DOUBLE);
-	HDF_GETSET_DEFINED_MACRO(y,        H5T_NATIVE_DOUBLE);
-	HDF_GETSET_DEFINED_MACRO(radius,   H5T_NATIVE_DOUBLE);
-	HDF_GETSET_DEFINED_MACRO(diameter, H5T_NATIVE_DOUBLE);
-	HDF_GETSET_DEFINED_MACRO(lsd,      H5T_NATIVE_DOUBLE);
+	HDF_GETSET_DEFINED_MACRO(x_user,        H5T_NATIVE_DOUBLE);
+	HDF_GETSET_DEFINED_MACRO(y_user,        H5T_NATIVE_DOUBLE);
+	HDF_GETSET_DEFINED_MACRO(radius,        H5T_NATIVE_DOUBLE);
+	HDF_GETSET_DEFINED_MACRO(diameter,      H5T_NATIVE_DOUBLE);
+	HDF_GETSET_DEFINED_MACRO(lsd_user,      H5T_NATIVE_DOUBLE);
 
-	HDF_WELL_INTERVAL_MACRO(elevation);
-	HDF_WELL_INTERVAL_MACRO(depth);
+	HDF_WELL_INTERVAL_MACRO(elevation_user);
+	HDF_WELL_INTERVAL_MACRO(depth_user);
+#if 9991 // well w/ grid rotation
+	CGlobal::HDFSerializeXYCoordinateSystem(bStoring, loc_id, this->xy_coordinate_system_user);
+	CGlobal::HDFSerializeZCoordinateSystem(bStoring, loc_id, this->z_coordinate_system_user);	
+#endif // 9991 well w/ grid rotation
 }
 
 void CWell::Serialize(CArchive& ar)
 {
-	int nVersion = 1;
+	int nVersion = 2;
 
 	ARC_VERSION(ar, CWell, nVersion);
 
 	ARC_GETSET_MACRO(ar, n_user);
 	ARC_GETSET_MACRO(ar, new_def);
 	ARC_GETSET_MACRO(ar, mobility_and_pressure);
-
+#if 9991 // well w/ grid rotation
+	ARC_GETSET_MACRO(ar, (int&)xy_coordinate_system_user);
+	ARC_GETSET_MACRO(ar, (int&)z_coordinate_system_user);
+#endif // 9991 well w/ grid rotation
 	ARC_GET_CHAR_STAR_MACRO(ar, description);
 
-	ARC_GETSET_DEFINED_MACRO(ar, x);
-	ARC_GETSET_DEFINED_MACRO(ar, y);
+	ARC_GETSET_DEFINED_MACRO(ar, x_user);
+	ARC_GETSET_DEFINED_MACRO(ar, y_user);
 	ARC_GETSET_DEFINED_MACRO(ar, radius);
 	ARC_GETSET_DEFINED_MACRO(ar, diameter);
-	ARC_GETSET_DEFINED_MACRO(ar, lsd);
+	ARC_GETSET_DEFINED_MACRO(ar, lsd_user);
 
-	ARC_WELL_INTERVAL_MACRO(ar, elevation);
-	ARC_WELL_INTERVAL_MACRO(ar, depth);
+	ARC_WELL_INTERVAL_MACRO(ar, elevation_user);
+	ARC_WELL_INTERVAL_MACRO(ar, depth_user);
 
 	ARC_VERSION(ar, CWell, nVersion);
 }

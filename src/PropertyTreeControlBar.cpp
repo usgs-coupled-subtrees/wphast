@@ -19,9 +19,9 @@
 #include "MediaPropertyPage.h"
 #include "GridPropertyPage.h"
 #include "RiverPropertySheet.h"
-#include "SetRiverAction.h"
-#include "RiverDeleteAction.h"
-#include "RiverDeletePointAction.h"
+#include "SetAction.h"
+#include "PointConnectorDeleteAction.h"
+#include "PointConnectorDeletePointAction.h"
 #include "DragDropAction.h"
 #include "ZoneCreateAction.h"
 
@@ -33,11 +33,13 @@
 #include "ZoneActor.h"
 #include "WellActor.h"
 #include "RiverActor.h"
+#include "DrainActor.h"
 #include "MediaZoneActor.h"
 #include "ICZoneActor.h"
 #include "ICHeadZoneActor.h"
 #include "ICChemZoneActor.h"
 #include "BCZoneActor.h"
+#include "ZoneFlowRateZoneActor.h"
 #include "Units.h"
 #include "NewModel.h"
 #include "FlowOnly.h"
@@ -48,6 +50,7 @@
 #include "BoxPropertiesDialogBar.h"
 #include "Global.h"
 #include "RiverPropertyPage2.h"
+#include "DrainPropertyPage.h"
 
 // Actions
 #include "ResizeGridAction.h"
@@ -55,7 +58,7 @@
 #include "ZoneRemoveAction.h"
 #include "WellDeleteAction.h"
 #include "WellCreateAction.h"
-#include "RiverCreateAction.h"
+#include "PointConnectorCreateAction.h"
 
 #include <vtkWin32RenderWindowInteractor.h>
 #include <vtkProperty.h>
@@ -87,9 +90,11 @@ static const TCHAR szIC_CHEM[]             = _T("CHEMISTRY_IC");
 static const TCHAR szBOUNDARY_CONDITIONS[] = _T("BOUNDARY_CONDITIONS");
 static const TCHAR szWELLS[]               = _T("WELLS");
 static const TCHAR szRIVERS[]              = _T("RIVERS");
+static const TCHAR szDRAINS[]              = _T("DRAINS");
 static const TCHAR szPRINT_INITIAL[]       = _T("PRINT_INITIAL");
 static const TCHAR szPRINT_FREQUENCY[]     = _T("PRINT_FREQUENCY");
 static const TCHAR szTIME_CONTROL[]        = _T("TIME_CONTROL");
+static const TCHAR szZONE_FLOW_RATES[]     = _T("ZONE_FLOW_RATES");
 
 static const int BC_INDEX              = 0;
 static const int PRINT_FREQUENCY_INDEX = 1;
@@ -212,7 +217,7 @@ void CPropertyTreeControlBar::OnSelChanged(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 	{
 		HTREEITEM hParent = m_wndTree.GetParentItem(pNMTREEVIEW->itemNew.hItem);
 
-		if (hParent == m_nodeMedia || hParent == this->m_nodeBC || hParent == this->m_nodeICHead || hParent == this->m_nodeICChem)
+		if (hParent == m_nodeMedia || hParent == this->m_nodeBC || hParent == this->m_nodeICHead || hParent == this->m_nodeICChem || hParent == this->m_nodeZFRates)
 		{
 
 			CZoneActor* pZone = reinterpret_cast<CZoneActor*>(m_wndTree.GetItemData(pNMTREEVIEW->itemNew.hItem));
@@ -240,6 +245,21 @@ void CPropertyTreeControlBar::OnSelChanged(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 			}
 		}
 		else if (hParent == this->m_nodeRivers)
+		{
+			if (item.GetData())
+			{
+				if (vtkProp* pProp = vtkProp::SafeDownCast(reinterpret_cast<vtkObject*>(item.GetData())))
+				{
+					// Notify listeners
+					//
+					if (CWPhastDoc* pDoc = this->GetDocument())
+					{
+						pDoc->Notify(this, WPN_SELCHANGED, 0, pProp);
+					}
+				}
+			}
+		}
+		else if (hParent == this->m_nodeDrains)
 		{
 			if (item.GetData())
 			{
@@ -303,7 +323,10 @@ void CPropertyTreeControlBar::OnSelChanged(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 				{
 					if (CRiverActor *pRiverActor = CRiverActor::SafeDownCast(reinterpret_cast<vtkObject*>(riverNode.GetData())))
 					{
-						pRiverActor->SelectPoint(riverNode.GetIndex(item));
+						if (riverNode.GetIndex(item) > 1)
+						{
+							pRiverActor->SelectPoint(riverNode.GetIndex(item) - 2);
+						}
 					}
 					else
 					{
@@ -312,6 +335,31 @@ void CPropertyTreeControlBar::OnSelChanged(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 				}
 			}
 		}
+
+		// Drain point selection
+		//
+		if (item.IsNodeAncestor(this->GetDrainsNode()) && item != this->GetDrainsNode())
+		{
+			if ((item != this->GetDrainsNode()) && (item.GetParent() != this->GetDrainsNode()))
+			{
+				CTreeCtrlNode drainNode = item.GetParent();
+				if (drainNode.GetData())
+				{
+					if (CDrainActor *pDrainActor = CDrainActor::SafeDownCast(reinterpret_cast<vtkObject*>(drainNode.GetData())))
+					{
+						if (drainNode.GetIndex(item) > 1)
+						{
+							pDrainActor->SelectPoint(drainNode.GetIndex(item) - 2);
+						}
+					}
+					else
+					{
+						ASSERT(FALSE);
+					}
+				}
+			}
+		}
+
 
 	}
 	TRACE("%s, out\n", __FUNCTION__);
@@ -435,6 +483,20 @@ void CPropertyTreeControlBar::SetNodeCheck(CTreeCtrlNode node, UINT nCheckState)
 			return;
 		}
 	}
+	else if (node == this->GetDrainsNode())
+	{
+		if (!((pDoc = this->GetDocument()) && (pPropAssembly = pDoc->GetPropAssemblyDrains())))
+		{
+			return;
+		}
+	}
+	else if (node == this->GetZoneFlowRatesNode())
+	{
+		if (!((pDoc = this->GetDocument()) && (pPropAssembly = pDoc->GetPropAssemblyZoneFlowRates())))
+		{
+			return;
+		}
+	}
 	else if (node == this->GetGridNode())
 	{
 		if (CWPhastDoc *pDoc = this->GetDocument())
@@ -536,6 +598,11 @@ UINT CPropertyTreeControlBar::GetICCheck(void)
 UINT CPropertyTreeControlBar::GetMediaCheck(void)
 {
 	return this->GetNodeCheck(this->GetMediaNode());
+}
+
+UINT CPropertyTreeControlBar::GetZoneFlowRatesCheck(void)
+{
+	return this->GetNodeCheck(this->GetZoneFlowRatesNode());
 }
 
 void CPropertyTreeControlBar::OnNMDblClk(NMHDR* pNMHDR, LRESULT* pResult)
@@ -768,6 +835,7 @@ bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode editNode, bool bDoEdi
 							page.SetProperties(river);
 							page.SetFlowOnly(bool(pWPhastDoc->GetFlowOnly()));
 							page.SetUnits(pWPhastDoc->GetUnits());
+							page.SetGridKeyword(pWPhastDoc->GetGridKeyword());
 							if (point) page.SetPoint(point);
 
 							std::set<int> riverNums;
@@ -786,7 +854,7 @@ bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode editNode, bool bDoEdi
 							{
 								CRiver river;
 								page.GetProperties(river);
-								pWPhastDoc->Execute(new CSetRiverAction(pRiverActor, river, pWPhastDoc));
+								pWPhastDoc->Execute(new CSetAction<CRiverActor, CRiver>(pRiverActor, river, pWPhastDoc));
 							}
 						}
 					}
@@ -797,6 +865,82 @@ bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode editNode, bool bDoEdi
 		return false;
 	}
 
+
+	// DRAINS
+	//
+	if (item.IsNodeAncestor(this->m_nodeDrains))
+	{
+		if (item != this->m_nodeDrains)
+		{
+			CTreeCtrlNode ptNode = item;
+			while (item.GetParent() != this->m_nodeDrains)
+			{
+				item = item.GetParent();
+				if (!item) break;
+			}
+
+			// determine point being edited
+			//
+			int point = 0;
+			if (ptNode != item)
+			{
+				while (ptNode.GetParent() != item)
+				{
+					ptNode = ptNode.GetParent();
+					if (!ptNode) break;
+				}
+				point = item.GetIndex(ptNode);
+			}
+
+			if (item.GetData())
+			{
+				if (CDrainActor* pDrainActor = CDrainActor::SafeDownCast((vtkObject*)item.GetData()))
+				{
+					if (bDoEdit)
+					{
+						CDrain drain = pDrainActor->GetDrain();
+
+						CString str;
+						str.Format(_T("Drain %d Properties"), drain.n_user);
+						CPropertySheet sheet(str);
+						
+						CDrainPropertyPage page;
+						sheet.AddPage(&page);
+
+						if (CWPhastDoc* pWPhastDoc = this->GetDocument())
+						{
+							page.SetProperties(drain);
+							page.SetFlowOnly(bool(pWPhastDoc->GetFlowOnly()));
+							page.SetUnits(pWPhastDoc->GetUnits());
+							page.SetGridKeyword(pWPhastDoc->GetGridKeyword());
+							if (point) page.SetPoint(point);
+
+							std::set<int> drainNums;
+							pWPhastDoc->GetUsedDrainNumbers(drainNums);
+
+							// remove this drain number from used list
+							std::set<int>::iterator iter = drainNums.find(drain.n_user);
+							ASSERT(iter != drainNums.end());
+							if (iter != drainNums.end())
+							{
+								drainNums.erase(iter);
+							}
+							page.SetUsedDrainNumbers(drainNums);
+
+							if (sheet.DoModal() == IDOK)
+							{
+								CDrain drain;
+								page.GetProperties(drain);
+								pWPhastDoc->Execute(new CSetAction<CDrainActor, CDrain>(pDrainActor, drain, pWPhastDoc));
+							}
+						}
+					}
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 
 	// GRID
 	//
@@ -884,6 +1028,32 @@ bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode editNode, bool bDoEdi
 			if (item.GetData())
 			{
 				if (CZoneActor* pZone = CZoneActor::SafeDownCast((vtkObject*)item.GetData()))
+				{
+					if (bDoEdit)
+					{
+						pZone->Edit(&this->m_wndTree);
+					}
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	// Zone Flow Rates
+	//
+	if (item.IsNodeAncestor(this->m_nodeZFRates))
+	{
+		if (item != this->m_nodeZFRates)
+		{
+			while (item.GetParent() != this->m_nodeZFRates)
+			{
+				item = item.GetParent();
+				if (!item) break;
+			}
+			if (item.GetData())
+			{
+				if (CZoneFlowRateZoneActor* pZone = CZoneFlowRateZoneActor::SafeDownCast((vtkObject*)item.GetData()))
 				{
 					if (bDoEdit)
 					{
@@ -1259,17 +1429,21 @@ void CPropertyTreeControlBar::DeleteContents()
 	this->m_nodeBC           = this->m_wndTree.InsertItem(szBOUNDARY_CONDITIONS );
 	this->m_nodeWells        = this->m_wndTree.InsertItem(szWELLS               );
 	this->m_nodeRivers       = this->m_wndTree.InsertItem(szRIVERS              );
+	this->m_nodeDrains       = this->m_wndTree.InsertItem(szDRAINS              );
+	this->m_nodeZFRates      = this->m_wndTree.InsertItem(szZONE_FLOW_RATES     );
 	this->m_nodePrintInput   = this->m_wndTree.InsertItem(szPRINT_INITIAL       );
 	this->m_nodePF           = this->m_wndTree.InsertItem(szPRINT_FREQUENCY     );
 	this->m_nodeTimeControl2 = this->m_wndTree.InsertItem(szTIME_CONTROL        );
 
 	// set initial checkmark states (eyes)
-	this->m_wndTree.SetItemState(this->m_nodeMedia,  INDEXTOSTATEIMAGEMASK(BST_CHECKED + 1), TVIS_STATEIMAGEMASK);
-	this->m_wndTree.SetItemState(this->m_nodeGrid,   INDEXTOSTATEIMAGEMASK(BST_CHECKED + 1), TVIS_STATEIMAGEMASK);
-	this->m_wndTree.SetItemState(this->m_nodeIC,     INDEXTOSTATEIMAGEMASK(BST_CHECKED + 1), TVIS_STATEIMAGEMASK);
-	this->m_wndTree.SetItemState(this->m_nodeBC,     INDEXTOSTATEIMAGEMASK(BST_CHECKED + 1), TVIS_STATEIMAGEMASK);
-	this->m_wndTree.SetItemState(this->m_nodeWells,  INDEXTOSTATEIMAGEMASK(BST_CHECKED + 1), TVIS_STATEIMAGEMASK);
-	this->m_wndTree.SetItemState(this->m_nodeRivers, INDEXTOSTATEIMAGEMASK(BST_CHECKED + 1), TVIS_STATEIMAGEMASK);
+	this->m_wndTree.SetItemState(this->m_nodeMedia,   INDEXTOSTATEIMAGEMASK(BST_CHECKED + 1), TVIS_STATEIMAGEMASK);
+	this->m_wndTree.SetItemState(this->m_nodeGrid,    INDEXTOSTATEIMAGEMASK(BST_CHECKED + 1), TVIS_STATEIMAGEMASK);
+	this->m_wndTree.SetItemState(this->m_nodeIC,      INDEXTOSTATEIMAGEMASK(BST_CHECKED + 1), TVIS_STATEIMAGEMASK);
+	this->m_wndTree.SetItemState(this->m_nodeBC,      INDEXTOSTATEIMAGEMASK(BST_CHECKED + 1), TVIS_STATEIMAGEMASK);
+	this->m_wndTree.SetItemState(this->m_nodeWells,   INDEXTOSTATEIMAGEMASK(BST_CHECKED + 1), TVIS_STATEIMAGEMASK);
+	this->m_wndTree.SetItemState(this->m_nodeRivers,  INDEXTOSTATEIMAGEMASK(BST_CHECKED + 1), TVIS_STATEIMAGEMASK);
+	this->m_wndTree.SetItemState(this->m_nodeDrains,  INDEXTOSTATEIMAGEMASK(BST_CHECKED + 1), TVIS_STATEIMAGEMASK);
+	this->m_wndTree.SetItemState(this->m_nodeZFRates, INDEXTOSTATEIMAGEMASK(BST_CHECKED + 1), TVIS_STATEIMAGEMASK);
 }
 
 void CPropertyTreeControlBar::Update(IObserver* pSender, LPARAM lHint, CObject* pHint, vtkObject* pObject)
@@ -1348,6 +1522,21 @@ void CPropertyTreeControlBar::Update(IObserver* pSender, LPARAM lHint, CObject* 
 						}
 					}
 				}
+				parent = this->GetZoneFlowRatesNode();
+				for (int i = 0; !bFound && i < parent.GetChildCount(); ++i)
+				{
+					CTreeCtrlNode node = parent.GetChildAt(i);
+					if (node.GetData())
+					{
+						CZoneActor *pZoneActor = (CZoneActor*)node.GetData();
+						if (pZoneActor == pObject)
+						{
+							node.Select();
+							bFound = true;
+							break;
+						}
+					}
+				}
 				ASSERT(bFound);
 			}
 			else if (CWellActor* pWellActor = CWellActor::SafeDownCast(pProp))
@@ -1391,6 +1580,27 @@ void CPropertyTreeControlBar::Update(IObserver* pSender, LPARAM lHint, CObject* 
 				}
 				ASSERT(bFound);
 				if (!bFound) rivers.Select();
+			}
+			else if (CDrainActor* pDrainActor = CDrainActor::SafeDownCast(pProp))
+			{
+				CTreeCtrlNode drains = this->GetDrainsNode();
+				bool bFound = false;
+				for (int i = 0; i < drains.GetChildCount(); ++i)
+				{
+					CTreeCtrlNode drn = drains.GetChildAt(i);
+					if (drn.GetData())
+					{
+						CDrainActor* pDrainActor = (CDrainActor*)drn.GetData();
+						if (pDrainActor == pObject)
+						{
+							drn.Select();
+							bFound = true;
+							break;
+						}
+					}
+				}
+				ASSERT(bFound);
+				if (!bFound) drains.Select();
 			}
 			else
 			{
@@ -1506,10 +1716,8 @@ void CPropertyTreeControlBar::ClearSelection(void)
 	this->SelectWithoutNotification(0);
 }
 
-bool CPropertyTreeControlBar::IsNodeDraggable(CTreeCtrlNode dragNode, COleDataSource &oleDataSource)
+bool CPropertyTreeControlBar::IsNodeDraggable(CTreeCtrlNode dragNode, COleDataSource *pOleDataSource)
 {
-	std::ostringstream oss;
-
 	if (dragNode.GetParent() == this->GetMediaNode())
 	{
 		if (dragNode.GetData())
@@ -1518,28 +1726,29 @@ bool CPropertyTreeControlBar::IsNodeDraggable(CTreeCtrlNode dragNode, COleDataSo
 			{
 				if (!pZone->GetDefault())
 				{
-					CGridElt elt = pZone->GetGridElt();
-					oss << "MEDIA\n";
-					oss << elt;
-					oss << "\n";
+					if (pOleDataSource)
+					{
+						CGridElt elt = pZone->GetGridElt();
+						std::ostringstream oss;
+						oss << "MEDIA\n";
+						oss << elt;
+						oss << "\n";
 
-					std::string s = oss.str();
-// COMMENT: {7/28/2008 12:34:43 PM}					//}}
-// COMMENT: {7/28/2008 12:34:43 PM}					TRACE("IsNodeDraggable = %s\n", s.c_str());
-// COMMENT: {7/28/2008 12:34:43 PM}					//}}
-					HGLOBAL hGlobal = ::GlobalAlloc(GMEM_MOVEABLE, s.length() + 1);
-					LPTSTR pData = (LPTSTR)::GlobalLock(hGlobal);
+						std::string s = oss.str();
+						HGLOBAL hGlobal = ::GlobalAlloc(GMEM_MOVEABLE, s.length() + 1);
+						LPTSTR pData = (LPTSTR)::GlobalLock(hGlobal);
 
-					::lstrcpy(pData, s.c_str());
-					::GlobalUnlock(hGlobal);
+						::lstrcpy(pData, s.c_str());
+						::GlobalUnlock(hGlobal);
 
-					oleDataSource.CacheGlobalData(this->m_cfPID, hGlobal);
-					oleDataSource.CacheGlobalData(CF_TEXT, hGlobal);
-
+						pOleDataSource->CacheGlobalData(this->m_cfPID, hGlobal);
+						pOleDataSource->CacheGlobalData(CF_TEXT, hGlobal);
+					}
 					return true;
 				}
 			}
 		}
+		return false;
 	}
 
 	if (dragNode.GetParent() == this->GetBCNode())
@@ -1549,24 +1758,27 @@ bool CPropertyTreeControlBar::IsNodeDraggable(CTreeCtrlNode dragNode, COleDataSo
 			if (CBCZoneActor* pZone = CBCZoneActor::SafeDownCast((vtkObject*)dragNode.GetData()))
 			{
 				ASSERT(!pZone->GetDefault());
+				if (pOleDataSource)
+				{
+					CBC b = pZone->GetBC();
+					std::ostringstream oss;
+					oss << b;
+					oss << "\n";
 
-				CBC b = pZone->GetBC();
-				oss << b;
-				oss << "\n";
+					std::string s = oss.str();
+					HGLOBAL hGlobal = ::GlobalAlloc(GMEM_MOVEABLE, s.length() + 1);
+					LPTSTR pData = (LPTSTR)::GlobalLock(hGlobal);
 
-				std::string s = oss.str();
-				HGLOBAL hGlobal = ::GlobalAlloc(GMEM_MOVEABLE, s.length() + 1);
-				LPTSTR pData = (LPTSTR)::GlobalLock(hGlobal);
+					::lstrcpy(pData, s.c_str());
+					::GlobalUnlock(hGlobal);
 
-				::lstrcpy(pData, s.c_str());
-				::GlobalUnlock(hGlobal);
-
-				oleDataSource.CacheGlobalData(this->m_cfPID, hGlobal);
-				oleDataSource.CacheGlobalData(CF_TEXT, hGlobal);
-
+					pOleDataSource->CacheGlobalData(this->m_cfPID, hGlobal);
+					pOleDataSource->CacheGlobalData(CF_TEXT, hGlobal);
+				}
 				return true;
 			}
 		}
+		return false;
 	}
 
 	if (dragNode.GetParent() == this->GetICHeadNode())
@@ -1577,19 +1789,22 @@ bool CPropertyTreeControlBar::IsNodeDraggable(CTreeCtrlNode dragNode, COleDataSo
 			{
 				if (!pZone->GetDefault())
 				{
-					oss << pZone->GetData();
-					oss << "\n";
+					if (pOleDataSource)
+					{
+						std::ostringstream oss;
+						oss << pZone->GetData();
+						oss << "\n";
 
-					std::string s = oss.str();
-					HGLOBAL hGlobal = ::GlobalAlloc(GMEM_MOVEABLE, s.length() + 1);
-					LPTSTR pData = (LPTSTR)::GlobalLock(hGlobal);
+						std::string s = oss.str();
+						HGLOBAL hGlobal = ::GlobalAlloc(GMEM_MOVEABLE, s.length() + 1);
+						LPTSTR pData = (LPTSTR)::GlobalLock(hGlobal);
 
-					::lstrcpy(pData, s.c_str());
-					::GlobalUnlock(hGlobal);
+						::lstrcpy(pData, s.c_str());
+						::GlobalUnlock(hGlobal);
 
-					oleDataSource.CacheGlobalData(this->m_cfPID, hGlobal);
-					oleDataSource.CacheGlobalData(CF_TEXT, hGlobal);
-
+						pOleDataSource->CacheGlobalData(this->m_cfPID, hGlobal);
+						pOleDataSource->CacheGlobalData(CF_TEXT, hGlobal);
+					}
 					return true;
 				}
 			}
@@ -1602,6 +1817,7 @@ bool CPropertyTreeControlBar::IsNodeDraggable(CTreeCtrlNode dragNode, COleDataSo
 		{
 			ASSERT(FALSE);
 		}
+		return false;
 	}
 
 	if (dragNode.GetParent() == this->GetICChemNode())
@@ -1612,19 +1828,22 @@ bool CPropertyTreeControlBar::IsNodeDraggable(CTreeCtrlNode dragNode, COleDataSo
 			{
 				if (!pZone->GetDefault())
 				{
-					oss << pZone->GetData();
-					oss << "\n";
+					if (pOleDataSource)
+					{
+						std::ostringstream oss;
+						oss << pZone->GetData();
+						oss << "\n";
 
-					std::string s = oss.str();
-					HGLOBAL hGlobal = ::GlobalAlloc(GMEM_MOVEABLE, s.length() + 1);
-					LPTSTR pData = (LPTSTR)::GlobalLock(hGlobal);
+						std::string s = oss.str();
+						HGLOBAL hGlobal = ::GlobalAlloc(GMEM_MOVEABLE, s.length() + 1);
+						LPTSTR pData = (LPTSTR)::GlobalLock(hGlobal);
 
-					::lstrcpy(pData, s.c_str());
-					::GlobalUnlock(hGlobal);
+						::lstrcpy(pData, s.c_str());
+						::GlobalUnlock(hGlobal);
 
-					oleDataSource.CacheGlobalData(this->m_cfPID, hGlobal);
-					oleDataSource.CacheGlobalData(CF_TEXT, hGlobal);
-
+						pOleDataSource->CacheGlobalData(this->m_cfPID, hGlobal);
+						pOleDataSource->CacheGlobalData(CF_TEXT, hGlobal);
+					}
 					return true;
 				}
 			}
@@ -1637,6 +1856,7 @@ bool CPropertyTreeControlBar::IsNodeDraggable(CTreeCtrlNode dragNode, COleDataSo
 		{
 			ASSERT(FALSE);
 		}
+		return false;
 	}
 
 	if (dragNode.GetParent() == this->GetWellsNode())
@@ -1645,18 +1865,21 @@ bool CPropertyTreeControlBar::IsNodeDraggable(CTreeCtrlNode dragNode, COleDataSo
 		{
 			if (CWellActor *pWellActor = CWellActor::SafeDownCast((vtkObject*)dragNode.GetData()))
 			{
-				oss << pWellActor->GetWell();
+				if (pOleDataSource)
+				{
+					std::ostringstream oss;
+					oss << pWellActor->GetWell();
 
-				std::string s = oss.str();
-				HGLOBAL hGlobal = ::GlobalAlloc(GMEM_MOVEABLE, s.length() + 1);
-				LPTSTR pData = (LPTSTR)::GlobalLock(hGlobal);
+					std::string s = oss.str();
+					HGLOBAL hGlobal = ::GlobalAlloc(GMEM_MOVEABLE, s.length() + 1);
+					LPTSTR pData = (LPTSTR)::GlobalLock(hGlobal);
 
-				::lstrcpy(pData, s.c_str());
-				::GlobalUnlock(hGlobal);
+					::lstrcpy(pData, s.c_str());
+					::GlobalUnlock(hGlobal);
 
-				oleDataSource.CacheGlobalData(this->m_cfPID, hGlobal);
-				oleDataSource.CacheGlobalData(CF_TEXT, hGlobal);
-
+					pOleDataSource->CacheGlobalData(this->m_cfPID, hGlobal);
+					pOleDataSource->CacheGlobalData(CF_TEXT, hGlobal);
+				}
 				return true;
 			}
 			else
@@ -1668,6 +1891,7 @@ bool CPropertyTreeControlBar::IsNodeDraggable(CTreeCtrlNode dragNode, COleDataSo
 		{
 			ASSERT(FALSE);
 		}
+		return false;
 	}
 
 	if (dragNode.GetParent() == this->GetRiversNode())
@@ -1676,18 +1900,21 @@ bool CPropertyTreeControlBar::IsNodeDraggable(CTreeCtrlNode dragNode, COleDataSo
 		{
 			if (CRiverActor *pRiverActor = CRiverActor::SafeDownCast((vtkObject*)dragNode.GetData()))
 			{
-				oss << pRiverActor->GetRiver();
+				if (pOleDataSource)
+				{
+					std::ostringstream oss;
+					oss << pRiverActor->GetRiver();
 
-				std::string s = oss.str();
-				HGLOBAL hGlobal = ::GlobalAlloc(GMEM_MOVEABLE, s.length() + 1);
-				LPTSTR pData = (LPTSTR)::GlobalLock(hGlobal);
+					std::string s = oss.str();
+					HGLOBAL hGlobal = ::GlobalAlloc(GMEM_MOVEABLE, s.length() + 1);
+					LPTSTR pData = (LPTSTR)::GlobalLock(hGlobal);
 
-				::lstrcpy(pData, s.c_str());
-				::GlobalUnlock(hGlobal);
+					::lstrcpy(pData, s.c_str());
+					::GlobalUnlock(hGlobal);
 
-				oleDataSource.CacheGlobalData(this->m_cfPID, hGlobal);
-				oleDataSource.CacheGlobalData(CF_TEXT, hGlobal);
-
+					pOleDataSource->CacheGlobalData(this->m_cfPID, hGlobal);
+					pOleDataSource->CacheGlobalData(CF_TEXT, hGlobal);
+				}
 				return true;
 			}
 			else
@@ -1699,8 +1926,8 @@ bool CPropertyTreeControlBar::IsNodeDraggable(CTreeCtrlNode dragNode, COleDataSo
 		{
 			ASSERT(FALSE);
 		}
+		return false;
 	}
-
 	return false;
 }
 
@@ -1714,8 +1941,7 @@ void CPropertyTreeControlBar::OnBeginDrag(NMHDR* pNMHDR, LRESULT* pResult)
 	dragNode.Select();
 
 	COleDataSource oleDataSource;
-
-	if (!this->IsNodeDraggable(dragNode, oleDataSource))
+	if (!this->IsNodeDraggable(dragNode, &oleDataSource))
 	{
 		TRACE("%s, out 1\n", __FUNCTION__);
 		return;
@@ -2273,6 +2499,10 @@ CLIPFORMAT CPropertyTreeControlBar::GetZoneClipFormat(void)const
 		{
 			type = CBC::clipFormat;
 		}
+		else if (dataObject.IsDataAvailable(CZoneFlowRateZoneActor::clipFormat))
+		{
+			type = CZoneFlowRateZoneActor::clipFormat;
+		}
 	}
 	return type;
 }
@@ -2307,6 +2537,11 @@ bool CPropertyTreeControlBar::IsNodePasteable(CTreeCtrlNode pasteNode, bool bDoP
 	else if (pasteNode.IsNodeAncestor(this->GetRiversNode()))
 	{
 		return this->IsNodePasteableRiver(pasteNode, bDoPaste);
+	}
+	else if (pasteNode.IsNodeAncestor(this->GetZoneFlowRatesNode()))
+	{
+// COMMENT: {2/19/2009 8:43:24 PM}		return this->IsNodePasteableRiver(pasteNode, bDoPaste);
+		return this->IsNodePasteable<CZoneFlowRateZoneActor, Zone_budget>(this->GetZoneFlowRatesNode(), pasteNode, bDoPaste);
 	}
 	return false;
 }
@@ -2396,7 +2631,9 @@ bool CPropertyTreeControlBar::IsNodePasteableRiver(CTreeCtrlNode pasteNode, bool
 					}
 				}
 				river.n_user = pWPhastDoc->GetNextRiverNumber();
-				CRiverCreateAction* pAction = new CRiverCreateAction(pWPhastDoc, river, after);
+				//CRiverCreateAction* pAction = new CRiverCreateAction(pWPhastDoc, river, after);
+				CPointConnectorCreateAction<CRiverActor, CRiver>* pAction = new CPointConnectorCreateAction<CRiverActor, CRiver>(pWPhastDoc, river, after);
+
 				pWPhastDoc->Execute(pAction);
 			}
 		}
@@ -2483,10 +2720,13 @@ bool CPropertyTreeControlBar::IsNodePasteable(CTreeCtrlNode headNode, CTreeCtrlN
 					CArchive descArch(&descFile, CArchive::load);
 					descArch >> strDesc;
 				}
+				CGridKeyword gridKeyword = pWPhastDoc->GetGridKeyword();
 				ASSERT(data.polyh && ::AfxIsValidAddress(data.polyh, sizeof(Polyhedron)));
 				CZoneCreateAction<ZT>* pAction = new CZoneCreateAction<ZT>(
 					pWPhastDoc,
 					data.polyh,
+					gridKeyword.m_grid_origin,
+					gridKeyword.m_grid_angle,
 					strDesc.IsEmpty() ? NULL : strDesc,
 					after
 					);
@@ -2659,9 +2899,8 @@ void CPropertyTreeControlBar::OnUpdateEditCut(CCmdUI *pCmdUI)
 {
 	if (CTreeCtrlEx *pTreeCtrlEx = this->GetTreeCtrlEx())
 	{
-		CTreeCtrlNode dragNode = pTreeCtrlEx->GetSelectedItem();
-		COleDataSource source;
-		if (this->IsNodeDraggable(dragNode, source) && this->IsNodeCopyable(dragNode, NULL))
+		CTreeCtrlNode cutNode = pTreeCtrlEx->GetSelectedItem();
+		if (this->IsNodeDraggable(cutNode, NULL) && this->IsNodeCopyable(cutNode, NULL))
 		{
 			pCmdUI->Enable(TRUE);
 			return;
@@ -2677,8 +2916,7 @@ void CPropertyTreeControlBar::OnEditCut()
 		CWaitCursor wait;
 		CTreeCtrlNode cutNode = pTreeCtrlEx->GetSelectedItem();
 
-		COleDataSource source;
-		if (this->IsNodeDraggable(cutNode, source))
+		if (this->IsNodeDraggable(cutNode, NULL))
 		{
 			COleDataSource* pOleDataSource = new COleDataSource();
 			if (pOleDataSource && this->IsNodeCopyable(cutNode, pOleDataSource))
@@ -2790,7 +3028,7 @@ void CPropertyTreeControlBar::OnEditClear()
 
 			// determine if point is being deleted
 			//
-			int point = sel.GetIndex(ptNode);
+			int point = sel.GetIndex(ptNode) - 2;
 
 			if (sel && sel.GetData())
 			{
@@ -2808,13 +3046,13 @@ void CPropertyTreeControlBar::OnEditClear()
 							else
 							{
 								VERIFY(ptNode.GetParent().Select());
-								pDoc->Execute(new CRiverDeletePointAction(pRiverActor, pDoc, point));
+								pDoc->Execute(new CPointConnectorDeletePointAction<CRiverActor, CRiverPoint>(pRiverActor, pDoc, point));
 							}
 						}
 						else
 						{
 							VERIFY(parent.Select());
-							pDoc->Execute(new CRiverDeleteAction(pDoc, pRiverActor));
+							pDoc->Execute(new CPointConnectorDeleteAction<CRiverActor>(pDoc, pRiverActor));
 						}							
 					}
 					return;
@@ -2823,6 +3061,57 @@ void CPropertyTreeControlBar::OnEditClear()
 		}
 		return;
 	}
+
+
+	// DRAINS
+	//
+	if (sel.IsNodeAncestor(this->GetDrainsNode()))
+	{
+		if (sel != this->GetDrainsNode())
+		{
+			CTreeCtrlNode ptNode = sel;
+			while (sel.GetParent() != this->GetDrainsNode())
+			{
+				sel = sel.GetParent();
+				if (!sel) break;
+			}
+
+			// determine if point is being deleted
+			//
+			int point = sel.GetIndex(ptNode) - 2;
+
+			if (sel && sel.GetData())
+			{
+				if (CDrainActor* pDrainActor = CDrainActor::SafeDownCast((vtkObject*)sel.GetData()))
+				{
+					CTreeCtrlNode parent = sel.GetParent();
+					if (CWPhastDoc* pDoc = this->GetDocument())
+					{
+						if (point >= 0)
+						{
+							if (point == 0 || point == pDrainActor->GetPointCount() - 1)
+							{
+								::AfxMessageBox("The first and the last drain points cannot be deleted.");
+							}
+							else
+							{
+								VERIFY(ptNode.GetParent().Select());
+								pDoc->Execute(new CPointConnectorDeletePointAction<CDrainActor, CRiverPoint>(pDrainActor, pDoc, point));
+							}
+						}
+						else
+						{
+							VERIFY(parent.Select());
+							pDoc->Execute(new CPointConnectorDeleteAction<CDrainActor>(pDoc, pDrainActor));
+						}							
+					}
+					return;
+				}
+			}
+		}
+		return;
+	}
+
 
 	// HEAD_IC
 	//
@@ -2922,6 +3211,35 @@ void CPropertyTreeControlBar::OnEditClear()
 		}
 		return;
 	}
+
+	//{{
+	// ZONE_FLOW_RATES
+	//
+	if (sel.IsNodeAncestor(this->GetZoneFlowRatesNode()))
+	{
+		if (sel != this->GetZoneFlowRatesNode())
+		{
+			while (sel.GetParent() != this->GetZoneFlowRatesNode())
+			{
+				sel = sel.GetParent();
+				if (!sel) break;
+			}
+			if (sel.GetData())
+			{
+				if (CZoneActor* pZone = CZoneActor::SafeDownCast((vtkObject*)sel.GetData()))
+				{
+					CTreeCtrlNode parent = sel.GetParent();
+					if (CWPhastDoc* pDoc = this->GetDocument())
+					{
+						pDoc->Execute(new CZoneRemoveAction(pDoc, pZone, this));
+					}
+					return;
+				}
+			}
+		}
+		return;
+	}
+	//}}
 
 	// TIME_CONTROL
 	//
