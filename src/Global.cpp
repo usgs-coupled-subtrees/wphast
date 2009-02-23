@@ -30,10 +30,17 @@
 #include "WorldTransform.h"
 
 #include "Units.h"
+#include "srcinput/Data_source.h"
+#include "srcinput/Prism.h"
 
 #include <afxmt.h>
+#include <atlpath.h> // ATL::ATLPath::FileExists
 static CCriticalSection  critSect;
 
+// Note: No header files should follow the following three lines
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#endif
 
 CGlobal::CGlobal(void)
 {
@@ -400,6 +407,11 @@ herr_t CGlobal::HDFSerializeAllocate(bool bStoring, hid_t loc_id, const char* sz
 	return CGlobal::HDFSerializeAllocate<double>(bStoring, loc_id, szName, H5T_NATIVE_DOUBLE, count, buffer);
 }
 
+herr_t CGlobal::HDFSerializeAllocate(bool bStoring, hid_t loc_id, const char* szName, hsize_t& count, float** buffer)
+{
+	return CGlobal::HDFSerializeAllocate<float>(bStoring, loc_id, szName, H5T_NATIVE_FLOAT, count, buffer);
+}
+
 herr_t CGlobal::HDFSerializeAllocate(bool bStoring, hid_t loc_id, const char* szName, hsize_t& count, int** buffer)
 {
 	return CGlobal::HDFSerializeAllocate<int>(bStoring, loc_id, szName, H5T_NATIVE_INT, count, buffer);
@@ -654,7 +666,7 @@ void CGlobal::DDX_Property(CDataExchange* pDX, CCheckTreeCtrl* pTree, HTREEITEM 
 	ASSERT(pDX->m_pDlgWnd->GetDlgItem(IDC_LINEAR_INTERPOLATION_RADIO));
 	//{{
 	ASSERT(pDX->m_pDlgWnd->GetDlgItem(IDC_STATIC_DIRECTION));
-	//}}	
+	//}}
 	ASSERT(pDX->m_pDlgWnd->GetDlgItem(IDC_X_RADIO));
 	ASSERT(pDX->m_pDlgWnd->GetDlgItem(IDC_Y_RADIO));
 	ASSERT(pDX->m_pDlgWnd->GetDlgItem(IDC_Z_RADIO));
@@ -730,7 +742,7 @@ void CGlobal::DDX_Property(CDataExchange* pDX, CCheckTreeCtrl* pTree, HTREEITEM 
 			DDX_Text(pDX, IDC_DISTANCE2_EDIT, value->dist2);
 		}
 
-		// all ok so copy 
+		// all ok so copy
 		if (value->type == FIXED)
 		{
 			value->count_v = 1;
@@ -997,7 +1009,7 @@ herr_t CGlobal::HDFSerializeString(bool bStoring, hid_t loc_id, const char* szNa
 		}
 		else
 		{
-			str = szCopy;	
+			str = szCopy;
 			delete[] szCopy;
 		}
 	}
@@ -1361,7 +1373,7 @@ bool CGlobal::SimpleFloatParse(LPCTSTR lpszText, double& d)
 	// digits. If no digits appear before the radix character, at least one must
 	// appear after the radix character. The decimal digits can be followed by an
 	// exponent, which consists of an introductory letter (d, D, e, or E) and an
-	// optionally signed integer. If neither an exponent part nor a radix 
+	// optionally signed integer. If neither an exponent part nor a radix
 	// character appears, a radix character is assumed to follow the last digit
 	// in the string. The first character that does not fit this form stops the
 	// scan.
@@ -1387,23 +1399,23 @@ int CGlobal::LoadWorldFile(const char *filename, CWorldTransform &wtrans)
 {
 	/////////////////////////////////////////////////
 	//from http://support.esri.com
-	//Article ID: 17489 
-	//Software:  ArcGIS - ArcInfo 8.0.1, 8.0.2 ArcInfo Workstation 7.0.4, 7.1.1, 7.1.2, 7.2.1 ArcView GIS 3.0, 3.0a, 3.0b, 3.1, 3.2, 3.2a 
-	//Platforms: N/A 
+	//Article ID: 17489
+	//Software:  ArcGIS - ArcInfo 8.0.1, 8.0.2 ArcInfo Workstation 7.0.4, 7.1.1, 7.1.2, 7.2.1 ArcView GIS 3.0, 3.0a, 3.0b, 3.1, 3.2, 3.2a
+	//Platforms: N/A
 	//
 	//Question
 	//What is the format of the world file used for georeferencing images?
 	//
 	//
 	//Answer
-	//The world file is an ASCII text file associated with an image and contains the following lines: 
+	//The world file is an ASCII text file associated with an image and contains the following lines:
 	//
-	//Line 1: x-dimension of a pixel in map units 
-	//Line 2: rotation parameter 
-	//Line 3: rotation parameter 
-	//Line 4: NEGATIVE of y-dimension of a pixel in map units 
-	//Line 5: x-coordinate of center of upper left pixel 
-	//Line 6: y-coordinate of center of upper left pixel 
+	//Line 1: x-dimension of a pixel in map units
+	//Line 2: rotation parameter
+	//Line 3: rotation parameter
+	//Line 4: NEGATIVE of y-dimension of a pixel in map units
+	//Line 5: x-coordinate of center of upper left pixel
+	//Line 6: y-coordinate of center of upper left pixel
 	/////////////////////////////////////////////////
 
 	std::ifstream ifs;
@@ -1422,7 +1434,7 @@ int CGlobal::LoadWorldFile(const char *filename, CWorldTransform &wtrans)
 
 	ASSERT(rotation[0] == 0.0);
 	ASSERT(rotation[1] == 0.0);
-	
+
 	ifs >> dataSpacing[1];
 	ASSERT(dataSpacing[1] < 0.0);
 	dataSpacing[1] = fabs(dataSpacing[1]);
@@ -1721,7 +1733,7 @@ void CGlobal::DDX_GridTimeSeries(CDataExchange* pDX, int nIDC, CTimeSeries<Cprop
 				{
 					pGrid->EnableCell(nRow, nCol);
 				}
-				
+
 				// direction
 				//
 				CString dir(iter->second.coord);
@@ -1894,7 +1906,7 @@ void CGlobal::DDX_Property(CDataExchange* pDX, int nIDC, int nRow, struct proper
 			pGrid->EnableCell(nRow, COL_DISTANCE_1);
 			pGrid->EnableCell(nRow, COL_VALUE_2);
 			pGrid->EnableCell(nRow, COL_DISTANCE_2);
-			
+
 			// direction
 			//
 			CString dir(pProperty->coord);
@@ -2145,7 +2157,7 @@ void CGlobal::Serialize(Polyhedron **p, CArchive &ar)
 		t = (*p)->get_type();
 		ar << t;
 
-		CZone z(*(*p)->Get_box());
+		CZone z(*(*p)->Get_bounding_box());
 		z.Serialize(ar);
 
 		if (t == Polyhedron::WEDGE)
@@ -2222,9 +2234,15 @@ void CGlobal::Dump(CDumpContext& dc, Polyhedron& p)
 	case Polyhedron::WEDGE:
 		dc << "<WEDGE>\n";
 		break;
+	case Polyhedron::PRISM:
+		dc << "<PRISM>\n";
+		break;
+	default:
+		dc << "<UNKNOWN>\n";
+		break;
 	}
 
-	CZone z(*p.Get_box());
+	CZone z(*p.Get_bounding_box());
 	z.Dump(dc);
 
 	switch (t)
@@ -2234,6 +2252,12 @@ void CGlobal::Dump(CDumpContext& dc, Polyhedron& p)
 		break;
 	case Polyhedron::WEDGE:
 		dc << "</WEDGE>\n";
+		break;
+	case Polyhedron::PRISM:
+		dc << "</PRISM>\n";
+		break;
+	default:
+		dc << "</UNKNOWN>\n";
 		break;
 	}
 
@@ -2372,4 +2396,1062 @@ HDFSerializeError:
 		ASSERT(status >= 0); // unable to close dataspace
 	}
 	return return_val;
+}
+
+herr_t CGlobal::HDFSerializePolyData(bool bStoring, hid_t loc_id, const char* szName, vtkPolyData *&pPolyData)
+{
+	// based on vtkXMLPolyDataReader and vtkXMLPolyDataWriter
+
+	hid_t group_id;
+	herr_t return_val = 0;
+
+	static const char szVerts[]         = "Verts";
+	static const char szLines[]         = "Lines";
+	static const char szStrips[]        = "Strips";
+	static const char szPolys[]         = "Polys";
+
+	if (bStoring)
+	{
+		ASSERT(pPolyData != 0);
+		group_id = ::H5Gcreate(loc_id, szName, 0);
+		if (group_id > 0)
+		{
+			// points
+			vtkPoints *p = pPolyData->GetPoints();
+			HDFSerializePoints(bStoring, group_id, p);
+
+			// cells
+			//
+
+			// verts
+			vtkCellArray *verts = pPolyData->GetVerts();
+			HDFSerializeCells(bStoring, group_id, szVerts, verts);
+
+			// lines
+			vtkCellArray *lines = pPolyData->GetLines();
+			HDFSerializeCells(bStoring, group_id, szLines, lines);
+
+			// strips
+			vtkCellArray *strips = pPolyData->GetStrips();
+			HDFSerializeCells(bStoring, group_id, szStrips, strips);
+
+			// polys
+			vtkCellArray *polys = pPolyData->GetPolys();
+			HDFSerializeCells(bStoring, group_id, szPolys, polys);
+
+			return_val = H5Gclose(group_id);
+			ASSERT(return_val >= 0);
+		}
+	}
+	else
+	{
+		ASSERT(pPolyData == 0);
+		pPolyData = vtkPolyData::New();
+
+		group_id = ::H5Gopen(loc_id, szName);
+		if (group_id > 0)
+		{
+			// points
+			vtkPoints *points = vtkPoints::New();
+			HDFSerializePoints(bStoring, group_id, points);
+			pPolyData->SetPoints(points);
+			points->Delete();
+
+			// verts
+			vtkCellArray *verts = 0;
+			HDFSerializeCells(bStoring, group_id, szVerts,  verts);
+			if (verts)
+			{
+				pPolyData->SetVerts(verts);
+				verts->Delete();
+			}
+
+			// lines
+			vtkCellArray *lines = 0;
+			HDFSerializeCells(bStoring, group_id, szLines,  lines);
+			if (lines)
+			{
+				pPolyData->SetLines(lines);
+				verts->Delete();
+			}
+
+			// strips
+			vtkCellArray *strips = 0;
+			HDFSerializeCells(bStoring, group_id, szStrips, strips);
+			if (strips)
+			{
+				pPolyData->SetStrips(strips);
+				strips->Delete();
+			}
+
+			// polys
+			vtkCellArray *polys = 0;
+			HDFSerializeCells(bStoring, group_id, szPolys, polys);
+			if (polys)
+			{
+				pPolyData->SetPolys(polys);
+				polys->Delete();
+			}
+
+			return_val = H5Gclose(group_id);
+		}
+
+	}
+	return return_val;
+}
+
+herr_t CGlobal::HDFSerializePoints(bool bStoring, hid_t loc_id, vtkPoints *&pPoints)
+{
+	static const char szPoints[] = "Points";
+	static const char szData[]   = "Data";
+
+	herr_t return_val = 0;
+	hid_t group_id = 0;
+	hid_t mem_type_id = 0;
+	hsize_t size = 0;
+
+	if (bStoring)
+	{
+		ASSERT(pPoints != 0);
+
+		group_id = ::H5Gcreate(loc_id, szPoints, 0);
+		ASSERT(group_id >= 0);
+		if (group_id > 0)
+		{
+			vtkDataArray* data = pPoints->GetData();
+			int numberOfComponents = data->GetNumberOfComponents();
+			ASSERT(numberOfComponents == 3);
+			vtkIdType numberOfTuples = data->GetNumberOfTuples();
+
+			mem_type_id = 0;
+			if (data->GetDataType() == VTK_FLOAT)
+			{
+				mem_type_id = H5T_NATIVE_FLOAT;
+			}
+			else if (data->GetDataType() == VTK_DOUBLE)
+			{
+				mem_type_id = H5T_NATIVE_DOUBLE;
+			}
+			else
+			{
+				ASSERT(FALSE);
+				return H5Gclose(group_id);
+			}
+			if (numberOfTuples*numberOfComponents > 0)
+			{
+				return_val = CGlobal::HDFSerializeSafe(bStoring, group_id, szData, mem_type_id, numberOfTuples*numberOfComponents, data->GetVoidPointer(0));
+			}
+			return_val = H5Gclose(group_id);
+			ASSERT(return_val >= 0);
+		}
+	}
+	else
+	{
+		ASSERT(pPoints != 0);
+
+		group_id = ::H5Gopen(loc_id, szPoints);
+		ASSERT(group_id >= 0);
+		if (group_id > 0)
+		{
+			// Open the szName dataset
+			hid_t dset_id = ::H5Dopen(group_id, szData);
+			if (dset_id > 0)
+			{
+				hid_t type_id = ::H5Dget_type(dset_id);
+				if (type_id)
+				{
+
+					if (::H5Tequal(type_id, H5T_NATIVE_FLOAT) > 0)
+					{
+						mem_type_id = H5T_NATIVE_FLOAT;
+					}
+					else if (::H5Tequal(type_id, H5T_NATIVE_DOUBLE) > 0)
+					{
+						mem_type_id = H5T_NATIVE_DOUBLE;
+					}
+					else
+					{
+						ASSERT(FALSE);
+					}
+					return_val = H5Tclose(type_id);
+					ASSERT(return_val >= 0); // unable to close type
+				}
+
+				// Close the szName dataset
+				return_val = ::H5Dclose(dset_id);
+				ASSERT(return_val >= 0); // unable to close dataset
+			}
+			if (mem_type_id == H5T_NATIVE_FLOAT)
+			{
+				hsize_t size = HDFGetSize(group_id, szData, H5T_NATIVE_FLOAT);
+				ASSERT(pPoints->GetData()->GetNumberOfComponents() == 3);
+				int npts = size/pPoints->GetData()->GetNumberOfComponents();
+				pPoints->GetData()->SetNumberOfTuples(npts);
+				return_val = CGlobal::HDFSerializeWithSize(bStoring, group_id, szData, H5T_NATIVE_FLOAT, size, pPoints->GetData()->GetVoidPointer(0));
+			}
+			else if (mem_type_id == H5T_NATIVE_DOUBLE)
+			{
+				hsize_t size = HDFGetSize(group_id, szData, H5T_NATIVE_DOUBLE);
+				ASSERT(pPoints->GetData()->GetNumberOfComponents() == 3);
+				int npts = size/pPoints->GetData()->GetNumberOfComponents();
+				pPoints->GetData()->SetNumberOfTuples(npts);
+				return_val = CGlobal::HDFSerializeWithSize(bStoring, group_id, szData, H5T_NATIVE_DOUBLE, size, pPoints->GetData()->GetVoidPointer(0));
+			}
+			return_val = H5Gclose(group_id);
+			ASSERT(return_val >= 0);
+		}
+	}
+	return return_val;
+}
+
+herr_t CGlobal::HDFSerializeCells(bool bStoring, hid_t loc_id, const char* szName, vtkCellArray *&pCells)
+{
+	herr_t return_val = 0;
+
+	static const char szConnectivity[]  = "connectivity";
+	static const char szOffsets[]       = "offsets";
+
+	if (bStoring)
+	{
+		ASSERT(pCells);
+
+		// based on vtkXMLUnstructuredDataWriter::ConvertCells
+		//
+		vtkIdTypeArray* connectivity = pCells->GetData();
+		vtkIdType numberOfCells = pCells->GetNumberOfCells();
+		vtkIdType numberOfTuples = connectivity->GetNumberOfTuples();
+
+		if (numberOfTuples - numberOfCells == 0) return return_val;
+
+		hid_t group_id = ::H5Gcreate(loc_id, szName, 0);
+		if (group_id > 0)
+		{
+			vtkIdTypeArray *cellPoints = vtkIdTypeArray::New();
+			vtkIdTypeArray *cellOffsets = vtkIdTypeArray::New();
+
+			cellPoints->SetNumberOfTuples(numberOfTuples - numberOfCells);
+			cellOffsets->SetNumberOfTuples(numberOfCells);
+
+			vtkIdType* inCell = connectivity->GetPointer(0);
+			vtkIdType* outCellPointsBase = cellPoints->GetPointer(0);
+			vtkIdType* outCellPoints = outCellPointsBase;
+			vtkIdType* outCellOffset = cellOffsets->GetPointer(0);
+
+			vtkIdType i;
+			for(i = 0; i < numberOfCells; ++i)
+			{
+				vtkIdType numberOfPoints = *inCell++;
+				::memcpy(outCellPoints, inCell, sizeof(vtkIdType)*numberOfPoints);
+				outCellPoints += numberOfPoints;
+				inCell += numberOfPoints;
+				*outCellOffset++ = outCellPoints - outCellPointsBase;
+			}
+
+			return_val = CGlobal::HDFSerializeSafe(bStoring, group_id, szConnectivity, H5T_NATIVE_INT, cellPoints->GetNumberOfTuples(), cellPoints->GetPointer(0));
+			return_val = CGlobal::HDFSerializeSafe(bStoring, group_id, szOffsets, H5T_NATIVE_INT, cellOffsets->GetNumberOfTuples(), cellOffsets->GetPointer(0));
+
+			cellPoints->Delete();
+			cellOffsets->Delete();
+
+			return_val = H5Gclose(group_id);
+			ASSERT(return_val >= 0);
+		}
+	}
+	else
+	{
+		ASSERT(pCells == 0);
+		hid_t group_id = ::H5Gopen(loc_id, szName);
+		if (group_id > 0)
+		{
+			vtkIdTypeArray *cellPoints = vtkIdTypeArray::New();
+			vtkIdTypeArray *cellOffsets = vtkIdTypeArray::New();
+
+			hsize_t sizec = HDFGetSize(group_id, szConnectivity, H5T_NATIVE_INT);
+			cellPoints->SetNumberOfTuples(sizec);
+
+			hsize_t sizeo = HDFGetSize(group_id, szOffsets, H5T_NATIVE_INT);
+			cellOffsets->SetNumberOfTuples(sizec);
+
+			if (sizec*sizeo)
+			{
+				return_val = CGlobal::HDFSerializeSafe(bStoring, group_id, szConnectivity, H5T_NATIVE_INT, sizec, cellPoints->GetPointer(0));
+				return_val = CGlobal::HDFSerializeSafe(bStoring, group_id, szOffsets, H5T_NATIVE_INT, sizeo, cellOffsets->GetPointer(0));
+
+				pCells = vtkCellArray::New();
+				if (pCells)
+				{
+					// based on vtkXMLUnstructuredDataReader::ReadCellArray
+					//
+					vtkIdType numberOfCells = sizeo;
+					vtkIdType newSize = sizec + sizeo;
+					vtkIdType* cptr = pCells->WritePointer(sizeo, newSize);
+
+					pCells->WritePointer(sizeo, sizec+sizeo);
+
+					// Copy the connectivity data.
+					vtkIdType i;
+					vtkIdType previousOffset = 0;
+					for(i=0; i < numberOfCells; ++i)
+					{
+						vtkIdType length = cellOffsets->GetValue(i)-previousOffset;
+						*cptr++ = length;
+						vtkIdType* sptr = cellPoints->GetPointer(previousOffset);
+						// Copy the point indices, but increment them for the appended
+						// version's index.
+						vtkIdType j;
+						for(j=0;j < length; ++j)
+						{
+							cptr[j] = sptr[j];
+						}
+						cptr += length;
+						previousOffset += length;
+					}
+				}
+			}
+			cellPoints->Delete();
+			cellOffsets->Delete();
+
+			return_val = H5Gclose(group_id);
+			ASSERT(return_val >= 0);
+		}
+	}
+
+	return return_val;
+}
+
+hsize_t CGlobal::HDFGetSize(hid_t loc_id, const char* szName, hid_t mem_type_id)
+{
+	herr_t status;
+	hsize_t dims[1], maxdims[1];
+	hid_t dspace_id = 0;
+	hid_t dset_id = 0;
+
+	hsize_t return_val = 0;
+
+	// Open the szName dataset
+	dset_id = ::H5Dopen(loc_id, szName);
+	if (dset_id > 0)
+	{
+		// get the szName dataspace
+		dspace_id = ::H5Dget_space(dset_id);
+		if (dspace_id > 0)
+		{
+			int n_dims = ::H5Sget_simple_extent_dims(dspace_id, dims, maxdims);
+			if (n_dims == 1)
+			{
+				return_val = dims[0];
+			}
+			else
+			{
+				ASSERT(FALSE); // unable to get_simple_extent_dims
+				goto HDFSerializeWithSizeError;
+			}
+			// Close the szName dataset
+			status = ::H5Dclose(dset_id);
+			ASSERT(status >= 0); // unable to close dataset
+		}
+		else
+		{
+			ASSERT(FALSE); // unable to open dataspace
+			goto HDFSerializeWithSizeError;
+		}
+	}
+	else
+	{
+		ASSERT(FALSE); // unable to open dataset
+		goto HDFSerializeWithSizeError;
+	}
+
+	// ok if here
+	return return_val; // no errors
+
+HDFSerializeWithSizeError:
+
+	if (dset_id > 0)
+	{
+		status = ::H5Dclose(dset_id);
+		ASSERT(status >= 0); // unable to close dataset
+	}
+	if (dspace_id > 0)
+	{
+		status = ::H5Sclose(dspace_id);
+		ASSERT(status >= 0); // unable to close dataspace
+	}
+	return return_val;
+
+}
+
+herr_t CGlobal::HDFSerializePrism(bool bStoring, hid_t loc_id, Prism &rPrism)
+{
+	static const char szPrism[]     = "Prism";
+	static const char szBox[]       = "box";
+	static const char szTop[]       = "top";
+	static const char szBottom[]    = "bottom";
+	static const char szPerimeter[] = "perimeter";
+
+	static const char szOrig_perimeter_datum[] = "orig_perimeter_datum";
+
+
+	/*
+	<polyh>
+		<Prism>
+			<box/>
+			<perimeter/>
+			<top/>
+			<bottom/>
+		</Prism>
+	</polyh>
+	*/
+	herr_t return_val = 0;
+	double xyz[6];
+
+	if (bStoring)
+	{
+		hid_t group_id = ::H5Gcreate(loc_id, szPrism, 0);
+		if (group_id > 0)
+		{
+			// box
+			//
+			struct zone* pzone = rPrism.Get_bounding_box();
+			ASSERT(pzone->zone_defined);
+			xyz[0] = pzone->x1;
+			xyz[1] = pzone->y1;
+			xyz[2] = pzone->z1;
+			xyz[3] = pzone->x2;
+			xyz[4] = pzone->y2;
+			xyz[5] = pzone->z2;
+			return_val = CGlobal::HDFSerialize(bStoring, group_id, szBox, H5T_NATIVE_DOUBLE, 6, xyz);
+			ASSERT(return_val >= 0);
+
+			// perimeter, top, bottom
+			CGlobal::HDFSerializeData_source(bStoring, group_id, szPerimeter, rPrism.perimeter);
+			CGlobal::HDFSerializeData_source(bStoring, group_id, szTop, rPrism.top);
+			CGlobal::HDFSerializeData_source(bStoring, group_id, szBottom, rPrism.bottom);
+
+			// perimeter_option
+			CGlobal::HDFSerializePerimeterOption(bStoring, group_id, rPrism.perimeter_option);
+
+			switch(rPrism.perimeter_option)
+			{
+			case Prism::CONSTANT:
+				CGlobal::HDFSerialize(bStoring, group_id, szOrig_perimeter_datum, H5T_NATIVE_DOUBLE, 1, &rPrism.orig_perimeter_datum);
+				break;
+			case Prism::ATTRIBUTE:
+				// do nothing
+				break;
+			case Prism::USE_Z:
+				// do nothing
+				break;
+			case Prism::DEFAULT:
+				// do nothing
+				break;
+			default:
+				ASSERT(FALSE);
+			}
+
+			return_val = H5Gclose(group_id);
+			ASSERT(return_val >= 0);
+		}
+	}
+	else
+	{
+		hid_t group_id = ::H5Gopen(loc_id, szPrism);
+		if (group_id > 0)
+		{
+			// box
+			return_val = CGlobal::HDFSerialize(bStoring, group_id, szBox, H5T_NATIVE_DOUBLE, 6, xyz);
+			ASSERT(return_val >= 0);
+			struct zone* pzone = rPrism.Get_bounding_box();
+			pzone->zone_defined = 1;
+			pzone->x1 = xyz[0];
+			pzone->y1 = xyz[1];
+			pzone->z1 = xyz[2];
+			pzone->x2 = xyz[3];
+			pzone->y2 = xyz[4];
+			pzone->z2 = xyz[5];
+
+			CGlobal::HDFSerializeData_source(bStoring, group_id, szPerimeter, rPrism.perimeter);
+			CGlobal::HDFSerializeData_source(bStoring, group_id, szTop, rPrism.top);
+			CGlobal::HDFSerializeData_source(bStoring, group_id, szBottom, rPrism.bottom);
+
+			// perimeter_option
+			CGlobal::HDFSerializePerimeterOption(bStoring, group_id, rPrism.perimeter_option);
+
+			switch(rPrism.perimeter_option)
+			{
+			case Prism::CONSTANT:
+				CGlobal::HDFSerialize(bStoring, group_id, szOrig_perimeter_datum, H5T_NATIVE_DOUBLE, 1, &rPrism.orig_perimeter_datum);
+				break;
+			case Prism::ATTRIBUTE:
+				// do nothing
+				break;
+			case Prism::USE_Z:
+				// do nothing
+				break;
+			case Prism::DEFAULT:
+				// do nothing
+				break;
+			default:
+				ASSERT(FALSE);
+			}
+
+			return_val = H5Gclose(group_id);
+			ASSERT(return_val >= 0);
+		}
+	}
+	return return_val;
+}
+
+herr_t CGlobal::HDFSerializeData_source(bool bStoring, hid_t loc_id, const char* szName, Data_source &rData_source)
+{
+	static const char szData_source[] = "Data_source";
+	static const char szType[]        = "type";
+	static const char szBox[]         = "box";
+	static const char szfile_name[]   = "file_name";
+	static const char szPoints[]      = "Points";
+	static const char szAttribute[]   = "attribute";
+	
+
+	/*
+	<polyh>
+		<Prism>
+			<szName> (ie top)
+				<Data_source>
+					<type>Data_source::DATA_SOURCE_TYPE</type>
+					<box/>
+					<file_name>std::string</file_name>
+				</Data_source>
+			</szName>
+		</Prism>
+	</polyh>
+	*/
+
+	herr_t status;
+	double xyz[6];
+	herr_t return_val = 0;
+
+// COMMENT: {7/6/2008 8:11:10 PM}	ASSERT(pData_source);
+
+	if (bStoring)
+	{
+		hid_t group_id = ::H5Gcreate(loc_id, szName, 0);
+		if (group_id > 0)
+		{
+			hid_t ds_gr_id = ::H5Gcreate(group_id, szData_source, 0);
+			if (ds_gr_id > 0)
+			{
+				// source_type
+				hid_t sourcetype = CGlobal::HDFCreateDataSourceType();
+				if (sourcetype > 0)
+				{
+					Data_source::DATA_SOURCE_TYPE nValue = rData_source.Get_source_type();
+					status = CGlobal::HDFSerialize(bStoring, ds_gr_id, szType, sourcetype, 1, &nValue);
+					ASSERT(status >= 0);
+
+					switch(nValue)
+					{
+					case Data_source::SHAPE:
+						{
+							std::string filename(rData_source.Get_file_name());
+							status = HDFSerializeString(bStoring, ds_gr_id, szfile_name, filename);
+							ASSERT(status >= 0);
+
+							int attrib = rData_source.Get_attribute();
+							status = HDFSerialize(bStoring, ds_gr_id, szAttribute, H5T_NATIVE_INT, 1, &attrib);
+							ASSERT(status >= 0);
+
+							rData_source.Set_attribute(attrib);
+						}
+						break;
+					case Data_source::ARCRASTER:
+					case Data_source::XYZ:
+						{
+							std::string filename(rData_source.Get_file_name());
+							status = HDFSerializeString(bStoring, ds_gr_id, szfile_name, filename);
+							ASSERT(status >= 0);
+						}
+						break;
+					case Data_source::CONSTANT:
+						{
+							std::vector<Point> &pts = rData_source.Get_points();
+							ASSERT(pts.size() == 1);
+							hsize_t count = 3;							
+							//double *points = new double[count];
+							pts.front().get_coord();
+							status = CGlobal::HDFSerializeWithSize(bStoring, ds_gr_id, szPoints, H5T_NATIVE_DOUBLE, count, pts.front().get_coord());
+						}
+						break;
+					case Data_source::POINTS:
+						{
+							std::vector<Point> &pts = rData_source.Get_points();
+							ASSERT(pts.size() >= 3);
+							hsize_t count = 3 * pts.size();							
+							double *points = new double[count];
+							for (size_t i = 0; i < pts.size(); ++i)
+							{
+								double *d = pts[i].get_coord();
+								for (size_t n = 0; n < 3; ++n)
+								{
+									points[i*3+n] = d[n];
+								}
+							}
+							status = CGlobal::HDFSerializeWithSize(bStoring, ds_gr_id, szPoints, H5T_NATIVE_DOUBLE, count, points);
+							delete[] points;
+						}
+						break;
+					case Data_source::NONE:
+						// do nothing
+						break;
+					default:
+						ASSERT(FALSE);
+					}
+					status = H5Tclose(sourcetype);
+					ASSERT(status >= 0);
+				}
+				// box
+				//
+				struct zone* pzone = rData_source.Get_bounding_box();
+				ASSERT(pzone->zone_defined);
+				xyz[0] = pzone->x1;
+				xyz[1] = pzone->y1;
+				xyz[2] = pzone->z1;
+				xyz[3] = pzone->x2;
+				xyz[4] = pzone->y2;
+				xyz[5] = pzone->z2;
+				return_val = CGlobal::HDFSerialize(bStoring, ds_gr_id, szBox, H5T_NATIVE_DOUBLE, 6, xyz);
+				ASSERT(return_val >= 0);
+
+				return_val = H5Gclose(ds_gr_id);
+				ASSERT(return_val >= 0);
+			}
+
+			return_val = H5Gclose(group_id);
+			ASSERT(return_val >= 0);
+		}
+
+	}
+	else
+	{
+		hid_t group_id = ::H5Gopen(loc_id, szName);
+		if (group_id > 0)
+		{
+			hid_t ds_gr_id = ::H5Gopen(group_id, szData_source);
+			if (ds_gr_id > 0)
+			{
+				// source_type
+				hid_t sourcetype = CGlobal::HDFCreateDataSourceType();
+				if (sourcetype > 0)
+				{
+					Data_source::DATA_SOURCE_TYPE nValue;
+					status = CGlobal::HDFSerialize(bStoring, ds_gr_id, szType, sourcetype, 1, &nValue);
+					rData_source.Set_source_type(nValue);
+
+					switch(nValue)
+					{
+					case Data_source::SHAPE:
+						{
+							std::string filename;
+							status = HDFSerializeString(bStoring, ds_gr_id, szfile_name, filename);
+							ASSERT(status >= 0);
+							rData_source.Set_file_name(filename);
+
+							int attrib;
+							status = HDFSerialize(bStoring, ds_gr_id, szAttribute, H5T_NATIVE_INT, 1, &attrib);
+							ASSERT(status >= 0);
+							rData_source.Set_attribute(attrib);
+						}
+						break;
+					case Data_source::ARCRASTER:
+					case Data_source::XYZ:
+						{
+							std::string filename;
+							status = HDFSerializeString(bStoring, ds_gr_id, szfile_name, filename);
+							ASSERT(status >= 0);
+							rData_source.Set_file_name(filename);
+						}
+						break;
+					case Data_source::CONSTANT:
+						{
+							std::vector<Point> &pts = rData_source.Get_points();
+							ASSERT(pts.size() == 0);
+							hsize_t count;							
+							double *data = NULL;
+							status = CGlobal::HDFSerializeAllocate(bStoring, ds_gr_id, szPoints, count, &data);
+							ASSERT(status >= 0);
+							ASSERT(count == 3);
+							pts.push_back(Point(data[0], data[1], data[2], data[2]));
+							delete[] data;
+						}
+						break;
+					case Data_source::POINTS:
+						{
+							std::vector<Point> &pts = rData_source.Get_points();
+							ASSERT(pts.size() == 0);
+							double *data = NULL;
+							hsize_t count;
+							status = CGlobal::HDFSerializeAllocate(bStoring, ds_gr_id, szPoints, count, &data);
+							ASSERT(status >= 0);
+							ASSERT((count%3) == 0);
+
+							Point p;
+							double *coord = p.get_coord();
+							for (size_t i = 0; i < count; ++i)
+							{
+								coord[i%3] = data[i];
+								if (i%3 == 2)
+								{
+									p.set_v(data[i]);
+									pts.push_back(p);
+								}
+							}
+							ASSERT(pts.size() == count/3);
+							delete[] data;
+						}
+						break;
+					case Data_source::NONE:
+						// do nothing
+						break;
+					default:
+						ASSERT(FALSE);
+					}
+					status = H5Tclose(sourcetype);
+					ASSERT(status >= 0);
+				}
+				// box
+				//
+				return_val = CGlobal::HDFSerialize(bStoring, ds_gr_id, szBox, H5T_NATIVE_DOUBLE, 6, xyz);
+				ASSERT(return_val >= 0);
+				struct zone* pzone = rData_source.Get_bounding_box();
+				pzone->zone_defined = 1;
+				pzone->x1 = xyz[0];
+				pzone->y1 = xyz[1];
+				pzone->z1 = xyz[2];
+				pzone->x2 = xyz[3];
+				pzone->y2 = xyz[4];
+				pzone->z2 = xyz[5];
+
+				return_val = H5Gclose(ds_gr_id);
+				ASSERT(return_val >= 0);
+			}
+			return_val = H5Gclose(group_id);
+			ASSERT(return_val >= 0);
+		}
+	}
+	return return_val;
+}
+
+hid_t CGlobal::HDFCreatePolyhedronDataType(void)
+{
+	herr_t status;
+
+	// Create the datatype
+	hid_t enum_datatype = H5Tcreate(H5T_ENUM, sizeof(Polyhedron::POLYHEDRON_TYPE));
+	ASSERT(enum_datatype >= 0);
+
+	Polyhedron::POLYHEDRON_TYPE nValue;
+
+	// Insert the enumerated data
+	nValue = Polyhedron::CUBE;
+	status = H5Tenum_insert(enum_datatype, "CUBE", &nValue);
+	ASSERT(status >= 0);
+
+	// Insert the enumerated data
+	nValue = Polyhedron::WEDGE;
+	status = H5Tenum_insert(enum_datatype, "WEDGE", &nValue);
+	ASSERT(status >= 0);
+
+	// Insert the enumerated data
+	nValue = Polyhedron::PRISM;
+	status = H5Tenum_insert(enum_datatype, "PRISM", &nValue);
+	ASSERT(status >= 0);
+
+	return enum_datatype;
+}
+
+hid_t CGlobal::HDFCreateWidgetOrientationDataType(void)
+{
+	herr_t status;
+
+	// Create the datatype
+	hid_t enum_datatype = H5Tcreate(H5T_ENUM, sizeof(Wedge::WEDGE_ORIENTATION));
+	ASSERT(enum_datatype >= 0);
+
+	Wedge::WEDGE_ORIENTATION nValue;
+
+	// Insert the enumerated data
+	nValue = Wedge::X1;
+	status = H5Tenum_insert(enum_datatype, "X1", &nValue);
+	ASSERT(status >= 0);
+
+	// Insert the enumerated data
+	nValue = Wedge::X2;
+	status = H5Tenum_insert(enum_datatype, "X2", &nValue);
+	ASSERT(status >= 0);
+
+	// Insert the enumerated data
+	nValue = Wedge::X3;
+	status = H5Tenum_insert(enum_datatype, "X3", &nValue);
+	ASSERT(status >= 0);
+
+	// Insert the enumerated data
+	nValue = Wedge::X4;
+	status = H5Tenum_insert(enum_datatype, "X4", &nValue);
+	ASSERT(status >= 0);
+
+	// Insert the enumerated data
+	nValue = Wedge::Y1;
+	status = H5Tenum_insert(enum_datatype, "Y1", &nValue);
+	ASSERT(status >= 0);
+
+	// Insert the enumerated data
+	nValue = Wedge::Y2;
+	status = H5Tenum_insert(enum_datatype, "Y2", &nValue);
+	ASSERT(status >= 0);
+
+	// Insert the enumerated data
+	nValue = Wedge::Y3;
+	status = H5Tenum_insert(enum_datatype, "Y3", &nValue);
+	ASSERT(status >= 0);
+
+	// Insert the enumerated data
+	nValue = Wedge::Y4;
+	status = H5Tenum_insert(enum_datatype, "Y4", &nValue);
+	ASSERT(status >= 0);
+
+	// Insert the enumerated data
+	nValue = Wedge::Z1;
+	status = H5Tenum_insert(enum_datatype, "Z1", &nValue);
+	ASSERT(status >= 0);
+
+	// Insert the enumerated data
+	nValue = Wedge::Z2;
+	status = H5Tenum_insert(enum_datatype, "Z2", &nValue);
+	ASSERT(status >= 0);
+
+	// Insert the enumerated data
+	nValue = Wedge::Z3;
+	status = H5Tenum_insert(enum_datatype, "Z3", &nValue);
+	ASSERT(status >= 0);
+
+	// Insert the enumerated data
+	nValue = Wedge::Z4;
+	status = H5Tenum_insert(enum_datatype, "Z4", &nValue);
+	ASSERT(status >= 0);
+
+	// Insert the enumerated data
+	nValue = Wedge::WEDGE_ERROR;
+	status = H5Tenum_insert(enum_datatype, "WEDGE_ERROR", &nValue);
+	ASSERT(status >= 0);
+
+	return enum_datatype;
+}
+
+hid_t CGlobal::HDFCreateDataSourceType(void)
+{
+	herr_t status;
+
+	// Create the datatype
+	hid_t enum_datatype = H5Tcreate(H5T_ENUM, sizeof(Data_source::DATA_SOURCE_TYPE));
+	ASSERT(enum_datatype > 0);
+
+	Data_source::DATA_SOURCE_TYPE nValue;
+
+	// Insert the enumerated data
+	nValue = Data_source::SHAPE;
+	status = H5Tenum_insert(enum_datatype, "SHAPE", &nValue);
+	ASSERT(status >= 0);
+
+	// Insert the enumerated data
+	nValue = Data_source::ARCRASTER;
+	status = H5Tenum_insert(enum_datatype, "ARCRASTER", &nValue);
+	ASSERT(status >= 0);
+
+	// Insert the enumerated data
+	nValue = Data_source::XYZ;
+	status = H5Tenum_insert(enum_datatype, "XYZ", &nValue);
+	ASSERT(status >= 0);
+
+	// Insert the enumerated data
+	nValue = Data_source::CONSTANT;
+	status = H5Tenum_insert(enum_datatype, "CONSTANT", &nValue);
+	ASSERT(status >= 0);
+
+	// Insert the enumerated data
+	nValue = Data_source::POINTS;
+	status = H5Tenum_insert(enum_datatype, "POINTS", &nValue);
+	ASSERT(status >= 0);
+
+	// Insert the enumerated data
+	nValue = Data_source::NONE;
+	status = H5Tenum_insert(enum_datatype, "NONE", &nValue);
+	ASSERT(status >= 0);
+
+	return enum_datatype;
+}
+
+herr_t CGlobal::HDFSerializePerimeterOption(bool bStoring, hid_t loc_id, Prism::PERIMETER_OPTION &perimeter_option)
+{
+	static const char szPerimeterOption[] = "perimeter_option";
+	
+	herr_t status = -1;
+
+	// source_type
+	hid_t po_type = CGlobal::HDFCreatePerimeterOptionType();
+	if (po_type > 0)
+	{
+		status = CGlobal::HDFSerialize(bStoring, loc_id, szPerimeterOption, po_type, 1, &perimeter_option);
+	}
+	return status;
+}
+
+hid_t CGlobal::HDFCreatePerimeterOptionType(void)
+{
+	herr_t status;
+
+	// Create the datatype
+	hid_t enum_datatype = H5Tcreate(H5T_ENUM, sizeof(Prism::PERIMETER_OPTION));
+	ASSERT(enum_datatype > 0);
+
+	Prism::PERIMETER_OPTION nValue;
+
+	// Insert the enumerated data
+	nValue = Prism::CONSTANT;
+	status = H5Tenum_insert(enum_datatype, "CONSTANT", &nValue);
+	ASSERT(status >= 0);
+
+	// Insert the enumerated data
+	nValue = Prism::ATTRIBUTE;
+	status = H5Tenum_insert(enum_datatype, "ATTRIBUTE", &nValue);
+	ASSERT(status >= 0);
+
+	// Insert the enumerated data
+	nValue = Prism::USE_Z;
+	status = H5Tenum_insert(enum_datatype, "USE_Z", &nValue);
+	ASSERT(status >= 0);
+
+	// Insert the enumerated data
+	nValue = Prism::DEFAULT;
+	status = H5Tenum_insert(enum_datatype, "DEFAULT", &nValue);
+	ASSERT(status >= 0);
+
+	return enum_datatype;
+}
+
+std::string CGlobal::FullPath(std::string filename)
+{
+	TCHAR   fullPath[4096] = TEXT(""); 
+	LPTSTR  lpszFilePart   = NULL;							    
+	DWORD retval = GetFullPathName(
+		filename.c_str(),
+		4096,
+		fullPath,
+		&lpszFilePart);
+	if (retval == 0)
+	{
+		std::string("");
+	}
+	return std::string(fullPath);
+}
+
+void CGlobal::InsertHeadings(CComboBox &combo, std::vector< std::string > headings)
+{
+	CDC* pDC = combo.GetDC();
+	CSize size(0, 0);
+	long nWidest = 0;
+
+	CString strNone("None");
+	combo.InsertString(0, strNone);
+	size = pDC->GetTextExtent(strNone);
+	nWidest = size.cx;
+
+	CString str;
+
+	for (size_t i = 0; i < headings.size(); ++i)
+	{
+		str.Format("%d - %s", (int)i, headings[i].c_str());
+		combo.InsertString((int)i+1, str);
+
+		size = pDC->GetTextExtent(str);
+		if (nWidest < size.cx )
+		{
+			nWidest = size.cx;
+		}
+	}
+	combo.SetDroppedWidth(nWidest);
+}
+
+BOOL CGlobal::IsValidShapefile(CString filename, CDataExchange* pDX /* = NULL */)
+{
+	filename.Trim();
+	if (!filename.IsEmpty())
+	{
+		TCHAR path[MAX_PATH];
+		::strcpy(path, filename);
+		ATL::ATLPath::RenameExtension(path, ".shp");
+		if (ATL::ATLPath::FileExists(path))
+		{
+			ATL::ATLPath::RenameExtension(path, ".shx");
+			if (ATL::ATLPath::FileExists(path))
+			{
+				ATL::ATLPath::RenameExtension(path, ".dbf");
+				if (ATL::ATLPath::FileExists(path))
+				{
+					return TRUE;
+				}
+				else
+				{
+					if (pDX)
+					{
+						CString str;
+						str.Format("Shape file component \"%s\" not found.\n", path);
+						::AfxMessageBox(str);
+						pDX->Fail(); // throws
+					}
+				}
+			}
+			else
+			{
+				if (pDX)
+				{
+					CString str;
+					str.Format("Shape file component \"%s\" not found.\n", path);
+					::AfxMessageBox(str);
+					pDX->Fail(); // throws
+				}
+			}
+		}
+		else
+		{
+			if (pDX)
+			{
+				CString str;
+				str.Format("Shape file \"%s\" not found.\n", path);
+				::AfxMessageBox(str);
+				pDX->Fail(); // throws
+			}
+		}
+	}
+	if (pDX)
+	{
+		::AfxMessageBox("Please select a shape file.");
+		pDX->Fail(); // throws
+	}
+	return FALSE;
+}
+
+BOOL CGlobal::IsValidArcraster(CString filename)
+{
+	if (filename.GetLength())
+	{
+		if (ATL::ATLPath::FileExists(filename))
+		{
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+
+BOOL CGlobal::FileExists(CString filename)
+{
+	return ATL::ATLPath::FileExists(filename);
 }

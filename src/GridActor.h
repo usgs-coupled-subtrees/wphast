@@ -41,7 +41,7 @@ public:
 
 	//void SetFlowOnly(BOOL bFlowOnly);
 	//BOOL GetFlowOnly(void);
-	void GetDefaultZone(CZone& rZone);
+	void GetDefaultZone(zone& rZone);
 
 	void GetSnap(CSnap &snap)const { snap = this->m_gridKeyword.m_snap; };
 	void SetSnap(const CSnap &snap) { this->m_gridKeyword.m_snap = snap; };

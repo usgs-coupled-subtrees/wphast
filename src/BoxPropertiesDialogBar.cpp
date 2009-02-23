@@ -20,6 +20,7 @@
 #include <vtkMapper.h>
 #include <vtkCubeSource.h>
 #include <vtkDataSet.h>
+#include <vtkLine.h>
 
 #include "MacroAction.h"
 #include "RiverMovePointAction.h"
@@ -29,9 +30,31 @@
 #include "ZoneActor.h"
 #include "WellActor.h"
 #include "RiverActor.h"
+#include "SaveCurrentDirectory.h"
+#include "srcinput/Prism.h"
+#include "srcinput/Data_source.h"
+#include "srcinput/Shapefiles/shapefile.h"
 
 #include "Units.h"
 #include "Global.h"
+
+static int PrismIDs[] = {
+	IDC_RADIO_NONE,
+	IDC_RADIO_CONSTANT,
+	IDC_RADIO_ARCRASTER,
+	IDC_RADIO_SHAPE,
+	IDC_RADIO_POINTS,
+
+	IDC_EDIT_CONSTANT,
+	IDC_EDIT_ARCRASTER,
+	IDC_EDIT_SHAPEFILE,
+
+	IDC_BUTTON_ARCRASTER,
+	IDC_BUTTON_SHAPE,
+
+	IDC_COMBO_SHAPE,
+	IDC_GRID_POINTS,
+};
 
 BOOL IsEditCtrl(HWND hWnd);
 BOOL IsEditCtrl(CWnd* pWnd);
@@ -63,7 +86,7 @@ BEGIN_MESSAGE_MAP(CBoxPropertiesDialogBar, CSizingDialogBarCFVS7)
 	ON_EN_CHANGE(IDC_EDIT_XMAX, OnEnChange)
 	ON_EN_CHANGE(IDC_EDIT_YMAX, OnEnChange)
 	ON_EN_CHANGE(IDC_EDIT_ZMAX, OnEnChange)
-	ON_BN_CLICKED(IDC_APPLY, OnBnClickedApply)
+	ON_BN_CLICKED(IDC_APPLY, OnApply)
 	//{{
 // COMMENT: {7/31/2007 5:47:43 PM}	ON_UPDATE_COMMAND_UI(ID_EDIT_CUT, OnUpdateEditCut)
 // COMMENT: {7/31/2007 5:47:43 PM}	ON_COMMAND(ID_EDIT_CUT, OnEditCut)
@@ -80,10 +103,12 @@ BEGIN_MESSAGE_MAP(CBoxPropertiesDialogBar, CSizingDialogBarCFVS7)
 	ON_EN_CHANGE(IDC_EDIT_WELL_X, OnEnChange)
 	ON_EN_CHANGE(IDC_EDIT_WELL_Y, OnEnChange)
 	ON_NOTIFY(GVN_ENDLABELEDIT, IDC_GRID_RIVER, OnEndLabelEditGrid)
+	ON_NOTIFY(GVN_ENDLABELEDIT, IDC_GRID_POINTS, OnEndLabelEditPointsGrid)
+
 	ON_CONTROL_RANGE(EN_KILLFOCUS, IDC_EDIT_XMIN, IDC_EDIT_ZMAX, OnEnKillfocusRange)
 	ON_CONTROL_RANGE(EN_KILLFOCUS, IDC_EDIT_WELL_X, IDC_EDIT_WELL_Y, OnEnKillfocusRange)
 	//}}
-	//{{
+
 	ON_BN_CLICKED(IDC_RADIO_X, OnBnClickedUpdateWedge)
 	ON_BN_CLICKED(IDC_RADIO_Y, OnBnClickedUpdateWedge)
 	ON_BN_CLICKED(IDC_RADIO_Z, OnBnClickedUpdateWedge)
@@ -91,7 +116,21 @@ BEGIN_MESSAGE_MAP(CBoxPropertiesDialogBar, CSizingDialogBarCFVS7)
 	ON_BN_CLICKED(IDC_RADIO_2, OnBnClickedUpdateWedge)
 	ON_BN_CLICKED(IDC_RADIO_3, OnBnClickedUpdateWedge)
 	ON_BN_CLICKED(IDC_RADIO_4, OnBnClickedUpdateWedge)
-	//}}
+	ON_WM_CTLCOLOR()
+	ON_WM_SIZE()
+	// PRISM Notifications
+	ON_NOTIFY(TCN_SELCHANGE, IDC_TAB, &CBoxPropertiesDialogBar::OnTcnSelchangeTab)
+	ON_NOTIFY(TCN_SELCHANGING, IDC_TAB, &CBoxPropertiesDialogBar::OnTcnSelchangingTab)
+	ON_BN_CLICKED(IDC_RADIO_CONSTANT, OnBnClickedData_source)
+	ON_BN_CLICKED(IDC_RADIO_NONE, OnBnClickedData_source)	
+	ON_BN_CLICKED(IDC_RADIO_ARCRASTER, OnBnClickedData_source)	
+	ON_BN_CLICKED(IDC_RADIO_SHAPE, OnBnClickedData_source)	
+	ON_BN_CLICKED(IDC_RADIO_POINTS, OnBnClickedData_source)	
+	ON_BN_CLICKED(IDC_BUTTON_ARCRASTER, OnBnClickedArcraster)
+	ON_BN_CLICKED(IDC_BUTTON_SHAPE, OnBnClickedShape)
+	ON_CBN_SELCHANGE(IDC_COMBO_SHAPE, OnCbnSelChangeShape)
+	ON_EN_CHANGE(IDC_EDIT_CONSTANT, OnEnChangeConstant)
+	ON_EN_KILLFOCUS(IDC_EDIT_CONSTANT, OnEnKillfocusConstant)
 END_MESSAGE_MAP()
 
 CBoxPropertiesDialogBar::CBoxPropertiesDialogBar()
@@ -101,13 +140,27 @@ CBoxPropertiesDialogBar::CBoxPropertiesDialogBar()
  , m_strHorizontalUnits("")
  , m_strVerticalUnits("")
  , m_nType(CBoxPropertiesDialogBar::BP_NONE)
+ , m_hBrush(0)
+ , m_bThemeActive(FALSE)
+ , m_nPrismPart(PRISM_TOP)
 {
 	TRACE("%s\n", __FUNCTION__);
+	this->m_pds[PRISM_TOP]       = new Data_source;
+	this->m_pds[PRISM_PERIMETER] = new Data_source;
+	this->m_pds[PRISM_BOTTOM]    = new Data_source;
+
+	for (size_t i = 0; i < 3; ++i)
+	{
+		this->m_nShapeAttribute[i] = -1;
+	}
 }
 
 CBoxPropertiesDialogBar::~CBoxPropertiesDialogBar()
 {
 	TRACE("%s\n", __FUNCTION__);
+	delete this->m_pds[PRISM_TOP];
+	delete this->m_pds[PRISM_PERIMETER];
+	delete this->m_pds[PRISM_BOTTOM];
 }
 
 BOOL CBoxPropertiesDialogBar::Create(UINT nIDTemplate, LPCTSTR lpszWindowName,
@@ -129,6 +182,7 @@ void CBoxPropertiesDialogBar::Update(IObserver* pSender, LPARAM lHint, CObject* 
 	ASSERT(pSender != this);
 
 	CFrameWnd *pFrame = reinterpret_cast<CFrameWnd*>(AfxGetApp()->m_pMainWnd);
+	if (!pFrame) return;
 	ASSERT_KINDOF(CFrameWnd, pFrame);
 	ASSERT_VALID(pFrame);
 
@@ -139,29 +193,45 @@ void CBoxPropertiesDialogBar::Update(IObserver* pSender, LPARAM lHint, CObject* 
 	switch (lHint)
 	{
 	case WPN_NONE:
+		TRACE("\t%s, WPN_NONE\n", __FUNCTION__);
+		break;
+	case WPN_SELCHANGING:
+		TRACE("\t%s, WPN_SELCHANGING\n", __FUNCTION__);
+		if (this->m_bNeedsUpdate)
+		{
+			this->OnApply();
+		}
 		break;
 	case WPN_SELCHANGED:
+		TRACE("\t%s, WPN_SELCHANGED\n", __FUNCTION__);
 		if (vtkProp* pProp = vtkProp::SafeDownCast(pObject))
 		{
 			if (CZoneActor* pZoneActor = CZoneActor::SafeDownCast(pProp))
 			{
-				this->m_nType = CBoxPropertiesDialogBar::BP_MIN_MAX;
-
 				if (pObject != this->m_pProp3D)
 				{
 					this->HideRiverControls();
 					this->HideWellControls();
 					this->HideWedgeControls();
-					if (pZoneActor->GetChopType() == srcWedgeSource::CHOP_NONE)
+					switch(pZoneActor->GetPolyhedronType())
 					{
-						this->ShowZoneControls();
-					}
-					else
-					{
+					case Polyhedron::WEDGE:
 						this->m_nType = CBoxPropertiesDialogBar::BP_WEDGE;
+						this->HidePrismControls();
 						this->ShowWedgeControls();
+						break;
+					case Polyhedron::CUBE:
+						this->m_nType = CBoxPropertiesDialogBar::BP_MIN_MAX;
+						this->HidePrismControls();
+						this->ShowZoneControls();
+						break;
+					case Polyhedron::PRISM:
+						this->m_nType = CBoxPropertiesDialogBar::BP_PRISM;
+						this->ShowPrismControls();
+						break;
+					default:
+						ASSERT(FALSE);
 					}
-					this->ShowApply();
 				}
 				this->Set(pView, pZoneActor, pView->GetDocument()->GetUnits());
 			}
@@ -213,8 +283,10 @@ void CBoxPropertiesDialogBar::Update(IObserver* pSender, LPARAM lHint, CObject* 
 		}
 		break;
 	case WPN_VISCHANGED:
+		TRACE("\t%s, WPN_VISCHANGED\n", __FUNCTION__);
 		break;
 	case WPN_SCALE_CHANGED:
+		TRACE("\t%s, WPN_SCALE_CHANGED\n", __FUNCTION__);
 		break;
 	default:
 		ASSERT(FALSE);
@@ -233,8 +305,6 @@ void CBoxPropertiesDialogBar::Set(CWPhastView* pView, vtkProp3D* pProp3D, const 
 
 	if (CZoneActor* pZone = this->m_pProp3D ? CZoneActor::SafeDownCast(this->m_pProp3D) : NULL)
 	{
-		this->m_nType = CBoxPropertiesDialogBar::BP_MIN_MAX;
-
 		float bounds[6];
 		pZone->GetUserBounds(bounds);
 
@@ -252,21 +322,21 @@ void CBoxPropertiesDialogBar::Set(CWPhastView* pView, vtkProp3D* pProp3D, const 
 		this->m_Y = bounds[2];
 		this->m_Z = bounds[4];
 
-		bool bIsWedge = (pZone->GetChopType() != srcWedgeSource::CHOP_NONE);
+		CString caption;
 
-		if (bIsWedge)
+		switch(pZone->GetPolyhedronType())
 		{
+		case Polyhedron::WEDGE:
 			this->m_nType = CBoxPropertiesDialogBar::BP_WEDGE;
 			this->m_nOrientation = srcWedgeSource::ConvertChopType(pZone->GetChopType());
 			this->Enable(TRUE);
 			this->UpdateData(FALSE);
 
-			CString caption;		
 			caption.Format(_T("Wedge dimensions (%s)"), pZone->GetName());
 			this->SetWindowText(caption);
-		}
-		else
-		{
+			break;
+		case Polyhedron::CUBE:
+			this->m_nType = CBoxPropertiesDialogBar::BP_MIN_MAX;
 			if (pZone->GetDefault())
 			{
 				// default zones cannot be changed
@@ -278,9 +348,18 @@ void CBoxPropertiesDialogBar::Set(CWPhastView* pView, vtkProp3D* pProp3D, const 
 				this->Enable(TRUE);
 				this->UpdateData(FALSE);
 			}
-			CString caption;		
 			caption.Format(_T("Zone dimensions (%s)"), pZone->GetName());
 			this->SetWindowText(caption);
+			break;
+		case Polyhedron::PRISM:
+			this->m_nType = CBoxPropertiesDialogBar::BP_PRISM;
+			this->UpdatePrism(pZone, true);
+			this->UpdateData(FALSE);
+			caption.Format(_T("Prism dimensions (%s)"), pZone->GetName());
+			this->SetWindowText(caption);
+			break;
+		default:
+			ASSERT(FALSE);
 		}
 	}
 	else if (CWellActor* pWell = this->m_pProp3D ? CWellActor::SafeDownCast(this->m_pProp3D) : NULL)
@@ -309,6 +388,7 @@ void CBoxPropertiesDialogBar::Set(CWPhastView* pView, vtkProp3D* pProp3D, const 
 	else
 	{
 		this->m_nType = CBoxPropertiesDialogBar::BP_NONE;		
+		this->UpdateData(FALSE);
 		this->Enable(FALSE);
 		this->SetWindowText(_T(""));
 	}
@@ -320,9 +400,19 @@ void CBoxPropertiesDialogBar::DoDataExchange(CDataExchange* pDX)
 {
 	TRACE("%s, in\n", __FUNCTION__);
 	
-	DDX_GridControl(pDX, IDC_GRID_RIVER, this->m_wndRiverGrid);
+	DDX_Control(pDX, IDC_TAB, m_wndTab);
+	DDX_Control(pDX, IDC_COMBO_SHAPE, m_wndShapeCombo);
+	DDX_GridControl(pDX, IDC_GRID_RIVER, this->m_wndRiverGrid);	
+	DDX_GridControl(pDX, IDC_GRID_POINTS, this->m_wndPointsGrid);
 
-	// Prepare Pump Sched. Grid
+	if (CWnd *pWnd = this->GetDlgItem(IDC_EDIT_SHAPEFILE))
+	{
+		RECT rc;
+		pWnd->GetWindowRect(&rc);
+		//TRACE("IDC_EDIT_SHAPEFILE = %d, %d, %d, %d\n", rc.bottom, rc.left, rc.right, rc.top);
+	}
+
+	// Prepare river point grid
 	//
 	if (!pDX->m_bSaveAndValidate && this->m_wndRiverGrid.GetColumnCount() == 0)
 	{
@@ -505,6 +595,23 @@ void CBoxPropertiesDialogBar::DoDataExchange(CDataExchange* pDX)
 			break;
 		}
 	}
+	else if (this->m_nType == CBoxPropertiesDialogBar::BP_PRISM)
+	{
+		switch (this->m_nPrismPart)
+		{
+		case PRISM_TOP:
+			DoDataExchangePrism(pDX, this->m_pds[PRISM_TOP]);
+			break;
+		case PRISM_PERIMETER:
+			DoDataExchangePrism(pDX, this->m_pds[PRISM_PERIMETER]);
+			break;
+		case PRISM_BOTTOM:
+			DoDataExchangePrism(pDX, this->m_pds[PRISM_BOTTOM]);
+			break;
+		default:
+			ASSERT(FALSE);
+		}
+	}
 
 	CSizingDialogBarCFVS7::DoDataExchange(pDX);
 	if (!pDX->m_bSaveAndValidate) 
@@ -517,7 +624,7 @@ void CBoxPropertiesDialogBar::DoDataExchange(CDataExchange* pDX)
 	TRACE("%s, out\n", __FUNCTION__);
 }
 
-void CBoxPropertiesDialogBar::OnBnClickedApply()
+void CBoxPropertiesDialogBar::OnApply()
 {
 	TRACE("%s, in\n", __FUNCTION__);
 
@@ -643,6 +750,12 @@ void CBoxPropertiesDialogBar::OnBnClickedApply()
 					}
 				}
 				break;
+			case CBoxPropertiesDialogBar::BP_PRISM:
+				if (CZoneActor* pZoneActor = this->m_pProp3D ? CZoneActor::SafeDownCast(this->m_pProp3D) : NULL)
+				{
+					this->ApplyNewPrism(pZoneActor);
+				}
+				break;
 			default:
 				ASSERT(FALSE);
 				break;
@@ -762,12 +875,58 @@ void CBoxPropertiesDialogBar::Enable(bool bEnable)
 			pEdit->SetReadOnly(!bEnable);
 		}
 	}
+	else if (this->m_nType == CBoxPropertiesDialogBar::BP_PRISM)
+	{
+		if (CWnd *pWnd = this->GetDlgItem(IDC_RADIO_NONE))
+		{
+			pWnd->EnableWindow(bEnable);
+		}
+		if (CWnd *pWnd = this->GetDlgItem(IDC_RADIO_CONSTANT))
+		{
+			pWnd->EnableWindow(bEnable);
+		}
+		if (CWnd *pWnd = this->GetDlgItem(IDC_RADIO_ARCRASTER))
+		{
+			pWnd->EnableWindow(bEnable);
+		}
+		if (CWnd *pWnd = this->GetDlgItem(IDC_RADIO_POINTS))
+		{
+			pWnd->EnableWindow(bEnable);
+		}
+		if (CWnd *pWnd = this->GetDlgItem(IDC_RADIO_SHAPE))
+		{
+			pWnd->EnableWindow(bEnable);
+		}
+
+		if (CEdit* pEdit = (CEdit*)this->GetDlgItem(IDC_EDIT_CONSTANT))
+		{
+			pEdit->SetReadOnly(!bEnable);
+		}
+		if (CEdit* pEdit = (CEdit*)this->GetDlgItem(IDC_EDIT_ARCRASTER))
+		{
+			pEdit->SetReadOnly(!bEnable);
+		}
+		if (CEdit* pEdit = (CEdit*)this->GetDlgItem(IDC_EDIT_SHAPEFILE))
+		{
+			pEdit->SetReadOnly(!bEnable);
+		}
+
+		if (CWnd *pWnd = this->GetDlgItem(IDC_BUTTON_SHAPE))
+		{
+			pWnd->EnableWindow(bEnable);
+		}
+		if (CWnd *pWnd = this->GetDlgItem(IDC_BUTTON_ARCRASTER))
+		{
+			pWnd->EnableWindow(bEnable);
+		}
+	}
 	else if (this->m_nType == CBoxPropertiesDialogBar::BP_NONE)
 	{
 		this->HideZoneControls();
 		this->HideRiverControls();
 		this->HideWedgeControls();
 		this->HideWellControls();
+		this->HidePrismControls();
 	}
 	TRACE("%s, out\n", __FUNCTION__);
 }
@@ -780,14 +939,70 @@ BOOL CBoxPropertiesDialogBar::PreTranslateMessage(MSG* pMsg)
 		TRACE("%s, in\n", __FUNCTION__);
 		if (pMsg->wParam == VK_RETURN)
 		{
-			if (this->m_nType != CBoxPropertiesDialogBar::BP_RIVER)
+			if (this->m_nType == CBoxPropertiesDialogBar::BP_PRISM)
+			{
+				if (this->GetCheckedRadioButton(IDC_RADIO_NONE, IDC_RADIO_SHAPE) != IDC_RADIO_POINTS)
+				{
+					if (::IsEditCtrl(pMsg->hwnd))
+					{
+						CWnd *pWnd = CWnd::FromHandle(pMsg->hwnd);
+						int nID = pWnd->GetDlgCtrlID();
+#ifdef SAVE_FOR_LATER
+						if (nID == IDC_EDIT_SHAPEFILE)
+						{
+							CString str;
+							this->GetDlgItemTextA(IDC_EDIT_SHAPEFILE, str);
+							if (CGlobal::IsValidShapefile(str))
+							{
+								this->OnApply();
+							}
+							else
+							{
+								this->UpdateData(FALSE);
+							}
+							::SendMessage(pMsg->hwnd, EM_SETSEL, 0, -1);
+						}
+						else if (nID == IDC_EDIT_ARCRASTER)
+						{
+							CString str;
+							this->GetDlgItemTextA(IDC_EDIT_ARCRASTER, str);
+							if (CGlobal::IsValidArcraster(str))
+							{
+								this->OnApply();
+							}
+							else
+							{
+								this->UpdateData(FALSE);
+							}
+							::SendMessage(pMsg->hwnd, EM_SETSEL, 0, -1);
+						}
+						else
+#endif // 
+						{
+							ASSERT(nID == IDC_EDIT_CONSTANT);
+							double d;
+							if (IsValidFloatFormat(this, pMsg->hwnd, d))
+							{
+								this->OnApply();
+							}
+							else
+							{
+								this->UpdateData(FALSE);
+							}
+							::SendMessage(pMsg->hwnd, EM_SETSEL, 0, -1);
+						}
+
+					}
+				}
+			}
+			if (this->m_nType != CBoxPropertiesDialogBar::BP_RIVER && this->m_nType != CBoxPropertiesDialogBar::BP_PRISM)
 			{
 				if (::IsEditCtrl(pMsg->hwnd))
 				{
 					double d;
 					if (IsValidFloatFormat(this, pMsg->hwnd, d))
 					{
-						this->OnBnClickedApply();
+						this->OnApply();
 					}
 					else
 					{
@@ -1514,7 +1729,151 @@ void CBoxPropertiesDialogBar::OnEndLabelEditGrid(NMHDR *pNotifyStruct, LRESULT *
 	double d;
 	if (IsValidFloatFormat(this, IDC_GRID_RIVER, pnmgv->iRow, pnmgv->iColumn, d))
 	{
-		this->OnBnClickedApply();
+		this->OnApply();
+	}
+	else
+	{
+		this->UpdateData(FALSE);
+	}
+
+	TRACE("%s, out\n", __FUNCTION__);
+}
+
+void CBoxPropertiesDialogBar::OnEndLabelEditPointsGrid(NMHDR *pNotifyStruct, LRESULT *result)
+{
+	TRACE("%s, in\n", __FUNCTION__);
+	NM_GRIDVIEW *pnmgv = (NM_GRIDVIEW*)pNotifyStruct;
+	double dCell;
+	coord c;
+	TCHAR szBuffer[40];
+	if (IsValidFloatFormat(this, IDC_GRID_POINTS, pnmgv->iRow, pnmgv->iColumn, dCell))
+	{
+		if (this->m_nPrismPart == this->PRISM_PERIMETER)
+		{
+			std::vector<coord> vect;
+			std::list<coord>::iterator li = this->m_listCoord[PRISM_PERIMETER].begin();
+			for (; li != this->m_listCoord[PRISM_PERIMETER].end(); ++li)
+			{
+				vect.push_back(*li);
+			}
+			for (size_t i = 0; i < vect.size(); ++i)
+			{
+				TRACE("Points %d=%g, %g, %g\n", i, vect[i].c[0], vect[i].c[1], vect[i].c[2]);
+			}
+
+			// check original
+			ASSERT(vect.size() > 3);
+
+			double *a, *b, *c, *d;
+			double rn, sn, den, r, s;
+			a = vect[0].c;
+			for (size_t i = 0; i < vect.size(); ++i)
+			{
+				b = vect[(i + 1) % vect.size()].c;
+				c = vect[(i + 2) % vect.size()].c;
+				for (size_t j = i+2; j < i+vect.size()-2; ++j)
+				{
+					d = vect[(j + 1) % vect.size()].c;
+					rn = (a[1]-c[1])*(d[0]-c[0])-(a[0]-c[0])*(d[1]-c[1]);
+					sn = (a[1]-c[1])*(b[0]-a[0])-(a[0]-c[0])*(b[1]-a[1]);
+					den = (b[0]-a[0])*(d[1]-c[1])-(b[1]-a[1])*(d[0]-c[0]);
+					if (den != 0)
+					{
+						r = rn/den;
+						s = sn/den;
+						if (r >= 0 && r <= 1 && s >= 0 && s <= 1)
+						{
+							ASSERT(FALSE);
+							*result = 1;
+							return; // return true;
+						}
+					}
+					else if (rn == 0)
+					{
+						// both AB and CD are collinear (coincident)
+						// project values to each axis to check for overlap
+						for (i = 0; i < 2; ++i)
+						{
+							double minab = (a[i] < b[i]) ? a[i] : b[i]; // Math.min(a[i], b[i]);
+							double maxab = (a[i] > b[i]) ? a[i] : b[i]; // Math.max(a[i], b[i]);
+							if (minab <= c[i] && c[i] <= maxab)
+							{
+								ASSERT(FALSE);
+								*result = 1;
+								return; // return true;
+							}
+							if (minab <= d[i] && d[i] <= maxab)
+							{
+								ASSERT(FALSE);
+								*result = 1;
+								return; // return true;
+							}
+						}
+					}
+					c = d;
+				}
+				a = b;
+			}
+
+			_stprintf(szBuffer, _T("%.*g"), DBL_DIG, vect[pnmgv->iRow - 1].c[pnmgv->iColumn]);
+			vect[pnmgv->iRow - 1].c[pnmgv->iColumn] = dCell;
+			{
+
+				double *a, *b, *c, *d;
+				double rn, sn, den, r, s;
+				a = vect[0].c;
+				for (size_t i = 0; i < vect.size(); ++i)
+				{
+					b = vect[(i + 1) % vect.size()].c;
+					c = vect[(i + 2) % vect.size()].c;
+					for (size_t j = i+2; j < i+vect.size()-2; ++j)
+					{
+						d = vect[(j + 1) % vect.size()].c;
+						rn = (a[1]-c[1])*(d[0]-c[0])-(a[0]-c[0])*(d[1]-c[1]);
+						sn = (a[1]-c[1])*(b[0]-a[0])-(a[0]-c[0])*(b[1]-a[1]);
+						den = (b[0]-a[0])*(d[1]-c[1])-(b[1]-a[1])*(d[0]-c[0]);
+						if (den != 0)
+						{
+							r = rn/den;
+							s = sn/den;
+							if (r >= 0 && r <= 1 && s >= 0 && s <= 1)
+							{
+								::AfxMessageBox("Perimeter cannot cross itself. Resetting original coordinates.");
+								VERIFY(this->m_wndPointsGrid.SetItemText(pnmgv->iRow, pnmgv->iColumn, szBuffer));
+								return;
+							}
+						}
+						else if (rn == 0)
+						{
+							// both AB and CD are collinear (coincident)
+							// project values to each axis to check for overlap
+							for (i = 0; i < 2; ++i)
+							{
+								double minab = (a[i] < b[i]) ? a[i] : b[i]; // Math.min(a[i], b[i]);
+								double maxab = (a[i] > b[i]) ? a[i] : b[i]; // Math.max(a[i], b[i]);
+								if (minab <= c[i] && c[i] <= maxab)
+								{
+									::AfxMessageBox("Perimeter cannot cross itself. Resetting original coordinates.");
+									VERIFY(this->m_wndPointsGrid.SetItemText(pnmgv->iRow, pnmgv->iColumn, szBuffer));
+									return;
+								}
+								if (minab <= d[i] && d[i] <= maxab)
+								{
+									::AfxMessageBox("Perimeter cannot cross itself. Resetting original coordinates.");
+									VERIFY(this->m_wndPointsGrid.SetItemText(pnmgv->iRow, pnmgv->iColumn, szBuffer));
+									return;
+								}
+							}
+						}
+						c = d;
+					}
+					a = b;
+				}
+			}
+		}
+		_stprintf(szBuffer, _T("%.*g"), DBL_DIG, dCell);
+		VERIFY(this->m_wndPointsGrid.SetItemText(pnmgv->iRow, pnmgv->iColumn, szBuffer));
+		this->OnApply();
 	}
 	else
 	{
@@ -1573,7 +1932,7 @@ void CBoxPropertiesDialogBar::OnEnKillfocusRange(UINT nID)
 		double d;
 		if (IsValidFloatFormat(this, nID, d))
 		{
-			this->OnBnClickedApply();
+			this->OnApply();
 		}
 		else
 		{
@@ -1872,3 +2231,1280 @@ void CBoxPropertiesDialogBar::OnBnClickedUpdateWedge()
 	TRACE("%s, out\n", __FUNCTION__);
 }
 
+HBRUSH CBoxPropertiesDialogBar::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
+{
+// COMMENT: {7/14/2008 9:39:52 PM}	static HBRUSH hbrRed = ::CreateSolidBrush(RGB(255, 0, 0));
+// COMMENT: {7/14/2008 9:39:52 PM}
+// COMMENT: {7/14/2008 9:39:52 PM}	static HBRUSH hbrWhite = ::CreateSolidBrush(RGB(0, 255, 0));
+// COMMENT: {7/14/2008 9:39:52 PM}
+// COMMENT: {7/14/2008 9:39:52 PM}	static HBRUSH hbrBlue = ::CreateSolidBrush(RGB(0, 0, 255));
+// COMMENT: {7/14/2008 9:39:52 PM}
+// COMMENT: {7/14/2008 9:39:52 PM}
+// COMMENT: {7/14/2008 9:39:52 PM}	TCHAR szClass[16];
+// COMMENT: {7/14/2008 9:39:52 PM}	::GetClassName(pWnd->GetSafeHwnd(), szClass, 16);
+// COMMENT: {7/14/2008 9:39:52 PM}	TRACE("CBoxPropertiesDialogBar::OnCtlColor control class = %s\n", szClass);
+// COMMENT: {7/14/2008 9:39:52 PM}	if (_tcsicmp(szClass, WC_COMBOBOX) == 0)
+// COMMENT: {7/14/2008 9:39:52 PM}	{
+// COMMENT: {7/14/2008 9:39:52 PM}		return hbrWhite;
+// COMMENT: {7/14/2008 9:39:52 PM}	}
+// COMMENT: {7/14/2008 9:39:52 PM}	if (_tcsicmp(szClass, WC_EDIT) == 0)
+// COMMENT: {7/14/2008 9:39:52 PM}	{
+// COMMENT: {7/14/2008 9:39:52 PM}		return hbrBlue;
+// COMMENT: {7/14/2008 9:39:52 PM}	}
+// COMMENT: {7/14/2008 9:39:52 PM}	if (_tcsicmp(szClass, "ComboLBox") == 0)
+// COMMENT: {7/14/2008 9:39:52 PM}	{
+// COMMENT: {7/14/2008 9:39:52 PM}		return hbrWhite;
+// COMMENT: {7/14/2008 9:39:52 PM}	}
+// COMMENT: {7/14/2008 9:39:52 PM}	return hbrRed;
+
+
+	if (this->m_bThemeActive)
+	{
+		if (nCtlColor == CTLCOLOR_DLG)
+		{
+			// just return the brush for dialogs
+			return this->m_hBrush;
+		}
+
+		TCHAR szClass[16];
+		::GetClassName(pWnd->GetSafeHwnd(), szClass, 16);
+// COMMENT: {7/22/2008 9:24:34 PM}		TRACE("CBoxPropertiesDialogBar::OnCtlColor control class = %s\n", szClass);
+		if (_tcsicmp(szClass, WC_EDIT) == 0  && (pWnd->GetStyle() & ES_READONLY))
+		{
+			// use default for read-only edit controls
+			return CSizingDialogBarCFVS7::OnCtlColor(pDC, pWnd, nCtlColor);
+		}
+		if (_tcsicmp(szClass, "ComboLBox") == 0)
+		{
+			return CSizingDialogBarCFVS7::OnCtlColor(pDC, pWnd, nCtlColor);
+		}
+
+		RECT rc;
+		// Set the background mode to transparent
+// COMMENT: {7/30/2008 4:22:33 PM}		pDC->SetBkMode(TRANSPARENT);
+
+		// Get the controls window dimensions
+		pWnd->GetWindowRect(&rc);
+
+		// Map the coordinates to coordinates with the upper left corner of dialog control as base
+		::MapWindowPoints(NULL, m_wndTab, (LPPOINT)(&rc), 2);	
+
+		// Adjust the position of the brush for this control (else we see the top left of the brush as background)
+		::SetBrushOrgEx((HDC)(*pDC), -rc.left, -rc.top, NULL);
+
+		// Return the brush
+		return this->m_hBrush;
+	}
+	else
+	{
+		return CSizingDialogBarCFVS7::OnCtlColor(pDC, pWnd, nCtlColor);
+	}
+}
+
+void CBoxPropertiesDialogBar::OnSize(UINT nType, int cx, int cy)
+{
+	CSizingDialogBarCFVS7::OnSize(nType, cx, cy);
+
+	// Can't use m_wndTab since CBoxPropertiesDialogBar::DoDataExchange
+	// may not have been called yet
+	CWnd* pTab = this->GetDlgItem(IDC_TAB);
+	if (pTab && pTab->GetSafeHwnd())
+	{
+		pTab->MoveWindow(0, 0, cx, cy);
+		this->UpdateBackgroundBrush();
+	}
+
+	if (this->m_nType == CBoxPropertiesDialogBar::BP_PRISM)
+	{
+		this->SizePrismControls(cx, cy);
+	}
+}
+
+void CBoxPropertiesDialogBar::UpdateBackgroundBrush()
+{
+	HMODULE hinstDll;
+
+	// Check if the application is themed
+	hinstDll = ::LoadLibrary(_T("UxTheme.dll"));
+	this->m_bThemeActive = FALSE;
+	if (hinstDll)
+	{
+		typedef BOOL (*ISAPPTHEMEDPROC)();
+		ISAPPTHEMEDPROC pIsAppThemed;
+		pIsAppThemed = (ISAPPTHEMEDPROC) ::GetProcAddress(hinstDll, "IsAppThemed");
+
+		if (pIsAppThemed)
+		{
+			this->m_bThemeActive = pIsAppThemed();
+		}
+		::FreeLibrary(hinstDll);
+	}
+
+	// Destroy old brush
+	if (this->m_hBrush)
+	{
+		::DeleteObject(this->m_hBrush);
+	}
+	this->m_hBrush = 0;
+
+	// Can't use m_wndTab since CBoxPropertiesDialogBar::DoDataExchange
+	// may not have been called yet
+	CWnd* pTab = this->GetDlgItem(IDC_TAB);
+
+	// Only do this if the theme is active
+	if (this->m_bThemeActive && pTab && pTab->GetSafeHwnd())
+	{
+		RECT rc;
+
+		// Get tab control dimensions
+		pTab->GetWindowRect(&rc);
+
+		// Get the tab control DC
+		CDC *pDC = pTab->GetDC();
+
+		// Create a compatible DC
+		HDC hDCMem = ::CreateCompatibleDC(pDC->GetSafeHdc());
+		HBITMAP hBmp = ::CreateCompatibleBitmap(pDC->GetSafeHdc(), rc.right - rc.left, rc.bottom - rc.top);
+		HBITMAP hBmpOld = (HBITMAP)(::SelectObject(hDCMem, hBmp));
+
+		// Tell the tab control to paint in our DC
+		pTab->SendMessage(WM_PRINTCLIENT, (WPARAM)(hDCMem), (LPARAM)(PRF_ERASEBKGND | PRF_CLIENT | PRF_NONCLIENT));
+
+		// Create a pattern brush from the bitmap selected in our DC
+		m_hBrush = ::CreatePatternBrush(hBmp);
+
+		// Restore the bitmap
+		::SelectObject(hDCMem, hBmpOld);
+
+		// Cleanup
+		::DeleteObject(hBmp);
+		::DeleteDC(hDCMem);
+		pTab->ReleaseDC(pDC);
+	}
+}
+
+void CBoxPropertiesDialogBar::ShowPrismControls(void)
+{
+	TRACE("%s, in\n", __FUNCTION__);
+	if (this->m_wndTab.GetSafeHwnd() == 0)
+	{
+		return;
+	}
+
+	if (this->m_wndTab.GetItemCount() == 0)
+	{
+		this->m_wndTab.InsertItem(0, "Top");
+		this->m_wndTab.InsertItem(1, "Perimeter");
+		this->m_wndTab.InsertItem(2, "Bottom");
+		this->m_nPrismPart = CBoxPropertiesDialogBar::PRISM_TOP;
+	}
+
+	for (int i = 0; i < sizeof(PrismIDs)/sizeof(PrismIDs[0]); ++i)
+	{
+		if (CWnd *pWnd = this->GetDlgItem(PrismIDs[i]))
+		{
+			pWnd->ShowWindow(SW_SHOW);
+		}
+	}
+
+	CRect rect;
+	this->GetClientRect(&rect);
+	this->SizePrismControls(rect.Width(), rect.Height());
+	TRACE("%s, out\n", __FUNCTION__);
+}
+
+void CBoxPropertiesDialogBar::SizePrismControls(int cx, int cy)
+{
+	CRect rect;
+	this->GetClientRect(&rect);
+
+	CRect rcC;
+	if (CWnd *pWnd = this->GetDlgItem(IDC_EDIT_CONSTANT))
+	{
+		pWnd->GetWindowRect(&rcC);
+		this->ScreenToClient(&rcC);
+	}
+	CRect rcS;
+	if (CWnd *pWnd = this->GetDlgItem(IDC_EDIT_SHAPEFILE))
+	{
+		pWnd->GetWindowRect(&rcS);
+		this->ScreenToClient(&rcS);
+	}
+
+	const int x = 5;
+	//const int y = 165;
+	const int y = rcS.top + rcS.top - rcC.top;
+	this->m_wndPointsGrid.MoveWindow(x, y, cx-2*x, cy-y-x);
+}
+
+void CBoxPropertiesDialogBar::HidePrismControls(void)
+{
+	TRACE("%s, in\n", __FUNCTION__);
+	if (this->m_wndTab.GetSafeHwnd() == 0) return;
+	this->m_wndTab.DeleteAllItems();
+
+	RECT rc;
+	for (int i = 0; i < sizeof(PrismIDs)/sizeof(PrismIDs[0]); ++i)
+	{
+		if (CWnd *pWnd = this->GetDlgItem(PrismIDs[i]))
+		{
+			pWnd->ShowWindow(SW_HIDE);
+			pWnd->GetWindowRect(&rc);
+			this->ScreenToClient(&rc);
+			this->InvalidateRect(&rc, TRUE);
+		}
+	}
+	TRACE("%s, out\n", __FUNCTION__);
+}
+
+void CBoxPropertiesDialogBar::OnTcnSelchangingTab(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	TRACE("%s, in\n", __FUNCTION__);
+	ASSERT(this->m_nType == CBoxPropertiesDialogBar::BP_PRISM);
+
+	ASSERT(this->m_nPrismPart == this->m_wndTab.GetCurSel());
+
+	if (this->UpdateData(TRUE))
+	{
+		if (this->m_bNeedsUpdate)
+		{
+			this->OnApply();
+		}
+		*pResult = 0;
+	}
+	else
+	{
+		*pResult = 1;
+	}
+	ASSERT(this->m_nType == CBoxPropertiesDialogBar::BP_PRISM);
+	TRACE("%s, out\n", __FUNCTION__);
+}
+
+void CBoxPropertiesDialogBar::OnTcnSelchangeTab(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	TRACE("%s, in\n", __FUNCTION__);
+	ASSERT(this->m_nType == CBoxPropertiesDialogBar::BP_PRISM);
+
+	this->m_nPrismPart = static_cast<CBoxPropertiesDialogBar::PRISM_PART>(this->m_wndTab.GetCurSel());
+	this->m_bNeedsUpdate = false;
+
+	this->UpdateData(FALSE);
+	*pResult = 0;
+	ASSERT(this->m_nType == CBoxPropertiesDialogBar::BP_PRISM);
+	TRACE("%s, out\n", __FUNCTION__);
+}
+
+void CBoxPropertiesDialogBar::UpdatePrism(CZoneActor *pZoneActor, bool bForceUpdate /* = FALSE */)
+{
+	TRACE("%s, in\n", __FUNCTION__);
+	if (Prism *p = dynamic_cast<Prism*>(pZoneActor->GetPolyhedron()))
+	{
+		*this->m_pds[PRISM_TOP]       = p->top;
+		*this->m_pds[PRISM_PERIMETER] = p->perimeter;
+		*this->m_pds[PRISM_BOTTOM]    = p->bottom;
+
+		// constants (PRISM_PERIMETER not used)
+
+		// top constant
+		CZone defzone;
+		this->m_pView->GetDocument()->GetDefaultZone(defzone);
+		if (this->m_pds[PRISM_TOP]->Get_source_type() == Data_source::CONSTANT)
+		{
+			this->m_dConstant[PRISM_TOP] = this->m_pds[PRISM_TOP]->Get_points().begin()->z();
+		}
+		else
+		{
+			this->m_dConstant[PRISM_TOP] = defzone.z2;
+		}
+
+		// bottom constant
+		if (this->m_pds[PRISM_BOTTOM]->Get_source_type() == Data_source::CONSTANT)
+		{
+			this->m_dConstant[PRISM_BOTTOM] = this->m_pds[PRISM_BOTTOM]->Get_points().begin()->z();
+		}
+		else
+		{
+			this->m_dConstant[PRISM_BOTTOM] = defzone.z1;
+		}
+
+		for (int i = 0; i < 3; ++i)
+		{
+			// arcraster
+			if (this->m_pds[i]->Get_source_type() == Data_source::ARCRASTER)
+			{
+				this->m_sArcraster[i] = this->m_pds[i]->Get_file_name().c_str();
+			}
+			else
+			{
+				if ((this->m_pProp3D != pZoneActor) || bForceUpdate)
+				{
+					this->m_sArcraster[i] = "";
+				}
+			}
+
+			// shape
+			if (this->m_pds[i]->Get_source_type() == Data_source::SHAPE)
+			{
+				this->m_sShapefile[i]      = this->m_pds[i]->Get_file_name().c_str();
+				this->m_nShapeAttribute[i] = this->m_pds[i]->Get_attribute();
+			}
+			else
+			{
+				// TODO do similar for other inputs
+				if ((this->m_pProp3D != pZoneActor) || bForceUpdate)
+				{
+					this->m_sShapefile[i]      = "";
+					this->m_nShapeAttribute[i] = -1;
+				}
+			}
+		}
+
+
+		// points
+		for (int i = 0; i < 3; ++i)
+		{
+			this->m_listCoord[i].clear();
+			if (this->m_pds[i]->Get_source_type() == Data_source::POINTS)
+			{
+				std::vector<Point>::iterator it = this->m_pds[i]->Get_points().begin();
+				coord c;
+				for (; it != this->m_pds[i]->Get_points().end(); ++it)
+				{					
+					c.c[0] = (*it).x();
+					c.c[1] = (*it).y();
+					c.c[2] = (*it).z();
+					this->m_listCoord[i].push_back(c);
+				}
+			}
+			else if (this->m_pds[i]->Get_source_type() == Data_source::NONE ||
+				this->m_pds[i]->Get_source_type() == Data_source::CONSTANT ||
+				this->m_pds[i]->Get_source_type() == Data_source::ARCRASTER
+				)
+			{
+				zone *z = &defzone; // TODO when opening wphast file no bounding_box exists??
+				ASSERT(z->zone_defined);
+				if (i == PRISM_TOP)
+				{
+					this->m_listCoord[i].push_back(coord(z->x1, z->y1, defzone.z2));
+					this->m_listCoord[i].push_back(coord(z->x2, z->y1, defzone.z2));
+					this->m_listCoord[i].push_back(coord(z->x2, z->y2, defzone.z2));
+					this->m_listCoord[i].push_back(coord(z->x1, z->y2, defzone.z2));
+				}
+				else if (i == PRISM_PERIMETER)
+				{
+					this->m_listCoord[i].push_back(coord(defzone.x1, defzone.y1));
+					this->m_listCoord[i].push_back(coord(defzone.x2, defzone.y1));
+					this->m_listCoord[i].push_back(coord(defzone.x2, defzone.y2));
+					this->m_listCoord[i].push_back(coord(defzone.x1, defzone.y2));
+				}
+				else if (i == PRISM_BOTTOM)
+				{
+					this->m_listCoord[i].push_back(coord(z->x1, z->y1, defzone.z1));
+					this->m_listCoord[i].push_back(coord(z->x2, z->y1, defzone.z1));
+					this->m_listCoord[i].push_back(coord(z->x2, z->y2, defzone.z1));
+					this->m_listCoord[i].push_back(coord(z->x1, z->y2, defzone.z1));
+				}
+			}
+			else if (this->m_pds[i]->Get_source_type() == Data_source::SHAPE)
+			{
+				zone *z = this->m_pds[i]->Get_bounding_box();
+				ASSERT(z->zone_defined);
+				if (i == PRISM_TOP)
+				{
+					this->m_listCoord[i].push_back(coord(z->x1, z->y1, z->z2));
+					this->m_listCoord[i].push_back(coord(z->x2, z->y1, z->z2));
+					this->m_listCoord[i].push_back(coord(z->x2, z->y2, z->z2));
+					this->m_listCoord[i].push_back(coord(z->x1, z->y2, z->z2));
+				}
+				else if (i == PRISM_PERIMETER)
+				{
+					this->m_listCoord[i].push_back(coord(defzone.x1, defzone.y1));
+					this->m_listCoord[i].push_back(coord(defzone.x2, defzone.y1));
+					this->m_listCoord[i].push_back(coord(defzone.x2, defzone.y2));
+					this->m_listCoord[i].push_back(coord(defzone.x1, defzone.y2));
+				}
+				else if (i == PRISM_BOTTOM)
+				{
+					this->m_listCoord[i].push_back(coord(z->x1, z->y1, z->z1));
+					this->m_listCoord[i].push_back(coord(z->x2, z->y1, z->z1));
+					this->m_listCoord[i].push_back(coord(z->x2, z->y2, z->z1));
+					this->m_listCoord[i].push_back(coord(z->x1, z->y2, z->z1));
+				}
+			}
+		}
+
+// COMMENT: {7/23/2008 2:36:40 PM}		// top points
+// COMMENT: {7/23/2008 2:36:40 PM}		this->m_listCoord[PRISM_TOP].clear();
+// COMMENT: {7/23/2008 2:36:40 PM}		if (this->m_pds[PRISM_TOP]->Get_source_type() == Data_source::POINTS)
+// COMMENT: {7/23/2008 2:36:40 PM}		{
+// COMMENT: {7/23/2008 2:36:40 PM}			std::vector<Point>::iterator it = this->m_pds[PRISM_TOP]->Get_points().begin();
+// COMMENT: {7/23/2008 2:36:40 PM}			coord c;
+// COMMENT: {7/23/2008 2:36:40 PM}			for (; it != this->m_pds[PRISM_TOP]->Get_points().end(); ++it)
+// COMMENT: {7/23/2008 2:36:40 PM}			{					
+// COMMENT: {7/23/2008 2:36:40 PM}				c.c[0] = (*it).x();
+// COMMENT: {7/23/2008 2:36:40 PM}				c.c[1] = (*it).y();
+// COMMENT: {7/23/2008 2:36:40 PM}				c.c[2] = (*it).z();
+// COMMENT: {7/23/2008 2:36:40 PM}				this->m_listCoord[PRISM_TOP].push_back(c);
+// COMMENT: {7/23/2008 2:36:40 PM}			}
+// COMMENT: {7/23/2008 2:36:40 PM}		}
+// COMMENT: {7/23/2008 2:36:40 PM}		// perimeter points
+// COMMENT: {7/23/2008 2:36:40 PM}		this->m_listCoord[PRISM_PERIMETER].clear();
+// COMMENT: {7/23/2008 2:36:40 PM}		if (this->m_pds[PRISM_PERIMETER]->Get_source_type() == Data_source::POINTS)
+// COMMENT: {7/23/2008 2:36:40 PM}		{
+// COMMENT: {7/23/2008 2:36:40 PM}			std::vector<Point>::iterator it = this->m_pds[PRISM_PERIMETER]->Get_points().begin();
+// COMMENT: {7/23/2008 2:36:40 PM}			coord c;
+// COMMENT: {7/23/2008 2:36:40 PM}			for (; it != this->m_pds[PRISM_PERIMETER]->Get_points().end(); ++it)
+// COMMENT: {7/23/2008 2:36:40 PM}			{					
+// COMMENT: {7/23/2008 2:36:40 PM}				c.c[0] = (*it).x();
+// COMMENT: {7/23/2008 2:36:40 PM}				c.c[1] = (*it).y();
+// COMMENT: {7/23/2008 2:36:40 PM}				c.c[2] = (*it).z();
+// COMMENT: {7/23/2008 2:36:40 PM}				this->m_listCoord[PRISM_PERIMETER].push_back(c);
+// COMMENT: {7/23/2008 2:36:40 PM}			}
+// COMMENT: {7/23/2008 2:36:40 PM}		}
+// COMMENT: {7/23/2008 2:36:40 PM}		// bottom points
+// COMMENT: {7/23/2008 2:36:40 PM}		this->m_listCoord[PRISM_BOTTOM].clear();
+// COMMENT: {7/23/2008 2:36:40 PM}		if (this->m_pds[PRISM_BOTTOM]->Get_source_type() == Data_source::POINTS)
+// COMMENT: {7/23/2008 2:36:40 PM}		{
+// COMMENT: {7/23/2008 2:36:40 PM}			std::vector<Point>::iterator it = this->m_pds[PRISM_BOTTOM]->Get_points().begin();
+// COMMENT: {7/23/2008 2:36:40 PM}			coord c;
+// COMMENT: {7/23/2008 2:36:40 PM}			for (; it != this->m_pds[PRISM_BOTTOM]->Get_points().end(); ++it)
+// COMMENT: {7/23/2008 2:36:40 PM}			{					
+// COMMENT: {7/23/2008 2:36:40 PM}				c.c[0] = (*it).x();
+// COMMENT: {7/23/2008 2:36:40 PM}				c.c[1] = (*it).y();
+// COMMENT: {7/23/2008 2:36:40 PM}				c.c[2] = (*it).z();
+// COMMENT: {7/23/2008 2:36:40 PM}				this->m_listCoord[PRISM_BOTTOM].push_back(c);
+// COMMENT: {7/23/2008 2:36:40 PM}			}
+// COMMENT: {7/23/2008 2:36:40 PM}		}
+	}
+	TRACE("%s, out\n", __FUNCTION__);
+}
+
+void CBoxPropertiesDialogBar::OnBnClickedData_source()
+{
+	TRACE("%s, in\n", __FUNCTION__);
+	
+	this->UpdatePrismControls();
+	double d;
+	switch (this->GetCheckedRadioButton(IDC_RADIO_NONE, IDC_RADIO_SHAPE))
+	{
+	case IDC_RADIO_NONE:
+		this->OnApply();
+		break;
+	case IDC_RADIO_CONSTANT:
+		if (IsValidFloatFormat(this, IDC_EDIT_CONSTANT, d))
+		{
+			this->OnApply();
+		}
+		break;
+	case IDC_RADIO_ARCRASTER:
+		if (CGlobal::IsValidArcraster(this->m_sArcraster[this->m_nPrismPart]))
+		{
+			this->OnApply();
+		}
+		break;
+	case IDC_RADIO_SHAPE:
+		//if (CGlobal::IsValidShapefile(this->m_sShapefile[this->m_nPrismPart]))
+		{
+// COMMENT: {7/28/2008 5:02:10 PM}			ASSERT(CGlobal::IsValidShapefile(this->m_sShapefile[this->m_nPrismPart]));
+			CString str;
+			this->GetDlgItemTextA(IDC_EDIT_SHAPEFILE, str);
+			ASSERT(str.IsEmpty() || CGlobal::IsValidShapefile(this->m_sShapefile[this->m_nPrismPart]));
+			if (CGlobal::IsValidShapefile(this->m_sShapefile[this->m_nPrismPart])
+				&& (this->m_nPrismPart == CBoxPropertiesDialogBar::PRISM_PERIMETER || this->m_wndShapeCombo.GetCurSel() != 0))
+			{
+				this->OnApply();
+			}
+			else
+			{
+				this->EnableShape(TRUE);
+				this->EnablePrismRadios(TRUE);
+			}
+		}
+		break;
+	case IDC_RADIO_POINTS:
+		this->OnApply();
+		break;
+	default:
+		ASSERT(FALSE);
+		break;
+	}
+	TRACE("%s, out\n", __FUNCTION__);
+}
+
+void CBoxPropertiesDialogBar::EnablePointsGrid(BOOL bEnable)
+{
+	for (int iRow = this->m_wndPointsGrid.GetFixedRowCount(); iRow < this->m_wndPointsGrid.GetRowCount(); ++iRow)
+	{
+		for (int iCol = 0; iCol < this->m_wndPointsGrid.GetColumnCount(); ++iCol)
+		{
+			if (bEnable)
+			{
+				this->m_wndPointsGrid.EnableCell(iRow, iCol);
+			}
+			else
+			{
+				this->m_wndPointsGrid.DisableCell(iRow, iCol);
+			}
+		}
+	}
+	this->m_wndPointsGrid.Invalidate();
+
+}
+
+void CBoxPropertiesDialogBar::DoDataExchangePrism(CDataExchange *pDX, Data_source *pData_source)
+{
+// COMMENT: {7/28/2008 12:15:04 PM}	this->m_wndShapeCombo.ResetContent();
+// COMMENT: {7/28/2008 12:15:04 PM}	this->m_wndShapeCombo.EnableWindow(1);
+// COMMENT: {7/28/2008 12:15:04 PM}	this->m_wndShapeCombo.EnableWindow(0);
+
+// COMMENT: {7/21/2008 11:27:54 PM}	this->m_wndPointsGrid.SetRowCount(0);
+
+	if (pDX->m_bSaveAndValidate)
+	{
+		switch (this->GetCheckedRadioButton(IDC_RADIO_NONE, IDC_RADIO_SHAPE))
+		{
+		case IDC_RADIO_NONE:
+			this->m_nDataSourceType = Data_source::NONE;
+			break;
+		case IDC_RADIO_CONSTANT:
+			this->m_nDataSourceType = Data_source::CONSTANT;
+			break;
+		case IDC_RADIO_ARCRASTER:
+			this->m_nDataSourceType = Data_source::ARCRASTER;
+			break;
+		case IDC_RADIO_POINTS:
+			this->m_nDataSourceType = Data_source::POINTS;
+			break;
+		case IDC_RADIO_SHAPE:
+			this->m_nDataSourceType = Data_source::SHAPE;
+			break;
+		default:
+			ASSERT(FALSE);
+			break;
+		}
+
+		// constant
+		if (this->m_nDataSourceType == Data_source::CONSTANT)
+		{
+			DDX_Text(pDX, IDC_EDIT_CONSTANT, this->m_dConstant[this->m_nPrismPart]);
+		}
+
+		// arcraster
+		if (this->m_nDataSourceType == Data_source::ARCRASTER)
+		{
+			CString str;
+			DDX_Text(pDX, IDC_EDIT_ARCRASTER, str);
+			if (str.IsEmpty())
+			{
+				::AfxMessageBox("Please select an ARCRASTER file.");
+				pDX->Fail();
+			}
+			ASSERT(CGlobal::IsValidArcraster(this->m_sArcraster[this->m_nPrismPart]));
+		}
+
+		// shape
+		if (this->m_nDataSourceType == Data_source::SHAPE)
+		{
+			CString str;
+			DDX_Text(pDX, IDC_EDIT_SHAPEFILE, str);
+			if (str.IsEmpty())
+			{
+				ASSERT(this->m_sShapefile[this->m_nPrismPart].IsEmpty());
+				::AfxMessageBox("Please select a shapefile.");
+				pDX->Fail();
+			}
+
+			CGlobal::IsValidShapefile(this->m_sShapefile[this->m_nPrismPart], pDX);
+
+			if (this->m_nPrismPart != CBoxPropertiesDialogBar::PRISM_PERIMETER)
+			{
+				this->m_nShapeAttribute[this->m_nPrismPart] = this->m_wndShapeCombo.GetCurSel() - 1;
+				if (this->m_nShapeAttribute[this->m_nPrismPart] == -1)
+				{
+					::AfxMessageBox("Please select a shapefile attribute.");
+					pDX->PrepareCtrl(IDC_COMBO_SHAPE);
+					pDX->Fail();
+				}
+			}
+		}
+
+		// points
+		if (this->m_nDataSourceType == Data_source::POINTS)
+		{
+			vtkPoints *points = vtkPoints::New();
+			std::list<coord> new_list;
+			try
+			{
+				double x, y, z;
+				//this->m_listCoord[this->m_nPrismPart].clear();
+				z = 0;
+				for (int row = 1; row < this->m_wndPointsGrid.GetRowCount(); ++row)
+				{
+					DDX_TextGridControl(pDX, IDC_GRID_POINTS, row, 0, x);
+					DDX_TextGridControl(pDX, IDC_GRID_POINTS, row, 1, y);
+					if (this->m_nPrismPart == this->PRISM_PERIMETER)
+					{
+						//this->m_listCoord[this->m_nPrismPart].push_back(coord(x, y));
+						new_list.push_back(coord(x, y));
+					}
+					else
+					{
+						DDX_TextGridControl(pDX, IDC_GRID_POINTS, row, 2, z);
+						//this->m_listCoord[this->m_nPrismPart].push_back(coord(x, y, z));
+						new_list.push_back(coord(x, y, z));
+					}
+// COMMENT: {7/25/2008 9:47:57 PM}					if (this->m_nPrismPart == this->PRISM_PERIMETER)
+// COMMENT: {7/25/2008 9:47:57 PM}					{
+// COMMENT: {7/25/2008 9:47:57 PM}						vtkFloatingPointType p1[3];
+// COMMENT: {7/25/2008 9:47:57 PM}						vtkFloatingPointType p2[3];
+// COMMENT: {7/25/2008 9:47:57 PM}						vtkFloatingPointType x1[3];
+// COMMENT: {7/25/2008 9:47:57 PM}						vtkFloatingPointType x2[3];
+// COMMENT: {7/25/2008 9:47:57 PM}						vtkFloatingPointType u;
+// COMMENT: {7/25/2008 9:47:57 PM}						vtkFloatingPointType v;
+// COMMENT: {7/25/2008 9:47:57 PM}						p1[0] = x;
+// COMMENT: {7/25/2008 9:47:57 PM}						p1[1] = y;
+// COMMENT: {7/25/2008 9:47:57 PM}						p1[2] = z;
+// COMMENT: {7/25/2008 9:47:57 PM}						if (3 < points->GetNumberOfPoints())
+// COMMENT: {7/25/2008 9:47:57 PM}						{
+// COMMENT: {7/25/2008 9:47:57 PM}							points->GetPoint(points->GetNumberOfPoints() - 1, p2);
+// COMMENT: {7/25/2008 9:47:57 PM}							for (vtkIdType i = 3; i < points->GetNumberOfPoints(); ++i)
+// COMMENT: {7/25/2008 9:47:57 PM}							{
+// COMMENT: {7/25/2008 9:47:57 PM}								points->GetPoint(i-2, x1);
+// COMMENT: {7/25/2008 9:47:57 PM}								points->GetPoint(i, x2);
+// COMMENT: {7/25/2008 9:47:57 PM}								if (vtkLine::Intersection(p1, p2, x1, x2, u, v) == 2)
+// COMMENT: {7/25/2008 9:47:57 PM}								{
+// COMMENT: {7/25/2008 9:47:57 PM}									char msg[] = "Perimeter must not cross itself.";
+// COMMENT: {7/25/2008 9:47:57 PM}									//this->m_wndPointsGrid.SetSelectedRange(row, 0, row, 1, TRUE);
+// COMMENT: {7/25/2008 9:47:57 PM}									DDX_GridControlFail(pDX, IDC_GRID_POINTS, row, 0, row, 1, msg);
+// COMMENT: {7/25/2008 9:47:57 PM}									//::AfxMessageBox("Perimeter must not cross itself.");
+// COMMENT: {7/25/2008 9:47:57 PM}									//pDX->Fail();
+// COMMENT: {7/25/2008 9:47:57 PM}								}
+// COMMENT: {7/25/2008 9:47:57 PM}							}
+// COMMENT: {7/25/2008 9:47:57 PM}						}
+// COMMENT: {7/25/2008 9:47:57 PM}						points->InsertNextPoint(x, y, z);
+// COMMENT: {7/25/2008 9:47:57 PM}					}
+				}
+				points->Delete();
+			}
+			catch(...)
+			{
+				points->Delete();
+				throw;
+			}
+			this->m_listCoord[this->m_nPrismPart] = new_list;
+		}
+	}
+	else
+	{
+		// select radio button
+		switch(pData_source->Get_source_type())
+		{
+		case Data_source::NONE:
+			this->CheckRadioButton(IDC_RADIO_NONE, IDC_RADIO_SHAPE, IDC_RADIO_NONE);
+			break;
+		case Data_source::CONSTANT:
+			this->CheckRadioButton(IDC_RADIO_NONE, IDC_RADIO_SHAPE, IDC_RADIO_CONSTANT);
+			break;
+		case Data_source::ARCRASTER:
+			this->CheckRadioButton(IDC_RADIO_NONE, IDC_RADIO_SHAPE, IDC_RADIO_ARCRASTER);
+			break;
+		case Data_source::POINTS:
+			this->CheckRadioButton(IDC_RADIO_NONE, IDC_RADIO_SHAPE, IDC_RADIO_POINTS);
+			break;
+		case Data_source::SHAPE:
+			this->CheckRadioButton(IDC_RADIO_NONE, IDC_RADIO_SHAPE, IDC_RADIO_SHAPE);
+			break;
+		default:
+			ASSERT(FALSE);
+			break;
+		}
+		this->UpdatePrismControls();
+
+
+		// enable/disable
+		if (this->m_nPrismPart == CBoxPropertiesDialogBar::PRISM_PERIMETER)
+		{
+			// constant
+			DDX_Text(pDX, IDC_EDIT_CONSTANT, CString("N/A"));
+
+			// arcraster
+			ASSERT(pData_source->Get_source_type() != Data_source::ARCRASTER);
+			DDX_Text(pDX, IDC_EDIT_ARCRASTER, CString("N/A"));
+
+			// shapefile
+			//DDX_Text(pDX, IDC_EDIT_SHAPEFILE, this->m_sShapefile[this->m_nPrismPart]);
+			::PathSetDlgItemPath(this->GetSafeHwnd(), IDC_EDIT_SHAPEFILE, this->m_sShapefile[this->m_nPrismPart]);
+		}
+		else
+		{
+			// TOP or BOTTOM
+
+			// constant
+			DDX_Text(pDX, IDC_EDIT_CONSTANT, this->m_dConstant[this->m_nPrismPart]);
+
+			// arcraster
+			//DDX_Text(pDX, IDC_EDIT_ARCRASTER, this->m_sArcraster[this->m_nPrismPart]);
+			::PathSetDlgItemPath(this->GetSafeHwnd(), IDC_EDIT_ARCRASTER, this->m_sArcraster[this->m_nPrismPart]);
+
+			// shapefile
+			//DDX_Text(pDX, IDC_EDIT_SHAPEFILE, this->m_sShapefile[this->m_nPrismPart]);
+			::PathSetDlgItemPath(this->GetSafeHwnd(), IDC_EDIT_SHAPEFILE, this->m_sShapefile[this->m_nPrismPart]);
+
+			if (CGlobal::IsValidShapefile(this->m_sShapefile[this->m_nPrismPart]))
+			{
+				this->m_wndShapeCombo.ResetContent();
+
+				std::string s = this->m_sShapefile[this->m_nPrismPart];
+				Shapefile sf(s);
+				std::vector< std::string > headings = sf.Get_headers();
+
+				CGlobal::InsertHeadings(this->m_wndShapeCombo, headings);
+
+				int n = this->m_nShapeAttribute[this->m_nPrismPart];
+				if (n >= -1)
+				{
+					this->m_wndShapeCombo.SetCurSel(n + 1);
+				}
+			}
+		}
+
+		// points
+		if (this->m_listCoord[this->m_nPrismPart].size() > 0)
+		{
+			// Prepare points grid
+			//
+			TRY
+			{
+				this->m_wndPointsGrid.SetRowCount((int)(1 + this->m_listCoord[this->m_nPrismPart].size()));
+				if (this->m_nPrismPart == PRISM_PERIMETER)
+				{
+					this->m_wndPointsGrid.SetColumnCount(2);
+				}
+				else
+				{
+					this->m_wndPointsGrid.SetColumnCount(3);
+				}
+				this->m_wndPointsGrid.SetFixedRowCount(1);
+				this->m_wndPointsGrid.SetFixedColumnCount(0);
+				this->m_wndPointsGrid.EnableTitleTips(FALSE);
+			}
+			CATCH (CMemoryException, e)
+			{
+				e->ReportError();
+				e->Delete();
+			}
+			END_CATCH
+
+			CString title_x(_T("X "));
+			title_x += this->m_strHorizontalUnits;
+			DDX_TextGridControl(pDX, IDC_GRID_POINTS, 0, 0, title_x);
+
+			CString title_y(_T("Y "));
+			title_y += this->m_strHorizontalUnits;
+			DDX_TextGridControl(pDX, IDC_GRID_POINTS, 0, 1, title_y);
+
+			if (this->m_nPrismPart != CBoxPropertiesDialogBar::PRISM_PERIMETER)
+			{
+				CString title_z(_T("Z "));
+				title_z += this->m_strVerticalUnits;
+				DDX_TextGridControl(pDX, IDC_GRID_POINTS, 0, 2, title_z);
+			}
+
+			//std::vector<Point>::iterator iter = pts.begin();
+			std::list<coord>::iterator iter = this->m_listCoord[this->m_nPrismPart].begin();
+			for (int row = 1; row < this->m_wndPointsGrid.GetRowCount(); ++row, ++iter)
+			{
+				DDX_TextGridControl(pDX, IDC_GRID_POINTS, row, 0, (*iter).c[0]);
+				DDX_TextGridControl(pDX, IDC_GRID_POINTS, row, 1, (*iter).c[1]);
+				if (this->m_nPrismPart != CBoxPropertiesDialogBar::PRISM_PERIMETER)
+				{
+					DDX_TextGridControl(pDX, IDC_GRID_POINTS, row, 2, (*iter).c[2]);
+					this->m_wndPointsGrid.RedrawCell(row, 2);
+				}
+				this->m_wndPointsGrid.RedrawCell(row, 0);
+				this->m_wndPointsGrid.RedrawCell(row, 1);
+			}
+			this->m_wndPointsGrid.SetModified(FALSE);
+			for (int r = 1; r < this->m_wndPointsGrid.GetRowCount(); ++r)
+			{
+				ASSERT(!this->m_wndPointsGrid.GetModified(r, 0));
+				ASSERT(!this->m_wndPointsGrid.GetModified(r, 1));
+				if (this->m_nPrismPart != CBoxPropertiesDialogBar::PRISM_PERIMETER)
+				{
+					ASSERT(!this->m_wndPointsGrid.GetModified(r, 2));
+				}
+			}
+			this->m_wndPointsGrid.RedrawWindow();
+			this->m_wndPointsGrid.ExpandColumnsToFit();
+			this->m_wndPointsGrid.SetColumnWidth(0, this->m_wndPointsGrid.GetColumnWidth(0) - 1);
+			this->m_wndPointsGrid.SetColumnWidth(1, this->m_wndPointsGrid.GetColumnWidth(1) - 1);
+			if (this->m_nPrismPart != CBoxPropertiesDialogBar::PRISM_PERIMETER)
+			{
+				int nwidth = this->m_wndPointsGrid.GetColumnWidth(2);
+				if (nwidth < 10) nwidth = 10;
+				this->m_wndPointsGrid.SetColumnWidth(2, nwidth - 1);
+			}
+		}
+		else
+		{
+			this->m_wndPointsGrid.SetRowCount(0);
+		}
+
+		// TODO this may be redundant
+		if (pData_source->Get_source_type() == Data_source::POINTS)
+		{
+			this->EnablePointsGrid(TRUE);
+		}
+		else
+		{
+			this->EnablePointsGrid(FALSE);
+		}
+		this->RedrawWindow();
+	}
+}
+
+void CBoxPropertiesDialogBar::ApplyNewPrism(CZoneActor *pZoneActor)
+{
+	if (Prism *prism = dynamic_cast<Prism*>(pZoneActor->GetPolyhedron()))
+	{
+		CWaitCursor wait;
+
+		// Update StatusBar
+		//
+		if (CWnd* pWnd = ((CFrameWnd*)::AfxGetMainWnd())->GetMessageBar())
+		{
+			CString status(_T("Generating new prism..."));
+			pWnd->SetWindowText(status);
+		}
+
+		Data_source new_data_source;
+		if (this->m_nDataSourceType == Data_source::NONE)
+		{
+			// do nothing (default type is Data_source::NONE)
+		}
+		else
+		{
+			std::ostringstream oss;
+			if (this->m_nDataSourceType == Data_source::CONSTANT)
+			{
+				ASSERT(this->m_nPrismPart != CBoxPropertiesDialogBar::PRISM_PERIMETER);
+				oss << "CONSTANT " << this->m_dConstant[this->m_nPrismPart] << std::endl;
+			}
+			else if (this->m_nDataSourceType == Data_source::ARCRASTER)
+			{
+				ASSERT(this->m_nPrismPart != CBoxPropertiesDialogBar::PRISM_PERIMETER);
+				if (CGlobal::FileExists(this->m_sArcraster[this->m_nPrismPart]))
+				{
+					oss << "ARCRASTER " << this->m_sArcraster[this->m_nPrismPart] << std::endl;
+				}
+			}
+			else if (this->m_nDataSourceType == Data_source::SHAPE)
+			{
+				if (this->m_nPrismPart == CBoxPropertiesDialogBar::PRISM_PERIMETER)
+				{
+					oss << "SHAPE " << this->m_sShapefile[this->m_nPrismPart] << std::endl;
+				}
+				else
+				{
+					oss << "SHAPE " << this->m_sShapefile[this->m_nPrismPart];
+					oss << " " << this->m_nShapeAttribute[this->m_nPrismPart];
+					oss << std::endl;
+				}
+			}
+			else if (this->m_nDataSourceType == Data_source::POINTS)
+			{
+				// write out new points
+				//
+				oss << "POINTS" << std::endl;
+				std::list<coord>::iterator cit = this->m_listCoord[this->m_nPrismPart].begin();
+				for (; cit != this->m_listCoord[this->m_nPrismPart].end(); ++cit)
+				{
+					oss << cit->c[0] << " ";
+					oss << cit->c[1] << " ";
+					oss << cit->c[2] << std::endl;
+				}
+			}
+
+			TRACE(oss.str().c_str());
+			std::istringstream iss(oss.str());
+
+			// read new part into Data_source
+			//
+			bool read_number = (this->m_nPrismPart != PRISM_PERIMETER) && (this->m_nDataSourceType == Data_source::SHAPE);
+			new_data_source.Read(iss, read_number);
+		}
+
+		// set new data_source
+		Prism copy(*prism);
+		switch(this->m_nPrismPart)
+		{
+		case CBoxPropertiesDialogBar::PRISM_TOP:
+			copy.top = new_data_source;
+			break;
+		case CBoxPropertiesDialogBar::PRISM_PERIMETER:
+			copy.perimeter = new_data_source;
+			break;
+		case CBoxPropertiesDialogBar::PRISM_BOTTOM:
+			copy.bottom = new_data_source;
+			break;
+		}
+
+		// dump new prism
+		std::ostringstream prism_oss;
+		prism_oss << copy;
+		TRACE(prism_oss.str().c_str());
+		std::istringstream prism_iss(prism_oss.str());
+
+		// remove first line (-prism)
+		std::string line;
+		std::getline(prism_iss, line);
+
+		// read new prism
+		Prism new_prism;
+		while(new_prism.Read(prism_iss))
+		{
+			if (prism_iss.rdstate() & std::ios::eofbit) break;
+			prism_iss.clear();
+		}
+
+		// setup domain
+		this->m_pView->GetDocument()->GetDefaultZone(::domain);
+
+		new_prism.Tidy();
+
+		pZoneActor->SetPolyhedron(&new_prism, this->m_pView->GetDocument()->GetUnits());
+		this->m_pView->GetDocument()->Notify(this, WPN_SELCHANGED, 0, pZoneActor);
+		this->m_pView->GetDocument()->UpdateAllViews(0);
+
+		// save points
+		std::list<coord> save = this->m_listCoord[this->m_nPrismPart];
+		this->UpdatePrism(pZoneActor);
+		// restore points
+		this->m_listCoord[this->m_nPrismPart] = save;
+
+		//{{HACK
+		this->m_pView->GetDocument()->SetModifiedFlag(TRUE);
+		//}}HACK
+	}
+	// Update StatusBar
+	//
+	if (CWnd* pWnd = ((CFrameWnd*)::AfxGetMainWnd())->GetMessageBar())
+	{
+		CString status;
+		status.LoadStringA(AFX_IDS_IDLEMESSAGE);
+		pWnd->SetWindowText(status);
+	}
+}
+
+void CBoxPropertiesDialogBar::EnableNone(BOOL bEnable)
+{
+	// do nothing
+}
+
+void CBoxPropertiesDialogBar::EnableConstant(BOOL bEnable)
+{
+	if (CEdit* pEdit = (CEdit*)this->GetDlgItem(IDC_EDIT_CONSTANT))
+	{
+		pEdit->EnableWindow(TRUE);
+		pEdit->SetReadOnly(!bEnable);
+	}
+}
+
+void CBoxPropertiesDialogBar::EnableArcraster(BOOL bEnable)
+{
+	if (CEdit* pEdit = (CEdit*)this->GetDlgItem(IDC_EDIT_ARCRASTER))
+	{
+		pEdit->EnableWindow(TRUE);
+		pEdit->SetReadOnly(TRUE);
+	}
+	if (CWnd* pWnd = this->GetDlgItem(IDC_BUTTON_ARCRASTER))
+	{
+		pWnd->EnableWindow(bEnable);
+	}
+}
+
+void CBoxPropertiesDialogBar::EnableShape(BOOL bEnable)
+{
+	if (CEdit* pEdit = (CEdit*)this->GetDlgItem(IDC_EDIT_SHAPEFILE))
+	{
+		pEdit->EnableWindow(TRUE);
+		pEdit->SetReadOnly(TRUE);
+	}
+	if (CWnd* pWnd = this->GetDlgItem(IDC_BUTTON_SHAPE))
+	{
+		pWnd->EnableWindow(bEnable);
+	}
+	if (this->m_nPrismPart == CBoxPropertiesDialogBar::PRISM_PERIMETER)
+	{
+		if (CWnd* pWnd = this->GetDlgItem(IDC_COMBO_SHAPE))
+		{
+			pWnd->EnableWindow(FALSE);
+		}
+	}
+	else
+	{
+		if (CWnd* pWnd = this->GetDlgItem(IDC_COMBO_SHAPE))
+		{
+			pWnd->EnableWindow(bEnable);
+		}
+	}
+}
+
+void CBoxPropertiesDialogBar::EnablePoints(BOOL bEnable)
+{
+	this->EnablePointsGrid(bEnable);
+}
+
+void CBoxPropertiesDialogBar::EnablePrismRadios(BOOL bEnable)
+{
+	if (CWnd* pWnd = this->GetDlgItem(IDC_RADIO_NONE))
+	{
+		pWnd->EnableWindow(bEnable);
+	}
+	if (CWnd* pWnd = this->GetDlgItem(IDC_RADIO_CONSTANT))
+	{
+		if (this->m_nPrismPart == CBoxPropertiesDialogBar::PRISM_PERIMETER)
+		{
+			pWnd->EnableWindow(FALSE);
+		}
+		else
+		{
+			pWnd->EnableWindow(bEnable);
+		}
+	}
+	if (CWnd* pWnd = this->GetDlgItem(IDC_RADIO_ARCRASTER))
+	{
+		if (this->m_nPrismPart == CBoxPropertiesDialogBar::PRISM_PERIMETER)
+		{
+			pWnd->EnableWindow(FALSE);
+		}
+		else
+		{
+			pWnd->EnableWindow(bEnable);
+		}
+	}
+	if (CWnd* pWnd = this->GetDlgItem(IDC_RADIO_SHAPE))
+	{
+		pWnd->EnableWindow(bEnable);
+	}
+	if (CWnd* pWnd = this->GetDlgItem(IDC_RADIO_POINTS))
+	{
+		pWnd->EnableWindow(bEnable);
+	}
+}
+
+void CBoxPropertiesDialogBar::OnBnClickedArcraster(void)
+{
+	static char szFilters[] =
+		"ARC/INFO ASCII Grid Files (*.txt)|*.txt|"
+		"All Files (*.*)|*.*|"
+		"|";
+
+	// Create an Open dialog; the default file name extension is ".txt".
+	CFileDialog fileDlg(TRUE, "txt", NULL,
+		OFN_FILEMUSTEXIST | OFN_HIDEREADONLY, szFilters, this);
+
+	if (this->m_sArcraster[this->m_nPrismPart].GetLength())
+	{
+		TCHAR buffer[MAX_PATH];
+		::strcpy(buffer, this->m_sArcraster[this->m_nPrismPart]);
+		if (::PathRemoveFileSpec(buffer))
+		{
+			fileDlg.m_ofn.lpstrInitialDir = buffer;
+		}
+	}
+
+	if (fileDlg.DoModal() == IDOK)
+	{
+		this->m_sArcraster[this->m_nPrismPart] = fileDlg.GetPathName();
+		::PathSetDlgItemPath(this->GetSafeHwnd(), IDC_EDIT_ARCRASTER, this->m_sArcraster[this->m_nPrismPart]);
+		if (CGlobal::IsValidArcraster(this->m_sArcraster[this->m_nPrismPart]))
+		{
+			this->OnApply();
+		}
+	}
+}
+
+void CBoxPropertiesDialogBar::OnBnClickedShape(void)
+{
+	static char szFilters[] =
+		"Shapefile Files (*.shp)|*.shp|"
+		"All Files (*.*)|*.*|"
+		"|";
+
+	// Create an Open dialog; the default file name extension is ".shp".
+	CFileDialog fileDlg(TRUE, "shp", NULL,
+		OFN_FILEMUSTEXIST | OFN_HIDEREADONLY, szFilters, this);
+
+	if (this->m_sShapefile[this->m_nPrismPart].GetLength())
+	{
+		TCHAR buffer[MAX_PATH];
+		::strcpy(buffer, this->m_sShapefile[this->m_nPrismPart]);
+		if (::PathRemoveFileSpec(buffer))
+		{
+			fileDlg.m_ofn.lpstrInitialDir = buffer;
+		}
+	}
+
+	if (fileDlg.DoModal() == IDOK)
+	{
+		this->m_sShapefile[this->m_nPrismPart] = fileDlg.GetPathName();
+		// TODO check if shape file has changed
+		//
+		PathSetDlgItemPath(this->GetSafeHwnd(), IDC_EDIT_SHAPEFILE, this->m_sShapefile[this->m_nPrismPart]);
+
+		// add headings
+		if (CGlobal::IsValidShapefile(this->m_sShapefile[this->m_nPrismPart]))
+		{
+			this->m_wndShapeCombo.ResetContent();
+
+			if (this->m_nPrismPart != CBoxPropertiesDialogBar::PRISM_PERIMETER)
+			{
+				std::string s = this->m_sShapefile[this->m_nPrismPart];
+				Shapefile sf(s);
+				std::vector< std::string > headings = sf.Get_headers();
+
+				CGlobal::InsertHeadings(this->m_wndShapeCombo, headings);
+
+				int n = this->m_nShapeAttribute[this->m_nPrismPart];
+				if (n >= -1)
+				{
+					this->m_wndShapeCombo.SetCurSel(n + 1);
+				}
+			}
+			else
+			{
+				this->OnApply();
+			}
+		}
+	}
+}
+
+void CBoxPropertiesDialogBar::UpdatePrismControls(void)
+{
+	switch(this->GetCheckedRadioButton(IDC_RADIO_NONE, IDC_RADIO_SHAPE))
+	{
+	case IDC_RADIO_NONE:
+		this->EnableNone(TRUE);
+		this->EnableConstant(FALSE);
+		this->EnableArcraster(FALSE);
+		this->EnableShape(FALSE);
+		this->EnablePoints(FALSE);
+		this->EnablePrismRadios(TRUE);
+		break;
+	case IDC_RADIO_CONSTANT:
+		if (this->m_nPrismPart == CBoxPropertiesDialogBar::PRISM_PERIMETER)
+		{
+			ASSERT(FALSE);
+		}
+		else
+		{
+			this->EnableNone(FALSE);
+			this->EnableConstant(TRUE);
+			this->EnableArcraster(FALSE);
+			this->EnableShape(FALSE);
+			this->EnablePoints(FALSE);
+			this->EnablePrismRadios(TRUE);
+		}
+		break;
+	case IDC_RADIO_ARCRASTER:
+		if (this->m_nPrismPart == CBoxPropertiesDialogBar::PRISM_PERIMETER)
+		{
+			ASSERT(FALSE);
+		}
+		else
+		{
+			this->EnableNone(FALSE);
+			this->EnableConstant(FALSE);
+			this->EnableArcraster(TRUE);
+			this->EnableShape(FALSE);
+			this->EnablePoints(FALSE);
+			this->EnablePrismRadios(TRUE);
+		}
+		break;
+	case IDC_RADIO_POINTS:
+		this->EnableNone(FALSE);
+		this->EnableConstant(FALSE);
+		this->EnableArcraster(FALSE);
+		this->EnableShape(FALSE);
+		this->EnablePoints(TRUE);
+		this->EnablePrismRadios(TRUE);
+		break;
+	case IDC_RADIO_SHAPE:
+		if (this->m_nPrismPart == CBoxPropertiesDialogBar::PRISM_PERIMETER)
+		{
+			this->EnableNone(FALSE);
+			this->EnableConstant(FALSE);
+			this->EnableArcraster(FALSE);
+			this->EnableShape(FALSE);
+			this->EnablePoints(FALSE);
+			if (CEdit* pEdit = (CEdit*)this->GetDlgItem(IDC_EDIT_SHAPEFILE))
+			{
+				pEdit->EnableWindow(TRUE);
+				pEdit->SetReadOnly(TRUE);
+			}
+			this->EnablePrismRadios(FALSE);
+		}
+		else
+		{
+			this->EnableNone(FALSE);
+			this->EnableConstant(FALSE);
+			this->EnableArcraster(FALSE);
+			this->EnableShape(TRUE);
+			this->EnablePoints(FALSE);
+			this->EnablePrismRadios(TRUE);
+		}
+		break;
+	default:
+		ASSERT(FALSE);
+		break;
+	}
+}
+
+void CBoxPropertiesDialogBar::OnCbnSelChangeShape(void)
+{
+	TRACE("%s, in\n", __FUNCTION__);
+	CString str;
+	this->GetDlgItemTextA(IDC_EDIT_SHAPEFILE, str);
+	ASSERT(!str.IsEmpty());
+	ASSERT(!this->m_sShapefile[this->m_nPrismPart].IsEmpty());
+	ASSERT(CGlobal::IsValidShapefile(this->m_sShapefile[this->m_nPrismPart]));
+	ASSERT(this->m_nPrismPart != CBoxPropertiesDialogBar::PRISM_PERIMETER);
+	if (this->m_wndShapeCombo.GetCurSel() != 0)
+	{
+		this->OnApply();
+	}
+	TRACE("%s, out\n", __FUNCTION__);
+}
+
+void CBoxPropertiesDialogBar::OnEnKillfocusConstant()
+{
+	TRACE("%s, in\n", __FUNCTION__);
+	ASSERT(this->m_nType == CBoxPropertiesDialogBar::BP_PRISM);
+	if (this->m_bNeedsUpdate)
+	{
+		double d;
+		if (IsValidFloatFormat(this, IDC_EDIT_CONSTANT, d))
+		{
+			this->OnApply();
+		}
+		else
+		{
+			this->UpdateData(FALSE);
+		}
+	}
+	TRACE("%s, out\n", __FUNCTION__);
+}
+
+void CBoxPropertiesDialogBar::OnEnChangeConstant()
+{
+	TRACE("%s, in\n", __FUNCTION__);
+	ASSERT(this->m_nType == CBoxPropertiesDialogBar::BP_PRISM);
+	double d;
+	if (!(IsValidFloatFormat(this, IDC_EDIT_CONSTANT, d) && this->m_dConstant[this->m_nPrismPart] == d))
+	{
+		TRACE("%s, this->m_bNeedsUpdate set to true\n", __FUNCTION__);
+		this->m_bNeedsUpdate = true;
+	}
+	TRACE("%s, out\n", __FUNCTION__);
+}

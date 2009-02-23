@@ -25,6 +25,8 @@
 #include "TestCBCSpecifiedHeadPropertyPage.h"
 #include "TestCTimeControlMultiPropertyPage2.h"
 #include "TestCPrintInitialPropertyPage.h"
+#include "TestHDFSerializePolyData.h"
+#include "TestPrism.h"
 
 
 TCPPUnit::TCPPUnit(void)
@@ -40,6 +42,8 @@ TCPPUnit::~TCPPUnit(void)
 
 void TCPPUnit::RunUnitTests(void)
 {
+	_CrtSetBreakAlloc(243);
+
 	{
 		CppUnit::TextUi::TestRunner runner;
 
@@ -52,17 +56,20 @@ void TCPPUnit::RunUnitTests(void)
 // COMMENT: {5/22/2006 6:20:43 PM}		}
 // COMMENT: {5/22/2006 6:20:43 PM}		//}}
 
-		runner.addTest(TestCPhastInput::suite());
-		runner.addTest(TestCZone::suite());
-		runner.addTest(TestCGrid::suite());
-		runner.addTest(TestCtime::suite());
-		runner.addTest(TestCBC::suite());
-		runner.addTest(TestCTimeControl::suite());
-		runner.addTest(TestCWPhastDoc::suite());
-		runner.addTest(TestCParser::suite());
-		runner.addTest(TestCPropertyTreeControlBar::suite());
-		runner.addTest(TestCUnits::suite());
-		runner.addTest(TestCPhastInput::suite());
+// COMMENT: {7/10/2008 7:43:30 PM}		runner.addTest(TestCPhastInput::suite());
+// COMMENT: {7/10/2008 7:43:30 PM}		runner.addTest(TestCZone::suite());
+// COMMENT: {7/10/2008 7:43:30 PM}		runner.addTest(TestCGrid::suite());
+// COMMENT: {7/10/2008 7:43:30 PM}		runner.addTest(TestCtime::suite());
+// COMMENT: {7/10/2008 7:43:30 PM}		runner.addTest(TestCBC::suite());
+// COMMENT: {7/10/2008 7:43:30 PM}		runner.addTest(TestCTimeControl::suite());
+// COMMENT: {7/10/2008 7:43:30 PM}		runner.addTest(TestCWPhastDoc::suite());
+// COMMENT: {7/10/2008 7:43:30 PM}		runner.addTest(TestCParser::suite());
+// COMMENT: {7/10/2008 7:43:30 PM}		runner.addTest(TestCPropertyTreeControlBar::suite());
+// COMMENT: {7/10/2008 7:43:30 PM}		runner.addTest(TestCUnits::suite());
+// COMMENT: {7/10/2008 7:43:30 PM}		runner.addTest(TestCPhastInput::suite());
+// COMMENT: {7/10/2008 7:43:30 PM}		
+// COMMENT: {7/10/2008 7:43:30 PM}		runner.addTest(TestPrism::suite());		
+// COMMENT: {7/10/2008 7:43:30 PM}		runner.addTest(TestHDFSerializePolyData::suite());		
 
 // COMMENT: {8/17/2005 3:52:59 PM}		runner.addTest(TestCTimeControlMultiPropertyPage2::suite());
 
@@ -96,5 +103,5 @@ void TCPPUnit::RunUnitTests(void)
 	}
 
 	CPPUNIT_ASSERT(::_fcloseall() == 0);
-// COMMENT: {3/28/2006 9:12:56 PM}	exit(0);
+// COMMENT: {7/10/2008 4:07:05 PM}	exit(0);
 }

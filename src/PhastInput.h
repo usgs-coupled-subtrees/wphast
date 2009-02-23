@@ -1,7 +1,10 @@
 #pragma once
 
 #include <string>
+#include <list>
 #include "Parser.h"
+
+class Prism;
 
 class CPhastInput
 {
@@ -36,4 +39,5 @@ private:
 	// static CParser* s_pParser;
 	std::string m_s_error;
 	std::string m_s_warning;
+	std::list<Prism*> m_save_prism_list;
 };

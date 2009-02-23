@@ -243,16 +243,19 @@
 #define IDD_SUBDIVIDE_DIALOG            273
 #define IDD_BC_TYPE_DIALOG              275
 #define IDD_COLORS                      276
-#define IDD_PROPS_WELL                  277
 #define IDD_PROPS_RIVER                 278
 #define IDR_DESCRIPTION_RTF             279
 #define IDD_PROPS_CUBE3                 279
 #define IDR_SOLUTE_TRUE_RTF             280
 #define IDD_PROPS_WEDGE                 280
 #define IDR_SOLUTE_FALSE_RTF            281
+#define IDD_PROPS_PRISM                 281
 #define IDR_DIFFUSIVITY_RTF             282
+#define IDD_PROPS_WELL                  282
 #define IDR_FREE_SURFACE_TRUE_RTF       283
+#define IDD_PROPS_PRISM2                283
 #define IDR_FREE_SURFACE_FALSE_RTF      284
+#define IDD_PROPS_CUBE4                 284
 #define IDR_SM_ITERATIVE_TRUE_RTF       285
 #define IDR_SM_ITERATIVE_FALSE_RTF      286
 #define IDR_SM_TOLERANCE_RTF            287
@@ -344,6 +347,7 @@
 #define IDR_RTF3                        389
 #define IDR_TC_TE_TIME_END_UNITS_RTF    389
 #define IDR_SM_REBALANCE_BY_CELL_RTF    390
+#define IDD_DIALOG_PERIMETER            393
 #define IDC_EDIT_X                      1000
 #define IDC_PROPERTIES                  1000
 #define IDC_TITLE                       1000
@@ -406,6 +410,7 @@
 #define IDC_BUTTON2                     1029
 #define IDC_XMAX_EDIT                   1029
 #define IDC_APPLY                       1030
+#define IDC_BUTTON3                     1030
 #define IDC_TREE_ZONES                  1031
 #define IDC_FACE_STATIC                 1032
 #define IDC_PROP_TREE                   1034
@@ -759,6 +764,8 @@
 #define IDC_STATIC_LOC                  1385
 #define IDC_GRID_RIVER                  1386
 #define IDC_UNITS_STATIC                1387
+#define IDC_GRID_RIVER2                 1387
+#define IDC_GRID_POINTS                 1387
 #define IDC_STARTTIME_EDIT              1388
 #define IDC_STARTTIME_STATIC            1389
 #define IDC_STARTTIME_COMBO             1390
@@ -785,6 +792,20 @@
 #define IDC_Z_UNITS_STATIC_WEDGE        1411
 #define IDC_GB_AXIS                     1412
 #define IDC_GB_CORNER                   1413
+#define IDC_TAB                         1414
+#define IDC_RADIO_NONE                  1415
+#define IDC_RADIO_CONSTANT              1416
+#define IDC_RADIO_ARCRASTER             1417
+#define IDC_RADIO_POINTS                1418
+#define IDC_RADIO_SHAPE                 1419
+#define IDC_EDIT_CONSTANT               1420
+#define IDC_EDIT_ARCRASTER              1421
+#define IDC_EDIT_SHAPEFILE              1422
+#define IDC_BUTTON_ARCRASTER            1423
+#define IDC_BUTTON_SHAPE                1424
+#define IDC_COMBO_SHAPE                 1430
+#define IDC_RADIO_PERIM_DRAW            1432
+#define IDC_RADIO_PERIM_SHAPEFILE       1433
 #define IDC_RESIZE_COLUMN               28654
 #define IDC_RESIZE_ROW                  28655
 #define IDR_POPUP                       28656
@@ -808,6 +829,12 @@
 #define ID_EDIT_PROPERTIES              32837
 #define ID_BUTTON32841                  32841
 #define ID_TOOLS_NEWWEDGE               32841
+#define ID_TOOLS_NEWPRISM               32842
+#define ID_BUTTON32843                  32843
+#define ID_BUTTON32844                  32844
+#define ID_BUTTON32845                  32845
+#define ID_BUTTON32846                  32846
+#define ID_BUTTON32848                  32848
 #define IDW_CONTROLBAR_TREE             59424
 #define IDW_CONTROLBAR_BOXPROPS         59425
 
@@ -815,9 +842,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        391
-#define _APS_NEXT_COMMAND_VALUE         32842
-#define _APS_NEXT_CONTROL_VALUE         1414
+#define _APS_NEXT_RESOURCE_VALUE        394
+#define _APS_NEXT_COMMAND_VALUE         32849
+#define _APS_NEXT_CONTROL_VALUE         1434
 #define _APS_NEXT_SYMED_VALUE           126
 #endif
 #endif

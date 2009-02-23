@@ -15,6 +15,9 @@
 #include <vtkTransform.h>
 #include <vtkProperty.h>
 #include <vtkPolyData.h>
+#include <vtkTransformPolyDataFilter.h>
+
+#include <vtkTriangleFilter.h>
 
 #include <vtkWin32RenderWindowInteractor.h>
 #include <vtkInteractorStyle.h>
@@ -27,6 +30,18 @@
 #include <vtkAbstractPropPicker.h>
 
 #include "Global.h"
+#include "srcinput/Prism.h"
+#include "srcinput/NNInterpolator/NNInterpolator.h"
+#include "srcinput/KDtree/KDtree.h"
+#include "srcinput/Filedata.h"
+
+#include "vtkImplicitFunctionNNInterpolator.h"
+#include <vtkImplicitBoolean.h>
+#include <vtkDelaunay3D.h>
+#include <vtkDelaunay2D.h>
+#include <vtkCutter.h>
+
+
 #include "PropertyTreeControlBar.h"
 #include "BoxPropertiesDialogBar.h"
 #include "ZoneResizeAction.h"
@@ -56,18 +71,31 @@ CZoneActor::CZoneActor(void)
 	, m_hInsertAfter(0)
 	, m_dwPrevSiblingItemData(0)
 	, m_bDefault(false)
+	, UnitsTransform(0)
+	, UnitsTransformPolyDataFilter(0)
+	, TopVisibility(1)
+	, BottomVisibility(1)
+	, PerimeterVisibility(1)
+
 {
 	this->m_pSource = srcWedgeSource::New();
 	this->m_pMapper = vtkPolyDataMapper::New();
 	this->m_pMapper->SetResolveCoincidentTopologyToPolygonOffset();
 
-	this->m_pMapper->SetInput( this->m_pSource->GetOutput() );
+	this->PolyData = this->m_pSource->GetOutput();
+
+	this->UnitsTransform = vtkTransform::New();
+	this->UnitsTransformPolyDataFilter = vtkTransformPolyDataFilter::New();
+	this->UnitsTransformPolyDataFilter->SetTransform(this->UnitsTransform);
+	this->UnitsTransformPolyDataFilter->SetInput(this->PolyData);
+
+	this->m_pMapper->SetInput( this->UnitsTransformPolyDataFilter->GetOutput() );
 	this->CubeActor = vtkActor::New();
 	this->CubeActor->SetMapper( this->m_pMapper );
 	this->AddPart(this->CubeActor);
 
 	this->mapOutline = vtkPolyDataMapper::New();
-	this->mapOutline->SetInput(this->m_pSource->GetOutput());
+	this->mapOutline->SetInput(this->UnitsTransformPolyDataFilter->GetOutput());
 
 	this->OutlineActor = vtkActor::New();
 	this->OutlineActor->SetMapper(mapOutline);
@@ -77,16 +105,140 @@ CZoneActor::CZoneActor(void)
 	this->OutlineActor->GetProperty()->SetRepresentationToWireframe();
 	this->OutlineActor->GetProperty()->SetAmbient(1.0);
 	this->OutlineActor->GetProperty()->SetAmbientColor(1.0,1.0,1.0);
+
+	this->mapOutline->SetInput(this->UnitsTransformPolyDataFilter->GetOutput());
+	this->m_pMapper->SetInput(this->UnitsTransformPolyDataFilter->GetOutput());
 }
 
 CZoneActor::~CZoneActor(void)
 {
+	this->CleanupPrisms();
+
 	this->m_pSource->Delete();
 	this->m_pMapper->Delete();
 
 	this->CubeActor->Delete();
 	this->OutlineActor->Delete();
 	this->mapOutline->Delete();
+
+	this->UnitsTransform->Delete();
+	this->UnitsTransformPolyDataFilter->Delete();
+}
+
+void CZoneActor::CleanupPrisms(void)
+{
+	//{{
+	this->CubeActor->SetVisibility(0);
+	this->AddPart(this->CubeActor);
+
+	this->OutlineActor->SetVisibility(0);
+	this->AddPart(this->OutlineActor);
+	//}}
+
+	std::vector<vtkPolyData*>::iterator pd_iter = this->PrismSidesPolyData.begin();
+	for (; pd_iter != this->PrismSidesPolyData.end(); ++pd_iter)
+	{
+		(*pd_iter)->Delete();
+	}
+	this->PrismSidesPolyData.clear();
+
+	std::vector<vtkActor*>::iterator actor_iter = this->SolidPerimeterActors.begin();
+	for (; actor_iter != this->SolidPerimeterActors.end(); ++actor_iter)
+	{
+		this->RemovePart(*actor_iter);
+		(*actor_iter)->Delete();
+	}
+	this->SolidPerimeterActors.clear();
+
+	actor_iter = this->OutlinePerimeterActors.begin();
+	for (; actor_iter != this->OutlinePerimeterActors.end(); ++actor_iter)
+	{
+		this->RemovePart(*actor_iter);
+		(*actor_iter)->Delete();
+	}
+	this->OutlinePerimeterActors.clear();
+
+	actor_iter = this->TopActors.begin();
+	for (; actor_iter != this->TopActors.end(); ++actor_iter)
+	{
+		this->RemovePart(*actor_iter);
+		(*actor_iter)->Delete();
+	}
+	this->TopActors.clear();
+
+	actor_iter = this->TopOutlineActors.begin();
+	for (; actor_iter != this->TopOutlineActors.end(); ++actor_iter)
+	{
+		this->RemovePart(*actor_iter);
+		(*actor_iter)->Delete();
+	}
+	this->TopOutlineActors.clear();
+
+	actor_iter = this->BottomActors.begin();
+	for (; actor_iter != this->BottomActors.end(); ++actor_iter)
+	{
+		this->RemovePart(*actor_iter);
+		(*actor_iter)->Delete();
+	}
+	this->BottomActors.clear();
+
+	actor_iter = this->BottomOutlineActors.begin();
+	for (; actor_iter != this->BottomOutlineActors.end(); ++actor_iter)
+	{
+		this->RemovePart(*actor_iter);
+		(*actor_iter)->Delete();
+	}
+	this->BottomOutlineActors.clear();
+
+	std::vector<vtkPolyDataMapper*>::iterator mapper_iter = this->SolidPerimeterMappers.begin();
+	for (; mapper_iter != this->SolidPerimeterMappers.end(); ++mapper_iter)
+	{
+		(*mapper_iter)->Delete();
+	}
+	this->SolidPerimeterMappers.clear();
+
+	mapper_iter = this->OutlinePerimeterMappers.begin();
+	for (; mapper_iter != this->OutlinePerimeterMappers.end(); ++mapper_iter)
+	{
+		(*mapper_iter)->Delete();
+	}
+	this->OutlinePerimeterMappers.clear();
+
+	std::vector<vtkTransformPolyDataFilter*>::iterator filt_iter;
+
+	filt_iter = this->TopFilters.begin();
+	for (; filt_iter != this->TopFilters.end(); ++filt_iter)
+	{
+		(*filt_iter)->Delete();
+	}
+	this->TopFilters.clear();
+
+	filt_iter = this->TopOutlineFilters.begin();
+	for (; filt_iter != this->TopOutlineFilters.end(); ++filt_iter)
+	{
+		if ((*filt_iter))
+		{
+			(*filt_iter)->Delete();
+		}
+	}
+	this->TopOutlineFilters.clear();
+
+	filt_iter = this->BottomFilters.begin();
+	for (; filt_iter != this->BottomFilters.end(); ++filt_iter)
+	{
+		(*filt_iter)->Delete();
+	}
+	this->BottomFilters.clear();
+
+	filt_iter = this->BottomOutlineFilters.begin();
+	for (; filt_iter != this->BottomOutlineFilters.end(); ++filt_iter)
+	{
+		if ((*filt_iter))
+		{
+			(*filt_iter)->Delete();
+		}
+	}
+	this->BottomOutlineFilters.clear();
 }
 
 void CZoneActor::Remove(CPropertyTreeControlBar* pTreeControlBar)
@@ -140,7 +292,7 @@ void CZoneActor::UnRemove(CPropertyTreeControlBar* pTreeControlBar)
 		}
 		if (this->m_hInsertAfter == 0)
 		{
-			TRACE("***WARNING*** PreviousSiblingItemData Not Found\n");
+			TRACE("***WARNING*** PreviousSiblingItemData Not Found\\n");
 			ASSERT(FALSE);
 			this->m_hInsertAfter = TVI_FIRST;
 		}
@@ -231,7 +383,7 @@ void CZoneActor::Select(CWPhastView* pView, bool bReselect)
 
 #if defined(_DEBUG)
 		int n = this->GetNumberOfPaths();
-		TRACE("This selection contains %d paths\n");
+		TRACE("This selection contains %d paths\\n");
 #endif
 	}
 
@@ -316,14 +468,17 @@ void CZoneActor::SetBounds(float xMin, float xMax, float yMin, float yMax, float
 	ASSERT(zMin <= zMax);
 
 	ASSERT(this->m_pSource);
+	ASSERT(this->GetPolyhedronType() != Polyhedron::PRISM);
 	this->m_pSource->SetBounds(
-		xMin * rUnits.horizontal.input_to_si,
-		xMax * rUnits.horizontal.input_to_si,
-		yMin * rUnits.horizontal.input_to_si,
-		yMax * rUnits.horizontal.input_to_si,
-		zMin * rUnits.vertical.input_to_si,
-		zMax * rUnits.vertical.input_to_si
+		xMin,
+		xMax,
+		yMin,
+		yMax,
+		zMin,
+		zMax
 		);
+	this->SetUnits(rUnits);
+
 
 	CZone zone(xMin, xMax, yMin, yMax, zMin, zMax);
 	if (this->GetChopType() == srcWedgeSource::CHOP_NONE)
@@ -352,16 +507,8 @@ void CZoneActor::SetBounds(const CZone& rZone, const CUnits& rUnits)
 void CZoneActor::SetUnits(const CUnits& rUnits)
 {
 	ASSERT(this->GetPolyhedron() && ::AfxIsValidAddress(this->GetPolyhedron(), sizeof(Polyhedron)));
-
-	struct zone* pzone = this->GetPolyhedron()->Get_box();
-	this->m_pSource->SetBounds(
-		pzone->x1 * rUnits.horizontal.input_to_si,
-		pzone->x2 * rUnits.horizontal.input_to_si,
-		pzone->y1 * rUnits.horizontal.input_to_si,
-		pzone->y2 * rUnits.horizontal.input_to_si,
-		pzone->z1 * rUnits.vertical.input_to_si,
-		pzone->z2 * rUnits.vertical.input_to_si
-		);
+	this->UnitsTransform->Identity();
+	this->UnitsTransform->Scale(rUnits.horizontal.input_to_si, rUnits.horizontal.input_to_si, rUnits.vertical.input_to_si);
 }
 
 void CZoneActor::SetBounds(float bounds[6], const CUnits& units)
@@ -372,7 +519,7 @@ void CZoneActor::SetBounds(float bounds[6], const CUnits& units)
 void CZoneActor::GetUserBounds(float bounds[6])
 {
 	ASSERT(this->GetPolyhedron() && ::AfxIsValidAddress(this->GetPolyhedron(), sizeof(Polyhedron)));
-	struct zone* pzone = this->GetPolyhedron()->Get_box();
+	struct zone* pzone = this->GetPolyhedron()->Get_bounding_box();
 
 	bounds[0] = pzone->x1;
 	bounds[1] = pzone->x2;
@@ -385,7 +532,7 @@ void CZoneActor::GetUserBounds(float bounds[6])
 float* CZoneActor::GetUserBounds()
 {
 	ASSERT(this->GetPolyhedron() && ::AfxIsValidAddress(this->GetPolyhedron(), sizeof(Polyhedron)));
-	struct zone* pzone = this->GetPolyhedron()->Get_box();
+	struct zone* pzone = this->GetPolyhedron()->Get_bounding_box();
 	this->m_ActualBounds[0] = pzone->x1;
 	this->m_ActualBounds[1] = pzone->x2;
 	this->m_ActualBounds[2] = pzone->y1;
@@ -416,14 +563,22 @@ void CZoneActor::Serialize(bool bStoring, hid_t loc_id)
 	static const char szDefault[] = "Default";
 	static const char szDesc[]    = "Description";
 
-	static const char szZone[]    = "zone";
-	static const char szPolyh[]   = "polyh";
-	static const char szBox[]     = "box";
-	static const char szType[]    = "type";
-	static const char szOrient[]  = "wedge_orientation";
-	hid_t polyh_id;
-	double xyz[6];
+	static const char szZone[]      = "zone";
+	static const char szPolyh[]     = "polyh";
+	static const char szBox[]       = "box";
+	static const char szType[]      = "type";
+	static const char szOrient[]    = "wedge_orientation";
+	static const char szPolyData[]  = "PolyData";
+	static const char szBottom[]    = "Bottom";
+	static const char szTop[]       = "Top";
+	static const char szPerimeter[] = "Perimeter";
+	static const char szNPOLYS[]    = "NPOLYS";
+	static const char szPFormat[]   = "%u";
+	static const char szOutFormat[] = "Outline %u";
 
+	hid_t polyh_id;
+	hid_t pd_id;
+	double xyz[6];
 	herr_t status;
 
 	if (bStoring)
@@ -435,15 +590,20 @@ void CZoneActor::Serialize(bool bStoring, hid_t loc_id)
 		{
 			// Polyhedron type
 			//
-			ASSERT(this->GetPolyhedron() && ::AfxIsValidAddress(this->GetPolyhedron(), sizeof(Polyhedron)));
-			int nValue = this->GetPolyhedron()->get_type();
-			status = CGlobal::HDFSerialize(bStoring, polyh_id, szType, H5T_NATIVE_INT, 1, &nValue);
+			hid_t polytype = CGlobal::HDFCreatePolyhedronDataType();
+
+			Polyhedron::POLYHEDRON_TYPE nValue = this->GetPolyhedron()->get_type();
+			status = CGlobal::HDFSerialize(bStoring, polyh_id, szType, polytype, 1, &nValue);
+
+			status = H5Tclose(polytype);
 			ASSERT(status >= 0);
+
 
 			// Polyhedron box
 			//
 			ASSERT(this->GetPolyhedron() && ::AfxIsValidAddress(this->GetPolyhedron(), sizeof(Polyhedron)));
-			struct zone* pzone = this->GetPolyhedron()->Get_box();
+			struct zone* pzone = this->GetPolyhedron()->Get_bounding_box();
+			ASSERT(pzone->zone_defined);
 			xyz[0] = pzone->x1;
 			xyz[1] = pzone->y1;
 			xyz[2] = pzone->z1;
@@ -457,9 +617,106 @@ void CZoneActor::Serialize(bool bStoring, hid_t loc_id)
 			{
 				// WEDGE_ORIENTATION
 				//
-				nValue = srcWedgeSource::ConvertChopType(this->GetChopType());
-				status = CGlobal::HDFSerialize(bStoring, polyh_id, szOrient, H5T_NATIVE_INT, 1, &nValue);
+				Wedge::WEDGE_ORIENTATION o = srcWedgeSource::ConvertChopType(this->GetChopType());
+				hid_t wotype = CGlobal::HDFCreateWidgetOrientationDataType();
+				status = CGlobal::HDFSerialize(bStoring, polyh_id, szOrient, wotype, 1, &o);
 				ASSERT(status >= 0);
+
+				status = H5Tclose(wotype);
+				ASSERT(status >= 0);
+			}
+			else if (nValue == Polyhedron::PRISM)
+			{
+				// create PolyData group
+				//
+				pd_id = ::H5Gcreate(polyh_id, szPolyData, 0);
+				if (pd_id > 0)
+				{
+					hid_t bottom_id = ::H5Gcreate(pd_id, szBottom, 0);
+					if (bottom_id)
+					{
+						char szName[80];
+						size_t npolys = this->BottomActors.size();
+						CGlobal::HDFSerialize(bStoring, bottom_id, szNPOLYS, H5T_NATIVE_UINT, 1, &npolys);
+						for (size_t poly = 0; poly < npolys; ++poly)
+						{
+							::sprintf(szName, szPFormat, poly);
+							ASSERT(this->BottomFilters[poly]);
+							if (vtkPolyData *pPolyData = this->BottomFilters[poly]->GetInput())
+							{
+								CGlobal::HDFSerializePolyData(bStoring, bottom_id, szName, pPolyData);
+							}
+							if (this->BottomOutlineFilters[poly])
+							{
+								if (vtkPolyData *pPolyData = this->BottomOutlineFilters[poly]->GetInput())
+								{
+									::sprintf(szName, szOutFormat, poly);
+									CGlobal::HDFSerializePolyData(bStoring, bottom_id, szName, pPolyData);
+								}
+							}
+						}
+						// close the bottom group
+						//
+						status = ::H5Gclose(bottom_id);
+						ASSERT(status >= 0);
+					}
+					hid_t top_id = ::H5Gcreate(pd_id, szTop, 0);
+					if (top_id)
+					{
+						char szName[80];
+						size_t npolys = this->TopActors.size();
+						CGlobal::HDFSerialize(bStoring, top_id, szNPOLYS, H5T_NATIVE_UINT, 1, &npolys);
+						for (size_t poly = 0; poly < npolys; ++poly)
+						{
+							::sprintf(szName, szPFormat, poly);
+							ASSERT(this->TopFilters[poly]);
+							if (vtkPolyData *pPolyData = this->TopFilters[poly]->GetInput())
+							{
+								CGlobal::HDFSerializePolyData(bStoring, top_id, szName, pPolyData);
+							}
+							if (this->TopOutlineFilters[poly])
+							{
+								if (vtkPolyData *pPolyData = this->TopOutlineFilters[poly]->GetInput())
+								{
+									::sprintf(szName, szOutFormat, poly);
+									CGlobal::HDFSerializePolyData(bStoring, top_id, szName, pPolyData);
+								}
+							}
+						}
+						// close the top group
+						//
+						status = ::H5Gclose(top_id);
+						ASSERT(status >= 0);
+					}
+					hid_t perim_id = ::H5Gcreate(pd_id, szPerimeter, 0);
+					if (perim_id)
+					{
+						char szName[80];
+						size_t npolys = this->PrismSidesPolyData.size();
+						CGlobal::HDFSerialize(bStoring, perim_id, szNPOLYS, H5T_NATIVE_UINT, 1, &npolys);
+						for (size_t poly = 0; poly < npolys; ++poly)
+						{
+							::sprintf(szName, szPFormat, poly);
+							CGlobal::HDFSerializePolyData(bStoring, perim_id, szName, this->PrismSidesPolyData[poly]);
+						}
+						// close the perim group
+						//
+						status = ::H5Gclose(perim_id);
+						ASSERT(status >= 0);
+					}
+
+					// close the PolyData group
+					//
+					status = ::H5Gclose(pd_id);
+					ASSERT(status >= 0);
+				}
+
+				// serialize prism
+				if (Prism *p = dynamic_cast<Prism*>(this->GetPolyhedron()))
+				{
+					status = CGlobal::HDFSerializePrism(bStoring, polyh_id, *p);
+					ASSERT(status >= 0);
+				}
 			}
 
 			// close the polyh group
@@ -490,11 +747,12 @@ void CZoneActor::Serialize(bool bStoring, hid_t loc_id)
 		{
 			// Polyhedron type
 			//
-			int nValue;
-			status = CGlobal::HDFSerialize(bStoring, polyh_id, szType, H5T_NATIVE_INT, 1, &nValue);
+			Polyhedron::POLYHEDRON_TYPE nValue;
+			hid_t polytype = CGlobal::HDFCreatePolyhedronDataType();
+			status = CGlobal::HDFSerialize(bStoring, polyh_id, szType, polytype, 1, &nValue);
+
+			status = H5Tclose(polytype);
 			ASSERT(status >= 0);
-			Polyhedron::POLYHEDRON_TYPE n = static_cast<Polyhedron::POLYHEDRON_TYPE>(nValue);
-			ASSERT(n == Polyhedron::CUBE || n == Polyhedron::WEDGE);
 
 			// Polyhedron box
 			//
@@ -512,13 +770,22 @@ void CZoneActor::Serialize(bool bStoring, hid_t loc_id)
 				zone.z2 = xyz[5];
 			}
 
+			this->m_pSource->SetBounds(
+				zone.x1,
+				zone.x2,
+				zone.y1,
+				zone.y2,
+				zone.z1,
+				zone.z2
+				);
+
 			// WEDGE_ORIENTATION
 			//
-			if (n == Polyhedron::WEDGE)
+			if (nValue == Polyhedron::WEDGE)
 			{
-				status = CGlobal::HDFSerialize(bStoring, polyh_id, szOrient, H5T_NATIVE_INT, 1, &nValue);
-				ASSERT(status >= 0);
-				Wedge::WEDGE_ORIENTATION o = static_cast<Wedge::WEDGE_ORIENTATION>(nValue);
+				Wedge::WEDGE_ORIENTATION o;
+				hid_t wotype = CGlobal::HDFCreateWidgetOrientationDataType();
+				status = CGlobal::HDFSerialize(bStoring, polyh_id, szOrient, wotype, 1, &o);
 				if (this->GetPolyhedron())
 				{
 					::AfxIsValidAddress(this->GetPolyhedron(), sizeof(Polyhedron));
@@ -526,6 +793,413 @@ void CZoneActor::Serialize(bool bStoring, hid_t loc_id)
 				}
 				this->GetPolyhedron() = new Wedge(&zone, srcWedgeSource::GetWedgeOrientationString(o));
 				this->SetChopType(srcWedgeSource::ConvertWedgeOrientation(o));
+
+				status = H5Tclose(wotype);
+				ASSERT(status >= 0);
+			}
+			else if (nValue == Polyhedron::PRISM)
+			{
+				Prism *prism = new Prism;
+				this->GetPolyhedron() = prism;
+
+				// serialize prism
+				if (prism)
+				{
+					status = CGlobal::HDFSerializePrism(bStoring, polyh_id, *prism);
+					ASSERT(status >= 0);
+				}
+
+				// remove objects used for cubes/wedges
+				this->CubeActor->SetVisibility(0);
+				this->RemovePart(this->CubeActor);
+				this->OutlineActor->SetVisibility(0);
+				this->RemovePart(this->OutlineActor);
+
+				// open PolyData group
+				//
+				pd_id = ::H5Gopen(polyh_id, szPolyData);
+				if (pd_id > 0)
+				{
+					// perimeters
+					//
+					hid_t perim_id = ::H5Gopen(pd_id, szPerimeter);
+					if (perim_id)
+					{
+						size_t npolys;
+						CGlobal::HDFSerialize(bStoring, perim_id, szNPOLYS, H5T_NATIVE_UINT, 1, &npolys);
+						ASSERT(0 < npolys);
+						this->PrismSidesPolyData.resize(npolys);
+						this->SolidPerimeterMappers.resize(npolys);
+						this->SolidPerimeterActors.resize(npolys);
+						this->OutlinePerimeterMappers.resize(npolys);
+						this->OutlinePerimeterActors.resize(npolys);
+
+						char szName[80];
+						for (size_t poly = 0; poly < npolys; ++poly)
+						{
+							// polydata
+							::sprintf(szName, szPFormat, poly);
+							ASSERT(this->PrismSidesPolyData[poly] == 0);
+							CGlobal::HDFSerializePolyData(bStoring, perim_id, szName, this->PrismSidesPolyData[poly]);
+							ASSERT(this->PrismSidesPolyData[poly] != 0);
+							
+							// units transform
+							ASSERT(this->UnitsTransform);
+							vtkTransformPolyDataFilter *transformPolyDataFilter = vtkTransformPolyDataFilter::New();
+							transformPolyDataFilter->SetTransform(this->UnitsTransform);			
+							transformPolyDataFilter->SetInput(this->PrismSidesPolyData[poly]);
+							
+							// solid mapper
+							ASSERT(this->SolidPerimeterMappers[poly] == 0);
+							this->SolidPerimeterMappers[poly] = vtkPolyDataMapper::New();
+							this->SolidPerimeterMappers[poly]->SetInput(transformPolyDataFilter->GetOutput());
+							
+							// solid actor
+							ASSERT(this->SolidPerimeterActors[poly] == 0);
+							this->SolidPerimeterActors[poly] = vtkActor::New();
+							this->SolidPerimeterActors[poly]->SetMapper(this->SolidPerimeterMappers[poly]);
+							this->AddPart(this->SolidPerimeterActors[poly]);
+							this->SolidPerimeterActors[poly]->SetProperty(this->CubeActor->GetProperty());
+
+							// wireframe mapper
+							ASSERT(this->OutlinePerimeterMappers[poly] == 0);
+							this->OutlinePerimeterMappers[poly] = vtkPolyDataMapper::New();
+							this->OutlinePerimeterMappers[poly]->SetInput(transformPolyDataFilter->GetOutput());
+
+							// wireframe actor
+							ASSERT(this->OutlinePerimeterActors[poly] == 0);
+							this->OutlinePerimeterActors[poly] = vtkActor::New();
+							this->OutlinePerimeterActors[poly]->SetMapper(this->OutlinePerimeterMappers[poly]);
+							this->AddPart(this->OutlinePerimeterActors[poly]);
+							this->OutlinePerimeterActors[poly]->SetProperty(this->OutlineActor->GetProperty());
+
+							// release ref counted objects
+							transformPolyDataFilter->Delete();
+						}
+
+						// close the perim group
+						//
+						status = ::H5Gclose(perim_id);
+						ASSERT(status >= 0);
+					}
+
+					// bottoms
+					//
+					hid_t bottom_id = ::H5Gopen(pd_id, szBottom);
+					if (bottom_id)
+					{
+						size_t npolys;
+						CGlobal::HDFSerialize(bStoring, bottom_id, szNPOLYS, H5T_NATIVE_UINT, 1, &npolys);
+						ASSERT(0 < npolys);
+						this->BottomFilters.resize(npolys);
+						this->BottomActors.resize(npolys);
+						this->BottomOutlineFilters.resize(npolys);
+						this->BottomOutlineActors.resize(npolys);
+
+						char szName[80];
+						for (size_t poly = 0; poly < npolys; ++poly)
+						{
+							::sprintf(szName, szPFormat, poly);
+							
+							// solid polydata
+							vtkPolyData *spolyData = 0;
+							CGlobal::HDFSerializePolyData(bStoring, bottom_id, szName, spolyData);
+							ASSERT(spolyData);
+
+							// solid filters
+							ASSERT(this->BottomFilters[poly] == 0);
+							this->BottomFilters[poly] = vtkTransformPolyDataFilter::New();
+							this->BottomFilters[poly]->SetTransform(this->UnitsTransform);			
+							this->BottomFilters[poly]->SetInput(spolyData);
+
+							// solid mapper
+							vtkPolyDataMapper *smapper = vtkPolyDataMapper::New();
+							smapper->SetInput(this->BottomFilters[poly]->GetOutput());
+
+							// solid actor
+							ASSERT(this->BottomActors[poly] == 0);
+							this->BottomActors[poly] = vtkLODActor::New();
+							if (vtkLODActor *pLOD = vtkLODActor::SafeDownCast(this->BottomActors[poly]))
+							{
+								pLOD->SetNumberOfCloudPoints(2000);
+							}
+							this->BottomActors[poly]->SetMapper(smapper);
+							this->BottomActors[poly]->SetProperty(this->CubeActor->GetProperty());
+							this->AddPart(this->BottomActors[poly]);
+
+							Data_source::DATA_SOURCE_TYPE bot_type = prism->bottom.Get_source_type();
+							if (bot_type == Data_source::CONSTANT || bot_type == Data_source::NONE)
+							{
+								::sprintf(szName, szOutFormat, poly);
+
+								// outline polydata
+								vtkPolyData *opolyData = 0;
+								CGlobal::HDFSerializePolyData(bStoring, bottom_id, szName, opolyData);
+								ASSERT(opolyData);
+
+								// outline filters
+								ASSERT(this->BottomOutlineFilters[poly] == 0);
+								this->BottomOutlineFilters[poly] = vtkTransformPolyDataFilter::New();
+								this->BottomOutlineFilters[poly]->SetTransform(this->UnitsTransform);			
+								this->BottomOutlineFilters[poly]->SetInput(opolyData);
+
+								// outline mapper
+								vtkPolyDataMapper *omapper = vtkPolyDataMapper::New();
+								omapper->SetInput(this->BottomOutlineFilters[poly]->GetOutput());
+
+								// outline actor
+								ASSERT(this->BottomOutlineActors[poly] == 0);
+								this->BottomOutlineActors[poly] = vtkLODActor::New();
+								if (vtkLODActor *pLOD = vtkLODActor::SafeDownCast(this->BottomOutlineActors[poly]))
+								{
+									pLOD->SetNumberOfCloudPoints(2000);
+								}
+								this->BottomOutlineActors[poly]->SetMapper(omapper);
+								this->BottomOutlineActors[poly]->SetProperty(this->OutlineActor->GetProperty());
+								this->AddPart(this->BottomOutlineActors[poly]);
+
+								opolyData->Delete();
+								omapper->Delete();
+							}
+							else
+							{
+								ASSERT(bot_type == Data_source::ARCRASTER || bot_type == Data_source::CONSTANT
+									|| bot_type == Data_source::POINTS || bot_type == Data_source::SHAPE
+									|| bot_type == Data_source::XYZ);
+
+								ASSERT(this->BottomFilters[poly]);
+
+								// outline mapper
+								vtkPolyDataMapper *omapper = vtkPolyDataMapper::New();
+								omapper->SetInput(this->BottomFilters[poly]->GetOutput());
+
+								// outline actor
+								ASSERT(this->BottomOutlineActors[poly] == 0);
+								this->BottomOutlineActors[poly] = vtkLODActor::New();
+								if (vtkLODActor *pLOD = vtkLODActor::SafeDownCast(this->BottomOutlineActors[poly]))
+								{
+									pLOD->SetNumberOfCloudPoints(2000);
+								}
+								this->BottomOutlineActors[poly]->SetMapper(omapper);
+								this->BottomOutlineActors[poly]->SetProperty(this->OutlineActor->GetProperty());
+								this->AddPart(this->BottomOutlineActors[poly]);
+
+								omapper->Delete();
+							}
+
+							// cleanup
+							spolyData->Delete();
+							smapper->Delete();
+						}
+						// close the bottom group
+						//
+						status = ::H5Gclose(bottom_id);
+						ASSERT(status >= 0);
+					}
+
+					// tops
+					//
+					hid_t top_id = ::H5Gopen(pd_id, szTop);
+					if (top_id)
+					{
+						size_t npolys;
+						CGlobal::HDFSerialize(bStoring, top_id, szNPOLYS, H5T_NATIVE_UINT, 1, &npolys);
+						ASSERT(0 < npolys);
+						this->TopFilters.resize(npolys);
+						this->TopActors.resize(npolys);
+						this->TopOutlineFilters.resize(npolys);
+						this->TopOutlineActors.resize(npolys);
+
+						char szName[80];
+						for (size_t poly = 0; poly < npolys; ++poly)
+						{
+							::sprintf(szName, szPFormat, poly);
+							
+							// solid polydata
+							vtkPolyData *spolyData = 0;
+							CGlobal::HDFSerializePolyData(bStoring, top_id, szName, spolyData);
+							ASSERT(spolyData);
+
+							// solid filters
+							ASSERT(this->TopFilters[poly] == 0);
+							this->TopFilters[poly] = vtkTransformPolyDataFilter::New();
+							this->TopFilters[poly]->SetTransform(this->UnitsTransform);			
+							this->TopFilters[poly]->SetInput(spolyData);
+
+							// solid mapper
+							vtkPolyDataMapper *smapper = vtkPolyDataMapper::New();
+							smapper->SetInput(this->TopFilters[poly]->GetOutput());
+
+							// solid actor
+							ASSERT(this->TopActors[poly] == 0);
+							this->TopActors[poly] = vtkLODActor::New();
+							if (vtkLODActor *pLOD = vtkLODActor::SafeDownCast(this->TopActors[poly]))
+							{
+								pLOD->SetNumberOfCloudPoints(2000);
+							}
+							this->TopActors[poly]->SetMapper(smapper);
+							this->TopActors[poly]->SetProperty(this->CubeActor->GetProperty());
+							this->AddPart(this->TopActors[poly]);
+
+							Data_source::DATA_SOURCE_TYPE top_type = prism->top.Get_source_type();
+							if (top_type == Data_source::CONSTANT || top_type == Data_source::NONE)
+							{
+								::sprintf(szName, szOutFormat, poly);
+
+								// outline polydata
+								vtkPolyData *opolyData = 0;
+								CGlobal::HDFSerializePolyData(bStoring, top_id, szName, opolyData);
+								ASSERT(opolyData);
+
+								// outline filters
+								ASSERT(this->TopOutlineFilters[poly] == 0);
+								this->TopOutlineFilters[poly] = vtkTransformPolyDataFilter::New();
+								this->TopOutlineFilters[poly]->SetTransform(this->UnitsTransform);			
+								this->TopOutlineFilters[poly]->SetInput(opolyData);
+
+								// outline mapper
+								vtkPolyDataMapper *omapper = vtkPolyDataMapper::New();
+								omapper->SetInput(this->TopOutlineFilters[poly]->GetOutput());
+
+								// outline actor
+								ASSERT(this->TopOutlineActors[poly] == 0);
+								this->TopOutlineActors[poly] = vtkLODActor::New();
+								if (vtkLODActor *pLOD = vtkLODActor::SafeDownCast(this->TopOutlineActors[poly]))
+								{
+									pLOD->SetNumberOfCloudPoints(2000);
+								}
+								this->TopOutlineActors[poly]->SetMapper(omapper);
+								this->TopOutlineActors[poly]->SetProperty(this->OutlineActor->GetProperty());
+								this->AddPart(this->TopOutlineActors[poly]);
+
+								opolyData->Delete();
+								omapper->Delete();
+							}
+							else
+							{
+								ASSERT(top_type == Data_source::ARCRASTER || top_type == Data_source::CONSTANT
+									|| top_type == Data_source::POINTS || top_type == Data_source::SHAPE
+									|| top_type == Data_source::XYZ);
+
+								ASSERT(this->TopFilters[poly]);
+
+								// outline mapper
+								vtkPolyDataMapper *omapper = vtkPolyDataMapper::New();
+								omapper->SetInput(this->TopFilters[poly]->GetOutput());
+
+								// outline actor
+								ASSERT(this->TopOutlineActors[poly] == 0);
+								this->TopOutlineActors[poly] = vtkLODActor::New();
+								if (vtkLODActor *pLOD = vtkLODActor::SafeDownCast(this->TopOutlineActors[poly]))
+								{
+									pLOD->SetNumberOfCloudPoints(2000);
+								}
+								this->TopOutlineActors[poly]->SetMapper(omapper);
+								this->TopOutlineActors[poly]->SetProperty(this->OutlineActor->GetProperty());
+								this->AddPart(this->TopOutlineActors[poly]);
+
+								omapper->Delete();
+							}
+
+							// cleanup
+							spolyData->Delete();
+							smapper->Delete();
+						}
+						// close the top group
+						//
+						status = ::H5Gclose(top_id);
+						ASSERT(status >= 0);
+					}
+//}}
+
+
+// COMMENT: {7/10/2008 11:03:44 PM}					// top
+// COMMENT: {7/10/2008 11:03:44 PM}					vtkPolyData *tpolyData = 0;
+// COMMENT: {7/10/2008 11:03:44 PM}					CGlobal::HDFSerializePolyData(bStoring, pd_id, szTop, tpolyData);
+// COMMENT: {7/10/2008 11:03:44 PM}
+// COMMENT: {7/10/2008 11:03:44 PM}					// bottom
+// COMMENT: {7/10/2008 11:03:44 PM}					vtkPolyData *bpolyData = 0;
+// COMMENT: {7/10/2008 11:03:44 PM}					CGlobal::HDFSerializePolyData(bStoring, pd_id, szBottom, bpolyData);
+// COMMENT: {7/10/2008 11:03:44 PM}
+// COMMENT: {7/10/2008 11:03:44 PM}					// perimeter solid actor
+// COMMENT: {7/10/2008 11:03:44 PM}					this->m_pMapper->SetInput(this->PrismSidesPolyData[0]);
+// COMMENT: {7/10/2008 11:03:44 PM}
+// COMMENT: {7/10/2008 11:03:44 PM}					// perimeter outline actor
+// COMMENT: {7/10/2008 11:03:44 PM}					this->mapOutline->SetInput(this->PrismSidesPolyData[0]);
+// COMMENT: {7/10/2008 11:03:44 PM}
+// COMMENT: {7/10/2008 11:03:44 PM}					// top solid actor
+// COMMENT: {7/10/2008 11:03:44 PM}					vtkPolyDataMapper *tmapper = vtkPolyDataMapper::New();
+// COMMENT: {7/10/2008 11:03:44 PM}					tmapper->SetInput(tpolyData);
+// COMMENT: {7/10/2008 11:03:44 PM}
+// COMMENT: {7/10/2008 11:03:44 PM}					ASSERT(this->TopActors == 0);
+// COMMENT: {7/10/2008 11:03:44 PM}					this->TopActors = vtkLODActor::New();
+// COMMENT: {7/10/2008 11:03:44 PM}					if (vtkLODActor *pLOD = vtkLODActor::SafeDownCast(this->TopActors))
+// COMMENT: {7/10/2008 11:03:44 PM}					{
+// COMMENT: {7/10/2008 11:03:44 PM}						pLOD->SetNumberOfCloudPoints(20000);
+// COMMENT: {7/10/2008 11:03:44 PM}					}
+// COMMENT: {7/10/2008 11:03:44 PM}					this->TopActors->SetMapper(tmapper);
+// COMMENT: {7/10/2008 11:03:44 PM}					this->TopActors->SetProperty(this->CubeActor->GetProperty());
+// COMMENT: {7/10/2008 11:03:44 PM}					this->AddPart(this->TopActors);
+// COMMENT: {7/10/2008 11:03:44 PM}
+// COMMENT: {7/10/2008 11:03:44 PM}					// top outline actor
+// COMMENT: {7/10/2008 11:03:44 PM}					vtkPolyDataMapper *tmapperOutline = vtkPolyDataMapper::New();
+// COMMENT: {7/10/2008 11:03:44 PM}					tmapperOutline->SetInput(tpolyData);
+// COMMENT: {7/10/2008 11:03:44 PM}
+// COMMENT: {7/10/2008 11:03:44 PM}					ASSERT(this->TopOutlineActors == 0);
+// COMMENT: {7/10/2008 11:03:44 PM}					this->TopOutlineActors = vtkLODActor::New();
+// COMMENT: {7/10/2008 11:03:44 PM}					if (vtkLODActor *pLOD = vtkLODActor::SafeDownCast(this->TopOutlineActors))
+// COMMENT: {7/10/2008 11:03:44 PM}					{
+// COMMENT: {7/10/2008 11:03:44 PM}						pLOD->SetNumberOfCloudPoints(20000);
+// COMMENT: {7/10/2008 11:03:44 PM}					}
+// COMMENT: {7/10/2008 11:03:44 PM}					this->TopOutlineActors->SetMapper(tmapperOutline);
+// COMMENT: {7/10/2008 11:03:44 PM}					this->TopOutlineActors->SetProperty(this->OutlineActor->GetProperty());
+// COMMENT: {7/10/2008 11:03:44 PM}					this->AddPart(this->TopOutlineActors);
+// COMMENT: {7/10/2008 11:03:44 PM}
+// COMMENT: {7/10/2008 11:03:44 PM}					// top cleanup
+// COMMENT: {7/10/2008 11:03:44 PM}					tpolyData->Delete();
+// COMMENT: {7/10/2008 11:03:44 PM}					tmapperOutline->Delete();
+// COMMENT: {7/10/2008 11:03:44 PM}					tmapper->Delete();
+// COMMENT: {7/10/2008 11:03:44 PM}
+// COMMENT: {7/10/2008 11:03:44 PM}
+// COMMENT: {7/10/2008 11:03:44 PM}					// bottom solid actor
+// COMMENT: {7/10/2008 11:03:44 PM}					vtkPolyDataMapper *bmapper = vtkPolyDataMapper::New();
+// COMMENT: {7/10/2008 11:03:44 PM}					bmapper->SetInput(bpolyData);
+// COMMENT: {7/10/2008 11:03:44 PM}
+// COMMENT: {7/10/2008 11:03:44 PM}					ASSERT(this->BottomActors == 0);
+// COMMENT: {7/10/2008 11:03:44 PM}					this->BottomActors = vtkLODActor::New();
+// COMMENT: {7/10/2008 11:03:44 PM}					if (vtkLODActor *pLOD = vtkLODActor::SafeDownCast(this->BottomActors))
+// COMMENT: {7/10/2008 11:03:44 PM}					{
+// COMMENT: {7/10/2008 11:03:44 PM}						pLOD->SetNumberOfCloudPoints(20000);
+// COMMENT: {7/10/2008 11:03:44 PM}					}
+// COMMENT: {7/10/2008 11:03:44 PM}					this->BottomActors->SetMapper(bmapper);
+// COMMENT: {7/10/2008 11:03:44 PM}					this->BottomActors->SetProperty(this->CubeActor->GetProperty());
+// COMMENT: {7/10/2008 11:03:44 PM}					this->AddPart(this->BottomActors);
+// COMMENT: {7/10/2008 11:03:44 PM}
+// COMMENT: {7/10/2008 11:03:44 PM}					// bottom outline actor
+// COMMENT: {7/10/2008 11:03:44 PM}					vtkPolyDataMapper *bmapperOutline = vtkPolyDataMapper::New();
+// COMMENT: {7/10/2008 11:03:44 PM}					bmapperOutline->SetInput(bpolyData);
+// COMMENT: {7/10/2008 11:03:44 PM}
+// COMMENT: {7/10/2008 11:03:44 PM}					ASSERT(this->BottomOutlineActors == 0);
+// COMMENT: {7/10/2008 11:03:44 PM}					this->BottomOutlineActors = vtkLODActor::New();
+// COMMENT: {7/10/2008 11:03:44 PM}					if (vtkLODActor *pLOD = vtkLODActor::SafeDownCast(this->BottomOutlineActors))
+// COMMENT: {7/10/2008 11:03:44 PM}					{
+// COMMENT: {7/10/2008 11:03:44 PM}						pLOD->SetNumberOfCloudPoints(20000);
+// COMMENT: {7/10/2008 11:03:44 PM}					}
+// COMMENT: {7/10/2008 11:03:44 PM}					this->BottomOutlineActors->SetMapper(bmapperOutline);
+// COMMENT: {7/10/2008 11:03:44 PM}					this->BottomOutlineActors->SetProperty(this->OutlineActor->GetProperty());
+// COMMENT: {7/10/2008 11:03:44 PM}					this->AddPart(this->BottomOutlineActors);
+// COMMENT: {7/10/2008 11:03:44 PM}
+// COMMENT: {7/10/2008 11:03:44 PM}					// bottom cleanup
+// COMMENT: {7/10/2008 11:03:44 PM}					bpolyData->Delete();
+// COMMENT: {7/10/2008 11:03:44 PM}					bmapperOutline->Delete();
+// COMMENT: {7/10/2008 11:03:44 PM}					bmapper->Delete();
+///}}}
+
+					// close the PolyData group
+					//
+					status = ::H5Gclose(pd_id);
+					ASSERT(status >= 0);
+				}
 			}
 			else
 			{
@@ -593,9 +1267,112 @@ void CZoneActor::SetVisibility(int visibility)
 	vtkDebugMacro(<< this->GetClassName() << " (" << this << "): setting Visibility to " << visibility);
 	if (this->Visibility != visibility)
 	{
-		this->CubeActor->SetVisibility(visibility);
-		this->OutlineActor->SetVisibility(visibility);
+		if (this->GetPolyhedronType() == Polyhedron::PRISM)
+		{
+			ASSERT(this->TopActors.size() > 0);
+			ASSERT(this->TopOutlineActors.size() > 0);
 
+			ASSERT(this->BottomActors.size() > 0);
+			ASSERT(this->BottomOutlineActors.size() > 0);
+
+			if (visibility)
+			{
+				if (this->GetPerimeterVisibility())
+				{
+					std::vector<vtkActor*>::iterator actor_iter = this->SolidPerimeterActors.begin();
+					for (; actor_iter != this->SolidPerimeterActors.end(); ++actor_iter)
+					{
+						ASSERT((*actor_iter)->GetVisibility() == 0);
+						(*actor_iter)->SetVisibility(visibility);
+					}
+
+					actor_iter = this->OutlinePerimeterActors.begin();
+					for (; actor_iter != this->OutlinePerimeterActors.end(); ++actor_iter)
+					{
+						ASSERT((*actor_iter)->GetVisibility() == 0);
+						(*actor_iter)->SetVisibility(visibility);
+					}
+
+				}
+				if (this->GetTopVisibility())
+				{
+					std::vector<vtkActor*>::iterator actor_iter = this->TopActors.begin();
+					for (; actor_iter != this->TopActors.end(); ++actor_iter)
+					{
+						ASSERT((*actor_iter)->GetVisibility() == 0);
+						(*actor_iter)->SetVisibility(visibility);
+					}
+
+					actor_iter = this->TopOutlineActors.begin();
+					for (; actor_iter != this->TopOutlineActors.end(); ++actor_iter)
+					{
+						ASSERT((*actor_iter)->GetVisibility() == 0);
+						(*actor_iter)->SetVisibility(visibility);
+					}
+				}
+				if (this->GetBottomVisibility())
+				{
+					std::vector<vtkActor*>::iterator actor_iter = this->BottomActors.begin();
+					for (; actor_iter != this->BottomActors.end(); ++actor_iter)
+					{
+						ASSERT((*actor_iter)->GetVisibility() == 0);
+						(*actor_iter)->SetVisibility(visibility);
+					}
+
+					actor_iter = this->BottomOutlineActors.begin();
+					for (; actor_iter != this->BottomOutlineActors.end(); ++actor_iter)
+					{
+						ASSERT((*actor_iter)->GetVisibility() == 0);
+						(*actor_iter)->SetVisibility(visibility);
+					}
+				}
+			}
+			else
+			{
+				// perimeter
+// COMMENT: {7/8/2008 6:53:35 PM}				this->CubeActor->SetVisibility(visibility);
+				std::vector<vtkActor*>::iterator actor_iter = this->SolidPerimeterActors.begin();
+				for (; actor_iter != this->SolidPerimeterActors.end(); ++actor_iter)
+				{
+					(*actor_iter)->SetVisibility(visibility);
+				}
+// COMMENT: {7/8/2008 8:29:46 PM}				this->OutlineActor->SetVisibility(visibility);
+				actor_iter = this->OutlinePerimeterActors.begin();
+				for (; actor_iter != this->OutlinePerimeterActors.end(); ++actor_iter)
+				{
+					(*actor_iter)->SetVisibility(visibility);
+				}
+
+				// top
+				actor_iter = this->TopActors.begin();
+				for (; actor_iter != this->TopActors.end(); ++actor_iter)
+				{
+					(*actor_iter)->SetVisibility(visibility);
+				}
+				actor_iter = this->TopOutlineActors.begin();
+				for (; actor_iter != this->TopOutlineActors.end(); ++actor_iter)
+				{
+					(*actor_iter)->SetVisibility(visibility);
+				}
+
+				// bottom
+				actor_iter = this->BottomActors.begin();
+				for (; actor_iter != this->BottomActors.end(); ++actor_iter)
+				{
+					(*actor_iter)->SetVisibility(visibility);
+				}
+				actor_iter = this->BottomOutlineActors.begin();
+				for (; actor_iter != this->BottomOutlineActors.end(); ++actor_iter)
+				{
+					(*actor_iter)->SetVisibility(visibility);
+				}
+			}
+		}
+		else
+		{
+			this->CubeActor->SetVisibility(visibility);
+			this->OutlineActor->SetVisibility(visibility);
+		}
 		this->Visibility = visibility;
 		this->Modified();
 	}
@@ -603,6 +1380,32 @@ void CZoneActor::SetVisibility(int visibility)
 
 vtkFloatingPointType *CZoneActor::GetBounds() // virtual
 {
+// COMMENT: {6/23/2008 9:13:56 PM}	if (this->GetPolyhedronType() == Polyhedron::PRISM /* && this->AppendPolyData->GetNumberOfInputs() == 0 */)
+// COMMENT: {6/23/2008 9:13:56 PM}	{
+// COMMENT: {6/23/2008 9:13:56 PM}		if (Prism *prism = dynamic_cast<Prism*>(this->GetPolyhedron()))
+// COMMENT: {6/23/2008 9:13:56 PM}		{
+// COMMENT: {6/23/2008 9:13:56 PM}			vtkMatrix4x4 *pMatrix4x4 = this->GetMatrix();
+// COMMENT: {6/23/2008 9:13:56 PM}			vtkFloatingPointType *bounds = this->PrismSidesPolyData->GetBounds();
+// COMMENT: {6/23/2008 9:13:56 PM}			float imin[4];
+// COMMENT: {6/23/2008 9:13:56 PM}			float imax[4];
+// COMMENT: {6/23/2008 9:13:56 PM}			float omin[4];
+// COMMENT: {6/23/2008 9:13:56 PM}			float omax[4];
+// COMMENT: {6/23/2008 9:13:56 PM}			for (int i = 0; i < 3; ++i)
+// COMMENT: {6/23/2008 9:13:56 PM}			{
+// COMMENT: {6/23/2008 9:13:56 PM}				imin[i] = bounds[i*2];
+// COMMENT: {6/23/2008 9:13:56 PM}				imax[i] = bounds[i*2+1];
+// COMMENT: {6/23/2008 9:13:56 PM}			}
+// COMMENT: {6/23/2008 9:13:56 PM}			pMatrix4x4->MultiplyPoint(imin, omin);
+// COMMENT: {6/23/2008 9:13:56 PM}			pMatrix4x4->MultiplyPoint(imax, omax);
+// COMMENT: {6/23/2008 9:13:56 PM}			for (int i = 0; i < 3; ++i)
+// COMMENT: {6/23/2008 9:13:56 PM}			{
+// COMMENT: {6/23/2008 9:13:56 PM}				this->Bounds[i*2] = omin[i];
+// COMMENT: {6/23/2008 9:13:56 PM}				this->Bounds[i*2+1] = omax[i];
+// COMMENT: {6/23/2008 9:13:56 PM}			}
+// COMMENT: {6/23/2008 9:13:56 PM}		}
+// COMMENT: {6/23/2008 9:13:56 PM}		return this->Bounds;
+// COMMENT: {6/23/2008 9:13:56 PM}	}
+
 	// from vtkAssembly.cxx
 	//
 	// Modified to return the same bounds regardless of visibility
@@ -686,10 +1489,154 @@ void CZoneActor::SetChopType(enum srcWedgeSource::tagChopType t)
 
 		this->m_pSource->SetChopType(t);
 
-		CZone z(*this->GetPolyhedron()->Get_box());
+		CZone z(*this->GetPolyhedron()->Get_bounding_box());
 		delete this->GetPolyhedron();
 		this->GetPolyhedron() = new Wedge(&z, srcWedgeSource::GetWedgeOrientationString(
 			srcWedgeSource::ConvertChopType(t)));
+	}
+}
+
+enum Polyhedron::POLYHEDRON_TYPE CZoneActor::GetPolyhedronType()const
+{
+	return const_cast<CZoneActor*>(this)->GetPolyhedron()->get_type();	
+}
+
+void CZoneActor::SetPerimeterVisibility(int visibility)
+{
+	if (this->GetPolyhedronType() != Polyhedron::PRISM)
+	{
+		// no-op
+		return;
+	}
+
+	ASSERT(this->SolidPerimeterActors.size() > 0);
+	ASSERT(this->OutlinePerimeterActors.size() > 0);
+
+	if (this->PerimeterVisibility != visibility)
+	{
+		std::vector<vtkActor*>::iterator actor_iter;
+		if (this->GetVisibility())
+		{
+			actor_iter = this->SolidPerimeterActors.begin();
+			for (; actor_iter != this->SolidPerimeterActors.end(); ++actor_iter)
+			{
+				(*actor_iter)->SetVisibility(visibility);
+			}
+
+			actor_iter = this->OutlinePerimeterActors.begin();
+			for (; actor_iter != this->OutlinePerimeterActors.end(); ++actor_iter)
+			{
+				(*actor_iter)->SetVisibility(visibility);
+			}
+		}
+		else
+		{
+			actor_iter = this->SolidPerimeterActors.begin();
+			for (; actor_iter != this->SolidPerimeterActors.end(); ++actor_iter)
+			{
+				ASSERT((*actor_iter)->GetVisibility() == 0);
+			}
+
+			actor_iter = this->OutlinePerimeterActors.begin();
+			for (; actor_iter != this->OutlinePerimeterActors.end(); ++actor_iter)
+			{
+				ASSERT((*actor_iter)->GetVisibility() == 0);
+				(*actor_iter)->SetVisibility(visibility);
+			}
+		}
+		this->PerimeterVisibility = visibility;
+	}
+}
+
+void CZoneActor::SetTopVisibility(int visibility)
+{
+	if (this->GetPolyhedronType() != Polyhedron::PRISM)
+	{
+		// no-op
+		return;
+	}
+
+	ASSERT(this->TopActors.size() > 0);
+	ASSERT(this->TopOutlineActors.size() > 0);
+
+	if (this->TopVisibility != visibility)
+	{
+		std::vector<vtkActor*>::iterator actor_iter;
+		if (this->GetVisibility())
+		{
+			actor_iter = this->TopActors.begin();
+			for (; actor_iter != this->TopActors.end(); ++actor_iter)
+			{
+				(*actor_iter)->SetVisibility(visibility);
+			}
+
+			actor_iter = this->TopOutlineActors.begin();
+			for (; actor_iter != this->TopOutlineActors.end(); ++actor_iter)
+			{
+				(*actor_iter)->SetVisibility(visibility);
+			}
+		}
+		else
+		{
+			actor_iter = this->TopActors.begin();
+			for (; actor_iter != this->TopActors.end(); ++actor_iter)
+			{
+				ASSERT((*actor_iter)->GetVisibility() == 0);
+			}
+
+			actor_iter = this->TopOutlineActors.begin();
+			for (; actor_iter != this->TopOutlineActors.end(); ++actor_iter)
+			{
+				ASSERT((*actor_iter)->GetVisibility() == 0);
+			}
+		}
+		this->TopVisibility = visibility;
+	}
+}
+
+void CZoneActor::SetBottomVisibility(int visibility)
+{
+	if (this->GetPolyhedronType() != Polyhedron::PRISM)
+	{
+		// no-op
+		return;
+	}
+
+	ASSERT(this->BottomActors.size() > 0);
+	ASSERT(this->BottomOutlineActors.size() > 0);
+
+	if (this->BottomVisibility != visibility)
+	{
+		std::vector<vtkActor*>::iterator actor_iter;
+		if (this->GetVisibility())
+		{
+			actor_iter = this->BottomActors.begin();
+			for (; actor_iter != this->BottomActors.end(); ++actor_iter)
+			{
+				(*actor_iter)->SetVisibility(visibility);
+			}
+
+			actor_iter = this->BottomOutlineActors.begin();
+			for (; actor_iter != this->BottomOutlineActors.end(); ++actor_iter)
+			{
+				(*actor_iter)->SetVisibility(visibility);
+			}
+		}
+		else
+		{
+			actor_iter = this->BottomActors.begin();
+			for (; actor_iter != this->BottomActors.end(); ++actor_iter)
+			{
+				ASSERT((*actor_iter)->GetVisibility() == 0);
+			}
+
+			actor_iter = this->BottomOutlineActors.begin();
+			for (; actor_iter != this->BottomOutlineActors.end(); ++actor_iter)
+			{
+				ASSERT((*actor_iter)->GetVisibility() == 0);
+			}
+		}
+		this->BottomVisibility = visibility;
 	}
 }
 
@@ -703,37 +1650,1031 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits)
 	}
 	this->GetPolyhedron() = polyh->clone();
 
-	enum srcWedgeSource::tagChopType ct = srcWedgeSource::CHOP_NONE;
-	if (Wedge *w = dynamic_cast<Wedge*>(this->GetPolyhedron()))
+	Polyhedron::POLYHEDRON_TYPE n = polyh->get_type();
+	if (n == Polyhedron::WEDGE || n == Polyhedron::CUBE)
 	{
-		ct = srcWedgeSource::ConvertWedgeOrientation(w->orientation);
+		enum srcWedgeSource::tagChopType ct = srcWedgeSource::CHOP_NONE;
+		if (Wedge *w = dynamic_cast<Wedge*>(this->GetPolyhedron()))
+		{
+			ct = srcWedgeSource::ConvertWedgeOrientation(w->orientation);
+		}
+
+		// size
+		//
+		struct zone *pzone = this->GetPolyhedron()->Get_bounding_box();
+		this->SetBounds(
+			pzone->x1,
+			pzone->x2,
+			pzone->y1,
+			pzone->y2,
+			pzone->z1,
+			pzone->z2,
+			rUnits
+			);
+
+		//
+		// Note: SetChopType must be called after
+		// at least one call to SetBounds
+		// (until SetBounds/SetChopType is replaced by
+		// SetPolyhedron or similar)
+		this->SetChopType(ct);
 	}
-	else if (Cube *c = dynamic_cast<Cube*>(this->GetPolyhedron()))
+	else if (Prism *prism = dynamic_cast<Prism*>(this->GetPolyhedron()))
 	{
-		ct = srcWedgeSource::CHOP_NONE;
+		// cleanup 
+		this->CleanupPrisms();
+
+		this->CubeActor->SetVisibility(0);
+		this->RemovePart(this->CubeActor);
+
+		this->OutlineActor->SetVisibility(0);
+		this->RemovePart(this->OutlineActor);
+
+		PHST_polygon &phst_polygons = prism->perimeter.Get_phst_polygons();
+		size_t npolys = phst_polygons.Get_begin().size();
+
+		this->PrismSidesPolyData.resize(npolys);
+		this->SolidPerimeterMappers.resize(npolys);
+		this->SolidPerimeterActors.resize(npolys);
+
+		this->OutlinePerimeterMappers.resize(npolys);
+		this->OutlinePerimeterActors.resize(npolys);
+
+		this->TopActors.resize(npolys);
+		this->TopFilters.resize(npolys);
+		this->TopOutlineActors.resize(npolys);
+		this->TopOutlineFilters.resize(npolys);
+
+		this->BottomActors.resize(npolys);
+		this->BottomFilters.resize(npolys);
+		this->BottomOutlineActors.resize(npolys);
+		this->BottomOutlineFilters.resize(npolys);
+
+		for (size_t poly = 0; poly < npolys; ++poly)
+		{
+			vtkIdType i = 0;
+			std::vector<Point> pts;
+			std::vector<Point>::iterator it = phst_polygons.Get_begin()[poly];
+			for (; it != phst_polygons.Get_end()[poly]; ++it)
+			{
+				pts.push_back(*it);
+			}
+
+			// always check for valid perimeters
+			{
+				double area = 0.0;
+				size_t i;
+				size_t j;
+				size_t n = pts.size();
+				for (i = 0; i < n; ++i)
+				{
+					j = (i+1)%n;
+					area += pts[i].x() * pts[j].y();
+					area -= pts[i].y() * pts[j].x();
+				}
+				if (area > 0)
+				{
+					// ignore holes in shape files
+					if (prism->perimeter.Get_source_type() == Data_source::SHAPE)
+					{
+						ASSERT(npolys > 1);
+						continue;
+					}
+					std::reverse(pts.begin(), pts.end());
+				}
+			}
+
+			vtkPoints *pointsSide = vtkPoints::New();
+			vtkCellArray *facesSide = vtkCellArray::New();
+
+			Point &back = pts.back();
+			Point &front = pts.front();
+			if (back == front)
+			{
+				// remove duplicate point
+				pts.pop_back();
+			}
+
+			vtkCellArray *bottomCellArray = vtkCellArray::New();
+			bottomCellArray->InsertNextCell(static_cast<int>(pts.size()));
+
+			vtkCellArray *topCellArray = vtkCellArray::New();
+			topCellArray->InsertNextCell(static_cast<int>(pts.size()));
+
+			ASSERT(this->PrismSidesPolyData[poly] == 0);
+			this->PrismSidesPolyData[poly] = vtkPolyData::New();
+
+			// top delaunay
+			vtkDelaunay2D *delaunay2DTop = vtkDelaunay2D::New();
+			vtkPolyData *profileTop = vtkPolyData::New();
+			vtkPolyData *constrainTop = vtkPolyData::New();
+
+			// bottom delaunay
+			vtkDelaunay2D *delaunay2DBottom = vtkDelaunay2D::New();
+			vtkPolyData *profileBottom = vtkPolyData::New();
+			vtkPolyData *constrainBottom = vtkPolyData::New();
+
+			vtkPoints *pointsBottom = vtkPoints::New();
+			vtkPoints *pointsTop = vtkPoints::New();
+
+			Data_source::DATA_SOURCE_TYPE top_type = prism->top.Get_source_type();
+			Data_source::DATA_SOURCE_TYPE bot_type = prism->bottom.Get_source_type();
+
+			if ((top_type == Data_source::CONSTANT || top_type == Data_source::NONE)
+				&&
+				(bot_type == Data_source::CONSTANT || bot_type == Data_source::NONE))
+			{
+				double dTop;
+				if (top_type == Data_source::CONSTANT)
+				{
+					dTop = prism->top.Get_points()[0].z();
+				}
+				else if (top_type == Data_source::NONE)
+				{
+					dTop = grid_zone()->z2;
+				}
+
+				double dBottom; 
+				if (bot_type == Data_source::CONSTANT)
+				{
+					dBottom = prism->bottom.Get_points()[0].z();
+				}
+				else
+				{
+					dBottom = grid_zone()->z1;
+				}
+
+				Point ptBottom;
+				Point ptTop;
+
+				// foreach perimeter point determine top and bottom points
+				//
+				std::vector<Point>::reverse_iterator perim_pt_riter = pts.rbegin();
+				for (i = 0; perim_pt_riter != pts.rend(); ++i, ++perim_pt_riter)
+				{
+					ptTop = ptBottom = *perim_pt_riter;
+
+					// top of perimeter
+					pointsTop->InsertPoint(i, ptTop.x(), ptTop.y(), dTop);
+					topCellArray->InsertNextCell(i);
+
+					// bottom of perimeter
+					pointsBottom->InsertPoint(i, ptBottom.x(), ptBottom.y(), dBottom);
+					bottomCellArray->InsertNextCell(i);
+
+					// side points
+					pointsSide->InsertPoint(i*2, ptBottom.x(), ptBottom.y(), dBottom);
+					pointsSide->InsertPoint(i*2+1, ptTop.x(), ptTop.y(), dTop);
+
+					// side facesSide
+					if (i)
+					{
+						facesSide->InsertNextCell(4);
+						facesSide->InsertCellPoint(i*2-2); // 0
+						facesSide->InsertCellPoint(i*2);   // 2
+						facesSide->InsertCellPoint(i*2+1); // 3
+						facesSide->InsertCellPoint(i*2-1); // 1
+					}
+				}
+				// add closing face
+				facesSide->InsertNextCell(4);
+				facesSide->InsertCellPoint(i*2-2);
+				facesSide->InsertCellPoint(0);
+				facesSide->InsertCellPoint(1);
+				facesSide->InsertCellPoint(i*2-1);
+
+				// set side points and facesSide
+				this->PrismSidesPolyData[poly]->SetPolys(facesSide);
+				this->PrismSidesPolyData[poly]->SetPoints(pointsSide);
+			}
+			else if (
+				(top_type == Data_source::CONSTANT || top_type == Data_source::NONE)
+				&&
+				(bot_type == Data_source::ARCRASTER || bot_type == Data_source::POINTS || bot_type == Data_source::SHAPE || bot_type == Data_source::XYZ)
+				)
+			{
+				double dTop;
+				if (top_type == Data_source::CONSTANT)
+				{
+					dTop = prism->top.Get_points()[0].z();
+				}
+				else
+				{
+					dTop = grid_zone()->z2;
+				}
+				double dBottom;
+
+				Point ptBottom;
+				Point ptTop;
+
+				std::vector<Point> empty;
+
+				// nni for bottom interpolation
+				//
+				NNInterpolator* nniBottom;
+				zone zbottom = *prism->bottom.Get_bounding_box();
+				bool bDestroy_nniBottom;
+				if (prism->bottom.Get_filedata()
+					&&
+					prism->bottom.Get_filedata()->Get_nni_map().find(prism->bottom.Get_attribute()) != prism->bottom.Get_filedata()->Get_nni_map().end()
+					)
+				{
+					nniBottom = prism->bottom.Get_filedata()->Get_nni_map()[prism->bottom.Get_attribute()];
+					bDestroy_nniBottom = false;
+				}
+				else
+				{
+					nniBottom = new NNInterpolator();
+					nniBottom->preprocess(prism->bottom.Get_points());
+					bDestroy_nniBottom = true;
+				}
+
+				double* xd;
+
+				// foreach perimeter point determine top and bottom points
+				//
+				std::vector<Point>::reverse_iterator perim_pt_riter = pts.rbegin();
+				for (i = 0; perim_pt_riter != pts.rend(); ++i, ++perim_pt_riter)
+				{
+					ptTop = ptBottom = *perim_pt_riter;
+
+					// interpolate bottom of perimeter point
+					dBottom = nniBottom->interpolate(ptBottom);
+
+					// top of perimeter
+					pointsTop->InsertPoint(i, ptTop.x(), ptTop.y(), dTop);
+					topCellArray->InsertNextCell(i);
+
+					// bottom of perimeter
+					pointsBottom->InsertPoint(i, ptBottom.x(), ptBottom.y(), dBottom);
+					bottomCellArray->InsertNextCell(i);
+
+					// side points
+					pointsSide->InsertPoint(i*2, ptBottom.x(), ptBottom.y(), dBottom);
+					pointsSide->InsertPoint(i*2+1, ptTop.x(), ptTop.y(), dTop);
+
+					// side facesSide
+					if (i)
+					{
+						facesSide->InsertNextCell(4);
+						facesSide->InsertCellPoint(i*2-2); // 0
+						facesSide->InsertCellPoint(i*2);   // 2
+						facesSide->InsertCellPoint(i*2+1); // 3
+						facesSide->InsertCellPoint(i*2-1); // 1
+					}
+				}
+				// add closing face
+				facesSide->InsertNextCell(4);
+				facesSide->InsertCellPoint(i*2-2);
+				facesSide->InsertCellPoint(0);
+				facesSide->InsertCellPoint(1);
+				facesSide->InsertCellPoint(i*2-1);
+
+				// set side points and facesSide
+				this->PrismSidesPolyData[poly]->SetPolys(facesSide);
+				this->PrismSidesPolyData[poly]->SetPoints(pointsSide);
+
+				// add points from the bottom that are within the perimeter polygon
+				//
+				std::vector<Point> &bottom_pts = prism->bottom.Get_points();
+				std::vector<Point>::iterator iterBottom = bottom_pts.begin();
+
+				PHST_polygon *bot_poly = NULL;
+				if (npolys > 1)
+				{
+					bot_poly = new PHST_polygon(pts);
+				}				
+				for (vtkIdType k = i; iterBottom != bottom_pts.end(); ++iterBottom)
+				{
+					if (npolys > 1)
+					{
+						if (bot_poly->Point_in_polygon(*iterBottom))
+						{
+							xd = iterBottom->get_coord();
+							pointsBottom->InsertPoint(k, xd[0], xd[1], xd[2]);
+							++k;
+						}
+					}
+					else
+					{
+						if (prism->perimeter.Get_tree()->Point_in_polygon(*iterBottom))
+						{
+							xd = iterBottom->get_coord();
+							pointsBottom->InsertPoint(k, xd[0], xd[1], xd[2]);
+							++k;
+						}
+					}
+				}
+				if (npolys > 1)
+				{
+					delete bot_poly;
+				}
+
+				// set points used for delaunay triangulation
+				//
+				profileBottom->SetPoints(pointsBottom);
+
+				// set points and constraining polygon used for delaunay triangulation
+				//
+				constrainBottom->SetPoints(pointsBottom);
+				constrainBottom->SetPolys(bottomCellArray);
+
+				// triangulate bottom
+				//
+				delaunay2DBottom->SetInput(profileBottom);
+				delaunay2DBottom->SetSource(constrainBottom);
+				delaunay2DBottom->Update();
+
+				// clean-up
+				if (bDestroy_nniBottom) delete nniBottom;
+			}
+			else if (
+				(top_type == Data_source::ARCRASTER || top_type == Data_source::POINTS || top_type == Data_source::SHAPE || top_type == Data_source::XYZ)
+				&&
+				(bot_type == Data_source::CONSTANT || bot_type == Data_source::NONE)
+				)
+			{
+				double dTop;
+				double dBottom; 
+				if (bot_type == Data_source::CONSTANT)
+				{
+					dBottom = prism->bottom.Get_points()[0].z();
+				}
+				else
+				{
+					dBottom = grid_zone()->z1;
+				}
+
+				Point ptBottom;
+				Point ptTop;
+
+				std::vector<Point> empty;
+
+				// nni for top interpolation
+				//
+				// nni for top interpolation
+				//
+				NNInterpolator* nniTop;
+				zone ztop = *prism->top.Get_bounding_box();
+				bool bDestroy_nniTop;
+				if (prism->top.Get_filedata()
+					&&
+					prism->top.Get_filedata()->Get_nni_map().find(prism->top.Get_attribute()) != prism->top.Get_filedata()->Get_nni_map().end()
+					)
+				{
+					nniTop = prism->top.Get_filedata()->Get_nni_map()[prism->top.Get_attribute()];
+					bDestroy_nniTop = false;
+				}
+				else
+				{
+					nniTop = new NNInterpolator();
+					nniTop->preprocess(prism->top.Get_points());
+					bDestroy_nniTop = true;
+				}
+
+				// foreach perimeter point determine top and bottom points
+				//
+				std::vector<Point>::reverse_iterator perim_pt_riter = pts.rbegin();
+				for (i = 0; perim_pt_riter != pts.rend(); ++i, ++perim_pt_riter)
+				{
+					ptTop = ptBottom = *perim_pt_riter;
+
+					// interpolate top of perimeter point
+					dTop = nniTop->interpolate(ptTop);
+
+					// top of perimeter
+					pointsTop->InsertPoint(i, ptTop.x(), ptTop.y(), dTop);
+					topCellArray->InsertNextCell(i);
+
+					// bottom of perimeter
+					pointsBottom->InsertPoint(i, ptBottom.x(), ptBottom.y(), dBottom);
+					bottomCellArray->InsertNextCell(i);
+
+					// side points
+					pointsSide->InsertPoint(i*2, ptBottom.x(), ptBottom.y(), dBottom);
+					pointsSide->InsertPoint(i*2+1, ptTop.x(), ptTop.y(), dTop);
+
+					// side faces
+					if (i)
+					{
+						facesSide->InsertNextCell(4);
+						facesSide->InsertCellPoint(i*2-2); // 0
+						facesSide->InsertCellPoint(i*2);   // 2
+						facesSide->InsertCellPoint(i*2+1); // 3
+						facesSide->InsertCellPoint(i*2-1); // 1
+					}
+				}
+				// add closing face
+				facesSide->InsertNextCell(4);
+				facesSide->InsertCellPoint(i*2-2);
+				facesSide->InsertCellPoint(0);
+				facesSide->InsertCellPoint(1);
+				facesSide->InsertCellPoint(i*2-1);
+
+				// set side points and faces
+				this->PrismSidesPolyData[poly]->SetPoints(pointsSide);
+				this->PrismSidesPolyData[poly]->SetPolys(facesSide);
+
+				// add points from the top that are within the perimeter polygon
+				//
+				double* xd;
+				std::vector<Point> &top_pts = prism->top.Get_points();
+				std::vector<Point>::iterator iterTop = top_pts.begin();
+				PHST_polygon *top_poly = NULL;
+				if (npolys > 1)
+				{
+					top_poly = new PHST_polygon(pts);
+				}				
+				for (vtkIdType k = i; iterTop != top_pts.end(); ++iterTop)
+				{
+					if (npolys > 1)
+					{
+						if (top_poly->Point_in_polygon(*iterTop))
+						{
+							xd = iterTop->get_coord();
+							pointsTop->InsertPoint(k, xd[0], xd[1], xd[2]);
+							++k;
+						}
+					}
+					else
+					{
+						if (prism->perimeter.Get_tree()->Point_in_polygon(*iterTop))
+						{
+							xd = iterTop->get_coord();
+							pointsTop->InsertPoint(k, xd[0], xd[1], xd[2]);
+							++k;
+						}
+					}
+				}
+				if (npolys > 1)
+				{
+					delete top_poly;
+				}
+
+				// set points used for delaunay triangulation
+				//
+				profileTop->SetPoints(pointsTop);
+
+				// set points and contraining polygon used for delaunay triangulation
+				//
+				constrainTop->SetPoints(pointsTop);
+				constrainTop->SetPolys(topCellArray);
+
+				// triangulate 
+				//
+				delaunay2DTop->SetInput(profileTop);
+				delaunay2DTop->SetSource(constrainTop);
+				delaunay2DTop->Update();
+
+				// clean-up
+				if (bDestroy_nniTop) delete nniTop;
+			}
+			else if (
+				(top_type == Data_source::ARCRASTER || top_type == Data_source::POINTS || top_type == Data_source::SHAPE || top_type == Data_source::XYZ)
+				&&
+				(bot_type == Data_source::ARCRASTER || bot_type == Data_source::POINTS || bot_type == Data_source::SHAPE || bot_type == Data_source::XYZ)
+				)
+			{
+				double dTop;
+				double dBottom;
+
+				Point ptBottom;
+				Point ptTop;
+
+				std::vector<Point> empty;
+
+				// nni for top interpolation
+				//
+				NNInterpolator* nniTop;
+				zone ztop = *prism->top.Get_bounding_box();
+				bool bDestroy_nniTop;
+				if (prism->top.Get_filedata()
+					&&
+					prism->top.Get_filedata()->Get_nni_map().find(prism->top.Get_attribute()) != prism->top.Get_filedata()->Get_nni_map().end()
+					)
+				{
+					nniTop = prism->top.Get_filedata()->Get_nni_map()[prism->top.Get_attribute()];
+					bDestroy_nniTop = false;
+				}
+				else
+				{
+					nniTop = new NNInterpolator();
+					nniTop->preprocess(prism->top.Get_points());
+					bDestroy_nniTop = true;
+				}
+
+				// nni for bottom interpolation
+				//
+				NNInterpolator* nniBottom;
+				zone zbottom = *prism->bottom.Get_bounding_box();
+				bool bDestroy_nniBottom;
+				if (prism->bottom.Get_filedata()
+					&&
+					prism->bottom.Get_filedata()->Get_nni_map().find(prism->bottom.Get_attribute()) != prism->bottom.Get_filedata()->Get_nni_map().end()
+					)
+				{
+					nniBottom = prism->bottom.Get_filedata()->Get_nni_map()[prism->bottom.Get_attribute()];
+					bDestroy_nniBottom = false;
+				}
+				else
+				{
+					nniBottom = new NNInterpolator();
+					nniBottom->preprocess(prism->bottom.Get_points());
+					bDestroy_nniBottom = true;
+				}
+
+				// foreach perimeter point determine top and bottom points
+				//
+				std::vector<Point>::reverse_iterator perim_pt_riter = pts.rbegin();
+				for (i = 0; perim_pt_riter != pts.rend(); ++i, ++perim_pt_riter)
+				{
+					ptTop = ptBottom = *perim_pt_riter;
+
+					dTop = nniTop->interpolate(ptTop);
+					dBottom = nniBottom->interpolate(ptBottom);
+
+					// top of perimeter
+					pointsTop->InsertPoint(i, ptTop.x(), ptTop.y(), dTop);
+					topCellArray->InsertNextCell(i);
+
+					// bottom of perimeter
+					pointsBottom->InsertPoint(i, ptBottom.x(), ptBottom.y(), dBottom);
+					bottomCellArray->InsertNextCell(i);
+
+					// side points
+					pointsSide->InsertPoint(i*2, ptBottom.x(), ptBottom.y(), dBottom);
+					pointsSide->InsertPoint(i*2+1, ptTop.x(), ptTop.y(), dTop);
+
+					// side facesSide
+					if (i)
+					{
+						facesSide->InsertNextCell(4);
+						facesSide->InsertCellPoint(i*2-2); // 0
+						facesSide->InsertCellPoint(i*2);   // 2
+						facesSide->InsertCellPoint(i*2+1); // 3
+						facesSide->InsertCellPoint(i*2-1); // 1
+					}
+				}
+				// add closing face
+				facesSide->InsertNextCell(4);
+				facesSide->InsertCellPoint(i*2-2);
+				facesSide->InsertCellPoint(0);
+				facesSide->InsertCellPoint(1);
+				facesSide->InsertCellPoint(i*2-1);
+
+				// set side points and facesSide
+				this->PrismSidesPolyData[poly]->SetPolys(facesSide);
+				this->PrismSidesPolyData[poly]->SetPoints(pointsSide);
+
+				// add points from the top that are within the perimeter polygon
+				//
+				double* xd;
+				std::vector<Point> &top_pts = prism->top.Get_points();
+				std::vector<Point>::iterator iterTop = top_pts.begin();
+				PHST_polygon *top_poly = NULL;
+				if (npolys > 1)
+				{
+					top_poly = new PHST_polygon(pts);
+				}				
+				for (vtkIdType k = i; iterTop != top_pts.end(); ++iterTop)
+				{
+					if (npolys > 1)
+					{
+						if (top_poly->Point_in_polygon(*iterTop))
+						{
+							xd = iterTop->get_coord();
+							pointsTop->InsertPoint(k, xd[0], xd[1], xd[2]);
+							++k;
+						}
+					}
+					else
+					{
+						if (prism->perimeter.Get_tree()->Point_in_polygon(*iterTop))
+						{
+							xd = iterTop->get_coord();
+							pointsTop->InsertPoint(k, xd[0], xd[1], xd[2]);
+							++k;
+						}
+					}
+				}
+				if (npolys > 1)
+				{
+					delete top_poly;
+				}
+
+				// add points from the bottom that are within the perimeter polygon
+				//
+				std::vector<Point> &bottom_pts = prism->bottom.Get_points();
+				std::vector<Point>::iterator iterBottom = bottom_pts.begin();
+
+				PHST_polygon *bot_poly = NULL;
+				if (npolys > 1)
+				{
+					bot_poly = new PHST_polygon(pts);
+				}				
+				for (vtkIdType k = i; iterBottom != bottom_pts.end(); ++iterBottom)
+				{
+					if (npolys > 1)
+					{
+						if (bot_poly->Point_in_polygon(*iterBottom))
+						{
+							xd = iterBottom->get_coord();
+							pointsBottom->InsertPoint(k, xd[0], xd[1], xd[2]);
+							++k;
+						}
+					}
+					else
+					{
+						if (prism->perimeter.Get_tree()->Point_in_polygon(*iterBottom))
+						{
+							xd = iterBottom->get_coord();
+							pointsBottom->InsertPoint(k, xd[0], xd[1], xd[2]);
+							++k;
+						}
+					}
+				}
+				if (npolys > 1)
+				{
+					delete bot_poly;
+				}
+
+				// set points used for delaunay triangulation
+				//
+				profileTop->SetPoints(pointsTop);
+
+				// set points and constraining polygon used for delaunay triangulation
+				//
+				constrainTop->SetPoints(pointsTop);
+				constrainTop->SetPolys(topCellArray);
+
+				// set points used for delaunay triangulation
+				//
+				profileBottom->SetPoints(pointsBottom);
+
+				// set points and constraining polygon used for delaunay triangulation
+				//
+				constrainBottom->SetPoints(pointsBottom);
+				constrainBottom->SetPolys(bottomCellArray);
+
+				// triangulate top
+				//
+				delaunay2DTop->SetInput(profileTop);
+				delaunay2DTop->SetSource(constrainTop);
+				delaunay2DTop->Update();
+
+				// triangulate bottom
+				//
+				delaunay2DBottom->SetInput(profileBottom);
+				TRACE("profileBottom= %d\n", profileBottom->GetNumberOfPoints());
+				delaunay2DBottom->SetSource(constrainBottom);
+				delaunay2DBottom->Update();
+
+				// clean-up
+				if (bDestroy_nniTop) delete nniTop;
+				if (bDestroy_nniBottom) delete nniBottom;
+			}
+			else
+			{
+				ASSERT(FALSE);
+			}
+
+			// top solid actor
+			//
+			ASSERT(this->TopActors[poly] == 0);
+			this->TopActors[poly] = vtkLODActor::New();
+			this->TopActors[poly]->SetVisibility(this->TopVisibility);
+			if (vtkLODActor *pLOD = vtkLODActor::SafeDownCast(this->TopActors[poly]))
+			{
+				pLOD->SetNumberOfCloudPoints(2000);
+			}
+			this->TopActors[poly]->SetProperty(this->CubeActor->GetProperty());
+
+			// top outline actor
+			//
+			ASSERT(this->TopOutlineActors[poly] == 0);
+			this->TopOutlineActors[poly] = vtkLODActor::New();
+			this->TopOutlineActors[poly]->SetVisibility(this->TopVisibility);
+			if (vtkLODActor *pLOD = vtkLODActor::SafeDownCast(this->TopOutlineActors[poly]))
+			{
+				pLOD->SetNumberOfCloudPoints(2000);
+			}
+			this->TopOutlineActors[poly]->SetProperty(this->OutlineActor->GetProperty());
+
+			if (top_type == Data_source::CONSTANT || top_type == Data_source::NONE)
+			{
+				// solid actor
+				//
+				vtkPolyData *polyData = vtkPolyData::New();
+				polyData->SetPolys(topCellArray);
+				polyData->SetPoints(pointsTop);
+
+				vtkTriangleFilter *triangleFilter = vtkTriangleFilter::New();
+				triangleFilter->SetInput(polyData);
+
+				ASSERT(this->TopFilters[poly] == 0);
+				this->TopFilters[poly] = vtkTransformPolyDataFilter::New();
+				this->TopFilters[poly]->SetTransform(this->UnitsTransform);			
+				this->TopFilters[poly]->SetInput(triangleFilter->GetOutput());
+
+				vtkPolyDataMapper *mapper = vtkPolyDataMapper::New();
+				mapper->SetInput(this->TopFilters[poly]->GetOutput());
+
+				this->TopActors[poly]->SetMapper(mapper);
+				this->AddPart(this->TopActors[poly]);
+
+				// outline actor
+				//
+				ASSERT(this->TopOutlineFilters[poly] == 0);
+				this->TopOutlineFilters[poly] = vtkTransformPolyDataFilter::New();
+				this->TopOutlineFilters[poly]->SetTransform(this->UnitsTransform);			
+				this->TopOutlineFilters[poly]->SetInput(polyData);
+
+				vtkPolyDataMapper *mapperOutline = vtkPolyDataMapper::New();
+				mapperOutline->SetInput(this->TopOutlineFilters[poly]->GetOutput());
+
+				this->TopOutlineActors[poly]->SetMapper(mapperOutline);
+				this->AddPart(this->TopOutlineActors[poly]);
+
+				// clean-up 
+				polyData->Delete();
+				triangleFilter->Delete();
+				mapper->Delete();
+				mapperOutline->Delete();
+			}
+			else if (top_type == Data_source::ARCRASTER || top_type == Data_source::POINTS || top_type == Data_source::SHAPE || top_type == Data_source::XYZ)
+			{
+				// solid actor
+				//
+				ASSERT(this->TopFilters[poly] == 0);
+				ASSERT(this->TopOutlineFilters[poly] == 0);
+				this->TopFilters[poly] = vtkTransformPolyDataFilter::New();
+				this->TopFilters[poly]->SetTransform(this->UnitsTransform);			
+				this->TopFilters[poly]->SetInput(delaunay2DTop->GetOutput());
+
+				vtkPolyDataMapper *mapper = vtkPolyDataMapper::New();
+				mapper->SetInput(this->TopFilters[poly]->GetOutput());
+
+				this->TopActors[poly]->SetMapper(mapper);
+				this->AddPart(this->TopActors[poly]);
+
+				// outline actor
+				//
+				vtkPolyDataMapper *mapperOutline = vtkPolyDataMapper::New();
+				mapperOutline->SetInput(this->TopFilters[poly]->GetOutput());
+
+				this->TopOutlineActors[poly]->SetMapper(mapperOutline);
+				this->AddPart(this->TopOutlineActors[poly]);
+
+				// clean-up 
+				mapper->Delete();
+				mapperOutline->Delete();
+			}
+			else
+			{
+				ASSERT(FALSE);
+			}
+
+
+			// bottom solid actor
+			//
+			ASSERT(this->BottomActors[poly] == 0);
+			this->BottomActors[poly] = vtkLODActor::New();
+			this->BottomActors[poly]->SetVisibility(this->BottomVisibility);
+			if (vtkLODActor *pLOD = vtkLODActor::SafeDownCast(this->BottomActors[poly]))
+			{
+				pLOD->SetNumberOfCloudPoints(2000);
+			}
+			this->BottomActors[poly]->SetProperty(this->CubeActor->GetProperty());
+
+			// bottom outline actor
+			//
+			ASSERT(this->BottomOutlineActors[poly] == 0);
+			this->BottomOutlineActors[poly] = vtkLODActor::New();
+			this->BottomOutlineActors[poly]->SetVisibility(this->BottomVisibility);
+			if (vtkLODActor *pLOD = vtkLODActor::SafeDownCast(this->BottomOutlineActors[poly]))
+			{
+				pLOD->SetNumberOfCloudPoints(2000);
+			}
+			this->BottomOutlineActors[poly]->SetProperty(this->OutlineActor->GetProperty());
+
+			if (bot_type == Data_source::CONSTANT || bot_type == Data_source::NONE)
+			{
+				// solid actor
+				//
+				vtkPolyData *polyData = vtkPolyData::New();
+				polyData->SetPolys(bottomCellArray);
+				polyData->SetPoints(pointsBottom);
+
+				vtkTriangleFilter *triangleFilter = vtkTriangleFilter::New();
+				triangleFilter->SetInput(polyData);
+
+				ASSERT(this->BottomFilters[poly] == 0);
+				this->BottomFilters[poly] = vtkTransformPolyDataFilter::New();
+				this->BottomFilters[poly]->SetTransform(this->UnitsTransform);			
+				this->BottomFilters[poly]->SetInput(triangleFilter->GetOutput());
+
+				vtkPolyDataMapper *mapper = vtkPolyDataMapper::New();
+				mapper->SetInput(this->BottomFilters[poly]->GetOutput());
+
+				this->BottomActors[poly]->SetMapper(mapper);
+				this->AddPart(this->BottomActors[poly]);
+
+				// outline actor
+				//
+				ASSERT(this->BottomOutlineFilters[poly] == 0);
+				this->BottomOutlineFilters[poly] = vtkTransformPolyDataFilter::New();
+				this->BottomOutlineFilters[poly]->SetTransform(this->UnitsTransform);			
+				this->BottomOutlineFilters[poly]->SetInput(polyData);
+
+				vtkPolyDataMapper *mapperOutline = vtkPolyDataMapper::New();
+				mapperOutline->SetInput(this->BottomOutlineFilters[poly]->GetOutput());
+
+				this->BottomOutlineActors[poly]->SetMapper(mapperOutline);
+				this->AddPart(this->BottomOutlineActors[poly]);
+
+				// clean-up 
+				polyData->Delete();
+				triangleFilter->Delete();
+				mapper->Delete();
+				mapperOutline->Delete();
+			}
+			else if (bot_type == Data_source::ARCRASTER || bot_type == Data_source::POINTS || bot_type == Data_source::SHAPE || bot_type == Data_source::XYZ)
+			{
+				// solid actor
+				//
+				ASSERT(this->BottomFilters[poly] == 0);
+				ASSERT(this->BottomOutlineFilters[poly] == 0);
+				this->BottomFilters[poly] = vtkTransformPolyDataFilter::New();
+				this->BottomFilters[poly]->SetTransform(this->UnitsTransform);			
+				this->BottomFilters[poly]->SetInput(delaunay2DBottom->GetOutput());
+
+				vtkPolyDataMapper *mapper = vtkPolyDataMapper::New();
+				mapper->SetInput(this->BottomFilters[poly]->GetOutput());
+
+				this->BottomActors[poly]->SetMapper(mapper);
+				this->AddPart(this->BottomActors[poly]);
+
+				// outline actor
+				//
+				vtkPolyDataMapper *mapperOutline = vtkPolyDataMapper::New();
+				mapperOutline->SetInput(this->BottomFilters[poly]->GetOutput());
+
+				this->BottomOutlineActors[poly]->SetMapper(mapperOutline);
+				this->AddPart(this->BottomOutlineActors[poly]);
+
+				// clean-up 
+				mapper->Delete();
+				mapperOutline->Delete();
+			}
+			else
+			{
+				ASSERT(FALSE);
+			}
+
+			ASSERT(this->UnitsTransform);
+			vtkTransformPolyDataFilter *transformPolyDataFilter = vtkTransformPolyDataFilter::New();
+			transformPolyDataFilter->SetTransform(this->UnitsTransform);			
+			transformPolyDataFilter->SetInput(this->PrismSidesPolyData[poly]);
+
+			// perimeter solid actor
+			ASSERT(this->SolidPerimeterMappers[poly] == 0);
+			this->SolidPerimeterMappers[poly] = vtkPolyDataMapper::New();
+			this->SolidPerimeterMappers[poly]->SetInput(transformPolyDataFilter->GetOutput());
+			ASSERT(this->SolidPerimeterActors[poly] == 0);
+			this->SolidPerimeterActors[poly] = vtkActor::New();
+			this->SolidPerimeterActors[poly]->SetVisibility(this->PerimeterVisibility);
+			this->SolidPerimeterActors[poly]->SetMapper(this->SolidPerimeterMappers[poly]);
+			this->AddPart(this->SolidPerimeterActors[poly]);
+			this->SolidPerimeterActors[poly]->SetProperty(this->CubeActor->GetProperty());
+
+			// perimeter outline actor
+			ASSERT(this->OutlinePerimeterMappers[poly] == 0);
+			this->OutlinePerimeterMappers[poly] = vtkPolyDataMapper::New();
+			this->OutlinePerimeterMappers[poly]->SetInput(transformPolyDataFilter->GetOutput());
+			ASSERT(this->OutlinePerimeterActors[poly] == 0);
+			this->OutlinePerimeterActors[poly] = vtkActor::New();
+			this->OutlinePerimeterActors[poly]->SetVisibility(this->PerimeterVisibility);
+			this->OutlinePerimeterActors[poly]->SetMapper(this->OutlinePerimeterMappers[poly]);
+			this->AddPart(this->OutlinePerimeterActors[poly]);
+			this->OutlinePerimeterActors[poly]->SetProperty(this->OutlineActor->GetProperty());
+
+			// cleanup top
+			topCellArray->Delete();
+			profileTop->Delete();
+			constrainTop->Delete();
+			delaunay2DTop->Delete();
+			pointsTop->Delete();
+
+			// cleanup bottom
+			bottomCellArray->Delete();
+			profileBottom->Delete();
+			constrainBottom->Delete();
+			delaunay2DBottom->Delete();
+			pointsBottom->Delete();
+
+			// cleanup sides (perimeter)
+			pointsSide->Delete();
+			facesSide->Delete();
+			transformPolyDataFilter->Delete();
+
+			// finally scale for units
+			this->SetUnits(rUnits);
+		}
+	}
+}
+
+void CZoneActor::Update(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent)
+{
+	// remove all previous items
+	//
+	while (HTREEITEM hChild = pTreeCtrl->GetChildItem(htiParent))
+	{
+		pTreeCtrl->DeleteItem(hChild);
+	}
+
+	// update description
+	//
+	pTreeCtrl->SetItemText(htiParent, this->GetNameDesc());
+
+	if (this->GetPolyhedronType() == Polyhedron::PRISM)
+	{
+		HTREEITEM hItem;
+		hItem = pTreeCtrl->InsertItem("Top", htiParent);
+		pTreeCtrl->SetItemState(hItem, INDEXTOSTATEIMAGEMASK(BST_CHECKED + 1), TVIS_STATEIMAGEMASK);
+
+		hItem = pTreeCtrl->InsertItem("Perimeter", htiParent);
+		pTreeCtrl->SetItemState(hItem, INDEXTOSTATEIMAGEMASK(BST_CHECKED + 1), TVIS_STATEIMAGEMASK);
+
+		hItem = pTreeCtrl->InsertItem("Bottom", htiParent);
+		pTreeCtrl->SetItemState(hItem, INDEXTOSTATEIMAGEMASK(BST_CHECKED + 1), TVIS_STATEIMAGEMASK);
+	}
+}
+
+// COMMENT: {7/16/2008 1:15:31 PM}void CZoneActor::SetPoint(vtkIdType n, vtkFloatingPointType *x)
+// COMMENT: {7/16/2008 1:15:31 PM}{
+// COMMENT: {7/16/2008 1:15:31 PM}}
+
+#ifdef _DEBUG
+void CZoneActor::SetColor(float r, float g, float b)
+{
+	vtkProperty *solidProperty = vtkProperty::New();
+	solidProperty->DeepCopy(this->CubeActor->GetProperty());
+	solidProperty->SetColor(r, g, b);
+
+	vtkProperty *outlineProperty = vtkProperty::New();
+	outlineProperty->DeepCopy(this->OutlineActor->GetProperty());
+	outlineProperty->SetColor(r, g, b);
+	outlineProperty->SetEdgeColor(r, g, b);
+	outlineProperty->SetAmbientColor(r, g, b);
+
+	if (this->GetPolyhedronType() == Polyhedron::PRISM)
+	{
+		ASSERT(this->SolidPerimeterActors.size() > 0);
+		ASSERT(this->OutlinePerimeterActors.size() > 0);
+
+		std::vector<vtkActor*>::iterator actor_iter;
+		actor_iter = this->SolidPerimeterActors.begin();
+		for (; actor_iter != this->SolidPerimeterActors.end(); ++actor_iter)
+		{
+			(*actor_iter)->SetProperty(solidProperty);
+		}
+
+		actor_iter = this->OutlinePerimeterActors.begin();
+		for (; actor_iter != this->OutlinePerimeterActors.end(); ++actor_iter)
+		{
+			(*actor_iter)->SetProperty(outlineProperty);
+		}
+
+		actor_iter = this->TopActors.begin();
+		for (; actor_iter != this->TopActors.end(); ++actor_iter)
+		{
+			(*actor_iter)->SetProperty(solidProperty);
+		}
+
+		actor_iter = this->TopOutlineActors.begin();
+		for (; actor_iter != this->TopOutlineActors.end(); ++actor_iter)
+		{
+			(*actor_iter)->SetProperty(outlineProperty);
+		}
+
+		actor_iter = this->BottomActors.begin();
+		for (; actor_iter != this->BottomActors.end(); ++actor_iter)
+		{
+			(*actor_iter)->SetProperty(solidProperty);
+		}
+
+		actor_iter = this->BottomOutlineActors.begin();
+		for (; actor_iter != this->BottomOutlineActors.end(); ++actor_iter)
+		{
+			(*actor_iter)->SetProperty(outlineProperty);
+		}
 	}
 	else
 	{
-		ASSERT(FALSE);
+		this->CubeActor->SetProperty(solidProperty);
+		this->OutlineActor->SetProperty(outlineProperty);
 	}
-
-	// size
-	//
-	struct zone *pzone = this->GetPolyhedron()->Get_box();
-	this->SetBounds(
-		pzone->x1,
-		pzone->x2,
-		pzone->y1,
-		pzone->y2,
-		pzone->z1,
-		pzone->z2,
-		rUnits
-		);
-
-	//
-	// Note: SetChopType must be called after
-	// at least one call to SetBounds
-	// (until SetBounds/SetChopType is replaced by
-	// SetPolyhedron or similar)
-	this->SetChopType(ct);
+	solidProperty->Delete();
+	outlineProperty->Delete();
 }
+#endif

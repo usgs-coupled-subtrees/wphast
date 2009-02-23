@@ -369,15 +369,16 @@ void CMapDialog::DDX_Point2(CDataExchange* pDX)
 
 void CMapDialog::DDX_Grid(CDataExchange* pDX)
 {
-	// Grid origin in map coordinates
-	::DDX_Text(pDX, IDC_EDIT_MO_X, this->m_siteMap.m_placement[0]);
-	::DDX_Text(pDX, IDC_EDIT_MO_Y, this->m_siteMap.m_placement[1]);
-
 	// Angle
 	::DDX_Text(pDX, IDC_EDIT_MO_ANGLE, this->m_siteMap.m_angle);
 
 	if (pDX->m_bSaveAndValidate)
 	{
+		// Grid origin in map coordinates
+		double map_coor[2];
+		::DDX_Text(pDX, IDC_EDIT_MO_X, map_coor[0]);
+		::DDX_Text(pDX, IDC_EDIT_MO_Y, map_coor[1]);
+
 		int nodes[3];
 		double minimum[3];
 		double length[3];
@@ -417,6 +418,11 @@ void CMapDialog::DDX_Grid(CDataExchange* pDX)
 			}
 			ASSERT( this->m_grid[i].coord[0] < this->m_grid[i].coord[1] );
 		}
+
+		// set placement
+		this->m_siteMap.m_placement[0] = map_coor[0] - minimum[0];
+		this->m_siteMap.m_placement[1] = map_coor[1] - minimum[1];
+		this->m_siteMap.m_placement[2] = 0.0;
 	}
 	else
 	{

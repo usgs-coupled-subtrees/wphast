@@ -117,18 +117,35 @@ void CMediaZoneActor::UnRemove(CPropertyTreeControlBar* pTreeControlBar)
 
 void CMediaZoneActor::Update(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent)
 {
+	CZoneActor::Update(pTreeCtrl, htiParent);
+
 	CString format;
 
-	// remove all previous items
-	//
-	while (HTREEITEM hChild = pTreeCtrl->GetChildItem(htiParent))
-	{
-		pTreeCtrl->DeleteItem(hChild);
-	}
-
-	// update description
-	//
-	pTreeCtrl->SetItemText(htiParent, this->GetNameDesc());
+// COMMENT: {6/23/2008 1:47:26 PM}	// remove all previous items
+// COMMENT: {6/23/2008 1:47:26 PM}	//
+// COMMENT: {6/23/2008 1:47:26 PM}	while (HTREEITEM hChild = pTreeCtrl->GetChildItem(htiParent))
+// COMMENT: {6/23/2008 1:47:26 PM}	{
+// COMMENT: {6/23/2008 1:47:26 PM}		pTreeCtrl->DeleteItem(hChild);
+// COMMENT: {6/23/2008 1:47:26 PM}	}
+// COMMENT: {6/23/2008 1:47:26 PM}
+// COMMENT: {6/23/2008 1:47:26 PM}	// update description
+// COMMENT: {6/23/2008 1:47:26 PM}	//
+// COMMENT: {6/23/2008 1:47:26 PM}	pTreeCtrl->SetItemText(htiParent, this->GetNameDesc());
+// COMMENT: {6/23/2008 1:47:26 PM}
+// COMMENT: {6/23/2008 1:47:26 PM}	//{{
+// COMMENT: {6/23/2008 1:47:26 PM}	if (this->GetPolyhedronType() == Polyhedron::PRISM)
+// COMMENT: {6/23/2008 1:47:26 PM}	{
+// COMMENT: {6/23/2008 1:47:26 PM}		HTREEITEM hItem;
+// COMMENT: {6/23/2008 1:47:26 PM}		hItem = pTreeCtrl->InsertItem("Top", htiParent);
+// COMMENT: {6/23/2008 1:47:26 PM}		pTreeCtrl->SetItemState(hItem, INDEXTOSTATEIMAGEMASK(BST_CHECKED + 1), TVIS_STATEIMAGEMASK);
+// COMMENT: {6/23/2008 1:47:26 PM}
+// COMMENT: {6/23/2008 1:47:26 PM}		hItem = pTreeCtrl->InsertItem("Perimeter", htiParent);
+// COMMENT: {6/23/2008 1:47:26 PM}		pTreeCtrl->SetItemState(hItem, INDEXTOSTATEIMAGEMASK(BST_CHECKED + 1), TVIS_STATEIMAGEMASK);
+// COMMENT: {6/23/2008 1:47:26 PM}
+// COMMENT: {6/23/2008 1:47:26 PM}		hItem = pTreeCtrl->InsertItem("Bottom", htiParent);
+// COMMENT: {6/23/2008 1:47:26 PM}		pTreeCtrl->SetItemState(hItem, INDEXTOSTATEIMAGEMASK(BST_CHECKED + 1), TVIS_STATEIMAGEMASK);
+// COMMENT: {6/23/2008 1:47:26 PM}	}
+// COMMENT: {6/23/2008 1:47:26 PM}	//}}
 
 	// active
 	if (this->m_grid_elt.active)
@@ -201,6 +218,8 @@ void CMediaZoneActor::Edit(CTreeCtrl* pTreeCtrl)
 	CWPhastDoc* pDoc = reinterpret_cast<CWPhastDoc*>(pFrame->GetActiveDocument());
 	ASSERT_VALID(pDoc);
 
+	ASSERT(this->GetData().polyh);
+
 	// set default as active
 	//
 	CGridElt elt(this->m_grid_elt);
@@ -227,6 +246,7 @@ void CMediaZoneActor::Edit(CTreeCtrl* pTreeCtrl)
 	{
 		CGridElt grid_elt;
 		mediaSpreadProps.GetProperties(grid_elt);
+		ASSERT(grid_elt.polyh);
 		pDoc->Execute(new CSetMediaAction(this, pTreeCtrl, grid_elt, mediaSpreadProps.GetDesc()));
 	}
 }

@@ -119,12 +119,14 @@ void CBCZoneActor::Update(CTreeCtrl* pTreeCtrl)
 
 void CBCZoneActor::Update(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent, const CBC& crBC)
 {
-	// remove all previous items
-	//
-	while (HTREEITEM hChild = pTreeCtrl->GetChildItem(htiParent))
-	{
-		pTreeCtrl->DeleteItem(hChild);
-	}
+	CZoneActor::Update(pTreeCtrl, htiParent);
+
+// COMMENT: {7/25/2008 5:01:30 PM}	// remove all previous items
+// COMMENT: {7/25/2008 5:01:30 PM}	//
+// COMMENT: {7/25/2008 5:01:30 PM}	while (HTREEITEM hChild = pTreeCtrl->GetChildItem(htiParent))
+// COMMENT: {7/25/2008 5:01:30 PM}	{
+// COMMENT: {7/25/2008 5:01:30 PM}		pTreeCtrl->DeleteItem(hChild);
+// COMMENT: {7/25/2008 5:01:30 PM}	}
 
 	// update description
 	//
@@ -237,6 +239,8 @@ void CBCZoneActor::Edit(CTreeCtrl* pTreeCtrl, int nStressPeriod)
 	CWPhastDoc* pDoc = reinterpret_cast<CWPhastDoc*>(pFrame->GetActiveDocument());
 	ASSERT_VALID(pDoc);
 
+	ASSERT(this->GetBC().polyh);
+
 	if (this->m_bc.bc_type == BC_info::BC_FLUX)
 	{
 		CBCFluxPropertyPage2 fluxProps;
@@ -248,6 +252,7 @@ void CBCZoneActor::Edit(CTreeCtrl* pTreeCtrl, int nStressPeriod)
 		{
 			CBC bc;
 			fluxProps.GetProperties(bc);
+			ASSERT(bc.polyh);
 			pDoc->Execute(new CSetBCAction(this, pTreeCtrl, bc, fluxProps.GetDesc()));
 		}
 	}
@@ -262,6 +267,7 @@ void CBCZoneActor::Edit(CTreeCtrl* pTreeCtrl, int nStressPeriod)
 		{
 			CBC bc;
 			leakyProps.GetProperties(bc);
+			ASSERT(bc.polyh);
 			pDoc->Execute(new CSetBCAction(this, pTreeCtrl, bc, leakyProps.GetDesc()));
 		}
 	}
@@ -276,6 +282,7 @@ void CBCZoneActor::Edit(CTreeCtrl* pTreeCtrl, int nStressPeriod)
 		{
 			CBC bc;
 			specified.GetProperties(bc);
+			ASSERT(bc.polyh);
 			pDoc->Execute(new CSetBCAction(this, pTreeCtrl, bc, specified.GetDesc()));
 		}		
 	}
@@ -479,6 +486,20 @@ void CBCZoneActor::UpdateProperty()
 		default:
 			ASSERT(FALSE);
 			break;
+	}
+	if (this->GetPolyhedronType() == Polyhedron::PRISM)
+	{
+		size_t npolys = this->SolidPerimeterActors.size();
+		for (size_t poly = 0; poly < npolys; ++poly)
+		{
+			this->TopActors[poly]->SetProperty(this->CubeActor->GetProperty());
+			this->SolidPerimeterActors[poly]->SetProperty(this->CubeActor->GetProperty());
+			this->BottomActors[poly]->SetProperty(this->CubeActor->GetProperty());
+
+			this->TopOutlineActors[poly]->SetProperty(this->OutlineActor->GetProperty());
+			this->OutlinePerimeterActors[poly]->SetProperty(this->OutlineActor->GetProperty());
+			this->BottomOutlineActors[poly]->SetProperty(this->OutlineActor->GetProperty());
+		}
 	}
 }
 

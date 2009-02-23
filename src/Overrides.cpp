@@ -48,6 +48,9 @@ extern char  error_string[10*MAX_LENGTH];
 extern char  *prefix, *transport_name, *chemistry_name, *database_name;
 extern int   head_ic_file_warning;
 extern char  *line;
+
+int setup_grid(void);
+void Tidy_prisms(void);
  
 int get_logical_line(FILE *fp, int *l);
 int get_line(FILE *fp);
@@ -117,11 +120,30 @@ int load(bool bWritePhastTmp)
 			reset_transient_data();
 			if (input_error > 0) break;
 			output_msg(OUTPUT_STDERR, "Accumulate...\n");
-			accumulate();
+			if (bWritePhastTmp)
+			{
+				accumulate();
+			}
+			else
+			{
+// COMMENT: {7/2/2008 10:33:48 PM}				if (simulation == 0)
+// COMMENT: {7/2/2008 10:33:48 PM}				{
+// COMMENT: {7/2/2008 10:33:48 PM}					// need to setup prisms
+// COMMENT: {7/2/2008 10:33:48 PM}					setup_grid();
+// COMMENT: {7/2/2008 10:33:48 PM}					Tidy_prisms();
+// COMMENT: {7/2/2008 10:33:48 PM}				}
+				// Note: accumulate needs to be called in order
+				// for GetDefaultHeadIC, GetDefaultChemIC, GetDefaultMedia
+				// to work
+				accumulate();
+			}
 			if (input_error > 0) break;
 			if (simulation == 0) {
 				output_msg(OUTPUT_STDERR, "Check properties...\n");
-				check_properties();
+				if (bWritePhastTmp)
+				{
+					check_properties();
+				}
 			}
 			output_msg(OUTPUT_STDERR, "Write hst...\n");
 			if (bWritePhastTmp) write_hst();

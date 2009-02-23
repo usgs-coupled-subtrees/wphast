@@ -85,6 +85,9 @@ void CBCLeakyPropertyPage2::DoDataExchange(CDataExchange* pDX)
 	if (pDX->m_bSaveAndValidate)
 	{
 		CBC bc;
+		
+		// copy polyh
+		if (this->m_bc.polyh) bc.polyh = this->m_bc.polyh->clone();
 
 		// bc_type
 		bc.bc_type = BC_info::BC_LEAKY;

@@ -167,12 +167,22 @@ void CSteadyFlow::Serialize(bool bStoring, hid_t loc_id)
 		ASSERT(status >= 0);
 
 		// head_tolerance
-		status = CGlobal::HDFSerialize(bStoring, loc_id, szHeadTolerance, H5T_NATIVE_DOUBLE, 1, &this->head_tolerance);
-		ASSERT(status >= 0);
+		status = CGlobal::HDFSerializeSafe(bStoring, group_id, szHeadTolerance, H5T_NATIVE_DOUBLE, 1, &this->head_tolerance);
+		if (!bStoring && status < 0)
+		{
+			// for backward compatibility (before 2972)
+			status = CGlobal::HDFSerialize(bStoring, loc_id, szHeadTolerance, H5T_NATIVE_DOUBLE, 1, &this->head_tolerance);
+			ASSERT(status >= 0);
+		}
 
 		// flow_balance_tolerance
-		status = CGlobal::HDFSerialize(bStoring, loc_id, szFlowBalanceTolerance, H5T_NATIVE_DOUBLE, 1, &this->flow_balance_tolerance);
-		ASSERT(status >= 0);
+		status = CGlobal::HDFSerializeSafe(bStoring, group_id, szFlowBalanceTolerance, H5T_NATIVE_DOUBLE, 1, &this->flow_balance_tolerance);
+		if (!bStoring && status < 0)
+		{
+			// for backward compatibility (before 2972)
+			status = CGlobal::HDFSerialize(bStoring, loc_id, szFlowBalanceTolerance, H5T_NATIVE_DOUBLE, 1, &this->flow_balance_tolerance);
+			ASSERT(status >= 0);
+		}
 
 		// minimum_time_step
 		if (min_timestep_id > 0)
@@ -191,12 +201,22 @@ void CSteadyFlow::Serialize(bool bStoring, hid_t loc_id)
 		}
 
 		// head_change_target
-		status = CGlobal::HDFSerialize(bStoring, loc_id, szHeadChangeTarget, H5T_NATIVE_DOUBLE, 1, &this->head_change_target);
-		ASSERT(status >= 0);
+		status = CGlobal::HDFSerializeSafe(bStoring, group_id, szHeadChangeTarget, H5T_NATIVE_DOUBLE, 1, &this->head_change_target);
+		if (!bStoring && status < 0)
+		{
+			// for backward compatibility (before 2972)
+			status = CGlobal::HDFSerialize(bStoring, loc_id, szHeadChangeTarget, H5T_NATIVE_DOUBLE, 1, &this->head_change_target);
+			ASSERT(status >= 0);
+		}
 
 		// iterations
-		status = CGlobal::HDFSerialize(bStoring, loc_id, szIterations, H5T_NATIVE_INT, 1, &this->iterations);
-		ASSERT(status >= 0);
+		status = CGlobal::HDFSerializeSafe(bStoring, group_id, szIterations, H5T_NATIVE_INT, 1, &this->iterations);
+		if (!bStoring && status < 0)
+		{
+			// for backward compatibility (before 2972)
+			status = CGlobal::HDFSerialize(bStoring, loc_id, szIterations, H5T_NATIVE_INT, 1, &this->iterations);
+			ASSERT(status >= 0);
+		}
 
 		// close the szSteadyFlow group
 		status = ::H5Gclose(group_id);

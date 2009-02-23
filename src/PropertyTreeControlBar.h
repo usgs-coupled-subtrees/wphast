@@ -72,6 +72,7 @@ protected:
 	afx_msg void OnDestroy();
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	// Tree control notifications
+	afx_msg void OnSelChanging(NMHDR* pNMHDR, LRESULT* pResult);	
 	afx_msg void OnSelChanged(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnNMClk(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnNMDblClk(NMHDR* pNMHDR, LRESULT* pResult);

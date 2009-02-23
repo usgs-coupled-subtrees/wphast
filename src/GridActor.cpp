@@ -592,7 +592,7 @@ void CGridActor::Setup(const CUnits& units)
 	this->m_pFeatureEdges->SetInput(this->m_pGeometryFilter->GetOutput());
 }
 
-void CGridActor::GetDefaultZone(CZone& rZone)
+void CGridActor::GetDefaultZone(zone& rZone)
 {
 	ASSERT(this->m_gridKeyword.m_grid[0].uniform_expanded == FALSE);
 	ASSERT(this->m_gridKeyword.m_grid[1].uniform_expanded == FALSE);
@@ -1234,6 +1234,8 @@ BOOL CGridActor::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 
 BOOL CGridActor::DeleteLine(int nAxisIndex, int nPlaneIndex)
 {
+	// TODO: this doesn't work if there are only 2 coords
+	//
 	if ( (0 <= nAxisIndex) && (nAxisIndex < 3) )
 	{
 		CGrid grid = this->m_gridKeyword.m_grid[nAxisIndex];

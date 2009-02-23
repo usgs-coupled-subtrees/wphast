@@ -15,6 +15,7 @@ class vtkRenderWindowInteractor;
 class CPropertyTreeControlBar;
 class CUnits;
 class ISerializable;
+class vtkTransformPolyDataFilter;
 
 #ifndef vtkFloatingPointType
 #define vtkFloatingPointType vtkFloatingPointType
@@ -46,6 +47,13 @@ public:
 	enum srcWedgeSource::tagChopType GetChopType()const;
 	void SetChopType(enum srcWedgeSource::tagChopType t);
 
+	void CleanupPrisms(void);
+#ifdef _DEBUG
+	void SetColor(float r, float g, float b);
+#endif
+
+	enum Polyhedron::POLYHEDRON_TYPE GetPolyhedronType()const;
+
 	void SetUnits(const CUnits& rUnits);
 
 	void SetDefault(bool bDefault);
@@ -64,7 +72,7 @@ public:
 
 	virtual void Insert(CPropertyTreeControlBar* pTreeControlBar, HTREEITEM hInsertAfter = TVI_LAST) = 0;
 
-	virtual void Update(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent) = 0;  // I don't think this needs to be virtual
+	virtual void Update(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent);
 	virtual void Edit(CTreeCtrl* pTreeCtrl) = 0;
 	virtual void InsertAt(CTreeCtrl* pTreeCtrl, HTREEITEM hParent, HTREEITEM hInsertAfter) = 0;
 	virtual void Remove(CPropertyTreeControlBar* pTreeControlBar);
@@ -74,6 +82,15 @@ public:
 	virtual void Remove(CWPhastDoc *pWPhastDoc);
 
 	virtual void SetVisibility(int visibility);
+
+	int GetPerimeterVisibility(void)const             { return this->PerimeterVisibility; };
+	void SetPerimeterVisibility(int visibility);
+
+	int GetTopVisibility(void)const                   { return this->TopVisibility; };
+	void SetTopVisibility(int visibility);
+
+	int GetBottomVisibility(void)const                { return this->BottomVisibility; };
+	void SetBottomVisibility(int visibility);
 
 	void UnSelect(CWPhastView* pView);
 	void Select(CWPhastView* pView, bool bReselect = false);
@@ -94,6 +111,7 @@ protected:
 	void UpdateNameDesc();
 
 	srcWedgeSource     *m_pSource;
+	vtkPolyData        *PolyData;
 
 	vtkPolyDataMapper *m_pMapper;
 
@@ -104,8 +122,30 @@ protected:
 	vtkPolyDataMapper *mapOutline;
 	vtkActor *OutlineActor;
 
-	//
-	vtkAppendPolyData *appendPolyData;
+	// prism sides
+	std::vector<vtkPolyData*>          PrismSidesPolyData;
+	std::vector<vtkActor*>             SolidPerimeterActors;     /* was CubeActor */
+	std::vector<vtkActor*>             OutlinePerimeterActors;   /* was OutlineActor */
+	std::vector<vtkPolyDataMapper*>    SolidPerimeterMappers;    /* was m_pMapper */
+	std::vector<vtkPolyDataMapper*>    OutlinePerimeterMappers;  /* was mapOutline */
+	int                                PerimeterVisibility;
+
+	// prism tops
+	std::vector<vtkActor*>                    TopActors;                   /* was TopActor */
+	std::vector<vtkActor*>                    TopOutlineActors;            /* was TopOutlineActor */
+	std::vector<vtkTransformPolyDataFilter*>  TopFilters;
+	std::vector<vtkTransformPolyDataFilter*>  TopOutlineFilters;
+	int                                       TopVisibility;
+
+	// prims bottoms
+	std::vector<vtkActor*>                    BottomActors;                /* was BottomActor */
+	std::vector<vtkActor*>                    BottomOutlineActors;         /* was BottomOutlineActor */
+	std::vector<vtkTransformPolyDataFilter*>  BottomFilters;
+	std::vector<vtkTransformPolyDataFilter*>  BottomOutlineFilters;
+	int                                       BottomVisibility;
+
+	vtkTransform      *UnitsTransform;
+	vtkTransformPolyDataFilter *UnitsTransformPolyDataFilter;
 
 	std::string        m_name;
 	std::string        m_desc;

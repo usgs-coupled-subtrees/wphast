@@ -59,7 +59,6 @@ CNewWedgeWidget::CNewWedgeWidget(void)
 
 	this->OutlineActor->GetProperty()->SetRepresentationToWireframe();
 	this->OutlineActor->GetProperty()->SetAmbient(1.0); // this makes the back edges easier to see
-
 }
 
 CNewWedgeWidget::~CNewWedgeWidget(void)

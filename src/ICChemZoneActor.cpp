@@ -83,12 +83,7 @@ void CICChemZoneActor::Insert(CPropertyTreeControlBar* pTreeControlBar, HTREEITE
 
 void CICChemZoneActor::Update(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent)
 {
-	// remove all previous items
-	//
-	while (HTREEITEM hChild = pTreeCtrl->GetChildItem(htiParent))
-	{
-		pTreeCtrl->DeleteItem(hChild);
-	}
+	CZoneActor::Update(pTreeCtrl, htiParent);
 
 	pTreeCtrl->SetItemText(htiParent, this->GetNameDesc());
 
@@ -164,6 +159,8 @@ void CICChemZoneActor::Edit(CTreeCtrl* pTreeCtrl)
 	CWPhastDoc* pDoc = reinterpret_cast<CWPhastDoc*>(pFrame->GetActiveDocument());
 	ASSERT_VALID(pDoc);
 
+	ASSERT(this->GetData().polyh);
+
 	CChemICSpreadPropertyPage chemICProps;
 	chemICProps.SetProperties(this->GetData());
 	chemICProps.SetDesc(this->GetDesc());
@@ -177,6 +174,8 @@ void CICChemZoneActor::Edit(CTreeCtrl* pTreeCtrl)
 	{
 		CChemIC chemIC;
 		chemICProps.GetProperties(chemIC);
+		ASSERT(chemIC.polyh);
+
 		pDoc->Execute(new CSetChemICAction(this, pTreeCtrl, chemIC, chemICProps.GetDesc()));
 	}
 }

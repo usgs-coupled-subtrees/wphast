@@ -140,7 +140,7 @@ void TestCZone::testSerialize(void)
 	z2.z1 = 5;
 	z2.z2 = 6;
 
-    CZone Z1(*pCube->Get_box());
+    CZone Z1(*pCube->Get_bounding_box());
 	CZone Z2(z2);
 	CPPUNIT_ASSERT(Z1 == Z2);
 

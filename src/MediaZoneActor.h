@@ -65,11 +65,14 @@ private:
 				CMediaZoneActor::s_Property = vtkProperty::New();
 				CMediaZoneActor::s_Property->SetColor(CMediaZoneActor::s_color);
 				CMediaZoneActor::s_Property->SetOpacity(0.3);
+// COMMENT: {6/30/2008 3:50:21 PM}				CMediaZoneActor::s_Property->SetAmbient(1.0);
+// COMMENT: {6/30/2008 3:45:40 PM}				CMediaZoneActor::s_Property->SetDiffuse(1.0);
 			}
 			if (CMediaZoneActor::s_OutlineProperty == 0)
 			{
 				CMediaZoneActor::s_OutlineProperty = vtkProperty::New();
 				CMediaZoneActor::s_OutlineProperty->SetAmbient(1.0);
+				CMediaZoneActor::s_OutlineProperty->SetDiffuse(1.0);
 				CMediaZoneActor::s_OutlineProperty->SetColor(CMediaZoneActor::s_color);
 				CMediaZoneActor::s_OutlineProperty->SetEdgeColor(CMediaZoneActor::s_color);	
 				CMediaZoneActor::s_OutlineProperty->SetAmbientColor(CMediaZoneActor::s_color);

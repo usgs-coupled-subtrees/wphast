@@ -83,12 +83,7 @@ void CICHeadZoneActor::Insert(CPropertyTreeControlBar* pTreeControlBar, HTREEITE
 
 void CICHeadZoneActor::Update(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent)
 {
-	// remove all previous items
-	//
-	while (HTREEITEM hChild = pTreeCtrl->GetChildItem(htiParent))
-	{
-		pTreeCtrl->DeleteItem(hChild);
-	}
+	CZoneActor::Update(pTreeCtrl, htiParent);
 
 	pTreeCtrl->SetItemText(htiParent, this->GetNameDesc());
 
@@ -128,6 +123,8 @@ void CICHeadZoneActor::Edit(CTreeCtrl* pTreeCtrl)
 	CWPhastDoc* pDoc = reinterpret_cast<CWPhastDoc*>(pFrame->GetActiveDocument());
 	ASSERT_VALID(pDoc);
 
+	ASSERT(this->GetData().polyh);
+
 	CICHeadSpreadPropertyPage icHeadProps;
 	icHeadProps.SetProperties(this->GetData());		
 	icHeadProps.SetDesc(this->GetDesc());		
@@ -137,6 +134,7 @@ void CICHeadZoneActor::Edit(CTreeCtrl* pTreeCtrl)
 	{
 		CHeadIC headIC;
 		icHeadProps.GetProperties(headIC);
+		ASSERT(headIC.polyh);
 		pDoc->Execute(new CSetHeadICAction(this, pTreeCtrl, headIC, icHeadProps.GetDesc()));
 	}
 }

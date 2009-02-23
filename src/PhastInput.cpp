@@ -2,8 +2,16 @@
 
 #include <cassert> // assert macro
 
-#include "phqalloc.h"  // PHRQ_free_all
+#if defined(__WPHAST__) && !defined(_DEBUG)
+#include "phqalloc.h"
+#else
+#ifdef _DEBUG
+#define _CRTDBG_MAP_ALLOC
+#include <crtdbg.h>
+#endif
+#endif
 #include "srcinput/message.h"
+#include "srcinput/Prism.h"
 
 extern char  *prefix, *transport_name, *chemistry_name, *database_name;
 extern int   input_error;
@@ -37,13 +45,16 @@ CPhastInput* CPhastInput::s_instance = 0;
 CPhastInput::CPhastInput(std::istream& is, const char *szPrefix)
 : m_parser(is)
 , m_prefix(szPrefix)
+, m_save_prism_list(Prism::prism_list)
 {
+	Prism::prism_list.clear();
 	this->DoInitialize();
 }
 
 CPhastInput::~CPhastInput(void)
 {
 	this->DoCleanUp();
+	Prism::prism_list = this->m_save_prism_list;
 }
 
 void CPhastInput::DoInitialize(void)
@@ -84,7 +95,7 @@ void CPhastInput::DoCleanUp(void)
 	{
 		::clean_up();
 		::clean_up_message();
-#if !defined(SHOW_MEM_LEAKS)
+#if !defined(_DEBUG)
 		::PHRQ_free_all();
 #endif
 	}
@@ -208,6 +219,10 @@ void CPhastInput::WritePhastTmp(const char* szPhastTmp)
 
 	__try
 	{
+		//{{
+		//try 
+		//{
+		//}}
 		assert(::chemistry_name == NULL);
 		if (::chemistry_name == NULL)
 		{
@@ -227,6 +242,15 @@ void CPhastInput::WritePhastTmp(const char* szPhastTmp)
 			return;
 		}
 		::load(true);
+		//{{
+		//}
+		//catch (int) 
+		//{
+		//	// input contains errors
+		//	assert(this->GetErrorCount() > 0);
+		//}
+		//}}
+
 // COMMENT: {3/29/2005 1:38:59 PM}		::load_first_sim(true);
 // COMMENT: {3/29/2005 1:38:59 PM}		while(true)
 // COMMENT: {3/29/2005 1:38:59 PM}		{
@@ -319,6 +343,7 @@ int CPhastInput::Output(const int type, const char *err_str, const int stop, voi
 	if (stop == STOP)
 	{
 		::RaiseException(INPUT_CONTAINS_ERRORS, 0, 0, NULL);
+		//throw pThis->GetErrorCount();
 	}
 	return OK;
 }

@@ -39,17 +39,21 @@ private:
 	class StaticInit
 	{
 	public:
-		StaticInit() {
+		StaticInit()
+		{
 			if (CICChemZoneActor::s_Property == 0)
 			{
 				CICChemZoneActor::s_Property = vtkProperty::New();
 				CICChemZoneActor::s_Property->SetColor(CICChemZoneActor::s_color);
 				CICChemZoneActor::s_Property->SetOpacity(0.3);
+// COMMENT: {6/30/2008 3:52:50 PM}				CICChemZoneActor::s_Property->SetAmbient(1.0);
+// COMMENT: {6/30/2008 3:52:50 PM}				CICChemZoneActor::s_Property->SetDiffuse(1.0);
 			}
 			if (CICChemZoneActor::s_OutlineProperty == 0)
 			{
 				CICChemZoneActor::s_OutlineProperty = vtkProperty::New();
 				CICChemZoneActor::s_OutlineProperty->SetAmbient(1.0);
+				CICChemZoneActor::s_OutlineProperty->SetDiffuse(1.0);
 				CICChemZoneActor::s_OutlineProperty->SetColor(CICChemZoneActor::s_color);
 				CICChemZoneActor::s_OutlineProperty->SetEdgeColor(CICChemZoneActor::s_color);	
 				CICChemZoneActor::s_OutlineProperty->SetAmbientColor(CICChemZoneActor::s_color);

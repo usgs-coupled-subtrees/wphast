@@ -23,6 +23,7 @@
 #include <vtkAssembly.h>
 #include <vtkPropAssembly.h>
 #include <vtkProp3DCollection.h>
+#include <vtkOutlineFilter.h>
 
 #include <vector>
 #include <list>
@@ -48,6 +49,7 @@
 
 #include "ImportErrorDialog.h"
 #include "RunDialog.h"
+#include "PerimeterDlg.h"
 
 #include "DisplayColors.h"
 #include "PropertyTreeControlBar.h"
@@ -66,11 +68,14 @@
 
 #include "NewZoneWidget.h"
 #include "NewWedgeWidget.h"
+#include "NewPrismWidget.h"
 
 #include <vtkBoxWidget.h>
 
 #include <vtkAbstractPropPicker.h>
 #include <vtkWin32RenderWindowInteractor.h>
+#include <vtkPolygon.h>
+#include <vtkTriangleFilter.h>
 
 // #include "CreateZoneAction.h"
 #include "ZoneCreateAction.h"
@@ -130,11 +135,18 @@ extern void GetDefaultChemIC(struct chem_ic* p_chem_ic);
 
 static const TCHAR szZoneFormat[]    = _T("Zone %d");
 static const TCHAR szWedgeFormat[]   = _T("Wedge %d");
+static const TCHAR szPrismFormat[]   = _T("Prism %d");
+
 static const TCHAR szZoneFind[]      = _T("Zone ");
 static const TCHAR szWedgeFind[]     = _T("Wedge ");
+static const TCHAR szPrismFind[]     = _T("Prism ");
 
 
 int error_msg (const char *err_str, const int stop);
+
+void Clear_NNInterpolatorList(void);
+void Clear_file_data_map(void);
+void Clear_KDtreeList(void);
 
 // Note: No header files should follow the following three lines
 #ifdef _DEBUG
@@ -242,6 +254,10 @@ BEGIN_MESSAGE_MAP(CWPhastDoc, CDocument)
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_NEWWEDGE, OnUpdateToolsNewWedge)
 	ON_COMMAND(ID_TOOLS_NEWWEDGE, OnToolsNewWedge)
 
+	// ID_TOOLS_NEWPRISM
+	ON_UPDATE_COMMAND_UI(ID_TOOLS_NEWPRISM, OnUpdateToolsNewPrism)
+	ON_COMMAND(ID_TOOLS_NEWPRISM, OnToolsNewPrism)
+
 	ON_COMMAND(ID_TOOLS_COLORS, &CWPhastDoc::OnToolsColors)
 END_MESSAGE_MAP()
 
@@ -296,6 +312,8 @@ CWPhastDoc::CWPhastDoc()
 , NewZoneCallbackCommand(0)
 , NewWedgeWidget(0)
 , NewWedgeCallbackCommand(0)
+, NewPrismWidget(0)
+, NewPrismCallbackCommand(0)
 {
 #if defined(WPHAST_AUTOMATION)
 	EnableAutomation();
@@ -1360,6 +1378,12 @@ void CWPhastDoc::DeleteContents()
 
 	this->UpdateAllViews(0);
 
+	// cleanup phastinput data
+	//
+	Clear_NNInterpolatorList();
+	Clear_file_data_map();
+	Clear_KDtreeList();
+
 	CDocument::DeleteContents();
 }
 
@@ -1700,6 +1724,12 @@ CString CWPhastDoc::GetNextWedgeName(void)
 	return str;
 }
 
+CString CWPhastDoc::GetNextPrismName(void)
+{
+	static CString str;
+	str.Format(szPrismFormat, this->GetNextPrismNumber());
+	return str;
+}
 
 int CWPhastDoc::GetNextWellNumber(void)
 {
@@ -1799,6 +1829,20 @@ int CWPhastDoc::GetNextWedgeNumber(void)const
 	}
 }
 
+int CWPhastDoc::GetNextPrismNumber(void)const
+{
+	std::set<int> prismNums;
+	this->GetUsedPrismNumbers(prismNums);
+	if (prismNums.rbegin() != prismNums.rend())
+	{
+		return (*prismNums.rbegin()) + 1;
+	}
+	else
+	{
+		return 1;
+	}
+}
+
 void CWPhastDoc::GetUsedZoneNumbers(std::set<int>& usedNums)const
 {
 	char *ptr;
@@ -1873,6 +1917,93 @@ void CWPhastDoc::GetUsedWedgeNumbers(std::set<int>& usedNums)const
 	}
 }
 
+void CWPhastDoc::GetUsedPrismNumbers(std::set<int>& usedNums)const
+{
+	char *ptr;
+	CZoneActor *pZoneActor;
+	usedNums.clear();
+
+	std::list<vtkPropCollection*> collections;
+	collections.push_back(this->GetPropAssemblyMedia()->GetParts());
+	collections.push_back(this->GetPropAssemblyBC()->GetParts());
+	collections.push_back(this->GetPropAssemblyIC()->GetParts());
+
+	std::list<vtkPropCollection*>::iterator iter = collections.begin();
+	for (; iter != collections.end(); ++iter)
+	{
+		if (vtkPropCollection *pPropCollection = (*iter))
+		{
+			vtkProp *pProp = 0;
+			pPropCollection->InitTraversal();
+			for (; (pProp = pPropCollection->GetNextProp()); )
+			{
+				if ((pZoneActor = CZoneActor::SafeDownCast(pProp)))
+				{
+					if (pZoneActor->GetPolyhedronType() == Polyhedron::PRISM)
+					{
+						// store used n_user numbers
+						//
+						std::pair< std::set<int>::iterator, bool > pr;
+						CString str = pZoneActor->GetName();
+						if (str.Find(szPrismFind) == 0)
+						{
+							int n = ::strtol((const char*)str + 5, &ptr, 10);
+							pr = usedNums.insert(n);
+							ASSERT(pr.second); // duplicate?
+						}
+					}
+				}
+			}
+		}
+	}
+}
+void CWPhastDoc::PrismPathsRelativeToAbsolute(void)
+{
+	CZoneActor *pZoneActor;
+
+	std::list<vtkPropCollection*> collections;
+	collections.push_back(this->GetPropAssemblyMedia()->GetParts());
+	collections.push_back(this->GetPropAssemblyBC()->GetParts());
+	collections.push_back(this->GetPropAssemblyIC()->GetParts());
+
+	std::list<vtkPropCollection*>::iterator iter = collections.begin();
+	for (; iter != collections.end(); ++iter)
+	{
+		if (vtkPropCollection *pPropCollection = (*iter))
+		{
+			vtkProp *pProp = 0;
+			pPropCollection->InitTraversal();
+			for (; (pProp = pPropCollection->GetNextProp()); )
+			{
+				if ((pZoneActor = CZoneActor::SafeDownCast(pProp)))
+				{
+					if (pZoneActor->GetPolyhedronType() == Polyhedron::PRISM)
+					{
+						if (Prism *p = dynamic_cast<Prism*>(pZoneActor->GetPolyhedron()))
+						{
+							std::string filename;
+							filename = p->perimeter.Get_file_name();
+							if (filename.length() > 0)
+							{
+								p->perimeter.Set_file_name(CGlobal::FullPath(filename));
+							}
+							filename = p->top.Get_file_name();
+							if (filename.length() > 0)
+							{
+								p->top.Set_file_name(CGlobal::FullPath(filename));
+							}
+							filename = p->bottom.Get_file_name();
+							if (filename.length() > 0)
+							{
+								p->bottom.Set_file_name(CGlobal::FullPath(filename));
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
 
 BOOL CWPhastDoc::OnSaveDocument(LPCTSTR lpszPathName)
 {
@@ -1946,7 +2077,11 @@ void CWPhastDoc::OnFileImport()
 	if (pDoc)
 	{
 		ASSERT(pDoc == this);
-		CDelayRedraw delay(::AfxGetMainWnd(), pDoc);
+// COMMENT: {6/2/2008 5:43:39 PM}		CDelayRedraw delay(::AfxGetMainWnd(), pDoc); // this breaks CWaitCursor
+		CDelayRedraw del1(this->GetPropertyTreeControlBar(), pDoc);
+		POSITION pos = this->GetFirstViewPosition();
+		CDelayRedraw del2(GetNextView(pos));
+		CDelayRedraw del3(this->GetBoxPropertiesDialogBar());
 		if (!this->DoImport(szPath))
 		{
 			::AfxMessageBox("An error occured during the import", MB_OK);
@@ -1969,6 +2104,16 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 	// Nonzero if the file was successfully loaded; otherwise 0.
 	CWaitCursor wait;
 	CSaveCurrentDirectory save;
+	// Update StatusBar
+	//
+	this->UpdateAllViews(NULL);
+	if (CWnd* pWnd = ((CFrameWnd*)::AfxGetMainWnd())->GetMessageBar())
+	{
+		CString status(_T("Importing..."));
+		pWnd->SetWindowText(status);
+	}
+	//::Sleep(100);
+	this->UpdateAllViews(NULL);
 
 	TCHAR szDrive[_MAX_DRIVE];
 	TCHAR szDir[_MAX_DIR];
@@ -1996,6 +2141,13 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 		return FALSE;
 	}
 
+// COMMENT: {6/2/2008 5:21:46 PM}	::OutputDebugString("DoWaitCursor In\n");
+// COMMENT: {6/2/2008 5:21:46 PM}	//::AfxGetApp()->DoWaitCursor(1);	
+// COMMENT: {6/2/2008 5:21:46 PM}	::SetCursor(::AfxGetApp()->LoadCursorA(IDC_WAIT));
+// COMMENT: {6/2/2008 5:21:46 PM}	Sleep(9000);
+// COMMENT: {6/2/2008 5:21:46 PM}	//::AfxGetApp()->DoWaitCursor(-1);
+// COMMENT: {6/2/2008 5:21:46 PM}	::OutputDebugString("DoWaitCursor Out\n");
+
 	// xml
 	//
 	std::stringbuf buf;
@@ -2013,7 +2165,9 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 		CPrintFreq printFreq;
 		printFreq.InitSync(pInput); // must be called before Load()
 
+		::OutputDebugString("Begin loading trans.dat file\n");
 		pInput->Load();
+		::OutputDebugString("Finished loading trans.dat file\n");
 		if (pInput->GetErrorCount() != 0)
 		{
 			// goto ImportError;
@@ -2103,7 +2257,7 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 			// not undoable
 			const struct grid_elt* grid_elt_ptr = ::grid_elt_zones[i];
 			ASSERT(grid_elt_ptr->polyh && ::AfxIsValidAddress(grid_elt_ptr->polyh, sizeof(Polyhedron)));
-			if (i == 0 && defaultZone == *grid_elt_ptr->polyh->Get_box())
+			if (i == 0 && defaultZone == *grid_elt_ptr->polyh->Get_bounding_box())
 			{
 				// if the first zone is equivalent to the default gridElt
 				// don't add it
@@ -2183,7 +2337,7 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 		{
 			const struct Head_ic* head_ic_ptr = ::head_ic[i];
 			ASSERT(head_ic_ptr->polyh && ::AfxIsValidAddress(head_ic_ptr->polyh, sizeof(Polyhedron)));
-			if (i == 0 && defaultZone == *head_ic_ptr->polyh->Get_box())
+			if (i == 0 && defaultZone == *head_ic_ptr->polyh->Get_bounding_box())
 			{
 				// if the first zone is equivalent to the default headIC
 				// don't add it
@@ -2208,7 +2362,7 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 		{
 			const struct chem_ic* chem_ic_ptr = ::chem_ic[i];
 			ASSERT(chem_ic_ptr->polyh && ::AfxIsValidAddress(chem_ic_ptr->polyh, sizeof(Polyhedron)));
-			if (i == 0 && defaultZone == *chem_ic_ptr->polyh->Get_box())
+			if (i == 0 && defaultZone == *chem_ic_ptr->polyh->Get_bounding_box())
 			{
 				// if the first zone is equivalent to the default chemIC
 				// don't add it
@@ -2245,6 +2399,10 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 			pAction->Execute();
 			delete pAction;
 		}
+		//{{
+		// convert all relative paths to absolute paths
+		this->PrismPathsRelativeToAbsolute();
+		//}}
 	}
 	catch (int)
 	{
@@ -2280,6 +2438,12 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 	pInput->Delete();
 	this->SetTitle(strPrefix);
 	this->SetModifiedFlag(TRUE);
+
+	if (CWnd* pWnd = ((CFrameWnd*)::AfxGetMainWnd())->GetMessageBar())
+	{
+		CString status(_T("Ready"));
+		pWnd->SetWindowText(status);
+	}
 
 	return bReturnValue;
 
@@ -2430,11 +2594,14 @@ BOOL CWPhastDoc::WriteTransDat(std::ostream& os)
 	// MEDIA
 	CTreeCtrlNode nodeMedia = this->GetPropertyTreeControlBar()->GetMediaNode();
 	nCount = nodeMedia.GetChildCount();
-	if (nCount > 0) {
+	if (nCount > 0)
+	{
 		os << "MEDIA\n";
 	}
-	for (int i = 0; i < nCount; ++i) {
-		if (CMediaZoneActor *pZone = CMediaZoneActor::SafeDownCast((vtkObject*)nodeMedia.GetChildAt(i).GetData())) {
+	for (int i = 0; i < nCount; ++i)
+	{
+		if (CMediaZoneActor *pZone = CMediaZoneActor::SafeDownCast((vtkObject*)nodeMedia.GetChildAt(i).GetData()))
+		{
 			CGridElt elt = pZone->GetGridElt();
 			os << elt;
 		}
@@ -2805,6 +2972,15 @@ void CWPhastDoc::New(const CNewModel& model)
 		pTree->ClearSelection();
 	}
 
+	// Update BoxPropertiesDialogBar
+	//
+	if (CBoxPropertiesDialogBar* pBar = this->GetBoxPropertiesDialogBar())
+	{
+		POSITION pos = this->GetFirstViewPosition();
+		CWPhastView *pView = (CWPhastView*) GetNextView(pos);
+		pBar->Set(pView, 0, this->GetUnits());
+	}
+
 	// refresh screen
 	//
 	this->ResetCamera();
@@ -2869,6 +3045,16 @@ void CWPhastDoc::OnFileRun()
 	}
 	catch (int)
 	{
+		// Update StatusBar
+		//
+		if (CWnd* pWnd = ((CFrameWnd*)::AfxGetMainWnd())->GetMessageBar())
+		{
+			CString status;
+			status.LoadStringA(AFX_IDS_IDLEMESSAGE);
+			pWnd->SetWindowText(status);
+		}
+
+		// display errors
 		CImportErrorDialog dlg;
 		dlg.m_lpszErrorMessages = pInput->GetErrorMsg();
 		dlg.DoModal();
@@ -4973,6 +5159,10 @@ BOOL CWPhastDoc::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 	{
 		return this->NewWedgeWidget->OnSetCursor(pWnd, nHitTest, message);
 	}
+	if (this->NewPrismWidget && this->NewPrismWidget->GetEnabled())
+	{
+		return this->NewPrismWidget->OnSetCursor(pWnd, nHitTest, message);
+	}
 	return FALSE;
 }
 
@@ -5201,4 +5391,342 @@ void CWPhastDoc::NewWedgeListener(vtkObject *caller, unsigned long eid, void *cl
 		}
 	}
 
+}
+
+void CWPhastDoc::OnUpdateToolsNewPrism(CCmdUI *pCmdUI)
+{
+	if (this->NewPrismWidget && this->NewPrismWidget->GetEnabled())
+	{
+		pCmdUI->SetCheck(1);
+	}
+	else
+	{
+		pCmdUI->SetCheck(0);
+	}
+}
+
+void CWPhastDoc::OnToolsNewPrism()
+{
+	if (this->NewPrismWidget && this->NewPrismWidget->GetEnabled())
+	{
+		this->EndNewPrism();
+	}
+	else
+	{
+		if (this->NewPrismWidget) this->EndNewPrism();
+
+		// CancelMode
+		//
+		POSITION pos = this->GetFirstViewPosition();
+		if (pos != NULL)
+		{
+			CWPhastView *pView = (CWPhastView*) GetNextView(pos);
+			ASSERT_VALID(pView);
+			if (pView)
+			{
+				pView->CancelMode();
+			}
+			this->UpdateAllViews(0);
+		}
+
+		CPerimeterDlg dlg;
+		if (dlg.DoModal() == IDOK)
+		{
+			CWaitCursor wait;
+			if (dlg.type == CPerimeterDlg::PT_DRAW)
+			{
+				this->BeginNewPrism();
+			}
+			else
+			{
+				std::ostringstream oss;
+				oss << "-perimeter SHAPE " << dlg.m_strShapefile;
+				std::istringstream iss(oss.str());
+
+				Prism *p = new Prism();
+				if (p->Read(iss))
+				{
+					p->Tidy();
+
+					//{{
+					// get type of zone
+					//
+					ETSLayoutPropertySheet        sheet("Prism Wizard", NULL, 0, NULL, false);
+
+					CNewZonePropertyPage          newZone;
+					CMediaSpreadPropertyPage      mediaProps;
+					CBCFluxPropertyPage2          fluxProps;
+					CBCLeakyPropertyPage2         leakyProps;
+					CBCSpecifiedHeadPropertyPage  specifiedProps;
+					CICHeadSpreadPropertyPage     icHeadProps;
+					CChemICSpreadPropertyPage     chemICProps;
+
+					// CChemICSpreadPropertyPage only needs the flowonly flag when the zone is a
+					// default zone
+					//
+					bool bFlowOnly = this->GetFlowOnly();
+
+					fluxProps.SetFlowOnly(bFlowOnly);
+					leakyProps.SetFlowOnly(bFlowOnly);
+					specifiedProps.SetFlowOnly(bFlowOnly);
+
+					sheet.AddPage(&newZone);
+					sheet.AddPage(&mediaProps);
+					sheet.AddPage(&fluxProps);
+					sheet.AddPage(&leakyProps);
+					sheet.AddPage(&specifiedProps);
+					sheet.AddPage(&icHeadProps);
+					sheet.AddPage(&chemICProps);
+
+					sheet.SetWizardMode();
+
+					if (sheet.DoModal() == ID_WIZFINISH)
+					{
+						this->UpdateAllViews(0);
+						CWaitCursor wait;
+						if (CWnd* pWnd = ((CFrameWnd*)::AfxGetMainWnd())->GetMessageBar())
+						{
+							CString status(_T("Creating new prism..."));
+							pWnd->SetWindowText(status);
+						}
+						::Sleep(100);
+
+						if (newZone.GetType() == ID_ZONE_TYPE_MEDIA)
+						{
+							CGridElt elt;
+							mediaProps.GetProperties(elt);
+							elt.polyh = p;
+							CMediaZoneActor::Create(this, elt, mediaProps.GetDesc());
+						}
+						else if (newZone.GetType() == ID_ZONE_TYPE_BC_FLUX)
+						{
+							CBC bc;
+							fluxProps.GetProperties(bc);
+							bc.polyh = p;
+							CBCZoneActor::Create(this, bc, fluxProps.GetDesc());
+						}
+						else if (newZone.GetType() == ID_ZONE_TYPE_BC_LEAKY)
+						{
+							CBC bc;
+							leakyProps.GetProperties(bc);
+							bc.polyh = p;
+							CBCZoneActor::Create(this, bc, leakyProps.GetDesc());
+						}
+						else if (newZone.GetType() == ID_ZONE_TYPE_BC_SPECIFIED)
+						{
+							CBC bc;
+							specifiedProps.GetProperties(bc);
+							bc.polyh = p;
+							CBCZoneActor::Create(this, bc, specifiedProps.GetDesc());
+						}
+						else if (newZone.GetType() == ID_ZONE_TYPE_IC_HEAD)
+						{
+							CHeadIC headic;
+							icHeadProps.GetProperties(headic);
+							headic.polyh = p;
+							CICHeadZoneActor::Create(this, headic, icHeadProps.GetDesc());
+						}
+						else if (newZone.GetType() == ID_ZONE_TYPE_IC_CHEM)
+						{
+							CChemIC chemIC;
+							chemICProps.GetProperties(chemIC);
+							chemIC.polyh = p;
+							CICChemZoneActor::Create(this, chemIC, chemICProps.GetDesc());
+						}
+					}
+
+					// refresh screen
+					//
+					this->ResetCamera();
+					this->UpdateAllViews(0);
+				}
+			}
+		}
+	}
+}
+
+void CWPhastDoc::BeginNewPrism()
+{
+	ASSERT(this->NewPrismWidget == 0);
+	ASSERT(this->NewPrismCallbackCommand == 0);
+
+	POSITION pos = this->GetFirstViewPosition();
+	if (pos != NULL)
+	{
+		CWPhastView *pView = (CWPhastView*) GetNextView(pos);
+		ASSERT_VALID(pView);
+		ASSERT(pView->GetRenderWindowInteractor());
+		if (pView->GetRenderWindowInteractor())
+		{
+			pView->CancelMode();
+
+			// create widget
+			this->NewPrismWidget = CNewPrismWidget::New();
+			this->NewPrismWidget->SetInteractor(pView->GetRenderWindowInteractor());
+			this->NewPrismWidget->SetProp3D(this->GetGridActor());
+
+			// add listener callback
+			this->NewPrismCallbackCommand = vtkCallbackCommand::New();
+			this->NewPrismCallbackCommand->SetClientData(this);
+			this->NewPrismCallbackCommand->SetCallback(CWPhastDoc::NewPrismListener);
+			this->NewPrismWidget->AddObserver(vtkCommand::EndInteractionEvent, this->NewPrismCallbackCommand);
+
+			// enable widget
+			this->NewPrismWidget->SetEnabled(1);
+		}
+	}
+}
+
+void CWPhastDoc::EndNewPrism()
+{
+	if (this->NewPrismCallbackCommand)
+	{
+		ASSERT(this->NewPrismCallbackCommand->IsA("vtkObjectBase"));
+		this->NewPrismCallbackCommand->Delete();
+		this->NewPrismCallbackCommand = 0;
+	}
+	if (this->NewPrismWidget)
+	{
+		ASSERT(this->NewPrismWidget->IsA("CNewPrismWidget"));
+		this->NewPrismWidget->SetInteractor(0);
+		this->NewPrismWidget->Delete();
+		this->NewPrismWidget = 0;
+	}
+}
+
+void CWPhastDoc::NewPrismListener(vtkObject *caller, unsigned long eid, void *clientdata, void *calldata) 
+{
+	ASSERT(caller->IsA("CNewPrismWidget"));
+	ASSERT(clientdata);
+
+	if (clientdata)
+	{
+		CWPhastDoc* self = reinterpret_cast<CWPhastDoc*>(clientdata);
+
+		if (eid == vtkCommand::EndInteractionEvent)
+		{
+			vtkFloatingPointType* scale = self->GetScale();
+			const CUnits& units = self->GetUnits();
+
+			vtkPoints *points = self->NewPrismWidget->GetPoints();
+
+			if (points->GetNumberOfPoints() < 6)
+			{
+				::AfxMessageBox("Perimeter must be defined by at least 3 points.");
+
+				// Note: cannot call EndNewPrism here
+				self->NewPrismWidget->SetInteractor(0);
+				return;
+			}
+
+			std::ostringstream oss;
+			oss << "-perimeter POINTS" << std::endl;
+			for (vtkIdType i = 0; i < points->GetNumberOfPoints(); i+=2)
+			{
+				vtkFloatingPointType *pt = points->GetPoint(i);
+				oss << pt[0] / scale[0] / units.horizontal.input_to_si << " ";
+				oss << pt[1] / scale[1] / units.horizontal.input_to_si << " ";
+				oss << "0.0" << std::endl;
+			}
+			TRACE(oss.str().c_str());
+			std::istringstream iss(oss.str());
+
+			// setup domain
+			self->GetDefaultZone(::domain);
+
+			Prism *p = new Prism();
+			if (p->Read(iss))
+			{
+				p->Tidy();
+
+				// get type of zone
+				//
+				ETSLayoutPropertySheet        sheet("Prism Wizard", NULL, 0, NULL, false);
+
+				CNewZonePropertyPage          newZone;
+				CMediaSpreadPropertyPage      mediaProps;
+				CBCFluxPropertyPage2          fluxProps;
+				CBCLeakyPropertyPage2         leakyProps;
+				CBCSpecifiedHeadPropertyPage  specifiedProps;
+				CICHeadSpreadPropertyPage     icHeadProps;
+				CChemICSpreadPropertyPage     chemICProps;
+
+				// CChemICSpreadPropertyPage only needs the flowonly flag when the zone is a
+				// default zone
+				//
+				bool bFlowOnly = self->GetFlowOnly();
+
+				fluxProps.SetFlowOnly(bFlowOnly);
+				leakyProps.SetFlowOnly(bFlowOnly);
+				specifiedProps.SetFlowOnly(bFlowOnly);
+
+				sheet.AddPage(&newZone);
+				sheet.AddPage(&mediaProps);
+				sheet.AddPage(&fluxProps);
+				sheet.AddPage(&leakyProps);
+				sheet.AddPage(&specifiedProps);
+				sheet.AddPage(&icHeadProps);
+				sheet.AddPage(&chemICProps);
+
+				sheet.SetWizardMode();
+
+				if (sheet.DoModal() == ID_WIZFINISH)
+				{
+					if (newZone.GetType() == ID_ZONE_TYPE_MEDIA)
+					{
+						CGridElt elt;
+						mediaProps.GetProperties(elt);
+						elt.polyh = p;
+						CMediaZoneActor::Create(self, elt, mediaProps.GetDesc());
+					}
+					else if (newZone.GetType() == ID_ZONE_TYPE_BC_FLUX)
+					{
+						CBC bc;
+						fluxProps.GetProperties(bc);
+						bc.polyh = p;
+						CBCZoneActor::Create(self, bc, fluxProps.GetDesc());
+					}
+					else if (newZone.GetType() == ID_ZONE_TYPE_BC_LEAKY)
+					{
+						CBC bc;
+						leakyProps.GetProperties(bc);
+						bc.polyh = p;
+						CBCZoneActor::Create(self, bc, leakyProps.GetDesc());
+					}
+					else if (newZone.GetType() == ID_ZONE_TYPE_BC_SPECIFIED)
+					{
+						CBC bc;
+						specifiedProps.GetProperties(bc);
+						bc.polyh = p;
+						CBCZoneActor::Create(self, bc, specifiedProps.GetDesc());
+					}
+					else if (newZone.GetType() == ID_ZONE_TYPE_IC_HEAD)
+					{
+						CHeadIC headic;
+						icHeadProps.GetProperties(headic);
+						headic.polyh = p;
+						CICHeadZoneActor::Create(self, headic, icHeadProps.GetDesc());
+					}
+					else if (newZone.GetType() == ID_ZONE_TYPE_IC_CHEM)
+					{
+						CChemIC chemIC;
+						chemICProps.GetProperties(chemIC);
+						chemIC.polyh = p;
+						CICChemZoneActor::Create(self, chemIC, chemICProps.GetDesc());
+					}
+				}
+			}
+
+			// Note: cannot call EndNewPrism here
+			self->NewPrismWidget->SetInteractor(0);
+		}
+	}
+}
+
+void CWPhastDoc::GetDefaultZone(zone &z)const
+{
+	if (this->m_pGridActor)
+	{
+		this->m_pGridActor->GetDefaultZone(z);
+	}
 }

@@ -73,6 +73,9 @@ void CBCSpecifiedHeadPropertyPage::DoDataExchange(CDataExchange* pDX)
 	{
 		CBC bc;
 
+		// polyh
+		if (this->m_bc.polyh) bc.polyh = this->m_bc.polyh->clone();
+
 		// bc_type
 		bc.bc_type = BC_info::BC_SPECIFIED;
 

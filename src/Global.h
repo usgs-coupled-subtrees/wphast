@@ -15,10 +15,12 @@ class vtkProp3D;
 #include <string>
 // #include "BC.h"
 #include "TimeSeries.h"
+#include "srcinput/Prism.h"
 class CBC;
 class Cproperty;
 class CCheckTreeCtrl;
 class CWPhastView;
+class Data_source;
 
 class vtkTransform;
 class CWorldTransform;
@@ -43,6 +45,8 @@ public:
 	static void WriteList(hid_t loc_id, const char *name, std::list<LPCTSTR> &rlist);
 	static herr_t HDFSerialize(bool bStoring, hid_t loc_id, const char* szName, hid_t mem_type_id, hsize_t count, void* buf);
 	static herr_t HDFSerializeSafe(bool bStoring, hid_t loc_id, const char* szName, hid_t mem_type_id, hsize_t count, void* buf);
+
+	static hsize_t HDFGetSize(hid_t loc_id, const char* szName, hid_t mem_type_id);
 
 	static herr_t HDFSerializeWithSize(bool bStoring, hid_t loc_id, const char* szName, hid_t mem_type_id, hsize_t& count, void* buf);
 	static bool IsValidTransform(vtkTransform* pTransform);
@@ -82,7 +86,31 @@ public:
 
 	static herr_t HDFSerializeCOLORREF(bool bStoring, hid_t loc_id, const char* szName, COLORREF& clr);
 
+	static herr_t HDFSerializePrism(bool bStoring, hid_t loc_id, Prism &rPrism);
+	static herr_t HDFSerializePolyData(bool bStoring, hid_t loc_id, const char* szName, vtkPolyData *&pPolyData);
+	static herr_t HDFSerializePoints(bool bStoring, hid_t loc_id, vtkPoints *&pPoints);
+	static herr_t HDFSerializeCells(bool bStoring, hid_t loc_id, const char* szName, vtkCellArray *&pCells);
+
+	static herr_t HDFSerializeData_source(bool bStoring, hid_t loc_id, const char* szName, Data_source &rData_source);
+	static herr_t HDFSerializePerimeterOption(bool bStoring, hid_t loc_id, Prism::PERIMETER_OPTION &perimeter_option);
+
+
+	static hid_t HDFCreatePolyhedronDataType(void);
+	static hid_t HDFCreateWidgetOrientationDataType(void);
+	static hid_t HDFCreateDataSourceType(void);
+	static hid_t HDFCreatePerimeterOptionType(void);
+
+
+	static std::string FullPath(std::string filename);
+	static void InsertHeadings(CComboBox &combo, std::vector< std::string > headings);
+	static BOOL IsValidShapefile(CString filename, CDataExchange* pDX = NULL);
+	static BOOL IsValidArcraster(CString filename);
+
+	static BOOL FileExists(CString filename);
+
+
 public:
+	static herr_t HDFSerializeAllocate(bool bStoring, hid_t loc_id, const char* szName, hsize_t& count, float** buffer);
 	static herr_t HDFSerializeAllocate(bool bStoring, hid_t loc_id, const char* szName, hsize_t& count, double** buffer);
 	static herr_t HDFSerializeAllocate(bool bStoring, hid_t loc_id, const char* szName, hsize_t& count, int** buffer);
 
@@ -98,7 +126,7 @@ private:
 public:
 	static int AddLengthUnits(CComboBox* pCombo);
 	static std::string GetStdLengthUnits(const char* unit);
-	
+
 	static int AddTimeUnits(CComboBox* pCombo);
 	static std::string GetStdTimeUnits(const char* unit);
 
@@ -197,7 +225,7 @@ herr_t CGlobal::HDFSerializeAllocate(bool bStoring, hid_t loc_id, const char* sz
 					count = dims[0];
 
 					if (*buffer) delete[] *buffer;
-					*buffer = new T[dims[0]];
+					*buffer = DEBUG_NEW T[dims[0]];
 					ASSERT(*buffer);
 
 					// read the szName dataset

@@ -292,11 +292,11 @@ std::ostream& operator<< (std::ostream &os, const CSolutionMethod &a)
 	os << "\t" << "-rebalance_fraction " << a.rebalance_fraction << "\n";
 	if (a.rebalance_by_cell)
 	{
-		os << "\t" << "-rebalance_by_cell   true\n";
+		os << "\t" << "-rebalance_by_cell  true\n";
 	}
 	else
 	{
-		os << "\t" << "-rebalance_by_cell   false\n";
+		os << "\t" << "-rebalance_by_cell  false\n";
 	}
 
 	return os;

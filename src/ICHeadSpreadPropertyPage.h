@@ -31,6 +31,7 @@ protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	BOOL SetupGrids(void);
 
+
 	CHeadIC      m_headIC;
 	std::string  m_desc;
 

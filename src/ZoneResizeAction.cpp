@@ -42,6 +42,7 @@ CZoneResizeAction::CZoneResizeAction(CWPhastView* pView, CZoneActor* pZone, floa
 {
 	ASSERT_VALID(pView);
 	ASSERT(pZone && pZone->IsA("CZoneActor"));
+	ASSERT(pZone->GetPolyhedronType() != Polyhedron::PRISM);
 	this->m_Bounds[0] = xMin;
 	this->m_Bounds[1] = xMax;
 	this->m_Bounds[2] = yMin;

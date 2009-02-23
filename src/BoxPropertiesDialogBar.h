@@ -3,6 +3,7 @@
 #include "IObserver.h"
 #include "gridctrl/ModGridCtrlEx.h"
 #include "srcWedgeSource.h"
+#include "srcinput/Data_source.h"
 #include <vector>
 
 class vtkObject;
@@ -10,6 +11,17 @@ class CWPhastView;
 class vtkProp3D;
 class vtkCubeSource;
 class CUnits;
+class Data_source;
+class Prism;
+class CZoneActor;
+
+struct coord
+{
+	double c[3];
+	coord(double x, double y, double z)   {c[0]=x; c[1]=y; c[2]=z;};
+	coord(double x, double y)             {c[0]=x; c[1]=y; c[2]=0.0;};
+	coord(void)                           {c[0]=c[1]=c[2]=0.0;};
+};
 
 class CBoxPropertiesDialogBar :	public CSizingDialogBarCFVS7, public IObserver
 {
@@ -30,7 +42,14 @@ public:
 		BP_WELL,
 		BP_RIVER,
 		BP_WEDGE,
+		BP_PRISM,
 	} BP_TYPE;
+
+	typedef enum tagPRISM_PART {
+		PRISM_TOP       = 0,
+		PRISM_PERIMETER = 1,
+		PRISM_BOTTOM    = 2,
+	} PRISM_PART;
 
 	virtual BOOL Create(UINT nIDTemplate, LPCTSTR lpszWindowName,
 		CWnd* pParentWnd, UINT nID, DWORD dwStyle = WS_CHILD | WS_VISIBLE | CBRS_TOP);
@@ -47,6 +66,9 @@ public:
 	void ShowWedgeControls(void);
 	void HideWedgeControls(void);
 
+	void ShowPrismControls(void);
+	void HidePrismControls(void);
+
 	void ShowApply();
 	void HideApply();
 
@@ -54,17 +76,56 @@ public:
 
 	void UpdateUnits(const CUnits& units);
 
+	void SizePrismControls(int cx, int cy);
+	void UpdatePrism(CZoneActor *pZoneActor, bool bForceUpdate = FALSE);
+	void EnablePointsGrid(BOOL bEnable);
+	void ApplyNewPrism(CZoneActor *pZoneActor);
+	void UpdatePrismControls(void);
+
+	void EnableNone(BOOL bEnable);
+	void EnableConstant(BOOL bEnable);
+	void EnableArcraster(BOOL bEnable);
+	void EnableShape(BOOL bEnable);
+	void EnablePoints(BOOL bEnable);
+	void EnablePrismRadios(BOOL bEnable);
+
 protected:
 	CWPhastView   *m_pView;
 	vtkProp3D     *m_pProp3D;
 	vtkCubeSource *m_CubeSource;
-	CTabCtrl m_wndMethodTab;
+	//CTabCtrl m_wndMethodTab;
 	CModGridCtrlEx   m_wndRiverGrid;
+	CModGridCtrlEx   m_wndPointsGrid;	
 	//CGridCtrl   m_wndRiverGrid;
-
+	//CBrush         m_HollowBrush;
+	HBRUSH         m_hBrush;
+	BOOL           m_bThemeActive;
+	CTabCtrl       m_wndTab;
+	CComboBox      m_wndShapeCombo;
 
 	BP_TYPE m_nType;
 	Wedge::WEDGE_ORIENTATION m_nOrientation;
+	PRISM_PART m_nPrismPart;
+	Data_source::DATA_SOURCE_TYPE m_nDataSourceType;
+
+// COMMENT: {7/21/2008 11:01:03 PM}	Data_source *m_pdsTop;
+// COMMENT: {7/21/2008 11:01:03 PM}	Data_source *m_pdsPerimeter;
+// COMMENT: {7/21/2008 11:01:03 PM}	Data_source *m_pdsBottom;
+
+	// Data_source data
+	//
+	Data_source *m_pds[3];
+	double m_dConstant[3];
+	CString m_sArcraster[3];
+	CString m_sShapefile[3];
+	int m_nShapeAttribute[3];
+	//std::vector< std::pair<double, double> > m_vectorPoints;
+	//std::vector<double[3]> m_vectorPoints2;
+	std::list<coord> m_listCoord[3];
+
+	// river data
+	//
+	std::vector< std::pair<double, double> > m_vectorPoints;
 
 	float m_X;
 	float m_Y;
@@ -84,25 +145,34 @@ protected:
 	float m_XWell;
 	float m_YWell;
 
-	std::vector< std::pair<double, double> > m_vectorPoints;
-
 	CString m_strHorizontalUnits;
 	CString m_strVerticalUnits;
 
 	bool m_bNeedsUpdate;
 	// float m_Position[3];
 	virtual void DoDataExchange(CDataExchange* pDX);
+	void DoDataExchangePrism(CDataExchange *pDX, Data_source *pData_source);
 public:
 	void Enable(bool bEnable);
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
+	void UpdateBackgroundBrush();
 
 protected:
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnEnKillfocusEdit();
 	afx_msg void OnEnChange(); 
-	afx_msg void OnBnClickedApply();
+	afx_msg void OnApply();
+	afx_msg void OnBnClickedArcraster();
+	afx_msg void OnBnClickedShape();
+	afx_msg void OnCbnSelChangeShape();
+	afx_msg void OnEnKillfocusConstant();
+	afx_msg void OnEnChangeConstant();
+
+
+
 	//afx_msg void OnEnKillfocusEditY();
 	//afx_msg void OnEnKillfocusEditZ();
+
 public:
 	afx_msg void OnUpdateEditCut(CCmdUI *pCmdUI);
 	afx_msg void OnEditCut();
@@ -117,6 +187,11 @@ public:
 	afx_msg void OnUpdateEditRedo(CCmdUI *pCmdUI);
 	afx_msg void OnEditRedo();
 	afx_msg void OnEndLabelEditGrid(NMHDR *pNotifyStruct, LRESULT *result);
+	afx_msg void OnEndLabelEditPointsGrid(NMHDR *pNotifyStruct, LRESULT *result);
+
+
+	afx_msg void OnTcnSelchangeTab(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnTcnSelchangingTab(NMHDR *pNMHDR, LRESULT *pResult);
 
 	//
 	///afx_msg void OnEnKillfocusYMAXEdit();
@@ -124,4 +199,11 @@ public:
 
 	// update wedge controls
 	afx_msg void OnBnClickedUpdateWedge();
+
+	// update prism controls
+	afx_msg void OnBnClickedData_source();
+
+	//
+	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
+	afx_msg void OnSize(UINT nType, int cx, int cy);
 };

@@ -5,6 +5,7 @@
 
 #include "WPhastDoc.h"
 #include "srcWedgeSource.h"
+#include "srcinput/Prism.h"
 #include <vtkProperty.h>
 
 #ifndef vtkFloatingPointType
@@ -58,17 +59,20 @@ CZoneCreateAction<T>::CZoneCreateAction(CWPhastDoc* pDoc, Polyhedron* polyh, con
 	// set name
 	//
 	CString name;
-	if (Wedge *w = dynamic_cast<Wedge*>(polyh))
+	switch (polyh->get_type())
 	{
-		name = pDoc->GetNextWedgeName();
-	}
-	else if (Cube *c = dynamic_cast<Cube*>(polyh))
-	{
+	case Polyhedron::CUBE:
 		name = pDoc->GetNextZoneName();
-	}
-	else
-	{
+		break;
+	case Polyhedron::WEDGE:
+		name = pDoc->GetNextWedgeName();
+		break;
+	case Polyhedron::PRISM:
+		name = pDoc->GetNextPrismName();
+		break;
+	default:
 		ASSERT(FALSE);
+		name = "Unknown Polyhedron type";
 	}
 	this->Create(pDoc, name, polyh, desc, nodeInsertAfter);
 }

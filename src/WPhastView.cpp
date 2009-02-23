@@ -457,6 +457,10 @@ LRESULT CWPhastView::WindowProc(UINT message, WPARAM wParam, LPARAM lParam)
 					// don't allow vtkHandleMessage2 call ExitCallback
 					return CView::WindowProc(message, wParam, lParam);
 					break;
+				case 'R' :
+				case 'r' :
+					TRACE("Reset camera\n");
+					break;
 				default  :
 					break;
 				}
@@ -610,6 +614,7 @@ void CWPhastView::DeleteContents(void)
 
 BOOL CWPhastView::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 {
+// COMMENT: {7/15/2008 7:13:33 PM}	TRACE("CWPhastView::OnSetCursor\n");
 	if (vtkInteractorStyleTrackballCameraEx *style = vtkInteractorStyleTrackballCameraEx::SafeDownCast(this->InteractorStyle))
 	{
 		if (style->GetPickWithMouse())
@@ -924,7 +929,22 @@ void CWPhastView::Select(vtkProp *pProp)
 
 	if (CZoneActor *pZoneActor = CZoneActor::SafeDownCast(pProp))
 	{
-		if (!pZoneActor->GetDefault() && this->BoxWidget)
+// COMMENT: {6/4/2008 8:19:55 PM}		if (!pZoneActor->GetDefault() && this->BoxWidget)
+		//{{ {7/10/2008 8:34:05 PM}
+		if (pZoneActor->GetVisibility() == 0)
+		{
+			// Highlight Prop
+			//
+			this->HighlightProp(pProp);
+
+			// redraw windows
+			//
+			this->GetDocument()->UpdateAllViews(this);
+			return;
+		}
+		//}} {7/10/2008 8:34:05 PM}
+
+		if (!(pZoneActor->GetDefault() || pZoneActor->GetPolyhedron()->get_type() == Polyhedron::PRISM) && this->BoxWidget)
 		{
 			//{{ {5/8/2006 4:25:45 PM}
 			this->HighlightProp(this->CurrentProp = NULL);
@@ -937,7 +957,7 @@ void CWPhastView::Select(vtkProp *pProp)
 			this->BoxWidget->On();
 		}
 		//{{ {5/3/2006 5:35:09 PM}
-		else if (pZoneActor->GetDefault())
+		else if (pZoneActor->GetDefault() || pZoneActor->GetPolyhedron()->get_type() == Polyhedron::PRISM)
 		{
 			// Highlight Prop
 			//
@@ -1196,6 +1216,8 @@ void CWPhastView::Update(IObserver* pSender, LPARAM lHint, CObject* /*pHint*/, v
 	switch (lHint)
 	{
 	case WPN_NONE:
+		break;
+	case WPN_SELCHANGING:
 		break;
 	case WPN_SELCHANGED:
 		if (this->CurrentProp = vtkProp::SafeDownCast(pObject))
@@ -1918,27 +1940,24 @@ void CWPhastView::CancelMode(void)
 	//
 	this->CancelMoveGridLine();
 
-	// Modify Grid
-	//
 	if (this->GetDocument())
 	{
+		// Modify Grid
+		//
 		this->GetDocument()->EndModifyGrid();
-	}
 
-	// New Zone
-	//
-	if (this->GetDocument())
-	{
+		// New Zone
+		//
 		this->GetDocument()->EndNewZone();
-	}
 
-	// New Wedge
-	//
-	if (this->GetDocument())
-	{
+		// New Wedge
+		//
 		this->GetDocument()->EndNewWedge();
-	}
 
+		// New Prism
+		//
+		this->GetDocument()->EndNewPrism();
+	}
 
 	// Select Object
 	//

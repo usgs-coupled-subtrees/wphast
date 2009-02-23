@@ -46,7 +46,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="&quot;$(DEV_CPPUNIT_1.10)\include&quot;;&quot;$(DEV_VTK_421_MEM_VS8_INC)&quot;;&quot;$(DEV_HDF5_INC)&quot;;&quot;$(DEV_XERCES)/include&quot;;&quot;$(DEV_BOOST)&quot;"
-				PreprocessorDefinitions="__CPPUNIT__;WIN32;_WINDOWS;_DEBUG;__WPHAST__;_CRT_SECURE_NO_DEPRECATE"
+				PreprocessorDefinitions="__CPPUNIT__;WIN32;_WINDOWS;_DEBUG;__WPHAST__;_CRT_SECURE_NO_DEPRECATE;ANSI_DECLARATORS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -71,7 +71,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="cppunitd.lib OpenGL32.Lib hdf5dll.lib $(DEV_VTK42_LINK) xerces-c_2.lib"
+				AdditionalDependencies="UxTheme.lib cppunitd.lib OpenGL32.Lib hdf5dll.lib $(DEV_VTK42_LINK) xerces-c_2.lib"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="&quot;$(DEV_CPPUNIT_1.10)/lib&quot;;&quot;$(DEV_VTK_421_MEM_VS8_LIB)&quot;;&quot;$(DEV_HDF5_LIBDLL)&quot;;&quot;$(DEV_XERCES)/lib&quot;"
 				DelayLoadDLLs=""
@@ -103,7 +103,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="copying dlls"
-				CommandLine="copy /Y &quot;$(DEV_HDF5_LIBDLL)\hdf5dll.dll&quot;           &quot;$(TargetDir)hdf5dll.dll&quot;   &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_XERCES)\bin\xerces-c_2_7.dll&quot;        &quot;$(TargetDir)xerces-c_2_7.dll&quot; &gt; NUL&#x0D;&#x0A;&#x0D;&#x0A;"
+				CommandLine="copy /Y &quot;$(DEV_HDF5_LIBDLL)\hdf5dll.dll&quot;           &quot;$(TargetDir)hdf5dll.dll&quot;   &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_HDF5_LIBDLL)\..\bin\zlib1.dll&quot;           &quot;$(TargetDir)zlib1.dll&quot;   &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_HDF5_LIBDLL)\..\bin\szlibdll.dll&quot;           &quot;$(TargetDir)szlibdll.dll&quot;   &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_XERCES)\bin\xerces-c_2_7.dll&quot;        &quot;$(TargetDir)xerces-c_2_7.dll&quot; &gt; NUL&#x0D;&#x0A;&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
@@ -143,7 +143,7 @@
 				InlineFunctionExpansion="1"
 				OmitFramePointers="true"
 				AdditionalIncludeDirectories="&quot;$(DEV_VTK42_VS8_DLL_INC)&quot;;&quot;$(DEV_HDF5_INC)&quot;;&quot;$(DEV_XERCES)/include&quot;;&quot;$(DEV_BOOST)&quot;"
-				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;__WPHAST__;WPHAST_AUTOMATION;_CRT_SECURE_NO_DEPRECATE"
+				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;__WPHAST__;WPHAST_AUTOMATION;_CRT_SECURE_NO_DEPRECATE;ANSI_DECLARATORS"
 				StringPooling="true"
 				MinimalRebuild="false"
 				RuntimeLibrary="2"
@@ -235,7 +235,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="&quot;$(DEV_VTK42_VS8_DLL_INC)&quot;;&quot;$(DEV_HDF5_INC)&quot;;&quot;$(DEV_XERCES)/include&quot;;&quot;$(DEV_BOOST)&quot;"
-				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;__WPHAST__;WPHAST_AUTOMATION;_CRT_SECURE_NO_DEPRECATE"
+				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;__WPHAST__;WPHAST_AUTOMATION;_CRT_SECURE_NO_DEPRECATE;ANSI_DECLARATORS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -291,6 +291,110 @@
 				Name="VCPostBuildEventTool"
 				Description="Copying dlls"
 				CommandLine="copy /Y &quot;$(DEV_HDF5_LIBDLL)\hdf5dll.dll&quot;           &quot;$(TargetDir)hdf5dll.dll&quot;   &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkCommon.dll&quot;    &quot;$(TargetDir)vtkCommon.dll&quot;    &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkFiltering.dll&quot; &quot;$(TargetDir)vtkFiltering.dll&quot; &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkGraphics.dll&quot;  &quot;$(TargetDir)vtkGraphics.dll&quot;  &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkHybrid.dll&quot;    &quot;$(TargetDir)vtkHybrid.dll&quot;    &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkIO.dll&quot;        &quot;$(TargetDir)vtkIO.dll&quot;        &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkImaging.dll&quot;   &quot;$(TargetDir)vtkImaging.dll&quot;   &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkRendering.dll&quot; &quot;$(TargetDir)vtkRendering.dll&quot; &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkexpat.dll&quot;     &quot;$(TargetDir)vtkexpat.dll&quot;     &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkfreetype.dll&quot;  &quot;$(TargetDir)vtkfreetype.dll&quot;  &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkftgl.dll&quot;      &quot;$(TargetDir)vtkftgl.dll&quot;      &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkjpeg.dll&quot;      &quot;$(TargetDir)vtkjpeg.dll&quot;      &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkpng.dll&quot;       &quot;$(TargetDir)vtkpng.dll&quot;       &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtktiff.dll&quot;      &quot;$(TargetDir)vtktiff.dll&quot;      &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkzlib.dll&quot;      &quot;$(TargetDir)vtkzlib.dll&quot;      &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_XERCES)\bin\xerces-c_2_7.dll&quot;        &quot;$(TargetDir)xerces-c_2_7.dll&quot; &gt; NUL&#x0D;&#x0A;&#x0D;&#x0A;"
+			/>
+		</Configuration>
+		<Configuration
+			Name="ReleaseRelease|Win32"
+			OutputDirectory="$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="1"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC70.vsprops"
+			UseOfMFC="2"
+			CharacterSet="2"
+			DeleteExtensionsOnClean="*.obj;*.ilk;*.tlb;*.tli;*.tlh;*.tmp;*.rsp;*.pgc;*.pgd;*.dll;$(TargetPath)"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+				Description=""
+				CommandLine=""
+				Outputs=""
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				PreprocessorDefinitions="NDEBUG;WPHAST_AUTOMATION"
+				MkTypLibCompatible="false"
+				TypeLibraryName="$(IntDir)/$(ProjectName).tlb"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="2"
+				InlineFunctionExpansion="2"
+				EnableIntrinsicFunctions="true"
+				FavorSizeOrSpeed="1"
+				OmitFramePointers="true"
+				EnableFiberSafeOptimizations="true"
+				WholeProgramOptimization="true"
+				AdditionalIncludeDirectories="&quot;$(DEV_VTK42_VS8_DLL_INC)&quot;;&quot;$(DEV_HDF5_INC)&quot;;&quot;$(DEV_XERCES)/include&quot;;&quot;$(DEV_BOOST)&quot;"
+				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;__WPHAST__;WPHAST_AUTOMATION;_CRT_SECURE_NO_DEPRECATE;ANSI_DECLARATORS"
+				StringPooling="true"
+				MinimalRebuild="false"
+				RuntimeLibrary="2"
+				EnableFunctionLevelLinking="true"
+				TreatWChar_tAsBuiltInType="true"
+				UsePrecompiledHeader="2"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="true"
+				DebugInformationFormat="3"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="NDEBUG;WPHAST_AUTOMATION"
+				Culture="1033"
+				AdditionalIncludeDirectories="$(IntDir)"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="$(DEV_VTK42_LINK) hdf5dll.lib xerces-c_2.lib"
+				LinkIncremental="1"
+				AdditionalLibraryDirectories="$(DEV_VTK42_VS8_DLL_LIB);$(DEV_HDF5_LIBDLL);$(DEV_XERCES)/lib"
+				GenerateDebugInformation="false"
+				SubSystem="2"
+				OptimizeReferences="2"
+				EnableCOMDATFolding="2"
+				LinkTimeCodeGeneration="1"
+				SetChecksum="true"
+				TargetMachine="1"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+				Description="Copying dlls"
+				CommandLine="copy /Y &quot;$(DEV_HDF5_LIBDLL)\hdf5dll.dll&quot;            &quot;$(TargetDir)hdf5dll.dll&quot;      &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_HDF5_LIBDLL)\zlib.dll&quot;               &quot;$(TargetDir)zlib.dll&quot;         &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkCommon.dll&quot;    &quot;$(TargetDir)vtkCommon.dll&quot;    &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkFiltering.dll&quot; &quot;$(TargetDir)vtkFiltering.dll&quot; &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkGraphics.dll&quot;  &quot;$(TargetDir)vtkGraphics.dll&quot;  &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkHybrid.dll&quot;    &quot;$(TargetDir)vtkHybrid.dll&quot;    &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkIO.dll&quot;        &quot;$(TargetDir)vtkIO.dll&quot;        &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkImaging.dll&quot;   &quot;$(TargetDir)vtkImaging.dll&quot;   &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkRendering.dll&quot; &quot;$(TargetDir)vtkRendering.dll&quot; &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkexpat.dll&quot;     &quot;$(TargetDir)vtkexpat.dll&quot;     &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkfreetype.dll&quot;  &quot;$(TargetDir)vtkfreetype.dll&quot;  &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkftgl.dll&quot;      &quot;$(TargetDir)vtkftgl.dll&quot;      &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkjpeg.dll&quot;      &quot;$(TargetDir)vtkjpeg.dll&quot;      &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkpng.dll&quot;       &quot;$(TargetDir)vtkpng.dll&quot;       &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtktiff.dll&quot;      &quot;$(TargetDir)vtktiff.dll&quot;      &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkzlib.dll&quot;      &quot;$(TargetDir)vtkzlib.dll&quot;      &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_XERCES)\bin\xerces-c_2_7.dll&quot;        &quot;$(TargetDir)xerces-c_2_7.dll&quot; &gt; NUL&#x0D;&#x0A;&#x0D;&#x0A;"
 			/>
 		</Configuration>
 	</Configurations>
@@ -462,6 +566,14 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="AutoDebug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="ReleaseRelease|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -642,6 +754,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\NewPrismWidget.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\NewWedgeWidget.cpp"
 				>
 				<FileConfiguration
@@ -659,6 +775,10 @@
 			</File>
 			<File
 				RelativePath="NewZoneWidget.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\PerimeterDlg.cpp"
 				>
 			</File>
 			<File
@@ -892,6 +1012,14 @@
 						UsePrecompiledHeader="1"
 					/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="ReleaseRelease|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="SteadyFlow.cpp"
@@ -992,6 +1120,14 @@
 						ObjectFile="$(IntDir)/$(InputName)1.obj"
 					/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="ReleaseRelease|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="ViewVTKCommand.cpp"
@@ -999,6 +1135,10 @@
 			</File>
 			<File
 				RelativePath="vtkBoxWidgetEx.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\vtkImplicitFunctionNNInterpolator.cpp"
 				>
 			</File>
 			<File
@@ -1151,6 +1291,15 @@
 							CompileAs="2"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+							CompileAs="2"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\srcinput\ArcRaster.cpp"
@@ -1179,6 +1328,14 @@
 							UsePrecompiledHeader="0"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\srcinput\BC_info.cpp"
@@ -1201,6 +1358,14 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="AutoDebug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -1238,6 +1403,15 @@
 							CompileAs="2"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+							CompileAs="2"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\srcinput\Cube.cpp"
@@ -1266,6 +1440,14 @@
 							UsePrecompiledHeader="0"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\srcinput\Data_source.cpp"
@@ -1288,6 +1470,14 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="AutoDebug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -1325,6 +1515,55 @@
 							CompileAs="2"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+							CompileAs="2"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\srcinput\NNInterpolator\delaunay.c"
+					>
+					<FileConfiguration
+						Name="cppunit|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+							CompileAs="2"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="AutoRelease|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+							CompileAs="2"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="AutoDebug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+							CompileAs="2"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+							CompileAs="2"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\srcinput\Drain.cpp"
@@ -1347,6 +1586,14 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="AutoDebug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -1381,6 +1628,14 @@
 							UsePrecompiledHeader="0"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\srcinput\Filedata.cpp"
@@ -1403,6 +1658,14 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="AutoDebug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -1433,6 +1696,15 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="AutoDebug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+							CompileAs="2"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -1471,6 +1743,15 @@
 							CompileAs="2"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+							CompileAs="2"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\srcinput\gpc_helper.c"
@@ -1495,6 +1776,95 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="AutoDebug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+							CompileAs="2"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+							CompileAs="2"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\srcinput\NNInterpolator\hash.c"
+					>
+					<FileConfiguration
+						Name="cppunit|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+							CompileAs="2"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="AutoRelease|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+							CompileAs="2"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="AutoDebug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+							CompileAs="2"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+							CompileAs="2"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\srcinput\NNInterpolator\istack.c"
+					>
+					<FileConfiguration
+						Name="cppunit|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+							CompileAs="2"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="AutoRelease|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+							CompileAs="2"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="AutoDebug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+							CompileAs="2"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -1530,6 +1900,14 @@
 							UsePrecompiledHeader="0"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\srcinput\KDtree\kdtree2.cpp"
@@ -1552,6 +1930,14 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="AutoDebug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -1582,6 +1968,15 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="AutoDebug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+							CompileAs="2"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -1620,6 +2015,171 @@
 							CompileAs="2"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+							CompileAs="2"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\srcinput\NNInterpolator\nncommon-vulnerable.c"
+					>
+					<FileConfiguration
+						Name="cppunit|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+							CompileAs="2"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="AutoRelease|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+							CompileAs="2"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="AutoDebug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+							CompileAs="2"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+							CompileAs="2"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\srcinput\NNInterpolator\nncommon.c"
+					>
+					<FileConfiguration
+						Name="cppunit|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+							CompileAs="2"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="AutoRelease|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+							CompileAs="2"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="AutoDebug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+							CompileAs="2"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+							CompileAs="2"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\srcinput\NNInterpolator\NNInterpolator.cpp"
+					>
+					<FileConfiguration
+						Name="cppunit|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="AutoRelease|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="AutoDebug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\srcinput\NNInterpolator\nnpi.c"
+					>
+					<FileConfiguration
+						Name="cppunit|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+							CompileAs="2"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="AutoRelease|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+							CompileAs="2"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="AutoDebug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+							CompileAs="2"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+							CompileAs="2"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="Overrides.cpp"
@@ -1642,6 +2202,14 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="AutoDebug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -1676,6 +2244,14 @@
 							UsePrecompiledHeader="0"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="PhastInput.cpp"
@@ -1698,6 +2274,14 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="AutoDebug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -1735,6 +2319,51 @@
 							CompileAs="2"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+							CompileAs="2"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\srcinput\PHST_polygon.cpp"
+					>
+					<FileConfiguration
+						Name="cppunit|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="AutoRelease|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="AutoDebug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\srcinput\Point.cpp"
@@ -1757,6 +2386,50 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="AutoDebug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\srcinput\Polygon_tree.cpp"
+					>
+					<FileConfiguration
+						Name="cppunit|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="AutoRelease|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="AutoDebug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -1791,6 +2464,14 @@
 							UsePrecompiledHeader="0"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\srcinput\Prism.cpp"
@@ -1813,6 +2494,14 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="AutoDebug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -1843,6 +2532,15 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="AutoDebug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+							CompileAs="2"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -1881,6 +2579,15 @@
 							CompileAs="2"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+							CompileAs="2"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\srcinput\Shapefiles\Shapefile.cpp"
@@ -1903,6 +2610,14 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="AutoDebug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -1933,6 +2648,15 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="AutoDebug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+							CompileAs="2"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -1971,6 +2695,15 @@
 							CompileAs="2"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+							CompileAs="2"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="srcinput\structures.c"
@@ -1995,6 +2728,15 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="AutoDebug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+							CompileAs="2"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -2036,6 +2778,56 @@
 							CompileAs="2"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+							ObjectFile="$(IntDir)/$(InputName)1.obj"
+							CompileAs="2"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\srcinput\NNInterpolator\triangle.c"
+					>
+					<FileConfiguration
+						Name="cppunit|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+							CompileAs="2"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="AutoRelease|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+							CompileAs="2"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="AutoDebug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+							CompileAs="2"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+							CompileAs="2"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\srcinput\unit_impl.cxx"
@@ -2064,6 +2856,14 @@
 							UsePrecompiledHeader="0"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\srcinput\units_impl.cxx"
@@ -2086,6 +2886,14 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="AutoDebug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -2123,6 +2931,15 @@
 							CompileAs="2"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+							CompileAs="2"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\srcinput\Wedge.cpp"
@@ -2145,6 +2962,14 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="AutoDebug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -2175,6 +3000,15 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="AutoDebug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+							CompileAs="2"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -2213,6 +3047,15 @@
 							CompileAs="2"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+							CompileAs="2"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\srcinput\XYZfile.cpp"
@@ -2239,6 +3082,58 @@
 						<Tool
 							Name="VCCLCompilerTool"
 							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\srcinput\zone.cpp"
+					>
+					<FileConfiguration
+						Name="cppunit|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="AutoRelease|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="AutoDebug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
 						/>
 					</FileConfiguration>
 				</File>
@@ -2274,6 +3169,14 @@
 							ObjectFile="$(IntDir)/$(InputName)1.obj"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)/$(InputName)1.obj"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="sizecbar\scbarcfvs7.cpp"
@@ -2296,6 +3199,14 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="AutoDebug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)/$(InputName)1.obj"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -2330,6 +3241,14 @@
 							ObjectFile="$(IntDir)/$(InputName)1.obj"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)/$(InputName)1.obj"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="sizecbar\sdbarcfvs7.cpp"
@@ -2358,6 +3277,14 @@
 							ObjectFile="$(IntDir)/$(InputName)1.obj"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)/$(InputName)1.obj"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="sizecbar\sizecbar.cpp"
@@ -2380,6 +3307,14 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="AutoDebug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)/$(InputName)1.obj"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -2422,6 +3357,14 @@
 							Name="VCCLCompilerTool"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="gridctrl\GridCellBase.cpp"
@@ -2444,6 +3387,14 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="AutoDebug|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
 						ExcludedFromBuild="true"
 						>
 						<Tool
@@ -2507,6 +3458,14 @@
 							Name="VCCLCompilerTool"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="TestCBC.cpp"
@@ -2527,6 +3486,14 @@
 							Name="VCCLCompilerTool"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="TestCBCSpecifiedHeadPropertyPage.cpp"
@@ -2541,6 +3508,14 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="AutoDebug|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
 						ExcludedFromBuild="true"
 						>
 						<Tool
@@ -2575,6 +3550,14 @@
 							Name="VCCLCompilerTool"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="TestCGridLODActor.cpp"
@@ -2589,6 +3572,14 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="AutoDebug|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
 						ExcludedFromBuild="true"
 						>
 						<Tool
@@ -2615,6 +3606,14 @@
 							Name="VCCLCompilerTool"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="TestCMapDialog.cpp"
@@ -2629,6 +3628,14 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="AutoDebug|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
 						ExcludedFromBuild="true"
 						>
 						<Tool
@@ -2655,6 +3662,14 @@
 							Name="VCCLCompilerTool"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="TestCModGridCtrlExPage.cpp"
@@ -2669,6 +3684,14 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="AutoDebug|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
 						ExcludedFromBuild="true"
 						>
 						<Tool
@@ -2695,6 +3718,14 @@
 							Name="VCCLCompilerTool"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="TestCParser.cpp"
@@ -2709,6 +3740,14 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="AutoDebug|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
 						ExcludedFromBuild="true"
 						>
 						<Tool
@@ -2735,6 +3774,14 @@
 							Name="VCCLCompilerTool"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="TestCPrintFreqPropertyPage.cpp"
@@ -2749,6 +3796,14 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="AutoDebug|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
 						ExcludedFromBuild="true"
 						>
 						<Tool
@@ -2775,6 +3830,14 @@
 							Name="VCCLCompilerTool"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="TestCPropertyTreeControlBar.cpp"
@@ -2789,6 +3852,14 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="AutoDebug|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
 						ExcludedFromBuild="true"
 						>
 						<Tool
@@ -2815,6 +3886,14 @@
 							Name="VCCLCompilerTool"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="TestCTimeControl.cpp"
@@ -2829,6 +3908,14 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="AutoDebug|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
 						ExcludedFromBuild="true"
 						>
 						<Tool
@@ -2855,6 +3942,14 @@
 							Name="VCCLCompilerTool"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="TestCTimeControlMultiPropertyPage2.cpp"
@@ -2869,6 +3964,14 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="AutoDebug|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
 						ExcludedFromBuild="true"
 						>
 						<Tool
@@ -2895,6 +3998,14 @@
 							Name="VCCLCompilerTool"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="TestCWellPropertyPage.cpp"
@@ -2909,6 +4020,14 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="AutoDebug|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
 						ExcludedFromBuild="true"
 						>
 						<Tool
@@ -2935,6 +4054,14 @@
 							Name="VCCLCompilerTool"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="TestCZone.cpp"
@@ -2949,6 +4076,70 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="AutoDebug|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\TestHDFSerializePolyData.cpp"
+					>
+					<FileConfiguration
+						Name="AutoRelease|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="AutoDebug|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\TestPrism.cpp"
+					>
+					<FileConfiguration
+						Name="AutoRelease|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="AutoDebug|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
 						ExcludedFromBuild="true"
 						>
 						<Tool
@@ -2975,6 +4166,14 @@
 							Name="VCCLCompilerTool"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="TestVTKDialog.cpp"
@@ -2989,6 +4188,14 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="AutoDebug|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
 						ExcludedFromBuild="true"
 						>
 						<Tool
@@ -3032,6 +4239,10 @@
 			</File>
 			<File
 				RelativePath="AxesPropertyPage.h"
+				>
+			</File>
+			<File
+				RelativePath=".\srcinput\basePolyhedron.h"
 				>
 			</File>
 			<File
@@ -3343,6 +4554,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\NewPrismWidget.h"
+				>
+			</File>
+			<File
 				RelativePath=".\NewWedgeWidget.h"
 				>
 			</File>
@@ -3352,6 +4567,10 @@
 			</File>
 			<File
 				RelativePath="NewZoneWidget.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PerimeterDlg.h"
 				>
 			</File>
 			<File
@@ -3663,6 +4882,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\vtkImplicitFunctionNNInterpolator.h"
+				>
+			</File>
+			<File
 				RelativePath="vtkInteractorStyleImage2.h"
 				>
 			</File>
@@ -3858,6 +5081,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\TestHDFSerializePolyData.h"
+					>
+				</File>
+				<File
+					RelativePath=".\TestPrism.h"
+					>
+				</File>
+				<File
 					RelativePath="TestPropertyPage.h"
 					>
 				</File>
@@ -3934,6 +5165,10 @@
 				Name="phastinput"
 				>
 				<File
+					RelativePath=".\srcinput\Data_source.h"
+					>
+				</File>
+				<File
 					RelativePath="srcinput\getopt.h"
 					>
 				</File>
@@ -3959,6 +5194,10 @@
 				</File>
 				<File
 					RelativePath="phqalloc.h"
+					>
+				</File>
+				<File
+					RelativePath=".\srcinput\Polygon_tree.h"
 					>
 				</File>
 				<File
@@ -4740,6 +5979,14 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="AutoDebug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="ReleaseRelease|Win32"
 					ExcludedFromBuild="true"
 					>
 					<Tool

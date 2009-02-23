@@ -45,9 +45,11 @@ class TestCPhastInput : public CppUnit::TestFixture
 	CPPUNIT_TEST( testRiver );
 	CPPUNIT_TEST( testUnconf );
 	CPPUNIT_TEST( testWell );
-
+// COMMENT: {7/10/2008 5:34:40 PM}	CPPUNIT_TEST( testCapeCod );
 	CPPUNIT_TEST( testNoFileProperties );
+#if defined(SHOW_MEM_LEAKS)
 	CPPUNIT_TEST( testUnknownOptionReadingProperty );	
+#endif
 	CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -96,5 +98,6 @@ protected:
 	void testWell(void);
 	void testNoFileProperties(void);
 	void testUnknownOptionReadingProperty(void);
+	void testCapeCod(void);
 };
 

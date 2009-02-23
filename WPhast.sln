@@ -7,6 +7,7 @@ Global
 		AutoDebug|Win32 = AutoDebug|Win32
 		AutoRelease|Win32 = AutoRelease|Win32
 		cppunit|Win32 = cppunit|Win32
+		ReleaseRelease|Win32 = ReleaseRelease|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{A7CB3EF2-FCFD-4E6C-98A8-C6EFCD35955C}.AutoDebug|Win32.ActiveCfg = AutoDebug|Win32
@@ -15,6 +16,8 @@ Global
 		{A7CB3EF2-FCFD-4E6C-98A8-C6EFCD35955C}.AutoRelease|Win32.Build.0 = AutoRelease|Win32
 		{A7CB3EF2-FCFD-4E6C-98A8-C6EFCD35955C}.cppunit|Win32.ActiveCfg = cppunit|Win32
 		{A7CB3EF2-FCFD-4E6C-98A8-C6EFCD35955C}.cppunit|Win32.Build.0 = cppunit|Win32
+		{A7CB3EF2-FCFD-4E6C-98A8-C6EFCD35955C}.ReleaseRelease|Win32.ActiveCfg = ReleaseRelease|Win32
+		{A7CB3EF2-FCFD-4E6C-98A8-C6EFCD35955C}.ReleaseRelease|Win32.Build.0 = ReleaseRelease|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -28,6 +28,7 @@ CZoneWidgetResizeAction::CZoneWidgetResizeAction(CWPhastView* pView, CZoneActor*
 {
 	ASSERT_VALID(m_pView);
 	ASSERT(m_pActor && m_pActor->IsA("CZoneActor"));
+	ASSERT(m_pActor->GetPolyhedronType() != Polyhedron::PRISM);
 	this->Store();
 }
 

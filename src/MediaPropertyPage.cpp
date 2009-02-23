@@ -94,17 +94,12 @@ void CMediaPropertyPage::GetProperties(CGridElt& r_grid_elt)const
 	if (r_grid_elt.alpha_long->type == UNDEFINED) {
 		Cproperty::CopyProperty(&r_grid_elt.alpha_long, 0);
 	}
-	//{{
-// COMMENT: {6/1/2004 1:17:38 PM}	if (r_grid_elt.alpha_trans->type == UNDEFINED) {
-// COMMENT: {6/1/2004 1:17:38 PM}		Cproperty::CopyProperty(&r_grid_elt.alpha_trans, 0);
-// COMMENT: {6/1/2004 1:17:38 PM}	}
 	if (r_grid_elt.alpha_horizontal->type == UNDEFINED) {
 		Cproperty::CopyProperty(&r_grid_elt.alpha_horizontal, 0);
 	}
 	if (r_grid_elt.alpha_vertical->type == UNDEFINED) {
 		Cproperty::CopyProperty(&r_grid_elt.alpha_vertical, 0);
 	}
-	//}}
 	if (r_grid_elt.kx->type == UNDEFINED) {
 		Cproperty::CopyProperty(&r_grid_elt.kx, 0);
 	}
@@ -135,17 +130,12 @@ void CMediaPropertyPage::SetProperties(const CGridElt& r_grid_elt)
 	if (this->m_grid_elt.alpha_long == NULL) {
 		this->m_grid_elt.alpha_long = new Cproperty();
 	}
-	//{{
-// COMMENT: {6/1/2004 2:04:27 PM}	if (this->m_grid_elt.alpha_trans == NULL) {
-// COMMENT: {6/1/2004 2:04:27 PM}		this->m_grid_elt.alpha_trans = new Cproperty();
-// COMMENT: {6/1/2004 2:04:27 PM}	}
 	if (this->m_grid_elt.alpha_horizontal == NULL) {
 		this->m_grid_elt.alpha_horizontal = new Cproperty();
 	}
 	if (this->m_grid_elt.alpha_vertical == NULL) {
 		this->m_grid_elt.alpha_vertical = new Cproperty();
 	}
-	//}}
 	if (this->m_grid_elt.kx == NULL) {
 		this->m_grid_elt.kx = new Cproperty();
 	}

@@ -23,6 +23,7 @@ class vtkCubeSource;
 class vtkPolyDataMapper;
 class vtkLODActor;
 
+struct zone;
 class CZone;
 class CZoneLODActor;
 class CGridActor;
@@ -50,6 +51,7 @@ class CGridCoarsenPage;
 class CGridElementsSelector;
 class CNewZoneWidget;
 class CNewWedgeWidget;
+class CNewPrismWidget;
 
 class vtkAxes;
 class vtkTubeFilter;
@@ -87,6 +89,7 @@ enum WPhastNotification {
 	WPN_VISCHANGED    = 2,
 	WPN_DELETE_WELL   = 3,
 	WPN_SCALE_CHANGED = 4,
+	WPN_SELCHANGING   = 5,
 };
 
 #ifndef vtkFloatingPointType
@@ -124,13 +127,18 @@ public:
 	void Delete(CZoneActor *pZoneActor);
 	void UnDelete(CZoneActor *pZoneActor);
 	void Select(CZoneActor *pZoneActor);
+
 	void GetUsedZoneNumbers(std::set<int>& usedNums)const;
-	int GetNextZoneNumber(void)const;
 	void GetUsedWedgeNumbers(std::set<int>& usedNums)const;
+	void GetUsedPrismNumbers(std::set<int>& usedNums)const;
+
+	int GetNextZoneNumber(void)const;
 	int GetNextWedgeNumber(void)const;
+	int GetNextPrismNumber(void)const;
+
 	CString GetNextZoneName(void);
 	CString GetNextWedgeName(void);
-
+	CString GetNextPrismName(void);
 
 	void Edit(CGridActor* pGridActor);
 	void ModifyGrid(CGridActor* gridActor, CGridElementsSelector* gridElementsSelector);
@@ -166,11 +174,15 @@ public:
 	static void GridListener(vtkObject* caller, unsigned long eid, void* clientdata, void *calldata);	
 	
 	void UpdateGridDomain(void);
+	void GetDefaultZone(zone &z)const;
 
 	void SizeHandles(double size);
 
 	void SetDisplayColors(const CDisplayColors& dc);
 	CDisplayColors GetDisplayColors()const;
+
+	void PrismPathsRelativeToAbsolute(void);
+
 
 protected:
 	void InternalAdd(CZoneActor *pZoneActor, bool bAdd, HTREEITEM hInsertAfter = TVI_LAST);
@@ -454,6 +466,15 @@ public:
 	static void NewWedgeListener(vtkObject *caller, unsigned long eid, void *clientdata, void *calldata);
 	vtkCallbackCommand *NewWedgeCallbackCommand;
 	CNewWedgeWidget    *NewWedgeWidget;
+
+	// ID_TOOLS_NEWPRISM
+	afx_msg void OnUpdateToolsNewPrism(CCmdUI *pCmdUI);
+	afx_msg void OnToolsNewPrism();	
+	void BeginNewPrism();
+	void EndNewPrism();
+	static void NewPrismListener(vtkObject *caller, unsigned long eid, void *clientdata, void *calldata);
+	vtkCallbackCommand *NewPrismCallbackCommand;
+	CNewPrismWidget    *NewPrismWidget;
 
 public:
 	afx_msg void OnToolsColors();

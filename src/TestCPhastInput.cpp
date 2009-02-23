@@ -3177,7 +3177,7 @@ void TestCPhastInput::testUnknownOptionReadingProperty(void)
 			pInput = NULL;
 		}
 		newMemState.Checkpoint();
-#if !defined(SHOW_MEM_LEAKS)
+#if defined(SHOW_MEM_LEAKS)
 		CPPUNIT_ASSERT(diffMemState.Difference( oldMemState, newMemState ) == 0);
 #endif
 	}
@@ -3187,6 +3187,49 @@ void TestCPhastInput::testUnknownOptionReadingProperty(void)
 		{
 			LPCTSTR lpsz = pInput->GetErrorMsg();
 			if (lpsz) TRACE("testUnknownOptionReadingProperty:\n%s\n", lpsz);
+			pInput->Delete();
+		}
+		throw;
+	}
+
+}
+
+void TestCPhastInput::testCapeCod(void)
+{
+	CPhastInput* pInput = NULL;
+	try
+	{
+		CMemoryState oldMemState, newMemState, diffMemState;
+		oldMemState.Checkpoint();
+		{
+			::SetCurrentDirectory("C:\\cygwin\\home\\charlton\\programs\\phreeqc\\wphast-prism\\setup\\phast\\examples\\CapeCod\\");
+
+			std::ifstream ifs;
+			ifs.open("C:\\cygwin\\home\\charlton\\programs\\phreeqc\\wphast-prism\\setup\\phast\\examples\\CapeCod\\capecod-90.trans.dat");
+			CPPUNIT_ASSERT(ifs.is_open());
+
+			pInput = CPhastInput::New(ifs, "testCapeCod");
+			CPPUNIT_ASSERT(pInput != NULL);
+
+			pInput->Load();
+			CPPUNIT_ASSERT(pInput->GetErrorCount() == 0);
+			pInput->Delete();
+			pInput = NULL;
+		}
+		newMemState.Checkpoint();
+		BOOL diff = diffMemState.Difference( oldMemState, newMemState );
+		if (diff)
+		{
+// COMMENT: {7/10/2008 4:01:51 PM}			diffMemState.DumpAllObjectsSince();
+		}
+// COMMENT: {7/10/2008 4:02:34 PM}		CPPUNIT_ASSERT(diffMemState.Difference( oldMemState, newMemState ) == 0);
+	}
+	catch (...)
+	{
+		if (pInput)
+		{
+			LPCTSTR lpsz = pInput->GetErrorMsg();
+			if (lpsz) TRACE("testCapeCod:\n%s\n", lpsz);
 			pInput->Delete();
 		}
 		throw;
