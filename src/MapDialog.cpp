@@ -393,14 +393,30 @@ void CMapDialog::DDX_Grid(CDataExchange* pDX)
 			}
 			// minimums
 			DDX_Text(pDX, IDC_EDIT_X + i, minimum[i]);
+		}
 
-			// lengths
-			DDX_Text(pDX, IDC_EDIT_LENGTH + i, length[i]);
-			if (length[i] == 0)
-			{
-				::AfxMessageBox("Length must be non-zero.");
-				pDX->Fail();
-			}
+		// width
+		DDX_Text(pDX, IDC_EDIT_WIDTH, length[0]);
+		if (length[0] == 0)
+		{
+			::AfxMessageBox("Width must be non-zero.");
+			pDX->Fail();
+		}
+
+		// length
+		DDX_Text(pDX, IDC_EDIT_LENGTH, length[1]);
+		if (length[1] == 0)
+		{
+			::AfxMessageBox("Length must be non-zero.");
+			pDX->Fail();
+		}
+
+		// Depth
+		DDX_Text(pDX, IDC_EDIT_DEPTH, length[2]);
+		if (length[2] == 0)
+		{
+			::AfxMessageBox("Depth must be non-zero.");
+			pDX->Fail();
 		}
 
 		for (int i = 0; i < 3; ++i)
@@ -437,7 +453,7 @@ void CMapDialog::DDX_Grid(CDataExchange* pDX)
 		}
 
 		double defaultZ = 1.0;
-		DDX_Text(pDX, IDC_EDIT_HEIGHT, defaultZ);
+		DDX_Text(pDX, IDC_EDIT_DEPTH, defaultZ);
 
 		//{{
 		//BUGBUG check to see if setting a world file breaks this

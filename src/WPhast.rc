@@ -805,9 +805,9 @@ BEGIN
     EDITTEXT        IDC_EDIT_Z,302,99,56,12,ES_AUTOHSCROLL
     GROUPBOX        "Grid dimensions",IDC_STATIC_GD,222,121,153,107
     LTEXT           "Width (X):",IDC_STATIC_LENGTH,256,129,46,8,0,WS_EX_RIGHT
-    EDITTEXT        IDC_EDIT_LENGTH,302,127,56,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_WIDTH,302,127,56,12,ES_AUTOHSCROLL
     LTEXT           "Length (Y):",IDC_STATIC_WIDTH,256,144,46,8,0,WS_EX_RIGHT
-    EDITTEXT        IDC_EDIT_WIDTH,302,142,56,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_LENGTH,302,142,56,12,ES_AUTOHSCROLL
     LTEXT           "Depth (Z):",IDC_STATIC_DEPTH,256,160,46,8,0,WS_EX_RIGHT
     EDITTEXT        IDC_EDIT_DEPTH,302,158,56,12,ES_AUTOHSCROLL
     RTEXT           "X Nodes:",IDC_X_NODES_STATIC,256,180,46,8
@@ -3110,10 +3110,10 @@ BEGIN
     IDS_MEDIA_PROPS_WIZ_135 "Define media properties for this zone"
     IDS_EXPORT_PHAST_TRANS_136 "Select Phast Transport File to Export to"
     IDS_UNITS1_CAPTION_137  "New Model Wizard"
-    IDS_UNITS1_TITLE_138    "Step 1 of 8"
+    IDS_UNITS1_TITLE_138    "Step 1 of 10"
     IDS_UNITS1_SUBTITLE_139 "Define the units for the following parameters"
     IDS_UNITS2_CAPTION_140  "New Model Wizard"
-    IDS_UNITS2_TITLE_141    "Step 2 of 8"
+    IDS_UNITS2_TITLE_141    "Step 2 of 10"
     IDS_UNITS2_SUBTITLE_142 "Define the units for the following parameters"
     IDS_GRID_CAPTION_143    "New Model Wizard"
 END
@@ -3245,27 +3245,33 @@ BEGIN
     IDS_CHEM_IC_CAPTION161  "Chemistry IC Properties"
     IDS_GREATER_THAN_ZERO   "Please enter a number greater than 0.0."
     ID_FILE_EXPORT          "Export to trans.dat file"
+    IDS_UNITS3_CAPTION_164  "New Model Wizard"
+    IDS_UNITS3_TITLE_165    "Step 3 of 10"
+    IDS_UNITS3_SUBTITLE_166 "Define the units for the following parameters"
+    IDS_UNITS4_CAPTION_167  "New Model Wizard"
+    IDS_UNITS4_TITLE_168    "Step 4 of 10"
+    IDS_UNITS4_SUBTITLE_169 "Define the units for the following parameters"
     ID_FILE_RUN             "Runs the current simulation\nRun simulation"
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_GRID_TITLE_144      "Step 4 of 8"
+    IDS_GRID_TITLE_144      "Step 6 of 10"
     IDS_GRID_SUBTITLE_145   "Enter the grid dimensions"
     IDS_MEDIA_CAPTION_146   "New Model Wizard"
-    IDS_MEDIA_TITLE_147     "Step 5 of 8"
+    IDS_MEDIA_TITLE_147     "Step 7 of 10"
     IDS_MEDIA_SUBTITLE_148  "Set the default media properties"
     IDS_IC_HEAD_CAPTION_149 "New Model Wizard"
-    IDS_IC_HEAD_TITLE_150   "Step 6 of 8"
+    IDS_IC_HEAD_TITLE_150   "Step 8 of 10"
     IDS_IC_HEAD_SUBTITLE_151 "Set the default initial head properties"
     IDS_TC_CAPTION_152      "New Model Wizard"
-    IDS_TC_TITLE_153        "Step 8 of 8"
+    IDS_TC_TITLE_153        "Step 10 of 10"
     IDS_TC_SUBTITLE_154     "Define the time step and the time at which the first simulation period ends"
     IDS_IMPMAP_CAPTION_155  "New Model Wizard"
-    IDS_IMPMAP_TITLE_156    "Step 3 of 8"
+    IDS_IMPMAP_TITLE_156    "Step 5 of 10"
     IDS_IMPMAP_SUBTITLE_157 "Import map file"
     IDS_CHEM_IC_CAPTION_158 "New Model Wizard"
-    IDS_CHEM_IC_TITLE_159   "Step 7 of 8"
+    IDS_CHEM_IC_TITLE_159   "Step 9 of 10"
 END
 
 STRINGTABLE 
