@@ -3261,6 +3261,8 @@ void CBoxPropertiesDialogBar::ApplyNewPrism(CZoneActor *pZoneActor)
 					ds = prism->bottom;
 					break;
 				}
+				ds.Set_source_type(Data_source::CONSTANT);
+				ds.Set_user_source_type(Data_source::CONSTANT);
 				std::vector<Point> &pts = ds.Get_points();
 				pts.clear();
 				pts.push_back(Point(0.0, 0.0, this->m_dConstant[this->m_nPrismPart], this->m_dConstant[this->m_nPrismPart]));
@@ -3273,6 +3275,7 @@ void CBoxPropertiesDialogBar::ApplyNewPrism(CZoneActor *pZoneActor)
 				{
 					Data_source ds;
 					ds.Set_source_type(Data_source::ARCRASTER);
+					ds.Set_user_source_type(Data_source::ARCRASTER);
 
 					PHAST_Transform::COORDINATE_SYSTEM c = PHAST_Transform::MAP;
 					ds.Set_coordinate_system(c);
@@ -3281,7 +3284,6 @@ void CBoxPropertiesDialogBar::ApplyNewPrism(CZoneActor *pZoneActor)
 					std::string file_name(this->m_sArcraster[this->m_nPrismPart]);
 					ds.Set_file_name(file_name);
 					oss << ds << std::endl;
-					////oss << "ARCRASTER " << " MAP " << this->m_sArcraster[this->m_nPrismPart] << std::endl;
 				}
 			}
 			else if (this->m_nDataSourceType == Data_source::SHAPE)
@@ -3290,6 +3292,7 @@ void CBoxPropertiesDialogBar::ApplyNewPrism(CZoneActor *pZoneActor)
 				{
 					Data_source ds;
 					ds.Set_source_type(Data_source::SHAPE);
+					ds.Set_user_source_type(Data_source::SHAPE);
 
 					PHAST_Transform::COORDINATE_SYSTEM c = PHAST_Transform::MAP;
 					ds.Set_coordinate_system(c);
@@ -3298,18 +3301,24 @@ void CBoxPropertiesDialogBar::ApplyNewPrism(CZoneActor *pZoneActor)
 					std::string file_name(this->m_sShapefile[this->m_nPrismPart]);
 					ds.Set_file_name(file_name);
 					oss << ds << std::endl;
-					////oss << "SHAPE" << " MAP " << this->m_sShapefile[this->m_nPrismPart] << std::endl;
 				}
 				else
 				{
-					const char* coor_name[] = {" MAP ", " GRID ", " NONE "};
+					Data_source ds;
+					ds.Set_source_type(Data_source::SHAPE);
+					ds.Set_user_source_type(Data_source::SHAPE);
+
 					PHAST_Transform::COORDINATE_SYSTEM c = PHAST_Transform::MAP;
-					oss << "SHAPE" << coor_name[c] << this->m_sShapefile[this->m_nPrismPart];
+					ds.Set_coordinate_system(c);
+					ds.Set_user_coordinate_system(c);
+
+					std::string file_name(this->m_sShapefile[this->m_nPrismPart]);
+					ds.Set_file_name(file_name);
 					if (this->m_nShapeAttribute[this->m_nPrismPart] != -1)
 					{
-						oss << " " << this->m_nShapeAttribute[this->m_nPrismPart];
+						ds.Set_attribute(this->m_nShapeAttribute[this->m_nPrismPart]);
 					}
-					oss << std::endl;
+					oss << ds << std::endl;
 				}
 			}
 			else if (this->m_nDataSourceType == Data_source::POINTS)

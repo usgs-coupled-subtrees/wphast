@@ -2641,7 +2641,7 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 					data.polyh,
 					::grid_origin,
 					::grid_angle,
-					NULL
+					data.polyh->Get_description()->c_str()
 					)
 				);
 			pAction->GetZoneActor()->SetData(data);
@@ -2669,7 +2669,7 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 					data.polyh,
 					::grid_origin,
 					::grid_angle,
-					NULL
+					data.polyh->Get_description()->c_str()
 					)
 				);
 			pAction->GetZoneActor()->SetData(data);
@@ -2732,7 +2732,7 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 					it->second->Get_polyh(),
 					::grid_origin,
 					::grid_angle,
-					NULL
+					it->second->Get_polyh()->Get_description()->c_str()
 					)
 				);
 			pAction->GetZoneActor()->SetData(data);
@@ -2768,7 +2768,7 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 					data.polyh,
 					::grid_origin,
 					::grid_angle,
-					NULL
+					data.polyh->Get_description()->c_str()
 					)
 				);
 			pAction->GetZoneActor()->SetData(data);
@@ -2826,7 +2826,7 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 					data.polyh,
 					::grid_origin,
 					::grid_angle,
-					NULL
+					data.polyh->Get_description()->c_str()
 					)
 				);
 			pAction->GetZoneActor()->SetData(data);

@@ -2928,6 +2928,7 @@ herr_t CGlobal::HDFSerializeData_source(bool bStoring, hid_t loc_id, const char*
 {
 	static const char szData_source[] = "Data_source";
 	static const char szType[]        = "type";
+	static const char szUserType[]    = "user_type";
 	static const char szBox[]         = "box";
 	static const char szfile_name[]   = "file_name";
 	static const char szPoints[]      = "Points";
@@ -2967,8 +2968,14 @@ herr_t CGlobal::HDFSerializeData_source(bool bStoring, hid_t loc_id, const char*
 				hid_t sourcetype = CGlobal::HDFCreateDataSourceType();
 				if (sourcetype > 0)
 				{
+					// source_type
 					Data_source::DATA_SOURCE_TYPE nValue = rData_source.Get_source_type();
 					status = CGlobal::HDFSerialize(bStoring, ds_gr_id, szType, sourcetype, 1, &nValue);
+					ASSERT(status >= 0);
+
+					// source_type_user
+					Data_source::DATA_SOURCE_TYPE nUserValue = rData_source.Get_user_source_type();
+					status = CGlobal::HDFSerialize(bStoring, ds_gr_id, szUserType, sourcetype, 1, &nUserValue);
 					ASSERT(status >= 0);
 
 					switch(nValue)
@@ -3075,9 +3082,19 @@ herr_t CGlobal::HDFSerializeData_source(bool bStoring, hid_t loc_id, const char*
 				hid_t sourcetype = CGlobal::HDFCreateDataSourceType();
 				if (sourcetype > 0)
 				{
+					// source_type
 					Data_source::DATA_SOURCE_TYPE nValue;
 					status = CGlobal::HDFSerialize(bStoring, ds_gr_id, szType, sourcetype, 1, &nValue);
 					rData_source.Set_source_type(nValue);
+
+					// source_type_user
+					Data_source::DATA_SOURCE_TYPE nUserValue;
+					status = CGlobal::HDFSerializeSafe(bStoring, ds_gr_id, szUserType, sourcetype, 1, &nUserValue);
+					if (status < 0)
+					{
+						nUserValue = nValue;
+					}
+					rData_source.Set_user_source_type(nUserValue);
 
 					switch(nValue)
 					{

@@ -447,7 +447,9 @@ void CZoneActor::SetDesc(LPCTSTR desc)
 	ASSERT(this->GetPolyhedron() && ::AfxIsValidAddress(this->GetPolyhedron(), sizeof(Polyhedron)));
 	if (desc && ::strlen(desc))
 	{
-		(*this->GetPolyhedron()->Get_description()) = desc;
+		CString d(desc);
+		d.Trim();
+		(*this->GetPolyhedron()->Get_description()) = d;
 	}
 	else
 	{
