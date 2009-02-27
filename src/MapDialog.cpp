@@ -384,6 +384,10 @@ void CMapDialog::DDX_Grid(CDataExchange* pDX)
 		double length[3];
 		for (int i = 0; i < 3; ++i)
 		{
+			IDC_X_NODES_EDIT;
+			IDC_Y_NODES_EDIT;
+			IDC_Z_NODES_EDIT;
+
 			// nodes
 			DDX_Text(pDX, FIRST_NODE_ID + i, nodes[i]);
 			if (nodes[i] < 2)
@@ -391,6 +395,11 @@ void CMapDialog::DDX_Grid(CDataExchange* pDX)
 				::AfxMessageBox("Each direction must have at least two nodes.");
 				pDX->Fail();
 			}
+
+			IDC_EDIT_X;
+			IDC_EDIT_Y;
+			IDC_EDIT_Z;
+
 			// minimums
 			DDX_Text(pDX, IDC_EDIT_X + i, minimum[i]);
 		}
@@ -1002,10 +1011,10 @@ void CMapDialog::OnEnKillfocusEditMoX()
 
 void CMapDialog::OnEnKillfocusEditLength()
 {
-	double dx;
-	if (CGlobal::GetEditValue(this, IDC_EDIT_LENGTH, dx))
+	double dy;
+	if (CGlobal::GetEditValue(this, IDC_EDIT_LENGTH, dy))
 	{
-		this->m_Widget->SetDeltaX(dx);
+		this->m_Widget->SetDeltaY(dy);
 		this->m_RenderWindowInteractor->Render();
 	}
 	else
@@ -1020,10 +1029,10 @@ void CMapDialog::OnEnKillfocusEditLength()
 
 void CMapDialog::OnEnKillfocusEditWidth()
 {
-	double dy;
-	if (CGlobal::GetEditValue(this, IDC_EDIT_WIDTH, dy))
+	double dx;
+	if (CGlobal::GetEditValue(this, IDC_EDIT_WIDTH, dx))
 	{
-		this->m_Widget->SetDeltaY(dy);
+		this->m_Widget->SetDeltaX(dx);
 		this->m_RenderWindowInteractor->Render();
 	}
 	else 
@@ -1067,7 +1076,7 @@ void CMapDialog::UpdateModelOriginAngle(void)const
 void CMapDialog::UpdateLength(void)const
 {
 	static TCHAR buffer[40];
-	double value = this->m_Widget->GetDeltaX();
+	double value = this->m_Widget->GetDeltaY();
 	if (value == 0.0)
 	{
 		_stprintf(buffer, _T("%.*g"), 2, value);
@@ -1082,7 +1091,7 @@ void CMapDialog::UpdateLength(void)const
 void CMapDialog::UpdateWidth(void)const
 {
 	static TCHAR buffer[40];
-	double value = this->m_Widget->GetDeltaY();
+	double value = this->m_Widget->GetDeltaX();
 	if (value == 0.0)
 	{
 		_stprintf(buffer, _T("%.*g"), 2, value);
@@ -1570,13 +1579,13 @@ void CMapDialog::LayoutGridPage(void)
 				<< 	( paneCtrl(IDC_STATIC_GD, VERTICAL, ABSOLUTE_VERT, nDefaultBorder, 10, 10 )
 
 					<< 	( pane(HORIZONTAL, ABSOLUTE_VERT, 0, 0, 0 )
-						<< item( IDC_STATIC_LENGTH, NORESIZE | ALIGN_VCENTER )
-						<< item( IDC_EDIT_LENGTH, NORESIZE )
+						<< item( IDC_STATIC_WIDTH, NORESIZE | ALIGN_VCENTER )
+						<< item( IDC_EDIT_WIDTH, NORESIZE )
 						)
 
 					<< 	( pane(HORIZONTAL, ABSOLUTE_VERT, 0, 0, 0 )
-						<< item( IDC_STATIC_WIDTH, NORESIZE | ALIGN_VCENTER )
-						<< item( IDC_EDIT_WIDTH, NORESIZE )
+						<< item( IDC_STATIC_LENGTH, NORESIZE | ALIGN_VCENTER )
+						<< item( IDC_EDIT_LENGTH, NORESIZE )
 						)
 
 					<< 	( pane(HORIZONTAL, ABSOLUTE_VERT, 0, 0, 0 )

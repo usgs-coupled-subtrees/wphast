@@ -3055,7 +3055,14 @@ void CBoxPropertiesDialogBar::DoDataExchangePrism(CDataExchange *pDX, Data_sourc
 			this->CheckRadioButton(IDC_RADIO_NONE, IDC_RADIO_SHAPE, IDC_RADIO_NONE);
 			break;
 		case Data_source::CONSTANT:
-			this->CheckRadioButton(IDC_RADIO_NONE, IDC_RADIO_SHAPE, IDC_RADIO_CONSTANT);
+			if (pData_source->Get_user_source_type() == Data_source::CONSTANT)
+			{
+				this->CheckRadioButton(IDC_RADIO_NONE, IDC_RADIO_SHAPE, IDC_RADIO_CONSTANT);
+			}
+			else
+			{
+				this->CheckRadioButton(IDC_RADIO_NONE, IDC_RADIO_SHAPE, IDC_RADIO_NONE);
+			}
 			break;
 		case Data_source::ARCRASTER:
 			this->CheckRadioButton(IDC_RADIO_NONE, IDC_RADIO_SHAPE, IDC_RADIO_ARCRASTER);
@@ -3266,9 +3273,15 @@ void CBoxPropertiesDialogBar::ApplyNewPrism(CZoneActor *pZoneActor)
 				{
 					Data_source ds;
 					ds.Set_source_type(Data_source::ARCRASTER);
+
+					PHAST_Transform::COORDINATE_SYSTEM c = PHAST_Transform::MAP;
+					ds.Set_coordinate_system(c);
+					ds.Set_user_coordinate_system(c);
+
 					std::string file_name(this->m_sArcraster[this->m_nPrismPart]);
 					ds.Set_file_name(file_name);
 					oss << ds << std::endl;
+					////oss << "ARCRASTER " << " MAP " << this->m_sArcraster[this->m_nPrismPart] << std::endl;
 				}
 			}
 			else if (this->m_nDataSourceType == Data_source::SHAPE)
@@ -3277,9 +3290,15 @@ void CBoxPropertiesDialogBar::ApplyNewPrism(CZoneActor *pZoneActor)
 				{
 					Data_source ds;
 					ds.Set_source_type(Data_source::SHAPE);
+
+					PHAST_Transform::COORDINATE_SYSTEM c = PHAST_Transform::MAP;
+					ds.Set_coordinate_system(c);
+					ds.Set_user_coordinate_system(c);
+
 					std::string file_name(this->m_sShapefile[this->m_nPrismPart]);
 					ds.Set_file_name(file_name);
 					oss << ds << std::endl;
+					////oss << "SHAPE" << " MAP " << this->m_sShapefile[this->m_nPrismPart] << std::endl;
 				}
 				else
 				{
@@ -3316,9 +3335,6 @@ void CBoxPropertiesDialogBar::ApplyNewPrism(CZoneActor *pZoneActor)
 				{
 					pts.push_back(Point(cit->c[0], cit->c[1], cit->c[2], cit->c[2]));
 				}
-// COMMENT: {11/20/2008 2:35:23 PM}				//{{
-// COMMENT: {11/20/2008 2:35:23 PM}				ds.Set_original_points(pts);
-// COMMENT: {11/20/2008 2:35:23 PM}				//}}
 				ds.Tidy(this->m_nPrismPart != CBoxPropertiesDialogBar::PRISM_PERIMETER);
 				oss << ds << std::endl;
 			}

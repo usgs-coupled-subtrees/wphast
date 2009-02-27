@@ -1280,6 +1280,13 @@ vtkPropCollection* CWPhastDoc::GetRemovedPropCollection() const
 
 BOOL CWPhastDoc::OnOpenDocument(LPCTSTR lpszPathName)
 {
+	// save and restore current directory
+	CSaveCurrentDirectory save(lpszPathName);
+
+	char curdir[MAX_PATH];
+	::GetCurrentDirectory(MAX_PATH, curdir);
+	TRACE("CWPhastDoc::OnOpenDocument(%s) GetCurrentDirectory = %s\n", lpszPathName, curdir);
+
 	BOOL bOk = CDocument::OnOpenDocument(lpszPathName);
 	this->PrismPathsRelativeToAbsolute(lpszPathName);
 	return bOk;
@@ -2114,6 +2121,7 @@ void CWPhastDoc::PrismPathsRelativeToAbsolute(LPCTSTR lpszPathName)
 	collections.push_back(this->GetPropAssemblyMedia()->GetParts());
 	collections.push_back(this->GetPropAssemblyBC()->GetParts());
 	collections.push_back(this->GetPropAssemblyIC()->GetParts());
+	collections.push_back(this->GetPropAssemblyZoneFlowRates()->GetParts());
 
 	std::list<vtkPropCollection*>::iterator iter = collections.begin();
 	for (; iter != collections.end(); ++iter)
@@ -2162,6 +2170,7 @@ void CWPhastDoc::PrismPathsAbsoluteToRelative(LPCTSTR lpszPathName)
 	collections.push_back(this->GetPropAssemblyMedia()->GetParts());
 	collections.push_back(this->GetPropAssemblyBC()->GetParts());
 	collections.push_back(this->GetPropAssemblyIC()->GetParts());
+	collections.push_back(this->GetPropAssemblyZoneFlowRates()->GetParts());
 
 	std::list<vtkPropCollection*>::iterator iter = collections.begin();
 	for (; iter != collections.end(); ++iter)
@@ -2204,7 +2213,7 @@ void CWPhastDoc::PrismPathsAbsoluteToRelative(LPCTSTR lpszPathName)
 
 std::string CWPhastDoc::GetRelativePath(LPCTSTR lpszPathName, const std::string src_path)const
 {
-	char szOut[MAX_PATH] = "";
+	TCHAR szOut[MAX_PATH] = "";
 	if (::PathIsSameRoot(lpszPathName, src_path.c_str()))
 	{
 		VERIFY(::PathRelativePathTo(szOut, lpszPathName, FILE_ATTRIBUTE_NORMAL, src_path.c_str(), FILE_ATTRIBUTE_NORMAL));
@@ -2217,21 +2226,25 @@ std::string CWPhastDoc::GetAbsolutePath(LPCTSTR lpszPathName, const std::string 
 {
 	if (::PathIsRelative(relative_path.c_str()))
 	{
-		char szOut[MAX_PATH];
-
-		TCHAR szDrive[_MAX_DRIVE];
-		TCHAR szDir[_MAX_DIR];
-		TCHAR szFName[_MAX_FNAME];
-		TCHAR szExt[_MAX_EXT];
-		::_tsplitpath_s(lpszPathName, szDrive, _MAX_DRIVE, szDir, _MAX_DIR, szFName, _MAX_FNAME, szExt, _MAX_EXT);
-
-		TCHAR szDirectory[_MAX_DIR];
-		::_tmakepath_s(szDirectory, _MAX_DIR, szDrive, szDir, NULL, NULL);
-
-		CString s(szDirectory);
-		s.Append(relative_path.c_str());
-
-		VERIFY(::PathCanonicalize(szOut, s));
+		TCHAR szPath[MAX_PATH];
+		TCHAR szOut[MAX_PATH];
+		if (::PathIsFileSpec(lpszPathName))
+		{
+			VERIFY(::GetCurrentDirectory(MAX_PATH, szPath));
+			VERIFY(::PathAddBackslash(szPath));
+		}
+		else
+		{
+			TCHAR szDrive[_MAX_DRIVE];
+			TCHAR szDir[_MAX_DIR];
+			TCHAR szFName[_MAX_FNAME];
+			TCHAR szExt[_MAX_EXT];
+			VERIFY(::_tsplitpath_s(lpszPathName, szDrive, _MAX_DRIVE, szDir, _MAX_DIR, szFName, _MAX_FNAME, szExt, _MAX_EXT) == 0);
+			VERIFY(::_tmakepath_s(szPath, _MAX_DIR, szDrive, szDir, NULL, NULL) == 0);
+			ASSERT(::strlen(szPath));
+		}
+		VERIFY(::PathAppend(szPath, relative_path.c_str()));
+		VERIFY(::PathCanonicalize(szOut, szPath));
 		return std::string(szOut);
 	}
 	return relative_path;
@@ -6033,11 +6046,12 @@ void CWPhastDoc::OnToolsNewPrism()
 			{
 				// use an empty phastinput in case of errors
 				//
+
 				std::istringstream emptyiss;
 				CPhastInput* pInput = CPhastInput::New(emptyiss, "OnToolsNewPrism", false);
 
 				std::ostringstream oss;
-				oss << "-perimeter SHAPE " << dlg.m_strShapefile;
+				oss << "-perimeter SHAPE map " << dlg.m_strShapefile;
 				std::istringstream iss(oss.str());
 
 				Prism *p = 0;
@@ -6047,6 +6061,9 @@ void CWPhastDoc::OnToolsNewPrism()
 					p = new Prism();
 					if (p && p->Read(iss))
 					{
+						//{{
+						this->GetDefaultZone(::domain);
+						//}}
 						p->Tidy();
 					}
 					if (pInput->GetErrorCount() != 0)

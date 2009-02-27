@@ -998,8 +998,9 @@ void CZoneActor::Serialize(bool bStoring, hid_t loc_id, const CWPhastDoc* pWPhas
 				this->RemovePart(this->OutlineActor);
 
 				// set up unit transforms
+				// TODO need to test if file exists ???
 				prism->Tidy();  // reqd to set units for datasources(shape)
-				this->SetUnits(pWPhastDoc->GetUnits());
+				this->SetUnits(pWPhastDoc->GetUnits(), false);
 
 				// open PolyData group
 				//
@@ -1977,6 +1978,15 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, do
 
 			Data_source::DATA_SOURCE_TYPE top_type = prism->top.Get_source_type();
 			Data_source::DATA_SOURCE_TYPE bot_type = prism->bottom.Get_source_type();
+
+			if (top_type == Data_source::CONSTANT)
+			{
+				top_type = prism->top.Get_user_source_type();
+			}
+			if (bot_type == Data_source::CONSTANT)
+			{
+				bot_type = prism->bottom.Get_user_source_type();
+			}
 
 			if ((top_type == Data_source::CONSTANT || top_type == Data_source::NONE)
 				&&

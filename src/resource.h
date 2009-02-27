@@ -515,6 +515,7 @@
 #define IDC_STATIC_XY                   1149
 #define IDC_STATIC_MO_GB                1150
 #define IDC_STATIC_LENGTH               1151
+#define IDC_STATIC_WIDTH_XX             1151
 #define IDC_STATIC_WIDTH                1152
 #define IDC_STATIC_GD                   1153
 #define IDC_STATIC_DEPTH                1154
