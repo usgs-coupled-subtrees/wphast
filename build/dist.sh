@@ -151,7 +151,7 @@ echo "Exporting revision $REVISION of WPHAST into sandbox..."
 
 (cd "$DIST_SANDBOX" && \
  	${SVN:-svn} export -q $EXTRA_EXPORT_OPTIONS --ignore-externals -r "$REVISION" \
-	     "http://internalbrr.cr.usgs.gov/svn_GW/phastpp/trunk/srcinput" \
+	     "http://internalbrr.cr.usgs.gov/svn_GW/phastpp/trunk/src/phastinput" \
 	     "$DISTNAME/src/srcinput")
 
 (cd "$DIST_SANDBOX" && \
