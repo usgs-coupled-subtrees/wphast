@@ -136,14 +136,6 @@
 
 
             <Directory Id="D__examples" Name="examples">
-              <Directory Id="D__decay" Name="decay">
-                <Component Id='C__decay' Guid='C37C0FE8-9FE3-43d3-93D1-578923AB9285' DiskId="1">
-                  <File Id="F__decay.chem.dat"  Name="DECAYC_1.DAT" LongName="decay.chem.dat" src="phast\examples\decay\decay.chem.dat" />
-                  <File Id="F__decay.trans.dat" Name="DECAYT_1.DAT" LongName="decay.trans.dat" src="phast\examples\decay\decay.trans.dat" />
-                  <File Id="F__decay.wphast"    Name="DECAY_1.WPH" LongName="decay.wphast" src="phast\examples\decay\decay.wphast" />
-                  <File Id="F__phast.dat.decay" Name="phast.dat" src="phast\examples\decay\phast.dat" />
-                </Component>
-              </Directory>
               <Directory Id="D__diffusion1d" Name="diffus1d" LongName="diffusion1d">
                 <Component Id='C__diffusion1d' Guid='4BE2D5BF-DBB7-4484-BD75-6D191B0F35DC' DiskId="1">
                   <File Id="F__diffusion1d.chem.dat" Name="DIFFUS_3.DAT" LongName="diffusion1d.chem.dat" Source="phast\examples\diffusion1d\diffusion1d.chem.dat" />
@@ -200,15 +192,6 @@
                   <File Id="F__phast.dat.ex4" Name="phast.dat" src="phast\examples\ex4\phast.dat" />
                 </Component>
               </Directory>
-              <Directory Id="D__free" Name="free">
-                <Component Id="C__free" Guid='D075DFAD-E9A5-4a88-BD6D-3DBFB1BC137C' DiskId="1">
-                  <File Id="F__free.chem.dat"  Name="FREECH_1.DAT" LongName="free.chem.dat" src="phast\examples\free\free.chem.dat" />
-                  <File Id="F__free.head.dat"  Name="FREEHE_1.DAT" LongName="free.head.dat" src="phast\examples\free\free.head.dat" />
-                  <File Id="F__free.trans.dat" Name="FREETR_1.DAT" LongName="free.trans.dat" src="phast\examples\free\free.trans.dat" />
-                  <File Id="F__free.wphast"    Name="FREE_1.WPH" LongName="free.wphast" src="phast\examples\free\free.wphast" />
-                  <File Id="F__phast.dat.free" Name="phast.dat" src="phast\examples\free\phast.dat" />
-                </Component>
-              </Directory>
               <Directory Id="D__kindred4.4" Name="kindred4.4">
                 <Component Id="C__kindred4.4" Guid='3BEF4DD7-F272-4d7e-9B42-A64C56FA802D' DiskId="1">
                   <File Id="F__kindred4.4.chem.dat"  Name="KINDRE_1.DAT" LongName="kindred4.4.chem.dat" src="phast\examples\kindred4.4\kindred4.4.chem.dat" />
@@ -249,28 +232,6 @@
                   <File Id="F__linear_ic.trans.dat" Name="LINEAR_2.DAT" LongName="linear_ic.trans.dat" src="phast\examples\linear_ic\linear_ic.trans.dat" />
                   <File Id="F__linear_ic.wphast"    Name="LINEAR_1.WPH" LongName="linear_ic.wphast" src="phast\examples\linear_ic\linear_ic.wphast" />
                   <File Id="F__phast.dat.linear_ic" Name="phast.dat" src="phast\examples\linear_ic\phast.dat" />
-                </Component>
-              </Directory>
-              <Directory Id="D__mass_balance" Name="notch">
-                <Component Id='C__mass_balance' Guid='55392F33-2B91-4159-8850-D3E73946D89E' DiskId="1">
-                  <File Id="F__mass_balance.chem.dat" Name="MASS_B_2.DAT" LongName="mass_balance.chem.dat" Source="phast\examples\mass_balance\mass_balance.chem.dat" />
-                  <File Id="F__mass_balance.trans.dat" Name="MASS_B_1.DAT" LongName="mass_balance.trans.dat" Source="phast\examples\mass_balance\mass_balance.trans.dat" />
-                  <File Id="F__mass_balance.wphast" Name="MASS_B_1.WPH" LongName="mass_balance.wphast" Source="phast\examples\mass_balance\mass_balance.wphast" />
-                  <File Id="F__phast.dat.mass_balance" Name="phast.dat" Source="phast\examples\mass_balance\phast.dat" />
-                </Component>
-              </Directory>
-              <Directory Id="D__notch" Name="notch">
-                <Component Id='C__notch' Guid='2CA76C8C-3982-4d44-B0AE-EEC5158AE970' DiskId="1">
-                  <File Id="F__notch.trans.dat" Name="NOTCHT_1.DAT" LongName="notch.trans.dat" Source="phast\examples\notch\notch.trans.dat" />
-                  <File Id="F__notch.wphast" Name="NOTCH_1.WPH" LongName="notch.wphast" Source="phast\examples\notch\notch.wphast" />
-                </Component>
-              </Directory>
-              <Directory Id="D__print_check_ss" Name="print_ch" LongName="print_check_ss">
-                <Component Id='C__print_check_ss' Guid='2BC9400E-07AB-4dce-A3B1-F89373B79608' DiskId="1">
-                  <File Id="F__phast.dat.print_check_ss" Name="phast.dat" Source="phast\examples\print_check_ss\phast.dat" />
-                  <File Id="F__print_check_ss.chem.dat" Name="PRINT__1.DAT" LongName="print_check_ss.chem.dat" Source="phast\examples\print_check_ss\print_check_ss.chem.dat" />
-                  <File Id="F__print_check_ss.trans.dat" Name="PRINT__2.DAT" LongName="print_check_ss.trans.dat" Source="phast\examples\print_check_ss\print_check_ss.trans.dat" />
-                  <File Id="F__print_check_ss.wphast" Name="PRINT__1.WPH" LongName="print_check_ss.wphast" Source="phast\examples\print_check_ss\print_check_ss.wphast" />
                 </Component>
               </Directory>
               <Directory Id="D__phrqex11" Name="phrqex11">
