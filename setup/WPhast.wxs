@@ -328,6 +328,7 @@
         <ComponentRef Id='C__linear_bc' />
         <ComponentRef Id='C__linear_ic' />
         <ComponentRef Id='C__phrqex11' />
+        <ComponentRef Id='C__simple' />
         <ComponentRef Id='C__radial' />
         <ComponentRef Id='C__river' />
         <ComponentRef Id='C__unconf' />
