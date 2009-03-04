@@ -314,7 +314,6 @@
       </Feature>
 
       <Feature Id='F__Examples' Title='Examples' Description='Example input files' TypicalDefault='install' Level='1' AllowAdvertise='no'>
-        <ComponentRef Id='C__decay' />
         <ComponentRef Id='C__diffusion1d' />
         <ComponentRef Id='C__diffusion2d' />
         <ComponentRef Id='C__disp2d' />
@@ -322,20 +321,15 @@
         <ComponentRef Id='C__ex2' />
         <ComponentRef Id='C__ex3' />
         <ComponentRef Id='C__ex4' />
-        <ComponentRef Id='C__free' />
         <ComponentRef Id='C__kindred4.4' />
         <ComponentRef Id='C__leaky' />
         <ComponentRef Id='C__leakyx' />
         <ComponentRef Id='C__leakyz' />
         <ComponentRef Id='C__linear_bc' />
         <ComponentRef Id='C__linear_ic' />
-        <ComponentRef Id='C__mass_balance' />
-        <ComponentRef Id='C__notch' />
         <ComponentRef Id='C__phrqex11' />
-        <ComponentRef Id='C__print_check_ss' />
         <ComponentRef Id='C__radial' />
         <ComponentRef Id='C__river' />
-        <ComponentRef Id='C__simple' />
         <ComponentRef Id='C__unconf' />
         <ComponentRef Id='C__well' />
       </Feature>
