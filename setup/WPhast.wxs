@@ -293,6 +293,7 @@
                   <File Id="F__phast.dat.phrqex11" Name="phast.dat" src="phast\examples\phrqex11\phast.dat" />
                 </Component>
               </Directory>
+<!--
               <Directory Id="D__property" Name="property">
                 <Component Id="C__property" DiskId="1" Guid="0F374CA6-3A79-4009-9CA7-DA64E490D716">
                   <File Id="F__property.chem.dat"  Name="PROPER_1.DAT" LongName="property.chem.dat" Source="phast\examples\property\property.chem.dat" />
@@ -311,6 +312,7 @@
                   <File Id="F__radial.trans.dat" Name="RADIAL_3.DAT" LongName="radial.trans.dat" src="phast\examples\radial\radial.trans.dat" />
                 </Component>
               </Directory>
+-->
               <Directory Id="D__river" Name="river">
                 <Component Id="C__river" Guid='C5571CC0-10C5-4482-8C0A-9ABFB3B14CC8' DiskId="1">
                   <File Id="F__river.trans.dat" Name="RIVERT_1.DAT" LongName="river.trans.dat" src="phast\examples\river\river.trans.dat" />
@@ -411,8 +413,10 @@
         <ComponentRef Id='C__linear_bc' />
         <ComponentRef Id='C__linear_ic' />
         <ComponentRef Id='C__phrqex11' />
+<?ifdef NOT_IMPORTABLE ?>
         <ComponentRef Id='C__property' />
         <ComponentRef Id='C__radial' />
+<?endif?>
         <ComponentRef Id='C__river' />
         <ComponentRef Id='C__shell' />
         <ComponentRef Id='C__simple' />

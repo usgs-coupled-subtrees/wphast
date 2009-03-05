@@ -72,7 +72,6 @@ WPHAST_FILES=\
 	$(EXAMPLES)/linear_bc/linear_bc.wphast\
 	$(EXAMPLES)/linear_ic/linear_ic.wphast\
 	$(EXAMPLES)/phrqex11/phrqex11.wphast\
-	$(EXAMPLES)/property/property.wphast\
 	$(EXAMPLES)/river/river.wphast\
 	$(EXAMPLES)/shell/shell.wphast\
 	$(EXAMPLES)/simple/simple.wphast\
@@ -81,6 +80,7 @@ WPHAST_FILES=\
 	$(EXAMPLES)/zf/zf.wphast
 	
 ###	$(EXAMPLES)/radial/radial.wphast\
+###	$(EXAMPLES)/property/property.wphast\
 	
 VTK_DLLS=\
 	$(VTK_DLL_DIR)/vtkCommon.dll\
