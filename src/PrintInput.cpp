@@ -28,7 +28,7 @@ CPrintInput::CPrintInput(void)
 	force_chem = FALSE;
 	hdf_chem = TRUE;
 	hdf_head = TRUE;
-	hdf_media = FALSE;
+	hdf_media = TRUE;
 	hdf_ss_vel = TRUE;
 	hdf_ss_vel_defined = FALSE;
 	head = TRUE;
