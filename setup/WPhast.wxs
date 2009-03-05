@@ -321,10 +321,10 @@
               </Directory>
               <Directory Id="D__shell" Name="shell">
                 <Component Id="C__shell" DiskId="1" Guid="6C697232-25EA-4b34-A755-C5E8F002CEB4">
-                  <File Id="FF__phast.dat.shell" Name="phast.dat" Source="phast\examples\shell\phast.dat" />
-                  <File Id="FF__shell.chem.dat"  Name="SHELLC_1.DAT" LongName="shell.chem.dat" Source="phast\examples\shell\shell.chem.dat" />
-                  <File Id="FF__shell.trans.dat" Name="SHELLT_1.DAT" LongName="shell.trans.dat" Source="phast\examples\shell\shell.trans.dat" />
-                  <File Id="FF__shell.wphast"    Name="SHELL_1.WPH" LongName="shell.wphast" Source="phast\examples\shell\shell.wphast" />
+                  <File Id="F__phast.dat.shell" Name="phast.dat" Source="phast\examples\shell\phast.dat" />
+                  <File Id="F__shell.chem.dat"  Name="SHELLC_1.DAT" LongName="shell.chem.dat" Source="phast\examples\shell\shell.chem.dat" />
+                  <File Id="F__shell.trans.dat" Name="SHELLT_1.DAT" LongName="shell.trans.dat" Source="phast\examples\shell\shell.trans.dat" />
+                  <File Id="F__shell.wphast"    Name="SHELL_1.WPH" LongName="shell.wphast" Source="phast\examples\shell\shell.wphast" />
                 </Component>
               </Directory>
               <Directory Id="D__simple" Name="simple">
