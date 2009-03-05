@@ -192,6 +192,51 @@
                   <File Id="F__phast.dat.ex4" Name="phast.dat" src="phast\examples\ex4\phast.dat" />
                 </Component>
               </Directory>
+              <Directory Id="D__ex4restart" Name="EX4RES_1" LongName="ex4restart">
+                <Component Id="C__ex4restart" DiskId="1" Guid="008C17E1-1D3A-4f01-8FEA-80CE0889D21F">
+                  <File Id="F__ex4.head.dat.ex4restart" Name="EX4HEA_1.DAT" LongName="ex4.head.dat" Source="phast\examples\ex4restart\ex4.head.dat" />
+                  <File Id="F__ex4.restart.gz"          Name="EX4RES_1.GZ"  LongName="ex4.restart.gz" Source="phast\examples\ex4restart\ex4.restart.gz" />
+                  <File Id="F__ex4restart.chem.dat"     Name="EX4RES_1.DAT" LongName="ex4restart.chem.dat" Source="phast\examples\ex4restart\ex4restart.chem.dat" />
+                  <File Id="F__ex4restart.head.dat"     Name="EX4RES_2.DAT" LongName="ex4restart.head.dat" Source="phast\examples\ex4restart\ex4restart.head.dat" />
+                  <File Id="F__ex4restart.trans.dat"    Name="EX4RES_3.DAT" LongName="ex4restart.trans.dat" Source="phast\examples\ex4restart\ex4restart.trans.dat" />
+                  <File Id="F__ex4restart.wphast"       Name="EX4RES_1.WPH" LongName="ex4restart.wphast" Source="phast\examples\ex4restart\ex4restart.wphast" />
+                  <File Id="F__phast.dat.ex4restart"    Name="phast.dat" Source="phast\examples\ex4restart\phast.dat" />
+                </Component>
+              </Directory>
+              <Directory Id="D__ex4_ddl" Name="ex4_ddl">
+                <Component Id="C__ex4_ddl" DiskId="1" Guid="2C7979C8-8770-4052-9A1A-F055EFA00BB8">
+                  <File Id="F__ex4_ddl.chem.dat"  Name="EX4_DD_1.DAT" LongName="ex4_ddl.chem.dat" Source="phast\examples\ex4_ddl\ex4_ddl.chem.dat" />
+                  <File Id="F__ex4_ddl.trans.dat" Name="EX4_DD_2.DAT" LongName="ex4_ddl.trans.dat" Source="phast\examples\ex4_ddl\ex4_ddl.trans.dat" />
+                  <File Id="F__ex4_ddl.wphast"    Name="EX4_DD_1.WPH" LongName="ex4_ddl.wphast" Source="phast\examples\ex4_ddl\ex4_ddl.wphast" />
+                  <File Id="F__phast.dat.ex4_ddl" Name="phast.dat" Source="phast\examples\ex4_ddl\phast.dat" />
+                </Component>
+              </Directory>
+              <Directory Id="D__ex4_noedl" Name="EX4_NO_1" LongName="ex4_noedl">
+                <Component Id="C__ex4_noedl" DiskId="1" Guid="FD61D5F0-F709-4a43-B9A2-F35FCF98235D">
+                  <File Id="F__ex4_noedl.chem.dat"  Name="EX4_NO_1.DAT" LongName="ex4_noedl.chem.dat" Source="phast\examples\ex4_noedl\ex4_noedl.chem.dat" />
+                  <File Id="F__ex4_noedl.trans.dat" Name="EX4_NO_2.DAT" LongName="ex4_noedl.trans.dat" Source="phast\examples\ex4_noedl\ex4_noedl.trans.dat" />
+                  <File Id="F__ex4_noedl.wphast"    Name="EX4_NO_1.WPH" LongName="ex4_noedl.wphast" Source="phast\examples\ex4_noedl\ex4_noedl.wphast" />
+                  <File Id="F__phast.dat.ex4_noedl" Name="phast.dat" Source="phast\examples\ex4_noedl\phast.dat" />
+                </Component>
+              </Directory>
+              <Directory Id="D__ex4_start_time" Name="EX4_ST_1" LongName="ex4_start_time">
+                <Component Id="C__ex4_start_time" DiskId="1" Guid="D1559A7A-CB90-4fac-A62D-568B7B63D210">
+                  <File Id="F__ex4_start_time.chem.dat"  Name="EX4_ST_1.DAT" LongName="ex4_start_time.chem.dat" Source="phast\examples\ex4_start_time\ex4_start_time.chem.dat" />
+                  <File Id="F__ex4_start_time.trans.dat" Name="EX4_ST_2.DAT" LongName="ex4_start_time.trans.dat" Source="phast\examples\ex4_start_time\ex4_start_time.trans.dat" />
+                  <File Id="F__ex4_start_time.wphast"    Name="EX4_ST_1.WPH" LongName="ex4_start_time.wphast" Source="phast\examples\ex4_start_time\ex4_start_time.wphast" />
+                  <File Id="F__phast.dat.ex4_start_time" Name="phast.dat" Source="phast\examples\ex4_start_time\phast.dat" />
+                </Component>
+              </Directory>
+              <Directory Id="D__ex4_transient" Name="EX4_TR_1" LongName="ex4_transient">
+                <Component Id="C__ex4_transient" DiskId="1" Guid="46FE6942-C428-4944-A9AF-EB5C8AD54672">
+                  <File Id="F__ex4.head.dat"            Name="EX4HEA_1.DAT" LongName="ex4.head.dat" Source="phast\examples\ex4_transient\ex4.head.dat" />
+                  <File Id="F__ex4_transient.chem.dat"  Name="EX4_TR_1.DAT" LongName="ex4_transient.chem.dat" Source="phast\examples\ex4_transient\ex4_transient.chem.dat" />
+                  <File Id="F__ex4_transient.trans.dat" Name="EX4_TR_2.DAT" LongName="ex4_transient.trans.dat" Source="phast\examples\ex4_transient\ex4_transient.trans.dat" />
+                  <File Id="F__ex4_transient.wphast"    Name="EX4_TR_1.WPH" LongName="ex4_transient.wphast" Source="phast\examples\ex4_transient\ex4_transient.wphast" />
+                  <File Id="F__initial.head.dat"        Name="INITIA_1.DAT" LongName="initial.head.dat" Source="phast\examples\ex4_transient\initial.head.dat" />
+                  <File Id="F__phast.dat.ex4_transient" Name="phast.dat" Source="phast\examples\ex4_transient\phast.dat" />
+                </Component>
+              </Directory>
               <Directory Id="D__kindred4.4" Name="kindred4.4">
                 <Component Id="C__kindred4.4" Guid='3BEF4DD7-F272-4d7e-9B42-A64C56FA802D' DiskId="1">
                   <File Id="F__kindred4.4.chem.dat"  Name="KINDRE_1.DAT" LongName="kindred4.4.chem.dat" src="phast\examples\kindred4.4\kindred4.4.chem.dat" />
@@ -204,6 +249,12 @@
                 <Component Id="C__leaky" Guid='CDCE84F8-00DA-478c-AA8C-16EF30C660E5' DiskId="1">
                   <File Id="F__leaky.trans.dat" Name="LEAKYT_1.DAT" LongName="leaky.trans.dat" src="phast\examples\leaky\leaky.trans.dat" />
                   <File Id="F__leaky.wphast" Name="LEAKY_1.WPH" LongName="leaky.wphast" src="phast\examples\leaky\leaky.wphast" />
+                </Component>
+              </Directory>
+              <Directory Id="D__leakysurface" Name="LEAKYS_1" LongName="leakysurface">
+                <Component Id="C__leakysurface" DiskId="1" Guid="12F8E69E-369B-4f01-A746-291B963FE850">
+                  <File Id="F__leakysurface.trans.dat" Name="LEAKYS_1.DAT" LongName="leakysurface.trans.dat" Source="phast\examples\leakysurface\leakysurface.trans.dat" />
+                  <File Id="F__leakysurface.wphast"    Name="LEAKYS_1.WPH" LongName="leakysurface.wphast" Source="phast\examples\leakysurface\leakysurface.wphast" />
                 </Component>
               </Directory>
               <Directory Id="D__leakyx" Name="leakyx">
@@ -223,7 +274,7 @@
                   <File Id="F__linear_bc.chem.dat"  Name="LINEAR_1.DAT" LongName="linear_bc.chem.dat" src="phast\examples\linear_bc\linear_bc.chem.dat" />
                   <File Id="F__linear_bc.trans.dat" Name="LINEAR_2.DAT" LongName="linear_bc.trans.dat" src="phast\examples\linear_bc\linear_bc.trans.dat" />
                   <File Id="F__linear_bc.wphast"    Name="LINEAR_1.WPH" LongName="linear_bc.wphast" src="phast\examples\linear_bc\linear_bc.wphast" />
-                  <File Id="F__phast.dat"           Name="phast.dat" src="phast\examples\linear_bc\phast.dat" />
+                  <File Id="F__phast.dat.linear_bc" Name="phast.dat" src="phast\examples\linear_bc\phast.dat" />
                 </Component>
               </Directory>
               <Directory Id="D__linear_ic" Name="LINEAR_2" LongName="linear_ic">
@@ -236,10 +287,20 @@
               </Directory>
               <Directory Id="D__phrqex11" Name="phrqex11">
                 <Component Id="C__phrqex11" Guid='3AD6458E-E539-4954-B867-3C31F62D49DD' DiskId="1">
-                  <File Id="F__phast.dat.phrqex11" Name="phast.dat" src="phast\examples\phrqex11\phast.dat" />
                   <File Id="F__phrqex11.chem.dat"  Name="PHRQEX_1.DAT" LongName="phrqex11.chem.dat" src="phast\examples\phrqex11\phrqex11.chem.dat" />
                   <File Id="F__phrqex11.trans.dat" Name="PHRQEX_2.DAT" LongName="phrqex11.trans.dat" src="phast\examples\phrqex11\phrqex11.trans.dat" />
                   <File Id="F__phrqex11.wphast"    Name="PHRQEX_1.WPH" LongName="phrqex11.wphast" src="phast\examples\phrqex11\phrqex11.wphast" />
+                  <File Id="F__phast.dat.phrqex11" Name="phast.dat" src="phast\examples\phrqex11\phast.dat" />
+                </Component>
+              </Directory>
+              <Directory Id="D__property" Name="property">
+                <Component Id="C__property" DiskId="1" Guid="0F374CA6-3A79-4009-9CA7-DA64E490D716">
+                  <File Id="F__property.chem.dat"  Name="PROPER_1.DAT" LongName="property.chem.dat" Source="phast\examples\property\property.chem.dat" />
+                  <File Id="F__property.mix"       Name="property.mix" Source="phast\examples\property\property.mix" />
+                  <File Id="F__property.solns"     Name="PROPER_1.SOL" LongName="property.solns" Source="phast\examples\property\property.solns" />
+                  <File Id="F__property.trans.dat" Name="PROPER_2.DAT" LongName="property.trans.dat" Source="phast\examples\property\property.trans.dat" />
+                  <File Id="F__property.wphast"    Name="PROPER_1.WPH" LongName="property.wphast" Source="phast\examples\property\property.wphast" />
+                  <File Id="F__phast.dat.property" Name="phast.dat" Source="phast\examples\property\phast.dat" />
                 </Component>
               </Directory>
               <Directory Id="D__radial" Name="radial">
@@ -254,6 +315,14 @@
                 <Component Id="C__river" Guid='C5571CC0-10C5-4482-8C0A-9ABFB3B14CC8' DiskId="1">
                   <File Id="F__river.trans.dat" Name="RIVERT_1.DAT" LongName="river.trans.dat" src="phast\examples\river\river.trans.dat" />
                   <File Id="F__river.wphast"    Name="RIVER_1.WPH" LongName="river.wphast" src="phast\examples\river\river.wphast" />
+                </Component>
+              </Directory>
+              <Directory Id="D__shell" Name="shell">
+                <Component Id="C__shell" DiskId="1" Guid="6C697232-25EA-4b34-A755-C5E8F002CEB4">
+                  <File Id="FF__phast.dat.shell" Name="phast.dat" Source="phast\examples\shell\phast.dat" />
+                  <File Id="FF__shell.chem.dat"  Name="SHELLC_1.DAT" LongName="shell.chem.dat" Source="phast\examples\shell\shell.chem.dat" />
+                  <File Id="FF__shell.trans.dat" Name="SHELLT_1.DAT" LongName="shell.trans.dat" Source="phast\examples\shell\shell.trans.dat" />
+                  <File Id="FF__shell.wphast"    Name="SHELL_1.WPH" LongName="shell.wphast" Source="phast\examples\shell\shell.wphast" />
                 </Component>
               </Directory>
               <Directory Id="D__simple" Name="simple">
@@ -275,6 +344,14 @@
                   <File Id="F__phast.dat.well" Name="phast.dat" src="phast\examples\well\phast.dat" />
                   <File Id="F__well.trans.dat" Name="WELLTR_1.DAT" LongName="well.trans.dat" src="phast\examples\well\well.trans.dat" />
                   <File Id="F__well.wphast5"   Name="WELL_1.WPH" LongName="well.wphast" src="phast\examples\well\well.wphast" />
+                </Component>
+              </Directory>
+              <Directory Id="D__zf" Name="zf">
+                <Component Id="C__zf" DiskId="1" Guid="BF2E36AE-DDB4-4afe-81AE-66B36C7B016C">
+                  <File Id="F_phast.dat.zf" Name="phast.dat" Source="phast\examples\zf\phast.dat" />
+                  <File Id="F_zf.chem.dat"  Name="ZFCHEM_1.DAT" LongName="zf.chem.dat" Source="phast\examples\zf\zf.chem.dat" />
+                  <File Id="F_zf.trans.dat" Name="ZFTRAN_1.DAT" LongName="zf.trans.dat" Source="phast\examples\zf\zf.trans.dat" />
+                  <File Id="F_zf.wphast"    Name="ZF84E0_1.WPH" LongName="zf.wphast" Source="phast\examples\zf\zf.wphast" />
                 </Component>
               </Directory>
             </Directory>
@@ -321,18 +398,27 @@
         <ComponentRef Id='C__ex2' />
         <ComponentRef Id='C__ex3' />
         <ComponentRef Id='C__ex4' />
+        <ComponentRef Id='C__ex4restart' />
+        <ComponentRef Id='C__ex4_ddl' />
+        <ComponentRef Id='C__ex4_noedl' />
+        <ComponentRef Id='C__ex4_start_time' />
+        <ComponentRef Id='C__ex4_transient' />
         <ComponentRef Id='C__kindred4.4' />
         <ComponentRef Id='C__leaky' />
+        <ComponentRef Id='C__leakysurface' />
         <ComponentRef Id='C__leakyx' />
         <ComponentRef Id='C__leakyz' />
         <ComponentRef Id='C__linear_bc' />
         <ComponentRef Id='C__linear_ic' />
         <ComponentRef Id='C__phrqex11' />
-        <ComponentRef Id='C__simple' />
+        <ComponentRef Id='C__property' />
         <ComponentRef Id='C__radial' />
         <ComponentRef Id='C__river' />
+        <ComponentRef Id='C__shell' />
+        <ComponentRef Id='C__simple' />
         <ComponentRef Id='C__unconf' />
         <ComponentRef Id='C__well' />
+        <ComponentRef Id='C__zf' />
       </Feature>
 
     </Feature>

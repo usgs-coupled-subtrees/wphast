@@ -52,7 +52,6 @@ BINARIES=\
 EXAMPLES = phast/examples
 	
 WPHAST_FILES=\
-	$(EXAMPLES)/decay/decay.wphast\
 	$(EXAMPLES)/diffusion1d/diffusion1d.wphast\
 	$(EXAMPLES)/diffusion2d/diffusion2d.wphast\
 	$(EXAMPLES)/disp2d/disp2d.wphast\
@@ -60,21 +59,28 @@ WPHAST_FILES=\
 	$(EXAMPLES)/ex2/ex2.wphast\
 	$(EXAMPLES)/ex3/ex3.wphast\
 	$(EXAMPLES)/ex4/ex4.wphast\
-	$(EXAMPLES)/free/free.wphast\
+	$(EXAMPLES)/ex4_ddl/ex4_ddl.wphast\
+	$(EXAMPLES)/ex4_noedl/ex4_noedl.wphast\
+	$(EXAMPLES)/ex4restart/ex4restart.wphast\
+	$(EXAMPLES)/ex4_start_time/ex4_start_time.wphast\
+	$(EXAMPLES)/ex4_transient/ex4_transient.wphast\
 	$(EXAMPLES)/kindred4.4/kindred4.4.wphast\
 	$(EXAMPLES)/leaky/leaky.wphast\
+	$(EXAMPLES)/leakysurface/leakysurface.wphast\
 	$(EXAMPLES)/leakyx/leakyx.wphast\
 	$(EXAMPLES)/leakyz/leakyz.wphast\
 	$(EXAMPLES)/linear_bc/linear_bc.wphast\
 	$(EXAMPLES)/linear_ic/linear_ic.wphast\
-	$(EXAMPLES)/mass_balance/mass_balance.wphast\
-	$(EXAMPLES)/notch/notch.wphast\
 	$(EXAMPLES)/phrqex11/phrqex11.wphast\
-	$(EXAMPLES)/print_check_ss/print_check_ss.wphast\
+	$(EXAMPLES)/property/property.wphast\
 	$(EXAMPLES)/river/river.wphast\
+	$(EXAMPLES)/shell/shell.wphast\
 	$(EXAMPLES)/simple/simple.wphast\
 	$(EXAMPLES)/unconf/unconf.wphast\
-	$(EXAMPLES)/well/well.wphast
+	$(EXAMPLES)/well/well.wphast\
+	$(EXAMPLES)/zf/zf.wphast
+	
+###	$(EXAMPLES)/radial/radial.wphast\
 	
 VTK_DLLS=\
 	$(VTK_DLL_DIR)/vtkCommon.dll\
