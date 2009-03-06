@@ -57,7 +57,7 @@ static UINT indicators[] =
 
 CMainFrame::CMainFrame()
 {
-	// TODO: add member initialization code here
+	// add member initialization code here
 }
 
 CMainFrame::~CMainFrame()
@@ -198,7 +198,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	pDoc->Attach(&this->m_wndDialogBarBoxProperties);
 
 
-	// TODO: Delete these three lines if you don't want the toolbar to be dockable
+	// Delete these three lines if you don't want the toolbar to be dockable
 	m_wndToolBar.EnableDocking(CBRS_ALIGN_ANY);
 	EnableDocking(CBRS_ALIGN_ANY);
 	DockControlBar(&m_wndToolBar);
@@ -240,7 +240,7 @@ BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
 {
 	if( !CFrameWnd::PreCreateWindow(cs) )
 		return FALSE;
-	// TODO: Modify the Window class or styles here by modifying
+	// Modify the Window class or styles here by modifying
 	//  the CREATESTRUCT cs
 
 	return TRUE;

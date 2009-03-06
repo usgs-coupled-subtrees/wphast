@@ -4539,7 +4539,7 @@ void CWPhastDoc::SetVisible(const VARIANT& newVal)
 {
 	AFX_MANAGE_STATE(AfxGetAppModuleState());
 
-	// TODO: Add your property handler code here
+	// Add your property handler code here
 #if defined(_DEBUG)
 	afxDump << (COleVariant)newVal;
 	ASSERT(newVal.vt == VT_BOOL);
@@ -4575,7 +4575,7 @@ VARIANT CWPhastDoc::SaveAs(const VARIANT& FileName)
 		vaResult.boolVal = VARIANT_TRUE;
 	}
 
-	// TODO: Add your dispatch handler code here
+	// Add your dispatch handler code here
 
 	return vaResult;
 }

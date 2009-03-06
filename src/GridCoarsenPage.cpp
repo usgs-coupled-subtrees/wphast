@@ -616,7 +616,7 @@ void CGridCoarsenPage::PostNcDestroy()
 	TRACE("In CGridCoarsenPage::PostNcDestroy\n");
 	this->Document->EndModifyGrid();
 	this->Document->UpdateAllViews(0);
-	// TODO: Add your specialized code here and/or call the base class
+	// Add your specialized code here and/or call the base class
 	CPropertyPage::PostNcDestroy();
 	TRACE("Out CGridCoarsenPage::PostNcDestroy\n");
 }
@@ -647,7 +647,7 @@ BOOL CGridCoarsenPage::OnKillActive()
 	TRACE("In CGridCoarsenPage::OnKillActive\n");
 	this->SetModified(FALSE);
 
-	// TODO: Add your specialized code here and/or call the base class
+	// Add your specialized code here and/or call the base class
 
 	//return CPropertyPage::OnKillActive();
 	BOOL b = CPropertyPage::OnKillActive();

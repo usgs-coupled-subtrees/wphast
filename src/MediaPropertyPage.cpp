@@ -574,7 +574,7 @@ BOOL CMediaPropertyPage::OnInitDialog()
 void CMediaPropertyPage::OnPaint()
 {
 	CPaintDC dc(this); // device context for painting
-	// TODO: Add your message handler code here
+	// Add your message handler code here
 	// Do not call CPropertyPage::OnPaint() for painting messages
 
 	if (this->m_bFirstPaint)

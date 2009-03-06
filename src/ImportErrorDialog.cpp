@@ -44,7 +44,7 @@ BOOL CImportErrorDialog::OnInitDialog()
 	
 
 
-	// TODO:  Add extra initialization here
+	// Add extra initialization here
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
@@ -52,7 +52,7 @@ BOOL CImportErrorDialog::OnInitDialog()
 
 INT_PTR CImportErrorDialog::DoModal()
 {
-	// TODO: Add your specialized code here and/or call the base class
+	// Add your specialized code here and/or call the base class
 	::MessageBeep(MB_ICONEXCLAMATION);
 
 	return CDialog::DoModal();

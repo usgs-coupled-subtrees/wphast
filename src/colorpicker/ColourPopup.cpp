@@ -978,6 +978,6 @@ void CColourPopup::OnCancelMode()
 {
 	CWnd::OnCancelMode();
 
-	// TODO: Add your message handler code here
+	// Add your message handler code here
 	TRACE("CColourPopup::OnCancelMode\n");
 }

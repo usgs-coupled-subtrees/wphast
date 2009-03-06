@@ -134,7 +134,7 @@ BOOL CNewModelIntro::OnInitDialog()
 {
 	CPropertyPage::OnInitDialog();
 
-	// TODO:  Add extra initialization here
+	// Add extra initialization here
 	CWnd* pTitle = this->GetDlgItem(IDC_TITLE);
 
 	CFont font;

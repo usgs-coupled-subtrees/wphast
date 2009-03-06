@@ -45,7 +45,7 @@ BOOL CModelessPropertySheet::OnInitDialog()
 
 	BOOL bResult = CPropertySheet::OnInitDialog();
 
-	// TODO:  Add your specialized code here
+	// Add your specialized code here
 
 	m_bModeless = TRUE;
 	m_nFlags &= ~WF_CONTINUEMODAL;

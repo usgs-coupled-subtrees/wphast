@@ -1700,14 +1700,14 @@ void CPropertyTreeControlBar::OnKeyDown(NMHDR* pNMHDR, LRESULT* pResult)
 
 void CPropertyTreeControlBar::OnLButtonDown(UINT nFlags, CPoint point)
 {
-	// TODO: Add your message handler code here and/or call default
+	// Add your message handler code here and/or call default
 	TRACE("CPropertyTreeControlBar::OnLButtonDown\n");
 	CSizingControlBarCFVS7::OnLButtonDown(nFlags, point);
 }
 
 void CPropertyTreeControlBar::OnContextMenu(CWnd* /*pWnd*/, CPoint /*point*/)
 {
-	// TODO: Add your message handler code here
+	// Add your message handler code here
 	TRACE("CPropertyTreeControlBar::OnContextMenu\n");
 }
 
@@ -2942,7 +2942,7 @@ void CPropertyTreeControlBar::OnEditCut()
 
 void CPropertyTreeControlBar::OnUpdateEditClear(CCmdUI *pCmdUI)
 {
-	// TODO: Add your command update UI handler code here
+	// Add your command update UI handler code here
 	pCmdUI->Enable(TRUE);
 }
 

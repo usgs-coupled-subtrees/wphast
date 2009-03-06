@@ -261,7 +261,7 @@ BOOL CMediaSpreadPropertyPage::OnInitDialog()
 {
 	CPropertyPage::OnInitDialog();
 
-	// TODO:  Add extra initialization here
+	// Add extra initialization here
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
@@ -529,7 +529,7 @@ void CMediaSpreadPropertyPage::OnSelChangedMedia(NMHDR *pNotifyStruct, LRESULT *
 
 BOOL CMediaSpreadPropertyPage::OnSetActive()
 {
-// COMMENT: {4/10/2006 9:40:04 PM}	// TODO: Add your specialized code here and/or call the base class
+// COMMENT: {4/10/2006 9:40:04 PM}	// Add your specialized code here and/or call the base class
 // COMMENT: {4/10/2006 9:40:04 PM}
 // COMMENT: {4/10/2006 9:40:04 PM}	return CPropertyPage::OnSetActive();
 	BOOL bRet = CPropertyPage::OnSetActive();
@@ -551,7 +551,7 @@ BOOL CMediaSpreadPropertyPage::OnSetActive()
 
 BOOL CMediaSpreadPropertyPage::OnKillActive()
 {
-// COMMENT: {4/10/2006 9:41:33 PM}	// TODO: Add your specialized code here and/or call the base class
+// COMMENT: {4/10/2006 9:41:33 PM}	// Add your specialized code here and/or call the base class
 // COMMENT: {4/10/2006 9:41:33 PM}
 // COMMENT: {4/10/2006 9:41:33 PM}	return CPropertyPage::OnKillActive();
 	CPropertySheet* pSheet = static_cast<CPropertySheet*>(this->GetParent());
@@ -565,7 +565,7 @@ BOOL CMediaSpreadPropertyPage::OnKillActive()
 
 LRESULT CMediaSpreadPropertyPage::OnWizardNext()
 {
-// COMMENT: {4/10/2006 9:41:51 PM}	// TODO: Add your specialized code here and/or call the base class
+// COMMENT: {4/10/2006 9:41:51 PM}	// Add your specialized code here and/or call the base class
 // COMMENT: {4/10/2006 9:41:51 PM}
 // COMMENT: {4/10/2006 9:41:51 PM}	return CPropertyPage::OnWizardNext();
 	CPropertySheet* pSheet = static_cast<CPropertySheet*>(this->GetParent());

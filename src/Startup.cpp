@@ -41,7 +41,7 @@ BOOL CStartup::OnInitDialog()
 {
 	BOOL bResult = CPropertySheet::OnInitDialog();
 
-	// TODO:  Add your specialized code here
+	// Add your specialized code here
 	//this->GetTabControl()->ModifyStyle(TCS_HOTTRACK|TCS_MULTILINE, TCS_BUTTONS|TCS_SINGLELINE/*|TCS_FLATBUTTONS*/);
 
 	//SetWindowTheme(this->GetSafeHwnd(), L" ", L" ");

@@ -77,7 +77,7 @@ BOOL CChildPropertyPage::OnInitDialog()
 {
 	CPropertyPage::OnInitDialog();
 
-	// TODO:  Add extra initialization here
+	// Add extra initialization here
 	if (this->GetPageCount() > 0) 
 	{
 		for (int i = 0; i < this->m_arrPages.GetSize(); i++)

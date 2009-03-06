@@ -335,7 +335,7 @@ CWPhastView::~CWPhastView()
 
 BOOL CWPhastView::PreCreateWindow(CREATESTRUCT& cs)
 {
-	// TODO: Modify the Window class or styles here by modifying
+	// Modify the Window class or styles here by modifying
 	//  the CREATESTRUCT cs
 
 	return CView::PreCreateWindow(cs);
@@ -596,7 +596,7 @@ void CWPhastView::OnActivateView(BOOL bActivate, CView* pActivateView, CView* pD
 
 	//}}FIXME
 
-	// TODO: Add your specialized code here and/or call the base class
+	// Add your specialized code here and/or call the base class
 	TRACE("CWPhastView::OnActivateView\n");
 	//{{
 	if (vtkAbstractPropPicker *picker = vtkAbstractPropPicker::SafeDownCast( this->GetRenderWindowInteractor()->GetPicker() )) {
@@ -758,13 +758,13 @@ BOOL CWPhastView::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 
 void CWPhastView::OnUpdateViewFromNx(CCmdUI *pCmdUI)
 {
-	// TODO: Add your command update UI handler code here
+	// Add your command update UI handler code here
 	pCmdUI->Enable(TRUE);
 }
 
 void CWPhastView::OnViewFromNx(void)
 {
-	// TODO: Add your command handler code here
+	// Add your command handler code here
 	vtkCamera *camera = this->m_Renderer->GetActiveCamera();
 	double *pos = camera->GetPosition();
 	double *fp = camera->GetFocalPoint();
@@ -781,13 +781,13 @@ void CWPhastView::OnViewFromNx(void)
 
 void CWPhastView::OnUpdateViewFromPx(CCmdUI *pCmdUI)
 {
-	// TODO: Add your command update UI handler code here
+	// Add your command update UI handler code here
 	pCmdUI->Enable(TRUE);
 }
 
 void CWPhastView::OnViewFromPx(void)
 {
-	// TODO: Add your command handler code here
+	// Add your command handler code here
 	vtkCamera *camera = this->m_Renderer->GetActiveCamera();
 	double *pos = camera->GetPosition();
 	double *fp = camera->GetFocalPoint();
@@ -804,13 +804,13 @@ void CWPhastView::OnViewFromPx(void)
 
 void CWPhastView::OnUpdateViewFromNy(CCmdUI *pCmdUI)
 {
-	// TODO: Add your command update UI handler code here
+	// Add your command update UI handler code here
 	pCmdUI->Enable(TRUE);
 }
 
 void CWPhastView::OnViewFromNy(void)
 {
-	// TODO: Add your command handler code here
+	// Add your command handler code here
 	vtkCamera *camera = this->m_Renderer->GetActiveCamera();
 	double *pos = camera->GetPosition();
 	double *fp = camera->GetFocalPoint();
@@ -1777,7 +1777,7 @@ void CWPhastView::OnEndNewRiver(bool bCancel)
 
 void CWPhastView::OnLButtonDblClk(UINT nFlags, CPoint point)
 {
-	// TODO: Add your message handler code here and/or call default
+	// Add your message handler code here and/or call default
 	::AfxMessageBox("OnLButtonDblClk");
 
 	__super::OnLButtonDblClk(nFlags, point);
@@ -1787,7 +1787,7 @@ void CWPhastView::OnDestroy()
 {
 	__super::OnDestroy();
 
-	// TODO: Add your message handler code here
+	// Add your message handler code here
 }
 
 bool CWPhastView::MovingGridLine()const
@@ -2243,7 +2243,7 @@ void CWPhastView::OnToolsSelectObject()
 
 BOOL CWPhastView::OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo)
 {
-	// TODO: Add your specialized code here and/or call the base class
+	// Add your specialized code here and/or call the base class
 	if (CWPhastDoc* pDoc = this->GetDocument())
 	{
 		if (CPropertyTreeControlBar *pPropertyTreeControlBar = pDoc->GetPropertyTreeControlBar())

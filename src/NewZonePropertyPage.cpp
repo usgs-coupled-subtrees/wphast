@@ -217,7 +217,7 @@ UINT CNewZonePropertyPage::GetType(void)
 
 LRESULT CNewZonePropertyPage::OnWizardNext()
 {
-	// TODO: Add your specialized code here and/or call the base class
+	// Add your specialized code here and/or call the base class
 	CPropertySheet* pSheet = (CPropertySheet*) this->GetParent();
 
 	// 0 : this page        CNewZonePropertyPage
@@ -270,7 +270,7 @@ LRESULT CNewZonePropertyPage::OnWizardNext()
 
 void CNewZonePropertyPage::OnNMDblclkTreeZones(NMHDR *pNMHDR, LRESULT *pResult)
 {
-	// TODO: Add your control notification handler code here
+	// Add your control notification handler code here
 	HTREEITEM hti = this->m_wndTree.GetSelectedItem();
 	if ((hti != NULL) && (hti != this->m_htiBC) && (hti != this->m_htiIC) /* && (hti != this->m_htiFlowRate) */)
 	{	

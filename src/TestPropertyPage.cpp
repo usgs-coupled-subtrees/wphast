@@ -156,7 +156,7 @@ void CTestPropertyPage::OnNMClickTree1(NMHDR *pNMHDR, LRESULT *pResult)
 	}
 
 	//}}
-	// TODO: Add your control notification handler code here
+	// Add your control notification handler code here
 	*pResult = 0;
 }
 
@@ -203,7 +203,7 @@ LRESULT CTestPropertyPage::OnUM_CheckStateChange(WPARAM wParam, LPARAM lParam)
 void CTestPropertyPage::OnTvnKeydownTree1(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	LPNMTVKEYDOWN pTVKeyDown = reinterpret_cast<LPNMTVKEYDOWN>(pNMHDR);
-	// TODO: Add your control notification handler code here
+	// Add your control notification handler code here
 	*pResult = 0;
 }
 

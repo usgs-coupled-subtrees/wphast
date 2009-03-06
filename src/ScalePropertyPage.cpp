@@ -127,14 +127,14 @@ void CScalePropertyPage::OnEnChange()
 
 void CScalePropertyPage::OnOK()
 {
-	// TODO: Add your specialized code here and/or call the base class
+	// Add your specialized code here and/or call the base class
 
 	CPropertyPage::OnOK();
 }
 
 void CScalePropertyPage::OnCancel()
 {
-	// TODO: Add your specialized code here and/or call the base class
+	// Add your specialized code here and/or call the base class
 	if (this->m_pAction)
 	{
 		if (this->m_bModifiedDoc && this->m_pDoc)
@@ -150,21 +150,21 @@ void CScalePropertyPage::OnCancel()
 
 BOOL CScalePropertyPage::OnQueryCancel()
 {
-	// TODO: Add your specialized code here and/or call the base class
+	// Add your specialized code here and/or call the base class
 
 	return CPropertyPage::OnQueryCancel();
 }
 
 void CScalePropertyPage::OnReset()
 {
-	// TODO: Add your specialized code here and/or call the base class
+	// Add your specialized code here and/or call the base class
 
 	CPropertyPage::OnReset();
 }
 
 BOOL CScalePropertyPage::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 {
-	// TODO: Add your specialized code here and/or call the base class
+	// Add your specialized code here and/or call the base class
 	UINT nID = (UINT)wParam;
 	NMHDR* pnmhdr = (NMHDR*)lParam;
 	TRACE("nID = 0x%04X\n", nID);
@@ -179,7 +179,7 @@ BOOL CScalePropertyPage::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult
 
 void CScalePropertyPage::PostNcDestroy()
 {
-	// TODO: Add your specialized code here and/or call the base class
+	// Add your specialized code here and/or call the base class
 	this->m_pAction = 0;
 	CPropertyPage::PostNcDestroy();
 }

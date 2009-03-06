@@ -48,7 +48,7 @@ END_MESSAGE_MAP()
 CWPhastApp::CWPhastApp()
 : m_bShellFileNew(FALSE)
 {
-	// TODO: add construction code here,
+	// add construction code here,
 	// Place all significant initialization in InitInstance
 }
 

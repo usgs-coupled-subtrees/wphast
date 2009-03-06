@@ -35,5 +35,5 @@ END_MESSAGE_MAP()
 
 void CTempPropertyPage::OnBnClickedApply()
 {
-	// TODO: Add your control notification handler code here
+	// Add your control notification handler code here
 }

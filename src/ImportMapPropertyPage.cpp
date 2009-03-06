@@ -132,13 +132,13 @@ END_MESSAGE_MAP()
 
 void CImportMapPropertyPage::OnBnClickedImportYes()
 {
-	// TODO: Add your control notification handler code here
+	// Add your control notification handler code here
 	this->EnableImport(TRUE);
 }
 
 void CImportMapPropertyPage::OnBnClickedImportNo()
 {
-	// TODO: Add your control notification handler code here
+	// Add your control notification handler code here
 	this->EnableImport(FALSE);
 }
 

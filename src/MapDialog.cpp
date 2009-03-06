@@ -1292,7 +1292,7 @@ BOOL CMapDialog::PreTranslateMessage(MSG* pMsg)
 
 BOOL CMapDialog::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 {
-	// TODO: Add your message handler code here and/or call default
+	// Add your message handler code here and/or call default
 
 	if (pWnd->GetSafeHwnd() == this->m_RenderWindow->GetWindowId())
 	{		
@@ -1745,7 +1745,7 @@ void CMapDialog::LayoutPointsPage(void)
 
 BOOL CMapDialog::OnHelpInfo(HELPINFO* pHelpInfo)
 {
-	// TODO: Add your message handler code here and/or call default
+	// Add your message handler code here and/or call default
 
 	return CDialog::OnHelpInfo(pHelpInfo);
 }
@@ -1917,19 +1917,19 @@ void CMapDialog::OnDeltaposSpinXp1(NMHDR *pNMHDR, LRESULT *pResult)
 
 	this->m_Renderer->AddActor(this->m_Point1Actor);
 
-	// TODO: Add your control notification handler code here
+	// Add your control notification handler code here
 	*pResult = 0;
 }
 
 void CMapDialog::OnEnChangeEditXp1()
 {
-	// TODO:  If this is a RICHEDIT control, the control will not
+	// If this is a RICHEDIT control, the control will not
 	// send this notification unless you override the CDialog::OnInitDialog()
 	// function and call CRichEditCtrl().SetEventMask()
 	// with the ENM_CHANGE flag ORed into the mask.
 	TRACE("OnEnChangeEditXp1\n");
 
-	// TODO:  Add your control notification handler code here
+	// Add your control notification handler code here
 }
 
 void CMapDialog::SetState(State state)
@@ -2006,7 +2006,7 @@ void CMapDialog::SetState(State state)
 
 BOOL CMapDialog::OnEraseBkgnd(CDC* pDC)
 {
-	// TODO: Add your message handler code here and/or call default
+	// Add your message handler code here and/or call default
 
 	return CMapDialogBase::OnEraseBkgnd(pDC);
 }
@@ -2020,6 +2020,6 @@ void CMapDialog::OnSize(UINT nType, int cx, int cy)
 {
 	CMapDialogBase::OnSize(nType, cx, cy);
 
-	// TODO: Add your message handler code here
+	// Add your message handler code here
 	this->m_Widget->SizeHandles();
 }

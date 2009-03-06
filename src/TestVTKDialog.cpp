@@ -193,7 +193,7 @@ int CTestVTKDialog::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (ETSLayoutDialog::OnCreate(lpCreateStruct) == -1)
 		return -1;
 
-	// TODO:  Add your specialized creation code here
+	// Add your specialized creation code here
 	if (!this->m_RenderWindow)
 		return -1;
 
@@ -221,7 +221,7 @@ void CTestVTKDialog::OnSize(UINT nType, int cx, int cy)
 // COMMENT: {2/3/2004 8:36:21 PM}
 // COMMENT: {2/3/2004 8:36:21 PM}	HDWP hDWP = ::BeginDeferWindowPos(8);
 // COMMENT: {2/3/2004 8:36:21 PM}
-// COMMENT: {2/3/2004 8:36:21 PM}	// TODO: Add your message handler code here
+// COMMENT: {2/3/2004 8:36:21 PM}	// Add your message handler code here
 // COMMENT: {2/3/2004 8:36:21 PM}	CRect rcClient, rcVTK; // rect
 // COMMENT: {2/3/2004 8:36:21 PM}	this->GetClientRect(&rcClient);
 // COMMENT: {2/3/2004 8:36:21 PM}	ASSERT(rcClient.Width() == cx);
@@ -297,7 +297,7 @@ void CTestVTKDialog::OnSize(UINT nType, int cx, int cy)
 void CTestVTKDialog::OnPaint()
 {
 	CPaintDC dc(this); // device context for painting
-	// TODO: Add your message handler code here
+	// Add your message handler code here
 	// Do not call CDialog::OnPaint() for painting messages
 
 // COMMENT: {2/3/2004 8:44:56 PM}	if ( !this->m_RenderWindowInteractor->GetInitialized() )
@@ -358,7 +358,7 @@ LRESULT CTestVTKDialog::WindowProc(UINT message, WPARAM wParam, LPARAM lParam)
 
 BOOL CTestVTKDialog::PreTranslateMessage(MSG* pMsg)
 {
-	// TODO: Add your specialized code here and/or call the base class
+	// Add your specialized code here and/or call the base class
 // COMMENT: {2/2/2004 4:44:31 PM}	switch (pMsg->message)
 // COMMENT: {2/2/2004 4:44:31 PM}	{
 // COMMENT: {2/2/2004 4:44:31 PM}	//case WM_PAINT: 
@@ -475,7 +475,7 @@ BOOL CTestVTKDialog::OnInitDialog()
 
 
 
-// COMMENT: {2/3/2004 8:41:02 PM}	// TODO:  Add extra initialization here
+// COMMENT: {2/3/2004 8:41:02 PM}	// Add extra initialization here
 // COMMENT: {2/3/2004 8:41:02 PM}	ASSERT(this->m_hWnd);
 // COMMENT: {2/3/2004 8:41:02 PM}
 // COMMENT: {2/3/2004 8:41:02 PM}// COMMENT: {2/3/2004 7:26:20 PM}	this->m_hWndStatusBar = ::CreateStatusWindow(WS_CHILD|WS_VISIBLE, "", this->m_hWnd, 105);

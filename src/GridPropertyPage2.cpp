@@ -861,7 +861,7 @@ void CGridPropertyPage2::OnShowWindow(BOOL bShow, UINT nStatus)
 {
 	CPropertyPage::OnShowWindow(bShow, nStatus);
 
-	// TODO: Add your message handler code here
+	// Add your message handler code here
 	if (bShow)
 	{
 		// reset selection

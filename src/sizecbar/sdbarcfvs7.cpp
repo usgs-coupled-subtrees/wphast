@@ -167,7 +167,7 @@ BOOL CSizingDialogBarCFVS7::SetOccDialogInfo(_AFX_OCC_DIALOG_INFO* pOccDialogInf
 //
 //BOOL CSizingDialogBarCFVS7::PreTranslateMessage(MSG* pMsg)
 //{
-//	// TODO: Add your specialized code here and/or call the base class
+//	// Add your specialized code here and/or call the base class
 //	if (pMsg->message == WM_KEYDOWN) {
 //		TRACE("WM_KEYDOWN\n");
 //	}

@@ -58,7 +58,7 @@ BOOL CMapPropertyPage::OnInitDialog()
 	CMapPropertyPageBase::OnInitDialog();
 // COMMENT: {4/22/2004 3:19:12 PM}	CPropertyPage::OnInitDialog();
 
-	// TODO:  Add extra initialization here
+	// Add extra initialization here
 #if defined(__IS_RESIZABLE__)
 	// Create the root pane
 	CreateRoot( VERTICAL );

@@ -39,7 +39,7 @@ BOOL TestCModGridCtrlExPage::OnInitDialog()
 {
 	CPropertyPage::OnInitDialog();
 
-	// TODO:  Add extra initialization here
+	// Add extra initialization here
 	TRY {
 		this->m_Grid.SetRowCount(10);
 		this->m_Grid.SetColumnCount(5);
