@@ -212,14 +212,16 @@ BOOL CWPhastApp::InitInstance()
 #endif
 	////{{SRC
 	//DebugBreak();
-	if (cmdInfo.m_nShellCommand == CCommandLineInfo::FileNew) {
+	if (cmdInfo.m_nShellCommand == CCommandLineInfo::FileNew)
+	{
 		this->m_bShellFileNew = TRUE;
         if (!AfxGetApp()->OnCmdMsg(ID_FILE_NEW, 0, NULL, NULL))
 			OnFileNew();
 		if (m_pMainWnd == NULL)
 			return FALSE;
 	}
-	else {
+	else
+	{
 	//}}SRC
 		// Dispatch commands specified on the command line.  Will return FALSE if
 		// app was launched with /RegServer, /Register, /Unregserver or /Unregister.
@@ -241,6 +243,11 @@ BOOL CWPhastApp::InitInstance()
 	// The one and only window has been initialized, so show and update it
 	m_pMainWnd->ShowWindow(SW_SHOW);
 	m_pMainWnd->UpdateWindow();
+
+	// force the view to redraw
+	CFrameWnd *pFrame = (CFrameWnd*)::AfxGetApp()->m_pMainWnd;
+	pFrame->GetActiveView()->Invalidate();
+
 	// call DragAcceptFiles only if there's a suffix
 	//  In an SDI app, this should occur after ProcessShellCommand
 	return TRUE;
