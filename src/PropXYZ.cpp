@@ -43,6 +43,9 @@ void CPropXYZ::DoDataExchange(CDataExchange* pDX)
 		DDX_Text(pDX, IDC_EDIT_XYZ, str);
 		std::string s(str);
 		p.data_source->Set_file_name(s);
+		//{{
+		p.data_source->Tidy(false);
+		//}}
 
 		// MAP or GRID
 		int state;
@@ -56,9 +59,6 @@ void CPropXYZ::DoDataExchange(CDataExchange* pDX)
 			p.data_source->Set_user_coordinate_system(PHAST_Transform::GRID);
 		}
 
-		//{{
-		p.data_source->Tidy(false);
-		//}}
 
 		this->prop = p;
 	}
