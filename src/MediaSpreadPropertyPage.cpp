@@ -20,7 +20,7 @@ const TCHAR KZ[]                = _T("Kz");
 const TCHAR POROSITY[]          = _T("Porosity");
 const TCHAR STORAGE[]           = _T("Specific storage");
 const TCHAR ALPHA_LONG[]        = _T("Longitudinal dispersivity");
-const TCHAR ALPHA_HORIZONTAL[]  = _T("Horizonal dispersivity");
+const TCHAR ALPHA_HORIZONTAL[]  = _T("Horizontal dispersivity");
 const TCHAR ALPHA_VERTICAL[]    = _T("Vertical dispersivity");
 
 const TCHAR HEADING_VALUE[]          = _T("Value");

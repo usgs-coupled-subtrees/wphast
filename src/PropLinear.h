@@ -5,23 +5,30 @@
 #include "afxwin.h"
 #include "resource.h"
 
-// CPropConstant dialog
+#include "property.h"
 
-class CPropConstant : public CResizablePage , public TreePropSheet::CWhiteBackgroundProvider
+// CPropLinear dialog
+
+class CPropLinear : public CResizablePage, public TreePropSheet::CWhiteBackgroundProvider
 {
-	DECLARE_DYNAMIC(CPropConstant)
+	DECLARE_DYNAMIC(CPropLinear)
 
 public:
-	CPropConstant();
-	virtual ~CPropConstant();
+	CPropLinear();
+	virtual ~CPropLinear();
+
+	Cproperty GetProperty();
+	void SetProperty(Cproperty p);
 
 // Dialog Data
-	enum { IDD = IDD_PROP_CONSTANT };
+	enum { IDD = IDD_PROP_LINEAR };
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 
 	DECLARE_MESSAGE_MAP()
+
+	Cproperty prop;
 	bool      bSkipUpdateData;
 
 public:
@@ -29,6 +36,5 @@ public:
 	virtual BOOL OnKillActive();
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	CComboBox ComboType;
-	double value;
 	afx_msg void OnCbnSelchangeTypeCombo();
 };

@@ -24,6 +24,7 @@ class Data_source;
 
 class vtkTransform;
 class CWorldTransform;
+class CTreePropSheetExSRC;
 
 // user defined messages
 #define UM_CHECKSTATECHANGE (WM_USER + 100)
@@ -60,6 +61,7 @@ public:
 	// Cproperty
 	static void DDX_Property(CDataExchange* pDX, CCheckTreeCtrl* pTree, HTREEITEM hti, Cproperty* value, Cproperty* fixed, Cproperty* linear);
 	static void DDX_Property(CDataExchange* pDX, int nIDC, int nRow, struct property* pProperty, bool bRequired);
+	static void DDX_Property(CDataExchange* pDX, CTreePropSheetExSRC* pTreeProp, HTREEITEM hti, std::vector<Cproperty*> &props, std::vector<CPropertyPage*> &pages);
 
 	static void EnableFixed(CWnd* pDlgWnd, BOOL bEnable);
 	static void EnableLinearInterpolation(CWnd* pDlgWnd, BOOL bEnable);

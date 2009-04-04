@@ -10,6 +10,8 @@
 #undef EXTERNAL
 #include "enum_fix.h"
 
+#include "PropStruct.h"
+
 #include <iosfwd> // std::ostream
 
 class CGridElt : public grid_elt
@@ -37,6 +39,7 @@ public:
 #endif
 	void Serialize(bool bStoring, hid_t loc_id);
 	void Serialize(CArchive& ar);
+	void Fill(std::vector<CPropStruct>& v)const;
 
 	friend std::ostream& operator<< (std::ostream &os, const CGridElt &a);
 

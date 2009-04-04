@@ -2113,6 +2113,34 @@ void CWPhastDoc::GetUsedZoneFlowRates(std::set<int>& usedNums)const
 	}
 }
 
+// COMMENT: {4/3/2009 10:55:31 PM}#define GET_FULL_PATH(P)
+// COMMENT: {4/3/2009 10:55:31 PM}if (elt.P && elt.P->type == PROP_XYZ)
+// COMMENT: {4/3/2009 10:55:31 PM}{
+// COMMENT: {4/3/2009 10:55:31 PM}	Cproperty p = *elt.P;
+// COMMENT: {4/3/2009 10:55:31 PM}	if (p.data_source)
+// COMMENT: {4/3/2009 10:55:31 PM}	{
+// COMMENT: {4/3/2009 10:55:31 PM}		std::string filename = p.data_source->Get_file_name();
+// COMMENT: {4/3/2009 10:55:31 PM}		if (filename.length() > 0)
+// COMMENT: {4/3/2009 10:55:31 PM}		{
+// COMMENT: {4/3/2009 10:55:31 PM}			p.data_source->Set_file_name(this->GetAbsolutePath(lpszPathName, filename));
+// COMMENT: {4/3/2009 10:55:31 PM}		}
+// COMMENT: {4/3/2009 10:55:31 PM}		(*elt.P) = p;
+// COMMENT: {4/3/2009 10:55:31 PM}	}
+// COMMENT: {4/3/2009 10:55:31 PM}}
+
+#define GET_ABS_PATH_MACRO(P) \
+do { \
+	if (elt.P && elt.P->type == PROP_XYZ) { \
+		if (elt.P->data_source) { \
+			std::string filename = elt.P->data_source->Get_file_name(); \
+			if (filename.length() > 0) { \
+				elt.P->data_source->Set_file_name(this->GetAbsolutePath(lpszPathName, filename)); \
+			} \
+		} \
+	} \
+} while(0)
+
+
 void CWPhastDoc::PrismPathsRelativeToAbsolute(LPCTSTR lpszPathName)
 {
 	CZoneActor *pZoneActor;
@@ -2134,6 +2162,23 @@ void CWPhastDoc::PrismPathsRelativeToAbsolute(LPCTSTR lpszPathName)
 			{
 				if ((pZoneActor = CZoneActor::SafeDownCast(pProp)))
 				{
+					//{{TODO
+					if (CMediaZoneActor *pMediaZoneActor = CMediaZoneActor::SafeDownCast(pZoneActor))
+					{
+						CGridElt elt = pMediaZoneActor->GetData();
+						GET_ABS_PATH_MACRO(active);
+						GET_ABS_PATH_MACRO(porosity);
+						GET_ABS_PATH_MACRO(kx);
+						GET_ABS_PATH_MACRO(ky);
+						GET_ABS_PATH_MACRO(kz);
+						GET_ABS_PATH_MACRO(storage);
+						GET_ABS_PATH_MACRO(alpha_long);
+						GET_ABS_PATH_MACRO(alpha_trans);
+						GET_ABS_PATH_MACRO(alpha_horizontal);
+						GET_ABS_PATH_MACRO(alpha_vertical);
+						pMediaZoneActor->SetData(elt);
+					}
+					//}}TODO
 					if (pZoneActor->GetPolyhedronType() == Polyhedron::PRISM)
 					{
 						if (Prism *p = dynamic_cast<Prism*>(pZoneActor->GetPolyhedron()))
@@ -2162,6 +2207,18 @@ void CWPhastDoc::PrismPathsRelativeToAbsolute(LPCTSTR lpszPathName)
 	}
 }
 
+#define GET_REL_PATH_MACRO(P) \
+do { \
+	if (elt.P && elt.P->type == PROP_XYZ) { \
+		if (elt.P->data_source) { \
+			std::string filename = elt.P->data_source->Get_file_name(); \
+			if (filename.length() > 0) { \
+				elt.P->data_source->Set_file_name(this->GetRelativePath(lpszPathName, filename)); \
+			} \
+		} \
+	} \
+} while(0)
+
 void CWPhastDoc::PrismPathsAbsoluteToRelative(LPCTSTR lpszPathName)
 {
 	CZoneActor *pZoneActor;
@@ -2183,6 +2240,24 @@ void CWPhastDoc::PrismPathsAbsoluteToRelative(LPCTSTR lpszPathName)
 			{
 				if ((pZoneActor = CZoneActor::SafeDownCast(pProp)))
 				{
+					//{{TODO
+					if (CMediaZoneActor *pMediaZoneActor = CMediaZoneActor::SafeDownCast(pZoneActor))
+					{
+						CGridElt elt = pMediaZoneActor->GetData();
+						GET_REL_PATH_MACRO(active);
+						GET_REL_PATH_MACRO(porosity);
+						GET_REL_PATH_MACRO(kx);
+						GET_REL_PATH_MACRO(ky);
+						GET_REL_PATH_MACRO(kz);
+						GET_REL_PATH_MACRO(storage);
+						GET_REL_PATH_MACRO(alpha_long);
+						GET_REL_PATH_MACRO(alpha_trans);
+						GET_REL_PATH_MACRO(alpha_horizontal);
+						GET_REL_PATH_MACRO(alpha_vertical);
+						pMediaZoneActor->SetData(elt);
+					}
+					//}}TODO
+
 					if (pZoneActor->GetPolyhedronType() == Polyhedron::PRISM)
 					{
 						if (Prism *p = dynamic_cast<Prism*>(pZoneActor->GetPolyhedron()))

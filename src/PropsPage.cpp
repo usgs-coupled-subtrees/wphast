@@ -11,6 +11,16 @@
 
 // CPropsPage dialog
 
+const TCHAR ACTIVE[]            = _T("Active");
+const TCHAR KX[]                = _T("Kx");
+const TCHAR KY[]                = _T("Ky");
+const TCHAR KZ[]                = _T("Kz");
+const TCHAR POROSITY[]          = _T("Porosity");
+const TCHAR STORAGE[]           = _T("Specific storage");
+const TCHAR ALPHA_LONG[]        = _T("Longitudinal dispersivity");
+const TCHAR ALPHA_HORIZONTAL[]  = _T("Horizontal dispersivity");
+const TCHAR ALPHA_VERTICAL[]    = _T("Vertical dispersivity");
+
 IMPLEMENT_DYNAMIC(CPropsPage, CResizablePage)
 
 CPropsPage::CPropsPage()
@@ -60,25 +70,21 @@ void CPropsPage::DoDataExchange(CDataExchange* pDX)
 
 	if (pTree && pTree->GetCount() == 0)
 	{
-		HTREEITEM hti;
-
-		// Active
-		hti = pTree->InsertItem(_T("Active"), TVI_ROOT, TVI_LAST);
-
-		// Kx
-		hti = pTree->InsertItem(_T("Kx"), TVI_ROOT, TVI_LAST);
-
-		// Ky
-		hti = pTree->InsertItem(_T("Ky"), TVI_ROOT, TVI_LAST);
-
-		// Kz
-		hti = pTree->InsertItem(_T("Kz"), TVI_ROOT, TVI_LAST);
+		htiACTIVE           = pTree->InsertItem(ACTIVE,           TVI_ROOT, TVI_LAST);
+		htiKX               = pTree->InsertItem(KX,               TVI_ROOT, TVI_LAST);
+		htiKY               = pTree->InsertItem(KY,               TVI_ROOT, TVI_LAST);
+		htiKZ               = pTree->InsertItem(KZ,               TVI_ROOT, TVI_LAST);
+		htiPOROSITY         = pTree->InsertItem(POROSITY,         TVI_ROOT, TVI_LAST);
+		htiSTORAGE          = pTree->InsertItem(STORAGE,          TVI_ROOT, TVI_LAST);
+		htiALPHA_LONG       = pTree->InsertItem(ALPHA_LONG,       TVI_ROOT, TVI_LAST);
+		htiALPHA_HORIZONTAL = pTree->InsertItem(ALPHA_HORIZONTAL, TVI_ROOT, TVI_LAST);
+		htiALPHA_VERTICAL   = pTree->InsertItem(ALPHA_VERTICAL,   TVI_ROOT, TVI_LAST);
 
 		// wrap richedit to window
 		this->RichEditCtrl.SetTargetDevice(NULL, 0);
 		this->RichEditCtrl.SetWindowText(this->m_sActiveRTF.c_str());
 
-		this->ItemDDX = pTree->GetFirstVisibleItem();
+		this->ItemDDX = htiACTIVE;
 		pTree->SelectItem(this->ItemDDX);
 	}
 
@@ -89,14 +95,19 @@ void CPropsPage::DoDataExchange(CDataExchange* pDX)
 		std::vector<CPropertyPage*> pages;
 		pages.push_back(&this->PropNone);
 		pages.push_back(&this->PropConstant);
+		pages.push_back(&this->PropLinear);
+		pages.push_back(&this->PropPoints);
+		pages.push_back(&this->PropXYZ);		
 
 		// Active
-		if (strItem.Compare(_T("Active")) == 0)
+		if (strItem.Compare(ACTIVE) == 0)
 		{
 			std::vector<Cproperty*> props;
 			props.push_back(static_cast<Cproperty*>(this->GridElt.active));
 			props.push_back(static_cast<Cproperty*>(this->GridEltFixed.active));
 			props.push_back(static_cast<Cproperty*>(this->GridEltLinear.active));
+			props.push_back(static_cast<Cproperty*>(this->GridEltPoints.active));
+			props.push_back(static_cast<Cproperty*>(this->GridEltXYZ.active));
 
 			CGlobal::DDX_Property(
 				pDX, 
@@ -107,12 +118,14 @@ void CPropsPage::DoDataExchange(CDataExchange* pDX)
 				);
 		}
 		// Kx
-		else if (strItem.Compare(_T("Kx")) == 0)
+		else if (strItem.Compare(KX) == 0)
 		{
 			std::vector<Cproperty*> props;
 			props.push_back(static_cast<Cproperty*>(this->GridElt.kx));
 			props.push_back(static_cast<Cproperty*>(this->GridEltFixed.kx));
 			props.push_back(static_cast<Cproperty*>(this->GridEltLinear.kx));
+			props.push_back(static_cast<Cproperty*>(this->GridEltPoints.kx));
+			props.push_back(static_cast<Cproperty*>(this->GridEltXYZ.kx));
 
 			CGlobal::DDX_Property(
 				pDX, 
@@ -123,12 +136,14 @@ void CPropsPage::DoDataExchange(CDataExchange* pDX)
 				);
 		}
 		// Ky
-		else if (strItem.Compare(_T("Ky")) == 0)
+		else if (strItem.Compare(KY) == 0)
 		{
 			std::vector<Cproperty*> props;
 			props.push_back(static_cast<Cproperty*>(this->GridElt.ky));
 			props.push_back(static_cast<Cproperty*>(this->GridEltFixed.ky));
 			props.push_back(static_cast<Cproperty*>(this->GridEltLinear.ky));
+			props.push_back(static_cast<Cproperty*>(this->GridEltPoints.ky));
+			props.push_back(static_cast<Cproperty*>(this->GridEltXYZ.ky));
 
 			CGlobal::DDX_Property(
 				pDX, 
@@ -139,12 +154,14 @@ void CPropsPage::DoDataExchange(CDataExchange* pDX)
 				);
 		}
 		// Kz
-		else if (strItem.Compare(_T("Kz")) == 0)
+		else if (strItem.Compare(KZ) == 0)
 		{
 			std::vector<Cproperty*> props;
 			props.push_back(static_cast<Cproperty*>(this->GridElt.kz));
 			props.push_back(static_cast<Cproperty*>(this->GridEltFixed.kz));
 			props.push_back(static_cast<Cproperty*>(this->GridEltLinear.kz));
+			props.push_back(static_cast<Cproperty*>(this->GridEltPoints.kz));
+			props.push_back(static_cast<Cproperty*>(this->GridEltXYZ.kz));
 
 			CGlobal::DDX_Property(
 				pDX, 
@@ -154,13 +171,178 @@ void CPropsPage::DoDataExchange(CDataExchange* pDX)
 				pages
 				);
 		}
+		else if (strItem.Compare(POROSITY) == 0)
+		{
+			std::vector<Cproperty*> props;
+			props.push_back(static_cast<Cproperty*>(this->GridElt.porosity));
+			props.push_back(static_cast<Cproperty*>(this->GridEltFixed.porosity));
+			props.push_back(static_cast<Cproperty*>(this->GridEltLinear.porosity));
+			props.push_back(static_cast<Cproperty*>(this->GridEltPoints.porosity));
+			props.push_back(static_cast<Cproperty*>(this->GridEltXYZ.porosity));
+
+			CGlobal::DDX_Property(
+				pDX, 
+				&this->SheetTop,
+				this->ItemDDX,
+				props,
+				pages
+				);
+		}
+		else if (strItem.Compare(STORAGE) == 0)
+		{
+			std::vector<Cproperty*> props;
+			props.push_back(static_cast<Cproperty*>(this->GridElt.storage));
+			props.push_back(static_cast<Cproperty*>(this->GridEltFixed.storage));
+			props.push_back(static_cast<Cproperty*>(this->GridEltLinear.storage));
+			props.push_back(static_cast<Cproperty*>(this->GridEltPoints.storage));
+			props.push_back(static_cast<Cproperty*>(this->GridEltXYZ.storage));
+
+			CGlobal::DDX_Property(
+				pDX, 
+				&this->SheetTop,
+				this->ItemDDX,
+				props,
+				pages
+				);
+		}
+		else if (strItem.Compare(ALPHA_LONG) == 0)
+		{
+			std::vector<Cproperty*> props;
+			props.push_back(static_cast<Cproperty*>(this->GridElt.alpha_long));
+			props.push_back(static_cast<Cproperty*>(this->GridEltFixed.alpha_long));
+			props.push_back(static_cast<Cproperty*>(this->GridEltLinear.alpha_long));
+			props.push_back(static_cast<Cproperty*>(this->GridEltPoints.alpha_long));
+			props.push_back(static_cast<Cproperty*>(this->GridEltXYZ.alpha_long));
+
+			CGlobal::DDX_Property(
+				pDX, 
+				&this->SheetTop,
+				this->ItemDDX,
+				props,
+				pages
+				);
+		}
+		else if (strItem.Compare(ALPHA_HORIZONTAL) == 0)
+		{
+			std::vector<Cproperty*> props;
+			props.push_back(static_cast<Cproperty*>(this->GridElt.alpha_horizontal));
+			props.push_back(static_cast<Cproperty*>(this->GridEltFixed.alpha_horizontal));
+			props.push_back(static_cast<Cproperty*>(this->GridEltLinear.alpha_horizontal));
+			props.push_back(static_cast<Cproperty*>(this->GridEltPoints.alpha_horizontal));
+			props.push_back(static_cast<Cproperty*>(this->GridEltXYZ.alpha_horizontal));
+
+			CGlobal::DDX_Property(
+				pDX, 
+				&this->SheetTop,
+				this->ItemDDX,
+				props,
+				pages
+				);
+		}
+		else if (strItem.Compare(ALPHA_VERTICAL) == 0)
+		{
+			std::vector<Cproperty*> props;
+			props.push_back(static_cast<Cproperty*>(this->GridElt.alpha_vertical));
+			props.push_back(static_cast<Cproperty*>(this->GridEltFixed.alpha_vertical));
+			props.push_back(static_cast<Cproperty*>(this->GridEltLinear.alpha_vertical));
+			props.push_back(static_cast<Cproperty*>(this->GridEltPoints.alpha_vertical));
+			props.push_back(static_cast<Cproperty*>(this->GridEltXYZ.alpha_vertical));
+
+			CGlobal::DDX_Property(
+				pDX, 
+				&this->SheetTop,
+				this->ItemDDX,
+				props,
+				pages
+				);
+		}
+// COMMENT: {4/2/2009 5:29:37 PM}		else
+// COMMENT: {4/2/2009 5:29:37 PM}		{
+// COMMENT: {4/2/2009 5:29:37 PM}			ASSERT(FALSE);
+// COMMENT: {4/2/2009 5:29:37 PM}		}
+
+		// ACTIVE
+		if (this->bDefault && pDX->m_bSaveAndValidate && this->GridElt.active->type == PROP_UNDEFINED)
+		{
+			CString str;
+			pTree->SelectItem(this->htiACTIVE);
+			str.Format("A default \"%s\" must be defined.", ACTIVE);
+			pDX->Fail();
+		}
+		// KX
+		if (this->bDefault && pDX->m_bSaveAndValidate && this->GridElt.kx->type == PROP_UNDEFINED)
+		{
+			CString str;
+			pTree->SelectItem(this->htiKX);
+			str.Format("A default \"%s\" must be defined.", KX);
+			::AfxMessageBox(str);
+			pDX->Fail();
+		}
+		// KY
+		if (this->bDefault && pDX->m_bSaveAndValidate && this->GridElt.ky->type == PROP_UNDEFINED)
+		{
+			CString str;
+			pTree->SelectItem(this->htiKY);
+			str.Format("A default \"%s\" must be defined.", KY);
+			::AfxMessageBox(str);
+			pDX->Fail();
+		}
+		// KZ
+		if (this->bDefault && pDX->m_bSaveAndValidate && this->GridElt.kz->type == PROP_UNDEFINED)
+		{
+			CString str;
+			pTree->SelectItem(this->htiKZ);
+			str.Format("A default \"%s\" must be defined.", KZ);
+			::AfxMessageBox(str);
+			pDX->Fail();
+		}
+		// POROSITY
+		if (this->bDefault && pDX->m_bSaveAndValidate && this->GridElt.porosity->type == PROP_UNDEFINED)
+		{
+			CString str;
+			pTree->SelectItem(this->htiPOROSITY);
+			str.Format("A default \"%s\" must be defined.", POROSITY);
+			::AfxMessageBox(str);
+			pDX->Fail();
+		}
+		// STORAGE
+		if (this->bDefault && pDX->m_bSaveAndValidate && this->GridElt.storage->type == PROP_UNDEFINED)
+		{
+			CString str;
+			pTree->SelectItem(this->htiSTORAGE);
+			str.Format("A default \"%s\" must be defined.", STORAGE);
+			::AfxMessageBox(str);
+			pDX->Fail();
+		}
+		// ALPHA_LONG
+		if (this->bDefault && !this->bFlowOnly && pDX->m_bSaveAndValidate && this->GridElt.alpha_long->type == PROP_UNDEFINED)
+		{
+			CString str;
+			pTree->SelectItem(this->htiALPHA_LONG);
+			str.Format("A default \"%s\" must be defined.", ALPHA_LONG);
+			::AfxMessageBox(str);
+			pDX->Fail();
+		}
+		// ALPHA_HORIZONTAL
+		if (this->bDefault && !this->bFlowOnly && pDX->m_bSaveAndValidate && this->GridElt.alpha_horizontal->type == PROP_UNDEFINED)
+		{
+			CString str;
+			pTree->SelectItem(this->htiALPHA_HORIZONTAL);
+			str.Format("A default \"%s\" must be defined.", ALPHA_HORIZONTAL);
+			::AfxMessageBox(str);
+			pDX->Fail();
+		}
+		// ALPHA_VERTICAL
+		if (this->bDefault && !this->bFlowOnly && pDX->m_bSaveAndValidate && this->GridElt.alpha_vertical->type == PROP_UNDEFINED)
+		{
+			CString str;
+			pTree->SelectItem(this->htiALPHA_VERTICAL);
+			str.Format("A default \"%s\" must be defined.", ALPHA_VERTICAL);
+			::AfxMessageBox(str);
+			pDX->Fail();
+		}
 	}
-
-
-	// COMMENT: {4/1/2009 6:48:07 PM}	this->SheetTop.SetActivePage(1);
 	TRACE("Out %s\n", __FUNCTION__);
-
-	// COMMENT: {4/1/2009 6:47:58 PM}	this->PropConstant.DoDataExchange(pDX);
 }
 
 
@@ -169,11 +351,8 @@ BEGIN_MESSAGE_MAP(CPropsPage, CResizablePage)
 	ON_NOTIFY(TVN_SELCHANGINGW, 0x7EEE, OnPageTreeSelChanging)
 	ON_NOTIFY(TVN_SELCHANGEDA,  0x7EEE, OnPageTreeSelChanged)
 	ON_NOTIFY(TVN_SELCHANGEDW,  0x7EEE, OnPageTreeSelChanged)
-	//{{USER
 	ON_MESSAGE(UM_DDX_FAILURE, OnUM_DDXFailure)
-	//}}USER
 END_MESSAGE_MAP()
-
 
 // CPropsPage message handlers
 
@@ -212,7 +391,10 @@ BOOL CPropsPage::OnInitDialog()
 
 	this->SheetTop.AddPage(&this->PropNone);
 	this->SheetTop.AddPage(&this->PropConstant);
-
+	this->SheetTop.AddPage(&this->PropLinear);
+	this->SheetTop.AddPage(&this->PropPoints);
+	this->SheetTop.AddPage(&this->PropXYZ);
+	
 	this->SheetTop.SetTreeViewMode(TRUE, FALSE, FALSE);
 	this->SheetTop.SetIsResizable(true);
 
@@ -236,81 +418,6 @@ BOOL CPropsPage::OnInitDialog()
 	__super::OnInitDialog();
 
 	// Add extra initialization here
-// COMMENT: {4/1/2009 7:52:42 PM}	this->SheetTop.AddPage(&this->PropNone);
-// COMMENT: {4/1/2009 7:52:42 PM}	this->SheetTop.AddPage(&this->PropConstant);
-// COMMENT: {4/1/2009 7:52:42 PM}
-// COMMENT: {4/1/2009 7:52:42 PM}	this->SheetTop.SetTreeViewMode(TRUE, FALSE, FALSE);
-// COMMENT: {4/1/2009 7:52:42 PM}	this->SheetTop.SetIsResizable(true);
-// COMMENT: {4/1/2009 7:52:42 PM}
-// COMMENT: {4/1/2009 7:52:42 PM}	this->RegisterSheet(IDC_TREE_PROPS, this->SheetTop);
-// COMMENT: {4/1/2009 7:52:42 PM}
-// COMMENT: {4/1/2009 7:52:42 PM}	VERIFY(this->Splitter.Create(this));
-// COMMENT: {4/1/2009 7:52:42 PM}	this->Splitter.SetPane(0, &this->SheetTop);
-// COMMENT: {4/1/2009 7:52:42 PM}	this->Splitter.SetPane(1, this->GetDlgItem(IDC_DESC_RICHEDIT));
-// COMMENT: {4/1/2009 7:52:42 PM}
-// COMMENT: {4/1/2009 7:52:42 PM}	const int splitter_sizes[2] = {190, 89};
-// COMMENT: {4/1/2009 7:52:42 PM}	this->Splitter.SetPaneSizes(splitter_sizes);
-// COMMENT: {4/1/2009 7:52:42 PM}
-// COMMENT: {4/1/2009 7:52:42 PM}	this->AddAnchor(this->Splitter, TOP_LEFT, BOTTOM_RIGHT );
-
-// COMMENT: {3/31/2009 10:13:35 PM}	//{{
-// COMMENT: {3/31/2009 10:13:35 PM}	if (CTreeCtrl *pTree = this->SheetTop.GetPageTreeControl())
-// COMMENT: {3/31/2009 10:13:35 PM}	{
-// COMMENT: {3/31/2009 10:13:35 PM}		pTree->DeleteAllItems();
-// COMMENT: {3/31/2009 10:13:35 PM}
-// COMMENT: {3/31/2009 10:13:35 PM}		HTREEITEM hItem = pTree->InsertItem("Active");
-// COMMENT: {3/31/2009 10:13:35 PM}		pTree->InsertItem("constant 0", hItem);
-// COMMENT: {3/31/2009 10:13:35 PM}
-// COMMENT: {3/31/2009 10:13:35 PM}		pTree->InsertItem("Kx  constant 90");
-// COMMENT: {3/31/2009 10:13:35 PM}		pTree->InsertItem("Ky  constant 90");
-// COMMENT: {3/31/2009 10:13:35 PM}		pTree->InsertItem("Kz  constant 20");
-// COMMENT: {3/31/2009 10:13:35 PM}		pTree->InsertItem("Porosity");
-// COMMENT: {3/31/2009 10:13:35 PM}		pTree->InsertItem("Specific storage");
-// COMMENT: {3/31/2009 10:13:35 PM}		pTree->InsertItem("Longitudinal dispersivity");
-// COMMENT: {3/31/2009 10:13:35 PM}		pTree->InsertItem("Horizontal dispersivity");
-// COMMENT: {3/31/2009 10:13:35 PM}		pTree->InsertItem("Vertical dispersivity");
-// COMMENT: {3/31/2009 10:13:35 PM}
-// COMMENT: {3/31/2009 10:13:35 PM}		pTree->ModifyStyle(TVS_TRACKSELECT, TVS_FULLROWSELECT|TVS_SHOWSELALWAYS, 0);
-// COMMENT: {3/31/2009 10:13:35 PM}	}
-// COMMENT: {3/31/2009 10:13:35 PM}	//}}
-
-
-// COMMENT: {3/31/2009 10:24:41 PM}	std::list<CPropStruct> items;
-// COMMENT: {3/31/2009 10:24:41 PM}	CPropStruct p;
-// COMMENT: {3/31/2009 10:24:41 PM}
-// COMMENT: {3/31/2009 10:24:41 PM}	p.title = "Active";
-// COMMENT: {3/31/2009 10:24:41 PM}	p.prop  = Cproperty(0);
-// COMMENT: {3/31/2009 10:24:41 PM}	items.push_back(p);
-// COMMENT: {3/31/2009 10:24:41 PM}
-// COMMENT: {3/31/2009 10:24:41 PM}	p.title = "Kx";
-// COMMENT: {3/31/2009 10:24:41 PM}	p.prop  = Cproperty(90);
-// COMMENT: {3/31/2009 10:24:41 PM}	items.push_back(p);
-// COMMENT: {3/31/2009 10:24:41 PM}
-// COMMENT: {3/31/2009 10:24:41 PM}	p.title = "Ky";
-// COMMENT: {3/31/2009 10:24:41 PM}	p.prop  = Cproperty(90);
-// COMMENT: {3/31/2009 10:24:41 PM}	items.push_back(p);
-// COMMENT: {3/31/2009 10:24:41 PM}
-// COMMENT: {3/31/2009 10:24:41 PM}	p.title = "Kz";
-// COMMENT: {3/31/2009 10:24:41 PM}	p.prop  = Cproperty(20);
-// COMMENT: {3/31/2009 10:24:41 PM}	items.push_back(p);
-
-// COMMENT: {4/1/2009 7:53:47 PM}	if (CTreeCtrl *pTree = this->SheetTop.GetPageTreeControl())
-// COMMENT: {4/1/2009 7:53:47 PM}	{
-// COMMENT: {4/1/2009 7:53:47 PM}		pTree->ModifyStyle(TVS_TRACKSELECT, TVS_FULLROWSELECT|TVS_SHOWSELALWAYS, 0);
-// COMMENT: {4/1/2009 7:53:47 PM}		pTree->DeleteAllItems();
-// COMMENT: {4/1/2009 7:53:47 PM}
-// COMMENT: {4/1/2009 7:53:47 PM}		std::vector<CPropStruct>::iterator it = this->Items.begin();
-// COMMENT: {4/1/2009 7:53:47 PM}		for (; it != this->Items.end(); ++it)
-// COMMENT: {4/1/2009 7:53:47 PM}		{
-// COMMENT: {4/1/2009 7:53:47 PM}			pTree->InsertItem((*it).title);
-// COMMENT: {4/1/2009 7:53:47 PM}		}
-// COMMENT: {4/1/2009 7:53:47 PM}		pTree->SelectItem(pTree->GetFirstVisibleItem());
-// COMMENT: {4/1/2009 7:53:47 PM}// COMMENT: {4/1/2009 4:02:51 PM}		this->SheetTop.SetFocus();
-// COMMENT: {4/1/2009 7:53:47 PM}// COMMENT: {4/1/2009 4:02:51 PM}		pTree->SetFocus();
-// COMMENT: {4/1/2009 7:53:47 PM}// COMMENT: {4/1/2009 4:02:51 PM}		this->Splitter.SetActivePane(0);
-// COMMENT: {4/1/2009 7:53:47 PM}// COMMENT: {4/1/2009 4:02:51 PM}		this->SheetTop.GetSplitterObject()->SetActivePane(0);
-// COMMENT: {4/1/2009 7:53:47 PM}// COMMENT: {4/1/2009 4:02:51 PM}		pTree->SetFocus();
-// COMMENT: {4/1/2009 7:53:47 PM}	}
 
 	TRACE("Out %s\n", __FUNCTION__);
 	return TRUE;  // return TRUE unless you set the focus to a control
@@ -355,26 +462,53 @@ void CPropsPage::OnPageTreeSelChanged(NMHDR *pNotifyStruct, LRESULT *pResult)
 		{
 			CString strItem = pTree->GetItemText(this->ItemDDX);
 
-			// Active
-			if (strItem.Compare(_T("Active")) == 0)
+			// ACTIVE
+			if (strItem.Compare(ACTIVE) == 0)
 			{
 				this->RichEditCtrl.SetWindowText(this->m_sActiveRTF.c_str());
 			}
-			// Kx
-			else if (strItem.Compare(_T("Kx")) == 0)
+			// KX
+			else if (strItem.Compare(KX) == 0)
 			{
 				this->RichEditCtrl.SetWindowText(this->m_sKxRTF.c_str());
 			}
-			// Ky
-			else if (strItem.Compare(_T("Ky")) == 0)
+			// KY
+			else if (strItem.Compare(KY) == 0)
 			{
 				this->RichEditCtrl.SetWindowText(this->m_sKyRTF.c_str());
 			}
-			// Kz
-			else if (strItem.Compare(_T("Kz")) == 0)
+			// KZ
+			else if (strItem.Compare(KZ) == 0)
 			{
 				this->RichEditCtrl.SetWindowText(this->m_sKzRTF.c_str());
 			}
+			// ALPHA_LONG
+			else if (strItem.Compare(ALPHA_LONG) == 0)
+			{
+				this->RichEditCtrl.SetWindowText(this->m_sAlphaLongRTF.c_str());
+			}
+			// POROSITY
+			else if (strItem.Compare(POROSITY) == 0)
+			{
+				this->RichEditCtrl.SetWindowText(this->m_sPorosityRTF.c_str());
+			}
+			// STORAGE
+			else if (strItem.Compare(STORAGE) == 0)
+			{
+				// this->m_wndRichEditCtrl.SetWindowText(this->m_sSpecStorageRTF.c_str());
+				this->RichEditCtrl.SetWindowText(this->m_sStorageRTF.c_str());
+			}
+			// ALPHA_HORIZONTAL
+			else if (strItem.Compare(ALPHA_HORIZONTAL) == 0)
+			{
+				this->RichEditCtrl.SetWindowText(this->m_sAlphaHorizontalRTF.c_str());
+			}
+			// ALPHA_VERTICAL
+			else if (strItem.Compare(ALPHA_VERTICAL) == 0)
+			{
+				this->RichEditCtrl.SetWindowText(this->m_sAlphaVerticalRTF.c_str());
+			}
+
 		}
 	}
 }
@@ -435,7 +569,7 @@ void CPropsPage::SetProperties(const CGridElt& rGridElt)
 
 	// copy to all
 	//
-	this->GridEltFixed = this->GridEltLinear = this->GridElt;
+	this->GridEltXYZ = this->GridEltPoints = this->GridEltFixed = this->GridEltLinear = this->GridElt;
 }
 
 void CPropsPage::GetProperties(CGridElt& rGridElt)const

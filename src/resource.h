@@ -364,6 +364,19 @@
 #define IDD_PROPS_WEDGE1                400
 #define IDD_PROPS_WEDGE2                401
 #define IDD_FLOW_RATE_PROPPAGE          402
+#define IDD_PROP_PROPPAGE               403
+#define IDD_PROP_PROPPAGE1              404
+#define IDR_TOOLBAR1                    404
+#define IDD_PROP_PROPPAGE2              405
+#define IDD_PROP_PROPPAGE3              406
+#define IDD_PROP_PROPPAGE4              407
+#define IDD_PROP_PROPPAGE5              408
+#define IDD_PROP_CONSTANT               409
+#define IDD_PROPS_PAGE                  410
+#define IDD_PROP_NONE                   411
+#define IDD_PROP_LINEAR                 412
+#define IDD_PROP_POINTS                 413
+#define IDD_PROP_XYZ                    414
 #define IDC_EDIT_X                      1000
 #define IDC_TITLE                       1000
 #define IDC_EDIT_Y                      1001
@@ -379,8 +392,11 @@
 #define IDC_RADIO2                      1013
 #define IDC_LINEAR_INTERPOLATION_RADIO  1014
 #define IDC_XY_MAP_RADIO                1015
+#define IDC_LINEAR_INTERPOLATION_RADIO2 1015
 #define IDC_RADIO3                      1016
+#define IDC_LINEAR_INTERPOLATION_RADIO3 1016
 #define IDC_LINE                        1017
+#define IDC_LINEAR_INTERPOLATION_RADIO4 1017
 #define IDC_YMAX_EDIT                   1018
 #define IDC_X_RADIO                     1019
 #define IDC_RADIO4                      1020
@@ -418,8 +434,11 @@
 #define IDC_VALUE2_STATIC               1052
 #define IDC_CHECK1                      1053
 #define IDC_XMIN_EDIT                   1054
+#define IDC_CHECK2                      1054
 #define IDC_YMIN_EDIT                   1055
+#define IDC_CHECK3                      1055
 #define IDC_XSCALE                      1056
+#define IDC_CHECK4                      1056
 #define IDC_COMBO1                      1057
 #define IDC_ZMIN_EDIT                   1058
 #define IDC_YSCALE                      1059
@@ -583,6 +602,7 @@
 #define IDC_EDIT_WYC                    1216
 #define IDC_BUTTON1                     1217
 #define IDC_BACK_BUTTON                 1218
+#define IDC_BUTTON4                     1218
 #define IDC_BUTTON_INSERT               1219
 #define IDC_MODIFY_CHECK                1220
 #define IDC_BUTTON_DELETE               1221
@@ -850,6 +870,13 @@
 #define IDC_NUM_STATIC                  1483
 #define IDC_NUM_EDIT                    1484
 #define IDC_EDIT_LENGTH_XXX             1485
+#define IDC_EDIT1                       1486
+#define IDC_EDIT5                       1487
+#define IDC_TREE_PROPS                  1488
+#define IDC_TYPE_COMBO                  1489
+#define IDC_VALUE_EDIT                  1490
+#define IDC_EDIT_XYZ                    1492
+#define IDC_BUTTON_XYZ                  1493
 #define IDC_RESIZE_COLUMN               28654
 #define IDC_RESIZE_ROW                  28655
 #define IDR_POPUP                       28656
@@ -885,6 +912,8 @@
 #define ID_VIEW_FROM_MAP_PZ             32852
 #define ID_VIEWFROMDIRECTION_MAP        32853
 #define ID_VIEW_FROM_MAP_NZ             32854
+#define ID_BUTTON32859                  32859
+#define ID_BUTTON32860                  32860
 #define IDW_CONTROLBAR_TREE             59424
 #define IDW_CONTROLBAR_BOXPROPS         59425
 
@@ -892,9 +921,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        403
-#define _APS_NEXT_COMMAND_VALUE         32858
-#define _APS_NEXT_CONTROL_VALUE         1486
+#define _APS_NEXT_RESOURCE_VALUE        413
+#define _APS_NEXT_COMMAND_VALUE         32861
+#define _APS_NEXT_CONTROL_VALUE         1494
 #define _APS_NEXT_SYMED_VALUE           126
 #endif
 #endif

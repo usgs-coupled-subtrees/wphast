@@ -32,6 +32,9 @@
 #include "Units.h"
 #include "srcinput/Data_source.h"
 #include "srcinput/Prism.h"
+#include "TreePropSheetExSRC.h"
+#include "PropsPage.h"
+
 
 #include <afxmt.h>
 #include <atlpath.h> // ATL::ATLPath::FileExists
@@ -889,6 +892,177 @@ void CGlobal::DDX_Property(CDataExchange* pDX, CCheckTreeCtrl* pTree, HTREEITEM 
 			//
 			pDX->m_pDlgWnd->GetDlgItem(IDC_SINGLE_VALUE_RADIO)->EnableWindow(FALSE);
 			pDX->m_pDlgWnd->GetDlgItem(IDC_LINEAR_INTERPOLATION_RADIO)->EnableWindow(FALSE);
+		}
+	}
+}
+
+void CGlobal::DDX_Property(CDataExchange* pDX, CTreePropSheetExSRC* pTreeProp, HTREEITEM hti, std::vector<Cproperty*> &props, std::vector<CPropertyPage*> &pages)
+{
+	const int PAGE_NONE   = 0;
+	const int PAGE_FIXED  = 1;
+	const int PAGE_LINEAR = 2;
+	const int PAGE_POINTS = 3;
+	const int PAGE_XYZ    = 4;
+
+	Cproperty *value = props[0];
+	ASSERT(value);
+	ASSERT(props.size() == 5);
+
+	// Cproperty* prop  => std::vector<Cproperty*> &props
+	if (pDX->m_bSaveAndValidate)
+	{
+		switch (pTreeProp->GetActiveIndex())
+		{
+		case PAGE_NONE:
+			value->type = PROP_UNDEFINED;
+			break;
+		case PAGE_FIXED:
+			value->type = PROP_FIXED;
+			break;
+		case PAGE_LINEAR:
+			value->type = PROP_LINEAR;
+			break;
+		case PAGE_POINTS:
+			value->type = PROP_POINTS;
+			break;
+//{{
+		case PAGE_XYZ:
+			value->type = PROP_XYZ;
+			break;
+//}}
+		default:
+			ASSERT(FALSE);
+		}
+
+		if (value->type == PROP_UNDEFINED)
+		{
+			// do nothing
+		}
+		else if (value->type == PROP_FIXED)
+		{
+			if (!pages[PAGE_FIXED]->UpdateData(TRUE))
+			{
+				pDX->Fail();
+			}
+			CPropConstant *pConstant = dynamic_cast<CPropConstant*>(pages[PAGE_FIXED]);
+			value->v[0] = pConstant->value;
+		}
+		else if (value->type == PROP_LINEAR)
+		{
+			if (!pages[PAGE_LINEAR]->UpdateData(TRUE))
+			{
+				pDX->Fail();
+			}
+			CPropLinear *pLinear = dynamic_cast<CPropLinear*>(pages[PAGE_LINEAR]);
+			(*value) = pLinear->GetProperty();
+			ASSERT(value->type == PROP_LINEAR);
+		}
+		else if (value->type == PROP_POINTS)
+		{
+			if (!pages[PAGE_POINTS]->UpdateData(TRUE))
+			{
+				pDX->Fail();
+			}
+			CPropPoints *pPoints = dynamic_cast<CPropPoints*>(pages[PAGE_POINTS]);
+			(*value) = pPoints->GetProperty();
+			ASSERT(value->type == PROP_POINTS);
+		}
+		else if (value->type == PROP_XYZ)
+		{
+			if (!pages[PAGE_XYZ]->UpdateData(TRUE))
+			{
+				pDX->Fail();
+			}
+			CPropXYZ *pXYZ = dynamic_cast<CPropXYZ*>(pages[PAGE_XYZ]);
+			(*value) = pXYZ->GetProperty();
+			ASSERT(value->type == PROP_XYZ);
+		}
+
+		// all ok so copy
+		if (value->type == PROP_FIXED)
+		{
+			value->count_v = 1;
+			(*props[PAGE_FIXED]) = (*value);
+		}
+		else if (value->type == PROP_LINEAR)
+		{
+			ASSERT(value->count_v == 2);
+			(*props[PAGE_LINEAR]) = (*value);
+		}
+		else if (value->type == PROP_POINTS)
+		{
+			(*props[PAGE_POINTS]) = (*value);
+		}
+		else if (value->type == PROP_XYZ)
+		{
+			(*props[PAGE_XYZ]) = (*value);
+		}
+
+	}
+	else
+	{
+		if (value->type == PROP_UNDEFINED)
+		{
+			if (pTreeProp->GetActiveIndex() != PAGE_NONE)
+			{
+				pTreeProp->SetActivePage(PAGE_NONE);
+			}
+			else
+			{
+				pages[PAGE_NONE]->UpdateData(FALSE);
+			}
+		}
+		else if (value->type == PROP_FIXED)
+		{
+			CPropConstant *pConstant = dynamic_cast<CPropConstant*>(pages[PAGE_FIXED]);
+			pConstant->value = value->v[0];
+			if (pTreeProp->GetActiveIndex() != PAGE_FIXED)
+			{
+				pTreeProp->SetActivePage(PAGE_FIXED);
+			}
+			else
+			{
+				pages[PAGE_FIXED]->UpdateData(FALSE);
+			}
+		}
+		else if (value->type == PROP_LINEAR)
+		{
+			CPropLinear *pLinear = dynamic_cast<CPropLinear*>(pages[PAGE_LINEAR]);
+			pLinear->SetProperty(*value);
+			if (pTreeProp->GetActiveIndex() != PAGE_LINEAR)
+			{
+				pTreeProp->SetActivePage(PAGE_LINEAR);
+			}
+			else
+			{
+				pages[PAGE_LINEAR]->UpdateData(FALSE);
+			}
+		}
+		else if (value->type == PROP_POINTS)
+		{
+			CPropPoints *pPoints = dynamic_cast<CPropPoints*>(pages[PAGE_POINTS]);
+			pPoints->SetProperty(*value);
+			if (pTreeProp->GetActiveIndex() != PAGE_POINTS)
+			{
+				pTreeProp->SetActivePage(PAGE_POINTS);
+			}
+			else
+			{
+				pages[PAGE_POINTS]->UpdateData(FALSE);
+			}
+		}
+		else if (value->type == PROP_XYZ)
+		{
+			CPropXYZ *pXYZ = dynamic_cast<CPropXYZ*>(pages[PAGE_XYZ]);
+			pXYZ->SetProperty(*value);
+			if (pTreeProp->GetActiveIndex() != PAGE_XYZ)
+			{
+				pTreeProp->SetActivePage(PAGE_XYZ);
+			}
+			else
+			{
+				pages[PAGE_XYZ]->UpdateData(FALSE);
+			}
 		}
 	}
 }
@@ -2932,6 +3106,7 @@ herr_t CGlobal::HDFSerializeData_source(bool bStoring, hid_t loc_id, const char*
 	static const char szBox[]         = "box";
 	static const char szfile_name[]   = "file_name";
 	static const char szPoints[]      = "Points";
+	static const char szPoints4[]     = "Points4";
 	static const char szAttribute[]   = "attribute";
 
 	/*
@@ -3014,18 +3189,19 @@ herr_t CGlobal::HDFSerializeData_source(bool bStoring, hid_t loc_id, const char*
 					case Data_source::POINTS:
 						{
 							std::vector<Point> &pts = rData_source.Get_points();
-							ASSERT(pts.size() >= 3);
-							hsize_t count = 3 * pts.size();							
+							//ASSERT(pts.size() >= 3);
+							hsize_t count = 4 * pts.size();							
 							double *points = new double[count];
 							for (size_t i = 0; i < pts.size(); ++i)
 							{
 								double *d = pts[i].get_coord();
 								for (size_t n = 0; n < 3; ++n)
 								{
-									points[i*3+n] = d[n];
+									points[i*4+n] = d[n];
 								}
+								points[i*4+3] = pts[i].get_v();
 							}
-							status = CGlobal::HDFSerializeWithSize(bStoring, ds_gr_id, szPoints, H5T_NATIVE_DOUBLE, count, points);
+							status = CGlobal::HDFSerializeWithSize(bStoring, ds_gr_id, szPoints4, H5T_NATIVE_DOUBLE, count, points);
 							delete[] points;
 						}
 						break;
@@ -3041,13 +3217,23 @@ herr_t CGlobal::HDFSerializeData_source(bool bStoring, hid_t loc_id, const char*
 				// box
 				//
 				struct zone* pzone = rData_source.Get_bounding_box();
-				ASSERT(pzone->zone_defined);
-				xyz[0] = pzone->x1;
-				xyz[1] = pzone->y1;
-				xyz[2] = pzone->z1;
-				xyz[3] = pzone->x2;
-				xyz[4] = pzone->y2;
-				xyz[5] = pzone->z2;
+				//ASSERT(pzone->zone_defined);
+				if (pzone->zone_defined)
+				{
+					xyz[0] = pzone->x1;
+					xyz[1] = pzone->y1;
+					xyz[2] = pzone->z1;
+					xyz[3] = pzone->x2;
+					xyz[4] = pzone->y2;
+					xyz[5] = pzone->z2;
+				}
+				else
+				{
+					for (int i = 0; i < 6; ++i)
+					{
+						xyz[i] = 0;
+					}
+				}
 				return_val = CGlobal::HDFSerialize(bStoring, ds_gr_id, szBox, H5T_NATIVE_DOUBLE, 6, xyz);
 				ASSERT(return_val >= 0);
 
@@ -3139,23 +3325,48 @@ herr_t CGlobal::HDFSerializeData_source(bool bStoring, hid_t loc_id, const char*
 							ASSERT(pts.size() == 0);
 							double *data = NULL;
 							hsize_t count;
-							status = CGlobal::HDFSerializeAllocate(bStoring, ds_gr_id, szPoints, count, &data);
-							ASSERT(status >= 0);
-							ASSERT((count%3) == 0);
-
-							Point p;
-							double *coord = p.get_coord();
-							for (size_t i = 0; i < count; ++i)
+							status = CGlobal::HDFSerializeAllocate(bStoring, ds_gr_id, szPoints4, count, &data);
+							if (status >= 0)
 							{
-								coord[i%3] = data[i];
-								if (i%3 == 2)
+								ASSERT((count%4) == 0);
+
+								Point p;
+								double *coord = p.get_coord();
+								for (size_t i = 0; i < count; ++i)
 								{
-									p.set_v(data[i]);
-									pts.push_back(p);
+									if (i%4 != 3)
+									{
+										coord[i%4] = data[i];
+									}
+									else
+									{
+										p.set_v(data[i]);
+										pts.push_back(p);
+									}
 								}
+								ASSERT(pts.size() == count/4);
+								delete[] data;
 							}
-							ASSERT(pts.size() == count/3);
-							delete[] data;
+							else
+							{
+								status = CGlobal::HDFSerializeAllocate(bStoring, ds_gr_id, szPoints, count, &data);
+								ASSERT(status >= 0);
+								ASSERT((count%3) == 0);
+
+								Point p;
+								double *coord = p.get_coord();
+								for (size_t i = 0; i < count; ++i)
+								{
+									coord[i%3] = data[i];
+									if (i%3 == 2)
+									{
+										p.set_v(data[i]);
+										pts.push_back(p);
+									}
+								}
+								ASSERT(pts.size() == count/3);
+								delete[] data;
+							}
 						}
 						break;
 					case Data_source::NONE:

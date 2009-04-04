@@ -4,19 +4,24 @@
 #include "TreePropSheetEx/TreePropSheetUtil.hpp"
 #include "afxwin.h"
 #include "resource.h"
+#include "property.h"
 
-// CPropConstant dialog
 
-class CPropConstant : public CResizablePage , public TreePropSheet::CWhiteBackgroundProvider
+// CPropXYZ dialog
+
+class CPropXYZ : public CResizablePage, public TreePropSheet::CWhiteBackgroundProvider
 {
-	DECLARE_DYNAMIC(CPropConstant)
+	DECLARE_DYNAMIC(CPropXYZ)
 
 public:
-	CPropConstant();
-	virtual ~CPropConstant();
+	CPropXYZ();
+	virtual ~CPropXYZ();
+
+	Cproperty GetProperty();
+	void SetProperty(Cproperty p);
 
 // Dialog Data
-	enum { IDD = IDD_PROP_CONSTANT };
+	enum { IDD = IDD_PROP_XYZ };
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
@@ -24,11 +29,13 @@ protected:
 	DECLARE_MESSAGE_MAP()
 	bool      bSkipUpdateData;
 
+	Cproperty prop;
+
 public:
 	virtual BOOL OnInitDialog();
 	virtual BOOL OnKillActive();
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	CComboBox ComboType;
-	double value;
 	afx_msg void OnCbnSelchangeTypeCombo();
+	afx_msg void OnBnClickedButtonXyz();
 };

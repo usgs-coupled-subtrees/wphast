@@ -5,8 +5,13 @@
 #include "TreePropSheetEx/ResizablePage.h"
 #include "TreePropSheetEx/TreePropSheetUtil.hpp"
 #include "TreePropSheetEx/TreePropSheetEx.h"
+
 #include "PropNone.h"
 #include "PropConstant.h"
+#include "PropLinear.h"
+#include "PropPoints.h"
+#include "PropXYZ.h"
+
 #include "TreePropSheetEx/TreePropSheetSplitter.h"
 #include "TreePropSheetExSRC.h"
 
@@ -61,12 +66,19 @@ protected:
 // COMMENT: {4/1/2009 3:46:35 PM}	TreePropSheet::CTreePropSheetEx          SheetTop;
 	CTreePropSheetExSRC                      SheetTop;
 	TreePropSheet::CTreePropSheetSplitter    Splitter;
-	CPropNone                                PropNone;
-	CPropConstant                            PropConstant;
+
+	CPropNone       PropNone;
+	CPropConstant   PropConstant;
+	CPropLinear     PropLinear;
+	CPropPoints     PropPoints;
+	CPropXYZ        PropXYZ;
 
 	CGridElt GridElt;
 	CGridElt GridEltFixed;
 	CGridElt GridEltLinear;
+	CGridElt GridEltPoints;
+	CGridElt GridEltXYZ;
+	
 	CRichEditCtrl RichEditCtrl;
 
 	HTREEITEM ItemDDX;
@@ -84,6 +96,16 @@ protected:
 	std::string m_sStorageRTF;           // IDR_MEDIA_SPEC_STORAGE_RTF
 	std::string m_sAlphaHorizontalRTF;   // IDR_MEDIA_ALPHA_HORZ_RTF
 	std::string m_sAlphaVerticalRTF;     // IDR_MEDIA_ALPHA_VERT_RTF
+
+	HTREEITEM htiACTIVE;
+	HTREEITEM htiKX;
+	HTREEITEM htiKY;
+	HTREEITEM htiKZ;
+	HTREEITEM htiPOROSITY;
+	HTREEITEM htiSTORAGE;
+	HTREEITEM htiALPHA_LONG;
+	HTREEITEM htiALPHA_HORIZONTAL;
+	HTREEITEM htiALPHA_VERTICAL; 
 
 	std::string sDesc;
 

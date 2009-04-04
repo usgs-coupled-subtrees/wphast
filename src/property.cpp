@@ -226,11 +226,12 @@ void Cproperty::Dump(CDumpContext& dc)const
 
 void Cproperty::Serialize(bool bStoring, hid_t loc_id)
 {
-	static const char szPropType[]  = "prop_type";
-	static const char szType[]      = "type";
-	static const char szV[]         = "v";
-	static const char szCoord[]     = "coord";
-	static const char szDist[]      = "dist";
+	static const char szPropType[]   = "prop_type";
+	static const char szType[]       = "type";
+	static const char szV[]          = "v";
+	static const char szCoord[]      = "coord";
+	static const char szDist[]       = "dist";
+	static const char szDataSource[] = "data_source";
 
 	const int _LINEAR = 11;
 	const int _FIXED  = 12;
@@ -245,18 +246,21 @@ void Cproperty::Serialize(bool bStoring, hid_t loc_id)
 	{
 		// prop_type
 		//
-  		ASSERT(this->type == PROP_FIXED || this->type == PROP_LINEAR);
+  		ASSERT(this->type == PROP_FIXED || this->type == PROP_LINEAR || this->type == PROP_POINTS || this->type == PROP_XYZ);
 		hid_t proptype = CGlobal::HDFCreatePropType();
 		status = CGlobal::HDFSerialize(bStoring, loc_id, szPropType, proptype, 1, &this->type);
 		ASSERT(status >= 0);
 		status = H5Tclose(proptype);
 		ASSERT(status >= 0);
 
-		// v and count_v
-		//
-		hsize_t count = this->count_v;
-		status = CGlobal::HDFSerializeWithSize(bStoring, loc_id, szV, H5T_NATIVE_DOUBLE, count, this->v);
-		ASSERT(status >= 0);
+		if (this->type == PROP_FIXED || this->type == PROP_LINEAR)
+		{
+			// v and count_v
+			//
+			hsize_t count = this->count_v;
+			status = CGlobal::HDFSerializeWithSize(bStoring, loc_id, szV, H5T_NATIVE_DOUBLE, count, this->v);
+			ASSERT(status >= 0);
+		}
 
 
 		switch (this->type)
@@ -279,6 +283,28 @@ void Cproperty::Serialize(bool bStoring, hid_t loc_id)
 				dist[1] = this->dist2;
 				status = CGlobal::HDFSerialize(bStoring, loc_id, szDist, H5T_NATIVE_DOUBLE, 2, dist);
 				ASSERT(status >= 0);
+				break;
+			case PROP_POINTS:
+				ASSERT(this->data_source);
+
+				// Datasource
+				//
+				if (this->data_source)
+				{
+					status = CGlobal::HDFSerializeData_source(bStoring, loc_id, szDataSource, *this->data_source);
+					ASSERT(status >= 0);
+				}
+				break;
+			case PROP_XYZ:
+				ASSERT(this->data_source);
+
+				// Datasource
+				//
+				if (this->data_source)
+				{
+					status = CGlobal::HDFSerializeData_source(bStoring, loc_id, szDataSource, *this->data_source);
+					ASSERT(status >= 0);
+				}
 				break;
 			default:
 				ASSERT(FALSE);
@@ -320,12 +346,15 @@ void Cproperty::Serialize(bool bStoring, hid_t loc_id)
 		status = H5Tclose(proptype);
 		ASSERT(status >= 0);
 
-		// v and count_v
-		//
-		hsize_t count;
-		status = CGlobal::HDFSerializeWithSize(bStoring, loc_id, szV, H5T_NATIVE_DOUBLE, count, this->v);
-		this->count_v = (int)count;
-		ASSERT(status >= 0);
+		if (this->type == PROP_FIXED || this->type == PROP_LINEAR)
+		{
+			// v and count_v
+			//
+			hsize_t count;
+			status = CGlobal::HDFSerializeWithSize(bStoring, loc_id, szV, H5T_NATIVE_DOUBLE, count, this->v);
+			this->count_v = (int)count;
+			ASSERT(status >= 0);
+		}
 
 		switch (this->type)
 		{
@@ -349,6 +378,39 @@ void Cproperty::Serialize(bool bStoring, hid_t loc_id)
 				this->dist1 = dist[0];
 				this->dist2 = dist[1];
 				ASSERT(status >= 0);
+				break;
+			case PROP_POINTS:
+				if (this->data_source)
+				{
+					delete this->data_source;
+				}
+				this->data_source = new Data_source();
+
+				// Datasource
+				//
+				if (this->data_source)
+				{
+					status = CGlobal::HDFSerializeData_source(bStoring, loc_id, szDataSource, *this->data_source);
+					ASSERT(status >= 0);
+					//{{ TODO CHECK
+					this->data_source->Set_user_points(this->data_source->Get_points());
+					//}}
+				}
+				break;
+			case PROP_XYZ:
+				if (this->data_source)
+				{
+					delete this->data_source;
+				}
+				this->data_source = new Data_source();
+
+				// Datasource
+				//
+				if (this->data_source)
+				{
+					status = CGlobal::HDFSerializeData_source(bStoring, loc_id, szDataSource, *this->data_source);
+					ASSERT(status >= 0);
+				}
 				break;
 			default:
 				ASSERT(FALSE);
@@ -499,6 +561,8 @@ void Cproperty::Serialize(CArchive& ar)
 void Cproperty::Insert(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent, LPCTSTR heading)const
 {
 	CString format;
+	const char *coor_name[] = { "MAP", "GRID", "NONE" };
+	size_t cs;
 
 	switch (this->type)
 	{
@@ -519,12 +583,33 @@ void Cproperty::Insert(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent, LPCTSTR headin
 				this->dist2
 				);
 			break;
+		case PROP_POINTS:
+			ASSERT(this->data_source);
+			cs = this->data_source->Get_user_coordinate_system();
+			ASSERT(cs >= PHAST_Transform::MAP && cs <= PHAST_Transform::NONE);
+			format.Format("%s POINTS %s", heading, coor_name[cs]);
+			break;
+		case PROP_XYZ:
+			ASSERT(this->data_source);
+			cs = this->data_source->Get_user_coordinate_system();
+			ASSERT(cs >= PHAST_Transform::MAP && cs <= PHAST_Transform::NONE);
+			format.Format("%s XYZ %s %s", heading, coor_name[cs], this->data_source->Get_file_name().c_str());
+			break;
 		default:
 			ASSERT(FALSE);
 	}
 	if (!format.IsEmpty())
 	{
-		pTreeCtrl->InsertItem(format, htiParent);
+		HTREEITEM item = pTreeCtrl->InsertItem(format, htiParent);
+		if (this->type == PROP_POINTS)
+		{
+			std::vector<Point>::const_iterator citer = this->data_source->Get_user_points().begin();
+			for (; citer != this->data_source->Get_user_points().end(); ++citer)
+			{
+				format.Format("%g %g %g %g", citer->x(), citer->y(), citer->z(), citer->get_v());
+				pTreeCtrl->InsertItem(format, item);
+			}
+		}
 	}
 }
 
@@ -573,6 +658,12 @@ std::ostream& operator<< (std::ostream &os, const Cproperty &a)
 				}
 				os << "\t\t\t\tend_points" << std::endl;
 			}
+			break;
+		case PROP_XYZ:
+			ASSERT(a.data_source);
+			cs = a.data_source->Get_user_coordinate_system();
+			ASSERT(cs >= PHAST_Transform::MAP && cs <= PHAST_Transform::NONE);
+			os << "XYZ" << coor_name[cs] << a.data_source->Get_file_name().c_str() << std::endl;
 			break;
 		default:
 			ASSERT(FALSE);

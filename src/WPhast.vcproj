@@ -858,6 +858,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\PropConstant.cpp"
+				>
+			</File>
+			<File
 				RelativePath="property.cpp"
 				>
 			</File>
@@ -866,7 +870,27 @@
 				>
 			</File>
 			<File
+				RelativePath=".\PropLinear.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\PropNone.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\PropPoints.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\PropsPage.cpp"
+				>
+			</File>
+			<File
 				RelativePath="PropTreeOleDropTarget.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\PropXYZ.cpp"
 				>
 			</File>
 			<File
@@ -1115,6 +1139,10 @@
 			</File>
 			<File
 				RelativePath="TreeCtrlNode.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\TreePropSheetExSRC.cpp"
 				>
 			</File>
 			<File
@@ -4476,6 +4504,82 @@
 					>
 				</File>
 			</Filter>
+			<Filter
+				Name="TreePropSheetEx"
+				>
+				<File
+					RelativePath=".\TreePropSheetEx\hookwnd.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\TreePropSheetEx\PropPageFrame.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\TreePropSheetEx\PropPageFrameBordered.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\TreePropSheetEx\PropPageFrameEx.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\TreePropSheetEx\PropPageFrameOffice2003.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\TreePropSheetEx\ResizableGrip.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\TreePropSheetEx\ResizableLayout.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\TreePropSheetEx\ResizableMinMax.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\TreePropSheetEx\ResizablePage.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\TreePropSheetEx\ResizableState.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\TreePropSheetEx\ThemeLibEx.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\TreePropSheetEx\TreePropSheetBase.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\TreePropSheetEx\TreePropSheetBordered.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\TreePropSheetEx\TreePropSheetEx.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\TreePropSheetEx\TreePropSheetOffice2003.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\TreePropSheetEx\TreePropSheetResizableLibHook.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\TreePropSheetEx\TreePropSheetSplitter.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\TreePropSheetEx\TreePropSheetTreeCtrl.cpp"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -4890,6 +4994,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\PropConstant.h"
+				>
+			</File>
+			<File
 				RelativePath="property.h"
 				>
 			</File>
@@ -4898,7 +5006,31 @@
 				>
 			</File>
 			<File
+				RelativePath=".\PropLinear.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PropNone.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PropPoints.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PropsPage.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PropStruct.h"
+				>
+			</File>
+			<File
 				RelativePath="PropTreeOleDropTarget.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PropXYZ.h"
 				>
 			</File>
 			<File
@@ -5127,6 +5259,10 @@
 			</File>
 			<File
 				RelativePath="TreeMemento.h"
+				>
+			</File>
+			<File
+				RelativePath=".\TreePropSheetExSRC.h"
 				>
 			</File>
 			<File
@@ -6384,6 +6520,10 @@
 			</File>
 			<File
 				RelativePath="res\Toolbar.bmp"
+				>
+			</File>
+			<File
+				RelativePath=".\res\toolbar1.bmp"
 				>
 			</File>
 			<File

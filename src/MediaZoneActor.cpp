@@ -12,6 +12,11 @@
 #include "FlowOnly.h"
 #include "Protect.h"
 
+//#include "MediaProps.h"
+#include "PropsPage.h"
+#include "TreePropSheetEx/TreePropSheetEx.h"
+
+
 #include <vtkPropAssembly.h>
 #include <vtkObjectFactory.h> // reqd by vtkStandardNewMacro
 
@@ -210,7 +215,8 @@ void CMediaZoneActor::Edit(CTreeCtrl* pTreeCtrl)
 {
 	CString str;
 	str.Format(_T("%s Properties"), this->GetName());
-	CPropertySheet props(str);
+// COMMENT: {3/31/2009 4:55:31 PM}	CPropertySheet props(str);
+	TreePropSheet::CTreePropSheetEx props(str);
 
 	CFrameWnd *pFrame = (CFrameWnd*)::AfxGetApp()->m_pMainWnd;
 	ASSERT_VALID(pFrame);
@@ -231,22 +237,43 @@ void CMediaZoneActor::Edit(CTreeCtrl* pTreeCtrl)
 		}
 	}
 
-	CMediaSpreadPropertyPage mediaSpreadProps;
-	mediaSpreadProps.SetProperties(elt);
-	mediaSpreadProps.SetDesc(this->GetDesc());
+// COMMENT: {3/31/2009 5:04:31 PM}	CMediaSpreadPropertyPage mediaSpreadProps;
+// COMMENT: {3/31/2009 5:04:31 PM}	mediaSpreadProps.SetProperties(elt);
+// COMMENT: {3/31/2009 5:04:31 PM}	mediaSpreadProps.SetDesc(this->GetDesc());
+// COMMENT: {3/31/2009 5:04:31 PM}	if (this->GetDefault())
+// COMMENT: {3/31/2009 5:04:31 PM}	{
+// COMMENT: {3/31/2009 5:04:31 PM}		mediaSpreadProps.SetDefault(true);
+// COMMENT: {3/31/2009 5:04:31 PM}		mediaSpreadProps.SetFlowOnly(bool(pDoc->GetFlowOnly()));
+// COMMENT: {3/31/2009 5:04:31 PM}	}
+// COMMENT: {3/31/2009 5:04:31 PM}	props.AddPage(&mediaSpreadProps);
+
+	//{{
+// COMMENT: {3/31/2009 5:10:56 PM}	CMediaProps mediaProps;
+	CPropsPage mediaProps;
+
+
+	mediaProps.SetProperties(elt);
+	mediaProps.SetDesc(this->GetDesc());
 	if (this->GetDefault())
 	{
-		mediaSpreadProps.SetDefault(true);
-		mediaSpreadProps.SetFlowOnly(bool(pDoc->GetFlowOnly()));
+		mediaProps.SetDefault(true);
+		mediaProps.SetFlowOnly(bool(pDoc->GetFlowOnly()));
 	}
-	props.AddPage(&mediaSpreadProps);
+	props.AddPage(&mediaProps);
+	//}}
 
 	if (props.DoModal() == IDOK)
 	{
-		CGridElt grid_elt;
-		mediaSpreadProps.GetProperties(grid_elt);
-		ASSERT(grid_elt.polyh);
-		pDoc->Execute(new CSetMediaAction(this, pTreeCtrl, grid_elt, mediaSpreadProps.GetDesc()));
+// COMMENT: {3/31/2009 5:05:38 PM}		CGridElt grid_elt;
+// COMMENT: {3/31/2009 5:05:38 PM}		mediaSpreadProps.GetProperties(grid_elt);
+// COMMENT: {3/31/2009 5:05:38 PM}		ASSERT(grid_elt.polyh);
+// COMMENT: {3/31/2009 5:05:38 PM}		pDoc->Execute(new CSetMediaAction(this, pTreeCtrl, grid_elt, mediaSpreadProps.GetDesc()));
+
+		CGridElt GridElt;
+		mediaProps.GetProperties(GridElt);
+		ASSERT(GridElt.polyh);
+		pDoc->Execute(new CSetMediaAction(this, pTreeCtrl, GridElt, mediaProps.GetDesc()));
+
 	}
 }
 

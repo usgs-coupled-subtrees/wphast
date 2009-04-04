@@ -12,6 +12,7 @@ IMPLEMENT_DYNAMIC(CPropNone, CResizablePage)
 
 CPropNone::CPropNone()
 : CResizablePage(CPropNone::IDD)
+, bSkipUpdateData(false)
 {
 
 }
@@ -70,5 +71,24 @@ HBRUSH CPropNone::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 void CPropNone::OnCbnSelchangeTypeCombo()
 {
 	// Add your control notification handler code here
+	ASSERT(!bSkipUpdateData);
+	bSkipUpdateData = true;
 	::SendMessage(*this->GetParent(), PSM_SETCURSEL, (WPARAM)ComboType.GetCurSel(), (LPARAM)0);
+	ASSERT(bSkipUpdateData);
+	bSkipUpdateData = false;
+}
+
+BOOL CPropNone::OnKillActive()
+{
+	ASSERT_VALID(this);
+
+	if (!this->bSkipUpdateData)
+	{
+		if (!UpdateData())
+		{
+			TRACE(traceAppMsg, 0, "UpdateData failed during page deactivation\n");
+			return FALSE;
+		}
+	}
+	return TRUE;
 }

@@ -22,9 +22,11 @@ protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 
 	DECLARE_MESSAGE_MAP()
+	bool      bSkipUpdateData;
 
 public:
 	virtual BOOL OnInitDialog();
+	virtual BOOL OnKillActive();
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	CComboBox ComboType;
 	afx_msg void OnCbnSelchangeTypeCombo();
