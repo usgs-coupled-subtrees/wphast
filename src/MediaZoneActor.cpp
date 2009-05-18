@@ -14,7 +14,7 @@
 #include "Global.h"
 
 //#include "MediaProps.h"
-#include "PropsPage.h"
+#include "MediaPropsPage.h"
 #include "TreePropSheetEx/TreePropSheetEx.h"
 
 
@@ -248,7 +248,7 @@ void CMediaZoneActor::Edit(CTreeCtrl* pTreeCtrl)
 
 	//{{
 // COMMENT: {3/31/2009 5:10:56 PM}	CMediaProps mediaProps;
-	CPropsPage mediaProps;
+	CMediaPropsPage mediaProps;
 
 
 	mediaProps.SetProperties(elt);

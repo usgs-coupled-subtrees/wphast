@@ -21,17 +21,17 @@
 #include "afxcmn.h"
 
 
-// CPropsPage dialog
+// CMediaPropsPage dialog
 
-class CPropsPage // : public CPropertyPage
+class CMediaPropsPage // : public CPropertyPage
 : public CResizablePage
 , public TreePropSheet::CWhiteBackgroundProvider
 {
-	DECLARE_DYNAMIC(CPropsPage)
+	DECLARE_DYNAMIC(CMediaPropsPage)
 
 public:
-	CPropsPage();
-	virtual ~CPropsPage();
+	CMediaPropsPage();
+	virtual ~CMediaPropsPage();
 
 	void CommonConstruct(void);
 

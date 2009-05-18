@@ -784,6 +784,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\MediaPropsPage.cpp"
+				>
+			</File>
+			<File
 				RelativePath="MediaSpreadPropertyPage.cpp"
 				>
 			</File>
@@ -889,10 +893,6 @@
 			</File>
 			<File
 				RelativePath=".\PropPoints.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\PropsPage.cpp"
 				>
 			</File>
 			<File
@@ -4912,6 +4912,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\MediaPropsPage.h"
+				>
+			</File>
+			<File
 				RelativePath="MediaSpreadPropertyPage.h"
 				>
 			</File>
@@ -5033,10 +5037,6 @@
 			</File>
 			<File
 				RelativePath=".\PropPoints.h"
-				>
-			</File>
-			<File
-				RelativePath=".\PropsPage.h"
 				>
 			</File>
 			<File

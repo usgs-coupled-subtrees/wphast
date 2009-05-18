@@ -3,13 +3,13 @@
 
 #include "stdafx.h"
 #include "WPhast.h"
-#include "PropsPage.h"
+#include "MediaPropsPage.h"
 
 #include "PropStruct.h"
 #include "Global.h"
 
 
-// CPropsPage dialog
+// CMediaPropsPage dialog
 
 const TCHAR ACTIVE[]            = _T("Active");
 const TCHAR KX[]                = _T("Kx");
@@ -21,10 +21,10 @@ const TCHAR ALPHA_LONG[]        = _T("Longitudinal dispersivity");
 const TCHAR ALPHA_HORIZONTAL[]  = _T("Horizontal dispersivity");
 const TCHAR ALPHA_VERTICAL[]    = _T("Vertical dispersivity");
 
-IMPLEMENT_DYNAMIC(CPropsPage, CResizablePage)
+IMPLEMENT_DYNAMIC(CMediaPropsPage, CResizablePage)
 
-CPropsPage::CPropsPage()
-: CResizablePage(CPropsPage::IDD)
+CMediaPropsPage::CMediaPropsPage()
+: CResizablePage(CMediaPropsPage::IDD)
 // COMMENT: {5/5/2009 5:23:33 PM}, Splitter(2, SSP_VERT, 10, 5)
 // COMMENT: {5/13/2009 6:18:55 PM}, Splitter(3, SSP_VERT, 10, 5)
 // COMMENT: {5/14/2009 4:03:18 PM}, Splitter(3, SSP_VERT, 33, 5)
@@ -36,7 +36,7 @@ CPropsPage::CPropsPage()
 	this->CommonConstruct();
 }
 
-void CPropsPage::CommonConstruct(void)
+void CMediaPropsPage::CommonConstruct(void)
 {
 	this->m_psp.dwFlags &= (~PSP_HASHELP); // remove help button
 
@@ -61,12 +61,12 @@ void CPropsPage::CommonConstruct(void)
 	CGlobal::LoadRTFString(this->m_sAlphaVerticalRTF,   IDR_MEDIA_ALPHA_VERT_RTF);
 }
 
-CPropsPage::~CPropsPage()
+CMediaPropsPage::~CMediaPropsPage()
 {
 	TRACE("%s\n", __FUNCTION__);
 }
 
-void CPropsPage::DoDataExchange(CDataExchange* pDX)
+void CMediaPropsPage::DoDataExchange(CDataExchange* pDX)
 {
 	TRACE("In %s\n", __FUNCTION__);
 	CResizablePage::DoDataExchange(pDX);
@@ -383,7 +383,7 @@ void CPropsPage::DoDataExchange(CDataExchange* pDX)
 }
 
 
-BEGIN_MESSAGE_MAP(CPropsPage, CResizablePage)
+BEGIN_MESSAGE_MAP(CMediaPropsPage, CResizablePage)
 	ON_NOTIFY(TVN_SELCHANGINGA, 0x7EEE, OnPageTreeSelChanging)
 	ON_NOTIFY(TVN_SELCHANGINGW, 0x7EEE, OnPageTreeSelChanging)
 	ON_NOTIFY(TVN_SELCHANGEDA,  0x7EEE, OnPageTreeSelChanged)
@@ -391,9 +391,9 @@ BEGIN_MESSAGE_MAP(CPropsPage, CResizablePage)
 	ON_MESSAGE(UM_DDX_FAILURE, OnUM_DDXFailure)
 END_MESSAGE_MAP()
 
-// CPropsPage message handlers
+// CMediaPropsPage message handlers
 
-bool CPropsPage::RegisterSheet(UINT nID, CPropertySheet& rSheet)
+bool CMediaPropsPage::RegisterSheet(UINT nID, CPropertySheet& rSheet)
 {
 	TRACE("In %s\n", __FUNCTION__);
 
@@ -422,7 +422,7 @@ bool CPropsPage::RegisterSheet(UINT nID, CPropertySheet& rSheet)
 	return true;
 }
 
-BOOL CPropsPage::OnInitDialog()
+BOOL CMediaPropsPage::OnInitDialog()
 {
 	TRACE("In %s\n", __FUNCTION__);
 
@@ -506,7 +506,7 @@ BOOL CPropsPage::OnInitDialog()
 	// EXCEPTION: OCX Property Pages should return FALSE
 }
 
-void CPropsPage::OnPageTreeSelChanging(NMHDR *pNotifyStruct, LRESULT *pResult)
+void CMediaPropsPage::OnPageTreeSelChanging(NMHDR *pNotifyStruct, LRESULT *pResult)
 {
 	TRACE("In %s\n", __FUNCTION__);
 	NMTREEVIEW *pTvn = reinterpret_cast<NMTREEVIEW*>(pNotifyStruct);
@@ -531,7 +531,7 @@ void CPropsPage::OnPageTreeSelChanging(NMHDR *pNotifyStruct, LRESULT *pResult)
 	TRACE("Out Allowed %s\n", __FUNCTION__);
 }
 
-void CPropsPage::OnPageTreeSelChanged(NMHDR *pNotifyStruct, LRESULT *pResult)
+void CMediaPropsPage::OnPageTreeSelChanged(NMHDR *pNotifyStruct, LRESULT *pResult)
 {
 	TRACE("In %s\n", __FUNCTION__);
 	UNREFERENCED_PARAMETER(pResult);
@@ -600,7 +600,7 @@ void CPropsPage::OnPageTreeSelChanged(NMHDR *pNotifyStruct, LRESULT *pResult)
 	TRACE("Out %s\n", __FUNCTION__);
 }
 
-LRESULT CPropsPage::OnUM_DDXFailure(WPARAM wParam, LPARAM lParam)
+LRESULT CMediaPropsPage::OnUM_DDXFailure(WPARAM wParam, LPARAM lParam)
 {
 	TRACE("In %s\n", __FUNCTION__);
 	// DDX/DDV failure occured
@@ -612,7 +612,7 @@ LRESULT CPropsPage::OnUM_DDXFailure(WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
-void CPropsPage::SetProperties(const CGridElt& rGridElt)
+void CMediaPropsPage::SetProperties(const CGridElt& rGridElt)
 {
 	TRACE("In %s\n", __FUNCTION__);
 	// copy grid_elt
@@ -663,7 +663,7 @@ void CPropsPage::SetProperties(const CGridElt& rGridElt)
 	TRACE("Out %s\n", __FUNCTION__);
 }
 
-void CPropsPage::GetProperties(CGridElt& rGridElt)const
+void CMediaPropsPage::GetProperties(CGridElt& rGridElt)const
 {
 	TRACE("In %s\n", __FUNCTION__);
 	rGridElt = this->GridElt;
@@ -709,12 +709,12 @@ void CPropsPage::GetProperties(CGridElt& rGridElt)const
 	TRACE("Out %s\n", __FUNCTION__);
 }
 
-void CPropsPage::SetDesc(LPCTSTR desc)
+void CMediaPropsPage::SetDesc(LPCTSTR desc)
 {
 	this->PageDesc.SetDesc(desc);
 }
 
-LPCTSTR CPropsPage::GetDesc()const
+LPCTSTR CMediaPropsPage::GetDesc()const
 {
 	return this->PageDesc.GetDesc();
 }

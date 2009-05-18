@@ -33,7 +33,7 @@
 #include "srcinput/Data_source.h"
 #include "srcinput/Prism.h"
 #include "TreePropSheetExSRC.h"
-#include "PropsPage.h"
+#include "MediaPropsPage.h"
 #include "FakeFiledata.h"
 
 
