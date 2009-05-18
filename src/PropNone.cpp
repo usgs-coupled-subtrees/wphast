@@ -14,11 +14,12 @@ CPropNone::CPropNone()
 : CResizablePage(CPropNone::IDD)
 , bSkipUpdateData(false)
 {
-
+	TRACE("%s(%p)\n", __FUNCTION__, this);
 }
 
 CPropNone::~CPropNone()
 {
+	TRACE("%s(%p)\n", __FUNCTION__, this);
 }
 
 void CPropNone::DoDataExchange(CDataExchange* pDX)

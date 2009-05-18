@@ -377,6 +377,9 @@
 #define IDD_PROP_LINEAR                 412
 #define IDD_PROP_POINTS                 413
 #define IDD_PROP_XYZ                    414
+#define IDD_PROPS_TIME_SERIES           415
+#define IDD_PROP_CONSTANT_M             416
+#define IDD_PROP_DESC                   417
 #define IDC_EDIT_X                      1000
 #define IDC_TITLE                       1000
 #define IDC_EDIT_Y                      1001
@@ -874,9 +877,13 @@
 #define IDC_EDIT5                       1487
 #define IDC_TREE_PROPS                  1488
 #define IDC_TYPE_COMBO                  1489
+#define IDC_TREE_PROPS2                 1489
+#define IDC_DESC_PAGE                   1489
 #define IDC_VALUE_EDIT                  1490
 #define IDC_EDIT_XYZ                    1492
 #define IDC_BUTTON_XYZ                  1493
+#define IDC_TAB1                        1494
+#define IDC_TIMES_GRID                  1495
 #define IDC_RESIZE_COLUMN               28654
 #define IDC_RESIZE_ROW                  28655
 #define IDR_POPUP                       28656
@@ -923,7 +930,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        413
 #define _APS_NEXT_COMMAND_VALUE         32861
-#define _APS_NEXT_CONTROL_VALUE         1494
+#define _APS_NEXT_CONTROL_VALUE         1496
 #define _APS_NEXT_SYMED_VALUE           126
 #endif
 #endif

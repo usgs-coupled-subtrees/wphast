@@ -34,6 +34,7 @@
 #include "srcinput/Prism.h"
 #include "TreePropSheetExSRC.h"
 #include "PropsPage.h"
+#include "FakeFiledata.h"
 
 
 #include <afxmt.h>
@@ -914,74 +915,62 @@ void CGlobal::DDX_Property(CDataExchange* pDX, CTreePropSheetExSRC* pTreeProp, H
 		switch (pTreeProp->GetActiveIndex())
 		{
 		case PAGE_NONE:
-			value->type = PROP_UNDEFINED;
+			{
+				value->type = PROP_UNDEFINED;
+			}
 			break;
 		case PAGE_FIXED:
-			value->type = PROP_FIXED;
+			{
+				if (!pages[PAGE_FIXED]->UpdateData(TRUE))
+				{
+					pDX->Fail();
+				}
+				CPropConstant *pConstant = dynamic_cast<CPropConstant*>(pages[PAGE_FIXED]);
+				(*value) = pConstant->GetProperty();
+				ASSERT(value->type == PROP_FIXED);
+			}
 			break;
 		case PAGE_LINEAR:
-			value->type = PROP_LINEAR;
+			{
+				if (!pages[PAGE_LINEAR]->UpdateData(TRUE))
+				{
+					pDX->Fail();
+				}
+				CPropLinear *pLinear = dynamic_cast<CPropLinear*>(pages[PAGE_LINEAR]);
+				(*value) = pLinear->GetProperty();
+				ASSERT(value->type == PROP_LINEAR);
+			}
 			break;
 		case PAGE_POINTS:
-			value->type = PROP_POINTS;
+			{
+				if (!pages[PAGE_POINTS]->UpdateData(TRUE))
+				{
+					pDX->Fail();
+				}
+				CPropPoints *pPoints = dynamic_cast<CPropPoints*>(pages[PAGE_POINTS]);
+				(*value) = pPoints->GetProperty();
+				ASSERT(value->type == PROP_POINTS);
+			}
 			break;
-//{{
 		case PAGE_XYZ:
-			value->type = PROP_XYZ;
+			{
+				if (!pages[PAGE_XYZ]->UpdateData(TRUE))
+				{
+					pDX->Fail();
+				}
+				CPropXYZ *pXYZ = dynamic_cast<CPropXYZ*>(pages[PAGE_XYZ]);
+				(*value) = pXYZ->GetProperty();
+				ASSERT(value->type == PROP_XYZ);
+			}
 			break;
-//}}
 		default:
 			ASSERT(FALSE);
-		}
-
-		if (value->type == PROP_UNDEFINED)
-		{
-			// do nothing
-		}
-		else if (value->type == PROP_FIXED)
-		{
-			if (!pages[PAGE_FIXED]->UpdateData(TRUE))
-			{
-				pDX->Fail();
-			}
-			CPropConstant *pConstant = dynamic_cast<CPropConstant*>(pages[PAGE_FIXED]);
-			value->v[0] = pConstant->value;
-		}
-		else if (value->type == PROP_LINEAR)
-		{
-			if (!pages[PAGE_LINEAR]->UpdateData(TRUE))
-			{
-				pDX->Fail();
-			}
-			CPropLinear *pLinear = dynamic_cast<CPropLinear*>(pages[PAGE_LINEAR]);
-			(*value) = pLinear->GetProperty();
-			ASSERT(value->type == PROP_LINEAR);
-		}
-		else if (value->type == PROP_POINTS)
-		{
-			if (!pages[PAGE_POINTS]->UpdateData(TRUE))
-			{
-				pDX->Fail();
-			}
-			CPropPoints *pPoints = dynamic_cast<CPropPoints*>(pages[PAGE_POINTS]);
-			(*value) = pPoints->GetProperty();
-			ASSERT(value->type == PROP_POINTS);
-		}
-		else if (value->type == PROP_XYZ)
-		{
-			if (!pages[PAGE_XYZ]->UpdateData(TRUE))
-			{
-				pDX->Fail();
-			}
-			CPropXYZ *pXYZ = dynamic_cast<CPropXYZ*>(pages[PAGE_XYZ]);
-			(*value) = pXYZ->GetProperty();
-			ASSERT(value->type == PROP_XYZ);
 		}
 
 		// all ok so copy
 		if (value->type == PROP_FIXED)
 		{
-			value->count_v = 1;
+			ASSERT(value->count_v == 1);
 			(*props[PAGE_FIXED]) = (*value);
 		}
 		else if (value->type == PROP_LINEAR)
@@ -998,14 +987,37 @@ void CGlobal::DDX_Property(CDataExchange* pDX, CTreePropSheetExSRC* pTreeProp, H
 			(*props[PAGE_XYZ]) = (*value);
 		}
 
+#if defined(_DEBUG)
+		value->AssertValid();
+#endif
+
 	}
 	else
 	{
+		//
+		// always set properties
+		//
+
+		CPropConstant *pConstant = dynamic_cast<CPropConstant*>(pages[PAGE_FIXED]);
+		pConstant->SetProperty(*props[PAGE_FIXED]);
+
+		CPropLinear *pLinear = dynamic_cast<CPropLinear*>(pages[PAGE_LINEAR]);
+		pLinear->SetProperty(*props[PAGE_LINEAR]);
+
+		CPropPoints *pPoints = dynamic_cast<CPropPoints*>(pages[PAGE_POINTS]);
+		pPoints->SetProperty(*props[PAGE_POINTS]);
+
+		CPropXYZ *pXYZ = dynamic_cast<CPropXYZ*>(pages[PAGE_XYZ]);
+		pXYZ->SetProperty(*props[PAGE_XYZ]);
+
+		bool bSetActivePage = false;
+
 		if (value->type == PROP_UNDEFINED)
 		{
 			if (pTreeProp->GetActiveIndex() != PAGE_NONE)
 			{
 				pTreeProp->SetActivePage(PAGE_NONE);
+				bSetActivePage = true;
 			}
 			else
 			{
@@ -1014,11 +1026,11 @@ void CGlobal::DDX_Property(CDataExchange* pDX, CTreePropSheetExSRC* pTreeProp, H
 		}
 		else if (value->type == PROP_FIXED)
 		{
-			CPropConstant *pConstant = dynamic_cast<CPropConstant*>(pages[PAGE_FIXED]);
-			pConstant->value = value->v[0];
+			ASSERT(*props[PAGE_FIXED] == *value);
 			if (pTreeProp->GetActiveIndex() != PAGE_FIXED)
 			{
 				pTreeProp->SetActivePage(PAGE_FIXED);
+				bSetActivePage = true;
 			}
 			else
 			{
@@ -1027,11 +1039,11 @@ void CGlobal::DDX_Property(CDataExchange* pDX, CTreePropSheetExSRC* pTreeProp, H
 		}
 		else if (value->type == PROP_LINEAR)
 		{
-			CPropLinear *pLinear = dynamic_cast<CPropLinear*>(pages[PAGE_LINEAR]);
-			pLinear->SetProperty(*value);
+			ASSERT(*props[PAGE_LINEAR] == *value);
 			if (pTreeProp->GetActiveIndex() != PAGE_LINEAR)
 			{
 				pTreeProp->SetActivePage(PAGE_LINEAR);
+				bSetActivePage = true;
 			}
 			else
 			{
@@ -1040,11 +1052,11 @@ void CGlobal::DDX_Property(CDataExchange* pDX, CTreePropSheetExSRC* pTreeProp, H
 		}
 		else if (value->type == PROP_POINTS)
 		{
-			CPropPoints *pPoints = dynamic_cast<CPropPoints*>(pages[PAGE_POINTS]);
-			pPoints->SetProperty(*value);
+			ASSERT(*props[PAGE_POINTS] == *value);
 			if (pTreeProp->GetActiveIndex() != PAGE_POINTS)
 			{
 				pTreeProp->SetActivePage(PAGE_POINTS);
+				bSetActivePage = true;
 			}
 			else
 			{
@@ -1053,16 +1065,39 @@ void CGlobal::DDX_Property(CDataExchange* pDX, CTreePropSheetExSRC* pTreeProp, H
 		}
 		else if (value->type == PROP_XYZ)
 		{
-			CPropXYZ *pXYZ = dynamic_cast<CPropXYZ*>(pages[PAGE_XYZ]);
-			pXYZ->SetProperty(*value);
+			ASSERT(*props[PAGE_XYZ] == *value);
 			if (pTreeProp->GetActiveIndex() != PAGE_XYZ)
 			{
 				pTreeProp->SetActivePage(PAGE_XYZ);
+				bSetActivePage = true;
 			}
 			else
 			{
 				pages[PAGE_XYZ]->UpdateData(FALSE);
 			}
+		}
+
+		if (bSetActivePage)
+		{
+			//
+			// Note: The above SetActivePage call causes a UpdateData(TRUE) and
+			// subsequently a DoDataExchange(bSaveAndValidate := TRUE) which causes
+			// the previous selected property to overwrite the newly selected property
+			// so we must re-overwrite the newly selected property with the correct
+			// value.
+			//
+
+			CPropConstant *pConstant = dynamic_cast<CPropConstant*>(pages[PAGE_FIXED]);
+			pConstant->SetProperty(*props[PAGE_FIXED]);
+
+			CPropLinear *pLinear = dynamic_cast<CPropLinear*>(pages[PAGE_LINEAR]);
+			pLinear->SetProperty(*props[PAGE_LINEAR]);
+
+			CPropPoints *pPoints = dynamic_cast<CPropPoints*>(pages[PAGE_POINTS]);
+			pPoints->SetProperty(*props[PAGE_POINTS]);
+
+			CPropXYZ *pXYZ = dynamic_cast<CPropXYZ*>(pages[PAGE_XYZ]);
+			pXYZ->SetProperty(*props[PAGE_XYZ]);
 		}
 	}
 }
@@ -3402,6 +3437,14 @@ herr_t CGlobal::HDFSerializeData_source(bool bStoring, hid_t loc_id, const char*
 				status = CGlobal::HDFSerializeCoordinateSystemUser(bStoring, ds_gr_id, nValue);
 				rData_source.Set_user_coordinate_system(nValue);
 
+				//{{
+				Data_source::DATA_SOURCE_TYPE ds = rData_source.Get_source_type();
+				if (ds == Data_source::SHAPE || ds == Data_source::ARCRASTER || ds == Data_source::XYZ)
+				{
+					rData_source.Set_filedata(FakeFiledata::New(rData_source.Get_file_name(), nValue));
+				}
+				//}}
+
 				return_val = H5Gclose(ds_gr_id);
 				ASSERT(return_val >= 0);
 
@@ -3827,6 +3870,36 @@ BOOL CGlobal::IsValidArcraster(CString filename)
 	return FALSE;
 }
 
+BOOL CGlobal::IsValidXYZFile(CString filename, CDataExchange* pDX /* = NULL */)
+{
+	filename.Trim();
+	if (!filename.IsEmpty())
+	{
+		TCHAR path[MAX_PATH];
+		::strcpy(path, filename);
+		if (ATL::ATLPath::FileExists(path))
+		{
+			return TRUE;
+		}
+		else
+		{
+			if (pDX)
+			{
+				CString str;
+				str.Format("XYZ file \"%s\" not found.\n", path);
+				::AfxMessageBox(str);
+				pDX->Fail(); // throws
+			}
+		}
+	}
+	if (pDX)
+	{
+		::AfxMessageBox("Please select an XYZ file.");
+		pDX->Fail(); // throws
+	}
+	return FALSE;
+}
+
 BOOL CGlobal::FileExists(CString filename)
 {
 	return ATL::ATLPath::FileExists(filename);
@@ -4047,3 +4120,55 @@ double CGlobal::ComputeHandleRadius(vtkRenderer *renderer)
 	return CGlobal::ComputeRadius(renderer) * CGlobal::GetRadiusFactor();
 }
 
+#define GET_ABS_PATH_MACRO(D, C, P) \
+do { \
+	if (C.P && C.P->type == PROP_XYZ) { \
+		if (C.P->data_source) { \
+			std::string filename = C.P->data_source->Get_file_name(); \
+			if (filename.length() > 0) { \
+				C.P->data_source->Set_file_name(D->GetAbsolutePath(lpszPathName, filename)); \
+			} \
+		} \
+	} \
+} while(0)
+
+void CGlobal::PathsRelativeToAbsolute(LPCTSTR lpszPathName, CWPhastDoc* pDoc, CGridElt& elt)
+{
+	GET_ABS_PATH_MACRO(pDoc, elt, active);
+	GET_ABS_PATH_MACRO(pDoc, elt, porosity);
+	GET_ABS_PATH_MACRO(pDoc, elt, kx);
+	GET_ABS_PATH_MACRO(pDoc, elt, ky);
+	GET_ABS_PATH_MACRO(pDoc, elt, kz);
+	GET_ABS_PATH_MACRO(pDoc, elt, storage);
+	GET_ABS_PATH_MACRO(pDoc, elt, alpha_long);
+	GET_ABS_PATH_MACRO(pDoc, elt, alpha_trans);
+	GET_ABS_PATH_MACRO(pDoc, elt, alpha_horizontal);
+	GET_ABS_PATH_MACRO(pDoc, elt, alpha_vertical);
+
+}
+
+#define GET_REL_PATH_MACRO(D, C, P) \
+do { \
+	if (C.P && C.P->type == PROP_XYZ) { \
+		if (C.P->data_source) { \
+			std::string filename = C.P->data_source->Get_file_name(); \
+			if (filename.length() > 0) { \
+				C.P->data_source->Set_file_name(D->GetRelativePath(lpszPathName, filename)); \
+			} \
+		} \
+	} \
+} while(0)
+
+void CGlobal::PathsAbsoluteToRelative(LPCTSTR lpszPathName, CWPhastDoc* pDoc, CGridElt& elt)
+{
+	GET_REL_PATH_MACRO(pDoc, elt, active);
+	GET_REL_PATH_MACRO(pDoc, elt, porosity);
+	GET_REL_PATH_MACRO(pDoc, elt, kx);
+	GET_REL_PATH_MACRO(pDoc, elt, ky);
+	GET_REL_PATH_MACRO(pDoc, elt, kz);
+	GET_REL_PATH_MACRO(pDoc, elt, storage);
+	GET_REL_PATH_MACRO(pDoc, elt, alpha_long);
+	GET_REL_PATH_MACRO(pDoc, elt, alpha_trans);
+	GET_REL_PATH_MACRO(pDoc, elt, alpha_horizontal);
+	GET_REL_PATH_MACRO(pDoc, elt, alpha_vertical);
+}

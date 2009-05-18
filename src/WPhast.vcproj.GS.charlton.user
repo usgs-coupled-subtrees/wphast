@@ -20,7 +20,7 @@
 				HttpUrl=""
 				PDBPath=""
 				SQLDebugging=""
-				Environment=""
+				Environment="input=&quot;C:\cygwin\home\charlton\programs\phreeqc\wphast-trunk\Class\7.Phast\CapeCodPhast\flow.28.wphast&quot;"
 				EnvironmentMerge="true"
 				DebuggerFlavor="0"
 				MPIRunCommand=""

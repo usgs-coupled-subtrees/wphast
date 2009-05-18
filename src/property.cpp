@@ -168,24 +168,34 @@ void Cproperty::AssertValid() const
 	ASSERT(this);
 	switch (this->type)
 	{
-		case PROP_FIXED:
-			ASSERT(this->count_v == 1);
-			break;
-		case PROP_LINEAR:
-			ASSERT(this->coord == 'x' || this->coord == 'y' || this->coord == 'z');
-			ASSERT(this->count_v == 2);
-			break;
-		case PROP_ZONE:
-			ASSERT(FALSE);
-			break;
-		case PROP_POINTS:
-			ASSERT(this->data_source);
-			ASSERT(this->data_source->Get_defined());
-			ASSERT(this->data_source->Get_points().size());
-			break;
-		default:
-			ASSERT(FALSE);
-			break;
+	case PROP_UNDEFINED:
+		break;
+	case PROP_FIXED:
+		ASSERT(this->count_v == 1);
+		break;
+	case PROP_LINEAR:
+		ASSERT(this->coord == 'x' || this->coord == 'y' || this->coord == 'z');
+		ASSERT(this->count_v == 2);
+		break;
+	case PROP_ZONE:
+		ASSERT(FALSE);
+		break;
+	case PROP_POINTS:
+		ASSERT(this->data_source);
+		ASSERT(this->data_source->Get_defined());
+		ASSERT(this->data_source->Get_points().size());
+		break;
+	case PROP_XYZ:
+		ASSERT(this->count_v == 0);
+		ASSERT(this->data_source);
+		ASSERT(this->data_source->Get_defined());
+		ASSERT(this->data_source->Get_file_name().size());
+		ASSERT(this->data_source->Get_source_type() == Data_source::XYZ);
+		ASSERT(this->data_source->Get_user_source_type() == Data_source::XYZ);
+		break;
+	default:
+		ASSERT(FALSE);
+		break;
 	}
 }
 
@@ -671,4 +681,69 @@ std::ostream& operator<< (std::ostream &os, const Cproperty &a)
 			break;
 	}
 	return os;
+}
+
+bool operator==(const property& lhs, const property& rhs)
+{
+	if (lhs.type == rhs.type)
+	{
+		switch (lhs.type)
+		{
+		case PROP_UNDEFINED:
+			break;
+		case PROP_FIXED:
+			if (lhs.v[0] != rhs.v[0])
+			{
+				return false;
+			}
+			break;
+		case PROP_LINEAR:
+			if (lhs.coord != rhs.coord) return false;
+			if (lhs.v[0]  != rhs.v[0])  return false;
+			if (lhs.dist1 != rhs.dist1) return false;
+			if (lhs.v[1]  != rhs.v[1])  return false;
+			if (lhs.dist2 != rhs.dist2) return false;
+			break;
+		case PROP_MIXTURE:
+			if (lhs.count_v == rhs.count_v)
+			{
+				for (int i = 0; i < lhs.count_v; ++i)
+				{
+					if (lhs.v[i] != rhs.v[i]) return false;
+				}
+			}
+			break;
+		case PROP_POINTS:
+			if (lhs.data_source->Get_points().size() == rhs.data_source->Get_points().size())
+			{
+				for (size_t i = 0; i < lhs.data_source->Get_points().size(); ++i)
+				{
+					if (lhs.data_source->Get_points()[i] != rhs.data_source->Get_points()[i])
+					{
+						return false;
+					}
+				}
+				if (lhs.data_source->Get_user_coordinate_system() != rhs.data_source->Get_user_coordinate_system())
+				{
+					return false;
+				}
+			}
+			break;
+		case PROP_XYZ:
+			if (lhs.data_source->Get_file_name() != rhs.data_source->Get_file_name())
+			{
+				return false;
+			}
+			if (lhs.data_source->Get_user_coordinate_system() != rhs.data_source->Get_user_coordinate_system())
+			{
+				return false;
+			}
+			break;
+		default:
+			ASSERT(FALSE);
+			return false;
+			break;
+		}
+	}
+	return true;
 }

@@ -6,6 +6,7 @@
 #include "TreePropSheetEx/TreePropSheetUtil.hpp"
 #include "TreePropSheetEx/TreePropSheetEx.h"
 
+#include "PropDesc.h"
 #include "PropNone.h"
 #include "PropConstant.h"
 #include "PropLinear.h"
@@ -43,8 +44,8 @@ public:
 	void SetDefault(bool bDefault)       { this->bDefault = bDefault; }
 	bool GetDefault(void)const           { return bDefault; }
 
-	void SetDesc(LPCTSTR desc)           { this->sDesc = desc; }
-	LPCTSTR GetDesc()                    { return sDesc.c_str(); }
+	void SetDesc(LPCTSTR desc);//           { this->sDesc = desc; }
+	LPCTSTR GetDesc()const;//               { return sDesc.c_str(); }
 
 
 // Dialog Data
@@ -64,6 +65,11 @@ protected:
 protected:
 	bool RegisterSheet(UINT nID, CPropertySheet& rSheet);
 // COMMENT: {4/1/2009 3:46:35 PM}	TreePropSheet::CTreePropSheetEx          SheetTop;
+	//{{
+	//CTreePropSheetExSRC                      SheetDesc;
+	//CResizablePage                           PageDesc;
+	CPropDesc                                PageDesc;
+	//}}
 	CTreePropSheetExSRC                      SheetTop;
 	TreePropSheet::CTreePropSheetSplitter    Splitter;
 
@@ -107,7 +113,7 @@ protected:
 	HTREEITEM htiALPHA_HORIZONTAL;
 	HTREEITEM htiALPHA_VERTICAL; 
 
-	std::string sDesc;
+	//std::string sDesc;
 
 public:
 	virtual BOOL OnInitDialog();

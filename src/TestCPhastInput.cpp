@@ -3238,3 +3238,71 @@ void TestCPhastInput::testCapeCod(void)
 	}
 
 }
+#define EXTERNAL extern
+#include "srcinput/property.h"
+#include "srcinput/Data_source.h"
+#include "property.h"
+void TestCPhastInput::testProperty(void)
+{
+	CPhastInput* pInput = NULL;
+	try
+	{
+		CMemoryState oldMemState, newMemState, diffMemState;
+		oldMemState.Checkpoint();
+		{
+			TCHAR buffer[MAX_PATH];
+			::GetCurrentDirectory(MAX_PATH, buffer);
+			::SetCurrentDirectory(".\\Test\\");
+
+			std::string str(
+				"MEDIA\n"
+				"-box  0 0 0 10 10 10\n"
+				"-active XYZ map points.fil\n"
+				);
+			std::istringstream iss(str);
+
+			pInput = CPhastInput::New(iss, "testProperty");
+			CPPUNIT_ASSERT(pInput != NULL);
+
+			//pInput->Load();
+			pInput->Read();
+			CPPUNIT_ASSERT(pInput->GetErrorCount() == 0);
+
+			// build from scratch and compare
+			Cproperty p;
+			p.type = PROP_XYZ;
+			p.data_source = new Data_source;
+			p.data_source->Set_defined(true);
+			p.data_source->Set_source_type(Data_source::XYZ);
+			p.data_source->Set_user_source_type(Data_source::XYZ);
+
+			// file name
+			std::string s("points.fil");
+			p.data_source->Set_file_name(s);
+			p.data_source->Tidy(false);
+
+			// coordinate_system
+			p.data_source->Set_coordinate_system(PHAST_Transform::MAP);
+			p.data_source->Set_user_coordinate_system(PHAST_Transform::MAP);
+			CPPUNIT_ASSERT(*p.data_source == *::properties_with_data_source.front()->data_source);
+
+			// cleanup
+			pInput->Delete();
+			pInput = NULL;
+		}
+		newMemState.Checkpoint();
+#if defined(SHOW_MEM_LEAKS)
+		CPPUNIT_ASSERT(diffMemState.Difference( oldMemState, newMemState ) == 0);
+#endif
+	}
+	catch (...)
+	{
+		if (pInput)
+		{
+			LPCTSTR lpsz = pInput->GetErrorMsg();
+			if (lpsz) TRACE("testProperty:\n%s\n", lpsz);
+			pInput->Delete();
+		}
+		throw;
+	}
+}

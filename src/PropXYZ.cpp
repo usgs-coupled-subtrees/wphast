@@ -7,6 +7,9 @@
 
 #include "srcinput/Point.h"
 #include "srcinput/Data_source.h"
+#include "srcinput/Filedata.h"
+#include "FakeFiledata.h"
+#include "Global.h"
 
 // CPropXYZ dialog
 
@@ -41,25 +44,38 @@ void CPropXYZ::DoDataExchange(CDataExchange* pDX)
 		//
 		CString str;
 		DDX_Text(pDX, IDC_EDIT_XYZ, str);
-		std::string s(str);
-		p.data_source->Set_file_name(s);
-		//{{
-		p.data_source->Tidy(false);
-		//}}
+		CGlobal::IsValidXYZFile(str, pDX);
+
+		std::string file_name(str);
+		p.data_source->Set_file_name(file_name);
 
 		// MAP or GRID
 		int state;
 		DDX_Check(pDX, IDC_CHECK_USE_MAP, state);
 		if (state == BST_CHECKED)
 		{
+			p.data_source->Set_coordinate_system(PHAST_Transform::MAP);
 			p.data_source->Set_user_coordinate_system(PHAST_Transform::MAP);
+			Data_source::DATA_SOURCE_TYPE ds = p.data_source->Get_source_type();
+			ASSERT(ds == Data_source::XYZ);
+			{
+				p.data_source->Set_filedata(FakeFiledata::New(file_name, PHAST_Transform::MAP));
+			}
+			ASSERT(p.data_source->Get_filedata());
+			p.data_source->Get_filedata()->Set_coordinate_system(PHAST_Transform::MAP);
 		}
 		else
 		{
+			p.data_source->Set_coordinate_system(PHAST_Transform::GRID);
 			p.data_source->Set_user_coordinate_system(PHAST_Transform::GRID);
+			Data_source::DATA_SOURCE_TYPE ds = p.data_source->Get_source_type();
+			ASSERT(ds == Data_source::XYZ);
+			{
+				p.data_source->Set_filedata(FakeFiledata::New(file_name, PHAST_Transform::GRID));
+			}
+			ASSERT(p.data_source->Get_filedata());
+			p.data_source->Get_filedata()->Set_coordinate_system(PHAST_Transform::GRID);
 		}
-
-
 		this->prop = p;
 	}
 	else
@@ -74,10 +90,17 @@ void CPropXYZ::DoDataExchange(CDataExchange* pDX)
 			ASSERT(this->prop.data_source->Get_source_type() == Data_source::XYZ);
 			ASSERT(this->prop.data_source->Get_user_source_type() == Data_source::XYZ);
 			ASSERT(this->prop.data_source->Get_file_name().size());
+
+			// File name
 			if (this->prop.data_source->Get_file_name().size())
 			{
 				CString str(this->prop.data_source->Get_file_name().c_str());
 				DDX_Text(pDX, IDC_EDIT_XYZ, str);
+			}
+			else
+			{
+				CString empty;
+				DDX_Text(pDX, IDC_EDIT_XYZ, empty);
 			}
 
 			// MAP or GRID
@@ -87,7 +110,16 @@ void CPropXYZ::DoDataExchange(CDataExchange* pDX)
 				state = BST_CHECKED;
 			}
 			DDX_Check(pDX, IDC_CHECK_USE_MAP, state);
+		}
+		else
+		{
+			// File name
+			CString empty;
+			DDX_Text(pDX, IDC_EDIT_XYZ, empty);
 
+			// MAP or GRID
+			int state = BST_UNCHECKED;
+			DDX_Check(pDX, IDC_CHECK_USE_MAP, state);
 		}
 	}
 }
@@ -164,6 +196,7 @@ void CPropXYZ::SetProperty(Cproperty p)
 {
 	this->prop = p;
 }
+
 void CPropXYZ::OnBnClickedButtonXyz()
 {
 	static char szFilters[] =

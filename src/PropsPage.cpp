@@ -25,8 +25,14 @@ IMPLEMENT_DYNAMIC(CPropsPage, CResizablePage)
 
 CPropsPage::CPropsPage()
 : CResizablePage(CPropsPage::IDD)
-, Splitter(2, SSP_VERT, 10, 5)
+// COMMENT: {5/5/2009 5:23:33 PM}, Splitter(2, SSP_VERT, 10, 5)
+// COMMENT: {5/13/2009 6:18:55 PM}, Splitter(3, SSP_VERT, 10, 5)
+// COMMENT: {5/14/2009 4:03:18 PM}, Splitter(3, SSP_VERT, 33, 5)
+, Splitter(3, SSP_VERT, 33, 3)
+, ItemDDX(0)
+// COMMENT: {5/5/2009 6:33:42 PM}, PageDesc(IDD_PROP_DESC)
 {
+	TRACE("%s\n", __FUNCTION__);
 	this->CommonConstruct();
 }
 
@@ -57,6 +63,7 @@ void CPropsPage::CommonConstruct(void)
 
 CPropsPage::~CPropsPage()
 {
+	TRACE("%s\n", __FUNCTION__);
 }
 
 void CPropsPage::DoDataExchange(CDataExchange* pDX)
@@ -65,6 +72,13 @@ void CPropsPage::DoDataExchange(CDataExchange* pDX)
 	CResizablePage::DoDataExchange(pDX);
 
 	DDX_Control(pDX, IDC_DESC_RICHEDIT, RichEditCtrl);
+
+
+	// description
+	if (pDX->m_bSaveAndValidate)
+	{
+		this->PageDesc.UpdateData(TRUE);
+	}
 
 	CTreeCtrl *pTree = this->SheetTop.GetPageTreeControl();
 
@@ -180,6 +194,28 @@ void CPropsPage::DoDataExchange(CDataExchange* pDX)
 			props.push_back(static_cast<Cproperty*>(this->GridEltPoints.porosity));
 			props.push_back(static_cast<Cproperty*>(this->GridEltXYZ.porosity));
 
+#ifdef _DEBUG
+			if (pDX->m_bSaveAndValidate)
+			{
+				CGlobal::DDX_Property(
+					pDX, 
+					&this->SheetTop,
+					this->ItemDDX,
+					props,
+					pages
+					);
+			}
+			else
+			{
+				CGlobal::DDX_Property(
+					pDX, 
+					&this->SheetTop,
+					this->ItemDDX,
+					props,
+					pages
+					);
+			}
+#else
 			CGlobal::DDX_Property(
 				pDX, 
 				&this->SheetTop,
@@ -187,6 +223,7 @@ void CPropsPage::DoDataExchange(CDataExchange* pDX)
 				props,
 				pages
 				);
+#endif
 		}
 		else if (strItem.Compare(STORAGE) == 0)
 		{
@@ -398,16 +435,61 @@ BOOL CPropsPage::OnInitDialog()
 	this->SheetTop.SetTreeViewMode(TRUE, FALSE, FALSE);
 	this->SheetTop.SetIsResizable(true);
 
+	{
+ 		CWnd* pWnd = this->GetDlgItem(IDC_DESC_PAGE);
+		ASSERT(pWnd);
+
+// COMMENT: {5/5/2009 6:32:57 PM}		VERIFY(this->PageDesc.Create(this, WS_CHILD|WS_VISIBLE, 0));
+		VERIFY(this->PageDesc.Create(IDD_PROP_DESC, this));
+
+		{
+// COMMENT: {5/11/2009 7:48:43 PM}			this->PageDesc.ModifyStyleEx(0, WS_EX_CONTROLPARENT);
+// COMMENT: {5/11/2009 7:48:43 PM}// COMMENT: {5/8/2009 4:21:54 PM}			this->PageDesc.ModifyStyle(0, WS_TABSTOP);
+// COMMENT: {5/11/2009 7:48:43 PM}			this->PageDesc.ModifyStyle(0, WS_CHILD|WS_TABSTOP);
+
+			ASSERT(this->PageDesc.GetStyle() | DS_CONTROL);			
+			ASSERT(this->PageDesc.GetExStyle() | WS_EX_CONTROLPARENT);
+
+			CRect rcSheet;
+			pWnd->GetWindowRect(&rcSheet);
+			this->ScreenToClient(&rcSheet);
+			this->PageDesc.SetWindowPos(NULL, 0, 0, 0, 0, SWP_NOZORDER|SWP_NOSIZE|SWP_NOACTIVATE);
+
+			//{{
+			this->PageDesc.ShowWindow(SW_SHOW);
+// COMMENT: {5/11/2009 7:46:41 PM}			ASSERT(this->PageDesc.IsWindowVisible());
+			//}}
+		}
+	}
+
 	this->RegisterSheet(IDC_TREE_PROPS, this->SheetTop);
 
 	VERIFY(this->Splitter.Create(this));
-	this->Splitter.SetPane(0, &this->SheetTop);
-	this->Splitter.SetPane(1, this->GetDlgItem(IDC_DESC_RICHEDIT));
+// COMMENT: {5/5/2009 5:22:40 PM}	this->Splitter.SetPane(0, &this->SheetTop);
+// COMMENT: {5/5/2009 5:22:40 PM}	this->Splitter.SetPane(1, this->GetDlgItem(IDC_DESC_RICHEDIT));
+	///this->Splitter.SetPane(0, this->GetDlgItem(IDC_DESC_EDIT));
+	this->Splitter.SetPane(0, &this->PageDesc);
+	this->Splitter.SetPane(1, &this->SheetTop);
+	this->Splitter.SetPane(2, this->GetDlgItem(IDC_DESC_RICHEDIT));
 
-	const int splitter_sizes[2] = {190, 89};
+
+// COMMENT: {5/5/2009 5:22:55 PM}	const int splitter_sizes[2] = {190, 89};
+// COMMENT: {5/11/2009 7:50:30 PM}	const int splitter_sizes[3] = {24, 190, 89};
+// COMMENT: {5/11/2009 7:52:04 PM}	const int splitter_sizes[3] = {31, 190, 89};
+	//const int splitter_sizes[3] = {31, 170, 89};
+	//const int splitter_sizes[3] = {80, 40, 40};
+	const int splitter_sizes[3] = {33, 164, 80};
 	this->Splitter.SetPaneSizes(splitter_sizes);
 
-	this->AddAnchor(this->Splitter, TOP_LEFT, BOTTOM_RIGHT );
+	const bool frozen[3] = {true, false, false};
+	this->Splitter.SetFrozenPanes(frozen);
+// COMMENT: {5/5/2009 6:16:57 PM}	this->Splitter.SetAllowUserResizing(false);
+
+// COMMENT: {5/5/2009 5:23:11 PM}	//{{
+// COMMENT: {5/5/2009 5:23:11 PM}	this->AddAnchor(IDC_DESC_EDIT, CSize(0, 10), TOP_RIGHT);
+// COMMENT: {5/5/2009 5:23:11 PM}	this->AddAnchor(this->Splitter, CSize(0, 0), BOTTOM_RIGHT);
+// COMMENT: {5/5/2009 5:23:11 PM}	//}}
+	this->AddAnchor(this->Splitter, TOP_LEFT, BOTTOM_RIGHT);
 
 	if (CTreeCtrl *pTree = this->SheetTop.GetPageTreeControl())
 	{
@@ -426,6 +508,7 @@ BOOL CPropsPage::OnInitDialog()
 
 void CPropsPage::OnPageTreeSelChanging(NMHDR *pNotifyStruct, LRESULT *pResult)
 {
+	TRACE("In %s\n", __FUNCTION__);
 	NMTREEVIEW *pTvn = reinterpret_cast<NMTREEVIEW*>(pNotifyStruct);
 	this->ItemDDX = pTvn->itemOld.hItem;
 	if (this->ItemDDX)
@@ -440,14 +523,17 @@ void CPropsPage::OnPageTreeSelChanging(NMHDR *pNotifyStruct, LRESULT *pResult)
 			// disallow change
 			//
 			*pResult = TRUE;
+			TRACE("Out Disallowed %s\n", __FUNCTION__);
 			return;
 		}
 	}
 	*pResult = 0;
+	TRACE("Out Allowed %s\n", __FUNCTION__);
 }
 
 void CPropsPage::OnPageTreeSelChanged(NMHDR *pNotifyStruct, LRESULT *pResult)
 {
+	TRACE("In %s\n", __FUNCTION__);
 	UNREFERENCED_PARAMETER(pResult);
 	NMTREEVIEW *pTvn = reinterpret_cast<NMTREEVIEW*>(pNotifyStruct);
 	this->ItemDDX = pTvn->itemNew.hItem;
@@ -511,20 +597,24 @@ void CPropsPage::OnPageTreeSelChanged(NMHDR *pNotifyStruct, LRESULT *pResult)
 
 		}
 	}
+	TRACE("Out %s\n", __FUNCTION__);
 }
 
 LRESULT CPropsPage::OnUM_DDXFailure(WPARAM wParam, LPARAM lParam)
 {
+	TRACE("In %s\n", __FUNCTION__);
 	// DDX/DDV failure occured
 	//
 	CWnd* pFocus = (CWnd*)wParam;
 	ASSERT_KINDOF(CWnd, pFocus);
 	pFocus->SetFocus();
+	TRACE("Out %s\n", __FUNCTION__);
 	return 0;
 }
 
 void CPropsPage::SetProperties(const CGridElt& rGridElt)
 {
+	TRACE("In %s\n", __FUNCTION__);
 	// copy grid_elt
 	this->GridElt = rGridElt;
 	
@@ -570,10 +660,12 @@ void CPropsPage::SetProperties(const CGridElt& rGridElt)
 	// copy to all
 	//
 	this->GridEltXYZ = this->GridEltPoints = this->GridEltFixed = this->GridEltLinear = this->GridElt;
+	TRACE("Out %s\n", __FUNCTION__);
 }
 
 void CPropsPage::GetProperties(CGridElt& rGridElt)const
 {
+	TRACE("In %s\n", __FUNCTION__);
 	rGridElt = this->GridElt;
 
 	// delete inactive properties
@@ -614,4 +706,15 @@ void CPropsPage::GetProperties(CGridElt& rGridElt)const
 	{
 		Cproperty::CopyProperty(&rGridElt.storage, 0);
 	}
+	TRACE("Out %s\n", __FUNCTION__);
+}
+
+void CPropsPage::SetDesc(LPCTSTR desc)
+{
+	this->PageDesc.SetDesc(desc);
+}
+
+LPCTSTR CPropsPage::GetDesc()const
+{
+	return this->PageDesc.GetDesc();
 }

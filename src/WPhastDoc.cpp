@@ -158,6 +158,7 @@ static const TCHAR szPrismFind[]     = _T("Prism ");
 
 int error_msg (const char *err_str, const int stop);
 
+#include "FakeFiledata.h"
 void Clear_NNInterpolatorList(void);
 void Clear_file_data_map(void);
 void Clear_KDtreeList(void);
@@ -1498,6 +1499,7 @@ void CWPhastDoc::DeleteContents()
 	Clear_NNInterpolatorList();
 	Clear_file_data_map();
 	Clear_KDtreeList();
+	FakeFiledata::Clear_fake_file_data_list();
 
 	CDocument::DeleteContents();
 }
@@ -2165,18 +2167,24 @@ void CWPhastDoc::PrismPathsRelativeToAbsolute(LPCTSTR lpszPathName)
 					//{{TODO
 					if (CMediaZoneActor *pMediaZoneActor = CMediaZoneActor::SafeDownCast(pZoneActor))
 					{
+						//{{
 						CGridElt elt = pMediaZoneActor->GetData();
-						GET_ABS_PATH_MACRO(active);
-						GET_ABS_PATH_MACRO(porosity);
-						GET_ABS_PATH_MACRO(kx);
-						GET_ABS_PATH_MACRO(ky);
-						GET_ABS_PATH_MACRO(kz);
-						GET_ABS_PATH_MACRO(storage);
-						GET_ABS_PATH_MACRO(alpha_long);
-						GET_ABS_PATH_MACRO(alpha_trans);
-						GET_ABS_PATH_MACRO(alpha_horizontal);
-						GET_ABS_PATH_MACRO(alpha_vertical);
+						CGlobal::PathsRelativeToAbsolute(lpszPathName, this, elt);
 						pMediaZoneActor->SetData(elt);
+						//}}
+
+// COMMENT: {4/28/2009 7:53:05 PM}						CGridElt elt = pMediaZoneActor->GetData();
+// COMMENT: {4/28/2009 7:53:05 PM}						GET_ABS_PATH_MACRO(active);
+// COMMENT: {4/28/2009 7:53:05 PM}						GET_ABS_PATH_MACRO(porosity);
+// COMMENT: {4/28/2009 7:53:05 PM}						GET_ABS_PATH_MACRO(kx);
+// COMMENT: {4/28/2009 7:53:05 PM}						GET_ABS_PATH_MACRO(ky);
+// COMMENT: {4/28/2009 7:53:05 PM}						GET_ABS_PATH_MACRO(kz);
+// COMMENT: {4/28/2009 7:53:05 PM}						GET_ABS_PATH_MACRO(storage);
+// COMMENT: {4/28/2009 7:53:05 PM}						GET_ABS_PATH_MACRO(alpha_long);
+// COMMENT: {4/28/2009 7:53:05 PM}						GET_ABS_PATH_MACRO(alpha_trans);
+// COMMENT: {4/28/2009 7:53:05 PM}						GET_ABS_PATH_MACRO(alpha_horizontal);
+// COMMENT: {4/28/2009 7:53:05 PM}						GET_ABS_PATH_MACRO(alpha_vertical);
+// COMMENT: {4/28/2009 7:53:05 PM}						pMediaZoneActor->SetData(elt);
 					}
 					//}}TODO
 					if (pZoneActor->GetPolyhedronType() == Polyhedron::PRISM)
@@ -2207,13 +2215,13 @@ void CWPhastDoc::PrismPathsRelativeToAbsolute(LPCTSTR lpszPathName)
 	}
 }
 
-#define GET_REL_PATH_MACRO(P) \
+#define GET_REL_PATH_MACRO(C, P) \
 do { \
-	if (elt.P && elt.P->type == PROP_XYZ) { \
-		if (elt.P->data_source) { \
-			std::string filename = elt.P->data_source->Get_file_name(); \
+	if (C.P && C.P->type == PROP_XYZ) { \
+		if (C.P->data_source) { \
+			std::string filename = C.P->data_source->Get_file_name(); \
 			if (filename.length() > 0) { \
-				elt.P->data_source->Set_file_name(this->GetRelativePath(lpszPathName, filename)); \
+				C.P->data_source->Set_file_name(this->GetRelativePath(lpszPathName, filename)); \
 			} \
 		} \
 	} \
@@ -2241,20 +2249,32 @@ void CWPhastDoc::PrismPathsAbsoluteToRelative(LPCTSTR lpszPathName)
 				if ((pZoneActor = CZoneActor::SafeDownCast(pProp)))
 				{
 					//{{TODO
+// COMMENT: {4/24/2009 4:48:55 PM}					// checkout: EXTERNAL std::list < property * >properties_with_data_source;
+// COMMENT: {4/24/2009 4:48:55 PM}					std::list<property*>::iterator piter = ::properties_with_data_source.begin();
+// COMMENT: {4/24/2009 4:48:55 PM}					for (; piter != ::properties_with_data_source.end(); ++piter)
+// COMMENT: {4/24/2009 4:48:55 PM}					{
+// COMMENT: {4/24/2009 4:48:55 PM}						ASSERT((*piter)->data_source);
+// COMMENT: {4/24/2009 4:48:55 PM}						std::string filename = (*piter)->data_source->Get_file_name()
+// COMMENT: {4/24/2009 4:48:55 PM}					}
+
 					if (CMediaZoneActor *pMediaZoneActor = CMediaZoneActor::SafeDownCast(pZoneActor))
 					{
 						CGridElt elt = pMediaZoneActor->GetData();
-						GET_REL_PATH_MACRO(active);
-						GET_REL_PATH_MACRO(porosity);
-						GET_REL_PATH_MACRO(kx);
-						GET_REL_PATH_MACRO(ky);
-						GET_REL_PATH_MACRO(kz);
-						GET_REL_PATH_MACRO(storage);
-						GET_REL_PATH_MACRO(alpha_long);
-						GET_REL_PATH_MACRO(alpha_trans);
-						GET_REL_PATH_MACRO(alpha_horizontal);
-						GET_REL_PATH_MACRO(alpha_vertical);
+						CGlobal::PathsAbsoluteToRelative(lpszPathName, this, elt);
 						pMediaZoneActor->SetData(elt);
+
+// COMMENT: {4/28/2009 8:07:56 PM}						CGridElt elt = pMediaZoneActor->GetData();
+// COMMENT: {4/28/2009 8:07:56 PM}						GET_REL_PATH_MACRO(elt, active);
+// COMMENT: {4/28/2009 8:07:56 PM}						GET_REL_PATH_MACRO(elt, porosity);
+// COMMENT: {4/28/2009 8:07:56 PM}						GET_REL_PATH_MACRO(elt, kx);
+// COMMENT: {4/28/2009 8:07:56 PM}						GET_REL_PATH_MACRO(elt, ky);
+// COMMENT: {4/28/2009 8:07:56 PM}						GET_REL_PATH_MACRO(elt, kz);
+// COMMENT: {4/28/2009 8:07:56 PM}						GET_REL_PATH_MACRO(elt, storage);
+// COMMENT: {4/28/2009 8:07:56 PM}						GET_REL_PATH_MACRO(elt, alpha_long);
+// COMMENT: {4/28/2009 8:07:56 PM}						GET_REL_PATH_MACRO(elt, alpha_trans);
+// COMMENT: {4/28/2009 8:07:56 PM}						GET_REL_PATH_MACRO(elt, alpha_horizontal);
+// COMMENT: {4/28/2009 8:07:56 PM}						GET_REL_PATH_MACRO(elt, alpha_vertical);
+// COMMENT: {4/28/2009 8:07:56 PM}						pMediaZoneActor->SetData(elt);
 					}
 					//}}TODO
 

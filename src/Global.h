@@ -20,7 +20,9 @@ class CBC;
 class Cproperty;
 class CCheckTreeCtrl;
 class CWPhastView;
+class CWPhastDoc;
 class Data_source;
+class CGridElt;
 
 class vtkTransform;
 class CWorldTransform;
@@ -118,6 +120,7 @@ public:
 	static void InsertHeadings(CComboBox &combo, std::vector< std::string > headings);
 	static BOOL IsValidShapefile(CString filename, CDataExchange* pDX = NULL);
 	static BOOL IsValidArcraster(CString filename);
+	static BOOL IsValidXYZFile(CString filename, CDataExchange* pDX = NULL);
 
 	static BOOL FileExists(CString filename);
 
@@ -167,6 +170,10 @@ public:
 
 	static void SetRadiusFactor(double factor);
 	static double GetRadiusFactor(void);
+
+	static void PathsRelativeToAbsolute(LPCTSTR lpszPathName, CWPhastDoc* pDoc, CGridElt& elt);
+	static void PathsAbsoluteToRelative(LPCTSTR lpszPathName, CWPhastDoc* pDoc, CGridElt& elt);
+
 
 protected:
 	static double CGlobal::RadiusFactor;

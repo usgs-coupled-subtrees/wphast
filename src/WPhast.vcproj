@@ -52,6 +52,8 @@
 				ExceptionHandling="2"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
+				FloatingPointModel="0"
+				FloatingPointExceptions="false"
 				TreatWChar_tAsBuiltInType="true"
 				UsePrecompiledHeader="2"
 				BrowseInformation="1"
@@ -574,6 +576,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\FakeFiledata.cpp"
+				>
+			</File>
+			<File
 				RelativePath="FlowOnly.cpp"
 				>
 			</File>
@@ -859,6 +865,10 @@
 			</File>
 			<File
 				RelativePath=".\PropConstant.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\PropDesc.cpp"
 				>
 			</File>
 			<File
@@ -4718,6 +4728,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\FakeFiledata.h"
+				>
+			</File>
+			<File
 				RelativePath="FlowOnly.h"
 				>
 			</File>
@@ -4995,6 +5009,10 @@
 			</File>
 			<File
 				RelativePath=".\PropConstant.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PropDesc.h"
 				>
 			</File>
 			<File

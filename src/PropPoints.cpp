@@ -77,11 +77,21 @@ void CPropPoints::DoDataExchange(CDataExchange* pDX)
 			p.data_source->Set_user_coordinate_system(PHAST_Transform::GRID);
 		}
 
+		p.data_source->Set_defined(true);
 		this->prop = p;
 	}
 	else
 	{
 		VERIFY(this->ComboType.SelectString(0, _T("Points")) != CB_ERR);
+
+		CString blank;
+		for (int row = 1; row < this->PointsGrid.GetRowCount(); ++row)
+		{
+			DDX_TextGridControl(pDX, IDC_GRID_POINTS, row, 1, blank);
+			DDX_TextGridControl(pDX, IDC_GRID_POINTS, row, 2, blank);
+			DDX_TextGridControl(pDX, IDC_GRID_POINTS, row, 3, blank);
+			DDX_TextGridControl(pDX, IDC_GRID_POINTS, row, 4, blank);
+		}
 
 		if (this->prop.data_source)
 		{
@@ -106,6 +116,13 @@ void CPropPoints::DoDataExchange(CDataExchange* pDX)
 			}
 			DDX_Check(pDX, IDC_CHECK_USE_MAP, state);
 		}
+		else
+		{
+			// MAP or GRID
+			int state = BST_UNCHECKED;
+			DDX_Check(pDX, IDC_CHECK_USE_MAP, state);
+		}
+		this->PointsGrid.RedrawWindow();
 	}
 }
 
