@@ -12,7 +12,6 @@ IMPLEMENT_DYNAMIC(CPropConstant, CPropPage)
 
 CPropConstant::CPropConstant()
 : CPropPage(CPropConstant::IDD)
-// COMMENT: {5/26/2009 8:48:57 PM}, bSkipUpdateData(false)
 {
 	TRACE("%s(%p)\n", __FUNCTION__, this);
 }
@@ -125,22 +124,7 @@ void CPropConstant::DoDataExchange(CDataExchange* pDX)
 		}
 		///this->m_wndTimesGrid.ExpandColumnsToFit();
 	}
-
 #endif
-
-
-// COMMENT: {4/22/2009 4:30:24 PM}#ifdef _DEBUG
-// COMMENT: {4/22/2009 4:30:24 PM}	if (pDX->m_bSaveAndValidate)
-// COMMENT: {4/22/2009 4:30:24 PM}	{
-// COMMENT: {4/22/2009 4:30:24 PM}		DDX_Text(pDX, IDC_VALUE_EDIT, this->value);
-// COMMENT: {4/22/2009 4:30:24 PM}	}
-// COMMENT: {4/22/2009 4:30:24 PM}	else
-// COMMENT: {4/22/2009 4:30:24 PM}	{
-// COMMENT: {4/22/2009 4:30:24 PM}		DDX_Text(pDX, IDC_VALUE_EDIT, this->value);
-// COMMENT: {4/22/2009 4:30:24 PM}	}
-// COMMENT: {4/22/2009 4:30:24 PM}#else
-// COMMENT: {4/22/2009 4:30:24 PM}	DDX_Text(pDX, IDC_VALUE_EDIT, this->value);
-// COMMENT: {4/22/2009 4:30:24 PM}#endif
 
 	if (pDX->m_bSaveAndValidate)
 	{
@@ -168,8 +152,6 @@ void CPropConstant::DoDataExchange(CDataExchange* pDX)
 
 
 BEGIN_MESSAGE_MAP(CPropConstant, CPropPage)
-// COMMENT: {5/26/2009 9:15:52 PM}	ON_WM_CTLCOLOR()
-// COMMENT: {5/26/2009 9:15:52 PM}	ON_CBN_SELCHANGE(IDC_TYPE_COMBO, &CPropConstant::OnCbnSelchangeTypeCombo)
 END_MESSAGE_MAP()
 
 
@@ -193,71 +175,6 @@ BOOL CPropConstant::OnInitDialog()
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
 }
-
-// COMMENT: {5/26/2009 8:51:03 PM}HBRUSH CPropConstant::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
-// COMMENT: {5/26/2009 8:51:03 PM}{
-// COMMENT: {5/26/2009 8:51:03 PM}	if (this->HasWhiteBackground())
-// COMMENT: {5/26/2009 8:51:03 PM}	{
-// COMMENT: {5/26/2009 8:51:03 PM}		pDC->SetBkMode(TRANSPARENT);
-// COMMENT: {5/26/2009 8:51:03 PM}		return ::GetSysColorBrush(COLOR_WINDOW);
-// COMMENT: {5/26/2009 8:51:03 PM}	}
-// COMMENT: {5/26/2009 8:51:03 PM}
-// COMMENT: {5/26/2009 8:51:03 PM}	// default
-// COMMENT: {5/26/2009 8:51:03 PM}	HBRUSH hbr = __super::OnCtlColor(pDC, pWnd, nCtlColor);
-// COMMENT: {5/26/2009 8:51:03 PM}	return hbr;
-// COMMENT: {5/26/2009 8:51:03 PM}}
-
-// COMMENT: {5/26/2009 8:50:22 PM}void CPropConstant::OnCbnSelchangeTypeCombo()
-// COMMENT: {5/26/2009 8:50:22 PM}{
-// COMMENT: {5/26/2009 8:50:22 PM}	TRACE("%s(%p)\n", __FUNCTION__, this);
-// COMMENT: {5/26/2009 8:50:22 PM}	// Add your control notification handler code here
-// COMMENT: {5/26/2009 8:50:22 PM}	ASSERT(!bSkipUpdateData);
-// COMMENT: {5/26/2009 8:50:22 PM}	bSkipUpdateData = true;
-// COMMENT: {5/26/2009 8:50:22 PM}	::SendMessage(*this->GetParent(), PSM_SETCURSEL, (WPARAM)ComboType.GetCurSel(), (LPARAM)0);
-// COMMENT: {5/26/2009 8:50:22 PM}	ASSERT(bSkipUpdateData);
-// COMMENT: {5/26/2009 8:50:22 PM}	bSkipUpdateData = false;
-// COMMENT: {5/26/2009 8:50:22 PM}}
-
-// COMMENT: {5/26/2009 8:54:30 PM}BOOL CPropConstant::OnSetActive()
-// COMMENT: {5/26/2009 8:54:30 PM}{
-// COMMENT: {5/26/2009 8:54:30 PM}	return __super::OnSetActive();
-// COMMENT: {5/26/2009 8:54:30 PM}
-// COMMENT: {5/26/2009 8:54:30 PM}	TRACE("%s(%p)\n", __FUNCTION__, this);
-// COMMENT: {5/26/2009 8:54:30 PM}	ASSERT_VALID(this);
-// COMMENT: {5/26/2009 8:54:30 PM}
-// COMMENT: {5/26/2009 8:54:30 PM}	if (m_bFirstSetActive)
-// COMMENT: {5/26/2009 8:54:30 PM}	{
-// COMMENT: {5/26/2009 8:54:30 PM}		m_bFirstSetActive = FALSE;
-// COMMENT: {5/26/2009 8:54:30 PM}	}
-// COMMENT: {5/26/2009 8:54:30 PM}	else
-// COMMENT: {5/26/2009 8:54:30 PM}	{
-// COMMENT: {5/26/2009 8:54:30 PM}		UpdateData(FALSE);
-// COMMENT: {5/26/2009 8:54:30 PM}	}
-// COMMENT: {5/26/2009 8:54:30 PM}	return TRUE;
-// COMMENT: {5/26/2009 8:54:30 PM}}
-
-// COMMENT: {5/26/2009 8:50:40 PM}BOOL CPropConstant::OnKillActive()
-// COMMENT: {5/26/2009 8:50:40 PM}{
-// COMMENT: {5/26/2009 8:50:40 PM}	TRACE("%s(%p)\n", __FUNCTION__, this);
-// COMMENT: {5/26/2009 8:50:40 PM}	ASSERT_VALID(this);
-// COMMENT: {5/26/2009 8:50:40 PM}
-// COMMENT: {5/26/2009 8:50:40 PM}#if defined(__MULTIPLE__)
-// COMMENT: {5/26/2009 8:50:40 PM}	for (int col = 0; col < this->m_wndTimesGrid.GetColumnCount(); ++col)
-// COMMENT: {5/26/2009 8:50:40 PM}	{
-// COMMENT: {5/26/2009 8:50:40 PM}		TRACE("Column(%d) = %d \n", col, this->m_wndTimesGrid.GetColumnWidth(col));
-// COMMENT: {5/26/2009 8:50:40 PM}	}
-// COMMENT: {5/26/2009 8:50:40 PM}#endif
-// COMMENT: {5/26/2009 8:50:40 PM}
-// COMMENT: {5/26/2009 8:50:40 PM}	if (!this->bSkipUpdateData)
-// COMMENT: {5/26/2009 8:50:40 PM}	{
-// COMMENT: {5/26/2009 8:50:40 PM}		if (!UpdateData())
-// COMMENT: {5/26/2009 8:50:40 PM}		{
-// COMMENT: {5/26/2009 8:50:40 PM}			TRACE(traceAppMsg, 0, "UpdateData failed during page deactivation\n");
-// COMMENT: {5/26/2009 8:50:40 PM}			return FALSE;
-// COMMENT: {5/26/2009 8:50:40 PM}		}
-// COMMENT: {5/26/2009 8:50:40 PM}	}
-// COMMENT: {5/26/2009 8:50:40 PM}	return TRUE;
-// COMMENT: {5/26/2009 8:50:40 PM}}
 
 Cproperty CPropConstant::GetProperty()
 {

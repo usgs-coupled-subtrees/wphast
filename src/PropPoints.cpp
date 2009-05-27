@@ -15,7 +15,6 @@ IMPLEMENT_DYNAMIC(CPropPoints, CPropPage)
 
 CPropPoints::CPropPoints()
 : CPropPage(CPropPoints::IDD)
-// COMMENT: {5/26/2009 9:15:12 PM}, bSkipUpdateData(false)
 {
 
 }
@@ -128,10 +127,7 @@ void CPropPoints::DoDataExchange(CDataExchange* pDX)
 
 
 BEGIN_MESSAGE_MAP(CPropPoints, CPropPage)
-// COMMENT: {5/26/2009 9:15:42 PM}	ON_WM_CTLCOLOR()
-// COMMENT: {5/26/2009 9:15:42 PM}	ON_CBN_SELCHANGE(IDC_TYPE_COMBO, &CPropPoints::OnCbnSelchangeTypeCombo)
 END_MESSAGE_MAP()
-
 
 // CPropPoints message handlers
 
@@ -150,44 +146,6 @@ BOOL CPropPoints::OnInitDialog()
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
 }
-
-// COMMENT: {5/26/2009 9:16:33 PM}HBRUSH CPropPoints::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
-// COMMENT: {5/26/2009 9:16:33 PM}{
-// COMMENT: {5/26/2009 9:16:33 PM}	if (this->HasWhiteBackground())
-// COMMENT: {5/26/2009 9:16:33 PM}	{
-// COMMENT: {5/26/2009 9:16:33 PM}		pDC->SetBkMode(TRANSPARENT);
-// COMMENT: {5/26/2009 9:16:33 PM}		return ::GetSysColorBrush(COLOR_WINDOW);
-// COMMENT: {5/26/2009 9:16:33 PM}	}
-// COMMENT: {5/26/2009 9:16:33 PM}
-// COMMENT: {5/26/2009 9:16:33 PM}	// default
-// COMMENT: {5/26/2009 9:16:33 PM}	HBRUSH hbr = __super::OnCtlColor(pDC, pWnd, nCtlColor);
-// COMMENT: {5/26/2009 9:16:33 PM}	return hbr;
-// COMMENT: {5/26/2009 9:16:33 PM}}
-// COMMENT: {5/26/2009 9:16:33 PM}
-// COMMENT: {5/26/2009 9:16:33 PM}void CPropPoints::OnCbnSelchangeTypeCombo()
-// COMMENT: {5/26/2009 9:16:33 PM}{
-// COMMENT: {5/26/2009 9:16:33 PM}	// Add your control notification handler code here
-// COMMENT: {5/26/2009 9:16:33 PM}	ASSERT(!bSkipUpdateData);
-// COMMENT: {5/26/2009 9:16:33 PM}	bSkipUpdateData = true;
-// COMMENT: {5/26/2009 9:16:33 PM}	::SendMessage(*this->GetParent(), PSM_SETCURSEL, (WPARAM)ComboType.GetCurSel(), (LPARAM)0);
-// COMMENT: {5/26/2009 9:16:33 PM}	ASSERT(bSkipUpdateData);
-// COMMENT: {5/26/2009 9:16:33 PM}	bSkipUpdateData = false;
-// COMMENT: {5/26/2009 9:16:33 PM}}
-// COMMENT: {5/26/2009 9:16:33 PM}
-// COMMENT: {5/26/2009 9:16:33 PM}BOOL CPropPoints::OnKillActive()
-// COMMENT: {5/26/2009 9:16:33 PM}{
-// COMMENT: {5/26/2009 9:16:33 PM}	ASSERT_VALID(this);
-// COMMENT: {5/26/2009 9:16:33 PM}
-// COMMENT: {5/26/2009 9:16:33 PM}	if (!this->bSkipUpdateData)
-// COMMENT: {5/26/2009 9:16:33 PM}	{
-// COMMENT: {5/26/2009 9:16:33 PM}		if (!UpdateData())
-// COMMENT: {5/26/2009 9:16:33 PM}		{
-// COMMENT: {5/26/2009 9:16:33 PM}			TRACE(traceAppMsg, 0, "UpdateData failed during page deactivation\n");
-// COMMENT: {5/26/2009 9:16:33 PM}			return FALSE;
-// COMMENT: {5/26/2009 9:16:33 PM}		}
-// COMMENT: {5/26/2009 9:16:33 PM}	}
-// COMMENT: {5/26/2009 9:16:33 PM}	return TRUE;
-// COMMENT: {5/26/2009 9:16:33 PM}}
 
 BOOL CPropPoints::SetupGrids(void)
 {
