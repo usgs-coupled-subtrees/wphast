@@ -8,11 +8,11 @@
 
 // CPropLinear dialog
 
-IMPLEMENT_DYNAMIC(CPropLinear, CResizablePage)
+IMPLEMENT_DYNAMIC(CPropLinear, CPropPage)
 
 CPropLinear::CPropLinear()
-: CResizablePage(CPropLinear::IDD)
-, bSkipUpdateData(false)
+: CPropPage(CPropLinear::IDD)
+// COMMENT: {5/26/2009 9:34:14 PM}, bSkipUpdateData(false)
 {
 
 }
@@ -23,7 +23,7 @@ CPropLinear::~CPropLinear()
 
 void CPropLinear::DoDataExchange(CDataExchange* pDX)
 {
-	CResizablePage::DoDataExchange(pDX);
+	__super::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_TYPE_COMBO, ComboType);
 
 	if (pDX->m_bSaveAndValidate)
@@ -99,9 +99,9 @@ void CPropLinear::DoDataExchange(CDataExchange* pDX)
 }
 
 
-BEGIN_MESSAGE_MAP(CPropLinear, CResizablePage)
-	ON_WM_CTLCOLOR()
-	ON_CBN_SELCHANGE(IDC_TYPE_COMBO, &CPropLinear::OnCbnSelchangeTypeCombo)
+BEGIN_MESSAGE_MAP(CPropLinear, CPropPage)
+// COMMENT: {5/26/2009 9:31:47 PM}	ON_WM_CTLCOLOR()
+// COMMENT: {5/26/2009 9:31:47 PM}	ON_CBN_SELCHANGE(IDC_TYPE_COMBO, &CPropLinear::OnCbnSelchangeTypeCombo)
 END_MESSAGE_MAP()
 
 
@@ -122,43 +122,43 @@ BOOL CPropLinear::OnInitDialog()
 	// EXCEPTION: OCX Property Pages should return FALSE
 }
 
-HBRUSH CPropLinear::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
-{
-	if (this->HasWhiteBackground())
-	{
-		pDC->SetBkMode(TRANSPARENT);
-		return ::GetSysColorBrush(COLOR_WINDOW);
-	}
-
-	// default
-	HBRUSH hbr = __super::OnCtlColor(pDC, pWnd, nCtlColor);
-	return hbr;
-}
-
-void CPropLinear::OnCbnSelchangeTypeCombo()
-{
-	// Add your control notification handler code here
-	ASSERT(!bSkipUpdateData);
-	bSkipUpdateData = true;
-	::SendMessage(*this->GetParent(), PSM_SETCURSEL, (WPARAM)ComboType.GetCurSel(), (LPARAM)0);
-	ASSERT(bSkipUpdateData);
-	bSkipUpdateData = false;
-}
-
-BOOL CPropLinear::OnKillActive()
-{
-	ASSERT_VALID(this);
-
-	if (!this->bSkipUpdateData)
-	{
-		if (!UpdateData())
-		{
-			TRACE(traceAppMsg, 0, "UpdateData failed during page deactivation\n");
-			return FALSE;
-		}
-	}
-	return TRUE;
-}
+// COMMENT: {5/26/2009 9:34:51 PM}HBRUSH CPropLinear::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
+// COMMENT: {5/26/2009 9:34:51 PM}{
+// COMMENT: {5/26/2009 9:34:51 PM}	if (this->HasWhiteBackground())
+// COMMENT: {5/26/2009 9:34:51 PM}	{
+// COMMENT: {5/26/2009 9:34:51 PM}		pDC->SetBkMode(TRANSPARENT);
+// COMMENT: {5/26/2009 9:34:51 PM}		return ::GetSysColorBrush(COLOR_WINDOW);
+// COMMENT: {5/26/2009 9:34:51 PM}	}
+// COMMENT: {5/26/2009 9:34:51 PM}
+// COMMENT: {5/26/2009 9:34:51 PM}	// default
+// COMMENT: {5/26/2009 9:34:51 PM}	HBRUSH hbr = __super::OnCtlColor(pDC, pWnd, nCtlColor);
+// COMMENT: {5/26/2009 9:34:51 PM}	return hbr;
+// COMMENT: {5/26/2009 9:34:51 PM}}
+// COMMENT: {5/26/2009 9:34:51 PM}
+// COMMENT: {5/26/2009 9:34:51 PM}void CPropLinear::OnCbnSelchangeTypeCombo()
+// COMMENT: {5/26/2009 9:34:51 PM}{
+// COMMENT: {5/26/2009 9:34:51 PM}	// Add your control notification handler code here
+// COMMENT: {5/26/2009 9:34:51 PM}	ASSERT(!bSkipUpdateData);
+// COMMENT: {5/26/2009 9:34:51 PM}	bSkipUpdateData = true;
+// COMMENT: {5/26/2009 9:34:51 PM}	::SendMessage(*this->GetParent(), PSM_SETCURSEL, (WPARAM)ComboType.GetCurSel(), (LPARAM)0);
+// COMMENT: {5/26/2009 9:34:51 PM}	ASSERT(bSkipUpdateData);
+// COMMENT: {5/26/2009 9:34:51 PM}	bSkipUpdateData = false;
+// COMMENT: {5/26/2009 9:34:51 PM}}
+// COMMENT: {5/26/2009 9:34:51 PM}
+// COMMENT: {5/26/2009 9:34:51 PM}BOOL CPropLinear::OnKillActive()
+// COMMENT: {5/26/2009 9:34:51 PM}{
+// COMMENT: {5/26/2009 9:34:51 PM}	ASSERT_VALID(this);
+// COMMENT: {5/26/2009 9:34:51 PM}
+// COMMENT: {5/26/2009 9:34:51 PM}	if (!this->bSkipUpdateData)
+// COMMENT: {5/26/2009 9:34:51 PM}	{
+// COMMENT: {5/26/2009 9:34:51 PM}		if (!UpdateData())
+// COMMENT: {5/26/2009 9:34:51 PM}		{
+// COMMENT: {5/26/2009 9:34:51 PM}			TRACE(traceAppMsg, 0, "UpdateData failed during page deactivation\n");
+// COMMENT: {5/26/2009 9:34:51 PM}			return FALSE;
+// COMMENT: {5/26/2009 9:34:51 PM}		}
+// COMMENT: {5/26/2009 9:34:51 PM}	}
+// COMMENT: {5/26/2009 9:34:51 PM}	return TRUE;
+// COMMENT: {5/26/2009 9:34:51 PM}}
 
 Cproperty CPropLinear::GetProperty()
 {

@@ -8,10 +8,10 @@
 
 // CPropDesc dialog
 
-IMPLEMENT_DYNAMIC(CPropDesc, CResizablePage)
+IMPLEMENT_DYNAMIC(CPropDesc, CPropPage)
 
 CPropDesc::CPropDesc()
-: CResizablePage(CPropDesc::IDD)
+: CPropPage(CPropDesc::IDD)
 {
 }
 
@@ -39,8 +39,8 @@ void CPropDesc::DoDataExchange(CDataExchange* pDX)
 }
 
 
-BEGIN_MESSAGE_MAP(CPropDesc, CResizablePage)
-	ON_WM_CTLCOLOR()
+BEGIN_MESSAGE_MAP(CPropDesc, CPropPage)
+// COMMENT: {5/26/2009 9:23:38 PM}	ON_WM_CTLCOLOR()
 END_MESSAGE_MAP()
 
 
@@ -57,15 +57,15 @@ BOOL CPropDesc::OnInitDialog()
 	// EXCEPTION: OCX Property Pages should return FALSE
 }
 
-HBRUSH CPropDesc::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
-{
-	if (this->HasWhiteBackground())
-	{
-		pDC->SetBkMode(TRANSPARENT);
-		return ::GetSysColorBrush(COLOR_WINDOW);
-	}
-
-	// default
-	HBRUSH hbr = __super::OnCtlColor(pDC, pWnd, nCtlColor);
-	return hbr;
-}
+// COMMENT: {5/26/2009 9:23:50 PM}HBRUSH CPropDesc::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
+// COMMENT: {5/26/2009 9:23:50 PM}{
+// COMMENT: {5/26/2009 9:23:50 PM}	if (this->HasWhiteBackground())
+// COMMENT: {5/26/2009 9:23:50 PM}	{
+// COMMENT: {5/26/2009 9:23:50 PM}		pDC->SetBkMode(TRANSPARENT);
+// COMMENT: {5/26/2009 9:23:50 PM}		return ::GetSysColorBrush(COLOR_WINDOW);
+// COMMENT: {5/26/2009 9:23:50 PM}	}
+// COMMENT: {5/26/2009 9:23:50 PM}
+// COMMENT: {5/26/2009 9:23:50 PM}	// default
+// COMMENT: {5/26/2009 9:23:50 PM}	HBRUSH hbr = __super::OnCtlColor(pDC, pWnd, nCtlColor);
+// COMMENT: {5/26/2009 9:23:50 PM}	return hbr;
+// COMMENT: {5/26/2009 9:23:50 PM}}

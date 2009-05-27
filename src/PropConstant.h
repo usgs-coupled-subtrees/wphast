@@ -1,7 +1,9 @@
 #pragma once
 
-#include "TreePropSheetEx/ResizablePage.h"
-#include "TreePropSheetEx/TreePropSheetUtil.hpp"
+// COMMENT: {5/26/2009 8:47:22 PM}#include "TreePropSheetEx/ResizablePage.h"
+// COMMENT: {5/26/2009 8:47:22 PM}#include "TreePropSheetEx/TreePropSheetUtil.hpp"
+#include "PropPage.h"
+
 #include "afxwin.h"
 #include "resource.h"
 #include "property.h"
@@ -16,7 +18,7 @@
 
 // CPropConstant dialog
 
-class CPropConstant : public CResizablePage , public TreePropSheet::CWhiteBackgroundProvider
+class CPropConstant : public CPropPage
 {
 	DECLARE_DYNAMIC(CPropConstant)
 
@@ -38,7 +40,7 @@ protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 
 	DECLARE_MESSAGE_MAP()
-	bool      bSkipUpdateData;
+// COMMENT: {5/26/2009 8:48:06 PM}	bool      bSkipUpdateData;
 	Cproperty prop;
 
 #if defined(__MULTIPLE__)
@@ -47,9 +49,9 @@ protected:
 
 public:
 	virtual BOOL OnInitDialog();
-	virtual BOOL OnSetActive();
-	virtual BOOL OnKillActive();
-	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
-	CComboBox ComboType;
-	afx_msg void OnCbnSelchangeTypeCombo();
+// COMMENT: {5/26/2009 8:54:48 PM}	virtual BOOL OnSetActive();
+// COMMENT: {5/26/2009 8:48:27 PM}	virtual BOOL OnKillActive();
+// COMMENT: {5/26/2009 8:48:27 PM}	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
+// COMMENT: {5/26/2009 8:48:17 PM}	CComboBox ComboType;
+// COMMENT: {5/26/2009 8:48:17 PM}	afx_msg void OnCbnSelchangeTypeCombo();
 };

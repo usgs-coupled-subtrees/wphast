@@ -1,7 +1,9 @@
 #pragma once
 
-#include "TreePropSheetEx/ResizablePage.h"
-#include "TreePropSheetEx/TreePropSheetUtil.hpp"
+// COMMENT: {5/26/2009 9:33:09 PM}#include "TreePropSheetEx/ResizablePage.h"
+// COMMENT: {5/26/2009 9:33:09 PM}#include "TreePropSheetEx/TreePropSheetUtil.hpp"
+#include "PropPage.h"
+
 #include "afxwin.h"
 #include "resource.h"
 
@@ -9,7 +11,7 @@
 
 // CPropLinear dialog
 
-class CPropLinear : public CResizablePage, public TreePropSheet::CWhiteBackgroundProvider
+class CPropLinear : public CPropPage
 {
 	DECLARE_DYNAMIC(CPropLinear)
 
@@ -29,12 +31,12 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 	Cproperty prop;
-	bool      bSkipUpdateData;
+// COMMENT: {5/26/2009 9:33:41 PM}	bool      bSkipUpdateData;
 
 public:
 	virtual BOOL OnInitDialog();
-	virtual BOOL OnKillActive();
-	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
-	CComboBox ComboType;
-	afx_msg void OnCbnSelchangeTypeCombo();
+// COMMENT: {5/26/2009 9:33:55 PM}	virtual BOOL OnKillActive();
+// COMMENT: {5/26/2009 9:33:55 PM}	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
+// COMMENT: {5/26/2009 9:33:55 PM}	CComboBox ComboType;
+// COMMENT: {5/26/2009 9:33:55 PM}	afx_msg void OnCbnSelchangeTypeCombo();
 };

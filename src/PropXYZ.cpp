@@ -13,11 +13,11 @@
 
 // CPropXYZ dialog
 
-IMPLEMENT_DYNAMIC(CPropXYZ, CResizablePage)
+IMPLEMENT_DYNAMIC(CPropXYZ, CPropPage)
 
 CPropXYZ::CPropXYZ()
-: CResizablePage(CPropXYZ::IDD)
-, bSkipUpdateData(false)
+: CPropPage(CPropXYZ::IDD)
+// COMMENT: {5/26/2009 9:19:53 PM}, bSkipUpdateData(false)
 {
 
 }
@@ -28,7 +28,7 @@ CPropXYZ::~CPropXYZ()
 
 void CPropXYZ::DoDataExchange(CDataExchange* pDX)
 {
-	CResizablePage::DoDataExchange(pDX);
+	__super::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_TYPE_COMBO, ComboType);
 
 	if (pDX->m_bSaveAndValidate)
@@ -125,9 +125,9 @@ void CPropXYZ::DoDataExchange(CDataExchange* pDX)
 }
 
 
-BEGIN_MESSAGE_MAP(CPropXYZ, CResizablePage)
-	ON_WM_CTLCOLOR()
-	ON_CBN_SELCHANGE(IDC_TYPE_COMBO, &CPropXYZ::OnCbnSelchangeTypeCombo)
+BEGIN_MESSAGE_MAP(CPropXYZ, CPropPage)
+// COMMENT: {5/26/2009 9:20:07 PM}	ON_WM_CTLCOLOR()
+// COMMENT: {5/26/2009 9:20:07 PM}	ON_CBN_SELCHANGE(IDC_TYPE_COMBO, &CPropXYZ::OnCbnSelchangeTypeCombo)
 	ON_BN_CLICKED(IDC_BUTTON_XYZ, &CPropXYZ::OnBnClickedButtonXyz)
 END_MESSAGE_MAP()
 
@@ -149,43 +149,43 @@ BOOL CPropXYZ::OnInitDialog()
 	// EXCEPTION: OCX Property Pages should return FALSE
 }
 
-HBRUSH CPropXYZ::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
-{
-	if (this->HasWhiteBackground())
-	{
-		pDC->SetBkMode(TRANSPARENT);
-		return ::GetSysColorBrush(COLOR_WINDOW);
-	}
+// COMMENT: {5/26/2009 9:20:20 PM}HBRUSH CPropXYZ::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
+// COMMENT: {5/26/2009 9:20:20 PM}{
+// COMMENT: {5/26/2009 9:20:20 PM}	if (this->HasWhiteBackground())
+// COMMENT: {5/26/2009 9:20:20 PM}	{
+// COMMENT: {5/26/2009 9:20:20 PM}		pDC->SetBkMode(TRANSPARENT);
+// COMMENT: {5/26/2009 9:20:20 PM}		return ::GetSysColorBrush(COLOR_WINDOW);
+// COMMENT: {5/26/2009 9:20:20 PM}	}
+// COMMENT: {5/26/2009 9:20:20 PM}
+// COMMENT: {5/26/2009 9:20:20 PM}	// default
+// COMMENT: {5/26/2009 9:20:20 PM}	HBRUSH hbr = __super::OnCtlColor(pDC, pWnd, nCtlColor);
+// COMMENT: {5/26/2009 9:20:20 PM}	return hbr;
+// COMMENT: {5/26/2009 9:20:20 PM}}
+// COMMENT: {5/26/2009 9:20:20 PM}
+// COMMENT: {5/26/2009 9:20:20 PM}void CPropXYZ::OnCbnSelchangeTypeCombo()
+// COMMENT: {5/26/2009 9:20:20 PM}{
+// COMMENT: {5/26/2009 9:20:20 PM}	// Add your control notification handler code here
+// COMMENT: {5/26/2009 9:20:20 PM}	ASSERT(!bSkipUpdateData);
+// COMMENT: {5/26/2009 9:20:20 PM}	bSkipUpdateData = true;
+// COMMENT: {5/26/2009 9:20:20 PM}	::SendMessage(*this->GetParent(), PSM_SETCURSEL, (WPARAM)ComboType.GetCurSel(), (LPARAM)0);
+// COMMENT: {5/26/2009 9:20:20 PM}	ASSERT(bSkipUpdateData);
+// COMMENT: {5/26/2009 9:20:20 PM}	bSkipUpdateData = false;
+// COMMENT: {5/26/2009 9:20:20 PM}}
 
-	// default
-	HBRUSH hbr = __super::OnCtlColor(pDC, pWnd, nCtlColor);
-	return hbr;
-}
-
-void CPropXYZ::OnCbnSelchangeTypeCombo()
-{
-	// Add your control notification handler code here
-	ASSERT(!bSkipUpdateData);
-	bSkipUpdateData = true;
-	::SendMessage(*this->GetParent(), PSM_SETCURSEL, (WPARAM)ComboType.GetCurSel(), (LPARAM)0);
-	ASSERT(bSkipUpdateData);
-	bSkipUpdateData = false;
-}
-
-BOOL CPropXYZ::OnKillActive()
-{
-	ASSERT_VALID(this);
-
-	if (!this->bSkipUpdateData)
-	{
-		if (!UpdateData())
-		{
-			TRACE(traceAppMsg, 0, "UpdateData failed during page deactivation\n");
-			return FALSE;
-		}
-	}
-	return TRUE;
-}
+// COMMENT: {5/26/2009 9:20:27 PM}BOOL CPropXYZ::OnKillActive()
+// COMMENT: {5/26/2009 9:20:27 PM}{
+// COMMENT: {5/26/2009 9:20:27 PM}	ASSERT_VALID(this);
+// COMMENT: {5/26/2009 9:20:27 PM}
+// COMMENT: {5/26/2009 9:20:27 PM}	if (!this->bSkipUpdateData)
+// COMMENT: {5/26/2009 9:20:27 PM}	{
+// COMMENT: {5/26/2009 9:20:27 PM}		if (!UpdateData())
+// COMMENT: {5/26/2009 9:20:27 PM}		{
+// COMMENT: {5/26/2009 9:20:27 PM}			TRACE(traceAppMsg, 0, "UpdateData failed during page deactivation\n");
+// COMMENT: {5/26/2009 9:20:27 PM}			return FALSE;
+// COMMENT: {5/26/2009 9:20:27 PM}		}
+// COMMENT: {5/26/2009 9:20:27 PM}	}
+// COMMENT: {5/26/2009 9:20:27 PM}	return TRUE;
+// COMMENT: {5/26/2009 9:20:27 PM}}
 
 Cproperty CPropXYZ::GetProperty()
 {

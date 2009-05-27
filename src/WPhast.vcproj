@@ -892,6 +892,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\PropPage.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\PropPoints.cpp"
 				>
 			</File>
@@ -5033,6 +5037,10 @@
 			</File>
 			<File
 				RelativePath=".\PropNone.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PropPage.h"
 				>
 			</File>
 			<File

@@ -8,11 +8,11 @@
 
 // CPropNone dialog
 
-IMPLEMENT_DYNAMIC(CPropNone, CResizablePage)
+IMPLEMENT_DYNAMIC(CPropNone, CPropPage)
 
 CPropNone::CPropNone()
-: CResizablePage(CPropNone::IDD)
-, bSkipUpdateData(false)
+: CPropPage(CPropNone::IDD)
+// COMMENT: {5/26/2009 8:35:58 PM}, bSkipUpdateData(false)
 {
 	TRACE("%s(%p)\n", __FUNCTION__, this);
 }
@@ -37,9 +37,9 @@ void CPropNone::DoDataExchange(CDataExchange* pDX)
 }
 
 
-BEGIN_MESSAGE_MAP(CPropNone, CResizablePage)
-	ON_WM_CTLCOLOR()
-	ON_CBN_SELCHANGE(IDC_TYPE_COMBO, &CPropNone::OnCbnSelchangeTypeCombo)
+BEGIN_MESSAGE_MAP(CPropNone, CPropPage)
+// COMMENT: {5/26/2009 9:16:04 PM}	ON_WM_CTLCOLOR()
+// COMMENT: {5/26/2009 9:16:04 PM}	ON_CBN_SELCHANGE(IDC_TYPE_COMBO, &CPropNone::OnCbnSelchangeTypeCombo)
 END_MESSAGE_MAP()
 
 
@@ -56,40 +56,40 @@ BOOL CPropNone::OnInitDialog()
 	// EXCEPTION: OCX Property Pages should return FALSE
 }
 
-HBRUSH CPropNone::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
-{
-	if (this->HasWhiteBackground())
-	{
-		pDC->SetBkMode(TRANSPARENT);
-		return ::GetSysColorBrush(COLOR_WINDOW);
-	}
+// COMMENT: {5/26/2009 8:36:12 PM}HBRUSH CPropNone::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
+// COMMENT: {5/26/2009 8:36:12 PM}{
+// COMMENT: {5/26/2009 8:36:12 PM}	if (this->HasWhiteBackground())
+// COMMENT: {5/26/2009 8:36:12 PM}	{
+// COMMENT: {5/26/2009 8:36:12 PM}		pDC->SetBkMode(TRANSPARENT);
+// COMMENT: {5/26/2009 8:36:12 PM}		return ::GetSysColorBrush(COLOR_WINDOW);
+// COMMENT: {5/26/2009 8:36:12 PM}	}
+// COMMENT: {5/26/2009 8:36:12 PM}
+// COMMENT: {5/26/2009 8:36:12 PM}	// default
+// COMMENT: {5/26/2009 8:36:12 PM}	HBRUSH hbr = __super::OnCtlColor(pDC, pWnd, nCtlColor);
+// COMMENT: {5/26/2009 8:36:12 PM}	return hbr;
+// COMMENT: {5/26/2009 8:36:12 PM}}
 
-	// default
-	HBRUSH hbr = __super::OnCtlColor(pDC, pWnd, nCtlColor);
-	return hbr;
-}
+// COMMENT: {5/26/2009 8:36:16 PM}void CPropNone::OnCbnSelchangeTypeCombo()
+// COMMENT: {5/26/2009 8:36:16 PM}{
+// COMMENT: {5/26/2009 8:36:16 PM}	// Add your control notification handler code here
+// COMMENT: {5/26/2009 8:36:16 PM}	ASSERT(!bSkipUpdateData);
+// COMMENT: {5/26/2009 8:36:16 PM}	bSkipUpdateData = true;
+// COMMENT: {5/26/2009 8:36:16 PM}	::SendMessage(*this->GetParent(), PSM_SETCURSEL, (WPARAM)ComboType.GetCurSel(), (LPARAM)0);
+// COMMENT: {5/26/2009 8:36:16 PM}	ASSERT(bSkipUpdateData);
+// COMMENT: {5/26/2009 8:36:16 PM}	bSkipUpdateData = false;
+// COMMENT: {5/26/2009 8:36:16 PM}}
 
-void CPropNone::OnCbnSelchangeTypeCombo()
-{
-	// Add your control notification handler code here
-	ASSERT(!bSkipUpdateData);
-	bSkipUpdateData = true;
-	::SendMessage(*this->GetParent(), PSM_SETCURSEL, (WPARAM)ComboType.GetCurSel(), (LPARAM)0);
-	ASSERT(bSkipUpdateData);
-	bSkipUpdateData = false;
-}
-
-BOOL CPropNone::OnKillActive()
-{
-	ASSERT_VALID(this);
-
-	if (!this->bSkipUpdateData)
-	{
-		if (!UpdateData())
-		{
-			TRACE(traceAppMsg, 0, "UpdateData failed during page deactivation\n");
-			return FALSE;
-		}
-	}
-	return TRUE;
-}
+// COMMENT: {5/26/2009 8:36:22 PM}BOOL CPropNone::OnKillActive()
+// COMMENT: {5/26/2009 8:36:22 PM}{
+// COMMENT: {5/26/2009 8:36:22 PM}	ASSERT_VALID(this);
+// COMMENT: {5/26/2009 8:36:22 PM}
+// COMMENT: {5/26/2009 8:36:22 PM}	if (!this->bSkipUpdateData)
+// COMMENT: {5/26/2009 8:36:22 PM}	{
+// COMMENT: {5/26/2009 8:36:22 PM}		if (!UpdateData())
+// COMMENT: {5/26/2009 8:36:22 PM}		{
+// COMMENT: {5/26/2009 8:36:22 PM}			TRACE(traceAppMsg, 0, "UpdateData failed during page deactivation\n");
+// COMMENT: {5/26/2009 8:36:22 PM}			return FALSE;
+// COMMENT: {5/26/2009 8:36:22 PM}		}
+// COMMENT: {5/26/2009 8:36:22 PM}	}
+// COMMENT: {5/26/2009 8:36:22 PM}	return TRUE;
+// COMMENT: {5/26/2009 8:36:22 PM}}

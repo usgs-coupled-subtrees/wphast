@@ -1,11 +1,12 @@
 #pragma once
 
-#include "TreePropSheetEx/ResizablePage.h"
-#include "TreePropSheetEx/TreePropSheetUtil.hpp"
+// COMMENT: {5/26/2009 9:22:47 PM}#include "TreePropSheetEx/ResizablePage.h"
+// COMMENT: {5/26/2009 9:22:47 PM}#include "TreePropSheetEx/TreePropSheetUtil.hpp"
+#include "PropPage.h"
 
 // CPropDesc dialog
 
-class CPropDesc : public CResizablePage, public TreePropSheet::CWhiteBackgroundProvider
+class CPropDesc : public CPropPage
 {
 	DECLARE_DYNAMIC(CPropDesc)
 
@@ -27,5 +28,5 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 	virtual BOOL OnInitDialog();
-	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
+// COMMENT: {5/26/2009 9:23:10 PM}	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 };
