@@ -1,46 +1,38 @@
-// PropConstant.cpp : implementation file
+// PropNone.cpp : implementation file
 //
 
 #include "stdafx.h"
 #include "WPhast.h"
-#include "PropConstant.h"
+#include "PropNoneM.h"
 
 
-// CPropConstant dialog
+// CPropNoneM dialog
 
-IMPLEMENT_DYNAMIC(CPropConstant, CPropPage)
+IMPLEMENT_DYNAMIC(CPropNoneM, CPropPage)
 
-CPropConstant::CPropConstant()
-: CPropPage(CPropConstant::IDD)
+CPropNoneM::CPropNoneM()
+: CPropPage(CPropNoneM::IDD)
 {
 	TRACE("%s(%p)\n", __FUNCTION__, this);
 }
 
-CPropConstant::~CPropConstant()
+CPropNoneM::~CPropNoneM()
 {
 	TRACE("%s(%p)\n", __FUNCTION__, this);
 }
 
-void CPropConstant::DoDataExchange(CDataExchange* pDX)
+void CPropNoneM::DoDataExchange(CDataExchange* pDX)
 {
-	TRACE("%s(%p)\n", __FUNCTION__, this);
-
-#if defined(__MULTIPLE__)
 	CResizablePage::DoDataExchange(pDX);
-#else
-	__super::DoDataExchange(pDX);
-#endif
-
-#if !defined(__MULTIPLE__)
-	DDX_Control(pDX, IDC_TYPE_COMBO, ComboType);
-	if (pDX->m_bSaveAndValidate)
-	{
-	}
-	else
-	{
-		VERIFY(this->ComboType.SelectString(0, _T("Constant")) != CB_ERR);
-	}
-#endif
+// COMMENT: {6/3/2009 3:01:48 PM}	DDX_Control(pDX, IDC_TYPE_COMBO, ComboType);
+// COMMENT: {6/3/2009 3:01:48 PM}
+// COMMENT: {6/3/2009 3:01:48 PM}	if (pDX->m_bSaveAndValidate)
+// COMMENT: {6/3/2009 3:01:48 PM}	{
+// COMMENT: {6/3/2009 3:01:48 PM}	}
+// COMMENT: {6/3/2009 3:01:48 PM}	else
+// COMMENT: {6/3/2009 3:01:48 PM}	{
+// COMMENT: {6/3/2009 3:01:48 PM}		VERIFY(this->ComboType.SelectString(0, _T("None")) != CB_ERR);
+// COMMENT: {6/3/2009 3:01:48 PM}	}
 
 #if defined(__MULTIPLE__)
 	DDX_GridControl(pDX, IDC_TIMES_GRID, m_wndTimesGrid);
@@ -71,7 +63,7 @@ void CPropConstant::DoDataExchange(CDataExchange* pDX)
 		for (int row = 0; row < this->m_wndTimesGrid.GetRowCount(); ++row)
 		{
 			for (int col = 0; col < this->m_wndTimesGrid.GetColumnCount(); ++col)
-			{ 
+			{
 				this->m_wndTimesGrid.SetItemFormat(row, col, DT_LEFT|DT_BOTTOM|DT_END_ELLIPSIS);
 			}
 		}
@@ -98,7 +90,7 @@ void CPropConstant::DoDataExchange(CDataExchange* pDX)
 
 			this->m_wndTimesGrid.DisableCell(1, 1);
 
-			this->m_wndTimesGrid.SetItemText(1, 2, _T("Constant"));
+			this->m_wndTimesGrid.SetItemText(1, 2, _T("None"));
 
 			//{{
 			std::vector<LPCTSTR> vecTimeUnits;
@@ -116,8 +108,8 @@ void CPropConstant::DoDataExchange(CDataExchange* pDX)
 			vecPropType.push_back(_T("None"));
 			vecPropType.push_back(_T("Constant"));
 			vecPropType.push_back(_T("Linear"));
-			vecPropType.push_back(_T("Points"));
-			vecPropType.push_back(_T("XYZ"));
+// COMMENT: {6/1/2009 10:02:58 PM}			vecPropType.push_back(_T("Points"));
+// COMMENT: {6/1/2009 10:02:58 PM}			vecPropType.push_back(_T("XYZ"));
 
 			this->m_wndTimesGrid.SetColumnOptions(2, vecPropType);
 			//}}
@@ -129,65 +121,83 @@ void CPropConstant::DoDataExchange(CDataExchange* pDX)
 		///this->m_wndTimesGrid.ExpandColumnsToFit();
 	}
 #endif
-
-	if (pDX->m_bSaveAndValidate)
-	{
-		TRACE("%s(%p) TRUE\n", __FUNCTION__, this);
-
-		double d;
-		DDX_Text(pDX, IDC_VALUE_EDIT, d);
-		this->prop = Cproperty(d);
-	}
-	else
-	{
-		TRACE("%s(%p) FALSE\n", __FUNCTION__, this);
-
-		if (this->prop.type == PROP_FIXED)
-		{
-			DDX_Text(pDX, IDC_VALUE_EDIT, this->prop.v[0]);
-		}
-		else
-		{
-			CString empty;
-			DDX_Text(pDX, IDC_VALUE_EDIT, empty);
-		}
-	}
 }
 
 
-BEGIN_MESSAGE_MAP(CPropConstant, CPropPage)
+BEGIN_MESSAGE_MAP(CPropNoneM, CPropPage)
+	ON_NOTIFY(GVN_ENDLABELEDIT, IDC_TIMES_GRID, OnEndLabelEditTimes)
+	ON_NOTIFY(GVN_SELCHANGED, IDC_TIMES_GRID, OnSelChangedTimes)
 END_MESSAGE_MAP()
 
 
-// CPropConstant message handlers
+// CPropNoneM message handlers
 
-BOOL CPropConstant::OnInitDialog()
+BOOL CPropNoneM::OnInitDialog()
 {
-	TRACE("%s(%p)\n", __FUNCTION__, this);
 	__super::OnInitDialog();
 
 	// TODO:  Add extra initialization here
-#if !defined(__MULTIPLE__)
-	this->AddAnchor(IDC_TYPE_COMBO, TOP_LEFT, TOP_RIGHT);
-#endif
-	this->AddAnchor(IDC_VALUE_EDIT, TOP_LEFT, TOP_RIGHT);
+// COMMENT: {6/3/2009 3:07:36 PM}	this->AddAnchor(IDC_TYPE_COMBO, TOP_LEFT, TOP_RIGHT);
 #if defined(__MULTIPLE__)
 	this->AddAnchor(IDC_TIMES_GRID, TOP_LEFT, BOTTOM_LEFT);
 #endif
-
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
 }
 
-Cproperty CPropConstant::GetProperty()
+void CPropNoneM::OnEndLabelEditTimes(NMHDR *pNotifyStruct, LRESULT *result)
 {
-	TRACE("%s(%p)\n", __FUNCTION__, this);
-	return this->prop;
+	NM_GRIDVIEW *pnmgv = (NM_GRIDVIEW*)pNotifyStruct;
+	CString str = this->m_wndTimesGrid.GetItemText(pnmgv->iRow, pnmgv->iColumn);
+
+	// Add your control notification handler code here
+	ASSERT(!this->SkipUpdateData);
+	this->SkipUpdateData = true;
+	if (this->m_wndTimesGrid.GetSafeHwnd() && pnmgv->iColumn == 2)
+	{
+		int n = 0; // "None"
+		if (str.Compare("Constant") == 0)
+		{
+			n = 1;
+		}
+		else if (str.Compare("Linear") == 0)
+		{
+			n = 2;
+		}
+		if (n != 0)
+		{
+			::SendMessage(*this->GetParent(), PSM_SETCURSEL, (WPARAM)n, (LPARAM)0);
+		}
+	}
+	ASSERT(this->SkipUpdateData);
+	this->SkipUpdateData = false;
 }
 
-void CPropConstant::SetProperty(Cproperty p)
+void CPropNoneM::OnSelChangedTimes(NMHDR *pNotifyStruct, LRESULT *result)
 {
-	TRACE("%s(%p)\n", __FUNCTION__, this);
-	this->prop = p;
+	NM_GRIDVIEW *pnmgv = (NM_GRIDVIEW*)pNotifyStruct;
+	TRACE("CPropNoneM::OnSelChangedFlux row = %d\n", pnmgv->iRow);
+
+	ASSERT(!this->SkipUpdateData);
+	this->SkipUpdateData = true;
+	if (this->m_wndTimesGrid.GetSafeHwnd())
+	{
+		CString str = this->m_wndTimesGrid.GetItemText(pnmgv->iRow, 2);
+		int n = 0; // "None"
+		if (str.Compare("Constant") == 0)
+		{
+			n = 1;
+		}
+		else if (str.Compare("Linear") == 0)
+		{
+			n = 2;
+		}
+		if (n != 0)
+		{
+			::SendMessage(*this->GetParent(), PSM_SETCURSEL, (WPARAM)n, (LPARAM)0);
+		}
+	}
+	ASSERT(this->SkipUpdateData);
+	this->SkipUpdateData = false;
 }

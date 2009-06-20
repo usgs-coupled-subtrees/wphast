@@ -6,7 +6,7 @@
 #include "resource.h"
 #include "property.h"
 
-// COMMENT: {5/27/2009 2:18:30 PM}#define __MULTIPLE__
+#define __MULTIPLE__
 
 #if defined(__MULTIPLE__)
 #include "gridctrl/ModGridCtrlEx.h"
@@ -14,15 +14,15 @@
 
 
 
-// CPropConstant dialog
+// CPropConstantM dialog
 
-class CPropConstant : public CPropPage
+class CPropConstantM : public CPropPage
 {
-	DECLARE_DYNAMIC(CPropConstant)
+	DECLARE_DYNAMIC(CPropConstantM)
 
 public:
-	CPropConstant();
-	virtual ~CPropConstant();
+	CPropConstantM();
+	virtual ~CPropConstantM();
 
 	Cproperty GetProperty();
 	void SetProperty(Cproperty p);
@@ -43,6 +43,8 @@ protected:
 #if defined(__MULTIPLE__)
 	CModGridCtrlEx   m_wndTimesGrid;      // IDC_TIMES_GRID
 #endif
+	afx_msg void OnEndLabelEditTimes(NMHDR *pNotifyStruct, LRESULT *result);
+	afx_msg void OnSelChangedTimes(NMHDR *pNotifyStruct, LRESULT *result);
 
 public:
 	virtual BOOL OnInitDialog();

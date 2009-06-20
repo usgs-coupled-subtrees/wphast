@@ -4,45 +4,43 @@
 
 #include "afxwin.h"
 #include "resource.h"
+
 #include "property.h"
 
-// COMMENT: {5/27/2009 2:18:30 PM}#define __MULTIPLE__
+#define __MULTIPLE__
 
 #if defined(__MULTIPLE__)
 #include "gridctrl/ModGridCtrlEx.h"
 #endif
 
+// CPropLinearM dialog
 
-
-// CPropConstant dialog
-
-class CPropConstant : public CPropPage
+class CPropLinearM : public CPropPage
 {
-	DECLARE_DYNAMIC(CPropConstant)
+	DECLARE_DYNAMIC(CPropLinearM)
 
 public:
-	CPropConstant();
-	virtual ~CPropConstant();
+	CPropLinearM();
+	virtual ~CPropLinearM();
 
 	Cproperty GetProperty();
 	void SetProperty(Cproperty p);
 
 // Dialog Data
-#if defined(__MULTIPLE__)
-	enum { IDD = IDD_PROP_CONSTANT_M };
-#else
-	enum { IDD = IDD_PROP_CONSTANT };
-#endif
+	enum { IDD = IDD_PROP_LINEAR_M };
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 
 	DECLARE_MESSAGE_MAP()
+
 	Cproperty prop;
 
 #if defined(__MULTIPLE__)
 	CModGridCtrlEx   m_wndTimesGrid;      // IDC_TIMES_GRID
 #endif
+	afx_msg void OnEndLabelEditTimes(NMHDR *pNotifyStruct, LRESULT *result);
+	afx_msg void OnSelChangedTimes(NMHDR *pNotifyStruct, LRESULT *result);
 
 public:
 	virtual BOOL OnInitDialog();

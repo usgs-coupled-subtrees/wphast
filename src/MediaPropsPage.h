@@ -12,6 +12,7 @@
 #include "PropLinear.h"
 #include "PropPoints.h"
 #include "PropXYZ.h"
+#include "PropRich.h"
 
 #include "TreePropSheetEx/TreePropSheetSplitter.h"
 #include "TreePropSheetExSRC.h"
@@ -20,6 +21,7 @@
 #include "GridElt.h"
 #include "afxcmn.h"
 
+#define MEDIA_SKIP
 
 // CMediaPropsPage dialog
 
@@ -44,12 +46,16 @@ public:
 	void SetDefault(bool bDefault)       { this->bDefault = bDefault; }
 	bool GetDefault(void)const           { return bDefault; }
 
-	void SetDesc(LPCTSTR desc);//           { this->sDesc = desc; }
-	LPCTSTR GetDesc()const;//               { return sDesc.c_str(); }
+	void SetDesc(LPCTSTR desc);
+	LPCTSTR GetDesc()const;
 
 
 // Dialog Data
-	enum { IDD = IDD_PROPS_PAGE };
+#if defined(MEDIA_SKIP)
+	enum { IDD = IDD_PROPS_MEDIA1 };
+#else
+	enum { IDD = IDD_PROPS_MEDIA };
+#endif
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
@@ -69,8 +75,10 @@ protected:
 	//CTreePropSheetExSRC                      SheetDesc;
 	//CResizablePage                           PageDesc;
 	CPropDesc                                PageDesc;
+	CPropRich                                PageRich;
 	//}}
 	CTreePropSheetExSRC                      SheetTop;
+// COMMENT: {5/28/2009 8:49:20 PM}	TreePropSheet::CTreePropSheetEx          SheetTop;
 	TreePropSheet::CTreePropSheetSplitter    Splitter;
 
 	CPropNone       PropNone;
@@ -80,12 +88,14 @@ protected:
 	CPropXYZ        PropXYZ;
 
 	CGridElt GridElt;
-	CGridElt GridEltFixed;
+	CGridElt GridEltConstant;
 	CGridElt GridEltLinear;
 	CGridElt GridEltPoints;
 	CGridElt GridEltXYZ;
 	
+#if defined(MEDIA_SKIP)
 	CRichEditCtrl RichEditCtrl;
+#endif
 
 	HTREEITEM ItemDDX;
 

@@ -372,7 +372,7 @@
 #define IDD_PROP_PROPPAGE4              407
 #define IDD_PROP_PROPPAGE5              408
 #define IDD_PROP_CONSTANT               409
-#define IDD_PROPS_PAGE                  410
+#define IDD_PROPS_MEDIA                 410
 #define IDD_PROP_NONE                   411
 #define IDD_PROP_LINEAR                 412
 #define IDD_PROP_POINTS                 413
@@ -380,6 +380,14 @@
 #define IDD_PROPS_TIME_SERIES           415
 #define IDD_PROP_CONSTANT_M             416
 #define IDD_PROP_DESC                   417
+#define IDD_PROPS_HEADIC                418
+#define IDD_PROPS_ICCHEM                419
+#define IDD_PROPS_MEDIA1                420
+#define IDD_PROP_RICH                   421
+#define IDD_PROPS_FLUX                  422
+#define IDD_PROP_LINEAR_M               423
+#define IDD_PROP_NONE_M                 424
+#define IDD_PROPS_FLUX_2                425
 #define IDC_EDIT_X                      1000
 #define IDC_TITLE                       1000
 #define IDC_EDIT_Y                      1001
@@ -877,13 +885,15 @@
 #define IDC_EDIT5                       1487
 #define IDC_TREE_PROPS                  1488
 #define IDC_TYPE_COMBO                  1489
-#define IDC_TREE_PROPS2                 1489
 #define IDC_DESC_PAGE                   1489
 #define IDC_VALUE_EDIT                  1490
 #define IDC_EDIT_XYZ                    1492
 #define IDC_BUTTON_XYZ                  1493
 #define IDC_TAB1                        1494
 #define IDC_TIMES_GRID                  1495
+#define IDC_GRID_SOLUTION               1496
+#define IDC_RICH_PAGE                   1497
+#define IDC_GB_PROPERTY                 1498
 #define IDC_RESIZE_COLUMN               28654
 #define IDC_RESIZE_ROW                  28655
 #define IDR_POPUP                       28656
@@ -923,6 +933,7 @@
 #define ID_BUTTON32860                  32860
 #define IDW_CONTROLBAR_TREE             59424
 #define IDW_CONTROLBAR_BOXPROPS         59425
+#define IDC_VALUE_STATIC                65535
 
 // Next default values for new objects
 // 
@@ -930,7 +941,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        413
 #define _APS_NEXT_COMMAND_VALUE         32861
-#define _APS_NEXT_CONTROL_VALUE         1496
+#define _APS_NEXT_CONTROL_VALUE         1499
 #define _APS_NEXT_SYMED_VALUE           126
 #endif
 #endif

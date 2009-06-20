@@ -9,6 +9,8 @@
 
 #include "PropertyTreeControlBar.h"
 #include "BCFluxPropertyPage2.h"
+#include "FluxPropsPage.h"
+#include "FluxPropsPage2.h"
 #include "BCLeakyPropertyPage2.h"
 #include "BCSpecifiedHeadPropertyPage.h"
 #include "ETSLayout/ETSLayout.h"
@@ -258,17 +260,21 @@ void CBCZoneActor::Edit(CTreeCtrl* pTreeCtrl, int nStressPeriod)
 
 	if (this->m_bc.bc_type == BC_info::BC_FLUX)
 	{
-		CBCFluxPropertyPage2 fluxProps;
+		//{{
+		CPropertySheet props(str);
+		//}}
+// COMMENT: {6/1/2009 6:08:37 PM}		CBCFluxPropertyPage2 fluxProps;
+		CFluxPropsPage2 fluxProps;
 		props.AddPage(&fluxProps);
 		fluxProps.SetProperties(this->GetBC());
 		fluxProps.SetFlowOnly(pDoc->GetFlowOnly());
-		fluxProps.SetDesc(this->GetDesc());
+// COMMENT: {6/5/2009 8:00:20 PM}		fluxProps.SetDesc(this->GetDesc());
 		if (props.DoModal() == IDOK)
 		{
-			CBC bc;
-			fluxProps.GetProperties(bc);
-			ASSERT(bc.polyh);
-			pDoc->Execute(new CSetBCAction(this, pTreeCtrl, bc, fluxProps.GetDesc()));
+// COMMENT: {6/5/2009 8:00:26 PM}			CBC bc;
+// COMMENT: {6/5/2009 8:00:26 PM}			fluxProps.GetProperties(bc);
+// COMMENT: {6/5/2009 8:00:26 PM}			ASSERT(bc.polyh);
+// COMMENT: {6/5/2009 8:00:26 PM}			pDoc->Execute(new CSetBCAction(this, pTreeCtrl, bc, fluxProps.GetDesc()));
 		}
 	}
 	else if (this->m_bc.bc_type == BC_info::BC_LEAKY)

@@ -1,27 +1,27 @@
-// PropConstant.cpp : implementation file
+// PropConstantM.cpp : implementation file
 //
 
 #include "stdafx.h"
 #include "WPhast.h"
-#include "PropConstant.h"
+#include "PropConstantM.h"
 
 
-// CPropConstant dialog
+// CPropConstantM dialog
 
-IMPLEMENT_DYNAMIC(CPropConstant, CPropPage)
+IMPLEMENT_DYNAMIC(CPropConstantM, CPropPage)
 
-CPropConstant::CPropConstant()
-: CPropPage(CPropConstant::IDD)
+CPropConstantM::CPropConstantM()
+: CPropPage(CPropConstantM::IDD)
 {
 	TRACE("%s(%p)\n", __FUNCTION__, this);
 }
 
-CPropConstant::~CPropConstant()
+CPropConstantM::~CPropConstantM()
 {
 	TRACE("%s(%p)\n", __FUNCTION__, this);
 }
 
-void CPropConstant::DoDataExchange(CDataExchange* pDX)
+void CPropConstantM::DoDataExchange(CDataExchange* pDX)
 {
 	TRACE("%s(%p)\n", __FUNCTION__, this);
 
@@ -71,7 +71,7 @@ void CPropConstant::DoDataExchange(CDataExchange* pDX)
 		for (int row = 0; row < this->m_wndTimesGrid.GetRowCount(); ++row)
 		{
 			for (int col = 0; col < this->m_wndTimesGrid.GetColumnCount(); ++col)
-			{ 
+			{
 				this->m_wndTimesGrid.SetItemFormat(row, col, DT_LEFT|DT_BOTTOM|DT_END_ELLIPSIS);
 			}
 		}
@@ -116,8 +116,8 @@ void CPropConstant::DoDataExchange(CDataExchange* pDX)
 			vecPropType.push_back(_T("None"));
 			vecPropType.push_back(_T("Constant"));
 			vecPropType.push_back(_T("Linear"));
-			vecPropType.push_back(_T("Points"));
-			vecPropType.push_back(_T("XYZ"));
+// COMMENT: {6/1/2009 10:02:58 PM}			vecPropType.push_back(_T("Points"));
+// COMMENT: {6/1/2009 10:02:58 PM}			vecPropType.push_back(_T("XYZ"));
 
 			this->m_wndTimesGrid.SetColumnOptions(2, vecPropType);
 			//}}
@@ -155,13 +155,15 @@ void CPropConstant::DoDataExchange(CDataExchange* pDX)
 }
 
 
-BEGIN_MESSAGE_MAP(CPropConstant, CPropPage)
+BEGIN_MESSAGE_MAP(CPropConstantM, CPropPage)
+	ON_NOTIFY(GVN_ENDLABELEDIT, IDC_TIMES_GRID, OnEndLabelEditTimes)
+	ON_NOTIFY(GVN_SELCHANGED, IDC_TIMES_GRID, OnSelChangedTimes)
 END_MESSAGE_MAP()
 
 
-// CPropConstant message handlers
+// CPropConstantM message handlers
 
-BOOL CPropConstant::OnInitDialog()
+BOOL CPropConstantM::OnInitDialog()
 {
 	TRACE("%s(%p)\n", __FUNCTION__, this);
 	__super::OnInitDialog();
@@ -180,14 +182,70 @@ BOOL CPropConstant::OnInitDialog()
 	// EXCEPTION: OCX Property Pages should return FALSE
 }
 
-Cproperty CPropConstant::GetProperty()
+Cproperty CPropConstantM::GetProperty()
 {
 	TRACE("%s(%p)\n", __FUNCTION__, this);
 	return this->prop;
 }
 
-void CPropConstant::SetProperty(Cproperty p)
+void CPropConstantM::SetProperty(Cproperty p)
 {
 	TRACE("%s(%p)\n", __FUNCTION__, this);
 	this->prop = p;
+}
+
+void CPropConstantM::OnEndLabelEditTimes(NMHDR *pNotifyStruct, LRESULT *result)
+{
+	NM_GRIDVIEW *pnmgv = (NM_GRIDVIEW*)pNotifyStruct;
+	CString str = this->m_wndTimesGrid.GetItemText(pnmgv->iRow, pnmgv->iColumn);
+
+	// Add your control notification handler code here
+	ASSERT(!this->SkipUpdateData);
+	this->SkipUpdateData = true;
+	if (this->m_wndTimesGrid.GetSafeHwnd() && pnmgv->iColumn == 2)
+	{
+		int n = 0; // "None"
+		if (str.Compare("Constant") == 0)
+		{
+			n = 1;
+		}
+		else if (str.Compare("Linear") == 0)
+		{
+			n = 2;
+		}
+		if (n != 1)
+		{
+			::SendMessage(*this->GetParent(), PSM_SETCURSEL, (WPARAM)n, (LPARAM)0);
+		}
+	}
+	ASSERT(this->SkipUpdateData);
+	this->SkipUpdateData = false;
+}
+
+void CPropConstantM::OnSelChangedTimes(NMHDR *pNotifyStruct, LRESULT *result)
+{
+	NM_GRIDVIEW *pnmgv = (NM_GRIDVIEW*)pNotifyStruct;
+	TRACE("CPropConstantM::OnSelChangedFlux row = %d\n", pnmgv->iRow);
+
+	ASSERT(!this->SkipUpdateData);
+	this->SkipUpdateData = true;
+	if (this->m_wndTimesGrid.GetSafeHwnd())
+	{
+		CString str = this->m_wndTimesGrid.GetItemText(pnmgv->iRow, 2);
+		int n = 0; // "None"
+		if (str.Compare("Constant") == 0)
+		{
+			n = 1;
+		}
+		else if (str.Compare("Linear") == 0)
+		{
+			n = 2;
+		}
+		if (n != 1)
+		{
+			::SendMessage(*this->GetParent(), PSM_SETCURSEL, (WPARAM)n, (LPARAM)0);
+		}
+	}
+	ASSERT(this->SkipUpdateData);
+	this->SkipUpdateData = false;
 }

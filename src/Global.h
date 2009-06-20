@@ -16,6 +16,7 @@ class vtkProp3D;
 // #include "BC.h"
 #include "TimeSeries.h"
 #include "srcinput/Prism.h"
+#include "TreePropSheetEx/TreePropSheetEx.h"
 class CBC;
 class Cproperty;
 class CCheckTreeCtrl;
@@ -27,6 +28,8 @@ class CGridElt;
 class vtkTransform;
 class CWorldTransform;
 class CTreePropSheetExSRC;
+class TreePropSheet::CTreePropSheetEx;
+
 
 // user defined messages
 #define UM_CHECKSTATECHANGE (WM_USER + 100)
@@ -63,7 +66,9 @@ public:
 	// Cproperty
 	static void DDX_Property(CDataExchange* pDX, CCheckTreeCtrl* pTree, HTREEITEM hti, Cproperty* value, Cproperty* fixed, Cproperty* linear);
 	static void DDX_Property(CDataExchange* pDX, int nIDC, int nRow, struct property* pProperty, bool bRequired);
-	static void DDX_Property(CDataExchange* pDX, CTreePropSheetExSRC* pTreeProp, HTREEITEM hti, std::vector<Cproperty*> &props, std::vector<CPropertyPage*> &pages);
+// COMMENT: {5/28/2009 6:46:43 PM}	static void DDX_Property(CDataExchange* pDX, CTreePropSheetExSRC* pTreeProp, HTREEITEM hti, std::vector<Cproperty*> &props, std::vector<CPropertyPage*> &pages);
+	static void DDX_Property(CDataExchange* pDX, TreePropSheet::CTreePropSheetEx* pTreeProp, HTREEITEM hti, std::vector<Cproperty*> &props, std::vector<CPropertyPage*> &pages);
+	static void DDX_PropertyM(CDataExchange* pDX, TreePropSheet::CTreePropSheetEx* pTreeProp, HTREEITEM hti, std::vector<Cproperty*> &props, std::vector<CPropertyPage*> &pages);
 
 	static void EnableFixed(CWnd* pDlgWnd, BOOL bEnable);
 	static void EnableLinearInterpolation(CWnd* pDlgWnd, BOOL bEnable);
@@ -145,6 +150,7 @@ public:
 
 	static int AddTimeUnits(CComboBox* pCombo);
 	static std::string GetStdTimeUnits(const char* unit);
+	static std::string GetStdTimeUnitsSafe(const char* unit);
 
 	static int AddVolumeUnits(CComboBox* pCombo);
 	static std::string GetStdVolumeUnits(const char* unit);

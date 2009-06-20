@@ -592,6 +592,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\FluxPropsPage.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\FluxPropsPage2.cpp"
+				>
+			</File>
+			<File
 				RelativePath="FreeSurface.cpp"
 				>
 			</File>
@@ -709,6 +717,14 @@
 			</File>
 			<File
 				RelativePath="HeadIC.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\HeadICPropsPage.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ICChemPropsPage.cpp"
 				>
 			</File>
 			<File
@@ -872,6 +888,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\PropConstantM.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\PropDesc.cpp"
 				>
 			</File>
@@ -888,7 +908,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\PropLinearM.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\PropNone.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\PropNoneM.cpp"
 				>
 			</File>
 			<File
@@ -897,6 +925,10 @@
 			</File>
 			<File
 				RelativePath=".\PropPoints.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\PropRich.cpp"
 				>
 			</File>
 			<File
@@ -4748,6 +4780,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\FluxPropsPage.h"
+				>
+			</File>
+			<File
+				RelativePath=".\FluxPropsPage2.h"
+				>
+			</File>
+			<File
 				RelativePath="FreeSurface.h"
 				>
 			</File>
@@ -4837,6 +4877,14 @@
 			</File>
 			<File
 				RelativePath="HeadIC.h"
+				>
+			</File>
+			<File
+				RelativePath=".\HeadICPropsPage.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ICChemPropsPage.h"
 				>
 			</File>
 			<File
@@ -5020,6 +5068,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\PropConstantM.h"
+				>
+			</File>
+			<File
 				RelativePath=".\PropDesc.h"
 				>
 			</File>
@@ -5036,7 +5088,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\PropLinearM.h"
+				>
+			</File>
+			<File
 				RelativePath=".\PropNone.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PropNoneM.h"
 				>
 			</File>
 			<File
@@ -5045,6 +5105,10 @@
 			</File>
 			<File
 				RelativePath=".\PropPoints.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PropRich.h"
 				>
 			</File>
 			<File

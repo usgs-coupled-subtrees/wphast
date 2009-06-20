@@ -45,6 +45,40 @@ Cproperty::Cproperty(double value)
 	this->count_v = 1;
 }
 
+//{{
+Cproperty::Cproperty(enum PROP_TYPE pt)
+{
+	this->InternalInit();
+
+	if (pt == PROP_FIXED)
+	{
+		this->count_alloc = 2;
+		this->v = new double[this->count_alloc];
+		ASSERT(this->v);
+		this->v[0]    = std::numeric_limits<double>::signaling_NaN();
+		this->count_v = 1;
+		this->type    = PROP_FIXED;
+	}
+	else if (pt == PROP_LINEAR)
+	{
+		this->count_alloc = 2;
+		this->v = new double[this->count_alloc];
+		ASSERT(this->v);
+		this->coord   = 'x';
+		this->v[0]    = std::numeric_limits<double>::signaling_NaN();
+		this->v[1]    = std::numeric_limits<double>::signaling_NaN();
+		this->dist1   = std::numeric_limits<double>::signaling_NaN();
+		this->dist2   = std::numeric_limits<double>::signaling_NaN();
+		this->count_v = 2;
+		this->type    = PROP_LINEAR;
+	}
+	else
+	{
+		ASSERT(FALSE);
+	}
+}
+//}}
+
 Cproperty::~Cproperty()
 {
 	this->InternalDelete();
@@ -71,8 +105,10 @@ void Cproperty::InternalInit(void)
 	this->type        = PROP_UNDEFINED;
 	this->coord       = '\000';
 	this->icoord      = -1;
-	this->dist1       = -1;
-	this->dist2       = -1;
+// COMMENT: {6/17/2009 9:54:24 PM}	this->dist1       = -1;
+// COMMENT: {6/17/2009 9:54:24 PM}	this->dist2       = -1;
+	this->dist1       = std::numeric_limits<double>::signaling_NaN();
+	this->dist2       = std::numeric_limits<double>::signaling_NaN();
 	this->data_source = 0;
 }
 
@@ -84,7 +120,8 @@ void Cproperty::InternalCopy(const property& src)
 	ASSERT(this->v == 0);
 	this->v = new double[this->count_alloc = src.count_alloc];
 	ASSERT(this->v);
-	for (int i = 0; i < src.count_v; ++i) {
+	for (int i = 0; i < src.count_v; ++i)
+	{
 		this->v[i] = src.v[i];
 	}
 	this->count_v = src.count_v;

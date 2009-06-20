@@ -34,6 +34,7 @@
 #include "srcinput/Prism.h"
 #include "TreePropSheetExSRC.h"
 #include "MediaPropsPage.h"
+#include "FluxPropsPage.h"
 #include "FakeFiledata.h"
 
 
@@ -875,6 +876,10 @@ void CGlobal::DDX_Property(CDataExchange* pDX, CCheckTreeCtrl* pTree, HTREEITEM 
 					CGlobal::EnableFixed(pDX->m_pDlgWnd, FALSE);
 					CGlobal::EnableLinearInterpolation(pDX->m_pDlgWnd, TRUE);
 					break;
+				case PROP_UNDEFINED:
+					CGlobal::EnableFixed(pDX->m_pDlgWnd, TRUE);
+					CGlobal::EnableLinearInterpolation(pDX->m_pDlgWnd, FALSE);
+					break;
 				default:
 					ASSERT(FALSE);
 			}
@@ -897,7 +902,7 @@ void CGlobal::DDX_Property(CDataExchange* pDX, CCheckTreeCtrl* pTree, HTREEITEM 
 	}
 }
 
-void CGlobal::DDX_Property(CDataExchange* pDX, CTreePropSheetExSRC* pTreeProp, HTREEITEM hti, std::vector<Cproperty*> &props, std::vector<CPropertyPage*> &pages)
+void CGlobal::DDX_Property(CDataExchange* pDX, TreePropSheet::CTreePropSheetEx* pTreeProp, HTREEITEM hti, std::vector<Cproperty*> &props, std::vector<CPropertyPage*> &pages)
 {
 	const int PAGE_NONE   = 0;
 	const int PAGE_FIXED  = 1;
@@ -1098,6 +1103,210 @@ void CGlobal::DDX_Property(CDataExchange* pDX, CTreePropSheetExSRC* pTreeProp, H
 
 			CPropXYZ *pXYZ = dynamic_cast<CPropXYZ*>(pages[PAGE_XYZ]);
 			pXYZ->SetProperty(*props[PAGE_XYZ]);
+		}
+	}
+}
+void CGlobal::DDX_PropertyM(CDataExchange* pDX, TreePropSheet::CTreePropSheetEx* pTreeProp, HTREEITEM hti, std::vector<Cproperty*> &props, std::vector<CPropertyPage*> &pages)
+{
+	const int PAGE_NONE   = 0;
+	const int PAGE_FIXED  = 1;
+	const int PAGE_LINEAR = 2;
+	const int PAGE_POINTS = 3;
+	const int PAGE_XYZ    = 4;
+
+	Cproperty *value = props[0];
+	ASSERT(value);
+// COMMENT: {6/3/2009 4:10:12 PM}	ASSERT(props.size() == 5);
+
+	// Cproperty* prop  => std::vector<Cproperty*> &props
+	if (pDX->m_bSaveAndValidate)
+	{
+		switch (pTreeProp->GetActiveIndex())
+		{
+		case PAGE_NONE:
+			{
+				value->type = PROP_UNDEFINED;
+			}
+			break;
+		case PAGE_FIXED:
+			{
+				if (!pages[PAGE_FIXED]->UpdateData(TRUE))
+				{
+					pDX->Fail();
+				}
+				CPropConstantM *pConstantM = dynamic_cast<CPropConstantM*>(pages[PAGE_FIXED]);
+				(*value) = pConstantM->GetProperty();
+				ASSERT(value->type == PROP_FIXED);
+			}
+			break;
+		case PAGE_LINEAR:
+			{
+				if (!pages[PAGE_LINEAR]->UpdateData(TRUE))
+				{
+					pDX->Fail();
+				}
+				CPropLinearM *pLinearM = dynamic_cast<CPropLinearM*>(pages[PAGE_LINEAR]);
+				(*value) = pLinearM->GetProperty();
+				ASSERT(value->type == PROP_LINEAR);
+			}
+			break;
+// COMMENT: {6/3/2009 4:15:26 PM}		case PAGE_POINTS:
+// COMMENT: {6/3/2009 4:15:26 PM}			{
+// COMMENT: {6/3/2009 4:15:26 PM}				if (!pages[PAGE_POINTS]->UpdateData(TRUE))
+// COMMENT: {6/3/2009 4:15:26 PM}				{
+// COMMENT: {6/3/2009 4:15:26 PM}					pDX->Fail();
+// COMMENT: {6/3/2009 4:15:26 PM}				}
+// COMMENT: {6/3/2009 4:15:26 PM}				CPropPoints *pPoints = dynamic_cast<CPropPoints*>(pages[PAGE_POINTS]);
+// COMMENT: {6/3/2009 4:15:26 PM}				(*value) = pPoints->GetProperty();
+// COMMENT: {6/3/2009 4:15:26 PM}				ASSERT(value->type == PROP_POINTS);
+// COMMENT: {6/3/2009 4:15:26 PM}			}
+// COMMENT: {6/3/2009 4:15:26 PM}			break;
+// COMMENT: {6/3/2009 4:15:26 PM}		case PAGE_XYZ:
+// COMMENT: {6/3/2009 4:15:26 PM}			{
+// COMMENT: {6/3/2009 4:15:26 PM}				if (!pages[PAGE_XYZ]->UpdateData(TRUE))
+// COMMENT: {6/3/2009 4:15:26 PM}				{
+// COMMENT: {6/3/2009 4:15:26 PM}					pDX->Fail();
+// COMMENT: {6/3/2009 4:15:26 PM}				}
+// COMMENT: {6/3/2009 4:15:26 PM}				CPropXYZ *pXYZ = dynamic_cast<CPropXYZ*>(pages[PAGE_XYZ]);
+// COMMENT: {6/3/2009 4:15:26 PM}				(*value) = pXYZ->GetProperty();
+// COMMENT: {6/3/2009 4:15:26 PM}				ASSERT(value->type == PROP_XYZ);
+// COMMENT: {6/3/2009 4:15:26 PM}			}
+// COMMENT: {6/3/2009 4:15:26 PM}			break;
+		default:
+			ASSERT(FALSE);
+		}
+
+		// all ok so copy
+		if (value->type == PROP_FIXED)
+		{
+			ASSERT(value->count_v == 1);
+			(*props[PAGE_FIXED]) = (*value);
+		}
+		else if (value->type == PROP_LINEAR)
+		{
+			ASSERT(value->count_v == 2);
+			(*props[PAGE_LINEAR]) = (*value);
+		}
+// COMMENT: {6/3/2009 4:16:40 PM}		else if (value->type == PROP_POINTS)
+// COMMENT: {6/3/2009 4:16:40 PM}		{
+// COMMENT: {6/3/2009 4:16:40 PM}			(*props[PAGE_POINTS]) = (*value);
+// COMMENT: {6/3/2009 4:16:40 PM}		}
+// COMMENT: {6/3/2009 4:16:40 PM}		else if (value->type == PROP_XYZ)
+// COMMENT: {6/3/2009 4:16:40 PM}		{
+// COMMENT: {6/3/2009 4:16:40 PM}			(*props[PAGE_XYZ]) = (*value);
+// COMMENT: {6/3/2009 4:16:40 PM}		}
+
+#if defined(_DEBUG)
+		value->AssertValid();
+#endif
+
+	}
+	else
+	{
+		//
+		// always set properties
+		//
+
+		CPropConstantM *pConstantM = dynamic_cast<CPropConstantM*>(pages[PAGE_FIXED]);
+		pConstantM->SetProperty(*props[PAGE_FIXED]);
+
+		CPropLinearM *pLinearM = dynamic_cast<CPropLinearM*>(pages[PAGE_LINEAR]);
+		pLinearM->SetProperty(*props[PAGE_LINEAR]);
+
+// COMMENT: {6/3/2009 4:13:25 PM}		CPropPoints *pPoints = dynamic_cast<CPropPoints*>(pages[PAGE_POINTS]);
+// COMMENT: {6/3/2009 4:13:25 PM}		pPoints->SetProperty(*props[PAGE_POINTS]);
+// COMMENT: {6/3/2009 4:13:25 PM}
+// COMMENT: {6/3/2009 4:13:25 PM}		CPropXYZ *pXYZ = dynamic_cast<CPropXYZ*>(pages[PAGE_XYZ]);
+// COMMENT: {6/3/2009 4:13:25 PM}		pXYZ->SetProperty(*props[PAGE_XYZ]);
+
+		bool bSetActivePage = false;
+
+		if (value->type == PROP_UNDEFINED)
+		{
+			if (pTreeProp->GetActiveIndex() != PAGE_NONE)
+			{
+				pTreeProp->SetActivePage(PAGE_NONE);
+				bSetActivePage = true;
+			}
+			else
+			{
+				pages[PAGE_NONE]->UpdateData(FALSE);
+			}
+		}
+		else if (value->type == PROP_FIXED)
+		{
+			ASSERT(*props[PAGE_FIXED] == *value);
+			if (pTreeProp->GetActiveIndex() != PAGE_FIXED)
+			{
+				pTreeProp->SetActivePage(PAGE_FIXED);
+				bSetActivePage = true;
+			}
+			else
+			{
+				pages[PAGE_FIXED]->UpdateData(FALSE);
+			}
+		}
+		else if (value->type == PROP_LINEAR)
+		{
+			ASSERT(*props[PAGE_LINEAR] == *value);
+			if (pTreeProp->GetActiveIndex() != PAGE_LINEAR)
+			{
+				pTreeProp->SetActivePage(PAGE_LINEAR);
+				bSetActivePage = true;
+			}
+			else
+			{
+				pages[PAGE_LINEAR]->UpdateData(FALSE);
+			}
+		}
+// COMMENT: {6/3/2009 4:14:15 PM}		else if (value->type == PROP_POINTS)
+// COMMENT: {6/3/2009 4:14:15 PM}		{
+// COMMENT: {6/3/2009 4:14:15 PM}			ASSERT(*props[PAGE_POINTS] == *value);
+// COMMENT: {6/3/2009 4:14:15 PM}			if (pTreeProp->GetActiveIndex() != PAGE_POINTS)
+// COMMENT: {6/3/2009 4:14:15 PM}			{
+// COMMENT: {6/3/2009 4:14:15 PM}				pTreeProp->SetActivePage(PAGE_POINTS);
+// COMMENT: {6/3/2009 4:14:15 PM}				bSetActivePage = true;
+// COMMENT: {6/3/2009 4:14:15 PM}			}
+// COMMENT: {6/3/2009 4:14:15 PM}			else
+// COMMENT: {6/3/2009 4:14:15 PM}			{
+// COMMENT: {6/3/2009 4:14:15 PM}				pages[PAGE_POINTS]->UpdateData(FALSE);
+// COMMENT: {6/3/2009 4:14:15 PM}			}
+// COMMENT: {6/3/2009 4:14:15 PM}		}
+// COMMENT: {6/3/2009 4:14:15 PM}		else if (value->type == PROP_XYZ)
+// COMMENT: {6/3/2009 4:14:15 PM}		{
+// COMMENT: {6/3/2009 4:14:15 PM}			ASSERT(*props[PAGE_XYZ] == *value);
+// COMMENT: {6/3/2009 4:14:15 PM}			if (pTreeProp->GetActiveIndex() != PAGE_XYZ)
+// COMMENT: {6/3/2009 4:14:15 PM}			{
+// COMMENT: {6/3/2009 4:14:15 PM}				pTreeProp->SetActivePage(PAGE_XYZ);
+// COMMENT: {6/3/2009 4:14:15 PM}				bSetActivePage = true;
+// COMMENT: {6/3/2009 4:14:15 PM}			}
+// COMMENT: {6/3/2009 4:14:15 PM}			else
+// COMMENT: {6/3/2009 4:14:15 PM}			{
+// COMMENT: {6/3/2009 4:14:15 PM}				pages[PAGE_XYZ]->UpdateData(FALSE);
+// COMMENT: {6/3/2009 4:14:15 PM}			}
+// COMMENT: {6/3/2009 4:14:15 PM}		}
+
+		if (bSetActivePage)
+		{
+			//
+			// Note: The above SetActivePage call causes a UpdateData(TRUE) and
+			// subsequently a DoDataExchange(bSaveAndValidate := TRUE) which causes
+			// the previous selected property to overwrite the newly selected property
+			// so we must re-overwrite the newly selected property with the correct
+			// value.
+			//
+
+			CPropConstantM *pConstantM = dynamic_cast<CPropConstantM*>(pages[PAGE_FIXED]);
+			pConstantM->SetProperty(*props[PAGE_FIXED]);
+
+			CPropLinearM *pLinearM = dynamic_cast<CPropLinearM*>(pages[PAGE_LINEAR]);
+			pLinearM->SetProperty(*props[PAGE_LINEAR]);
+
+// COMMENT: {6/3/2009 4:14:20 PM}			CPropPoints *pPoints = dynamic_cast<CPropPoints*>(pages[PAGE_POINTS]);
+// COMMENT: {6/3/2009 4:14:20 PM}			pPoints->SetProperty(*props[PAGE_POINTS]);
+// COMMENT: {6/3/2009 4:14:20 PM}
+// COMMENT: {6/3/2009 4:14:20 PM}			CPropXYZ *pXYZ = dynamic_cast<CPropXYZ*>(pages[PAGE_XYZ]);
+// COMMENT: {6/3/2009 4:14:20 PM}			pXYZ->SetProperty(*props[PAGE_XYZ]);
 		}
 	}
 }
@@ -1424,6 +1633,25 @@ std::string CGlobal::GetStdTimeUnits(const char* sz_unit)
 	ASSERT(FALSE);
 	return s_time_units[0];
 }
+
+std::string CGlobal::GetStdTimeUnitsSafe(const char* sz_unit)
+{
+	cunit std("s");
+	/*static*/ CUnits units_usr;
+
+	if (units_usr.time.set_input(sz_unit) != OK) return "";
+	for (size_t i = 0; i < sizeof(s_time_units) / sizeof(s_time_units[0]); ++i)
+	{
+		std.set_input(s_time_units[i]);
+		if (units_usr.time.input_to_si == std.input_to_si)
+		{
+			return s_time_units[i];
+		}
+	}
+	ASSERT(FALSE);
+	return "";
+}
+
 
 static const char* s_volume_units[] = {"gallon", "liter", "ft^3", "meters^3"};
 

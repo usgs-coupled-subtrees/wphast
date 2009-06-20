@@ -18,6 +18,10 @@ public:
 	Cproperty();             // type == UNDEFINED
 	Cproperty(int value);    // type == FIXED
 	Cproperty(double value); // type == FIXED
+	//{{
+	Cproperty(enum PROP_TYPE pt);
+	//}}
+
 	// Cproperty(double val1, double val2, int direction); // type == LINEAR
 	// dtor
 	~Cproperty();

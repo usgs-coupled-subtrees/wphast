@@ -25,12 +25,8 @@ IMPLEMENT_DYNAMIC(CMediaPropsPage, CResizablePage)
 
 CMediaPropsPage::CMediaPropsPage()
 : CResizablePage(CMediaPropsPage::IDD)
-// COMMENT: {5/5/2009 5:23:33 PM}, Splitter(2, SSP_VERT, 10, 5)
-// COMMENT: {5/13/2009 6:18:55 PM}, Splitter(3, SSP_VERT, 10, 5)
-// COMMENT: {5/14/2009 4:03:18 PM}, Splitter(3, SSP_VERT, 33, 5)
 , Splitter(3, SSP_VERT, 33, 3)
 , ItemDDX(0)
-// COMMENT: {5/5/2009 6:33:42 PM}, PageDesc(IDD_PROP_DESC)
 {
 	TRACE("%s\n", __FUNCTION__);
 	this->CommonConstruct();
@@ -68,10 +64,13 @@ CMediaPropsPage::~CMediaPropsPage()
 
 void CMediaPropsPage::DoDataExchange(CDataExchange* pDX)
 {
+
 	TRACE("In %s\n", __FUNCTION__);
 	CResizablePage::DoDataExchange(pDX);
 
+#if defined(MEDIA_SKIP)
 	DDX_Control(pDX, IDC_DESC_RICHEDIT, RichEditCtrl);
+#endif
 
 
 	// description
@@ -84,21 +83,23 @@ void CMediaPropsPage::DoDataExchange(CDataExchange* pDX)
 
 	if (pTree && pTree->GetCount() == 0)
 	{
-		htiACTIVE           = pTree->InsertItem(ACTIVE,           TVI_ROOT, TVI_LAST);
-		htiKX               = pTree->InsertItem(KX,               TVI_ROOT, TVI_LAST);
-		htiKY               = pTree->InsertItem(KY,               TVI_ROOT, TVI_LAST);
-		htiKZ               = pTree->InsertItem(KZ,               TVI_ROOT, TVI_LAST);
-		htiPOROSITY         = pTree->InsertItem(POROSITY,         TVI_ROOT, TVI_LAST);
-		htiSTORAGE          = pTree->InsertItem(STORAGE,          TVI_ROOT, TVI_LAST);
-		htiALPHA_LONG       = pTree->InsertItem(ALPHA_LONG,       TVI_ROOT, TVI_LAST);
-		htiALPHA_HORIZONTAL = pTree->InsertItem(ALPHA_HORIZONTAL, TVI_ROOT, TVI_LAST);
-		htiALPHA_VERTICAL   = pTree->InsertItem(ALPHA_VERTICAL,   TVI_ROOT, TVI_LAST);
+		this->htiACTIVE           = pTree->InsertItem(ACTIVE,           TVI_ROOT, TVI_LAST);
+		this->htiKX               = pTree->InsertItem(KX,               TVI_ROOT, TVI_LAST);
+		this->htiKY               = pTree->InsertItem(KY,               TVI_ROOT, TVI_LAST);
+		this->htiKZ               = pTree->InsertItem(KZ,               TVI_ROOT, TVI_LAST);
+		this->htiPOROSITY         = pTree->InsertItem(POROSITY,         TVI_ROOT, TVI_LAST);
+		this->htiSTORAGE          = pTree->InsertItem(STORAGE,          TVI_ROOT, TVI_LAST);
+		this->htiALPHA_LONG       = pTree->InsertItem(ALPHA_LONG,       TVI_ROOT, TVI_LAST);
+		this->htiALPHA_HORIZONTAL = pTree->InsertItem(ALPHA_HORIZONTAL, TVI_ROOT, TVI_LAST);
+		this->htiALPHA_VERTICAL   = pTree->InsertItem(ALPHA_VERTICAL,   TVI_ROOT, TVI_LAST);
 
+#if defined(MEDIA_SKIP)
 		// wrap richedit to window
 		this->RichEditCtrl.SetTargetDevice(NULL, 0);
 		this->RichEditCtrl.SetWindowText(this->m_sActiveRTF.c_str());
+#endif
 
-		this->ItemDDX = htiACTIVE;
+		this->ItemDDX = this->htiACTIVE;
 		pTree->SelectItem(this->ItemDDX);
 	}
 
@@ -118,7 +119,7 @@ void CMediaPropsPage::DoDataExchange(CDataExchange* pDX)
 		{
 			std::vector<Cproperty*> props;
 			props.push_back(static_cast<Cproperty*>(this->GridElt.active));
-			props.push_back(static_cast<Cproperty*>(this->GridEltFixed.active));
+			props.push_back(static_cast<Cproperty*>(this->GridEltConstant.active));
 			props.push_back(static_cast<Cproperty*>(this->GridEltLinear.active));
 			props.push_back(static_cast<Cproperty*>(this->GridEltPoints.active));
 			props.push_back(static_cast<Cproperty*>(this->GridEltXYZ.active));
@@ -136,7 +137,7 @@ void CMediaPropsPage::DoDataExchange(CDataExchange* pDX)
 		{
 			std::vector<Cproperty*> props;
 			props.push_back(static_cast<Cproperty*>(this->GridElt.kx));
-			props.push_back(static_cast<Cproperty*>(this->GridEltFixed.kx));
+			props.push_back(static_cast<Cproperty*>(this->GridEltConstant.kx));
 			props.push_back(static_cast<Cproperty*>(this->GridEltLinear.kx));
 			props.push_back(static_cast<Cproperty*>(this->GridEltPoints.kx));
 			props.push_back(static_cast<Cproperty*>(this->GridEltXYZ.kx));
@@ -154,7 +155,7 @@ void CMediaPropsPage::DoDataExchange(CDataExchange* pDX)
 		{
 			std::vector<Cproperty*> props;
 			props.push_back(static_cast<Cproperty*>(this->GridElt.ky));
-			props.push_back(static_cast<Cproperty*>(this->GridEltFixed.ky));
+			props.push_back(static_cast<Cproperty*>(this->GridEltConstant.ky));
 			props.push_back(static_cast<Cproperty*>(this->GridEltLinear.ky));
 			props.push_back(static_cast<Cproperty*>(this->GridEltPoints.ky));
 			props.push_back(static_cast<Cproperty*>(this->GridEltXYZ.ky));
@@ -172,7 +173,7 @@ void CMediaPropsPage::DoDataExchange(CDataExchange* pDX)
 		{
 			std::vector<Cproperty*> props;
 			props.push_back(static_cast<Cproperty*>(this->GridElt.kz));
-			props.push_back(static_cast<Cproperty*>(this->GridEltFixed.kz));
+			props.push_back(static_cast<Cproperty*>(this->GridEltConstant.kz));
 			props.push_back(static_cast<Cproperty*>(this->GridEltLinear.kz));
 			props.push_back(static_cast<Cproperty*>(this->GridEltPoints.kz));
 			props.push_back(static_cast<Cproperty*>(this->GridEltXYZ.kz));
@@ -189,33 +190,11 @@ void CMediaPropsPage::DoDataExchange(CDataExchange* pDX)
 		{
 			std::vector<Cproperty*> props;
 			props.push_back(static_cast<Cproperty*>(this->GridElt.porosity));
-			props.push_back(static_cast<Cproperty*>(this->GridEltFixed.porosity));
+			props.push_back(static_cast<Cproperty*>(this->GridEltConstant.porosity));
 			props.push_back(static_cast<Cproperty*>(this->GridEltLinear.porosity));
 			props.push_back(static_cast<Cproperty*>(this->GridEltPoints.porosity));
 			props.push_back(static_cast<Cproperty*>(this->GridEltXYZ.porosity));
 
-#ifdef _DEBUG
-			if (pDX->m_bSaveAndValidate)
-			{
-				CGlobal::DDX_Property(
-					pDX, 
-					&this->SheetTop,
-					this->ItemDDX,
-					props,
-					pages
-					);
-			}
-			else
-			{
-				CGlobal::DDX_Property(
-					pDX, 
-					&this->SheetTop,
-					this->ItemDDX,
-					props,
-					pages
-					);
-			}
-#else
 			CGlobal::DDX_Property(
 				pDX, 
 				&this->SheetTop,
@@ -223,13 +202,12 @@ void CMediaPropsPage::DoDataExchange(CDataExchange* pDX)
 				props,
 				pages
 				);
-#endif
 		}
 		else if (strItem.Compare(STORAGE) == 0)
 		{
 			std::vector<Cproperty*> props;
 			props.push_back(static_cast<Cproperty*>(this->GridElt.storage));
-			props.push_back(static_cast<Cproperty*>(this->GridEltFixed.storage));
+			props.push_back(static_cast<Cproperty*>(this->GridEltConstant.storage));
 			props.push_back(static_cast<Cproperty*>(this->GridEltLinear.storage));
 			props.push_back(static_cast<Cproperty*>(this->GridEltPoints.storage));
 			props.push_back(static_cast<Cproperty*>(this->GridEltXYZ.storage));
@@ -246,7 +224,7 @@ void CMediaPropsPage::DoDataExchange(CDataExchange* pDX)
 		{
 			std::vector<Cproperty*> props;
 			props.push_back(static_cast<Cproperty*>(this->GridElt.alpha_long));
-			props.push_back(static_cast<Cproperty*>(this->GridEltFixed.alpha_long));
+			props.push_back(static_cast<Cproperty*>(this->GridEltConstant.alpha_long));
 			props.push_back(static_cast<Cproperty*>(this->GridEltLinear.alpha_long));
 			props.push_back(static_cast<Cproperty*>(this->GridEltPoints.alpha_long));
 			props.push_back(static_cast<Cproperty*>(this->GridEltXYZ.alpha_long));
@@ -263,7 +241,7 @@ void CMediaPropsPage::DoDataExchange(CDataExchange* pDX)
 		{
 			std::vector<Cproperty*> props;
 			props.push_back(static_cast<Cproperty*>(this->GridElt.alpha_horizontal));
-			props.push_back(static_cast<Cproperty*>(this->GridEltFixed.alpha_horizontal));
+			props.push_back(static_cast<Cproperty*>(this->GridEltConstant.alpha_horizontal));
 			props.push_back(static_cast<Cproperty*>(this->GridEltLinear.alpha_horizontal));
 			props.push_back(static_cast<Cproperty*>(this->GridEltPoints.alpha_horizontal));
 			props.push_back(static_cast<Cproperty*>(this->GridEltXYZ.alpha_horizontal));
@@ -280,7 +258,7 @@ void CMediaPropsPage::DoDataExchange(CDataExchange* pDX)
 		{
 			std::vector<Cproperty*> props;
 			props.push_back(static_cast<Cproperty*>(this->GridElt.alpha_vertical));
-			props.push_back(static_cast<Cproperty*>(this->GridEltFixed.alpha_vertical));
+			props.push_back(static_cast<Cproperty*>(this->GridEltConstant.alpha_vertical));
 			props.push_back(static_cast<Cproperty*>(this->GridEltLinear.alpha_vertical));
 			props.push_back(static_cast<Cproperty*>(this->GridEltPoints.alpha_vertical));
 			props.push_back(static_cast<Cproperty*>(this->GridEltXYZ.alpha_vertical));
@@ -293,10 +271,6 @@ void CMediaPropsPage::DoDataExchange(CDataExchange* pDX)
 				pages
 				);
 		}
-// COMMENT: {4/2/2009 5:29:37 PM}		else
-// COMMENT: {4/2/2009 5:29:37 PM}		{
-// COMMENT: {4/2/2009 5:29:37 PM}			ASSERT(FALSE);
-// COMMENT: {4/2/2009 5:29:37 PM}		}
 
 		// ACTIVE
 		if (this->bDefault && pDX->m_bSaveAndValidate && this->GridElt.active->type == PROP_UNDEFINED)
@@ -304,6 +278,7 @@ void CMediaPropsPage::DoDataExchange(CDataExchange* pDX)
 			CString str;
 			pTree->SelectItem(this->htiACTIVE);
 			str.Format("A default \"%s\" must be defined.", ACTIVE);
+			::AfxMessageBox(str);
 			pDX->Fail();
 		}
 		// KX
@@ -435,60 +410,59 @@ BOOL CMediaPropsPage::OnInitDialog()
 	this->SheetTop.SetTreeViewMode(TRUE, FALSE, FALSE);
 	this->SheetTop.SetIsResizable(true);
 
+	if (CWnd* pWnd = this->GetDlgItem(IDC_DESC_PAGE))
 	{
- 		CWnd* pWnd = this->GetDlgItem(IDC_DESC_PAGE);
-		ASSERT(pWnd);
-
-// COMMENT: {5/5/2009 6:32:57 PM}		VERIFY(this->PageDesc.Create(this, WS_CHILD|WS_VISIBLE, 0));
 		VERIFY(this->PageDesc.Create(IDD_PROP_DESC, this));
+		ASSERT(this->PageDesc.GetStyle() | DS_CONTROL);			
+		ASSERT(this->PageDesc.GetExStyle() | WS_EX_CONTROLPARENT);
 
-		{
-// COMMENT: {5/11/2009 7:48:43 PM}			this->PageDesc.ModifyStyleEx(0, WS_EX_CONTROLPARENT);
-// COMMENT: {5/11/2009 7:48:43 PM}// COMMENT: {5/8/2009 4:21:54 PM}			this->PageDesc.ModifyStyle(0, WS_TABSTOP);
-// COMMENT: {5/11/2009 7:48:43 PM}			this->PageDesc.ModifyStyle(0, WS_CHILD|WS_TABSTOP);
-
-			ASSERT(this->PageDesc.GetStyle() | DS_CONTROL);			
-			ASSERT(this->PageDesc.GetExStyle() | WS_EX_CONTROLPARENT);
-
-			CRect rcSheet;
-			pWnd->GetWindowRect(&rcSheet);
-			this->ScreenToClient(&rcSheet);
-			this->PageDesc.SetWindowPos(NULL, 0, 0, 0, 0, SWP_NOZORDER|SWP_NOSIZE|SWP_NOACTIVATE);
-
-			//{{
-			this->PageDesc.ShowWindow(SW_SHOW);
-// COMMENT: {5/11/2009 7:46:41 PM}			ASSERT(this->PageDesc.IsWindowVisible());
-			//}}
-		}
+		CRect rcSheet;
+		pWnd->GetWindowRect(&rcSheet);
+		this->ScreenToClient(&rcSheet);
+		this->PageDesc.SetWindowPos(NULL, 0, 0, 0, 0, SWP_NOZORDER|SWP_NOSIZE|SWP_NOACTIVATE);
+		this->PageDesc.ShowWindow(SW_SHOW);
 	}
+	else
+	{
+		ASSERT(FALSE);
+	}
+
+#if !defined(MEDIA_SKIP)
+	if (CWnd* pWnd = this->GetDlgItem(IDC_RICH_PAGE))
+	{
+		VERIFY(this->PageRich.Create(IDD_PROP_RICH, this));
+		ASSERT(this->PageRich.GetStyle() | DS_CONTROL);			
+		ASSERT(this->PageRich.GetExStyle() | WS_EX_CONTROLPARENT);
+
+		CRect rcSheet;
+		pWnd->GetWindowRect(&rcSheet);
+		this->ScreenToClient(&rcSheet);
+		this->PageRich.SetWindowPos(NULL, 0, 0, 0, 0, SWP_NOZORDER|SWP_NOSIZE|SWP_NOACTIVATE);
+		this->PageRich.ShowWindow(SW_SHOW);
+	}
+	else
+	{
+		ASSERT(FALSE);
+	}
+#endif
 
 	this->RegisterSheet(IDC_TREE_PROPS, this->SheetTop);
 
 	VERIFY(this->Splitter.Create(this));
-// COMMENT: {5/5/2009 5:22:40 PM}	this->Splitter.SetPane(0, &this->SheetTop);
-// COMMENT: {5/5/2009 5:22:40 PM}	this->Splitter.SetPane(1, this->GetDlgItem(IDC_DESC_RICHEDIT));
-	///this->Splitter.SetPane(0, this->GetDlgItem(IDC_DESC_EDIT));
 	this->Splitter.SetPane(0, &this->PageDesc);
 	this->Splitter.SetPane(1, &this->SheetTop);
+#if defined(MEDIA_SKIP)
 	this->Splitter.SetPane(2, this->GetDlgItem(IDC_DESC_RICHEDIT));
+#else
+	this->Splitter.SetPane(2, &this->PageRich);
+#endif
 
-
-// COMMENT: {5/5/2009 5:22:55 PM}	const int splitter_sizes[2] = {190, 89};
-// COMMENT: {5/11/2009 7:50:30 PM}	const int splitter_sizes[3] = {24, 190, 89};
-// COMMENT: {5/11/2009 7:52:04 PM}	const int splitter_sizes[3] = {31, 190, 89};
-	//const int splitter_sizes[3] = {31, 170, 89};
-	//const int splitter_sizes[3] = {80, 40, 40};
 	const int splitter_sizes[3] = {33, 164, 80};
 	this->Splitter.SetPaneSizes(splitter_sizes);
 
 	const bool frozen[3] = {true, false, false};
 	this->Splitter.SetFrozenPanes(frozen);
-// COMMENT: {5/5/2009 6:16:57 PM}	this->Splitter.SetAllowUserResizing(false);
 
-// COMMENT: {5/5/2009 5:23:11 PM}	//{{
-// COMMENT: {5/5/2009 5:23:11 PM}	this->AddAnchor(IDC_DESC_EDIT, CSize(0, 10), TOP_RIGHT);
-// COMMENT: {5/5/2009 5:23:11 PM}	this->AddAnchor(this->Splitter, CSize(0, 0), BOTTOM_RIGHT);
-// COMMENT: {5/5/2009 5:23:11 PM}	//}}
 	this->AddAnchor(this->Splitter, TOP_LEFT, BOTTOM_RIGHT);
 
 	if (CTreeCtrl *pTree = this->SheetTop.GetPageTreeControl())
@@ -541,61 +515,66 @@ void CMediaPropsPage::OnPageTreeSelChanged(NMHDR *pNotifyStruct, LRESULT *pResul
 	{
 		this->UpdateData(FALSE);
 
-		// update property description
-		//
-		CTreeCtrl *pTree = this->SheetTop.GetPageTreeControl();
-		if (pTree && pTree->GetSafeHwnd())
-		{
-			CString strItem = pTree->GetItemText(this->ItemDDX);
-
-			// ACTIVE
-			if (strItem.Compare(ACTIVE) == 0)
-			{
-				this->RichEditCtrl.SetWindowText(this->m_sActiveRTF.c_str());
-			}
-			// KX
-			else if (strItem.Compare(KX) == 0)
-			{
-				this->RichEditCtrl.SetWindowText(this->m_sKxRTF.c_str());
-			}
-			// KY
-			else if (strItem.Compare(KY) == 0)
-			{
-				this->RichEditCtrl.SetWindowText(this->m_sKyRTF.c_str());
-			}
-			// KZ
-			else if (strItem.Compare(KZ) == 0)
-			{
-				this->RichEditCtrl.SetWindowText(this->m_sKzRTF.c_str());
-			}
-			// ALPHA_LONG
-			else if (strItem.Compare(ALPHA_LONG) == 0)
-			{
-				this->RichEditCtrl.SetWindowText(this->m_sAlphaLongRTF.c_str());
-			}
-			// POROSITY
-			else if (strItem.Compare(POROSITY) == 0)
-			{
-				this->RichEditCtrl.SetWindowText(this->m_sPorosityRTF.c_str());
-			}
-			// STORAGE
-			else if (strItem.Compare(STORAGE) == 0)
-			{
-				// this->m_wndRichEditCtrl.SetWindowText(this->m_sSpecStorageRTF.c_str());
-				this->RichEditCtrl.SetWindowText(this->m_sStorageRTF.c_str());
-			}
-			// ALPHA_HORIZONTAL
-			else if (strItem.Compare(ALPHA_HORIZONTAL) == 0)
-			{
-				this->RichEditCtrl.SetWindowText(this->m_sAlphaHorizontalRTF.c_str());
-			}
-			// ALPHA_VERTICAL
-			else if (strItem.Compare(ALPHA_VERTICAL) == 0)
-			{
-				this->RichEditCtrl.SetWindowText(this->m_sAlphaVerticalRTF.c_str());
-			}
-
-		}
+// COMMENT: {5/29/2009 4:04:19 PM}		// update property description
+// COMMENT: {5/29/2009 4:04:19 PM}		//
+// COMMENT: {5/29/2009 4:04:19 PM}		CTreeCtrl *pTree = this->SheetTop.GetPageTreeControl();
+// COMMENT: {5/29/2009 4:04:19 PM}		if (pTree && pTree->GetSafeHwnd())
+// COMMENT: {5/29/2009 4:04:19 PM}		{
+// COMMENT: {5/29/2009 4:04:19 PM}			CString strItem = pTree->GetItemText(this->ItemDDX);
+// COMMENT: {5/29/2009 4:04:19 PM}
+// COMMENT: {5/29/2009 4:04:19 PM}			// ACTIVE
+// COMMENT: {5/29/2009 4:04:19 PM}			if (strItem.Compare(ACTIVE) == 0)
+// COMMENT: {5/29/2009 4:04:19 PM}			{
+// COMMENT: {5/29/2009 4:04:19 PM}				this->RichEditCtrl.SetWindowText(this->m_sActiveRTF.c_str());
+// COMMENT: {5/29/2009 4:04:19 PM}			}
+// COMMENT: {5/29/2009 4:04:19 PM}			// KX
+// COMMENT: {5/29/2009 4:04:19 PM}			else if (strItem.Compare(KX) == 0)
+// COMMENT: {5/29/2009 4:04:19 PM}			{
+// COMMENT: {5/29/2009 4:04:19 PM}				this->RichEditCtrl.SetWindowText(this->m_sKxRTF.c_str());
+// COMMENT: {5/29/2009 4:04:19 PM}			}
+// COMMENT: {5/29/2009 4:04:19 PM}			// KY
+// COMMENT: {5/29/2009 4:04:19 PM}			else if (strItem.Compare(KY) == 0)
+// COMMENT: {5/29/2009 4:04:19 PM}			{
+// COMMENT: {5/29/2009 4:04:19 PM}				this->RichEditCtrl.SetWindowText(this->m_sKyRTF.c_str());
+// COMMENT: {5/29/2009 4:04:19 PM}			}
+// COMMENT: {5/29/2009 4:04:19 PM}			// KZ
+// COMMENT: {5/29/2009 4:04:19 PM}			else if (strItem.Compare(KZ) == 0)
+// COMMENT: {5/29/2009 4:04:19 PM}			{
+// COMMENT: {5/29/2009 4:04:19 PM}				this->RichEditCtrl.SetWindowText(this->m_sKzRTF.c_str());
+// COMMENT: {5/29/2009 4:04:19 PM}			}
+// COMMENT: {5/29/2009 4:04:19 PM}			// ALPHA_LONG
+// COMMENT: {5/29/2009 4:04:19 PM}			else if (strItem.Compare(ALPHA_LONG) == 0)
+// COMMENT: {5/29/2009 4:04:19 PM}			{
+// COMMENT: {5/29/2009 4:04:19 PM}				this->RichEditCtrl.SetWindowText(this->m_sAlphaLongRTF.c_str());
+// COMMENT: {5/29/2009 4:04:19 PM}			}
+// COMMENT: {5/29/2009 4:04:19 PM}			// POROSITY
+// COMMENT: {5/29/2009 4:04:19 PM}			else if (strItem.Compare(POROSITY) == 0)
+// COMMENT: {5/29/2009 4:04:19 PM}			{
+// COMMENT: {5/29/2009 4:04:19 PM}				this->RichEditCtrl.SetWindowText(this->m_sPorosityRTF.c_str());
+// COMMENT: {5/29/2009 4:04:19 PM}			}
+// COMMENT: {5/29/2009 4:04:19 PM}			// STORAGE
+// COMMENT: {5/29/2009 4:04:19 PM}			else if (strItem.Compare(STORAGE) == 0)
+// COMMENT: {5/29/2009 4:04:19 PM}			{
+// COMMENT: {5/29/2009 4:04:19 PM}				// this->m_wndRichEditCtrl.SetWindowText(this->m_sSpecStorageRTF.c_str());
+// COMMENT: {5/29/2009 4:04:19 PM}				this->RichEditCtrl.SetWindowText(this->m_sStorageRTF.c_str());
+// COMMENT: {5/29/2009 4:04:19 PM}			}
+// COMMENT: {5/29/2009 4:04:19 PM}			// ALPHA_HORIZONTAL
+// COMMENT: {5/29/2009 4:04:19 PM}			else if (strItem.Compare(ALPHA_HORIZONTAL) == 0)
+// COMMENT: {5/29/2009 4:04:19 PM}			{
+// COMMENT: {5/29/2009 4:04:19 PM}				this->RichEditCtrl.SetWindowText(this->m_sAlphaHorizontalRTF.c_str());
+// COMMENT: {5/29/2009 4:04:19 PM}			}
+// COMMENT: {5/29/2009 4:04:19 PM}			// ALPHA_VERTICAL
+// COMMENT: {5/29/2009 4:04:19 PM}			else if (strItem.Compare(ALPHA_VERTICAL) == 0)
+// COMMENT: {5/29/2009 4:04:19 PM}			{
+// COMMENT: {5/29/2009 4:04:19 PM}				this->RichEditCtrl.SetWindowText(this->m_sAlphaVerticalRTF.c_str());
+// COMMENT: {5/29/2009 4:04:19 PM}			}
+// COMMENT: {5/29/2009 4:04:19 PM}
+// COMMENT: {5/29/2009 4:04:19 PM}		}
+	}
+	CTreeCtrl *pTree = this->SheetTop.GetPageTreeControl();
+	if (pTree && pTree->GetSafeHwnd())
+	{
+		pTree->SetFocus();
 	}
 	TRACE("Out %s\n", __FUNCTION__);
 }
@@ -659,7 +638,7 @@ void CMediaPropsPage::SetProperties(const CGridElt& rGridElt)
 
 	// copy to all
 	//
-	this->GridEltXYZ = this->GridEltPoints = this->GridEltFixed = this->GridEltLinear = this->GridElt;
+	this->GridEltXYZ = this->GridEltPoints = this->GridEltLinear = this->GridEltConstant = this->GridElt;
 	TRACE("Out %s\n", __FUNCTION__);
 }
 
