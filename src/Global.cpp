@@ -4400,3 +4400,69 @@ void CGlobal::PathsAbsoluteToRelative(LPCTSTR lpszPathName, CWPhastDoc* pDoc, CG
 	GET_REL_PATH_MACRO(pDoc, elt, alpha_horizontal);
 	GET_REL_PATH_MACRO(pDoc, elt, alpha_vertical);
 }
+
+// based on DDX_Text(CDataExchange* pDX, int nIDC, float& value)
+void CGlobal::DDX_Text_Safe(CDataExchange* pDX, int nIDC, float& value)
+{
+	CGlobal::TextFloatFormat(pDX, nIDC, &value, value, FLT_DIG);
+}
+
+// based on DDX_Text(CDataExchange* pDX, int nIDC, double& value)
+void CGlobal::DDX_Text_Safe(CDataExchange *pDX, int nIDC, double &value)
+{
+	CGlobal::TextFloatFormat(pDX, nIDC, &value, value, DBL_DIG);
+}
+
+// based on ::AfxTextFloatFormat
+void CGlobal::TextFloatFormat(CDataExchange* pDX, int nIDC, void* pData, double value, int nSizeGcvt)
+{
+	ASSERT(pData != NULL);
+
+	pDX->PrepareEditCtrl(nIDC);
+	HWND hWndCtrl;
+	pDX->m_pDlgWnd->GetDlgItem(nIDC, &hWndCtrl);
+	
+	const int TEXT_BUFFER_SIZE = 400;
+	TCHAR szBuffer[TEXT_BUFFER_SIZE];
+	if (pDX->m_bSaveAndValidate)
+	{
+		::GetWindowText(hWndCtrl, szBuffer, _countof(szBuffer));
+		double d;
+		if (_sntscanf_s(szBuffer, _countof(szBuffer), _T("%lf"), &d) != 1)
+		{
+			//AfxMessageBox(AFX_IDP_PARSE_REAL);
+			//pDX->Fail();            // throws exception
+			if (nSizeGcvt == FLT_DIG)
+			{
+				*((float*)pData) = std::numeric_limits<float>::signaling_NaN();
+			}
+			else
+			{
+				*((double*)pData) = std::numeric_limits<double>::signaling_NaN();
+			}
+		}
+		else
+		{
+			if (nSizeGcvt == FLT_DIG)
+			{
+				*((float*)pData) = (float)d;
+			}
+			else
+			{
+				*((double*)pData) = d;
+			}
+		}
+	}
+	else
+	{
+		if (value == value)
+		{
+			ATL_CRT_ERRORCHECK_SPRINTF(_sntprintf_s(szBuffer, _countof(szBuffer), _countof(szBuffer) -1, _T("%.*g"), nSizeGcvt, value));
+			AfxSetWindowText(hWndCtrl, szBuffer);
+		}
+		else
+		{
+			AfxSetWindowText(hWndCtrl, _T(""));
+		}
+	}
+}

@@ -42,6 +42,7 @@ IMPLEMENT_DYNAMIC(CFluxPropsPage2, CPropertyPage)
 CFluxPropsPage2::CFluxPropsPage2()
 	: CPropertyPage(CFluxPropsPage2::IDD)
 {
+	TRACE("In %s\n", __FUNCTION__);
 	ASSERT(std::numeric_limits<double>::has_signaling_NaN);
 	double d = std::numeric_limits<double>::signaling_NaN();
 	ASSERT(d != d);
@@ -67,17 +68,21 @@ CFluxPropsPage2::CFluxPropsPage2()
 
 	this->DefaultUnits = _T("years");
 
+	this->FluxValidationRow = -1;
 	this->FluxVectors.push_back(&this->FluxVector);
 	this->FluxVectors.push_back(&this->FluxVectorConstant);
 	this->FluxVectors.push_back(&this->FluxVectorLinear);
 
+	this->SolutionValidationRow = -1;
 	this->SolutionVectors.push_back(&this->SolutionVector);
 	this->SolutionVectors.push_back(&this->SolutionVectorConstant);
 	this->SolutionVectors.push_back(&this->SolutionVectorLinear);
+	TRACE("Out %s\n", __FUNCTION__);
 }
 
 CFluxPropsPage2::~CFluxPropsPage2()
 {
+	TRACE("In %s\n", __FUNCTION__);
 	std::vector<Ctime*>::iterator t;
 
 	t = this->SolutionTimes.begin();
@@ -129,10 +134,12 @@ CFluxPropsPage2::~CFluxPropsPage2()
 	{
 		delete (*it);
 	}
+	TRACE("Out %s\n", __FUNCTION__);
 }
 
 void CFluxPropsPage2::DoDataExchange(CDataExchange* pDX)
 {
+	TRACE("In %s\n", __FUNCTION__);
 	CPropertyPage::DoDataExchange(pDX);
 
 	DDX_Control(pDX, IDC_DESC_RICHEDIT, this->RichEditCtrl);
@@ -154,151 +161,56 @@ void CFluxPropsPage2::DoDataExchange(CDataExchange* pDX)
 		this->TreeCtrl.ModifyStyle(TVS_TRACKSELECT, TVS_FULLROWSELECT|TVS_SHOWSELALWAYS, 0);
 	}
 
-	DDX_GridControl(pDX, IDC_TIMES_GRID,    this->GridFlux);
-	DDX_GridControl(pDX, IDC_GRID_SOLUTION, this->GridSolution);
+	DDX_GridControl(pDX, IDC_TIMES_GRID,    this->FluxGrid);
+	DDX_GridControl(pDX, IDC_GRID_SOLUTION, this->SolutionGrid);
 
-	this->InitializeGrid(pDX, this->GridFlux,     this->BC.m_bc_flux);
-	this->InitializeGrid(pDX, this->GridSolution, this->BC.m_bc_solution);
+	this->InitializeGrid(pDX, this->FluxGrid,     this->BC.m_bc_flux);
+	this->InitializeGrid(pDX, this->SolutionGrid, this->BC.m_bc_solution);
 
-	// COMMENT: {6/16/2009 3:31:50 PM}	// Prepare Times Grid
-	// COMMENT: {6/16/2009 3:31:50 PM}	//
-	// COMMENT: {6/16/2009 3:31:50 PM}	if (!pDX->m_bSaveAndValidate && this->GridFlux.GetColumnCount() == 0)
-	// COMMENT: {6/16/2009 3:31:50 PM}	{
-	// COMMENT: {6/16/2009 3:31:50 PM}		TRY
-	// COMMENT: {6/16/2009 3:31:50 PM}		{
-	// COMMENT: {6/16/2009 3:31:50 PM}			this->GridFlux.SetRowCount(MIN_ROWS/* + this->m_well.count_depth_user + this->m_well.count_elevation_user*/);
-	// COMMENT: {6/16/2009 3:31:50 PM}			this->GridFlux.SetColumnCount(3);
-	// COMMENT: {6/16/2009 3:31:50 PM}			this->GridFlux.SetFixedRowCount(1);
-	// COMMENT: {6/16/2009 3:31:50 PM}			this->GridFlux.SetFixedColumnCount(0);
-	// COMMENT: {6/16/2009 3:31:50 PM}			this->GridFlux.EnableTitleTips(FALSE);
-	// COMMENT: {6/16/2009 3:31:50 PM}			this->GridFlux.SetCurrentFocusCell(1, 2);
-	// COMMENT: {6/16/2009 3:31:50 PM}
-	// COMMENT: {6/16/2009 3:31:50 PM}			///CCellRange FluxCellRange = this->GridFlux.GetSelectedCellRange();
-	// COMMENT: {6/16/2009 3:31:50 PM}
-	// COMMENT: {6/16/2009 3:31:50 PM}			// this->GridFlux.EnableSelection(FALSE); // this breaks CutSelectedText
-	// COMMENT: {6/16/2009 3:31:50 PM}			this->GridFlux.SetHighLight(GV_HIGHLIGHT_ALWAYS);
-	// COMMENT: {6/16/2009 3:31:50 PM}		}
-	// COMMENT: {6/16/2009 3:31:50 PM}		CATCH (CMemoryException, e)
-	// COMMENT: {6/16/2009 3:31:50 PM}		{
-	// COMMENT: {6/16/2009 3:31:50 PM}			e->ReportError();
-	// COMMENT: {6/16/2009 3:31:50 PM}			e->Delete();
-	// COMMENT: {6/16/2009 3:31:50 PM}		}
-	// COMMENT: {6/16/2009 3:31:50 PM}		END_CATCH
-	// COMMENT: {6/16/2009 3:31:50 PM}
-	// COMMENT: {6/16/2009 3:31:50 PM}		// set default format
-	// COMMENT: {6/16/2009 3:31:50 PM}		for (int row = 0; row < this->GridFlux.GetRowCount(); ++row)
-	// COMMENT: {6/16/2009 3:31:50 PM}		{
-	// COMMENT: {6/16/2009 3:31:50 PM}			for (int col = 0; col < this->GridFlux.GetColumnCount(); ++col)
-	// COMMENT: {6/16/2009 3:31:50 PM}			{
-	// COMMENT: {6/16/2009 3:31:50 PM}				this->GridFlux.SetItemFormat(row, col, DT_LEFT|DT_BOTTOM|DT_END_ELLIPSIS);
-	// COMMENT: {6/16/2009 3:31:50 PM}			}
-	// COMMENT: {6/16/2009 3:31:50 PM}		}
-	// COMMENT: {6/16/2009 3:31:50 PM}		///this->SetScreenHeadings(this->m_bByDepth);
-	// COMMENT: {6/16/2009 3:31:50 PM}		{
-	// COMMENT: {6/16/2009 3:31:50 PM}			GV_ITEM Item;
-	// COMMENT: {6/16/2009 3:31:50 PM}			Item.mask = GVIF_TEXT;
-	// COMMENT: {6/16/2009 3:31:50 PM}			Item.row = 0;
-	// COMMENT: {6/16/2009 3:31:50 PM}
-	// COMMENT: {6/16/2009 3:31:50 PM}			Item.col = 0;
-	// COMMENT: {6/16/2009 3:31:50 PM}			Item.szText.Format(_T("Time"));
-	// COMMENT: {6/16/2009 3:31:50 PM}			this->GridFlux.SetItem(&Item);
-	// COMMENT: {6/16/2009 3:31:50 PM}
-	// COMMENT: {6/16/2009 3:31:50 PM}			Item.col = 1;
-	// COMMENT: {6/16/2009 3:31:50 PM}			Item.szText.Format(_T("Units"));
-	// COMMENT: {6/16/2009 3:31:50 PM}			this->GridFlux.SetItem(&Item);
-	// COMMENT: {6/16/2009 3:31:50 PM}
-	// COMMENT: {6/16/2009 3:31:50 PM}			Item.col = 2;
-	// COMMENT: {6/16/2009 3:31:50 PM}			Item.szText.Format(_T("Type"));
-	// COMMENT: {6/16/2009 3:31:50 PM}			this->GridFlux.SetItem(&Item);
-	// COMMENT: {6/16/2009 3:31:50 PM}
-	// COMMENT: {6/16/2009 3:31:50 PM}			this->GridFlux.SetItemText(1, 0, _T("0"));
-	// COMMENT: {6/16/2009 3:31:50 PM}			this->GridFlux.DisableCell(1, 0);
-	// COMMENT: {6/16/2009 3:31:50 PM}
-	// COMMENT: {6/16/2009 3:31:50 PM}			this->GridFlux.DisableCell(1, 1);
-	// COMMENT: {6/16/2009 3:31:50 PM}
-	// COMMENT: {6/16/2009 3:31:50 PM}			this->GridFlux.SetItemText(1, 2, PSZ_NONE);
-	// COMMENT: {6/16/2009 3:31:50 PM}			this->SetMode(CFluxPropsPage2::NONE);
-	// COMMENT: {6/16/2009 3:31:50 PM}
-	// COMMENT: {6/16/2009 3:31:50 PM}			//{{
-	// COMMENT: {6/16/2009 3:31:50 PM}			std::vector<LPCTSTR> vecTimeUnits;
-	// COMMENT: {6/16/2009 3:31:50 PM}			vecTimeUnits.push_back(PSZ_SECS);
-	// COMMENT: {6/16/2009 3:31:50 PM}			vecTimeUnits.push_back(PSZ_MINS);
-	// COMMENT: {6/16/2009 3:31:50 PM}			vecTimeUnits.push_back(PSZ_HOUR);
-	// COMMENT: {6/16/2009 3:31:50 PM}			vecTimeUnits.push_back(PSZ_DAYS);
-	// COMMENT: {6/16/2009 3:31:50 PM}			vecTimeUnits.push_back(PSZ_YEAR);
-	// COMMENT: {6/16/2009 3:31:50 PM}
-	// COMMENT: {6/16/2009 3:31:50 PM}			this->GridFlux.SetColumnOptions(1, vecTimeUnits);
-	// COMMENT: {6/16/2009 3:31:50 PM}			//}}
-	// COMMENT: {6/16/2009 3:31:50 PM}
-	// COMMENT: {6/16/2009 3:31:50 PM}			//{{
-	// COMMENT: {6/16/2009 3:31:50 PM}			std::vector<LPCTSTR> vecPropType;
-	// COMMENT: {6/16/2009 3:31:50 PM}			vecPropType.push_back(PSZ_NONE);
-	// COMMENT: {6/16/2009 3:31:50 PM}			vecPropType.push_back(PSZ_CONSTANT);
-	// COMMENT: {6/16/2009 3:31:50 PM}			vecPropType.push_back(PSZ_LINEAR);
-	// COMMENT: {6/16/2009 3:31:50 PM}// COMMENT: {6/10/2009 3:34:31 PM}			vecPropType.push_back(PSZ_POINTS);
-	// COMMENT: {6/16/2009 3:31:50 PM}// COMMENT: {6/10/2009 3:34:31 PM}			vecPropType.push_back(PSZ_XYZ);
-	// COMMENT: {6/16/2009 3:31:50 PM}			this->GridFlux.SetColumnOptions(2, vecPropType);
-	// COMMENT: {6/16/2009 3:31:50 PM}			//}}
-	// COMMENT: {6/16/2009 3:31:50 PM}
-	// COMMENT: {6/16/2009 3:31:50 PM}			this->GridFlux.SetColumnWidth(0, 71);
-	// COMMENT: {6/16/2009 3:31:50 PM}			this->GridFlux.SetColumnWidth(1, 62);
-	// COMMENT: {6/16/2009 3:31:50 PM}			this->GridFlux.SetColumnWidth(2, 70);
-	// COMMENT: {6/16/2009 3:31:50 PM}		}
-	// COMMENT: {6/16/2009 3:31:50 PM}		///this->GridFlux.ExpandColumnsToFit();
-	// COMMENT: {6/16/2009 3:31:50 PM}	}
 
 	if (pDX->m_bSaveAndValidate)
 	{
+		if (this->ItemDDX == this->htiFLUX)
+		{
+			this->DDX_Series(pDX, this->FluxGrid, this->FluxTimes, *(this->FluxVectors[SELECTED]));
+			ASSERT(!this->SolutionGrid.IsWindowVisible());
+			ASSERT(this->FluxGrid.IsWindowVisible());
+		}
+		else if (this->ItemDDX == this->htiSOLUTION)
+		{
+			this->DDX_Series(pDX, this->SolutionGrid, this->SolutionTimes, *(this->SolutionVectors[SELECTED]));
+			ASSERT(this->SolutionGrid.IsWindowVisible());
+			ASSERT(!this->FluxGrid.IsWindowVisible());
+		}
 	}
 	else
 	{
 		if (this->ItemDDX == this->htiFLUX)
 		{
-			//this->DDX_Series(pDX, this->GridFlux, this->BC.m_bc_flux);
-			this->DDX_Series(pDX, this->GridFlux, this->FluxTimes, *(this->FluxVectors[SELECTED]));
-			this->GridSolution.ShowWindow(SW_HIDE);
-			this->GridFlux.ShowWindow(SW_SHOW);
+			//this->DDX_Series(pDX, this->FluxGrid, this->BC.m_bc_flux);
+			this->DDX_Series(pDX, this->FluxGrid, this->FluxTimes, *(this->FluxVectors[SELECTED]));
+			this->SolutionGrid.ShowWindow(SW_HIDE);
+			this->FluxGrid.ShowWindow(SW_SHOW);
 		}
 		else if (this->ItemDDX == this->htiSOLUTION)
 		{
-			//this->DDX_Series(pDX, this->GridSolution, this->BC.m_bc_solution);
-			this->DDX_Series(pDX, this->GridSolution, this->SolutionTimes, *(this->SolutionVectors[SELECTED]));
-			this->GridFlux.ShowWindow(SW_HIDE);
-			this->GridSolution.ShowWindow(SW_SHOW);
+			//this->DDX_Series(pDX, this->SolutionGrid, this->BC.m_bc_solution);
+			this->DDX_Series(pDX, this->SolutionGrid, this->SolutionTimes, *(this->SolutionVectors[SELECTED]));
+			this->FluxGrid.ShowWindow(SW_HIDE);
+			this->SolutionGrid.ShowWindow(SW_SHOW);
 		}
-
-
-
-		// COMMENT: {6/16/2009 4:06:44 PM}		//{{
-		// COMMENT: {6/16/2009 4:06:44 PM}		ASSERT(this->GridFlux.GetFixedColumnCount() <= cell.col && cell.col < this->GridFlux.GetColumnCount());
-		// COMMENT: {6/16/2009 4:06:44 PM}		ASSERT(this->GridFlux.GetFixedRowCount() <= cell.row && cell.row < this->GridFlux.GetRowCount());
-		// COMMENT: {6/16/2009 4:06:44 PM}		
-		// COMMENT: {6/16/2009 4:06:44 PM}		////this->GridFlux.SendMessageToParent(cell.row, cell.col, GVN_SELCHANGED);
-		// COMMENT: {6/16/2009 4:06:44 PM}		static NM_GRIDVIEW nmgv;
-		// COMMENT: {6/16/2009 4:06:44 PM}		nmgv.iRow         = cell.row;
-		// COMMENT: {6/16/2009 4:06:44 PM}		nmgv.iColumn      = cell.col;
-		// COMMENT: {6/16/2009 4:06:44 PM}		nmgv.hdr.hwndFrom = this->GridFlux.GetSafeHwnd();
-		// COMMENT: {6/16/2009 4:06:44 PM}		nmgv.hdr.idFrom   = this->GridFlux.GetDlgCtrlID();
-		// COMMENT: {6/16/2009 4:06:44 PM}		nmgv.hdr.code     = GVN_SELCHANGED;
-		// COMMENT: {6/16/2009 4:06:44 PM}		ASSERT(::IsWindow(nmgv.hdr.hwndFrom));
-		// COMMENT: {6/16/2009 4:06:44 PM}
-		// COMMENT: {6/16/2009 4:06:44 PM}		CWnd *pOwner = this->GridFlux.GetOwner();
-		// COMMENT: {6/16/2009 4:06:44 PM}		if (pOwner && ::IsWindow(pOwner->m_hWnd))
-		// COMMENT: {6/16/2009 4:06:44 PM}		{
-		// COMMENT: {6/16/2009 4:06:44 PM}			//pOwner->SendMessage(WM_NOTIFY, nmgv.hdr.idFrom, (LPARAM)&nmgv);
-		// COMMENT: {6/16/2009 4:06:44 PM}			pOwner->PostMessage(WM_NOTIFY, nmgv.hdr.idFrom, (LPARAM)&nmgv);
-		// COMMENT: {6/16/2009 4:06:44 PM}		}
-		// COMMENT: {6/16/2009 4:06:44 PM}		//}}
-		// COMMENT: {6/16/2009 4:06:44 PM}		this->GridFlux.RedrawWindow();
 	}
+	TRACE("Out %s\n", __FUNCTION__);
 }
 
 void CFluxPropsPage2::DDX_Property(CDataExchange* pDX, Cproperty &p)
 {
+	TRACE("In %s\n", __FUNCTION__);
 	CString strEmpty(_T(""));
 
 	if (pDX->m_bSaveAndValidate)
 	{
+		ASSERT(FALSE);
 	}
 	else
 	{
@@ -307,18 +219,11 @@ void CFluxPropsPage2::DDX_Property(CDataExchange* pDX, Cproperty &p)
 		}
 		else if (p.type == PROP_FIXED)
 		{
-			if (p.v[0] != p.v[0])
-			{
-				DDX_Text(pDX, IDC_VALUE_EDIT, strEmpty);
-			}
-			else
-			{
-				DDX_Text(pDX, IDC_VALUE_EDIT, p.v[0]);
-			}
+			CGlobal::DDX_Text_Safe(pDX, IDC_VALUE_EDIT, p.v[0]);
 		}
 		else if (p.type == PROP_LINEAR)
 		{
-			//this->GridFlux.SetItemText(row, TYPE_COLUMN, PSZ_LINEAR);
+			//this->FluxGrid.SetItemText(row, TYPE_COLUMN, PSZ_LINEAR);
 			switch (p.coord)
 			{
 				case 'x':
@@ -334,47 +239,18 @@ void CFluxPropsPage2::DDX_Property(CDataExchange* pDX, Cproperty &p)
 					ASSERT(FALSE);
 					break;
 			}
-			if (p.v[0] != p.v[0])
-			{
-				DDX_Text(pDX, IDC_VALUE1_EDIT, strEmpty);
-			}
-			else
-			{
-				DDX_Text(pDX, IDC_VALUE1_EDIT, p.v[0]);
-			}
-
-			if (p.dist1 != p.dist1)
-			{
-				DDX_Text(pDX, IDC_DISTANCE1_EDIT, strEmpty);
-			}
-			else
-			{
-				DDX_Text(pDX, IDC_DISTANCE1_EDIT, p.dist1);
-			}
-
-			if (p.v[1] != p.v[1])
-			{
-				DDX_Text(pDX, IDC_VALUE2_EDIT, strEmpty);
-			}
-			else
-			{
-				DDX_Text(pDX, IDC_VALUE2_EDIT, p.v[1]);
-			}
-
-			if (p.dist2 != p.dist2)
-			{
-				DDX_Text(pDX, IDC_DISTANCE2_EDIT, strEmpty);
-			}
-			else
-			{
-				DDX_Text(pDX, IDC_DISTANCE2_EDIT, p.dist2);
-			}
+			CGlobal::DDX_Text_Safe(pDX, IDC_VALUE1_EDIT,    p.v[0]);
+			CGlobal::DDX_Text_Safe(pDX, IDC_DISTANCE1_EDIT, p.dist1);
+			CGlobal::DDX_Text_Safe(pDX, IDC_VALUE2_EDIT,    p.v[1]);
+			CGlobal::DDX_Text_Safe(pDX, IDC_DISTANCE2_EDIT, p.dist2);
 		}
 	}
+	TRACE("Out %s\n", __FUNCTION__);
 }
 
 void CFluxPropsPage2::DDX_Series(CDataExchange* pDX, CModGridCtrlEx &grid, CTimeSeries<Cproperty> &props)
 {
+	TRACE("In %s\n", __FUNCTION__);
 	ASSERT(!pDX->m_bSaveAndValidate);
 
 	CCellID cell = grid.GetFocusCell();
@@ -441,90 +317,195 @@ void CFluxPropsPage2::DDX_Series(CDataExchange* pDX, CModGridCtrlEx &grid, CTime
 		pOwner->PostMessage(WM_NOTIFY, nmgv.hdr.idFrom, (LPARAM)&nmgv);
 	}
 	grid.RedrawWindow();
+	TRACE("Out %s\n", __FUNCTION__);
 }
 
 
 void CFluxPropsPage2::DDX_Series(CDataExchange* pDX, CModGridCtrlEx &grid, std::vector<Ctime*> &times, std::vector<Cproperty*> &props)
 {
-	ASSERT(!pDX->m_bSaveAndValidate);
-
-	CString s;
-	CCellID cell = grid.GetFocusCell();
-	//CTimeSeries<Cproperty>::iterator fit = props.begin();
-	//for (int row = 1; fit != props.end(); ++fit, ++row)
-	ASSERT(times.size() == props.size());
-	for (int row = 1; row < grid.GetRowCount(); ++row)
+	TRACE("In %s\n", __FUNCTION__);
+	if (pDX->m_bSaveAndValidate)
 	{
-		// time
-		if (times[row])
+		std::vector<Ctime*> new_times;
+		std::vector<Cproperty*> new_props;
+		for (int row = 1; row < grid.GetRowCount(); ++row)
 		{
+			CString strValue;
+			double value;
+			Ctime time;
+
+			strValue = grid.GetItemText(row, TIME_COLUMN);
+			if (!strValue.Trim().IsEmpty())
+			{
+				// time value
+				DDX_TextGridControl(pDX, grid.GetDlgCtrlID(), row, TIME_COLUMN, value);
+				if (value < 0.0)
+				{
+					::DDX_GridControlFail(pDX, grid.GetDlgCtrlID(), row, TIME_COLUMN, _T("Start time must be positive."));
+				}
+				time.SetValue(value);
+
+				// time units
+				DDX_TextGridControl(pDX, grid.GetDlgCtrlID(), row, UNIT_COLUMN, strValue);
+				if (strValue.IsEmpty() || time.SetInput(strValue) != OK)
+				{
+					if (row != 1)
+					{
+						::DDX_GridControlFail(pDX, grid.GetDlgCtrlID(), row, UNIT_COLUMN, _T("Please enter the start time units."));
+					}
+				}
+
+				// prop
+				DDX_TextGridControl(pDX, grid.GetDlgCtrlID(), row, TYPE_COLUMN, strValue);
+				if (strValue.Trim().IsEmpty() || strValue.CompareNoCase(PSZ_NONE) == 0)
+				{
+					if (row == 1)
+					{
+						CString string("A property must be defined for time zero.");
+						::DDX_GridControlFail(pDX, grid.GetDlgCtrlID(), row, TYPE_COLUMN, string);
+					}
+					// (*vectors[SELECTED])[row]
+				}
+				else if (strValue.CompareNoCase(PSZ_CONSTANT) == 0)
+				{
+					CFluxPropsPage2::ModeType mt = CFluxPropsPage2::CONSTANT;
+					if (props[row])
+					{
+						if (props[row]->v[0] != props[row]->v[0])
+						{
+							double d;
+							grid.SetCurrentFocusCell(row, TYPE_COLUMN);
+							::DDX_Text(pDX, IDC_VALUE_EDIT, d);
+						}
+					}
+					else
+					{
+						ASSERT(FALSE);
+					}
+				}
+				else if (strValue.CompareNoCase(PSZ_LINEAR) == 0)
+				{
+					CFluxPropsPage2::ModeType mt = CFluxPropsPage2::LINEAR;
+					if (props[row])
+					{
+						double d;
+						if (props[row]->v[0] != props[row]->v[0])
+						{
+							grid.SetCurrentFocusCell(row, TYPE_COLUMN);
+							::DDX_Text(pDX, IDC_VALUE1_EDIT, d);
+						}
+						if (props[row]->dist1 != props[row]->dist1)
+						{
+							grid.SetCurrentFocusCell(row, TYPE_COLUMN);
+							::DDX_Text(pDX, IDC_DISTANCE1_EDIT, d);
+						}
+						if (props[row]->v[1] != props[row]->v[1])
+						{
+							grid.SetCurrentFocusCell(row, TYPE_COLUMN);
+							::DDX_Text(pDX, IDC_VALUE2_EDIT, d);
+						}
+						if (props[row]->dist2 != props[row]->dist2)
+						{
+							grid.SetCurrentFocusCell(row, TYPE_COLUMN);
+							::DDX_Text(pDX, IDC_DISTANCE2_EDIT, d);
+						}
+					}
+					else
+					{
+						ASSERT(FALSE);
+					}
+				}
+				else if (strValue.CompareNoCase(PSZ_POINTS) == 0)
+				{
+					CFluxPropsPage2::ModeType mt = CFluxPropsPage2::POINTS;
+					// (*vectors[SELECTED])[row]
+				}
+				else if (strValue.CompareNoCase(PSZ_XYZ) == 0)
+				{
+					CFluxPropsPage2::ModeType mt = CFluxPropsPage2::XYZ;
+					// (*vectors[SELECTED])[row]
+				}
+			}
+		}
+	}
+	else
+	{
+		CString s;
+		CCellID cell = grid.GetFocusCell();
+		ASSERT(times.size() == props.size());
+		for (int row = 1; row < grid.GetRowCount(); ++row)
+		{
+			// time
+			if (times[row])
+			{
+				if (row == 1)
+				{
+					ASSERT(times[row]->value == 0.);
+				}
+
+				// time value
+				s.Format(_T("%g"), times[row]->value);
+				grid.SetItemText(row, TIME_COLUMN, s);
+
+				// time units
+				if (times[row]->input && ::strlen(times[row]->input))
+				{
+					grid.SetItemText(row, UNIT_COLUMN, times[row]->input);
+				}
+				else
+				{
+					grid.SetItemText(row, UNIT_COLUMN, this->DefaultUnits);
+				}
+			}
+
 			if (row == 1)
 			{
-				ASSERT(times[row]->value == 0.);
+				grid.DisableCell(row, UNIT_COLUMN);
 			}
 
-			// time value
-			s.Format(_T("%g"), times[row]->value);
-			grid.SetItemText(row, TIME_COLUMN, s);
+			// prop
+			if (props[row])
+			{
+				// prop type
+				if (props[row]->type == PROP_UNDEFINED)
+				{
+					grid.SetItemText(row, TYPE_COLUMN, PSZ_NONE);
+				}
+				else if (props[row]->type == PROP_FIXED)
+				{
+					grid.SetItemText(row, TYPE_COLUMN, PSZ_CONSTANT);
+				}
+				else if (props[row]->type == PROP_LINEAR)
+				{
+					grid.SetItemText(row, TYPE_COLUMN, PSZ_LINEAR);
+				}
 
-			// time units
-			if (times[row]->input && ::strlen(times[row]->input))
-			{
-				grid.SetItemText(row, UNIT_COLUMN, times[row]->input);
-			}
-			else
-			{
-				grid.SetItemText(row, UNIT_COLUMN, this->DefaultUnits);
+				if (row == cell.row)
+				{
+					this->DDX_Property(pDX, *props[row]);
+				}
 			}
 		}
 
+		ASSERT(grid.GetFixedColumnCount() <= cell.col && cell.col < grid.GetColumnCount());
+		ASSERT(grid.GetFixedRowCount() <= cell.row && cell.row < grid.GetRowCount());
+		
+		static NM_GRIDVIEW nmgv;
+		nmgv.iRow         = cell.row;
+		nmgv.iColumn      = cell.col;
+		nmgv.hdr.hwndFrom = grid.GetSafeHwnd();
+		nmgv.hdr.idFrom   = grid.GetDlgCtrlID();
+		nmgv.hdr.code     = GVN_SELCHANGED;
+		ASSERT(::IsWindow(nmgv.hdr.hwndFrom));
 
-		if (row == 1)
+		CWnd *pOwner = grid.GetOwner();
+		if (pOwner && ::IsWindow(pOwner->m_hWnd))
 		{
-			grid.DisableCell(row, UNIT_COLUMN);
+			pOwner->PostMessage(WM_NOTIFY, nmgv.hdr.idFrom, (LPARAM)&nmgv);
 		}
-
-		// prop
-		if (props[row])
-		{
-			// prop type
-			if (props[row]->type == PROP_UNDEFINED)
-			{
-				grid.SetItemText(row, TYPE_COLUMN, PSZ_NONE);
-			}
-			else if (props[row]->type == PROP_FIXED)
-			{
-				grid.SetItemText(row, TYPE_COLUMN, PSZ_CONSTANT);
-			}
-			else if (props[row]->type == PROP_LINEAR)
-			{
-				grid.SetItemText(row, TYPE_COLUMN, PSZ_LINEAR);
-			}
-
-			if (row == cell.row)
-			{
-				this->DDX_Property(pDX, *props[row]);
-			}
-		}
+		grid.RedrawWindow();
 	}
-
-	ASSERT(grid.GetFixedColumnCount() <= cell.col && cell.col < grid.GetColumnCount());
-	ASSERT(grid.GetFixedRowCount() <= cell.row && cell.row < grid.GetRowCount());
-	
-	static NM_GRIDVIEW nmgv;
-	nmgv.iRow         = cell.row;
-	nmgv.iColumn      = cell.col;
-	nmgv.hdr.hwndFrom = grid.GetSafeHwnd();
-	nmgv.hdr.idFrom   = grid.GetDlgCtrlID();
-	nmgv.hdr.code     = GVN_SELCHANGED;
-	ASSERT(::IsWindow(nmgv.hdr.hwndFrom));
-
-	CWnd *pOwner = grid.GetOwner();
-	if (pOwner && ::IsWindow(pOwner->m_hWnd))
-	{
-		pOwner->PostMessage(WM_NOTIFY, nmgv.hdr.idFrom, (LPARAM)&nmgv);
-	}
-	grid.RedrawWindow();
+	TRACE("Out %s\n", __FUNCTION__);
 }
 
 
@@ -639,10 +620,11 @@ BEGIN_MESSAGE_MAP(CFluxPropsPage2, CPropertyPage)
 	ON_NOTIFY(GVN_SELCHANGED, IDC_TIMES_GRID,    OnSelChangedFlux)
 	ON_NOTIFY(GVN_SELCHANGED, IDC_GRID_SOLUTION, OnSelChangedSolution)
 
-
 	ON_NOTIFY(TVN_SELCHANGING, IDC_PROP_TREE, OnTreeSelChanging)
 	ON_NOTIFY(TVN_SELCHANGED,  IDC_PROP_TREE, OnTreeSelChanged)
 	ON_EN_SETFOCUS(IDC_DESC_EDIT, &CFluxPropsPage2::OnEnSetfocusDescEdit)
+
+	ON_MESSAGE(UM_DDX_FAILURE, OnUM_DDXFailure)
 END_MESSAGE_MAP()
 
 
@@ -650,20 +632,21 @@ END_MESSAGE_MAP()
 
 void CFluxPropsPage2::SetMode(CFluxPropsPage2::ModeType mode)
 {
+	TRACE("In %s\n", __FUNCTION__);
 	CString time;
 	CString units;
 
 	if (this->ItemDDX == this->htiFLUX)
 	{
-		CCellID id = this->GridFlux.GetFocusCell();
-		time = this->GridFlux.GetItemText(id.row, TIME_COLUMN);
-		units = this->GridFlux.GetItemText(id.row, UNIT_COLUMN);
+		CCellID id = this->FluxGrid.GetFocusCell();
+		time = this->FluxGrid.GetItemText(id.row, TIME_COLUMN);
+		units = this->FluxGrid.GetItemText(id.row, UNIT_COLUMN);
 	}
 	else if (this->ItemDDX == this->htiSOLUTION)
 	{
-		CCellID id = this->GridSolution.GetFocusCell();
-		time = this->GridSolution.GetItemText(id.row, TIME_COLUMN);
-		units = this->GridSolution.GetItemText(id.row, UNIT_COLUMN);
+		CCellID id = this->SolutionGrid.GetFocusCell();
+		time = this->SolutionGrid.GetItemText(id.row, TIME_COLUMN);
+		units = this->SolutionGrid.GetItemText(id.row, UNIT_COLUMN);
 	}
 
 	if (!units.Trim().IsEmpty() && !time.Trim().IsEmpty())
@@ -709,10 +692,12 @@ void CFluxPropsPage2::SetMode(CFluxPropsPage2::ModeType mode)
 		this->ShowConstant(false);
 		this->ShowLinear(true);
 	}
+	TRACE("Out %s\n", __FUNCTION__);
 }
 
 void CFluxPropsPage2::ShowConstant(bool show)
 {
+	TRACE("In %s\n", __FUNCTION__);
 	if (show)
 	{
 		if (CWnd* pWnd = this->GetDlgItem(IDC_VALUE_STATIC))
@@ -735,10 +720,12 @@ void CFluxPropsPage2::ShowConstant(bool show)
 			pWnd->ShowWindow(SW_HIDE);
 		}
 	}
+	TRACE("Out %s\n", __FUNCTION__);
 }
 
 void CFluxPropsPage2::ShowLinear(bool show)
 {
+	TRACE("In %s\n", __FUNCTION__);
 	if (show)
 	{
 		if (CWnd* pWnd = this->GetDlgItem(IDC_STATIC_DIRECTION))
@@ -844,22 +831,27 @@ void CFluxPropsPage2::ShowLinear(bool show)
 		{
 			pWnd->ShowWindow(SW_HIDE);
 		}
-
 	}
+	TRACE("Out %s\n", __FUNCTION__);
 }
 
 void CFluxPropsPage2::OnEndLabelEditFlux(NMHDR *pNotifyStruct, LRESULT *result)
 {
-	this->OnEndLabelEdit(pNotifyStruct, result, this->GridFlux, this->FluxVectors);
+	TRACE("In %s\n", __FUNCTION__);
+	this->OnEndLabelEdit(pNotifyStruct, result, this->FluxGrid, this->FluxVectors);
+	TRACE("Out %s\n", __FUNCTION__);
 }
 
 void CFluxPropsPage2::OnEndLabelEditSolution(NMHDR *pNotifyStruct, LRESULT *result)
 {
-	this->OnEndLabelEdit(pNotifyStruct, result, this->GridSolution, this->SolutionVectors);
+	TRACE("In %s\n", __FUNCTION__);
+	this->OnEndLabelEdit(pNotifyStruct, result, this->SolutionGrid, this->SolutionVectors);
+	TRACE("Out %s\n", __FUNCTION__);
 }
 
 void CFluxPropsPage2::OnEndLabelEdit(NMHDR *pNotifyStruct, LRESULT *result, CModGridCtrlEx &grid, std::vector< std::vector<Cproperty*>* > &vectors)
 {
+	TRACE("In %s\n", __FUNCTION__);
 	NM_GRIDVIEW *pnmgv = (NM_GRIDVIEW*)pNotifyStruct;
 	CString str = grid.GetItemText(pnmgv->iRow, pnmgv->iColumn);
 
@@ -982,11 +974,15 @@ void CFluxPropsPage2::OnEndLabelEdit(NMHDR *pNotifyStruct, LRESULT *result, CMod
 						}
 					}
 					(*vectors[mt])[pnmgv->iRow] = new Cproperty(def);
-					///{{
-					delete (*vectors[SELECTED])[pnmgv->iRow];
-					(*vectors[SELECTED])[pnmgv->iRow] = new Cproperty(def);
-					///}}
+// COMMENT: {6/24/2009 3:08:51 PM}					///{{
+// COMMENT: {6/24/2009 3:08:51 PM}					delete (*vectors[SELECTED])[pnmgv->iRow];
+// COMMENT: {6/24/2009 3:08:51 PM}					(*vectors[SELECTED])[pnmgv->iRow] = new Cproperty(def);
+// COMMENT: {6/24/2009 3:08:51 PM}					///}}
 				}
+				///{{
+				delete (*vectors[SELECTED])[pnmgv->iRow];
+				(*vectors[SELECTED])[pnmgv->iRow] = new Cproperty(*(*vectors[mt])[pnmgv->iRow]);
+				///}}
 			}
 			else if (str.Compare(PSZ_LINEAR) == 0)
 			{
@@ -1005,18 +1001,30 @@ void CFluxPropsPage2::OnEndLabelEdit(NMHDR *pNotifyStruct, LRESULT *result, CMod
 						}
 					}
 					(*vectors[mt])[pnmgv->iRow] = new Cproperty(def);
-					///{{
-					delete (*vectors[SELECTED])[pnmgv->iRow];
-					(*vectors[SELECTED])[pnmgv->iRow] = new Cproperty(def);
-					///}}
+// COMMENT: {6/24/2009 3:07:09 PM}					///{{
+// COMMENT: {6/24/2009 3:07:09 PM}					delete (*vectors[SELECTED])[pnmgv->iRow];
+// COMMENT: {6/24/2009 3:07:09 PM}					(*vectors[SELECTED])[pnmgv->iRow] = new Cproperty(def);
+// COMMENT: {6/24/2009 3:07:09 PM}					///}}
 				}
+				///{{
+				delete (*vectors[SELECTED])[pnmgv->iRow];
+				(*vectors[SELECTED])[pnmgv->iRow] = new Cproperty(*(*vectors[mt])[pnmgv->iRow]);
+				///}}
 			}
 			//{{
-			this->UpdateData(FALSE);
+			////{{{{
+			if (mt != CFluxPropsPage2::NONE)
+			{
+			////}}}}
+				this->UpdateData(FALSE);
+			////{{{{
+			}
+			////}}}}
 			//}}
 			this->SetMode(mt);
 		}
 	}
+	TRACE("Out %s\n", __FUNCTION__);
 }
 
 void CFluxPropsPage2::OnTreeSelChanging(NMHDR *pNotifyStruct, LRESULT *pResult)
@@ -1026,19 +1034,53 @@ void CFluxPropsPage2::OnTreeSelChanging(NMHDR *pNotifyStruct, LRESULT *pResult)
 	this->ItemDDX = pTvn->itemOld.hItem;
 	if (this->ItemDDX)
 	{
+		//{{{{
+		if (this->ItemDDX == this->htiFLUX)
+		{
+			if (this->FluxValidationRow > 0)
+			{
+				this->DDV_SoftValidate(this->FluxGrid, this->FluxVectors, this->FluxValidationRow);
+			}
+		}
+		else if (this->ItemDDX == this->htiSOLUTION)
+		{
+			if (this->SolutionValidationRow > 0)
+			{
+				this->DDV_SoftValidate(this->SolutionGrid, this->SolutionVectors, this->SolutionValidationRow);
+			}
+		}
+		//}}}}
+		//////{{
 		if (!this->UpdateData(TRUE))
 		{
-// COMMENT: {6/9/2009 8:49:59 PM}			// notify which control caused failure
-// COMMENT: {6/9/2009 8:49:59 PM}			//
-// COMMENT: {6/9/2009 8:49:59 PM}			CWnd* pFocus = CWnd::GetFocus();
-// COMMENT: {6/9/2009 8:49:59 PM}			::PostMessage(this->GetSafeHwnd(), UM_DDX_FAILURE, (WPARAM)pFocus, (LPARAM)0);
+			// notify which control caused failure
+			//
+			CWnd* pFocus = CWnd::GetFocus();
+			this->PostMessage(UM_DDX_FAILURE, (WPARAM)pFocus, (LPARAM)0);
+			//::PostMessage(this->GetSafeHwnd(), UM_DDX_FAILURE, (WPARAM)pFocus, (LPARAM)0);
+
 
 			// disallow change
 			//
 			*pResult = TRUE;
-			TRACE("Out Disallowed %s\n", __FUNCTION__);
+			TRACE("Out %s Disallowed\n", __FUNCTION__);
 			return;
 		}
+		//////}}
+
+// COMMENT: {6/23/2009 9:16:54 PM}		if (!this->UpdateData(TRUE))
+// COMMENT: {6/23/2009 9:16:54 PM}		{
+// COMMENT: {6/23/2009 9:16:54 PM}// COMMENT: {6/9/2009 8:49:59 PM}			// notify which control caused failure
+// COMMENT: {6/23/2009 9:16:54 PM}// COMMENT: {6/9/2009 8:49:59 PM}			//
+// COMMENT: {6/23/2009 9:16:54 PM}// COMMENT: {6/9/2009 8:49:59 PM}			CWnd* pFocus = CWnd::GetFocus();
+// COMMENT: {6/23/2009 9:16:54 PM}// COMMENT: {6/9/2009 8:49:59 PM}			::PostMessage(this->GetSafeHwnd(), UM_DDX_FAILURE, (WPARAM)pFocus, (LPARAM)0);
+// COMMENT: {6/23/2009 9:16:54 PM}
+// COMMENT: {6/23/2009 9:16:54 PM}			// disallow change
+// COMMENT: {6/23/2009 9:16:54 PM}			//
+// COMMENT: {6/23/2009 9:16:54 PM}			*pResult = TRUE;
+// COMMENT: {6/23/2009 9:16:54 PM}			TRACE("Out Disallowed %s\n", __FUNCTION__);
+// COMMENT: {6/23/2009 9:16:54 PM}			return;
+// COMMENT: {6/23/2009 9:16:54 PM}		}
 	}
 	*pResult = 0;
 	TRACE("Out Allowed %s\n", __FUNCTION__);
@@ -1080,42 +1122,123 @@ void CFluxPropsPage2::OnTreeSelChanged(NMHDR *pNotifyStruct, LRESULT *pResult)
 
 void CFluxPropsPage2::OnEnSetfocusDescEdit()
 {
+	TRACE("In %s\n", __FUNCTION__);
 	this->RichEditCtrl.SetWindowText(this->m_sDescriptionRTF.c_str());
+	TRACE("Out %s\n", __FUNCTION__);
 }
 
 void CFluxPropsPage2::OnSelChangedFlux(NMHDR *pNotifyStruct, LRESULT *result)
 {
-	this->OnSelChanged(pNotifyStruct, result, this->GridFlux);
+	TRACE("In %s\n", __FUNCTION__);
+	////{{
+	// soft-validate
+	if (this->FluxValidationRow > 0)
+	{
+		// TODO skip validation if (pnmgv->iRow == FluxValidationRow)
+		this->DDV_SoftValidate(this->FluxGrid, this->FluxVectors, this->FluxValidationRow);
+	}
+	////}}
+
+	this->OnSelChanged(pNotifyStruct, result, this->FluxGrid);
+	//{{
+	// set next validation row
+	NM_GRIDVIEW *pnmgv = (NM_GRIDVIEW*)pNotifyStruct;
+	this->FluxValidationRow = pnmgv->iRow;
+	//}}
+	TRACE("Out %s\n", __FUNCTION__);
 }
 
 void CFluxPropsPage2::OnSelChangedSolution(NMHDR *pNotifyStruct, LRESULT *result)
 {
-	this->OnSelChanged(pNotifyStruct, result, this->GridSolution);
+	TRACE("In %s\n", __FUNCTION__);
+	////{{
+	// soft-validate
+	if (this->SolutionValidationRow > 0)
+	{
+		// TODO skip validation if (pnmgv->iRow == SolutionValidationRow)
+		this->DDV_SoftValidate(this->SolutionGrid, this->SolutionVectors, this->SolutionValidationRow);
+	}
+	////}}
+
+	this->OnSelChanged(pNotifyStruct, result, this->SolutionGrid);
+
+	//{{
+	// set next validation row
+	NM_GRIDVIEW *pnmgv = (NM_GRIDVIEW*)pNotifyStruct;
+	this->SolutionValidationRow = pnmgv->iRow;
+	//}}
+	TRACE("Out %s\n", __FUNCTION__);
 }
+
+//{{
+void CFluxPropsPage2::DDV_SoftValidate(CModGridCtrlEx &grid, std::vector< std::vector<Cproperty*>* > &vectors, int row)
+{
+	TRACE("In %s\n", __FUNCTION__);
+	if (grid.GetSafeHwnd())
+	{
+		CString str = grid.GetItemText(row, TYPE_COLUMN);
+
+		if (str.Trim().IsEmpty() || str.CompareNoCase(PSZ_NONE) == 0)
+		{
+			delete (*vectors[SELECTED])[row];
+			(*vectors[SELECTED])[row] = 0;
+		}
+		else if (str.Compare(PSZ_CONSTANT) == 0)
+		{
+			CDataExchange dx(this, TRUE);
+
+			ASSERT((*vectors[SELECTED])[row]);
+			ASSERT((*vectors[CONSTANT])[row]);
+			CGlobal::DDX_Text_Safe(&dx, IDC_VALUE_EDIT, (*vectors[SELECTED])[row]->v[0]);
+			*(*vectors[CONSTANT])[row] = *(*vectors[SELECTED])[row];
+			//mode = CFluxPropsPage2::CONSTANT;
+		}
+		else if (str.Compare(PSZ_LINEAR) == 0)
+		{
+			CDataExchange dx(this, TRUE);
+
+			ASSERT((*vectors[SELECTED])[row]);
+			ASSERT((*vectors[LINEAR])[row]);
+
+			CGlobal::DDX_Text_Safe(&dx, IDC_VALUE1_EDIT,    (*vectors[SELECTED])[row]->v[0]);
+			CGlobal::DDX_Text_Safe(&dx, IDC_DISTANCE1_EDIT, (*vectors[SELECTED])[row]->dist1);
+			CGlobal::DDX_Text_Safe(&dx, IDC_VALUE2_EDIT,    (*vectors[SELECTED])[row]->v[1]);
+			CGlobal::DDX_Text_Safe(&dx, IDC_DISTANCE2_EDIT, (*vectors[SELECTED])[row]->dist2);
+
+			*(*vectors[LINEAR])[row] = *(*vectors[SELECTED])[row];
+
+			//mode = CFluxPropsPage2::LINEAR;
+		}
+	}
+	TRACE("Out %s\n", __FUNCTION__);
+}
+//}}
 
 void CFluxPropsPage2::OnSelChanged(NMHDR *pNotifyStruct, LRESULT *result, CModGridCtrlEx &grid)
 {
 	NM_GRIDVIEW *pnmgv = (NM_GRIDVIEW*)pNotifyStruct;
-	TRACE("CFluxPropsPage2::OnSelChanged row = %d\n", pnmgv->iRow);
+	TRACE("In %s row = %d\n", __FUNCTION__, pnmgv->iRow);
 
 	if (grid.GetSafeHwnd())
 	{
 		CString str = grid.GetItemText(pnmgv->iRow, TYPE_COLUMN);
 		if (this->ItemDDX == this->htiFLUX)
 		{
-			ASSERT(&grid == &this->GridFlux);
+			ASSERT(&grid == &this->FluxGrid);
 			this->DDX_Vectors(pnmgv->iRow, str, this->FluxVectors);
 		}
 		else if (this->ItemDDX == this->htiSOLUTION)
 		{
-			ASSERT(&grid == &this->GridSolution);
+			ASSERT(&grid == &this->SolutionGrid);
 			this->DDX_Vectors(pnmgv->iRow, str, this->SolutionVectors);
 		}
 	}
+	TRACE("Out %s\n", __FUNCTION__);
 }
 
 void CFluxPropsPage2::DDX_Vectors(int row, CString &str, std::vector< std::vector<Cproperty*>* > &vectors)
 {
+	TRACE("In %s\n", __FUNCTION__);
 	CDataExchange dx(this, FALSE);
 
 	CFluxPropsPage2::ModeType mode = CFluxPropsPage2::NONE;
@@ -1136,10 +1259,12 @@ void CFluxPropsPage2::DDX_Vectors(int row, CString &str, std::vector< std::vecto
 		}
 	}
 	this->SetMode(mode);
+	TRACE("Out %s\n", __FUNCTION__);
 }
 
 void CFluxPropsPage2::InitializeGrid(CDataExchange* pDX, CModGridCtrlEx &grid, CTimeSeries<Cproperty> &series)
 {
+	TRACE("In %s\n", __FUNCTION__);
 	// Prepare Grid
 	//
 	if (!pDX->m_bSaveAndValidate && grid.GetColumnCount() == 0)
@@ -1229,5 +1354,16 @@ void CFluxPropsPage2::InitializeGrid(CDataExchange* pDX, CModGridCtrlEx &grid, C
 // COMMENT: {6/19/2009 3:05:26 PM}		this->DDX_Series(pDX, grid, series);
 // COMMENT: {6/19/2009 3:05:26 PM}		//}}
 	}
+	TRACE("Out %s\n", __FUNCTION__);
 }
 
+LRESULT CFluxPropsPage2::OnUM_DDXFailure(WPARAM wParam, LPARAM lParam)
+{
+	CWnd* pFocus = (CWnd*)wParam;
+	if (pFocus && pFocus->GetSafeHwnd())
+	{
+		ASSERT_KINDOF(CWnd, pFocus);
+		pFocus->SetFocus();
+	}
+	return 0;
+}

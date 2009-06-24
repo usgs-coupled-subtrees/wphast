@@ -49,7 +49,7 @@ protected:
 	void DDX_Property(CDataExchange* pDX, Cproperty &p);
 	void DDX_Series(CDataExchange* pDX, CModGridCtrlEx &grid, CTimeSeries<Cproperty> &props);
 	void DDX_Series(CDataExchange* pDX, CModGridCtrlEx &grid, std::vector<Ctime*> &times, std::vector<Cproperty*> &props);
-
+	void DDV_SoftValidate(CModGridCtrlEx &grid, std::vector< std::vector<Cproperty*>* > &vectors, int row);
 	
 	void DDX_Vectors(int row, CString &str, std::vector< std::vector<Cproperty*>* > &vectors);
 
@@ -69,8 +69,10 @@ protected:
 	afx_msg void OnSelChangedFlux(NMHDR *pNotifyStruct, LRESULT *result);
 	afx_msg void OnSelChangedSolution(NMHDR *pNotifyStruct, LRESULT *result);
 
-	CModGridCtrlEx   GridFlux;         // IDC_TIMES_GRID
-	CModGridCtrlEx   GridSolution;     // IDC_GRID_SOLUTION
+	afx_msg LRESULT OnUM_DDXFailure(WPARAM wParam, LPARAM lParam);
+
+	CModGridCtrlEx   FluxGrid;         // IDC_TIMES_GRID
+	CModGridCtrlEx   SolutionGrid;     // IDC_GRID_SOLUTION
 	CRichEditCtrl RichEditCtrl;
 	CTreeCtrl     TreeCtrl;
 
@@ -92,12 +94,14 @@ protected:
 	//CBC BCPoints;
 	//CBC BCXYZ;
 
+	int FluxValidationRow;
 	std::vector<Ctime*> FluxTimes;
 	std::vector< std::vector<Cproperty*>* > FluxVectors; // indexed by ModeType
 	std::vector<Cproperty*> FluxVector; // new
 	std::vector<Cproperty*> FluxVectorConstant;
 	std::vector<Cproperty*> FluxVectorLinear;
 
+	int SolutionValidationRow;
 	std::vector<Ctime*> SolutionTimes;
 	std::vector< std::vector<Cproperty*>* > SolutionVectors; // indexed by ModeType
 	std::vector<Cproperty*> SolutionVector; // new

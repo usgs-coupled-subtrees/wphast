@@ -180,6 +180,9 @@ public:
 	static void PathsRelativeToAbsolute(LPCTSTR lpszPathName, CWPhastDoc* pDoc, CGridElt& elt);
 	static void PathsAbsoluteToRelative(LPCTSTR lpszPathName, CWPhastDoc* pDoc, CGridElt& elt);
 
+	static void DDX_Text_Safe(CDataExchange* pDX, int nIDC, float& value);
+	static void DDX_Text_Safe(CDataExchange *pDX, int nIDC, double &value);
+	static void TextFloatFormat(CDataExchange* pDX, int nIDC, void* pData, double value, int nSizeGcvt);
 
 protected:
 	static double CGlobal::RadiusFactor;
