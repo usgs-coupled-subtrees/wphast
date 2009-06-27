@@ -1102,16 +1102,18 @@ void CFluxPropsPage2::OnSelChangedFlux(NMHDR *pNotifyStruct, LRESULT *result)
 {
 	TRACE("In %s\n", __FUNCTION__);
 
-	// soft-validate
-	if (this->FluxSeries.validation_row > 0)
-	{
-		CCellID cell = this->FluxSeries.grid.GetFocusCell();
-		if (cell.row != this->FluxSeries.validation_row)
-		{
-// COMMENT: {6/25/2009 7:53:30 PM}			this->DDV_SoftValidate(this->FluxSeries.grid, this->FluxSeries.vv_props, this->FluxSeries.validation_row);
-			this->FluxSeries.DDV_SoftValidate();
-		}
-	}
+	//{{ MOVED to OnSelChanged
+// COMMENT: {6/26/2009 6:31:15 PM}	// soft-validate
+// COMMENT: {6/26/2009 6:31:15 PM}	if (this->FluxSeries.validation_row > 0)
+// COMMENT: {6/26/2009 6:31:15 PM}	{
+// COMMENT: {6/26/2009 6:31:15 PM}		CCellID cell = this->FluxSeries.grid.GetFocusCell();
+// COMMENT: {6/26/2009 6:31:15 PM}		if (cell.row != this->FluxSeries.validation_row)
+// COMMENT: {6/26/2009 6:31:15 PM}		{
+// COMMENT: {6/26/2009 6:31:15 PM}// COMMENT: {6/25/2009 7:53:30 PM}			this->DDV_SoftValidate(this->FluxSeries.grid, this->FluxSeries.vv_props, this->FluxSeries.validation_row);
+// COMMENT: {6/26/2009 6:31:15 PM}			this->FluxSeries.DDV_SoftValidate();
+// COMMENT: {6/26/2009 6:31:15 PM}		}
+// COMMENT: {6/26/2009 6:31:15 PM}	}
+	//}} MOVED to OnSelChanged
 
 // COMMENT: {6/25/2009 9:00:13 PM}	this->OnSelChanged(pNotifyStruct, result, this->FluxSeries.grid);
 // COMMENT: {6/25/2009 9:00:13 PM}
