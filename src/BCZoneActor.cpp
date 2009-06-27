@@ -268,13 +268,13 @@ void CBCZoneActor::Edit(CTreeCtrl* pTreeCtrl, int nStressPeriod)
 		props.AddPage(&fluxProps);
 		fluxProps.SetProperties(this->GetBC());
 		fluxProps.SetFlowOnly(pDoc->GetFlowOnly());
-// COMMENT: {6/5/2009 8:00:20 PM}		fluxProps.SetDesc(this->GetDesc());
+		fluxProps.SetDesc(this->GetDesc());
 		if (props.DoModal() == IDOK)
 		{
-// COMMENT: {6/5/2009 8:00:26 PM}			CBC bc;
-// COMMENT: {6/5/2009 8:00:26 PM}			fluxProps.GetProperties(bc);
-// COMMENT: {6/5/2009 8:00:26 PM}			ASSERT(bc.polyh);
-// COMMENT: {6/5/2009 8:00:26 PM}			pDoc->Execute(new CSetBCAction(this, pTreeCtrl, bc, fluxProps.GetDesc()));
+			CBC bc;
+			fluxProps.GetProperties(bc);
+			ASSERT(bc.polyh);
+			pDoc->Execute(new CSetBCAction(this, pTreeCtrl, bc, fluxProps.GetDesc()));
 		}
 	}
 	else if (this->m_bc.bc_type == BC_info::BC_LEAKY)
