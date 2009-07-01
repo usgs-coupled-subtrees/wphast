@@ -4135,6 +4135,14 @@ BOOL CGlobal::FileExists(CString filename)
 
 hid_t CGlobal::HDFCreatePropType(void)
 {
+	ASSERT(PROP_UNDEFINED == 100);
+	ASSERT(PROP_FIXED     == 101);
+	ASSERT(PROP_LINEAR    == 102);
+	ASSERT(PROP_ZONE      == 103);
+	ASSERT(PROP_POINTS    == 105);
+	ASSERT(PROP_XYZ       == 106);
+	ASSERT(PROP_XYZT      == 110);
+
 	herr_t status;
 
 	// Create the datatype
@@ -4164,8 +4172,13 @@ hid_t CGlobal::HDFCreatePropType(void)
 	ASSERT(status >= 0);
 
 	// Insert the enumerated data
-	nValue = PROP_MIXTURE;
-	status = H5Tenum_insert(enum_datatype, "PROP_MIXTURE", &nValue);
+	// nValue = PROP_MIXTURE;
+	// status = H5Tenum_insert(enum_datatype, "PROP_MIXTURE", &nValue);
+	//
+	// Note: This must be inserted in order to be backward compatible
+	//
+	int n = 104;
+	status = H5Tenum_insert(enum_datatype, "PROP_MIXTURE", &n);
 	ASSERT(status >= 0);
 
 	// Insert the enumerated data
@@ -4176,6 +4189,11 @@ hid_t CGlobal::HDFCreatePropType(void)
 	// Insert the enumerated data
 	nValue = PROP_XYZ;
 	status = H5Tenum_insert(enum_datatype, "PROP_XYZ", &nValue);
+	ASSERT(status >= 0);
+
+	// Insert the enumerated data
+	nValue = PROP_XYZT;
+	status = H5Tenum_insert(enum_datatype, "PROP_XYZT", &nValue);
 	ASSERT(status >= 0);
 
 	return enum_datatype;
@@ -4372,7 +4390,33 @@ void CGlobal::PathsRelativeToAbsolute(LPCTSTR lpszPathName, CWPhastDoc* pDoc, CG
 	GET_ABS_PATH_MACRO(pDoc, elt, alpha_trans);
 	GET_ABS_PATH_MACRO(pDoc, elt, alpha_horizontal);
 	GET_ABS_PATH_MACRO(pDoc, elt, alpha_vertical);
+}
 
+#define GET_ABS_PATH_TIMESERIES_MACRO(D, C, TS) \
+do { \
+	CTimeSeries<Cproperty>::iterator it = C.TS.begin(); \
+	for (; it != C.TS.end(); ++it) { \
+		if ((*it).second.type == PROP_XYZ) { \
+			if ((*it).second.data_source) { \
+				std::string filename = (*it).second.data_source->Get_file_name(); \
+				if (filename.length() > 0) { \
+					(*it).second.data_source->Set_file_name(D->GetAbsolutePath(lpszPathName, filename)); \
+				} \
+			} \
+		} \
+	} \
+} while(0)
+
+void CGlobal::PathsRelativeToAbsolute(LPCTSTR lpszPathName, CWPhastDoc* pDoc, CBC& bc)
+{	
+	// Cproperty
+	GET_ABS_PATH_MACRO(pDoc, bc, bc_k);
+	GET_ABS_PATH_MACRO(pDoc, bc, bc_thick);
+
+	// CTimeSeries<Cproperty>
+	GET_ABS_PATH_TIMESERIES_MACRO(pDoc, bc, m_bc_head);
+	GET_ABS_PATH_TIMESERIES_MACRO(pDoc, bc, m_bc_flux);
+	GET_ABS_PATH_TIMESERIES_MACRO(pDoc, bc, m_bc_solution);
 }
 
 #define GET_REL_PATH_MACRO(D, C, P) \
@@ -4399,6 +4443,33 @@ void CGlobal::PathsAbsoluteToRelative(LPCTSTR lpszPathName, CWPhastDoc* pDoc, CG
 	GET_REL_PATH_MACRO(pDoc, elt, alpha_trans);
 	GET_REL_PATH_MACRO(pDoc, elt, alpha_horizontal);
 	GET_REL_PATH_MACRO(pDoc, elt, alpha_vertical);
+}
+
+#define GET_REL_PATH_TIMESERIES_MACRO(D, C, TS) \
+do { \
+	CTimeSeries<Cproperty>::iterator it = C.TS.begin(); \
+	for (; it != C.TS.end(); ++it) { \
+		if ((*it).second.type == PROP_XYZ) { \
+			if ((*it).second.data_source) { \
+				std::string filename = (*it).second.data_source->Get_file_name(); \
+				if (filename.length() > 0) { \
+					(*it).second.data_source->Set_file_name(D->GetRelativePath(lpszPathName, filename)); \
+				} \
+			} \
+		} \
+	} \
+} while(0)
+
+void CGlobal::PathsAbsoluteToRelative(LPCTSTR lpszPathName, CWPhastDoc* pDoc, CBC& bc)
+{
+	// Cproperty
+	GET_REL_PATH_MACRO(pDoc, bc, bc_k);
+	GET_REL_PATH_MACRO(pDoc, bc, bc_thick);
+
+	// CTimeSeries<Cproperty>
+	GET_REL_PATH_TIMESERIES_MACRO(pDoc, bc, m_bc_head);
+	GET_REL_PATH_TIMESERIES_MACRO(pDoc, bc, m_bc_flux);
+	GET_REL_PATH_TIMESERIES_MACRO(pDoc, bc, m_bc_solution);
 }
 
 // based on DDX_Text(CDataExchange* pDX, int nIDC, float& value)

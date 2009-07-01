@@ -2732,6 +2732,18 @@
 					</FileConfiguration>
 				</File>
 				<File
+					RelativePath=".\srcinput\XYZTfile.cpp"
+					>
+					<FileConfiguration
+						Name="cppunit|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
 					RelativePath=".\srcinput\zone.cpp"
 					>
 					<FileConfiguration
@@ -5840,6 +5852,10 @@
 				</File>
 				<File
 					RelativePath=".\srcinput\XYZfile.h"
+					>
+				</File>
+				<File
+					RelativePath=".\srcinput\XYZTfile.h"
 					>
 				</File>
 				<File

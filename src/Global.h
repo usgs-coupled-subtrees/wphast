@@ -178,7 +178,10 @@ public:
 	static double GetRadiusFactor(void);
 
 	static void PathsRelativeToAbsolute(LPCTSTR lpszPathName, CWPhastDoc* pDoc, CGridElt& elt);
+	static void PathsRelativeToAbsolute(LPCTSTR lpszPathName, CWPhastDoc* pDoc, CBC& bc);
+
 	static void PathsAbsoluteToRelative(LPCTSTR lpszPathName, CWPhastDoc* pDoc, CGridElt& elt);
+	static void PathsAbsoluteToRelative(LPCTSTR lpszPathName, CWPhastDoc* pDoc, CBC& bc);
 
 	static void DDX_Text_Safe(CDataExchange* pDX, int nIDC, float& value);
 	static void DDX_Text_Safe(CDataExchange *pDX, int nIDC, double &value);

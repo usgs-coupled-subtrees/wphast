@@ -1497,9 +1497,9 @@ void CWPhastDoc::DeleteContents()
 	// cleanup phastinput data
 	//
 	Clear_NNInterpolatorList();
+	FakeFiledata::Clear_fake_file_data_list();
 	Clear_file_data_map();
 	Clear_KDtreeList();
-	FakeFiledata::Clear_fake_file_data_list();
 
 	CDocument::DeleteContents();
 }
@@ -2164,29 +2164,20 @@ void CWPhastDoc::PrismPathsRelativeToAbsolute(LPCTSTR lpszPathName)
 			{
 				if ((pZoneActor = CZoneActor::SafeDownCast(pProp)))
 				{
-					//{{TODO
 					if (CMediaZoneActor *pMediaZoneActor = CMediaZoneActor::SafeDownCast(pZoneActor))
 					{
-						//{{
 						CGridElt elt = pMediaZoneActor->GetData();
 						CGlobal::PathsRelativeToAbsolute(lpszPathName, this, elt);
 						pMediaZoneActor->SetData(elt);
-						//}}
-
-// COMMENT: {4/28/2009 7:53:05 PM}						CGridElt elt = pMediaZoneActor->GetData();
-// COMMENT: {4/28/2009 7:53:05 PM}						GET_ABS_PATH_MACRO(active);
-// COMMENT: {4/28/2009 7:53:05 PM}						GET_ABS_PATH_MACRO(porosity);
-// COMMENT: {4/28/2009 7:53:05 PM}						GET_ABS_PATH_MACRO(kx);
-// COMMENT: {4/28/2009 7:53:05 PM}						GET_ABS_PATH_MACRO(ky);
-// COMMENT: {4/28/2009 7:53:05 PM}						GET_ABS_PATH_MACRO(kz);
-// COMMENT: {4/28/2009 7:53:05 PM}						GET_ABS_PATH_MACRO(storage);
-// COMMENT: {4/28/2009 7:53:05 PM}						GET_ABS_PATH_MACRO(alpha_long);
-// COMMENT: {4/28/2009 7:53:05 PM}						GET_ABS_PATH_MACRO(alpha_trans);
-// COMMENT: {4/28/2009 7:53:05 PM}						GET_ABS_PATH_MACRO(alpha_horizontal);
-// COMMENT: {4/28/2009 7:53:05 PM}						GET_ABS_PATH_MACRO(alpha_vertical);
-// COMMENT: {4/28/2009 7:53:05 PM}						pMediaZoneActor->SetData(elt);
 					}
-					//}}TODO
+					//{{
+					if (CBCZoneActor *pBCZoneActor = CBCZoneActor::SafeDownCast(pZoneActor))
+					{
+						CBC bc = pBCZoneActor->GetData();
+						CGlobal::PathsRelativeToAbsolute(lpszPathName, this, bc);
+						pBCZoneActor->SetData(bc);
+					}
+					//}}
 					if (pZoneActor->GetPolyhedronType() == Polyhedron::PRISM)
 					{
 						if (Prism *p = dynamic_cast<Prism*>(pZoneActor->GetPolyhedron()))

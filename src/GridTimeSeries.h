@@ -34,24 +34,31 @@ public:
 public:
 	void InitializeGrid(CDataExchange* pDX);
 	void ShowConstant(bool show);
-	void ShowLinear(bool show);
+	void ShowLinear(bool show);	
+	void ShowPoints(bool show);
+	void ShowXYZ(bool show);
 
 	void SetSeries(const CTimeSeries<Cproperty> &series);
 	void FreeVectors();
 
 	void DDX_Property(CDataExchange* pDX, Cproperty &p);
-	void DDV_SoftValidate(/*CModGridCtrlEx &grid, std::vector< std::vector<Cproperty*>* > &vectors, int row*/);
-	void DDX_Vectors(int row, CString &str /*, std::vector< std::vector<Cproperty*>* > &vectors*/);
-	void DDX_Series(CDataExchange* pDX, /*CModGridCtrlEx &this->grid, std::vector<Ctime*> &times, std::vector<Cproperty*> &props,*/ bool bTimeZeroRequired = true);
+	void DDV_SoftValidate();
+	void DDX_Vectors(int row, CString &str);
+	void DDX_Series(CDataExchange* pDX, bool bTimeZeroRequired = true);
+	void SetPointsGrid(CModGridCtrlEx *grid);
 
-	void OnEndLabelEdit(int nRow, int nCol /*NMHDR *pNotifyStruct, LRESULT *result, CModGridCtrlEx &grid, std::vector< std::vector<Cproperty*>* > &vectors*/);
-	void OnSelChanged(int nRow, int nCol   /*NMHDR *pNotifyStruct, LRESULT *result, CModGridCtrlEx &grid*/);
-
+	void OnEndLabelEdit(int nRow, int nCol);
+	void OnSelChanged(int nRow, int nCol);
+	void OnBnClickedButtonXYZ();
 
 	void SetMode(CGridTimeSeries::ModeType mode);
+	void SetType(PROP_TYPE pt);
+
+
 
 public:
 	CModGridCtrlEx grid;
+	//CModGridCtrlEx pts_grid;
 	int validation_row;
 	std::vector<Ctime*> v_times;
 	std::vector< std::vector<Cproperty*>* > vv_props;
@@ -59,10 +66,13 @@ public:
 	CString DefaultUnits;
 
 protected:
-	CWnd* DlgWnd;           // container usually a dialog
+	CWnd *DlgWnd;           // container usually a dialog
+	CModGridCtrlEx *PointsGrid;
 
 	std::vector<Cproperty*> v_selected;
 	std::vector<Cproperty*> v_constant;
 	std::vector<Cproperty*> v_linear;
+	std::vector<Cproperty*> v_points;
+	std::vector<Cproperty*> v_xyz;
 
 };

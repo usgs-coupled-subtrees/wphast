@@ -388,6 +388,10 @@
 #define IDD_PROP_LINEAR_M               423
 #define IDD_PROP_NONE_M                 424
 #define IDD_PROPS_FLUX_2                425
+#define IDD_DIALOG1                     426
+#define IDD_DIALOG2                     427
+#define IDD_DIALOG3                     428
+#define IDD_DIALOG4                     429
 #define IDC_EDIT_X                      1000
 #define IDC_TITLE                       1000
 #define IDC_EDIT_Y                      1001
@@ -894,6 +898,9 @@
 #define IDC_GRID_SOLUTION               1496
 #define IDC_RICH_PAGE                   1497
 #define IDC_GB_PROPERTY                 1498
+#define IDC_POINTS_GRID                 1499
+#define IDC_USE_MAP_COOR                1500
+#define IDC_STATIC_FN                   1501
 #define IDC_RESIZE_COLUMN               28654
 #define IDC_RESIZE_ROW                  28655
 #define IDR_POPUP                       28656
@@ -939,9 +946,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        413
+#define _APS_NEXT_RESOURCE_VALUE        430
 #define _APS_NEXT_COMMAND_VALUE         32861
-#define _APS_NEXT_CONTROL_VALUE         1499
+#define _APS_NEXT_CONTROL_VALUE         1502
 #define _APS_NEXT_SYMED_VALUE           126
 #endif
 #endif

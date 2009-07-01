@@ -72,6 +72,12 @@ Cproperty::Cproperty(enum PROP_TYPE pt)
 		this->count_v = 2;
 		this->type    = PROP_LINEAR;
 	}
+	else if (pt == PROP_POINTS)
+	{
+	}
+	else if (pt == PROP_XYZ)
+	{
+	}
 	else
 	{
 		ASSERT(FALSE);
@@ -367,7 +373,7 @@ void Cproperty::Serialize(bool bStoring, hid_t loc_id)
 		if (CGlobal::HDFSerializeSafe(bStoring, loc_id, szPropType, proptype, 1, &this->type) >= 0)
 		{
 			ASSERT(this->type == PROP_FIXED || this->type == PROP_LINEAR || this->type == PROP_ZONE ||
-				this->type == PROP_MIXTURE || this->type == PROP_POINTS || this->type == PROP_XYZ);
+				this->type == PROP_XYZT || this->type == PROP_POINTS || this->type == PROP_XYZ);
 		}
 		else
 		{
@@ -682,14 +688,17 @@ std::ostream& operator<< (std::ostream &os, const Cproperty &a)
 				<< " " << a.dist2
 				<< "\n";
 			break;
-		case PROP_MIXTURE:
-			os << "mixture " << a.v[0] << " " << a.v[1] << "\n";
-			os << "\t\t\t\t<";
-			for (int i = 2; i < a.count_v; ++i)
-			{
-				os << " " << a.v[i];
-			}
-			os << " >\n";
+// COMMENT: {6/30/2009 9:33:01 PM}		case PROP_MIXTURE:
+// COMMENT: {6/30/2009 9:33:01 PM}			os << "mixture " << a.v[0] << " " << a.v[1] << "\n";
+// COMMENT: {6/30/2009 9:33:01 PM}			os << "\t\t\t\t<";
+// COMMENT: {6/30/2009 9:33:01 PM}			for (int i = 2; i < a.count_v; ++i)
+// COMMENT: {6/30/2009 9:33:01 PM}			{
+// COMMENT: {6/30/2009 9:33:01 PM}				os << " " << a.v[i];
+// COMMENT: {6/30/2009 9:33:01 PM}			}
+// COMMENT: {6/30/2009 9:33:01 PM}			os << " >\n";
+// COMMENT: {6/30/2009 9:33:01 PM}			break;
+		case PROP_XYZT:
+			ASSERT(FALSE);
 			break;
 		case PROP_POINTS:
 			ASSERT(a.data_source);
@@ -741,14 +750,17 @@ bool operator==(const property& lhs, const property& rhs)
 			if (lhs.v[1]  != rhs.v[1])  return false;
 			if (lhs.dist2 != rhs.dist2) return false;
 			break;
-		case PROP_MIXTURE:
-			if (lhs.count_v == rhs.count_v)
-			{
-				for (int i = 0; i < lhs.count_v; ++i)
-				{
-					if (lhs.v[i] != rhs.v[i]) return false;
-				}
-			}
+// COMMENT: {6/30/2009 9:33:36 PM}		case PROP_MIXTURE:
+// COMMENT: {6/30/2009 9:33:36 PM}			if (lhs.count_v == rhs.count_v)
+// COMMENT: {6/30/2009 9:33:36 PM}			{
+// COMMENT: {6/30/2009 9:33:36 PM}				for (int i = 0; i < lhs.count_v; ++i)
+// COMMENT: {6/30/2009 9:33:36 PM}				{
+// COMMENT: {6/30/2009 9:33:36 PM}					if (lhs.v[i] != rhs.v[i]) return false;
+// COMMENT: {6/30/2009 9:33:36 PM}				}
+// COMMENT: {6/30/2009 9:33:36 PM}			}
+// COMMENT: {6/30/2009 9:33:36 PM}			break;
+		case PROP_XYZT:
+			ASSERT(FALSE);
 			break;
 		case PROP_POINTS:
 			if (lhs.data_source->Get_points().size() == rhs.data_source->Get_points().size())
