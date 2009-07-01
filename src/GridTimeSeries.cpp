@@ -2,6 +2,7 @@
 #include "GridTimeSeries.h"
 
 #include "Global.h"
+#include "Units.h"
 #include "FakeFiledata.h"
 
 const TCHAR PSZ_NONE[]     = _T("None");
@@ -57,7 +58,7 @@ CGridTimeSeries::CGridTimeSeries(CWnd* pWnd)
 	this->vv_props.push_back(&this->v_points);
 	this->vv_props.push_back(&this->v_xyz);
 
-	this->DefaultUnits = PSZ_YEAR;
+	this->DefaultTimeUnits = PSZ_SECS;
 }
 
 CGridTimeSeries::~CGridTimeSeries(void)
@@ -640,7 +641,7 @@ void CGridTimeSeries::OnEndLabelEdit(int nRow, int nCol)
 			if (units.Trim().IsEmpty())
 			{
 				// look upwards to find default units
-				CString u = this->DefaultUnits;
+				CString u = this->DefaultTimeUnits;
 				for (int r = nRow - 1; r >= 0; --r)
 				{
 					CString d = this->grid.GetItemText(r, UNIT_COLUMN);
@@ -1264,7 +1265,7 @@ void CGridTimeSeries::DDX_Series(CDataExchange* pDX, bool bTimeZeroRequired)
 				}
 				else
 				{
-					this->grid.SetItemText(row, UNIT_COLUMN, this->DefaultUnits);
+					this->grid.SetItemText(row, UNIT_COLUMN, this->DefaultTimeUnits);
 				}
 			}
 
@@ -1395,5 +1396,17 @@ void CGridTimeSeries::OnBnClickedButtonXYZ()
 	if (fileDlg.DoModal() == IDOK)
 	{
 		this->DlgWnd->SetDlgItemText(IDC_EDIT_XYZ, fileDlg.GetPathName());
+	}
+}
+
+void CGridTimeSeries::SetUnits(const CUnits &u)
+{
+	if (u.time.defined)
+	{
+		this->DefaultTimeUnits = CGlobal::GetStdTimeUnits(u.time.input).c_str();
+	}
+	else
+	{
+		this->DefaultTimeUnits = CGlobal::GetStdTimeUnits(u.time.si).c_str();
 	}
 }

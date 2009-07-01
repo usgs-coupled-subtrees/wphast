@@ -72,7 +72,6 @@ void CFluxPropsPage2::DoDataExchange(CDataExchange* pDX)
 
 	DDX_Control(pDX, IDC_DESC_RICHEDIT, this->RichEditCtrl);
 	DDX_Control(pDX, IDC_PROP_TREE, this->TreeCtrl);
-	DDX_Control(pDX, IDC_GB_PROPERTY, this->PropertyGroupBox);
 
 	if (this->TreeCtrl.GetCount() == 0)
 	{
@@ -88,9 +87,7 @@ void CFluxPropsPage2::DoDataExchange(CDataExchange* pDX)
 		this->TreeCtrl.ModifyStyle(TVS_TRACKSELECT, TVS_FULLROWSELECT|TVS_SHOWSELALWAYS, 0);
 	}
 
-	//{{
 	DDX_GridControl(pDX, IDC_POINTS_GRID, this->PointsGrid);
-	//}}
 	DDX_GridControl(pDX, IDC_TIMES_GRID,    this->FluxSeries.grid);
 	DDX_GridControl(pDX, IDC_GRID_SOLUTION, this->SolutionSeries.grid);
 
@@ -376,4 +373,10 @@ void CFluxPropsPage2::OnBnClickedButtonXYZ()
 			this->SolutionSeries.OnBnClickedButtonXYZ();
 		}
 	}
+}
+
+void CFluxPropsPage2::SetUnits(const CUnits &u)
+{
+	this->FluxSeries.SetUnits(u);
+	this->SolutionSeries.SetUnits(u);
 }

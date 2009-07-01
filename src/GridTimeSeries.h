@@ -13,6 +13,7 @@
 
 #include "gridctrl/ModGridCtrlEx.h"
 
+class CUnits;
 
 class CGridTimeSeries
 {
@@ -40,6 +41,8 @@ public:
 
 	void SetSeries(const CTimeSeries<Cproperty> &series);
 	void FreeVectors();
+	void SetUnits(const CUnits &u);
+
 
 	void DDX_Property(CDataExchange* pDX, Cproperty &p);
 	void DDV_SoftValidate();
@@ -54,16 +57,13 @@ public:
 	void SetMode(CGridTimeSeries::ModeType mode);
 	void SetType(PROP_TYPE pt);
 
-
-
 public:
 	CModGridCtrlEx grid;
-	//CModGridCtrlEx pts_grid;
+
 	int validation_row;
 	std::vector<Ctime*> v_times;
 	std::vector< std::vector<Cproperty*>* > vv_props;
 	HTREEITEM treeitem;
-	CString DefaultUnits;
 
 protected:
 	CWnd *DlgWnd;           // container usually a dialog
@@ -75,4 +75,5 @@ protected:
 	std::vector<Cproperty*> v_points;
 	std::vector<Cproperty*> v_xyz;
 
+	CString DefaultTimeUnits;
 };

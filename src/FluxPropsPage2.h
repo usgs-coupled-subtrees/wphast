@@ -6,6 +6,7 @@
 
 #include "GridTimeSeries.h"
 
+class CUnits;
 
 // CFluxPropsPage2 dialog
 
@@ -28,6 +29,8 @@ public:
 
 	void SetDesc(LPCTSTR desc)           { this->Description = desc; }
 	LPCTSTR GetDesc()                    { return this->Description; }
+
+	void SetUnits(const CUnits &u);
 
 // Dialog Data
 	enum { IDD = IDD_PROPS_FLUX_2 };
@@ -69,7 +72,6 @@ protected:
 
 	CRichEditCtrl  RichEditCtrl;
 	CTreeCtrl      TreeCtrl;
-	CStatic        PropertyGroupBox;
 
 	HTREEITEM ItemDDX;
 
@@ -79,7 +81,7 @@ protected:
 	std::string m_sFaceRTF;          // IDR_BC_FLUX_FACE_RTF
 
 	CString Description;
-	CString DefaultUnits;
+// COMMENT: {6/30/2009 11:16:25 PM}	CString DefaultUnits;
 
 	bool FlowOnly;
 	bool Default;

@@ -197,8 +197,8 @@ public:
 	void SetDisplayColors(const CDisplayColors& dc);
 	CDisplayColors GetDisplayColors()const;
 
-	void PrismPathsRelativeToAbsolute(LPCTSTR lpszPathName);
-	void PrismPathsAbsoluteToRelative(LPCTSTR lpszPathName);
+	void DataSourcePathsRelativeToAbsolute(LPCTSTR lpszPathName);
+	void DataSourcePathsAbsoluteToRelative(LPCTSTR lpszPathName);
 	std::string GetRelativePath(LPCTSTR lpszPathName, const std::string src_path)const;
 	std::string GetAbsolutePath(LPCTSTR lpszPathName, const std::string relative_path)const;
 

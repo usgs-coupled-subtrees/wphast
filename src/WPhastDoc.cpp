@@ -1289,7 +1289,7 @@ BOOL CWPhastDoc::OnOpenDocument(LPCTSTR lpszPathName)
 	TRACE("CWPhastDoc::OnOpenDocument(%s) GetCurrentDirectory = %s\n", lpszPathName, curdir);
 
 	BOOL bOk = CDocument::OnOpenDocument(lpszPathName);
-	this->PrismPathsRelativeToAbsolute(lpszPathName);
+	this->DataSourcePathsRelativeToAbsolute(lpszPathName);
 	return bOk;
 }
 
@@ -2115,35 +2115,7 @@ void CWPhastDoc::GetUsedZoneFlowRates(std::set<int>& usedNums)const
 	}
 }
 
-// COMMENT: {4/3/2009 10:55:31 PM}#define GET_FULL_PATH(P)
-// COMMENT: {4/3/2009 10:55:31 PM}if (elt.P && elt.P->type == PROP_XYZ)
-// COMMENT: {4/3/2009 10:55:31 PM}{
-// COMMENT: {4/3/2009 10:55:31 PM}	Cproperty p = *elt.P;
-// COMMENT: {4/3/2009 10:55:31 PM}	if (p.data_source)
-// COMMENT: {4/3/2009 10:55:31 PM}	{
-// COMMENT: {4/3/2009 10:55:31 PM}		std::string filename = p.data_source->Get_file_name();
-// COMMENT: {4/3/2009 10:55:31 PM}		if (filename.length() > 0)
-// COMMENT: {4/3/2009 10:55:31 PM}		{
-// COMMENT: {4/3/2009 10:55:31 PM}			p.data_source->Set_file_name(this->GetAbsolutePath(lpszPathName, filename));
-// COMMENT: {4/3/2009 10:55:31 PM}		}
-// COMMENT: {4/3/2009 10:55:31 PM}		(*elt.P) = p;
-// COMMENT: {4/3/2009 10:55:31 PM}	}
-// COMMENT: {4/3/2009 10:55:31 PM}}
-
-#define GET_ABS_PATH_MACRO(P) \
-do { \
-	if (elt.P && elt.P->type == PROP_XYZ) { \
-		if (elt.P->data_source) { \
-			std::string filename = elt.P->data_source->Get_file_name(); \
-			if (filename.length() > 0) { \
-				elt.P->data_source->Set_file_name(this->GetAbsolutePath(lpszPathName, filename)); \
-			} \
-		} \
-	} \
-} while(0)
-
-
-void CWPhastDoc::PrismPathsRelativeToAbsolute(LPCTSTR lpszPathName)
+void CWPhastDoc::DataSourcePathsRelativeToAbsolute(LPCTSTR lpszPathName)
 {
 	CZoneActor *pZoneActor;
 
@@ -2164,20 +2136,22 @@ void CWPhastDoc::PrismPathsRelativeToAbsolute(LPCTSTR lpszPathName)
 			{
 				if ((pZoneActor = CZoneActor::SafeDownCast(pProp)))
 				{
+					//{{TODO
+					// checkout: EXTERNAL std::list < property * >properties_with_data_source;
+					//}}TODO
+
 					if (CMediaZoneActor *pMediaZoneActor = CMediaZoneActor::SafeDownCast(pZoneActor))
 					{
 						CGridElt elt = pMediaZoneActor->GetData();
 						CGlobal::PathsRelativeToAbsolute(lpszPathName, this, elt);
 						pMediaZoneActor->SetData(elt);
 					}
-					//{{
 					if (CBCZoneActor *pBCZoneActor = CBCZoneActor::SafeDownCast(pZoneActor))
 					{
 						CBC bc = pBCZoneActor->GetData();
 						CGlobal::PathsRelativeToAbsolute(lpszPathName, this, bc);
 						pBCZoneActor->SetData(bc);
 					}
-					//}}
 					if (pZoneActor->GetPolyhedronType() == Polyhedron::PRISM)
 					{
 						if (Prism *p = dynamic_cast<Prism*>(pZoneActor->GetPolyhedron()))
@@ -2206,19 +2180,7 @@ void CWPhastDoc::PrismPathsRelativeToAbsolute(LPCTSTR lpszPathName)
 	}
 }
 
-#define GET_REL_PATH_MACRO(C, P) \
-do { \
-	if (C.P && C.P->type == PROP_XYZ) { \
-		if (C.P->data_source) { \
-			std::string filename = C.P->data_source->Get_file_name(); \
-			if (filename.length() > 0) { \
-				C.P->data_source->Set_file_name(this->GetRelativePath(lpszPathName, filename)); \
-			} \
-		} \
-	} \
-} while(0)
-
-void CWPhastDoc::PrismPathsAbsoluteToRelative(LPCTSTR lpszPathName)
+void CWPhastDoc::DataSourcePathsAbsoluteToRelative(LPCTSTR lpszPathName)
 {
 	CZoneActor *pZoneActor;
 
@@ -2240,34 +2202,22 @@ void CWPhastDoc::PrismPathsAbsoluteToRelative(LPCTSTR lpszPathName)
 				if ((pZoneActor = CZoneActor::SafeDownCast(pProp)))
 				{
 					//{{TODO
-// COMMENT: {4/24/2009 4:48:55 PM}					// checkout: EXTERNAL std::list < property * >properties_with_data_source;
-// COMMENT: {4/24/2009 4:48:55 PM}					std::list<property*>::iterator piter = ::properties_with_data_source.begin();
-// COMMENT: {4/24/2009 4:48:55 PM}					for (; piter != ::properties_with_data_source.end(); ++piter)
-// COMMENT: {4/24/2009 4:48:55 PM}					{
-// COMMENT: {4/24/2009 4:48:55 PM}						ASSERT((*piter)->data_source);
-// COMMENT: {4/24/2009 4:48:55 PM}						std::string filename = (*piter)->data_source->Get_file_name()
-// COMMENT: {4/24/2009 4:48:55 PM}					}
+					// checkout: EXTERNAL std::list < property * >properties_with_data_source;
+					//}}TODO
 
 					if (CMediaZoneActor *pMediaZoneActor = CMediaZoneActor::SafeDownCast(pZoneActor))
 					{
 						CGridElt elt = pMediaZoneActor->GetData();
 						CGlobal::PathsAbsoluteToRelative(lpszPathName, this, elt);
 						pMediaZoneActor->SetData(elt);
-
-// COMMENT: {4/28/2009 8:07:56 PM}						CGridElt elt = pMediaZoneActor->GetData();
-// COMMENT: {4/28/2009 8:07:56 PM}						GET_REL_PATH_MACRO(elt, active);
-// COMMENT: {4/28/2009 8:07:56 PM}						GET_REL_PATH_MACRO(elt, porosity);
-// COMMENT: {4/28/2009 8:07:56 PM}						GET_REL_PATH_MACRO(elt, kx);
-// COMMENT: {4/28/2009 8:07:56 PM}						GET_REL_PATH_MACRO(elt, ky);
-// COMMENT: {4/28/2009 8:07:56 PM}						GET_REL_PATH_MACRO(elt, kz);
-// COMMENT: {4/28/2009 8:07:56 PM}						GET_REL_PATH_MACRO(elt, storage);
-// COMMENT: {4/28/2009 8:07:56 PM}						GET_REL_PATH_MACRO(elt, alpha_long);
-// COMMENT: {4/28/2009 8:07:56 PM}						GET_REL_PATH_MACRO(elt, alpha_trans);
-// COMMENT: {4/28/2009 8:07:56 PM}						GET_REL_PATH_MACRO(elt, alpha_horizontal);
-// COMMENT: {4/28/2009 8:07:56 PM}						GET_REL_PATH_MACRO(elt, alpha_vertical);
-// COMMENT: {4/28/2009 8:07:56 PM}						pMediaZoneActor->SetData(elt);
 					}
-					//}}TODO
+
+					if (CBCZoneActor *pBCZoneActor = CBCZoneActor::SafeDownCast(pZoneActor))
+					{
+						CBC bc = pBCZoneActor->GetData();
+						CGlobal::PathsAbsoluteToRelative(lpszPathName, this, bc);
+						pBCZoneActor->SetData(bc);
+					}
 
 					if (pZoneActor->GetPolyhedronType() == Polyhedron::PRISM)
 					{
@@ -2341,9 +2291,9 @@ BOOL CWPhastDoc::OnSaveDocument(LPCTSTR lpszPathName)
 	// Add your specialized code here and/or call the base class
 	this->m_pimpl->m_lastSaveIndex = this->m_pimpl->m_vectorActionsIndex;
 
-	this->PrismPathsAbsoluteToRelative(lpszPathName);
+	this->DataSourcePathsAbsoluteToRelative(lpszPathName);
 	BOOL bOk = CDocument::OnSaveDocument(lpszPathName);
-	this->PrismPathsRelativeToAbsolute(lpszPathName);
+	this->DataSourcePathsRelativeToAbsolute(lpszPathName);
 	return bOk;
 }
 
@@ -2919,7 +2869,7 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 			pAction->Execute();
 		}
 		// convert all relative paths to absolute paths
-		this->PrismPathsRelativeToAbsolute(lpszPathName);
+		this->DataSourcePathsRelativeToAbsolute(lpszPathName);
 	}
 	catch (int)
 	{
@@ -3044,13 +2994,13 @@ void CWPhastDoc::OnFileExport()
 		strPath += ".trans.dat";
 	}
 
-	this->PrismPathsAbsoluteToRelative(strPath);
+	this->DataSourcePathsAbsoluteToRelative(strPath);
 	if (!this->DoExport(strPath))
 	{
 		::AfxMessageBox("An error occured during the export", MB_OK);
 // COMMENT: {8/7/2008 4:03:09 PM}		this->SetModifiedFlag(FALSE);
 	}
-	this->PrismPathsRelativeToAbsolute(strPath);
+	this->DataSourcePathsRelativeToAbsolute(strPath);
 }
 
 BOOL CWPhastDoc::DoExport(LPCTSTR lpszPathName)
@@ -3591,9 +3541,9 @@ void CWPhastDoc::OnFileRun()
 	CString strPrefix(szFName);
 
 	std::ostringstream oss;
-	this->PrismPathsAbsoluteToRelative(szPhastTmp);
+	this->DataSourcePathsAbsoluteToRelative(szPhastTmp);
 	this->WriteTransDat(oss);
-	this->PrismPathsRelativeToAbsolute(szPhastTmp);
+	this->DataSourcePathsRelativeToAbsolute(szPhastTmp);
 
 	std::string str = oss.str();
 	std::istringstream iss(str);

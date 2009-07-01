@@ -269,6 +269,7 @@ void CBCZoneActor::Edit(CTreeCtrl* pTreeCtrl, int nStressPeriod)
 		fluxProps.SetProperties(this->GetBC());
 		fluxProps.SetFlowOnly(pDoc->GetFlowOnly());
 		fluxProps.SetDesc(this->GetDesc());
+		fluxProps.SetUnits(pDoc->GetUnits());
 		if (props.DoModal() == IDOK)
 		{
 			CBC bc;

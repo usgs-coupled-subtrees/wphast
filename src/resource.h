@@ -392,6 +392,8 @@
 #define IDD_DIALOG2                     427
 #define IDD_DIALOG3                     428
 #define IDD_DIALOG4                     429
+#define IDD_PROPS_FLUX_3                430
+#define IDD_PROPS_SPECIFIED_HEAD        430
 #define IDC_EDIT_X                      1000
 #define IDC_TITLE                       1000
 #define IDC_EDIT_Y                      1001
