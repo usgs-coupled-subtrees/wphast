@@ -12,7 +12,9 @@
 #include "FluxPropsPage.h"
 #include "FluxPropsPage2.h"
 #include "BCLeakyPropertyPage2.h"
+#include "LeakyPropsPage.h"
 #include "BCSpecifiedHeadPropertyPage.h"
+#include "SpecifiedHeadPropsPage.h"
 #include "ETSLayout/ETSLayout.h"
 
 #include "WPhastDoc.h"
@@ -280,11 +282,16 @@ void CBCZoneActor::Edit(CTreeCtrl* pTreeCtrl, int nStressPeriod)
 	}
 	else if (this->m_bc.bc_type == BC_info::BC_LEAKY)
 	{
-		CBCLeakyPropertyPage2 leakyProps;
+		//{{
+		CPropertySheet props(str);
+		//}}
+// COMMENT: {7/6/2009 9:20:46 PM}		CBCLeakyPropertyPage2 leakyProps;
+		CLeakyPropsPage leakyProps;
 		props.AddPage(&leakyProps);
 		leakyProps.SetProperties(this->GetBC());		
 		leakyProps.SetFlowOnly(pDoc->GetFlowOnly());
 		leakyProps.SetDesc(this->GetDesc());
+		leakyProps.SetUnits(pDoc->GetUnits());
 		if (props.DoModal() == IDOK)
 		{
 			CBC bc;
@@ -295,11 +302,16 @@ void CBCZoneActor::Edit(CTreeCtrl* pTreeCtrl, int nStressPeriod)
 	}
 	else if (this->m_bc.bc_type == BC_info::BC_SPECIFIED)
 	{
-		CBCSpecifiedHeadPropertyPage specified;
+		//{{
+		CPropertySheet props(str);
+		//}}
+		//CBCSpecifiedHeadPropertyPage specified;
+		CSpecifiedHeadPropsPage specified;
 		props.AddPage(&specified);
 		specified.SetProperties(this->GetBC());		
 		specified.SetFlowOnly(pDoc->GetFlowOnly());
 		specified.SetDesc(this->GetDesc());
+		specified.SetUnits(pDoc->GetUnits());
 		if (props.DoModal() == IDOK)
 		{
 			CBC bc;

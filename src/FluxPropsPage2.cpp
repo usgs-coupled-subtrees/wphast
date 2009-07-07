@@ -13,24 +13,6 @@
 const TCHAR PSZ_FLUX[]     = _T("Flux");
 const TCHAR PSZ_SOLUTION[] = _T("Solution");
 
-const TCHAR PSZ_NONE[]     = _T("None");
-const TCHAR PSZ_CONSTANT[] = _T("Constant");
-const TCHAR PSZ_LINEAR[]   = _T("Linear");
-const TCHAR PSZ_POINTS[]   = _T("Points");
-const TCHAR PSZ_XYZ[]      = _T("XYZ");
-
-const TCHAR PSZ_SECS[] = _T("seconds");
-const TCHAR PSZ_MINS[] = _T("minutes");
-const TCHAR PSZ_HOUR[] = _T("hours");
-const TCHAR PSZ_DAYS[] = _T("days");
-const TCHAR PSZ_YEAR[] = _T("years");
-
-const int TIME_COLUMN = 0;
-const int UNIT_COLUMN = 1;
-const int TYPE_COLUMN = 2;
-
-const int MIN_ROWS = 200;
-
 const int SELECTED = 0;
 
 #ifdef _DEBUG
@@ -212,6 +194,7 @@ void CFluxPropsPage2::GetProperties(CBC& rBC)const
 			rBC.m_bc_solution[t] = p;
 		}
 	}
+	TRACE("Out %s\n", __FUNCTION__);
 }
 
 BEGIN_MESSAGE_MAP(CFluxPropsPage2, CPropertyPage)
@@ -223,7 +206,7 @@ BEGIN_MESSAGE_MAP(CFluxPropsPage2, CPropertyPage)
 
 	ON_NOTIFY(TVN_SELCHANGING, IDC_PROP_TREE, OnTreeSelChanging)
 	ON_NOTIFY(TVN_SELCHANGED,  IDC_PROP_TREE, OnTreeSelChanged)
-	ON_EN_SETFOCUS(IDC_DESC_EDIT, &CFluxPropsPage2::OnEnSetfocusDescEdit)
+	ON_EN_SETFOCUS(IDC_DESC_EDIT, OnEnSetfocusDescEdit)
 
 	ON_BN_CLICKED(IDC_BUTTON_XYZ, OnBnClickedButtonXYZ)
 

@@ -126,6 +126,7 @@ public:
 	static BOOL IsValidShapefile(CString filename, CDataExchange* pDX = NULL);
 	static BOOL IsValidArcraster(CString filename);
 	static BOOL IsValidXYZFile(CString filename, CDataExchange* pDX = NULL);
+	static BOOL IsValidXYZTFile(CString filename, CDataExchange* pDX = NULL);
 
 	static BOOL FileExists(CString filename);
 

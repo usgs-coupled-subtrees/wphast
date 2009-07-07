@@ -2,6 +2,7 @@
 #include "property.h"
 
 #include "Global.h"
+#include "FakeFiledata.h"
 #include <ostream> // std::ostream
 
 // Note: No header files should follow the following three lines
@@ -48,6 +49,8 @@ Cproperty::Cproperty(double value)
 //{{
 Cproperty::Cproperty(enum PROP_TYPE pt)
 {
+	const TCHAR PSZ_UNDEFINED[] = _T("UNDEFINED");
+
 	this->InternalInit();
 
 	if (pt == PROP_FIXED)
@@ -74,9 +77,32 @@ Cproperty::Cproperty(enum PROP_TYPE pt)
 	}
 	else if (pt == PROP_POINTS)
 	{
+		this->type    = PROP_POINTS;
+		this->data_source = new Data_source;
+		this->data_source->Set_defined(true);
+		this->data_source->Set_source_type(Data_source::POINTS);
+		this->data_source->Set_user_source_type(Data_source::POINTS);
 	}
 	else if (pt == PROP_XYZ)
 	{
+		this->type = PROP_XYZ;
+		this->data_source = new Data_source;
+		this->data_source->Set_defined(true);
+		this->data_source->Set_source_type(Data_source::XYZ);
+		this->data_source->Set_user_source_type(Data_source::XYZ);
+		this->data_source->Set_file_name(PSZ_UNDEFINED);
+		this->data_source->Set_filedata(FakeFiledata::New(PSZ_UNDEFINED, PHAST_Transform::GRID));
+
+	}
+	else if (pt == PROP_XYZT)
+	{
+		this->type = PROP_XYZT;
+		this->data_source = new Data_source;
+		this->data_source->Set_defined(true);
+		this->data_source->Set_source_type(Data_source::XYZT);
+		this->data_source->Set_user_source_type(Data_source::XYZT);
+		this->data_source->Set_file_name(PSZ_UNDEFINED);
+		this->data_source->Set_filedata(FakeFiledata::New(PSZ_UNDEFINED, PHAST_Transform::GRID));
 	}
 	else
 	{
@@ -647,6 +673,12 @@ void Cproperty::Insert(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent, LPCTSTR headin
 			cs = this->data_source->Get_user_coordinate_system();
 			ASSERT(cs >= PHAST_Transform::MAP && cs <= PHAST_Transform::NONE);
 			format.Format("%s XYZ %s %s", heading, coor_name[cs], this->data_source->Get_file_name().c_str());
+			break;
+		case PROP_XYZT:
+			ASSERT(this->data_source);
+			cs = this->data_source->Get_user_coordinate_system();
+			ASSERT(cs >= PHAST_Transform::MAP && cs <= PHAST_Transform::NONE);
+			format.Format("%s XYZT %s %s", heading, coor_name[cs], this->data_source->Get_file_name().c_str());
 			break;
 		default:
 			ASSERT(FALSE);

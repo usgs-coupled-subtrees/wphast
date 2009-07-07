@@ -15,10 +15,16 @@
 
 class CUnits;
 
+#define NEW_SINGLE_PROPERTY
+
 class CGridTimeSeries
 {
 public:
 	CGridTimeSeries(CWnd* pWnd);
+#if defined(NEW_SINGLE_PROPERTY)
+	CGridTimeSeries(CWnd* pWnd, bool bSingle);
+#endif
+
 	~CGridTimeSeries(void);
 
 public:
@@ -30,6 +36,7 @@ public:
 		LINEAR   = 2,
 		POINTS   = 3,
 		XYZ      = 4,
+		XYZT     = 5,
 	};
 
 public:
@@ -38,6 +45,10 @@ public:
 	void ShowLinear(bool show);	
 	void ShowPoints(bool show);
 	void ShowXYZ(bool show);
+#if defined(NEW_SINGLE_PROPERTY)
+	bool bSingleProperty;
+	static void ShowSingleProperty(CWnd *pDlgWnd, int nShow);
+#endif
 
 	void SetSeries(const CTimeSeries<Cproperty> &series);
 	void FreeVectors();
@@ -49,6 +60,12 @@ public:
 	void DDX_Vectors(int row, CString &str);
 	void DDX_Series(CDataExchange* pDX, bool bTimeZeroRequired = true);
 	void SetPointsGrid(CModGridCtrlEx *grid);
+
+#if defined(NEW_SINGLE_PROPERTY)
+	void DDX_Single(CDataExchange* pDX, bool bRequired = true);
+	void SetProperty(const property *prop);
+	void OnCbnSelchangeComboProptype();
+#endif
 
 	void OnEndLabelEdit(int nRow, int nCol);
 	void OnSelChanged(int nRow, int nCol);
@@ -73,7 +90,8 @@ protected:
 	std::vector<Cproperty*> v_constant;
 	std::vector<Cproperty*> v_linear;
 	std::vector<Cproperty*> v_points;
-	std::vector<Cproperty*> v_xyz;
+	std::vector<Cproperty*> v_xyz;	
+	std::vector<Cproperty*> v_xyzt;
 
 	CString DefaultTimeUnits;
 };

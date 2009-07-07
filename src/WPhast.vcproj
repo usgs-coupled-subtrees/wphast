@@ -772,6 +772,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\LeakyPropsPage.cpp"
+				>
+			</File>
+			<File
 				RelativePath="MacroAction.cpp"
 				>
 			</File>
@@ -1081,6 +1085,10 @@
 			</File>
 			<File
 				RelativePath="SolutionMethodPropertyPage.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\SpecifiedHeadPropsPage.cpp"
 				>
 			</File>
 			<File
@@ -4952,6 +4960,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\LeakyPropsPage.h"
+				>
+			</File>
+			<File
 				RelativePath="MacroAction.h"
 				>
 			</File>
@@ -5293,6 +5305,10 @@
 			</File>
 			<File
 				RelativePath="SolutionMethodPropertyPage.h"
+				>
+			</File>
+			<File
+				RelativePath=".\SpecifiedHeadPropsPage.h"
 				>
 			</File>
 			<File

@@ -392,8 +392,8 @@
 #define IDD_DIALOG2                     427
 #define IDD_DIALOG3                     428
 #define IDD_DIALOG4                     429
-#define IDD_PROPS_FLUX_3                430
 #define IDD_PROPS_SPECIFIED_HEAD        430
+#define IDD_PROPS_LEAKY                 431
 #define IDC_EDIT_X                      1000
 #define IDC_TITLE                       1000
 #define IDC_EDIT_Y                      1001
@@ -903,6 +903,11 @@
 #define IDC_POINTS_GRID                 1499
 #define IDC_USE_MAP_COOR                1500
 #define IDC_STATIC_FN                   1501
+#define IDC_GRID_HEAD                   1502
+#define IDC_STATIC_PROPTYPE             1503
+#define IDC_COMBO_PROPTYPE              1504
+#define IDC_GB_PROPTYPE                 1505
+#define IDC_CHECK_FACE                  1506
 #define IDC_RESIZE_COLUMN               28654
 #define IDC_RESIZE_ROW                  28655
 #define IDR_POPUP                       28656
@@ -948,9 +953,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        430
+#define _APS_NEXT_RESOURCE_VALUE        432
 #define _APS_NEXT_COMMAND_VALUE         32861
-#define _APS_NEXT_CONTROL_VALUE         1502
+#define _APS_NEXT_CONTROL_VALUE         1507
 #define _APS_NEXT_SYMED_VALUE           126
 #endif
 #endif

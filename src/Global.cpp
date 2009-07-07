@@ -4128,6 +4128,36 @@ BOOL CGlobal::IsValidXYZFile(CString filename, CDataExchange* pDX /* = NULL */)
 	return FALSE;
 }
 
+BOOL CGlobal::IsValidXYZTFile(CString filename, CDataExchange* pDX /* = NULL */)
+{
+	filename.Trim();
+	if (!filename.IsEmpty())
+	{
+		TCHAR path[MAX_PATH];
+		::strcpy(path, filename);
+		if (ATL::ATLPath::FileExists(path))
+		{
+			return TRUE;
+		}
+		else
+		{
+			if (pDX)
+			{
+				CString str;
+				str.Format("XYZT file \"%s\" not found.\n", path);
+				::AfxMessageBox(str);
+				pDX->Fail(); // throws
+			}
+		}
+	}
+	if (pDX)
+	{
+		::AfxMessageBox("Please select an XYZT file.");
+		pDX->Fail(); // throws
+	}
+	return FALSE;
+}
+
 BOOL CGlobal::FileExists(CString filename)
 {
 	return ATL::ATLPath::FileExists(filename);
