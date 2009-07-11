@@ -105,7 +105,7 @@ void CHeadICPropsPage::DoDataExchange(CDataExchange* pDX)
 		}
 
 		// Head
-		if (this->bDefault && pDX->m_bSaveAndValidate && this->HeadIC.head->type == PROP_UNDEFINED)
+		if (this->Default && pDX->m_bSaveAndValidate && this->HeadIC.head->type == PROP_UNDEFINED)
 		{
 			CString str;
 			pTree->SelectItem(this->htiHEAD);

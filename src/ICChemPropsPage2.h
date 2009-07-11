@@ -1,7 +1,7 @@
 #pragma once
 
 #include "PropsPropertyPage.h"
-#include "BC.h"
+#include "ChemIC.h"
 #include "gridctrl/ModGridCtrlEx.h"
 #include "afxwin.h"
 
@@ -9,18 +9,18 @@
 
 class CUnits;
 
-// CFluxPropsPage2 dialog
+// CICChemPropsPage2 dialog
 
-class CFluxPropsPage2 : public CPropsPropertyPage
+class CICChemPropsPage2 : public CPropsPropertyPage
 {
-	DECLARE_DYNAMIC(CFluxPropsPage2)
+	DECLARE_DYNAMIC(CICChemPropsPage2)
 
 public:
-	CFluxPropsPage2();
-	virtual ~CFluxPropsPage2();
+	CICChemPropsPage2();
+	virtual ~CICChemPropsPage2();
 
-	void SetProperties(const CBC& rBC);
-	void GetProperties(CBC& rBC)const;
+	void SetProperties(const CChemIC& rChemIC);
+	void GetProperties(CChemIC& rChemIC)const;
 
 	void SetFlowOnly(bool flowOnly)      { this->FlowOnly = flowOnly; }
 	bool GetFlowOnly(void)const          { return this->FlowOnly; }
@@ -31,10 +31,10 @@ public:
 	void SetDesc(LPCTSTR desc)           { this->Description = desc; }
 	LPCTSTR GetDesc()                    { return this->Description; }
 
-	void SetUnits(const CUnits &u);
+	void SetUnits(const CUnits& u);
 
 // Dialog Data
-	enum { IDD = IDD_PROPS_FLUX_3 };
+	enum { IDD = IDD_PROPS_ICCHEM2 };
 
 	// type enum
 	enum ModeType
@@ -55,12 +55,6 @@ protected:
  	afx_msg void OnTreeSelChanging(NMHDR *pNotifyStruct, LRESULT *plResult);
  	afx_msg void OnTreeSelChanged(NMHDR *pNotifyStruct, LRESULT *plResult);
 
-	afx_msg void OnEndLabelEditFlux(NMHDR *pNotifyStruct, LRESULT *result);
-	afx_msg void OnEndLabelEditSolution(NMHDR *pNotifyStruct, LRESULT *result);
-
-	afx_msg void OnSelChangedFlux(NMHDR *pNotifyStruct, LRESULT *result);
-	afx_msg void OnSelChangedSolution(NMHDR *pNotifyStruct, LRESULT *result);
-
 	afx_msg void OnBnClickedButtonXYZ();
 
 	afx_msg LRESULT OnUM_DDXFailure(WPARAM wParam, LPARAM lParam);
@@ -73,8 +67,13 @@ protected:
 
 	afx_msg void OnBnClickedCheckFace();
 
-	CGridTimeSeries FluxSeries;
-	CGridTimeSeries SolutionSeries;
+	CGridTimeSeries SolutionProperty;          // single
+	CGridTimeSeries EquilibriumPhasesProperty; // single
+	CGridTimeSeries SurfaceProperty;           // single
+	CGridTimeSeries ExchangeProperty;          // single
+	CGridTimeSeries GasPhaseProperty;          // single
+	CGridTimeSeries SolidSolutionsProperty;    // single
+	CGridTimeSeries KineticsProperty;          // single
 
 	CModGridCtrlEx PointsGrid;
 
@@ -83,17 +82,20 @@ protected:
 
 	HTREEITEM ItemDDX;
 
-	std::string m_sDescriptionRTF;   // IDR_DESCRIPTION_RTF
-	std::string m_sAssocSolutionRTF; // IDR_BC_FLUX_ASSOC_SOL_RTF
-	std::string m_sFluxRTF;          // IDR_BC_FLUX_FLUX_RTF
-	std::string m_sFaceRTF;          // IDR_BC_FLUX_FACE_RTF
+	std::string m_sDescriptionRTF;        // IDR_DESCRIPTION_RTF
+	std::string m_sSolutionRTF;           // IDR_CHEM_IC_SOLUTION_RTF
+	std::string m_sEquilibriumPhasesRTF;  // IDR_CHEM_IC_EQUILIBRIUM_PHASES_RTF
+	std::string m_sSurfaceRTF;            // IDR_CHEM_IC_SURFACE_RTF
+	std::string m_sExchangeRTF;           // IDR_CHEM_IC_EXCHANGE_RTF
+	std::string m_sGasPhaseRTF;           // IDR_CHEM_IC_GAS_PHASE_RTF
+	std::string m_sSolidSolutionsRTF;     // IDR_CHEM_IC_SOLID_SOLUTIONS_RTF
+	std::string m_sKineticsRTF;           // IDR_CHEM_IC_KINETICS_RTF
 
 	CString Description;
-// COMMENT: {6/30/2009 11:16:25 PM}	CString DefaultUnits;
 
 	bool FlowOnly;
 	bool Default;
 
 protected:
-	CBC BC;
+	CChemIC ChemIC;
 };

@@ -19,7 +19,7 @@ public:
 	virtual ~CNewZonePropertyPage();
 
 // Dialog Data
-	enum { IDD = IDD_NEW_ZONE_PROPPAGE };
+	enum { IDD = IDD_NEW_ZONE_PROPPAGE2 };
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support

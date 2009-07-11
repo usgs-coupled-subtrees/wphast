@@ -30,6 +30,7 @@
 #define IDR_HTML_UNITS1PROPERTYPAGE     122
 #define ID_ZONE_TYPE_IC_CHEM            123
 #define IDD_CHILDPROPERTYPAGE           125
+#define IDD_PROPS_PAGE                  126
 #define IDR_MAINFRAME                   128
 #define IDR_WPhastTYPE                  129
 #define IDR_MEDIA_LONG_DISP_RTF         129
@@ -377,7 +378,6 @@
 #define IDD_PROP_LINEAR                 412
 #define IDD_PROP_POINTS                 413
 #define IDD_PROP_XYZ                    414
-#define IDD_PROPS_TIME_SERIES           415
 #define IDD_PROP_CONSTANT_M             416
 #define IDD_PROP_DESC                   417
 #define IDD_PROPS_HEADIC                418
@@ -393,7 +393,16 @@
 #define IDD_DIALOG3                     428
 #define IDD_DIALOG4                     429
 #define IDD_PROPS_SPECIFIED_HEAD        430
-#define IDD_PROPS_LEAKY                 431
+#define IDD_PROPS_MIXTURE               432
+#define IDD_PROPS_LEAKY                 433
+#define IDD_PROPS_TIMESERIES            434
+#define IDD_PROPS_SPECIFIED_HEAD2       435
+#define IDD_PROPS_FLUX_3                436
+#define IDD_PROPS_MEDIA2                437
+#define IDD_PROPS_HEADIC2               438
+#define IDD_PROPS_ICCHEM2               439
+#define IDD_FLOW_RATE_PROPPAGE2         440
+#define IDD_NEW_ZONE_PROPPAGE2          441
 #define IDC_EDIT_X                      1000
 #define IDC_TITLE                       1000
 #define IDC_EDIT_Y                      1001
@@ -417,15 +426,18 @@
 #define IDC_YMAX_EDIT                   1018
 #define IDC_X_RADIO                     1019
 #define IDC_RADIO4                      1020
+#define IDC_X_RADIO2                    1020
 #define IDC_TUBE                        1021
 #define IDC_EDIT_HEIGHT                 1022
 #define IDC_ZMAX_EDIT                   1023
 #define IDC_Y_RADIO                     1024
 #define IDC_EDIT2                       1025
+#define IDC_Y_RADIO2                    1025
 #define IDC_RADIO5                      1026
 #define IDC_AXES_SIZE                   1027
 #define IDC_Z_RADIO                     1028
 #define IDC_EDIT3                       1029
+#define IDC_Z_RADIO2                    1029
 #define IDC_RADIO6                      1030
 #define IDC_Z_ORIGIN                    1031
 #define IDC_SINGLE_VALUE_EDIT           1032
@@ -435,12 +447,16 @@
 #define IDC_DISTANCE1_EDIT              1036
 #define IDC_VALUE1_EDIT                 1037
 #define IDC_RADIO8                      1038
+#define IDC_VALUE1_EDIT2                1038
 #define IDC_Y_ORIGIN                    1039
+#define IDC_DISTANCE1_EDIT2             1039
 #define IDC_X_ORIGIN                    1040
 #define IDC_DISTANCE2_EDIT              1041
 #define IDC_VALUE2_EDIT                 1042
 #define IDC_GROUP1                      1043
+#define IDC_VALUE2_EDIT2                1043
 #define IDC_EDIT7                       1044
+#define IDC_DISTANCE2_EDIT2             1044
 #define IDC_X_EDIT                      1045
 #define IDC_EDIT8                       1046
 #define IDC_Y_EDIT                      1047
@@ -450,12 +466,16 @@
 #define IDC_DISTANCE2_STATIC            1051
 #define IDC_VALUE2_STATIC               1052
 #define IDC_CHECK1                      1053
+#define IDC_VALUE1_STATIC2              1053
 #define IDC_XMIN_EDIT                   1054
 #define IDC_CHECK2                      1054
+#define IDC_DISTANCE1_STATIC2           1054
 #define IDC_YMIN_EDIT                   1055
 #define IDC_CHECK3                      1055
+#define IDC_VALUE2_STATIC2              1055
 #define IDC_XSCALE                      1056
 #define IDC_CHECK4                      1056
+#define IDC_DISTANCE2_STATIC2           1056
 #define IDC_COMBO1                      1057
 #define IDC_ZMIN_EDIT                   1058
 #define IDC_YSCALE                      1059
@@ -468,6 +488,7 @@
 #define IDC_FACE_STATIC                 1066
 #define IDC_PROP_TREE                   1067
 #define IDC_LIST1                       1068
+#define IDC_PROP_TREE2                  1068
 #define IDC_TREE1                       1069
 #define IDC_LIST2                       1070
 #define IDC_EXPLORER1                   1071
@@ -481,6 +502,7 @@
 #define IDC_EDIT_WIDTH_UNITS            1079
 #define IDC_STATIC_DIRECTION            1080
 #define IDC_EDIT_LENGTH_UNITS           1081
+#define IDC_STATIC_DIRECTION2           1081
 #define IDC_EDIT_X_UNITS                1082
 #define IDC_EDIT_Y_UNITS                1083
 #define IDC_EDIT_Z_UNITS                1084
@@ -901,6 +923,7 @@
 #define IDC_RICH_PAGE                   1497
 #define IDC_GB_PROPERTY                 1498
 #define IDC_POINTS_GRID                 1499
+#define IDC_GB_PROPERTY2                1499
 #define IDC_USE_MAP_COOR                1500
 #define IDC_STATIC_FN                   1501
 #define IDC_GRID_HEAD                   1502
@@ -908,6 +931,17 @@
 #define IDC_COMBO_PROPTYPE              1504
 #define IDC_GB_PROPTYPE                 1505
 #define IDC_CHECK_FACE                  1506
+#define IDC_CHECK5                      1507
+#define IDC_CHECK_MIXTURE               1507
+#define IDC_GB_PROPTYPE2                1508
+#define IDC_STATIC_PROPTYPE2            1509
+#define IDC_COMBO_PROPTYPE2             1510
+#define IDC_GB_MIXTURE                  1511
+#define IDC_STATIC_I                    1512
+#define IDC_STATIC_J                    1513
+#define IDC_EDIT_J                      1514
+#define IDC_EDIT_I                      1515
+#define IDC_GRID_FLUX                   1516
 #define IDC_RESIZE_COLUMN               28654
 #define IDC_RESIZE_ROW                  28655
 #define IDR_POPUP                       28656
@@ -955,7 +989,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        432
 #define _APS_NEXT_COMMAND_VALUE         32861
-#define _APS_NEXT_CONTROL_VALUE         1507
-#define _APS_NEXT_SYMED_VALUE           126
+#define _APS_NEXT_CONTROL_VALUE         1517
+#define _APS_NEXT_SYMED_VALUE           127
 #endif
 #endif

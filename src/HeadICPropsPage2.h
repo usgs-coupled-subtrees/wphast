@@ -1,7 +1,7 @@
 #pragma once
 
 #include "PropsPropertyPage.h"
-#include "BC.h"
+#include "HeadIC.h"
 #include "gridctrl/ModGridCtrlEx.h"
 #include "afxwin.h"
 
@@ -9,21 +9,21 @@
 
 class CUnits;
 
-// CFluxPropsPage2 dialog
+// CHeadICPropsPage2 dialog
 
-class CFluxPropsPage2 : public CPropsPropertyPage
+class CHeadICPropsPage2 : public CPropsPropertyPage
 {
-	DECLARE_DYNAMIC(CFluxPropsPage2)
+	DECLARE_DYNAMIC(CHeadICPropsPage2)
 
 public:
-	CFluxPropsPage2();
-	virtual ~CFluxPropsPage2();
+	CHeadICPropsPage2();
+	virtual ~CHeadICPropsPage2();
 
-	void SetProperties(const CBC& rBC);
-	void GetProperties(CBC& rBC)const;
+	void SetProperties(const CHeadIC& rHeadIC);
+	void GetProperties(CHeadIC& rHeadIC)const;
 
-	void SetFlowOnly(bool flowOnly)      { this->FlowOnly = flowOnly; }
-	bool GetFlowOnly(void)const          { return this->FlowOnly; }
+// COMMENT: {7/10/2009 1:46:39 PM}	void SetFlowOnly(bool flowOnly)      { this->FlowOnly = flowOnly; }
+// COMMENT: {7/10/2009 1:46:39 PM}	bool GetFlowOnly(void)const          { return this->FlowOnly; }
 
 	void SetDefault(bool bDefault)       { this->Default = bDefault; }
 	bool GetDefault(void)const           { return this->Default; }
@@ -31,10 +31,10 @@ public:
 	void SetDesc(LPCTSTR desc)           { this->Description = desc; }
 	LPCTSTR GetDesc()                    { return this->Description; }
 
-	void SetUnits(const CUnits &u);
+	void SetUnits(const CUnits& u);
 
 // Dialog Data
-	enum { IDD = IDD_PROPS_FLUX_3 };
+	enum { IDD = IDD_PROPS_HEADIC2 };
 
 	// type enum
 	enum ModeType
@@ -55,12 +55,6 @@ protected:
  	afx_msg void OnTreeSelChanging(NMHDR *pNotifyStruct, LRESULT *plResult);
  	afx_msg void OnTreeSelChanged(NMHDR *pNotifyStruct, LRESULT *plResult);
 
-	afx_msg void OnEndLabelEditFlux(NMHDR *pNotifyStruct, LRESULT *result);
-	afx_msg void OnEndLabelEditSolution(NMHDR *pNotifyStruct, LRESULT *result);
-
-	afx_msg void OnSelChangedFlux(NMHDR *pNotifyStruct, LRESULT *result);
-	afx_msg void OnSelChangedSolution(NMHDR *pNotifyStruct, LRESULT *result);
-
 	afx_msg void OnBnClickedButtonXYZ();
 
 	afx_msg LRESULT OnUM_DDXFailure(WPARAM wParam, LPARAM lParam);
@@ -73,8 +67,7 @@ protected:
 
 	afx_msg void OnBnClickedCheckFace();
 
-	CGridTimeSeries FluxSeries;
-	CGridTimeSeries SolutionSeries;
+	CGridTimeSeries HeadProperty;          // single
 
 	CModGridCtrlEx PointsGrid;
 
@@ -83,17 +76,13 @@ protected:
 
 	HTREEITEM ItemDDX;
 
-	std::string m_sDescriptionRTF;   // IDR_DESCRIPTION_RTF
-	std::string m_sAssocSolutionRTF; // IDR_BC_FLUX_ASSOC_SOL_RTF
-	std::string m_sFluxRTF;          // IDR_BC_FLUX_FLUX_RTF
-	std::string m_sFaceRTF;          // IDR_BC_FLUX_FACE_RTF
+	std::string m_sDescriptionRTF;  // IDR_DESCRIPTION_RTF
+	std::string m_sHeadRTF;         // IDR_IC_HEAD_HEAD_RTF
 
 	CString Description;
-// COMMENT: {6/30/2009 11:16:25 PM}	CString DefaultUnits;
 
-	bool FlowOnly;
 	bool Default;
 
 protected:
-	CBC BC;
+	CHeadIC HeadIC;
 };

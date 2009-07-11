@@ -21,9 +21,18 @@ const TCHAR PSZ_YEAR[] = _T("years");
 
 const TCHAR PSZ_UNDEFINED[] = _T("UNDEFINED");
 
-const int TIME_COLUMN = 0;
-const int UNIT_COLUMN = 1;
-const int TYPE_COLUMN = 2;
+// COMMENT: {7/8/2009 7:30:58 PM}const int TIME_COLUMN = 0;
+// COMMENT: {7/8/2009 7:30:58 PM}const int UNIT_COLUMN = 1;
+// COMMENT: {7/8/2009 7:30:58 PM}const int TYPE_COLUMN = 2;
+const int ITEM_COLUMN = 0;
+const int TIME_COLUMN = 1;
+const int UNIT_COLUMN = 2;
+const int TYPE_COLUMN = 3;
+
+const int X_COLUMN = 1;
+const int Y_COLUMN = 2;
+const int Z_COLUMN = 3;
+const int V_COLUMN = 4;
 
 const int MIN_ROWS = 500;
 const int MIN_POINTS = 500;
@@ -32,6 +41,10 @@ const int SELECTED = 0;
 
 #if defined(NEW_SINGLE_PROPERTY)
 const int SINGLE = 0;
+#endif
+
+#ifdef _DEBUG
+#define new DEBUG_NEW
 #endif
 
 CGridTimeSeries::CGridTimeSeries(CWnd* pWnd)
@@ -73,10 +86,11 @@ CGridTimeSeries::CGridTimeSeries(CWnd* pWnd)
 }
 
 #if defined(NEW_SINGLE_PROPERTY)
-CGridTimeSeries::CGridTimeSeries(CWnd* pWnd, bool bSingle)
+CGridTimeSeries::CGridTimeSeries(CWnd* pWnd, bool bSingle, bool bMixture)
 : DlgWnd(pWnd)
 , validation_row(-1)
 , bSingleProperty(bSingle)
+, bEnableMixture(bMixture)
 {
 	ASSERT(std::numeric_limits<double>::has_signaling_NaN);
 	double d = std::numeric_limits<double>::signaling_NaN();
@@ -176,10 +190,12 @@ void CGridTimeSeries::InitializeGrid(CDataExchange* pDX)
 	{
 		TRY
 		{
-			this->grid.SetRowCount(MIN_ROWS);
-			this->grid.SetColumnCount(3);
+// COMMENT: {7/8/2009 7:31:37 PM}			this->grid.SetColumnCount(3);
+			this->grid.SetRowCount(MIN_ROWS+1);
+			this->grid.SetColumnCount(4);
 			this->grid.SetFixedRowCount(1);
-			this->grid.SetFixedColumnCount(0);
+// COMMENT: {7/8/2009 7:37:41 PM}			this->grid.SetFixedColumnCount(0);
+			this->grid.SetFixedColumnCount(1);
 			this->grid.EnableTitleTips(FALSE);
 			this->grid.SetCurrentFocusCell(1, TYPE_COLUMN);
 			this->validation_row = 1;
@@ -193,37 +209,83 @@ void CGridTimeSeries::InitializeGrid(CDataExchange* pDX)
 		}
 		END_CATCH
 
+// COMMENT: {7/8/2009 7:42:05 PM}		// set default format
+// COMMENT: {7/8/2009 7:42:05 PM}		for (int row = this->grid.GetFixedRowCount(); row < this->grid.GetRowCount(); ++row)
+// COMMENT: {7/8/2009 7:42:05 PM}		{
+// COMMENT: {7/8/2009 7:42:05 PM}			for (int col = 0; col < this->grid.GetColumnCount(); ++col)
+// COMMENT: {7/8/2009 7:42:05 PM}			{
+// COMMENT: {7/8/2009 7:42:05 PM}				this->grid.SetItemFormat(row, col, DT_LEFT|DT_BOTTOM|DT_END_ELLIPSIS);
+// COMMENT: {7/8/2009 7:42:05 PM}			}
+// COMMENT: {7/8/2009 7:42:05 PM}		}
+
+		//{{
 		// set default format
-		for (int row = this->grid.GetFixedRowCount(); row < this->grid.GetRowCount(); ++row)
+		GV_ITEM defaultFormat;
+		defaultFormat.mask    = GVIF_FORMAT;
+		defaultFormat.nFormat = DT_LEFT|DT_VCENTER|DT_END_ELLIPSIS;
+
+		GV_ITEM timeFormat;
+		timeFormat.mask    = GVIF_FORMAT;
+		timeFormat.nFormat = DT_LEFT|DT_VCENTER|DT_END_ELLIPSIS;
+		timeFormat.col     = TIME_COLUMN;
+
+		GV_ITEM headItem;
+		headItem.mask    = GVIF_TEXT|GVIF_FORMAT;
+		headItem.nFormat = DT_CENTER|DT_VCENTER|DT_END_ELLIPSIS;
+		headItem.col     = 0;
+
+		for (int row = 0; row < this->grid.GetRowCount(); ++row)
 		{
+			defaultFormat.row = row;
+			timeFormat.row = row;
 			for (int col = 0; col < this->grid.GetColumnCount(); ++col)
-			{
-				this->grid.SetItemFormat(row, col, DT_LEFT|DT_BOTTOM|DT_END_ELLIPSIS);
+			{ 
+				if (col == ITEM_COLUMN)
+				{
+					headItem.row = row+1;
+					headItem.szText.Format("%d", row+1);
+					this->grid.SetItem(&headItem);
+				}
+				else if (col == TIME_COLUMN)
+				{
+					this->grid.SetItem(&timeFormat);
+				}
+				else
+				{
+					defaultFormat.col = col;
+					this->grid.SetItem(&defaultFormat);
+				}
 			}
 		}
+		//}}
+
 		{
 			GV_ITEM Item;
-			Item.mask = GVIF_TEXT;
+// COMMENT: {7/8/2009 7:50:12 PM}			Item.mask = GVIF_TEXT;
+			//{{
+			Item.mask = GVIF_TEXT|GVIF_FORMAT;
+			Item.nFormat = DT_LEFT|DT_VCENTER|DT_END_ELLIPSIS;
+			//}}
 			Item.row = 0;
 
-			Item.col = 0;
+			Item.col = TIME_COLUMN;
 			Item.szText.Format(_T("Time"));
 			this->grid.SetItem(&Item);
 
-			Item.col = 1;
+			Item.col = UNIT_COLUMN;
 			Item.szText.Format(_T("Units"));
 			this->grid.SetItem(&Item);
 
-			Item.col = 2;
+			Item.col = TYPE_COLUMN;
 			Item.szText.Format(_T("Type"));
 			this->grid.SetItem(&Item);
 
-			this->grid.SetItemText(1, 0, _T("0"));
-			this->grid.DisableCell(1, 0);
+			this->grid.SetItemText(1, TIME_COLUMN, _T("0"));
+			this->grid.DisableCell(1, TIME_COLUMN);
 
-			this->grid.DisableCell(1, 1);
+			this->grid.DisableCell(1, UNIT_COLUMN);
 
-			this->grid.SetItemText(1, 2, PSZ_NONE);
+			this->grid.SetItemText(1, TYPE_COLUMN, PSZ_NONE);
 
 			// units column
 			std::vector<LPCTSTR> vecTimeUnits;
@@ -232,7 +294,7 @@ void CGridTimeSeries::InitializeGrid(CDataExchange* pDX)
 			vecTimeUnits.push_back(PSZ_HOUR);
 			vecTimeUnits.push_back(PSZ_DAYS);
 			vecTimeUnits.push_back(PSZ_YEAR);
-			this->grid.SetColumnOptions(1, vecTimeUnits);
+			this->grid.SetColumnOptions(UNIT_COLUMN, vecTimeUnits);
 
 			// type column
 			std::vector<LPCTSTR> vecPropType;
@@ -242,11 +304,19 @@ void CGridTimeSeries::InitializeGrid(CDataExchange* pDX)
 			vecPropType.push_back(PSZ_POINTS);
 			vecPropType.push_back(PSZ_XYZ);
 			vecPropType.push_back(PSZ_XYZT);
-			this->grid.SetColumnOptions(2, vecPropType);
+			this->grid.SetColumnOptions(TYPE_COLUMN, vecPropType);
 
-			this->grid.SetColumnWidth(0, 71);
-			this->grid.SetColumnWidth(1, 62);
-			this->grid.SetColumnWidth(2, 70);
+// COMMENT: {7/8/2009 7:35:18 PM}			this->grid.SetColumnWidth(TIME_COLUMN, 71);
+// COMMENT: {7/8/2009 7:35:18 PM}			this->grid.SetColumnWidth(UNIT_COLUMN, 62);
+// COMMENT: {7/8/2009 7:35:18 PM}			this->grid.SetColumnWidth(TYPE_COLUMN, 70);
+			//{{
+			this->grid.SetColumnWidth(ITEM_COLUMN, 28);
+			this->grid.SetColumnWidth(TIME_COLUMN, 71);
+			this->grid.SetColumnWidth(UNIT_COLUMN, 62);
+			this->grid.SetColumnWidth(TYPE_COLUMN, 70);
+			//this->grid.ResetScrollBars();
+			this->grid.SetRedraw(TRUE, TRUE); // force a reset scroll bars
+			//}}
 		}
 	}
 	TRACE("Out %s\n", __FUNCTION__);
@@ -411,6 +481,40 @@ void CGridTimeSeries::ShowSingleProperty(CWnd *pDlgWnd, int nShow)
 	TRACE("Out %s\n", __FUNCTION__);
 }
 
+void CGridTimeSeries::ShowMixture(bool show)
+{
+	static UINT IDs[] =
+	{
+		IDC_GB_MIXTURE,
+		IDC_CHECK_MIXTURE,
+		IDC_STATIC_I,
+		IDC_EDIT_I,
+		IDC_STATIC_J,
+		IDC_EDIT_J,
+	};
+
+	size_t n = sizeof(IDs) / sizeof(IDs[0]);
+
+	CWnd *pWnd;
+	for (size_t i = 0; i < n; ++i)
+	{
+		pWnd = this->DlgWnd->GetDlgItem(IDs[i]);
+		ASSERT(pWnd && pWnd->GetSafeHwnd());
+		if (pWnd)
+		{
+			if (show)
+			{
+				pWnd->ShowWindow(SW_SHOW);
+			}
+			else
+			{
+				pWnd->ShowWindow(SW_HIDE);
+			}
+		}
+	}
+	TRACE("Out %s\n", __FUNCTION__);
+}
+
 void CGridTimeSeries::SetSeries(const CTimeSeries<Cproperty> &series)
 {
 	this->FreeVectors();
@@ -422,34 +526,71 @@ void CGridTimeSeries::SetSeries(const CTimeSeries<Cproperty> &series)
 		this->v_times[row] = new Ctime((*fit).first);
 
 		// Cproperty
+		CGridTimeSeries::ModeType mt = NONE;
 		if ((*fit).second.type == PROP_UNDEFINED)
 		{
 			ASSERT(FALSE);
 		}
 		else if ((*fit).second.type == PROP_FIXED)
 		{
+			mt = CONSTANT;
 			(*this->vv_props[SELECTED])[row] = new Cproperty((*fit).second);
-			(*this->vv_props[CONSTANT])[row] = new Cproperty((*fit).second);
 		}
 		else if ((*fit).second.type == PROP_LINEAR)
 		{
+			mt = LINEAR;
 			(*this->vv_props[SELECTED])[row] = new Cproperty((*fit).second);
-			(*this->vv_props[LINEAR])[row] = new Cproperty((*fit).second);
 		}
 		else if ((*fit).second.type == PROP_POINTS)
 		{
+			mt = POINTS;
 			(*this->vv_props[SELECTED])[row] = new Cproperty((*fit).second);
-			(*this->vv_props[POINTS])[row] = new Cproperty((*fit).second);
 		}
 		else if ((*fit).second.type == PROP_XYZ)
 		{
+			mt = XYZ;
 			(*this->vv_props[SELECTED])[row] = new Cproperty((*fit).second);
-			(*this->vv_props[XYZ])[row] = new Cproperty((*fit).second);
 		}
 		else if ((*fit).second.type == PROP_XYZT)
 		{
+			mt = XYZT;
 			(*this->vv_props[SELECTED])[row] = new Cproperty((*fit).second);
-			(*this->vv_props[XYZT])[row] = new Cproperty((*fit).second);
+		}
+
+		// mix
+		if (!(*this->vv_props[SELECTED])[row]->mix)
+		{
+			if ((*this->vv_props[SELECTED])[row]->mix1 == -1)
+			{
+				(*this->vv_props[SELECTED])[row]->mix1 = std::numeric_limits<double>::signaling_NaN();
+			}
+			if ((*this->vv_props[SELECTED])[row]->mix2 == -1)
+			{
+				(*this->vv_props[SELECTED])[row]->mix2 = std::numeric_limits<double>::signaling_NaN();
+			}
+		}
+
+		// copy to save vectors
+		if (mt != NONE)
+		{
+			(*this->vv_props[mt])[row] = new Cproperty(*(*this->vv_props[SELECTED])[row]);
+		}
+	}
+}
+
+void CGridTimeSeries::GetSeries(CTimeSeries<Cproperty> &series)const
+{
+	series.clear();
+	for (size_t row = 1; row < this->v_times.size(); ++row)
+	{
+		if (this->v_times[row] && (*this->vv_props[SELECTED])[row])
+		{
+			if ((*this->vv_props[SELECTED])[row]->type != PROP_UNDEFINED)
+			{
+				Ctime t(*this->v_times[row]);
+				Cproperty p(*(*this->vv_props[SELECTED])[row]);
+				series[t] = p;
+			}
 		}
 	}
 }
@@ -461,34 +602,104 @@ void CGridTimeSeries::SetProperty(const property *prop)
 	if (prop)
 	{
 		(*this->vv_props[SELECTED])[SINGLE] = new Cproperty(*prop);
+		if (!(*this->vv_props[SELECTED])[SINGLE]->mix)
+		{
+			if ((*this->vv_props[SELECTED])[SINGLE]->mix1 == -1)
+			{
+				(*this->vv_props[SELECTED])[SINGLE]->mix1 = std::numeric_limits<double>::signaling_NaN();
+			}
+			if ((*this->vv_props[SELECTED])[SINGLE]->mix2 == -1)
+			{
+				(*this->vv_props[SELECTED])[SINGLE]->mix2 = std::numeric_limits<double>::signaling_NaN();
+			}
+		}
 
+		// copy to save vectors
 		if (prop->type == PROP_UNDEFINED)
 		{
-			ASSERT(FALSE);
+// COMMENT: {7/10/2009 3:00:40 PM}			ASSERT(FALSE);
 		}
 		else if (prop->type == PROP_FIXED)
 		{
-			(*this->vv_props[CONSTANT])[SINGLE] = new Cproperty(*prop);
+			(*this->vv_props[CONSTANT])[SINGLE] = new Cproperty(*(*this->vv_props[SELECTED])[SINGLE]);
 		}
 		else if (prop->type == PROP_LINEAR)
 		{
-			(*this->vv_props[LINEAR])[SINGLE] = new Cproperty(*prop);
+			(*this->vv_props[LINEAR])[SINGLE] = new Cproperty(*(*this->vv_props[SELECTED])[SINGLE]);
 		}
 		else if (prop->type == PROP_POINTS)
 		{
-			(*this->vv_props[POINTS])[SINGLE] = new Cproperty(*prop);
+			(*this->vv_props[POINTS])[SINGLE] = new Cproperty(*(*this->vv_props[SELECTED])[SINGLE]);
 		}
 		else if (prop->type == PROP_XYZ)
 		{
-			(*this->vv_props[XYZ])[SINGLE] = new Cproperty(*prop);
+			(*this->vv_props[XYZ])[SINGLE] = new Cproperty(*(*this->vv_props[SELECTED])[SINGLE]);
 		}
 		else if (prop->type == PROP_XYZT)
 		{
-			(*this->vv_props[XYZT])[SINGLE] = new Cproperty(*prop);
+			(*this->vv_props[XYZT])[SINGLE] = new Cproperty(*(*this->vv_props[SELECTED])[SINGLE]);
 		}
 	}
 }
+
+void CGridTimeSeries::GetProperty(property *&prop)const
+{
+	delete static_cast<Cproperty*>(prop);
+	if ((*this->vv_props[SELECTED])[SINGLE])
+	{
+		prop = new Cproperty(*(*this->vv_props[SELECTED])[SINGLE]);
+	}
+	else
+	{
+		prop = 0;
+	}
+}
 #endif
+
+void CGridTimeSeries::DDX_Mixture(CDataExchange* pDX, Cproperty &p)
+{
+	if (this->bEnableMixture)
+	{
+		if (pDX->m_bSaveAndValidate)
+		{
+			if (this->DlgWnd->IsDlgButtonChecked(IDC_CHECK_MIXTURE))
+			{
+				p.mix = true;
+			}
+			else
+			{
+				p.mix = false;
+			}
+			CGlobal::DDX_Text_Safe(pDX, IDC_EDIT_I, p.mix1);
+			CGlobal::DDX_Text_Safe(pDX, IDC_EDIT_J, p.mix2);
+		}
+		else
+		{
+			if (p.mix)
+			{
+				this->DlgWnd->CheckDlgButton(IDC_CHECK_MIXTURE, BST_CHECKED);
+			}
+			else
+			{
+				this->DlgWnd->CheckDlgButton(IDC_CHECK_MIXTURE, BST_UNCHECKED);
+			}
+			CGlobal::DDX_Text_Safe(pDX, IDC_EDIT_I, p.mix1);
+			CGlobal::DDX_Text_Safe(pDX, IDC_EDIT_J, p.mix2);
+			this->OnBnClickedCheckMixture();
+		}
+	}
+	else
+	{
+		this->DlgWnd->CheckDlgButton(IDC_CHECK_MIXTURE, BST_UNCHECKED);
+		double d = std::numeric_limits<double>::signaling_NaN();
+		if (!pDX->m_bSaveAndValidate)
+		{
+			CGlobal::DDX_Text_Safe(pDX, IDC_EDIT_I, d);
+			CGlobal::DDX_Text_Safe(pDX, IDC_EDIT_J, d);
+			this->OnBnClickedCheckMixture();
+		}
+	}
+}
 
 void CGridTimeSeries::DDX_Property(CDataExchange* pDX, Cproperty &p)
 {
@@ -507,6 +718,7 @@ void CGridTimeSeries::DDX_Property(CDataExchange* pDX, Cproperty &p)
 		else if (p.type == PROP_FIXED)
 		{
 			CGlobal::DDX_Text_Safe(pDX, IDC_VALUE_EDIT, p.v[0]);
+			this->DDX_Mixture(pDX, p);
 		}
 		else if (p.type == PROP_LINEAR)
 		{
@@ -529,6 +741,7 @@ void CGridTimeSeries::DDX_Property(CDataExchange* pDX, Cproperty &p)
 			CGlobal::DDX_Text_Safe(pDX, IDC_DISTANCE1_EDIT, p.dist1);
 			CGlobal::DDX_Text_Safe(pDX, IDC_VALUE2_EDIT,    p.v[1]);
 			CGlobal::DDX_Text_Safe(pDX, IDC_DISTANCE2_EDIT, p.dist2);
+			this->DDX_Mixture(pDX, p);
 		}
 		else if (p.type == PROP_POINTS)
 		{
@@ -543,21 +756,23 @@ void CGridTimeSeries::DDX_Property(CDataExchange* pDX, Cproperty &p)
 					double y = (*citer).y();
 					double z = (*citer).z();
 					double v = (*citer).get_v();
-					DDX_TextGridControl_Safe(pDX, IDC_POINTS_GRID, row, 0, x);
-					DDX_TextGridControl_Safe(pDX, IDC_POINTS_GRID, row, 1, y);
-					DDX_TextGridControl_Safe(pDX, IDC_POINTS_GRID, row, 2, z);
-					DDX_TextGridControl_Safe(pDX, IDC_POINTS_GRID, row, 3, v);
+					DDX_TextGridControl_Safe(pDX, IDC_POINTS_GRID, row, X_COLUMN, x);
+					DDX_TextGridControl_Safe(pDX, IDC_POINTS_GRID, row, Y_COLUMN, y);
+					DDX_TextGridControl_Safe(pDX, IDC_POINTS_GRID, row, Z_COLUMN, z);
+					DDX_TextGridControl_Safe(pDX, IDC_POINTS_GRID, row, V_COLUMN, v);
 				}
 
 				// blank remaining rows
 				CString blank;
 				for (; row < this->PointsGrid->GetRowCount(); ++row)
 				{
-					DDX_TextGridControl(pDX, IDC_POINTS_GRID, row, 0, blank);
-					DDX_TextGridControl(pDX, IDC_POINTS_GRID, row, 1, blank);
-					DDX_TextGridControl(pDX, IDC_POINTS_GRID, row, 2, blank);
-					DDX_TextGridControl(pDX, IDC_POINTS_GRID, row, 3, blank);
+					DDX_TextGridControl(pDX, IDC_POINTS_GRID, row, X_COLUMN, blank);
+					DDX_TextGridControl(pDX, IDC_POINTS_GRID, row, Y_COLUMN, blank);
+					DDX_TextGridControl(pDX, IDC_POINTS_GRID, row, Z_COLUMN, blank);
+					DDX_TextGridControl(pDX, IDC_POINTS_GRID, row, V_COLUMN, blank);
 				}
+				this->PointsGrid->RedrawWindow();
+
 
 				// MAP or GRID
 				int state = BST_UNCHECKED;
@@ -566,6 +781,9 @@ void CGridTimeSeries::DDX_Property(CDataExchange* pDX, Cproperty &p)
 					state = BST_CHECKED;
 				}
 				DDX_Check(pDX, IDC_USE_MAP_COOR, state);
+
+				// MIXTURE
+				this->DDX_Mixture(pDX, p);
 			}
 			else
 			{
@@ -602,6 +820,9 @@ void CGridTimeSeries::DDX_Property(CDataExchange* pDX, Cproperty &p)
 					state = BST_CHECKED;
 				}
 				DDX_Check(pDX, IDC_CHECK_USE_MAP, state);
+
+				// MIXTURE
+				this->DDX_Mixture(pDX, p);
 			}
 			else
 			{
@@ -638,6 +859,9 @@ void CGridTimeSeries::DDX_Property(CDataExchange* pDX, Cproperty &p)
 					state = BST_CHECKED;
 				}
 				DDX_Check(pDX, IDC_CHECK_USE_MAP, state);
+
+				// MIXTURE
+				this->DDX_Mixture(pDX, p);
 			}
 			else
 			{
@@ -683,7 +907,11 @@ void CGridTimeSeries::DDV_SoftValidate()
 		}
 		else
 		{
-			if (!this->grid.GetSafeHwnd()) return;
+			if (!this->grid.GetSafeHwnd())
+			{
+				ASSERT(FALSE);
+				return;
+			}
 			row = this->validation_row;
 			str = this->grid.GetItemText(row, TYPE_COLUMN);
 		}
@@ -691,16 +919,29 @@ void CGridTimeSeries::DDV_SoftValidate()
 
 		if (str.Trim().IsEmpty() || str.CompareNoCase(PSZ_NONE) == 0)
 		{
-			delete (*this->vv_props[SELECTED])[row];
-			(*this->vv_props[SELECTED])[row] = 0;
+			//delete (*this->vv_props[SELECTED])[row];
+			//(*this->vv_props[SELECTED])[row] = 0;
+			if ((*this->vv_props[SELECTED])[row])
+			{
+				(*this->vv_props[SELECTED])[row]->type = PROP_UNDEFINED;
+
+				// mixture
+				CDataExchange dx(this->DlgWnd, TRUE);
+				this->DDX_Mixture(&dx, *(*this->vv_props[SELECTED])[row]);
+			}
 		}
 		else if (str.Compare(PSZ_CONSTANT) == 0)
 		{
 			CDataExchange dx(this->DlgWnd, TRUE);
 
+			// value
 			ASSERT((*this->vv_props[SELECTED])[row]);
 			ASSERT((*this->vv_props[CONSTANT])[row]);
 			CGlobal::DDX_Text_Safe(&dx, IDC_VALUE_EDIT, (*this->vv_props[SELECTED])[row]->v[0]);
+
+			// mixture
+			this->DDX_Mixture(&dx, *(*this->vv_props[SELECTED])[row]);
+
 			*(*this->vv_props[CONSTANT])[row] = *(*this->vv_props[SELECTED])[row];
 		}
 		else if (str.Compare(PSZ_LINEAR) == 0)
@@ -710,10 +951,14 @@ void CGridTimeSeries::DDV_SoftValidate()
 			ASSERT((*this->vv_props[SELECTED])[row]);
 			ASSERT((*this->vv_props[LINEAR])[row]);
 
+			// value1 dist1 value2 dist2
 			CGlobal::DDX_Text_Safe(&dx, IDC_VALUE1_EDIT,    (*this->vv_props[SELECTED])[row]->v[0]);
 			CGlobal::DDX_Text_Safe(&dx, IDC_DISTANCE1_EDIT, (*this->vv_props[SELECTED])[row]->dist1);
 			CGlobal::DDX_Text_Safe(&dx, IDC_VALUE2_EDIT,    (*this->vv_props[SELECTED])[row]->v[1]);
 			CGlobal::DDX_Text_Safe(&dx, IDC_DISTANCE2_EDIT, (*this->vv_props[SELECTED])[row]->dist2);
+
+			// mixture
+			this->DDX_Mixture(&dx, *(*this->vv_props[SELECTED])[row]);
 
 			*(*this->vv_props[LINEAR])[row] = *(*this->vv_props[SELECTED])[row];
 		}
@@ -729,21 +974,21 @@ void CGridTimeSeries::DDV_SoftValidate()
 			p.data_source = new Data_source;
 			std::vector<Point> pts;
 
-			CString sx, sy, sz, sv;
-
+			// points
+			CString sx, sy, sz, sv;			
 			for (int r = 1; r < this->PointsGrid->GetRowCount(); ++r)
 			{
 				double x, y, z, v;
-				sx = this->PointsGrid->GetItemText(r, 0);
-				sy = this->PointsGrid->GetItemText(r, 1);
-				sz = this->PointsGrid->GetItemText(r, 2);
-				sv = this->PointsGrid->GetItemText(r, 3);
+				sx = this->PointsGrid->GetItemText(r, X_COLUMN);
+				sy = this->PointsGrid->GetItemText(r, Y_COLUMN);
+				sz = this->PointsGrid->GetItemText(r, Z_COLUMN);
+				sv = this->PointsGrid->GetItemText(r, V_COLUMN);
 				if (!sx.IsEmpty() || !sy.IsEmpty() ||!sz.IsEmpty() ||!sv.IsEmpty())
 				{
-					DDX_TextGridControl_Safe(&dx, IDC_POINTS_GRID, r, 0, x);
-					DDX_TextGridControl_Safe(&dx, IDC_POINTS_GRID, r, 1, y);
-					DDX_TextGridControl_Safe(&dx, IDC_POINTS_GRID, r, 2, z);
-					DDX_TextGridControl_Safe(&dx, IDC_POINTS_GRID, r, 3, v);
+					DDX_TextGridControl_Safe(&dx, IDC_POINTS_GRID, r, X_COLUMN, x);
+					DDX_TextGridControl_Safe(&dx, IDC_POINTS_GRID, r, Y_COLUMN, y);
+					DDX_TextGridControl_Safe(&dx, IDC_POINTS_GRID, r, Z_COLUMN, z);
+					DDX_TextGridControl_Safe(&dx, IDC_POINTS_GRID, r, V_COLUMN, v);
 
 					Point pt(x, y, z, v);
 					pts.push_back(pt);
@@ -766,6 +1011,9 @@ void CGridTimeSeries::DDV_SoftValidate()
 			}
 
 			p.data_source->Set_defined(true);
+
+			// mixture
+			this->DDX_Mixture(&dx, p);
 
 			*(*this->vv_props[POINTS])[row] = p;
 			*(*this->vv_props[SELECTED])[row] = p;
@@ -830,6 +1078,9 @@ void CGridTimeSeries::DDV_SoftValidate()
 				p.data_source->Get_filedata()->Set_coordinate_system(PHAST_Transform::GRID);
 			}
 
+			// mixture
+			this->DDX_Mixture(&dx, p);
+
 			*(*this->vv_props[XYZ])[row] = p;
 			*(*this->vv_props[SELECTED])[row] = p;
 		}
@@ -892,6 +1143,9 @@ void CGridTimeSeries::DDV_SoftValidate()
 				ASSERT(p.data_source->Get_filedata());
 				p.data_source->Get_filedata()->Set_coordinate_system(PHAST_Transform::GRID);
 			}
+
+			// mixture
+			this->DDX_Mixture(&dx, p);
 
 			*(*this->vv_props[XYZT])[row] = p;
 			*(*this->vv_props[SELECTED])[row] = p;
@@ -1029,8 +1283,12 @@ void CGridTimeSeries::OnEndLabelEdit(int nRow, int nCol)
 			CGridTimeSeries::ModeType mt = CGridTimeSeries::NONE;
 			if (str.Trim().IsEmpty() || str.Compare(PSZ_NONE) == 0)
 			{
-				delete (*this->vv_props[SELECTED])[nRow];
-				(*this->vv_props[SELECTED])[nRow] = 0;
+				//delete (*this->vv_props[SELECTED])[nRow];
+				//(*this->vv_props[SELECTED])[nRow] = 0;
+				if ((*this->vv_props[SELECTED])[nRow])
+				{
+					(*this->vv_props[SELECTED])[nRow]->type = PROP_UNDEFINED;
+				}
 			}
 			else if (str.Compare(PSZ_CONSTANT) == 0)
 			{
@@ -1049,6 +1307,13 @@ void CGridTimeSeries::OnEndLabelEdit(int nRow, int nCol)
 						}
 					}
 					(*this->vv_props[mt])[nRow] = new Cproperty(def);
+				}
+				// save mix settings
+				if ((*this->vv_props[SELECTED])[nRow])
+				{
+					(*this->vv_props[mt])[nRow]->mix  = (*this->vv_props[SELECTED])[nRow]->mix;
+					(*this->vv_props[mt])[nRow]->mix1 = (*this->vv_props[SELECTED])[nRow]->mix1;
+					(*this->vv_props[mt])[nRow]->mix2 = (*this->vv_props[SELECTED])[nRow]->mix2;
 				}
 				delete (*this->vv_props[SELECTED])[nRow];
 				(*this->vv_props[SELECTED])[nRow] = new Cproperty(*(*this->vv_props[mt])[nRow]);
@@ -1075,6 +1340,13 @@ void CGridTimeSeries::OnEndLabelEdit(int nRow, int nCol)
 					}
 					(*this->vv_props[mt])[nRow] = new Cproperty(def);
 				}
+				// save mix settings
+				if ((*this->vv_props[SELECTED])[nRow])
+				{
+					(*this->vv_props[mt])[nRow]->mix  = (*this->vv_props[SELECTED])[nRow]->mix;
+					(*this->vv_props[mt])[nRow]->mix1 = (*this->vv_props[SELECTED])[nRow]->mix1;
+					(*this->vv_props[mt])[nRow]->mix2 = (*this->vv_props[SELECTED])[nRow]->mix2;
+				}
 				delete (*this->vv_props[SELECTED])[nRow];
 				(*this->vv_props[SELECTED])[nRow] = new Cproperty(*(*this->vv_props[mt])[nRow]);
 
@@ -1099,6 +1371,13 @@ void CGridTimeSeries::OnEndLabelEdit(int nRow, int nCol)
 						}
 					}
 					(*this->vv_props[mt])[nRow] = new Cproperty(def);
+				}
+				// save mix settings
+				if ((*this->vv_props[SELECTED])[nRow])
+				{
+					(*this->vv_props[mt])[nRow]->mix  = (*this->vv_props[SELECTED])[nRow]->mix;
+					(*this->vv_props[mt])[nRow]->mix1 = (*this->vv_props[SELECTED])[nRow]->mix1;
+					(*this->vv_props[mt])[nRow]->mix2 = (*this->vv_props[SELECTED])[nRow]->mix2;
 				}
 				delete (*this->vv_props[SELECTED])[nRow];
 				(*this->vv_props[SELECTED])[nRow] = new Cproperty(*(*this->vv_props[mt])[nRow]);
@@ -1125,6 +1404,13 @@ void CGridTimeSeries::OnEndLabelEdit(int nRow, int nCol)
 					}
 					(*this->vv_props[mt])[nRow] = new Cproperty(def);
 				}
+				// save mix settings
+				if ((*this->vv_props[SELECTED])[nRow])
+				{
+					(*this->vv_props[mt])[nRow]->mix  = (*this->vv_props[SELECTED])[nRow]->mix;
+					(*this->vv_props[mt])[nRow]->mix1 = (*this->vv_props[SELECTED])[nRow]->mix1;
+					(*this->vv_props[mt])[nRow]->mix2 = (*this->vv_props[SELECTED])[nRow]->mix2;
+				}
 				delete (*this->vv_props[SELECTED])[nRow];
 				(*this->vv_props[SELECTED])[nRow] = new Cproperty(*(*this->vv_props[mt])[nRow]);
 	
@@ -1149,6 +1435,13 @@ void CGridTimeSeries::OnEndLabelEdit(int nRow, int nCol)
 						}
 					}
 					(*this->vv_props[mt])[nRow] = new Cproperty(def);
+				}
+				// save mix settings
+				if ((*this->vv_props[SELECTED])[nRow])
+				{
+					(*this->vv_props[mt])[nRow]->mix  = (*this->vv_props[SELECTED])[nRow]->mix;
+					(*this->vv_props[mt])[nRow]->mix1 = (*this->vv_props[SELECTED])[nRow]->mix1;
+					(*this->vv_props[mt])[nRow]->mix2 = (*this->vv_props[SELECTED])[nRow]->mix2;
 				}
 				delete (*this->vv_props[SELECTED])[nRow];
 				(*this->vv_props[SELECTED])[nRow] = new Cproperty(*(*this->vv_props[mt])[nRow]);
@@ -1219,12 +1512,13 @@ void CGridTimeSeries::SetMode(CGridTimeSeries::ModeType mode)
 	{
 		if (CWnd *pWnd = this->DlgWnd->GetDlgItem(IDC_GB_PROPERTY))
 		{
-			pWnd->SetWindowText(_T(""));
+			pWnd->SetWindowText(PSZ_NONE);
 		}
 		this->ShowConstant(false);
 		this->ShowLinear(false);
 		this->ShowPoints(false);		
 		this->ShowXYZ(false);
+		this->ShowMixture(false);
 // COMMENT: {7/6/2009 6:14:40 PM}		this->ShowSingleProperty(this->bSingleProperty);
 	}
 	else if (mode == CGridTimeSeries::CONSTANT)
@@ -1246,7 +1540,8 @@ void CGridTimeSeries::SetMode(CGridTimeSeries::ModeType mode)
 		this->ShowLinear(false);
 		this->ShowPoints(false);
 		this->ShowXYZ(false);
-// COMMENT: {7/6/2009 6:14:36 PM}		this->ShowSingleProperty(this->bSingleProperty);
+		this->ShowMixture(true);
+		this->EnableMixture(this->bEnableMixture);
 	}
 	else if (mode == CGridTimeSeries::LINEAR)
 	{
@@ -1267,7 +1562,8 @@ void CGridTimeSeries::SetMode(CGridTimeSeries::ModeType mode)
 		this->ShowLinear(true);
 		this->ShowPoints(false);
 		this->ShowXYZ(false);
-// COMMENT: {7/6/2009 6:14:33 PM}		this->ShowSingleProperty(this->bSingleProperty);
+		this->ShowMixture(true);
+		this->EnableMixture(this->bEnableMixture);
 	}
 	else if (mode == CGridTimeSeries::POINTS)
 	{
@@ -1288,7 +1584,8 @@ void CGridTimeSeries::SetMode(CGridTimeSeries::ModeType mode)
 		this->ShowLinear(false);
 		this->ShowPoints(true);
 		this->ShowXYZ(false);
-// COMMENT: {7/6/2009 6:14:29 PM}		this->ShowSingleProperty(this->bSingleProperty);
+		this->ShowMixture(true);
+		this->EnableMixture(this->bEnableMixture);
 	}
 	else if (mode == CGridTimeSeries::XYZ)
 	{
@@ -1309,7 +1606,8 @@ void CGridTimeSeries::SetMode(CGridTimeSeries::ModeType mode)
 		this->ShowLinear(false);
 		this->ShowPoints(false);
 		this->ShowXYZ(true);
-// COMMENT: {7/6/2009 6:14:24 PM}		this->ShowSingleProperty(this->bSingleProperty);
+		this->ShowMixture(true);
+		this->EnableMixture(this->bEnableMixture);
 	}
 	else if (mode == CGridTimeSeries::XYZT)
 	{
@@ -1330,7 +1628,8 @@ void CGridTimeSeries::SetMode(CGridTimeSeries::ModeType mode)
 		this->ShowLinear(false);
 		this->ShowPoints(false);
 		this->ShowXYZ(true);
-// COMMENT: {7/6/2009 6:14:21 PM}		this->ShowSingleProperty(this->bSingleProperty);
+		this->ShowMixture(true);
+		this->EnableMixture(this->bEnableMixture);
 	}
 	TRACE("Out %s\n", __FUNCTION__);
 }
@@ -1457,7 +1756,7 @@ void CGridTimeSeries::DDX_Series(CDataExchange* pDX, bool bTimeZeroRequired)
 						CString string("A property must be defined for time zero.");
 						::DDX_GridControlFail(pDX, this->grid.GetDlgCtrlID(), row, TYPE_COLUMN, string);
 					}
-					ASSERT(!(*this->vv_props[SELECTED])[row]);
+					ASSERT(!(*this->vv_props[SELECTED])[row] || ((*this->vv_props[SELECTED])[row]->type == PROP_UNDEFINED));
 				}
 				else if (strValue.CompareNoCase(PSZ_CONSTANT) == 0)
 				{
@@ -1621,6 +1920,29 @@ void CGridTimeSeries::DDX_Series(CDataExchange* pDX, bool bTimeZeroRequired)
 					}
 				}
 
+				// mixture
+				//				
+				ASSERT((*this->vv_props[SELECTED])[row]);
+				if (this->bEnableMixture)
+				{
+					if ((*this->vv_props[SELECTED])[row]->mix)
+					{
+						double d;
+						if ((*this->vv_props[SELECTED])[row]->mix1 != (*this->vv_props[SELECTED])[row]->mix1)
+						{
+							this->grid.SetCurrentFocusCell(row, TYPE_COLUMN);
+							this->OnSelChanged(row, TYPE_COLUMN);
+							::DDX_Text(pDX, IDC_EDIT_I, d);
+						}
+						if ((*this->vv_props[SELECTED])[row]->mix2 != (*this->vv_props[SELECTED])[row]->mix2)
+						{
+							this->grid.SetCurrentFocusCell(row, TYPE_COLUMN);
+							this->OnSelChanged(row, TYPE_COLUMN);
+							::DDX_Text(pDX, IDC_EDIT_J, d);
+						}
+					}
+				}
+
 				delete this->v_times[row];
 				this->v_times[row] = new Ctime(time);
 			}
@@ -1730,7 +2052,7 @@ void CGridTimeSeries::DDX_Single(CDataExchange* pDX, bool bRequired /* = true*/)
 
 			if (strValue.Trim().IsEmpty() || strValue.CompareNoCase(PSZ_NONE) == 0)
 			{
-				ASSERT(!(*this->vv_props[SELECTED])[SINGLE]);
+// COMMENT: {7/10/2009 5:28:46 PM}				ASSERT(!(*this->vv_props[SELECTED])[SINGLE]);
 				if (bRequired)
 				{
 					::AfxMessageBox("Property must be defined.");
@@ -1920,6 +2242,14 @@ void CGridTimeSeries::DDX_Single(CDataExchange* pDX, bool bRequired /* = true*/)
 			//
 			this->DDX_Property(pDX, *(*this->vv_props[SELECTED])[SINGLE]);
 		}
+		else
+		{
+			if (CComboBox *pComboBox = (CComboBox*)this->DlgWnd->GetDlgItem(IDC_COMBO_PROPTYPE))
+			{
+				VERIFY(pComboBox->SelectString(0, PSZ_NONE) != CB_ERR);
+				this->SetMode(NONE);
+			}
+		}
 	}
 
 	TRACE("Out %s\n", __FUNCTION__);
@@ -1933,10 +2263,10 @@ void CGridTimeSeries::SetPointsGrid(CModGridCtrlEx *grid)
 	{
 		TRY
 		{
-			this->PointsGrid->SetRowCount(MIN_POINTS);
-			this->PointsGrid->SetColumnCount(4);
+			this->PointsGrid->SetRowCount(MIN_POINTS+1);
+			this->PointsGrid->SetColumnCount(5);
 			this->PointsGrid->SetFixedRowCount(1);
-			this->PointsGrid->SetFixedColumnCount(0);
+			this->PointsGrid->SetFixedColumnCount(1);
 			this->PointsGrid->EnableTitleTips(FALSE);
 			this->PointsGrid->SetCurrentFocusCell(1, 0);
 		}
@@ -1946,6 +2276,20 @@ void CGridTimeSeries::SetPointsGrid(CModGridCtrlEx *grid)
 			e->Delete();
 		}
 		END_CATCH
+
+
+		// set row headings
+		GV_ITEM headItem;
+		headItem.mask    = GVIF_TEXT|GVIF_FORMAT;
+		headItem.nFormat = DT_CENTER|DT_VCENTER|DT_END_ELLIPSIS;
+		headItem.col     = ITEM_COLUMN;
+		for (int row = this->PointsGrid->GetFixedRowCount(); row < this->PointsGrid->GetRowCount(); ++row)
+		{
+			headItem.row = row;
+			headItem.szText.Format("%d", row);
+			this->PointsGrid->SetItem(&headItem);
+		}
+
 
 		// set default format
 		for (int row = this->PointsGrid->GetFixedRowCount(); row < this->PointsGrid->GetRowCount(); ++row)
@@ -1961,26 +2305,28 @@ void CGridTimeSeries::SetPointsGrid(CModGridCtrlEx *grid)
 		Item.mask = GVIF_TEXT;
 		Item.row = 0;
 
-		Item.col = 0;
+		Item.col = 1;
 		Item.szText.Format(_T("X"));
 		this->PointsGrid->SetItem(&Item);
 
-		Item.col = 1;
+		Item.col = 2;
 		Item.szText.Format(_T("Y"));
 		this->PointsGrid->SetItem(&Item);
 
-		Item.col = 2;
+		Item.col = 3;
 		Item.szText.Format(_T("Z"));
 		this->PointsGrid->SetItem(&Item);
 
-		Item.col = 3;
+		Item.col = 4;
 		Item.szText.Format(_T("Value"));
 		this->PointsGrid->SetItem(&Item);
 
-		this->PointsGrid->SetColumnWidth(0, 60);
+		this->PointsGrid->SetColumnWidth(0, 28);
 		this->PointsGrid->SetColumnWidth(1, 60);
 		this->PointsGrid->SetColumnWidth(2, 60);
 		this->PointsGrid->SetColumnWidth(3, 60);
+		this->PointsGrid->SetColumnWidth(4, 60);
+		this->PointsGrid->SetRedraw(TRUE, TRUE);
 	}
 }
 
@@ -2115,3 +2461,60 @@ void CGridTimeSeries::OnCbnSelchangeComboProptype()
 		this->SetMode(mt);
 	}
 }
+
+#if defined(NEW_SINGLE_PROPERTY)
+void CGridTimeSeries::OnBnClickedCheckMixture()
+{
+	static UINT IDs[] =
+	{
+		IDC_GB_MIXTURE,
+		IDC_STATIC_I,
+		IDC_EDIT_I,
+		IDC_STATIC_J,
+		IDC_EDIT_J,
+	};
+
+	size_t n = sizeof(IDs) / sizeof(IDs[0]);
+
+	CWnd *pWnd;
+	BOOL bEnable = this->DlgWnd->IsDlgButtonChecked(IDC_CHECK_MIXTURE);
+	for (size_t i = 0; i < n; ++i)
+	{
+		pWnd = this->DlgWnd->GetDlgItem(IDs[i]);
+		ASSERT(pWnd && pWnd->GetSafeHwnd());
+		if (pWnd)
+		{
+			pWnd->EnableWindow(bEnable);
+		}
+	}
+}
+
+void CGridTimeSeries::EnableMixture(BOOL bEnable)
+{
+	static UINT IDs[] =
+	{
+		IDC_GB_MIXTURE,
+		IDC_STATIC_I,
+		IDC_EDIT_I,
+		IDC_STATIC_J,
+		IDC_EDIT_J,
+	};
+
+	CWnd *pWnd = this->DlgWnd->GetDlgItem(IDC_CHECK_MIXTURE);
+	if (pWnd)
+	{
+		pWnd->EnableWindow(bEnable);
+	}
+	size_t n = sizeof(IDs) / sizeof(IDs[0]);
+	BOOL b = this->DlgWnd->IsDlgButtonChecked(IDC_CHECK_MIXTURE);
+	for (size_t i = 0; i < n; ++i)
+	{
+		pWnd = this->DlgWnd->GetDlgItem(IDs[i]);
+		ASSERT(pWnd && pWnd->GetSafeHwnd());
+		if (pWnd)
+		{
+			pWnd->EnableWindow(b);
+		}
+	}
+}
+#endif

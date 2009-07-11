@@ -1,38 +1,46 @@
-// FluxPropsPage2.cpp : implementation file
+// LeakyPropsPage.cpp : implementation file
 //
 
 #include "stdafx.h"
 #include "WPhast.h"
-#include "FluxPropsPage2.h"
+#include "LeakyPropsPage.h"
 
 #include "Global.h"
 
 
-// CFluxPropsPage2 dialog
+// CLeakyPropsPage dialog
 
-const TCHAR PSZ_FLUX[]     = _T("Flux");
-const TCHAR PSZ_SOLUTION[] = _T("Solution");
+const TCHAR PSZ_THICKNESS[] = _T("Thickness");
+const TCHAR PSZ_HYD_COND[]  = _T("Hydraulic conductivity");
+const TCHAR PSZ_HEAD[]      = _T("Head");
+const TCHAR PSZ_SOLUTION[]  = _T("Solution");
 
 const int SELECTED = 0;
+const int SINGLE = 0;
+
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
-IMPLEMENT_DYNAMIC(CFluxPropsPage2, CPropsPropertyPage)
+IMPLEMENT_DYNAMIC(CLeakyPropsPage, CPropsPropertyPage)
 
-CFluxPropsPage2::CFluxPropsPage2()
-	: CPropsPropertyPage(CFluxPropsPage2::IDD)
-	, FluxSeries(this, false, false)
+CLeakyPropsPage::CLeakyPropsPage()
+	: CPropsPropertyPage(CLeakyPropsPage::IDD)
+	, HeadSeries(this, false, false)
 	, SolutionSeries(this, false, true)
+	, ThicknessSeries(this, true, false)
+	, HydCondSeries(this, true, false)
 {
 	TRACE("In %s\n", __FUNCTION__);
 
 	// load property descriptions
 	CGlobal::LoadRTFString(this->m_sDescriptionRTF,   IDR_DESCRIPTION_RTF);
-	CGlobal::LoadRTFString(this->m_sAssocSolutionRTF, IDR_BC_FLUX_ASSOC_SOL_RTF);
-	CGlobal::LoadRTFString(this->m_sFluxRTF,          IDR_BC_FLUX_FLUX_RTF);
-	CGlobal::LoadRTFString(this->m_sFaceRTF,          IDR_BC_FLUX_FACE_RTF);
+	CGlobal::LoadRTFString(this->m_sHeadRTF,          IDR_BC_LEAKY_HEAD_RTF);
+	CGlobal::LoadRTFString(this->m_sThicknessRTF,     IDR_BC_LEAKY_THICKNESS_RTF);
+	CGlobal::LoadRTFString(this->m_sHydCondRTF,       IDR_BC_LEAKY_HYD_COND_RTF);
+	CGlobal::LoadRTFString(this->m_sAssocSolutionRTF, IDR_BC_LEAKY_ASSOC_SOL_RTF);
+	CGlobal::LoadRTFString(this->m_sFaceRTF,          IDR_BC_LEAKY_FACE_RTF);
 
 	// init properties
 	this->SetFlowOnly(false);
@@ -41,13 +49,13 @@ CFluxPropsPage2::CFluxPropsPage2()
 	TRACE("Out %s\n", __FUNCTION__);
 }
 
-CFluxPropsPage2::~CFluxPropsPage2()
+CLeakyPropsPage::~CLeakyPropsPage()
 {
 	TRACE("In %s\n", __FUNCTION__);
 	TRACE("Out %s\n", __FUNCTION__);
 }
 
-void CFluxPropsPage2::DoDataExchange(CDataExchange* pDX)
+void CLeakyPropsPage::DoDataExchange(CDataExchange* pDX)
 {
 	TRACE("In %s\n", __FUNCTION__);
 	CPropsPropertyPage::DoDataExchange(pDX);
@@ -57,27 +65,31 @@ void CFluxPropsPage2::DoDataExchange(CDataExchange* pDX)
 
 	if (this->TreeCtrl.GetCount() == 0)
 	{
-		this->FluxSeries.treeitem     = this->TreeCtrl.InsertItem(PSZ_FLUX,     TVI_ROOT, TVI_LAST);
-		this->SolutionSeries.treeitem = this->TreeCtrl.InsertItem(PSZ_SOLUTION, TVI_ROOT, TVI_LAST);
+		this->HeadSeries.treeitem      = this->TreeCtrl.InsertItem(PSZ_HEAD,      TVI_ROOT, TVI_LAST);
+		this->SolutionSeries.treeitem  = this->TreeCtrl.InsertItem(PSZ_SOLUTION,  TVI_ROOT, TVI_LAST);
+		this->ThicknessSeries.treeitem = this->TreeCtrl.InsertItem(PSZ_THICKNESS, TVI_ROOT, TVI_LAST);
+		this->HydCondSeries.treeitem   = this->TreeCtrl.InsertItem(PSZ_HYD_COND,  TVI_ROOT, TVI_LAST);
 
 		// wrap richedit to window
 		this->RichEditCtrl.SetTargetDevice(NULL, 0);
 
-		this->ItemDDX = this->FluxSeries.treeitem;
+		this->ItemDDX = this->HeadSeries.treeitem;
 		this->TreeCtrl.SelectItem(this->ItemDDX);
 
 		this->TreeCtrl.ModifyStyle(TVS_TRACKSELECT, TVS_FULLROWSELECT|TVS_SHOWSELALWAYS, 0);
 	}
 
 	DDX_GridControl(pDX, IDC_POINTS_GRID,   this->PointsGrid);
-	DDX_GridControl(pDX, IDC_GRID_FLUX,     this->FluxSeries.grid);
+	DDX_GridControl(pDX, IDC_GRID_HEAD,     this->HeadSeries.grid);
 	DDX_GridControl(pDX, IDC_GRID_SOLUTION, this->SolutionSeries.grid);
 
-	this->FluxSeries.InitializeGrid(pDX);
+	this->HeadSeries.InitializeGrid(pDX);
 	this->SolutionSeries.InitializeGrid(pDX);
 
-	this->FluxSeries.SetPointsGrid(&this->PointsGrid);
+	this->HeadSeries.SetPointsGrid(&this->PointsGrid);
 	this->SolutionSeries.SetPointsGrid(&this->PointsGrid);
+	this->ThicknessSeries.SetPointsGrid(&this->PointsGrid);
+	this->HydCondSeries.SetPointsGrid(&this->PointsGrid);
 
 	// description
 	::DDX_Text(pDX, IDC_DESC_EDIT, this->Description);
@@ -105,20 +117,42 @@ void CFluxPropsPage2::DoDataExchange(CDataExchange* pDX)
 		}
 
 		// time series
-		if (this->ItemDDX == this->FluxSeries.treeitem)
+		if (this->ItemDDX == this->HeadSeries.treeitem)
 		{
-			this->FluxSeries.DDV_SoftValidate();
-			this->FluxSeries.DDX_Series(pDX);
+			this->HeadSeries.DDV_SoftValidate();
+			this->HeadSeries.DDX_Series(pDX);
 			ASSERT(!this->SolutionSeries.grid.IsWindowVisible());
-			ASSERT(this->FluxSeries.grid.IsWindowVisible());
+			ASSERT(this->HeadSeries.grid.IsWindowVisible());
 		}
 		else if (this->ItemDDX == this->SolutionSeries.treeitem)
 		{
 			this->SolutionSeries.DDV_SoftValidate();
 			this->SolutionSeries.DDX_Series(pDX, !this->FlowOnly);
 			ASSERT(this->SolutionSeries.grid.IsWindowVisible());
-			ASSERT(!this->FluxSeries.grid.IsWindowVisible());
+			ASSERT(!this->HeadSeries.grid.IsWindowVisible());
 		}
+		else if (this->ItemDDX == this->ThicknessSeries.treeitem)
+		{
+			this->ThicknessSeries.DDV_SoftValidate();
+			this->ThicknessSeries.DDX_Single(pDX, true);
+			ASSERT(!this->SolutionSeries.grid.IsWindowVisible());
+			ASSERT(!this->HeadSeries.grid.IsWindowVisible());
+		}
+		else if (this->ItemDDX == this->HydCondSeries.treeitem)
+		{
+			this->HydCondSeries.DDV_SoftValidate();
+			this->HydCondSeries.DDX_Single(pDX, true);
+			ASSERT(!this->SolutionSeries.grid.IsWindowVisible());
+			ASSERT(!this->HeadSeries.grid.IsWindowVisible());
+		}
+
+#ifdef _DEBUG
+		for (int nCol = 0; nCol < this->HeadSeries.grid.GetColumnCount(); ++nCol)
+		{
+			afxDump << "Column " << nCol << " = " << this->HeadSeries.grid.GetColumnWidth(nCol) << "\n";
+		}
+#endif
+
 	}
 	else
 	{
@@ -148,23 +182,44 @@ void CFluxPropsPage2::DoDataExchange(CDataExchange* pDX)
 		this->OnBnClickedCheckFace();
 
 		// time series
-		if (this->ItemDDX == this->FluxSeries.treeitem)
+		if (this->ItemDDX == this->HeadSeries.treeitem)
 		{
-			this->FluxSeries.DDX_Series(pDX);
+			this->HeadSeries.DDX_Series(pDX);
+
 			this->SolutionSeries.grid.ShowWindow(SW_HIDE);
-			this->FluxSeries.grid.ShowWindow(SW_SHOW);
+			CGridTimeSeries::ShowSingleProperty(this, SW_HIDE);
+			this->HeadSeries.grid.ShowWindow(SW_SHOW);
 		}
 		else if (this->ItemDDX == this->SolutionSeries.treeitem)
 		{
 			this->SolutionSeries.DDX_Series(pDX, !this->FlowOnly);
-			this->FluxSeries.grid.ShowWindow(SW_HIDE);
+
+			this->HeadSeries.grid.ShowWindow(SW_HIDE);
+			CGridTimeSeries::ShowSingleProperty(this, SW_HIDE);
 			this->SolutionSeries.grid.ShowWindow(SW_SHOW);
 		}
+		else if (this->ItemDDX == this->ThicknessSeries.treeitem)
+		{
+			this->ThicknessSeries.DDX_Single(pDX);
+
+			this->HeadSeries.grid.ShowWindow(SW_HIDE);
+			this->SolutionSeries.grid.ShowWindow(SW_HIDE);
+			CGridTimeSeries::ShowSingleProperty(this, SW_SHOW);
+		}
+		else if (this->ItemDDX == this->HydCondSeries.treeitem)
+		{
+			this->HydCondSeries.DDX_Single(pDX);
+
+			this->HeadSeries.grid.ShowWindow(SW_HIDE);
+			this->SolutionSeries.grid.ShowWindow(SW_HIDE);
+			CGridTimeSeries::ShowSingleProperty(this, SW_SHOW);
+		}
+
 	}
 	TRACE("Out %s\n", __FUNCTION__);
 }
 
-void CFluxPropsPage2::SetProperties(const CBC& rBC)
+void CLeakyPropsPage::SetProperties(const CBC& rBC)
 {
 	TRACE("In %s\n", __FUNCTION__);
 
@@ -172,33 +227,42 @@ void CFluxPropsPage2::SetProperties(const CBC& rBC)
 	this->BC = rBC;
 
 	// time series
-	this->FluxSeries.SetSeries(rBC.m_bc_flux);
+	this->HeadSeries.SetSeries(rBC.m_bc_head);
 	this->SolutionSeries.SetSeries(rBC.m_bc_solution);
+	// single properties
+	this->ThicknessSeries.SetProperty(rBC.bc_thick);
+	this->HydCondSeries.SetProperty(rBC.bc_k);
 
 	TRACE("Out %s\n", __FUNCTION__);
 }
 
-void CFluxPropsPage2::GetProperties(CBC& rBC)const
+void CLeakyPropsPage::GetProperties(CBC& rBC)const
 {
 	TRACE("In %s\n", __FUNCTION__);
 
 	rBC = this->BC;
 
 	// series
-	this->FluxSeries.GetSeries(rBC.m_bc_flux);
+	this->HeadSeries.GetSeries(rBC.m_bc_head);
 	this->SolutionSeries.GetSeries(rBC.m_bc_solution);
+
+	// single properties
+	this->ThicknessSeries.GetProperty(rBC.bc_thick);
+	ASSERT(rBC.bc_thick);
+	this->HydCondSeries.GetProperty(rBC.bc_k);
+	ASSERT(rBC.bc_k);
 
 	TRACE("Out %s\n", __FUNCTION__);
 }
 
-BEGIN_MESSAGE_MAP(CFluxPropsPage2, CPropsPropertyPage)
-	// IDC_GRID_FLUX
-	ON_NOTIFY(GVN_ENDLABELEDIT, IDC_GRID_FLUX, OnEndLabelEditFlux)
-	ON_NOTIFY(GVN_SELCHANGED, IDC_GRID_FLUX, OnSelChangedFlux)
+BEGIN_MESSAGE_MAP(CLeakyPropsPage, CPropsPropertyPage)
+	// IDC_GRID_HEAD
+	ON_NOTIFY(GVN_ENDLABELEDIT, IDC_GRID_HEAD, OnEndLabelEditFlux)
+	ON_NOTIFY(GVN_SELCHANGED, IDC_GRID_HEAD,    OnSelChangedFlux)
 
 	// IDC_GRID_SOLUTION
-	ON_NOTIFY(GVN_SELCHANGED, IDC_GRID_SOLUTION, OnSelChangedSolution)
 	ON_NOTIFY(GVN_ENDLABELEDIT, IDC_GRID_SOLUTION, OnEndLabelEditSolution)
+	ON_NOTIFY(GVN_SELCHANGED, IDC_GRID_SOLUTION, OnSelChangedSolution)
 
 	// IDC_PROP_TREE
 	ON_NOTIFY(TVN_SELCHANGING, IDC_PROP_TREE, OnTreeSelChanging)
@@ -210,8 +274,8 @@ BEGIN_MESSAGE_MAP(CFluxPropsPage2, CPropsPropertyPage)
 	// IDC_BUTTON_XYZ
 	ON_BN_CLICKED(IDC_BUTTON_XYZ, OnBnClickedButtonXYZ)
 
-	//// IDC_COMBO_PROPTYPE
-	//ON_CBN_SELCHANGE(IDC_COMBO_PROPTYPE, OnCbnSelchangeComboProptype)
+	// IDC_COMBO_PROPTYPE
+	ON_CBN_SELCHANGE(IDC_COMBO_PROPTYPE, OnCbnSelchangeComboProptype)
 
 	// IDC_CHECK_MIXTURE
 	ON_BN_CLICKED(IDC_CHECK_MIXTURE, OnBnClickedCheckMixture)
@@ -224,17 +288,17 @@ BEGIN_MESSAGE_MAP(CFluxPropsPage2, CPropsPropertyPage)
 END_MESSAGE_MAP()
 
 
-// CFluxPropsPage2 message handlers
+// CLeakyPropsPage message handlers
 
-void CFluxPropsPage2::OnEndLabelEditFlux(NMHDR *pNotifyStruct, LRESULT *result)
+void CLeakyPropsPage::OnEndLabelEditFlux(NMHDR *pNotifyStruct, LRESULT *result)
 {
 	TRACE("In %s\n", __FUNCTION__);
 	NM_GRIDVIEW *pnmgv = (NM_GRIDVIEW*)pNotifyStruct;
-	this->FluxSeries.OnEndLabelEdit(pnmgv->iRow, pnmgv->iColumn);
+	this->HeadSeries.OnEndLabelEdit(pnmgv->iRow, pnmgv->iColumn);
 	TRACE("Out %s\n", __FUNCTION__);
 }
 
-void CFluxPropsPage2::OnEndLabelEditSolution(NMHDR *pNotifyStruct, LRESULT *result)
+void CLeakyPropsPage::OnEndLabelEditSolution(NMHDR *pNotifyStruct, LRESULT *result)
 {
 	TRACE("In %s\n", __FUNCTION__);
 	NM_GRIDVIEW *pnmgv = (NM_GRIDVIEW*)pNotifyStruct;
@@ -242,16 +306,16 @@ void CFluxPropsPage2::OnEndLabelEditSolution(NMHDR *pNotifyStruct, LRESULT *resu
 	TRACE("Out %s\n", __FUNCTION__);
 }
 
-void CFluxPropsPage2::OnTreeSelChanging(NMHDR *pNotifyStruct, LRESULT *pResult)
+void CLeakyPropsPage::OnTreeSelChanging(NMHDR *pNotifyStruct, LRESULT *pResult)
 {
 	TRACE("In %s\n", __FUNCTION__);
 	NMTREEVIEW *pTvn = reinterpret_cast<NMTREEVIEW*>(pNotifyStruct);
 	this->ItemDDX = pTvn->itemOld.hItem;
 	if (this->ItemDDX)
 	{
-		if (this->ItemDDX == this->FluxSeries.treeitem)
+		if (this->ItemDDX == this->HeadSeries.treeitem)
 		{
-			this->FluxSeries.DDV_SoftValidate();
+			this->HeadSeries.DDV_SoftValidate();
 		}
 		else if (this->ItemDDX == this->SolutionSeries.treeitem)
 		{
@@ -288,7 +352,7 @@ do { \
 	} \
 } while (0)
 
-void CFluxPropsPage2::OnTreeSelChanged(NMHDR *pNotifyStruct, LRESULT *pResult)
+void CLeakyPropsPage::OnTreeSelChanged(NMHDR *pNotifyStruct, LRESULT *pResult)
 {
 	TRACE("In %s\n", __FUNCTION__);
 	UNREFERENCED_PARAMETER(pResult);
@@ -304,7 +368,7 @@ void CFluxPropsPage2::OnTreeSelChanged(NMHDR *pNotifyStruct, LRESULT *pResult)
 		{
 			CString strItem = this->TreeCtrl.GetItemText(this->ItemDDX);
 
-			COMPARE_SET(PSZ_FLUX,     this->m_sFluxRTF);
+			COMPARE_SET(PSZ_HEAD,     this->m_sHeadRTF);
 			COMPARE_SET(PSZ_SOLUTION, this->m_sAssocSolutionRTF);
 		}
 	}
@@ -315,24 +379,24 @@ void CFluxPropsPage2::OnTreeSelChanged(NMHDR *pNotifyStruct, LRESULT *pResult)
 	TRACE("Out %s\n", __FUNCTION__);
 }
 
-void CFluxPropsPage2::OnEnSetfocusDescEdit()
+void CLeakyPropsPage::OnEnSetfocusDescEdit()
 {
 	TRACE("In %s\n", __FUNCTION__);
 	this->RichEditCtrl.SetWindowText(this->m_sDescriptionRTF.c_str());
 	TRACE("Out %s\n", __FUNCTION__);
 }
 
-void CFluxPropsPage2::OnSelChangedFlux(NMHDR *pNotifyStruct, LRESULT *result)
+void CLeakyPropsPage::OnSelChangedFlux(NMHDR *pNotifyStruct, LRESULT *result)
 {
 	TRACE("In %s\n", __FUNCTION__);
 
 	NM_GRIDVIEW *pnmgv = (NM_GRIDVIEW*)pNotifyStruct;
-	this->FluxSeries.OnSelChanged(pnmgv->iRow, pnmgv->iColumn);
+	this->HeadSeries.OnSelChanged(pnmgv->iRow, pnmgv->iColumn);
 
 	TRACE("Out %s\n", __FUNCTION__);
 }
 
-void CFluxPropsPage2::OnSelChangedSolution(NMHDR *pNotifyStruct, LRESULT *result)
+void CLeakyPropsPage::OnSelChangedSolution(NMHDR *pNotifyStruct, LRESULT *result)
 {
 	TRACE("In %s\n", __FUNCTION__);
 
@@ -342,7 +406,7 @@ void CFluxPropsPage2::OnSelChangedSolution(NMHDR *pNotifyStruct, LRESULT *result
 	TRACE("Out %s\n", __FUNCTION__);
 }
 
-LRESULT CFluxPropsPage2::OnUM_DDXFailure(WPARAM wParam, LPARAM lParam)
+LRESULT CLeakyPropsPage::OnUM_DDXFailure(WPARAM wParam, LPARAM lParam)
 {
 	CWnd* pFocus = (CWnd*)wParam;
 	if (pFocus && pFocus->GetSafeHwnd())
@@ -353,28 +417,61 @@ LRESULT CFluxPropsPage2::OnUM_DDXFailure(WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
-void CFluxPropsPage2::OnBnClickedButtonXYZ()
+void CLeakyPropsPage::OnBnClickedButtonXYZ()
 {
 	if (this->ItemDDX)
 	{
-		if (this->ItemDDX == this->FluxSeries.treeitem)
+		if (this->ItemDDX == this->HeadSeries.treeitem)
 		{
-			this->FluxSeries.OnBnClickedButtonXYZ();
+			this->HeadSeries.OnBnClickedButtonXYZ();
 		}
 		else if (this->ItemDDX == this->SolutionSeries.treeitem)
 		{
 			this->SolutionSeries.OnBnClickedButtonXYZ();
 		}
+		else if (this->ItemDDX == this->ThicknessSeries.treeitem)
+		{
+			this->ThicknessSeries.OnBnClickedButtonXYZ();
+		}
+		else if (this->ItemDDX == this->HydCondSeries.treeitem)
+		{
+			this->HydCondSeries.OnBnClickedButtonXYZ();
+		}
 	}
 }
 
-void CFluxPropsPage2::SetUnits(const CUnits &u)
+void CLeakyPropsPage::SetUnits(const CUnits &u)
 {
-	this->FluxSeries.SetUnits(u);
+	this->HeadSeries.SetUnits(u);
 	this->SolutionSeries.SetUnits(u);
+	this->ThicknessSeries.SetUnits(u);
+	this->HydCondSeries.SetUnits(u);
 }
 
-void CFluxPropsPage2::OnBnClickedCheckFace()
+void CLeakyPropsPage::OnCbnSelchangeComboProptype()
+{
+	if (this->ItemDDX)
+	{
+		if (this->ItemDDX == this->HeadSeries.treeitem)
+		{
+			ASSERT(FALSE);
+		}
+		else if (this->ItemDDX == this->SolutionSeries.treeitem)
+		{
+			ASSERT(FALSE);
+		}
+		else if (this->ItemDDX == this->ThicknessSeries.treeitem)
+		{
+			this->ThicknessSeries.OnCbnSelchangeComboProptype();
+		}
+		else if (this->ItemDDX == this->HydCondSeries.treeitem)
+		{
+			this->HydCondSeries.OnCbnSelchangeComboProptype();
+		}
+	}
+}
+
+void CLeakyPropsPage::OnBnClickedCheckFace()
 {
 	if (this->IsDlgButtonChecked(IDC_CHECK_FACE))
 	{
@@ -408,17 +505,25 @@ void CFluxPropsPage2::OnBnClickedCheckFace()
 	}
 }
 
-void CFluxPropsPage2::OnBnClickedCheckMixture()
+void CLeakyPropsPage::OnBnClickedCheckMixture()
 {
 	if (this->ItemDDX)
 	{
-		if (this->ItemDDX == this->FluxSeries.treeitem)
+		if (this->ItemDDX == this->HeadSeries.treeitem)
 		{
-			this->FluxSeries.OnBnClickedCheckMixture();
+			this->HeadSeries.OnBnClickedCheckMixture();
 		}
 		else if (this->ItemDDX == this->SolutionSeries.treeitem)
 		{
 			this->SolutionSeries.OnBnClickedCheckMixture();
+		}
+		else if (this->ItemDDX == this->ThicknessSeries.treeitem)
+		{
+			this->ThicknessSeries.OnBnClickedCheckMixture();
+		}
+		else if (this->ItemDDX == this->HydCondSeries.treeitem)
+		{
+			this->HydCondSeries.OnBnClickedCheckMixture();
 		}
 		else
 		{

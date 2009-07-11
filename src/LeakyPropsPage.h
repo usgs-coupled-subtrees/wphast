@@ -9,15 +9,15 @@
 
 class CUnits;
 
-// CFluxPropsPage2 dialog
+// CLeakyPropsPage dialog
 
-class CFluxPropsPage2 : public CPropsPropertyPage
+class CLeakyPropsPage : public CPropsPropertyPage
 {
-	DECLARE_DYNAMIC(CFluxPropsPage2)
+	DECLARE_DYNAMIC(CLeakyPropsPage)
 
 public:
-	CFluxPropsPage2();
-	virtual ~CFluxPropsPage2();
+	CLeakyPropsPage();
+	virtual ~CLeakyPropsPage();
 
 	void SetProperties(const CBC& rBC);
 	void GetProperties(CBC& rBC)const;
@@ -34,7 +34,7 @@ public:
 	void SetUnits(const CUnits &u);
 
 // Dialog Data
-	enum { IDD = IDD_PROPS_FLUX_3 };
+	enum { IDD = IDD_PROPS_LEAKY };
 
 	// type enum
 	enum ModeType
@@ -73,7 +73,9 @@ protected:
 
 	afx_msg void OnBnClickedCheckFace();
 
-	CGridTimeSeries FluxSeries;
+	CGridTimeSeries ThicknessSeries; // single
+	CGridTimeSeries HydCondSeries;   // single
+	CGridTimeSeries HeadSeries;
 	CGridTimeSeries SolutionSeries;
 
 	CModGridCtrlEx PointsGrid;
@@ -84,9 +86,11 @@ protected:
 	HTREEITEM ItemDDX;
 
 	std::string m_sDescriptionRTF;   // IDR_DESCRIPTION_RTF
-	std::string m_sAssocSolutionRTF; // IDR_BC_FLUX_ASSOC_SOL_RTF
-	std::string m_sFluxRTF;          // IDR_BC_FLUX_FLUX_RTF
-	std::string m_sFaceRTF;          // IDR_BC_FLUX_FACE_RTF
+	std::string m_sHeadRTF;          // IDR_DESCRIPTION_RTF
+	std::string m_sThicknessRTF;     // IDR_BC_LEAKY_THICKNESS_RTF
+	std::string m_sHydCondRTF;       // IDR_BC_LEAKY_HYD_COND_RTF
+	std::string m_sAssocSolutionRTF; // IDR_BC_LEAKY_ASSOC_SOL_RTF
+	std::string m_sFaceRTF;          // IDR_BC_LEAKY_FACE_RTF
 
 	CString Description;
 // COMMENT: {6/30/2009 11:16:25 PM}	CString DefaultUnits;

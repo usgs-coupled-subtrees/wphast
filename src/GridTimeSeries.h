@@ -22,7 +22,7 @@ class CGridTimeSeries
 public:
 	CGridTimeSeries(CWnd* pWnd);
 #if defined(NEW_SINGLE_PROPERTY)
-	CGridTimeSeries(CWnd* pWnd, bool bSingle);
+	CGridTimeSeries(CWnd* pWnd, bool bSingle, bool bMixture);
 #endif
 
 	~CGridTimeSeries(void);
@@ -46,16 +46,26 @@ public:
 	void ShowPoints(bool show);
 	void ShowXYZ(bool show);
 #if defined(NEW_SINGLE_PROPERTY)
+	bool bEnableMixture;
 	bool bSingleProperty;
 	static void ShowSingleProperty(CWnd *pDlgWnd, int nShow);
+	void ShowMixture(bool show);
+	void EnableMixture(BOOL bEnable);
 #endif
 
 	void SetSeries(const CTimeSeries<Cproperty> &series);
+	void GetSeries(CTimeSeries<Cproperty> &series)const;
+
+#if defined(NEW_SINGLE_PROPERTY)
+	void SetProperty(const property *prop);
+	void GetProperty(property *&prop)const;
+#endif
+
 	void FreeVectors();
 	void SetUnits(const CUnits &u);
 
-
 	void DDX_Property(CDataExchange* pDX, Cproperty &p);
+	void DDX_Mixture(CDataExchange* pDX, Cproperty &p);
 	void DDV_SoftValidate();
 	void DDX_Vectors(int row, CString &str);
 	void DDX_Series(CDataExchange* pDX, bool bTimeZeroRequired = true);
@@ -63,8 +73,8 @@ public:
 
 #if defined(NEW_SINGLE_PROPERTY)
 	void DDX_Single(CDataExchange* pDX, bool bRequired = true);
-	void SetProperty(const property *prop);
 	void OnCbnSelchangeComboProptype();
+	void OnBnClickedCheckMixture();
 #endif
 
 	void OnEndLabelEdit(int nRow, int nCol);

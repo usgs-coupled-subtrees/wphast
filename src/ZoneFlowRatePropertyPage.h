@@ -1,6 +1,7 @@
 #pragma once
 
 #include <set>
+#include "PropsPropertyPage.h"
 #include "srcinput/Zone_budget.h"
 #include "ETSLayout/ETSLayout.h"
 #include "ETSLayoutPropertyPageXP.h"
@@ -8,7 +9,8 @@
 
 #ifndef baseCZoneFlowRatePropertyPage
 //#define baseCZoneFlowRatePropertyPage ETSLayoutPropertyPageXP
-#define baseCZoneFlowRatePropertyPage CPropertyPage
+//#define baseCZoneFlowRatePropertyPage CPropertyPage
+#define baseCZoneFlowRatePropertyPage CPropsPropertyPage
 #endif
 
 // CZoneFlowRatePropertyPage dialog
@@ -30,7 +32,7 @@ public:
 // COMMENT: {2/18/2009 9:16:28 PM}	LPCTSTR GetDesc() { return m_desc.c_str(); }
 
 // Dialog Data
-	enum { IDD = IDD_FLOW_RATE_PROPPAGE };
+	enum { IDD = IDD_FLOW_RATE_PROPPAGE2 };
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support

@@ -40,11 +40,11 @@ public:
 	void SetProperties(const CGridElt& rGridElt);
 	void GetProperties(CGridElt& rGridElt)const;
 
-	void SetFlowOnly(bool flowOnly)      { this->bFlowOnly = flowOnly; }
-	bool GetFlowOnly(void)const          { return this->bFlowOnly; }
+	void SetFlowOnly(bool flowOnly)      { this->FlowOnly = flowOnly; }
+	bool GetFlowOnly(void)const          { return this->FlowOnly; }
 
-	void SetDefault(bool bDefault)       { this->bDefault = bDefault; }
-	bool GetDefault(void)const           { return bDefault; }
+	void SetDefault(bool bDefault)       { this->Default = bDefault; }
+	bool GetDefault(void)const           { return this->Default; }
 
 	void SetDesc(LPCTSTR desc);
 	LPCTSTR GetDesc()const;
@@ -99,8 +99,8 @@ protected:
 
 	HTREEITEM ItemDDX;
 
-	bool bFlowOnly;
-	bool bDefault;
+	bool FlowOnly;
+	bool Default;
 
 	std::string m_sDescriptionRTF;       // IDR_DESCRIPTION_RTF
 	std::string m_sActiveRTF;            // IDR_MEDIA_ACTIVE_RTF

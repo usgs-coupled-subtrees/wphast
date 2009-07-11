@@ -41,8 +41,8 @@ public:
 // COMMENT: {5/27/2009 4:43:54 PM}	void SetFlowOnly(bool flowOnly)      { this->bFlowOnly = flowOnly; }
 // COMMENT: {5/27/2009 4:43:54 PM}	bool GetFlowOnly(void)const          { return this->bFlowOnly; }
 
-	void SetDefault(bool bDefault)       { this->bDefault = bDefault; }
-	bool GetDefault(void)const           { return bDefault; }
+	void SetDefault(bool bDefault)       { this->Default = bDefault; }
+	bool GetDefault(void)const           { return this->Default; }
 
 	void SetDesc(LPCTSTR desc);
 	LPCTSTR GetDesc()const;
@@ -84,8 +84,8 @@ protected:
 
 	HTREEITEM ItemDDX;
 
-	bool bFlowOnly;
-	bool bDefault;
+// COMMENT: {7/10/2009 1:30:20 PM}	bool FlowOnly;
+	bool Default;
 
 	std::string m_sMaskRTF;    // IDR_IC_HEAD_MASK_RTF
 	std::string m_sHeadRTF;    // IDR_IC_HEAD_HEAD_RTF

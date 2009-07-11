@@ -273,7 +273,7 @@ void CMediaPropsPage::DoDataExchange(CDataExchange* pDX)
 		}
 
 		// ACTIVE
-		if (this->bDefault && pDX->m_bSaveAndValidate && this->GridElt.active->type == PROP_UNDEFINED)
+		if (this->Default && pDX->m_bSaveAndValidate && this->GridElt.active->type == PROP_UNDEFINED)
 		{
 			CString str;
 			pTree->SelectItem(this->htiACTIVE);
@@ -282,7 +282,7 @@ void CMediaPropsPage::DoDataExchange(CDataExchange* pDX)
 			pDX->Fail();
 		}
 		// KX
-		if (this->bDefault && pDX->m_bSaveAndValidate && this->GridElt.kx->type == PROP_UNDEFINED)
+		if (this->Default && pDX->m_bSaveAndValidate && this->GridElt.kx->type == PROP_UNDEFINED)
 		{
 			CString str;
 			pTree->SelectItem(this->htiKX);
@@ -291,7 +291,7 @@ void CMediaPropsPage::DoDataExchange(CDataExchange* pDX)
 			pDX->Fail();
 		}
 		// KY
-		if (this->bDefault && pDX->m_bSaveAndValidate && this->GridElt.ky->type == PROP_UNDEFINED)
+		if (this->Default && pDX->m_bSaveAndValidate && this->GridElt.ky->type == PROP_UNDEFINED)
 		{
 			CString str;
 			pTree->SelectItem(this->htiKY);
@@ -300,7 +300,7 @@ void CMediaPropsPage::DoDataExchange(CDataExchange* pDX)
 			pDX->Fail();
 		}
 		// KZ
-		if (this->bDefault && pDX->m_bSaveAndValidate && this->GridElt.kz->type == PROP_UNDEFINED)
+		if (this->Default && pDX->m_bSaveAndValidate && this->GridElt.kz->type == PROP_UNDEFINED)
 		{
 			CString str;
 			pTree->SelectItem(this->htiKZ);
@@ -309,7 +309,7 @@ void CMediaPropsPage::DoDataExchange(CDataExchange* pDX)
 			pDX->Fail();
 		}
 		// POROSITY
-		if (this->bDefault && pDX->m_bSaveAndValidate && this->GridElt.porosity->type == PROP_UNDEFINED)
+		if (this->Default && pDX->m_bSaveAndValidate && this->GridElt.porosity->type == PROP_UNDEFINED)
 		{
 			CString str;
 			pTree->SelectItem(this->htiPOROSITY);
@@ -318,7 +318,7 @@ void CMediaPropsPage::DoDataExchange(CDataExchange* pDX)
 			pDX->Fail();
 		}
 		// STORAGE
-		if (this->bDefault && pDX->m_bSaveAndValidate && this->GridElt.storage->type == PROP_UNDEFINED)
+		if (this->Default && pDX->m_bSaveAndValidate && this->GridElt.storage->type == PROP_UNDEFINED)
 		{
 			CString str;
 			pTree->SelectItem(this->htiSTORAGE);
@@ -327,7 +327,7 @@ void CMediaPropsPage::DoDataExchange(CDataExchange* pDX)
 			pDX->Fail();
 		}
 		// ALPHA_LONG
-		if (this->bDefault && !this->bFlowOnly && pDX->m_bSaveAndValidate && this->GridElt.alpha_long->type == PROP_UNDEFINED)
+		if (this->Default && !this->FlowOnly && pDX->m_bSaveAndValidate && this->GridElt.alpha_long->type == PROP_UNDEFINED)
 		{
 			CString str;
 			pTree->SelectItem(this->htiALPHA_LONG);
@@ -336,7 +336,7 @@ void CMediaPropsPage::DoDataExchange(CDataExchange* pDX)
 			pDX->Fail();
 		}
 		// ALPHA_HORIZONTAL
-		if (this->bDefault && !this->bFlowOnly && pDX->m_bSaveAndValidate && this->GridElt.alpha_horizontal->type == PROP_UNDEFINED)
+		if (this->Default && !this->FlowOnly && pDX->m_bSaveAndValidate && this->GridElt.alpha_horizontal->type == PROP_UNDEFINED)
 		{
 			CString str;
 			pTree->SelectItem(this->htiALPHA_HORIZONTAL);
@@ -345,7 +345,7 @@ void CMediaPropsPage::DoDataExchange(CDataExchange* pDX)
 			pDX->Fail();
 		}
 		// ALPHA_VERTICAL
-		if (this->bDefault && !this->bFlowOnly && pDX->m_bSaveAndValidate && this->GridElt.alpha_vertical->type == PROP_UNDEFINED)
+		if (this->Default && !this->FlowOnly && pDX->m_bSaveAndValidate && this->GridElt.alpha_vertical->type == PROP_UNDEFINED)
 		{
 			CString str;
 			pTree->SelectItem(this->htiALPHA_VERTICAL);

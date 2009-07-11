@@ -1782,8 +1782,7 @@ herr_t CGlobal::HDFSerializeBool(bool bStoring, hid_t loc_id, const char* szName
 		}
 	}
 
-	herr_t status = CGlobal::HDFSerialize(bStoring, loc_id, szName, H5T_NATIVE_INT, 1, &nValue);
-	ASSERT(status >= 0);
+	herr_t status = CGlobal::HDFSerializeSafe(bStoring, loc_id, szName, H5T_NATIVE_INT, 1, &nValue);
 
 	if (!bStoring && status >= 0)
 	{
@@ -3828,6 +3827,11 @@ hid_t CGlobal::HDFCreateDataSourceType(void)
 	// Insert the enumerated data
 	nValue = Data_source::NONE;
 	status = H5Tenum_insert(enum_datatype, "NONE", &nValue);
+	ASSERT(status >= 0);
+
+	// Insert the enumerated data
+	nValue = Data_source::XYZT;
+	status = H5Tenum_insert(enum_datatype, "XYZT", &nValue);
 	ASSERT(status >= 0);
 
 	return enum_datatype;

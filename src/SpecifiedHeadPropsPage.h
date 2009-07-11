@@ -9,15 +9,15 @@
 
 class CUnits;
 
-// CFluxPropsPage2 dialog
+// CSpecifiedHeadPropsPage dialog
 
-class CFluxPropsPage2 : public CPropsPropertyPage
+class CSpecifiedHeadPropsPage : public CPropsPropertyPage
 {
-	DECLARE_DYNAMIC(CFluxPropsPage2)
+	DECLARE_DYNAMIC(CSpecifiedHeadPropsPage)
 
 public:
-	CFluxPropsPage2();
-	virtual ~CFluxPropsPage2();
+	CSpecifiedHeadPropsPage();
+	virtual ~CSpecifiedHeadPropsPage();
 
 	void SetProperties(const CBC& rBC);
 	void GetProperties(CBC& rBC)const;
@@ -34,7 +34,7 @@ public:
 	void SetUnits(const CUnits &u);
 
 // Dialog Data
-	enum { IDD = IDD_PROPS_FLUX_3 };
+	enum { IDD = IDD_PROPS_SPECIFIED_HEAD2 };
 
 	// type enum
 	enum ModeType
@@ -71,9 +71,9 @@ protected:
 	afx_msg void OnBnClickedCheckMixture();
 	//}} COMMON
 
-	afx_msg void OnBnClickedCheckFace();
+	afx_msg void OnBnClickedExteriorOnly();
 
-	CGridTimeSeries FluxSeries;
+	CGridTimeSeries HeadSeries;
 	CGridTimeSeries SolutionSeries;
 
 	CModGridCtrlEx PointsGrid;
@@ -89,7 +89,6 @@ protected:
 	std::string m_sFaceRTF;          // IDR_BC_FLUX_FACE_RTF
 
 	CString Description;
-// COMMENT: {6/30/2009 11:16:25 PM}	CString DefaultUnits;
 
 	bool FlowOnly;
 	bool Default;

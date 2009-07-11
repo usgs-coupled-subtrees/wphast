@@ -728,7 +728,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\HeadICPropsPage2.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\ICChemPropsPage.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ICChemPropsPage2.cpp"
 				>
 			</File>
 			<File
@@ -809,6 +817,10 @@
 			</File>
 			<File
 				RelativePath=".\MediaPropsPage.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\MediaPropsPage2.cpp"
 				>
 			</File>
 			<File
@@ -937,6 +949,10 @@
 			</File>
 			<File
 				RelativePath=".\PropRich.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\PropsPropertyPage.cpp"
 				>
 			</File>
 			<File
@@ -4912,7 +4928,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\HeadICPropsPage2.h"
+				>
+			</File>
+			<File
 				RelativePath=".\ICChemPropsPage.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ICChemPropsPage2.h"
 				>
 			</File>
 			<File
@@ -4997,6 +5021,10 @@
 			</File>
 			<File
 				RelativePath=".\MediaPropsPage.h"
+				>
+			</File>
+			<File
+				RelativePath=".\MediaPropsPage2.h"
 				>
 			</File>
 			<File
@@ -5141,6 +5169,10 @@
 			</File>
 			<File
 				RelativePath=".\PropRich.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PropsPropertyPage.h"
 				>
 			</File>
 			<File

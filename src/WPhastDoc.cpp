@@ -45,6 +45,14 @@
 #include "ICHeadZoneActor.h"
 #include "ICChemZoneActor.h"
 #include "ZoneFlowRateZoneActor.h"
+
+#include "MediaPropsPage2.h"
+#include "FluxPropsPage2.h"
+#include "LeakyPropsPage.h"
+#include "HeadICPropsPage2.h"
+#include "SpecifiedHeadPropsPage.h"
+#include "ICChemPropsPage2.h"
+
 #include "SeException.h"
 
 #include "ISerial.h"
@@ -5672,12 +5680,12 @@ void CWPhastDoc::NewZoneListener(vtkObject *caller, unsigned long eid, void *cli
 			ETSLayoutPropertySheet        sheet("Zone Wizard", NULL, 0, NULL, false);
 
 			CNewZonePropertyPage          newZone;
-			CMediaSpreadPropertyPage      mediaProps;
-			CBCFluxPropertyPage2          fluxProps;
-			CBCLeakyPropertyPage2         leakyProps;
-			CBCSpecifiedHeadPropertyPage  specifiedProps;
-			CICHeadSpreadPropertyPage     icHeadProps;
-			CChemICSpreadPropertyPage     chemICProps;
+			CMediaPropsPage2              mediaProps;
+			CFluxPropsPage2               fluxProps;
+			CLeakyPropsPage               leakyProps;
+			CSpecifiedHeadPropsPage       specifiedProps;
+			CHeadICPropsPage2             headProps;
+			CICChemPropsPage2             chemICProps;
 			CZoneFlowRatePropertyPage     zoneFlowRateProps;
 
 			// CChemICSpreadPropertyPage only needs the flowonly flag when the zone is a
@@ -5699,7 +5707,7 @@ void CWPhastDoc::NewZoneListener(vtkObject *caller, unsigned long eid, void *cli
 			sheet.AddPage(&fluxProps);
 			sheet.AddPage(&leakyProps);
 			sheet.AddPage(&specifiedProps);
-			sheet.AddPage(&icHeadProps);
+			sheet.AddPage(&headProps);
 			sheet.AddPage(&chemICProps);
 			sheet.AddPage(&zoneFlowRateProps);
 
@@ -5738,9 +5746,9 @@ void CWPhastDoc::NewZoneListener(vtkObject *caller, unsigned long eid, void *cli
 				else if (newZone.GetType() == ID_ZONE_TYPE_IC_HEAD)
 				{
 					CHeadIC headic;
-					icHeadProps.GetProperties(headic);
+					headProps.GetProperties(headic);
 					headic.polyh = new Cube(&zone);
-					CICHeadZoneActor::Create(self, headic, icHeadProps.GetDesc());
+					CICHeadZoneActor::Create(self, headic, headProps.GetDesc());
 				}
 				else if (newZone.GetType() == ID_ZONE_TYPE_IC_CHEM)
 				{
@@ -5940,12 +5948,12 @@ void CWPhastDoc::NewWedgeListener(vtkObject *caller, unsigned long eid, void *cl
 			ETSLayoutPropertySheet        sheet("Wedge Wizard", NULL, 0, NULL, false);
 
 			CNewZonePropertyPage          newZone;
-			CMediaSpreadPropertyPage      mediaProps;
-			CBCFluxPropertyPage2          fluxProps;
-			CBCLeakyPropertyPage2         leakyProps;
-			CBCSpecifiedHeadPropertyPage  specifiedProps;
-			CICHeadSpreadPropertyPage     icHeadProps;
-			CChemICSpreadPropertyPage     chemICProps;
+			CMediaPropsPage2              mediaProps;
+			CFluxPropsPage2               fluxProps;
+			CLeakyPropsPage               leakyProps;
+			CSpecifiedHeadPropsPage       specifiedProps;
+			CHeadICPropsPage2             headProps;
+			CICChemPropsPage2             chemICProps;
 			CZoneFlowRatePropertyPage     zoneFlowRateProps;
 
 			// CChemICSpreadPropertyPage only needs the flowonly flag when the zone is a
@@ -5967,7 +5975,7 @@ void CWPhastDoc::NewWedgeListener(vtkObject *caller, unsigned long eid, void *cl
 			sheet.AddPage(&fluxProps);
 			sheet.AddPage(&leakyProps);
 			sheet.AddPage(&specifiedProps);
-			sheet.AddPage(&icHeadProps);
+			sheet.AddPage(&headProps);
 			sheet.AddPage(&chemICProps);
 			sheet.AddPage(&zoneFlowRateProps);
 
@@ -6006,9 +6014,9 @@ void CWPhastDoc::NewWedgeListener(vtkObject *caller, unsigned long eid, void *cl
 				else if (newZone.GetType() == ID_ZONE_TYPE_IC_HEAD)
 				{
 					CHeadIC headic;
-					icHeadProps.GetProperties(headic);
+					headProps.GetProperties(headic);
 					headic.polyh = new Wedge(&zone, srcWedgeSource::GetWedgeOrientationString(ct));
-					CICHeadZoneActor::Create(self, headic, icHeadProps.GetDesc());
+					CICHeadZoneActor::Create(self, headic, headProps.GetDesc());
 				}
 				else if (newZone.GetType() == ID_ZONE_TYPE_IC_CHEM)
 				{
@@ -6140,12 +6148,12 @@ void CWPhastDoc::OnToolsNewPrism()
 					ETSLayoutPropertySheet        sheet("Prism Wizard", NULL, 0, NULL, false);
 
 					CNewZonePropertyPage          newZone;
-					CMediaSpreadPropertyPage      mediaProps;
-					CBCFluxPropertyPage2          fluxProps;
-					CBCLeakyPropertyPage2         leakyProps;
-					CBCSpecifiedHeadPropertyPage  specifiedProps;
-					CICHeadSpreadPropertyPage     icHeadProps;
-					CChemICSpreadPropertyPage     chemICProps;
+					CMediaPropsPage2              mediaProps;
+					CFluxPropsPage2               fluxProps;
+					CLeakyPropsPage               leakyProps;
+					CSpecifiedHeadPropsPage       specifiedProps;
+					CHeadICPropsPage2             headProps;
+					CICChemPropsPage2             chemICProps;
 					CZoneFlowRatePropertyPage     zoneFlowRateProps;
 
 					// CChemICSpreadPropertyPage only needs the flowonly flag when the zone is a
@@ -6167,7 +6175,7 @@ void CWPhastDoc::OnToolsNewPrism()
 					sheet.AddPage(&fluxProps);
 					sheet.AddPage(&leakyProps);
 					sheet.AddPage(&specifiedProps);
-					sheet.AddPage(&icHeadProps);
+					sheet.AddPage(&headProps);
 					sheet.AddPage(&chemICProps);
 					sheet.AddPage(&zoneFlowRateProps);
 
@@ -6215,9 +6223,9 @@ void CWPhastDoc::OnToolsNewPrism()
 						else if (newZone.GetType() == ID_ZONE_TYPE_IC_HEAD)
 						{
 							CHeadIC headic;
-							icHeadProps.GetProperties(headic);
+							headProps.GetProperties(headic);
 							headic.polyh = p;
-							CICHeadZoneActor::Create(this, headic, icHeadProps.GetDesc());
+							CICHeadZoneActor::Create(this, headic, headProps.GetDesc());
 						}
 						else if (newZone.GetType() == ID_ZONE_TYPE_IC_CHEM)
 						{
@@ -6355,12 +6363,12 @@ void CWPhastDoc::NewPrismListener(vtkObject *caller, unsigned long eid, void *cl
 				ETSLayoutPropertySheet        sheet("Prism Wizard", NULL, 0, NULL, false);
 
 				CNewZonePropertyPage          newZone;
-				CMediaSpreadPropertyPage      mediaProps;
-				CBCFluxPropertyPage2          fluxProps;
-				CBCLeakyPropertyPage2         leakyProps;
-				CBCSpecifiedHeadPropertyPage  specifiedProps;
-				CICHeadSpreadPropertyPage     icHeadProps;
-				CChemICSpreadPropertyPage     chemICProps;
+				CMediaPropsPage2              mediaProps;
+				CFluxPropsPage2               fluxProps;
+				CLeakyPropsPage               leakyProps;
+				CSpecifiedHeadPropsPage       specifiedProps;
+				CHeadICPropsPage2             headProps;
+				CICChemPropsPage2             chemICProps;
 				CZoneFlowRatePropertyPage     zoneFlowRateProps;
 
 				// CChemICSpreadPropertyPage only needs the flowonly flag when the zone is a
@@ -6382,7 +6390,7 @@ void CWPhastDoc::NewPrismListener(vtkObject *caller, unsigned long eid, void *cl
 				sheet.AddPage(&fluxProps);
 				sheet.AddPage(&leakyProps);
 				sheet.AddPage(&specifiedProps);
-				sheet.AddPage(&icHeadProps);
+				sheet.AddPage(&headProps);
 				sheet.AddPage(&chemICProps);
 				sheet.AddPage(&zoneFlowRateProps);
 
@@ -6421,9 +6429,9 @@ void CWPhastDoc::NewPrismListener(vtkObject *caller, unsigned long eid, void *cl
 					else if (newZone.GetType() == ID_ZONE_TYPE_IC_HEAD)
 					{
 						CHeadIC headic;
-						icHeadProps.GetProperties(headic);
+						headProps.GetProperties(headic);
 						headic.polyh = p;
-						CICHeadZoneActor::Create(self, headic, icHeadProps.GetDesc());
+						CICHeadZoneActor::Create(self, headic, headProps.GetDesc());
 					}
 					else if (newZone.GetType() == ID_ZONE_TYPE_IC_CHEM)
 					{

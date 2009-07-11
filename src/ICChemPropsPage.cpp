@@ -79,7 +79,7 @@ do { \
 
 #define CHECK_DEFAULT(P, H, S) \
 do { \
-	if (this->bDefault && pDX->m_bSaveAndValidate && this->ChemIC.P->type == PROP_UNDEFINED) { \
+	if (this->Default && pDX->m_bSaveAndValidate && this->ChemIC.P->type == PROP_UNDEFINED) { \
 		CString str; \
 		pTree->SelectItem(this->H); \
 		str.Format("A default \"%s\" must be defined.", S); \
