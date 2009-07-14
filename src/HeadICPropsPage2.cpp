@@ -75,6 +75,10 @@ void CHeadICPropsPage2::DoDataExchange(CDataExchange* pDX)
 
 void CHeadICPropsPage2::DDV_SoftValidate()
 {
+	// description
+	CDataExchange dx(this, TRUE);
+	::DDX_Text(&dx, IDC_DESC_EDIT, this->Description);
+
 	if (this->ItemDDX)
 	{
 		if (this->ItemDDX == this->HeadProperty.treeitem)
@@ -135,10 +139,6 @@ void CHeadICPropsPage2::GetProperties(CHeadIC& rHeadIC)const
 }
 
 BEGIN_MESSAGE_MAP(CHeadICPropsPage2, CPropsPropertyPage)
-// COMMENT: {7/13/2009 7:27:08 PM}	// IDC_PROP_TREE
-// COMMENT: {7/13/2009 7:27:08 PM}	ON_NOTIFY(TVN_SELCHANGING, IDC_PROP_TREE, OnTreeSelChanging)
-// COMMENT: {7/13/2009 7:27:08 PM}	ON_NOTIFY(TVN_SELCHANGED,  IDC_PROP_TREE, OnTreeSelChanged)
-
 	// IDC_DESC_EDIT
 	ON_EN_SETFOCUS(IDC_DESC_EDIT, OnEnSetfocusDescEdit)
 
@@ -158,75 +158,12 @@ END_MESSAGE_MAP()
 
 // CHeadICPropsPage2 message handlers
 
-// COMMENT: {7/13/2009 7:46:39 PM}void CHeadICPropsPage2::OnTreeSelChanging(NMHDR *pNotifyStruct, LRESULT *pResult)
-// COMMENT: {7/13/2009 7:46:39 PM}{
-// COMMENT: {7/13/2009 7:46:39 PM}	TRACE("In %s\n", __FUNCTION__);
-// COMMENT: {7/13/2009 7:46:39 PM}	NMTREEVIEW *pTvn = reinterpret_cast<NMTREEVIEW*>(pNotifyStruct);
-// COMMENT: {7/13/2009 7:46:39 PM}	this->ItemDDX = pTvn->itemOld.hItem;
-// COMMENT: {7/13/2009 7:46:39 PM}	if (this->ItemDDX)
-// COMMENT: {7/13/2009 7:46:39 PM}	{
-// COMMENT: {7/13/2009 7:46:39 PM}		if (this->ItemDDX == this->HeadProperty.treeitem)
-// COMMENT: {7/13/2009 7:46:39 PM}		{
-// COMMENT: {7/13/2009 7:46:39 PM}			this->HeadProperty.DDV_SoftValidate();
-// COMMENT: {7/13/2009 7:46:39 PM}		}
-// COMMENT: {7/13/2009 7:46:39 PM}		else
-// COMMENT: {7/13/2009 7:46:39 PM}		{
-// COMMENT: {7/13/2009 7:46:39 PM}			ASSERT(FALSE);
-// COMMENT: {7/13/2009 7:46:39 PM}		}
-// COMMENT: {7/13/2009 7:46:39 PM}
-// COMMENT: {7/13/2009 7:46:39 PM}
-// COMMENT: {7/13/2009 7:46:39 PM}		// force CInPlaceXXX to lose focus
-// COMMENT: {7/13/2009 7:46:39 PM}		this->TreeCtrl.SetFocus();
-// COMMENT: {7/13/2009 7:46:39 PM}
-// COMMENT: {7/13/2009 7:46:39 PM}		if (!this->UpdateData(TRUE))
-// COMMENT: {7/13/2009 7:46:39 PM}		{
-// COMMENT: {7/13/2009 7:46:39 PM}			// notify which control caused failure
-// COMMENT: {7/13/2009 7:46:39 PM}			//
-// COMMENT: {7/13/2009 7:46:39 PM}			CWnd* pFocus = CWnd::GetFocus();
-// COMMENT: {7/13/2009 7:46:39 PM}			this->PostMessage(UM_DDX_FAILURE, (WPARAM)pFocus, (LPARAM)0);
-// COMMENT: {7/13/2009 7:46:39 PM}
-// COMMENT: {7/13/2009 7:46:39 PM}			// disallow change
-// COMMENT: {7/13/2009 7:46:39 PM}			//
-// COMMENT: {7/13/2009 7:46:39 PM}			*pResult = TRUE;
-// COMMENT: {7/13/2009 7:46:39 PM}			TRACE("Out %s Disallowed\n", __FUNCTION__);
-// COMMENT: {7/13/2009 7:46:39 PM}			return;
-// COMMENT: {7/13/2009 7:46:39 PM}		}
-// COMMENT: {7/13/2009 7:46:39 PM}	}
-// COMMENT: {7/13/2009 7:46:39 PM}	*pResult = 0;
-// COMMENT: {7/13/2009 7:46:39 PM}	TRACE("Out Allowed %s\n", __FUNCTION__);
-// COMMENT: {7/13/2009 7:46:39 PM}}
-
 #define COMPARE_SET(S, R) \
 do { \
 	if (strItem.Compare(S) == 0) { \
 		this->RichEditCtrl.SetWindowText(R.c_str()); \
 	} \
 } while (0)
-
-// COMMENT: {7/13/2009 7:42:27 PM}void CHeadICPropsPage2::OnTreeSelChanged(NMHDR *pNotifyStruct, LRESULT *pResult)
-// COMMENT: {7/13/2009 7:42:27 PM}{
-// COMMENT: {7/13/2009 7:42:27 PM}	TRACE("In %s\n", __FUNCTION__);
-// COMMENT: {7/13/2009 7:42:27 PM}	UNREFERENCED_PARAMETER(pResult);
-// COMMENT: {7/13/2009 7:42:27 PM}	NMTREEVIEW *pTvn = reinterpret_cast<NMTREEVIEW*>(pNotifyStruct);
-// COMMENT: {7/13/2009 7:42:27 PM}	this->ItemDDX = pTvn->itemNew.hItem;
-// COMMENT: {7/13/2009 7:42:27 PM}	if (this->ItemDDX)
-// COMMENT: {7/13/2009 7:42:27 PM}	{
-// COMMENT: {7/13/2009 7:42:27 PM}		this->UpdateData(FALSE);
-// COMMENT: {7/13/2009 7:42:27 PM}
-// COMMENT: {7/13/2009 7:42:27 PM}		// update property description
-// COMMENT: {7/13/2009 7:42:27 PM}		//
-// COMMENT: {7/13/2009 7:42:27 PM}		if (this->TreeCtrl.GetSafeHwnd())
-// COMMENT: {7/13/2009 7:42:27 PM}		{
-// COMMENT: {7/13/2009 7:42:27 PM}			CString strItem = this->TreeCtrl.GetItemText(this->ItemDDX);
-// COMMENT: {7/13/2009 7:42:27 PM}			COMPARE_SET(HEAD, this->m_sHeadRTF);
-// COMMENT: {7/13/2009 7:42:27 PM}		}
-// COMMENT: {7/13/2009 7:42:27 PM}	}
-// COMMENT: {7/13/2009 7:42:27 PM}	if (this->TreeCtrl.GetSafeHwnd())
-// COMMENT: {7/13/2009 7:42:27 PM}	{
-// COMMENT: {7/13/2009 7:42:27 PM}		this->TreeCtrl.SetFocus();
-// COMMENT: {7/13/2009 7:42:27 PM}	}
-// COMMENT: {7/13/2009 7:42:27 PM}	TRACE("Out %s\n", __FUNCTION__);
-// COMMENT: {7/13/2009 7:42:27 PM}}
 
 void CHeadICPropsPage2::SetPropertyDescription()
 {

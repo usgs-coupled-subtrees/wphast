@@ -49,19 +49,18 @@ public:
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	virtual void DDV_SoftValidate();
-	virtual void SetPropertyDescription();
-
 	virtual void DDX_Series(CDataExchange* pDX);
 	virtual void DDX_Single(CDataExchange* pDX);
+	virtual void SetPropertyDescription();
 
 	DECLARE_MESSAGE_MAP()
 
 	//{{ COMMON
-	// end edit grids
+	// end edit time series grids
 	afx_msg void OnEndLabelEditFlux(NMHDR *pNotifyStruct, LRESULT *result);
 	afx_msg void OnEndLabelEditSolution(NMHDR *pNotifyStruct, LRESULT *result);
 
-	// selection changed grids
+	// selection changed time series grids
 	afx_msg void OnSelChangedFlux(NMHDR *pNotifyStruct, LRESULT *result);
 	afx_msg void OnSelChangedSolution(NMHDR *pNotifyStruct, LRESULT *result);
 
@@ -84,12 +83,9 @@ protected:
 	// face checkbox
 	afx_msg void OnBnClickedCheckFace();
 
-	// face radios
-	afx_msg void OnBnClickedFaceRadios();
-
 	// property controllers
-	CGridTimeSeries ThicknessSeries; // single
-	CGridTimeSeries HydCondSeries;   // single
+	CGridTimeSeries ThicknessProperty; // single
+	CGridTimeSeries HydCondProperty;   // single
 	CGridTimeSeries HeadSeries;
 	CGridTimeSeries SolutionSeries;
 

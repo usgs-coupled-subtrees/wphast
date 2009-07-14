@@ -28,28 +28,20 @@ public:
 
 	void SetUsedZoneFlowRates(const std::set<int>& used);
 
-// COMMENT: {2/18/2009 9:16:28 PM}	void SetDesc(LPCTSTR desc) { m_desc = desc; }
-// COMMENT: {2/18/2009 9:16:28 PM}	LPCTSTR GetDesc() { return m_desc.c_str(); }
-
 // Dialog Data
 	enum { IDD = IDD_FLOW_RATE_PROPPAGE2 };
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-	//virtual void DDV_SoftValidate();
-	//virtual void SetPropertyDescription();
-
-// COMMENT: {2/18/2009 9:16:32 PM}	std::string  m_desc;
+	virtual void DDV_SoftValidate();
 
 	Zone_budget  m_zone_budget;
 	std::set<int> m_usedZoneFlowRatesNumbers;
 
 	DECLARE_MESSAGE_MAP()
-public:
+
 	CListCtrl CombinationList;
 
 public:
 	virtual BOOL OnInitDialog();
-	virtual BOOL OnSetActive();
-	virtual BOOL OnKillActive();
 };

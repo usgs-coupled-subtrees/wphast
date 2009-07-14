@@ -2,7 +2,6 @@
 
 #include "PropsPropertyPage.h"
 #include "GridElt.h"
-// COMMENT: {7/13/2009 6:55:47 PM}#include "gridctrl/ModGridCtrlEx.h"
 #include "afxwin.h"
 
 #include "GridTimeSeries.h"
@@ -49,39 +48,32 @@ public:
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	virtual void DDV_SoftValidate();
-	virtual void SetPropertyDescription();
-
 	virtual void DDX_Single(CDataExchange* pDX);
-
-// COMMENT: {7/10/2009 7:46:21 PM}	virtual BOOL OnSetActive();
-// COMMENT: {7/10/2009 7:46:21 PM}	virtual BOOL OnKillActive();
-// COMMENT: {7/10/2009 7:46:21 PM}	virtual LRESULT OnWizardNext();
-// COMMENT: {7/10/2009 7:46:21 PM}	virtual LRESULT OnWizardBack();
+	virtual void SetPropertyDescription();
 
 	DECLARE_MESSAGE_MAP()
 
 	//{{ COMMON
-// COMMENT: {7/13/2009 7:11:02 PM} 	virtual afx_msg void OnTreeSelChanging(NMHDR *pNotifyStruct, LRESULT *plResult);
-// COMMENT: {7/13/2009 7:11:02 PM} 	virtual afx_msg void OnTreeSelChanged(NMHDR *pNotifyStruct, LRESULT *plResult);
-
-	//afx_msg void OnEndLabelEditFlux(NMHDR *pNotifyStruct, LRESULT *result);
-	//afx_msg void OnEndLabelEditSolution(NMHDR *pNotifyStruct, LRESULT *result);
-
-	//afx_msg void OnSelChangedFlux(NMHDR *pNotifyStruct, LRESULT *result);
-	//afx_msg void OnSelChangedSolution(NMHDR *pNotifyStruct, LRESULT *result);
-
+	// browse for XYZ and XYZT
 	afx_msg void OnBnClickedButtonXYZ();
 
+	// DDV failures
 	afx_msg LRESULT OnUM_DDXFailure(WPARAM wParam, LPARAM lParam);
 
+	// should be on superclass
 	afx_msg void OnEnSetfocusDescEdit();
 
+	// single property combo
 	afx_msg void OnCbnSelchangeComboProptype();
+
+	// mixture checkbox
 	afx_msg void OnBnClickedCheckMixture();
 	//}} COMMON
 
+	// face checkbox
 	afx_msg void OnBnClickedCheckFace();
 
+	// property controllers
 	CGridTimeSeries ActiveProperty;          // single
 	CGridTimeSeries KxProperty;              // single
 	CGridTimeSeries KyProperty;              // single
@@ -92,13 +84,7 @@ protected:
 	CGridTimeSeries AlphaHorizontalProperty; // single
 	CGridTimeSeries AlphaVerticalProperty;   // single
 
-// COMMENT: {7/13/2009 7:13:55 PM}	CModGridCtrlEx PointsGrid;
-// COMMENT: {7/13/2009 7:13:55 PM}
-// COMMENT: {7/13/2009 7:13:55 PM}	CRichEditCtrl  RichEditCtrl;
-// COMMENT: {7/13/2009 7:13:55 PM}	CTreeCtrl      TreeCtrl;
-// COMMENT: {7/13/2009 7:13:55 PM}
-// COMMENT: {7/13/2009 7:13:55 PM}	HTREEITEM ItemDDX;
-
+	// RTF strings
 	std::string m_sDescriptionRTF;       // IDR_DESCRIPTION_RTF
 	std::string m_sActiveRTF;            // IDR_MEDIA_ACTIVE_RTF
 	std::string m_sKxRTF;                // IDR_MEDIA_KX_RTF
@@ -110,14 +96,14 @@ protected:
 	std::string m_sAlphaHorizontalRTF;   // IDR_MEDIA_ALPHA_HORZ_RTF
 	std::string m_sAlphaVerticalRTF;     // IDR_MEDIA_ALPHA_VERT_RTF
 
+	// should be member of superclass
 	CString Description;
 
+	// flags
 	bool FlowOnly;
 	bool Default;
 
 protected:
+	// data
 	CGridElt GridElt;
-
-public:
-// COMMENT: {7/13/2009 6:56:38 PM}	afx_msg void OnNMSetfocusPropTree(NMHDR *pNMHDR, LRESULT *pResult);
 };

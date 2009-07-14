@@ -100,93 +100,15 @@ void CICChemPropsPage2::DoDataExchange(CDataExchange* pDX)
 	}
 	this->DDX_Single(pDX);
 
-// COMMENT: {7/13/2009 8:15:58 PM}	if (pDX->m_bSaveAndValidate)
-// COMMENT: {7/13/2009 8:15:58 PM}	{
-// COMMENT: {7/13/2009 8:15:58 PM}		// properties
-// COMMENT: {7/13/2009 8:15:58 PM}		if (this->ItemDDX == this->SolutionProperty.treeitem)
-// COMMENT: {7/13/2009 8:15:58 PM}		{
-// COMMENT: {7/13/2009 8:15:58 PM}			this->SolutionProperty.DDV_SoftValidate();
-// COMMENT: {7/13/2009 8:15:58 PM}			this->SolutionProperty.DDX_Single(pDX, this->Default);
-// COMMENT: {7/13/2009 8:15:58 PM}		}
-// COMMENT: {7/13/2009 8:15:58 PM}		else if (this->ItemDDX == this->EquilibriumPhasesProperty.treeitem)
-// COMMENT: {7/13/2009 8:15:58 PM}		{
-// COMMENT: {7/13/2009 8:15:58 PM}			this->EquilibriumPhasesProperty.DDV_SoftValidate();
-// COMMENT: {7/13/2009 8:15:58 PM}			this->EquilibriumPhasesProperty.DDX_Single(pDX, false);
-// COMMENT: {7/13/2009 8:15:58 PM}		}
-// COMMENT: {7/13/2009 8:15:58 PM}		else if (this->ItemDDX == this->SurfaceProperty.treeitem)
-// COMMENT: {7/13/2009 8:15:58 PM}		{
-// COMMENT: {7/13/2009 8:15:58 PM}			this->SurfaceProperty.DDV_SoftValidate();
-// COMMENT: {7/13/2009 8:15:58 PM}			this->SurfaceProperty.DDX_Single(pDX, false);
-// COMMENT: {7/13/2009 8:15:58 PM}		}
-// COMMENT: {7/13/2009 8:15:58 PM}		else if (this->ItemDDX == this->ExchangeProperty.treeitem)
-// COMMENT: {7/13/2009 8:15:58 PM}		{
-// COMMENT: {7/13/2009 8:15:58 PM}			this->ExchangeProperty.DDV_SoftValidate();
-// COMMENT: {7/13/2009 8:15:58 PM}			this->ExchangeProperty.DDX_Single(pDX, false);
-// COMMENT: {7/13/2009 8:15:58 PM}		}
-// COMMENT: {7/13/2009 8:15:58 PM}		else if (this->ItemDDX == this->GasPhaseProperty.treeitem)
-// COMMENT: {7/13/2009 8:15:58 PM}		{
-// COMMENT: {7/13/2009 8:15:58 PM}			this->GasPhaseProperty.DDV_SoftValidate();
-// COMMENT: {7/13/2009 8:15:58 PM}			this->GasPhaseProperty.DDX_Single(pDX, false);
-// COMMENT: {7/13/2009 8:15:58 PM}		}
-// COMMENT: {7/13/2009 8:15:58 PM}		else if (this->ItemDDX == this->SolidSolutionsProperty.treeitem)
-// COMMENT: {7/13/2009 8:15:58 PM}		{
-// COMMENT: {7/13/2009 8:15:58 PM}			this->SolidSolutionsProperty.DDV_SoftValidate();
-// COMMENT: {7/13/2009 8:15:58 PM}			this->SolidSolutionsProperty.DDX_Single(pDX, false);
-// COMMENT: {7/13/2009 8:15:58 PM}		}
-// COMMENT: {7/13/2009 8:15:58 PM}		else if (this->ItemDDX == this->KineticsProperty.treeitem)
-// COMMENT: {7/13/2009 8:15:58 PM}		{
-// COMMENT: {7/13/2009 8:15:58 PM}			this->KineticsProperty.DDV_SoftValidate();
-// COMMENT: {7/13/2009 8:15:58 PM}			this->KineticsProperty.DDX_Single(pDX, false);
-// COMMENT: {7/13/2009 8:15:58 PM}		}
-// COMMENT: {7/13/2009 8:15:58 PM}		else
-// COMMENT: {7/13/2009 8:15:58 PM}		{
-// COMMENT: {7/13/2009 8:15:58 PM}			ASSERT(FALSE);
-// COMMENT: {7/13/2009 8:15:58 PM}		}
-// COMMENT: {7/13/2009 8:15:58 PM}	}
-// COMMENT: {7/13/2009 8:15:58 PM}	else
-// COMMENT: {7/13/2009 8:15:58 PM}	{
-// COMMENT: {7/13/2009 8:15:58 PM}		// properties
-// COMMENT: {7/13/2009 8:15:58 PM}		CGridTimeSeries::ShowSingleProperty(this, SW_SHOW);
-// COMMENT: {7/13/2009 8:15:58 PM}
-// COMMENT: {7/13/2009 8:15:58 PM}		// properties
-// COMMENT: {7/13/2009 8:15:58 PM}		if (this->ItemDDX == this->SolutionProperty.treeitem)
-// COMMENT: {7/13/2009 8:15:58 PM}		{
-// COMMENT: {7/13/2009 8:15:58 PM}			this->SolutionProperty.DDX_Single(pDX);
-// COMMENT: {7/13/2009 8:15:58 PM}		}
-// COMMENT: {7/13/2009 8:15:58 PM}		else if (this->ItemDDX == this->EquilibriumPhasesProperty.treeitem)
-// COMMENT: {7/13/2009 8:15:58 PM}		{
-// COMMENT: {7/13/2009 8:15:58 PM}			this->EquilibriumPhasesProperty.DDX_Single(pDX);
-// COMMENT: {7/13/2009 8:15:58 PM}		}
-// COMMENT: {7/13/2009 8:15:58 PM}		else if (this->ItemDDX == this->SurfaceProperty.treeitem)
-// COMMENT: {7/13/2009 8:15:58 PM}		{
-// COMMENT: {7/13/2009 8:15:58 PM}			this->SurfaceProperty.DDX_Single(pDX);
-// COMMENT: {7/13/2009 8:15:58 PM}		}
-// COMMENT: {7/13/2009 8:15:58 PM}		else if (this->ItemDDX == this->ExchangeProperty.treeitem)
-// COMMENT: {7/13/2009 8:15:58 PM}		{
-// COMMENT: {7/13/2009 8:15:58 PM}			this->ExchangeProperty.DDX_Single(pDX);
-// COMMENT: {7/13/2009 8:15:58 PM}		}
-// COMMENT: {7/13/2009 8:15:58 PM}		else if (this->ItemDDX == this->GasPhaseProperty.treeitem)
-// COMMENT: {7/13/2009 8:15:58 PM}		{
-// COMMENT: {7/13/2009 8:15:58 PM}			this->GasPhaseProperty.DDX_Single(pDX);
-// COMMENT: {7/13/2009 8:15:58 PM}		}
-// COMMENT: {7/13/2009 8:15:58 PM}		else if (this->ItemDDX == this->SolidSolutionsProperty.treeitem)
-// COMMENT: {7/13/2009 8:15:58 PM}		{
-// COMMENT: {7/13/2009 8:15:58 PM}			this->SolidSolutionsProperty.DDX_Single(pDX);
-// COMMENT: {7/13/2009 8:15:58 PM}		}
-// COMMENT: {7/13/2009 8:15:58 PM}		else if (this->ItemDDX == this->KineticsProperty.treeitem)
-// COMMENT: {7/13/2009 8:15:58 PM}		{
-// COMMENT: {7/13/2009 8:15:58 PM}			this->KineticsProperty.DDX_Single(pDX);
-// COMMENT: {7/13/2009 8:15:58 PM}		}
-// COMMENT: {7/13/2009 8:15:58 PM}		else
-// COMMENT: {7/13/2009 8:15:58 PM}		{
-// COMMENT: {7/13/2009 8:15:58 PM}			ASSERT(FALSE);
-// COMMENT: {7/13/2009 8:15:58 PM}		}
-// COMMENT: {7/13/2009 8:15:58 PM}	}
 	TRACE("Out %s\n", __FUNCTION__);
 }
 
 void CICChemPropsPage2::DDV_SoftValidate()
 {
+	// description
+	CDataExchange dx(this, TRUE);
+	::DDX_Text(&dx, IDC_DESC_EDIT, this->Description);
+
 	if (this->ItemDDX)
 	{
 		// properties

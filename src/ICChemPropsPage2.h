@@ -49,28 +49,32 @@ public:
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	virtual void DDV_SoftValidate();
-	virtual void SetPropertyDescription();
-
 	virtual void DDX_Single(CDataExchange* pDX);
+	virtual void SetPropertyDescription();
 
 	DECLARE_MESSAGE_MAP()
 
 	//{{ COMMON
-// COMMENT: {7/13/2009 7:46:50 PM} 	afx_msg void OnTreeSelChanging(NMHDR *pNotifyStruct, LRESULT *plResult);
-// COMMENT: {7/13/2009 7:46:50 PM} 	afx_msg void OnTreeSelChanged(NMHDR *pNotifyStruct, LRESULT *plResult);
-
+	// browse for XYZ and XYZT
 	afx_msg void OnBnClickedButtonXYZ();
 
+	// DDV failures
 	afx_msg LRESULT OnUM_DDXFailure(WPARAM wParam, LPARAM lParam);
 
+	// should be on superclass
 	afx_msg void OnEnSetfocusDescEdit();
 
+	// single property combo
 	afx_msg void OnCbnSelchangeComboProptype();
+
+	// mixture checkbox
 	afx_msg void OnBnClickedCheckMixture();
 	//}} COMMON
 
+	// face checkbox
 	afx_msg void OnBnClickedCheckFace();
 
+	// property controllers
 	CGridTimeSeries SolutionProperty;          // single
 	CGridTimeSeries EquilibriumPhasesProperty; // single
 	CGridTimeSeries SurfaceProperty;           // single
@@ -79,13 +83,7 @@ protected:
 	CGridTimeSeries SolidSolutionsProperty;    // single
 	CGridTimeSeries KineticsProperty;          // single
 
-// COMMENT: {7/13/2009 7:18:39 PM}	CModGridCtrlEx PointsGrid;
-// COMMENT: {7/13/2009 7:18:39 PM}
-// COMMENT: {7/13/2009 7:18:39 PM}	CRichEditCtrl  RichEditCtrl;
-// COMMENT: {7/13/2009 7:18:39 PM}	CTreeCtrl      TreeCtrl;
-// COMMENT: {7/13/2009 7:18:39 PM}
-// COMMENT: {7/13/2009 7:18:39 PM}	HTREEITEM ItemDDX;
-
+	// RTF strings
 	std::string m_sDescriptionRTF;        // IDR_DESCRIPTION_RTF
 	std::string m_sSolutionRTF;           // IDR_CHEM_IC_SOLUTION_RTF
 	std::string m_sEquilibriumPhasesRTF;  // IDR_CHEM_IC_EQUILIBRIUM_PHASES_RTF
@@ -95,11 +93,14 @@ protected:
 	std::string m_sSolidSolutionsRTF;     // IDR_CHEM_IC_SOLID_SOLUTIONS_RTF
 	std::string m_sKineticsRTF;           // IDR_CHEM_IC_KINETICS_RTF
 
+	// should be member of superclass
 	CString Description;
 
+	// flags
 	bool FlowOnly;
 	bool Default;
 
 protected:
+	// data
 	CChemIC ChemIC;
 };

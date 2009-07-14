@@ -103,7 +103,6 @@ void CFluxPropsPage2::DoDataExchange(CDataExchange* pDX)
 	}
 	else
 	{
-		// face
 		switch(this->BC.face)
 		{
 		case 0: // x
@@ -136,42 +135,35 @@ void CFluxPropsPage2::DoDataExchange(CDataExchange* pDX)
 	}
 	this->DDX_Series(pDX);
 
-// COMMENT: {7/13/2009 8:01:38 PM}	if (pDX->m_bSaveAndValidate)
-// COMMENT: {7/13/2009 8:01:38 PM}	{
-// COMMENT: {7/13/2009 8:01:38 PM}		if (this->ItemDDX == this->FluxSeries.treeitem)
-// COMMENT: {7/13/2009 8:01:38 PM}		{
-// COMMENT: {7/13/2009 8:01:38 PM}			this->FluxSeries.DDX_Series(pDX);
-// COMMENT: {7/13/2009 8:01:38 PM}			ASSERT(!this->SolutionSeries.grid.IsWindowVisible());
-// COMMENT: {7/13/2009 8:01:38 PM}			ASSERT(this->FluxSeries.grid.IsWindowVisible());
-// COMMENT: {7/13/2009 8:01:38 PM}		}
-// COMMENT: {7/13/2009 8:01:38 PM}		else if (this->ItemDDX == this->SolutionSeries.treeitem)
-// COMMENT: {7/13/2009 8:01:38 PM}		{
-// COMMENT: {7/13/2009 8:01:38 PM}			this->SolutionSeries.DDX_Series(pDX, !this->FlowOnly);
-// COMMENT: {7/13/2009 8:01:38 PM}			ASSERT(this->SolutionSeries.grid.IsWindowVisible());
-// COMMENT: {7/13/2009 8:01:38 PM}			ASSERT(!this->FluxSeries.grid.IsWindowVisible());
-// COMMENT: {7/13/2009 8:01:38 PM}		}
-// COMMENT: {7/13/2009 8:01:38 PM}	}
-// COMMENT: {7/13/2009 8:01:38 PM}	else
-// COMMENT: {7/13/2009 8:01:38 PM}	{
-// COMMENT: {7/13/2009 8:01:38 PM}		if (this->ItemDDX == this->FluxSeries.treeitem)
-// COMMENT: {7/13/2009 8:01:38 PM}		{
-// COMMENT: {7/13/2009 8:01:38 PM}			this->FluxSeries.DDX_Series(pDX);
-// COMMENT: {7/13/2009 8:01:38 PM}			this->SolutionSeries.grid.ShowWindow(SW_HIDE);
-// COMMENT: {7/13/2009 8:01:38 PM}			this->FluxSeries.grid.ShowWindow(SW_SHOW);
-// COMMENT: {7/13/2009 8:01:38 PM}		}
-// COMMENT: {7/13/2009 8:01:38 PM}		else if (this->ItemDDX == this->SolutionSeries.treeitem)
-// COMMENT: {7/13/2009 8:01:38 PM}		{
-// COMMENT: {7/13/2009 8:01:38 PM}			this->SolutionSeries.DDX_Series(pDX, !this->FlowOnly);
-// COMMENT: {7/13/2009 8:01:38 PM}			this->FluxSeries.grid.ShowWindow(SW_HIDE);
-// COMMENT: {7/13/2009 8:01:38 PM}			this->SolutionSeries.grid.ShowWindow(SW_SHOW);
-// COMMENT: {7/13/2009 8:01:38 PM}		}
-// COMMENT: {7/13/2009 8:01:38 PM}	}
-
 	TRACE("Out %s\n", __FUNCTION__);
 }
 
 void CFluxPropsPage2::DDV_SoftValidate()
 {
+	// description
+	CDataExchange dx(this, TRUE);
+	::DDX_Text(&dx, IDC_DESC_EDIT, this->Description);
+
+	// face
+	if (this->IsDlgButtonChecked(IDC_CHECK_FACE))
+	{
+		if (this->IsDlgButtonChecked(IDC_FACE_X_RADIO))
+		{
+			this->BC.face_defined = TRUE;
+			this->BC.face         = 0;
+		}
+		if (this->IsDlgButtonChecked(IDC_FACE_Y_RADIO))
+		{
+			this->BC.face_defined = TRUE;
+			this->BC.face         = 1;
+		}
+		if (this->IsDlgButtonChecked(IDC_FACE_Z_RADIO))
+		{
+			this->BC.face_defined = TRUE;
+			this->BC.face         = 2;
+		}
+	}
+
 	if (this->ItemDDX)
 	{
 		if (this->ItemDDX == this->FluxSeries.treeitem)
@@ -262,10 +254,6 @@ BEGIN_MESSAGE_MAP(CFluxPropsPage2, CPropsPropertyPage)
 	ON_NOTIFY(GVN_SELCHANGED, IDC_GRID_SOLUTION, OnSelChangedSolution)
 	ON_NOTIFY(GVN_ENDLABELEDIT, IDC_GRID_SOLUTION, OnEndLabelEditSolution)
 
-// COMMENT: {7/13/2009 7:26:43 PM}	// IDC_PROP_TREE
-// COMMENT: {7/13/2009 7:26:43 PM}	ON_NOTIFY(TVN_SELCHANGING, IDC_PROP_TREE, OnTreeSelChanging)
-// COMMENT: {7/13/2009 7:26:43 PM}	ON_NOTIFY(TVN_SELCHANGED,  IDC_PROP_TREE, OnTreeSelChanged)
-
 	// IDC_DESC_EDIT
 	ON_EN_SETFOCUS(IDC_DESC_EDIT, OnEnSetfocusDescEdit)
 
@@ -304,79 +292,12 @@ void CFluxPropsPage2::OnEndLabelEditSolution(NMHDR *pNotifyStruct, LRESULT *resu
 	TRACE("Out %s\n", __FUNCTION__);
 }
 
-// COMMENT: {7/13/2009 7:25:54 PM}void CFluxPropsPage2::OnTreeSelChanging(NMHDR *pNotifyStruct, LRESULT *pResult)
-// COMMENT: {7/13/2009 7:25:54 PM}{
-// COMMENT: {7/13/2009 7:25:54 PM}	TRACE("In %s\n", __FUNCTION__);
-// COMMENT: {7/13/2009 7:25:54 PM}	NMTREEVIEW *pTvn = reinterpret_cast<NMTREEVIEW*>(pNotifyStruct);
-// COMMENT: {7/13/2009 7:25:54 PM}	this->ItemDDX = pTvn->itemOld.hItem;
-// COMMENT: {7/13/2009 7:25:54 PM}	if (this->ItemDDX)
-// COMMENT: {7/13/2009 7:25:54 PM}	{
-// COMMENT: {7/13/2009 7:25:54 PM}		this->DDV_SoftValidate();
-// COMMENT: {7/13/2009 7:25:54 PM}// COMMENT: {7/13/2009 7:25:02 PM}		if (this->ItemDDX == this->FluxSeries.treeitem)
-// COMMENT: {7/13/2009 7:25:54 PM}// COMMENT: {7/13/2009 7:25:02 PM}		{
-// COMMENT: {7/13/2009 7:25:54 PM}// COMMENT: {7/13/2009 7:25:02 PM}			this->FluxSeries.DDV_SoftValidate();
-// COMMENT: {7/13/2009 7:25:54 PM}// COMMENT: {7/13/2009 7:25:02 PM}		}
-// COMMENT: {7/13/2009 7:25:54 PM}// COMMENT: {7/13/2009 7:25:02 PM}		else if (this->ItemDDX == this->SolutionSeries.treeitem)
-// COMMENT: {7/13/2009 7:25:54 PM}// COMMENT: {7/13/2009 7:25:02 PM}		{
-// COMMENT: {7/13/2009 7:25:54 PM}// COMMENT: {7/13/2009 7:25:02 PM}			this->SolutionSeries.DDV_SoftValidate();
-// COMMENT: {7/13/2009 7:25:54 PM}// COMMENT: {7/13/2009 7:25:02 PM}		}
-// COMMENT: {7/13/2009 7:25:54 PM}
-// COMMENT: {7/13/2009 7:25:54 PM}		//{{{6/26/2009 5:12:11 PM}
-// COMMENT: {7/13/2009 7:25:54 PM}		// force CInPlaceXXX to lose focus
-// COMMENT: {7/13/2009 7:25:54 PM}		this->TreeCtrl.SetFocus();
-// COMMENT: {7/13/2009 7:25:54 PM}		//}}{6/26/2009 5:12:11 PM}
-// COMMENT: {7/13/2009 7:25:54 PM}
-// COMMENT: {7/13/2009 7:25:54 PM}		if (!this->UpdateData(TRUE))
-// COMMENT: {7/13/2009 7:25:54 PM}		{
-// COMMENT: {7/13/2009 7:25:54 PM}			// notify which control caused failure
-// COMMENT: {7/13/2009 7:25:54 PM}			//
-// COMMENT: {7/13/2009 7:25:54 PM}			CWnd* pFocus = CWnd::GetFocus();
-// COMMENT: {7/13/2009 7:25:54 PM}			this->PostMessage(UM_DDX_FAILURE, (WPARAM)pFocus, (LPARAM)0);
-// COMMENT: {7/13/2009 7:25:54 PM}
-// COMMENT: {7/13/2009 7:25:54 PM}			// disallow change
-// COMMENT: {7/13/2009 7:25:54 PM}			//
-// COMMENT: {7/13/2009 7:25:54 PM}			*pResult = TRUE;
-// COMMENT: {7/13/2009 7:25:54 PM}			TRACE("Out %s Disallowed\n", __FUNCTION__);
-// COMMENT: {7/13/2009 7:25:54 PM}			return;
-// COMMENT: {7/13/2009 7:25:54 PM}		}
-// COMMENT: {7/13/2009 7:25:54 PM}	}
-// COMMENT: {7/13/2009 7:25:54 PM}	*pResult = 0;
-// COMMENT: {7/13/2009 7:25:54 PM}	TRACE("Out Allowed %s\n", __FUNCTION__);
-// COMMENT: {7/13/2009 7:25:54 PM}}
-
 #define COMPARE_SET(S, R) \
 do { \
 	if (strItem.Compare(S) == 0) { \
 		this->RichEditCtrl.SetWindowText(R.c_str()); \
 	} \
 } while (0)
-
-// COMMENT: {7/13/2009 7:30:01 PM}void CFluxPropsPage2::OnTreeSelChanged(NMHDR *pNotifyStruct, LRESULT *pResult)
-// COMMENT: {7/13/2009 7:30:01 PM}{
-// COMMENT: {7/13/2009 7:30:01 PM}	TRACE("In %s\n", __FUNCTION__);
-// COMMENT: {7/13/2009 7:30:01 PM}	UNREFERENCED_PARAMETER(pResult);
-// COMMENT: {7/13/2009 7:30:01 PM}	NMTREEVIEW *pTvn = reinterpret_cast<NMTREEVIEW*>(pNotifyStruct);
-// COMMENT: {7/13/2009 7:30:01 PM}	this->ItemDDX = pTvn->itemNew.hItem;
-// COMMENT: {7/13/2009 7:30:01 PM}	if (this->ItemDDX)
-// COMMENT: {7/13/2009 7:30:01 PM}	{
-// COMMENT: {7/13/2009 7:30:01 PM}		this->UpdateData(FALSE);
-// COMMENT: {7/13/2009 7:30:01 PM}
-// COMMENT: {7/13/2009 7:30:01 PM}		// update property description
-// COMMENT: {7/13/2009 7:30:01 PM}		//
-// COMMENT: {7/13/2009 7:30:01 PM}		if (this->TreeCtrl.GetSafeHwnd())
-// COMMENT: {7/13/2009 7:30:01 PM}		{
-// COMMENT: {7/13/2009 7:30:01 PM}			CString strItem = this->TreeCtrl.GetItemText(this->ItemDDX);
-// COMMENT: {7/13/2009 7:30:01 PM}
-// COMMENT: {7/13/2009 7:30:01 PM}			COMPARE_SET(PSZ_FLUX,     this->m_sFluxRTF);
-// COMMENT: {7/13/2009 7:30:01 PM}			COMPARE_SET(PSZ_SOLUTION, this->m_sAssocSolutionRTF);
-// COMMENT: {7/13/2009 7:30:01 PM}		}
-// COMMENT: {7/13/2009 7:30:01 PM}	}
-// COMMENT: {7/13/2009 7:30:01 PM}	if (this->TreeCtrl.GetSafeHwnd())
-// COMMENT: {7/13/2009 7:30:01 PM}	{
-// COMMENT: {7/13/2009 7:30:01 PM}		this->TreeCtrl.SetFocus();
-// COMMENT: {7/13/2009 7:30:01 PM}	}
-// COMMENT: {7/13/2009 7:30:01 PM}	TRACE("Out %s\n", __FUNCTION__);
-// COMMENT: {7/13/2009 7:30:01 PM}}
 
 void CFluxPropsPage2::SetPropertyDescription()
 {

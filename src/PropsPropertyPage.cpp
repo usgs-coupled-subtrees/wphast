@@ -151,7 +151,6 @@ void CPropsPropertyPage::OnTreeSelChanged(NMHDR *pNotifyStruct, LRESULT *pResult
 		this->UpdateData(FALSE);
 
 		// update property description
-		//
 		if (this->TreeCtrl.GetSafeHwnd())
 		{
 			this->SetPropertyDescription();
@@ -172,21 +171,13 @@ void CPropsPropertyPage::SetPropertyDescription()
 void CPropsPropertyPage::OnNMSetfocusPropTree(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	TRACE("In %s\n", __FUNCTION__);
-// COMMENT: {7/14/2009 2:17:30 PM}	NMTREEVIEW tvn;
-// COMMENT: {7/14/2009 2:17:30 PM}	tvn.hdr.hwndFrom = this->TreeCtrl.GetSafeHwnd();
-// COMMENT: {7/14/2009 2:17:30 PM}	tvn.itemNew.hItem = this->ItemDDX;
-// COMMENT: {7/14/2009 2:17:30 PM}	tvn.itemOld.hItem = this->ItemDDX;
-// COMMENT: {7/14/2009 2:17:30 PM}
-// COMMENT: {7/14/2009 2:17:30 PM}	this->OnTreeSelChanged((NMHDR*)&tvn, pResult);
 
-	//{{
 	// update property description
 	//
 	if (this->TreeCtrl.GetSafeHwnd())
 	{
 		this->SetPropertyDescription();
 	}
-	//}}
 
 	*pResult = 0;
 	TRACE("Out %s\n", __FUNCTION__);

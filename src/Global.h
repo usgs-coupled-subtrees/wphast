@@ -195,6 +195,10 @@ public:
 	static void DDX_Text_Safe(CDataExchange *pDX, int nIDC, double &value);
 	static void TextFloatFormat(CDataExchange* pDX, int nIDC, void* pData, double value, int nSizeGcvt);
 
+	static BOOL DDX_Text_Safe(CDataExchange* pDX, int nIDC, int& value);
+	static void TextWithFormat(CDataExchange* pDX, int nIDC, LPCTSTR lpszFormat, ...);
+
+
 protected:
 	static double CGlobal::RadiusFactor;
 

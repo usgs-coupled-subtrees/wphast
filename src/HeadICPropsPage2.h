@@ -22,9 +22,6 @@ public:
 	void SetProperties(const CHeadIC& rHeadIC);
 	void GetProperties(CHeadIC& rHeadIC)const;
 
-// COMMENT: {7/10/2009 1:46:39 PM}	void SetFlowOnly(bool flowOnly)      { this->FlowOnly = flowOnly; }
-// COMMENT: {7/10/2009 1:46:39 PM}	bool GetFlowOnly(void)const          { return this->FlowOnly; }
-
 	void SetDefault(bool bDefault)       { this->Default = bDefault; }
 	bool GetDefault(void)const           { return this->Default; }
 
@@ -49,44 +46,45 @@ public:
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	virtual void DDV_SoftValidate();
-	virtual void SetPropertyDescription();
-
 	virtual void DDX_Single(CDataExchange* pDX);
+	virtual void SetPropertyDescription();
 
 	DECLARE_MESSAGE_MAP()
 
 	//{{ COMMON
- 	afx_msg void OnTreeSelChanging(NMHDR *pNotifyStruct, LRESULT *plResult);
- 	afx_msg void OnTreeSelChanged(NMHDR *pNotifyStruct, LRESULT *plResult);
-
+	// browse for XYZ and XYZT
 	afx_msg void OnBnClickedButtonXYZ();
 
+	// DDV failures
 	afx_msg LRESULT OnUM_DDXFailure(WPARAM wParam, LPARAM lParam);
 
+	// should be on superclass
 	afx_msg void OnEnSetfocusDescEdit();
 
-	afx_msg void OnCbnSelchangeComboProptype();
+	// single property combo
+	afx_msg void OnCbnSelchangeComboProptype();\
+
+	// mixture checkbox
 	afx_msg void OnBnClickedCheckMixture();
 	//}} COMMON
 
+	// face checkbox
 	afx_msg void OnBnClickedCheckFace();
 
+	// property controllers
 	CGridTimeSeries HeadProperty;          // single
 
-// COMMENT: {7/13/2009 7:18:32 PM}	CModGridCtrlEx PointsGrid;
-// COMMENT: {7/13/2009 7:18:32 PM}
-// COMMENT: {7/13/2009 7:18:32 PM}	CRichEditCtrl  RichEditCtrl;
-// COMMENT: {7/13/2009 7:18:32 PM}	CTreeCtrl      TreeCtrl;
-// COMMENT: {7/13/2009 7:18:32 PM}
-// COMMENT: {7/13/2009 7:18:32 PM}	HTREEITEM ItemDDX;
-
+	// RTF strings
 	std::string m_sDescriptionRTF;  // IDR_DESCRIPTION_RTF
 	std::string m_sHeadRTF;         // IDR_IC_HEAD_HEAD_RTF
 
+	// should be member of superclass
 	CString Description;
 
+	// flags
 	bool Default;
 
 protected:
+	// data
 	CHeadIC HeadIC;
 };

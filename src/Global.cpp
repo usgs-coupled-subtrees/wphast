@@ -4610,3 +4610,71 @@ void CGlobal::TextFloatFormat(CDataExchange* pDX, int nIDC, void* pData, double 
 		}
 	}
 }
+
+BOOL CGlobal::DDX_Text_Safe(CDataExchange* pDX, int nIDC, int& value)
+{
+	if (pDX->m_bSaveAndValidate)
+	{
+		try 
+		{
+			int i;
+			CGlobal::TextWithFormat(pDX, nIDC, _T("%d"), &i);
+			value = i;
+		}
+		catch(...)
+		{
+			value = -1;
+			return FALSE;
+		}
+	}
+	else
+	{
+		if (value < 0)
+		{
+			pDX->PrepareEditCtrl(nIDC);
+			HWND hWndCtrl;
+			pDX->m_pDlgWnd->GetDlgItem(nIDC, &hWndCtrl);
+			AfxSetWindowText(hWndCtrl, _T(""));
+		}
+		else
+		{
+			CGlobal::TextWithFormat(pDX, nIDC, _T("%d"), value);
+		}
+	}
+	return TRUE;
+}
+
+// based on AFX_STATIC void AFX_CDECL _Afx_DDX_TextWithFormat(CDataExchange* pDX, int nIDC,	LPCTSTR lpszFormat, UINT nIDPrompt, ...)
+// only supports windows output formats - no floating point
+void CGlobal::TextWithFormat(CDataExchange* pDX, int nIDC, LPCTSTR lpszFormat, ...)
+{
+	va_list pData;
+	va_start(pData, lpszFormat);
+
+	HWND hWndCtrl = pDX->PrepareEditCtrl(nIDC);
+	ASSERT( hWndCtrl != NULL );
+
+	const int SZT_SIZE = 64;
+	TCHAR szT[SZT_SIZE];
+	if (pDX->m_bSaveAndValidate)
+	{
+		void* pResult;
+
+		pResult = va_arg( pData, void* );
+		// the following works for %d, %u, %ld, %lu
+		::GetWindowText(hWndCtrl, szT, _countof(szT));
+		if (_sntscanf_s(szT, _countof(szT), lpszFormat, pResult) != 1)
+		{
+			//AfxMessageBox(nIDPrompt);
+			pDX->Fail();        // throws exception
+		}
+	}
+	else
+	{
+		ATL_CRT_ERRORCHECK_SPRINTF(_vsntprintf_s(szT, _countof(szT), _countof(szT) - 1, lpszFormat, pData));
+			// does not support floating point numbers - see dlgfloat.cpp
+		AfxSetWindowText(hWndCtrl, szT);
+	}
+
+	va_end(pData);
+}

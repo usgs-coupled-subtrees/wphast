@@ -29,8 +29,8 @@ CLeakyPropsPage::CLeakyPropsPage()
 	: CPropsPropertyPage(CLeakyPropsPage::IDD)
 	, HeadSeries(this, false, false)
 	, SolutionSeries(this, false, true)
-	, ThicknessSeries(this, true, false)
-	, HydCondSeries(this, true, false)
+	, ThicknessProperty(this, true, false)
+	, HydCondProperty(this, true, false)
 {
 	TRACE("In %s\n", __FUNCTION__);
 
@@ -69,8 +69,8 @@ void CLeakyPropsPage::DoDataExchange(CDataExchange* pDX)
 		// setup tree
 		this->HeadSeries.treeitem      = this->TreeCtrl.InsertItem(PSZ_HEAD,      TVI_ROOT, TVI_LAST);
 		this->SolutionSeries.treeitem  = this->TreeCtrl.InsertItem(PSZ_SOLUTION,  TVI_ROOT, TVI_LAST);
-		this->ThicknessSeries.treeitem = this->TreeCtrl.InsertItem(PSZ_THICKNESS, TVI_ROOT, TVI_LAST);
-		this->HydCondSeries.treeitem   = this->TreeCtrl.InsertItem(PSZ_HYD_COND,  TVI_ROOT, TVI_LAST);
+		this->ThicknessProperty.treeitem = this->TreeCtrl.InsertItem(PSZ_THICKNESS, TVI_ROOT, TVI_LAST);
+		this->HydCondProperty.treeitem   = this->TreeCtrl.InsertItem(PSZ_HYD_COND,  TVI_ROOT, TVI_LAST);
 
 		// setup tree selection
 		this->ItemDDX = this->HeadSeries.treeitem;
@@ -84,15 +84,36 @@ void CLeakyPropsPage::DoDataExchange(CDataExchange* pDX)
 		// set points grid for each propety
 		this->HeadSeries.SetPointsGrid(&this->PointsGrid);
 		this->SolutionSeries.SetPointsGrid(&this->PointsGrid);
-		this->ThicknessSeries.SetPointsGrid(&this->PointsGrid);
-		this->HydCondSeries.SetPointsGrid(&this->PointsGrid);
+		this->ThicknessProperty.SetPointsGrid(&this->PointsGrid);
+		this->HydCondProperty.SetPointsGrid(&this->PointsGrid);
 	}
 
 	// description
 	::DDX_Text(pDX, IDC_DESC_EDIT, this->Description);
 
 	// face
-	if (!pDX->m_bSaveAndValidate)
+	if (pDX->m_bSaveAndValidate)
+	{
+		if (this->IsDlgButtonChecked(IDC_CHECK_FACE))
+		{
+			if (this->IsDlgButtonChecked(IDC_FACE_X_RADIO))
+			{
+				this->BC.face_defined = TRUE;
+				this->BC.face         = 0;
+			}
+			if (this->IsDlgButtonChecked(IDC_FACE_Y_RADIO))
+			{
+				this->BC.face_defined = TRUE;
+				this->BC.face         = 1;
+			}
+			if (this->IsDlgButtonChecked(IDC_FACE_Z_RADIO))
+			{
+				this->BC.face_defined = TRUE;
+				this->BC.face         = 2;
+			}
+		}
+	}
+	else
 	{
 		switch(this->BC.face)
 		{
@@ -127,88 +148,35 @@ void CLeakyPropsPage::DoDataExchange(CDataExchange* pDX)
 	this->DDX_Series(pDX);
 	this->DDX_Single(pDX);
 
-
-	if (pDX->m_bSaveAndValidate)
-	{
-// COMMENT: {7/13/2009 9:46:27 PM}		// time series
-// COMMENT: {7/13/2009 9:46:27 PM}		if (this->ItemDDX == this->HeadSeries.treeitem)
-// COMMENT: {7/13/2009 9:46:27 PM}		{
-// COMMENT: {7/13/2009 9:46:27 PM}			this->HeadSeries.DDV_SoftValidate();
-// COMMENT: {7/13/2009 9:46:27 PM}			this->HeadSeries.DDX_Series(pDX);
-// COMMENT: {7/13/2009 9:46:27 PM}			ASSERT(!this->SolutionSeries.grid.IsWindowVisible());
-// COMMENT: {7/13/2009 9:46:27 PM}			ASSERT(this->HeadSeries.grid.IsWindowVisible());
-// COMMENT: {7/13/2009 9:46:27 PM}		}
-// COMMENT: {7/13/2009 9:46:27 PM}		else if (this->ItemDDX == this->SolutionSeries.treeitem)
-// COMMENT: {7/13/2009 9:46:27 PM}		{
-// COMMENT: {7/13/2009 9:46:27 PM}			this->SolutionSeries.DDV_SoftValidate();
-// COMMENT: {7/13/2009 9:46:27 PM}			this->SolutionSeries.DDX_Series(pDX, !this->FlowOnly);
-// COMMENT: {7/13/2009 9:46:27 PM}			ASSERT(this->SolutionSeries.grid.IsWindowVisible());
-// COMMENT: {7/13/2009 9:46:27 PM}			ASSERT(!this->HeadSeries.grid.IsWindowVisible());
-// COMMENT: {7/13/2009 9:46:27 PM}		}
-// COMMENT: {7/13/2009 9:46:27 PM}		else if (this->ItemDDX == this->ThicknessSeries.treeitem)
-// COMMENT: {7/13/2009 9:46:27 PM}		{
-// COMMENT: {7/13/2009 9:46:27 PM}			this->ThicknessSeries.DDV_SoftValidate();
-// COMMENT: {7/13/2009 9:46:27 PM}			this->ThicknessSeries.DDX_Single(pDX, true);
-// COMMENT: {7/13/2009 9:46:27 PM}			ASSERT(!this->SolutionSeries.grid.IsWindowVisible());
-// COMMENT: {7/13/2009 9:46:27 PM}			ASSERT(!this->HeadSeries.grid.IsWindowVisible());
-// COMMENT: {7/13/2009 9:46:27 PM}		}
-// COMMENT: {7/13/2009 9:46:27 PM}		else if (this->ItemDDX == this->HydCondSeries.treeitem)
-// COMMENT: {7/13/2009 9:46:27 PM}		{
-// COMMENT: {7/13/2009 9:46:27 PM}			this->HydCondSeries.DDV_SoftValidate();
-// COMMENT: {7/13/2009 9:46:27 PM}			this->HydCondSeries.DDX_Single(pDX, true);
-// COMMENT: {7/13/2009 9:46:27 PM}			ASSERT(!this->SolutionSeries.grid.IsWindowVisible());
-// COMMENT: {7/13/2009 9:46:27 PM}			ASSERT(!this->HeadSeries.grid.IsWindowVisible());
-// COMMENT: {7/13/2009 9:46:27 PM}		}
-
-#ifdef _DEBUG
-		for (int nCol = 0; nCol < this->HeadSeries.grid.GetColumnCount(); ++nCol)
-		{
-			afxDump << "Column " << nCol << " = " << this->HeadSeries.grid.GetColumnWidth(nCol) << "\n";
-		}
-#endif
-
-	}
-	else
-	{
-// COMMENT: {7/13/2009 9:46:14 PM}		// time series
-// COMMENT: {7/13/2009 9:46:14 PM}		if (this->ItemDDX == this->HeadSeries.treeitem)
-// COMMENT: {7/13/2009 9:46:14 PM}		{
-// COMMENT: {7/13/2009 9:46:14 PM}			this->HeadSeries.DDX_Series(pDX);
-// COMMENT: {7/13/2009 9:46:14 PM}
-// COMMENT: {7/13/2009 9:46:14 PM}			this->SolutionSeries.grid.ShowWindow(SW_HIDE);
-// COMMENT: {7/13/2009 9:46:14 PM}			CGridTimeSeries::ShowSingleProperty(this, SW_HIDE);
-// COMMENT: {7/13/2009 9:46:14 PM}			this->HeadSeries.grid.ShowWindow(SW_SHOW);
-// COMMENT: {7/13/2009 9:46:14 PM}		}
-// COMMENT: {7/13/2009 9:46:14 PM}		else if (this->ItemDDX == this->SolutionSeries.treeitem)
-// COMMENT: {7/13/2009 9:46:14 PM}		{
-// COMMENT: {7/13/2009 9:46:14 PM}			this->SolutionSeries.DDX_Series(pDX, !this->FlowOnly);
-// COMMENT: {7/13/2009 9:46:14 PM}
-// COMMENT: {7/13/2009 9:46:14 PM}			this->HeadSeries.grid.ShowWindow(SW_HIDE);
-// COMMENT: {7/13/2009 9:46:14 PM}			CGridTimeSeries::ShowSingleProperty(this, SW_HIDE);
-// COMMENT: {7/13/2009 9:46:14 PM}			this->SolutionSeries.grid.ShowWindow(SW_SHOW);
-// COMMENT: {7/13/2009 9:46:14 PM}		}
-// COMMENT: {7/13/2009 9:46:14 PM}		else if (this->ItemDDX == this->ThicknessSeries.treeitem)
-// COMMENT: {7/13/2009 9:46:14 PM}		{
-// COMMENT: {7/13/2009 9:46:14 PM}			this->ThicknessSeries.DDX_Single(pDX);
-// COMMENT: {7/13/2009 9:46:14 PM}
-// COMMENT: {7/13/2009 9:46:14 PM}			this->HeadSeries.grid.ShowWindow(SW_HIDE);
-// COMMENT: {7/13/2009 9:46:14 PM}			this->SolutionSeries.grid.ShowWindow(SW_HIDE);
-// COMMENT: {7/13/2009 9:46:14 PM}			CGridTimeSeries::ShowSingleProperty(this, SW_SHOW);
-// COMMENT: {7/13/2009 9:46:14 PM}		}
-// COMMENT: {7/13/2009 9:46:14 PM}		else if (this->ItemDDX == this->HydCondSeries.treeitem)
-// COMMENT: {7/13/2009 9:46:14 PM}		{
-// COMMENT: {7/13/2009 9:46:14 PM}			this->HydCondSeries.DDX_Single(pDX);
-// COMMENT: {7/13/2009 9:46:14 PM}
-// COMMENT: {7/13/2009 9:46:14 PM}			this->HeadSeries.grid.ShowWindow(SW_HIDE);
-// COMMENT: {7/13/2009 9:46:14 PM}			this->SolutionSeries.grid.ShowWindow(SW_HIDE);
-// COMMENT: {7/13/2009 9:46:14 PM}			CGridTimeSeries::ShowSingleProperty(this, SW_SHOW);
-// COMMENT: {7/13/2009 9:46:14 PM}		}
-	}
 	TRACE("Out %s\n", __FUNCTION__);
 }
 
 void CLeakyPropsPage::DDV_SoftValidate()
 {
+	// description
+	CDataExchange dx(this, TRUE);
+	::DDX_Text(&dx, IDC_DESC_EDIT, this->Description);
+
+	// face
+	if (this->IsDlgButtonChecked(IDC_CHECK_FACE))
+	{
+		if (this->IsDlgButtonChecked(IDC_FACE_X_RADIO))
+		{
+			this->BC.face_defined = TRUE;
+			this->BC.face         = 0;
+		}
+		if (this->IsDlgButtonChecked(IDC_FACE_Y_RADIO))
+		{
+			this->BC.face_defined = TRUE;
+			this->BC.face         = 1;
+		}
+		if (this->IsDlgButtonChecked(IDC_FACE_Z_RADIO))
+		{
+			this->BC.face_defined = TRUE;
+			this->BC.face         = 2;
+		}
+	}
+
 	if (this->ItemDDX)
 	{
 		// time series
@@ -220,13 +188,14 @@ void CLeakyPropsPage::DDV_SoftValidate()
 		{
 			this->SolutionSeries.DDV_SoftValidate();
 		}
-		else if (this->ItemDDX == this->ThicknessSeries.treeitem)
+		// properties
+		else if (this->ItemDDX == this->ThicknessProperty.treeitem)
 		{
-			this->ThicknessSeries.DDV_SoftValidate();
+			this->ThicknessProperty.DDV_SoftValidate();
 		}
-		else if (this->ItemDDX == this->HydCondSeries.treeitem)
+		else if (this->ItemDDX == this->HydCondProperty.treeitem)
 		{
-			this->HydCondSeries.DDV_SoftValidate();
+			this->HydCondProperty.DDV_SoftValidate();
 		}
 	}
 }
@@ -237,6 +206,7 @@ void CLeakyPropsPage::DDX_Series(CDataExchange* pDX)
 	{
 		if (pDX->m_bSaveAndValidate)
 		{
+			// time series
 			if (this->ItemDDX == this->HeadSeries.treeitem)
 			{
 				this->HeadSeries.DDX_Series(pDX);
@@ -277,10 +247,10 @@ void CLeakyPropsPage::DDX_Single(CDataExchange* pDX)
 {
 	if (this->ItemDDX)
 	{
-		// time series
-		if (this->ItemDDX == this->ThicknessSeries.treeitem)
+		// properties
+		if (this->ItemDDX == this->ThicknessProperty.treeitem)
 		{
-			this->ThicknessSeries.DDX_Single(pDX);
+			this->ThicknessProperty.DDX_Single(pDX);
 
 			this->HeadSeries.grid.ShowWindow(SW_HIDE);
 			this->SolutionSeries.grid.ShowWindow(SW_HIDE);
@@ -289,9 +259,9 @@ void CLeakyPropsPage::DDX_Single(CDataExchange* pDX)
 				CGridTimeSeries::ShowSingleProperty(this, SW_SHOW);
 			}
 		}
-		else if (this->ItemDDX == this->HydCondSeries.treeitem)
+		else if (this->ItemDDX == this->HydCondProperty.treeitem)
 		{
-			this->HydCondSeries.DDX_Single(pDX);
+			this->HydCondProperty.DDX_Single(pDX);
 
 			this->HeadSeries.grid.ShowWindow(SW_HIDE);
 			this->SolutionSeries.grid.ShowWindow(SW_HIDE);
@@ -313,9 +283,10 @@ void CLeakyPropsPage::SetProperties(const CBC& rBC)
 	// time series
 	this->HeadSeries.SetSeries(rBC.m_bc_head);
 	this->SolutionSeries.SetSeries(rBC.m_bc_solution);
+
 	// single properties
-	this->ThicknessSeries.SetProperty(rBC.bc_thick);
-	this->HydCondSeries.SetProperty(rBC.bc_k);
+	this->ThicknessProperty.SetProperty(rBC.bc_thick);
+	this->HydCondProperty.SetProperty(rBC.bc_k);
 
 	TRACE("Out %s\n", __FUNCTION__);
 }
@@ -331,9 +302,9 @@ void CLeakyPropsPage::GetProperties(CBC& rBC)const
 	this->SolutionSeries.GetSeries(rBC.m_bc_solution);
 
 	// single properties
-	this->ThicknessSeries.GetProperty(rBC.bc_thick);
+	this->ThicknessProperty.GetProperty(rBC.bc_thick);
 	ASSERT(rBC.bc_thick);
-	this->HydCondSeries.GetProperty(rBC.bc_k);
+	this->HydCondProperty.GetProperty(rBC.bc_k);
 	ASSERT(rBC.bc_k);
 
 	TRACE("Out %s\n", __FUNCTION__);
@@ -347,10 +318,6 @@ BEGIN_MESSAGE_MAP(CLeakyPropsPage, CPropsPropertyPage)
 	// IDC_GRID_SOLUTION
 	ON_NOTIFY(GVN_ENDLABELEDIT, IDC_GRID_SOLUTION, OnEndLabelEditSolution)
 	ON_NOTIFY(GVN_SELCHANGED, IDC_GRID_SOLUTION, OnSelChangedSolution)
-
-// COMMENT: {7/13/2009 7:27:27 PM}	// IDC_PROP_TREE
-// COMMENT: {7/13/2009 7:27:27 PM}	ON_NOTIFY(TVN_SELCHANGING, IDC_PROP_TREE, OnTreeSelChanging)
-// COMMENT: {7/13/2009 7:27:27 PM}	ON_NOTIFY(TVN_SELCHANGED,  IDC_PROP_TREE, OnTreeSelChanged)
 
 	// IDC_DESC_EDIT
 	ON_EN_SETFOCUS(IDC_DESC_EDIT, OnEnSetfocusDescEdit)
@@ -367,11 +334,6 @@ BEGIN_MESSAGE_MAP(CLeakyPropsPage, CPropsPropertyPage)
 	// IDC_CHECK_FACE
 	ON_BN_CLICKED(IDC_CHECK_FACE, OnBnClickedCheckFace)
 
-	// Face radios
-	ON_BN_CLICKED(IDC_FACE_X_RADIO, OnBnClickedFaceRadios)
-	ON_BN_CLICKED(IDC_FACE_Y_RADIO, OnBnClickedFaceRadios)
-	ON_BN_CLICKED(IDC_FACE_Z_RADIO, OnBnClickedFaceRadios)
-
 	// DDX failure
 	ON_MESSAGE(UM_DDX_FAILURE, OnUM_DDXFailure)
 END_MESSAGE_MAP()
@@ -382,57 +344,22 @@ END_MESSAGE_MAP()
 void CLeakyPropsPage::OnEndLabelEditFlux(NMHDR *pNotifyStruct, LRESULT *result)
 {
 	TRACE("In %s\n", __FUNCTION__);
+
 	NM_GRIDVIEW *pnmgv = (NM_GRIDVIEW*)pNotifyStruct;
 	this->HeadSeries.OnEndLabelEdit(pnmgv->iRow, pnmgv->iColumn);
+
 	TRACE("Out %s\n", __FUNCTION__);
 }
 
 void CLeakyPropsPage::OnEndLabelEditSolution(NMHDR *pNotifyStruct, LRESULT *result)
 {
 	TRACE("In %s\n", __FUNCTION__);
+
 	NM_GRIDVIEW *pnmgv = (NM_GRIDVIEW*)pNotifyStruct;
 	this->SolutionSeries.OnEndLabelEdit(pnmgv->iRow, pnmgv->iColumn);
+
 	TRACE("Out %s\n", __FUNCTION__);
 }
-
-// COMMENT: {7/13/2009 7:47:22 PM}void CLeakyPropsPage::OnTreeSelChanging(NMHDR *pNotifyStruct, LRESULT *pResult)
-// COMMENT: {7/13/2009 7:47:22 PM}{
-// COMMENT: {7/13/2009 7:47:22 PM}	TRACE("In %s\n", __FUNCTION__);
-// COMMENT: {7/13/2009 7:47:22 PM}	NMTREEVIEW *pTvn = reinterpret_cast<NMTREEVIEW*>(pNotifyStruct);
-// COMMENT: {7/13/2009 7:47:22 PM}	this->ItemDDX = pTvn->itemOld.hItem;
-// COMMENT: {7/13/2009 7:47:22 PM}	if (this->ItemDDX)
-// COMMENT: {7/13/2009 7:47:22 PM}	{
-// COMMENT: {7/13/2009 7:47:22 PM}		if (this->ItemDDX == this->HeadSeries.treeitem)
-// COMMENT: {7/13/2009 7:47:22 PM}		{
-// COMMENT: {7/13/2009 7:47:22 PM}			this->HeadSeries.DDV_SoftValidate();
-// COMMENT: {7/13/2009 7:47:22 PM}		}
-// COMMENT: {7/13/2009 7:47:22 PM}		else if (this->ItemDDX == this->SolutionSeries.treeitem)
-// COMMENT: {7/13/2009 7:47:22 PM}		{
-// COMMENT: {7/13/2009 7:47:22 PM}			this->SolutionSeries.DDV_SoftValidate();
-// COMMENT: {7/13/2009 7:47:22 PM}		}
-// COMMENT: {7/13/2009 7:47:22 PM}
-// COMMENT: {7/13/2009 7:47:22 PM}		//{{{6/26/2009 5:12:11 PM}
-// COMMENT: {7/13/2009 7:47:22 PM}		// force CInPlaceXXX to lose focus
-// COMMENT: {7/13/2009 7:47:22 PM}		this->TreeCtrl.SetFocus();
-// COMMENT: {7/13/2009 7:47:22 PM}		//}}{6/26/2009 5:12:11 PM}
-// COMMENT: {7/13/2009 7:47:22 PM}
-// COMMENT: {7/13/2009 7:47:22 PM}		if (!this->UpdateData(TRUE))
-// COMMENT: {7/13/2009 7:47:22 PM}		{
-// COMMENT: {7/13/2009 7:47:22 PM}			// notify which control caused failure
-// COMMENT: {7/13/2009 7:47:22 PM}			//
-// COMMENT: {7/13/2009 7:47:22 PM}			CWnd* pFocus = CWnd::GetFocus();
-// COMMENT: {7/13/2009 7:47:22 PM}			this->PostMessage(UM_DDX_FAILURE, (WPARAM)pFocus, (LPARAM)0);
-// COMMENT: {7/13/2009 7:47:22 PM}
-// COMMENT: {7/13/2009 7:47:22 PM}			// disallow change
-// COMMENT: {7/13/2009 7:47:22 PM}			//
-// COMMENT: {7/13/2009 7:47:22 PM}			*pResult = TRUE;
-// COMMENT: {7/13/2009 7:47:22 PM}			TRACE("Out %s Disallowed\n", __FUNCTION__);
-// COMMENT: {7/13/2009 7:47:22 PM}			return;
-// COMMENT: {7/13/2009 7:47:22 PM}		}
-// COMMENT: {7/13/2009 7:47:22 PM}	}
-// COMMENT: {7/13/2009 7:47:22 PM}	*pResult = 0;
-// COMMENT: {7/13/2009 7:47:22 PM}	TRACE("Out Allowed %s\n", __FUNCTION__);
-// COMMENT: {7/13/2009 7:47:22 PM}}
 
 #define COMPARE_SET(S, R) \
 do { \
@@ -440,33 +367,6 @@ do { \
 		this->RichEditCtrl.SetWindowText(R.c_str()); \
 	} \
 } while (0)
-
-// COMMENT: {7/13/2009 7:44:18 PM}void CLeakyPropsPage::OnTreeSelChanged(NMHDR *pNotifyStruct, LRESULT *pResult)
-// COMMENT: {7/13/2009 7:44:18 PM}{
-// COMMENT: {7/13/2009 7:44:18 PM}	TRACE("In %s\n", __FUNCTION__);
-// COMMENT: {7/13/2009 7:44:18 PM}	UNREFERENCED_PARAMETER(pResult);
-// COMMENT: {7/13/2009 7:44:18 PM}	NMTREEVIEW *pTvn = reinterpret_cast<NMTREEVIEW*>(pNotifyStruct);
-// COMMENT: {7/13/2009 7:44:18 PM}	this->ItemDDX = pTvn->itemNew.hItem;
-// COMMENT: {7/13/2009 7:44:18 PM}	if (this->ItemDDX)
-// COMMENT: {7/13/2009 7:44:18 PM}	{
-// COMMENT: {7/13/2009 7:44:18 PM}		this->UpdateData(FALSE);
-// COMMENT: {7/13/2009 7:44:18 PM}
-// COMMENT: {7/13/2009 7:44:18 PM}		// update property description
-// COMMENT: {7/13/2009 7:44:18 PM}		//
-// COMMENT: {7/13/2009 7:44:18 PM}		if (this->TreeCtrl.GetSafeHwnd())
-// COMMENT: {7/13/2009 7:44:18 PM}		{
-// COMMENT: {7/13/2009 7:44:18 PM}			CString strItem = this->TreeCtrl.GetItemText(this->ItemDDX);
-// COMMENT: {7/13/2009 7:44:18 PM}
-// COMMENT: {7/13/2009 7:44:18 PM}			COMPARE_SET(PSZ_HEAD,     this->m_sHeadRTF);
-// COMMENT: {7/13/2009 7:44:18 PM}			COMPARE_SET(PSZ_SOLUTION, this->m_sAssocSolutionRTF);
-// COMMENT: {7/13/2009 7:44:18 PM}		}
-// COMMENT: {7/13/2009 7:44:18 PM}	}
-// COMMENT: {7/13/2009 7:44:18 PM}	if (this->TreeCtrl.GetSafeHwnd())
-// COMMENT: {7/13/2009 7:44:18 PM}	{
-// COMMENT: {7/13/2009 7:44:18 PM}		this->TreeCtrl.SetFocus();
-// COMMENT: {7/13/2009 7:44:18 PM}	}
-// COMMENT: {7/13/2009 7:44:18 PM}	TRACE("Out %s\n", __FUNCTION__);
-// COMMENT: {7/13/2009 7:44:18 PM}}
 
 void CLeakyPropsPage::SetPropertyDescription()
 {
@@ -482,7 +382,9 @@ void CLeakyPropsPage::SetPropertyDescription()
 void CLeakyPropsPage::OnEnSetfocusDescEdit()
 {
 	TRACE("In %s\n", __FUNCTION__);
+
 	this->RichEditCtrl.SetWindowText(this->m_sDescriptionRTF.c_str());
+
 	TRACE("Out %s\n", __FUNCTION__);
 }
 
@@ -529,13 +431,13 @@ void CLeakyPropsPage::OnBnClickedButtonXYZ()
 		{
 			this->SolutionSeries.OnBnClickedButtonXYZ();
 		}
-		else if (this->ItemDDX == this->ThicknessSeries.treeitem)
+		else if (this->ItemDDX == this->ThicknessProperty.treeitem)
 		{
-			this->ThicknessSeries.OnBnClickedButtonXYZ();
+			this->ThicknessProperty.OnBnClickedButtonXYZ();
 		}
-		else if (this->ItemDDX == this->HydCondSeries.treeitem)
+		else if (this->ItemDDX == this->HydCondProperty.treeitem)
 		{
-			this->HydCondSeries.OnBnClickedButtonXYZ();
+			this->HydCondProperty.OnBnClickedButtonXYZ();
 		}
 	}
 }
@@ -544,8 +446,8 @@ void CLeakyPropsPage::SetUnits(const CUnits &u)
 {
 	this->HeadSeries.SetUnits(u);
 	this->SolutionSeries.SetUnits(u);
-	this->ThicknessSeries.SetUnits(u);
-	this->HydCondSeries.SetUnits(u);
+	this->ThicknessProperty.SetUnits(u);
+	this->HydCondProperty.SetUnits(u);
 }
 
 void CLeakyPropsPage::OnCbnSelchangeComboProptype()
@@ -560,13 +462,13 @@ void CLeakyPropsPage::OnCbnSelchangeComboProptype()
 		{
 			ASSERT(FALSE);
 		}
-		else if (this->ItemDDX == this->ThicknessSeries.treeitem)
+		else if (this->ItemDDX == this->ThicknessProperty.treeitem)
 		{
-			this->ThicknessSeries.OnCbnSelchangeComboProptype();
+			this->ThicknessProperty.OnCbnSelchangeComboProptype();
 		}
-		else if (this->ItemDDX == this->HydCondSeries.treeitem)
+		else if (this->ItemDDX == this->HydCondProperty.treeitem)
 		{
-			this->HydCondSeries.OnCbnSelchangeComboProptype();
+			this->HydCondProperty.OnCbnSelchangeComboProptype();
 		}
 	}
 }
@@ -617,40 +519,17 @@ void CLeakyPropsPage::OnBnClickedCheckMixture()
 		{
 			this->SolutionSeries.OnBnClickedCheckMixture();
 		}
-		else if (this->ItemDDX == this->ThicknessSeries.treeitem)
+		else if (this->ItemDDX == this->ThicknessProperty.treeitem)
 		{
-			this->ThicknessSeries.OnBnClickedCheckMixture();
+			this->ThicknessProperty.OnBnClickedCheckMixture();
 		}
-		else if (this->ItemDDX == this->HydCondSeries.treeitem)
+		else if (this->ItemDDX == this->HydCondProperty.treeitem)
 		{
-			this->HydCondSeries.OnBnClickedCheckMixture();
+			this->HydCondProperty.OnBnClickedCheckMixture();
 		}
 		else
 		{
 			ASSERT(FALSE);
-		}
-	}
-}
-
-void CLeakyPropsPage::OnBnClickedFaceRadios()
-{
-	ASSERT(this->IsDlgButtonChecked(IDC_CHECK_FACE));
-	if (this->IsDlgButtonChecked(IDC_CHECK_FACE))
-	{
-		if (this->IsDlgButtonChecked(IDC_FACE_X_RADIO))
-		{
-			this->BC.face_defined = TRUE;
-			this->BC.face         = 0;
-		}
-		if (this->IsDlgButtonChecked(IDC_FACE_Y_RADIO))
-		{
-			this->BC.face_defined = TRUE;
-			this->BC.face         = 1;
-		}
-		if (this->IsDlgButtonChecked(IDC_FACE_Z_RADIO))
-		{
-			this->BC.face_defined = TRUE;
-			this->BC.face         = 2;
 		}
 	}
 }
