@@ -21,7 +21,8 @@ CZoneFlowRatePropertyPage::~CZoneFlowRatePropertyPage()
 
 void CZoneFlowRatePropertyPage::DoDataExchange(CDataExchange* pDX)
 {
-	baseCZoneFlowRatePropertyPage::DoDataExchange(pDX);
+// COMMENT: {7/13/2009 7:20:16 PM}	baseCZoneFlowRatePropertyPage::DoDataExchange(pDX);
+	CPropertyPage::DoDataExchange(pDX);
 
 	DDX_Control(pDX, IDC_COMBINATION_LIST, this->CombinationList);
 	this->CombinationList.SetExtendedStyle(LVS_EX_CHECKBOXES);

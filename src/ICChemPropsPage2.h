@@ -48,12 +48,16 @@ public:
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual void DDV_SoftValidate();
+	virtual void SetPropertyDescription();
+
+	virtual void DDX_Single(CDataExchange* pDX);
 
 	DECLARE_MESSAGE_MAP()
 
 	//{{ COMMON
- 	afx_msg void OnTreeSelChanging(NMHDR *pNotifyStruct, LRESULT *plResult);
- 	afx_msg void OnTreeSelChanged(NMHDR *pNotifyStruct, LRESULT *plResult);
+// COMMENT: {7/13/2009 7:46:50 PM} 	afx_msg void OnTreeSelChanging(NMHDR *pNotifyStruct, LRESULT *plResult);
+// COMMENT: {7/13/2009 7:46:50 PM} 	afx_msg void OnTreeSelChanged(NMHDR *pNotifyStruct, LRESULT *plResult);
 
 	afx_msg void OnBnClickedButtonXYZ();
 
@@ -75,12 +79,12 @@ protected:
 	CGridTimeSeries SolidSolutionsProperty;    // single
 	CGridTimeSeries KineticsProperty;          // single
 
-	CModGridCtrlEx PointsGrid;
-
-	CRichEditCtrl  RichEditCtrl;
-	CTreeCtrl      TreeCtrl;
-
-	HTREEITEM ItemDDX;
+// COMMENT: {7/13/2009 7:18:39 PM}	CModGridCtrlEx PointsGrid;
+// COMMENT: {7/13/2009 7:18:39 PM}
+// COMMENT: {7/13/2009 7:18:39 PM}	CRichEditCtrl  RichEditCtrl;
+// COMMENT: {7/13/2009 7:18:39 PM}	CTreeCtrl      TreeCtrl;
+// COMMENT: {7/13/2009 7:18:39 PM}
+// COMMENT: {7/13/2009 7:18:39 PM}	HTREEITEM ItemDDX;
 
 	std::string m_sDescriptionRTF;        // IDR_DESCRIPTION_RTF
 	std::string m_sSolutionRTF;           // IDR_CHEM_IC_SOLUTION_RTF

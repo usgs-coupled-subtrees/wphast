@@ -8,6 +8,9 @@
 #include "WPhastView.h"
 
 #include "BC.h"
+#include "ChemIC.h"
+#include "HeadIC.h"
+
 #include "property.h"
 #include "CheckTreeCtrl.h"
 #include "ZoneActor.h"
@@ -4402,7 +4405,7 @@ double CGlobal::ComputeHandleRadius(vtkRenderer *renderer)
 
 #define GET_ABS_PATH_MACRO(D, C, P) \
 do { \
-	if (C.P && C.P->type == PROP_XYZ) { \
+	if (C.P && (C.P->type == PROP_XYZ || C.P->type == PROP_XYZT)) { \
 		if (C.P->data_source) { \
 			std::string filename = C.P->data_source->Get_file_name(); \
 			if (filename.length() > 0) { \
@@ -4430,7 +4433,7 @@ void CGlobal::PathsRelativeToAbsolute(LPCTSTR lpszPathName, CWPhastDoc* pDoc, CG
 do { \
 	CTimeSeries<Cproperty>::iterator it = C.TS.begin(); \
 	for (; it != C.TS.end(); ++it) { \
-		if ((*it).second.type == PROP_XYZ) { \
+		if ((*it).second.type == PROP_XYZ || (*it).second.type == PROP_XYZT) { \
 			if ((*it).second.data_source) { \
 				std::string filename = (*it).second.data_source->Get_file_name(); \
 				if (filename.length() > 0) { \
@@ -4453,9 +4456,27 @@ void CGlobal::PathsRelativeToAbsolute(LPCTSTR lpszPathName, CWPhastDoc* pDoc, CB
 	GET_ABS_PATH_TIMESERIES_MACRO(pDoc, bc, m_bc_solution);
 }
 
+void CGlobal::PathsRelativeToAbsolute(LPCTSTR lpszPathName, CWPhastDoc* pDoc, CChemIC& chemIC)
+{	
+	// Cproperty
+	GET_ABS_PATH_MACRO(pDoc, chemIC, equilibrium_phases);
+	GET_ABS_PATH_MACRO(pDoc, chemIC, exchange);
+	GET_ABS_PATH_MACRO(pDoc, chemIC, gas_phase);
+	GET_ABS_PATH_MACRO(pDoc, chemIC, kinetics);
+	GET_ABS_PATH_MACRO(pDoc, chemIC, solid_solutions);
+	GET_ABS_PATH_MACRO(pDoc, chemIC, solution);
+	GET_ABS_PATH_MACRO(pDoc, chemIC, surface);
+}
+
+void CGlobal::PathsRelativeToAbsolute(LPCTSTR lpszPathName, CWPhastDoc* pDoc, CHeadIC& headIC)
+{
+	// Cproperty
+	GET_ABS_PATH_MACRO(pDoc, headIC, head);
+}
+
 #define GET_REL_PATH_MACRO(D, C, P) \
 do { \
-	if (C.P && C.P->type == PROP_XYZ) { \
+	if (C.P && (C.P->type == PROP_XYZ || C.P->type == PROP_XYZT)) { \
 		if (C.P->data_source) { \
 			std::string filename = C.P->data_source->Get_file_name(); \
 			if (filename.length() > 0) { \
@@ -4483,7 +4504,7 @@ void CGlobal::PathsAbsoluteToRelative(LPCTSTR lpszPathName, CWPhastDoc* pDoc, CG
 do { \
 	CTimeSeries<Cproperty>::iterator it = C.TS.begin(); \
 	for (; it != C.TS.end(); ++it) { \
-		if ((*it).second.type == PROP_XYZ) { \
+		if ((*it).second.type == PROP_XYZ || (*it).second.type == PROP_XYZT) { \
 			if ((*it).second.data_source) { \
 				std::string filename = (*it).second.data_source->Get_file_name(); \
 				if (filename.length() > 0) { \
@@ -4504,6 +4525,24 @@ void CGlobal::PathsAbsoluteToRelative(LPCTSTR lpszPathName, CWPhastDoc* pDoc, CB
 	GET_REL_PATH_TIMESERIES_MACRO(pDoc, bc, m_bc_head);
 	GET_REL_PATH_TIMESERIES_MACRO(pDoc, bc, m_bc_flux);
 	GET_REL_PATH_TIMESERIES_MACRO(pDoc, bc, m_bc_solution);
+}
+
+void CGlobal::PathsAbsoluteToRelative(LPCTSTR lpszPathName, CWPhastDoc* pDoc, CChemIC& chemIC)
+{
+	// Cproperty
+	GET_REL_PATH_MACRO(pDoc, chemIC, equilibrium_phases);
+	GET_REL_PATH_MACRO(pDoc, chemIC, exchange);
+	GET_REL_PATH_MACRO(pDoc, chemIC, gas_phase);
+	GET_REL_PATH_MACRO(pDoc, chemIC, kinetics);
+	GET_REL_PATH_MACRO(pDoc, chemIC, solid_solutions);
+	GET_REL_PATH_MACRO(pDoc, chemIC, solution);
+	GET_REL_PATH_MACRO(pDoc, chemIC, surface);
+}
+
+void CGlobal::PathsAbsoluteToRelative(LPCTSTR lpszPathName, CWPhastDoc* pDoc, CHeadIC& headIC)
+{
+	// Cproperty
+	GET_REL_PATH_MACRO(pDoc, headIC, head);
 }
 
 // based on DDX_Text(CDataExchange* pDX, int nIDC, float& value)

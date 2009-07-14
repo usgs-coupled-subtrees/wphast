@@ -18,6 +18,9 @@ class vtkProp3D;
 #include "srcinput/Prism.h"
 #include "TreePropSheetEx/TreePropSheetEx.h"
 class CBC;
+class CChemIC;
+class CHeadIC;
+
 class Cproperty;
 class CCheckTreeCtrl;
 class CWPhastView;
@@ -180,9 +183,13 @@ public:
 
 	static void PathsRelativeToAbsolute(LPCTSTR lpszPathName, CWPhastDoc* pDoc, CGridElt& elt);
 	static void PathsRelativeToAbsolute(LPCTSTR lpszPathName, CWPhastDoc* pDoc, CBC& bc);
+	static void PathsRelativeToAbsolute(LPCTSTR lpszPathName, CWPhastDoc* pDoc, CChemIC& chemIC);
+	static void PathsRelativeToAbsolute(LPCTSTR lpszPathName, CWPhastDoc* pDoc, CHeadIC& headIC);
 
 	static void PathsAbsoluteToRelative(LPCTSTR lpszPathName, CWPhastDoc* pDoc, CGridElt& elt);
 	static void PathsAbsoluteToRelative(LPCTSTR lpszPathName, CWPhastDoc* pDoc, CBC& bc);
+	static void PathsAbsoluteToRelative(LPCTSTR lpszPathName, CWPhastDoc* pDoc, CChemIC& chemIC);
+	static void PathsAbsoluteToRelative(LPCTSTR lpszPathName, CWPhastDoc* pDoc, CHeadIC& headIC);
 
 	static void DDX_Text_Safe(CDataExchange* pDX, int nIDC, float& value);
 	static void DDX_Text_Safe(CDataExchange *pDX, int nIDC, double &value);

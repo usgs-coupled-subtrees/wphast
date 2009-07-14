@@ -48,43 +48,52 @@ public:
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual void DDV_SoftValidate();
+	virtual void SetPropertyDescription();
+
+	virtual void DDX_Series(CDataExchange* pDX);
+	virtual void DDX_Single(CDataExchange* pDX);
 
 	DECLARE_MESSAGE_MAP()
 
 	//{{ COMMON
- 	afx_msg void OnTreeSelChanging(NMHDR *pNotifyStruct, LRESULT *plResult);
- 	afx_msg void OnTreeSelChanged(NMHDR *pNotifyStruct, LRESULT *plResult);
-
+	// end edit grids
 	afx_msg void OnEndLabelEditFlux(NMHDR *pNotifyStruct, LRESULT *result);
 	afx_msg void OnEndLabelEditSolution(NMHDR *pNotifyStruct, LRESULT *result);
 
+	// selection changed grids
 	afx_msg void OnSelChangedFlux(NMHDR *pNotifyStruct, LRESULT *result);
 	afx_msg void OnSelChangedSolution(NMHDR *pNotifyStruct, LRESULT *result);
 
+	// browse for XYZ and XYZT
 	afx_msg void OnBnClickedButtonXYZ();
 
+	// DDV failures
 	afx_msg LRESULT OnUM_DDXFailure(WPARAM wParam, LPARAM lParam);
 
+	// should be on superclass
 	afx_msg void OnEnSetfocusDescEdit();
 
+	// single property combo
 	afx_msg void OnCbnSelchangeComboProptype();
+
+	// mixture checkbox
 	afx_msg void OnBnClickedCheckMixture();
 	//}} COMMON
 
+	// face checkbox
 	afx_msg void OnBnClickedCheckFace();
 
+	// face radios
+	afx_msg void OnBnClickedFaceRadios();
+
+	// property controllers
 	CGridTimeSeries ThicknessSeries; // single
 	CGridTimeSeries HydCondSeries;   // single
 	CGridTimeSeries HeadSeries;
 	CGridTimeSeries SolutionSeries;
 
-	CModGridCtrlEx PointsGrid;
-
-	CRichEditCtrl  RichEditCtrl;
-	CTreeCtrl      TreeCtrl;
-
-	HTREEITEM ItemDDX;
-
+	// RTF strings
 	std::string m_sDescriptionRTF;   // IDR_DESCRIPTION_RTF
 	std::string m_sHeadRTF;          // IDR_DESCRIPTION_RTF
 	std::string m_sThicknessRTF;     // IDR_BC_LEAKY_THICKNESS_RTF
@@ -92,12 +101,14 @@ protected:
 	std::string m_sAssocSolutionRTF; // IDR_BC_LEAKY_ASSOC_SOL_RTF
 	std::string m_sFaceRTF;          // IDR_BC_LEAKY_FACE_RTF
 
+	// should be member of superclass
 	CString Description;
-// COMMENT: {6/30/2009 11:16:25 PM}	CString DefaultUnits;
 
+	// flags
 	bool FlowOnly;
 	bool Default;
 
 protected:
+	// data
 	CBC BC;
 };

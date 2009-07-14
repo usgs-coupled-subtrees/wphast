@@ -64,11 +64,9 @@ void CICChemPropsPage2::DoDataExchange(CDataExchange* pDX)
 	TRACE("In %s\n", __FUNCTION__);
 	CPropsPropertyPage::DoDataExchange(pDX);
 
-	DDX_Control(pDX, IDC_DESC_RICHEDIT, this->RichEditCtrl);
-	DDX_Control(pDX, IDC_PROP_TREE, this->TreeCtrl);
-
 	if (this->TreeCtrl.GetCount() == 0)
 	{
+		// setup tree
 		this->SolutionProperty.treeitem          = this->TreeCtrl.InsertItem(PSZ_SOLUTION,           TVI_ROOT, TVI_LAST);
 		this->EquilibriumPhasesProperty.treeitem = this->TreeCtrl.InsertItem(PSZ_EQUILIBRIUM_PHASES, TVI_ROOT, TVI_LAST);
 		this->SurfaceProperty.treeitem           = this->TreeCtrl.InsertItem(PSZ_EXCHANGE,           TVI_ROOT, TVI_LAST);
@@ -77,77 +75,167 @@ void CICChemPropsPage2::DoDataExchange(CDataExchange* pDX)
 		this->SolidSolutionsProperty.treeitem    = this->TreeCtrl.InsertItem(PSZ_SOLID_SOLUTIONS,    TVI_ROOT, TVI_LAST);
 		this->KineticsProperty.treeitem          = this->TreeCtrl.InsertItem(PSZ_KINETICS,           TVI_ROOT, TVI_LAST);
 
-		// wrap richedit to window
-		this->RichEditCtrl.SetTargetDevice(NULL, 0);
-
+		// setup tree selection
 		this->ItemDDX = this->SolutionProperty.treeitem;
 		this->TreeCtrl.SelectItem(this->ItemDDX);
-
 		this->TreeCtrl.ModifyStyle(TVS_TRACKSELECT, TVS_FULLROWSELECT|TVS_SHOWSELALWAYS, 0);
+
+		// set points grid for each propety
+		this->SolutionProperty.SetPointsGrid(&this->PointsGrid);
+		this->EquilibriumPhasesProperty.SetPointsGrid(&this->PointsGrid);
+		this->SurfaceProperty.SetPointsGrid(&this->PointsGrid);
+		this->ExchangeProperty.SetPointsGrid(&this->PointsGrid);
+		this->GasPhaseProperty.SetPointsGrid(&this->PointsGrid);
+		this->SolidSolutionsProperty.SetPointsGrid(&this->PointsGrid);
+		this->KineticsProperty.SetPointsGrid(&this->PointsGrid);
 	}
-
-	DDX_GridControl(pDX, IDC_POINTS_GRID, this->PointsGrid);
-
-	this->SolutionProperty.SetPointsGrid(&this->PointsGrid);
-	this->EquilibriumPhasesProperty.SetPointsGrid(&this->PointsGrid);
-	this->SurfaceProperty.SetPointsGrid(&this->PointsGrid);
-	this->ExchangeProperty.SetPointsGrid(&this->PointsGrid);
-	this->GasPhaseProperty.SetPointsGrid(&this->PointsGrid);
-	this->SolidSolutionsProperty.SetPointsGrid(&this->PointsGrid);
-	this->KineticsProperty.SetPointsGrid(&this->PointsGrid);
 
 	// description
 	::DDX_Text(pDX, IDC_DESC_EDIT, this->Description);
 
+	// properties
 	if (pDX->m_bSaveAndValidate)
+	{
+		this->DDV_SoftValidate();
+	}
+	this->DDX_Single(pDX);
+
+// COMMENT: {7/13/2009 8:15:58 PM}	if (pDX->m_bSaveAndValidate)
+// COMMENT: {7/13/2009 8:15:58 PM}	{
+// COMMENT: {7/13/2009 8:15:58 PM}		// properties
+// COMMENT: {7/13/2009 8:15:58 PM}		if (this->ItemDDX == this->SolutionProperty.treeitem)
+// COMMENT: {7/13/2009 8:15:58 PM}		{
+// COMMENT: {7/13/2009 8:15:58 PM}			this->SolutionProperty.DDV_SoftValidate();
+// COMMENT: {7/13/2009 8:15:58 PM}			this->SolutionProperty.DDX_Single(pDX, this->Default);
+// COMMENT: {7/13/2009 8:15:58 PM}		}
+// COMMENT: {7/13/2009 8:15:58 PM}		else if (this->ItemDDX == this->EquilibriumPhasesProperty.treeitem)
+// COMMENT: {7/13/2009 8:15:58 PM}		{
+// COMMENT: {7/13/2009 8:15:58 PM}			this->EquilibriumPhasesProperty.DDV_SoftValidate();
+// COMMENT: {7/13/2009 8:15:58 PM}			this->EquilibriumPhasesProperty.DDX_Single(pDX, false);
+// COMMENT: {7/13/2009 8:15:58 PM}		}
+// COMMENT: {7/13/2009 8:15:58 PM}		else if (this->ItemDDX == this->SurfaceProperty.treeitem)
+// COMMENT: {7/13/2009 8:15:58 PM}		{
+// COMMENT: {7/13/2009 8:15:58 PM}			this->SurfaceProperty.DDV_SoftValidate();
+// COMMENT: {7/13/2009 8:15:58 PM}			this->SurfaceProperty.DDX_Single(pDX, false);
+// COMMENT: {7/13/2009 8:15:58 PM}		}
+// COMMENT: {7/13/2009 8:15:58 PM}		else if (this->ItemDDX == this->ExchangeProperty.treeitem)
+// COMMENT: {7/13/2009 8:15:58 PM}		{
+// COMMENT: {7/13/2009 8:15:58 PM}			this->ExchangeProperty.DDV_SoftValidate();
+// COMMENT: {7/13/2009 8:15:58 PM}			this->ExchangeProperty.DDX_Single(pDX, false);
+// COMMENT: {7/13/2009 8:15:58 PM}		}
+// COMMENT: {7/13/2009 8:15:58 PM}		else if (this->ItemDDX == this->GasPhaseProperty.treeitem)
+// COMMENT: {7/13/2009 8:15:58 PM}		{
+// COMMENT: {7/13/2009 8:15:58 PM}			this->GasPhaseProperty.DDV_SoftValidate();
+// COMMENT: {7/13/2009 8:15:58 PM}			this->GasPhaseProperty.DDX_Single(pDX, false);
+// COMMENT: {7/13/2009 8:15:58 PM}		}
+// COMMENT: {7/13/2009 8:15:58 PM}		else if (this->ItemDDX == this->SolidSolutionsProperty.treeitem)
+// COMMENT: {7/13/2009 8:15:58 PM}		{
+// COMMENT: {7/13/2009 8:15:58 PM}			this->SolidSolutionsProperty.DDV_SoftValidate();
+// COMMENT: {7/13/2009 8:15:58 PM}			this->SolidSolutionsProperty.DDX_Single(pDX, false);
+// COMMENT: {7/13/2009 8:15:58 PM}		}
+// COMMENT: {7/13/2009 8:15:58 PM}		else if (this->ItemDDX == this->KineticsProperty.treeitem)
+// COMMENT: {7/13/2009 8:15:58 PM}		{
+// COMMENT: {7/13/2009 8:15:58 PM}			this->KineticsProperty.DDV_SoftValidate();
+// COMMENT: {7/13/2009 8:15:58 PM}			this->KineticsProperty.DDX_Single(pDX, false);
+// COMMENT: {7/13/2009 8:15:58 PM}		}
+// COMMENT: {7/13/2009 8:15:58 PM}		else
+// COMMENT: {7/13/2009 8:15:58 PM}		{
+// COMMENT: {7/13/2009 8:15:58 PM}			ASSERT(FALSE);
+// COMMENT: {7/13/2009 8:15:58 PM}		}
+// COMMENT: {7/13/2009 8:15:58 PM}	}
+// COMMENT: {7/13/2009 8:15:58 PM}	else
+// COMMENT: {7/13/2009 8:15:58 PM}	{
+// COMMENT: {7/13/2009 8:15:58 PM}		// properties
+// COMMENT: {7/13/2009 8:15:58 PM}		CGridTimeSeries::ShowSingleProperty(this, SW_SHOW);
+// COMMENT: {7/13/2009 8:15:58 PM}
+// COMMENT: {7/13/2009 8:15:58 PM}		// properties
+// COMMENT: {7/13/2009 8:15:58 PM}		if (this->ItemDDX == this->SolutionProperty.treeitem)
+// COMMENT: {7/13/2009 8:15:58 PM}		{
+// COMMENT: {7/13/2009 8:15:58 PM}			this->SolutionProperty.DDX_Single(pDX);
+// COMMENT: {7/13/2009 8:15:58 PM}		}
+// COMMENT: {7/13/2009 8:15:58 PM}		else if (this->ItemDDX == this->EquilibriumPhasesProperty.treeitem)
+// COMMENT: {7/13/2009 8:15:58 PM}		{
+// COMMENT: {7/13/2009 8:15:58 PM}			this->EquilibriumPhasesProperty.DDX_Single(pDX);
+// COMMENT: {7/13/2009 8:15:58 PM}		}
+// COMMENT: {7/13/2009 8:15:58 PM}		else if (this->ItemDDX == this->SurfaceProperty.treeitem)
+// COMMENT: {7/13/2009 8:15:58 PM}		{
+// COMMENT: {7/13/2009 8:15:58 PM}			this->SurfaceProperty.DDX_Single(pDX);
+// COMMENT: {7/13/2009 8:15:58 PM}		}
+// COMMENT: {7/13/2009 8:15:58 PM}		else if (this->ItemDDX == this->ExchangeProperty.treeitem)
+// COMMENT: {7/13/2009 8:15:58 PM}		{
+// COMMENT: {7/13/2009 8:15:58 PM}			this->ExchangeProperty.DDX_Single(pDX);
+// COMMENT: {7/13/2009 8:15:58 PM}		}
+// COMMENT: {7/13/2009 8:15:58 PM}		else if (this->ItemDDX == this->GasPhaseProperty.treeitem)
+// COMMENT: {7/13/2009 8:15:58 PM}		{
+// COMMENT: {7/13/2009 8:15:58 PM}			this->GasPhaseProperty.DDX_Single(pDX);
+// COMMENT: {7/13/2009 8:15:58 PM}		}
+// COMMENT: {7/13/2009 8:15:58 PM}		else if (this->ItemDDX == this->SolidSolutionsProperty.treeitem)
+// COMMENT: {7/13/2009 8:15:58 PM}		{
+// COMMENT: {7/13/2009 8:15:58 PM}			this->SolidSolutionsProperty.DDX_Single(pDX);
+// COMMENT: {7/13/2009 8:15:58 PM}		}
+// COMMENT: {7/13/2009 8:15:58 PM}		else if (this->ItemDDX == this->KineticsProperty.treeitem)
+// COMMENT: {7/13/2009 8:15:58 PM}		{
+// COMMENT: {7/13/2009 8:15:58 PM}			this->KineticsProperty.DDX_Single(pDX);
+// COMMENT: {7/13/2009 8:15:58 PM}		}
+// COMMENT: {7/13/2009 8:15:58 PM}		else
+// COMMENT: {7/13/2009 8:15:58 PM}		{
+// COMMENT: {7/13/2009 8:15:58 PM}			ASSERT(FALSE);
+// COMMENT: {7/13/2009 8:15:58 PM}		}
+// COMMENT: {7/13/2009 8:15:58 PM}	}
+	TRACE("Out %s\n", __FUNCTION__);
+}
+
+void CICChemPropsPage2::DDV_SoftValidate()
+{
+	if (this->ItemDDX)
 	{
 		// properties
 		if (this->ItemDDX == this->SolutionProperty.treeitem)
 		{
 			this->SolutionProperty.DDV_SoftValidate();
-			this->SolutionProperty.DDX_Single(pDX, this->Default);
 		}
 		else if (this->ItemDDX == this->EquilibriumPhasesProperty.treeitem)
 		{
 			this->EquilibriumPhasesProperty.DDV_SoftValidate();
-			this->EquilibriumPhasesProperty.DDX_Single(pDX, false);
 		}
 		else if (this->ItemDDX == this->SurfaceProperty.treeitem)
 		{
 			this->SurfaceProperty.DDV_SoftValidate();
-			this->SurfaceProperty.DDX_Single(pDX, false);
 		}
 		else if (this->ItemDDX == this->ExchangeProperty.treeitem)
 		{
 			this->ExchangeProperty.DDV_SoftValidate();
-			this->ExchangeProperty.DDX_Single(pDX, false);
 		}
 		else if (this->ItemDDX == this->GasPhaseProperty.treeitem)
 		{
 			this->GasPhaseProperty.DDV_SoftValidate();
-			this->GasPhaseProperty.DDX_Single(pDX, false);
 		}
 		else if (this->ItemDDX == this->SolidSolutionsProperty.treeitem)
 		{
 			this->SolidSolutionsProperty.DDV_SoftValidate();
-			this->SolidSolutionsProperty.DDX_Single(pDX, false);
 		}
 		else if (this->ItemDDX == this->KineticsProperty.treeitem)
 		{
 			this->KineticsProperty.DDV_SoftValidate();
-			this->KineticsProperty.DDX_Single(pDX, false);
 		}
 		else
 		{
 			ASSERT(FALSE);
 		}
 	}
-	else
-	{
-		// properties
-		CGridTimeSeries::ShowSingleProperty(this, SW_SHOW);
+}
 
-		// properties
+void CICChemPropsPage2::DDX_Single(CDataExchange* pDX)
+{
+	if (this->ItemDDX)
+	{
+		if (!pDX->m_bSaveAndValidate)
+		{
+			// display single
+			CGridTimeSeries::ShowSingleProperty(this, SW_SHOW);
+		}
+
+		// DDX_Single selected property
 		if (this->ItemDDX == this->SolutionProperty.treeitem)
 		{
 			this->SolutionProperty.DDX_Single(pDX);
@@ -181,7 +269,6 @@ void CICChemPropsPage2::DoDataExchange(CDataExchange* pDX)
 			ASSERT(FALSE);
 		}
 	}
-	TRACE("Out %s\n", __FUNCTION__);
 }
 
 void CICChemPropsPage2::SetProperties(const CChemIC& rChemIC)
@@ -222,9 +309,9 @@ void CICChemPropsPage2::GetProperties(CChemIC& rChemIC)const
 }
 
 BEGIN_MESSAGE_MAP(CICChemPropsPage2, CPropsPropertyPage)
-	// IDC_PROP_TREE
-	ON_NOTIFY(TVN_SELCHANGING, IDC_PROP_TREE, OnTreeSelChanging)
-	ON_NOTIFY(TVN_SELCHANGED,  IDC_PROP_TREE, OnTreeSelChanged)
+// COMMENT: {7/13/2009 7:27:18 PM}	// IDC_PROP_TREE
+// COMMENT: {7/13/2009 7:27:18 PM}	ON_NOTIFY(TVN_SELCHANGING, IDC_PROP_TREE, OnTreeSelChanging)
+// COMMENT: {7/13/2009 7:27:18 PM}	ON_NOTIFY(TVN_SELCHANGED,  IDC_PROP_TREE, OnTreeSelChanged)
 
 	// IDC_DESC_EDIT
 	ON_EN_SETFOCUS(IDC_DESC_EDIT, OnEnSetfocusDescEdit)
@@ -245,67 +332,67 @@ END_MESSAGE_MAP()
 
 // CICChemPropsPage2 message handlers
 
-void CICChemPropsPage2::OnTreeSelChanging(NMHDR *pNotifyStruct, LRESULT *pResult)
-{
-	TRACE("In %s\n", __FUNCTION__);
-	NMTREEVIEW *pTvn = reinterpret_cast<NMTREEVIEW*>(pNotifyStruct);
-	this->ItemDDX = pTvn->itemOld.hItem;
-	if (this->ItemDDX)
-	{
-		if (this->ItemDDX == this->SolutionProperty.treeitem)
-		{
-			this->SolutionProperty.DDV_SoftValidate();
-		}
-		else if (this->ItemDDX == this->EquilibriumPhasesProperty.treeitem)
-		{
-			this->EquilibriumPhasesProperty.DDV_SoftValidate();
-		}
-		else if (this->ItemDDX == this->SurfaceProperty.treeitem)
-		{
-			this->SurfaceProperty.DDV_SoftValidate();
-		}
-		else if (this->ItemDDX == this->ExchangeProperty.treeitem)
-		{
-			this->ExchangeProperty.DDV_SoftValidate();
-		}
-		else if (this->ItemDDX == this->GasPhaseProperty.treeitem)
-		{
-			this->GasPhaseProperty.DDV_SoftValidate();
-		}
-		else if (this->ItemDDX == this->SolidSolutionsProperty.treeitem)
-		{
-			this->SolidSolutionsProperty.DDV_SoftValidate();
-		}
-		else if (this->ItemDDX == this->KineticsProperty.treeitem)
-		{
-			this->KineticsProperty.DDV_SoftValidate();
-		}
-		else
-		{
-			ASSERT(FALSE);
-		}
-
-
-		// force CInPlaceXXX to lose focus
-		this->TreeCtrl.SetFocus();
-
-		if (!this->UpdateData(TRUE))
-		{
-			// notify which control caused failure
-			//
-			CWnd* pFocus = CWnd::GetFocus();
-			this->PostMessage(UM_DDX_FAILURE, (WPARAM)pFocus, (LPARAM)0);
-
-			// disallow change
-			//
-			*pResult = TRUE;
-			TRACE("Out %s Disallowed\n", __FUNCTION__);
-			return;
-		}
-	}
-	*pResult = 0;
-	TRACE("Out Allowed %s\n", __FUNCTION__);
-}
+// COMMENT: {7/13/2009 7:47:03 PM}void CICChemPropsPage2::OnTreeSelChanging(NMHDR *pNotifyStruct, LRESULT *pResult)
+// COMMENT: {7/13/2009 7:47:03 PM}{
+// COMMENT: {7/13/2009 7:47:03 PM}	TRACE("In %s\n", __FUNCTION__);
+// COMMENT: {7/13/2009 7:47:03 PM}	NMTREEVIEW *pTvn = reinterpret_cast<NMTREEVIEW*>(pNotifyStruct);
+// COMMENT: {7/13/2009 7:47:03 PM}	this->ItemDDX = pTvn->itemOld.hItem;
+// COMMENT: {7/13/2009 7:47:03 PM}	if (this->ItemDDX)
+// COMMENT: {7/13/2009 7:47:03 PM}	{
+// COMMENT: {7/13/2009 7:47:03 PM}		if (this->ItemDDX == this->SolutionProperty.treeitem)
+// COMMENT: {7/13/2009 7:47:03 PM}		{
+// COMMENT: {7/13/2009 7:47:03 PM}			this->SolutionProperty.DDV_SoftValidate();
+// COMMENT: {7/13/2009 7:47:03 PM}		}
+// COMMENT: {7/13/2009 7:47:03 PM}		else if (this->ItemDDX == this->EquilibriumPhasesProperty.treeitem)
+// COMMENT: {7/13/2009 7:47:03 PM}		{
+// COMMENT: {7/13/2009 7:47:03 PM}			this->EquilibriumPhasesProperty.DDV_SoftValidate();
+// COMMENT: {7/13/2009 7:47:03 PM}		}
+// COMMENT: {7/13/2009 7:47:03 PM}		else if (this->ItemDDX == this->SurfaceProperty.treeitem)
+// COMMENT: {7/13/2009 7:47:03 PM}		{
+// COMMENT: {7/13/2009 7:47:03 PM}			this->SurfaceProperty.DDV_SoftValidate();
+// COMMENT: {7/13/2009 7:47:03 PM}		}
+// COMMENT: {7/13/2009 7:47:03 PM}		else if (this->ItemDDX == this->ExchangeProperty.treeitem)
+// COMMENT: {7/13/2009 7:47:03 PM}		{
+// COMMENT: {7/13/2009 7:47:03 PM}			this->ExchangeProperty.DDV_SoftValidate();
+// COMMENT: {7/13/2009 7:47:03 PM}		}
+// COMMENT: {7/13/2009 7:47:03 PM}		else if (this->ItemDDX == this->GasPhaseProperty.treeitem)
+// COMMENT: {7/13/2009 7:47:03 PM}		{
+// COMMENT: {7/13/2009 7:47:03 PM}			this->GasPhaseProperty.DDV_SoftValidate();
+// COMMENT: {7/13/2009 7:47:03 PM}		}
+// COMMENT: {7/13/2009 7:47:03 PM}		else if (this->ItemDDX == this->SolidSolutionsProperty.treeitem)
+// COMMENT: {7/13/2009 7:47:03 PM}		{
+// COMMENT: {7/13/2009 7:47:03 PM}			this->SolidSolutionsProperty.DDV_SoftValidate();
+// COMMENT: {7/13/2009 7:47:03 PM}		}
+// COMMENT: {7/13/2009 7:47:03 PM}		else if (this->ItemDDX == this->KineticsProperty.treeitem)
+// COMMENT: {7/13/2009 7:47:03 PM}		{
+// COMMENT: {7/13/2009 7:47:03 PM}			this->KineticsProperty.DDV_SoftValidate();
+// COMMENT: {7/13/2009 7:47:03 PM}		}
+// COMMENT: {7/13/2009 7:47:03 PM}		else
+// COMMENT: {7/13/2009 7:47:03 PM}		{
+// COMMENT: {7/13/2009 7:47:03 PM}			ASSERT(FALSE);
+// COMMENT: {7/13/2009 7:47:03 PM}		}
+// COMMENT: {7/13/2009 7:47:03 PM}
+// COMMENT: {7/13/2009 7:47:03 PM}
+// COMMENT: {7/13/2009 7:47:03 PM}		// force CInPlaceXXX to lose focus
+// COMMENT: {7/13/2009 7:47:03 PM}		this->TreeCtrl.SetFocus();
+// COMMENT: {7/13/2009 7:47:03 PM}
+// COMMENT: {7/13/2009 7:47:03 PM}		if (!this->UpdateData(TRUE))
+// COMMENT: {7/13/2009 7:47:03 PM}		{
+// COMMENT: {7/13/2009 7:47:03 PM}			// notify which control caused failure
+// COMMENT: {7/13/2009 7:47:03 PM}			//
+// COMMENT: {7/13/2009 7:47:03 PM}			CWnd* pFocus = CWnd::GetFocus();
+// COMMENT: {7/13/2009 7:47:03 PM}			this->PostMessage(UM_DDX_FAILURE, (WPARAM)pFocus, (LPARAM)0);
+// COMMENT: {7/13/2009 7:47:03 PM}
+// COMMENT: {7/13/2009 7:47:03 PM}			// disallow change
+// COMMENT: {7/13/2009 7:47:03 PM}			//
+// COMMENT: {7/13/2009 7:47:03 PM}			*pResult = TRUE;
+// COMMENT: {7/13/2009 7:47:03 PM}			TRACE("Out %s Disallowed\n", __FUNCTION__);
+// COMMENT: {7/13/2009 7:47:03 PM}			return;
+// COMMENT: {7/13/2009 7:47:03 PM}		}
+// COMMENT: {7/13/2009 7:47:03 PM}	}
+// COMMENT: {7/13/2009 7:47:03 PM}	*pResult = 0;
+// COMMENT: {7/13/2009 7:47:03 PM}	TRACE("Out Allowed %s\n", __FUNCTION__);
+// COMMENT: {7/13/2009 7:47:03 PM}}
 
 #define COMPARE_SET(S, R) \
 do { \
@@ -314,35 +401,51 @@ do { \
 	} \
 } while (0)
 
-void CICChemPropsPage2::OnTreeSelChanged(NMHDR *pNotifyStruct, LRESULT *pResult)
+// COMMENT: {7/13/2009 7:43:20 PM}void CICChemPropsPage2::OnTreeSelChanged(NMHDR *pNotifyStruct, LRESULT *pResult)
+// COMMENT: {7/13/2009 7:43:20 PM}{
+// COMMENT: {7/13/2009 7:43:20 PM}	TRACE("In %s\n", __FUNCTION__);
+// COMMENT: {7/13/2009 7:43:20 PM}	UNREFERENCED_PARAMETER(pResult);
+// COMMENT: {7/13/2009 7:43:20 PM}	NMTREEVIEW *pTvn = reinterpret_cast<NMTREEVIEW*>(pNotifyStruct);
+// COMMENT: {7/13/2009 7:43:20 PM}	this->ItemDDX = pTvn->itemNew.hItem;
+// COMMENT: {7/13/2009 7:43:20 PM}	if (this->ItemDDX)
+// COMMENT: {7/13/2009 7:43:20 PM}	{
+// COMMENT: {7/13/2009 7:43:20 PM}		this->UpdateData(FALSE);
+// COMMENT: {7/13/2009 7:43:20 PM}
+// COMMENT: {7/13/2009 7:43:20 PM}		// update property description
+// COMMENT: {7/13/2009 7:43:20 PM}		//
+// COMMENT: {7/13/2009 7:43:20 PM}		if (this->TreeCtrl.GetSafeHwnd())
+// COMMENT: {7/13/2009 7:43:20 PM}		{
+// COMMENT: {7/13/2009 7:43:20 PM}			CString strItem = this->TreeCtrl.GetItemText(this->ItemDDX);
+// COMMENT: {7/13/2009 7:43:20 PM}			COMPARE_SET(PSZ_SOLUTION,           this->m_sSolutionRTF);
+// COMMENT: {7/13/2009 7:43:20 PM}			COMPARE_SET(PSZ_EQUILIBRIUM_PHASES, this->m_sEquilibriumPhasesRTF);
+// COMMENT: {7/13/2009 7:43:20 PM}			COMPARE_SET(PSZ_EXCHANGE,           this->m_sExchangeRTF);
+// COMMENT: {7/13/2009 7:43:20 PM}			COMPARE_SET(PSZ_SURFACE,            this->m_sSurfaceRTF);
+// COMMENT: {7/13/2009 7:43:20 PM}			COMPARE_SET(PSZ_GAS_PHASE,          this->m_sGasPhaseRTF);
+// COMMENT: {7/13/2009 7:43:20 PM}			COMPARE_SET(PSZ_SOLID_SOLUTIONS,    this->m_sSolidSolutionsRTF);
+// COMMENT: {7/13/2009 7:43:20 PM}			COMPARE_SET(PSZ_KINETICS,           this->m_sKineticsRTF);
+// COMMENT: {7/13/2009 7:43:20 PM}		}
+// COMMENT: {7/13/2009 7:43:20 PM}	}
+// COMMENT: {7/13/2009 7:43:20 PM}	if (this->TreeCtrl.GetSafeHwnd())
+// COMMENT: {7/13/2009 7:43:20 PM}	{
+// COMMENT: {7/13/2009 7:43:20 PM}		this->TreeCtrl.SetFocus();
+// COMMENT: {7/13/2009 7:43:20 PM}	}
+// COMMENT: {7/13/2009 7:43:20 PM}	TRACE("Out %s\n", __FUNCTION__);
+// COMMENT: {7/13/2009 7:43:20 PM}}
+
+void CICChemPropsPage2::SetPropertyDescription()
 {
-	TRACE("In %s\n", __FUNCTION__);
-	UNREFERENCED_PARAMETER(pResult);
-	NMTREEVIEW *pTvn = reinterpret_cast<NMTREEVIEW*>(pNotifyStruct);
-	this->ItemDDX = pTvn->itemNew.hItem;
 	if (this->ItemDDX)
 	{
-		this->UpdateData(FALSE);
+		CString strItem = this->TreeCtrl.GetItemText(this->ItemDDX);
 
-		// update property description
-		//
-		if (this->TreeCtrl.GetSafeHwnd())
-		{
-			CString strItem = this->TreeCtrl.GetItemText(this->ItemDDX);
-			COMPARE_SET(PSZ_SOLUTION,           this->m_sSolutionRTF);
-			COMPARE_SET(PSZ_EQUILIBRIUM_PHASES, this->m_sEquilibriumPhasesRTF);
-			COMPARE_SET(PSZ_EXCHANGE,           this->m_sExchangeRTF);
-			COMPARE_SET(PSZ_SURFACE,            this->m_sSurfaceRTF);
-			COMPARE_SET(PSZ_GAS_PHASE,          this->m_sGasPhaseRTF);
-			COMPARE_SET(PSZ_SOLID_SOLUTIONS,    this->m_sSolidSolutionsRTF);
-			COMPARE_SET(PSZ_KINETICS,           this->m_sKineticsRTF);
-		}
+		COMPARE_SET(PSZ_SOLUTION,           this->m_sSolutionRTF);
+		COMPARE_SET(PSZ_EQUILIBRIUM_PHASES, this->m_sEquilibriumPhasesRTF);
+		COMPARE_SET(PSZ_EXCHANGE,           this->m_sExchangeRTF);
+		COMPARE_SET(PSZ_SURFACE,            this->m_sSurfaceRTF);
+		COMPARE_SET(PSZ_GAS_PHASE,          this->m_sGasPhaseRTF);
+		COMPARE_SET(PSZ_SOLID_SOLUTIONS,    this->m_sSolidSolutionsRTF);
+		COMPARE_SET(PSZ_KINETICS,           this->m_sKineticsRTF);
 	}
-	if (this->TreeCtrl.GetSafeHwnd())
-	{
-		this->TreeCtrl.SetFocus();
-	}
-	TRACE("Out %s\n", __FUNCTION__);
 }
 
 void CICChemPropsPage2::OnEnSetfocusDescEdit()

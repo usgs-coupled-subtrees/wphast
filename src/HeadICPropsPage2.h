@@ -48,6 +48,10 @@ public:
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual void DDV_SoftValidate();
+	virtual void SetPropertyDescription();
+
+	virtual void DDX_Single(CDataExchange* pDX);
 
 	DECLARE_MESSAGE_MAP()
 
@@ -69,12 +73,12 @@ protected:
 
 	CGridTimeSeries HeadProperty;          // single
 
-	CModGridCtrlEx PointsGrid;
-
-	CRichEditCtrl  RichEditCtrl;
-	CTreeCtrl      TreeCtrl;
-
-	HTREEITEM ItemDDX;
+// COMMENT: {7/13/2009 7:18:32 PM}	CModGridCtrlEx PointsGrid;
+// COMMENT: {7/13/2009 7:18:32 PM}
+// COMMENT: {7/13/2009 7:18:32 PM}	CRichEditCtrl  RichEditCtrl;
+// COMMENT: {7/13/2009 7:18:32 PM}	CTreeCtrl      TreeCtrl;
+// COMMENT: {7/13/2009 7:18:32 PM}
+// COMMENT: {7/13/2009 7:18:32 PM}	HTREEITEM ItemDDX;
 
 	std::string m_sDescriptionRTF;  // IDR_DESCRIPTION_RTF
 	std::string m_sHeadRTF;         // IDR_IC_HEAD_HEAD_RTF

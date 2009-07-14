@@ -36,6 +36,8 @@ public:
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	//virtual void DDV_SoftValidate();
+	//virtual void SetPropertyDescription();
 
 // COMMENT: {2/18/2009 9:16:32 PM}	std::string  m_desc;
 

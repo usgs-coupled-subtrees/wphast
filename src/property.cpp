@@ -276,6 +276,14 @@ void Cproperty::AssertValid() const
 		ASSERT(this->data_source->Get_source_type() == Data_source::XYZ);
 		ASSERT(this->data_source->Get_user_source_type() == Data_source::XYZ);
 		break;
+	case PROP_XYZT:
+		ASSERT(this->count_v == 0);
+		ASSERT(this->data_source);
+		ASSERT(this->data_source->Get_defined());
+		ASSERT(this->data_source->Get_file_name().size());
+		ASSERT(this->data_source->Get_source_type() == Data_source::XYZT);
+		ASSERT(this->data_source->Get_user_source_type() == Data_source::XYZT);
+		break;
 	default:
 		ASSERT(FALSE);
 		break;
@@ -308,6 +316,23 @@ void Cproperty::Dump(CDumpContext& dc)const
 				<< " value2=\"" << this->v[1] << "\""
 				<< " dist2=\"" << this->dist2 << "\""
                 << ">\n";
+			break;
+		case PROP_POINTS:
+			{
+				dc << "\t\t<POINTS>";
+				std::vector<Point> &pts = this->data_source->Get_user_points();
+				for (size_t i = 0; i < pts.size(); ++i)
+				{
+					dc << "\t\t\t<pt \'x\'=" << pts[i].x() << " \'y\'=" << pts[i].y() << " \'z\'=" << pts[i].z() << " \'v\'=" << pts[i].get_v() << "/>\n";
+				}
+				dc << "\t\t<\\POINTS>\n";
+			}
+			break;
+		case PROP_XYZ:
+			dc << "\t\t<XYZ \'filename\'=\"" << this->data_source->Get_file_name().c_str() << "\"\\>\n";
+			break;
+		case PROP_XYZT:
+			dc << "\t\t<XYZT \'filename\'=\"" << this->data_source->Get_file_name().c_str() << "\"\\>\n";
 			break;
 		default:
 			ASSERT(FALSE);
@@ -523,6 +548,7 @@ void Cproperty::Serialize(bool bStoring, hid_t loc_id)
 				}
 				break;
 			case PROP_XYZ:
+			case PROP_XYZT:
 				if (this->data_source)
 				{
 					delete this->data_source;

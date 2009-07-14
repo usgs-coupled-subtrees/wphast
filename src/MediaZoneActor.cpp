@@ -215,8 +215,7 @@ void CMediaZoneActor::Edit(CTreeCtrl* pTreeCtrl)
 {
 	CString str;
 	str.Format(_T("%s Properties"), this->GetName());
-// COMMENT: {3/31/2009 4:55:31 PM}	CPropertySheet props(str);
-	TreePropSheet::CTreePropSheetEx props(str);
+	CPropertySheet props(str);
 
 	CFrameWnd *pFrame = (CFrameWnd*)::AfxGetApp()->m_pMainWnd;
 	ASSERT_VALID(pFrame);
@@ -237,39 +236,19 @@ void CMediaZoneActor::Edit(CTreeCtrl* pTreeCtrl)
 		}
 	}
 
-// COMMENT: {3/31/2009 5:04:31 PM}	CMediaSpreadPropertyPage mediaSpreadProps;
-// COMMENT: {3/31/2009 5:04:31 PM}	mediaSpreadProps.SetProperties(elt);
-// COMMENT: {3/31/2009 5:04:31 PM}	mediaSpreadProps.SetDesc(this->GetDesc());
-// COMMENT: {3/31/2009 5:04:31 PM}	if (this->GetDefault())
-// COMMENT: {3/31/2009 5:04:31 PM}	{
-// COMMENT: {3/31/2009 5:04:31 PM}		mediaSpreadProps.SetDefault(true);
-// COMMENT: {3/31/2009 5:04:31 PM}		mediaSpreadProps.SetFlowOnly(bool(pDoc->GetFlowOnly()));
-// COMMENT: {3/31/2009 5:04:31 PM}	}
-// COMMENT: {3/31/2009 5:04:31 PM}	props.AddPage(&mediaSpreadProps);
-
-	//{{
-// COMMENT: {3/31/2009 5:10:56 PM}	CMediaProps mediaProps;
-// COMMENT: {7/9/2009 9:05:30 PM}	CMediaPropsPage mediaProps;
 	CMediaPropsPage2 mediaProps;
-
-
 	mediaProps.SetProperties(elt);
 	mediaProps.SetDesc(this->GetDesc());
+	mediaProps.SetUnits(pDoc->GetUnits());
 	if (this->GetDefault())
 	{
 		mediaProps.SetDefault(true);
 		mediaProps.SetFlowOnly(bool(pDoc->GetFlowOnly()));
 	}
 	props.AddPage(&mediaProps);
-	//}}
 
 	if (props.DoModal() == IDOK)
 	{
-// COMMENT: {3/31/2009 5:05:38 PM}		CGridElt grid_elt;
-// COMMENT: {3/31/2009 5:05:38 PM}		mediaSpreadProps.GetProperties(grid_elt);
-// COMMENT: {3/31/2009 5:05:38 PM}		ASSERT(grid_elt.polyh);
-// COMMENT: {3/31/2009 5:05:38 PM}		pDoc->Execute(new CSetMediaAction(this, pTreeCtrl, grid_elt, mediaSpreadProps.GetDesc()));
-
 		CGridElt GridElt;
 		mediaProps.GetProperties(GridElt);
 		ASSERT(GridElt.polyh);

@@ -33,6 +33,11 @@
 #include "srcinput/Filedata.h"
 
 #include "Action.h"
+#include "SetMediaAction.h"
+#include "SetBCAction.h"
+#include "SetChemICAction.h"
+#include "SetHeadICAction.h"
+
 #include "SetDisplayColorsAction.h"
 #include "ZoneActor.h"
 #include "DrainActor.h"
@@ -2144,10 +2149,6 @@ void CWPhastDoc::DataSourcePathsRelativeToAbsolute(LPCTSTR lpszPathName)
 			{
 				if ((pZoneActor = CZoneActor::SafeDownCast(pProp)))
 				{
-					//{{TODO
-					// checkout: EXTERNAL std::list < property * >properties_with_data_source;
-					//}}TODO
-
 					if (CMediaZoneActor *pMediaZoneActor = CMediaZoneActor::SafeDownCast(pZoneActor))
 					{
 						CGridElt elt = pMediaZoneActor->GetData();
@@ -2159,6 +2160,18 @@ void CWPhastDoc::DataSourcePathsRelativeToAbsolute(LPCTSTR lpszPathName)
 						CBC bc = pBCZoneActor->GetData();
 						CGlobal::PathsRelativeToAbsolute(lpszPathName, this, bc);
 						pBCZoneActor->SetData(bc);
+					}
+					if (CICChemZoneActor *pICChemZoneActor = CICChemZoneActor::SafeDownCast(pZoneActor))
+					{
+						CChemIC chemIC = pICChemZoneActor->GetData();
+						CGlobal::PathsRelativeToAbsolute(lpszPathName, this, chemIC);
+						pICChemZoneActor->SetData(chemIC);
+					}
+					if (CICHeadZoneActor *pICHeadZoneActor = CICHeadZoneActor::SafeDownCast(pZoneActor))
+					{
+						CHeadIC headIC = pICHeadZoneActor->GetData();
+						CGlobal::PathsAbsoluteToRelative(lpszPathName, this, headIC);
+						pICHeadZoneActor->SetData(headIC);
 					}
 					if (pZoneActor->GetPolyhedronType() == Polyhedron::PRISM)
 					{
@@ -2209,24 +2222,46 @@ void CWPhastDoc::DataSourcePathsAbsoluteToRelative(LPCTSTR lpszPathName)
 			{
 				if ((pZoneActor = CZoneActor::SafeDownCast(pProp)))
 				{
-					//{{TODO
-					// checkout: EXTERNAL std::list < property * >properties_with_data_source;
-					//}}TODO
-
 					if (CMediaZoneActor *pMediaZoneActor = CMediaZoneActor::SafeDownCast(pZoneActor))
 					{
 						CGridElt elt = pMediaZoneActor->GetData();
 						CGlobal::PathsAbsoluteToRelative(lpszPathName, this, elt);
-						pMediaZoneActor->SetData(elt);
-					}
 
+						CTreeCtrl *pTreeCtrl = this->GetPropertyTreeControlBar()->GetTreeCtrl();
+						CAction *pAction = new CSetMediaAction(pMediaZoneActor, pTreeCtrl, elt, pMediaZoneActor->GetDesc());
+						pAction->Execute();
+						delete pAction;
+					}
 					if (CBCZoneActor *pBCZoneActor = CBCZoneActor::SafeDownCast(pZoneActor))
 					{
 						CBC bc = pBCZoneActor->GetData();
 						CGlobal::PathsAbsoluteToRelative(lpszPathName, this, bc);
-						pBCZoneActor->SetData(bc);
-					}
 
+						CTreeCtrl *pTreeCtrl = this->GetPropertyTreeControlBar()->GetTreeCtrl();
+						CAction *pAction = new CSetBCAction(pBCZoneActor, pTreeCtrl, bc, pBCZoneActor->GetDesc());
+						pAction->Execute();
+						delete pAction;
+					}
+					if (CICChemZoneActor *pICChemZoneActor = CICChemZoneActor::SafeDownCast(pZoneActor))
+					{
+						CChemIC chemIC = pICChemZoneActor->GetData();
+						CGlobal::PathsAbsoluteToRelative(lpszPathName, this, chemIC);
+
+						CTreeCtrl *pTreeCtrl = this->GetPropertyTreeControlBar()->GetTreeCtrl();
+						CAction *pAction = new CSetChemICAction(pICChemZoneActor, pTreeCtrl, chemIC, pICChemZoneActor->GetDesc());
+						pAction->Execute();
+						delete pAction;
+					}
+					if (CICHeadZoneActor *pICHeadZoneActor = CICHeadZoneActor::SafeDownCast(pZoneActor))
+					{
+						CHeadIC headIC = pICHeadZoneActor->GetData();
+						CGlobal::PathsAbsoluteToRelative(lpszPathName, this, headIC);
+
+						CTreeCtrl *pTreeCtrl = this->GetPropertyTreeControlBar()->GetTreeCtrl();
+						CAction *pAction = new CSetHeadICAction(pICHeadZoneActor, pTreeCtrl, headIC, pICHeadZoneActor->GetDesc());
+						pAction->Execute();
+						delete pAction;
+					}
 					if (pZoneActor->GetPolyhedronType() == Polyhedron::PRISM)
 					{
 						if (Prism *p = dynamic_cast<Prism*>(pZoneActor->GetPolyhedron()))
@@ -5677,7 +5712,8 @@ void CWPhastDoc::NewZoneListener(vtkObject *caller, unsigned long eid, void *cli
 
 			// get type of zone
 			//
-			ETSLayoutPropertySheet        sheet("Zone Wizard", NULL, 0, NULL, false);
+// COMMENT: {7/13/2009 2:44:44 PM}			ETSLayoutPropertySheet        sheet("Zone Wizard", NULL, 0, NULL, false);
+			CPropertySheet                sheet("Zone Wizard", NULL, 0, NULL, false);
 
 			CNewZonePropertyPage          newZone;
 			CMediaPropsPage2              mediaProps;

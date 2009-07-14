@@ -48,13 +48,14 @@ public:
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual void DDV_SoftValidate();
+	virtual void SetPropertyDescription();
+
+	virtual void DDX_Series(CDataExchange* pDX);
 
 	DECLARE_MESSAGE_MAP()
 
 	//{{ COMMON
- 	afx_msg void OnTreeSelChanging(NMHDR *pNotifyStruct, LRESULT *plResult);
- 	afx_msg void OnTreeSelChanged(NMHDR *pNotifyStruct, LRESULT *plResult);
-
 	afx_msg void OnEndLabelEditFlux(NMHDR *pNotifyStruct, LRESULT *result);
 	afx_msg void OnEndLabelEditSolution(NMHDR *pNotifyStruct, LRESULT *result);
 
@@ -71,22 +72,30 @@ protected:
 	afx_msg void OnBnClickedCheckMixture();
 	//}} COMMON
 
+	// exterior only checkbox
 	afx_msg void OnBnClickedExteriorOnly();
+
+// COMMENT: {7/14/2009 2:32:47 PM}	// exterior only radios
+// COMMENT: {7/14/2009 2:32:47 PM}	void OnBnClickedExteriorRadios();
+// COMMENT: {7/14/2009 2:32:47 PM}
+// COMMENT: {7/14/2009 2:32:47 PM}	// solution type radios
+// COMMENT: {7/14/2009 2:32:47 PM}	afx_msg void OnBnClickedSolutionRadios();
 
 	CGridTimeSeries HeadSeries;
 	CGridTimeSeries SolutionSeries;
 
-	CModGridCtrlEx PointsGrid;
-
-	CRichEditCtrl  RichEditCtrl;
-	CTreeCtrl      TreeCtrl;
-
-	HTREEITEM ItemDDX;
+// COMMENT: {7/13/2009 7:19:03 PM}	CModGridCtrlEx PointsGrid;
+// COMMENT: {7/13/2009 7:19:03 PM}
+// COMMENT: {7/13/2009 7:19:03 PM}	CRichEditCtrl  RichEditCtrl;
+// COMMENT: {7/13/2009 7:19:03 PM}	CTreeCtrl      TreeCtrl;
+// COMMENT: {7/13/2009 7:19:03 PM}
+// COMMENT: {7/13/2009 7:19:03 PM}	HTREEITEM ItemDDX;
 
 	std::string m_sDescriptionRTF;   // IDR_DESCRIPTION_RTF
-	std::string m_sAssocSolutionRTF; // IDR_BC_FLUX_ASSOC_SOL_RTF
-	std::string m_sFluxRTF;          // IDR_BC_FLUX_FLUX_RTF
-	std::string m_sFaceRTF;          // IDR_BC_FLUX_FACE_RTF
+	std::string m_sHeadRTF;          // IDR_BC_SPECIFIED_HEAD_RTF
+	std::string m_sSolutionAssocRTF; // IDR_BC_SPECIFIED_SOL_ASSOC_RTF
+	std::string m_sSolutionFixRTF;   // IDR_BC_SPECIFIED_SOL_FIX_RTF
+	std::string m_sSolTypeRTF;       // IDR_BC_SOL_TYPE_RTF
 
 	CString Description;
 
@@ -95,4 +104,5 @@ protected:
 
 protected:
 	CBC BC;
+public:
 };

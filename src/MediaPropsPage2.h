@@ -2,7 +2,7 @@
 
 #include "PropsPropertyPage.h"
 #include "GridElt.h"
-#include "gridctrl/ModGridCtrlEx.h"
+// COMMENT: {7/13/2009 6:55:47 PM}#include "gridctrl/ModGridCtrlEx.h"
 #include "afxwin.h"
 
 #include "GridTimeSeries.h"
@@ -49,6 +49,8 @@ public:
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	virtual void DDV_SoftValidate();
+	virtual void SetPropertyDescription();
+
 	virtual void DDX_Single(CDataExchange* pDX);
 
 // COMMENT: {7/10/2009 7:46:21 PM}	virtual BOOL OnSetActive();
@@ -59,8 +61,8 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 	//{{ COMMON
- 	afx_msg void OnTreeSelChanging(NMHDR *pNotifyStruct, LRESULT *plResult);
- 	afx_msg void OnTreeSelChanged(NMHDR *pNotifyStruct, LRESULT *plResult);
+// COMMENT: {7/13/2009 7:11:02 PM} 	virtual afx_msg void OnTreeSelChanging(NMHDR *pNotifyStruct, LRESULT *plResult);
+// COMMENT: {7/13/2009 7:11:02 PM} 	virtual afx_msg void OnTreeSelChanged(NMHDR *pNotifyStruct, LRESULT *plResult);
 
 	//afx_msg void OnEndLabelEditFlux(NMHDR *pNotifyStruct, LRESULT *result);
 	//afx_msg void OnEndLabelEditSolution(NMHDR *pNotifyStruct, LRESULT *result);
@@ -90,12 +92,12 @@ protected:
 	CGridTimeSeries AlphaHorizontalProperty; // single
 	CGridTimeSeries AlphaVerticalProperty;   // single
 
-	CModGridCtrlEx PointsGrid;
-
-	CRichEditCtrl  RichEditCtrl;
-	CTreeCtrl      TreeCtrl;
-
-	HTREEITEM ItemDDX;
+// COMMENT: {7/13/2009 7:13:55 PM}	CModGridCtrlEx PointsGrid;
+// COMMENT: {7/13/2009 7:13:55 PM}
+// COMMENT: {7/13/2009 7:13:55 PM}	CRichEditCtrl  RichEditCtrl;
+// COMMENT: {7/13/2009 7:13:55 PM}	CTreeCtrl      TreeCtrl;
+// COMMENT: {7/13/2009 7:13:55 PM}
+// COMMENT: {7/13/2009 7:13:55 PM}	HTREEITEM ItemDDX;
 
 	std::string m_sDescriptionRTF;       // IDR_DESCRIPTION_RTF
 	std::string m_sActiveRTF;            // IDR_MEDIA_ACTIVE_RTF
@@ -116,4 +118,6 @@ protected:
 protected:
 	CGridElt GridElt;
 
+public:
+// COMMENT: {7/13/2009 6:56:38 PM}	afx_msg void OnNMSetfocusPropTree(NMHDR *pNMHDR, LRESULT *pResult);
 };

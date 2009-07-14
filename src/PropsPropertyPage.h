@@ -1,5 +1,6 @@
 #pragma once
 
+#include "gridctrl/ModGridCtrlEx.h"
 
 // CPropsPropertyPage dialog
 
@@ -19,6 +20,7 @@ public:
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	virtual void DDV_SoftValidate();
+	virtual void SetPropertyDescription();
 
 	virtual BOOL OnSetActive();
 	virtual BOOL OnKillActive();
@@ -26,4 +28,16 @@ protected:
 	virtual LRESULT OnWizardBack();
 
 	DECLARE_MESSAGE_MAP()
+
+ 	/*virtual*/ afx_msg void OnTreeSelChanging(NMHDR *pNotifyStruct, LRESULT *plResult);
+ 	/*virtual*/ afx_msg void OnTreeSelChanged(NMHDR *pNotifyStruct, LRESULT *plResult);
+	/*virtual*/ afx_msg void OnNMSetfocusPropTree(NMHDR *pNMHDR, LRESULT *pResult);
+
+protected:
+	CModGridCtrlEx PointsGrid;
+
+	CRichEditCtrl  RichEditCtrl;
+	CTreeCtrl      TreeCtrl;
+
+	HTREEITEM      ItemDDX;
 };

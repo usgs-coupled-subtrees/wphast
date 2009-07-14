@@ -251,7 +251,8 @@ void CBCZoneActor::Edit(CTreeCtrl* pTreeCtrl, int nStressPeriod)
 {
 	CString str;
 	str.Format(_T("%s Properties"), this->GetName());
-	ETSLayoutPropertySheet props(str);
+// COMMENT: {7/13/2009 4:51:42 PM}	ETSLayoutPropertySheet props(str);
+	CPropertySheet props(str);
 
 	CFrameWnd *pFrame = (CFrameWnd*)::AfxGetApp()->m_pMainWnd;
 	ASSERT_VALID(pFrame);
@@ -262,10 +263,6 @@ void CBCZoneActor::Edit(CTreeCtrl* pTreeCtrl, int nStressPeriod)
 
 	if (this->m_bc.bc_type == BC_info::BC_FLUX)
 	{
-		//{{
-		CPropertySheet props(str);
-		//}}
-// COMMENT: {6/1/2009 6:08:37 PM}		CBCFluxPropertyPage2 fluxProps;
 		CFluxPropsPage2 fluxProps;
 		props.AddPage(&fluxProps);
 		fluxProps.SetProperties(this->GetBC());
@@ -282,10 +279,6 @@ void CBCZoneActor::Edit(CTreeCtrl* pTreeCtrl, int nStressPeriod)
 	}
 	else if (this->m_bc.bc_type == BC_info::BC_LEAKY)
 	{
-		//{{
-		CPropertySheet props(str);
-		//}}
-// COMMENT: {7/6/2009 9:20:46 PM}		CBCLeakyPropertyPage2 leakyProps;
 		CLeakyPropsPage leakyProps;
 		props.AddPage(&leakyProps);
 		leakyProps.SetProperties(this->GetBC());		
@@ -302,10 +295,6 @@ void CBCZoneActor::Edit(CTreeCtrl* pTreeCtrl, int nStressPeriod)
 	}
 	else if (this->m_bc.bc_type == BC_info::BC_SPECIFIED)
 	{
-		//{{
-		CPropertySheet props(str);
-		//}}
-		//CBCSpecifiedHeadPropertyPage specified;
 		CSpecifiedHeadPropsPage specified;
 		props.AddPage(&specified);
 		specified.SetProperties(this->GetBC());		

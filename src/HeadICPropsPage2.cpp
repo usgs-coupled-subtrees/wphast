@@ -46,47 +46,57 @@ void CHeadICPropsPage2::DoDataExchange(CDataExchange* pDX)
 	TRACE("In %s\n", __FUNCTION__);
 	CPropsPropertyPage::DoDataExchange(pDX);
 
-	DDX_Control(pDX, IDC_DESC_RICHEDIT, this->RichEditCtrl);
-	DDX_Control(pDX, IDC_PROP_TREE, this->TreeCtrl);
-
 	if (this->TreeCtrl.GetCount() == 0)
 	{
+		// setup tree
 		this->HeadProperty.treeitem = this->TreeCtrl.InsertItem(HEAD, TVI_ROOT, TVI_LAST);
 
-		// wrap richedit to window
-		this->RichEditCtrl.SetTargetDevice(NULL, 0);
-
+		// setup tree selection
 		this->ItemDDX = this->HeadProperty.treeitem;
 		this->TreeCtrl.SelectItem(this->ItemDDX);
-
 		this->TreeCtrl.ModifyStyle(TVS_TRACKSELECT, TVS_FULLROWSELECT|TVS_SHOWSELALWAYS, 0);
+
+		// set points grid for each propety
+		this->HeadProperty.SetPointsGrid(&this->PointsGrid);
 	}
-
-	DDX_GridControl(pDX, IDC_POINTS_GRID, this->PointsGrid);
-
-	this->HeadProperty.SetPointsGrid(&this->PointsGrid);
 
 	// description
 	::DDX_Text(pDX, IDC_DESC_EDIT, this->Description);
 
+	// properties
 	if (pDX->m_bSaveAndValidate)
 	{
-		// properties
+		this->DDV_SoftValidate();
+	}
+	this->DDX_Single(pDX);
+
+	TRACE("Out %s\n", __FUNCTION__);
+}
+
+void CHeadICPropsPage2::DDV_SoftValidate()
+{
+	if (this->ItemDDX)
+	{
 		if (this->ItemDDX == this->HeadProperty.treeitem)
 		{
 			this->HeadProperty.DDV_SoftValidate();
-			this->HeadProperty.DDX_Single(pDX, this->Default);
 		}
 		else
 		{
 			ASSERT(FALSE);
 		}
-
 	}
-	else
+}
+
+void CHeadICPropsPage2::DDX_Single(CDataExchange* pDX)
+{
+	if (this->ItemDDX)
 	{
-		// properties
-		CGridTimeSeries::ShowSingleProperty(this, SW_SHOW);
+		if (!pDX->m_bSaveAndValidate)
+		{
+			// display single
+			CGridTimeSeries::ShowSingleProperty(this, SW_SHOW);
+		}
 
 		if (this->ItemDDX == this->HeadProperty.treeitem)
 		{
@@ -97,7 +107,6 @@ void CHeadICPropsPage2::DoDataExchange(CDataExchange* pDX)
 			ASSERT(FALSE);
 		}
 	}
-	TRACE("Out %s\n", __FUNCTION__);
 }
 
 void CHeadICPropsPage2::SetProperties(const CHeadIC& rHeadIC)
@@ -126,9 +135,9 @@ void CHeadICPropsPage2::GetProperties(CHeadIC& rHeadIC)const
 }
 
 BEGIN_MESSAGE_MAP(CHeadICPropsPage2, CPropsPropertyPage)
-	// IDC_PROP_TREE
-	ON_NOTIFY(TVN_SELCHANGING, IDC_PROP_TREE, OnTreeSelChanging)
-	ON_NOTIFY(TVN_SELCHANGED,  IDC_PROP_TREE, OnTreeSelChanged)
+// COMMENT: {7/13/2009 7:27:08 PM}	// IDC_PROP_TREE
+// COMMENT: {7/13/2009 7:27:08 PM}	ON_NOTIFY(TVN_SELCHANGING, IDC_PROP_TREE, OnTreeSelChanging)
+// COMMENT: {7/13/2009 7:27:08 PM}	ON_NOTIFY(TVN_SELCHANGED,  IDC_PROP_TREE, OnTreeSelChanged)
 
 	// IDC_DESC_EDIT
 	ON_EN_SETFOCUS(IDC_DESC_EDIT, OnEnSetfocusDescEdit)
@@ -149,43 +158,43 @@ END_MESSAGE_MAP()
 
 // CHeadICPropsPage2 message handlers
 
-void CHeadICPropsPage2::OnTreeSelChanging(NMHDR *pNotifyStruct, LRESULT *pResult)
-{
-	TRACE("In %s\n", __FUNCTION__);
-	NMTREEVIEW *pTvn = reinterpret_cast<NMTREEVIEW*>(pNotifyStruct);
-	this->ItemDDX = pTvn->itemOld.hItem;
-	if (this->ItemDDX)
-	{
-		if (this->ItemDDX == this->HeadProperty.treeitem)
-		{
-			this->HeadProperty.DDV_SoftValidate();
-		}
-		else
-		{
-			ASSERT(FALSE);
-		}
-
-
-		// force CInPlaceXXX to lose focus
-		this->TreeCtrl.SetFocus();
-
-		if (!this->UpdateData(TRUE))
-		{
-			// notify which control caused failure
-			//
-			CWnd* pFocus = CWnd::GetFocus();
-			this->PostMessage(UM_DDX_FAILURE, (WPARAM)pFocus, (LPARAM)0);
-
-			// disallow change
-			//
-			*pResult = TRUE;
-			TRACE("Out %s Disallowed\n", __FUNCTION__);
-			return;
-		}
-	}
-	*pResult = 0;
-	TRACE("Out Allowed %s\n", __FUNCTION__);
-}
+// COMMENT: {7/13/2009 7:46:39 PM}void CHeadICPropsPage2::OnTreeSelChanging(NMHDR *pNotifyStruct, LRESULT *pResult)
+// COMMENT: {7/13/2009 7:46:39 PM}{
+// COMMENT: {7/13/2009 7:46:39 PM}	TRACE("In %s\n", __FUNCTION__);
+// COMMENT: {7/13/2009 7:46:39 PM}	NMTREEVIEW *pTvn = reinterpret_cast<NMTREEVIEW*>(pNotifyStruct);
+// COMMENT: {7/13/2009 7:46:39 PM}	this->ItemDDX = pTvn->itemOld.hItem;
+// COMMENT: {7/13/2009 7:46:39 PM}	if (this->ItemDDX)
+// COMMENT: {7/13/2009 7:46:39 PM}	{
+// COMMENT: {7/13/2009 7:46:39 PM}		if (this->ItemDDX == this->HeadProperty.treeitem)
+// COMMENT: {7/13/2009 7:46:39 PM}		{
+// COMMENT: {7/13/2009 7:46:39 PM}			this->HeadProperty.DDV_SoftValidate();
+// COMMENT: {7/13/2009 7:46:39 PM}		}
+// COMMENT: {7/13/2009 7:46:39 PM}		else
+// COMMENT: {7/13/2009 7:46:39 PM}		{
+// COMMENT: {7/13/2009 7:46:39 PM}			ASSERT(FALSE);
+// COMMENT: {7/13/2009 7:46:39 PM}		}
+// COMMENT: {7/13/2009 7:46:39 PM}
+// COMMENT: {7/13/2009 7:46:39 PM}
+// COMMENT: {7/13/2009 7:46:39 PM}		// force CInPlaceXXX to lose focus
+// COMMENT: {7/13/2009 7:46:39 PM}		this->TreeCtrl.SetFocus();
+// COMMENT: {7/13/2009 7:46:39 PM}
+// COMMENT: {7/13/2009 7:46:39 PM}		if (!this->UpdateData(TRUE))
+// COMMENT: {7/13/2009 7:46:39 PM}		{
+// COMMENT: {7/13/2009 7:46:39 PM}			// notify which control caused failure
+// COMMENT: {7/13/2009 7:46:39 PM}			//
+// COMMENT: {7/13/2009 7:46:39 PM}			CWnd* pFocus = CWnd::GetFocus();
+// COMMENT: {7/13/2009 7:46:39 PM}			this->PostMessage(UM_DDX_FAILURE, (WPARAM)pFocus, (LPARAM)0);
+// COMMENT: {7/13/2009 7:46:39 PM}
+// COMMENT: {7/13/2009 7:46:39 PM}			// disallow change
+// COMMENT: {7/13/2009 7:46:39 PM}			//
+// COMMENT: {7/13/2009 7:46:39 PM}			*pResult = TRUE;
+// COMMENT: {7/13/2009 7:46:39 PM}			TRACE("Out %s Disallowed\n", __FUNCTION__);
+// COMMENT: {7/13/2009 7:46:39 PM}			return;
+// COMMENT: {7/13/2009 7:46:39 PM}		}
+// COMMENT: {7/13/2009 7:46:39 PM}	}
+// COMMENT: {7/13/2009 7:46:39 PM}	*pResult = 0;
+// COMMENT: {7/13/2009 7:46:39 PM}	TRACE("Out Allowed %s\n", __FUNCTION__);
+// COMMENT: {7/13/2009 7:46:39 PM}}
 
 #define COMPARE_SET(S, R) \
 do { \
@@ -194,29 +203,39 @@ do { \
 	} \
 } while (0)
 
-void CHeadICPropsPage2::OnTreeSelChanged(NMHDR *pNotifyStruct, LRESULT *pResult)
+// COMMENT: {7/13/2009 7:42:27 PM}void CHeadICPropsPage2::OnTreeSelChanged(NMHDR *pNotifyStruct, LRESULT *pResult)
+// COMMENT: {7/13/2009 7:42:27 PM}{
+// COMMENT: {7/13/2009 7:42:27 PM}	TRACE("In %s\n", __FUNCTION__);
+// COMMENT: {7/13/2009 7:42:27 PM}	UNREFERENCED_PARAMETER(pResult);
+// COMMENT: {7/13/2009 7:42:27 PM}	NMTREEVIEW *pTvn = reinterpret_cast<NMTREEVIEW*>(pNotifyStruct);
+// COMMENT: {7/13/2009 7:42:27 PM}	this->ItemDDX = pTvn->itemNew.hItem;
+// COMMENT: {7/13/2009 7:42:27 PM}	if (this->ItemDDX)
+// COMMENT: {7/13/2009 7:42:27 PM}	{
+// COMMENT: {7/13/2009 7:42:27 PM}		this->UpdateData(FALSE);
+// COMMENT: {7/13/2009 7:42:27 PM}
+// COMMENT: {7/13/2009 7:42:27 PM}		// update property description
+// COMMENT: {7/13/2009 7:42:27 PM}		//
+// COMMENT: {7/13/2009 7:42:27 PM}		if (this->TreeCtrl.GetSafeHwnd())
+// COMMENT: {7/13/2009 7:42:27 PM}		{
+// COMMENT: {7/13/2009 7:42:27 PM}			CString strItem = this->TreeCtrl.GetItemText(this->ItemDDX);
+// COMMENT: {7/13/2009 7:42:27 PM}			COMPARE_SET(HEAD, this->m_sHeadRTF);
+// COMMENT: {7/13/2009 7:42:27 PM}		}
+// COMMENT: {7/13/2009 7:42:27 PM}	}
+// COMMENT: {7/13/2009 7:42:27 PM}	if (this->TreeCtrl.GetSafeHwnd())
+// COMMENT: {7/13/2009 7:42:27 PM}	{
+// COMMENT: {7/13/2009 7:42:27 PM}		this->TreeCtrl.SetFocus();
+// COMMENT: {7/13/2009 7:42:27 PM}	}
+// COMMENT: {7/13/2009 7:42:27 PM}	TRACE("Out %s\n", __FUNCTION__);
+// COMMENT: {7/13/2009 7:42:27 PM}}
+
+void CHeadICPropsPage2::SetPropertyDescription()
 {
-	TRACE("In %s\n", __FUNCTION__);
-	UNREFERENCED_PARAMETER(pResult);
-	NMTREEVIEW *pTvn = reinterpret_cast<NMTREEVIEW*>(pNotifyStruct);
-	this->ItemDDX = pTvn->itemNew.hItem;
 	if (this->ItemDDX)
 	{
-		this->UpdateData(FALSE);
+		CString strItem = this->TreeCtrl.GetItemText(this->ItemDDX);
 
-		// update property description
-		//
-		if (this->TreeCtrl.GetSafeHwnd())
-		{
-			CString strItem = this->TreeCtrl.GetItemText(this->ItemDDX);
-			COMPARE_SET(HEAD, this->m_sHeadRTF);
-		}
+		COMPARE_SET(HEAD, this->m_sHeadRTF);
 	}
-	if (this->TreeCtrl.GetSafeHwnd())
-	{
-		this->TreeCtrl.SetFocus();
-	}
-	TRACE("Out %s\n", __FUNCTION__);
 }
 
 void CHeadICPropsPage2::OnEnSetfocusDescEdit()

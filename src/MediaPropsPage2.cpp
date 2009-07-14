@@ -73,9 +73,9 @@ void CMediaPropsPage2::DoDataExchange(CDataExchange* pDX)
 	CPropsPropertyPage::DoDataExchange(pDX);
 
 	// controls
-	DDX_Control(pDX, IDC_DESC_RICHEDIT, this->RichEditCtrl);
-	DDX_Control(pDX, IDC_PROP_TREE, this->TreeCtrl);
-	DDX_GridControl(pDX, IDC_POINTS_GRID, this->PointsGrid);
+// COMMENT: {7/13/2009 6:53:49 PM}	DDX_Control(pDX, IDC_DESC_RICHEDIT, this->RichEditCtrl);
+// COMMENT: {7/13/2009 6:53:49 PM}	DDX_Control(pDX, IDC_PROP_TREE, this->TreeCtrl);
+// COMMENT: {7/13/2009 6:53:49 PM}	DDX_GridControl(pDX, IDC_POINTS_GRID, this->PointsGrid);
 
 	if (this->TreeCtrl.GetCount() == 0)
 	{
@@ -94,9 +94,6 @@ void CMediaPropsPage2::DoDataExchange(CDataExchange* pDX)
 		this->ItemDDX = this->ActiveProperty.treeitem;
 		this->TreeCtrl.SelectItem(this->ItemDDX);
 		this->TreeCtrl.ModifyStyle(TVS_TRACKSELECT, TVS_FULLROWSELECT|TVS_SHOWSELALWAYS, 0);
-
-		// wrap richedit to window
-		this->RichEditCtrl.SetTargetDevice(NULL, 0);
 
 		// set points grid for each propety
 		this->ActiveProperty.SetPointsGrid(&this->PointsGrid);
@@ -258,9 +255,10 @@ void CMediaPropsPage2::GetProperties(CGridElt& rGridElt)const
 }
 
 BEGIN_MESSAGE_MAP(CMediaPropsPage2, CPropsPropertyPage)
-	// IDC_PROP_TREE
-	ON_NOTIFY(TVN_SELCHANGING, IDC_PROP_TREE, OnTreeSelChanging)
-	ON_NOTIFY(TVN_SELCHANGED,  IDC_PROP_TREE, OnTreeSelChanged)
+// COMMENT: {7/13/2009 7:08:42 PM}	// IDC_PROP_TREE
+// COMMENT: {7/13/2009 7:08:42 PM}	ON_NOTIFY(TVN_SELCHANGING, IDC_PROP_TREE, OnTreeSelChanging)
+// COMMENT: {7/13/2009 7:08:42 PM}	ON_NOTIFY(TVN_SELCHANGED,  IDC_PROP_TREE, OnTreeSelChanged)
+// COMMENT: {7/13/2009 7:08:42 PM}	ON_NOTIFY(NM_SETFOCUS,     IDC_PROP_TREE, OnNMSetfocusPropTree)
 
 	// IDC_DESC_EDIT
 	ON_EN_SETFOCUS(IDC_DESC_EDIT, OnEnSetfocusDescEdit)
@@ -281,35 +279,35 @@ END_MESSAGE_MAP()
 
 // CMediaPropsPage2 message handlers
 
-void CMediaPropsPage2::OnTreeSelChanging(NMHDR *pNotifyStruct, LRESULT *pResult)
-{
-	TRACE("In %s\n", __FUNCTION__);
-	NMTREEVIEW *pTvn = reinterpret_cast<NMTREEVIEW*>(pNotifyStruct);
-	this->ItemDDX = pTvn->itemOld.hItem;
-	if (this->ItemDDX)
-	{
-		this->DDV_SoftValidate(); // this may be unnecessary
-
-		// force CInPlaceXXX to lose focus
-		this->TreeCtrl.SetFocus();
-
-		if (!this->UpdateData(TRUE))
-		{
-			// notify which control caused failure
-			//
-			CWnd* pFocus = CWnd::GetFocus();
-			this->PostMessage(UM_DDX_FAILURE, (WPARAM)pFocus, (LPARAM)0);
-
-			// disallow change
-			//
-			*pResult = TRUE;
-			TRACE("Out %s Disallowed\n", __FUNCTION__);
-			return;
-		}
-	}
-	*pResult = 0;
-	TRACE("Out Allowed %s\n", __FUNCTION__);
-}
+// COMMENT: {7/13/2009 6:59:44 PM}void CMediaPropsPage2::OnTreeSelChanging(NMHDR *pNotifyStruct, LRESULT *pResult)
+// COMMENT: {7/13/2009 6:59:44 PM}{
+// COMMENT: {7/13/2009 6:59:44 PM}	TRACE("In %s\n", __FUNCTION__);
+// COMMENT: {7/13/2009 6:59:44 PM}	NMTREEVIEW *pTvn = reinterpret_cast<NMTREEVIEW*>(pNotifyStruct);
+// COMMENT: {7/13/2009 6:59:44 PM}	this->ItemDDX = pTvn->itemOld.hItem;
+// COMMENT: {7/13/2009 6:59:44 PM}	if (this->ItemDDX)
+// COMMENT: {7/13/2009 6:59:44 PM}	{
+// COMMENT: {7/13/2009 6:59:44 PM}		this->DDV_SoftValidate(); // this may be unnecessary
+// COMMENT: {7/13/2009 6:59:44 PM}
+// COMMENT: {7/13/2009 6:59:44 PM}		// force CInPlaceXXX to lose focus
+// COMMENT: {7/13/2009 6:59:44 PM}		this->TreeCtrl.SetFocus();
+// COMMENT: {7/13/2009 6:59:44 PM}
+// COMMENT: {7/13/2009 6:59:44 PM}		if (!this->UpdateData(TRUE))
+// COMMENT: {7/13/2009 6:59:44 PM}		{
+// COMMENT: {7/13/2009 6:59:44 PM}			// notify which control caused failure
+// COMMENT: {7/13/2009 6:59:44 PM}			//
+// COMMENT: {7/13/2009 6:59:44 PM}			CWnd* pFocus = CWnd::GetFocus();
+// COMMENT: {7/13/2009 6:59:44 PM}			this->PostMessage(UM_DDX_FAILURE, (WPARAM)pFocus, (LPARAM)0);
+// COMMENT: {7/13/2009 6:59:44 PM}
+// COMMENT: {7/13/2009 6:59:44 PM}			// disallow change
+// COMMENT: {7/13/2009 6:59:44 PM}			//
+// COMMENT: {7/13/2009 6:59:44 PM}			*pResult = TRUE;
+// COMMENT: {7/13/2009 6:59:44 PM}			TRACE("Out %s Disallowed\n", __FUNCTION__);
+// COMMENT: {7/13/2009 6:59:44 PM}			return;
+// COMMENT: {7/13/2009 6:59:44 PM}		}
+// COMMENT: {7/13/2009 6:59:44 PM}	}
+// COMMENT: {7/13/2009 6:59:44 PM}	*pResult = 0;
+// COMMENT: {7/13/2009 6:59:44 PM}	TRACE("Out Allowed %s\n", __FUNCTION__);
+// COMMENT: {7/13/2009 6:59:44 PM}}
 
 #define COMPARE_SET(S, R) \
 do { \
@@ -318,38 +316,56 @@ do { \
 	} \
 } while (0)
 
-void CMediaPropsPage2::OnTreeSelChanged(NMHDR *pNotifyStruct, LRESULT *pResult)
+// COMMENT: {7/13/2009 7:09:30 PM}void CMediaPropsPage2::OnTreeSelChanged(NMHDR *pNotifyStruct, LRESULT *pResult)
+// COMMENT: {7/13/2009 7:09:30 PM}{
+// COMMENT: {7/13/2009 7:09:30 PM}	TRACE("In %s\n", __FUNCTION__);
+// COMMENT: {7/13/2009 7:09:30 PM}	UNREFERENCED_PARAMETER(pResult);
+// COMMENT: {7/13/2009 7:09:30 PM}	NMTREEVIEW *pTvn = reinterpret_cast<NMTREEVIEW*>(pNotifyStruct);
+// COMMENT: {7/13/2009 7:09:30 PM}	this->ItemDDX = pTvn->itemNew.hItem;
+// COMMENT: {7/13/2009 7:09:30 PM}	if (this->ItemDDX)
+// COMMENT: {7/13/2009 7:09:30 PM}	{
+// COMMENT: {7/13/2009 7:09:30 PM}		this->UpdateData(FALSE);
+// COMMENT: {7/13/2009 7:09:30 PM}
+// COMMENT: {7/13/2009 7:09:30 PM}		// update property description
+// COMMENT: {7/13/2009 7:09:30 PM}		//
+// COMMENT: {7/13/2009 7:09:30 PM}		if (this->TreeCtrl.GetSafeHwnd())
+// COMMENT: {7/13/2009 7:09:30 PM}		{
+// COMMENT: {7/13/2009 7:09:30 PM}			//{{
+// COMMENT: {7/13/2009 7:09:30 PM}			this->SetPropertyDescription();
+// COMMENT: {7/13/2009 7:09:30 PM}			//}}
+// COMMENT: {7/13/2009 7:09:30 PM}			CString strItem = this->TreeCtrl.GetItemText(this->ItemDDX);
+// COMMENT: {7/13/2009 7:09:30 PM}
+// COMMENT: {7/13/2009 7:09:30 PM}			COMPARE_SET(ACTIVE,           this->m_sActiveRTF);
+// COMMENT: {7/13/2009 7:09:30 PM}			COMPARE_SET(KX,               this->m_sKxRTF);
+// COMMENT: {7/13/2009 7:09:30 PM}			COMPARE_SET(KY,               this->m_sKyRTF);
+// COMMENT: {7/13/2009 7:09:30 PM}			COMPARE_SET(KZ,               this->m_sKzRTF);
+// COMMENT: {7/13/2009 7:09:30 PM}			COMPARE_SET(POROSITY,         this->m_sPorosityRTF);
+// COMMENT: {7/13/2009 7:09:30 PM}			COMPARE_SET(STORAGE,          this->m_sStorageRTF);
+// COMMENT: {7/13/2009 7:09:30 PM}			COMPARE_SET(ALPHA_LONG,       this->m_sAlphaLongRTF);
+// COMMENT: {7/13/2009 7:09:30 PM}			COMPARE_SET(ALPHA_HORIZONTAL, this->m_sAlphaHorizontalRTF);
+// COMMENT: {7/13/2009 7:09:30 PM}			COMPARE_SET(ALPHA_VERTICAL,   this->m_sAlphaVerticalRTF);
+// COMMENT: {7/13/2009 7:09:30 PM}		}
+// COMMENT: {7/13/2009 7:09:30 PM}	}
+// COMMENT: {7/13/2009 7:09:30 PM}	if (this->TreeCtrl.GetSafeHwnd())
+// COMMENT: {7/13/2009 7:09:30 PM}	{
+// COMMENT: {7/13/2009 7:09:30 PM}		this->TreeCtrl.SetFocus();
+// COMMENT: {7/13/2009 7:09:30 PM}	}
+// COMMENT: {7/13/2009 7:09:30 PM}	TRACE("Out %s\n", __FUNCTION__);
+// COMMENT: {7/13/2009 7:09:30 PM}}
+
+void CMediaPropsPage2::SetPropertyDescription()
 {
-	TRACE("In %s\n", __FUNCTION__);
-	UNREFERENCED_PARAMETER(pResult);
-	NMTREEVIEW *pTvn = reinterpret_cast<NMTREEVIEW*>(pNotifyStruct);
-	this->ItemDDX = pTvn->itemNew.hItem;
-	if (this->ItemDDX)
-	{
-		this->UpdateData(FALSE);
+	CString strItem = this->TreeCtrl.GetItemText(this->ItemDDX);
 
-		// update property description
-		//
-		if (this->TreeCtrl.GetSafeHwnd())
-		{
-			CString strItem = this->TreeCtrl.GetItemText(this->ItemDDX);
-
-			COMPARE_SET(ACTIVE,           this->m_sActiveRTF);
-			COMPARE_SET(KX,               this->m_sKxRTF);
-			COMPARE_SET(KY,               this->m_sKyRTF);
-			COMPARE_SET(KZ,               this->m_sKzRTF);
-			COMPARE_SET(POROSITY,         this->m_sPorosityRTF);
-			COMPARE_SET(STORAGE,          this->m_sStorageRTF);
-			COMPARE_SET(ALPHA_LONG,       this->m_sAlphaLongRTF);
-			COMPARE_SET(ALPHA_HORIZONTAL, this->m_sAlphaHorizontalRTF);
-			COMPARE_SET(ALPHA_VERTICAL,  this->m_sAlphaVerticalRTF);
-		}
-	}
-	if (this->TreeCtrl.GetSafeHwnd())
-	{
-		this->TreeCtrl.SetFocus();
-	}
-	TRACE("Out %s\n", __FUNCTION__);
+	COMPARE_SET(ACTIVE,           this->m_sActiveRTF);
+	COMPARE_SET(KX,               this->m_sKxRTF);
+	COMPARE_SET(KY,               this->m_sKyRTF);
+	COMPARE_SET(KZ,               this->m_sKzRTF);
+	COMPARE_SET(POROSITY,         this->m_sPorosityRTF);
+	COMPARE_SET(STORAGE,          this->m_sStorageRTF);
+	COMPARE_SET(ALPHA_LONG,       this->m_sAlphaLongRTF);
+	COMPARE_SET(ALPHA_HORIZONTAL, this->m_sAlphaHorizontalRTF);
+	COMPARE_SET(ALPHA_VERTICAL,   this->m_sAlphaVerticalRTF);
 }
 
 void CMediaPropsPage2::OnEnSetfocusDescEdit()
@@ -477,40 +493,6 @@ void CMediaPropsPage2::OnCbnSelchangeComboProptype()
 	}
 }
 
-// COMMENT: {7/9/2009 9:01:55 PM}void CMediaPropsPage2::OnBnClickedCheckFace()
-// COMMENT: {7/9/2009 9:01:55 PM}{
-// COMMENT: {7/9/2009 9:01:55 PM}	if (this->IsDlgButtonChecked(IDC_CHECK_FACE))
-// COMMENT: {7/9/2009 9:01:55 PM}	{
-// COMMENT: {7/9/2009 9:01:55 PM}		if (CWnd *pWnd = this->GetDlgItem(IDC_FACE_X_RADIO))
-// COMMENT: {7/9/2009 9:01:55 PM}		{
-// COMMENT: {7/9/2009 9:01:55 PM}			pWnd->EnableWindow(TRUE);
-// COMMENT: {7/9/2009 9:01:55 PM}		}
-// COMMENT: {7/9/2009 9:01:55 PM}		if (CWnd *pWnd = this->GetDlgItem(IDC_FACE_Y_RADIO))
-// COMMENT: {7/9/2009 9:01:55 PM}		{
-// COMMENT: {7/9/2009 9:01:55 PM}			pWnd->EnableWindow(TRUE);
-// COMMENT: {7/9/2009 9:01:55 PM}		}
-// COMMENT: {7/9/2009 9:01:55 PM}		if (CWnd *pWnd = this->GetDlgItem(IDC_FACE_Z_RADIO))
-// COMMENT: {7/9/2009 9:01:55 PM}		{
-// COMMENT: {7/9/2009 9:01:55 PM}			pWnd->EnableWindow(TRUE);
-// COMMENT: {7/9/2009 9:01:55 PM}		}
-// COMMENT: {7/9/2009 9:01:55 PM}	}
-// COMMENT: {7/9/2009 9:01:55 PM}	else
-// COMMENT: {7/9/2009 9:01:55 PM}	{
-// COMMENT: {7/9/2009 9:01:55 PM}		if (CWnd *pWnd = this->GetDlgItem(IDC_FACE_X_RADIO))
-// COMMENT: {7/9/2009 9:01:55 PM}		{
-// COMMENT: {7/9/2009 9:01:55 PM}			pWnd->EnableWindow(FALSE);
-// COMMENT: {7/9/2009 9:01:55 PM}		}
-// COMMENT: {7/9/2009 9:01:55 PM}		if (CWnd *pWnd = this->GetDlgItem(IDC_FACE_Y_RADIO))
-// COMMENT: {7/9/2009 9:01:55 PM}		{
-// COMMENT: {7/9/2009 9:01:55 PM}			pWnd->EnableWindow(FALSE);
-// COMMENT: {7/9/2009 9:01:55 PM}		}
-// COMMENT: {7/9/2009 9:01:55 PM}		if (CWnd *pWnd = this->GetDlgItem(IDC_FACE_Z_RADIO))
-// COMMENT: {7/9/2009 9:01:55 PM}		{
-// COMMENT: {7/9/2009 9:01:55 PM}			pWnd->EnableWindow(FALSE);
-// COMMENT: {7/9/2009 9:01:55 PM}		}
-// COMMENT: {7/9/2009 9:01:55 PM}	}
-// COMMENT: {7/9/2009 9:01:55 PM}}
-
 void CMediaPropsPage2::OnBnClickedCheckMixture()
 {
 	if (this->ItemDDX)
@@ -558,4 +540,15 @@ void CMediaPropsPage2::OnBnClickedCheckMixture()
 	}
 }
 
-
+// COMMENT: {7/13/2009 7:09:55 PM}void CMediaPropsPage2::OnNMSetfocusPropTree(NMHDR *pNMHDR, LRESULT *pResult)
+// COMMENT: {7/13/2009 7:09:55 PM}{
+// COMMENT: {7/13/2009 7:09:55 PM}	TRACE("In %s\n", __FUNCTION__);
+// COMMENT: {7/13/2009 7:09:55 PM}	NMTREEVIEW tvn;
+// COMMENT: {7/13/2009 7:09:55 PM}	tvn.hdr.hwndFrom = this->TreeCtrl.GetSafeHwnd();
+// COMMENT: {7/13/2009 7:09:55 PM}	tvn.itemNew.hItem = this->ItemDDX;
+// COMMENT: {7/13/2009 7:09:55 PM}	tvn.itemOld.hItem = this->ItemDDX;
+// COMMENT: {7/13/2009 7:09:55 PM}
+// COMMENT: {7/13/2009 7:09:55 PM}	this->OnTreeSelChanged((NMHDR*)&tvn, pResult);
+// COMMENT: {7/13/2009 7:09:55 PM}	*pResult = 0;
+// COMMENT: {7/13/2009 7:09:55 PM}	TRACE("Out %s\n", __FUNCTION__);
+// COMMENT: {7/13/2009 7:09:55 PM}}

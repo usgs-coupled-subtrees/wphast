@@ -5,7 +5,11 @@
 #include "ETSLayoutPropertyPageXP.h"
 
 #ifndef baseCNewZonePropertyPage
+#if defined(USE_LAYOUT)
 #define baseCNewZonePropertyPage ETSLayoutPropertyPageXP
+#else
+#define baseCNewZonePropertyPage CPropertyPage
+#endif
 #endif
 
 // CNewZonePropertyPage dialog

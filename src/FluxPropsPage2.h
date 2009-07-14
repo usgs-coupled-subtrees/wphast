@@ -48,12 +48,16 @@ public:
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual void DDV_SoftValidate();
+	virtual void SetPropertyDescription();
+
+	virtual void DDX_Series(CDataExchange* pDX);
 
 	DECLARE_MESSAGE_MAP()
 
 	//{{ COMMON
- 	afx_msg void OnTreeSelChanging(NMHDR *pNotifyStruct, LRESULT *plResult);
- 	afx_msg void OnTreeSelChanged(NMHDR *pNotifyStruct, LRESULT *plResult);
+// COMMENT: {7/13/2009 7:46:11 PM} 	afx_msg void OnTreeSelChanging(NMHDR *pNotifyStruct, LRESULT *plResult);
+// COMMENT: {7/13/2009 7:46:11 PM} 	afx_msg void OnTreeSelChanged(NMHDR *pNotifyStruct, LRESULT *plResult);
 
 	afx_msg void OnEndLabelEditFlux(NMHDR *pNotifyStruct, LRESULT *result);
 	afx_msg void OnEndLabelEditSolution(NMHDR *pNotifyStruct, LRESULT *result);
@@ -76,12 +80,12 @@ protected:
 	CGridTimeSeries FluxSeries;
 	CGridTimeSeries SolutionSeries;
 
-	CModGridCtrlEx PointsGrid;
-
-	CRichEditCtrl  RichEditCtrl;
-	CTreeCtrl      TreeCtrl;
-
-	HTREEITEM ItemDDX;
+// COMMENT: {7/13/2009 7:18:25 PM}	CModGridCtrlEx PointsGrid;
+// COMMENT: {7/13/2009 7:18:25 PM}
+// COMMENT: {7/13/2009 7:18:25 PM}	CRichEditCtrl  RichEditCtrl;
+// COMMENT: {7/13/2009 7:18:25 PM}	CTreeCtrl      TreeCtrl;
+// COMMENT: {7/13/2009 7:18:25 PM}
+// COMMENT: {7/13/2009 7:18:25 PM}	HTREEITEM ItemDDX;
 
 	std::string m_sDescriptionRTF;   // IDR_DESCRIPTION_RTF
 	std::string m_sAssocSolutionRTF; // IDR_BC_FLUX_ASSOC_SOL_RTF
