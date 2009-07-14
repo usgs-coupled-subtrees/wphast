@@ -33,7 +33,7 @@ CSpecifiedHeadPropsPage::CSpecifiedHeadPropsPage()
 	CGlobal::LoadRTFString(this->m_sHeadRTF,          IDR_BC_SPECIFIED_HEAD_RTF);
 	CGlobal::LoadRTFString(this->m_sSolutionAssocRTF, IDR_BC_SPECIFIED_SOL_ASSOC_RTF);
 	CGlobal::LoadRTFString(this->m_sSolutionFixRTF,   IDR_BC_SPECIFIED_SOL_FIX_RTF);	
-	CGlobal::LoadRTFString(this->m_sSolTypeRTF,       IDR_BC_SOL_TYPE_RTF);
+	CGlobal::LoadRTFString(this->m_sSolTypeRTF,       IDR_BC_SOL_TYPE_RTF); // ???
 
 	// init properties
 	this->SetFlowOnly(false);

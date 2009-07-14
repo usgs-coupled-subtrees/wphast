@@ -81,6 +81,7 @@ protected:
 
 	// face checkbox
 	afx_msg void OnBnClickedCheckFace();
+	afx_msg void OnBnSetfocusCheckFace();
 
 	// property controllers
 	CGridTimeSeries FluxSeries;

@@ -260,14 +260,15 @@ BEGIN_MESSAGE_MAP(CFluxPropsPage2, CPropsPropertyPage)
 	// IDC_BUTTON_XYZ
 	ON_BN_CLICKED(IDC_BUTTON_XYZ, OnBnClickedButtonXYZ)
 
-	//// IDC_COMBO_PROPTYPE
-	//ON_CBN_SELCHANGE(IDC_COMBO_PROPTYPE, OnCbnSelchangeComboProptype)
-
 	// IDC_CHECK_MIXTURE
 	ON_BN_CLICKED(IDC_CHECK_MIXTURE, OnBnClickedCheckMixture)
 
 	// IDC_CHECK_FACE
 	ON_BN_CLICKED(IDC_CHECK_FACE, OnBnClickedCheckFace)
+	ON_BN_SETFOCUS(IDC_CHECK_FACE, OnBnSetfocusCheckFace)
+	ON_BN_SETFOCUS(IDC_FACE_X_RADIO, OnBnSetfocusCheckFace)
+	ON_BN_SETFOCUS(IDC_FACE_Y_RADIO, OnBnSetfocusCheckFace)
+	ON_BN_SETFOCUS(IDC_FACE_Z_RADIO, OnBnSetfocusCheckFace)
 
 	// DDX failure
 	ON_MESSAGE(UM_DDX_FAILURE, OnUM_DDXFailure)
@@ -401,6 +402,7 @@ void CFluxPropsPage2::OnBnClickedCheckFace()
 			pWnd->EnableWindow(FALSE);
 		}
 	}
+	this->OnBnSetfocusCheckFace();
 }
 
 void CFluxPropsPage2::OnBnClickedCheckMixture()
@@ -420,4 +422,9 @@ void CFluxPropsPage2::OnBnClickedCheckMixture()
 			ASSERT(FALSE);
 		}
 	}
+}
+
+void CFluxPropsPage2::OnBnSetfocusCheckFace()
+{
+	this->RichEditCtrl.SetWindowText(this->m_sFaceRTF.c_str());
 }

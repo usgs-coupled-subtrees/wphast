@@ -333,6 +333,10 @@ BEGIN_MESSAGE_MAP(CLeakyPropsPage, CPropsPropertyPage)
 
 	// IDC_CHECK_FACE
 	ON_BN_CLICKED(IDC_CHECK_FACE, OnBnClickedCheckFace)
+	ON_BN_SETFOCUS(IDC_CHECK_FACE, OnBnSetfocusCheckFace)
+	ON_BN_SETFOCUS(IDC_FACE_X_RADIO, OnBnSetfocusCheckFace)
+	ON_BN_SETFOCUS(IDC_FACE_Y_RADIO, OnBnSetfocusCheckFace)
+	ON_BN_SETFOCUS(IDC_FACE_Z_RADIO, OnBnSetfocusCheckFace)
 
 	// DDX failure
 	ON_MESSAGE(UM_DDX_FAILURE, OnUM_DDXFailure)
@@ -505,6 +509,7 @@ void CLeakyPropsPage::OnBnClickedCheckFace()
 			pWnd->EnableWindow(FALSE);
 		}
 	}
+	this->OnBnSetfocusCheckFace();
 }
 
 void CLeakyPropsPage::OnBnClickedCheckMixture()
@@ -532,4 +537,9 @@ void CLeakyPropsPage::OnBnClickedCheckMixture()
 			ASSERT(FALSE);
 		}
 	}
+}
+
+void CLeakyPropsPage::OnBnSetfocusCheckFace()
+{
+	this->RichEditCtrl.SetWindowText(this->m_sFaceRTF.c_str());
 }
