@@ -28,11 +28,12 @@ End If
 
 Set Sh = CreateObject("WScript.Shell")
 
-bCreateDoc = false
-Sh.RegRead(classes & doc & "\CLSID\")
-If Err <> 0 Then
-  bCreateDoc = true
-End if
+'''bCreateDoc = false
+'''Sh.RegRead(classes & doc & "\CLSID\")
+'''If Err <> 0 Then
+'''  bCreateDoc = true
+'''End if
+bCreateDoc = true
 
 If bCreateDoc Then
 	' [HKEY_CURRENT_USER\Software\Classes\Testing.WPhast.Document]
@@ -41,11 +42,12 @@ If bCreateDoc Then
 	Sh.RegWrite classes & doc & "\", doc
 End If
 
-bCreateDocCLSID = false
-Sh.RegRead(classes & doc & "\CLSID\")
-If Err <> 0 Then
-  bCreateDocCLSID = true
-End if
+'''bCreateDocCLSID = false
+'''Sh.RegRead(classes & doc & "\CLSID\")
+'''If Err <> 0 Then
+'''  bCreateDocCLSID = true
+'''End if
+bCreateDocCLSID = true
 
 If bCreateDocCLSID Then
 	' [HKEY_CURRENT_USER\Software\Classes\Testing.WPhast.Document\CLSID]
@@ -55,11 +57,13 @@ If bCreateDocCLSID Then
 End If
 
 
-bCreateClassCLSID = false
-Sh.RegRead(classes & "\CLSID\" & clsid & "\")
-If Err <> 0 Then
-  bCreateClassCLSID = true
-End if
+'''bCreateClassCLSID = false
+'''Sh.RegRead(classes & "\CLSID\" & clsid & "\")
+'''If Err <> 0 Then
+'''  bCreateClassCLSID = true
+'''End if
+bCreateClassCLSID = true
+
 If bCreateClassCLSID Then
 	' [HKEY_CURRENT_USER\Software\Classes\CLSID\{36353903-2137-43FD-9AD6-40B65A96A839}]
 	' @="Testing.WPhast.Document"
@@ -68,11 +72,13 @@ If bCreateClassCLSID Then
 End If
 
 
-bCreateLocalServer32 = false
-Sh.RegRead(classes & "\CLSID\" & clsid & "\LocalServer32\")
-If Err <> 0 Then
-  bCreateLocalServer32 = true
-End if
+'''bCreateLocalServer32 = false
+'''Sh.RegRead(classes & "\CLSID\" & clsid & "\LocalServer32\")
+'''If Err <> 0 Then
+'''  bCreateLocalServer32 = true
+'''End if
+bCreateLocalServer32 = true
+
 If bCreateLocalServer32 Then
 	' [HKEY_CURRENT_USER\Software\Classes\CLSID\{36353903-2137-43FD-9AD6-40B65A96A839}\LocalServer32]
 	' @="<scriptdir>..\src\AutoRelease\WPhast.exe
@@ -81,14 +87,16 @@ If bCreateLocalServer32 Then
 End If
 
 
-bCreateProgID = false
-Sh.RegRead(classes & "\CLSID\" & clsid & "\ProgID\")
-If Err <> 0 Then
-  bCreateProgID = true
-End if
+'''bCreateProgID = false
+'''Sh.RegRead(classes & "\CLSID\" & clsid & "\ProgID\")
+'''If Err <> 0 Then
+'''  bCreateProgID = true
+'''End if
+bCreateProgID = true
+
 If bCreateProgID Then
 	' [HKEY_CURRENT_USER\Software\Classes\CLSID\{36353903-2137-43FD-9AD6-40B65A96A839}\ProgID]
-	' @="WPhast.Document"
+	' @="Testing.WPhast.Document"
 	'
 	Sh.RegWrite classes & "\CLSID\" & clsid & "\ProgID\", doc
 End If
