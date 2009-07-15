@@ -11,6 +11,13 @@
 #include "ZoneCreateAction.h"
 #include "FlowOnly.h"
 #include "Protect.h"
+#include "Global.h"
+
+//#include "MediaProps.h"
+#include "MediaPropsPage.h"
+#include "MediaPropsPage2.h"
+#include "TreePropSheetEx/TreePropSheetEx.h"
+
 
 #include <vtkPropAssembly.h>
 #include <vtkObjectFactory.h> // reqd by vtkStandardNewMacro
@@ -120,31 +127,21 @@ void CMediaZoneActor::Update(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent)
 
 	CString format;
 
-// COMMENT: {6/23/2008 1:47:26 PM}	// remove all previous items
-// COMMENT: {6/23/2008 1:47:26 PM}	//
-// COMMENT: {6/23/2008 1:47:26 PM}	while (HTREEITEM hChild = pTreeCtrl->GetChildItem(htiParent))
-// COMMENT: {6/23/2008 1:47:26 PM}	{
-// COMMENT: {6/23/2008 1:47:26 PM}		pTreeCtrl->DeleteItem(hChild);
-// COMMENT: {6/23/2008 1:47:26 PM}	}
-// COMMENT: {6/23/2008 1:47:26 PM}
-// COMMENT: {6/23/2008 1:47:26 PM}	// update description
-// COMMENT: {6/23/2008 1:47:26 PM}	//
-// COMMENT: {6/23/2008 1:47:26 PM}	pTreeCtrl->SetItemText(htiParent, this->GetNameDesc());
-// COMMENT: {6/23/2008 1:47:26 PM}
-// COMMENT: {6/23/2008 1:47:26 PM}	//{{
-// COMMENT: {6/23/2008 1:47:26 PM}	if (this->GetPolyhedronType() == Polyhedron::PRISM)
-// COMMENT: {6/23/2008 1:47:26 PM}	{
-// COMMENT: {6/23/2008 1:47:26 PM}		HTREEITEM hItem;
-// COMMENT: {6/23/2008 1:47:26 PM}		hItem = pTreeCtrl->InsertItem("Top", htiParent);
-// COMMENT: {6/23/2008 1:47:26 PM}		pTreeCtrl->SetItemState(hItem, INDEXTOSTATEIMAGEMASK(BST_CHECKED + 1), TVIS_STATEIMAGEMASK);
-// COMMENT: {6/23/2008 1:47:26 PM}
-// COMMENT: {6/23/2008 1:47:26 PM}		hItem = pTreeCtrl->InsertItem("Perimeter", htiParent);
-// COMMENT: {6/23/2008 1:47:26 PM}		pTreeCtrl->SetItemState(hItem, INDEXTOSTATEIMAGEMASK(BST_CHECKED + 1), TVIS_STATEIMAGEMASK);
-// COMMENT: {6/23/2008 1:47:26 PM}
-// COMMENT: {6/23/2008 1:47:26 PM}		hItem = pTreeCtrl->InsertItem("Bottom", htiParent);
-// COMMENT: {6/23/2008 1:47:26 PM}		pTreeCtrl->SetItemState(hItem, INDEXTOSTATEIMAGEMASK(BST_CHECKED + 1), TVIS_STATEIMAGEMASK);
-// COMMENT: {6/23/2008 1:47:26 PM}	}
-// COMMENT: {6/23/2008 1:47:26 PM}	//}}
+	//{{
+	CGridElt relative_elt(this->m_grid_elt);
+	CGridElt absolute_elt(relative_elt);
+	CFrameWnd *pFrame = (CFrameWnd*)::AfxGetApp()->m_pMainWnd;
+	if (pFrame)
+	{
+		ASSERT_VALID(pFrame);
+		CWPhastDoc* pDoc = reinterpret_cast<CWPhastDoc*>(pFrame->GetActiveDocument());
+		ASSERT_VALID(pDoc);
+
+		CGlobal::PathsAbsoluteToRelative(pDoc->GetPathName(), pDoc, relative_elt);
+
+		this->m_grid_elt = relative_elt;
+	}
+	//}}
 
 	// active
 	if (this->m_grid_elt.active)
@@ -204,6 +201,14 @@ void CMediaZoneActor::Update(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent)
 	{
 		static_cast<Cproperty*>(this->m_grid_elt.alpha_vertical)->Insert(pTreeCtrl, htiParent, "vertical_dispersivity");
 	}
+
+	//{{
+	if (pFrame)
+	{
+		this->m_grid_elt = absolute_elt;
+	}
+	//}}
+
 }
 
 void CMediaZoneActor::Edit(CTreeCtrl* pTreeCtrl)
@@ -231,22 +236,34 @@ void CMediaZoneActor::Edit(CTreeCtrl* pTreeCtrl)
 		}
 	}
 
-	CMediaSpreadPropertyPage mediaSpreadProps;
-	mediaSpreadProps.SetProperties(elt);
-	mediaSpreadProps.SetDesc(this->GetDesc());
+	CMediaPropsPage2 mediaProps;
+	mediaProps.SetProperties(elt);
+	mediaProps.SetDesc(this->GetDesc());
+	mediaProps.SetUnits(pDoc->GetUnits());
 	if (this->GetDefault())
 	{
-		mediaSpreadProps.SetDefault(true);
-		mediaSpreadProps.SetFlowOnly(bool(pDoc->GetFlowOnly()));
+		mediaProps.SetDefault(true);
+		mediaProps.SetFlowOnly(bool(pDoc->GetFlowOnly()));
 	}
-	props.AddPage(&mediaSpreadProps);
+	props.AddPage(&mediaProps);
 
 	if (props.DoModal() == IDOK)
 	{
-		CGridElt grid_elt;
-		mediaSpreadProps.GetProperties(grid_elt);
-		ASSERT(grid_elt.polyh);
-		pDoc->Execute(new CSetMediaAction(this, pTreeCtrl, grid_elt, mediaSpreadProps.GetDesc()));
+		CGridElt GridElt;
+		mediaProps.GetProperties(GridElt);
+		ASSERT(GridElt.polyh);
+
+// COMMENT: {4/28/2009 10:13:54 PM}		//{{
+// COMMENT: {4/28/2009 10:13:54 PM}		CFrameWnd *pFrame = (CFrameWnd*)::AfxGetApp()->m_pMainWnd;
+// COMMENT: {4/28/2009 10:13:54 PM}		ASSERT_VALID(pFrame);
+// COMMENT: {4/28/2009 10:13:54 PM}		CWPhastDoc* pDoc = reinterpret_cast<CWPhastDoc*>(pFrame->GetActiveDocument());
+// COMMENT: {4/28/2009 10:13:54 PM}		ASSERT_VALID(pDoc);
+// COMMENT: {4/28/2009 10:13:54 PM}
+// COMMENT: {4/28/2009 10:13:54 PM}		CGlobal::PathsAbsoluteToRelative(pDoc->GetPathName(), pDoc, GridElt);
+// COMMENT: {4/28/2009 10:13:54 PM}		//}}
+
+		pDoc->Execute(new CSetMediaAction(this, pTreeCtrl, GridElt, mediaProps.GetDesc()));
+
 	}
 }
 

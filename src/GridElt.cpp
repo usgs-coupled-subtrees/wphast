@@ -581,3 +581,28 @@ bool CGridElt::operator==(const grid_elt& rhs)const
 
 	return true;
 }
+
+#define COPY_PROP_MACRO(S, P) \
+	do { \
+		p.title = S; \
+		if (this->P) { \
+			p.prop = *this->P; \
+		} else { \
+			p.prop = Cproperty(); \
+		} \
+		v.push_back(p); \
+	} while (0)			
+
+void CGridElt::Fill(std::vector<CPropStruct>& v)const
+{
+	CPropStruct p;
+	COPY_PROP_MACRO("Active",                    active);
+	COPY_PROP_MACRO("Kx",                        kx);
+	COPY_PROP_MACRO("Ky",                        ky);
+	COPY_PROP_MACRO("Kz",                        kz);
+	COPY_PROP_MACRO("Porosity",                  porosity);
+	COPY_PROP_MACRO("Specific storage",          storage);
+	COPY_PROP_MACRO("Longitudinal dispersivity", alpha_long);
+	COPY_PROP_MACRO("Horizontal dispersivity",   alpha_horizontal);
+	COPY_PROP_MACRO("Vertical dispersivity",     alpha_vertical);
+}

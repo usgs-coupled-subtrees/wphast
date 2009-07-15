@@ -4,6 +4,8 @@
 #include "resource.h"
 #include "PropertyTreeControlBar.h"
 #include "ChemICSpreadPropertyPage.h"
+#include "ICChemPropsPage.h"
+#include "ICChemPropsPage2.h"
 
 #include "property.h"
 #include "Global.h"
@@ -159,11 +161,14 @@ void CICChemZoneActor::Edit(CTreeCtrl* pTreeCtrl)
 
 	ASSERT(this->GetData().polyh);
 
-	CChemICSpreadPropertyPage chemICProps;
+	//CChemICSpreadPropertyPage chemICProps;
+	//CICChemPropsPage chemICProps;
+	CICChemPropsPage2 chemICProps;
 	chemICProps.SetProperties(this->GetData());
 	chemICProps.SetDesc(this->GetDesc());
 	if (this->GetDefault())
 	{
+		chemICProps.SetDefault(true);		
 		chemICProps.SetFlowOnly(bool(pDoc->GetFlowOnly()));
 	}
 

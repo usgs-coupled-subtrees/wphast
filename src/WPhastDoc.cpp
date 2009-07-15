@@ -33,6 +33,11 @@
 #include "srcinput/Filedata.h"
 
 #include "Action.h"
+#include "SetMediaAction.h"
+#include "SetBCAction.h"
+#include "SetChemICAction.h"
+#include "SetHeadICAction.h"
+
 #include "SetDisplayColorsAction.h"
 #include "ZoneActor.h"
 #include "DrainActor.h"
@@ -45,6 +50,14 @@
 #include "ICHeadZoneActor.h"
 #include "ICChemZoneActor.h"
 #include "ZoneFlowRateZoneActor.h"
+
+#include "MediaPropsPage2.h"
+#include "FluxPropsPage2.h"
+#include "LeakyPropsPage.h"
+#include "HeadICPropsPage2.h"
+#include "SpecifiedHeadPropsPage.h"
+#include "ICChemPropsPage2.h"
+
 #include "SeException.h"
 
 #include "ISerial.h"
@@ -158,6 +171,7 @@ static const TCHAR szPrismFind[]     = _T("Prism ");
 
 int error_msg (const char *err_str, const int stop);
 
+#include "FakeFiledata.h"
 void Clear_NNInterpolatorList(void);
 void Clear_file_data_map(void);
 void Clear_KDtreeList(void);
@@ -1288,7 +1302,7 @@ BOOL CWPhastDoc::OnOpenDocument(LPCTSTR lpszPathName)
 	TRACE("CWPhastDoc::OnOpenDocument(%s) GetCurrentDirectory = %s\n", lpszPathName, curdir);
 
 	BOOL bOk = CDocument::OnOpenDocument(lpszPathName);
-	this->PrismPathsRelativeToAbsolute(lpszPathName);
+	this->DataSourcePathsRelativeToAbsolute(lpszPathName);
 	return bOk;
 }
 
@@ -1496,6 +1510,7 @@ void CWPhastDoc::DeleteContents()
 	// cleanup phastinput data
 	//
 	Clear_NNInterpolatorList();
+	FakeFiledata::Clear_fake_file_data_list();
 	Clear_file_data_map();
 	Clear_KDtreeList();
 
@@ -2113,7 +2128,7 @@ void CWPhastDoc::GetUsedZoneFlowRates(std::set<int>& usedNums)const
 	}
 }
 
-void CWPhastDoc::PrismPathsRelativeToAbsolute(LPCTSTR lpszPathName)
+void CWPhastDoc::DataSourcePathsRelativeToAbsolute(LPCTSTR lpszPathName)
 {
 	CZoneActor *pZoneActor;
 
@@ -2134,6 +2149,30 @@ void CWPhastDoc::PrismPathsRelativeToAbsolute(LPCTSTR lpszPathName)
 			{
 				if ((pZoneActor = CZoneActor::SafeDownCast(pProp)))
 				{
+					if (CMediaZoneActor *pMediaZoneActor = CMediaZoneActor::SafeDownCast(pZoneActor))
+					{
+						CGridElt elt = pMediaZoneActor->GetData();
+						CGlobal::PathsRelativeToAbsolute(lpszPathName, this, elt);
+						pMediaZoneActor->SetData(elt);
+					}
+					if (CBCZoneActor *pBCZoneActor = CBCZoneActor::SafeDownCast(pZoneActor))
+					{
+						CBC bc = pBCZoneActor->GetData();
+						CGlobal::PathsRelativeToAbsolute(lpszPathName, this, bc);
+						pBCZoneActor->SetData(bc);
+					}
+					if (CICChemZoneActor *pICChemZoneActor = CICChemZoneActor::SafeDownCast(pZoneActor))
+					{
+						CChemIC chemIC = pICChemZoneActor->GetData();
+						CGlobal::PathsRelativeToAbsolute(lpszPathName, this, chemIC);
+						pICChemZoneActor->SetData(chemIC);
+					}
+					if (CICHeadZoneActor *pICHeadZoneActor = CICHeadZoneActor::SafeDownCast(pZoneActor))
+					{
+						CHeadIC headIC = pICHeadZoneActor->GetData();
+						CGlobal::PathsAbsoluteToRelative(lpszPathName, this, headIC);
+						pICHeadZoneActor->SetData(headIC);
+					}
 					if (pZoneActor->GetPolyhedronType() == Polyhedron::PRISM)
 					{
 						if (Prism *p = dynamic_cast<Prism*>(pZoneActor->GetPolyhedron()))
@@ -2162,7 +2201,7 @@ void CWPhastDoc::PrismPathsRelativeToAbsolute(LPCTSTR lpszPathName)
 	}
 }
 
-void CWPhastDoc::PrismPathsAbsoluteToRelative(LPCTSTR lpszPathName)
+void CWPhastDoc::DataSourcePathsAbsoluteToRelative(LPCTSTR lpszPathName)
 {
 	CZoneActor *pZoneActor;
 
@@ -2183,6 +2222,46 @@ void CWPhastDoc::PrismPathsAbsoluteToRelative(LPCTSTR lpszPathName)
 			{
 				if ((pZoneActor = CZoneActor::SafeDownCast(pProp)))
 				{
+					if (CMediaZoneActor *pMediaZoneActor = CMediaZoneActor::SafeDownCast(pZoneActor))
+					{
+						CGridElt elt = pMediaZoneActor->GetData();
+						CGlobal::PathsAbsoluteToRelative(lpszPathName, this, elt);
+
+						CTreeCtrl *pTreeCtrl = this->GetPropertyTreeControlBar()->GetTreeCtrl();
+						CAction *pAction = new CSetMediaAction(pMediaZoneActor, pTreeCtrl, elt, pMediaZoneActor->GetDesc());
+						pAction->Execute();
+						delete pAction;
+					}
+					if (CBCZoneActor *pBCZoneActor = CBCZoneActor::SafeDownCast(pZoneActor))
+					{
+						CBC bc = pBCZoneActor->GetData();
+						CGlobal::PathsAbsoluteToRelative(lpszPathName, this, bc);
+
+						CTreeCtrl *pTreeCtrl = this->GetPropertyTreeControlBar()->GetTreeCtrl();
+						CAction *pAction = new CSetBCAction(pBCZoneActor, pTreeCtrl, bc, pBCZoneActor->GetDesc());
+						pAction->Execute();
+						delete pAction;
+					}
+					if (CICChemZoneActor *pICChemZoneActor = CICChemZoneActor::SafeDownCast(pZoneActor))
+					{
+						CChemIC chemIC = pICChemZoneActor->GetData();
+						CGlobal::PathsAbsoluteToRelative(lpszPathName, this, chemIC);
+
+						CTreeCtrl *pTreeCtrl = this->GetPropertyTreeControlBar()->GetTreeCtrl();
+						CAction *pAction = new CSetChemICAction(pICChemZoneActor, pTreeCtrl, chemIC, pICChemZoneActor->GetDesc());
+						pAction->Execute();
+						delete pAction;
+					}
+					if (CICHeadZoneActor *pICHeadZoneActor = CICHeadZoneActor::SafeDownCast(pZoneActor))
+					{
+						CHeadIC headIC = pICHeadZoneActor->GetData();
+						CGlobal::PathsAbsoluteToRelative(lpszPathName, this, headIC);
+
+						CTreeCtrl *pTreeCtrl = this->GetPropertyTreeControlBar()->GetTreeCtrl();
+						CAction *pAction = new CSetHeadICAction(pICHeadZoneActor, pTreeCtrl, headIC, pICHeadZoneActor->GetDesc());
+						pAction->Execute();
+						delete pAction;
+					}
 					if (pZoneActor->GetPolyhedronType() == Polyhedron::PRISM)
 					{
 						if (Prism *p = dynamic_cast<Prism*>(pZoneActor->GetPolyhedron()))
@@ -2255,9 +2334,9 @@ BOOL CWPhastDoc::OnSaveDocument(LPCTSTR lpszPathName)
 	// Add your specialized code here and/or call the base class
 	this->m_pimpl->m_lastSaveIndex = this->m_pimpl->m_vectorActionsIndex;
 
-	this->PrismPathsAbsoluteToRelative(lpszPathName);
+	this->DataSourcePathsAbsoluteToRelative(lpszPathName);
 	BOOL bOk = CDocument::OnSaveDocument(lpszPathName);
-	this->PrismPathsRelativeToAbsolute(lpszPathName);
+	this->DataSourcePathsRelativeToAbsolute(lpszPathName);
 	return bOk;
 }
 
@@ -2833,7 +2912,7 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 			pAction->Execute();
 		}
 		// convert all relative paths to absolute paths
-		this->PrismPathsRelativeToAbsolute(lpszPathName);
+		this->DataSourcePathsRelativeToAbsolute(lpszPathName);
 	}
 	catch (int)
 	{
@@ -2958,13 +3037,13 @@ void CWPhastDoc::OnFileExport()
 		strPath += ".trans.dat";
 	}
 
-	this->PrismPathsAbsoluteToRelative(strPath);
+	this->DataSourcePathsAbsoluteToRelative(strPath);
 	if (!this->DoExport(strPath))
 	{
 		::AfxMessageBox("An error occured during the export", MB_OK);
 // COMMENT: {8/7/2008 4:03:09 PM}		this->SetModifiedFlag(FALSE);
 	}
-	this->PrismPathsRelativeToAbsolute(strPath);
+	this->DataSourcePathsRelativeToAbsolute(strPath);
 }
 
 BOOL CWPhastDoc::DoExport(LPCTSTR lpszPathName)
@@ -3505,9 +3584,9 @@ void CWPhastDoc::OnFileRun()
 	CString strPrefix(szFName);
 
 	std::ostringstream oss;
-	this->PrismPathsAbsoluteToRelative(szPhastTmp);
+	this->DataSourcePathsAbsoluteToRelative(szPhastTmp);
 	this->WriteTransDat(oss);
-	this->PrismPathsRelativeToAbsolute(szPhastTmp);
+	this->DataSourcePathsRelativeToAbsolute(szPhastTmp);
 
 	std::string str = oss.str();
 	std::istringstream iss(str);
@@ -5633,15 +5712,16 @@ void CWPhastDoc::NewZoneListener(vtkObject *caller, unsigned long eid, void *cli
 
 			// get type of zone
 			//
-			ETSLayoutPropertySheet        sheet("Zone Wizard", NULL, 0, NULL, false);
+// COMMENT: {7/13/2009 2:44:44 PM}			ETSLayoutPropertySheet        sheet("Zone Wizard", NULL, 0, NULL, false);
+			CPropertySheet                sheet("Zone Wizard", NULL, 0, NULL, false);
 
 			CNewZonePropertyPage          newZone;
-			CMediaSpreadPropertyPage      mediaProps;
-			CBCFluxPropertyPage2          fluxProps;
-			CBCLeakyPropertyPage2         leakyProps;
-			CBCSpecifiedHeadPropertyPage  specifiedProps;
-			CICHeadSpreadPropertyPage     icHeadProps;
-			CChemICSpreadPropertyPage     chemICProps;
+			CMediaPropsPage2              mediaProps;
+			CFluxPropsPage2               fluxProps;
+			CLeakyPropsPage               leakyProps;
+			CSpecifiedHeadPropsPage       specifiedProps;
+			CHeadICPropsPage2             headProps;
+			CICChemPropsPage2             chemICProps;
 			CZoneFlowRatePropertyPage     zoneFlowRateProps;
 
 			// CChemICSpreadPropertyPage only needs the flowonly flag when the zone is a
@@ -5663,7 +5743,7 @@ void CWPhastDoc::NewZoneListener(vtkObject *caller, unsigned long eid, void *cli
 			sheet.AddPage(&fluxProps);
 			sheet.AddPage(&leakyProps);
 			sheet.AddPage(&specifiedProps);
-			sheet.AddPage(&icHeadProps);
+			sheet.AddPage(&headProps);
 			sheet.AddPage(&chemICProps);
 			sheet.AddPage(&zoneFlowRateProps);
 
@@ -5702,9 +5782,9 @@ void CWPhastDoc::NewZoneListener(vtkObject *caller, unsigned long eid, void *cli
 				else if (newZone.GetType() == ID_ZONE_TYPE_IC_HEAD)
 				{
 					CHeadIC headic;
-					icHeadProps.GetProperties(headic);
+					headProps.GetProperties(headic);
 					headic.polyh = new Cube(&zone);
-					CICHeadZoneActor::Create(self, headic, icHeadProps.GetDesc());
+					CICHeadZoneActor::Create(self, headic, headProps.GetDesc());
 				}
 				else if (newZone.GetType() == ID_ZONE_TYPE_IC_CHEM)
 				{
@@ -5904,12 +5984,12 @@ void CWPhastDoc::NewWedgeListener(vtkObject *caller, unsigned long eid, void *cl
 			ETSLayoutPropertySheet        sheet("Wedge Wizard", NULL, 0, NULL, false);
 
 			CNewZonePropertyPage          newZone;
-			CMediaSpreadPropertyPage      mediaProps;
-			CBCFluxPropertyPage2          fluxProps;
-			CBCLeakyPropertyPage2         leakyProps;
-			CBCSpecifiedHeadPropertyPage  specifiedProps;
-			CICHeadSpreadPropertyPage     icHeadProps;
-			CChemICSpreadPropertyPage     chemICProps;
+			CMediaPropsPage2              mediaProps;
+			CFluxPropsPage2               fluxProps;
+			CLeakyPropsPage               leakyProps;
+			CSpecifiedHeadPropsPage       specifiedProps;
+			CHeadICPropsPage2             headProps;
+			CICChemPropsPage2             chemICProps;
 			CZoneFlowRatePropertyPage     zoneFlowRateProps;
 
 			// CChemICSpreadPropertyPage only needs the flowonly flag when the zone is a
@@ -5931,7 +6011,7 @@ void CWPhastDoc::NewWedgeListener(vtkObject *caller, unsigned long eid, void *cl
 			sheet.AddPage(&fluxProps);
 			sheet.AddPage(&leakyProps);
 			sheet.AddPage(&specifiedProps);
-			sheet.AddPage(&icHeadProps);
+			sheet.AddPage(&headProps);
 			sheet.AddPage(&chemICProps);
 			sheet.AddPage(&zoneFlowRateProps);
 
@@ -5970,9 +6050,9 @@ void CWPhastDoc::NewWedgeListener(vtkObject *caller, unsigned long eid, void *cl
 				else if (newZone.GetType() == ID_ZONE_TYPE_IC_HEAD)
 				{
 					CHeadIC headic;
-					icHeadProps.GetProperties(headic);
+					headProps.GetProperties(headic);
 					headic.polyh = new Wedge(&zone, srcWedgeSource::GetWedgeOrientationString(ct));
-					CICHeadZoneActor::Create(self, headic, icHeadProps.GetDesc());
+					CICHeadZoneActor::Create(self, headic, headProps.GetDesc());
 				}
 				else if (newZone.GetType() == ID_ZONE_TYPE_IC_CHEM)
 				{
@@ -6104,12 +6184,12 @@ void CWPhastDoc::OnToolsNewPrism()
 					ETSLayoutPropertySheet        sheet("Prism Wizard", NULL, 0, NULL, false);
 
 					CNewZonePropertyPage          newZone;
-					CMediaSpreadPropertyPage      mediaProps;
-					CBCFluxPropertyPage2          fluxProps;
-					CBCLeakyPropertyPage2         leakyProps;
-					CBCSpecifiedHeadPropertyPage  specifiedProps;
-					CICHeadSpreadPropertyPage     icHeadProps;
-					CChemICSpreadPropertyPage     chemICProps;
+					CMediaPropsPage2              mediaProps;
+					CFluxPropsPage2               fluxProps;
+					CLeakyPropsPage               leakyProps;
+					CSpecifiedHeadPropsPage       specifiedProps;
+					CHeadICPropsPage2             headProps;
+					CICChemPropsPage2             chemICProps;
 					CZoneFlowRatePropertyPage     zoneFlowRateProps;
 
 					// CChemICSpreadPropertyPage only needs the flowonly flag when the zone is a
@@ -6131,7 +6211,7 @@ void CWPhastDoc::OnToolsNewPrism()
 					sheet.AddPage(&fluxProps);
 					sheet.AddPage(&leakyProps);
 					sheet.AddPage(&specifiedProps);
-					sheet.AddPage(&icHeadProps);
+					sheet.AddPage(&headProps);
 					sheet.AddPage(&chemICProps);
 					sheet.AddPage(&zoneFlowRateProps);
 
@@ -6179,9 +6259,9 @@ void CWPhastDoc::OnToolsNewPrism()
 						else if (newZone.GetType() == ID_ZONE_TYPE_IC_HEAD)
 						{
 							CHeadIC headic;
-							icHeadProps.GetProperties(headic);
+							headProps.GetProperties(headic);
 							headic.polyh = p;
-							CICHeadZoneActor::Create(this, headic, icHeadProps.GetDesc());
+							CICHeadZoneActor::Create(this, headic, headProps.GetDesc());
 						}
 						else if (newZone.GetType() == ID_ZONE_TYPE_IC_CHEM)
 						{
@@ -6319,12 +6399,12 @@ void CWPhastDoc::NewPrismListener(vtkObject *caller, unsigned long eid, void *cl
 				ETSLayoutPropertySheet        sheet("Prism Wizard", NULL, 0, NULL, false);
 
 				CNewZonePropertyPage          newZone;
-				CMediaSpreadPropertyPage      mediaProps;
-				CBCFluxPropertyPage2          fluxProps;
-				CBCLeakyPropertyPage2         leakyProps;
-				CBCSpecifiedHeadPropertyPage  specifiedProps;
-				CICHeadSpreadPropertyPage     icHeadProps;
-				CChemICSpreadPropertyPage     chemICProps;
+				CMediaPropsPage2              mediaProps;
+				CFluxPropsPage2               fluxProps;
+				CLeakyPropsPage               leakyProps;
+				CSpecifiedHeadPropsPage       specifiedProps;
+				CHeadICPropsPage2             headProps;
+				CICChemPropsPage2             chemICProps;
 				CZoneFlowRatePropertyPage     zoneFlowRateProps;
 
 				// CChemICSpreadPropertyPage only needs the flowonly flag when the zone is a
@@ -6346,7 +6426,7 @@ void CWPhastDoc::NewPrismListener(vtkObject *caller, unsigned long eid, void *cl
 				sheet.AddPage(&fluxProps);
 				sheet.AddPage(&leakyProps);
 				sheet.AddPage(&specifiedProps);
-				sheet.AddPage(&icHeadProps);
+				sheet.AddPage(&headProps);
 				sheet.AddPage(&chemICProps);
 				sheet.AddPage(&zoneFlowRateProps);
 
@@ -6385,9 +6465,9 @@ void CWPhastDoc::NewPrismListener(vtkObject *caller, unsigned long eid, void *cl
 					else if (newZone.GetType() == ID_ZONE_TYPE_IC_HEAD)
 					{
 						CHeadIC headic;
-						icHeadProps.GetProperties(headic);
+						headProps.GetProperties(headic);
 						headic.polyh = p;
-						CICHeadZoneActor::Create(self, headic, icHeadProps.GetDesc());
+						CICHeadZoneActor::Create(self, headic, headProps.GetDesc());
 					}
 					else if (newZone.GetType() == ID_ZONE_TYPE_IC_CHEM)
 					{

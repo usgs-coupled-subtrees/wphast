@@ -9,8 +9,12 @@
 
 #include "PropertyTreeControlBar.h"
 #include "BCFluxPropertyPage2.h"
+#include "FluxPropsPage.h"
+#include "FluxPropsPage2.h"
 #include "BCLeakyPropertyPage2.h"
+#include "LeakyPropsPage.h"
 #include "BCSpecifiedHeadPropertyPage.h"
+#include "SpecifiedHeadPropsPage.h"
 #include "ETSLayout/ETSLayout.h"
 
 #include "WPhastDoc.h"
@@ -247,7 +251,8 @@ void CBCZoneActor::Edit(CTreeCtrl* pTreeCtrl, int nStressPeriod)
 {
 	CString str;
 	str.Format(_T("%s Properties"), this->GetName());
-	ETSLayoutPropertySheet props(str);
+// COMMENT: {7/13/2009 4:51:42 PM}	ETSLayoutPropertySheet props(str);
+	CPropertySheet props(str);
 
 	CFrameWnd *pFrame = (CFrameWnd*)::AfxGetApp()->m_pMainWnd;
 	ASSERT_VALID(pFrame);
@@ -258,11 +263,12 @@ void CBCZoneActor::Edit(CTreeCtrl* pTreeCtrl, int nStressPeriod)
 
 	if (this->m_bc.bc_type == BC_info::BC_FLUX)
 	{
-		CBCFluxPropertyPage2 fluxProps;
+		CFluxPropsPage2 fluxProps;
 		props.AddPage(&fluxProps);
 		fluxProps.SetProperties(this->GetBC());
 		fluxProps.SetFlowOnly(pDoc->GetFlowOnly());
 		fluxProps.SetDesc(this->GetDesc());
+		fluxProps.SetUnits(pDoc->GetUnits());
 		if (props.DoModal() == IDOK)
 		{
 			CBC bc;
@@ -273,11 +279,12 @@ void CBCZoneActor::Edit(CTreeCtrl* pTreeCtrl, int nStressPeriod)
 	}
 	else if (this->m_bc.bc_type == BC_info::BC_LEAKY)
 	{
-		CBCLeakyPropertyPage2 leakyProps;
+		CLeakyPropsPage leakyProps;
 		props.AddPage(&leakyProps);
 		leakyProps.SetProperties(this->GetBC());		
 		leakyProps.SetFlowOnly(pDoc->GetFlowOnly());
 		leakyProps.SetDesc(this->GetDesc());
+		leakyProps.SetUnits(pDoc->GetUnits());
 		if (props.DoModal() == IDOK)
 		{
 			CBC bc;
@@ -288,11 +295,12 @@ void CBCZoneActor::Edit(CTreeCtrl* pTreeCtrl, int nStressPeriod)
 	}
 	else if (this->m_bc.bc_type == BC_info::BC_SPECIFIED)
 	{
-		CBCSpecifiedHeadPropertyPage specified;
+		CSpecifiedHeadPropsPage specified;
 		props.AddPage(&specified);
 		specified.SetProperties(this->GetBC());		
 		specified.SetFlowOnly(pDoc->GetFlowOnly());
 		specified.SetDesc(this->GetDesc());
+		specified.SetUnits(pDoc->GetUnits());
 		if (props.DoModal() == IDOK)
 		{
 			CBC bc;

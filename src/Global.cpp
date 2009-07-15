@@ -8,6 +8,9 @@
 #include "WPhastView.h"
 
 #include "BC.h"
+#include "ChemIC.h"
+#include "HeadIC.h"
+
 #include "property.h"
 #include "CheckTreeCtrl.h"
 #include "ZoneActor.h"
@@ -32,6 +35,11 @@
 #include "Units.h"
 #include "srcinput/Data_source.h"
 #include "srcinput/Prism.h"
+#include "TreePropSheetExSRC.h"
+#include "MediaPropsPage.h"
+#include "FluxPropsPage.h"
+#include "FakeFiledata.h"
+
 
 #include <afxmt.h>
 #include <atlpath.h> // ATL::ATLPath::FileExists
@@ -871,6 +879,10 @@ void CGlobal::DDX_Property(CDataExchange* pDX, CCheckTreeCtrl* pTree, HTREEITEM 
 					CGlobal::EnableFixed(pDX->m_pDlgWnd, FALSE);
 					CGlobal::EnableLinearInterpolation(pDX->m_pDlgWnd, TRUE);
 					break;
+				case PROP_UNDEFINED:
+					CGlobal::EnableFixed(pDX->m_pDlgWnd, TRUE);
+					CGlobal::EnableLinearInterpolation(pDX->m_pDlgWnd, FALSE);
+					break;
 				default:
 					ASSERT(FALSE);
 			}
@@ -889,6 +901,415 @@ void CGlobal::DDX_Property(CDataExchange* pDX, CCheckTreeCtrl* pTree, HTREEITEM 
 			//
 			pDX->m_pDlgWnd->GetDlgItem(IDC_SINGLE_VALUE_RADIO)->EnableWindow(FALSE);
 			pDX->m_pDlgWnd->GetDlgItem(IDC_LINEAR_INTERPOLATION_RADIO)->EnableWindow(FALSE);
+		}
+	}
+}
+
+void CGlobal::DDX_Property(CDataExchange* pDX, TreePropSheet::CTreePropSheetEx* pTreeProp, HTREEITEM hti, std::vector<Cproperty*> &props, std::vector<CPropertyPage*> &pages)
+{
+	const int PAGE_NONE   = 0;
+	const int PAGE_FIXED  = 1;
+	const int PAGE_LINEAR = 2;
+	const int PAGE_POINTS = 3;
+	const int PAGE_XYZ    = 4;
+
+	Cproperty *value = props[0];
+	ASSERT(value);
+	ASSERT(props.size() == 5);
+
+	// Cproperty* prop  => std::vector<Cproperty*> &props
+	if (pDX->m_bSaveAndValidate)
+	{
+		switch (pTreeProp->GetActiveIndex())
+		{
+		case PAGE_NONE:
+			{
+				value->type = PROP_UNDEFINED;
+			}
+			break;
+		case PAGE_FIXED:
+			{
+				if (!pages[PAGE_FIXED]->UpdateData(TRUE))
+				{
+					pDX->Fail();
+				}
+				CPropConstant *pConstant = dynamic_cast<CPropConstant*>(pages[PAGE_FIXED]);
+				(*value) = pConstant->GetProperty();
+				ASSERT(value->type == PROP_FIXED);
+			}
+			break;
+		case PAGE_LINEAR:
+			{
+				if (!pages[PAGE_LINEAR]->UpdateData(TRUE))
+				{
+					pDX->Fail();
+				}
+				CPropLinear *pLinear = dynamic_cast<CPropLinear*>(pages[PAGE_LINEAR]);
+				(*value) = pLinear->GetProperty();
+				ASSERT(value->type == PROP_LINEAR);
+			}
+			break;
+		case PAGE_POINTS:
+			{
+				if (!pages[PAGE_POINTS]->UpdateData(TRUE))
+				{
+					pDX->Fail();
+				}
+				CPropPoints *pPoints = dynamic_cast<CPropPoints*>(pages[PAGE_POINTS]);
+				(*value) = pPoints->GetProperty();
+				ASSERT(value->type == PROP_POINTS);
+			}
+			break;
+		case PAGE_XYZ:
+			{
+				if (!pages[PAGE_XYZ]->UpdateData(TRUE))
+				{
+					pDX->Fail();
+				}
+				CPropXYZ *pXYZ = dynamic_cast<CPropXYZ*>(pages[PAGE_XYZ]);
+				(*value) = pXYZ->GetProperty();
+				ASSERT(value->type == PROP_XYZ);
+			}
+			break;
+		default:
+			ASSERT(FALSE);
+		}
+
+		// all ok so copy
+		if (value->type == PROP_FIXED)
+		{
+			ASSERT(value->count_v == 1);
+			(*props[PAGE_FIXED]) = (*value);
+		}
+		else if (value->type == PROP_LINEAR)
+		{
+			ASSERT(value->count_v == 2);
+			(*props[PAGE_LINEAR]) = (*value);
+		}
+		else if (value->type == PROP_POINTS)
+		{
+			(*props[PAGE_POINTS]) = (*value);
+		}
+		else if (value->type == PROP_XYZ)
+		{
+			(*props[PAGE_XYZ]) = (*value);
+		}
+
+#if defined(_DEBUG)
+		value->AssertValid();
+#endif
+
+	}
+	else
+	{
+		//
+		// always set properties
+		//
+
+		CPropConstant *pConstant = dynamic_cast<CPropConstant*>(pages[PAGE_FIXED]);
+		pConstant->SetProperty(*props[PAGE_FIXED]);
+
+		CPropLinear *pLinear = dynamic_cast<CPropLinear*>(pages[PAGE_LINEAR]);
+		pLinear->SetProperty(*props[PAGE_LINEAR]);
+
+		CPropPoints *pPoints = dynamic_cast<CPropPoints*>(pages[PAGE_POINTS]);
+		pPoints->SetProperty(*props[PAGE_POINTS]);
+
+		CPropXYZ *pXYZ = dynamic_cast<CPropXYZ*>(pages[PAGE_XYZ]);
+		pXYZ->SetProperty(*props[PAGE_XYZ]);
+
+		bool bSetActivePage = false;
+
+		if (value->type == PROP_UNDEFINED)
+		{
+			if (pTreeProp->GetActiveIndex() != PAGE_NONE)
+			{
+				pTreeProp->SetActivePage(PAGE_NONE);
+				bSetActivePage = true;
+			}
+			else
+			{
+				pages[PAGE_NONE]->UpdateData(FALSE);
+			}
+		}
+		else if (value->type == PROP_FIXED)
+		{
+			ASSERT(*props[PAGE_FIXED] == *value);
+			if (pTreeProp->GetActiveIndex() != PAGE_FIXED)
+			{
+				pTreeProp->SetActivePage(PAGE_FIXED);
+				bSetActivePage = true;
+			}
+			else
+			{
+				pages[PAGE_FIXED]->UpdateData(FALSE);
+			}
+		}
+		else if (value->type == PROP_LINEAR)
+		{
+			ASSERT(*props[PAGE_LINEAR] == *value);
+			if (pTreeProp->GetActiveIndex() != PAGE_LINEAR)
+			{
+				pTreeProp->SetActivePage(PAGE_LINEAR);
+				bSetActivePage = true;
+			}
+			else
+			{
+				pages[PAGE_LINEAR]->UpdateData(FALSE);
+			}
+		}
+		else if (value->type == PROP_POINTS)
+		{
+			ASSERT(*props[PAGE_POINTS] == *value);
+			if (pTreeProp->GetActiveIndex() != PAGE_POINTS)
+			{
+				pTreeProp->SetActivePage(PAGE_POINTS);
+				bSetActivePage = true;
+			}
+			else
+			{
+				pages[PAGE_POINTS]->UpdateData(FALSE);
+			}
+		}
+		else if (value->type == PROP_XYZ)
+		{
+			ASSERT(*props[PAGE_XYZ] == *value);
+			if (pTreeProp->GetActiveIndex() != PAGE_XYZ)
+			{
+				pTreeProp->SetActivePage(PAGE_XYZ);
+				bSetActivePage = true;
+			}
+			else
+			{
+				pages[PAGE_XYZ]->UpdateData(FALSE);
+			}
+		}
+
+		if (bSetActivePage)
+		{
+			//
+			// Note: The above SetActivePage call causes a UpdateData(TRUE) and
+			// subsequently a DoDataExchange(bSaveAndValidate := TRUE) which causes
+			// the previous selected property to overwrite the newly selected property
+			// so we must re-overwrite the newly selected property with the correct
+			// value.
+			//
+
+			CPropConstant *pConstant = dynamic_cast<CPropConstant*>(pages[PAGE_FIXED]);
+			pConstant->SetProperty(*props[PAGE_FIXED]);
+
+			CPropLinear *pLinear = dynamic_cast<CPropLinear*>(pages[PAGE_LINEAR]);
+			pLinear->SetProperty(*props[PAGE_LINEAR]);
+
+			CPropPoints *pPoints = dynamic_cast<CPropPoints*>(pages[PAGE_POINTS]);
+			pPoints->SetProperty(*props[PAGE_POINTS]);
+
+			CPropXYZ *pXYZ = dynamic_cast<CPropXYZ*>(pages[PAGE_XYZ]);
+			pXYZ->SetProperty(*props[PAGE_XYZ]);
+		}
+	}
+}
+void CGlobal::DDX_PropertyM(CDataExchange* pDX, TreePropSheet::CTreePropSheetEx* pTreeProp, HTREEITEM hti, std::vector<Cproperty*> &props, std::vector<CPropertyPage*> &pages)
+{
+	const int PAGE_NONE   = 0;
+	const int PAGE_FIXED  = 1;
+	const int PAGE_LINEAR = 2;
+	const int PAGE_POINTS = 3;
+	const int PAGE_XYZ    = 4;
+
+	Cproperty *value = props[0];
+	ASSERT(value);
+// COMMENT: {6/3/2009 4:10:12 PM}	ASSERT(props.size() == 5);
+
+	// Cproperty* prop  => std::vector<Cproperty*> &props
+	if (pDX->m_bSaveAndValidate)
+	{
+		switch (pTreeProp->GetActiveIndex())
+		{
+		case PAGE_NONE:
+			{
+				value->type = PROP_UNDEFINED;
+			}
+			break;
+		case PAGE_FIXED:
+			{
+				if (!pages[PAGE_FIXED]->UpdateData(TRUE))
+				{
+					pDX->Fail();
+				}
+				CPropConstantM *pConstantM = dynamic_cast<CPropConstantM*>(pages[PAGE_FIXED]);
+				(*value) = pConstantM->GetProperty();
+				ASSERT(value->type == PROP_FIXED);
+			}
+			break;
+		case PAGE_LINEAR:
+			{
+				if (!pages[PAGE_LINEAR]->UpdateData(TRUE))
+				{
+					pDX->Fail();
+				}
+				CPropLinearM *pLinearM = dynamic_cast<CPropLinearM*>(pages[PAGE_LINEAR]);
+				(*value) = pLinearM->GetProperty();
+				ASSERT(value->type == PROP_LINEAR);
+			}
+			break;
+// COMMENT: {6/3/2009 4:15:26 PM}		case PAGE_POINTS:
+// COMMENT: {6/3/2009 4:15:26 PM}			{
+// COMMENT: {6/3/2009 4:15:26 PM}				if (!pages[PAGE_POINTS]->UpdateData(TRUE))
+// COMMENT: {6/3/2009 4:15:26 PM}				{
+// COMMENT: {6/3/2009 4:15:26 PM}					pDX->Fail();
+// COMMENT: {6/3/2009 4:15:26 PM}				}
+// COMMENT: {6/3/2009 4:15:26 PM}				CPropPoints *pPoints = dynamic_cast<CPropPoints*>(pages[PAGE_POINTS]);
+// COMMENT: {6/3/2009 4:15:26 PM}				(*value) = pPoints->GetProperty();
+// COMMENT: {6/3/2009 4:15:26 PM}				ASSERT(value->type == PROP_POINTS);
+// COMMENT: {6/3/2009 4:15:26 PM}			}
+// COMMENT: {6/3/2009 4:15:26 PM}			break;
+// COMMENT: {6/3/2009 4:15:26 PM}		case PAGE_XYZ:
+// COMMENT: {6/3/2009 4:15:26 PM}			{
+// COMMENT: {6/3/2009 4:15:26 PM}				if (!pages[PAGE_XYZ]->UpdateData(TRUE))
+// COMMENT: {6/3/2009 4:15:26 PM}				{
+// COMMENT: {6/3/2009 4:15:26 PM}					pDX->Fail();
+// COMMENT: {6/3/2009 4:15:26 PM}				}
+// COMMENT: {6/3/2009 4:15:26 PM}				CPropXYZ *pXYZ = dynamic_cast<CPropXYZ*>(pages[PAGE_XYZ]);
+// COMMENT: {6/3/2009 4:15:26 PM}				(*value) = pXYZ->GetProperty();
+// COMMENT: {6/3/2009 4:15:26 PM}				ASSERT(value->type == PROP_XYZ);
+// COMMENT: {6/3/2009 4:15:26 PM}			}
+// COMMENT: {6/3/2009 4:15:26 PM}			break;
+		default:
+			ASSERT(FALSE);
+		}
+
+		// all ok so copy
+		if (value->type == PROP_FIXED)
+		{
+			ASSERT(value->count_v == 1);
+			(*props[PAGE_FIXED]) = (*value);
+		}
+		else if (value->type == PROP_LINEAR)
+		{
+			ASSERT(value->count_v == 2);
+			(*props[PAGE_LINEAR]) = (*value);
+		}
+// COMMENT: {6/3/2009 4:16:40 PM}		else if (value->type == PROP_POINTS)
+// COMMENT: {6/3/2009 4:16:40 PM}		{
+// COMMENT: {6/3/2009 4:16:40 PM}			(*props[PAGE_POINTS]) = (*value);
+// COMMENT: {6/3/2009 4:16:40 PM}		}
+// COMMENT: {6/3/2009 4:16:40 PM}		else if (value->type == PROP_XYZ)
+// COMMENT: {6/3/2009 4:16:40 PM}		{
+// COMMENT: {6/3/2009 4:16:40 PM}			(*props[PAGE_XYZ]) = (*value);
+// COMMENT: {6/3/2009 4:16:40 PM}		}
+
+#if defined(_DEBUG)
+		value->AssertValid();
+#endif
+
+	}
+	else
+	{
+		//
+		// always set properties
+		//
+
+		CPropConstantM *pConstantM = dynamic_cast<CPropConstantM*>(pages[PAGE_FIXED]);
+		pConstantM->SetProperty(*props[PAGE_FIXED]);
+
+		CPropLinearM *pLinearM = dynamic_cast<CPropLinearM*>(pages[PAGE_LINEAR]);
+		pLinearM->SetProperty(*props[PAGE_LINEAR]);
+
+// COMMENT: {6/3/2009 4:13:25 PM}		CPropPoints *pPoints = dynamic_cast<CPropPoints*>(pages[PAGE_POINTS]);
+// COMMENT: {6/3/2009 4:13:25 PM}		pPoints->SetProperty(*props[PAGE_POINTS]);
+// COMMENT: {6/3/2009 4:13:25 PM}
+// COMMENT: {6/3/2009 4:13:25 PM}		CPropXYZ *pXYZ = dynamic_cast<CPropXYZ*>(pages[PAGE_XYZ]);
+// COMMENT: {6/3/2009 4:13:25 PM}		pXYZ->SetProperty(*props[PAGE_XYZ]);
+
+		bool bSetActivePage = false;
+
+		if (value->type == PROP_UNDEFINED)
+		{
+			if (pTreeProp->GetActiveIndex() != PAGE_NONE)
+			{
+				pTreeProp->SetActivePage(PAGE_NONE);
+				bSetActivePage = true;
+			}
+			else
+			{
+				pages[PAGE_NONE]->UpdateData(FALSE);
+			}
+		}
+		else if (value->type == PROP_FIXED)
+		{
+			ASSERT(*props[PAGE_FIXED] == *value);
+			if (pTreeProp->GetActiveIndex() != PAGE_FIXED)
+			{
+				pTreeProp->SetActivePage(PAGE_FIXED);
+				bSetActivePage = true;
+			}
+			else
+			{
+				pages[PAGE_FIXED]->UpdateData(FALSE);
+			}
+		}
+		else if (value->type == PROP_LINEAR)
+		{
+			ASSERT(*props[PAGE_LINEAR] == *value);
+			if (pTreeProp->GetActiveIndex() != PAGE_LINEAR)
+			{
+				pTreeProp->SetActivePage(PAGE_LINEAR);
+				bSetActivePage = true;
+			}
+			else
+			{
+				pages[PAGE_LINEAR]->UpdateData(FALSE);
+			}
+		}
+// COMMENT: {6/3/2009 4:14:15 PM}		else if (value->type == PROP_POINTS)
+// COMMENT: {6/3/2009 4:14:15 PM}		{
+// COMMENT: {6/3/2009 4:14:15 PM}			ASSERT(*props[PAGE_POINTS] == *value);
+// COMMENT: {6/3/2009 4:14:15 PM}			if (pTreeProp->GetActiveIndex() != PAGE_POINTS)
+// COMMENT: {6/3/2009 4:14:15 PM}			{
+// COMMENT: {6/3/2009 4:14:15 PM}				pTreeProp->SetActivePage(PAGE_POINTS);
+// COMMENT: {6/3/2009 4:14:15 PM}				bSetActivePage = true;
+// COMMENT: {6/3/2009 4:14:15 PM}			}
+// COMMENT: {6/3/2009 4:14:15 PM}			else
+// COMMENT: {6/3/2009 4:14:15 PM}			{
+// COMMENT: {6/3/2009 4:14:15 PM}				pages[PAGE_POINTS]->UpdateData(FALSE);
+// COMMENT: {6/3/2009 4:14:15 PM}			}
+// COMMENT: {6/3/2009 4:14:15 PM}		}
+// COMMENT: {6/3/2009 4:14:15 PM}		else if (value->type == PROP_XYZ)
+// COMMENT: {6/3/2009 4:14:15 PM}		{
+// COMMENT: {6/3/2009 4:14:15 PM}			ASSERT(*props[PAGE_XYZ] == *value);
+// COMMENT: {6/3/2009 4:14:15 PM}			if (pTreeProp->GetActiveIndex() != PAGE_XYZ)
+// COMMENT: {6/3/2009 4:14:15 PM}			{
+// COMMENT: {6/3/2009 4:14:15 PM}				pTreeProp->SetActivePage(PAGE_XYZ);
+// COMMENT: {6/3/2009 4:14:15 PM}				bSetActivePage = true;
+// COMMENT: {6/3/2009 4:14:15 PM}			}
+// COMMENT: {6/3/2009 4:14:15 PM}			else
+// COMMENT: {6/3/2009 4:14:15 PM}			{
+// COMMENT: {6/3/2009 4:14:15 PM}				pages[PAGE_XYZ]->UpdateData(FALSE);
+// COMMENT: {6/3/2009 4:14:15 PM}			}
+// COMMENT: {6/3/2009 4:14:15 PM}		}
+
+		if (bSetActivePage)
+		{
+			//
+			// Note: The above SetActivePage call causes a UpdateData(TRUE) and
+			// subsequently a DoDataExchange(bSaveAndValidate := TRUE) which causes
+			// the previous selected property to overwrite the newly selected property
+			// so we must re-overwrite the newly selected property with the correct
+			// value.
+			//
+
+			CPropConstantM *pConstantM = dynamic_cast<CPropConstantM*>(pages[PAGE_FIXED]);
+			pConstantM->SetProperty(*props[PAGE_FIXED]);
+
+			CPropLinearM *pLinearM = dynamic_cast<CPropLinearM*>(pages[PAGE_LINEAR]);
+			pLinearM->SetProperty(*props[PAGE_LINEAR]);
+
+// COMMENT: {6/3/2009 4:14:20 PM}			CPropPoints *pPoints = dynamic_cast<CPropPoints*>(pages[PAGE_POINTS]);
+// COMMENT: {6/3/2009 4:14:20 PM}			pPoints->SetProperty(*props[PAGE_POINTS]);
+// COMMENT: {6/3/2009 4:14:20 PM}
+// COMMENT: {6/3/2009 4:14:20 PM}			CPropXYZ *pXYZ = dynamic_cast<CPropXYZ*>(pages[PAGE_XYZ]);
+// COMMENT: {6/3/2009 4:14:20 PM}			pXYZ->SetProperty(*props[PAGE_XYZ]);
 		}
 	}
 }
@@ -1216,6 +1637,25 @@ std::string CGlobal::GetStdTimeUnits(const char* sz_unit)
 	return s_time_units[0];
 }
 
+std::string CGlobal::GetStdTimeUnitsSafe(const char* sz_unit)
+{
+	cunit std("s");
+	/*static*/ CUnits units_usr;
+
+	if (units_usr.time.set_input(sz_unit) != OK) return "";
+	for (size_t i = 0; i < sizeof(s_time_units) / sizeof(s_time_units[0]); ++i)
+	{
+		std.set_input(s_time_units[i]);
+		if (units_usr.time.input_to_si == std.input_to_si)
+		{
+			return s_time_units[i];
+		}
+	}
+	ASSERT(FALSE);
+	return "";
+}
+
+
 static const char* s_volume_units[] = {"gallon", "liter", "ft^3", "meters^3"};
 
 int CGlobal::AddVolumeUnits(CComboBox* pCombo)
@@ -1345,8 +1785,7 @@ herr_t CGlobal::HDFSerializeBool(bool bStoring, hid_t loc_id, const char* szName
 		}
 	}
 
-	herr_t status = CGlobal::HDFSerialize(bStoring, loc_id, szName, H5T_NATIVE_INT, 1, &nValue);
-	ASSERT(status >= 0);
+	herr_t status = CGlobal::HDFSerializeSafe(bStoring, loc_id, szName, H5T_NATIVE_INT, 1, &nValue);
 
 	if (!bStoring && status >= 0)
 	{
@@ -2932,6 +3371,7 @@ herr_t CGlobal::HDFSerializeData_source(bool bStoring, hid_t loc_id, const char*
 	static const char szBox[]         = "box";
 	static const char szfile_name[]   = "file_name";
 	static const char szPoints[]      = "Points";
+	static const char szPoints4[]     = "Points4";
 	static const char szAttribute[]   = "attribute";
 
 	/*
@@ -3014,18 +3454,19 @@ herr_t CGlobal::HDFSerializeData_source(bool bStoring, hid_t loc_id, const char*
 					case Data_source::POINTS:
 						{
 							std::vector<Point> &pts = rData_source.Get_points();
-							ASSERT(pts.size() >= 3);
-							hsize_t count = 3 * pts.size();							
+							//ASSERT(pts.size() >= 3);
+							hsize_t count = 4 * pts.size();							
 							double *points = new double[count];
 							for (size_t i = 0; i < pts.size(); ++i)
 							{
 								double *d = pts[i].get_coord();
 								for (size_t n = 0; n < 3; ++n)
 								{
-									points[i*3+n] = d[n];
+									points[i*4+n] = d[n];
 								}
+								points[i*4+3] = pts[i].get_v();
 							}
-							status = CGlobal::HDFSerializeWithSize(bStoring, ds_gr_id, szPoints, H5T_NATIVE_DOUBLE, count, points);
+							status = CGlobal::HDFSerializeWithSize(bStoring, ds_gr_id, szPoints4, H5T_NATIVE_DOUBLE, count, points);
 							delete[] points;
 						}
 						break;
@@ -3041,13 +3482,23 @@ herr_t CGlobal::HDFSerializeData_source(bool bStoring, hid_t loc_id, const char*
 				// box
 				//
 				struct zone* pzone = rData_source.Get_bounding_box();
-				ASSERT(pzone->zone_defined);
-				xyz[0] = pzone->x1;
-				xyz[1] = pzone->y1;
-				xyz[2] = pzone->z1;
-				xyz[3] = pzone->x2;
-				xyz[4] = pzone->y2;
-				xyz[5] = pzone->z2;
+				//ASSERT(pzone->zone_defined);
+				if (pzone->zone_defined)
+				{
+					xyz[0] = pzone->x1;
+					xyz[1] = pzone->y1;
+					xyz[2] = pzone->z1;
+					xyz[3] = pzone->x2;
+					xyz[4] = pzone->y2;
+					xyz[5] = pzone->z2;
+				}
+				else
+				{
+					for (int i = 0; i < 6; ++i)
+					{
+						xyz[i] = 0;
+					}
+				}
 				return_val = CGlobal::HDFSerialize(bStoring, ds_gr_id, szBox, H5T_NATIVE_DOUBLE, 6, xyz);
 				ASSERT(return_val >= 0);
 
@@ -3139,23 +3590,48 @@ herr_t CGlobal::HDFSerializeData_source(bool bStoring, hid_t loc_id, const char*
 							ASSERT(pts.size() == 0);
 							double *data = NULL;
 							hsize_t count;
-							status = CGlobal::HDFSerializeAllocate(bStoring, ds_gr_id, szPoints, count, &data);
-							ASSERT(status >= 0);
-							ASSERT((count%3) == 0);
-
-							Point p;
-							double *coord = p.get_coord();
-							for (size_t i = 0; i < count; ++i)
+							status = CGlobal::HDFSerializeAllocate(bStoring, ds_gr_id, szPoints4, count, &data);
+							if (status >= 0)
 							{
-								coord[i%3] = data[i];
-								if (i%3 == 2)
+								ASSERT((count%4) == 0);
+
+								Point p;
+								double *coord = p.get_coord();
+								for (size_t i = 0; i < count; ++i)
 								{
-									p.set_v(data[i]);
-									pts.push_back(p);
+									if (i%4 != 3)
+									{
+										coord[i%4] = data[i];
+									}
+									else
+									{
+										p.set_v(data[i]);
+										pts.push_back(p);
+									}
 								}
+								ASSERT(pts.size() == count/4);
+								delete[] data;
 							}
-							ASSERT(pts.size() == count/3);
-							delete[] data;
+							else
+							{
+								status = CGlobal::HDFSerializeAllocate(bStoring, ds_gr_id, szPoints, count, &data);
+								ASSERT(status >= 0);
+								ASSERT((count%3) == 0);
+
+								Point p;
+								double *coord = p.get_coord();
+								for (size_t i = 0; i < count; ++i)
+								{
+									coord[i%3] = data[i];
+									if (i%3 == 2)
+									{
+										p.set_v(data[i]);
+										pts.push_back(p);
+									}
+								}
+								ASSERT(pts.size() == count/3);
+								delete[] data;
+							}
 						}
 						break;
 					case Data_source::NONE:
@@ -3190,6 +3666,14 @@ herr_t CGlobal::HDFSerializeData_source(bool bStoring, hid_t loc_id, const char*
 
 				status = CGlobal::HDFSerializeCoordinateSystemUser(bStoring, ds_gr_id, nValue);
 				rData_source.Set_user_coordinate_system(nValue);
+
+				//{{
+				Data_source::DATA_SOURCE_TYPE ds = rData_source.Get_source_type();
+				if (ds == Data_source::SHAPE || ds == Data_source::ARCRASTER || ds == Data_source::XYZ)
+				{
+					rData_source.Set_filedata(FakeFiledata::New(rData_source.Get_file_name(), nValue));
+				}
+				//}}
 
 				return_val = H5Gclose(ds_gr_id);
 				ASSERT(return_val >= 0);
@@ -3346,6 +3830,11 @@ hid_t CGlobal::HDFCreateDataSourceType(void)
 	// Insert the enumerated data
 	nValue = Data_source::NONE;
 	status = H5Tenum_insert(enum_datatype, "NONE", &nValue);
+	ASSERT(status >= 0);
+
+	// Insert the enumerated data
+	nValue = Data_source::XYZT;
+	status = H5Tenum_insert(enum_datatype, "XYZT", &nValue);
 	ASSERT(status >= 0);
 
 	return enum_datatype;
@@ -3616,6 +4105,66 @@ BOOL CGlobal::IsValidArcraster(CString filename)
 	return FALSE;
 }
 
+BOOL CGlobal::IsValidXYZFile(CString filename, CDataExchange* pDX /* = NULL */)
+{
+	filename.Trim();
+	if (!filename.IsEmpty())
+	{
+		TCHAR path[MAX_PATH];
+		::strcpy(path, filename);
+		if (ATL::ATLPath::FileExists(path))
+		{
+			return TRUE;
+		}
+		else
+		{
+			if (pDX)
+			{
+				CString str;
+				str.Format("XYZ file \"%s\" not found.\n", path);
+				::AfxMessageBox(str);
+				pDX->Fail(); // throws
+			}
+		}
+	}
+	if (pDX)
+	{
+		::AfxMessageBox("Please select an XYZ file.");
+		pDX->Fail(); // throws
+	}
+	return FALSE;
+}
+
+BOOL CGlobal::IsValidXYZTFile(CString filename, CDataExchange* pDX /* = NULL */)
+{
+	filename.Trim();
+	if (!filename.IsEmpty())
+	{
+		TCHAR path[MAX_PATH];
+		::strcpy(path, filename);
+		if (ATL::ATLPath::FileExists(path))
+		{
+			return TRUE;
+		}
+		else
+		{
+			if (pDX)
+			{
+				CString str;
+				str.Format("XYZT file \"%s\" not found.\n", path);
+				::AfxMessageBox(str);
+				pDX->Fail(); // throws
+			}
+		}
+	}
+	if (pDX)
+	{
+		::AfxMessageBox("Please select an XYZT file.");
+		pDX->Fail(); // throws
+	}
+	return FALSE;
+}
+
 BOOL CGlobal::FileExists(CString filename)
 {
 	return ATL::ATLPath::FileExists(filename);
@@ -3623,6 +4172,14 @@ BOOL CGlobal::FileExists(CString filename)
 
 hid_t CGlobal::HDFCreatePropType(void)
 {
+	ASSERT(PROP_UNDEFINED == 100);
+	ASSERT(PROP_FIXED     == 101);
+	ASSERT(PROP_LINEAR    == 102);
+	ASSERT(PROP_ZONE      == 103);
+	ASSERT(PROP_POINTS    == 105);
+	ASSERT(PROP_XYZ       == 106);
+	ASSERT(PROP_XYZT      == 110);
+
 	herr_t status;
 
 	// Create the datatype
@@ -3652,8 +4209,13 @@ hid_t CGlobal::HDFCreatePropType(void)
 	ASSERT(status >= 0);
 
 	// Insert the enumerated data
-	nValue = PROP_MIXTURE;
-	status = H5Tenum_insert(enum_datatype, "PROP_MIXTURE", &nValue);
+	// nValue = PROP_MIXTURE;
+	// status = H5Tenum_insert(enum_datatype, "PROP_MIXTURE", &nValue);
+	//
+	// Note: This must be inserted in order to be backward compatible
+	//
+	int n = 104;
+	status = H5Tenum_insert(enum_datatype, "PROP_MIXTURE", &n);
 	ASSERT(status >= 0);
 
 	// Insert the enumerated data
@@ -3664,6 +4226,11 @@ hid_t CGlobal::HDFCreatePropType(void)
 	// Insert the enumerated data
 	nValue = PROP_XYZ;
 	status = H5Tenum_insert(enum_datatype, "PROP_XYZ", &nValue);
+	ASSERT(status >= 0);
+
+	// Insert the enumerated data
+	nValue = PROP_XYZT;
+	status = H5Tenum_insert(enum_datatype, "PROP_XYZT", &nValue);
 	ASSERT(status >= 0);
 
 	return enum_datatype;
@@ -3836,3 +4403,278 @@ double CGlobal::ComputeHandleRadius(vtkRenderer *renderer)
 	return CGlobal::ComputeRadius(renderer) * CGlobal::GetRadiusFactor();
 }
 
+#define GET_ABS_PATH_MACRO(D, C, P) \
+do { \
+	if (C.P && (C.P->type == PROP_XYZ || C.P->type == PROP_XYZT)) { \
+		if (C.P->data_source) { \
+			std::string filename = C.P->data_source->Get_file_name(); \
+			if (filename.length() > 0) { \
+				C.P->data_source->Set_file_name(D->GetAbsolutePath(lpszPathName, filename)); \
+			} \
+		} \
+	} \
+} while(0)
+
+void CGlobal::PathsRelativeToAbsolute(LPCTSTR lpszPathName, CWPhastDoc* pDoc, CGridElt& elt)
+{
+	GET_ABS_PATH_MACRO(pDoc, elt, active);
+	GET_ABS_PATH_MACRO(pDoc, elt, porosity);
+	GET_ABS_PATH_MACRO(pDoc, elt, kx);
+	GET_ABS_PATH_MACRO(pDoc, elt, ky);
+	GET_ABS_PATH_MACRO(pDoc, elt, kz);
+	GET_ABS_PATH_MACRO(pDoc, elt, storage);
+	GET_ABS_PATH_MACRO(pDoc, elt, alpha_long);
+	GET_ABS_PATH_MACRO(pDoc, elt, alpha_trans);
+	GET_ABS_PATH_MACRO(pDoc, elt, alpha_horizontal);
+	GET_ABS_PATH_MACRO(pDoc, elt, alpha_vertical);
+}
+
+#define GET_ABS_PATH_TIMESERIES_MACRO(D, C, TS) \
+do { \
+	CTimeSeries<Cproperty>::iterator it = C.TS.begin(); \
+	for (; it != C.TS.end(); ++it) { \
+		if ((*it).second.type == PROP_XYZ || (*it).second.type == PROP_XYZT) { \
+			if ((*it).second.data_source) { \
+				std::string filename = (*it).second.data_source->Get_file_name(); \
+				if (filename.length() > 0) { \
+					(*it).second.data_source->Set_file_name(D->GetAbsolutePath(lpszPathName, filename)); \
+				} \
+			} \
+		} \
+	} \
+} while(0)
+
+void CGlobal::PathsRelativeToAbsolute(LPCTSTR lpszPathName, CWPhastDoc* pDoc, CBC& bc)
+{	
+	// Cproperty
+	GET_ABS_PATH_MACRO(pDoc, bc, bc_k);
+	GET_ABS_PATH_MACRO(pDoc, bc, bc_thick);
+
+	// CTimeSeries<Cproperty>
+	GET_ABS_PATH_TIMESERIES_MACRO(pDoc, bc, m_bc_head);
+	GET_ABS_PATH_TIMESERIES_MACRO(pDoc, bc, m_bc_flux);
+	GET_ABS_PATH_TIMESERIES_MACRO(pDoc, bc, m_bc_solution);
+}
+
+void CGlobal::PathsRelativeToAbsolute(LPCTSTR lpszPathName, CWPhastDoc* pDoc, CChemIC& chemIC)
+{	
+	// Cproperty
+	GET_ABS_PATH_MACRO(pDoc, chemIC, equilibrium_phases);
+	GET_ABS_PATH_MACRO(pDoc, chemIC, exchange);
+	GET_ABS_PATH_MACRO(pDoc, chemIC, gas_phase);
+	GET_ABS_PATH_MACRO(pDoc, chemIC, kinetics);
+	GET_ABS_PATH_MACRO(pDoc, chemIC, solid_solutions);
+	GET_ABS_PATH_MACRO(pDoc, chemIC, solution);
+	GET_ABS_PATH_MACRO(pDoc, chemIC, surface);
+}
+
+void CGlobal::PathsRelativeToAbsolute(LPCTSTR lpszPathName, CWPhastDoc* pDoc, CHeadIC& headIC)
+{
+	// Cproperty
+	GET_ABS_PATH_MACRO(pDoc, headIC, head);
+}
+
+#define GET_REL_PATH_MACRO(D, C, P) \
+do { \
+	if (C.P && (C.P->type == PROP_XYZ || C.P->type == PROP_XYZT)) { \
+		if (C.P->data_source) { \
+			std::string filename = C.P->data_source->Get_file_name(); \
+			if (filename.length() > 0) { \
+				C.P->data_source->Set_file_name(D->GetRelativePath(lpszPathName, filename)); \
+			} \
+		} \
+	} \
+} while(0)
+
+void CGlobal::PathsAbsoluteToRelative(LPCTSTR lpszPathName, CWPhastDoc* pDoc, CGridElt& elt)
+{
+	GET_REL_PATH_MACRO(pDoc, elt, active);
+	GET_REL_PATH_MACRO(pDoc, elt, porosity);
+	GET_REL_PATH_MACRO(pDoc, elt, kx);
+	GET_REL_PATH_MACRO(pDoc, elt, ky);
+	GET_REL_PATH_MACRO(pDoc, elt, kz);
+	GET_REL_PATH_MACRO(pDoc, elt, storage);
+	GET_REL_PATH_MACRO(pDoc, elt, alpha_long);
+	GET_REL_PATH_MACRO(pDoc, elt, alpha_trans);
+	GET_REL_PATH_MACRO(pDoc, elt, alpha_horizontal);
+	GET_REL_PATH_MACRO(pDoc, elt, alpha_vertical);
+}
+
+#define GET_REL_PATH_TIMESERIES_MACRO(D, C, TS) \
+do { \
+	CTimeSeries<Cproperty>::iterator it = C.TS.begin(); \
+	for (; it != C.TS.end(); ++it) { \
+		if ((*it).second.type == PROP_XYZ || (*it).second.type == PROP_XYZT) { \
+			if ((*it).second.data_source) { \
+				std::string filename = (*it).second.data_source->Get_file_name(); \
+				if (filename.length() > 0) { \
+					(*it).second.data_source->Set_file_name(D->GetRelativePath(lpszPathName, filename)); \
+				} \
+			} \
+		} \
+	} \
+} while(0)
+
+void CGlobal::PathsAbsoluteToRelative(LPCTSTR lpszPathName, CWPhastDoc* pDoc, CBC& bc)
+{
+	// Cproperty
+	GET_REL_PATH_MACRO(pDoc, bc, bc_k);
+	GET_REL_PATH_MACRO(pDoc, bc, bc_thick);
+
+	// CTimeSeries<Cproperty>
+	GET_REL_PATH_TIMESERIES_MACRO(pDoc, bc, m_bc_head);
+	GET_REL_PATH_TIMESERIES_MACRO(pDoc, bc, m_bc_flux);
+	GET_REL_PATH_TIMESERIES_MACRO(pDoc, bc, m_bc_solution);
+}
+
+void CGlobal::PathsAbsoluteToRelative(LPCTSTR lpszPathName, CWPhastDoc* pDoc, CChemIC& chemIC)
+{
+	// Cproperty
+	GET_REL_PATH_MACRO(pDoc, chemIC, equilibrium_phases);
+	GET_REL_PATH_MACRO(pDoc, chemIC, exchange);
+	GET_REL_PATH_MACRO(pDoc, chemIC, gas_phase);
+	GET_REL_PATH_MACRO(pDoc, chemIC, kinetics);
+	GET_REL_PATH_MACRO(pDoc, chemIC, solid_solutions);
+	GET_REL_PATH_MACRO(pDoc, chemIC, solution);
+	GET_REL_PATH_MACRO(pDoc, chemIC, surface);
+}
+
+void CGlobal::PathsAbsoluteToRelative(LPCTSTR lpszPathName, CWPhastDoc* pDoc, CHeadIC& headIC)
+{
+	// Cproperty
+	GET_REL_PATH_MACRO(pDoc, headIC, head);
+}
+
+// based on DDX_Text(CDataExchange* pDX, int nIDC, float& value)
+void CGlobal::DDX_Text_Safe(CDataExchange* pDX, int nIDC, float& value)
+{
+	CGlobal::TextFloatFormat(pDX, nIDC, &value, value, FLT_DIG);
+}
+
+// based on DDX_Text(CDataExchange* pDX, int nIDC, double& value)
+void CGlobal::DDX_Text_Safe(CDataExchange *pDX, int nIDC, double &value)
+{
+	CGlobal::TextFloatFormat(pDX, nIDC, &value, value, DBL_DIG);
+}
+
+// based on ::AfxTextFloatFormat
+void CGlobal::TextFloatFormat(CDataExchange* pDX, int nIDC, void* pData, double value, int nSizeGcvt)
+{
+	ASSERT(pData != NULL);
+
+	pDX->PrepareEditCtrl(nIDC);
+	HWND hWndCtrl;
+	pDX->m_pDlgWnd->GetDlgItem(nIDC, &hWndCtrl);
+	
+	const int TEXT_BUFFER_SIZE = 400;
+	TCHAR szBuffer[TEXT_BUFFER_SIZE];
+	if (pDX->m_bSaveAndValidate)
+	{
+		::GetWindowText(hWndCtrl, szBuffer, _countof(szBuffer));
+		double d;
+		if (_sntscanf_s(szBuffer, _countof(szBuffer), _T("%lf"), &d) != 1)
+		{
+			//AfxMessageBox(AFX_IDP_PARSE_REAL);
+			//pDX->Fail();            // throws exception
+			if (nSizeGcvt == FLT_DIG)
+			{
+				*((float*)pData) = std::numeric_limits<float>::signaling_NaN();
+			}
+			else
+			{
+				*((double*)pData) = std::numeric_limits<double>::signaling_NaN();
+			}
+		}
+		else
+		{
+			if (nSizeGcvt == FLT_DIG)
+			{
+				*((float*)pData) = (float)d;
+			}
+			else
+			{
+				*((double*)pData) = d;
+			}
+		}
+	}
+	else
+	{
+		if (value == value)
+		{
+			ATL_CRT_ERRORCHECK_SPRINTF(_sntprintf_s(szBuffer, _countof(szBuffer), _countof(szBuffer) -1, _T("%.*g"), nSizeGcvt, value));
+			AfxSetWindowText(hWndCtrl, szBuffer);
+		}
+		else
+		{
+			AfxSetWindowText(hWndCtrl, _T(""));
+		}
+	}
+}
+
+BOOL CGlobal::DDX_Text_Safe(CDataExchange* pDX, int nIDC, int& value)
+{
+	if (pDX->m_bSaveAndValidate)
+	{
+		try 
+		{
+			int i;
+			CGlobal::TextWithFormat(pDX, nIDC, _T("%d"), &i);
+			value = i;
+		}
+		catch(...)
+		{
+			value = -1;
+			return FALSE;
+		}
+	}
+	else
+	{
+		if (value < 0)
+		{
+			pDX->PrepareEditCtrl(nIDC);
+			HWND hWndCtrl;
+			pDX->m_pDlgWnd->GetDlgItem(nIDC, &hWndCtrl);
+			AfxSetWindowText(hWndCtrl, _T(""));
+		}
+		else
+		{
+			CGlobal::TextWithFormat(pDX, nIDC, _T("%d"), value);
+		}
+	}
+	return TRUE;
+}
+
+// based on AFX_STATIC void AFX_CDECL _Afx_DDX_TextWithFormat(CDataExchange* pDX, int nIDC,	LPCTSTR lpszFormat, UINT nIDPrompt, ...)
+// only supports windows output formats - no floating point
+void CGlobal::TextWithFormat(CDataExchange* pDX, int nIDC, LPCTSTR lpszFormat, ...)
+{
+	va_list pData;
+	va_start(pData, lpszFormat);
+
+	HWND hWndCtrl = pDX->PrepareEditCtrl(nIDC);
+	ASSERT( hWndCtrl != NULL );
+
+	const int SZT_SIZE = 64;
+	TCHAR szT[SZT_SIZE];
+	if (pDX->m_bSaveAndValidate)
+	{
+		void* pResult;
+
+		pResult = va_arg( pData, void* );
+		// the following works for %d, %u, %ld, %lu
+		::GetWindowText(hWndCtrl, szT, _countof(szT));
+		if (_sntscanf_s(szT, _countof(szT), lpszFormat, pResult) != 1)
+		{
+			//AfxMessageBox(nIDPrompt);
+			pDX->Fail();        // throws exception
+		}
+	}
+	else
+	{
+		ATL_CRT_ERRORCHECK_SPRINTF(_vsntprintf_s(szT, _countof(szT), _countof(szT) - 1, lpszFormat, pData));
+			// does not support floating point numbers - see dlgfloat.cpp
+		AfxSetWindowText(hWndCtrl, szT);
+	}
+
+	va_end(pData);
+}

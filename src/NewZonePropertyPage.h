@@ -5,7 +5,11 @@
 #include "ETSLayoutPropertyPageXP.h"
 
 #ifndef baseCNewZonePropertyPage
+#if defined(USE_LAYOUT)
 #define baseCNewZonePropertyPage ETSLayoutPropertyPageXP
+#else
+#define baseCNewZonePropertyPage CPropertyPage
+#endif
 #endif
 
 // CNewZonePropertyPage dialog
@@ -19,7 +23,7 @@ public:
 	virtual ~CNewZonePropertyPage();
 
 // Dialog Data
-	enum { IDD = IDD_NEW_ZONE_PROPPAGE };
+	enum { IDD = IDD_NEW_ZONE_PROPPAGE2 };
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support

@@ -18,6 +18,10 @@ public:
 	Cproperty();             // type == UNDEFINED
 	Cproperty(int value);    // type == FIXED
 	Cproperty(double value); // type == FIXED
+	//{{
+	Cproperty(enum PROP_TYPE pt);
+	//}}
+
 	// Cproperty(double val1, double val2, int direction); // type == LINEAR
 	// dtor
 	~Cproperty();
@@ -41,7 +45,7 @@ public:
 	static void CopyProperty(struct property** dest, const struct property* src);
 
 	friend std::ostream& operator<< (std::ostream &os, const Cproperty &a);
-	friend inline bool operator==(const property& lhs, const property& rhs);
+	friend bool operator==(const property& lhs, const property& rhs);
 
 private:
 	void InternalCopy(const property& src);
@@ -114,7 +118,6 @@ inline void Cproperty::Serial(CArchive& ar, const char *heading, property** prop
 	}
 }
 
-
 inline void Cproperty::CopyProperty(struct property** dest, const struct property* src)
 {
 	if (src) {
@@ -131,44 +134,6 @@ inline void Cproperty::CopyProperty(struct property** dest, const struct propert
 		}
 		(*dest) = 0;
 	}
-}
-
-inline bool operator==(const property& lhs, const property& rhs)
-{
-	if (lhs.type == rhs.type)
-	{
-		switch (lhs.type)
-		{
-		case PROP_UNDEFINED:
-			return true;
-			break;
-		case PROP_FIXED:
-			return (lhs.v[0] == rhs.v[0]);
-			break;
-		case PROP_LINEAR:
-			return (lhs.coord == rhs.coord &&
-				lhs.v[0] == rhs.v[0] &&
-				lhs.dist1 == rhs.dist1 &&
-				lhs.v[1] == rhs.v[1] &&
-				lhs.dist2 == rhs.dist2);
-			break;
-		case PROP_MIXTURE:
-			if (lhs.count_v == rhs.count_v)
-			{
-				for (int i = 0; i < lhs.count_v; ++i)
-				{
-					if (lhs.v[i] != rhs.v[i]) return false;
-				}
-				return true;
-			}
-			break;
-		default:
-			ASSERT(FALSE);
-			return false;
-			break;
-		}
-	}
-	return false;
 }
 
 inline bool operator!=(const property& lhs, const property& rhs)

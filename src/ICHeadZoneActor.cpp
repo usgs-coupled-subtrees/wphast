@@ -4,6 +4,9 @@
 #include "resource.h"
 #include "PropertyTreeControlBar.h"
 #include "ICHeadSpreadPropertyPage.h"
+#include "HeadICPropsPage.h"
+#include "HeadICPropsPage2.h"
+
 
 #include "property.h"
 #include "Global.h"
@@ -123,9 +126,12 @@ void CICHeadZoneActor::Edit(CTreeCtrl* pTreeCtrl)
 
 	ASSERT(this->GetData().polyh);
 
-	CICHeadSpreadPropertyPage icHeadProps;
+// COMMENT: {5/27/2009 4:44:27 PM}	CICHeadSpreadPropertyPage icHeadProps;
+// COMMENT: {7/10/2009 2:07:31 PM}	CHeadICPropsPage icHeadProps;
+	CHeadICPropsPage2 icHeadProps;
 	icHeadProps.SetProperties(this->GetData());		
-	icHeadProps.SetDesc(this->GetDesc());		
+	icHeadProps.SetDesc(this->GetDesc());
+	icHeadProps.SetDefault(this->m_bDefault);
 
 	props.AddPage(&icHeadProps);
 	if (props.DoModal() == IDOK)

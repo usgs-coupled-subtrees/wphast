@@ -132,6 +132,8 @@
 #include <vtkWin32RenderWindowInteractor.h>
 #include <afxole.h>
 
+#include <afxmt.h>
+
 #if _MSC_VER >= 1400
 
 /* Manifest */

@@ -47,7 +47,8 @@ void CBC::InternalCopy(const struct BC& src)
 	this->bc_flux = 0;
 
 	// current_bc_flux
-	// this->current_bc_flux = 0;
+	this->current_bc_flux = 0;
+	Cproperty::CopyProperty(&this->current_bc_flux, src.current_bc_flux);
 
 	// bc_k
 	this->bc_k = 0;
@@ -73,7 +74,8 @@ void CBC::InternalCopy(const struct BC& src)
 	this->bc_solution = 0;
 
 	// current_bc_solution
-	//this->current_bc_solution = 0;
+	this->current_bc_solution = 0;
+	Cproperty::CopyProperty(&this->current_bc_solution, src.current_bc_solution);
 
 	// current_bc_head
 	//this->current_bc_head = 0;
@@ -88,25 +90,28 @@ void CBC::InternalDelete(void)
 	delete static_cast<Cproperty*>(this->bc_k);
 	delete static_cast<Cproperty*>(this->bc_thick);
 	this->m_bc_solution.clear();
+
+	delete static_cast<Cproperty*>(this->current_bc_flux);
+	delete static_cast<Cproperty*>(this->current_bc_solution);
 }
 
 void CBC::InternalInit(void)
 {
-	this->polyh            = 0;
-	this->mask             = 0;
+	this->polyh               = 0;
+	this->mask                = 0;
 
 	// boundary conditions
-	this->bc_type          = BC_info::BC_UNDEFINED;
-	this->bc_head          = 0;
-	this->bc_flux          = 0;
-	this->current_bc_flux  = 0;
-	this->bc_k             = 0;
-	this->bc_thick         = 0;
-	this->face             = -1;
-	this->cell_face        = CF_UNKNOWN;
-	this->face_defined     = FALSE;
-	this->bc_solution_type = ST_UNDEFINED;
-	this->bc_solution      = 0;
+	this->bc_type             = BC_info::BC_UNDEFINED;
+	this->bc_head             = 0;
+	this->bc_flux             = 0;
+	this->current_bc_flux     = 0;
+	this->bc_k                = 0;
+	this->bc_thick            = 0;
+	this->face                = -1;
+	this->cell_face           = CF_UNKNOWN;
+	this->face_defined        = FALSE;
+	this->bc_solution_type    = ST_UNDEFINED;
+	this->bc_solution         = 0;
 	this->current_bc_solution = 0;
 	this->current_bc_head     = 0;
 	ASSERT(this->m_bc_head.empty());

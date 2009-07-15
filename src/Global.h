@@ -16,14 +16,23 @@ class vtkProp3D;
 // #include "BC.h"
 #include "TimeSeries.h"
 #include "srcinput/Prism.h"
+#include "TreePropSheetEx/TreePropSheetEx.h"
 class CBC;
+class CChemIC;
+class CHeadIC;
+
 class Cproperty;
 class CCheckTreeCtrl;
 class CWPhastView;
+class CWPhastDoc;
 class Data_source;
+class CGridElt;
 
 class vtkTransform;
 class CWorldTransform;
+class CTreePropSheetExSRC;
+class TreePropSheet::CTreePropSheetEx;
+
 
 // user defined messages
 #define UM_CHECKSTATECHANGE (WM_USER + 100)
@@ -60,6 +69,9 @@ public:
 	// Cproperty
 	static void DDX_Property(CDataExchange* pDX, CCheckTreeCtrl* pTree, HTREEITEM hti, Cproperty* value, Cproperty* fixed, Cproperty* linear);
 	static void DDX_Property(CDataExchange* pDX, int nIDC, int nRow, struct property* pProperty, bool bRequired);
+// COMMENT: {5/28/2009 6:46:43 PM}	static void DDX_Property(CDataExchange* pDX, CTreePropSheetExSRC* pTreeProp, HTREEITEM hti, std::vector<Cproperty*> &props, std::vector<CPropertyPage*> &pages);
+	static void DDX_Property(CDataExchange* pDX, TreePropSheet::CTreePropSheetEx* pTreeProp, HTREEITEM hti, std::vector<Cproperty*> &props, std::vector<CPropertyPage*> &pages);
+	static void DDX_PropertyM(CDataExchange* pDX, TreePropSheet::CTreePropSheetEx* pTreeProp, HTREEITEM hti, std::vector<Cproperty*> &props, std::vector<CPropertyPage*> &pages);
 
 	static void EnableFixed(CWnd* pDlgWnd, BOOL bEnable);
 	static void EnableLinearInterpolation(CWnd* pDlgWnd, BOOL bEnable);
@@ -116,6 +128,8 @@ public:
 	static void InsertHeadings(CComboBox &combo, std::vector< std::string > headings);
 	static BOOL IsValidShapefile(CString filename, CDataExchange* pDX = NULL);
 	static BOOL IsValidArcraster(CString filename);
+	static BOOL IsValidXYZFile(CString filename, CDataExchange* pDX = NULL);
+	static BOOL IsValidXYZTFile(CString filename, CDataExchange* pDX = NULL);
 
 	static BOOL FileExists(CString filename);
 
@@ -140,6 +154,7 @@ public:
 
 	static int AddTimeUnits(CComboBox* pCombo);
 	static std::string GetStdTimeUnits(const char* unit);
+	static std::string GetStdTimeUnitsSafe(const char* unit);
 
 	static int AddVolumeUnits(CComboBox* pCombo);
 	static std::string GetStdVolumeUnits(const char* unit);
@@ -165,6 +180,24 @@ public:
 
 	static void SetRadiusFactor(double factor);
 	static double GetRadiusFactor(void);
+
+	static void PathsRelativeToAbsolute(LPCTSTR lpszPathName, CWPhastDoc* pDoc, CGridElt& elt);
+	static void PathsRelativeToAbsolute(LPCTSTR lpszPathName, CWPhastDoc* pDoc, CBC& bc);
+	static void PathsRelativeToAbsolute(LPCTSTR lpszPathName, CWPhastDoc* pDoc, CChemIC& chemIC);
+	static void PathsRelativeToAbsolute(LPCTSTR lpszPathName, CWPhastDoc* pDoc, CHeadIC& headIC);
+
+	static void PathsAbsoluteToRelative(LPCTSTR lpszPathName, CWPhastDoc* pDoc, CGridElt& elt);
+	static void PathsAbsoluteToRelative(LPCTSTR lpszPathName, CWPhastDoc* pDoc, CBC& bc);
+	static void PathsAbsoluteToRelative(LPCTSTR lpszPathName, CWPhastDoc* pDoc, CChemIC& chemIC);
+	static void PathsAbsoluteToRelative(LPCTSTR lpszPathName, CWPhastDoc* pDoc, CHeadIC& headIC);
+
+	static void DDX_Text_Safe(CDataExchange* pDX, int nIDC, float& value);
+	static void DDX_Text_Safe(CDataExchange *pDX, int nIDC, double &value);
+	static void TextFloatFormat(CDataExchange* pDX, int nIDC, void* pData, double value, int nSizeGcvt);
+
+	static BOOL DDX_Text_Safe(CDataExchange* pDX, int nIDC, int& value);
+	static void TextWithFormat(CDataExchange* pDX, int nIDC, LPCTSTR lpszFormat, ...);
+
 
 protected:
 	static double CGlobal::RadiusFactor;

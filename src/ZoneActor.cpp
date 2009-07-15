@@ -1001,7 +1001,7 @@ void CZoneActor::Serialize(bool bStoring, hid_t loc_id, const CWPhastDoc* pWPhas
 
 				// set up unit transforms
 				// TODO need to test if file exists ???
-				prism->Tidy();  // reqd to set units for datasources(shape)
+// COMMENT: {4/21/2009 9:00:32 PM}				prism->Tidy();  // reqd to set units for datasources(shape)
 				this->SetUnits(pWPhastDoc->GetUnits(), false);
 
 				// open PolyData group

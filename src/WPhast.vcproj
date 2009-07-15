@@ -52,6 +52,8 @@
 				ExceptionHandling="2"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
+				FloatingPointModel="0"
+				FloatingPointExceptions="false"
 				TreatWChar_tAsBuiltInType="true"
 				UsePrecompiledHeader="2"
 				BrowseInformation="1"
@@ -574,6 +576,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\FakeFiledata.cpp"
+				>
+			</File>
+			<File
 				RelativePath="FlowOnly.cpp"
 				>
 			</File>
@@ -583,6 +589,14 @@
 			</File>
 			<File
 				RelativePath="FlowOnlyPropertyPage2.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\FluxPropsPage.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\FluxPropsPage2.cpp"
 				>
 			</File>
 			<File
@@ -698,11 +712,31 @@
 				>
 			</File>
 			<File
+				RelativePath=".\GridTimeSeries.cpp"
+				>
+			</File>
+			<File
 				RelativePath="HDFMirrorFile.cpp"
 				>
 			</File>
 			<File
 				RelativePath="HeadIC.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\HeadICPropsPage.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\HeadICPropsPage2.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ICChemPropsPage.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ICChemPropsPage2.cpp"
 				>
 			</File>
 			<File
@@ -746,6 +780,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\LeakyPropsPage.cpp"
+				>
+			</File>
+			<File
 				RelativePath="MacroAction.cpp"
 				>
 			</File>
@@ -775,6 +813,14 @@
 			</File>
 			<File
 				RelativePath=".\MediaPropertyPage.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\MediaPropsPage.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\MediaPropsPage2.cpp"
 				>
 			</File>
 			<File
@@ -858,6 +904,18 @@
 				>
 			</File>
 			<File
+				RelativePath=".\PropConstant.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\PropConstantM.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\PropDesc.cpp"
+				>
+			</File>
+			<File
 				RelativePath="property.cpp"
 				>
 			</File>
@@ -866,7 +924,43 @@
 				>
 			</File>
 			<File
+				RelativePath=".\PropLinear.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\PropLinearM.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\PropNone.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\PropNoneM.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\PropPage.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\PropPoints.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\PropRich.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\PropsPropertyPage.cpp"
+				>
+			</File>
+			<File
 				RelativePath="PropTreeOleDropTarget.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\PropXYZ.cpp"
 				>
 			</File>
 			<File
@@ -1010,6 +1104,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\SpecifiedHeadPropsPage.cpp"
+				>
+			</File>
+			<File
 				RelativePath="srcimpl.cpp"
 				>
 			</File>
@@ -1115,6 +1213,10 @@
 			</File>
 			<File
 				RelativePath="TreeCtrlNode.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\TreePropSheetExSRC.cpp"
 				>
 			</File>
 			<File
@@ -2646,6 +2748,18 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="ReleaseRelease|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\srcinput\XYZTfile.cpp"
+					>
+					<FileConfiguration
+						Name="cppunit|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -4476,6 +4590,82 @@
 					>
 				</File>
 			</Filter>
+			<Filter
+				Name="TreePropSheetEx"
+				>
+				<File
+					RelativePath=".\TreePropSheetEx\hookwnd.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\TreePropSheetEx\PropPageFrame.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\TreePropSheetEx\PropPageFrameBordered.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\TreePropSheetEx\PropPageFrameEx.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\TreePropSheetEx\PropPageFrameOffice2003.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\TreePropSheetEx\ResizableGrip.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\TreePropSheetEx\ResizableLayout.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\TreePropSheetEx\ResizableMinMax.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\TreePropSheetEx\ResizablePage.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\TreePropSheetEx\ResizableState.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\TreePropSheetEx\ThemeLibEx.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\TreePropSheetEx\TreePropSheetBase.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\TreePropSheetEx\TreePropSheetBordered.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\TreePropSheetEx\TreePropSheetEx.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\TreePropSheetEx\TreePropSheetOffice2003.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\TreePropSheetEx\TreePropSheetResizableLibHook.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\TreePropSheetEx\TreePropSheetSplitter.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\TreePropSheetEx\TreePropSheetTreeCtrl.cpp"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -4614,6 +4804,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\FakeFiledata.h"
+				>
+			</File>
+			<File
 				RelativePath="FlowOnly.h"
 				>
 			</File>
@@ -4623,6 +4817,14 @@
 			</File>
 			<File
 				RelativePath="FlowOnlyPropertyPage2.h"
+				>
+			</File>
+			<File
+				RelativePath=".\FluxPropsPage.h"
+				>
+			</File>
+			<File
+				RelativePath=".\FluxPropsPage2.h"
 				>
 			</File>
 			<File
@@ -4710,11 +4912,31 @@
 				>
 			</File>
 			<File
+				RelativePath=".\GridTimeSeries.h"
+				>
+			</File>
+			<File
 				RelativePath="HDFMirrorFile.h"
 				>
 			</File>
 			<File
 				RelativePath="HeadIC.h"
+				>
+			</File>
+			<File
+				RelativePath=".\HeadICPropsPage.h"
+				>
+			</File>
+			<File
+				RelativePath=".\HeadICPropsPage2.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ICChemPropsPage.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ICChemPropsPage2.h"
 				>
 			</File>
 			<File
@@ -4762,6 +4984,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\LeakyPropsPage.h"
+				>
+			</File>
+			<File
 				RelativePath="MacroAction.h"
 				>
 			</File>
@@ -4791,6 +5017,14 @@
 			</File>
 			<File
 				RelativePath=".\MediaPropertyPage.h"
+				>
+			</File>
+			<File
+				RelativePath=".\MediaPropsPage.h"
+				>
+			</File>
+			<File
+				RelativePath=".\MediaPropsPage2.h"
 				>
 			</File>
 			<File
@@ -4890,6 +5124,18 @@
 				>
 			</File>
 			<File
+				RelativePath=".\PropConstant.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PropConstantM.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PropDesc.h"
+				>
+			</File>
+			<File
 				RelativePath="property.h"
 				>
 			</File>
@@ -4898,7 +5144,47 @@
 				>
 			</File>
 			<File
+				RelativePath=".\PropLinear.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PropLinearM.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PropNone.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PropNoneM.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PropPage.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PropPoints.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PropRich.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PropsPropertyPage.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PropStruct.h"
+				>
+			</File>
+			<File
 				RelativePath="PropTreeOleDropTarget.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PropXYZ.h"
 				>
 			</File>
 			<File
@@ -5054,6 +5340,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\SpecifiedHeadPropsPage.h"
+				>
+			</File>
+			<File
 				RelativePath="srcimpl.h"
 				>
 			</File>
@@ -5127,6 +5417,10 @@
 			</File>
 			<File
 				RelativePath="TreeMemento.h"
+				>
+			</File>
+			<File
+				RelativePath=".\TreePropSheetExSRC.h"
 				>
 			</File>
 			<File
@@ -5606,6 +5900,10 @@
 				</File>
 				<File
 					RelativePath=".\srcinput\XYZfile.h"
+					>
+				</File>
+				<File
+					RelativePath=".\srcinput\XYZTfile.h"
 					>
 				</File>
 				<File
@@ -6384,6 +6682,10 @@
 			</File>
 			<File
 				RelativePath="res\Toolbar.bmp"
+				>
+			</File>
+			<File
+				RelativePath=".\res\toolbar1.bmp"
 				>
 			</File>
 			<File

@@ -55,23 +55,36 @@ void TCPPUnit::RunUnitTests(void)
 // COMMENT: {5/22/2006 6:20:43 PM}		}
 // COMMENT: {5/22/2006 6:20:43 PM}		//}}
 
-// COMMENT: {2/18/2009 4:48:25 PM}		runner.addTest(TestCPhastInput::suite());
-// COMMENT: {2/18/2009 4:48:25 PM}		runner.addTest(TestCZone::suite());
-// COMMENT: {2/18/2009 4:48:25 PM}		runner.addTest(TestCGrid::suite());
-// COMMENT: {2/18/2009 4:48:25 PM}		runner.addTest(TestCtime::suite());
-// COMMENT: {2/18/2009 4:48:25 PM}		runner.addTest(TestCBC::suite());
-// COMMENT: {2/18/2009 4:48:25 PM}		runner.addTest(TestCTimeControl::suite());
-// COMMENT: {2/18/2009 4:48:25 PM}		runner.addTest(TestCWPhastDoc::suite());
-// COMMENT: {2/18/2009 4:48:25 PM}		runner.addTest(TestCParser::suite());
-// COMMENT: {2/18/2009 4:48:25 PM}		runner.addTest(TestCPropertyTreeControlBar::suite());
-// COMMENT: {2/18/2009 4:48:25 PM}		runner.addTest(TestCUnits::suite());
-// COMMENT: {2/18/2009 4:48:25 PM}		runner.addTest(TestCPhastInput::suite());
-		runner.addTest(TestPrism::suite());
-// COMMENT: {2/18/2009 4:48:25 PM}		runner.addTest(TestHDFSerializePolyData::suite());		
+#ifdef FLOAT_EXCEPT
+		_clearfp();
+		unsigned int cw = _controlfp(0, 0);
 
-// COMMENT: {9/25/2008 2:20:29 PM}		runner.addTest(TestCTimeControlMultiPropertyPage2::suite());
+		cw &= ~(EM_OVERFLOW|EM_UNDERFLOW|EM_ZERODIVIDE|EM_DENORMAL|EM_INVALID);
+		unsigned int cwOriginal = _controlfp(cw, MCW_EM);
 
-		runner.addTest(TestUniqueMap::suite());
+		double z = 0.0;
+
+		double d = 1/z;
+		double d1 = 0/z;
+#endif
+
+// COMMENT: {4/21/2009 8:49:03 PM}		runner.addTest(TestCPhastInput::suite());
+// COMMENT: {4/6/2009 4:20:57 PM}		runner.addTest(TestCZone::suite());
+// COMMENT: {4/6/2009 4:20:57 PM}		runner.addTest(TestCGrid::suite());
+// COMMENT: {4/6/2009 4:20:57 PM}		runner.addTest(TestCtime::suite());
+// COMMENT: {4/6/2009 4:20:57 PM}		runner.addTest(TestCBC::suite());
+// COMMENT: {4/6/2009 4:20:57 PM}		runner.addTest(TestCTimeControl::suite());
+// COMMENT: {4/6/2009 4:20:57 PM}		runner.addTest(TestCWPhastDoc::suite());
+// COMMENT: {4/6/2009 4:20:57 PM}		runner.addTest(TestCParser::suite());
+// COMMENT: {4/6/2009 4:20:57 PM}		runner.addTest(TestCPropertyTreeControlBar::suite());
+// COMMENT: {4/6/2009 4:20:57 PM}		runner.addTest(TestCUnits::suite());
+// COMMENT: {4/6/2009 4:20:57 PM}		runner.addTest(TestCPhastInput::suite());
+// COMMENT: {4/6/2009 4:20:57 PM}		runner.addTest(TestPrism::suite());
+// COMMENT: {4/6/2009 4:20:57 PM}		runner.addTest(TestHDFSerializePolyData::suite());		
+// COMMENT: {4/6/2009 4:20:57 PM}
+// COMMENT: {4/6/2009 4:20:57 PM}// COMMENT: {9/25/2008 2:20:29 PM}		runner.addTest(TestCTimeControlMultiPropertyPage2::suite());
+// COMMENT: {4/6/2009 4:20:57 PM}
+// COMMENT: {4/6/2009 4:20:57 PM}		runner.addTest(TestUniqueMap::suite());
 
 		/**********************************************************
 		// the following require user input
@@ -104,5 +117,5 @@ void TCPPUnit::RunUnitTests(void)
 			DebugBreak();
 		}
 	}
-// COMMENT: {12/8/2008 3:22:22 PM}	exit(0);
+// COMMENT: {4/6/2009 7:41:16 PM}	exit(0);
 }
