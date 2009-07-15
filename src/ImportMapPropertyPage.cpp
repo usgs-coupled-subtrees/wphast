@@ -307,15 +307,18 @@ LRESULT CImportMapPropertyPage::OnWizardNext()
 	}
 
 	// validate page
-	if (this->m_bImport) {
-		if (this->m_pDlg->DoModal() == IDCANCEL) {
+	if (this->m_bImport)
+	{
+		if (this->m_pDlg->DoModal() == IDCANCEL)
+		{
 			delete this->m_pDlg;
 			this->m_pDlg = new CMapDialog(this);
 			return -1;
 		}
 
 		// store grid
-		for (int i = 0; i < 3; ++i) {
+		for (int i = 0; i < 3; ++i)
+		{
 			this->m_pGridPage->m_grid[i] = this->m_pDlg->m_grid[i];
 		}
 
@@ -324,6 +327,11 @@ LRESULT CImportMapPropertyPage::OnWizardNext()
 
 		delete this->m_pDlg;
 		this->m_pDlg = new CMapDialog(this);
+		// TODO ??? this->m_pDlg->SetSiteMap(this->m_siteMap); // in case user hits the backs button
+		for (int i = 0; i < 3; ++i)
+		{
+			this->m_pDlg->m_grid[i] = this->m_pGridPage->m_grid[i];
+		}
 	}
 
 	////{{
