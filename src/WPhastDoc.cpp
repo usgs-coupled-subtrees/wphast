@@ -2691,7 +2691,7 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 			// not undoable
 			const struct grid_elt* grid_elt_ptr = ::grid_elt_zones[i];
 			ASSERT(grid_elt_ptr->polyh && ::AfxIsValidAddress(grid_elt_ptr->polyh, sizeof(Polyhedron)));
-			if (i == 0 && defaultZone == *grid_elt_ptr->polyh->Get_bounding_box())
+			if (i == 0 && dynamic_cast<Cube*>(grid_elt_ptr->polyh) && defaultZone == *grid_elt_ptr->polyh->Get_bounding_box())
 			{
 				// if the first zone is equivalent to the default gridElt
 				// don't add it
@@ -2824,7 +2824,7 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 		{
 			const struct Head_ic* head_ic_ptr = ::head_ic[i];
 			ASSERT(head_ic_ptr->polyh && ::AfxIsValidAddress(head_ic_ptr->polyh, sizeof(Polyhedron)));
-			if (i == 0 && defaultZone == *head_ic_ptr->polyh->Get_bounding_box())
+			if (i == 0 && dynamic_cast<Cube*>(head_ic_ptr->polyh) && defaultZone == *head_ic_ptr->polyh->Get_bounding_box())
 			{
 				// if the first zone is equivalent to the default headIC
 				// don't add it
@@ -2860,7 +2860,7 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 		{
 			const struct chem_ic* chem_ic_ptr = ::chem_ic[i];
 			ASSERT(chem_ic_ptr->polyh && ::AfxIsValidAddress(chem_ic_ptr->polyh, sizeof(Polyhedron)));
-			if (i == 0 && defaultZone == *chem_ic_ptr->polyh->Get_bounding_box())
+			if (i == 0 && dynamic_cast<Cube*>(chem_ic_ptr->polyh) && defaultZone == *chem_ic_ptr->polyh->Get_bounding_box())
 			{
 				// if the first zone is equivalent to the default chemIC
 				// don't add it

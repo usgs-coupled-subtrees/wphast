@@ -25,6 +25,7 @@ CFluxPropsPage2::CFluxPropsPage2()
 	: CPropsPropertyPage(CFluxPropsPage2::IDD)
 	, FluxSeries(this, false, false)
 	, SolutionSeries(this, false, true)
+	, bSkipFaceValidation(false)
 {
 	TRACE("In %s\n", __FUNCTION__);
 
@@ -37,6 +38,9 @@ CFluxPropsPage2::CFluxPropsPage2()
 	// init properties
 	this->SetFlowOnly(false);
 	this->SetDefault(false);
+
+	// init data
+	this->BC.bc_type = BC_info::BC_FLUX;
 
 	TRACE("Out %s\n", __FUNCTION__);
 }
@@ -82,22 +86,29 @@ void CFluxPropsPage2::DoDataExchange(CDataExchange* pDX)
 	// face
 	if (pDX->m_bSaveAndValidate)
 	{
-		if (this->IsDlgButtonChecked(IDC_CHECK_FACE))
+		//if (this->IsDlgButtonChecked(IDC_CHECK_FACE))
+		if (!this->bSkipFaceValidation)
 		{
 			if (this->IsDlgButtonChecked(IDC_FACE_X_RADIO))
 			{
 				this->BC.face_defined = TRUE;
 				this->BC.face         = 0;
 			}
-			if (this->IsDlgButtonChecked(IDC_FACE_Y_RADIO))
+			else if (this->IsDlgButtonChecked(IDC_FACE_Y_RADIO))
 			{
 				this->BC.face_defined = TRUE;
 				this->BC.face         = 1;
 			}
-			if (this->IsDlgButtonChecked(IDC_FACE_Z_RADIO))
+			else if (this->IsDlgButtonChecked(IDC_FACE_Z_RADIO))
 			{
 				this->BC.face_defined = TRUE;
 				this->BC.face         = 2;
+			}
+			else
+			{
+				pDX->PrepareCtrl(IDC_FACE_X_RADIO);
+				::AfxMessageBox("No face has been defined");
+				pDX->Fail();
 			}
 		}
 	}
@@ -114,18 +125,7 @@ void CFluxPropsPage2::DoDataExchange(CDataExchange* pDX)
 		case 2: // z
 			this->CheckRadioButton(IDC_FACE_X_RADIO, IDC_FACE_Z_RADIO, IDC_FACE_Z_RADIO);
 			break;
-		default: // x
-			this->CheckRadioButton(IDC_FACE_X_RADIO, IDC_FACE_Z_RADIO, IDC_FACE_X_RADIO);
 		}
-		if (this->BC.face_defined)
-		{
-			this->CheckDlgButton(IDC_CHECK_FACE, BST_CHECKED);
-		}
-		else
-		{
-			this->CheckDlgButton(IDC_CHECK_FACE, BST_UNCHECKED);
-		}
-		this->OnBnClickedCheckFace();
 	}
 
 	// time series
@@ -145,7 +145,7 @@ void CFluxPropsPage2::DDV_SoftValidate()
 	::DDX_Text(&dx, IDC_DESC_EDIT, this->Description);
 
 	// face
-	if (this->IsDlgButtonChecked(IDC_CHECK_FACE))
+	//if (this->IsDlgButtonChecked(IDC_CHECK_FACE))
 	{
 		if (this->IsDlgButtonChecked(IDC_FACE_X_RADIO))
 		{
@@ -246,6 +246,9 @@ void CFluxPropsPage2::GetProperties(CBC& rBC)const
 }
 
 BEGIN_MESSAGE_MAP(CFluxPropsPage2, CPropsPropertyPage)
+	// override
+	ON_NOTIFY(TVN_SELCHANGING, IDC_PROP_TREE, OnTreeSelChanging)
+
 	// IDC_GRID_FLUX
 	ON_NOTIFY(GVN_ENDLABELEDIT, IDC_GRID_FLUX, OnEndLabelEditFlux)
 	ON_NOTIFY(GVN_SELCHANGED, IDC_GRID_FLUX, OnSelChangedFlux)
@@ -372,7 +375,7 @@ void CFluxPropsPage2::SetUnits(const CUnits &u)
 
 void CFluxPropsPage2::OnBnClickedCheckFace()
 {
-	if (this->IsDlgButtonChecked(IDC_CHECK_FACE))
+// COMMENT: {7/15/2009 8:32:40 PM}	if (this->IsDlgButtonChecked(IDC_CHECK_FACE))
 	{
 		if (CWnd *pWnd = this->GetDlgItem(IDC_FACE_X_RADIO))
 		{
@@ -387,21 +390,21 @@ void CFluxPropsPage2::OnBnClickedCheckFace()
 			pWnd->EnableWindow(TRUE);
 		}
 	}
-	else
-	{
-		if (CWnd *pWnd = this->GetDlgItem(IDC_FACE_X_RADIO))
-		{
-			pWnd->EnableWindow(FALSE);
-		}
-		if (CWnd *pWnd = this->GetDlgItem(IDC_FACE_Y_RADIO))
-		{
-			pWnd->EnableWindow(FALSE);
-		}
-		if (CWnd *pWnd = this->GetDlgItem(IDC_FACE_Z_RADIO))
-		{
-			pWnd->EnableWindow(FALSE);
-		}
-	}
+// COMMENT: {7/15/2009 8:32:59 PM}	else
+// COMMENT: {7/15/2009 8:32:59 PM}	{
+// COMMENT: {7/15/2009 8:32:59 PM}		if (CWnd *pWnd = this->GetDlgItem(IDC_FACE_X_RADIO))
+// COMMENT: {7/15/2009 8:32:59 PM}		{
+// COMMENT: {7/15/2009 8:32:59 PM}			pWnd->EnableWindow(FALSE);
+// COMMENT: {7/15/2009 8:32:59 PM}		}
+// COMMENT: {7/15/2009 8:32:59 PM}		if (CWnd *pWnd = this->GetDlgItem(IDC_FACE_Y_RADIO))
+// COMMENT: {7/15/2009 8:32:59 PM}		{
+// COMMENT: {7/15/2009 8:32:59 PM}			pWnd->EnableWindow(FALSE);
+// COMMENT: {7/15/2009 8:32:59 PM}		}
+// COMMENT: {7/15/2009 8:32:59 PM}		if (CWnd *pWnd = this->GetDlgItem(IDC_FACE_Z_RADIO))
+// COMMENT: {7/15/2009 8:32:59 PM}		{
+// COMMENT: {7/15/2009 8:32:59 PM}			pWnd->EnableWindow(FALSE);
+// COMMENT: {7/15/2009 8:32:59 PM}		}
+// COMMENT: {7/15/2009 8:32:59 PM}	}
 	this->OnBnSetfocusCheckFace();
 }
 
@@ -427,4 +430,11 @@ void CFluxPropsPage2::OnBnClickedCheckMixture()
 void CFluxPropsPage2::OnBnSetfocusCheckFace()
 {
 	this->RichEditCtrl.SetWindowText(this->m_sFaceRTF.c_str());
+}
+
+void CFluxPropsPage2::OnTreeSelChanging(NMHDR *pNotifyStruct, LRESULT *pResult)
+{
+	this->bSkipFaceValidation = true;
+	CPropsPropertyPage::OnTreeSelChanging(pNotifyStruct, pResult);
+	this->bSkipFaceValidation = false;
 }

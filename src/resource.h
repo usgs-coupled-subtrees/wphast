@@ -942,6 +942,7 @@
 #define IDC_EDIT_J                      1514
 #define IDC_EDIT_I                      1515
 #define IDC_GRID_FLUX                   1516
+#define IDC_STATIC_FACE                 1517
 #define IDC_RESIZE_COLUMN               28654
 #define IDC_RESIZE_ROW                  28655
 #define IDR_POPUP                       28656
@@ -984,12 +985,12 @@
 #define IDC_VALUE_STATIC                65535
 
 // Next default values for new objects
-// 
+//
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        432
 #define _APS_NEXT_COMMAND_VALUE         32861
-#define _APS_NEXT_CONTROL_VALUE         1517
+#define _APS_NEXT_CONTROL_VALUE         1518
 #define _APS_NEXT_SYMED_VALUE           127
 #endif
 #endif

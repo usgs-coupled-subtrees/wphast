@@ -79,6 +79,9 @@ protected:
 	afx_msg void OnBnClickedCheckMixture();
 	//}} COMMON
 
+	// override
+	afx_msg void OnTreeSelChanging(NMHDR *pNotifyStruct, LRESULT *plResult);
+
 	// face checkbox
 	afx_msg void OnBnClickedCheckFace();
 	afx_msg void OnBnSetfocusCheckFace();
@@ -99,6 +102,7 @@ protected:
 	// flags
 	bool FlowOnly;
 	bool Default;
+	bool bSkipFaceValidation;
 
 protected:
 	// data

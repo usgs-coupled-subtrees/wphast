@@ -1196,6 +1196,7 @@ bool operator==(const property& lhs, const property& rhs)
 			return false;
 			break;
 		}
+		return true;
 	}
-	return true;
+	return false;
 }

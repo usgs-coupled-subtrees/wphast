@@ -42,6 +42,8 @@
 #include "srcinput/Data_source.h"
 #include "srcinput/Shapefiles/shapefile.h"
 
+#include "PropertyTreeControlBar.h"
+
 #include "Units.h"
 #include "Global.h"
 
@@ -213,30 +215,107 @@ void CBoxPropertiesDialogBar::Update(IObserver* pSender, LPARAM lHint, CObject* 
 			{
 				if (true) // in case zone has morphed // if (pObject != this->m_pProp3D)
 				{
-					this->HideRiverControls();
-					this->HideWellControls();
-					this->HideWedgeControls();
+					if (this->m_nType == CBoxPropertiesDialogBar::BP_RIVER || this->m_nType == CBoxPropertiesDialogBar::BP_DRAIN)
+					{
+						this->HideRiverControls();
+					}
+					else if (this->m_nType == CBoxPropertiesDialogBar::BP_WELL)
+					{
+						this->HideWellControls();
+					}
+
 					switch(pZoneActor->GetPolyhedronType())
 					{
 					case Polyhedron::WEDGE:
-						this->m_nType = CBoxPropertiesDialogBar::BP_WEDGE;
-						this->HidePrismControls();
-						this->ShowWedgeControls();
+						if (this->m_nType == CBoxPropertiesDialogBar::BP_MIN_MAX)
+						{
+							this->HideZoneControls();
+							this->HideCheckUseMap();
+						}
+						else if (this->m_nType == CBoxPropertiesDialogBar::BP_PRISM)
+						{
+							this->HidePrismControls();
+						}
+
+						if (this->m_nType != CBoxPropertiesDialogBar::BP_WEDGE)
+						{
+							this->m_nType = CBoxPropertiesDialogBar::BP_WEDGE;
+							this->ShowWedgeControls();
+						}
 						break;
 					case Polyhedron::CUBE:
-						this->m_nType = CBoxPropertiesDialogBar::BP_MIN_MAX;
-						this->HidePrismControls();
-						this->ShowZoneControls();
+						if (this->m_nType == CBoxPropertiesDialogBar::BP_WEDGE)
+						{
+							this->HideWedgeControls();
+						}
+						else if (this->m_nType == CBoxPropertiesDialogBar::BP_PRISM)
+						{
+							this->HidePrismControls();
+						}
+
+						if (this->m_nType != CBoxPropertiesDialogBar::BP_MIN_MAX)
+						{
+							this->m_nType = CBoxPropertiesDialogBar::BP_MIN_MAX;
+							this->ShowZoneControls();
+							this->ShowCheckUseMap();
+						}
 						break;
 					case Polyhedron::PRISM:
-						this->m_nType = CBoxPropertiesDialogBar::BP_PRISM;
-						this->ShowPrismControls();
+						if (this->m_nType == CBoxPropertiesDialogBar::BP_MIN_MAX)
+						{
+							this->HideZoneControls();
+							this->HideCheckUseMap();
+						}
+						else if (this->m_nType == CBoxPropertiesDialogBar::BP_WEDGE)
+						{
+							this->HideWedgeControls();
+						}
+
+						if (this->m_nType != CBoxPropertiesDialogBar::BP_PRISM)
+						{
+							this->m_nType = CBoxPropertiesDialogBar::BP_PRISM;
+							this->ShowPrismControls();
+						}
 						break;
 					default:
 						ASSERT(FALSE);
 					}
 				}
 				this->Set(pView, pZoneActor, pView->GetDocument()->GetUnits());
+				//{{
+				if (this->m_nType == CBoxPropertiesDialogBar::BP_PRISM)
+				{
+					if (CPropertyTreeControlBar *pBar = dynamic_cast<CPropertyTreeControlBar*>(pSender))
+					{
+						if (CTreeCtrlEx* pTree = pBar->GetTreeCtrlEx())
+						{
+							CTreeCtrlNode node = pTree->GetSelectedItem();
+							CString item = node.GetText().Left(3);
+							if (item.CompareNoCase(_T("Per")) == 0)
+							{
+								this->m_wndTab.SetCurSel(1);
+								this->m_bNeedsUpdate = false;
+								this->m_nPrismPart = CBoxPropertiesDialogBar::PRISM_PERIMETER;
+								this->UpdateData(FALSE);
+							}
+							else if (item.CompareNoCase(_T("Top")) == 0)
+							{
+								this->m_wndTab.SetCurSel(0);
+								this->m_bNeedsUpdate = false;
+								this->m_nPrismPart = CBoxPropertiesDialogBar::PRISM_TOP;
+								this->UpdateData(FALSE);
+							}
+							else if (item.CompareNoCase(_T("Bot")) == 0)
+							{
+								this->m_wndTab.SetCurSel(2);
+								this->m_bNeedsUpdate = false;
+								this->m_nPrismPart = CBoxPropertiesDialogBar::PRISM_BOTTOM;
+								this->UpdateData(FALSE);
+							}
+						}
+					}
+				}
+				//}}
 			}
 			else if (CWellActor* pWellActor = CWellActor::SafeDownCast(pProp))
 			{
@@ -248,6 +327,7 @@ void CBoxPropertiesDialogBar::Update(IObserver* pSender, LPARAM lHint, CObject* 
 					this->HideWedgeControls();
 					this->HidePrismControls();
 					this->ShowWellControls();
+					this->ShowCheckUseMap();
 					this->ShowApply();
 				}
 
@@ -261,6 +341,7 @@ void CBoxPropertiesDialogBar::Update(IObserver* pSender, LPARAM lHint, CObject* 
 				{
 					this->HideWedgeControls();
 					this->HideWellControls();
+					this->HideCheckUseMap();
 					this->HidePrismControls();
 					this->ShowRiverControls();
 					this->ShowApply();
@@ -276,6 +357,7 @@ void CBoxPropertiesDialogBar::Update(IObserver* pSender, LPARAM lHint, CObject* 
 				{
 					this->HideWedgeControls();
 					this->HideWellControls();
+					this->HideCheckUseMap();
 					this->HidePrismControls();
 					this->ShowRiverControls();
 					this->ShowApply();
@@ -296,6 +378,7 @@ void CBoxPropertiesDialogBar::Update(IObserver* pSender, LPARAM lHint, CObject* 
 			this->HideRiverControls();
 			this->HideWedgeControls();
 			this->HideWellControls();
+			this->HideCheckUseMap();
 			this->HideApply();
 			this->Enable(FALSE);
 			this->SetWindowText(_T(""));
@@ -1137,6 +1220,7 @@ void CBoxPropertiesDialogBar::Enable(bool bEnable)
 		this->HideRiverControls();
 		this->HideWedgeControls();
 		this->HideWellControls();
+		this->HideCheckUseMap();
 		this->HidePrismControls();
 	}
 	TRACE("%s, out\n", __FUNCTION__);
@@ -1561,7 +1645,7 @@ static int ZoneIDs[] = {
 	IDC_X_UNITS_STATIC2,
 	IDC_Y_UNITS_STATIC2,
 	IDC_Z_UNITS_STATIC2,
-	IDC_CHECK_USE_MAP,
+// COMMENT: {7/15/2009 10:57:53 PM}	IDC_CHECK_USE_MAP,
 };
 
 void CBoxPropertiesDialogBar::ShowZoneControls()
@@ -1637,10 +1721,10 @@ void CBoxPropertiesDialogBar::ShowZoneControls()
 		pWnd->MoveWindow(186, 117, 30, 13, TRUE);
 		pWnd->ShowWindow(SW_SHOW);
 	}
-	if (CWnd *pWnd = this->GetDlgItem(IDC_CHECK_USE_MAP))
-	{
-		pWnd->ShowWindow(SW_SHOW);
-	}
+// COMMENT: {7/15/2009 11:13:54 PM}	if (CWnd *pWnd = this->GetDlgItem(IDC_CHECK_USE_MAP))
+// COMMENT: {7/15/2009 11:13:54 PM}	{
+// COMMENT: {7/15/2009 11:13:54 PM}		pWnd->ShowWindow(SW_SHOW);
+// COMMENT: {7/15/2009 11:13:54 PM}	}
 	TRACE("%s, out\n", __FUNCTION__);
 }
 
@@ -1661,6 +1745,25 @@ void CBoxPropertiesDialogBar::HideZoneControls()
 	TRACE("%s, out\n", __FUNCTION__);
 }
 
+//{{{7/15/2009 10:54:00 PM}
+void CBoxPropertiesDialogBar::ShowCheckUseMap()
+{
+	if (CWnd *pWnd = this->GetDlgItem(IDC_CHECK_USE_MAP))
+	{
+		pWnd->ShowWindow(SW_SHOW);
+	}
+}
+
+void CBoxPropertiesDialogBar::HideCheckUseMap()
+{
+	if (CWnd *pWnd = this->GetDlgItem(IDC_CHECK_USE_MAP))
+	{
+		pWnd->ShowWindow(SW_HIDE);
+	}
+}
+//}}{7/15/2009 10:54:00 PM}
+
+
 static int WellIDs[] = {
 //	IDC_STATIC_LOC,
 	IDC_STATIC_WELL_X,
@@ -1669,7 +1772,7 @@ static int WellIDs[] = {
 	IDC_EDIT_WELL_Y,
 	IDC_X_UNITS_STATIC,
 	IDC_Y_UNITS_STATIC,
-	IDC_CHECK_USE_MAP,
+// COMMENT: {7/15/2009 10:54:00 PM}	IDC_CHECK_USE_MAP,
 };
 
 void CBoxPropertiesDialogBar::ShowWellControls()

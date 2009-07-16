@@ -17,11 +17,13 @@ CLIPFORMAT CBC::clipFormat = (CLIPFORMAT)::RegisterClipboardFormat(_T("WPhast:CB
 
 CBC::CBC() // ctor
 {
+	ASSERT(this);
 	this->InternalInit();
 }
 
 CBC::~CBC() // dtor
 {
+	ASSERT(this);
 	this->InternalDelete();
 }
 
@@ -83,6 +85,7 @@ void CBC::InternalCopy(const struct BC& src)
 
 void CBC::InternalDelete(void)
 {
+	ASSERT(this);
 	delete this->polyh;
 	delete static_cast<Cproperty*>(this->mask);
 	this->m_bc_head.clear();

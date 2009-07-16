@@ -39,6 +39,9 @@ CSpecifiedHeadPropsPage::CSpecifiedHeadPropsPage()
 	this->SetFlowOnly(false);
 	this->SetDefault(false);
 
+	// init data
+	this->BC.bc_type = BC_info::BC_SPECIFIED;
+
 	TRACE("Out %s\n", __FUNCTION__);
 }
 

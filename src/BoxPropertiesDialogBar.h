@@ -70,6 +70,9 @@ public:
 	void ShowPrismControls(void);
 	void HidePrismControls(void);
 
+	void ShowCheckUseMap(void);
+	void HideCheckUseMap(void);
+
 	void ShowApply();
 	void HideApply();
 

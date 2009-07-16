@@ -150,7 +150,7 @@ protected:
 
 	CLIPFORMAT m_cfPID;
 
-	bool IsNodeEditable(CTreeCtrlNode editNode, bool bDoEdit);
+	bool IsNodeEditable(CTreeCtrlNode &editNode, bool bDoEdit);
 // COMMENT: {8/14/2008 7:07:05 PM}	bool IsNodeDraggable(CTreeCtrlNode dragNode, COleDataSource &oleDataSource);
 	bool IsNodeDraggable(CTreeCtrlNode dragNode, COleDataSource *pOleDataSource);
 	bool IsNodeCopyable(CTreeCtrlNode copyNode, COleDataSource *pOleDataSource);

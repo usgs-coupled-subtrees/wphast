@@ -212,14 +212,34 @@ void CPropertyTreeControlBar::OnSelChanged(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 
 	NMTREEVIEW *pNMTREEVIEW = (LPNMTREEVIEW)pNMHDR;
 	CTreeCtrlNode item(pNMTREEVIEW->itemNew.hItem, this->GetTreeCtrlEx());
+	CTreeCtrlNode itemParent = item.GetParent();
+	CTreeCtrlNode itemGrandParent = itemParent.GetParent();
+
+	//{{
+	CTreeCtrlNode editable = item;
+	if (this->IsNodeEditable(editable, false))
+	{
+		HTREEITEM hParent = editable.GetParent();
+		if (hParent == this->m_nodeMedia || hParent == this->m_nodeBC || hParent == this->m_nodeICHead || hParent == this->m_nodeICChem || hParent == this->m_nodeZFRates)
+		{
+			ASSERT(editable.GetData());
+			CZoneActor* pZone = reinterpret_cast<CZoneActor*>(editable.GetData());
+			if (CWPhastDoc* pDoc = this->GetDocument())
+			{
+				// Notify listeners
+				//
+				pDoc->Notify(this, WPN_SELCHANGED, 0, pZone);
+				return;
+			}
+		}
+	}
+	//}}
 
 	if (m_wndTree.GetItemData(pNMTREEVIEW->itemNew.hItem))
 	{
 		HTREEITEM hParent = m_wndTree.GetParentItem(pNMTREEVIEW->itemNew.hItem);
-
-		if (hParent == m_nodeMedia || hParent == this->m_nodeBC || hParent == this->m_nodeICHead || hParent == this->m_nodeICChem || hParent == this->m_nodeZFRates)
+		if (hParent == this->m_nodeMedia || hParent == this->m_nodeBC || hParent == this->m_nodeICHead || hParent == this->m_nodeICChem || hParent == this->m_nodeZFRates)
 		{
-
 			CZoneActor* pZone = reinterpret_cast<CZoneActor*>(m_wndTree.GetItemData(pNMTREEVIEW->itemNew.hItem));
 			if (CWPhastDoc* pDoc = this->GetDocument())
 			{
@@ -659,7 +679,8 @@ void CPropertyTreeControlBar::OnNMDblClk(NMHDR* pNMHDR, LRESULT* pResult)
 
 	///this->EditSelection(pResult);
 	//{{
-	if (this->IsNodeEditable(this->GetTreeCtrlEx()->GetSelectedItem(), true))
+	CTreeCtrlNode node = this->GetTreeCtrlEx()->GetSelectedItem();
+	if (this->IsNodeEditable(node, true))
 	{
 		*pResult = TRUE;
 	}
@@ -667,7 +688,7 @@ void CPropertyTreeControlBar::OnNMDblClk(NMHDR* pNMHDR, LRESULT* pResult)
 	TRACE("%s, out 4\n", __FUNCTION__);
 }
 
-bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode editNode, bool bDoEdit)
+bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode &editNode, bool bDoEdit)
 {
 	CTreeCtrlNode item = editNode;
 	CTreeCtrlNode parent = item.GetParent();
@@ -699,6 +720,9 @@ bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode editNode, bool bDoEdi
 		{
 			pFlowOnly->Edit(&this->m_wndTree, pMediaZoneActor, 0);
 		}
+		///{{{
+		editNode = this->m_nodeFlowOnly;
+		///}}}
 		//}} HACK
 		return true;
 	}
@@ -715,6 +739,9 @@ bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode editNode, bool bDoEdi
 		{
 			pFreeSurface->Edit(&this->m_wndTree);
 		}
+		///{{{
+		editNode = this->m_nodeFreeSurface;
+		///}}}
 		return true;
 	}
 
@@ -729,6 +756,9 @@ bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode editNode, bool bDoEdi
 		{
 			pSolutionMethod->Edit(&this->m_wndTree);
 		}
+		///{{{
+		editNode = this->m_nodeSolutionMethod;
+		///}}}
 		return true;
 	}
 
@@ -743,6 +773,9 @@ bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode editNode, bool bDoEdi
 		{
 			pSteadyFlow->Edit(&this->m_wndTree);
 		}
+		///{{{
+		editNode = this->m_nodeSteadyFlow;
+		///}}}
 		return true;
 	}
 
@@ -758,6 +791,9 @@ bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode editNode, bool bDoEdi
 			{
 				pUnits->Edit(&this->m_wndTree);
 			}
+			///{{{
+			editNode = this->m_nodeUnits;
+			///}}}
 			return true;
 		}
 		return false;
@@ -782,6 +818,9 @@ bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode editNode, bool bDoEdi
 					{
 						pWellActor->Edit(this->GetDocument());
 					}
+					///{{{
+					editNode = item;
+					///}}}
 					return true;
 				}
 			}
@@ -858,6 +897,9 @@ bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode editNode, bool bDoEdi
 							}
 						}
 					}
+					///{{{
+					editNode = item;
+					///}}}
 					return true;
 				}
 			}
@@ -935,6 +977,9 @@ bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode editNode, bool bDoEdi
 							}
 						}
 					}
+					///{{{
+					editNode = item;
+					///}}}
 					return true;
 				}
 			}
@@ -946,7 +991,7 @@ bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode editNode, bool bDoEdi
 	//
 	if (item.IsNodeAncestor(this->m_nodeGrid))
 	{
-		if (CGridActor* pGridActor = CGridActor::SafeDownCast((vtkObject*)m_nodeGrid.GetData()))
+		if (CGridActor* pGridActor = CGridActor::SafeDownCast((vtkObject*)this->m_nodeGrid.GetData()))
 		{
 			CFrameWnd *pFrame = reinterpret_cast<CFrameWnd*>(AfxGetApp()->m_pMainWnd);
 			ASSERT_VALID(pFrame);
@@ -957,6 +1002,9 @@ bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode editNode, bool bDoEdi
 			{
 				pWPhastDoc->Edit(pGridActor);
 			}
+			///{{{
+			editNode = this->m_nodeGrid;
+			///}}}
 			return true;
 		}
 		return false;
@@ -981,6 +1029,9 @@ bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode editNode, bool bDoEdi
 					{
 						pZone->Edit(&this->m_wndTree);
 					}
+					///{{{
+					editNode = item;
+					///}}}
 					return true;
 				}
 			}
@@ -1007,6 +1058,9 @@ bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode editNode, bool bDoEdi
 					{
 						pZone->Edit(&this->m_wndTree);
 					}
+					///{{{
+					editNode = item;
+					///}}}
 					return true;
 				}
 			}
@@ -1033,6 +1087,9 @@ bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode editNode, bool bDoEdi
 					{
 						pZone->Edit(&this->m_wndTree);
 					}
+					///{{{
+					editNode = item;
+					///}}}
 					return true;
 				}
 			}
@@ -1059,6 +1116,9 @@ bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode editNode, bool bDoEdi
 					{
 						pZone->Edit(&this->m_wndTree);
 					}
+					///{{{
+					editNode = item;
+					///}}}
 					return true;
 				}
 			}
@@ -1077,6 +1137,9 @@ bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode editNode, bool bDoEdi
 			{
 				pPI->Edit(&this->m_wndTree);
 			}
+			///{{{
+			editNode = this->m_nodePrintInput;
+			///}}}
 			return true;
 		}
 		return false;
@@ -1093,6 +1156,9 @@ bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode editNode, bool bDoEdi
 			{
 				pPF->Edit(&this->m_wndTree);
 			}
+			///{{{
+			editNode = this->m_nodePF;
+			///}}}
 			return true;
 		}
 		return false;
@@ -1110,6 +1176,9 @@ bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode editNode, bool bDoEdi
 			{
 				pTC->Edit(&this->m_wndTree);
 			}
+			///{{{
+			editNode = this->m_nodeTimeControl2;
+			///}}}
 			return true;
 		}
 		return false;

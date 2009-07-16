@@ -31,6 +31,7 @@ CLeakyPropsPage::CLeakyPropsPage()
 	, SolutionSeries(this, false, true)
 	, ThicknessProperty(this, true, false)
 	, HydCondProperty(this, true, false)
+	, bSkipFaceValidation(false)
 {
 	TRACE("In %s\n", __FUNCTION__);
 
@@ -45,6 +46,9 @@ CLeakyPropsPage::CLeakyPropsPage()
 	// init properties
 	this->SetFlowOnly(false);
 	this->SetDefault(false);
+
+	// init data
+	this->BC.bc_type = BC_info::BC_LEAKY;
 
 	TRACE("Out %s\n", __FUNCTION__);
 }
@@ -94,50 +98,49 @@ void CLeakyPropsPage::DoDataExchange(CDataExchange* pDX)
 	// face
 	if (pDX->m_bSaveAndValidate)
 	{
-		if (this->IsDlgButtonChecked(IDC_CHECK_FACE))
+		//if (this->IsDlgButtonChecked(IDC_CHECK_FACE))
+		if (!this->bSkipFaceValidation)
 		{
 			if (this->IsDlgButtonChecked(IDC_FACE_X_RADIO))
 			{
 				this->BC.face_defined = TRUE;
 				this->BC.face         = 0;
 			}
-			if (this->IsDlgButtonChecked(IDC_FACE_Y_RADIO))
+			else if (this->IsDlgButtonChecked(IDC_FACE_Y_RADIO))
 			{
 				this->BC.face_defined = TRUE;
 				this->BC.face         = 1;
 			}
-			if (this->IsDlgButtonChecked(IDC_FACE_Z_RADIO))
+			else if (this->IsDlgButtonChecked(IDC_FACE_Z_RADIO))
 			{
 				this->BC.face_defined = TRUE;
 				this->BC.face         = 2;
+			}
+			else
+			{
+				pDX->PrepareCtrl(IDC_FACE_X_RADIO);
+				::AfxMessageBox("No face has been defined");
+				pDX->Fail();
 			}
 		}
 	}
 	else
 	{
-		switch(this->BC.face)
+		//if (this->BC.face_defined)
 		{
-		case 0: // x
-			this->CheckRadioButton(IDC_FACE_X_RADIO, IDC_FACE_Z_RADIO, IDC_FACE_X_RADIO);
-			break;
-		case 1: // y
-			this->CheckRadioButton(IDC_FACE_X_RADIO, IDC_FACE_Z_RADIO, IDC_FACE_Y_RADIO);
-			break;
-		case 2: // z
-			this->CheckRadioButton(IDC_FACE_X_RADIO, IDC_FACE_Z_RADIO, IDC_FACE_Z_RADIO);
-			break;
-		default: // x
-			this->CheckRadioButton(IDC_FACE_X_RADIO, IDC_FACE_Z_RADIO, IDC_FACE_X_RADIO);
+			switch(this->BC.face)
+			{
+			case 0: // x
+				this->CheckRadioButton(IDC_FACE_X_RADIO, IDC_FACE_Z_RADIO, IDC_FACE_X_RADIO);
+				break;
+			case 1: // y
+				this->CheckRadioButton(IDC_FACE_X_RADIO, IDC_FACE_Z_RADIO, IDC_FACE_Y_RADIO);
+				break;
+			case 2: // z
+				this->CheckRadioButton(IDC_FACE_X_RADIO, IDC_FACE_Z_RADIO, IDC_FACE_Z_RADIO);
+				break;
+			}
 		}
-		if (this->BC.face_defined)
-		{
-			this->CheckDlgButton(IDC_CHECK_FACE, BST_CHECKED);
-		}
-		else
-		{
-			this->CheckDlgButton(IDC_CHECK_FACE, BST_UNCHECKED);
-		}
-		this->OnBnClickedCheckFace();
 	}
 
 	// properties
@@ -158,7 +161,7 @@ void CLeakyPropsPage::DDV_SoftValidate()
 	::DDX_Text(&dx, IDC_DESC_EDIT, this->Description);
 
 	// face
-	if (this->IsDlgButtonChecked(IDC_CHECK_FACE))
+	//if (this->IsDlgButtonChecked(IDC_CHECK_FACE))
 	{
 		if (this->IsDlgButtonChecked(IDC_FACE_X_RADIO))
 		{
@@ -311,6 +314,9 @@ void CLeakyPropsPage::GetProperties(CBC& rBC)const
 }
 
 BEGIN_MESSAGE_MAP(CLeakyPropsPage, CPropsPropertyPage)
+	// override
+	ON_NOTIFY(TVN_SELCHANGING, IDC_PROP_TREE, OnTreeSelChanging)
+
 	// IDC_GRID_HEAD
 	ON_NOTIFY(GVN_ENDLABELEDIT, IDC_GRID_HEAD, OnEndLabelEditFlux)
 	ON_NOTIFY(GVN_SELCHANGED, IDC_GRID_HEAD,    OnSelChangedFlux)
@@ -479,7 +485,7 @@ void CLeakyPropsPage::OnCbnSelchangeComboProptype()
 
 void CLeakyPropsPage::OnBnClickedCheckFace()
 {
-	if (this->IsDlgButtonChecked(IDC_CHECK_FACE))
+// COMMENT: {7/15/2009 4:39:48 PM}	if (this->IsDlgButtonChecked(IDC_CHECK_FACE))
 	{
 		if (CWnd *pWnd = this->GetDlgItem(IDC_FACE_X_RADIO))
 		{
@@ -494,21 +500,21 @@ void CLeakyPropsPage::OnBnClickedCheckFace()
 			pWnd->EnableWindow(TRUE);
 		}
 	}
-	else
-	{
-		if (CWnd *pWnd = this->GetDlgItem(IDC_FACE_X_RADIO))
-		{
-			pWnd->EnableWindow(FALSE);
-		}
-		if (CWnd *pWnd = this->GetDlgItem(IDC_FACE_Y_RADIO))
-		{
-			pWnd->EnableWindow(FALSE);
-		}
-		if (CWnd *pWnd = this->GetDlgItem(IDC_FACE_Z_RADIO))
-		{
-			pWnd->EnableWindow(FALSE);
-		}
-	}
+// COMMENT: {7/15/2009 4:39:58 PM}	else
+// COMMENT: {7/15/2009 4:39:58 PM}	{
+// COMMENT: {7/15/2009 4:39:58 PM}		if (CWnd *pWnd = this->GetDlgItem(IDC_FACE_X_RADIO))
+// COMMENT: {7/15/2009 4:39:58 PM}		{
+// COMMENT: {7/15/2009 4:39:58 PM}			pWnd->EnableWindow(FALSE);
+// COMMENT: {7/15/2009 4:39:58 PM}		}
+// COMMENT: {7/15/2009 4:39:58 PM}		if (CWnd *pWnd = this->GetDlgItem(IDC_FACE_Y_RADIO))
+// COMMENT: {7/15/2009 4:39:58 PM}		{
+// COMMENT: {7/15/2009 4:39:58 PM}			pWnd->EnableWindow(FALSE);
+// COMMENT: {7/15/2009 4:39:58 PM}		}
+// COMMENT: {7/15/2009 4:39:58 PM}		if (CWnd *pWnd = this->GetDlgItem(IDC_FACE_Z_RADIO))
+// COMMENT: {7/15/2009 4:39:58 PM}		{
+// COMMENT: {7/15/2009 4:39:58 PM}			pWnd->EnableWindow(FALSE);
+// COMMENT: {7/15/2009 4:39:58 PM}		}
+// COMMENT: {7/15/2009 4:39:58 PM}	}
 	this->OnBnSetfocusCheckFace();
 }
 
@@ -542,4 +548,11 @@ void CLeakyPropsPage::OnBnClickedCheckMixture()
 void CLeakyPropsPage::OnBnSetfocusCheckFace()
 {
 	this->RichEditCtrl.SetWindowText(this->m_sFaceRTF.c_str());
+}
+
+void CLeakyPropsPage::OnTreeSelChanging(NMHDR *pNotifyStruct, LRESULT *pResult)
+{
+	this->bSkipFaceValidation = true;
+	CPropsPropertyPage::OnTreeSelChanging(pNotifyStruct, pResult);
+	this->bSkipFaceValidation = false;
 }
