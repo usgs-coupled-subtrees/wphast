@@ -212,10 +212,7 @@ void CPropertyTreeControlBar::OnSelChanged(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 
 	NMTREEVIEW *pNMTREEVIEW = (LPNMTREEVIEW)pNMHDR;
 	CTreeCtrlNode item(pNMTREEVIEW->itemNew.hItem, this->GetTreeCtrlEx());
-	CTreeCtrlNode itemParent = item.GetParent();
-	CTreeCtrlNode itemGrandParent = itemParent.GetParent();
 
-	//{{
 	CTreeCtrlNode editable = item;
 	if (this->IsNodeEditable(editable, false))
 	{
@@ -232,86 +229,149 @@ void CPropertyTreeControlBar::OnSelChanged(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 				return;
 			}
 		}
-	}
-	//}}
-
-	if (m_wndTree.GetItemData(pNMTREEVIEW->itemNew.hItem))
-	{
-		HTREEITEM hParent = m_wndTree.GetParentItem(pNMTREEVIEW->itemNew.hItem);
-		if (hParent == this->m_nodeMedia || hParent == this->m_nodeBC || hParent == this->m_nodeICHead || hParent == this->m_nodeICChem || hParent == this->m_nodeZFRates)
-		{
-			CZoneActor* pZone = reinterpret_cast<CZoneActor*>(m_wndTree.GetItemData(pNMTREEVIEW->itemNew.hItem));
-			if (CWPhastDoc* pDoc = this->GetDocument())
-			{
-				// Notify listeners
-				//
-				pDoc->Notify(this, WPN_SELCHANGED, 0, pZone);
-			}
-		}
 		else if (hParent == this->m_nodeWells)
 		{
 			// if (CWellActor* pWell = reinterpret_cast<CWellActor*>(item.GetData()))
-			if (item.GetData())
+			if (editable.GetData())
 			{
-				if (vtkProp* pProp = vtkProp::SafeDownCast(reinterpret_cast<vtkObject*>(item.GetData())))
+				if (vtkProp* pProp = vtkProp::SafeDownCast(reinterpret_cast<vtkObject*>(editable.GetData())))
 				{
 					// Notify listeners
 					//
 					if (CWPhastDoc* pDoc = this->GetDocument())
 					{
 						pDoc->Notify(this, WPN_SELCHANGED, 0, pProp);
+						return;
 					}
 				}
 			}
 		}
 		else if (hParent == this->m_nodeRivers)
 		{
-			if (item.GetData())
+			if (editable.GetData())
 			{
-				if (vtkProp* pProp = vtkProp::SafeDownCast(reinterpret_cast<vtkObject*>(item.GetData())))
+				if (vtkProp* pProp = vtkProp::SafeDownCast(reinterpret_cast<vtkObject*>(editable.GetData())))
 				{
+					// Check if point is selected
+					//
+					if (item.IsNodeAncestor(this->GetRiversNode()) && item != this->GetRiversNode())
+					{
+						if ((item != this->GetRiversNode()) && (item.GetParent() != this->GetRiversNode()))
+						{
+							// Determine which river point is selected
+							//
+							CTreeCtrlNode riverNode = editable;
+							CTreeCtrlNode ptNode = item;
+							while (ptNode.GetParent() != riverNode)
+							{
+								ptNode = ptNode.GetParent();
+								if (!ptNode) break;
+							}
+							ASSERT(riverNode.GetParent() == this->GetRiversNode());
+							ASSERT(ptNode.GetParent() == riverNode);
+
+							if (riverNode.GetData())
+							{
+								if (CRiverActor *pRiverActor = CRiverActor::SafeDownCast(reinterpret_cast<vtkObject*>(riverNode.GetData())))
+								{
+									if (riverNode.GetIndex(ptNode) > 1)
+									{
+										// minus xy_coordinate_system and z_coordinate_system
+										pRiverActor->SelectPoint(riverNode.GetIndex(ptNode) - 2);
+										return;
+									}
+								}
+								else
+								{
+									ASSERT(FALSE);
+								}
+							}
+						}
+					}
+
 					// Notify listeners
 					//
 					if (CWPhastDoc* pDoc = this->GetDocument())
 					{
 						pDoc->Notify(this, WPN_SELCHANGED, 0, pProp);
+						return;
 					}
 				}
 			}
 		}
 		else if (hParent == this->m_nodeDrains)
 		{
-			if (item.GetData())
+			if (editable.GetData())
 			{
-				if (vtkProp* pProp = vtkProp::SafeDownCast(reinterpret_cast<vtkObject*>(item.GetData())))
+				if (vtkProp* pProp = vtkProp::SafeDownCast(reinterpret_cast<vtkObject*>(editable.GetData())))
 				{
+					// Check if point is selected
+					//
+					if (item.IsNodeAncestor(this->GetDrainsNode()) && item != this->GetDrainsNode())
+					{
+						if ((item != this->GetDrainsNode()) && (item.GetParent() != this->GetDrainsNode()))
+						{
+							// Determine which river point is selected
+							//
+							CTreeCtrlNode drainNode = editable;
+							CTreeCtrlNode ptNode = item;
+							while (ptNode.GetParent() != drainNode)
+							{
+								ptNode = ptNode.GetParent();
+								if (!ptNode) break;
+							}
+							ASSERT(drainNode.GetParent() == this->GetDrainsNode());
+							ASSERT(ptNode.GetParent() == drainNode);
+
+							if (drainNode.GetData())
+							{
+								if (CDrainActor *pDrainActor = CDrainActor::SafeDownCast(reinterpret_cast<vtkObject*>(drainNode.GetData())))
+								{
+									if (drainNode.GetIndex(ptNode) > 1)
+									{
+										// minus xy_coordinate_system and z_coordinate_system
+										pDrainActor->SelectPoint(drainNode.GetIndex(ptNode) - 2);
+										return;
+									}
+								}
+								else
+								{
+									ASSERT(FALSE);
+								}
+							}
+						}
+					}
+
 					// Notify listeners
 					//
 					if (CWPhastDoc* pDoc = this->GetDocument())
 					{
 						pDoc->Notify(this, WPN_SELCHANGED, 0, pProp);
+						return;
 					}
 				}
 			}
 		}
-		else
-		{
-			// Notify listeners
-			//
-			if (CWPhastDoc *pDoc = this->GetDocument())
-			{
-				pDoc->Notify(this, WPN_SELCHANGED, 0, 0);
-			}
+	}
 
-			// Update StatusBar
-			//
-			if (CWnd* pWnd = ((CFrameWnd*)::AfxGetMainWnd())->GetMessageBar())
-			{
-				CString status;
-				status.LoadString(AFX_IDS_IDLEMESSAGE);
-				pWnd->SetWindowText(status);
-			}
-		}		
+	if (m_wndTree.GetItemData(pNMTREEVIEW->itemNew.hItem))
+	{
+		// Notify listeners
+		//
+		if (CWPhastDoc *pDoc = this->GetDocument())
+		{
+			pDoc->Notify(this, WPN_SELCHANGED, 0, 0);
+		}
+
+		// Note: MessageBar should be a listener for WPN_SELCHANGED
+		// Update StatusBar
+		//
+		if (CWnd* pWnd = ((CFrameWnd*)::AfxGetMainWnd())->GetMessageBar())
+		{
+			CString status;
+			status.LoadString(AFX_IDS_IDLEMESSAGE);
+			pWnd->SetWindowText(status);
+		}
 	}
 	else
 	{
@@ -331,56 +391,6 @@ void CPropertyTreeControlBar::OnSelChanged(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 			status.LoadString(AFX_IDS_IDLEMESSAGE);
 			pWnd->SetWindowText(status);
 		}
-
-		// River point selection
-		//
-		if (item.IsNodeAncestor(this->GetRiversNode()) && item != this->GetRiversNode())
-		{
-			if ((item != this->GetRiversNode()) && (item.GetParent() != this->GetRiversNode()))
-			{
-				CTreeCtrlNode riverNode = item.GetParent();
-				if (riverNode.GetData())
-				{
-					if (CRiverActor *pRiverActor = CRiverActor::SafeDownCast(reinterpret_cast<vtkObject*>(riverNode.GetData())))
-					{
-						if (riverNode.GetIndex(item) > 1)
-						{
-							pRiverActor->SelectPoint(riverNode.GetIndex(item) - 2);
-						}
-					}
-					else
-					{
-						ASSERT(FALSE);
-					}
-				}
-			}
-		}
-
-		// Drain point selection
-		//
-		if (item.IsNodeAncestor(this->GetDrainsNode()) && item != this->GetDrainsNode())
-		{
-			if ((item != this->GetDrainsNode()) && (item.GetParent() != this->GetDrainsNode()))
-			{
-				CTreeCtrlNode drainNode = item.GetParent();
-				if (drainNode.GetData())
-				{
-					if (CDrainActor *pDrainActor = CDrainActor::SafeDownCast(reinterpret_cast<vtkObject*>(drainNode.GetData())))
-					{
-						if (drainNode.GetIndex(item) > 1)
-						{
-							pDrainActor->SelectPoint(drainNode.GetIndex(item) - 2);
-						}
-					}
-					else
-					{
-						ASSERT(FALSE);
-					}
-				}
-			}
-		}
-
-
 	}
 	TRACE("%s, out\n", __FUNCTION__);
 }
@@ -852,6 +862,8 @@ bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode &editNode, bool bDoEd
 					if (!ptNode) break;
 				}
 				point = item.GetIndex(ptNode);
+				// minus xy_coordinate_system and z_coordinate_system
+				point -= 2;
 			}
 
 			if (item.GetData())
@@ -932,6 +944,8 @@ bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode &editNode, bool bDoEd
 					if (!ptNode) break;
 				}
 				point = item.GetIndex(ptNode);
+				// minus xy_coordinate_system and z_coordinate_system
+				point -= 2;
 			}
 
 			if (item.GetData())
