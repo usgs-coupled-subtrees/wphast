@@ -5158,16 +5158,19 @@ void CWPhastDoc::ModifyGrid(CGridActor* gridActor, CGridElementsSelector* gridEl
 	{
 		this->ModifyGridSheet->DestroyWindow();
 		delete this->ModifyGridSheet;
+		this->ModifyGridSheet = 0;
 	}
 	if (this->GridRefinePage)
 	{
 		this->GridRefinePage->DestroyWindow();
 		delete this->GridRefinePage;
+		this->GridRefinePage = 0;
 	}
 	if (this->GridCoarsenPage)
 	{
 		this->GridCoarsenPage->DestroyWindow();
 		delete this->GridCoarsenPage;
+		this->GridCoarsenPage = 0;
 	}
 
 	this->ModifyGridSheet = new CModelessPropertySheet("");
@@ -5380,6 +5383,8 @@ void CWPhastDoc::OnViewHideAll()
 		pTree->SetICCheck(BST_UNCHECKED);
 		pTree->SetNodeCheck(pTree->GetWellsNode(), BST_UNCHECKED);
 		pTree->SetNodeCheck(pTree->GetRiversNode(), BST_UNCHECKED);
+		pTree->SetNodeCheck(pTree->GetDrainsNode(), BST_UNCHECKED);
+		pTree->SetNodeCheck(pTree->GetZoneFlowRatesNode(), BST_UNCHECKED);
 		pTree->GetGridNode().Select();
 	}
 	this->UpdateAllViews(0);
@@ -5562,6 +5567,8 @@ void CWPhastDoc::OnViewShowAll()
 		pTree->SetICCheck(BST_CHECKED);
 		pTree->SetNodeCheck(pTree->GetWellsNode(), BST_CHECKED);
 		pTree->SetNodeCheck(pTree->GetRiversNode(), BST_CHECKED);
+		pTree->SetNodeCheck(pTree->GetDrainsNode(), BST_CHECKED);
+		pTree->SetNodeCheck(pTree->GetZoneFlowRatesNode(), BST_CHECKED);
 		pTree->GetGridNode().Select();
 	}
 	this->UpdateAllViews(0);
