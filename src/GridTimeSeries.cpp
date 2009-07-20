@@ -1059,7 +1059,8 @@ void CGridTimeSeries::DDV_SoftValidate()
 				ASSERT(ds == Data_source::XYZ);
 				{
 					ASSERT(!p.data_source->Get_filedata()); // new property
-					p.data_source->Set_filedata(FakeFiledata::New(file_name, PHAST_Transform::MAP));
+					ASSERT(p.data_source->Get_attribute() == -1);
+					p.data_source->Set_filedata(FakeFiledata::New(file_name, PHAST_Transform::MAP, -1));
 				}
 				ASSERT(p.data_source->Get_filedata());
 				p.data_source->Get_filedata()->Set_coordinate_system(PHAST_Transform::MAP);
@@ -1072,7 +1073,8 @@ void CGridTimeSeries::DDV_SoftValidate()
 				ASSERT(ds == Data_source::XYZ);
 				{
 					ASSERT(!p.data_source->Get_filedata()); // new property
-					p.data_source->Set_filedata(FakeFiledata::New(file_name, PHAST_Transform::GRID));
+					ASSERT(p.data_source->Get_attribute() == -1);
+					p.data_source->Set_filedata(FakeFiledata::New(file_name, PHAST_Transform::GRID, -1));
 				}
 				ASSERT(p.data_source->Get_filedata());
 				p.data_source->Get_filedata()->Set_coordinate_system(PHAST_Transform::GRID);
@@ -1125,7 +1127,8 @@ void CGridTimeSeries::DDV_SoftValidate()
 				ASSERT(ds == Data_source::XYZT);
 				{
 					ASSERT(!p.data_source->Get_filedata()); // new property
-					p.data_source->Set_filedata(FakeFiledata::New(file_name, PHAST_Transform::GRID));
+					ASSERT(p.data_source->Get_attribute() == -1);
+					p.data_source->Set_filedata(FakeFiledata::New(file_name, PHAST_Transform::GRID, -1));
 				}
 				ASSERT(p.data_source->Get_filedata());
 				p.data_source->Get_filedata()->Set_coordinate_system(PHAST_Transform::MAP);
@@ -1138,7 +1141,8 @@ void CGridTimeSeries::DDV_SoftValidate()
 				ASSERT(ds == Data_source::XYZT);
 				{
 					ASSERT(!p.data_source->Get_filedata()); // new property
-					p.data_source->Set_filedata(FakeFiledata::New(file_name, PHAST_Transform::GRID));
+					ASSERT(p.data_source->Get_attribute() == -1);
+					p.data_source->Set_filedata(FakeFiledata::New(file_name, PHAST_Transform::GRID, -1));
 				}
 				ASSERT(p.data_source->Get_filedata());
 				p.data_source->Get_filedata()->Set_coordinate_system(PHAST_Transform::GRID);

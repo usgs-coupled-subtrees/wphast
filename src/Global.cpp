@@ -3671,7 +3671,8 @@ herr_t CGlobal::HDFSerializeData_source(bool bStoring, hid_t loc_id, const char*
 				Data_source::DATA_SOURCE_TYPE ds = rData_source.Get_source_type();
 				if (ds == Data_source::SHAPE || ds == Data_source::ARCRASTER || ds == Data_source::XYZ)
 				{
-					rData_source.Set_filedata(FakeFiledata::New(rData_source.Get_file_name(), nValue));
+					if (ds != Data_source::SHAPE) ASSERT(rData_source.Get_attribute() == -1);
+					rData_source.Set_filedata(FakeFiledata::New(rData_source.Get_file_name(), nValue, rData_source.Get_attribute()));
 				}
 				//}}
 

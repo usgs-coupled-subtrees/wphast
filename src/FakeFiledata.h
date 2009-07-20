@@ -6,7 +6,7 @@
 class FakeFiledata : public Filedata
 {
 public:
-	static Filedata* New(std::string filename, PHAST_Transform::COORDINATE_SYSTEM cs);
+	static Filedata* New(std::string filename, PHAST_Transform::COORDINATE_SYSTEM cs, int attribute);
 	static void Clear_fake_file_data_list(void);
 
 	virtual ~FakeFiledata(void);
@@ -17,7 +17,7 @@ public:
 
 private:
 	FakeFiledata(void);
-	FakeFiledata(std::string filename, PHAST_Transform::COORDINATE_SYSTEM cs);
+	FakeFiledata(std::string filename, PHAST_Transform::COORDINATE_SYSTEM cs, int attribute);
 	FakeFiledata(const FakeFiledata& a);
 
 	FakeFiledata& operator=(const FakeFiledata& rhs);

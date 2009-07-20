@@ -58,7 +58,8 @@ void CPropXYZ::DoDataExchange(CDataExchange* pDX)
 			Data_source::DATA_SOURCE_TYPE ds = p.data_source->Get_source_type();
 			ASSERT(ds == Data_source::XYZ);
 			{
-				p.data_source->Set_filedata(FakeFiledata::New(file_name, PHAST_Transform::MAP));
+				ASSERT(p.data_source->Get_attribute() == -1);
+				p.data_source->Set_filedata(FakeFiledata::New(file_name, PHAST_Transform::MAP, -1));
 			}
 			ASSERT(p.data_source->Get_filedata());
 			p.data_source->Get_filedata()->Set_coordinate_system(PHAST_Transform::MAP);
@@ -70,7 +71,8 @@ void CPropXYZ::DoDataExchange(CDataExchange* pDX)
 			Data_source::DATA_SOURCE_TYPE ds = p.data_source->Get_source_type();
 			ASSERT(ds == Data_source::XYZ);
 			{
-				p.data_source->Set_filedata(FakeFiledata::New(file_name, PHAST_Transform::GRID));
+				ASSERT(p.data_source->Get_attribute() == -1);
+				p.data_source->Set_filedata(FakeFiledata::New(file_name, PHAST_Transform::GRID, -1));
 			}
 			ASSERT(p.data_source->Get_filedata());
 			p.data_source->Get_filedata()->Set_coordinate_system(PHAST_Transform::GRID);

@@ -11,18 +11,20 @@ FakeFiledata::FakeFiledata(void)
 {
 }
 
-FakeFiledata::FakeFiledata(std::string filename, PHAST_Transform::COORDINATE_SYSTEM cs)
+FakeFiledata::FakeFiledata(std::string filename, PHAST_Transform::COORDINATE_SYSTEM cs, int attribute)
 {
 	this->filename = filename;
 
 	std::vector<Point> new_pts;
 	this->coordinate_system = cs;
-	this->Add_data_source(-1, new_pts, 3, this->coordinate_system);
+// COMMENT: {7/20/2009 4:29:41 PM}	this->Add_data_source(-1, new_pts, 3, this->coordinate_system);
+	this->Add_data_source(attribute, new_pts, 3, this->coordinate_system);
 }
 
-Filedata* FakeFiledata::New(std::string filename, PHAST_Transform::COORDINATE_SYSTEM cs)
+// COMMENT: {7/20/2009 4:29:03 PM}Filedata* FakeFiledata::New(std::string filename, PHAST_Transform::COORDINATE_SYSTEM cs)
+Filedata* FakeFiledata::New(std::string filename, PHAST_Transform::COORDINATE_SYSTEM cs, int attribute)
 {
-	FakeFiledata* fd = new FakeFiledata(filename, cs);
+	FakeFiledata* fd = new FakeFiledata(filename, cs, attribute);
 	FakeFiledata::fake_file_data_list.push_back(fd);
 	return fd;
 }

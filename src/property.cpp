@@ -97,7 +97,7 @@ Cproperty::Cproperty(enum PROP_TYPE pt)
 		this->data_source->Set_source_type(Data_source::XYZ);
 		this->data_source->Set_user_source_type(Data_source::XYZ);
 		this->data_source->Set_file_name(PSZ_UNDEFINED);
-		this->data_source->Set_filedata(FakeFiledata::New(PSZ_UNDEFINED, PHAST_Transform::GRID));
+		this->data_source->Set_filedata(FakeFiledata::New(PSZ_UNDEFINED, PHAST_Transform::GRID, -1));
 		this->mix1        = std::numeric_limits<double>::signaling_NaN();
 		this->mix2        = std::numeric_limits<double>::signaling_NaN();
 	}
@@ -109,7 +109,7 @@ Cproperty::Cproperty(enum PROP_TYPE pt)
 		this->data_source->Set_source_type(Data_source::XYZT);
 		this->data_source->Set_user_source_type(Data_source::XYZT);
 		this->data_source->Set_file_name(PSZ_UNDEFINED);
-		this->data_source->Set_filedata(FakeFiledata::New(PSZ_UNDEFINED, PHAST_Transform::GRID));
+		this->data_source->Set_filedata(FakeFiledata::New(PSZ_UNDEFINED, PHAST_Transform::GRID, -1));
 		this->mix1        = std::numeric_limits<double>::signaling_NaN();
 		this->mix2        = std::numeric_limits<double>::signaling_NaN();
 	}
@@ -421,6 +421,7 @@ void Cproperty::Serialize(bool bStoring, hid_t loc_id)
 				//
 				if (this->data_source)
 				{
+					ASSERT(this->data_source->Get_attribute() == -1);
 					status = CGlobal::HDFSerializeData_source(bStoring, loc_id, szDataSource, *this->data_source);
 					ASSERT(status >= 0);
 				}
@@ -433,6 +434,7 @@ void Cproperty::Serialize(bool bStoring, hid_t loc_id)
 				//
 				if (this->data_source)
 				{
+					ASSERT(this->data_source->Get_attribute() == -1);
 					status = CGlobal::HDFSerializeData_source(bStoring, loc_id, szDataSource, *this->data_source);
 					ASSERT(status >= 0);
 				}
@@ -540,6 +542,7 @@ void Cproperty::Serialize(bool bStoring, hid_t loc_id)
 				//
 				if (this->data_source)
 				{
+					ASSERT(this->data_source->Get_attribute() == -1);
 					status = CGlobal::HDFSerializeData_source(bStoring, loc_id, szDataSource, *this->data_source);
 					ASSERT(status >= 0);
 					//{{ TODO CHECK
@@ -559,6 +562,7 @@ void Cproperty::Serialize(bool bStoring, hid_t loc_id)
 				//
 				if (this->data_source)
 				{
+					ASSERT(this->data_source->Get_attribute() == -1);
 					status = CGlobal::HDFSerializeData_source(bStoring, loc_id, szDataSource, *this->data_source);
 					ASSERT(status >= 0);
 				}
@@ -925,7 +929,8 @@ void Cproperty::Serialize(CArchive& ar)
   					ASSERT(cs == PHAST_Transform::MAP || cs == PHAST_Transform::GRID);
 					this->data_source->Set_user_coordinate_system(cs);
 					ASSERT(!this->data_source->Get_filedata());
-					this->data_source->Set_filedata(FakeFiledata::New(file_name, cs));
+					ASSERT(this->data_source->Get_attribute() == -1); // should be -1 for XYZ and XYZT
+					this->data_source->Set_filedata(FakeFiledata::New(file_name, cs, this->data_source->Get_attribute()));
 					ASSERT(this->data_source->Get_filedata());
 					this->data_source->Get_filedata()->Set_coordinate_system(cs);
 				}
