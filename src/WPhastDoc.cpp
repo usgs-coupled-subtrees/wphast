@@ -5505,7 +5505,6 @@ void CWPhastDoc::OnToolsModifyGrid()
 {
 	if (this->GridElementsSelector)
 	{
-		ASSERT(this->ModifyGridSheet && this->ModifyGridSheet->GetSafeHwnd());
 		this->EndModifyGrid();
 	}
 	else
@@ -5538,7 +5537,7 @@ void CWPhastDoc::EndModifyGrid()
 		this->GridElementsSelector->Delete();
 		this->GridElementsSelector = 0;
 	}
-	if (this->ModifyGridSheet->GetSafeHwnd())
+	if (this->ModifyGridSheet && this->ModifyGridSheet->GetSafeHwnd())
 	{
 		this->ModifyGridSheet->DestroyWindow();
 	}

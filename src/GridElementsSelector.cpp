@@ -40,6 +40,7 @@ CGridElementsSelector::CGridElementsSelector(void)
 	this->Actor = vtkActor::New();
 	this->Actor->SetMapper( this->Mapper );
 	this->Actor->SetVisibility(0);
+    this->Actor->GetProperty()->SetColor(1, 0, 0);
 
 	// outline
 	//
