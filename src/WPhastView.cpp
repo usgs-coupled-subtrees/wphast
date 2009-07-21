@@ -57,6 +57,7 @@
 #include "Grid.h"
 #include "FlowOnly.h"
 #include "ZonePrismResetAction.h"
+#include "PointSelectionObject.h"
 
 #include <vtkImplicitPlaneWidget.h>
 
@@ -1442,7 +1443,7 @@ void CWPhastView::OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint)
 	}
 }
 
-void CWPhastView::Update(IObserver* pSender, LPARAM lHint, CObject* /*pHint*/, vtkObject* pObject)
+void CWPhastView::Update(IObserver* pSender, LPARAM lHint, CObject* pHint, vtkObject* pObject)
 {
 	ASSERT(pSender != this);
 
@@ -1456,6 +1457,17 @@ void CWPhastView::Update(IObserver* pSender, LPARAM lHint, CObject* /*pHint*/, v
 		if (this->CurrentProp = vtkProp::SafeDownCast(pObject))
 		{
 			this->Select(this->CurrentProp);
+			if (pHint)
+			{
+				if (pHint->IsKindOf(RUNTIME_CLASS(CPointSelectionObject)))
+				{
+					CPointSelectionObject *pt = (CPointSelectionObject*)pHint;
+					if (CPointConnectorActor *pActor = CPointConnectorActor::SafeDownCast(pObject))
+					{
+						pActor->SelectPoint(pt->GetPoint());
+					}
+				}
+			}
 		}
 		else if (pObject == 0)
 		{

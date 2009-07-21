@@ -4833,9 +4833,9 @@ void CWPhastDoc::Remove(CRiverActor *pRiverActor)
 	//
 	vtkFloatingPointType *scale = this->GetScale();
 	vtkFloatingPointType *riverscale = pRiverActor->GetScale();
-	ASSERT(riverscale[0] == scale[0]);
-	ASSERT(riverscale[1] == scale[1]);
-	ASSERT(riverscale[2] == scale[2]);
+// COMMENT: {7/20/2009 8:33:12 PM}	ASSERT(riverscale[0] == scale[0]);
+// COMMENT: {7/20/2009 8:33:12 PM}	ASSERT(riverscale[1] == scale[1]);
+// COMMENT: {7/20/2009 8:33:12 PM}	ASSERT(riverscale[2] == scale[2]);
 
 	// make sure pRiverActor ref count doesn't go to zero
 	//
@@ -4880,9 +4880,9 @@ void CWPhastDoc::UnRemove(CRiverActor *pRiverActor)
 	//
 	vtkFloatingPointType *scale = this->GetScale();
 	vtkFloatingPointType *riverscale = pRiverActor->GetScale();
-	ASSERT(riverscale[0] == scale[0]);
-	ASSERT(riverscale[1] == scale[1]);
-	ASSERT(riverscale[2] == scale[2]);
+// COMMENT: {7/20/2009 8:33:36 PM}	ASSERT(riverscale[0] == scale[0]);
+// COMMENT: {7/20/2009 8:33:36 PM}	ASSERT(riverscale[1] == scale[1]);
+// COMMENT: {7/20/2009 8:33:36 PM}	ASSERT(riverscale[2] == scale[2]);
 
 	// add to rivers assembly
 	//
@@ -4926,9 +4926,9 @@ void CWPhastDoc::Remove(CDrainActor *pDrainActor)
 	//
 	vtkFloatingPointType *scale = this->GetScale();
 	vtkFloatingPointType *riverscale = pDrainActor->GetScale();
-	ASSERT(riverscale[0] == scale[0]);
-	ASSERT(riverscale[1] == scale[1]);
-	ASSERT(riverscale[2] == scale[2]);
+// COMMENT: {7/20/2009 8:34:20 PM}	ASSERT(riverscale[0] == scale[0]);
+// COMMENT: {7/20/2009 8:34:20 PM}	ASSERT(riverscale[1] == scale[1]);
+// COMMENT: {7/20/2009 8:34:20 PM}	ASSERT(riverscale[2] == scale[2]);
 
 	// make sure pDrainActor ref count doesn't go to zero
 	//
@@ -4973,9 +4973,9 @@ void CWPhastDoc::UnRemove(CDrainActor *pDrainActor)
 	//
 	vtkFloatingPointType *scale = this->GetScale();
 	vtkFloatingPointType *riverscale = pDrainActor->GetScale();
-	ASSERT(riverscale[0] == scale[0]);
-	ASSERT(riverscale[1] == scale[1]);
-	ASSERT(riverscale[2] == scale[2]);
+// COMMENT: {7/20/2009 8:34:29 PM}	ASSERT(riverscale[0] == scale[0]);
+// COMMENT: {7/20/2009 8:34:29 PM}	ASSERT(riverscale[1] == scale[1]);
+// COMMENT: {7/20/2009 8:34:29 PM}	ASSERT(riverscale[2] == scale[2]);
 
 	// add to drains assembly
 	//

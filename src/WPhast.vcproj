@@ -884,6 +884,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\PointSelectionObject.cpp"
+				>
+			</File>
+			<File
 				RelativePath="PrintFreq.cpp"
 				>
 			</File>
@@ -5125,6 +5129,10 @@
 			</File>
 			<File
 				RelativePath=".\PointConnectorMovePointAction.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PointSelectionObject.h"
 				>
 			</File>
 			<File

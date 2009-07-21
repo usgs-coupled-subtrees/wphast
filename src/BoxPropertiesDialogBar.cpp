@@ -44,6 +44,8 @@
 
 #include "PropertyTreeControlBar.h"
 
+#include "PointSelectionObject.h"
+
 #include "Units.h"
 #include "Global.h"
 
@@ -348,6 +350,22 @@ void CBoxPropertiesDialogBar::Update(IObserver* pSender, LPARAM lHint, CObject* 
 				}
 
 				this->Set(pView, pRiverActor, pView->GetDocument()->GetUnits());
+				if (pHint)
+				{
+					if (pHint->IsKindOf(RUNTIME_CLASS(CPointSelectionObject)))
+					{
+						CPointSelectionObject *pt = (CPointSelectionObject*)pHint;
+						int row = pt->GetPoint() + 1;
+						this->m_wndRiverGrid.SetCurrentFocusCell(-1, -1);
+						CCellRange range(row, this->m_wndRiverGrid.GetFixedColumnCount(), row, this->m_wndRiverGrid.GetColumnCount() - 1);
+						this->m_wndRiverGrid.SetSelectedRange(range, TRUE);
+					}
+				}
+				else
+				{
+					this->m_wndRiverGrid.SetCurrentFocusCell(-1, -1);
+					this->m_wndRiverGrid.SetSelectedRange(-1, -1, -1, -1, TRUE);
+				}
 			}
 			else if (CDrainActor* pDrainActor = CDrainActor::SafeDownCast(pProp))
 			{
@@ -364,6 +382,22 @@ void CBoxPropertiesDialogBar::Update(IObserver* pSender, LPARAM lHint, CObject* 
 				}
 
 				this->Set(pView, pDrainActor, pView->GetDocument()->GetUnits());
+				if (pHint)
+				{
+					if (pHint->IsKindOf(RUNTIME_CLASS(CPointSelectionObject)))
+					{
+						CPointSelectionObject *pt = (CPointSelectionObject*)pHint;
+						int row = pt->GetPoint() + 1;
+						this->m_wndRiverGrid.SetCurrentFocusCell(-1, -1);
+						CCellRange range(row, this->m_wndRiverGrid.GetFixedColumnCount(), row, this->m_wndRiverGrid.GetColumnCount() - 1);
+						this->m_wndRiverGrid.SetSelectedRange(range, TRUE);
+					}
+				}
+				else
+				{
+					this->m_wndRiverGrid.SetCurrentFocusCell(-1, -1);
+					this->m_wndRiverGrid.SetSelectedRange(-1, -1, -1, -1, TRUE);
+				}
 			}
 			else
 			{
@@ -542,6 +576,7 @@ void CBoxPropertiesDialogBar::DoDataExchange(CDataExchange* pDX)
 			this->m_wndRiverGrid.SetFixedRowCount(1);
 			this->m_wndRiverGrid.SetFixedColumnCount(0);
 			this->m_wndRiverGrid.EnableTitleTips(FALSE);
+			this->m_wndRiverGrid.SetHighLight(GV_HIGHLIGHT_ALWAYS);
 		}
 		CATCH (CMemoryException, e)
 		{

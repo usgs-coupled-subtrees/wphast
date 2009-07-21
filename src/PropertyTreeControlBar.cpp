@@ -51,6 +51,7 @@
 #include "Global.h"
 #include "RiverPropertyPage2.h"
 #include "DrainPropertyPage.h"
+#include "PointSelectionObject.h"
 
 // Actions
 #include "ResizeGridAction.h"
@@ -254,6 +255,7 @@ void CPropertyTreeControlBar::OnSelChanged(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 				{
 					// Check if point is selected
 					//
+					int point = -1; // no point selected
 					if (item.IsNodeAncestor(this->GetRiversNode()) && item != this->GetRiversNode())
 					{
 						if ((item != this->GetRiversNode()) && (item.GetParent() != this->GetRiversNode()))
@@ -277,8 +279,7 @@ void CPropertyTreeControlBar::OnSelChanged(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 									if (riverNode.GetIndex(ptNode) > 1)
 									{
 										// minus xy_coordinate_system and z_coordinate_system
-										pRiverActor->SelectPoint(riverNode.GetIndex(ptNode) - 2);
-										return;
+										point = riverNode.GetIndex(ptNode) - 2;
 									}
 								}
 								else
@@ -293,7 +294,15 @@ void CPropertyTreeControlBar::OnSelChanged(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 					//
 					if (CWPhastDoc* pDoc = this->GetDocument())
 					{
-						pDoc->Notify(this, WPN_SELCHANGED, 0, pProp);
+						if (point > -1)
+						{
+							CPointSelectionObject pt(point);
+							pDoc->Notify(this, WPN_SELCHANGED, &pt, pProp);
+						}
+						else
+						{
+							pDoc->Notify(this, WPN_SELCHANGED, 0, pProp);
+						}
 						return;
 					}
 				}
@@ -307,6 +316,7 @@ void CPropertyTreeControlBar::OnSelChanged(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 				{
 					// Check if point is selected
 					//
+					int point = -1; // no point selected
 					if (item.IsNodeAncestor(this->GetDrainsNode()) && item != this->GetDrainsNode())
 					{
 						if ((item != this->GetDrainsNode()) && (item.GetParent() != this->GetDrainsNode()))
@@ -330,8 +340,8 @@ void CPropertyTreeControlBar::OnSelChanged(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 									if (drainNode.GetIndex(ptNode) > 1)
 									{
 										// minus xy_coordinate_system and z_coordinate_system
-										pDrainActor->SelectPoint(drainNode.GetIndex(ptNode) - 2);
-										return;
+										point = drainNode.GetIndex(ptNode) - 2;
+
 									}
 								}
 								else
@@ -346,7 +356,15 @@ void CPropertyTreeControlBar::OnSelChanged(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 					//
 					if (CWPhastDoc* pDoc = this->GetDocument())
 					{
-						pDoc->Notify(this, WPN_SELCHANGED, 0, pProp);
+						if (point > -1)
+						{
+							CPointSelectionObject pt(point);
+							pDoc->Notify(this, WPN_SELCHANGED, &pt, pProp);
+						}
+						else
+						{
+							pDoc->Notify(this, WPN_SELCHANGED, 0, pProp);
+						}
 						return;
 					}
 				}
