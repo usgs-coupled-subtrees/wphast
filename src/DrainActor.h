@@ -46,6 +46,8 @@ public:
 
 	void Serialize(bool bStoring, hid_t loc_id, const CWPhastDoc* pWPhastDoc);
 
+	void Edit(int point);
+
 protected:
 	CDrainActor(void);
 	~CDrainActor(void);

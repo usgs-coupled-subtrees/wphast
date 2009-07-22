@@ -748,10 +748,8 @@ bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode &editNode, bool bDoEd
 		{
 			pFlowOnly->Edit(&this->m_wndTree, pMediaZoneActor, 0);
 		}
-		///{{{
-		editNode = this->m_nodeFlowOnly;
-		///}}}
 		//}} HACK
+		editNode = this->m_nodeFlowOnly;
 		return true;
 	}
 
@@ -767,9 +765,7 @@ bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode &editNode, bool bDoEd
 		{
 			pFreeSurface->Edit(&this->m_wndTree);
 		}
-		///{{{
 		editNode = this->m_nodeFreeSurface;
-		///}}}
 		return true;
 	}
 
@@ -784,9 +780,7 @@ bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode &editNode, bool bDoEd
 		{
 			pSolutionMethod->Edit(&this->m_wndTree);
 		}
-		///{{{
 		editNode = this->m_nodeSolutionMethod;
-		///}}}
 		return true;
 	}
 
@@ -801,12 +795,9 @@ bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode &editNode, bool bDoEd
 		{
 			pSteadyFlow->Edit(&this->m_wndTree);
 		}
-		///{{{
 		editNode = this->m_nodeSteadyFlow;
-		///}}}
 		return true;
 	}
-
 
 	// UNITS
 	//
@@ -819,9 +810,7 @@ bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode &editNode, bool bDoEd
 			{
 				pUnits->Edit(&this->m_wndTree);
 			}
-			///{{{
 			editNode = this->m_nodeUnits;
-			///}}}
 			return true;
 		}
 		return false;
@@ -846,9 +835,7 @@ bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode &editNode, bool bDoEd
 					{
 						pWellActor->Edit(this->GetDocument());
 					}
-					///{{{
 					editNode = item;
-					///}}}
 					return true;
 				}
 			}
@@ -890,46 +877,9 @@ bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode &editNode, bool bDoEd
 				{
 					if (bDoEdit)
 					{
-						CRiver river = pRiverActor->GetRiver();
-
-						CString str;
-						str.Format(_T("River %d Properties"), river.n_user);
-						CPropertySheet sheet(str);
-						
-						CRiverPropertyPage2 page;
-						sheet.AddPage(&page);
-
-						if (CWPhastDoc* pWPhastDoc = this->GetDocument())
-						{
-							page.SetProperties(river);
-							page.SetFlowOnly(bool(pWPhastDoc->GetFlowOnly()));
-							page.SetUnits(pWPhastDoc->GetUnits());
-							page.SetGridKeyword(pWPhastDoc->GetGridKeyword());
-							if (point) page.SetPoint(point);
-
-							std::set<int> riverNums;
-							pWPhastDoc->GetUsedRiverNumbers(riverNums);
-
-							// remove this river number from used list
-							std::set<int>::iterator iter = riverNums.find(river.n_user);
-							ASSERT(iter != riverNums.end());
-							if (iter != riverNums.end())
-							{
-								riverNums.erase(iter);
-							}
-							page.SetUsedRiverNumbers(riverNums);
-
-							if (sheet.DoModal() == IDOK)
-							{
-								CRiver river;
-								page.GetProperties(river);
-								pWPhastDoc->Execute(new CSetAction<CRiverActor, CRiver>(pRiverActor, river, pWPhastDoc));
-							}
-						}
+						pRiverActor->Edit(point);
 					}
-					///{{{
 					editNode = item;
-					///}}}
 					return true;
 				}
 			}
@@ -972,46 +922,9 @@ bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode &editNode, bool bDoEd
 				{
 					if (bDoEdit)
 					{
-						CDrain drain = pDrainActor->GetDrain();
-
-						CString str;
-						str.Format(_T("Drain %d Properties"), drain.n_user);
-						CPropertySheet sheet(str);
-						
-						CDrainPropertyPage page;
-						sheet.AddPage(&page);
-
-						if (CWPhastDoc* pWPhastDoc = this->GetDocument())
-						{
-							page.SetProperties(drain);
-							page.SetFlowOnly(bool(pWPhastDoc->GetFlowOnly()));
-							page.SetUnits(pWPhastDoc->GetUnits());
-							page.SetGridKeyword(pWPhastDoc->GetGridKeyword());
-							if (point) page.SetPoint(point);
-
-							std::set<int> drainNums;
-							pWPhastDoc->GetUsedDrainNumbers(drainNums);
-
-							// remove this drain number from used list
-							std::set<int>::iterator iter = drainNums.find(drain.n_user);
-							ASSERT(iter != drainNums.end());
-							if (iter != drainNums.end())
-							{
-								drainNums.erase(iter);
-							}
-							page.SetUsedDrainNumbers(drainNums);
-
-							if (sheet.DoModal() == IDOK)
-							{
-								CDrain drain;
-								page.GetProperties(drain);
-								pWPhastDoc->Execute(new CSetAction<CDrainActor, CDrain>(pDrainActor, drain, pWPhastDoc));
-							}
-						}
+						pDrainActor->Edit(point);
 					}
-					///{{{
 					editNode = item;
-					///}}}
 					return true;
 				}
 			}
@@ -1034,9 +947,7 @@ bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode &editNode, bool bDoEd
 			{
 				pWPhastDoc->Edit(pGridActor);
 			}
-			///{{{
 			editNode = this->m_nodeGrid;
-			///}}}
 			return true;
 		}
 		return false;
@@ -1061,9 +972,7 @@ bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode &editNode, bool bDoEd
 					{
 						pZone->Edit(&this->m_wndTree);
 					}
-					///{{{
 					editNode = item;
-					///}}}
 					return true;
 				}
 			}
@@ -1090,9 +999,7 @@ bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode &editNode, bool bDoEd
 					{
 						pZone->Edit(&this->m_wndTree);
 					}
-					///{{{
 					editNode = item;
-					///}}}
 					return true;
 				}
 			}
@@ -1119,9 +1026,7 @@ bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode &editNode, bool bDoEd
 					{
 						pZone->Edit(&this->m_wndTree);
 					}
-					///{{{
 					editNode = item;
-					///}}}
 					return true;
 				}
 			}
@@ -1148,9 +1053,7 @@ bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode &editNode, bool bDoEd
 					{
 						pZone->Edit(&this->m_wndTree);
 					}
-					///{{{
 					editNode = item;
-					///}}}
 					return true;
 				}
 			}
@@ -1169,9 +1072,7 @@ bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode &editNode, bool bDoEd
 			{
 				pPI->Edit(&this->m_wndTree);
 			}
-			///{{{
 			editNode = this->m_nodePrintInput;
-			///}}}
 			return true;
 		}
 		return false;
@@ -1188,9 +1089,7 @@ bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode &editNode, bool bDoEd
 			{
 				pPF->Edit(&this->m_wndTree);
 			}
-			///{{{
 			editNode = this->m_nodePF;
-			///}}}
 			return true;
 		}
 		return false;
@@ -1208,9 +1107,7 @@ bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode &editNode, bool bDoEd
 			{
 				pTC->Edit(&this->m_wndTree);
 			}
-			///{{{
 			editNode = this->m_nodeTimeControl2;
-			///}}}
 			return true;
 		}
 		return false;

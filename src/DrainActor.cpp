@@ -8,6 +8,10 @@
 #include "WPhastDoc.h"
 #include "GridKeyword.h"
 
+#include "DrainPropertyPage.h"
+#include "SetAction.h"
+#include "FlowOnly.h"
+
 vtkCxxRevisionMacro(CDrainActor, "$Revision$");
 vtkStandardNewMacro(CDrainActor);
 
@@ -344,4 +348,49 @@ std::ostream& operator<< (std::ostream &os, const CDrainActor &a)
 PHAST_Transform::COORDINATE_SYSTEM CDrainActor::GetCoordinateSystem(void)const
 {
 	return this->Drain.coordinate_system;
+}
+
+void CDrainActor::Edit(int point)
+{
+	CFrameWnd *pFrame = (CFrameWnd*)::AfxGetApp()->m_pMainWnd;
+	ASSERT_VALID(pFrame);
+	CWPhastDoc* pWPhastDoc = reinterpret_cast<CWPhastDoc*>(pFrame->GetActiveDocument());
+	ASSERT_VALID(pWPhastDoc);
+
+	if (pWPhastDoc)
+	{
+		CDrain drain = this->GetDrain();
+
+		CString str;
+		str.Format(_T("Drain %d Properties"), drain.n_user);
+		CPropertySheet sheet(str);
+
+		CDrainPropertyPage page;
+		sheet.AddPage(&page);
+
+		page.SetProperties(drain);
+		page.SetFlowOnly(bool(pWPhastDoc->GetFlowOnly()));
+		page.SetUnits(pWPhastDoc->GetUnits());
+		page.SetGridKeyword(pWPhastDoc->GetGridKeyword());
+		if (point) page.SetPoint(point);
+
+		std::set<int> drainNums;
+		pWPhastDoc->GetUsedDrainNumbers(drainNums);
+
+		// remove this drain number from used list
+		std::set<int>::iterator iter = drainNums.find(drain.n_user);
+		ASSERT(iter != drainNums.end());
+		if (iter != drainNums.end())
+		{
+			drainNums.erase(iter);
+		}
+		page.SetUsedDrainNumbers(drainNums);
+
+		if (sheet.DoModal() == IDOK)
+		{
+			CDrain drain;
+			page.GetProperties(drain);
+			pWPhastDoc->Execute(new CSetAction<CDrainActor, CDrain>(this, drain, pWPhastDoc));
+		}
+	}
 }

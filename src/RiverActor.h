@@ -39,6 +39,8 @@ public:
 
 	void Serialize(bool bStoring, hid_t loc_id, const CWPhastDoc* pWPhastDoc);
 
+	void Edit(int point);
+
 protected:
 	CRiverActor(void);
 	~CRiverActor(void);

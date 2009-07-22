@@ -716,6 +716,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\GridWidget.cpp"
+				>
+			</File>
+			<File
 				RelativePath="HDFMirrorFile.cpp"
 				>
 			</File>
@@ -4941,6 +4945,10 @@
 			</File>
 			<File
 				RelativePath=".\GridTimeSeries.h"
+				>
+			</File>
+			<File
+				RelativePath=".\GridWidget.h"
 				>
 			</File>
 			<File
