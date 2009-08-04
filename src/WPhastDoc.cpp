@@ -2526,8 +2526,6 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 	::_tfullpath(szFullpath, lpszPathName, MAX_PATH);
 
 	std::ifstream ifs;
-// COMMENT: {12/4/2008 4:10:48 PM}	ifs.open(lpszPathName);
-// COMMENT: {12/4/2008 4:04:45 PM}	ifs.open(szFullpath);
 	ifs.open(szTitle);
 	if (!ifs.is_open())
 	{
@@ -2575,14 +2573,13 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 		for (int i = 0; i < ::count_bc; ++i)
 		{
 			const struct BC* bc_ptr = ::bc[i];
-			bc_map[bc_ptr] = bc_ptr->polyh->clone();
+			bc_map[bc_ptr] = bc_ptr->polyh ? bc_ptr->polyh->clone() : 0;
 		}
 		// Zone_budget zones
 		std::map<int, Zone_budget*>::iterator zit = Zone_budget::zone_budget_map.begin();
 		for (; zit != Zone_budget::zone_budget_map.end(); ++zit)
 		{
-			ASSERT(zit->second->Get_polyh());
-			zb_map[zit->second] = zit->second->Get_polyh()->clone();
+			zb_map[zit->second] = zit->second->Get_polyh() ? zit->second->Get_polyh()->clone() : 0;
 		}
 		// IC zones
 		for (int i = 0; i < ::count_head_ic; ++i)
@@ -2717,6 +2714,7 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 			std::auto_ptr<Polyhedron> ap(data.polyh);
 			ASSERT(grid_elt_map.find(grid_elt_ptr) != grid_elt_map.end());
 			data.polyh = grid_elt_map[grid_elt_ptr] ? grid_elt_map[grid_elt_ptr]->clone() : grid_elt_ptr->polyh->clone();
+
 			// not undoable
 			std::auto_ptr< CZoneCreateAction<CMediaZoneActor> > pAction(
 				new CZoneCreateAction<CMediaZoneActor>(
@@ -2743,7 +2741,7 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 			CBC data(*bc_ptr);
 			std::auto_ptr<Polyhedron> ap(data.polyh);
 			ASSERT(bc_map.find(bc_ptr) != bc_map.end());
-			data.polyh = bc_map[bc_ptr]->clone();
+			data.polyh = bc_map[bc_ptr] ? bc_map[bc_ptr]->clone() : bc_ptr->polyh->clone();
 
 			// not undoable
 			std::auto_ptr< CZoneCreateAction<CBCZoneActor> > pAction(
@@ -2806,7 +2804,7 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 			// store pre-translated polyh
 			Zone_budget data(*it->second);
 			ASSERT(zb_map.find(it->second) != zb_map.end());
-			data.Set_polyh(zb_map[it->second]->clone());
+			data.Set_polyh(zb_map[it->second] ? zb_map[it->second]->clone() : it->second->Get_polyh()->clone());
 
 			// not undoable
 			std::auto_ptr< CZoneCreateAction<CZoneFlowRateZoneActor> > pAction(
@@ -2843,6 +2841,7 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 			std::auto_ptr<Polyhedron> ap(data.polyh);
 			ASSERT(head_ic_map.find(head_ic_ptr) != head_ic_map.end());
 			data.polyh = head_ic_map[head_ic_ptr] ? head_ic_map[head_ic_ptr]->clone() : head_ic_ptr->polyh->clone();
+
 			// not undoable
 			std::auto_ptr< CZoneCreateAction<CICHeadZoneActor> > pAction(
 				new CZoneCreateAction<CICHeadZoneActor>(
