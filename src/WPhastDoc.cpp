@@ -31,6 +31,7 @@
 #include <sstream>  // std::ostringstream std::istringstream
 
 #include "srcinput/Filedata.h"
+#include "srcinput/Domain.h"
 
 #include "Action.h"
 #include "SetMediaAction.h"
@@ -2568,7 +2569,7 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 		for (int i = 0; i < ::count_grid_elt_zones; ++i)
 		{
 			const struct grid_elt* grid_elt_ptr = ::grid_elt_zones[i];
-			grid_elt_map[grid_elt_ptr] = grid_elt_ptr->polyh->clone();
+			grid_elt_map[grid_elt_ptr] = grid_elt_ptr->polyh ? grid_elt_ptr->polyh->clone() : 0;
 		}
 		// BC zones
 		for (int i = 0; i < ::count_bc; ++i)
@@ -2587,13 +2588,13 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 		for (int i = 0; i < ::count_head_ic; ++i)
 		{
 			const struct Head_ic* head_ic_ptr = ::head_ic[i];
-			head_ic_map[head_ic_ptr] = head_ic_ptr->polyh->clone();
+			head_ic_map[head_ic_ptr] = head_ic_ptr->polyh ? head_ic_ptr->polyh->clone() : 0;
 		}
 		// CHEMISTRY_IC
 		for (int i = 0; i < ::count_chem_ic; ++i)
 		{
 			const struct chem_ic* chem_ic_ptr = ::chem_ic[i];
-			chem_ic_map[chem_ic_ptr] = chem_ic_ptr->polyh->clone();
+			chem_ic_map[chem_ic_ptr] = chem_ic_ptr->polyh ? chem_ic_ptr->polyh->clone() : 0;
 		}
 		pInput->Accumulate(false);
 		///pInput->Load();
@@ -2713,7 +2714,18 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 			CGridElt data(*grid_elt_ptr);
 			std::auto_ptr<Polyhedron> ap(data.polyh);
 			ASSERT(grid_elt_map.find(grid_elt_ptr) != grid_elt_map.end());
-			data.polyh = grid_elt_map[grid_elt_ptr]->clone();
+// COMMENT: {8/3/2009 9:31:47 PM}			data.polyh = grid_elt_map[grid_elt_ptr] ? grid_elt_map[grid_elt_ptr]->clone() : grid_elt_map[grid_elt_ptr];
+			data.polyh = grid_elt_map[grid_elt_ptr] ? grid_elt_map[grid_elt_ptr]->clone() : grid_elt_ptr->polyh->clone();
+// COMMENT: {7/24/2009 10:52:51 PM}			data.polyh = grid_elt_map[grid_elt_ptr]->clone();
+// COMMENT: {7/30/2009 8:19:51 PM}			if (grid_elt_map[grid_elt_ptr])
+// COMMENT: {7/30/2009 8:19:51 PM}			{
+// COMMENT: {7/30/2009 8:19:51 PM}				data.polyh = grid_elt_map[grid_elt_ptr]->clone();
+// COMMENT: {7/30/2009 8:19:51 PM}			}
+// COMMENT: {7/30/2009 8:19:51 PM}			else
+// COMMENT: {7/30/2009 8:19:51 PM}			{
+// COMMENT: {7/30/2009 8:19:51 PM}				ASSERT(grid_elt_ptr->polyh);
+// COMMENT: {7/30/2009 8:19:51 PM}				data.polyh = grid_elt_map[grid_elt_ptr];
+// COMMENT: {7/30/2009 8:19:51 PM}			}
 			std::auto_ptr< CZoneCreateAction<CMediaZoneActor> > pAction(
 				new CZoneCreateAction<CMediaZoneActor>(
 					this,
@@ -2794,7 +2806,7 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 			delete pAction;
 		}
 
-		// ZONE_FLOW_RATES
+		// ZONE_FLOW
 		//
 		std::map<int, Zone_budget*>::iterator it = Zone_budget::zone_budget_map.begin();
 		for (; it != Zone_budget::zone_budget_map.end(); ++it)
@@ -2838,7 +2850,16 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 			CHeadIC data(*head_ic_ptr);
 			std::auto_ptr<Polyhedron> ap(data.polyh);
 			ASSERT(head_ic_map.find(head_ic_ptr) != head_ic_map.end());
-			data.polyh = head_ic_map[head_ic_ptr]->clone();
+			data.polyh = head_ic_map[head_ic_ptr] ? head_ic_map[head_ic_ptr]->clone() : head_ic_ptr->polyh->clone();
+// COMMENT: {8/3/2009 9:31:37 PM}			if (head_ic_map[head_ic_ptr])
+// COMMENT: {8/3/2009 9:31:37 PM}			{
+// COMMENT: {8/3/2009 9:31:37 PM}				data.polyh = head_ic_map[head_ic_ptr]->clone();
+// COMMENT: {8/3/2009 9:31:37 PM}			}
+// COMMENT: {8/3/2009 9:31:37 PM}			else
+// COMMENT: {8/3/2009 9:31:37 PM}			{
+// COMMENT: {8/3/2009 9:31:37 PM}				ASSERT(head_ic_ptr->polyh);
+// COMMENT: {8/3/2009 9:31:37 PM}				data.polyh = head_ic_ptr->polyh->clone();
+// COMMENT: {8/3/2009 9:31:37 PM}			}
 
 			// not undoable
 			std::auto_ptr< CZoneCreateAction<CICHeadZoneActor> > pAction(
@@ -2896,7 +2917,16 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 			CChemIC data(*chem_ic_ptr);
 			std::auto_ptr<Polyhedron> ap(data.polyh);
 			ASSERT(chem_ic_map.find(chem_ic_ptr) != chem_ic_map.end());
-			data.polyh = chem_ic_map[chem_ic_ptr]->clone();
+			data.polyh = chem_ic_map[chem_ic_ptr] ? chem_ic_map[chem_ic_ptr]->clone() : chem_ic_ptr->polyh->clone();
+// COMMENT: {8/3/2009 9:33:48 PM}			if (chem_ic_map[chem_ic_ptr])
+// COMMENT: {8/3/2009 9:33:48 PM}			{
+// COMMENT: {8/3/2009 9:33:48 PM}				data.polyh = chem_ic_map[chem_ic_ptr]->clone();
+// COMMENT: {8/3/2009 9:33:48 PM}			}
+// COMMENT: {8/3/2009 9:33:48 PM}			else
+// COMMENT: {8/3/2009 9:33:48 PM}			{
+// COMMENT: {8/3/2009 9:33:48 PM}				ASSERT(chem_ic_ptr->polyh);
+// COMMENT: {8/3/2009 9:33:48 PM}				data.polyh = chem_ic_ptr->polyh->clone();
+// COMMENT: {8/3/2009 9:33:48 PM}			}
 
 			// not undoable
 			std::auto_ptr< CZoneCreateAction<CICChemZoneActor> > pAction(
@@ -3216,7 +3246,7 @@ BOOL CWPhastDoc::WriteTransDat(std::ostream& os)
 		}
 	}
 
-	// ZONE_FLOW_RATES
+	// ZONE_FLOW
 	CTreeCtrlNode nodeZoneFlowRates = this->GetPropertyTreeControlBar()->GetZoneFlowRatesNode();
 	nCount = nodeZoneFlowRates.GetChildCount();
 	for (int i = 0; i < nCount; ++i)
@@ -3462,20 +3492,21 @@ void CWPhastDoc::New(const CNewModel& model)
 	//
 	CZone zone;
 	this->m_pGridActor->GetDefaultZone(zone);
-	Cube cube(&zone);
+// COMMENT: {7/30/2009 8:33:32 PM}	Cube cube(&zone);
+	Domain domain(&zone, PHAST_Transform::GRID);
 
 	// default media
 	//
 	CZoneCreateAction<CMediaZoneActor>* pMediaAction = new CZoneCreateAction<CMediaZoneActor>(
 		this,
 		"Default",
-		&cube,
+		&domain,
 		NULL
 		);
 	//{{
 	CGridElt media(model.m_media);
 	ASSERT(media.polyh == NULL);
-	media.polyh = cube.clone();
+	media.polyh = domain.clone();
 	pMediaAction->GetZoneActor()->SetData(media);
 	//}}
 // COMMENT: {10/31/2008 9:00:31 PM}	pMediaAction->GetZoneActor()->SetData(model.m_media);
@@ -3488,7 +3519,7 @@ void CWPhastDoc::New(const CNewModel& model)
 	CZoneCreateAction<CICHeadZoneActor>* pICHeadAction = new CZoneCreateAction<CICHeadZoneActor>(
 		this,
 		"Default",
-		&cube,
+		&domain,
 		NULL
 		);
 	pICHeadAction->GetZoneActor()->SetData(model.m_headIC);
@@ -3500,7 +3531,7 @@ void CWPhastDoc::New(const CNewModel& model)
 	CZoneCreateAction<CICChemZoneActor>* pChemICAction = new CZoneCreateAction<CICChemZoneActor>(
 		this,
 		"Default",
-		&cube,
+		&domain,
 		NULL
 		);
 	pChemICAction->GetZoneActor()->SetData(model.m_chemIC);
