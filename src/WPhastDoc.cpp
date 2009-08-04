@@ -2711,21 +2711,13 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 					continue;
 				}
 			}
+
+			// store pre-translated polyh
 			CGridElt data(*grid_elt_ptr);
 			std::auto_ptr<Polyhedron> ap(data.polyh);
 			ASSERT(grid_elt_map.find(grid_elt_ptr) != grid_elt_map.end());
-// COMMENT: {8/3/2009 9:31:47 PM}			data.polyh = grid_elt_map[grid_elt_ptr] ? grid_elt_map[grid_elt_ptr]->clone() : grid_elt_map[grid_elt_ptr];
 			data.polyh = grid_elt_map[grid_elt_ptr] ? grid_elt_map[grid_elt_ptr]->clone() : grid_elt_ptr->polyh->clone();
-// COMMENT: {7/24/2009 10:52:51 PM}			data.polyh = grid_elt_map[grid_elt_ptr]->clone();
-// COMMENT: {7/30/2009 8:19:51 PM}			if (grid_elt_map[grid_elt_ptr])
-// COMMENT: {7/30/2009 8:19:51 PM}			{
-// COMMENT: {7/30/2009 8:19:51 PM}				data.polyh = grid_elt_map[grid_elt_ptr]->clone();
-// COMMENT: {7/30/2009 8:19:51 PM}			}
-// COMMENT: {7/30/2009 8:19:51 PM}			else
-// COMMENT: {7/30/2009 8:19:51 PM}			{
-// COMMENT: {7/30/2009 8:19:51 PM}				ASSERT(grid_elt_ptr->polyh);
-// COMMENT: {7/30/2009 8:19:51 PM}				data.polyh = grid_elt_map[grid_elt_ptr];
-// COMMENT: {7/30/2009 8:19:51 PM}			}
+			// not undoable
 			std::auto_ptr< CZoneCreateAction<CMediaZoneActor> > pAction(
 				new CZoneCreateAction<CMediaZoneActor>(
 					this,
@@ -2851,16 +2843,6 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 			std::auto_ptr<Polyhedron> ap(data.polyh);
 			ASSERT(head_ic_map.find(head_ic_ptr) != head_ic_map.end());
 			data.polyh = head_ic_map[head_ic_ptr] ? head_ic_map[head_ic_ptr]->clone() : head_ic_ptr->polyh->clone();
-// COMMENT: {8/3/2009 9:31:37 PM}			if (head_ic_map[head_ic_ptr])
-// COMMENT: {8/3/2009 9:31:37 PM}			{
-// COMMENT: {8/3/2009 9:31:37 PM}				data.polyh = head_ic_map[head_ic_ptr]->clone();
-// COMMENT: {8/3/2009 9:31:37 PM}			}
-// COMMENT: {8/3/2009 9:31:37 PM}			else
-// COMMENT: {8/3/2009 9:31:37 PM}			{
-// COMMENT: {8/3/2009 9:31:37 PM}				ASSERT(head_ic_ptr->polyh);
-// COMMENT: {8/3/2009 9:31:37 PM}				data.polyh = head_ic_ptr->polyh->clone();
-// COMMENT: {8/3/2009 9:31:37 PM}			}
-
 			// not undoable
 			std::auto_ptr< CZoneCreateAction<CICHeadZoneActor> > pAction(
 				new CZoneCreateAction<CICHeadZoneActor>(
@@ -2918,15 +2900,6 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 			std::auto_ptr<Polyhedron> ap(data.polyh);
 			ASSERT(chem_ic_map.find(chem_ic_ptr) != chem_ic_map.end());
 			data.polyh = chem_ic_map[chem_ic_ptr] ? chem_ic_map[chem_ic_ptr]->clone() : chem_ic_ptr->polyh->clone();
-// COMMENT: {8/3/2009 9:33:48 PM}			if (chem_ic_map[chem_ic_ptr])
-// COMMENT: {8/3/2009 9:33:48 PM}			{
-// COMMENT: {8/3/2009 9:33:48 PM}				data.polyh = chem_ic_map[chem_ic_ptr]->clone();
-// COMMENT: {8/3/2009 9:33:48 PM}			}
-// COMMENT: {8/3/2009 9:33:48 PM}			else
-// COMMENT: {8/3/2009 9:33:48 PM}			{
-// COMMENT: {8/3/2009 9:33:48 PM}				ASSERT(chem_ic_ptr->polyh);
-// COMMENT: {8/3/2009 9:33:48 PM}				data.polyh = chem_ic_ptr->polyh->clone();
-// COMMENT: {8/3/2009 9:33:48 PM}			}
 
 			// not undoable
 			std::auto_ptr< CZoneCreateAction<CICChemZoneActor> > pAction(
@@ -3492,7 +3465,6 @@ void CWPhastDoc::New(const CNewModel& model)
 	//
 	CZone zone;
 	this->m_pGridActor->GetDefaultZone(zone);
-// COMMENT: {7/30/2009 8:33:32 PM}	Cube cube(&zone);
 	Domain domain(&zone, PHAST_Transform::GRID);
 
 	// default media
@@ -3503,13 +3475,10 @@ void CWPhastDoc::New(const CNewModel& model)
 		&domain,
 		NULL
 		);
-	//{{
 	CGridElt media(model.m_media);
 	ASSERT(media.polyh == NULL);
 	media.polyh = domain.clone();
 	pMediaAction->GetZoneActor()->SetData(media);
-	//}}
-// COMMENT: {10/31/2008 9:00:31 PM}	pMediaAction->GetZoneActor()->SetData(model.m_media);
 	pMediaAction->GetZoneActor()->SetDefault(true);
 	pMediaAction->Execute();
 	delete pMediaAction;
