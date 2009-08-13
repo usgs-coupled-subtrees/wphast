@@ -30,6 +30,7 @@
 #include <vtkAbstractPropPicker.h>
 
 #include "Global.h"
+#include "srcinput/Domain.h"
 #include "srcinput/Prism.h"
 #include "srcinput/NNInterpolator/NNInterpolator.h"
 #include "srcinput/KDtree/KDtree.h"
@@ -529,8 +530,13 @@ void CZoneActor::SetBounds(float xMin, float xMax, float yMin, float yMax, float
 
 // COMMENT: {12/9/2008 3:24:22 PM}	CZone zone(xMin, xMax, yMin, yMax, zMin, zMax);
 	PHAST_Transform::COORDINATE_SYSTEM cs = PHAST_Transform::GRID;
+	bool domain = false;
 	if (this->GetPolyhedron())
 	{
+		if (dynamic_cast<Domain*>(this->GetPolyhedron()))
+		{
+			domain = true;
+		}
 		if (Cube *c = dynamic_cast<Cube*>(this->GetPolyhedron()))
 		{
 			cs = c->Get_coordinate_system();
@@ -550,7 +556,14 @@ void CZoneActor::SetBounds(float xMin, float xMax, float yMin, float yMax, float
 	CZone zone(xMin, xMax, yMin, yMax, zMin, zMax);
 	if (this->GetChopType() == srcWedgeSource::CHOP_NONE)
 	{
-		this->GetPolyhedron() = new Cube(&zone, cs);
+		if (domain)
+		{
+			this->GetPolyhedron() = new Domain(&zone, cs);
+		}
+		else
+		{
+			this->GetPolyhedron() = new Cube(&zone, cs);
+		}
 	}
 	else
 	{
@@ -726,6 +739,7 @@ void CZoneActor::Serialize(bool bStoring, hid_t loc_id, const CWPhastDoc* pWPhas
 	static const char szNPOLYS[]    = "NPOLYS";
 	static const char szPFormat[]   = "%u";
 	static const char szOutFormat[] = "Outline %u";
+	static const char szDomain[]    = "domain";
 
 	hid_t polyh_id;
 	hid_t pd_id;
@@ -777,6 +791,8 @@ void CZoneActor::Serialize(bool bStoring, hid_t loc_id, const CWPhastDoc* pWPhas
 					val = CGlobal::HDFSerializeCoordinateSystemUser(bStoring, polyh_id, nValue);
 					ASSERT(val >= 0);
 				}
+				bool domain = dynamic_cast<Domain*>(this->GetPolyhedron()) ? true : false;
+				CGlobal::HDFSerializeBool(bStoring, polyh_id, szDomain, domain);
 			}
 			else if (nValue == Polyhedron::WEDGE)
 			{
@@ -1313,10 +1329,16 @@ void CZoneActor::Serialize(bool bStoring, hid_t loc_id, const CWPhastDoc* pWPhas
 					delete this->GetPolyhedron();
 				}
 
-				// coor_sys_type
-				//
-				if (Cube *cube = new Cube(&zone))
+				bool domain;
+				if (CGlobal::HDFSerializeBool(bStoring, polyh_id, szDomain, domain) < 0)
 				{
+					domain = false;
+				}
+				Cube *cube = domain ? new Domain(&zone) : new Cube(&zone);
+				if (cube)
+				{
+					// coor_sys_type
+					//
 					PHAST_Transform::COORDINATE_SYSTEM nValue;
 					herr_t val = CGlobal::HDFSerializeCoordinateSystem(bStoring, polyh_id, nValue);
 					cube->Set_coordinate_system(nValue);

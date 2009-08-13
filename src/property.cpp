@@ -593,6 +593,7 @@ void Cproperty::Serialize(CArchive& ar)
 
 		// store version in case changes need to be made
 		ar << version;
+		ver = version;
 	}
 	else
 	{

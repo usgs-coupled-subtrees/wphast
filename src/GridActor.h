@@ -13,6 +13,8 @@ class vtkGeometryFilter;
 class vtkFeatureEdges;
 class vtkPolyDataMapper;
 class vtkImplicitPlaneWidget;
+class vtkBoxWidget;
+class vtkBoxWidget2;
 class CGridLineWidget;
 
 class CZone;
@@ -22,11 +24,51 @@ class CZone;
 typedef float vtkFloatingPointType;
 #endif
 
+#define GRID_WIDGET
+
 //class CGridActor : public vtkLODActor
 class CGridActor : public vtkAssembly
 {
 public:
-	vtkTypeRevisionMacro(CGridActor,vtkAssembly);
+// COMMENT: {8/10/2009 5:54:26 PM}	vtkTypeRevisionMacro(CGridActor,vtkAssembly);
+//{{
+  protected:
+  void CollectRevisions(ostream& os);
+  public:
+  // vtkTypeMacro(thisClass,superclass)
+  typedef vtkAssembly Superclass;
+  virtual const char *GetClassName() const {return "CGridActor";}
+  static int IsTypeOf(const char *type)
+  {
+    if ( !strcmp("CGridActor",type) )
+      {
+      return 1;
+      }
+    return vtkAssembly::IsTypeOf(type);
+  }
+  virtual int IsA(const char *type)
+  {
+    return this->CGridActor::IsTypeOf(type);
+  }
+  static CGridActor* SafeDownCast(vtkObject *o)
+  {
+    if ( o && o->IsA("CGridActor") )
+      {
+      return static_cast<CGridActor *>(o);
+      }
+    return NULL;
+  }
+  protected:
+  virtual vtkObject *NewInstanceInternal() const
+  {
+    return CGridActor::New();
+  }
+  public:
+  CGridActor *NewInstance() const
+  {
+    return CGridActor::SafeDownCast(this->NewInstanceInternal());
+  }
+//}}
 
 	static CGridActor *New();
 
@@ -159,6 +201,20 @@ protected:
 
 	vtkTransform*       ScaleTransform;
 	vtkTransform*       UnitsTransform;
+
+#if defined(GRID_WIDGET)
+	vtkCubeSource*      CubeSource;
+	vtkPolyDataMapper*  CubeMapper;
+	vtkActor*           CubeActor;
+
+	float HandleSize;
+	double Center[3];
+
+	virtual void SizeHandles();
+	double SizeHandles(double factor);
+
+	vtkBoxWidget2*       BoxWidget;
+#endif
 
 	// vtkImplicitPlaneWidget    *PlaneWidget;	
 	CGridLineWidget           *PlaneWidget;

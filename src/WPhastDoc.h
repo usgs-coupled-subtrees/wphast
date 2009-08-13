@@ -69,7 +69,7 @@ class vtkProp3D;
   class CDrainActor;
 
 // map
-class CMapImageActor;
+class CMapImageActor3;
 class CMapActor;
 // COMMENT: {3/12/2004 4:47:12 PM}class vtkImageReader2;
 // COMMENT: {3/12/2004 4:47:12 PM}class vtkImageShiftScale;
@@ -257,6 +257,8 @@ protected:
 
 	// map
 	CMapActor *m_pMapActor;
+// COMMENT: {8/7/2009 9:39:35 PM}	CMapActor2 *MapActor2;
+	CMapImageActor3 *MapImageActor3;
 
 	// Geometry property sheet
 	CModelessPropertySheet *m_pGeometrySheet;

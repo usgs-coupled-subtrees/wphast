@@ -13,6 +13,9 @@
 #include "ICZoneActor.h"
 #include "ICHeadZoneActor.h"
 #include "ICChemZoneActor.h"
+//{{
+#include "MapImageActor3.h"
+//}}
 
 #include "WellActor.h"
 #include "Well.h"
@@ -75,6 +78,8 @@
 
 #include <afxmt.h>
 static CCriticalSection  critSect;
+
+#define USE_INTRINSIC
 
 #if defined(USE_INTRINSIC)
 #pragma intrinsic(fabs) // using this inlines fabs and is ~ 4x faster
@@ -342,7 +347,7 @@ void CViewVTKCommand::OnEndPickEvent(vtkObject* caller, void* callData)
 
 void CViewVTKCommand::OnInteractionEvent(vtkObject* caller, void* callData)
 {
-	Update();
+	Update2();
 
 	if (vtkPointWidget2 *widget = vtkPointWidget2::SafeDownCast(caller))
 	{
@@ -623,6 +628,166 @@ void CViewVTKCommand::Update()
 		);
 }
 
+void CViewVTKCommand::Update2()
+{
+	// Modified from
+	// int vtkPicker::Pick(float selectionX, float selectionY, float selectionZ,
+	//                     vtkRenderer *renderer)
+	int i;
+
+	// get the position of the mouse cursor in screen/window coordinates
+	// (pixel)
+	vtkRenderer *renderer = this->m_pView->GetRenderer();
+	int* pos = this->m_pView->GetRenderWindowInteractor()->GetEventPosition();
+
+	// get the focal point in world coordinates
+	//
+	vtkCamera *camera = renderer->GetActiveCamera();
+	double cameraFP[4];
+	camera->GetFocalPoint(cameraFP); cameraFP[3] = 1.0;
+
+	// Convert the focal point coordinates to display (or screen) coordinates.
+	//
+	renderer->SetWorldPoint(cameraFP[0], cameraFP[1], cameraFP[2], cameraFP[3]);
+	renderer->WorldToDisplay();
+	double displayCoords[4];
+	renderer->GetDisplayPoint(displayCoords);
+
+	// Convert the selection point into world coordinates.
+	//
+	renderer->SetDisplayPoint(pos[0], pos[1], displayCoords[2]);
+	renderer->DisplayToWorld();
+	double worldCoords[4];
+	renderer->GetWorldPoint(worldCoords);
+	if ( worldCoords[3] == 0.0 )
+	{
+		ASSERT(FALSE);
+		return;
+	}
+	double PickPosition[3];
+	for (i = 0; i < 3; ++i)
+	{
+		PickPosition[i] = worldCoords[i] / worldCoords[3];
+	}
+
+	vtkFloatingPointType* bounds = this->m_pView->GetDocument()->GetGridBounds();
+	double zMin = bounds[4];
+	double zMax = bounds[5];
+	double zPos = zMax;
+
+	if ( camera->GetParallelProjection() )
+	{
+		double* cameraDOP = camera->GetDirectionOfProjection();
+		// double t = -PickPosition[2] / cameraDOP[2];
+		double t = (zPos - PickPosition[2]) / cameraDOP[2];
+		for (i = 0; i < 2; ++i)
+		{
+			this->m_WorldPointXYPlane[i] = PickPosition[i] + t * cameraDOP[i];
+		}
+	}
+	else
+	{
+		double *cameraPos = camera->GetPosition();
+		// double t = -cameraPos[2] / ( PickPosition[2] - cameraPos[2] );
+		double t = (zPos - cameraPos[2]) / ( PickPosition[2] - cameraPos[2] );
+		for (i = 0; i < 2; ++i)
+		{
+			this->m_WorldPointXYPlane[i] = cameraPos[i] + t * ( PickPosition[i] - cameraPos[i] );
+		}
+	}
+	this->m_WorldPointXYPlane[2] = zPos;
+
+	// SCALE
+	//
+	double scale[3];
+	scale[0] = this->m_pView->GetDocument()->GetScale()[0];
+	scale[1] = this->m_pView->GetDocument()->GetScale()[1];
+	scale[2] = this->m_pView->GetDocument()->GetScale()[2];
+
+	// UNITS
+	const CUnits& units = this->m_pView->GetDocument()->GetUnits();
+	const char* xy_grid = units.horizontal.defined ? units.horizontal.input : units.horizontal.si;
+	const char* z_grid = units.vertical.defined ? units.vertical.input : units.vertical.si;
+
+	const char* xy_map = units.map_horizontal.defined ? units.map_horizontal.input : units.map_horizontal.si;
+	const char* z_map = units.map_vertical.defined ? units.map_vertical.input : units.map_vertical.si;
+
+	// determine most likely plane by finding
+	// largest component vector
+	//
+	double max = 0.0;
+	double viewPlaneNormal[3];
+	camera->GetViewPlaneNormal(viewPlaneNormal);
+	for (int i = 0; i < 3; ++i)
+	{
+		// Note: fabs() is ~4x slower
+		//
+		if ( max < FABS(viewPlaneNormal[i]) )
+		{
+			this->FixedCoord = i;
+			if ( viewPlaneNormal[i] < 0.0 )
+			{
+				max = -viewPlaneNormal[i];
+				this->FixedPlane = 2 * i;
+			}
+			else
+			{
+				max = viewPlaneNormal[i];
+				this->FixedPlane = 2 * i + 1;
+			}
+		}
+	}
+	ASSERT( 0 <= this->FixedPlane && this->FixedPlane < 6 );
+	ASSERT( 0 <= this->FixedCoord && this->FixedCoord < 3 );
+
+	// get point of intersection of axis=this->FixedCoord with a value of bounds[this->this->FixedPlane]
+	// this->FixedPlane       this->FixedCoord
+	//    0 => xmin        0 => x
+	//    1 => xmax        1 => y
+	//    2 => ymin        2 => z
+	//    3 => ymax
+	//    4 => zmin
+	//    5 => zmax
+	//
+	CUtilities::GetWorldPointAtFixedPlane(this->m_pView->GetRenderWindowInteractor(), renderer, this->FixedCoord, bounds[this->FixedPlane], this->FixedPlanePoint);
+
+	double fpos[3];
+	fpos[0] = this->FixedPlanePoint[0] / scale[0] / units.horizontal.input_to_si;
+	fpos[1] = this->FixedPlanePoint[1] / scale[1] / units.horizontal.input_to_si;
+	fpos[2] = this->FixedPlanePoint[2] / scale[2] / units.vertical.input_to_si;
+
+	((CMainFrame*)::AfxGetMainWnd())->UpdateGrid(
+		fpos[0],
+		fpos[1],
+		fpos[2],
+		xy_grid,
+		z_grid
+		);
+
+	CGridKeyword gridk = this->m_pView->GetDocument()->GetGridKeyword();
+	PHAST_Transform t(
+		gridk.m_grid_origin[0],
+		gridk.m_grid_origin[1],
+		gridk.m_grid_origin[2],
+		gridk.m_grid_angle,
+		units.map_horizontal.input_to_si / units.horizontal.input_to_si,
+		units.map_horizontal.input_to_si / units.horizontal.input_to_si,
+		units.map_vertical.input_to_si   / units.vertical.input_to_si
+		);
+
+	Point p(fpos[0], fpos[1], fpos[2]);
+
+	t.Inverse_transform(p);
+
+	((CMainFrame*)::AfxGetMainWnd())->UpdateMap(
+		p.x(),
+		p.y(),
+		p.z(),
+		xy_map,
+		z_map
+		);
+}
+
 void CViewVTKCommand::ComputeDisplayToWorld(double x, double y, double z, double worldPt[4])
 {
 	CGlobal::ComputeDisplayToWorld(this->m_pView->GetRenderer(), x, y, z, worldPt);
@@ -645,7 +810,7 @@ void CViewVTKCommand::OnLeftButtonPressEvent(vtkObject* caller, void* callData)
 
 		// update m_WorldPointXYPlane and save starting point
 		//
-		Update();
+		Update2();
 		for (int i = 0; i < 3; ++i)
 		{
 			this->m_BeginPoint[i] = this->m_WorldPointXYPlane[i];
@@ -768,7 +933,7 @@ void CViewVTKCommand::OnLeftButtonReleaseEvent(vtkObject* caller, void* callData
 
 void CViewVTKCommand::OnMouseMoveEvent(vtkObject* caller, void* callData)
 {
-	Update();
+	Update2();
 
 	if (this->m_pView->CreatingNewWell() || this->m_pView->CreatingNewRiver())
 	{
@@ -818,16 +983,16 @@ void CViewVTKCommand::OnModifiedEvent(vtkObject* caller, void* callData)
 	}
 #endif
 
-	ASSERT(caller && vtkCamera::SafeDownCast(caller));
-	if (vtkBoxWidget *pWidget = this->m_pView->GetBoxWidget())
-	{
-// COMMENT: {11/5/2008 8:07:57 PM}		if (pWidget->GetEnabled())
-// COMMENT: {11/5/2008 8:07:57 PM}		{
-// COMMENT: {11/5/2008 8:07:57 PM}			// this implicitly calls the protected method pWidget->SizeHandles();
-// COMMENT: {11/5/2008 8:07:57 PM}			pWidget->PlaceWidget();
-// COMMENT: {11/5/2008 8:07:57 PM}			pWidget->Modified();
-// COMMENT: {11/5/2008 8:07:57 PM}		}
-	}
+// COMMENT: {7/22/2009 9:19:37 PM}	ASSERT(caller && vtkCamera::SafeDownCast(caller));
+// COMMENT: {7/22/2009 9:19:37 PM}	if (vtkBoxWidget *pWidget = this->m_pView->GetBoxWidget())
+// COMMENT: {7/22/2009 9:19:37 PM}	{
+// COMMENT: {7/22/2009 9:19:37 PM}		if (pWidget->GetEnabled())
+// COMMENT: {7/22/2009 9:19:37 PM}		{
+// COMMENT: {7/22/2009 9:19:37 PM}			// this implicitly calls the protected method pWidget->SizeHandles();
+// COMMENT: {7/22/2009 9:19:37 PM}			pWidget->PlaceWidget();
+// COMMENT: {7/22/2009 9:19:37 PM}			pWidget->Modified();
+// COMMENT: {7/22/2009 9:19:37 PM}		}
+// COMMENT: {7/22/2009 9:19:37 PM}	}
 
 	if (vtkRenderer *renderer =  this->m_pView->GetRenderer())
 	{
@@ -967,6 +1132,14 @@ void CViewVTKCommand::OnEndPickEvent(vtkObject* caller, void* callData)
 				{
 					this->m_pView->GetDocument()->Select(pWell);
 				}
+				//{{
+				// check for sitemap
+				else if (CMapImageActor3 *pMapImageActor3 = CMapImageActor3::SafeDownCast(prop))
+				{
+					// TODO
+					TRACE("TODO CMapImageActor3 selected\n");
+				}
+				//}}
 				else
 				{
 					ASSERT(FALSE);

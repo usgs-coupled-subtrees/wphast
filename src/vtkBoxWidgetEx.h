@@ -20,6 +20,7 @@ public:
 	void SetOrientation(float x, float y, float z);
 
 // COMMENT: {5/10/2006 9:26:25 PM}	virtual void PlaceWidget(float bounds[6]);
+	virtual void SetEnabled(int);
 
 protected:
 	// Handles the events

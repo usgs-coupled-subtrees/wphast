@@ -16,6 +16,7 @@ public:
 
 	virtual void Execute(vtkObject *caller, unsigned long eventId, void *callData);
 	void Update();
+	void Update2();
 
 protected:
 	// interactor events

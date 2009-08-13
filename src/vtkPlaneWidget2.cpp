@@ -450,7 +450,8 @@ void vtkPlaneWidget2::Spin(void)
 	oldAngle *= vtkMath::RadiansToDegrees();
 
 	double angle = newAngle - oldAngle;
-	cerr << "angle = " << angle << "\n";
+	//cerr << "angle = " << angle << "\n";
+	TRACE("angle = %g\n", angle);
 
 // COMMENT: {1/29/2004 9:41:02 PM}	//****  THIS NEEDS WORK
 // COMMENT: {1/29/2004 9:41:02 PM}	// SEEMS TO WORK COUNTERCLOCKWISE BUT NOT CLOCKWISE

@@ -20,7 +20,8 @@
 
 #include "CoorDialog.h"
 #include "Global.h"
-#include "MapImageActor.h"
+#include "MapImageActor2.h"
+#include "MapActor.h"
 #include "vtkInteractorStyleImage2.h"
 #include "vtkPlaneWidget2.h"
 #include "Marker.h"
@@ -220,14 +221,15 @@ CMapDialog::CMapDialog(CWnd* pParent /*=NULL*/)
 	this->m_RenderWindowInteractor->AddObserver(vtkCommand::MouseMoveEvent, this->m_CallbackCommand);
 	this->m_RenderWindowInteractor->AddObserver(vtkCommand::LeftButtonPressEvent, this->m_CallbackCommand);
 	this->m_RenderWindowInteractor->AddObserver(vtkCommand::LeftButtonReleaseEvent, this->m_CallbackCommand);
-
-	//{{ {4/18/2006 10:05:59 PM}
 	this->m_RenderWindowInteractor->AddObserver(vtkCommand::ModifiedEvent, this->m_CallbackCommand);
-	//}} {4/18/2006 10:05:59 PM}
 
 	if (this->m_Style) this->m_RenderWindowInteractor->SetInteractorStyle(this->m_Style);
 
-	this->m_MapImageActor = CMapImageActor::New();
+	this->m_MapImageActor2 = CMapImageActor2::New();
+#if defined(USE_MAP_ACTOR)
+	this->MapActor = CMapActor::New();
+	this->MapActor->GetProperty()->SetOpacity(0.2);
+#endif
 
 	this->m_Point1Actor = CMarker::New();
 	this->m_Point2Actor = CMarker::New();
@@ -245,7 +247,10 @@ CMapDialog::~CMapDialog()
 	if (this->m_Widget) this->m_Widget->Delete();
 	if (this->m_CallbackCommand) this->m_CallbackCommand->Delete();
 
-	this->m_MapImageActor->Delete();
+	this->m_MapImageActor2->Delete();
+#if defined(USE_MAP_ACTOR)
+	this->MapActor->Delete();
+#endif
 	this->m_Point1Actor->Delete();
 	this->m_Point2Actor->Delete();
 }
@@ -302,6 +307,8 @@ void CMapDialog::DDX_Point1(CDataExchange* pDX)
 		this->m_point1.y_val = y;
 		this->m_point1.x_val_defined = true;
 		this->m_point1.y_val_defined = true;
+		this->m_point1.x_pixel = pixelx;
+		this->m_point1.y_pixel = pixely;
 	}
 }
 
@@ -325,52 +332,101 @@ void CMapDialog::DDX_Point2(CDataExchange* pDX)
 		this->m_point2.y_val = y;
 		this->m_point2.x_val_defined = true;
 		this->m_point2.y_val_defined = true;
+		this->m_point2.x_pixel = pixelx;
+		this->m_point2.y_pixel = pixely;
 
 		{
-			vtkFloatingPointType *dataSpacing = this->m_MapImageActor->GetImageReader2()->GetDataSpacing();
-			vtkFloatingPointType *dataOrigin  = this->m_MapImageActor->GetImageReader2()->GetDataOrigin();
-			int                  *dataExtent  = this->m_MapImageActor->GetDataExtent();
-			ASSERT(dataSpacing[0] != 0);
-			ASSERT(dataSpacing[1] != 0);
-			ASSERT(dataSpacing[2] != 0);
-
-			double cy = (double) dataExtent[3];
-
-			double xpix[2];
-			double ypix[2];
-
-			// x_world and y_world are set in ProcessEvents
-			// or in OnEnUpdateEdit[12]p[12]
-			xpix[0] = (this->m_point1.x_world - dataOrigin[0]) / (dataSpacing[0]);
-			xpix[1] = (this->m_point2.x_world - dataOrigin[0]) / (dataSpacing[0]);
-
-			ypix[0] = (this->m_point1.y_world - dataOrigin[1]) / (dataSpacing[1]);
-			ypix[1] = (this->m_point2.y_world - dataOrigin[1]) / (dataSpacing[1]);
-
 			double spacing[3];
-			ASSERT( (xpix[1] - xpix[0]) != 0);
-			ASSERT( (ypix[1] - ypix[0]) != 0);
-			spacing[0] = (this->m_point2.x_val - this->m_point1.x_val) / (xpix[1] - xpix[0]);
-			spacing[1] = (this->m_point2.y_val - this->m_point1.y_val) / (ypix[1] - ypix[0]);;
-			spacing[2] = 1.0;
-			this->m_worldTransform.SetDataSpacing(spacing);
+
+			spacing[0] = (this->m_point2.x_val - this->m_point1.x_val) / (this->m_point2.x_pixel - this->m_point1.x_pixel);
+			spacing[1] = (this->m_point2.y_val - this->m_point1.y_val) / (this->m_point2.y_pixel - this->m_point1.y_pixel);
+			spacing[2] = 1.;
+
+#if defined(USE_MAP_ACTOR)
+			int *dataExtent  = this->m_MapImageActor2->GetDataExtent();
+			int *dataExtent2  = this->MapActor->GetDataExtent();
+			for (int i = 0; i < 3; ++i)
+			{
+				ASSERT(dataExtent[i] == dataExtent2[i]);
+			}
+#else
+			int *dataExtent  = this->m_MapImageActor2->GetDataExtent();
+#endif
+
+			double xest1 = this->m_point1.x_val - spacing[0] * this->m_point1.x_pixel;
+			double xest2 = this->m_point2.x_val - spacing[0] * this->m_point2.x_pixel;
+
+			double yest1 = (this->m_point1.y_val - spacing[1] * this->m_point1.y_pixel) + dataExtent[3] * spacing[1];
+			double yest2 = (this->m_point2.y_val - spacing[1] * this->m_point2.y_pixel) + dataExtent[3] * spacing[1];
 
 			double upperleft[3];
-			upperleft[0] = this->m_point1.x_val - spacing[0] * xpix[0];
-			upperleft[1] = this->m_point1.y_val + spacing[1] * (cy - ypix[0]);
-			upperleft[2] = 0;
-			this->m_worldTransform.SetUpperLeft(upperleft);
+			upperleft[0] = (xest1 + xest2)/2.;
+			upperleft[1] = (yest1 + yest2)/2.;
+			upperleft[2] = 0.;
 
-			// TODO validate site map
-			this->m_siteMap.SetWorldTransform(this->m_worldTransform);
+			this->m_worldTransform.SetDataSpacing(spacing[0], spacing[1], spacing[2]);
+			this->m_worldTransform.SetUpperLeft(upperleft[0], upperleft[1], upperleft[2]);
+			this->m_siteMap2.SetWorldTransform(this->m_worldTransform);
 		}
+
+// COMMENT: {8/11/2009 5:15:17 PM}		{
+// COMMENT: {8/11/2009 5:15:17 PM}			vtkFloatingPointType *dataSpacing = this->m_MapImageActor2->GetImageReader2()->GetDataSpacing();
+// COMMENT: {8/11/2009 5:15:17 PM}			vtkFloatingPointType *dataOrigin  = this->m_MapImageActor2->GetImageReader2()->GetDataOrigin();
+// COMMENT: {8/11/2009 5:15:17 PM}			int                  *dataExtent  = this->m_MapImageActor2->GetDataExtent();
+// COMMENT: {8/11/2009 5:15:17 PM}			ASSERT(dataSpacing[0] != 0);
+// COMMENT: {8/11/2009 5:15:17 PM}			ASSERT(dataSpacing[1] != 0);
+// COMMENT: {8/11/2009 5:15:17 PM}			ASSERT(dataSpacing[2] != 0);
+// COMMENT: {8/11/2009 5:15:17 PM}
+// COMMENT: {8/11/2009 5:15:17 PM}			int *dataExtent2 = this->MapActor->GetDataExtent();
+// COMMENT: {8/11/2009 5:15:17 PM}			for (int i = 0; i < 6; ++i)
+// COMMENT: {8/11/2009 5:15:17 PM}			{
+// COMMENT: {8/11/2009 5:15:17 PM}				ASSERT(dataExtent2[i] == dataExtent[i]);
+// COMMENT: {8/11/2009 5:15:17 PM}			}
+// COMMENT: {8/11/2009 5:15:17 PM}
+// COMMENT: {8/11/2009 5:15:17 PM}			//{{
+// COMMENT: {8/11/2009 5:15:17 PM}			// TODO
+// COMMENT: {8/11/2009 5:15:17 PM}			//this->MapActor->GetDataSpacing();
+// COMMENT: {8/11/2009 5:15:17 PM}			//this->MapActor->GetDataOrigin();
+// COMMENT: {8/11/2009 5:15:17 PM}			//this->MapActor->GetDataExtent();
+// COMMENT: {8/11/2009 5:15:17 PM}			//}}
+// COMMENT: {8/11/2009 5:15:17 PM}
+// COMMENT: {8/11/2009 5:15:17 PM}			double cy = (double) dataExtent[3];
+// COMMENT: {8/11/2009 5:15:17 PM}
+// COMMENT: {8/11/2009 5:15:17 PM}			double xpix[2];
+// COMMENT: {8/11/2009 5:15:17 PM}			double ypix[2];
+// COMMENT: {8/11/2009 5:15:17 PM}
+// COMMENT: {8/11/2009 5:15:17 PM}			// x_world and y_world are set in ProcessEvents
+// COMMENT: {8/11/2009 5:15:17 PM}			// or in OnEnUpdateEdit[12]p[12]
+// COMMENT: {8/11/2009 5:15:17 PM}			xpix[0] = (this->m_point1.x_world - dataOrigin[0]) / (dataSpacing[0]);
+// COMMENT: {8/11/2009 5:15:17 PM}			xpix[1] = (this->m_point2.x_world - dataOrigin[0]) / (dataSpacing[0]);
+// COMMENT: {8/11/2009 5:15:17 PM}
+// COMMENT: {8/11/2009 5:15:17 PM}			ypix[0] = (this->m_point1.y_world - dataOrigin[1]) / (dataSpacing[1]);
+// COMMENT: {8/11/2009 5:15:17 PM}			ypix[1] = (this->m_point2.y_world - dataOrigin[1]) / (dataSpacing[1]);
+// COMMENT: {8/11/2009 5:15:17 PM}
+// COMMENT: {8/11/2009 5:15:17 PM}			double spacing[3];
+// COMMENT: {8/11/2009 5:15:17 PM}			ASSERT( (xpix[1] - xpix[0]) != 0);
+// COMMENT: {8/11/2009 5:15:17 PM}			ASSERT( (ypix[1] - ypix[0]) != 0);
+// COMMENT: {8/11/2009 5:15:17 PM}			spacing[0] = (this->m_point2.x_val - this->m_point1.x_val) / (xpix[1] - xpix[0]);
+// COMMENT: {8/11/2009 5:15:17 PM}			spacing[1] = (this->m_point2.y_val - this->m_point1.y_val) / (ypix[1] - ypix[0]);;
+// COMMENT: {8/11/2009 5:15:17 PM}			spacing[2] = 1.0;
+// COMMENT: {8/11/2009 5:15:17 PM}			this->m_worldTransform.SetDataSpacing(spacing);
+// COMMENT: {8/11/2009 5:15:17 PM}
+// COMMENT: {8/11/2009 5:15:17 PM}			double upperleft[3];
+// COMMENT: {8/11/2009 5:15:17 PM}			upperleft[0] = this->m_point1.x_val - spacing[0] * xpix[0];
+// COMMENT: {8/11/2009 5:15:17 PM}			upperleft[1] = this->m_point1.y_val + spacing[1] * (cy - ypix[0]);
+// COMMENT: {8/11/2009 5:15:17 PM}			upperleft[2] = 0;
+// COMMENT: {8/11/2009 5:15:17 PM}			this->m_worldTransform.SetUpperLeft(upperleft);
+// COMMENT: {8/11/2009 5:15:17 PM}
+// COMMENT: {8/11/2009 5:15:17 PM}			// TODO validate site map
+// COMMENT: {8/11/2009 5:15:17 PM}			this->m_siteMap2.SetWorldTransform(this->m_worldTransform);
+// COMMENT: {8/11/2009 5:15:17 PM}		}
 	}
 }
 
 void CMapDialog::DDX_Grid(CDataExchange* pDX)
 {
 	// Angle
-	::DDX_Text(pDX, IDC_EDIT_MO_ANGLE, this->m_siteMap.m_angle);
+	::DDX_Text(pDX, IDC_EDIT_MO_ANGLE, this->m_siteMap2.Angle);
 
 	if (pDX->m_bSaveAndValidate)
 	{
@@ -445,9 +501,9 @@ void CMapDialog::DDX_Grid(CDataExchange* pDX)
 		}
 
 		// set placement
-		this->m_siteMap.m_placement[0] = map_coor[0] - minimum[0];
-		this->m_siteMap.m_placement[1] = map_coor[1] - minimum[1];
-		this->m_siteMap.m_placement[2] = 0.0;
+		this->m_siteMap2.Origin[0] = map_coor[0] - minimum[0];
+		this->m_siteMap2.Origin[1] = map_coor[1] - minimum[1];
+		this->m_siteMap2.Origin[2] = 0.0;
 	}
 	else
 	{
@@ -596,8 +652,13 @@ int CMapDialog::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (!this->m_RenderWindowInteractor)
 		return -1;
 
-	if (!this->m_MapImageActor)
+	if (!this->m_MapImageActor2)
 		return -1;
+
+#if defined(USE_MAP_ACTOR)
+	if (!this->MapActor)
+		return -1;
+#endif
 
 	// setup the parent window
 	this->m_RenderWindow->AddRenderer(this->m_Renderer);
@@ -609,10 +670,26 @@ int CMapDialog::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 int CMapDialog::SetFileName(const char *filename)
 {
-	if (this->m_MapImageActor->SetFileName(filename) == 1) {
-		this->m_Renderer->AddActor( this->m_MapImageActor );
+#if defined(USE_MAP_ACTOR)
+	if (this->MapActor->SetFileName(filename))
+	{
+		this->m_siteMap2.FileName = filename;
+
+		CWorldTransform trans;
+		trans.SetDataSpacing(1., 1., 1.);
+		trans.SetUpperLeft(0., this->MapActor->GetDataExtent()[3], 0.);
+		this->m_siteMap2.SetWorldTransform(trans);
+
+		this->MapActor->SetSiteMap2(this->m_siteMap2);
+
+		this->m_Renderer->AddActor(this->MapActor);
+		// return 1; // success
+	}
+#endif
+	if (this->m_MapImageActor2->SetFileName(filename) == 1) {
+		this->m_Renderer->AddActor( this->m_MapImageActor2 );
 		// BUGBUG: consolidate SetFileName and SetWorldFileName into SetSiteMap
-		this->m_siteMap.m_fileName = filename;
+		this->m_siteMap2.FileName = filename;
 		return 1; // success
 	}
 	return 0; // failure
@@ -625,13 +702,16 @@ int CMapDialog::SetWorldFileName(const char *filename)
 
 	if (CGlobal::LoadWorldFile(filename, wtrans) == 0)
 	{
-		nreturn = this->m_MapImageActor->SetWorldTransform(wtrans);
+#if defined(USE_MAP_ACTOR)
+		nreturn = this->MapActor->SetWorldTransform(wtrans);
+#endif
+		nreturn = this->m_MapImageActor2->SetWorldTransform(wtrans);
 		if (nreturn == 1)
 		{
 			// TODO get rid of this->m_worldTransform
 			this->m_worldTransform = wtrans;
-			this->m_siteMap.SetWorldTransform(wtrans);
-			this->m_Widget->SetInput( this->m_MapImageActor->GetInput() );
+			this->m_siteMap2.SetWorldTransform(wtrans);
+			this->m_Widget->SetInput( this->m_MapImageActor2->GetInput() );
 			this->m_Widget->PlaceWidget();
 			this->m_bHaveWorld = true;
 			this->m_CurrentState = MDS_Grid;
@@ -922,9 +1002,17 @@ void CMapDialog::ProcessEvents(vtkObject* caller,
 					}
 				}
 
-				vtkFloatingPointType* dataSpacing = self->m_MapImageActor->GetImageReader2()->GetDataSpacing();
-				vtkFloatingPointType* dataOrigin = self->m_MapImageActor->GetImageReader2()->GetDataOrigin();
-
+				vtkFloatingPointType* dataSpacing = self->m_MapImageActor2->GetImageReader2()->GetDataSpacing();
+				vtkFloatingPointType* dataOrigin = self->m_MapImageActor2->GetImageReader2()->GetDataOrigin();
+#if defined(USE_MAP_ACTOR)
+				float *spacing = self->MapActor->GetDataSpacing();
+				float *origin = self->MapActor->GetDataOrigin();
+				for (int i = 0; i < 3; ++i)
+				{
+					ASSERT(spacing[i] == dataSpacing[i]);
+					ASSERT(origin[i] == dataOrigin[i]);
+				}
+#endif
 				ASSERT(dataSpacing[0] == 1);
 				ASSERT(dataSpacing[1] == 1);
 				ASSERT(dataOrigin[0] == 0);
@@ -1131,10 +1219,16 @@ void CMapDialog::UpdatePoint1(void)
 		this->GetDlgItem(IDC_EDIT_YC1)->SetWindowText(strBuffer);
 	}
 
+// COMMENT: {8/11/2009 9:14:39 PM}	double point[3];
+// COMMENT: {8/11/2009 9:14:39 PM}	point[0] = this->m_point1.x_world;
+// COMMENT: {8/11/2009 9:14:39 PM}	point[1] = this->m_point1.y_world;
+// COMMENT: {8/11/2009 9:14:39 PM}	point[2] = 0;
+
 	double point[3];
-	point[0] = this->m_point1.x_world;
-	point[1] = this->m_point1.y_world;
+	point[0] = this->m_point1.x * this->m_siteMap2.GetWorldTransform().GetDataSpacing()[0];
+	point[1] = this->m_point1.y * this->m_siteMap2.GetWorldTransform().GetDataSpacing()[1];
 	point[2] = 0;
+
 
 	this->m_Point1Actor->SetPoint(point);
 	this->m_Point1Actor->GetProperty()->SetColor(1, 0, 1);
@@ -1170,9 +1264,14 @@ void CMapDialog::UpdatePoint2(void)
 		this->GetDlgItem(IDC_EDIT_YC2)->SetWindowText(strBuffer);
 	}
 
+// COMMENT: {8/11/2009 9:24:44 PM}	double point[3];
+// COMMENT: {8/11/2009 9:24:44 PM}	point[0] = this->m_point2.x_world;
+// COMMENT: {8/11/2009 9:24:44 PM}	point[1] = this->m_point2.y_world;
+// COMMENT: {8/11/2009 9:24:44 PM}	point[2] = 0;
+
 	double point[3];
-	point[0] = this->m_point2.x_world;
-	point[1] = this->m_point2.y_world;
+	point[0] = this->m_point2.x * this->m_siteMap2.GetWorldTransform().GetDataSpacing()[0];
+	point[1] = this->m_point2.y * this->m_siteMap2.GetWorldTransform().GetDataSpacing()[1];
 	point[2] = 0;
 
 	this->m_Point2Actor->SetPoint(point);
@@ -1368,7 +1467,7 @@ void CMapDialog::OnBnClickedButton1()
 		ASSERT(FALSE); // unhandled state
 	}
 
-	this->m_Widget->SetInput( this->m_MapImageActor->GetInput() );
+	this->m_Widget->SetInput( this->m_MapImageActor2->GetInput() );
 	this->m_Widget->PlaceWidget();
 
 	switch (this->m_CurrentState)
@@ -1844,8 +1943,8 @@ void CMapDialog::OnEnUpdateEditXp1()
 	int pixel =(int)this->GetDlgItemInt(IDC_EDIT_XP1, &bTranslated, TRUE);
 	if (bTranslated)
 	{
-		vtkFloatingPointType* dataSpacing = this->m_MapImageActor->GetImageReader2()->GetDataSpacing();
-		vtkFloatingPointType* dataOrigin  = this->m_MapImageActor->GetImageReader2()->GetDataOrigin();
+		vtkFloatingPointType* dataSpacing = this->m_MapImageActor2->GetImageReader2()->GetDataSpacing();
+		vtkFloatingPointType* dataOrigin  = this->m_MapImageActor2->GetImageReader2()->GetDataOrigin();
 
 		this->m_point1.x       = pixel;
 		this->m_point1.x_world = pixel * dataSpacing[0] + dataOrigin[0];
@@ -1863,8 +1962,8 @@ void CMapDialog::OnEnUpdateEditYp1()
 	int pixel =(int)this->GetDlgItemInt(IDC_EDIT_YP1, &bTranslated, TRUE);
 	if (bTranslated)
 	{
-		vtkFloatingPointType* dataSpacing = this->m_MapImageActor->GetImageReader2()->GetDataSpacing();
-		vtkFloatingPointType* dataOrigin = this->m_MapImageActor->GetImageReader2()->GetDataOrigin();
+		vtkFloatingPointType* dataSpacing = this->m_MapImageActor2->GetImageReader2()->GetDataSpacing();
+		vtkFloatingPointType* dataOrigin = this->m_MapImageActor2->GetImageReader2()->GetDataOrigin();
 
 		this->m_point1.y       = pixel;
 		this->m_point1.y_world = pixel * dataSpacing[1] + dataOrigin[1];
@@ -1881,8 +1980,8 @@ void CMapDialog::OnEnUpdateEditXp2()
 	int pixel =(int)this->GetDlgItemInt(IDC_EDIT_XP2, &bTranslated, TRUE);
 	if (bTranslated)
 	{
-		vtkFloatingPointType* dataSpacing = this->m_MapImageActor->GetImageReader2()->GetDataSpacing();
-		vtkFloatingPointType* dataOrigin = this->m_MapImageActor->GetImageReader2()->GetDataOrigin();
+		vtkFloatingPointType* dataSpacing = this->m_MapImageActor2->GetImageReader2()->GetDataSpacing();
+		vtkFloatingPointType* dataOrigin = this->m_MapImageActor2->GetImageReader2()->GetDataOrigin();
 
 		this->m_point2.x       = pixel;
 		this->m_point2.x_world = pixel * dataSpacing[0] + dataOrigin[0];
@@ -1899,8 +1998,8 @@ void CMapDialog::OnEnUpdateEditYp2()
 	int pixel =(int)this->GetDlgItemInt(IDC_EDIT_YP2, &bTranslated, TRUE);
 	if (bTranslated)
 	{
-		vtkFloatingPointType* dataSpacing = this->m_MapImageActor->GetImageReader2()->GetDataSpacing();
-		vtkFloatingPointType* dataOrigin = this->m_MapImageActor->GetImageReader2()->GetDataOrigin();
+		vtkFloatingPointType* dataSpacing = this->m_MapImageActor2->GetImageReader2()->GetDataSpacing();
+		vtkFloatingPointType* dataOrigin = this->m_MapImageActor2->GetImageReader2()->GetDataOrigin();
 
 		this->m_point2.y       = pixel;
 		this->m_point2.y_world = pixel * dataSpacing[1] + dataOrigin[1];
@@ -1952,8 +2051,12 @@ void CMapDialog::SetState(State state)
 		this->EnablePoint1(TRUE);
 		this->EnablePoint2(FALSE);
 		this->LayoutPointsPage();
-		this->m_MapImageActor->GetImageReader2()->SetDataOrigin(0, 0, 0);
-		this->m_MapImageActor->GetImageReader2()->SetDataSpacing(1, 1, 1);
+		this->m_MapImageActor2->GetImageReader2()->SetDataOrigin(0, 0, 0);
+		this->m_MapImageActor2->GetImageReader2()->SetDataSpacing(1, 1, 1);
+#if defined(USE_MAP_ACTOR)
+		this->MapActor->SetDataOrigin(0, 0, 0);
+		this->MapActor->SetDataSpacing(1, 1, 1);
+#endif
 		this->m_Point1Actor->VisibilityOff();
 		this->m_Point2Actor->VisibilityOff();
 		this->m_Renderer->ResetCamera();
@@ -1970,8 +2073,12 @@ void CMapDialog::SetState(State state)
 		this->EnablePoint1(FALSE);
 		this->EnablePoint2(TRUE);
 		this->LayoutPointsPage();
-		this->m_MapImageActor->GetImageReader2()->SetDataOrigin(0, 0, 0);
-		this->m_MapImageActor->GetImageReader2()->SetDataSpacing(1, 1, 1);
+		this->m_MapImageActor2->GetImageReader2()->SetDataOrigin(0, 0, 0);
+		this->m_MapImageActor2->GetImageReader2()->SetDataSpacing(1, 1, 1);
+#if defined(USE_MAP_ACTOR)
+		this->MapActor->SetDataOrigin(0, 0, 0);
+		this->MapActor->SetDataSpacing(1, 1, 1);
+#endif
 		this->m_Point1Actor->VisibilityOff();
 		this->m_Point2Actor->VisibilityOff();
 		///this->m_Renderer->ResetCamera();
@@ -1982,9 +2089,12 @@ void CMapDialog::SetState(State state)
 	case MDS_Grid:
 		this->m_Point1Actor->VisibilityOff();
 		this->m_Point2Actor->VisibilityOff();
-		this->m_MapImageActor->SetWorldTransform(this->m_worldTransform);
+		this->m_MapImageActor2->SetWorldTransform(this->m_worldTransform);
+#if defined(USE_MAP_ACTOR)
+		this->MapActor->SetWorldTransform(this->m_worldTransform);
+#endif
 		this->m_Renderer->ResetCamera();
-		this->m_Widget->SetInput( this->m_MapImageActor->GetInput() );
+		this->m_Widget->SetInput( this->m_MapImageActor2->GetInput() );
 		this->m_Widget->PlaceWidget();
 		this->m_Widget->SetEnabled(1);
 		if (this->m_bHaveWorld)

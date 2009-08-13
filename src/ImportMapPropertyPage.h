@@ -1,6 +1,6 @@
 #pragma once
 
-#include "SiteMap.h"
+#include "SiteMap2.h"
 
 class CMapDialog;
 class CGridPropertyPage;
@@ -16,8 +16,8 @@ public:
 	CImportMapPropertyPage(UINT nIDCaption, UINT nIDHeaderTitle, UINT nIDHeaderSubTitle = 0);
 	void CommonConstruct(void);
 
-	CSiteMap GetSiteMap(void)const { return m_siteMap; }
-	void SetSiteMap(const CSiteMap& siteMap) { m_siteMap = siteMap; }
+	CSiteMap2 GetSiteMap2(void)const { return m_siteMap2; }
+	void SetSiteMap2(const CSiteMap2& siteMap2) { m_siteMap2 = siteMap2; }
 
 	bool m_bImport;
 	bool m_bWorld;
@@ -36,7 +36,7 @@ protected:
 	CGridPropertyPage *m_pGridPage;
 	int m_idxGridPage;
 
-	CSiteMap m_siteMap;
+	CSiteMap2 m_siteMap2;
 	CString m_sExt;
 
 	DECLARE_MESSAGE_MAP()

@@ -1,6 +1,6 @@
 #pragma once
 #include <vtkOpenGLActor.h>
-#include "SiteMap.h"
+#include "SiteMap2.h"
 
 class vtkImageReader2;
 class vtkTexture;
@@ -20,22 +20,37 @@ public:
 	vtkTypeRevisionMacro(CMapActor,vtkOpenGLActor);
 	static CMapActor *New();
 
-	void SetSiteMap(const CSiteMap &siteMap); // throws LPTCSTR
-	CSiteMap GetSiteMap(void)const { return m_siteMap; }
+	void SetSiteMap2(const CSiteMap2 &siteMap2); // throws LPTCSTR
+	CSiteMap2 GetSiteMap2(void)const { return SiteMap2; }
 
 	void Serialize(bool bStoring, hid_t loc_id);
-// COMMENT: {7/12/2006 11:37:17 PM}	//xercesc_2_7::DOMElement* Export(const char * prefix, xercesc_2_7::DOMDocument* doc);
-// COMMENT: {7/12/2006 11:37:17 PM}	int Export(const char* prefix, xercesc_2_7::DOMElement* element);
 	friend class CXMLSerializer;
+
+	int SetFileName(const char *filename);
+	int SetWorldTransform(const CWorldTransform &wtrans);
+
+	float *GetDataSpacing()const;
+	float *GetDataOrigin()const;
+	int *GetDataExtent()const;
+
+	void SetDataOrigin(float x, float y, float z);
+	void SetDataSpacing(float x, float y, float z);
 
 protected:
 	CMapActor(void);
 	virtual ~CMapActor(void);
 
-	int PlaceMap(vtkFloatingPointType xPos, vtkFloatingPointType yPos, vtkFloatingPointType zPos, vtkFloatingPointType angle);
-	int SetFileName(const char *filename);
-	int SetWorldTransform(const CWorldTransform &wtrans);
+	int PlaceMap(double xPos, double yPos, double zPos, double angle);
+// COMMENT: {8/11/2009 2:52:54 PM}	int SetFileName(const char *filename);
+// COMMENT: {8/11/2009 2:56:55 PM}	int SetWorldTransform(const CWorldTransform &wtrans);
 	int SetWorldFileName(const char *filename);
+
+	// Description:
+	// Turn on/off linear interpolation of the texture map when rendering.
+	int GetInterpolate() { return this->m_Texture->GetInterpolate(); };
+	void SetInterpolate(int interpolate) { this->m_Texture->SetInterpolate(interpolate); };
+	void InterpolateOn() { this->SetInterpolate((int)1); };
+	void InterpolateOff() { this->SetInterpolate((int)0); };
 
 protected:
 	vtkImageReader2    *m_ImageReader2;
@@ -49,10 +64,18 @@ public:
 	double m_XUpperLeft;
 	double m_YUpperLeft;
 
+	double xMin;
+	double xMax;
+
+	double yMax;
+	double yMin;
+
+	double Z;
+
 protected:
 	vtkFloatingPointType m_UpperLeft[3];
 	vtkFloatingPointType m_DataSpacing[3];
-	CSiteMap m_siteMap;
+	CSiteMap2 SiteMap2;
 	TCHAR m_szTempFileName[MAX_PATH];
 private:
 	CMapActor(const CMapActor&);  // Not implemented.

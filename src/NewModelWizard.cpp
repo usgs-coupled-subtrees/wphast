@@ -67,10 +67,10 @@ CNewModel CNewModelWizard::GetModel(void)const
 	this->m_units4Page.GetProperties(model.m_units);
 	if (this->m_importPage.m_bImport)
 	{
-		CSiteMap site = this->m_importPage.GetSiteMap();
-		site.m_fileName = (LPCTSTR)this->m_importPage.m_strMapFileName;
-		site.m_placement[2] = this->m_gridPage.m_grid[2].coord[0] - .01 *(this->m_gridPage.m_grid[2].coord[1] - this->m_gridPage.m_grid[2].coord[0]);
-		model.SetSiteMap(site);
+		CSiteMap2 siteMap2 = this->m_importPage.GetSiteMap2();
+		siteMap2.FileName = (LPCTSTR)this->m_importPage.m_strMapFileName;
+		siteMap2.Origin[2] = this->m_gridPage.m_grid[2].coord[0] - .01 *(this->m_gridPage.m_grid[2].coord[1] - this->m_gridPage.m_grid[2].coord[0]);
+		model.SetSiteMap2(siteMap2);
 	}
 	for (int i = 0; i < 3; ++i)
 	{

@@ -95,7 +95,7 @@ static const TCHAR szDRAINS[]              = _T("DRAINS");
 static const TCHAR szPRINT_INITIAL[]       = _T("PRINT_INITIAL");
 static const TCHAR szPRINT_FREQUENCY[]     = _T("PRINT_FREQUENCY");
 static const TCHAR szTIME_CONTROL[]        = _T("TIME_CONTROL");
-static const TCHAR szZONE_FLOW_RATES[]     = _T("ZONE_FLOW_RATES");
+static const TCHAR szZONE_FLOW[]           = _T("ZONE_FLOW");
 
 static const int BC_INDEX              = 0;
 static const int PRINT_FREQUENCY_INDEX = 1;
@@ -213,6 +213,8 @@ void CPropertyTreeControlBar::OnSelChanged(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 
 	NMTREEVIEW *pNMTREEVIEW = (LPNMTREEVIEW)pNMHDR;
 	CTreeCtrlNode item(pNMTREEVIEW->itemNew.hItem, this->GetTreeCtrlEx());
+
+	if (pNMTREEVIEW->itemNew.hItem == 0) return;
 
 	CTreeCtrlNode editable = item;
 	if (this->IsNodeEditable(editable, false))
@@ -936,6 +938,9 @@ bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode &editNode, bool bDoEd
 	//
 	if (item.IsNodeAncestor(this->m_nodeGrid))
 	{
+#ifdef _DEBUG
+		DWORD_PTR dw = this->m_nodeGrid.GetData();
+#endif
 		if (CGridActor* pGridActor = CGridActor::SafeDownCast((vtkObject*)this->m_nodeGrid.GetData()))
 		{
 			CFrameWnd *pFrame = reinterpret_cast<CFrameWnd*>(AfxGetApp()->m_pMainWnd);
@@ -1408,6 +1413,7 @@ void CPropertyTreeControlBar::SetGridActor(CGridActor* pGridActor)
 
 void CPropertyTreeControlBar::DeleteContents()
 {
+	this->m_wndTree.SelectItem(0);
 	this->m_wndTree.DeleteAllItems();
 
 	// populate static properties
@@ -1428,7 +1434,7 @@ void CPropertyTreeControlBar::DeleteContents()
 	this->m_nodeWells        = this->m_wndTree.InsertItem(szWELLS               );
 	this->m_nodeRivers       = this->m_wndTree.InsertItem(szRIVERS              );
 	this->m_nodeDrains       = this->m_wndTree.InsertItem(szDRAINS              );
-	this->m_nodeZFRates      = this->m_wndTree.InsertItem(szZONE_FLOW_RATES     );
+	this->m_nodeZFRates      = this->m_wndTree.InsertItem(szZONE_FLOW           );
 	this->m_nodePrintInput   = this->m_wndTree.InsertItem(szPRINT_INITIAL       );
 	this->m_nodePF           = this->m_wndTree.InsertItem(szPRINT_FREQUENCY     );
 	this->m_nodeTimeControl2 = this->m_wndTree.InsertItem(szTIME_CONTROL        );
@@ -3210,8 +3216,7 @@ void CPropertyTreeControlBar::OnEditClear()
 		return;
 	}
 
-	//{{
-	// ZONE_FLOW_RATES
+	// ZONE_FLOW
 	//
 	if (sel.IsNodeAncestor(this->GetZoneFlowRatesNode()))
 	{
@@ -3237,7 +3242,6 @@ void CPropertyTreeControlBar::OnEditClear()
 		}
 		return;
 	}
-	//}}
 
 	// TIME_CONTROL
 	//

@@ -137,7 +137,7 @@
 #include "HeadIC.h"
 #include "TimeControl2.h"
 #include "MapActor.h"
-#include "MapImageActor.h"
+#include "MapImageActor3.h"
 #include "WorldTransform.h"
 #include "SiteMap.h"
 #include "NewModel.h"
@@ -327,6 +327,9 @@ CWPhastDoc::CWPhastDoc()
 , m_pModel(0) // , m_pFlowOnly(0)
 , m_ProjectionMode(PT_PERSPECTIVE)
 , m_pMapActor(0)
+//{{
+, MapImageActor3(0)
+//}}
 , m_pPropAssemblyMedia(0)
 , m_pPropAssemblyBC(0)
 , m_pPropAssemblyIC(0)
@@ -529,6 +532,11 @@ CWPhastDoc::~CWPhastDoc()
 		this->m_pMapActor->Delete();
 		this->m_pMapActor = 0;
 	}
+	if (this->MapImageActor3)
+	{
+		this->MapImageActor3->Delete();
+		this->MapImageActor3 = 0;
+	}
 
 	// callbacks
 	//
@@ -677,6 +685,9 @@ void CWPhastDoc::Serialize(CArchive& ar)
 
 			// store site map
 			if (this->m_pMapActor) this->m_pMapActor->Serialize(bStoring, wphast_id);
+			//{{
+			if (this->MapImageActor3) this->MapImageActor3->Serialize(bStoring, wphast_id);
+			//}}
 
 			// store display colors
 			this->DisplayColors.Serialize(bStoring, wphast_id);
@@ -792,8 +803,8 @@ void CWPhastDoc::Serialize(CArchive& ar)
 			ASSERT(this->m_pMapActor == NULL);
 			this->m_pMapActor = CMapActor::New();
 			this->m_pMapActor->Serialize(bStoring, wphast_id);
-			CSiteMap siteMap = this->m_pMapActor->GetSiteMap();
-			if (siteMap.m_fileName.empty())
+			CSiteMap2 siteMap2 = this->m_pMapActor->GetSiteMap2();
+			if (siteMap2.FileName.empty())
 			{
 				this->m_pMapActor->Delete();
 				this->m_pMapActor = 0;
@@ -803,6 +814,23 @@ void CWPhastDoc::Serialize(CArchive& ar)
 				this->m_pMapActor->SetPickable(0);
 				this->GetPropCollection()->AddItem(this->m_pMapActor);
 			}
+
+			//{{
+			ASSERT(this->MapImageActor3 == NULL);
+// COMMENT: {8/10/2009 3:21:23 PM}			this->MapImageActor3 = CMapImageActor3::New();
+// COMMENT: {8/10/2009 3:21:23 PM}			this->MapImageActor3->Serialize(bStoring, wphast_id);
+// COMMENT: {8/10/2009 3:21:23 PM}// COMMENT: {8/6/2009 8:32:58 PM}			CSiteMap siteMap = this->MapImageActor3->GetSiteMap();
+// COMMENT: {8/10/2009 3:21:23 PM}// COMMENT: {8/6/2009 8:32:58 PM}			if (siteMap.m_fileName.empty())
+// COMMENT: {8/10/2009 3:21:23 PM}// COMMENT: {8/6/2009 8:32:58 PM}			{
+// COMMENT: {8/10/2009 3:21:23 PM}// COMMENT: {8/6/2009 8:32:58 PM}				this->MapImageActor3->Delete();
+// COMMENT: {8/10/2009 3:21:23 PM}// COMMENT: {8/6/2009 8:32:58 PM}				this->MapImageActor3 = 0;
+// COMMENT: {8/10/2009 3:21:23 PM}// COMMENT: {8/6/2009 8:32:58 PM}			}
+// COMMENT: {8/10/2009 3:21:23 PM}// COMMENT: {8/6/2009 8:32:58 PM}			else
+// COMMENT: {8/10/2009 3:21:23 PM}			{
+// COMMENT: {8/10/2009 3:21:23 PM}				this->MapImageActor3->SetPickable(1);
+// COMMENT: {8/10/2009 3:21:23 PM}				this->GetPropCollection()->AddItem(this->MapImageActor3);
+// COMMENT: {8/10/2009 3:21:23 PM}			}
+			//}}
 
 			// load display colors
 			this->DisplayColors.Serialize(bStoring, wphast_id);
@@ -1483,6 +1511,11 @@ void CWPhastDoc::DeleteContents()
 		this->m_pMapActor->Delete();
 		this->m_pMapActor = 0;
 	}
+	if (this->MapImageActor3)
+	{
+		this->MapImageActor3->Delete();
+		this->MapImageActor3 = 0;
+	}
 
 	// update geometry property sheet
 	// Note: can't call this->SetScale(1.0f, 1.0f, 1.0f);
@@ -1645,6 +1678,12 @@ void CWPhastDoc::SetScale(vtkFloatingPointType x, vtkFloatingPointType y, vtkFlo
 	{
 		this->m_pMapActor->SetScale(x, y, z);
 	}
+	//{{
+	if (this->MapImageActor3)
+	{
+		this->MapImageActor3->SetScale(x, y, z);
+	}
+	//}}
 
 	// set scale for all zones
 	//
@@ -3514,13 +3553,23 @@ void CWPhastDoc::New(const CNewModel& model)
 		pTree->SetTimeControl2(&this->m_pModel->m_timeControl2);
 	}
 
-	if (model.HasSiteMap())
+	if (model.HasSiteMap2())
 	{
 		ASSERT(this->m_pMapActor == NULL);
 		this->m_pMapActor = CMapActor::New();   // Note pixel(0,0) is the same size as all other pixels
-		this->m_pMapActor->SetSiteMap(model.GetSiteMap());
+// COMMENT: {8/11/2009 3:07:31 PM}		//{{
+// COMMENT: {8/11/2009 3:07:31 PM}		this->m_pMapActor->GetProperty()->SetOpacity(0.3);
+// COMMENT: {8/11/2009 3:07:31 PM}		//}}
+		this->m_pMapActor->SetSiteMap2(model.GetSiteMap2());
 		this->m_pMapActor->SetPickable(0);
 		this->GetPropCollection()->AddItem(this->m_pMapActor);
+// COMMENT: {8/10/2009 6:02:25 PM}		//{{
+// COMMENT: {8/10/2009 6:02:25 PM}		this->MapImageActor3 = CMapImageActor3::New();
+// COMMENT: {8/10/2009 6:02:25 PM}		this->MapImageActor3->SetFileName(model.GetSiteMap().m_fileName.c_str());
+// COMMENT: {8/10/2009 6:02:25 PM}		this->MapImageActor3->SetWorldTransform(model.GetSiteMap().GetWorldTransform());
+// COMMENT: {8/10/2009 6:02:25 PM}		this->MapImageActor3->SetPickable(1);
+// COMMENT: {8/10/2009 6:02:25 PM}		this->GetPropCollection()->AddItem(this->MapImageActor3);
+// COMMENT: {8/10/2009 6:02:25 PM}		//}}
 	}
 
 	// reset tree control

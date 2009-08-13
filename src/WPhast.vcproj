@@ -800,11 +800,23 @@
 				>
 			</File>
 			<File
+				RelativePath=".\MapActor2.cpp"
+				>
+			</File>
+			<File
 				RelativePath="MapDialog.cpp"
 				>
 			</File>
 			<File
 				RelativePath="MapImageActor.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\MapImageActor2.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\MapImageActor3.cpp"
 				>
 			</File>
 			<File
@@ -1100,6 +1112,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\SiteMap2.cpp"
+				>
+			</File>
+			<File
 				RelativePath="Snap.cpp"
 				>
 			</File>
@@ -1292,6 +1308,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\vtkBoxWidget2.cxx"
+				>
+			</File>
+			<File
 				RelativePath="vtkBoxWidgetEx.cpp"
 				>
 			</File>
@@ -1312,6 +1332,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\vtkOpenGLTexture2.cxx"
+				>
+			</File>
+			<File
 				RelativePath="vtkPlaneWidget2.cpp"
 				>
 			</File>
@@ -1321,6 +1345,10 @@
 			</File>
 			<File
 				RelativePath="vtkPropPickerFixed.cxx"
+				>
+			</File>
+			<File
+				RelativePath=".\vtkSimpleImageFilterExample2.cxx"
 				>
 			</File>
 			<File
@@ -1629,6 +1657,42 @@
 				</File>
 				<File
 					RelativePath=".\srcinput\Data_source.cpp"
+					>
+					<FileConfiguration
+						Name="cppunit|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="AutoRelease|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="AutoDebug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\srcinput\Domain.cpp"
 					>
 					<FileConfiguration
 						Name="cppunit|Win32"
@@ -5036,11 +5100,23 @@
 				>
 			</File>
 			<File
+				RelativePath=".\MapActor2.h"
+				>
+			</File>
+			<File
 				RelativePath="MapDialog.h"
 				>
 			</File>
 			<File
 				RelativePath="MapImageActor.h"
+				>
+			</File>
+			<File
+				RelativePath=".\MapImageActor2.h"
+				>
+			</File>
+			<File
+				RelativePath=".\MapImageActor3.h"
 				>
 			</File>
 			<File
@@ -5368,6 +5444,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\SiteMap2.h"
+				>
+			</File>
+			<File
 				RelativePath="Snap.h"
 				>
 			</File>
@@ -5504,6 +5584,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\vtkBoxWidget2.h"
+				>
+			</File>
+			<File
 				RelativePath="vtkBoxWidgetEx.h"
 				>
 			</File>
@@ -5524,6 +5608,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\vtkOpenGLTexture2.h"
+				>
+			</File>
+			<File
 				RelativePath="vtkPlaneWidget2.h"
 				>
 			</File>
@@ -5533,6 +5621,10 @@
 			</File>
 			<File
 				RelativePath="vtkPropPickerFixed.h"
+				>
+			</File>
+			<File
+				RelativePath=".\vtkSimpleImageFilterExample2.h"
 				>
 			</File>
 			<File
@@ -5832,6 +5924,10 @@
 				</File>
 				<File
 					RelativePath=".\srcinput\Data_source.h"
+					>
+				</File>
+				<File
+					RelativePath=".\srcinput\Domain.h"
 					>
 				</File>
 				<File
@@ -6863,6 +6959,14 @@
 		</File>
 		<File
 			RelativePath="ReadMe.txt"
+			>
+		</File>
+		<File
+			RelativePath="..\..\..\..\..\..\..\3RDPARTY\vtk-4-2-1-bin-mem-VS8\Common\debug\vtkCommon.bsc"
+			>
+		</File>
+		<File
+			RelativePath="..\..\..\..\..\..\..\3RDPARTY\vtk-4-2-1-bin-mem-VS8\Hybrid\debug\vtkHybrid.bsc"
 			>
 		</File>
 		<File

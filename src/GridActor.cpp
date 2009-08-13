@@ -20,6 +20,8 @@
 #include <vtkPolyData.h>
 #include <vtkUnstructuredGrid.h>
 #include <vtkImplicitPlaneWidget.h>
+#include <vtkBoxWidget.h>
+#include "vtkBoxWidget2.h"
 #include "GridLineWidget.h"
 #include "GridLineMoveMemento.h"
 
@@ -61,6 +63,13 @@ CGridActor::CGridActor(void)
 	, ScaleTransform(0)
 	, UnitsTransform(0)
 	, LinePicker(0)
+#if defined(GRID_WIDGET)
+	, CubeSource(0)
+	, CubeMapper(0)
+	, CubeActor(0)
+	, BoxWidget(0)
+#endif
+
 {
 	this->m_pGeometryFilter = vtkGeometryFilter::New();
 
@@ -94,6 +103,9 @@ CGridActor::CGridActor(void)
 	for (int i = 0; i < 6; ++i)
 	{
 		this->PlaneSources[i] = vtkPlaneSource::New();
+// COMMENT: {8/4/2009 8:29:37 PM}		//{{
+// COMMENT: {8/4/2009 8:29:37 PM}		if (i == 5) this->PlaneSources[i]->SetNormal(-1, 0, 0);
+// COMMENT: {8/4/2009 8:29:37 PM}		//}}
 		this->PlaneMappers[i] = vtkPolyDataMapper::New();
 		this->PlaneMappers[i]->SetInput(this->PlaneSources[i]->GetOutput());
 		this->PlaneActors[i]  = vtkLODActor::New();
@@ -112,10 +124,38 @@ CGridActor::CGridActor(void)
 	}
 	this->LinePicker = vtkCellPicker::New();
 	this->LinePicker->SetTolerance(0.002);
+
+#if defined(GRID_WIDGET)
+	this->CubeSource = vtkCubeSource::New();
+	this->CubeMapper = vtkPolyDataMapper::New();
+	this->CubeMapper->SetInput(this->CubeSource->GetOutput());
+	this->CubeActor  = vtkActor::New();
+	this->CubeActor->SetMapper(this->CubeMapper);
+	this->HandleSize = 0.008 / 1.5;
+	this->BoxWidget = vtkBoxWidget2::New();
+#endif
 }
 
 CGridActor::~CGridActor(void)
 {
+#if defined(GRID_WIDGET)
+	if (this->CubeSource)
+	{
+		this->CubeSource->Delete();
+	}
+	if (this->CubeMapper)
+	{
+		this->CubeMapper->Delete();
+	}
+	if (this->CubeActor)
+	{
+		this->CubeActor->Delete();
+	}
+	if (this->BoxWidget)
+	{
+		this->BoxWidget->Delete();
+	}
+#endif
 	if (this->LinePicker)
 	{
 		this->LinePicker->Delete();
@@ -581,6 +621,18 @@ void CGridActor::Setup(const CUnits& units)
 					// this insert is ok
 					VERIFY(this->ValueToIndex[0].insert(std::map<vtkFloatingPointType, int>::value_type(t[0], i)).second);
 				}
+#if defined(GRID_WIDGET)
+				if (i == 0 && j == 0 && k == 0)
+				{
+					//this->CubeSource->SetCenter(t[0], t[1], t[2]);
+					this->Center[0] = t[0];
+					this->Center[1] = t[1];
+					this->Center[2] = t[2];
+// COMMENT: {7/22/2009 10:36:57 PM}					this->CubeSource->SetXLength(500);
+// COMMENT: {7/22/2009 10:36:57 PM}					this->CubeSource->SetYLength(500);
+// COMMENT: {7/22/2009 10:36:57 PM}					this->CubeSource->SetZLength(500);
+				}
+#endif
 				points->InsertPoint(offset, t);
 			}
 		}
@@ -729,6 +781,17 @@ void CGridActor::SetEnabled(int enabling)
 		i->AddObserver(vtkCommand::CharEvent, 
 			this->EventCallbackCommand, 10);		
 
+#if defined(GRID_WIDGET)
+		i->AddObserver(vtkCommand::ModifiedEvent, 
+			this->EventCallbackCommand, 10);		
+		this->SizeHandles();
+		this->CurrentRenderer->AddActor(this->CubeActor);
+		this->BoxWidget->SetProp3D(this);
+		this->BoxWidget->SetInteractor(i);
+		this->BoxWidget->SetPlaceFactor(1.0);
+		this->BoxWidget->PlaceWidget(this->GetBounds());
+		this->BoxWidget->On();
+#endif
 	}
 
 	else //disabling-------------------------------------------------------------
@@ -741,6 +804,20 @@ void CGridActor::SetEnabled(int enabling)
 		}
 
 		this->Enabled = 0;
+
+#if defined(GRID_WIDGET)
+		// remove handle
+		this->CurrentRenderer->RemoveActor(this->CubeActor);
+		if (this->Interactor)
+		{
+			this->BoxWidget->SetProp3D(0);
+			if (this->BoxWidget && this->BoxWidget->GetEnabled())
+			{
+				this->BoxWidget->SetEnabled(enabling);
+			}
+			this->Interactor->Render();
+		}
+#endif
 
 		// don't listen for events any more
 		if (this->Interactor)
@@ -805,6 +882,12 @@ void CGridActor::ProcessEvents(vtkObject* object, unsigned long event, void* cli
 		ASSERT(object == self->PlaneWidget);
 		self->State = CGridActor::Dragging;
 		break;
+
+#if defined(GRID_WIDGET)
+	case vtkCommand::ModifiedEvent:
+		self->SizeHandles();
+		break;
+#endif
 	}
 }
 
@@ -859,238 +942,238 @@ void CGridActor::OnMouseMove()
 #endif
 	TRACE("CGridActor::OnMouseMove X = %d, Y= %d\n", X, Y);
 
-	int nPlane;
-	if (this->PlanePicker->Pick(X, Y, 0.0, this->CurrentRenderer))
-	{
-		vtkActor* pActor = this->PlanePicker->GetActor();
-		for (int i = 0; i < 6; ++i)
-		{
-			if (this->PlaneActors[i] == pActor)
-			{
-                nPlane = i;
-				break;
-			}
-		}
-	}
-	else
-	{
-		this->AxisIndex = -1;
-		this->PlaneWidget->SetInteractor(this->Interactor);
-		this->PlaneWidget->EnabledOff();
-		for (int i = 0; i < 6; ++i)
-		{
-			this->PlaneActors[i]->GetProperty()->SetOpacity(0.1);
-		}
-		this->Interactor->Render();
-		return;
-	}
+// COMMENT: {7/23/2009 3:45:23 PM}	int nPlane;
+// COMMENT: {7/23/2009 3:45:23 PM}	if (this->PlanePicker->Pick(X, Y, 0.0, this->CurrentRenderer))
+// COMMENT: {7/23/2009 3:45:23 PM}	{
+// COMMENT: {7/23/2009 3:45:23 PM}		vtkActor* pActor = this->PlanePicker->GetActor();
+// COMMENT: {7/23/2009 3:45:23 PM}		for (int i = 0; i < 6; ++i)
+// COMMENT: {7/23/2009 3:45:23 PM}		{
+// COMMENT: {7/23/2009 3:45:23 PM}			if (this->PlaneActors[i] == pActor)
+// COMMENT: {7/23/2009 3:45:23 PM}			{
+// COMMENT: {7/23/2009 3:45:23 PM}                nPlane = i;
+// COMMENT: {7/23/2009 3:45:23 PM}				break;
+// COMMENT: {7/23/2009 3:45:23 PM}			}
+// COMMENT: {7/23/2009 3:45:23 PM}		}
+// COMMENT: {7/23/2009 3:45:23 PM}	}
+// COMMENT: {7/23/2009 3:45:23 PM}	else
+// COMMENT: {7/23/2009 3:45:23 PM}	{
+// COMMENT: {7/23/2009 3:45:23 PM}		this->AxisIndex = -1;
+// COMMENT: {7/23/2009 3:45:23 PM}		this->PlaneWidget->SetInteractor(this->Interactor);
+// COMMENT: {7/23/2009 3:45:23 PM}		this->PlaneWidget->EnabledOff();
+// COMMENT: {7/23/2009 3:45:23 PM}		for (int i = 0; i < 6; ++i)
+// COMMENT: {7/23/2009 3:45:23 PM}		{
+// COMMENT: {7/23/2009 3:45:23 PM}			this->PlaneActors[i]->GetProperty()->SetOpacity(0.1);
+// COMMENT: {7/23/2009 3:45:23 PM}		}
+// COMMENT: {7/23/2009 3:45:23 PM}		this->Interactor->Render();
+// COMMENT: {7/23/2009 3:45:23 PM}		return;
+// COMMENT: {7/23/2009 3:45:23 PM}	}
 
-	this->LinePicker->PickFromListOn();
-	this->Actor->PickableOn();
-	this->LinePicker->AddPickList(this->Actor);
-
-	this->LinePicker->Pick(X, Y, 0.0, ren);
-	vtkAssemblyPath *path = this->LinePicker->GetPath();
-
-	if (path != 0)
-	{
-		vtkActor* pActor = vtkActor::SafeDownCast(path->GetFirstNode()->GetProp());
-		ASSERT(path->GetNumberOfItems() == 1);
-		ASSERT(pActor);
-		ASSERT(pActor == this->Actor);
-
-		vtkIdType n = this->LinePicker->GetCellId();
-		TRACE("CellId = %d\n", n);
-		vtkFloatingPointType* pt = this->LinePicker->GetPickPosition();
-		if (vtkDataSet* pDataSet = this->LinePicker->GetDataSet())
-		{
-			vtkCell* pCell = pDataSet->GetCell(n);
-			if (pCell->GetCellType() == VTK_LINE)
-			{
-				ASSERT(pCell->GetNumberOfPoints() == 2);				
-				if (vtkPoints* pPoints = pCell->GetPoints())
-				{
-					pPoints->GetPoint(0, this->CurrentPoint);
-					vtkFloatingPointType* pt0 = this->CurrentPoint;
-					vtkFloatingPointType* pt1 = pPoints->GetPoint(1);
-					TRACE("pt0[0] = %g, pt0[1] = %g, pt0[2] = %g\n", pt0[0], pt0[1], pt0[2]);
-					TRACE("pt1[0] = %g, pt1[1] = %g, pt1[2] = %g\n", pt1[0], pt1[1], pt1[2]);
-
-					vtkFloatingPointType length;
-					vtkFloatingPointType bounds[6];
-					this->GetBounds(bounds);
-
-					if (nPlane == 0 && ( pt0[2] == this->m_max[2] && pt1[2] == this->m_max[2] )
-						||
-						nPlane == 1 && ( pt0[2] == this->m_min[2] && pt1[2] == this->m_min[2] ) )
-					{
-						// +z / -z
-						//
-						if (pt0[0] == pt1[0])
-						{
-							if (this->PlaneWidget)
-							{
-								this->AxisIndex = 0;
-								this->PlaneWidget->SetInteractor(this->Interactor);
-								this->PlaneWidget->SetInitialPickPosition(this->CurrentPoint);
-								this->PlaneWidget->NormalToXAxisOn();
-								length = (bounds[1] - bounds[0]);
-								bounds[0] -= length * 4;
-								bounds[1] += length * 4;
-								this->PlaneWidget->PlaceWidget(bounds);
-								this->PlaneWidget->SetOrigin(pt0[0], 0, 0);
-								this->PlaneWidget->EnabledOn();
-								this->PlaneWidget->GetPlaneProperty()->SetColor(1, 0, 0);
-								this->PlaneWidget->GetSelectedPlaneProperty()->SetColor(1, 0, 0);
-								this->PlanePicker->GetActor()->GetProperty()->SetOpacity(0.20);
-								this->Interactor->Render();
-							}
-						}
-						else if (pt0[1] == pt1[1])
-						{
-							if (this->PlaneWidget)
-							{
-								this->AxisIndex = 1;
-								this->PlaneWidget->SetInteractor(this->Interactor);
-								this->PlaneWidget->SetInitialPickPosition(this->CurrentPoint);
-								this->PlaneWidget->NormalToYAxisOn();
-								length = (bounds[3] - bounds[2]);
-								bounds[2] -= length * 4;
-								bounds[3] += length * 4;
-								this->PlaneWidget->PlaceWidget(bounds);
-								this->PlaneWidget->SetOrigin(0, pt0[1], 0);
-								this->PlaneWidget->EnabledOn();
-								this->PlaneWidget->GetPlaneProperty()->SetColor(0, 1, 0);
-								this->PlaneWidget->GetSelectedPlaneProperty()->SetColor(0, 1, 0);
-								this->PlanePicker->GetActor()->GetProperty()->SetOpacity(0.20);
-								this->Interactor->Render();
-							}
-						}
-						else
-						{
-							ASSERT(FALSE);
-						}
-					}
-					if (nPlane == 2 && ( pt0[1] == this->m_max[1] && pt1[1] == this->m_max[1] )
-						||
-						nPlane == 3 && ( pt0[1] == this->m_min[1] && pt1[1] == this->m_min[1] ) )
-					{
-						// -y / +y
-						//
-						if (pt0[0] == pt1[0])
-						{
-							if (this->PlaneWidget)
-							{
-								this->AxisIndex = 0;
-								this->PlaneWidget->SetInteractor(this->Interactor);
-								this->PlaneWidget->SetInitialPickPosition(this->CurrentPoint);
-								this->PlaneWidget->NormalToXAxisOn();
-								length = (bounds[1] - bounds[0]);
-								bounds[0] -= length * 4;
-								bounds[1] += length * 4;
-								this->PlaneWidget->PlaceWidget(bounds);
-								this->PlaneWidget->SetOrigin(pt0[0], 0, 0);
-								this->PlaneWidget->EnabledOn();
-								this->PlaneWidget->GetPlaneProperty()->SetColor(1, 0, 0);
-								this->PlaneWidget->GetSelectedPlaneProperty()->SetColor(1, 0, 0);
-								this->PlanePicker->GetActor()->GetProperty()->SetOpacity(0.20);
-								this->Interactor->Render();
-							}
-						}
-						else if (pt0[2] == pt1[2])
-						{
-							if (this->PlaneWidget)
-							{
-								this->AxisIndex = 2;
-								this->PlaneWidget->SetInteractor(this->Interactor);
-								this->PlaneWidget->SetInitialPickPosition(this->CurrentPoint);
-								this->PlaneWidget->NormalToZAxisOn();
-								length = (bounds[5] - bounds[4]);
-								bounds[4] -= length * 4;
-								bounds[5] += length * 4;
-								this->PlaneWidget->PlaceWidget(bounds);
-								this->PlaneWidget->SetOrigin(0, 0, pt0[2]);
-								this->PlaneWidget->EnabledOn();
-								this->PlaneWidget->GetPlaneProperty()->SetColor(0, 0, 1);
-								this->PlaneWidget->GetSelectedPlaneProperty()->SetColor(0, 0, 1);
-								this->PlanePicker->GetActor()->GetProperty()->SetOpacity(0.20);
-								this->Interactor->Render();
-							}
-						}
-						else
-						{
-							ASSERT(FALSE);
-						}
-					}
-					if (nPlane == 4 && ( pt0[0] == this->m_max[0] && pt1[0] == this->m_max[0] )
-						||
-						nPlane == 5 && ( pt0[0] == this->m_min[0] && pt1[0] == this->m_min[0] ) )
-					{
-						// +x / -x
-						//
-						if (pt0[1] == pt1[1])
-						{
-							if (this->PlaneWidget)
-							{
-								this->AxisIndex = 1;
-								this->PlaneWidget->SetInteractor(this->Interactor);
-								this->PlaneWidget->SetInitialPickPosition(this->CurrentPoint);
-								this->PlaneWidget->NormalToYAxisOn();
-								length = (bounds[3] - bounds[2]);
-								bounds[2] -= length * 4;
-								bounds[3] += length * 4;
-								this->PlaneWidget->PlaceWidget(bounds);
-								this->PlaneWidget->SetOrigin(0, pt0[1], 0);
-								this->PlaneWidget->EnabledOn();
-								this->PlaneWidget->GetPlaneProperty()->SetColor(0, 1, 0);
-								this->PlaneWidget->GetSelectedPlaneProperty()->SetColor(0, 1, 0);
-								this->PlanePicker->GetActor()->GetProperty()->SetOpacity(0.20);
-								this->Interactor->Render();
-							}
-						}
-						else if (pt0[2] == pt1[2])
-						{
-							if (this->PlaneWidget)
-							{
-								this->AxisIndex = 2;
-								this->PlaneWidget->SetInteractor(this->Interactor);
-								this->PlaneWidget->SetInitialPickPosition(this->CurrentPoint);
-								this->PlaneWidget->NormalToZAxisOn();
-								length = (bounds[5] - bounds[4]);
-								bounds[4] -= length * 4;
-								bounds[5] += length * 4;
-								this->PlaneWidget->PlaceWidget(bounds);
-								this->PlaneWidget->SetOrigin(0, 0, pt0[2]);
-								this->PlaneWidget->EnabledOn();
-								this->PlaneWidget->GetPlaneProperty()->SetColor(0, 0, 1);
-								this->PlaneWidget->GetSelectedPlaneProperty()->SetColor(0, 0, 1);
-								this->PlanePicker->GetActor()->GetProperty()->SetOpacity(0.20);
-								this->Interactor->Render();
-							}
-						}
-						else
-						{
-							ASSERT(FALSE);
-						}
-					}
-				}
-			}
-		}
-		TRACE("pt[0] = %g, pt[1] = %g, pt[2] = %g\n", pt[0], pt[1], pt[2]);
-	}
-	else
-	{
-		this->AxisIndex = -1;
-		this->PlaneWidget->SetInteractor(this->Interactor);
-		this->PlaneWidget->EnabledOff();
-		for (int i = 0; i < 6; ++i)
-		{
-			this->PlaneActors[i]->GetProperty()->SetOpacity(0.1);
-		}
-		this->Interactor->Render();
-	}
-	this->LinePicker->DeletePickList(this->Actor);
-	this->Actor->PickableOff();
+// COMMENT: {7/23/2009 3:45:54 PM}	this->LinePicker->PickFromListOn();
+// COMMENT: {7/23/2009 3:45:54 PM}	this->Actor->PickableOn();
+// COMMENT: {7/23/2009 3:45:54 PM}	this->LinePicker->AddPickList(this->Actor);
+// COMMENT: {7/23/2009 3:45:54 PM}
+// COMMENT: {7/23/2009 3:45:54 PM}	this->LinePicker->Pick(X, Y, 0.0, ren);
+// COMMENT: {7/23/2009 3:45:54 PM}	vtkAssemblyPath *path = this->LinePicker->GetPath();
+// COMMENT: {7/23/2009 3:45:54 PM}
+// COMMENT: {7/23/2009 3:45:54 PM}	if (path != 0)
+// COMMENT: {7/23/2009 3:45:54 PM}	{
+// COMMENT: {7/23/2009 3:45:54 PM}		vtkActor* pActor = vtkActor::SafeDownCast(path->GetFirstNode()->GetProp());
+// COMMENT: {7/23/2009 3:45:54 PM}		ASSERT(path->GetNumberOfItems() == 1);
+// COMMENT: {7/23/2009 3:45:54 PM}		ASSERT(pActor);
+// COMMENT: {7/23/2009 3:45:54 PM}		ASSERT(pActor == this->Actor);
+// COMMENT: {7/23/2009 3:45:54 PM}
+// COMMENT: {7/23/2009 3:45:54 PM}		vtkIdType n = this->LinePicker->GetCellId();
+// COMMENT: {7/23/2009 3:45:54 PM}		TRACE("CellId = %d\n", n);
+// COMMENT: {7/23/2009 3:45:54 PM}		vtkFloatingPointType* pt = this->LinePicker->GetPickPosition();
+// COMMENT: {7/23/2009 3:45:54 PM}		if (vtkDataSet* pDataSet = this->LinePicker->GetDataSet())
+// COMMENT: {7/23/2009 3:45:54 PM}		{
+// COMMENT: {7/23/2009 3:45:54 PM}			vtkCell* pCell = pDataSet->GetCell(n);
+// COMMENT: {7/23/2009 3:45:54 PM}			if (pCell->GetCellType() == VTK_LINE)
+// COMMENT: {7/23/2009 3:45:54 PM}			{
+// COMMENT: {7/23/2009 3:45:54 PM}				ASSERT(pCell->GetNumberOfPoints() == 2);				
+// COMMENT: {7/23/2009 3:45:54 PM}				if (vtkPoints* pPoints = pCell->GetPoints())
+// COMMENT: {7/23/2009 3:45:54 PM}				{
+// COMMENT: {7/23/2009 3:45:54 PM}					pPoints->GetPoint(0, this->CurrentPoint);
+// COMMENT: {7/23/2009 3:45:54 PM}					vtkFloatingPointType* pt0 = this->CurrentPoint;
+// COMMENT: {7/23/2009 3:45:54 PM}					vtkFloatingPointType* pt1 = pPoints->GetPoint(1);
+// COMMENT: {7/23/2009 3:45:54 PM}					TRACE("pt0[0] = %g, pt0[1] = %g, pt0[2] = %g\n", pt0[0], pt0[1], pt0[2]);
+// COMMENT: {7/23/2009 3:45:54 PM}					TRACE("pt1[0] = %g, pt1[1] = %g, pt1[2] = %g\n", pt1[0], pt1[1], pt1[2]);
+// COMMENT: {7/23/2009 3:45:54 PM}
+// COMMENT: {7/23/2009 3:45:54 PM}					vtkFloatingPointType length;
+// COMMENT: {7/23/2009 3:45:54 PM}					vtkFloatingPointType bounds[6];
+// COMMENT: {7/23/2009 3:45:54 PM}					this->GetBounds(bounds);
+// COMMENT: {7/23/2009 3:45:54 PM}
+// COMMENT: {7/23/2009 3:45:54 PM}					if (nPlane == 0 && ( pt0[2] == this->m_max[2] && pt1[2] == this->m_max[2] )
+// COMMENT: {7/23/2009 3:45:54 PM}						||
+// COMMENT: {7/23/2009 3:45:54 PM}						nPlane == 1 && ( pt0[2] == this->m_min[2] && pt1[2] == this->m_min[2] ) )
+// COMMENT: {7/23/2009 3:45:54 PM}					{
+// COMMENT: {7/23/2009 3:45:54 PM}						// +z / -z
+// COMMENT: {7/23/2009 3:45:54 PM}						//
+// COMMENT: {7/23/2009 3:45:54 PM}						if (pt0[0] == pt1[0])
+// COMMENT: {7/23/2009 3:45:54 PM}						{
+// COMMENT: {7/23/2009 3:45:54 PM}							if (this->PlaneWidget)
+// COMMENT: {7/23/2009 3:45:54 PM}							{
+// COMMENT: {7/23/2009 3:45:54 PM}								this->AxisIndex = 0;
+// COMMENT: {7/23/2009 3:45:54 PM}								this->PlaneWidget->SetInteractor(this->Interactor);
+// COMMENT: {7/23/2009 3:45:54 PM}								this->PlaneWidget->SetInitialPickPosition(this->CurrentPoint);
+// COMMENT: {7/23/2009 3:45:54 PM}								this->PlaneWidget->NormalToXAxisOn();
+// COMMENT: {7/23/2009 3:45:54 PM}								length = (bounds[1] - bounds[0]);
+// COMMENT: {7/23/2009 3:45:54 PM}								bounds[0] -= length * 4;
+// COMMENT: {7/23/2009 3:45:54 PM}								bounds[1] += length * 4;
+// COMMENT: {7/23/2009 3:45:54 PM}								this->PlaneWidget->PlaceWidget(bounds);
+// COMMENT: {7/23/2009 3:45:54 PM}								this->PlaneWidget->SetOrigin(pt0[0], 0, 0);
+// COMMENT: {7/23/2009 3:45:54 PM}								this->PlaneWidget->EnabledOn();
+// COMMENT: {7/23/2009 3:45:54 PM}								this->PlaneWidget->GetPlaneProperty()->SetColor(1, 0, 0);
+// COMMENT: {7/23/2009 3:45:54 PM}								this->PlaneWidget->GetSelectedPlaneProperty()->SetColor(1, 0, 0);
+// COMMENT: {7/23/2009 3:45:54 PM}								this->PlanePicker->GetActor()->GetProperty()->SetOpacity(0.20);
+// COMMENT: {7/23/2009 3:45:54 PM}								this->Interactor->Render();
+// COMMENT: {7/23/2009 3:45:54 PM}							}
+// COMMENT: {7/23/2009 3:45:54 PM}						}
+// COMMENT: {7/23/2009 3:45:54 PM}						else if (pt0[1] == pt1[1])
+// COMMENT: {7/23/2009 3:45:54 PM}						{
+// COMMENT: {7/23/2009 3:45:54 PM}							if (this->PlaneWidget)
+// COMMENT: {7/23/2009 3:45:54 PM}							{
+// COMMENT: {7/23/2009 3:45:54 PM}								this->AxisIndex = 1;
+// COMMENT: {7/23/2009 3:45:54 PM}								this->PlaneWidget->SetInteractor(this->Interactor);
+// COMMENT: {7/23/2009 3:45:54 PM}								this->PlaneWidget->SetInitialPickPosition(this->CurrentPoint);
+// COMMENT: {7/23/2009 3:45:54 PM}								this->PlaneWidget->NormalToYAxisOn();
+// COMMENT: {7/23/2009 3:45:54 PM}								length = (bounds[3] - bounds[2]);
+// COMMENT: {7/23/2009 3:45:54 PM}								bounds[2] -= length * 4;
+// COMMENT: {7/23/2009 3:45:54 PM}								bounds[3] += length * 4;
+// COMMENT: {7/23/2009 3:45:54 PM}								this->PlaneWidget->PlaceWidget(bounds);
+// COMMENT: {7/23/2009 3:45:54 PM}								this->PlaneWidget->SetOrigin(0, pt0[1], 0);
+// COMMENT: {7/23/2009 3:45:54 PM}								this->PlaneWidget->EnabledOn();
+// COMMENT: {7/23/2009 3:45:54 PM}								this->PlaneWidget->GetPlaneProperty()->SetColor(0, 1, 0);
+// COMMENT: {7/23/2009 3:45:54 PM}								this->PlaneWidget->GetSelectedPlaneProperty()->SetColor(0, 1, 0);
+// COMMENT: {7/23/2009 3:45:54 PM}								this->PlanePicker->GetActor()->GetProperty()->SetOpacity(0.20);
+// COMMENT: {7/23/2009 3:45:54 PM}								this->Interactor->Render();
+// COMMENT: {7/23/2009 3:45:54 PM}							}
+// COMMENT: {7/23/2009 3:45:54 PM}						}
+// COMMENT: {7/23/2009 3:45:54 PM}						else
+// COMMENT: {7/23/2009 3:45:54 PM}						{
+// COMMENT: {7/23/2009 3:45:54 PM}							ASSERT(FALSE);
+// COMMENT: {7/23/2009 3:45:54 PM}						}
+// COMMENT: {7/23/2009 3:45:54 PM}					}
+// COMMENT: {7/23/2009 3:45:54 PM}					if (nPlane == 2 && ( pt0[1] == this->m_max[1] && pt1[1] == this->m_max[1] )
+// COMMENT: {7/23/2009 3:45:54 PM}						||
+// COMMENT: {7/23/2009 3:45:54 PM}						nPlane == 3 && ( pt0[1] == this->m_min[1] && pt1[1] == this->m_min[1] ) )
+// COMMENT: {7/23/2009 3:45:54 PM}					{
+// COMMENT: {7/23/2009 3:45:54 PM}						// -y / +y
+// COMMENT: {7/23/2009 3:45:54 PM}						//
+// COMMENT: {7/23/2009 3:45:54 PM}						if (pt0[0] == pt1[0])
+// COMMENT: {7/23/2009 3:45:54 PM}						{
+// COMMENT: {7/23/2009 3:45:54 PM}							if (this->PlaneWidget)
+// COMMENT: {7/23/2009 3:45:54 PM}							{
+// COMMENT: {7/23/2009 3:45:54 PM}								this->AxisIndex = 0;
+// COMMENT: {7/23/2009 3:45:54 PM}								this->PlaneWidget->SetInteractor(this->Interactor);
+// COMMENT: {7/23/2009 3:45:54 PM}								this->PlaneWidget->SetInitialPickPosition(this->CurrentPoint);
+// COMMENT: {7/23/2009 3:45:54 PM}								this->PlaneWidget->NormalToXAxisOn();
+// COMMENT: {7/23/2009 3:45:54 PM}								length = (bounds[1] - bounds[0]);
+// COMMENT: {7/23/2009 3:45:54 PM}								bounds[0] -= length * 4;
+// COMMENT: {7/23/2009 3:45:54 PM}								bounds[1] += length * 4;
+// COMMENT: {7/23/2009 3:45:54 PM}								this->PlaneWidget->PlaceWidget(bounds);
+// COMMENT: {7/23/2009 3:45:54 PM}								this->PlaneWidget->SetOrigin(pt0[0], 0, 0);
+// COMMENT: {7/23/2009 3:45:54 PM}								this->PlaneWidget->EnabledOn();
+// COMMENT: {7/23/2009 3:45:54 PM}								this->PlaneWidget->GetPlaneProperty()->SetColor(1, 0, 0);
+// COMMENT: {7/23/2009 3:45:54 PM}								this->PlaneWidget->GetSelectedPlaneProperty()->SetColor(1, 0, 0);
+// COMMENT: {7/23/2009 3:45:54 PM}								this->PlanePicker->GetActor()->GetProperty()->SetOpacity(0.20);
+// COMMENT: {7/23/2009 3:45:54 PM}								this->Interactor->Render();
+// COMMENT: {7/23/2009 3:45:54 PM}							}
+// COMMENT: {7/23/2009 3:45:54 PM}						}
+// COMMENT: {7/23/2009 3:45:54 PM}						else if (pt0[2] == pt1[2])
+// COMMENT: {7/23/2009 3:45:54 PM}						{
+// COMMENT: {7/23/2009 3:45:54 PM}							if (this->PlaneWidget)
+// COMMENT: {7/23/2009 3:45:54 PM}							{
+// COMMENT: {7/23/2009 3:45:54 PM}								this->AxisIndex = 2;
+// COMMENT: {7/23/2009 3:45:54 PM}								this->PlaneWidget->SetInteractor(this->Interactor);
+// COMMENT: {7/23/2009 3:45:54 PM}								this->PlaneWidget->SetInitialPickPosition(this->CurrentPoint);
+// COMMENT: {7/23/2009 3:45:54 PM}								this->PlaneWidget->NormalToZAxisOn();
+// COMMENT: {7/23/2009 3:45:54 PM}								length = (bounds[5] - bounds[4]);
+// COMMENT: {7/23/2009 3:45:54 PM}								bounds[4] -= length * 4;
+// COMMENT: {7/23/2009 3:45:54 PM}								bounds[5] += length * 4;
+// COMMENT: {7/23/2009 3:45:54 PM}								this->PlaneWidget->PlaceWidget(bounds);
+// COMMENT: {7/23/2009 3:45:54 PM}								this->PlaneWidget->SetOrigin(0, 0, pt0[2]);
+// COMMENT: {7/23/2009 3:45:54 PM}								this->PlaneWidget->EnabledOn();
+// COMMENT: {7/23/2009 3:45:54 PM}								this->PlaneWidget->GetPlaneProperty()->SetColor(0, 0, 1);
+// COMMENT: {7/23/2009 3:45:54 PM}								this->PlaneWidget->GetSelectedPlaneProperty()->SetColor(0, 0, 1);
+// COMMENT: {7/23/2009 3:45:54 PM}								this->PlanePicker->GetActor()->GetProperty()->SetOpacity(0.20);
+// COMMENT: {7/23/2009 3:45:54 PM}								this->Interactor->Render();
+// COMMENT: {7/23/2009 3:45:54 PM}							}
+// COMMENT: {7/23/2009 3:45:54 PM}						}
+// COMMENT: {7/23/2009 3:45:54 PM}						else
+// COMMENT: {7/23/2009 3:45:54 PM}						{
+// COMMENT: {7/23/2009 3:45:54 PM}							ASSERT(FALSE);
+// COMMENT: {7/23/2009 3:45:54 PM}						}
+// COMMENT: {7/23/2009 3:45:54 PM}					}
+// COMMENT: {7/23/2009 3:45:54 PM}					if (nPlane == 4 && ( pt0[0] == this->m_max[0] && pt1[0] == this->m_max[0] )
+// COMMENT: {7/23/2009 3:45:54 PM}						||
+// COMMENT: {7/23/2009 3:45:54 PM}						nPlane == 5 && ( pt0[0] == this->m_min[0] && pt1[0] == this->m_min[0] ) )
+// COMMENT: {7/23/2009 3:45:54 PM}					{
+// COMMENT: {7/23/2009 3:45:54 PM}						// +x / -x
+// COMMENT: {7/23/2009 3:45:54 PM}						//
+// COMMENT: {7/23/2009 3:45:54 PM}						if (pt0[1] == pt1[1])
+// COMMENT: {7/23/2009 3:45:54 PM}						{
+// COMMENT: {7/23/2009 3:45:54 PM}							if (this->PlaneWidget)
+// COMMENT: {7/23/2009 3:45:54 PM}							{
+// COMMENT: {7/23/2009 3:45:54 PM}								this->AxisIndex = 1;
+// COMMENT: {7/23/2009 3:45:54 PM}								this->PlaneWidget->SetInteractor(this->Interactor);
+// COMMENT: {7/23/2009 3:45:54 PM}								this->PlaneWidget->SetInitialPickPosition(this->CurrentPoint);
+// COMMENT: {7/23/2009 3:45:54 PM}								this->PlaneWidget->NormalToYAxisOn();
+// COMMENT: {7/23/2009 3:45:54 PM}								length = (bounds[3] - bounds[2]);
+// COMMENT: {7/23/2009 3:45:54 PM}								bounds[2] -= length * 4;
+// COMMENT: {7/23/2009 3:45:54 PM}								bounds[3] += length * 4;
+// COMMENT: {7/23/2009 3:45:54 PM}								this->PlaneWidget->PlaceWidget(bounds);
+// COMMENT: {7/23/2009 3:45:54 PM}								this->PlaneWidget->SetOrigin(0, pt0[1], 0);
+// COMMENT: {7/23/2009 3:45:54 PM}								this->PlaneWidget->EnabledOn();
+// COMMENT: {7/23/2009 3:45:54 PM}								this->PlaneWidget->GetPlaneProperty()->SetColor(0, 1, 0);
+// COMMENT: {7/23/2009 3:45:54 PM}								this->PlaneWidget->GetSelectedPlaneProperty()->SetColor(0, 1, 0);
+// COMMENT: {7/23/2009 3:45:54 PM}								this->PlanePicker->GetActor()->GetProperty()->SetOpacity(0.20);
+// COMMENT: {7/23/2009 3:45:54 PM}								this->Interactor->Render();
+// COMMENT: {7/23/2009 3:45:54 PM}							}
+// COMMENT: {7/23/2009 3:45:54 PM}						}
+// COMMENT: {7/23/2009 3:45:54 PM}						else if (pt0[2] == pt1[2])
+// COMMENT: {7/23/2009 3:45:54 PM}						{
+// COMMENT: {7/23/2009 3:45:54 PM}							if (this->PlaneWidget)
+// COMMENT: {7/23/2009 3:45:54 PM}							{
+// COMMENT: {7/23/2009 3:45:54 PM}								this->AxisIndex = 2;
+// COMMENT: {7/23/2009 3:45:54 PM}								this->PlaneWidget->SetInteractor(this->Interactor);
+// COMMENT: {7/23/2009 3:45:54 PM}								this->PlaneWidget->SetInitialPickPosition(this->CurrentPoint);
+// COMMENT: {7/23/2009 3:45:54 PM}								this->PlaneWidget->NormalToZAxisOn();
+// COMMENT: {7/23/2009 3:45:54 PM}								length = (bounds[5] - bounds[4]);
+// COMMENT: {7/23/2009 3:45:54 PM}								bounds[4] -= length * 4;
+// COMMENT: {7/23/2009 3:45:54 PM}								bounds[5] += length * 4;
+// COMMENT: {7/23/2009 3:45:54 PM}								this->PlaneWidget->PlaceWidget(bounds);
+// COMMENT: {7/23/2009 3:45:54 PM}								this->PlaneWidget->SetOrigin(0, 0, pt0[2]);
+// COMMENT: {7/23/2009 3:45:54 PM}								this->PlaneWidget->EnabledOn();
+// COMMENT: {7/23/2009 3:45:54 PM}								this->PlaneWidget->GetPlaneProperty()->SetColor(0, 0, 1);
+// COMMENT: {7/23/2009 3:45:54 PM}								this->PlaneWidget->GetSelectedPlaneProperty()->SetColor(0, 0, 1);
+// COMMENT: {7/23/2009 3:45:54 PM}								this->PlanePicker->GetActor()->GetProperty()->SetOpacity(0.20);
+// COMMENT: {7/23/2009 3:45:54 PM}								this->Interactor->Render();
+// COMMENT: {7/23/2009 3:45:54 PM}							}
+// COMMENT: {7/23/2009 3:45:54 PM}						}
+// COMMENT: {7/23/2009 3:45:54 PM}						else
+// COMMENT: {7/23/2009 3:45:54 PM}						{
+// COMMENT: {7/23/2009 3:45:54 PM}							ASSERT(FALSE);
+// COMMENT: {7/23/2009 3:45:54 PM}						}
+// COMMENT: {7/23/2009 3:45:54 PM}					}
+// COMMENT: {7/23/2009 3:45:54 PM}				}
+// COMMENT: {7/23/2009 3:45:54 PM}			}
+// COMMENT: {7/23/2009 3:45:54 PM}		}
+// COMMENT: {7/23/2009 3:45:54 PM}		TRACE("pt[0] = %g, pt[1] = %g, pt[2] = %g\n", pt[0], pt[1], pt[2]);
+// COMMENT: {7/23/2009 3:45:54 PM}	}
+// COMMENT: {7/23/2009 3:45:54 PM}	else
+// COMMENT: {7/23/2009 3:45:54 PM}	{
+// COMMENT: {7/23/2009 3:45:54 PM}		this->AxisIndex = -1;
+// COMMENT: {7/23/2009 3:45:54 PM}		this->PlaneWidget->SetInteractor(this->Interactor);
+// COMMENT: {7/23/2009 3:45:54 PM}		this->PlaneWidget->EnabledOff();
+// COMMENT: {7/23/2009 3:45:54 PM}		for (int i = 0; i < 6; ++i)
+// COMMENT: {7/23/2009 3:45:54 PM}		{
+// COMMENT: {7/23/2009 3:45:54 PM}			this->PlaneActors[i]->GetProperty()->SetOpacity(0.1);
+// COMMENT: {7/23/2009 3:45:54 PM}		}
+// COMMENT: {7/23/2009 3:45:54 PM}		this->Interactor->Render();
+// COMMENT: {7/23/2009 3:45:54 PM}	}
+// COMMENT: {7/23/2009 3:45:54 PM}	this->LinePicker->DeletePickList(this->Actor);
+// COMMENT: {7/23/2009 3:45:54 PM}	this->Actor->PickableOff();
 }
 
 void CGridActor::OnLeftButtonUp()
@@ -1455,8 +1538,11 @@ void CGridActor::UpdatePoints(void)
 
 	// -x plane
 	this->PlaneSources[5]->SetOrigin(this->m_min[0], this->m_min[1], this->m_min[2]);
-	this->PlaneSources[5]->SetPoint1(this->m_min[0], this->m_min[1], this->m_max[2]);
+	//{{
 	this->PlaneSources[5]->SetPoint2(this->m_min[0], this->m_max[1], this->m_min[2]);
+	//}}
+	this->PlaneSources[5]->SetPoint1(this->m_min[0], this->m_min[1], this->m_max[2]);
+// COMMENT: {8/4/2009 8:29:15 PM}	this->PlaneSources[5]->SetPoint2(this->m_min[0], this->m_max[1], this->m_min[2]);
 	this->PlaneActors[5]->GetProperty()->SetColor(1, 0, 0);
 	this->PlaneActors[5]->GetProperty()->SetOpacity(0.1);
 }
@@ -1502,3 +1588,70 @@ void CGridActor::OnChar(void)
 		break;
 	}
 }
+
+#if defined(GRID_WIDGET)
+void CGridActor::SizeHandles()
+{
+	if (!this->Interactor) return;
+
+	if (!this->CurrentRenderer)
+	{
+		int X = this->Interactor->GetEventPosition()[0];
+		int Y = this->Interactor->GetEventPosition()[1];
+		this->CurrentRenderer = this->Interactor->FindPokedRenderer(X, Y);
+	}
+
+	//{{
+	this->CurrentRenderer->SetWorldPoint(this->Center[0], this->Center[1], this->Center[2], 1.0);
+	this->CurrentRenderer->WorldToDisplay();
+	double pt[4];
+	this->CurrentRenderer->GetDisplayPoint(pt);
+	char buffer[80];
+	::sprintf(buffer, "GetDisplayPoint = %g, %g, %g\n", pt[0], pt[1], pt[2]);
+	::OutputDebugString(buffer);
+
+	pt[0] -= 10;
+	pt[1] -= 10;
+	this->CurrentRenderer->SetDisplayPoint(pt[0], pt[1], pt[2]);
+
+	vtkCamera* camera = this->CurrentRenderer->GetActiveCamera();
+	double *vu = camera->GetViewUp();
+	::sprintf(buffer, "GetViewUp = %g, %g, %g\n", vu[0], vu[1], vu[2]);
+	if (vu[0] > .9)
+	{
+		camera->SetViewUp(1, 0, 0);
+	}
+	::OutputDebugString(buffer);
+
+	//{{
+	double zaxis[3];
+	zaxis[0] = 0.0;
+	zaxis[1] = 0.0;
+	zaxis[2] = 1.0;
+	//}}
+
+	double worldPt[4];
+	this->CurrentRenderer->DisplayToWorld();
+	this->CurrentRenderer->GetWorldPoint(worldPt);
+	if (worldPt[3] != 0)
+	{
+		worldPt[0] /= worldPt[3];
+		worldPt[1] /= worldPt[3];
+		worldPt[2] /= worldPt[3];
+		worldPt[3] = 1.0;
+	}
+	this->CubeSource->SetCenter(worldPt[0], worldPt[1], this->Center[2]);
+	//}}
+
+	double radius = CGlobal::ComputeRadius(this->CurrentRenderer);
+
+	//for(int i=0; i<7; i++)
+	{
+		double length = 2 * CGlobal::ComputeRadius(this->CurrentRenderer) * 0.004;
+		this->CubeSource->SetXLength(length);
+		this->CubeSource->SetYLength(length);
+		this->CubeSource->SetZLength(length);
+// COMMENT: {7/22/2009 10:03:07 PM}		this->HandleGeometry[i]->SetRadius(radius);
+	}
+}
+#endif

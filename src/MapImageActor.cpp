@@ -52,7 +52,8 @@ int CMapImageActor::SetFileName(const char *filename)
 		this->m_MapImageReader2->Update( );
 		this->m_MapShiftScale->SetInput( this->m_MapImageReader2->GetOutput() );
 		this->m_MapShiftScale->SetOutputScalarTypeToUnsignedChar( );
-		this->SetInput( this->m_MapShiftScale->GetOutput() );
+// COMMENT: {8/4/2009 6:29:25 PM}		this->SetInput( this->m_MapShiftScale->GetOutput() );
+		this->SetInput( this->m_MapImageReader2->GetOutput() );
 
 		return 1; // success
 	}

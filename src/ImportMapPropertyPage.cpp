@@ -323,7 +323,7 @@ LRESULT CImportMapPropertyPage::OnWizardNext()
 		}
 
 		// store siteMap
-		this->m_siteMap = this->m_pDlg->GetSiteMap();
+		this->m_siteMap2 = this->m_pDlg->GetSiteMap2();
 
 		delete this->m_pDlg;
 		this->m_pDlg = new CMapDialog(this);
