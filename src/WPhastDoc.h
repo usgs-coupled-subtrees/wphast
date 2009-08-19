@@ -326,6 +326,7 @@ public:
 	afx_msg void OnEditRedo();
 
 	void ResizeGrid(const CGrid&  x, const CGrid&  y, const CGrid&  z);
+	void ResizeGrid(const CGridKeyword& keyword);
 
 	void SetFlowOnly(const CFlowOnly& flowOnly);
 	// const CFlowOnly& GetFlowOnly(void)const;

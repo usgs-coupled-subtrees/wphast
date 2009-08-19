@@ -449,50 +449,54 @@ void CGridActor::Insert(CTreeCtrl* pTreeCtrl, HTREEITEM htiGrid)
 		pTreeCtrl->DeleteItem(hChild);
 	}
 
-	// insert
-	this->m_gridKeyword.m_grid[0].Insert(pTreeCtrl, htiGrid);
-	this->m_gridKeyword.m_grid[1].Insert(pTreeCtrl, htiGrid);
-	this->m_gridKeyword.m_grid[2].Insert(pTreeCtrl, htiGrid);
+	//{{
+	this->m_gridKeyword.Insert(pTreeCtrl, htiGrid);
+	//}}
 
-	// snap
-	CSnap defaultSnap;
-	if (this->m_gridKeyword.m_snap[0] != defaultSnap[0])
-	{
-		CString str;
-		str.Format("snap X %g", this->m_gridKeyword.m_snap[0]);
-		pTreeCtrl->InsertItem(str, htiGrid);
-	}
-	if (this->m_gridKeyword.m_snap[1] != defaultSnap[1])
-	{
-		CString str;
-		str.Format("snap Y %g", this->m_gridKeyword.m_snap[1]);
-		pTreeCtrl->InsertItem(str, htiGrid);
-	}
-	if (this->m_gridKeyword.m_snap[2] != defaultSnap[2])
-	{
-		CString str;
-		str.Format("snap Z %g", this->m_gridKeyword.m_snap[2]);
-		pTreeCtrl->InsertItem(str, htiGrid);
-	}
-
-	// chem dims
-	if (!this->m_gridKeyword.m_axes[0] || !this->m_gridKeyword.m_axes[1] || !this->m_gridKeyword.m_axes[2])
-	{
-		CString str("chemistry_dimensions ");
-		if (this->m_gridKeyword.m_axes[0]) str += _T("X");
-		if (this->m_gridKeyword.m_axes[1]) str += _T("Y");
-		if (this->m_gridKeyword.m_axes[2]) str += _T("Z");
-		pTreeCtrl->InsertItem(str, htiGrid);
-	}
-
-	if (this->m_gridKeyword.m_print_input_xy)
-	{
-		pTreeCtrl->InsertItem("print_orientation XY", htiGrid);
-	}
-	else
-	{
-		pTreeCtrl->InsertItem("print_orientation XZ", htiGrid);
-	}
+// COMMENT: {8/19/2009 3:52:51 PM}	// insert
+// COMMENT: {8/19/2009 3:52:51 PM}	this->m_gridKeyword.m_grid[0].Insert(pTreeCtrl, htiGrid);
+// COMMENT: {8/19/2009 3:52:51 PM}	this->m_gridKeyword.m_grid[1].Insert(pTreeCtrl, htiGrid);
+// COMMENT: {8/19/2009 3:52:51 PM}	this->m_gridKeyword.m_grid[2].Insert(pTreeCtrl, htiGrid);
+// COMMENT: {8/19/2009 3:52:51 PM}
+// COMMENT: {8/19/2009 3:52:51 PM}	// snap
+// COMMENT: {8/19/2009 3:52:51 PM}	CSnap defaultSnap;
+// COMMENT: {8/19/2009 3:52:51 PM}	if (this->m_gridKeyword.m_snap[0] != defaultSnap[0])
+// COMMENT: {8/19/2009 3:52:51 PM}	{
+// COMMENT: {8/19/2009 3:52:51 PM}		CString str;
+// COMMENT: {8/19/2009 3:52:51 PM}		str.Format("snap X %g", this->m_gridKeyword.m_snap[0]);
+// COMMENT: {8/19/2009 3:52:51 PM}		pTreeCtrl->InsertItem(str, htiGrid);
+// COMMENT: {8/19/2009 3:52:51 PM}	}
+// COMMENT: {8/19/2009 3:52:51 PM}	if (this->m_gridKeyword.m_snap[1] != defaultSnap[1])
+// COMMENT: {8/19/2009 3:52:51 PM}	{
+// COMMENT: {8/19/2009 3:52:51 PM}		CString str;
+// COMMENT: {8/19/2009 3:52:51 PM}		str.Format("snap Y %g", this->m_gridKeyword.m_snap[1]);
+// COMMENT: {8/19/2009 3:52:51 PM}		pTreeCtrl->InsertItem(str, htiGrid);
+// COMMENT: {8/19/2009 3:52:51 PM}	}
+// COMMENT: {8/19/2009 3:52:51 PM}	if (this->m_gridKeyword.m_snap[2] != defaultSnap[2])
+// COMMENT: {8/19/2009 3:52:51 PM}	{
+// COMMENT: {8/19/2009 3:52:51 PM}		CString str;
+// COMMENT: {8/19/2009 3:52:51 PM}		str.Format("snap Z %g", this->m_gridKeyword.m_snap[2]);
+// COMMENT: {8/19/2009 3:52:51 PM}		pTreeCtrl->InsertItem(str, htiGrid);
+// COMMENT: {8/19/2009 3:52:51 PM}	}
+// COMMENT: {8/19/2009 3:52:51 PM}
+// COMMENT: {8/19/2009 3:52:51 PM}	// chem dims
+// COMMENT: {8/19/2009 3:52:51 PM}	if (!this->m_gridKeyword.m_axes[0] || !this->m_gridKeyword.m_axes[1] || !this->m_gridKeyword.m_axes[2])
+// COMMENT: {8/19/2009 3:52:51 PM}	{
+// COMMENT: {8/19/2009 3:52:51 PM}		CString str("chemistry_dimensions ");
+// COMMENT: {8/19/2009 3:52:51 PM}		if (this->m_gridKeyword.m_axes[0]) str += _T("X");
+// COMMENT: {8/19/2009 3:52:51 PM}		if (this->m_gridKeyword.m_axes[1]) str += _T("Y");
+// COMMENT: {8/19/2009 3:52:51 PM}		if (this->m_gridKeyword.m_axes[2]) str += _T("Z");
+// COMMENT: {8/19/2009 3:52:51 PM}		pTreeCtrl->InsertItem(str, htiGrid);
+// COMMENT: {8/19/2009 3:52:51 PM}	}
+// COMMENT: {8/19/2009 3:52:51 PM}
+// COMMENT: {8/19/2009 3:52:51 PM}	if (this->m_gridKeyword.m_print_input_xy)
+// COMMENT: {8/19/2009 3:52:51 PM}	{
+// COMMENT: {8/19/2009 3:52:51 PM}		pTreeCtrl->InsertItem("print_orientation XY", htiGrid);
+// COMMENT: {8/19/2009 3:52:51 PM}	}
+// COMMENT: {8/19/2009 3:52:51 PM}	else
+// COMMENT: {8/19/2009 3:52:51 PM}	{
+// COMMENT: {8/19/2009 3:52:51 PM}		pTreeCtrl->InsertItem("print_orientation XZ", htiGrid);
+// COMMENT: {8/19/2009 3:52:51 PM}	}
 
 	// set data
 	pTreeCtrl->SetItemData(htiGrid, (DWORD_PTR)this);

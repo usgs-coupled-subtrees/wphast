@@ -29,6 +29,8 @@ void CGridSetAction::Execute(void)
 		this->m_pDoc->SetGridKeyword(gridK);
 		this->m_pDoc->UpdateAllViews(0);
 	}
+	this->m_pDoc->SetGridKeyword(this->m_newGridKeyword);
+	this->m_pDoc->UpdateAllViews(0);
 #endif
 }
 

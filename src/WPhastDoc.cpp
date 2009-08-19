@@ -1809,6 +1809,38 @@ void CWPhastDoc::ResizeGrid(const CGrid& x, const CGrid&  y, const CGrid&  z)
 	this->UpdateGridDomain();
 }
 
+void CWPhastDoc::ResizeGrid(const CGridKeyword& keyword)
+{
+	ASSERT(this->m_pGridActor);
+	ASSERT(this->m_pAxesActor);
+	ASSERT(this->m_pPropCollection);
+	ASSERT(this->m_pimpl);
+	ASSERT(this->m_pUnits);
+	ASSERT(this->m_pModel);
+
+	//{{
+	if (this->m_pMapActor)
+	{
+		CSiteMap2 siteMap2 = this->m_pMapActor->GetSiteMap2();
+		siteMap2.Angle = keyword.m_grid_angle;
+		this->m_pMapActor->SetSiteMap2(siteMap2);
+	}
+	//}}
+
+	// reset the grid
+	//
+	this->m_pGridActor->SetGridKeyword(keyword, this->GetUnits());
+	this->m_pGridActor->SetPickable(0);
+	this->m_pPropCollection->AddItem(this->m_pGridActor);
+	if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar())
+	{
+		pTree->SetGridActor(this->m_pGridActor);
+	}
+
+	// Update default zones etc.
+	//
+	this->UpdateGridDomain();
+}
 
 void CWPhastDoc::AddDefaultZone(CZone* pZone)
 {
@@ -5131,7 +5163,8 @@ CGridKeyword CWPhastDoc::GetGridKeyword(void)const
 void CWPhastDoc::SetGridKeyword(const CGridKeyword& gridKeyword)
 {
 	this->m_pGridActor->SetGridKeyword(gridKeyword, this->GetUnits());
-	this->ResizeGrid(gridKeyword.m_grid[0], gridKeyword.m_grid[1], gridKeyword.m_grid[2]);
+// COMMENT: {8/19/2009 4:35:52 PM}	this->ResizeGrid(gridKeyword.m_grid[0], gridKeyword.m_grid[1], gridKeyword.m_grid[2]);
+	this->ResizeGrid(gridKeyword);
 
 	// set grid for all zones
 	//

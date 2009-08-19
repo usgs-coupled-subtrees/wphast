@@ -170,6 +170,7 @@ CMapDialog::CMapDialog(CWnd* pParent /*=NULL*/)
 	, m_strHeaderSubTitle(_T("MDS_Point1_SUBTITLE"))
 	, m_Point1Actor(0)
 	, m_Point2Actor(0)
+	, Transform(0)
 {
 	// IDC_X_NODES_EDIT - IDC_Z_NODES_EDIT must be contiguous
 	//
@@ -180,11 +181,12 @@ CMapDialog::CMapDialog(CWnd* pParent /*=NULL*/)
 	// initialize grid
 	for (int i = 0; i < 3; ++i)
 	{
-		this->m_grid[i].coord[0]    = 0.0;
-		this->m_grid[i].coord[1]    = 0.0;
-		this->m_grid[i].count_coord = 2;
-		this->m_grid[i].c           = 'x' + i;
-		this->m_grid[i].uniform     = TRUE;
+		this->GridKeyword.m_grid[i].coord[0]    = 0.0;
+		this->GridKeyword.m_grid[i].coord[1]    = 0.0;
+		this->GridKeyword.m_grid[i].count_coord = 2;
+		this->GridKeyword.m_grid[i].c           = 'x' + i;
+		this->GridKeyword.m_grid[i].uniform     = TRUE;
+		this->GridKeyword.m_grid_angle          = 0.;
 	}
 
 	// adjust layout
@@ -206,7 +208,7 @@ CMapDialog::CMapDialog(CWnd* pParent /*=NULL*/)
 	this->m_Widget->GetSelectedHandleProperty()->SetOpacity(0.75);
 	for (int i = 0; i < 3; ++i)
 	{
-		this->m_Widget->SetResolution(i, this->m_grid[i].count_coord - 1);
+		this->m_Widget->SetResolution(i, this->GridKeyword.m_grid[i].count_coord - 1);
 	}
 	this->m_Widget->SizeHandles();
 
@@ -233,6 +235,8 @@ CMapDialog::CMapDialog(CWnd* pParent /*=NULL*/)
 
 	this->m_Point1Actor = CMarker::New();
 	this->m_Point2Actor = CMarker::New();
+
+	this->Transform = vtkTransform::New();
 }
 
 CMapDialog::~CMapDialog()
@@ -253,6 +257,7 @@ CMapDialog::~CMapDialog()
 #endif
 	this->m_Point1Actor->Delete();
 	this->m_Point2Actor->Delete();
+	this->Transform->Delete();
 }
 
 void CMapDialog::DoDataExchange(CDataExchange* pDX)
@@ -427,6 +432,7 @@ void CMapDialog::DDX_Grid(CDataExchange* pDX)
 {
 	// Angle
 	::DDX_Text(pDX, IDC_EDIT_MO_ANGLE, this->m_siteMap2.Angle);
+	this->GridKeyword.m_grid_angle = this->m_siteMap2.Angle;
 
 	if (pDX->m_bSaveAndValidate)
 	{
@@ -435,15 +441,16 @@ void CMapDialog::DDX_Grid(CDataExchange* pDX)
 		::DDX_Text(pDX, IDC_EDIT_MO_X, map_coor[0]);
 		::DDX_Text(pDX, IDC_EDIT_MO_Y, map_coor[1]);
 
+		//{{
+		this->GridKeyword.m_grid_origin[0] = map_coor[0];
+		this->GridKeyword.m_grid_origin[1] = map_coor[1];
+		//}}
+
 		int nodes[3];
 		double minimum[3];
 		double length[3];
 		for (int i = 0; i < 3; ++i)
 		{
-			IDC_X_NODES_EDIT;
-			IDC_Y_NODES_EDIT;
-			IDC_Z_NODES_EDIT;
-
 			// nodes
 			DDX_Text(pDX, FIRST_NODE_ID + i, nodes[i]);
 			if (nodes[i] < 2)
@@ -451,10 +458,6 @@ void CMapDialog::DDX_Grid(CDataExchange* pDX)
 				::AfxMessageBox("Each direction must have at least two nodes.");
 				pDX->Fail();
 			}
-
-			IDC_EDIT_X;
-			IDC_EDIT_Y;
-			IDC_EDIT_Z;
 
 			// minimums
 			DDX_Text(pDX, IDC_EDIT_X + i, minimum[i]);
@@ -486,18 +489,18 @@ void CMapDialog::DDX_Grid(CDataExchange* pDX)
 
 		for (int i = 0; i < 3; ++i)
 		{
-			this->m_grid[i].count_coord = nodes[i];
+			this->GridKeyword.m_grid[i].count_coord = nodes[i];
 			if (length[i] < 0)
 			{
-				this->m_grid[i].coord[0] = minimum[i] + length[i];
-				this->m_grid[i].coord[1] = minimum[i];
+				this->GridKeyword.m_grid[i].coord[0] = minimum[i] + length[i];
+				this->GridKeyword.m_grid[i].coord[1] = minimum[i];
 			}
 			else
 			{
-				this->m_grid[i].coord[0] = minimum[i];
-				this->m_grid[i].coord[1] = minimum[i] + length[i];
+				this->GridKeyword.m_grid[i].coord[0] = minimum[i];
+				this->GridKeyword.m_grid[i].coord[1] = minimum[i] + length[i];
 			}
-			ASSERT( this->m_grid[i].coord[0] < this->m_grid[i].coord[1] );
+			ASSERT( this->GridKeyword.m_grid[i].coord[0] < this->GridKeyword.m_grid[i].coord[1] );
 		}
 
 		// set placement
@@ -510,11 +513,11 @@ void CMapDialog::DDX_Grid(CDataExchange* pDX)
 		for (int i = 0; i < 3; ++i)
 		{
 			// nodes
-			this->m_Widget->SetResolution(i, this->m_grid[i].count_coord - 1);
+			this->m_Widget->SetResolution(i, this->GridKeyword.m_grid[i].count_coord - 1);
 			this->UpdateNodes(i);
 
 			// minimums
-			DDX_Text(pDX, IDC_EDIT_X + i, this->m_grid[i].coord[0]);
+			DDX_Text(pDX, IDC_EDIT_X + i, this->GridKeyword.m_grid[i].coord[0]);
 		}
 
 		double defaultZ = 1.0;
@@ -1287,9 +1290,9 @@ void CMapDialog::UpdateNodes(int idx)const
 	const TCHAR format[] = "%d";
 	static TCHAR buffer[40];
 
-	ASSERT(this->m_grid[idx].count_coord >= 2);
+	ASSERT(this->GridKeyword.m_grid[idx].count_coord >= 2);
 
-	_stprintf(buffer, format, this->m_grid[idx].count_coord);
+	_stprintf(buffer, format, this->GridKeyword.m_grid[idx].count_coord);
 	this->GetDlgItem(FIRST_NODE_ID + idx)->SetWindowText(buffer);
 }
 
@@ -1297,26 +1300,34 @@ BOOL CMapDialog::PreTranslateMessage(MSG* pMsg)
 {
 	if (this->m_CurrentState == CMapDialog::MDS_Point1 || this->m_CurrentState == CMapDialog::MDS_Point2)
 	{
-		if (pMsg->hwnd == this->GetDlgItem(IDC_EDIT_XP1)->GetSafeHwnd()) {
-			if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_RETURN) {
+		if (pMsg->hwnd == this->GetDlgItem(IDC_EDIT_XP1)->GetSafeHwnd())
+		{
+			if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_RETURN)
+			{
 				SELECT_ALL(IDC_EDIT_XP1);
 				return TRUE;
 			}
 		}
-		if (pMsg->hwnd == this->GetDlgItem(IDC_EDIT_YP1)->GetSafeHwnd()) {
-			if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_RETURN) {
+		if (pMsg->hwnd == this->GetDlgItem(IDC_EDIT_YP1)->GetSafeHwnd())
+		{
+			if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_RETURN)
+			{
 				SELECT_ALL(IDC_EDIT_YP1);
 				return TRUE;
 			}
 		}
-		if (pMsg->hwnd == this->GetDlgItem(IDC_EDIT_XP2)->GetSafeHwnd()) {
-			if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_RETURN) {
+		if (pMsg->hwnd == this->GetDlgItem(IDC_EDIT_XP2)->GetSafeHwnd())
+		{
+			if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_RETURN)
+			{
 				SELECT_ALL(IDC_EDIT_XP2);
 				return TRUE;
 			}
 		}
-		if (pMsg->hwnd == this->GetDlgItem(IDC_EDIT_YP2)->GetSafeHwnd()) {
-			if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_RETURN) {
+		if (pMsg->hwnd == this->GetDlgItem(IDC_EDIT_YP2)->GetSafeHwnd())
+		{
+			if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_RETURN)
+			{
 				SELECT_ALL(IDC_EDIT_YP2);
 				return TRUE;
 			}
@@ -1325,60 +1336,76 @@ BOOL CMapDialog::PreTranslateMessage(MSG* pMsg)
 
 	if (this->m_CurrentState == CMapDialog::MDS_Grid)
 	{
-		if (pMsg->hwnd == this->GetDlgItem(IDC_EDIT_MO_X)->GetSafeHwnd()) {
-			if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_RETURN) {
+		if (pMsg->hwnd == this->GetDlgItem(IDC_EDIT_MO_X)->GetSafeHwnd())
+		{
+			if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_RETURN)
+			{
 				this->OnEnKillfocusEditMoX();
 				SELECT_ALL(IDC_EDIT_MO_X);
 				return TRUE;
 			}
 		}
-		if (pMsg->hwnd == this->GetDlgItem(IDC_EDIT_MO_Y)->GetSafeHwnd()) {
-			if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_RETURN) {
+		if (pMsg->hwnd == this->GetDlgItem(IDC_EDIT_MO_Y)->GetSafeHwnd())
+		{
+			if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_RETURN)
+			{
 				this->OnEnKillfocusEditMoY();
 				SELECT_ALL(IDC_EDIT_MO_Y);
 				return TRUE;
 			}
 		}
-		if (pMsg->hwnd == this->GetDlgItem(IDC_EDIT_MO_ANGLE)->GetSafeHwnd()) {
-			if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_RETURN) {
+		if (pMsg->hwnd == this->GetDlgItem(IDC_EDIT_MO_ANGLE)->GetSafeHwnd())
+		{
+			if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_RETURN)
+			{
 				this->OnEnKillfocusEditMoAngle();
 				this->UpdateModelOriginAngle();
 				SELECT_ALL(IDC_EDIT_MO_ANGLE);
 				return TRUE;
 			}
 		}
-		if (pMsg->hwnd == this->GetDlgItem(IDC_EDIT_LENGTH)->GetSafeHwnd()) {
-			if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_RETURN) {
+		if (pMsg->hwnd == this->GetDlgItem(IDC_EDIT_LENGTH)->GetSafeHwnd())
+		{
+			if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_RETURN)
+			{
 				this->OnEnKillfocusEditLength();
 				this->UpdateLength();
 				SELECT_ALL(IDC_EDIT_LENGTH);
 				return TRUE;
 			}
 		}
-		if (pMsg->hwnd == this->GetDlgItem(IDC_EDIT_WIDTH)->GetSafeHwnd()) {
-			if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_RETURN) {
+		if (pMsg->hwnd == this->GetDlgItem(IDC_EDIT_WIDTH)->GetSafeHwnd())
+		{
+			if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_RETURN)
+			{
 				this->OnEnKillfocusEditWidth();
 				this->UpdateWidth();
 				SELECT_ALL(IDC_EDIT_WIDTH);
 				return TRUE;
 			}
 		}
-		if (pMsg->hwnd == this->GetDlgItem(IDC_X_NODES_EDIT)->GetSafeHwnd()) {
-			if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_RETURN) {
+		if (pMsg->hwnd == this->GetDlgItem(IDC_X_NODES_EDIT)->GetSafeHwnd())
+		{
+			if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_RETURN)
+			{
 				KILLFOCUS_NODES(IDC_X_NODES_EDIT);
 				SELECT_ALL(IDC_X_NODES_EDIT);
 				return TRUE;
 			}
 		}
-		if (pMsg->hwnd == this->GetDlgItem(IDC_Y_NODES_EDIT)->GetSafeHwnd()) {
-			if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_RETURN) {
+		if (pMsg->hwnd == this->GetDlgItem(IDC_Y_NODES_EDIT)->GetSafeHwnd())
+		{
+			if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_RETURN)
+			{
 				KILLFOCUS_NODES(IDC_Y_NODES_EDIT);
 				SELECT_ALL(IDC_Y_NODES_EDIT);
 				return TRUE;
 			}
 		}
-		if (pMsg->hwnd == this->GetDlgItem(IDC_Z_NODES_EDIT)->GetSafeHwnd()) {
-			if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_RETURN) {
+		if (pMsg->hwnd == this->GetDlgItem(IDC_Z_NODES_EDIT)->GetSafeHwnd())
+		{
+			if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_RETURN)
+			{
 				KILLFOCUS_NODES(IDC_Z_NODES_EDIT);
 				SELECT_ALL(IDC_Z_NODES_EDIT);
 				return TRUE;
@@ -1520,7 +1547,7 @@ void CMapDialog::OnEnKillfocusNodesEdit(int idx)
 	UINT nNodes = this->GetDlgItemInt(FIRST_NODE_ID + idx, &bTranslated, FALSE);
 	if (bTranslated && nNodes > 1)
 	{
-		this->m_grid[idx].count_coord = nNodes;
+		this->GridKeyword.m_grid[idx].count_coord = nNodes;
 		this->m_Widget->SetResolution(idx, nNodes - 1);
 		this->m_RenderWindowInteractor->Render();
 	}

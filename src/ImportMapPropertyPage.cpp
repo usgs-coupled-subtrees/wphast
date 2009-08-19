@@ -317,10 +317,11 @@ LRESULT CImportMapPropertyPage::OnWizardNext()
 		}
 
 		// store grid
-		for (int i = 0; i < 3; ++i)
-		{
-			this->m_pGridPage->m_grid[i] = this->m_pDlg->m_grid[i];
-		}
+		//for (int i = 0; i < 3; ++i)
+		//{
+		//	this->m_pGridPage->m_grid[i] = this->m_pDlg->m_grid[i];
+		//}
+		this->m_pGridPage->GridKeyword = this->m_pDlg->GridKeyword;
 
 		// store siteMap
 		this->m_siteMap2 = this->m_pDlg->GetSiteMap2();
@@ -328,10 +329,11 @@ LRESULT CImportMapPropertyPage::OnWizardNext()
 		delete this->m_pDlg;
 		this->m_pDlg = new CMapDialog(this);
 		// TODO ??? this->m_pDlg->SetSiteMap(this->m_siteMap); // in case user hits the backs button
-		for (int i = 0; i < 3; ++i)
-		{
-			this->m_pDlg->m_grid[i] = this->m_pGridPage->m_grid[i];
-		}
+		//for (int i = 0; i < 3; ++i)
+		//{
+		//	this->m_pDlg->m_grid[i] = this->m_pGridPage->m_grid[i];
+		//}
+		this->m_pDlg->GridKeyword = this->m_pGridPage->GridKeyword;
 	}
 
 	////{{

@@ -95,7 +95,9 @@ protected:
 	vtkActor          *XAxisActor;
 	vtkActor          *YAxisActor;
 	double            Angle;
-	vtkFloatingPointType   m_InvisablePosX[3];
+	double            GridOrigin[3];
+	double            Deltas[3];
+	double            m_InvisablePosX[3];
 
 // COMMENT: {4/18/2006 11:11:02 PM}	// axes triangle
 // COMMENT: {4/18/2006 11:11:02 PM}	vtkPoints         *TrianglePoints;

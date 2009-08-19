@@ -121,7 +121,7 @@ vtkPlaneWidget2::vtkPlaneWidget2(void)
 	this->m_VisHandle->SetMapper(this->m_VisHandleMapper);
 	this->m_VisHandle->GetProperty()->SetColor(1, 0, 1);
 
-	this->m_VisHandleGeometry->SetCenter(this->m_InvisablePosX);
+	this->m_VisHandleGeometry->SetCenter(this->m_InvisablePosX[0], this->m_InvisablePosX[1], this->m_InvisablePosX[2]);
 #endif
 
 }
@@ -418,7 +418,7 @@ void vtkPlaneWidget2::OnMouseMove(void)
 	if (this->CurrentRenderer) this->CurrentRenderer->ResetCameraClippingRange();
 
 #if defined(_DEBUG)
-	this->m_VisHandleGeometry->SetCenter(this->m_InvisablePosX);
+	this->m_VisHandleGeometry->SetCenter(this->m_InvisablePosX[0], this->m_InvisablePosX[1], this->m_InvisablePosX[2]);
 #endif
 
 	this->Interactor->Render();
@@ -472,14 +472,9 @@ void vtkPlaneWidget2::Spin(void)
 	this->Transform->TransformPoint(pt1, pt1New);
 	this->Transform->TransformPoint(pt2, pt2New);
 
-	vtkFloatingPointType inv[3];
-	this->Transform->TransformPoint(this->m_InvisablePosX, inv);
-	for (int i=0; i < 3; ++i)
-	{
-		this->m_InvisablePosX[i] = inv[i];
-	}
+	this->Transform->TransformPoint(this->m_InvisablePosX, this->m_InvisablePosX);
 #if defined(_DEBUG)
-	this->m_VisHandleGeometry->SetCenter(this->m_InvisablePosX);
+	this->m_VisHandleGeometry->SetCenter(this->m_InvisablePosX[0], this->m_InvisablePosX[1], this->m_InvisablePosX[2]);
 #endif
 
 	this->PlaneSource->SetOrigin(oNew);
@@ -610,7 +605,13 @@ void vtkPlaneWidget2::SetDeltaY(double dy)
 
 double vtkPlaneWidget2::GetRadians(void)
 {
-	vtkFloatingPointType *o = this->PlaneSource->GetOrigin();
+	vtkFloatingPointType *origin = this->PlaneSource->GetOrigin();
+	//{{
+	double o[3];
+	o[0] = origin[0];
+	o[1] = origin[1];
+	o[2] = origin[2];
+	//}}
 	return atan2(this->m_InvisablePosX[1] - o[1], this->m_InvisablePosX[0] - o[0]);
 }
 
@@ -633,9 +634,9 @@ void vtkPlaneWidget2::SetAngle(double angle)
 
 	// Manipulate the transform to reflect the rotation
 	this->Transform->Identity();
-	this->Transform->Translate(center[0], center[1], center[2]);
+	this->Transform->Translate(o[0], o[1], o[2]);
 	this->Transform->RotateZ(angle - this->GetAngle());
-	this->Transform->Translate(-center[0], -center[1], -center[2]);
+	this->Transform->Translate(-o[0], -o[1], -o[2]);
 
 	// Set the corners
 	vtkFloatingPointType oNew[3], pt1New[3], pt2New[3];
@@ -644,7 +645,7 @@ void vtkPlaneWidget2::SetAngle(double angle)
 	this->Transform->TransformPoint(pt2, pt2New);
 	this->Transform->TransformPoint(this->m_InvisablePosX, this->m_InvisablePosX);
 #if defined(_DEBUG)
-	this->m_VisHandleGeometry->SetCenter(this->m_InvisablePosX);
+	this->m_VisHandleGeometry->SetCenter(this->m_InvisablePosX[0], this->m_InvisablePosX[1], this->m_InvisablePosX[2]);
 #endif
 
 	this->PlaneSource->SetOrigin(oNew);
@@ -674,7 +675,7 @@ void vtkPlaneWidget2::SetModelOrigin(float x, float y)
 	this->m_InvisablePosX[0] += x - o[0];
 	this->m_InvisablePosX[1] += y - o[1];
 #if defined(_DEBUG)
-	this->m_VisHandleGeometry->SetCenter(this->m_InvisablePosX);
+	this->m_VisHandleGeometry->SetCenter(this->m_InvisablePosX[0], this->m_InvisablePosX[1], this->m_InvisablePosX[2]);
 #endif
 
 	//Set the corners
@@ -770,12 +771,27 @@ void vtkPlaneWidget2::PlaceWidget(void)
 
     this->Superclass::PlaceWidget();
 
+	//{{
+	float *o = this->GetOrigin();
+	this->GridOrigin[0] = o[0];
+	this->GridOrigin[1] = o[1];
+	this->GridOrigin[2] = o[2];
+
+	float *p1 = this->GetPoint1();
+	this->Deltas[0] = p1[0] - o[0];
+
+	float *p2 = this->GetPoint2();
+	this->Deltas[1] = p2[1] - o[1];
+
+	this->Deltas[2] = 0.;
+	//}}
+
 	vtkFloatingPointType* pt1 = this->GetPoint1();
 	for (int i = 0 ; i < 3; ++i) {
 		this->m_InvisablePosX[i] = pt1[i];
 	}
 #if defined(_DEBUG)
-	this->m_VisHandleGeometry->SetCenter(this->m_InvisablePosX);
+	this->m_VisHandleGeometry->SetCenter(this->m_InvisablePosX[0], this->m_InvisablePosX[1], this->m_InvisablePosX[2]);
 #endif
 }
 

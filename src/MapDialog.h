@@ -21,7 +21,7 @@ class CMapActor;
 
 #include "ETSLayout/ETSLayout.h"
 #include "afxcmn.h"
-#include "Grid.h"
+#include "GridKeyword.h"
 #include "WorldTransform.h"
 #include "SiteMap2.h"
 
@@ -40,10 +40,8 @@ public:
 	bool   x_val_defined;
 	bool   y_val_defined;
 
-	//{{
 	int    x_pixel;
 	int    y_pixel;
-	//}}
 };
 
 
@@ -72,7 +70,7 @@ public:
 	CSiteMap2 GetSiteMap2(void)const { return m_siteMap2; }
 
 	// BUGBUG should these be public?
-	CGrid    m_grid[3];
+	CGridKeyword  GridKeyword;
 
 	enum State {
 		MDS_Point1,
@@ -110,6 +108,7 @@ protected:
 #if defined(USE_MAP_ACTOR)
 	CMapActor            *MapActor;
 #endif
+	vtkTransform         *Transform;
 
 	//handles the events
 	static void ProcessEvents(vtkObject* object, 
