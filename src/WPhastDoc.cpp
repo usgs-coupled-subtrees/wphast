@@ -137,7 +137,7 @@
 #include "HeadIC.h"
 #include "TimeControl2.h"
 #include "MapActor.h"
-#include "MapImageActor3.h"
+// COMMENT: {8/19/2009 6:08:40 PM}#include "MapImageActor3.h"
 #include "WorldTransform.h"
 #include "SiteMap.h"
 #include "NewModel.h"
@@ -327,9 +327,9 @@ CWPhastDoc::CWPhastDoc()
 , m_pModel(0) // , m_pFlowOnly(0)
 , m_ProjectionMode(PT_PERSPECTIVE)
 , m_pMapActor(0)
-//{{
-, MapImageActor3(0)
-//}}
+// COMMENT: {8/19/2009 6:11:30 PM}//{{
+// COMMENT: {8/19/2009 6:11:30 PM}, MapImageActor3(0)
+// COMMENT: {8/19/2009 6:11:30 PM}//}}
 , m_pPropAssemblyMedia(0)
 , m_pPropAssemblyBC(0)
 , m_pPropAssemblyIC(0)
@@ -532,11 +532,11 @@ CWPhastDoc::~CWPhastDoc()
 		this->m_pMapActor->Delete();
 		this->m_pMapActor = 0;
 	}
-	if (this->MapImageActor3)
-	{
-		this->MapImageActor3->Delete();
-		this->MapImageActor3 = 0;
-	}
+// COMMENT: {8/19/2009 6:09:05 PM}	if (this->MapImageActor3)
+// COMMENT: {8/19/2009 6:09:05 PM}	{
+// COMMENT: {8/19/2009 6:09:05 PM}		this->MapImageActor3->Delete();
+// COMMENT: {8/19/2009 6:09:05 PM}		this->MapImageActor3 = 0;
+// COMMENT: {8/19/2009 6:09:05 PM}	}
 
 	// callbacks
 	//
@@ -685,9 +685,9 @@ void CWPhastDoc::Serialize(CArchive& ar)
 
 			// store site map
 			if (this->m_pMapActor) this->m_pMapActor->Serialize(bStoring, wphast_id);
-			//{{
-			if (this->MapImageActor3) this->MapImageActor3->Serialize(bStoring, wphast_id);
-			//}}
+// COMMENT: {8/19/2009 6:09:21 PM}			//{{
+// COMMENT: {8/19/2009 6:09:21 PM}			if (this->MapImageActor3) this->MapImageActor3->Serialize(bStoring, wphast_id);
+// COMMENT: {8/19/2009 6:09:21 PM}			//}}
 
 			// store display colors
 			this->DisplayColors.Serialize(bStoring, wphast_id);
@@ -815,22 +815,22 @@ void CWPhastDoc::Serialize(CArchive& ar)
 				this->GetPropCollection()->AddItem(this->m_pMapActor);
 			}
 
-			//{{
-			ASSERT(this->MapImageActor3 == NULL);
-// COMMENT: {8/10/2009 3:21:23 PM}			this->MapImageActor3 = CMapImageActor3::New();
-// COMMENT: {8/10/2009 3:21:23 PM}			this->MapImageActor3->Serialize(bStoring, wphast_id);
-// COMMENT: {8/10/2009 3:21:23 PM}// COMMENT: {8/6/2009 8:32:58 PM}			CSiteMap siteMap = this->MapImageActor3->GetSiteMap();
-// COMMENT: {8/10/2009 3:21:23 PM}// COMMENT: {8/6/2009 8:32:58 PM}			if (siteMap.m_fileName.empty())
-// COMMENT: {8/10/2009 3:21:23 PM}// COMMENT: {8/6/2009 8:32:58 PM}			{
-// COMMENT: {8/10/2009 3:21:23 PM}// COMMENT: {8/6/2009 8:32:58 PM}				this->MapImageActor3->Delete();
-// COMMENT: {8/10/2009 3:21:23 PM}// COMMENT: {8/6/2009 8:32:58 PM}				this->MapImageActor3 = 0;
-// COMMENT: {8/10/2009 3:21:23 PM}// COMMENT: {8/6/2009 8:32:58 PM}			}
-// COMMENT: {8/10/2009 3:21:23 PM}// COMMENT: {8/6/2009 8:32:58 PM}			else
-// COMMENT: {8/10/2009 3:21:23 PM}			{
-// COMMENT: {8/10/2009 3:21:23 PM}				this->MapImageActor3->SetPickable(1);
-// COMMENT: {8/10/2009 3:21:23 PM}				this->GetPropCollection()->AddItem(this->MapImageActor3);
-// COMMENT: {8/10/2009 3:21:23 PM}			}
-			//}}
+// COMMENT: {8/19/2009 6:11:55 PM}			//{{
+// COMMENT: {8/19/2009 6:11:55 PM}			ASSERT(this->MapImageActor3 == NULL);
+// COMMENT: {8/19/2009 6:11:55 PM}// COMMENT: {8/10/2009 3:21:23 PM}			this->MapImageActor3 = CMapImageActor3::New();
+// COMMENT: {8/19/2009 6:11:55 PM}// COMMENT: {8/10/2009 3:21:23 PM}			this->MapImageActor3->Serialize(bStoring, wphast_id);
+// COMMENT: {8/19/2009 6:11:55 PM}// COMMENT: {8/10/2009 3:21:23 PM}// COMMENT: {8/6/2009 8:32:58 PM}			CSiteMap siteMap = this->MapImageActor3->GetSiteMap();
+// COMMENT: {8/19/2009 6:11:55 PM}// COMMENT: {8/10/2009 3:21:23 PM}// COMMENT: {8/6/2009 8:32:58 PM}			if (siteMap.m_fileName.empty())
+// COMMENT: {8/19/2009 6:11:55 PM}// COMMENT: {8/10/2009 3:21:23 PM}// COMMENT: {8/6/2009 8:32:58 PM}			{
+// COMMENT: {8/19/2009 6:11:55 PM}// COMMENT: {8/10/2009 3:21:23 PM}// COMMENT: {8/6/2009 8:32:58 PM}				this->MapImageActor3->Delete();
+// COMMENT: {8/19/2009 6:11:55 PM}// COMMENT: {8/10/2009 3:21:23 PM}// COMMENT: {8/6/2009 8:32:58 PM}				this->MapImageActor3 = 0;
+// COMMENT: {8/19/2009 6:11:55 PM}// COMMENT: {8/10/2009 3:21:23 PM}// COMMENT: {8/6/2009 8:32:58 PM}			}
+// COMMENT: {8/19/2009 6:11:55 PM}// COMMENT: {8/10/2009 3:21:23 PM}// COMMENT: {8/6/2009 8:32:58 PM}			else
+// COMMENT: {8/19/2009 6:11:55 PM}// COMMENT: {8/10/2009 3:21:23 PM}			{
+// COMMENT: {8/19/2009 6:11:55 PM}// COMMENT: {8/10/2009 3:21:23 PM}				this->MapImageActor3->SetPickable(1);
+// COMMENT: {8/19/2009 6:11:55 PM}// COMMENT: {8/10/2009 3:21:23 PM}				this->GetPropCollection()->AddItem(this->MapImageActor3);
+// COMMENT: {8/19/2009 6:11:55 PM}// COMMENT: {8/10/2009 3:21:23 PM}			}
+// COMMENT: {8/19/2009 6:11:55 PM}			//}}
 
 			// load display colors
 			this->DisplayColors.Serialize(bStoring, wphast_id);
@@ -1511,11 +1511,11 @@ void CWPhastDoc::DeleteContents()
 		this->m_pMapActor->Delete();
 		this->m_pMapActor = 0;
 	}
-	if (this->MapImageActor3)
-	{
-		this->MapImageActor3->Delete();
-		this->MapImageActor3 = 0;
-	}
+// COMMENT: {8/19/2009 6:09:33 PM}	if (this->MapImageActor3)
+// COMMENT: {8/19/2009 6:09:33 PM}	{
+// COMMENT: {8/19/2009 6:09:33 PM}		this->MapImageActor3->Delete();
+// COMMENT: {8/19/2009 6:09:33 PM}		this->MapImageActor3 = 0;
+// COMMENT: {8/19/2009 6:09:33 PM}	}
 
 	// update geometry property sheet
 	// Note: can't call this->SetScale(1.0f, 1.0f, 1.0f);
@@ -1678,12 +1678,12 @@ void CWPhastDoc::SetScale(vtkFloatingPointType x, vtkFloatingPointType y, vtkFlo
 	{
 		this->m_pMapActor->SetScale(x, y, z);
 	}
-	//{{
-	if (this->MapImageActor3)
-	{
-		this->MapImageActor3->SetScale(x, y, z);
-	}
-	//}}
+// COMMENT: {8/19/2009 6:09:47 PM}	//{{
+// COMMENT: {8/19/2009 6:09:47 PM}	if (this->MapImageActor3)
+// COMMENT: {8/19/2009 6:09:47 PM}	{
+// COMMENT: {8/19/2009 6:09:47 PM}		this->MapImageActor3->SetScale(x, y, z);
+// COMMENT: {8/19/2009 6:09:47 PM}	}
+// COMMENT: {8/19/2009 6:09:47 PM}	//}}
 
 	// set scale for all zones
 	//

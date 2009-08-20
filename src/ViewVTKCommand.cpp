@@ -13,9 +13,6 @@
 #include "ICZoneActor.h"
 #include "ICHeadZoneActor.h"
 #include "ICChemZoneActor.h"
-//{{
-#include "MapImageActor3.h"
-//}}
 
 #include "WellActor.h"
 #include "Well.h"
@@ -1132,14 +1129,6 @@ void CViewVTKCommand::OnEndPickEvent(vtkObject* caller, void* callData)
 				{
 					this->m_pView->GetDocument()->Select(pWell);
 				}
-				//{{
-				// check for sitemap
-				else if (CMapImageActor3 *pMapImageActor3 = CMapImageActor3::SafeDownCast(prop))
-				{
-					// TODO
-					TRACE("TODO CMapImageActor3 selected\n");
-				}
-				//}}
 				else
 				{
 					ASSERT(FALSE);

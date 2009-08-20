@@ -816,10 +816,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\MapImageActor3.cpp"
-				>
-			</File>
-			<File
 				RelativePath="MapPropertyPage.cpp"
 				>
 			</File>
@@ -5113,10 +5109,6 @@
 			</File>
 			<File
 				RelativePath=".\MapImageActor2.h"
-				>
-			</File>
-			<File
-				RelativePath=".\MapImageActor3.h"
 				>
 			</File>
 			<File
