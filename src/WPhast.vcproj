@@ -1340,10 +1340,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\vtkSimpleImageFilterExample2.cxx"
-				>
-			</File>
-			<File
 				RelativePath=".\WedgeChangeChopTypeAction.cpp"
 				>
 			</File>
@@ -5605,10 +5601,6 @@
 			</File>
 			<File
 				RelativePath="vtkPropPickerFixed.h"
-				>
-			</File>
-			<File
-				RelativePath=".\vtkSimpleImageFilterExample2.h"
 				>
 			</File>
 			<File
