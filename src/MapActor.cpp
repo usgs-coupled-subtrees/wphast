@@ -8,14 +8,8 @@
 #include <vtkPlaneSource.h>
 #include <vtkPolyDataMapper.h>
 #include <vtkTexture.h>
-#include "vtkOpenGLTexture2.h"
 #include <vtkTransform.h>
 #include <vtkObjectFactory.h>
-
-//{{
-#include "vtkSimpleImageFilterExample2.h"
-#include <vtkImageMagnify.h>
-//}}
 
 #include "Global.h"
 #include "WorldTransform.h"
