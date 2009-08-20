@@ -800,10 +800,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\MapActor2.cpp"
-				>
-			</File>
-			<File
 				RelativePath="MapDialog.cpp"
 				>
 			</File>
@@ -5085,10 +5081,6 @@
 			</File>
 			<File
 				RelativePath="MapActor.h"
-				>
-			</File>
-			<File
-				RelativePath=".\MapActor2.h"
 				>
 			</File>
 			<File
