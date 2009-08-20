@@ -1328,10 +1328,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\vtkOpenGLTexture2.cxx"
-				>
-			</File>
-			<File
 				RelativePath="vtkPlaneWidget2.cpp"
 				>
 			</File>
@@ -5597,10 +5593,6 @@
 			</File>
 			<File
 				RelativePath="vtkInteractorStyleTrackballCameraEx.h"
-				>
-			</File>
-			<File
-				RelativePath=".\vtkOpenGLTexture2.h"
 				>
 			</File>
 			<File
