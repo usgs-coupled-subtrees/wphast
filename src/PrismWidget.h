@@ -5,11 +5,6 @@
 #include <list>
 #include <vector>
 
-#ifndef vtkFloatingPointType
-#define vtkFloatingPointType vtkFloatingPointType
-typedef float vtkFloatingPointType;
-#endif
-
 class vtkProperty;
 class CZoneActor;
 
@@ -26,7 +21,7 @@ public:
 	// Description:
 	// Methods that satisfy the superclass' API.
 	virtual void SetEnabled(int);
-	virtual void PlaceWidget(vtkFloatingPointType bounds[6]);
+	virtual void PlaceWidget(double bounds[6]);
 	virtual void SetProp3D(vtkProp3D*);
 
 	int State;

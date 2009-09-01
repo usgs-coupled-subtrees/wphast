@@ -71,7 +71,7 @@ vtkPlaneWidget2::vtkPlaneWidget2(void)
 	this->YAxisActor->SetMapper(AxisMapper);
 	this->YAxisActor->GetProperty()->SetColor(0, 1, 0);
 
-	vtkFloatingPointType* pt1 = this->GetPoint1();
+	double* pt1 = this->GetPoint1();
 	for (int i = 0; i < 3; ++i)
 	{
 		this->m_InvisablePosX[i] = pt1[i];
@@ -258,7 +258,7 @@ void vtkPlaneWidget2::OnCtrlLeftButtonDown(void)
 	if ( path != NULL )
 	{
 		this->State = vtkPlaneWidget2::Spinning;
-		this->HighlightHandle(path->GetFirstNode()->GetProp());
+		this->HighlightHandle(path->GetFirstNode()->GetViewProp());
 	}
 	else
 	{
@@ -325,8 +325,8 @@ void vtkPlaneWidget2::OnMouseMove(void)
 			if ( this->CurrentHandle == this->Handle[0] )
 			{
 				this->Substate = MovingMoveOrigin;
-				vtkFloatingPointType* o = this->GetOrigin();
-				vtkFloatingPointType prevO[3];
+				double* o = this->GetOrigin();
+				double prevO[3];
 				for (int i = 0; i < 3; ++i)
 				{
 					prevO[i] = o[i];
@@ -339,8 +339,8 @@ void vtkPlaneWidget2::OnMouseMove(void)
 			else if ( this->CurrentHandle == this->Handle[1] )
 			{
 				this->Substate = MovingMovePoint1;
-				vtkFloatingPointType* o = this->GetOrigin();
-				vtkFloatingPointType prevO[3];
+				double* o = this->GetOrigin();
+				double prevO[3];
 				for (int i = 0; i < 3; ++i)
 				{
 					prevO[i] = o[i];
@@ -353,8 +353,8 @@ void vtkPlaneWidget2::OnMouseMove(void)
 			else if ( this->CurrentHandle == this->Handle[2] )
 			{
 				this->Substate = MovingMovePoint2;
-				vtkFloatingPointType* o = this->GetOrigin();
-				vtkFloatingPointType prevO[3];
+				double* o = this->GetOrigin();
+				double prevO[3];
 				for (int i = 0; i < 3; ++i)
 				{
 					prevO[i] = o[i];
@@ -382,8 +382,8 @@ void vtkPlaneWidget2::OnMouseMove(void)
 	}
 	else if (this->State == vtkPlaneWidget::Scaling)
 	{
-		vtkFloatingPointType* o = this->GetOrigin();
-		vtkFloatingPointType prevO[3];
+		double* o = this->GetOrigin();
+		double prevO[3];
 		for (int i = 0; i < 3; ++i)
 		{
 			prevO[i] = o[i];
@@ -428,12 +428,12 @@ void vtkPlaneWidget2::Spin(void)
 {
 	vtkRenderWindowInteractor *rwi = this->Interactor;
 
-	vtkFloatingPointType *o = this->PlaneSource->GetOrigin();
-	vtkFloatingPointType *pt1 = this->PlaneSource->GetPoint1();
-	vtkFloatingPointType *pt2 = this->PlaneSource->GetPoint2();
-	vtkFloatingPointType *center = this->PlaneSource->GetCenter();
+	double *o = this->PlaneSource->GetOrigin();
+	double *pt1 = this->PlaneSource->GetPoint1();
+	double *pt2 = this->PlaneSource->GetPoint2();
+	double *center = this->PlaneSource->GetCenter();
 
-	vtkFloatingPointType disp_obj_center[3];
+	double disp_obj_center[3];
 
 	this->ComputeWorldToDisplay(center[0], center[1], center[2],
 		disp_obj_center);
@@ -446,8 +446,8 @@ void vtkPlaneWidget2::Spin(void)
 		atan2((double)rwi->GetLastEventPosition()[1] - (double)disp_obj_center[1],
 		(double)rwi->GetLastEventPosition()[0] - (double)disp_obj_center[0]);
 
-	newAngle *= vtkMath::RadiansToDegrees();
-	oldAngle *= vtkMath::RadiansToDegrees();
+	newAngle = vtkMath::DegreesFromRadians(newAngle);
+	oldAngle = vtkMath::DegreesFromRadians(oldAngle);
 
 	double angle = newAngle - oldAngle;
 	//cerr << "angle = " << angle << "\n";
@@ -467,7 +467,7 @@ void vtkPlaneWidget2::Spin(void)
 	this->Transform->Translate(-center[0], -center[1], -center[2]);
 
 	// Set the corners
-	vtkFloatingPointType oNew[3], pt1New[3], pt2New[3];
+	double oNew[3], pt1New[3], pt2New[3];
 	this->Transform->TransformPoint(o, oNew);
 	this->Transform->TransformPoint(pt1, pt1New);
 	this->Transform->TransformPoint(pt2, pt2New);
@@ -487,15 +487,15 @@ void vtkPlaneWidget2::Spin(void)
 
 double vtkPlaneWidget2::GetDeltaX(void)
 {
-	vtkFloatingPointType *o = this->PlaneSource->GetOrigin();
-	vtkFloatingPointType *pt1 = this->PlaneSource->GetPoint1();
+	double *o = this->PlaneSource->GetOrigin();
+	double *pt1 = this->PlaneSource->GetPoint1();
 	double distance = sqrt(vtkMath::Distance2BetweenPoints(o, pt1));
 
 	// Unrotate in order to determine sign
 	this->Transform->Identity();
 	this->Transform->RotateZ(-this->GetAngle());
 
-	vtkFloatingPointType oNew[3], pt1New[3];
+	double oNew[3], pt1New[3];
 	this->Transform->TransformPoint(o, oNew);
 	this->Transform->TransformPoint(pt1, pt1New);
 	if (pt1New[0] > oNew[0])
@@ -514,26 +514,26 @@ double vtkPlaneWidget2::GetDeltaX(void)
 
 void vtkPlaneWidget2::SetDeltaX(double dx)
 {
-	vtkFloatingPointType *o = this->PlaneSource->GetOrigin();
-	vtkFloatingPointType *pt1 = this->PlaneSource->GetPoint1();
-	vtkFloatingPointType *pt2 = this->PlaneSource->GetPoint2();
+	double *o = this->PlaneSource->GetOrigin();
+	double *pt1 = this->PlaneSource->GetPoint1();
+	double *pt2 = this->PlaneSource->GetPoint2();
 	double radians = atan2(pt1[1] - o[1], pt1[0] - o[0]);
 
 	//BUGBUG entering a value when length is negative
 	//causes a flip of entered sign
-	vtkFloatingPointType new_pt1[3];
+	double new_pt1[3];
 	new_pt1[0] = o[0] + (dx * cos(radians));
 	new_pt1[1] = o[1] + (dx * sin(radians));
 	new_pt1[2] = 0.0;
 
 	// check validity
-	vtkFloatingPointType v1[3], v2[3];
+	double v1[3], v2[3];
 	for (int i = 0; i < 3; ++i)
 	{
 		v1[i] = new_pt1[i] - o[i];
 		v2[i] = pt2[i] - o[i];
 	}
-	vtkFloatingPointType n[3];
+	double n[3];
 	vtkMath::Cross(v1, v2, n);
 	if ( vtkMath::Normalize(n) == 0.0 ) return;
 
@@ -545,8 +545,8 @@ void vtkPlaneWidget2::SetDeltaX(double dx)
 
 double vtkPlaneWidget2::GetDeltaY(void)
 {
-	vtkFloatingPointType *o = this->PlaneSource->GetOrigin();
-	vtkFloatingPointType *pt2 = this->PlaneSource->GetPoint2();
+	double *o = this->PlaneSource->GetOrigin();
+	double *pt2 = this->PlaneSource->GetPoint2();
 	double distance = sqrt(vtkMath::Distance2BetweenPoints(o, pt2));
 
 	// Unrotate in order to determine sign
@@ -554,7 +554,7 @@ double vtkPlaneWidget2::GetDeltaY(void)
 	this->Transform->RotateZ(-this->GetAngle());
 
 	// Set the corners
-	vtkFloatingPointType oNew[3], pt2New[3];
+	double oNew[3], pt2New[3];
 	this->Transform->TransformPoint(o, oNew);
 	this->Transform->TransformPoint(pt2, pt2New);
 	if (pt2New[1] > oNew[1])
@@ -573,26 +573,26 @@ double vtkPlaneWidget2::GetDeltaY(void)
 
 void vtkPlaneWidget2::SetDeltaY(double dy)
 {
-	vtkFloatingPointType *o = this->PlaneSource->GetOrigin();
-	vtkFloatingPointType *pt1 = this->PlaneSource->GetPoint1();
-	vtkFloatingPointType *pt2 = this->PlaneSource->GetPoint2();
+	double *o = this->PlaneSource->GetOrigin();
+	double *pt1 = this->PlaneSource->GetPoint1();
+	double *pt2 = this->PlaneSource->GetPoint2();
 	double radians = atan2(pt2[1] - o[1], pt2[0] - o[0]);
 
 	//BUGBUG entering a value when length is negative
 	//causes a flip of entered sign
-	vtkFloatingPointType new_pt2[3];
+	double new_pt2[3];
 	new_pt2[0] = o[0] + (dy * cos(radians));
 	new_pt2[1] = o[1] + (dy * sin(radians));
 	new_pt2[2] = 0.0;
 
 	// check validity
-	vtkFloatingPointType v1[3], v2[3];
+	double v1[3], v2[3];
 	for (int i = 0; i < 3; ++i)
 	{
 		v1[i] = pt1[i] - o[i];
 		v2[i] = new_pt2[i] - o[i];
 	}
-	vtkFloatingPointType n[3];
+	double n[3];
 	vtkMath::Cross(v1, v2, n);
 	if ( vtkMath::Normalize(n) == 0.0 ) {
 		return; // Bad plane coordinate system
@@ -605,7 +605,7 @@ void vtkPlaneWidget2::SetDeltaY(double dy)
 
 double vtkPlaneWidget2::GetRadians(void)
 {
-	vtkFloatingPointType *origin = this->PlaneSource->GetOrigin();
+	double *origin = this->PlaneSource->GetOrigin();
 	//{{
 	double o[3];
 	o[0] = origin[0];
@@ -617,20 +617,20 @@ double vtkPlaneWidget2::GetRadians(void)
 
 void vtkPlaneWidget2::SetRadians(double radians)
 {
-	this->SetAngle(radians * vtkMath::DoubleRadiansToDegrees());
+	this->SetAngle(vtkMath::DegreesFromRadians(radians));
 }
 
 double vtkPlaneWidget2::GetAngle(void)
 {
-	return vtkMath::DoubleRadiansToDegrees() * this->GetRadians();
+	return vtkMath::DegreesFromRadians(this->GetRadians());
 }
 
 void vtkPlaneWidget2::SetAngle(double angle)
 {
-	vtkFloatingPointType *o = this->PlaneSource->GetOrigin();
-	vtkFloatingPointType *pt1 = this->PlaneSource->GetPoint1();
-	vtkFloatingPointType *pt2 = this->PlaneSource->GetPoint2();
-	vtkFloatingPointType *center = this->PlaneSource->GetCenter();
+	double *o = this->PlaneSource->GetOrigin();
+	double *pt1 = this->PlaneSource->GetPoint1();
+	double *pt2 = this->PlaneSource->GetPoint2();
+	double *center = this->PlaneSource->GetCenter();
 
 	// Manipulate the transform to reflect the rotation
 	this->Transform->Identity();
@@ -639,7 +639,7 @@ void vtkPlaneWidget2::SetAngle(double angle)
 	this->Transform->Translate(-o[0], -o[1], -o[2]);
 
 	// Set the corners
-	vtkFloatingPointType oNew[3], pt1New[3], pt2New[3];
+	double oNew[3], pt1New[3], pt2New[3];
 	this->Transform->TransformPoint(o, oNew);
 	this->Transform->TransformPoint(pt1, pt1New);
 	this->Transform->TransformPoint(pt2, pt2New);
@@ -657,16 +657,16 @@ void vtkPlaneWidget2::SetAngle(double angle)
 	this->SizeHandles();
 }
 
-vtkFloatingPointType* vtkPlaneWidget2::GetModelOrigin(void)
+double* vtkPlaneWidget2::GetModelOrigin(void)
 {
 	return this->GetOrigin();
 }
 
 void vtkPlaneWidget2::SetModelOrigin(float x, float y)
 {
-	vtkFloatingPointType *o = this->PlaneSource->GetOrigin();
-	vtkFloatingPointType *pt1 = this->PlaneSource->GetPoint1();
-	vtkFloatingPointType *pt2 = this->PlaneSource->GetPoint2();
+	double *o = this->PlaneSource->GetOrigin();
+	double *pt1 = this->PlaneSource->GetPoint1();
+	double *pt2 = this->PlaneSource->GetPoint2();
 
 	//Manipulate the transform to reflect the rotation
 	this->Transform->Identity();
@@ -679,7 +679,7 @@ void vtkPlaneWidget2::SetModelOrigin(float x, float y)
 #endif
 
 	//Set the corners
-	vtkFloatingPointType oNew[3], pt1New[3], pt2New[3];
+	double oNew[3], pt1New[3], pt2New[3];
 	this->Transform->TransformPoint(o,oNew);
 	this->Transform->TransformPoint(pt1,pt1New);
 	this->Transform->TransformPoint(pt2,pt2New);
@@ -703,7 +703,7 @@ void vtkPlaneWidget2::SizeHandles(void)
 		this->ValidPick = 1;
 	}
 
-	vtkFloatingPointType radius = this->vtk3DWidget::SizeHandles(.50);
+	double radius = this->vtk3DWidget::SizeHandles(.50);
 	for(int i = 0; i < 4; ++i)
 	{
 		this->HandleGeometry[i]->SetRadius(radius);
@@ -711,8 +711,8 @@ void vtkPlaneWidget2::SizeHandles(void)
 
 	if (this->CurrentRenderer)
 	{
-		vtkFloatingPointType *o = this->PlaneSource->GetOrigin();
-		vtkFloatingPointType scale = this->vtk3DWidget::SizeHandles(5.0);
+		double *o = this->PlaneSource->GetOrigin();
+		double scale = this->vtk3DWidget::SizeHandles(5.0);
 		if (this->XAxisActor)
 		{
 			this->XAxisActor->SetPosition(o);
@@ -727,8 +727,8 @@ void vtkPlaneWidget2::SizeHandles(void)
 		}
 		if (this->ActivePlaneSource)
 		{
-			vtkFloatingPointType *pt1 = this->PlaneSource->GetPoint1();
-			vtkFloatingPointType *pt2 = this->PlaneSource->GetPoint2();
+			double *pt1 = this->PlaneSource->GetPoint1();
+			double *pt2 = this->PlaneSource->GetPoint2();
 			double rad = this->GetRadians();
 
 			float npt1[3];
@@ -762,7 +762,7 @@ void vtkPlaneWidget2::PlaceWidget(void)
 	afxDump << "before vtkPlaneWidget2::PlaceWidget\n";
 	ostrstream oss;
 
-	this->PrintSelf(oss, 4);
+	this->PrintSelf(oss, vtkIndent(4));
 
 	oss << ends;
 	afxDump << oss.str() << "\n";
@@ -772,21 +772,21 @@ void vtkPlaneWidget2::PlaceWidget(void)
     this->Superclass::PlaceWidget();
 
 	//{{
-	float *o = this->GetOrigin();
+	double *o = this->GetOrigin();
 	this->GridOrigin[0] = o[0];
 	this->GridOrigin[1] = o[1];
 	this->GridOrigin[2] = o[2];
 
-	float *p1 = this->GetPoint1();
+	double *p1 = this->GetPoint1();
 	this->Deltas[0] = p1[0] - o[0];
 
-	float *p2 = this->GetPoint2();
+	double *p2 = this->GetPoint2();
 	this->Deltas[1] = p2[1] - o[1];
 
 	this->Deltas[2] = 0.;
 	//}}
 
-	vtkFloatingPointType* pt1 = this->GetPoint1();
+	double* pt1 = this->GetPoint1();
 	for (int i = 0 ; i < 3; ++i) {
 		this->m_InvisablePosX[i] = pt1[i];
 	}

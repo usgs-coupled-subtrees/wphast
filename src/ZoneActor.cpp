@@ -836,13 +836,13 @@ void CZoneActor::Serialize(bool bStoring, hid_t loc_id, const CWPhastDoc* pWPhas
 						{
 							::sprintf(szName, szPFormat, poly);
 							ASSERT(this->BottomFilters[poly]);
-							if (vtkPolyData *pPolyData = this->BottomFilters[poly]->GetInput())
+							if (vtkPolyData *pPolyData = this->BottomFilters[poly]->GetPolyDataInput(0))
 							{
 								CGlobal::HDFSerializePolyData(bStoring, bottom_id, szName, pPolyData);
 							}
 							if (this->BottomOutlineFilters[poly])
 							{
-								if (vtkPolyData *pPolyData = this->BottomOutlineFilters[poly]->GetInput())
+								if (vtkPolyData *pPolyData = this->BottomOutlineFilters[poly]->GetPolyDataInput(0))
 								{
 									::sprintf(szName, szOutFormat, poly);
 									CGlobal::HDFSerializePolyData(bStoring, bottom_id, szName, pPolyData);
@@ -864,13 +864,13 @@ void CZoneActor::Serialize(bool bStoring, hid_t loc_id, const CWPhastDoc* pWPhas
 						{
 							::sprintf(szName, szPFormat, poly);
 							ASSERT(this->TopFilters[poly]);
-							if (vtkPolyData *pPolyData = this->TopFilters[poly]->GetInput())
+							if (vtkPolyData *pPolyData = this->TopFilters[poly]->GetPolyDataInput(0))
 							{
 								CGlobal::HDFSerializePolyData(bStoring, top_id, szName, pPolyData);
 							}
 							if (this->TopOutlineFilters[poly])
 							{
-								if (vtkPolyData *pPolyData = this->TopOutlineFilters[poly]->GetInput())
+								if (vtkPolyData *pPolyData = this->TopOutlineFilters[poly]->GetPolyDataInput(0))
 								{
 									::sprintf(szName, szOutFormat, poly);
 									CGlobal::HDFSerializePolyData(bStoring, top_id, szName, pPolyData);
@@ -1523,14 +1523,14 @@ void CZoneActor::SetVisibility(int visibility)
 	}
 }
 
-vtkFloatingPointType *CZoneActor::GetBounds() // virtual
+double *CZoneActor::GetBounds() // virtual
 {
 // COMMENT: {6/23/2008 9:13:56 PM}	if (this->GetPolyhedronType() == Polyhedron::PRISM /* && this->AppendPolyData->GetNumberOfInputs() == 0 */)
 // COMMENT: {6/23/2008 9:13:56 PM}	{
 // COMMENT: {6/23/2008 9:13:56 PM}		if (Prism *prism = dynamic_cast<Prism*>(this->GetPolyhedron()))
 // COMMENT: {6/23/2008 9:13:56 PM}		{
 // COMMENT: {6/23/2008 9:13:56 PM}			vtkMatrix4x4 *pMatrix4x4 = this->GetMatrix();
-// COMMENT: {6/23/2008 9:13:56 PM}			vtkFloatingPointType *bounds = this->PrismSidesPolyData->GetBounds();
+// COMMENT: {6/23/2008 9:13:56 PM}			double *bounds = this->PrismSidesPolyData->GetBounds();
 // COMMENT: {6/23/2008 9:13:56 PM}			float imin[4];
 // COMMENT: {6/23/2008 9:13:56 PM}			float imax[4];
 // COMMENT: {6/23/2008 9:13:56 PM}			float omin[4];
@@ -1562,7 +1562,7 @@ vtkFloatingPointType *CZoneActor::GetBounds() // virtual
 	vtkProp3D *prop3D;
 	vtkAssemblyPath *path;
 	int i, n;
-	vtkFloatingPointType *bounds, bbox[24];
+	double *bounds, bbox[24];
 	int propVisible=0;
 
 	this->UpdatePaths();
@@ -1573,7 +1573,7 @@ vtkFloatingPointType *CZoneActor::GetBounds() // virtual
 
 	for ( this->Paths->InitTraversal(); (path = this->Paths->GetNextItem()); )
 	{
-		prop3D = (vtkProp3D *)path->GetLastNode()->GetProp();
+		prop3D = (vtkProp3D *)path->GetLastNode()->GetViewProp();
 		//if ( prop3D->GetVisibility() )
 		{
 			propVisible = 1;
@@ -2887,7 +2887,7 @@ void CZoneActor::Update(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent)
 	}
 }
 
-// COMMENT: {7/16/2008 1:15:31 PM}void CZoneActor::SetPoint(vtkIdType n, vtkFloatingPointType *x)
+// COMMENT: {7/16/2008 1:15:31 PM}void CZoneActor::SetPoint(vtkIdType n, double *x)
 // COMMENT: {7/16/2008 1:15:31 PM}{
 // COMMENT: {7/16/2008 1:15:31 PM}}
 

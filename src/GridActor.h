@@ -19,56 +19,13 @@ class CGridLineWidget;
 
 class CZone;
 
-#ifndef vtkFloatingPointType
-#define vtkFloatingPointType vtkFloatingPointType
-typedef float vtkFloatingPointType;
-#endif
-
-#define GRID_WIDGET
+// COMMENT: {8/21/2009 6:54:14 PM}#define GRID_WIDGET
 
 //class CGridActor : public vtkLODActor
 class CGridActor : public vtkAssembly
 {
 public:
-// COMMENT: {8/10/2009 5:54:26 PM}	vtkTypeRevisionMacro(CGridActor,vtkAssembly);
-//{{
-  protected:
-  void CollectRevisions(ostream& os);
-  public:
-  // vtkTypeMacro(thisClass,superclass)
-  typedef vtkAssembly Superclass;
-  virtual const char *GetClassName() const {return "CGridActor";}
-  static int IsTypeOf(const char *type)
-  {
-    if ( !strcmp("CGridActor",type) )
-      {
-      return 1;
-      }
-    return vtkAssembly::IsTypeOf(type);
-  }
-  virtual int IsA(const char *type)
-  {
-    return this->CGridActor::IsTypeOf(type);
-  }
-  static CGridActor* SafeDownCast(vtkObject *o)
-  {
-    if ( o && o->IsA("CGridActor") )
-      {
-      return static_cast<CGridActor *>(o);
-      }
-    return NULL;
-  }
-  protected:
-  virtual vtkObject *NewInstanceInternal() const
-  {
-    return CGridActor::New();
-  }
-  public:
-  CGridActor *NewInstance() const
-  {
-    return CGridActor::SafeDownCast(this->NewInstanceInternal());
-  }
-//}}
+	vtkTypeRevisionMacro(CGridActor,vtkAssembly);
 
 	static CGridActor *New();
 
@@ -138,11 +95,11 @@ public:
 
 
 	///virtual void SetScale(float x, float y, float z);
-	virtual void SetScale(vtkFloatingPointType x, vtkFloatingPointType y, vtkFloatingPointType z);
-	virtual void SetScale(vtkFloatingPointType scale[3]);
+	virtual void SetScale(double x, double y, double z);
+	virtual void SetScale(double scale[3]);
 
-	virtual vtkFloatingPointType* GetScale(void);
-	virtual void GetScale(vtkFloatingPointType scale[3]);
+	virtual double* GetScale(void);
+	virtual void GetScale(double scale[3]);
 
 #if defined(WIN32)
 	BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
@@ -224,10 +181,10 @@ protected:
 	// Internal ivars for processing events
 	vtkRenderer        *CurrentRenderer;
 
-	int                                  AxisIndex;
-	int                                  PlaneIndex;
-	vtkFloatingPointType                 CurrentPoint[3];
-	std::map<vtkFloatingPointType, int>  ValueToIndex[3];
+	int                   AxisIndex;
+	int                   PlaneIndex;
+	double                CurrentPoint[3];
+	std::map<float, int>  ValueToIndex[3];
 
 
 	///CGrid               m_grid[3];

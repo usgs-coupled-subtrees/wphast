@@ -122,7 +122,7 @@ void CGridLODActor::Serialize(bool bStoring, hid_t loc_id)
 	static const char szPrintXY[]  = "PrintXYOrient";
 	static const char szChemDims[] = "ChemDims";
 	
-	vtkFloatingPointType scale[3];
+	double scale[3];
 	double double_scale[3];
 
 	herr_t status;
@@ -439,7 +439,7 @@ void CGridLODActor::Setup(const CUnits& units)
 	this->ValueToIndex[0].clear();
 	this->ValueToIndex[1].clear();
 	this->ValueToIndex[2].clear();
-	vtkFloatingPointType x[3];
+	double x[3];
 	register int j, k, offset, jOffset, kOffset;
 	for (k = 0; k < this->m_gridKeyword.m_grid[2].count_coord; ++k)
 	{
@@ -453,7 +453,7 @@ void CGridLODActor::Setup(const CUnits& units)
 		}
 		kOffset = k * this->m_gridKeyword.m_grid[0].count_coord * this->m_gridKeyword.m_grid[1].count_coord;
 		// this insert is ok
-		VERIFY(this->ValueToIndex[2].insert(std::map<vtkFloatingPointType, int>::value_type(x[2], k)).second);
+		VERIFY(this->ValueToIndex[2].insert(std::map<double, int>::value_type(x[2], k)).second);
 		for (j = 0; j < this->m_gridKeyword.m_grid[1].count_coord; ++j)
 		{
 			if (this->m_gridKeyword.m_grid[1].uniform)
@@ -468,7 +468,7 @@ void CGridLODActor::Setup(const CUnits& units)
 			if (k == 0)
 			{
 				// this insert is ok
-				VERIFY(this->ValueToIndex[1].insert(std::map<vtkFloatingPointType, int>::value_type(x[1], j)).second);
+				VERIFY(this->ValueToIndex[1].insert(std::map<double, int>::value_type(x[1], j)).second);
 			}
 			for (i = 0; i < this->m_gridKeyword.m_grid[0].count_coord; ++i)
 			{
@@ -484,7 +484,7 @@ void CGridLODActor::Setup(const CUnits& units)
 				if (k == 0 && j == 0)
 				{
 					// this insert is ok
-					VERIFY(this->ValueToIndex[0].insert(std::map<vtkFloatingPointType, int>::value_type(x[0], i)).second);
+					VERIFY(this->ValueToIndex[0].insert(std::map<double, int>::value_type(x[0], i)).second);
 				}
 				points->InsertPoint(offset, x);
 			}
@@ -794,7 +794,7 @@ void CGridLODActor::OnMouseMove()
 	{
 		vtkIdType n = pCellPicker->GetCellId();
 		TRACE("CellId = %d\n", n);
-		vtkFloatingPointType* pt = pCellPicker->GetPickPosition();
+		double* pt = pCellPicker->GetPickPosition();
 		if (vtkDataSet* pDataSet = pCellPicker->GetDataSet())
 		{
 			vtkCell* pCell = pDataSet->GetCell(n);
@@ -804,14 +804,14 @@ void CGridLODActor::OnMouseMove()
 				if (vtkPoints* pPoints = pCell->GetPoints())
 				{
 					pPoints->GetPoint(0, this->CurrentPoint);
-					vtkFloatingPointType* pt0 = this->CurrentPoint;
-					vtkFloatingPointType* pt1 = pPoints->GetPoint(1);
+					double* pt0 = this->CurrentPoint;
+					double* pt1 = pPoints->GetPoint(1);
 					TRACE("pt0[0] = %g, pt0[1] = %g, pt0[2] = %g\n", pt0[0], pt0[1], pt0[2]);
 					TRACE("pt1[0] = %g, pt1[1] = %g, pt1[2] = %g\n", pt1[0], pt1[1], pt1[2]);
-					vtkFloatingPointType* scale = this->GetScale();
+					double* scale = this->GetScale();
 
-					vtkFloatingPointType length;
-					vtkFloatingPointType bounds[6];
+					double length;
+					double bounds[6];
 					this->GetBounds(bounds);
 
 					if ((pt0[2] == this->m_min[2] && pt1[2] == this->m_min[2]) || (pt0[2] == this->m_max[2] && pt1[2] == this->m_max[2]))
@@ -989,7 +989,7 @@ void CGridLODActor::OnKeyPress()
 		if (::strcmp(keysym, "Delete") == 0 && this->AxisIndex != -1)
 		{
 			this->PlaneIndex = -1;
-			std::map<vtkFloatingPointType, int>::iterator i = this->ValueToIndex[this->AxisIndex].find(this->CurrentPoint[this->AxisIndex]);
+			std::map<double, int>::iterator i = this->ValueToIndex[this->AxisIndex].find(this->CurrentPoint[this->AxisIndex]);
 			if (i != this->ValueToIndex[this->AxisIndex].end())
 			{
 				if (this->m_gridKeyword.m_grid[this->AxisIndex].count_coord > 2)
@@ -1043,7 +1043,7 @@ void CGridLODActor::OnEndInteraction(void)
 
 		// lookup current point and convert to grid index
 		//
-		std::map<vtkFloatingPointType, int>::iterator setIter = this->ValueToIndex[this->AxisIndex].find(this->CurrentPoint[this->AxisIndex]);
+		std::map<double, int>::iterator setIter = this->ValueToIndex[this->AxisIndex].find(this->CurrentPoint[this->AxisIndex]);
 		if (setIter != this->ValueToIndex[this->AxisIndex].end())
 		{
 			int originalPlaneIndex = setIter->second;

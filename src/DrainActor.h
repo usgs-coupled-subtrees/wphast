@@ -57,7 +57,7 @@ protected:
 	CDrain Drain;
 	static vtkProperty *s_HandleProperty;
 	static vtkProperty *s_ConnectorProperty;
-	static vtkFloatingPointType s_color[3];
+	static double s_color[3];
 
 	virtual vtkProperty *GetHandleProperty(void)      { return s_HandleProperty;    };
 	virtual vtkProperty *GetConnectorProperty(void)   { return s_ConnectorProperty; };

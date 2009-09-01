@@ -3,7 +3,7 @@
 
 #include <vtkAssembly.h>
 #include <vtkPropAssembly.h>
-#include <vtkIdType.h>
+#include <vtkType.h>
 
 #include "tree.h"           // CTreeCtrlNode
 #include "srcinput/PHAST_Transform.h"
@@ -12,11 +12,6 @@ class CUnits;
 class CPropertyTreeControlBar;
 class CTreeMemento;
 class CGridKeyword;
-
-#ifndef vtkFloatingPointType
-#define vtkFloatingPointType vtkFloatingPointType
-typedef float vtkFloatingPointType;
-#endif
 
 class CPointConnectorActor : public vtkAssembly
 {
@@ -38,13 +33,13 @@ public:
 
 	void SetScale(float x, float y, float z);
 	void SetScale(double x, double y, double z);
-	void SetScale(vtkFloatingPointType scale[3]) { this->SetScale(scale[0], scale[1], scale[2]); }
+	void SetScale(double scale[3]) { this->SetScale(scale[0], scale[1], scale[2]); }
 	virtual PHAST_Transform::COORDINATE_SYSTEM GetCoordinateSystem(void)const      { return PHAST_Transform::GRID; };
 
-	void SetRadius(vtkFloatingPointType radius);
-	vtkFloatingPointType GetRadius(void)const;
+	void SetRadius(double radius);
+	double GetRadius(void)const;
 
-	void ScaleFromBounds(vtkFloatingPointType bounds[6]);
+	void ScaleFromBounds(double bounds[6]);
 
 	void SetZ(double z);
 	double GetZ(void)const;
@@ -189,7 +184,7 @@ protected:
 	vtkRenderer *CurrentRenderer;
 
 	std::string          Name;
-	vtkFloatingPointType Radius;
+	double               Radius;
 	double               Z;
 	int                  Enabled;
 

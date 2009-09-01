@@ -5,7 +5,7 @@
 #include "WPhastView.h"
 
 
-CSetScaleAction::CSetScaleAction(CWPhastDoc* pDoc, vtkFloatingPointType xScale, vtkFloatingPointType yScale, vtkFloatingPointType zScale)
+CSetScaleAction::CSetScaleAction(CWPhastDoc* pDoc, double xScale, double yScale, double zScale)
 : m_pDoc(pDoc)
 {
 	this->m_Scale[0] = xScale;
@@ -30,7 +30,7 @@ void CSetScaleAction::UnExecute()
 	this->m_pDoc->SetScale(this->m_OriginalScale[0], this->m_OriginalScale[1], this->m_OriginalScale[2]);
 }
 
-void CSetScaleAction::Apply(vtkFloatingPointType xScale, vtkFloatingPointType yScale, vtkFloatingPointType zScale)
+void CSetScaleAction::Apply(double xScale, double yScale, double zScale)
 {
 	this->m_Scale[0] = xScale;
 	this->m_Scale[1] = yScale;

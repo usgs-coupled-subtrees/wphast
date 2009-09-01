@@ -22,7 +22,7 @@ vtkStandardNewMacro(CRiverActor);
 #endif
 
 const char CRiverActor::szHeading[] = "Rivers";
-vtkFloatingPointType CRiverActor::s_color[3];
+double CRiverActor::s_color[3];
 vtkProperty* CRiverActor::s_HandleProperty = 0;
 vtkProperty* CRiverActor::s_ConnectorProperty = 0;
 

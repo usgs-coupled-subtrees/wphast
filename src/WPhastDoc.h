@@ -94,11 +94,6 @@ enum WPhastNotification {
 	WPN_SELCHANGING   = 5,
 };
 
-#ifndef vtkFloatingPointType
-#define vtkFloatingPointType vtkFloatingPointType
-typedef float vtkFloatingPointType;
-#endif
-
 class CWPhastDoc : public CDocument, public CSubject, public IObserver
 {
 protected: // create from serialization only
@@ -291,6 +286,9 @@ protected:
 	// colors
 	CDisplayColors DisplayColors;
 
+	// grid keyboard accelerator
+	HACCEL hGridAccel;
+
 protected:
 	template<typename ACTOR>
 	void SerializeActors(bool bStoring, hid_t loc_id, CTreeCtrlNode parentNode, const char* szNamesListHeading);
@@ -359,10 +357,10 @@ public:
 	void SetPrintInput(const CPrintInput& printInput);
 	const CPrintInput& GetPrintInput(void)const;
 
-	vtkFloatingPointType* GetGridBounds();
-	void SetScale(vtkFloatingPointType x, vtkFloatingPointType y, vtkFloatingPointType z);
-	vtkFloatingPointType* GetScale();
-	void GetScale(vtkFloatingPointType data[3]);
+	double* GetGridBounds();
+	void SetScale(double x, double y, double z);
+	double* GetScale();
+	void GetScale(double data[3]);
 	afx_msg void OnUpdateToolsGeometry(CCmdUI *pCmdUI);
 	afx_msg void OnToolsGeometry();
 	virtual void DeleteContents();
@@ -512,6 +510,7 @@ public:
 	CDrainActor        *NewDrainActor;
 	vtkCallbackCommand *DrainCallbackCommand;
 
+	virtual HACCEL GetDefaultAccelerator();
 
 public:
 	afx_msg void OnToolsColors();

@@ -23,7 +23,7 @@ vtkCxxRevisionMacro(CICChemZoneActor, "$Revision$");
 vtkStandardNewMacro(CICChemZoneActor);
 
 const char CICChemZoneActor::szHeading[] = "ICChem";
-vtkFloatingPointType CICChemZoneActor::s_color[3] = {0., 0., 0.};
+double CICChemZoneActor::s_color[3] = {0., 0., 0.};
 vtkProperty* CICChemZoneActor::s_Property = 0;
 vtkProperty* CICChemZoneActor::s_OutlineProperty = 0;
 

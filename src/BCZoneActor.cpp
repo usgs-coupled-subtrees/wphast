@@ -34,7 +34,7 @@ vtkStandardNewMacro(CBCZoneActor);
 #endif
 
 const char CBCZoneActor::szHeading[] = "BC";
-vtkFloatingPointType CBCZoneActor::s_color[3][3];
+double CBCZoneActor::s_color[3][3];
 vtkProperty* CBCZoneActor::s_Property[3] = {0, 0, 0};
 vtkProperty* CBCZoneActor::s_OutlineProperty[3] = {0, 0, 0};
 

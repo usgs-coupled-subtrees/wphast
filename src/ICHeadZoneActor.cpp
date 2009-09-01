@@ -24,7 +24,7 @@ vtkCxxRevisionMacro(CICHeadZoneActor, "$Revision$");
 vtkStandardNewMacro(CICHeadZoneActor);
 
 const char CICHeadZoneActor::szHeading[] = "ICHead";
-vtkFloatingPointType CICHeadZoneActor::s_color[3] = {0., 0., 0};
+double CICHeadZoneActor::s_color[3] = {0., 0., 0};
 vtkProperty* CICHeadZoneActor::s_Property = 0;
 vtkProperty* CICHeadZoneActor::s_OutlineProperty = 0;
 

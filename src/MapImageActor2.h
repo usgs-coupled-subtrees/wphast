@@ -6,11 +6,6 @@ class vtkImageReader2;
 class vtkImageShiftScale;
 class CWorldTransform;
 
-#ifndef vtkFloatingPointType
-#define vtkFloatingPointType vtkFloatingPointType
-typedef float vtkFloatingPointType;
-#endif
-
 class CMapImageActor2 : public vtkOpenGLImageActor
 {
 public:
@@ -22,9 +17,9 @@ public:
 	int SetWorldFileName(const char *filename);
 	int* GetDataExtent(void)const;
 
-	int PlaceMap(vtkFloatingPointType xPos, vtkFloatingPointType yPos, vtkFloatingPointType zPos, vtkFloatingPointType angle);
+	int PlaceMap(double xPos, double yPos, double zPos, double angle);
 
-	void SetScale(vtkFloatingPointType xScale, vtkFloatingPointType yScale, vtkFloatingPointType zScale);
+	void SetScale(double xScale, double yScale, double zScale);
 	vtkImageReader2* GetImageReader2(void) { return m_MapImageReader2; }
 
 protected:

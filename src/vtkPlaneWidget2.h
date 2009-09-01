@@ -4,11 +4,6 @@
 
 class vtkArrowSource;
 
-#ifndef vtkFloatingPointType
-#define vtkFloatingPointType vtkFloatingPointType
-typedef float vtkFloatingPointType;
-#endif
-
 class vtkPlaneWidget2 : public vtkPlaneWidget  
 {
 
@@ -28,7 +23,7 @@ public:
 	double GetRadians(void);
 	void SetRadians(double radians);
 	
-	vtkFloatingPointType* GetModelOrigin(void); // degrees
+	double* GetModelOrigin(void); // degrees
 	void SetModelOrigin(float x, float y);
 
 	void SetResolution(int index, int n);

@@ -72,7 +72,7 @@ CTestVTKDialog::CTestVTKDialog(CWnd* pParent /*=NULL*/)
 	afxDump << "vtkImageReader2\n";
 	ostrstream oss;
 
-	imageReader->PrintSelf(oss, 4);
+	imageReader->PrintSelf(oss, vtkIndent(4));
 
 	oss << ends;
 	afxDump << oss.str() << "\n";

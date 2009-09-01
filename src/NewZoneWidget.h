@@ -2,11 +2,6 @@
 
 #include <vtk3DWidget.h>
 
-#ifndef vtkFloatingPointType
-#define vtkFloatingPointType vtkFloatingPointType
-typedef float vtkFloatingPointType;
-#endif
-
 class CGridActor;
 class vtkCursor3D;
 class vtkPolyDataMapper;
@@ -24,10 +19,10 @@ public:
 	// Description:
 	// Methods that satisfy the superclass' API.
 	virtual void SetEnabled(int);
-	virtual void PlaceWidget(vtkFloatingPointType bounds[6]);
+	virtual void PlaceWidget(double bounds[6]);
 
-	vtkFloatingPointType* GetBounds(void) { return this->OutlineActor->GetBounds(); }
-	void GetBounds(vtkFloatingPointType bounds[6]) { this->OutlineActor->GetBounds(bounds); }
+	double* GetBounds(void) { return this->OutlineActor->GetBounds(); }
+	void GetBounds(double bounds[6]) { this->OutlineActor->GetBounds(bounds); }
 
 // COMMENT: {5/10/2006 4:23:30 PM}	vtkSetMacro(GridActor,CGridActor*);
 
@@ -64,10 +59,10 @@ protected:
 	vtkActor             *OutlineActor;
 	vtkPolyDataMapper    *OutlineMapper;
 	vtkOutlineSource     *OutlineSource;
-	vtkFloatingPointType  StartPoint[3];
+	double                StartPoint[3];
 
 	// Mouse state
-	vtkFloatingPointType  FixedPlanePoint[3];
+	double                FixedPlanePoint[3];
 	int                   FixedPlane;  // [0-5]
 	int                   FixedCoord;  // [0-2]
 

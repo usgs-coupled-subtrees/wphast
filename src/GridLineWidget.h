@@ -1,11 +1,6 @@
 #pragma once
 #include <vtkImplicitPlaneWidget.h>
 
-#ifndef vtkFloatingPointType
-#define vtkFloatingPointType vtkFloatingPointType
-typedef float vtkFloatingPointType;
-#endif
-
 class CGridLineWidget : public vtkImplicitPlaneWidget
 {
 public:
@@ -18,7 +13,7 @@ public:
 
   virtual void SetEnabled(int);
 
-  void SetInitialPickPosition(vtkFloatingPointType pos[3]);
+  void SetInitialPickPosition(double pos[3]);
 
 protected:
 	CGridLineWidget(void);
@@ -37,7 +32,7 @@ protected:
 	//void OnRightButtonUp();
 	//void OnMouseMove();
 
-	vtkFloatingPointType InitialPickPosition[3];
+	double InitialPickPosition[3];
 
 private:
   CGridLineWidget(const CGridLineWidget&);  //Not implemented

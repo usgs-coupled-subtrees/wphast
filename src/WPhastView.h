@@ -82,7 +82,7 @@ protected:
 
 	vtkInteractorStyle             *InteractorStyle;
 
-	vtkFloatingPointType            BackgroundColor[3];
+	double                          BackgroundColor[3];
 
 	bool                            m_bResetCamera;
 	bool                            m_bMovingGridLine;

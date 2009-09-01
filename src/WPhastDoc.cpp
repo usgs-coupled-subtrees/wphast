@@ -291,6 +291,7 @@ BEGIN_MESSAGE_MAP(CWPhastDoc, CDocument)
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_NEWDRAIN, OnUpdateToolsNewDrain)
 	ON_COMMAND(ID_TOOLS_NEWDRAIN, OnToolsNewDrain)
 
+	// ID_TOOLS_COLORS
 	ON_COMMAND(ID_TOOLS_COLORS, &CWPhastDoc::OnToolsColors)
 END_MESSAGE_MAP()
 
@@ -356,12 +357,15 @@ CWPhastDoc::CWPhastDoc()
 , NewPrismCallbackCommand(0)
 , NewDrainActor(0)
 , NewDrainCallbackCommand(0)
+, hGridAccel(0)
 {
 #if defined(WPHAST_AUTOMATION)
 	EnableAutomation();
 
 	AfxOleLockApp();
 #endif
+
+	VERIFY(this->hGridAccel = ::LoadAccelerators(::AfxGetInstanceHandle(), MAKEINTRESOURCE(IDR_GRID_ACCEL)));
 
 	ASSERT(this->m_pimpl == 0);
 	this->m_pimpl = new WPhastDocImpl();
@@ -473,6 +477,13 @@ CWPhastDoc::~CWPhastDoc()
 #if defined(WPHAST_AUTOMATION)
 	AfxOleUnlockApp();
 #endif
+
+	ASSERT(this->hGridAccel);
+	if (this->hGridAccel)
+	{
+		VERIFY(::DestroyAcceleratorTable(this->hGridAccel));
+		this->hGridAccel = 0;
+	}
 
 	ASSERT(this->m_pimpl);
 	if (this->m_pimpl)
@@ -884,7 +895,7 @@ void CWPhastDoc::Serialize(CArchive& ar)
 		}
 
 		// set scale for all zones, wells ...
-		vtkFloatingPointType* scale = this->m_pGridActor->GetScale();
+		double* scale = this->m_pGridActor->GetScale();
 		this->SetScale(scale[0], scale[1], scale[2]);
 
 		this->ResetCamera();
@@ -1433,7 +1444,7 @@ void CWPhastDoc::DeleteContents()
 			for (int i = 0; i < this->m_pPropCollection->GetNumberOfItems(); ++i)
 			{
 				vtkProp* prop = this->m_pPropCollection->GetNextProp();
-				pView->GetRenderer()->GetProps()->RemoveItem(prop);
+				pView->GetRenderer()->GetViewProps()->RemoveItem(prop);
 			}
 		}
 
@@ -1634,13 +1645,13 @@ void CWPhastDoc::OnEditRedo() // 57644
 	this->SetModifiedFlag(this->m_pimpl->m_vectorActionsIndex != this->m_pimpl->m_lastSaveIndex);
 }
 
-void CWPhastDoc::SetScale(vtkFloatingPointType x, vtkFloatingPointType y, vtkFloatingPointType z)
+void CWPhastDoc::SetScale(double x, double y, double z)
 {
 	ASSERT(x != 0);
 	ASSERT(y != 0);
 	ASSERT(z != 0);
 
-	vtkFloatingPointType scale[3];
+	double scale[3];
 	scale[0] = x;
 	scale[1] = y;
 	scale[2] = z;
@@ -1665,7 +1676,7 @@ void CWPhastDoc::SetScale(vtkFloatingPointType x, vtkFloatingPointType y, vtkFlo
 
 	// reset the axes
 	//
-	vtkFloatingPointType bounds[6];
+	double bounds[6];
 	this->m_pGridActor->GetBounds(bounds);
 	float defaultAxesSize = (bounds[1]-bounds[0] + bounds[3]-bounds[2] + bounds[5]-bounds[4])/12;
 	this->m_pAxesActor->SetDefaultPositions(bounds);
@@ -1851,17 +1862,17 @@ void CWPhastDoc::AddDefaultZone(CZone* pZone)
 	}
 }
 
-vtkFloatingPointType* CWPhastDoc::GetScale()
+double* CWPhastDoc::GetScale()
 {
 	return this->m_pGridActor->GetScale();
 }
 
-void CWPhastDoc::GetScale(vtkFloatingPointType data[3])
+void CWPhastDoc::GetScale(double data[3])
 {
 	this->m_pGridActor->GetScale(data);
 }
 
-vtkFloatingPointType* CWPhastDoc::GetGridBounds()
+double* CWPhastDoc::GetGridBounds()
 {
 	if (this->m_pGridActor)
 	{
@@ -3524,8 +3535,8 @@ void CWPhastDoc::New(const CNewModel& model)
 
 	// set the axes
 	//
-	vtkFloatingPointType *bounds = this->GetGridBounds();
-	vtkFloatingPointType defaultAxesSize = (bounds[1]-bounds[0] + bounds[3]-bounds[2] + bounds[5]-bounds[4])/12;
+	double *bounds = this->GetGridBounds();
+	double defaultAxesSize = (bounds[1]-bounds[0] + bounds[3]-bounds[2] + bounds[5]-bounds[4])/12;
 	this->m_pAxesActor->SetDefaultPositions(bounds);
 	this->m_pAxesActor->SetDefaultSize(defaultAxesSize);
 	this->m_pAxesActor->SetDefaultTubeDiameter(defaultAxesSize * 0.1);
@@ -4296,7 +4307,7 @@ void CWPhastDoc::InternalAdd(CZoneActor *pZoneActor, bool bAdd, HTREEITEM hInser
 
 	// set scale
 	//
-	vtkFloatingPointType *scale = this->GetScale();
+	double *scale = this->GetScale();
 	pZoneActor->SetScale(scale[0], scale[1], scale[2]);
 
 	// add to document
@@ -4399,7 +4410,7 @@ void CWPhastDoc::Add(CWellActor *pWellActor, HTREEITEM hInsertAfter)
 
 	// set scale
 	//
-	vtkFloatingPointType *scale = this->GetScale();
+	double *scale = this->GetScale();
 	pWellActor->SetScale(scale[0], scale[1], scale[2]);
 
 	// set height
@@ -4410,7 +4421,7 @@ void CWPhastDoc::Add(CWellActor *pWellActor, HTREEITEM hInsertAfter)
 
 	// set radius
 	//
-	vtkFloatingPointType *bounds = this->GetGridBounds();
+	double *bounds = this->GetGridBounds();
 	float defaultAxesSize = (bounds[1]-bounds[0] + bounds[3]-bounds[2] + bounds[5]-bounds[4])/12;
 	pWellActor->SetDefaultTubeDiameter(defaultAxesSize * 0.17 / sqrt(scale[0] * scale[1]));
 
@@ -4474,8 +4485,8 @@ void CWPhastDoc::Remove(CWellActor *pWellActor)
 
 	// validate actor
 	//
-	vtkFloatingPointType *scale = this->GetScale();
-	vtkFloatingPointType *wellscale = pWellActor->GetScale();
+	double *scale = this->GetScale();
+	double *wellscale = pWellActor->GetScale();
 	ASSERT(wellscale[0] == scale[0]);
 	ASSERT(wellscale[1] == scale[1]);
 	ASSERT(wellscale[2] == scale[2]);
@@ -4521,8 +4532,8 @@ void CWPhastDoc::UnRemove(CWellActor *pWellActor)
 
 	// verify scale
 	//
-	vtkFloatingPointType *scale = this->GetScale();
-	vtkFloatingPointType *wellscale = pWellActor->GetScale();
+	double *scale = this->GetScale();
+	double *wellscale = pWellActor->GetScale();
 	ASSERT(wellscale[0] == scale[0]);
 	ASSERT(wellscale[1] == scale[1]);
 	ASSERT(wellscale[2] == scale[2]);
@@ -4810,7 +4821,7 @@ void CWPhastDoc::Add(CRiverActor *pRiverActor, HTREEITEM hInsertAfter)
 
 	// set scale
 	//
-	vtkFloatingPointType *scale = this->GetScale();
+	double *scale = this->GetScale();
 	pRiverActor->SetScale(scale[0], scale[1], scale[2]);
 
 	// set radius
@@ -4819,7 +4830,7 @@ void CWPhastDoc::Add(CRiverActor *pRiverActor, HTREEITEM hInsertAfter)
 
 	// set z
 	//
-// COMMENT: {6/22/2005 5:50:09 PM}	vtkFloatingPointType *bounds = this->GetGridBounds();
+// COMMENT: {6/22/2005 5:50:09 PM}	double *bounds = this->GetGridBounds();
 	CGrid x, y, z;
 	this->GetGrid(x, y, z);
 	z.Setup();
@@ -4911,8 +4922,8 @@ void CWPhastDoc::Remove(CRiverActor *pRiverActor)
 
 	// validate actor
 	//
-	vtkFloatingPointType *scale = this->GetScale();
-	vtkFloatingPointType *riverscale = pRiverActor->GetScale();
+	double *scale = this->GetScale();
+	double *riverscale = pRiverActor->GetScale();
 // COMMENT: {7/20/2009 8:33:12 PM}	ASSERT(riverscale[0] == scale[0]);
 // COMMENT: {7/20/2009 8:33:12 PM}	ASSERT(riverscale[1] == scale[1]);
 // COMMENT: {7/20/2009 8:33:12 PM}	ASSERT(riverscale[2] == scale[2]);
@@ -4958,8 +4969,8 @@ void CWPhastDoc::UnRemove(CRiverActor *pRiverActor)
 
 	// verify scale
 	//
-	vtkFloatingPointType *scale = this->GetScale();
-	vtkFloatingPointType *riverscale = pRiverActor->GetScale();
+	double *scale = this->GetScale();
+	double *riverscale = pRiverActor->GetScale();
 // COMMENT: {7/20/2009 8:33:36 PM}	ASSERT(riverscale[0] == scale[0]);
 // COMMENT: {7/20/2009 8:33:36 PM}	ASSERT(riverscale[1] == scale[1]);
 // COMMENT: {7/20/2009 8:33:36 PM}	ASSERT(riverscale[2] == scale[2]);
@@ -5004,8 +5015,8 @@ void CWPhastDoc::Remove(CDrainActor *pDrainActor)
 
 	// validate actor
 	//
-	vtkFloatingPointType *scale = this->GetScale();
-	vtkFloatingPointType *riverscale = pDrainActor->GetScale();
+	double *scale = this->GetScale();
+	double *riverscale = pDrainActor->GetScale();
 // COMMENT: {7/20/2009 8:34:20 PM}	ASSERT(riverscale[0] == scale[0]);
 // COMMENT: {7/20/2009 8:34:20 PM}	ASSERT(riverscale[1] == scale[1]);
 // COMMENT: {7/20/2009 8:34:20 PM}	ASSERT(riverscale[2] == scale[2]);
@@ -5051,8 +5062,8 @@ void CWPhastDoc::UnRemove(CDrainActor *pDrainActor)
 
 	// verify scale
 	//
-	vtkFloatingPointType *scale = this->GetScale();
-	vtkFloatingPointType *riverscale = pDrainActor->GetScale();
+	double *scale = this->GetScale();
+	double *riverscale = pDrainActor->GetScale();
 // COMMENT: {7/20/2009 8:34:29 PM}	ASSERT(riverscale[0] == scale[0]);
 // COMMENT: {7/20/2009 8:34:29 PM}	ASSERT(riverscale[1] == scale[1]);
 // COMMENT: {7/20/2009 8:34:29 PM}	ASSERT(riverscale[2] == scale[2]);
@@ -5340,11 +5351,11 @@ void CWPhastDoc::UpdateGridDomain(void)
 {
 	// get scale
 	//
-	vtkFloatingPointType *scale = this->GetScale();
+	double *scale = this->GetScale();
 
 	// get bounds
 	//
-	vtkFloatingPointType bounds[6];
+	double bounds[6];
 	this->m_pGridActor->GetBounds(bounds);
 	float defaultAxesSize = (bounds[1]-bounds[0] + bounds[3]-bounds[2] + bounds[5]-bounds[4])/12;
 
@@ -5781,12 +5792,12 @@ void CWPhastDoc::NewZoneListener(vtkObject *caller, unsigned long eid, void *cli
 		CWPhastDoc* self = reinterpret_cast<CWPhastDoc*>(clientdata);
 		if (eid == vtkCommand::EndInteractionEvent)
 		{
-			vtkFloatingPointType scaled_meters[6];
+			double scaled_meters[6];
 			self->NewZoneWidget->GetBounds(scaled_meters);
 
 			// calc zone
 			CZone zone;
-			vtkFloatingPointType* scale = self->GetScale();
+			double* scale = self->GetScale();
 			const CUnits& units = self->GetUnits();
 			zone.x1 = scaled_meters[0] / scale[0] / units.horizontal.input_to_si;
 			zone.x2 = scaled_meters[1] / scale[0] / units.horizontal.input_to_si;
@@ -6048,12 +6059,12 @@ void CWPhastDoc::NewWedgeListener(vtkObject *caller, unsigned long eid, void *cl
 		CWPhastDoc* self = reinterpret_cast<CWPhastDoc*>(clientdata);
 		if (eid == vtkCommand::EndInteractionEvent)
 		{
-			vtkFloatingPointType scaled_meters[6];
+			double scaled_meters[6];
 			self->NewWedgeWidget->GetBounds(scaled_meters);
 
 			// calc zone
 			CZone zone;
-			vtkFloatingPointType* scale = self->GetScale();
+			double* scale = self->GetScale();
 			const CUnits& units = self->GetUnits();
 			zone.x1 = scaled_meters[0] / scale[0] / units.horizontal.input_to_si;
 			zone.x2 = scaled_meters[1] / scale[0] / units.horizontal.input_to_si;
@@ -6444,7 +6455,7 @@ void CWPhastDoc::NewPrismListener(vtkObject *caller, unsigned long eid, void *cl
 
 		if (eid == vtkCommand::EndInteractionEvent)
 		{
-			vtkFloatingPointType* scale = self->GetScale();
+			double* scale = self->GetScale();
 			const CUnits& units = self->GetUnits();
 
 			vtkPoints *points = self->NewPrismWidget->GetPoints();
@@ -6464,7 +6475,7 @@ void CWPhastDoc::NewPrismListener(vtkObject *caller, unsigned long eid, void *cl
 			double pt[3];
 			for (vtkIdType i = 0; i < points->GetNumberOfPoints(); i+=2)
 			{
-				//vtkFloatingPointType *pt = points->GetPoint(i);
+				//double *pt = points->GetPoint(i);
 				points->GetPoint(i, pt);
 				oss << pt[0] / scale[0] / units.horizontal.input_to_si << " ";
 				oss << pt[1] / scale[1] / units.horizontal.input_to_si << " ";
@@ -6670,7 +6681,7 @@ void CWPhastDoc::BeginNewDrain()
 			this->NewDrainActor->AddObserver(CRiverActor::CancelNewEvent, this->NewDrainCallbackCommand);
 
 			// scale
-			vtkFloatingPointType* scale = this->GetScale();
+			double* scale = this->GetScale();
 			this->NewDrainActor->SetScale(scale[0], scale[1], scale[2]);
 
 			this->NewDrainActor->ScaleFromBounds(this->GetGridBounds());
@@ -6689,7 +6700,7 @@ void CWPhastDoc::BeginNewDrain()
 				ASSERT_VALID(pView);
 				if (pView)
 				{
-					pView->GetRenderer()->AddProp(this->NewDrainActor);
+					pView->GetRenderer()->AddViewProp(this->NewDrainActor);
 				}
 				this->UpdateAllViews(0);
 			}
@@ -6711,7 +6722,7 @@ void CWPhastDoc::EndNewDrain()
 		ASSERT(pView->GetRenderer());
 		if (pView->GetRenderer())
 		{
-			pView->GetRenderer()->RemoveProp(this->NewDrainActor);
+			pView->GetRenderer()->RemoveViewProp(this->NewDrainActor);
 		}
 	}
 
@@ -6803,7 +6814,7 @@ void CWPhastDoc::OnEndNewDrain(bool bCancel)
 			ASSERT_VALID(pView);
 			if (pView)
 			{
-				pView->GetRenderer()->RemoveProp(this->NewDrainActor);
+				pView->GetRenderer()->RemoveViewProp(this->NewDrainActor);
 			}
 		}
 	}
@@ -6858,7 +6869,7 @@ void CWPhastDoc::Add(CDrainActor *pDrainActor, HTREEITEM hInsertAfter)
 
 	// set scale
 	//
-	vtkFloatingPointType *scale = this->GetScale();
+	double *scale = this->GetScale();
 	pDrainActor->SetScale(scale[0], scale[1], scale[2]);
 
 	// set radius
@@ -6867,7 +6878,7 @@ void CWPhastDoc::Add(CDrainActor *pDrainActor, HTREEITEM hInsertAfter)
 
 	// set z
 	//
-// COMMENT: {6/22/2005 5:50:09 PM}	vtkFloatingPointType *bounds = this->GetGridBounds();
+// COMMENT: {6/22/2005 5:50:09 PM}	double *bounds = this->GetGridBounds();
 	CGrid x, y, z;
 	this->GetGrid(x, y, z);
 	z.Setup();
@@ -7011,4 +7022,23 @@ void CWPhastDoc::DrainListener(vtkObject* caller, unsigned long eid, void* clien
 			break;
 		}
 	}
+}
+
+HACCEL CWPhastDoc::GetDefaultAccelerator()
+{
+	// Need to override in order to allow GridActor to 
+	// handle WM_KEYPRESS for delete
+	//
+	POSITION pos =  this->GetFirstViewPosition();
+	CWPhastView *pView = (CWPhastView*)this->GetNextView(pos);
+	ASSERT_VALID(pView);
+	if (pView && pView->MovingGridLine())
+	{
+		// maybe use GetForegroundWindow
+		if (::GetFocus() == pView->GetSafeHwnd())
+		{
+			return this->hGridAccel;
+		}
+	}
+	return CDocument::GetDefaultAccelerator();
 }

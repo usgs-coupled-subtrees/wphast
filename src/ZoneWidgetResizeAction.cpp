@@ -77,11 +77,11 @@ void CZoneWidgetResizeAction::Store()
 		widget->GetPolyData(pPolyData);
 
 		// bounds
-		vtkFloatingPointType bounds[6];
+		double bounds[6];
 		pPolyData->GetBounds(bounds);
 
 		// scale
-		vtkFloatingPointType* scale = this->m_pActor->GetScale();
+		double* scale = this->m_pActor->GetScale();
 
 		// units
 		const CUnits& units = this->m_pView->GetDocument()->GetUnits();
@@ -133,7 +133,7 @@ void CZoneWidgetResizeAction::Store()
 				widget->GetTransform(pTransform);
 #ifdef _DEBUG
 				std::ostringstream oss;
-				pTransform->PrintSelf(oss, 0);
+				pTransform->PrintSelf(oss, vtkIndent(0));
 				TRACE("transform=\n");
 				TRACE(oss.str().c_str());
 #endif

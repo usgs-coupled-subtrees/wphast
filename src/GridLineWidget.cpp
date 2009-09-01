@@ -73,7 +73,7 @@ void CGridLineWidget::SetEnabled(int enabling)
 
     // add the edges
     this->CurrentRenderer->AddActor(this->EdgesActor);
-    this->OutlineActor->SetProperty(this->EdgesProperty);
+    this->EdgesActor->SetProperty(this->EdgesProperty);
 
 // COMMENT: {7/29/2005 6:13:09 PM}    // add the normal vector
 // COMMENT: {7/29/2005 6:13:09 PM}    this->CurrentRenderer->AddActor(this->LineActor);
@@ -205,7 +205,7 @@ void CGridLineWidget::OnLeftButtonDown()
     return;
     }
 
-  vtkProp *prop = path->GetFirstNode()->GetProp();
+  vtkProp *prop = path->GetFirstNode()->GetViewProp();
   this->ValidPick = 1;
   this->Picker->GetPickPosition(this->LastPickPosition);
   if ( prop == this->ConeActor || prop == this->LineActor ||
@@ -244,7 +244,7 @@ void CGridLineWidget::OnLeftButtonDown()
   this->Interactor->Render();
 }
 
-void CGridLineWidget::SetInitialPickPosition(vtkFloatingPointType pos[3])
+void CGridLineWidget::SetInitialPickPosition(double pos[3])
 {
 	for (int i = 0; i < 3; ++i)
 	{

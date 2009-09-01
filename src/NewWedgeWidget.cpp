@@ -164,7 +164,7 @@ void CNewWedgeWidget::SetEnabled(int enabling)
 	this->Interactor->Render();
 }
 
-void CNewWedgeWidget::PlaceWidget(vtkFloatingPointType bounds[6])
+void CNewWedgeWidget::PlaceWidget(double bounds[6])
 {
 	// set bounds for the outline
 	//
@@ -218,7 +218,7 @@ void CNewWedgeWidget::OnMouseMove()
 	// largest component vector
 	//
 	double max = 0.0;
-	vtkFloatingPointType viewPlaneNormal[3];
+	double viewPlaneNormal[3];
 	vtkCamera *camera = this->CurrentRenderer->GetActiveCamera();
 	camera->GetViewPlaneNormal(viewPlaneNormal);
 	for (int i = 0; i < 3; ++i)
@@ -253,11 +253,11 @@ void CNewWedgeWidget::OnMouseMove()
 	//    5 => zmax
 	//
 
-	///vtkFloatingPointType* bounds = this->GridActor->GetBounds();
-	vtkFloatingPointType* bounds = this->Prop3D->GetBounds();
+	///double* bounds = this->GridActor->GetBounds();
+	double* bounds = this->Prop3D->GetBounds();
 	CUtilities::GetWorldPointAtFixedPlane(this->Interactor, this->CurrentRenderer, this->FixedCoord, bounds[this->FixedPlane], this->FixedPlanePoint);
 
-	vtkFloatingPointType dim = (bounds[1] - bounds[0]) / 20.0;
+	double dim = (bounds[1] - bounds[0]) / 20.0;
 	this->Cursor3D->SetModelBounds(-dim, dim, -dim, dim, -dim, dim);
 
 	this->Cursor3DActor->SetPosition(this->FixedPlanePoint);
@@ -418,7 +418,7 @@ void CNewWedgeWidget::OnLeftButtonDown()
 	//    4 => zmin
 	//    5 => zmax
 	//
-	vtkFloatingPointType* bounds = this->Prop3D->GetBounds();
+	double* bounds = this->Prop3D->GetBounds();
 	CUtilities::GetWorldPointAtFixedPlane(this->Interactor, this->CurrentRenderer, this->FixedCoord, bounds[this->FixedPlane], this->StartPoint);
 
 	// set bounds for the outline
@@ -448,7 +448,7 @@ void CNewWedgeWidget::OnLeftButtonUp()
 	TRACE("CNewWedgeWidget::OnLeftButtonUp\n");
 	if ( this->State == CNewWedgeWidget::Selecting )
 	{
-		vtkFloatingPointType* bounds = this->Prop3D->GetBounds();
+		double* bounds = this->Prop3D->GetBounds();
 		CUtilities::GetWorldPointAtFixedPlane(this->Interactor, this->CurrentRenderer, this->FixedCoord, bounds[this->FixedPlane], this->FixedPlanePoint);
 		for (int i = 0; i < 3; ++i)
 		{

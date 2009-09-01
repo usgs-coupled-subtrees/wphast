@@ -8,11 +8,6 @@
 #include "srcinput/Prism.h"
 #include <vtkProperty.h>
 
-#ifndef vtkFloatingPointType
-#define vtkFloatingPointType vtkFloatingPointType
-typedef float vtkFloatingPointType;
-#endif
-
 template<typename T>
 class CZoneCreateAction : public CAction
 {

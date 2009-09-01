@@ -22,7 +22,7 @@ vtkStandardNewMacro(CDrainActor);
 #endif
 
 const char CDrainActor::szHeading[] = "Drains";
-vtkFloatingPointType CDrainActor::s_color[3];
+double CDrainActor::s_color[3];
 vtkProperty* CDrainActor::s_HandleProperty = 0;
 vtkProperty* CDrainActor::s_ConnectorProperty = 0;
 

@@ -41,6 +41,8 @@
 #define IDR_MENU1                       133
 #define IDS_STRING133                   133
 #define IDS_IMPORT_PHAST_TRANS_133      133
+#define IDR_MAINFRAME_SDI1              133
+#define IDR_GRID_ACCEL                  133
 #define ID_TOOLS_NEWZONE                134
 #define IDC_PAN_REAL                    135
 #define IDS_MEDIA_PROPS_WIZ_135         135
@@ -985,7 +987,7 @@
 #define IDC_VALUE_STATIC                65535
 
 // Next default values for new objects
-//
+// 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        432

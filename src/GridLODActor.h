@@ -16,11 +16,6 @@ class CGridLineWidget;
 
 class CZone;
 
-#ifndef vtkFloatingPointType
-#define vtkFloatingPointType vtkFloatingPointType
-typedef float vtkFloatingPointType;
-#endif
-
 class CGridLODActor : public vtkLODActor
 {
 public:
@@ -137,10 +132,10 @@ protected:
 	// Internal ivars for processing events
 	vtkRenderer        *CurrentRenderer;
 
-	int                                  AxisIndex;
-	int                                  PlaneIndex;
-	vtkFloatingPointType                 CurrentPoint[3];
-	std::map<vtkFloatingPointType, int>  ValueToIndex[3];
+	int                    AxisIndex;
+	int                    PlaneIndex;
+	double                 CurrentPoint[3];
+	std::map<double, int>  ValueToIndex[3];
 
 
 	///CGrid               m_grid[3];

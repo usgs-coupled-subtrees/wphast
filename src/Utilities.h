@@ -2,11 +2,6 @@
 
 #include <vector>
 
-#ifndef vtkFloatingPointType
-#define vtkFloatingPointType vtkFloatingPointType
-typedef float vtkFloatingPointType;
-#endif
-
 class CUtilities
 {
 public:
