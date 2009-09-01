@@ -26,7 +26,7 @@ vtkCxxRevisionMacro(CMediaZoneActor, "$Revision$");
 vtkStandardNewMacro(CMediaZoneActor);
 
 const char CMediaZoneActor::szHeading[] = "Media";
-vtkFloatingPointType CMediaZoneActor::s_color[3] = {0., 0., 0.};
+double CMediaZoneActor::s_color[3] = {0., 0., 0.};
 vtkProperty* CMediaZoneActor::s_Property = 0;
 vtkProperty* CMediaZoneActor::s_OutlineProperty = 0;
 

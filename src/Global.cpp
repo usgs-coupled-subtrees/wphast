@@ -104,7 +104,7 @@ void CGlobal::PickProp(vtkProp3D* pProp3D, vtkRenderer* pRenderer, vtkRenderWind
 
 	// get center of prop
 	//
-	vtkFloatingPointType *bounds = pProp3D->GetBounds();
+	double *bounds = pProp3D->GetBounds();
 	vtkCoordinate* pCoor = vtkCoordinate::New();
 	pCoor->SetCoordinateSystemToWorld();
 	pCoor->SetValue((bounds[0] + bounds[1])/2, (bounds[2] + bounds[3])/2, (bounds[4] + bounds[5])/2);
@@ -4349,15 +4349,15 @@ double CGlobal::ComputeRadius(vtkRenderer *renderer)
 		int i;
 		double z;
 		double windowLowerLeft[4], windowUpperRight[4];
-		vtkFloatingPointType *viewport = renderer->GetViewport();
+		double *viewport = renderer->GetViewport();
 		int *winSize = renderer->GetRenderWindow()->GetSize();
 		double focalPoint[4];
 
 		// get the focal point in world coordinates
 		//
 		vtkCamera *camera = renderer->GetActiveCamera();	
-		vtkFloatingPointType cameraFP[4];
-		camera->GetFocalPoint((vtkFloatingPointType*)cameraFP); cameraFP[3] = 1.0;
+		double cameraFP[4];
+		camera->GetFocalPoint((double*)cameraFP); cameraFP[3] = 1.0;
 
 		CGlobal::ComputeWorldToDisplay(renderer, cameraFP[0], cameraFP[1], cameraFP[2], focalPoint);
 

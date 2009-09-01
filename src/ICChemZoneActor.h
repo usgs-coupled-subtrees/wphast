@@ -28,7 +28,7 @@ protected:
 	CICChemZoneActor(void);
 	virtual ~CICChemZoneActor(void);
 	CChemIC m_chemIC;
-	static vtkFloatingPointType s_color[3];
+	static double s_color[3];
 	static vtkProperty* s_Property;
 	static vtkProperty* s_OutlineProperty;
 

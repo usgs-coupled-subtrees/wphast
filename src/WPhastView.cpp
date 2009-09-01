@@ -65,11 +65,6 @@
 // #include "CreateZoneAction.h"
 #include "ZoneCreateAction.h"
 
-#ifndef vtkFloatingPointType
-#define vtkFloatingPointType vtkFloatingPointType
-typedef float vtkFloatingPointType;
-#endif
-
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -113,9 +108,9 @@ BEGIN_MESSAGE_MAP(CWPhastView, CView)
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_MOVE_VER_LINE, OnUpdateToolsMoveVerLine)
 // COMMENT: {8/29/2005 6:46:54 PM}	ON_UPDATE_COMMAND_UI(ID_TOOLS_MODIFYGRID, OnUpdateToolsModifyGrid)
 // COMMENT: {8/29/2005 6:46:54 PM}	ON_COMMAND(ID_TOOLS_MODIFYGRID, OnToolsModifyGrid)
-ON_COMMAND(ID_VIEW_FROM_PREV_DIRECTION, OnViewFromPrevDirection)
-ON_UPDATE_COMMAND_UI(ID_TOOLS_SELECTOBJECT, OnUpdateToolsSelectObject)
-ON_COMMAND(ID_TOOLS_SELECTOBJECT, OnToolsSelectObject)
+	ON_COMMAND(ID_VIEW_FROM_PREV_DIRECTION, OnViewFromPrevDirection)
+	ON_UPDATE_COMMAND_UI(ID_TOOLS_SELECTOBJECT, OnUpdateToolsSelectObject)
+	ON_COMMAND(ID_TOOLS_SELECTOBJECT, OnToolsSelectObject)
 END_MESSAGE_MAP()
 
 // CWPhastView construction/destruction
@@ -271,7 +266,7 @@ CWPhastView::~CWPhastView()
 	// River actor
 	if (this->m_pRiverActor)
 	{
-		this->m_Renderer->RemoveProp(this->m_pRiverActor);
+		this->m_Renderer->RemoveViewProp(this->m_pRiverActor);
 		this->m_pRiverActor->Delete();
 		this->m_pRiverActor = 0;
 	}
@@ -542,7 +537,7 @@ void CWPhastView::Pipeline()
 
 	/* TODO:
 	if (this->m_pNewCubeActor && this->m_pNewCubeActor->GetVisibility()) {
-		this->m_Renderer->AddProp(this->m_pNewCubeActor);
+		this->m_Renderer->AddViewProp(this->m_pNewCubeActor);
 	}
 	*/
 
@@ -550,7 +545,7 @@ void CWPhastView::Pipeline()
 	// this->m_Renderer->RemoveAllProps(); // this removes the selection actor and the BoxWidget
 	//}}
 
-	this->m_Renderer->AddProp(this->m_pCursor3DActor);
+	this->m_Renderer->AddViewProp(this->m_pCursor3DActor);
 
 	// add props to renderer
 	if ( vtkPropCollection *props = this->GetDocument()->GetPropCollection() ) {
@@ -560,7 +555,7 @@ void CWPhastView::Pipeline()
 			//{{ {4/25/2006 10:15:10 PM}
 			if (prop)
 			{
-				this->m_Renderer->AddProp(prop);
+				this->m_Renderer->AddViewProp(prop);
 			}
 			//}} {4/25/2006 10:15:10 PM}
 
@@ -605,7 +600,7 @@ void CWPhastView::OnActivateView(BOOL bActivate, CView* pActivateView, CView* pD
 			// Update StatusBar
 			//
 			if (CWnd* pWnd = ((CFrameWnd*)::AfxGetMainWnd())->GetMessageBar()) {
-				vtkFloatingPointType* bounds = prop->GetBounds();
+				double* bounds = prop->GetBounds();
 				TCHAR buffer[80];
 				// ::_sntprintf(buffer, 80, "%6.4f x %6.4f x %6.4f", fabs(bounds[1] - bounds[0]), fabs(bounds[3] - bounds[2]), fabs(bounds[5] - bounds[4]));
 				::_sntprintf(buffer, 80, "%6.4g x %6.4g x %6.4g", fabs(bounds[1] - bounds[0]), fabs(bounds[3] - bounds[2]), fabs(bounds[5] - bounds[4]));
@@ -1113,7 +1108,7 @@ void CWPhastView::Select(vtkProp *pProp)
 				if (this->BoxWidget)
 				{
 					const CUnits &units = this->GetDocument()->GetUnits();
-					vtkFloatingPointType* scale = this->GetDocument()->GetScale();
+					double* scale = this->GetDocument()->GetScale();
 
 					ostringstream oss;
 					oss << *pZoneActor;
@@ -1251,8 +1246,8 @@ void CWPhastView::StartNewWell(void)
 {
 	// set size of 3D cursor
 	//
-	vtkFloatingPointType* bounds = this->GetDocument()->GetGridBounds();
-	vtkFloatingPointType dim = (bounds[1] - bounds[0]) / 20.0;
+	double* bounds = this->GetDocument()->GetGridBounds();
+	double dim = (bounds[1] - bounds[0]) / 20.0;
 	this->m_pCursor3D->SetModelBounds(-dim, dim, -dim, dim, -dim, dim);
 	this->m_pCursor3DActor->VisibilityOn();
 
@@ -1327,7 +1322,7 @@ void CWPhastView::EndNewWell(void)
 
 	// stop rendering the well actor
 	//
-	this->m_Renderer->RemoveProp(this->m_pWellActor);
+	this->m_Renderer->RemoveViewProp(this->m_pWellActor);
 
 	// clean-up
 	//
@@ -1486,7 +1481,7 @@ void CWPhastView::Update(IObserver* pSender, LPARAM lHint, CObject* pHint, vtkOb
 					{
 						if (vtkPropCollection *pParts = pPropAssembly->GetParts())
 						{
-							if (pParts->IsItemPresent(pPicker->GetProp()))
+							if (pParts->IsItemPresent(pPicker->GetViewProp()))
 							{
 								this->ClearSelection();
 							}
@@ -1494,7 +1489,7 @@ void CWPhastView::Update(IObserver* pSender, LPARAM lHint, CObject* pHint, vtkOb
 					}
 					else
 					{
-						if (pPicker->GetProp() == pProp)
+						if (pPicker->GetViewProp() == pProp)
 						{
 							this->ClearSelection();
 						}
@@ -1528,7 +1523,7 @@ void CWPhastView::Update(IObserver* pSender, LPARAM lHint, CObject* pHint, vtkOb
 				if (CZoneActor *pZoneActor = CZoneActor::SafeDownCast(pProp3D))
 				{
 					const CUnits &units = this->GetDocument()->GetUnits();
-					vtkFloatingPointType* scale = this->GetDocument()->GetScale();
+					double* scale = this->GetDocument()->GetScale();
 					struct zone *z = pZoneActor->GetPolyhedron()->Get_bounding_box();
 
 					if (Cube *c = dynamic_cast<Cube*>(pZoneActor->GetPolyhedron()))
@@ -1640,7 +1635,7 @@ void CWPhastView::StartNewRiver(void)
 		this->m_pRiverActor->AddObserver(CRiverActor::EndNewEvent, RiverCallbackCommand);
 		this->m_pRiverActor->AddObserver(CRiverActor::CancelNewEvent, RiverCallbackCommand);
 
-		vtkFloatingPointType* scale = this->GetDocument()->GetScale();
+		double* scale = this->GetDocument()->GetScale();
 		this->m_pRiverActor->SetScale(scale[0], scale[1], scale[2]);
 
 		this->m_pRiverActor->ScaleFromBounds(this->GetDocument()->GetGridBounds());
@@ -1649,7 +1644,7 @@ void CWPhastView::StartNewRiver(void)
 		this->GetDocument()->GetGrid(x, y, z);
 		z.Setup();
 		this->m_pRiverActor->SetZ(z.coord[z.count_coord - 1]);
-		this->m_Renderer->AddProp(this->m_pRiverActor);
+		this->m_Renderer->AddViewProp(this->m_pRiverActor);
 	}
 
 	// hide Widgets
@@ -1676,7 +1671,7 @@ void CWPhastView::EndNewRiver(void)
 
 	// stop rendering the river actor
 	//
-	this->m_Renderer->RemoveProp(this->m_pRiverActor);
+	this->m_Renderer->RemoveViewProp(this->m_pRiverActor);
 
 	// clean-up
 	//
@@ -1776,7 +1771,7 @@ void CWPhastView::OnEndNewRiver(bool bCancel)
 				::AfxMessageBox("Rivers must contain at least two points");
 			}
 		}
-		this->m_Renderer->RemoveProp(this->m_pRiverActor);
+		this->m_Renderer->RemoveViewProp(this->m_pRiverActor);
 	}
 
 	if (this->RiverCallbackCommand)
@@ -1790,7 +1785,9 @@ void CWPhastView::OnEndNewRiver(bool bCancel)
 void CWPhastView::OnLButtonDblClk(UINT nFlags, CPoint point)
 {
 	// Add your message handler code here and/or call default
+#if defined(_DEBUG)
 	::AfxMessageBox("OnLButtonDblClk");
+#endif
 
 	__super::OnLButtonDblClk(nFlags, point);
 }
@@ -1811,6 +1808,7 @@ void CWPhastView::EndMoveGridLine()
 {
 	if (CGridActor* pGridActor = CGridActor::SafeDownCast(this->GetDocument()->GetGridActor()))
 	{
+		pGridActor->SetInteractor(this->m_RenderWindowInteractor);
 		pGridActor->SetEnabled(0);
 	}
 	this->m_bMovingGridLine = false;
@@ -1829,6 +1827,7 @@ void CWPhastView::StartMoveGridLine()
 	if (CGridActor* pGridActor = CGridActor::SafeDownCast(this->GetDocument()->GetGridActor()))
 	{
 		pGridActor->SetInteractor(this->m_RenderWindowInteractor);
+		ASSERT(pGridActor->GetEnabled());
 		this->m_bMovingGridLine = true;
 	}
 }
@@ -2276,11 +2275,16 @@ BOOL CWPhastView::OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO
 // COMMENT: {8/1/2007 1:52:50 PM}				}
 // COMMENT: {8/1/2007 1:52:50 PM}			}
 // COMMENT: {8/1/2007 1:52:50 PM}			//}}
-			if (nCode == CN_COMMAND || nCode == CN_UPDATE_COMMAND_UI)
+
+			// maybe use GetForegroundWindow
+			if (::GetFocus() == pPropertyTreeControlBar->GetTreeCtrl()->GetSafeHwnd())
 			{
-				if (pPropertyTreeControlBar->OnCmdMsg(nID, nCode, pExtra, pHandlerInfo))
+				if (nCode == CN_COMMAND || nCode == CN_UPDATE_COMMAND_UI)
 				{
-					return TRUE;
+					if (pPropertyTreeControlBar->OnCmdMsg(nID, nCode, pExtra, pHandlerInfo))
+					{
+						return TRUE;
+					}
 				}
 			}
 		}

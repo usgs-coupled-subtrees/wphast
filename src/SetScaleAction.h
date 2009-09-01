@@ -3,23 +3,18 @@
 
 class CWPhastDoc;
 
-#ifndef vtkFloatingPointType
-#define vtkFloatingPointType vtkFloatingPointType
-typedef float vtkFloatingPointType;
-#endif
-
 class CSetScaleAction : public CAction
 {
 public:
-	CSetScaleAction(CWPhastDoc* pDoc, vtkFloatingPointType xScale, vtkFloatingPointType yScale, vtkFloatingPointType zScale);
+	CSetScaleAction(CWPhastDoc* pDoc, double xScale, double yScale, double zScale);
 	virtual ~CSetScaleAction(void);
 
 	virtual void Execute();
 	virtual void UnExecute();
-	void Apply(vtkFloatingPointType xScale, vtkFloatingPointType yScale, vtkFloatingPointType zScale);
+	void Apply(double xScale, double yScale, double zScale);
 
 protected:
 	CWPhastDoc* m_pDoc;
-	vtkFloatingPointType m_Scale[3];
-	vtkFloatingPointType m_OriginalScale[3];
+	double m_Scale[3];
+	double m_OriginalScale[3];
 };

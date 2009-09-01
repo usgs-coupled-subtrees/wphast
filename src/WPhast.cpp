@@ -42,7 +42,6 @@ BEGIN_MESSAGE_MAP(CWPhastApp, CWinApp)
 	ON_COMMAND(ID_FILE_NEW, OnFileNew)
 END_MESSAGE_MAP()
 
-
 // CWPhastApp construction
 
 CWPhastApp::CWPhastApp()
@@ -90,6 +89,9 @@ BOOL CWPhastApp::InitInstance()
 // COMMENT: {11/26/2008 4:44:28 PM}		tmpDbgFlag |= _CRTDBG_CHECK_ALWAYS_DF;
 // COMMENT: {11/26/2008 4:44:28 PM}		_CrtSetDbgFlag(tmpDbgFlag);
 
+// COMMENT: {8/21/2009 4:29:28 PM}		// set this to avoid warning display window
+// COMMENT: {8/21/2009 4:29:28 PM}		// 
+// COMMENT: {8/21/2009 4:29:28 PM}		vtkObject::SetGlobalWarningDisplay(0);
 	}
 #endif
 #if defined(_DEBUG)

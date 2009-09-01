@@ -79,8 +79,8 @@ void CUtilities::GetWorldPointAtFixedPlane(vtkRenderWindowInteractor *interactor
 	// get the focal point in world coordinates
 	//
 	vtkCamera *camera = renderer->GetActiveCamera();	
-	vtkFloatingPointType cameraFP[4];
-	camera->GetFocalPoint((vtkFloatingPointType*)cameraFP); cameraFP[3] = 1.0;
+	double cameraFP[4];
+	camera->GetFocalPoint((double*)cameraFP); cameraFP[3] = 1.0;
 #ifdef _DEBUG
 // COMMENT: {5/5/2006 5:11:01 PM}	TRACE("fp=%g,%g,%g\n", cameraFP[0], cameraFP[1], cameraFP[2]);
 #endif
@@ -89,7 +89,7 @@ void CUtilities::GetWorldPointAtFixedPlane(vtkRenderWindowInteractor *interactor
 	//
 	renderer->SetWorldPoint(cameraFP);
 	renderer->WorldToDisplay();
-	vtkFloatingPointType *displayCoords = renderer->GetDisplayPoint();
+	double *displayCoords = renderer->GetDisplayPoint();
 #ifdef _DEBUG
 // COMMENT: {5/5/2006 5:11:05 PM}	float dCoord[3];
 // COMMENT: {5/5/2006 5:11:05 PM}	dCoord[0] = displayCoords[0];
@@ -102,7 +102,7 @@ void CUtilities::GetWorldPointAtFixedPlane(vtkRenderWindowInteractor *interactor
 	//
 	renderer->SetDisplayPoint(pos[0], pos[1], displayCoords[2]);
 	renderer->DisplayToWorld();
-	vtkFloatingPointType *worldCoords = renderer->GetWorldPoint();
+	double *worldCoords = renderer->GetWorldPoint();
 	if ( worldCoords[3] == 0.0 )
 	{
 		ASSERT(FALSE);
@@ -119,7 +119,7 @@ void CUtilities::GetWorldPointAtFixedPlane(vtkRenderWindowInteractor *interactor
 // COMMENT: {5/5/2006 4:56:04 PM}	worldCoords = renderer->GetWorldPoint();
 // COMMENT: {5/5/2006 4:56:04 PM}	TRACE("worldCoords(%g,%g,%g)=%g,%g,%g\n", dCoord[0], dCoord[1], dCoord[2], worldCoords[0], worldCoords[1], worldCoords[2]);
 #endif
-	vtkFloatingPointType pickPosition[3];
+	double pickPosition[3];
 	for (i = 0; i < 3; ++i)
 	{
 		pickPosition[i] = worldCoords[i] / worldCoords[3];
@@ -190,7 +190,7 @@ void CUtilities::GetWorldPointAtFixedPlane(vtkRenderWindowInteractor *interactor
 	//
 	renderer->SetWorldPoint(cameraFP[0], cameraFP[1], cameraFP[2], cameraFP[3]);
 	renderer->WorldToDisplay();
-// COMMENT: {8/26/2008 9:41:57 PM}	vtkFloatingPointType *displayCoords = renderer->GetDisplayPoint();
+// COMMENT: {8/26/2008 9:41:57 PM}	double *displayCoords = renderer->GetDisplayPoint();
 	double displayCoords[3];
 	renderer->GetDisplayPoint(displayCoords);
 #ifdef _DEBUG
@@ -205,7 +205,7 @@ void CUtilities::GetWorldPointAtFixedPlane(vtkRenderWindowInteractor *interactor
 	//
 	renderer->SetDisplayPoint(pos[0], pos[1], displayCoords[2]);
 	renderer->DisplayToWorld();
-// COMMENT: {8/26/2008 9:43:19 PM}	vtkFloatingPointType *worldCoords = renderer->GetWorldPoint();
+// COMMENT: {8/26/2008 9:43:19 PM}	double *worldCoords = renderer->GetWorldPoint();
 	double worldCoords[4];
 	renderer->GetWorldPoint(worldCoords);
 	if ( worldCoords[3] == 0.0 )
@@ -262,7 +262,7 @@ void CUtilities::VTK_dump(vtkObject* obj)
 {
 #if defined(_DEBUG)
 	std::ostringstream oss;
-	obj->PrintSelf(oss, 4);
+	obj->PrintSelf(oss, vtkIndent(4));
 	TRACE("%s\n", oss.str().c_str());
 #endif
 }

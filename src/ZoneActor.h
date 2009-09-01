@@ -18,11 +18,6 @@ class ISerializable;
 class vtkTransformPolyDataFilter;
 class CWPhastDoc;
 
-#ifndef vtkFloatingPointType
-#define vtkFloatingPointType vtkFloatingPointType
-typedef float vtkFloatingPointType;
-#endif 
-
 class CZoneActor : public vtkAssembly
 {
 public:
@@ -110,7 +105,7 @@ public:
 	void UnPick(vtkRenderer* pRenderer, vtkRenderWindowInteractor* pRenderWindowInteractor);
 
 	vtkProperty* GetProperty() { return this->CubeActor->GetProperty(); }
-	virtual vtkFloatingPointType* GetBounds(); //  { return this->vtkAssembly::GetBounds(); }
+	virtual double* GetBounds(); //  { return this->vtkAssembly::GetBounds(); }
 
 	PHAST_Transform& GetPhastTransform() { return this->Map2GridPhastTransform; }
 
@@ -194,8 +189,8 @@ private:
 	float GetYLength(void); // use SetBounds instead.
 	float GetZLength(void); // use SetBounds instead.
 
-	void SetCenter(vtkFloatingPointType x, vtkFloatingPointType y, vtkFloatingPointType z); // use SetBounds instead.
-	void SetCenter(vtkFloatingPointType data[3]); // use SetBounds instead.
-	vtkFloatingPointType* GetCenter(void); // use SetBounds instead.
-	void GetCenter(vtkFloatingPointType data[3]); // use SetBounds instead.
+	void SetCenter(double x, double y, double z); // use SetBounds instead.
+	void SetCenter(double data[3]); // use SetBounds instead.
+	double* GetCenter(void); // use SetBounds instead.
+	void GetCenter(double data[3]); // use SetBounds instead.
 };

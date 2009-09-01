@@ -142,7 +142,7 @@ vtkBoxWidget2::vtkBoxWidget2()
     }
   
   // Define the point coordinates
-  float bounds[6];
+  double bounds[6];
   bounds[0] = -0.5;
   bounds[1] = 0.5;
   bounds[2] = -0.5;
@@ -569,7 +569,7 @@ void vtkBoxWidget2::OnLeftButtonDown()
     {
     this->State = vtkBoxWidget2::Moving;
     this->HighlightFace(
-      this->HighlightHandle(path->GetFirstNode()->GetProp()));
+      this->HighlightHandle(path->GetFirstNode()->GetViewProp()));
     this->HandlePicker->GetPickPosition(this->LastPickPosition);
     this->ValidPick = 1;
     }
@@ -1291,10 +1291,10 @@ void vtkBoxWidget2::CreateDefaultProperties()
   this->SelectedOutlineProperty->SetLineWidth(2.0);
 }
 
-void vtkBoxWidget2::PlaceWidget(float bds[6])
+void vtkBoxWidget2::PlaceWidget(double bds[6])
 {
   int i;
-  float bounds[6], center[3];
+  double bounds[6], center[3];
   
   this->AdjustBounds(bds,bounds,center);
   
@@ -1328,7 +1328,7 @@ void vtkBoxWidget2::GetTransform(vtkTransform *t)
   double *p4 = pts + 3*4;
   double *p14 = pts + 3*14;
   double center[3], translate[3], scale[3], scaleVec[3][3];
-  float  position[3];
+  double  position[3];
   int i;
 
   // The transformation is relative to the initial bounds.
@@ -1467,8 +1467,8 @@ void vtkBoxWidget2::Spin(int X, int Y, double *p1, double *p2, double *vpn)
 	  ::atan2((double)this->Interactor->GetLastEventPosition()[1] - (double)disp_center[1],
 	  (double)this->Interactor->GetLastEventPosition()[0] - (double)disp_center[0]);
 
-  newAngle *= vtkMath::RadiansToDegrees();
-  oldAngle *= vtkMath::RadiansToDegrees();
+  newAngle = vtkMath::DegreesFromRadians(newAngle);
+  oldAngle = vtkMath::DegreesFromRadians(oldAngle);
 
   theta = newAngle - oldAngle;
   if (theta != theta) return;

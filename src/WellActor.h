@@ -20,11 +20,6 @@ class CTreeMemento;
 
 #include <string>
 
-#ifndef vtkFloatingPointType
-#define vtkFloatingPointType vtkFloatingPointType
-typedef float vtkFloatingPointType;
-#endif
-
 class CWellActor : public vtkOpenGLActor, public ISerial
 {
 public:
@@ -73,18 +68,18 @@ public:
 	std::ostream& Output(std::ostream& os, const Ctime& time)const;
 	CString GetWarning(CTimeControl *pTimeControl)const;
 
-	virtual void SetScale(vtkFloatingPointType x, vtkFloatingPointType y, vtkFloatingPointType z);
-	virtual void SetScale(vtkFloatingPointType scale[3]);
+	virtual void SetScale(double x, double y, double z);
+	virtual void SetScale(double scale[3]);
 
-	virtual vtkFloatingPointType* GetScale();
-	virtual void GetScale(vtkFloatingPointType scale[3]);
+	virtual double* GetScale();
+	virtual void GetScale(double scale[3]);
 
 	static const char szHeading[];
 
 	static void SetStaticColor(COLORREF cr);
 
 protected:
-	static vtkFloatingPointType s_color[3];
+	static double s_color[3];
 	static vtkProperty* s_Property;
 
 	friend std::ostream& operator<< (std::ostream &os, const CWellActor &a);

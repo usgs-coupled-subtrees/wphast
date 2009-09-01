@@ -192,7 +192,7 @@ void vtkInteractorStyleTrackballCameraEx::OnChar()
         {
         for (anActor->InitPathTraversal(); (path=anActor->GetNextPath()); ) 
           {
-          aPart=(vtkActor *)path->GetLastNode()->GetProp();
+          aPart=(vtkActor *)path->GetLastNode()->GetViewProp();
           aPart->GetProperty()->SetRepresentationToWireframe();
           }
         }
@@ -213,7 +213,7 @@ void vtkInteractorStyleTrackballCameraEx::OnChar()
         {
         for (anActor->InitPathTraversal(); (path=anActor->GetNextPath()); ) 
           {
-          aPart=(vtkActor *)path->GetLastNode()->GetProp();
+          aPart=(vtkActor *)path->GetLastNode()->GetViewProp();
           aPart->GetProperty()->SetRepresentationToSurface();
           }
         }
@@ -221,6 +221,7 @@ void vtkInteractorStyleTrackballCameraEx::OnChar()
       }
       break;
 
+#if defined(SKIP_FOR_VTK_542)
     case 'l' :
     case 'L' :
       {
@@ -238,6 +239,7 @@ void vtkInteractorStyleTrackballCameraEx::OnChar()
       rwi->Render();
       }
       break;
+#endif
 
     case '3' :
       if (rwi->GetRenderWindow()->GetStereoRender()) 
@@ -287,13 +289,13 @@ void vtkInteractorStyleTrackballCameraEx::OnChar()
 			if (path->GetNumberOfItems() == 3)
 			{
 				path->InitTraversal();
-				vtkProp* pPropAssembly = path->GetNextNode()->GetProp();
+				vtkProp* pPropAssembly = path->GetNextNode()->GetViewProp();
 				ASSERT(pPropAssembly->IsA("vtkPropAssembly"));
-				this->LastProp = path->GetNextNode()->GetProp();
+				this->LastProp = path->GetNextNode()->GetViewProp();
 			}
 			else
 			{
-				this->LastProp = path->GetLastNode()->GetProp();
+				this->LastProp = path->GetLastNode()->GetViewProp();
 			}
 
 			ASSERT(
@@ -304,7 +306,7 @@ void vtkInteractorStyleTrackballCameraEx::OnChar()
 				this->LastProp->IsA("CRiverActor")
 				);
 #endif
-          this->HighlightProp(path->GetFirstNode()->GetProp());
+          this->HighlightProp(path->GetFirstNode()->GetViewProp());
           this->PropPicked = 1;
           }
         rwi->EndPickCallback();
@@ -358,13 +360,13 @@ void vtkInteractorStyleTrackballCameraEx::OnLeftButtonDown()
 				if (path->GetNumberOfItems() == 3)
 				{
 					path->InitTraversal();
-					vtkProp* pPropAssembly = path->GetNextNode()->GetProp();
+					vtkProp* pPropAssembly = path->GetNextNode()->GetViewProp();
 					ASSERT(pPropAssembly->IsA("vtkPropAssembly"));
-					this->LastProp = path->GetNextNode()->GetProp();
+					this->LastProp = path->GetNextNode()->GetViewProp();
 				}
 				else
 				{
-					this->LastProp = path->GetLastNode()->GetProp();
+					this->LastProp = path->GetLastNode()->GetViewProp();
 				}
 
 				ASSERT(
@@ -417,7 +419,7 @@ void vtkInteractorStyleTrackballCameraEx::OnKeyPress()
 			{
 				// this is the first time Tab has been pressed
 				vtkProp *prop;
-				props = this->CurrentRenderer->GetProps();
+				props = this->CurrentRenderer->GetViewProps();
 				for ( props->InitTraversal(); (prop = props->GetNextProp()); )
 				{
 					if (vtkPropAssembly *pPropAssembly = vtkPropAssembly::SafeDownCast(prop))
@@ -477,10 +479,10 @@ void vtkInteractorStyleTrackballCameraEx::OnKeyPress()
 			else
 			{
 				path->InitTraversal();
-				this->LastProp = path->GetNextNode()->GetProp();
+				this->LastProp = path->GetNextNode()->GetViewProp();
 				if (this->LastProp && this->LastProp->IsA("vtkPropAssembly"))
 				{
-					this->LastProp = path->GetNextNode()->GetProp();
+					this->LastProp = path->GetNextNode()->GetViewProp();
 				}
 				else
 				{

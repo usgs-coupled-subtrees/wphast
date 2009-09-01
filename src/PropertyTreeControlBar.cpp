@@ -474,6 +474,8 @@ void CPropertyTreeControlBar::OnNMClk(NMHDR* pNMHDR, LRESULT* pResult)
 
 UINT CPropertyTreeControlBar::GetNodeCheck(CTreeCtrlNode node)const
 {
+	if (!(HTREEITEM)node) return BST_INDETERMINATE;
+
 	switch (node.GetState(TVIS_STATEIMAGEMASK) & TVIS_STATEIMAGEMASK)
 	{
 		case (INDEXTOSTATEIMAGEMASK(BST_UNCHECKED + 1)):
@@ -720,6 +722,8 @@ void CPropertyTreeControlBar::OnNMDblClk(NMHDR* pNMHDR, LRESULT* pResult)
 
 bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode &editNode, bool bDoEdit)
 {
+	if (!(HTREEITEM)editNode) return false;
+
 	CTreeCtrlNode item = editNode;
 	CTreeCtrlNode parent = item.GetParent();
 	HTREEITEM hItem = item;
@@ -1722,6 +1726,8 @@ void CPropertyTreeControlBar::ClearSelection(void)
 
 bool CPropertyTreeControlBar::IsNodeDraggable(CTreeCtrlNode dragNode, COleDataSource *pOleDataSource)
 {
+	if (!(HTREEITEM)dragNode) return false;
+
 	if (dragNode.GetParent() == this->GetMediaNode())
 	{
 		if (dragNode.GetData())
@@ -2159,8 +2165,9 @@ void CPropertyTreeControlBar::OnDragLeave(CWnd* pWnd)
 
 bool CPropertyTreeControlBar::IsNodeCopyable(CTreeCtrlNode copyNode, COleDataSource *pOleDataSource)
 {
-	std::ostringstream oss;
+	if (!(HTREEITEM)copyNode) return false;
 
+	std::ostringstream oss;
 	if (copyNode.GetParent() == this->GetMediaNode())
 	{
 		if (copyNode.GetData())
@@ -2513,6 +2520,8 @@ CLIPFORMAT CPropertyTreeControlBar::GetZoneClipFormat(void)const
 
 bool CPropertyTreeControlBar::IsNodePasteable(CTreeCtrlNode pasteNode, bool bDoPaste)
 {
+	if (!(HTREEITEM)pasteNode) return false;
+
 	if (!this->GetNativeClipFormat())
 	{
 		return false;
@@ -2552,7 +2561,10 @@ bool CPropertyTreeControlBar::IsNodePasteable(CTreeCtrlNode pasteNode, bool bDoP
 
 bool CPropertyTreeControlBar::IsNodePasteableWell(CTreeCtrlNode pasteNode, bool bDoPaste)
 {
+	if (!(HTREEITEM)pasteNode) return false;
+
 	CTreeCtrlNode headNode = this->GetWellsNode();
+	if (!(HTREEITEM)headNode) return false;
 
 	CLIPFORMAT type = this->GetNativeClipFormat();
 	if (type == CWellSchedule::clipFormat && pasteNode.IsNodeAncestor(headNode))
@@ -2599,7 +2611,10 @@ bool CPropertyTreeControlBar::IsNodePasteableWell(CTreeCtrlNode pasteNode, bool 
 
 bool CPropertyTreeControlBar::IsNodePasteableRiver(CTreeCtrlNode pasteNode, bool bDoPaste)
 {
+	if (!(HTREEITEM)pasteNode) return false;
+
 	CTreeCtrlNode headNode = this->GetRiversNode();
+	if (!(HTREEITEM)headNode) return false;
 
 	CLIPFORMAT type = this->GetNativeClipFormat();
 	if (type == CRiver::clipFormat && pasteNode.IsNodeAncestor(headNode))
@@ -2649,6 +2664,9 @@ bool CPropertyTreeControlBar::IsNodePasteableRiver(CTreeCtrlNode pasteNode, bool
 template<typename ZT, typename DT>
 bool CPropertyTreeControlBar::IsNodePasteable(CTreeCtrlNode headNode, CTreeCtrlNode pasteNode, bool bDoPaste)
 {
+	if (!(HTREEITEM)headNode) return false;
+	if (!(HTREEITEM)pasteNode) return false;
+
 	CLIPFORMAT type = this->GetZoneClipFormat();
 	if (type && pasteNode.IsNodeAncestor(headNode))
 	{

@@ -1,11 +1,6 @@
 #pragma once
 #include <vtkBoxWidget.h>
 
-#ifndef vtkFloatingPointType
-#define vtkFloatingPointType vtkFloatingPointType
-typedef float vtkFloatingPointType;
-#endif
-
 class vtkBoxWidgetEx : public vtkBoxWidget
 {
 public:

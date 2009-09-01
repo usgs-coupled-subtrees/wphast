@@ -76,11 +76,6 @@ class vtkCellPicker;
 class vtkPolyData;
 class vtkProperty;
 
-#ifndef vtkFloatingPointType
-#define vtkFloatingPointType vtkFloatingPointType
-typedef float vtkFloatingPointType;
-#endif
-
 class vtkPointWidget2 : public vtk3DWidget
 {
 public:
@@ -94,11 +89,11 @@ public:
   // Description:
   // Methods that satisfy the superclass' API.
   virtual void SetEnabled(int);
-  virtual void PlaceWidget(vtkFloatingPointType bounds[6]);
+  virtual void PlaceWidget(double bounds[6]);
   void PlaceWidget()
     {this->Superclass::PlaceWidget();}
-  void PlaceWidget(vtkFloatingPointType xmin, vtkFloatingPointType xmax, vtkFloatingPointType ymin, vtkFloatingPointType ymax, 
-                   vtkFloatingPointType zmin, vtkFloatingPointType zmax)
+  void PlaceWidget(double xmin, double xmax, double ymin, double ymax, 
+                   double zmin, double zmax)
     {this->Superclass::PlaceWidget(xmin,xmax,ymin,ymax,zmin,zmax);}
 
   // Description:
@@ -110,13 +105,13 @@ public:
   // Set/Get the position of the point. Note that if the position is set
   // outside of the bounding box, it will be clamped to the boundary of
   // the bounding box.
-  void SetPosition(vtkFloatingPointType x, vtkFloatingPointType y, vtkFloatingPointType z)
+  void SetPosition(double x, double y, double z)
     {this->Cursor3D->SetFocalPoint(x,y,z);}
-  void SetPosition(vtkFloatingPointType x[3])
+  void SetPosition(double x[3])
     {this->SetPosition(x[0],x[1],x[2]);}
-  vtkFloatingPointType* GetPosition() 
+  double* GetPosition() 
     {return this->Cursor3D->GetFocalPoint();}
-  void GetPosition(vtkFloatingPointType xyz[3]) 
+  void GetPosition(double xyz[3]) 
     {this->Cursor3D->GetFocalPoint(xyz);}
 
   // Description:
@@ -205,8 +200,8 @@ public:
   // motion vector is used to control the constrained sliding action. Note the
   // size is specified as a fraction of the length of the diagonal of the 
   // point widget's bounding box.
-  vtkSetClampMacro(HotSpotSize,vtkFloatingPointType,0.0,1.0);
-  vtkGetMacro(HotSpotSize,vtkFloatingPointType);
+  vtkSetClampMacro(HotSpotSize,double,0.0,1.0);
+  vtkGetMacro(HotSpotSize,double);
 
 #if 9991 // well w/ grid rotation
   void SetOrientation(float x, float y, float z);
@@ -268,7 +263,7 @@ protected:
   void CreateDefaultProperties();
   
   // The size of the hot spot.
-  vtkFloatingPointType HotSpotSize;
+  double HotSpotSize;
   int DetermineConstraintAxis(int constraint, double *x);
   int WaitingForMotion;
   int WaitCount;

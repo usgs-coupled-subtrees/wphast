@@ -82,7 +82,7 @@ int CMapActor::SetFileName(const char *filename)
 #if USE_FILTER
 		std::ostrstream oss1;
 		oss1 << "m_ImageReader2\n";
-		this->m_ImageReader2->GetOutput()->PrintSelf(oss1, 4);
+		this->m_ImageReader2->GetOutput()->PrintSelf(oss1, vtkIndent(4));
 		oss1 << std::ends;
 		TRACE("%s", oss1.str());
 
@@ -148,7 +148,7 @@ CDumpContext& operator<< (CDumpContext &dc, vtkObject &o);
 CDumpContext& operator<< (CDumpContext &dc, vtkObject &o)
 {
 	ostrstream oss;
-	o.PrintSelf(oss, 4);
+	o.PrintSelf(oss, vtkIndent(4));
 	oss << ends;
 	dc << oss.str() << "\n";
 	oss.rdbuf()->freeze(false); // this must be called after str() to avoid memory leak
@@ -156,13 +156,13 @@ CDumpContext& operator<< (CDumpContext &dc, vtkObject &o)
 }
 #endif // _DEBUG
 
-// COMMENT: {8/10/2009 7:51:21 PM}int CMapActor::PlaceMap(vtkFloatingPointType xPos, vtkFloatingPointType yPos, vtkFloatingPointType zPos, vtkFloatingPointType angle)
+// COMMENT: {8/10/2009 7:51:21 PM}int CMapActor::PlaceMap(double xPos, double yPos, double zPos, double angle)
 int CMapActor::PlaceMap(double xPos, double yPos, double zPos, double angle)
 {
 	vtkTransform* transform = vtkTransform::New();
 
 	////{{{{
-	vtkFloatingPointType* center = this->m_PlaneSource->GetCenter();
+	double* center = this->m_PlaneSource->GetCenter();
 	//transform->Translate(center[0],center[1],center[2]);
 	transform->RotateZ(-angle);
 	//transform->Translate(-center[0],-center[1],-center[2]);
@@ -171,9 +171,9 @@ int CMapActor::PlaceMap(double xPos, double yPos, double zPos, double angle)
 	// translate
 	///transform->Translate(-xPos, -yPos, -zPos);
 	transform->Translate(-xPos, -yPos, zPos);
-	vtkFloatingPointType *o = this->m_PlaneSource->GetOrigin();
-	vtkFloatingPointType *pt1 = this->m_PlaneSource->GetPoint1();
-	vtkFloatingPointType *pt2 = this->m_PlaneSource->GetPoint2();
+	double *o = this->m_PlaneSource->GetOrigin();
+	double *pt1 = this->m_PlaneSource->GetPoint1();
+	double *pt2 = this->m_PlaneSource->GetPoint2();
 
 	//{{
 	/*
@@ -183,7 +183,7 @@ int CMapActor::PlaceMap(double xPos, double yPos, double zPos, double angle)
 	*/
 	//}}
 
-	vtkFloatingPointType oNew[3], pt1New[3], pt2New[3];
+	double oNew[3], pt1New[3], pt2New[3];
 	transform->TransformPoint(o,oNew);
 	transform->TransformPoint(pt1,pt1New);
 	transform->TransformPoint(pt2,pt2New);
@@ -320,29 +320,29 @@ int* CMapActor::GetDataExtent(void)const
 	return (int*)extent;
 }
 
-float* CMapActor::GetDataSpacing(void)const
+double* CMapActor::GetDataSpacing(void)const
 {
-	static const float spacing[3];
+	static const double spacing[3];
 	if (this->m_ImageReader2)
 	{
 		this->m_ImageReader2->Update();
 		return this->m_ImageReader2->GetDataSpacing();
 	}
-	return (float*)spacing;
+	return (double*)spacing;
 }
 
-float* CMapActor::GetDataOrigin(void)const
+double* CMapActor::GetDataOrigin(void)const
 {
-	static const float origin[3];
+	static const double origin[3];
 	if (this->m_ImageReader2)
 	{
 		this->m_ImageReader2->Update();
 		return this->m_ImageReader2->GetDataOrigin();
 	}
-	return (float*)origin;
+	return (double*)origin;
 }
 
-void CMapActor::SetDataOrigin(float x, float y, float z)
+void CMapActor::SetDataOrigin(double x, double y, double z)
 {
 	if (this->m_ImageReader2)
 	{
@@ -355,7 +355,7 @@ void CMapActor::SetDataOrigin(float x, float y, float z)
 	}
 }
 
-void CMapActor::SetDataSpacing(float x, float y, float z)
+void CMapActor::SetDataSpacing(double x, double y, double z)
 {
 	if (this->m_ImageReader2)
 	{

@@ -8,11 +8,6 @@
 class CGridActor;
 class CWPhastDoc;
 
-#ifndef vtkFloatingPointType
-#define vtkFloatingPointType vtkFloatingPointType
-typedef float vtkFloatingPointType;
-#endif
-
 class CGridElementsSelector : public vtk3DWidget
 {
 public:
@@ -26,11 +21,11 @@ public:
 	// Description:
 	// Methods that satisfy the superclass' API.
 	virtual void SetEnabled(int);
-	virtual void PlaceWidget(vtkFloatingPointType bounds[6]);
+	virtual void PlaceWidget(double bounds[6]);
 	void PlaceWidget()
 	{this->Superclass::PlaceWidget();}
-	void PlaceWidget(vtkFloatingPointType xmin, vtkFloatingPointType xmax, vtkFloatingPointType ymin, vtkFloatingPointType ymax, 
-		vtkFloatingPointType zmin, vtkFloatingPointType zmax)
+	void PlaceWidget(double xmin, double xmax, double ymin, double ymax, 
+		double zmin, double zmax)
 	{this->Superclass::PlaceWidget(xmin,xmax,ymin,ymax,zmin,zmax);}
 
 	//
@@ -104,7 +99,7 @@ protected:
 	vtkActor             *OutlineActor;
 	vtkPolyDataMapper    *OutlineMapper;
 	vtkOutlineSource     *OutlineSource;
-	vtkFloatingPointType  StartPoint[3];
+	double  StartPoint[3];
 
 	int FixedPlane;  // [0-5]
 	int FixedCoord;  // [0-2]

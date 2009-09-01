@@ -50,7 +50,7 @@ int CMapImageActor2::SetFileName(const char *filename)
 
 		this->m_MapImageReader2->SetFileName( filename );
 		this->m_MapImageReader2->Update( );
-		float *origin = this->m_MapImageReader2->GetOutput()->GetOrigin();
+		double *origin = this->m_MapImageReader2->GetOutput()->GetOrigin();
 		TRACE("origin before setinput = %g %g %g\n", origin[0], origin[1], origin[2]);
 // COMMENT: {8/8/2009 1:01:41 AM}		this->m_MapShiftScale->SetInput( this->m_MapImageReader2->GetOutput() );
 // COMMENT: {8/8/2009 1:01:41 AM}		this->m_MapShiftScale->SetOutputScalarTypeToUnsignedChar( );
@@ -175,7 +175,7 @@ int CMapImageActor2::SetWorldFileName(const char *filename)
 	return 1; // success
 }
 
-int CMapImageActor2::PlaceMap(vtkFloatingPointType xPos, vtkFloatingPointType yPos, vtkFloatingPointType zPos, vtkFloatingPointType angle)
+int CMapImageActor2::PlaceMap(double xPos, double yPos, double zPos, double angle)
 {
 	//{{
 	int *dims = this->GetDataExtent();
@@ -221,8 +221,8 @@ void CMapImageActor2::UpdateImageReader2(void)
 
 
 		//{{
-		vtkFloatingPointType* origin = this->m_MapImageReader2->GetDataOrigin();
-		vtkFloatingPointType newOrigin[3];
+		double* origin = this->m_MapImageReader2->GetDataOrigin();
+		double newOrigin[3];
 		for (int i = 0; i < 3; ++i) {
 			newOrigin[i] = origin[i] * this->m_Scale[i];
 		}
@@ -250,7 +250,7 @@ void CMapImageActor2::UpdateImageReader2(void)
 	}
 }
 
-void CMapImageActor2::SetScale(vtkFloatingPointType xScale, vtkFloatingPointType yScale, vtkFloatingPointType zScale)
+void CMapImageActor2::SetScale(double xScale, double yScale, double zScale)
 {
 	this->m_Scale[0] = xScale;
 	this->m_Scale[1] = yScale;

@@ -66,13 +66,15 @@ void TestHDFSerializePolyData::testPolyDataReaderWriter(void)
 		std::getline(expected, str_expected, '\n');
 		std::getline(actual,   str_actual,   '\n');
 
-		//::OutputDebugString("Expected:\n");
-		//::OutputDebugString(str_expected.c_str());
-		//::OutputDebugString("\n");
+#if defined(SKIP)
+		::OutputDebugString("Expected:\n");
+		::OutputDebugString(str_expected.c_str());
+		::OutputDebugString("\n");
 
-		//::OutputDebugString("Actual:\n");
-		//::OutputDebugString(str_actual.c_str());
-		//::OutputDebugString("\n");
+		::OutputDebugString("Actual:\n");
+		::OutputDebugString(str_actual.c_str());
+		::OutputDebugString("\n");
+#endif
 		CPPUNIT_ASSERT( str_expected == str_actual );
 	}
 	CPPUNIT_ASSERT( expected.eof() && actual.eof() );
@@ -160,13 +162,15 @@ void TestHDFSerializePolyData::testHDF(void)
 		std::getline(expected, str_expected, '\n');
 		std::getline(actual,   str_actual,   '\n');
 
-		//::OutputDebugString("Expected:\n");
-		//::OutputDebugString(str_expected.c_str());
-		//::OutputDebugString("\n");
+#if defined(SKIP)
+		::OutputDebugString("Expected:\n");
+		::OutputDebugString(str_expected.c_str());
+		::OutputDebugString("\n");
 
-		//::OutputDebugString("Actual:\n");
-		//::OutputDebugString(str_actual.c_str());
-		//::OutputDebugString("\n");
+		::OutputDebugString("Actual:\n");
+		::OutputDebugString(str_actual.c_str());
+		::OutputDebugString("\n");
+#endif
 		CPPUNIT_ASSERT( str_expected == str_actual );
 	}
 	CPPUNIT_ASSERT( expected.eof() && actual.eof() );

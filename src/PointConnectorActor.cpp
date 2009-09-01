@@ -199,9 +199,9 @@ vtkIdType CPointConnectorActor::InsertNextPoint(double x, double y, double z)
 	//
 	if (vtkIdType np = this->Points->GetNumberOfPoints())
 	{
-		vtkFloatingPointType p[3];
-		vtkFloatingPointType pNext[3];
-		vtkFloatingPointType sNext[3];
+		double p[3];
+		double pNext[3];
+		double sNext[3];
 		this->Points->GetPoint(np - 1, p);
 		pNext[0] = x; pNext[1] = y; pNext[2] = z;
 		for (int i = 0; i < 3; ++i)
@@ -311,7 +311,7 @@ double CPointConnectorActor::GetZ(void)const
 
 void CPointConnectorActor::SetScale(double x, double y, double z)
 {
-	vtkFloatingPointType point[3];
+	double point[3];
 	if (this->State == CPointConnectorActor::CreatingRiver)
 	{
 		if (this->Points->GetNumberOfPoints())
@@ -431,12 +431,12 @@ void CPointConnectorActor::ClearPoints(void)
 	this->LineActors.clear();
 }
 
-vtkFloatingPointType CPointConnectorActor::GetRadius(void)const
+double CPointConnectorActor::GetRadius(void)const
 {
 	return this->Radius;
 }
 
-void CPointConnectorActor::SetRadius(vtkFloatingPointType radius)
+void CPointConnectorActor::SetRadius(double radius)
 {
 	this->Radius = radius;
 	std::list<vtkSphereSource*>::iterator iterSphereSource = this->SphereSources.begin();
@@ -592,9 +592,9 @@ void CPointConnectorActor::OnLeftButtonDown()
 		path = this->CellPicker->GetPath();
 		if (path != NULL)
 		{
-			if (vtkActor* pActor = vtkActor::SafeDownCast(path->GetFirstNode()->GetProp()))
+			if (vtkActor* pActor = vtkActor::SafeDownCast(path->GetFirstNode()->GetViewProp()))
 			{
-				this->HighlightHandle(path->GetFirstNode()->GetProp());
+				this->HighlightHandle(path->GetFirstNode()->GetViewProp());
 				this->Points->GetPoint(this->GetCurrentPointId(), this->WorldPointXYPlane);
 				this->EventCallbackCommand->SetAbortFlag(1);
 				this->State = CPointConnectorActor::MovingPoint;
@@ -610,7 +610,7 @@ void CPointConnectorActor::OnLeftButtonDown()
 		path = this->LineCellPicker->GetPath();
 		if (path != NULL)
 		{
-			if (vtkActor* pActor = vtkActor::SafeDownCast(path->GetFirstNode()->GetProp()))
+			if (vtkActor* pActor = vtkActor::SafeDownCast(path->GetFirstNode()->GetViewProp()))
 			{
 				std::list<vtkActor*>::iterator iterActor = this->LineActors.begin();
 				for (vtkIdType id = 0; iterActor != this->LineActors.end(); ++id, ++iterActor)
@@ -673,7 +673,7 @@ void CPointConnectorActor::OnMouseMove()
 				path = this->LineCellPicker->GetPath();
 				if (path != NULL)
 				{
-					if (vtkActor* pActor = vtkActor::SafeDownCast(path->GetFirstNode()->GetProp()))
+					if (vtkActor* pActor = vtkActor::SafeDownCast(path->GetFirstNode()->GetViewProp()))
 					{
 						this->Update();
 						this->GhostSphereSource->SetCenter(this->WorldSIPoint[0], this->WorldSIPoint[1], this->WorldSIPoint[2]);
@@ -1092,18 +1092,18 @@ int CPointConnectorActor::GetVisibility(void)
 	return this->Visibility;
 }
 
-void CPointConnectorActor::ScaleFromBounds(vtkFloatingPointType bounds[6])
+void CPointConnectorActor::ScaleFromBounds(double bounds[6])
 {
 	// set radius
 	//
-	vtkFloatingPointType defaultAxesSize = (bounds[1]-bounds[0] + bounds[3]-bounds[2] + bounds[5]-bounds[4])/12;
+	double defaultAxesSize = (bounds[1]-bounds[0] + bounds[3]-bounds[2] + bounds[5]-bounds[4])/12;
 	this->SetRadius(defaultAxesSize * 0.085 /* / sqrt(scale[0] * scale[1]) */ );
 
 	if (this->Cursor3D)
 	{
 		// set size of 3D cursor
 		//
-		vtkFloatingPointType dim = (bounds[1] - bounds[0]) / 20.0;
+		double dim = (bounds[1] - bounds[0]) / 20.0;
 		this->Cursor3D->SetModelBounds(-dim, dim, -dim, dim, -dim, dim);
 	}
 }

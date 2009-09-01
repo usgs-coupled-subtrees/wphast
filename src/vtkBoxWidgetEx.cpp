@@ -183,7 +183,7 @@ void vtkBoxWidgetEx::OnLeftButtonDown()
 	{
 		this->State = vtkBoxWidget::Moving;
 		this->HighlightFace(
-			this->HighlightHandle(path->GetFirstNode()->GetProp()));
+			this->HighlightHandle(path->GetFirstNode()->GetViewProp()));
 		this->HandlePicker->GetPickPosition(this->LastPickPosition);
 		this->ValidPick = 1;
 	}
@@ -271,7 +271,7 @@ double vtkBoxWidgetEx::SizeHandles(double factor)
 	{
 		double radius, z;
 		double windowLowerLeft[4], windowUpperRight[4];
-		vtkFloatingPointType *viewport = renderer->GetViewport();
+		double *viewport = renderer->GetViewport();
 		int *winSize = renderer->GetRenderWindow()->GetSize();
 		double focalPoint[4];
 
