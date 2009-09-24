@@ -54,6 +54,7 @@ class TestCPhastInput : public CppUnit::TestFixture
 // COMMENT: {4/6/2009 6:30:25 PM}#endif
 	CPPUNIT_TEST( testProperty );
 	CPPUNIT_TEST( testWellDefinedThenUndefined );
+	CPPUNIT_TEST( testDescription );
 	CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -105,5 +106,6 @@ protected:
 	void testCapeCod(void);
 	void testProperty(void);
 	void testWellDefinedThenUndefined(void);
+	void testDescription(void);	
 };
 

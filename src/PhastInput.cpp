@@ -122,10 +122,10 @@ void CPhastInput::DoCleanUp(void)
 	::clean_up();
 	::clean_up_message();
 
-	// clean up shapefile/prism
-	Clear_NNInterpolatorList();
-	Clear_file_data_map();
-	Clear_KDtreeList();
+// COMMENT: {9/1/2009 8:21:30 PM}	// clean up shapefile/prism
+// COMMENT: {9/1/2009 8:21:30 PM}	Clear_NNInterpolatorList();
+// COMMENT: {9/1/2009 8:21:30 PM}	Clear_file_data_map();
+// COMMENT: {9/1/2009 8:21:30 PM}	Clear_KDtreeList();
 
 // COMMENT: {12/2/2008 3:00:12 PM}#if !defined(_DEBUG)
 // COMMENT: {12/2/2008 3:00:12 PM}	::PHRQ_free_all();

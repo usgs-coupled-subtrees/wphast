@@ -50,8 +50,6 @@ CPointConnectorActor::CPointConnectorActor(void)
 , GhostActor(0)
 , GridAngle(0.0)
 {
-// COMMENT: {9/17/2008 8:22:29 PM}	static StaticInit init; // constructs/destructs s_HandleProperty s_ConnectorProperty
-
 	for (size_t i = 0; i < 3; ++i)
 	{
 		this->GridOrigin[i] = 0.0;
@@ -112,13 +110,19 @@ CPointConnectorActor::~CPointConnectorActor(void)
 	TRACE("CPointConnectorActor dtor %d \n", count);
 	++count;
 
+// COMMENT: {9/9/2009 10:30:36 PM}	if (this->Interactor)
+// COMMENT: {9/9/2009 10:30:36 PM}	{
+// COMMENT: {9/9/2009 10:30:36 PM}		// this is req'd since messages will continue to be sent
+// COMMENT: {9/9/2009 10:30:36 PM}		// after deletion and this->Interactor == 0xcdcdcdcd or
+// COMMENT: {9/9/2009 10:30:36 PM}		// this->Interactor->SubjectHelper == 0xcdcdcdcd
+// COMMENT: {9/9/2009 10:30:36 PM}		this->Interactor->RemoveObserver(this->EventCallbackCommand);
+// COMMENT: {9/9/2009 10:30:36 PM}	}
+	//{{
 	if (this->Interactor)
 	{
-		// this is req'd since messages will continue to be sent
-		// after deletion and this->Interactor == 0xcdcdcdcd or
-		// this->Interactor->SubjectHelper == 0xcdcdcdcd
-		this->Interactor->RemoveObserver(this->EventCallbackCommand);
+		this->SetInteractor(0);
 	}
+	//}}
 	this->EventCallbackCommand->Delete();    this->EventCallbackCommand   = 0;
 
 	this->ClearPoints();
@@ -459,18 +463,40 @@ void CPointConnectorActor::SetRadius(double radius)
 	}
 }
 
+// COMMENT: {9/16/2009 9:23:05 PM}#pragma optimize( "g", off )
 void CPointConnectorActor::SetInteractor(vtkRenderWindowInteractor* i)
 {
+	char buffer[160];
+	::sprintf(buffer, "CPointConnectorActor::SetInteractor In this = %p i = %p Interactor = %p\n", this, i, this->Interactor);
+	::OutputDebugString(buffer);
+
+// COMMENT: {9/15/2009 8:31:21 PM}// COMMENT: {9/15/2009 7:04:53 PM}#if defined(_DEBUG)
+// COMMENT: {9/15/2009 8:31:21 PM}	vtkDebugMacro(<< "Setting Interactor to = " << i << "\n");
+// COMMENT: {9/15/2009 8:31:21 PM}	vtkDebugMacro(<< "Previous Interactor to = " << this->Interactor << "\n");
+// COMMENT: {9/15/2009 8:31:21 PM}// COMMENT: {9/15/2009 7:04:55 PM}#endif
 	if (i == this->Interactor)
 	{
 		return;
 	}
 
+	::sprintf(buffer, "this = %p\n", this);
+	::OutputDebugString(buffer);
+	
+	::sprintf(buffer, "this->EventCallbackCommand = %p\n", this->EventCallbackCommand);
+	::OutputDebugString(buffer);
+
 	// if we already have an Interactor then stop observing it
 	if (this->Interactor)
 	{
+		::OutputDebugString("In If\n");
 		this->Interactor->RemoveObserver(this->EventCallbackCommand);
 	}
+
+	::sprintf(buffer, "this->Interactor = %p\n", this->Interactor);
+	::OutputDebugString(buffer);
+
+	::sprintf(buffer, "i = %p\n", i);
+	::OutputDebugString(buffer);
 
 	this->Interactor = i;
 
@@ -481,6 +507,7 @@ void CPointConnectorActor::SetInteractor(vtkRenderWindowInteractor* i)
 
 	this->Modified();
 }
+// COMMENT: {9/16/2009 9:23:01 PM}#pragma optimize( "g", on )
 
 //----------------------------------------------------------------------------
 void CPointConnectorActor::ProcessEvents(vtkObject* vtkNotUsed(object),
@@ -636,6 +663,7 @@ void CPointConnectorActor::OnLeftButtonDown()
 	{
 		this->Update();
 		this->Cursor3DActor->SetPosition(this->WorldSIPoint[0], this->WorldSIPoint[1], this->WorldSIPoint[2]);
+		this->EventCallbackCommand->SetAbortFlag(1);
 		this->Interactor->Render();
 	}
 }
@@ -843,11 +871,11 @@ void CPointConnectorActor::PrintSelf(ostream& os, vtkIndent indent)
 
 void CPointConnectorActor::SetEnabled(int enabling)
 {
-	if (!this->Interactor)
-	{
-		vtkErrorMacro(<<"The interactor must be set prior to enabling/disabling widget");
-		return;
-	}
+// COMMENT: {9/16/2009 6:44:30 PM}	if (!this->Interactor)
+// COMMENT: {9/16/2009 6:44:30 PM}	{
+// COMMENT: {9/16/2009 6:44:30 PM}		vtkErrorMacro(<<"The interactor must be set prior to enabling/disabling widget");
+// COMMENT: {9/16/2009 6:44:30 PM}		return;
+// COMMENT: {9/16/2009 6:44:30 PM}	}
 
 	if ( enabling ) //------------------------------------------------------------
 	{
@@ -857,6 +885,14 @@ void CPointConnectorActor::SetEnabled(int enabling)
 		{
 			return;
 		}
+
+		//{{
+		if (!this->Interactor)
+		{
+			vtkErrorMacro(<<"The interactor must be set prior to enabling the widget");
+			return;
+		}
+		//}}
 
 		if ( ! this->CurrentRenderer )
 		{
@@ -893,7 +929,7 @@ void CPointConnectorActor::SetEnabled(int enabling)
 
 	else //disabling-------------------------------------------------------------
 	{
-		vtkDebugMacro(<<"Disabling river");
+		vtkDebugMacro(<<"Disabling CPointConnectorActor");
 
 		if ( ! this->Enabled ) //already disabled, just return
 		{

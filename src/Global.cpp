@@ -76,17 +76,17 @@ void CGlobal::LoadRTFString(std::string& str, UINT nID)
 
 void CGlobal::PickProp(CWPhastView* pView, vtkProp3D* pProp3D)
 {
-	ASSERT(FALSE); // deprecated use CZoneActor->Select instead
-
-	vtkRenderer* pRenderer = pView->GetRenderer();
-	vtkRenderWindowInteractor* pRenderWindowInteractor = pView->GetRenderWindowInteractor();
-
-	////CGlobal::PickProp(pProp3D, pView->GetRenderer(), pView->GetRenderWindowInteractor());
-
-	if (CZoneActor* pZone = CZoneActor::SafeDownCast(pProp3D))
-	{
-		pZone->Select(pView);
-	}
+// COMMENT: {9/8/2009 9:04:42 PM}	ASSERT(FALSE); // deprecated use CZoneActor->Select instead
+// COMMENT: {9/8/2009 9:04:42 PM}
+// COMMENT: {9/8/2009 9:04:42 PM}	vtkRenderer* pRenderer = pView->GetRenderer();
+// COMMENT: {9/8/2009 9:04:42 PM}	vtkRenderWindowInteractor* pRenderWindowInteractor = pView->GetRenderWindowInteractor();
+// COMMENT: {9/8/2009 9:04:42 PM}
+// COMMENT: {9/8/2009 9:04:42 PM}	////CGlobal::PickProp(pProp3D, pView->GetRenderer(), pView->GetRenderWindowInteractor());
+// COMMENT: {9/8/2009 9:04:42 PM}
+// COMMENT: {9/8/2009 9:04:42 PM}	if (CZoneActor* pZone = CZoneActor::SafeDownCast(pProp3D))
+// COMMENT: {9/8/2009 9:04:42 PM}	{
+// COMMENT: {9/8/2009 9:04:42 PM}		pZone->Select(pView);
+// COMMENT: {9/8/2009 9:04:42 PM}	}
 }
 
 void CGlobal::PickProp(vtkProp3D* pProp3D, vtkRenderer* pRenderer, vtkRenderWindowInteractor* pRenderWindowInteractor)
@@ -3435,6 +3435,9 @@ herr_t CGlobal::HDFSerializeData_source(bool bStoring, hid_t loc_id, const char*
 						break;
 					case Data_source::ARCRASTER:
 					case Data_source::XYZ:
+					//{{
+					case Data_source::XYZT:
+					//}}
 						{
 							std::string filename(rData_source.Get_file_name());
 							status = HDFSerializeString(bStoring, ds_gr_id, szfile_name, filename);
@@ -3454,6 +3457,7 @@ herr_t CGlobal::HDFSerializeData_source(bool bStoring, hid_t loc_id, const char*
 					case Data_source::POINTS:
 						{
 							std::vector<Point> &pts = rData_source.Get_points();
+							std::vector<Point> &upts = rData_source.Get_user_points();
 							//ASSERT(pts.size() >= 3);
 							hsize_t count = 4 * pts.size();							
 							double *points = new double[count];
@@ -3564,6 +3568,9 @@ herr_t CGlobal::HDFSerializeData_source(bool bStoring, hid_t loc_id, const char*
 						break;
 					case Data_source::ARCRASTER:
 					case Data_source::XYZ:
+					//{{
+					case Data_source::XYZT:
+					//}}
 						{
 							std::string filename;
 							status = HDFSerializeString(bStoring, ds_gr_id, szfile_name, filename);

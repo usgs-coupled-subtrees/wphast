@@ -358,27 +358,27 @@ void CZoneActor::Select(CWPhastView* pView, bool bReselect)
 // COMMENT: {3/5/2008 4:39:13 PM}	}
 // COMMENT: {3/5/2008 4:39:13 PM}	//}}HACK
 
-	if (vtkAbstractPropPicker *picker = vtkAbstractPropPicker::SafeDownCast( pView->GetRenderWindowInteractor()->GetPicker() ))
-	{
-		vtkAssemblyPath *path = vtkAssemblyPath::New();
-		path->AddNode(this, this->GetMatrix());
-		picker->SetPath(path);
-		path->Delete();
-	}
+// COMMENT: {9/8/2009 9:00:26 PM}	if (vtkAbstractPropPicker *picker = vtkAbstractPropPicker::SafeDownCast( pView->GetRenderWindowInteractor()->GetPicker() ))
+// COMMENT: {9/8/2009 9:00:26 PM}	{
+// COMMENT: {9/8/2009 9:00:26 PM}		vtkAssemblyPath *path = vtkAssemblyPath::New();
+// COMMENT: {9/8/2009 9:00:26 PM}		path->AddNode(this, this->GetMatrix());
+// COMMENT: {9/8/2009 9:00:26 PM}		picker->SetPath(path);
+// COMMENT: {9/8/2009 9:00:26 PM}		path->Delete();
+// COMMENT: {9/8/2009 9:00:26 PM}	}
 
 	if (this->GetDefault())
 	{
-		ASSERT(!bReselect);
-		if (!bReselect)
-		{
-			pView->HighlightProp(this);
-		}
-
-		// TODO May want to highlight the zone some other way
-		// ie (set selection color to white; change the translucency)
-		pView->GetBoxWidget()->Off();
-		//pView->GetPointWidget()->Off();
-		//pView->GetPrismWidget()->Off();
+// COMMENT: {9/8/2009 9:00:41 PM}		ASSERT(!bReselect);
+// COMMENT: {9/8/2009 9:00:41 PM}		if (!bReselect)
+// COMMENT: {9/8/2009 9:00:41 PM}		{
+// COMMENT: {9/8/2009 9:00:41 PM}			pView->HighlightProp(this);
+// COMMENT: {9/8/2009 9:00:41 PM}		}
+// COMMENT: {9/8/2009 9:00:41 PM}
+// COMMENT: {9/8/2009 9:00:41 PM}		// TODO May want to highlight the zone some other way
+// COMMENT: {9/8/2009 9:00:41 PM}		// ie (set selection color to white; change the translucency)
+// COMMENT: {9/8/2009 9:00:41 PM}		pView->GetBoxWidget()->Off();
+// COMMENT: {9/8/2009 9:00:41 PM}		//pView->GetPointWidget()->Off();
+// COMMENT: {9/8/2009 9:00:41 PM}		//pView->GetPrismWidget()->Off();
 	}
 	else
 	{
@@ -389,12 +389,12 @@ void CZoneActor::Select(CWPhastView* pView, bool bReselect)
 			pView->ClearSelection();
 		}
 
-		// Reset BoxWidget
-		//
-		pView->GetBoxWidget()->SetProp3D(this);
-		pView->GetBoxWidget()->PlaceWidget();
-		ASSERT(this == pView->GetBoxWidget()->GetProp3D());
-		pView->GetBoxWidget()->SetEnabled(1);
+// COMMENT: {9/8/2009 9:01:01 PM}		// Reset BoxWidget
+// COMMENT: {9/8/2009 9:01:01 PM}		//
+// COMMENT: {9/8/2009 9:01:01 PM}		pView->GetBoxWidget()->SetProp3D(this);
+// COMMENT: {9/8/2009 9:01:01 PM}		pView->GetBoxWidget()->PlaceWidget();
+// COMMENT: {9/8/2009 9:01:01 PM}		ASSERT(this == pView->GetBoxWidget()->GetProp3D());
+// COMMENT: {9/8/2009 9:01:01 PM}		pView->GetBoxWidget()->SetEnabled(1);
 
 #if defined(_DEBUG)
 		int n = this->GetNumberOfPaths();
@@ -1571,7 +1571,8 @@ double *CZoneActor::GetBounds() // virtual
 	this->Bounds[0] = this->Bounds[2] = this->Bounds[4] = VTK_LARGE_FLOAT;
 	this->Bounds[1] = this->Bounds[3] = this->Bounds[5] = -VTK_LARGE_FLOAT;
 
-	for ( this->Paths->InitTraversal(); (path = this->Paths->GetNextItem()); )
+	vtkCollectionSimpleIterator csi;
+	for ( this->Paths->InitTraversal(csi); (path = this->Paths->GetNextPath(csi)); )
 	{
 		prop3D = (vtkProp3D *)path->GetLastNode()->GetViewProp();
 		//if ( prop3D->GetVisibility() )
@@ -1832,6 +1833,7 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, do
 	this->Map2GridPhastTransform = PHAST_Transform(origin[0], origin[1], origin[2], angle, scale_h, scale_h, scale_v);
 
 	Polyhedron *clone = polyh->clone();
+	TRACE("%s\n", clone->Get_description()->c_str());
 	if (this->GetPolyhedron())
 	{
 		if (this->GetPolyhedronType() == Polyhedron::PRISM)
@@ -1953,12 +1955,12 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, do
 				}
 				if (area > 0)
 				{
-					// ignore holes in shape files
-					if (prism->perimeter.Get_source_type() == Data_source::SHAPE)
-					{
-						ASSERT(npolys > 1);
-						continue;
-					}
+// COMMENT: {9/1/2009 4:19:57 PM}					// ignore holes in shape files
+// COMMENT: {9/1/2009 4:19:57 PM}					if (prism->perimeter.Get_source_type() == Data_source::SHAPE && prism->perimeter.)
+// COMMENT: {9/1/2009 4:19:57 PM}					{
+// COMMENT: {9/1/2009 4:19:57 PM}						ASSERT(npolys > 1);
+// COMMENT: {9/1/2009 4:19:57 PM}						continue;
+// COMMENT: {9/1/2009 4:19:57 PM}					}
 					std::reverse(pts.begin(), pts.end());
 				}
 			}

@@ -39,16 +39,25 @@ vtkInteractorStyleTrackballCameraEx::~vtkInteractorStyleTrackballCameraEx(void)
 
 void vtkInteractorStyleTrackballCameraEx::Delete(void)
 {
-	if (this->Interactor)
-	{
-		// HACK
-		// If this isn't here a reference count proble occurs
-		//
-		vtkPropCollection *pickProps = this->Interactor->GetPicker()->GetPickList();
-		ASSERT(pickProps);
-		pickProps->RemoveAllItems();
-	}
+// COMMENT: {9/10/2009 10:04:30 PM}	if (this->Interactor)
+// COMMENT: {9/10/2009 10:04:30 PM}	{
+// COMMENT: {9/10/2009 10:04:30 PM}		// HACK
+// COMMENT: {9/10/2009 10:04:30 PM}		// If this isn't here a reference count proble occurs
+// COMMENT: {9/10/2009 10:04:30 PM}		//
+// COMMENT: {9/10/2009 10:04:30 PM}		vtkPropCollection *pickProps = this->Interactor->GetPicker()->GetPickList();
+// COMMENT: {9/10/2009 10:04:30 PM}		ASSERT(pickProps);
+// COMMENT: {9/10/2009 10:04:30 PM}		pickProps->RemoveAllItems();
+// COMMENT: {9/10/2009 10:04:30 PM}	}
 
+// COMMENT: {9/18/2009 8:03:52 PM}//{{ {9/18/2009 6:51:30 PM}
+// COMMENT: {9/18/2009 8:03:52 PM}	if (this->CurrentRenderer->GetRenderWindow())
+// COMMENT: {9/18/2009 8:03:52 PM}	{
+// COMMENT: {9/18/2009 8:03:52 PM}		if (!::AfxIsValidAddress(this->CurrentRenderer->GetRenderWindow(), 1))
+// COMMENT: {9/18/2009 8:03:52 PM}		{
+// COMMENT: {9/18/2009 8:03:52 PM}			this->CurrentRenderer = 0;
+// COMMENT: {9/18/2009 8:03:52 PM}		}
+// COMMENT: {9/18/2009 8:03:52 PM}	}
+// COMMENT: {9/18/2009 8:03:52 PM}//}} {9/18/2009 6:51:30 PM}
 	this->Superclass::Delete();
 }
 
@@ -188,7 +197,8 @@ void vtkInteractorStyleTrackballCameraEx::OnChar()
       this->FindPokedRenderer(rwi->GetEventPosition()[0],
                               rwi->GetEventPosition()[1]);
       ac = this->CurrentRenderer->GetActors();
-      for (ac->InitTraversal(); (anActor = ac->GetNextItem()); ) 
+      vtkCollectionSimpleIterator csi;
+      for (ac->InitTraversal(csi); (anActor = ac->GetNextActor(csi)); ) 
         {
         for (anActor->InitPathTraversal(); (path=anActor->GetNextPath()); ) 
           {
@@ -288,8 +298,9 @@ void vtkInteractorStyleTrackballCameraEx::OnChar()
 #if !defined(USE_ORIGINAL)
 			if (path->GetNumberOfItems() == 3)
 			{
-				path->InitTraversal();
-				vtkProp* pPropAssembly = path->GetNextNode()->GetViewProp();
+				vtkCollectionSimpleIterator csi;
+				path->InitTraversal(csi);
+				vtkProp* pPropAssembly = path->GetNextNode(csi)->GetViewProp();
 				ASSERT(pPropAssembly->IsA("vtkPropAssembly"));
 				this->LastProp = path->GetNextNode()->GetViewProp();
 			}
@@ -359,10 +370,11 @@ void vtkInteractorStyleTrackballCameraEx::OnLeftButtonDown()
 			{
 				if (path->GetNumberOfItems() == 3)
 				{
-					path->InitTraversal();
-					vtkProp* pPropAssembly = path->GetNextNode()->GetViewProp();
+					vtkCollectionSimpleIterator csi;
+					path->InitTraversal(csi);
+					vtkProp* pPropAssembly = path->GetNextNode(csi)->GetViewProp();
 					ASSERT(pPropAssembly->IsA("vtkPropAssembly"));
-					this->LastProp = path->GetNextNode()->GetViewProp();
+					this->LastProp = path->GetNextNode(csi)->GetViewProp();
 				}
 				else
 				{
@@ -420,16 +432,18 @@ void vtkInteractorStyleTrackballCameraEx::OnKeyPress()
 				// this is the first time Tab has been pressed
 				vtkProp *prop;
 				props = this->CurrentRenderer->GetViewProps();
-				for ( props->InitTraversal(); (prop = props->GetNextProp()); )
+				vtkCollectionSimpleIterator csi;
+				for ( props->InitTraversal(csi); (prop = props->GetNextProp(csi)); )
 				{
 					if (vtkPropAssembly *pPropAssembly = vtkPropAssembly::SafeDownCast(prop))
 					{
 						if (vtkPropCollection *pPropCollection = pPropAssembly->GetParts())
 						{
-							pPropCollection->InitTraversal();
+							vtkCollectionSimpleIterator pci;
+							pPropCollection->InitTraversal(pci);
 							for (int i = 0; i < pPropCollection->GetNumberOfItems(); ++i)
 							{
-								if (vtkProp* p = pPropCollection->GetNextProp())
+								if (vtkProp* p = pPropCollection->GetNextProp(pci))
 								{
 									rwi->GetPicker()->AddPickList(p);
 									ASSERT(
@@ -478,11 +492,12 @@ void vtkInteractorStyleTrackballCameraEx::OnKeyPress()
 			}
 			else
 			{
-				path->InitTraversal();
-				this->LastProp = path->GetNextNode()->GetViewProp();
+				vtkCollectionSimpleIterator csi;
+				path->InitTraversal(csi);
+				this->LastProp = path->GetNextNode(csi)->GetViewProp();
 				if (this->LastProp && this->LastProp->IsA("vtkPropAssembly"))
 				{
-					this->LastProp = path->GetNextNode()->GetViewProp();
+					this->LastProp = path->GetNextNode(csi)->GetViewProp();
 				}
 				else
 				{

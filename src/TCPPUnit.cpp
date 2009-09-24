@@ -28,6 +28,8 @@
 #include "TestHDFSerializePolyData.h"
 #include "TestPrism.h"
 #include "TestUniqueMap.h"
+#include "TestCproperty.h"
+
 
 
 TCPPUnit::TCPPUnit(void)
@@ -68,7 +70,7 @@ void TCPPUnit::RunUnitTests(void)
 		double d1 = 0/z;
 #endif
 
-		runner.addTest(TestCPhastInput::suite());
+// COMMENT: {9/1/2009 7:41:13 PM}		runner.addTest(TestCPhastInput::suite());
 // COMMENT: {8/31/2009 3:57:40 PM}		runner.addTest(TestCZone::suite());
 // COMMENT: {8/31/2009 3:57:40 PM}		runner.addTest(TestCGrid::suite());
 // COMMENT: {8/31/2009 3:57:40 PM}		runner.addTest(TestCtime::suite());
@@ -84,7 +86,9 @@ void TCPPUnit::RunUnitTests(void)
 
 // COMMENT: {9/25/2008 2:20:29 PM}		runner.addTest(TestCTimeControlMultiPropertyPage2::suite());
 
-		runner.addTest(TestUniqueMap::suite());
+// COMMENT: {9/1/2009 7:41:09 PM}		runner.addTest(TestUniqueMap::suite());
+		runner.addTest(TestCproperty::suite());
+
 
 		/**********************************************************
 		// the following require user input

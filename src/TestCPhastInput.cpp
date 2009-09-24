@@ -3678,3 +3678,68 @@ void TestCPhastInput::testWellDefinedThenUndefined(void)
 		throw;
 	}
 }
+
+#include "srcinput/Zone_budget.h"
+void TestCPhastInput::testDescription(void)
+{
+	CPhastInput* pInput = NULL;
+	try
+	{
+		CMemoryState oldMemState, newMemState, diffMemState;
+		oldMemState.Checkpoint();
+		{
+			std::string str(
+				"ZONE_FLOW 3 Coonamessett River \n"
+				"-box 277000 814000  -200 277500  822000 20\n"
+				"-description Flux to Coonamessett River and nearby specified bc\n"
+				);
+			std::istringstream iss(str);
+
+			pInput = CPhastInput::New(iss, "testDescription");
+			CPPUNIT_ASSERT(pInput != NULL);
+
+			pInput->Read();
+			CPPUNIT_ASSERT(pInput->GetErrorCount() == 0);
+
+			//{{
+			std::map<int, Zone_budget*>::iterator it = Zone_budget::zone_budget_map.begin();
+			for (; it != Zone_budget::zone_budget_map.end(); ++it)
+			{
+				Zone_budget data(*it->second);
+				std::string s = *it->second->Get_polyh()->Get_description();
+// COMMENT: {9/1/2009 5:01:35 PM}				ASSERT(zb_map.find(it->second) != zb_map.end());
+// COMMENT: {9/1/2009 5:01:35 PM}				data.Set_polyh(zb_map[it->second] ? zb_map[it->second]->clone() : it->second->Get_polyh()->clone());
+// COMMENT: {9/1/2009 5:01:35 PM}
+// COMMENT: {9/1/2009 5:01:35 PM}				// not undoable
+// COMMENT: {9/1/2009 5:01:35 PM}				std::auto_ptr< CZoneCreateAction<CZoneFlowRateZoneActor> > pAction(
+// COMMENT: {9/1/2009 5:01:35 PM}					new CZoneCreateAction<CZoneFlowRateZoneActor>(
+// COMMENT: {9/1/2009 5:01:35 PM}						this,
+// COMMENT: {9/1/2009 5:01:35 PM}						it->second->Get_polyh(),
+// COMMENT: {9/1/2009 5:01:35 PM}						::grid_origin,
+// COMMENT: {9/1/2009 5:01:35 PM}						::grid_angle,
+// COMMENT: {9/1/2009 5:01:35 PM}						it->second->Get_polyh()->Get_description().c_str()
+// COMMENT: {9/1/2009 5:01:35 PM}						)
+// COMMENT: {9/1/2009 5:01:35 PM}					);
+// COMMENT: {9/1/2009 5:01:35 PM}				pAction->GetZoneActor()->SetData(data);
+// COMMENT: {9/1/2009 5:01:35 PM}				pAction->Execute();
+			}
+
+			//}}
+
+			// cleanup
+			pInput->Delete();
+			pInput = NULL;
+		}
+		newMemState.Checkpoint();
+	}
+	catch (...)
+	{
+		if (pInput)
+		{
+			LPCTSTR lpsz = pInput->GetErrorMsg();
+			if (lpsz) TRACE("testProperty:\n%s\n", lpsz);
+			pInput->Delete();
+		}
+		throw;
+	}
+}

@@ -108,6 +108,11 @@ public:
 	vtkPropCollection *GetPropCollection() const;
 	vtkPropCollection *GetRemovedPropCollection() const;
 
+#if ((VTK_MAJOR_VERSION >= 5) && (VTK_MINOR_VERSION >= 4))
+	void ExecutePipeline();
+#endif
+
+
 // Operations
 public:
 	void Execute(CAction* pAction);
@@ -248,7 +253,7 @@ protected:
 	CGridActor *m_pGridActor;
 
 	// axes
-	CAxesActor *m_pAxesActor;
+	CAxesActor *AxesActor;
 
 	// map
 	CMapActor *m_pMapActor;
@@ -271,7 +276,7 @@ protected:
 	CPointConnectorMovePointAction<CDrainActor> *DrainMovePointAction;
 
 	// properties
-	enum ProjectionType m_ProjectionMode;
+	enum ProjectionType ProjectionMode;
 
 	// grid
 	//
@@ -364,7 +369,11 @@ public:
 	afx_msg void OnUpdateToolsGeometry(CCmdUI *pCmdUI);
 	afx_msg void OnToolsGeometry();
 	virtual void DeleteContents();
+
 	void ResetCamera(void);
+	void ResetCamera(double bounds[6]);
+	void ResetCamera(double xmin, double xmax, double ymin, double ymax, double zmin, double zmax);
+
 private:
 	void AddDefaultZone(CZone* pZone);
 public:

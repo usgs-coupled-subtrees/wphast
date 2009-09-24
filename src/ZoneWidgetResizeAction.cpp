@@ -63,7 +63,7 @@ void CZoneWidgetResizeAction::Store()
 
 	if (vtkPolyData* pPolyData = vtkPolyData::New())
 	{
-		widget->Off();
+// COMMENT: {9/15/2009 2:26:50 PM}		widget->Off();
 		if (vtkBoxWidgetEx *w = vtkBoxWidgetEx::SafeDownCast(widget))
 		{
 			if (cs == PHAST_Transform::MAP)
@@ -130,7 +130,7 @@ void CZoneWidgetResizeAction::Store()
 			Wedge::WEDGE_ORIENTATION n = srcWedgeSource::ConvertChopType(t);
 			if (vtkTransform *pTransform = vtkTransform::New())
 			{
-				widget->GetTransform(pTransform);
+// COMMENT: {9/8/2009 8:59:45 PM}				widget->GetTransform(pTransform);
 #ifdef _DEBUG
 				std::ostringstream oss;
 				pTransform->PrintSelf(oss, vtkIndent(0));

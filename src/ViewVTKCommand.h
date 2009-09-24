@@ -10,7 +10,6 @@ public:
 	static CViewVTKCommand *New(CWPhastView *pView);
 
 	virtual void Execute(vtkObject *caller, unsigned long eventId, void *callData);
-	void Update();
 	void Update2();
 
 protected:

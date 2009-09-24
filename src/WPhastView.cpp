@@ -8,7 +8,12 @@
 #include "WPhastView.h"
 #include "PropertyTreeControlBar.h"
 
+#if ((VTK_MAJOR_VERSION >= 5) && (VTK_MINOR_VERSION >= 4))
+#include <vtkMFCWindow.h>
+#else
 #include <vtkWin32OpenGLRenderWindow.h>
+#endif
+
 #include <vtkRenderer.h>
 #include <vtkWin32RenderWindowInteractor.h>
 
@@ -98,67 +103,73 @@ BEGIN_MESSAGE_MAP(CWPhastView, CView)
 	ON_COMMAND(ID_VIEW_FROM_MAP_NZ, OnViewFromMapNz)
 	ON_COMMAND(ID_VIEW_FROM_MAP_PZ, OnViewFromMapPz)
 	ON_COMMAND(ID_VIEW_FROM_NEXT_DIRECTION, OnViewFromNextDirection)
+	ON_COMMAND(ID_VIEW_FROM_PREV_DIRECTION, OnViewFromPrevDirection)
+	// Wells
 	ON_COMMAND(ID_TOOLS_NEWWELL, OnToolsNewWell)
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_NEWWELL, OnUpdateToolsNewWell)
+	// River
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_NEWRIVER, OnUpdateToolsNewRiver)
 	ON_COMMAND(ID_TOOLS_NEWRIVER, OnToolsNewRiver)
-	ON_WM_LBUTTONDBLCLK()
+// COMMENT: {9/8/2009 8:43:12 PM}	ON_WM_LBUTTONDBLCLK()
 	ON_WM_DESTROY()
-	ON_COMMAND(ID_TOOLS_MOVE_VER_LINE, OnToolsMoveVerLine)
-	ON_UPDATE_COMMAND_UI(ID_TOOLS_MOVE_VER_LINE, OnUpdateToolsMoveVerLine)
+// COMMENT: {9/8/2009 8:43:18 PM}	ON_COMMAND(ID_TOOLS_MOVE_VER_LINE, OnToolsMoveVerLine)
+// COMMENT: {9/8/2009 8:43:18 PM}	ON_UPDATE_COMMAND_UI(ID_TOOLS_MOVE_VER_LINE, OnUpdateToolsMoveVerLine)
 // COMMENT: {8/29/2005 6:46:54 PM}	ON_UPDATE_COMMAND_UI(ID_TOOLS_MODIFYGRID, OnUpdateToolsModifyGrid)
 // COMMENT: {8/29/2005 6:46:54 PM}	ON_COMMAND(ID_TOOLS_MODIFYGRID, OnToolsModifyGrid)
-	ON_COMMAND(ID_VIEW_FROM_PREV_DIRECTION, OnViewFromPrevDirection)
-	ON_UPDATE_COMMAND_UI(ID_TOOLS_SELECTOBJECT, OnUpdateToolsSelectObject)
-	ON_COMMAND(ID_TOOLS_SELECTOBJECT, OnToolsSelectObject)
+// COMMENT: {9/8/2009 8:43:30 PM}	ON_UPDATE_COMMAND_UI(ID_TOOLS_SELECTOBJECT, OnUpdateToolsSelectObject)
+// COMMENT: {9/8/2009 8:43:30 PM}	ON_COMMAND(ID_TOOLS_SELECTOBJECT, OnToolsSelectObject)
 END_MESSAGE_MAP()
 
 // CWPhastView construction/destruction
 
 CWPhastView::CWPhastView()
-: m_RenderWindow(0)
-, m_Renderer(0)
-, m_RenderWindowInteractor(0)
+: MFCWindow(0)
+, Renderer(0)
 , BoxWidget(0)
 , PointWidget(0)
 , PrismWidget(0)
-, m_pViewVTKCommand(0)
+, ViewVTKCommand(0)
 , InteractorStyle(0)
-, m_bResetCamera(false)
-, m_bMovingGridLine(false)
-, m_pCursor3D(0)
-, m_pCursor3DMapper(0)
-, m_pCursor3DActor(0)
-, m_ViewFromDirection(ID_VIEW_FROM_PZ)
-, m_pWellActor(0)
-, m_pRiverActor(0)
+// COMMENT: {9/8/2009 8:42:04 PM}, m_bResetCamera(false)
+, bMovingGridLine(false)
+, Cursor3D(0)
+, Cursor3DMapper(0)
+, Cursor3DActor(0)
+, ViewFromDirection(ID_VIEW_FROM_PZ)
+, WellActor(0)
+, RiverActor(0)
 , CurrentProp(0)
 , RiverCallbackCommand(0)
 , PrismWidgetCallbackCommand(0)
 , CoordinateMode(CWPhastView::GridMode)
 {
-	// Create the renderer, window and interactor objects.
+	// Create the renderer
 	//
-	this->m_RenderWindow           = vtkWin32OpenGLRenderWindow::New();
-	this->m_Renderer               = vtkRenderer::New();
-	this->m_RenderWindowInteractor = vtkWin32RenderWindowInteractor::New();
+	// This is a hack.  It forces the renderer to delay deletion.
+	// Something is causing the ReferenceCount to be decreased and
+	// is deleted early (see dtor)
+	//
+	this->Renderer = vtkRenderer::New();
+	this->Renderer->SetReferenceCount(10);    // delay deletion
 
-	// Create the the BoxWidget
+	// Command/Observer
 	//
-	this->BoxWidget = vtkBoxWidgetEx::New();
-	this->BoxWidget->SetInteractor(this->m_RenderWindowInteractor);
+	this->ViewVTKCommand = CViewVTKCommand::New(this);
+
+	// Create the BoxWidget
+	//
+	this->BoxWidget = this->BoxWidget = vtkBoxWidgetEx::New();
 	this->BoxWidget->SetPlaceFactor(1.0);
-// COMMENT: {11/4/2008 7:52:50 PM}	this->BoxWidget->RotationEnabledOff();
-	if (vtkBoxWidgetEx *widget = vtkBoxWidgetEx::SafeDownCast(this->BoxWidget))
-	{
-		widget->HexPickerEnabledOff();
-	}
+	this->BoxWidget->AddObserver(vtkCommand::InteractionEvent, this->ViewVTKCommand);
+	this->BoxWidget->AddObserver(vtkCommand::EndInteractionEvent, this->ViewVTKCommand);
+	this->BoxWidget->AddObserver(vtkCommand::StartInteractionEvent, this->ViewVTKCommand);
 
-	// Create the the PointWidget2
+	// Create the PointWidget2
 	//
 	this->PointWidget = vtkPointWidget2::New();
-	this->PointWidget->SetInteractor(this->m_RenderWindowInteractor);
-	///this->PointWidget->TranslationModeOn();
+	this->PointWidget->AddObserver(vtkCommand::InteractionEvent, this->ViewVTKCommand);
+	this->PointWidget->AddObserver(vtkCommand::EndInteractionEvent, this->ViewVTKCommand);
+	this->PointWidget->AddObserver(vtkCommand::StartInteractionEvent, this->ViewVTKCommand);
 
 	// Create the PrismWidget listener
 	//
@@ -169,107 +180,87 @@ CWPhastView::CWPhastView()
 	// Create the PrismWidget
 	//
 	this->PrismWidget = CPrismWidget::New();
-	this->PrismWidget->SetInteractor(this->m_RenderWindowInteractor);
 	this->PrismWidget->AddObserver(vtkCommand::EndInteractionEvent, this->PrismWidgetCallbackCommand);
 	this->PrismWidget->AddObserver(CPrismWidget::InsertPointEvent, this->PrismWidgetCallbackCommand);
 	this->PrismWidget->AddObserver(CPrismWidget::DeletePointEvent, this->PrismWidgetCallbackCommand);
 
-	//
-	this->InteractorStyle = vtkInteractorStyleTrackballCameraEx::New();
-	this->m_RenderWindowInteractor->SetInteractorStyle(this->InteractorStyle);
-
-	// picker
-	vtkPropPickerFixed* picker = vtkPropPickerFixed::New();
-	this->m_RenderWindowInteractor->SetPicker(picker);
-	picker->Delete();
-
 	// 3D Cursor
 	//
-	this->m_pCursor3D = vtkCursor3D::New();
-	this->m_pCursor3D->XShadowsOff();
-	this->m_pCursor3D->YShadowsOff();
-	this->m_pCursor3D->ZShadowsOff();
-	this->m_pCursor3D->OutlineOff();
+	this->Cursor3D = vtkCursor3D::New();
+	this->Cursor3D->XShadowsOff();
+	this->Cursor3D->YShadowsOff();
+	this->Cursor3D->ZShadowsOff();
+	this->Cursor3D->OutlineOff();
 
-	this->m_pCursor3DMapper = vtkPolyDataMapper::New();
-	this->m_pCursor3DMapper->SetInput(this->m_pCursor3D->GetOutput());
+	this->Cursor3DMapper = vtkPolyDataMapper::New();
+	this->Cursor3DMapper->SetInput(this->Cursor3D->GetOutput());
 
-	this->m_pCursor3DActor = vtkActor::New();
-	this->m_pCursor3DActor->SetMapper(this->m_pCursor3DMapper);
-	this->m_pCursor3DActor->SetPosition(0, 0, 0);
-	this->m_pCursor3DActor->VisibilityOff();
-
-	// Add Observers
-	//
-	this->m_pViewVTKCommand = CViewVTKCommand::New(this);
-	this->m_RenderWindowInteractor->AddObserver(vtkCommand::EndPickEvent, this->m_pViewVTKCommand);
-
-	this->BoxWidget->AddObserver(vtkCommand::InteractionEvent, this->m_pViewVTKCommand);
-	this->BoxWidget->AddObserver(vtkCommand::EndInteractionEvent, this->m_pViewVTKCommand);
-	this->BoxWidget->AddObserver(vtkCommand::StartInteractionEvent, this->m_pViewVTKCommand);
-
-	this->PointWidget->AddObserver(vtkCommand::InteractionEvent, this->m_pViewVTKCommand);
-	this->PointWidget->AddObserver(vtkCommand::EndInteractionEvent, this->m_pViewVTKCommand);
-	this->PointWidget->AddObserver(vtkCommand::StartInteractionEvent, this->m_pViewVTKCommand);
-
-
-	// camera events
-	//
-	vtkCamera* pCamera = this->m_Renderer->GetActiveCamera();
-	ASSERT(pCamera);
-	pCamera->AddObserver(vtkCommand::ModifiedEvent, this->m_pViewVTKCommand);
-
-	// mouse events
-	//
-	this->m_RenderWindowInteractor->AddObserver(vtkCommand::MouseMoveEvent, this->m_pViewVTKCommand);
-	this->m_RenderWindowInteractor->AddObserver(vtkCommand::LeftButtonPressEvent, this->m_pViewVTKCommand);
-	this->m_RenderWindowInteractor->AddObserver(vtkCommand::LeftButtonReleaseEvent, this->m_pViewVTKCommand);
-
-	// 	keyboard events
-	//
-	this->m_RenderWindowInteractor->AddObserver(vtkCommand::KeyPressEvent, this->m_pViewVTKCommand);
-
-	// background color
-	//
-	this->BackgroundColor[0] = 0.0;
-	this->BackgroundColor[1] = 0.0;
-	this->BackgroundColor[2] = 0.0;
+	this->Cursor3DActor = vtkActor::New();
+	this->Cursor3DActor->SetMapper(this->Cursor3DMapper);
+	this->Cursor3DActor->SetPosition(0, 0, 0);
+	this->Cursor3DActor->VisibilityOff();
 }
 
 CWPhastView::~CWPhastView()
 {
-	this->CancelMode();
+// COMMENT: {9/18/2009 6:41:38 PM}	this->CancelMode();
 
-	this->InteractorStyle->Delete();
-	this->BoxWidget->SetInteractor(0);
-	this->BoxWidget->Delete();
-	this->PointWidget->SetInteractor(0);
-	this->PointWidget->Delete();
-	this->PrismWidget->SetInteractor(0);
-	this->PrismWidget->Delete();
+	if (this->GetInteractor())
+	{
+		this->GetInteractor()->Disable();
+	}
 
-	this->m_pViewVTKCommand->Delete();
+	if (this->BoxWidget)
+	{
+		this->BoxWidget->SetEnabled(0);
+		this->BoxWidget->SetInteractor(0);
+		this->BoxWidget->Delete();
+	}
+
+	if (this->PointWidget)
+	{
+		this->PointWidget->SetEnabled(0);
+		this->PointWidget->SetInteractor(0);
+		this->PointWidget->Delete();
+	}
+
+	if (this->PrismWidget)
+	{
+		this->PrismWidget->SetEnabled(0);
+		this->PrismWidget->SetInteractor(0);
+		this->PrismWidget->Delete();
+	}
 
 	// 3D Cursor
-	this->m_pCursor3D->Delete();
-	this->m_pCursor3DMapper->Delete();
-	this->m_pCursor3DActor->Delete();
+	if (this->Cursor3D)
+	{
+		this->Cursor3D->Delete();
+	}
+	if (this->Cursor3DMapper)
+	{
+		this->Cursor3DMapper->Delete();
+	}
+	if (this->Cursor3DActor)
+	{
+		this->Cursor3DActor->Delete();
+	}
 
 
 	// Well actor
-	if (this->m_pWellActor)
+	if (this->WellActor)
 	{
-		this->m_pWellActor->Delete();
-		this->m_pWellActor = 0;
+		this->WellActor->Delete();
+		this->WellActor = 0;
 	}
 
 	// River actor
-	if (this->m_pRiverActor)
+	if (this->RiverActor)
 	{
-		this->m_Renderer->RemoveViewProp(this->m_pRiverActor);
-		this->m_pRiverActor->Delete();
-		this->m_pRiverActor = 0;
+		this->Renderer->RemoveViewProp(this->RiverActor);
+		this->RiverActor->Delete();
+		this->RiverActor = 0;
 	}
+
 	// River listener
 	if (this->RiverCallbackCommand)
 	{
@@ -283,8 +274,7 @@ CWPhastView::~CWPhastView()
 		this->PrismWidgetCallbackCommand->Delete();
 		this->PrismWidgetCallbackCommand = 0;
 	}
-
-	if (this->m_bMovingGridLine)
+	if (this->bMovingGridLine)
 	{
 		if (CGridLODActor* pGridLODActor = CGridLODActor::SafeDownCast(this->GetDocument()->GetGridActor()))
 		{
@@ -292,6 +282,7 @@ CWPhastView::~CWPhastView()
 		}
 	}
 
+// COMMENT: {9/18/2009 9:57:24 PM}#if !((VTK_MAJOR_VERSION >= 5) && (VTK_MINOR_VERSION >= 4))
 	// this allows RemoveObserver of the Interactor of CPointConnectorActor to be called for the EventCallbackCommand
 	// fixing a crash that sometimes occured during program exit
 	//
@@ -300,8 +291,9 @@ CWPhastView::~CWPhastView()
 		if (vtkPropCollection *pPropCollection = this->GetDocument()->GetPropAssemblyRivers()->GetParts())
 		{
 			vtkProp *pProp = 0;
-			pPropCollection->InitTraversal();
-			for (; (pProp = pPropCollection->GetNextProp()); )
+			vtkCollectionSimpleIterator csi;
+			pPropCollection->InitTraversal(csi);
+			for (; (pProp = pPropCollection->GetNextProp(csi)); )
 			{
 				if (CRiverActor *pRiverActor = CRiverActor::SafeDownCast(pProp))
 				{
@@ -312,8 +304,9 @@ CWPhastView::~CWPhastView()
 		if (vtkPropCollection *pPropCollection = this->GetDocument()->GetPropAssemblyDrains()->GetParts())
 		{
 			vtkProp *pProp = 0;
-			pPropCollection->InitTraversal();
-			for (; (pProp = pPropCollection->GetNextProp()); )
+			vtkCollectionSimpleIterator csi;
+			pPropCollection->InitTraversal(csi);
+			for (; (pProp = pPropCollection->GetNextProp(csi)); )
 			{
 				if (CDrainActor *pDrainActor = CDrainActor::SafeDownCast(pProp))
 				{
@@ -322,29 +315,68 @@ CWPhastView::~CWPhastView()
 			}
 		}
 	}
+// COMMENT: {9/18/2009 9:57:27 PM}#endif
 
+#if ((VTK_MAJOR_VERSION >= 5) && (VTK_MINOR_VERSION >= 4))
+// COMMENT: {9/18/2009 8:02:20 PM}	if (this->MFCWindow)
+// COMMENT: {9/18/2009 8:02:20 PM}	{
+// COMMENT: {9/18/2009 8:02:20 PM}		delete this->MFCWindow;
+// COMMENT: {9/18/2009 8:02:20 PM}	}
+	if (this->InteractorStyle)
+	{
+		this->InteractorStyle->Delete();
+	}
+// {{ {9/18/2009 8:02:26 PM}
+	if (this->MFCWindow)
+	{
+		delete this->MFCWindow;
+	}
+// }} {9/18/2009 8:02:26 PM}
+	if (this->ViewVTKCommand)
+	{
+		this->ViewVTKCommand->Delete();
+	}
+
+	if (this->Renderer)
+	{
+		TRACE("Deleting this->Renderer = %p\n", this->Renderer);
+		TRACE("this->Renderer->GetReferenceCount() = %d\n",  this->Renderer->GetReferenceCount());
+		this->Renderer->SetReferenceCount(1);
+		this->Renderer->Delete();
+	}
+
+#else
 	// Delete the the renderer, window and interactor objects.
-	this->m_Renderer->Delete();
+	this->Renderer->Delete();
 	this->m_RenderWindow->Delete();
 	this->m_RenderWindowInteractor->Delete();
+#endif
 }
 
-BOOL CWPhastView::PreCreateWindow(CREATESTRUCT& cs)
-{
-	// Modify the Window class or styles here by modifying
-	//  the CREATESTRUCT cs
-
-	return CView::PreCreateWindow(cs);
-}
+// COMMENT: {9/8/2009 8:50:25 PM}BOOL CWPhastView::PreCreateWindow(CREATESTRUCT& cs)
+// COMMENT: {9/8/2009 8:50:25 PM}{
+// COMMENT: {9/8/2009 8:50:25 PM}	// Modify the Window class or styles here by modifying
+// COMMENT: {9/8/2009 8:50:25 PM}	//  the CREATESTRUCT cs
+// COMMENT: {9/8/2009 8:50:25 PM}
+// COMMENT: {9/8/2009 8:50:25 PM}	return CView::PreCreateWindow(cs);
+// COMMENT: {9/8/2009 8:50:25 PM}}
 
 // CWPhastView drawing
-
 void CWPhastView::OnDraw(CDC* pDC)
 {
 	TRACE("CWPhastView::OnDraw\n");
 	CWPhastDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
 
+#if ((VTK_MAJOR_VERSION >= 5) && (VTK_MINOR_VERSION >= 4))
+	if (this->MFCWindow)
+	{
+		if (pDC->IsPrinting())
+		{
+			this->MFCWindow->DrawDC(pDC);
+		}
+	}
+#else
 	if ( !this->m_RenderWindowInteractor->GetInitialized() )
 	{
 		CRect rect;
@@ -353,7 +385,7 @@ void CWPhastView::OnDraw(CDC* pDC)
 		this->m_RenderWindowInteractor->Initialize();
 		this->m_RenderWindow->SetSize(rect.right-rect.left,rect.bottom-rect.top);
 
-		this->m_Renderer->ResetCamera();
+		this->Renderer->ResetCamera();
 	}
 
 	// Invoke the pipeline
@@ -388,8 +420,8 @@ void CWPhastView::OnDraw(CDC* pDC)
 	{
 		this->m_RenderWindow->Render();
 	}
+#endif
 }
-
 
 // CWPhastView printing
 
@@ -430,6 +462,16 @@ CWPhastDoc* CWPhastView::GetDocument() const // non-debug version is inline
 }
 #endif //_DEBUG
 
+#if ((VTK_MAJOR_VERSION >= 5) && (VTK_MINOR_VERSION >= 4))
+vtkRenderWindowInteractor* CWPhastView::GetInteractor(void)
+{
+	if (this->MFCWindow)
+	{
+		return this->MFCWindow->GetInteractor();
+	};
+	return 0;
+}
+#endif
 
 // CWPhastView message handlers
 
@@ -438,16 +480,18 @@ int CWPhastView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (CView::OnCreate(lpCreateStruct) == -1)
 		return -1;
 
+#if !((VTK_MAJOR_VERSION >= 5) && (VTK_MINOR_VERSION >= 4))
+
 	if (!this->m_RenderWindow)
 		return -1;
 
-	if (!this->m_Renderer)
+	if (!this->Renderer)
 		return -1;
 
 	if (!this->m_RenderWindowInteractor)
 		return -1;
 
-	this->m_RenderWindow->AddRenderer(this->m_Renderer);
+	this->m_RenderWindow->AddRenderer(this->Renderer);
 #if ((VTK_MAJOR_VERSION <= 4) && (VTK_MINOR_VERSION <= 2))
 	// Note: No double-click events will be received
 	//
@@ -457,7 +501,10 @@ int CWPhastView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 #endif
 	this->m_RenderWindowInteractor->SetRenderWindow(this->m_RenderWindow);
 
+#endif
 
+	// add listener
+	//
 	CCreateContext *pContext = static_cast<CCreateContext*>(lpCreateStruct->lpCreateParams);
 	ASSERT(pContext);
 	CWPhastDoc *pDoc = static_cast<CWPhastDoc*>(pContext->m_pCurrentDoc);
@@ -471,6 +518,14 @@ void CWPhastView::OnSize(UINT nType, int cx, int cy)
 {
 	CView::OnSize(nType, cx, cy);
 
+#if ((VTK_MAJOR_VERSION >= 5) && (VTK_MINOR_VERSION >= 4))
+	if (this->MFCWindow)
+	{
+		this->MFCWindow->MoveWindow(0, 0, cx, cy);
+	}
+	return;
+#endif
+
 #if ((VTK_MAJOR_VERSION <= 4) && (VTK_MINOR_VERSION <= 2))
 	CRect rect;
 	this->GetClientRect(&rect);
@@ -483,6 +538,7 @@ BOOL CWPhastView::OnEraseBkgnd(CDC* pDC)
 	return TRUE;
 }
 
+#if !((VTK_MAJOR_VERSION >= 5) && (VTK_MINOR_VERSION >= 4))
 LRESULT CWPhastView::WindowProc(UINT message, WPARAM wParam, LPARAM lParam)
 {
 	switch (message)
@@ -532,133 +588,265 @@ LRESULT CWPhastView::WindowProc(UINT message, WPARAM wParam, LPARAM lParam)
 void CWPhastView::Pipeline()
 {
 	// set background color
-	ASSERT(this->m_Renderer);
-	this->m_Renderer->SetBackground(this->BackgroundColor);
+	ASSERT(this->Renderer);
+	this->Renderer->SetBackground(this->BackgroundColor);
 
 	/* TODO:
 	if (this->m_pNewCubeActor && this->m_pNewCubeActor->GetVisibility()) {
-		this->m_Renderer->AddViewProp(this->m_pNewCubeActor);
+		this->Renderer->AddViewProp(this->m_pNewCubeActor);
 	}
 	*/
 
 	//{{
-	// this->m_Renderer->RemoveAllProps(); // this removes the selection actor and the BoxWidget
+	// this->Renderer->RemoveAllProps(); // this removes the selection actor and the BoxWidget
 	//}}
 
-	this->m_Renderer->AddViewProp(this->m_pCursor3DActor);
+	this->Renderer->AddViewProp(this->Cursor3DActor);
 
 	// add props to renderer
 	if ( vtkPropCollection *props = this->GetDocument()->GetPropCollection() ) {
-		props->InitTraversal();
+		vtkCollectionSimpleIterator csi;
+		props->InitTraversal(csi);
 		for (int i = 0; i < props->GetNumberOfItems(); ++i) {
-			vtkProp* prop = props->GetNextProp();
+			vtkProp* prop = props->GetNextProp(csi);
 			//{{ {4/25/2006 10:15:10 PM}
 			if (prop)
 			{
-				this->m_Renderer->AddViewProp(prop);
+				this->Renderer->AddViewProp(prop);
 			}
 			//}} {4/25/2006 10:15:10 PM}
 
 			if (this->m_bResetCamera) {
-				this->m_Renderer->ResetCamera();
+				this->Renderer->ResetCamera();
 				this->m_bResetCamera = false;
 			}
 
 			/* TODO:
 			if (vtkCubeAxesActor2D *pCubeAxisActor2D = vtkCubeAxesActor2D::SafeDownCast(prop)) {
-				pCubeAxisActor2D->SetCamera(this->m_Renderer->GetActiveCamera());
+				pCubeAxisActor2D->SetCamera(this->Renderer->GetActiveCamera());
 			}
 			*/
 		}
 	}
 	//{{
-	this->m_Renderer->ResetCameraClippingRange();
+	this->Renderer->ResetCameraClippingRange();
 	//}}
 }
+#endif //!((VTK_MAJOR_VERSION >= 5) && (VTK_MINOR_VERSION >= 4))
 
 
-void CWPhastView::OnActivateView(BOOL bActivate, CView* pActivateView, CView* pDeactiveView)
-{
-	//{{FIXME
-	CView::OnActivateView(bActivate, pActivateView, pDeactiveView);
-	//{{ {5/4/2006 5:38:44 PM}
-	///this->Invalidate();
-	///this->Pipeline();
-	//}} {5/4/2006 5:38:44 PM}
-	return;
-
-	// Note: The code below causes the Zone dimensions to be disabled
-	// when the hardware pick fails
-
-	//}}FIXME
-
-	// Add your specialized code here and/or call the base class
-	TRACE("CWPhastView::OnActivateView\n");
-	//{{
-	if (vtkAbstractPropPicker *picker = vtkAbstractPropPicker::SafeDownCast( this->GetRenderWindowInteractor()->GetPicker() )) {
-		if (vtkProp3D* prop = picker->GetProp3D()) {
-			// Update StatusBar
-			//
-			if (CWnd* pWnd = ((CFrameWnd*)::AfxGetMainWnd())->GetMessageBar()) {
-				double* bounds = prop->GetBounds();
-				TCHAR buffer[80];
-				// ::_sntprintf(buffer, 80, "%6.4f x %6.4f x %6.4f", fabs(bounds[1] - bounds[0]), fabs(bounds[3] - bounds[2]), fabs(bounds[5] - bounds[4]));
-				::_sntprintf(buffer, 80, "%6.4g x %6.4g x %6.4g", fabs(bounds[1] - bounds[0]), fabs(bounds[3] - bounds[2]), fabs(bounds[5] - bounds[4]));
-
-				// FIXME: This will cause a buffer overrun if the transform is invalid
-				// FIXME: WHY ARE THE BOUNDS OUT OF RANGE???
-				// ::_stprintf(buffer, "%6.4f x %6.4f x %6.4f", fabs(bounds[1] - bounds[0]), fabs(bounds[3] - bounds[2]), fabs(bounds[5] - bounds[4]));
-				//
-				pWnd->SetWindowText(buffer);
-
-			}
-
-			////// Update BoxPropertiesDialogBar
-			//////
-			////if (CBoxPropertiesDialogBar* pBar = static_cast<CBoxPropertiesDialogBar*>(  ((CFrameWnd*)::AfxGetMainWnd())->GetControlBar(IDW_CONTROLBAR_BOXPROPS) ) ) {
-			////	pBar->Set(this, prop);
-			////}
-		}
-		else {
-			// Update StatusBar
-			//
-			if (CWnd* pWnd = ((CFrameWnd*)::AfxGetMainWnd())->GetMessageBar()) {
-				CString status;
-				status.LoadString(AFX_IDS_IDLEMESSAGE);
-				pWnd->SetWindowText(status);
-			}
-
-			// Update BoxPropertiesDialogBar
-			//
-			if (CBoxPropertiesDialogBar* pBar = static_cast<CBoxPropertiesDialogBar*>(((CFrameWnd*)::AfxGetMainWnd())->GetControlBar(IDW_CONTROLBAR_BOXPROPS))) {
-				pBar->Set(NULL, NULL, this->GetDocument()->GetUnits());
-			}
-		}
-	}
-	//}}
-
-	CView::OnActivateView(bActivate, pActivateView, pDeactiveView);
-}
+// COMMENT: {9/8/2009 8:50:53 PM}void CWPhastView::OnActivateView(BOOL bActivate, CView* pActivateView, CView* pDeactiveView)
+// COMMENT: {9/8/2009 8:50:53 PM}{
+// COMMENT: {9/8/2009 8:50:53 PM}	//{{FIXME
+// COMMENT: {9/8/2009 8:50:53 PM}	CView::OnActivateView(bActivate, pActivateView, pDeactiveView);
+// COMMENT: {9/8/2009 8:50:53 PM}	//{{ {5/4/2006 5:38:44 PM}
+// COMMENT: {9/8/2009 8:50:53 PM}	///this->Invalidate();
+// COMMENT: {9/8/2009 8:50:53 PM}	///this->Pipeline();
+// COMMENT: {9/8/2009 8:50:53 PM}	//}} {5/4/2006 5:38:44 PM}
+// COMMENT: {9/8/2009 8:50:53 PM}	return;
+// COMMENT: {9/8/2009 8:50:53 PM}
+// COMMENT: {9/8/2009 8:50:53 PM}	// Note: The code below causes the Zone dimensions to be disabled
+// COMMENT: {9/8/2009 8:50:53 PM}	// when the hardware pick fails
+// COMMENT: {9/8/2009 8:50:53 PM}
+// COMMENT: {9/8/2009 8:50:53 PM}	//}}FIXME
+// COMMENT: {9/8/2009 8:50:53 PM}
+// COMMENT: {9/8/2009 8:50:53 PM}#if !((VTK_MAJOR_VERSION >= 5) && (VTK_MINOR_VERSION >= 4))
+// COMMENT: {9/8/2009 8:50:53 PM}	// Add your specialized code here and/or call the base class
+// COMMENT: {9/8/2009 8:50:53 PM}	TRACE("CWPhastView::OnActivateView\n");
+// COMMENT: {9/8/2009 8:50:53 PM}	//{{
+// COMMENT: {9/8/2009 8:50:53 PM}	if (vtkAbstractPropPicker *picker = vtkAbstractPropPicker::SafeDownCast( this->GetRenderWindowInteractor()->GetPicker() )) {
+// COMMENT: {9/8/2009 8:50:53 PM}		if (vtkProp3D* prop = picker->GetProp3D()) {
+// COMMENT: {9/8/2009 8:50:53 PM}			// Update StatusBar
+// COMMENT: {9/8/2009 8:50:53 PM}			//
+// COMMENT: {9/8/2009 8:50:53 PM}			if (CWnd* pWnd = ((CFrameWnd*)::AfxGetMainWnd())->GetMessageBar()) {
+// COMMENT: {9/8/2009 8:50:53 PM}				double* bounds = prop->GetBounds();
+// COMMENT: {9/8/2009 8:50:53 PM}				TCHAR buffer[80];
+// COMMENT: {9/8/2009 8:50:53 PM}				// ::_sntprintf(buffer, 80, "%6.4f x %6.4f x %6.4f", fabs(bounds[1] - bounds[0]), fabs(bounds[3] - bounds[2]), fabs(bounds[5] - bounds[4]));
+// COMMENT: {9/8/2009 8:50:53 PM}				::_sntprintf(buffer, 80, "%6.4g x %6.4g x %6.4g", fabs(bounds[1] - bounds[0]), fabs(bounds[3] - bounds[2]), fabs(bounds[5] - bounds[4]));
+// COMMENT: {9/8/2009 8:50:53 PM}
+// COMMENT: {9/8/2009 8:50:53 PM}				// FIXME: This will cause a buffer overrun if the transform is invalid
+// COMMENT: {9/8/2009 8:50:53 PM}				// FIXME: WHY ARE THE BOUNDS OUT OF RANGE???
+// COMMENT: {9/8/2009 8:50:53 PM}				// ::_stprintf(buffer, "%6.4f x %6.4f x %6.4f", fabs(bounds[1] - bounds[0]), fabs(bounds[3] - bounds[2]), fabs(bounds[5] - bounds[4]));
+// COMMENT: {9/8/2009 8:50:53 PM}				//
+// COMMENT: {9/8/2009 8:50:53 PM}				pWnd->SetWindowText(buffer);
+// COMMENT: {9/8/2009 8:50:53 PM}
+// COMMENT: {9/8/2009 8:50:53 PM}			}
+// COMMENT: {9/8/2009 8:50:53 PM}
+// COMMENT: {9/8/2009 8:50:53 PM}			////// Update BoxPropertiesDialogBar
+// COMMENT: {9/8/2009 8:50:53 PM}			//////
+// COMMENT: {9/8/2009 8:50:53 PM}			////if (CBoxPropertiesDialogBar* pBar = static_cast<CBoxPropertiesDialogBar*>(  ((CFrameWnd*)::AfxGetMainWnd())->GetControlBar(IDW_CONTROLBAR_BOXPROPS) ) ) {
+// COMMENT: {9/8/2009 8:50:53 PM}			////	pBar->Set(this, prop);
+// COMMENT: {9/8/2009 8:50:53 PM}			////}
+// COMMENT: {9/8/2009 8:50:53 PM}		}
+// COMMENT: {9/8/2009 8:50:53 PM}		else {
+// COMMENT: {9/8/2009 8:50:53 PM}			// Update StatusBar
+// COMMENT: {9/8/2009 8:50:53 PM}			//
+// COMMENT: {9/8/2009 8:50:53 PM}			if (CWnd* pWnd = ((CFrameWnd*)::AfxGetMainWnd())->GetMessageBar()) {
+// COMMENT: {9/8/2009 8:50:53 PM}				CString status;
+// COMMENT: {9/8/2009 8:50:53 PM}				status.LoadString(AFX_IDS_IDLEMESSAGE);
+// COMMENT: {9/8/2009 8:50:53 PM}				pWnd->SetWindowText(status);
+// COMMENT: {9/8/2009 8:50:53 PM}			}
+// COMMENT: {9/8/2009 8:50:53 PM}
+// COMMENT: {9/8/2009 8:50:53 PM}			// Update BoxPropertiesDialogBar
+// COMMENT: {9/8/2009 8:50:53 PM}			//
+// COMMENT: {9/8/2009 8:50:53 PM}			if (CBoxPropertiesDialogBar* pBar = static_cast<CBoxPropertiesDialogBar*>(((CFrameWnd*)::AfxGetMainWnd())->GetControlBar(IDW_CONTROLBAR_BOXPROPS))) {
+// COMMENT: {9/8/2009 8:50:53 PM}				pBar->Set(NULL, NULL, this->GetDocument()->GetUnits());
+// COMMENT: {9/8/2009 8:50:53 PM}			}
+// COMMENT: {9/8/2009 8:50:53 PM}		}
+// COMMENT: {9/8/2009 8:50:53 PM}	}
+// COMMENT: {9/8/2009 8:50:53 PM}	//}}
+// COMMENT: {9/8/2009 8:50:53 PM}
+// COMMENT: {9/8/2009 8:50:53 PM}	CView::OnActivateView(bActivate, pActivateView, pDeactiveView);
+// COMMENT: {9/8/2009 8:50:53 PM}#endif // !((VTK_MAJOR_VERSION >= 5) && (VTK_MINOR_VERSION >= 4))
+// COMMENT: {9/8/2009 8:50:53 PM}}
 
 void CWPhastView::ResetCamera(void)
 {
+#if ((VTK_MAJOR_VERSION >= 5) && (VTK_MINOR_VERSION >= 4))
+	if (this->GetRenderer())
+	{
+		this->GetRenderer()->ResetCamera();
+		this->GetRenderer()->ResetCameraClippingRange();
+	}	
+#else
 	this->m_bResetCamera = true;
+#endif
+}
+
+void CWPhastView::ResetCamera(double bounds[6])
+{
+	if (this->GetRenderer())
+	{
+		this->GetRenderer()->ResetCamera(bounds);
+		this->GetRenderer()->ResetCameraClippingRange();
+	}
+}
+
+void CWPhastView::ResetCamera(double xmin, double xmax, double ymin, double ymax, double zmin, double zmax)
+{
+	double bounds[6];
+
+	bounds[0] = xmin;
+	bounds[1] = xmax;
+	bounds[2] = ymin;
+	bounds[3] = ymax;
+	bounds[4] = zmin;
+	bounds[5] = zmax;
+
+	this->ResetCamera(bounds);
 }
 
 void CWPhastView::OnInitialUpdate()
 {
 	CView::OnInitialUpdate();
+
+#if ((VTK_MAJOR_VERSION >= 5) && (VTK_MINOR_VERSION >= 4))
+// COMMENT: {9/16/2009 10:45:17 PM}	if (this->MFCWindow)
+// COMMENT: {9/16/2009 10:45:17 PM}	{
+// COMMENT: {9/16/2009 10:45:17 PM}		this->ClearSelection();
+// COMMENT: {9/16/2009 10:45:17 PM}		delete this->MFCWindow;
+// COMMENT: {9/16/2009 10:45:17 PM}	}
+// COMMENT: {9/16/2009 10:45:17 PM}	this->MFCWindow = new vtkMFCWindow(this);
+// COMMENT: {9/16/2009 10:45:17 PM}	this->MFCWindow->GetRenderWindow()->AddRenderer(this->Renderer);
+	if (!this->MFCWindow)
+	{
+		this->MFCWindow = new vtkMFCWindow(this);
+		this->MFCWindow->GetRenderWindow()->AddRenderer(this->Renderer);
+
+		ASSERT(this->GetInteractor());
+		if (this->GetInteractor())
+		{
+			// set picker
+			//
+			vtkPropPickerFixed* picker = vtkPropPickerFixed::New();
+			this->GetInteractor()->SetPicker(picker);
+			picker->Delete();
+
+			// set interactor
+			//
+// COMMENT: {9/17/2009 2:45:16 PM}			if (this->InteractorStyle)
+// COMMENT: {9/17/2009 2:45:16 PM}			{
+// COMMENT: {9/17/2009 2:45:16 PM}				this->InteractorStyle->Delete();
+// COMMENT: {9/17/2009 2:45:16 PM}			}
+			ASSERT(this->InteractorStyle == 0);
+			this->InteractorStyle = vtkInteractorStyleTrackballCameraEx::New();
+			this->GetInteractor()->SetInteractorStyle(this->InteractorStyle);
+
+			// box widget (cubes)
+			//
+			ASSERT(this->BoxWidget);
+			if (this->BoxWidget)
+			{
+				this->BoxWidget->SetInteractor(this->GetInteractor());
+				if (vtkBoxWidgetEx *widget = vtkBoxWidgetEx::SafeDownCast(this->BoxWidget))
+				{
+					widget->HexPickerEnabledOff();
+				}
+			}
+
+			// point widget (wells)
+			//
+			ASSERT(this->PointWidget);
+			if (this->PointWidget)
+			{
+				this->PointWidget->SetInteractor(this->GetInteractor());
+			}
+
+			// prism widget
+			//
+			ASSERT(this->PrismWidget);
+			if (this->PrismWidget)
+			{
+				this->PrismWidget->SetInteractor(this->GetInteractor());
+			}
+
+			// Add Observers
+			//
+			ASSERT(this->ViewVTKCommand);
+
+			// mouse events
+			//
+			this->GetInteractor()->AddObserver(vtkCommand::MouseMoveEvent, this->ViewVTKCommand);
+			this->GetInteractor()->AddObserver(vtkCommand::LeftButtonPressEvent, this->ViewVTKCommand);
+			this->GetInteractor()->AddObserver(vtkCommand::LeftButtonReleaseEvent, this->ViewVTKCommand);
+
+			// keyboard events
+			//
+			this->GetInteractor()->AddObserver(vtkCommand::KeyPressEvent, this->ViewVTKCommand);
+
+			// pick events
+			//
+			this->GetInteractor()->AddObserver(vtkCommand::EndPickEvent, this->ViewVTKCommand);
+
+			// camera events
+			//
+			vtkCamera* pCamera = this->Renderer->GetActiveCamera();
+			ASSERT(pCamera);
+			pCamera->AddObserver(vtkCommand::ModifiedEvent, this->ViewVTKCommand);
+
+			// add cursor
+			//
+			this->Renderer->AddViewProp(this->Cursor3DActor);
+		}
+	}
+#endif
 }
 
 void CWPhastView::DeleteContents(void)
 {
+	//{{ {9/23/2009 9:29:09 PM}
+	this->GetRenderer()->RemoveAllViewProps();
+	this->Cursor3DActor->SetVisibility(0);
+	this->GetRenderer()->AddViewProp(this->Cursor3DActor);
+	//}} {9/23/2009 9:29:09 PM}
+
 	// clear the selection
 	//
 	this->ClearSelection();
 
 	// reset the camera
 	//
-	vtkCamera* pCamera = this->m_Renderer->GetActiveCamera();
+	vtkCamera* pCamera = this->Renderer->GetActiveCamera();
 	pCamera->SetFocalPoint(0, 0, 0);
 	pCamera->SetPosition(0, 0, 1);
 	pCamera->SetViewUp(0, 1, 0);
@@ -701,7 +889,7 @@ BOOL CWPhastView::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 
 	// set 3D cursor
 	//
-	if (this->m_pCursor3DActor->GetVisibility() && nHitTest == HTCLIENT)
+	if (this->Cursor3DActor->GetVisibility() && nHitTest == HTCLIENT)
 	{
 		::SetCursor(AfxGetApp()->LoadCursor(IDC_NULL));
 		return TRUE;
@@ -713,29 +901,29 @@ BOOL CWPhastView::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 // COMMENT: {9/7/2005 4:29:33 PM}		return TRUE;
 // COMMENT: {9/7/2005 4:29:33 PM}	}
 
-	if (this->m_bMovingGridLine && nHitTest == HTCLIENT)
-	{
-		if (CGridLODActor* pGridLODActor = CGridLODActor::SafeDownCast(this->GetDocument()->GetGridActor()))
-		{
-// COMMENT: {8/4/2005 8:57:01 PM}			extern HCURSOR Test();
-// COMMENT: {8/4/2005 8:57:01 PM}			//{{
-// COMMENT: {8/4/2005 8:57:01 PM}			static HCURSOR s_hcur = 0;
-// COMMENT: {8/4/2005 8:57:01 PM}			if (s_hcur == 0)
-// COMMENT: {8/4/2005 8:57:01 PM}			{
-// COMMENT: {8/4/2005 8:57:01 PM}				s_hcur = Test();
-// COMMENT: {8/4/2005 8:57:01 PM}			}
-// COMMENT: {8/4/2005 8:57:01 PM}			if (s_hcur && (::GetKeyState(VK_CONTROL) < 0))
-// COMMENT: {8/4/2005 8:57:01 PM}			{
-// COMMENT: {8/4/2005 8:57:01 PM}				::SetCursor(s_hcur);
-// COMMENT: {8/4/2005 8:57:01 PM}				return TRUE;
-// COMMENT: {8/4/2005 8:57:01 PM}			}
-// COMMENT: {8/4/2005 8:57:01 PM}			//}}
-			if (pGridLODActor->OnSetCursor(pWnd, nHitTest, message))
-			{
-				return TRUE;
-			}
-		}
-	}
+// COMMENT: {9/17/2009 4:21:22 PM}	if (this->bMovingGridLine && nHitTest == HTCLIENT)
+// COMMENT: {9/17/2009 4:21:22 PM}	{
+// COMMENT: {9/17/2009 4:21:22 PM}		if (CGridLODActor* pGridLODActor = CGridLODActor::SafeDownCast(this->GetDocument()->GetGridActor()))
+// COMMENT: {9/17/2009 4:21:22 PM}		{
+// COMMENT: {9/17/2009 4:21:22 PM}// COMMENT: {8/4/2005 8:57:01 PM}			extern HCURSOR Test();
+// COMMENT: {9/17/2009 4:21:22 PM}// COMMENT: {8/4/2005 8:57:01 PM}			//{{
+// COMMENT: {9/17/2009 4:21:22 PM}// COMMENT: {8/4/2005 8:57:01 PM}			static HCURSOR s_hcur = 0;
+// COMMENT: {9/17/2009 4:21:22 PM}// COMMENT: {8/4/2005 8:57:01 PM}			if (s_hcur == 0)
+// COMMENT: {9/17/2009 4:21:22 PM}// COMMENT: {8/4/2005 8:57:01 PM}			{
+// COMMENT: {9/17/2009 4:21:22 PM}// COMMENT: {8/4/2005 8:57:01 PM}				s_hcur = Test();
+// COMMENT: {9/17/2009 4:21:22 PM}// COMMENT: {8/4/2005 8:57:01 PM}			}
+// COMMENT: {9/17/2009 4:21:22 PM}// COMMENT: {8/4/2005 8:57:01 PM}			if (s_hcur && (::GetKeyState(VK_CONTROL) < 0))
+// COMMENT: {9/17/2009 4:21:22 PM}// COMMENT: {8/4/2005 8:57:01 PM}			{
+// COMMENT: {9/17/2009 4:21:22 PM}// COMMENT: {8/4/2005 8:57:01 PM}				::SetCursor(s_hcur);
+// COMMENT: {9/17/2009 4:21:22 PM}// COMMENT: {8/4/2005 8:57:01 PM}				return TRUE;
+// COMMENT: {9/17/2009 4:21:22 PM}// COMMENT: {8/4/2005 8:57:01 PM}			}
+// COMMENT: {9/17/2009 4:21:22 PM}// COMMENT: {8/4/2005 8:57:01 PM}			//}}
+// COMMENT: {9/17/2009 4:21:22 PM}			if (pGridLODActor->OnSetCursor(pWnd, nHitTest, message))
+// COMMENT: {9/17/2009 4:21:22 PM}			{
+// COMMENT: {9/17/2009 4:21:22 PM}				return TRUE;
+// COMMENT: {9/17/2009 4:21:22 PM}			}
+// COMMENT: {9/17/2009 4:21:22 PM}		}
+// COMMENT: {9/17/2009 4:21:22 PM}	}
 
 	if (CWPhastDoc* pDoc = this->GetDocument())
 	{
@@ -761,7 +949,7 @@ void CWPhastView::OnUpdateViewFromNx(CCmdUI *pCmdUI)
 void CWPhastView::OnViewFromNx(void)
 {
 	// Add your command handler code here
-	vtkCamera *camera = this->m_Renderer->GetActiveCamera();
+	vtkCamera *camera = this->Renderer->GetActiveCamera();
 	double *pos = camera->GetPosition();
 	double *fp = camera->GetFocalPoint();
 	double dist = sqrt((pos[0]-fp[0])*(pos[0]-fp[0]) +
@@ -769,9 +957,8 @@ void CWPhastView::OnViewFromNx(void)
 	camera->SetPosition(fp[0] - dist, fp[1], fp[2]);
 	camera->SetViewUp(0, 0, 1);
 	camera->ComputeViewPlaneNormal();
-	///PlaceHeadlightWithCamera();
-	this->m_Renderer->ResetCameraClippingRange();
-	this->m_ViewFromDirection = ID_VIEW_FROM_NX;
+	this->Renderer->ResetCameraClippingRange();
+	this->ViewFromDirection = ID_VIEW_FROM_NX;
 	this->Invalidate();
 }
 
@@ -784,7 +971,7 @@ void CWPhastView::OnUpdateViewFromPx(CCmdUI *pCmdUI)
 void CWPhastView::OnViewFromPx(void)
 {
 	// Add your command handler code here
-	vtkCamera *camera = this->m_Renderer->GetActiveCamera();
+	vtkCamera *camera = this->Renderer->GetActiveCamera();
 	double *pos = camera->GetPosition();
 	double *fp = camera->GetFocalPoint();
 	double dist = sqrt((pos[0]-fp[0])*(pos[0]-fp[0]) +
@@ -792,9 +979,8 @@ void CWPhastView::OnViewFromPx(void)
 	camera->SetPosition(fp[0] + dist, fp[1], fp[2]);
 	camera->SetViewUp(0, 0, 1);
 	camera->ComputeViewPlaneNormal();
-	///PlaceHeadlightWithCamera();
-	this->m_Renderer->ResetCameraClippingRange();
-	this->m_ViewFromDirection = ID_VIEW_FROM_PX;
+	this->Renderer->ResetCameraClippingRange();
+	this->ViewFromDirection = ID_VIEW_FROM_PX;
 	this->Invalidate();
 }
 
@@ -807,7 +993,7 @@ void CWPhastView::OnUpdateViewFromNy(CCmdUI *pCmdUI)
 void CWPhastView::OnViewFromNy(void)
 {
 	// Add your command handler code here
-	vtkCamera *camera = this->m_Renderer->GetActiveCamera();
+	vtkCamera *camera = this->Renderer->GetActiveCamera();
 	double *pos = camera->GetPosition();
 	double *fp = camera->GetFocalPoint();
 	double dist = sqrt((pos[0]-fp[0])*(pos[0]-fp[0]) +
@@ -815,9 +1001,8 @@ void CWPhastView::OnViewFromNy(void)
 	camera->SetPosition(fp[0], fp[1] - dist, fp[2]);
 	camera->SetViewUp(0, 0, 1);
 	camera->ComputeViewPlaneNormal();
-	///PlaceHeadlightWithCamera();
-	this->m_Renderer->ResetCameraClippingRange();
-	this->m_ViewFromDirection = ID_VIEW_FROM_NY;
+	this->Renderer->ResetCameraClippingRange();
+	this->ViewFromDirection = ID_VIEW_FROM_NY;
 	this->Invalidate();
 }
 
@@ -830,7 +1015,7 @@ void CWPhastView::OnUpdateViewFromPy(CCmdUI *pCmdUI)
 void CWPhastView::OnViewFromPy(void)
 {
 	// Add your command handler code here
-	vtkCamera *camera = this->m_Renderer->GetActiveCamera();
+	vtkCamera *camera = this->Renderer->GetActiveCamera();
 	double *pos = camera->GetPosition();
 	double *fp = camera->GetFocalPoint();
 	double dist = sqrt((pos[0]-fp[0])*(pos[0]-fp[0]) +
@@ -838,9 +1023,8 @@ void CWPhastView::OnViewFromPy(void)
 	camera->SetPosition(fp[0], fp[1] + dist, fp[2]);
 	camera->SetViewUp(0, 0, 1);
 	camera->ComputeViewPlaneNormal();
-	///PlaceHeadlightWithCamera();
-	this->m_Renderer->ResetCameraClippingRange();
-	this->m_ViewFromDirection = ID_VIEW_FROM_PY;
+	this->Renderer->ResetCameraClippingRange();
+	this->ViewFromDirection = ID_VIEW_FROM_PY;
 	this->Invalidate();
 }
 
@@ -853,7 +1037,7 @@ void CWPhastView::OnUpdateViewFromNz(CCmdUI *pCmdUI)
 void CWPhastView::OnViewFromNz(void)
 {
 	// Add your command handler code here
-	vtkCamera *camera = this->m_Renderer->GetActiveCamera();
+	vtkCamera *camera = this->Renderer->GetActiveCamera();
 	double *pos = camera->GetPosition();
 	double *fp = camera->GetFocalPoint();
 	double dist = sqrt((pos[0]-fp[0])*(pos[0]-fp[0]) +
@@ -861,16 +1045,15 @@ void CWPhastView::OnViewFromNz(void)
 	camera->SetPosition(fp[0], fp[1], fp[2] - dist);
 	camera->SetViewUp(0, -1, 0);
 	camera->ComputeViewPlaneNormal();
-	///PlaceHeadlightWithCamera();
-	this->m_Renderer->ResetCameraClippingRange();
-	this->m_ViewFromDirection = ID_VIEW_FROM_NZ;
+	this->Renderer->ResetCameraClippingRange();
+	this->ViewFromDirection = ID_VIEW_FROM_NZ;
 	this->Invalidate();
 }
 
 void CWPhastView::OnViewFromMapNz(void)
 {
 	// Add your command handler code here
-	vtkCamera *camera = this->m_Renderer->GetActiveCamera();
+	vtkCamera *camera = this->Renderer->GetActiveCamera();
 	double *pos = camera->GetPosition();
 	double *fp = camera->GetFocalPoint();
 	double dist = sqrt((pos[0]-fp[0])*(pos[0]-fp[0]) +
@@ -882,9 +1065,8 @@ void CWPhastView::OnViewFromMapNz(void)
 	camera->SetViewUp(-sin(angle), -cos(angle), 0);
 
 	camera->ComputeViewPlaneNormal();
-	///PlaceHeadlightWithCamera();
-	this->m_Renderer->ResetCameraClippingRange();
-	this->m_ViewFromDirection = ID_VIEW_FROM_NZ;
+	this->Renderer->ResetCameraClippingRange();
+	this->ViewFromDirection = ID_VIEW_FROM_NZ;
 	this->Invalidate();
 }
 
@@ -897,7 +1079,7 @@ void CWPhastView::OnUpdateViewFromPz(CCmdUI *pCmdUI)
 void CWPhastView::OnViewFromPz(void)
 {
 	// Add your command handler code here
-	vtkCamera *camera = this->m_Renderer->GetActiveCamera();
+	vtkCamera *camera = this->Renderer->GetActiveCamera();
 	double *pos = camera->GetPosition();
 	double *fp = camera->GetFocalPoint();
 	double dist = sqrt((pos[0]-fp[0])*(pos[0]-fp[0]) +
@@ -905,16 +1087,15 @@ void CWPhastView::OnViewFromPz(void)
 	camera->SetPosition(fp[0], fp[1], fp[2] + dist);
 	camera->SetViewUp(0, 1, 0);
 	camera->ComputeViewPlaneNormal();
-	///PlaceHeadlightWithCamera();
-	this->m_Renderer->ResetCameraClippingRange();
-	this->m_ViewFromDirection = ID_VIEW_FROM_PZ;
+	this->Renderer->ResetCameraClippingRange();
+	this->ViewFromDirection = ID_VIEW_FROM_PZ;
 	this->Invalidate();
 }
 
 void CWPhastView::OnViewFromMapPz(void)
 {
 	// Add your command handler code here
-	vtkCamera *camera = this->m_Renderer->GetActiveCamera();
+	vtkCamera *camera = this->Renderer->GetActiveCamera();
 	double *pos = camera->GetPosition();
 	double *fp = camera->GetFocalPoint();
 	double dist = sqrt((pos[0]-fp[0])*(pos[0]-fp[0]) +
@@ -926,15 +1107,14 @@ void CWPhastView::OnViewFromMapPz(void)
 	camera->SetViewUp(sin(angle), cos(angle), 0);
 
 	camera->ComputeViewPlaneNormal();
-	///PlaceHeadlightWithCamera();
-	this->m_Renderer->ResetCameraClippingRange();
-	this->m_ViewFromDirection = ID_VIEW_FROM_PZ;
+	this->Renderer->ResetCameraClippingRange();
+	this->ViewFromDirection = ID_VIEW_FROM_PZ;
 	this->Invalidate();
 }
 
 void CWPhastView::OnViewFromNextDirection(void)
 {
-	switch (this->m_ViewFromDirection)
+	switch (this->ViewFromDirection)
 	{
 	case ID_VIEW_FROM_NX:
 		this->OnViewFromNy();
@@ -954,12 +1134,14 @@ void CWPhastView::OnViewFromNextDirection(void)
 	case ID_VIEW_FROM_PZ:
 		this->OnViewFromNx();
 		return;
+	default:
+		ASSERT(FALSE);
 	}
 }
 
 void CWPhastView::OnViewFromPrevDirection()
 {
-	switch (this->m_ViewFromDirection)
+	switch (this->ViewFromDirection)
 	{
 	case ID_VIEW_FROM_NX:
 		this->OnViewFromPz();
@@ -979,11 +1161,17 @@ void CWPhastView::OnViewFromPrevDirection()
 	case ID_VIEW_FROM_PZ:
 		this->OnViewFromNz();
 		return;
+	default:
+		ASSERT(FALSE);
 	}
 }
 
 void CWPhastView::Select(vtkProp *pProp)
 {
+	//{{
+	if (!this->MFCWindow) return;
+	//}}
+
 	// hide zone widget
 	//
 	if (this->BoxWidget) this->BoxWidget->Off();
@@ -996,17 +1184,20 @@ void CWPhastView::Select(vtkProp *pProp)
 	//
 	if (this->PrismWidget) this->PrismWidget->Off();
 
+
 	// disable rivers
 	//
 	if (vtkPropCollection *pPropCollection = this->GetDocument()->GetPropAssemblyRivers()->GetParts())
 	{
 		vtkProp *pProp = 0;
-		pPropCollection->InitTraversal();
-		for (; (pProp = pPropCollection->GetNextProp()); )
+		vtkCollectionSimpleIterator csi;
+		pPropCollection->InitTraversal(csi);
+		for (; (pProp = pPropCollection->GetNextProp(csi)); )
 		{
 			if (CRiverActor *pRiverActor = CRiverActor::SafeDownCast(pProp))
 			{
 				pRiverActor->ClearSelection();
+// COMMENT: {9/16/2009 9:46:04 PM}				pRiverActor->SetInteractor(0);
 				pRiverActor->Off();
 			}
 		}
@@ -1017,24 +1208,27 @@ void CWPhastView::Select(vtkProp *pProp)
 	if (vtkPropCollection *pPropCollection = this->GetDocument()->GetPropAssemblyDrains()->GetParts())
 	{
 		vtkProp *pProp = 0;
-		pPropCollection->InitTraversal();
-		for (; (pProp = pPropCollection->GetNextProp()); )
+		vtkCollectionSimpleIterator csi;
+		pPropCollection->InitTraversal(csi);
+		for (; (pProp = pPropCollection->GetNextProp(csi)); )
 		{
+// COMMENT: {9/15/2009 7:35:45 PM}			pProp->SetDebug(1);
 			if (CDrainActor *pDrainActor = CDrainActor::SafeDownCast(pProp))
 			{
 				pDrainActor->ClearSelection();
+// COMMENT: {9/16/2009 9:46:07 PM}				pDrainActor->SetInteractor(0);
 				pDrainActor->Off();
 			}
 		}
 	}
 
-	// Highlight Prop (clear selection)
+	// Clear selection
 	//
-	if (!pProp) this->HighlightProp(pProp);
+	if (!pProp) this->HighlightProp(0);
 
 	// Set Picker
 	//
-	if (vtkAbstractPropPicker *pPicker = vtkAbstractPropPicker::SafeDownCast( this->GetRenderWindowInteractor()->GetPicker() ))
+	if (vtkAbstractPropPicker *pPicker = vtkAbstractPropPicker::SafeDownCast( this->GetInteractor()->GetPicker() ))
 	{
 		if (pProp)
 		{
@@ -1092,7 +1286,6 @@ void CWPhastView::Select(vtkProp *pProp)
 				}
 			}
 		}
-// COMMENT: {11/12/2008 5:11:56 PM}		else if (n == Polyhedron::CUBE || n == Polyhedron::WEDGE)
 		else if (Cube *c = dynamic_cast<Cube*>(pZoneActor->GetPolyhedron()))
 		{
 			if (pZoneActor->GetDefault())
@@ -1105,6 +1298,7 @@ void CWPhastView::Select(vtkProp *pProp)
 			{
 				this->HighlightProp(this->CurrentProp = NULL);
 
+				ASSERT(this->BoxWidget);
 				if (this->BoxWidget)
 				{
 					const CUnits &units = this->GetDocument()->GetUnits();
@@ -1147,7 +1341,8 @@ void CWPhastView::Select(vtkProp *pProp)
 							z->z2 * units.vertical.input_to_si   * scale[2]
 							);
 					}
-					this->m_RenderWindowInteractor->Render();
+					this->GetInteractor()->Render();
+					this->BoxWidget->SetInteractor(this->GetInteractor());
 					this->BoxWidget->On();
 				}
 			}
@@ -1181,6 +1376,7 @@ void CWPhastView::Select(vtkProp *pProp)
 				this->PointWidget->SetOrientation(0, 0, 0);
 			}
 #endif // 9991 well w/ grid rotation
+			this->PointWidget->SetInteractor(this->GetInteractor());
 			this->PointWidget->On();
 		}
 	}
@@ -1190,6 +1386,7 @@ void CWPhastView::Select(vtkProp *pProp)
 		//
 		this->HighlightProp(pProp);
 
+		pRiverActor->SetInteractor(this->GetInteractor());
 		pRiverActor->On();
 	}
 	else if (CDrainActor *pDrainActor = CDrainActor::SafeDownCast(pProp))
@@ -1198,6 +1395,7 @@ void CWPhastView::Select(vtkProp *pProp)
 		//
 		this->HighlightProp(pProp);
 
+		pDrainActor->SetInteractor(this->GetInteractor());
 		pDrainActor->On();
 	}
 	else if (pProp)
@@ -1239,7 +1437,7 @@ void CWPhastView::ParallelProjectionOn(void)
 
 bool CWPhastView::CreatingNewWell(void)const
 {
-	return (this->m_pWellActor != 0);
+	return (this->WellActor != 0);
 }
 
 void CWPhastView::StartNewWell(void)
@@ -1248,22 +1446,22 @@ void CWPhastView::StartNewWell(void)
 	//
 	double* bounds = this->GetDocument()->GetGridBounds();
 	double dim = (bounds[1] - bounds[0]) / 20.0;
-	this->m_pCursor3D->SetModelBounds(-dim, dim, -dim, dim, -dim, dim);
-	this->m_pCursor3DActor->VisibilityOn();
+	this->Cursor3D->SetModelBounds(-dim, dim, -dim, dim, -dim, dim);
+	this->Cursor3DActor->VisibilityOn();
 
 	// set yellow cursor
 	//
-	this->m_pCursor3DActor->GetProperty()->SetColor(1, 1, 0);
+	this->Cursor3DActor->GetProperty()->SetColor(1, 1, 0);
 
 #if 9991 // well w/ grid rotation
 	if (this->CoordinateMode == CWPhastView::GridMode)
 	{
-		this->m_pCursor3DActor->SetOrientation(0, 0, 0);
+		this->Cursor3DActor->SetOrientation(0, 0, 0);
 	}
 	else if (this->CoordinateMode == CWPhastView::MapMode)
 	{
 		CGridKeyword gridKeyword = this->GetDocument()->GetGridKeyword();
-		this->m_pCursor3DActor->SetOrientation(0, 0, -gridKeyword.m_grid_angle);
+		this->Cursor3DActor->SetOrientation(0, 0, -gridKeyword.m_grid_angle);
 	}
 	else
 	{
@@ -1273,8 +1471,8 @@ void CWPhastView::StartNewWell(void)
 
 	// create well actor
 	//
-	ASSERT(this->m_pWellActor == 0);
-	this->m_pWellActor = CWellActor::New();
+	ASSERT(this->WellActor == 0);
+	this->WellActor = CWellActor::New();
 
 	// Disable Interactor
 	//
@@ -1286,13 +1484,6 @@ void CWPhastView::StartNewWell(void)
 		}
 		style->SetInteractor(0);
 	}
-
-// COMMENT: {9/9/2005 4:45:27 PM}	// hide BoxWidget
-// COMMENT: {9/9/2005 4:45:27 PM}	//
-// COMMENT: {9/9/2005 4:45:27 PM}	// Note: This is reqd because the widget will
-// COMMENT: {9/9/2005 4:45:27 PM}	// recieve all the mouse input
-// COMMENT: {9/9/2005 4:45:27 PM}	this->BoxWidget->Off();
-// COMMENT: {9/9/2005 4:45:27 PM}	this->PointWidget->Off();
 }
 
 void CWPhastView::CancelNewWell(void)
@@ -1307,7 +1498,7 @@ void CWPhastView::EndNewWell(void)
 {
 	// reset cursor
 	//
-	this->m_pCursor3DActor->VisibilityOff();
+	this->Cursor3DActor->VisibilityOff();
 
 	// reattach interactor
 	//
@@ -1317,20 +1508,20 @@ void CWPhastView::EndNewWell(void)
 		{
 			style = switcher->GetCurrentStyle();
 		}
-		style->SetInteractor(this->m_RenderWindowInteractor);
+		style->SetInteractor(this->GetInteractor());
 	}
 
 	// stop rendering the well actor
 	//
-	this->m_Renderer->RemoveViewProp(this->m_pWellActor);
+	this->Renderer->RemoveViewProp(this->WellActor);
 
 	// clean-up
 	//
-	ASSERT(this->m_pWellActor != 0);
-	if (this->m_pWellActor)
+	ASSERT(this->WellActor != 0);
+	if (this->WellActor)
 	{
-		this->m_pWellActor->Delete();
-		this->m_pWellActor = 0;
+		this->WellActor->Delete();
+		this->WellActor = 0;
 	}
 	this->GetDocument()->UpdateAllViews(0);
 }
@@ -1368,7 +1559,10 @@ void CWPhastView::HighlightProp(vtkProp *pProp)
 // COMMENT: {8/17/2004 7:28:04 PM}		pStyle->HighlightProp(pProp);
 // COMMENT: {8/17/2004 7:28:04 PM}	}
 	//{{
-	if (vtkInteractorStyle *pStyle = vtkInteractorStyle::SafeDownCast(this->GetRenderWindowInteractor()->GetInteractorStyle()))
+	if (!this->GetInteractor()) return;
+	//}}
+	//{{
+	if (vtkInteractorStyle *pStyle = vtkInteractorStyle::SafeDownCast(this->GetInteractor()->GetInteractorStyle()))
 	{
 		if (vtkInteractorStyleSwitch* switcher = vtkInteractorStyleSwitch::SafeDownCast(pStyle))
 		{
@@ -1385,8 +1579,8 @@ void CWPhastView::HighlightProp(vtkProp *pProp)
 			// temporarily reattach interactor
 			// pStyle->HighlightProp will attempt to use its Interactor
 			// causing a GPF
-			pStyle->SetInteractor(this->m_RenderWindowInteractor);
-			ASSERT(pStyle->GetInteractor() == this->m_RenderWindowInteractor);
+			pStyle->SetInteractor(this->GetInteractor());
+			ASSERT(pStyle->GetInteractor() == this->GetInteractor());
 			pStyle->HighlightProp(pProp);
 			pStyle->SetInteractor(0);
 			// HACK }}
@@ -1397,7 +1591,7 @@ void CWPhastView::HighlightProp(vtkProp *pProp)
 
 void CWPhastView::HighlightProp3D(vtkProp3D *pProp3D)
 {
-	if (vtkInteractorStyle *pStyle = vtkInteractorStyle::SafeDownCast(this->GetRenderWindowInteractor()->GetInteractorStyle()))
+	if (vtkInteractorStyle *pStyle = vtkInteractorStyle::SafeDownCast(this->GetInteractor()->GetInteractorStyle()))
 	{
 		if (vtkInteractorStyleSwitch* switcher = vtkInteractorStyleSwitch::SafeDownCast(pStyle))
 		{
@@ -1414,8 +1608,8 @@ void CWPhastView::HighlightProp3D(vtkProp3D *pProp3D)
 			// temporarily reattach interactor
 			// pStyle->HighlightProp will attempt to use its Interactor
 			// causing a GPF
-			pStyle->SetInteractor(this->m_RenderWindowInteractor);
-			ASSERT(pStyle->GetInteractor() == this->m_RenderWindowInteractor);
+			pStyle->SetInteractor(this->GetInteractor());
+			ASSERT(pStyle->GetInteractor() == this->GetInteractor());
 			pStyle->HighlightProp3D(pProp3D);
 			pStyle->SetInteractor(0);
 			// HACK }}
@@ -1423,20 +1617,20 @@ void CWPhastView::HighlightProp3D(vtkProp3D *pProp3D)
 	}
 }
 
-void CWPhastView::OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint)
-{
-	// Added GetSaveHwnd in order to avoid assertion that occurs when
-	// the user is in the middle of creating a new river and selects
-	// file->exit
-	if (this->GetSafeHwnd())
-	{
-		CView::OnUpdate(pSender, lHint, pHint);
-
-		// Add your specialized code here and/or call the base class
-		this->Invalidate();
-		this->RedrawWindow();
-	}
-}
+// COMMENT: {9/8/2009 8:37:50 PM}void CWPhastView::OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint)
+// COMMENT: {9/8/2009 8:37:50 PM}{
+// COMMENT: {9/8/2009 8:37:50 PM}	// Added GetSaveHwnd in order to avoid assertion that occurs when
+// COMMENT: {9/8/2009 8:37:50 PM}	// the user is in the middle of creating a new river and selects
+// COMMENT: {9/8/2009 8:37:50 PM}	// file->exit
+// COMMENT: {9/8/2009 8:37:50 PM}	if (this->GetSafeHwnd())
+// COMMENT: {9/8/2009 8:37:50 PM}	{
+// COMMENT: {9/8/2009 8:37:50 PM}		CView::OnUpdate(pSender, lHint, pHint);
+// COMMENT: {9/8/2009 8:37:50 PM}
+// COMMENT: {9/8/2009 8:37:50 PM}		// Add your specialized code here and/or call the base class
+// COMMENT: {9/8/2009 8:37:50 PM}		this->Invalidate();
+// COMMENT: {9/8/2009 8:37:50 PM}		this->RedrawWindow();
+// COMMENT: {9/8/2009 8:37:50 PM}	}
+// COMMENT: {9/8/2009 8:37:50 PM}}
 
 void CWPhastView::Update(IObserver* pSender, LPARAM lHint, CObject* pHint, vtkObject* pObject)
 {
@@ -1445,10 +1639,13 @@ void CWPhastView::Update(IObserver* pSender, LPARAM lHint, CObject* pHint, vtkOb
 	switch (lHint)
 	{
 	case WPN_NONE:
+		::OutputDebugString("View->Update WPN_NONE\n");
 		break;
 	case WPN_SELCHANGING:
+		::OutputDebugString("View->Update WPN_SELCHANGING\n");
 		break;
 	case WPN_SELCHANGED:
+		::OutputDebugString("View->Update WPN_SELCHANGED\n");
 		if (this->CurrentProp = vtkProp::SafeDownCast(pObject))
 		{
 			this->Select(this->CurrentProp);
@@ -1471,11 +1668,12 @@ void CWPhastView::Update(IObserver* pSender, LPARAM lHint, CObject* pHint, vtkOb
 		}
 		break;
 	case WPN_VISCHANGED:
+		::OutputDebugString("View->Update WPN_VISCHANGED\n");
 		if (vtkProp* pProp = vtkProp::SafeDownCast(pObject))
 		{
 			if (!pProp->GetVisibility())
 			{
-				if (vtkAbstractPropPicker *pPicker = vtkAbstractPropPicker::SafeDownCast( this->GetRenderWindowInteractor()->GetPicker() ))
+				if (vtkAbstractPropPicker *pPicker = vtkAbstractPropPicker::SafeDownCast( this->GetInteractor()->GetPicker() ))
 				{
 					if (vtkPropAssembly* pPropAssembly = vtkPropAssembly::SafeDownCast(pObject))
 					{
@@ -1499,6 +1697,7 @@ void CWPhastView::Update(IObserver* pSender, LPARAM lHint, CObject* pHint, vtkOb
 		}
 		break;
 	case WPN_SCALE_CHANGED:
+		::OutputDebugString("View->Update WPN_SCALE_CHANGED\n");
 		if (this->PointWidget->GetEnabled())
 		{
 			if (vtkProp3D* pProp3D = this->PointWidget->GetProp3D())
@@ -1514,7 +1713,7 @@ void CWPhastView::Update(IObserver* pSender, LPARAM lHint, CObject* pHint, vtkOb
 		}
 		if (this->CreatingNewRiver())
 		{
-			this->m_pRiverActor->SetScale(this->GetDocument()->GetScale());
+			this->RiverActor->SetScale(this->GetDocument()->GetScale());
 		}
 		if (this->BoxWidget->GetEnabled())
 		{
@@ -1577,6 +1776,7 @@ void CWPhastView::Update(IObserver* pSender, LPARAM lHint, CObject* pHint, vtkOb
 // COMMENT: {5/8/2006 4:35:15 PM}		//}} {4/25/2006 4:41:58 PM}
 		break;
 	default:
+		::OutputDebugString("View->Update default\n");
 		ASSERT(FALSE);
 	}
 }
@@ -1620,31 +1820,31 @@ void CWPhastView::StartNewRiver(void)
 		this->RiverCallbackCommand->SetClientData(this);
 		this->RiverCallbackCommand->SetCallback(CWPhastView::RiverListener);
 
-		if (this->m_pRiverActor != 0)
+		if (this->RiverActor != 0)
 		{
-			this->m_pRiverActor->Delete();
+			this->RiverActor->Delete();
 		}
-		this->m_pRiverActor = CRiverActor::StartNewRiver(this->GetRenderWindowInteractor());
+		this->RiverActor = CRiverActor::StartNewRiver(this->GetInteractor());
 
 		CRiver river;
 		river.coordinate_system = PHAST_Transform::GRID;
 		river.z_coordinate_system_user = PHAST_Transform::GRID;
 		river.n_user = this->GetDocument()->GetNextRiverNumber();
-		this->m_pRiverActor->SetRiver(river, this->GetDocument()->GetUnits(), this->GetDocument()->GetGridKeyword());
+		this->RiverActor->SetRiver(river, this->GetDocument()->GetUnits(), this->GetDocument()->GetGridKeyword());
 
-		this->m_pRiverActor->AddObserver(CRiverActor::EndNewEvent, RiverCallbackCommand);
-		this->m_pRiverActor->AddObserver(CRiverActor::CancelNewEvent, RiverCallbackCommand);
+		this->RiverActor->AddObserver(CRiverActor::EndNewEvent, RiverCallbackCommand);
+		this->RiverActor->AddObserver(CRiverActor::CancelNewEvent, RiverCallbackCommand);
 
 		double* scale = this->GetDocument()->GetScale();
-		this->m_pRiverActor->SetScale(scale[0], scale[1], scale[2]);
+		this->RiverActor->SetScale(scale[0], scale[1], scale[2]);
 
-		this->m_pRiverActor->ScaleFromBounds(this->GetDocument()->GetGridBounds());
+		this->RiverActor->ScaleFromBounds(this->GetDocument()->GetGridBounds());
 
 		CGrid x, y, z;
 		this->GetDocument()->GetGrid(x, y, z);
 		z.Setup();
-		this->m_pRiverActor->SetZ(z.coord[z.count_coord - 1]);
-		this->m_Renderer->AddViewProp(this->m_pRiverActor);
+		this->RiverActor->SetZ(z.coord[z.count_coord - 1]);
+		this->Renderer->AddViewProp(this->RiverActor);
 	}
 
 	// hide Widgets
@@ -1666,20 +1866,22 @@ void CWPhastView::EndNewRiver(void)
 		{
 			style = switcher->GetCurrentStyle();
 		}
-		style->SetInteractor(this->m_RenderWindowInteractor);
+		style->SetInteractor(this->GetInteractor());
 	}
 
 	// stop rendering the river actor
 	//
-	this->m_Renderer->RemoveViewProp(this->m_pRiverActor);
+	this->Renderer->RemoveViewProp(this->RiverActor);
 
 	// clean-up
 	//
-	ASSERT(this->m_pRiverActor != 0);
-	if (this->m_pRiverActor)
+	ASSERT(this->RiverActor != 0);
+	if (this->RiverActor)
 	{
-		this->m_pRiverActor->Delete();
-		this->m_pRiverActor = 0;
+		this->RiverActor->SetEnabled(0);
+		this->RiverActor->SetInteractor(0);
+		this->RiverActor->Delete();
+		this->RiverActor = 0;
 	}
 	ASSERT(this->RiverCallbackCommand != 0);
 	if (this->RiverCallbackCommand)
@@ -1707,7 +1909,7 @@ void CWPhastView::RiverListener(vtkObject* caller, unsigned long eid, void* clie
 	if (CRiverActor* pRiverActor = CRiverActor::SafeDownCast(caller))
 	{
 		CWPhastView* self = reinterpret_cast<CWPhastView*>(clientdata);
-		ASSERT(pRiverActor == self->m_pRiverActor);
+		ASSERT(pRiverActor == self->RiverActor);
 		switch (eid)
 		{
 		case CRiverActor::CancelNewEvent:
@@ -1730,22 +1932,22 @@ void CWPhastView::OnEndNewRiver(bool bCancel)
 		{
 			style = switcher->GetCurrentStyle();
 		}
-		style->SetInteractor(this->m_RenderWindowInteractor);
+		style->SetInteractor(this->GetInteractor());
 	}
 
 	//
-	// NOTE: this->m_pRiverActor->Delete() can't be called within
+	// NOTE: this->RiverActor->Delete() can't be called within
 	// here because the list of listeners will also be deleted
 	// *** this may be fixed in 4.4 ***
 	//
-	ASSERT(this->m_pRiverActor != 0);
-	if (this->m_pRiverActor)
+	ASSERT(this->RiverActor != 0);
+	if (this->RiverActor)
 	{
 		if (!bCancel)
 		{
-			if (this->m_pRiverActor->GetPointCount() > 1)
+			if (this->RiverActor->GetPointCount() > 1)
 			{
-				CRiver river = this->m_pRiverActor->GetRiver();
+				CRiver river = this->RiverActor->GetRiver();
 				CString title;
 				title.Format("River %d Properties", river.n_user);
 
@@ -1771,7 +1973,7 @@ void CWPhastView::OnEndNewRiver(bool bCancel)
 				::AfxMessageBox("Rivers must contain at least two points");
 			}
 		}
-		this->m_Renderer->RemoveViewProp(this->m_pRiverActor);
+		this->Renderer->RemoveViewProp(this->RiverActor);
 	}
 
 	if (this->RiverCallbackCommand)
@@ -1782,18 +1984,36 @@ void CWPhastView::OnEndNewRiver(bool bCancel)
 	this->GetDocument()->UpdateAllViews(0);
 }
 
-void CWPhastView::OnLButtonDblClk(UINT nFlags, CPoint point)
-{
-	// Add your message handler code here and/or call default
-#if defined(_DEBUG)
-	::AfxMessageBox("OnLButtonDblClk");
-#endif
-
-	__super::OnLButtonDblClk(nFlags, point);
-}
+// COMMENT: {9/17/2009 4:19:04 PM}void CWPhastView::OnLButtonDblClk(UINT nFlags, CPoint point)
+// COMMENT: {9/17/2009 4:19:04 PM}{
+// COMMENT: {9/17/2009 4:19:04 PM}	// Add your message handler code here and/or call default
+// COMMENT: {9/17/2009 4:19:04 PM}#if defined(_DEBUG)
+// COMMENT: {9/17/2009 4:19:04 PM}	::AfxMessageBox("OnLButtonDblClk");
+// COMMENT: {9/17/2009 4:19:04 PM}#endif
+// COMMENT: {9/17/2009 4:19:04 PM}
+// COMMENT: {9/17/2009 4:19:04 PM}	__super::OnLButtonDblClk(nFlags, point);
+// COMMENT: {9/17/2009 4:19:04 PM}}
 
 void CWPhastView::OnDestroy()
 {
+#if ((VTK_MAJOR_VERSION >= 5) && (VTK_MINOR_VERSION >= 4))
+	//{{ {9/18/2009 6:42:01 PM}
+	this->CancelMode();
+	//}} {9/18/2009 6:42:01 PM}
+
+// COMMENT: {9/18/2009 8:36:29 PM}	if (this->Renderer)
+// COMMENT: {9/18/2009 8:36:29 PM}	{
+// COMMENT: {9/18/2009 8:36:29 PM}		TRACE("Deleting this->Renderer = %p\n", this->Renderer);
+// COMMENT: {9/18/2009 8:36:29 PM}		TRACE("this->Renderer->GetReferenceCount() = %d\n",  this->Renderer->GetReferenceCount());
+// COMMENT: {9/18/2009 8:36:29 PM}		//this->Renderer->FastDelete();
+// COMMENT: {9/18/2009 8:36:29 PM}		if (this->Renderer->GetReferenceCount() <= 2)
+// COMMENT: {9/18/2009 8:36:29 PM}		{
+// COMMENT: {9/18/2009 8:36:29 PM}			this->Renderer->SetReferenceCount(3);
+// COMMENT: {9/18/2009 8:36:29 PM}		}
+// COMMENT: {9/18/2009 8:36:29 PM}
+// COMMENT: {9/18/2009 8:36:29 PM}		this->Renderer->Delete();
+// COMMENT: {9/18/2009 8:36:29 PM}	}
+#endif
 	__super::OnDestroy();
 
 	// Add your message handler code here
@@ -1801,17 +2021,17 @@ void CWPhastView::OnDestroy()
 
 bool CWPhastView::MovingGridLine()const
 {
-	return this->m_bMovingGridLine;
+	return this->bMovingGridLine;
 }
 
 void CWPhastView::EndMoveGridLine()
 {
 	if (CGridActor* pGridActor = CGridActor::SafeDownCast(this->GetDocument()->GetGridActor()))
 	{
-		pGridActor->SetInteractor(this->m_RenderWindowInteractor);
+		pGridActor->SetInteractor(this->GetInteractor());
 		pGridActor->SetEnabled(0);
 	}
-	this->m_bMovingGridLine = false;
+	this->bMovingGridLine = false;
 }
 
 void CWPhastView::CancelMoveGridLine()
@@ -1826,9 +2046,9 @@ void CWPhastView::StartMoveGridLine()
 {
 	if (CGridActor* pGridActor = CGridActor::SafeDownCast(this->GetDocument()->GetGridActor()))
 	{
-		pGridActor->SetInteractor(this->m_RenderWindowInteractor);
+		pGridActor->SetInteractor(this->GetInteractor());
 		ASSERT(pGridActor->GetEnabled());
-		this->m_bMovingGridLine = true;
+		this->bMovingGridLine = true;
 	}
 }
 
@@ -2252,45 +2472,45 @@ void CWPhastView::OnToolsSelectObject()
 	}
 }
 
-BOOL CWPhastView::OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo)
-{
-	// Add your specialized code here and/or call the base class
-	if (CWPhastDoc* pDoc = this->GetDocument())
-	{
-		if (CPropertyTreeControlBar *pPropertyTreeControlBar = pDoc->GetPropertyTreeControlBar())
-		{
-// COMMENT: {8/1/2007 1:52:50 PM}			//{{
-// COMMENT: {8/1/2007 1:52:50 PM}			if (CBoxPropertiesDialogBar *pBar = pDoc->GetBoxPropertiesDialogBar())
-// COMMENT: {8/1/2007 1:52:50 PM}			{
-// COMMENT: {8/1/2007 1:52:50 PM}				if (pBar->IsChild(CWnd::GetFocus()))
-// COMMENT: {8/1/2007 1:52:50 PM}				{
-// COMMENT: {8/1/2007 1:52:50 PM}					if (nCode == CN_COMMAND || nCode == CN_UPDATE_COMMAND_UI)
-// COMMENT: {8/1/2007 1:52:50 PM}					{
-// COMMENT: {8/1/2007 1:52:50 PM}						if (pBar->OnCmdMsg(nID, nCode, pExtra, pHandlerInfo))
-// COMMENT: {8/1/2007 1:52:50 PM}						{
-// COMMENT: {8/1/2007 1:52:50 PM}							return TRUE;
-// COMMENT: {8/1/2007 1:52:50 PM}						}
-// COMMENT: {8/1/2007 1:52:50 PM}					}
-// COMMENT: {8/1/2007 1:52:50 PM}					return __super::OnCmdMsg(nID, nCode, pExtra, pHandlerInfo);
-// COMMENT: {8/1/2007 1:52:50 PM}				}
-// COMMENT: {8/1/2007 1:52:50 PM}			}
-// COMMENT: {8/1/2007 1:52:50 PM}			//}}
-
-			// maybe use GetForegroundWindow
-			if (::GetFocus() == pPropertyTreeControlBar->GetTreeCtrl()->GetSafeHwnd())
-			{
-				if (nCode == CN_COMMAND || nCode == CN_UPDATE_COMMAND_UI)
-				{
-					if (pPropertyTreeControlBar->OnCmdMsg(nID, nCode, pExtra, pHandlerInfo))
-					{
-						return TRUE;
-					}
-				}
-			}
-		}
-	}
-	return __super::OnCmdMsg(nID, nCode, pExtra, pHandlerInfo);
-}
+// COMMENT: {9/8/2009 8:36:37 PM}BOOL CWPhastView::OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo)
+// COMMENT: {9/8/2009 8:36:37 PM}{
+// COMMENT: {9/8/2009 8:36:37 PM}	// Add your specialized code here and/or call the base class
+// COMMENT: {9/8/2009 8:36:37 PM}	if (CWPhastDoc* pDoc = this->GetDocument())
+// COMMENT: {9/8/2009 8:36:37 PM}	{
+// COMMENT: {9/8/2009 8:36:37 PM}		if (CPropertyTreeControlBar *pPropertyTreeControlBar = pDoc->GetPropertyTreeControlBar())
+// COMMENT: {9/8/2009 8:36:37 PM}		{
+// COMMENT: {9/8/2009 8:36:37 PM}// COMMENT: {8/1/2007 1:52:50 PM}			//{{
+// COMMENT: {9/8/2009 8:36:37 PM}// COMMENT: {8/1/2007 1:52:50 PM}			if (CBoxPropertiesDialogBar *pBar = pDoc->GetBoxPropertiesDialogBar())
+// COMMENT: {9/8/2009 8:36:37 PM}// COMMENT: {8/1/2007 1:52:50 PM}			{
+// COMMENT: {9/8/2009 8:36:37 PM}// COMMENT: {8/1/2007 1:52:50 PM}				if (pBar->IsChild(CWnd::GetFocus()))
+// COMMENT: {9/8/2009 8:36:37 PM}// COMMENT: {8/1/2007 1:52:50 PM}				{
+// COMMENT: {9/8/2009 8:36:37 PM}// COMMENT: {8/1/2007 1:52:50 PM}					if (nCode == CN_COMMAND || nCode == CN_UPDATE_COMMAND_UI)
+// COMMENT: {9/8/2009 8:36:37 PM}// COMMENT: {8/1/2007 1:52:50 PM}					{
+// COMMENT: {9/8/2009 8:36:37 PM}// COMMENT: {8/1/2007 1:52:50 PM}						if (pBar->OnCmdMsg(nID, nCode, pExtra, pHandlerInfo))
+// COMMENT: {9/8/2009 8:36:37 PM}// COMMENT: {8/1/2007 1:52:50 PM}						{
+// COMMENT: {9/8/2009 8:36:37 PM}// COMMENT: {8/1/2007 1:52:50 PM}							return TRUE;
+// COMMENT: {9/8/2009 8:36:37 PM}// COMMENT: {8/1/2007 1:52:50 PM}						}
+// COMMENT: {9/8/2009 8:36:37 PM}// COMMENT: {8/1/2007 1:52:50 PM}					}
+// COMMENT: {9/8/2009 8:36:37 PM}// COMMENT: {8/1/2007 1:52:50 PM}					return __super::OnCmdMsg(nID, nCode, pExtra, pHandlerInfo);
+// COMMENT: {9/8/2009 8:36:37 PM}// COMMENT: {8/1/2007 1:52:50 PM}				}
+// COMMENT: {9/8/2009 8:36:37 PM}// COMMENT: {8/1/2007 1:52:50 PM}			}
+// COMMENT: {9/8/2009 8:36:37 PM}// COMMENT: {8/1/2007 1:52:50 PM}			//}}
+// COMMENT: {9/8/2009 8:36:37 PM}
+// COMMENT: {9/8/2009 8:36:37 PM}			// maybe use GetForegroundWindow
+// COMMENT: {9/8/2009 8:36:37 PM}			if (::GetFocus() == pPropertyTreeControlBar->GetTreeCtrl()->GetSafeHwnd())
+// COMMENT: {9/8/2009 8:36:37 PM}			{
+// COMMENT: {9/8/2009 8:36:37 PM}				if (nCode == CN_COMMAND || nCode == CN_UPDATE_COMMAND_UI)
+// COMMENT: {9/8/2009 8:36:37 PM}				{
+// COMMENT: {9/8/2009 8:36:37 PM}					if (pPropertyTreeControlBar->OnCmdMsg(nID, nCode, pExtra, pHandlerInfo))
+// COMMENT: {9/8/2009 8:36:37 PM}					{
+// COMMENT: {9/8/2009 8:36:37 PM}						return TRUE;
+// COMMENT: {9/8/2009 8:36:37 PM}					}
+// COMMENT: {9/8/2009 8:36:37 PM}				}
+// COMMENT: {9/8/2009 8:36:37 PM}			}
+// COMMENT: {9/8/2009 8:36:37 PM}		}
+// COMMENT: {9/8/2009 8:36:37 PM}	}
+// COMMENT: {9/8/2009 8:36:37 PM}	return __super::OnCmdMsg(nID, nCode, pExtra, pHandlerInfo);
+// COMMENT: {9/8/2009 8:36:37 PM}}
 
 void CWPhastView::SizeHandles(double size)
 {
@@ -2314,9 +2534,9 @@ void CWPhastView::SetBackground(COLORREF cr)
 	this->BackgroundColor[0] = (double)GetRValue(cr)/255.;
 	this->BackgroundColor[1] = (double)GetGValue(cr)/255.;
 	this->BackgroundColor[2] = (double)GetBValue(cr)/255.;
-	if (this->m_Renderer)
+	if (this->Renderer)
 	{
-		this->m_Renderer->SetBackground(this->BackgroundColor);
+		this->Renderer->SetBackground(this->BackgroundColor);
 	}
 }
 
@@ -2743,17 +2963,22 @@ void CWPhastView::UpdateWellMode(void)
 	{
 		if (this->CoordinateMode == CWPhastView::GridMode)
 		{
-			this->m_pCursor3DActor->SetOrientation(0, 0, 0);
+			this->Cursor3DActor->SetOrientation(0, 0, 0);
 		}
 		else if (this->CoordinateMode == CWPhastView::MapMode)
 		{
 			CGridKeyword gridKeyword = this->GetDocument()->GetGridKeyword();
-			this->m_pCursor3DActor->SetOrientation(0, 0, -gridKeyword.m_grid_angle);
+			this->Cursor3DActor->SetOrientation(0, 0, -gridKeyword.m_grid_angle);
 		}
 		else
 		{
 			ASSERT(FALSE);
 		}
+#if ((VTK_MAJOR_VERSION >= 5) && (VTK_MINOR_VERSION >= 4))
+		ASSERT(FALSE); // check this
+		this->MFCWindow->GetRenderWindow()->Render();
+#else
 		this->m_RenderWindow->Render();
+#endif
 	}
 }
