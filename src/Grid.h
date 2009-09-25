@@ -42,7 +42,14 @@ public:
 			{
 				this->m_coordinates.push_back(*First);
 			}
-			this->uniform = FALSE;
+			if (this->m_coordinates.size() == 2)
+			{
+				this->uniform = TRUE;
+			}
+			else
+			{
+				this->uniform = FALSE;
+			}
 			this->count_coord = (int)this->m_coordinates.size();
 			this->coord = &this->m_coordinates[0];
 		}

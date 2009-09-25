@@ -85,13 +85,15 @@ enum ProjectionType {
 	PT_PARALLEL    = 1
 };
 
-enum WPhastNotification {
-	WPN_NONE          = 0,
-	WPN_SELCHANGED    = 1,
-	WPN_VISCHANGED    = 2,
-	WPN_DELETE_WELL   = 3,
-	WPN_SCALE_CHANGED = 4,
-	WPN_SELCHANGING   = 5,
+enum WPhastNotification
+{
+	WPN_NONE           = 0,
+	WPN_SELCHANGED     = 1,
+	WPN_VISCHANGED     = 2,
+	WPN_DELETE_WELL    = 3,
+	WPN_SCALE_CHANGED  = 4,
+	WPN_SELCHANGING    = 5,
+	WPN_DOMAIN_CHANGED = 6,
 };
 
 class CWPhastDoc : public CDocument, public CSubject, public IObserver

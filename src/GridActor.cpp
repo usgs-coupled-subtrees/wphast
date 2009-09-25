@@ -990,6 +990,7 @@ void CGridActor::OnMouseMove()
 					{
 						// +z / -z
 						//
+						ATLTRACE2(GRIDACTOR, 0, "+z/-z\n");
 						if (pt0[0] == pt1[0])
 						{
 							if (this->PlaneWidget)
@@ -1041,6 +1042,7 @@ void CGridActor::OnMouseMove()
 					{
 						// -y / +y
 						//
+						ATLTRACE2(GRIDACTOR, 0, "-y/+y\n");
 						if (pt0[0] == pt1[0])
 						{
 							if (this->PlaneWidget)
@@ -1092,6 +1094,7 @@ void CGridActor::OnMouseMove()
 					{
 						// +x / -x
 						//
+						ATLTRACE2(GRIDACTOR, 0, "+x/-x\n");
 						if (pt0[1] == pt1[1])
 						{
 							if (this->PlaneWidget)
@@ -1144,7 +1147,9 @@ void CGridActor::OnMouseMove()
 					{
 						if (vtkWin32OpenGLRenderWindow *w = vtkWin32OpenGLRenderWindow::SafeDownCast(rwi->GetRenderWindow()))
 						{
+#if defined(WIN32)
 							::SetFocus(w->GetWindowId());
+#endif
 						}
 					}
 				}
@@ -1262,12 +1267,36 @@ void CGridActor::OnEndInteraction(void)
 			// interator no longer valid
 			struct GridLineMoveMemento memento;
 			memento.Uniform = this->m_gridKeyword.m_grid[this->AxisIndex].uniform;
+#if defined(DELETE_BEFORE_INSERT)
 			if (bMoving)
 			{
 				VERIFY(this->DeleteLine(this->AxisIndex, originalPlaneIndex));
 			}
+#endif
 			double value = this->PlaneWidget->GetOrigin()[this->AxisIndex] / this->GetScale()[this->AxisIndex];
 			this->PlaneIndex = this->InsertLine(this->AxisIndex, value);
+#if !defined(DELETE_BEFORE_INSERT)
+			if (bMoving)
+			{
+				std::map<float, int>::iterator setIter = this->ValueToIndex[this->AxisIndex].find(this->CurrentPoint[this->AxisIndex]);
+				if (setIter != this->ValueToIndex[this->AxisIndex].end())
+				{
+					originalPlaneIndex = setIter->second;
+					//{{ BUG
+					//VERIFY(this->DeleteLine(this->AxisIndex, originalPlaneIndex));
+					if (!this->DeleteLine(this->AxisIndex, originalPlaneIndex))
+					{
+						ASSERT(this->PlaneIndex == -1); // no-op
+						this->State = CGridActor::Start;
+						this->AxisIndex = -1;
+						this->PlaneIndex = -1;
+						::SetCursor(::LoadCursor(NULL, IDC_ARROW));
+						return;
+					}
+					//}}
+				}
+			}
+#endif
 			if (this->PlaneIndex != -1)
 			{
 				if (bMoving)

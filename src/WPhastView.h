@@ -254,7 +254,7 @@ public:
 	afx_msg void OnToolsModifyGrid();
 	afx_msg void OnUpdateToolsSelectObject(CCmdUI *pCmdUI);
 	afx_msg void OnToolsSelectObject();
-// COMMENT: {9/8/2009 8:45:33 PM}	virtual BOOL OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo);
+	virtual BOOL OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo);
 };
 
 #ifndef _DEBUG  // debug version in WPhastView.cpp

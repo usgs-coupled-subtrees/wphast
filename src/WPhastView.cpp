@@ -112,12 +112,12 @@ BEGIN_MESSAGE_MAP(CWPhastView, CView)
 	ON_COMMAND(ID_TOOLS_NEWRIVER, OnToolsNewRiver)
 // COMMENT: {9/8/2009 8:43:12 PM}	ON_WM_LBUTTONDBLCLK()
 	ON_WM_DESTROY()
-// COMMENT: {9/8/2009 8:43:18 PM}	ON_COMMAND(ID_TOOLS_MOVE_VER_LINE, OnToolsMoveVerLine)
-// COMMENT: {9/8/2009 8:43:18 PM}	ON_UPDATE_COMMAND_UI(ID_TOOLS_MOVE_VER_LINE, OnUpdateToolsMoveVerLine)
+	ON_COMMAND(ID_TOOLS_MOVE_VER_LINE, OnToolsMoveVerLine)
+	ON_UPDATE_COMMAND_UI(ID_TOOLS_MOVE_VER_LINE, OnUpdateToolsMoveVerLine)
 // COMMENT: {8/29/2005 6:46:54 PM}	ON_UPDATE_COMMAND_UI(ID_TOOLS_MODIFYGRID, OnUpdateToolsModifyGrid)
 // COMMENT: {8/29/2005 6:46:54 PM}	ON_COMMAND(ID_TOOLS_MODIFYGRID, OnToolsModifyGrid)
-// COMMENT: {9/8/2009 8:43:30 PM}	ON_UPDATE_COMMAND_UI(ID_TOOLS_SELECTOBJECT, OnUpdateToolsSelectObject)
-// COMMENT: {9/8/2009 8:43:30 PM}	ON_COMMAND(ID_TOOLS_SELECTOBJECT, OnToolsSelectObject)
+	ON_UPDATE_COMMAND_UI(ID_TOOLS_SELECTOBJECT, OnUpdateToolsSelectObject)
+	ON_COMMAND(ID_TOOLS_SELECTOBJECT, OnToolsSelectObject)
 END_MESSAGE_MAP()
 
 // CWPhastView construction/destruction
@@ -1696,7 +1696,7 @@ void CWPhastView::Update(IObserver* pSender, LPARAM lHint, CObject* pHint, vtkOb
 			}
 		}
 		break;
-	case WPN_SCALE_CHANGED:
+	case WPN_SCALE_CHANGED: case WPN_DOMAIN_CHANGED:
 		::OutputDebugString("View->Update WPN_SCALE_CHANGED\n");
 		if (this->PointWidget->GetEnabled())
 		{
@@ -2472,45 +2472,45 @@ void CWPhastView::OnToolsSelectObject()
 	}
 }
 
-// COMMENT: {9/8/2009 8:36:37 PM}BOOL CWPhastView::OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo)
-// COMMENT: {9/8/2009 8:36:37 PM}{
-// COMMENT: {9/8/2009 8:36:37 PM}	// Add your specialized code here and/or call the base class
-// COMMENT: {9/8/2009 8:36:37 PM}	if (CWPhastDoc* pDoc = this->GetDocument())
-// COMMENT: {9/8/2009 8:36:37 PM}	{
-// COMMENT: {9/8/2009 8:36:37 PM}		if (CPropertyTreeControlBar *pPropertyTreeControlBar = pDoc->GetPropertyTreeControlBar())
-// COMMENT: {9/8/2009 8:36:37 PM}		{
-// COMMENT: {9/8/2009 8:36:37 PM}// COMMENT: {8/1/2007 1:52:50 PM}			//{{
-// COMMENT: {9/8/2009 8:36:37 PM}// COMMENT: {8/1/2007 1:52:50 PM}			if (CBoxPropertiesDialogBar *pBar = pDoc->GetBoxPropertiesDialogBar())
-// COMMENT: {9/8/2009 8:36:37 PM}// COMMENT: {8/1/2007 1:52:50 PM}			{
-// COMMENT: {9/8/2009 8:36:37 PM}// COMMENT: {8/1/2007 1:52:50 PM}				if (pBar->IsChild(CWnd::GetFocus()))
-// COMMENT: {9/8/2009 8:36:37 PM}// COMMENT: {8/1/2007 1:52:50 PM}				{
-// COMMENT: {9/8/2009 8:36:37 PM}// COMMENT: {8/1/2007 1:52:50 PM}					if (nCode == CN_COMMAND || nCode == CN_UPDATE_COMMAND_UI)
-// COMMENT: {9/8/2009 8:36:37 PM}// COMMENT: {8/1/2007 1:52:50 PM}					{
-// COMMENT: {9/8/2009 8:36:37 PM}// COMMENT: {8/1/2007 1:52:50 PM}						if (pBar->OnCmdMsg(nID, nCode, pExtra, pHandlerInfo))
-// COMMENT: {9/8/2009 8:36:37 PM}// COMMENT: {8/1/2007 1:52:50 PM}						{
-// COMMENT: {9/8/2009 8:36:37 PM}// COMMENT: {8/1/2007 1:52:50 PM}							return TRUE;
-// COMMENT: {9/8/2009 8:36:37 PM}// COMMENT: {8/1/2007 1:52:50 PM}						}
-// COMMENT: {9/8/2009 8:36:37 PM}// COMMENT: {8/1/2007 1:52:50 PM}					}
-// COMMENT: {9/8/2009 8:36:37 PM}// COMMENT: {8/1/2007 1:52:50 PM}					return __super::OnCmdMsg(nID, nCode, pExtra, pHandlerInfo);
-// COMMENT: {9/8/2009 8:36:37 PM}// COMMENT: {8/1/2007 1:52:50 PM}				}
-// COMMENT: {9/8/2009 8:36:37 PM}// COMMENT: {8/1/2007 1:52:50 PM}			}
-// COMMENT: {9/8/2009 8:36:37 PM}// COMMENT: {8/1/2007 1:52:50 PM}			//}}
-// COMMENT: {9/8/2009 8:36:37 PM}
-// COMMENT: {9/8/2009 8:36:37 PM}			// maybe use GetForegroundWindow
-// COMMENT: {9/8/2009 8:36:37 PM}			if (::GetFocus() == pPropertyTreeControlBar->GetTreeCtrl()->GetSafeHwnd())
-// COMMENT: {9/8/2009 8:36:37 PM}			{
-// COMMENT: {9/8/2009 8:36:37 PM}				if (nCode == CN_COMMAND || nCode == CN_UPDATE_COMMAND_UI)
-// COMMENT: {9/8/2009 8:36:37 PM}				{
-// COMMENT: {9/8/2009 8:36:37 PM}					if (pPropertyTreeControlBar->OnCmdMsg(nID, nCode, pExtra, pHandlerInfo))
-// COMMENT: {9/8/2009 8:36:37 PM}					{
-// COMMENT: {9/8/2009 8:36:37 PM}						return TRUE;
-// COMMENT: {9/8/2009 8:36:37 PM}					}
-// COMMENT: {9/8/2009 8:36:37 PM}				}
-// COMMENT: {9/8/2009 8:36:37 PM}			}
-// COMMENT: {9/8/2009 8:36:37 PM}		}
-// COMMENT: {9/8/2009 8:36:37 PM}	}
-// COMMENT: {9/8/2009 8:36:37 PM}	return __super::OnCmdMsg(nID, nCode, pExtra, pHandlerInfo);
-// COMMENT: {9/8/2009 8:36:37 PM}}
+BOOL CWPhastView::OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo)
+{
+	// Add your specialized code here and/or call the base class
+	if (CWPhastDoc* pDoc = this->GetDocument())
+	{
+		if (CPropertyTreeControlBar *pPropertyTreeControlBar = pDoc->GetPropertyTreeControlBar())
+		{
+// COMMENT: {8/1/2007 1:52:50 PM}			//{{
+// COMMENT: {8/1/2007 1:52:50 PM}			if (CBoxPropertiesDialogBar *pBar = pDoc->GetBoxPropertiesDialogBar())
+// COMMENT: {8/1/2007 1:52:50 PM}			{
+// COMMENT: {8/1/2007 1:52:50 PM}				if (pBar->IsChild(CWnd::GetFocus()))
+// COMMENT: {8/1/2007 1:52:50 PM}				{
+// COMMENT: {8/1/2007 1:52:50 PM}					if (nCode == CN_COMMAND || nCode == CN_UPDATE_COMMAND_UI)
+// COMMENT: {8/1/2007 1:52:50 PM}					{
+// COMMENT: {8/1/2007 1:52:50 PM}						if (pBar->OnCmdMsg(nID, nCode, pExtra, pHandlerInfo))
+// COMMENT: {8/1/2007 1:52:50 PM}						{
+// COMMENT: {8/1/2007 1:52:50 PM}							return TRUE;
+// COMMENT: {8/1/2007 1:52:50 PM}						}
+// COMMENT: {8/1/2007 1:52:50 PM}					}
+// COMMENT: {8/1/2007 1:52:50 PM}					return __super::OnCmdMsg(nID, nCode, pExtra, pHandlerInfo);
+// COMMENT: {8/1/2007 1:52:50 PM}				}
+// COMMENT: {8/1/2007 1:52:50 PM}			}
+// COMMENT: {8/1/2007 1:52:50 PM}			//}}
+
+			// maybe use GetForegroundWindow
+			if (::GetFocus() == pPropertyTreeControlBar->GetTreeCtrl()->GetSafeHwnd())
+			{
+				if (nCode == CN_COMMAND || nCode == CN_UPDATE_COMMAND_UI)
+				{
+					if (pPropertyTreeControlBar->OnCmdMsg(nID, nCode, pExtra, pHandlerInfo))
+					{
+						return TRUE;
+					}
+				}
+			}
+		}
+	}
+	return __super::OnCmdMsg(nID, nCode, pExtra, pHandlerInfo);
+}
 
 void CWPhastView::SizeHandles(double size)
 {

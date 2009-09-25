@@ -1630,6 +1630,9 @@ void CPropertyTreeControlBar::Update(IObserver* pSender, LPARAM lHint, CObject* 
 	case WPN_SCALE_CHANGED:
 		break;
 
+	case WPN_DOMAIN_CHANGED:
+		break;
+
 	default:
 		ASSERT(FALSE);
 	}

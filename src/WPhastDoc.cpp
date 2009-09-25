@@ -5477,7 +5477,7 @@ void CWPhastDoc::UpdateGridDomain(void)
 						vtkProp* prop = pPropCollection->GetNextProp(pcsi);
 						if (CZoneActor *pZone = CZoneActor::SafeDownCast(prop))
 						{
-							if (pZone->GetDefault())
+							if (dynamic_cast<Domain*>(pZone->GetPolyhedron()) || pZone->GetDefault())
 							{
 								pZone->SetBounds(bounds, this->GetUnits());
 							}
@@ -5487,7 +5487,7 @@ void CWPhastDoc::UpdateGridDomain(void)
 			}
 			if (CZoneActor *pZone = CZoneActor::SafeDownCast(prop))
 			{
-				if (pZone->GetDefault())
+				if (dynamic_cast<Domain*>(pZone->GetPolyhedron()) || pZone->GetDefault())
 				{
 					pZone->SetBounds(bounds, this->GetUnits());
 				}
@@ -5554,6 +5554,10 @@ void CWPhastDoc::UpdateGridDomain(void)
 		}
 	}
 #endif
+
+	// update possible selection
+	//
+	this->Notify(this, WPN_DOMAIN_CHANGED, 0, 0);
 
 	// refresh screen
 	//
@@ -7166,11 +7170,6 @@ void CWPhastDoc::ExecutePipeline()
 		CWPhastView *pView = (CWPhastView*) this->GetNextView(pos);
 		ASSERT_VALID(pView);
 
-// COMMENT: {9/23/2009 9:03:37 PM}		//{{
-// COMMENT: {9/23/2009 9:03:37 PM}		vtkPropCollection *pc = pView->GetRenderer()->GetViewProps();
-// COMMENT: {9/23/2009 9:03:37 PM}		pView->GetRenderer()->RemoveAllViewProps();
-// COMMENT: {9/23/2009 9:03:37 PM}		//}}
-
 		// add props to renderer
 		if (vtkPropCollection *props = this->GetPropCollection())
 		{
@@ -7191,12 +7190,6 @@ void CWPhastDoc::ExecutePipeline()
 					}
 				}
 			}
-// COMMENT: {9/23/2009 7:40:28 PM}			////{{
-// COMMENT: {9/23/2009 7:40:28 PM}			if (!pView->GetRenderer()->GetViewProps()->IsItemPresent(this->GetPropAssemblyRivers()))
-// COMMENT: {9/23/2009 7:40:28 PM}			{
-// COMMENT: {9/23/2009 7:40:28 PM}				pView->GetRenderer()->AddViewProp(this->GetPropAssemblyRivers());
-// COMMENT: {9/23/2009 7:40:28 PM}			}
-// COMMENT: {9/23/2009 7:40:28 PM}			////}}
 		}
 		pView->GetRenderer()->ResetCameraClippingRange();
 	}

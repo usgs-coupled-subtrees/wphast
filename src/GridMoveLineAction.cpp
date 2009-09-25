@@ -30,9 +30,15 @@ void CGridMoveLineAction::Execute()
 		this->m_pGridActor->GetGridKeyword(grid);
 		this->m_memento.Uniform = grid.m_grid[this->m_memento.AxisIndex].uniform;
 
+#if defined(DELETE_BEFORE_INSERT)
 		VERIFY(this->m_pGridActor->DeleteLine(this->m_memento.AxisIndex, this->m_memento.OriginalPlaneIndex));
 		this->m_memento.OriginalCoord = this->m_pGridActor->GetLastDeletedValue();   // nec only when ctor(bSkipFirstExecute = false)
+#endif
 		this->m_memento.NewPlaneIndex = this->m_pGridActor->InsertLine(this->m_memento.AxisIndex, this->m_memento.NewCoord);
+#if !defined(DELETE_BEFORE_INSERT)
+		VERIFY(this->m_pGridActor->DeleteLine(this->m_memento.AxisIndex, this->m_memento.OriginalPlaneIndex));
+		this->m_memento.OriginalCoord = this->m_pGridActor->GetLastDeletedValue();   // nec only when ctor(bSkipFirstExecute = false)
+#endif
 	}
 	this->m_bSkipFirstExecute = false;
 
@@ -45,11 +51,19 @@ void CGridMoveLineAction::UnExecute()
 {
 	ASSERT( (0 <= this->m_memento.AxisIndex) && (this->m_memento.AxisIndex < 3) );
 	ASSERT(this->m_memento.NewPlaneIndex != -1);
+#if defined(DELETE_BEFORE_INSERT)
 	if (this->m_memento.NewPlaneIndex != -1)
 	{
 		VERIFY(this->m_pGridActor->DeleteLine(this->m_memento.AxisIndex, this->m_memento.NewPlaneIndex));
 	}
+#endif
 	VERIFY(this->m_pGridActor->InsertLine(this->m_memento.AxisIndex, this->m_memento.OriginalCoord) != -1);
+#if !defined(DELETE_BEFORE_INSERT)
+	if (this->m_memento.NewPlaneIndex != -1)
+	{
+		VERIFY(this->m_pGridActor->DeleteLine(this->m_memento.AxisIndex, this->m_memento.NewPlaneIndex));
+	}
+#endif
 	if (this->m_memento.Uniform)
 	{
 		CGridKeyword grid;
@@ -58,7 +72,7 @@ void CGridMoveLineAction::UnExecute()
 		grid.m_grid[i].uniform = 1;
 		grid.m_grid[i].coord[1] = grid.m_grid[i].coord[grid.m_grid[i].count_coord - 1];
 		grid.m_grid[i].uniform_expanded = 0;
-		this->m_pGridActor->SetGridKeyword(grid, m_pWPhastDoc->GetUnits());
+		this->m_pGridActor->SetGridKeyword(grid, this->m_pWPhastDoc->GetUnits());
 		this->m_pGridActor->UpdateNode();
 	}
 	this->m_pWPhastDoc->UpdateGridDomain();

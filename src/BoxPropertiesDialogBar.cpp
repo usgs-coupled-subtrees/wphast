@@ -425,6 +425,10 @@ void CBoxPropertiesDialogBar::Update(IObserver* pSender, LPARAM lHint, CObject* 
 	case WPN_SCALE_CHANGED:
 		TRACE("\t%s, WPN_SCALE_CHANGED\n", __FUNCTION__);
 		break;
+	case WPN_DOMAIN_CHANGED:
+		TRACE("\t%s, WPN_DOMAIN_CHANGED\n", __FUNCTION__);
+		this->Update(0, WPN_SELCHANGED, 0, this->m_pProp3D);
+		break;
 	default:
 		ASSERT(FALSE);
 	}
