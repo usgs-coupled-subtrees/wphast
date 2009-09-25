@@ -1267,15 +1267,8 @@ void CGridActor::OnEndInteraction(void)
 			// interator no longer valid
 			struct GridLineMoveMemento memento;
 			memento.Uniform = this->m_gridKeyword.m_grid[this->AxisIndex].uniform;
-#if defined(DELETE_BEFORE_INSERT)
-			if (bMoving)
-			{
-				VERIFY(this->DeleteLine(this->AxisIndex, originalPlaneIndex));
-			}
-#endif
 			double value = this->PlaneWidget->GetOrigin()[this->AxisIndex] / this->GetScale()[this->AxisIndex];
 			this->PlaneIndex = this->InsertLine(this->AxisIndex, value);
-#if !defined(DELETE_BEFORE_INSERT)
 			if (bMoving)
 			{
 				std::map<float, int>::iterator setIter = this->ValueToIndex[this->AxisIndex].find(this->CurrentPoint[this->AxisIndex]);
@@ -1283,7 +1276,6 @@ void CGridActor::OnEndInteraction(void)
 				{
 					originalPlaneIndex = setIter->second;
 					//{{ BUG
-					//VERIFY(this->DeleteLine(this->AxisIndex, originalPlaneIndex));
 					if (!this->DeleteLine(this->AxisIndex, originalPlaneIndex))
 					{
 						ASSERT(this->PlaneIndex == -1); // no-op
@@ -1296,7 +1288,6 @@ void CGridActor::OnEndInteraction(void)
 					//}}
 				}
 			}
-#endif
 			if (this->PlaneIndex != -1)
 			{
 				if (bMoving)
