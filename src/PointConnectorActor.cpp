@@ -470,6 +470,14 @@ void CPointConnectorActor::SetInteractor(vtkRenderWindowInteractor* i)
 	::sprintf(buffer, "CPointConnectorActor::SetInteractor In this = %p i = %p Interactor = %p\n", this, i, this->Interactor);
 	::OutputDebugString(buffer);
 
+#ifdef SAVE
+	vtkDebugMacro(<< "Setting Interactor to = " << i << "\n");
+
+	stdout << "Setting Interactor to = " << i << "\n");
+	stderr << "Setting Interactor to = " << i << "\n");
+	oss << "Setting Interactor to = " << i << "\n");
+#endif
+
 // COMMENT: {9/15/2009 8:31:21 PM}// COMMENT: {9/15/2009 7:04:53 PM}#if defined(_DEBUG)
 // COMMENT: {9/15/2009 8:31:21 PM}	vtkDebugMacro(<< "Setting Interactor to = " << i << "\n");
 // COMMENT: {9/15/2009 8:31:21 PM}	vtkDebugMacro(<< "Previous Interactor to = " << this->Interactor << "\n");
