@@ -22,7 +22,7 @@ LIGHT_FLAGS=\
 
 CSCRIPT = cscript
 
-MERGE_DIR := "C:\Program Files\Common Files\Merge Modules"
+MERGE_DIR := "C:\Program Files (x86)\Common Files\Merge Modules"
 
 MSIVAL2 := /cygdrive/c/Program\ Files/MsiVal2/msival2
 
