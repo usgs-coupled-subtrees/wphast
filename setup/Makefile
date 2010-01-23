@@ -1,6 +1,6 @@
 # $Id$
 
-DEVENV := /cygdrive/c/Program\ Files/Microsoft\ Visual\ Studio\ 8/Common7/IDE/devenv
+DEVENV := /cygdrive/c/Program\ Files\ \(x86\)/Microsoft\ Visual\ Studio\ 8/Common7/IDE/devenv
 
 SLN := ../WPhast.sln
 
