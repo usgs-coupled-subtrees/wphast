@@ -13,8 +13,8 @@ scriptdir = Mid(WScript.ScriptFullName, 1, Len(Wscript.ScriptFullName) - Len(Wsc
 '
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-''clsid = "{36353903-2137-43FD-9AD6-40B65A96A839}"
-clsid = "{F4360876-E70B-4f23-B9BF-A6EBC1F20031}"
+clsid = "{36353903-2137-43FD-9AD6-40B65A96A839}"
+''clsid = "{F4360876-E70B-4f23-B9BF-A6EBC1F20031}"
 classes = "HKEY_CURRENT_USER\Software\Classes\"
 doc = "Testing.WPhast.Document"
 exepath = scriptdir & "..\src\AutoRelease\WPhast.exe"
