@@ -147,11 +147,11 @@ vtkPlaneWidget2::~vtkPlaneWidget2(void)
 
 void vtkPlaneWidget2::SetEnabled(int enabling)
 {
-	vtkRenderer *pSaveCurrentRenderer = this->CurrentRenderer;
-	Superclass::SetEnabled(enabling);
-
 	if (enabling)
 	{
+		// called before adding axes
+		Superclass::SetEnabled(enabling);
+
 		// turn off the normal vector
 		this->CurrentRenderer->RemoveActor(this->LineActor);
 		this->CurrentRenderer->RemoveActor(this->ConeActor);
@@ -175,17 +175,30 @@ void vtkPlaneWidget2::SetEnabled(int enabling)
 	else
 	{
 		// remove axes
-		if (pSaveCurrentRenderer)
+		if (this->CurrentRenderer)
 		{
-			pSaveCurrentRenderer->RemoveActor(this->XAxisActor);
-			pSaveCurrentRenderer->RemoveActor(this->YAxisActor);
-			pSaveCurrentRenderer->RemoveActor(this->ActivePlaneActor);
+			ASSERT(this->XAxisActor->GetNumberOfConsumers()       != 0);
+			ASSERT(this->YAxisActor->GetNumberOfConsumers()       != 0);
+			ASSERT(this->ActivePlaneActor->GetNumberOfConsumers() != 0);
+
+			this->CurrentRenderer->RemoveActor(this->XAxisActor);
+			this->CurrentRenderer->RemoveActor(this->YAxisActor);
+			this->CurrentRenderer->RemoveActor(this->ActivePlaneActor);
+
+			ASSERT(this->XAxisActor->GetNumberOfConsumers()       == 0);
+			ASSERT(this->YAxisActor->GetNumberOfConsumers()       == 0);
+			ASSERT(this->ActivePlaneActor->GetNumberOfConsumers() == 0);
 
 #ifdef _DEBUG
-			pSaveCurrentRenderer->RemoveActor(this->m_VisHandle);
+			ASSERT(this->m_VisHandle->GetNumberOfConsumers()      != 0);
+			this->CurrentRenderer->RemoveActor(this->m_VisHandle);
+			ASSERT(this->m_VisHandle->GetNumberOfConsumers()      == 0);
 #endif
 		}
 		this->Interactor->Render();
+
+		// must be called after removing axes (this->CurrentRender gets freed)
+		Superclass::SetEnabled(enabling);
 	}
 }
 
