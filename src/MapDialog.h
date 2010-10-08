@@ -45,7 +45,7 @@ public:
 };
 
 
-#define USE_MAP_ACTOR
+// COMMENT: {9/7/2010 3:48:29 PM}#define USE_MAP_ACTOR
 
 #define WM_SHOWCOORDLG      WM_USER + 100
 #define CMapDialogBase ETSLayoutDialog
@@ -120,6 +120,10 @@ protected:
 	void UpdateModelOriginY(void)const;
 	void UpdateModelOriginAngle(void)const;
 
+	void UpdateGridLocationX(void)const;
+	void UpdateGridLocationY(void)const;
+	void UpdateGridLocationZ(void)const;
+
 	void UpdateLength(void)const;
 	void UpdateWidth(void)const;
 
@@ -176,10 +180,6 @@ public:
 	CSpinButtonCtrl m_udXP2; // IDC_SPIN_XP2
 	CSpinButtonCtrl m_udYP2; // IDC_SPIN_YP2
 
-	//{{
-	CButton m_btnZoom; // IDI_ZOOM_REAL
-	//}}
-
 	afx_msg void OnWizardBack();
 
 	afx_msg void OnEnUpdateNodes(int idx);
@@ -228,4 +228,7 @@ public:
 	afx_msg void OnEnChangeRange(UINT nID);
 	std::map<UINT, bool> m_needsExchange;
 	afx_msg void OnSize(UINT nType, int cx, int cy);
+	afx_msg void OnEnKillfocusEditX();
+	afx_msg void OnEnKillfocusEditY();
+	afx_msg void OnEnKillfocusEditZ();
 };
