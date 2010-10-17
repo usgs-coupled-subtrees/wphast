@@ -70,7 +70,7 @@ void TCPPUnit::RunUnitTests(void)
 		double d1 = 0/z;
 #endif
 
-// COMMENT: {8/18/2010 7:04:57 PM}		runner.addTest(TestCPhastInput::suite());
+		runner.addTest(TestCPhastInput::suite());
 // COMMENT: {8/18/2010 7:04:57 PM}		runner.addTest(TestCZone::suite());
 		runner.addTest(TestCGrid::suite());
 		runner.addTest(TestPHAST_Transform::suite());
