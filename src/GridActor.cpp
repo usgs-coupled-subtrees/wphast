@@ -131,6 +131,11 @@ CGridActor::CGridActor(void)
 	this->CubeActor->SetMapper(this->CubeMapper);
 	this->HandleSize = 0.008 / 1.5;
 	this->BoxWidget = vtkBoxWidget2::New();
+// COMMENT: {9/22/2010 3:50:33 PM}	//{{
+// COMMENT: {9/22/2010 3:50:33 PM}	this->BoxWidget->SetTranslationEnabled(0);
+// COMMENT: {9/22/2010 3:50:33 PM}	this->BoxWidget->SetScalingEnabled(0);
+// COMMENT: {9/22/2010 3:50:33 PM}	this->BoxWidget->SetRotationEnabled(0);
+// COMMENT: {9/22/2010 3:50:33 PM}	//}}
 #endif
 }
 

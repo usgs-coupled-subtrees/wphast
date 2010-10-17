@@ -19,7 +19,7 @@ class CGridLineWidget;
 
 class CZone;
 
-// COMMENT: {8/21/2009 6:54:14 PM}#define GRID_WIDGET
+// COMMENT: {10/16/2010 10:39:05 PM}#define GRID_WIDGET
 
 //class CGridActor : public vtkLODActor
 class CGridActor : public vtkAssembly
