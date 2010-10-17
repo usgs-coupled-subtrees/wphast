@@ -1635,6 +1635,7 @@ void CWPhastView::HighlightProp3D(vtkProp3D *pProp3D)
 void CWPhastView::Update(IObserver* pSender, LPARAM lHint, CObject* pHint, vtkObject* pObject)
 {
 	ASSERT(pSender != this);
+	ASSERT(this);
 
 	switch (lHint)
 	{
@@ -2982,3 +2983,15 @@ void CWPhastView::UpdateWellMode(void)
 #endif
 	}
 }
+
+#if defined(_DEBUG) && !defined(__CPPUNIT__)
+void vtkMFCWindow::AssertValid() const
+{
+  CWnd::AssertValid();
+}
+
+void vtkMFCWindow::Dump(CDumpContext& dc) const
+{
+  CWnd::Dump(dc);
+}
+#endif //defined(_DEBUG) && !defined(__CPPUNIT__)
