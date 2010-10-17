@@ -1399,14 +1399,12 @@ bool CZoneActor::GetDefault(void)const
 
 void CZoneActor::Add(CWPhastDoc *pWPhastDoc)
 {
-	pWPhastDoc->GetPropCollection()->AddItem(this);
+	ASSERT(FALSE);
 }
 
 void CZoneActor::Remove(CWPhastDoc *pWPhastDoc)
 {
-	while(pWPhastDoc->GetPropCollection()->IsItemPresent(this)) {
-		pWPhastDoc->GetPropCollection()->RemoveItem(this);
-	}
+	ASSERT(FALSE);
 }
 
 void CZoneActor::SetVisibility(int visibility)
