@@ -109,6 +109,7 @@ public:
 
 	vtkPropCollection *GetPropCollection() const;
 	vtkPropCollection *GetRemovedPropCollection() const;
+	void AddPropAssembly(vtkPropAssembly *pPropAssembly);
 
 #if ((VTK_MAJOR_VERSION >= 5) && (VTK_MINOR_VERSION >= 4))
 	void ExecutePipeline();
@@ -525,6 +526,7 @@ public:
 
 public:
 	afx_msg void OnToolsColors();
+	afx_msg void OnAccelerator32862();
 };
 
 inline vtkPropAssembly* CWPhastDoc::GetPropAssemblyMedia() const

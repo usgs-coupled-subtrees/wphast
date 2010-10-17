@@ -294,6 +294,7 @@ BEGIN_MESSAGE_MAP(CWPhastDoc, CDocument)
 
 	// ID_TOOLS_COLORS
 	ON_COMMAND(ID_TOOLS_COLORS, &CWPhastDoc::OnToolsColors)
+	ON_COMMAND(ID_ACCELERATOR32862, &CWPhastDoc::OnAccelerator32862)
 END_MESSAGE_MAP()
 
 #if defined(WPHAST_AUTOMATION)
@@ -385,6 +386,14 @@ CWPhastDoc::CWPhastDoc()
 
 	// create the prop-assemblies
 	//
+	ASSERT(this->m_pPropAssemblyMedia  == 0);
+	ASSERT(this->m_pPropAssemblyIC     == 0);
+	ASSERT(this->m_pPropAssemblyBC     == 0);
+	ASSERT(this->m_pPropAssemblyWells  == 0);
+	ASSERT(this->m_pPropAssemblyRivers == 0);
+	ASSERT(this->m_pPropAssemblyDrains == 0);
+	ASSERT(this->m_pPropAssemblyZFR    == 0);
+
 	this->m_pPropAssemblyMedia  = vtkPropAssembly::New();
 	this->m_pPropAssemblyIC     = vtkPropAssembly::New();
 	this->m_pPropAssemblyBC     = vtkPropAssembly::New();
@@ -392,14 +401,6 @@ CWPhastDoc::CWPhastDoc()
 	this->m_pPropAssemblyRivers = vtkPropAssembly::New();
 	this->m_pPropAssemblyDrains = vtkPropAssembly::New();	
 	this->m_pPropAssemblyZFR    = vtkPropAssembly::New();
-
-	this->m_pPropCollection->AddItem(this->m_pPropAssemblyMedia);
-	this->m_pPropCollection->AddItem(this->m_pPropAssemblyIC);
-	this->m_pPropCollection->AddItem(this->m_pPropAssemblyBC);
-	this->m_pPropCollection->AddItem(this->m_pPropAssemblyWells);
-	this->m_pPropCollection->AddItem(this->m_pPropAssemblyRivers);
-	this->m_pPropCollection->AddItem(this->m_pPropAssemblyDrains);
-	this->m_pPropCollection->AddItem(this->m_pPropAssemblyZFR);
 
 	// create the axes
 	//
@@ -757,6 +758,12 @@ void CWPhastDoc::Serialize(CArchive& ar)
 		// delay redrawing render window
 		//
 		CDelayRedraw delayRender(::AfxGetMainWnd()->GetActiveWindow(), this);
+
+		// This fixes the BUG that occured when creating a new document
+		// and then opening an existing document causing a crash in 
+		// CWPhastView::Select() called from CWPhastView::Update the
+		// CWPhastView::CurrentProp had probably been deleted
+		this->ClearSelection();
 
 		CHDFMirrorFile* pFile = (CHDFMirrorFile*)ar.GetFile();
 		ASSERT(pFile->GetHID() > 0);
@@ -1342,7 +1349,10 @@ do { \
 	if (PROP_ASSEMBLY_PTR) { \
 		if (vtkPropCollection *pPropCollection = PROP_ASSEMBLY_PTR->GetParts()) { \
 			pPropCollection->RemoveAllItems(); \
+			ASSERT(pPropCollection->GetNumberOfItems() == 0); \
+			PROP_ASSEMBLY_PTR->Modified(); \
 		} \
+		ASSERT(PROP_ASSEMBLY_PTR->GetNumberOfPaths() == 0); \
 	} \
 } while(0)
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -1832,14 +1842,12 @@ void CWPhastDoc::ResizeGrid(const CGridKeyword& keyword)
 	ASSERT(this->m_pUnits);
 	ASSERT(this->m_pModel);
 
-	//{{
 	if (this->m_pMapActor)
 	{
 		CSiteMap2 siteMap2 = this->m_pMapActor->GetSiteMap2();
 		siteMap2.Angle = keyword.m_grid_angle;
 		this->m_pMapActor->SetSiteMap2(siteMap2);
 	}
-	//}}
 
 	// reset the grid
 	//
@@ -1851,9 +1859,19 @@ void CWPhastDoc::ResizeGrid(const CGridKeyword& keyword)
 		pTree->SetGridActor(this->m_pGridActor);
 	}
 
-	// Update default zones etc.
+// COMMENT: {9/7/2010 10:18:15 PM}	// Update default zones etc.
+// COMMENT: {9/7/2010 10:18:15 PM}	//
+// COMMENT: {9/7/2010 10:18:15 PM}	this->UpdateGridDomain();
+
+	//{{
+	// update possible selection
 	//
-	this->UpdateGridDomain();
+	this->Notify(this, WPN_DOMAIN_CHANGED, 0, 0);
+
+// COMMENT: {9/7/2010 10:19:23 PM}	// refresh screen
+// COMMENT: {9/7/2010 10:19:23 PM}	//
+// COMMENT: {9/7/2010 10:19:23 PM}	this->UpdateAllViews(0);
+	//}}
 }
 
 void CWPhastDoc::AddDefaultZone(CZone* pZone)
@@ -2932,20 +2950,28 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 			// store pre-translated polyh
 			Zone_budget data(*it->second);
 			ASSERT(zb_map.find(it->second) != zb_map.end());
-			data.Set_polyh(zb_map[it->second] ? zb_map[it->second]->clone() : it->second->Get_polyh()->clone());
+			ASSERT(zb_map[it->second] || it->second->Get_polyh());
+			if (zb_map[it->second] == 0 && it->second->Get_polyh() == 0)
+			{
+				::AfxMessageBox("Warning: Empty ZONE_FLOW Not Implemented");
+			}
+			else
+			{
+				data.Set_polyh(zb_map[it->second] ? zb_map[it->second]->clone() : it->second->Get_polyh()->clone());
 
-			// not undoable
-			std::auto_ptr< CZoneCreateAction<CZoneFlowRateZoneActor> > pAction(
-				new CZoneCreateAction<CZoneFlowRateZoneActor>(
-					this,
-					it->second->Get_polyh(),
-					::grid_origin,
-					::grid_angle,
-					it->second->Get_polyh()->Get_description()->c_str()
-					)
-				);
-			pAction->GetZoneActor()->SetData(data);
-			pAction->Execute();
+				// not undoable
+				std::auto_ptr< CZoneCreateAction<CZoneFlowRateZoneActor> > pAction(
+					new CZoneCreateAction<CZoneFlowRateZoneActor>(
+						this,
+						it->second->Get_polyh(),
+						::grid_origin,
+						::grid_angle,
+						it->second->Get_polyh()->Get_description()->c_str()
+						)
+					);
+				pAction->GetZoneActor()->SetData(data);
+				pAction->Execute();
+			}
 		}
 
 		// IC
@@ -3551,6 +3577,11 @@ void CWPhastDoc::New(const CNewModel& model)
 	ASSERT(this->m_pPropCollection);
 	ASSERT(this->m_pimpl);
 	ASSERT(this->m_pUnits);
+
+	if (vtkPropCollection *props = this->GetPropCollection())
+	{
+		ASSERT(props->GetNumberOfItems() == 0);
+	}
 
 	// set FlowOnly
 	// set SteadyFlow
@@ -4409,10 +4440,6 @@ void CWPhastDoc::InternalAdd(CZoneActor *pZoneActor, bool bAdd, HTREEITEM hInser
 	{
 		this->Notify(0, WPN_SELCHANGED, 0, pZoneActor);
 	}
-	else
-	{
-		this->Notify(0, WPN_SELCHANGED, 0, 0);
-	}
 
 	// render
 	//
@@ -4424,7 +4451,8 @@ void CWPhastDoc::InternalDelete(CZoneActor *pZoneActor, bool bDelete)
 	ASSERT(pZoneActor);
 	if (pZoneActor == NULL) return;
 
-	if (bDelete) {
+	if (bDelete)
+	{
 		// make sure pZoneActor ref count doesn't go to zero
 		//
 		ASSERT(this->m_pRemovedPropCollection);
@@ -4453,7 +4481,8 @@ void CWPhastDoc::InternalDelete(CZoneActor *pZoneActor, bool bDelete)
 
 			// Update BoxPropertiesDialogBar
 			//
-			if (CBoxPropertiesDialogBar* pBar = static_cast<CBoxPropertiesDialogBar*>(  ((CFrameWnd*)::AfxGetMainWnd())->GetControlBar(IDW_CONTROLBAR_BOXPROPS) ) ) {
+			if (CBoxPropertiesDialogBar* pBar = static_cast<CBoxPropertiesDialogBar*>(  ((CFrameWnd*)::AfxGetMainWnd())->GetControlBar(IDW_CONTROLBAR_BOXPROPS) ) )
+			{
 				pBar->Set(pWPhastView, NULL, this->GetUnits());
 			}
 		}
@@ -4461,7 +4490,8 @@ void CWPhastDoc::InternalDelete(CZoneActor *pZoneActor, bool bDelete)
 
 	// remove from property tree
 	//
-	if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar()) {
+	if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar())
+	{
 		pTree->RemoveZone(pZoneActor);
 	}
 
@@ -4499,10 +4529,8 @@ void CWPhastDoc::Add(CWellActor *pWellActor, HTREEITEM hInsertAfter)
 	{
 		ASSERT(!pPropAssembly->GetParts()->IsItemPresent(pWellActor));
 		pPropAssembly->AddPart(pWellActor);
-		if (!this->GetPropCollection()->IsItemPresent(pPropAssembly))
-		{
-			this->GetPropCollection()->AddItem(pPropAssembly);
-		}
+		ASSERT(pPropAssembly->GetParts()->IsItemPresent(pWellActor));
+		this->AddPropAssembly(pPropAssembly);
 	}
 
 	// add to property tree
@@ -4924,25 +4952,7 @@ void CWPhastDoc::Add(CRiverActor *pRiverActor, HTREEITEM hInsertAfter)
 		ASSERT(!pPropAssembly->GetParts()->IsItemPresent(pRiverActor));
 		pPropAssembly->AddPart(pRiverActor);
 		ASSERT(pPropAssembly->GetParts()->IsItemPresent(pRiverActor));
-		if (!this->GetPropCollection()->IsItemPresent(pPropAssembly))
-		{
-			this->GetPropCollection()->AddItem(pPropAssembly);
-			pos = this->GetFirstViewPosition();
-			while (pos != NULL)
-			{
-				CWPhastView *pView = (CWPhastView*) GetNextView(pos);
-				ASSERT_VALID(pView);
-				if (pView->GetRenderer()->GetViewProps()->IsItemPresent(this->GetPropAssemblyMedia()))
-				{
-					// This is a hack.  Since the default media must exist
-					// the list of props must contain the media assembly
-					// and therefore ExecutePipeline has been called for this
-					// document.  If ExecutePipeline has not been executed
-					// the river assembly will flash
-					pView->GetRenderer()->AddViewProp(pPropAssembly);
-				}
-			}
-		}
+		this->AddPropAssembly(pPropAssembly);
 	}
 
 	// add to property tree
@@ -6339,10 +6349,26 @@ void CWPhastDoc::OnToolsNewPrism()
 					p = new Prism();
 					if (p && p->Read(iss))
 					{
-						//{{
 						this->GetDefaultZone(::domain);
-						//}}
+
 						p->Tidy();
+
+						// this may need to be updated when grid rotation is enabled
+						//
+						const CUnits &units = this->GetUnits();
+						CGridKeyword gridKeyword = this->GetGridKeyword();
+						double scale_h = units.map_horizontal.input_to_si / units.horizontal.input_to_si;
+						double scale_v = units.map_vertical.input_to_si / units.vertical.input_to_si;
+						PHAST_Transform t = PHAST_Transform(
+							gridKeyword.m_grid_origin[0],
+							gridKeyword.m_grid_origin[1],
+							gridKeyword.m_grid_origin[2],
+							gridKeyword.m_grid_angle,
+							scale_h,
+							scale_h,
+							scale_v
+							);
+						p->Convert_coordinates(PHAST_Transform::GRID, &t);
 					}
 					if (pInput->GetErrorCount() != 0)
 					{
@@ -7002,25 +7028,7 @@ void CWPhastDoc::Add(CDrainActor *pDrainActor, HTREEITEM hInsertAfter)
 		ASSERT(!pPropAssembly->GetParts()->IsItemPresent(pDrainActor));
 		pPropAssembly->AddPart(pDrainActor);
 		ASSERT(pPropAssembly->GetParts()->IsItemPresent(pDrainActor));
-		if (!this->GetPropCollection()->IsItemPresent(pPropAssembly))
-		{
-			this->GetPropCollection()->AddItem(pPropAssembly);
-			pos = this->GetFirstViewPosition();
-			while (pos != NULL)
-			{
-				CWPhastView *pView = (CWPhastView*) GetNextView(pos);
-				ASSERT_VALID(pView);
-				if (pView->GetRenderer()->GetViewProps()->IsItemPresent(this->GetPropAssemblyMedia()))
-				{
-					// This is a hack.  Since the default media must exist
-					// the list of props must contain the media assembly
-					// and therefore ExecutePipeline has been called for this
-					// document.  If ExecutePipeline has not been executed
-					// the drain assembly will flash
-					pView->GetRenderer()->AddViewProp(pPropAssembly);
-				}
-			}
-		}
+		this->AddPropAssembly(pPropAssembly);
 	}
 
 	// add to property tree
@@ -7180,6 +7188,18 @@ void CWPhastDoc::ExecutePipeline()
 				vtkProp* prop = props->GetNextProp(csi);
 				if (prop)
 				{
+					if (vtkPropAssembly *pPropAssembly = vtkPropAssembly::SafeDownCast(prop))
+					{
+						if (vtkPropCollection *pPropCollection = pPropAssembly->GetParts())
+						{
+							if (pPropCollection->GetNumberOfItems() == 0)
+							{
+								ASSERT(FALSE);
+								continue;
+							}
+						}
+						TRACE("Adding vtkPropAssembly to Renderer\n");
+					}
 					pView->GetRenderer()->AddViewProp(prop);
 					if (i == 0)
 					{
@@ -7195,3 +7215,62 @@ void CWPhastDoc::ExecutePipeline()
 	}
 }
 #endif
+
+void CWPhastDoc::OnAccelerator32862()
+{
+#if defined(__CPPUNIT__)
+	if (this->m_pMapActor)
+	{
+		//{{
+		CSiteMap2 siteMap2 = this->m_pMapActor->GetSiteMap2();
+		double angle_save = siteMap2.Angle;
+		for (double a = 0; a < 360.0; a+=1.0)
+		{
+			siteMap2.Angle = angle_save + a;
+			this->m_pMapActor->SetSiteMap2(siteMap2);
+			this->Notify(this, WPN_DOMAIN_CHANGED, 0, 0);
+			
+		}
+		siteMap2.Angle = angle_save;
+		this->m_pMapActor->SetSiteMap2(siteMap2);
+		this->Notify(this, WPN_DOMAIN_CHANGED, 0, 0);
+		//}}
+
+// COMMENT: {9/7/2010 10:21:15 PM}		//{{
+// COMMENT: {9/7/2010 10:21:15 PM}		CGridKeyword keyword = this->GetGridKeyword();
+// COMMENT: {9/7/2010 10:21:15 PM}		double angle_save = keyword.m_grid_angle;
+// COMMENT: {9/7/2010 10:21:15 PM}		for (double a = 0; a < 360.0; a+=10.0)
+// COMMENT: {9/7/2010 10:21:15 PM}		{
+// COMMENT: {9/7/2010 10:21:15 PM}			keyword.m_grid_angle = angle_save + a;
+// COMMENT: {9/7/2010 10:21:15 PM}
+// COMMENT: {9/7/2010 10:21:15 PM}			this->ResizeGrid(keyword);
+// COMMENT: {9/7/2010 10:21:15 PM}		}
+// COMMENT: {9/7/2010 10:21:15 PM}		keyword.m_grid_angle = angle_save;
+// COMMENT: {9/7/2010 10:21:15 PM}		this->ResizeGrid(keyword);
+// COMMENT: {9/7/2010 10:21:15 PM}		//}}
+	}
+#endif
+}
+
+void CWPhastDoc::AddPropAssembly(vtkPropAssembly *pPropAssembly)
+{
+	if (!this->GetPropCollection()->IsItemPresent(pPropAssembly))
+	{
+		this->GetPropCollection()->AddItem(pPropAssembly);
+		POSITION pos = this->GetFirstViewPosition();
+		while (pos != NULL)
+		{
+			CWPhastView *pView = (CWPhastView*) GetNextView(pos);
+			ASSERT_VALID(pView);
+			if (pView->GetRenderer()->GetViewProps()->IsItemPresent(this->GetPropAssemblyMedia()))
+			{
+				// This is a hack.  Since the default media must exist
+				// the list of props must contain the media assembly
+				// and therefore ExecutePipeline has been called for this
+				// document.  If ExecutePipeline has not been executed
+				// the river assembly will flash
+				pView->GetRenderer()->AddViewProp(pPropAssembly);
+			}
+		}
+	}
+}
