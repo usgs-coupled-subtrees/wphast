@@ -101,13 +101,6 @@ protected:
 // COMMENT: {4/18/2006 11:11:02 PM}	vtkPolyDataMapper *TriangleMapper;
 // COMMENT: {4/18/2006 11:11:02 PM}	vtkActor          *TriangleActor;
 
-	// active plane
-	vtkPlaneSource      *ActivePlaneSource;
-	vtkPolyData         *ActivePlaneOutline;
-	vtkPolyDataMapper   *ActivePlaneMapper;
-	vtkActor            *ActivePlaneActor;
-
-
 #if defined(_DEBUG)
 	vtkActor          *m_VisHandle;
 	vtkPolyDataMapper *m_VisHandleMapper;

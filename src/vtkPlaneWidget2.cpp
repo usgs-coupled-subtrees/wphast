@@ -28,10 +28,8 @@
 #include <vtkTransform.h>
 
 #include <vtkObjectFactory.h> // reqd by vtkStandardNewMacro
-
-//{{
 #include <vtkArrowSource.h>
-//}}
+
 #include "resource.h"
 
 vtkCxxRevisionMacro(vtkPlaneWidget2, "$Revision$");
@@ -77,37 +75,10 @@ vtkPlaneWidget2::vtkPlaneWidget2(void)
 		this->m_InvisablePosX[i] = pt1[i];
 	}
 
-	// Represent the active plane
-	//
-	this->ActivePlaneSource = vtkPlaneSource::New();
-
-	this->ActivePlaneOutline = vtkPolyData::New();
-
-	vtkPoints *ptsAct = vtkPoints::New();
-	ptsAct->SetNumberOfPoints(4);
-
-	vtkCellArray *outlineAct = vtkCellArray::New();
-	outlineAct->InsertNextCell(4);
-	outlineAct->InsertCellPoint(0);
-	outlineAct->InsertCellPoint(1);
-	outlineAct->InsertCellPoint(2);
-	outlineAct->InsertCellPoint(3);
-
-	this->ActivePlaneOutline->SetPoints(ptsAct);
-	ptsAct->Delete();
-
-	this->ActivePlaneOutline->SetPolys(outlineAct);
-	outlineAct->Delete();
-
-	this->ActivePlaneMapper = vtkPolyDataMapper::New();
-	this->ActivePlaneMapper->SetInput(this->ActivePlaneSource->GetOutput());
-
-	this->ActivePlaneActor = vtkActor::New();
-	this->ActivePlaneActor->SetMapper(this->ActivePlaneMapper);
-	this->ActivePlaneActor->GetProperty()->SetColor(1, 1, 0);
-	this->ActivePlaneActor->GetProperty()->SetOpacity(.7);
-
-	this->PlanePicker->AddPickList(this->ActivePlaneActor);
+	// Add arrow heads to pick list in order to allow
+	// drag/drop/rotate grid
+	this->PlanePicker->AddPickList(this->XAxisActor);
+	this->PlanePicker->AddPickList(this->YAxisActor);
 
 #if defined(_DEBUG)
 	this->m_VisHandleGeometry = vtkSphereSource::New();
@@ -128,20 +99,15 @@ vtkPlaneWidget2::vtkPlaneWidget2(void)
 
 vtkPlaneWidget2::~vtkPlaneWidget2(void)
 {
-	this->XAxisActor->Delete();
-	this->YAxisActor->Delete();
-	this->AxisMapper->Delete();
-	this->AxisSource->Delete();
-
-	this->ActivePlaneSource->Delete();
-	this->ActivePlaneOutline->Delete();
-	this->ActivePlaneMapper->Delete();
-	this->ActivePlaneActor->Delete();
+	if (this->XAxisActor) this->XAxisActor->Delete();
+	if (this->YAxisActor) this->YAxisActor->Delete();
+	if (this->AxisMapper) this->AxisMapper->Delete();
+	if (this->AxisSource) this->AxisSource->Delete();
 
 #if defined(_DEBUG)
-	this->m_VisHandleGeometry->Delete();
-	this->m_VisHandleMapper->Delete();
-	this->m_VisHandle->Delete();
+	if (this->m_VisHandleGeometry) this->m_VisHandleGeometry->Delete();
+	if (this->m_VisHandleMapper)   this->m_VisHandleMapper->Delete();
+	if (this->m_VisHandle)         this->m_VisHandle->Delete();
 #endif
 }
 
@@ -162,11 +128,11 @@ void vtkPlaneWidget2::SetEnabled(int enabling)
 		this->CurrentRenderer->AddActor(this->XAxisActor);
 		this->CurrentRenderer->AddActor(this->YAxisActor);
 
-		// add active plane
-		this->CurrentRenderer->AddActor(this->ActivePlaneActor);
-
 #ifdef _DEBUG
-		this->CurrentRenderer->AddActor(this->m_VisHandle);
+		if (this->m_VisHandle)
+		{
+			this->CurrentRenderer->AddActor(this->m_VisHandle);
+		}
 #endif
 
 		this->Interactor->Render();
@@ -179,15 +145,12 @@ void vtkPlaneWidget2::SetEnabled(int enabling)
 		{
 			ASSERT(this->XAxisActor->GetNumberOfConsumers()       != 0);
 			ASSERT(this->YAxisActor->GetNumberOfConsumers()       != 0);
-			ASSERT(this->ActivePlaneActor->GetNumberOfConsumers() != 0);
 
 			this->CurrentRenderer->RemoveActor(this->XAxisActor);
 			this->CurrentRenderer->RemoveActor(this->YAxisActor);
-			this->CurrentRenderer->RemoveActor(this->ActivePlaneActor);
 
 			ASSERT(this->XAxisActor->GetNumberOfConsumers()       == 0);
 			ASSERT(this->YAxisActor->GetNumberOfConsumers()       == 0);
-			ASSERT(this->ActivePlaneActor->GetNumberOfConsumers() == 0);
 
 #ifdef _DEBUG
 			ASSERT(this->m_VisHandle->GetNumberOfConsumers()      != 0);
@@ -548,7 +511,10 @@ void vtkPlaneWidget2::SetDeltaX(double dx)
 	}
 	double n[3];
 	vtkMath::Cross(v1, v2, n);
-	if ( vtkMath::Normalize(n) == 0.0 ) return;
+	if ( vtkMath::Normalize(n) == 0.0 )
+	{
+		return;
+	}
 
 	// if here ok to change
 	this->PlaneSource->SetPoint1(new_pt1);
@@ -607,7 +573,8 @@ void vtkPlaneWidget2::SetDeltaY(double dy)
 	}
 	double n[3];
 	vtkMath::Cross(v1, v2, n);
-	if ( vtkMath::Normalize(n) == 0.0 ) {
+	if ( vtkMath::Normalize(n) == 0.0 )
+	{
 		return; // Bad plane coordinate system
 	}
 
@@ -716,7 +683,7 @@ void vtkPlaneWidget2::SizeHandles(void)
 		this->ValidPick = 1;
 	}
 
-	double radius = this->vtk3DWidget::SizeHandles(.50);
+	double radius = this->vtk3DWidget::SizeHandles(.10);
 	for(int i = 0; i < 4; ++i)
 	{
 		this->HandleGeometry[i]->SetRadius(radius);
@@ -725,7 +692,7 @@ void vtkPlaneWidget2::SizeHandles(void)
 	if (this->CurrentRenderer)
 	{
 		double *o = this->PlaneSource->GetOrigin();
-		double scale = this->vtk3DWidget::SizeHandles(5.0);
+		double scale = this->vtk3DWidget::SizeHandles(1.0);
 		if (this->XAxisActor)
 		{
 			this->XAxisActor->SetPosition(o);
@@ -737,27 +704,6 @@ void vtkPlaneWidget2::SizeHandles(void)
 			this->YAxisActor->SetPosition(o);
 			this->YAxisActor->SetScale(scale);
 			this->YAxisActor->SetOrientation(0, 0, this->GetAngle() + 90);
-		}
-		if (this->ActivePlaneSource)
-		{
-			double *pt1 = this->PlaneSource->GetPoint1();
-			double *pt2 = this->PlaneSource->GetPoint2();
-			double rad = this->GetRadians();
-
-			float npt1[3];
-			npt1[0] = scale*cos(rad) + o[0];
-			npt1[1] = scale*sin(rad) + o[1];
-			npt1[2] = 0.0;
-
-			float npt2[3];
-			npt2[0] = scale * cos(rad + vtkMath::Pi()/2) + o[0];
-			npt2[1] = scale * sin(rad + vtkMath::Pi()/2) + o[1];
-			npt2[2] = 0.0;
-
-			this->ActivePlaneSource->SetOrigin(o);
-			this->ActivePlaneSource->SetPoint1(npt1[0], npt1[1], npt1[2]);
-			this->ActivePlaneSource->SetPoint2(npt2[0], npt2[1], npt2[2]);
-			this->ActivePlaneSource->Update();
 		}
 #ifdef _DEBUG
 		if (this->m_VisHandleGeometry)

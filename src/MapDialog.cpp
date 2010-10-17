@@ -843,6 +843,7 @@ void CMapDialog::ProcessEvents(vtkObject* caller,
 					TRACE("Spinning\n");
 					self->UpdateGridLocationX();
 					self->UpdateGridLocationY();
+					self->GridKeyword.m_grid_angle = self->m_Widget->GetAngle();
 					self->UpdateModelOriginAngle();
 					break;
 				default:
@@ -1222,7 +1223,10 @@ void CMapDialog::UpdateModelOriginAngle(void)const
 	const TCHAR format[] = "%.2f";
 	static TCHAR buffer[40];
 
-	sprintf(buffer, format, this->m_Widget->GetAngle());
+	double angle_deg = this->m_Widget->GetAngle();
+	ASSERT( fabs(angle_deg - this->GridKeyword.m_grid_angle ) <= ::pow((double)10, (double)-(DBL_DIG-2)));
+
+	sprintf(buffer, format, this->GridKeyword.m_grid_angle);
 	this->GetDlgItem(IDC_EDIT_MO_ANGLE)->SetWindowText(buffer);
 }
 
