@@ -5,7 +5,7 @@
 #include "WPhast.h"
 #include "PropPoints.h"
 
-#include "srcinput/Point.h"
+#include "srcinput/KDtree/Point.h"
 #include "srcinput/Data_source.h"
 
 

@@ -1,6 +1,6 @@
 #include "StdAfx.h"
 #include "PrintFreq.h"
-#include "srcinput/time.h"
+#include "srcinput/timepi.h"
 
 #include "Global.h"
 
