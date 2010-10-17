@@ -77,8 +77,6 @@ private:
 					CBCZoneActor::s_Property[i] = vtkProperty::New();
 					CBCZoneActor::s_Property[i]->SetColor(CBCZoneActor::s_color[i]);
 					CBCZoneActor::s_Property[i]->SetOpacity(0.3);
-// COMMENT: {6/30/2008 3:52:37 PM}					CBCZoneActor::s_Property[i]->SetAmbient(1.0);
-// COMMENT: {6/30/2008 3:52:37 PM}					CBCZoneActor::s_Property[i]->SetDiffuse(1.0);
 				}
 				if (CBCZoneActor::s_OutlineProperty[i] == 0)
 				{
@@ -90,7 +88,6 @@ private:
 					CBCZoneActor::s_OutlineProperty[i]->SetAmbientColor(CBCZoneActor::s_color[i]);
 					CBCZoneActor::s_OutlineProperty[i]->SetRepresentationToWireframe();
 				}
-
 			}
 		}
 		~StaticInit()

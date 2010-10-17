@@ -48,8 +48,6 @@ private:
 				CICHeadZoneActor::s_Property = vtkProperty::New();
 				CICHeadZoneActor::s_Property->SetColor(CICHeadZoneActor::s_color);
 				CICHeadZoneActor::s_Property->SetOpacity(0.3);
-// COMMENT: {6/30/2008 3:52:59 PM}				CICHeadZoneActor::s_Property->SetAmbient(1.0);
-// COMMENT: {6/30/2008 3:52:59 PM}				CICHeadZoneActor::s_Property->SetDiffuse(1.0);
 			}
 			if (CICHeadZoneActor::s_OutlineProperty == 0)
 			{

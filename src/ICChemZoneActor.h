@@ -46,8 +46,6 @@ private:
 				CICChemZoneActor::s_Property = vtkProperty::New();
 				CICChemZoneActor::s_Property->SetColor(CICChemZoneActor::s_color);
 				CICChemZoneActor::s_Property->SetOpacity(0.3);
-// COMMENT: {6/30/2008 3:52:50 PM}				CICChemZoneActor::s_Property->SetAmbient(1.0);
-// COMMENT: {6/30/2008 3:52:50 PM}				CICChemZoneActor::s_Property->SetDiffuse(1.0);
 			}
 			if (CICChemZoneActor::s_OutlineProperty == 0)
 			{
