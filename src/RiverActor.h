@@ -39,6 +39,8 @@ public:
 
 	void Serialize(bool bStoring, hid_t loc_id, const CWPhastDoc* pWPhastDoc);
 
+	void Edit(int point);
+
 protected:
 	CRiverActor(void);
 	~CRiverActor(void);
@@ -47,7 +49,7 @@ protected:
 	CRiver m_river;
 	static vtkProperty *s_HandleProperty;
 	static vtkProperty *s_ConnectorProperty;
-	static vtkFloatingPointType s_color[3];
+	static double s_color[3];
 
 	virtual vtkProperty *GetHandleProperty(void)      { return s_HandleProperty;    };
 	virtual vtkProperty *GetConnectorProperty(void)   { return s_ConnectorProperty; };

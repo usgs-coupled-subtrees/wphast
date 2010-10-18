@@ -24,7 +24,7 @@ vtkCxxRevisionMacro(CICHeadZoneActor, "$Revision$");
 vtkStandardNewMacro(CICHeadZoneActor);
 
 const char CICHeadZoneActor::szHeading[] = "ICHead";
-vtkFloatingPointType CICHeadZoneActor::s_color[3] = {0., 0., 0};
+double CICHeadZoneActor::s_color[3] = {0., 0., 0};
 vtkProperty* CICHeadZoneActor::s_Property = 0;
 vtkProperty* CICHeadZoneActor::s_OutlineProperty = 0;
 
@@ -148,11 +148,10 @@ void CICHeadZoneActor::Add(CWPhastDoc *pWPhastDoc)
 	if (!pWPhastDoc) { ASSERT(FALSE); return; }
 	if (vtkPropAssembly *pPropAssembly = pWPhastDoc->GetPropAssemblyIC())
 	{
+		ASSERT(!pPropAssembly->GetParts()->IsItemPresent(this));
 		pPropAssembly->AddPart(this);
-		if (!pWPhastDoc->GetPropCollection()->IsItemPresent(pPropAssembly))
-		{
-			pWPhastDoc->GetPropCollection()->AddItem(pPropAssembly);
-		}
+		ASSERT(pPropAssembly->GetParts()->IsItemPresent(this));
+		pWPhastDoc->AddPropAssembly(pPropAssembly);
 	}
 #ifdef _DEBUG
 	else ASSERT(FALSE);

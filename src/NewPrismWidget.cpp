@@ -176,7 +176,7 @@ void CNewPrismWidget::SetEnabled(int enabling)
 	this->Interactor->Render();
 }
 
-void CNewPrismWidget::PlaceWidget(vtkFloatingPointType bounds[6])
+void CNewPrismWidget::PlaceWidget(double bounds[6])
 {
 	this->OutlineActor->SetVisibility(1);
 }
@@ -237,7 +237,7 @@ void CNewPrismWidget::OnMouseMove()
 	//    5 => zmax
 	//
 
-	vtkFloatingPointType* bounds = this->Prop3D->GetBounds();
+	double* bounds = this->Prop3D->GetBounds();
 	CUtilities::GetWorldPointAtFixedPlane(this->Interactor, this->CurrentRenderer, this->FixedCoord, bounds[this->FixedPlane], this->FixedPlanePoint);
 
 	if (this->LastPointId > 0)
@@ -248,7 +248,7 @@ void CNewPrismWidget::OnMouseMove()
 		this->Points->Modified();
 	}
 
-	vtkFloatingPointType dim = (bounds[1] - bounds[0]) / 20.0;
+	double dim = (bounds[1] - bounds[0]) / 20.0;
 	this->Cursor3D->SetModelBounds(-dim, dim, -dim, dim, -dim, dim);
 
 	this->Cursor3DActor->SetPosition(this->FixedPlanePoint);
@@ -341,8 +341,8 @@ void CNewPrismWidget::OnLeftButtonDown()
 	//    4 => zmin
 	//    5 => zmax
 	//
-	vtkFloatingPointType* bounds = this->Prop3D->GetBounds();
-	vtkFloatingPointType pt[3];
+	double* bounds = this->Prop3D->GetBounds();
+	double pt[3];
 	CUtilities::GetWorldPointAtFixedPlane(this->Interactor, this->CurrentRenderer, this->FixedCoord, bounds[this->FixedPlane], pt);
 
 	if (this->LastPointId == 0) // first click
@@ -377,12 +377,12 @@ void CNewPrismWidget::OnLeftButtonDown()
 		bool AllowIntersection = false;
 		if (!AllowIntersection)
 		{
-			vtkFloatingPointType p1[3];
-			vtkFloatingPointType p2[3];
-			vtkFloatingPointType x1[3];
-			vtkFloatingPointType x2[3];
-			vtkFloatingPointType u;
-			vtkFloatingPointType v;
+			double p1[3];
+			double p2[3];
+			double x1[3];
+			double x2[3];
+			double u;
+			double v;
 			p1[0] = pt[0];
 			p1[1] = pt[1];
 			p1[2] = pt[2];
@@ -397,7 +397,7 @@ void CNewPrismWidget::OnLeftButtonDown()
 					TRACE("last point crosses\n");
 #ifdef _DEBUG
 					std::ostringstream oss;
-					this->PrintSelf(oss, 0);
+					this->PrintSelf(oss, vtkIndent(0));
 					//TRACE(oss.str().c_str());
 					::OutputDebugStringA(oss.str().c_str());
 #endif
@@ -416,8 +416,8 @@ void CNewPrismWidget::OnLeftButtonDown()
 
 		// avoid adding duplicate points (possible double-click)
 		//
-		vtkFloatingPointType lastpt[3];
-		vtkFloatingPointType sNext[3];
+		double lastpt[3];
+		double sNext[3];
 		this->Points->GetPoint(this->LastPointId-2, lastpt);
 		for (int i = 0; i < 3; ++i) 
 		{
@@ -429,7 +429,7 @@ void CNewPrismWidget::OnLeftButtonDown()
 			TRACE("duplicate point found\n");
 #ifdef _DEBUG
 			std::ostringstream oss;
-			this->PrintSelf(oss, 0);
+			this->PrintSelf(oss, vtkIndent(0));
 			::OutputDebugStringA(oss.str().c_str());
 #endif
 			// stop forwarding event
@@ -464,7 +464,7 @@ void CNewPrismWidget::OnLeftButtonDown()
 
 #ifdef _DEBUG
 	std::ostringstream oss;
-	this->PrintSelf(oss, 0);
+	this->PrintSelf(oss, vtkIndent(0));
 	TRACE(oss.str().c_str());
 #endif
 
@@ -521,10 +521,10 @@ void CNewPrismWidget::PrintSelf(ostream& os, vtkIndent indent)
 		os << indent << "CellId(" << i << ")=" << pts[0] << "," << pts[1] << "," << pts[2] << "," << pts[3] << "\n";
 	}
 	os << "Points\n";	
-	this->Points->PrintSelf(os, 0);
+	this->Points->PrintSelf(os, vtkIndent(0));
 	for (vtkIdType i = 0; i < this->Points->GetNumberOfPoints(); ++i)
 	{
-		vtkFloatingPointType *pt = this->Points->GetPoint(i);
+		double *pt = this->Points->GetPoint(i);
 		os << indent << "PointId(" << i << ")=(" << pt[0] << "," << pt[1] << "," << pt[2] << ")\n";
 	}
 }
@@ -536,7 +536,7 @@ void CNewPrismWidget::OnKeyPress()
 #ifdef _DEBUG
 	{
 		std::ostringstream oss;
-		this->PrintSelf(oss, 1);
+		this->PrintSelf(oss, vtkIndent(1));
 		::OutputDebugStringA("CNewPrismWidget::OnKeyPress IN\n");
 		::OutputDebugStringA(oss.str().c_str());
 	}
@@ -608,7 +608,7 @@ void CNewPrismWidget::OnKeyPress()
 #ifdef _DEBUG
 	{
 		std::ostringstream oss;
-		this->PrintSelf(oss, 1);
+		this->PrintSelf(oss, vtkIndent(1));
 		::OutputDebugStringA("CNewPrismWidget::OnKeyPress OUT\n");
 		::OutputDebugStringA(oss.str().c_str());
 	}

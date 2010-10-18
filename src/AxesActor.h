@@ -10,11 +10,6 @@ class vtkLookupTable;
 struct AxesActorProperties {
 };
 
-#ifndef vtkFloatingPointType
-#define vtkFloatingPointType vtkFloatingPointType
-typedef float vtkFloatingPointType;
-#endif
-
 // 6/20/05 Why is this inherited from vtkOpenGLActor and not vtkActor?
 // It isn't visible if vtkActor is used
 
@@ -24,7 +19,7 @@ public:
 	vtkTypeRevisionMacro(CAxesActor,vtkOpenGLActor);
 	static CAxesActor *New();
 
-	void SetDefaultPositions(const vtkFloatingPointType p[6]);
+	void SetDefaultPositions(const double p[6]);
 	void SetDefaultSize(float s);
 	void SetDefaultTubeDiameter(float d);
 

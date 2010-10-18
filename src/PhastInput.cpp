@@ -115,8 +115,18 @@ void CPhastInput::DoInitialize(void)
 
 void CPhastInput::DoCleanUp(void)
 {
+	extern void Clear_NNInterpolatorList(void);
+	extern void Clear_file_data_map(void);
+	extern void Clear_KDtreeList(void);
+
 	::clean_up();
 	::clean_up_message();
+
+// COMMENT: {9/1/2009 8:21:30 PM}	// clean up shapefile/prism
+// COMMENT: {9/1/2009 8:21:30 PM}	Clear_NNInterpolatorList();
+// COMMENT: {9/1/2009 8:21:30 PM}	Clear_file_data_map();
+// COMMENT: {9/1/2009 8:21:30 PM}	Clear_KDtreeList();
+
 // COMMENT: {12/2/2008 3:00:12 PM}#if !defined(_DEBUG)
 // COMMENT: {12/2/2008 3:00:12 PM}	::PHRQ_free_all();
 // COMMENT: {12/2/2008 3:00:12 PM}#endif

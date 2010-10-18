@@ -22,7 +22,7 @@ vtkCxxRevisionMacro(CWellActor, "$Revision$");
 vtkStandardNewMacro(CWellActor);
 
 const char CWellActor::szHeading[] = "Wells";
-vtkFloatingPointType CWellActor::s_color[3] = {0., 0., 0};
+double CWellActor::s_color[3] = {0., 0., 0};
 vtkProperty* CWellActor::s_Property = 0;
 
 CWellActor::CWellActor(void)
@@ -114,8 +114,8 @@ void CWellActor::SetUnits(const CUnits &units, bool bUpdatePoints/*=true*/)
 
 void CWellActor::UpdatePoints(void)
 {
-	vtkFloatingPointType point1[3];
-	vtkFloatingPointType point2[3];
+	double point1[3];
+	double point2[3];
 
 	point1[0] = point2[0] = this->m_well.x_user;
 	point1[1] = point2[1] = this->m_well.y_user;
@@ -558,24 +558,24 @@ void CWellActor::SetRadius(float r)
 	this->m_pTubeFilter->SetRadius(r);
 }
 
-void CWellActor::SetScale(vtkFloatingPointType x, vtkFloatingPointType y, vtkFloatingPointType z)
+void CWellActor::SetScale(double x, double y, double z)
 {
 	this->m_pTransformScale->Identity();
 	this->m_pTransformScale->Scale(x, y, z);
 	this->UpdatePoints();
 }
 
-void CWellActor::SetScale(vtkFloatingPointType scale[3])
+void CWellActor::SetScale(double scale[3])
 {
 	this->SetScale(scale[0], scale[1], scale[2]);
 }
 
-vtkFloatingPointType* CWellActor::GetScale()
+double* CWellActor::GetScale()
 {
 	return this->m_pTransformScale->GetScale();
 }
 
-void CWellActor::GetScale(vtkFloatingPointType scale[3])
+void CWellActor::GetScale(double scale[3])
 {
 	double d[3];
 	this->m_pTransformScale->GetScale(d);

@@ -8,11 +8,6 @@
 #include "srcinput/Prism.h"
 #include <vtkProperty.h>
 
-#ifndef vtkFloatingPointType
-#define vtkFloatingPointType vtkFloatingPointType
-typedef float vtkFloatingPointType;
-#endif
-
 template<typename T>
 class CZoneCreateAction : public CAction
 {
@@ -52,6 +47,7 @@ CZoneCreateAction<T>::CZoneCreateAction(CWPhastDoc* pDoc, Polyhedron* polyh, dou
 	// set name
 	//
 	CString name;
+	ASSERT(polyh && ::AfxIsValidAddress(polyh, sizeof(Polyhedron)));
 	switch (polyh->get_type())
 	{
 	case Polyhedron::CUBE:
@@ -77,6 +73,7 @@ CZoneCreateAction<T>::CZoneCreateAction(CWPhastDoc* pDoc, const char* name, Poly
 , m_dwInsertAfter(0)
 , m_pZoneActor(0)
 {
+	ASSERT(polyh && ::AfxIsValidAddress(polyh, sizeof(Polyhedron)));
 	this->Create(pDoc, name, polyh, desc, nodeInsertAfter, origin, angle);
 }
 
@@ -89,6 +86,7 @@ CZoneCreateAction<T>::CZoneCreateAction(CWPhastDoc* pDoc, const char* name, Poly
 {
 	double angle = 0.0;
 	double origin[3] = { 0.0, 0.0, 0.0 };
+	ASSERT(polyh && ::AfxIsValidAddress(polyh, sizeof(Polyhedron)));
 	this->Create(pDoc, name, polyh, desc, nodeInsertAfter, origin, angle);
 }
 
@@ -102,6 +100,7 @@ CZoneCreateAction<T>::CZoneCreateAction(CWPhastDoc* pDoc, Polyhedron* polyh, con
 	// set name
 	//
 	CString name;
+	ASSERT(polyh && ::AfxIsValidAddress(polyh, sizeof(Polyhedron)));
 	switch (polyh->get_type())
 	{
 	case Polyhedron::CUBE:

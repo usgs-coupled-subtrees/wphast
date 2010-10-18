@@ -41,7 +41,7 @@ protected:
 protected:
 // COMMENT: {2/19/2009 9:32:44 PM}	Polyhedron* polyh;
 	Zone_budget m_zone_budget;
-	static vtkFloatingPointType s_color[3];
+	static double s_color[3];
 	static vtkProperty* s_Property;
 	static vtkProperty* s_OutlineProperty;
 

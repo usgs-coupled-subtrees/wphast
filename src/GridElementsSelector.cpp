@@ -141,7 +141,7 @@ void CGridElementsSelector::SetEnabled(int enabling)
 	this->Interactor->Render();
 }
 
-void CGridElementsSelector::PlaceWidget(vtkFloatingPointType bounds[6])
+void CGridElementsSelector::PlaceWidget(double bounds[6])
 {
 	// set bounds for the outline
 	//
@@ -154,7 +154,7 @@ void CGridElementsSelector::PlaceWidget(vtkFloatingPointType bounds[6])
 	this->Actor->SetVisibility(1);
 }
 
-// COMMENT: {5/4/2006 8:48:49 PM}void GetWorldPointAtFixedPlane(vtkRenderWindowInteractor *interactor, vtkRenderer *renderer, int fixed, vtkFloatingPointType value, vtkFloatingPointType point[3])
+// COMMENT: {5/4/2006 8:48:49 PM}void GetWorldPointAtFixedPlane(vtkRenderWindowInteractor *interactor, vtkRenderer *renderer, int fixed, double value, double point[3])
 // COMMENT: {5/4/2006 8:48:49 PM}{
 // COMMENT: {5/4/2006 8:48:49 PM}	// fixed 
 // COMMENT: {5/4/2006 8:48:49 PM}	//   0 => X
@@ -174,26 +174,26 @@ void CGridElementsSelector::PlaceWidget(vtkFloatingPointType bounds[6])
 // COMMENT: {5/4/2006 8:48:49 PM}	// get the focal point in world coordinates
 // COMMENT: {5/4/2006 8:48:49 PM}	//
 // COMMENT: {5/4/2006 8:48:49 PM}	vtkCamera *camera = renderer->GetActiveCamera();	
-// COMMENT: {5/4/2006 8:48:49 PM}	vtkFloatingPointType cameraFP[4];
-// COMMENT: {5/4/2006 8:48:49 PM}	camera->GetFocalPoint((vtkFloatingPointType*)cameraFP); cameraFP[3] = 1.0;
+// COMMENT: {5/4/2006 8:48:49 PM}	double cameraFP[4];
+// COMMENT: {5/4/2006 8:48:49 PM}	camera->GetFocalPoint((double*)cameraFP); cameraFP[3] = 1.0;
 // COMMENT: {5/4/2006 8:48:49 PM}
 // COMMENT: {5/4/2006 8:48:49 PM}	// Convert the focal point coordinates to display (or screen) coordinates.
 // COMMENT: {5/4/2006 8:48:49 PM}	//
 // COMMENT: {5/4/2006 8:48:49 PM}	renderer->SetWorldPoint(cameraFP);
 // COMMENT: {5/4/2006 8:48:49 PM}	renderer->WorldToDisplay();
-// COMMENT: {5/4/2006 8:48:49 PM}	vtkFloatingPointType *displayCoords = renderer->GetDisplayPoint();
+// COMMENT: {5/4/2006 8:48:49 PM}	double *displayCoords = renderer->GetDisplayPoint();
 // COMMENT: {5/4/2006 8:48:49 PM}
 // COMMENT: {5/4/2006 8:48:49 PM}	// Convert the selection point into world coordinates.
 // COMMENT: {5/4/2006 8:48:49 PM}	//
 // COMMENT: {5/4/2006 8:48:49 PM}	renderer->SetDisplayPoint(pos[0], pos[1], displayCoords[2]);
 // COMMENT: {5/4/2006 8:48:49 PM}	renderer->DisplayToWorld();
-// COMMENT: {5/4/2006 8:48:49 PM}	vtkFloatingPointType *worldCoords = renderer->GetWorldPoint();
+// COMMENT: {5/4/2006 8:48:49 PM}	double *worldCoords = renderer->GetWorldPoint();
 // COMMENT: {5/4/2006 8:48:49 PM}	if ( worldCoords[3] == 0.0 )
 // COMMENT: {5/4/2006 8:48:49 PM}	{
 // COMMENT: {5/4/2006 8:48:49 PM}		ASSERT(FALSE);
 // COMMENT: {5/4/2006 8:48:49 PM}		return;
 // COMMENT: {5/4/2006 8:48:49 PM}	}
-// COMMENT: {5/4/2006 8:48:49 PM}	vtkFloatingPointType pickPosition[3];
+// COMMENT: {5/4/2006 8:48:49 PM}	double pickPosition[3];
 // COMMENT: {5/4/2006 8:48:49 PM}	for (i = 0; i < 3; ++i)
 // COMMENT: {5/4/2006 8:48:49 PM}	{
 // COMMENT: {5/4/2006 8:48:49 PM}		pickPosition[i] = worldCoords[i] / worldCoords[3];
@@ -264,10 +264,10 @@ void CGridElementsSelector::OnMouseMove(void)
 {
 	if ( this->State == CGridElementsSelector::Selecting )
 	{
-		vtkFloatingPointType bounds[6];
+		double bounds[6];
 		this->GridActor->GetBounds(bounds);
 
-		vtkFloatingPointType endPoint[3];
+		double endPoint[3];
 		CUtilities::GetWorldPointAtFixedPlane(this->Interactor, this->CurrentRenderer, this->FixedCoord, bounds[this->FixedPlane], endPoint);
 
 		for (int i = 0; i < 3; ++i)
@@ -281,7 +281,7 @@ void CGridElementsSelector::OnMouseMove(void)
 		this->OutlineSource->SetBounds(bounds);
 
 		this->GridActor->GetBounds(bounds);		
-		vtkFloatingPointType *scale = this->GridActor->GetScale();
+		double *scale = this->GridActor->GetScale();
 		for (int i = 0; i < 3; ++i)
 		{
 			if (i == this->FixedCoord)
@@ -347,7 +347,7 @@ void CGridElementsSelector::OnLeftButtonDown(void)
 	// largest component vector
 	//
 	double max = 0.0;
-	vtkFloatingPointType viewPlaneNormal[3];
+	double viewPlaneNormal[3];
 	vtkCamera *camera = this->CurrentRenderer->GetActiveCamera();
 	camera->GetViewPlaneNormal(viewPlaneNormal);
 	for (int i = 0; i < 3; ++i)
@@ -382,7 +382,7 @@ void CGridElementsSelector::OnLeftButtonDown(void)
 	//    4 => zmin
 	//    5 => zmax
 	//
-	vtkFloatingPointType* bounds = this->GridActor->GetBounds();
+	double* bounds = this->GridActor->GetBounds();
 	CUtilities::GetWorldPointAtFixedPlane(this->Interactor, this->CurrentRenderer, this->FixedCoord, bounds[this->FixedPlane], this->StartPoint);
 
 	// set bounds for the outline
@@ -402,7 +402,7 @@ void CGridElementsSelector::OnLeftButtonDown(void)
 	{
 		// set bounds for the highlighted elements
 		//
-		vtkFloatingPointType *scale = this->GridActor->GetScale();
+		double *scale = this->GridActor->GetScale();
 		for (int i = 0; i < 3; ++i)
 		{
 			if (i == this->FixedCoord)
@@ -464,8 +464,8 @@ void CGridElementsSelector::SetIBounds(int imin, int imax, int jmin, int jmax, i
 
 void CGridElementsSelector::SetIBounds(int ibounds[6])
 {
-	vtkFloatingPointType *scale = this->GridActor->GetScale();
-	vtkFloatingPointType bounds[6];
+	double *scale = this->GridActor->GetScale();
+	double bounds[6];
 	for (int i = 0; i < 3; ++i)
 	{
 		if (ibounds[2*i] < ibounds[2*i + 1])

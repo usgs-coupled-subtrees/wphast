@@ -26,7 +26,7 @@ vtkCxxRevisionMacro(CMediaZoneActor, "$Revision$");
 vtkStandardNewMacro(CMediaZoneActor);
 
 const char CMediaZoneActor::szHeading[] = "Media";
-vtkFloatingPointType CMediaZoneActor::s_color[3] = {0., 0., 0.};
+double CMediaZoneActor::s_color[3] = {0., 0., 0.};
 vtkProperty* CMediaZoneActor::s_Property = 0;
 vtkProperty* CMediaZoneActor::s_OutlineProperty = 0;
 
@@ -298,18 +298,13 @@ HTREEITEM CMediaZoneActor::GetHTreeItem(void)const
 
 void CMediaZoneActor::Add(CWPhastDoc *pWPhastDoc)
 {
-	if (!pWPhastDoc)
-	{
-		ASSERT(FALSE);
-		return;
-	}
+	if (!pWPhastDoc) { ASSERT(FALSE); return; }
 	if (vtkPropAssembly *pPropAssembly = pWPhastDoc->GetPropAssemblyMedia())
 	{
+		ASSERT(!pPropAssembly->GetParts()->IsItemPresent(this));
 		pPropAssembly->AddPart(this);
-		if (!pWPhastDoc->GetPropCollection()->IsItemPresent(pPropAssembly))
-		{
-			pWPhastDoc->GetPropCollection()->AddItem(pPropAssembly);
-		}
+		ASSERT(pPropAssembly->GetParts()->IsItemPresent(this));
+		pWPhastDoc->AddPropAssembly(pPropAssembly);
 	}
 #ifdef _DEBUG
 	else ASSERT(FALSE);
@@ -318,11 +313,7 @@ void CMediaZoneActor::Add(CWPhastDoc *pWPhastDoc)
 
 void CMediaZoneActor::Remove(CWPhastDoc *pWPhastDoc)
 {
-	if (!pWPhastDoc)
-	{
-		ASSERT(FALSE);
-		return;
-	}
+	if (!pWPhastDoc) { ASSERT(FALSE); return; }
 	if (vtkPropAssembly *pPropAssembly = pWPhastDoc->GetPropAssemblyMedia())
 	{
 		pPropAssembly->RemovePart(this);

@@ -1,7 +1,7 @@
 #pragma once
 #include "Action.h"
 
-#include <vtkIdType.h>
+#include <vtkType.h>
 
 class CWPhastDoc;
 

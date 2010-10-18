@@ -13,7 +13,7 @@ vtkStandardNewMacro(CPrismWidget);
 #include "Global.h"
 #include "Utilities.h"
 
-static vtkFloatingPointType SelectedColor[3] = {1, 0, 0};
+static double SelectedColor[3] = {1, 0, 0};
 
 double RadiusFactor = 0.008;
 
@@ -279,7 +279,7 @@ void CPrismWidget::SetEnabled(int enabling)
 	TRACE("%s, out\n", __FUNCTION__);
 }
 
-void CPrismWidget::PlaceWidget(vtkFloatingPointType bounds[6])
+void CPrismWidget::PlaceWidget(double bounds[6])
 {
 	TRACE("%s, in\n", __FUNCTION__);
 	TRACE("%s, out\n", __FUNCTION__);
@@ -392,7 +392,7 @@ void CPrismWidget::SetProp3D(vtkProp3D* prop3D)
 
 	if (this->ZoneActor = CZoneActor::SafeDownCast(this->Prop3D))
 	{
-		vtkFloatingPointType scale[3];
+		double scale[3];
 		this->ZoneActor->GetScale(scale);
 		this->TransformScale->Identity();
 		this->TransformScale->Scale(scale);
@@ -433,7 +433,7 @@ void CPrismWidget::PositionHandles(void)
 
 			double ptB[3];
 			double ptT[3];
-			vtkFloatingPointType x[3];
+			double x[3];
 			std::vector<vtkSphereSource*>::iterator iterSphereSource = this->SphereSources.begin();
 			std::vector<vtkLineSource*>::iterator iterLineSource = this->LineSources.begin();
 			for (vtkIdType i = 0; i < points->GetNumberOfPoints(); ++i, ++iterSphereSource)
@@ -808,7 +808,7 @@ void CPrismWidget::OnLeftButtonDown(void)
 		std::vector<vtkSphereSource*>::iterator sactor = this->SphereSources.begin();
 		for (; iactor != this->Actors.end(); ++iactor, ++sactor, ++id)
 		{
-			if ((*iactor) == path->GetFirstNode()->GetProp())
+			if ((*iactor) == path->GetFirstNode()->GetViewProp())
 			{
 				if (id % 2)
 				{
@@ -862,8 +862,8 @@ void CPrismWidget::OnLeftButtonDown(void)
 
 				// calculate closest intersection
 				//
-				float pt1[3];
-				float pt2[3];
+				double pt1[3];
+				double pt2[3];
 				this->LineSources[this->LineIndex]->GetPoint1(pt1);
 				this->LineSources[this->LineIndex]->GetPoint2(pt2);
 				double magsq = (pt2[0] - pt1[0]) * (pt2[0] - pt1[0]) + (pt2[1] - pt1[1]) * (pt2[1] - pt1[1]);
@@ -979,7 +979,7 @@ void CPrismWidget::OnMouseMove(void)
 			vtkAssemblyPath *path = this->LinePicker->GetPath();
 			if (path != NULL && !(::GetAsyncKeyState(VK_LBUTTON) < 0) && !(::GetAsyncKeyState(VK_RBUTTON) < 0) && !(::GetAsyncKeyState(VK_MBUTTON) < 0))
 			{
-				float *pickPoint = this->LinePicker->GetPickPosition();
+				double *pickPoint = this->LinePicker->GetPickPosition();
 
 				size_t i = 0;
 				for (; i < this->LineActors.size(); ++i)
@@ -988,8 +988,8 @@ void CPrismWidget::OnMouseMove(void)
 					{
 						// calculate closest intersection
 						//
-						float pt1[3];
-						float pt2[3];
+						double pt1[3];
+						double pt2[3];
 						this->LineSources[i]->GetPoint1(pt1);
 						this->LineSources[i]->GetPoint2(pt2);
 						double magsq = (pt2[0] - pt1[0]) * (pt2[0] - pt1[0]) + (pt2[1] - pt1[1]) * (pt2[1] - pt1[1]);
@@ -1169,7 +1169,7 @@ void CPrismWidget::OnRightButtonDown(void)
 		std::vector<vtkSphereSource*>::iterator sactor = this->SphereSources.begin();
 		for (; iactor != this->Actors.end(); ++iactor, ++sactor, ++id)
 		{
-			if ((*iactor) == path->GetFirstNode()->GetProp())
+			if ((*iactor) == path->GetFirstNode()->GetViewProp())
 			{
 				if (id % 2)
 				{

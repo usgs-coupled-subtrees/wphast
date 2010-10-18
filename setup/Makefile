@@ -1,6 +1,6 @@
 # $Id$
 
-DEVENV := /cygdrive/c/Program\ Files/Microsoft\ Visual\ Studio\ 8/Common7/IDE/devenv
+DEVENV := /cygdrive/c/Program\ Files\ \(x86\)/Microsoft\ Visual\ Studio\ 8/Common7/IDE/devenv
 
 SLN := ../WPhast.sln
 
@@ -22,7 +22,7 @@ LIGHT_FLAGS=\
 
 CSCRIPT = cscript
 
-MERGE_DIR := "C:\Program Files\Common Files\Merge Modules"
+MERGE_DIR := "C:\Program Files (x86)\Common Files\Merge Modules"
 
 MSIVAL2 := /cygdrive/c/Program\ Files/MsiVal2/msival2
 

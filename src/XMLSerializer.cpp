@@ -15,6 +15,7 @@
 
 #include "WPhastDoc.h"
 #include "NewModel.h"
+#include "SiteMap.h" // no longer used - kept only for backward compatibility
 #include "MapActor.h"
 
 // Note: these could be replaced by either of the following if using VS2005
@@ -176,7 +177,7 @@ void CXMLSerializer::AddSiteMapNode(xercesc::DOMDocument* doc, CWPhastDoc* wphas
 	TCHAR szFName[_MAX_FNAME];
 	TCHAR szExt[_MAX_EXT];
 
-	::_tsplitpath(mapActor->m_siteMap.m_fileName.c_str(), szDrive, szDir, szFName, szExt);
+	::_tsplitpath(mapActor->SiteMap2.FileName.c_str(), szDrive, szDir, szFName, szExt);
 
 	CString imageFileName(prefix);
 	imageFileName += ".sitemap";
@@ -213,7 +214,7 @@ void CXMLSerializer::AddSiteMapNode(xercesc::DOMDocument* doc, CWPhastDoc* wphas
 
 	try 
 	{
-		CGlobal::WriteWorldFile(strWorldFileName, mapActor->m_siteMap.GetWorldTransform());
+		CGlobal::WriteWorldFile(strWorldFileName, mapActor->SiteMap2.GetWorldTransform());
 	}
 	catch(...)
 	{
@@ -222,7 +223,7 @@ void CXMLSerializer::AddSiteMapNode(xercesc::DOMDocument* doc, CWPhastDoc* wphas
 
 	std::ostringstream oss;
 	oss.precision(DBL_DIG);
-	oss << mapActor->m_siteMap.m_angle;
+	oss << mapActor->SiteMap2.Angle;
 
 	// SiteMap
 	//
@@ -244,7 +245,7 @@ void CXMLSerializer::AddSiteMapNode(xercesc::DOMDocument* doc, CWPhastDoc* wphas
 	{
 		std::ostringstream oss;
 		std::streamsize p(oss.precision(DBL_DIG));
-		oss << mapActor->m_siteMap.m_angle;
+		oss << mapActor->SiteMap2.Angle;
 		oss.precision(p);
 		element->setAttribute(gAngle, X(oss.str().c_str()));
 	}
@@ -254,7 +255,7 @@ void CXMLSerializer::AddSiteMapNode(xercesc::DOMDocument* doc, CWPhastDoc* wphas
 	{
 		std::ostringstream oss;
 		std::streamsize p(oss.precision(DBL_DIG));
-		oss << mapActor->m_siteMap.m_placement[0];
+		oss << mapActor->SiteMap2.Origin[0];
 		oss.precision(p);
 		element->setAttribute(gPlacement_x, X(oss.str().c_str()));
 	}
@@ -264,7 +265,7 @@ void CXMLSerializer::AddSiteMapNode(xercesc::DOMDocument* doc, CWPhastDoc* wphas
 	{
 		std::ostringstream oss;
 		std::streamsize p(oss.precision(DBL_DIG));
-		oss << mapActor->m_siteMap.m_placement[1];
+		oss << mapActor->SiteMap2.Origin[1];
 		oss.precision(p);
 		element->setAttribute(gPlacement_y, X(oss.str().c_str()));
 	}
@@ -274,7 +275,7 @@ void CXMLSerializer::AddSiteMapNode(xercesc::DOMDocument* doc, CWPhastDoc* wphas
 	{
 		std::ostringstream oss;
 		std::streamsize p(oss.precision(DBL_DIG));
-		oss << mapActor->m_siteMap.m_placement[2];
+		oss << mapActor->SiteMap2.Origin[2];
 		oss.precision(p);
 		element->setAttribute(gPlacement_z, X(oss.str().c_str()));
 	}
@@ -285,99 +286,99 @@ void CXMLSerializer::AddSiteMapNode(xercesc::DOMDocument* doc, CWPhastDoc* wphas
 
 int CXMLSerializer::AddSiteMapNode(CMapActor* mapActor, const char* prefix, xercesc::DOMElement* element)
 {
-	if (!mapActor) return 0;
-
-	TCHAR szDrive[_MAX_DRIVE];
-	TCHAR szDir[_MAX_DIR];
-	TCHAR szFName[_MAX_FNAME];
-	TCHAR szExt[_MAX_EXT];
-
-	::_tsplitpath(mapActor->m_siteMap.m_fileName.c_str(), szDrive, szDir, szFName, szExt);
-
-	CString imageFileName(prefix);
-	imageFileName += ".sitemap";
-	imageFileName += szExt;
-	if (::CopyFile(mapActor->m_szTempFileName, imageFileName, FALSE) == 0)
-	{
-		::AfxMessageBox("Unable to write sitemap image file.");
-	}
-
-	CString strWorldFileName(prefix);
-	strWorldFileName += ".sitemap";
-	CString strExt(szExt);
-	if (strExt.CompareNoCase(_T(".bmp")) == 0)
-	{
-		strWorldFileName += _T(".bpw");
-	}
-	else if (strExt.CompareNoCase(_T(".jpg")) == 0 || strExt.CompareNoCase(_T(".jpeg")) == 0)
-	{
-		strWorldFileName += _T(".jgw");
-	}
-	else if (strExt.CompareNoCase(_T(".png")) == 0)
-	{
-		strWorldFileName += _T(".pgw");
-	}
-	else if (strExt.CompareNoCase(_T(".tif")) == 0 || strExt.CompareNoCase(_T(".tiff")) == 0)
-	{
-		strWorldFileName += _T(".tfw");
-	}
-	else
-	{
-		ASSERT(FALSE);
-		strWorldFileName += _T(".wf");
-	}
-
-	try 
-	{
-		CGlobal::WriteWorldFile(strWorldFileName, mapActor->m_siteMap.GetWorldTransform());
-	}
-	catch(...)
-	{
-		::AfxMessageBox("Unable to write worldfile.");
-	}
-
-	element->setAttribute(gSrc, X(imageFileName));
-	element->setAttribute(gWorldfile, X(strWorldFileName));
-
-	// angle
-	//
-	{
-		std::ostringstream oss;
-		std::streamsize p(oss.precision(DBL_DIG));
-		oss << mapActor->m_siteMap.m_angle;
-		oss.precision(p);
-		element->setAttribute(gAngle, X(oss.str().c_str()));
-	}
-
-	// placement_x
-	//
-	{
-		std::ostringstream oss;
-		std::streamsize p(oss.precision(DBL_DIG));
-		oss << mapActor->m_siteMap.m_placement[0];
-		oss.precision(p);
-		element->setAttribute(gPlacement_x, X(oss.str().c_str()));
-	}
-
-	// placement_y
-	//
-	{
-		std::ostringstream oss;
-		std::streamsize p(oss.precision(DBL_DIG));
-		oss << mapActor->m_siteMap.m_placement[1];
-		oss.precision(p);
-		element->setAttribute(gPlacement_y, X(oss.str().c_str()));
-	}
-
-	// placement_z
-	//
-	{
-		std::ostringstream oss;
-		std::streamsize p(oss.precision(DBL_DIG));
-		oss << mapActor->m_siteMap.m_placement[2];
-		oss.precision(p);
-		element->setAttribute(gPlacement_z, X(oss.str().c_str()));
-	}
+// COMMENT: {8/10/2009 8:23:28 PM}	if (!mapActor) return 0;
+// COMMENT: {8/10/2009 8:23:28 PM}
+// COMMENT: {8/10/2009 8:23:28 PM}	TCHAR szDrive[_MAX_DRIVE];
+// COMMENT: {8/10/2009 8:23:28 PM}	TCHAR szDir[_MAX_DIR];
+// COMMENT: {8/10/2009 8:23:28 PM}	TCHAR szFName[_MAX_FNAME];
+// COMMENT: {8/10/2009 8:23:28 PM}	TCHAR szExt[_MAX_EXT];
+// COMMENT: {8/10/2009 8:23:28 PM}
+// COMMENT: {8/10/2009 8:23:28 PM}	::_tsplitpath(mapActor->m_siteMap.m_fileName.c_str(), szDrive, szDir, szFName, szExt);
+// COMMENT: {8/10/2009 8:23:28 PM}
+// COMMENT: {8/10/2009 8:23:28 PM}	CString imageFileName(prefix);
+// COMMENT: {8/10/2009 8:23:28 PM}	imageFileName += ".sitemap";
+// COMMENT: {8/10/2009 8:23:28 PM}	imageFileName += szExt;
+// COMMENT: {8/10/2009 8:23:28 PM}	if (::CopyFile(mapActor->m_szTempFileName, imageFileName, FALSE) == 0)
+// COMMENT: {8/10/2009 8:23:28 PM}	{
+// COMMENT: {8/10/2009 8:23:28 PM}		::AfxMessageBox("Unable to write sitemap image file.");
+// COMMENT: {8/10/2009 8:23:28 PM}	}
+// COMMENT: {8/10/2009 8:23:28 PM}
+// COMMENT: {8/10/2009 8:23:28 PM}	CString strWorldFileName(prefix);
+// COMMENT: {8/10/2009 8:23:28 PM}	strWorldFileName += ".sitemap";
+// COMMENT: {8/10/2009 8:23:28 PM}	CString strExt(szExt);
+// COMMENT: {8/10/2009 8:23:28 PM}	if (strExt.CompareNoCase(_T(".bmp")) == 0)
+// COMMENT: {8/10/2009 8:23:28 PM}	{
+// COMMENT: {8/10/2009 8:23:28 PM}		strWorldFileName += _T(".bpw");
+// COMMENT: {8/10/2009 8:23:28 PM}	}
+// COMMENT: {8/10/2009 8:23:28 PM}	else if (strExt.CompareNoCase(_T(".jpg")) == 0 || strExt.CompareNoCase(_T(".jpeg")) == 0)
+// COMMENT: {8/10/2009 8:23:28 PM}	{
+// COMMENT: {8/10/2009 8:23:28 PM}		strWorldFileName += _T(".jgw");
+// COMMENT: {8/10/2009 8:23:28 PM}	}
+// COMMENT: {8/10/2009 8:23:28 PM}	else if (strExt.CompareNoCase(_T(".png")) == 0)
+// COMMENT: {8/10/2009 8:23:28 PM}	{
+// COMMENT: {8/10/2009 8:23:28 PM}		strWorldFileName += _T(".pgw");
+// COMMENT: {8/10/2009 8:23:28 PM}	}
+// COMMENT: {8/10/2009 8:23:28 PM}	else if (strExt.CompareNoCase(_T(".tif")) == 0 || strExt.CompareNoCase(_T(".tiff")) == 0)
+// COMMENT: {8/10/2009 8:23:28 PM}	{
+// COMMENT: {8/10/2009 8:23:28 PM}		strWorldFileName += _T(".tfw");
+// COMMENT: {8/10/2009 8:23:28 PM}	}
+// COMMENT: {8/10/2009 8:23:28 PM}	else
+// COMMENT: {8/10/2009 8:23:28 PM}	{
+// COMMENT: {8/10/2009 8:23:28 PM}		ASSERT(FALSE);
+// COMMENT: {8/10/2009 8:23:28 PM}		strWorldFileName += _T(".wf");
+// COMMENT: {8/10/2009 8:23:28 PM}	}
+// COMMENT: {8/10/2009 8:23:28 PM}
+// COMMENT: {8/10/2009 8:23:28 PM}	try 
+// COMMENT: {8/10/2009 8:23:28 PM}	{
+// COMMENT: {8/10/2009 8:23:28 PM}		CGlobal::WriteWorldFile(strWorldFileName, mapActor->m_siteMap.GetWorldTransform());
+// COMMENT: {8/10/2009 8:23:28 PM}	}
+// COMMENT: {8/10/2009 8:23:28 PM}	catch(...)
+// COMMENT: {8/10/2009 8:23:28 PM}	{
+// COMMENT: {8/10/2009 8:23:28 PM}		::AfxMessageBox("Unable to write worldfile.");
+// COMMENT: {8/10/2009 8:23:28 PM}	}
+// COMMENT: {8/10/2009 8:23:28 PM}
+// COMMENT: {8/10/2009 8:23:28 PM}	element->setAttribute(gSrc, X(imageFileName));
+// COMMENT: {8/10/2009 8:23:28 PM}	element->setAttribute(gWorldfile, X(strWorldFileName));
+// COMMENT: {8/10/2009 8:23:28 PM}
+// COMMENT: {8/10/2009 8:23:28 PM}	// angle
+// COMMENT: {8/10/2009 8:23:28 PM}	//
+// COMMENT: {8/10/2009 8:23:28 PM}	{
+// COMMENT: {8/10/2009 8:23:28 PM}		std::ostringstream oss;
+// COMMENT: {8/10/2009 8:23:28 PM}		std::streamsize p(oss.precision(DBL_DIG));
+// COMMENT: {8/10/2009 8:23:28 PM}		oss << mapActor->m_siteMap.m_angle;
+// COMMENT: {8/10/2009 8:23:28 PM}		oss.precision(p);
+// COMMENT: {8/10/2009 8:23:28 PM}		element->setAttribute(gAngle, X(oss.str().c_str()));
+// COMMENT: {8/10/2009 8:23:28 PM}	}
+// COMMENT: {8/10/2009 8:23:28 PM}
+// COMMENT: {8/10/2009 8:23:28 PM}	// placement_x
+// COMMENT: {8/10/2009 8:23:28 PM}	//
+// COMMENT: {8/10/2009 8:23:28 PM}	{
+// COMMENT: {8/10/2009 8:23:28 PM}		std::ostringstream oss;
+// COMMENT: {8/10/2009 8:23:28 PM}		std::streamsize p(oss.precision(DBL_DIG));
+// COMMENT: {8/10/2009 8:23:28 PM}		oss << mapActor->m_siteMap.m_placement[0];
+// COMMENT: {8/10/2009 8:23:28 PM}		oss.precision(p);
+// COMMENT: {8/10/2009 8:23:28 PM}		element->setAttribute(gPlacement_x, X(oss.str().c_str()));
+// COMMENT: {8/10/2009 8:23:28 PM}	}
+// COMMENT: {8/10/2009 8:23:28 PM}
+// COMMENT: {8/10/2009 8:23:28 PM}	// placement_y
+// COMMENT: {8/10/2009 8:23:28 PM}	//
+// COMMENT: {8/10/2009 8:23:28 PM}	{
+// COMMENT: {8/10/2009 8:23:28 PM}		std::ostringstream oss;
+// COMMENT: {8/10/2009 8:23:28 PM}		std::streamsize p(oss.precision(DBL_DIG));
+// COMMENT: {8/10/2009 8:23:28 PM}		oss << mapActor->m_siteMap.m_placement[1];
+// COMMENT: {8/10/2009 8:23:28 PM}		oss.precision(p);
+// COMMENT: {8/10/2009 8:23:28 PM}		element->setAttribute(gPlacement_y, X(oss.str().c_str()));
+// COMMENT: {8/10/2009 8:23:28 PM}	}
+// COMMENT: {8/10/2009 8:23:28 PM}
+// COMMENT: {8/10/2009 8:23:28 PM}	// placement_z
+// COMMENT: {8/10/2009 8:23:28 PM}	//
+// COMMENT: {8/10/2009 8:23:28 PM}	{
+// COMMENT: {8/10/2009 8:23:28 PM}		std::ostringstream oss;
+// COMMENT: {8/10/2009 8:23:28 PM}		std::streamsize p(oss.precision(DBL_DIG));
+// COMMENT: {8/10/2009 8:23:28 PM}		oss << mapActor->m_siteMap.m_placement[2];
+// COMMENT: {8/10/2009 8:23:28 PM}		oss.precision(p);
+// COMMENT: {8/10/2009 8:23:28 PM}		element->setAttribute(gPlacement_z, X(oss.str().c_str()));
+// COMMENT: {8/10/2009 8:23:28 PM}	}
 
 
 	return 0;
@@ -410,7 +411,15 @@ int CXMLSerializer::load(std::istream& is, CNewModel& model)
 	CSiteMap siteMap;
 	if (this->LoadSiteMap(doc, siteMap) == 0)
 	{
-		model.SetSiteMap(siteMap);
+		CSiteMap2 siteMap2;
+		siteMap2.Angle    = siteMap.m_angle;
+		siteMap2.FileName = siteMap.m_fileName;
+		for (int i = 0; i < 3; ++i)
+		{
+			siteMap2.Origin[i] = siteMap.m_placement[i];
+		}
+		siteMap2.SetWorldTransform(siteMap.GetWorldTransform());
+		model.SetSiteMap2(siteMap2);
 	}
 
 	return 0;

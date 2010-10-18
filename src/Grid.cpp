@@ -167,6 +167,10 @@ void CGrid::InternalCopy(const struct grid& p)
 	
 	// uniform
 	this->uniform = p.uniform;
+	if (this->m_coordinates.size() == 2)
+	{
+		this->uniform = TRUE;
+	}
 	
 	// uniform_expanded
 	this->uniform_expanded = FALSE;  // always shallow

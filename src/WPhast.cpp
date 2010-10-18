@@ -42,7 +42,6 @@ BEGIN_MESSAGE_MAP(CWPhastApp, CWinApp)
 	ON_COMMAND(ID_FILE_NEW, OnFileNew)
 END_MESSAGE_MAP()
 
-
 // CWPhastApp construction
 
 CWPhastApp::CWPhastApp()
@@ -90,6 +89,9 @@ BOOL CWPhastApp::InitInstance()
 // COMMENT: {11/26/2008 4:44:28 PM}		tmpDbgFlag |= _CRTDBG_CHECK_ALWAYS_DF;
 // COMMENT: {11/26/2008 4:44:28 PM}		_CrtSetDbgFlag(tmpDbgFlag);
 
+// COMMENT: {8/21/2009 4:29:28 PM}		// set this to avoid warning display window
+// COMMENT: {8/21/2009 4:29:28 PM}		// 
+// COMMENT: {8/21/2009 4:29:28 PM}		vtkObject::SetGlobalWarningDisplay(0);
 	}
 #endif
 #if defined(_DEBUG)
@@ -101,6 +103,13 @@ BOOL CWPhastApp::InitInstance()
 	// CHECKOUT => TRACE(traceAppMsg, 0, _T("Warning: could not parse the path '%s'.\n"), "TESTING");
 	///g_Allocator.GetProcess()->m_bFileNameAndLineNo = true;
 #endif
+
+#if !defined(_DEBUG)
+		// set this to avoid warning display window
+		// 
+		vtkObject::SetGlobalWarningDisplay(0);
+#endif
+
 
 	// Check requirements
 	// ie  Version 4.71 and later of Shlwapi.dll
@@ -348,13 +357,15 @@ void CWPhastApp::OnFileNew()
 					CDelayRedraw delay(this->m_pMainWnd, pDoc);
 					pDoc->New(CNewModel::Default());
 					pDoc->SetModifiedFlag(FALSE);
+					pDoc->ExecutePipeline();
 					return;
 				}
 				else if (dlg.GetAction() == CStartupDialog::SDA_IMPORT_FILE)
 				{
 					CDelayRedraw delay(this->m_pMainWnd, pDoc);
 					pDoc->DoImport(dlg.GetFileName());
-					pDoc->SetModifiedFlag(FALSE);
+// COMMENT: {9/10/2009 10:43:53 PM}					pDoc->SetModifiedFlag(FALSE);
+					pDoc->ExecutePipeline();
 					return;
 				}
 			}
@@ -375,12 +386,14 @@ void CWPhastApp::OnFileNew()
 				CDelayRedraw delay(this->m_pMainWnd, pDoc);
 				CNewModel model = wizard.GetModel();
 				pDoc->New(model);
+				pDoc->ExecutePipeline();
 			}
 			else
 			{
 				CDelayRedraw delay(this->m_pMainWnd, pDoc);
 				pDoc->New(CNewModel::Default());
 				pDoc->SetModifiedFlag(FALSE);
+				pDoc->ExecutePipeline();
 			}
 		}
 	}

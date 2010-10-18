@@ -20,10 +20,14 @@
 
 #include "CoorDialog.h"
 #include "Global.h"
-#include "MapImageActor.h"
+#include "MapImageActor2.h"
+#include "MapActor.h"
 #include "vtkInteractorStyleImage2.h"
 #include "vtkPlaneWidget2.h"
 #include "Marker.h"
+
+// for tracing CMapDialog events
+CTraceCategory CMAPDIALOG("CMapDialog", 0);
 
 #if !defined(IDC_HEADER_BORDER)
 #define IDC_HEADER_BORDER 1133
@@ -132,11 +136,6 @@ static UINT s_GridIDs[] =
 	this->GetDlgItem(ID)->SendMessage(EM_SETSEL, 0, -1)
 
 
-#ifndef vtkFloatingPointType
-#define vtkFloatingPointType vtkFloatingPointType
-typedef float vtkFloatingPointType;
-#endif
-
 #define TITLEX                 22
 #define TITLEY                 10
 #define SUBTITLEX              44
@@ -169,6 +168,7 @@ CMapDialog::CMapDialog(CWnd* pParent /*=NULL*/)
 	, m_strHeaderSubTitle(_T("MDS_Point1_SUBTITLE"))
 	, m_Point1Actor(0)
 	, m_Point2Actor(0)
+	, Transform(0)
 {
 	// IDC_X_NODES_EDIT - IDC_Z_NODES_EDIT must be contiguous
 	//
@@ -179,11 +179,13 @@ CMapDialog::CMapDialog(CWnd* pParent /*=NULL*/)
 	// initialize grid
 	for (int i = 0; i < 3; ++i)
 	{
-		this->m_grid[i].coord[0]    = 0.0;
-		this->m_grid[i].coord[1]    = 0.0;
-		this->m_grid[i].count_coord = 2;
-		this->m_grid[i].c           = 'x' + i;
-		this->m_grid[i].uniform     = TRUE;
+		this->GridKeyword.m_grid[i].coord[0]    = 0.0;
+		this->GridKeyword.m_grid[i].coord[1]    = 0.0;
+		this->GridKeyword.m_grid[i].count_coord = 2;
+		this->GridKeyword.m_grid[i].c           = 'x' + i;
+		this->GridKeyword.m_grid[i].uniform     = TRUE;
+		this->GridKeyword.m_grid_angle          = 0.;
+		this->GridKeyword.m_grid_origin[i]      = 0.;
 	}
 
 	// adjust layout
@@ -205,7 +207,7 @@ CMapDialog::CMapDialog(CWnd* pParent /*=NULL*/)
 	this->m_Widget->GetSelectedHandleProperty()->SetOpacity(0.75);
 	for (int i = 0; i < 3; ++i)
 	{
-		this->m_Widget->SetResolution(i, this->m_grid[i].count_coord - 1);
+		this->m_Widget->SetResolution(i, this->GridKeyword.m_grid[i].count_coord - 1);
 	}
 	this->m_Widget->SizeHandles();
 
@@ -217,20 +219,23 @@ CMapDialog::CMapDialog(CWnd* pParent /*=NULL*/)
 
 	// mouse events
 	//
-	this->m_RenderWindowInteractor->AddObserver(vtkCommand::MouseMoveEvent, this->m_CallbackCommand);
-	this->m_RenderWindowInteractor->AddObserver(vtkCommand::LeftButtonPressEvent, this->m_CallbackCommand);
-	this->m_RenderWindowInteractor->AddObserver(vtkCommand::LeftButtonReleaseEvent, this->m_CallbackCommand);
-
-	//{{ {4/18/2006 10:05:59 PM}
-	this->m_RenderWindowInteractor->AddObserver(vtkCommand::ModifiedEvent, this->m_CallbackCommand);
-	//}} {4/18/2006 10:05:59 PM}
+	this->m_RenderWindowInteractor->AddObserver(vtkCommand::MouseMoveEvent,         this->m_CallbackCommand, 1);
+	this->m_RenderWindowInteractor->AddObserver(vtkCommand::LeftButtonPressEvent,   this->m_CallbackCommand, 1);
+	this->m_RenderWindowInteractor->AddObserver(vtkCommand::LeftButtonReleaseEvent, this->m_CallbackCommand, 1);
+	this->m_RenderWindowInteractor->AddObserver(vtkCommand::ModifiedEvent,          this->m_CallbackCommand, 1);
 
 	if (this->m_Style) this->m_RenderWindowInteractor->SetInteractorStyle(this->m_Style);
 
-	this->m_MapImageActor = CMapImageActor::New();
+	this->m_MapImageActor2 = CMapImageActor2::New();
+#if defined(USE_MAP_ACTOR)
+	this->MapActor = CMapActor::New();
+	this->MapActor->GetProperty()->SetOpacity(0.2);
+#endif
 
 	this->m_Point1Actor = CMarker::New();
 	this->m_Point2Actor = CMarker::New();
+
+	this->Transform = vtkTransform::New();
 }
 
 CMapDialog::~CMapDialog()
@@ -245,9 +250,13 @@ CMapDialog::~CMapDialog()
 	if (this->m_Widget) this->m_Widget->Delete();
 	if (this->m_CallbackCommand) this->m_CallbackCommand->Delete();
 
-	this->m_MapImageActor->Delete();
+	this->m_MapImageActor2->Delete();
+#if defined(USE_MAP_ACTOR)
+	this->MapActor->Delete();
+#endif
 	this->m_Point1Actor->Delete();
 	this->m_Point2Actor->Delete();
+	this->Transform->Delete();
 }
 
 void CMapDialog::DoDataExchange(CDataExchange* pDX)
@@ -261,10 +270,6 @@ void CMapDialog::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_SPIN_YP1, m_udYP1);
 	DDX_Control(pDX, IDC_SPIN_XP2, m_udXP2);
 	DDX_Control(pDX, IDC_SPIN_YP2, m_udYP2);
-
-// COMMENT: {4/13/2006 5:24:24 PM}	//{{
-// COMMENT: {4/13/2006 5:24:24 PM}	DDX_Control(pDX, IDC_ZOOM_BUTTON, m_btnZoom);	
-// COMMENT: {4/13/2006 5:24:24 PM}	//}}
 
 	switch (this->m_CurrentState)
 	{
@@ -302,6 +307,8 @@ void CMapDialog::DDX_Point1(CDataExchange* pDX)
 		this->m_point1.y_val = y;
 		this->m_point1.x_val_defined = true;
 		this->m_point1.y_val_defined = true;
+		this->m_point1.x_pixel = pixelx;
+		this->m_point1.y_pixel = pixely;
 	}
 }
 
@@ -325,44 +332,41 @@ void CMapDialog::DDX_Point2(CDataExchange* pDX)
 		this->m_point2.y_val = y;
 		this->m_point2.x_val_defined = true;
 		this->m_point2.y_val_defined = true;
+		this->m_point2.x_pixel = pixelx;
+		this->m_point2.y_pixel = pixely;
 
 		{
-			vtkFloatingPointType *dataSpacing = this->m_MapImageActor->GetImageReader2()->GetDataSpacing();
-			vtkFloatingPointType *dataOrigin  = this->m_MapImageActor->GetImageReader2()->GetDataOrigin();
-			int                  *dataExtent  = this->m_MapImageActor->GetDataExtent();
-			ASSERT(dataSpacing[0] != 0);
-			ASSERT(dataSpacing[1] != 0);
-			ASSERT(dataSpacing[2] != 0);
-
-			double cy = (double) dataExtent[3];
-
-			double xpix[2];
-			double ypix[2];
-
-			// x_world and y_world are set in ProcessEvents
-			// or in OnEnUpdateEdit[12]p[12]
-			xpix[0] = (this->m_point1.x_world - dataOrigin[0]) / (dataSpacing[0]);
-			xpix[1] = (this->m_point2.x_world - dataOrigin[0]) / (dataSpacing[0]);
-
-			ypix[0] = (this->m_point1.y_world - dataOrigin[1]) / (dataSpacing[1]);
-			ypix[1] = (this->m_point2.y_world - dataOrigin[1]) / (dataSpacing[1]);
-
 			double spacing[3];
-			ASSERT( (xpix[1] - xpix[0]) != 0);
-			ASSERT( (ypix[1] - ypix[0]) != 0);
-			spacing[0] = (this->m_point2.x_val - this->m_point1.x_val) / (xpix[1] - xpix[0]);
-			spacing[1] = (this->m_point2.y_val - this->m_point1.y_val) / (ypix[1] - ypix[0]);;
-			spacing[2] = 1.0;
-			this->m_worldTransform.SetDataSpacing(spacing);
+
+			spacing[0] = (this->m_point2.x_val - this->m_point1.x_val) / (this->m_point2.x_pixel - this->m_point1.x_pixel);
+			spacing[1] = (this->m_point2.y_val - this->m_point1.y_val) / (this->m_point2.y_pixel - this->m_point1.y_pixel);
+			spacing[2] = 1.;
+
+#if defined(USE_MAP_ACTOR)
+			int *dataExtent  = this->m_MapImageActor2->GetDataExtent();
+			int *dataExtent2  = this->MapActor->GetDataExtent();
+			for (int i = 0; i < 3; ++i)
+			{
+				ASSERT(dataExtent[i] == dataExtent2[i]);
+			}
+#else
+			int *dataExtent  = this->m_MapImageActor2->GetDataExtent();
+#endif
+
+			double xest1 = this->m_point1.x_val - spacing[0] * this->m_point1.x_pixel;
+			double xest2 = this->m_point2.x_val - spacing[0] * this->m_point2.x_pixel;
+
+			double yest1 = (this->m_point1.y_val - spacing[1] * this->m_point1.y_pixel) + dataExtent[3] * spacing[1];
+			double yest2 = (this->m_point2.y_val - spacing[1] * this->m_point2.y_pixel) + dataExtent[3] * spacing[1];
 
 			double upperleft[3];
-			upperleft[0] = this->m_point1.x_val - spacing[0] * xpix[0];
-			upperleft[1] = this->m_point1.y_val + spacing[1] * (cy - ypix[0]);
-			upperleft[2] = 0;
-			this->m_worldTransform.SetUpperLeft(upperleft);
+			upperleft[0] = (xest1 + xest2)/2.;
+			upperleft[1] = (yest1 + yest2)/2.;
+			upperleft[2] = 0.;
 
-			// TODO validate site map
-			this->m_siteMap.SetWorldTransform(this->m_worldTransform);
+			this->m_worldTransform.SetDataSpacing(spacing[0], spacing[1], spacing[2]);
+			this->m_worldTransform.SetUpperLeft(upperleft[0], upperleft[1], upperleft[2]);
+			this->m_siteMap2.SetWorldTransform(this->m_worldTransform);
 		}
 	}
 }
@@ -370,7 +374,8 @@ void CMapDialog::DDX_Point2(CDataExchange* pDX)
 void CMapDialog::DDX_Grid(CDataExchange* pDX)
 {
 	// Angle
-	::DDX_Text(pDX, IDC_EDIT_MO_ANGLE, this->m_siteMap.m_angle);
+	::DDX_Text(pDX, IDC_EDIT_MO_ANGLE, this->m_siteMap2.Angle);
+	this->GridKeyword.m_grid_angle = this->m_siteMap2.Angle;
 
 	if (pDX->m_bSaveAndValidate)
 	{
@@ -379,15 +384,14 @@ void CMapDialog::DDX_Grid(CDataExchange* pDX)
 		::DDX_Text(pDX, IDC_EDIT_MO_X, map_coor[0]);
 		::DDX_Text(pDX, IDC_EDIT_MO_Y, map_coor[1]);
 
+		this->GridKeyword.m_grid_origin[0] = map_coor[0];
+		this->GridKeyword.m_grid_origin[1] = map_coor[1];
+
 		int nodes[3];
 		double minimum[3];
 		double length[3];
 		for (int i = 0; i < 3; ++i)
 		{
-			IDC_X_NODES_EDIT;
-			IDC_Y_NODES_EDIT;
-			IDC_Z_NODES_EDIT;
-
 			// nodes
 			DDX_Text(pDX, FIRST_NODE_ID + i, nodes[i]);
 			if (nodes[i] < 2)
@@ -395,10 +399,6 @@ void CMapDialog::DDX_Grid(CDataExchange* pDX)
 				::AfxMessageBox("Each direction must have at least two nodes.");
 				pDX->Fail();
 			}
-
-			IDC_EDIT_X;
-			IDC_EDIT_Y;
-			IDC_EDIT_Z;
 
 			// minimums
 			DDX_Text(pDX, IDC_EDIT_X + i, minimum[i]);
@@ -430,48 +430,51 @@ void CMapDialog::DDX_Grid(CDataExchange* pDX)
 
 		for (int i = 0; i < 3; ++i)
 		{
-			this->m_grid[i].count_coord = nodes[i];
+			this->GridKeyword.m_grid[i].count_coord = nodes[i];
 			if (length[i] < 0)
 			{
-				this->m_grid[i].coord[0] = minimum[i] + length[i];
-				this->m_grid[i].coord[1] = minimum[i];
+				this->GridKeyword.m_grid[i].coord[0] = minimum[i] + length[i];
+				this->GridKeyword.m_grid[i].coord[1] = minimum[i];
 			}
 			else
 			{
-				this->m_grid[i].coord[0] = minimum[i];
-				this->m_grid[i].coord[1] = minimum[i] + length[i];
+				this->GridKeyword.m_grid[i].coord[0] = minimum[i];
+				this->GridKeyword.m_grid[i].coord[1] = minimum[i] + length[i];
 			}
-			ASSERT( this->m_grid[i].coord[0] < this->m_grid[i].coord[1] );
+			ASSERT( this->GridKeyword.m_grid[i].coord[0] < this->GridKeyword.m_grid[i].coord[1] );
 		}
 
 		// set placement
-		this->m_siteMap.m_placement[0] = map_coor[0] - minimum[0];
-		this->m_siteMap.m_placement[1] = map_coor[1] - minimum[1];
-		this->m_siteMap.m_placement[2] = 0.0;
+		this->m_siteMap2.Origin[0] = map_coor[0];
+		this->m_siteMap2.Origin[1] = map_coor[1];
+		this->m_siteMap2.Origin[2] = 0.0;
 	}
 	else
 	{
 		for (int i = 0; i < 3; ++i)
 		{
 			// nodes
-			this->m_Widget->SetResolution(i, this->m_grid[i].count_coord - 1);
+			this->m_Widget->SetResolution(i, this->GridKeyword.m_grid[i].count_coord - 1);
 			this->UpdateNodes(i);
 
+
 			// minimums
-			DDX_Text(pDX, IDC_EDIT_X + i, this->m_grid[i].coord[0]);
+			DDX_Text(pDX, IDC_EDIT_X + i, this->GridKeyword.m_grid[i].coord[0]);
 		}
 
 		double defaultZ = 1.0;
 		DDX_Text(pDX, IDC_EDIT_DEPTH, defaultZ);
 
-		//{{
-		//BUGBUG check to see if setting a world file breaks this
+		// BUGBUG check to see if setting a world file breaks this
 		this->UpdateLength();
 		this->UpdateWidth();
-		this->UpdateModelOriginX();
-		this->UpdateModelOriginY();
-		this->UpdateModelOriginAngle();
-		//}}
+
+		this->UpdateGridLocationX();
+		this->UpdateGridLocationY();
+
+		DDX_Text(pDX, IDC_EDIT_MO_X,     this->GridKeyword.m_grid_origin[0]);
+		DDX_Text(pDX, IDC_EDIT_MO_Y,     this->GridKeyword.m_grid_origin[1]);
+		DDX_Text(pDX, IDC_EDIT_MO_ANGLE, this->GridKeyword.m_grid_angle);
 	}
 }
 
@@ -485,9 +488,15 @@ BEGIN_MESSAGE_MAP(CMapDialog, CMapDialogBase)
 	ON_WM_PAINT()
 	ON_WM_SETCURSOR()
 	ON_WM_HELPINFO()
-	ON_EN_KILLFOCUS(IDC_EDIT_MO_ANGLE, OnEnKillfocusEditMoAngle)
-	ON_EN_KILLFOCUS(IDC_EDIT_MO_Y, OnEnKillfocusEditMoY)
+
 	ON_EN_KILLFOCUS(IDC_EDIT_MO_X, OnEnKillfocusEditMoX)
+	ON_EN_KILLFOCUS(IDC_EDIT_MO_Y, OnEnKillfocusEditMoY)
+	ON_EN_KILLFOCUS(IDC_EDIT_MO_ANGLE, OnEnKillfocusEditMoAngle)
+
+	ON_EN_KILLFOCUS(IDC_EDIT_X, &CMapDialog::OnEnKillfocusEditX)
+	ON_EN_KILLFOCUS(IDC_EDIT_Y, &CMapDialog::OnEnKillfocusEditY)
+	ON_EN_KILLFOCUS(IDC_EDIT_Z, &CMapDialog::OnEnKillfocusEditZ)
+
 	ON_EN_KILLFOCUS(IDC_EDIT_LENGTH, OnEnKillfocusEditLength)
 	ON_EN_KILLFOCUS(IDC_EDIT_WIDTH, OnEnKillfocusEditWidth)
 	ON_EN_KILLFOCUS(IDC_X_NODES_EDIT, OnEnKillfocusXNodesEdit)
@@ -565,15 +574,9 @@ BOOL CMapDialog::OnInitDialog()
 
 	this->SetState(this->m_CurrentState);
 
-// COMMENT: {4/13/2006 5:24:08 PM}	//{{
-// COMMENT: {4/13/2006 5:24:08 PM}	HICON h = ::LoadIcon(::AfxGetInstanceHandle(), MAKEINTRESOURCE(IDI_ZOOM_REAL));
-// COMMENT: {4/13/2006 5:24:08 PM}	m_btnZoom.SetIcon(h);
-// COMMENT: {4/13/2006 5:24:08 PM}	//}}
-
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
 }
-
 
 int CMapDialog::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
@@ -596,8 +599,13 @@ int CMapDialog::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (!this->m_RenderWindowInteractor)
 		return -1;
 
-	if (!this->m_MapImageActor)
+	if (!this->m_MapImageActor2)
 		return -1;
+
+#if defined(USE_MAP_ACTOR)
+	if (!this->MapActor)
+		return -1;
+#endif
 
 	// setup the parent window
 	this->m_RenderWindow->AddRenderer(this->m_Renderer);
@@ -609,10 +617,27 @@ int CMapDialog::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 int CMapDialog::SetFileName(const char *filename)
 {
-	if (this->m_MapImageActor->SetFileName(filename) == 1) {
-		this->m_Renderer->AddActor( this->m_MapImageActor );
+#if defined(USE_MAP_ACTOR)
+	if (this->MapActor->SetFileName(filename))
+	{
+		this->m_siteMap2.FileName = filename;
+
+		CWorldTransform trans;
+		trans.SetDataSpacing(1., 1., 1.);
+		trans.SetUpperLeft(0., this->MapActor->GetDataExtent()[3], 0.);
+		this->m_siteMap2.SetWorldTransform(trans);
+
+		this->MapActor->SetSiteMap2(this->m_siteMap2);
+
+		this->m_Renderer->AddActor(this->MapActor);
+		// return 1; // success
+	}
+#endif
+	if (this->m_MapImageActor2->SetFileName(filename) == 1)
+	{
+		this->m_Renderer->AddActor( this->m_MapImageActor2 );
 		// BUGBUG: consolidate SetFileName and SetWorldFileName into SetSiteMap
-		this->m_siteMap.m_fileName = filename;
+		this->m_siteMap2.FileName = filename;
 		return 1; // success
 	}
 	return 0; // failure
@@ -625,13 +650,16 @@ int CMapDialog::SetWorldFileName(const char *filename)
 
 	if (CGlobal::LoadWorldFile(filename, wtrans) == 0)
 	{
-		nreturn = this->m_MapImageActor->SetWorldTransform(wtrans);
+#if defined(USE_MAP_ACTOR)
+		nreturn = this->MapActor->SetWorldTransform(wtrans);
+#endif
+		nreturn = this->m_MapImageActor2->SetWorldTransform(wtrans);
 		if (nreturn == 1)
 		{
 			// TODO get rid of this->m_worldTransform
 			this->m_worldTransform = wtrans;
-			this->m_siteMap.SetWorldTransform(wtrans);
-			this->m_Widget->SetInput( this->m_MapImageActor->GetInput() );
+			this->m_siteMap2.SetWorldTransform(wtrans);
+			this->m_Widget->SetInput( this->m_MapImageActor2->GetInput() );
 			this->m_Widget->PlaceWidget();
 			this->m_bHaveWorld = true;
 			this->m_CurrentState = MDS_Grid;
@@ -738,11 +766,8 @@ void CMapDialog::OnPaint()
 	}
 }
 
-#include <vtkCamera.h>
-#include <vtkImageReader2.h>
-
 void CMapDialog::ProcessEvents(vtkObject* caller,
-							   unsigned long event,
+							   unsigned long e,
 							   void* clientdata, 
 							   void *calldata)
 {
@@ -752,7 +777,7 @@ void CMapDialog::ProcessEvents(vtkObject* caller,
 	if (caller && caller == self->m_Widget)
 	{
 		// look for char and delete events
-		switch(event)
+		switch(e)
 		{
 		case vtkCommand::InteractionEvent:
 			if (vtkPlaneWidget2 *widget = vtkPlaneWidget2::SafeDownCast(caller))
@@ -769,20 +794,20 @@ void CMapDialog::ProcessEvents(vtkObject* caller,
 					{
 					case vtkPlaneWidget2::MovingMoveOrigin:
 						TRACE("MovingMoveOrigin\n");
-						self->UpdateModelOriginX();
-						self->UpdateModelOriginY();
+						self->UpdateGridLocationX();
+						self->UpdateGridLocationY();
 						self->UpdateLength();
 						self->UpdateWidth();
 						break;
 					case vtkPlaneWidget2::MovingMovePoint1:
 						TRACE("MovingMovePoint1\n");
-						self->UpdateModelOriginY();
+						self->UpdateGridLocationY();
 						self->UpdateLength();
 						self->UpdateWidth();
 						break;
 					case vtkPlaneWidget2::MovingMovePoint2:
 						TRACE("MovingMovePoint2\n");
-						self->UpdateModelOriginX();
+						self->UpdateGridLocationX();
 						self->UpdateLength();
 						self->UpdateWidth();
 						break;
@@ -793,15 +818,15 @@ void CMapDialog::ProcessEvents(vtkObject* caller,
 						break;
 					case vtkPlaneWidget2::MovingTranslate:
 						TRACE("MovingTranslate\n");
-						self->UpdateModelOriginX();
-						self->UpdateModelOriginY();
+						self->UpdateGridLocationX();
+						self->UpdateGridLocationY();
 						break;
 					}
 					break;
 				case vtkPlaneWidget2::Scaling:
 					TRACE("Scaling\n");
-					self->UpdateModelOriginX();
-					self->UpdateModelOriginY();
+					self->UpdateGridLocationX();
+					self->UpdateGridLocationY();
 					self->UpdateLength();
 					self->UpdateWidth();
 					break;
@@ -816,12 +841,13 @@ void CMapDialog::ProcessEvents(vtkObject* caller,
 					break;
 				case vtkPlaneWidget2::Spinning:
 					TRACE("Spinning\n");
-					self->UpdateModelOriginX();
-					self->UpdateModelOriginY();
+					self->UpdateGridLocationX();
+					self->UpdateGridLocationY();
+					self->GridKeyword.m_grid_angle = self->m_Widget->GetAngle();
 					self->UpdateModelOriginAngle();
 					break;
 				default:
-					TRACE("UNKNOWN\n");
+					ATLTRACE2(CMAPDIALOG, 0, "UNKNOWN\n");
 				}
 			}
 			break;
@@ -834,7 +860,7 @@ void CMapDialog::ProcessEvents(vtkObject* caller,
 		int* pos;
 		static int x;
 		static int y;
-		switch ( event ) 
+		switch ( e ) 
 		{
 		case vtkCommand::LeftButtonReleaseEvent:
 			switch (self->m_CurrentState)
@@ -846,6 +872,8 @@ void CMapDialog::ProcessEvents(vtkObject* caller,
 					self->UpdatePoint1();
 					self->PostMessage(WM_SHOWCOORDLG);
 				}
+				// reset interactor
+				self->m_RenderWindowInteractor->SetInteractorStyle(self->m_Style);
 				break;
 			case MDS_Point2:
 				if (self->m_mouseDownPoint.x_defined && self->m_mouseDownPoint.y_defined)
@@ -854,6 +882,8 @@ void CMapDialog::ProcessEvents(vtkObject* caller,
 					self->UpdatePoint2();
 					self->PostMessage(WM_SHOWCOORDLG);
 				}
+				// reset interactor
+				self->m_RenderWindowInteractor->SetInteractorStyle(self->m_Style);
 				break;
 			case MDS_Grid:
 				// do nothing
@@ -880,24 +910,24 @@ void CMapDialog::ProcessEvents(vtkObject* caller,
 				vtkRenderer *renderer = self->m_Renderer;
 
 				vtkCamera *camera = renderer->GetActiveCamera();	
-				vtkFloatingPointType cameraFP[4];
-				camera->GetFocalPoint((vtkFloatingPointType*)cameraFP); cameraFP[3] = 1.0;
+				double cameraFP[4];
+				camera->GetFocalPoint((double*)cameraFP); cameraFP[3] = 1.0;
 
 				renderer->SetWorldPoint(cameraFP);
 				renderer->WorldToDisplay();
-				vtkFloatingPointType *displayCoords = renderer->GetDisplayPoint();
+				double *displayCoords = renderer->GetDisplayPoint();
 
 				// Convert the selection point into world coordinates.
 				//
 				renderer->SetDisplayPoint(pos[0], pos[1], displayCoords[2]);
 				renderer->DisplayToWorld();
-				vtkFloatingPointType *worldCoords = renderer->GetWorldPoint();
+				double *worldCoords = renderer->GetWorldPoint();
 				if ( worldCoords[3] == 0.0 )
 				{
 					ASSERT(FALSE);
 					return;
 				}
-				vtkFloatingPointType PickPosition[3];
+				double PickPosition[3];
 				for (i = 0; i < 3; ++i)
 				{
 					PickPosition[i] = worldCoords[i] / worldCoords[3];
@@ -922,9 +952,17 @@ void CMapDialog::ProcessEvents(vtkObject* caller,
 					}
 				}
 
-				vtkFloatingPointType* dataSpacing = self->m_MapImageActor->GetImageReader2()->GetDataSpacing();
-				vtkFloatingPointType* dataOrigin = self->m_MapImageActor->GetImageReader2()->GetDataOrigin();
-
+				double* dataSpacing = self->m_MapImageActor2->GetImageReader2()->GetDataSpacing();
+				double* dataOrigin = self->m_MapImageActor2->GetImageReader2()->GetDataOrigin();
+#if defined(USE_MAP_ACTOR)
+				double *spacing = self->MapActor->GetDataSpacing();
+				double *origin = self->MapActor->GetDataOrigin();
+				for (int i = 0; i < 3; ++i)
+				{
+					ASSERT(spacing[i] == dataSpacing[i]);
+					ASSERT(origin[i] == dataOrigin[i]);
+				}
+#endif
 				ASSERT(dataSpacing[0] == 1);
 				ASSERT(dataSpacing[1] == 1);
 				ASSERT(dataOrigin[0] == 0);
@@ -936,6 +974,9 @@ void CMapDialog::ProcessEvents(vtkObject* caller,
 				TRACE("LeftButtonPressEvent world(%g, %g)\n", worldPointXYPlane[0], worldPointXYPlane[1]);
 				TRACE("LeftButtonPressEvent pixels(%d, %d)\n", x, y);
 
+				// disable interactor
+				self->m_RenderWindowInteractor->SetInteractorStyle(0);
+
 				self->m_mouseDownPoint.x = x;
 				self->m_mouseDownPoint.y = y;
 				self->m_mouseDownPoint.x_defined = true;
@@ -946,7 +987,7 @@ void CMapDialog::ProcessEvents(vtkObject* caller,
 			break;
 
 		default:
-			TRACE("m_RenderWindowInteractor Unknown Event \n");
+			ATLTRACE2(CMAPDIALOG, 0, "m_RenderWindowInteractor Unknown Event \n");
 			self->m_Widget->SizeHandles();
 			break;
 		}
@@ -958,7 +999,26 @@ void CMapDialog::OnEnKillfocusEditMoAngle()
 	double value;
 	if (CGlobal::GetEditValue(this, IDC_EDIT_MO_ANGLE, value))
 	{
-		this->m_Widget->SetAngle(value);
+		this->GridKeyword.m_grid_angle = value;
+
+		double x = this->GridKeyword.m_grid_origin[0];
+		double y = this->GridKeyword.m_grid_origin[1];
+		double z = 0.;
+
+		double angle_deg = this->GridKeyword.m_grid_angle;
+
+		double scale_x = 1.;
+		double scale_y = 1.;
+		double scale_z = 1.;
+
+		PHAST_Transform map2grid(x, y, z, angle_deg, scale_x, scale_y, scale_z);
+
+		Point pt(this->GridKeyword.m_grid[0].coord[0], this->GridKeyword.m_grid[1].coord[0], 0.);
+
+		map2grid.Inverse_transform(pt);
+
+		this->m_Widget->SetModelOrigin(pt.x(), pt.y());
+		this->m_Widget->SetAngle(angle_deg);
 		this->m_RenderWindowInteractor->Render();
 	}
 	else
@@ -971,32 +1031,31 @@ void CMapDialog::OnEnKillfocusEditMoAngle()
 	}
 }
 
-void CMapDialog::OnEnKillfocusEditMoY()
-{
-	double value;
-	vtkFloatingPointType* origin = this->m_Widget->GetModelOrigin();
-	if (CGlobal::GetEditValue(this, IDC_EDIT_MO_Y, value))
-	{
-		this->m_Widget->SetModelOrigin(origin[0], value);
-		this->m_RenderWindowInteractor->Render();
-	}
-	else
-	{
-		if (::IsWindowVisible(this->GetDlgItem(IDC_EDIT_MO_Y)->GetSafeHwnd()))
-		{
-			this->UpdateModelOriginY();
-			::MessageBeep(-1);
-		}
-	}
-}
-
 void CMapDialog::OnEnKillfocusEditMoX()
 {
 	double value;
-	vtkFloatingPointType* origin = this->m_Widget->GetModelOrigin();
 	if (CGlobal::GetEditValue(this, IDC_EDIT_MO_X, value))
 	{
-		this->m_Widget->SetModelOrigin(value, origin[1]);
+		this->GridKeyword.m_grid_origin[0] = value;
+
+		double x = this->GridKeyword.m_grid_origin[0];
+		double y = this->GridKeyword.m_grid_origin[1];
+		double z = 0.;
+
+		double angle_deg = this->GridKeyword.m_grid_angle;
+
+		double scale_x = 1.;
+		double scale_y = 1.;
+		double scale_z = 1.;
+
+		PHAST_Transform map2grid(x, y, z, angle_deg, scale_x, scale_y, scale_z);
+
+		Point pt(this->GridKeyword.m_grid[0].coord[0], this->GridKeyword.m_grid[1].coord[0], 0.);
+
+		map2grid.Inverse_transform(pt);
+
+		this->m_Widget->SetModelOrigin(pt.x(), pt.y());
+		ASSERT( fabs(this->m_Widget->GetAngle() - angle_deg ) <= ::pow((double)10, (double)-FLT_DIG));
 		this->m_RenderWindowInteractor->Render();
 	}
 	else
@@ -1004,6 +1063,44 @@ void CMapDialog::OnEnKillfocusEditMoX()
 		if (::IsWindowVisible(this->GetDlgItem(IDC_EDIT_MO_X)->GetSafeHwnd()))
 		{
 			this->UpdateModelOriginX();
+			::MessageBeep(-1);
+		}
+	}
+}
+
+
+void CMapDialog::OnEnKillfocusEditMoY()
+{
+	double value;
+	if (CGlobal::GetEditValue(this, IDC_EDIT_MO_Y, value))
+	{
+		this->GridKeyword.m_grid_origin[1] = value;
+
+		double x = this->GridKeyword.m_grid_origin[0];
+		double y = this->GridKeyword.m_grid_origin[1];
+		double z = 0.;
+
+		double angle_deg = this->GridKeyword.m_grid_angle;
+
+		double scale_x = 1.;
+		double scale_y = 1.;
+		double scale_z = 1.;
+
+		PHAST_Transform map2grid(x, y, z, angle_deg, scale_x, scale_y, scale_z);
+
+		Point pt(this->GridKeyword.m_grid[0].coord[0], this->GridKeyword.m_grid[1].coord[0], 0.);
+
+		map2grid.Inverse_transform(pt);
+
+		this->m_Widget->SetModelOrigin(pt.x(), pt.y());
+		ASSERT( fabs(this->m_Widget->GetAngle() - angle_deg ) <= ::pow((double)10, (double)-FLT_DIG));
+		this->m_RenderWindowInteractor->Render();
+	}
+	else
+	{
+		if (::IsWindowVisible(this->GetDlgItem(IDC_EDIT_MO_Y)->GetSafeHwnd()))
+		{
+			this->UpdateModelOriginY();
 			::MessageBeep(-1);
 		}
 	}
@@ -1047,29 +1144,89 @@ void CMapDialog::OnEnKillfocusEditWidth()
 
 void CMapDialog::UpdateModelOriginX(void)const
 {
-	const TCHAR format[] = "%.2f";
+	const TCHAR format[] = "%g";
 	static TCHAR buffer[40];
-	vtkFloatingPointType* origin = this->m_Widget->GetModelOrigin();
-	
-	::sprintf(buffer, format, origin[0]);
+	::sprintf(buffer, format, this->GridKeyword.m_grid_origin[0]);
 	this->GetDlgItem(IDC_EDIT_MO_X)->SetWindowText(buffer);
 }
 
 void CMapDialog::UpdateModelOriginY(void)const
 {
-	const TCHAR format[] = "%.2f";
+	const TCHAR format[] = "%g";
 	static TCHAR buffer[40];
-	vtkFloatingPointType* origin = this->m_Widget->GetModelOrigin();
-	
-	::sprintf(buffer, format, origin[1]);
+	::sprintf(buffer, format, this->GridKeyword.m_grid_origin[1]);
 	this->GetDlgItem(IDC_EDIT_MO_Y)->SetWindowText(buffer);
+}
+
+void CMapDialog::UpdateGridLocationX(void)const
+{
+	double x = this->GridKeyword.m_grid_origin[0];
+	double y = this->GridKeyword.m_grid_origin[1];
+	double z = 0.;
+
+	double angle_deg = this->GridKeyword.m_grid_angle;
+
+	double scale_x = 1.;
+	double scale_y = 1.;
+	double scale_z = 1.;
+
+	PHAST_Transform map2grid(x, y, z, angle_deg, scale_x, scale_y, scale_z);
+
+	double* origin = this->m_Widget->GetModelOrigin();
+	Point pt(origin[0], origin[1], origin[2]);
+	map2grid.Transform(pt);
+
+	this->GridKeyword.m_grid[0].coord[0] = pt.x();
+
+	const TCHAR format[] = "%g";
+	static TCHAR buffer[40];
+	::sprintf(buffer, format, pt.x());
+	this->GetDlgItem(IDC_EDIT_X)->SetWindowText(buffer);
+}
+
+void CMapDialog::UpdateGridLocationY(void)const
+{
+	double x = this->GridKeyword.m_grid_origin[0];
+	double y = this->GridKeyword.m_grid_origin[1];
+	double z = 0.;
+
+	double angle_deg = this->GridKeyword.m_grid_angle;
+
+	double scale_x = 1.;
+	double scale_y = 1.;
+	double scale_z = 1.;
+
+	PHAST_Transform map2grid(x, y, z, angle_deg, scale_x, scale_y, scale_z);
+
+	double* origin = this->m_Widget->GetModelOrigin();
+	Point pt(origin[0], origin[1], origin[2]);
+	map2grid.Transform(pt);
+
+	this->GridKeyword.m_grid[1].coord[0] = pt.y();
+
+	const TCHAR format[] = "%g";
+	static TCHAR buffer[40];
+	::sprintf(buffer, format, pt.y());
+	this->GetDlgItem(IDC_EDIT_Y)->SetWindowText(buffer);
+}
+
+void CMapDialog::UpdateGridLocationZ(void)const
+{
+	const TCHAR format[] = "%g";
+	static TCHAR buffer[40];
+	::sprintf(buffer, format, this->GridKeyword.m_grid[2].coord[0]);
+	this->GetDlgItem(IDC_EDIT_Z)->SetWindowText(buffer);
 }
 
 void CMapDialog::UpdateModelOriginAngle(void)const
 {
 	const TCHAR format[] = "%.2f";
 	static TCHAR buffer[40];
-	sprintf(buffer, format, this->m_Widget->GetAngle());
+
+	double angle_deg = this->m_Widget->GetAngle();
+	ASSERT( fabs(angle_deg - this->GridKeyword.m_grid_angle ) <= ::pow((double)10, (double)-(DBL_DIG-2)));
+
+	sprintf(buffer, format, this->GridKeyword.m_grid_angle);
 	this->GetDlgItem(IDC_EDIT_MO_ANGLE)->SetWindowText(buffer);
 }
 
@@ -1083,7 +1240,9 @@ void CMapDialog::UpdateLength(void)const
 	}
 	else
 	{
-		_stprintf(buffer, _T("%.*g"), DBL_DIG, value);
+		///_stprintf(buffer, _T("%.*g"), DBL_DIG, value);
+		///_stprintf(buffer, _T("%.*g"), DBL_DIG-1, value);
+		_stprintf(buffer, _T("%g"), value);
 	}
 	this->GetDlgItem(IDC_EDIT_LENGTH)->SetWindowText(buffer);
 }
@@ -1098,7 +1257,9 @@ void CMapDialog::UpdateWidth(void)const
 	}
 	else
 	{
-		_stprintf(buffer, _T("%.*g"), DBL_DIG, value);
+		///_stprintf(buffer, _T("%.*g"), DBL_DIG, value);
+		///_stprintf(buffer, _T("%.*g"), DBL_DIG-1, value);
+		_stprintf(buffer, _T("%g"), value);
 	}
 	this->GetDlgItem(IDC_EDIT_WIDTH)->SetWindowText(buffer);
 }
@@ -1132,8 +1293,8 @@ void CMapDialog::UpdatePoint1(void)
 	}
 
 	double point[3];
-	point[0] = this->m_point1.x_world;
-	point[1] = this->m_point1.y_world;
+	point[0] = this->m_point1.x * this->m_siteMap2.GetWorldTransform().GetDataSpacing()[0];
+	point[1] = this->m_point1.y * this->m_siteMap2.GetWorldTransform().GetDataSpacing()[1];
 	point[2] = 0;
 
 	this->m_Point1Actor->SetPoint(point);
@@ -1171,8 +1332,8 @@ void CMapDialog::UpdatePoint2(void)
 	}
 
 	double point[3];
-	point[0] = this->m_point2.x_world;
-	point[1] = this->m_point2.y_world;
+	point[0] = this->m_point2.x * this->m_siteMap2.GetWorldTransform().GetDataSpacing()[0];
+	point[1] = this->m_point2.y * this->m_siteMap2.GetWorldTransform().GetDataSpacing()[1];
 	point[2] = 0;
 
 	this->m_Point2Actor->SetPoint(point);
@@ -1188,9 +1349,9 @@ void CMapDialog::UpdateNodes(int idx)const
 	const TCHAR format[] = "%d";
 	static TCHAR buffer[40];
 
-	ASSERT(this->m_grid[idx].count_coord >= 2);
+	ASSERT(this->GridKeyword.m_grid[idx].count_coord >= 2);
 
-	_stprintf(buffer, format, this->m_grid[idx].count_coord);
+	_stprintf(buffer, format, this->GridKeyword.m_grid[idx].count_coord);
 	this->GetDlgItem(FIRST_NODE_ID + idx)->SetWindowText(buffer);
 }
 
@@ -1198,26 +1359,25 @@ BOOL CMapDialog::PreTranslateMessage(MSG* pMsg)
 {
 	if (this->m_CurrentState == CMapDialog::MDS_Point1 || this->m_CurrentState == CMapDialog::MDS_Point2)
 	{
-		if (pMsg->hwnd == this->GetDlgItem(IDC_EDIT_XP1)->GetSafeHwnd()) {
-			if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_RETURN) {
+		if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_RETURN)
+		{
+			if (pMsg->hwnd == this->GetDlgItem(IDC_EDIT_XP1)->GetSafeHwnd())
+			{
 				SELECT_ALL(IDC_EDIT_XP1);
 				return TRUE;
 			}
-		}
-		if (pMsg->hwnd == this->GetDlgItem(IDC_EDIT_YP1)->GetSafeHwnd()) {
-			if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_RETURN) {
+			if (pMsg->hwnd == this->GetDlgItem(IDC_EDIT_YP1)->GetSafeHwnd())
+			{
 				SELECT_ALL(IDC_EDIT_YP1);
 				return TRUE;
 			}
-		}
-		if (pMsg->hwnd == this->GetDlgItem(IDC_EDIT_XP2)->GetSafeHwnd()) {
-			if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_RETURN) {
+			if (pMsg->hwnd == this->GetDlgItem(IDC_EDIT_XP2)->GetSafeHwnd())
+			{
 				SELECT_ALL(IDC_EDIT_XP2);
 				return TRUE;
 			}
-		}
-		if (pMsg->hwnd == this->GetDlgItem(IDC_EDIT_YP2)->GetSafeHwnd()) {
-			if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_RETURN) {
+			if (pMsg->hwnd == this->GetDlgItem(IDC_EDIT_YP2)->GetSafeHwnd())
+			{
 				SELECT_ALL(IDC_EDIT_YP2);
 				return TRUE;
 			}
@@ -1226,60 +1386,78 @@ BOOL CMapDialog::PreTranslateMessage(MSG* pMsg)
 
 	if (this->m_CurrentState == CMapDialog::MDS_Grid)
 	{
-		if (pMsg->hwnd == this->GetDlgItem(IDC_EDIT_MO_X)->GetSafeHwnd()) {
-			if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_RETURN) {
+		if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_RETURN)
+		{
+			if (pMsg->hwnd == this->GetDlgItem(IDC_EDIT_MO_X)->GetSafeHwnd())
+			{
 				this->OnEnKillfocusEditMoX();
 				SELECT_ALL(IDC_EDIT_MO_X);
 				return TRUE;
 			}
-		}
-		if (pMsg->hwnd == this->GetDlgItem(IDC_EDIT_MO_Y)->GetSafeHwnd()) {
-			if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_RETURN) {
+			if (pMsg->hwnd == this->GetDlgItem(IDC_EDIT_MO_Y)->GetSafeHwnd())
+			{
 				this->OnEnKillfocusEditMoY();
 				SELECT_ALL(IDC_EDIT_MO_Y);
 				return TRUE;
 			}
-		}
-		if (pMsg->hwnd == this->GetDlgItem(IDC_EDIT_MO_ANGLE)->GetSafeHwnd()) {
-			if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_RETURN) {
+			if (pMsg->hwnd == this->GetDlgItem(IDC_EDIT_X)->GetSafeHwnd())
+			{
+				this->OnEnKillfocusEditX();
+				SELECT_ALL(IDC_EDIT_X);
+				return TRUE;
+			}
+			if (pMsg->hwnd == this->GetDlgItem(IDC_EDIT_Y)->GetSafeHwnd())
+			{
+				this->OnEnKillfocusEditY();
+				SELECT_ALL(IDC_EDIT_Y);
+				return TRUE;
+			}
+			if (pMsg->hwnd == this->GetDlgItem(IDC_EDIT_Z)->GetSafeHwnd())
+			{
+				this->OnEnKillfocusEditZ();
+				SELECT_ALL(IDC_EDIT_Z);
+				return TRUE;
+			}
+			if (pMsg->hwnd == this->GetDlgItem(IDC_EDIT_MO_ANGLE)->GetSafeHwnd())
+			{
 				this->OnEnKillfocusEditMoAngle();
 				this->UpdateModelOriginAngle();
 				SELECT_ALL(IDC_EDIT_MO_ANGLE);
 				return TRUE;
 			}
-		}
-		if (pMsg->hwnd == this->GetDlgItem(IDC_EDIT_LENGTH)->GetSafeHwnd()) {
-			if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_RETURN) {
+			if (pMsg->hwnd == this->GetDlgItem(IDC_EDIT_LENGTH)->GetSafeHwnd())
+			{
 				this->OnEnKillfocusEditLength();
 				this->UpdateLength();
 				SELECT_ALL(IDC_EDIT_LENGTH);
 				return TRUE;
 			}
-		}
-		if (pMsg->hwnd == this->GetDlgItem(IDC_EDIT_WIDTH)->GetSafeHwnd()) {
-			if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_RETURN) {
+			if (pMsg->hwnd == this->GetDlgItem(IDC_EDIT_WIDTH)->GetSafeHwnd())
+			{
 				this->OnEnKillfocusEditWidth();
 				this->UpdateWidth();
 				SELECT_ALL(IDC_EDIT_WIDTH);
 				return TRUE;
 			}
-		}
-		if (pMsg->hwnd == this->GetDlgItem(IDC_X_NODES_EDIT)->GetSafeHwnd()) {
-			if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_RETURN) {
+			if (pMsg->hwnd == this->GetDlgItem(IDC_EDIT_DEPTH)->GetSafeHwnd())
+			{
+				SELECT_ALL(IDC_EDIT_DEPTH);
+				return TRUE;
+			}
+			if (pMsg->hwnd == this->GetDlgItem(IDC_X_NODES_EDIT)->GetSafeHwnd())
+			{
 				KILLFOCUS_NODES(IDC_X_NODES_EDIT);
 				SELECT_ALL(IDC_X_NODES_EDIT);
 				return TRUE;
 			}
-		}
-		if (pMsg->hwnd == this->GetDlgItem(IDC_Y_NODES_EDIT)->GetSafeHwnd()) {
-			if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_RETURN) {
+			if (pMsg->hwnd == this->GetDlgItem(IDC_Y_NODES_EDIT)->GetSafeHwnd())
+			{
 				KILLFOCUS_NODES(IDC_Y_NODES_EDIT);
 				SELECT_ALL(IDC_Y_NODES_EDIT);
 				return TRUE;
 			}
-		}
-		if (pMsg->hwnd == this->GetDlgItem(IDC_Z_NODES_EDIT)->GetSafeHwnd()) {
-			if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_RETURN) {
+			if (pMsg->hwnd == this->GetDlgItem(IDC_Z_NODES_EDIT)->GetSafeHwnd())
+			{
 				KILLFOCUS_NODES(IDC_Z_NODES_EDIT);
 				SELECT_ALL(IDC_Z_NODES_EDIT);
 				return TRUE;
@@ -1368,7 +1546,7 @@ void CMapDialog::OnBnClickedButton1()
 		ASSERT(FALSE); // unhandled state
 	}
 
-	this->m_Widget->SetInput( this->m_MapImageActor->GetInput() );
+	this->m_Widget->SetInput( this->m_MapImageActor2->GetInput() );
 	this->m_Widget->PlaceWidget();
 
 	switch (this->m_CurrentState)
@@ -1421,7 +1599,7 @@ void CMapDialog::OnEnKillfocusNodesEdit(int idx)
 	UINT nNodes = this->GetDlgItemInt(FIRST_NODE_ID + idx, &bTranslated, FALSE);
 	if (bTranslated && nNodes > 1)
 	{
-		this->m_grid[idx].count_coord = nNodes;
+		this->GridKeyword.m_grid[idx].count_coord = nNodes;
 		this->m_Widget->SetResolution(idx, nNodes - 1);
 		this->m_RenderWindowInteractor->Render();
 	}
@@ -1844,8 +2022,8 @@ void CMapDialog::OnEnUpdateEditXp1()
 	int pixel =(int)this->GetDlgItemInt(IDC_EDIT_XP1, &bTranslated, TRUE);
 	if (bTranslated)
 	{
-		vtkFloatingPointType* dataSpacing = this->m_MapImageActor->GetImageReader2()->GetDataSpacing();
-		vtkFloatingPointType* dataOrigin  = this->m_MapImageActor->GetImageReader2()->GetDataOrigin();
+		double* dataSpacing = this->m_MapImageActor2->GetImageReader2()->GetDataSpacing();
+		double* dataOrigin  = this->m_MapImageActor2->GetImageReader2()->GetDataOrigin();
 
 		this->m_point1.x       = pixel;
 		this->m_point1.x_world = pixel * dataSpacing[0] + dataOrigin[0];
@@ -1863,8 +2041,8 @@ void CMapDialog::OnEnUpdateEditYp1()
 	int pixel =(int)this->GetDlgItemInt(IDC_EDIT_YP1, &bTranslated, TRUE);
 	if (bTranslated)
 	{
-		vtkFloatingPointType* dataSpacing = this->m_MapImageActor->GetImageReader2()->GetDataSpacing();
-		vtkFloatingPointType* dataOrigin = this->m_MapImageActor->GetImageReader2()->GetDataOrigin();
+		double* dataSpacing = this->m_MapImageActor2->GetImageReader2()->GetDataSpacing();
+		double* dataOrigin = this->m_MapImageActor2->GetImageReader2()->GetDataOrigin();
 
 		this->m_point1.y       = pixel;
 		this->m_point1.y_world = pixel * dataSpacing[1] + dataOrigin[1];
@@ -1881,8 +2059,8 @@ void CMapDialog::OnEnUpdateEditXp2()
 	int pixel =(int)this->GetDlgItemInt(IDC_EDIT_XP2, &bTranslated, TRUE);
 	if (bTranslated)
 	{
-		vtkFloatingPointType* dataSpacing = this->m_MapImageActor->GetImageReader2()->GetDataSpacing();
-		vtkFloatingPointType* dataOrigin = this->m_MapImageActor->GetImageReader2()->GetDataOrigin();
+		double* dataSpacing = this->m_MapImageActor2->GetImageReader2()->GetDataSpacing();
+		double* dataOrigin = this->m_MapImageActor2->GetImageReader2()->GetDataOrigin();
 
 		this->m_point2.x       = pixel;
 		this->m_point2.x_world = pixel * dataSpacing[0] + dataOrigin[0];
@@ -1899,8 +2077,8 @@ void CMapDialog::OnEnUpdateEditYp2()
 	int pixel =(int)this->GetDlgItemInt(IDC_EDIT_YP2, &bTranslated, TRUE);
 	if (bTranslated)
 	{
-		vtkFloatingPointType* dataSpacing = this->m_MapImageActor->GetImageReader2()->GetDataSpacing();
-		vtkFloatingPointType* dataOrigin = this->m_MapImageActor->GetImageReader2()->GetDataOrigin();
+		double* dataSpacing = this->m_MapImageActor2->GetImageReader2()->GetDataSpacing();
+		double* dataOrigin = this->m_MapImageActor2->GetImageReader2()->GetDataOrigin();
 
 		this->m_point2.y       = pixel;
 		this->m_point2.y_world = pixel * dataSpacing[1] + dataOrigin[1];
@@ -1952,8 +2130,12 @@ void CMapDialog::SetState(State state)
 		this->EnablePoint1(TRUE);
 		this->EnablePoint2(FALSE);
 		this->LayoutPointsPage();
-		this->m_MapImageActor->GetImageReader2()->SetDataOrigin(0, 0, 0);
-		this->m_MapImageActor->GetImageReader2()->SetDataSpacing(1, 1, 1);
+		this->m_MapImageActor2->GetImageReader2()->SetDataOrigin(0, 0, 0);
+		this->m_MapImageActor2->GetImageReader2()->SetDataSpacing(1, 1, 1);
+#if defined(USE_MAP_ACTOR)
+		this->MapActor->SetDataOrigin(0, 0, 0);
+		this->MapActor->SetDataSpacing(1, 1, 1);
+#endif
 		this->m_Point1Actor->VisibilityOff();
 		this->m_Point2Actor->VisibilityOff();
 		this->m_Renderer->ResetCamera();
@@ -1970,8 +2152,12 @@ void CMapDialog::SetState(State state)
 		this->EnablePoint1(FALSE);
 		this->EnablePoint2(TRUE);
 		this->LayoutPointsPage();
-		this->m_MapImageActor->GetImageReader2()->SetDataOrigin(0, 0, 0);
-		this->m_MapImageActor->GetImageReader2()->SetDataSpacing(1, 1, 1);
+		this->m_MapImageActor2->GetImageReader2()->SetDataOrigin(0, 0, 0);
+		this->m_MapImageActor2->GetImageReader2()->SetDataSpacing(1, 1, 1);
+#if defined(USE_MAP_ACTOR)
+		this->MapActor->SetDataOrigin(0, 0, 0);
+		this->MapActor->SetDataSpacing(1, 1, 1);
+#endif
 		this->m_Point1Actor->VisibilityOff();
 		this->m_Point2Actor->VisibilityOff();
 		///this->m_Renderer->ResetCamera();
@@ -1982,19 +2168,18 @@ void CMapDialog::SetState(State state)
 	case MDS_Grid:
 		this->m_Point1Actor->VisibilityOff();
 		this->m_Point2Actor->VisibilityOff();
-		this->m_MapImageActor->SetWorldTransform(this->m_worldTransform);
+		this->m_MapImageActor2->SetWorldTransform(this->m_worldTransform);
+#if defined(USE_MAP_ACTOR)
+		this->MapActor->SetWorldTransform(this->m_worldTransform);
+#endif
 		this->m_Renderer->ResetCamera();
-		this->m_Widget->SetInput( this->m_MapImageActor->GetInput() );
+		this->m_Widget->SetInput( this->m_MapImageActor2->GetInput() );
 		this->m_Widget->PlaceWidget();
 		this->m_Widget->SetEnabled(1);
-		if (this->m_bHaveWorld)
-		{
-			this->GetDlgItem(IDC_BACK_BUTTON)->EnableWindow(FALSE);
-		}
-		else
-		{
-			this->GetDlgItem(IDC_BACK_BUTTON)->EnableWindow(TRUE);
-		}
+
+		// Back is now always disabled when grid page is shown
+		this->GetDlgItem(IDC_BACK_BUTTON)->EnableWindow(FALSE);
+
 		this->GetDlgItem(IDOK)->SetWindowText(_T("&Next >"));
 		this->UpdateData(FALSE);
 		this->LayoutGridPage();
@@ -2022,4 +2207,93 @@ void CMapDialog::OnSize(UINT nType, int cx, int cy)
 
 	// Add your message handler code here
 	this->m_Widget->SizeHandles();
+}
+
+void CMapDialog::OnEnKillfocusEditX()
+{
+	double value;
+	if (CGlobal::GetEditValue(this, IDC_EDIT_X, value))
+	{
+		this->GridKeyword.m_grid[0].coord[0] = value;
+
+		double x = this->GridKeyword.m_grid_origin[0];
+		double y = this->GridKeyword.m_grid_origin[1];
+		double z = 0.;
+
+		double angle_deg = this->GridKeyword.m_grid_angle;
+
+		double scale_x = 1.;
+		double scale_y = 1.;
+		double scale_z = 1.;
+
+		PHAST_Transform map2grid(x, y, z, angle_deg, scale_x, scale_y, scale_z);
+
+		Point pt(this->GridKeyword.m_grid[0].coord[0], this->GridKeyword.m_grid[1].coord[0], 0.);
+
+		map2grid.Inverse_transform(pt);
+
+		this->m_Widget->SetModelOrigin(pt.x(), pt.y());
+		this->m_RenderWindowInteractor->Render();
+	}
+	else
+	{
+		if (::IsWindowVisible(this->GetDlgItem(IDC_EDIT_X)->GetSafeHwnd()))
+		{
+			this->UpdateGridLocationX();
+			::MessageBeep(-1);
+		}
+	}
+}
+
+void CMapDialog::OnEnKillfocusEditY()
+{
+	double value;
+	if (CGlobal::GetEditValue(this, IDC_EDIT_Y, value))
+	{
+		this->GridKeyword.m_grid[1].coord[0] = value;
+
+		double x = this->GridKeyword.m_grid_origin[0];
+		double y = this->GridKeyword.m_grid_origin[1];
+		double z = 0.;
+
+		double angle_deg = this->GridKeyword.m_grid_angle;
+
+		double scale_x = 1.;
+		double scale_y = 1.;
+		double scale_z = 1.;
+
+		PHAST_Transform map2grid(x, y, z, angle_deg, scale_x, scale_y, scale_z);
+
+		Point pt(this->GridKeyword.m_grid[0].coord[0], this->GridKeyword.m_grid[1].coord[0], 0.);
+
+		map2grid.Inverse_transform(pt);
+
+		this->m_Widget->SetModelOrigin(pt.x(), pt.y());
+		this->m_RenderWindowInteractor->Render();
+	}
+	else
+	{
+		if (::IsWindowVisible(this->GetDlgItem(IDC_EDIT_Y)->GetSafeHwnd()))
+		{
+			this->UpdateGridLocationY();
+			::MessageBeep(-1);
+		}
+	}
+}
+
+void CMapDialog::OnEnKillfocusEditZ()
+{
+	double value;
+	if (CGlobal::GetEditValue(this, IDC_EDIT_Z, value))
+	{
+		this->GridKeyword.m_grid[2].coord[0] = value;
+	}
+	else
+	{
+		if (::IsWindowVisible(this->GetDlgItem(IDC_EDIT_Z)->GetSafeHwnd()))
+		{
+			this->UpdateGridLocationZ();
+			::MessageBeep(-1);
+		}
+	}
 }

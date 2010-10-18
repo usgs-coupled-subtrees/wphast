@@ -34,7 +34,7 @@ vtkStandardNewMacro(CBCZoneActor);
 #endif
 
 const char CBCZoneActor::szHeading[] = "BC";
-vtkFloatingPointType CBCZoneActor::s_color[3][3];
+double CBCZoneActor::s_color[3][3];
 vtkProperty* CBCZoneActor::s_Property[3] = {0, 0, 0};
 vtkProperty* CBCZoneActor::s_OutlineProperty[3] = {0, 0, 0};
 
@@ -377,11 +377,10 @@ void CBCZoneActor::Add(CWPhastDoc *pWPhastDoc)
 	if (!pWPhastDoc) { ASSERT(FALSE); return; }
 	if (vtkPropAssembly *pPropAssembly = pWPhastDoc->GetPropAssemblyBC())
 	{
+		ASSERT(!pPropAssembly->GetParts()->IsItemPresent(this));
 		pPropAssembly->AddPart(this);
-		if (!pWPhastDoc->GetPropCollection()->IsItemPresent(pPropAssembly))
-		{
-			pWPhastDoc->GetPropCollection()->AddItem(pPropAssembly);
-		}
+		ASSERT(pPropAssembly->GetParts()->IsItemPresent(this));
+		pWPhastDoc->AddPropAssembly(pPropAssembly);
 	}
 #ifdef _DEBUG
 	else

@@ -17,7 +17,7 @@
 vtkCxxRevisionMacro(srcWedgeSource, "$Revision: 1.48 $");
 vtkStandardNewMacro(srcWedgeSource);
 
-srcWedgeSource::srcWedgeSource(float xL, float yL, float zL, enum srcWedgeSource::tagChopType n /*=srcWedgeSource::CHOP_NONE*/ )
+srcWedgeSource::srcWedgeSource(double xL, double yL, double zL, enum srcWedgeSource::tagChopType n /*=srcWedgeSource::CHOP_NONE*/ )
 : chopType(n)
 {
   this->XLength = fabs(xL);
@@ -885,11 +885,11 @@ void srcWedgeSource::Execute()
 }
 
 // Convenience method allows creation of cube by specifying bounding box.
-void srcWedgeSource::SetBounds(float xMin, float xMax,
-                              float yMin, float yMax,
-                              float zMin, float zMax)
+void srcWedgeSource::SetBounds(double xMin, double xMax,
+                              double yMin, double yMax,
+                              double zMin, double zMax)
 {
-  float bounds[6];
+  double bounds[6];
   bounds[0] = xMin;
   bounds[1] = xMax;
   bounds[2] = yMin;
@@ -899,7 +899,7 @@ void srcWedgeSource::SetBounds(float xMin, float xMax,
   this->SetBounds (bounds);
 }
 
-void srcWedgeSource::SetBounds(float bounds[6])
+void srcWedgeSource::SetBounds(double bounds[6])
 {
   this->SetXLength(bounds[1]-bounds[0]);
   this->SetYLength(bounds[3]-bounds[2]);

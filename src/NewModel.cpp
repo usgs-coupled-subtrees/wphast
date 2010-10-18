@@ -2,7 +2,7 @@
 #include "NewModel.h"
 
 CNewModel::CNewModel(void)
-: m_bHaveSiteMap(false)
+: m_bHaveSiteMap2(false)
 // COMMENT: {7/18/2005 6:39:21 PM}, m_print_input_xy(true)
 {
 // COMMENT: {7/18/2005 6:39:19 PM}	for(int i = 0; i < 3; ++i)
@@ -39,18 +39,18 @@ CNewModel CNewModel::Default(void)
 	return model;
 }
 
-bool CNewModel::HasSiteMap(void)const
+bool CNewModel::HasSiteMap2(void)const
 {
-	return this->m_bHaveSiteMap;
+	return this->m_bHaveSiteMap2;
 }
 
-void CNewModel::SetSiteMap(const CSiteMap &siteMap)
+void CNewModel::SetSiteMap2(const CSiteMap2 &siteMap2)
 {
-	this->m_siteMap = siteMap;
-	this->m_bHaveSiteMap = true;
+	this->m_siteMap2 = siteMap2;
+	this->m_bHaveSiteMap2 = true;
 }
 
-CSiteMap CNewModel::GetSiteMap(void)const
+CSiteMap2 CNewModel::GetSiteMap2(void)const
 {
-	return this->m_siteMap;
+	return this->m_siteMap2;
 }

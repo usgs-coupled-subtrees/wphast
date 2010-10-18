@@ -18,7 +18,7 @@ vtkCxxRevisionMacro(CZoneFlowRateZoneActor, "$Revision: 3286 $");
 vtkStandardNewMacro(CZoneFlowRateZoneActor);
 
 const char CZoneFlowRateZoneActor::szHeading[] = "ZoneFlowRates";
-vtkFloatingPointType CZoneFlowRateZoneActor::s_color[3] = {0., 0., 0.};
+double CZoneFlowRateZoneActor::s_color[3] = {0., 0., 0.};
 vtkProperty* CZoneFlowRateZoneActor::s_Property = 0;
 vtkProperty* CZoneFlowRateZoneActor::s_OutlineProperty = 0;
 
@@ -174,18 +174,13 @@ void CZoneFlowRateZoneActor::UnRemove(CPropertyTreeControlBar* pTreeControlBar)
 
 void CZoneFlowRateZoneActor::Add(CWPhastDoc *pWPhastDoc)
 {
-	if (!pWPhastDoc)
-	{
-		ASSERT(FALSE);
-		return;
-	}
+	if (!pWPhastDoc) { ASSERT(FALSE); return; }
 	if (vtkPropAssembly *pPropAssembly = pWPhastDoc->GetPropAssemblyZoneFlowRates())
 	{
+		ASSERT(!pPropAssembly->GetParts()->IsItemPresent(this));
 		pPropAssembly->AddPart(this);
-		if (!pWPhastDoc->GetPropCollection()->IsItemPresent(pPropAssembly))
-		{
-			pWPhastDoc->GetPropCollection()->AddItem(pPropAssembly);
-		}
+		ASSERT(pPropAssembly->GetParts()->IsItemPresent(this));
+		pWPhastDoc->AddPropAssembly(pPropAssembly);
 	}
 #ifdef _DEBUG
 	else ASSERT(FALSE);
@@ -194,11 +189,7 @@ void CZoneFlowRateZoneActor::Add(CWPhastDoc *pWPhastDoc)
 
 void CZoneFlowRateZoneActor::Remove(CWPhastDoc *pWPhastDoc)
 {
-	if (!pWPhastDoc)
-	{
-		ASSERT(FALSE);
-		return;
-	}
+	if (!pWPhastDoc) { ASSERT(FALSE); return; }
 	if (vtkPropAssembly *pPropAssembly = pWPhastDoc->GetPropAssemblyZoneFlowRates())
 	{
 		pPropAssembly->RemovePart(this);

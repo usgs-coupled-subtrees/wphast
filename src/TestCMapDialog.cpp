@@ -18,9 +18,9 @@ void TestCMapDialog::testDoModal(void)
 void TestCMapDialog::testDoModalWithGrid(void)
 {
 	CMapDialog dlg;
-	dlg.m_grid[0].count_coord = 10;
-	dlg.m_grid[1].count_coord = 15;
-	dlg.m_grid[2].count_coord = 4;
+	dlg.GridKeyword.m_grid[0].count_coord = 10;
+	dlg.GridKeyword.m_grid[1].count_coord = 15;
+	dlg.GridKeyword.m_grid[2].count_coord = 4;
 	CPPUNIT_ASSERT(dlg.SetFileName("ok1.bmp") == 1);
 	//CPPUNIT_ASSERT(dlg.SetWorldFileName("ok1.bpw") == 1);
 // COMMENT: {5/13/2004 9:50:15 PM}	dlg.DoModal();
@@ -82,21 +82,21 @@ void TestCMapDialog::testDDX_Grid(void)
 
 	// check default grid values
 	//
-	CPPUNIT_ASSERT(pDlg->m_grid[0].coord[0] == 0.0);
-	CPPUNIT_ASSERT(pDlg->m_grid[1].coord[0] == 0.0);
-	CPPUNIT_ASSERT(pDlg->m_grid[2].coord[0] == 0.0);
-	CPPUNIT_ASSERT(pDlg->m_grid[0].count_coord == 2);
-	CPPUNIT_ASSERT(pDlg->m_grid[1].count_coord == 2);
-	CPPUNIT_ASSERT(pDlg->m_grid[2].count_coord == 2);
+	CPPUNIT_ASSERT(pDlg->GridKeyword.m_grid[0].coord[0] == 0.0);
+	CPPUNIT_ASSERT(pDlg->GridKeyword.m_grid[1].coord[0] == 0.0);
+	CPPUNIT_ASSERT(pDlg->GridKeyword.m_grid[2].coord[0] == 0.0);
+	CPPUNIT_ASSERT(pDlg->GridKeyword.m_grid[0].count_coord == 2);
+	CPPUNIT_ASSERT(pDlg->GridKeyword.m_grid[1].count_coord == 2);
+	CPPUNIT_ASSERT(pDlg->GridKeyword.m_grid[2].count_coord == 2);
 
 	// overide default
 	//
-    pDlg->m_grid[0].count_coord = 15;
-	pDlg->m_grid[1].count_coord = 8;
-	pDlg->m_grid[2].count_coord = 4;
-    pDlg->m_grid[0].coord[0]    = 1;
-    pDlg->m_grid[1].coord[0]    = 2;
-    pDlg->m_grid[2].coord[0]    = 3;
+    pDlg->GridKeyword.m_grid[0].count_coord = 15;
+	pDlg->GridKeyword.m_grid[1].count_coord = 8;
+	pDlg->GridKeyword.m_grid[2].count_coord = 4;
+    pDlg->GridKeyword.m_grid[0].coord[0]    = 1;
+    pDlg->GridKeyword.m_grid[1].coord[0]    = 2;
+    pDlg->GridKeyword.m_grid[2].coord[0]    = 3;
 // COMMENT: {5/17/2004 3:21:34 PM}    pDlg->m_grid[0].coord[1]    = -80001;
 // COMMENT: {5/17/2004 3:21:34 PM}    pDlg->m_grid[1].coord[1]    = -46002;
 // COMMENT: {5/17/2004 3:21:34 PM}    pDlg->m_grid[2].coord[1]    = -203;
@@ -153,15 +153,15 @@ void TestCMapDialog::testDDX_Grid(void)
 
 	// check DDX/DDV;
 	//
-	CPPUNIT_ASSERT(pDlg->m_grid[0].count_coord == 16);
-	CPPUNIT_ASSERT(pDlg->m_grid[1].count_coord == 9);
-	CPPUNIT_ASSERT(pDlg->m_grid[2].count_coord == 5);
-    CPPUNIT_ASSERT( pDlg->m_grid[0].coord[0] == 0 );
-    CPPUNIT_ASSERT( pDlg->m_grid[1].coord[0] == 0 );
-    CPPUNIT_ASSERT( pDlg->m_grid[2].coord[0] == 0 );
-    CPPUNIT_ASSERT( pDlg->m_grid[0].coord[1] == 90000 );
-    CPPUNIT_ASSERT( pDlg->m_grid[1].coord[1] == 48000 );
-    CPPUNIT_ASSERT( pDlg->m_grid[2].coord[1] == 400   );
+	CPPUNIT_ASSERT(pDlg->GridKeyword.m_grid[0].count_coord == 16);
+	CPPUNIT_ASSERT(pDlg->GridKeyword.m_grid[1].count_coord == 9);
+	CPPUNIT_ASSERT(pDlg->GridKeyword.m_grid[2].count_coord == 5);
+    CPPUNIT_ASSERT( pDlg->GridKeyword.m_grid[0].coord[0] == 0 );
+    CPPUNIT_ASSERT( pDlg->GridKeyword.m_grid[1].coord[0] == 0 );
+    CPPUNIT_ASSERT( pDlg->GridKeyword.m_grid[2].coord[0] == 0 );
+    CPPUNIT_ASSERT( pDlg->GridKeyword.m_grid[0].coord[1] == 90000 );
+    CPPUNIT_ASSERT( pDlg->GridKeyword.m_grid[1].coord[1] == 48000 );
+    CPPUNIT_ASSERT( pDlg->GridKeyword.m_grid[2].coord[1] == 400   );
 
 	CPPUNIT_ASSERT(pDlg->DestroyWindow() != 0);
 

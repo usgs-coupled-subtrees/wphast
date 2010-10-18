@@ -16,13 +16,14 @@ class vtkDataSetMapper;
 class vtkImageShiftScale;
 class vtkImageActor;
 class CMarker;
-class CMapImageActor;
+class CMapImageActor2;
+class CMapActor;
 
 #include "ETSLayout/ETSLayout.h"
 #include "afxcmn.h"
-#include "Grid.h"
+#include "GridKeyword.h"
 #include "WorldTransform.h"
-#include "SiteMap.h"
+#include "SiteMap2.h"
 
 class CGridPoint : public CPoint
 {
@@ -38,9 +39,13 @@ public:
 	bool   y_defined;
 	bool   x_val_defined;
 	bool   y_val_defined;
+
+	int    x_pixel;
+	int    y_pixel;
 };
 
 
+// COMMENT: {9/7/2010 3:48:29 PM}#define USE_MAP_ACTOR
 
 #define WM_SHOWCOORDLG      WM_USER + 100
 #define CMapDialogBase ETSLayoutDialog
@@ -62,10 +67,10 @@ public:
 	DECLARE_LAYOUT();
 	virtual CRect GetRect();
 
-	CSiteMap GetSiteMap(void)const { return m_siteMap; }
+	CSiteMap2 GetSiteMap2(void)const { return m_siteMap2; }
 
 	// BUGBUG should these be public?
-	CGrid    m_grid[3];
+	CGridKeyword  GridKeyword;
 
 	enum State {
 		MDS_Point1,
@@ -99,15 +104,11 @@ protected:
 
 
 	// the map	
-	CMapImageActor      *m_MapImageActor;
-// COMMENT: {3/12/2004 1:48:29 PM}	vtkImageReader2    *m_MapImageReader2;
-// COMMENT: {3/12/2004 1:48:29 PM}	vtkImageShiftScale *m_MapShiftScale;
-// COMMENT: {3/12/2004 1:48:29 PM}	vtkImageActor      *m_MapImageActor;
-
-// COMMENT: {3/12/2004 2:36:53 PM}	double m_XDataSpacing;
-// COMMENT: {3/12/2004 2:36:53 PM}	double m_YDataSpacing;
-// COMMENT: {3/12/2004 2:36:53 PM}	double m_XUpperLeft;
-// COMMENT: {3/12/2004 2:36:53 PM}	double m_YUpperLeft;
+	CMapImageActor2      *m_MapImageActor2;
+#if defined(USE_MAP_ACTOR)
+	CMapActor            *MapActor;
+#endif
+	vtkTransform         *Transform;
 
 	//handles the events
 	static void ProcessEvents(vtkObject* object, 
@@ -118,6 +119,10 @@ protected:
 	void UpdateModelOriginX(void)const;
 	void UpdateModelOriginY(void)const;
 	void UpdateModelOriginAngle(void)const;
+
+	void UpdateGridLocationX(void)const;
+	void UpdateGridLocationY(void)const;
+	void UpdateGridLocationZ(void)const;
 
 	void UpdateLength(void)const;
 	void UpdateWidth(void)const;
@@ -175,10 +180,6 @@ public:
 	CSpinButtonCtrl m_udXP2; // IDC_SPIN_XP2
 	CSpinButtonCtrl m_udYP2; // IDC_SPIN_YP2
 
-	//{{
-	CButton m_btnZoom; // IDI_ZOOM_REAL
-	//}}
-
 	afx_msg void OnWizardBack();
 
 	afx_msg void OnEnUpdateNodes(int idx);
@@ -192,7 +193,7 @@ public:
 
 	afx_msg LRESULT OnShowCoorDlg(WPARAM wParam, LPARAM lParam);
 
-	CSiteMap m_siteMap;
+	CSiteMap2 m_siteMap2;
 
 	double m_xMin;
 	double m_yMin;
@@ -227,4 +228,7 @@ public:
 	afx_msg void OnEnChangeRange(UINT nID);
 	std::map<UINT, bool> m_needsExchange;
 	afx_msg void OnSize(UINT nType, int cx, int cy);
+	afx_msg void OnEnKillfocusEditX();
+	afx_msg void OnEnKillfocusEditY();
+	afx_msg void OnEnKillfocusEditZ();
 };

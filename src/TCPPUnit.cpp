@@ -28,6 +28,8 @@
 #include "TestHDFSerializePolyData.h"
 #include "TestPrism.h"
 #include "TestUniqueMap.h"
+#include "TestCproperty.h"
+#include "TestPHAST_Transform.h"
 
 
 TCPPUnit::TCPPUnit(void)
@@ -68,29 +70,29 @@ void TCPPUnit::RunUnitTests(void)
 		double d1 = 0/z;
 #endif
 
-// COMMENT: {4/21/2009 8:49:03 PM}		runner.addTest(TestCPhastInput::suite());
-// COMMENT: {4/6/2009 4:20:57 PM}		runner.addTest(TestCZone::suite());
-// COMMENT: {4/6/2009 4:20:57 PM}		runner.addTest(TestCGrid::suite());
-// COMMENT: {4/6/2009 4:20:57 PM}		runner.addTest(TestCtime::suite());
-// COMMENT: {4/6/2009 4:20:57 PM}		runner.addTest(TestCBC::suite());
-// COMMENT: {4/6/2009 4:20:57 PM}		runner.addTest(TestCTimeControl::suite());
-// COMMENT: {4/6/2009 4:20:57 PM}		runner.addTest(TestCWPhastDoc::suite());
-// COMMENT: {4/6/2009 4:20:57 PM}		runner.addTest(TestCParser::suite());
-// COMMENT: {4/6/2009 4:20:57 PM}		runner.addTest(TestCPropertyTreeControlBar::suite());
-// COMMENT: {4/6/2009 4:20:57 PM}		runner.addTest(TestCUnits::suite());
-// COMMENT: {4/6/2009 4:20:57 PM}		runner.addTest(TestCPhastInput::suite());
-// COMMENT: {4/6/2009 4:20:57 PM}		runner.addTest(TestPrism::suite());
-// COMMENT: {4/6/2009 4:20:57 PM}		runner.addTest(TestHDFSerializePolyData::suite());		
-// COMMENT: {4/6/2009 4:20:57 PM}
-// COMMENT: {4/6/2009 4:20:57 PM}// COMMENT: {9/25/2008 2:20:29 PM}		runner.addTest(TestCTimeControlMultiPropertyPage2::suite());
-// COMMENT: {4/6/2009 4:20:57 PM}
-// COMMENT: {4/6/2009 4:20:57 PM}		runner.addTest(TestUniqueMap::suite());
+		runner.addTest(TestCPhastInput::suite());
+// COMMENT: {8/18/2010 7:04:57 PM}		runner.addTest(TestCZone::suite());
+		runner.addTest(TestCGrid::suite());
+		runner.addTest(TestPHAST_Transform::suite());
+// COMMENT: {8/18/2010 7:05:00 PM}		runner.addTest(TestCtime::suite());
+// COMMENT: {8/18/2010 7:05:00 PM}		runner.addTest(TestCBC::suite());
+// COMMENT: {8/18/2010 7:05:00 PM}		runner.addTest(TestCTimeControl::suite());
+// COMMENT: {8/18/2010 7:05:00 PM}		runner.addTest(TestCWPhastDoc::suite());
+// COMMENT: {8/18/2010 7:05:00 PM}		runner.addTest(TestCParser::suite());
+// COMMENT: {8/18/2010 7:05:00 PM}		runner.addTest(TestCPropertyTreeControlBar::suite());
+// COMMENT: {8/18/2010 7:05:00 PM}		runner.addTest(TestCUnits::suite());
+// COMMENT: {8/18/2010 7:05:00 PM}		runner.addTest(TestCPhastInput::suite());
+// COMMENT: {8/18/2010 7:05:00 PM}		runner.addTest(TestPrism::suite());
+// COMMENT: {8/18/2010 7:05:00 PM}		runner.addTest(TestHDFSerializePolyData::suite());
+// COMMENT: {8/18/2010 7:05:00 PM}		runner.addTest(TestUniqueMap::suite());
+// COMMENT: {8/18/2010 7:05:00 PM}		runner.addTest(TestCproperty::suite());
 
 		/**********************************************************
 		// the following require user input
 		//
 		runner.addTest(TestCModGridCtrlEx::suite());
 		runner.addTest(TestCTimeControlMultiPropertyPage::suite());
+		runner.addTest(TestCTimeControlMultiPropertyPage2::suite());
 		runner.addTest(TestCMapDialog::suite());	
 		runner.addTest(TestCMapActor::suite());	
 		runner.addTest(TestCGridLODActor::suite());	
@@ -117,5 +119,5 @@ void TCPPUnit::RunUnitTests(void)
 			DebugBreak();
 		}
 	}
-// COMMENT: {4/6/2009 7:41:16 PM}	exit(0);
+// COMMENT: {9/29/2010 5:20:35 PM}	exit(0);
 }

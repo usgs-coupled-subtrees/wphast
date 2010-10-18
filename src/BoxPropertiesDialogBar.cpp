@@ -425,6 +425,10 @@ void CBoxPropertiesDialogBar::Update(IObserver* pSender, LPARAM lHint, CObject* 
 	case WPN_SCALE_CHANGED:
 		TRACE("\t%s, WPN_SCALE_CHANGED\n", __FUNCTION__);
 		break;
+	case WPN_DOMAIN_CHANGED:
+		TRACE("\t%s, WPN_DOMAIN_CHANGED\n", __FUNCTION__);
+		this->Update(0, WPN_SELCHANGED, 0, this->m_pProp3D);
+		break;
 	default:
 		ASSERT(FALSE);
 	}
@@ -3145,12 +3149,12 @@ void CBoxPropertiesDialogBar::DoDataExchangePrism(CDataExchange *pDX, Data_sourc
 					}
 // COMMENT: {7/25/2008 9:47:57 PM}					if (this->m_nPrismPart == this->PRISM_PERIMETER)
 // COMMENT: {7/25/2008 9:47:57 PM}					{
-// COMMENT: {7/25/2008 9:47:57 PM}						vtkFloatingPointType p1[3];
-// COMMENT: {7/25/2008 9:47:57 PM}						vtkFloatingPointType p2[3];
-// COMMENT: {7/25/2008 9:47:57 PM}						vtkFloatingPointType x1[3];
-// COMMENT: {7/25/2008 9:47:57 PM}						vtkFloatingPointType x2[3];
-// COMMENT: {7/25/2008 9:47:57 PM}						vtkFloatingPointType u;
-// COMMENT: {7/25/2008 9:47:57 PM}						vtkFloatingPointType v;
+// COMMENT: {7/25/2008 9:47:57 PM}						double p1[3];
+// COMMENT: {7/25/2008 9:47:57 PM}						double p2[3];
+// COMMENT: {7/25/2008 9:47:57 PM}						double x1[3];
+// COMMENT: {7/25/2008 9:47:57 PM}						double x2[3];
+// COMMENT: {7/25/2008 9:47:57 PM}						double u;
+// COMMENT: {7/25/2008 9:47:57 PM}						double v;
 // COMMENT: {7/25/2008 9:47:57 PM}						p1[0] = x;
 // COMMENT: {7/25/2008 9:47:57 PM}						p1[1] = y;
 // COMMENT: {7/25/2008 9:47:57 PM}						p1[2] = z;

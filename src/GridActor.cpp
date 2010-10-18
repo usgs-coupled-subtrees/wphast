@@ -20,6 +20,8 @@
 #include <vtkPolyData.h>
 #include <vtkUnstructuredGrid.h>
 #include <vtkImplicitPlaneWidget.h>
+#include <vtkBoxWidget.h>
+#include "vtkBoxWidget2.h"
 #include "GridLineWidget.h"
 #include "GridLineMoveMemento.h"
 
@@ -32,10 +34,11 @@
 #include "Resource.h"
 #endif
 
-//{{
-static HCURSOR s_hcur = 0;
-//}}
+// for tracing gridactor events
+CTraceCategory GRIDACTOR("GridActor", 0);
 
+static HCURSOR s_hcur = 0;
+static double GridColor[3] = {1.0, 0.8, 0.6};
 
 vtkCxxRevisionMacro(CGridActor, "$Revision: 418 $");
 vtkStandardNewMacro(CGridActor);
@@ -61,23 +64,30 @@ CGridActor::CGridActor(void)
 	, ScaleTransform(0)
 	, UnitsTransform(0)
 	, LinePicker(0)
+#if defined(GRID_WIDGET)
+	, CubeSource(0)
+	, CubeMapper(0)
+	, CubeActor(0)
+	, BoxWidget(0)
+#endif
+
 {
 	this->m_pGeometryFilter = vtkGeometryFilter::New();
 
 	this->m_pFeatureEdges = vtkFeatureEdges::New();
 	this->m_pFeatureEdges->BoundaryEdgesOn();
 	this->m_pFeatureEdges->ManifoldEdgesOn();
-	this->m_pFeatureEdges->FeatureEdgesOn();
+	this->m_pFeatureEdges->FeatureEdgesOff();
 	this->m_pFeatureEdges->NonManifoldEdgesOn();
 	this->m_pFeatureEdges->ColoringOff();
 
 	this->m_pPolyDataMapper = vtkPolyDataMapper::New();
-	this->m_pPolyDataMapper->SetInput(this->m_pFeatureEdges->GetOutput());
+	this->m_pPolyDataMapper->SetInputConnection(this->m_pFeatureEdges->GetOutputPort());
 	this->m_pPolyDataMapper->SetResolveCoincidentTopologyToPolygonOffset();
 
 	this->Actor = vtkActor::New();
 	this->Actor->SetMapper(this->m_pPolyDataMapper);
-	this->Actor->GetProperty()->SetColor(1.0, 0.8, 0.6);
+	this->Actor->GetProperty()->SetColor(GridColor);
 	this->AddPart(this->Actor);
 
 	this->m_gridKeyword.m_grid[0].c = 'X';
@@ -112,10 +122,43 @@ CGridActor::CGridActor(void)
 	}
 	this->LinePicker = vtkCellPicker::New();
 	this->LinePicker->SetTolerance(0.002);
+
+#if defined(GRID_WIDGET)
+	this->CubeSource = vtkCubeSource::New();
+	this->CubeMapper = vtkPolyDataMapper::New();
+	this->CubeMapper->SetInput(this->CubeSource->GetOutput());
+	this->CubeActor  = vtkActor::New();
+	this->CubeActor->SetMapper(this->CubeMapper);
+	this->HandleSize = 0.008 / 1.5;
+	this->BoxWidget = vtkBoxWidget2::New();
+// COMMENT: {9/22/2010 3:50:33 PM}	//{{
+// COMMENT: {9/22/2010 3:50:33 PM}	this->BoxWidget->SetTranslationEnabled(0);
+// COMMENT: {9/22/2010 3:50:33 PM}	this->BoxWidget->SetScalingEnabled(0);
+// COMMENT: {9/22/2010 3:50:33 PM}	this->BoxWidget->SetRotationEnabled(0);
+// COMMENT: {9/22/2010 3:50:33 PM}	//}}
+#endif
 }
 
 CGridActor::~CGridActor(void)
 {
+#if defined(GRID_WIDGET)
+	if (this->CubeSource)
+	{
+		this->CubeSource->Delete();
+	}
+	if (this->CubeMapper)
+	{
+		this->CubeMapper->Delete();
+	}
+	if (this->CubeActor)
+	{
+		this->CubeActor->Delete();
+	}
+	if (this->BoxWidget)
+	{
+		this->BoxWidget->Delete();
+	}
+#endif
 	if (this->LinePicker)
 	{
 		this->LinePicker->Delete();
@@ -182,7 +225,7 @@ void CGridActor::Serialize(bool bStoring, hid_t loc_id)
 	static const char szGridOrigin[] = "GridOrigin";
 
 	
-	vtkFloatingPointType scale[3];
+	double scale[3];
 	double double_scale[3];
 
 	herr_t status;
@@ -409,50 +452,7 @@ void CGridActor::Insert(CTreeCtrl* pTreeCtrl, HTREEITEM htiGrid)
 		pTreeCtrl->DeleteItem(hChild);
 	}
 
-	// insert
-	this->m_gridKeyword.m_grid[0].Insert(pTreeCtrl, htiGrid);
-	this->m_gridKeyword.m_grid[1].Insert(pTreeCtrl, htiGrid);
-	this->m_gridKeyword.m_grid[2].Insert(pTreeCtrl, htiGrid);
-
-	// snap
-	CSnap defaultSnap;
-	if (this->m_gridKeyword.m_snap[0] != defaultSnap[0])
-	{
-		CString str;
-		str.Format("snap X %g", this->m_gridKeyword.m_snap[0]);
-		pTreeCtrl->InsertItem(str, htiGrid);
-	}
-	if (this->m_gridKeyword.m_snap[1] != defaultSnap[1])
-	{
-		CString str;
-		str.Format("snap Y %g", this->m_gridKeyword.m_snap[1]);
-		pTreeCtrl->InsertItem(str, htiGrid);
-	}
-	if (this->m_gridKeyword.m_snap[2] != defaultSnap[2])
-	{
-		CString str;
-		str.Format("snap Z %g", this->m_gridKeyword.m_snap[2]);
-		pTreeCtrl->InsertItem(str, htiGrid);
-	}
-
-	// chem dims
-	if (!this->m_gridKeyword.m_axes[0] || !this->m_gridKeyword.m_axes[1] || !this->m_gridKeyword.m_axes[2])
-	{
-		CString str("chemistry_dimensions ");
-		if (this->m_gridKeyword.m_axes[0]) str += _T("X");
-		if (this->m_gridKeyword.m_axes[1]) str += _T("Y");
-		if (this->m_gridKeyword.m_axes[2]) str += _T("Z");
-		pTreeCtrl->InsertItem(str, htiGrid);
-	}
-
-	if (this->m_gridKeyword.m_print_input_xy)
-	{
-		pTreeCtrl->InsertItem("print_orientation XY", htiGrid);
-	}
-	else
-	{
-		pTreeCtrl->InsertItem("print_orientation XZ", htiGrid);
-	}
+	this->m_gridKeyword.Insert(pTreeCtrl, htiGrid);
 
 	// set data
 	pTreeCtrl->SetItemData(htiGrid, (DWORD_PTR)this);
@@ -522,6 +522,7 @@ void CGridActor::Setup(const CUnits& units)
 	sgrid->SetDimensions(this->m_gridKeyword.m_grid[0].count_coord, this->m_gridKeyword.m_grid[1].count_coord, this->m_gridKeyword.m_grid[2].count_coord);
 
 	vtkPoints *points = vtkPoints::New();
+	points->SetDataTypeToDouble();
 	points->Allocate(this->m_gridKeyword.m_grid[0].count_coord * this->m_gridKeyword.m_grid[1].count_coord * this->m_gridKeyword.m_grid[2].count_coord);
 
 	// load grid points
@@ -529,8 +530,8 @@ void CGridActor::Setup(const CUnits& units)
 	this->ValueToIndex[0].clear();
 	this->ValueToIndex[1].clear();
 	this->ValueToIndex[2].clear();
-	vtkFloatingPointType x[3];
-	vtkFloatingPointType t[3];
+	double x[3];
+	double t[3];
 	int j, k, offset, jOffset, kOffset;
 	for (k = 0; k < this->m_gridKeyword.m_grid[2].count_coord; ++k)
 	{
@@ -569,19 +570,51 @@ void CGridActor::Setup(const CUnits& units)
 				if (i == 0 && j == 0)
 				{
 					// this insert is ok
-					VERIFY(this->ValueToIndex[2].insert(std::map<vtkFloatingPointType, int>::value_type(t[2], k)).second);
+					VERIFY(this->ValueToIndex[2].insert(std::map<float, int>::value_type(t[2], k)).second);
+#if defined(_DEBUG)
+					std::map<float, int>::iterator setIter = this->ValueToIndex[2].find(t[2]);
+					ASSERT(setIter != this->ValueToIndex[2].end());
+#endif
 				}
 				if (i == 0 && k == 0)
 				{
 					// this insert is ok
-					VERIFY(this->ValueToIndex[1].insert(std::map<vtkFloatingPointType, int>::value_type(t[1], j)).second);
+					VERIFY(this->ValueToIndex[1].insert(std::map<float, int>::value_type(t[1], j)).second);
+#if defined(_DEBUG)
+					std::map<float, int>::iterator setIter = this->ValueToIndex[1].find(t[1]);
+					ASSERT(setIter != this->ValueToIndex[1].end());
+#endif
 				}
 				if (j == 0 && k == 0)
 				{
 					// this insert is ok
-					VERIFY(this->ValueToIndex[0].insert(std::map<vtkFloatingPointType, int>::value_type(t[0], i)).second);
+					VERIFY(this->ValueToIndex[0].insert(std::map<float, int>::value_type(t[0], i)).second);
+#if defined(_DEBUG)
+					std::map<float, int>::iterator setIter = this->ValueToIndex[0].find(t[0]);
+					ASSERT(setIter != this->ValueToIndex[0].end());
+#endif
 				}
+#if defined(GRID_WIDGET)
+				if (i == 0 && j == 0 && k == 0)
+				{
+					//this->CubeSource->SetCenter(t[0], t[1], t[2]);
+					this->Center[0] = t[0];
+					this->Center[1] = t[1];
+					this->Center[2] = t[2];
+// COMMENT: {7/22/2009 10:36:57 PM}					this->CubeSource->SetXLength(500);
+// COMMENT: {7/22/2009 10:36:57 PM}					this->CubeSource->SetYLength(500);
+// COMMENT: {7/22/2009 10:36:57 PM}					this->CubeSource->SetZLength(500);
+				}
+#endif
 				points->InsertPoint(offset, t);
+#if defined(_DEBUG)
+				double tt[3];
+				points->GetPoint(offset, tt);
+				for (size_t ii = 0; ii < 3; ++ii)
+				{
+					ASSERT(t[ii] == tt[ii]);
+				}
+#endif
 			}
 		}
 	}
@@ -729,6 +762,17 @@ void CGridActor::SetEnabled(int enabling)
 		i->AddObserver(vtkCommand::CharEvent, 
 			this->EventCallbackCommand, 10);		
 
+#if defined(GRID_WIDGET)
+		i->AddObserver(vtkCommand::ModifiedEvent, 
+			this->EventCallbackCommand, 10);		
+		this->SizeHandles();
+		this->CurrentRenderer->AddActor(this->CubeActor);
+		this->BoxWidget->SetProp3D(this);
+		this->BoxWidget->SetInteractor(i);
+		this->BoxWidget->SetPlaceFactor(1.0);
+		this->BoxWidget->PlaceWidget(this->GetBounds());
+		this->BoxWidget->On();
+#endif
 	}
 
 	else //disabling-------------------------------------------------------------
@@ -741,6 +785,20 @@ void CGridActor::SetEnabled(int enabling)
 		}
 
 		this->Enabled = 0;
+
+#if defined(GRID_WIDGET)
+		// remove handle
+		this->CurrentRenderer->RemoveActor(this->CubeActor);
+		if (this->Interactor)
+		{
+			this->BoxWidget->SetProp3D(0);
+			if (this->BoxWidget && this->BoxWidget->GetEnabled())
+			{
+				this->BoxWidget->SetEnabled(enabling);
+			}
+			this->Interactor->Render();
+		}
+#endif
 
 		// don't listen for events any more
 		if (this->Interactor)
@@ -805,6 +863,12 @@ void CGridActor::ProcessEvents(vtkObject* object, unsigned long event, void* cli
 		ASSERT(object == self->PlaneWidget);
 		self->State = CGridActor::Dragging;
 		break;
+
+#if defined(GRID_WIDGET)
+	case vtkCommand::ModifiedEvent:
+		self->SizeHandles();
+		break;
+#endif
 	}
 }
 
@@ -821,7 +885,7 @@ void CGridActor::OnLeftButtonDown()
 	{
 		return;
 	}
-	TRACE("OnLeftButtonDown X = %d, Y= %d\n", X, Y);
+	ATLTRACE2(GRIDACTOR, 0, "OnLeftButtonDown X = %d, Y= %d\n", X, Y);
 }
 
 void CGridActor::OnMouseMove()
@@ -843,7 +907,7 @@ void CGridActor::OnMouseMove()
 #if defined(WIN32)
 	if (::GetAsyncKeyState(VK_LBUTTON) < 0)
 	{
-		// ignore if right mouse button is down
+		// ignore if left mouse button is down
 		return;
 	}
 	if (::GetAsyncKeyState(VK_RBUTTON) < 0)
@@ -853,12 +917,13 @@ void CGridActor::OnMouseMove()
 	}
 	if (::GetAsyncKeyState(VK_MBUTTON) < 0)
 	{
-		// ignore if right mouse button is down
+		// ignore if middle mouse button is down
 		return;
 	}
 #endif
-	TRACE("CGridActor::OnMouseMove X = %d, Y= %d\n", X, Y);
+	ATLTRACE2(GRIDACTOR, 1, "OnMouseMove X = %d, Y= %d\n", X, Y);
 
+#if !defined(GRID_WIDGET)
 	int nPlane;
 	if (this->PlanePicker->Pick(X, Y, 0.0, this->CurrentRenderer))
 	{
@@ -884,7 +949,9 @@ void CGridActor::OnMouseMove()
 		this->Interactor->Render();
 		return;
 	}
+#endif
 
+#if !defined(GRID_WIDGET)
 	this->LinePicker->PickFromListOn();
 	this->Actor->PickableOn();
 	this->LinePicker->AddPickList(this->Actor);
@@ -894,14 +961,15 @@ void CGridActor::OnMouseMove()
 
 	if (path != 0)
 	{
-		vtkActor* pActor = vtkActor::SafeDownCast(path->GetFirstNode()->GetProp());
+		vtkActor* pActor = vtkActor::SafeDownCast(path->GetFirstNode()->GetViewProp());
 		ASSERT(path->GetNumberOfItems() == 1);
 		ASSERT(pActor);
 		ASSERT(pActor == this->Actor);
 
 		vtkIdType n = this->LinePicker->GetCellId();
-		TRACE("CellId = %d\n", n);
-		vtkFloatingPointType* pt = this->LinePicker->GetPickPosition();
+		ATLTRACE2(GRIDACTOR, 0, "CellId = %d\n", n);
+
+		double* pt = this->LinePicker->GetPickPosition();
 		if (vtkDataSet* pDataSet = this->LinePicker->GetDataSet())
 		{
 			vtkCell* pCell = pDataSet->GetCell(n);
@@ -911,13 +979,14 @@ void CGridActor::OnMouseMove()
 				if (vtkPoints* pPoints = pCell->GetPoints())
 				{
 					pPoints->GetPoint(0, this->CurrentPoint);
-					vtkFloatingPointType* pt0 = this->CurrentPoint;
-					vtkFloatingPointType* pt1 = pPoints->GetPoint(1);
-					TRACE("pt0[0] = %g, pt0[1] = %g, pt0[2] = %g\n", pt0[0], pt0[1], pt0[2]);
-					TRACE("pt1[0] = %g, pt1[1] = %g, pt1[2] = %g\n", pt1[0], pt1[1], pt1[2]);
+					double* pt0 = this->CurrentPoint;
+					double* pt1 = pPoints->GetPoint(1);
 
-					vtkFloatingPointType length;
-					vtkFloatingPointType bounds[6];
+					ATLTRACE2(GRIDACTOR, 0, "pt0[0] =  %.*g, pt0[1] =  %.*g, pt0[2] =  %.*g\n", DBL_DIG, pt0[0], DBL_DIG, pt0[1], DBL_DIG, pt0[2]);
+					ATLTRACE2(GRIDACTOR, 0, "pt1[0] =  %.*g, pt1[1] =  %.*g, pt1[2] =  %.*g\n", DBL_DIG, pt1[0], DBL_DIG, pt1[1], DBL_DIG, pt1[2]);
+
+					double length;
+					double bounds[6];
 					this->GetBounds(bounds);
 
 					if (nPlane == 0 && ( pt0[2] == this->m_max[2] && pt1[2] == this->m_max[2] )
@@ -926,6 +995,7 @@ void CGridActor::OnMouseMove()
 					{
 						// +z / -z
 						//
+						ATLTRACE2(GRIDACTOR, 0, "+z/-z\n");
 						if (pt0[0] == pt1[0])
 						{
 							if (this->PlaneWidget)
@@ -977,6 +1047,7 @@ void CGridActor::OnMouseMove()
 					{
 						// -y / +y
 						//
+						ATLTRACE2(GRIDACTOR, 0, "-y/+y\n");
 						if (pt0[0] == pt1[0])
 						{
 							if (this->PlaneWidget)
@@ -1028,6 +1099,7 @@ void CGridActor::OnMouseMove()
 					{
 						// +x / -x
 						//
+						ATLTRACE2(GRIDACTOR, 0, "+x/-x\n");
 						if (pt0[1] == pt1[1])
 						{
 							if (this->PlaneWidget)
@@ -1073,10 +1145,22 @@ void CGridActor::OnMouseMove()
 							ASSERT(FALSE);
 						}
 					}
+					//
+					// this should probably done outside this class
+					// sets focus on the main view so that deletes may occur
+					if (vtkWin32RenderWindowInteractor *rwi = vtkWin32RenderWindowInteractor::SafeDownCast(this->Interactor))
+					{
+						if (vtkWin32OpenGLRenderWindow *w = vtkWin32OpenGLRenderWindow::SafeDownCast(rwi->GetRenderWindow()))
+						{
+#if defined(WIN32)
+							::SetFocus(w->GetWindowId());
+#endif
+						}
+					}
 				}
 			}
 		}
-		TRACE("pt[0] = %g, pt[1] = %g, pt[2] = %g\n", pt[0], pt[1], pt[2]);
+		ATLTRACE2(GRIDACTOR, 0, "pt[0] = %g, pt[1] = %g, pt[2] = %g\n", pt[0], pt[1], pt[2]);
 	}
 	else
 	{
@@ -1091,6 +1175,7 @@ void CGridActor::OnMouseMove()
 	}
 	this->LinePicker->DeletePickList(this->Actor);
 	this->Actor->PickableOff();
+#endif
 }
 
 void CGridActor::OnLeftButtonUp()
@@ -1112,7 +1197,7 @@ void CGridActor::OnKeyPress()
 	if (!this->Interactor) return;
 
 	char* keysym = this->Interactor->GetKeySym();
-	TRACE("OnKeyPress %s\n", keysym);
+	ATLTRACE2(GRIDACTOR, 0, "OnKeyPress %s\n", keysym);
 	
 	if (this->PlaneWidget->GetEnabled())
 	{
@@ -1120,7 +1205,7 @@ void CGridActor::OnKeyPress()
 		if (::strcmp(keysym, "Delete") == 0 && this->AxisIndex != -1)
 		{
 			this->PlaneIndex = -1;
-			std::map<vtkFloatingPointType, int>::iterator i = this->ValueToIndex[this->AxisIndex].find(this->CurrentPoint[this->AxisIndex]);
+			std::map<float, int>::iterator i = this->ValueToIndex[this->AxisIndex].find(this->CurrentPoint[this->AxisIndex]);
 			if (i != this->ValueToIndex[this->AxisIndex].end())
 			{
 				if (this->m_gridKeyword.m_grid[this->AxisIndex].count_coord > 2)
@@ -1137,13 +1222,17 @@ void CGridActor::OnKeyPress()
 				}
 				this->State = CGridActor::Start;
 			}
+			else
+			{
+				ASSERT(FALSE);
+			}
 		}
 	}
 }
 
 void CGridActor::OnInteraction(void)
 {
-	TRACE("CGridActor::OnInteraction\n");
+	ATLTRACE2(GRIDACTOR, 0, "OnInteraction\n");
 	// set state
 	this->State = CGridActor::Dragging;
 
@@ -1174,7 +1263,7 @@ void CGridActor::OnEndInteraction(void)
 
 		// lookup current point and convert to grid index
 		//
-		std::map<vtkFloatingPointType, int>::iterator setIter = this->ValueToIndex[this->AxisIndex].find(this->CurrentPoint[this->AxisIndex]);
+		std::map<float, int>::iterator setIter = this->ValueToIndex[this->AxisIndex].find(this->CurrentPoint[this->AxisIndex]);
 		if (setIter != this->ValueToIndex[this->AxisIndex].end())
 		{
 			int originalPlaneIndex = setIter->second;
@@ -1183,12 +1272,27 @@ void CGridActor::OnEndInteraction(void)
 			// interator no longer valid
 			struct GridLineMoveMemento memento;
 			memento.Uniform = this->m_gridKeyword.m_grid[this->AxisIndex].uniform;
-			if (bMoving)
-			{
-				VERIFY(this->DeleteLine(this->AxisIndex, originalPlaneIndex));
-			}
 			double value = this->PlaneWidget->GetOrigin()[this->AxisIndex] / this->GetScale()[this->AxisIndex];
 			this->PlaneIndex = this->InsertLine(this->AxisIndex, value);
+			if (bMoving)
+			{
+				std::map<float, int>::iterator setIter = this->ValueToIndex[this->AxisIndex].find(this->CurrentPoint[this->AxisIndex]);
+				if (setIter != this->ValueToIndex[this->AxisIndex].end())
+				{
+					originalPlaneIndex = setIter->second;
+					//{{ BUG
+					if (!this->DeleteLine(this->AxisIndex, originalPlaneIndex))
+					{
+						ASSERT(this->PlaneIndex == -1); // no-op
+						this->State = CGridActor::Start;
+						this->AxisIndex = -1;
+						this->PlaneIndex = -1;
+						::SetCursor(::LoadCursor(NULL, IDC_ARROW));
+						return;
+					}
+					//}}
+				}
+			}
 			if (this->PlaneIndex != -1)
 			{
 				if (bMoving)
@@ -1217,13 +1321,17 @@ void CGridActor::OnEndInteraction(void)
 			}
 			else
 			{
-				// PlaneIndex well be -1 if the moved line lands exactly
+				// PlaneIndex will be -1 if the moved line lands exactly
 				// on an existing line.  Therefore this just becomes a deleted line.
 				this->PlaneIndex = originalPlaneIndex;
 
 				// notify listeners
 				this->InvokeEvent(CGridActor::DeleteGridLineEvent, &this->m_dDeletedValue);
 			}
+		}
+		else
+		{
+			ASSERT(FALSE);
 		}
 	}
 
@@ -1280,7 +1388,7 @@ BOOL CGridActor::DeleteLine(int nAxisIndex, int nPlaneIndex)
 			coordinates.insert(grid.coord, grid.coord + grid.count_coord);
 
 			this->m_dDeletedValue = grid.coord[nPlaneIndex];
-			TRACE("CGridActor::DeleteLine %d = %g from grid[%d]\n", nPlaneIndex, this->m_dDeletedValue, nAxisIndex);
+			ATLTRACE2(GRIDACTOR, 0, "DeleteLine %d = %.*g from grid[%d]\n", nPlaneIndex, DBL_DIG, this->m_dDeletedValue, nAxisIndex);
 
 			// remove coordinate
 			VERIFY(coordinates.erase(grid.coord[nPlaneIndex]) == 1);
@@ -1301,12 +1409,12 @@ BOOL CGridActor::DeleteLine(int nAxisIndex, int nPlaneIndex)
 		}
 		else
 		{
-			TRACE("CGridActor::DeleteLine: Bad Plane Index => %d for grid[%d](0..%d)\n", nPlaneIndex, nAxisIndex, grid.count_coord);
+			ATLTRACE2(GRIDACTOR, 0, "DeleteLine: Bad Plane Index => %d for grid[%d](0..%d)\n", nPlaneIndex, nAxisIndex, grid.count_coord);
 		}
 	}
 	else
 	{
-		TRACE("CGridActor::DeleteLine: Bad Axis Index => %d\n", nAxisIndex);
+		ATLTRACE2(GRIDACTOR, 0, "DeleteLine: Bad Axis Index => %d\n", nAxisIndex);
 	}
 	return FALSE; // failure
 }
@@ -1327,7 +1435,7 @@ int CGridActor::InsertLine(int nAxisIndex, double dValue)
 		std::pair< std::set<double>::iterator, bool > ins = coordinates.insert(dValue);
 		if (ins.second)
 		{
-			TRACE("CGridActor::InsertLine %g into grid[%d]\n", dValue, nAxisIndex);
+			ATLTRACE2(GRIDACTOR, 0, "InsertLine %.*g into grid[%d]\n", DBL_DIG, dValue, nAxisIndex);
 
 			// insert new coordinates
 			this->m_gridKeyword.m_grid[nAxisIndex].insert(coordinates.begin(), coordinates.end());
@@ -1349,12 +1457,12 @@ int CGridActor::InsertLine(int nAxisIndex, double dValue)
 		}
 		else
 		{
-			TRACE("CGridActor::InsertLine: Bad Value %g already exists\n", dValue);
+			ATLTRACE2(GRIDACTOR, 0, "CGridActor::InsertLine: Bad Value %.*g already exists\n", DBL_DIG, dValue);
 		}
 	}
 	else
 	{
-		TRACE("CGridActor::InsertLine: Bad Axis Index => %d\n", nAxisIndex);
+		ATLTRACE2(GRIDACTOR, 0, "InsertLine: Bad Axis Index => %d\n", nAxisIndex);
 	}
 	return -1; // failure
 }
@@ -1398,12 +1506,12 @@ BOOL CGridActor::MoveLine(int nAxisIndex, int nPlaneIndex, double dValue)
 			}
 			else
 			{
-				TRACE("CGridActor::MoveLine(%d, %d, %g) Unable to insert %g\n", nAxisIndex, nPlaneIndex, dValue, dValue);
+				ATLTRACE2(GRIDACTOR, 0, "MoveLine(%d, %d, %g) Unable to insert %g\n", nAxisIndex, nPlaneIndex, dValue, dValue);
 			}
 		}
 		else
 		{
-			TRACE("CGridActor::MoveLine(%d, %d, %g) Bad Plane Index(0..%d)\n", nAxisIndex, nPlaneIndex, dValue, grid.count_coord);
+			ATLTRACE2(GRIDACTOR, 0, "MoveLine(%d, %d, %g) Bad Plane Index(0..%d)\n", nAxisIndex, nPlaneIndex, dValue, grid.count_coord);
 		}
 	}
 	return FALSE; // failure
@@ -1455,33 +1563,36 @@ void CGridActor::UpdatePoints(void)
 
 	// -x plane
 	this->PlaneSources[5]->SetOrigin(this->m_min[0], this->m_min[1], this->m_min[2]);
-	this->PlaneSources[5]->SetPoint1(this->m_min[0], this->m_min[1], this->m_max[2]);
+	//{{
 	this->PlaneSources[5]->SetPoint2(this->m_min[0], this->m_max[1], this->m_min[2]);
+	//}}
+	this->PlaneSources[5]->SetPoint1(this->m_min[0], this->m_min[1], this->m_max[2]);
+// COMMENT: {8/4/2009 8:29:15 PM}	this->PlaneSources[5]->SetPoint2(this->m_min[0], this->m_max[1], this->m_min[2]);
 	this->PlaneActors[5]->GetProperty()->SetColor(1, 0, 0);
 	this->PlaneActors[5]->GetProperty()->SetOpacity(0.1);
 }
 
-void CGridActor::SetScale(vtkFloatingPointType x, vtkFloatingPointType y, vtkFloatingPointType z)
+void CGridActor::SetScale(double x, double y, double z)
 {
 	this->ScaleTransform->Identity();
 	this->ScaleTransform->Scale(x, y, z);
 	this->Setup(this->m_units);
 }
 
-void CGridActor::SetScale(vtkFloatingPointType scale[3])
+void CGridActor::SetScale(double scale[3])
 {
 	this->ScaleTransform->Identity();
 	this->ScaleTransform->Scale(scale);
 	this->Setup(this->m_units);
 }
 
-vtkFloatingPointType* CGridActor::GetScale(void)
+double* CGridActor::GetScale(void)
 {
 	ASSERT(this->ScaleTransform);
 	return this->ScaleTransform->GetScale();
 }
 
-void CGridActor::GetScale(vtkFloatingPointType scale[3])
+void CGridActor::GetScale(double scale[3])
 {
 	ASSERT(this->ScaleTransform);
 	return this->ScaleTransform->GetScale(scale);
@@ -1502,3 +1613,70 @@ void CGridActor::OnChar(void)
 		break;
 	}
 }
+
+#if defined(GRID_WIDGET)
+void CGridActor::SizeHandles()
+{
+	if (!this->Interactor) return;
+
+	if (!this->CurrentRenderer)
+	{
+		int X = this->Interactor->GetEventPosition()[0];
+		int Y = this->Interactor->GetEventPosition()[1];
+		this->CurrentRenderer = this->Interactor->FindPokedRenderer(X, Y);
+	}
+
+	//{{
+	this->CurrentRenderer->SetWorldPoint(this->Center[0], this->Center[1], this->Center[2], 1.0);
+	this->CurrentRenderer->WorldToDisplay();
+	double pt[4];
+	this->CurrentRenderer->GetDisplayPoint(pt);
+	char buffer[80];
+	::sprintf(buffer, "GetDisplayPoint = %g, %g, %g\n", pt[0], pt[1], pt[2]);
+	::OutputDebugString(buffer);
+
+	pt[0] -= 10;
+	pt[1] -= 10;
+	this->CurrentRenderer->SetDisplayPoint(pt[0], pt[1], pt[2]);
+
+	vtkCamera* camera = this->CurrentRenderer->GetActiveCamera();
+	double *vu = camera->GetViewUp();
+	::sprintf(buffer, "GetViewUp = %g, %g, %g\n", vu[0], vu[1], vu[2]);
+	if (vu[0] > .9)
+	{
+		camera->SetViewUp(1, 0, 0);
+	}
+	::OutputDebugString(buffer);
+
+	//{{
+	double zaxis[3];
+	zaxis[0] = 0.0;
+	zaxis[1] = 0.0;
+	zaxis[2] = 1.0;
+	//}}
+
+	double worldPt[4];
+	this->CurrentRenderer->DisplayToWorld();
+	this->CurrentRenderer->GetWorldPoint(worldPt);
+	if (worldPt[3] != 0)
+	{
+		worldPt[0] /= worldPt[3];
+		worldPt[1] /= worldPt[3];
+		worldPt[2] /= worldPt[3];
+		worldPt[3] = 1.0;
+	}
+	this->CubeSource->SetCenter(worldPt[0], worldPt[1], this->Center[2]);
+	//}}
+
+	double radius = CGlobal::ComputeRadius(this->CurrentRenderer);
+
+	//for(int i=0; i<7; i++)
+	{
+		double length = 2 * CGlobal::ComputeRadius(this->CurrentRenderer) * 0.004;
+		this->CubeSource->SetXLength(length);
+		this->CubeSource->SetYLength(length);
+		this->CubeSource->SetZLength(length);
+// COMMENT: {7/22/2009 10:03:07 PM}		this->HandleGeometry[i]->SetRadius(radius);
+	}
+}
+#endif

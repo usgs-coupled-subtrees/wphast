@@ -31,14 +31,14 @@ void CGridPropertyPage::CommonConstruct(void)
 {
 	for(int i = 0; i < 3; ++i)
 	{
-		this->m_grid[i].count_coord = 2;
-		this->m_grid[i].uniform = TRUE;
-		this->m_grid[i].coord[0] = 0;
-		this->m_grid[i].coord[1] = 1;
+		this->GridKeyword.m_grid[i].count_coord = 2;
+		this->GridKeyword.m_grid[i].uniform = TRUE;
+		this->GridKeyword.m_grid[i].coord[0] = 0;
+		this->GridKeyword.m_grid[i].coord[1] = 1;
 	}
-	this->m_grid[0].c = 'x';
-	this->m_grid[1].c = 'y';
-	this->m_grid[2].c = 'z';
+	this->GridKeyword.m_grid[0].c = 'x';
+	this->GridKeyword.m_grid[1].c = 'y';
+	this->GridKeyword.m_grid[2].c = 'z';
 
 #ifdef _DEBUG
 	/*
@@ -49,9 +49,9 @@ void CGridPropertyPage::CommonConstruct(void)
 	-uniform z
 			0       400 5
 	*/
-	this->m_grid[0].SetUniformRange(0, 90000, 16);
-	this->m_grid[1].SetUniformRange(0, 48000, 9);
-	this->m_grid[2].SetUniformRange(0, 400, 5);
+	this->GridKeyword.m_grid[0].SetUniformRange(0, 90000, 16);
+	this->GridKeyword.m_grid[1].SetUniformRange(0, 48000, 9);
+	this->GridKeyword.m_grid[2].SetUniformRange(0, 400, 5);
 #endif
 
 }
@@ -76,38 +76,38 @@ void CGridPropertyPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_ZMAX_UNITS_STATIC, m_strVerticalUnits);
 
 	// UNIFORM X
-	DDX_Text(pDX, IDC_XMIN_EDIT, m_grid[0].coord[0]);
-	DDX_Text(pDX, IDC_XMAX_EDIT, m_grid[0].coord[1]);
+	DDX_Text(pDX, IDC_XMIN_EDIT, this->GridKeyword.m_grid[0].coord[0]);
+	DDX_Text(pDX, IDC_XMAX_EDIT, this->GridKeyword.m_grid[0].coord[1]);
 	// DDV_MinMaxDouble(pDX, m_grid[0].coord[1], m_grid[0].coord[0], DBL_MAX);
-	if (pDX->m_bSaveAndValidate && (m_grid[0].coord[1] <= m_grid[0].coord[0]))
+	if (pDX->m_bSaveAndValidate && (this->GridKeyword.m_grid[0].coord[1] <= this->GridKeyword.m_grid[0].coord[0]))
 	{
 		::AfxMessageBox("Coordinate values must be in ascending order for X grid definition");
 		pDX->Fail();
 	}
-	DDX_Text(pDX, IDC_X_NODES_EDIT, m_grid[0].count_coord);
-	DDV_MinMaxInt(pDX, m_grid[0].count_coord, 2, INT_MAX);
+	DDX_Text(pDX, IDC_X_NODES_EDIT, this->GridKeyword.m_grid[0].count_coord);
+	DDV_MinMaxInt(pDX, this->GridKeyword.m_grid[0].count_coord, 2, INT_MAX);
 
 	// UNIFORM Y
-	DDX_Text(pDX, IDC_YMIN_EDIT, m_grid[1].coord[0]);
-	DDX_Text(pDX, IDC_YMAX_EDIT, m_grid[1].coord[1]);
-	if (pDX->m_bSaveAndValidate && (m_grid[1].coord[1] <= m_grid[1].coord[0]))
+	DDX_Text(pDX, IDC_YMIN_EDIT, this->GridKeyword.m_grid[1].coord[0]);
+	DDX_Text(pDX, IDC_YMAX_EDIT, this->GridKeyword.m_grid[1].coord[1]);
+	if (pDX->m_bSaveAndValidate && (this->GridKeyword.m_grid[1].coord[1] <= this->GridKeyword.m_grid[1].coord[0]))
 	{
 		::AfxMessageBox("Coordinate values must be in ascending order for Y grid definition");
 		pDX->Fail();
 	}
-	DDX_Text(pDX, IDC_Y_NODES_EDIT, m_grid[1].count_coord);
-	DDV_MinMaxInt(pDX, m_grid[1].count_coord, 2, INT_MAX);
+	DDX_Text(pDX, IDC_Y_NODES_EDIT, this->GridKeyword.m_grid[1].count_coord);
+	DDV_MinMaxInt(pDX, this->GridKeyword.m_grid[1].count_coord, 2, INT_MAX);
 
 	// UNIFORM Z
-	DDX_Text(pDX, IDC_ZMIN_EDIT, m_grid[2].coord[0]);
-	DDX_Text(pDX, IDC_ZMAX_EDIT, m_grid[2].coord[1]);
-	if (pDX->m_bSaveAndValidate && (m_grid[2].coord[1] <= m_grid[2].coord[0]))
+	DDX_Text(pDX, IDC_ZMIN_EDIT, this->GridKeyword.m_grid[2].coord[0]);
+	DDX_Text(pDX, IDC_ZMAX_EDIT, this->GridKeyword.m_grid[2].coord[1]);
+	if (pDX->m_bSaveAndValidate && (this->GridKeyword.m_grid[2].coord[1] <= this->GridKeyword.m_grid[2].coord[0]))
 	{
 		::AfxMessageBox("Coordinate values must be in ascending order for Z grid definition");
 		pDX->Fail();
 	}
-	DDX_Text(pDX, IDC_Z_NODES_EDIT, m_grid[2].count_coord);
-	DDV_MinMaxInt(pDX, m_grid[2].count_coord, 2, INT_MAX);
+	DDX_Text(pDX, IDC_Z_NODES_EDIT, this->GridKeyword.m_grid[2].count_coord);
+	DDV_MinMaxInt(pDX, this->GridKeyword.m_grid[2].count_coord, 2, INT_MAX);
 }
 
 
@@ -180,7 +180,7 @@ BOOL CGridPropertyPage::OnApply()
 		if (this->UpdateData(TRUE) && this->m_pDoc)
 		{
 			// unrecorded undo
-			CResizeGridAction action(this->m_pDoc, this->m_grid);
+			CResizeGridAction action(this->m_pDoc, this->GridKeyword.m_grid);
 			action.Execute();
 		}
 	}

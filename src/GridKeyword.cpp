@@ -84,12 +84,89 @@ std::ostream& operator<< (std::ostream &os, const CGridKeyword &a)
 		os << "\t" << "-print_orientation XZ\n";
 	}
 
+	// Line 9
 	os << "\t" << "-grid_origin   "
 		<< a.m_grid_origin[0] << "  "
 		<< a.m_grid_origin[1] << "  "
 		<< a.m_grid_origin[2] << "\n";
 
+	// Line 10
 	os << "\t" << "-grid_angle    " << a.m_grid_angle << "\n";
 		
 	return os;
+}
+
+void CGridKeyword::Insert(CTreeCtrl* pTreeCtrl, HTREEITEM htiGrid)
+{
+	// Lines 1-3
+	this->m_grid[0].Insert(pTreeCtrl, htiGrid);
+	this->m_grid[1].Insert(pTreeCtrl, htiGrid);
+	this->m_grid[2].Insert(pTreeCtrl, htiGrid);
+
+	// Lines 4-5
+	// TODO
+
+	// Line 6
+	// snap
+	CSnap defaultSnap;
+	if (this->m_snap[0] != defaultSnap[0])
+	{
+		CString str;
+		str.Format("snap X %g", this->m_snap[0]);
+		pTreeCtrl->InsertItem(str, htiGrid);
+	}
+	if (this->m_snap[1] != defaultSnap[1])
+	{
+		CString str;
+		str.Format("snap Y %g", this->m_snap[1]);
+		pTreeCtrl->InsertItem(str, htiGrid);
+	}
+	if (this->m_snap[2] != defaultSnap[2])
+	{
+		CString str;
+		str.Format("snap Z %g", this->m_snap[2]);
+		pTreeCtrl->InsertItem(str, htiGrid);
+	}
+
+	// Line 7
+	// chemistry_dimensions
+	if (!this->m_axes[0] || !this->m_axes[1] || !this->m_axes[2])
+	{
+		CString str("chemistry_dimensions ");
+		if (this->m_axes[0]) str += _T("X");
+		if (this->m_axes[1]) str += _T("Y");
+		if (this->m_axes[2]) str += _T("Z");
+		pTreeCtrl->InsertItem(str, htiGrid);
+	}
+
+	// Line 8
+	if (this->m_print_input_xy)
+	{
+		pTreeCtrl->InsertItem("print_orientation XY", htiGrid);
+	}
+	else
+	{
+		pTreeCtrl->InsertItem("print_orientation XZ", htiGrid);
+	}
+
+	// Line 9
+	{
+		std::ostringstream oss;
+		oss.precision(DBL_DIG);
+
+		oss << "grid_origin   "
+			<< this->m_grid_origin[0] << "  "
+			<< this->m_grid_origin[1] << "  "
+			<< this->m_grid_origin[2];
+		pTreeCtrl->InsertItem(oss.str().c_str(), htiGrid);
+	}
+
+	// Line 10
+	{
+		std::ostringstream oss;
+		oss.precision(DBL_DIG);
+
+		oss << "grid_angle    " << this->m_grid_angle;
+		pTreeCtrl->InsertItem(oss.str().c_str(), htiGrid);
+	}
 }

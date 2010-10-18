@@ -6,7 +6,13 @@
 #include "IObserver.h"
 
 class vtkObject;
+
+#if ((VTK_MAJOR_VERSION >= 5) && (VTK_MINOR_VERSION >= 4))
+class vtkMFCWindow;
+#else
 class vtkWin32OpenGLRenderWindow;
+#endif
+
 class vtkRenderer;
 class vtkWin32RenderWindowInteractor;
 class vtkBoxWidget;
@@ -44,14 +50,20 @@ public:
 public:
 	void HighlightProp(vtkProp *pProp);
 	void HighlightProp3D(vtkProp3D *pProp3D);
+	void ClearSelection(void);
+	void Select(vtkProp *pProp);
+protected:
+	vtkProp *CurrentProp;   // currently selected prop
 
+public:
 	// IObserver
 	virtual void Update(IObserver* pSender = 0, LPARAM lHint = 0L, CObject* pHint = 0, vtkObject* pObject = 0);
 
 // Overrides
 	public:
 	virtual void OnDraw(CDC* pDC);  // overridden to draw this view
-virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
+
+// COMMENT: {9/8/2009 8:46:21 PM}	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
 protected:
 	virtual BOOL OnPreparePrinting(CPrintInfo* pInfo);
 	virtual void OnBeginPrinting(CDC* pDC, CPrintInfo* pInfo);
@@ -59,7 +71,7 @@ protected:
 
 // Implementation
 private:
-	void Pipeline( void );
+// COMMENT: {9/8/2009 8:46:10 PM}	void Pipeline( void );
 
 public:
 	virtual ~CWPhastView();
@@ -70,41 +82,43 @@ public:
 
 protected:
 	// Renderer
+#if ((VTK_MAJOR_VERSION >= 5) && (VTK_MINOR_VERSION >= 4))
+	vtkMFCWindow                   *MFCWindow;
+#else
 	vtkWin32OpenGLRenderWindow     *m_RenderWindow;
-	vtkRenderer                    *m_Renderer;
+#endif
+	vtkRenderer                    *Renderer;
+#if !((VTK_MAJOR_VERSION >= 5) && (VTK_MINOR_VERSION >= 4))
 	vtkWin32RenderWindowInteractor *m_RenderWindowInteractor;
+#endif
+	CViewVTKCommand                *ViewVTKCommand;
+	vtkInteractorStyle             *InteractorStyle;
 
+	// widgets
+	//
 	vtkBoxWidget                   *BoxWidget;
 	vtkPointWidget2                *PointWidget;
 	CPrismWidget                   *PrismWidget;
+	vtkCallbackCommand             *PrismWidgetCallbackCommand;
+	vtkCallbackCommand             *RiverCallbackCommand;
 
-	CViewVTKCommand                *m_pViewVTKCommand;
+	double                          BackgroundColor[3];
 
-	vtkInteractorStyle             *InteractorStyle;
-
-	vtkFloatingPointType            BackgroundColor[3];
-
-	bool                            m_bResetCamera;
-	bool                            m_bMovingGridLine;
+// COMMENT: {9/8/2009 8:46:00 PM}	bool                            m_bResetCamera;
+	bool                            bMovingGridLine;
 
 	// 3D Cursor
-	vtkCursor3D                    *m_pCursor3D;
-	vtkPolyDataMapper              *m_pCursor3DMapper;
-	vtkActor                       *m_pCursor3DActor;
+	vtkCursor3D                    *Cursor3D;
+	vtkPolyDataMapper              *Cursor3DMapper;
+	vtkActor                       *Cursor3DActor;
 
+	// New well
+	CWellActor                     *WellActor;
 
-	int                             m_ViewFromDirection;
+	// New river
+	CRiverActor                    *RiverActor;
 
-	// new well
-	CWellActor                     *m_pWellActor;
-
-	// new river
-	CRiverActor                    *m_pRiverActor;
-
-	vtkProp                        *CurrentProp;   // currently selected prop
-
-	vtkCallbackCommand             *RiverCallbackCommand;
-	vtkCallbackCommand             *PrismWidgetCallbackCommand;
+	int                             ViewFromDirection;
 
 	//
 	// coordinate mode
@@ -124,27 +138,32 @@ public:
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 
-	vtkRenderer* GetRenderer(void) const {return this->m_Renderer;}
-	vtkWin32RenderWindowInteractor* GetRenderWindowInteractor(void) const {return this->m_RenderWindowInteractor;}
+	vtkRenderer* GetRenderer(void) const {return this->Renderer;}
+#if ((VTK_MAJOR_VERSION >= 5) && (VTK_MINOR_VERSION >= 4))
+	vtkRenderWindowInteractor* GetInteractor(void);
 	vtkBoxWidget    *GetBoxWidget(void)const {return this->BoxWidget;}
 	vtkPointWidget2 *GetPointWidget(void)const {return this->PointWidget;}
 	CPrismWidget    *GetPrismWidget(void)const {return this->PrismWidget;}
+#else
+	vtkWin32RenderWindowInteractor* GetRenderWindowInteractor(void) const {return this->m_RenderWindowInteractor;}
+#endif
 
 protected:
-	virtual LRESULT WindowProc(UINT message, WPARAM wParam, LPARAM lParam);
-	virtual void OnActivateView(BOOL bActivate, CView* pActivateView, CView* pDeactiveView);
+// COMMENT: {9/8/2009 8:44:03 PM}	virtual LRESULT WindowProc(UINT message, WPARAM wParam, LPARAM lParam);
+// COMMENT: {9/8/2009 8:44:03 PM}	virtual void OnActivateView(BOOL bActivate, CView* pActivateView, CView* pDeactiveView);
 public:
 	void ResetCamera(void);
+	void ResetCamera(double bounds[6]);
+	void ResetCamera(double xmin, double xmax, double ymin, double ymax, double zmin, double zmax);
+
 	virtual void OnInitialUpdate(void);
 	void DeleteContents(void);
-	void ClearSelection(void);
-	void Select(vtkProp *pProp);
-
+	
 	void SizeHandles(double size);
 
 	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
-	afx_msg void OnUpdateToolsNewZone(CCmdUI *pCmdUI);
-	afx_msg void OnToolsNewZone();
+// COMMENT: {9/8/2009 8:44:35 PM}	afx_msg void OnUpdateToolsNewZone(CCmdUI *pCmdUI);
+// COMMENT: {9/8/2009 8:44:35 PM}	afx_msg void OnToolsNewZone();
 
 	// Moving/Copying grid lines
 	//
@@ -197,12 +216,13 @@ public:
 	afx_msg void OnViewFromMapNz();
 	afx_msg void OnViewFromMapPz();
 	afx_msg void OnViewFromNextDirection();
+	afx_msg void OnViewFromPrevDirection();
 
 	void ParallelProjectionOff(void);
 	void ParallelProjectionOn(void);
 
 protected:
-	virtual void OnUpdate(CView* /*pSender*/, LPARAM /*lHint*/, CObject* /*pHint*/);
+// COMMENT: {9/8/2009 8:45:00 PM}	virtual void OnUpdate(CView* /*pSender*/, LPARAM /*lHint*/, CObject* /*pHint*/);
 
 public:
 	afx_msg void OnUpdateToolsNewRiver(CCmdUI *pCmdUI);
@@ -226,13 +246,12 @@ public:
 	void UpdateWellMode(void);
 
 
-	afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
+// COMMENT: {9/8/2009 8:45:16 PM}	afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
 	afx_msg void OnDestroy();
 	afx_msg void OnToolsMoveVerLine();
 	afx_msg void OnUpdateToolsMoveVerLine(CCmdUI *pCmdUI);
 // COMMENT: {9/9/2005 6:14:50 PM}	afx_msg void OnUpdateToolsModifyGrid(CCmdUI *pCmdUI);
 	afx_msg void OnToolsModifyGrid();
-	afx_msg void OnViewFromPrevDirection();
 	afx_msg void OnUpdateToolsSelectObject(CCmdUI *pCmdUI);
 	afx_msg void OnToolsSelectObject();
 	virtual BOOL OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo);

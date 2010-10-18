@@ -30,6 +30,7 @@
 #include <vtkAbstractPropPicker.h>
 
 #include "Global.h"
+#include "srcinput/Domain.h"
 #include "srcinput/Prism.h"
 #include "srcinput/NNInterpolator/NNInterpolator.h"
 #include "srcinput/KDtree/KDtree.h"
@@ -357,27 +358,27 @@ void CZoneActor::Select(CWPhastView* pView, bool bReselect)
 // COMMENT: {3/5/2008 4:39:13 PM}	}
 // COMMENT: {3/5/2008 4:39:13 PM}	//}}HACK
 
-	if (vtkAbstractPropPicker *picker = vtkAbstractPropPicker::SafeDownCast( pView->GetRenderWindowInteractor()->GetPicker() ))
-	{
-		vtkAssemblyPath *path = vtkAssemblyPath::New();
-		path->AddNode(this, this->GetMatrix());
-		picker->SetPath(path);
-		path->Delete();
-	}
+// COMMENT: {9/8/2009 9:00:26 PM}	if (vtkAbstractPropPicker *picker = vtkAbstractPropPicker::SafeDownCast( pView->GetRenderWindowInteractor()->GetPicker() ))
+// COMMENT: {9/8/2009 9:00:26 PM}	{
+// COMMENT: {9/8/2009 9:00:26 PM}		vtkAssemblyPath *path = vtkAssemblyPath::New();
+// COMMENT: {9/8/2009 9:00:26 PM}		path->AddNode(this, this->GetMatrix());
+// COMMENT: {9/8/2009 9:00:26 PM}		picker->SetPath(path);
+// COMMENT: {9/8/2009 9:00:26 PM}		path->Delete();
+// COMMENT: {9/8/2009 9:00:26 PM}	}
 
 	if (this->GetDefault())
 	{
-		ASSERT(!bReselect);
-		if (!bReselect)
-		{
-			pView->HighlightProp(this);
-		}
-
-		// TODO May want to highlight the zone some other way
-		// ie (set selection color to white; change the translucency)
-		pView->GetBoxWidget()->Off();
-		//pView->GetPointWidget()->Off();
-		//pView->GetPrismWidget()->Off();
+// COMMENT: {9/8/2009 9:00:41 PM}		ASSERT(!bReselect);
+// COMMENT: {9/8/2009 9:00:41 PM}		if (!bReselect)
+// COMMENT: {9/8/2009 9:00:41 PM}		{
+// COMMENT: {9/8/2009 9:00:41 PM}			pView->HighlightProp(this);
+// COMMENT: {9/8/2009 9:00:41 PM}		}
+// COMMENT: {9/8/2009 9:00:41 PM}
+// COMMENT: {9/8/2009 9:00:41 PM}		// TODO May want to highlight the zone some other way
+// COMMENT: {9/8/2009 9:00:41 PM}		// ie (set selection color to white; change the translucency)
+// COMMENT: {9/8/2009 9:00:41 PM}		pView->GetBoxWidget()->Off();
+// COMMENT: {9/8/2009 9:00:41 PM}		//pView->GetPointWidget()->Off();
+// COMMENT: {9/8/2009 9:00:41 PM}		//pView->GetPrismWidget()->Off();
 	}
 	else
 	{
@@ -388,12 +389,12 @@ void CZoneActor::Select(CWPhastView* pView, bool bReselect)
 			pView->ClearSelection();
 		}
 
-		// Reset BoxWidget
-		//
-		pView->GetBoxWidget()->SetProp3D(this);
-		pView->GetBoxWidget()->PlaceWidget();
-		ASSERT(this == pView->GetBoxWidget()->GetProp3D());
-		pView->GetBoxWidget()->SetEnabled(1);
+// COMMENT: {9/8/2009 9:01:01 PM}		// Reset BoxWidget
+// COMMENT: {9/8/2009 9:01:01 PM}		//
+// COMMENT: {9/8/2009 9:01:01 PM}		pView->GetBoxWidget()->SetProp3D(this);
+// COMMENT: {9/8/2009 9:01:01 PM}		pView->GetBoxWidget()->PlaceWidget();
+// COMMENT: {9/8/2009 9:01:01 PM}		ASSERT(this == pView->GetBoxWidget()->GetProp3D());
+// COMMENT: {9/8/2009 9:01:01 PM}		pView->GetBoxWidget()->SetEnabled(1);
 
 #if defined(_DEBUG)
 		int n = this->GetNumberOfPaths();
@@ -529,8 +530,13 @@ void CZoneActor::SetBounds(float xMin, float xMax, float yMin, float yMax, float
 
 // COMMENT: {12/9/2008 3:24:22 PM}	CZone zone(xMin, xMax, yMin, yMax, zMin, zMax);
 	PHAST_Transform::COORDINATE_SYSTEM cs = PHAST_Transform::GRID;
+	bool domain = false;
 	if (this->GetPolyhedron())
 	{
+		if (dynamic_cast<Domain*>(this->GetPolyhedron()))
+		{
+			domain = true;
+		}
 		if (Cube *c = dynamic_cast<Cube*>(this->GetPolyhedron()))
 		{
 			cs = c->Get_coordinate_system();
@@ -550,7 +556,14 @@ void CZoneActor::SetBounds(float xMin, float xMax, float yMin, float yMax, float
 	CZone zone(xMin, xMax, yMin, yMax, zMin, zMax);
 	if (this->GetChopType() == srcWedgeSource::CHOP_NONE)
 	{
-		this->GetPolyhedron() = new Cube(&zone, cs);
+		if (domain)
+		{
+			this->GetPolyhedron() = new Domain(&zone, cs);
+		}
+		else
+		{
+			this->GetPolyhedron() = new Cube(&zone, cs);
+		}
 	}
 	else
 	{
@@ -726,6 +739,7 @@ void CZoneActor::Serialize(bool bStoring, hid_t loc_id, const CWPhastDoc* pWPhas
 	static const char szNPOLYS[]    = "NPOLYS";
 	static const char szPFormat[]   = "%u";
 	static const char szOutFormat[] = "Outline %u";
+	static const char szDomain[]    = "domain";
 
 	hid_t polyh_id;
 	hid_t pd_id;
@@ -777,6 +791,8 @@ void CZoneActor::Serialize(bool bStoring, hid_t loc_id, const CWPhastDoc* pWPhas
 					val = CGlobal::HDFSerializeCoordinateSystemUser(bStoring, polyh_id, nValue);
 					ASSERT(val >= 0);
 				}
+				bool domain = dynamic_cast<Domain*>(this->GetPolyhedron()) ? true : false;
+				CGlobal::HDFSerializeBool(bStoring, polyh_id, szDomain, domain);
 			}
 			else if (nValue == Polyhedron::WEDGE)
 			{
@@ -820,13 +836,13 @@ void CZoneActor::Serialize(bool bStoring, hid_t loc_id, const CWPhastDoc* pWPhas
 						{
 							::sprintf(szName, szPFormat, poly);
 							ASSERT(this->BottomFilters[poly]);
-							if (vtkPolyData *pPolyData = this->BottomFilters[poly]->GetInput())
+							if (vtkPolyData *pPolyData = this->BottomFilters[poly]->GetPolyDataInput(0))
 							{
 								CGlobal::HDFSerializePolyData(bStoring, bottom_id, szName, pPolyData);
 							}
 							if (this->BottomOutlineFilters[poly])
 							{
-								if (vtkPolyData *pPolyData = this->BottomOutlineFilters[poly]->GetInput())
+								if (vtkPolyData *pPolyData = this->BottomOutlineFilters[poly]->GetPolyDataInput(0))
 								{
 									::sprintf(szName, szOutFormat, poly);
 									CGlobal::HDFSerializePolyData(bStoring, bottom_id, szName, pPolyData);
@@ -848,13 +864,13 @@ void CZoneActor::Serialize(bool bStoring, hid_t loc_id, const CWPhastDoc* pWPhas
 						{
 							::sprintf(szName, szPFormat, poly);
 							ASSERT(this->TopFilters[poly]);
-							if (vtkPolyData *pPolyData = this->TopFilters[poly]->GetInput())
+							if (vtkPolyData *pPolyData = this->TopFilters[poly]->GetPolyDataInput(0))
 							{
 								CGlobal::HDFSerializePolyData(bStoring, top_id, szName, pPolyData);
 							}
 							if (this->TopOutlineFilters[poly])
 							{
-								if (vtkPolyData *pPolyData = this->TopOutlineFilters[poly]->GetInput())
+								if (vtkPolyData *pPolyData = this->TopOutlineFilters[poly]->GetPolyDataInput(0))
 								{
 									::sprintf(szName, szOutFormat, poly);
 									CGlobal::HDFSerializePolyData(bStoring, top_id, szName, pPolyData);
@@ -1313,10 +1329,16 @@ void CZoneActor::Serialize(bool bStoring, hid_t loc_id, const CWPhastDoc* pWPhas
 					delete this->GetPolyhedron();
 				}
 
-				// coor_sys_type
-				//
-				if (Cube *cube = new Cube(&zone))
+				bool domain;
+				if (CGlobal::HDFSerializeBool(bStoring, polyh_id, szDomain, domain) < 0)
 				{
+					domain = false;
+				}
+				Cube *cube = domain ? new Domain(&zone) : new Cube(&zone);
+				if (cube)
+				{
+					// coor_sys_type
+					//
 					PHAST_Transform::COORDINATE_SYSTEM nValue;
 					herr_t val = CGlobal::HDFSerializeCoordinateSystem(bStoring, polyh_id, nValue);
 					cube->Set_coordinate_system(nValue);
@@ -1377,14 +1399,12 @@ bool CZoneActor::GetDefault(void)const
 
 void CZoneActor::Add(CWPhastDoc *pWPhastDoc)
 {
-	pWPhastDoc->GetPropCollection()->AddItem(this);
+	ASSERT(FALSE);
 }
 
 void CZoneActor::Remove(CWPhastDoc *pWPhastDoc)
 {
-	while(pWPhastDoc->GetPropCollection()->IsItemPresent(this)) {
-		pWPhastDoc->GetPropCollection()->RemoveItem(this);
-	}
+	ASSERT(FALSE);
 }
 
 void CZoneActor::SetVisibility(int visibility)
@@ -1501,14 +1521,14 @@ void CZoneActor::SetVisibility(int visibility)
 	}
 }
 
-vtkFloatingPointType *CZoneActor::GetBounds() // virtual
+double *CZoneActor::GetBounds() // virtual
 {
 // COMMENT: {6/23/2008 9:13:56 PM}	if (this->GetPolyhedronType() == Polyhedron::PRISM /* && this->AppendPolyData->GetNumberOfInputs() == 0 */)
 // COMMENT: {6/23/2008 9:13:56 PM}	{
 // COMMENT: {6/23/2008 9:13:56 PM}		if (Prism *prism = dynamic_cast<Prism*>(this->GetPolyhedron()))
 // COMMENT: {6/23/2008 9:13:56 PM}		{
 // COMMENT: {6/23/2008 9:13:56 PM}			vtkMatrix4x4 *pMatrix4x4 = this->GetMatrix();
-// COMMENT: {6/23/2008 9:13:56 PM}			vtkFloatingPointType *bounds = this->PrismSidesPolyData->GetBounds();
+// COMMENT: {6/23/2008 9:13:56 PM}			double *bounds = this->PrismSidesPolyData->GetBounds();
 // COMMENT: {6/23/2008 9:13:56 PM}			float imin[4];
 // COMMENT: {6/23/2008 9:13:56 PM}			float imax[4];
 // COMMENT: {6/23/2008 9:13:56 PM}			float omin[4];
@@ -1540,7 +1560,7 @@ vtkFloatingPointType *CZoneActor::GetBounds() // virtual
 	vtkProp3D *prop3D;
 	vtkAssemblyPath *path;
 	int i, n;
-	vtkFloatingPointType *bounds, bbox[24];
+	double *bounds, bbox[24];
 	int propVisible=0;
 
 	this->UpdatePaths();
@@ -1549,9 +1569,10 @@ vtkFloatingPointType *CZoneActor::GetBounds() // virtual
 	this->Bounds[0] = this->Bounds[2] = this->Bounds[4] = VTK_LARGE_FLOAT;
 	this->Bounds[1] = this->Bounds[3] = this->Bounds[5] = -VTK_LARGE_FLOAT;
 
-	for ( this->Paths->InitTraversal(); (path = this->Paths->GetNextItem()); )
+	vtkCollectionSimpleIterator csi;
+	for ( this->Paths->InitTraversal(csi); (path = this->Paths->GetNextPath(csi)); )
 	{
-		prop3D = (vtkProp3D *)path->GetLastNode()->GetProp();
+		prop3D = (vtkProp3D *)path->GetLastNode()->GetViewProp();
 		//if ( prop3D->GetVisibility() )
 		{
 			propVisible = 1;
@@ -1810,6 +1831,7 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, do
 	this->Map2GridPhastTransform = PHAST_Transform(origin[0], origin[1], origin[2], angle, scale_h, scale_h, scale_v);
 
 	Polyhedron *clone = polyh->clone();
+	TRACE("%s\n", clone->Get_description()->c_str());
 	if (this->GetPolyhedron())
 	{
 		if (this->GetPolyhedronType() == Polyhedron::PRISM)
@@ -1931,12 +1953,12 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, do
 				}
 				if (area > 0)
 				{
-					// ignore holes in shape files
-					if (prism->perimeter.Get_source_type() == Data_source::SHAPE)
-					{
-						ASSERT(npolys > 1);
-						continue;
-					}
+// COMMENT: {9/1/2009 4:19:57 PM}					// ignore holes in shape files
+// COMMENT: {9/1/2009 4:19:57 PM}					if (prism->perimeter.Get_source_type() == Data_source::SHAPE && prism->perimeter.)
+// COMMENT: {9/1/2009 4:19:57 PM}					{
+// COMMENT: {9/1/2009 4:19:57 PM}						ASSERT(npolys > 1);
+// COMMENT: {9/1/2009 4:19:57 PM}						continue;
+// COMMENT: {9/1/2009 4:19:57 PM}					}
 					std::reverse(pts.begin(), pts.end());
 				}
 			}
@@ -2865,7 +2887,7 @@ void CZoneActor::Update(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent)
 	}
 }
 
-// COMMENT: {7/16/2008 1:15:31 PM}void CZoneActor::SetPoint(vtkIdType n, vtkFloatingPointType *x)
+// COMMENT: {7/16/2008 1:15:31 PM}void CZoneActor::SetPoint(vtkIdType n, double *x)
 // COMMENT: {7/16/2008 1:15:31 PM}{
 // COMMENT: {7/16/2008 1:15:31 PM}}
 

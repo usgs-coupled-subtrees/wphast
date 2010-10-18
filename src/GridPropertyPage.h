@@ -2,7 +2,8 @@
 #include "afxcmn.h"
 
 //#include "GridLODActor.h"
-#include "Grid.h"
+//#include "Grid.h"
+#include "GridKeyword.h"
 #include "Units.h"
 
 class CWPhastDoc;
@@ -36,7 +37,8 @@ public:
 	CSpinButtonCtrl m_spinY;
 	CSpinButtonCtrl m_spinZ;
 	virtual BOOL OnInitDialog();
-	CGrid m_grid[3];
+	//CGrid m_grid[3];
+	CGridKeyword GridKeyword;
 	virtual BOOL OnApply();
 	afx_msg void OnEnChange();
 	////BOOL m_bFlowOnly;

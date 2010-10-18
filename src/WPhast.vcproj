@@ -46,9 +46,9 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(DEV_CPPUNIT_1.10)\include&quot;;&quot;$(DEV_VTK_421_MEM_VS8_INC)&quot;;&quot;$(DEV_HDF5_INC)&quot;;&quot;$(DEV_XERCES)/include&quot;;&quot;$(DEV_BOOST)&quot;"
-				PreprocessorDefinitions="__CPPUNIT__;WIN32;_WINDOWS;_DEBUG;__WPHAST__;_CRT_SECURE_NO_DEPRECATE;ANSI_DECLARATORS;WINVER=0x0400"
-				MinimalRebuild="true"
+				AdditionalIncludeDirectories="&quot;$(DEV_CPPUNIT_1.10)\include&quot;;&quot;$(DEV_VTK_542_MEM_VS8_INC)&quot;;&quot;$(DEV_HDF5_INC)&quot;;&quot;$(DEV_XERCES)/include&quot;;&quot;$(DEV_BOOST)&quot;"
+				PreprocessorDefinitions="__CPPUNIT__;WIN32;_WINDOWS;_DEBUG;__WPHAST__;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_WARNINGS;ANSI_DECLARATORS;WINVER=0x0400"
+				MinimalRebuild="false"
 				ExceptionHandling="2"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -59,7 +59,7 @@
 				BrowseInformation="1"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="true"
-				DebugInformationFormat="3"
+				DebugInformationFormat="4"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -75,9 +75,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="Pdh.lib UxTheme.lib cppunitd.lib OpenGL32.Lib hdf5dll.lib $(DEV_VTK42_LINK) xerces-c_2.lib"
-				LinkIncremental="1"
-				AdditionalLibraryDirectories="&quot;$(DEV_CPPUNIT_1.10)/lib&quot;;&quot;$(DEV_VTK_421_MEM_VS8_LIB)&quot;;&quot;$(DEV_HDF5_LIBDLL)&quot;;&quot;$(DEV_XERCES)/lib&quot;"
+				AdditionalDependencies="Pdh.lib UxTheme.lib cppunitd.lib hdf5dll.lib $(DEV_VTK_542_ADDL_DEPS) vtkMFC.lib Vfw32.lib xerces-c_2.lib"
+				LinkIncremental="2"
+				AdditionalLibraryDirectories="&quot;$(DEV_CPPUNIT_1.10)/lib&quot;;&quot;$(DEV_VTK_542_MEM_VS8_LIB)&quot;;&quot;$(DEV_HDF5_LIBDLL)&quot;;&quot;$(DEV_XERCES)/lib&quot;"
 				DelayLoadDLLs=""
 				GenerateDebugInformation="true"
 				SubSystem="2"
@@ -107,7 +107,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="copying dlls"
-				CommandLine="copy /Y &quot;$(DEV_HDF5_LIBDLL)\hdf5dll.dll&quot;           &quot;$(TargetDir)hdf5dll.dll&quot;   &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_HDF5_LIBDLL)\..\bin\zlib1.dll&quot;           &quot;$(TargetDir)zlib1.dll&quot;   &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_HDF5_LIBDLL)\..\bin\szlibdll.dll&quot;           &quot;$(TargetDir)szlibdll.dll&quot;   &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_XERCES)\bin\xerces-c_2_7.dll&quot;        &quot;$(TargetDir)xerces-c_2_7.dll&quot; &gt; NUL&#x0D;&#x0A;&#x0D;&#x0A;"
+				CommandLine="copy /Y &quot;$(DEV_VTK_542_MEM_VS8)\bin\vtkMFC.dll&quot;         &quot;$(TargetDir)vtkMFC.dll&quot;         &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_HDF5_LIBDLL)\hdf5dll.dll&quot;           &quot;$(TargetDir)hdf5dll.dll&quot;   &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_HDF5_LIBDLL)\..\bin\zlib1.dll&quot;           &quot;$(TargetDir)zlib1.dll&quot;   &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_HDF5_LIBDLL)\..\bin\szlibdll.dll&quot;           &quot;$(TargetDir)szlibdll.dll&quot;   &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_XERCES)\bin\xerces-c_2_7.dll&quot;        &quot;$(TargetDir)xerces-c_2_7.dll&quot; &gt; NUL&#x0D;&#x0A;&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
@@ -147,8 +147,8 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				OmitFramePointers="true"
-				AdditionalIncludeDirectories="&quot;$(DEV_VTK42_VS8_DLL_INC)&quot;;&quot;$(DEV_HDF5_INC)&quot;;&quot;$(DEV_XERCES)/include&quot;;&quot;$(DEV_BOOST)&quot;"
-				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;__WPHAST__;WPHAST_AUTOMATION;_CRT_SECURE_NO_DEPRECATE;ANSI_DECLARATORS"
+				AdditionalIncludeDirectories="&quot;$(DEV_VTK_542_VS8_DLL_INC)&quot;;&quot;$(DEV_HDF5_INC)&quot;;&quot;$(DEV_XERCES)/include&quot;;&quot;$(DEV_BOOST)&quot;"
+				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;__WPHAST__;WPHAST_AUTOMATION;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_WARNINGS;ANSI_DECLARATORS"
 				StringPooling="true"
 				MinimalRebuild="false"
 				ExceptionHandling="2"
@@ -174,9 +174,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(DEV_VTK42_LINK) hdf5dll.lib xerces-c_2.lib"
+				AdditionalDependencies="$(DEV_VTK_542_ADDL_DEPS) vtkMFC.lib hdf5dll.lib xerces-c_2.lib"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="$(DEV_VTK42_VS8_DLL_LIB);$(DEV_HDF5_LIBDLL);$(DEV_XERCES)/lib"
+				AdditionalLibraryDirectories="&quot;$(DEV_VTK_542_VS8_DLL_LIB)&quot;;&quot;$(DEV_HDF5_LIBDLL)&quot;;&quot;$(DEV_XERCES)/lib&quot;"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				OptimizeReferences="2"
@@ -208,7 +208,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Copying dlls"
-				CommandLine="copy /Y &quot;$(DEV_HDF5_LIBDLL)\hdf5dll.dll&quot;            &quot;$(TargetDir)hdf5dll.dll&quot;      &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_HDF5_LIBDLL)\..\bin\zlib1.dll&quot;           &quot;$(TargetDir)zlib1.dll&quot;   &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_HDF5_LIBDLL)\..\bin\szlibdll.dll&quot;           &quot;$(TargetDir)szlibdll.dll&quot;   &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkCommon.dll&quot;    &quot;$(TargetDir)vtkCommon.dll&quot;    &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkFiltering.dll&quot; &quot;$(TargetDir)vtkFiltering.dll&quot; &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkGraphics.dll&quot;  &quot;$(TargetDir)vtkGraphics.dll&quot;  &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkHybrid.dll&quot;    &quot;$(TargetDir)vtkHybrid.dll&quot;    &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkIO.dll&quot;        &quot;$(TargetDir)vtkIO.dll&quot;        &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkImaging.dll&quot;   &quot;$(TargetDir)vtkImaging.dll&quot;   &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkRendering.dll&quot; &quot;$(TargetDir)vtkRendering.dll&quot; &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkexpat.dll&quot;     &quot;$(TargetDir)vtkexpat.dll&quot;     &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkfreetype.dll&quot;  &quot;$(TargetDir)vtkfreetype.dll&quot;  &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkftgl.dll&quot;      &quot;$(TargetDir)vtkftgl.dll&quot;      &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkjpeg.dll&quot;      &quot;$(TargetDir)vtkjpeg.dll&quot;      &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkpng.dll&quot;       &quot;$(TargetDir)vtkpng.dll&quot;       &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtktiff.dll&quot;      &quot;$(TargetDir)vtktiff.dll&quot;      &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkzlib.dll&quot;      &quot;$(TargetDir)vtkzlib.dll&quot;      &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_XERCES)\bin\xerces-c_2_7.dll&quot;        &quot;$(TargetDir)xerces-c_2_7.dll&quot; &gt; NUL&#x0D;&#x0A;&#x0D;&#x0A;"
+				CommandLine="REM ********************************************************************************************&#x0D;&#x0A;REM                                         VTK&#x0D;&#x0A;REM ********************************************************************************************&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_BIN)\vtkCommon.dll&quot;       &quot;$(TargetDir)vtkCommon.dll&quot;       &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_BIN)\vtkDICOMParser.dll&quot;  &quot;$(TargetDir)vtkDICOMParser.dll&quot;  &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_BIN)\vtkexoIIc.dll&quot;       &quot;$(TargetDir)vtkexoIIc.dll&quot;       &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_BIN)\vtkexpat.dll&quot;        &quot;$(TargetDir)vtkexpat.dll&quot;        &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_BIN)\vtkFiltering.dll&quot;    &quot;$(TargetDir)vtkFiltering.dll&quot;    &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_BIN)\vtkfreetype.dll&quot;     &quot;$(TargetDir)vtkfreetype.dll&quot;     &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_BIN)\vtkftgl.dll&quot;         &quot;$(TargetDir)vtkftgl.dll&quot;         &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_BIN)\vtkGraphics.dll&quot;     &quot;$(TargetDir)vtkGraphics.dll&quot;     &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_BIN)\vtkHybrid.dll&quot;       &quot;$(TargetDir)vtkHybrid.dll&quot;       &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_BIN)\vtkImaging.dll&quot;      &quot;$(TargetDir)vtkImaging.dll&quot;      &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_BIN)\vtkIO.dll&quot;           &quot;$(TargetDir)vtkIO.dll&quot;           &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_BIN)\vtkjpeg.dll&quot;         &quot;$(TargetDir)vtkjpeg.dll&quot;         &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_BIN)\vtkmetaio.dll&quot;       &quot;$(TargetDir)vtkmetaio.dll&quot;       &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_BIN)\vtkNetCDF.dll&quot;       &quot;$(TargetDir)vtkNetCDF.dll&quot;       &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_BIN)\vtkParallel.dll&quot;     &quot;$(TargetDir)vtkParallel.dll&quot;     &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_BIN)\vtkpng.dll&quot;          &quot;$(TargetDir)vtkpng.dll&quot;          &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_BIN)\vtkRendering.dll&quot;    &quot;$(TargetDir)vtkRendering.dll&quot;    &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_BIN)\vtksys.dll&quot;          &quot;$(TargetDir)vtksys.dll&quot;          &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_BIN)\vtktiff.dll&quot;         &quot;$(TargetDir)vtktiff.dll&quot;         &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_BIN)\vtkverdict.dll&quot;      &quot;$(TargetDir)vtkverdict.dll&quot;      &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_BIN)\vtkWidgets.dll&quot;      &quot;$(TargetDir)vtkWidgets.dll&quot;      &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_BIN)\vtkzlib.dll&quot;         &quot;$(TargetDir)vtkzlib.dll&quot;         &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_BIN)\vtkMFC.dll&quot;         &quot;$(TargetDir)vtkMFC.dll&quot;         &gt; NUL&#x0D;&#x0A;REM ********************************************************************************************&#x0D;&#x0A;REM                                        HDF5&#x0D;&#x0A;REM ********************************************************************************************&#x0D;&#x0A;copy /Y &quot;$(DEV_HDF5_LIBDLL)\hdf5dll.dll&quot;                 &quot;$(TargetDir)hdf5dll.dll&quot;         &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_HDF5_LIBDLL)\..\bin\zlib1.dll&quot;            &quot;$(TargetDir)zlib1.dll&quot;           &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_HDF5_LIBDLL)\..\bin\szlibdll.dll&quot;         &quot;$(TargetDir)szlibdll.dll&quot;        &gt; NUL&#x0D;&#x0A;REM ********************************************************************************************&#x0D;&#x0A;REM                                       XERCES&#x0D;&#x0A;REM ********************************************************************************************&#x0D;&#x0A;copy /Y &quot;$(DEV_XERCES)\bin\xerces-c_2_7.dll&quot;             &quot;$(TargetDir)xerces-c_2_7.dll&quot;    &gt; NUL&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
@@ -241,8 +241,8 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(DEV_VTK42_VS8_DLL_INC)&quot;;&quot;$(DEV_HDF5_INC)&quot;;&quot;$(DEV_XERCES)/include&quot;;&quot;$(DEV_BOOST)&quot;"
-				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;__WPHAST__;WPHAST_AUTOMATION;_CRT_SECURE_NO_DEPRECATE;ANSI_DECLARATORS;WINVER=0x0400"
+				AdditionalIncludeDirectories="&quot;$(DEV_VTK_542_VS8_DLL_INC)&quot;;&quot;$(DEV_HDF5_INC)&quot;;&quot;$(DEV_XERCES)/include&quot;;&quot;$(DEV_BOOST)&quot;"
+				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;__WPHAST__;WPHAST_AUTOMATION;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_WARNINGS;ANSI_DECLARATORS;WINVER=0x0400"
 				MinimalRebuild="true"
 				ExceptionHandling="2"
 				BasicRuntimeChecks="3"
@@ -267,9 +267,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(DEV_VTK42_LINK) hdf5dll.lib xerces-c_2.lib"
+				AdditionalDependencies="$(DEV_VTK_542_ADDL_DEPS) vtkMFC.lib hdf5dll.lib xerces-c_2.lib"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="$(DEV_VTK42_VS8_DLL_LIB);$(DEV_HDF5_LIBDLL);$(DEV_XERCES)/lib"
+				AdditionalLibraryDirectories="&quot;$(DEV_VTK_542_VS8_DLL_LIB)&quot;;&quot;$(DEV_HDF5_LIBDLL)&quot;;&quot;$(DEV_XERCES)/lib&quot;"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				TargetMachine="1"
@@ -298,7 +298,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Copying dlls"
-				CommandLine="copy /Y &quot;$(DEV_HDF5_LIBDLL)\hdf5dll.dll&quot;           &quot;$(TargetDir)hdf5dll.dll&quot;   &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_HDF5_LIBDLL)\..\bin\zlib1.dll&quot;           &quot;$(TargetDir)zlib1.dll&quot;   &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_HDF5_LIBDLL)\..\bin\szlibdll.dll&quot;           &quot;$(TargetDir)szlibdll.dll&quot;   &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkCommon.dll&quot;    &quot;$(TargetDir)vtkCommon.dll&quot;    &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkFiltering.dll&quot; &quot;$(TargetDir)vtkFiltering.dll&quot; &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkGraphics.dll&quot;  &quot;$(TargetDir)vtkGraphics.dll&quot;  &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkHybrid.dll&quot;    &quot;$(TargetDir)vtkHybrid.dll&quot;    &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkIO.dll&quot;        &quot;$(TargetDir)vtkIO.dll&quot;        &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkImaging.dll&quot;   &quot;$(TargetDir)vtkImaging.dll&quot;   &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkRendering.dll&quot; &quot;$(TargetDir)vtkRendering.dll&quot; &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkexpat.dll&quot;     &quot;$(TargetDir)vtkexpat.dll&quot;     &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkfreetype.dll&quot;  &quot;$(TargetDir)vtkfreetype.dll&quot;  &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkftgl.dll&quot;      &quot;$(TargetDir)vtkftgl.dll&quot;      &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkjpeg.dll&quot;      &quot;$(TargetDir)vtkjpeg.dll&quot;      &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkpng.dll&quot;       &quot;$(TargetDir)vtkpng.dll&quot;       &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtktiff.dll&quot;      &quot;$(TargetDir)vtktiff.dll&quot;      &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkzlib.dll&quot;      &quot;$(TargetDir)vtkzlib.dll&quot;      &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_XERCES)\bin\xerces-c_2_7.dll&quot;        &quot;$(TargetDir)xerces-c_2_7.dll&quot; &gt; NUL&#x0D;&#x0A;&#x0D;&#x0A;"
+				CommandLine="REM ********************************************************************************************&#x0D;&#x0A;REM                                         VTK&#x0D;&#x0A;REM ********************************************************************************************&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_BIN)\vtkCommon.dll&quot;       &quot;$(TargetDir)vtkCommon.dll&quot;       &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_BIN)\vtkDICOMParser.dll&quot;  &quot;$(TargetDir)vtkDICOMParser.dll&quot;  &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_BIN)\vtkexoIIc.dll&quot;       &quot;$(TargetDir)vtkexoIIc.dll&quot;       &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_BIN)\vtkexpat.dll&quot;        &quot;$(TargetDir)vtkexpat.dll&quot;        &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_BIN)\vtkFiltering.dll&quot;    &quot;$(TargetDir)vtkFiltering.dll&quot;    &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_BIN)\vtkfreetype.dll&quot;     &quot;$(TargetDir)vtkfreetype.dll&quot;     &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_BIN)\vtkftgl.dll&quot;         &quot;$(TargetDir)vtkftgl.dll&quot;         &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_BIN)\vtkGraphics.dll&quot;     &quot;$(TargetDir)vtkGraphics.dll&quot;     &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_BIN)\vtkHybrid.dll&quot;       &quot;$(TargetDir)vtkHybrid.dll&quot;       &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_BIN)\vtkImaging.dll&quot;      &quot;$(TargetDir)vtkImaging.dll&quot;      &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_BIN)\vtkIO.dll&quot;           &quot;$(TargetDir)vtkIO.dll&quot;           &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_BIN)\vtkjpeg.dll&quot;         &quot;$(TargetDir)vtkjpeg.dll&quot;         &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_BIN)\vtkmetaio.dll&quot;       &quot;$(TargetDir)vtkmetaio.dll&quot;       &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_BIN)\vtkNetCDF.dll&quot;       &quot;$(TargetDir)vtkNetCDF.dll&quot;       &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_BIN)\vtkParallel.dll&quot;     &quot;$(TargetDir)vtkParallel.dll&quot;     &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_BIN)\vtkpng.dll&quot;          &quot;$(TargetDir)vtkpng.dll&quot;          &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_BIN)\vtkRendering.dll&quot;    &quot;$(TargetDir)vtkRendering.dll&quot;    &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_BIN)\vtksys.dll&quot;          &quot;$(TargetDir)vtksys.dll&quot;          &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_BIN)\vtktiff.dll&quot;         &quot;$(TargetDir)vtktiff.dll&quot;         &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_BIN)\vtkverdict.dll&quot;      &quot;$(TargetDir)vtkverdict.dll&quot;      &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_BIN)\vtkWidgets.dll&quot;      &quot;$(TargetDir)vtkWidgets.dll&quot;      &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_BIN)\vtkzlib.dll&quot;         &quot;$(TargetDir)vtkzlib.dll&quot;         &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_BIN)\vtkMFC.dll&quot;          &quot;$(TargetDir)vtkMFC.dll&quot;          &gt; NUL&#x0D;&#x0A;REM ********************************************************************************************&#x0D;&#x0A;REM                                        HDF5&#x0D;&#x0A;REM ********************************************************************************************&#x0D;&#x0A;copy /Y &quot;$(DEV_HDF5_LIBDLL)\hdf5dll.dll&quot;                 &quot;$(TargetDir)hdf5dll.dll&quot;         &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_HDF5_LIBDLL)\..\bin\zlib1.dll&quot;            &quot;$(TargetDir)zlib1.dll&quot;           &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_HDF5_LIBDLL)\..\bin\szlibdll.dll&quot;         &quot;$(TargetDir)szlibdll.dll&quot;        &gt; NUL&#x0D;&#x0A;REM ********************************************************************************************&#x0D;&#x0A;REM                                       XERCES&#x0D;&#x0A;REM ********************************************************************************************&#x0D;&#x0A;copy /Y &quot;$(DEV_XERCES)\bin\xerces-c_2_7.dll&quot;             &quot;$(TargetDir)xerces-c_2_7.dll&quot;    &gt; NUL&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
@@ -342,8 +342,8 @@
 				OmitFramePointers="true"
 				EnableFiberSafeOptimizations="true"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories="&quot;$(DEV_VTK42_VS8_DLL_INC)&quot;;&quot;$(DEV_HDF5_INC)&quot;;&quot;$(DEV_XERCES)/include&quot;;&quot;$(DEV_BOOST)&quot;"
-				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;__WPHAST__;WPHAST_AUTOMATION;_CRT_SECURE_NO_DEPRECATE;ANSI_DECLARATORS"
+				AdditionalIncludeDirectories="&quot;$(DEV_VTK_542_VS8_DLL_INC)&quot;;&quot;$(DEV_HDF5_INC)&quot;;&quot;$(DEV_XERCES)/include&quot;;&quot;$(DEV_BOOST)&quot;"
+				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;__WPHAST__;WPHAST_AUTOMATION;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_WARNINGS;ANSI_DECLARATORS"
 				StringPooling="true"
 				MinimalRebuild="false"
 				ExceptionHandling="2"
@@ -369,9 +369,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(DEV_VTK42_LINK) hdf5dll.lib xerces-c_2.lib"
+				AdditionalDependencies="$(DEV_VTK_542_ADDL_DEPS) vtkMFC.lib hdf5dll.lib xerces-c_2.lib"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="$(DEV_VTK42_VS8_DLL_LIB);$(DEV_HDF5_LIBDLL);$(DEV_XERCES)/lib"
+				AdditionalLibraryDirectories="&quot;$(DEV_VTK_542_VS8_DLL_LIB)&quot;;&quot;$(DEV_HDF5_LIBDLL)&quot;;&quot;$(DEV_XERCES)/lib&quot;"
 				GenerateDebugInformation="false"
 				SubSystem="2"
 				OptimizeReferences="2"
@@ -404,7 +404,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Copying dlls"
-				CommandLine="copy /Y &quot;$(DEV_HDF5_LIBDLL)\hdf5dll.dll&quot;            &quot;$(TargetDir)hdf5dll.dll&quot;      &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_HDF5_LIBDLL)\..\bin\zlib1.dll&quot;           &quot;$(TargetDir)zlib1.dll&quot;   &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_HDF5_LIBDLL)\..\bin\szlibdll.dll&quot;           &quot;$(TargetDir)szlibdll.dll&quot;   &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkCommon.dll&quot;    &quot;$(TargetDir)vtkCommon.dll&quot;    &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkFiltering.dll&quot; &quot;$(TargetDir)vtkFiltering.dll&quot; &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkGraphics.dll&quot;  &quot;$(TargetDir)vtkGraphics.dll&quot;  &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkHybrid.dll&quot;    &quot;$(TargetDir)vtkHybrid.dll&quot;    &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkIO.dll&quot;        &quot;$(TargetDir)vtkIO.dll&quot;        &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkImaging.dll&quot;   &quot;$(TargetDir)vtkImaging.dll&quot;   &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkRendering.dll&quot; &quot;$(TargetDir)vtkRendering.dll&quot; &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkexpat.dll&quot;     &quot;$(TargetDir)vtkexpat.dll&quot;     &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkfreetype.dll&quot;  &quot;$(TargetDir)vtkfreetype.dll&quot;  &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkftgl.dll&quot;      &quot;$(TargetDir)vtkftgl.dll&quot;      &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkjpeg.dll&quot;      &quot;$(TargetDir)vtkjpeg.dll&quot;      &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkpng.dll&quot;       &quot;$(TargetDir)vtkpng.dll&quot;       &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtktiff.dll&quot;      &quot;$(TargetDir)vtktiff.dll&quot;      &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK42_VS8_DLL_BIN)\vtkzlib.dll&quot;      &quot;$(TargetDir)vtkzlib.dll&quot;      &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_XERCES)\bin\xerces-c_2_7.dll&quot;        &quot;$(TargetDir)xerces-c_2_7.dll&quot; &gt; NUL&#x0D;&#x0A;&#x0D;&#x0A;"
+				CommandLine="REM ********************************************************************************************&#x0D;&#x0A;REM                                         VTK&#x0D;&#x0A;REM ********************************************************************************************&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_BIN)\vtkCommon.dll&quot;       &quot;$(TargetDir)vtkCommon.dll&quot;       &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_BIN)\vtkDICOMParser.dll&quot;  &quot;$(TargetDir)vtkDICOMParser.dll&quot;  &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_BIN)\vtkexoIIc.dll&quot;       &quot;$(TargetDir)vtkexoIIc.dll&quot;       &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_BIN)\vtkexpat.dll&quot;        &quot;$(TargetDir)vtkexpat.dll&quot;        &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_BIN)\vtkFiltering.dll&quot;    &quot;$(TargetDir)vtkFiltering.dll&quot;    &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_BIN)\vtkfreetype.dll&quot;     &quot;$(TargetDir)vtkfreetype.dll&quot;     &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_BIN)\vtkftgl.dll&quot;         &quot;$(TargetDir)vtkftgl.dll&quot;         &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_BIN)\vtkGraphics.dll&quot;     &quot;$(TargetDir)vtkGraphics.dll&quot;     &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_BIN)\vtkHybrid.dll&quot;       &quot;$(TargetDir)vtkHybrid.dll&quot;       &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_BIN)\vtkImaging.dll&quot;      &quot;$(TargetDir)vtkImaging.dll&quot;      &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_BIN)\vtkIO.dll&quot;           &quot;$(TargetDir)vtkIO.dll&quot;           &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_BIN)\vtkjpeg.dll&quot;         &quot;$(TargetDir)vtkjpeg.dll&quot;         &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_BIN)\vtkmetaio.dll&quot;       &quot;$(TargetDir)vtkmetaio.dll&quot;       &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_BIN)\vtkNetCDF.dll&quot;       &quot;$(TargetDir)vtkNetCDF.dll&quot;       &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_BIN)\vtkParallel.dll&quot;     &quot;$(TargetDir)vtkParallel.dll&quot;     &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_BIN)\vtkpng.dll&quot;          &quot;$(TargetDir)vtkpng.dll&quot;          &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_BIN)\vtkRendering.dll&quot;    &quot;$(TargetDir)vtkRendering.dll&quot;    &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_BIN)\vtksys.dll&quot;          &quot;$(TargetDir)vtksys.dll&quot;          &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_BIN)\vtktiff.dll&quot;         &quot;$(TargetDir)vtktiff.dll&quot;         &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_BIN)\vtkverdict.dll&quot;      &quot;$(TargetDir)vtkverdict.dll&quot;      &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_BIN)\vtkWidgets.dll&quot;      &quot;$(TargetDir)vtkWidgets.dll&quot;      &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_BIN)\vtkzlib.dll&quot;         &quot;$(TargetDir)vtkzlib.dll&quot;         &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_BIN)\vtkMFC.dll&quot;         &quot;$(TargetDir)vtkMFC.dll&quot;         &gt; NUL&#x0D;&#x0A;REM ********************************************************************************************&#x0D;&#x0A;REM                                        HDF5&#x0D;&#x0A;REM ********************************************************************************************&#x0D;&#x0A;copy /Y &quot;$(DEV_HDF5_LIBDLL)\hdf5dll.dll&quot;                 &quot;$(TargetDir)hdf5dll.dll&quot;         &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_HDF5_LIBDLL)\..\bin\zlib1.dll&quot;            &quot;$(TargetDir)zlib1.dll&quot;           &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_HDF5_LIBDLL)\..\bin\szlibdll.dll&quot;         &quot;$(TargetDir)szlibdll.dll&quot;        &gt; NUL&#x0D;&#x0A;REM ********************************************************************************************&#x0D;&#x0A;REM                                       XERCES&#x0D;&#x0A;REM ********************************************************************************************&#x0D;&#x0A;copy /Y &quot;$(DEV_XERCES)\bin\xerces-c_2_7.dll&quot;             &quot;$(TargetDir)xerces-c_2_7.dll&quot;    &gt; NUL&#x0D;&#x0A;"
 			/>
 		</Configuration>
 	</Configurations>
@@ -800,7 +800,7 @@
 				>
 			</File>
 			<File
-				RelativePath="MapImageActor.cpp"
+				RelativePath=".\MapImageActor2.cpp"
 				>
 			</File>
 			<File
@@ -1096,6 +1096,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\SiteMap2.cpp"
+				>
+			</File>
+			<File
 				RelativePath="Snap.cpp"
 				>
 			</File>
@@ -1288,15 +1292,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\vtkBoxWidget2.cxx"
+				>
+			</File>
+			<File
 				RelativePath="vtkBoxWidgetEx.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\vtkCellPicker2.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\vtkImplicitFunctionNNInterpolator.cpp"
 				>
 			</File>
 			<File
@@ -1625,6 +1629,42 @@
 				</File>
 				<File
 					RelativePath=".\srcinput\Data_source.cpp"
+					>
+					<FileConfiguration
+						Name="cppunit|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="AutoRelease|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="AutoDebug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\srcinput\Domain.cpp"
 					>
 					<FileConfiguration
 						Name="cppunit|Win32"
@@ -2184,42 +2224,6 @@
 							Name="VCCLCompilerTool"
 							UsePrecompiledHeader="0"
 							CompileAs="2"
-						/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\srcinput\Point.cpp"
-					>
-					<FileConfiguration
-						Name="cppunit|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="0"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="AutoRelease|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="0"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="AutoDebug|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="0"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="ReleaseRelease|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="0"
 						/>
 					</FileConfiguration>
 				</File>
@@ -2888,6 +2892,7 @@
 								Name="VCCLCompilerTool"
 								UsePrecompiledHeader="0"
 								CompileAs="2"
+								DisableSpecificWarnings="4267"
 							/>
 						</FileConfiguration>
 						<FileConfiguration
@@ -2897,6 +2902,7 @@
 								Name="VCCLCompilerTool"
 								UsePrecompiledHeader="0"
 								CompileAs="2"
+								DisableSpecificWarnings="4267"
 							/>
 						</FileConfiguration>
 						<FileConfiguration
@@ -2906,6 +2912,7 @@
 								Name="VCCLCompilerTool"
 								UsePrecompiledHeader="0"
 								CompileAs="2"
+								DisableSpecificWarnings="4267"
 							/>
 						</FileConfiguration>
 						<FileConfiguration
@@ -2915,6 +2922,7 @@
 								Name="VCCLCompilerTool"
 								UsePrecompiledHeader="0"
 								CompileAs="2"
+								DisableSpecificWarnings="4267"
 							/>
 						</FileConfiguration>
 					</File>
@@ -2964,6 +2972,7 @@
 								Name="VCCLCompilerTool"
 								UsePrecompiledHeader="0"
 								CompileAs="2"
+								DisableSpecificWarnings="4267"
 							/>
 						</FileConfiguration>
 						<FileConfiguration
@@ -2973,6 +2982,7 @@
 								Name="VCCLCompilerTool"
 								UsePrecompiledHeader="0"
 								CompileAs="2"
+								DisableSpecificWarnings="4267"
 							/>
 						</FileConfiguration>
 						<FileConfiguration
@@ -2982,6 +2992,7 @@
 								Name="VCCLCompilerTool"
 								UsePrecompiledHeader="0"
 								CompileAs="2"
+								DisableSpecificWarnings="4267"
 							/>
 						</FileConfiguration>
 						<FileConfiguration
@@ -2991,6 +3002,7 @@
 								Name="VCCLCompilerTool"
 								UsePrecompiledHeader="0"
 								CompileAs="2"
+								DisableSpecificWarnings="4267"
 							/>
 						</FileConfiguration>
 					</File>
@@ -3076,6 +3088,46 @@
 					</File>
 					<File
 						RelativePath=".\srcinput\KDtree\kdtree2.cpp"
+						>
+						<FileConfiguration
+							Name="cppunit|Win32"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								UsePrecompiledHeader="0"
+								DisableSpecificWarnings="4267"
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="AutoRelease|Win32"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								UsePrecompiledHeader="0"
+								DisableSpecificWarnings="4267"
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="AutoDebug|Win32"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								UsePrecompiledHeader="0"
+								DisableSpecificWarnings="4267"
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="ReleaseRelease|Win32"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								UsePrecompiledHeader="0"
+								DisableSpecificWarnings="4267"
+							/>
+						</FileConfiguration>
+					</File>
+					<File
+						RelativePath=".\srcinput\KDtree\Point.cpp"
 						>
 						<FileConfiguration
 							Name="cppunit|Win32"
@@ -4210,6 +4262,34 @@
 					</FileConfiguration>
 				</File>
 				<File
+					RelativePath=".\TestCProperty.cpp"
+					>
+					<FileConfiguration
+						Name="AutoRelease|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="AutoDebug|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
 					RelativePath="TestCPropertyTreeControlBar.cpp"
 					>
 					<FileConfiguration
@@ -4490,6 +4570,34 @@
 					</FileConfiguration>
 				</File>
 				<File
+					RelativePath=".\TestPHAST_Transform.cpp"
+					>
+					<FileConfiguration
+						Name="AutoRelease|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="AutoDebug|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
 					RelativePath=".\TestPrism.cpp"
 					>
 					<FileConfiguration
@@ -4616,6 +4724,38 @@
 				<File
 					RelativePath="BCMenu\BCMenu.cpp"
 					>
+					<FileConfiguration
+						Name="cppunit|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							DisableSpecificWarnings="4267"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="AutoRelease|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							DisableSpecificWarnings="4267"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="AutoDebug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							DisableSpecificWarnings="4267"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							DisableSpecificWarnings="4267"
+						/>
+					</FileConfiguration>
 				</File>
 			</Filter>
 			<Filter
@@ -5032,7 +5172,7 @@
 				>
 			</File>
 			<File
-				RelativePath="MapImageActor.h"
+				RelativePath=".\MapImageActor2.h"
 				>
 			</File>
 			<File
@@ -5360,6 +5500,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\SiteMap2.h"
+				>
+			</File>
+			<File
 				RelativePath="Snap.h"
 				>
 			</File>
@@ -5496,15 +5640,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\vtkBoxWidget2.h"
+				>
+			</File>
+			<File
 				RelativePath="vtkBoxWidgetEx.h"
 				>
 			</File>
 			<File
 				RelativePath=".\vtkCellPicker2.h"
-				>
-			</File>
-			<File
-				RelativePath=".\vtkImplicitFunctionNNInterpolator.h"
 				>
 			</File>
 			<File
@@ -5683,6 +5827,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\TestCProperty.h"
+					>
+				</File>
+				<File
 					RelativePath="TestCPropertyTreeControlBar.h"
 					>
 				</File>
@@ -5720,6 +5868,10 @@
 				</File>
 				<File
 					RelativePath=".\TestHDFSerializePolyData.h"
+					>
+				</File>
+				<File
+					RelativePath=".\TestPHAST_Transform.h"
 					>
 				</File>
 				<File
@@ -5815,15 +5967,15 @@
 					>
 				</File>
 				<File
-					RelativePath=".\srcinput\Cell_Face.h"
-					>
-				</File>
-				<File
 					RelativePath=".\srcinput\Cube.h"
 					>
 				</File>
 				<File
 					RelativePath=".\srcinput\Data_source.h"
+					>
+				</File>
+				<File
+					RelativePath=".\srcinput\Domain.h"
 					>
 				</File>
 				<File
@@ -5887,10 +6039,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\srcinput\Point.h"
-					>
-				</File>
-				<File
 					RelativePath=".\srcinput\Polygon_tree.h"
 					>
 				</File>
@@ -5912,10 +6060,6 @@
 				</File>
 				<File
 					RelativePath="srcinput\tailor.h"
-					>
-				</File>
-				<File
-					RelativePath=".\srcinput\time.h"
 					>
 				</File>
 				<File
@@ -5962,11 +6106,19 @@
 					Name="KDtree"
 					>
 					<File
+						RelativePath=".\srcinput\KDtree\Cell_Face.h"
+						>
+					</File>
+					<File
 						RelativePath=".\srcinput\KDtree\KDtree.h"
 						>
 					</File>
 					<File
 						RelativePath=".\srcinput\KDtree\kdtree2.hpp"
+						>
+					</File>
+					<File
+						RelativePath=".\srcinput\KDtree\Point.h"
 						>
 					</File>
 				</Filter>

@@ -8,49 +8,53 @@
 class TestCPhastInput : public CppUnit::TestFixture
 {
 	CPPUNIT_TEST_SUITE( TestCPhastInput );
-// COMMENT: {4/6/2009 6:30:25 PM}	CPPUNIT_TEST( test );
-// COMMENT: {4/6/2009 6:30:25 PM}	CPPUNIT_TEST( testWriteMinimal );
-// COMMENT: {4/6/2009 6:30:25 PM}	CPPUNIT_TEST( testWritePulse );
-// COMMENT: {4/6/2009 6:30:25 PM}	CPPUNIT_TEST( testEqualTimeEndsMinimal );
-// COMMENT: {4/6/2009 6:30:25 PM}	CPPUNIT_TEST( testMemoryLeaks );
-// COMMENT: {4/6/2009 6:30:25 PM}	CPPUNIT_TEST( testCannotChangeBCSolutionType );
-// COMMENT: {4/6/2009 6:30:25 PM}	CPPUNIT_TEST( testRedefineSolution );
-// COMMENT: {4/6/2009 6:30:25 PM}	CPPUNIT_TEST( testRedefineSolution2 );
-// COMMENT: {4/6/2009 6:30:25 PM}	CPPUNIT_TEST( testRedefineSolution3 );
-// COMMENT: {4/6/2009 6:30:25 PM}	CPPUNIT_TEST( testRedefineSolution4 );
-// COMMENT: {4/6/2009 6:30:25 PM}	CPPUNIT_TEST( testRedefineSolution5 );
-// COMMENT: {4/6/2009 6:30:25 PM}	CPPUNIT_TEST( testRedefineSolution6 );
-// COMMENT: {4/6/2009 6:30:25 PM}	CPPUNIT_TEST( testRedefineHead );
-// COMMENT: {4/6/2009 6:30:25 PM}	CPPUNIT_TEST( testRedefineHead2 );
-// COMMENT: {4/6/2009 6:30:25 PM}	CPPUNIT_TEST( testRedefineHead3 );
-// COMMENT: {4/6/2009 6:30:25 PM}	CPPUNIT_TEST( testRedefineFlux );
-// COMMENT: {4/6/2009 6:30:25 PM}	CPPUNIT_TEST( testRedefineRate );
-// COMMENT: {4/6/2009 6:30:25 PM}	CPPUNIT_TEST( testRedefineRate2 );
-// COMMENT: {4/6/2009 6:30:25 PM}
-// COMMENT: {4/6/2009 6:30:25 PM}	CPPUNIT_TEST( testDecay );
-// COMMENT: {4/6/2009 6:30:25 PM}	CPPUNIT_TEST( testDisp2d );
-// COMMENT: {4/6/2009 6:30:25 PM}	CPPUNIT_TEST( testEx1 );
-// COMMENT: {4/6/2009 6:30:25 PM}	CPPUNIT_TEST( testEx2 );
-// COMMENT: {4/6/2009 6:30:25 PM}	CPPUNIT_TEST( testEx3 );
-// COMMENT: {4/6/2009 6:30:25 PM}	CPPUNIT_TEST( testEx4 );
-// COMMENT: {4/6/2009 6:30:25 PM}	CPPUNIT_TEST( testFree );
-// COMMENT: {4/6/2009 6:30:25 PM}	CPPUNIT_TEST( testKindred4_4 );
-// COMMENT: {4/6/2009 6:30:25 PM}	CPPUNIT_TEST( testLeaky );
-// COMMENT: {4/6/2009 6:30:25 PM}	CPPUNIT_TEST( testLeakyx );
-// COMMENT: {4/6/2009 6:30:25 PM}	CPPUNIT_TEST( testLeakyz );
-// COMMENT: {4/6/2009 6:30:25 PM}	CPPUNIT_TEST( testLinear_bc );
-// COMMENT: {4/6/2009 6:30:25 PM}	CPPUNIT_TEST( testLinear_ic );
-// COMMENT: {4/6/2009 6:30:25 PM}	CPPUNIT_TEST( testPhrqex11 );
-// COMMENT: {4/6/2009 6:30:25 PM}	CPPUNIT_TEST( testRadial );
-// COMMENT: {4/6/2009 6:30:25 PM}	CPPUNIT_TEST( testRiver );
-// COMMENT: {4/6/2009 6:30:25 PM}	CPPUNIT_TEST( testUnconf );
-// COMMENT: {4/6/2009 6:30:25 PM}	CPPUNIT_TEST( testWell );
+	CPPUNIT_TEST( test );
+	CPPUNIT_TEST( testWriteMinimal );
+	CPPUNIT_TEST( testWritePulse );
+	CPPUNIT_TEST( testEqualTimeEndsMinimal );
+	CPPUNIT_TEST( testMemoryLeaks );
+	CPPUNIT_TEST( testCannotChangeBCSolutionType );
+	CPPUNIT_TEST( testRedefineSolution );
+	CPPUNIT_TEST( testRedefineSolution2 );
+	CPPUNIT_TEST( testRedefineSolution3 );
+	CPPUNIT_TEST( testRedefineSolution4 );
+	CPPUNIT_TEST( testRedefineSolution5 );
+	CPPUNIT_TEST( testRedefineSolution6 );
+	CPPUNIT_TEST( testRedefineHead );
+	CPPUNIT_TEST( testRedefineHead2 );
+	CPPUNIT_TEST( testRedefineHead3 );
+	CPPUNIT_TEST( testRedefineFlux );
+	CPPUNIT_TEST( testRedefineRate );
+	CPPUNIT_TEST( testRedefineRate2 );
+	CPPUNIT_TEST( testDecay );
+	CPPUNIT_TEST( testDisp2d );
+	CPPUNIT_TEST( testEx1 );
+	CPPUNIT_TEST( testEx2 );
+	CPPUNIT_TEST( testEx3 );
+	CPPUNIT_TEST( testEx4 );
+
+
+	CPPUNIT_TEST( testFree );
+	CPPUNIT_TEST( testKindred4_4 );
+	CPPUNIT_TEST( testLeaky );
+	CPPUNIT_TEST( testLeakyx );
+	CPPUNIT_TEST( testLeakyz );
+	CPPUNIT_TEST( testLinear_bc );
+	CPPUNIT_TEST( testLinear_ic );
+	CPPUNIT_TEST( testPhrqex11 );
+	CPPUNIT_TEST( testRadial );
+	CPPUNIT_TEST( testRiver );
+	CPPUNIT_TEST( testUnconf );
+	CPPUNIT_TEST( testWell );
+
 // COMMENT: {4/6/2009 6:30:25 PM}// COMMENT: {7/10/2008 5:34:40 PM}	CPPUNIT_TEST( testCapeCod );
 // COMMENT: {4/6/2009 6:30:25 PM}	CPPUNIT_TEST( testNoFileProperties );
 // COMMENT: {4/6/2009 6:30:25 PM}#if defined(SHOW_MEM_LEAKS)
 // COMMENT: {4/6/2009 6:30:25 PM}	CPPUNIT_TEST( testUnknownOptionReadingProperty );	
 // COMMENT: {4/6/2009 6:30:25 PM}#endif
-	CPPUNIT_TEST( testProperty );	
+	CPPUNIT_TEST( testProperty );
+	CPPUNIT_TEST( testWellDefinedThenUndefined );
+	CPPUNIT_TEST( testDescription );
 	CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -100,6 +104,8 @@ protected:
 	void testNoFileProperties(void);
 	void testUnknownOptionReadingProperty(void);
 	void testCapeCod(void);
-	void testProperty(void);	
+	void testProperty(void);
+	void testWellDefinedThenUndefined(void);
+	void testDescription(void);	
 };
 

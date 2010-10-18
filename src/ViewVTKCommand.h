@@ -4,18 +4,13 @@
 class CWPhastView;
 class CAction;
 
-#ifndef vtkFloatingPointType
-#define vtkFloatingPointType vtkFloatingPointType
-typedef float vtkFloatingPointType;
-#endif
-
 class CViewVTKCommand : public vtkCommand
 {
 public:
 	static CViewVTKCommand *New(CWPhastView *pView);
 
 	virtual void Execute(vtkObject *caller, unsigned long eventId, void *callData);
-	void Update();
+	void Update2();
 
 protected:
 	// interactor events
@@ -52,7 +47,7 @@ protected:
 
 	CAction* m_pAction;
 
-	vtkFloatingPointType FixedPlanePoint[3];
+	double               FixedPlanePoint[3];
 	int                  FixedPlane;  // [0-5]
 	int                  FixedCoord;  // [0-2]
 };

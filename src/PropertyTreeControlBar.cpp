@@ -95,7 +95,7 @@ static const TCHAR szDRAINS[]              = _T("DRAINS");
 static const TCHAR szPRINT_INITIAL[]       = _T("PRINT_INITIAL");
 static const TCHAR szPRINT_FREQUENCY[]     = _T("PRINT_FREQUENCY");
 static const TCHAR szTIME_CONTROL[]        = _T("TIME_CONTROL");
-static const TCHAR szZONE_FLOW_RATES[]     = _T("ZONE_FLOW_RATES");
+static const TCHAR szZONE_FLOW[]           = _T("ZONE_FLOW");
 
 static const int BC_INDEX              = 0;
 static const int PRINT_FREQUENCY_INDEX = 1;
@@ -213,6 +213,8 @@ void CPropertyTreeControlBar::OnSelChanged(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 
 	NMTREEVIEW *pNMTREEVIEW = (LPNMTREEVIEW)pNMHDR;
 	CTreeCtrlNode item(pNMTREEVIEW->itemNew.hItem, this->GetTreeCtrlEx());
+
+	if (pNMTREEVIEW->itemNew.hItem == 0) return;
 
 	CTreeCtrlNode editable = item;
 	if (this->IsNodeEditable(editable, false))
@@ -472,6 +474,8 @@ void CPropertyTreeControlBar::OnNMClk(NMHDR* pNMHDR, LRESULT* pResult)
 
 UINT CPropertyTreeControlBar::GetNodeCheck(CTreeCtrlNode node)const
 {
+	if (!(HTREEITEM)node) return BST_INDETERMINATE;
+
 	switch (node.GetState(TVIS_STATEIMAGEMASK) & TVIS_STATEIMAGEMASK)
 	{
 		case (INDEXTOSTATEIMAGEMASK(BST_UNCHECKED + 1)):
@@ -718,6 +722,8 @@ void CPropertyTreeControlBar::OnNMDblClk(NMHDR* pNMHDR, LRESULT* pResult)
 
 bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode &editNode, bool bDoEdit)
 {
+	if (!(HTREEITEM)editNode) return false;
+
 	CTreeCtrlNode item = editNode;
 	CTreeCtrlNode parent = item.GetParent();
 	HTREEITEM hItem = item;
@@ -748,10 +754,8 @@ bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode &editNode, bool bDoEd
 		{
 			pFlowOnly->Edit(&this->m_wndTree, pMediaZoneActor, 0);
 		}
-		///{{{
-		editNode = this->m_nodeFlowOnly;
-		///}}}
 		//}} HACK
+		editNode = this->m_nodeFlowOnly;
 		return true;
 	}
 
@@ -767,9 +771,7 @@ bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode &editNode, bool bDoEd
 		{
 			pFreeSurface->Edit(&this->m_wndTree);
 		}
-		///{{{
 		editNode = this->m_nodeFreeSurface;
-		///}}}
 		return true;
 	}
 
@@ -784,9 +786,7 @@ bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode &editNode, bool bDoEd
 		{
 			pSolutionMethod->Edit(&this->m_wndTree);
 		}
-		///{{{
 		editNode = this->m_nodeSolutionMethod;
-		///}}}
 		return true;
 	}
 
@@ -801,12 +801,9 @@ bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode &editNode, bool bDoEd
 		{
 			pSteadyFlow->Edit(&this->m_wndTree);
 		}
-		///{{{
 		editNode = this->m_nodeSteadyFlow;
-		///}}}
 		return true;
 	}
-
 
 	// UNITS
 	//
@@ -819,9 +816,7 @@ bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode &editNode, bool bDoEd
 			{
 				pUnits->Edit(&this->m_wndTree);
 			}
-			///{{{
 			editNode = this->m_nodeUnits;
-			///}}}
 			return true;
 		}
 		return false;
@@ -846,9 +841,7 @@ bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode &editNode, bool bDoEd
 					{
 						pWellActor->Edit(this->GetDocument());
 					}
-					///{{{
 					editNode = item;
-					///}}}
 					return true;
 				}
 			}
@@ -890,46 +883,9 @@ bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode &editNode, bool bDoEd
 				{
 					if (bDoEdit)
 					{
-						CRiver river = pRiverActor->GetRiver();
-
-						CString str;
-						str.Format(_T("River %d Properties"), river.n_user);
-						CPropertySheet sheet(str);
-						
-						CRiverPropertyPage2 page;
-						sheet.AddPage(&page);
-
-						if (CWPhastDoc* pWPhastDoc = this->GetDocument())
-						{
-							page.SetProperties(river);
-							page.SetFlowOnly(bool(pWPhastDoc->GetFlowOnly()));
-							page.SetUnits(pWPhastDoc->GetUnits());
-							page.SetGridKeyword(pWPhastDoc->GetGridKeyword());
-							if (point) page.SetPoint(point);
-
-							std::set<int> riverNums;
-							pWPhastDoc->GetUsedRiverNumbers(riverNums);
-
-							// remove this river number from used list
-							std::set<int>::iterator iter = riverNums.find(river.n_user);
-							ASSERT(iter != riverNums.end());
-							if (iter != riverNums.end())
-							{
-								riverNums.erase(iter);
-							}
-							page.SetUsedRiverNumbers(riverNums);
-
-							if (sheet.DoModal() == IDOK)
-							{
-								CRiver river;
-								page.GetProperties(river);
-								pWPhastDoc->Execute(new CSetAction<CRiverActor, CRiver>(pRiverActor, river, pWPhastDoc));
-							}
-						}
+						pRiverActor->Edit(point);
 					}
-					///{{{
 					editNode = item;
-					///}}}
 					return true;
 				}
 			}
@@ -972,46 +928,9 @@ bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode &editNode, bool bDoEd
 				{
 					if (bDoEdit)
 					{
-						CDrain drain = pDrainActor->GetDrain();
-
-						CString str;
-						str.Format(_T("Drain %d Properties"), drain.n_user);
-						CPropertySheet sheet(str);
-						
-						CDrainPropertyPage page;
-						sheet.AddPage(&page);
-
-						if (CWPhastDoc* pWPhastDoc = this->GetDocument())
-						{
-							page.SetProperties(drain);
-							page.SetFlowOnly(bool(pWPhastDoc->GetFlowOnly()));
-							page.SetUnits(pWPhastDoc->GetUnits());
-							page.SetGridKeyword(pWPhastDoc->GetGridKeyword());
-							if (point) page.SetPoint(point);
-
-							std::set<int> drainNums;
-							pWPhastDoc->GetUsedDrainNumbers(drainNums);
-
-							// remove this drain number from used list
-							std::set<int>::iterator iter = drainNums.find(drain.n_user);
-							ASSERT(iter != drainNums.end());
-							if (iter != drainNums.end())
-							{
-								drainNums.erase(iter);
-							}
-							page.SetUsedDrainNumbers(drainNums);
-
-							if (sheet.DoModal() == IDOK)
-							{
-								CDrain drain;
-								page.GetProperties(drain);
-								pWPhastDoc->Execute(new CSetAction<CDrainActor, CDrain>(pDrainActor, drain, pWPhastDoc));
-							}
-						}
+						pDrainActor->Edit(point);
 					}
-					///{{{
 					editNode = item;
-					///}}}
 					return true;
 				}
 			}
@@ -1023,6 +942,9 @@ bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode &editNode, bool bDoEd
 	//
 	if (item.IsNodeAncestor(this->m_nodeGrid))
 	{
+#ifdef _DEBUG
+		DWORD_PTR dw = this->m_nodeGrid.GetData();
+#endif
 		if (CGridActor* pGridActor = CGridActor::SafeDownCast((vtkObject*)this->m_nodeGrid.GetData()))
 		{
 			CFrameWnd *pFrame = reinterpret_cast<CFrameWnd*>(AfxGetApp()->m_pMainWnd);
@@ -1034,9 +956,7 @@ bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode &editNode, bool bDoEd
 			{
 				pWPhastDoc->Edit(pGridActor);
 			}
-			///{{{
 			editNode = this->m_nodeGrid;
-			///}}}
 			return true;
 		}
 		return false;
@@ -1061,9 +981,7 @@ bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode &editNode, bool bDoEd
 					{
 						pZone->Edit(&this->m_wndTree);
 					}
-					///{{{
 					editNode = item;
-					///}}}
 					return true;
 				}
 			}
@@ -1090,9 +1008,7 @@ bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode &editNode, bool bDoEd
 					{
 						pZone->Edit(&this->m_wndTree);
 					}
-					///{{{
 					editNode = item;
-					///}}}
 					return true;
 				}
 			}
@@ -1119,9 +1035,7 @@ bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode &editNode, bool bDoEd
 					{
 						pZone->Edit(&this->m_wndTree);
 					}
-					///{{{
 					editNode = item;
-					///}}}
 					return true;
 				}
 			}
@@ -1148,9 +1062,7 @@ bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode &editNode, bool bDoEd
 					{
 						pZone->Edit(&this->m_wndTree);
 					}
-					///{{{
 					editNode = item;
-					///}}}
 					return true;
 				}
 			}
@@ -1169,9 +1081,7 @@ bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode &editNode, bool bDoEd
 			{
 				pPI->Edit(&this->m_wndTree);
 			}
-			///{{{
 			editNode = this->m_nodePrintInput;
-			///}}}
 			return true;
 		}
 		return false;
@@ -1188,9 +1098,7 @@ bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode &editNode, bool bDoEd
 			{
 				pPF->Edit(&this->m_wndTree);
 			}
-			///{{{
 			editNode = this->m_nodePF;
-			///}}}
 			return true;
 		}
 		return false;
@@ -1208,9 +1116,7 @@ bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode &editNode, bool bDoEd
 			{
 				pTC->Edit(&this->m_wndTree);
 			}
-			///{{{
 			editNode = this->m_nodeTimeControl2;
-			///}}}
 			return true;
 		}
 		return false;
@@ -1511,6 +1417,7 @@ void CPropertyTreeControlBar::SetGridActor(CGridActor* pGridActor)
 
 void CPropertyTreeControlBar::DeleteContents()
 {
+	this->m_wndTree.SelectItem(0);
 	this->m_wndTree.DeleteAllItems();
 
 	// populate static properties
@@ -1531,7 +1438,7 @@ void CPropertyTreeControlBar::DeleteContents()
 	this->m_nodeWells        = this->m_wndTree.InsertItem(szWELLS               );
 	this->m_nodeRivers       = this->m_wndTree.InsertItem(szRIVERS              );
 	this->m_nodeDrains       = this->m_wndTree.InsertItem(szDRAINS              );
-	this->m_nodeZFRates      = this->m_wndTree.InsertItem(szZONE_FLOW_RATES     );
+	this->m_nodeZFRates      = this->m_wndTree.InsertItem(szZONE_FLOW           );
 	this->m_nodePrintInput   = this->m_wndTree.InsertItem(szPRINT_INITIAL       );
 	this->m_nodePF           = this->m_wndTree.InsertItem(szPRINT_FREQUENCY     );
 	this->m_nodeTimeControl2 = this->m_wndTree.InsertItem(szTIME_CONTROL        );
@@ -1723,6 +1630,9 @@ void CPropertyTreeControlBar::Update(IObserver* pSender, LPARAM lHint, CObject* 
 	case WPN_SCALE_CHANGED:
 		break;
 
+	case WPN_DOMAIN_CHANGED:
+		break;
+
 	default:
 		ASSERT(FALSE);
 	}
@@ -1819,6 +1729,8 @@ void CPropertyTreeControlBar::ClearSelection(void)
 
 bool CPropertyTreeControlBar::IsNodeDraggable(CTreeCtrlNode dragNode, COleDataSource *pOleDataSource)
 {
+	if (!(HTREEITEM)dragNode) return false;
+
 	if (dragNode.GetParent() == this->GetMediaNode())
 	{
 		if (dragNode.GetData())
@@ -2256,8 +2168,9 @@ void CPropertyTreeControlBar::OnDragLeave(CWnd* pWnd)
 
 bool CPropertyTreeControlBar::IsNodeCopyable(CTreeCtrlNode copyNode, COleDataSource *pOleDataSource)
 {
-	std::ostringstream oss;
+	if (!(HTREEITEM)copyNode) return false;
 
+	std::ostringstream oss;
 	if (copyNode.GetParent() == this->GetMediaNode())
 	{
 		if (copyNode.GetData())
@@ -2610,6 +2523,8 @@ CLIPFORMAT CPropertyTreeControlBar::GetZoneClipFormat(void)const
 
 bool CPropertyTreeControlBar::IsNodePasteable(CTreeCtrlNode pasteNode, bool bDoPaste)
 {
+	if (!(HTREEITEM)pasteNode) return false;
+
 	if (!this->GetNativeClipFormat())
 	{
 		return false;
@@ -2649,7 +2564,10 @@ bool CPropertyTreeControlBar::IsNodePasteable(CTreeCtrlNode pasteNode, bool bDoP
 
 bool CPropertyTreeControlBar::IsNodePasteableWell(CTreeCtrlNode pasteNode, bool bDoPaste)
 {
+	if (!(HTREEITEM)pasteNode) return false;
+
 	CTreeCtrlNode headNode = this->GetWellsNode();
+	if (!(HTREEITEM)headNode) return false;
 
 	CLIPFORMAT type = this->GetNativeClipFormat();
 	if (type == CWellSchedule::clipFormat && pasteNode.IsNodeAncestor(headNode))
@@ -2696,7 +2614,10 @@ bool CPropertyTreeControlBar::IsNodePasteableWell(CTreeCtrlNode pasteNode, bool 
 
 bool CPropertyTreeControlBar::IsNodePasteableRiver(CTreeCtrlNode pasteNode, bool bDoPaste)
 {
+	if (!(HTREEITEM)pasteNode) return false;
+
 	CTreeCtrlNode headNode = this->GetRiversNode();
+	if (!(HTREEITEM)headNode) return false;
 
 	CLIPFORMAT type = this->GetNativeClipFormat();
 	if (type == CRiver::clipFormat && pasteNode.IsNodeAncestor(headNode))
@@ -2746,6 +2667,9 @@ bool CPropertyTreeControlBar::IsNodePasteableRiver(CTreeCtrlNode pasteNode, bool
 template<typename ZT, typename DT>
 bool CPropertyTreeControlBar::IsNodePasteable(CTreeCtrlNode headNode, CTreeCtrlNode pasteNode, bool bDoPaste)
 {
+	if (!(HTREEITEM)headNode) return false;
+	if (!(HTREEITEM)pasteNode) return false;
+
 	CLIPFORMAT type = this->GetZoneClipFormat();
 	if (type && pasteNode.IsNodeAncestor(headNode))
 	{
@@ -3313,8 +3237,7 @@ void CPropertyTreeControlBar::OnEditClear()
 		return;
 	}
 
-	//{{
-	// ZONE_FLOW_RATES
+	// ZONE_FLOW
 	//
 	if (sel.IsNodeAncestor(this->GetZoneFlowRatesNode()))
 	{
@@ -3340,7 +3263,6 @@ void CPropertyTreeControlBar::OnEditClear()
 		}
 		return;
 	}
-	//}}
 
 	// TIME_CONTROL
 	//

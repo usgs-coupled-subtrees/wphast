@@ -23,7 +23,7 @@ vtkCxxRevisionMacro(CICChemZoneActor, "$Revision$");
 vtkStandardNewMacro(CICChemZoneActor);
 
 const char CICChemZoneActor::szHeading[] = "ICChem";
-vtkFloatingPointType CICChemZoneActor::s_color[3] = {0., 0., 0.};
+double CICChemZoneActor::s_color[3] = {0., 0., 0.};
 vtkProperty* CICChemZoneActor::s_Property = 0;
 vtkProperty* CICChemZoneActor::s_OutlineProperty = 0;
 
@@ -188,11 +188,10 @@ void CICChemZoneActor::Add(CWPhastDoc *pWPhastDoc)
 	if (!pWPhastDoc) { ASSERT(FALSE); return; }
 	if (vtkPropAssembly *pPropAssembly = pWPhastDoc->GetPropAssemblyIC())
 	{
+		ASSERT(!pPropAssembly->GetParts()->IsItemPresent(this));
 		pPropAssembly->AddPart(this);
-		if (!pWPhastDoc->GetPropCollection()->IsItemPresent(pPropAssembly))
-		{
-			pWPhastDoc->GetPropCollection()->AddItem(pPropAssembly);
-		}
+		ASSERT(pPropAssembly->GetParts()->IsItemPresent(this));
+		pWPhastDoc->AddPropAssembly(pPropAssembly);
 	}
 #ifdef _DEBUG
 	else ASSERT(FALSE);

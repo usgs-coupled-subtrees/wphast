@@ -8,6 +8,10 @@
 #include "WPhastDoc.h"
 #include "GridKeyword.h"
 
+#include "RiverPropertyPage2.h"
+#include "SetAction.h"
+#include "FlowOnly.h"
+
 vtkCxxRevisionMacro(CRiverActor, "$Revision$");
 vtkStandardNewMacro(CRiverActor);
 
@@ -18,7 +22,7 @@ vtkStandardNewMacro(CRiverActor);
 #endif
 
 const char CRiverActor::szHeading[] = "Rivers";
-vtkFloatingPointType CRiverActor::s_color[3];
+double CRiverActor::s_color[3];
 vtkProperty* CRiverActor::s_HandleProperty = 0;
 vtkProperty* CRiverActor::s_ConnectorProperty = 0;
 
@@ -395,4 +399,49 @@ std::ostream& operator<< (std::ostream &os, const CRiverActor &a)
 PHAST_Transform::COORDINATE_SYSTEM CRiverActor::GetCoordinateSystem(void)const
 {
 	return this->m_river.coordinate_system;
+}
+
+void CRiverActor::Edit(int point)
+{
+	CFrameWnd *pFrame = (CFrameWnd*)::AfxGetApp()->m_pMainWnd;
+	ASSERT_VALID(pFrame);
+	CWPhastDoc* pWPhastDoc = reinterpret_cast<CWPhastDoc*>(pFrame->GetActiveDocument());
+	ASSERT_VALID(pWPhastDoc);
+
+	if (pWPhastDoc)
+	{
+		CRiver river = this->GetRiver();
+
+		CString str;
+		str.Format(_T("River %d Properties"), river.n_user);
+		CPropertySheet sheet(str);
+
+		CRiverPropertyPage2 page;
+		sheet.AddPage(&page);
+
+		page.SetProperties(river);
+		page.SetFlowOnly(bool(pWPhastDoc->GetFlowOnly()));
+		page.SetUnits(pWPhastDoc->GetUnits());
+		page.SetGridKeyword(pWPhastDoc->GetGridKeyword());
+		if (point) page.SetPoint(point);
+
+		std::set<int> riverNums;
+		pWPhastDoc->GetUsedRiverNumbers(riverNums);
+
+		// remove this river number from used list
+		std::set<int>::iterator iter = riverNums.find(river.n_user);
+		ASSERT(iter != riverNums.end());
+		if (iter != riverNums.end())
+		{
+			riverNums.erase(iter);
+		}
+		page.SetUsedRiverNumbers(riverNums);
+
+		if (sheet.DoModal() == IDOK)
+		{
+			CRiver river;
+			page.GetProperties(river);
+			pWPhastDoc->Execute(new CSetAction<CRiverActor, CRiver>(this, river, pWPhastDoc));
+		}
+	}
 }

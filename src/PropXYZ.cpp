@@ -5,7 +5,7 @@
 #include "WPhast.h"
 #include "PropXYZ.h"
 
-#include "srcinput/Point.h"
+#include "srcinput/KDtree/Point.h"
 #include "srcinput/Data_source.h"
 #include "srcinput/Filedata.h"
 #include "FakeFiledata.h"

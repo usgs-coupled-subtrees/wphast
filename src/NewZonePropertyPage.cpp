@@ -37,7 +37,7 @@ void CNewZonePropertyPage::DoDataExchange(CDataExchange* pDX)
 		this->m_htiMedia    = this->m_wndTree.InsertItem(_T("MEDIA"));
 		this->m_htiIC       = this->m_wndTree.InsertItem(_T("INITIAL_CONDITIONS"));
 		this->m_htiBC       = this->m_wndTree.InsertItem(_T("BOUNDARY_CONDITIONS"));
-		this->m_htiFlowRate = this->m_wndTree.InsertItem(_T("ZONE_FLOW_RATES"));
+		this->m_htiFlowRate = this->m_wndTree.InsertItem(_T("ZONE_FLOW"));
 
 		// IC
 		this->m_htiICHead   = this->m_wndTree.InsertItem(_T("HEAD_IC"), this->m_htiIC);

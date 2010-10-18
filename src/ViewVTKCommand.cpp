@@ -76,6 +76,8 @@
 #include <afxmt.h>
 static CCriticalSection  critSect;
 
+#define USE_INTRINSIC
+
 #if defined(USE_INTRINSIC)
 #pragma intrinsic(fabs) // using this inlines fabs and is ~ 4x faster
 #define FABS(x) fabs(x)
@@ -172,6 +174,9 @@ void CViewVTKCommand::OnEndInteractionEvent(vtkObject* caller, void* callData)
 	{
 		if (CZoneActor *pZone = CZoneActor::SafeDownCast(widget->GetProp3D()))
 		{
+			//{{
+			pZone->SetUserTransform(0);
+			//}}
 			pZone->Resize(this->m_pView);
 		}
 	}
@@ -184,7 +189,7 @@ void CViewVTKCommand::OnEndInteractionEvent(vtkObject* caller, void* callData)
 			const CUnits& units = this->m_pView->GetDocument()->GetUnits();
 
 			// Scale
-			const vtkFloatingPointType* scale = this->m_pView->GetDocument()->GetScale();
+			const double* scale = this->m_pView->GetDocument()->GetScale();
 
 			// well position
 			Point p(
@@ -228,7 +233,7 @@ void CViewVTKCommand::OnEndPickEvent(vtkObject* caller, void* callData)
 			{
 #if defined(_DEBUG)
 				ostrstream oss;
-				path->PrintSelf(oss, 4);
+				path->PrintSelf(oss, vtkIndent(4));
 				oss << ends;
 				TRACE("\n");
 				afxDump << "vtkAssemblyPath{{\n" << oss.str() << "vtkAssemblyPath}}\n";
@@ -236,20 +241,21 @@ void CViewVTKCommand::OnEndPickEvent(vtkObject* caller, void* callData)
 #endif
 
 			//{{
-			if (path->GetFirstNode()->GetProp()->IsA("vtkPropAssembly"))
+			if (path->GetFirstNode()->GetViewProp()->IsA("vtkPropAssembly"))
 			{
 			//}}
 
-				ASSERT(path->GetFirstNode()->GetProp()->IsA("vtkPropAssembly"));
+				ASSERT(path->GetFirstNode()->GetViewProp()->IsA("vtkPropAssembly"));
 
 				if (path->GetNumberOfItems() == 3)
 				{
 					// should be river
 					//
-					path->InitTraversal();
-					vtkProp* pPropAssembly = path->GetNextNode()->GetProp();
+					vtkCollectionSimpleIterator csi;
+					path->InitTraversal(csi);
+					vtkProp* pPropAssembly = path->GetNextNode(csi)->GetViewProp();
 					ASSERT(pPropAssembly->IsA("vtkPropAssembly"));
-					vtkProp* pRiverActor = path->GetNextNode()->GetProp();
+					vtkProp* pRiverActor = path->GetNextNode()->GetViewProp();
 					ASSERT(pRiverActor->IsA("CRiverActor"));
 					if (CRiverActor *pRiver = CRiverActor::SafeDownCast(pRiverActor))
 					{
@@ -263,14 +269,14 @@ void CViewVTKCommand::OnEndPickEvent(vtkObject* caller, void* callData)
 					// this will change as additional pickable types are added
 					//
 					ASSERT(
-						path->GetLastNode()->GetProp()->IsA("CZoneActor")
+						path->GetLastNode()->GetViewProp()->IsA("CZoneActor")
 						||
-						path->GetLastNode()->GetProp()->IsA("CWellActor")
+						path->GetLastNode()->GetViewProp()->IsA("CWellActor")
 						);
 
 					// check if zone
 					//
-					if (CZoneActor *pZoneActor = CZoneActor::SafeDownCast(path->GetLastNode()->GetProp()))
+					if (CZoneActor *pZoneActor = CZoneActor::SafeDownCast(path->GetLastNode()->GetViewProp()))
 					{
 						///pZone->Select(this->m_pView);
 						this->m_pView->GetDocument()->Select(pZoneActor);
@@ -278,7 +284,7 @@ void CViewVTKCommand::OnEndPickEvent(vtkObject* caller, void* callData)
 
 					// check if well
 					//
-					if (CWellActor *pWell = CWellActor::SafeDownCast(path->GetLastNode()->GetProp()))
+					if (CWellActor *pWell = CWellActor::SafeDownCast(path->GetLastNode()->GetViewProp()))
 					{
 						this->m_pView->GetDocument()->Select(pWell);
 					}
@@ -288,7 +294,7 @@ void CViewVTKCommand::OnEndPickEvent(vtkObject* caller, void* callData)
 			}
 			else
 			{
-				vtkProp *prop = path->GetFirstNode()->GetProp();
+				vtkProp *prop = path->GetFirstNode()->GetViewProp();
 
 				// check if zone
 				//
@@ -342,7 +348,7 @@ void CViewVTKCommand::OnEndPickEvent(vtkObject* caller, void* callData)
 
 void CViewVTKCommand::OnInteractionEvent(vtkObject* caller, void* callData)
 {
-	Update();
+	Update2();
 
 	if (vtkPointWidget2 *widget = vtkPointWidget2::SafeDownCast(caller))
 	{
@@ -355,7 +361,7 @@ void CViewVTKCommand::OnInteractionEvent(vtkObject* caller, void* callData)
 			const CGridKeyword& gridKeyword = this->m_pView->GetDocument()->GetGridKeyword();
 
 			// Scale
-			const vtkFloatingPointType* scale = pWellActor->GetScale();
+			const double* scale = pWellActor->GetScale();
 
 			// well position
 			Point p(
@@ -391,59 +397,75 @@ void CViewVTKCommand::OnInteractionEvent(vtkObject* caller, void* callData)
 	{
 		// Apply transform
 		//
-		if (vtkActor *actor = vtkActor::SafeDownCast(widget->GetProp3D()))
+		////if (vtkActor *actor = vtkActor::SafeDownCast(widget->GetProp3D()))
+		if (CZoneActor *zoneActor = CZoneActor::SafeDownCast(widget->GetProp3D()))
 		{
-			vtkMapper *mapper = actor->GetMapper();
-			if (vtkDataSet *dataset = mapper->GetInput())
+			Polyhedron *poly = zoneActor->GetPolyhedron();
+			////vtkMapper *mapper = actor->GetMapper();
+			if (Cube *cube = dynamic_cast<Cube*>(zoneActor->GetPolyhedron()))
 			{
-				if (vtkSource *source = dataset->GetSource())
+				vtkTransform *t = vtkTransform::New();
+				widget->GetTransform(t);
+
+// COMMENT: {9/15/2009 2:12:31 PM}				double* scale = zoneActor->GetScale();
+// COMMENT: {9/15/2009 2:12:31 PM}				double* center = cube->GetCenter();
+
+				if (CGlobal::IsValidTransform(t))
 				{
-					if (vtkCubeSource* cube = vtkCubeSource::SafeDownCast(source))
-					{
-						vtkTransform *t = vtkTransform::New();
-						widget->GetTransform(t);
-#ifdef _DEBUG
-						vtkFloatingPointType* pos = widget->GetProp3D()->GetPosition();
-						ASSERT(pos[0] == 0.0);
-						ASSERT(pos[1] == 0.0);
-						ASSERT(pos[2] == 0.0);
-#endif
-						vtkFloatingPointType* scale = actor->GetScale();
-						vtkFloatingPointType* center = cube->GetCenter();
-						widget->GetProp3D()->SetPosition(center[0]*scale[0], center[1]*scale[1], center[2]*scale[2]);
-						widget->GetTransform(t);
-#if (0)
-#ifdef _DEBUG
-						{
-							afxDump << "widget->GetTransform(t)\n";
-							ostrstream oss;
-
-							t->PrintSelf(oss, 4);
-
-							oss << ends;
-							afxDump << oss.str() << "\n";
-							oss.rdbuf()->freeze(false); // this must be called after str() to avoid memory leak
-						}
-#endif
-#endif
-						widget->GetProp3D()->SetPosition(0, 0, 0);
-						if (CGlobal::IsValidTransform(t))
-						{
-							widget->GetProp3D()->SetUserTransform(t);
-						}
-						t->Delete();
-					}
+					widget->GetProp3D()->SetUserTransform(t);
 				}
+				t->Delete();
 			}
+// COMMENT: {9/15/2009 1:11:43 PM}			if (vtkDataSet *dataset = mapper->GetInput())
+// COMMENT: {9/15/2009 1:11:43 PM}			{
+// COMMENT: {9/15/2009 1:11:43 PM}				if (vtkSource *source = dataset->GetSource())
+// COMMENT: {9/15/2009 1:11:43 PM}				{
+// COMMENT: {9/15/2009 1:11:43 PM}					if (vtkCubeSource* cube = vtkCubeSource::SafeDownCast(source))
+// COMMENT: {9/15/2009 1:11:43 PM}					{
+// COMMENT: {9/15/2009 1:11:43 PM}						vtkTransform *t = vtkTransform::New();
+// COMMENT: {9/15/2009 1:11:43 PM}						widget->GetTransform(t);
+// COMMENT: {9/15/2009 1:11:43 PM}#ifdef _DEBUG
+// COMMENT: {9/15/2009 1:11:43 PM}						double* pos = widget->GetProp3D()->GetPosition();
+// COMMENT: {9/15/2009 1:11:43 PM}						ASSERT(pos[0] == 0.0);
+// COMMENT: {9/15/2009 1:11:43 PM}						ASSERT(pos[1] == 0.0);
+// COMMENT: {9/15/2009 1:11:43 PM}						ASSERT(pos[2] == 0.0);
+// COMMENT: {9/15/2009 1:11:43 PM}#endif
+// COMMENT: {9/15/2009 1:11:43 PM}						double* scale = actor->GetScale();
+// COMMENT: {9/15/2009 1:11:43 PM}						double* center = cube->GetCenter();
+// COMMENT: {9/15/2009 1:11:43 PM}						widget->GetProp3D()->SetPosition(center[0]*scale[0], center[1]*scale[1], center[2]*scale[2]);
+// COMMENT: {9/15/2009 1:11:43 PM}						widget->GetTransform(t);
+// COMMENT: {9/15/2009 1:11:43 PM}#if (0)
+// COMMENT: {9/15/2009 1:11:43 PM}#ifdef _DEBUG
+// COMMENT: {9/15/2009 1:11:43 PM}						{
+// COMMENT: {9/15/2009 1:11:43 PM}							afxDump << "widget->GetTransform(t)\n";
+// COMMENT: {9/15/2009 1:11:43 PM}							ostrstream oss;
+// COMMENT: {9/15/2009 1:11:43 PM}
+// COMMENT: {9/15/2009 1:11:43 PM}							t->PrintSelf(oss, vtkIndent(4));
+// COMMENT: {9/15/2009 1:11:43 PM}
+// COMMENT: {9/15/2009 1:11:43 PM}							oss << ends;
+// COMMENT: {9/15/2009 1:11:43 PM}							afxDump << oss.str() << "\n";
+// COMMENT: {9/15/2009 1:11:43 PM}							oss.rdbuf()->freeze(false); // this must be called after str() to avoid memory leak
+// COMMENT: {9/15/2009 1:11:43 PM}						}
+// COMMENT: {9/15/2009 1:11:43 PM}#endif
+// COMMENT: {9/15/2009 1:11:43 PM}#endif
+// COMMENT: {9/15/2009 1:11:43 PM}						widget->GetProp3D()->SetPosition(0, 0, 0);
+// COMMENT: {9/15/2009 1:11:43 PM}						if (CGlobal::IsValidTransform(t))
+// COMMENT: {9/15/2009 1:11:43 PM}						{
+// COMMENT: {9/15/2009 1:11:43 PM}							widget->GetProp3D()->SetUserTransform(t);
+// COMMENT: {9/15/2009 1:11:43 PM}						}
+// COMMENT: {9/15/2009 1:11:43 PM}						t->Delete();
+// COMMENT: {9/15/2009 1:11:43 PM}					}
+// COMMENT: {9/15/2009 1:11:43 PM}				}
+// COMMENT: {9/15/2009 1:11:43 PM}			}
 		}
 
 		// Update StatusBar
 		//
 		if (CWnd* pWnd = ((CFrameWnd*)::AfxGetMainWnd())->GetMessageBar())
 		{
-			vtkFloatingPointType bounds[6];
+			double bounds[6];
 			widget->GetProp3D()->GetBounds(bounds);
-			vtkFloatingPointType* scale = widget->GetProp3D()->GetScale();
+			double* scale = widget->GetProp3D()->GetScale();
 			TCHAR buffer[80];
 			const CUnits& units = this->m_pView->GetDocument()->GetUnits();
 			::_sntprintf(buffer, 80, "%g[%s] x %g[%s] x %g[%s])",
@@ -454,6 +476,7 @@ void CViewVTKCommand::OnInteractionEvent(vtkObject* caller, void* callData)
 				fabs(bounds[5] - bounds[4]) / scale[2] / units.vertical.input_to_si,
 				units.vertical.defined ? units.vertical.input : units.vertical.si
 				);
+			TRACE("%s\n", buffer);
 			pWnd->SetWindowText(buffer);
 		}
 
@@ -468,7 +491,7 @@ void CViewVTKCommand::OnInteractionEvent(vtkObject* caller, void* callData)
 	}
 }
 
-void CViewVTKCommand::Update()
+void CViewVTKCommand::Update2()
 {
 	// Modified from
 	// int vtkPicker::Pick(float selectionX, float selectionY, float selectionZ,
@@ -478,40 +501,42 @@ void CViewVTKCommand::Update()
 	// get the position of the mouse cursor in screen/window coordinates
 	// (pixel)
 	vtkRenderer *renderer = this->m_pView->GetRenderer();
-	int* pos = this->m_pView->GetRenderWindowInteractor()->GetEventPosition();
+	int* pos = this->m_pView->GetInteractor()->GetEventPosition();
 
 	// get the focal point in world coordinates
 	//
 	vtkCamera *camera = renderer->GetActiveCamera();
-	vtkFloatingPointType cameraFP[4];
-	camera->GetFocalPoint((vtkFloatingPointType*)cameraFP); cameraFP[3] = 1.0;
+	double cameraFP[4];
+	camera->GetFocalPoint(cameraFP); cameraFP[3] = 1.0;
 
 	// Convert the focal point coordinates to display (or screen) coordinates.
 	//
-	renderer->SetWorldPoint(cameraFP);
+	renderer->SetWorldPoint(cameraFP[0], cameraFP[1], cameraFP[2], cameraFP[3]);
 	renderer->WorldToDisplay();
-	vtkFloatingPointType *displayCoords = renderer->GetDisplayPoint();
+	double displayCoords[4];
+	renderer->GetDisplayPoint(displayCoords);
 
 	// Convert the selection point into world coordinates.
 	//
 	renderer->SetDisplayPoint(pos[0], pos[1], displayCoords[2]);
 	renderer->DisplayToWorld();
-	vtkFloatingPointType *worldCoords = renderer->GetWorldPoint();
+	double worldCoords[4];
+	renderer->GetWorldPoint(worldCoords);
 	if ( worldCoords[3] == 0.0 )
 	{
 		ASSERT(FALSE);
 		return;
 	}
-	vtkFloatingPointType PickPosition[3];
+	double PickPosition[3];
 	for (i = 0; i < 3; ++i)
 	{
 		PickPosition[i] = worldCoords[i] / worldCoords[3];
 	}
 
-	vtkFloatingPointType* bounds = this->m_pView->GetDocument()->GetGridBounds();
-	vtkFloatingPointType zMin = bounds[4];
-	vtkFloatingPointType zMax = bounds[5];
-	vtkFloatingPointType zPos = zMax;
+	double* bounds = this->m_pView->GetDocument()->GetGridBounds();
+	double zMin = bounds[4];
+	double zMax = bounds[5];
+	double zPos = zMax;
 
 	if ( camera->GetParallelProjection() )
 	{
@@ -537,7 +562,10 @@ void CViewVTKCommand::Update()
 
 	// SCALE
 	//
-	vtkFloatingPointType* scale = this->m_pView->GetDocument()->GetScale();
+	double scale[3];
+	scale[0] = this->m_pView->GetDocument()->GetScale()[0];
+	scale[1] = this->m_pView->GetDocument()->GetScale()[1];
+	scale[2] = this->m_pView->GetDocument()->GetScale()[2];
 
 	// UNITS
 	const CUnits& units = this->m_pView->GetDocument()->GetUnits();
@@ -551,7 +579,7 @@ void CViewVTKCommand::Update()
 	// largest component vector
 	//
 	double max = 0.0;
-	vtkFloatingPointType viewPlaneNormal[3];
+	double viewPlaneNormal[3];
 	camera->GetViewPlaneNormal(viewPlaneNormal);
 	for (int i = 0; i < 3; ++i)
 	{
@@ -584,9 +612,9 @@ void CViewVTKCommand::Update()
 	//    4 => zmin
 	//    5 => zmax
 	//
-	CUtilities::GetWorldPointAtFixedPlane(this->m_pView->GetRenderWindowInteractor(), renderer, this->FixedCoord, bounds[this->FixedPlane], this->FixedPlanePoint);
+	CUtilities::GetWorldPointAtFixedPlane(this->m_pView->GetInteractor(), renderer, this->FixedCoord, bounds[this->FixedPlane], this->FixedPlanePoint);
 
-	float fpos[3];
+	double fpos[3];
 	fpos[0] = this->FixedPlanePoint[0] / scale[0] / units.horizontal.input_to_si;
 	fpos[1] = this->FixedPlanePoint[1] / scale[1] / units.horizontal.input_to_si;
 	fpos[2] = this->FixedPlanePoint[2] / scale[2] / units.vertical.input_to_si;
@@ -639,13 +667,13 @@ void CViewVTKCommand::OnLeftButtonPressEvent(vtkObject* caller, void* callData)
 
 	if (this->m_pView->CreatingNewWell())
 	{
-		this->m_pView->m_pCursor3DActor->SetPosition(this->m_WorldPointXYPlane[0], this->m_WorldPointXYPlane[1], this->m_WorldPointXYPlane[2]);
-		this->m_pView->m_Renderer->ResetCameraClippingRange();
-		this->m_pView->m_RenderWindowInteractor->Render();
+		this->m_pView->Cursor3DActor->SetPosition(this->m_WorldPointXYPlane[0], this->m_WorldPointXYPlane[1], this->m_WorldPointXYPlane[2]);
+		this->m_pView->GetRenderer()->ResetCameraClippingRange();
+		this->m_pView->GetInteractor()->Render();
 
 		// update m_WorldPointXYPlane and save starting point
 		//
-		Update();
+		Update2();
 		for (int i = 0; i < 3; ++i)
 		{
 			this->m_BeginPoint[i] = this->m_WorldPointXYPlane[i];
@@ -659,7 +687,7 @@ void CViewVTKCommand::OnLeftButtonReleaseEvent(vtkObject* caller, void* callData
 
 // COMMENT: {6/22/2005 6:27:15 PM}	if (this->m_pView->CreatingNewRiver())
 // COMMENT: {6/22/2005 6:27:15 PM}	{
-// COMMENT: {6/22/2005 6:27:15 PM}		vtkFloatingPointType* scale = this->m_pView->GetDocument()->GetScale();
+// COMMENT: {6/22/2005 6:27:15 PM}		double* scale = this->m_pView->GetDocument()->GetScale();
 // COMMENT: {6/22/2005 6:27:15 PM}
 // COMMENT: {6/22/2005 6:27:15 PM}		this->m_pView->m_pRiverActor->InsertNextPoint(
 // COMMENT: {6/22/2005 6:27:15 PM}			this->m_BeginPoint[0] / scale[0] / this->m_pView->GetDocument()->GetUnits().horizontal.input_to_si,
@@ -675,19 +703,19 @@ void CViewVTKCommand::OnLeftButtonReleaseEvent(vtkObject* caller, void* callData
 	if (this->m_pView->CreatingNewWell())
 	{
 
-		vtkFloatingPointType* bounds = this->m_pView->GetDocument()->GetGridBounds();
-		vtkFloatingPointType zMin = bounds[4];
-		vtkFloatingPointType zMax = bounds[5];
+		double* bounds = this->m_pView->GetDocument()->GetGridBounds();
+		double zMin = bounds[4];
+		double zMax = bounds[5];
 
 		// set radius
 		//
-		vtkFloatingPointType defaultAxesSize = (bounds[1]-bounds[0] + bounds[3]-bounds[2] + bounds[5]-bounds[4])/12;
-		this->m_pView->m_pWellActor->SetDefaultTubeDiameter(defaultAxesSize * 0.17);
+		double defaultAxesSize = (bounds[1]-bounds[0] + bounds[3]-bounds[2] + bounds[5]-bounds[4])/12;
+		this->m_pView->WellActor->SetDefaultTubeDiameter(defaultAxesSize * 0.17);
 
 		// set scale
 		//
-		vtkFloatingPointType* scale = this->m_pView->GetDocument()->GetScale();
-		this->m_pView->m_pWellActor->SetScale(scale);
+		double* scale = this->m_pView->GetDocument()->GetScale();
+		this->m_pView->WellActor->SetScale(scale);
 
 		// set well position
 		Point p(
@@ -723,18 +751,18 @@ void CViewVTKCommand::OnLeftButtonReleaseEvent(vtkObject* caller, void* callData
 
 		well.x_user         = p.x();
 		well.y_user         = p.y();
-		this->m_pView->m_pWellActor->SetWell(well, this->m_pView->GetDocument()->GetUnits(), this->m_pView->GetDocument()->GetGridKeyword());
+		this->m_pView->WellActor->SetWell(well, this->m_pView->GetDocument()->GetUnits(), this->m_pView->GetDocument()->GetGridKeyword());
 
 		// set height
 		//
 		CGridKeyword gridKeyword = this->m_pView->GetDocument()->GetGridKeyword();
-		this->m_pView->m_pWellActor->SetZAxis(gridKeyword.m_grid[2], this->m_pView->GetDocument()->GetUnits());
-		this->m_pView->m_pWellActor->VisibilityOn();
+		this->m_pView->WellActor->SetZAxis(gridKeyword.m_grid[2], this->m_pView->GetDocument()->GetUnits());
+		this->m_pView->WellActor->VisibilityOn();
 
 		// render
 		//
-		this->m_pView->m_Renderer->AddProp(this->m_pView->m_pWellActor);
-		this->m_pView->m_Renderer->Render();
+		this->m_pView->GetRenderer()->AddViewProp(this->m_pView->WellActor);
+		this->m_pView->GetRenderer()->Render();
 
 		// display well properties
 		//
@@ -768,22 +796,22 @@ void CViewVTKCommand::OnLeftButtonReleaseEvent(vtkObject* caller, void* callData
 
 void CViewVTKCommand::OnMouseMoveEvent(vtkObject* caller, void* callData)
 {
-	Update();
+	Update2();
 
 	if (this->m_pView->CreatingNewWell() || this->m_pView->CreatingNewRiver())
 	{
-		this->m_pView->m_pCursor3DActor->SetPosition(this->m_WorldPointXYPlane[0], this->m_WorldPointXYPlane[1], this->m_WorldPointXYPlane[2]);
-		this->m_pView->m_Renderer->ResetCameraClippingRange();
-		this->m_pView->m_RenderWindowInteractor->Render();
+		this->m_pView->Cursor3DActor->SetPosition(this->m_WorldPointXYPlane[0], this->m_WorldPointXYPlane[1], this->m_WorldPointXYPlane[2]);
+		this->m_pView->GetRenderer()->ResetCameraClippingRange();
+		this->m_pView->GetInteractor()->Render();
 	}
 }
 
 void CViewVTKCommand::OnKeyPressEvent(vtkObject* caller, void* callData)
 {
-	char* keysym = this->m_pView->m_RenderWindowInteractor->GetKeySym();
+	char* keysym = this->m_pView->GetInteractor()->GetKeySym();
 
 	//{{
-	if (this->m_pView->CreatingNewWell() /* || this->m_pView->CreatingNewRiver()*/)
+	if (this->m_pView->CreatingNewWell() || this->m_pView->CreatingNewRiver())
 	{
 		if (::_stricmp(keysym, "m") == 0)
 		{
@@ -810,7 +838,7 @@ void CViewVTKCommand::OnModifiedEvent(vtkObject* caller, void* callData)
 	if (caller)
 	{
 		ostrstream oss;
-		caller->PrintSelf(oss, 4);
+		caller->PrintSelf(oss, vtkIndent(4));
 		oss << ends;
 		///afxDump << oss.str() << "\n";
 		TRACE("%s\n", oss.str());
@@ -818,31 +846,31 @@ void CViewVTKCommand::OnModifiedEvent(vtkObject* caller, void* callData)
 	}
 #endif
 
-	ASSERT(caller && vtkCamera::SafeDownCast(caller));
-	if (vtkBoxWidget *pWidget = this->m_pView->GetBoxWidget())
-	{
-// COMMENT: {11/5/2008 8:07:57 PM}		if (pWidget->GetEnabled())
-// COMMENT: {11/5/2008 8:07:57 PM}		{
-// COMMENT: {11/5/2008 8:07:57 PM}			// this implicitly calls the protected method pWidget->SizeHandles();
-// COMMENT: {11/5/2008 8:07:57 PM}			pWidget->PlaceWidget();
-// COMMENT: {11/5/2008 8:07:57 PM}			pWidget->Modified();
-// COMMENT: {11/5/2008 8:07:57 PM}		}
-	}
+// COMMENT: {7/22/2009 9:19:37 PM}	ASSERT(caller && vtkCamera::SafeDownCast(caller));
+// COMMENT: {7/22/2009 9:19:37 PM}	if (vtkBoxWidget *pWidget = this->m_pView->GetBoxWidget())
+// COMMENT: {7/22/2009 9:19:37 PM}	{
+// COMMENT: {7/22/2009 9:19:37 PM}		if (pWidget->GetEnabled())
+// COMMENT: {7/22/2009 9:19:37 PM}		{
+// COMMENT: {7/22/2009 9:19:37 PM}			// this implicitly calls the protected method pWidget->SizeHandles();
+// COMMENT: {7/22/2009 9:19:37 PM}			pWidget->PlaceWidget();
+// COMMENT: {7/22/2009 9:19:37 PM}			pWidget->Modified();
+// COMMENT: {7/22/2009 9:19:37 PM}		}
+// COMMENT: {7/22/2009 9:19:37 PM}	}
 
 	if (vtkRenderer *renderer =  this->m_pView->GetRenderer())
 	{
 // COMMENT: {8/20/2008 10:06:55 PM}		int i;
 // COMMENT: {8/20/2008 10:06:55 PM}		double radius, z;
 // COMMENT: {8/20/2008 10:06:55 PM}		double windowLowerLeft[4], windowUpperRight[4];
-// COMMENT: {8/20/2008 10:06:55 PM}		vtkFloatingPointType *viewport = renderer->GetViewport();
+// COMMENT: {8/20/2008 10:06:55 PM}		double *viewport = renderer->GetViewport();
 // COMMENT: {8/20/2008 10:06:55 PM}		int *winSize = renderer->GetRenderWindow()->GetSize();
 // COMMENT: {8/20/2008 10:06:55 PM}		double focalPoint[4];
 // COMMENT: {8/20/2008 10:06:55 PM}
 // COMMENT: {8/20/2008 10:06:55 PM}		// get the focal point in world coordinates
 // COMMENT: {8/20/2008 10:06:55 PM}		//
 // COMMENT: {8/20/2008 10:06:55 PM}		vtkCamera *camera = renderer->GetActiveCamera();	
-// COMMENT: {8/20/2008 10:06:55 PM}		vtkFloatingPointType cameraFP[4];
-// COMMENT: {8/20/2008 10:06:55 PM}		camera->GetFocalPoint((vtkFloatingPointType*)cameraFP); cameraFP[3] = 1.0;
+// COMMENT: {8/20/2008 10:06:55 PM}		double cameraFP[4];
+// COMMENT: {8/20/2008 10:06:55 PM}		camera->GetFocalPoint((double*)cameraFP); cameraFP[3] = 1.0;
 // COMMENT: {8/20/2008 10:06:55 PM}
 // COMMENT: {8/20/2008 10:06:55 PM}		this->ComputeWorldToDisplay(cameraFP[0],
 // COMMENT: {8/20/2008 10:06:55 PM}									cameraFP[1],
@@ -876,30 +904,31 @@ void CViewVTKCommand::OnModifiedEvent(vtkObject* caller, void* callData)
 
 void CViewVTKCommand::OnEndPickEvent(vtkObject* caller, void* callData)
 {
-	if (vtkAbstractPropPicker *picker = vtkAbstractPropPicker::SafeDownCast( this->m_pView->GetRenderWindowInteractor()->GetPicker() ))
+	if (vtkAbstractPropPicker *picker = vtkAbstractPropPicker::SafeDownCast( this->m_pView->GetInteractor()->GetPicker() ))
 	{
 		if (vtkAssemblyPath *path = picker->GetPath())
 		{
 #if defined(_DEBUG)
 			ostrstream oss;
-			path->PrintSelf(oss, 4);
+			path->PrintSelf(oss, vtkIndent(4));
 			oss << ends;
 			TRACE("\n");
 			afxDump << "vtkAssemblyPath{{\n" << oss.str() << "vtkAssemblyPath}}\n";
 			oss.rdbuf()->freeze(false); // this must be called after str() to avoid memory leak
 #endif
-			if (path->GetFirstNode()->GetProp()->IsA("vtkPropAssembly"))
+			if (path->GetFirstNode()->GetViewProp()->IsA("vtkPropAssembly"))
 			{
 				TRACE("path->GetNumberOfItems() = %d\n", path->GetNumberOfItems());
 				if (path->GetNumberOfItems() == 3)
 				{
 					// should be river Or CZoneActor
 					//
-					path->InitTraversal();
-					vtkProp* pPropAssembly = path->GetNextNode()->GetProp();
+					vtkCollectionSimpleIterator csi;
+					path->InitTraversal(csi);
+					vtkProp* pPropAssembly = path->GetNextNode(csi)->GetViewProp();
 					ASSERT(pPropAssembly->IsA("vtkPropAssembly"));
 
-					vtkProp* pActor = path->GetNextNode()->GetProp();
+					vtkProp* pActor = path->GetNextNode(csi)->GetViewProp();
 					if (CZoneActor *pZoneActor = CZoneActor::SafeDownCast(pActor))
 					{
 						this->m_pView->GetDocument()->Select(pZoneActor);
@@ -925,21 +954,21 @@ void CViewVTKCommand::OnEndPickEvent(vtkObject* caller, void* callData)
 					// this will change as additional pickable types are added
 					//
 					ASSERT(
-						path->GetLastNode()->GetProp()->IsA("CZoneActor")
+						path->GetLastNode()->GetViewProp()->IsA("CZoneActor")
 						||
-						path->GetLastNode()->GetProp()->IsA("CWellActor")
+						path->GetLastNode()->GetViewProp()->IsA("CWellActor")
 						);
 
 					// check if zone
 					//
-					if (CZoneActor *pZoneActor = CZoneActor::SafeDownCast(path->GetLastNode()->GetProp()))
+					if (CZoneActor *pZoneActor = CZoneActor::SafeDownCast(path->GetLastNode()->GetViewProp()))
 					{
 						this->m_pView->GetDocument()->Select(pZoneActor);
 					}
 
 					// check if well
 					//
-					if (CWellActor *pWell = CWellActor::SafeDownCast(path->GetLastNode()->GetProp()))
+					if (CWellActor *pWell = CWellActor::SafeDownCast(path->GetLastNode()->GetViewProp()))
 					{
 						this->m_pView->GetDocument()->Select(pWell);
 					}
@@ -947,7 +976,7 @@ void CViewVTKCommand::OnEndPickEvent(vtkObject* caller, void* callData)
 			}
 			else
 			{
-				vtkProp *prop = path->GetFirstNode()->GetProp();
+				vtkProp *prop = path->GetFirstNode()->GetViewProp();
 
 				// check if zone
 				//
@@ -974,7 +1003,7 @@ void CViewVTKCommand::OnEndPickEvent(vtkObject* caller, void* callData)
 			}
 
 #ifdef _DEBUG
-			int* xy = this->m_pView->GetRenderWindowInteractor()->GetEventPosition();
+			int* xy = this->m_pView->GetInteractor()->GetEventPosition();
 			TRACE("EventPosition(%d, %d)\n", xy[0], xy[1]);
 #endif
 		}

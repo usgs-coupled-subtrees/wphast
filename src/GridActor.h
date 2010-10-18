@@ -13,14 +13,13 @@ class vtkGeometryFilter;
 class vtkFeatureEdges;
 class vtkPolyDataMapper;
 class vtkImplicitPlaneWidget;
+class vtkBoxWidget;
+class vtkBoxWidget2;
 class CGridLineWidget;
 
 class CZone;
 
-#ifndef vtkFloatingPointType
-#define vtkFloatingPointType vtkFloatingPointType
-typedef float vtkFloatingPointType;
-#endif
+// COMMENT: {10/16/2010 10:39:05 PM}#define GRID_WIDGET
 
 //class CGridActor : public vtkLODActor
 class CGridActor : public vtkAssembly
@@ -96,11 +95,11 @@ public:
 
 
 	///virtual void SetScale(float x, float y, float z);
-	virtual void SetScale(vtkFloatingPointType x, vtkFloatingPointType y, vtkFloatingPointType z);
-	virtual void SetScale(vtkFloatingPointType scale[3]);
+	virtual void SetScale(double x, double y, double z);
+	virtual void SetScale(double scale[3]);
 
-	virtual vtkFloatingPointType* GetScale(void);
-	virtual void GetScale(vtkFloatingPointType scale[3]);
+	virtual double* GetScale(void);
+	virtual void GetScale(double scale[3]);
 
 #if defined(WIN32)
 	BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
@@ -160,6 +159,20 @@ protected:
 	vtkTransform*       ScaleTransform;
 	vtkTransform*       UnitsTransform;
 
+#if defined(GRID_WIDGET)
+	vtkCubeSource*      CubeSource;
+	vtkPolyDataMapper*  CubeMapper;
+	vtkActor*           CubeActor;
+
+	float HandleSize;
+	double Center[3];
+
+	virtual void SizeHandles();
+	double SizeHandles(double factor);
+
+	vtkBoxWidget2*       BoxWidget;
+#endif
+
 	// vtkImplicitPlaneWidget    *PlaneWidget;	
 	CGridLineWidget           *PlaneWidget;
 
@@ -168,10 +181,10 @@ protected:
 	// Internal ivars for processing events
 	vtkRenderer        *CurrentRenderer;
 
-	int                                  AxisIndex;
-	int                                  PlaneIndex;
-	vtkFloatingPointType                 CurrentPoint[3];
-	std::map<vtkFloatingPointType, int>  ValueToIndex[3];
+	int                   AxisIndex;
+	int                   PlaneIndex;
+	double                CurrentPoint[3];
+	std::map<float, int>  ValueToIndex[3];
 
 
 	///CGrid               m_grid[3];

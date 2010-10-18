@@ -17,6 +17,114 @@ vtkBoxWidgetEx::~vtkBoxWidgetEx(void)
 {
 }
 
+// modified to add handling of vtkCommand::ModifiedEvent
+void vtkBoxWidgetEx::SetEnabled(int enabling)
+{
+  if ( ! this->Interactor )
+    {
+    vtkErrorMacro(<<"The interactor must be set prior to enabling/disabling widget");
+    return;
+    }
+
+  if ( enabling ) //------------------------------------------------------------
+    {
+    vtkDebugMacro(<<"Enabling widget");
+
+    if ( this->Enabled ) //already enabled, just return
+      {
+      return;
+      }
+    
+    if ( ! this->CurrentRenderer )
+      {
+      this->CurrentRenderer = this->Interactor->FindPokedRenderer(
+        this->Interactor->GetLastEventPosition()[0],
+        this->Interactor->GetLastEventPosition()[1]);
+      if (this->CurrentRenderer == NULL)
+        {
+        return;
+        }
+      }
+
+    this->Enabled = 1;
+
+    // listen to the following events
+    vtkRenderWindowInteractor *i = this->Interactor;
+    i->AddObserver(vtkCommand::MouseMoveEvent, this->EventCallbackCommand, 
+                   this->Priority);
+    i->AddObserver(vtkCommand::LeftButtonPressEvent, 
+                   this->EventCallbackCommand, this->Priority);
+    i->AddObserver(vtkCommand::LeftButtonReleaseEvent, 
+                   this->EventCallbackCommand, this->Priority);
+    i->AddObserver(vtkCommand::MiddleButtonPressEvent, 
+                   this->EventCallbackCommand, this->Priority);
+    i->AddObserver(vtkCommand::MiddleButtonReleaseEvent, 
+                   this->EventCallbackCommand, this->Priority);
+    i->AddObserver(vtkCommand::RightButtonPressEvent, 
+                   this->EventCallbackCommand, this->Priority);
+    i->AddObserver(vtkCommand::RightButtonReleaseEvent, 
+                   this->EventCallbackCommand, this->Priority);
+	//{{
+    i->AddObserver(vtkCommand::ModifiedEvent, 
+                   this->EventCallbackCommand, this->Priority);
+	//}}
+
+    // Add the various actors
+    // Add the outline
+    this->CurrentRenderer->AddActor(this->HexActor);
+    this->CurrentRenderer->AddActor(this->HexOutline);
+    this->HexActor->SetProperty(this->OutlineProperty);
+    this->HexOutline->SetProperty(this->OutlineProperty);
+
+    // Add the hex face
+    this->CurrentRenderer->AddActor(this->HexFace);
+    this->HexFace->SetProperty(this->FaceProperty);
+
+    // turn on the handles
+    for (int j=0; j<7; j++)
+      {
+      this->CurrentRenderer->AddActor(this->Handle[j]);
+      this->Handle[j]->SetProperty(this->HandleProperty);
+      }
+
+    this->InvokeEvent(vtkCommand::EnableEvent,NULL);
+    }
+
+  else //disabling-------------------------------------------------------------
+    {
+    vtkDebugMacro(<<"Disabling widget");
+
+    if ( ! this->Enabled ) //already disabled, just return
+      {
+      return;
+      }
+    
+    this->Enabled = 0;
+
+    // don't listen for events any more
+    this->Interactor->RemoveObserver(this->EventCallbackCommand);
+
+    // turn off the outline
+    this->CurrentRenderer->RemoveActor(this->HexActor);
+    this->CurrentRenderer->RemoveActor(this->HexOutline);
+
+    // turn off the hex face
+    this->CurrentRenderer->RemoveActor(this->HexFace);
+
+    // turn off the handles
+    for (int i=0; i<7; i++)
+      {
+      this->CurrentRenderer->RemoveActor(this->Handle[i]);
+      }
+
+    this->CurrentHandle = NULL;
+    this->InvokeEvent(vtkCommand::DisableEvent,NULL);
+    this->CurrentRenderer = NULL;
+    }
+  
+  this->Interactor->Render();
+}
+
 void vtkBoxWidgetEx::ProcessEvents(vtkObject* object, unsigned long event, void* clientdata, void* calldata)
 {
 	vtkBoxWidgetEx* self = reinterpret_cast<vtkBoxWidgetEx *>( clientdata );
@@ -44,6 +152,12 @@ void vtkBoxWidgetEx::ProcessEvents(vtkObject* object, unsigned long event, void*
 // COMMENT: {8/13/2008 5:47:48 PM}		break;
 	case vtkCommand::MouseMoveEvent:
 		self->OnMouseMove();
+// COMMENT: {7/22/2009 9:16:09 PM}		//{{
+// COMMENT: {7/22/2009 9:16:09 PM}		self->SizeHandles();
+// COMMENT: {7/22/2009 9:16:09 PM}		//}}
+		break;
+	case vtkCommand::ModifiedEvent:
+		self->SizeHandles();
 		break;
 	}
 }
@@ -69,7 +183,7 @@ void vtkBoxWidgetEx::OnLeftButtonDown()
 	{
 		this->State = vtkBoxWidget::Moving;
 		this->HighlightFace(
-			this->HighlightHandle(path->GetFirstNode()->GetProp()));
+			this->HighlightHandle(path->GetFirstNode()->GetViewProp()));
 		this->HandlePicker->GetPickPosition(this->LastPickPosition);
 		this->ValidPick = 1;
 	}
@@ -157,7 +271,7 @@ double vtkBoxWidgetEx::SizeHandles(double factor)
 	{
 		double radius, z;
 		double windowLowerLeft[4], windowUpperRight[4];
-		vtkFloatingPointType *viewport = renderer->GetViewport();
+		double *viewport = renderer->GetViewport();
 		int *winSize = renderer->GetRenderWindow()->GetSize();
 		double focalPoint[4];
 

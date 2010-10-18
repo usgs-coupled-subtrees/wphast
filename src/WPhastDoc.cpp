@@ -31,6 +31,7 @@
 #include <sstream>  // std::ostringstream std::istringstream
 
 #include "srcinput/Filedata.h"
+#include "srcinput/Domain.h"
 
 #include "Action.h"
 #include "SetMediaAction.h"
@@ -136,7 +137,7 @@
 #include "HeadIC.h"
 #include "TimeControl2.h"
 #include "MapActor.h"
-#include "MapImageActor.h"
+// COMMENT: {8/19/2009 6:08:40 PM}#include "MapImageActor3.h"
 #include "WorldTransform.h"
 #include "SiteMap.h"
 #include "NewModel.h"
@@ -182,12 +183,13 @@ void Clear_KDtreeList(void);
 #endif
 
 
-struct WPhastDocImpl {
+struct WPhastDocImpl
+{
 	// Note: see http://www.gotw.ca/publications/mill04.htm
-	std::vector<CAction*> m_vectorActions;
+	std::vector<CAction*>            m_vectorActions;
 	std::vector<CAction*>::size_type m_vectorActionsIndex;
 	std::vector<CAction*>::size_type m_lastSaveIndex;
-	std::vector<CZone*> m_vectorDefaultZones;
+	std::vector<CZone*>              m_vectorDefaultZones;
 };
 
 
@@ -290,7 +292,9 @@ BEGIN_MESSAGE_MAP(CWPhastDoc, CDocument)
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_NEWDRAIN, OnUpdateToolsNewDrain)
 	ON_COMMAND(ID_TOOLS_NEWDRAIN, OnToolsNewDrain)
 
+	// ID_TOOLS_COLORS
 	ON_COMMAND(ID_TOOLS_COLORS, &CWPhastDoc::OnToolsColors)
+	ON_COMMAND(ID_ACCELERATOR32862, &CWPhastDoc::OnAccelerator32862)
 END_MESSAGE_MAP()
 
 #if defined(WPHAST_AUTOMATION)
@@ -319,13 +323,16 @@ CWPhastDoc::CWPhastDoc()
 , m_pPropCollection(0)
 , m_pRemovedPropCollection(0)
 , m_pGridActor(0)
-, m_pAxesActor(0)
+, AxesActor(0)
 , m_pGeometrySheet(0)
 , m_pScalePage(0)
 , m_pUnits(0)
 , m_pModel(0) // , m_pFlowOnly(0)
-, m_ProjectionMode(PT_PERSPECTIVE)
+, ProjectionMode(PT_PERSPECTIVE)
 , m_pMapActor(0)
+// COMMENT: {8/19/2009 6:11:30 PM}//{{
+// COMMENT: {8/19/2009 6:11:30 PM}, MapImageActor3(0)
+// COMMENT: {8/19/2009 6:11:30 PM}//}}
 , m_pPropAssemblyMedia(0)
 , m_pPropAssemblyBC(0)
 , m_pPropAssemblyIC(0)
@@ -352,12 +359,15 @@ CWPhastDoc::CWPhastDoc()
 , NewPrismCallbackCommand(0)
 , NewDrainActor(0)
 , NewDrainCallbackCommand(0)
+, hGridAccel(0)
 {
 #if defined(WPHAST_AUTOMATION)
 	EnableAutomation();
 
 	AfxOleLockApp();
 #endif
+
+	VERIFY(this->hGridAccel = ::LoadAccelerators(::AfxGetInstanceHandle(), MAKEINTRESOURCE(IDR_GRID_ACCEL)));
 
 	ASSERT(this->m_pimpl == 0);
 	this->m_pimpl = new WPhastDocImpl();
@@ -376,6 +386,14 @@ CWPhastDoc::CWPhastDoc()
 
 	// create the prop-assemblies
 	//
+	ASSERT(this->m_pPropAssemblyMedia  == 0);
+	ASSERT(this->m_pPropAssemblyIC     == 0);
+	ASSERT(this->m_pPropAssemblyBC     == 0);
+	ASSERT(this->m_pPropAssemblyWells  == 0);
+	ASSERT(this->m_pPropAssemblyRivers == 0);
+	ASSERT(this->m_pPropAssemblyDrains == 0);
+	ASSERT(this->m_pPropAssemblyZFR    == 0);
+
 	this->m_pPropAssemblyMedia  = vtkPropAssembly::New();
 	this->m_pPropAssemblyIC     = vtkPropAssembly::New();
 	this->m_pPropAssemblyBC     = vtkPropAssembly::New();
@@ -384,17 +402,9 @@ CWPhastDoc::CWPhastDoc()
 	this->m_pPropAssemblyDrains = vtkPropAssembly::New();	
 	this->m_pPropAssemblyZFR    = vtkPropAssembly::New();
 
-	this->m_pPropCollection->AddItem(this->m_pPropAssemblyMedia);
-	this->m_pPropCollection->AddItem(this->m_pPropAssemblyIC);
-	this->m_pPropCollection->AddItem(this->m_pPropAssemblyBC);
-	this->m_pPropCollection->AddItem(this->m_pPropAssemblyWells);
-	this->m_pPropCollection->AddItem(this->m_pPropAssemblyRivers);
-	this->m_pPropCollection->AddItem(this->m_pPropAssemblyDrains);
-	this->m_pPropCollection->AddItem(this->m_pPropAssemblyZFR);
-
 	// create the axes
 	//
-	this->m_pAxesActor = CAxesActor::New();
+	this->AxesActor = CAxesActor::New();
 
 	// create Geometry property sheet
 	//
@@ -470,6 +480,13 @@ CWPhastDoc::~CWPhastDoc()
 	AfxOleUnlockApp();
 #endif
 
+	ASSERT(this->hGridAccel);
+	if (this->hGridAccel)
+	{
+		VERIFY(::DestroyAcceleratorTable(this->hGridAccel));
+		this->hGridAccel = 0;
+	}
+
 	ASSERT(this->m_pimpl);
 	if (this->m_pimpl)
 	{
@@ -510,11 +527,11 @@ CWPhastDoc::~CWPhastDoc()
 	CLEANUP_ASSEMBLY_MACRO(this->m_pPropAssemblyZFR);
 	
 
-	ASSERT(this->m_pAxesActor);
-	if (this->m_pAxesActor)
+	ASSERT(this->AxesActor);
+	if (this->AxesActor)
 	{
-		this->m_pAxesActor->Delete();
-		this->m_pAxesActor = 0;
+		this->AxesActor->Delete();
+		this->AxesActor = 0;
 	}
 
 	ASSERT(this->m_pScalePage == 0);     // should be deleted in CWPhastDoc::OnCloseDocument()
@@ -593,6 +610,17 @@ BOOL CWPhastDoc::OnNewDocument()
 	// (SDI documents will reuse this document)
 	TRACE("CWPhastDoc::OnNewDocument()\n");
 	this->SetModifiedFlag(TRUE);
+
+#if ((VTK_MAJOR_VERSION >= 5) && (VTK_MINOR_VERSION >= 4))
+	if (vtkPropCollection *props = this->GetPropCollection())
+	{
+		// should be removed in DeleteContents()
+		ASSERT(props->GetNumberOfItems() == 0);
+	}
+
+	// execute object pipeline
+	this->ExecutePipeline();
+#endif
 
 	return TRUE;
 }
@@ -701,15 +729,6 @@ void CWPhastDoc::Serialize(CArchive& ar)
 			// store zone flow rates
 			this->SerializeZoneFlowRates(bStoring, wphast_id);
 
-// COMMENT: {2/11/2009 7:05:47 PM}			// store PRINT_INITIAL
-// COMMENT: {2/11/2009 7:05:47 PM}			this->m_pModel->m_printInput.Serialize(bStoring, wphast_id);
-// COMMENT: {2/11/2009 7:05:47 PM}
-// COMMENT: {2/11/2009 7:05:47 PM}			// store PRINT_FREQUENCY
-// COMMENT: {2/11/2009 7:05:47 PM}			this->m_pModel->m_printFreq.Serialize(bStoring, wphast_id);
-// COMMENT: {2/11/2009 7:05:47 PM}
-// COMMENT: {2/11/2009 7:05:47 PM}			// store time control
-// COMMENT: {2/11/2009 7:05:47 PM}			this->m_pModel->m_timeControl2.Serialize(bStoring, wphast_id);
-
 			// close WPhast group
 			status = ::H5Gclose(wphast_id);
 			ASSERT(status >= 0);
@@ -739,6 +758,12 @@ void CWPhastDoc::Serialize(CArchive& ar)
 		// delay redrawing render window
 		//
 		CDelayRedraw delayRender(::AfxGetMainWnd()->GetActiveWindow(), this);
+
+		// This fixes the BUG that occured when creating a new document
+		// and then opening an existing document causing a crash in 
+		// CWPhastView::Select() called from CWPhastView::Update the
+		// CWPhastView::CurrentProp had probably been deleted
+		this->ClearSelection();
 
 		CHDFMirrorFile* pFile = (CHDFMirrorFile*)ar.GetFile();
 		ASSERT(pFile->GetHID() > 0);
@@ -785,14 +810,14 @@ void CWPhastDoc::Serialize(CArchive& ar)
 
 			// load axes
 			//this->m_pAxesActor->Serialize(bStoring, wphast_id); // not implemented
-			this->GetPropCollection()->AddItem(this->m_pAxesActor);
+			this->GetPropCollection()->AddItem(this->AxesActor);
 
 			// load site map
 			ASSERT(this->m_pMapActor == NULL);
 			this->m_pMapActor = CMapActor::New();
 			this->m_pMapActor->Serialize(bStoring, wphast_id);
-			CSiteMap siteMap = this->m_pMapActor->GetSiteMap();
-			if (siteMap.m_fileName.empty())
+			CSiteMap2 siteMap2 = this->m_pMapActor->GetSiteMap2();
+			if (siteMap2.FileName.empty())
 			{
 				this->m_pMapActor->Delete();
 				this->m_pMapActor = 0;
@@ -828,20 +853,11 @@ void CWPhastDoc::Serialize(CArchive& ar)
 			// load zone flow rates
 			this->SerializeZoneFlowRates(bStoring, wphast_id);
 
-// COMMENT: {2/11/2009 7:08:25 PM}			// load PRINT_INITIAL
-// COMMENT: {2/11/2009 7:08:25 PM}			this->m_pModel->m_printInput.Serialize(bStoring, wphast_id);
-
-// COMMENT: {2/11/2009 7:09:10 PM}			// load PRINT_FREQUENCY
-// COMMENT: {2/11/2009 7:09:10 PM}			this->m_pModel->m_printFreq.Serialize(bStoring, wphast_id);
-
 			// update properties bar
 			if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar())
 			{
 				pTree->SetPrintFrequency(&this->m_pModel->m_printFreq);
 			}
-
-// COMMENT: {2/11/2009 7:08:03 PM}			// load time control
-// COMMENT: {2/11/2009 7:08:03 PM}			this->m_pModel->m_timeControl2.Serialize(bStoring, wphast_id);
 
 			// update properties bar
 			if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar())
@@ -855,7 +871,7 @@ void CWPhastDoc::Serialize(CArchive& ar)
 		}
 
 		// set scale for all zones, wells ...
-		vtkFloatingPointType* scale = this->m_pGridActor->GetScale();
+		double* scale = this->m_pGridActor->GetScale();
 		this->SetScale(scale[0], scale[1], scale[2]);
 
 		this->ResetCamera();
@@ -1239,7 +1255,7 @@ void CWPhastDoc::SerializeActors(bool bStoring, hid_t loc_id, CTreeCtrlNode pare
 void CWPhastDoc::AssertValid() const
 {
 	CDocument::AssertValid();
-	ASSERT(this->m_pAxesActor != 0);
+	ASSERT(this->AxesActor != 0);
 	ASSERT(this->m_pimpl != 0);
 	ASSERT(this->m_pPropCollection != 0);
 	ASSERT(this->m_pRemovedPropCollection != 0);
@@ -1303,6 +1319,11 @@ BOOL CWPhastDoc::OnOpenDocument(LPCTSTR lpszPathName)
 
 	BOOL bOk = CDocument::OnOpenDocument(lpszPathName);
 	this->DataSourcePathsRelativeToAbsolute(lpszPathName);
+
+#if ((VTK_MAJOR_VERSION >= 5) && (VTK_MINOR_VERSION >= 4))
+	this->ExecutePipeline();
+#endif
+
 	return bOk;
 }
 
@@ -1328,7 +1349,10 @@ do { \
 	if (PROP_ASSEMBLY_PTR) { \
 		if (vtkPropCollection *pPropCollection = PROP_ASSEMBLY_PTR->GetParts()) { \
 			pPropCollection->RemoveAllItems(); \
+			ASSERT(pPropCollection->GetNumberOfItems() == 0); \
+			PROP_ASSEMBLY_PTR->Modified(); \
 		} \
+		ASSERT(PROP_ASSEMBLY_PTR->GetNumberOfPaths() == 0); \
 	} \
 } while(0)
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -1338,7 +1362,33 @@ void CWPhastDoc::DeleteContents()
 	// Add your specialized code here and/or call the base class
 	TRACE("CWPhastDoc::DeleteContents()\n");
 
-	ASSERT(this->m_pAxesActor);
+	//{{
+	// remove old actors
+	if ( vtkPropCollection *props = this->GetPropCollection() )
+	{
+		POSITION pos =  this->GetFirstViewPosition();
+		CWPhastView *pView = (CWPhastView*)this->GetNextView(pos);
+		if (pView)
+		{
+			vtkCollectionSimpleIterator csi;
+			props->InitTraversal(csi);
+			for (int i = 0; i < props->GetNumberOfItems(); ++i)
+			{
+				vtkProp* prop = props->GetNextProp(csi);
+				if (prop)
+				{
+					pView->GetRenderer()->RemoveViewProp(prop);
+				}
+			}
+			pView->DeleteContents();
+// COMMENT: {9/17/2009 4:12:56 PM}			ASSERT(pView->GetRenderer()->GetViewProps()->GetNumberOfItems() == 0);
+			pView->UpdateWindow();
+			this->UpdateAllViews(0);
+		}
+	}
+	//}}
+
+	ASSERT(this->AxesActor);
 
 	// reset model
 	ASSERT(this->m_pModel);
@@ -1389,32 +1439,33 @@ void CWPhastDoc::DeleteContents()
 	this->m_pGridActor->SetScale(1, 1, 1);
 	this->m_pGridActor->SetPickable(0);
 
-	// update views
-	//
-	POSITION pos = this->GetFirstViewPosition();
-	while (pos != NULL)
-	{
-		CWPhastView *pView = (CWPhastView*) GetNextView(pos);
-		ASSERT_VALID(pView);
-		ASSERT(this->m_pPropCollection);
-		if (this->m_pPropCollection)
-		{
-			// remove all props
-			this->m_pPropCollection->InitTraversal();
-			for (int i = 0; i < this->m_pPropCollection->GetNumberOfItems(); ++i)
-			{
-				vtkProp* prop = this->m_pPropCollection->GetNextProp();
-				pView->GetRenderer()->GetProps()->RemoveItem(prop);
-			}
-		}
-
-		// all vtkProps must release before the Renderer is destroyed
-		// ie when an import fails
-		this->m_pGridActor->ReleaseGraphicsResources(pView->GetRenderer()->GetVTKWindow());
-		this->m_pAxesActor->ReleaseGraphicsResources(pView->GetRenderer()->GetVTKWindow());
-
-		pView->DeleteContents();
-	}
+// COMMENT: {9/10/2009 11:22:38 PM}	// update views
+// COMMENT: {9/10/2009 11:22:38 PM}	//
+// COMMENT: {9/10/2009 11:22:38 PM}	POSITION pos = this->GetFirstViewPosition();
+// COMMENT: {9/10/2009 11:22:38 PM}	while (pos != NULL)
+// COMMENT: {9/10/2009 11:22:38 PM}	{
+// COMMENT: {9/10/2009 11:22:38 PM}		CWPhastView *pView = (CWPhastView*) GetNextView(pos);
+// COMMENT: {9/10/2009 11:22:38 PM}		ASSERT_VALID(pView);
+// COMMENT: {9/10/2009 11:22:38 PM}// COMMENT: {9/4/2009 7:49:01 PM}		ASSERT(this->m_pPropCollection);
+// COMMENT: {9/10/2009 11:22:38 PM}// COMMENT: {9/4/2009 7:49:01 PM}		if (this->m_pPropCollection)
+// COMMENT: {9/10/2009 11:22:38 PM}// COMMENT: {9/4/2009 7:49:01 PM}		{
+// COMMENT: {9/10/2009 11:22:38 PM}// COMMENT: {9/4/2009 7:49:01 PM}			// remove all props
+																				///vtkCollectionSimpleIterator csi;
+// COMMENT: {9/10/2009 11:22:38 PM}// COMMENT: {9/4/2009 7:49:01 PM}			this->m_pPropCollection->InitTraversal(csi);
+// COMMENT: {9/10/2009 11:22:38 PM}// COMMENT: {9/4/2009 7:49:01 PM}			for (int i = 0; i < this->m_pPropCollection->GetNumberOfItems(); ++i)
+// COMMENT: {9/10/2009 11:22:38 PM}// COMMENT: {9/4/2009 7:49:01 PM}			{
+// COMMENT: {9/10/2009 11:22:38 PM}// COMMENT: {9/4/2009 7:49:01 PM}				vtkProp* prop = this->m_pPropCollection->GetNextProp(csi);
+// COMMENT: {9/10/2009 11:22:38 PM}// COMMENT: {9/4/2009 7:49:01 PM}				pView->GetRenderer()->GetViewProps()->RemoveItem(prop);
+// COMMENT: {9/10/2009 11:22:38 PM}// COMMENT: {9/4/2009 7:49:01 PM}			}
+// COMMENT: {9/10/2009 11:22:38 PM}// COMMENT: {9/4/2009 7:49:01 PM}		}
+// COMMENT: {9/10/2009 11:22:38 PM}// COMMENT: {9/4/2009 7:49:01 PM}
+// COMMENT: {9/10/2009 11:22:38 PM}// COMMENT: {9/4/2009 7:49:01 PM}		// all vtkProps must release before the Renderer is destroyed
+// COMMENT: {9/10/2009 11:22:38 PM}// COMMENT: {9/4/2009 7:49:01 PM}		// ie when an import fails
+// COMMENT: {9/10/2009 11:22:38 PM}// COMMENT: {9/4/2009 7:49:01 PM}		this->m_pGridActor->ReleaseGraphicsResources(pView->GetRenderer()->GetVTKWindow());
+// COMMENT: {9/10/2009 11:22:38 PM}// COMMENT: {9/4/2009 7:49:01 PM}		this->m_pAxesActor->ReleaseGraphicsResources(pView->GetRenderer()->GetVTKWindow());
+// COMMENT: {9/10/2009 11:22:38 PM}
+// COMMENT: {9/10/2009 11:22:38 PM}		pView->DeleteContents();
+// COMMENT: {9/10/2009 11:22:38 PM}	}
 
 	// clear prop collection
 	//
@@ -1482,6 +1533,11 @@ void CWPhastDoc::DeleteContents()
 		this->m_pMapActor->Delete();
 		this->m_pMapActor = 0;
 	}
+// COMMENT: {8/19/2009 6:09:33 PM}	if (this->MapImageActor3)
+// COMMENT: {8/19/2009 6:09:33 PM}	{
+// COMMENT: {8/19/2009 6:09:33 PM}		this->MapImageActor3->Delete();
+// COMMENT: {8/19/2009 6:09:33 PM}		this->MapImageActor3 = 0;
+// COMMENT: {8/19/2009 6:09:33 PM}	}
 
 	// update geometry property sheet
 	// Note: can't call this->SetScale(1.0f, 1.0f, 1.0f);
@@ -1505,7 +1561,7 @@ void CWPhastDoc::DeleteContents()
 		pBar->Set(0, 0, this->GetUnits());
 	}
 
-	this->UpdateAllViews(0);
+// COMMENT: {9/8/2009 6:10:37 PM}	this->UpdateAllViews(0);
 
 	// cleanup phastinput data
 	//
@@ -1600,13 +1656,13 @@ void CWPhastDoc::OnEditRedo() // 57644
 	this->SetModifiedFlag(this->m_pimpl->m_vectorActionsIndex != this->m_pimpl->m_lastSaveIndex);
 }
 
-void CWPhastDoc::SetScale(vtkFloatingPointType x, vtkFloatingPointType y, vtkFloatingPointType z)
+void CWPhastDoc::SetScale(double x, double y, double z)
 {
 	ASSERT(x != 0);
 	ASSERT(y != 0);
 	ASSERT(z != 0);
 
-	vtkFloatingPointType scale[3];
+	double scale[3];
 	scale[0] = x;
 	scale[1] = y;
 	scale[2] = z;
@@ -1631,12 +1687,12 @@ void CWPhastDoc::SetScale(vtkFloatingPointType x, vtkFloatingPointType y, vtkFlo
 
 	// reset the axes
 	//
-	vtkFloatingPointType bounds[6];
+	double bounds[6];
 	this->m_pGridActor->GetBounds(bounds);
 	float defaultAxesSize = (bounds[1]-bounds[0] + bounds[3]-bounds[2] + bounds[5]-bounds[4])/12;
-	this->m_pAxesActor->SetDefaultPositions(bounds);
-	this->m_pAxesActor->SetDefaultSize(defaultAxesSize);
-	this->m_pAxesActor->SetDefaultTubeDiameter(defaultAxesSize * 0.1);
+	this->AxesActor->SetDefaultPositions(bounds);
+	this->AxesActor->SetDefaultSize(defaultAxesSize);
+	this->AxesActor->SetDefaultTubeDiameter(defaultAxesSize * 0.1);
 
 	// set scale for the map
 	//
@@ -1644,15 +1700,22 @@ void CWPhastDoc::SetScale(vtkFloatingPointType x, vtkFloatingPointType y, vtkFlo
 	{
 		this->m_pMapActor->SetScale(x, y, z);
 	}
+// COMMENT: {8/19/2009 6:09:47 PM}	//{{
+// COMMENT: {8/19/2009 6:09:47 PM}	if (this->MapImageActor3)
+// COMMENT: {8/19/2009 6:09:47 PM}	{
+// COMMENT: {8/19/2009 6:09:47 PM}		this->MapImageActor3->SetScale(x, y, z);
+// COMMENT: {8/19/2009 6:09:47 PM}	}
+// COMMENT: {8/19/2009 6:09:47 PM}	//}}
 
 	// set scale for all zones
 	//
 	if (vtkPropCollection* pCollection = this->GetPropCollection())
 	{
-		pCollection->InitTraversal();
+		vtkCollectionSimpleIterator csi;
+		pCollection->InitTraversal(csi);
 		for (int i = 0; i < pCollection->GetNumberOfItems(); ++i)
 		{
-			vtkProp* prop = pCollection->GetNextProp();
+			vtkProp* prop = pCollection->GetNextProp(csi);
 			if (CZoneActor *pZone = CZoneActor::SafeDownCast(prop))
 			{
 				pZone->SetScale(scale);
@@ -1662,8 +1725,9 @@ void CWPhastDoc::SetScale(vtkFloatingPointType x, vtkFloatingPointType y, vtkFlo
 				if (vtkPropCollection *pPropCollection = pPropAssembly->GetParts())
 				{
 					vtkProp *pProp;
-					pPropCollection->InitTraversal();
-					for (; (pProp = pPropCollection->GetNextProp()); )
+					vtkCollectionSimpleIterator csi2;
+					pPropCollection->InitTraversal(csi2);
+					for (; (pProp = pPropCollection->GetNextProp(csi2)); )
 					{
 						if (vtkProp3D *prop3D = vtkProp3D::SafeDownCast(pProp))
 						{
@@ -1748,7 +1812,7 @@ void CWPhastDoc::SetModel(const CNewModel& model)
 void CWPhastDoc::ResizeGrid(const CGrid& x, const CGrid&  y, const CGrid&  z)
 {
 	ASSERT(this->m_pGridActor);
-	ASSERT(this->m_pAxesActor);
+	ASSERT(this->AxesActor);
 	ASSERT(this->m_pPropCollection);
 	ASSERT(this->m_pimpl);
 	ASSERT(this->m_pUnits);
@@ -1769,6 +1833,46 @@ void CWPhastDoc::ResizeGrid(const CGrid& x, const CGrid&  y, const CGrid&  z)
 	this->UpdateGridDomain();
 }
 
+void CWPhastDoc::ResizeGrid(const CGridKeyword& keyword)
+{
+	ASSERT(this->m_pGridActor);
+	ASSERT(this->AxesActor);
+	ASSERT(this->m_pPropCollection);
+	ASSERT(this->m_pimpl);
+	ASSERT(this->m_pUnits);
+	ASSERT(this->m_pModel);
+
+	if (this->m_pMapActor)
+	{
+		CSiteMap2 siteMap2 = this->m_pMapActor->GetSiteMap2();
+		siteMap2.Angle = keyword.m_grid_angle;
+		this->m_pMapActor->SetSiteMap2(siteMap2);
+	}
+
+	// reset the grid
+	//
+	this->m_pGridActor->SetGridKeyword(keyword, this->GetUnits());
+	this->m_pGridActor->SetPickable(0);
+	this->m_pPropCollection->AddItem(this->m_pGridActor);
+	if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar())
+	{
+		pTree->SetGridActor(this->m_pGridActor);
+	}
+
+// COMMENT: {9/7/2010 10:18:15 PM}	// Update default zones etc.
+// COMMENT: {9/7/2010 10:18:15 PM}	//
+// COMMENT: {9/7/2010 10:18:15 PM}	this->UpdateGridDomain();
+
+	//{{
+	// update possible selection
+	//
+	this->Notify(this, WPN_DOMAIN_CHANGED, 0, 0);
+
+// COMMENT: {9/7/2010 10:19:23 PM}	// refresh screen
+// COMMENT: {9/7/2010 10:19:23 PM}	//
+// COMMENT: {9/7/2010 10:19:23 PM}	this->UpdateAllViews(0);
+	//}}
+}
 
 void CWPhastDoc::AddDefaultZone(CZone* pZone)
 {
@@ -1779,17 +1883,17 @@ void CWPhastDoc::AddDefaultZone(CZone* pZone)
 	}
 }
 
-vtkFloatingPointType* CWPhastDoc::GetScale()
+double* CWPhastDoc::GetScale()
 {
 	return this->m_pGridActor->GetScale();
 }
 
-void CWPhastDoc::GetScale(vtkFloatingPointType data[3])
+void CWPhastDoc::GetScale(double data[3])
 {
 	this->m_pGridActor->GetScale(data);
 }
 
-vtkFloatingPointType* CWPhastDoc::GetGridBounds()
+double* CWPhastDoc::GetGridBounds()
 {
 	if (this->m_pGridActor)
 	{
@@ -1833,11 +1937,45 @@ void CWPhastDoc::OnToolsGeometry()
 void CWPhastDoc::ResetCamera(void)
 {
 	POSITION pos = this->GetFirstViewPosition();
-	while (pos != NULL) {
+	while (pos != NULL)
+	{
 		CWPhastView *pView = (CWPhastView*) this->GetNextView(pos);
 		ASSERT_VALID(pView);
-		pView->ResetCamera();
+		if (pView->GetRenderer())
+		{
+			pView->GetRenderer()->ResetCamera();
+			pView->GetRenderer()->ResetCameraClippingRange();
+		}
 	}
+}
+
+void CWPhastDoc::ResetCamera(double bounds[6])
+{
+	POSITION pos = this->GetFirstViewPosition();
+	while (pos != NULL)
+	{
+		CWPhastView *pView = (CWPhastView*) this->GetNextView(pos);
+		ASSERT_VALID(pView);
+		if (pView->GetRenderer())
+		{
+			pView->GetRenderer()->ResetCamera(bounds);
+			pView->GetRenderer()->ResetCameraClippingRange();
+		}
+	}
+}
+
+void CWPhastDoc::ResetCamera(double xmin, double xmax, double ymin, double ymax, double zmin, double zmax)
+{
+	double bounds[6];
+
+	bounds[0] = xmin;
+	bounds[1] = xmax;
+	bounds[2] = ymin;
+	bounds[3] = ymax;
+	bounds[4] = zmin;
+	bounds[5] = zmax;
+
+	this->ResetCamera(bounds);
 }
 
 CString CWPhastDoc::GetNextZoneName(void)
@@ -1881,8 +2019,9 @@ void CWPhastDoc::GetUsedWellNumbers(std::set<int>& usedNums)
 	if (vtkPropCollection *pPropCollection = this->GetPropAssemblyWells()->GetParts())
 	{
 		vtkProp *pProp = 0;
-		pPropCollection->InitTraversal();
-		for (; (pProp = pPropCollection->GetNextProp()); )
+		vtkCollectionSimpleIterator csi;
+		pPropCollection->InitTraversal(csi);
+		for (; (pProp = pPropCollection->GetNextProp(csi)); )
 		{
 			if (CWellActor *pWellActor = CWellActor::SafeDownCast(pProp))
 			{
@@ -1916,8 +2055,9 @@ void CWPhastDoc::GetUsedRiverNumbers(std::set<int>& usedNums)
 	if (vtkPropCollection *pPropCollection = this->GetPropAssemblyRivers()->GetParts())
 	{
 		vtkProp *pProp = 0;
-		pPropCollection->InitTraversal();
-		for (; (pProp = pPropCollection->GetNextProp()); )
+		vtkCollectionSimpleIterator csi;
+		pPropCollection->InitTraversal(csi);
+		for (; (pProp = pPropCollection->GetNextProp(csi)); )
 		{
 			if (CRiverActor *pRiverActor = CRiverActor::SafeDownCast(pProp))
 			{
@@ -2006,8 +2146,9 @@ void CWPhastDoc::GetUsedZoneNumbers(std::set<int>& usedNums)const
 		if (vtkPropCollection *pPropCollection = (*iter))
 		{
 			vtkProp *pProp = 0;
-			pPropCollection->InitTraversal();
-			for (; (pProp = pPropCollection->GetNextProp()); )
+			vtkCollectionSimpleIterator csi;
+			pPropCollection->InitTraversal(csi);
+			for (; (pProp = pPropCollection->GetNextProp(csi)); )
 			{
 				if ((pZoneActor = CZoneActor::SafeDownCast(pProp)) && (pZoneActor->GetChopType() == srcWedgeSource::CHOP_NONE))
 				{
@@ -2045,8 +2186,9 @@ void CWPhastDoc::GetUsedWedgeNumbers(std::set<int>& usedNums)const
 		if (vtkPropCollection *pPropCollection = (*iter))
 		{
 			vtkProp *pProp = 0;
-			pPropCollection->InitTraversal();
-			for (; (pProp = pPropCollection->GetNextProp()); )
+			vtkCollectionSimpleIterator csi;
+			pPropCollection->InitTraversal(csi);
+			for (; (pProp = pPropCollection->GetNextProp(csi)); )
 			{
 				if ((pZoneActor = CZoneActor::SafeDownCast(pProp)) && (pZoneActor->GetChopType() != srcWedgeSource::CHOP_NONE))
 				{
@@ -2083,8 +2225,9 @@ void CWPhastDoc::GetUsedPrismNumbers(std::set<int>& usedNums)const
 		if (vtkPropCollection *pPropCollection = (*iter))
 		{
 			vtkProp *pProp = 0;
-			pPropCollection->InitTraversal();
-			for (; (pProp = pPropCollection->GetNextProp()); )
+			vtkCollectionSimpleIterator csi;
+			pPropCollection->InitTraversal(csi);
+			for (; (pProp = pPropCollection->GetNextProp(csi)); )
 			{
 				if ((pZoneActor = CZoneActor::SafeDownCast(pProp)))
 				{
@@ -2113,8 +2256,9 @@ void CWPhastDoc::GetUsedZoneFlowRates(std::set<int>& usedNums)const
 	if (vtkPropCollection *pPropCollection = this->GetPropAssemblyZoneFlowRates()->GetParts())
 	{
 		vtkProp *pProp = 0;
-		pPropCollection->InitTraversal();
-		for (; (pProp = pPropCollection->GetNextProp()); )
+		vtkCollectionSimpleIterator csi;
+		pPropCollection->InitTraversal(csi);
+		for (; (pProp = pPropCollection->GetNextProp(csi)); )
 		{
 			if (CZoneFlowRateZoneActor *pActor = CZoneFlowRateZoneActor::SafeDownCast(pProp))
 			{
@@ -2144,8 +2288,9 @@ void CWPhastDoc::DataSourcePathsRelativeToAbsolute(LPCTSTR lpszPathName)
 		if (vtkPropCollection *pPropCollection = (*iter))
 		{
 			vtkProp *pProp = 0;
-			pPropCollection->InitTraversal();
-			for (; (pProp = pPropCollection->GetNextProp()); )
+			vtkCollectionSimpleIterator csi;
+			pPropCollection->InitTraversal(csi);
+			for (; (pProp = pPropCollection->GetNextProp(csi)); )
 			{
 				if ((pZoneActor = CZoneActor::SafeDownCast(pProp)))
 				{
@@ -2217,8 +2362,9 @@ void CWPhastDoc::DataSourcePathsAbsoluteToRelative(LPCTSTR lpszPathName)
 		if (vtkPropCollection *pPropCollection = (*iter))
 		{
 			vtkProp *pProp = 0;
-			pPropCollection->InitTraversal();
-			for (; (pProp = pPropCollection->GetNextProp()); )
+			vtkCollectionSimpleIterator csi;
+			pPropCollection->InitTraversal(csi);
+			for (; (pProp = pPropCollection->GetNextProp(csi)); )
 			{
 				if ((pZoneActor = CZoneActor::SafeDownCast(pProp)))
 				{
@@ -2451,7 +2597,8 @@ void CWPhastDoc::OnFileImport()
 			::AfxMessageBox("An error occured during the import", MB_OK);
 			this->SetModifiedFlag(FALSE);
 		}
-		this->ResetCamera();
+// COMMENT: {9/10/2009 10:39:36 PM}		this->ResetCamera();
+		this->ExecutePipeline();
 	}
 	if (CPropertyTreeControlBar *pPropertyTreeControlBar = this->GetPropertyTreeControlBar())
 	{
@@ -2525,8 +2672,6 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 	::_tfullpath(szFullpath, lpszPathName, MAX_PATH);
 
 	std::ifstream ifs;
-// COMMENT: {12/4/2008 4:10:48 PM}	ifs.open(lpszPathName);
-// COMMENT: {12/4/2008 4:04:45 PM}	ifs.open(szFullpath);
 	ifs.open(szTitle);
 	if (!ifs.is_open())
 	{
@@ -2568,32 +2713,31 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 		for (int i = 0; i < ::count_grid_elt_zones; ++i)
 		{
 			const struct grid_elt* grid_elt_ptr = ::grid_elt_zones[i];
-			grid_elt_map[grid_elt_ptr] = grid_elt_ptr->polyh->clone();
+			grid_elt_map[grid_elt_ptr] = grid_elt_ptr->polyh ? grid_elt_ptr->polyh->clone() : 0;
 		}
 		// BC zones
 		for (int i = 0; i < ::count_bc; ++i)
 		{
 			const struct BC* bc_ptr = ::bc[i];
-			bc_map[bc_ptr] = bc_ptr->polyh->clone();
+			bc_map[bc_ptr] = bc_ptr->polyh ? bc_ptr->polyh->clone() : 0;
 		}
 		// Zone_budget zones
 		std::map<int, Zone_budget*>::iterator zit = Zone_budget::zone_budget_map.begin();
 		for (; zit != Zone_budget::zone_budget_map.end(); ++zit)
 		{
-			ASSERT(zit->second->Get_polyh());
-			zb_map[zit->second] = zit->second->Get_polyh()->clone();
+			zb_map[zit->second] = zit->second->Get_polyh() ? zit->second->Get_polyh()->clone() : 0;
 		}
 		// IC zones
 		for (int i = 0; i < ::count_head_ic; ++i)
 		{
 			const struct Head_ic* head_ic_ptr = ::head_ic[i];
-			head_ic_map[head_ic_ptr] = head_ic_ptr->polyh->clone();
+			head_ic_map[head_ic_ptr] = head_ic_ptr->polyh ? head_ic_ptr->polyh->clone() : 0;
 		}
 		// CHEMISTRY_IC
 		for (int i = 0; i < ::count_chem_ic; ++i)
 		{
 			const struct chem_ic* chem_ic_ptr = ::chem_ic[i];
-			chem_ic_map[chem_ic_ptr] = chem_ic_ptr->polyh->clone();
+			chem_ic_map[chem_ic_ptr] = chem_ic_ptr->polyh ? chem_ic_ptr->polyh->clone() : 0;
 		}
 		pInput->Accumulate(false);
 		///pInput->Load();
@@ -2710,10 +2854,14 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 					continue;
 				}
 			}
+
+			// store pre-translated polyh
 			CGridElt data(*grid_elt_ptr);
 			std::auto_ptr<Polyhedron> ap(data.polyh);
 			ASSERT(grid_elt_map.find(grid_elt_ptr) != grid_elt_map.end());
-			data.polyh = grid_elt_map[grid_elt_ptr]->clone();
+			data.polyh = grid_elt_map[grid_elt_ptr] ? grid_elt_map[grid_elt_ptr]->clone() : grid_elt_ptr->polyh->clone();
+
+			// not undoable
 			std::auto_ptr< CZoneCreateAction<CMediaZoneActor> > pAction(
 				new CZoneCreateAction<CMediaZoneActor>(
 					this,
@@ -2739,7 +2887,7 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 			CBC data(*bc_ptr);
 			std::auto_ptr<Polyhedron> ap(data.polyh);
 			ASSERT(bc_map.find(bc_ptr) != bc_map.end());
-			data.polyh = bc_map[bc_ptr]->clone();
+			data.polyh = bc_map[bc_ptr] ? bc_map[bc_ptr]->clone() : bc_ptr->polyh->clone();
 
 			// not undoable
 			std::auto_ptr< CZoneCreateAction<CBCZoneActor> > pAction(
@@ -2794,7 +2942,7 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 			delete pAction;
 		}
 
-		// ZONE_FLOW_RATES
+		// ZONE_FLOW
 		//
 		std::map<int, Zone_budget*>::iterator it = Zone_budget::zone_budget_map.begin();
 		for (; it != Zone_budget::zone_budget_map.end(); ++it)
@@ -2802,20 +2950,28 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 			// store pre-translated polyh
 			Zone_budget data(*it->second);
 			ASSERT(zb_map.find(it->second) != zb_map.end());
-			data.Set_polyh(zb_map[it->second]->clone());
+			ASSERT(zb_map[it->second] || it->second->Get_polyh());
+			if (zb_map[it->second] == 0 && it->second->Get_polyh() == 0)
+			{
+				::AfxMessageBox("Warning: Empty ZONE_FLOW Not Implemented");
+			}
+			else
+			{
+				data.Set_polyh(zb_map[it->second] ? zb_map[it->second]->clone() : it->second->Get_polyh()->clone());
 
-			// not undoable
-			std::auto_ptr< CZoneCreateAction<CZoneFlowRateZoneActor> > pAction(
-				new CZoneCreateAction<CZoneFlowRateZoneActor>(
-					this,
-					it->second->Get_polyh(),
-					::grid_origin,
-					::grid_angle,
-					it->second->Get_polyh()->Get_description()->c_str()
-					)
-				);
-			pAction->GetZoneActor()->SetData(data);
-			pAction->Execute();
+				// not undoable
+				std::auto_ptr< CZoneCreateAction<CZoneFlowRateZoneActor> > pAction(
+					new CZoneCreateAction<CZoneFlowRateZoneActor>(
+						this,
+						it->second->Get_polyh(),
+						::grid_origin,
+						::grid_angle,
+						it->second->Get_polyh()->Get_description()->c_str()
+						)
+					);
+				pAction->GetZoneActor()->SetData(data);
+				pAction->Execute();
+			}
 		}
 
 		// IC
@@ -2838,7 +2994,7 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 			CHeadIC data(*head_ic_ptr);
 			std::auto_ptr<Polyhedron> ap(data.polyh);
 			ASSERT(head_ic_map.find(head_ic_ptr) != head_ic_map.end());
-			data.polyh = head_ic_map[head_ic_ptr]->clone();
+			data.polyh = head_ic_map[head_ic_ptr] ? head_ic_map[head_ic_ptr]->clone() : head_ic_ptr->polyh->clone();
 
 			// not undoable
 			std::auto_ptr< CZoneCreateAction<CICHeadZoneActor> > pAction(
@@ -2896,7 +3052,7 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 			CChemIC data(*chem_ic_ptr);
 			std::auto_ptr<Polyhedron> ap(data.polyh);
 			ASSERT(chem_ic_map.find(chem_ic_ptr) != chem_ic_map.end());
-			data.polyh = chem_ic_map[chem_ic_ptr]->clone();
+			data.polyh = chem_ic_map[chem_ic_ptr] ? chem_ic_map[chem_ic_ptr]->clone() : chem_ic_ptr->polyh->clone();
 
 			// not undoable
 			std::auto_ptr< CZoneCreateAction<CICChemZoneActor> > pAction(
@@ -3216,7 +3372,7 @@ BOOL CWPhastDoc::WriteTransDat(std::ostream& os)
 		}
 	}
 
-	// ZONE_FLOW_RATES
+	// ZONE_FLOW
 	CTreeCtrlNode nodeZoneFlowRates = this->GetPropertyTreeControlBar()->GetZoneFlowRatesNode();
 	nCount = nodeZoneFlowRates.GetChildCount();
 	for (int i = 0; i < nCount; ++i)
@@ -3344,10 +3500,11 @@ void CWPhastDoc::SetUnits(const CUnits& units)
 	//
 	if (vtkPropCollection* pCollection = this->GetPropCollection())
 	{
-		pCollection->InitTraversal();
+		vtkCollectionSimpleIterator csi;
+		pCollection->InitTraversal(csi);
 		for (int i = 0; i < pCollection->GetNumberOfItems(); ++i)
 		{
-			vtkProp* prop = pCollection->GetNextProp();
+			vtkProp* prop = pCollection->GetNextProp(csi);
 			if (CZoneActor *pZone = CZoneActor::SafeDownCast(prop))
 			{
 				ASSERT(FALSE);
@@ -3358,8 +3515,9 @@ void CWPhastDoc::SetUnits(const CUnits& units)
 				if (vtkPropCollection *pPropCollection = pPropAssembly->GetParts())
 				{
 					vtkProp *pProp;
-					pPropCollection->InitTraversal();
-					for (; (pProp = pPropCollection->GetNextProp()); )
+					vtkCollectionSimpleIterator c2;
+					pPropCollection->InitTraversal(c2);
+					for (; (pProp = pPropCollection->GetNextProp(c2)); )
 					{
 						if (vtkProp3D *prop3D = vtkProp3D::SafeDownCast(pProp))
 						{
@@ -3391,7 +3549,7 @@ void CWPhastDoc::SetUnits(const CUnits& units)
 
 		// resize the widgets
 		//
-		if (vtkAbstractPropPicker *picker = vtkAbstractPropPicker::SafeDownCast( pView->GetRenderWindowInteractor()->GetPicker() ))
+		if (vtkAbstractPropPicker *picker = vtkAbstractPropPicker::SafeDownCast( pView->GetInteractor()->GetPicker() ))
 		{
 			if (vtkProp3D* prop = picker->GetProp3D())
 			{
@@ -3415,10 +3573,15 @@ void CWPhastDoc::SetUnits(const CUnits& units)
 void CWPhastDoc::New(const CNewModel& model)
 {
 	ASSERT(this->m_pGridActor);
-	ASSERT(this->m_pAxesActor);
+	ASSERT(this->AxesActor);
 	ASSERT(this->m_pPropCollection);
 	ASSERT(this->m_pimpl);
 	ASSERT(this->m_pUnits);
+
+	if (vtkPropCollection *props = this->GetPropCollection())
+	{
+		ASSERT(props->GetNumberOfItems() == 0);
+	}
 
 	// set FlowOnly
 	// set SteadyFlow
@@ -3451,34 +3614,31 @@ void CWPhastDoc::New(const CNewModel& model)
 
 	// set the axes
 	//
-	vtkFloatingPointType *bounds = this->GetGridBounds();
-	vtkFloatingPointType defaultAxesSize = (bounds[1]-bounds[0] + bounds[3]-bounds[2] + bounds[5]-bounds[4])/12;
-	this->m_pAxesActor->SetDefaultPositions(bounds);
-	this->m_pAxesActor->SetDefaultSize(defaultAxesSize);
-	this->m_pAxesActor->SetDefaultTubeDiameter(defaultAxesSize * 0.1);
-	this->m_pPropCollection->AddItem(this->m_pAxesActor);
+	double *bounds = this->GetGridBounds();
+	double defaultAxesSize = (bounds[1]-bounds[0] + bounds[3]-bounds[2] + bounds[5]-bounds[4])/12;
+	this->AxesActor->SetDefaultPositions(bounds);
+	this->AxesActor->SetDefaultSize(defaultAxesSize);
+	this->AxesActor->SetDefaultTubeDiameter(defaultAxesSize * 0.1);
+	this->m_pPropCollection->AddItem(this->AxesActor);
 
 	// create the default zones
 	//
 	CZone zone;
 	this->m_pGridActor->GetDefaultZone(zone);
-	Cube cube(&zone);
+	Domain domain(&zone, PHAST_Transform::GRID);
 
 	// default media
 	//
 	CZoneCreateAction<CMediaZoneActor>* pMediaAction = new CZoneCreateAction<CMediaZoneActor>(
 		this,
 		"Default",
-		&cube,
+		&domain,
 		NULL
 		);
-	//{{
 	CGridElt media(model.m_media);
 	ASSERT(media.polyh == NULL);
-	media.polyh = cube.clone();
+	media.polyh = domain.clone();
 	pMediaAction->GetZoneActor()->SetData(media);
-	//}}
-// COMMENT: {10/31/2008 9:00:31 PM}	pMediaAction->GetZoneActor()->SetData(model.m_media);
 	pMediaAction->GetZoneActor()->SetDefault(true);
 	pMediaAction->Execute();
 	delete pMediaAction;
@@ -3488,7 +3648,7 @@ void CWPhastDoc::New(const CNewModel& model)
 	CZoneCreateAction<CICHeadZoneActor>* pICHeadAction = new CZoneCreateAction<CICHeadZoneActor>(
 		this,
 		"Default",
-		&cube,
+		&domain,
 		NULL
 		);
 	pICHeadAction->GetZoneActor()->SetData(model.m_headIC);
@@ -3500,7 +3660,7 @@ void CWPhastDoc::New(const CNewModel& model)
 	CZoneCreateAction<CICChemZoneActor>* pChemICAction = new CZoneCreateAction<CICChemZoneActor>(
 		this,
 		"Default",
-		&cube,
+		&domain,
 		NULL
 		);
 	pChemICAction->GetZoneActor()->SetData(model.m_chemIC);
@@ -3515,13 +3675,23 @@ void CWPhastDoc::New(const CNewModel& model)
 		pTree->SetTimeControl2(&this->m_pModel->m_timeControl2);
 	}
 
-	if (model.HasSiteMap())
+	if (model.HasSiteMap2())
 	{
 		ASSERT(this->m_pMapActor == NULL);
 		this->m_pMapActor = CMapActor::New();   // Note pixel(0,0) is the same size as all other pixels
-		this->m_pMapActor->SetSiteMap(model.GetSiteMap());
+// COMMENT: {8/11/2009 3:07:31 PM}		//{{
+// COMMENT: {8/11/2009 3:07:31 PM}		this->m_pMapActor->GetProperty()->SetOpacity(0.3);
+// COMMENT: {8/11/2009 3:07:31 PM}		//}}
+		this->m_pMapActor->SetSiteMap2(model.GetSiteMap2());
 		this->m_pMapActor->SetPickable(0);
 		this->GetPropCollection()->AddItem(this->m_pMapActor);
+// COMMENT: {8/10/2009 6:02:25 PM}		//{{
+// COMMENT: {8/10/2009 6:02:25 PM}		this->MapImageActor3 = CMapImageActor3::New();
+// COMMENT: {8/10/2009 6:02:25 PM}		this->MapImageActor3->SetFileName(model.GetSiteMap().m_fileName.c_str());
+// COMMENT: {8/10/2009 6:02:25 PM}		this->MapImageActor3->SetWorldTransform(model.GetSiteMap().GetWorldTransform());
+// COMMENT: {8/10/2009 6:02:25 PM}		this->MapImageActor3->SetPickable(1);
+// COMMENT: {8/10/2009 6:02:25 PM}		this->GetPropCollection()->AddItem(this->MapImageActor3);
+// COMMENT: {8/10/2009 6:02:25 PM}		//}}
 	}
 
 	// reset tree control
@@ -3546,10 +3716,11 @@ void CWPhastDoc::New(const CNewModel& model)
 		pBar->Set(pView, 0, this->GetUnits());
 	}
 
-	// refresh screen
-	//
-	this->ResetCamera();
-	this->UpdateAllViews(0);
+// COMMENT: {9/4/2009 9:16:25 PM}	// refresh screen
+// COMMENT: {9/4/2009 9:16:25 PM}	//
+// COMMENT: {9/4/2009 9:16:25 PM}	this->ResetCamera();
+// COMMENT: {9/4/2009 9:16:25 PM}	this->UpdateAllViews(0);
+// COMMENT: {9/9/2009 9:26:21 PM}	this->ExecutePipeline();
 }
 
 void CWPhastDoc::OnFileRun()
@@ -3736,7 +3907,7 @@ void CWPhastDoc::ReleaseGraphicsResources(vtkProp* pProp)
 
 void CWPhastDoc::OnUpdateViewAxes(CCmdUI *pCmdUI)
 {
-	if (this->m_pAxesActor->GetVisibility())
+	if (this->AxesActor->GetVisibility())
 	{
 		pCmdUI->SetCheck(1);
 	}
@@ -3748,29 +3919,30 @@ void CWPhastDoc::OnUpdateViewAxes(CCmdUI *pCmdUI)
 
 void CWPhastDoc::OnViewAxes()
 {
-	if (this->m_pAxesActor->GetVisibility())
+	if (this->AxesActor->GetVisibility())
 	{
-		this->m_pAxesActor->SetVisibility(0);
+		this->AxesActor->SetVisibility(0);
 	}
 	else
 	{
-		this->m_pAxesActor->SetVisibility(1);
+		this->AxesActor->SetVisibility(1);
 	}
 	this->UpdateAllViews(0);
 }
 
 void CWPhastDoc::OnUpdateSetprojectiontoParallel(CCmdUI *pCmdUI)
 {
-	pCmdUI->SetCheck(this->m_ProjectionMode == PT_PARALLEL);
+	pCmdUI->SetCheck(this->ProjectionMode == PT_PARALLEL);
 }
 
 void CWPhastDoc::OnSetprojectiontoParallel()
 {
-	this->m_ProjectionMode = PT_PARALLEL;
+	this->ProjectionMode = PT_PARALLEL;
 	// update views
 	//
 	POSITION pos = this->GetFirstViewPosition();
-	while (pos != NULL) {
+	while (pos != NULL)
+	{
 		CWPhastView *pView = (CWPhastView*) GetNextView(pos);
 		ASSERT_VALID(pView);
 		pView->ParallelProjectionOn();
@@ -3780,17 +3952,18 @@ void CWPhastDoc::OnSetprojectiontoParallel()
 
 void CWPhastDoc::OnUpdateSetprojectiontoPerspective(CCmdUI *pCmdUI)
 {
-	pCmdUI->SetCheck(this->m_ProjectionMode == PT_PERSPECTIVE);
+	pCmdUI->SetCheck(this->ProjectionMode == PT_PERSPECTIVE);
 }
 
 void CWPhastDoc::OnSetprojectiontoPerspective()
 {
-	this->m_ProjectionMode = PT_PERSPECTIVE;
+	this->ProjectionMode = PT_PERSPECTIVE;
 
 	// update views
 	//
 	POSITION pos = this->GetFirstViewPosition();
-	while (pos != NULL) {
+	while (pos != NULL)
+	{
 		CWPhastView *pView = (CWPhastView*) GetNextView(pos);
 		ASSERT_VALID(pView);
 		pView->ParallelProjectionOff();
@@ -4155,34 +4328,51 @@ void CWPhastDoc::OnBCZonesUnselectAll()
 
 void CWPhastDoc::ClearSelection(void)
 {
-	// clear selected river points
-	//
-	vtkPropCollection *pRiverPropCollection = this->GetPropAssemblyRivers()->GetParts();
-	pRiverPropCollection->InitTraversal();
-	vtkProp* pRiverProp = pRiverPropCollection->GetNextProp();
-	for (; pRiverProp; pRiverProp = pRiverPropCollection->GetNextProp())
+	POSITION pos = this->GetFirstViewPosition();
+	while (pos != NULL)
 	{
-		if (CRiverActor *pActor = CRiverActor::SafeDownCast(pRiverProp))
+		CWPhastView *pView = (CWPhastView*) this->GetNextView(pos);
+		ASSERT_VALID(pView);
+		vtkRenderWindowInteractor *iren = pView->GetInteractor();
+
+		// clear selected river points
+		//
+		vtkPropCollection *pRiverPropCollection = this->GetPropAssemblyRivers()->GetParts();
+		vtkCollectionSimpleIterator rcsi;
+		pRiverPropCollection->InitTraversal(rcsi);
+		vtkProp* pRiverProp = pRiverPropCollection->GetNextProp(rcsi);
+		for (; pRiverProp; pRiverProp = pRiverPropCollection->GetNextProp(rcsi))
 		{
-			pActor->ClearSelection();
-			pActor->SetEnabled(0);
+			if (CRiverActor *pActor = CRiverActor::SafeDownCast(pRiverProp))
+			{
+				pActor->ClearSelection();
+				if (pActor->GetInteractor())
+				{
+					pActor->SetInteractor(iren);
+					pActor->SetEnabled(0);
+				}
+			}
+		}
+
+		// clear selected drain points  -- TODO river and drain move to Notify()
+		//
+		vtkPropCollection *pDrainPropCollection = this->GetPropAssemblyDrains()->GetParts();
+		vtkCollectionSimpleIterator dcsi;
+		pDrainPropCollection->InitTraversal(dcsi);
+		vtkProp* pDrainProp = pDrainPropCollection->GetNextProp(dcsi);
+		for (; pDrainProp; pDrainProp = pDrainPropCollection->GetNextProp(dcsi))
+		{
+			if (CDrainActor *pActor = CDrainActor::SafeDownCast(pDrainProp))
+			{
+				pActor->ClearSelection();
+				if (pActor->GetInteractor())
+				{
+					pActor->SetInteractor(iren);
+					pActor->SetEnabled(0);
+				}
+			}
 		}
 	}
-
-	// clear selected drain points  -- TODO river and drain move to Notify()
-	//
-	vtkPropCollection *pDrainPropCollection = this->GetPropAssemblyDrains()->GetParts();
-	pDrainPropCollection->InitTraversal();
-	vtkProp* pDrainProp = pDrainPropCollection->GetNextProp();
-	for (; pDrainProp; pDrainProp = pDrainPropCollection->GetNextProp())
-	{
-		if (CDrainActor *pActor = CDrainActor::SafeDownCast(pDrainProp))
-		{
-			pActor->ClearSelection();
-			pActor->SetEnabled(0);
-		}
-	}
-
 
 	// Notify
 	//
@@ -4216,7 +4406,7 @@ void CWPhastDoc::InternalAdd(CZoneActor *pZoneActor, bool bAdd, HTREEITEM hInser
 
 	// set scale
 	//
-	vtkFloatingPointType *scale = this->GetScale();
+	double *scale = this->GetScale();
 	pZoneActor->SetScale(scale[0], scale[1], scale[2]);
 
 	// add to document
@@ -4250,10 +4440,6 @@ void CWPhastDoc::InternalAdd(CZoneActor *pZoneActor, bool bAdd, HTREEITEM hInser
 	{
 		this->Notify(0, WPN_SELCHANGED, 0, pZoneActor);
 	}
-	else
-	{
-		this->Notify(0, WPN_SELCHANGED, 0, 0);
-	}
 
 	// render
 	//
@@ -4265,7 +4451,8 @@ void CWPhastDoc::InternalDelete(CZoneActor *pZoneActor, bool bDelete)
 	ASSERT(pZoneActor);
 	if (pZoneActor == NULL) return;
 
-	if (bDelete) {
+	if (bDelete)
+	{
 		// make sure pZoneActor ref count doesn't go to zero
 		//
 		ASSERT(this->m_pRemovedPropCollection);
@@ -4294,7 +4481,8 @@ void CWPhastDoc::InternalDelete(CZoneActor *pZoneActor, bool bDelete)
 
 			// Update BoxPropertiesDialogBar
 			//
-			if (CBoxPropertiesDialogBar* pBar = static_cast<CBoxPropertiesDialogBar*>(  ((CFrameWnd*)::AfxGetMainWnd())->GetControlBar(IDW_CONTROLBAR_BOXPROPS) ) ) {
+			if (CBoxPropertiesDialogBar* pBar = static_cast<CBoxPropertiesDialogBar*>(  ((CFrameWnd*)::AfxGetMainWnd())->GetControlBar(IDW_CONTROLBAR_BOXPROPS) ) )
+			{
 				pBar->Set(pWPhastView, NULL, this->GetUnits());
 			}
 		}
@@ -4302,7 +4490,8 @@ void CWPhastDoc::InternalDelete(CZoneActor *pZoneActor, bool bDelete)
 
 	// remove from property tree
 	//
-	if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar()) {
+	if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar())
+	{
 		pTree->RemoveZone(pZoneActor);
 	}
 
@@ -4319,7 +4508,7 @@ void CWPhastDoc::Add(CWellActor *pWellActor, HTREEITEM hInsertAfter)
 
 	// set scale
 	//
-	vtkFloatingPointType *scale = this->GetScale();
+	double *scale = this->GetScale();
 	pWellActor->SetScale(scale[0], scale[1], scale[2]);
 
 	// set height
@@ -4330,7 +4519,7 @@ void CWPhastDoc::Add(CWellActor *pWellActor, HTREEITEM hInsertAfter)
 
 	// set radius
 	//
-	vtkFloatingPointType *bounds = this->GetGridBounds();
+	double *bounds = this->GetGridBounds();
 	float defaultAxesSize = (bounds[1]-bounds[0] + bounds[3]-bounds[2] + bounds[5]-bounds[4])/12;
 	pWellActor->SetDefaultTubeDiameter(defaultAxesSize * 0.17 / sqrt(scale[0] * scale[1]));
 
@@ -4340,10 +4529,8 @@ void CWPhastDoc::Add(CWellActor *pWellActor, HTREEITEM hInsertAfter)
 	{
 		ASSERT(!pPropAssembly->GetParts()->IsItemPresent(pWellActor));
 		pPropAssembly->AddPart(pWellActor);
-		if (!this->GetPropCollection()->IsItemPresent(pPropAssembly))
-		{
-			this->GetPropCollection()->AddItem(pPropAssembly);
-		}
+		ASSERT(pPropAssembly->GetParts()->IsItemPresent(pWellActor));
+		this->AddPropAssembly(pPropAssembly);
 	}
 
 	// add to property tree
@@ -4394,8 +4581,8 @@ void CWPhastDoc::Remove(CWellActor *pWellActor)
 
 	// validate actor
 	//
-	vtkFloatingPointType *scale = this->GetScale();
-	vtkFloatingPointType *wellscale = pWellActor->GetScale();
+	double *scale = this->GetScale();
+	double *wellscale = pWellActor->GetScale();
 	ASSERT(wellscale[0] == scale[0]);
 	ASSERT(wellscale[1] == scale[1]);
 	ASSERT(wellscale[2] == scale[2]);
@@ -4441,8 +4628,8 @@ void CWPhastDoc::UnRemove(CWellActor *pWellActor)
 
 	// verify scale
 	//
-	vtkFloatingPointType *scale = this->GetScale();
-	vtkFloatingPointType *wellscale = pWellActor->GetScale();
+	double *scale = this->GetScale();
+	double *wellscale = pWellActor->GetScale();
 	ASSERT(wellscale[0] == scale[0]);
 	ASSERT(wellscale[1] == scale[1]);
 	ASSERT(wellscale[2] == scale[2]);
@@ -4704,7 +4891,10 @@ VARIANT CWPhastDoc::Import(const VARIANT& FileName)
 			vaResult.boolVal = VARIANT_TRUE;
 			this->SetModifiedFlag(FALSE);
 		}
-		this->ResetCamera();
+		if (::AfxGetMainWnd()->IsWindowVisible())
+		{
+			this->ExecutePipeline();
+		}
 	}
 
 	return vaResult;
@@ -4730,7 +4920,7 @@ void CWPhastDoc::Add(CRiverActor *pRiverActor, HTREEITEM hInsertAfter)
 
 	// set scale
 	//
-	vtkFloatingPointType *scale = this->GetScale();
+	double *scale = this->GetScale();
 	pRiverActor->SetScale(scale[0], scale[1], scale[2]);
 
 	// set radius
@@ -4739,7 +4929,6 @@ void CWPhastDoc::Add(CRiverActor *pRiverActor, HTREEITEM hInsertAfter)
 
 	// set z
 	//
-// COMMENT: {6/22/2005 5:50:09 PM}	vtkFloatingPointType *bounds = this->GetGridBounds();
 	CGrid x, y, z;
 	this->GetGrid(x, y, z);
 	z.Setup();
@@ -4752,7 +4941,7 @@ void CWPhastDoc::Add(CRiverActor *pRiverActor, HTREEITEM hInsertAfter)
 	{
 		CWPhastView *pView = (CWPhastView*) GetNextView(pos);
 		ASSERT_VALID(pView);
-		pRiverActor->SetInteractor(pView->GetRenderWindowInteractor());
+		pRiverActor->SetInteractor(pView->GetInteractor());
 		pRiverActor->SetEnabled(0);
 	}
 
@@ -4763,10 +4952,7 @@ void CWPhastDoc::Add(CRiverActor *pRiverActor, HTREEITEM hInsertAfter)
 		ASSERT(!pPropAssembly->GetParts()->IsItemPresent(pRiverActor));
 		pPropAssembly->AddPart(pRiverActor);
 		ASSERT(pPropAssembly->GetParts()->IsItemPresent(pRiverActor));
-		if (!this->GetPropCollection()->IsItemPresent(pPropAssembly))
-		{
-			this->GetPropCollection()->AddItem(pPropAssembly);
-		}
+		this->AddPropAssembly(pPropAssembly);
 	}
 
 	// add to property tree
@@ -4801,10 +4987,13 @@ void CWPhastDoc::UnAdd(CRiverActor *pRiverActor)
 		ASSERT(pPropAssembly->GetParts()->IsItemPresent(pRiverActor));
 		pPropAssembly->RemovePart(pRiverActor);
 		ASSERT(!pPropAssembly->GetParts()->IsItemPresent(pRiverActor));
-		// VTK HACK
-		// This is req'd because ReleaseGraphicsResources is not called when
-		// vtkPropAssembly::RemovePart(vtkProp *prop) is called
-		this->ReleaseGraphicsResources(pRiverActor);
+// COMMENT: {9/23/2009 8:24:23 PM}		// VTK HACK
+// COMMENT: {9/23/2009 8:24:23 PM}		// This is req'd because ReleaseGraphicsResources is not called when
+// COMMENT: {9/23/2009 8:24:23 PM}		// vtkPropAssembly::RemovePart(vtkProp *prop) is called
+// COMMENT: {9/23/2009 8:24:23 PM}		this->ReleaseGraphicsResources(pRiverActor);
+		//{{
+		pRiverActor->SetInteractor(0);
+		//}}
 	}
 
 	// remove from property tree
@@ -4831,8 +5020,8 @@ void CWPhastDoc::Remove(CRiverActor *pRiverActor)
 
 	// validate actor
 	//
-	vtkFloatingPointType *scale = this->GetScale();
-	vtkFloatingPointType *riverscale = pRiverActor->GetScale();
+	double *scale = this->GetScale();
+	double *riverscale = pRiverActor->GetScale();
 // COMMENT: {7/20/2009 8:33:12 PM}	ASSERT(riverscale[0] == scale[0]);
 // COMMENT: {7/20/2009 8:33:12 PM}	ASSERT(riverscale[1] == scale[1]);
 // COMMENT: {7/20/2009 8:33:12 PM}	ASSERT(riverscale[2] == scale[2]);
@@ -4878,8 +5067,8 @@ void CWPhastDoc::UnRemove(CRiverActor *pRiverActor)
 
 	// verify scale
 	//
-	vtkFloatingPointType *scale = this->GetScale();
-	vtkFloatingPointType *riverscale = pRiverActor->GetScale();
+	double *scale = this->GetScale();
+	double *riverscale = pRiverActor->GetScale();
 // COMMENT: {7/20/2009 8:33:36 PM}	ASSERT(riverscale[0] == scale[0]);
 // COMMENT: {7/20/2009 8:33:36 PM}	ASSERT(riverscale[1] == scale[1]);
 // COMMENT: {7/20/2009 8:33:36 PM}	ASSERT(riverscale[2] == scale[2]);
@@ -4924,8 +5113,8 @@ void CWPhastDoc::Remove(CDrainActor *pDrainActor)
 
 	// validate actor
 	//
-	vtkFloatingPointType *scale = this->GetScale();
-	vtkFloatingPointType *riverscale = pDrainActor->GetScale();
+	double *scale = this->GetScale();
+	double *riverscale = pDrainActor->GetScale();
 // COMMENT: {7/20/2009 8:34:20 PM}	ASSERT(riverscale[0] == scale[0]);
 // COMMENT: {7/20/2009 8:34:20 PM}	ASSERT(riverscale[1] == scale[1]);
 // COMMENT: {7/20/2009 8:34:20 PM}	ASSERT(riverscale[2] == scale[2]);
@@ -4971,8 +5160,8 @@ void CWPhastDoc::UnRemove(CDrainActor *pDrainActor)
 
 	// verify scale
 	//
-	vtkFloatingPointType *scale = this->GetScale();
-	vtkFloatingPointType *riverscale = pDrainActor->GetScale();
+	double *scale = this->GetScale();
+	double *riverscale = pDrainActor->GetScale();
 // COMMENT: {7/20/2009 8:34:29 PM}	ASSERT(riverscale[0] == scale[0]);
 // COMMENT: {7/20/2009 8:34:29 PM}	ASSERT(riverscale[1] == scale[1]);
 // COMMENT: {7/20/2009 8:34:29 PM}	ASSERT(riverscale[2] == scale[2]);
@@ -5083,23 +5272,26 @@ CGridKeyword CWPhastDoc::GetGridKeyword(void)const
 void CWPhastDoc::SetGridKeyword(const CGridKeyword& gridKeyword)
 {
 	this->m_pGridActor->SetGridKeyword(gridKeyword, this->GetUnits());
-	this->ResizeGrid(gridKeyword.m_grid[0], gridKeyword.m_grid[1], gridKeyword.m_grid[2]);
+// COMMENT: {8/19/2009 4:35:52 PM}	this->ResizeGrid(gridKeyword.m_grid[0], gridKeyword.m_grid[1], gridKeyword.m_grid[2]);
+	this->ResizeGrid(gridKeyword);
 
 	// set grid for all zones
 	//
 	if (vtkPropCollection* pCollection = this->GetPropCollection())
 	{
-		pCollection->InitTraversal();
+		vtkCollectionSimpleIterator csi;
+		pCollection->InitTraversal(csi);
 		for (int i = 0; i < pCollection->GetNumberOfItems(); ++i)
 		{
-			vtkProp* prop = pCollection->GetNextProp();
+			vtkProp* prop = pCollection->GetNextProp(csi);
 			if (vtkPropAssembly *pPropAssembly = vtkPropAssembly::SafeDownCast(prop))
 			{
 				if (vtkPropCollection *pPropCollection = pPropAssembly->GetParts())
 				{
 					vtkProp *pProp;
-					pPropCollection->InitTraversal();
-					for (; (pProp = pPropCollection->GetNextProp()); )
+					vtkCollectionSimpleIterator pcsi;
+					pPropCollection->InitTraversal(pcsi);
+					for (; (pProp = pPropCollection->GetNextProp(pcsi)); )
 					{
 						if (vtkProp3D *prop3D = vtkProp3D::SafeDownCast(pProp))
 						{
@@ -5259,19 +5451,19 @@ void CWPhastDoc::UpdateGridDomain(void)
 {
 	// get scale
 	//
-	vtkFloatingPointType *scale = this->GetScale();
+	double *scale = this->GetScale();
 
 	// get bounds
 	//
-	vtkFloatingPointType bounds[6];
+	double bounds[6];
 	this->m_pGridActor->GetBounds(bounds);
 	float defaultAxesSize = (bounds[1]-bounds[0] + bounds[3]-bounds[2] + bounds[5]-bounds[4])/12;
 
 	// reset the axes
 	//
-	this->m_pAxesActor->SetDefaultPositions(bounds);
-	this->m_pAxesActor->SetDefaultSize(defaultAxesSize);
-	this->m_pAxesActor->SetDefaultTubeDiameter(defaultAxesSize * 0.1);
+	this->AxesActor->SetDefaultPositions(bounds);
+	this->AxesActor->SetDefaultSize(defaultAxesSize);
+	this->AxesActor->SetDefaultTubeDiameter(defaultAxesSize * 0.1);
 
 	// update default zones
 	//
@@ -5279,21 +5471,23 @@ void CWPhastDoc::UpdateGridDomain(void)
 	{
 		CZone bounds;
 		this->m_pGridActor->GetDefaultZone(bounds);
-		pCollection->InitTraversal();
+		vtkCollectionSimpleIterator csi;
+		pCollection->InitTraversal(csi);
 		for (int i = 0; i < pCollection->GetNumberOfItems(); ++i)
 		{
-			vtkProp* prop = pCollection->GetNextProp();
+			vtkProp* prop = pCollection->GetNextProp(csi);
 			if (vtkPropAssembly *pPropAssembly = vtkPropAssembly::SafeDownCast(prop))
 			{
 				if (vtkPropCollection *pPropCollection = pPropAssembly->GetParts())
 				{
-					pPropCollection->InitTraversal();
+					vtkCollectionSimpleIterator pcsi;
+					pPropCollection->InitTraversal(pcsi);
 					for (int i = 0; i < pPropCollection->GetNumberOfItems(); ++i)
 					{
-						vtkProp* prop = pPropCollection->GetNextProp();
+						vtkProp* prop = pPropCollection->GetNextProp(pcsi);
 						if (CZoneActor *pZone = CZoneActor::SafeDownCast(prop))
 						{
-							if (pZone->GetDefault())
+							if (dynamic_cast<Domain*>(pZone->GetPolyhedron()) || pZone->GetDefault())
 							{
 								pZone->SetBounds(bounds, this->GetUnits());
 							}
@@ -5303,7 +5497,7 @@ void CWPhastDoc::UpdateGridDomain(void)
 			}
 			if (CZoneActor *pZone = CZoneActor::SafeDownCast(prop))
 			{
-				if (pZone->GetDefault())
+				if (dynamic_cast<Domain*>(pZone->GetPolyhedron()) || pZone->GetDefault())
 				{
 					pZone->SetBounds(bounds, this->GetUnits());
 				}
@@ -5319,8 +5513,9 @@ void CWPhastDoc::UpdateGridDomain(void)
 		if (vtkPropCollection *pPropCollection = pPropAssembly->GetParts())
 		{
 			vtkProp *pProp;
-			pPropCollection->InitTraversal();
-			for (; (pProp = pPropCollection->GetNextProp()); )
+			vtkCollectionSimpleIterator csi;
+			pPropCollection->InitTraversal(csi);
+			for (; (pProp = pPropCollection->GetNextProp(csi)); )
 			{
 				if (CRiverActor* pRiverActor = CRiverActor::SafeDownCast(pProp))
 				{
@@ -5349,8 +5544,9 @@ void CWPhastDoc::UpdateGridDomain(void)
 		if (vtkPropCollection *pPropCollection = pPropAssembly->GetParts())
 		{
 			vtkProp *pProp;
-			pPropCollection->InitTraversal();
-			for (; (pProp = pPropCollection->GetNextProp()); )
+			vtkCollectionSimpleIterator csi;
+			pPropCollection->InitTraversal(csi);
+			for (; (pProp = pPropCollection->GetNextProp(csi)); )
 			{
 				if (CWellActor* pWellActor = CWellActor::SafeDownCast(pProp))
 				{
@@ -5368,6 +5564,10 @@ void CWPhastDoc::UpdateGridDomain(void)
 		}
 	}
 #endif
+
+	// update possible selection
+	//
+	this->Notify(this, WPN_DOMAIN_CHANGED, 0, 0);
 
 	// refresh screen
 	//
@@ -5514,13 +5714,13 @@ void CWPhastDoc::OnToolsModifyGrid()
 		{
 			CWPhastView *pView = (CWPhastView*) GetNextView(pos);
 			ASSERT_VALID(pView);
-			ASSERT(pView->GetRenderWindowInteractor());
-			if (pView->GetRenderWindowInteractor())
+			ASSERT(pView->GetInteractor());
+			if (pView->GetInteractor())
 			{
 				pView->CancelMode();
 
 				this->GridElementsSelector = CGridElementsSelector::New();
-				this->GridElementsSelector->SetInteractor(pView->GetRenderWindowInteractor());
+				this->GridElementsSelector->SetInteractor(pView->GetInteractor());
 				this->GridElementsSelector->SetGridActor(reinterpret_cast<CGridActor *>(this->GetGridActor()));
 				this->GridElementsSelector->SetDocument(this);
 				this->GridElementsSelector->SetEnabled(1);
@@ -5578,21 +5778,23 @@ void CWPhastDoc::SizeHandles(double size)
 	if (size != size) return;
 	TRACE("SizeHandles = %g\n", size);
 
-	// set scale for all zones
+	// size handles for wells/rivers/drains
 	//
-	if (vtkPropCollection* pCollection = this->GetPropCollection())
+	if (vtkPropCollection *pCollection = this->GetPropCollection())
 	{
-		pCollection->InitTraversal();
-		for (int i = 0; i < pCollection->GetNumberOfItems(); ++i)
+		vtkProp *prop;
+		vtkCollectionSimpleIterator c;
+		pCollection->InitTraversal(c);
+		for (; (prop = pCollection->GetNextProp(c)); )
 		{
-			vtkProp* prop = pCollection->GetNextProp();
 			if (vtkPropAssembly *pPropAssembly = vtkPropAssembly::SafeDownCast(prop))
 			{
 				if (vtkPropCollection *pPropCollection = pPropAssembly->GetParts())
 				{
 					vtkProp *pProp;
-					pPropCollection->InitTraversal();
-					for (; (pProp = pPropCollection->GetNextProp()); )
+					vtkCollectionSimpleIterator c2;
+					pPropCollection->InitTraversal(c2);
+					for (; (pProp = pPropCollection->GetNextProp(c2)); )
 					{
 						if (vtkProp3D *prop3D = vtkProp3D::SafeDownCast(pProp))
 						{
@@ -5651,14 +5853,14 @@ void CWPhastDoc::BeginNewZone()
 	{
 		CWPhastView *pView = (CWPhastView*) GetNextView(pos);
 		ASSERT_VALID(pView);
-		ASSERT(pView->GetRenderWindowInteractor());
-		if (pView->GetRenderWindowInteractor())
+		ASSERT(pView->GetInteractor());
+		if (pView->GetInteractor())
 		{
 			pView->CancelMode();
 
 			// create widget
 			this->NewZoneWidget = CNewZoneWidget::New();
-			this->NewZoneWidget->SetInteractor(pView->GetRenderWindowInteractor());
+			this->NewZoneWidget->SetInteractor(pView->GetInteractor());
 			this->NewZoneWidget->SetProp3D(this->GetGridActor());
 
 			// add listener callback
@@ -5700,12 +5902,12 @@ void CWPhastDoc::NewZoneListener(vtkObject *caller, unsigned long eid, void *cli
 		CWPhastDoc* self = reinterpret_cast<CWPhastDoc*>(clientdata);
 		if (eid == vtkCommand::EndInteractionEvent)
 		{
-			vtkFloatingPointType scaled_meters[6];
+			double scaled_meters[6];
 			self->NewZoneWidget->GetBounds(scaled_meters);
 
 			// calc zone
 			CZone zone;
-			vtkFloatingPointType* scale = self->GetScale();
+			double* scale = self->GetScale();
 			const CUnits& units = self->GetUnits();
 			zone.x1 = scaled_meters[0] / scale[0] / units.horizontal.input_to_si;
 			zone.x2 = scaled_meters[1] / scale[0] / units.horizontal.input_to_si;
@@ -5918,14 +6120,14 @@ void CWPhastDoc::BeginNewWedge()
 	{
 		CWPhastView *pView = (CWPhastView*) GetNextView(pos);
 		ASSERT_VALID(pView);
-		ASSERT(pView->GetRenderWindowInteractor());
-		if (pView->GetRenderWindowInteractor())
+		ASSERT(pView->GetInteractor());
+		if (pView->GetInteractor())
 		{
 			pView->CancelMode();
 
 			// create widget
 			this->NewWedgeWidget = CNewWedgeWidget::New();
-			this->NewWedgeWidget->SetInteractor(pView->GetRenderWindowInteractor());
+			this->NewWedgeWidget->SetInteractor(pView->GetInteractor());
 			this->NewWedgeWidget->SetProp3D(this->GetGridActor());
 
 			// add listener callback
@@ -5967,12 +6169,12 @@ void CWPhastDoc::NewWedgeListener(vtkObject *caller, unsigned long eid, void *cl
 		CWPhastDoc* self = reinterpret_cast<CWPhastDoc*>(clientdata);
 		if (eid == vtkCommand::EndInteractionEvent)
 		{
-			vtkFloatingPointType scaled_meters[6];
+			double scaled_meters[6];
 			self->NewWedgeWidget->GetBounds(scaled_meters);
 
 			// calc zone
 			CZone zone;
-			vtkFloatingPointType* scale = self->GetScale();
+			double* scale = self->GetScale();
 			const CUnits& units = self->GetUnits();
 			zone.x1 = scaled_meters[0] / scale[0] / units.horizontal.input_to_si;
 			zone.x2 = scaled_meters[1] / scale[0] / units.horizontal.input_to_si;
@@ -6147,10 +6349,26 @@ void CWPhastDoc::OnToolsNewPrism()
 					p = new Prism();
 					if (p && p->Read(iss))
 					{
-						//{{
 						this->GetDefaultZone(::domain);
-						//}}
+
 						p->Tidy();
+
+						// this may need to be updated when grid rotation is enabled
+						//
+						const CUnits &units = this->GetUnits();
+						CGridKeyword gridKeyword = this->GetGridKeyword();
+						double scale_h = units.map_horizontal.input_to_si / units.horizontal.input_to_si;
+						double scale_v = units.map_vertical.input_to_si / units.vertical.input_to_si;
+						PHAST_Transform t = PHAST_Transform(
+							gridKeyword.m_grid_origin[0],
+							gridKeyword.m_grid_origin[1],
+							gridKeyword.m_grid_origin[2],
+							gridKeyword.m_grid_angle,
+							scale_h,
+							scale_h,
+							scale_v
+							);
+						p->Convert_coordinates(PHAST_Transform::GRID, &t);
 					}
 					if (pInput->GetErrorCount() != 0)
 					{
@@ -6313,8 +6531,8 @@ void CWPhastDoc::BeginNewPrism()
 	{
 		CWPhastView *pView = (CWPhastView*) GetNextView(pos);
 		ASSERT_VALID(pView);
-		ASSERT(pView->GetRenderWindowInteractor());
-		if (pView->GetRenderWindowInteractor())
+		ASSERT(pView->GetInteractor());
+		if (pView->GetInteractor())
 		{
 			pView->CancelMode();
 
@@ -6325,7 +6543,7 @@ void CWPhastDoc::BeginNewPrism()
 
 			// create widget
 			this->NewPrismWidget = CNewPrismWidget::New();
-			this->NewPrismWidget->SetInteractor(pView->GetRenderWindowInteractor());
+			this->NewPrismWidget->SetInteractor(pView->GetInteractor());
 			this->NewPrismWidget->SetProp3D(this->GetGridActor());
 			this->NewPrismWidget->AddObserver(vtkCommand::EndInteractionEvent, this->NewPrismCallbackCommand);
 
@@ -6363,7 +6581,7 @@ void CWPhastDoc::NewPrismListener(vtkObject *caller, unsigned long eid, void *cl
 
 		if (eid == vtkCommand::EndInteractionEvent)
 		{
-			vtkFloatingPointType* scale = self->GetScale();
+			double* scale = self->GetScale();
 			const CUnits& units = self->GetUnits();
 
 			vtkPoints *points = self->NewPrismWidget->GetPoints();
@@ -6383,7 +6601,7 @@ void CWPhastDoc::NewPrismListener(vtkObject *caller, unsigned long eid, void *cl
 			double pt[3];
 			for (vtkIdType i = 0; i < points->GetNumberOfPoints(); i+=2)
 			{
-				//vtkFloatingPointType *pt = points->GetPoint(i);
+				//double *pt = points->GetPoint(i);
 				points->GetPoint(i, pt);
 				oss << pt[0] / scale[0] / units.horizontal.input_to_si << " ";
 				oss << pt[1] / scale[1] / units.horizontal.input_to_si << " ";
@@ -6566,8 +6784,8 @@ void CWPhastDoc::BeginNewDrain()
 	{
 		CWPhastView *pView = (CWPhastView*) GetNextView(pos);
 		ASSERT_VALID(pView);
-		ASSERT(pView->GetRenderWindowInteractor());
-		if (pView->GetRenderWindowInteractor())
+		ASSERT(pView->GetInteractor());
+		if (pView->GetInteractor())
 		{
 			pView->CancelMode();
 
@@ -6576,20 +6794,20 @@ void CWPhastDoc::BeginNewDrain()
 			this->NewDrainCallbackCommand->SetClientData(this);
 			this->NewDrainCallbackCommand->SetCallback(CWPhastDoc::NewDrainListener);
 
-			// create river
+			// create drain
 			CDrain drain;
 			drain.coordinate_system = PHAST_Transform::GRID;
 			drain.z_coordinate_system = PHAST_Transform::GRID;
 			drain.n_user = this->GetNextDrainNumber();
 
 			// create widget
-			this->NewDrainActor = CDrainActor::StartNewDrain(pView->GetRenderWindowInteractor());
+			this->NewDrainActor = CDrainActor::StartNewDrain(pView->GetInteractor());
 			this->NewDrainActor->SetDrain(drain, this->GetUnits(), this->GetGridKeyword());
 			this->NewDrainActor->AddObserver(CRiverActor::EndNewEvent, this->NewDrainCallbackCommand);
 			this->NewDrainActor->AddObserver(CRiverActor::CancelNewEvent, this->NewDrainCallbackCommand);
 
 			// scale
-			vtkFloatingPointType* scale = this->GetScale();
+			double* scale = this->GetScale();
 			this->NewDrainActor->SetScale(scale[0], scale[1], scale[2]);
 
 			this->NewDrainActor->ScaleFromBounds(this->GetGridBounds());
@@ -6608,7 +6826,7 @@ void CWPhastDoc::BeginNewDrain()
 				ASSERT_VALID(pView);
 				if (pView)
 				{
-					pView->GetRenderer()->AddProp(this->NewDrainActor);
+					pView->GetRenderer()->AddViewProp(this->NewDrainActor);
 				}
 				this->UpdateAllViews(0);
 			}
@@ -6630,7 +6848,7 @@ void CWPhastDoc::EndNewDrain()
 		ASSERT(pView->GetRenderer());
 		if (pView->GetRenderer())
 		{
-			pView->GetRenderer()->RemoveProp(this->NewDrainActor);
+			pView->GetRenderer()->RemoveViewProp(this->NewDrainActor);
 		}
 	}
 
@@ -6722,7 +6940,7 @@ void CWPhastDoc::OnEndNewDrain(bool bCancel)
 			ASSERT_VALID(pView);
 			if (pView)
 			{
-				pView->GetRenderer()->RemoveProp(this->NewDrainActor);
+				pView->GetRenderer()->RemoveViewProp(this->NewDrainActor);
 			}
 		}
 	}
@@ -6741,8 +6959,9 @@ void CWPhastDoc::GetUsedDrainNumbers(std::set<int>& usedNums)
 	if (vtkPropCollection *pPropCollection = this->GetPropAssemblyDrains()->GetParts())
 	{
 		vtkProp *pProp = 0;
-		pPropCollection->InitTraversal();
-		for (; (pProp = pPropCollection->GetNextProp()); )
+		vtkCollectionSimpleIterator csi;
+		pPropCollection->InitTraversal(csi);
+		for (; (pProp = pPropCollection->GetNextProp(csi)); )
 		{
 			if (CDrainActor *pDrainActor = CDrainActor::SafeDownCast(pProp))
 			{
@@ -6777,7 +6996,7 @@ void CWPhastDoc::Add(CDrainActor *pDrainActor, HTREEITEM hInsertAfter)
 
 	// set scale
 	//
-	vtkFloatingPointType *scale = this->GetScale();
+	double *scale = this->GetScale();
 	pDrainActor->SetScale(scale[0], scale[1], scale[2]);
 
 	// set radius
@@ -6786,7 +7005,6 @@ void CWPhastDoc::Add(CDrainActor *pDrainActor, HTREEITEM hInsertAfter)
 
 	// set z
 	//
-// COMMENT: {6/22/2005 5:50:09 PM}	vtkFloatingPointType *bounds = this->GetGridBounds();
 	CGrid x, y, z;
 	this->GetGrid(x, y, z);
 	z.Setup();
@@ -6799,7 +7017,7 @@ void CWPhastDoc::Add(CDrainActor *pDrainActor, HTREEITEM hInsertAfter)
 	{
 		CWPhastView *pView = (CWPhastView*) GetNextView(pos);
 		ASSERT_VALID(pView);
-		pDrainActor->SetInteractor(pView->GetRenderWindowInteractor());
+		pDrainActor->SetInteractor(pView->GetInteractor());
 		pDrainActor->SetEnabled(0);
 	}
 
@@ -6810,10 +7028,7 @@ void CWPhastDoc::Add(CDrainActor *pDrainActor, HTREEITEM hInsertAfter)
 		ASSERT(!pPropAssembly->GetParts()->IsItemPresent(pDrainActor));
 		pPropAssembly->AddPart(pDrainActor);
 		ASSERT(pPropAssembly->GetParts()->IsItemPresent(pDrainActor));
-		if (!this->GetPropCollection()->IsItemPresent(pPropAssembly))
-		{
-			this->GetPropCollection()->AddItem(pPropAssembly);
-		}
+		this->AddPropAssembly(pPropAssembly);
 	}
 
 	// add to property tree
@@ -6848,10 +7063,13 @@ void CWPhastDoc::UnAdd(CDrainActor *pDrainActor)
 		ASSERT(pPropAssembly->GetParts()->IsItemPresent(pDrainActor));
 		pPropAssembly->RemovePart(pDrainActor);
 		ASSERT(!pPropAssembly->GetParts()->IsItemPresent(pDrainActor));
-		// VTK HACK
-		// This is req'd because ReleaseGraphicsResources is not called when
-		// vtkPropAssembly::RemovePart(vtkProp *prop) is called
-		this->ReleaseGraphicsResources(pDrainActor);
+// COMMENT: {9/23/2009 8:52:37 PM}		// VTK HACK
+// COMMENT: {9/23/2009 8:52:37 PM}		// This is req'd because ReleaseGraphicsResources is not called when
+// COMMENT: {9/23/2009 8:52:37 PM}		// vtkPropAssembly::RemovePart(vtkProp *prop) is called
+// COMMENT: {9/23/2009 8:52:37 PM}		this->ReleaseGraphicsResources(pDrainActor);
+		//{{
+		pDrainActor->SetInteractor(0);
+		//}}
 	}
 
 	// remove from property tree
@@ -6928,6 +7146,131 @@ void CWPhastDoc::DrainListener(vtkObject* caller, unsigned long eid, void* clien
 		default:
 			ASSERT(FALSE);
 			break;
+		}
+	}
+}
+
+HACCEL CWPhastDoc::GetDefaultAccelerator()
+{
+	// Need to override in order to allow GridActor to 
+	// handle WM_KEYPRESS for delete
+	//
+	POSITION pos =  this->GetFirstViewPosition();
+	CWPhastView *pView = (CWPhastView*)this->GetNextView(pos);
+	ASSERT_VALID(pView);
+	if (pView && pView->MovingGridLine())
+	{
+		// maybe use GetForegroundWindow
+		if (::GetFocus() == pView->GetSafeHwnd())
+		{
+			return this->hGridAccel;
+		}
+	}
+	return CDocument::GetDefaultAccelerator();
+}
+
+#if ((VTK_MAJOR_VERSION >= 5) && (VTK_MINOR_VERSION >= 4))
+void CWPhastDoc::ExecutePipeline()
+{
+	POSITION pos = this->GetFirstViewPosition();
+	while (pos != NULL)
+	{
+		CWPhastView *pView = (CWPhastView*) this->GetNextView(pos);
+		ASSERT_VALID(pView);
+
+		// add props to renderer
+		if (vtkPropCollection *props = this->GetPropCollection())
+		{
+			vtkCollectionSimpleIterator csi;
+			props->InitTraversal(csi);
+			for (int i = 0; i < props->GetNumberOfItems(); ++i)
+			{
+				vtkProp* prop = props->GetNextProp(csi);
+				if (prop)
+				{
+					if (vtkPropAssembly *pPropAssembly = vtkPropAssembly::SafeDownCast(prop))
+					{
+						if (vtkPropCollection *pPropCollection = pPropAssembly->GetParts())
+						{
+							if (pPropCollection->GetNumberOfItems() == 0)
+							{
+								ASSERT(FALSE);
+								continue;
+							}
+						}
+						TRACE("Adding vtkPropAssembly to Renderer\n");
+					}
+					pView->GetRenderer()->AddViewProp(prop);
+					if (i == 0)
+					{
+						// Note: pView->ResetCamera(xmin, xmax, ymin, ymax, zmin, zmax)
+						// doesn't seem to work for example ex1
+						ASSERT(prop == this->m_pGridActor);
+						pView->ResetCamera();
+					}
+				}
+			}
+		}
+		pView->GetRenderer()->ResetCameraClippingRange();
+	}
+}
+#endif
+
+void CWPhastDoc::OnAccelerator32862()
+{
+#if defined(__CPPUNIT__)
+	if (this->m_pMapActor)
+	{
+		//{{
+		CSiteMap2 siteMap2 = this->m_pMapActor->GetSiteMap2();
+		double angle_save = siteMap2.Angle;
+		for (double a = 0; a < 360.0; a+=1.0)
+		{
+			siteMap2.Angle = angle_save + a;
+			this->m_pMapActor->SetSiteMap2(siteMap2);
+			this->Notify(this, WPN_DOMAIN_CHANGED, 0, 0);
+			
+		}
+		siteMap2.Angle = angle_save;
+		this->m_pMapActor->SetSiteMap2(siteMap2);
+		this->Notify(this, WPN_DOMAIN_CHANGED, 0, 0);
+		//}}
+
+// COMMENT: {9/7/2010 10:21:15 PM}		//{{
+// COMMENT: {9/7/2010 10:21:15 PM}		CGridKeyword keyword = this->GetGridKeyword();
+// COMMENT: {9/7/2010 10:21:15 PM}		double angle_save = keyword.m_grid_angle;
+// COMMENT: {9/7/2010 10:21:15 PM}		for (double a = 0; a < 360.0; a+=10.0)
+// COMMENT: {9/7/2010 10:21:15 PM}		{
+// COMMENT: {9/7/2010 10:21:15 PM}			keyword.m_grid_angle = angle_save + a;
+// COMMENT: {9/7/2010 10:21:15 PM}
+// COMMENT: {9/7/2010 10:21:15 PM}			this->ResizeGrid(keyword);
+// COMMENT: {9/7/2010 10:21:15 PM}		}
+// COMMENT: {9/7/2010 10:21:15 PM}		keyword.m_grid_angle = angle_save;
+// COMMENT: {9/7/2010 10:21:15 PM}		this->ResizeGrid(keyword);
+// COMMENT: {9/7/2010 10:21:15 PM}		//}}
+	}
+#endif
+}
+
+void CWPhastDoc::AddPropAssembly(vtkPropAssembly *pPropAssembly)
+{
+	if (!this->GetPropCollection()->IsItemPresent(pPropAssembly))
+	{
+		this->GetPropCollection()->AddItem(pPropAssembly);
+		POSITION pos = this->GetFirstViewPosition();
+		while (pos != NULL)
+		{
+			CWPhastView *pView = (CWPhastView*) GetNextView(pos);
+			ASSERT_VALID(pView);
+			if (pView->GetRenderer()->GetViewProps()->IsItemPresent(this->GetPropAssemblyMedia()))
+			{
+				// This is a hack.  Since the default media must exist
+				// the list of props must contain the media assembly
+				// and therefore ExecutePipeline has been called for this
+				// document.  If ExecutePipeline has not been executed
+				// the river assembly will flash
+				pView->GetRenderer()->AddViewProp(pPropAssembly);
+			}
 		}
 	}
 }

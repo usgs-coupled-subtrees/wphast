@@ -36,7 +36,7 @@ protected:
 	virtual ~CMediaZoneActor(void);
 protected:
 	CGridElt m_grid_elt;
-	static vtkFloatingPointType s_color[3];
+	static double s_color[3];
 	static vtkProperty* s_Property;
 	static vtkProperty* s_OutlineProperty;
 
@@ -65,8 +65,6 @@ private:
 				CMediaZoneActor::s_Property = vtkProperty::New();
 				CMediaZoneActor::s_Property->SetColor(CMediaZoneActor::s_color);
 				CMediaZoneActor::s_Property->SetOpacity(0.3);
-// COMMENT: {6/30/2008 3:50:21 PM}				CMediaZoneActor::s_Property->SetAmbient(1.0);
-// COMMENT: {6/30/2008 3:45:40 PM}				CMediaZoneActor::s_Property->SetDiffuse(1.0);
 			}
 			if (CMediaZoneActor::s_OutlineProperty == 0)
 			{

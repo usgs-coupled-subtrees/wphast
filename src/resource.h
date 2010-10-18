@@ -41,6 +41,8 @@
 #define IDR_MENU1                       133
 #define IDS_STRING133                   133
 #define IDS_IMPORT_PHAST_TRANS_133      133
+#define IDR_MAINFRAME_SDI1              133
+#define IDR_GRID_ACCEL                  133
 #define ID_TOOLS_NEWZONE                134
 #define IDC_PAN_REAL                    135
 #define IDS_MEDIA_PROPS_WIZ_135         135
@@ -980,16 +982,17 @@
 #define ID_VIEW_FROM_MAP_NZ             32854
 #define ID_BUTTON32859                  32859
 #define ID_BUTTON32860                  32860
+#define ID_ACCELERATOR32862             32862
 #define IDW_CONTROLBAR_TREE             59424
 #define IDW_CONTROLBAR_BOXPROPS         59425
 #define IDC_VALUE_STATIC                65535
 
 // Next default values for new objects
-//
+// 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        432
-#define _APS_NEXT_COMMAND_VALUE         32861
+#define _APS_NEXT_COMMAND_VALUE         32864
 #define _APS_NEXT_CONTROL_VALUE         1518
 #define _APS_NEXT_SYMED_VALUE           127
 #endif

@@ -12,7 +12,7 @@ public:
 	vtkTypeRevisionMacro(vtkCellPicker2, vtkCellPicker);
 // COMMENT: {9/9/2008 9:06:48 PM}	void PrintSelf(ostream& os, vtkIndent indent);
 // COMMENT: {9/9/2008 9:06:48 PM}
-	virtual int Pick(float selectionX, float selectionY, float selectionZ, vtkRenderer *renderer);
+	virtual int Pick(double selectionX, double selectionY, double selectionZ, vtkRenderer *renderer);
 
 protected:
 	vtkCellPicker2(void);

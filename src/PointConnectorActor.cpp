@@ -50,8 +50,6 @@ CPointConnectorActor::CPointConnectorActor(void)
 , GhostActor(0)
 , GridAngle(0.0)
 {
-// COMMENT: {9/17/2008 8:22:29 PM}	static StaticInit init; // constructs/destructs s_HandleProperty s_ConnectorProperty
-
 	for (size_t i = 0; i < 3; ++i)
 	{
 		this->GridOrigin[i] = 0.0;
@@ -112,13 +110,19 @@ CPointConnectorActor::~CPointConnectorActor(void)
 	TRACE("CPointConnectorActor dtor %d \n", count);
 	++count;
 
+// COMMENT: {9/9/2009 10:30:36 PM}	if (this->Interactor)
+// COMMENT: {9/9/2009 10:30:36 PM}	{
+// COMMENT: {9/9/2009 10:30:36 PM}		// this is req'd since messages will continue to be sent
+// COMMENT: {9/9/2009 10:30:36 PM}		// after deletion and this->Interactor == 0xcdcdcdcd or
+// COMMENT: {9/9/2009 10:30:36 PM}		// this->Interactor->SubjectHelper == 0xcdcdcdcd
+// COMMENT: {9/9/2009 10:30:36 PM}		this->Interactor->RemoveObserver(this->EventCallbackCommand);
+// COMMENT: {9/9/2009 10:30:36 PM}	}
+	//{{
 	if (this->Interactor)
 	{
-		// this is req'd since messages will continue to be sent
-		// after deletion and this->Interactor == 0xcdcdcdcd or
-		// this->Interactor->SubjectHelper == 0xcdcdcdcd
-		this->Interactor->RemoveObserver(this->EventCallbackCommand);
+		this->SetInteractor(0);
 	}
+	//}}
 	this->EventCallbackCommand->Delete();    this->EventCallbackCommand   = 0;
 
 	this->ClearPoints();
@@ -199,9 +203,9 @@ vtkIdType CPointConnectorActor::InsertNextPoint(double x, double y, double z)
 	//
 	if (vtkIdType np = this->Points->GetNumberOfPoints())
 	{
-		vtkFloatingPointType p[3];
-		vtkFloatingPointType pNext[3];
-		vtkFloatingPointType sNext[3];
+		double p[3];
+		double pNext[3];
+		double sNext[3];
 		this->Points->GetPoint(np - 1, p);
 		pNext[0] = x; pNext[1] = y; pNext[2] = z;
 		for (int i = 0; i < 3; ++i)
@@ -311,7 +315,7 @@ double CPointConnectorActor::GetZ(void)const
 
 void CPointConnectorActor::SetScale(double x, double y, double z)
 {
-	vtkFloatingPointType point[3];
+	double point[3];
 	if (this->State == CPointConnectorActor::CreatingRiver)
 	{
 		if (this->Points->GetNumberOfPoints())
@@ -431,12 +435,12 @@ void CPointConnectorActor::ClearPoints(void)
 	this->LineActors.clear();
 }
 
-vtkFloatingPointType CPointConnectorActor::GetRadius(void)const
+double CPointConnectorActor::GetRadius(void)const
 {
 	return this->Radius;
 }
 
-void CPointConnectorActor::SetRadius(vtkFloatingPointType radius)
+void CPointConnectorActor::SetRadius(double radius)
 {
 	this->Radius = radius;
 	std::list<vtkSphereSource*>::iterator iterSphereSource = this->SphereSources.begin();
@@ -459,18 +463,48 @@ void CPointConnectorActor::SetRadius(vtkFloatingPointType radius)
 	}
 }
 
+// COMMENT: {9/16/2009 9:23:05 PM}#pragma optimize( "g", off )
 void CPointConnectorActor::SetInteractor(vtkRenderWindowInteractor* i)
 {
+	char buffer[160];
+	::sprintf(buffer, "CPointConnectorActor::SetInteractor In this = %p i = %p Interactor = %p\n", this, i, this->Interactor);
+	::OutputDebugString(buffer);
+
+#ifdef SAVE
+	vtkDebugMacro(<< "Setting Interactor to = " << i << "\n");
+
+	stdout << "Setting Interactor to = " << i << "\n");
+	stderr << "Setting Interactor to = " << i << "\n");
+	oss << "Setting Interactor to = " << i << "\n");
+#endif
+
+// COMMENT: {9/15/2009 8:31:21 PM}// COMMENT: {9/15/2009 7:04:53 PM}#if defined(_DEBUG)
+// COMMENT: {9/15/2009 8:31:21 PM}	vtkDebugMacro(<< "Setting Interactor to = " << i << "\n");
+// COMMENT: {9/15/2009 8:31:21 PM}	vtkDebugMacro(<< "Previous Interactor to = " << this->Interactor << "\n");
+// COMMENT: {9/15/2009 8:31:21 PM}// COMMENT: {9/15/2009 7:04:55 PM}#endif
 	if (i == this->Interactor)
 	{
 		return;
 	}
 
+	::sprintf(buffer, "this = %p\n", this);
+	::OutputDebugString(buffer);
+	
+	::sprintf(buffer, "this->EventCallbackCommand = %p\n", this->EventCallbackCommand);
+	::OutputDebugString(buffer);
+
 	// if we already have an Interactor then stop observing it
 	if (this->Interactor)
 	{
+		::OutputDebugString("In If\n");
 		this->Interactor->RemoveObserver(this->EventCallbackCommand);
 	}
+
+	::sprintf(buffer, "this->Interactor = %p\n", this->Interactor);
+	::OutputDebugString(buffer);
+
+	::sprintf(buffer, "i = %p\n", i);
+	::OutputDebugString(buffer);
 
 	this->Interactor = i;
 
@@ -481,6 +515,7 @@ void CPointConnectorActor::SetInteractor(vtkRenderWindowInteractor* i)
 
 	this->Modified();
 }
+// COMMENT: {9/16/2009 9:23:01 PM}#pragma optimize( "g", on )
 
 //----------------------------------------------------------------------------
 void CPointConnectorActor::ProcessEvents(vtkObject* vtkNotUsed(object),
@@ -592,9 +627,9 @@ void CPointConnectorActor::OnLeftButtonDown()
 		path = this->CellPicker->GetPath();
 		if (path != NULL)
 		{
-			if (vtkActor* pActor = vtkActor::SafeDownCast(path->GetFirstNode()->GetProp()))
+			if (vtkActor* pActor = vtkActor::SafeDownCast(path->GetFirstNode()->GetViewProp()))
 			{
-				this->HighlightHandle(path->GetFirstNode()->GetProp());
+				this->HighlightHandle(path->GetFirstNode()->GetViewProp());
 				this->Points->GetPoint(this->GetCurrentPointId(), this->WorldPointXYPlane);
 				this->EventCallbackCommand->SetAbortFlag(1);
 				this->State = CPointConnectorActor::MovingPoint;
@@ -610,7 +645,7 @@ void CPointConnectorActor::OnLeftButtonDown()
 		path = this->LineCellPicker->GetPath();
 		if (path != NULL)
 		{
-			if (vtkActor* pActor = vtkActor::SafeDownCast(path->GetFirstNode()->GetProp()))
+			if (vtkActor* pActor = vtkActor::SafeDownCast(path->GetFirstNode()->GetViewProp()))
 			{
 				std::list<vtkActor*>::iterator iterActor = this->LineActors.begin();
 				for (vtkIdType id = 0; iterActor != this->LineActors.end(); ++id, ++iterActor)
@@ -636,6 +671,7 @@ void CPointConnectorActor::OnLeftButtonDown()
 	{
 		this->Update();
 		this->Cursor3DActor->SetPosition(this->WorldSIPoint[0], this->WorldSIPoint[1], this->WorldSIPoint[2]);
+		this->EventCallbackCommand->SetAbortFlag(1);
 		this->Interactor->Render();
 	}
 }
@@ -673,7 +709,7 @@ void CPointConnectorActor::OnMouseMove()
 				path = this->LineCellPicker->GetPath();
 				if (path != NULL)
 				{
-					if (vtkActor* pActor = vtkActor::SafeDownCast(path->GetFirstNode()->GetProp()))
+					if (vtkActor* pActor = vtkActor::SafeDownCast(path->GetFirstNode()->GetViewProp()))
 					{
 						this->Update();
 						this->GhostSphereSource->SetCenter(this->WorldSIPoint[0], this->WorldSIPoint[1], this->WorldSIPoint[2]);
@@ -843,11 +879,11 @@ void CPointConnectorActor::PrintSelf(ostream& os, vtkIndent indent)
 
 void CPointConnectorActor::SetEnabled(int enabling)
 {
-	if (!this->Interactor)
-	{
-		vtkErrorMacro(<<"The interactor must be set prior to enabling/disabling widget");
-		return;
-	}
+// COMMENT: {9/16/2009 6:44:30 PM}	if (!this->Interactor)
+// COMMENT: {9/16/2009 6:44:30 PM}	{
+// COMMENT: {9/16/2009 6:44:30 PM}		vtkErrorMacro(<<"The interactor must be set prior to enabling/disabling widget");
+// COMMENT: {9/16/2009 6:44:30 PM}		return;
+// COMMENT: {9/16/2009 6:44:30 PM}	}
 
 	if ( enabling ) //------------------------------------------------------------
 	{
@@ -857,6 +893,14 @@ void CPointConnectorActor::SetEnabled(int enabling)
 		{
 			return;
 		}
+
+		//{{
+		if (!this->Interactor)
+		{
+			vtkErrorMacro(<<"The interactor must be set prior to enabling the widget");
+			return;
+		}
+		//}}
 
 		if ( ! this->CurrentRenderer )
 		{
@@ -893,7 +937,7 @@ void CPointConnectorActor::SetEnabled(int enabling)
 
 	else //disabling-------------------------------------------------------------
 	{
-		vtkDebugMacro(<<"Disabling river");
+		vtkDebugMacro(<<"Disabling CPointConnectorActor");
 
 		if ( ! this->Enabled ) //already disabled, just return
 		{
@@ -1092,18 +1136,18 @@ int CPointConnectorActor::GetVisibility(void)
 	return this->Visibility;
 }
 
-void CPointConnectorActor::ScaleFromBounds(vtkFloatingPointType bounds[6])
+void CPointConnectorActor::ScaleFromBounds(double bounds[6])
 {
 	// set radius
 	//
-	vtkFloatingPointType defaultAxesSize = (bounds[1]-bounds[0] + bounds[3]-bounds[2] + bounds[5]-bounds[4])/12;
+	double defaultAxesSize = (bounds[1]-bounds[0] + bounds[3]-bounds[2] + bounds[5]-bounds[4])/12;
 	this->SetRadius(defaultAxesSize * 0.085 /* / sqrt(scale[0] * scale[1]) */ );
 
 	if (this->Cursor3D)
 	{
 		// set size of 3D cursor
 		//
-		vtkFloatingPointType dim = (bounds[1] - bounds[0]) / 20.0;
+		double dim = (bounds[1] - bounds[0]) / 20.0;
 		this->Cursor3D->SetModelBounds(-dim, dim, -dim, dim, -dim, dim);
 	}
 }

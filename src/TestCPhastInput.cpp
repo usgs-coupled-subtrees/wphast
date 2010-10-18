@@ -80,6 +80,7 @@ void TestCPhastInput::testWriteMinimal(void)
 		{
 			pInput->Delete();
 		}
+		throw;
 	}
 }
 
@@ -956,6 +957,11 @@ void TestCPhastInput::testDecay(void)
 
 			pInput->Load();
 
+			if (pInput->GetErrorCount() != 0)
+			{
+				TRACE("%s\n", pInput->GetWarningMsg());
+				TRACE("%s\n", pInput->GetErrorMsg());
+			}
 			CPPUNIT_ASSERT(pInput->GetErrorCount()   == 0);
 
 			pInput->Delete();
@@ -1073,6 +1079,11 @@ void TestCPhastInput::testDisp2d(void)
 
 			pInput->Load();
 
+			if (pInput->GetErrorCount() != 0)
+			{
+				TRACE("%s\n", pInput->GetWarningMsg());
+				TRACE("%s\n", pInput->GetErrorMsg());
+			}
 			CPPUNIT_ASSERT(pInput->GetErrorCount()   == 0);
 
 			pInput->Delete();
@@ -1174,6 +1185,11 @@ void TestCPhastInput::testEx1(void)
 
 			pInput->Load();
 
+			if (pInput->GetErrorCount() != 0)
+			{
+				TRACE("%s\n", pInput->GetWarningMsg());
+				TRACE("%s\n", pInput->GetErrorMsg());
+			}
 			CPPUNIT_ASSERT(pInput->GetErrorCount()   == 0);
 
 			pInput->Delete();
@@ -1284,6 +1300,11 @@ void TestCPhastInput::testEx2(void)
 
 			pInput->Load();
 
+			if (pInput->GetErrorCount() != 0)
+			{
+				TRACE("%s\n", pInput->GetWarningMsg());
+				TRACE("%s\n", pInput->GetErrorMsg());
+			}
 			CPPUNIT_ASSERT(pInput->GetErrorCount()   == 0);
 
 			pInput->Delete();
@@ -1380,6 +1401,11 @@ void TestCPhastInput::testEx3(void)
 
 			pInput->Load();
 
+			if (pInput->GetErrorCount() != 0)
+			{
+				TRACE("%s\n", pInput->GetWarningMsg());
+				TRACE("%s\n", pInput->GetErrorMsg());
+			}
 			CPPUNIT_ASSERT(pInput->GetErrorCount()   == 0);
 
 			pInput->Delete();
@@ -1562,6 +1588,11 @@ void TestCPhastInput::testEx4(void)
 
 			pInput->Load();
 
+			if (pInput->GetErrorCount() != 0)
+			{
+				TRACE("%s\n", pInput->GetWarningMsg());
+				TRACE("%s\n", pInput->GetErrorMsg());
+			}
 			CPPUNIT_ASSERT(pInput->GetErrorCount()   == 0);
 
 			pInput->Delete();
@@ -1687,12 +1718,22 @@ void TestCPhastInput::testFree(void)
 
 			pInput->Load();
 
+			if (pInput->GetErrorCount() != 0)
+			{
+				TRACE("%s\n", pInput->GetWarningMsg());
+				TRACE("%s\n", pInput->GetErrorMsg());
+			}
 			CPPUNIT_ASSERT(pInput->GetErrorCount()   == 0);
 
 			pInput->Delete();
 			pInput = NULL;
 		}
 		newMemState.Checkpoint();
+		if( diffMemState.Difference( oldMemState, newMemState ) != 0)
+		{
+			diffMemState.DumpStatistics();
+			oldMemState.DumpAllObjectsSince();
+		}
 		CPPUNIT_ASSERT(diffMemState.Difference( oldMemState, newMemState ) == 0);
 	}
 	catch (...)
@@ -1787,6 +1828,11 @@ void TestCPhastInput::testKindred4_4(void)
 
 			pInput->Load();
 
+			if (pInput->GetErrorCount() != 0)
+			{
+				TRACE("%s\n", pInput->GetWarningMsg());
+				TRACE("%s\n", pInput->GetErrorMsg());
+			}
 			CPPUNIT_ASSERT(pInput->GetErrorCount()   == 0);
 
 			pInput->Delete();
@@ -1880,6 +1926,11 @@ void TestCPhastInput::testLeaky(void)
 
 			pInput->Load();
 
+			if (pInput->GetErrorCount() != 0)
+			{
+				TRACE("%s\n", pInput->GetWarningMsg());
+				TRACE("%s\n", pInput->GetErrorMsg());
+			}
 			CPPUNIT_ASSERT(pInput->GetErrorCount()   == 0);
 
 			pInput->Delete();
@@ -1972,6 +2023,11 @@ void TestCPhastInput::testLeakyx(void)
 
 			pInput->Load();
 
+			if (pInput->GetErrorCount() != 0)
+			{
+				TRACE("%s\n", pInput->GetWarningMsg());
+				TRACE("%s\n", pInput->GetErrorMsg());
+			}
 			CPPUNIT_ASSERT(pInput->GetErrorCount()   == 0);
 
 			pInput->Delete();
@@ -2065,6 +2121,11 @@ void TestCPhastInput::testLeakyz(void)
 
 			pInput->Load();
 
+			if (pInput->GetErrorCount() != 0)
+			{
+				TRACE("%s\n", pInput->GetWarningMsg());
+				TRACE("%s\n", pInput->GetErrorMsg());
+			}
 			CPPUNIT_ASSERT(pInput->GetErrorCount()   == 0);
 
 			pInput->Delete();
@@ -2163,6 +2224,11 @@ void TestCPhastInput::testLinear_bc(void)
 
 			pInput->Load();
 
+			if (pInput->GetErrorCount() != 0)
+			{
+				TRACE("%s\n", pInput->GetWarningMsg());
+				TRACE("%s\n", pInput->GetErrorMsg());
+			}
 			CPPUNIT_ASSERT(pInput->GetErrorCount()   == 0);
 
 			pInput->Delete();
@@ -2272,6 +2338,11 @@ void TestCPhastInput::testLinear_ic(void)
 
 			pInput->Load();
 
+			if (pInput->GetErrorCount() != 0)
+			{
+				TRACE("%s\n", pInput->GetWarningMsg());
+				TRACE("%s\n", pInput->GetErrorMsg());
+			}
 			CPPUNIT_ASSERT(pInput->GetErrorCount()   == 0);
 
 			pInput->Delete();
@@ -2375,6 +2446,11 @@ void TestCPhastInput::testPhrqex11(void)
 
 			pInput->Load();
 
+			if (pInput->GetErrorCount() != 0)
+			{
+				TRACE("%s\n", pInput->GetWarningMsg());
+				TRACE("%s\n", pInput->GetErrorMsg());
+			}
 			CPPUNIT_ASSERT(pInput->GetErrorCount()   == 0);
 
 			pInput->Delete();
@@ -2713,6 +2789,11 @@ void TestCPhastInput::testRadial(void)
 
 			pInput->Load();
 
+			if (pInput->GetErrorCount() != 0)
+			{
+				TRACE("%s\n", pInput->GetWarningMsg());
+				TRACE("%s\n", pInput->GetErrorMsg());
+			}
 			CPPUNIT_ASSERT(pInput->GetErrorCount()   == 0);
 
 			pInput->Delete();
@@ -2816,6 +2897,11 @@ void TestCPhastInput::testRiver(void)
 
 			pInput->Load();
 
+			if (pInput->GetErrorCount() != 0)
+			{
+				TRACE("%s\n", pInput->GetWarningMsg());
+				TRACE("%s\n", pInput->GetErrorMsg());
+			}
 			CPPUNIT_ASSERT(pInput->GetErrorCount()   == 0);
 
 			pInput->Delete();
@@ -2908,6 +2994,11 @@ void TestCPhastInput::testUnconf(void)
 
 			pInput->Load();
 
+			if (pInput->GetErrorCount() != 0)
+			{
+				TRACE("%s\n", pInput->GetWarningMsg());
+				TRACE("%s\n", pInput->GetErrorMsg());
+			}
 			CPPUNIT_ASSERT(pInput->GetErrorCount()   == 0);
 
 			pInput->Delete();
@@ -3005,6 +3096,11 @@ void TestCPhastInput::testWell(void)
 
 			pInput->Load();
 
+			if (pInput->GetErrorCount() != 0)
+			{
+				TRACE("%s\n", pInput->GetWarningMsg());
+				TRACE("%s\n", pInput->GetErrorMsg());
+			}
 			CPPUNIT_ASSERT(pInput->GetErrorCount()   == 0);
 
 			pInput->Delete();
@@ -3128,7 +3224,12 @@ void TestCPhastInput::testNoFileProperties(void)
 
 			pInput->Load();
 
-			CPPUNIT_ASSERT(pInput->GetErrorCount() == 2);
+			if (pInput->GetErrorCount() != 0)
+			{
+				TRACE("%s\n", pInput->GetWarningMsg());
+				TRACE("%s\n", pInput->GetErrorMsg());
+			}
+			CPPUNIT_ASSERT(pInput->GetErrorCount()   == 0);
 
 			pInput->Delete();
 			pInput = NULL;
@@ -3214,6 +3315,11 @@ void TestCPhastInput::testCapeCod(void)
 			CPPUNIT_ASSERT(pInput != NULL);
 
 			pInput->Load();
+			if (pInput->GetErrorCount() != 0)
+			{
+				TRACE("%s\n", pInput->GetWarningMsg());
+				TRACE("%s\n", pInput->GetErrorMsg());
+			}
 			CPPUNIT_ASSERT(pInput->GetErrorCount() == 0);
 			pInput->Delete();
 			pInput = NULL;
@@ -3250,14 +3356,10 @@ void TestCPhastInput::testProperty(void)
 		CMemoryState oldMemState, newMemState, diffMemState;
 		oldMemState.Checkpoint();
 		{
-			TCHAR buffer[MAX_PATH];
-			::GetCurrentDirectory(MAX_PATH, buffer);
-			::SetCurrentDirectory(".\\Test\\");
-
 			std::string str(
 				"MEDIA\n"
 				"-box  0 0 0 10 10 10\n"
-				"-active XYZ map points.fil\n"
+				"-active XYZ map Test\\points.fil\n"
 				);
 			std::istringstream iss(str);
 
@@ -3277,7 +3379,7 @@ void TestCPhastInput::testProperty(void)
 			p.data_source->Set_user_source_type(Data_source::XYZ);
 
 			// file name
-			std::string s("points.fil");
+			std::string s("Test\\points.fil");
 			p.data_source->Set_file_name(s);
 			p.data_source->Tidy(false);
 
@@ -3294,6 +3396,341 @@ void TestCPhastInput::testProperty(void)
 #if defined(SHOW_MEM_LEAKS)
 		CPPUNIT_ASSERT(diffMemState.Difference( oldMemState, newMemState ) == 0);
 #endif
+	}
+	catch (...)
+	{
+		if (pInput)
+		{
+			LPCTSTR lpsz = pInput->GetErrorMsg();
+			if (lpsz) TRACE("testProperty:\n%s\n", lpsz);
+			pInput->Delete();
+		}
+		throw;
+	}
+}
+
+void TestCPhastInput::testWellDefinedThenUndefined(void)
+{
+	CPhastInput* pInput = NULL;
+	try
+	{
+		{
+			std::string str(
+				"TITLE\n"
+				" Central Oklahoma aquifer,\n"
+				" demonstration of PHAST\n"
+				"UNITS\n"
+				"        -time                                 years\n"
+				"        -horizontal_grid                      meters\n"
+				"        -vertical_grid                        meters\n"
+				"        -head                                 meters\n"
+				"        -hydraulic_conductivity               m/s\n"
+				"        -specific_storage                     1/m\n"
+				"        -dispersivity                         m\n"
+				"        -leaky_k                              m/sec\n"
+				"        -leaky_thickness                      m\n"
+				"        -flux                                 m/yr\n"
+				"        -river_bed_thickness                  m\n"
+				"        -river_bed_hydraulic_conductivity     m/s\n"
+				"        -river_width                          m\n"
+				"        -well_diameter                        in\n"
+				"        -well_flow_rate                       L/day\n"
+				"GRID\n"
+				"        -uniform x    0    90000    16\n"
+				"        -uniform y    0    48000    9\n"
+				"        -uniform z    0    400      5\n"
+				"        -print_orientation                    XY \n"
+				"SOLUTE_TRANSPORT true\n"
+				"STEADY_FLOW true\n"
+				"        -head_tolerance                       1e-6\n"
+				"        -flow_balance_tolerance               1e-3\n"
+				"MEDIA\n"
+				"        -zone   0. 0. 0. 90000.  48000. 400.\n"
+				"                -porosity                     0.22\n"
+				"                -long_dispersivity            2000.\n"
+				"                -horizontal_dispersivity      50.\n"
+				"                -vertical_dispersivity        50.\n"
+				"                -Kx                           1.5e-5\n"
+				"                -Ky                           1.5e-5\n"
+				"                -Kz                           1.5e-7\n"
+				"                -storage                      0\n"
+				"        # Make bottom, east zone inactive\n"
+				"        -zone   48000. 0. 0. 90000. 48000. 100.\n"
+				"                -active                       0\n"
+				"\n"
+				"RIVER 1 Little River\n"
+				"        -point  44000. 15000.\n"
+				"                -width                        200.\n"
+				"                -depth                        1.\n"
+				"                -bed_thickness                1.\n"
+				"                -bed_hydraulic_conductivity   1.\n"
+				"                -head                         0         335.\n"
+				"                -solution                     0         1\n"
+				"        -point  44000. 0.\n"
+				"        -point  90000. 0.\n"
+				"                -width                        200.\n"
+				"                -depth                        1.\n"
+				"                -bed_thickness                1.\n"
+				"                -bed_hydraulic_conductivity   1.\n"
+				"                -head                         0         275.\n"
+				"                -solution                     0         1\n"
+				"RIVER 2 North Fork River\n"
+				"        -point  30000. 36000.\n"
+				"                -width                        200.\n"
+				"                -depth                        1.\n"
+				"                -bed_thickness                1.\n"
+				"                -bed_hydraulic_conductivity   1\n"
+				"                -head                         0         335.\n"
+				"                -solution                     0         1\n"
+				"        -point  30000. 48000.\n"
+				"        -point  90000. 48000.\n"
+				"                -width                        200.\n"
+				"                -depth                        1.\n"
+				"                -bed_thickness                1.\n"
+				"                -bed_hydraulic_conductivity   1\n"
+				"                -head                         0         280.\n"
+				"                -solution                     0         1\n"
+				"RIVER 3 North Canadian River\n"
+				"        -point  60000. 30000.\n"
+				"                -width                        200.\n"
+				"                -depth                        1.\n"
+				"                -bed_thickness                1.\n"
+				"                -bed_hydraulic_conductivity   1\n"
+				"                -head                         0         350.\n"
+				"                -solution                     0         1\n"
+				"        -point  90000. 20000.\n"
+				"                -width                        200.\n"
+				"                -depth                        1.\n"
+				"                -bed_thickness                1.\n"
+				"                -bed_hydraulic_conductivity   1\n"
+				"                -head                         0         305.\n"
+				"                -solution                     0         1\n"
+				"FLUX_BC\n"
+				"        -zone   30000. 3000. 400.  90000. 45000. 400.\n"
+				"                -flux                         0         -0.055\n"
+				"                -associated_solution          0         1\n"
+				"SPECIFIED_HEAD_BC\n"
+				"        # Lake Stanley Draper\n"
+				"        -zone   30000. 14000 300. 32000.  20000.  400.\n"
+				"                -head                         0         348.\n"
+				"                -associated_solution          0         1\n"
+				"LEAKY_BC\n"
+				"        -zone   0. 48000. 0. 29000. 48000. 400.\n"
+				"                -hydraulic                    1.5e-5\n"
+				"                -thickness                   30000.\n"
+				"                -head                         0         305.0\n"
+				"                -associated                   0         1\n"
+				"       -zone 0 0 0 39000 0 400\n"
+				"                -hydraulic_conductivity       1.5E-5\n"
+				"                -thickness                    20000\n"
+				"                -head                         0         320\n"
+				"                -associated_solution          0         2\n"
+				"FREE_SURFACE_BC true\n"
+				"WELL 1 Observation well 1 in arsenic zone\n"
+				"        12000 36000\n"
+				"                -diameter       2                               # inches\n"
+				"                -pumping                      0         1       # L/day\n"
+				"                -elevation      90 110                          # m\n"
+				"HEAD_IC\n"
+				"        -zone   0. 0. 0. 90000. 48000. 400.\n"
+				"                -head   380.\n"
+				"CHEMISTRY_IC\n"
+				"        -zone   0. 0. 0. 90000. 48000. 400.\n"
+				"                -solution               2\n"
+				"                -equilibrium_phases     2\n"
+				"                -exchange               2\n"
+				"                -surface                2       \n"
+				"SOLUTION_METHOD\n"
+				"        -iterative_solver       true\n"
+				"        -tolerance              1e-10\n"
+				"        -space_differencing     0.\n"
+				"        -time_differencing      1.\n"
+				"TIME_CONTROL\n"
+				"        -delta_time     0               2000    yr\n"
+				"        -end_time                       100000  yr\n"
+				"PRINT_INITIAL\n"
+				"        -velocities             true\n"
+				"        -xyz_head               true\n"
+				"        -xyz_ss_velocities      true\n"
+				"PRINT_FREQUENCY\n"
+				"        0\n"
+				"        -xyz_chemistry          50000   yr\n"
+				"        -hdf_chemistry          2000    yr\n"
+				"        -xyz_well               2000    yr\n"
+				"        -save_final_heads       true\n"
+				"PRINT_LOCATIONS\n"
+				"# Don't print bottom layer to ex4.xyz.chem file\n"
+				"        -xyz_chemistry\n"
+				"               -zone   0 0 0  90000 48000 0\n"
+				"               -print 0\n"
+				"END\n"
+				);
+			std::istringstream iss(str);
+
+			pInput = CPhastInput::New(iss, "testEx1");
+			CPPUNIT_ASSERT(pInput != NULL);
+
+			pInput->Load();
+
+			if (pInput->GetErrorCount() != 0)
+			{
+				TRACE("%s\n", pInput->GetWarningMsg());
+				TRACE("%s\n", pInput->GetErrorMsg());
+			}
+			CPPUNIT_ASSERT(pInput->GetErrorCount()   == 0);
+
+			pInput->Delete();
+			pInput = NULL;
+		}
+		{
+			std::string str(
+				"TITLE\n"
+				"        Kindred and Celia, WRR, 1989, v. 25, p. 1154. Problem 4.4. \n"
+				"        Aerobic biodegradation combined with nitrate-reducing metabolism\n"
+				"UNITS\n"
+				"        -time                   days\n"
+				"        -horizontal_grid        meters\n"
+				"        -vertical_grid          meters\n"
+				"        -head                   meters\n"
+				"        -hydraulic_conductivity m/s\n"
+				"        -specific_storage       1/m\n"
+				"        -dispersivity           m\n"
+				"SOLUTION_METHOD\n"
+				"        -direct_solver          true\n"
+				"        -space_differencing     .5\n"
+				"        -time_differencing      .5\n"
+				"SOLUTE_TRANSPORT  true\n"
+				"        -diffusivity            0.0             #m^2/s\n"
+				"GRID\n"
+				"        -uniform x   0.00000      100.0    201\n"
+				"        -uniform y   0.00000      1.0    2\n"
+				"        -uniform z   0.00000      1.0    2\n"
+				"        -chemistry_dimensions X\n"
+				"        -print_orientation XZ \n"
+				"MEDIA\n"
+				"        -zone   0. 0. 0. 100.  1. 1.\n"
+				"                -porosity                       0.38\n"
+				"                -long_dispersivity              0.2\n"
+				"                -horizontal_dispersivity        0.2\n"
+				"                -vertical_dispersivity          0.2\n"
+				"                -Kx                             1e-4\n"
+				"                -Ky                             1e-4\n"
+				"                -Kz                             1e-4\n"
+				"                -storage                        0\n"
+				"SPECIFIED_HEAD_BC\n"
+				"        -zone           0. 0. 0. 0.  1.  1.\n"
+				"                -head			 0	4.3981481481\n"
+				"                -associated_solution	 0	2\n"
+				"\n"
+				"        -zone   100. 0. 0. 100.  1.  1.\n"
+				"                -head			 0	0\n"
+				"                -associated_solution	 0	1\n"
+				"\n"
+				"HEAD_IC\n"
+				"#velocity 1 m/day    v*por/K*L = delta H\n"
+				"# 1/(24*3600)*.38*100./1e-4 = 4.3981481481 \n"
+				"        -zone   0. 0. 0. 100. 1. 1.\n"
+				"                -head   X   4.3981481481 0.  0. 100.\n"
+				"FREE_SURFACE_BC false\n"
+				"CHEMISTRY_IC\n"
+				"        -zone   0. 0. 0. 100. 1. 1.\n"
+				"                -solution               1\n"
+				"                -kinetics               1\n"
+				"        -zone   0. 0. 0. 0. 1. 1.\n"
+				"                -kinetics               2\n"
+				"PRINT_INITIAL\n"
+				"        -components             true\n"
+				"TIME_CONTROL\n"
+				"        -delta_time     0	.25     day\n"
+				"        -end_time		68      day\n"
+				"\n"
+				"PRINT_FREQUENCY\n"
+				"	0\n"
+				"        -xyz_chemistry          10      day\n"
+				"        -hdf_chemistry          2       day\n"
+				"        -hdf_velocity           100     day\n"
+				"END\n"
+				);
+			std::istringstream iss(str);
+
+			pInput = CPhastInput::New(iss, "testKindred4_4");
+			CPPUNIT_ASSERT(pInput != NULL);
+
+			pInput->Load();
+
+			if (pInput->GetErrorCount() != 0)
+			{
+				TRACE("%s\n", pInput->GetWarningMsg());
+				TRACE("%s\n", pInput->GetErrorMsg());
+			}
+			CPPUNIT_ASSERT(pInput->GetErrorCount()   == 0);
+
+			pInput->Delete();
+			pInput = NULL;
+		}
+	}
+	catch (...)
+	{
+		if (pInput)
+		{
+			pInput->Delete();
+		}
+		throw;
+	}
+}
+
+#include "srcinput/Zone_budget.h"
+void TestCPhastInput::testDescription(void)
+{
+	CPhastInput* pInput = NULL;
+	try
+	{
+		CMemoryState oldMemState, newMemState, diffMemState;
+		oldMemState.Checkpoint();
+		{
+			std::string str(
+				"ZONE_FLOW 3 Coonamessett River \n"
+				"-box 277000 814000  -200 277500  822000 20\n"
+				"-description Flux to Coonamessett River and nearby specified bc\n"
+				);
+			std::istringstream iss(str);
+
+			pInput = CPhastInput::New(iss, "testDescription");
+			CPPUNIT_ASSERT(pInput != NULL);
+
+			pInput->Read();
+			CPPUNIT_ASSERT(pInput->GetErrorCount() == 0);
+
+			//{{
+			std::map<int, Zone_budget*>::iterator it = Zone_budget::zone_budget_map.begin();
+			for (; it != Zone_budget::zone_budget_map.end(); ++it)
+			{
+				Zone_budget data(*it->second);
+				std::string s = *it->second->Get_polyh()->Get_description();
+// COMMENT: {9/1/2009 5:01:35 PM}				ASSERT(zb_map.find(it->second) != zb_map.end());
+// COMMENT: {9/1/2009 5:01:35 PM}				data.Set_polyh(zb_map[it->second] ? zb_map[it->second]->clone() : it->second->Get_polyh()->clone());
+// COMMENT: {9/1/2009 5:01:35 PM}
+// COMMENT: {9/1/2009 5:01:35 PM}				// not undoable
+// COMMENT: {9/1/2009 5:01:35 PM}				std::auto_ptr< CZoneCreateAction<CZoneFlowRateZoneActor> > pAction(
+// COMMENT: {9/1/2009 5:01:35 PM}					new CZoneCreateAction<CZoneFlowRateZoneActor>(
+// COMMENT: {9/1/2009 5:01:35 PM}						this,
+// COMMENT: {9/1/2009 5:01:35 PM}						it->second->Get_polyh(),
+// COMMENT: {9/1/2009 5:01:35 PM}						::grid_origin,
+// COMMENT: {9/1/2009 5:01:35 PM}						::grid_angle,
+// COMMENT: {9/1/2009 5:01:35 PM}						it->second->Get_polyh()->Get_description().c_str()
+// COMMENT: {9/1/2009 5:01:35 PM}						)
+// COMMENT: {9/1/2009 5:01:35 PM}					);
+// COMMENT: {9/1/2009 5:01:35 PM}				pAction->GetZoneActor()->SetData(data);
+// COMMENT: {9/1/2009 5:01:35 PM}				pAction->Execute();
+			}
+
+			//}}
+
+			// cleanup
+			pInput->Delete();
+			pInput = NULL;
+		}
+		newMemState.Checkpoint();
 	}
 	catch (...)
 	{

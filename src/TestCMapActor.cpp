@@ -46,15 +46,15 @@ void TestCMapActor::testSpin(void)
 	CMapActor *actor = CMapActor::New();
 	CPPUNIT_ASSERT(actor != NULL);
 
-	CSiteMap siteMap;
-	siteMap.m_fileName      = "ok1.bmp";
+	CSiteMap2 siteMap2;
+	siteMap2.FileName      = "ok1.bmp";
 
 	CWorldTransform wtrans;
 	wtrans.LoadWorldFile("ok1.bpw");
-	siteMap.SetWorldTransform(wtrans);
+	siteMap2.SetWorldTransform(wtrans);
 	// siteMap.SetWorldFileName("ok1.bpw"); // siteMap.m_worldFileName = "ok1.bpw";
 
-	actor->SetSiteMap(siteMap); // may throw
+	actor->SetSiteMap2(siteMap2); // may throw
 // COMMENT: {5/20/2004 2:54:06 PM}	CPPUNIT_ASSERT(actor->SetFileName("ok1.bmp") == 1);
 // COMMENT: {5/20/2004 2:54:06 PM}	CPPUNIT_ASSERT(actor->SetWorldFileName("ok1.bpw") == 1);
 

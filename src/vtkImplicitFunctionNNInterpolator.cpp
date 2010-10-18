@@ -123,10 +123,10 @@ float vtkImplicitFunctionNNInterpolator::EvaluateFunction(float x[3])
 // COMMENT: {5/5/2008 8:28:40 PM}	assert(cell->GetNumberOfPoints() == 3);
 // COMMENT: {5/5/2008 8:28:40 PM}	//{{
 // COMMENT: {5/5/2008 8:28:40 PM}	std::ostringstream oss;
-// COMMENT: {5/5/2008 8:28:40 PM}	cell->PrintSelf(oss, 1);
+// COMMENT: {5/5/2008 8:28:40 PM}	cell->PrintSelf(oss, vtkIndent(1));
 // COMMENT: {5/5/2008 8:28:40 PM}	::OutputDebugStringA(oss.str().c_str());
 // COMMENT: {5/5/2008 8:28:40 PM}	std::ostringstream oss2;
-// COMMENT: {5/5/2008 8:28:40 PM}	cell->GetPoints()->PrintSelf(oss2, 2);
+// COMMENT: {5/5/2008 8:28:40 PM}	cell->GetPoints()->PrintSelf(oss2, vtkIndent(2));
 // COMMENT: {5/5/2008 8:28:40 PM}	::OutputDebugStringA(oss2.str().c_str());
 // COMMENT: {5/5/2008 8:28:40 PM}	//}}
 // COMMENT: {5/5/2008 8:28:40 PM}	if (cell->IntersectWithLine(p1, p2, 1e-6, t, g, pcoords, subId))
