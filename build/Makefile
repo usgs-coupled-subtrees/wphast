@@ -27,7 +27,7 @@ TARBALL := $(NAME)-$(VERSION)-$(RELEASE).tar.gz
 
 BUILD_SCRIPT := $(NAME)-$(VERSION)-$(RELEASE).sh
 
-DEVENV := /cygdrive/c/Program\ Files\ \(x86\)/Microsoft\ Visual\ Studio\ 8/Common7/IDE/devenv
+DEVENV := devenv
 
 SLN := ../WPhast.sln
 

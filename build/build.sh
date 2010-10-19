@@ -153,9 +153,12 @@ build() {
     echo "Error: PHAST_BUILD is not set"; \
     exit 1; \
   fi && \
-  export phast_ser="`tar tvjf ${PHAST_BUILD} | egrep phast-ser.exe | sed 's/.* //'`" && \
-  tar xvjf ${PHAST_BUILD} $phast_ser && \
-  export PHAST_EXE_PATH="`cygpath -aw "$phast_ser"`" && \
+  export phast_msi="`tar tvjf ${PHAST_BUILD} | egrep phast.*.msi | egrep -v x64 | sed 's/.* //'`" && \
+  tar xvjf ${PHAST_BUILD} $phast_msi && \
+  7z x -y $phast_msi media.cab && \
+  extract /Y media.cab phast_ser.exe && \
+  mv -f phast_ser.exe phast-ser.exe && \
+  export PHAST_EXE_PATH="`cygpath -aw "phast-ser.exe"`" && \
   cd ${objdir}/setup && \
   make )
 }
