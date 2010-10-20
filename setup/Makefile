@@ -13,7 +13,6 @@ CANDLE = candle
 CANDLE_FLAGS=\
 	-nologo \
 	-dWPHAST_AUTOMATION \
-	-dMergeDir=$(MERGE_DIR) \
 	-dVS2005
 
 LIGHT = light
@@ -21,8 +20,6 @@ LIGHT_FLAGS=\
 	-nologo
 
 CSCRIPT = cscript
-
-MERGE_DIR := "%CommonProgramFiles%\Merge Modules"
 
 MSIVAL2 := /cygdrive/c/Program\ Files/MsiVal2/msival2
 
@@ -33,6 +30,11 @@ PHAST := $(PHAST_EXE_PATH)
 DEV_VTK42_VS8_DLL_BIN_CYG = /cygdrive/c/PROGRA~1/VTK-4-~1/bin
 
 DEV_HDF5_LIBDLL_CYG = /cygdrive/c/3RDPARTY/HDF5/5-143-~1/c/release/dll
+
+
+%.wphast : %.trans.dat $(WPHAST_EXE) $(HDF_DLLS) $(VTK_DLLS)
+	$(CSCRIPT) /NOLOGO import.vbs $<
+
 
 BINARIES=\
 	Binary/Banner.bmp\
@@ -116,9 +118,6 @@ $(WPHAST_EXE) : $(SLN)
 	$(DEVENV) /out AutoRelease.log /build AutoRelease $(SLN)
 	@cat AutoRelease.log
 	
-%.wphast : %.trans.dat $(WPHAST_EXE) $(HDF_DLLS) $(VTK_DLLS)
-	$(CSCRIPT) /NOLOGO import.vbs $<	
-
 install :
 	$(MSIEXEC) /i WPhast.msi /qn+ INSTALLLOCATION=C:\DOCUME~1\charlton\PROGRA~1\WPhast /log WPhast.log
 	

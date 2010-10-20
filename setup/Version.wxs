@@ -14,6 +14,11 @@
 <?define phastExePath="$(env.PHAST_EXE_PATH)"?>
 <?define xercesDllPath="$(env.DEV_XERCES)\bin"?>
 
+<?if $(env.PROCESSOR_ARCHITECTURE)=x86 ?>
+  <?define MergeDir="$(env.CommonProgramFiles)\Merge Modules"?>
+<?else?>
+  <?define MergeDir="$(env.CommonProgramFiles(x86))\Merge Modules"?>
+<?endif?>
 
 <?define Version=$(var.Major).$(var.Minor).$(var.Build)?>
 <?define Description="USGS $(var.Name) $(var.Major).$(var.Minor).$(var.Build) Installer"?>
