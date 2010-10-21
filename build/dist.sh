@@ -55,6 +55,7 @@ do
          -v)  VERSION="$ARG" ;;
          -r)  REVISION="$ARG" ;;
         -rs)  REVISION_SVN="$ARG" ;;
+        -rp)  REVISION_PHAST="$ARG" ;;
         -pr)  REPOS_PATH="$ARG" ;;
         -rc)  RC="$ARG" ;;
       -beta)  BETA="$ARG" ;;
@@ -85,6 +86,10 @@ done
 
 if [ -z "$REVISION_SVN" ]; then
   REVISION_SVN=$REVISION
+fi
+
+if [ -z "$REVISION_PHAST" ]; then
+  REVISION_PHAST=$REVISION
 fi
 
 if [ -n "$ALPHA" ] && [ -n "$BETA" ] ||
@@ -136,6 +141,7 @@ DISTPATH="$DIST_SANDBOX/$DISTNAME"
 echo "Distribution will be named: $DISTNAME"
 echo " release branch's revision: $REVISION"
 echo "     executable's revision: $REVISION_SVN"
+echo "          phast's revision: $REVISION_PHAST"
 echo "     constructed from path: /$REPOS_PATH"
 echo "              release date: $RELEASE_DATE"
 
@@ -150,17 +156,17 @@ echo "Exporting revision $REVISION of WPHAST into sandbox..."
 	     "$DISTNAME")
 
 (cd "$DIST_SANDBOX" && \
- 	${SVN:-svn} export -q $EXTRA_EXPORT_OPTIONS --ignore-externals -r "$REVISION" \
+ 	${SVN:-svn} export -q $EXTRA_EXPORT_OPTIONS --ignore-externals -r "$REVISION_PHAST" \
 	     "http://internalbrr.cr.usgs.gov/svn_GW/phastpp/trunk/src/phastinput" \
 	     "$DISTNAME/src/srcinput")
 
 (cd "$DIST_SANDBOX" && \
- 	${SVN:-svn} export -q $EXTRA_EXPORT_OPTIONS --ignore-externals -r "$REVISION" \
+ 	${SVN:-svn} export -q $EXTRA_EXPORT_OPTIONS --ignore-externals -r "$REVISION_PHAST" \
 	     "http://internalbrr.cr.usgs.gov/svn_GW/phastpp/trunk/examples" \
 	     "$DISTNAME/setup/phast/examples")
 
 (cd "$DIST_SANDBOX" && \
- 	${SVN:-svn} export -q $EXTRA_EXPORT_OPTIONS --ignore-externals -r "$REVISION" \
+ 	${SVN:-svn} export -q $EXTRA_EXPORT_OPTIONS --ignore-externals -r "$REVISION_PHAST" \
 	     "http://internalbrr.cr.usgs.gov/svn_GW/phastpp/trunk/doc" \
 	     "$DISTNAME/setup/phast/doc")
 

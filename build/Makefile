@@ -21,6 +21,8 @@ FORCE_UPDATE := $(shell svn up ..)
 
 RELEASE ?= $(shell svn st -v dist.sh | cut -b 10- | ( read one two ; echo $$one ) )
 
+REVISION_PHAST ?= $(RELEASE)
+
 DATE_STAMP := $(shell date -d $(DATE) "+%m-%d-%Y")
 
 TARBALL := $(NAME)-$(VERSION)-$(RELEASE).tar.gz
@@ -73,7 +75,7 @@ source : check_args $(TARBALL)
 
 $(TARBALL) : dist.sh $(DATE_STAMP).tstamp
 	@echo "Creating $(TARBALL)"
-	time ./dist.sh -v $(VERSION) -r $(RELEASE) -d $(DATE) -pr $(REPOS_PATH) 2>&1 | tee dist-$(RELEASE).log
+	time ./dist.sh -v $(VERSION) -r $(RELEASE) -rp $(REVISION_PHAST) -d $(DATE) -pr $(REPOS_PATH) 2>&1 | tee dist-$(RELEASE).log
 	
 script : check_version $(BUILD_SCRIPT)	
 	@echo "created $(BUILD_SCRIPT)"
@@ -117,7 +119,7 @@ endif
 
 usage:
 	@echo ""
-	@echo "usage: make VERSION=<number> DATE=<xx/xx/xxxx> PHAST_BUILD=<file> [RELEASE=<number>] [SIG=<0|1>]"
+	@echo "usage: make VERSION=<number> DATE=<xx/xx/xxxx> PHAST_BUILD=<file> [RELEASE=<number>] [REVISION_PHAST=<number>] [SIG=<0|1>]"
 	@echo "    ie make VERSION=0.1 DATE=10/24/2005 PHAST_BUILD=phast-1.2-577.tar.bz2"
-	@echo "       make VERSION=0.1 DATE=10/24/2005 PHAST_BUILD=phast-1.2-577.tar.bz2 RELEASE=620 SIG=1"
+	@echo "       make VERSION=0.1 DATE=10/24/2005 PHAST_BUILD=phast-1.2-577.tar.bz2 RELEASE=620 REVISION_PHAST=577 SIG=1"
 	@echo ""
