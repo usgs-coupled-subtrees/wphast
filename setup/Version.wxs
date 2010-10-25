@@ -1,5 +1,6 @@
 <Include>
 <?define Name=Phast for Windows?>
+<?define NameNS=Phast_for_Windows?>
 <?define Major=0?>
 <?define Minor=1?>
 <?define Build=581?>
@@ -26,5 +27,5 @@
 <?define PrgMenu="$(var.Name) $(var.Major).$(var.Minor)"?>
 <?define Shortcut="$(var.Name) $(var.Major).$(var.Minor)"?>
 <?define FeatureTitle="$(var.Name) $(var.Major).$(var.Minor).$(var.Build)"?>
-<?define Cabinet=$(var.Name).cab?>
+<?define Cabinet=$(var.NameNS).cab?>
 </Include>
