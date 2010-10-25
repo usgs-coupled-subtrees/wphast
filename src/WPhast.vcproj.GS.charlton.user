@@ -39,7 +39,7 @@
 			<DebugSettings
 				Command="$(TargetPath)"
 				WorkingDirectory=""
-				CommandArguments="&quot;C:\cygwin\home\charlton\programs\phreeqc\wphast-trunk\Class\7.Phast\CapeCodPhast\flow.28.wphast&quot;"
+				CommandArguments=""
 				Attach="false"
 				DebuggerType="3"
 				Remote="1"

@@ -33,7 +33,7 @@ void CStartupDialog::DoDataExchange(CDataExchange* pDX)
 		case IDC_OPEN_FILE:
 			this->m_nAction = CStartupDialog::SDA_OPEN_FILE;
 			{
-				char szFilters[] = "WPhast Files (*.wphast)|*.wphast||";
+				char szFilters[] = "Phast for Windows Files (*.wphast)|*.wphast|All Files (*.*)|*.*||";
 
 				CFileDialog fileDlg(TRUE, "wphast", "*.wphast",
 					OFN_FILEMUSTEXIST | OFN_HIDEREADONLY, szFilters, this, 0);
@@ -52,7 +52,7 @@ void CStartupDialog::DoDataExchange(CDataExchange* pDX)
 		case IDC_IMPORT_TRANS:
 			this->m_nAction = CStartupDialog::SDA_IMPORT_FILE;
 			{
-				char szFilters[] = "Phast Transport Files (*.trans.dat)|*.trans.dat||";
+				char szFilters[] = "Phast Transport Files (*.trans.dat)|*.trans.dat|All Files (*.*)|*.*||";
 
 				CFileDialog fileDlg(TRUE, "trans.dat", "*.trans.dat",
 					OFN_FILEMUSTEXIST | OFN_HIDEREADONLY, szFilters, this, 0);

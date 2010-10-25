@@ -194,7 +194,7 @@ BEGIN
     END
     POPUP "&Help"
     BEGIN
-        MENUITEM "&About WPhast...",            ID_APP_ABOUT
+        MENUITEM "&About Phast for Windows...", ID_APP_ABOUT
     END
 END
 
@@ -241,7 +241,7 @@ BEGIN
     END
     POPUP "&Help"
     BEGIN
-        MENUITEM "&About WPhast...",            ID_APP_ABOUT
+        MENUITEM "&About Phast for Windows...", ID_APP_ABOUT
     END
 END
 
@@ -369,7 +369,7 @@ BEGIN
     END
     POPUP "&Help"
     BEGIN
-        MENUITEM "&About WPhast...",            57664
+        MENUITEM "&About Phast for Windows...", 57664
     END
 END
 
@@ -575,14 +575,14 @@ END
 // Dialog
 //
 
-IDD_ABOUTBOX DIALOGEX 0, 0, 235, 66
+IDD_ABOUTBOX DIALOGEX 0, 0, 257, 66
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_CAPTION | WS_SYSMENU
-CAPTION "About WPhast"
+CAPTION "About Phast for Windows"
 FONT 8, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
-    ICON            IDR_MAINFRAME,IDC_STATIC,7,14,20,20
-    LTEXT           "WPhast Version @VERSION_LONG@",IDC_STATIC,37,13,128,8,SS_NOPREFIX
-    DEFPUSHBUTTON   "OK",IDOK,178,7,50,16,WS_GROUP
+    ICON            IDR_MAINFRAME,IDC_STATIC,7,14,21,20
+    LTEXT           "Phast for Windows Version @VERSION_LONG@",IDC_STATIC,37,13,163,8,SS_NOPREFIX
+    DEFPUSHBUTTON   "OK",IDOK,200,7,50,16,WS_GROUP
     LTEXT           "Released: @RELEASE_DATE@",IDC_STATIC,37,30,98,8
 END
 
@@ -2986,7 +2986,7 @@ BEGIN
     IDD_ABOUTBOX, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 228
+        RIGHTMARGIN, 250
         TOPMARGIN, 7
         BOTTOMMARGIN, 59
     END
@@ -4508,11 +4508,11 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDR_MAINFRAME           "WPhast"
+    IDR_MAINFRAME           "Phast for Windows"
     IDR_WPhastTYPE          "\nWPhast\nWPhast\nWPhast Files (*.wphast)\n.wphast\nWPhast.Document\nWPhast.Document"
     ID_VIEW_RESETDEFAULTLAYOUT "Resets all toolbars to their original state"
     ID_INDICATOR_XYZ        "                                                                                "
-    IDR_MAINFRAME_SDI       "WPhast\n\nWPhast\nWPhast Files (*.wphast)\n.wphast\nWPhast.Document\nWPhast.Document"
+    IDR_MAINFRAME_SDI       "Phast for Windows\n\nPhast for Windows\nPhast for Windows Files (*.wphast)\n.wphast\nPhast.Document\nPhast for Windows Document"
     IDS_IMPORT_PHAST_TRANS_133 "Select Phast Transport File to Import from"
     ID_TOOLS_NEWZONE        "Creates a new zone\nCreate new zone"
     IDS_MEDIA_PROPS_WIZ_135 "Define media properties for this zone"
@@ -4528,7 +4528,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    AFX_IDS_APP_TITLE       "WPhast"
+    AFX_IDS_APP_TITLE       "Phast for Windows"
     AFX_IDS_IDLEMESSAGE     "Ready"
 END
 

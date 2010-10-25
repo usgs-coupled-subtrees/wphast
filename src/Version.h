@@ -16,7 +16,7 @@
 
 
 
-#define PRODUCT_NAME       "WPhast" \
+#define PRODUCT_NAME       "Phast for Windows" \
                        "-" APR_STRINGIFY(VER_MAJOR) \
                        "." APR_STRINGIFY(VER_MINOR) \
                        "." APR_STRINGIFY(VER_REVISION)
