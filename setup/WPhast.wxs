@@ -54,8 +54,8 @@
                   <Shortcut Id="S__WPhast" Directory="D_PrgMenu.2FB136FF_6AAD_442A_A6EB_99511F1CDF82" Name='$(var.Shortcut)' Icon="WPhast.exe" IconIndex="0" />
                 </File>
                 <File Id='F__phast.exe' Name='phast.exe' DiskId='1' Source='$(var.phastExePath)' Vital='yes' Checksum='yes'/>
-                <Class Id="36353903-2137-43FD-9AD6-40B65A96A839" Context="LocalServer32" Description="WPhast.Document" Advertise="yes">
-                  <ProgId Id="WPhast.Document" Description="WPhast.Document">
+                <Class Id="36353903-2137-43FD-9AD6-40B65A96A839" Context="LocalServer32" Description="Phast for Windows Document" Advertise="yes">
+                  <ProgId Id="Phast.Document" Description="Phast.Document">
                     <Extension Id="wphast">
                       <Verb Id="open" Argument='"%1"'/>
                       <Verb Id="print" Argument='/p "%1"'/>
