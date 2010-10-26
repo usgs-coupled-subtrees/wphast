@@ -356,7 +356,7 @@ void CChemICPropertyPage::OnTvnSelchangingPropTree(NMHDR *pNMHDR, LRESULT *pResu
 
 LRESULT CChemICPropertyPage::OnUM_DDXFailure(WPARAM wParam, LPARAM lParam)
 {
-	// DDX/DDV failure occured
+	// DDX/DDV failure occurred
 	//
 	CWnd* pFocus = (CWnd*)wParam;
 	ASSERT_KINDOF(CWnd, pFocus);

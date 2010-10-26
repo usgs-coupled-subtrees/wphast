@@ -327,7 +327,7 @@ void CICChemPropsPage::OnPageTreeSelChanged(NMHDR *pNotifyStruct, LRESULT *pResu
 LRESULT CICChemPropsPage::OnUM_DDXFailure(WPARAM wParam, LPARAM lParam)
 {
 	TRACE("In %s\n", __FUNCTION__);
-	// DDX/DDV failure occured
+	// DDX/DDV failure occurred
 	//
 	CWnd* pFocus = (CWnd*)wParam;
 	ASSERT_KINDOF(CWnd, pFocus);

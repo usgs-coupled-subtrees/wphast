@@ -348,7 +348,7 @@ void CFluxPropsPage::OnPageTreeSelChanged(NMHDR *pNotifyStruct, LRESULT *pResult
 LRESULT CFluxPropsPage::OnUM_DDXFailure(WPARAM wParam, LPARAM lParam)
 {
 	TRACE("In %s\n", __FUNCTION__);
-	// DDX/DDV failure occured
+	// DDX/DDV failure occurred
 	//
 	CWnd* pFocus = (CWnd*)wParam;
 	ASSERT_KINDOF(CWnd, pFocus);

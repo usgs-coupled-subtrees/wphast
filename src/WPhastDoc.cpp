@@ -759,7 +759,7 @@ void CWPhastDoc::Serialize(CArchive& ar)
 		//
 		CDelayRedraw delayRender(::AfxGetMainWnd()->GetActiveWindow(), this);
 
-		// This fixes the BUG that occured when creating a new document
+		// This fixes the BUG that occurred when creating a new document
 		// and then opening an existing document causing a crash in 
 		// CWPhastView::Select() called from CWPhastView::Update the
 		// CWPhastView::CurrentProp had probably been deleted
@@ -2594,7 +2594,7 @@ void CWPhastDoc::OnFileImport()
 		CDelayRedraw del3(this->GetBoxPropertiesDialogBar());
 		if (!this->DoImport(szPath))
 		{
-			::AfxMessageBox("An error occured during the import", MB_OK);
+			::AfxMessageBox("An error occurred during the import", MB_OK);
 			this->SetModifiedFlag(FALSE);
 		}
 // COMMENT: {9/10/2009 10:39:36 PM}		this->ResetCamera();
@@ -3085,7 +3085,7 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 #if !defined(_DEBUG)
 	catch (...)
 	{
-		::AfxMessageBox("An unknown error occured during import", MB_OK|MB_ICONEXCLAMATION);
+		::AfxMessageBox("An unknown error occurred during import", MB_OK|MB_ICONEXCLAMATION);
 		bReturnValue = FALSE;
 	}
 #endif
@@ -3196,7 +3196,7 @@ void CWPhastDoc::OnFileExport()
 	this->DataSourcePathsAbsoluteToRelative(strPath);
 	if (!this->DoExport(strPath))
 	{
-		::AfxMessageBox("An error occured during the export", MB_OK);
+		::AfxMessageBox("An error occurred during the export", MB_OK);
 // COMMENT: {8/7/2008 4:03:09 PM}		this->SetModifiedFlag(FALSE);
 	}
 	this->DataSourcePathsRelativeToAbsolute(strPath);
@@ -3807,7 +3807,7 @@ void CWPhastDoc::OnFileRun()
 	}
 	catch (...)
 	{
-		::AfxMessageBox("An unknown error occured during the run.", MB_OK|MB_ICONEXCLAMATION);
+		::AfxMessageBox("An unknown error occurred during the run.", MB_OK|MB_ICONEXCLAMATION);
 	}
 	pInput->Delete();
 
@@ -6395,7 +6395,7 @@ void CWPhastDoc::OnToolsNewPrism()
 				}
 				catch (...)
 				{
-					::AfxMessageBox("An unknown error occured while loading perimeter file.", MB_OK|MB_ICONEXCLAMATION);
+					::AfxMessageBox("An unknown error occurred while loading perimeter file.", MB_OK|MB_ICONEXCLAMATION);
 					delete p;
 				}
 

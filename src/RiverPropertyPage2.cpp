@@ -957,7 +957,7 @@ void CRiverPropertyPage2::OnTvnSelchangedPropTree(NMHDR *pNMHDR, LRESULT *pResul
 
 LRESULT CRiverPropertyPage2::OnUM_DDXFailure(WPARAM wParam, LPARAM lParam)
 {
-	// DDX/DDV failure occured
+	// DDX/DDV failure occurred
 	//
 	CWnd* pFocus = (CWnd*)wParam;
 	if (pFocus)

@@ -284,7 +284,7 @@ CWPhastView::~CWPhastView()
 
 // COMMENT: {9/18/2009 9:57:24 PM}#if !((VTK_MAJOR_VERSION >= 5) && (VTK_MINOR_VERSION >= 4))
 	// this allows RemoveObserver of the Interactor of CPointConnectorActor to be called for the EventCallbackCommand
-	// fixing a crash that sometimes occured during program exit
+	// fixing a crash that sometimes occurred during program exit
 	//
 	if (CWPhastDoc *pDoc = this->GetDocument())
 	{

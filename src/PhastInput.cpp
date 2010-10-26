@@ -247,7 +247,7 @@ long ExceptionFilter(unsigned long dwExceptionCode)
 		lReturn = EXCEPTION_EXECUTE_HANDLER;
 		break;
 	default :
-		// a hardware exception has occured
+		// a hardware exception has occurred
 		switch (dwExceptionCode)
 		{
 		case EXCEPTION_ACCESS_VIOLATION :

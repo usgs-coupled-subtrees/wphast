@@ -608,7 +608,7 @@ void CDrainPropertyPage::OnTvnSelchangedPropTree(NMHDR *pNMHDR, LRESULT *pResult
 
 LRESULT CDrainPropertyPage::OnUM_DDXFailure(WPARAM wParam, LPARAM lParam)
 {
-	// DDX/DDV failure occured
+	// DDX/DDV failure occurred
 	//
 	CWnd* pFocus = (CWnd*)wParam;
 	if (pFocus)

@@ -443,7 +443,7 @@ void CMediaPropertyPage::OnTvnSelchangingPropTree(NMHDR *pNMHDR, LRESULT *pResul
 
 LRESULT CMediaPropertyPage::OnUM_DDXFailure(WPARAM wParam, LPARAM lParam)
 {
-	// DDX/DDV failure occured
+	// DDX/DDV failure occurred
 	//
 	CWnd* pFocus = (CWnd*)wParam;
 	ASSERT_KINDOF(CWnd, pFocus);
