@@ -844,6 +844,8 @@
 #define IDC_SPEC_HEAD_BTN               1416
 #define IDC_RIVER_BTN                   1417
 #define IDC_RIVER_BTN2                  1418
+#define IDC_CHEM_IC_BTN2                1418
+#define IDC_ZONE_FLOW_BTN               1418
 #define IDC_WELL_BTN                    1419
 #define IDC_STATIC_WELL_X               1420
 #define IDC_WELL_BTN2                   1421

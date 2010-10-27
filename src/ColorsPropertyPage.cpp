@@ -37,6 +37,9 @@ CColorsPropertyPage::CColorsPropertyPage()
 	// Wells (light purple)
 	this->m_wellColorPicker.SetDefaultText(_T(""));
 
+	// Zone flow (magenta)
+	this->m_zoneFlowColorPicker.SetDefaultText(_T(""));
+
 	// Background (black)
 	this->m_bgColorPicker.SetDefaultText(_T(""));	
 }
@@ -80,6 +83,10 @@ void CColorsPropertyPage::DoDataExchange(CDataExchange* pDX)
 	// Wells
     DDX_Control(pDX, IDC_WELL_BTN, m_wellColorPicker);
     DDX_ColourPicker(pDX, IDC_WELL_BTN, m_colors.crWell);
+
+	// Zone flow (magenta)
+    DDX_Control(pDX, IDC_ZONE_FLOW_BTN, m_zoneFlowColorPicker);
+    DDX_ColourPicker(pDX, IDC_ZONE_FLOW_BTN, m_colors.crZoneFlowRate);
 
 	// Background
     DDX_Control(pDX, IDC_BG_BTN, m_bgColorPicker);
