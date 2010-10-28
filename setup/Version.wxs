@@ -28,4 +28,5 @@
 <?define Shortcut="$(var.Name) $(var.Major).$(var.Minor)"?>
 <?define FeatureTitle="$(var.Name) $(var.Major).$(var.Minor).$(var.Build)"?>
 <?define Cabinet=$(var.NameNS).cab?>
+<?define ExampleDir=phast\examples?>
 </Include>

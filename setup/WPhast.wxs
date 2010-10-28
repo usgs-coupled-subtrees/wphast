@@ -262,6 +262,119 @@
                   <File Id="F__phast.dat.ex4_transient" Name="phast.dat" Source="phast\examples\ex4_transient\phast.dat" />
                 </Component>
               </Directory>
+              <Directory Id="ex5" Name="ex5">
+                <Component Id="ex5.head.200.dat" Guid="*">
+                  <File Id="ex5.head.200.dat" KeyPath="yes" Source="$(var.ExampleDir)\ex5\ex5.head.200.dat" />
+                </Component>
+                <Component Id="ex5.trans.dat" Guid="*">
+                  <File Id="ex5.trans.dat" KeyPath="yes" Source="$(var.ExampleDir)\ex5\ex5.trans.dat" />
+                </Component>
+                <Directory Id="ArcData" Name="ArcData">
+                  <Component Id="Ashumet.dbf" Guid="*">
+                    <File Id="Ashumet.dbf" KeyPath="yes" Source="$(var.ExampleDir)\ex5\ArcData\Ashumet.dbf" />
+                  </Component>
+                  <Component Id="Ashumet.shp" Guid="*">
+                    <File Id="Ashumet.shp" KeyPath="yes" Source="$(var.ExampleDir)\ex5\ArcData\Ashumet.shp" />
+                  </Component>
+                  <Component Id="Ashumet.shx" Guid="*">
+                    <File Id="Ashumet.shx" KeyPath="yes" Source="$(var.ExampleDir)\ex5\ArcData\Ashumet.shx" />
+                  </Component>
+                  <Component Id="AshumetBath.dbf" Guid="*">
+                    <File Id="AshumetBath.dbf" KeyPath="yes" Source="$(var.ExampleDir)\ex5\ArcData\AshumetBath.dbf" />
+                  </Component>
+                  <Component Id="AshumetBath.shp" Guid="*">
+                    <File Id="AshumetBath.shp" KeyPath="yes" Source="$(var.ExampleDir)\ex5\ArcData\AshumetBath.shp" />
+                  </Component>
+                  <Component Id="AshumetBath.shx" Guid="*">
+                    <File Id="AshumetBath.shx" KeyPath="yes" Source="$(var.ExampleDir)\ex5\ArcData\AshumetBath.shx" />
+                  </Component>
+                  <Component Id="bedrock.txt" Guid="*">
+                    <File Id="bedrock.txt" KeyPath="yes" Source="$(var.ExampleDir)\ex5\ArcData\bedrock.txt" />
+                  </Component>
+                  <Component Id="Coona.dbf" Guid="*">
+                    <File Id="Coona.dbf" KeyPath="yes" Source="$(var.ExampleDir)\ex5\ArcData\Coona.dbf" />
+                  </Component>
+                  <Component Id="Coona.shp" Guid="*">
+                    <File Id="Coona.shp" KeyPath="yes" Source="$(var.ExampleDir)\ex5\ArcData\Coona.shp" />
+                  </Component>
+                  <Component Id="Coona.shx" Guid="*">
+                    <File Id="Coona.shx" KeyPath="yes" Source="$(var.ExampleDir)\ex5\ArcData\Coona.shx" />
+                  </Component>
+                  <Component Id="CoonaBath.dbf" Guid="*">
+                    <File Id="CoonaBath.dbf" KeyPath="yes" Source="$(var.ExampleDir)\ex5\ArcData\CoonaBath.dbf" />
+                  </Component>
+                  <Component Id="CoonaBath.shp" Guid="*">
+                    <File Id="CoonaBath.shp" KeyPath="yes" Source="$(var.ExampleDir)\ex5\ArcData\CoonaBath.shp" />
+                  </Component>
+                  <Component Id="CoonaBath.shx" Guid="*">
+                    <File Id="CoonaBath.shx" KeyPath="yes" Source="$(var.ExampleDir)\ex5\ArcData\CoonaBath.shx" />
+                  </Component>
+                  <Component Id="ModelExtent.dbf" Guid="*">
+                    <File Id="ModelExtent.dbf" KeyPath="yes" Source="$(var.ExampleDir)\ex5\ArcData\ModelExtent.dbf" />
+                  </Component>
+                  <Component Id="ModelExtent.shp" Guid="*">
+                    <File Id="ModelExtent.shp" KeyPath="yes" Source="$(var.ExampleDir)\ex5\ArcData\ModelExtent.shp" />
+                  </Component>
+                  <Component Id="ModelExtent.shx" Guid="*">
+                    <File Id="ModelExtent.shx" KeyPath="yes" Source="$(var.ExampleDir)\ex5\ArcData\ModelExtent.shx" />
+                  </Component>
+                  <Component Id="OffShore.dbf" Guid="*">
+                    <File Id="OffShore.dbf" KeyPath="yes" Source="$(var.ExampleDir)\ex5\ArcData\OffShore.dbf" />
+                  </Component>
+                  <Component Id="OffShore.shp" Guid="*">
+                    <File Id="OffShore.shp" KeyPath="yes" Source="$(var.ExampleDir)\ex5\ArcData\OffShore.shp" />
+                  </Component>
+                  <Component Id="OffShore.shx" Guid="*">
+                    <File Id="OffShore.shx" KeyPath="yes" Source="$(var.ExampleDir)\ex5\ArcData\OffShore.shx" />
+                  </Component>
+                  <Component Id="OnShore.dbf" Guid="*">
+                    <File Id="OnShore.dbf" KeyPath="yes" Source="$(var.ExampleDir)\ex5\ArcData\OnShore.dbf" />
+                  </Component>
+                  <Component Id="OnShore.shp" Guid="*">
+                    <File Id="OnShore.shp" KeyPath="yes" Source="$(var.ExampleDir)\ex5\ArcData\OnShore.shp" />
+                  </Component>
+                  <Component Id="OnShore.shx" Guid="*">
+                    <File Id="OnShore.shx" KeyPath="yes" Source="$(var.ExampleDir)\ex5\ArcData\OnShore.shx" />
+                  </Component>
+                  <Component Id="SimpleBath.dbf" Guid="*">
+                    <File Id="SimpleBath.dbf" KeyPath="yes" Source="$(var.ExampleDir)\ex5\ArcData\SimpleBath.dbf" />
+                  </Component>
+                  <Component Id="SimpleBath.shp" Guid="*">
+                    <File Id="SimpleBath.shp" KeyPath="yes" Source="$(var.ExampleDir)\ex5\ArcData\SimpleBath.shp" />
+                  </Component>
+                  <Component Id="SimpleBath.shx" Guid="*">
+                    <File Id="SimpleBath.shx" KeyPath="yes" Source="$(var.ExampleDir)\ex5\ArcData\SimpleBath.shx" />
+                  </Component>
+                  <Component Id="SimplePonds.dbf" Guid="*">
+                    <File Id="SimplePonds.dbf" KeyPath="yes" Source="$(var.ExampleDir)\ex5\ArcData\SimplePonds.dbf" />
+                  </Component>
+                  <Component Id="SimplePonds.shp" Guid="*">
+                    <File Id="SimplePonds.shp" KeyPath="yes" Source="$(var.ExampleDir)\ex5\ArcData\SimplePonds.shp" />
+                  </Component>
+                  <Component Id="SimplePonds.shx" Guid="*">
+                    <File Id="SimplePonds.shx" KeyPath="yes" Source="$(var.ExampleDir)\ex5\ArcData\SimplePonds.shx" />
+                  </Component>
+                </Directory>
+                <Directory Id="Parameters" Name="Parameters">
+                  <Component Id="kh_meters" Guid="*">
+                    <File Id="kh_meters" KeyPath="yes" Source="$(var.ExampleDir)\ex5\Parameters\kh_meters" />
+                  </Component>
+                  <Component Id="kz_meters" Guid="*">
+                    <File Id="kz_meters" KeyPath="yes" Source="$(var.ExampleDir)\ex5\Parameters\kz_meters" />
+                  </Component>
+                </Directory>
+              </Directory>
+              <Directory Id="ex6" Name="ex6">
+                <Component Id="ex6.chem.dat" Guid="*">
+                  <File Id="ex6.chem.dat" KeyPath="yes" Source="$(var.ExampleDir)\ex6\ex6.chem.dat" />
+                </Component>
+                <Component Id="ex6.trans.dat" Guid="*">
+                  <File Id="ex6.trans.dat" KeyPath="yes" Source="$(var.ExampleDir)\ex6\ex6.trans.dat" />
+                </Component>
+                <Component Id="phast.dat_14" Guid="*">
+                  <File Id="phast.dat_14" KeyPath="yes" Source="$(var.ExampleDir)\ex6\phast.dat" />
+                </Component>
+              </Directory>
               <Directory Id="D__kindred4.4" Name="kindred4.4">
                 <Component Id="C__kindred4.4" Guid='3BEF4DD7-F272-4d7e-9B42-A64C56FA802D' DiskId="1">
                   <File Id="F__kindred4.4.chem.dat"  Name="kindred4.4.chem.dat" Source="phast\examples\kindred4.4\kindred4.4.chem.dat" />
@@ -430,6 +543,46 @@
         <ComponentRef Id='C__ex4_noedl' />
         <ComponentRef Id='C__ex4_start_time' />
         <ComponentRef Id='C__ex4_transient' />
+
+        <!-- ex5 -->
+        <ComponentRef Id="ex5.head.200.dat" />
+        <ComponentRef Id="ex5.trans.dat" />
+        <ComponentRef Id="Ashumet.dbf" />
+        <ComponentRef Id="Ashumet.shp" />
+        <ComponentRef Id="Ashumet.shx" />
+        <ComponentRef Id="AshumetBath.dbf" />
+        <ComponentRef Id="AshumetBath.shp" />
+        <ComponentRef Id="AshumetBath.shx" />
+        <ComponentRef Id="bedrock.txt" />
+        <ComponentRef Id="Coona.dbf" />
+        <ComponentRef Id="Coona.shp" />
+        <ComponentRef Id="Coona.shx" />
+        <ComponentRef Id="CoonaBath.dbf" />
+        <ComponentRef Id="CoonaBath.shp" />
+        <ComponentRef Id="CoonaBath.shx" />
+        <ComponentRef Id="ModelExtent.dbf" />
+        <ComponentRef Id="ModelExtent.shp" />
+        <ComponentRef Id="ModelExtent.shx" />
+        <ComponentRef Id="OffShore.dbf" />
+        <ComponentRef Id="OffShore.shp" />
+        <ComponentRef Id="OffShore.shx" />
+        <ComponentRef Id="OnShore.dbf" />
+        <ComponentRef Id="OnShore.shp" />
+        <ComponentRef Id="OnShore.shx" />
+        <ComponentRef Id="SimpleBath.dbf" />
+        <ComponentRef Id="SimpleBath.shp" />
+        <ComponentRef Id="SimpleBath.shx" />
+        <ComponentRef Id="SimplePonds.dbf" />
+        <ComponentRef Id="SimplePonds.shp" />
+        <ComponentRef Id="SimplePonds.shx" />
+        <ComponentRef Id="kh_meters" />
+        <ComponentRef Id="kz_meters" />
+        
+        <!-- ex6 -->
+        <ComponentRef Id="ex6.chem.dat" />
+        <ComponentRef Id="ex6.trans.dat" />
+        <ComponentRef Id="phast.dat_14" />
+        
         <ComponentRef Id='C__kindred4.4' />
         <ComponentRef Id='C__leaky' />
         <ComponentRef Id='C__leakysurface' />

@@ -18,6 +18,7 @@ clsid = "{36353903-2137-43FD-9AD6-40B65A96A839}"
 classes = "HKEY_CURRENT_USER\Software\Classes\"
 doc = "Testing.WPhast.Document"
 exepath = scriptdir & "..\src\AutoRelease\WPhast.exe"
+''!!exepath = scriptdir & "..\src\cppunit\WPhast.exe"
 
 Set Fso = CreateObject("Scripting.FileSystemObject")
 exepath  = Fso.GetAbsolutePathName(exepath)
@@ -112,6 +113,8 @@ Set trans_dat_file = Fso.GetFile(WScript.Arguments(0))
 wphast_file = Mid(trans_dat_file, 1, Len(trans_dat_file) - Len(".trans.dat")) & ".wphast"
 
 Set WPhast = WScript.CreateObject("Testing.WPhast.Document")
+
+'''WPhast.Visible = True
 
 If WPhast.Import(trans_dat_file.Path) Then
 	WPhast.SaveAs(wphast_file)

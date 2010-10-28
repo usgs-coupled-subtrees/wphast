@@ -2953,7 +2953,10 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 			ASSERT(zb_map[it->second] || it->second->Get_polyh());
 			if (zb_map[it->second] == 0 && it->second->Get_polyh() == 0)
 			{
-				::AfxMessageBox("Warning: Empty ZONE_FLOW Not Implemented");
+				if (::AfxGetMainWnd()->IsWindowVisible())
+				{
+					::AfxMessageBox("Warning: Empty ZONE_FLOW Not Implemented");
+				}
 			}
 			else
 			{
@@ -4891,8 +4894,10 @@ VARIANT CWPhastDoc::Import(const VARIANT& FileName)
 			vaResult.boolVal = VARIANT_TRUE;
 			this->SetModifiedFlag(FALSE);
 		}
-		if (::AfxGetMainWnd()->IsWindowVisible())
+		////if (::AfxGetMainWnd()->IsWindowVisible())
 		{
+			// must always call this otherwise there may be problems
+			// with serializing prisms (parts lose reference counts)
 			this->ExecutePipeline();
 		}
 	}

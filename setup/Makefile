@@ -66,6 +66,8 @@ WPHAST_FILES=\
 	$(EXAMPLES)/ex4restart/ex4restart.wphast\
 	$(EXAMPLES)/ex4_start_time/ex4_start_time.wphast\
 	$(EXAMPLES)/ex4_transient/ex4_transient.wphast\
+	$(EXAMPLES)/ex5/ex5.wphast\
+	$(EXAMPLES)/ex6/ex6.wphast\
 	$(EXAMPLES)/kindred4.4/kindred4.4.wphast\
 	$(EXAMPLES)/leaky/leaky.wphast\
 	$(EXAMPLES)/leakysurface/leakysurface.wphast\
