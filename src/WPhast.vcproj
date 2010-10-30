@@ -6321,6 +6321,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\res\bmp00001.bmp"
+				>
+			</File>
+			<File
 				RelativePath="res\checks.bmp"
 				>
 			</File>
@@ -6486,6 +6490,10 @@
 			</File>
 			<File
 				RelativePath=".\res\mainfram.bmp"
+				>
+			</File>
+			<File
+				RelativePath=".\res\mainfram3.bmp"
 				>
 			</File>
 			<File

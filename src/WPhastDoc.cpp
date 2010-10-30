@@ -3075,20 +3075,29 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 	}
 	catch (int)
 	{
-		CImportErrorDialog dlg;
-		dlg.m_lpszErrorMessages = pInput->GetErrorMsg();
-		dlg.DoModal();
+		if (::AfxGetMainWnd()->IsWindowVisible())
+		{
+			CImportErrorDialog dlg;
+			dlg.m_lpszErrorMessages = pInput->GetErrorMsg();
+			dlg.DoModal();
+		}
 		bReturnValue = FALSE;
 	}
 	catch (const char * error)
 	{
-		::AfxMessageBox(error, MB_OK|MB_ICONEXCLAMATION);
+		if (::AfxGetMainWnd()->IsWindowVisible())
+		{
+			::AfxMessageBox(error, MB_OK|MB_ICONEXCLAMATION);
+		}
 		bReturnValue = FALSE;
 	}
 #if !defined(_DEBUG)
 	catch (...)
 	{
-		::AfxMessageBox("An unknown error occurred during import", MB_OK|MB_ICONEXCLAMATION);
+		if (::AfxGetMainWnd()->IsWindowVisible())
+		{
+			::AfxMessageBox("An unknown error occurred during import", MB_OK|MB_ICONEXCLAMATION);
+		}
 		bReturnValue = FALSE;
 	}
 #endif
@@ -5950,6 +5959,15 @@ void CWPhastDoc::NewZoneListener(vtkObject *caller, unsigned long eid, void *cli
 			std::set<int> usedZoneFlowRatesNumbers;
 			self->GetUsedZoneFlowRates(usedZoneFlowRatesNumbers);
 			zoneFlowRateProps.SetUsedZoneFlowRates(usedZoneFlowRatesNumbers);
+
+			// set units
+			mediaProps.SetUnits(self->GetUnits());
+			fluxProps.SetUnits(self->GetUnits());
+			leakyProps.SetUnits(self->GetUnits());
+			specifiedProps.SetUnits(self->GetUnits());
+			headProps.SetUnits(self->GetUnits());
+			chemICProps.SetUnits(self->GetUnits());
+			//zoneFlowRateProps.SetUnits(self->GetUnits());
 
 			sheet.AddPage(&newZone);
 			sheet.AddPage(&mediaProps);

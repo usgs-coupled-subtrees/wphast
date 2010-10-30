@@ -371,6 +371,7 @@
 #define IDD_PROP_PROPPAGE1              404
 #define IDR_TOOLBAR1                    404
 #define IDD_PROP_PROPPAGE2              405
+#define IDR_MAINFRAME3                  405
 #define IDD_PROP_PROPPAGE3              406
 #define IDD_PROP_PROPPAGE4              407
 #define IDD_PROP_PROPPAGE5              408
@@ -844,7 +845,6 @@
 #define IDC_SPEC_HEAD_BTN               1416
 #define IDC_RIVER_BTN                   1417
 #define IDC_RIVER_BTN2                  1418
-#define IDC_CHEM_IC_BTN2                1418
 #define IDC_ZONE_FLOW_BTN               1418
 #define IDC_WELL_BTN                    1419
 #define IDC_STATIC_WELL_X               1420

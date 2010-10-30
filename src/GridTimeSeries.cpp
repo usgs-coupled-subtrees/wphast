@@ -283,6 +283,8 @@ void CGridTimeSeries::InitializeGrid(CDataExchange* pDX)
 			this->grid.SetItemText(1, TIME_COLUMN, _T("0"));
 			this->grid.DisableCell(1, TIME_COLUMN);
 
+			CString u = CGlobal::GetStdTimeUnitsSafe(this->DefaultTimeUnits).c_str();
+			this->grid.SetItemText(1, UNIT_COLUMN, u);
 			this->grid.DisableCell(1, UNIT_COLUMN);
 
 			this->grid.SetItemText(1, TYPE_COLUMN, PSZ_NONE);
