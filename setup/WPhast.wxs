@@ -149,8 +149,8 @@
 
             <Directory Id="D__doc" Name="doc">
               <Component Id='C__Documentation' Guid='5E5DF2AA-627A-4c53-83F4-665AEA8D66E2' >
-                <File Id='F__phast.pdf' Name='phast.pdf' DiskId='1' Source='phast\doc\phast.pdf' >
-                  <Shortcut Id="S__PHASTManual" Directory="D_PrgMenu.2FB136FF_6AAD_442A_A6EB_99511F1CDF82" Name="User's Guide to PHAST (PDF)" />
+                <File Id='F__phast2_TM6_A35.pdf' Name='phast.pdf' DiskId='1' Source='phast\doc\phast2-TM6-A35.pdf' >
+                  <Shortcut Id="S__PHASTManual" Directory="D_PrgMenu.2FB136FF_6AAD_442A_A6EB_99511F1CDF82" Name="User's Guide to PHAST 2 (PDF)" />
                 </File>
                 <File Id='F__phreeqc.pdf' Name='phreeqc.pdf' DiskId='1' Source='phast\doc\phreeqc.pdf' >
                   <Shortcut Id="S__PHREEQCManual" Directory="D_PrgMenu.2FB136FF_6AAD_442A_A6EB_99511F1CDF82" Name="User's Guide to PHREEQC (Version 2 PDF)" />
