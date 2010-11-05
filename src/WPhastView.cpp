@@ -477,6 +477,8 @@ vtkRenderWindowInteractor* CWPhastView::GetInteractor(void)
 
 int CWPhastView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
+	TRACE("CWPhastView::OnCreate\n");
+
 	if (CView::OnCreate(lpCreateStruct) == -1)
 		return -1;
 
@@ -535,6 +537,26 @@ void CWPhastView::OnSize(UINT nType, int cx, int cy)
 
 BOOL CWPhastView::OnEraseBkgnd(CDC* pDC)
 {
+	static bool bFirst = true;
+	if (bFirst)
+	{
+		// this is reqd in order to reduce flicker under windows 7
+		//
+
+		// Set brush to desired background color
+		CBrush backBrush(RGB(0, 0, 0));
+
+		// Save old brush
+		CBrush* pOldBrush = pDC->SelectObject(&backBrush);
+
+		CRect rect;
+		pDC->GetClipBox(&rect);     // Erase the area needed
+
+		pDC->PatBlt(rect.left, rect.top, rect.Width(), rect.Height(), PATCOPY);
+		pDC->SelectObject(pOldBrush);
+		bFirst = false;
+	}
+	TRACE("CWPhastView::OnEraseBkgnd\n");
 	return TRUE;
 }
 
@@ -738,6 +760,7 @@ void CWPhastView::ResetCamera(double xmin, double xmax, double ymin, double ymax
 
 void CWPhastView::OnInitialUpdate()
 {
+	TRACE("CWPhastView::OnInitialUpdate\n");
 	CView::OnInitialUpdate();
 
 #if ((VTK_MAJOR_VERSION >= 5) && (VTK_MINOR_VERSION >= 4))
