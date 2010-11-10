@@ -307,10 +307,18 @@ void vtkPlaneWidget2::OnMouseMove(void)
 				{
 					prevO[i] = o[i];
 				}
-				this->MoveOrigin(prevPickPoint, pickPoint);
-				this->m_InvisablePosX[0] += o[0] - prevO[0];
-				this->m_InvisablePosX[1] += o[1] - prevO[1];
-				this->SizeHandles();
+				if (!(pickPoint[0] == prevPickPoint[0] && pickPoint[1] == prevPickPoint[1] && pickPoint[2] == prevPickPoint[2]))
+				{
+					this->MoveOrigin(prevPickPoint, pickPoint);
+					ASSERT(!::_isnan(this->GetOrigin()[0]));
+					this->m_InvisablePosX[0] += o[0] - prevO[0];
+					this->m_InvisablePosX[1] += o[1] - prevO[1];
+					this->SizeHandles();
+				}
+				else
+				{
+					TRACE("MouseMove equal 0\n");
+				}
 			}
 			else if ( this->CurrentHandle == this->Handle[1] )
 			{
@@ -321,10 +329,18 @@ void vtkPlaneWidget2::OnMouseMove(void)
 				{
 					prevO[i] = o[i];
 				}
-				this->MovePoint1(prevPickPoint, pickPoint);
-				this->m_InvisablePosX[0] += o[0] - prevO[0];
-				this->m_InvisablePosX[1] += o[1] - prevO[1];
-				this->SizeHandles();
+				if (!(pickPoint[0] == prevPickPoint[0] && pickPoint[1] == prevPickPoint[1] && pickPoint[2] == prevPickPoint[2]))
+				{
+					this->MovePoint1(prevPickPoint, pickPoint);
+					ASSERT(!::_isnan(this->GetOrigin()[0]));
+					this->m_InvisablePosX[0] += o[0] - prevO[0];
+					this->m_InvisablePosX[1] += o[1] - prevO[1];
+					this->SizeHandles();
+				}
+				else
+				{
+					TRACE("MouseMove equal 1\n");
+				}
 			}
 			else if ( this->CurrentHandle == this->Handle[2] )
 			{
@@ -335,21 +351,38 @@ void vtkPlaneWidget2::OnMouseMove(void)
 				{
 					prevO[i] = o[i];
 				}
-				this->MovePoint2(prevPickPoint, pickPoint);
-				this->m_InvisablePosX[0] += o[0] - prevO[0];
-				this->m_InvisablePosX[1] += o[1] - prevO[1];
-				this->SizeHandles();
+				if (!(pickPoint[0] == prevPickPoint[0] && pickPoint[1] == prevPickPoint[1] && pickPoint[2] == prevPickPoint[2]))
+				{
+					this->MovePoint2(prevPickPoint, pickPoint);
+					ASSERT(!::_isnan(this->GetOrigin()[0]));
+					this->m_InvisablePosX[0] += o[0] - prevO[0];
+					this->m_InvisablePosX[1] += o[1] - prevO[1];
+					this->SizeHandles();
+				}
+				else
+				{
+					TRACE("MouseMove equal 2\n");
+				}
 			}
 			else if ( this->CurrentHandle == this->Handle[3] )
 			{
 				this->Substate = MovingMovePoint3;
-				this->MovePoint3(prevPickPoint, pickPoint);
+				if (!(pickPoint[0] == prevPickPoint[0] && pickPoint[1] == prevPickPoint[1] && pickPoint[2] == prevPickPoint[2]))
+				{
+					this->MovePoint3(prevPickPoint, pickPoint);
+					ASSERT(!::_isnan(this->GetOrigin()[0]));
+				}
+				else
+				{
+					TRACE("MouseMove equal 3\n");
+				}
 			}
 		}
 		else // must be moving the plane
 		{
 			this->Substate = MovingTranslate;
 			this->Translate(prevPickPoint, pickPoint);
+			ASSERT(!::_isnan(this->GetOrigin()[0]));
 			::SetCursor(::LoadCursor(NULL, MAKEINTRESOURCE(IDC_SIZEALL)));
 			this->m_InvisablePosX[0] += pickPoint[0] - prevPickPoint[0];
 			this->m_InvisablePosX[1] += pickPoint[1] - prevPickPoint[1];
@@ -366,6 +399,7 @@ void vtkPlaneWidget2::OnMouseMove(void)
 		}
 		::SetCursor(AfxGetApp()->LoadCursor(IDC_SCALE_OBJ));
 		this->Scale(prevPickPoint, pickPoint, X, Y);
+		ASSERT(!::_isnan(this->GetOrigin()[0]));
 		this->m_InvisablePosX[0] += o[0] - prevO[0];
 		this->m_InvisablePosX[1] += o[1] - prevO[1];
 		this->SizeHandles();
@@ -373,17 +407,20 @@ void vtkPlaneWidget2::OnMouseMove(void)
 	else if (this->State == vtkPlaneWidget::Pushing)
 	{
 		this->Push(prevPickPoint, pickPoint);
+		ASSERT(!::_isnan(this->GetOrigin()[0]));
 		this->SizeHandles();
 	}
 	else if (this->State == vtkPlaneWidget::Rotating)
 	{
 		camera->GetViewPlaneNormal(vpn);
 		this->Rotate(X, Y, prevPickPoint, pickPoint, vpn);
+		ASSERT(!::_isnan(this->GetOrigin()[0]));
 		this->SizeHandles();
 	}
 	else if (vtkPlaneWidget2::Spinning)
 	{
 		this->Spin();
+		ASSERT(!::_isnan(this->GetOrigin()[0]));
 		this->SizeHandles();
 	}
 
@@ -453,6 +490,7 @@ void vtkPlaneWidget2::Spin(void)
 	this->m_VisHandleGeometry->SetCenter(this->m_InvisablePosX[0], this->m_InvisablePosX[1], this->m_InvisablePosX[2]);
 #endif
 
+	ASSERT(!::_isnan(oNew[0]) && !::_isnan(oNew[1]) && !::_isnan(oNew[2]) && !::_isnan(pt1New[0]) && !::_isnan(pt1New[1]) && !::_isnan(pt1New[2]) && !::_isnan(pt2New[0]) && !::_isnan(pt2New[1]) && !::_isnan(pt2New[2]));
 	this->PlaneSource->SetOrigin(oNew);
 	this->PlaneSource->SetPoint1(pt1New);
 	this->PlaneSource->SetPoint2(pt2New);
@@ -517,6 +555,7 @@ void vtkPlaneWidget2::SetDeltaX(double dx)
 	}
 
 	// if here ok to change
+	ASSERT(!::_isnan(new_pt1[0]) && !::_isnan(new_pt1[1]) && !::_isnan(new_pt1[2]));
 	this->PlaneSource->SetPoint1(new_pt1);
 	this->PositionHandles();
 	this->SizeHandles();
@@ -578,6 +617,7 @@ void vtkPlaneWidget2::SetDeltaY(double dy)
 		return; // Bad plane coordinate system
 	}
 
+	ASSERT(!::_isnan(new_pt2[0]) && !::_isnan(new_pt2[1]) && !::_isnan(new_pt2[2]));
 	this->PlaneSource->SetPoint2(new_pt2);
 	this->PositionHandles();
 	this->SizeHandles();
@@ -628,6 +668,7 @@ void vtkPlaneWidget2::SetAngle(double angle)
 	this->m_VisHandleGeometry->SetCenter(this->m_InvisablePosX[0], this->m_InvisablePosX[1], this->m_InvisablePosX[2]);
 #endif
 
+	ASSERT(!::_isnan(oNew[0]) && !::_isnan(oNew[1]) && !::_isnan(oNew[2]) && !::_isnan(pt1New[0]) && !::_isnan(pt1New[1]) && !::_isnan(pt1New[2]) && !::_isnan(pt2New[0]) && !::_isnan(pt2New[1]) && !::_isnan(pt2New[2]));
 	this->PlaneSource->SetOrigin(oNew);
 	this->PlaneSource->SetPoint1(pt1New);
 	this->PlaneSource->SetPoint2(pt2New);
@@ -664,6 +705,7 @@ void vtkPlaneWidget2::SetModelOrigin(float x, float y)
 	this->Transform->TransformPoint(pt1,pt1New);
 	this->Transform->TransformPoint(pt2,pt2New);
 
+	ASSERT(!::_isnan(oNew[0]) && !::_isnan(oNew[1]) && !::_isnan(oNew[2]) && !::_isnan(pt1New[0]) && !::_isnan(pt1New[1]) && !::_isnan(pt1New[2]) && !::_isnan(pt2New[0]) && !::_isnan(pt2New[1]) && !::_isnan(pt2New[2]));
 	this->PlaneSource->SetOrigin(oNew);
 	this->PlaneSource->SetPoint1(pt1New);
 	this->PlaneSource->SetPoint2(pt2New);
