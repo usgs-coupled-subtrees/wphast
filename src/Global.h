@@ -32,6 +32,8 @@ class vtkTransform;
 class CWorldTransform;
 class CTreePropSheetExSRC;
 class TreePropSheet::CTreePropSheetEx;
+class CGridKeyword;
+class CUnits;
 
 
 // user defined messages
@@ -193,6 +195,8 @@ public:
 	static BOOL DDX_Text_Safe(CDataExchange* pDX, int nIDC, int& value);
 	static void TextWithFormat(CDataExchange* pDX, int nIDC, LPCTSTR lpszFormat, ...);
 
+	static void UpgradePrism(Prism &rPrism, const CGridKeyword &rGridKeyword, const CUnits &rUnits);
+	static void UpgradeDataSourcePoints(Data_source &rData_source, const CGridKeyword &rGridKeyword, const CUnits &rUnits);
 
 protected:
 	static double CGlobal::RadiusFactor;

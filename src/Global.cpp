@@ -39,6 +39,7 @@
 #include "MediaPropsPage.h"
 #include "FluxPropsPage.h"
 #include "FakeFiledata.h"
+#include "GridKeyword.h"
 
 
 #include <afxmt.h>
@@ -3363,6 +3364,60 @@ herr_t CGlobal::HDFSerializePrism(bool bStoring, hid_t loc_id, Prism &rPrism)
 	return return_val;
 }
 
+void CGlobal::UpgradePrism(Prism &rPrism, const CGridKeyword &rGridKeyword, const CUnits &rUnits)
+{
+	// perimeter, top, bottom
+	CGlobal::UpgradeDataSourcePoints(rPrism.perimeter, rGridKeyword, rUnits);
+	CGlobal::UpgradeDataSourcePoints(rPrism.top,       rGridKeyword, rUnits);
+	CGlobal::UpgradeDataSourcePoints(rPrism.bottom,    rGridKeyword, rUnits);
+}
+
+void CGlobal::UpgradeDataSourcePoints(Data_source &rData_source, const CGridKeyword &rGridKeyword, const CUnits &rUnits)
+{
+	if (rData_source.Get_source_type() == Data_source::POINTS)
+	{
+		std::vector<Point> &upts = rData_source.Get_user_points();
+		if (upts.size() != 0)
+		{
+			ASSERT(upts.size() == rData_source.Get_points().size());
+			return;
+		}
+
+		upts = rData_source.Get_points();
+
+		double scale_h = rUnits.map_horizontal.input_to_si / rUnits.horizontal.input_to_si;
+		double scale_v = rUnits.map_vertical.input_to_si / rUnits.vertical.input_to_si;
+		PHAST_Transform map2grid = PHAST_Transform(
+			rGridKeyword.m_grid_origin[0],
+			rGridKeyword.m_grid_origin[1],
+			rGridKeyword.m_grid_origin[2],
+			rGridKeyword.m_grid_angle,
+			scale_h,
+			scale_h,
+			scale_v
+			);
+
+		switch (rData_source.Get_coordinate_system())
+		{
+		case PHAST_Transform::GRID:
+			if (rData_source.Get_user_coordinate_system() == PHAST_Transform::MAP)
+			{
+				map2grid.Inverse_transform(upts);
+			}
+			break;
+		case PHAST_Transform::MAP:
+			if (rData_source.Get_user_coordinate_system() == PHAST_Transform::GRID)
+			{
+				map2grid.Transform(upts);
+			}
+			break;
+		default:
+			ASSERT(FALSE);
+			break;
+		}
+	}
+}
+
 herr_t CGlobal::HDFSerializeData_source(bool bStoring, hid_t loc_id, const char* szName, Data_source &rData_source)
 {
 	static const char szData_source[] = "Data_source";
@@ -3372,6 +3427,7 @@ herr_t CGlobal::HDFSerializeData_source(bool bStoring, hid_t loc_id, const char*
 	static const char szfile_name[]   = "file_name";
 	static const char szPoints[]      = "Points";
 	static const char szPoints4[]     = "Points4";
+	static const char szUPoints4[]    = "UserPoints4";
 	static const char szAttribute[]   = "attribute";
 
 	/*
@@ -3393,8 +3449,6 @@ herr_t CGlobal::HDFSerializeData_source(bool bStoring, hid_t loc_id, const char*
 	herr_t status;
 	double xyz[6];
 	herr_t return_val = 0;
-
-// COMMENT: {7/6/2008 8:11:10 PM}	ASSERT(pData_source);
 
 	if (bStoring)
 	{
@@ -3435,9 +3489,7 @@ herr_t CGlobal::HDFSerializeData_source(bool bStoring, hid_t loc_id, const char*
 						break;
 					case Data_source::ARCRASTER:
 					case Data_source::XYZ:
-					//{{
 					case Data_source::XYZT:
-					//}}
 						{
 							std::string filename(rData_source.Get_file_name());
 							status = HDFSerializeString(bStoring, ds_gr_id, szfile_name, filename);
@@ -3458,20 +3510,29 @@ herr_t CGlobal::HDFSerializeData_source(bool bStoring, hid_t loc_id, const char*
 						{
 							std::vector<Point> &pts = rData_source.Get_points();
 							std::vector<Point> &upts = rData_source.Get_user_points();
-							//ASSERT(pts.size() >= 3);
+							ASSERT(pts.size() == upts.size());
+
 							hsize_t count = 4 * pts.size();							
 							double *points = new double[count];
+							double *upoints = new double[count];
 							for (size_t i = 0; i < pts.size(); ++i)
 							{
 								double *d = pts[i].get_coord();
+								double *u = upts[i].get_coord();
 								for (size_t n = 0; n < 3; ++n)
 								{
 									points[i*4+n] = d[n];
+									upoints[i*4+n] = u[n];
 								}
 								points[i*4+3] = pts[i].get_v();
+								upoints[i*4+3] = upts[i].get_v();
 							}
 							status = CGlobal::HDFSerializeWithSize(bStoring, ds_gr_id, szPoints4, H5T_NATIVE_DOUBLE, count, points);
+							ASSERT(status >= 0);
+							status = CGlobal::HDFSerializeWithSize(bStoring, ds_gr_id, szUPoints4, H5T_NATIVE_DOUBLE, count, upoints);
+							ASSERT(status >= 0);
 							delete[] points;
+							delete[] upoints;
 						}
 						break;
 					case Data_source::NONE:
@@ -3507,6 +3568,7 @@ herr_t CGlobal::HDFSerializeData_source(bool bStoring, hid_t loc_id, const char*
 				ASSERT(return_val >= 0);
 
 				// coor_sys_type
+				ASSERT(rData_source.Get_coordinate_system() == PHAST_Transform::GRID);
 				PHAST_Transform::COORDINATE_SYSTEM nValue = rData_source.Get_coordinate_system();
 				return_val = CGlobal::HDFSerializeCoordinateSystem(bStoring, ds_gr_id, nValue);
 				ASSERT(return_val >= 0);
@@ -3568,9 +3630,7 @@ herr_t CGlobal::HDFSerializeData_source(bool bStoring, hid_t loc_id, const char*
 						break;
 					case Data_source::ARCRASTER:
 					case Data_source::XYZ:
-					//{{
 					case Data_source::XYZT:
-					//}}
 						{
 							std::string filename;
 							status = HDFSerializeString(bStoring, ds_gr_id, szfile_name, filename);
@@ -3639,6 +3699,33 @@ herr_t CGlobal::HDFSerializeData_source(bool bStoring, hid_t loc_id, const char*
 								ASSERT(pts.size() == count/3);
 								delete[] data;
 							}
+
+							std::vector<Point> &upts = rData_source.Get_user_points();
+							ASSERT(upts.size() == 0);
+							data = NULL;
+							status = CGlobal::HDFSerializeAllocate(bStoring, ds_gr_id, szUPoints4, count, &data);
+							if (status >= 0)
+							{
+								ASSERT((count%4) == 0);
+
+								Point p;
+								double *coord = p.get_coord();
+								for (size_t i = 0; i < count; ++i)
+								{
+									if (i%4 != 3)
+									{
+										coord[i%4] = data[i];
+									}
+									else
+									{
+										p.set_v(data[i]);
+										upts.push_back(p);
+									}
+								}
+								ASSERT(upts.size() == count/4);
+								ASSERT(pts.size() == upts.size());
+								delete[] data;
+							}
 						}
 						break;
 					case Data_source::NONE:
@@ -3670,18 +3757,17 @@ herr_t CGlobal::HDFSerializeData_source(bool bStoring, hid_t loc_id, const char*
 				PHAST_Transform::COORDINATE_SYSTEM nValue;
 				status = CGlobal::HDFSerializeCoordinateSystem(bStoring, ds_gr_id, nValue);
 				rData_source.Set_coordinate_system(nValue);
+				ASSERT(rData_source.Get_coordinate_system() == PHAST_Transform::GRID);
 
 				status = CGlobal::HDFSerializeCoordinateSystemUser(bStoring, ds_gr_id, nValue);
 				rData_source.Set_user_coordinate_system(nValue);
 
-				//{{
 				Data_source::DATA_SOURCE_TYPE ds = rData_source.Get_source_type();
 				if (ds == Data_source::SHAPE || ds == Data_source::ARCRASTER || ds == Data_source::XYZ)
 				{
 					if (ds != Data_source::SHAPE) ASSERT(rData_source.Get_attribute() == -1);
 					rData_source.Set_filedata(FakeFiledata::New(rData_source.Get_file_name(), nValue, rData_source.Get_attribute()));
 				}
-				//}}
 
 				return_val = H5Gclose(ds_gr_id);
 				ASSERT(return_val >= 0);

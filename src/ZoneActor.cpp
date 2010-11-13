@@ -1007,6 +1007,8 @@ void CZoneActor::Serialize(bool bStoring, hid_t loc_id, const CWPhastDoc* pWPhas
 				{
 					status = CGlobal::HDFSerializePrism(bStoring, polyh_id, *prism);
 					ASSERT(status >= 0);
+					// Fix prisms that may be missing pts_user (serialized before -r4922)
+					CGlobal::UpgradePrism(*prism, pWPhastDoc->GetGridKeyword(), pWPhastDoc->GetUnits());
 				}
 
 				// remove objects used for cubes/wedges
