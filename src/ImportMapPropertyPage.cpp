@@ -217,28 +217,28 @@ void CImportMapPropertyPage::OnBnClickedBrowseMapButton()
 			TCHAR szExt[_MAX_EXT];
 			TCHAR szWorldFileName[_MAX_PATH];
 
-			::_tsplitpath(pathName, szDrive, szDir, szFName, szExt);
+			VERIFY(::_tsplitpath_s(pathName, szDrive, _MAX_DRIVE, szDir, _MAX_DIR, szFName, _MAX_FNAME, szExt, _MAX_EXT) == 0);
 
 			CString strExt(szExt);
 			CString strWorldFileName;
 			if (strExt.CompareNoCase(_T(".bmp")) == 0)
 			{
-				::_tmakepath(szWorldFileName, szDrive, szDir, szFName, _T(".bpw"));
+				VERIFY(::_tmakepath_s(szWorldFileName, _MAX_PATH, szDrive, szDir, szFName, _T(".bpw")) == 0);
 				strWorldFileName = szWorldFileName;
 			}
 			else if (strExt.CompareNoCase(_T(".jpg")) == 0 || strExt.CompareNoCase(_T(".jpeg")) == 0)
 			{
-				::_tmakepath(szWorldFileName, szDrive, szDir, szFName, _T(".jgw"));
+				VERIFY(::_tmakepath_s(szWorldFileName, _MAX_PATH, szDrive, szDir, szFName, _T(".jgw")) == 0);
 				strWorldFileName = szWorldFileName;
 			}
 			else if (strExt.CompareNoCase(_T(".png")) == 0)
 			{
-				::_tmakepath(szWorldFileName, szDrive, szDir, szFName, _T(".pgw"));
+				VERIFY(::_tmakepath_s(szWorldFileName, _MAX_PATH, szDrive, szDir, szFName, _T(".pgw")) == 0);
 				strWorldFileName = szWorldFileName;
 			}
 			else if (strExt.CompareNoCase(_T(".tif")) == 0 || strExt.CompareNoCase(_T(".tiff")) == 0)
 			{
-				::_tmakepath(szWorldFileName, szDrive, szDir, szFName, _T(".tfw"));
+				VERIFY(::_tmakepath_s(szWorldFileName, _MAX_PATH, szDrive, szDir, szFName, _T(".tfw")) == 0);
 				strWorldFileName = szWorldFileName;
 			}
 

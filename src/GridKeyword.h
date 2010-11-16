@@ -3,13 +3,6 @@
 #include "Grid.h"
 #include "Snap.h"
 
-//extern "C" {
-//#define EXTERNAL extern
-//#include "srcinput/hstinpt.h"
-//#undef EXTERNAL
-//}
-
-
 class CGridKeyword
 {
 public:
@@ -30,13 +23,3 @@ public:
 	double m_grid_origin[3];        /* grid origin in map coordinates */
 	double m_grid_angle;            /* grid angle counterclockwise from map axes in degrees */
 };
-
-
-// COMMENT: {7/18/2005 6:49:44 PM}		model.m_gridKeyword.m_grid[0]         = ::grid[0];
-// COMMENT: {7/18/2005 6:49:44 PM}		model.m_gridKeyword.m_grid[1]         = ::grid[1];
-// COMMENT: {7/18/2005 6:49:44 PM}		model.m_gridKeyword.m_grid[2]         = ::grid[2];
-// COMMENT: {7/18/2005 6:49:44 PM}		model.m_gridKeyword.m_snap            = ::snap;
-// COMMENT: {7/18/2005 6:49:44 PM}		model.m_gridKeyword.m_print_input_xy  = (::print_input_xy != 0);
-// COMMENT: {7/18/2005 6:49:44 PM}		model.m_gridKeyword.m_axes[0]         = ::axes[0];
-// COMMENT: {7/18/2005 6:49:44 PM}		model.m_gridKeyword.m_axes[1]         = ::axes[1];
-// COMMENT: {7/18/2005 6:49:44 PM}		model.m_gridKeyword.m_axes[2]         = ::axes[2];

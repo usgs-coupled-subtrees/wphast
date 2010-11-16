@@ -177,7 +177,7 @@ void CXMLSerializer::AddSiteMapNode(xercesc::DOMDocument* doc, CWPhastDoc* wphas
 	TCHAR szFName[_MAX_FNAME];
 	TCHAR szExt[_MAX_EXT];
 
-	::_tsplitpath(mapActor->SiteMap2.FileName.c_str(), szDrive, szDir, szFName, szExt);
+	VERIFY(::_tsplitpath_s(mapActor->SiteMap2.FileName.c_str(), szDrive, _MAX_DRIVE, szDir, _MAX_DIR, szFName, _MAX_FNAME, szExt, _MAX_EXT) == 0);
 
 	CString imageFileName(prefix);
 	imageFileName += ".sitemap";
@@ -240,45 +240,45 @@ void CXMLSerializer::AddSiteMapNode(xercesc::DOMDocument* doc, CWPhastDoc* wphas
 	ASSERT(doc->getDocumentElement() != (xercesc::DOMElement*)doc);
 	ASSERT(doc->getDocumentElement()->getOwnerDocument() == doc);
 
-	// angle
-	//
-	{
-		std::ostringstream oss;
-		std::streamsize p(oss.precision(DBL_DIG));
-		oss << mapActor->SiteMap2.Angle;
-		oss.precision(p);
-		element->setAttribute(gAngle, X(oss.str().c_str()));
-	}
+// COMMENT: {11/15/2010 4:24:30 PM}	// angle
+// COMMENT: {11/15/2010 4:24:30 PM}	//
+// COMMENT: {11/15/2010 4:24:30 PM}	{
+// COMMENT: {11/15/2010 4:24:30 PM}		std::ostringstream oss;
+// COMMENT: {11/15/2010 4:24:30 PM}		std::streamsize p(oss.precision(DBL_DIG));
+// COMMENT: {11/15/2010 4:24:30 PM}		oss << mapActor->SiteMap2.Angle;
+// COMMENT: {11/15/2010 4:24:30 PM}		oss.precision(p);
+// COMMENT: {11/15/2010 4:24:30 PM}		element->setAttribute(gAngle, X(oss.str().c_str()));
+// COMMENT: {11/15/2010 4:24:30 PM}	}
 
-	// placement_x
-	//
-	{
-		std::ostringstream oss;
-		std::streamsize p(oss.precision(DBL_DIG));
-		oss << mapActor->SiteMap2.Origin[0];
-		oss.precision(p);
-		element->setAttribute(gPlacement_x, X(oss.str().c_str()));
-	}
+// COMMENT: {11/15/2010 4:24:34 PM}	// placement_x
+// COMMENT: {11/15/2010 4:24:34 PM}	//
+// COMMENT: {11/15/2010 4:24:34 PM}	{
+// COMMENT: {11/15/2010 4:24:34 PM}		std::ostringstream oss;
+// COMMENT: {11/15/2010 4:24:34 PM}		std::streamsize p(oss.precision(DBL_DIG));
+// COMMENT: {11/15/2010 4:24:34 PM}		oss << mapActor->SiteMap2.Origin[0];
+// COMMENT: {11/15/2010 4:24:34 PM}		oss.precision(p);
+// COMMENT: {11/15/2010 4:24:34 PM}		element->setAttribute(gPlacement_x, X(oss.str().c_str()));
+// COMMENT: {11/15/2010 4:24:34 PM}	}
 
-	// placement_y
-	//
-	{
-		std::ostringstream oss;
-		std::streamsize p(oss.precision(DBL_DIG));
-		oss << mapActor->SiteMap2.Origin[1];
-		oss.precision(p);
-		element->setAttribute(gPlacement_y, X(oss.str().c_str()));
-	}
+// COMMENT: {11/15/2010 4:24:39 PM}	// placement_y
+// COMMENT: {11/15/2010 4:24:39 PM}	//
+// COMMENT: {11/15/2010 4:24:39 PM}	{
+// COMMENT: {11/15/2010 4:24:39 PM}		std::ostringstream oss;
+// COMMENT: {11/15/2010 4:24:39 PM}		std::streamsize p(oss.precision(DBL_DIG));
+// COMMENT: {11/15/2010 4:24:39 PM}		oss << mapActor->SiteMap2.Origin[1];
+// COMMENT: {11/15/2010 4:24:39 PM}		oss.precision(p);
+// COMMENT: {11/15/2010 4:24:39 PM}		element->setAttribute(gPlacement_y, X(oss.str().c_str()));
+// COMMENT: {11/15/2010 4:24:39 PM}	}
 
-	// placement_z
-	//
-	{
-		std::ostringstream oss;
-		std::streamsize p(oss.precision(DBL_DIG));
-		oss << mapActor->SiteMap2.Origin[2];
-		oss.precision(p);
-		element->setAttribute(gPlacement_z, X(oss.str().c_str()));
-	}
+// COMMENT: {11/15/2010 4:24:44 PM}	// placement_z
+// COMMENT: {11/15/2010 4:24:44 PM}	//
+// COMMENT: {11/15/2010 4:24:44 PM}	{
+// COMMENT: {11/15/2010 4:24:44 PM}		std::ostringstream oss;
+// COMMENT: {11/15/2010 4:24:44 PM}		std::streamsize p(oss.precision(DBL_DIG));
+// COMMENT: {11/15/2010 4:24:44 PM}		oss << mapActor->SiteMap2.Origin[2];
+// COMMENT: {11/15/2010 4:24:44 PM}		oss.precision(p);
+// COMMENT: {11/15/2010 4:24:44 PM}		element->setAttribute(gPlacement_z, X(oss.str().c_str()));
+// COMMENT: {11/15/2010 4:24:44 PM}	}
 
 	xercesc::DOMElement* rootElem = doc->getDocumentElement();
 	rootElem->appendChild(element);
@@ -412,11 +412,13 @@ int CXMLSerializer::load(std::istream& is, CNewModel& model)
 	if (this->LoadSiteMap(doc, siteMap) == 0)
 	{
 		CSiteMap2 siteMap2;
-		siteMap2.Angle    = siteMap.m_angle;
+// COMMENT: {11/15/2010 4:19:15 PM}		siteMap2.Angle    = siteMap.m_angle;
+		siteMap2.Angle    = model.m_gridKeyword.m_grid_angle;
 		siteMap2.FileName = siteMap.m_fileName;
 		for (int i = 0; i < 3; ++i)
 		{
-			siteMap2.Origin[i] = siteMap.m_placement[i];
+// COMMENT: {11/15/2010 4:19:22 PM}			siteMap2.Origin[i] = siteMap.m_placement[i];
+			siteMap2.Origin[i] = model.m_gridKeyword.m_grid_origin[i];
 		}
 		siteMap2.SetWorldTransform(siteMap.GetWorldTransform());
 		model.SetSiteMap2(siteMap2);
@@ -463,36 +465,44 @@ int CXMLSerializer::LoadSiteMap(xercesc::DOMDocument* doc, CSiteMap& siteMap)
 		//
 		{
 			StrX angle(siteElement->getAttribute(gAngle));
-			if (::strlen(angle.localForm()) == 0) return 6;
-			std::istringstream iss(angle.localForm());
-			iss >> siteMap.m_angle;
+			if (::strlen(angle.localForm()) != 0)
+			{
+				std::istringstream iss(angle.localForm());
+				iss >> siteMap.m_angle;
+			}
 		}
 
 		// placement_x
 		//
 		{
 			StrX placement_x(siteElement->getAttribute(gPlacement_x));
-			if (::strlen(placement_x.localForm()) == 0) return 7;
-			std::istringstream iss(placement_x.localForm());
-			iss >> siteMap.m_placement[0];
+			if (::strlen(placement_x.localForm()) != 0)
+			{
+				std::istringstream iss(placement_x.localForm());
+				iss >> siteMap.m_placement[0];
+			}
 		}
 
 		// placement_y
 		//
 		{
 			StrX placement_y(siteElement->getAttribute(gPlacement_y));
-			if (::strlen(placement_y.localForm()) == 0) return 8;
-			std::istringstream iss(placement_y.localForm());
-			iss >> siteMap.m_placement[1];
+			if (::strlen(placement_y.localForm()) != 0)
+			{
+				std::istringstream iss(placement_y.localForm());
+				iss >> siteMap.m_placement[1];
+			}
 		}
 
 		// placement_z
 		//
 		{
 			StrX placement_z(siteElement->getAttribute(gPlacement_z));
-			if (::strlen(placement_z.localForm()) == 0) return 9;
-			std::istringstream iss(placement_z.localForm());
-			iss >> siteMap.m_placement[2];
+			if (::strlen(placement_z.localForm()) != 0)
+			{
+				std::istringstream iss(placement_z.localForm());
+				iss >> siteMap.m_placement[2];
+			}
 		}
 	}
 

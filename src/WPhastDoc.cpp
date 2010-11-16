@@ -2647,29 +2647,43 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 	TCHAR szFName[_MAX_FNAME];
 	TCHAR szExt[_MAX_EXT];
 
-	::_tsplitpath(lpszPathName, szDrive, szDir, szFName, szExt);
+	VERIFY(::_tsplitpath_s(lpszPathName, szDrive, _MAX_DRIVE, szDir, _MAX_DIR, szFName, _MAX_FNAME, szExt, _MAX_EXT) == 0);
 
 	// change directory in case there's a sitemap
 	//
 	TCHAR szNewDir[MAX_PATH];
-	::_tmakepath(szNewDir, szDrive, szDir, NULL, NULL);
+	VERIFY(::_tmakepath_s(szNewDir, _MAX_PATH, szDrive, szDir, NULL, NULL) == 0);
+
+
 	BOOL b = save.SetCurrentDirectory(szNewDir);
 
 	// remove .trans if it exists
 	//
 	CString strPrefix(szFName);
-	strPrefix.MakeLower();
-	strPrefix.Replace(_T(".trans"), _T(""));
+	{
+		TCHAR szDrive[_MAX_DRIVE];
+		TCHAR szDir[_MAX_DIR];
+		TCHAR szFName[_MAX_FNAME];
+		TCHAR szExt[_MAX_EXT];
+		VERIFY(::_tsplitpath_s(strPrefix, szDrive, _MAX_DRIVE, szDir, _MAX_DIR, szFName, _MAX_FNAME, szExt, _MAX_EXT) == 0);
+
+		if (::_tcsicmp(szExt, _T(".trans")) == 0)
+		{
+			strPrefix = szFName;
+		}
+	}
 
 	// get title
 	//
 	TCHAR szTitle[MAX_PATH];
-	::_tmakepath(szTitle, NULL, NULL, szFName, szExt);
+	VERIFY(::_tmakepath_s(szTitle, _MAX_PATH, NULL, NULL, szFName, szExt) == 0);
+
+
 
 	// get fullpath
 	//
 	TCHAR szFullpath[MAX_PATH];
-	::_tfullpath(szFullpath, lpszPathName, MAX_PATH);
+	VERIFY(::_tfullpath(szFullpath, lpszPathName, MAX_PATH) != NULL);
 
 	std::ifstream ifs;
 	ifs.open(szTitle);
@@ -3176,8 +3190,12 @@ void CWPhastDoc::OnFileExport()
 	TCHAR szFName[_MAX_FNAME];
 	TCHAR szExt[_MAX_EXT];
 
-	::_tsplitpath_s(newName.GetBuffer(), szDrive, _MAX_DRIVE, szDir, _MAX_DIR, szFName, _MAX_FNAME, szExt, _MAX_EXT);
+	VERIFY(::_tsplitpath_s(newName.GetBuffer(), szDrive, _MAX_DRIVE, szDir, _MAX_DIR, szFName, _MAX_FNAME, szExt, _MAX_EXT) == 0);
 	newName = szFName;
+	if (::_tcsicmp(szExt, _T(".wphast")) != 0)
+	{
+		newName += szExt;
+	}
 	newName += ".trans.dat";
 
 	if (!DoPromptFileName(newName, IDS_EXPORT_PHAST_TRANS_136,
@@ -3188,10 +3206,10 @@ void CWPhastDoc::OnFileExport()
 	TCHAR szPath[_MAX_PATH];
 	ASSERT(lstrlen(newName) < sizeof(szPath)/sizeof(szPath[0]));
 	TCHAR szTemp[_MAX_PATH];
-	if (newName[0] == '\"')
+	if (newName[0] == _T('\"'))
 		newName = newName.Mid(1);
 	lstrcpyn(szTemp, newName, _MAX_PATH);
-	LPTSTR lpszLast = _tcsrchr(szTemp, '\"');
+	LPTSTR lpszLast = _tcsrchr(szTemp, _T('\"'));
 	if (lpszLast != NULL)
 		*lpszLast = 0;
 	SrcFullPath(szPath, szTemp);
@@ -3200,16 +3218,15 @@ void CWPhastDoc::OnFileExport()
 		lstrcpy(szPath, szLinkName);
 
 	CString strPath(szPath);
-	if (strPath.Right(10).CompareNoCase(".trans.dat") != 0)
+	if (strPath.Right(10).CompareNoCase(_T(".trans.dat")) != 0)
 	{
-		strPath += ".trans.dat";
+		strPath += _T(".trans.dat");
 	}
 
 	this->DataSourcePathsAbsoluteToRelative(strPath);
 	if (!this->DoExport(strPath))
 	{
-		::AfxMessageBox("An error occurred during the export", MB_OK);
-// COMMENT: {8/7/2008 4:03:09 PM}		this->SetModifiedFlag(FALSE);
+		::AfxMessageBox(_T("An error occurred during the export"), MB_OK);
 	}
 	this->DataSourcePathsRelativeToAbsolute(strPath);
 }
@@ -3220,9 +3237,9 @@ BOOL CWPhastDoc::DoExport(LPCTSTR lpszPathName)
 	ofs.open(lpszPathName);
 	if (!ofs.is_open())
 	{
-		CString str("Unable to open \"");
+		CString str(_T("Unable to open \""));
 		str += lpszPathName;
-		str += "\" for writing.";
+		str += _T("\" for writing.");
 		::AfxMessageBox(str, MB_OK|MB_ICONEXCLAMATION);
 		return FALSE;
 	}
@@ -3234,14 +3251,14 @@ BOOL CWPhastDoc::DoExport(LPCTSTR lpszPathName)
 	TCHAR szDir[_MAX_DIR];
 	TCHAR szFName[_MAX_FNAME];
 	TCHAR szExt[_MAX_EXT];
-	::_tsplitpath_s(lpszPathName, szDrive, _MAX_DRIVE, szDir, _MAX_DIR, szFName, _MAX_FNAME, szExt, _MAX_EXT);
+	VERIFY(::_tsplitpath_s(lpszPathName, szDrive, _MAX_DRIVE, szDir, _MAX_DIR, szFName, _MAX_FNAME, szExt, _MAX_EXT) == 0);
 
 	TCHAR szDirectory[_MAX_DIR];
-	::_tmakepath_s(szDirectory, _MAX_DIR, szDrive, szDir, NULL, NULL);
+	VERIFY(::_tmakepath_s(szDirectory, _MAX_DIR, szDrive, szDir, NULL, NULL) == 0);
 	save.SetCurrentDirectory(szDirectory);
 
 	CString strPrefix(szFName);
-	if (strPrefix.Right(6).CompareNoCase(".trans") == 0)
+	if (strPrefix.Right(6).CompareNoCase(_T(".trans")) == 0)
 	{
 		strPrefix = strPrefix.Left(strPrefix.GetLength() - 6);
 	}
@@ -3755,14 +3772,14 @@ void CWPhastDoc::OnFileRun()
 	TCHAR szExt[_MAX_EXT];
 
 	ASSERT(!this->GetPathName().IsEmpty());
-	::_tsplitpath(this->GetPathName(), szDrive, szDir, szFName, szExt);
+	VERIFY(::_tsplitpath_s(this->GetPathName(), szDrive, _MAX_DRIVE, szDir, _MAX_DIR, szFName, _MAX_FNAME, szExt, _MAX_EXT) == 0);
 
 	TCHAR szOutDir[_MAX_PATH];
-	::_tmakepath(szOutDir, szDrive, szDir, NULL, NULL);
+	VERIFY(::_tmakepath_s(szOutDir, _MAX_PATH, szDrive, szDir, NULL, NULL) == 0);
 	scd.SetCurrentDirectoryA(szOutDir);
 
 	TCHAR szPhastTmp[_MAX_PATH];
-	::_tmakepath(szPhastTmp, szDrive, szDir, "Phast", ".tmp");
+	VERIFY(::_tmakepath_s(szPhastTmp, _MAX_PATH, szDrive, szDir, _T("Phast"), _T(".tmp")) == 0);
 
 	CString strPrefix(szFName);
 
@@ -3819,7 +3836,7 @@ void CWPhastDoc::OnFileRun()
 	}
 	catch (...)
 	{
-		::AfxMessageBox("An unknown error occurred during the run.", MB_OK|MB_ICONEXCLAMATION);
+		::AfxMessageBox(_T("An unknown error occurred during the run."), MB_OK|MB_ICONEXCLAMATION);
 	}
 	pInput->Delete();
 
@@ -3828,7 +3845,7 @@ void CWPhastDoc::OnFileRun()
 		wait.Restore();
 
 		TCHAR szPhastTmpDir[_MAX_PATH];
-		::_tmakepath(szPhastTmpDir, szDrive, szDir, "", "");
+		VERIFY(::_tmakepath_s(szPhastTmpDir, _MAX_PATH, szDrive, szDir, _T(""), _T("")) == 0);
 
 		// Update StatusBar
 		//
