@@ -195,6 +195,7 @@ public:
 	static BOOL DDX_Text_Safe(CDataExchange* pDX, int nIDC, int& value);
 	static void TextWithFormat(CDataExchange* pDX, int nIDC, LPCTSTR lpszFormat, ...);
 
+	static void DumpAndLoadPrism(const Prism &src, Prism &dest);
 	static void UpgradePrism(Prism &rPrism, const CGridKeyword &rGridKeyword, const CUnits &rUnits);
 	static void UpgradeDataSourcePoints(Data_source &rData_source, const CGridKeyword &rGridKeyword, const CUnits &rUnits);
 

@@ -63,6 +63,7 @@
 #include "FlowOnly.h"
 #include "ZonePrismResetAction.h"
 #include "PointSelectionObject.h"
+#include "Global.h"
 
 #include <vtkImplicitPlaneWidget.h>
 
@@ -2574,8 +2575,7 @@ void CWPhastView::PrismWidgetListener(vtkObject *caller, unsigned long eid, void
 		CWPhastView* self = reinterpret_cast<CWPhastView*>(clientdata);
 		if (eid == vtkCommand::EndInteractionEvent)
 		{
-			//{{
-			// update polyhedron
+			TRACE("CPrismWidget::EndInteractionEvent recd\n");
 			if (CPrismWidget *widget = CPrismWidget::SafeDownCast(caller))
 			{
 				if (CZoneActor *zoneActor = CZoneActor::SafeDownCast(widget->GetProp3D()))
@@ -2584,8 +2584,10 @@ void CWPhastView::PrismWidgetListener(vtkObject *caller, unsigned long eid, void
 					{
 						Prism copy(*prism);
 						ASSERT(copy.perimeter.Get_source_type() == Data_source::POINTS);
-#if 999
+
 						std::vector<Point>& vect = copy.perimeter.Get_user_points();
+						vect.clear();
+
 						const CUnits &units = self->GetDocument()->GetUnits();
 						CGridKeyword gridKeyword = self->GetDocument()->GetGridKeyword();
 						double scale_h = units.map_horizontal.input_to_si / units.horizontal.input_to_si;
@@ -2599,10 +2601,6 @@ void CWPhastView::PrismWidgetListener(vtkObject *caller, unsigned long eid, void
 							scale_h,
 							scale_v
 							);
-#else
-						std::vector<Point>& vect = copy.perimeter.Get_points();
-#endif
-						vect.clear();
 
 						// rewrite points
 						vtkPoints *points = widget->GetPoints();
@@ -2621,30 +2619,12 @@ void CWPhastView::PrismWidgetListener(vtkObject *caller, unsigned long eid, void
 								vect.push_back(Point(pt.get_coord()[0], pt.get_coord()[1], pt.get_coord()[2]));
 							}
 
-							// dump new prism
-							std::ostringstream prism_oss;
-							prism_oss.precision(DBL_DIG);
-
-							prism_oss << copy;
-							TRACE(prism_oss.str().c_str());
-							std::istringstream prism_iss(prism_oss.str());
-
-							// remove first line (-prism)
-							std::string line;
-							std::getline(prism_iss, line);
-							ASSERT(line.find("-prism") != std::string::npos);
-
-							// read new prism
+							// load new prism
 							Prism new_prism;
-							while(new_prism.Read(prism_iss))
-							{
-								if (prism_iss.rdstate() & std::ios::eofbit) break;
-								prism_iss.clear();
-							}
+							CGlobal::DumpAndLoadPrism(copy, new_prism);
 
-							// setup domain
+							// setup domain in order to tidy
 							self->GetDocument()->GetDefaultZone(::domain);
-
 							new_prism.Tidy();
 
 							CZonePrismResetAction *pAction = new CZonePrismResetAction(
@@ -2662,6 +2642,7 @@ void CWPhastView::PrismWidgetListener(vtkObject *caller, unsigned long eid, void
 							{
 								b = vect[(i + 1) % vect.size()].get_coord();
 								c = vect[(i + 2) % vect.size()].get_coord();
+								// BUG (this doesn't correctly handle 4 points)
 								for (size_t j = i+2; j < i+vect.size()-2; ++j)
 								{
 									d = vect[(j + 1) % vect.size()].get_coord();
@@ -2674,7 +2655,7 @@ void CWPhastView::PrismWidgetListener(vtkObject *caller, unsigned long eid, void
 										s = sn/den;
 										if (r >= 0 && r <= 1 && s >= 0 && s <= 1)
 										{
-											::AfxMessageBox("Perimeter cannot cross itself. Resetting original coordinates.");
+											::AfxMessageBox(_T("Perimeter cannot cross itself. Resetting original coordinates."));
 											pAction->UnExecute();
 											delete pAction;
 											return;
@@ -2690,14 +2671,14 @@ void CWPhastView::PrismWidgetListener(vtkObject *caller, unsigned long eid, void
 											double maxab = (a[i] > b[i]) ? a[i] : b[i]; // Math.max(a[i], b[i]);
 											if (minab <= c[i] && c[i] <= maxab)
 											{
-												::AfxMessageBox("Perimeter cannot cross itself. Resetting original coordinates.");
+												::AfxMessageBox(_T("Perimeter cannot cross itself. Resetting original coordinates."));
 												pAction->UnExecute();
 												delete pAction;
 												return;
 											}
 											if (minab <= d[i] && d[i] <= maxab)
 											{
-												::AfxMessageBox("Perimeter cannot cross itself. Resetting original coordinates.");
+												::AfxMessageBox(_T("Perimeter cannot cross itself. Resetting original coordinates."));
 												pAction->UnExecute();
 												delete pAction;
 												return;
@@ -2717,7 +2698,6 @@ void CWPhastView::PrismWidgetListener(vtkObject *caller, unsigned long eid, void
 		else if (eid == CPrismWidget::InsertPointEvent)
 		{
 			TRACE("CPrismWidget::InsertPointEvent recd\n");
-
 			if (CPrismWidget *widget = CPrismWidget::SafeDownCast(caller))
 			{
 				if (CZoneActor *zoneActor = CZoneActor::SafeDownCast(widget->GetProp3D()))
@@ -2726,6 +2706,7 @@ void CWPhastView::PrismWidgetListener(vtkObject *caller, unsigned long eid, void
 					{
 						Prism copy(*prism);
 						ASSERT(copy.perimeter.Get_source_type() == Data_source::POINTS);
+
 						std::vector<Point>& vect = copy.perimeter.Get_user_points();
 						vect.clear();
 
@@ -2761,30 +2742,12 @@ void CWPhastView::PrismWidgetListener(vtkObject *caller, unsigned long eid, void
 							}
 							points->Delete();
 
-							// dump new prism
-							std::ostringstream prism_oss;
-							prism_oss.precision(DBL_DIG);
-
-							prism_oss << copy;
-							TRACE(prism_oss.str().c_str());
-							std::istringstream prism_iss(prism_oss.str());
-
-							// remove first line (-prism)
-							std::string line;
-							std::getline(prism_iss, line);
-							ASSERT(line.find("-prism") != std::string::npos);
-
-							// read new prism
+							// load new prism
 							Prism new_prism;
-							while(new_prism.Read(prism_iss))
-							{
-								if (prism_iss.rdstate() & std::ios::eofbit) break;
-								prism_iss.clear();
-							}
+							CGlobal::DumpAndLoadPrism(copy, new_prism);
 
-							// setup domain
+							// setup domain in order to tidy
 							self->GetDocument()->GetDefaultZone(::domain);
-
 							new_prism.Tidy();
 
 							CZonePrismResetAction *pAction = new CZonePrismResetAction(
@@ -2809,6 +2772,7 @@ void CWPhastView::PrismWidgetListener(vtkObject *caller, unsigned long eid, void
 					{
 						Prism copy(*prism);
 						ASSERT(copy.perimeter.Get_source_type() == Data_source::POINTS);
+
 						std::vector<Point>& vect = copy.perimeter.Get_user_points();
 						vect.clear();
 
@@ -2832,7 +2796,7 @@ void CWPhastView::PrismWidgetListener(vtkObject *caller, unsigned long eid, void
 						{
 							if (points->GetNumberOfPoints() < 6)
 							{
-								::AfxMessageBox("Perimeters must contain at least three points.");
+								::AfxMessageBox(_T("Perimeters must contain at least three points."));
 								points->Delete();
 								return;
 							}
@@ -2851,30 +2815,12 @@ void CWPhastView::PrismWidgetListener(vtkObject *caller, unsigned long eid, void
 							}
 							points->Delete();
 
-							// dump new prism
-							std::ostringstream prism_oss;
-							prism_oss.precision(DBL_DIG);
-
-							prism_oss << copy;
-							TRACE(prism_oss.str().c_str());
-							std::istringstream prism_iss(prism_oss.str());
-
-							// remove first line (-prism)
-							std::string line;
-							std::getline(prism_iss, line);
-							ASSERT(line.find("-prism") != std::string::npos);
-
-							// read new prism
+							// load new prism
 							Prism new_prism;
-							while(new_prism.Read(prism_iss))
-							{
-								if (prism_iss.rdstate() & std::ios::eofbit) break;
-								prism_iss.clear();
-							}
+							CGlobal::DumpAndLoadPrism(copy, new_prism);
 
-							// setup domain
+							// setup domain in order to tidy
 							self->GetDocument()->GetDefaultZone(::domain);
-
 							new_prism.Tidy();
 
 							CZonePrismResetAction *pAction = new CZonePrismResetAction(
@@ -2893,6 +2839,7 @@ void CWPhastView::PrismWidgetListener(vtkObject *caller, unsigned long eid, void
 							{
 								b = vect[(i + 1) % vect.size()].get_coord();
 								c = vect[(i + 2) % vect.size()].get_coord();
+								// BUG (this doesn't correctly handle 4 points)
 								for (size_t j = i+2; j < i+vect.size()-2; ++j)
 								{
 									d = vect[(j + 1) % vect.size()].get_coord();

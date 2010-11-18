@@ -131,6 +131,8 @@ CPrismWidget::~CPrismWidget(void)
 
 void CPrismWidget::SetEnabled(int enabling)
 {
+	const bool TurnOffTopAndBottomActors = true;
+
 	TRACE("%s, in\n", __FUNCTION__);
 	if ( ! this->Interactor )
 	{
@@ -194,13 +196,20 @@ void CPrismWidget::SetEnabled(int enabling)
 				Data_source::DATA_SOURCE_TYPE s = p->perimeter.Get_source_type();
 				if (s == Data_source::POINTS)
 				{
-// COMMENT: {9/2/2008 3:22:40 PM}					ASSERT(pZoneActor->TopActors.size() == 1);
-// COMMENT: {9/2/2008 3:22:40 PM}					pZoneActor->TopActors[0]->SetVisibility(0);
-					pZoneActor->TopOutlineActors[0]->SetVisibility(0);
-// COMMENT: {9/2/2008 3:22:40 PM}
-// COMMENT: {9/2/2008 3:22:40 PM}					ASSERT(pZoneActor->BottomActors.size() == 1);
-// COMMENT: {9/2/2008 3:22:40 PM}					pZoneActor->BottomActors[0]->SetVisibility(0);
-					pZoneActor->BottomOutlineActors[0]->SetVisibility(0);
+					if (TurnOffTopAndBottomActors)
+					{
+						ASSERT(pZoneActor->TopActors.size() == 1);
+						pZoneActor->TopActors[0]->SetVisibility(0);
+
+						ASSERT(pZoneActor->TopOutlineActors.size() == 1);
+						pZoneActor->TopOutlineActors[0]->SetVisibility(0);
+
+						ASSERT(pZoneActor->BottomActors.size() == 1);
+						pZoneActor->BottomActors[0]->SetVisibility(0);
+
+						ASSERT(pZoneActor->BottomOutlineActors.size() == 1);
+						pZoneActor->BottomOutlineActors[0]->SetVisibility(0);
+					}
 
 					ASSERT(pZoneActor->OutlinePerimeterActors.size() == 1);
 					pZoneActor->OutlinePerimeterActors[0]->SetProperty(this->SelectedProperty);
@@ -239,19 +248,24 @@ void CPrismWidget::SetEnabled(int enabling)
 					Data_source::DATA_SOURCE_TYPE s = p->perimeter.Get_source_type();
 					if (s == Data_source::POINTS)
 					{
-// COMMENT: {9/2/2008 3:23:32 PM}						ASSERT(pZoneActor->TopActors.size() == 1);
-// COMMENT: {9/2/2008 3:23:32 PM}						if (pZoneActor->GetVisibility())
-// COMMENT: {9/2/2008 3:23:32 PM}						{
-// COMMENT: {9/2/2008 3:23:32 PM}							pZoneActor->TopActors[0]->SetVisibility(pZoneActor->TopVisibility);
-// COMMENT: {9/2/2008 3:23:32 PM}							pZoneActor->TopOutlineActors[0]->SetVisibility(pZoneActor->TopVisibility);
-// COMMENT: {9/2/2008 3:23:32 PM}						}
-// COMMENT: {9/2/2008 3:23:32 PM}
-// COMMENT: {9/2/2008 3:23:32 PM}						ASSERT(pZoneActor->BottomActors.size() == 1);
-// COMMENT: {9/2/2008 3:23:32 PM}						if (pZoneActor->GetVisibility())
-// COMMENT: {9/2/2008 3:23:32 PM}						{
-// COMMENT: {9/2/2008 3:23:32 PM}							pZoneActor->BottomActors[0]->SetVisibility(pZoneActor->BottomVisibility);
-// COMMENT: {9/2/2008 3:23:32 PM}							pZoneActor->BottomOutlineActors[0]->SetVisibility(pZoneActor->BottomVisibility);
-// COMMENT: {9/2/2008 3:23:32 PM}						}
+						if (TurnOffTopAndBottomActors)
+						{
+							ASSERT(pZoneActor->TopActors.size() == 1);
+							ASSERT(pZoneActor->TopOutlineActors.size() == 1);
+							if (pZoneActor->GetVisibility())
+							{
+								pZoneActor->TopActors[0]->SetVisibility(pZoneActor->TopVisibility);
+								pZoneActor->TopOutlineActors[0]->SetVisibility(pZoneActor->TopVisibility);
+							}
+
+							ASSERT(pZoneActor->BottomActors.size() == 1);
+							ASSERT(pZoneActor->BottomOutlineActors.size() == 1);
+							if (pZoneActor->GetVisibility())
+							{
+								pZoneActor->BottomActors[0]->SetVisibility(pZoneActor->BottomVisibility);
+								pZoneActor->BottomOutlineActors[0]->SetVisibility(pZoneActor->BottomVisibility);
+							}
+						}
 
 						ASSERT(pZoneActor->OutlinePerimeterActors.size() == 1);
 						pZoneActor->OutlinePerimeterActors[0]->SetProperty(pZoneActor->OutlineActor->GetProperty());

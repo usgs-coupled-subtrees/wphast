@@ -6628,7 +6628,7 @@ void CWPhastDoc::NewPrismListener(vtkObject *caller, unsigned long eid, void *cl
 
 			if (points->GetNumberOfPoints() < 6)
 			{
-				::AfxMessageBox("Perimeter must be defined by at least 3 points.");
+				::AfxMessageBox(_T("Perimeter must be defined by at least 3 points."));
 
 				// Note: cannot call EndNewPrism here
 				self->NewPrismWidget->SetInteractor(0);

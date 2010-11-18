@@ -4772,3 +4772,66 @@ void CGlobal::TextWithFormat(CDataExchange* pDX, int nIDC, LPCTSTR lpszFormat, .
 
 	va_end(pData);
 }
+
+void CGlobal::DumpAndLoadPrism(const Prism &src, Prism &dest)
+{
+	// TOP
+	if (src.top.Get_source_type() != Data_source::NONE && src.top.Get_user_source_type() != Data_source::NONE)
+	{
+		std::ostringstream oss;
+		oss.precision(DBL_DIG);
+		oss << "\t\t-top       " << src.top;
+
+		TRACE(oss.str().c_str());
+		std::istringstream iss(oss.str());
+
+		// read top
+		while(dest.Read(iss))
+		{
+			if (iss.rdstate() & std::ios::eofbit) break;
+			iss.clear();
+		}
+		ASSERT(dest.top.Get_defined());
+	}
+	ASSERT(dest.top.Get_defined() == src.top.Get_defined());
+
+	// BOTTOM
+	if (src.bottom.Get_source_type() != Data_source::NONE && src.bottom.Get_user_source_type() != Data_source::NONE)
+	{
+		std::ostringstream oss;
+		oss.precision(DBL_DIG);
+		oss << "\t\t-bottom       " << src.bottom;
+
+		TRACE(oss.str().c_str());
+		std::istringstream iss(oss.str());
+
+		// read bottom
+		while(dest.Read(iss))
+		{
+			if (iss.rdstate() & std::ios::eofbit) break;
+			iss.clear();
+		}
+		ASSERT(dest.bottom.Get_defined());
+	}
+	ASSERT(dest.bottom.Get_defined() == src.bottom.Get_defined());
+
+	// PERIMETER
+	if (src.perimeter.Get_source_type() != Data_source::NONE && src.perimeter.Get_user_source_type() != Data_source::NONE)
+	{
+		std::ostringstream oss;
+		oss.precision(DBL_DIG);
+		oss << "\t\t-perimeter       " << src.perimeter;
+
+		TRACE(oss.str().c_str());
+		std::istringstream iss(oss.str());
+
+		// read perimeter
+		while(dest.Read(iss))
+		{
+			if (iss.rdstate() & std::ios::eofbit) break;
+			iss.clear();
+		}
+		ASSERT(dest.perimeter.Get_defined());
+	}
+	ASSERT(dest.perimeter.Get_defined() == src.perimeter.Get_defined());
+}
