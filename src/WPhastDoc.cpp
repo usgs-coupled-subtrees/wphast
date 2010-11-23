@@ -1859,19 +1859,17 @@ void CWPhastDoc::ResizeGrid(const CGridKeyword& keyword)
 		pTree->SetGridActor(this->m_pGridActor);
 	}
 
-// COMMENT: {9/7/2010 10:18:15 PM}	// Update default zones etc.
-// COMMENT: {9/7/2010 10:18:15 PM}	//
-// COMMENT: {9/7/2010 10:18:15 PM}	this->UpdateGridDomain();
+	// Update default zones etc.
+	//
+	this->UpdateGridDomain();
 
-	//{{
 	// update possible selection
 	//
 	this->Notify(this, WPN_DOMAIN_CHANGED, 0, 0);
 
-// COMMENT: {9/7/2010 10:19:23 PM}	// refresh screen
-// COMMENT: {9/7/2010 10:19:23 PM}	//
-// COMMENT: {9/7/2010 10:19:23 PM}	this->UpdateAllViews(0);
-	//}}
+	// refresh screen
+	//
+	this->UpdateAllViews(0);
 }
 
 void CWPhastDoc::AddDefaultZone(CZone* pZone)
