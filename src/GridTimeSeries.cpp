@@ -1928,23 +1928,25 @@ void CGridTimeSeries::DDX_Series(CDataExchange* pDX, bool bTimeZeroRequired)
 
 				// mixture
 				//				
-				ASSERT((*this->vv_props[SELECTED])[row]);
 				if (this->bEnableMixture)
 				{
-					if ((*this->vv_props[SELECTED])[row]->mix)
+					if ((*this->vv_props[SELECTED])[row])
 					{
-						double d;
-						if ((*this->vv_props[SELECTED])[row]->mix1 != (*this->vv_props[SELECTED])[row]->mix1)
+						if ((*this->vv_props[SELECTED])[row]->mix)
 						{
-							this->grid.SetCurrentFocusCell(row, TYPE_COLUMN);
-							this->OnSelChanged(row, TYPE_COLUMN);
-							::DDX_Text(pDX, IDC_EDIT_I, d);
-						}
-						if ((*this->vv_props[SELECTED])[row]->mix2 != (*this->vv_props[SELECTED])[row]->mix2)
-						{
-							this->grid.SetCurrentFocusCell(row, TYPE_COLUMN);
-							this->OnSelChanged(row, TYPE_COLUMN);
-							::DDX_Text(pDX, IDC_EDIT_J, d);
+							double d;
+							if ((*this->vv_props[SELECTED])[row]->mix1 != (*this->vv_props[SELECTED])[row]->mix1)
+							{
+								this->grid.SetCurrentFocusCell(row, TYPE_COLUMN);
+								this->OnSelChanged(row, TYPE_COLUMN);
+								::DDX_Text(pDX, IDC_EDIT_I, d);
+							}
+							if ((*this->vv_props[SELECTED])[row]->mix2 != (*this->vv_props[SELECTED])[row]->mix2)
+							{
+								this->grid.SetCurrentFocusCell(row, TYPE_COLUMN);
+								this->OnSelChanged(row, TYPE_COLUMN);
+								::DDX_Text(pDX, IDC_EDIT_J, d);
+							}
 						}
 					}
 				}
