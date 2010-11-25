@@ -3489,12 +3489,14 @@ herr_t CGlobal::HDFSerializeData_source(bool bStoring, hid_t loc_id, const char*
 						break;
 					case Data_source::ARCRASTER:
 					case Data_source::XYZ:
-					case Data_source::XYZT:
 						{
 							std::string filename(rData_source.Get_file_name());
 							status = HDFSerializeString(bStoring, ds_gr_id, szfile_name, filename);
 							ASSERT(status >= 0);
 						}
+						break;
+					case Data_source::XYZT:
+						ASSERT(FALSE);
 						break;
 					case Data_source::CONSTANT:
 						{
@@ -3568,7 +3570,6 @@ herr_t CGlobal::HDFSerializeData_source(bool bStoring, hid_t loc_id, const char*
 				ASSERT(return_val >= 0);
 
 				// coor_sys_type
-				ASSERT(rData_source.Get_coordinate_system() == PHAST_Transform::GRID);
 				PHAST_Transform::COORDINATE_SYSTEM nValue = rData_source.Get_coordinate_system();
 				return_val = CGlobal::HDFSerializeCoordinateSystem(bStoring, ds_gr_id, nValue);
 				ASSERT(return_val >= 0);
@@ -3630,13 +3631,15 @@ herr_t CGlobal::HDFSerializeData_source(bool bStoring, hid_t loc_id, const char*
 						break;
 					case Data_source::ARCRASTER:
 					case Data_source::XYZ:
-					case Data_source::XYZT:
 						{
 							std::string filename;
 							status = HDFSerializeString(bStoring, ds_gr_id, szfile_name, filename);
 							ASSERT(status >= 0);
 							rData_source.Set_file_name(filename);
 						}
+						break;
+					case Data_source::XYZT:
+						ASSERT(FALSE);
 						break;
 					case Data_source::CONSTANT:
 						{
@@ -3757,12 +3760,12 @@ herr_t CGlobal::HDFSerializeData_source(bool bStoring, hid_t loc_id, const char*
 				PHAST_Transform::COORDINATE_SYSTEM nValue;
 				status = CGlobal::HDFSerializeCoordinateSystem(bStoring, ds_gr_id, nValue);
 				rData_source.Set_coordinate_system(nValue);
-				ASSERT(rData_source.Get_coordinate_system() == PHAST_Transform::GRID);
 
 				status = CGlobal::HDFSerializeCoordinateSystemUser(bStoring, ds_gr_id, nValue);
 				rData_source.Set_user_coordinate_system(nValue);
 
 				Data_source::DATA_SOURCE_TYPE ds = rData_source.Get_source_type();
+				ASSERT(ds != Data_source::XYZT);
 				if (ds == Data_source::SHAPE || ds == Data_source::ARCRASTER || ds == Data_source::XYZ)
 				{
 					if (ds != Data_source::SHAPE) ASSERT(rData_source.Get_attribute() == -1);
@@ -4793,7 +4796,6 @@ void CGlobal::DumpAndLoadPrism(const Prism &src, Prism &dest)
 		}
 		ASSERT(dest.top.Get_defined());
 	}
-	ASSERT(dest.top.Get_defined() == src.top.Get_defined());
 
 	// BOTTOM
 	if (src.bottom.Get_source_type() != Data_source::NONE && src.bottom.Get_user_source_type() != Data_source::NONE)
@@ -4813,7 +4815,6 @@ void CGlobal::DumpAndLoadPrism(const Prism &src, Prism &dest)
 		}
 		ASSERT(dest.bottom.Get_defined());
 	}
-	ASSERT(dest.bottom.Get_defined() == src.bottom.Get_defined());
 
 	// PERIMETER
 	if (src.perimeter.Get_source_type() != Data_source::NONE && src.perimeter.Get_user_source_type() != Data_source::NONE)
@@ -4833,5 +4834,56 @@ void CGlobal::DumpAndLoadPrism(const Prism &src, Prism &dest)
 		}
 		ASSERT(dest.perimeter.Get_defined());
 	}
-	ASSERT(dest.perimeter.Get_defined() == src.perimeter.Get_defined());
+}
+
+bool CGlobal::PolygonIntersectsSelf(std::vector<Point> &vect)
+{
+	// TODO check for 3 coincident points
+	//
+
+	double *a, *b, *c, *d;
+	double rn, sn, den, r, s;
+	a = vect[0].get_coord();
+	for (size_t i = 0; i < vect.size(); ++i)
+	{
+		b = vect[(i + 1) % vect.size()].get_coord();
+		c = vect[(i + 2) % vect.size()].get_coord();
+		for (size_t j = i+2; j <= i+vect.size()-2; ++j)
+		{
+			d   = vect[(j + 1) % vect.size()].get_coord();
+			rn  = (a[1]-c[1])*(d[0]-c[0])-(a[0]-c[0])*(d[1]-c[1]);
+			sn  = (a[1]-c[1])*(b[0]-a[0])-(a[0]-c[0])*(b[1]-a[1]);
+			den = (b[0]-a[0])*(d[1]-c[1])-(b[1]-a[1])*(d[0]-c[0]);
+			if (den != 0)
+			{
+				r = rn/den;
+				s = sn/den;
+				if (r >= 0 && r <= 1 && s >= 0 && s <= 1)
+				{
+					return true;
+				}
+			}
+			else if (rn == 0)
+			{
+				// both AB and CD are collinear (coincident)
+				// project values to each axis to check for overlap
+				for (size_t k = 0; k < 2; ++k)
+				{
+					double minab = (a[k] < b[k]) ? a[k] : b[k];
+					double maxab = (a[k] > b[k]) ? a[k] : b[k];
+					if (minab <= c[k] && c[k] <= maxab)
+					{
+						return true;
+					}
+					if (minab <= d[k] && d[k] <= maxab)
+					{
+						return true;
+					}
+				}
+			}
+			c = d;
+		}
+		a = b;
+	}
+	return false;
 }

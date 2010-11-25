@@ -82,10 +82,10 @@ void TCPPUnit::RunUnitTests(void)
 // COMMENT: {8/18/2010 7:05:00 PM}		runner.addTest(TestCPropertyTreeControlBar::suite());
 // COMMENT: {8/18/2010 7:05:00 PM}		runner.addTest(TestCUnits::suite());
 // COMMENT: {8/18/2010 7:05:00 PM}		runner.addTest(TestCPhastInput::suite());
-// COMMENT: {8/18/2010 7:05:00 PM}		runner.addTest(TestPrism::suite());
-// COMMENT: {8/18/2010 7:05:00 PM}		runner.addTest(TestHDFSerializePolyData::suite());
-// COMMENT: {8/18/2010 7:05:00 PM}		runner.addTest(TestUniqueMap::suite());
-// COMMENT: {8/18/2010 7:05:00 PM}		runner.addTest(TestCproperty::suite());
+		runner.addTest(TestPrism::suite());
+		runner.addTest(TestHDFSerializePolyData::suite());
+		runner.addTest(TestUniqueMap::suite());
+		runner.addTest(TestCproperty::suite());
 
 		/**********************************************************
 		// the following require user input

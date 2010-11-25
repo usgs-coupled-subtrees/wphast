@@ -284,7 +284,7 @@ void CBoxPropertiesDialogBar::Update(IObserver* pSender, LPARAM lHint, CObject* 
 					}
 				}
 				this->Set(pView, pZoneActor, pView->GetDocument()->GetUnits());
-				//{{
+
 				if (this->m_nType == CBoxPropertiesDialogBar::BP_PRISM)
 				{
 					if (CPropertyTreeControlBar *pBar = dynamic_cast<CPropertyTreeControlBar*>(pSender))
@@ -317,7 +317,7 @@ void CBoxPropertiesDialogBar::Update(IObserver* pSender, LPARAM lHint, CObject* 
 						}
 					}
 				}
-				//}}
+
 			}
 			else if (CWellActor* pWellActor = CWellActor::SafeDownCast(pProp))
 			{
@@ -2842,32 +2842,18 @@ void CBoxPropertiesDialogBar::UpdatePrism(CZoneActor *pZoneActor, bool bForceUpd
 		// points
 		for (int i = 0; i < 3; ++i)
 		{
-			this->m_listCoord[i].clear();
+			this->m_listPoint[i].clear();
 			if (this->m_pds[i]->Get_source_type() == Data_source::POINTS)
 			{
 				std::vector<Point>::iterator it = this->m_pds[i]->Get_points().begin();
-				coord c;
 				for (; it != this->m_pds[i]->Get_points().end(); ++it)
 				{
-#if 999
+					Point p(*it);
 					if (this->m_pds[i]->Get_user_coordinate_system() == PHAST_Transform::MAP)
 					{
-						Point pt((*it).x(), (*it).y(), (*it).z());
-						pZoneActor->GetPhastTransform().Inverse_transform(pt);
-						c.c[0] = pt.x();
-						c.c[1] = pt.y();
-						c.c[2] = pt.z();
+						pZoneActor->GetPhastTransform().Inverse_transform(p);
 					}
-					else
-					{
-#endif
-						c.c[0] = (*it).x();
-						c.c[1] = (*it).y();
-						c.c[2] = (*it).z();
-#if 999
-					}
-#endif
-					this->m_listCoord[i].push_back(c);
+					this->m_listPoint[i].push_back(p);
 				}
 			}
 			else if (this->m_pds[i]->Get_source_type() == Data_source::NONE ||
@@ -2879,24 +2865,24 @@ void CBoxPropertiesDialogBar::UpdatePrism(CZoneActor *pZoneActor, bool bForceUpd
 				ASSERT(z->zone_defined);
 				if (i == PRISM_TOP)
 				{
-					this->m_listCoord[i].push_back(coord(z->x1, z->y1, defzone.z2));
-					this->m_listCoord[i].push_back(coord(z->x2, z->y1, defzone.z2));
-					this->m_listCoord[i].push_back(coord(z->x2, z->y2, defzone.z2));
-					this->m_listCoord[i].push_back(coord(z->x1, z->y2, defzone.z2));
+					this->m_listPoint[i].push_back(Point(z->x1, z->y1, defzone.z2));
+					this->m_listPoint[i].push_back(Point(z->x2, z->y1, defzone.z2));
+					this->m_listPoint[i].push_back(Point(z->x2, z->y2, defzone.z2));
+					this->m_listPoint[i].push_back(Point(z->x1, z->y2, defzone.z2));
 				}
 				else if (i == PRISM_PERIMETER)
 				{
-					this->m_listCoord[i].push_back(coord(defzone.x1, defzone.y1));
-					this->m_listCoord[i].push_back(coord(defzone.x2, defzone.y1));
-					this->m_listCoord[i].push_back(coord(defzone.x2, defzone.y2));
-					this->m_listCoord[i].push_back(coord(defzone.x1, defzone.y2));
+					this->m_listPoint[i].push_back(Point(defzone.x1, defzone.y1, 0.0));
+					this->m_listPoint[i].push_back(Point(defzone.x2, defzone.y1, 0.0));
+					this->m_listPoint[i].push_back(Point(defzone.x2, defzone.y2, 0.0));
+					this->m_listPoint[i].push_back(Point(defzone.x1, defzone.y2, 0.0));
 				}
 				else if (i == PRISM_BOTTOM)
 				{
-					this->m_listCoord[i].push_back(coord(z->x1, z->y1, defzone.z1));
-					this->m_listCoord[i].push_back(coord(z->x2, z->y1, defzone.z1));
-					this->m_listCoord[i].push_back(coord(z->x2, z->y2, defzone.z1));
-					this->m_listCoord[i].push_back(coord(z->x1, z->y2, defzone.z1));
+					this->m_listPoint[i].push_back(Point(z->x1, z->y1, defzone.z1));
+					this->m_listPoint[i].push_back(Point(z->x2, z->y1, defzone.z1));
+					this->m_listPoint[i].push_back(Point(z->x2, z->y2, defzone.z1));
+					this->m_listPoint[i].push_back(Point(z->x1, z->y2, defzone.z1));
 				}
 			}
 			else if (this->m_pds[i]->Get_source_type() == Data_source::SHAPE)
@@ -2905,70 +2891,27 @@ void CBoxPropertiesDialogBar::UpdatePrism(CZoneActor *pZoneActor, bool bForceUpd
 				ASSERT(z->zone_defined);
 				if (i == PRISM_TOP)
 				{
-					this->m_listCoord[i].push_back(coord(z->x1, z->y1, z->z2));
-					this->m_listCoord[i].push_back(coord(z->x2, z->y1, z->z2));
-					this->m_listCoord[i].push_back(coord(z->x2, z->y2, z->z2));
-					this->m_listCoord[i].push_back(coord(z->x1, z->y2, z->z2));
+					this->m_listPoint[i].push_back(Point(z->x1, z->y1, z->z2));
+					this->m_listPoint[i].push_back(Point(z->x2, z->y1, z->z2));
+					this->m_listPoint[i].push_back(Point(z->x2, z->y2, z->z2));
+					this->m_listPoint[i].push_back(Point(z->x1, z->y2, z->z2));
 				}
 				else if (i == PRISM_PERIMETER)
 				{
-					this->m_listCoord[i].push_back(coord(defzone.x1, defzone.y1));
-					this->m_listCoord[i].push_back(coord(defzone.x2, defzone.y1));
-					this->m_listCoord[i].push_back(coord(defzone.x2, defzone.y2));
-					this->m_listCoord[i].push_back(coord(defzone.x1, defzone.y2));
+					this->m_listPoint[i].push_back(Point(defzone.x1, defzone.y1, 0.0));
+					this->m_listPoint[i].push_back(Point(defzone.x2, defzone.y1, 0.0));
+					this->m_listPoint[i].push_back(Point(defzone.x2, defzone.y2, 0.0));
+					this->m_listPoint[i].push_back(Point(defzone.x1, defzone.y2, 0.0));
 				}
 				else if (i == PRISM_BOTTOM)
 				{
-					this->m_listCoord[i].push_back(coord(z->x1, z->y1, z->z1));
-					this->m_listCoord[i].push_back(coord(z->x2, z->y1, z->z1));
-					this->m_listCoord[i].push_back(coord(z->x2, z->y2, z->z1));
-					this->m_listCoord[i].push_back(coord(z->x1, z->y2, z->z1));
+					this->m_listPoint[i].push_back(Point(z->x1, z->y1, z->z1));
+					this->m_listPoint[i].push_back(Point(z->x2, z->y1, z->z1));
+					this->m_listPoint[i].push_back(Point(z->x2, z->y2, z->z1));
+					this->m_listPoint[i].push_back(Point(z->x1, z->y2, z->z1));
 				}
 			}
 		}
-
-// COMMENT: {7/23/2008 2:36:40 PM}		// top points
-// COMMENT: {7/23/2008 2:36:40 PM}		this->m_listCoord[PRISM_TOP].clear();
-// COMMENT: {7/23/2008 2:36:40 PM}		if (this->m_pds[PRISM_TOP]->Get_source_type() == Data_source::POINTS)
-// COMMENT: {7/23/2008 2:36:40 PM}		{
-// COMMENT: {7/23/2008 2:36:40 PM}			std::vector<Point>::iterator it = this->m_pds[PRISM_TOP]->Get_points().begin();
-// COMMENT: {7/23/2008 2:36:40 PM}			coord c;
-// COMMENT: {7/23/2008 2:36:40 PM}			for (; it != this->m_pds[PRISM_TOP]->Get_points().end(); ++it)
-// COMMENT: {7/23/2008 2:36:40 PM}			{					
-// COMMENT: {7/23/2008 2:36:40 PM}				c.c[0] = (*it).x();
-// COMMENT: {7/23/2008 2:36:40 PM}				c.c[1] = (*it).y();
-// COMMENT: {7/23/2008 2:36:40 PM}				c.c[2] = (*it).z();
-// COMMENT: {7/23/2008 2:36:40 PM}				this->m_listCoord[PRISM_TOP].push_back(c);
-// COMMENT: {7/23/2008 2:36:40 PM}			}
-// COMMENT: {7/23/2008 2:36:40 PM}		}
-// COMMENT: {7/23/2008 2:36:40 PM}		// perimeter points
-// COMMENT: {7/23/2008 2:36:40 PM}		this->m_listCoord[PRISM_PERIMETER].clear();
-// COMMENT: {7/23/2008 2:36:40 PM}		if (this->m_pds[PRISM_PERIMETER]->Get_source_type() == Data_source::POINTS)
-// COMMENT: {7/23/2008 2:36:40 PM}		{
-// COMMENT: {7/23/2008 2:36:40 PM}			std::vector<Point>::iterator it = this->m_pds[PRISM_PERIMETER]->Get_points().begin();
-// COMMENT: {7/23/2008 2:36:40 PM}			coord c;
-// COMMENT: {7/23/2008 2:36:40 PM}			for (; it != this->m_pds[PRISM_PERIMETER]->Get_points().end(); ++it)
-// COMMENT: {7/23/2008 2:36:40 PM}			{					
-// COMMENT: {7/23/2008 2:36:40 PM}				c.c[0] = (*it).x();
-// COMMENT: {7/23/2008 2:36:40 PM}				c.c[1] = (*it).y();
-// COMMENT: {7/23/2008 2:36:40 PM}				c.c[2] = (*it).z();
-// COMMENT: {7/23/2008 2:36:40 PM}				this->m_listCoord[PRISM_PERIMETER].push_back(c);
-// COMMENT: {7/23/2008 2:36:40 PM}			}
-// COMMENT: {7/23/2008 2:36:40 PM}		}
-// COMMENT: {7/23/2008 2:36:40 PM}		// bottom points
-// COMMENT: {7/23/2008 2:36:40 PM}		this->m_listCoord[PRISM_BOTTOM].clear();
-// COMMENT: {7/23/2008 2:36:40 PM}		if (this->m_pds[PRISM_BOTTOM]->Get_source_type() == Data_source::POINTS)
-// COMMENT: {7/23/2008 2:36:40 PM}		{
-// COMMENT: {7/23/2008 2:36:40 PM}			std::vector<Point>::iterator it = this->m_pds[PRISM_BOTTOM]->Get_points().begin();
-// COMMENT: {7/23/2008 2:36:40 PM}			coord c;
-// COMMENT: {7/23/2008 2:36:40 PM}			for (; it != this->m_pds[PRISM_BOTTOM]->Get_points().end(); ++it)
-// COMMENT: {7/23/2008 2:36:40 PM}			{					
-// COMMENT: {7/23/2008 2:36:40 PM}				c.c[0] = (*it).x();
-// COMMENT: {7/23/2008 2:36:40 PM}				c.c[1] = (*it).y();
-// COMMENT: {7/23/2008 2:36:40 PM}				c.c[2] = (*it).z();
-// COMMENT: {7/23/2008 2:36:40 PM}				this->m_listCoord[PRISM_BOTTOM].push_back(c);
-// COMMENT: {7/23/2008 2:36:40 PM}			}
-// COMMENT: {7/23/2008 2:36:40 PM}		}
 	}
 	TRACE("%s, out\n", __FUNCTION__);
 }
@@ -2997,9 +2940,7 @@ void CBoxPropertiesDialogBar::OnBnClickedData_source()
 		}
 		break;
 	case IDC_RADIO_SHAPE:
-		//if (CGlobal::IsValidShapefile(this->m_sShapefile[this->m_nPrismPart]))
 		{
-// COMMENT: {7/28/2008 5:02:10 PM}			ASSERT(CGlobal::IsValidShapefile(this->m_sShapefile[this->m_nPrismPart]));
 			CString str;
 			this->GetDlgItemTextA(IDC_EDIT_SHAPEFILE, str);
 			ASSERT(str.IsEmpty() || CGlobal::IsValidShapefile(this->m_sShapefile[this->m_nPrismPart]));
@@ -3047,12 +2988,6 @@ void CBoxPropertiesDialogBar::EnablePointsGrid(BOOL bEnable)
 
 void CBoxPropertiesDialogBar::DoDataExchangePrism(CDataExchange *pDX, Data_source *pData_source)
 {
-// COMMENT: {7/28/2008 12:15:04 PM}	this->m_wndShapeCombo.ResetContent();
-// COMMENT: {7/28/2008 12:15:04 PM}	this->m_wndShapeCombo.EnableWindow(1);
-// COMMENT: {7/28/2008 12:15:04 PM}	this->m_wndShapeCombo.EnableWindow(0);
-
-// COMMENT: {7/21/2008 11:27:54 PM}	this->m_wndPointsGrid.SetRowCount(0);
-
 	if (pDX->m_bSaveAndValidate)
 	{
 		switch (this->GetCheckedRadioButton(IDC_RADIO_NONE, IDC_RADIO_SHAPE))
@@ -3090,7 +3025,7 @@ void CBoxPropertiesDialogBar::DoDataExchangePrism(CDataExchange *pDX, Data_sourc
 			DDX_Text(pDX, IDC_EDIT_ARCRASTER, str);
 			if (str.IsEmpty())
 			{
-				::AfxMessageBox("Please select an ARCRASTER file.");
+				::AfxMessageBox(_T("Please select an ARCRASTER file."));
 				pDX->Fail();
 			}
 			ASSERT(CGlobal::IsValidArcraster(this->m_sArcraster[this->m_nPrismPart]));
@@ -3104,7 +3039,7 @@ void CBoxPropertiesDialogBar::DoDataExchangePrism(CDataExchange *pDX, Data_sourc
 			if (str.IsEmpty())
 			{
 				ASSERT(this->m_sShapefile[this->m_nPrismPart].IsEmpty());
-				::AfxMessageBox("Please select a shapefile.");
+				::AfxMessageBox(_T("Please select a shapefile."));
 				pDX->Fail();
 			}
 
@@ -3115,7 +3050,7 @@ void CBoxPropertiesDialogBar::DoDataExchangePrism(CDataExchange *pDX, Data_sourc
 				this->m_nShapeAttribute[this->m_nPrismPart] = this->m_wndShapeCombo.GetCurSel() - 1;
 				if (this->m_nShapeAttribute[this->m_nPrismPart] == -1)
 				{
-					::AfxMessageBox("Please select a shapefile attribute.");
+					::AfxMessageBox(_T("Please select a shapefile attribute."));
 					pDX->PrepareCtrl(IDC_COMBO_SHAPE);
 					pDX->Fail();
 				}
@@ -3126,11 +3061,10 @@ void CBoxPropertiesDialogBar::DoDataExchangePrism(CDataExchange *pDX, Data_sourc
 		if (this->m_nDataSourceType == Data_source::POINTS)
 		{
 			vtkPoints *points = vtkPoints::New();
-			std::list<coord> new_list;
+			std::list<Point> new_points;
 			try
 			{
 				double x, y, z;
-				//this->m_listCoord[this->m_nPrismPart].clear();
 				z = 0;
 				for (int row = 1; row < this->m_wndPointsGrid.GetRowCount(); ++row)
 				{
@@ -3138,45 +3072,13 @@ void CBoxPropertiesDialogBar::DoDataExchangePrism(CDataExchange *pDX, Data_sourc
 					DDX_TextGridControl(pDX, IDC_GRID_POINTS, row, 1, y);
 					if (this->m_nPrismPart == this->PRISM_PERIMETER)
 					{
-						//this->m_listCoord[this->m_nPrismPart].push_back(coord(x, y));
-						new_list.push_back(coord(x, y));
+						new_points.push_back(Point(x, y, 0.0));
 					}
 					else
 					{
 						DDX_TextGridControl(pDX, IDC_GRID_POINTS, row, 2, z);
-						//this->m_listCoord[this->m_nPrismPart].push_back(coord(x, y, z));
-						new_list.push_back(coord(x, y, z));
+						new_points.push_back(Point(x, y, z));
 					}
-// COMMENT: {7/25/2008 9:47:57 PM}					if (this->m_nPrismPart == this->PRISM_PERIMETER)
-// COMMENT: {7/25/2008 9:47:57 PM}					{
-// COMMENT: {7/25/2008 9:47:57 PM}						double p1[3];
-// COMMENT: {7/25/2008 9:47:57 PM}						double p2[3];
-// COMMENT: {7/25/2008 9:47:57 PM}						double x1[3];
-// COMMENT: {7/25/2008 9:47:57 PM}						double x2[3];
-// COMMENT: {7/25/2008 9:47:57 PM}						double u;
-// COMMENT: {7/25/2008 9:47:57 PM}						double v;
-// COMMENT: {7/25/2008 9:47:57 PM}						p1[0] = x;
-// COMMENT: {7/25/2008 9:47:57 PM}						p1[1] = y;
-// COMMENT: {7/25/2008 9:47:57 PM}						p1[2] = z;
-// COMMENT: {7/25/2008 9:47:57 PM}						if (3 < points->GetNumberOfPoints())
-// COMMENT: {7/25/2008 9:47:57 PM}						{
-// COMMENT: {7/25/2008 9:47:57 PM}							points->GetPoint(points->GetNumberOfPoints() - 1, p2);
-// COMMENT: {7/25/2008 9:47:57 PM}							for (vtkIdType i = 3; i < points->GetNumberOfPoints(); ++i)
-// COMMENT: {7/25/2008 9:47:57 PM}							{
-// COMMENT: {7/25/2008 9:47:57 PM}								points->GetPoint(i-2, x1);
-// COMMENT: {7/25/2008 9:47:57 PM}								points->GetPoint(i, x2);
-// COMMENT: {7/25/2008 9:47:57 PM}								if (vtkLine::Intersection(p1, p2, x1, x2, u, v) == 2)
-// COMMENT: {7/25/2008 9:47:57 PM}								{
-// COMMENT: {7/25/2008 9:47:57 PM}									char msg[] = "Perimeter must not cross itself.";
-// COMMENT: {7/25/2008 9:47:57 PM}									//this->m_wndPointsGrid.SetSelectedRange(row, 0, row, 1, TRUE);
-// COMMENT: {7/25/2008 9:47:57 PM}									DDX_GridControlFail(pDX, IDC_GRID_POINTS, row, 0, row, 1, msg);
-// COMMENT: {7/25/2008 9:47:57 PM}									//::AfxMessageBox("Perimeter must not cross itself.");
-// COMMENT: {7/25/2008 9:47:57 PM}									//pDX->Fail();
-// COMMENT: {7/25/2008 9:47:57 PM}								}
-// COMMENT: {7/25/2008 9:47:57 PM}							}
-// COMMENT: {7/25/2008 9:47:57 PM}						}
-// COMMENT: {7/25/2008 9:47:57 PM}						points->InsertNextPoint(x, y, z);
-// COMMENT: {7/25/2008 9:47:57 PM}					}
 				}
 				points->Delete();
 			}
@@ -3185,7 +3087,7 @@ void CBoxPropertiesDialogBar::DoDataExchangePrism(CDataExchange *pDX, Data_sourc
 				points->Delete();
 				throw;
 			}
-			this->m_listCoord[this->m_nPrismPart] = new_list;
+			this->m_listPoint[this->m_nPrismPart] = new_points;
 		}
 	}
 	else
@@ -3270,13 +3172,13 @@ void CBoxPropertiesDialogBar::DoDataExchangePrism(CDataExchange *pDX, Data_sourc
 		}
 
 		// points
-		if (this->m_listCoord[this->m_nPrismPart].size() > 0)
+		if (this->m_listPoint[this->m_nPrismPart].size() > 0)
 		{
 			// Prepare points grid
 			//
 			TRY
 			{
-				this->m_wndPointsGrid.SetRowCount((int)(1 + this->m_listCoord[this->m_nPrismPart].size()));
+				this->m_wndPointsGrid.SetRowCount((int)(1 + this->m_listPoint[this->m_nPrismPart].size()));
 				if (this->m_nPrismPart == PRISM_PERIMETER)
 				{
 					this->m_wndPointsGrid.SetColumnCount(2);
@@ -3312,14 +3214,15 @@ void CBoxPropertiesDialogBar::DoDataExchangePrism(CDataExchange *pDX, Data_sourc
 			}
 
 			//std::vector<Point>::iterator iter = pts.begin();
-			std::list<coord>::iterator iter = this->m_listCoord[this->m_nPrismPart].begin();
+			std::list<Point>::iterator iter = this->m_listPoint[this->m_nPrismPart].begin();
 			for (int row = 1; row < this->m_wndPointsGrid.GetRowCount(); ++row, ++iter)
 			{
-				DDX_TextGridControl(pDX, IDC_GRID_POINTS, row, 0, (*iter).c[0]);
-				DDX_TextGridControl(pDX, IDC_GRID_POINTS, row, 1, (*iter).c[1]);
+				double *c = (*iter).get_coord();
+				DDX_TextGridControl(pDX, IDC_GRID_POINTS, row, 0, c[0]);
+				DDX_TextGridControl(pDX, IDC_GRID_POINTS, row, 1, c[1]);
 				if (this->m_nPrismPart != CBoxPropertiesDialogBar::PRISM_PERIMETER)
 				{
-					DDX_TextGridControl(pDX, IDC_GRID_POINTS, row, 2, (*iter).c[2]);
+					DDX_TextGridControl(pDX, IDC_GRID_POINTS, row, 2, c[2]);
 					this->m_wndPointsGrid.RedrawCell(row, 2);
 				}
 				this->m_wndPointsGrid.RedrawCell(row, 0);
@@ -3481,10 +3384,10 @@ void CBoxPropertiesDialogBar::ApplyNewPrism(CZoneActor *pZoneActor)
 				ASSERT(ds.Get_points().size() > 2);
 				std::vector<Point> &pts = ds.Get_points();
 				pts.clear();
-				std::list<coord>::iterator cit = this->m_listCoord[this->m_nPrismPart].begin();
-				for (; cit != this->m_listCoord[this->m_nPrismPart].end(); ++cit)
+				std::list<Point>::iterator cit = this->m_listPoint[this->m_nPrismPart].begin();
+				for (; cit != this->m_listPoint[this->m_nPrismPart].end(); ++cit)
 				{
-					pts.push_back(Point(cit->c[0], cit->c[1], cit->c[2], cit->c[2]));
+					pts.push_back(*cit);
 				}
 				ds.Tidy(this->m_nPrismPart != CBoxPropertiesDialogBar::PRISM_PERIMETER);
 				oss << ds << std::endl;
@@ -3515,27 +3418,11 @@ void CBoxPropertiesDialogBar::ApplyNewPrism(CZoneActor *pZoneActor)
 			break;
 		}
 
+		// load new prism
+		Prism new_prism;
+		CGlobal::DumpAndLoadPrism(copy, new_prism);
 		copy.Tidy();
 
-		// dump new prism
-		std::ostringstream prism_oss;
-		prism_oss.precision(DBL_DIG);
-		prism_oss << copy;
-		TRACE(prism_oss.str().c_str());
-		std::istringstream prism_iss(prism_oss.str());
-
-		// remove first line (-prism)
-		std::string line;
-		std::getline(prism_iss, line);
-		ASSERT(line.find("-prism") != std::string::npos);
-
-		// read new prism
-		Prism new_prism;
-		while(new_prism.Read(prism_iss))
-		{
-			if (prism_iss.rdstate() & std::ios::eofbit) break;
-			prism_iss.clear();
-		}
 
 		// setup domain
 		this->m_pView->GetDocument()->GetDefaultZone(::domain);
@@ -3553,11 +3440,11 @@ void CBoxPropertiesDialogBar::ApplyNewPrism(CZoneActor *pZoneActor)
 
 
 		// save points
-		std::list<coord> save = this->m_listCoord[this->m_nPrismPart];
+		std::list<Point> save = this->m_listPoint[this->m_nPrismPart];
 		this->UpdatePrism(pZoneActor);
 
 		// restore points
-		this->m_listCoord[this->m_nPrismPart] = save;
+		this->m_listPoint[this->m_nPrismPart] = save;
 
 	}
 
@@ -3580,7 +3467,7 @@ void CBoxPropertiesDialogBar::EnableConstant(BOOL bEnable)
 {
 	if (CEdit* pEdit = (CEdit*)this->GetDlgItem(IDC_EDIT_CONSTANT))
 	{
-		pEdit->EnableWindow(TRUE);
+		pEdit->EnableWindow(bEnable);
 		pEdit->SetReadOnly(!bEnable);
 	}
 }
@@ -3589,7 +3476,7 @@ void CBoxPropertiesDialogBar::EnableArcraster(BOOL bEnable)
 {
 	if (CEdit* pEdit = (CEdit*)this->GetDlgItem(IDC_EDIT_ARCRASTER))
 	{
-		pEdit->EnableWindow(TRUE);
+		pEdit->EnableWindow(FALSE);
 		pEdit->SetReadOnly(TRUE);
 	}
 	if (CWnd* pWnd = this->GetDlgItem(IDC_BUTTON_ARCRASTER))
@@ -3602,7 +3489,7 @@ void CBoxPropertiesDialogBar::EnableShape(BOOL bEnable)
 {
 	if (CEdit* pEdit = (CEdit*)this->GetDlgItem(IDC_EDIT_SHAPEFILE))
 	{
-		pEdit->EnableWindow(TRUE);
+		pEdit->EnableWindow(FALSE);
 		pEdit->SetReadOnly(TRUE);
 	}
 	if (CWnd* pWnd = this->GetDlgItem(IDC_BUTTON_SHAPE))
@@ -3855,7 +3742,6 @@ void CBoxPropertiesDialogBar::OnCbnSelChangeShape(void)
 void CBoxPropertiesDialogBar::OnEnKillfocusConstant()
 {
 	TRACE("%s, in\n", __FUNCTION__);
-// COMMENT: {2/19/2009 9:56:17 PM}	ASSERT(this->m_nType == CBoxPropertiesDialogBar::BP_PRISM);
 	if (this->m_nType == CBoxPropertiesDialogBar::BP_PRISM)
 	{
 		if (this->m_bNeedsUpdate)
@@ -3898,134 +3784,38 @@ void CBoxPropertiesDialogBar::TestPointsGrid(NMHDR *pNotifyStruct, LRESULT *resu
 	{
 		if (this->m_nPrismPart == this->PRISM_PERIMETER)
 		{
-			std::vector<coord> vect;
-			std::list<coord>::iterator li = this->m_listCoord[PRISM_PERIMETER].begin();
-			for (; li != this->m_listCoord[PRISM_PERIMETER].end(); ++li)
+			std::vector<Point> vect;
+			std::list<Point>::iterator li = this->m_listPoint[PRISM_PERIMETER].begin();
+			for (; li != this->m_listPoint[PRISM_PERIMETER].end(); ++li)
 			{
 				vect.push_back(*li);
 			}
 			for (size_t i = 0; i < vect.size(); ++i)
 			{
-				TRACE("Points %d=%g, %g, %g\n", i, vect[i].c[0], vect[i].c[1], vect[i].c[2]);
+				double *c = vect[i].get_coord();
+				TRACE("Points %d=%g, %g, %g\n", i, c[0], c[1], c[2]);
 			}
 
 			// check original
 			ASSERT(vect.size() > 2);
-
-			double *a, *b, *c, *d;
-			double rn, sn, den, r, s;
-			a = vect[0].c;
-			for (size_t i = 0; i < vect.size(); ++i)
+			if (CGlobal::PolygonIntersectsSelf(vect))
 			{
-				b = vect[(i + 1) % vect.size()].c;
-				c = vect[(i + 2) % vect.size()].c;
-				for (size_t j = i+2; j < i+vect.size()-2; ++j)
-				{
-					d = vect[(j + 1) % vect.size()].c;
-					rn = (a[1]-c[1])*(d[0]-c[0])-(a[0]-c[0])*(d[1]-c[1]);
-					sn = (a[1]-c[1])*(b[0]-a[0])-(a[0]-c[0])*(b[1]-a[1]);
-					den = (b[0]-a[0])*(d[1]-c[1])-(b[1]-a[1])*(d[0]-c[0]);
-					if (den != 0)
-					{
-						r = rn/den;
-						s = sn/den;
-						if (r >= 0 && r <= 1 && s >= 0 && s <= 1)
-						{
-							ASSERT(FALSE);
-							*result = 1;
-							return; // return true;
-						}
-					}
-					else if (rn == 0)
-					{
-						// both AB and CD are collinear (coincident)
-						// project values to each axis to check for overlap
-						for (i = 0; i < 2; ++i)
-						{
-							double minab = (a[i] < b[i]) ? a[i] : b[i]; // Math.min(a[i], b[i]);
-							double maxab = (a[i] > b[i]) ? a[i] : b[i]; // Math.max(a[i], b[i]);
-							if (minab <= c[i] && c[i] <= maxab)
-							{
-								ASSERT(FALSE);
-								*result = 1;
-								return; // return true;
-							}
-							if (minab <= d[i] && d[i] <= maxab)
-							{
-								ASSERT(FALSE);
-								*result = 1;
-								return; // return true;
-							}
-						}
-					}
-					c = d;
-				}
-				a = b;
+				ASSERT(FALSE);
+				*result = 1;
+				return;
 			}
+			_stprintf(szBuffer, _T("%.*g"), DBL_DIG, vect[pnmgv->iRow - 1].get_coord()[pnmgv->iColumn]);
 
-			_stprintf(szBuffer, _T("%.*g"), DBL_DIG, vect[pnmgv->iRow - 1].c[pnmgv->iColumn]);
-			vect[pnmgv->iRow - 1].c[pnmgv->iColumn] = dCell;
+			// check new
+			vect[pnmgv->iRow - 1].get_coord()[pnmgv->iColumn] = dCell;
+			if (CGlobal::PolygonIntersectsSelf(vect))
 			{
-
-				double *a, *b, *c, *d;
-				double rn, sn, den, r, s;
-				a = vect[0].c;
-				for (size_t i = 0; i < vect.size(); ++i)
+				if (bShowErrors)
 				{
-					b = vect[(i + 1) % vect.size()].c;
-					c = vect[(i + 2) % vect.size()].c;
-					for (size_t j = i+2; j < i+vect.size()-2; ++j)
-					{
-						d = vect[(j + 1) % vect.size()].c;
-						rn = (a[1]-c[1])*(d[0]-c[0])-(a[0]-c[0])*(d[1]-c[1]);
-						sn = (a[1]-c[1])*(b[0]-a[0])-(a[0]-c[0])*(b[1]-a[1]);
-						den = (b[0]-a[0])*(d[1]-c[1])-(b[1]-a[1])*(d[0]-c[0]);
-						if (den != 0)
-						{
-							r = rn/den;
-							s = sn/den;
-							if (r >= 0 && r <= 1 && s >= 0 && s <= 1)
-							{
-								if (bShowErrors)
-								{
-									::AfxMessageBox("Perimeter cannot cross itself. Resetting original coordinates.");
-								}
-								VERIFY(this->m_wndPointsGrid.SetItemText(pnmgv->iRow, pnmgv->iColumn, szBuffer));
-								return;
-							}
-						}
-						else if (rn == 0)
-						{
-							// both AB and CD are collinear (coincident)
-							// project values to each axis to check for overlap
-							for (i = 0; i < 2; ++i)
-							{
-								double minab = (a[i] < b[i]) ? a[i] : b[i]; // Math.min(a[i], b[i]);
-								double maxab = (a[i] > b[i]) ? a[i] : b[i]; // Math.max(a[i], b[i]);
-								if (minab <= c[i] && c[i] <= maxab)
-								{
-									if (bShowErrors)
-									{
-										::AfxMessageBox("Perimeter cannot cross itself. Resetting original coordinates.");
-									}
-									VERIFY(this->m_wndPointsGrid.SetItemText(pnmgv->iRow, pnmgv->iColumn, szBuffer));
-									return;
-								}
-								if (minab <= d[i] && d[i] <= maxab)
-								{
-									if (bShowErrors)
-									{
-										::AfxMessageBox("Perimeter cannot cross itself. Resetting original coordinates.");
-									}
-									VERIFY(this->m_wndPointsGrid.SetItemText(pnmgv->iRow, pnmgv->iColumn, szBuffer));
-									return;
-								}
-							}
-						}
-						c = d;
-					}
-					a = b;
+					::AfxMessageBox("Perimeter cannot cross itself. Resetting original coordinates.");
 				}
+				VERIFY(this->m_wndPointsGrid.SetItemText(pnmgv->iRow, pnmgv->iColumn, szBuffer));
+				return;
 			}
 		}
 		_stprintf(szBuffer, _T("%.*g"), DBL_DIG, dCell);

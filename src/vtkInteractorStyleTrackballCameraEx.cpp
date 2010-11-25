@@ -144,13 +144,6 @@ void vtkInteractorStyleTrackballCameraEx::OnChar()
         }
       break;
 
-// COMMENT: {9/7/2005 9:46:57 PM}    case 'Q' :
-// COMMENT: {9/7/2005 9:46:57 PM}    case 'q' :
-// COMMENT: {9/7/2005 9:46:57 PM}    case 'e' :
-// COMMENT: {9/7/2005 9:46:57 PM}    case 'E' :
-// COMMENT: {9/7/2005 9:46:57 PM}      rwi->ExitCallback();
-// COMMENT: {9/7/2005 9:46:57 PM}      break;
-
     case 'f' :      
     case 'F' :
       {
@@ -188,6 +181,7 @@ void vtkInteractorStyleTrackballCameraEx::OnChar()
       rwi->Render();
       break;
 
+#if defined(SKIP_FOR_VTK_542)
     case 'w' :
     case 'W' :
       {
@@ -231,7 +225,6 @@ void vtkInteractorStyleTrackballCameraEx::OnChar()
       }
       break;
 
-#if defined(SKIP_FOR_VTK_542)
     case 'l' :
     case 'L' :
       {
@@ -302,14 +295,30 @@ void vtkInteractorStyleTrackballCameraEx::OnChar()
 				path->InitTraversal(csi);
 				vtkProp* pPropAssembly = path->GetNextNode(csi)->GetViewProp();
 				ASSERT(pPropAssembly->IsA("vtkPropAssembly"));
-				this->LastProp = path->GetNextNode()->GetViewProp();
+				if (path->GetNextNode())
+				{
+					this->LastProp = path->GetNextNode()->GetViewProp();
+				}
+				else
+				{
+					this->LastProp = NULL;
+				}
 			}
 			else
 			{
-				this->LastProp = path->GetLastNode()->GetViewProp();
+				if (path->GetLastNode())
+				{
+					this->LastProp = path->GetLastNode()->GetViewProp();
+				}
+				else
+				{
+					this->LastProp = NULL;
+				}
 			}
 
 			ASSERT(
+				this->LastProp == NULL
+				||
 				this->LastProp->IsA("CZoneActor")
 				||
 				this->LastProp->IsA("CWellActor")

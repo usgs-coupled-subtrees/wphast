@@ -198,6 +198,7 @@ public:
 	static void DumpAndLoadPrism(const Prism &src, Prism &dest);
 	static void UpgradePrism(Prism &rPrism, const CGridKeyword &rGridKeyword, const CUnits &rUnits);
 	static void UpgradeDataSourcePoints(Data_source &rData_source, const CGridKeyword &rGridKeyword, const CUnits &rUnits);
+	static bool PolygonIntersectsSelf(std::vector<Point> &vect);
 
 protected:
 	static double CGlobal::RadiusFactor;

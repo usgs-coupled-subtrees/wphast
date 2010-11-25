@@ -197,49 +197,54 @@ void TestPrism::testOStream(void)
 
 void TestPrism::testHDFSerialize(void)
 {
-// COMMENT: {8/31/2009 2:43:48 PM}	const char input[] =
-// COMMENT: {8/31/2009 2:43:48 PM}		"\t-perimeter SHAPE     map  ..\\setup\\phast\\examples\\capecod\\ArcData\\coast.shp\n"
-// COMMENT: {8/31/2009 2:43:48 PM}		"\t-top       arcraster map  ..\\setup\\phast\\examples\\capecod\\ArcData\\elevation-90.txt\n"
-// COMMENT: {8/31/2009 2:43:48 PM}		"\t-bottom    arcraster map  ..\\setup\\phast\\examples\\capecod\\ArcData\\bedrock-90.txt\n"
-// COMMENT: {8/31/2009 2:43:48 PM}		"\t-active 1";
-// COMMENT: {8/31/2009 2:43:48 PM}
-// COMMENT: {8/31/2009 2:43:48 PM}	::input_error = 0;
-// COMMENT: {8/31/2009 2:43:48 PM}	std::istringstream iss(input);
-// COMMENT: {8/31/2009 2:43:48 PM}
-// COMMENT: {8/31/2009 2:43:48 PM}	Prism prism;
-// COMMENT: {8/31/2009 2:43:48 PM}	while(prism.Read(iss))
-// COMMENT: {8/31/2009 2:43:48 PM}	{
-// COMMENT: {8/31/2009 2:43:48 PM}		if (iss.rdstate() & std::ios::eofbit) break;
-// COMMENT: {8/31/2009 2:43:48 PM}		iss.clear();
-// COMMENT: {8/31/2009 2:43:48 PM}	}
-// COMMENT: {8/31/2009 2:43:48 PM}	prism.Tidy();
-// COMMENT: {8/31/2009 2:43:48 PM}
-// COMMENT: {8/31/2009 2:43:48 PM}
-// COMMENT: {8/31/2009 2:43:48 PM}	hid_t file_id = H5Fcreate("Test/prism.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-// COMMENT: {8/31/2009 2:43:48 PM}	CPPUNIT_ASSERT(file_id > 0);
-// COMMENT: {8/31/2009 2:43:48 PM}
-// COMMENT: {8/31/2009 2:43:48 PM}	herr_t e = CGlobal::HDFSerializePrism(true, file_id, prism);
-// COMMENT: {8/31/2009 2:43:48 PM}	CPPUNIT_ASSERT(e >= 0);
-// COMMENT: {8/31/2009 2:43:48 PM}
-// COMMENT: {8/31/2009 2:43:48 PM}	herr_t s = H5Fclose(file_id);
-// COMMENT: {8/31/2009 2:43:48 PM}	CPPUNIT_ASSERT(e >= 0);
-// COMMENT: {8/31/2009 2:43:48 PM}
-// COMMENT: {8/31/2009 2:43:48 PM}
-// COMMENT: {8/31/2009 2:43:48 PM}	/* Create a new file using default properties. */
-// COMMENT: {8/31/2009 2:43:48 PM}	file_id = H5Fopen("Test/prism.h5", H5F_ACC_RDONLY, H5P_DEFAULT);
-// COMMENT: {8/31/2009 2:43:48 PM}	CPPUNIT_ASSERT(file_id > 0);
-// COMMENT: {8/31/2009 2:43:48 PM}
-// COMMENT: {8/31/2009 2:43:48 PM}	Prism cp;
-// COMMENT: {8/31/2009 2:43:48 PM}	e = CGlobal::HDFSerializePrism(false, file_id, cp);
-// COMMENT: {8/31/2009 2:43:48 PM}	CPPUNIT_ASSERT(e >= 0);
-// COMMENT: {8/31/2009 2:43:48 PM}	cp.Tidy();
-// COMMENT: {8/31/2009 2:43:48 PM}
-// COMMENT: {8/31/2009 2:43:48 PM}	s = H5Fclose(file_id);
-// COMMENT: {8/31/2009 2:43:48 PM}	CPPUNIT_ASSERT(e >= 0);
-// COMMENT: {8/31/2009 2:43:48 PM}
-// COMMENT: {8/31/2009 2:43:48 PM}	CPPUNIT_ASSERT(prism == cp);
-// COMMENT: {8/31/2009 2:43:48 PM}
-// COMMENT: {8/31/2009 2:43:48 PM}	Clear_NNInterpolatorList();
-// COMMENT: {8/31/2009 2:43:48 PM}	Clear_file_data_map();
-// COMMENT: {8/31/2009 2:43:48 PM}	Clear_KDtreeList();
+	const char input[] =
+		"\t-perimeter SHAPE     map  ..\\setup\\phast\\examples\\capecod\\ArcData\\coast.shp\n"
+		"\t-top       arcraster map  ..\\setup\\phast\\examples\\capecod\\ArcData\\elevation-90.txt\n"
+		"\t-bottom    arcraster map  ..\\setup\\phast\\examples\\capecod\\ArcData\\bedrock-90.txt\n";
+
+#ifdef SAVE
+	const char input[] =
+		"\t-perimeter SHAPE     grid  ..\\setup\\phast\\examples\\capecod\\ArcData\\coast.shp\n"
+		"\t-top       arcraster grid  ..\\setup\\phast\\examples\\capecod\\ArcData\\elevation-90.txt\n"
+		"\t-bottom    arcraster grid  ..\\setup\\phast\\examples\\capecod\\ArcData\\bedrock-90.txt\n";
+#endif
+
+	::input_error = 0;
+	std::istringstream iss(input);
+
+	Prism prism;
+	while(prism.Read(iss))
+	{
+		if (iss.rdstate() & std::ios::eofbit) break;
+		iss.clear();
+	}
+	CPPUNIT_ASSERT(::input_error == 0);
+	prism.Tidy();
+	CPPUNIT_ASSERT(::input_error == 0);
+
+	hid_t file_id = H5Fcreate("Test/prism.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+	CPPUNIT_ASSERT(file_id > 0);
+
+	herr_t e = CGlobal::HDFSerializePrism(true, file_id, prism);
+	CPPUNIT_ASSERT(e >= 0);
+
+	herr_t s = H5Fclose(file_id);
+	CPPUNIT_ASSERT(e >= 0);
+
+	file_id = H5Fopen("Test/prism.h5", H5F_ACC_RDONLY, H5P_DEFAULT);
+	CPPUNIT_ASSERT(file_id > 0);
+
+	Prism cp;
+	e = CGlobal::HDFSerializePrism(false, file_id, cp);
+	CPPUNIT_ASSERT(e >= 0);
+	cp.Tidy();
+
+	s = H5Fclose(file_id);
+	CPPUNIT_ASSERT(e >= 0);
+
+	CPPUNIT_ASSERT(prism == cp);
+
+	Clear_NNInterpolatorList();
+	Clear_file_data_map();
+	Clear_KDtreeList();
 }

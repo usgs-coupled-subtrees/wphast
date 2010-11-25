@@ -112,10 +112,6 @@ protected:
 	PRISM_PART m_nPrismPart;
 	Data_source::DATA_SOURCE_TYPE m_nDataSourceType;
 
-// COMMENT: {7/21/2008 11:01:03 PM}	Data_source *m_pdsTop;
-// COMMENT: {7/21/2008 11:01:03 PM}	Data_source *m_pdsPerimeter;
-// COMMENT: {7/21/2008 11:01:03 PM}	Data_source *m_pdsBottom;
-
 	// Data_source data
 	//
 	Data_source *m_pds[3];
@@ -123,9 +119,7 @@ protected:
 	CString m_sArcraster[3];
 	CString m_sShapefile[3];
 	int m_nShapeAttribute[3];
-	//std::vector< std::pair<double, double> > m_vectorPoints;
-	//std::vector<double[3]> m_vectorPoints2;
-	std::list<coord> m_listCoord[3];
+	std::list<Point> m_listPoint[3];
 
 	// river data
 	//

@@ -2633,61 +2633,12 @@ void CWPhastView::PrismWidgetListener(vtkObject *caller, unsigned long eid, void
 								&new_prism
 								);
 
-							// TODO check for 3 coincident points
-							//
-							double *a, *b, *c, *d;
-							double rn, sn, den, r, s;
-							a = vect[0].get_coord();
-							for (size_t i = 0; i < vect.size(); ++i)
+							if (CGlobal::PolygonIntersectsSelf(vect))
 							{
-								b = vect[(i + 1) % vect.size()].get_coord();
-								c = vect[(i + 2) % vect.size()].get_coord();
-								// BUG (this doesn't correctly handle 4 points)
-								for (size_t j = i+2; j < i+vect.size()-2; ++j)
-								{
-									d = vect[(j + 1) % vect.size()].get_coord();
-									rn = (a[1]-c[1])*(d[0]-c[0])-(a[0]-c[0])*(d[1]-c[1]);
-									sn = (a[1]-c[1])*(b[0]-a[0])-(a[0]-c[0])*(b[1]-a[1]);
-									den = (b[0]-a[0])*(d[1]-c[1])-(b[1]-a[1])*(d[0]-c[0]);
-									if (den != 0)
-									{
-										r = rn/den;
-										s = sn/den;
-										if (r >= 0 && r <= 1 && s >= 0 && s <= 1)
-										{
-											::AfxMessageBox(_T("Perimeter cannot cross itself. Resetting original coordinates."));
-											pAction->UnExecute();
-											delete pAction;
-											return;
-										}
-									}
-									else if (rn == 0)
-									{
-										// both AB and CD are collinear (coincident)
-										// project values to each axis to check for overlap
-										for (i = 0; i < 2; ++i)
-										{
-											double minab = (a[i] < b[i]) ? a[i] : b[i]; // Math.min(a[i], b[i]);
-											double maxab = (a[i] > b[i]) ? a[i] : b[i]; // Math.max(a[i], b[i]);
-											if (minab <= c[i] && c[i] <= maxab)
-											{
-												::AfxMessageBox(_T("Perimeter cannot cross itself. Resetting original coordinates."));
-												pAction->UnExecute();
-												delete pAction;
-												return;
-											}
-											if (minab <= d[i] && d[i] <= maxab)
-											{
-												::AfxMessageBox(_T("Perimeter cannot cross itself. Resetting original coordinates."));
-												pAction->UnExecute();
-												delete pAction;
-												return;
-											}
-										}
-									}
-									c = d;
-								}
-								a = b;
+								::AfxMessageBox(_T("Perimeter cannot cross itself. Resetting original coordinates."));
+								pAction->UnExecute();
+								delete pAction;
+								return;
 							}
 							self->GetDocument()->Execute(pAction);
 						}
@@ -2823,69 +2774,17 @@ void CWPhastView::PrismWidgetListener(vtkObject *caller, unsigned long eid, void
 							self->GetDocument()->GetDefaultZone(::domain);
 							new_prism.Tidy();
 
+							if (CGlobal::PolygonIntersectsSelf(vect))
+							{
+								::AfxMessageBox(_T("Deleting this point would cause the perimeter to cross itself. Resetting original coordinates."));
+								return;
+							}
+
 							CZonePrismResetAction *pAction = new CZonePrismResetAction(
 								self,
 								zoneActor,
 								&new_prism
 								);
-
-							// TODO check for 3 coincident points
-							//
-							const char szMsg[] = "Deleting this point would cause the perimeter to cross itself. Resetting original coordinates.";
-							double *a, *b, *c, *d;
-							double rn, sn, den, r, s;
-							a = vect[0].get_coord();
-							for (size_t i = 0; i < vect.size(); ++i)
-							{
-								b = vect[(i + 1) % vect.size()].get_coord();
-								c = vect[(i + 2) % vect.size()].get_coord();
-								// BUG (this doesn't correctly handle 4 points)
-								for (size_t j = i+2; j < i+vect.size()-2; ++j)
-								{
-									d = vect[(j + 1) % vect.size()].get_coord();
-									rn = (a[1]-c[1])*(d[0]-c[0])-(a[0]-c[0])*(d[1]-c[1]);
-									sn = (a[1]-c[1])*(b[0]-a[0])-(a[0]-c[0])*(b[1]-a[1]);
-									den = (b[0]-a[0])*(d[1]-c[1])-(b[1]-a[1])*(d[0]-c[0]);
-									if (den != 0)
-									{
-										r = rn/den;
-										s = sn/den;
-										if (r >= 0 && r <= 1 && s >= 0 && s <= 1)
-										{
-											::AfxMessageBox(szMsg);
-											pAction->UnExecute();
-											delete pAction;
-											return;
-										}
-									}
-									else if (rn == 0)
-									{
-										// both AB and CD are collinear (coincident)
-										// project values to each axis to check for overlap
-										for (i = 0; i < 2; ++i)
-										{
-											double minab = (a[i] < b[i]) ? a[i] : b[i]; // Math.min(a[i], b[i]);
-											double maxab = (a[i] > b[i]) ? a[i] : b[i]; // Math.max(a[i], b[i]);
-											if (minab <= c[i] && c[i] <= maxab)
-											{
-												::AfxMessageBox(szMsg);
-												pAction->UnExecute();
-												delete pAction;
-												return;
-											}
-											if (minab <= d[i] && d[i] <= maxab)
-											{
-												::AfxMessageBox(szMsg);
-												pAction->UnExecute();
-												delete pAction;
-												return;
-											}
-										}
-									}
-									c = d;
-								}
-								a = b;
-							}
 							self->GetDocument()->Execute(pAction);
 						}
 					}
