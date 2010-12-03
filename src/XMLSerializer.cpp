@@ -188,7 +188,7 @@ void CXMLSerializer::AddSiteMapNode(xercesc::DOMDocument* doc, CWPhastDoc* wphas
 	}
 
 	CString strWorldFileName(prefix);
-	strWorldFileName += ".sitemap";
+	strWorldFileName += _T(".sitemap");
 	CString strExt(szExt);
 	if (strExt.CompareNoCase(_T(".bmp")) == 0)
 	{
@@ -218,7 +218,7 @@ void CXMLSerializer::AddSiteMapNode(xercesc::DOMDocument* doc, CWPhastDoc* wphas
 	}
 	catch(...)
 	{
-		::AfxMessageBox("Unable to write worldfile.");
+		::AfxMessageBox(_T("Unable to write worldfile."));
 	}
 
 	std::ostringstream oss;

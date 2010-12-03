@@ -1905,10 +1905,7 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, do
 		this->CleanupPrisms();
 		this->SetOrientation(0, 0, 0);
 
-// COMMENT: {2/3/2009 6:03:44 PM}		this->CubeActor->SetVisibility(0);
 		this->RemovePart(this->CubeActor);
-
-// COMMENT: {2/3/2009 6:03:47 PM}		this->OutlineActor->SetVisibility(0);
 		this->RemovePart(this->OutlineActor);
 
 		PHAST_polygon &phst_polygons = prism->perimeter.Get_phast_polygons();
@@ -1955,12 +1952,6 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, do
 				}
 				if (area > 0)
 				{
-// COMMENT: {9/1/2009 4:19:57 PM}					// ignore holes in shape files
-// COMMENT: {9/1/2009 4:19:57 PM}					if (prism->perimeter.Get_source_type() == Data_source::SHAPE && prism->perimeter.)
-// COMMENT: {9/1/2009 4:19:57 PM}					{
-// COMMENT: {9/1/2009 4:19:57 PM}						ASSERT(npolys > 1);
-// COMMENT: {9/1/2009 4:19:57 PM}						continue;
-// COMMENT: {9/1/2009 4:19:57 PM}					}
 					std::reverse(pts.begin(), pts.end());
 				}
 			}
@@ -2105,37 +2096,9 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, do
 
 				// nni for bottom interpolation
 				//
-// COMMENT: {10/21/2008 3:57:20 PM}				NNInterpolator* nniBottom;
-// COMMENT: {10/21/2008 3:57:20 PM}				zone zbottom = *prism->bottom.Get_bounding_box();
-// COMMENT: {10/21/2008 3:57:20 PM}				bool bDestroy_nniBottom = false;
-// COMMENT: {10/21/2008 3:57:20 PM}				nniBottom = prism->bottom.Get_filedata()->Get_data_source(prism->bottom.Get_attribute())->Make_nni();
-// COMMENT: {10/21/2008 3:57:20 PM}
-// COMMENT: {10/21/2008 3:57:20 PM}				if (prism->bottom.Get_filedata()
-// COMMENT: {10/21/2008 3:57:20 PM}					//&&
-// COMMENT: {10/21/2008 3:57:20 PM}					//prism->bottom.Get_filedata()->Get_nni_map().find(prism->bottom.Get_attribute()) != prism->bottom.Get_filedata()->Get_nni_map().end()
-// COMMENT: {10/21/2008 3:57:20 PM}					&&
-// COMMENT: {10/21/2008 3:57:20 PM}					prism->bottom.Get_filedata()->Get_data_source(prism->bottom.Get_attribute()) != NULL
-// COMMENT: {10/21/2008 3:57:20 PM}					&&
-// COMMENT: {10/21/2008 3:57:20 PM}					prism->bottom.Get_filedata()->Get_data_source(prism->bottom.Get_attribute())->Get_nni() != NULL
-// COMMENT: {10/21/2008 3:57:20 PM}					)
-// COMMENT: {10/21/2008 3:57:20 PM}				{
-// COMMENT: {10/21/2008 3:57:20 PM}					//nniBottom = prism->bottom.Get_filedata()->Get_nni_map()[prism->bottom.Get_attribute()];
-// COMMENT: {10/21/2008 3:57:20 PM}					nniBottom = prism->bottom.Get_filedata()->Get_data_source(prism->bottom.Get_attribute())->Get_nni();
-// COMMENT: {10/21/2008 3:57:20 PM}					bDestroy_nniBottom = false;
-// COMMENT: {10/21/2008 3:57:20 PM}				}
-// COMMENT: {10/21/2008 3:57:20 PM}				else
-// COMMENT: {10/21/2008 3:57:20 PM}				{
-// COMMENT: {10/21/2008 3:57:20 PM}					//nniBottom = new NNInterpolator();
-// COMMENT: {10/21/2008 3:57:20 PM}					//nniBottom->preprocess(prism->bottom.Get_points());
-// COMMENT: {10/21/2008 3:57:20 PM}					nniBottom = prism->bottom.Get_filedata()->Get_data_source(prism->bottom.Get_attribute())->Make_nni();
-// COMMENT: {10/21/2008 3:57:20 PM}					bDestroy_nniBottom = true;
-// COMMENT: {10/21/2008 3:57:20 PM}				}
-
-				//{{
 				bool bDestroy_nniBottom = false;
 				prism->bottom.Make_nni();
 				NNInterpolator* nniBottom = prism->bottom.Get_nni();
-				//}}
 
 				double* xd;
 
@@ -2258,32 +2221,9 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, do
 
 				std::vector<Point> empty;
 
-// COMMENT: {10/21/2008 4:01:12 PM}				// nni for top interpolation
-// COMMENT: {10/21/2008 4:01:12 PM}				//
-// COMMENT: {10/21/2008 4:01:12 PM}				NNInterpolator* nniTop;
-// COMMENT: {10/21/2008 4:01:12 PM}				zone ztop = *prism->top.Get_bounding_box();
-// COMMENT: {10/21/2008 4:01:12 PM}				bool bDestroy_nniTop;
-// COMMENT: {10/21/2008 4:01:12 PM}				if (prism->top.Get_filedata()
-// COMMENT: {10/21/2008 4:01:12 PM}					&&
-// COMMENT: {10/21/2008 4:01:12 PM}					prism->top.Get_filedata()->Get_nni_map().find(prism->top.Get_attribute()) != prism->top.Get_filedata()->Get_nni_map().end()
-// COMMENT: {10/21/2008 4:01:12 PM}					)
-// COMMENT: {10/21/2008 4:01:12 PM}				{
-// COMMENT: {10/21/2008 4:01:12 PM}					nniTop = prism->top.Get_filedata()->Get_nni_map()[prism->top.Get_attribute()];
-// COMMENT: {10/21/2008 4:01:12 PM}					bDestroy_nniTop = false;
-// COMMENT: {10/21/2008 4:01:12 PM}				}
-// COMMENT: {10/21/2008 4:01:12 PM}				else
-// COMMENT: {10/21/2008 4:01:12 PM}				{
-// COMMENT: {10/21/2008 4:01:12 PM}					nniTop = new NNInterpolator();
-// COMMENT: {10/21/2008 4:01:12 PM}					nniTop->preprocess(prism->top.Get_points());
-// COMMENT: {10/21/2008 4:01:12 PM}					bDestroy_nniTop = true;
-// COMMENT: {10/21/2008 4:01:12 PM}				}
-
-				//{{
 				bool bDestroy_nniTop = false;
 				prism->top.Make_nni();
 				NNInterpolator* nniTop = prism->top.Get_nni();
-				//}}
-
 
 				// foreach perimeter point determine top and bottom points
 				//
@@ -2368,7 +2308,7 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, do
 				//
 				profileTop->SetPoints(pointsTop);
 
-				// set points and contraining polygon used for delaunay triangulation
+				// set points and constraining polygon used for delaunay triangulation
 				//
 				constrainTop->SetPoints(pointsTop);
 				constrainTop->SetPolys(topCellArray);
@@ -2396,58 +2336,13 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, do
 
 				std::vector<Point> empty;
 
-// COMMENT: {10/21/2008 4:02:02 PM}				// nni for top interpolation
-// COMMENT: {10/21/2008 4:02:02 PM}				//
-// COMMENT: {10/21/2008 4:02:02 PM}				NNInterpolator* nniTop;
-// COMMENT: {10/21/2008 4:02:02 PM}				zone ztop = *prism->top.Get_bounding_box();
-// COMMENT: {10/21/2008 4:02:02 PM}				bool bDestroy_nniTop;
-// COMMENT: {10/21/2008 4:02:02 PM}				if (prism->top.Get_filedata()
-// COMMENT: {10/21/2008 4:02:02 PM}					&&
-// COMMENT: {10/21/2008 4:02:02 PM}					prism->top.Get_filedata()->Get_nni_map().find(prism->top.Get_attribute()) != prism->top.Get_filedata()->Get_nni_map().end()
-// COMMENT: {10/21/2008 4:02:02 PM}					)
-// COMMENT: {10/21/2008 4:02:02 PM}				{
-// COMMENT: {10/21/2008 4:02:02 PM}					nniTop = prism->top.Get_filedata()->Get_nni_map()[prism->top.Get_attribute()];
-// COMMENT: {10/21/2008 4:02:02 PM}					bDestroy_nniTop = false;
-// COMMENT: {10/21/2008 4:02:02 PM}				}
-// COMMENT: {10/21/2008 4:02:02 PM}				else
-// COMMENT: {10/21/2008 4:02:02 PM}				{
-// COMMENT: {10/21/2008 4:02:02 PM}					nniTop = new NNInterpolator();
-// COMMENT: {10/21/2008 4:02:02 PM}					nniTop->preprocess(prism->top.Get_points());
-// COMMENT: {10/21/2008 4:02:02 PM}					bDestroy_nniTop = true;
-// COMMENT: {10/21/2008 4:02:02 PM}				}
-
-				//{{
 				bool bDestroy_nniTop = false;
 				prism->top.Make_nni();
 				NNInterpolator* nniTop = prism->top.Get_nni();
-				//}}
 
-
-// COMMENT: {10/21/2008 4:02:42 PM}				// nni for bottom interpolation
-// COMMENT: {10/21/2008 4:02:42 PM}				//
-// COMMENT: {10/21/2008 4:02:42 PM}				NNInterpolator* nniBottom;
-// COMMENT: {10/21/2008 4:02:42 PM}				zone zbottom = *prism->bottom.Get_bounding_box();
-// COMMENT: {10/21/2008 4:02:42 PM}				bool bDestroy_nniBottom;
-// COMMENT: {10/21/2008 4:02:42 PM}				if (prism->bottom.Get_filedata()
-// COMMENT: {10/21/2008 4:02:42 PM}					&&
-// COMMENT: {10/21/2008 4:02:42 PM}					prism->bottom.Get_filedata()->Get_nni_map().find(prism->bottom.Get_attribute()) != prism->bottom.Get_filedata()->Get_nni_map().end()
-// COMMENT: {10/21/2008 4:02:42 PM}					)
-// COMMENT: {10/21/2008 4:02:42 PM}				{
-// COMMENT: {10/21/2008 4:02:42 PM}					nniBottom = prism->bottom.Get_filedata()->Get_nni_map()[prism->bottom.Get_attribute()];
-// COMMENT: {10/21/2008 4:02:42 PM}					bDestroy_nniBottom = false;
-// COMMENT: {10/21/2008 4:02:42 PM}				}
-// COMMENT: {10/21/2008 4:02:42 PM}				else
-// COMMENT: {10/21/2008 4:02:42 PM}				{
-// COMMENT: {10/21/2008 4:02:42 PM}					nniBottom = new NNInterpolator();
-// COMMENT: {10/21/2008 4:02:42 PM}					nniBottom->preprocess(prism->bottom.Get_points());
-// COMMENT: {10/21/2008 4:02:42 PM}					bDestroy_nniBottom = true;
-// COMMENT: {10/21/2008 4:02:42 PM}				}
-
-				//{{
 				bool bDestroy_nniBottom = false;
 				prism->bottom.Make_nni();
 				NNInterpolator* nniBottom = prism->bottom.Get_nni();
-				//}}
 
 
 				// foreach perimeter point determine top and bottom points

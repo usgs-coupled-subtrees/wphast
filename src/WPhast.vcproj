@@ -1176,6 +1176,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\StopWatch.cpp"
+				>
+			</File>
+			<File
 				RelativePath="SubdivideDialog.cpp"
 				>
 			</File>
@@ -5541,6 +5545,10 @@
 			</File>
 			<File
 				RelativePath="SteadyFlowPropertyPage.h"
+				>
+			</File>
+			<File
+				RelativePath=".\StopWatch.h"
 				>
 			</File>
 			<File

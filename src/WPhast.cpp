@@ -76,6 +76,11 @@ BOOL CWPhastApp::InitInstance()
 {
 #if defined(__CPPUNIT__)
 	{
+// COMMENT: {12/1/2010 7:33:18 PM}		// turn off memory tracking
+// COMMENT: {12/1/2010 7:33:18 PM}		BOOL prev = ::AfxEnableMemoryTracking(FALSE);
+// COMMENT: {12/1/2010 7:33:18 PM}		int prevafxMemDF = ::afxMemDF;
+// COMMENT: {12/1/2010 7:33:18 PM}		::afxMemDF = 0;
+
 		TCPPUnit theTests;  // TCPPUnit must be constructed after/within theApp.InitInstance()
 		// CWPhastApp anotherApp; // this will ASSERT
 		/***
@@ -339,6 +344,8 @@ void CWPhastApp::OnFileNew()
 				pWndTreeCtrl = pPropertyTreeControlBar->GetTreeCtrl();
 			}
 			CDelayRedraw tree(pWndTreeCtrl);
+			CDelayRedraw bar(pWndTreeCtrl ? pWndTreeCtrl->GetParent() : 0);
+			CDelayRedraw box(pDoc->GetBoxPropertiesDialogBar());
 
 			if (this->m_bShellFileNew)
 			{
@@ -354,7 +361,6 @@ void CWPhastApp::OnFileNew()
 				}
 				else if (dlg.GetAction() == CStartupDialog::SDA_CREATE_DEFAULT)
 				{
-					CDelayRedraw delay(this->m_pMainWnd, pDoc);
 					pDoc->New(CNewModel::Default());
 					pDoc->SetModifiedFlag(FALSE);
 					pDoc->ExecutePipeline();
@@ -362,9 +368,7 @@ void CWPhastApp::OnFileNew()
 				}
 				else if (dlg.GetAction() == CStartupDialog::SDA_IMPORT_FILE)
 				{
-					CDelayRedraw delay(this->m_pMainWnd, pDoc);
 					pDoc->DoImport(dlg.GetFileName());
-// COMMENT: {9/10/2009 10:43:53 PM}					pDoc->SetModifiedFlag(FALSE);
 					pDoc->ExecutePipeline();
 					return;
 				}
@@ -375,7 +379,7 @@ void CWPhastApp::OnFileNew()
 			VERIFY(bmpWatermark.LoadBitmap(IDB_WATERMARK));
 			VERIFY(bmpHeader.LoadBitmap(IDB_BANNER));
 
-			CNewModelWizard wizard("New Model Wizard", this->m_pMainWnd, 0, bmpWatermark, 0, bmpHeader);
+			CNewModelWizard wizard(_T("New Model Wizard"), this->m_pMainWnd, 0, bmpWatermark, 0, bmpHeader);
 
 			wizard.SetGridElt(CGridElt::NewDefaults(false));
 			wizard.SetHeadIC(CHeadIC::NewDefaults());
@@ -383,14 +387,12 @@ void CWPhastApp::OnFileNew()
 
 			if (wizard.DoModal() == ID_WIZFINISH)
 			{
-				CDelayRedraw delay(this->m_pMainWnd, pDoc);
 				CNewModel model = wizard.GetModel();
 				pDoc->New(model);
 				pDoc->ExecutePipeline();
 			}
 			else
 			{
-				CDelayRedraw delay(this->m_pMainWnd, pDoc);
 				pDoc->New(CNewModel::Default());
 				pDoc->SetModifiedFlag(FALSE);
 				pDoc->ExecutePipeline();

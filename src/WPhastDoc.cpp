@@ -644,15 +644,15 @@ void CWPhastDoc::Serialize(CArchive& ar)
 		PdhCloseQuery(hquery);
 	}
 
+	PDH_RAW_COUNTER start;
 	pdh_status = PdhCollectQueryData(hquery);
 	if (pdh_status == ERROR_SUCCESS)
 	{
-		PDH_RAW_COUNTER value;
 		DWORD dwType;
-		pdh_status = PdhGetRawCounterValue(hcounter, &dwType, &value);
+		pdh_status = PdhGetRawCounterValue(hcounter, &dwType, &start);
 		if (pdh_status == ERROR_SUCCESS)
 		{
-			TRACE("Before serialize %lld %lld\n", value.TimeStamp, value.FirstValue);
+			TRACE("Before serialize %lld %lld\n", start.TimeStamp, start.FirstValue);
 		}
 	}
 #endif
@@ -892,15 +892,16 @@ void CWPhastDoc::Serialize(CArchive& ar)
 	}
 
 #if defined(__CPPUNIT__)
+	PDH_RAW_COUNTER finish;
 	pdh_status = PdhCollectQueryData(hquery);
 	if (pdh_status == ERROR_SUCCESS)
 	{
-		PDH_RAW_COUNTER value;
 		DWORD dwType;
-		pdh_status = PdhGetRawCounterValue(hcounter, &dwType, &value);
+		pdh_status = PdhGetRawCounterValue(hcounter, &dwType, &finish);
 		if (pdh_status == ERROR_SUCCESS)
 		{
-			TRACE("After serialize %lld %lld\n", value.TimeStamp, value.FirstValue);
+			TRACE("After serialize %lld %lld\n", finish.TimeStamp, finish.FirstValue);
+			TRACE("Time %g\n", (finish.TimeStamp.dwLowDateTime - start.TimeStamp.dwLowDateTime)/1e7);
 		}
 	}
 #endif
@@ -3087,7 +3088,7 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 	}
 	catch (int)
 	{
-		if (::AfxGetMainWnd()->IsWindowVisible())
+		if (::AfxGetMainWnd() && ::AfxGetMainWnd()->IsWindowVisible())
 		{
 			CImportErrorDialog dlg;
 			dlg.m_lpszErrorMessages = pInput->GetErrorMsg();
@@ -3097,7 +3098,7 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 	}
 	catch (const char * error)
 	{
-		if (::AfxGetMainWnd()->IsWindowVisible())
+		if (::AfxGetMainWnd() && ::AfxGetMainWnd()->IsWindowVisible())
 		{
 			::AfxMessageBox(error, MB_OK|MB_ICONEXCLAMATION);
 		}
@@ -3106,7 +3107,7 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 #if !defined(_DEBUG)
 	catch (...)
 	{
-		if (::AfxGetMainWnd()->IsWindowVisible())
+		if (::AfxGetMainWnd() && ::AfxGetMainWnd()->IsWindowVisible())
 		{
 			::AfxMessageBox("An unknown error occurred during import", MB_OK|MB_ICONEXCLAMATION);
 		}

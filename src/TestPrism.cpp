@@ -57,121 +57,7 @@ extern int input_error;
 
 void TestPrism::setUp(void)
 {
-// COMMENT: {12/6/2008 8:50:34 PM}	CGridLineWidget *glw = CGridLineWidget::New();
-// COMMENT: {12/6/2008 8:50:34 PM}	glw->Delete();
-// COMMENT: {12/6/2008 8:50:34 PM}
-// COMMENT: {12/6/2008 8:50:34 PM}	vtkStructuredGrid *sg = vtkStructuredGrid::New();
-// COMMENT: {12/6/2008 8:50:34 PM}	sg->Delete();
-// COMMENT: {12/6/2008 8:50:34 PM}
-// COMMENT: {12/6/2008 8:50:34 PM}	vtkHexahedron *h = vtkHexahedron::New();
-// COMMENT: {12/6/2008 8:50:34 PM}	h->Delete();
-// COMMENT: {12/6/2008 8:50:34 PM}
-// COMMENT: {12/6/2008 8:50:34 PM}	vtkPlane *p = vtkPlane::New();
-// COMMENT: {12/6/2008 8:50:34 PM}	p->Delete();
-// COMMENT: {12/6/2008 8:50:34 PM}
-// COMMENT: {12/6/2008 8:50:34 PM}	vtkImageData *id = vtkImageData::New();
-// COMMENT: {12/6/2008 8:50:34 PM}	id->Delete();
-// COMMENT: {12/6/2008 8:50:34 PM}
-// COMMENT: {12/6/2008 8:50:34 PM}	vtkPixel *px = vtkPixel::New();
-// COMMENT: {12/6/2008 8:50:34 PM}	px->Delete();
-// COMMENT: {12/6/2008 8:50:34 PM}
-// COMMENT: {12/6/2008 8:50:34 PM}	vtkVoxel *v = vtkVoxel::New();
-// COMMENT: {12/6/2008 8:50:34 PM}	v->Delete();
-// COMMENT: {12/6/2008 8:50:34 PM}
-// COMMENT: {12/6/2008 8:50:34 PM}	vtkOutlineFilter *of = vtkOutlineFilter::New();
-// COMMENT: {12/6/2008 8:50:34 PM}	of->Delete();
-// COMMENT: {12/6/2008 8:50:34 PM}
-// COMMENT: {12/6/2008 8:50:34 PM}	vtkOutlineSource *os = vtkOutlineSource::New();
-// COMMENT: {12/6/2008 8:50:34 PM}	os->Delete();
-// COMMENT: {12/6/2008 8:50:34 PM}
-// COMMENT: {12/6/2008 8:50:34 PM}	vtkCutter *c = vtkCutter::New();
-// COMMENT: {12/6/2008 8:50:34 PM}	c->Delete();
-// COMMENT: {12/6/2008 8:50:34 PM}
-// COMMENT: {12/6/2008 8:50:34 PM}	vtkContourValues *cv = vtkContourValues::New();
-// COMMENT: {12/6/2008 8:50:34 PM}	cv->Delete();
-// COMMENT: {12/6/2008 8:50:34 PM}
-// COMMENT: {12/6/2008 8:50:34 PM}	vtkConeSource *cs = vtkConeSource::New();
-// COMMENT: {12/6/2008 8:50:34 PM}	cs->Delete();
-// COMMENT: {12/6/2008 8:50:34 PM}
-// COMMENT: {12/6/2008 8:50:34 PM}	vtkLODActor *la = vtkLODActor::New();
-// COMMENT: {12/6/2008 8:50:34 PM}	la->Delete();
-// COMMENT: {12/6/2008 8:50:34 PM}
-// COMMENT: {12/6/2008 8:50:34 PM}	vtkPlaneSource *ps = vtkPlaneSource::New();
-// COMMENT: {12/6/2008 8:50:34 PM}	ps->Delete();
-// COMMENT: {12/6/2008 8:50:34 PM}
-// COMMENT: {12/6/2008 8:50:34 PM}	vtkFeatureEdges *fe = vtkFeatureEdges::New();
-// COMMENT: {12/6/2008 8:50:34 PM}	fe->Delete();
-// COMMENT: {12/6/2008 8:50:34 PM}
-// COMMENT: {12/6/2008 8:50:34 PM}	vtkGeometryFilter *gf = vtkGeometryFilter::New();
-// COMMENT: {12/6/2008 8:50:34 PM}	gf->Delete();
-// COMMENT: {12/6/2008 8:50:34 PM}
-// COMMENT: {12/6/2008 8:50:34 PM}	CGridActor *ga = CGridActor::New();
-// COMMENT: {12/6/2008 8:50:34 PM}	ga->Delete();
-// COMMENT: {12/6/2008 8:50:34 PM}
-// COMMENT: {12/6/2008 8:50:34 PM}	vtkLookupTable *lt = vtkLookupTable::New();
-// COMMENT: {12/6/2008 8:50:34 PM}	lt->Delete();
-// COMMENT: {12/6/2008 8:50:34 PM}
-// COMMENT: {12/6/2008 8:50:34 PM}	vtkPropAssembly *pa = vtkPropAssembly::New();
-// COMMENT: {12/6/2008 8:50:34 PM}	pa->Delete();
-// COMMENT: {12/6/2008 8:50:34 PM}
-// COMMENT: {12/6/2008 8:50:34 PM}	vtkAxes *a = vtkAxes::New();
-// COMMENT: {12/6/2008 8:50:34 PM}	a->Delete();
-// COMMENT: {12/6/2008 8:50:34 PM}
-// COMMENT: {12/6/2008 8:50:34 PM}	vtkAssemblyPaths *aps = vtkAssemblyPaths::New();
-// COMMENT: {12/6/2008 8:50:34 PM}	aps->Delete();
-// COMMENT: {12/6/2008 8:50:34 PM}
-// COMMENT: {12/6/2008 8:50:34 PM}	vtkAssemblyPath *ap = vtkAssemblyPath::New();
-// COMMENT: {12/6/2008 8:50:34 PM}	ap->Delete();
-// COMMENT: {12/6/2008 8:50:34 PM}
-// COMMENT: {12/6/2008 8:50:34 PM}	vtkAssemblyNode *an = vtkAssemblyNode::New();
-// COMMENT: {12/6/2008 8:50:34 PM}	an->Delete();
-// COMMENT: {12/6/2008 8:50:34 PM}
-// COMMENT: {12/6/2008 8:50:34 PM}	vtkCellTypes *ct = vtkCellTypes::New();
-// COMMENT: {12/6/2008 8:50:34 PM}	ct->Delete();
-// COMMENT: {12/6/2008 8:50:34 PM}
-// COMMENT: {12/6/2008 8:50:34 PM}	vtkIntArray *ia = vtkIntArray::New();
-// COMMENT: {12/6/2008 8:50:34 PM}	ia->Delete();
-// COMMENT: {12/6/2008 8:50:34 PM}
-// COMMENT: {12/6/2008 8:50:34 PM}	vtkCellLinks *cl = vtkCellLinks::New();
-// COMMENT: {12/6/2008 8:50:34 PM}	cl->Delete();
-// COMMENT: {12/6/2008 8:50:34 PM}
-// COMMENT: {12/6/2008 8:50:34 PM}	vtkMergePoints *mp = vtkMergePoints::New();
-// COMMENT: {12/6/2008 8:50:34 PM}	mp->Delete();
-// COMMENT: {12/6/2008 8:50:34 PM}
-// COMMENT: {12/6/2008 8:50:34 PM}	vtkTransformPolyDataFilter *tpdf = vtkTransformPolyDataFilter::New();
-// COMMENT: {12/6/2008 8:50:34 PM}	tpdf->Delete();
-// COMMENT: {12/6/2008 8:50:34 PM}	
-// COMMENT: {12/6/2008 8:50:34 PM}	vtkTransform *t = vtkTransform::New();
-// COMMENT: {12/6/2008 8:50:34 PM}	vtkMatrix4x4 *m = vtkMatrix4x4::New();
-// COMMENT: {12/6/2008 8:50:34 PM}	t->Concatenate(m);
-// COMMENT: {12/6/2008 8:50:34 PM}	m->Delete();
-// COMMENT: {12/6/2008 8:50:34 PM}	t->Delete();
-// COMMENT: {12/6/2008 8:50:34 PM}
-// COMMENT: {12/6/2008 8:50:34 PM}	CAxesActor *aa = CAxesActor::New();
-// COMMENT: {12/6/2008 8:50:34 PM}	aa->Delete();
-// COMMENT: {12/6/2008 8:50:34 PM}
-// COMMENT: {12/6/2008 8:50:34 PM}	CMediaZoneActor *mza = CMediaZoneActor::New();
-// COMMENT: {12/6/2008 8:50:34 PM}	mza->Delete();
-// COMMENT: {12/6/2008 8:50:34 PM}
-// COMMENT: {12/6/2008 8:50:34 PM}	srcWedgeSource *ws = srcWedgeSource::New();
-// COMMENT: {12/6/2008 8:50:34 PM}	ws->Delete();
-// COMMENT: {12/6/2008 8:50:34 PM}
-// COMMENT: {12/6/2008 8:50:34 PM}	CICHeadZoneActor *ich = CICHeadZoneActor::New();
-// COMMENT: {12/6/2008 8:50:34 PM}	ich->Delete();
-// COMMENT: {12/6/2008 8:50:34 PM}
-// COMMENT: {12/6/2008 8:50:34 PM}	CICChemZoneActor *icc = CICChemZoneActor::New();
-// COMMENT: {12/6/2008 8:50:34 PM}	icc->Delete();
-// COMMENT: {12/6/2008 8:50:34 PM}
-// COMMENT: {12/6/2008 8:50:34 PM}	CBCZoneActor *bc = CBCZoneActor::New();
-// COMMENT: {12/6/2008 8:50:34 PM}	bc->Delete();
-// COMMENT: {12/6/2008 8:50:34 PM}
-// COMMENT: {12/6/2008 8:50:34 PM}	CWellActor *wa = CWellActor::New();
-// COMMENT: {12/6/2008 8:50:34 PM}	wa->Delete();
-// COMMENT: {12/6/2008 8:50:34 PM}
-// COMMENT: {12/6/2008 8:50:34 PM}	CRiverActor *ra = CRiverActor::New();
-// COMMENT: {12/6/2008 8:50:34 PM}	ra->Delete();
 }
-
 
 void TestPrism::testOStream(void)
 {
@@ -247,4 +133,97 @@ void TestPrism::testHDFSerialize(void)
 	Clear_NNInterpolatorList();
 	Clear_file_data_map();
 	Clear_KDtreeList();
+}
+
+#include "StopWatch.h"
+
+void TestPrism::testCopyCtor(void)
+{
+	const char input[] =
+		"\t-perimeter SHAPE      GRID   ..\\setup\\phast\\examples\\ex5\\ArcData\\SimplePonds.shp\n"
+		"\t-top       CONSTANT   GRID   20\n"
+		"\t-bottom    SHAPE      GRID   ..\\setup\\phast\\examples\\ex5\\ArcData\\SimpleBath.shp 10\n";
+
+	// Set_bounding_box requires the domain to be set
+	//
+	::domain = zone(275000, 810000, -120, 285000, 830000, 20);
+	::input_error = 0;
+	std::istringstream iss(input);
+
+	Prism prism;
+	while(prism.Read(iss))
+	{
+		if (iss.rdstate() & std::ios::eofbit) break;
+		iss.clear();
+	}
+	CPPUNIT_ASSERT(::input_error == 0);
+	prism.Tidy();
+	CPPUNIT_ASSERT(::input_error == 0);
+
+	CPPUNIT_ASSERT(prism.Point_in_polyhedron(Point(277760., 819191., 10.)));
+	CPPUNIT_ASSERT(prism.Point_in_polyhedron(Point(280300., 820760., 10.)));
+	CPPUNIT_ASSERT(prism.Point_in_polyhedron(Point(281536., 820145., 10.)));
+
+	Prism cp(prism);
+
+	CPPUNIT_ASSERT(prism == cp);
+
+	CPPUNIT_ASSERT(cp.Point_in_polyhedron(Point(277760., 819191., 10.)));
+	CPPUNIT_ASSERT(cp.Point_in_polyhedron(Point(280300., 820760., 10.)));
+	CPPUNIT_ASSERT(cp.Point_in_polyhedron(Point(281536., 820145., 10.)));
+
+	Clear_NNInterpolatorList();
+	Clear_file_data_map();
+	Clear_KDtreeList();
+	::domain = zone(0, 0, 0, 0, 0, 0);
+
+	delete ::map_to_grid;
+	::map_to_grid = 0;
+}
+
+void TestPrism::timeMemDebug(void)
+{
+// COMMENT: {12/2/2010 4:50:39 PM}	// turn off memory tracking
+// COMMENT: {12/2/2010 4:50:39 PM}	BOOL save = ::AfxEnableMemoryTracking(FALSE);
+// COMMENT: {12/2/2010 4:50:39 PM}
+// COMMENT: {12/2/2010 4:50:39 PM}	const char input[] =
+// COMMENT: {12/2/2010 4:50:39 PM}		"\t-perimeter SHAPE     map  ..\\setup\\phast\\examples\\capecod\\ArcData\\coast.shp\n"
+// COMMENT: {12/2/2010 4:50:39 PM}		"\t-top       arcraster map  ..\\setup\\phast\\examples\\capecod\\ArcData\\elevation-90.txt\n"
+// COMMENT: {12/2/2010 4:50:39 PM}		"\t-bottom    arcraster map  ..\\setup\\phast\\examples\\capecod\\ArcData\\bedrock-90.txt\n";
+// COMMENT: {12/2/2010 4:50:39 PM}
+// COMMENT: {12/2/2010 4:50:39 PM}	::map_to_grid = new PHAST_Transform(0, 0, 0, 0, 1, 1, 1);
+// COMMENT: {12/2/2010 4:50:39 PM}
+// COMMENT: {12/2/2010 4:50:39 PM}	CStopWatch sw;
+// COMMENT: {12/2/2010 4:50:39 PM}	sw.startTimer();
+// COMMENT: {12/2/2010 4:50:39 PM}
+// COMMENT: {12/2/2010 4:50:39 PM}	// Set_bounding_box requires the domain to be set
+// COMMENT: {12/2/2010 4:50:39 PM}	//
+// COMMENT: {12/2/2010 4:50:39 PM}	::domain = zone(275000, 810000, -120, 285000, 830000, 20);
+// COMMENT: {12/2/2010 4:50:39 PM}	::input_error = 0;
+// COMMENT: {12/2/2010 4:50:39 PM}	std::istringstream iss(input);
+// COMMENT: {12/2/2010 4:50:39 PM}
+// COMMENT: {12/2/2010 4:50:39 PM}	Prism prism;
+// COMMENT: {12/2/2010 4:50:39 PM}	while(prism.Read(iss))
+// COMMENT: {12/2/2010 4:50:39 PM}	{
+// COMMENT: {12/2/2010 4:50:39 PM}		if (iss.rdstate() & std::ios::eofbit) break;
+// COMMENT: {12/2/2010 4:50:39 PM}		iss.clear();
+// COMMENT: {12/2/2010 4:50:39 PM}	}
+// COMMENT: {12/2/2010 4:50:39 PM}	CPPUNIT_ASSERT(::input_error == 0);
+// COMMENT: {12/2/2010 4:50:39 PM}	prism.Tidy();
+// COMMENT: {12/2/2010 4:50:39 PM}	CPPUNIT_ASSERT(::input_error == 0);
+// COMMENT: {12/2/2010 4:50:39 PM}
+// COMMENT: {12/2/2010 4:50:39 PM}	prism.Point_in_polyhedron(Point(277760., 819191., 5.));
+// COMMENT: {12/2/2010 4:50:39 PM}
+// COMMENT: {12/2/2010 4:50:39 PM}	Clear_NNInterpolatorList();
+// COMMENT: {12/2/2010 4:50:39 PM}	Clear_file_data_map();
+// COMMENT: {12/2/2010 4:50:39 PM}	Clear_KDtreeList();
+// COMMENT: {12/2/2010 4:50:39 PM}	::domain = zone(0, 0, 0, 0, 0, 0);
+// COMMENT: {12/2/2010 4:50:39 PM}
+// COMMENT: {12/2/2010 4:50:39 PM}	sw.stopTimer();
+// COMMENT: {12/2/2010 4:50:39 PM}	delete ::map_to_grid;
+// COMMENT: {12/2/2010 4:50:39 PM}	::map_to_grid = 0;
+// COMMENT: {12/2/2010 4:50:39 PM}	TRACE("TestPrism::timeMemDebug time = %g\n", sw.getElapsedTime());
+// COMMENT: {12/2/2010 4:50:39 PM}
+// COMMENT: {12/2/2010 4:50:39 PM}	// restore memory tracking
+// COMMENT: {12/2/2010 4:50:39 PM}	::AfxEnableMemoryTracking(save);
 }

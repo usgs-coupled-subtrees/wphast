@@ -19,7 +19,10 @@ inline CDelayRedraw::CDelayRedraw(CWnd *pWnd)
 	m_bVisible = m_pWnd && m_pWnd->IsWindowVisible();
 	if (m_bVisible)
 	{
-		if (m_pWnd) m_pWnd->SetRedraw(FALSE);
+		if (m_pWnd)
+		{
+			m_pWnd->SetRedraw(FALSE);
+		}
 	}
 }
 
@@ -30,7 +33,10 @@ inline CDelayRedraw::CDelayRedraw(CWnd *pWnd, CDocument *pDoc)
 	m_bVisible = m_pWnd && m_pWnd->IsWindowVisible();
 	if (m_bVisible)
 	{
-		if (m_pWnd) m_pWnd->SetRedraw(FALSE);
+		if (m_pWnd)
+		{
+			m_pWnd->SetRedraw(FALSE);
+		}
 	}
 }
 
@@ -41,6 +47,7 @@ inline CDelayRedraw::~CDelayRedraw(void)
 		if (m_pWnd)
 		{
 			m_pWnd->SetRedraw(TRUE);
+			m_pWnd->Invalidate();
 			m_pWnd->SendMessage(WM_NCPAINT);  // scrollbars
 			m_pWnd->RedrawWindow();
 		}
