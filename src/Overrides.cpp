@@ -206,38 +206,37 @@ int accumulate(bool bWritePhastTmp)
 {
 	check_hst_units();
 	check_time_series_data();
-	if (input_error == 0) {
+	if (input_error == 0)
+	{
 		collate_simulation_periods();
-		for (simulation=0; simulation < count_simulation_periods; simulation++) {
-			if (simulation > 0 && bWritePhastTmp) write_thru(FALSE);
-			current_start_time = simulation_periods[simulation];
-			if (simulation < count_simulation_periods - 1) {
-				current_end_time = simulation_periods[simulation + 1];
-			} else {
-				current_end_time = time_end[count_time_end - 1].value*time_end[count_time_end - 1].input_to_user;
-			}
-			reset_transient_data();
-			if (input_error > 0) break;
-			output_msg(OUTPUT_STDERR, "Accumulate...\n");
-			if (bWritePhastTmp)
+		for (simulation=0; simulation < count_simulation_periods; simulation++)
+		{
+			if (simulation > 0 && bWritePhastTmp)
 			{
-				accumulate();
+				write_thru(FALSE);
+			}
+			current_start_time = simulation_periods[simulation];
+			if (simulation < count_simulation_periods - 1)
+			{
+				current_end_time = simulation_periods[simulation + 1];
 			}
 			else
 			{
-// COMMENT: {7/2/2008 10:33:48 PM}				if (simulation == 0)
-// COMMENT: {7/2/2008 10:33:48 PM}				{
-// COMMENT: {7/2/2008 10:33:48 PM}					// need to setup prisms
-// COMMENT: {7/2/2008 10:33:48 PM}					setup_grid();
-// COMMENT: {7/2/2008 10:33:48 PM}					Tidy_prisms();
-// COMMENT: {7/2/2008 10:33:48 PM}				}
-				// Note: accumulate needs to be called in order
-				// for GetDefaultHeadIC, GetDefaultChemIC, GetDefaultMedia
-				// to work
-				accumulate();
+				current_end_time = time_end[count_time_end - 1].value*time_end[count_time_end - 1].input_to_user;
 			}
-			if (input_error > 0) break;
-			if (simulation == 0) {
+			reset_transient_data();
+			if (input_error > 0)
+			{
+				break;
+			}
+			output_msg(OUTPUT_STDERR, "Accumulate...\n");
+			accumulate();
+			if (input_error > 0)
+			{
+				break;
+			}
+			if (simulation == 0)
+			{
 				output_msg(OUTPUT_STDERR, "Check properties...\n");
 				if (bWritePhastTmp)
 				{
@@ -245,10 +244,19 @@ int accumulate(bool bWritePhastTmp)
 				}
 			}
 			output_msg(OUTPUT_STDERR, "Write hst...\n");
-			if (bWritePhastTmp) write_hst();
-			if (input_error > 0) break;
+			if (bWritePhastTmp)
+			{
+				write_hst();
+			}
+			if (input_error > 0)
+			{
+				break;
+			}
 		}
-		if (bWritePhastTmp) write_thru(TRUE);
+		if (bWritePhastTmp)
+		{
+			write_thru(TRUE);
+		}
 	}
 	/*
 	 *  Finish
