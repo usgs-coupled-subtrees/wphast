@@ -53,8 +53,9 @@ void CWellSetPositionAction::UnExecute(void)
 	this->m_pWPhastDoc->Select(this->m_pWellActor);
 }
 
-void CWellSetPositionAction::SetPosition(double x, double y)
+void CWellSetPositionAction::SetPosition(double x, double y, PHAST_Transform::COORDINATE_SYSTEM cs)
 {
-	this->m_newX = x;
-	this->m_newY = y;
+	this->m_newX       = x;
+	this->m_newY       = y;
+	this->m_newCoorSys = cs;
 }

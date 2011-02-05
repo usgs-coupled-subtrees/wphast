@@ -39,25 +39,6 @@ vtkInteractorStyleTrackballCameraEx::~vtkInteractorStyleTrackballCameraEx(void)
 
 void vtkInteractorStyleTrackballCameraEx::Delete(void)
 {
-// COMMENT: {9/10/2009 10:04:30 PM}	if (this->Interactor)
-// COMMENT: {9/10/2009 10:04:30 PM}	{
-// COMMENT: {9/10/2009 10:04:30 PM}		// HACK
-// COMMENT: {9/10/2009 10:04:30 PM}		// If this isn't here a reference count proble occurs
-// COMMENT: {9/10/2009 10:04:30 PM}		//
-// COMMENT: {9/10/2009 10:04:30 PM}		vtkPropCollection *pickProps = this->Interactor->GetPicker()->GetPickList();
-// COMMENT: {9/10/2009 10:04:30 PM}		ASSERT(pickProps);
-// COMMENT: {9/10/2009 10:04:30 PM}		pickProps->RemoveAllItems();
-// COMMENT: {9/10/2009 10:04:30 PM}	}
-
-// COMMENT: {9/18/2009 8:03:52 PM}//{{ {9/18/2009 6:51:30 PM}
-// COMMENT: {9/18/2009 8:03:52 PM}	if (this->CurrentRenderer->GetRenderWindow())
-// COMMENT: {9/18/2009 8:03:52 PM}	{
-// COMMENT: {9/18/2009 8:03:52 PM}		if (!::AfxIsValidAddress(this->CurrentRenderer->GetRenderWindow(), 1))
-// COMMENT: {9/18/2009 8:03:52 PM}		{
-// COMMENT: {9/18/2009 8:03:52 PM}			this->CurrentRenderer = 0;
-// COMMENT: {9/18/2009 8:03:52 PM}		}
-// COMMENT: {9/18/2009 8:03:52 PM}	}
-// COMMENT: {9/18/2009 8:03:52 PM}//}} {9/18/2009 6:51:30 PM}
 	this->Superclass::Delete();
 }
 
@@ -323,7 +304,7 @@ void vtkInteractorStyleTrackballCameraEx::OnChar()
 				||
 				this->LastProp->IsA("CWellActor")
 				||
-				this->LastProp->IsA("CRiverActor")
+				this->LastProp->IsA("CPointConnectorActor")
 				);
 #endif
           this->HighlightProp(path->GetFirstNode()->GetViewProp());
@@ -395,9 +376,7 @@ void vtkInteractorStyleTrackballCameraEx::OnLeftButtonDown()
 					||
 					this->LastProp->IsA("CWellActor")
 					||
-					this->LastProp->IsA("CRiverActor")
-					||
-					this->LastProp->IsA("CDrainActor")
+					this->LastProp->IsA("CPointConnectorActor")
 					//{{
 					||
 					this->LastProp->IsA("CMapImageActor3")
@@ -460,7 +439,7 @@ void vtkInteractorStyleTrackballCameraEx::OnKeyPress()
 										||
 										p->IsA("CWellActor")
 										||
-										p->IsA("CRiverActor")
+										p->IsA("CPointConnectorActor")
 										);
 								}
 							}
@@ -515,7 +494,7 @@ void vtkInteractorStyleTrackballCameraEx::OnKeyPress()
 						||
 						this->LastProp->IsA("CWellActor")
 						||
-						this->LastProp->IsA("CRiverActor")
+						this->LastProp->IsA("CPointConnectorActor")
 						);
 				}
 				ASSERT(this->LastProp);

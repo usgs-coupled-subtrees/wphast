@@ -14,7 +14,7 @@ public:
 	virtual void Execute(void);
 	virtual void UnExecute(void);
 
-	void SetPosition(double x, double y);
+	void SetPosition(double x, double y, PHAST_Transform::COORDINATE_SYSTEM cs);
 
 protected:
 	CWellActor    *m_pWellActor;

@@ -985,6 +985,11 @@
 #define ID_BUTTON32859                  32859
 #define ID_BUTTON32860                  32860
 #define ID_ACCELERATOR32862             32862
+#define ID_SETGRID_MODE                 32864
+#define ID_SETMAP_MODE                  32865
+#define ID_CANCEL_MODE                  32866
+#define ID_TOOLS_ROTATE_GRID            32867
+#define ID_TOOLS_ROTATEGRID             32868
 #define IDW_CONTROLBAR_TREE             59424
 #define IDW_CONTROLBAR_BOXPROPS         59425
 #define IDC_VALUE_STATIC                65535
@@ -994,7 +999,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        432
-#define _APS_NEXT_COMMAND_VALUE         32864
+#define _APS_NEXT_COMMAND_VALUE         32869
 #define _APS_NEXT_CONTROL_VALUE         1518
 #define _APS_NEXT_SYMED_VALUE           127
 #endif

@@ -24,6 +24,7 @@
 #include "Protect.h"
 #include "Global.h"
 #include "Utilities.h"
+#include "GridKeyword.h"
 
 vtkCxxRevisionMacro(CBCZoneActor, "$Revision$");
 vtkStandardNewMacro(CBCZoneActor);
@@ -51,9 +52,13 @@ CBCZoneActor::~CBCZoneActor(void)
 void CBCZoneActor::Create(CWPhastDoc* pWPhastDoc, const CBC& bc, LPCTSTR desc)
 {
 	ASSERT(bc.polyh && ::AfxIsValidAddress(bc.polyh, sizeof(Polyhedron)));
+	CGridKeyword gk;
+	pWPhastDoc->GetGridKeyword(gk);
 	CZoneCreateAction<CBCZoneActor>* pAction = new CZoneCreateAction<CBCZoneActor>(
 		pWPhastDoc,
 		bc.polyh,
+		gk.m_grid_origin,
+		gk.m_grid_angle,
 		desc
 		);
 	pAction->GetZoneActor()->SetData(bc);

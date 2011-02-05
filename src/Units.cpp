@@ -25,144 +25,8 @@ CUnits::CUnits(void)
 	, m_htiUnits(0)
 {
 }
-//
-//CUnits::~CUnits(void)
-//{
-//	this->InternalDelete();
-//}
-//
-//CUnits::CUnits(const struct units& src) // copy ctor
-//{
-//	this->InternalCopy(src);
-//}
-//
-//CUnits::CUnits(const CUnits& src) // copy ctor
-//{
-//	this->InternalCopy(src);
-//}
-//
-//CUnits& CUnits::operator=(const CUnits& rhs) // copy assignment
-//{
-//	if (this != &rhs) {
-//		this->InternalDelete();
-//		this->InternalInit();
-//		this->InternalCopy(rhs);
-//	}
-//	return *this;
-//}
-//
-//CUnits& CUnits::operator=(const struct units& rhs) // copy assignment
-//{
-//	if (this != &rhs) {
-//		this->InternalDelete();
-//		this->InternalInit();
-//		this->InternalCopy(rhs);
-//	}
-//	return *this;
-//}
-//
-//
-//void CUnits::InternalInit(void)
-//{
-//	CUnit::Init(&this->alpha, "m");
-//	CUnit::Init(&this->flux, "m/s");
-//	CUnit::Init(&this->head, "m");
-//	CUnit::Init(&this->horizontal, "m");
-//	CUnit::Init(&this->k, "m/s");
-//	CUnit::Init(&this->leaky_k, "m/s");
-//	CUnit::Init(&this->leaky_thick, "m");
-//	CUnit::Init(&this->river_bed_k, "m/s");
-//	CUnit::Init(&this->river_bed_thickness, "m");
-//	CUnit::Init(&this->s, "1/m");
-//	CUnit::Init(&this->time, "s");
-//	CUnit::Init(&this->vertical, "m");
-//	CUnit::Init(&this->well_diameter, "m");
-//	CUnit::Init(&this->well_pumpage, "m^3/s");
-//}
-//
-//void CUnits::InternalDelete(void)
-//{
-//	CUnit::Delete(&this->alpha);
-//	CUnit::Delete(&this->flux);
-//	CUnit::Delete(&this->head);
-//	CUnit::Delete(&this->horizontal);
-//	CUnit::Delete(&this->k);
-//	CUnit::Delete(&this->leaky_k);
-//	CUnit::Delete(&this->leaky_thick);
-//	CUnit::Delete(&this->river_bed_k);
-//	CUnit::Delete(&this->river_bed_thickness);
-//	CUnit::Delete(&this->s);
-//	CUnit::Delete(&this->time);
-//	CUnit::Delete(&this->vertical);
-//	CUnit::Delete(&this->well_diameter);
-//	CUnit::Delete(&this->well_pumpage);
-//}
-//
-//void CUnits::InternalCopy(const struct units& src)
-//{
-//	//{{ need to move // for copy constructor and operator=
-//	::AfxDebugBreak();
-//	// this pointer has not been initialized
-//	CUnit::Init(&this->alpha);
-//	CUnit::Init(&this->flux);
-//	CUnit::Init(&this->head);
-//	CUnit::Init(&this->horizontal);
-//	CUnit::Init(&this->k);
-//	CUnit::Init(&this->leaky_k);
-//	CUnit::Init(&this->leaky_thick);
-//	CUnit::Init(&this->river_bed_k);
-//	CUnit::Init(&this->river_bed_thickness);
-//	CUnit::Init(&this->s);
-//	CUnit::Init(&this->time);
-//	CUnit::Init(&this->vertical);
-//	CUnit::Init(&this->well_diameter);
-//	CUnit::Init(&this->well_pumpage);
-//	//}} need to move
-//
-//	CUnit::Copy(&this->alpha,               &src.alpha);
-//	CUnit::Copy(&this->flux,                &src.flux);
-//	CUnit::Copy(&this->head,                &src.head);
-//	CUnit::Copy(&this->horizontal,          &src.horizontal);
-//	CUnit::Copy(&this->k,                   &src.k);
-//	CUnit::Copy(&this->leaky_k,             &src.leaky_k);
-//	CUnit::Copy(&this->leaky_thick,         &src.leaky_thick);
-//	CUnit::Copy(&this->river_bed_k,         &src.river_bed_k);
-//	CUnit::Copy(&this->river_bed_thickness, &src.river_bed_thickness);
-//	CUnit::Copy(&this->s,                   &src.s);
-//	CUnit::Copy(&this->time,                &src.time);
-//	CUnit::Copy(&this->vertical,            &src.vertical);
-//	CUnit::Copy(&this->well_diameter,       &src.well_diameter);
-//	CUnit::Copy(&this->well_pumpage,        &src.well_pumpage);
-//}
-//
-//void CUnits::Insert(CTreeCtrl* pTreeCtrl, HTREEITEM htiUnits)const
-//{
-//	// remove all previous items
-//	//
-//	while (HTREEITEM hChild = pTreeCtrl->GetChildItem(htiUnits)) {
-//		pTreeCtrl->DeleteItem(hChild);
-//	}
-//
-//	CUnit::Insert(&this->time,                pTreeCtrl, htiUnits, "time");
-//	CUnit::Insert(&this->horizontal,          pTreeCtrl, htiUnits, "horizontal_grid");
-//	CUnit::Insert(&this->vertical,            pTreeCtrl, htiUnits, "vertical_grid");
-//	CUnit::Insert(&this->head,                pTreeCtrl, htiUnits, "head");
-//	CUnit::Insert(&this->k,                   pTreeCtrl, htiUnits, "hydraulic_conductivity");
-//	CUnit::Insert(&this->s,                   pTreeCtrl, htiUnits, "specific_storage");
-//	CUnit::Insert(&this->alpha,               pTreeCtrl, htiUnits, "dispersivity");
-//	CUnit::Insert(&this->flux,                pTreeCtrl, htiUnits, "flux");
-//	CUnit::Insert(&this->leaky_k,             pTreeCtrl, htiUnits, "leaky_hydraulic_conductivity");
-//	CUnit::Insert(&this->leaky_thick,         pTreeCtrl, htiUnits, "leaky_thickness");
-//	CUnit::Insert(&this->well_diameter,       pTreeCtrl, htiUnits, "well_diameter");
-//	CUnit::Insert(&this->well_pumpage,        pTreeCtrl, htiUnits, "well_flow_rate");
-//	CUnit::Insert(&this->river_bed_k,         pTreeCtrl, htiUnits, "river_bed_hydraulic_conductivity");
-//	CUnit::Insert(&this->river_bed_thickness, pTreeCtrl, htiUnits, "river_bed_thickness");
-//
-//	VERIFY(pTreeCtrl->SetItemData(htiUnits, (DWORD_PTR)this));
-//}
-CUnits::CUnits(const struct cunits& src, const PHAST_Transform& trans) // copy ctor
+CUnits::CUnits(const struct cunits& src) // copy ctor
 	: cunits(src)
-	, transform(trans)
 	, m_htiUnits(0)
 {
 	// => implicit call to units::units()
@@ -172,7 +36,7 @@ CUnits::CUnits(const struct cunits& src, const PHAST_Transform& trans) // copy c
 CUnits& CUnits::operator=(const CUnits& rhs)
 {
 	this->cunits::operator=(rhs);
-	this->transform = rhs.transform;
+// COMMENT: {12/6/2010 2:31:08 PM}	this->transform = rhs.transform;
 	this->m_htiUnits = rhs.m_htiUnits;
 	return *this;
 }

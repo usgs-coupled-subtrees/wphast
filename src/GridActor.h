@@ -19,7 +19,7 @@ class CGridLineWidget;
 
 class CZone;
 
-// COMMENT: {10/16/2010 10:39:05 PM}#define GRID_WIDGET
+#define GRID_WIDGET
 
 //class CGridActor : public vtkLODActor
 class CGridActor : public vtkAssembly
@@ -33,6 +33,9 @@ public:
 		DeleteGridLineEvent = vtkCommand::UserEvent + 600,
 		InsertGridLineEvent,
 		MoveGridLineEvent,
+#if defined(GRID_WIDGET)
+		RotateGridEvent,
+#endif
 	};
 
 	void SetGrid(const CGrid& x, const CGrid& y, const CGrid& z, const CUnits& units);
@@ -89,8 +92,13 @@ public:
 	void OnLeftButtonDown(void);
 	void OnLeftButtonUp(void);
 	void OnKeyPress(void);
+#if !defined(GRID_WIDGET)
 	void OnInteraction(void);
 	void OnEndInteraction(void);
+#else
+	void OnInteraction(vtkObject* object);
+	void OnEndInteraction(vtkObject* object);
+#endif
 	void OnChar(void);
 
 
@@ -192,6 +200,9 @@ protected:
 	///int                 m_axes[3];
 	///bool                m_print_input_xy;
 	CGridKeyword        m_gridKeyword;
+#if defined(GRID_WIDGET)
+	CGridKeyword        RotatedGridKeyword;
+#endif
 	CUnits              m_units;
 	// HTREEITEM           m_htiGrid;
 	CTreeCtrlNode       m_node;

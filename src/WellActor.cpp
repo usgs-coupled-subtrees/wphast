@@ -101,10 +101,12 @@ void CWellActor::SetUnits(const CUnits &units, bool bUpdatePoints/*=true*/)
 	{
 		scale_h = units.map_horizontal.input_to_si;
 	}
+#if defined(SKIP) /* z is always scaled by vertical */
 	if (this->m_well.z_coordinate_system_user == PHAST_Transform::MAP)
 	{
 		scale_v = units.map_vertical.input_to_si;
 	}
+#endif
 	this->m_pTransformUnits->Scale(scale_h, scale_h, scale_v);
 	if (bUpdatePoints)
 	{

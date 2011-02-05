@@ -80,11 +80,12 @@ CZoneActor::CZoneActor(void)
 	, TopVisibility(1)
 	, BottomVisibility(1)
 	, PerimeterVisibility(1)
-	, m_grid_angle(0.0)
+	, GridAngle(0.0)
 {
 	for (size_t i = 0; i < 3; ++i)
 	{
-		this->m_grid_origin[i] = 0.0;
+		this->GridOrigin[i]    = 0.0;
+		this->GeometryScale[i] = 1.0;
 	}
 
 	this->m_pSource = srcWedgeSource::New();
@@ -487,48 +488,37 @@ void CZoneActor::SetBounds(float xMin, float xMax, float yMin, float yMax, float
 
 	ASSERT(this->m_pSource);
 	ASSERT(this->GetPolyhedronType() != Polyhedron::PRISM);
-#if !999
-	this->m_pSource->SetBounds(
-		xMin,
-		xMax,
-		yMin,
-		yMax,
-		zMin,
-		zMax
-		);
-#endif
 
-#if 999
 	if (Cube *c = dynamic_cast<Cube*>(this->GetPolyhedron()))
 	{
-		if (c->Get_user_coordinate_system() == PHAST_Transform::MAP)
-		{
-			this->m_pSource->SetBounds(
-				xMin - this->m_grid_origin[0],
-				xMax - this->m_grid_origin[0],
-				yMin - this->m_grid_origin[1],
-				yMax - this->m_grid_origin[1],
-				zMin - this->m_grid_origin[2],
-				zMax - this->m_grid_origin[2]
-				);
-		}
-		else
-		{
-			this->m_pSource->SetBounds(
-				xMin,
-				xMax,
-				yMin,
-				yMax,
-				zMin,
-				zMax
-				);
-		}
+		this->m_pSource->SetBounds(
+			xMin,
+			xMax,
+			yMin,
+			yMax,
+			zMin,
+			zMax
+			);
+// COMMENT: {1/13/2011 9:58:23 PM}		if (c->Get_user_coordinate_system() == PHAST_Transform::MAP)
+// COMMENT: {1/13/2011 9:58:23 PM}		{
+// COMMENT: {1/13/2011 9:58:23 PM}			vtkTransform *user = vtkTransform::New();
+// COMMENT: {1/13/2011 9:58:23 PM}			user->Scale(
+// COMMENT: {1/13/2011 9:58:23 PM}				this->GeometryScale[0] * rUnits.map_horizontal.input_to_si,
+// COMMENT: {1/13/2011 9:58:23 PM}				this->GeometryScale[1] * rUnits.map_horizontal.input_to_si,
+// COMMENT: {1/13/2011 9:58:23 PM}				this->GeometryScale[2] * rUnits.map_vertical.input_to_si);
+// COMMENT: {1/13/2011 9:58:23 PM}			user->RotateZ(-this->GridAngle);
+// COMMENT: {1/13/2011 9:58:23 PM}			user->Translate(-this->GridOrigin[0], -this->GridOrigin[1], -this->GridOrigin[2]);
+// COMMENT: {1/13/2011 9:58:23 PM}			this->SetUserTransform(user);
+// COMMENT: {1/13/2011 9:58:23 PM}			user->Delete();
+// COMMENT: {1/13/2011 9:58:23 PM}		}
+// COMMENT: {1/13/2011 9:58:23 PM}		else
+// COMMENT: {1/13/2011 9:58:23 PM}		{
+// COMMENT: {1/13/2011 9:58:23 PM}			this->SetUserTransform(0);
+// COMMENT: {1/13/2011 9:58:23 PM}		}
 	}
-#endif
 
 	this->SetUnits(rUnits);
 
-// COMMENT: {12/9/2008 3:24:22 PM}	CZone zone(xMin, xMax, yMin, yMax, zMin, zMax);
 	PHAST_Transform::COORDINATE_SYSTEM cs = PHAST_Transform::GRID;
 	bool domain = false;
 	if (this->GetPolyhedron())
@@ -540,15 +530,6 @@ void CZoneActor::SetBounds(float xMin, float xMax, float yMin, float yMax, float
 		if (Cube *c = dynamic_cast<Cube*>(this->GetPolyhedron()))
 		{
 			cs = c->Get_coordinate_system();
-// COMMENT: {11/12/2008 9:36:49 PM}			if (cs == PHAST_Transform::MAP)
-// COMMENT: {11/12/2008 9:36:49 PM}			{
-// COMMENT: {11/12/2008 9:36:49 PM}				zone.x1 += this->m_grid_origin[0];
-// COMMENT: {11/12/2008 9:36:49 PM}				zone.x2 += this->m_grid_origin[0];
-// COMMENT: {11/12/2008 9:36:49 PM}				zone.y1 += this->m_grid_origin[1];
-// COMMENT: {11/12/2008 9:36:49 PM}				zone.y2 += this->m_grid_origin[1];
-// COMMENT: {11/12/2008 9:36:49 PM}				zone.z1 += this->m_grid_origin[2];
-// COMMENT: {11/12/2008 9:36:49 PM}				zone.z2 += this->m_grid_origin[2];
-// COMMENT: {11/12/2008 9:36:49 PM}			}
 		}
 		delete this->GetPolyhedron();
 	}
@@ -579,23 +560,15 @@ void CZoneActor::SetBounds(const CZone& rZone, const CUnits& rUnits)
 void CZoneActor::SetUnits(const CUnits& rUnits, bool bSetPolyhedron)
 {
 	ASSERT(this->GetPolyhedron() && ::AfxIsValidAddress(this->GetPolyhedron(), sizeof(Polyhedron)));
+
+	this->Units = rUnits;
 	
 	if (Cube *c = dynamic_cast<Cube*>(this->GetPolyhedron()))
 	{
 		ASSERT(this->UnitsTransform);
 
-		double scale_h = rUnits.horizontal.input_to_si;
-		double scale_v = rUnits.vertical.input_to_si;
-		if (c->Get_user_coordinate_system() == PHAST_Transform::MAP)
-		{
-			scale_h = rUnits.map_horizontal.input_to_si;
-		}
-		if (c->Get_user_coordinate_system() == PHAST_Transform::MAP)
-		{
-			scale_v = rUnits.map_vertical.input_to_si;
-		}
 		this->UnitsTransform->Identity();
-		this->UnitsTransform->Scale(scale_h, scale_h, scale_v);
+		this->UpdateUserTransform();
 	}
 	else if (Prism *p = dynamic_cast<Prism*>(this->GetPolyhedron()))
 	{
@@ -603,54 +576,21 @@ void CZoneActor::SetUnits(const CUnits& rUnits, bool bSetPolyhedron)
 		ASSERT(this->BottomUnitsTransform);
 		ASSERT(this->UnitsTransform);
 
-		// top
-		double scale_h = rUnits.horizontal.input_to_si;
-		double scale_v = rUnits.vertical.input_to_si;
-		if (p->perimeter.Get_user_coordinate_system() == PHAST_Transform::MAP)
-		{
-			scale_h = rUnits.map_horizontal.input_to_si;
-		}
-		if (p->top.Get_user_coordinate_system() == PHAST_Transform::MAP)
-		{
-			scale_v = rUnits.map_vertical.input_to_si;
-		}
 		this->TopUnitsTransform->Identity();
-		this->TopUnitsTransform->Scale(scale_h, scale_h, scale_v);
 
-		// bottom
-		scale_h = rUnits.horizontal.input_to_si;
-		scale_v = rUnits.vertical.input_to_si;
-		if (p->perimeter.Get_user_coordinate_system() == PHAST_Transform::MAP)
-		{
-			scale_h = rUnits.map_horizontal.input_to_si;
-		}
-		if (p->bottom.Get_user_coordinate_system() == PHAST_Transform::MAP)
-		{
-			scale_v = rUnits.map_vertical.input_to_si;
-		}
 		this->BottomUnitsTransform->Identity();
-		this->BottomUnitsTransform->Scale(scale_h, scale_h, scale_v);
 
 		// sides
-		scale_h = rUnits.horizontal.input_to_si;
-		scale_v = rUnits.vertical.input_to_si;
-		if (p->perimeter.Get_user_coordinate_system() == PHAST_Transform::MAP)
-		{
-			scale_h = rUnits.map_horizontal.input_to_si;
-		}
-		if (p->perimeter.Get_user_coordinate_system() == PHAST_Transform::MAP)
-		{
-			scale_v = rUnits.map_vertical.input_to_si;
-		}
 		this->UnitsTransform->Identity();
-		this->UnitsTransform->Scale(scale_h, scale_h, scale_v);
+
+		this->UpdateUserTransform();
 
 		if (bSetPolyhedron)
 		{
 			// TODO may need to rebuild prisms
 			if (p->top.Get_source_type() != Data_source::CONSTANT || p->bottom.Get_source_type() != Data_source::CONSTANT)
 			{
-				this->SetPolyhedron(this->GetPolyhedron(), rUnits);
+				this->SetPolyhedron(this->GetPolyhedron(), this->Units);
 			}
 		}
 	}
@@ -676,21 +616,6 @@ void CZoneActor::GetUserBounds(float bounds[6])
 	bounds[3] = pzone->y2;
 	bounds[4] = pzone->z1;
 	bounds[5] = pzone->z2;
-
-// COMMENT: {11/12/2008 8:35:44 PM}	if (Cube* c = dynamic_cast<Cube*>(this->GetPolyhedron()))
-// COMMENT: {11/12/2008 8:35:44 PM}	{
-// COMMENT: {11/12/2008 8:35:44 PM}		double* o = this->GetGridOrigin();
-// COMMENT: {11/12/2008 8:35:44 PM}		PHAST_Transform::COORDINATE_SYSTEM cs = c->Get_coordinate_system();
-// COMMENT: {11/12/2008 8:35:44 PM}		if (cs == PHAST_Transform::MAP)
-// COMMENT: {11/12/2008 8:35:44 PM}		{
-// COMMENT: {11/12/2008 8:35:44 PM}			bounds[0] += o[0];
-// COMMENT: {11/12/2008 8:35:44 PM}			bounds[1] += o[0];
-// COMMENT: {11/12/2008 8:35:44 PM}			bounds[2] += o[1];
-// COMMENT: {11/12/2008 8:35:44 PM}			bounds[3] += o[1];
-// COMMENT: {11/12/2008 8:35:44 PM}			bounds[4] += o[2];
-// COMMENT: {11/12/2008 8:35:44 PM}			bounds[5] += o[2];
-// COMMENT: {11/12/2008 8:35:44 PM}		}
-// COMMENT: {11/12/2008 8:35:44 PM}	}
 }
 
 float* CZoneActor::GetUserBounds()
@@ -1017,10 +942,10 @@ void CZoneActor::Serialize(bool bStoring, hid_t loc_id, const CWPhastDoc* pWPhas
 				this->OutlineActor->SetVisibility(0);
 				this->RemovePart(this->OutlineActor);
 
-				// set up unit transforms
-				// TODO need to test if file exists ???
-// COMMENT: {4/21/2009 9:00:32 PM}				prism->Tidy();  // reqd to set units for datasources(shape)
-				this->SetUnits(pWPhastDoc->GetUnits(), false);
+// COMMENT: {1/14/2011 12:07:29 AM}				// set up unit transforms
+// COMMENT: {1/14/2011 12:07:29 AM}				// TODO need to test if file exists ???
+// COMMENT: {1/14/2011 12:07:29 AM}// COMMENT: {4/21/2009 9:00:32 PM}				prism->Tidy();  // reqd to set units for datasources(shape)
+// COMMENT: {1/14/2011 12:07:29 AM}				this->SetUnits(pWPhastDoc->GetUnits(), false);
 
 				// open PolyData group
 				//
@@ -1322,6 +1247,28 @@ void CZoneActor::Serialize(bool bStoring, hid_t loc_id, const CWPhastDoc* pWPhas
 					status = ::H5Gclose(pd_id);
 					ASSERT(status >= 0);
 				}
+
+				//{{ {1/14/2011 12:08:25 AM}
+				if (prism)
+				{
+					// set up unit transforms
+					// TODO need to test if file exists ???
+					////{{
+
+					// THIS IS KIND OF UGLY SHOULD PROBABLY CLEAN UP [ ??? this->SetupUserTransform(CGridKeyword, CUnits, GeometryScale) ==> this->UpdateUserTransform() ??? ]
+					// ALSO NEED TO CHECK OUT IF POLYDATA WAS EVER STORED
+					// PRE GRID ROTATED
+
+					CGridKeyword gk;
+					pWPhastDoc->GetGridKeyword(gk);
+					this->GridAngle = gk.m_grid_angle;
+					this->GridOrigin[0] = gk.m_grid_origin[0];
+					this->GridOrigin[1] = gk.m_grid_origin[1];
+					this->GridOrigin[2] = gk.m_grid_origin[2];
+					////}}
+					this->SetUnits(pWPhastDoc->GetUnits(), false);
+				}
+				//}} {1/14/2011 12:08:25 AM}
 			}
 			else
 			{
@@ -1791,46 +1738,107 @@ void CZoneActor::SetBottomVisibility(int visibility)
 	}
 }
 
-void CZoneActor::SetGridOrigin(double origin[3])
+void CZoneActor::SetGridOrigin(const double origin[3])
 {
-	for (int i = 0; i < 3; ++i)
+	// validate polyhedron
+	ASSERT(this->GetPolyhedron() && ::AfxIsValidAddress(this->GetPolyhedron(), sizeof(Polyhedron)));
+
+	if (this->GridOrigin[0] != origin[0] ||
+		this->GridOrigin[1] != origin[1] ||
+		this->GridOrigin[2] != origin[2] ||
+		this->GetUserTransform() == 0)
 	{
-		this->m_grid_origin[i] = origin[i];
+		for (int i = 0; i < 3; ++i)
+		{
+			this->GridOrigin[i] = origin[i];
+		}
+		// TODO maybe check if coordinate system is PHAST_Transform::MAP
+		this->UpdateUserTransform();
 	}
 }
 
 double* CZoneActor::GetGridOrigin(void)const
 {
-	return (double*)this->m_grid_origin;
+	return (double*)this->GridOrigin;
 }
 
 
 void CZoneActor::SetGridAngle(double angle)
 {
-	this->m_grid_angle = angle;
+	// validate polyhedron
+	ASSERT(this->GetPolyhedron() && ::AfxIsValidAddress(this->GetPolyhedron(), sizeof(Polyhedron)));
+
+	if (this->GridAngle != angle || this->GetUserTransform() == 0)
+	{
+		this->GridAngle = angle;
+		// TODO maybe check if coordinate system is PHAST_Transform::MAP
+		this->UpdateUserTransform();
+	}
 }
 
 double CZoneActor::GetGridAngle(void)const
 {
-	return this->m_grid_angle;
+	return this->GridAngle;
 }
 
 void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits)
 {
-	this->SetPolyhedron(polyh, rUnits, this->m_grid_origin, this->m_grid_angle);
+	this->SetPolyhedron(polyh, rUnits, this->GridOrigin, this->GridAngle);
 }
 
-void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, double origin[3], double angle)
+void CZoneActor::SetScale(double _arg1, double _arg2, double _arg3)
+{
+	if (this->GeometryScale[0] != _arg1 ||
+		this->GeometryScale[1] != _arg2 ||
+		this->GeometryScale[2] != _arg3 ||
+		this->GetUserTransform() == 0)
+	{
+		this->GeometryScale[0] = _arg1;
+		this->GeometryScale[1] = _arg2;
+		this->GeometryScale[2] = _arg3;
+
+		this->UpdateUserTransform();
+	}
+}
+
+double* CZoneActor::GetScale(void)
+{
+	if (vtkTransform *user = dynamic_cast<vtkTransform*>(this->GetUserTransform()))
+	{
+		return this->GeometryScale;
+	}
+	else
+	{
+		return this->vtkProp3D::GetScale();
+	}
+}
+
+void CZoneActor::GetScale(double scale[3])
+{
+	if (vtkTransform *user = dynamic_cast<vtkTransform*>(this->GetUserTransform()))
+	{
+		for (int i = 0; i < 3; ++i)
+		{
+			scale[i] = this->GeometryScale[i];
+		}
+	}
+	else
+	{
+		ASSERT(FALSE);
+		this->vtkProp3D::GetScale(scale);
+	}
+}
+
+void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, const double origin[3], double angle)
 {
 	TRACE("%s, in\n", __FUNCTION__);
 	ASSERT(polyh && ::AfxIsValidAddress(polyh, sizeof(Polyhedron)));
 
 	// set up for transform
-	this->SetGridAngle(angle);
-	this->SetGridOrigin(origin);
-	double scale_h = rUnits.map_horizontal.input_to_si / rUnits.horizontal.input_to_si;
-	double scale_v = rUnits.map_vertical.input_to_si / rUnits.vertical.input_to_si;
-	this->Map2GridPhastTransform = PHAST_Transform(origin[0], origin[1], origin[2], angle, scale_h, scale_h, scale_v);
+	this->GridAngle     = angle;
+	this->GridOrigin[0] = origin[0];
+	this->GridOrigin[1] = origin[1];
+	this->GridOrigin[2] = origin[2];
 
 	Polyhedron *clone = polyh->clone();
 	TRACE("%s\n", clone->Get_description()->c_str());
@@ -1873,18 +1881,6 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, do
 		// SetPolyhedron or similar)
 		this->SetChopType(ct);
 
-#if 999
-		if (Cube *c = dynamic_cast<Cube*>(this->GetPolyhedron()))
-		{
-			if (c->Get_coordinate_system() == PHAST_Transform::MAP)
-			{
-				if (angle)
-				{
-					this->SetOrientation(0, 0, -angle);
-				}
-			}
-		}
-#endif
 		this->CubeActor->SetVisibility(this->Visibility);
 		this->AddPart(this->CubeActor);
 
@@ -1893,17 +1889,11 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, do
 	}
 	else if (Prism *prism = dynamic_cast<Prism*>(this->GetPolyhedron()))
 	{
-		prism->perimeter.Convert_coordinates(PHAST_Transform::GRID, &this->Map2GridPhastTransform);
-		prism->top.Convert_coordinates(PHAST_Transform::GRID, &this->Map2GridPhastTransform);
-		prism->bottom.Convert_coordinates(PHAST_Transform::GRID, &this->Map2GridPhastTransform);
-
-		ASSERT(prism->perimeter.Get_coordinate_system() == PHAST_Transform::GRID);
-		ASSERT(prism->top.Get_coordinate_system()       == PHAST_Transform::GRID);
-		ASSERT(prism->bottom.Get_coordinate_system()    == PHAST_Transform::GRID);
+		prism->Tidy();
 
 		// cleanup 
 		this->CleanupPrisms();
-		this->SetOrientation(0, 0, 0);
+		ASSERT(this->GetOrientation()[0] == 0.0 && this->GetOrientation()[1] == 0.0 && this->GetOrientation()[2] == 0.0);
 
 		this->RemovePart(this->CubeActor);
 		this->RemovePart(this->OutlineActor);
@@ -1955,10 +1945,6 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, do
 					std::reverse(pts.begin(), pts.end());
 				}
 			}
-
-#if 999
-// COMMENT: {11/19/2008 6:50:39 PM}			this->Map2GridPhastTransform.Transform(pts);
-#endif
 
 			vtkPoints *pointsSide = vtkPoints::New(VTK_DOUBLE);
 			vtkCellArray *facesSide = vtkCellArray::New();
@@ -2119,6 +2105,7 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, do
 					// bottom of perimeter
 					pointsBottom->InsertPoint(i, ptBottom.x(), ptBottom.y(), dBottom);
 					bottomCellArray->InsertNextCell(i);
+					TRACE("poly %d bottom(%d)=%g, %g, %g\n", poly, i, ptBottom.x(), ptBottom.y(), dBottom);
 
 					// side points
 					pointsSide->InsertPoint(i*2, ptBottom.x(), ptBottom.y(), dBottom);
@@ -2784,10 +2771,6 @@ void CZoneActor::Update(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent)
 	}
 }
 
-// COMMENT: {7/16/2008 1:15:31 PM}void CZoneActor::SetPoint(vtkIdType n, double *x)
-// COMMENT: {7/16/2008 1:15:31 PM}{
-// COMMENT: {7/16/2008 1:15:31 PM}}
-
 #ifdef _DEBUG
 void CZoneActor::SetColor(float r, float g, float b)
 {
@@ -2861,4 +2844,53 @@ HTREEITEM CZoneActor::GetTreeItem(void)const
 HTREEITEM CZoneActor::GetParentTreeItem(void)const
 {
 	return this->m_hParent;
+}
+
+void CZoneActor::UpdateUserTransform(void)
+{
+	// validate polyhedron
+	ASSERT(this->GetPolyhedron() && ::AfxIsValidAddress(this->GetPolyhedron(), sizeof(Polyhedron)));
+
+	// validate actor
+	ASSERT(this->GetPosition()[0]         == 0.0 && this->GetPosition()[1]         == 0.0 && this->GetPosition()[2]         == 0.0);
+	ASSERT(this->GetOrigin()[0]           == 0.0 && this->GetOrigin()[1]           == 0.0 && this->GetOrigin()[2]           == 0.0);
+	ASSERT(this->GetOrientation()[0]      == 0.0 && this->GetOrientation()[1]      == 0.0 && this->GetOrientation()[2]      == 0.0);
+	ASSERT(this->vtkProp3D::GetScale()[0] == 1.0 && this->vtkProp3D::GetScale()[1] == 1.0 && this->vtkProp3D::GetScale()[2] == 1.0);
+
+	PHAST_Transform::COORDINATE_SYSTEM cs = PHAST_Transform::GRID;
+	if (Cube *c = dynamic_cast<Cube*>(this->GetPolyhedron()))
+	{
+		cs = c->Get_user_coordinate_system();
+	}
+	else if (Prism *p = dynamic_cast<Prism*>(this->GetPolyhedron()))
+	{
+		cs = p->perimeter.Get_user_coordinate_system();
+	}
+	else
+	{
+		ASSERT(FALSE);
+	}
+
+	vtkTransform *user = vtkTransform::New();
+	user->Identity();
+
+	if (cs == PHAST_Transform::MAP)
+	{
+		user->Scale(
+			this->GeometryScale[0] * this->Units.map_horizontal.input_to_si,
+			this->GeometryScale[1] * this->Units.map_horizontal.input_to_si,
+			this->GeometryScale[2] * this->Units.map_vertical.input_to_si);
+		user->RotateZ(-this->GridAngle);
+		user->Translate(-this->GridOrigin[0], -this->GridOrigin[1], -this->GridOrigin[2]);
+	}
+	else
+	{
+		user->Scale(
+			this->GeometryScale[0] * this->Units.horizontal.input_to_si,
+			this->GeometryScale[1] * this->Units.horizontal.input_to_si,
+			this->GeometryScale[2] * this->Units.vertical.input_to_si);
+	}
+
+	this->SetUserTransform(user);
+	user->Delete();
 }

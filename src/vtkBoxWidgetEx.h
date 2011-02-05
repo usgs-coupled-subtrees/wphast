@@ -17,6 +17,13 @@ public:
 // COMMENT: {5/10/2006 9:26:25 PM}	virtual void PlaceWidget(float bounds[6]);
 	virtual void SetEnabled(int);
 
+	//{{
+	vtkPoints* GetPoints(void)
+	{
+		return this->Points;
+	}
+	//}}
+
 protected:
 	// Handles the events
 	static void ProcessEvents(vtkObject* object, unsigned long event, void* clientdata, void* calldata);

@@ -53,15 +53,10 @@ CPointConnectorActor::CPointConnectorActor(void)
 	for (size_t i = 0; i < 3; ++i)
 	{
 		this->GridOrigin[i] = 0.0;
+		this->GeometryScale[i] = 1.0;
 	}
 
-	this->Points         = vtkPoints::New();
-	this->TransformUnits = vtkTransform::New();
-	this->TransformScale = vtkTransform::New();
-	this->TransformGrid  = vtkTransform::New();
-	this->TransformUnits->Identity();
-	this->TransformScale->Identity();
-	this->TransformGrid->Identity();
+	this->Points         = vtkPoints::New(VTK_DOUBLE);
 
 	this->CellPicker     = vtkCellPicker::New();
 	this->CellPicker->SetTolerance(0.001);
@@ -110,27 +105,15 @@ CPointConnectorActor::~CPointConnectorActor(void)
 	TRACE("CPointConnectorActor dtor %d \n", count);
 	++count;
 
-// COMMENT: {9/9/2009 10:30:36 PM}	if (this->Interactor)
-// COMMENT: {9/9/2009 10:30:36 PM}	{
-// COMMENT: {9/9/2009 10:30:36 PM}		// this is req'd since messages will continue to be sent
-// COMMENT: {9/9/2009 10:30:36 PM}		// after deletion and this->Interactor == 0xcdcdcdcd or
-// COMMENT: {9/9/2009 10:30:36 PM}		// this->Interactor->SubjectHelper == 0xcdcdcdcd
-// COMMENT: {9/9/2009 10:30:36 PM}		this->Interactor->RemoveObserver(this->EventCallbackCommand);
-// COMMENT: {9/9/2009 10:30:36 PM}	}
-	//{{
 	if (this->Interactor)
 	{
 		this->SetInteractor(0);
 	}
-	//}}
 	this->EventCallbackCommand->Delete();    this->EventCallbackCommand   = 0;
 
 	this->ClearPoints();
 
 	this->Points->Delete();               this->Points              = 0;
-	this->TransformUnits->Delete();       this->TransformUnits      = 0;
-	this->TransformScale->Delete();       this->TransformScale      = 0;
-	this->TransformGrid->Delete();        this->TransformGrid       = 0;
 	this->CellPicker->Delete();           this->CellPicker          = 0;
 	this->LineCellPicker->Delete();       this->LineCellPicker      = 0;
 
@@ -221,11 +204,6 @@ vtkIdType CPointConnectorActor::InsertNextPoint(double x, double y, double z)
 
 	// append point to this->Points
 	//
-	double pt[3];
-	pt[0] = x; pt[1] = y; pt[2] = z;
-	this->TransformGrid->TransformPoint(pt, pt);
-	this->TransformScale->TransformPoint(pt, pt);
-	this->TransformUnits->TransformPoint(pt, pt);
 	vtkIdType id = this->Points->InsertNextPoint(x, y, z);
 
 	// add vtk objects
@@ -242,18 +220,7 @@ vtkIdType CPointConnectorActor::InsertNextPoint(double x, double y, double z)
 
 void CPointConnectorActor::SetUnits(const CUnits &units, bool bUpdatePoints)
 {
-	double scale_h = units.horizontal.input_to_si;
-	double scale_v = units.vertical.input_to_si;
-	if (this->GetCoordinateSystem() == PHAST_Transform::MAP)
-	{
-		scale_h = units.map_horizontal.input_to_si;
-	}
-	if (this->GetCoordinateSystem() == PHAST_Transform::MAP)
-	{
-		scale_v = units.map_vertical.input_to_si;
-	}
-	this->TransformUnits->Identity();
-	this->TransformUnits->Scale(scale_h, scale_h, scale_v);
+	this->Units = units;
 
 	this->HorizonalUnits = units.horizontal.defined ? units.horizontal.input : units.horizontal.si;
 	this->VerticalUnits = units.vertical.defined ? units.vertical.input : units.vertical.si;
@@ -275,11 +242,10 @@ void CPointConnectorActor::SetUnits(const CUnits &units, bool bUpdatePoints)
 
 void CPointConnectorActor::SetGridKeyword(const CGridKeyword &gridKeyword, bool bUpdatePoints)
 {
-	this->TransformGrid->Identity();
-	if (this->GetCoordinateSystem() == PHAST_Transform::MAP)
+	this->GridAngle = gridKeyword.m_grid_angle;
+	for (size_t i = 0; i < 3; ++i)
 	{
-		this->TransformGrid->RotateZ(-gridKeyword.m_grid_angle);
-		this->TransformGrid->Translate(-gridKeyword.m_grid_origin[0], -gridKeyword.m_grid_origin[1], -gridKeyword.m_grid_origin[2]);
+		this->GridOrigin[i] = gridKeyword.m_grid_origin[i];
 	}
 
 	if (bUpdatePoints)
@@ -318,20 +284,65 @@ void CPointConnectorActor::SetScale(double x, double y, double z)
 	double point[3];
 	if (this->State == CPointConnectorActor::CreatingRiver)
 	{
+		//
+		// transform from world to user (using previous GeometryScale)
+		//
 		if (this->Points->GetNumberOfPoints())
 		{
+			vtkTransform *t = vtkTransform::New();
+			if (this->GetCoordinateSystem() == PHAST_Transform::MAP)
+			{
+				t->Scale(
+					this->GeometryScale[0] * this->Units.map_horizontal.input_to_si,
+					this->GeometryScale[1] * this->Units.map_horizontal.input_to_si,
+					this->GeometryScale[2] * this->Units.map_vertical.input_to_si);
+				t->RotateZ(-this->GridAngle);
+				t->Translate(-this->GridOrigin[0], -this->GridOrigin[1], -this->GridOrigin[2]);
+			}
+			else
+			{
+				t->Scale(
+					this->GeometryScale[0] * this->Units.horizontal.input_to_si,
+					this->GeometryScale[1] * this->Units.horizontal.input_to_si,
+					this->GeometryScale[2] * this->Units.vertical.input_to_si);
+			}
 			this->ConnectingLineSource->GetPoint1(point);
-			this->TransformScale->GetInverse()->TransformPoint(point, point);
+			t->GetInverse()->TransformPoint(point, point);
+			t->Delete();
 		}
 	}
-	this->TransformScale->Identity();
-	this->TransformScale->Scale(x, y, z);
+
+	this->GeometryScale[0] = x;
+	this->GeometryScale[1] = y;
+	this->GeometryScale[2] = z;
+
 	if (this->State == CPointConnectorActor::CreatingRiver)
 	{
+		//
+		// transform from user to world (using new GeometryScale)
+		//
 		if (this->Points->GetNumberOfPoints())
 		{
-			this->TransformScale->TransformPoint(point, point);
+			vtkTransform *t = vtkTransform::New();
+			if (this->GetCoordinateSystem() == PHAST_Transform::MAP)
+			{
+				t->Scale(
+					this->GeometryScale[0] * this->Units.map_horizontal.input_to_si,
+					this->GeometryScale[1] * this->Units.map_horizontal.input_to_si,
+					this->GeometryScale[2] * this->Units.map_vertical.input_to_si);
+				t->RotateZ(-this->GridAngle);
+				t->Translate(-this->GridOrigin[0], -this->GridOrigin[1], -this->GridOrigin[2]);
+			}
+			else
+			{
+				t->Scale(
+					this->GeometryScale[0] * this->Units.horizontal.input_to_si,
+					this->GeometryScale[1] * this->Units.horizontal.input_to_si,
+					this->GeometryScale[2] * this->Units.vertical.input_to_si);
+			}
+			t->TransformPoint(point, point);
 			this->ConnectingLineSource->SetPoint1(point);
+			t->Delete();
 		}
 		this->Interactor->Render();
 	}
@@ -350,12 +361,37 @@ void CPointConnectorActor::UpdatePoints(void)
 
 	std::list<vtkSphereSource*>::iterator iterSphereSource = this->SphereSources.begin();
 	std::list<vtkLineSource*>::iterator iterLineSource = this->LineSources.begin();
+
+	//
+	// transform from given coor (either grid or map) to world (SI)
+	//
+
+	vtkTransform *t = vtkTransform::New();
+	if (this->GetCoordinateSystem() == PHAST_Transform::MAP)
+	{
+		t->Scale(
+			this->GeometryScale[0] * this->Units.map_horizontal.input_to_si,
+			this->GeometryScale[1] * this->Units.map_horizontal.input_to_si,
+#if defined(SKIP) /* z is always scaled by vertical */
+			this->GeometryScale[2] * this->Units.map_vertical.input_to_si);
+#else
+			this->GeometryScale[2] * this->Units.vertical.input_to_si);
+#endif
+		t->RotateZ(-this->GridAngle);
+		t->Translate(-this->GridOrigin[0], -this->GridOrigin[1], -this->GridOrigin[2]);
+	}
+	else
+	{
+		t->Scale(
+			this->GeometryScale[0] * this->Units.horizontal.input_to_si,
+			this->GeometryScale[1] * this->Units.horizontal.input_to_si,
+			this->GeometryScale[2] * this->Units.vertical.input_to_si);
+	}
+
 	for (vtkIdType i = 0; i < np; ++i, ++iterSphereSource)
 	{
 		this->Points->GetPoint(i, pt);
-		this->TransformGrid->TransformPoint(pt, pt);
-		this->TransformScale->TransformPoint(pt, pt);
-		this->TransformUnits->TransformPoint(pt, pt);
+		t->TransformPoint(pt, pt);
 
 		if (iterSphereSource != this->SphereSources.end())
 		{
@@ -372,6 +408,7 @@ void CPointConnectorActor::UpdatePoints(void)
 		}
 		prev_pt[0] = pt[0];   prev_pt[1] = pt[1];   prev_pt[2] = pt[2];
 	}
+	t->Delete();
 }
 
 void CPointConnectorActor::ClearPoints(void)
@@ -461,27 +498,21 @@ void CPointConnectorActor::SetRadius(double radius)
 			this->GhostSphereSource->SetRadius(this->Radius);
 		}
 	}
+	if (this->Cursor3D)
+	{
+		// set size of 3D cursor
+		//
+		double dim = 2. * this->Radius;
+		this->Cursor3D->SetModelBounds(-dim, dim, -dim, dim, -dim, dim);
+	}
 }
 
-// COMMENT: {9/16/2009 9:23:05 PM}#pragma optimize( "g", off )
 void CPointConnectorActor::SetInteractor(vtkRenderWindowInteractor* i)
 {
 	char buffer[160];
 	::sprintf(buffer, "CPointConnectorActor::SetInteractor In this = %p i = %p Interactor = %p\n", this, i, this->Interactor);
 	::OutputDebugString(buffer);
 
-#ifdef SAVE
-	vtkDebugMacro(<< "Setting Interactor to = " << i << "\n");
-
-	stdout << "Setting Interactor to = " << i << "\n");
-	stderr << "Setting Interactor to = " << i << "\n");
-	oss << "Setting Interactor to = " << i << "\n");
-#endif
-
-// COMMENT: {9/15/2009 8:31:21 PM}// COMMENT: {9/15/2009 7:04:53 PM}#if defined(_DEBUG)
-// COMMENT: {9/15/2009 8:31:21 PM}	vtkDebugMacro(<< "Setting Interactor to = " << i << "\n");
-// COMMENT: {9/15/2009 8:31:21 PM}	vtkDebugMacro(<< "Previous Interactor to = " << this->Interactor << "\n");
-// COMMENT: {9/15/2009 8:31:21 PM}// COMMENT: {9/15/2009 7:04:55 PM}#endif
 	if (i == this->Interactor)
 	{
 		return;
@@ -515,9 +546,7 @@ void CPointConnectorActor::SetInteractor(vtkRenderWindowInteractor* i)
 
 	this->Modified();
 }
-// COMMENT: {9/16/2009 9:23:01 PM}#pragma optimize( "g", on )
 
-//----------------------------------------------------------------------------
 void CPointConnectorActor::ProcessEvents(vtkObject* vtkNotUsed(object),
 									   unsigned long event,
 									   void* clientdata,
@@ -630,7 +659,7 @@ void CPointConnectorActor::OnLeftButtonDown()
 			if (vtkActor* pActor = vtkActor::SafeDownCast(path->GetFirstNode()->GetViewProp()))
 			{
 				this->HighlightHandle(path->GetFirstNode()->GetViewProp());
-				this->Points->GetPoint(this->GetCurrentPointId(), this->WorldPointXYPlane);
+				this->Points->GetPoint(this->GetCurrentPointId(), this->UserPoint);
 				this->EventCallbackCommand->SetAbortFlag(1);
 				this->State = CPointConnectorActor::MovingPoint;
 				this->InvokeEvent(CPointConnectorActor::StartMovePointEvent, NULL);
@@ -654,7 +683,7 @@ void CPointConnectorActor::OnLeftButtonDown()
 					{
 						// add and select point
 						this->Update();
-						this->InsertPoint(id, this->WorldPointXYPlane[0], this->WorldPointXYPlane[1], this->WorldPointXYPlane[2]);
+						this->InsertPoint(id, this->UserPoint[0], this->UserPoint[1], this->UserPoint[2]);
 						this->SelectPoint(id + 1);
 
 						// notify listeners
@@ -670,7 +699,7 @@ void CPointConnectorActor::OnLeftButtonDown()
 	if (this->State == CPointConnectorActor::CreatingRiver)
 	{
 		this->Update();
-		this->Cursor3DActor->SetPosition(this->WorldSIPoint[0], this->WorldSIPoint[1], this->WorldSIPoint[2]);
+		this->Cursor3DActor->SetPosition(this->WorldPointXYPlane[0], this->WorldPointXYPlane[1], this->WorldPointXYPlane[2]);
 		this->EventCallbackCommand->SetAbortFlag(1);
 		this->Interactor->Render();
 	}
@@ -712,7 +741,7 @@ void CPointConnectorActor::OnMouseMove()
 					if (vtkActor* pActor = vtkActor::SafeDownCast(path->GetFirstNode()->GetViewProp()))
 					{
 						this->Update();
-						this->GhostSphereSource->SetCenter(this->WorldSIPoint[0], this->WorldSIPoint[1], this->WorldSIPoint[2]);
+						this->GhostSphereSource->SetCenter(this->WorldPointXYPlane[0], this->WorldPointXYPlane[1], this->WorldPointXYPlane[2]);
 						this->GhostActor->VisibilityOn();
 						this->Interactor->Render();
 					}
@@ -734,18 +763,34 @@ void CPointConnectorActor::OnMouseMove()
 	if (this->State == CPointConnectorActor::MovingPoint)
 	{
 		// update WorldPointXYPlane
-		//
 		this->Update();
-// COMMENT: {2/9/2009 10:25:03 PM}		//{{
-// COMMENT: {2/9/2009 10:25:03 PM}		double pt[3];
-// COMMENT: {2/9/2009 10:25:03 PM}		this->TransformGrid->GetInverse()->TransformPoint(this->WorldPointXYPlane, pt);
-// COMMENT: {2/9/2009 10:25:03 PM}		this->TransformScale->GetInverse()->TransformPoint(pt, pt);
-// COMMENT: {2/9/2009 10:25:03 PM}		this->TransformUnits->GetInverse()->TransformPoint(pt, pt);
-// COMMENT: {2/9/2009 10:25:03 PM}		//}}
-		this->Points->SetPoint(this->CurrentId, this->WorldPointXYPlane);
+
+		vtkTransform *t = vtkTransform::New();
+		if (this->GetCoordinateSystem() == PHAST_Transform::MAP)
+		{
+			t->Scale(
+				this->GeometryScale[0] * this->Units.map_horizontal.input_to_si,
+				this->GeometryScale[1] * this->Units.map_horizontal.input_to_si,
+				this->GeometryScale[2] * this->Units.map_vertical.input_to_si);
+			t->RotateZ(-this->GridAngle);
+			t->Translate(-this->GridOrigin[0], -this->GridOrigin[1], -this->GridOrigin[2]);
+		}
+		else
+		{
+			t->Scale(
+				this->GeometryScale[0] * this->Units.horizontal.input_to_si,
+				this->GeometryScale[1] * this->Units.horizontal.input_to_si,
+				this->GeometryScale[2] * this->Units.vertical.input_to_si);
+		}
+		t->Inverse();
+
+		double pt[3];
+		t->TransformPoint(this->WorldPointXYPlane, pt);
+		this->Points->SetPoint(this->CurrentId, pt);
+		t->Delete();
+
 		this->UpdatePoints();
 
-		this->EventCallbackCommand->SetAbortFlag(1);
 		this->InvokeEvent(CPointConnectorActor::MovingPointEvent, NULL);
 		this->Interactor->Render();
 	}
@@ -753,14 +798,13 @@ void CPointConnectorActor::OnMouseMove()
 	if (this->State == CPointConnectorActor::CreatingRiver)
 	{
 		this->Update();
-		this->Cursor3DActor->SetPosition(this->WorldSIPoint[0], this->WorldSIPoint[1], this->WorldSIPoint[2]);
+		this->Cursor3DActor->SetPosition(this->WorldPointXYPlane[0], this->WorldPointXYPlane[1], this->WorldPointXYPlane[2]);
 		this->Cursor3DActor->VisibilityOn();
 		if (this->Points->GetNumberOfPoints())
 		{
-			this->ConnectingLineSource->SetPoint2(this->WorldSIPoint[0], this->WorldSIPoint[1], this->WorldSIPoint[2]);
+			this->ConnectingLineSource->SetPoint2(this->WorldPointXYPlane[0], this->WorldPointXYPlane[1], this->WorldPointXYPlane[2]);
 			this->ConnectingActor->VisibilityOn();
 		}
-		this->EventCallbackCommand->SetAbortFlag(1);
 		this->Interactor->Render();
 	}
 }
@@ -783,7 +827,7 @@ void CPointConnectorActor::OnLeftButtonUp()
 		// update WorldPointXYPlane
 		//
 		this->Update();
-		this->Points->SetPoint(this->CurrentId, this->WorldPointXYPlane);
+		this->Points->SetPoint(this->CurrentId, this->UserPoint);
 		this->UpdatePoints();
 
 		this->HighlightHandle(NULL);
@@ -796,11 +840,11 @@ void CPointConnectorActor::OnLeftButtonUp()
 	if (this->State == CPointConnectorActor::CreatingRiver)
 	{
 		this->Update();
-		if (this->InsertNextPoint(this->WorldPointXYPlane[0], this->WorldPointXYPlane[1], this->WorldPointXYPlane[2]) != -1)
+		if (this->InsertNextPoint(this->UserPoint[0], this->UserPoint[1], this->UserPoint[2]) != -1)
 		{
 			this->UpdatePoints();
-			this->ConnectingLineSource->SetPoint1(this->WorldSIPoint[0], this->WorldSIPoint[1], this->WorldSIPoint[2]);
-			this->ConnectingLineSource->SetPoint2(this->WorldSIPoint[0], this->WorldSIPoint[1], this->WorldSIPoint[2]);
+			this->ConnectingLineSource->SetPoint1(this->WorldPointXYPlane[0], this->WorldPointXYPlane[1], this->WorldPointXYPlane[2]);
+			this->ConnectingLineSource->SetPoint2(this->WorldPointXYPlane[0], this->WorldPointXYPlane[1], this->WorldPointXYPlane[2]);
 			this->Interactor->Render();
 		}
 	}
@@ -879,12 +923,6 @@ void CPointConnectorActor::PrintSelf(ostream& os, vtkIndent indent)
 
 void CPointConnectorActor::SetEnabled(int enabling)
 {
-// COMMENT: {9/16/2009 6:44:30 PM}	if (!this->Interactor)
-// COMMENT: {9/16/2009 6:44:30 PM}	{
-// COMMENT: {9/16/2009 6:44:30 PM}		vtkErrorMacro(<<"The interactor must be set prior to enabling/disabling widget");
-// COMMENT: {9/16/2009 6:44:30 PM}		return;
-// COMMENT: {9/16/2009 6:44:30 PM}	}
-
 	if ( enabling ) //------------------------------------------------------------
 	{
 		vtkDebugMacro(<<"Enabling CPointConnectorActor");
@@ -894,13 +932,11 @@ void CPointConnectorActor::SetEnabled(int enabling)
 			return;
 		}
 
-		//{{
 		if (!this->Interactor)
 		{
 			vtkErrorMacro(<<"The interactor must be set prior to enabling the widget");
 			return;
 		}
-		//}}
 
 		if ( ! this->CurrentRenderer )
 		{
@@ -912,6 +948,9 @@ void CPointConnectorActor::SetEnabled(int enabling)
 				return;
 			}
 		}
+
+		// size handles
+		this->SetRadius(0.008 * CGlobal::ComputeRadius(this->CurrentRenderer));
 
 		this->Enabled = 1;
 
@@ -965,33 +1004,49 @@ void CPointConnectorActor::Update()
 {
 	if (!this->CurrentRenderer) return;
 
-	double zPos = this->Z * this->TransformScale->GetMatrix()->GetElement(2, 2) * this->TransformUnits->GetMatrix()->GetElement(2, 2);
-	CUtilities::GetWorldPointAtFixedPlane(this->Interactor, this->CurrentRenderer, 2, zPos, this->WorldPointXYPlane);
-	for (int i = 0; i < 3; ++i)
+	//
+	// transform Z from grid to world
+	//
+	double pt[3];
+	vtkTransform *t = vtkTransform::New();
+	t->Scale(
+		this->GeometryScale[0] * this->Units.horizontal.input_to_si,
+		this->GeometryScale[1] * this->Units.horizontal.input_to_si,
+		this->GeometryScale[2] * this->Units.vertical.input_to_si);
+
+	pt[0] = pt[1] = 0.0;
+	pt[2] = this->Z;
+	t->TransformPoint(pt, pt);
+	double worldZ = pt[2];
+
+	CUtilities::GetWorldPointAtFixedPlane(this->Interactor, this->CurrentRenderer, 2, worldZ, this->WorldPointXYPlane);
+
+	//
+	// transform from world to user
+	//
+	t->Identity();
+	if (this->GetCoordinateSystem() == PHAST_Transform::MAP)
 	{
-		this->WorldSIPoint[i] = this->WorldPointXYPlane[i];
+		t->Scale(
+			this->GeometryScale[0] * this->Units.map_horizontal.input_to_si,
+			this->GeometryScale[1] * this->Units.map_horizontal.input_to_si,
+			this->GeometryScale[2] * this->Units.map_vertical.input_to_si);
+		t->RotateZ(-this->GridAngle);
+		t->Translate(-this->GridOrigin[0], -this->GridOrigin[1], -this->GridOrigin[2]);
 	}
+	else
+	{
+		t->Scale(
+			this->GeometryScale[0] * this->Units.horizontal.input_to_si,
+			this->GeometryScale[1] * this->Units.horizontal.input_to_si,
+			this->GeometryScale[2] * this->Units.vertical.input_to_si);
+	}
+	t->GetInverse()->TransformPoint(this->WorldPointXYPlane, this->UserPoint);
 
-	// UN-SCALE
-	this->TransformGrid->GetInverse()->TransformPoint(this->WorldPointXYPlane, this->WorldPointXYPlane);
-	this->TransformScale->GetInverse()->TransformPoint(this->WorldPointXYPlane, this->WorldPointXYPlane);
-	this->TransformUnits->GetInverse()->TransformPoint(this->WorldPointXYPlane, this->WorldPointXYPlane);
+	t->Delete();
 
-	// this is probably wrong (should use same point in and out and add TransformGrid)
-	this->TransformScale->GetInverse()->TransformPoint(this->WorldSIPoint, this->WorldScaledUnitPoint);
-	this->TransformUnits->GetInverse()->TransformPoint(this->WorldSIPoint, this->WorldScaledUnitPoint);
-
-	// update status bar
-	((CMainFrame*)::AfxGetMainWnd())->UpdateGrid(
-		this->WorldPointXYPlane[0],
-		this->WorldPointXYPlane[1],
-		this->WorldPointXYPlane[2],
-		this->HorizonalUnits,
-		this->VerticalUnits
-		);
-
-	this->WorldPointXYPlane[2] = this->Z;
-	this->WorldSIPoint[2] = zPos;
+	TRACE("WorldPointXYPlane(%g, %g %g)\n", this->WorldPointXYPlane[0], this->WorldPointXYPlane[1], this->WorldPointXYPlane[2]);
+	TRACE("        UserPoint(%g, %g %g)\n", this->UserPoint[0], this->UserPoint[1], this->UserPoint[2]);
 }
 
 void CPointConnectorActor::Add(CPropertyTreeControlBar *pTree, HTREEITEM hInsertAfter)
@@ -1069,7 +1124,7 @@ vtkIdType CPointConnectorActor::GetCurrentPointId(void)const
 
 double* CPointConnectorActor::GetCurrentPointPosition(void)
 {
-	return this->WorldPointXYPlane;
+	return this->UserPoint;
 }
 
 size_t CPointConnectorActor::GetPointCount(void)const
@@ -1079,9 +1134,9 @@ size_t CPointConnectorActor::GetPointCount(void)const
 
 void CPointConnectorActor::GetCurrentPointPosition(double x[3])const
 {
-	x[0] = this->WorldPointXYPlane[0];
-	x[1] = this->WorldPointXYPlane[1];
-	x[2] = this->WorldPointXYPlane[2];
+	x[0] = this->UserPoint[0];
+	x[1] = this->UserPoint[1];
+	x[2] = this->UserPoint[2];
 }
 
 void CPointConnectorActor::MovePoint(vtkIdType id, double x, double y)
@@ -1136,19 +1191,16 @@ int CPointConnectorActor::GetVisibility(void)
 	return this->Visibility;
 }
 
-void CPointConnectorActor::ScaleFromBounds(double bounds[6])
+void CPointConnectorActor::ScaleFromBounds(double bounds[6], vtkRenderer* ren)
 {
-	// set radius
-	//
-	double defaultAxesSize = (bounds[1]-bounds[0] + bounds[3]-bounds[2] + bounds[5]-bounds[4])/12;
-	this->SetRadius(defaultAxesSize * 0.085 /* / sqrt(scale[0] * scale[1]) */ );
-
-	if (this->Cursor3D)
+	if (ren)
 	{
-		// set size of 3D cursor
-		//
-		double dim = (bounds[1] - bounds[0]) / 20.0;
-		this->Cursor3D->SetModelBounds(-dim, dim, -dim, dim, -dim, dim);
+		this->SetRadius(0.008 * CGlobal::ComputeRadius(ren));
+	}
+	else
+	{
+		double defaultAxesSize = (bounds[1]-bounds[0] + bounds[3]-bounds[2] + bounds[5]-bounds[4])/12;
+		this->SetRadius(defaultAxesSize * 0.085);
 	}
 }
 

@@ -110,10 +110,6 @@ protected:
 	int                              TubeVisibility;
 	int                              HandleHover;
 
-
-	// transforms
-	vtkTransform *TransformScale;
-
 	void PositionHandles(void);
 	void FreeHandles(void);
 	void CreateHandles(void);

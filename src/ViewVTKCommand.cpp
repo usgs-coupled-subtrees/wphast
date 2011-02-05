@@ -88,12 +88,18 @@ static CCriticalSection  critSect;
 CViewVTKCommand::CViewVTKCommand(CWPhastView* pView)
 : m_pView(pView)
 , m_pAction(0)
+, Transform(0)
 {
 	ASSERT_VALID(pView);
+	this->Transform = vtkTransform::New();
 }
 
 CViewVTKCommand::~CViewVTKCommand()
 {
+	if (this->Transform)
+	{
+		this->Transform->Delete();
+	}
 }
 
 CViewVTKCommand *CViewVTKCommand::New(CWPhastView *pView)
@@ -155,11 +161,6 @@ void CViewVTKCommand::OnStartInteractionEvent(vtkObject* caller, void* callData)
 		if (CWellActor *pWellActor = CWellActor::SafeDownCast(widget->GetProp3D()))
 		{
 			ASSERT(this->m_pAction == 0);
-// COMMENT: {1/16/2009 11:18:37 PM}			PHAST_Transform::COORDINATE_SYSTEM cs = PHAST_Transform::GRID;
-// COMMENT: {1/16/2009 11:18:37 PM}			if (this->m_pView->GetCoordinateMode() == CWPhastView::MapMode)
-// COMMENT: {1/16/2009 11:18:37 PM}			{
-// COMMENT: {1/16/2009 11:18:37 PM}				cs = PHAST_Transform::MAP;
-// COMMENT: {1/16/2009 11:18:37 PM}			}
 			// TODO add functionality to change coor sys on the fly
 			PHAST_Transform::COORDINATE_SYSTEM cs = pWellActor->GetWell().xy_coordinate_system_user;
 			this->m_pAction =
@@ -191,33 +192,77 @@ void CViewVTKCommand::OnEndInteractionEvent(vtkObject* caller, void* callData)
 			// Scale
 			const double* scale = this->m_pView->GetDocument()->GetScale();
 
-			// well position
-			Point p(
-				widget->GetPosition()[0] / scale[0] / units.horizontal.input_to_si,
-				widget->GetPosition()[1] / scale[1] / units.horizontal.input_to_si,
-				0.0
-				);
+			// Coor Sys
+			PHAST_Transform::COORDINATE_SYSTEM cs = PHAST_Transform::GRID;
 
-#if 9991 // well w/ grid rotation
-			if (pWellActor->GetWell().xy_coordinate_system_user == PHAST_Transform::MAP)
+			if (this->Transform)
 			{
-				const CGridKeyword& gridKeyword = this->m_pView->GetDocument()->GetGridKeyword();
-				PHAST_Transform t(
-					gridKeyword.m_grid_origin[0],
-					gridKeyword.m_grid_origin[1],
-					gridKeyword.m_grid_origin[2],
-					gridKeyword.m_grid_angle,
-					units.map_horizontal.input_to_si / units.horizontal.input_to_si,
-					units.map_horizontal.input_to_si / units.horizontal.input_to_si,
-					units.map_vertical.input_to_si   / units.vertical.input_to_si
-					);
-				t.Inverse_transform(p);
-			}
-#endif // 9991 well w/ grid rotation
+				this->Transform->Identity();
+				if (this->m_pView->GetCoordinateMode() == CWPhastView::MapMode)
+				{
+					const CGridKeyword& gridKeyword = this->m_pView->GetDocument()->GetGridKeyword();
+					this->Transform->Scale(
+						scale[0] * units.map_horizontal.input_to_si,
+						scale[1] * units.map_horizontal.input_to_si,
+						scale[2] * units.map_vertical.input_to_si);
+					this->Transform->RotateZ(-gridKeyword.m_grid_angle);
+					this->Transform->Translate(-gridKeyword.m_grid_origin[0], -gridKeyword.m_grid_origin[1], -gridKeyword.m_grid_origin[2]);
+					cs = PHAST_Transform::MAP;
+				}
+				else
+				{
+					this->Transform->Scale(
+						scale[0] * units.horizontal.input_to_si,
+						scale[1] * units.horizontal.input_to_si,
+						scale[2] * units.vertical.input_to_si);
+				}
+				this->Transform->Inverse();
 
-			((CWellSetPositionAction*)this->m_pAction)->SetPosition(p.x(), p.y());
-			this->m_pView->GetDocument()->Execute(this->m_pAction);
-			this->m_pAction = 0;
+				double pt[3];
+				pt[0] = widget->GetPosition()[0];
+				pt[1] = widget->GetPosition()[1];
+				pt[2] = 0;
+
+				this->Transform->TransformPoint(pt, pt);
+
+				((CWellSetPositionAction*)this->m_pAction)->SetPosition(pt[0], pt[1], cs);
+				this->m_pView->GetDocument()->Execute(this->m_pAction);
+				this->m_pAction = 0;
+			}
+			else
+			{
+				ASSERT(FALSE);
+			}
+
+
+
+// COMMENT: {1/12/2011 11:42:38 PM}			// well position
+// COMMENT: {1/12/2011 11:42:38 PM}			Point p(
+// COMMENT: {1/12/2011 11:42:38 PM}				widget->GetPosition()[0] / scale[0] / units.horizontal.input_to_si,
+// COMMENT: {1/12/2011 11:42:38 PM}				widget->GetPosition()[1] / scale[1] / units.horizontal.input_to_si,
+// COMMENT: {1/12/2011 11:42:38 PM}				0.0
+// COMMENT: {1/12/2011 11:42:38 PM}				);
+// COMMENT: {1/12/2011 11:42:38 PM}
+// COMMENT: {1/12/2011 11:42:38 PM}#if 9991 // well w/ grid rotation
+// COMMENT: {1/12/2011 11:42:38 PM}			if (pWellActor->GetWell().xy_coordinate_system_user == PHAST_Transform::MAP)
+// COMMENT: {1/12/2011 11:42:38 PM}			{
+// COMMENT: {1/12/2011 11:42:38 PM}				const CGridKeyword& gridKeyword = this->m_pView->GetDocument()->GetGridKeyword();
+// COMMENT: {1/12/2011 11:42:38 PM}				PHAST_Transform t(
+// COMMENT: {1/12/2011 11:42:38 PM}					gridKeyword.m_grid_origin[0],
+// COMMENT: {1/12/2011 11:42:38 PM}					gridKeyword.m_grid_origin[1],
+// COMMENT: {1/12/2011 11:42:38 PM}					gridKeyword.m_grid_origin[2],
+// COMMENT: {1/12/2011 11:42:38 PM}					gridKeyword.m_grid_angle,
+// COMMENT: {1/12/2011 11:42:38 PM}					units.map_horizontal.input_to_si / units.horizontal.input_to_si,
+// COMMENT: {1/12/2011 11:42:38 PM}					units.map_horizontal.input_to_si / units.horizontal.input_to_si,
+// COMMENT: {1/12/2011 11:42:38 PM}					units.map_vertical.input_to_si   / units.vertical.input_to_si
+// COMMENT: {1/12/2011 11:42:38 PM}					);
+// COMMENT: {1/12/2011 11:42:38 PM}				t.Inverse_transform(p);
+// COMMENT: {1/12/2011 11:42:38 PM}			}
+// COMMENT: {1/12/2011 11:42:38 PM}#endif // 9991 well w/ grid rotation
+// COMMENT: {1/12/2011 11:42:38 PM}
+// COMMENT: {1/12/2011 11:42:38 PM}			((CWellSetPositionAction*)this->m_pAction)->SetPosition(p.x(), p.y(), cs);
+// COMMENT: {1/12/2011 11:42:38 PM}			this->m_pView->GetDocument()->Execute(this->m_pAction);
+// COMMENT: {1/12/2011 11:42:38 PM}			this->m_pAction = 0;
 		}
 	}
 }
@@ -358,38 +403,57 @@ void CViewVTKCommand::OnInteractionEvent(vtkObject* caller, void* callData)
 			const CUnits& units = this->m_pView->GetDocument()->GetUnits();
 
 			// GridKeyword
-			const CGridKeyword& gridKeyword = this->m_pView->GetDocument()->GetGridKeyword();
+			CGridKeyword gridKeyword;
+			this->m_pView->GetDocument()->GetGridKeyword(gridKeyword);
 
 			// Scale
 			const double* scale = pWellActor->GetScale();
 
-			// well position
-			Point p(
-				widget->GetPosition()[0] / scale[0] / units.horizontal.input_to_si,
-				widget->GetPosition()[1] / scale[1] / units.horizontal.input_to_si,
-				0.0
-				);
-
-#if 9991 // well w/ grid rotation
-			if (pWellActor->GetWell().xy_coordinate_system_user == PHAST_Transform::MAP)
+			if (this->Transform)
 			{
-				PHAST_Transform t(
-					gridKeyword.m_grid_origin[0],
-					gridKeyword.m_grid_origin[1],
-					gridKeyword.m_grid_origin[2],
-					gridKeyword.m_grid_angle,
-					units.map_horizontal.input_to_si / units.horizontal.input_to_si,
-					units.map_horizontal.input_to_si / units.horizontal.input_to_si,
-					units.map_vertical.input_to_si   / units.vertical.input_to_si
-					);
-				t.Inverse_transform(p);
-			}
-#endif // 9991 well w/ grid rotation
+				this->Transform->Identity();
+				if (pWellActor->GetWell().xy_coordinate_system_user == PHAST_Transform::MAP)
+				{
+					this->Transform->Scale(
+						scale[0] * units.map_horizontal.input_to_si,
+						scale[1] * units.map_horizontal.input_to_si,
+						scale[2] * units.map_vertical.input_to_si);
+					this->Transform->RotateZ(-gridKeyword.m_grid_angle);
+					this->Transform->Translate(-gridKeyword.m_grid_origin[0], -gridKeyword.m_grid_origin[1], -gridKeyword.m_grid_origin[2]);
+				}
+				else
+				{
+					this->Transform->Scale(
+						scale[0] * units.horizontal.input_to_si,
+						scale[1] * units.horizontal.input_to_si,
+						scale[2] * units.vertical.input_to_si);
+				}
+				this->Transform->Inverse();
 
-			CWellSchedule well = pWellActor->GetWell();
-			well.x_user = p.x();
-			well.y_user = p.y();
-			pWellActor->SetWell(well, units, gridKeyword);
+				double wp[3];
+				wp[0] = widget->GetPosition()[0];
+				wp[1] = widget->GetPosition()[1];
+				wp[2] = 0;
+				this->Transform->TransformPoint(wp, wp);
+
+				CWellSchedule well = pWellActor->GetWell();
+				well.x_user = wp[0];
+				well.y_user = wp[1];
+				pWellActor->SetWell(well, units, gridKeyword);
+			}
+			else
+			{
+				ASSERT(FALSE);
+			}
+
+			// Update BoxPropertiesDialogBar
+			//
+			if (CBoxPropertiesDialogBar* pBar = static_cast<CBoxPropertiesDialogBar*>(  ((CFrameWnd*)::AfxGetMainWnd())->GetControlBar(IDW_CONTROLBAR_BOXPROPS) ) )
+			{
+				// TODO for now just disable CBoxPropertiesDialogBar
+				//pBar->Set(0, widget->GetProp3D(), this->m_pView->GetDocument()->GetUnits());
+				pBar->Set(0, 0, this->m_pView->GetDocument()->GetUnits());
+			}
 		}
 	}
 
@@ -397,18 +461,13 @@ void CViewVTKCommand::OnInteractionEvent(vtkObject* caller, void* callData)
 	{
 		// Apply transform
 		//
-		////if (vtkActor *actor = vtkActor::SafeDownCast(widget->GetProp3D()))
 		if (CZoneActor *zoneActor = CZoneActor::SafeDownCast(widget->GetProp3D()))
 		{
 			Polyhedron *poly = zoneActor->GetPolyhedron();
-			////vtkMapper *mapper = actor->GetMapper();
 			if (Cube *cube = dynamic_cast<Cube*>(zoneActor->GetPolyhedron()))
 			{
 				vtkTransform *t = vtkTransform::New();
 				widget->GetTransform(t);
-
-// COMMENT: {9/15/2009 2:12:31 PM}				double* scale = zoneActor->GetScale();
-// COMMENT: {9/15/2009 2:12:31 PM}				double* center = cube->GetCenter();
 
 				if (CGlobal::IsValidTransform(t))
 				{
@@ -416,77 +475,38 @@ void CViewVTKCommand::OnInteractionEvent(vtkObject* caller, void* callData)
 				}
 				t->Delete();
 			}
-// COMMENT: {9/15/2009 1:11:43 PM}			if (vtkDataSet *dataset = mapper->GetInput())
-// COMMENT: {9/15/2009 1:11:43 PM}			{
-// COMMENT: {9/15/2009 1:11:43 PM}				if (vtkSource *source = dataset->GetSource())
-// COMMENT: {9/15/2009 1:11:43 PM}				{
-// COMMENT: {9/15/2009 1:11:43 PM}					if (vtkCubeSource* cube = vtkCubeSource::SafeDownCast(source))
-// COMMENT: {9/15/2009 1:11:43 PM}					{
-// COMMENT: {9/15/2009 1:11:43 PM}						vtkTransform *t = vtkTransform::New();
-// COMMENT: {9/15/2009 1:11:43 PM}						widget->GetTransform(t);
-// COMMENT: {9/15/2009 1:11:43 PM}#ifdef _DEBUG
-// COMMENT: {9/15/2009 1:11:43 PM}						double* pos = widget->GetProp3D()->GetPosition();
-// COMMENT: {9/15/2009 1:11:43 PM}						ASSERT(pos[0] == 0.0);
-// COMMENT: {9/15/2009 1:11:43 PM}						ASSERT(pos[1] == 0.0);
-// COMMENT: {9/15/2009 1:11:43 PM}						ASSERT(pos[2] == 0.0);
-// COMMENT: {9/15/2009 1:11:43 PM}#endif
-// COMMENT: {9/15/2009 1:11:43 PM}						double* scale = actor->GetScale();
-// COMMENT: {9/15/2009 1:11:43 PM}						double* center = cube->GetCenter();
-// COMMENT: {9/15/2009 1:11:43 PM}						widget->GetProp3D()->SetPosition(center[0]*scale[0], center[1]*scale[1], center[2]*scale[2]);
-// COMMENT: {9/15/2009 1:11:43 PM}						widget->GetTransform(t);
-// COMMENT: {9/15/2009 1:11:43 PM}#if (0)
-// COMMENT: {9/15/2009 1:11:43 PM}#ifdef _DEBUG
-// COMMENT: {9/15/2009 1:11:43 PM}						{
-// COMMENT: {9/15/2009 1:11:43 PM}							afxDump << "widget->GetTransform(t)\n";
-// COMMENT: {9/15/2009 1:11:43 PM}							ostrstream oss;
-// COMMENT: {9/15/2009 1:11:43 PM}
-// COMMENT: {9/15/2009 1:11:43 PM}							t->PrintSelf(oss, vtkIndent(4));
-// COMMENT: {9/15/2009 1:11:43 PM}
-// COMMENT: {9/15/2009 1:11:43 PM}							oss << ends;
-// COMMENT: {9/15/2009 1:11:43 PM}							afxDump << oss.str() << "\n";
-// COMMENT: {9/15/2009 1:11:43 PM}							oss.rdbuf()->freeze(false); // this must be called after str() to avoid memory leak
-// COMMENT: {9/15/2009 1:11:43 PM}						}
-// COMMENT: {9/15/2009 1:11:43 PM}#endif
-// COMMENT: {9/15/2009 1:11:43 PM}#endif
-// COMMENT: {9/15/2009 1:11:43 PM}						widget->GetProp3D()->SetPosition(0, 0, 0);
-// COMMENT: {9/15/2009 1:11:43 PM}						if (CGlobal::IsValidTransform(t))
-// COMMENT: {9/15/2009 1:11:43 PM}						{
-// COMMENT: {9/15/2009 1:11:43 PM}							widget->GetProp3D()->SetUserTransform(t);
-// COMMENT: {9/15/2009 1:11:43 PM}						}
-// COMMENT: {9/15/2009 1:11:43 PM}						t->Delete();
-// COMMENT: {9/15/2009 1:11:43 PM}					}
-// COMMENT: {9/15/2009 1:11:43 PM}				}
-// COMMENT: {9/15/2009 1:11:43 PM}			}
 		}
 
 		// Update StatusBar
 		//
 		if (CWnd* pWnd = ((CFrameWnd*)::AfxGetMainWnd())->GetMessageBar())
 		{
-			double bounds[6];
-			widget->GetProp3D()->GetBounds(bounds);
-			double* scale = widget->GetProp3D()->GetScale();
-			TCHAR buffer[80];
-			const CUnits& units = this->m_pView->GetDocument()->GetUnits();
-			::_sntprintf(buffer, 80, "%g[%s] x %g[%s] x %g[%s])",
-				fabs(bounds[1] - bounds[0]) / scale[0] / units.horizontal.input_to_si,
-				units.horizontal.defined ? units.horizontal.input : units.horizontal.si,
-				fabs(bounds[3] - bounds[2]) / scale[1] / units.horizontal.input_to_si,
-				units.horizontal.defined ? units.horizontal.input : units.horizontal.si,
-				fabs(bounds[5] - bounds[4]) / scale[2] / units.vertical.input_to_si,
-				units.vertical.defined ? units.vertical.input : units.vertical.si
-				);
-			TRACE("%s\n", buffer);
-			pWnd->SetWindowText(buffer);
+			// TODO this doesn't handle map coordinates
+			//
+// COMMENT: {1/12/2011 6:04:01 PM}			double bounds[6];
+// COMMENT: {1/12/2011 6:04:01 PM}			widget->GetProp3D()->GetBounds(bounds);
+// COMMENT: {1/12/2011 6:04:01 PM}			double* scale = widget->GetProp3D()->GetScale();
+// COMMENT: {1/12/2011 6:04:01 PM}			TCHAR buffer[80];
+// COMMENT: {1/12/2011 6:04:01 PM}			const CUnits& units = this->m_pView->GetDocument()->GetUnits();
+// COMMENT: {1/12/2011 6:04:01 PM}			::_sntprintf(buffer, 80, "%g[%s] x %g[%s] x %g[%s])",
+// COMMENT: {1/12/2011 6:04:01 PM}				fabs(bounds[1] - bounds[0]) / scale[0] / units.horizontal.input_to_si,
+// COMMENT: {1/12/2011 6:04:01 PM}				units.horizontal.defined ? units.horizontal.input : units.horizontal.si,
+// COMMENT: {1/12/2011 6:04:01 PM}				fabs(bounds[3] - bounds[2]) / scale[1] / units.horizontal.input_to_si,
+// COMMENT: {1/12/2011 6:04:01 PM}				units.horizontal.defined ? units.horizontal.input : units.horizontal.si,
+// COMMENT: {1/12/2011 6:04:01 PM}				fabs(bounds[5] - bounds[4]) / scale[2] / units.vertical.input_to_si,
+// COMMENT: {1/12/2011 6:04:01 PM}				units.vertical.defined ? units.vertical.input : units.vertical.si
+// COMMENT: {1/12/2011 6:04:01 PM}				);
+// COMMENT: {1/12/2011 6:04:01 PM}			TRACE("%s\n", buffer);
+// COMMENT: {1/12/2011 6:04:01 PM}			pWnd->SetWindowText(buffer);
 		}
 
 		// Update BoxPropertiesDialogBar
 		//
 		if (CBoxPropertiesDialogBar* pBar = static_cast<CBoxPropertiesDialogBar*>(  ((CFrameWnd*)::AfxGetMainWnd())->GetControlBar(IDW_CONTROLBAR_BOXPROPS) ) )
 		{
-			// pBar->Set(this->m_pView, widget->GetProp3D());
+			// TODO for now just disable CBoxPropertiesDialogBar
+			//pBar->Set(0, widget->GetProp3D(), this->m_pView->GetDocument()->GetUnits());
 			pBar->Set(0, 0, this->m_pView->GetDocument()->GetUnits());
-			/// pBar->Set(this->m_pView, widget->GetProp3D(), this->m_pView->GetDocument()->GetUnits());
 		}
 	}
 }
@@ -614,38 +634,46 @@ void CViewVTKCommand::Update2()
 	//
 	CUtilities::GetWorldPointAtFixedPlane(this->m_pView->GetInteractor(), renderer, this->FixedCoord, bounds[this->FixedPlane], this->FixedPlanePoint);
 
-	double fpos[3];
-	fpos[0] = this->FixedPlanePoint[0] / scale[0] / units.horizontal.input_to_si;
-	fpos[1] = this->FixedPlanePoint[1] / scale[1] / units.horizontal.input_to_si;
-	fpos[2] = this->FixedPlanePoint[2] / scale[2] / units.vertical.input_to_si;
+	// Update grid coordinates
+	//
+	this->Transform->Identity();
+	this->Transform->Scale(
+		scale[0] * units.horizontal.input_to_si,
+		scale[1] * units.horizontal.input_to_si,
+		scale[2] * units.vertical.input_to_si);
+	this->Transform->Inverse();
+
+	this->Transform->TransformPoint(this->FixedPlanePoint, this->GridPoint);
 
 	((CMainFrame*)::AfxGetMainWnd())->UpdateGrid(
-		fpos[0],
-		fpos[1],
-		fpos[2],
+		this->GridPoint[0],
+		this->GridPoint[1],
+		this->GridPoint[2],
 		xy_grid,
 		z_grid
 		);
 
-	CGridKeyword gridk = this->m_pView->GetDocument()->GetGridKeyword();
-	PHAST_Transform t(
-		gridk.m_grid_origin[0],
-		gridk.m_grid_origin[1],
-		gridk.m_grid_origin[2],
-		gridk.m_grid_angle,
-		units.map_horizontal.input_to_si / units.horizontal.input_to_si,
-		units.map_horizontal.input_to_si / units.horizontal.input_to_si,
-		units.map_vertical.input_to_si   / units.vertical.input_to_si
-		);
 
-	Point p(fpos[0], fpos[1], fpos[2]);
+	// Update map coordinates
+	//
+	CGridKeyword gridk;
+	this->m_pView->GetDocument()->GetGridKeyword(gridk);
 
-	t.Inverse_transform(p);
+	this->Transform->Identity();
+	this->Transform->Scale(
+		scale[0] * units.map_horizontal.input_to_si,
+		scale[1] * units.map_horizontal.input_to_si,
+		scale[2] * units.map_vertical.input_to_si);
+	this->Transform->RotateZ(-gridk.m_grid_angle);
+	this->Transform->Translate(-gridk.m_grid_origin[0], -gridk.m_grid_origin[1], -gridk.m_grid_origin[2]);
+	this->Transform->Inverse();
+
+	this->Transform->TransformPoint(this->FixedPlanePoint, this->MapPoint);
 
 	((CMainFrame*)::AfxGetMainWnd())->UpdateMap(
-		p.x(),
-		p.y(),
-		p.z(),
+		this->MapPoint[0],
+		this->MapPoint[1],
+		this->MapPoint[2],
 		xy_map,
 		z_map
 		);
@@ -674,7 +702,7 @@ void CViewVTKCommand::OnLeftButtonPressEvent(vtkObject* caller, void* callData)
 		// update m_WorldPointXYPlane and save starting point
 		//
 		Update2();
-		for (int i = 0; i < 3; ++i)
+		for (int i = 0; i < 4; ++i)
 		{
 			this->m_BeginPoint[i] = this->m_WorldPointXYPlane[i];
 		}
@@ -685,24 +713,8 @@ void CViewVTKCommand::OnLeftButtonReleaseEvent(vtkObject* caller, void* callData
 {
 	TRACE("OnLeftButtonReleaseEvent\n");
 
-// COMMENT: {6/22/2005 6:27:15 PM}	if (this->m_pView->CreatingNewRiver())
-// COMMENT: {6/22/2005 6:27:15 PM}	{
-// COMMENT: {6/22/2005 6:27:15 PM}		double* scale = this->m_pView->GetDocument()->GetScale();
-// COMMENT: {6/22/2005 6:27:15 PM}
-// COMMENT: {6/22/2005 6:27:15 PM}		this->m_pView->m_pRiverActor->InsertNextPoint(
-// COMMENT: {6/22/2005 6:27:15 PM}			this->m_BeginPoint[0] / scale[0] / this->m_pView->GetDocument()->GetUnits().horizontal.input_to_si,
-// COMMENT: {6/22/2005 6:27:15 PM}			this->m_BeginPoint[1] / scale[1] / this->m_pView->GetDocument()->GetUnits().horizontal.input_to_si,
-// COMMENT: {6/22/2005 6:27:15 PM}			this->m_pView->m_pRiverActor->GetZ()
-// COMMENT: {6/22/2005 6:27:15 PM}			);
-// COMMENT: {6/22/2005 6:27:15 PM}
-// COMMENT: {6/22/2005 6:27:15 PM}		this->m_pView->m_Renderer->Render();
-// COMMENT: {6/22/2005 6:27:15 PM}
-// COMMENT: {6/22/2005 6:27:15 PM}		/// this->m_pView->CancelNewRiver();
-// COMMENT: {6/22/2005 6:27:15 PM}	}
-
 	if (this->m_pView->CreatingNewWell())
 	{
-
 		double* bounds = this->m_pView->GetDocument()->GetGridBounds();
 		double zMin = bounds[4];
 		double zMax = bounds[5];
@@ -717,13 +729,6 @@ void CViewVTKCommand::OnLeftButtonReleaseEvent(vtkObject* caller, void* callData
 		double* scale = this->m_pView->GetDocument()->GetScale();
 		this->m_pView->WellActor->SetScale(scale);
 
-		// set well position
-		Point p(
-			this->m_BeginPoint[0] / scale[0] / this->m_pView->GetDocument()->GetUnits().horizontal.input_to_si,
-			this->m_BeginPoint[1] / scale[1] / this->m_pView->GetDocument()->GetUnits().horizontal.input_to_si,
-			0.0
-			);
-
 		// set well
 		//
 		CWellSchedule well;
@@ -731,31 +736,43 @@ void CViewVTKCommand::OnLeftButtonReleaseEvent(vtkObject* caller, void* callData
 		well.x_user_defined = TRUE;
 		well.y_user_defined = TRUE;
 
-#if 9991 // well w/ grid rotation
-		if (this->m_pView->GetCoordinateMode() == CWPhastView::MapMode)
-		{
-			CGridKeyword gridKeyword = this->m_pView->GetDocument()->GetGridKeyword();
-			PHAST_Transform t(
-				gridKeyword.m_grid_origin[0],
-				gridKeyword.m_grid_origin[1],
-				gridKeyword.m_grid_origin[2],
-				gridKeyword.m_grid_angle,
-				units.map_horizontal.input_to_si / units.horizontal.input_to_si,
-				units.map_horizontal.input_to_si / units.horizontal.input_to_si,
-				units.map_vertical.input_to_si   / units.vertical.input_to_si
-				);
-			t.Inverse_transform(p);
-			well.xy_coordinate_system_user = PHAST_Transform::MAP;
-		}
-#endif // 9991 well w/ grid rotation
+		CGridKeyword gridKeyword;
+		this->m_pView->GetDocument()->GetGridKeyword(gridKeyword);
+		const CUnits& units = this->m_pView->GetDocument()->GetUnits();
 
-		well.x_user         = p.x();
-		well.y_user         = p.y();
+		double pt[3];
+		ASSERT(this->Transform);
+		if (this->Transform)
+		{
+			this->Transform->Identity();
+			if (this->m_pView->GetCoordinateMode() == CWPhastView::MapMode)
+			{
+				this->Transform->Scale(
+					scale[0] * units.map_horizontal.input_to_si,
+					scale[1] * units.map_horizontal.input_to_si,
+					scale[2] * units.map_vertical.input_to_si);
+				this->Transform->RotateZ(-gridKeyword.m_grid_angle);
+				this->Transform->Translate(-gridKeyword.m_grid_origin[0], -gridKeyword.m_grid_origin[1], -gridKeyword.m_grid_origin[2]);
+				well.xy_coordinate_system_user = PHAST_Transform::MAP;
+			}
+			else
+			{
+				this->Transform->Scale(
+					scale[0] * units.horizontal.input_to_si,
+					scale[1] * units.horizontal.input_to_si,
+					scale[2] * units.vertical.input_to_si);
+				well.xy_coordinate_system_user = PHAST_Transform::GRID;
+			}
+			this->Transform->Inverse();
+			this->Transform->TransformPoint(this->m_BeginPoint, pt);
+		}
+
+		well.x_user = pt[0];
+		well.y_user = pt[1];
 		this->m_pView->WellActor->SetWell(well, this->m_pView->GetDocument()->GetUnits(), this->m_pView->GetDocument()->GetGridKeyword());
 
 		// set height
 		//
-		CGridKeyword gridKeyword = this->m_pView->GetDocument()->GetGridKeyword();
 		this->m_pView->WellActor->SetZAxis(gridKeyword.m_grid[2], this->m_pView->GetDocument()->GetUnits());
 		this->m_pView->WellActor->VisibilityOn();
 
@@ -813,6 +830,7 @@ void CViewVTKCommand::OnKeyPressEvent(vtkObject* caller, void* callData)
 	//{{
 	if (this->m_pView->CreatingNewWell() || this->m_pView->CreatingNewRiver())
 	{
+		ASSERT(FALSE); // Should now be caught by Accelerator
 		if (::_stricmp(keysym, "m") == 0)
 		{
 			this->m_pView->SetMapMode();
@@ -826,6 +844,7 @@ void CViewVTKCommand::OnKeyPressEvent(vtkObject* caller, void* callData)
 
 	if (::strcmp(keysym, "Escape") == 0)
 	{
+		ASSERT(FALSE); // Should now be caught by Accelerator
 		this->m_pView->CancelMode();
 	}
 }

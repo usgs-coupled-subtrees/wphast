@@ -290,7 +290,8 @@ std::ostream& operator<< (std::ostream &os, const CRiver &a)
 	}
 	os << "\n";
 
-	os << "\t-coordinate_system" << " " << coor_name[a.coordinate_system] << "\n";
+	os << "\t-xy_coordinate_system" << " " << coor_name[a.coordinate_system] << "\n";
+	os << "\t-z_coordinate_system " << " " << coor_name[a.z_coordinate_system_user] << "\n";
 
 	std::list<CRiverPoint>::const_iterator it = a.m_listPoints.begin();
 	for(; it != a.m_listPoints.end(); ++it)

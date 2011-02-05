@@ -309,6 +309,16 @@ void vtkBoxWidgetEx::RotateZ(float angle)
 {
 // COMMENT: {11/6/2008 2:08:25 PM}	double *pts = ((vtkDoubleArray *)this->Points->GetData())->GetPointer(0);
 // COMMENT: {11/6/2008 2:08:25 PM}	double *center = ((vtkDoubleArray *)this->Points->GetData())->GetPointer(3*14);
+// COMMENT: {12/14/2010 4:06:34 PM}	double m[16];
+// COMMENT: {12/14/2010 4:06:34 PM}	vtkMatrix4x4 *m4x4 = this->Transform->GetMatrix();
+// COMMENT: {12/14/2010 4:06:34 PM}	vtkMatrix4x4::DeepCopy(m, m4x4);
+// COMMENT: {12/14/2010 4:06:34 PM}
+// COMMENT: {12/14/2010 4:06:34 PM}	TRACE("\nvtkBoxWidgetEx::RotateZ before rotate:\n");
+// COMMENT: {12/14/2010 4:06:34 PM}	TRACE("%g %g %g %g\n", m[0],  m[1],  m[2],  m[3]);
+// COMMENT: {12/14/2010 4:06:34 PM}	TRACE("%g %g %g %g\n", m[4],  m[5],  m[6],  m[7]);
+// COMMENT: {12/14/2010 4:06:34 PM}	TRACE("%g %g %g %g\n", m[8],  m[9],  m[10], m[11]);
+// COMMENT: {12/14/2010 4:06:34 PM}	TRACE("%g %g %g %g\n", m[12], m[13], m[14], m[15]);
+
 	int i;
 
 	//Manipulate the transform to reflect the rotation
@@ -317,7 +327,22 @@ void vtkBoxWidgetEx::RotateZ(float angle)
 
 	//Set the corners
 	vtkPoints *newPts = vtkPoints::New(VTK_DOUBLE);
-	this->Transform->TransformPoints(this->Points,newPts);
+	this->Transform->TransformPoints(this->Points, newPts);
+
+	//{{
+	TRACE("\nthis->Points:\n");
+	for (i = 0; i < 8; ++i)
+	{
+		double *d = this->Points->GetPoint(i);
+		TRACE("  Point(%d) = %g, %g, %g\n", i, d[0], d[1], d[2]);
+	}
+	TRACE("\nnewPts:\n");
+	for (i = 0; i < 8; ++i)
+	{
+		double *d = newPts->GetPoint(i);
+		TRACE("  Point(%d) = %g, %g, %g\n", i, d[0], d[1], d[2]);
+	}
+	//}}
 
 	for (i = 0; i < 8; ++i)
 	{
@@ -329,22 +354,22 @@ void vtkBoxWidgetEx::RotateZ(float angle)
 
 void vtkBoxWidgetEx::SetOrientation(float x, float y, float z)
 {
-	//Manipulate the transform to reflect the rotation
-
-	this->Transform->Identity();
-	this->Transform->PreMultiply();
-	this->Transform->RotateZ(z);
-	this->Transform->RotateX(x);
-	this->Transform->RotateY(y);
-
-	// Set the corners
-	vtkPoints *newPts = vtkPoints::New(VTK_DOUBLE);
-	this->Transform->TransformPoints(this->Points, newPts);
-
-	for (int i = 0; i < 8; ++i)
-	{
-		this->Points->SetPoint(i, newPts->GetPoint(i));
-	}
-	newPts->Delete();
-	this->PositionHandles();
+// COMMENT: {12/13/2010 4:00:26 PM}	//Manipulate the transform to reflect the rotation
+// COMMENT: {12/13/2010 4:00:26 PM}
+// COMMENT: {12/13/2010 4:00:26 PM}	this->Transform->Identity();
+// COMMENT: {12/13/2010 4:00:26 PM}	this->Transform->PreMultiply();
+// COMMENT: {12/13/2010 4:00:26 PM}	this->Transform->RotateZ(z);
+// COMMENT: {12/13/2010 4:00:26 PM}	this->Transform->RotateX(x);
+// COMMENT: {12/13/2010 4:00:26 PM}	this->Transform->RotateY(y);
+// COMMENT: {12/13/2010 4:00:26 PM}
+// COMMENT: {12/13/2010 4:00:26 PM}	// Set the corners
+// COMMENT: {12/13/2010 4:00:26 PM}	vtkPoints *newPts = vtkPoints::New(VTK_DOUBLE);
+// COMMENT: {12/13/2010 4:00:26 PM}	this->Transform->TransformPoints(this->Points, newPts);
+// COMMENT: {12/13/2010 4:00:26 PM}
+// COMMENT: {12/13/2010 4:00:26 PM}	for (int i = 0; i < 8; ++i)
+// COMMENT: {12/13/2010 4:00:26 PM}	{
+// COMMENT: {12/13/2010 4:00:26 PM}		this->Points->SetPoint(i, newPts->GetPoint(i));
+// COMMENT: {12/13/2010 4:00:26 PM}	}
+// COMMENT: {12/13/2010 4:00:26 PM}	newPts->Delete();
+// COMMENT: {12/13/2010 4:00:26 PM}	this->PositionHandles();
 } 

@@ -314,8 +314,10 @@ vtkIdType CDrainActor::InsertNextPoint(double x, double y, double z)
 		if (id != -1)
 		{
 			CRiverPoint rivpt;
-			rivpt.x_user = this->WorldPointXYPlane[0]; rivpt.x_user_defined = TRUE;
-			rivpt.y_user = this->WorldPointXYPlane[1]; rivpt.y_user_defined = TRUE;
+// COMMENT: {1/21/2011 9:01:33 PM}			rivpt.x_user = this->WorldPointXYPlane[0]; rivpt.x_user_defined = TRUE;
+// COMMENT: {1/21/2011 9:01:33 PM}			rivpt.y_user = this->WorldPointXYPlane[1]; rivpt.y_user_defined = TRUE;
+			rivpt.x_user = this->UserPoint[0]; rivpt.x_user_defined = TRUE;
+			rivpt.y_user = this->UserPoint[1]; rivpt.y_user_defined = TRUE;
 			this->Drain.m_listPoints.push_back(rivpt);
 		}
 	}

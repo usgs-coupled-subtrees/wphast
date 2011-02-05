@@ -32,9 +32,6 @@ CPrismWidget::CPrismWidget(void)
 	ASSERT(this->EventCallbackCommand);
 	this->EventCallbackCommand->SetCallback(CPrismWidget::ProcessEvents);
 
-	this->TransformScale = vtkTransform::New();
-	this->TransformScale->Identity();
-
 	this->HandleProperty = vtkProperty::New();
 
 	this->SelectedProperty = vtkProperty::New();
@@ -94,11 +91,6 @@ CPrismWidget::~CPrismWidget(void)
 	{
 		this->SelectedHandleProperty->Delete();
 		this->SelectedHandleProperty = 0;
-	}
-	if (this->TransformScale)
-	{
-		this->TransformScale->Delete();
-		this->TransformScale = 0;
 	}
 	if (this->HandlePicker)
 	{
@@ -406,10 +398,6 @@ void CPrismWidget::SetProp3D(vtkProp3D* prop3D)
 
 	if (this->ZoneActor = CZoneActor::SafeDownCast(this->Prop3D))
 	{
-		double scale[3];
-		this->ZoneActor->GetScale(scale);
-		this->TransformScale->Identity();
-		this->TransformScale->Scale(scale);
 		if (bCreate)
 		{
 			this->FreeHandles();
@@ -453,8 +441,14 @@ void CPrismWidget::PositionHandles(void)
 			for (vtkIdType i = 0; i < points->GetNumberOfPoints(); ++i, ++iterSphereSource)
 			{
 				points->GetPoint(i, x);
-				this->TransformScale->TransformPoint(x, x);
-				pZoneActor->UnitsTransform->TransformPoint(x, x);
+				if (vtkTransform *user = dynamic_cast<vtkTransform*>(pZoneActor->GetUserTransform()))
+				{
+					user->TransformPoint(x, x);
+				}
+				else
+				{
+					ASSERT(FALSE);
+				}
 				(*iterSphereSource)->SetCenter(x);
 				if (i > 1)
 				{
@@ -486,8 +480,15 @@ void CPrismWidget::PositionHandles(void)
 			for (vtkIdType i = 0; i < 2; ++i, ++iterLineSource)
 			{
 				points->GetPoint(i, x);
-				this->TransformScale->TransformPoint(x, x);
-				pZoneActor->UnitsTransform->TransformPoint(x, x);
+
+				if (vtkTransform *user = dynamic_cast<vtkTransform*>(pZoneActor->GetUserTransform()))
+				{
+					user->TransformPoint(x, x);
+				}
+				else
+				{
+					ASSERT(FALSE);
+				}
 
 				if (i % 2)
 				{
@@ -592,8 +593,15 @@ void CPrismWidget::CreateHandles(void)
 					for (vtkIdType i = 0; i < points->GetNumberOfPoints(); ++i)
 					{
 						points->GetPoint(i, x);
-						this->TransformScale->TransformPoint(x, x);
-						pZoneActor->UnitsTransform->TransformPoint(x, x);
+
+						if (vtkTransform *user = dynamic_cast<vtkTransform*>(pZoneActor->GetUserTransform()))
+						{
+							user->TransformPoint(x, x);
+						}
+						else
+						{
+							ASSERT(FALSE);
+						}
 
 						vtkSphereSource *sphereSource = vtkSphereSource::New();
 						sphereSource->SetPhiResolution(10);
@@ -679,8 +687,16 @@ void CPrismWidget::CreateHandles(void)
 					for (vtkIdType i = 0; i < 2; ++i)
 					{
 						points->GetPoint(i, x);
-						this->TransformScale->TransformPoint(x, x);
-						pZoneActor->UnitsTransform->TransformPoint(x, x);
+
+						if (vtkTransform *user = dynamic_cast<vtkTransform*>(pZoneActor->GetUserTransform()))
+						{
+							user->TransformPoint(x, x);
+						}
+						else
+						{
+							ASSERT(FALSE);
+						}
+
 						if (i % 2)
 						{
 							vtkLineSource *lineSource = vtkLineSource::New();
@@ -887,14 +903,7 @@ void CPrismWidget::OnLeftButtonDown(void)
 
 				// unscale pickpoint
 				//
-				ASSERT(this->TransformScale);
-				ASSERT(this->TransformScale->GetInverse());
-				this->TransformScale->GetInverse()->TransformPoint(this->PickPoint, this->PickPoint);
-
-				ASSERT(this->ZoneActor);
-				ASSERT(this->ZoneActor->UnitsTransform);
-				ASSERT(this->ZoneActor->UnitsTransform->GetInverse());
-				this->ZoneActor->UnitsTransform->GetInverse()->TransformPoint(this->PickPoint, this->PickPoint);
+				this->ZoneActor->GetUserTransform()->GetInverse()->TransformPoint(this->PickPoint, this->PickPoint);
 
 				this->EventCallbackCommand->SetAbortFlag(1);
 				this->InvokeEvent(CPrismWidget::InsertPointEvent, NULL);
@@ -1041,14 +1050,7 @@ void CPrismWidget::OnMouseMove(void)
 
 			// unscale pickpoint
 			//
-			ASSERT(this->TransformScale);
-			ASSERT(this->TransformScale->GetInverse());
-			this->TransformScale->GetInverse()->TransformPoint(pickPoint, this->WorldSIPoint);
-
-			ASSERT(this->ZoneActor);
-			ASSERT(this->ZoneActor->UnitsTransform);
-			ASSERT(this->ZoneActor->UnitsTransform->GetInverse());
-			this->ZoneActor->UnitsTransform->GetInverse()->TransformPoint(this->WorldSIPoint, this->WorldSIPoint);
+			this->ZoneActor->GetUserTransform()->GetInverse()->TransformPoint(pickPoint, this->WorldSIPoint);
 
 			ASSERT(this->ZoneActor);
 			ASSERT(this->ZoneActor->PrismSidesPolyData[0]);
@@ -1063,15 +1065,12 @@ void CPrismWidget::OnMouseMove(void)
 				points->Modified();
 				this->PositionHandles();
 			}
-			//{{
 			TRACE("IDC_SIZEALL 2\n");
 			::SetCursor(::AfxGetApp()->LoadStandardCursor(IDC_SIZEALL));
-			//}}
 		}
 	}
 
 	// Interact, if desired
-// COMMENT: {8/26/2008 4:54:06 PM}	this->EventCallbackCommand->SetAbortFlag(1);
 	this->InvokeEvent(vtkCommand::InteractionEvent, NULL);
 
 	ASSERT(this->Interactor);

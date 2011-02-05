@@ -49,13 +49,7 @@ void CRiverActor::SetRiver(const CRiver &river, const CUnits &units, const CGrid
 	std::list<CRiverPoint>::iterator iter = this->m_river.m_listPoints.begin();
 	for (; iter != this->m_river.m_listPoints.end(); ++iter)
 	{
-// COMMENT: {12/19/2008 7:39:17 PM}		this->InsertNextPoint((*iter).x_user, (*iter).y_user, 0.0);
-// COMMENT: {12/22/2008 10:43:39 PM}		double x = (*iter).x_grid;
-// COMMENT: {12/22/2008 10:43:39 PM}		double y = (*iter).y_grid;
-		double x = (*iter).x_user;
-		double y = (*iter).y_user;
-
-		this->InsertNextPoint(x, y, 0.0);
+		this->InsertNextPoint((*iter).x_user, (*iter).y_user, 0.0);
 	}
 	this->SetGridKeyword(gridKeyword, false);
 	this->SetUnits(units, true);
@@ -365,8 +359,8 @@ vtkIdType CRiverActor::InsertNextPoint(double x, double y, double z)
 		if (id != -1)
 		{
 			CRiverPoint rivpt;
-			rivpt.x_user = this->WorldPointXYPlane[0]; rivpt.x_user_defined = TRUE;
-			rivpt.y_user = this->WorldPointXYPlane[1]; rivpt.y_user_defined = TRUE;
+			rivpt.x_user = this->UserPoint[0]; rivpt.x_user_defined = TRUE;
+			rivpt.y_user = this->UserPoint[1]; rivpt.y_user_defined = TRUE;
 			this->m_river.m_listPoints.push_back(rivpt);
 		}
 	}

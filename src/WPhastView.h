@@ -255,6 +255,9 @@ public:
 	afx_msg void OnUpdateToolsSelectObject(CCmdUI *pCmdUI);
 	afx_msg void OnToolsSelectObject();
 	virtual BOOL OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo);
+	afx_msg void OnSetGridMode();
+	afx_msg void OnSetMapMode();
+	afx_msg void OnCancelMode();
 };
 
 #ifndef _DEBUG  // debug version in WPhastView.cpp

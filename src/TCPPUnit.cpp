@@ -73,7 +73,7 @@ void TCPPUnit::RunUnitTests(void)
 // COMMENT: {10/20/2010 4:28:42 PM}		runner.addTest(TestCPhastInput::suite());
 // COMMENT: {10/20/2010 4:28:42 PM}// COMMENT: {8/18/2010 7:04:57 PM}		runner.addTest(TestCZone::suite());
 // COMMENT: {10/20/2010 4:28:42 PM}		runner.addTest(TestCGrid::suite());
-// COMMENT: {10/20/2010 4:28:42 PM}		runner.addTest(TestPHAST_Transform::suite());
+		runner.addTest(TestPHAST_Transform::suite());
 // COMMENT: {8/18/2010 7:05:00 PM}		runner.addTest(TestCtime::suite());
 // COMMENT: {8/18/2010 7:05:00 PM}		runner.addTest(TestCBC::suite());
 // COMMENT: {8/18/2010 7:05:00 PM}		runner.addTest(TestCTimeControl::suite());

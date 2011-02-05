@@ -15,6 +15,7 @@
 #include "ZoneCreateAction.h"
 #include "FlowOnly.h"
 #include "Protect.h"
+#include "GridKeyword.h"
 
 #include <vtkObjectFactory.h> // reqd by vtkStandardNewMacro
 #include <vtkPropAssembly.h>
@@ -50,9 +51,13 @@ CICChemZoneActor::~CICChemZoneActor(void)
 void CICChemZoneActor::Create(CWPhastDoc* pWPhastDoc, const CChemIC& chemIC, LPCTSTR desc)
 {
 	ASSERT(chemIC.polyh && ::AfxIsValidAddress(chemIC.polyh, sizeof(Polyhedron)));
+	CGridKeyword gk;
+	pWPhastDoc->GetGridKeyword(gk);
 	CZoneCreateAction<CICChemZoneActor>* pAction = new CZoneCreateAction<CICChemZoneActor>(
 		pWPhastDoc,
 		chemIC.polyh,
+		gk.m_grid_origin,
+		gk.m_grid_angle,
 		desc
 		);
 	pAction->GetZoneActor()->SetData(chemIC);

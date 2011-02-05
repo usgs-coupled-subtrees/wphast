@@ -16,6 +16,7 @@
 #include "ZoneCreateAction.h"
 #include "FlowOnly.h"
 #include "Protect.h"
+#include "GridKeyword.h"
 
 #include <vtkObjectFactory.h> // reqd by vtkStandardNewMacro
 #include <vtkPropAssembly.h>
@@ -51,9 +52,13 @@ CICHeadZoneActor::~CICHeadZoneActor(void)
 
 void CICHeadZoneActor::Create(CWPhastDoc* pWPhastDoc, const CHeadIC& headIC, LPCTSTR desc)
 {
+	CGridKeyword gk;
+	pWPhastDoc->GetGridKeyword(gk);
 	CZoneCreateAction<CICHeadZoneActor>* pAction = new CZoneCreateAction<CICHeadZoneActor>(
 		pWPhastDoc,
 		headIC.polyh,
+		gk.m_grid_origin,
+		gk.m_grid_angle,
 		desc
 		);
 	pAction->GetZoneActor()->SetData(headIC);

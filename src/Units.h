@@ -19,7 +19,7 @@ public:
 	CUnits(void);
 
 	// copy ctor
-	CUnits(const struct cunits& src, const PHAST_Transform& trans);
+	CUnits(const struct cunits& src);
 
 	// copy assignment
 	CUnits& operator=(const CUnits& rhs);
@@ -32,5 +32,4 @@ public:
 protected:
 	friend std::ostream& operator<< (std::ostream &os, const CUnits &a);
 	HTREEITEM m_htiUnits;
-	PHAST_Transform transform;
 };

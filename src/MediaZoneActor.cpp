@@ -17,6 +17,7 @@
 #include "MediaPropsPage.h"
 #include "MediaPropsPage2.h"
 #include "TreePropSheetEx/TreePropSheetEx.h"
+#include "GridKeyword.h"
 
 
 #include <vtkPropAssembly.h>
@@ -54,9 +55,13 @@ CMediaZoneActor::~CMediaZoneActor(void)
 void CMediaZoneActor::Create(CWPhastDoc* pWPhastDoc, const CGridElt& gridElt, LPCTSTR desc)
 {
 	ASSERT(gridElt.polyh && ::AfxIsValidAddress(gridElt.polyh, sizeof(Polyhedron)));
+	CGridKeyword gk;
+	pWPhastDoc->GetGridKeyword(gk);
 	CZoneCreateAction<CMediaZoneActor>* pAction = new CZoneCreateAction<CMediaZoneActor>(
 		pWPhastDoc,
 		gridElt.polyh,
+		gk.m_grid_origin,
+		gk.m_grid_angle,
 		desc
 		);
 	pAction->GetZoneActor()->SetGridElt(gridElt);

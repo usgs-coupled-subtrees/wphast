@@ -38,6 +38,7 @@
 #include "SetBCAction.h"
 #include "SetChemICAction.h"
 #include "SetHeadICAction.h"
+#include "GridRotateAction.h"
 
 #include "SetDisplayColorsAction.h"
 #include "ZoneActor.h"
@@ -295,6 +296,7 @@ BEGIN_MESSAGE_MAP(CWPhastDoc, CDocument)
 	// ID_TOOLS_COLORS
 	ON_COMMAND(ID_TOOLS_COLORS, &CWPhastDoc::OnToolsColors)
 	ON_COMMAND(ID_ACCELERATOR32862, &CWPhastDoc::OnAccelerator32862)
+	ON_COMMAND(ID_TOOLS_ROTATE_GRID, &CWPhastDoc::OnToolsRotateGrid)
 END_MESSAGE_MAP()
 
 #if defined(WPHAST_AUTOMATION)
@@ -448,6 +450,9 @@ CWPhastDoc::CWPhastDoc()
 	this->m_pGridActor->AddObserver(CGridActor::DeleteGridLineEvent, this->GridCallbackCommand);
 	this->m_pGridActor->AddObserver(CGridActor::InsertGridLineEvent, this->GridCallbackCommand);
 	this->m_pGridActor->AddObserver(CGridActor::MoveGridLineEvent,   this->GridCallbackCommand);
+#if defined(GRID_WIDGET)
+	this->m_pGridActor->AddObserver(CGridActor::RotateGridEvent,     this->GridCallbackCommand);
+#endif
 	this->m_pGridActor->SetScale(1, 1, 1);
 	this->m_pGridActor->SetPickable(0);
 	//}}
@@ -1436,6 +1441,9 @@ void CWPhastDoc::DeleteContents()
 	this->m_pGridActor->AddObserver(CGridActor::DeleteGridLineEvent, this->GridCallbackCommand);
 	this->m_pGridActor->AddObserver(CGridActor::InsertGridLineEvent, this->GridCallbackCommand);
 	this->m_pGridActor->AddObserver(CGridActor::MoveGridLineEvent,   this->GridCallbackCommand);
+#if defined(GRID_WIDGET)
+	this->m_pGridActor->AddObserver(CGridActor::RotateGridEvent,     this->GridCallbackCommand);
+#endif
 // COMMENT: {8/9/2005 7:57:14 PM}	this->m_pGridActor->GetProperty()->SetColor(1.0, 0.8, 0.6);
 	this->m_pGridActor->SetScale(1, 1, 1);
 	this->m_pGridActor->SetPickable(0);
@@ -1699,6 +1707,20 @@ void CWPhastDoc::SetScale(double x, double y, double z)
 	//
 	if (this->m_pMapActor)
 	{
+// COMMENT: {12/9/2010 8:31:48 PM}		//{{
+// COMMENT: {12/9/2010 8:31:48 PM}		CGridKeyword gk;
+// COMMENT: {12/9/2010 8:31:48 PM}		this->GetGridKeyword(gk);
+// COMMENT: {12/9/2010 8:31:48 PM}		vtkTransform *user = vtkTransform::New();
+// COMMENT: {12/9/2010 8:31:48 PM}		user->Scale(x, y, z);
+// COMMENT: {12/9/2010 8:31:48 PM}		user->RotateZ(-gk.m_grid_angle);
+// COMMENT: {12/9/2010 8:31:48 PM}		user->Translate(-gk.m_grid_origin[0], -gk.m_grid_origin[1], -gk.m_grid_origin[2]);
+// COMMENT: {12/9/2010 8:31:48 PM}
+// COMMENT: {12/9/2010 8:31:48 PM}		this->m_pMapActor->SetOrientation(0, 0, 0);
+// COMMENT: {12/9/2010 8:31:48 PM}		this->m_pMapActor->SetOrigin(0, 0, 0);
+// COMMENT: {12/9/2010 8:31:48 PM}		this->m_pMapActor->SetPosition(0, 0, 0);
+// COMMENT: {12/9/2010 8:31:48 PM}		this->m_pMapActor->ComputeMatrix();
+// COMMENT: {12/9/2010 8:31:48 PM}		this->m_pMapActor->SetUserTransform(user);
+// COMMENT: {12/9/2010 8:31:48 PM}		//}}
 		this->m_pMapActor->SetScale(x, y, z);
 	}
 // COMMENT: {8/19/2009 6:09:47 PM}	//{{
@@ -1733,12 +1755,22 @@ void CWPhastDoc::SetScale(double x, double y, double z)
 						if (vtkProp3D *prop3D = vtkProp3D::SafeDownCast(pProp))
 						{
 							prop3D->SetScale(scale);
+// COMMENT: {12/10/2010 3:49:33 PM}							double m[16];
+// COMMENT: {12/10/2010 3:49:33 PM}							prop3D->GetMatrix(m);
+// COMMENT: {12/10/2010 3:49:33 PM}							TRACE("");
 						}
 					}
 				}
 			}
 		}
 	}
+
+	//{{
+	if (this->NewDrainActor)
+	{
+		this->NewDrainActor->SetScale(scale);
+	}
+	//}}
 
 	// if modifying grid update GridElementsSelector
 	//
@@ -1751,6 +1783,9 @@ void CWPhastDoc::SetScale(double x, double y, double z)
 
 	this->Notify(0, WPN_SCALE_CHANGED, 0, 0);
 // COMMENT: {5/8/2006 4:32:55 PM}	this->UpdateAllViews(0);
+	//{{
+	this->UpdateAllViews(0);
+	//}}
 }
 
 void CWPhastDoc::SetFlowOnly(const CFlowOnly& flowOnly)
@@ -1847,6 +1882,9 @@ void CWPhastDoc::ResizeGrid(const CGridKeyword& keyword)
 	{
 		CSiteMap2 siteMap2 = this->m_pMapActor->GetSiteMap2();
 		siteMap2.Angle = keyword.m_grid_angle;
+		siteMap2.Origin[0] = keyword.m_grid_origin[0];
+		siteMap2.Origin[1] = keyword.m_grid_origin[1];
+		siteMap2.Origin[2] = keyword.m_grid_origin[2];
 		this->m_pMapActor->SetSiteMap2(siteMap2);
 	}
 
@@ -1864,13 +1902,13 @@ void CWPhastDoc::ResizeGrid(const CGridKeyword& keyword)
 	//
 	this->UpdateGridDomain();
 
-	// update possible selection
-	//
-	this->Notify(this, WPN_DOMAIN_CHANGED, 0, 0);
-
-	// refresh screen
-	//
-	this->UpdateAllViews(0);
+// COMMENT: {1/25/2011 7:07:47 PM}	// update possible selection
+// COMMENT: {1/25/2011 7:07:47 PM}	//
+// COMMENT: {1/25/2011 7:07:47 PM}	this->Notify(this, WPN_DOMAIN_CHANGED, 0, 0);
+// COMMENT: {1/25/2011 7:07:47 PM}
+// COMMENT: {1/25/2011 7:07:47 PM}	// refresh screen
+// COMMENT: {1/25/2011 7:07:47 PM}	//
+// COMMENT: {1/25/2011 7:07:47 PM}	this->UpdateAllViews(0);
 }
 
 void CWPhastDoc::AddDefaultZone(CZone* pZone)
@@ -2440,7 +2478,11 @@ std::string CWPhastDoc::GetRelativePath(LPCTSTR lpszPathName, const std::string 
 	TCHAR szOut[MAX_PATH] = "";
 	if (::PathIsSameRoot(lpszPathName, src_path.c_str()))
 	{
-		VERIFY(::PathRelativePathTo(szOut, lpszPathName, FILE_ATTRIBUTE_NORMAL, src_path.c_str(), FILE_ATTRIBUTE_NORMAL));
+		std::string cp_src_path(src_path);
+		std::replace(cp_src_path.begin(), cp_src_path.end(), '/', '\\');
+		VERIFY(::PathCanonicalize(szOut, cp_src_path.c_str()));
+		cp_src_path = szOut;
+		VERIFY(::PathRelativePathTo(szOut, lpszPathName, FILE_ATTRIBUTE_NORMAL, cp_src_path.c_str(), FILE_ATTRIBUTE_NORMAL));
 		return std::string(szOut);
 	}
 	return src_path;
@@ -2621,6 +2663,8 @@ void CWPhastDoc::OnFileImport()
 #endif
 }
 
+int setup_grid(void);
+
 BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 {
 	// Return Value
@@ -2752,7 +2796,13 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 			const struct chem_ic* chem_ic_ptr = ::chem_ic[i];
 			chem_ic_map[chem_ic_ptr] = chem_ic_ptr->polyh ? chem_ic_ptr->polyh->clone() : 0;
 		}
-		pInput->Accumulate(false);
+// COMMENT: {1/18/2011 6:57:30 PM}#ifndef __SKIP_ACCUMULATE__
+// COMMENT: {1/18/2011 6:57:30 PM}		pInput->Accumulate(false);
+// COMMENT: {1/18/2011 6:57:30 PM}#else // __SKIP_ACCUMULATE__
+		// setup domain
+		::setup_grid();
+// COMMENT: {1/18/2011 6:57:34 PM}#endif // __SKIP_ACCUMULATE__
+
 		///pInput->Load();
 
 		::OutputDebugString("Finished loading trans.dat file\n");
@@ -2815,12 +2865,13 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 
 		// create new document
 		//
-		ASSERT(::map_to_grid);
+// COMMENT: {12/6/2010 2:35:45 PM}		ASSERT(::map_to_grid);
 		CNewModel model;
 		model.m_flowOnly       = flowOnly;
 		model.m_freeSurface    = (::free_surface != 0);
 		model.m_steadyFlow     = steadyFlow;
-		model.m_units          = CUnits(::units, *::map_to_grid);
+// COMMENT: {12/6/2010 2:35:53 PM}		model.m_units          = CUnits(::units, *::map_to_grid);
+		model.m_units          = CUnits(::units);
 		model.m_gridKeyword    = CGridKeyword(::grid, ::snap, ::axes, ::print_input_xy, ::grid_origin, ::grid_angle);
 		model.m_media          = gridElt;
 		model.m_headIC         = headIC;
@@ -2847,6 +2898,12 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 		{
 			// not undoable
 			const struct grid_elt* grid_elt_ptr = ::grid_elt_zones[i];
+#ifdef __SKIP_ACCUMULATE__
+			if (grid_elt_ptr->polyh == 0)
+			{
+				const_cast<grid_elt*>(grid_elt_ptr)->polyh = new Domain(&domain, PHAST_Transform::GRID);
+			}
+#endif // __SKIP_ACCUMULATE__
 			ASSERT(grid_elt_ptr->polyh && ::AfxIsValidAddress(grid_elt_ptr->polyh, sizeof(Polyhedron)));
 			if (i == 0 && dynamic_cast<Cube*>(grid_elt_ptr->polyh) && defaultZone == *grid_elt_ptr->polyh->Get_bounding_box())
 			{
@@ -2894,6 +2951,12 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 		for (int i = 0; i < ::count_bc; ++i)
 		{
 			const struct BC* bc_ptr = ::bc[i];
+#ifdef __SKIP_ACCUMULATE__
+			if (bc_ptr->polyh == 0)
+			{
+				const_cast<struct BC*>(bc_ptr)->polyh = new Domain(&domain, PHAST_Transform::GRID);
+			}
+#endif // __SKIP_ACCUMULATE__
 			ASSERT(bc_ptr->polyh && ::AfxIsValidAddress(bc_ptr->polyh, sizeof(Polyhedron)));
 
 			// store pre-translated polyh
@@ -2968,7 +3031,7 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 			{
 				if (::AfxGetMainWnd()->IsWindowVisible())
 				{
-					::AfxMessageBox("Warning: Empty ZONE_FLOW Not Implemented");
+					::AfxMessageBox(_T("Warning: Empty ZONE_FLOW Not Implemented"));
 				}
 			}
 			else
@@ -2995,6 +3058,12 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 		for (int i = 0; i < ::count_head_ic; ++i)
 		{
 			const struct Head_ic* head_ic_ptr = ::head_ic[i];
+#ifdef __SKIP_ACCUMULATE__
+			if (head_ic_ptr->polyh == 0)
+			{
+				const_cast<Head_ic*>(head_ic_ptr)->polyh = new Domain(&domain, PHAST_Transform::GRID);
+			}
+#endif // __SKIP_ACCUMULATE__
 			ASSERT(head_ic_ptr->polyh && ::AfxIsValidAddress(head_ic_ptr->polyh, sizeof(Polyhedron)));
 			if (i == 0 && dynamic_cast<Cube*>(head_ic_ptr->polyh) && defaultZone == *head_ic_ptr->polyh->Get_bounding_box())
 			{
@@ -3031,6 +3100,12 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 		for (int i = 0; i < ::count_chem_ic; ++i)
 		{
 			const struct chem_ic* chem_ic_ptr = ::chem_ic[i];
+#ifdef __SKIP_ACCUMULATE__
+			if (chem_ic_ptr->polyh == 0)
+			{
+				const_cast<struct chem_ic*>(chem_ic_ptr)->polyh = new Domain(&domain, PHAST_Transform::GRID);
+			}
+#endif // __SKIP_ACCUMULATE__
 			ASSERT(chem_ic_ptr->polyh && ::AfxIsValidAddress(chem_ic_ptr->polyh, sizeof(Polyhedron)));
 			if (i == 0 && dynamic_cast<Cube*>(chem_ic_ptr->polyh) && defaultZone == *chem_ic_ptr->polyh->Get_bounding_box())
 			{
@@ -3557,9 +3632,13 @@ void CWPhastDoc::SetUnits(const CUnits& units)
 							{
 								pWellActor->SetUnits(units);
 							}
-							if (CRiverActor *pRiverActor = CRiverActor::SafeDownCast(prop3D))
+// COMMENT: {1/7/2011 3:37:11 PM}							if (CRiverActor *pRiverActor = CRiverActor::SafeDownCast(prop3D))
+// COMMENT: {1/7/2011 3:37:11 PM}							{
+// COMMENT: {1/7/2011 3:37:11 PM}								pRiverActor->SetUnits(units);
+// COMMENT: {1/7/2011 3:37:11 PM}							}
+							if (CPointConnectorActor *pPointConnectorActor = CPointConnectorActor::SafeDownCast(prop3D))
 							{
-								pRiverActor->SetUnits(units);
+								pPointConnectorActor->SetUnits(units);
 							}
 						}
 					}
@@ -3597,6 +3676,9 @@ void CWPhastDoc::SetUnits(const CUnits& units)
 		pBar->Set(pView, pBar->GetProp3D(), this->GetUnits());
 	}
 }
+
+#include "srcinput/Polyhedron.h"
+#include "srcinput/Domain.h"
 
 void CWPhastDoc::New(const CNewModel& model)
 {
@@ -3661,6 +3743,8 @@ void CWPhastDoc::New(const CNewModel& model)
 		this,
 		"Default",
 		&domain,
+		model.m_gridKeyword.m_grid_origin,
+		model.m_gridKeyword.m_grid_angle,
 		NULL
 		);
 	CGridElt media(model.m_media);
@@ -3677,6 +3761,8 @@ void CWPhastDoc::New(const CNewModel& model)
 		this,
 		"Default",
 		&domain,
+		model.m_gridKeyword.m_grid_origin,
+		model.m_gridKeyword.m_grid_angle,
 		NULL
 		);
 	pICHeadAction->GetZoneActor()->SetData(model.m_headIC);
@@ -3689,6 +3775,8 @@ void CWPhastDoc::New(const CNewModel& model)
 		this,
 		"Default",
 		&domain,
+		model.m_gridKeyword.m_grid_origin,
+		model.m_gridKeyword.m_grid_angle,
 		NULL
 		);
 	pChemICAction->GetZoneActor()->SetData(model.m_chemIC);
@@ -4953,9 +5041,9 @@ void CWPhastDoc::Add(CRiverActor *pRiverActor, HTREEITEM hInsertAfter)
 	double *scale = this->GetScale();
 	pRiverActor->SetScale(scale[0], scale[1], scale[2]);
 
-	// set radius
-	//
-	pRiverActor->ScaleFromBounds(this->GetGridBounds());
+// COMMENT: {1/25/2011 5:08:26 PM}	// set radius
+// COMMENT: {1/25/2011 5:08:26 PM}	//
+// COMMENT: {1/25/2011 5:08:26 PM}	pRiverActor->ScaleFromBounds(this->GetGridBounds());
 
 	// set z
 	//
@@ -4972,6 +5060,7 @@ void CWPhastDoc::Add(CRiverActor *pRiverActor, HTREEITEM hInsertAfter)
 		CWPhastView *pView = (CWPhastView*) GetNextView(pos);
 		ASSERT_VALID(pView);
 		pRiverActor->SetInteractor(pView->GetInteractor());
+		pRiverActor->ScaleFromBounds(this->GetGridBounds(), pView->GetRenderer());
 		pRiverActor->SetEnabled(0);
 	}
 
@@ -5328,14 +5417,21 @@ void CWPhastDoc::SetGridKeyword(const CGridKeyword& gridKeyword)
 							if (CZoneActor *pZone = CZoneActor::SafeDownCast(prop3D))
 							{
 // COMMENT: {12/30/2008 5:39:12 PM}								pZone->SetUnits(units);
+								//{{
+								pZone->SetGridAngle(gridKeyword.m_grid_angle);
+								pZone->SetGridOrigin(gridKeyword.m_grid_origin);
+								//}}
 							}
 							if (CWellActor *pWellActor = CWellActor::SafeDownCast(prop3D))
 							{
 								pWellActor->SetGridKeyword(gridKeyword);
 							}
-							if (CRiverActor *pRiverActor = CRiverActor::SafeDownCast(prop3D))
+							if (CPointConnectorActor *pPointConnectorActor = CPointConnectorActor::SafeDownCast(prop3D))
 							{
 // COMMENT: {12/30/2008 5:39:17 PM}								pRiverActor->SetUnits(units);
+								//{{
+								pPointConnectorActor->SetGridKeyword(gridKeyword);
+								//}}
 							}
 						}
 					}
@@ -5473,6 +5569,25 @@ void CWPhastDoc::GridListener(vtkObject* caller, unsigned long eid, void* client
 				self->Execute(pGridMoveLineAction);
 			}
 			break;
+#if defined(GRID_WIDGET)
+		case CGridActor::RotateGridEvent:
+			{
+				CGridKeyword gk = *(CGridKeyword*)calldata;
+// COMMENT: {2/3/2011 4:28:14 PM}				//{{
+// COMMENT: {2/3/2011 4:28:14 PM}				gk.m_grid_angle = 90.;
+// COMMENT: {2/3/2011 4:28:14 PM}				gk.m_grid_origin[0] = 7.;
+// COMMENT: {2/3/2011 4:28:14 PM}				gk.m_grid_origin[1] = 3.;
+// COMMENT: {2/3/2011 4:28:14 PM}				gk.m_grid_origin[2] = 0.;
+// COMMENT: {2/3/2011 4:28:14 PM}				//}}
+				CGridRotateAction* pGridRotateAction = new CGridRotateAction(self, grid, gk);
+				self->Execute(pGridRotateAction);
+				//{{
+				grid->SetEnabled(0);
+// COMMENT: {2/2/2011 11:03:12 PM}				grid->SetEnabled(1);
+				//}}
+			}
+			break;
+#endif
 		}
 	}
 }
@@ -5599,6 +5714,9 @@ void CWPhastDoc::UpdateGridDomain(void)
 	//
 	this->Notify(this, WPN_DOMAIN_CHANGED, 0, 0);
 
+// COMMENT: {1/25/2011 7:04:09 PM}	// refresh screen
+// COMMENT: {1/25/2011 7:04:09 PM}	//
+// COMMENT: {1/25/2011 7:04:09 PM}	this->UpdateAllViews(0);
 	// refresh screen
 	//
 	this->UpdateAllViews(0);
@@ -5832,19 +5950,21 @@ void CWPhastDoc::SizeHandles(double size)
 							{
 								pWellActor->SetRadius(0.008 * size);
 							}
-							if (CRiverActor *pRiverActor = CRiverActor::SafeDownCast(prop3D))
+							if (CPointConnectorActor *pPointConnectorActor = CPointConnectorActor::SafeDownCast(prop3D))
 							{
-								pRiverActor->SetRadius(0.008 * size);
-							}
-							if (CDrainActor *pDrainActor = CDrainActor::SafeDownCast(prop3D))
-							{
-								pDrainActor->SetRadius(0.008 * size);
+								pPointConnectorActor->SetRadius(0.008 * size);
+								ASSERT(this->NewDrainActor != pPointConnectorActor);
 							}
 						}
 					}
 				}
 			}
 		}
+	}
+
+	if (this->NewDrainActor)
+	{
+		this->NewDrainActor->SetRadius(0.008 * size);
 	}
 }
 
@@ -6392,22 +6512,24 @@ void CWPhastDoc::OnToolsNewPrism()
 
 						p->Tidy();
 
-						// this may need to be updated when grid rotation is enabled
-						//
-						const CUnits &units = this->GetUnits();
-						CGridKeyword gridKeyword = this->GetGridKeyword();
-						double scale_h = units.map_horizontal.input_to_si / units.horizontal.input_to_si;
-						double scale_v = units.map_vertical.input_to_si / units.vertical.input_to_si;
-						PHAST_Transform t = PHAST_Transform(
-							gridKeyword.m_grid_origin[0],
-							gridKeyword.m_grid_origin[1],
-							gridKeyword.m_grid_origin[2],
-							gridKeyword.m_grid_angle,
-							scale_h,
-							scale_h,
-							scale_v
-							);
-						p->Convert_coordinates(PHAST_Transform::GRID, &t);
+// COMMENT: {1/18/2011 6:58:41 PM}#ifndef __SKIP_ACCUMULATE__
+// COMMENT: {1/18/2011 6:58:41 PM}						// this may need to be updated when grid rotation is enabled
+// COMMENT: {1/18/2011 6:58:41 PM}						//
+// COMMENT: {1/18/2011 6:58:41 PM}						const CUnits &units = this->GetUnits();
+// COMMENT: {1/18/2011 6:58:41 PM}						CGridKeyword gridKeyword = this->GetGridKeyword();
+// COMMENT: {1/18/2011 6:58:41 PM}						double scale_h = units.map_horizontal.input_to_si / units.horizontal.input_to_si;
+// COMMENT: {1/18/2011 6:58:41 PM}						double scale_v = units.map_vertical.input_to_si / units.vertical.input_to_si;
+// COMMENT: {1/18/2011 6:58:41 PM}						PHAST_Transform t = PHAST_Transform(
+// COMMENT: {1/18/2011 6:58:41 PM}							gridKeyword.m_grid_origin[0],
+// COMMENT: {1/18/2011 6:58:41 PM}							gridKeyword.m_grid_origin[1],
+// COMMENT: {1/18/2011 6:58:41 PM}							gridKeyword.m_grid_origin[2],
+// COMMENT: {1/18/2011 6:58:41 PM}							gridKeyword.m_grid_angle,
+// COMMENT: {1/18/2011 6:58:41 PM}							scale_h,
+// COMMENT: {1/18/2011 6:58:41 PM}							scale_h,
+// COMMENT: {1/18/2011 6:58:41 PM}							scale_v
+// COMMENT: {1/18/2011 6:58:41 PM}							);
+// COMMENT: {1/18/2011 6:58:41 PM}						p->Convert_coordinates(PHAST_Transform::GRID, &t);
+// COMMENT: {1/18/2011 6:58:41 PM}#endif
 					}
 					if (pInput->GetErrorCount() != 0)
 					{
@@ -6849,9 +6971,8 @@ void CWPhastDoc::BeginNewDrain()
 			double* scale = this->GetScale();
 			this->NewDrainActor->SetScale(scale[0], scale[1], scale[2]);
 
-			this->NewDrainActor->ScaleFromBounds(this->GetGridBounds());
+			this->NewDrainActor->ScaleFromBounds(this->GetGridBounds(), pView->GetRenderer());
 
-			// TODO scale by window size
 			CGrid x, y, z;
 			this->GetGrid(x, y, z);
 			z.Setup();
@@ -7038,9 +7159,9 @@ void CWPhastDoc::Add(CDrainActor *pDrainActor, HTREEITEM hInsertAfter)
 	double *scale = this->GetScale();
 	pDrainActor->SetScale(scale[0], scale[1], scale[2]);
 
-	// set radius
-	//
-	pDrainActor->ScaleFromBounds(this->GetGridBounds());
+// COMMENT: {1/25/2011 5:10:43 PM}	// set radius
+// COMMENT: {1/25/2011 5:10:43 PM}	//
+// COMMENT: {1/25/2011 5:10:43 PM}	pDrainActor->ScaleFromBounds(this->GetGridBounds());
 
 	// set z
 	//
@@ -7057,6 +7178,7 @@ void CWPhastDoc::Add(CDrainActor *pDrainActor, HTREEITEM hInsertAfter)
 		CWPhastView *pView = (CWPhastView*) GetNextView(pos);
 		ASSERT_VALID(pView);
 		pDrainActor->SetInteractor(pView->GetInteractor());
+		pDrainActor->ScaleFromBounds(this->GetGridBounds(), pView->GetRenderer());
 		pDrainActor->SetEnabled(0);
 	}
 
@@ -7152,12 +7274,24 @@ void CWPhastDoc::DrainListener(vtkObject* caller, unsigned long eid, void* clien
 				//
 				static TCHAR buffer[80];
 				const CUnits& units = self->GetUnits();
-				::_sntprintf(buffer, 80, "%g[%s] x %g[%s]",
-					self->DrainMovePointAction->GetActor()->GetCurrentPointPosition()[0] / units.horizontal.input_to_si,
-					units.horizontal.defined ? units.horizontal.input : units.horizontal.si,
-					self->DrainMovePointAction->GetActor()->GetCurrentPointPosition()[1] / units.horizontal.input_to_si,
-					units.horizontal.defined ? units.horizontal.input : units.horizontal.si
-					);
+				if (self->DrainMovePointAction->GetActor()->GetCoordinateSystem() == PHAST_Transform::MAP)
+				{
+					::_sntprintf(buffer, 80, "%g[%s] x %g[%s]",
+						self->DrainMovePointAction->GetActor()->GetCurrentPointPosition()[0],
+						units.map_horizontal.defined ? units.map_horizontal.input : units.map_horizontal.si,
+						self->DrainMovePointAction->GetActor()->GetCurrentPointPosition()[1],
+						units.map_horizontal.defined ? units.map_horizontal.input : units.horizontal.si
+						);
+				}
+				else
+				{
+					::_sntprintf(buffer, 80, "%g[%s] x %g[%s]",
+						self->DrainMovePointAction->GetActor()->GetCurrentPointPosition()[0],
+						units.horizontal.defined ? units.horizontal.input : units.horizontal.si,
+						self->DrainMovePointAction->GetActor()->GetCurrentPointPosition()[1],
+						units.horizontal.defined ? units.horizontal.input : units.horizontal.si
+						);
+				}
 				pWnd->SetWindowText(buffer);
 			}
 			break;
@@ -7312,4 +7446,21 @@ void CWPhastDoc::AddPropAssembly(vtkPropAssembly *pPropAssembly)
 			}
 		}
 	}
+}
+
+void CWPhastDoc::OnToolsRotateGrid()
+{
+// COMMENT: {2/3/2011 9:31:20 PM}	CGridKeyword gkOrig;
+// COMMENT: {2/3/2011 9:31:20 PM}	this->GetGridKeyword(gkOrig);
+// COMMENT: {2/3/2011 9:31:20 PM}
+// COMMENT: {2/3/2011 9:31:20 PM}	gkOrig.m_grid_angle += 1.;
+// COMMENT: {2/3/2011 9:31:20 PM}	this->SetGridKeyword(gkOrig);
+// COMMENT: {2/3/2011 9:31:20 PM}
+// COMMENT: {2/3/2011 9:31:20 PM}	POSITION pos = this->GetFirstViewPosition();
+// COMMENT: {2/3/2011 9:31:20 PM}	while (pos != NULL)
+// COMMENT: {2/3/2011 9:31:20 PM}	{
+// COMMENT: {2/3/2011 9:31:20 PM}		CWPhastView *pView = (CWPhastView*) GetNextView(pos);
+// COMMENT: {2/3/2011 9:31:20 PM}		ASSERT_VALID(pView);
+// COMMENT: {2/3/2011 9:31:20 PM}		pView->RedrawWindow();
+// COMMENT: {2/3/2011 9:31:20 PM}	}
 }

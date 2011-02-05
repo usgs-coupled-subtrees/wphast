@@ -9,6 +9,7 @@
 #include "WPhastDoc.h"
 #include "Protect.h"
 #include "Global.h"
+#include "GridKeyword.h"
 #include "WPhastMacros.h"
 
 #include <vtkPropAssembly.h>
@@ -250,9 +251,18 @@ Zone_budget CZoneFlowRateZoneActor::GetData(void)const
 void CZoneFlowRateZoneActor::Create(CWPhastDoc* pWPhastDoc, const Zone_budget& zone_budget)
 {
 	ASSERT(zone_budget.polyh && ::AfxIsValidAddress(zone_budget.polyh, sizeof(Polyhedron)));
+// COMMENT: {1/18/2011 5:47:50 PM}	CZoneCreateAction<CZoneFlowRateZoneActor>* pAction = new CZoneCreateAction<CZoneFlowRateZoneActor>(
+// COMMENT: {1/18/2011 5:47:50 PM}		pWPhastDoc,
+// COMMENT: {1/18/2011 5:47:50 PM}		zone_budget.polyh,
+// COMMENT: {1/18/2011 5:47:50 PM}		""
+// COMMENT: {1/18/2011 5:47:50 PM}		);
+	CGridKeyword gk;
+	pWPhastDoc->GetGridKeyword(gk);
 	CZoneCreateAction<CZoneFlowRateZoneActor>* pAction = new CZoneCreateAction<CZoneFlowRateZoneActor>(
 		pWPhastDoc,
 		zone_budget.polyh,
+		gk.m_grid_origin,
+		gk.m_grid_angle,
 		""
 		);
 	pAction->GetZoneActor()->SetData(zone_budget);

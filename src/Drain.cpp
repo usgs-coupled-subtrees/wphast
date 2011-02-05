@@ -144,12 +144,17 @@ void CDrain::Serialize(CArchive& ar)
 
 std::ostream& operator<< (std::ostream &os, const CDrain &a)
 {
+	const char* coor_name[] = {"MAP", "GRID", "NONE"};
+
 	os << "DRAIN " << a.n_user;
 	if (!a.description.empty())
 	{
 		os << " " << a.description;
 	}
 	os << "\n";
+
+	os << "\t-xy_coordinate_system" << " " << coor_name[a.coordinate_system] << "\n";
+	os << "\t-z_coordinate_system " << " " << coor_name[a.z_coordinate_system] << "\n";
 
 	std::list<CRiverPoint>::const_iterator it = a.m_listPoints.begin();
 	for(; it != a.m_listPoints.end(); ++it)

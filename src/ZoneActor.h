@@ -6,6 +6,7 @@
 #include <string>
 // #include "structs.h"
 #include "Zone.h"
+#include "Units.h"
 
 class vtkCubeSource;
 class vtkPolyDataMapper;
@@ -38,10 +39,10 @@ public:
 	void SetBounds(const CZone& rZone, const CUnits& rUnits);
 
 	virtual void SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits);
-	virtual void SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, double origin[3], double angle);
+	virtual void SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, const double origin[3], double angle);
 	virtual Polyhedron*& GetPolyhedron(void) = 0;
 
-	void SetGridOrigin(double origin[3]);
+	void SetGridOrigin(const double origin[3]);
 	void SetGridAngle(double angle);
 
 	double* GetGridOrigin(void)const;
@@ -107,10 +108,22 @@ public:
 	vtkProperty* GetProperty() { return this->CubeActor->GetProperty(); }
 	virtual double* GetBounds(); //  { return this->vtkAssembly::GetBounds(); }
 
-	PHAST_Transform& GetPhastTransform() { return this->Map2GridPhastTransform; }
+// COMMENT: {1/13/2011 11:59:41 PM}	PHAST_Transform& GetPhastTransform() { return this->Map2GridPhastTransform; }
 
 	HTREEITEM GetTreeItem(void)const;
 	HTREEITEM GetParentTreeItem(void)const;
+
+	void UpdateUserTransform(void);
+
+#ifdef __SKIP_ACCUMULATE__
+	virtual void SetScale(double _arg1, double _arg2, double _arg3);
+	virtual void SetScale (double scale[3])
+	{
+		this->SetScale(scale[0], scale[1], scale[2]);
+	}
+	virtual double* GetScale(void);
+	virtual void GetScale(double scale[3]);
+#endif
 
 protected:
 	CZoneActor(void);
@@ -170,27 +183,26 @@ protected:
 
 	bool               m_bDefault;
 
-	//{{
-	double             m_grid_origin[3];
-	double             m_grid_angle;
-	PHAST_Transform    Map2GridPhastTransform;
-	//}}
+	double             GridOrigin[3];
+	double             GridAngle;
+	double             GeometryScale[3];
+	CUnits             Units;
 
 	friend class CPrismWidget;
 
 private:
-	CZoneActor(const CZoneActor&);  // Not implemented.
+	CZoneActor(const CZoneActor&);      // Not implemented.
 	void operator=(const CZoneActor&);  // Not implemented.
 
 	void SetXLength(float x); // use SetBounds instead.
 	void SetYLength(float y); // use SetBounds instead.
 	void SetZLength(float z); // use SetBounds instead.
-	float GetXLength(void); // use SetBounds instead.
-	float GetYLength(void); // use SetBounds instead.
-	float GetZLength(void); // use SetBounds instead.
+	float GetXLength(void);   // use SetBounds instead.
+	float GetYLength(void);   // use SetBounds instead.
+	float GetZLength(void);   // use SetBounds instead.
 
 	void SetCenter(double x, double y, double z); // use SetBounds instead.
-	void SetCenter(double data[3]); // use SetBounds instead.
-	double* GetCenter(void); // use SetBounds instead.
-	void GetCenter(double data[3]); // use SetBounds instead.
+	void SetCenter(double data[3]);               // use SetBounds instead.
+	double* GetCenter(void);                      // use SetBounds instead.
+	void GetCenter(double data[3]);               // use SetBounds instead.
 };

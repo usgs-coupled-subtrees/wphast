@@ -749,8 +749,9 @@ void CGridActor::SetEnabled(int enabling)
 
 		this->Enabled = 1;
 
-		// listen to the following events
 		vtkRenderWindowInteractor *i = this->Interactor;
+#if !defined(GRID_WIDGET)			
+		// listen to the following events
 		i->AddObserver(vtkCommand::MouseMoveEvent,
 			this->EventCallbackCommand, 10);
 		i->AddObserver(vtkCommand::LeftButtonPressEvent, 
@@ -760,12 +761,16 @@ void CGridActor::SetEnabled(int enabling)
 		i->AddObserver(vtkCommand::KeyPressEvent, 
 			this->EventCallbackCommand, 10);
 		i->AddObserver(vtkCommand::CharEvent, 
-			this->EventCallbackCommand, 10);		
+			this->EventCallbackCommand, 10);
+#endif
 
 #if defined(GRID_WIDGET)
-		i->AddObserver(vtkCommand::ModifiedEvent, 
-			this->EventCallbackCommand, 10);		
-		this->SizeHandles();
+		this->BoxWidget->AddObserver(vtkCommand::InteractionEvent, 
+			this->EventCallbackCommand, 10);
+		this->BoxWidget->AddObserver(vtkCommand::EndInteractionEvent, 
+			this->EventCallbackCommand, 10);
+
+		this->CubeActor->SetVisibility(0);
 		this->CurrentRenderer->AddActor(this->CubeActor);
 		this->BoxWidget->SetProp3D(this);
 		this->BoxWidget->SetInteractor(i);
@@ -796,6 +801,7 @@ void CGridActor::SetEnabled(int enabling)
 			{
 				this->BoxWidget->SetEnabled(enabling);
 			}
+			this->BoxWidget->RemoveObserver(this->EventCallbackCommand);
 			this->Interactor->Render();
 		}
 #endif
@@ -850,13 +856,21 @@ void CGridActor::ProcessEvents(vtkObject* object, unsigned long event, void* cli
 		break;	
 
 	case vtkCommand::InteractionEvent:
+#if !defined(GRID_WIDGET)
 		ASSERT(object == self->PlaneWidget);
 		self->OnInteraction();
+#else
+		self->OnInteraction(object);
+#endif
 		break;
 
 	case vtkCommand::EndInteractionEvent:
+#if !defined(GRID_WIDGET)
 		ASSERT(object == self->PlaneWidget);
 		self->OnEndInteraction();
+#else
+		self->OnEndInteraction(object);
+#endif
 		break;
 
 	case vtkCommand::StartInteractionEvent:
@@ -1230,6 +1244,7 @@ void CGridActor::OnKeyPress()
 	}
 }
 
+#if !defined(GRID_WIDGET)
 void CGridActor::OnInteraction(void)
 {
 	ATLTRACE2(GRIDACTOR, 0, "OnInteraction\n");
@@ -1252,7 +1267,101 @@ void CGridActor::OnInteraction(void)
 	}
 	// HACK }}
 }
+#else
+void CGridActor::OnInteraction(vtkObject* object)
+{
+	ATLTRACE2(GRIDACTOR, 0, "OnInteraction\n");
 
+	if (object == this->PlaneWidget)
+	{
+		// set state
+		this->State = CGridActor::Dragging;
+
+		// HACK {{
+		extern HCURSOR Test();
+		if (s_hcur == 0)
+		{
+			s_hcur = Test();
+		}
+		if (s_hcur && (::GetAsyncKeyState(VK_CONTROL) < 0))
+		{
+			::SetCursor(s_hcur);
+		}
+		else
+		{
+			::SetCursor(::LoadCursor(NULL, IDC_ARROW));
+		}
+		// HACK }}
+	}
+	else if (object == this->BoxWidget)
+	{
+		double* origin = this->m_gridKeyword.m_grid_origin;
+		double angle = this->m_gridKeyword.m_grid_angle;
+		ATLTRACE2(GRIDACTOR, 0, "grid orig(%g, %g, %g) angle(%g)\n", origin[0], origin[1], origin[2], angle);
+
+		// determine grid midpoint
+		//
+		double midgrid[3];
+		for (int i = 0; i < 3; i++)
+		{
+			if (this->m_gridKeyword.m_grid[0].uniform && (!this->m_gridKeyword.m_grid[0].uniform_expanded))
+			{
+				midgrid[i] = (this->m_gridKeyword.m_grid[i].coord[0] + this->m_gridKeyword.m_grid[i].coord[1]) / 2.0;
+			}
+			else
+			{
+				midgrid[i] = (this->m_gridKeyword.m_grid[0].coord[0] + this->m_gridKeyword.m_grid[0].coord[this->m_gridKeyword.m_grid[0].count_coord - 1]) / 2.0;
+			}
+		}
+
+		vtkTransform *bwt = vtkTransform::New();
+		this->BoxWidget->GetTransform(bwt);
+		double* orientation = bwt->GetOrientation();
+		ATLTRACE2(GRIDACTOR, 0, "orientation(%g, %g, %g)\n", orientation[0], orientation[1], orientation[2]);
+
+		double scale_h = this->m_units.map_horizontal.input_to_si / this->m_units.horizontal.input_to_si;
+		double scale_v = this->m_units.map_vertical.input_to_si / this->m_units.vertical.input_to_si;
+
+		vtkTransform *map2grid = vtkTransform::New();
+		map2grid->Scale(scale_h, scale_h, scale_v);
+		map2grid->RotateZ(-angle);
+		map2grid->Translate(-origin[0], -origin[1], -origin[2]);
+		map2grid->Inverse();
+
+		double midmap[3];
+		vtkTransform *grid2map = map2grid;
+		grid2map->TransformPoint(midgrid, midmap);
+
+		double tr_origin[3];
+		tr_origin[0] = origin[0] - midmap[0];
+		tr_origin[1] = origin[1] - midmap[1];
+		tr_origin[2] = 0;
+
+		double tr_rot_origin[3];
+
+		vtkTransform *r = vtkTransform::New();
+		r->RotateZ(orientation[2]);
+		r->TransformPoint(tr_origin, tr_rot_origin);
+
+		double new_origin[2];
+		new_origin[0] = tr_rot_origin[0] + midmap[0];
+		new_origin[1] = tr_rot_origin[1] + midmap[1];
+
+		ATLTRACE2(GRIDACTOR, 0, "new grid_angle (%g)\n", angle + orientation[2]);
+		ATLTRACE2(GRIDACTOR, 0, "new grid_origin (%g,%g)\n", new_origin[0], new_origin[1]);
+
+		bwt->Delete();
+		r->Delete();
+		map2grid->Delete();
+	}
+	else
+	{
+		ASSERT(FALSE);
+	}
+}
+#endif
+
+#if !defined(GRID_WIDGET)
 void CGridActor::OnEndInteraction(void)
 {
 	if (0 <= this->AxisIndex && this->AxisIndex < 3)
@@ -1272,7 +1381,8 @@ void CGridActor::OnEndInteraction(void)
 			// interator no longer valid
 			struct GridLineMoveMemento memento;
 			memento.Uniform = this->m_gridKeyword.m_grid[this->AxisIndex].uniform;
-			double value = this->PlaneWidget->GetOrigin()[this->AxisIndex] / this->GetScale()[this->AxisIndex];
+			double input_to_si = (this->AxisIndex == 2) ? this->m_units.vertical.input_to_si : this->m_units.horizontal.input_to_si;
+			double value = this->PlaneWidget->GetOrigin()[this->AxisIndex] / (this->GetScale()[this->AxisIndex] * input_to_si);
 			this->PlaneIndex = this->InsertLine(this->AxisIndex, value);
 			if (bMoving)
 			{
@@ -1342,6 +1452,175 @@ void CGridActor::OnEndInteraction(void)
 	this->PlaneIndex = -1;
 	::SetCursor(::LoadCursor(NULL, IDC_ARROW));
 }
+#else
+void CGridActor::OnEndInteraction(vtkObject* object)
+{
+	if (object == this->PlaneWidget)
+	{
+		if (0 <= this->AxisIndex && this->AxisIndex < 3)
+		{
+			// if Ctrl is pressed copy line otherwise move line
+			//
+			bool bMoving = !(::GetAsyncKeyState(VK_CONTROL) < 0);
+
+			// lookup current point and convert to grid index
+			//
+			std::map<float, int>::iterator setIter = this->ValueToIndex[this->AxisIndex].find(this->CurrentPoint[this->AxisIndex]);
+			if (setIter != this->ValueToIndex[this->AxisIndex].end())
+			{
+				int originalPlaneIndex = setIter->second;
+				// be careful here the iterator setIter should not be used below here
+				// because DeleteLine/InsertLine refill ValueToIndex making the
+				// interator no longer valid
+				struct GridLineMoveMemento memento;
+				memento.Uniform = this->m_gridKeyword.m_grid[this->AxisIndex].uniform;
+				double input_to_si = (this->AxisIndex == 2) ? this->m_units.vertical.input_to_si : this->m_units.horizontal.input_to_si;
+				double value = this->PlaneWidget->GetOrigin()[this->AxisIndex] / (this->GetScale()[this->AxisIndex] * input_to_si);
+
+				this->PlaneIndex = this->InsertLine(this->AxisIndex, value);
+				if (bMoving)
+				{
+					std::map<float, int>::iterator setIter = this->ValueToIndex[this->AxisIndex].find(this->CurrentPoint[this->AxisIndex]);
+					if (setIter != this->ValueToIndex[this->AxisIndex].end())
+					{
+						originalPlaneIndex = setIter->second;
+						//{{ BUG
+						if (!this->DeleteLine(this->AxisIndex, originalPlaneIndex))
+						{
+							ASSERT(this->PlaneIndex == -1); // no-op
+							this->State = CGridActor::Start;
+							this->AxisIndex = -1;
+							this->PlaneIndex = -1;
+							::SetCursor(::LoadCursor(NULL, IDC_ARROW));
+							return;
+						}
+						//}}
+					}
+				}
+				if (this->PlaneIndex != -1)
+				{
+					if (bMoving)
+					{
+						// the memento is the only information listeners
+						// need in order to undo/redo
+						memento.AxisIndex          = this->AxisIndex;
+						memento.OriginalPlaneIndex = originalPlaneIndex;
+						memento.NewPlaneIndex      = this->PlaneIndex;
+						memento.OriginalCoord      = this->m_dDeletedValue;
+						memento.NewCoord           = value;
+
+						// notify listeners
+						this->InvokeEvent(CGridActor::MoveGridLineEvent, &memento);
+					}
+					else
+					{
+						// at this point the variables:
+						//     AxisIndex
+						//     PlaneIndex
+						// should be valid for the listeners use
+
+						// notify listeners
+						this->InvokeEvent(CGridActor::InsertGridLineEvent, &value);
+					}
+				}
+				else
+				{
+					// PlaneIndex will be -1 if the moved line lands exactly
+					// on an existing line.  Therefore this just becomes a deleted line.
+					this->PlaneIndex = originalPlaneIndex;
+
+					// notify listeners
+					this->InvokeEvent(CGridActor::DeleteGridLineEvent, &this->m_dDeletedValue);
+				}
+			}
+			else
+			{
+				ASSERT(FALSE);
+			}
+		}
+
+		// reset state
+		//
+		this->State = CGridActor::Start;
+		this->AxisIndex = -1;
+		this->PlaneIndex = -1;
+		::SetCursor(::LoadCursor(NULL, IDC_ARROW));
+
+	}
+	else if (object == this->BoxWidget)
+	{
+		this->RotatedGridKeyword = this->m_gridKeyword;
+
+		double* origin = this->m_gridKeyword.m_grid_origin;
+		double angle = this->m_gridKeyword.m_grid_angle;
+		ATLTRACE2(GRIDACTOR, 0, "grid orig(%g, %g, %g) angle(%g)\n", origin[0], origin[1], origin[2], angle);
+
+		// determine grid midpoint
+		//
+		double midgrid[3];
+		for (int i = 0; i < 3; i++)
+		{
+			if (this->m_gridKeyword.m_grid[0].uniform && (!this->m_gridKeyword.m_grid[0].uniform_expanded))
+			{
+				midgrid[i] = (this->m_gridKeyword.m_grid[i].coord[0] + this->m_gridKeyword.m_grid[i].coord[1]) / 2.0;
+			}
+			else
+			{
+				midgrid[i] = (this->m_gridKeyword.m_grid[0].coord[0] + this->m_gridKeyword.m_grid[0].coord[this->m_gridKeyword.m_grid[0].count_coord - 1]) / 2.0;
+			}
+		}
+
+		vtkTransform *bwt = vtkTransform::New();
+		this->BoxWidget->GetTransform(bwt);
+		double* orientation = bwt->GetOrientation();
+		ATLTRACE2(GRIDACTOR, 0, "orientation(%g, %g, %g)\n", orientation[0], orientation[1], orientation[2]);
+
+		double scale_h = this->m_units.map_horizontal.input_to_si / this->m_units.horizontal.input_to_si;
+		double scale_v = this->m_units.map_vertical.input_to_si / this->m_units.vertical.input_to_si;
+
+		vtkTransform *map2grid = vtkTransform::New();
+		map2grid->Scale(scale_h, scale_h, scale_v);
+		map2grid->RotateZ(-angle);
+		map2grid->Translate(-origin[0], -origin[1], -origin[2]);
+		map2grid->Inverse();
+
+		double midmap[3];
+		vtkTransform *grid2map = map2grid;
+		grid2map->TransformPoint(midgrid, midmap);
+
+		double tr_origin[3];
+		tr_origin[0] = origin[0] - midmap[0];
+		tr_origin[1] = origin[1] - midmap[1];
+		tr_origin[2] = 0;
+
+		double tr_rot_origin[3];
+
+		vtkTransform *r = vtkTransform::New();
+		r->RotateZ(orientation[2]);
+		r->TransformPoint(tr_origin, tr_rot_origin);
+
+		double new_origin[2];
+		new_origin[0] = tr_rot_origin[0] + midmap[0];
+		new_origin[1] = tr_rot_origin[1] + midmap[1];
+
+		ATLTRACE2(GRIDACTOR, 0, "new grid_angle (%g)\n", angle + orientation[2]);
+		ATLTRACE2(GRIDACTOR, 0, "new grid_origin (%g,%g)\n", new_origin[0], new_origin[1]);
+		this->RotatedGridKeyword.m_grid_angle = angle + orientation[2];
+		this->RotatedGridKeyword.m_grid_origin[0] = new_origin[0];
+		this->RotatedGridKeyword.m_grid_origin[1] = new_origin[1];
+
+		bwt->Delete();
+		r->Delete();
+		map2grid->Delete();
+
+		this->InvokeEvent(CGridActor::RotateGridEvent, &this->RotatedGridKeyword);
+	}
+	else
+	{
+		ASSERT(FALSE);
+	}
+}
+#endif
 
 #if defined(WIN32)
 BOOL CGridActor::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
@@ -1626,57 +1905,57 @@ void CGridActor::SizeHandles()
 		this->CurrentRenderer = this->Interactor->FindPokedRenderer(X, Y);
 	}
 
-	//{{
-	this->CurrentRenderer->SetWorldPoint(this->Center[0], this->Center[1], this->Center[2], 1.0);
-	this->CurrentRenderer->WorldToDisplay();
-	double pt[4];
-	this->CurrentRenderer->GetDisplayPoint(pt);
-	char buffer[80];
-	::sprintf(buffer, "GetDisplayPoint = %g, %g, %g\n", pt[0], pt[1], pt[2]);
-	::OutputDebugString(buffer);
-
-	pt[0] -= 10;
-	pt[1] -= 10;
-	this->CurrentRenderer->SetDisplayPoint(pt[0], pt[1], pt[2]);
-
-	vtkCamera* camera = this->CurrentRenderer->GetActiveCamera();
-	double *vu = camera->GetViewUp();
-	::sprintf(buffer, "GetViewUp = %g, %g, %g\n", vu[0], vu[1], vu[2]);
-	if (vu[0] > .9)
-	{
-		camera->SetViewUp(1, 0, 0);
-	}
-	::OutputDebugString(buffer);
-
-	//{{
-	double zaxis[3];
-	zaxis[0] = 0.0;
-	zaxis[1] = 0.0;
-	zaxis[2] = 1.0;
-	//}}
-
-	double worldPt[4];
-	this->CurrentRenderer->DisplayToWorld();
-	this->CurrentRenderer->GetWorldPoint(worldPt);
-	if (worldPt[3] != 0)
-	{
-		worldPt[0] /= worldPt[3];
-		worldPt[1] /= worldPt[3];
-		worldPt[2] /= worldPt[3];
-		worldPt[3] = 1.0;
-	}
-	this->CubeSource->SetCenter(worldPt[0], worldPt[1], this->Center[2]);
-	//}}
-
-	double radius = CGlobal::ComputeRadius(this->CurrentRenderer);
-
-	//for(int i=0; i<7; i++)
-	{
-		double length = 2 * CGlobal::ComputeRadius(this->CurrentRenderer) * 0.004;
-		this->CubeSource->SetXLength(length);
-		this->CubeSource->SetYLength(length);
-		this->CubeSource->SetZLength(length);
-// COMMENT: {7/22/2009 10:03:07 PM}		this->HandleGeometry[i]->SetRadius(radius);
-	}
+// COMMENT: {1/26/2011 5:37:53 PM}	//{{
+// COMMENT: {1/26/2011 5:37:53 PM}	this->CurrentRenderer->SetWorldPoint(this->Center[0], this->Center[1], this->Center[2], 1.0);
+// COMMENT: {1/26/2011 5:37:53 PM}	this->CurrentRenderer->WorldToDisplay();
+// COMMENT: {1/26/2011 5:37:53 PM}	double pt[4];
+// COMMENT: {1/26/2011 5:37:53 PM}	this->CurrentRenderer->GetDisplayPoint(pt);
+// COMMENT: {1/26/2011 5:37:53 PM}	char buffer[80];
+// COMMENT: {1/26/2011 5:37:53 PM}	::sprintf(buffer, "GetDisplayPoint = %g, %g, %g\n", pt[0], pt[1], pt[2]);
+// COMMENT: {1/26/2011 5:37:53 PM}	::OutputDebugString(buffer);
+// COMMENT: {1/26/2011 5:37:53 PM}
+// COMMENT: {1/26/2011 5:37:53 PM}	pt[0] -= 10;
+// COMMENT: {1/26/2011 5:37:53 PM}	pt[1] -= 10;
+// COMMENT: {1/26/2011 5:37:53 PM}	this->CurrentRenderer->SetDisplayPoint(pt[0], pt[1], pt[2]);
+// COMMENT: {1/26/2011 5:37:53 PM}
+// COMMENT: {1/26/2011 5:37:53 PM}	vtkCamera* camera = this->CurrentRenderer->GetActiveCamera();
+// COMMENT: {1/26/2011 5:37:53 PM}	double *vu = camera->GetViewUp();
+// COMMENT: {1/26/2011 5:37:53 PM}	::sprintf(buffer, "GetViewUp = %g, %g, %g\n", vu[0], vu[1], vu[2]);
+// COMMENT: {1/26/2011 5:37:53 PM}	if (vu[0] > .9)
+// COMMENT: {1/26/2011 5:37:53 PM}	{
+// COMMENT: {1/26/2011 5:37:53 PM}		camera->SetViewUp(1, 0, 0);
+// COMMENT: {1/26/2011 5:37:53 PM}	}
+// COMMENT: {1/26/2011 5:37:53 PM}	::OutputDebugString(buffer);
+// COMMENT: {1/26/2011 5:37:53 PM}
+// COMMENT: {1/26/2011 5:37:53 PM}	//{{
+// COMMENT: {1/26/2011 5:37:53 PM}	double zaxis[3];
+// COMMENT: {1/26/2011 5:37:53 PM}	zaxis[0] = 0.0;
+// COMMENT: {1/26/2011 5:37:53 PM}	zaxis[1] = 0.0;
+// COMMENT: {1/26/2011 5:37:53 PM}	zaxis[2] = 1.0;
+// COMMENT: {1/26/2011 5:37:53 PM}	//}}
+// COMMENT: {1/26/2011 5:37:53 PM}
+// COMMENT: {1/26/2011 5:37:53 PM}	double worldPt[4];
+// COMMENT: {1/26/2011 5:37:53 PM}	this->CurrentRenderer->DisplayToWorld();
+// COMMENT: {1/26/2011 5:37:53 PM}	this->CurrentRenderer->GetWorldPoint(worldPt);
+// COMMENT: {1/26/2011 5:37:53 PM}	if (worldPt[3] != 0)
+// COMMENT: {1/26/2011 5:37:53 PM}	{
+// COMMENT: {1/26/2011 5:37:53 PM}		worldPt[0] /= worldPt[3];
+// COMMENT: {1/26/2011 5:37:53 PM}		worldPt[1] /= worldPt[3];
+// COMMENT: {1/26/2011 5:37:53 PM}		worldPt[2] /= worldPt[3];
+// COMMENT: {1/26/2011 5:37:53 PM}		worldPt[3] = 1.0;
+// COMMENT: {1/26/2011 5:37:53 PM}	}
+// COMMENT: {1/26/2011 5:37:53 PM}	this->CubeSource->SetCenter(worldPt[0], worldPt[1], this->Center[2]);
+// COMMENT: {1/26/2011 5:37:53 PM}	//}}
+// COMMENT: {1/26/2011 5:37:53 PM}
+// COMMENT: {1/26/2011 5:37:53 PM}	double radius = CGlobal::ComputeRadius(this->CurrentRenderer);
+// COMMENT: {1/26/2011 5:37:53 PM}
+// COMMENT: {1/26/2011 5:37:53 PM}	//for(int i=0; i<7; i++)
+// COMMENT: {1/26/2011 5:37:53 PM}	{
+// COMMENT: {1/26/2011 5:37:53 PM}		double length = 2 * CGlobal::ComputeRadius(this->CurrentRenderer) * 0.004;
+// COMMENT: {1/26/2011 5:37:53 PM}		this->CubeSource->SetXLength(length);
+// COMMENT: {1/26/2011 5:37:53 PM}		this->CubeSource->SetYLength(length);
+// COMMENT: {1/26/2011 5:37:53 PM}		this->CubeSource->SetZLength(length);
+// COMMENT: {1/26/2011 5:37:53 PM}// COMMENT: {7/22/2009 10:03:07 PM}		this->HandleGeometry[i]->SetRadius(radius);
+// COMMENT: {1/26/2011 5:37:53 PM}	}
 }
 #endif

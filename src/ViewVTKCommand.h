@@ -42,7 +42,7 @@ protected:
 
 	CWPhastView* m_pView;
 	double m_WorldPointXYPlane[4];
-	double m_WorldPointMinZPlane[4];
+// COMMENT: {1/24/2011 2:40:57 PM}	double m_WorldPointMinZPlane[4];
 	double m_BeginPoint[4];
 
 	CAction* m_pAction;
@@ -50,4 +50,8 @@ protected:
 	double               FixedPlanePoint[3];
 	int                  FixedPlane;  // [0-5]
 	int                  FixedCoord;  // [0-2]
+
+	vtkTransform        *Transform;
+	double               GridPoint[3];
+	double               MapPoint[3];
 };

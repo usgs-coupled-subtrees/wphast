@@ -119,6 +119,9 @@ BEGIN_MESSAGE_MAP(CWPhastView, CView)
 // COMMENT: {8/29/2005 6:46:54 PM}	ON_COMMAND(ID_TOOLS_MODIFYGRID, OnToolsModifyGrid)
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_SELECTOBJECT, OnUpdateToolsSelectObject)
 	ON_COMMAND(ID_TOOLS_SELECTOBJECT, OnToolsSelectObject)
+	ON_COMMAND(ID_SETGRID_MODE, &CWPhastView::OnSetGridMode)
+	ON_COMMAND(ID_SETMAP_MODE, &CWPhastView::OnSetMapMode)
+	ON_COMMAND(ID_CANCEL_MODE, &CWPhastView::OnCancelMode)
 END_MESSAGE_MAP()
 
 // CWPhastView construction/destruction
@@ -159,7 +162,7 @@ CWPhastView::CWPhastView()
 
 	// Create the BoxWidget
 	//
-	this->BoxWidget = this->BoxWidget = vtkBoxWidgetEx::New();
+	this->BoxWidget = vtkBoxWidgetEx::New();
 	this->BoxWidget->SetPlaceFactor(1.0);
 	this->BoxWidget->AddObserver(vtkCommand::InteractionEvent, this->ViewVTKCommand);
 	this->BoxWidget->AddObserver(vtkCommand::EndInteractionEvent, this->ViewVTKCommand);
@@ -1196,6 +1199,10 @@ void CWPhastView::Select(vtkProp *pProp)
 	if (!this->MFCWindow) return;
 	//}}
 
+	//{{ {12/16/2010 8:12:18 PM}
+	this->GetInteractor()->Render();
+	//}} {12/16/2010 8:12:18 PM}
+
 	// hide zone widget
 	//
 	if (this->BoxWidget) this->BoxWidget->Off();
@@ -1339,31 +1346,146 @@ void CWPhastView::Select(vtkProp *pProp)
 
 					if (c->Get_user_coordinate_system() == PHAST_Transform::MAP)
 					{
-						double *o = pZoneActor->GetGridOrigin();
-						this->BoxWidget->PlaceWidget(
-							(z->x1 - o[0]) * units.map_horizontal.input_to_si * scale[0],
-							(z->x2 - o[0]) * units.map_horizontal.input_to_si * scale[0],
-							(z->y1 - o[1]) * units.map_horizontal.input_to_si * scale[1],
-							(z->y2 - o[1]) * units.map_horizontal.input_to_si * scale[1],
-							(z->z1 - o[2]) * units.map_vertical.input_to_si   * scale[2],
-							(z->z2 - o[2]) * units.map_vertical.input_to_si   * scale[2]
-							);
+// COMMENT: {1/18/2011 6:59:19 PM}#ifndef __SKIP_ACCUMULATE__
+// COMMENT: {1/18/2011 6:59:19 PM}						double *o = pZoneActor->GetGridOrigin();
+// COMMENT: {1/18/2011 6:59:19 PM}						this->BoxWidget->PlaceWidget(
+// COMMENT: {1/18/2011 6:59:19 PM}							(z->x1 - o[0]) * units.map_horizontal.input_to_si * scale[0],
+// COMMENT: {1/18/2011 6:59:19 PM}							(z->x2 - o[0]) * units.map_horizontal.input_to_si * scale[0],
+// COMMENT: {1/18/2011 6:59:19 PM}							(z->y1 - o[1]) * units.map_horizontal.input_to_si * scale[1],
+// COMMENT: {1/18/2011 6:59:19 PM}							(z->y2 - o[1]) * units.map_horizontal.input_to_si * scale[1],
+// COMMENT: {1/18/2011 6:59:19 PM}							(z->z1 - o[2]) * units.map_vertical.input_to_si   * scale[2],
+// COMMENT: {1/18/2011 6:59:19 PM}							(z->z2 - o[2]) * units.map_vertical.input_to_si   * scale[2]
+// COMMENT: {1/18/2011 6:59:19 PM}							);
+// COMMENT: {1/18/2011 6:59:19 PM}
+// COMMENT: {1/18/2011 6:59:19 PM}						if (vtkBoxWidgetEx *widget = vtkBoxWidgetEx::SafeDownCast(this->BoxWidget))
+// COMMENT: {1/18/2011 6:59:19 PM}						{
+// COMMENT: {1/18/2011 6:59:19 PM}							widget->SetOrientation(0, 0, -pZoneActor->GetGridAngle());
+// COMMENT: {1/18/2011 6:59:19 PM}						}
+// COMMENT: {1/18/2011 6:59:19 PM}#else
+						double *origin = pZoneActor->GetGridOrigin();
+						double angle = pZoneActor->GetGridAngle();
+						double *scale = pZoneActor->GetScale();
 
-						if (vtkBoxWidgetEx *widget = vtkBoxWidgetEx::SafeDownCast(this->BoxWidget))
+						if (Cube *c = dynamic_cast<Cube*>(pZoneActor->GetPolyhedron()))
 						{
-							widget->SetOrientation(0, 0, -pZoneActor->GetGridAngle());
+							zone *z = c->Get_bounding_box();
+// COMMENT: {12/16/2010 8:49:18 PM}							this->BoxWidget->PlaceWidget(
+// COMMENT: {12/16/2010 8:49:18 PM}								z->x1,
+// COMMENT: {12/16/2010 8:49:18 PM}								z->x2,
+// COMMENT: {12/16/2010 8:49:18 PM}								z->y1,
+// COMMENT: {12/16/2010 8:49:18 PM}								z->y2,
+// COMMENT: {12/16/2010 8:49:18 PM}								z->z1,
+// COMMENT: {12/16/2010 8:49:18 PM}								z->z2
+// COMMENT: {12/16/2010 8:49:18 PM}								);
+
+// COMMENT: {1/5/2011 10:39:33 PM}							this->BoxWidget->PlaceWidget(
+// COMMENT: {1/5/2011 10:39:33 PM}								z->x1 * units.map_horizontal.input_to_si,
+// COMMENT: {1/5/2011 10:39:33 PM}								z->x2 * units.map_horizontal.input_to_si,
+// COMMENT: {1/5/2011 10:39:33 PM}								z->y1 * units.map_horizontal.input_to_si,
+// COMMENT: {1/5/2011 10:39:33 PM}								z->y2 * units.map_horizontal.input_to_si,
+// COMMENT: {1/5/2011 10:39:33 PM}								z->z1 * units.map_vertical.input_to_si,
+// COMMENT: {1/5/2011 10:39:33 PM}								z->z2 * units.map_vertical.input_to_si
+// COMMENT: {1/5/2011 10:39:33 PM}								);
+
+							//{{ {1/5/2011 10:40:14 PM}
+							this->BoxWidget->PlaceWidget(
+								z->x1,
+								z->x2,
+								z->y1,
+								z->y2,
+								z->z1,
+								z->z2
+								);
+							//}} {1/5/2011 10:40:14 PM}
 						}
+
+// COMMENT: {1/18/2011 9:23:27 PM}						//{{
+// COMMENT: {1/18/2011 9:23:27 PM}						if (vtkBoxWidgetEx *boxw = vtkBoxWidgetEx::SafeDownCast(this->BoxWidget))
+// COMMENT: {1/18/2011 9:23:27 PM}						{
+// COMMENT: {1/18/2011 9:23:27 PM}							int i;
+// COMMENT: {1/18/2011 9:23:27 PM}							TRACE("\nbefore trans\n");
+// COMMENT: {1/18/2011 9:23:27 PM}							for (i = 0; i < 8; ++i)
+// COMMENT: {1/18/2011 9:23:27 PM}							{
+// COMMENT: {1/18/2011 9:23:27 PM}								double *d = boxw->GetPoints()->GetPoint(i);
+// COMMENT: {1/18/2011 9:23:27 PM}								TRACE("  Point(%d) = %g, %g, %g\n", i, d[0], d[1], d[2]);
+// COMMENT: {1/18/2011 9:23:27 PM}							}
+// COMMENT: {1/18/2011 9:23:27 PM}						}
+// COMMENT: {1/18/2011 9:23:27 PM}						//}}
+
+// COMMENT: {1/18/2011 9:22:42 PM}						vtkTransform *user = vtkTransform::New();
+// COMMENT: {1/18/2011 9:22:42 PM}// COMMENT: {1/5/2011 10:21:34 PM}						user->Scale(scale[0], scale[1], scale[2]); // TODO: need unit scale factor
+// COMMENT: {1/18/2011 9:22:42 PM}// COMMENT: {1/5/2011 10:21:34 PM}// COMMENT: {12/16/2010 8:48:00 PM}						user->Scale(scale[0]*units.map_horizontal.input_to_si, scale[1]*units.map_horizontal.input_to_si, scale[2]*units.map_vertical.input_to_si);
+// COMMENT: {1/18/2011 9:22:42 PM}// COMMENT: {1/5/2011 10:21:34 PM}						user->RotateZ(-angle);
+// COMMENT: {1/18/2011 9:22:42 PM}// COMMENT: {1/5/2011 10:21:34 PM}						user->Translate(-origin[0], -origin[1], -origin[2]);
+// COMMENT: {1/18/2011 9:22:42 PM}// COMMENT: {1/5/2011 10:21:34 PM}						this->BoxWidget->SetTransform(user);
+
+						//{{ {1/5/2011 10:20:05 PM}
+						if (vtkTransform *t = vtkTransform::SafeDownCast(pZoneActor->GetUserTransform()))
+						{
+							this->BoxWidget->SetTransform(t);
+						}
+						else
+						{
+							ASSERT(FALSE);
+						}
+						//}} {1/5/2011 10:20:05 PM}
+
+// COMMENT: {1/18/2011 9:23:13 PM}						//{{
+// COMMENT: {1/18/2011 9:23:13 PM}						if (vtkBoxWidgetEx *boxw = vtkBoxWidgetEx::SafeDownCast(this->BoxWidget))
+// COMMENT: {1/18/2011 9:23:13 PM}						{
+// COMMENT: {1/18/2011 9:23:13 PM}							int i;
+// COMMENT: {1/18/2011 9:23:13 PM}							TRACE("\nafter trans\n");
+// COMMENT: {1/18/2011 9:23:13 PM}							for (i = 0; i < 8; ++i)
+// COMMENT: {1/18/2011 9:23:13 PM}							{
+// COMMENT: {1/18/2011 9:23:13 PM}								double *d = boxw->GetPoints()->GetPoint(i);
+// COMMENT: {1/18/2011 9:23:13 PM}								TRACE("  Point(%d) = %g, %g, %g\n", i, d[0], d[1], d[2]);
+// COMMENT: {1/18/2011 9:23:13 PM}							}
+// COMMENT: {1/18/2011 9:23:13 PM}						}
+// COMMENT: {1/18/2011 9:23:13 PM}						//}}
+
+// COMMENT: {1/18/2011 9:23:01 PM}						//{{
+// COMMENT: {1/18/2011 9:23:01 PM}						double m[16];
+// COMMENT: {1/18/2011 9:23:01 PM}						vtkMatrix4x4 *m4x4 = user->GetMatrix();
+// COMMENT: {1/18/2011 9:23:01 PM}						vtkMatrix4x4::DeepCopy(m, m4x4);
+// COMMENT: {1/18/2011 9:23:01 PM}
+// COMMENT: {1/18/2011 9:23:01 PM}						TRACE("\nSelect vtkTransform Matrix:\n");
+// COMMENT: {1/18/2011 9:23:01 PM}						TRACE("%g %g %g %g\n", m[0],  m[1],  m[2],  m[3]);
+// COMMENT: {1/18/2011 9:23:01 PM}						TRACE("%g %g %g %g\n", m[4],  m[5],  m[6],  m[7]);
+// COMMENT: {1/18/2011 9:23:01 PM}						TRACE("%g %g %g %g\n", m[8],  m[9],  m[10], m[11]);
+// COMMENT: {1/18/2011 9:23:01 PM}						TRACE("%g %g %g %g\n", m[12], m[13], m[14], m[15]);
+// COMMENT: {1/18/2011 9:23:01 PM}						//}}
+
+// COMMENT: {1/18/2011 9:22:55 PM}						user->Delete();
+// COMMENT: {1/18/2011 6:59:07 PM}#endif // __SKIP_ACCUMULATE__
 					}
 					else
 					{
+						//{{ {1/5/2011 11:45:41 PM}
+// COMMENT: {1/5/2011 11:46:06 PM}						this->BoxWidget->PlaceWidget(
+// COMMENT: {1/5/2011 11:46:06 PM}							z->x1 * units.horizontal.input_to_si * scale[0],
+// COMMENT: {1/5/2011 11:46:06 PM}							z->x2 * units.horizontal.input_to_si * scale[0],
+// COMMENT: {1/5/2011 11:46:06 PM}							z->y1 * units.horizontal.input_to_si * scale[1],
+// COMMENT: {1/5/2011 11:46:06 PM}							z->y2 * units.horizontal.input_to_si * scale[1],
+// COMMENT: {1/5/2011 11:46:06 PM}							z->z1 * units.vertical.input_to_si   * scale[2],
+// COMMENT: {1/5/2011 11:46:06 PM}							z->z2 * units.vertical.input_to_si   * scale[2]
+// COMMENT: {1/5/2011 11:46:06 PM}							);
 						this->BoxWidget->PlaceWidget(
-							z->x1 * units.horizontal.input_to_si * scale[0],
-							z->x2 * units.horizontal.input_to_si * scale[0],
-							z->y1 * units.horizontal.input_to_si * scale[1],
-							z->y2 * units.horizontal.input_to_si * scale[1],
-							z->z1 * units.vertical.input_to_si   * scale[2],
-							z->z2 * units.vertical.input_to_si   * scale[2]
+							z->x1,
+							z->x2,
+							z->y1,
+							z->y2,
+							z->z1,
+							z->z2
 							);
+						if (vtkTransform *t = vtkTransform::SafeDownCast(pZoneActor->GetUserTransform()))
+						{
+							this->BoxWidget->SetTransform(t);
+						}
+						else
+						{
+							ASSERT(FALSE);
+						}
+						//}} {1/5/2011 11:45:41 PM}
 					}
 					this->GetInteractor()->Render();
 					this->BoxWidget->SetInteractor(this->GetInteractor());
@@ -1390,16 +1512,22 @@ void CWPhastView::Select(vtkProp *pProp)
 			this->PointWidget->PlaceWidget();
 			ASSERT(pWellActor == this->PointWidget->GetProp3D());
 			this->PointWidget->TranslationModeOn();
-#if 9991 // well w/ grid rotation
+
 			if (pWellActor->GetWell().xy_coordinate_system_user == PHAST_Transform::MAP)
 			{
-				this->PointWidget->SetOrientation(0, 0, -(this->GetDocument()->GetGridKeyword().m_grid_angle));
+				this->CoordinateMode = CWPhastView::MapMode;
+				CGridKeyword gridKeyword;
+				this->GetDocument()->GetGridKeyword(gridKeyword);
+				this->Cursor3DActor->SetOrientation(0, 0, -gridKeyword.m_grid_angle);
+				this->PointWidget->SetOrientation(0, 0, -gridKeyword.m_grid_angle);
 			}
 			else
 			{
+				this->CoordinateMode = CWPhastView::GridMode;
+				this->Cursor3DActor->SetOrientation(0, 0, 0);
 				this->PointWidget->SetOrientation(0, 0, 0);
 			}
-#endif // 9991 well w/ grid rotation
+
 			this->PointWidget->SetInteractor(this->GetInteractor());
 			this->PointWidget->On();
 		}
@@ -1754,6 +1882,7 @@ void CWPhastView::Update(IObserver* pSender, LPARAM lHint, CObject* pHint, vtkOb
 					{
 						if (c->Get_user_coordinate_system() == PHAST_Transform::MAP)
 						{
+#ifndef __SKIP_ACCUMULATE__
 							double *o = pZoneActor->GetGridOrigin();
 							this->BoxWidget->PlaceWidget(
 								(z->x1 - o[0]) * units.map_horizontal.input_to_si * scale[0],
@@ -1768,6 +1897,41 @@ void CWPhastView::Update(IObserver* pSender, LPARAM lHint, CObject* pHint, vtkOb
 							{
 								widget->SetOrientation(0, 0, -pZoneActor->GetGridAngle());
 							}
+#else // __SKIP_ACCUMULATE__
+						double *o = pZoneActor->GetGridOrigin();
+						double angle = pZoneActor->GetGridAngle();
+
+						if (Cube *c = dynamic_cast<Cube*>(pZoneActor->GetPolyhedron()))
+						{
+// COMMENT: {1/18/2011 7:11:35 PM}							this->BoxWidget->PlaceWidget(
+// COMMENT: {1/18/2011 7:11:35 PM}								6,
+// COMMENT: {1/18/2011 7:11:35 PM}								8,
+// COMMENT: {1/18/2011 7:11:35 PM}								6,
+// COMMENT: {1/18/2011 7:11:35 PM}								7,
+// COMMENT: {1/18/2011 7:11:35 PM}								0,
+// COMMENT: {1/18/2011 7:11:35 PM}								1
+// COMMENT: {1/18/2011 7:11:35 PM}								);
+
+							//{{ {1/18/2011 7:11:35 PM}
+							this->BoxWidget->PlaceWidget(
+								z->x1,
+								z->x2,
+								z->y1,
+								z->y2,
+								z->z1,
+								z->z2
+								);
+							//}} {1/18/2011 7:11:35 PM}
+
+						}
+
+						vtkTransform *user = vtkTransform::New();
+						user->Scale(pZoneActor->GetScale());
+						user->RotateZ(-angle);
+						user->Translate(-o[0], -o[1], -o[2]);
+						this->BoxWidget->SetTransform(user);
+						user->Delete();
+#endif // __SKIP_ACCUMULATE__
 						}
 						else
 						{
@@ -1795,10 +1959,10 @@ void CWPhastView::Update(IObserver* pSender, LPARAM lHint, CObject* pHint, vtkOb
 		if (this->CurrentProp) this->Select(this->CurrentProp);
 		//}} {5/8/2006 4:00:51 PM}
 
-// COMMENT: {5/8/2006 4:35:15 PM}		//{{ {4/25/2006 4:41:58 PM}
-// COMMENT: {5/8/2006 4:35:15 PM}		this->ResetCamera();
-		this->RedrawWindow();
-// COMMENT: {5/8/2006 4:35:15 PM}		//}} {4/25/2006 4:41:58 PM}
+// COMMENT: {1/25/2011 7:12:24 PM}// COMMENT: {5/8/2006 4:35:15 PM}		//{{ {4/25/2006 4:41:58 PM}
+// COMMENT: {1/25/2011 7:12:24 PM}// COMMENT: {5/8/2006 4:35:15 PM}		this->ResetCamera();
+// COMMENT: {1/25/2011 7:12:24 PM}		this->RedrawWindow();
+// COMMENT: {1/25/2011 7:12:24 PM}// COMMENT: {5/8/2006 4:35:15 PM}		//}} {4/25/2006 4:41:58 PM}
 		break;
 	default:
 		::OutputDebugString("View->Update default\n");
@@ -1863,7 +2027,7 @@ void CWPhastView::StartNewRiver(void)
 		double* scale = this->GetDocument()->GetScale();
 		this->RiverActor->SetScale(scale[0], scale[1], scale[2]);
 
-		this->RiverActor->ScaleFromBounds(this->GetDocument()->GetGridBounds());
+		this->RiverActor->ScaleFromBounds(this->GetDocument()->GetGridBounds(), this->GetRenderer());
 
 		CGrid x, y, z;
 		this->GetDocument()->GetGrid(x, y, z);
@@ -2547,9 +2711,14 @@ void CWPhastView::SizeHandles(double size)
 		//
 		if (this->PointWidget && this->PointWidget->GetProp3D())
 		{
-// COMMENT: {5/3/2006 5:24:47 PM}			this->HighlightProp(this->PointWidget->GetProp3D());
-// COMMENT: {5/3/2006 5:30:39 PM}			this->HighlightProp(NULL);
 			this->PointWidget->PlaceWidget();
+		}
+
+		// update river actor
+		//
+		if (this->RiverActor)
+		{
+			this->RiverActor->SetRadius(0.008 * size);
 		}
 	}
 }
@@ -2588,6 +2757,7 @@ void CWPhastView::PrismWidgetListener(vtkObject *caller, unsigned long eid, void
 						std::vector<Point>& vect = copy.perimeter.Get_user_points();
 						vect.clear();
 
+#ifndef __SKIP_ACCUMULATE__
 						const CUnits &units = self->GetDocument()->GetUnits();
 						CGridKeyword gridKeyword = self->GetDocument()->GetGridKeyword();
 						double scale_h = units.map_horizontal.input_to_si / units.horizontal.input_to_si;
@@ -2601,6 +2771,7 @@ void CWPhastView::PrismWidgetListener(vtkObject *caller, unsigned long eid, void
 							scale_h,
 							scale_v
 							);
+#endif // __SKIP_ACCUMULATE__
 
 						// rewrite points
 						vtkPoints *points = widget->GetPoints();
@@ -2612,10 +2783,12 @@ void CWPhastView::PrismWidgetListener(vtkObject *caller, unsigned long eid, void
 							for (; i < points->GetNumberOfPoints(); i+=2)
 							{
 								points->GetPoint(i, coor);
+#ifndef __SKIP_ACCUMULATE__
 								if (copy.perimeter.Get_user_coordinate_system() == PHAST_Transform::MAP)
 								{
 									t.Inverse_transform(pt);
 								}
+#endif // __SKIP_ACCUMULATE__
 								vect.push_back(Point(pt.get_coord()[0], pt.get_coord()[1], pt.get_coord()[2]));
 							}
 
@@ -2661,6 +2834,7 @@ void CWPhastView::PrismWidgetListener(vtkObject *caller, unsigned long eid, void
 						std::vector<Point>& vect = copy.perimeter.Get_user_points();
 						vect.clear();
 
+#ifndef __SKIP_ACCUMULATE__
 						const CUnits &units = self->GetDocument()->GetUnits();
 						CGridKeyword gridKeyword = self->GetDocument()->GetGridKeyword();
 						double scale_h = units.map_horizontal.input_to_si / units.horizontal.input_to_si;
@@ -2674,6 +2848,7 @@ void CWPhastView::PrismWidgetListener(vtkObject *caller, unsigned long eid, void
 							scale_h,
 							scale_v
 							);
+#endif // __SKIP_ACCUMULATE__
 
 						// rewrite points
 						vtkPoints *points = widget->GetInsertPoints();
@@ -2685,10 +2860,12 @@ void CWPhastView::PrismWidgetListener(vtkObject *caller, unsigned long eid, void
 							for (; i < points->GetNumberOfPoints(); i+=2)
 							{
 								points->GetPoint(i, coor);
+#ifndef __SKIP_ACCUMULATE__
 								if (copy.perimeter.Get_user_coordinate_system() == PHAST_Transform::MAP)
 								{
 									t.Inverse_transform(pt);
 								}
+#endif // __SKIP_ACCUMULATE__
 								vect.push_back(Point(pt.get_coord()[0], pt.get_coord()[1], pt.get_coord()[2]));
 							}
 							points->Delete();
@@ -2727,6 +2904,7 @@ void CWPhastView::PrismWidgetListener(vtkObject *caller, unsigned long eid, void
 						std::vector<Point>& vect = copy.perimeter.Get_user_points();
 						vect.clear();
 
+#ifndef __SKIP_ACCUMULATE__
 						const CUnits &units = self->GetDocument()->GetUnits();
 						CGridKeyword gridKeyword = self->GetDocument()->GetGridKeyword();
 						double scale_h = units.map_horizontal.input_to_si / units.horizontal.input_to_si;
@@ -2740,6 +2918,7 @@ void CWPhastView::PrismWidgetListener(vtkObject *caller, unsigned long eid, void
 							scale_h,
 							scale_v
 							);
+#endif // __SKIP_ACCUMULATE__
 
 						// rewrite points
 						vtkPoints *points = widget->GetDeletePoints();
@@ -2758,10 +2937,12 @@ void CWPhastView::PrismWidgetListener(vtkObject *caller, unsigned long eid, void
 							for (; i < points->GetNumberOfPoints(); i+=2)
 							{
 								points->GetPoint(i, coor);
+#ifndef __SKIP_ACCUMULATE__
 								if (copy.perimeter.Get_user_coordinate_system() == PHAST_Transform::MAP)
 								{
 									t.Inverse_transform(pt);
 								}
+#endif // __SKIP_ACCUMULATE__
 								vect.push_back(Point(pt.get_coord()[0], pt.get_coord()[1], pt.get_coord()[2]));
 							}
 							points->Delete();
@@ -2829,23 +3010,25 @@ CWPhastView::CoordinateState CWPhastView::GetCoordinateMode(void)const
 
 void CWPhastView::UpdateWellMode(void)
 {
-	if (CWPhastView::CreatingNewWell())
+	if (CWPhastView::CreatingNewWell() || this->PointWidget->GetEnabled())
 	{
 		if (this->CoordinateMode == CWPhastView::GridMode)
 		{
 			this->Cursor3DActor->SetOrientation(0, 0, 0);
+			this->PointWidget->SetOrientation(0, 0, 0);
 		}
 		else if (this->CoordinateMode == CWPhastView::MapMode)
 		{
 			CGridKeyword gridKeyword = this->GetDocument()->GetGridKeyword();
 			this->Cursor3DActor->SetOrientation(0, 0, -gridKeyword.m_grid_angle);
+			this->PointWidget->SetOrientation(0, 0, -gridKeyword.m_grid_angle);
 		}
 		else
 		{
 			ASSERT(FALSE);
 		}
 #if ((VTK_MAJOR_VERSION >= 5) && (VTK_MINOR_VERSION >= 4))
-		ASSERT(FALSE); // check this
+// COMMENT: {1/4/2011 5:18:39 PM}		ASSERT(FALSE); // check this
 		this->MFCWindow->GetRenderWindow()->Render();
 #else
 		this->m_RenderWindow->Render();
@@ -2864,3 +3047,18 @@ void vtkMFCWindow::Dump(CDumpContext& dc) const
   CWnd::Dump(dc);
 }
 #endif //defined(_DEBUG) && !defined(__CPPUNIT__)
+
+void CWPhastView::OnSetGridMode()
+{
+	this->SetGridMode();
+}
+
+void CWPhastView::OnSetMapMode()
+{
+	this->SetMapMode();
+}
+
+void CWPhastView::OnCancelMode()
+{
+	this->CancelMode();
+}

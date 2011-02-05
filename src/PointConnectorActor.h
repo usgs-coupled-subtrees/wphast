@@ -6,12 +6,12 @@
 #include <vtkType.h>
 
 #include "tree.h"           // CTreeCtrlNode
-#include "srcinput/PHAST_Transform.h"
+#include "Units.h"
 
-class CUnits;
 class CPropertyTreeControlBar;
 class CTreeMemento;
 class CGridKeyword;
+class vtkRenderer;
 
 class CPointConnectorActor : public vtkAssembly
 {
@@ -39,7 +39,7 @@ public:
 	void SetRadius(double radius);
 	double GetRadius(void)const;
 
-	void ScaleFromBounds(double bounds[6]);
+	void ScaleFromBounds(double bounds[6], vtkRenderer* ren);
 
 	void SetZ(double z);
 	double GetZ(void)const;
@@ -120,8 +120,6 @@ public:
 
 	CTreeCtrlNode GetTreeCtrlNode(void)      { return Node; }
 
-// COMMENT: {10/8/2008 1:57:03 PM}	static const char szHeading[];
-
 	static void SetStaticColor(COLORREF cr);
 
 #ifdef WIN32
@@ -170,9 +168,8 @@ protected:
 
 	//
 	void Update(void);
-	double WorldPointXYPlane[4];
-	double WorldSIPoint[4];
-	double WorldScaledUnitPoint[4];
+	double WorldPointXYPlane[4];     // world coordinate system
+	double UserPoint[4];             // user coordinate as determined by GetCoordinateSystem()
 
 	// Used to process events
 	vtkCallbackCommand* EventCallbackCommand;
@@ -207,9 +204,6 @@ protected:
 	std::list<vtkActor*>          LineActors;
 
 	vtkPoints     *Points;
-	vtkTransform  *TransformUnits;
-	vtkTransform  *TransformScale;
-	vtkTransform  *TransformGrid;
 
 	// Do the picking
 	vtkCellPicker   *CellPicker;
@@ -232,4 +226,6 @@ protected:
 
 	double  GridOrigin[3];
 	double  GridAngle;
+	double  GeometryScale[3];
+	CUnits  Units;
 };

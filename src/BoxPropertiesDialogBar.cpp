@@ -2849,10 +2849,12 @@ void CBoxPropertiesDialogBar::UpdatePrism(CZoneActor *pZoneActor, bool bForceUpd
 				for (; it != this->m_pds[i]->Get_points().end(); ++it)
 				{
 					Point p(*it);
-					if (this->m_pds[i]->Get_user_coordinate_system() == PHAST_Transform::MAP)
-					{
-						pZoneActor->GetPhastTransform().Inverse_transform(p);
-					}
+// COMMENT: {1/18/2011 6:56:55 PM}#ifndef __SKIP_ACCUMULATE__
+// COMMENT: {1/18/2011 6:56:55 PM}					if (this->m_pds[i]->Get_user_coordinate_system() == PHAST_Transform::MAP)
+// COMMENT: {1/18/2011 6:56:55 PM}					{
+// COMMENT: {1/18/2011 6:56:55 PM}						pZoneActor->GetPhastTransform().Inverse_transform(p);
+// COMMENT: {1/18/2011 6:56:55 PM}					}
+// COMMENT: {1/18/2011 6:56:55 PM}#endif // __SKIP_ACCUMULATE__
 					this->m_listPoint[i].push_back(p);
 				}
 			}
@@ -3428,7 +3430,9 @@ void CBoxPropertiesDialogBar::ApplyNewPrism(CZoneActor *pZoneActor)
 		this->m_pView->GetDocument()->GetDefaultZone(::domain);
 
 		new_prism.Tidy();
-		new_prism.Convert_coordinates(PHAST_Transform::GRID, &pZoneActor->GetPhastTransform());
+// COMMENT: {1/18/2011 6:57:10 PM}#ifndef __SKIP_ACCUMULATE__
+// COMMENT: {1/18/2011 6:57:10 PM}		new_prism.Convert_coordinates(PHAST_Transform::GRID, &pZoneActor->GetPhastTransform());
+// COMMENT: {1/18/2011 6:57:10 PM}#endif
 
 		CZonePrismResetAction *pAction = new CZonePrismResetAction(
 			this->m_pView,
@@ -3860,34 +3864,33 @@ void CBoxPropertiesDialogBar::OnUseMapWell(void)
 {
 	const CUnits& units = this->m_pView->GetDocument()->GetUnits();
 	const CGridKeyword& gridKeyword = this->m_pView->GetDocument()->GetGridKeyword();
-	PHAST_Transform t(
-		gridKeyword.m_grid_origin[0],
-		gridKeyword.m_grid_origin[1],
-		gridKeyword.m_grid_origin[2],
-		gridKeyword.m_grid_angle,
-		units.map_horizontal.input_to_si/units.horizontal.input_to_si,
-		units.map_horizontal.input_to_si/units.horizontal.input_to_si,
-		units.map_vertical.input_to_si/units.vertical.input_to_si
-		);
 
-	Point p(
-		this->m_XWell,
-		this->m_YWell,
-		0.0
-		);
+	double scale_h = units.map_horizontal.input_to_si/units.horizontal.input_to_si;
+	double scale_v = units.map_vertical.input_to_si/units.vertical.input_to_si;
+
+	vtkTransform *trans = vtkTransform::New();
+	trans->Scale(scale_h, scale_h, scale_v);
+	trans->RotateZ(-gridKeyword.m_grid_angle);
+	trans->Translate(-gridKeyword.m_grid_origin[0], -gridKeyword.m_grid_origin[1], -gridKeyword.m_grid_origin[2]);
+	
+	double pt[3];
+	pt[0] = this->m_XWell;
+	pt[1] = this->m_YWell;
+	pt[2] = 0.0;
 
 	if (this->IsDlgButtonChecked(IDC_CHECK_USE_MAP) == BST_CHECKED)
 	{
-		t.Inverse_transform(p);
-		this->m_XWell = p.x();
-		this->m_YWell = p.y();
+		trans->Inverse();
+		trans->TransformPoint(pt, pt);
+		this->m_XWell = pt[0];
+		this->m_YWell = pt[1];
 		this->m_xy_coordinate_system_user = PHAST_Transform::MAP;
 	}
 	else
 	{
-		t.Transform(p);
-		this->m_XWell = p.x();
-		this->m_YWell = p.y();
+		trans->TransformPoint(pt, pt);
+		this->m_XWell = pt[0];
+		this->m_YWell = pt[1];
 		this->m_xy_coordinate_system_user = PHAST_Transform::GRID;
 	}
 
@@ -3905,6 +3908,7 @@ void CBoxPropertiesDialogBar::OnUseMapWell(void)
 			this->m_pView->GetDocument()->Execute(pAction);
 		}
 	}
+	trans->Delete();
 }
 
 void CBoxPropertiesDialogBar::OnUseMapBox(void)
@@ -3924,7 +3928,7 @@ void CBoxPropertiesDialogBar::OnUseMapBox(void)
 	if (this->IsDlgButtonChecked(IDC_CHECK_USE_MAP) == BST_CHECKED)
 	{
 		// Grid => Map
-		// Box => Prism
+		// Cube => Prism
 		//
 		if (CZoneActor* pZoneActor = this->m_pProp3D ? CZoneActor::SafeDownCast(this->m_pProp3D) : NULL)
 		{
@@ -3935,18 +3939,23 @@ void CBoxPropertiesDialogBar::OnUseMapBox(void)
 				Prism p1(*pc);
 				Prism p2(*pc);
 
-				ASSERT(p1.perimeter.Get_coordinate_system() == PHAST_Transform::GRID);
+				ASSERT(p1.perimeter.Get_coordinate_system()      == PHAST_Transform::GRID);
 				ASSERT(p1.perimeter.Get_user_coordinate_system() == PHAST_Transform::GRID);
-				ASSERT(p2.perimeter.Get_coordinate_system() == PHAST_Transform::GRID);
+				ASSERT(p2.perimeter.Get_coordinate_system()      == PHAST_Transform::GRID);
 				ASSERT(p2.perimeter.Get_user_coordinate_system() == PHAST_Transform::GRID);
 
 				p2.Convert_coordinates(PHAST_Transform::MAP, &map2grid);
-				p1.perimeter.Set_user_points(p2.perimeter.Get_points());
-				p1.top.Set_user_points(p2.top.Get_points());
-				p1.bottom.Set_user_points(p2.bottom.Get_points());
 
+				p1.perimeter.Set_points(p2.perimeter.Get_points());
+				p1.top.Set_points(p2.top.Get_points());
+				p1.bottom.Set_points(p2.bottom.Get_points());
+
+				p1.perimeter.Set_coordinate_system(PHAST_Transform::MAP);
 				p1.perimeter.Set_user_coordinate_system(PHAST_Transform::MAP);
 				p1.Tidy();
+
+				ASSERT(p1.perimeter.Get_coordinate_system()      == PHAST_Transform::MAP);
+				ASSERT(p1.perimeter.Get_user_coordinate_system() == PHAST_Transform::MAP);
 
 				CAction *pAction = new CZoneSetPolyAction(
 					this->m_pView,
@@ -3972,21 +3981,31 @@ void CBoxPropertiesDialogBar::OnUseMapBox(void)
 			if (Cube *pc = dynamic_cast<Cube*>(pZoneActor->GetPolyhedron()))
 			{
 				ASSERT(pc->Get_coordinate_system() == PHAST_Transform::MAP);
-				Prism p(*pc);
-				ASSERT(p.perimeter.Get_coordinate_system() == PHAST_Transform::MAP);
-				ASSERT(p.perimeter.Get_user_coordinate_system() == PHAST_Transform::MAP);
+				Prism p1(*pc);
+				Prism p2(*pc);
 
-				p.Convert_coordinates(PHAST_Transform::GRID, &map2grid);
+				ASSERT(p1.perimeter.Get_coordinate_system()      == PHAST_Transform::MAP);
+				ASSERT(p1.perimeter.Get_user_coordinate_system() == PHAST_Transform::MAP);
+				ASSERT(p2.perimeter.Get_coordinate_system()      == PHAST_Transform::MAP);
+				ASSERT(p2.perimeter.Get_user_coordinate_system() == PHAST_Transform::MAP);
 
-				p.perimeter.Set_user_coordinate_system(PHAST_Transform::GRID);
-				p.top.Set_user_coordinate_system(PHAST_Transform::GRID);
-				p.bottom.Set_user_coordinate_system(PHAST_Transform::GRID);
-				p.perimeter.Set_user_points(p.perimeter.Get_points());
+				p2.Convert_coordinates(PHAST_Transform::GRID, &map2grid);
+
+				p1.perimeter.Set_points(p2.perimeter.Get_points());
+				p1.top.Set_points(p2.top.Get_points());
+				p1.bottom.Set_points(p2.bottom.Get_points());
+
+				p1.perimeter.Set_coordinate_system(PHAST_Transform::GRID);
+				p1.perimeter.Set_user_coordinate_system(PHAST_Transform::GRID);
+				p1.Tidy();
+
+				ASSERT(p1.perimeter.Get_coordinate_system()      == PHAST_Transform::GRID);
+				ASSERT(p1.perimeter.Get_user_coordinate_system() == PHAST_Transform::GRID);
 
 				CAction *pAction = new CZoneSetPolyAction(
 					this->m_pView,
 					pZoneActor,
-					&p
+					&p1
 					);
 				if (pAction)
 				{

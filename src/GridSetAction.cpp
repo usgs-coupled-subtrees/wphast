@@ -23,20 +23,8 @@ CGridSetAction::~CGridSetAction(void)
 
 void CGridSetAction::Execute(void)
 {
-#if !defined(__CPPUNIT__)
 	this->m_pDoc->SetGridKeyword(this->m_newGridKeyword);
 	this->m_pDoc->UpdateAllViews(0);
-#else
-	CGridKeyword gridK(this->m_newGridKeyword);
-	for (int i = 0; i < 360; i+=10)
-	{
-		gridK.m_grid_angle -= 10;
-		this->m_pDoc->SetGridKeyword(gridK);
-		this->m_pDoc->UpdateAllViews(0);
-	}
-	this->m_pDoc->SetGridKeyword(this->m_newGridKeyword);
-	this->m_pDoc->UpdateAllViews(0);
-#endif
 }
 
 void CGridSetAction::UnExecute(void)
