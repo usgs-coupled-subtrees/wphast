@@ -32,6 +32,7 @@
 
 #include "srcinput/Filedata.h"
 #include "srcinput/Domain.h"
+#include "srcinput/Polyhedron.h"
 
 #include "Action.h"
 #include "SetMediaAction.h"
@@ -329,12 +330,9 @@ CWPhastDoc::CWPhastDoc()
 , m_pGeometrySheet(0)
 , m_pScalePage(0)
 , m_pUnits(0)
-, m_pModel(0) // , m_pFlowOnly(0)
+, m_pModel(0)
 , ProjectionMode(PT_PERSPECTIVE)
 , m_pMapActor(0)
-// COMMENT: {8/19/2009 6:11:30 PM}//{{
-// COMMENT: {8/19/2009 6:11:30 PM}, MapImageActor3(0)
-// COMMENT: {8/19/2009 6:11:30 PM}//}}
 , m_pPropAssemblyMedia(0)
 , m_pPropAssemblyBC(0)
 , m_pPropAssemblyIC(0)
@@ -2764,46 +2762,51 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 
 		pInput->Read();
 
-		// store original polyhs
+		CNewModel model;
+		model.m_gridKeyword = CGridKeyword(::grid, ::snap, ::axes, ::print_input_xy, ::grid_origin, ::grid_angle);
+
+		//
+		// store original polyhs 
+		// SaveCoorSystem/RestoreCoorSystem is required to keep Prisms from automatically converted to GRID coordinates
+		//
 
 		// MEDIA zones
 		for (int i = 0; i < ::count_grid_elt_zones; ++i)
 		{
 			const struct grid_elt* grid_elt_ptr = ::grid_elt_zones[i];
 			grid_elt_map[grid_elt_ptr] = grid_elt_ptr->polyh ? grid_elt_ptr->polyh->clone() : 0;
+			this->SaveCoorSystem(grid_elt_map[grid_elt_ptr]);
 		}
 		// BC zones
 		for (int i = 0; i < ::count_bc; ++i)
 		{
 			const struct BC* bc_ptr = ::bc[i];
 			bc_map[bc_ptr] = bc_ptr->polyh ? bc_ptr->polyh->clone() : 0;
+			this->SaveCoorSystem(bc_map[bc_ptr]);
 		}
 		// Zone_budget zones
 		std::map<int, Zone_budget*>::iterator zit = Zone_budget::zone_budget_map.begin();
 		for (; zit != Zone_budget::zone_budget_map.end(); ++zit)
 		{
 			zb_map[zit->second] = zit->second->Get_polyh() ? zit->second->Get_polyh()->clone() : 0;
+			this->SaveCoorSystem(zb_map[zit->second]);
 		}
 		// IC zones
 		for (int i = 0; i < ::count_head_ic; ++i)
 		{
 			const struct Head_ic* head_ic_ptr = ::head_ic[i];
 			head_ic_map[head_ic_ptr] = head_ic_ptr->polyh ? head_ic_ptr->polyh->clone() : 0;
+			this->SaveCoorSystem(head_ic_map[head_ic_ptr]);
 		}
 		// CHEMISTRY_IC
 		for (int i = 0; i < ::count_chem_ic; ++i)
 		{
 			const struct chem_ic* chem_ic_ptr = ::chem_ic[i];
 			chem_ic_map[chem_ic_ptr] = chem_ic_ptr->polyh ? chem_ic_ptr->polyh->clone() : 0;
+			this->SaveCoorSystem(chem_ic_map[chem_ic_ptr]);
 		}
-// COMMENT: {1/18/2011 6:57:30 PM}#ifndef __SKIP_ACCUMULATE__
-// COMMENT: {1/18/2011 6:57:30 PM}		pInput->Accumulate(false);
-// COMMENT: {1/18/2011 6:57:30 PM}#else // __SKIP_ACCUMULATE__
-		// setup domain
-		::setup_grid();
-// COMMENT: {1/18/2011 6:57:34 PM}#endif // __SKIP_ACCUMULATE__
 
-		///pInput->Load();
+		pInput->Accumulate(false);
 
 		::OutputDebugString("Finished loading trans.dat file\n");
 		if (pInput->GetErrorCount() != 0)
@@ -2865,14 +2868,10 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 
 		// create new document
 		//
-// COMMENT: {12/6/2010 2:35:45 PM}		ASSERT(::map_to_grid);
-		CNewModel model;
 		model.m_flowOnly       = flowOnly;
 		model.m_freeSurface    = (::free_surface != 0);
 		model.m_steadyFlow     = steadyFlow;
-// COMMENT: {12/6/2010 2:35:53 PM}		model.m_units          = CUnits(::units, *::map_to_grid);
 		model.m_units          = CUnits(::units);
-		model.m_gridKeyword    = CGridKeyword(::grid, ::snap, ::axes, ::print_input_xy, ::grid_origin, ::grid_angle);
 		model.m_media          = gridElt;
 		model.m_headIC         = headIC;
 		model.m_chemIC         = chemIC;
@@ -2898,12 +2897,10 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 		{
 			// not undoable
 			const struct grid_elt* grid_elt_ptr = ::grid_elt_zones[i];
-#ifdef __SKIP_ACCUMULATE__
 			if (grid_elt_ptr->polyh == 0)
 			{
 				const_cast<grid_elt*>(grid_elt_ptr)->polyh = new Domain(&domain, PHAST_Transform::GRID);
 			}
-#endif // __SKIP_ACCUMULATE__
 			ASSERT(grid_elt_ptr->polyh && ::AfxIsValidAddress(grid_elt_ptr->polyh, sizeof(Polyhedron)));
 			if (i == 0 && dynamic_cast<Cube*>(grid_elt_ptr->polyh) && defaultZone == *grid_elt_ptr->polyh->Get_bounding_box())
 			{
@@ -2930,6 +2927,7 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 			std::auto_ptr<Polyhedron> ap(data.polyh);
 			ASSERT(grid_elt_map.find(grid_elt_ptr) != grid_elt_map.end());
 			data.polyh = grid_elt_map[grid_elt_ptr] ? grid_elt_map[grid_elt_ptr]->clone() : grid_elt_ptr->polyh->clone();
+			this->RestoreCoorSystem(data.polyh);
 
 			// not undoable
 			std::auto_ptr< CZoneCreateAction<CMediaZoneActor> > pAction(
@@ -2951,12 +2949,10 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 		for (int i = 0; i < ::count_bc; ++i)
 		{
 			const struct BC* bc_ptr = ::bc[i];
-#ifdef __SKIP_ACCUMULATE__
 			if (bc_ptr->polyh == 0)
 			{
 				const_cast<struct BC*>(bc_ptr)->polyh = new Domain(&domain, PHAST_Transform::GRID);
 			}
-#endif // __SKIP_ACCUMULATE__
 			ASSERT(bc_ptr->polyh && ::AfxIsValidAddress(bc_ptr->polyh, sizeof(Polyhedron)));
 
 			// store pre-translated polyh
@@ -2964,6 +2960,7 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 			std::auto_ptr<Polyhedron> ap(data.polyh);
 			ASSERT(bc_map.find(bc_ptr) != bc_map.end());
 			data.polyh = bc_map[bc_ptr] ? bc_map[bc_ptr]->clone() : bc_ptr->polyh->clone();
+			this->RestoreCoorSystem(data.polyh);
 
 			// not undoable
 			std::auto_ptr< CZoneCreateAction<CBCZoneActor> > pAction(
@@ -3037,12 +3034,13 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 			else
 			{
 				data.Set_polyh(zb_map[it->second] ? zb_map[it->second]->clone() : it->second->Get_polyh()->clone());
+				this->RestoreCoorSystem(data.Get_polyh());
 
 				// not undoable
 				std::auto_ptr< CZoneCreateAction<CZoneFlowRateZoneActor> > pAction(
 					new CZoneCreateAction<CZoneFlowRateZoneActor>(
 						this,
-						it->second->Get_polyh(),
+						data.Get_polyh(),
 						::grid_origin,
 						::grid_angle,
 						it->second->Get_polyh()->Get_description()->c_str()
@@ -3058,12 +3056,10 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 		for (int i = 0; i < ::count_head_ic; ++i)
 		{
 			const struct Head_ic* head_ic_ptr = ::head_ic[i];
-#ifdef __SKIP_ACCUMULATE__
 			if (head_ic_ptr->polyh == 0)
 			{
 				const_cast<Head_ic*>(head_ic_ptr)->polyh = new Domain(&domain, PHAST_Transform::GRID);
 			}
-#endif // __SKIP_ACCUMULATE__
 			ASSERT(head_ic_ptr->polyh && ::AfxIsValidAddress(head_ic_ptr->polyh, sizeof(Polyhedron)));
 			if (i == 0 && dynamic_cast<Cube*>(head_ic_ptr->polyh) && defaultZone == *head_ic_ptr->polyh->Get_bounding_box())
 			{
@@ -3080,6 +3076,7 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 			std::auto_ptr<Polyhedron> ap(data.polyh);
 			ASSERT(head_ic_map.find(head_ic_ptr) != head_ic_map.end());
 			data.polyh = head_ic_map[head_ic_ptr] ? head_ic_map[head_ic_ptr]->clone() : head_ic_ptr->polyh->clone();
+			this->RestoreCoorSystem(data.polyh);
 
 			// not undoable
 			std::auto_ptr< CZoneCreateAction<CICHeadZoneActor> > pAction(
@@ -3100,12 +3097,10 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 		for (int i = 0; i < ::count_chem_ic; ++i)
 		{
 			const struct chem_ic* chem_ic_ptr = ::chem_ic[i];
-#ifdef __SKIP_ACCUMULATE__
 			if (chem_ic_ptr->polyh == 0)
 			{
 				const_cast<struct chem_ic*>(chem_ic_ptr)->polyh = new Domain(&domain, PHAST_Transform::GRID);
 			}
-#endif // __SKIP_ACCUMULATE__
 			ASSERT(chem_ic_ptr->polyh && ::AfxIsValidAddress(chem_ic_ptr->polyh, sizeof(Polyhedron)));
 			if (i == 0 && dynamic_cast<Cube*>(chem_ic_ptr->polyh) && defaultZone == *chem_ic_ptr->polyh->Get_bounding_box())
 			{
@@ -3144,6 +3139,7 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 			std::auto_ptr<Polyhedron> ap(data.polyh);
 			ASSERT(chem_ic_map.find(chem_ic_ptr) != chem_ic_map.end());
 			data.polyh = chem_ic_map[chem_ic_ptr] ? chem_ic_map[chem_ic_ptr]->clone() : chem_ic_ptr->polyh->clone();
+			this->RestoreCoorSystem(data.polyh);
 
 			// not undoable
 			std::auto_ptr< CZoneCreateAction<CICChemZoneActor> > pAction(
@@ -3270,7 +3266,7 @@ void CWPhastDoc::OnFileExport()
 	{
 		newName += szExt;
 	}
-	newName += ".trans.dat";
+	newName += _T(".trans.dat");
 
 	if (!DoPromptFileName(newName, IDS_EXPORT_PHAST_TRANS_136,
 	  OFN_HIDEREADONLY, FALSE))
@@ -3632,10 +3628,6 @@ void CWPhastDoc::SetUnits(const CUnits& units)
 							{
 								pWellActor->SetUnits(units);
 							}
-// COMMENT: {1/7/2011 3:37:11 PM}							if (CRiverActor *pRiverActor = CRiverActor::SafeDownCast(prop3D))
-// COMMENT: {1/7/2011 3:37:11 PM}							{
-// COMMENT: {1/7/2011 3:37:11 PM}								pRiverActor->SetUnits(units);
-// COMMENT: {1/7/2011 3:37:11 PM}							}
 							if (CPointConnectorActor *pPointConnectorActor = CPointConnectorActor::SafeDownCast(prop3D))
 							{
 								pPointConnectorActor->SetUnits(units);
@@ -3676,9 +3668,6 @@ void CWPhastDoc::SetUnits(const CUnits& units)
 		pBar->Set(pView, pBar->GetProp3D(), this->GetUnits());
 	}
 }
-
-#include "srcinput/Polyhedron.h"
-#include "srcinput/Domain.h"
 
 void CWPhastDoc::New(const CNewModel& model)
 {
@@ -6511,25 +6500,6 @@ void CWPhastDoc::OnToolsNewPrism()
 						this->GetDefaultZone(::domain);
 
 						p->Tidy();
-
-// COMMENT: {1/18/2011 6:58:41 PM}#ifndef __SKIP_ACCUMULATE__
-// COMMENT: {1/18/2011 6:58:41 PM}						// this may need to be updated when grid rotation is enabled
-// COMMENT: {1/18/2011 6:58:41 PM}						//
-// COMMENT: {1/18/2011 6:58:41 PM}						const CUnits &units = this->GetUnits();
-// COMMENT: {1/18/2011 6:58:41 PM}						CGridKeyword gridKeyword = this->GetGridKeyword();
-// COMMENT: {1/18/2011 6:58:41 PM}						double scale_h = units.map_horizontal.input_to_si / units.horizontal.input_to_si;
-// COMMENT: {1/18/2011 6:58:41 PM}						double scale_v = units.map_vertical.input_to_si / units.vertical.input_to_si;
-// COMMENT: {1/18/2011 6:58:41 PM}						PHAST_Transform t = PHAST_Transform(
-// COMMENT: {1/18/2011 6:58:41 PM}							gridKeyword.m_grid_origin[0],
-// COMMENT: {1/18/2011 6:58:41 PM}							gridKeyword.m_grid_origin[1],
-// COMMENT: {1/18/2011 6:58:41 PM}							gridKeyword.m_grid_origin[2],
-// COMMENT: {1/18/2011 6:58:41 PM}							gridKeyword.m_grid_angle,
-// COMMENT: {1/18/2011 6:58:41 PM}							scale_h,
-// COMMENT: {1/18/2011 6:58:41 PM}							scale_h,
-// COMMENT: {1/18/2011 6:58:41 PM}							scale_v
-// COMMENT: {1/18/2011 6:58:41 PM}							);
-// COMMENT: {1/18/2011 6:58:41 PM}						p->Convert_coordinates(PHAST_Transform::GRID, &t);
-// COMMENT: {1/18/2011 6:58:41 PM}#endif
 					}
 					if (pInput->GetErrorCount() != 0)
 					{
@@ -7464,3 +7434,28 @@ void CWPhastDoc::OnToolsRotateGrid()
 // COMMENT: {2/3/2011 9:31:20 PM}		pView->RedrawWindow();
 // COMMENT: {2/3/2011 9:31:20 PM}	}
 }
+
+void CWPhastDoc::SaveCoorSystem(Polyhedron *poly)
+{
+	if (Prism *prism = dynamic_cast<Prism*>(poly))
+	{
+		prism->top.Set_coordinate_system(PHAST_Transform::NONE);
+		prism->bottom.Set_coordinate_system(PHAST_Transform::NONE);
+		prism->perimeter.Set_coordinate_system(PHAST_Transform::NONE);
+	}
+}
+
+void CWPhastDoc::RestoreCoorSystem(Polyhedron *poly)
+{
+	if (Prism *prism = dynamic_cast<Prism*>(poly))
+	{
+		ASSERT(prism->top.Get_coordinate_system()       == PHAST_Transform::NONE);
+		ASSERT(prism->bottom.Get_coordinate_system()    == PHAST_Transform::NONE);
+		ASSERT(prism->perimeter.Get_coordinate_system() == PHAST_Transform::NONE);
+
+		prism->top.Set_coordinate_system(prism->top.Get_user_coordinate_system());
+		prism->bottom.Set_coordinate_system(prism->bottom.Get_user_coordinate_system());
+		prism->perimeter.Set_coordinate_system(prism->perimeter.Get_user_coordinate_system());
+	}
+}
+

@@ -2849,12 +2849,6 @@ void CBoxPropertiesDialogBar::UpdatePrism(CZoneActor *pZoneActor, bool bForceUpd
 				for (; it != this->m_pds[i]->Get_points().end(); ++it)
 				{
 					Point p(*it);
-// COMMENT: {1/18/2011 6:56:55 PM}#ifndef __SKIP_ACCUMULATE__
-// COMMENT: {1/18/2011 6:56:55 PM}					if (this->m_pds[i]->Get_user_coordinate_system() == PHAST_Transform::MAP)
-// COMMENT: {1/18/2011 6:56:55 PM}					{
-// COMMENT: {1/18/2011 6:56:55 PM}						pZoneActor->GetPhastTransform().Inverse_transform(p);
-// COMMENT: {1/18/2011 6:56:55 PM}					}
-// COMMENT: {1/18/2011 6:56:55 PM}#endif // __SKIP_ACCUMULATE__
 					this->m_listPoint[i].push_back(p);
 				}
 			}
@@ -3430,9 +3424,6 @@ void CBoxPropertiesDialogBar::ApplyNewPrism(CZoneActor *pZoneActor)
 		this->m_pView->GetDocument()->GetDefaultZone(::domain);
 
 		new_prism.Tidy();
-// COMMENT: {1/18/2011 6:57:10 PM}#ifndef __SKIP_ACCUMULATE__
-// COMMENT: {1/18/2011 6:57:10 PM}		new_prism.Convert_coordinates(PHAST_Transform::GRID, &pZoneActor->GetPhastTransform());
-// COMMENT: {1/18/2011 6:57:10 PM}#endif
 
 		CZonePrismResetAction *pAction = new CZonePrismResetAction(
 			this->m_pView,

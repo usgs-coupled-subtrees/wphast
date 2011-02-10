@@ -230,7 +230,7 @@ int accumulate(bool bWritePhastTmp)
 				break;
 			}
 			output_msg(OUTPUT_STDERR, "Accumulate...\n");
-			accumulate();
+			accumulate_defaults();
 			if (input_error > 0)
 			{
 				break;

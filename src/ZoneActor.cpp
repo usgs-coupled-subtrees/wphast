@@ -1472,32 +1472,6 @@ void CZoneActor::SetVisibility(int visibility)
 
 double *CZoneActor::GetBounds() // virtual
 {
-// COMMENT: {6/23/2008 9:13:56 PM}	if (this->GetPolyhedronType() == Polyhedron::PRISM /* && this->AppendPolyData->GetNumberOfInputs() == 0 */)
-// COMMENT: {6/23/2008 9:13:56 PM}	{
-// COMMENT: {6/23/2008 9:13:56 PM}		if (Prism *prism = dynamic_cast<Prism*>(this->GetPolyhedron()))
-// COMMENT: {6/23/2008 9:13:56 PM}		{
-// COMMENT: {6/23/2008 9:13:56 PM}			vtkMatrix4x4 *pMatrix4x4 = this->GetMatrix();
-// COMMENT: {6/23/2008 9:13:56 PM}			double *bounds = this->PrismSidesPolyData->GetBounds();
-// COMMENT: {6/23/2008 9:13:56 PM}			float imin[4];
-// COMMENT: {6/23/2008 9:13:56 PM}			float imax[4];
-// COMMENT: {6/23/2008 9:13:56 PM}			float omin[4];
-// COMMENT: {6/23/2008 9:13:56 PM}			float omax[4];
-// COMMENT: {6/23/2008 9:13:56 PM}			for (int i = 0; i < 3; ++i)
-// COMMENT: {6/23/2008 9:13:56 PM}			{
-// COMMENT: {6/23/2008 9:13:56 PM}				imin[i] = bounds[i*2];
-// COMMENT: {6/23/2008 9:13:56 PM}				imax[i] = bounds[i*2+1];
-// COMMENT: {6/23/2008 9:13:56 PM}			}
-// COMMENT: {6/23/2008 9:13:56 PM}			pMatrix4x4->MultiplyPoint(imin, omin);
-// COMMENT: {6/23/2008 9:13:56 PM}			pMatrix4x4->MultiplyPoint(imax, omax);
-// COMMENT: {6/23/2008 9:13:56 PM}			for (int i = 0; i < 3; ++i)
-// COMMENT: {6/23/2008 9:13:56 PM}			{
-// COMMENT: {6/23/2008 9:13:56 PM}				this->Bounds[i*2] = omin[i];
-// COMMENT: {6/23/2008 9:13:56 PM}				this->Bounds[i*2+1] = omax[i];
-// COMMENT: {6/23/2008 9:13:56 PM}			}
-// COMMENT: {6/23/2008 9:13:56 PM}		}
-// COMMENT: {6/23/2008 9:13:56 PM}		return this->Bounds;
-// COMMENT: {6/23/2008 9:13:56 PM}	}
-
 	// from vtkAssembly.cxx
 	//
 	// Modified to return the same bounds regardless of visibility

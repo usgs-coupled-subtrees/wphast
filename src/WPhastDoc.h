@@ -54,6 +54,7 @@ class CGridElementsSelector;
 class CNewZoneWidget;
 class CNewWedgeWidget;
 class CNewPrismWidget;
+class Polyhedron;
 
 class vtkAxes;
 class vtkTubeFilter;
@@ -212,6 +213,9 @@ protected:
 public:
 	void ReleaseGraphicsResources(vtkProp* pProp);
 	void ClearSelection(void);
+
+	void SaveCoorSystem(Polyhedron *poly);
+	void RestoreCoorSystem(Polyhedron *poly);
 
 // Overrides
 	public:
