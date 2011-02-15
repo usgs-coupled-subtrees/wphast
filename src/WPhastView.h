@@ -156,6 +156,8 @@ public:
 	void ResetCamera(double bounds[6]);
 	void ResetCamera(double xmin, double xmax, double ymin, double ymax, double zmin, double zmax);
 
+	void ResetSelection(void);
+
 	virtual void OnInitialUpdate(void);
 	void DeleteContents(void);
 	

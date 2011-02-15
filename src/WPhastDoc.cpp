@@ -756,11 +756,16 @@ void CWPhastDoc::Serialize(CArchive& ar)
 		{
 			pWndTreeCtrl = pPropertyTreeControlBar->GetTreeCtrl();
 		}
-		CDelayRedraw delayTree(pWndTreeCtrl);
+		CDelayRedraw tree(pWndTreeCtrl);
+		CDelayRedraw bar(pWndTreeCtrl ? pWndTreeCtrl->GetParent() : 0);
 
-		// delay redrawing render window
+		// delay redrawing box properties window
 		//
-		CDelayRedraw delayRender(::AfxGetMainWnd()->GetActiveWindow(), this);
+		CDelayRedraw box(this->GetBoxPropertiesDialogBar());
+
+		// delay rendering the scene
+		//
+		CDelayRedraw scene(0, this);
 
 		// This fixes the BUG that occurred when creating a new document
 		// and then opening an existing document causing a crash in 
@@ -2626,17 +2631,13 @@ void CWPhastDoc::OnFileImport()
 	if (pDoc)
 	{
 		ASSERT(pDoc == this);
-// COMMENT: {6/2/2008 5:43:39 PM}		CDelayRedraw delay(::AfxGetMainWnd(), pDoc); // this breaks CWaitCursor
 		CDelayRedraw del1(this->GetPropertyTreeControlBar(), pDoc);
-		POSITION pos = this->GetFirstViewPosition();
-		CDelayRedraw del2(GetNextView(pos));
 		CDelayRedraw del3(this->GetBoxPropertiesDialogBar());
 		if (!this->DoImport(szPath))
 		{
 			::AfxMessageBox("An error occurred during the import", MB_OK);
 			this->SetModifiedFlag(FALSE);
 		}
-// COMMENT: {9/10/2009 10:39:36 PM}		this->ResetCamera();
 		this->ExecutePipeline();
 	}
 	if (CPropertyTreeControlBar *pPropertyTreeControlBar = this->GetPropertyTreeControlBar())
@@ -2720,7 +2721,6 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 	VERIFY(::_tmakepath_s(szTitle, _MAX_PATH, NULL, NULL, szFName, szExt) == 0);
 
 
-
 	// get fullpath
 	//
 	TCHAR szFullpath[MAX_PATH];
@@ -2775,35 +2775,30 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 		{
 			const struct grid_elt* grid_elt_ptr = ::grid_elt_zones[i];
 			grid_elt_map[grid_elt_ptr] = grid_elt_ptr->polyh ? grid_elt_ptr->polyh->clone() : 0;
-			this->SaveCoorSystem(grid_elt_map[grid_elt_ptr]);
 		}
 		// BC zones
 		for (int i = 0; i < ::count_bc; ++i)
 		{
 			const struct BC* bc_ptr = ::bc[i];
 			bc_map[bc_ptr] = bc_ptr->polyh ? bc_ptr->polyh->clone() : 0;
-			this->SaveCoorSystem(bc_map[bc_ptr]);
 		}
 		// Zone_budget zones
 		std::map<int, Zone_budget*>::iterator zit = Zone_budget::zone_budget_map.begin();
 		for (; zit != Zone_budget::zone_budget_map.end(); ++zit)
 		{
 			zb_map[zit->second] = zit->second->Get_polyh() ? zit->second->Get_polyh()->clone() : 0;
-			this->SaveCoorSystem(zb_map[zit->second]);
 		}
 		// IC zones
 		for (int i = 0; i < ::count_head_ic; ++i)
 		{
 			const struct Head_ic* head_ic_ptr = ::head_ic[i];
 			head_ic_map[head_ic_ptr] = head_ic_ptr->polyh ? head_ic_ptr->polyh->clone() : 0;
-			this->SaveCoorSystem(head_ic_map[head_ic_ptr]);
 		}
 		// CHEMISTRY_IC
 		for (int i = 0; i < ::count_chem_ic; ++i)
 		{
 			const struct chem_ic* chem_ic_ptr = ::chem_ic[i];
 			chem_ic_map[chem_ic_ptr] = chem_ic_ptr->polyh ? chem_ic_ptr->polyh->clone() : 0;
-			this->SaveCoorSystem(chem_ic_map[chem_ic_ptr]);
 		}
 
 		pInput->Accumulate(false);
@@ -2927,7 +2922,6 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 			std::auto_ptr<Polyhedron> ap(data.polyh);
 			ASSERT(grid_elt_map.find(grid_elt_ptr) != grid_elt_map.end());
 			data.polyh = grid_elt_map[grid_elt_ptr] ? grid_elt_map[grid_elt_ptr]->clone() : grid_elt_ptr->polyh->clone();
-			this->RestoreCoorSystem(data.polyh);
 
 			// not undoable
 			std::auto_ptr< CZoneCreateAction<CMediaZoneActor> > pAction(
@@ -2960,7 +2954,6 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 			std::auto_ptr<Polyhedron> ap(data.polyh);
 			ASSERT(bc_map.find(bc_ptr) != bc_map.end());
 			data.polyh = bc_map[bc_ptr] ? bc_map[bc_ptr]->clone() : bc_ptr->polyh->clone();
-			this->RestoreCoorSystem(data.polyh);
 
 			// not undoable
 			std::auto_ptr< CZoneCreateAction<CBCZoneActor> > pAction(
@@ -3034,7 +3027,6 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 			else
 			{
 				data.Set_polyh(zb_map[it->second] ? zb_map[it->second]->clone() : it->second->Get_polyh()->clone());
-				this->RestoreCoorSystem(data.Get_polyh());
 
 				// not undoable
 				std::auto_ptr< CZoneCreateAction<CZoneFlowRateZoneActor> > pAction(
@@ -3076,7 +3068,6 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 			std::auto_ptr<Polyhedron> ap(data.polyh);
 			ASSERT(head_ic_map.find(head_ic_ptr) != head_ic_map.end());
 			data.polyh = head_ic_map[head_ic_ptr] ? head_ic_map[head_ic_ptr]->clone() : head_ic_ptr->polyh->clone();
-			this->RestoreCoorSystem(data.polyh);
 
 			// not undoable
 			std::auto_ptr< CZoneCreateAction<CICHeadZoneActor> > pAction(
@@ -3139,7 +3130,6 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 			std::auto_ptr<Polyhedron> ap(data.polyh);
 			ASSERT(chem_ic_map.find(chem_ic_ptr) != chem_ic_map.end());
 			data.polyh = chem_ic_map[chem_ic_ptr] ? chem_ic_map[chem_ic_ptr]->clone() : chem_ic_ptr->polyh->clone();
-			this->RestoreCoorSystem(data.polyh);
 
 			// not undoable
 			std::auto_ptr< CZoneCreateAction<CICChemZoneActor> > pAction(
@@ -3647,14 +3637,7 @@ void CWPhastDoc::SetUnits(const CUnits& units)
 		CWPhastView *pView = (CWPhastView*) GetNextView(pos);
 
 		// resize the widgets
-		//
-		if (vtkAbstractPropPicker *picker = vtkAbstractPropPicker::SafeDownCast( pView->GetInteractor()->GetPicker() ))
-		{
-			if (vtkProp3D* prop = picker->GetProp3D())
-			{
-				pView->Select(prop);
-			}
-		}
+		pView->ResetSelection();
 	}
 	this->UpdateAllViews(0);
 
@@ -7437,25 +7420,25 @@ void CWPhastDoc::OnToolsRotateGrid()
 
 void CWPhastDoc::SaveCoorSystem(Polyhedron *poly)
 {
-	if (Prism *prism = dynamic_cast<Prism*>(poly))
-	{
-		prism->top.Set_coordinate_system(PHAST_Transform::NONE);
-		prism->bottom.Set_coordinate_system(PHAST_Transform::NONE);
-		prism->perimeter.Set_coordinate_system(PHAST_Transform::NONE);
-	}
+// COMMENT: {2/10/2011 10:39:24 PM}	if (Prism *prism = dynamic_cast<Prism*>(poly))
+// COMMENT: {2/10/2011 10:39:24 PM}	{
+// COMMENT: {2/10/2011 10:39:24 PM}		prism->top.Set_coordinate_system(PHAST_Transform::NONE);
+// COMMENT: {2/10/2011 10:39:24 PM}		prism->bottom.Set_coordinate_system(PHAST_Transform::NONE);
+// COMMENT: {2/10/2011 10:39:24 PM}		prism->perimeter.Set_coordinate_system(PHAST_Transform::NONE);
+// COMMENT: {2/10/2011 10:39:24 PM}	}
 }
 
 void CWPhastDoc::RestoreCoorSystem(Polyhedron *poly)
 {
-	if (Prism *prism = dynamic_cast<Prism*>(poly))
-	{
-		ASSERT(prism->top.Get_coordinate_system()       == PHAST_Transform::NONE);
-		ASSERT(prism->bottom.Get_coordinate_system()    == PHAST_Transform::NONE);
-		ASSERT(prism->perimeter.Get_coordinate_system() == PHAST_Transform::NONE);
-
-		prism->top.Set_coordinate_system(prism->top.Get_user_coordinate_system());
-		prism->bottom.Set_coordinate_system(prism->bottom.Get_user_coordinate_system());
-		prism->perimeter.Set_coordinate_system(prism->perimeter.Get_user_coordinate_system());
-	}
+// COMMENT: {2/10/2011 10:39:28 PM}	if (Prism *prism = dynamic_cast<Prism*>(poly))
+// COMMENT: {2/10/2011 10:39:28 PM}	{
+// COMMENT: {2/10/2011 10:39:28 PM}		ASSERT(prism->top.Get_coordinate_system()       == PHAST_Transform::NONE);
+// COMMENT: {2/10/2011 10:39:28 PM}		ASSERT(prism->bottom.Get_coordinate_system()    == PHAST_Transform::NONE);
+// COMMENT: {2/10/2011 10:39:28 PM}		ASSERT(prism->perimeter.Get_coordinate_system() == PHAST_Transform::NONE);
+// COMMENT: {2/10/2011 10:39:28 PM}
+// COMMENT: {2/10/2011 10:39:28 PM}		prism->top.Set_coordinate_system(prism->top.Get_user_coordinate_system());
+// COMMENT: {2/10/2011 10:39:28 PM}		prism->bottom.Set_coordinate_system(prism->bottom.Get_user_coordinate_system());
+// COMMENT: {2/10/2011 10:39:28 PM}		prism->perimeter.Set_coordinate_system(prism->perimeter.Get_user_coordinate_system());
+// COMMENT: {2/10/2011 10:39:28 PM}	}
 }
 

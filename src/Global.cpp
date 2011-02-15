@@ -4779,7 +4779,8 @@ void CGlobal::TextWithFormat(CDataExchange* pDX, int nIDC, LPCTSTR lpszFormat, .
 void CGlobal::DumpAndLoadPrism(const Prism &src, Prism &dest)
 {
 	// TOP
-	if (src.top.Get_source_type() != Data_source::NONE && src.top.Get_user_source_type() != Data_source::NONE)
+	ASSERT(src.top.Get_source_type() != Data_source::NONE);
+	if (src.top.Get_user_source_type() != Data_source::NONE)
 	{
 		std::ostringstream oss;
 		oss.precision(DBL_DIG);
@@ -4798,7 +4799,8 @@ void CGlobal::DumpAndLoadPrism(const Prism &src, Prism &dest)
 	}
 
 	// BOTTOM
-	if (src.bottom.Get_source_type() != Data_source::NONE && src.bottom.Get_user_source_type() != Data_source::NONE)
+	ASSERT(src.bottom.Get_source_type() != Data_source::NONE);
+	if (src.bottom.Get_user_source_type() != Data_source::NONE)
 	{
 		std::ostringstream oss;
 		oss.precision(DBL_DIG);
@@ -4817,7 +4819,8 @@ void CGlobal::DumpAndLoadPrism(const Prism &src, Prism &dest)
 	}
 
 	// PERIMETER
-	if (src.perimeter.Get_source_type() != Data_source::NONE && src.perimeter.Get_user_source_type() != Data_source::NONE)
+	ASSERT(src.perimeter.Get_source_type() != Data_source::NONE);
+	if (src.perimeter.Get_user_source_type() != Data_source::NONE)
 	{
 		std::ostringstream oss;
 		oss.precision(DBL_DIG);

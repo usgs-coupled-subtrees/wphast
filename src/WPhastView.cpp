@@ -1195,13 +1195,7 @@ void CWPhastView::OnViewFromPrevDirection()
 
 void CWPhastView::Select(vtkProp *pProp)
 {
-	//{{
 	if (!this->MFCWindow) return;
-	//}}
-
-	//{{ {12/16/2010 8:12:18 PM}
-	this->GetInteractor()->Render();
-	//}} {12/16/2010 8:12:18 PM}
 
 	// hide zone widget
 	//
@@ -1228,7 +1222,6 @@ void CWPhastView::Select(vtkProp *pProp)
 			if (CRiverActor *pRiverActor = CRiverActor::SafeDownCast(pProp))
 			{
 				pRiverActor->ClearSelection();
-// COMMENT: {9/16/2009 9:46:04 PM}				pRiverActor->SetInteractor(0);
 				pRiverActor->Off();
 			}
 		}
@@ -1243,11 +1236,9 @@ void CWPhastView::Select(vtkProp *pProp)
 		pPropCollection->InitTraversal(csi);
 		for (; (pProp = pPropCollection->GetNextProp(csi)); )
 		{
-// COMMENT: {9/15/2009 7:35:45 PM}			pProp->SetDebug(1);
 			if (CDrainActor *pDrainActor = CDrainActor::SafeDownCast(pProp))
 			{
 				pDrainActor->ClearSelection();
-// COMMENT: {9/16/2009 9:46:07 PM}				pDrainActor->SetInteractor(0);
 				pDrainActor->Off();
 			}
 		}
@@ -1276,7 +1267,8 @@ void CWPhastView::Select(vtkProp *pProp)
 
 	if (CZoneActor *pZoneActor = CZoneActor::SafeDownCast(pProp))
 	{
-		//{{ {7/10/2008 8:34:05 PM}
+		// highlight even if not visible
+		// (this may be inconsistent with other selectable objects)
 		if (pZoneActor->GetVisibility() == 0)
 		{
 			// Highlight Prop
@@ -1288,7 +1280,6 @@ void CWPhastView::Select(vtkProp *pProp)
 			this->GetDocument()->UpdateAllViews(this);
 			return;
 		}
-		//}} {7/10/2008 8:34:05 PM}
 
 		Polyhedron::POLYHEDRON_TYPE n = pZoneActor->GetPolyhedron()->get_type();
 		if (n == Polyhedron::PRISM)
@@ -2644,6 +2635,7 @@ void CWPhastView::PrismWidgetListener(vtkObject *caller, unsigned long eid, void
 							// load new prism
 							Prism new_prism;
 							CGlobal::DumpAndLoadPrism(copy, new_prism);
+							ASSERT(new_prism.perimeter.Get_user_source_type() == Data_source::POINTS);
 
 							// setup domain in order to tidy
 							self->GetDocument()->GetDefaultZone(::domain);
@@ -2700,6 +2692,7 @@ void CWPhastView::PrismWidgetListener(vtkObject *caller, unsigned long eid, void
 							// load new prism
 							Prism new_prism;
 							CGlobal::DumpAndLoadPrism(copy, new_prism);
+							ASSERT(new_prism.perimeter.Get_user_source_type() == Data_source::POINTS);
 
 							// setup domain in order to tidy
 							self->GetDocument()->GetDefaultZone(::domain);
@@ -2755,6 +2748,7 @@ void CWPhastView::PrismWidgetListener(vtkObject *caller, unsigned long eid, void
 							// load new prism
 							Prism new_prism;
 							CGlobal::DumpAndLoadPrism(copy, new_prism);
+							ASSERT(new_prism.perimeter.Get_user_source_type() == Data_source::POINTS);
 
 							// setup domain in order to tidy
 							self->GetDocument()->GetDefaultZone(::domain);
@@ -2866,4 +2860,15 @@ void CWPhastView::OnSetMapMode()
 void CWPhastView::OnCancelMode()
 {
 	this->CancelMode();
+}
+
+void CWPhastView::ResetSelection()
+{
+	if (vtkAbstractPropPicker *picker = vtkAbstractPropPicker::SafeDownCast( this->GetInteractor()->GetPicker() ))
+	{
+		if (vtkProp3D* prop = picker->GetProp3D())
+		{
+			this->Select(prop);
+		}
+	}
 }

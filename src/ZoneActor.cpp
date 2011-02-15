@@ -2857,12 +2857,16 @@ void CZoneActor::UpdateUserTransform(void)
 		user->RotateZ(-this->GridAngle);
 		user->Translate(-this->GridOrigin[0], -this->GridOrigin[1], -this->GridOrigin[2]);
 	}
-	else
+	else if (cs == PHAST_Transform::GRID)
 	{
 		user->Scale(
 			this->GeometryScale[0] * this->Units.horizontal.input_to_si,
 			this->GeometryScale[1] * this->Units.horizontal.input_to_si,
 			this->GeometryScale[2] * this->Units.vertical.input_to_si);
+	}
+	else
+	{
+		ASSERT(FALSE);
 	}
 
 	this->SetUserTransform(user);

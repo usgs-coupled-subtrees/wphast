@@ -1,5 +1,8 @@
 #pragma once
 
+#include "WPhastDoc.h"
+#include "WPhastView.h"
+
 class CDelayRedraw
 {
 public:
@@ -38,10 +41,31 @@ inline CDelayRedraw::CDelayRedraw(CWnd *pWnd, CDocument *pDoc)
 			m_pWnd->SetRedraw(FALSE);
 		}
 	}
+	if (this->m_pDoc)
+	{
+		if (POSITION pos = this->m_pDoc->GetFirstViewPosition())
+		{
+			if (CWPhastView *pView = dynamic_cast<CWPhastView*>(this->m_pDoc->GetNextView(pos)))
+			{					
+				pView->GetInteractor()->SetEnableRender(false);
+			}
+		}
+	}
 }
 
 inline CDelayRedraw::~CDelayRedraw(void)
 {
+	if (this->m_pDoc)
+	{
+		if (POSITION pos = this->m_pDoc->GetFirstViewPosition())
+		{
+			if (CWPhastView *pView = dynamic_cast<CWPhastView*>(this->m_pDoc->GetNextView(pos)))
+			{					
+				pView->GetInteractor()->SetEnableRender(true);
+			}
+		}
+	}
+
 	if (m_bVisible)
 	{
 		if (m_pWnd)

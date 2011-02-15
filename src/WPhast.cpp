@@ -343,9 +343,12 @@ void CWPhastApp::OnFileNew()
 			{
 				pWndTreeCtrl = pPropertyTreeControlBar->GetTreeCtrl();
 			}
-			CDelayRedraw tree(pWndTreeCtrl);
-			CDelayRedraw bar(pWndTreeCtrl ? pWndTreeCtrl->GetParent() : 0);
-			CDelayRedraw box(pDoc->GetBoxPropertiesDialogBar());
+
+			//
+			// 2/14/2011
+			// It'd be nice if all the CDelayRedraws were here, but for some reason
+			// Serialize needs to have them when loading
+			//
 
 			if (this->m_bShellFileNew)
 			{
@@ -354,13 +357,17 @@ void CWPhastApp::OnFileNew()
 				dlg.DoModal();
 				if (dlg.GetAction() == CStartupDialog::SDA_OPEN_FILE)
 				{
-					this->m_pMainWnd->UpdateWindow();
 					pDoc->SetModifiedFlag(FALSE);
 					pDoc = static_cast<CWPhastDoc*> (pTemplate->OpenDocumentFile(dlg.GetFileName()));
 					return;
 				}
 				else if (dlg.GetAction() == CStartupDialog::SDA_CREATE_DEFAULT)
 				{
+					CDelayRedraw tree(pWndTreeCtrl);
+					CDelayRedraw bar(pWndTreeCtrl ? pWndTreeCtrl->GetParent() : 0);
+					CDelayRedraw box(pDoc->GetBoxPropertiesDialogBar());
+					CDelayRedraw mainwnd(0, pDoc);
+
 					pDoc->New(CNewModel::Default());
 					pDoc->SetModifiedFlag(FALSE);
 					pDoc->ExecutePipeline();
@@ -368,11 +375,21 @@ void CWPhastApp::OnFileNew()
 				}
 				else if (dlg.GetAction() == CStartupDialog::SDA_IMPORT_FILE)
 				{
+					CDelayRedraw tree(pWndTreeCtrl);
+					CDelayRedraw bar(pWndTreeCtrl ? pWndTreeCtrl->GetParent() : 0);
+					CDelayRedraw box(pDoc->GetBoxPropertiesDialogBar());
+					CDelayRedraw mainwnd(0, pDoc);
+
 					pDoc->DoImport(dlg.GetFileName());
 					pDoc->ExecutePipeline();
 					return;
 				}
 			}
+
+			CDelayRedraw tree(pWndTreeCtrl);
+			CDelayRedraw bar(pWndTreeCtrl ? pWndTreeCtrl->GetParent() : 0);
+			CDelayRedraw box(pDoc->GetBoxPropertiesDialogBar());
+			CDelayRedraw mainwnd(0, pDoc);
 
 			CBitmap bmpWatermark;
 			CBitmap bmpHeader;

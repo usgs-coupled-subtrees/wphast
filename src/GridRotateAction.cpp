@@ -25,12 +25,14 @@ CGridRotateAction::~CGridRotateAction(void)
 
 void CGridRotateAction::Execute(void)
 {
-	this->WPhastDoc->SetGridKeyword(this->NewGridKeyword);
 	if (POSITION pos = this->WPhastDoc->GetFirstViewPosition())
 	{
 		CWPhastView *pView = (CWPhastView*) this->WPhastDoc->GetNextView(pos);
 		ASSERT_VALID(pView);
 		vtkCamera *camera = pView->GetRenderer()->GetActiveCamera();
+
+		pView->GetInteractor()->SetEnableRender(false);
+		this->WPhastDoc->SetGridKeyword(this->NewGridKeyword);
 
 		double midgrid[3];
 		for (int i = 0; i < 3; i++)
@@ -88,6 +90,8 @@ void CGridRotateAction::Execute(void)
 
 		trans->Delete();
 
+		pView->ResetSelection();
+		pView->GetInteractor()->SetEnableRender(true);
 		pView->GetInteractor()->Render();
 	}
 	this->WPhastDoc->UpdateAllViews(0);
@@ -95,12 +99,14 @@ void CGridRotateAction::Execute(void)
 
 void CGridRotateAction::UnExecute(void)
 {
-	this->WPhastDoc->SetGridKeyword(this->OriginalGridKeyword);
 	if (POSITION pos = this->WPhastDoc->GetFirstViewPosition())
 	{
 		CWPhastView *pView = (CWPhastView*) this->WPhastDoc->GetNextView(pos);
 		ASSERT_VALID(pView);
 		vtkCamera *camera = pView->GetRenderer()->GetActiveCamera();
+
+		pView->GetInteractor()->SetEnableRender(false);
+		this->WPhastDoc->SetGridKeyword(this->OriginalGridKeyword);
 
 		// determine grid midpoint
 		//
@@ -165,6 +171,8 @@ void CGridRotateAction::UnExecute(void)
 
 		trans->Delete();
 
+		pView->ResetSelection();
+		pView->GetInteractor()->SetEnableRender(true);
 		pView->GetInteractor()->Render();
 	}
 	this->WPhastDoc->UpdateAllViews(0);
