@@ -2905,16 +2905,6 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 				{
 					continue;
 				}
-				// special case for active property
-				// it's assumed that the default media zone
-				// is always active
-				CGridElt alt(*grid_elt_ptr);
-				if (alt.active) delete static_cast<Cproperty*>(alt.active);
-				alt.active = new Cproperty(1);
-				if (model.m_media == alt)
-				{
-					continue;
-				}
 			}
 
 			// store pre-translated polyh
@@ -5545,18 +5535,8 @@ void CWPhastDoc::GridListener(vtkObject* caller, unsigned long eid, void* client
 		case CGridActor::RotateGridEvent:
 			{
 				CGridKeyword gk = *(CGridKeyword*)calldata;
-// COMMENT: {2/3/2011 4:28:14 PM}				//{{
-// COMMENT: {2/3/2011 4:28:14 PM}				gk.m_grid_angle = 90.;
-// COMMENT: {2/3/2011 4:28:14 PM}				gk.m_grid_origin[0] = 7.;
-// COMMENT: {2/3/2011 4:28:14 PM}				gk.m_grid_origin[1] = 3.;
-// COMMENT: {2/3/2011 4:28:14 PM}				gk.m_grid_origin[2] = 0.;
-// COMMENT: {2/3/2011 4:28:14 PM}				//}}
 				CGridRotateAction* pGridRotateAction = new CGridRotateAction(self, grid, gk);
 				self->Execute(pGridRotateAction);
-				//{{
-				grid->SetEnabled(0);
-// COMMENT: {2/2/2011 11:03:12 PM}				grid->SetEnabled(1);
-				//}}
 			}
 			break;
 #endif

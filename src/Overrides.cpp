@@ -19,7 +19,7 @@ extern int accumulate(void);
 extern int backspace (FILE *file, int spaces);
 extern int bc_free(struct bc *bc_ptr);
 extern int cell_free(struct cell *cell_ptr);
-extern int check_properties(void);
+extern int check_properties(bool defaults);
 extern int chem_ic_free(struct chem_ic *chem_ic_ptr);
 extern int copy_token (char *token_ptr, char **ptr, int *length);
 extern int dup_print(const char *ptr, int emphasis);
@@ -143,7 +143,7 @@ int load(bool bWritePhastTmp)
 				output_msg(OUTPUT_STDERR, "Check properties...\n");
 				if (bWritePhastTmp)
 				{
-					check_properties();
+					check_properties(true);
 				}
 			}
 			output_msg(OUTPUT_STDERR, "Write hst...\n");
@@ -238,9 +238,9 @@ int accumulate(bool bWritePhastTmp)
 			if (simulation == 0)
 			{
 				output_msg(OUTPUT_STDERR, "Check properties...\n");
-				if (bWritePhastTmp)
+// COMMENT: {2/15/2011 4:21:36 PM}				if (bWritePhastTmp)
 				{
-					check_properties();
+					check_properties(true);
 				}
 			}
 			output_msg(OUTPUT_STDERR, "Write hst...\n");
@@ -355,71 +355,86 @@ void GetDefaultMedia(struct grid_elt* p_grid_elt)
 	assert(p_grid_elt->alpha_long);
 	assert(p_grid_elt->alpha_horizontal);
 	assert(p_grid_elt->alpha_vertical);
+	assert(p_grid_elt->tortuosity);
+
+	for (i = 0; i < nxyz; i++)
+	{
 
 	/*
 	 * Active
 	 */
-	p_grid_elt->active->type = PROP_FIXED;
-	p_grid_elt->active->count_v = 1;
-	p_grid_elt->active->v[0] = 1;
-
-	for (i = 0; i < nxyz; i++)
-	{
-		if (cells[i].is_element == FALSE) continue;
-		if (cells[i].elt_active == FALSE) continue;
-/* 
- *   Porosity
- */
-		p_grid_elt->porosity->type = PROP_FIXED;
-		p_grid_elt->porosity->count_v = 1;
-		p_grid_elt->porosity->v[0] = cells[i].porosity;
-/* 
- *   X hydraulic conductivity
- */
-		p_grid_elt->kx->type = PROP_FIXED;
-		p_grid_elt->kx->count_v = 1;
-		p_grid_elt->kx->v[0] = cells[i].kx;
-
-/* 
- *   Y hydraulic conductivity
- */
-		p_grid_elt->ky->type = PROP_FIXED;
-		p_grid_elt->ky->count_v = 1;
-		p_grid_elt->ky->v[0] = cells[i].ky;
-/* 
- *   Z hydraulic conductivity
- */
-		p_grid_elt->kz->type = PROP_FIXED;
-		p_grid_elt->kz->count_v = 1;
-		p_grid_elt->kz->v[0] = cells[i].kz;
-/* 
- *   Specific storage
- */
-		p_grid_elt->storage->type = PROP_FIXED;
-		p_grid_elt->storage->count_v = 1;
-		p_grid_elt->storage->v[0] = cells[i].storage;
-
-		if (flow_only != TRUE)
+		if (cells[i].is_element)
 		{
-/* 
- *   Longitudinal dispersivity
- */
-			p_grid_elt->alpha_long->type = PROP_FIXED;
-			p_grid_elt->alpha_long->count_v = 1;
-			p_grid_elt->alpha_long->v[0] = cells[i].alpha_long;
-/* 
- *   Horizontal dispersivity
- */
-			p_grid_elt->alpha_horizontal->type = PROP_FIXED;
-			p_grid_elt->alpha_horizontal->count_v = 1;
-			p_grid_elt->alpha_horizontal->v[0] = cells[i].alpha_horizontal;
-/* 
- *   Vertical dispersivity
- */
-			p_grid_elt->alpha_vertical->type = PROP_FIXED;
-			p_grid_elt->alpha_vertical->count_v = 1;
-			p_grid_elt->alpha_vertical->v[0] = cells[i].alpha_vertical;
+			p_grid_elt->active->type = PROP_FIXED;
+			p_grid_elt->active->count_v = 1;
+			p_grid_elt->active->v[0] = cells[i].elt_active;
+	/* 
+	 *   Porosity
+	 */
+			p_grid_elt->porosity->type = PROP_FIXED;
+			p_grid_elt->porosity->count_v = 1;
+			p_grid_elt->porosity->v[0] = cells[i].porosity;
+	/* 
+	 *   X hydraulic conductivity
+	 */
+			p_grid_elt->kx->type = PROP_FIXED;
+			p_grid_elt->kx->count_v = 1;
+			p_grid_elt->kx->v[0] = cells[i].kx;
+
+	/* 
+	 *   Y hydraulic conductivity
+	 */
+			p_grid_elt->ky->type = PROP_FIXED;
+			p_grid_elt->ky->count_v = 1;
+			p_grid_elt->ky->v[0] = cells[i].ky;
+	/* 
+	 *   Z hydraulic conductivity
+	 */
+			p_grid_elt->kz->type = PROP_FIXED;
+			p_grid_elt->kz->count_v = 1;
+			p_grid_elt->kz->v[0] = cells[i].kz;
+	/* 
+	 *   Specific storage
+	 */
+			p_grid_elt->storage->type = PROP_FIXED;
+			p_grid_elt->storage->count_v = 1;
+			p_grid_elt->storage->v[0] = cells[i].storage;
+
+			if (flow_only != TRUE)
+			{
+	/* 
+	 *   Longitudinal dispersivity
+	 */
+				p_grid_elt->alpha_long->type = PROP_FIXED;
+				p_grid_elt->alpha_long->count_v = 1;
+				p_grid_elt->alpha_long->v[0] = cells[i].alpha_long;
+	/* 
+	 *   Horizontal dispersivity
+	 */
+				p_grid_elt->alpha_horizontal->type = PROP_FIXED;
+				p_grid_elt->alpha_horizontal->count_v = 1;
+				p_grid_elt->alpha_horizontal->v[0] = cells[i].alpha_horizontal;
+	/* 
+	 *   Vertical dispersivity
+	 */
+				p_grid_elt->alpha_vertical->type = PROP_FIXED;
+				p_grid_elt->alpha_vertical->count_v = 1;
+				p_grid_elt->alpha_vertical->v[0] = cells[i].alpha_vertical;
+	/* 
+	 *   Tortuosity
+	 */
+				if (cells[i].tortuosity_defined == FALSE)
+				{
+					cells[i].tortuosity = 1.0;
+					cells[i].tortuosity_defined = TRUE;
+				}
+				p_grid_elt->tortuosity->type = PROP_FIXED;
+				p_grid_elt->tortuosity->count_v = 1;
+				p_grid_elt->tortuosity->v[0] = cells[i].tortuosity;
+
+			}
 		}
+
 		break;
 	}		
 }
@@ -438,8 +453,6 @@ void GetDefaultHeadIC(struct Head_ic* p_head_ic)
  */
 	for (i = 0; i < nxyz; i++)
 	{
-		if (cells[i].cell_active == FALSE) continue;
-
 		p_head_ic->ic_type = HIC_ZONE;
 /* 
  *   Head initial condition
@@ -471,7 +484,6 @@ void GetDefaultChemIC(struct chem_ic* p_chem_ic)
 	{
 		for (i = 0; i < nxyz; i++)
 		{
-			if (cells[i].cell_active == FALSE) continue;
 /* 
 *   Solution initial condition
 */
