@@ -140,6 +140,12 @@ BEGIN_MESSAGE_MAP(CBoxPropertiesDialogBar, CSizingDialogBarCFVS7)
 
 END_MESSAGE_MAP()
 
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
+#endif
+
 CBoxPropertiesDialogBar::CBoxPropertiesDialogBar()
  : m_pView(0)
  , m_pProp3D(0)
@@ -2838,76 +2844,152 @@ void CBoxPropertiesDialogBar::UpdatePrism(CZoneActor *pZoneActor, bool bForceUpd
 			}
 		}
 
-
 		// points
-		for (int i = 0; i < 3; ++i)
+		this->m_listPoint[PRISM_PERIMETER].clear();
+		this->m_listPoint[PRISM_BOTTOM].clear();
+		this->m_listPoint[PRISM_TOP].clear();
+
+#ifdef SAME_POINTS_AS_PERIMETER
+		if (this->m_pds[PRISM_PERIMETER]->Get_source_type() == Data_source::POINTS)
 		{
-			this->m_listPoint[i].clear();
-			if (this->m_pds[i]->Get_source_type() == Data_source::POINTS)
+			ASSERT(this->m_listPoint[PRISM_PERIMETER].size() == 0);
+			ASSERT(this->m_listPoint[PRISM_BOTTOM].size() == 0);
+			ASSERT(this->m_listPoint[PRISM_TOP].size() == 0);
+
+			Data_source::DATA_SOURCE_TYPE n_bot = this->m_pds[PRISM_BOTTOM]->Get_source_type();
+			Data_source::DATA_SOURCE_TYPE n_top = this->m_pds[PRISM_TOP]->Get_source_type();
+
+			zone *zb = this->m_pds[PRISM_BOTTOM]->Get_bounding_box();
+			ASSERT(zb->zone_defined);
+
+			zone *zt = this->m_pds[PRISM_TOP]->Get_bounding_box();
+			ASSERT(zt->zone_defined);
+
+			ASSERT(this->m_listPoint[PRISM_PERIMETER].size() == 0);
+			std::vector<Point>::iterator it = this->m_pds[PRISM_PERIMETER]->Get_points().begin();
+			for (; it != this->m_pds[PRISM_PERIMETER]->Get_points().end(); ++it)
 			{
-				std::vector<Point>::iterator it = this->m_pds[i]->Get_points().begin();
-				for (; it != this->m_pds[i]->Get_points().end(); ++it)
+				// perimeter
+				Point p(*it);
+				this->m_listPoint[PRISM_PERIMETER].push_back(p);
+
+				// bottom
+				if (n_bot == Data_source::NONE || n_bot == Data_source::CONSTANT || n_bot == Data_source::ARCRASTER)
+				{
+					this->m_listPoint[PRISM_BOTTOM].push_back(Point(it->x(), it->y(), defzone.z1));
+				}
+				else if (n_bot == Data_source::SHAPE)
+				{
+					this->m_listPoint[PRISM_BOTTOM].push_back(Point(it->x(), it->y(), zb->z1));
+				}
+
+				// top
+				if (n_top == Data_source::NONE || n_top == Data_source::CONSTANT || n_top == Data_source::ARCRASTER)
+				{
+					this->m_listPoint[PRISM_TOP].push_back(Point(it->x(), it->y(), defzone.z2));
+				}
+				else if (n_bot == Data_source::SHAPE)
+				{
+					this->m_listPoint[PRISM_TOP].push_back(Point(it->x(), it->y(), zt->z1));
+				}
+			}
+
+			// bottom
+			if (n_bot == Data_source::POINTS)
+			{
+				ASSERT(this->m_listPoint[PRISM_BOTTOM].size() == 0);
+				std::vector<Point>::iterator it = this->m_pds[PRISM_BOTTOM]->Get_points().begin();
+				for (; it != this->m_pds[PRISM_BOTTOM]->Get_points().end(); ++it)
 				{
 					Point p(*it);
-					this->m_listPoint[i].push_back(p);
+					this->m_listPoint[PRISM_BOTTOM].push_back(p);
 				}
 			}
-			else if (this->m_pds[i]->Get_source_type() == Data_source::NONE ||
-				this->m_pds[i]->Get_source_type() == Data_source::CONSTANT ||
-				this->m_pds[i]->Get_source_type() == Data_source::ARCRASTER
-				)
+
+			// top
+			if (n_top == Data_source::POINTS)
 			{
-				zone *z = &defzone; // TODO when opening wphast file no bounding_box exists??
-				ASSERT(z->zone_defined);
-				if (i == PRISM_TOP)
+				ASSERT(this->m_listPoint[PRISM_TOP].size() == 0);
+				std::vector<Point>::iterator it = this->m_pds[PRISM_TOP]->Get_points().begin();
+				for (; it != this->m_pds[PRISM_TOP]->Get_points().end(); ++it)
 				{
-					this->m_listPoint[i].push_back(Point(z->x1, z->y1, defzone.z2));
-					this->m_listPoint[i].push_back(Point(z->x2, z->y1, defzone.z2));
-					this->m_listPoint[i].push_back(Point(z->x2, z->y2, defzone.z2));
-					this->m_listPoint[i].push_back(Point(z->x1, z->y2, defzone.z2));
-				}
-				else if (i == PRISM_PERIMETER)
-				{
-					this->m_listPoint[i].push_back(Point(defzone.x1, defzone.y1, 0.0));
-					this->m_listPoint[i].push_back(Point(defzone.x2, defzone.y1, 0.0));
-					this->m_listPoint[i].push_back(Point(defzone.x2, defzone.y2, 0.0));
-					this->m_listPoint[i].push_back(Point(defzone.x1, defzone.y2, 0.0));
-				}
-				else if (i == PRISM_BOTTOM)
-				{
-					this->m_listPoint[i].push_back(Point(z->x1, z->y1, defzone.z1));
-					this->m_listPoint[i].push_back(Point(z->x2, z->y1, defzone.z1));
-					this->m_listPoint[i].push_back(Point(z->x2, z->y2, defzone.z1));
-					this->m_listPoint[i].push_back(Point(z->x1, z->y2, defzone.z1));
-				}
-			}
-			else if (this->m_pds[i]->Get_source_type() == Data_source::SHAPE)
-			{
-				zone *z = this->m_pds[i]->Get_bounding_box();
-				ASSERT(z->zone_defined);
-				if (i == PRISM_TOP)
-				{
-					this->m_listPoint[i].push_back(Point(z->x1, z->y1, z->z2));
-					this->m_listPoint[i].push_back(Point(z->x2, z->y1, z->z2));
-					this->m_listPoint[i].push_back(Point(z->x2, z->y2, z->z2));
-					this->m_listPoint[i].push_back(Point(z->x1, z->y2, z->z2));
-				}
-				else if (i == PRISM_PERIMETER)
-				{
-					this->m_listPoint[i].push_back(Point(defzone.x1, defzone.y1, 0.0));
-					this->m_listPoint[i].push_back(Point(defzone.x2, defzone.y1, 0.0));
-					this->m_listPoint[i].push_back(Point(defzone.x2, defzone.y2, 0.0));
-					this->m_listPoint[i].push_back(Point(defzone.x1, defzone.y2, 0.0));
-				}
-				else if (i == PRISM_BOTTOM)
-				{
-					this->m_listPoint[i].push_back(Point(z->x1, z->y1, z->z1));
-					this->m_listPoint[i].push_back(Point(z->x2, z->y1, z->z1));
-					this->m_listPoint[i].push_back(Point(z->x2, z->y2, z->z1));
-					this->m_listPoint[i].push_back(Point(z->x1, z->y2, z->z1));
+					Point p(*it);
+					this->m_listPoint[PRISM_TOP].push_back(p);
 				}
 			}
 		}
+		else
+#endif SAME_POINTS_AS_PERIMETER
+		{
+			for (int i = 0; i < 3; ++i)
+			{
+				if (this->m_pds[i]->Get_source_type() == Data_source::POINTS)
+				{
+					std::vector<Point>::iterator it = this->m_pds[i]->Get_points().begin();
+					for (; it != this->m_pds[i]->Get_points().end(); ++it)
+					{
+						Point p(*it);
+						this->m_listPoint[i].push_back(p);
+					}
+				}
+				else if (this->m_pds[i]->Get_source_type() == Data_source::NONE ||
+					this->m_pds[i]->Get_source_type() == Data_source::CONSTANT ||
+					this->m_pds[i]->Get_source_type() == Data_source::ARCRASTER
+					)
+				{
+					zone *z = &defzone; // TODO when opening wphast file no bounding_box exists??
+					ASSERT(z->zone_defined);
+					if (i == PRISM_TOP)
+					{
+						this->m_listPoint[i].push_back(Point(z->x1, z->y1, defzone.z2));
+						this->m_listPoint[i].push_back(Point(z->x2, z->y1, defzone.z2));
+						this->m_listPoint[i].push_back(Point(z->x2, z->y2, defzone.z2));
+						this->m_listPoint[i].push_back(Point(z->x1, z->y2, defzone.z2));
+					}
+					else if (i == PRISM_PERIMETER)
+					{
+						this->m_listPoint[i].push_back(Point(defzone.x1, defzone.y1, 0.0));
+						this->m_listPoint[i].push_back(Point(defzone.x2, defzone.y1, 0.0));
+						this->m_listPoint[i].push_back(Point(defzone.x2, defzone.y2, 0.0));
+						this->m_listPoint[i].push_back(Point(defzone.x1, defzone.y2, 0.0));
+					}
+					else if (i == PRISM_BOTTOM)
+					{
+						this->m_listPoint[i].push_back(Point(z->x1, z->y1, defzone.z1));
+						this->m_listPoint[i].push_back(Point(z->x2, z->y1, defzone.z1));
+						this->m_listPoint[i].push_back(Point(z->x2, z->y2, defzone.z1));
+						this->m_listPoint[i].push_back(Point(z->x1, z->y2, defzone.z1));
+					}
+				}
+				else if (this->m_pds[i]->Get_source_type() == Data_source::SHAPE)
+				{
+					zone *z = this->m_pds[i]->Get_bounding_box();
+					ASSERT(z->zone_defined);
+					if (i == PRISM_TOP)
+					{
+						this->m_listPoint[i].push_back(Point(z->x1, z->y1, z->z2));
+						this->m_listPoint[i].push_back(Point(z->x2, z->y1, z->z2));
+						this->m_listPoint[i].push_back(Point(z->x2, z->y2, z->z2));
+						this->m_listPoint[i].push_back(Point(z->x1, z->y2, z->z2));
+					}
+					else if (i == PRISM_PERIMETER)
+					{
+						this->m_listPoint[i].push_back(Point(defzone.x1, defzone.y1, 0.0));
+						this->m_listPoint[i].push_back(Point(defzone.x2, defzone.y1, 0.0));
+						this->m_listPoint[i].push_back(Point(defzone.x2, defzone.y2, 0.0));
+						this->m_listPoint[i].push_back(Point(defzone.x1, defzone.y2, 0.0));
+					}
+					else if (i == PRISM_BOTTOM)
+					{
+						this->m_listPoint[i].push_back(Point(z->x1, z->y1, z->z1));
+						this->m_listPoint[i].push_back(Point(z->x2, z->y1, z->z1));
+						this->m_listPoint[i].push_back(Point(z->x2, z->y2, z->z1));
+						this->m_listPoint[i].push_back(Point(z->x1, z->y2, z->z1));
+					}
+				}
+			}
+		}
+
 	}
 	TRACE("%s, out\n", __FUNCTION__);
 }
@@ -3089,7 +3171,7 @@ void CBoxPropertiesDialogBar::DoDataExchangePrism(CDataExchange *pDX, Data_sourc
 	else
 	{
 		// select radio button
-		switch(pData_source->Get_source_type())
+		switch(pData_source->Get_user_source_type())
 		{
 		case Data_source::NONE:
 			this->CheckRadioButton(IDC_RADIO_NONE, IDC_RADIO_SHAPE, IDC_RADIO_NONE);
@@ -3251,7 +3333,7 @@ void CBoxPropertiesDialogBar::DoDataExchangePrism(CDataExchange *pDX, Data_sourc
 		}
 
 		// TODO this may be redundant
-		if (pData_source->Get_source_type() == Data_source::POINTS)
+		if (pData_source->Get_user_source_type() == Data_source::POINTS)
 		{
 			this->EnablePointsGrid(TRUE);
 		}
@@ -3365,19 +3447,13 @@ void CBoxPropertiesDialogBar::ApplyNewPrism(CZoneActor *pZoneActor)
 			else if (this->m_nDataSourceType == Data_source::POINTS)
 			{
 				Data_source ds;
-				switch(this->m_nPrismPart)
-				{
-				case CBoxPropertiesDialogBar::PRISM_TOP:
-					ds = prism->top;
-					break;
-				case CBoxPropertiesDialogBar::PRISM_PERIMETER:
-					ds = prism->perimeter;
-					break;
-				case CBoxPropertiesDialogBar::PRISM_BOTTOM:
-					ds = prism->bottom;
-					break;
-				}
-				ASSERT(ds.Get_points().size() > 2);
+				ds.Set_source_type(Data_source::POINTS);
+				ds.Set_user_source_type(Data_source::POINTS);
+
+				PHAST_Transform::COORDINATE_SYSTEM c = PHAST_Transform::MAP;
+				ds.Set_coordinate_system(c);
+				ds.Set_user_coordinate_system(c);
+
 				std::vector<Point> &pts = ds.Get_points();
 				pts.clear();
 				std::list<Point>::iterator cit = this->m_listPoint[this->m_nPrismPart].begin();
