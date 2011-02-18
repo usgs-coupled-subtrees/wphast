@@ -4779,7 +4779,6 @@ void CGlobal::TextWithFormat(CDataExchange* pDX, int nIDC, LPCTSTR lpszFormat, .
 void CGlobal::DumpAndLoadPrism(const Prism &src, Prism &dest)
 {
 	// TOP
-	ASSERT(src.top.Get_source_type() != Data_source::NONE);
 	if (src.top.Get_user_source_type() != Data_source::NONE)
 	{
 		std::ostringstream oss;
@@ -4799,7 +4798,6 @@ void CGlobal::DumpAndLoadPrism(const Prism &src, Prism &dest)
 	}
 
 	// BOTTOM
-	ASSERT(src.bottom.Get_source_type() != Data_source::NONE);
 	if (src.bottom.Get_user_source_type() != Data_source::NONE)
 	{
 		std::ostringstream oss;
@@ -4819,7 +4817,6 @@ void CGlobal::DumpAndLoadPrism(const Prism &src, Prism &dest)
 	}
 
 	// PERIMETER
-	ASSERT(src.perimeter.Get_source_type() != Data_source::NONE);
 	if (src.perimeter.Get_user_source_type() != Data_source::NONE)
 	{
 		std::ostringstream oss;
