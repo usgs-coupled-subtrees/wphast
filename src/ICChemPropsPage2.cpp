@@ -164,27 +164,27 @@ void CICChemPropsPage2::DDX_Single(CDataExchange* pDX)
 		}
 		else if (this->ItemDDX == this->EquilibriumPhasesProperty.treeitem)
 		{
-			this->EquilibriumPhasesProperty.DDX_Single(pDX);
+			this->EquilibriumPhasesProperty.DDX_Single(pDX, false);
 		}
 		else if (this->ItemDDX == this->SurfaceProperty.treeitem)
 		{
-			this->SurfaceProperty.DDX_Single(pDX);
+			this->SurfaceProperty.DDX_Single(pDX, false);
 		}
 		else if (this->ItemDDX == this->ExchangeProperty.treeitem)
 		{
-			this->ExchangeProperty.DDX_Single(pDX);
+			this->ExchangeProperty.DDX_Single(pDX, false);
 		}
 		else if (this->ItemDDX == this->GasPhaseProperty.treeitem)
 		{
-			this->GasPhaseProperty.DDX_Single(pDX);
+			this->GasPhaseProperty.DDX_Single(pDX, false);
 		}
 		else if (this->ItemDDX == this->SolidSolutionsProperty.treeitem)
 		{
-			this->SolidSolutionsProperty.DDX_Single(pDX);
+			this->SolidSolutionsProperty.DDX_Single(pDX, false);
 		}
 		else if (this->ItemDDX == this->KineticsProperty.treeitem)
 		{
-			this->KineticsProperty.DDX_Single(pDX);
+			this->KineticsProperty.DDX_Single(pDX, false);
 		}
 		else
 		{
