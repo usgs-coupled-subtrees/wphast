@@ -106,6 +106,7 @@ protected:
 
 // COMMENT: {9/8/2009 8:46:00 PM}	bool                            m_bResetCamera;
 	bool                            bMovingGridLine;
+	bool                            bRotatingGrid;
 
 	// 3D Cursor
 	vtkCursor3D                    *Cursor3D;
@@ -173,6 +174,13 @@ public:
 	bool MovingGridLine(void)const;
 	void StartMoveGridLine(void);
 	void EndMoveGridLine(void);
+
+	// Rotating grid
+	//
+	void CancelRotateGrid(void);
+	bool RotatingGrid(void)const;
+	void StartRotateGrid(void);
+	void EndRotateGrid(void);
 
 	void CancelMode(void);
 
@@ -252,6 +260,11 @@ public:
 	afx_msg void OnDestroy();
 	afx_msg void OnToolsMoveVerLine();
 	afx_msg void OnUpdateToolsMoveVerLine(CCmdUI *pCmdUI);
+
+	// Rotate grid
+	afx_msg void OnToolsRotateGrid();
+	afx_msg void OnUpdateToolsRotateGrid(CCmdUI *pCmdUI);
+
 // COMMENT: {9/9/2005 6:14:50 PM}	afx_msg void OnUpdateToolsModifyGrid(CCmdUI *pCmdUI);
 	afx_msg void OnToolsModifyGrid();
 	afx_msg void OnUpdateToolsSelectObject(CCmdUI *pCmdUI);

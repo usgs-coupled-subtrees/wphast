@@ -66,7 +66,7 @@ public:
 	double GetLastDeletedValue(void) { return m_dDeletedValue; }
 
 	void GetGridKeyword(CGridKeyword& gridKeyword)const;
-	void SetGridKeyword(const CGridKeyword& gridKeyword, const CUnits& units);
+	void SetGridKeyword(const CGridKeyword& gridKeyword, const CUnits& units, bool setup = true);
 
 	BOOL DeleteLine(int nAxisIndex, int nPlaneIndex);
 	int InsertLine(int nAxisIndex, double dValue);
@@ -168,16 +168,6 @@ protected:
 	vtkTransform*       UnitsTransform;
 
 #if defined(GRID_WIDGET)
-	vtkCubeSource*      CubeSource;
-	vtkPolyDataMapper*  CubeMapper;
-	vtkActor*           CubeActor;
-
-	float HandleSize;
-	double Center[3];
-
-	virtual void SizeHandles();
-	double SizeHandles(double factor);
-
 	vtkBoxWidget2*       BoxWidget;
 #endif
 
@@ -201,7 +191,7 @@ protected:
 	///bool                m_print_input_xy;
 	CGridKeyword        m_gridKeyword;
 #if defined(GRID_WIDGET)
-	CGridKeyword        RotatedGridKeyword;
+	CGridKeyword        RotatedGridKeyword;     // used in InvokeEvent/CGridActor::RotateGridEvent
 #endif
 	CUnits              m_units;
 	// HTREEITEM           m_htiGrid;

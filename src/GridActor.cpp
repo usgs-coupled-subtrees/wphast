@@ -65,9 +65,6 @@ CGridActor::CGridActor(void)
 	, UnitsTransform(0)
 	, LinePicker(0)
 #if defined(GRID_WIDGET)
-	, CubeSource(0)
-	, CubeMapper(0)
-	, CubeActor(0)
 	, BoxWidget(0)
 #endif
 
@@ -124,36 +121,16 @@ CGridActor::CGridActor(void)
 	this->LinePicker->SetTolerance(0.002);
 
 #if defined(GRID_WIDGET)
-	this->CubeSource = vtkCubeSource::New();
-	this->CubeMapper = vtkPolyDataMapper::New();
-	this->CubeMapper->SetInput(this->CubeSource->GetOutput());
-	this->CubeActor  = vtkActor::New();
-	this->CubeActor->SetMapper(this->CubeMapper);
-	this->HandleSize = 0.008 / 1.5;
 	this->BoxWidget = vtkBoxWidget2::New();
-// COMMENT: {9/22/2010 3:50:33 PM}	//{{
-// COMMENT: {9/22/2010 3:50:33 PM}	this->BoxWidget->SetTranslationEnabled(0);
-// COMMENT: {9/22/2010 3:50:33 PM}	this->BoxWidget->SetScalingEnabled(0);
-// COMMENT: {9/22/2010 3:50:33 PM}	this->BoxWidget->SetRotationEnabled(0);
-// COMMENT: {9/22/2010 3:50:33 PM}	//}}
+	this->BoxWidget->SetTranslationEnabled(0);
+	this->BoxWidget->SetScalingEnabled(0);
+	this->BoxWidget->SetRotationEnabled(0);
 #endif
 }
 
 CGridActor::~CGridActor(void)
 {
 #if defined(GRID_WIDGET)
-	if (this->CubeSource)
-	{
-		this->CubeSource->Delete();
-	}
-	if (this->CubeMapper)
-	{
-		this->CubeMapper->Delete();
-	}
-	if (this->CubeActor)
-	{
-		this->CubeActor->Delete();
-	}
 	if (this->BoxWidget)
 	{
 		this->BoxWidget->Delete();
@@ -481,11 +458,14 @@ void CGridActor::GetGridKeyword(CGridKeyword& gridKeyword)const
 	gridKeyword = this->m_gridKeyword;
 }
 
-void CGridActor::SetGridKeyword(const CGridKeyword& gridKeyword, const CUnits& units)
+void CGridActor::SetGridKeyword(const CGridKeyword& gridKeyword, const CUnits& units, bool setup)
 {
 	this->m_gridKeyword = gridKeyword;
 	this->m_units = units;
-	this->Setup(this->m_units);
+	if (setup)
+	{
+		this->Setup(this->m_units);
+	}
 }
 
 void CGridActor::Setup(const CUnits& units)
@@ -770,8 +750,6 @@ void CGridActor::SetEnabled(int enabling)
 		this->BoxWidget->AddObserver(vtkCommand::EndInteractionEvent, 
 			this->EventCallbackCommand, 10);
 
-		this->CubeActor->SetVisibility(0);
-		this->CurrentRenderer->AddActor(this->CubeActor);
 		this->BoxWidget->SetProp3D(this);
 		this->BoxWidget->SetInteractor(i);
 		this->BoxWidget->SetPlaceFactor(1.0);
@@ -793,7 +771,6 @@ void CGridActor::SetEnabled(int enabling)
 
 #if defined(GRID_WIDGET)
 		// remove handle
-		this->CurrentRenderer->RemoveActor(this->CubeActor);
 		if (this->Interactor)
 		{
 			this->BoxWidget->SetProp3D(0);
@@ -802,6 +779,7 @@ void CGridActor::SetEnabled(int enabling)
 				this->BoxWidget->SetEnabled(enabling);
 			}
 			this->BoxWidget->RemoveObserver(this->EventCallbackCommand);
+			this->BoxWidget->Off();
 			this->Interactor->Render();
 		}
 #endif
@@ -877,12 +855,6 @@ void CGridActor::ProcessEvents(vtkObject* object, unsigned long event, void* cli
 		ASSERT(object == self->PlaneWidget);
 		self->State = CGridActor::Dragging;
 		break;
-
-#if defined(GRID_WIDGET)
-	case vtkCommand::ModifiedEvent:
-		self->SizeHandles();
-		break;
-#endif
 	}
 }
 
@@ -1892,70 +1864,3 @@ void CGridActor::OnChar(void)
 		break;
 	}
 }
-
-#if defined(GRID_WIDGET)
-void CGridActor::SizeHandles()
-{
-	if (!this->Interactor) return;
-
-	if (!this->CurrentRenderer)
-	{
-		int X = this->Interactor->GetEventPosition()[0];
-		int Y = this->Interactor->GetEventPosition()[1];
-		this->CurrentRenderer = this->Interactor->FindPokedRenderer(X, Y);
-	}
-
-// COMMENT: {1/26/2011 5:37:53 PM}	//{{
-// COMMENT: {1/26/2011 5:37:53 PM}	this->CurrentRenderer->SetWorldPoint(this->Center[0], this->Center[1], this->Center[2], 1.0);
-// COMMENT: {1/26/2011 5:37:53 PM}	this->CurrentRenderer->WorldToDisplay();
-// COMMENT: {1/26/2011 5:37:53 PM}	double pt[4];
-// COMMENT: {1/26/2011 5:37:53 PM}	this->CurrentRenderer->GetDisplayPoint(pt);
-// COMMENT: {1/26/2011 5:37:53 PM}	char buffer[80];
-// COMMENT: {1/26/2011 5:37:53 PM}	::sprintf(buffer, "GetDisplayPoint = %g, %g, %g\n", pt[0], pt[1], pt[2]);
-// COMMENT: {1/26/2011 5:37:53 PM}	::OutputDebugString(buffer);
-// COMMENT: {1/26/2011 5:37:53 PM}
-// COMMENT: {1/26/2011 5:37:53 PM}	pt[0] -= 10;
-// COMMENT: {1/26/2011 5:37:53 PM}	pt[1] -= 10;
-// COMMENT: {1/26/2011 5:37:53 PM}	this->CurrentRenderer->SetDisplayPoint(pt[0], pt[1], pt[2]);
-// COMMENT: {1/26/2011 5:37:53 PM}
-// COMMENT: {1/26/2011 5:37:53 PM}	vtkCamera* camera = this->CurrentRenderer->GetActiveCamera();
-// COMMENT: {1/26/2011 5:37:53 PM}	double *vu = camera->GetViewUp();
-// COMMENT: {1/26/2011 5:37:53 PM}	::sprintf(buffer, "GetViewUp = %g, %g, %g\n", vu[0], vu[1], vu[2]);
-// COMMENT: {1/26/2011 5:37:53 PM}	if (vu[0] > .9)
-// COMMENT: {1/26/2011 5:37:53 PM}	{
-// COMMENT: {1/26/2011 5:37:53 PM}		camera->SetViewUp(1, 0, 0);
-// COMMENT: {1/26/2011 5:37:53 PM}	}
-// COMMENT: {1/26/2011 5:37:53 PM}	::OutputDebugString(buffer);
-// COMMENT: {1/26/2011 5:37:53 PM}
-// COMMENT: {1/26/2011 5:37:53 PM}	//{{
-// COMMENT: {1/26/2011 5:37:53 PM}	double zaxis[3];
-// COMMENT: {1/26/2011 5:37:53 PM}	zaxis[0] = 0.0;
-// COMMENT: {1/26/2011 5:37:53 PM}	zaxis[1] = 0.0;
-// COMMENT: {1/26/2011 5:37:53 PM}	zaxis[2] = 1.0;
-// COMMENT: {1/26/2011 5:37:53 PM}	//}}
-// COMMENT: {1/26/2011 5:37:53 PM}
-// COMMENT: {1/26/2011 5:37:53 PM}	double worldPt[4];
-// COMMENT: {1/26/2011 5:37:53 PM}	this->CurrentRenderer->DisplayToWorld();
-// COMMENT: {1/26/2011 5:37:53 PM}	this->CurrentRenderer->GetWorldPoint(worldPt);
-// COMMENT: {1/26/2011 5:37:53 PM}	if (worldPt[3] != 0)
-// COMMENT: {1/26/2011 5:37:53 PM}	{
-// COMMENT: {1/26/2011 5:37:53 PM}		worldPt[0] /= worldPt[3];
-// COMMENT: {1/26/2011 5:37:53 PM}		worldPt[1] /= worldPt[3];
-// COMMENT: {1/26/2011 5:37:53 PM}		worldPt[2] /= worldPt[3];
-// COMMENT: {1/26/2011 5:37:53 PM}		worldPt[3] = 1.0;
-// COMMENT: {1/26/2011 5:37:53 PM}	}
-// COMMENT: {1/26/2011 5:37:53 PM}	this->CubeSource->SetCenter(worldPt[0], worldPt[1], this->Center[2]);
-// COMMENT: {1/26/2011 5:37:53 PM}	//}}
-// COMMENT: {1/26/2011 5:37:53 PM}
-// COMMENT: {1/26/2011 5:37:53 PM}	double radius = CGlobal::ComputeRadius(this->CurrentRenderer);
-// COMMENT: {1/26/2011 5:37:53 PM}
-// COMMENT: {1/26/2011 5:37:53 PM}	//for(int i=0; i<7; i++)
-// COMMENT: {1/26/2011 5:37:53 PM}	{
-// COMMENT: {1/26/2011 5:37:53 PM}		double length = 2 * CGlobal::ComputeRadius(this->CurrentRenderer) * 0.004;
-// COMMENT: {1/26/2011 5:37:53 PM}		this->CubeSource->SetXLength(length);
-// COMMENT: {1/26/2011 5:37:53 PM}		this->CubeSource->SetYLength(length);
-// COMMENT: {1/26/2011 5:37:53 PM}		this->CubeSource->SetZLength(length);
-// COMMENT: {1/26/2011 5:37:53 PM}// COMMENT: {7/22/2009 10:03:07 PM}		this->HandleGeometry[i]->SetRadius(radius);
-// COMMENT: {1/26/2011 5:37:53 PM}	}
-}
-#endif

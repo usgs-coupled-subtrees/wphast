@@ -153,6 +153,7 @@ public:
 	void SetGridKeyword(const CGridKeyword& gridKeyword);
 	void GetGridKeyword(CGridKeyword& gridKeyword)const;
 	CGridKeyword GetGridKeyword(void)const;
+	void RotateGrid(const CGridKeyword& gridKeyword);
 
 	vtkProp3D* GetGridActor(void);
 
@@ -213,9 +214,6 @@ protected:
 public:
 	void ReleaseGraphicsResources(vtkProp* pProp);
 	void ClearSelection(void);
-
-	void SaveCoorSystem(Polyhedron *poly);
-	void RestoreCoorSystem(Polyhedron *poly);
 
 // Overrides
 	public:
@@ -531,7 +529,6 @@ public:
 public:
 	afx_msg void OnToolsColors();
 	afx_msg void OnAccelerator32862();
-	afx_msg void OnToolsRotateGrid();
 };
 
 inline vtkPropAssembly* CWPhastDoc::GetPropAssemblyMedia() const

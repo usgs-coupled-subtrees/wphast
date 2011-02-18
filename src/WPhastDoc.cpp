@@ -297,7 +297,6 @@ BEGIN_MESSAGE_MAP(CWPhastDoc, CDocument)
 	// ID_TOOLS_COLORS
 	ON_COMMAND(ID_TOOLS_COLORS, &CWPhastDoc::OnToolsColors)
 	ON_COMMAND(ID_ACCELERATOR32862, &CWPhastDoc::OnAccelerator32862)
-	ON_COMMAND(ID_TOOLS_ROTATE_GRID, &CWPhastDoc::OnToolsRotateGrid)
 END_MESSAGE_MAP()
 
 #if defined(WPHAST_AUTOMATION)
@@ -5352,8 +5351,6 @@ CGridKeyword CWPhastDoc::GetGridKeyword(void)const
 
 void CWPhastDoc::SetGridKeyword(const CGridKeyword& gridKeyword)
 {
-	this->m_pGridActor->SetGridKeyword(gridKeyword, this->GetUnits());
-// COMMENT: {8/19/2009 4:35:52 PM}	this->ResizeGrid(gridKeyword.m_grid[0], gridKeyword.m_grid[1], gridKeyword.m_grid[2]);
 	this->ResizeGrid(gridKeyword);
 
 	// set grid for all zones
@@ -5378,11 +5375,8 @@ void CWPhastDoc::SetGridKeyword(const CGridKeyword& gridKeyword)
 						{
 							if (CZoneActor *pZone = CZoneActor::SafeDownCast(prop3D))
 							{
-// COMMENT: {12/30/2008 5:39:12 PM}								pZone->SetUnits(units);
-								//{{
 								pZone->SetGridAngle(gridKeyword.m_grid_angle);
 								pZone->SetGridOrigin(gridKeyword.m_grid_origin);
-								//}}
 							}
 							if (CWellActor *pWellActor = CWellActor::SafeDownCast(prop3D))
 							{
@@ -5390,10 +5384,82 @@ void CWPhastDoc::SetGridKeyword(const CGridKeyword& gridKeyword)
 							}
 							if (CPointConnectorActor *pPointConnectorActor = CPointConnectorActor::SafeDownCast(prop3D))
 							{
-// COMMENT: {12/30/2008 5:39:17 PM}								pRiverActor->SetUnits(units);
-								//{{
 								pPointConnectorActor->SetGridKeyword(gridKeyword);
-								//}}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+void CWPhastDoc::RotateGrid(const CGridKeyword& gridKeyword)
+{
+	// 2/17/2011
+	// TODO Clean this up.
+	// This replaces a call to SetGridKeyword skipping the call to
+	// CGridActor::Setup (for speed reasons)
+
+	////this->ResizeGrid(gridKeyword);
+	{
+		if (this->m_pMapActor)
+		{
+			CSiteMap2 siteMap2 = this->m_pMapActor->GetSiteMap2();
+			siteMap2.Angle = gridKeyword.m_grid_angle;
+			siteMap2.Origin[0] = gridKeyword.m_grid_origin[0];
+			siteMap2.Origin[1] = gridKeyword.m_grid_origin[1];
+			siteMap2.Origin[2] = gridKeyword.m_grid_origin[2];
+			this->m_pMapActor->SetSiteMap2(siteMap2);
+		}
+
+		// reset the grid
+		//
+		this->m_pGridActor->SetGridKeyword(gridKeyword, this->GetUnits(), false);
+		this->m_pGridActor->SetPickable(0);
+		this->m_pPropCollection->AddItem(this->m_pGridActor);
+		if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar())
+		{
+			pTree->SetGridActor(this->m_pGridActor);
+		}
+
+		// Update default zones etc.
+		//
+		////this->UpdateGridDomain();    Domains don't change on a grid rotation
+	}
+
+	// set grid for all zones
+	//
+	if (vtkPropCollection* pCollection = this->GetPropCollection())
+	{
+		vtkCollectionSimpleIterator csi;
+		pCollection->InitTraversal(csi);
+		for (int i = 0; i < pCollection->GetNumberOfItems(); ++i)
+		{
+			vtkProp* prop = pCollection->GetNextProp(csi);
+			if (vtkPropAssembly *pPropAssembly = vtkPropAssembly::SafeDownCast(prop))
+			{
+				if (vtkPropCollection *pPropCollection = pPropAssembly->GetParts())
+				{
+					vtkProp *pProp;
+					vtkCollectionSimpleIterator pcsi;
+					pPropCollection->InitTraversal(pcsi);
+					for (; (pProp = pPropCollection->GetNextProp(pcsi)); )
+					{
+						if (vtkProp3D *prop3D = vtkProp3D::SafeDownCast(pProp))
+						{
+							if (CZoneActor *pZone = CZoneActor::SafeDownCast(prop3D))
+							{
+								pZone->SetGridAngle(gridKeyword.m_grid_angle);
+								pZone->SetGridOrigin(gridKeyword.m_grid_origin);
+							}
+							if (CWellActor *pWellActor = CWellActor::SafeDownCast(prop3D))
+							{
+								pWellActor->SetGridKeyword(gridKeyword);
+							}
+							if (CPointConnectorActor *pPointConnectorActor = CPointConnectorActor::SafeDownCast(prop3D))
+							{
+								pPointConnectorActor->SetGridKeyword(gridKeyword);
 							}
 						}
 					}
@@ -7380,45 +7446,3 @@ void CWPhastDoc::AddPropAssembly(vtkPropAssembly *pPropAssembly)
 		}
 	}
 }
-
-void CWPhastDoc::OnToolsRotateGrid()
-{
-// COMMENT: {2/3/2011 9:31:20 PM}	CGridKeyword gkOrig;
-// COMMENT: {2/3/2011 9:31:20 PM}	this->GetGridKeyword(gkOrig);
-// COMMENT: {2/3/2011 9:31:20 PM}
-// COMMENT: {2/3/2011 9:31:20 PM}	gkOrig.m_grid_angle += 1.;
-// COMMENT: {2/3/2011 9:31:20 PM}	this->SetGridKeyword(gkOrig);
-// COMMENT: {2/3/2011 9:31:20 PM}
-// COMMENT: {2/3/2011 9:31:20 PM}	POSITION pos = this->GetFirstViewPosition();
-// COMMENT: {2/3/2011 9:31:20 PM}	while (pos != NULL)
-// COMMENT: {2/3/2011 9:31:20 PM}	{
-// COMMENT: {2/3/2011 9:31:20 PM}		CWPhastView *pView = (CWPhastView*) GetNextView(pos);
-// COMMENT: {2/3/2011 9:31:20 PM}		ASSERT_VALID(pView);
-// COMMENT: {2/3/2011 9:31:20 PM}		pView->RedrawWindow();
-// COMMENT: {2/3/2011 9:31:20 PM}	}
-}
-
-void CWPhastDoc::SaveCoorSystem(Polyhedron *poly)
-{
-// COMMENT: {2/10/2011 10:39:24 PM}	if (Prism *prism = dynamic_cast<Prism*>(poly))
-// COMMENT: {2/10/2011 10:39:24 PM}	{
-// COMMENT: {2/10/2011 10:39:24 PM}		prism->top.Set_coordinate_system(PHAST_Transform::NONE);
-// COMMENT: {2/10/2011 10:39:24 PM}		prism->bottom.Set_coordinate_system(PHAST_Transform::NONE);
-// COMMENT: {2/10/2011 10:39:24 PM}		prism->perimeter.Set_coordinate_system(PHAST_Transform::NONE);
-// COMMENT: {2/10/2011 10:39:24 PM}	}
-}
-
-void CWPhastDoc::RestoreCoorSystem(Polyhedron *poly)
-{
-// COMMENT: {2/10/2011 10:39:28 PM}	if (Prism *prism = dynamic_cast<Prism*>(poly))
-// COMMENT: {2/10/2011 10:39:28 PM}	{
-// COMMENT: {2/10/2011 10:39:28 PM}		ASSERT(prism->top.Get_coordinate_system()       == PHAST_Transform::NONE);
-// COMMENT: {2/10/2011 10:39:28 PM}		ASSERT(prism->bottom.Get_coordinate_system()    == PHAST_Transform::NONE);
-// COMMENT: {2/10/2011 10:39:28 PM}		ASSERT(prism->perimeter.Get_coordinate_system() == PHAST_Transform::NONE);
-// COMMENT: {2/10/2011 10:39:28 PM}
-// COMMENT: {2/10/2011 10:39:28 PM}		prism->top.Set_coordinate_system(prism->top.Get_user_coordinate_system());
-// COMMENT: {2/10/2011 10:39:28 PM}		prism->bottom.Set_coordinate_system(prism->bottom.Get_user_coordinate_system());
-// COMMENT: {2/10/2011 10:39:28 PM}		prism->perimeter.Set_coordinate_system(prism->perimeter.Get_user_coordinate_system());
-// COMMENT: {2/10/2011 10:39:28 PM}	}
-}
-

@@ -113,8 +113,12 @@ BEGIN_MESSAGE_MAP(CWPhastView, CView)
 	ON_COMMAND(ID_TOOLS_NEWRIVER, OnToolsNewRiver)
 // COMMENT: {9/8/2009 8:43:12 PM}	ON_WM_LBUTTONDBLCLK()
 	ON_WM_DESTROY()
+	// Move Grid Line
 	ON_COMMAND(ID_TOOLS_MOVE_VER_LINE, OnToolsMoveVerLine)
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_MOVE_VER_LINE, OnUpdateToolsMoveVerLine)
+	// Rotate Grid
+	ON_COMMAND(ID_TOOLS_ROTATE_GRID, &CWPhastView::OnToolsRotateGrid)
+	ON_UPDATE_COMMAND_UI(ID_TOOLS_ROTATE_GRID, &CWPhastView::OnUpdateToolsRotateGrid)
 // COMMENT: {8/29/2005 6:46:54 PM}	ON_UPDATE_COMMAND_UI(ID_TOOLS_MODIFYGRID, OnUpdateToolsModifyGrid)
 // COMMENT: {8/29/2005 6:46:54 PM}	ON_COMMAND(ID_TOOLS_MODIFYGRID, OnToolsModifyGrid)
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_SELECTOBJECT, OnUpdateToolsSelectObject)
@@ -136,6 +140,7 @@ CWPhastView::CWPhastView()
 , InteractorStyle(0)
 // COMMENT: {9/8/2009 8:42:04 PM}, m_bResetCamera(false)
 , bMovingGridLine(false)
+, bRotatingGrid(false)
 , Cursor3D(0)
 , Cursor3DMapper(0)
 , Cursor3DActor(0)
@@ -1286,8 +1291,8 @@ void CWPhastView::Select(vtkProp *pProp)
 		{
 			if (Prism *p = dynamic_cast<Prism*>(pZoneActor->GetPolyhedron()))
 			{
-				Data_source::DATA_SOURCE_TYPE s = p->perimeter.Get_source_type();
-				if (s == Data_source::POINTS)
+				Data_source::DATA_SOURCE_TYPE s = p->perimeter.Get_user_source_type();
+				if (s == Data_source::POINTS || s == Data_source::NONE)
 				{
 					this->HighlightProp(this->CurrentProp = NULL);
 
@@ -2118,6 +2123,11 @@ void CWPhastView::OnToolsMoveVerLine()
 
 void CWPhastView::OnUpdateToolsMoveVerLine(CCmdUI *pCmdUI)
 {
+#if defined(GRID_WIDGET)
+	pCmdUI->Enable(FALSE);
+	return;
+#endif
+
 	if (CGridActor* pGridActor = CGridActor::SafeDownCast(this->GetDocument()->GetGridActor()))
 	{
 		if (pGridActor->GetVisibility())
@@ -2130,6 +2140,84 @@ void CWPhastView::OnUpdateToolsMoveVerLine(CCmdUI *pCmdUI)
 		}
 
 		if (this->MovingGridLine())
+		{
+			pCmdUI->SetCheck(1);
+		}
+		else
+		{
+			pCmdUI->SetCheck(0);
+		}
+	}
+	else
+	{
+		pCmdUI->Enable(FALSE);
+	}
+}
+
+bool CWPhastView::RotatingGrid()const
+{
+	return this->bRotatingGrid;
+}
+
+void CWPhastView::EndRotateGrid()
+{
+	if (CGridActor* pGridActor = CGridActor::SafeDownCast(this->GetDocument()->GetGridActor()))
+	{
+		pGridActor->SetInteractor(this->GetInteractor());
+		pGridActor->SetEnabled(0);
+	}
+	this->bRotatingGrid = false;
+}
+
+void CWPhastView::CancelRotateGrid()
+{
+	if (this->RotatingGrid())
+	{
+		this->EndRotateGrid();
+	}
+}
+
+void CWPhastView::StartRotateGrid()
+{
+	if (CGridActor* pGridActor = CGridActor::SafeDownCast(this->GetDocument()->GetGridActor()))
+	{
+		pGridActor->SetInteractor(this->GetInteractor());
+		ASSERT(pGridActor->GetEnabled());
+		this->bRotatingGrid = true;
+	}
+}
+
+void CWPhastView::OnToolsRotateGrid()
+{
+	if (this->RotatingGrid())
+	{
+		this->CancelRotateGrid();
+	}
+	else
+	{
+		this->CancelMode();
+		this->StartRotateGrid();
+	}
+}
+
+void CWPhastView::OnUpdateToolsRotateGrid(CCmdUI *pCmdUI)
+{
+#if !defined(GRID_WIDGET)
+	pCmdUI->Enable(FALSE);
+	return;
+#endif
+	if (CGridActor* pGridActor = CGridActor::SafeDownCast(this->GetDocument()->GetGridActor()))
+	{
+		if (pGridActor->GetVisibility())
+		{
+			pCmdUI->Enable(TRUE);
+		}
+		else
+		{
+			pCmdUI->Enable(FALSE);
+		}
+
+		if (this->RotatingGrid())
 		{
 			pCmdUI->SetCheck(1);
 		}
@@ -2449,6 +2537,10 @@ void CWPhastView::CancelMode(void)
 	//
 	this->CancelMoveGridLine();
 
+	// Rotate Grid
+	//
+	this->CancelRotateGrid();
+
 	// TODO: this should be a single function
 	// ie this->GetDocument()->CancelMode()
 	if (this->GetDocument())
@@ -2615,6 +2707,7 @@ void CWPhastView::PrismWidgetListener(vtkObject *caller, unsigned long eid, void
 					{
 						Prism copy(*prism);
 						ASSERT(copy.perimeter.Get_source_type() == Data_source::POINTS);
+						ASSERT(copy.perimeter.Get_user_source_type() == Data_source::POINTS || copy.perimeter.Get_user_source_type() == Data_source::NONE);
 
 						std::vector<Point>& vect = copy.perimeter.Get_user_points();
 						vect.clear();
@@ -2635,7 +2728,7 @@ void CWPhastView::PrismWidgetListener(vtkObject *caller, unsigned long eid, void
 							// load new prism
 							Prism new_prism;
 							CGlobal::DumpAndLoadPrism(copy, new_prism);
-							ASSERT(new_prism.perimeter.Get_user_source_type() == Data_source::POINTS);
+							ASSERT(new_prism.perimeter.Get_user_source_type() == Data_source::NONE || new_prism.perimeter.Get_user_source_type() == Data_source::POINTS);
 
 							// setup domain in order to tidy
 							self->GetDocument()->GetDefaultZone(::domain);
@@ -2671,6 +2764,7 @@ void CWPhastView::PrismWidgetListener(vtkObject *caller, unsigned long eid, void
 					{
 						Prism copy(*prism);
 						ASSERT(copy.perimeter.Get_source_type() == Data_source::POINTS);
+						ASSERT(copy.perimeter.Get_user_source_type() == Data_source::POINTS || copy.perimeter.Get_user_source_type() == Data_source::NONE);
 
 						std::vector<Point>& vect = copy.perimeter.Get_user_points();
 						vect.clear();
@@ -2720,6 +2814,7 @@ void CWPhastView::PrismWidgetListener(vtkObject *caller, unsigned long eid, void
 					{
 						Prism copy(*prism);
 						ASSERT(copy.perimeter.Get_source_type() == Data_source::POINTS);
+						ASSERT(copy.perimeter.Get_user_source_type() == Data_source::POINTS || copy.perimeter.Get_user_source_type() == Data_source::NONE);
 
 						std::vector<Point>& vect = copy.perimeter.Get_user_points();
 						vect.clear();

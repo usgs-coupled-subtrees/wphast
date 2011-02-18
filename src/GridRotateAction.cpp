@@ -32,7 +32,7 @@ void CGridRotateAction::Execute(void)
 		vtkCamera *camera = pView->GetRenderer()->GetActiveCamera();
 
 		pView->GetInteractor()->SetEnableRender(false);
-		this->WPhastDoc->SetGridKeyword(this->NewGridKeyword);
+		this->WPhastDoc->RotateGrid(this->NewGridKeyword);
 
 		double midgrid[3];
 		for (int i = 0; i < 3; i++)
@@ -91,6 +91,8 @@ void CGridRotateAction::Execute(void)
 		trans->Delete();
 
 		pView->ResetSelection();
+		pView->EndRotateGrid();
+		pView->StartRotateGrid();
 		pView->GetInteractor()->SetEnableRender(true);
 		pView->GetInteractor()->Render();
 	}
@@ -106,7 +108,7 @@ void CGridRotateAction::UnExecute(void)
 		vtkCamera *camera = pView->GetRenderer()->GetActiveCamera();
 
 		pView->GetInteractor()->SetEnableRender(false);
-		this->WPhastDoc->SetGridKeyword(this->OriginalGridKeyword);
+		this->WPhastDoc->RotateGrid(this->OriginalGridKeyword);
 
 		// determine grid midpoint
 		//
@@ -172,6 +174,8 @@ void CGridRotateAction::UnExecute(void)
 		trans->Delete();
 
 		pView->ResetSelection();
+		pView->EndRotateGrid();
+		pView->StartRotateGrid();
 		pView->GetInteractor()->SetEnableRender(true);
 		pView->GetInteractor()->Render();
 	}
