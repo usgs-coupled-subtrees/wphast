@@ -157,6 +157,7 @@ BEGIN
     BUTTON      ID_TOOLS_MOVE_VER_LINE
     BUTTON      ID_TOOLS_MODIFYGRID
     BUTTON      ID_TOOLS_ROTATE_GRID
+    SEPARATOR
     BUTTON      ID_TOOLS_SELECTOBJECT
     SEPARATOR
     BUTTON      ID_FILE_RUN
@@ -391,9 +392,10 @@ BEGIN
         MENUITEM "New &Zone",                   ID_TOOLS_NEWZONE
         MENUITEM SEPARATOR
         MENUITEM "&Geometry...",                ID_TOOLS_GEOMETRY
-        MENUITEM "Move Vertical",               ID_TOOLS_MOVE_VER_LINE
-        MENUITEM "Modify Grid",                 ID_TOOLS_MODIFYGRID
-        MENUITEM "Rotate Grid",                 ID_TOOLS_ROTATE_GRID
+        MENUITEM SEPARATOR
+        MENUITEM "Move Grid &Line",             ID_TOOLS_MOVE_VER_LINE
+        MENUITEM "Modi&fy Grid",                ID_TOOLS_MODIFYGRID
+        MENUITEM "Ro&tate Grid",                ID_TOOLS_ROTATE_GRID
         MENUITEM SEPARATOR
         MENUITEM "&Select Object",              ID_TOOLS_SELECTOBJECT
         MENUITEM SEPARATOR
@@ -4534,7 +4536,6 @@ BEGIN
     ID_VIEW_RESETDEFAULTLAYOUT "Resets all toolbars to their original state"
     ID_INDICATOR_XYZ        "                                                                                "
     IDR_MAINFRAME_SDI       "Phast for Windows\n\nPhast for Windows\nPhast for Windows Files (*.wphast)\n.wphast\nPhast.Document\nPhast for Windows Document"
-    IDS_IMPORT_PHAST_TRANS_133 "Select Phast Transport File to Import from"
     ID_TOOLS_NEWZONE        "Creates a new zone\nCreate new zone"
     IDS_MEDIA_PROPS_WIZ_135 "Define media properties for this zone"
     IDS_EXPORT_PHAST_TRANS_136 "Select Phast Transport File to Export to"
@@ -4734,7 +4735,8 @@ END
 
 STRINGTABLE 
 BEGIN
-    ID_TOOLS_MOVE_VER_LINE  "TODO:\nTODO:"
+    ID_TOOLS_MOVE_VER_LINE  "Moves a grid line\nMove grid line"
+    ID_TOOLS_MODIFYGRID     "Modify grid\nModify grid"
 END
 
 STRINGTABLE 
@@ -4746,6 +4748,11 @@ END
 STRINGTABLE 
 BEGIN
     ID_TOOLS_NEWDRAIN       "Create a new drain\nCreate new drain"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_TOOLS_ROTATE_GRID    "Rotate grid\nRotate grid"
 END
 
 #endif    // English (U.S.) resources
