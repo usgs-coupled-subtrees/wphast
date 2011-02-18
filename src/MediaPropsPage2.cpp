@@ -19,6 +19,8 @@ const TCHAR STORAGE[]           = _T("Specific storage");
 const TCHAR ALPHA_LONG[]        = _T("Longitudinal dispersivity");
 const TCHAR ALPHA_HORIZONTAL[]  = _T("Horizontal dispersivity");
 const TCHAR ALPHA_VERTICAL[]    = _T("Vertical dispersivity");
+const TCHAR TORTUOSITY[]        = _T("Tortuosity");
+
 
 const int SELECTED = 0;
 const int SINGLE = 0;
@@ -41,6 +43,7 @@ CMediaPropsPage2::CMediaPropsPage2()
 	, AlphaLongProperty(this, true, false)
 	, AlphaHorizontalProperty(this, true, false)
 	, AlphaVerticalProperty(this, true, false)
+	, TortuosityProperty(this, true, false)
 	, FlowOnly(false)
 	, Default(false)
 {
@@ -57,6 +60,7 @@ CMediaPropsPage2::CMediaPropsPage2()
 	CGlobal::LoadRTFString(this->m_sAlphaLongRTF,       IDR_MEDIA_LONG_DISP_RTF);
 	CGlobal::LoadRTFString(this->m_sAlphaHorizontalRTF, IDR_MEDIA_ALPHA_HORZ_RTF);
 	CGlobal::LoadRTFString(this->m_sAlphaVerticalRTF,   IDR_MEDIA_ALPHA_VERT_RTF);
+	// TODO CGlobal::LoadRTFString(this->m_sTortuosityRTF,   IDR_MEDIA_TORTUOSITY_RTF);
 
 	TRACE("Out %s\n", __FUNCTION__);
 }
@@ -83,7 +87,8 @@ void CMediaPropsPage2::DoDataExchange(CDataExchange* pDX)
 		this->StorageProperty.treeitem         = this->TreeCtrl.InsertItem(STORAGE,          TVI_ROOT, TVI_LAST);
 		this->AlphaLongProperty.treeitem       = this->TreeCtrl.InsertItem(ALPHA_LONG,       TVI_ROOT, TVI_LAST);
 		this->AlphaHorizontalProperty.treeitem = this->TreeCtrl.InsertItem(ALPHA_HORIZONTAL, TVI_ROOT, TVI_LAST);
-		this->AlphaVerticalProperty.treeitem   = this->TreeCtrl.InsertItem(ALPHA_VERTICAL,   TVI_ROOT, TVI_LAST);
+		this->AlphaVerticalProperty.treeitem   = this->TreeCtrl.InsertItem(ALPHA_VERTICAL,   TVI_ROOT, TVI_LAST);		
+		this->TortuosityProperty.treeitem      = this->TreeCtrl.InsertItem(TORTUOSITY,       TVI_ROOT, TVI_LAST);
 
 		// setup tree selection
 		this->ItemDDX = this->ActiveProperty.treeitem;
@@ -100,6 +105,7 @@ void CMediaPropsPage2::DoDataExchange(CDataExchange* pDX)
 		this->AlphaLongProperty.SetPointsGrid(&this->PointsGrid);
 		this->AlphaHorizontalProperty.SetPointsGrid(&this->PointsGrid);
 		this->AlphaVerticalProperty.SetPointsGrid(&this->PointsGrid);
+		this->TortuosityProperty.SetPointsGrid(&this->PointsGrid);
 	}
 
 	// description
@@ -159,6 +165,10 @@ void CMediaPropsPage2::DDV_SoftValidate()
 		{
 			this->AlphaVerticalProperty.DDV_SoftValidate();
 		}
+		else if (this->ItemDDX == this->TortuosityProperty.treeitem)
+		{
+			this->TortuosityProperty.DDV_SoftValidate();
+		}
 	}
 }
 
@@ -209,6 +219,10 @@ void CMediaPropsPage2::DDX_Single(CDataExchange* pDX)
 		{
 			this->AlphaVerticalProperty.DDX_Single(pDX, false);
 		}
+		else if (this->ItemDDX == this->TortuosityProperty.treeitem)
+		{
+			this->TortuosityProperty.DDX_Single(pDX, false);
+		}
 	}
 }
 
@@ -229,6 +243,7 @@ void CMediaPropsPage2::SetProperties(const CGridElt& rGridElt)
 	this->AlphaLongProperty.SetProperty(rGridElt.alpha_long);
 	this->AlphaHorizontalProperty.SetProperty(rGridElt.alpha_horizontal);
 	this->AlphaVerticalProperty.SetProperty(rGridElt.alpha_vertical);
+	this->TortuosityProperty.SetProperty(rGridElt.tortuosity);
 
 	TRACE("Out %s\n", __FUNCTION__);
 }
@@ -249,6 +264,7 @@ void CMediaPropsPage2::GetProperties(CGridElt& rGridElt)const
 	this->AlphaLongProperty.GetProperty(rGridElt.alpha_long);
 	this->AlphaHorizontalProperty.GetProperty(rGridElt.alpha_horizontal);
 	this->AlphaVerticalProperty.GetProperty(rGridElt.alpha_vertical);
+	this->TortuosityProperty.GetProperty(rGridElt.tortuosity);
 
 	TRACE("Out %s\n", __FUNCTION__);
 }
@@ -293,6 +309,7 @@ void CMediaPropsPage2::SetPropertyDescription()
 	COMPARE_SET(ALPHA_LONG,       this->m_sAlphaLongRTF);
 	COMPARE_SET(ALPHA_HORIZONTAL, this->m_sAlphaHorizontalRTF);
 	COMPARE_SET(ALPHA_VERTICAL,   this->m_sAlphaVerticalRTF);
+	// TODO COMPARE_SET(TORTUOSITY,       this->m_sTortuosityRTF);
 }
 
 void CMediaPropsPage2::OnEnSetfocusDescEdit()
@@ -353,6 +370,10 @@ void CMediaPropsPage2::OnBnClickedButtonXYZ()
 		{
 			this->AlphaVerticalProperty.OnBnClickedButtonXYZ();
 		}
+		else if (this->ItemDDX == this->TortuosityProperty.treeitem)
+		{
+			this->TortuosityProperty.OnBnClickedButtonXYZ();
+		}
 		else
 		{
 			ASSERT(FALSE);
@@ -371,6 +392,7 @@ void CMediaPropsPage2::SetUnits(const CUnits &u)
 	this->AlphaLongProperty.SetUnits(u);
 	this->AlphaHorizontalProperty.SetUnits(u);
 	this->AlphaVerticalProperty.SetUnits(u);
+	this->TortuosityProperty.SetUnits(u);
 }
 
 void CMediaPropsPage2::OnCbnSelchangeComboProptype()
@@ -412,6 +434,10 @@ void CMediaPropsPage2::OnCbnSelchangeComboProptype()
 		else if (this->ItemDDX == this->AlphaVerticalProperty.treeitem)
 		{
 			this->AlphaVerticalProperty.OnCbnSelchangeComboProptype();
+		}
+		else if (this->ItemDDX == this->TortuosityProperty.treeitem)
+		{
+			this->TortuosityProperty.OnCbnSelchangeComboProptype();
 		}
 		else
 		{
@@ -459,6 +485,10 @@ void CMediaPropsPage2::OnBnClickedCheckMixture()
 		else if (this->ItemDDX == this->AlphaVerticalProperty.treeitem)
 		{
 			this->AlphaVerticalProperty.OnBnClickedCheckMixture();
+		}
+		else if (this->ItemDDX == this->TortuosityProperty.treeitem)
+		{
+			this->TortuosityProperty.OnBnClickedCheckMixture();
 		}
 		else
 		{

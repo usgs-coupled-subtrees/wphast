@@ -83,6 +83,7 @@ protected:
 	CGridTimeSeries AlphaLongProperty;       // single
 	CGridTimeSeries AlphaHorizontalProperty; // single
 	CGridTimeSeries AlphaVerticalProperty;   // single
+	CGridTimeSeries TortuosityProperty;      // single
 
 	// RTF strings
 	std::string m_sDescriptionRTF;       // IDR_DESCRIPTION_RTF
@@ -95,6 +96,7 @@ protected:
 	std::string m_sStorageRTF;           // IDR_MEDIA_SPEC_STORAGE_RTF
 	std::string m_sAlphaHorizontalRTF;   // IDR_MEDIA_ALPHA_HORZ_RTF
 	std::string m_sAlphaVerticalRTF;     // IDR_MEDIA_ALPHA_VERT_RTF
+	std::string m_sTortuosityRTF;        // IDR_MEDIA_TORTUOSITY_RTF
 
 	// should be member of superclass
 	CString Description;

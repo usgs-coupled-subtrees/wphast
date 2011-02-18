@@ -82,6 +82,14 @@ void CMediaZoneActor::Serialize(bool bStoring, hid_t loc_id, const CWPhastDoc* p
 		// load grid_elt
 		this->m_grid_elt.Serialize(bStoring, loc_id);
 
+		if (this->GetDefault() && this->m_grid_elt.tortuosity == 0)
+		{
+			this->m_grid_elt.tortuosity          = new Cproperty();
+			this->m_grid_elt.tortuosity->type    = PROP_FIXED;
+			this->m_grid_elt.tortuosity->count_v = 1;
+			this->m_grid_elt.tortuosity->v[0]    = 1.0;
+		}
+
 		// color
 		if (CMediaZoneActor::s_Property)
 		{
@@ -132,7 +140,6 @@ void CMediaZoneActor::Update(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent)
 
 	CString format;
 
-	//{{
 	CGridElt relative_elt(this->m_grid_elt);
 	CGridElt absolute_elt(relative_elt);
 	CFrameWnd *pFrame = (CFrameWnd*)::AfxGetApp()->m_pMainWnd;
@@ -146,7 +153,6 @@ void CMediaZoneActor::Update(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent)
 
 		this->m_grid_elt = relative_elt;
 	}
-	//}}
 
 	// active
 	if (this->m_grid_elt.active)
@@ -207,13 +213,16 @@ void CMediaZoneActor::Update(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent)
 		static_cast<Cproperty*>(this->m_grid_elt.alpha_vertical)->Insert(pTreeCtrl, htiParent, "vertical_dispersivity");
 	}
 
-	//{{
+	// tortuosity
+	if (this->m_grid_elt.tortuosity)
+	{
+		static_cast<Cproperty*>(this->m_grid_elt.tortuosity)->Insert(pTreeCtrl, htiParent, "tortuosity");
+	}
+
 	if (pFrame)
 	{
 		this->m_grid_elt = absolute_elt;
 	}
-	//}}
-
 }
 
 void CMediaZoneActor::Edit(CTreeCtrl* pTreeCtrl)

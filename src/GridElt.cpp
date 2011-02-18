@@ -42,6 +42,7 @@ void CGridElt::InternalInit(void)
 	this->alpha_trans       = 0;
 	this->alpha_horizontal  = 0;
 	this->alpha_vertical    = 0;
+	this->tortuosity        = 0;
 	this->shell             = false;
 	this->shell_width[0]    = 0;
 	this->shell_width[1]    = 0;
@@ -62,6 +63,7 @@ void CGridElt::InternalDelete(void)
 	delete static_cast<Cproperty*>(this->alpha_trans);
 	delete static_cast<Cproperty*>(this->alpha_horizontal);
 	delete static_cast<Cproperty*>(this->alpha_vertical);
+	delete static_cast<Cproperty*>(this->tortuosity);
 }
 
 CGridElt CGridElt::NewDefaults(bool bFlowOnly)
@@ -114,6 +116,11 @@ CGridElt CGridElt::NewDefaults(bool bFlowOnly)
 		elt.alpha_vertical->type      = PROP_FIXED;
 		elt.alpha_vertical->count_v   = 1;
 		elt.alpha_vertical->v[0]      = 1.0;
+
+		elt.tortuosity                = new Cproperty();
+		elt.tortuosity->type          = PROP_FIXED;
+		elt.tortuosity->count_v       = 1;
+		elt.tortuosity->v[0]          = 1.0;
 	}
 	return elt;
 }
@@ -132,6 +139,7 @@ CGridElt CGridElt::Full(void)
 	elt.alpha_trans       = new Cproperty;
 	elt.alpha_horizontal  = new Cproperty;
 	elt.alpha_vertical    = new Cproperty;
+	elt.tortuosity        = new Cproperty;
 	return elt;
 }
 
@@ -148,6 +156,7 @@ void CGridElt::Serialize(bool bStoring, hid_t loc_id)
 	static const char szAlphaTrans[]      = "alpha_trans";
 	static const char szAlphaHorizontal[] = "alpha_horizontal";
 	static const char szAlphaVertical[]   = "alpha_vertical";
+	static const char szTortuosity[]      = "tortuosity";
 	static const char szShell[]           = "shell";
 	static const char szShellWidth[]      = "shell_width";
 
@@ -164,6 +173,7 @@ void CGridElt::Serialize(bool bStoring, hid_t loc_id)
 		//Cproperty::SerializeCreate(szAlphaTrans,      static_cast<Cproperty*>(this->alpha_trans),      loc_id);
 		Cproperty::SerializeCreate(szAlphaHorizontal, static_cast<Cproperty*>(this->alpha_horizontal), loc_id);
 		Cproperty::SerializeCreate(szAlphaVertical,   static_cast<Cproperty*>(this->alpha_vertical),   loc_id);
+		Cproperty::SerializeCreate(szTortuosity,      static_cast<Cproperty*>(this->tortuosity),       loc_id);
 	}
 	else
 	{
@@ -178,6 +188,7 @@ void CGridElt::Serialize(bool bStoring, hid_t loc_id)
 		//Cproperty::SerializeOpen(szAlphaTrans,      (Cproperty**)&this->alpha_trans,      loc_id);
 		Cproperty::SerializeOpen(szAlphaHorizontal, (Cproperty**)&this->alpha_horizontal, loc_id);
 		Cproperty::SerializeOpen(szAlphaVertical,   (Cproperty**)&this->alpha_vertical,   loc_id);
+		Cproperty::SerializeOpen(szTortuosity,      (Cproperty**)&this->tortuosity,       loc_id);
 	}
 
 	CGlobal::HDFSerializeBool(bStoring, loc_id, szShell, this->shell);
@@ -276,6 +287,14 @@ void CGridElt::Dump(CDumpContext& dc)const
 		dc << "(NULL)\n";
 	dc << "</alpha_vertical>\n";
 
+	dc << "<tortuosity>\n";
+	if (this->tortuosity)
+		static_cast<Cproperty*>(this->tortuosity)->Dump(dc);
+	else
+		dc << "(NULL)\n";
+	dc << "</tortuosity>\n";
+
+
 	dc << "<shell>\n";
 	dc << this->shell << "\n";
 	dc << this->shell_width[0] << "\n";
@@ -351,6 +370,10 @@ void CGridElt::InternalCopy(const grid_elt& src)
 	// alpha_vertical
 	this->alpha_vertical = 0;
 	Cproperty::CopyProperty(&this->alpha_vertical, src.alpha_vertical);
+
+	// tortuosity
+	this->tortuosity = 0;
+	Cproperty::CopyProperty(&this->tortuosity, src.tortuosity);
 
 	// shell
 	this->shell             = src.shell;
@@ -432,6 +455,11 @@ std::ostream& operator<< (std::ostream &os, const CGridElt &a)
 	{
 		os << "\t\t-vertical_dispersivity    " << (*property_ptr);
 	}
+	property_ptr = static_cast<Cproperty*>(a.tortuosity);
+	if (property_ptr && property_ptr->type != PROP_UNDEFINED)
+	{
+		os << "\t\t-tortuosity               " << (*property_ptr);
+	}
 	if (a.shell)
 	{
 		os << "\t\t-shell " << a.shell_width[0] << " " <<  a.shell_width[1] << " " << a.shell_width[2] << "\n";
@@ -442,7 +470,7 @@ std::ostream& operator<< (std::ostream &os, const CGridElt &a)
 void CGridElt::Serialize(CArchive& ar)
 {
 	static const char szCGridElt[] = "CGridElt";
-	static int version = 3;
+	static int version = 4;
 
 	CString type;
 	int ver = version;
@@ -488,7 +516,7 @@ void CGridElt::Serialize(CArchive& ar)
 	{
 		CGlobal::Serialize(&(this->polyh), ar);
 	}
-	else if(ver == 3)
+	else if(ver >= 3)
 	{
 		CGlobal::Serialize(&(this->polyh), ar);
 
@@ -507,11 +535,6 @@ void CGridElt::Serialize(CArchive& ar)
 			ar >> this->shell_width[2];
 		}
 	}
-	else
-	{
-		ASSERT(FALSE);
-	}
-
 
 	static const char szActive[]          = "active";
 	static const char szPorosity[]        = "porosity";
@@ -522,6 +545,7 @@ void CGridElt::Serialize(CArchive& ar)
 	static const char szAlphaLong[]       = "alpha_long";
 	static const char szAlphaHorizontal[] = "alpha_horizontal";
 	static const char szAlphaVertical[]   = "alpha_vertical";
+	static const char szTortuosity[]      = "tortuosity";
 
 	Cproperty::Serial(ar, szActive,          &this->active);
 	Cproperty::Serial(ar, szPorosity,        &this->porosity);
@@ -532,6 +556,11 @@ void CGridElt::Serialize(CArchive& ar)
 	Cproperty::Serial(ar, szAlphaLong,       &this->alpha_long);
 	Cproperty::Serial(ar, szAlphaHorizontal, &this->alpha_horizontal);
 	Cproperty::Serial(ar, szAlphaVertical,   &this->alpha_vertical);
+
+	if (ver == 4)
+	{
+		Cproperty::Serial(ar, szTortuosity, &this->tortuosity);
+	}
 
 	// type and version footer
 	//
