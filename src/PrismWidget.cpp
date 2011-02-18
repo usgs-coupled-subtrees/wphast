@@ -123,7 +123,7 @@ CPrismWidget::~CPrismWidget(void)
 
 void CPrismWidget::SetEnabled(int enabling)
 {
-	const bool TurnOffTopAndBottomActors = true;
+	const bool TurnOffTopAndBottomActors = false;
 
 	TRACE("%s, in\n", __FUNCTION__);
 	if ( ! this->Interactor )
