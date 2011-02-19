@@ -34,16 +34,18 @@ void CGridRotateAction::Execute(void)
 		pView->GetInteractor()->SetEnableRender(false);
 		this->WPhastDoc->RotateGrid(this->NewGridKeyword);
 
+		// determine grid midpoint
+		//
 		double midgrid[3];
 		for (int i = 0; i < 3; i++)
 		{
-			if (this->NewGridKeyword.m_grid[0].uniform && (!this->NewGridKeyword.m_grid[0].uniform_expanded))
+			if (this->NewGridKeyword.m_grid[i].uniform && (!this->NewGridKeyword.m_grid[i].uniform_expanded))
 			{
 				midgrid[i] = (this->NewGridKeyword.m_grid[i].coord[0] + this->NewGridKeyword.m_grid[i].coord[1]) / 2.0;
 			}
 			else
 			{
-				midgrid[i] = (this->NewGridKeyword.m_grid[0].coord[0] + this->NewGridKeyword.m_grid[0].coord[this->NewGridKeyword.m_grid[0].count_coord - 1]) / 2.0;
+				midgrid[i] = (this->NewGridKeyword.m_grid[i].coord[0] + this->NewGridKeyword.m_grid[i].coord[this->NewGridKeyword.m_grid[i].count_coord - 1]) / 2.0;
 			}
 		}
 
@@ -91,8 +93,11 @@ void CGridRotateAction::Execute(void)
 		trans->Delete();
 
 		pView->ResetSelection();
-		pView->EndRotateGrid();
-		pView->StartRotateGrid();
+		if (pView->RotatingGrid())
+		{
+			pView->CancelRotateGrid();
+			pView->StartRotateGrid();
+		}
 		pView->GetInteractor()->SetEnableRender(true);
 		pView->GetInteractor()->Render();
 	}
@@ -115,13 +120,13 @@ void CGridRotateAction::UnExecute(void)
 		double midgrid[3];
 		for (int i = 0; i < 3; i++)
 		{
-			if (this->NewGridKeyword.m_grid[0].uniform && (!this->NewGridKeyword.m_grid[0].uniform_expanded))
+			if (this->NewGridKeyword.m_grid[i].uniform && (!this->NewGridKeyword.m_grid[i].uniform_expanded))
 			{
 				midgrid[i] = (this->NewGridKeyword.m_grid[i].coord[0] + this->NewGridKeyword.m_grid[i].coord[1]) / 2.0;
 			}
 			else
 			{
-				midgrid[i] = (this->NewGridKeyword.m_grid[0].coord[0] + this->NewGridKeyword.m_grid[0].coord[this->NewGridKeyword.m_grid[0].count_coord - 1]) / 2.0;
+				midgrid[i] = (this->NewGridKeyword.m_grid[i].coord[0] + this->NewGridKeyword.m_grid[i].coord[this->NewGridKeyword.m_grid[i].count_coord - 1]) / 2.0;
 			}
 		}
 
@@ -174,8 +179,11 @@ void CGridRotateAction::UnExecute(void)
 		trans->Delete();
 
 		pView->ResetSelection();
-		pView->EndRotateGrid();
-		pView->StartRotateGrid();
+		if (pView->RotatingGrid())
+		{
+			pView->CancelRotateGrid();
+			pView->StartRotateGrid();
+		}
 		pView->GetInteractor()->SetEnableRender(true);
 		pView->GetInteractor()->Render();
 	}

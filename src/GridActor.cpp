@@ -64,10 +64,8 @@ CGridActor::CGridActor(void)
 	, ScaleTransform(0)
 	, UnitsTransform(0)
 	, LinePicker(0)
-#if defined(GRID_WIDGET)
 	, BoxWidget(0)
-#endif
-
+	, IMode(CGridActor::IModeNone)
 {
 	this->m_pGeometryFilter = vtkGeometryFilter::New();
 
@@ -120,22 +118,18 @@ CGridActor::CGridActor(void)
 	this->LinePicker = vtkCellPicker::New();
 	this->LinePicker->SetTolerance(0.002);
 
-#if defined(GRID_WIDGET)
 	this->BoxWidget = vtkBoxWidget2::New();
 	this->BoxWidget->SetTranslationEnabled(0);
 	this->BoxWidget->SetScalingEnabled(0);
 	this->BoxWidget->SetRotationEnabled(0);
-#endif
 }
 
 CGridActor::~CGridActor(void)
 {
-#if defined(GRID_WIDGET)
 	if (this->BoxWidget)
 	{
 		this->BoxWidget->Delete();
 	}
-#endif
 	if (this->LinePicker)
 	{
 		this->LinePicker->Delete();
@@ -574,18 +568,6 @@ void CGridActor::Setup(const CUnits& units)
 					ASSERT(setIter != this->ValueToIndex[0].end());
 #endif
 				}
-#if defined(GRID_WIDGET)
-				if (i == 0 && j == 0 && k == 0)
-				{
-					//this->CubeSource->SetCenter(t[0], t[1], t[2]);
-					this->Center[0] = t[0];
-					this->Center[1] = t[1];
-					this->Center[2] = t[2];
-// COMMENT: {7/22/2009 10:36:57 PM}					this->CubeSource->SetXLength(500);
-// COMMENT: {7/22/2009 10:36:57 PM}					this->CubeSource->SetYLength(500);
-// COMMENT: {7/22/2009 10:36:57 PM}					this->CubeSource->SetZLength(500);
-				}
-#endif
 				points->InsertPoint(offset, t);
 #if defined(_DEBUG)
 				double tt[3];
@@ -699,11 +681,28 @@ void CGridActor::SetInteractor(vtkRenderWindowInteractor* iren)
 	this->Modified();
 }
 
+void CGridActor::SetInteractorMode(InteractorMode mode)
+{
+	this->IMode = mode;
+}
+
+CGridActor::InteractorMode CGridActor::GetInteractorMode()
+{
+	return this->IMode;
+}
+
 void CGridActor::SetEnabled(int enabling)
 {
 	if (!this->Interactor)
 	{
 		vtkErrorMacro(<<"The interactor must be set prior to enabling/disabling widget");
+		return;
+	}
+
+	if (enabling && this->IMode == CGridActor::IModeNone)
+	{
+		ASSERT(FALSE);
+		vtkErrorMacro(<<"Bad CGridActor::InteractorMode");
 		return;
 	}
 
@@ -730,32 +729,39 @@ void CGridActor::SetEnabled(int enabling)
 		this->Enabled = 1;
 
 		vtkRenderWindowInteractor *i = this->Interactor;
-#if !defined(GRID_WIDGET)			
-		// listen to the following events
-		i->AddObserver(vtkCommand::MouseMoveEvent,
-			this->EventCallbackCommand, 10);
-		i->AddObserver(vtkCommand::LeftButtonPressEvent, 
-			this->EventCallbackCommand, 10);
-		i->AddObserver(vtkCommand::LeftButtonReleaseEvent, 
-			this->EventCallbackCommand, 10);
-		i->AddObserver(vtkCommand::KeyPressEvent, 
-			this->EventCallbackCommand, 10);
-		i->AddObserver(vtkCommand::CharEvent, 
-			this->EventCallbackCommand, 10);
-#endif
 
-#if defined(GRID_WIDGET)
-		this->BoxWidget->AddObserver(vtkCommand::InteractionEvent, 
-			this->EventCallbackCommand, 10);
-		this->BoxWidget->AddObserver(vtkCommand::EndInteractionEvent, 
-			this->EventCallbackCommand, 10);
+		if (this->IMode == CGridActor::IModeMoveGridLine)
+		{
+			// listen to the following events
+			i->AddObserver(vtkCommand::MouseMoveEvent,
+				this->EventCallbackCommand, 10);
+			i->AddObserver(vtkCommand::LeftButtonPressEvent, 
+				this->EventCallbackCommand, 10);
+			i->AddObserver(vtkCommand::LeftButtonReleaseEvent, 
+				this->EventCallbackCommand, 10);
+			i->AddObserver(vtkCommand::KeyPressEvent, 
+				this->EventCallbackCommand, 10);
+			i->AddObserver(vtkCommand::CharEvent, 
+				this->EventCallbackCommand, 10);
+		}
+		else if (this->IMode == CGridActor::IModeRotateGrid)
+		{
+			this->BoxWidget->AddObserver(vtkCommand::InteractionEvent, 
+				this->EventCallbackCommand, 10);
+			this->BoxWidget->AddObserver(vtkCommand::EndInteractionEvent, 
+				this->EventCallbackCommand, 10);
 
-		this->BoxWidget->SetProp3D(this);
-		this->BoxWidget->SetInteractor(i);
-		this->BoxWidget->SetPlaceFactor(1.0);
-		this->BoxWidget->PlaceWidget(this->GetBounds());
-		this->BoxWidget->On();
-#endif
+			this->BoxWidget->SetProp3D(this);
+			this->BoxWidget->SetInteractor(i);
+			this->BoxWidget->SetPlaceFactor(1.0);
+			this->BoxWidget->PlaceWidget(this->GetBounds());
+			this->BoxWidget->On();
+		}
+		else
+		{
+			ASSERT(FALSE);
+		}
+
 	}
 
 	else //disabling-------------------------------------------------------------
@@ -769,20 +775,20 @@ void CGridActor::SetEnabled(int enabling)
 
 		this->Enabled = 0;
 
-#if defined(GRID_WIDGET)
-		// remove handle
-		if (this->Interactor)
+		if (this->IMode == CGridActor::IModeRotateGrid)
 		{
-			this->BoxWidget->SetProp3D(0);
-			if (this->BoxWidget && this->BoxWidget->GetEnabled())
+			if (this->Interactor)
 			{
-				this->BoxWidget->SetEnabled(enabling);
+				this->BoxWidget->SetProp3D(0);
+				if (this->BoxWidget && this->BoxWidget->GetEnabled())
+				{
+					this->BoxWidget->SetEnabled(enabling);
+				}
+				this->BoxWidget->RemoveObserver(this->EventCallbackCommand);
+				this->BoxWidget->Off();
+				this->Interactor->Render();
 			}
-			this->BoxWidget->RemoveObserver(this->EventCallbackCommand);
-			this->BoxWidget->Off();
-			this->Interactor->Render();
 		}
-#endif
 
 		// don't listen for events any more
 		if (this->Interactor)
@@ -795,6 +801,8 @@ void CGridActor::SetEnabled(int enabling)
 			this->Interactor->UnRegister(this);
 			this->Interactor = 0;
 		}
+
+		this->IMode = CGridActor::IModeNone;
 	}
 
 	if (this->Interactor)
@@ -803,10 +811,6 @@ void CGridActor::SetEnabled(int enabling)
 	}
 }
 
-//void CGridActor::ProcessEvents(vtkObject* vtkNotUsed(object), 
-//									   unsigned long event,
-//									   void* clientdata, 
-//									   void* vtkNotUsed(calldata))
 void CGridActor::ProcessEvents(vtkObject* object, unsigned long event, void* clientdata, void* calldata)
 {
 	CGridActor* self = reinterpret_cast<CGridActor *>( clientdata );
@@ -834,21 +838,11 @@ void CGridActor::ProcessEvents(vtkObject* object, unsigned long event, void* cli
 		break;	
 
 	case vtkCommand::InteractionEvent:
-#if !defined(GRID_WIDGET)
-		ASSERT(object == self->PlaneWidget);
-		self->OnInteraction();
-#else
 		self->OnInteraction(object);
-#endif
 		break;
 
 	case vtkCommand::EndInteractionEvent:
-#if !defined(GRID_WIDGET)
-		ASSERT(object == self->PlaneWidget);
-		self->OnEndInteraction();
-#else
 		self->OnEndInteraction(object);
-#endif
 		break;
 
 	case vtkCommand::StartInteractionEvent:
@@ -909,7 +903,6 @@ void CGridActor::OnMouseMove()
 #endif
 	ATLTRACE2(GRIDACTOR, 1, "OnMouseMove X = %d, Y= %d\n", X, Y);
 
-#if !defined(GRID_WIDGET)
 	int nPlane;
 	if (this->PlanePicker->Pick(X, Y, 0.0, this->CurrentRenderer))
 	{
@@ -935,9 +928,7 @@ void CGridActor::OnMouseMove()
 		this->Interactor->Render();
 		return;
 	}
-#endif
 
-#if !defined(GRID_WIDGET)
 	this->LinePicker->PickFromListOn();
 	this->Actor->PickableOn();
 	this->LinePicker->AddPickList(this->Actor);
@@ -1161,7 +1152,6 @@ void CGridActor::OnMouseMove()
 	}
 	this->LinePicker->DeletePickList(this->Actor);
 	this->Actor->PickableOff();
-#endif
 }
 
 void CGridActor::OnLeftButtonUp()
@@ -1216,36 +1206,14 @@ void CGridActor::OnKeyPress()
 	}
 }
 
-#if !defined(GRID_WIDGET)
-void CGridActor::OnInteraction(void)
-{
-	ATLTRACE2(GRIDACTOR, 0, "OnInteraction\n");
-	// set state
-	this->State = CGridActor::Dragging;
-
-	// HACK {{
-	extern HCURSOR Test();
-	if (s_hcur == 0)
-	{
-		s_hcur = Test();
-	}
-	if (s_hcur && (::GetAsyncKeyState(VK_CONTROL) < 0))
-	{
-		::SetCursor(s_hcur);
-	}
-	else
-	{
-		::SetCursor(::LoadCursor(NULL, IDC_ARROW));
-	}
-	// HACK }}
-}
-#else
 void CGridActor::OnInteraction(vtkObject* object)
 {
 	ATLTRACE2(GRIDACTOR, 0, "OnInteraction\n");
 
 	if (object == this->PlaneWidget)
 	{
+		ASSERT(this->IMode == CGridActor::IModeMoveGridLine);
+
 		// set state
 		this->State = CGridActor::Dragging;
 
@@ -1267,6 +1235,8 @@ void CGridActor::OnInteraction(vtkObject* object)
 	}
 	else if (object == this->BoxWidget)
 	{
+		ASSERT(this->IMode == CGridActor::IModeRotateGrid);
+
 		double* origin = this->m_gridKeyword.m_grid_origin;
 		double angle = this->m_gridKeyword.m_grid_angle;
 		ATLTRACE2(GRIDACTOR, 0, "grid orig(%g, %g, %g) angle(%g)\n", origin[0], origin[1], origin[2], angle);
@@ -1331,104 +1301,13 @@ void CGridActor::OnInteraction(vtkObject* object)
 		ASSERT(FALSE);
 	}
 }
-#endif
 
-#if !defined(GRID_WIDGET)
-void CGridActor::OnEndInteraction(void)
-{
-	if (0 <= this->AxisIndex && this->AxisIndex < 3)
-	{
-		// if Ctrl is pressed copy line otherwise move line
-		//
-		bool bMoving = !(::GetAsyncKeyState(VK_CONTROL) < 0);
-
-		// lookup current point and convert to grid index
-		//
-		std::map<float, int>::iterator setIter = this->ValueToIndex[this->AxisIndex].find(this->CurrentPoint[this->AxisIndex]);
-		if (setIter != this->ValueToIndex[this->AxisIndex].end())
-		{
-			int originalPlaneIndex = setIter->second;
-			// be careful here the iterator setIter should not be used below here
-			// because DeleteLine/InsertLine refill ValueToIndex making the
-			// interator no longer valid
-			struct GridLineMoveMemento memento;
-			memento.Uniform = this->m_gridKeyword.m_grid[this->AxisIndex].uniform;
-			double input_to_si = (this->AxisIndex == 2) ? this->m_units.vertical.input_to_si : this->m_units.horizontal.input_to_si;
-			double value = this->PlaneWidget->GetOrigin()[this->AxisIndex] / (this->GetScale()[this->AxisIndex] * input_to_si);
-			this->PlaneIndex = this->InsertLine(this->AxisIndex, value);
-			if (bMoving)
-			{
-				std::map<float, int>::iterator setIter = this->ValueToIndex[this->AxisIndex].find(this->CurrentPoint[this->AxisIndex]);
-				if (setIter != this->ValueToIndex[this->AxisIndex].end())
-				{
-					originalPlaneIndex = setIter->second;
-					//{{ BUG
-					if (!this->DeleteLine(this->AxisIndex, originalPlaneIndex))
-					{
-						ASSERT(this->PlaneIndex == -1); // no-op
-						this->State = CGridActor::Start;
-						this->AxisIndex = -1;
-						this->PlaneIndex = -1;
-						::SetCursor(::LoadCursor(NULL, IDC_ARROW));
-						return;
-					}
-					//}}
-				}
-			}
-			if (this->PlaneIndex != -1)
-			{
-				if (bMoving)
-				{
-					// the memento is the only information listeners
-					// need in order to undo/redo
-					memento.AxisIndex          = this->AxisIndex;
-					memento.OriginalPlaneIndex = originalPlaneIndex;
-					memento.NewPlaneIndex      = this->PlaneIndex;
-					memento.OriginalCoord      = this->m_dDeletedValue;
-					memento.NewCoord           = value;
-
-					// notify listeners
-					this->InvokeEvent(CGridActor::MoveGridLineEvent, &memento);
-				}
-				else
-				{
-					// at this point the variables:
-					//     AxisIndex
-					//     PlaneIndex
-					// should be valid for the listeners use
-
-					// notify listeners
-					this->InvokeEvent(CGridActor::InsertGridLineEvent, &value);
-				}
-			}
-			else
-			{
-				// PlaneIndex will be -1 if the moved line lands exactly
-				// on an existing line.  Therefore this just becomes a deleted line.
-				this->PlaneIndex = originalPlaneIndex;
-
-				// notify listeners
-				this->InvokeEvent(CGridActor::DeleteGridLineEvent, &this->m_dDeletedValue);
-			}
-		}
-		else
-		{
-			ASSERT(FALSE);
-		}
-	}
-
-	// reset state
-	//
-	this->State = CGridActor::Start;
-	this->AxisIndex = -1;
-	this->PlaneIndex = -1;
-	::SetCursor(::LoadCursor(NULL, IDC_ARROW));
-}
-#else
 void CGridActor::OnEndInteraction(vtkObject* object)
 {
 	if (object == this->PlaneWidget)
 	{
+		ASSERT(this->IMode == CGridActor::IModeMoveGridLine);
+
 		if (0 <= this->AxisIndex && this->AxisIndex < 3)
 		{
 			// if Ctrl is pressed copy line otherwise move line
@@ -1521,6 +1400,8 @@ void CGridActor::OnEndInteraction(vtkObject* object)
 	}
 	else if (object == this->BoxWidget)
 	{
+		ASSERT(this->IMode == CGridActor::IModeRotateGrid);
+
 		this->RotatedGridKeyword = this->m_gridKeyword;
 
 		double* origin = this->m_gridKeyword.m_grid_origin;
@@ -1532,15 +1413,16 @@ void CGridActor::OnEndInteraction(vtkObject* object)
 		double midgrid[3];
 		for (int i = 0; i < 3; i++)
 		{
-			if (this->m_gridKeyword.m_grid[0].uniform && (!this->m_gridKeyword.m_grid[0].uniform_expanded))
+			if (this->m_gridKeyword.m_grid[i].uniform && (!this->m_gridKeyword.m_grid[i].uniform_expanded))
 			{
 				midgrid[i] = (this->m_gridKeyword.m_grid[i].coord[0] + this->m_gridKeyword.m_grid[i].coord[1]) / 2.0;
 			}
 			else
 			{
-				midgrid[i] = (this->m_gridKeyword.m_grid[0].coord[0] + this->m_gridKeyword.m_grid[0].coord[this->m_gridKeyword.m_grid[0].count_coord - 1]) / 2.0;
+				midgrid[i] = (this->m_gridKeyword.m_grid[i].coord[0] + this->m_gridKeyword.m_grid[i].coord[this->m_gridKeyword.m_grid[i].count_coord - 1]) / 2.0;
 			}
 		}
+		ATLTRACE2(GRIDACTOR, 0, "midgrid(%g, %g, %g)\n", midgrid[0], midgrid[1], midgrid[2]);
 
 		vtkTransform *bwt = vtkTransform::New();
 		this->BoxWidget->GetTransform(bwt);
@@ -1592,7 +1474,6 @@ void CGridActor::OnEndInteraction(vtkObject* object)
 		ASSERT(FALSE);
 	}
 }
-#endif
 
 #if defined(WIN32)
 BOOL CGridActor::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)

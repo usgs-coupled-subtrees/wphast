@@ -1,9 +1,8 @@
 #pragma once
+
 #include <map>
 #include <vtkLODActor.h>
 #include <vtkAssembly.h>
-// #include "structs.h"
-///#include "Grid.h"
 #include "GridKeyword.h"
 #include "Units.h"
 #include "Snap.h"
@@ -16,12 +15,8 @@ class vtkImplicitPlaneWidget;
 class vtkBoxWidget;
 class vtkBoxWidget2;
 class CGridLineWidget;
-
 class CZone;
 
-#define GRID_WIDGET
-
-//class CGridActor : public vtkLODActor
 class CGridActor : public vtkAssembly
 {
 public:
@@ -29,14 +24,23 @@ public:
 
 	static CGridActor *New();
 
-	enum EventIds {
+	enum EventIds
+	{
 		DeleteGridLineEvent = vtkCommand::UserEvent + 600,
 		InsertGridLineEvent,
 		MoveGridLineEvent,
-#if defined(GRID_WIDGET)
 		RotateGridEvent,
-#endif
 	};
+
+	enum InteractorMode 
+	{
+		IModeNone,
+		IModeMoveGridLine,
+		IModeRotateGrid,
+	};
+
+	void SetInteractorMode(InteractorMode mode);
+	InteractorMode GetInteractorMode(void);
 
 	void SetGrid(const CGrid& x, const CGrid& y, const CGrid& z, const CUnits& units);
 	void GetGrid(CGrid& x, CGrid& y, CGrid& z)const;
@@ -92,13 +96,8 @@ public:
 	void OnLeftButtonDown(void);
 	void OnLeftButtonUp(void);
 	void OnKeyPress(void);
-#if !defined(GRID_WIDGET)
-	void OnInteraction(void);
-	void OnEndInteraction(void);
-#else
 	void OnInteraction(vtkObject* object);
 	void OnEndInteraction(vtkObject* object);
-#endif
 	void OnChar(void);
 
 
@@ -122,11 +121,6 @@ public:
 
 	void UpdateNode(void);
 
-	////void SetDimensions(int dims[3])    { m_nDimensions[0] = dims[0]; m_nDimensions[1] = dims[1]; m_nDimensions[2] = dims[2]; }
-	////void SetDimensions(int nx, int ny, int nz)    { m_nDimensions[0] = nx; m_nDimensions[1] = ny; m_nDimensions[2] = nz; }
-	////void SetCoordinates(float *xCoords, float *yCoords, float *zCoords);
-
-
 protected:
 	CGridActor(void);
 	virtual ~CGridActor(void);
@@ -140,6 +134,7 @@ protected:
 		Dragging, // Pushing,
 	};
 
+	InteractorMode IMode;
 
 	void Setup(const CUnits& units);
 	void UpdatePoints(void);
@@ -167,9 +162,7 @@ protected:
 	vtkTransform*       ScaleTransform;
 	vtkTransform*       UnitsTransform;
 
-#if defined(GRID_WIDGET)
 	vtkBoxWidget2*       BoxWidget;
-#endif
 
 	// vtkImplicitPlaneWidget    *PlaneWidget;	
 	CGridLineWidget           *PlaneWidget;
@@ -185,16 +178,9 @@ protected:
 	std::map<float, int>  ValueToIndex[3];
 
 
-	///CGrid               m_grid[3];
-	///CSnap               m_snap;
-	///int                 m_axes[3];
-	///bool                m_print_input_xy;
 	CGridKeyword        m_gridKeyword;
-#if defined(GRID_WIDGET)
 	CGridKeyword        RotatedGridKeyword;     // used in InvokeEvent/CGridActor::RotateGridEvent
-#endif
 	CUnits              m_units;
-	// HTREEITEM           m_htiGrid;
 	CTreeCtrlNode       m_node;
 
 	float               m_min[3];

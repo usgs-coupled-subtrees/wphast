@@ -2102,6 +2102,7 @@ void CWPhastView::StartMoveGridLine()
 {
 	if (CGridActor* pGridActor = CGridActor::SafeDownCast(this->GetDocument()->GetGridActor()))
 	{
+		pGridActor->SetInteractorMode(CGridActor::IModeMoveGridLine);
 		pGridActor->SetInteractor(this->GetInteractor());
 		ASSERT(pGridActor->GetEnabled());
 		this->bMovingGridLine = true;
@@ -2123,11 +2124,6 @@ void CWPhastView::OnToolsMoveVerLine()
 
 void CWPhastView::OnUpdateToolsMoveVerLine(CCmdUI *pCmdUI)
 {
-#if defined(GRID_WIDGET)
-	pCmdUI->Enable(FALSE);
-	return;
-#endif
-
 	if (CGridActor* pGridActor = CGridActor::SafeDownCast(this->GetDocument()->GetGridActor()))
 	{
 		if (pGridActor->GetVisibility())
@@ -2181,6 +2177,7 @@ void CWPhastView::StartRotateGrid()
 {
 	if (CGridActor* pGridActor = CGridActor::SafeDownCast(this->GetDocument()->GetGridActor()))
 	{
+		pGridActor->SetInteractorMode(CGridActor::IModeRotateGrid);
 		pGridActor->SetInteractor(this->GetInteractor());
 		ASSERT(pGridActor->GetEnabled());
 		this->bRotatingGrid = true;
@@ -2202,10 +2199,6 @@ void CWPhastView::OnToolsRotateGrid()
 
 void CWPhastView::OnUpdateToolsRotateGrid(CCmdUI *pCmdUI)
 {
-#if !defined(GRID_WIDGET)
-	pCmdUI->Enable(FALSE);
-	return;
-#endif
 	if (CGridActor* pGridActor = CGridActor::SafeDownCast(this->GetDocument()->GetGridActor()))
 	{
 		if (pGridActor->GetVisibility())

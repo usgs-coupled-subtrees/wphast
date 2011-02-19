@@ -439,7 +439,6 @@ CWPhastDoc::CWPhastDoc()
 	this->GridCallbackCommand->SetClientData(this);
 	this->GridCallbackCommand->SetCallback(CWPhastDoc::GridListener);
 
-	//{{
 	// grid actor
 	//
 	this->m_pGridActor = CGridActor::New();
@@ -447,12 +446,9 @@ CWPhastDoc::CWPhastDoc()
 	this->m_pGridActor->AddObserver(CGridActor::DeleteGridLineEvent, this->GridCallbackCommand);
 	this->m_pGridActor->AddObserver(CGridActor::InsertGridLineEvent, this->GridCallbackCommand);
 	this->m_pGridActor->AddObserver(CGridActor::MoveGridLineEvent,   this->GridCallbackCommand);
-#if defined(GRID_WIDGET)
 	this->m_pGridActor->AddObserver(CGridActor::RotateGridEvent,     this->GridCallbackCommand);
-#endif
 	this->m_pGridActor->SetScale(1, 1, 1);
 	this->m_pGridActor->SetPickable(0);
-	//}}
 
 	// colors
 	//
@@ -1443,10 +1439,7 @@ void CWPhastDoc::DeleteContents()
 	this->m_pGridActor->AddObserver(CGridActor::DeleteGridLineEvent, this->GridCallbackCommand);
 	this->m_pGridActor->AddObserver(CGridActor::InsertGridLineEvent, this->GridCallbackCommand);
 	this->m_pGridActor->AddObserver(CGridActor::MoveGridLineEvent,   this->GridCallbackCommand);
-#if defined(GRID_WIDGET)
 	this->m_pGridActor->AddObserver(CGridActor::RotateGridEvent,     this->GridCallbackCommand);
-#endif
-// COMMENT: {8/9/2005 7:57:14 PM}	this->m_pGridActor->GetProperty()->SetColor(1.0, 0.8, 0.6);
 	this->m_pGridActor->SetScale(1, 1, 1);
 	this->m_pGridActor->SetPickable(0);
 
@@ -5597,7 +5590,6 @@ void CWPhastDoc::GridListener(vtkObject* caller, unsigned long eid, void* client
 				self->Execute(pGridMoveLineAction);
 			}
 			break;
-#if defined(GRID_WIDGET)
 		case CGridActor::RotateGridEvent:
 			{
 				CGridKeyword gk = *(CGridKeyword*)calldata;
@@ -5605,7 +5597,6 @@ void CWPhastDoc::GridListener(vtkObject* caller, unsigned long eid, void* client
 				self->Execute(pGridRotateAction);
 			}
 			break;
-#endif
 		}
 	}
 }
