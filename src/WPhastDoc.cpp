@@ -2573,7 +2573,7 @@ void CWPhastDoc::OnCloseDocument()
 void CWPhastDoc::OnFileImport()
 {
 	CString newName;
-	if (!DoPromptFileName(newName, IDS_IMPORT_PHAST_TRANS_133, //AFX_IDS_OPENFILE,
+	if (!DoPromptFileName(newName, IDS_IMPORT_PHAST_TRANS_442, //AFX_IDS_OPENFILE,
 	  OFN_HIDEREADONLY | OFN_FILEMUSTEXIST, TRUE))
 		return; // open cancelled
 

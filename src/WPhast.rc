@@ -4755,6 +4755,11 @@ BEGIN
     ID_TOOLS_ROTATE_GRID    "Rotate grid\nRotate grid"
 END
 
+STRINGTABLE 
+BEGIN
+    IDS_IMPORT_PHAST_TRANS_442 "Select Phast Transport File to Import from"
+END
+
 #endif    // English (U.S.) resources
 /////////////////////////////////////////////////////////////////////////////
 

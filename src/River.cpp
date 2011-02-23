@@ -21,6 +21,7 @@ CLIPFORMAT CRiver::clipFormat = (CLIPFORMAT)::RegisterClipboardFormat(_T("WPhast
 
 CRiver::CRiver(void)
 : coordinate_system(PHAST_Transform::MAP)
+, z_coordinate_system_user(PHAST_Transform::MAP)
 {
 }
 
@@ -28,7 +29,11 @@ CRiver::CRiver(const River &r)
 : n_user(r.n_user)
 , description(r.description)
 , coordinate_system(r.coordinate_system)
+, z_coordinate_system_user(r.z_coordinate_system_user)
 {
+	ASSERT(this->coordinate_system        == PHAST_Transform::GRID || this->coordinate_system        == PHAST_Transform::MAP);
+	ASSERT(this->z_coordinate_system_user == PHAST_Transform::GRID || this->z_coordinate_system_user == PHAST_Transform::MAP);
+
 	// points
 	//
 	for (int ip = 0; ip < r.count_points; ++ip)

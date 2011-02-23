@@ -113,6 +113,7 @@
 #define IDR_IC_HEAD_MASK_RTF            169
 #define IDS_UNITS4_SUBTITLE_169         169
 #define IDR_IC_HEAD_HEAD_RTF            170
+#define IDS_IMPORT_PHAST_TRANS_170      170
 #define ID_FILE_RUN                     171
 #define IDR_TC_TIME_STEP_RTF            172
 #define OLD_UNITS2_PROPPAGE             173
@@ -406,6 +407,7 @@
 #define IDD_PROPS_ICCHEM2               439
 #define IDD_FLOW_RATE_PROPPAGE2         440
 #define IDD_NEW_ZONE_PROPPAGE2          441
+#define IDS_IMPORT_PHAST_TRANS_442      442
 #define IDC_EDIT_X                      1000
 #define IDC_TITLE                       1000
 #define IDC_EDIT_Y                      1001
@@ -990,7 +992,6 @@
 #define ID_CANCEL_MODE                  32866
 #define ID_TOOLS_ROTATE_GRID            32867
 #define ID_TOOLS_ROTATEGRID             32868
-#define ID_BUTTON32874                  32874
 #define IDW_CONTROLBAR_TREE             59424
 #define IDW_CONTROLBAR_BOXPROPS         59425
 #define IDC_VALUE_STATIC                65535
