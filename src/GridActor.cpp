@@ -405,9 +405,8 @@ void CGridActor::Insert(CTreeCtrlNode node)
 	}
 
 	// insert
-	this->m_gridKeyword.m_grid[0].Insert(node);
-	this->m_gridKeyword.m_grid[1].Insert(node);
-	this->m_gridKeyword.m_grid[2].Insert(node);
+	this->m_gridKeyword.Insert(node);
+	node.SetData((DWORD_PTR)this);
 
 	if (bMainExpanded)
 	{
@@ -418,16 +417,7 @@ void CGridActor::Insert(CTreeCtrlNode node)
 
 void CGridActor::Insert(CTreeCtrl* pTreeCtrl, HTREEITEM htiGrid)
 {
-	while (HTREEITEM hChild = pTreeCtrl->GetChildItem(htiGrid))
-	{
-		pTreeCtrl->DeleteItem(hChild);
-	}
-
-	this->m_gridKeyword.Insert(pTreeCtrl, htiGrid);
-
-	// set data
-	pTreeCtrl->SetItemData(htiGrid, (DWORD_PTR)this);
-	this->m_node = CTreeCtrlNode(htiGrid, (CTreeCtrlEx*)pTreeCtrl);
+	this->Insert(CTreeCtrlNode(htiGrid, static_cast<CTreeCtrlEx*>(pTreeCtrl)));
 }
 
 void CGridActor::SetGrid(const CGrid& x, const CGrid& y, const CGrid& z, const CUnits& units)
@@ -460,6 +450,11 @@ void CGridActor::SetGridKeyword(const CGridKeyword& gridKeyword, const CUnits& u
 	{
 		this->Setup(this->m_units);
 	}
+}
+
+const CUnits& CGridActor::GetUnits(void)const
+{
+	return this->m_units;
 }
 
 void CGridActor::Setup(const CUnits& units)

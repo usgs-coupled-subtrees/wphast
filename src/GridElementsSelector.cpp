@@ -25,7 +25,7 @@ CGridElementsSelector::CGridElementsSelector(void)
 , OutlineMapper(0)
 , OutlineActor(0)
 , State(CGridElementsSelector::Start)
-, SelectElementIntersection(true)
+, SelectElementIntersection(1)
 {
 	this->EventCallbackCommand->SetCallback(CGridElementsSelector::ProcessEvents);
 	this->SetKeyPressActivation(0);
@@ -210,6 +210,7 @@ void CGridElementsSelector::OnMouseMove(void)
 
 		this->GridActor->GetBounds(bounds);		
 		double *scale = this->GridActor->GetScale();
+		const CUnits& units = this->GridActor->GetUnits();
 		for (int i = 0; i < 3; ++i)
 		{
 			if (i == this->FixedCoord)
@@ -222,23 +223,51 @@ void CGridElementsSelector::OnMouseMove(void)
 				if (this->SelectElementIntersection)
 				{
 					// select intersected elements
-					this->Min[i] = this->GridKeyword.m_grid[i].upper_bound(this->OutlineSource->GetBounds()[2 * i] / scale[i]) - 1;
-					if (this->Min[i] < 0)
+					if (i == 2)
 					{
-						this->Min[i] = 0;
+						this->Min[i] = this->GridKeyword.m_grid[i].upper_bound(this->OutlineSource->GetBounds()[2 * i] / scale[i] / units.vertical.input_to_si) - 1;
+						if (this->Min[i] < 0)
+						{
+							this->Min[i] = 0;
+						}
+						this->Max[i] = this->GridKeyword.m_grid[i].lower_bound(this->OutlineSource->GetBounds()[2 * i + 1] / scale[i] / units.vertical.input_to_si);
 					}
-					this->Max[i] = this->GridKeyword.m_grid[i].lower_bound(this->OutlineSource->GetBounds()[2 * i + 1] / scale[i]);
+					else
+					{
+						this->Min[i] = this->GridKeyword.m_grid[i].upper_bound(this->OutlineSource->GetBounds()[2 * i] / scale[i] / units.horizontal.input_to_si) - 1;
+						if (this->Min[i] < 0)
+						{
+							this->Min[i] = 0;
+						}
+						this->Max[i] = this->GridKeyword.m_grid[i].lower_bound(this->OutlineSource->GetBounds()[2 * i + 1] / scale[i] / units.horizontal.input_to_si);
+					}
 				}
 				else
 				{
 					// only select interior elements
-					this->Min[i] = this->GridKeyword.m_grid[i].lower_bound(this->OutlineSource->GetBounds()[2 * i] / scale[i]);
-					this->Max[i] = this->GridKeyword.m_grid[i].upper_bound(this->OutlineSource->GetBounds()[2 * i + 1] / scale[i]) - 1;
+					if (i == 2)
+					{
+						this->Min[i] = this->GridKeyword.m_grid[i].lower_bound(this->OutlineSource->GetBounds()[2 * i] / scale[i] / units.vertical.input_to_si);
+						this->Max[i] = this->GridKeyword.m_grid[i].upper_bound(this->OutlineSource->GetBounds()[2 * i + 1] / scale[i] / units.vertical.input_to_si) - 1;
+					}
+					else
+					{
+						this->Min[i] = this->GridKeyword.m_grid[i].lower_bound(this->OutlineSource->GetBounds()[2 * i] / scale[i] / units.horizontal.input_to_si);
+						this->Max[i] = this->GridKeyword.m_grid[i].upper_bound(this->OutlineSource->GetBounds()[2 * i + 1] / scale[i] / units.horizontal.input_to_si) - 1;
+					}
 				}
 				ASSERT( 0 <= this->Min[i] && this->Min[i] < this->GridKeyword.m_grid[i].count_coord );
 				ASSERT( 0 <= this->Max[i] && this->Max[i] < this->GridKeyword.m_grid[i].count_coord );
-				bounds[2 * i]     = this->GridKeyword.m_grid[i].coord[this->Min[i]] * scale[i];
-				bounds[2 * i + 1] = this->GridKeyword.m_grid[i].coord[this->Max[i]] * scale[i];
+				if (i == 2)
+				{
+					bounds[2 * i]     = this->GridKeyword.m_grid[i].coord[this->Min[i]] * scale[i] * units.vertical.input_to_si;
+					bounds[2 * i + 1] = this->GridKeyword.m_grid[i].coord[this->Max[i]] * scale[i] * units.vertical.input_to_si;
+				}
+				else
+				{
+					bounds[2 * i]     = this->GridKeyword.m_grid[i].coord[this->Min[i]] * scale[i] * units.horizontal.input_to_si;
+					bounds[2 * i + 1] = this->GridKeyword.m_grid[i].coord[this->Max[i]] * scale[i] * units.horizontal.input_to_si;
+				}
 			}
 		}
 
@@ -392,6 +421,7 @@ void CGridElementsSelector::SetIBounds(int imin, int imax, int jmin, int jmax, i
 
 void CGridElementsSelector::SetIBounds(int ibounds[6])
 {
+	const CUnits& units = this->GridActor->GetUnits();
 	double *scale = this->GridActor->GetScale();
 	double bounds[6];
 	for (int i = 0; i < 3; ++i)
@@ -415,8 +445,16 @@ void CGridElementsSelector::SetIBounds(int ibounds[6])
 			this->Max[i] = this->GridKeyword.m_grid[i].count_coord - 1;
 		}
 
-		bounds[2 * i]     = this->GridKeyword.m_grid[i].coord[this->Min[i]] * scale[i];
-		bounds[2 * i + 1] = this->GridKeyword.m_grid[i].coord[this->Max[i]] * scale[i];
+		if (i == 2)
+		{
+			bounds[2 * i]     = this->GridKeyword.m_grid[i].coord[this->Min[i]] * scale[i] * units.vertical.input_to_si;
+			bounds[2 * i + 1] = this->GridKeyword.m_grid[i].coord[this->Max[i]] * scale[i] * units.vertical.input_to_si;
+		}
+		else
+		{
+			bounds[2 * i]     = this->GridKeyword.m_grid[i].coord[this->Min[i]] * scale[i] * units.horizontal.input_to_si;
+			bounds[2 * i + 1] = this->GridKeyword.m_grid[i].coord[this->Max[i]] * scale[i] * units.horizontal.input_to_si;
+		}
 	}
 	this->PlaceWidget(bounds);
 	if (this->Interactor) this->Interactor->Render();

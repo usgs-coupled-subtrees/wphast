@@ -367,7 +367,7 @@ void GetDefaultMedia(struct grid_elt* p_grid_elt)
 		{
 			p_grid_elt->active->type = PROP_FIXED;
 			p_grid_elt->active->count_v = 1;
-// COMMENT: {2/18/2011 11:25:10 PM}			p_grid_elt->active->v[0] = cells[i].elt_active;
+			//p_grid_elt->active->v[0] = cells[i].elt_active;
 			p_grid_elt->active->v[0] = 1;
 	/* 
 	 *   Porosity

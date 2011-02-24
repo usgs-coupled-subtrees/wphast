@@ -71,6 +71,7 @@ public:
 
 	void GetGridKeyword(CGridKeyword& gridKeyword)const;
 	void SetGridKeyword(const CGridKeyword& gridKeyword, const CUnits& units, bool setup = true);
+	const CUnits& GetUnits(void)const;
 
 	BOOL DeleteLine(int nAxisIndex, int nPlaneIndex);
 	int InsertLine(int nAxisIndex, double dValue);

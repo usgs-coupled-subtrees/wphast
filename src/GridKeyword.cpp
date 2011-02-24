@@ -98,10 +98,16 @@ std::ostream& operator<< (std::ostream &os, const CGridKeyword &a)
 
 void CGridKeyword::Insert(CTreeCtrl* pTreeCtrl, HTREEITEM htiGrid)
 {
+	CTreeCtrlNode node(htiGrid, static_cast<CTreeCtrlEx*>(pTreeCtrl));
+	this->Insert(node);
+}
+
+void CGridKeyword::Insert(CTreeCtrlNode node)
+{
 	// Lines 1-3
-	this->m_grid[0].Insert(pTreeCtrl, htiGrid);
-	this->m_grid[1].Insert(pTreeCtrl, htiGrid);
-	this->m_grid[2].Insert(pTreeCtrl, htiGrid);
+	this->m_grid[0].Insert(node);
+	this->m_grid[1].Insert(node);
+	this->m_grid[2].Insert(node);
 
 	// Lines 4-5
 	// TODO
@@ -113,19 +119,19 @@ void CGridKeyword::Insert(CTreeCtrl* pTreeCtrl, HTREEITEM htiGrid)
 	{
 		CString str;
 		str.Format("snap X %g", this->m_snap[0]);
-		pTreeCtrl->InsertItem(str, htiGrid);
+		node.AddTail(str);
 	}
 	if (this->m_snap[1] != defaultSnap[1])
 	{
 		CString str;
 		str.Format("snap Y %g", this->m_snap[1]);
-		pTreeCtrl->InsertItem(str, htiGrid);
+		node.AddTail(str);
 	}
 	if (this->m_snap[2] != defaultSnap[2])
 	{
 		CString str;
 		str.Format("snap Z %g", this->m_snap[2]);
-		pTreeCtrl->InsertItem(str, htiGrid);
+		node.AddTail(str);
 	}
 
 	// Line 7
@@ -136,17 +142,17 @@ void CGridKeyword::Insert(CTreeCtrl* pTreeCtrl, HTREEITEM htiGrid)
 		if (this->m_axes[0]) str += _T("X");
 		if (this->m_axes[1]) str += _T("Y");
 		if (this->m_axes[2]) str += _T("Z");
-		pTreeCtrl->InsertItem(str, htiGrid);
+		node.AddTail(str);
 	}
 
 	// Line 8
 	if (this->m_print_input_xy)
 	{
-		pTreeCtrl->InsertItem("print_orientation XY", htiGrid);
+		node.AddTail("print_orientation XY");
 	}
 	else
 	{
-		pTreeCtrl->InsertItem("print_orientation XZ", htiGrid);
+		node.AddTail("print_orientation XZ");
 	}
 
 	// Line 9
@@ -158,7 +164,7 @@ void CGridKeyword::Insert(CTreeCtrl* pTreeCtrl, HTREEITEM htiGrid)
 			<< this->m_grid_origin[0] << "  "
 			<< this->m_grid_origin[1] << "  "
 			<< this->m_grid_origin[2];
-		pTreeCtrl->InsertItem(oss.str().c_str(), htiGrid);
+		node.AddTail(oss.str().c_str());
 	}
 
 	// Line 10
@@ -167,6 +173,6 @@ void CGridKeyword::Insert(CTreeCtrl* pTreeCtrl, HTREEITEM htiGrid)
 		oss.precision(DBL_DIG);
 
 		oss << "grid_angle    " << this->m_grid_angle;
-		pTreeCtrl->InsertItem(oss.str().c_str(), htiGrid);
+		node.AddTail(oss.str().c_str());
 	}
 }

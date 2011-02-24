@@ -11,6 +11,7 @@ public:
 	~CGridKeyword(void);
 
 	void Insert(CTreeCtrl* pTreeCtrl, HTREEITEM htiGrid);
+	void Insert(CTreeCtrlNode node);
 
 	friend std::ostream& operator<< (std::ostream &os, const CGridKeyword &a);
 
