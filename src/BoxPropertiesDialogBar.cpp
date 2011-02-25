@@ -3455,11 +3455,14 @@ void CBoxPropertiesDialogBar::ApplyNewPrism(CZoneActor *pZoneActor)
 				ds.Set_user_coordinate_system(c);
 
 				std::vector<Point> &pts = ds.Get_points();
+				std::vector<Point> &upts = ds.Get_user_points();
 				pts.clear();
+				upts.clear();
 				std::list<Point>::iterator cit = this->m_listPoint[this->m_nPrismPart].begin();
 				for (; cit != this->m_listPoint[this->m_nPrismPart].end(); ++cit)
 				{
 					pts.push_back(*cit);
+					upts.push_back(*cit);
 				}
 				ds.Tidy(this->m_nPrismPart != CBoxPropertiesDialogBar::PRISM_PERIMETER);
 				oss << ds << std::endl;
