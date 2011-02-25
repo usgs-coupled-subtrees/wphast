@@ -363,6 +363,7 @@ BEGIN
         MENUITEM "&Hide All\tCtrl+H",           ID_VIEW_HIDEALL
         MENUITEM "Show &All\tCtrl+Shift+H",     ID_VIEW_SHOWALL
         MENUITEM SEPARATOR
+        MENUITEM "Reset &Viewpoint\tCtrl+R",    ID_VIEW_RESETVIEWPOINT
         MENUITEM "View From &Next Direction\tCtrl+D", ID_VIEW_FROM_NEXT_DIRECTION
         MENUITEM "View From &Previous Direction\tCtrl+Shift+D", ID_VIEW_FROM_PREV_DIRECTION
         POPUP "View From &Direction"
@@ -385,11 +386,13 @@ BEGIN
     END
     POPUP "&Tools"
     BEGIN
+        MENUITEM "New &Box",                    ID_TOOLS_NEWZONE
+        MENUITEM "New W&edge",                  ID_TOOLS_NEWWEDGE
+        MENUITEM "New &Prism",                  ID_TOOLS_NEWPRISM
+        MENUITEM SEPARATOR
         MENUITEM "New &Drain",                  ID_TOOLS_NEWDRAIN
         MENUITEM "New &River",                  ID_TOOLS_NEWRIVER
-        MENUITEM "New We&dge",                  ID_TOOLS_NEWWEDGE
         MENUITEM "New &Well",                   ID_TOOLS_NEWWELL
-        MENUITEM "New &Zone",                   ID_TOOLS_NEWZONE
         MENUITEM SEPARATOR
         MENUITEM "&Geometry...",                ID_TOOLS_GEOMETRY
         MENUITEM SEPARATOR
@@ -535,6 +538,7 @@ END
 IDR_MAINFRAME_SDI ACCELERATORS 
 BEGIN
     VK_OEM_3,       ID_ACCELERATOR32862,    VIRTKEY, CONTROL, NOINVERT
+    VK_ESCAPE,      ID_CANCEL_MODE,         VIRTKEY, NOINVERT
     VK_DELETE,      ID_EDIT_CLEAR,          VIRTKEY, NOINVERT
     "C",            ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
     VK_INSERT,      ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
@@ -552,6 +556,8 @@ BEGIN
     "S",            ID_FILE_SAVE,           VIRTKEY, CONTROL, NOINVERT
     VK_F6,          ID_NEXT_PANE,           VIRTKEY, NOINVERT
     VK_F6,          ID_PREV_PANE,           VIRTKEY, SHIFT, NOINVERT
+    "G",            ID_SETGRID_MODE,        VIRTKEY, NOINVERT
+    "M",            ID_SETMAP_MODE,         VIRTKEY, NOINVERT
     "L",            ID_SETPROJECTIONTO_PARALLEL, VIRTKEY, CONTROL, NOINVERT
     "L",            ID_SETPROJECTIONTO_PERSPECTIVE, VIRTKEY, SHIFT, CONTROL, NOINVERT
     VK_HOME,        ID_VIEW_FROM_MAP_NZ,    VIRTKEY, SHIFT, CONTROL, NOINVERT
@@ -566,9 +572,7 @@ BEGIN
     VK_HOME,        ID_VIEW_FROM_PZ,        VIRTKEY, NOINVERT
     "H",            ID_VIEW_HIDEALL,        VIRTKEY, CONTROL, NOINVERT
     "H",            ID_VIEW_SHOWALL,        VIRTKEY, SHIFT, CONTROL, NOINVERT
-    "G",            ID_SETGRID_MODE,        VIRTKEY, NOINVERT
-    "M",            ID_SETMAP_MODE,         VIRTKEY, NOINVERT
-    VK_ESCAPE,      ID_CANCEL_MODE,         VIRTKEY, NOINVERT
+    "R",            ID_VIEW_RESETVIEWPOINT, VIRTKEY, CONTROL, NOINVERT
 END
 
 IDR_GRID_ACCEL ACCELERATORS 
@@ -4536,7 +4540,7 @@ BEGIN
     ID_VIEW_RESETDEFAULTLAYOUT "Resets all toolbars to their original state"
     ID_INDICATOR_XYZ        "                                                                                "
     IDR_MAINFRAME_SDI       "Phast for Windows\n\nPhast for Windows\nPhast for Windows Files (*.wphast)\n.wphast\nPhast.Document\nPhast for Windows Document"
-    ID_TOOLS_NEWZONE        "Creates a new zone\nCreate new zone"
+    ID_TOOLS_NEWZONE        "Creates a new box\nCreate new box"
     IDS_MEDIA_PROPS_WIZ_135 "Define media properties for this zone"
     IDS_EXPORT_PHAST_TRANS_136 "Select Phast Transport File to Export to"
     IDS_UNITS1_CAPTION_137  "New Model Wizard"

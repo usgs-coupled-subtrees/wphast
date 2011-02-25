@@ -273,6 +273,7 @@ public:
 	afx_msg void OnSetGridMode();
 	afx_msg void OnSetMapMode();
 	afx_msg void OnCancelMode();
+	afx_msg void OnViewResetviewpoint();
 };
 
 #ifndef _DEBUG  // debug version in WPhastView.cpp

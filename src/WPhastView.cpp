@@ -126,6 +126,7 @@ BEGIN_MESSAGE_MAP(CWPhastView, CView)
 	ON_COMMAND(ID_SETGRID_MODE, &CWPhastView::OnSetGridMode)
 	ON_COMMAND(ID_SETMAP_MODE, &CWPhastView::OnSetMapMode)
 	ON_COMMAND(ID_CANCEL_MODE, &CWPhastView::OnCancelMode)
+	ON_COMMAND(ID_VIEW_RESETVIEWPOINT, &CWPhastView::OnViewResetviewpoint)
 END_MESSAGE_MAP()
 
 // CWPhastView construction/destruction
@@ -2957,6 +2958,18 @@ void CWPhastView::ResetSelection()
 		if (vtkProp3D* prop = picker->GetProp3D())
 		{
 			this->Select(prop);
+		}
+	}
+}
+
+void CWPhastView::OnViewResetviewpoint()
+{
+	if (vtkRenderer *r = this->GetRenderer())
+	{
+		r->ResetCamera();
+		if (vtkRenderWindowInteractor *rwi = this->GetInteractor())
+		{
+			rwi->Render();
 		}
 	}
 }
