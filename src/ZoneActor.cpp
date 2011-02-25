@@ -436,7 +436,6 @@ void CZoneActor::SetName(LPCTSTR name)
 {
 	ASSERT(name != NULL);
 	this->m_name = name;
-	this->UpdateNameDesc();
 }
 
 LPCTSTR CZoneActor::GetName(void)const
@@ -457,7 +456,6 @@ void CZoneActor::SetDesc(LPCTSTR desc)
 	{
 		(*this->GetPolyhedron()->Get_description()) = "";
 	}
-	this->UpdateNameDesc();
 }
 
 LPCTSTR CZoneActor::GetDesc(void)const
@@ -465,8 +463,9 @@ LPCTSTR CZoneActor::GetDesc(void)const
 	return const_cast<CZoneActor*>(this)->GetPolyhedron()->Get_description()->c_str();
 }
 
-LPCTSTR CZoneActor::GetNameDesc(void)const
+LPCTSTR CZoneActor::GetNameDesc(void)
 {
+	this->UpdateNameDesc();
 	return this->m_name_desc.c_str();
 }
 
@@ -499,30 +498,16 @@ void CZoneActor::SetBounds(float xMin, float xMax, float yMin, float yMax, float
 			zMin,
 			zMax
 			);
-// COMMENT: {1/13/2011 9:58:23 PM}		if (c->Get_user_coordinate_system() == PHAST_Transform::MAP)
-// COMMENT: {1/13/2011 9:58:23 PM}		{
-// COMMENT: {1/13/2011 9:58:23 PM}			vtkTransform *user = vtkTransform::New();
-// COMMENT: {1/13/2011 9:58:23 PM}			user->Scale(
-// COMMENT: {1/13/2011 9:58:23 PM}				this->GeometryScale[0] * rUnits.map_horizontal.input_to_si,
-// COMMENT: {1/13/2011 9:58:23 PM}				this->GeometryScale[1] * rUnits.map_horizontal.input_to_si,
-// COMMENT: {1/13/2011 9:58:23 PM}				this->GeometryScale[2] * rUnits.map_vertical.input_to_si);
-// COMMENT: {1/13/2011 9:58:23 PM}			user->RotateZ(-this->GridAngle);
-// COMMENT: {1/13/2011 9:58:23 PM}			user->Translate(-this->GridOrigin[0], -this->GridOrigin[1], -this->GridOrigin[2]);
-// COMMENT: {1/13/2011 9:58:23 PM}			this->SetUserTransform(user);
-// COMMENT: {1/13/2011 9:58:23 PM}			user->Delete();
-// COMMENT: {1/13/2011 9:58:23 PM}		}
-// COMMENT: {1/13/2011 9:58:23 PM}		else
-// COMMENT: {1/13/2011 9:58:23 PM}		{
-// COMMENT: {1/13/2011 9:58:23 PM}			this->SetUserTransform(0);
-// COMMENT: {1/13/2011 9:58:23 PM}		}
 	}
 
 	this->SetUnits(rUnits);
 
 	PHAST_Transform::COORDINATE_SYSTEM cs = PHAST_Transform::GRID;
 	bool domain = false;
+	std::string desc;
 	if (this->GetPolyhedron())
 	{
+		desc = this->GetDesc();
 		if (dynamic_cast<Domain*>(this->GetPolyhedron()))
 		{
 			domain = true;
@@ -550,6 +535,7 @@ void CZoneActor::SetBounds(float xMin, float xMax, float yMin, float yMax, float
 	{
 		this->GetPolyhedron() = new Wedge(&zone, srcWedgeSource::GetWedgeOrientationString(this->GetChopType()), cs);
 	}
+	(*this->GetPolyhedron()->Get_description()) = desc;
 }
 
 void CZoneActor::SetBounds(const CZone& rZone, const CUnits& rUnits)

@@ -35,6 +35,7 @@ CZoneSetPolyAction::CZoneSetPolyAction(CWPhastView* pView, CZoneActor* pZoneActo
 
 	this->OriginalPoly = this->ZoneActor->GetPolyhedron()->clone();
 	this->OriginalName = this->ZoneActor->GetName();
+	(*this->NewPoly->Get_description()) = this->ZoneActor->GetDesc();
 }
 
 CZoneSetPolyAction::~CZoneSetPolyAction(void)

@@ -25,6 +25,10 @@ CZonePrismResetAction::CZonePrismResetAction(CWPhastView* pView, CZoneActor* pZo
 	ASSERT(this->NewPrism);
 
 	this->Store();
+
+	// copy description
+	(*this->NewPrism->Get_description()) = pZoneActor->GetDesc();
+
 	TRACE("%s, out\n", __FUNCTION__);
 }
 

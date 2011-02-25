@@ -85,7 +85,7 @@ void CBCZoneActor::InsertAt(CTreeCtrl* pTreeCtrl, HTREEITEM hParent, HTREEITEM h
 	this->Update(pTreeCtrl, this->m_hti);
 }
 
-CString CBCZoneActor::GetTreeHeading(void)const
+CString CBCZoneActor::GetTreeHeading(void)
 {
 	CString str;
 	// UNDEFINED, SPECIFIED, FLUX, LEAKY

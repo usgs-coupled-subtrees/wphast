@@ -72,7 +72,7 @@ public:
 	void SetDesc(LPCTSTR name);
 	LPCTSTR GetDesc(void)const;
 
-	LPCTSTR GetNameDesc(void)const;
+	LPCTSTR GetNameDesc(void);
 
 	virtual void Insert(CPropertyTreeControlBar* pTreeControlBar, HTREEITEM hInsertAfter = TVI_LAST) = 0;
 

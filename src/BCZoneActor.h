@@ -31,7 +31,7 @@ public:
 
 	static void SetStaticColor(int bc_type, COLORREF cr); 
 
-	CString GetTreeHeading(void)const;
+	CString GetTreeHeading(void);
 
 	void Update(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent, const CBC& crBC);
 	void Update(CTreeCtrl* pTreeCtrl);
