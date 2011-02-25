@@ -520,6 +520,7 @@ void CZoneWidgetResizeAction::Store()
 		}
 		pPolyData->Delete();
 	}
+	(*this->m_NewPolyHedron->Get_description()) = this->m_pActor->GetDesc();
 }
 
 void CZoneWidgetResizeAction::Execute(void)
