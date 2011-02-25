@@ -5659,7 +5659,10 @@ void CWPhastDoc::UpdateGridDomain(void)
 		}
 	}
 
-#ifdef SKIP
+	CGrid x, y, z;
+	this->GetGrid(x, y, z);
+	z.Setup();
+
 	// update rivers
 	//
 	if (vtkPropAssembly *pPropAssembly = this->GetPropAssemblyRivers())
@@ -5671,30 +5674,38 @@ void CWPhastDoc::UpdateGridDomain(void)
 			pPropCollection->InitTraversal(csi);
 			for (; (pProp = pPropCollection->GetNextProp(csi)); )
 			{
-				if (CRiverActor* pRiverActor = CRiverActor::SafeDownCast(pProp))
+				if (CPointConnectorActor* pActor = CPointConnectorActor::SafeDownCast(pProp))
 				{
-					// update radius
-					//
-					pRiverActor->ScaleFromBounds(this->GetGridBounds());
-					TRACE("pRiverActor->ScaleFromBounds\n");
-
-					//
-					//
-					CGrid x, y, z;
-					this->GetGrid(x, y, z);
-					z.Setup();
-					pRiverActor->SetZ(z.coord[z.count_coord - 1]);
+					pActor->SetZ(z.coord[z.count_coord - 1]);
 				}
 			}
 		}
 	}
 
+	// update drains
+	//
+	if (vtkPropAssembly *pPropAssembly = this->GetPropAssemblyDrains())
+	{
+		if (vtkPropCollection *pPropCollection = pPropAssembly->GetParts())
+		{
+			vtkProp *pProp;
+			vtkCollectionSimpleIterator csi;
+			pPropCollection->InitTraversal(csi);
+			for (; (pProp = pPropCollection->GetNextProp(csi)); )
+			{
+				if (CPointConnectorActor* pActor = CPointConnectorActor::SafeDownCast(pProp))
+				{
+					pActor->SetZ(z.coord[z.count_coord - 1]);
+				}
+			}
+		}
+	}
+
+
 	// update wells
 	//
 	if (vtkPropAssembly *pPropAssembly = this->GetPropAssemblyWells())
 	{
-		CGrid xyz[3];
-		this->GetGrid(xyz[0], xyz[1], xyz[2]);
 		if (vtkPropCollection *pPropCollection = pPropAssembly->GetParts())
 		{
 			vtkProp *pProp;
@@ -5706,26 +5717,17 @@ void CWPhastDoc::UpdateGridDomain(void)
 				{
 					// update height
 					//
-					pWellActor->SetZAxis(xyz[2], this->GetUnits());
+					pWellActor->SetZAxis(z, this->GetUnits());
 
-					// update radius
-					//
-// COMMENT: {8/16/2005 6:59:13 PM}					pWellActor->SetDefaultTubeDiameter(defaultAxesSize * 0.17 / sqrt(scale[0] * scale[1]));
-					pWellActor->SetDefaultTubeDiameter(defaultAxesSize * 0.17);
-					TRACE("pWellActor->SetDefaultTubeDiameter = %g\n", defaultAxesSize * 0.17);
 				}
 			}
 		}
 	}
-#endif
 
 	// update possible selection
 	//
 	this->Notify(this, WPN_DOMAIN_CHANGED, 0, 0);
 
-// COMMENT: {1/25/2011 7:04:09 PM}	// refresh screen
-// COMMENT: {1/25/2011 7:04:09 PM}	//
-// COMMENT: {1/25/2011 7:04:09 PM}	this->UpdateAllViews(0);
 	// refresh screen
 	//
 	this->UpdateAllViews(0);
