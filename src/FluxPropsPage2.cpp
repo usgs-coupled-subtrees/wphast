@@ -128,6 +128,12 @@ void CFluxPropsPage2::DoDataExchange(CDataExchange* pDX)
 		}
 	}
 
+	// solution type
+	if (pDX->m_bSaveAndValidate)
+	{
+		this->BC.bc_solution_type = ST_ASSOCIATED;
+	}
+
 	// time series
 	if (pDX->m_bSaveAndValidate)
 	{

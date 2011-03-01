@@ -692,6 +692,8 @@ void CBC::Serialize(CArchive& ar)
 
 std::ostream& operator<< (std::ostream &os, const CBC &a)
 {
+	ASSERT(a.m_bc_solution.size() == 0 || a.bc_solution_type != ST_UNDEFINED);
+
 	if (!a.ContainsProperties())
 	{
 #if defined(_DEBUG)

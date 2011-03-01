@@ -143,6 +143,12 @@ void CLeakyPropsPage::DoDataExchange(CDataExchange* pDX)
 		}
 	}
 
+	// solution type
+	if (pDX->m_bSaveAndValidate)
+	{
+		this->BC.bc_solution_type = ST_ASSOCIATED;
+	}
+
 	// properties
 	if (pDX->m_bSaveAndValidate)
 	{
