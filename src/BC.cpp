@@ -771,72 +771,21 @@ std::ostream& operator<< (std::ostream &os, const CBC &a)
 		if (a.m_bc_head.size())
 		{
 			os << "\t\t-head\n";
-			CTimeSeries<Cproperty>::const_iterator iter = a.m_bc_head.begin();
-			for (; iter != a.m_bc_head.end(); ++iter)
-			{
-				ASSERT((*iter).second.type != PROP_UNDEFINED);
-				if ((*iter).second.type == PROP_UNDEFINED) continue;
-
-				os << "\t\t\t";
-				if ((*iter).first.input)
-				{
-					os << (*iter).first.value << " " << (*iter).first.input;
-				}
-				else
-				{
-					os << (*iter).first.value;
-				}
-				os << "\t";
-				os << (*iter).second;
-			}
+			os << a.m_bc_head;
 		}
 
 		// associated_solution
 		if (a.m_bc_solution.size() && a.bc_solution_type == ST_ASSOCIATED)
 		{
 			os << "\t\t-associated_solution\n";
-			CTimeSeries<Cproperty>::const_iterator iter = a.m_bc_solution.begin();
-			for (; iter != a.m_bc_solution.end(); ++iter)
-			{
-				ASSERT((*iter).second.type != PROP_UNDEFINED);
-				if ((*iter).second.type == PROP_UNDEFINED) continue;
-
-				os << "\t\t\t";
-				if ((*iter).first.input)
-				{
-					os << (*iter).first.value << " " << (*iter).first.input;
-				}
-				else
-				{
-					os << (*iter).first.value;
-				}
-				os << "\t";
-				os << (*iter).second;
-			}
+			os << a.m_bc_solution;
 		}
 
 		// fixed_solution
 		if (a.m_bc_solution.size() && a.bc_solution_type == ST_FIXED)
 		{
 			os << "\t\t-fixed_solution\n";
-			CTimeSeries<Cproperty>::const_iterator iter = a.m_bc_solution.begin();
-			for (; iter != a.m_bc_solution.end(); ++iter)
-			{
-				ASSERT((*iter).second.type != PROP_UNDEFINED);
-				if ((*iter).second.type == PROP_UNDEFINED) continue;
-
-				os << "\t\t\t";
-				if ((*iter).first.input)
-				{
-					os << (*iter).first.value << " " << (*iter).first.input;
-				}
-				else
-				{
-					os << (*iter).first.value;
-				}
-				os << "\t";
-				os << (*iter).second;
-			}
+			os << a.m_bc_solution;
 		}
 
 		break;
@@ -866,48 +815,14 @@ std::ostream& operator<< (std::ostream &os, const CBC &a)
 		if (a.m_bc_solution.size() && a.bc_solution_type == ST_ASSOCIATED)
 		{
 			os << "\t\t-associated_solution\n";
-			CTimeSeries<Cproperty>::const_iterator iter = a.m_bc_solution.begin();
-			for (; iter != a.m_bc_solution.end(); ++iter)
-			{
-				ASSERT((*iter).second.type != PROP_UNDEFINED);
-				if ((*iter).second.type == PROP_UNDEFINED) continue;
-
-				os << "\t\t\t";
-				if ((*iter).first.input)
-				{
-					os << (*iter).first.value << " " << (*iter).first.input;
-				}
-				else
-				{
-					os << (*iter).first.value;
-				}
-				os << "\t";
-				os << (*iter).second;
-			}
+			os << a.m_bc_solution;
 		}
 
 		// flux
 		if (a.m_bc_flux.size())
 		{
 			os << "\t\t-flux\n";
-			CTimeSeries<Cproperty>::const_iterator iter = a.m_bc_flux.begin();
-			for (; iter != a.m_bc_flux.end(); ++iter)
-			{
-				ASSERT((*iter).second.type != PROP_UNDEFINED);
-				if ((*iter).second.type == PROP_UNDEFINED) continue;
-
-				os << "\t\t\t";
-				if ((*iter).first.input)
-				{
-					os << (*iter).first.value << " " << (*iter).first.input;
-				}
-				else
-				{
-					os << (*iter).first.value;
-				}
-				os << "\t";
-				os << (*iter).second;
-			}
+			os << a.m_bc_flux;
 		}
 
 		break;
@@ -937,48 +852,14 @@ std::ostream& operator<< (std::ostream &os, const CBC &a)
 		if (a.m_bc_solution.size() && a.bc_solution_type == ST_ASSOCIATED)
 		{
 			os << "\t\t-associated_solution\n";
-			CTimeSeries<Cproperty>::const_iterator iter = a.m_bc_solution.begin();
-			for (; iter != a.m_bc_solution.end(); ++iter)
-			{
-				ASSERT((*iter).second.type != PROP_UNDEFINED);
-				if ((*iter).second.type == PROP_UNDEFINED) continue;
-
-				os << "\t\t\t";
-				if ((*iter).first.input)
-				{
-					os << (*iter).first.value << " " << (*iter).first.input;
-				}
-				else
-				{
-					os << (*iter).first.value;
-				}
-				os << "\t";
-				os << (*iter).second;
-			}
+			os << a.m_bc_solution;
 		}
 
 		// head
 		if (a.m_bc_head.size())
 		{
 			os << "\t\t-head\n";
-			CTimeSeries<Cproperty>::const_iterator iter = a.m_bc_head.begin();
-			for (; iter != a.m_bc_head.end(); ++iter)
-			{
-				ASSERT((*iter).second.type != PROP_UNDEFINED);
-				if ((*iter).second.type == PROP_UNDEFINED) continue;
-
-				os << "\t\t\t";
-				if ((*iter).first.input)
-				{
-					os << (*iter).first.value << " " << (*iter).first.input;
-				}
-				else
-				{
-					os << (*iter).first.value;
-				}
-				os << "\t";
-				os << (*iter).second;
-			}
+			os << a.m_bc_head;
 		}
 
 		// hydraulic_conductivity

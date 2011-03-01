@@ -1121,7 +1121,7 @@ std::ostream& operator<< (std::ostream &os, const Cproperty &a)
 			ASSERT(a.data_source);
 			cs = a.data_source->Get_user_coordinate_system();
 			ASSERT(cs >= PHAST_Transform::MAP && cs <= PHAST_Transform::NONE);
-			os << "XYZ" << coor_name[cs] << a.data_source->Get_file_name().c_str() << std::endl;
+			os << "XYZT" << coor_name[cs] << a.data_source->Get_file_name().c_str() << std::endl;
 			break;
 		default:
 			ASSERT(FALSE);

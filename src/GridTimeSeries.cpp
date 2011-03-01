@@ -521,9 +521,16 @@ void CGridTimeSeries::SetSeries(const CTimeSeries<Cproperty> &series)
 {
 	this->FreeVectors();
 
+	std::string fname;
+	bool bLastWasXYZT = false;
+
 	CTimeSeries<Cproperty>::const_iterator fit = series.begin();
-	for (int row = 1; fit != series.end(); ++fit, ++row)
+	for (int row = 1; fit != series.end(); ++fit)
 	{
+		ASSERT((*fit).second.type != PROP_UNDEFINED);
+		if ((*fit).second.type == PROP_UNDEFINED) continue;
+		if (bLastWasXYZT && (*fit).second.type == PROP_XYZT && (fname == (*fit).second.data_source->Get_file_name())) continue;
+
 		// Ctime
 		this->v_times[row] = new Ctime((*fit).first);
 
@@ -577,6 +584,18 @@ void CGridTimeSeries::SetSeries(const CTimeSeries<Cproperty> &series)
 		{
 			(*this->vv_props[mt])[row] = new Cproperty(*(*this->vv_props[SELECTED])[row]);
 		}
+
+		if ((*fit).second.type == PROP_XYZT)
+		{
+			fname = (*fit).second.data_source->Get_file_name();
+			ASSERT(fname.size());
+			bLastWasXYZT = true;
+		}
+		else
+		{
+			bLastWasXYZT = false;
+		}
+		++row;
 	}
 }
 

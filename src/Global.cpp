@@ -3496,7 +3496,12 @@ herr_t CGlobal::HDFSerializeData_source(bool bStoring, hid_t loc_id, const char*
 						}
 						break;
 					case Data_source::XYZT:
-						ASSERT(FALSE);
+						{
+							// TODO this may need additional work
+							std::string filename(rData_source.Get_file_name());
+							status = HDFSerializeString(bStoring, ds_gr_id, szfile_name, filename);
+							ASSERT(status >= 0);
+						}
 						break;
 					case Data_source::CONSTANT:
 						{
@@ -3639,7 +3644,13 @@ herr_t CGlobal::HDFSerializeData_source(bool bStoring, hid_t loc_id, const char*
 						}
 						break;
 					case Data_source::XYZT:
-						ASSERT(FALSE);
+						{
+							// TODO this may need additional work
+							std::string filename;
+							status = HDFSerializeString(bStoring, ds_gr_id, szfile_name, filename);
+							ASSERT(status >= 0);
+							rData_source.Set_file_name(filename);
+						}
 						break;
 					case Data_source::CONSTANT:
 						{
@@ -3765,7 +3776,7 @@ herr_t CGlobal::HDFSerializeData_source(bool bStoring, hid_t loc_id, const char*
 				rData_source.Set_user_coordinate_system(nValue);
 
 				Data_source::DATA_SOURCE_TYPE ds = rData_source.Get_source_type();
-				ASSERT(ds != Data_source::XYZT);
+				if (ds == Data_source::XYZT) TRACE("WARNING: ds == Data_source::XYZT FakeFiledata may be needed\n");
 				if (ds == Data_source::SHAPE || ds == Data_source::ARCRASTER || ds == Data_source::XYZ)
 				{
 					if (ds != Data_source::SHAPE) ASSERT(rData_source.Get_attribute() == -1);

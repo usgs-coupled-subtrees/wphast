@@ -10,6 +10,8 @@
 
 #include "time.h"
 
+class Cproperty;
+
 template<typename T>
 class CTimeSeries : public std::map<Ctime, T>
 {
@@ -51,5 +53,7 @@ inline void CTimeSeries<T>::SerializeOpen(const char *heading, CTimeSeries<T>& s
 		::H5Gclose(group_id);
 	}
 }
+
+std::ostream& operator<< (std::ostream &os, const CTimeSeries<Cproperty> &a);
 
 #endif

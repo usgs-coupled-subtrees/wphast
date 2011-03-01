@@ -45,6 +45,43 @@ CTimeSeries<Cproperty>& CTimeSeries<Cproperty>::operator=(const struct time_seri
 	return *this;
 }
 
+std::ostream& operator<< (std::ostream &os, const CTimeSeries<Cproperty> &a)
+{
+	std::string fname;
+	bool bLastWasXYZT = false;
+	CTimeSeries<Cproperty>::const_iterator iter = a.begin();
+	for (; iter != a.end(); ++iter)
+	{
+		ASSERT((*iter).second.type != PROP_UNDEFINED);
+		if ((*iter).second.type == PROP_UNDEFINED) continue;
+		if (bLastWasXYZT && (*iter).second.type == PROP_XYZT && (fname == (*iter).second.data_source->Get_file_name())) continue;
+
+		os << "\t\t\t";
+		if ((*iter).first.input)
+		{
+			os << (*iter).first.value << " " << (*iter).first.input;
+		}
+		else
+		{
+			os << (*iter).first.value;
+		}
+		os << "\t";
+		os << (*iter).second;
+
+		if ((*iter).second.type == PROP_XYZT)
+		{
+			fname = (*iter).second.data_source->Get_file_name();
+			ASSERT(fname.size());
+			bLastWasXYZT = true;
+		}
+		else
+		{
+			bLastWasXYZT = false;
+		}
+	}
+	return os;
+}
+
 // specialization for Cproperty
 template<>
 CTimeSeries<Cproperty>& CTimeSeries<Cproperty>::Append(const struct time_series& rhs)
@@ -136,11 +173,15 @@ HTREEITEM CTimeSeries<Cproperty>::InsertItem(CTreeCtrl* pTreeCtrl, LPCTSTR lpszH
 	if (!pTreeCtrl || this->size() == 0) return item;
 
 	item = pTreeCtrl->InsertItem(lpszHeading, hParent, hInsertAfter);
+
+	std::string fname;
+	bool bLastWasXYZT = false;
 	CTimeSeries<Cproperty>::const_iterator iter = this->begin();
 	for (; iter != this->end(); ++iter)
 	{
 		ASSERT((*iter).second.type != PROP_UNDEFINED);
 		if ((*iter).second.type == PROP_UNDEFINED) continue;
+		if (bLastWasXYZT && (*iter).second.type == PROP_XYZT && (fname == (*iter).second.data_source->Get_file_name())) continue;
 
 		CString str;
 		if ((*iter).first.input)
@@ -152,6 +193,17 @@ HTREEITEM CTimeSeries<Cproperty>::InsertItem(CTreeCtrl* pTreeCtrl, LPCTSTR lpszH
 			str.Format("%g", (*iter).first.value);
 		}
 		iter->second.Insert(pTreeCtrl, item, str);
+
+		if ((*iter).second.type == PROP_XYZT)
+		{
+			fname = (*iter).second.data_source->Get_file_name();
+			ASSERT(fname.size());
+			bLastWasXYZT = true;
+		}
+		else
+		{
+			bLastWasXYZT = false;
+		}
 	}
 	return item;
 }
