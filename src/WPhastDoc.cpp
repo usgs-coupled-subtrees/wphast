@@ -296,7 +296,6 @@ BEGIN_MESSAGE_MAP(CWPhastDoc, CDocument)
 
 	// ID_TOOLS_COLORS
 	ON_COMMAND(ID_TOOLS_COLORS, &CWPhastDoc::OnToolsColors)
-	ON_COMMAND(ID_ACCELERATOR32862, &CWPhastDoc::OnAccelerator32862)
 END_MESSAGE_MAP()
 
 #if defined(WPHAST_AUTOMATION)
@@ -1876,10 +1875,25 @@ void CWPhastDoc::ResizeGrid(const CGridKeyword& keyword)
 	if (this->m_pMapActor)
 	{
 		CSiteMap2 siteMap2 = this->m_pMapActor->GetSiteMap2();
-		siteMap2.Angle = keyword.m_grid_angle;
+		siteMap2.Angle     = keyword.m_grid_angle;
 		siteMap2.Origin[0] = keyword.m_grid_origin[0];
 		siteMap2.Origin[1] = keyword.m_grid_origin[1];
-		siteMap2.Origin[2] = keyword.m_grid_origin[2];
+
+		double pt[3] = {0.0, 0.0, 0.0};
+		CGrid z = keyword.m_grid[2];
+		z.Setup();
+		pt[2] = z.coord[0] - .01 *(z.coord[z.count_coord - 1] - z.coord[0]);
+
+		vtkTransform *trans = vtkTransform::New();
+		const CUnits& units = this->GetUnits();
+		trans->Scale(
+			units.horizontal.input_to_si,
+			units.horizontal.input_to_si,
+			units.vertical.input_to_si);
+		trans->TransformPoint(pt, pt);
+		siteMap2.Origin[2] = pt[2];
+		trans->Delete();
+
 		this->m_pMapActor->SetSiteMap2(siteMap2);
 	}
 
@@ -5399,10 +5413,25 @@ void CWPhastDoc::RotateGrid(const CGridKeyword& gridKeyword)
 		if (this->m_pMapActor)
 		{
 			CSiteMap2 siteMap2 = this->m_pMapActor->GetSiteMap2();
-			siteMap2.Angle = gridKeyword.m_grid_angle;
+			siteMap2.Angle     = gridKeyword.m_grid_angle;
 			siteMap2.Origin[0] = gridKeyword.m_grid_origin[0];
 			siteMap2.Origin[1] = gridKeyword.m_grid_origin[1];
-			siteMap2.Origin[2] = gridKeyword.m_grid_origin[2];
+
+			double pt[3] = {0.0, 0.0, 0.0};
+			CGrid z = gridKeyword.m_grid[2];
+			z.Setup();
+			pt[2] = z.coord[0] - .01 *(z.coord[z.count_coord - 1] - z.coord[0]);
+
+			vtkTransform *trans = vtkTransform::New();
+			const CUnits& units = this->GetUnits();
+			trans->Scale(
+				units.horizontal.input_to_si,
+				units.horizontal.input_to_si,
+				units.vertical.input_to_si);
+			trans->TransformPoint(pt, pt);
+			siteMap2.Origin[2] = pt[2];
+			trans->Delete();
+
 			this->m_pMapActor->SetSiteMap2(siteMap2);
 		}
 
@@ -7380,42 +7409,6 @@ void CWPhastDoc::ExecutePipeline()
 	}
 }
 #endif
-
-void CWPhastDoc::OnAccelerator32862()
-{
-#if defined(__CPPUNIT__)
-	if (this->m_pMapActor)
-	{
-		//{{
-		CSiteMap2 siteMap2 = this->m_pMapActor->GetSiteMap2();
-		double angle_save = siteMap2.Angle;
-		for (double a = 0; a < 360.0; a+=1.0)
-		{
-			siteMap2.Angle = angle_save + a;
-			this->m_pMapActor->SetSiteMap2(siteMap2);
-			this->Notify(this, WPN_DOMAIN_CHANGED, 0, 0);
-			
-		}
-		siteMap2.Angle = angle_save;
-		this->m_pMapActor->SetSiteMap2(siteMap2);
-		this->Notify(this, WPN_DOMAIN_CHANGED, 0, 0);
-		//}}
-
-// COMMENT: {9/7/2010 10:21:15 PM}		//{{
-// COMMENT: {9/7/2010 10:21:15 PM}		CGridKeyword keyword = this->GetGridKeyword();
-// COMMENT: {9/7/2010 10:21:15 PM}		double angle_save = keyword.m_grid_angle;
-// COMMENT: {9/7/2010 10:21:15 PM}		for (double a = 0; a < 360.0; a+=10.0)
-// COMMENT: {9/7/2010 10:21:15 PM}		{
-// COMMENT: {9/7/2010 10:21:15 PM}			keyword.m_grid_angle = angle_save + a;
-// COMMENT: {9/7/2010 10:21:15 PM}
-// COMMENT: {9/7/2010 10:21:15 PM}			this->ResizeGrid(keyword);
-// COMMENT: {9/7/2010 10:21:15 PM}		}
-// COMMENT: {9/7/2010 10:21:15 PM}		keyword.m_grid_angle = angle_save;
-// COMMENT: {9/7/2010 10:21:15 PM}		this->ResizeGrid(keyword);
-// COMMENT: {9/7/2010 10:21:15 PM}		//}}
-	}
-#endif
-}
 
 void CWPhastDoc::AddPropAssembly(vtkPropAssembly *pPropAssembly)
 {

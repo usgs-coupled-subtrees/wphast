@@ -528,7 +528,6 @@ public:
 
 public:
 	afx_msg void OnToolsColors();
-	afx_msg void OnAccelerator32862();
 };
 
 inline vtkPropAssembly* CWPhastDoc::GetPropAssemblyMedia() const

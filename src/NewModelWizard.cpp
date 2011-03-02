@@ -69,7 +69,16 @@ CNewModel CNewModelWizard::GetModel(void)const
 	{
 		CSiteMap2 siteMap2 = this->m_importPage.GetSiteMap2();
 		siteMap2.FileName = (LPCTSTR)this->m_importPage.m_strMapFileName;
-		siteMap2.Origin[2] = this->m_gridPage.GridKeyword.m_grid[2].coord[0] - .01 *(this->m_gridPage.GridKeyword.m_grid[2].coord[1] - this->m_gridPage.GridKeyword.m_grid[2].coord[0]);
+		double pt[3] = {0.0, 0.0, 0.0};
+		pt[2] = this->m_gridPage.GridKeyword.m_grid[2].coord[0] - .01 *(this->m_gridPage.GridKeyword.m_grid[2].coord[1] - this->m_gridPage.GridKeyword.m_grid[2].coord[0]);
+		vtkTransform *trans = vtkTransform::New();
+		trans->Scale(
+			model.m_units.horizontal.input_to_si,
+			model.m_units.horizontal.input_to_si,
+			model.m_units.vertical.input_to_si);
+		trans->TransformPoint(pt, pt);
+		siteMap2.Origin[2] = pt[2];
+		trans->Delete();
 		model.SetSiteMap2(siteMap2);
 	}
 	model.m_gridKeyword = this->m_gridPage.GridKeyword;
