@@ -20,6 +20,7 @@ CNewModelWizard::CNewModelWizard(LPCTSTR pszCaption, CWnd* pParentWnd,
 	, m_units2Page(IDS_UNITS2_CAPTION_140,  IDS_UNITS2_TITLE_141,  IDS_UNITS2_SUBTITLE_142)
 	, m_units3Page(IDS_UNITS3_CAPTION_164,  IDS_UNITS3_TITLE_165,  IDS_UNITS3_SUBTITLE_166)
 	, m_units4Page(IDS_UNITS4_CAPTION_167,  IDS_UNITS4_TITLE_168,  IDS_UNITS4_SUBTITLE_169)
+	, m_units5Page(IDS_UNITS5_CAPTION_244,  IDS_UNITS5_TITLE_245,  IDS_UNITS5_SUBTITLE_246)
 	, m_importPage(IDS_IMPMAP_CAPTION_155,  IDS_IMPMAP_TITLE_156,  IDS_IMPMAP_SUBTITLE_157)
 	, m_gridPage  (IDS_GRID_CAPTION_143,    IDS_GRID_TITLE_144,    IDS_GRID_SUBTITLE_145)
 	, m_mediaPage (IDS_MEDIA_CAPTION_146,   IDS_MEDIA_TITLE_147,   IDS_MEDIA_SUBTITLE_148)
@@ -36,6 +37,7 @@ CNewModelWizard::CNewModelWizard(LPCTSTR pszCaption, CWnd* pParentWnd,
 	AddPage(&this->m_units2Page);
 	AddPage(&this->m_units3Page);
 	AddPage(&this->m_units4Page);
+	AddPage(&this->m_units5Page);
 	AddPage(&this->m_importPage);
 	AddPage(&this->m_gridPage);
 	AddPage(&this->m_mediaPage);
@@ -65,6 +67,7 @@ CNewModel CNewModelWizard::GetModel(void)const
 	this->m_units2Page.GetProperties(model.m_units);
 	this->m_units3Page.GetProperties(model.m_units);
 	this->m_units4Page.GetProperties(model.m_units);
+	this->m_units5Page.GetProperties(model.m_units);
 	if (this->m_importPage.m_bImport)
 	{
 		CSiteMap2 siteMap2 = this->m_importPage.GetSiteMap2();
@@ -101,6 +104,7 @@ CUnits CNewModelWizard::GetUnits(void)const
 	this->m_units2Page.GetProperties(units);
 	this->m_units3Page.GetProperties(units);
 	this->m_units4Page.GetProperties(units);
+	this->m_units5Page.GetProperties(units);
 	return units;
 }
 

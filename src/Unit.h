@@ -9,6 +9,7 @@
 #include "srcinput/hstinpt.h"
 #undef EXTERNAL
 #include "enum_fix.h"
+#include "Global.h"
 
 class CUnit :
 	public cunit
@@ -22,10 +23,14 @@ public:
 	void InsertL_T(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent, LPCTSTR heading, int nID)const;
 	void InsertL3_T(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent, LPCTSTR heading, int nID)const;
 
+	static void InsertSolidUnits(SOLID_UNITS su, CTreeCtrl* pTreeCtrl, HTREEITEM htiParent, LPCTSTR heading, int nID);
+
 	void Serialize(bool bStoring, hid_t loc_id);
 
 	static void SerializeCreate(CUnit* src, const char *heading, hid_t loc_id);
 	static void SerializeOpen(CUnit* src, const char *heading, hid_t loc_id);
+	static void SerializeCreateSU(SOLID_UNITS su, const char *heading, hid_t loc_id);
+	static void SerializeOpenSU(SOLID_UNITS* su, const char *heading, hid_t loc_id);
 };
 
 inline void CUnit::SerializeCreate(CUnit* src, const char *heading, hid_t loc_id)
@@ -64,7 +69,40 @@ inline void CUnit::SerializeOpen(CUnit* src, const char *heading, hid_t loc_id)
 	}
 }
 
+inline void CUnit::SerializeCreateSU(SOLID_UNITS su, const char *heading, hid_t loc_id)
+{
+	ASSERT(loc_id > 0);
+	if (loc_id > 0)
+	{
+		hid_t type = CGlobal::HDFCreateSolidUnitsType();
+		if (type > 0)
+		{
+			herr_t status = CGlobal::HDFSerialize(true, loc_id, heading, type, 1, &su);
+			ASSERT(status >= 0);
+			status = H5Tclose(type);
+			ASSERT(status >= 0);
+		}
+	}
+}
 
+inline void CUnit::SerializeOpenSU(SOLID_UNITS* su, const char *heading, hid_t loc_id)
+{
+	ASSERT(loc_id > 0);
+	if (loc_id > 0)
+	{
+		hid_t type = CGlobal::HDFCreateSolidUnitsType();
+		if (type > 0)
+		{
+			herr_t status = CGlobal::HDFSerializeSafe(false, loc_id, heading, type, 1, su);
+			if (status < 0)
+			{
+				*su = WATER;
+			}
+			status = H5Tclose(type);
+			ASSERT(status >= 0);
+		}
+	}
+}
 
 //class CUnit :
 //	public unit

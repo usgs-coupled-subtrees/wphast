@@ -3017,6 +3017,25 @@ BEGIN
     PUSHBUTTON      "Cancel",IDCANCEL,129,26,50,16
 END
 
+IDD_UNITS5_PROPPAGE DIALOGEX 0, 0, 317, 143
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_CAPTION
+CAPTION "Solid Units"
+FONT 8, "MS Shell Dlg", 400, 0, 0x0
+BEGIN
+    LTEXT           "Equilbrium phases:",IDC_STATIC,36,17,73,12,SS_CENTERIMAGE
+    COMBOBOX        IDC_SU_PPASSEMBLAGE_COMBO,132,17,62,57,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Exchange:",IDC_STATIC,36,36,73,12,SS_CENTERIMAGE
+    COMBOBOX        IDC_SU_EXCHANGE_COMBO,132,36,62,57,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Surface:",IDC_STATIC,36,55,73,12,SS_CENTERIMAGE
+    COMBOBOX        IDC_SU_SURFACE_COMBO,132,55,62,57,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Gas phase:",IDC_STATIC,36,112,73,12,SS_CENTERIMAGE
+    COMBOBOX        IDC_SU_GASPHASE_COMBO,132,112,62,57,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Solid solutions:",IDC_STATIC,36,74,73,12,SS_CENTERIMAGE
+    COMBOBOX        IDC_SU_SSASSEMBLAGE_COMBO,132,74,62,57,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Kinetics:",IDC_STATIC,36,93,73,12,SS_CENTERIMAGE
+    COMBOBOX        IDC_SU_KINETICS_COMBO,132,93,62,57,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -4089,6 +4108,18 @@ BEGIN
         TOPMARGIN, 7
         BOTTOMMARGIN, 88
     END
+
+    IDD_UNITS5_PROPPAGE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 310
+        VERTGUIDE, 36
+        VERTGUIDE, 132
+        VERTGUIDE, 205
+        VERTGUIDE, 220
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 136
+    END
 END
 #endif    // APSTUDIO_INVOKED
 
@@ -4544,10 +4575,10 @@ BEGIN
     IDS_MEDIA_PROPS_WIZ_135 "Define media properties for this zone"
     IDS_EXPORT_PHAST_TRANS_136 "Select Phast Transport File to Export to"
     IDS_UNITS1_CAPTION_137  "New Model Wizard"
-    IDS_UNITS1_TITLE_138    "Step 1 of 10"
+    IDS_UNITS1_TITLE_138    "Step 1 of 11"
     IDS_UNITS1_SUBTITLE_139 "Define the units for the following parameters"
     IDS_UNITS2_CAPTION_140  "New Model Wizard"
-    IDS_UNITS2_TITLE_141    "Step 2 of 10"
+    IDS_UNITS2_TITLE_141    "Step 2 of 11"
     IDS_UNITS2_SUBTITLE_142 "Define the units for the following parameters"
     IDS_GRID_CAPTION_143    "New Model Wizard"
 END
@@ -4680,32 +4711,32 @@ BEGIN
     IDS_GREATER_THAN_ZERO   "Please enter a number greater than 0.0."
     ID_FILE_EXPORT          "Export to trans.dat file"
     IDS_UNITS3_CAPTION_164  "New Model Wizard"
-    IDS_UNITS3_TITLE_165    "Step 3 of 10"
+    IDS_UNITS3_TITLE_165    "Step 3 of 11"
     IDS_UNITS3_SUBTITLE_166 "Define the units for the following parameters"
     IDS_UNITS4_CAPTION_167  "New Model Wizard"
-    IDS_UNITS4_TITLE_168    "Step 4 of 10"
+    IDS_UNITS4_TITLE_168    "Step 4 of 11"
     IDS_UNITS4_SUBTITLE_169 "Define the units for the following parameters"
     ID_FILE_RUN             "Runs the current simulation\nRun simulation"
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_GRID_TITLE_144      "Step 6 of 10"
+    IDS_GRID_TITLE_144      "Step 7 of 11"
     IDS_GRID_SUBTITLE_145   "Enter the grid dimensions"
     IDS_MEDIA_CAPTION_146   "New Model Wizard"
-    IDS_MEDIA_TITLE_147     "Step 7 of 10"
+    IDS_MEDIA_TITLE_147     "Step 8 of 11"
     IDS_MEDIA_SUBTITLE_148  "Set the default media properties"
     IDS_IC_HEAD_CAPTION_149 "New Model Wizard"
-    IDS_IC_HEAD_TITLE_150   "Step 8 of 10"
+    IDS_IC_HEAD_TITLE_150   "Step 9 of 11"
     IDS_IC_HEAD_SUBTITLE_151 "Set the default initial head properties"
     IDS_TC_CAPTION_152      "New Model Wizard"
-    IDS_TC_TITLE_153        "Step 10 of 10"
+    IDS_TC_TITLE_153        "Step 11 of 11"
     IDS_TC_SUBTITLE_154     "Define the time step and the time at which the first simulation period ends"
     IDS_IMPMAP_CAPTION_155  "New Model Wizard"
-    IDS_IMPMAP_TITLE_156    "Step 5 of 10"
+    IDS_IMPMAP_TITLE_156    "Step 6 of 11"
     IDS_IMPMAP_SUBTITLE_157 "Import map file"
     IDS_CHEM_IC_CAPTION_158 "New Model Wizard"
-    IDS_CHEM_IC_TITLE_159   "Step 9 of 10"
+    IDS_CHEM_IC_TITLE_159   "Step 10 of 11"
 END
 
 STRINGTABLE 
@@ -4730,6 +4761,9 @@ BEGIN
     ID_INDICATOR_GRID       "Grid: XXXXXX.XX feet, XXXXXX.XX feet, XXXXXX.XX feet"
     ID_INDICATOR_MAP        "Map: XXXXXX.XX feet, XXXXXX.XX feet, XXXXXX.XX feet"
     ID_INDICATOR_SPACE      " "
+    IDS_UNITS5_CAPTION_244  "New Model Wizard"
+    IDS_UNITS5_TITLE_245    "Step 5 of 11"
+    IDS_UNITS5_SUBTITLE_246 "Define the units for the following parameters"
 END
 
 STRINGTABLE 

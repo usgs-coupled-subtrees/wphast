@@ -1260,6 +1260,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Units5PropertyPage.cpp"
+				>
+			</File>
+			<File
 				RelativePath="Utilities.cpp"
 				>
 				<FileConfiguration
@@ -5641,6 +5645,10 @@
 			</File>
 			<File
 				RelativePath=".\Units4PropertyPage.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Units5PropertyPage.h"
 				>
 			</File>
 			<File

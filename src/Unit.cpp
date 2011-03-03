@@ -327,6 +327,16 @@ void CUnit::Insert1_L(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent, LPCTSTR heading
 	pTreeCtrl->SetItemData(hItem, nID);
 }
 
+void CUnit::InsertSolidUnits(SOLID_UNITS su, CTreeCtrl* pTreeCtrl, HTREEITEM htiParent, LPCTSTR heading, int nID)
+{
+	const char *solid_units[] = { " UNKNOWN", " WATER", " ROCK" };
+
+	std::string sTreeItem = heading;
+	sTreeItem += solid_units[su];
+
+	HTREEITEM hItem = pTreeCtrl->InsertItem(sTreeItem.c_str(), htiParent);
+	pTreeCtrl->SetItemData(hItem, nID);
+}
 
 void CUnit::Serialize(bool bStoring, hid_t loc_id)
 {

@@ -5,6 +5,7 @@
 #include "Units2PropertyPage.h"
 #include "Units3PropertyPage.h"
 #include "Units4PropertyPage.h"
+#include "Units5PropertyPage.h"
 #include "ImportMapPropertyPage.h"
 #include "GridPropertyPage.h"
 #include "MediaPropertyPage.h"
@@ -49,6 +50,7 @@ public:
 	CUnits2PropertyPage      m_units2Page;
 	CUnits3PropertyPage      m_units3Page;
 	CUnits4PropertyPage      m_units4Page;
+	CUnits5PropertyPage      m_units5Page;
 	CImportMapPropertyPage   m_importPage;
 	CGridPropertyPage        m_gridPage;
 	CMediaPropertyPage       m_mediaPage;

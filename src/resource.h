@@ -229,6 +229,10 @@
 #define ID_WELLS_SELECTALL              243
 #define ID_INDICATOR_SPACE              243
 #define ID_WELLS_UNSELECTALL            244
+#define IDS_STRING244                   244
+#define IDS_UNITS5_CAPTION_244          244
+#define IDS_UNITS5_TITLE_245            245
+#define IDS_UNITS5_SUBTITLE_246         246
 #define IDD_SERIES_DIALOG               248
 #define IDC_VE_SPLIT                    249
 #define IDD_GRID_REFINE                 249
@@ -407,6 +411,7 @@
 #define IDD_FLOW_RATE_PROPPAGE2         440
 #define IDD_NEW_ZONE_PROPPAGE2          441
 #define IDS_IMPORT_PHAST_TRANS_442      442
+#define IDD_UNITS5_PROPPAGE             442
 #define IDC_EDIT_X                      1000
 #define IDC_TITLE                       1000
 #define IDC_EDIT_Y                      1001
@@ -948,6 +953,12 @@
 #define IDC_EDIT_I                      1515
 #define IDC_GRID_FLUX                   1516
 #define IDC_STATIC_FACE                 1517
+#define IDC_SU_PPASSEMBLAGE_COMBO       1518
+#define IDC_SU_EXCHANGE_COMBO           1519
+#define IDC_SU_SURFACE_COMBO            1520
+#define IDC_SU_SSASSEMBLAGE_COMBO       1521
+#define IDC_SU_KINETICS_COMBO           1522
+#define IDC_SU_GASPHASE_COMBO           1523
 #define IDC_RESIZE_COLUMN               28654
 #define IDC_RESIZE_ROW                  28655
 #define IDR_POPUP                       28656
@@ -1001,8 +1012,8 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        432
-#define _APS_NEXT_COMMAND_VALUE         32876
-#define _APS_NEXT_CONTROL_VALUE         1518
+#define _APS_NEXT_COMMAND_VALUE         32877
+#define _APS_NEXT_CONTROL_VALUE         1524
 #define _APS_NEXT_SYMED_VALUE           127
 #endif
 #endif

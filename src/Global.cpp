@@ -1770,6 +1770,56 @@ std::string CGlobal::GetStdLengthUnitsDenom(const char* unit)
 	return s_length_units_denom[0];
 }
 
+static const char* s_solid_units[] = {"UNKNOWN", "WATER", "ROCK"};
+
+int CGlobal::AddSolidUnits(CComboBox* pCombo)
+{
+	if (pCombo->GetCount() == 0)
+	{
+		for (size_t i = 1; i < sizeof(s_solid_units) / sizeof(s_solid_units[0]); ++i)
+		{
+			pCombo->InsertString(-1, s_solid_units[i]);
+		}
+	}
+	return 0;
+}
+
+SOLID_UNITS CGlobal::GetSolidUnits(const CComboBox* pCombo)
+{
+	SOLID_UNITS su = WATER;
+	switch (pCombo->GetCurSel())
+	{
+	case 0:
+		su = WATER;
+		break;
+	case 1:
+		su = ROCK;
+		break;
+	default:
+		ASSERT(FALSE);
+		break;
+	}
+	return su;
+}
+
+void CGlobal::SetSolidUnits(CComboBox* pCombo, SOLID_UNITS su)
+{
+	ASSERT(pCombo->GetCount() == 2);
+	switch (su)
+	{
+	case WATER:
+		pCombo->SetCurSel(0);
+		break;
+	case ROCK:
+		pCombo->SetCurSel(1);
+		break;
+	default:
+		ASSERT(FALSE);
+		pCombo->SetCurSel(0);
+		break;
+	}
+}
+
 herr_t CGlobal::HDFSerializeBool(bool bStoring, hid_t loc_id, const char* szName, bool& bValue)
 {
 	int nValue;
@@ -3971,6 +4021,29 @@ hid_t CGlobal::HDFCreateCoordinateSystemType(void)
 	// Insert the enumerated data
 	nValue = PHAST_Transform::NONE;
 	status = H5Tenum_insert(enum_datatype, "NONE", &nValue);
+	ASSERT(status >= 0);
+
+	return enum_datatype;
+}
+
+hid_t CGlobal::HDFCreateSolidUnitsType(void)
+{
+	herr_t status;
+
+	// Create the datatype
+	hid_t enum_datatype = H5Tcreate(H5T_ENUM, sizeof(SOLID_UNITS));
+	ASSERT(enum_datatype >= 0);
+
+	SOLID_UNITS nValue;
+
+	// Insert the enumerated data
+	nValue = WATER;
+	status = H5Tenum_insert(enum_datatype, "WATER", &nValue);
+	ASSERT(status >= 0);
+
+	// Insert the enumerated data
+	nValue = ROCK;
+	status = H5Tenum_insert(enum_datatype, "ROCK", &nValue);
 	ASSERT(status >= 0);
 
 	return enum_datatype;

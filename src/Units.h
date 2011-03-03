@@ -29,6 +29,14 @@ public:
 	void Serialize(bool bStoring, hid_t loc_id);
 	void Edit(CTreeCtrl* pTreeCtrl);
 	HTREEITEM GetTreeItem(void)const { return m_htiUnits; }
+
+	SOLID_UNITS exchange_units;
+	SOLID_UNITS surface_units;
+	SOLID_UNITS ssassemblage_units;
+	SOLID_UNITS ppassemblage_units;
+	SOLID_UNITS gasphase_units;
+	SOLID_UNITS kinetics_units;
+
 protected:
 	friend std::ostream& operator<< (std::ostream &os, const CUnits &a);
 	HTREEITEM m_htiUnits;

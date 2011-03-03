@@ -117,8 +117,7 @@ public:
 	static hid_t HDFCreateCoordinateSystemType(void);	
 	static hid_t HDFCreatePropType(void);
 	static hid_t HDFCreateCellFace(void);
-
-
+	static hid_t HDFCreateSolidUnitsType(void);
 
 
 	static std::string FullPath(std::string filename);
@@ -161,6 +160,10 @@ public:
 
 	static int AddLengthUnitsDenom(CComboBox* pCombo);
 	static std::string GetStdLengthUnitsDenom(const char* unit);
+
+	static int AddSolidUnits(CComboBox* pCombo);
+	static SOLID_UNITS CGlobal::GetSolidUnits(const CComboBox* pCombo);
+	static void SetSolidUnits(CComboBox* pCombo, SOLID_UNITS su);
 
 	static int ExtractXMLStream(std::istream &is, std::iostream &ios);
 

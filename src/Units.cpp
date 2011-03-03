@@ -11,7 +11,7 @@
 #include "Units2PropertyPage.h"
 #include "Units3PropertyPage.h"
 #include "Units4PropertyPage.h"
-
+#include "Units5PropertyPage.h"
 
 #include <ostream> // std::ostream
 
@@ -23,14 +23,27 @@
 CUnits::CUnits(void)
 	: cunits()
 	, m_htiUnits(0)
+	, exchange_units(WATER)
+	, surface_units(WATER)
+	, ssassemblage_units(WATER)
+	, ppassemblage_units(WATER)
+	, gasphase_units(WATER)
+	, kinetics_units(WATER)
 {
 }
+
 CUnits::CUnits(const struct cunits& src) // copy ctor
 	: cunits(src)
 	, m_htiUnits(0)
 {
 	// => implicit call to units::units()
 	// (*this) = src;
+	this->exchange_units     = ::exchange_units;
+	this->surface_units      = ::surface_units;
+	this->ssassemblage_units = ::ssassemblage_units;
+	this->ppassemblage_units = ::ppassemblage_units;
+	this->gasphase_units     = ::gasphase_units;
+	this->kinetics_units     = ::kinetics_units;
 }
 
 CUnits& CUnits::operator=(const CUnits& rhs)
@@ -38,6 +51,14 @@ CUnits& CUnits::operator=(const CUnits& rhs)
 	this->cunits::operator=(rhs);
 // COMMENT: {12/6/2010 2:31:08 PM}	this->transform = rhs.transform;
 	this->m_htiUnits = rhs.m_htiUnits;
+
+	this->exchange_units     = rhs.exchange_units;
+	this->surface_units      = rhs.surface_units;
+	this->ssassemblage_units = rhs.ssassemblage_units;
+	this->ppassemblage_units = rhs.ppassemblage_units;
+	this->gasphase_units     = rhs.gasphase_units;
+	this->kinetics_units     = rhs.kinetics_units;
+
 	return *this;
 }
 
@@ -75,6 +96,14 @@ void CUnits::Insert(CTreeCtrl* pTreeCtrl, HTREEITEM htiUnits)
 	static_cast<const CUnit*>(&this->drain_bed_thickness )->InsertL(pTreeCtrl,    htiUnits, "drain_bed_thickness",              IDC_DRAIN_THICK_COMBO);
 	static_cast<const CUnit*>(&this->drain_width         )->InsertL(pTreeCtrl,    htiUnits, "drain_width",                      IDC_DRAIN_WIDTH_COMBO);
 
+	// solid units
+	CUnit::InsertSolidUnits(this->ppassemblage_units, pTreeCtrl, htiUnits, "equilibrium_phases", IDC_SU_PPASSEMBLAGE_COMBO);
+	CUnit::InsertSolidUnits(this->exchange_units,     pTreeCtrl, htiUnits, "exchange",           IDC_SU_EXCHANGE_COMBO);
+	CUnit::InsertSolidUnits(this->surface_units,      pTreeCtrl, htiUnits, "surface",            IDC_SU_SURFACE_COMBO);
+	CUnit::InsertSolidUnits(this->ssassemblage_units, pTreeCtrl, htiUnits, "solid_solutions",    IDC_SU_SSASSEMBLAGE_COMBO);
+	CUnit::InsertSolidUnits(this->kinetics_units,     pTreeCtrl, htiUnits, "kinetics",           IDC_SU_KINETICS_COMBO);
+	CUnit::InsertSolidUnits(this->gasphase_units,     pTreeCtrl, htiUnits, "gas_phase",          IDC_SU_GASPHASE_COMBO);
+
 	VERIFY(pTreeCtrl->SetItemData(htiUnits, (DWORD_PTR)this));
 	this->m_htiUnits = htiUnits;
 }
@@ -108,6 +137,13 @@ void CUnits::Serialize(bool bStoring, hid_t loc_id)
 	static const char szDrainBedK[]         = "drain_bed_k";
 	static const char szDrainBedThickness[] = "drain_bed_thickness";
 	static const char szDrainWidth[]        = "drain_width";
+
+	static const char szEquilibriumPhases[] = "equilibrium_phases";
+	static const char szExchange[]          = "exchange";
+	static const char szSurface[]           = "surface";
+	static const char szSolidSolutions[]    = "solid_solutions";
+	static const char szKinetics[]          = "kinetics";
+	static const char szGasPhase[]          = "gas_phase";
 
 	hid_t units_id;
 	herr_t status;
@@ -144,6 +180,13 @@ void CUnits::Serialize(bool bStoring, hid_t loc_id)
 			CUnit::SerializeCreate(static_cast<CUnit*>(&this->drain_bed_k),         szDrainBedK,         units_id);
 			CUnit::SerializeCreate(static_cast<CUnit*>(&this->drain_bed_thickness), szDrainBedThickness, units_id);
 			CUnit::SerializeCreate(static_cast<CUnit*>(&this->drain_width),         szDrainWidth,        units_id);
+
+			CUnit::SerializeCreateSU(this->ppassemblage_units, szEquilibriumPhases, units_id);
+			CUnit::SerializeCreateSU(this->exchange_units,     szExchange,          units_id);
+			CUnit::SerializeCreateSU(this->surface_units,      szSurface,           units_id);
+			CUnit::SerializeCreateSU(this->ssassemblage_units, szSolidSolutions,    units_id);
+			CUnit::SerializeCreateSU(this->kinetics_units,     szKinetics,          units_id);
+			CUnit::SerializeCreateSU(this->gasphase_units,     szGasPhase,          units_id);
 
 			// close the szUnits group
 			status = ::H5Gclose(units_id);
@@ -182,6 +225,13 @@ void CUnits::Serialize(bool bStoring, hid_t loc_id)
 			CUnit::SerializeOpen(static_cast<CUnit*>(&this->drain_bed_thickness), szDrainBedThickness, units_id);
 			CUnit::SerializeOpen(static_cast<CUnit*>(&this->drain_width),         szDrainWidth,        units_id);
 
+			CUnit::SerializeOpenSU(&this->ppassemblage_units, szEquilibriumPhases, units_id);
+			CUnit::SerializeOpenSU(&this->exchange_units,     szExchange,          units_id);
+			CUnit::SerializeOpenSU(&this->surface_units,      szSurface,           units_id);
+			CUnit::SerializeOpenSU(&this->ssassemblage_units, szSolidSolutions,    units_id);
+			CUnit::SerializeOpenSU(&this->kinetics_units,     szKinetics,          units_id);
+			CUnit::SerializeOpenSU(&this->gasphase_units,     szGasPhase,          units_id);
+
 			// close the szUnits group
 			status = ::H5Gclose(units_id);
 			ASSERT(status >= 0);
@@ -216,6 +266,12 @@ std::ostream& operator<< (std::ostream &os, const CUnits &a)
 	static const char szDrainK[]            = "-drain_hydraulic_conductivity    ";
 	static const char szDrainThickness[]    = "-drain_thickness                 ";
 	static const char szDrainWidth[]        = "-drain_width                     ";
+	static const char szEquilibriumPhases[] = "-equilibrium_phases              ";
+	static const char szExchange[]          = "-exchange                        ";
+	static const char szSurface[]           = "-surface                         ";
+	static const char szSolidSolutions[]    = "-solid_solutions                 ";
+	static const char szKinetics[]          = "-kinetics                        ";
+	static const char szGasPhase[]          = "-gas_phase                       ";
 
 	os << szUnits << "\n";
 
@@ -244,6 +300,13 @@ std::ostream& operator<< (std::ostream &os, const CUnits &a)
 	os << "\t" << szDrainK            << szSpace << (a.drain_bed_k.defined         ? a.drain_bed_k.input         : a.drain_bed_k.si)         << "\n";
 	os << "\t" << szDrainThickness    << szSpace << (a.drain_bed_thickness.defined ? a.drain_bed_thickness.input : a.drain_bed_thickness.si) << "\n";
 	os << "\t" << szDrainWidth        << szSpace << (a.drain_width.defined         ? a.drain_width.input         : a.drain_width.si)         << "\n";
+
+	os << "\t" << szEquilibriumPhases << szSpace << (a.ppassemblage_units == ROCK  ? "ROCK"                      : "WATER")                  << "\n";
+	os << "\t" << szExchange          << szSpace << (a.exchange_units     == ROCK  ? "ROCK"                      : "WATER")                  << "\n";
+	os << "\t" << szSurface           << szSpace << (a.surface_units      == ROCK  ? "ROCK"                      : "WATER")                  << "\n";
+	os << "\t" << szSolidSolutions    << szSpace << (a.ssassemblage_units == ROCK  ? "ROCK"                      : "WATER")                  << "\n";
+	os << "\t" << szKinetics          << szSpace << (a.kinetics_units     == ROCK  ? "ROCK"                      : "WATER")                  << "\n";
+	os << "\t" << szGasPhase          << szSpace << (a.gasphase_units     == ROCK  ? "ROCK"                      : "WATER")                  << "\n";
 
 	return os;
 }
@@ -274,10 +337,14 @@ void CUnits::Edit(CTreeCtrl* pTreeCtrl)
 	CUnits4PropertyPage units4Page;
 	units4Page.SetProperties(*this);
 
+	CUnits5PropertyPage units5Page;
+	units5Page.SetProperties(*this);
+
 	propSheet.AddPage(&units1Page);
 	propSheet.AddPage(&units2Page);
 	propSheet.AddPage(&units3Page);
 	propSheet.AddPage(&units4Page);
+	propSheet.AddPage(&units5Page);
 
 	HTREEITEM htiItem = pTreeCtrl->GetSelectedItem();
 
@@ -287,6 +354,8 @@ void CUnits::Edit(CTreeCtrl* pTreeCtrl)
 		units2Page.SetControlFocus((int)pTreeCtrl->GetItemData(htiItem));
 		units3Page.SetControlFocus((int)pTreeCtrl->GetItemData(htiItem));
 		units4Page.SetControlFocus((int)pTreeCtrl->GetItemData(htiItem));
+		units5Page.SetControlFocus((int)pTreeCtrl->GetItemData(htiItem));
+
 		if (units2Page.Contains((int)pTreeCtrl->GetItemData(htiItem)))
 		{
 			propSheet.SetActivePage(&units2Page);
@@ -299,6 +368,10 @@ void CUnits::Edit(CTreeCtrl* pTreeCtrl)
 		{
 			propSheet.SetActivePage(&units4Page);
 		}
+		if (units5Page.Contains((int)pTreeCtrl->GetItemData(htiItem)))
+		{
+			propSheet.SetActivePage(&units5Page);
+		}
 	}
 
 	switch (propSheet.DoModal())
@@ -310,6 +383,7 @@ void CUnits::Edit(CTreeCtrl* pTreeCtrl)
 				units2Page.GetProperties(newUnits);
 				units3Page.GetProperties(newUnits);
 				units4Page.GetProperties(newUnits);
+				units5Page.GetProperties(newUnits);
 				pDoc->Execute(new CSetUnitsAction(pDoc, newUnits));
 			}
 			break;
