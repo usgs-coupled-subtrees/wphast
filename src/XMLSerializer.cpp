@@ -144,13 +144,13 @@ void CXMLSerializer::AddCommentNode(xercesc::DOMDocument* doc, CWPhastDoc* wphas
 {
 	// Create comment node
 	//
-	std::string comment("Exported from ");
-	std::string comment2("Exported to   ");
+	std::string comment(_T("Exported from "));
+	std::string comment2(_T("Exported to   "));
 	comment2 += lpszPathName;
 	CString path = wphastDoc->GetPathName();
 	if (path.IsEmpty())
 	{
-		comment += "an unsaved file";
+		comment += _T("an unsaved file");
 	}
 	else
 	{
@@ -180,11 +180,11 @@ void CXMLSerializer::AddSiteMapNode(xercesc::DOMDocument* doc, CWPhastDoc* wphas
 	VERIFY(::_tsplitpath_s(mapActor->SiteMap2.FileName.c_str(), szDrive, _MAX_DRIVE, szDir, _MAX_DIR, szFName, _MAX_FNAME, szExt, _MAX_EXT) == 0);
 
 	CString imageFileName(prefix);
-	imageFileName += ".sitemap";
+	imageFileName += _T(".sitemap");
 	imageFileName += szExt;
 	if (!::CopyFile(mapActor->m_szTempFileName, imageFileName, FALSE))
 	{
-		::AfxMessageBox("Unable to write site map.");
+		::AfxMessageBox(_T("Unable to write site map."));
 	}
 
 	CString strWorldFileName(prefix);
@@ -384,6 +384,9 @@ int CXMLSerializer::AddSiteMapNode(CMapActor* mapActor, const char* prefix, xerc
 	return 0;
 }
 
+/**
+  Prereqs: valid model.m_units and model.m_gridKeyword.m_grid[2]
+*/
 int CXMLSerializer::load(std::istream& is, CNewModel& model)
 {
 	// Instantiate the DOM parser.
@@ -406,20 +409,37 @@ int CXMLSerializer::load(std::istream& is, CNewModel& model)
 	xercesc::Wrapper4InputSource wrap(&isrc, false);
 	xercesc::DOMDocument* doc = parser->parse(wrap);
 
+	// get minimum z value for sitemap
+	//
+	double pt[3] = {0.0, 0.0, 0.0};
+	CGrid z(model.m_gridKeyword.m_grid[2]);
+	z.Setup();
+	pt[2] = z.coord[0] - .01 *(z.coord[z.count_coord - 1] - z.coord[0]);
+
 	// Load SiteMap
 	//
 	CSiteMap siteMap;
 	if (this->LoadSiteMap(doc, siteMap) == 0)
 	{
 		CSiteMap2 siteMap2;
-// COMMENT: {11/15/2010 4:19:15 PM}		siteMap2.Angle    = siteMap.m_angle;
 		siteMap2.Angle    = model.m_gridKeyword.m_grid_angle;
 		siteMap2.FileName = siteMap.m_fileName;
 		for (int i = 0; i < 3; ++i)
 		{
-// COMMENT: {11/15/2010 4:19:22 PM}			siteMap2.Origin[i] = siteMap.m_placement[i];
 			siteMap2.Origin[i] = model.m_gridKeyword.m_grid_origin[i];
 		}
+
+		vtkTransform *trans = vtkTransform::New();
+		const CUnits& units = model.m_units;
+		trans->Scale(
+			units.horizontal.input_to_si,
+			units.horizontal.input_to_si,
+			units.vertical.input_to_si);
+		trans->TransformPoint(pt, pt);
+		siteMap2.Origin[2] = pt[2];
+		trans->Delete();
+
+		siteMap2.Origin[2] = pt[2];
 		siteMap2.SetWorldTransform(siteMap.GetWorldTransform());
 		model.SetSiteMap2(siteMap2);
 	}
