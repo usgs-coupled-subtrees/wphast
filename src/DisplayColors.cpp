@@ -33,6 +33,7 @@ void CDisplayColors::Serialize(bool bStoring, hid_t loc_id)
 	static const char szLeaky[]        = "Leaky";
 	static const char szMedia[]        = "Media";
 	static const char szRiver[]        = "River";
+	static const char szDrain[]        = "Drain";
 	static const char szSpecHead[]     = "SpecHead";
 	static const char szWell[]         = "Well";
 	static const char szZoneFlowRate[] = "ZoneFlowRate";
@@ -76,6 +77,7 @@ void CDisplayColors::Serialize(bool bStoring, hid_t loc_id)
 		status = CGlobal::HDFSerializeCOLORREF(bStoring, colors_id, szLeaky,        this->crLeaky);        ASSERT(status >= 0);
 		status = CGlobal::HDFSerializeCOLORREF(bStoring, colors_id, szMedia,        this->crMedia);        ASSERT(status >= 0);
 		status = CGlobal::HDFSerializeCOLORREF(bStoring, colors_id, szRiver,        this->crRiver);        ASSERT(status >= 0);
+		status = CGlobal::HDFSerializeCOLORREF(bStoring, colors_id, szDrain,        this->crDrain);
 		status = CGlobal::HDFSerializeCOLORREF(bStoring, colors_id, szSpecHead,     this->crSpecHead);     ASSERT(status >= 0);
 		status = CGlobal::HDFSerializeCOLORREF(bStoring, colors_id, szWell,         this->crWell);         ASSERT(status >= 0);
 		status = CGlobal::HDFSerializeCOLORREF(bStoring, colors_id, szZoneFlowRate, this->crZoneFlowRate);

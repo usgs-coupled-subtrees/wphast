@@ -32,6 +32,7 @@ protected:
     CColourPickerMultiMon m_leakyColorPicker;
     CColourPickerMultiMon m_specHeadColorPicker;
     CColourPickerMultiMon m_riverColorPicker;
+    CColourPickerMultiMon m_drainColorPicker;
     CColourPickerMultiMon m_wellColorPicker;
 	CColourPickerMultiMon m_zoneFlowColorPicker;
     CColourPickerMultiMon m_bgColorPicker;

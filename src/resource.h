@@ -229,7 +229,6 @@
 #define ID_WELLS_SELECTALL              243
 #define ID_INDICATOR_SPACE              243
 #define ID_WELLS_UNSELECTALL            244
-#define IDS_STRING244                   244
 #define IDS_UNITS5_CAPTION_244          244
 #define IDS_UNITS5_TITLE_245            245
 #define IDS_UNITS5_SUBTITLE_246         246
@@ -857,6 +856,8 @@
 #define IDC_WELL_BTN2                   1421
 #define IDC_BG_BTN                      1422
 #define IDC_STATIC_WELL_Y               1423
+#define IDC_BG_BTN2                     1423
+#define IDC_DRAIN_BTN                   1423
 #define IDC_EDIT_WELL_X                 1424
 #define IDC_EDIT_WELL_Y                 1425
 #define IDC_STATIC_LOC                  1426

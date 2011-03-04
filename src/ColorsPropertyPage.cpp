@@ -34,6 +34,9 @@ CColorsPropertyPage::CColorsPropertyPage()
 	// River (blue)
 	this->m_riverColorPicker.SetDefaultText(_T(""));
 
+	// Drain (green)
+	this->m_drainColorPicker.SetDefaultText(_T(""));
+
 	// Wells (light purple)
 	this->m_wellColorPicker.SetDefaultText(_T(""));
 
@@ -79,6 +82,10 @@ void CColorsPropertyPage::DoDataExchange(CDataExchange* pDX)
 	// River
     DDX_Control(pDX, IDC_RIVER_BTN, m_riverColorPicker);
     DDX_ColourPicker(pDX, IDC_RIVER_BTN, m_colors.crRiver);
+
+	// Drain
+    DDX_Control(pDX, IDC_DRAIN_BTN, m_drainColorPicker);
+    DDX_ColourPicker(pDX, IDC_DRAIN_BTN, m_colors.crDrain);
 
 	// Wells
     DDX_Control(pDX, IDC_WELL_BTN, m_wellColorPicker);
