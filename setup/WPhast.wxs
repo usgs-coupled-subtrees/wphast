@@ -6,7 +6,7 @@
            Id='*'
            Language='1033'
            Name='$(var.Name)'
-           Version='$(var.Version)'>
+           Version='$(var.VersionInternal)'>
 
 <?ifdef VS2005 ?>
     <Package Id='*'
@@ -31,8 +31,8 @@
 <?endif?>
 
     <Upgrade Id='$(var.UpgradeCode)' >
-      <UpgradeVersion Minimum='$(var.Version)' Property="NEWERPRODUCTFOUND" OnlyDetect="yes" IncludeMinimum="yes" />
-      <UpgradeVersion Minimum="0.1.0" Maximum='$(var.Version)' Property="PREVIOUSVERSIONSINSTALLED" IncludeMinimum="yes" />
+      <UpgradeVersion Minimum='$(var.VersionInternal)' Property="NEWERPRODUCTFOUND" OnlyDetect="yes" IncludeMinimum="yes" />
+      <UpgradeVersion Minimum="0.1.0" Maximum='$(var.VersionInternal)' Property="PREVIOUSVERSIONSINSTALLED" IncludeMinimum="yes" />
     </Upgrade>
 
 <?ifdef VS2005 ?>
@@ -608,7 +608,9 @@
 	<!-- Custom Actions -->
     <CustomAction Id="ProgramMenuFolder.2FB136FF_6AAD_442A_A6EB_99511F1CDF82" Return="check" Property="ProgramMenuFolder.2FB136FF_6AAD_442A_A6EB_99511F1CDF82" Value="[ProgramMenuFolder]" />
     <CustomAction Id="StartMenuFolder.2FB136FF_6AAD_442A_A6EB_99511F1CDF82" Return="check" Property="StartMenuFolder.2FB136FF_6AAD_442A_A6EB_99511F1CDF82" Value="[StartMenuFolder]" />
+    <?ifdef SKIP ?>
     <CustomAction Id="ERRCA_CANCELNEWERVERSION" Return="check" Error="[VSDVERSIONMSG]" />
+    <?endif?>
 
     <UI>
       <Property Id="DefaultUIFont">DlgFont8</Property>
@@ -1735,8 +1737,10 @@
     <Property Id="VSDVERSIONMSG"><![CDATA[Unable to install because a newer version of this product is already installed.]]></Property>
     
     <!-- Custom uninstall previous versions -->
+    <?ifdef SKIP ?>
     <Property Id="NEWERPRODUCTFOUND" Secure="yes" />
     <Property Id="PREVIOUSVERSIONSINSTALLED" Secure="yes" />
+    <?endif?>
 
     <AdminExecuteSequence>
       <Custom Action="ProgramMenuFolder.2FB136FF_6AAD_442A_A6EB_99511F1CDF82" Before="CostInitialize" />
@@ -1744,9 +1748,11 @@
     </AdminExecuteSequence>
 
     <InstallExecuteSequence>
+      <?ifdef SKIP ?>
       <Custom Action="ERRCA_CANCELNEWERVERSION" After="FindRelatedProducts"><![CDATA[NEWERPRODUCTFOUND AND NOT Installed]]></Custom>
       <LaunchConditions After="AppSearch"><![CDATA[NOT Installed]]></LaunchConditions>
       <RemoveExistingProducts After="InstallInitialize" />
+      <?endif?>
       <Custom Action="ProgramMenuFolder.2FB136FF_6AAD_442A_A6EB_99511F1CDF82" Before="LaunchConditions" />
       <Custom Action="StartMenuFolder.2FB136FF_6AAD_442A_A6EB_99511F1CDF82" Before="ProgramMenuFolder.2FB136FF_6AAD_442A_A6EB_99511F1CDF82" />
     </InstallExecuteSequence>

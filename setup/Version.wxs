@@ -3,6 +3,7 @@
 <?define NameNS=Phast_for_Windows?>
 <?define Major=0?>
 <?define Minor=1?>
+<?define Micro=0?>
 <?define Build=581?>
 <?define Manufacturer="U.S. Geological Survey"?>
 <?define UpgradeCode=BB03D5EE-DB02-463D-8CE4-F7724B006ACF?>
@@ -21,12 +22,14 @@
   <?define MergeDir="$(env.CommonProgramFiles(x86))\Merge Modules"?>
 <?endif?>
 
-<?define Version=$(var.Major).$(var.Minor).$(var.Build)?>
-<?define Description="USGS $(var.Name) $(var.Major).$(var.Minor).$(var.Build) Installer"?>
-<?define DiskPrompt="USGS $(var.Name) $(var.Major).$(var.Minor).$(var.Build) Installation [1]"?>
-<?define PrgMenu="$(var.Name) $(var.Major).$(var.Minor)"?>
-<?define Shortcut="$(var.Name) $(var.Major).$(var.Minor)"?>
-<?define FeatureTitle="$(var.Name) $(var.Major).$(var.Minor).$(var.Build)"?>
+<?define VersionInternal=$(var.Major).$(var.Minor).$(var.Build)?>
+<?define VersionUserVisible=$(var.Major).$(var.Minor).$(var.Micro).$(var.Build)?>
+
+<?define Description="USGS $(var.Name) $(var.VersionUserVisible) Installer"?>
+<?define DiskPrompt="USGS $(var.Name) $(var.VersionUserVisible) Installation [1]"?>
+<?define PrgMenu="$(var.Name) $(var.VersionUserVisible)"?>
+<?define Shortcut="$(var.Name) $(var.VersionUserVisible)"?>
+<?define FeatureTitle="$(var.Name) $(var.VersionUserVisible)"?>
 <?define Cabinet=$(var.NameNS).cab?>
 <?define ExampleDir=phast\examples?>
 </Include>
