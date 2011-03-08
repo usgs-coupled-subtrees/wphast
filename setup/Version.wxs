@@ -3,7 +3,7 @@
 <?define NameNS=Phast_for_Windows?>
 <?define Major=0?>
 <?define Minor=1?>
-<?define Micro=0?>
+<?define Patch=0?>
 <?define Build=581?>
 <?define Manufacturer="U.S. Geological Survey"?>
 <?define UpgradeCode=BB03D5EE-DB02-463D-8CE4-F7724B006ACF?>
@@ -23,7 +23,7 @@
 <?endif?>
 
 <?define VersionInternal=$(var.Major).$(var.Minor).$(var.Build)?>
-<?define VersionUserVisible=$(var.Major).$(var.Minor).$(var.Micro).$(var.Build)?>
+<?define VersionUserVisible=$(var.Major).$(var.Minor).$(var.Patch).$(var.Build)?>
 
 <?define Description="USGS $(var.Name) $(var.VersionUserVisible) Installer"?>
 <?define DiskPrompt="USGS $(var.Name) $(var.VersionUserVisible) Installation [1]"?>
