@@ -1,0 +1,130 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<?include Version.wxi?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <Fragment>
+        <ComponentGroup Id="Bin">
+            <ComponentRef Id="hdf5dll.dll" />
+            <ComponentRef Id="phast.exe" />
+            <ComponentRef Id="szlibdll.dll" />
+            <ComponentRef Id="vtkCommon.dll" />
+            <ComponentRef Id="vtkDICOMParser.dll" />
+            <ComponentRef Id="vtkexoIIc.dll" />
+            <ComponentRef Id="vtkexpat.dll" />
+            <ComponentRef Id="vtkFiltering.dll" />
+            <ComponentRef Id="vtkfreetype.dll" />
+            <ComponentRef Id="vtkftgl.dll" />
+            <ComponentRef Id="vtkGraphics.dll" />
+            <ComponentRef Id="vtkHybrid.dll" />
+            <ComponentRef Id="vtkImaging.dll" />
+            <ComponentRef Id="vtkIO.dll" />
+            <ComponentRef Id="vtkjpeg.dll" />
+            <ComponentRef Id="vtkmetaio.dll" />
+            <ComponentRef Id="vtkMFC.dll" />
+            <ComponentRef Id="vtkNetCDF.dll" />
+            <ComponentRef Id="vtkParallel.dll" />
+            <ComponentRef Id="vtkpng.dll" />
+            <ComponentRef Id="vtkRendering.dll" />
+            <ComponentRef Id="vtksys.dll" />
+            <ComponentRef Id="vtktiff.dll" />
+            <ComponentRef Id="vtkverdict.dll" />
+            <ComponentRef Id="vtkWidgets.dll" />
+            <ComponentRef Id="vtkzlib.dll" />
+            <ComponentRef Id="WPhast.exe" />
+            <ComponentRef Id="xerces_c_2_7.dll" />
+            <ComponentRef Id="zlib1.dll" />
+        </ComponentGroup>
+    </Fragment>
+    <Fragment>
+        <DirectoryRef Id="APPLICATIONFOLDER">
+            <Directory Id="bin" Name="bin">
+                <Component Id="hdf5dll.dll" Guid="*">
+                    <File Id="hdf5dll.dll" KeyPath="yes" Source="$(var.hdfDllPath)\hdf5dll.dll" />
+                </Component>
+                <Component Id="phast.exe" Guid="*">
+                    <File Id="phast.exe" KeyPath="yes" Source="$(var.phastExePath)" />
+                </Component>
+                <Component Id="szlibdll.dll" Guid="*">
+                    <File Id="szlibdll.dll" KeyPath="yes" Source="$(var.hdfDllPath)\..\bin\szlibdll.dll" />
+                </Component>
+                <Component Id="vtkCommon.dll" Guid="*">
+                    <File Id="vtkCommon.dll" KeyPath="yes" Source="$(var.vtkDllPath)\vtkCommon.dll" />
+                </Component>
+                <Component Id="vtkDICOMParser.dll" Guid="*">
+                    <File Id="vtkDICOMParser.dll" KeyPath="yes" Source="$(var.vtkDllPath)\vtkDICOMParser.dll" />
+                </Component>
+                <Component Id="vtkexoIIc.dll" Guid="*">
+                    <File Id="vtkexoIIc.dll" KeyPath="yes" Source="$(var.vtkDllPath)\vtkexoIIc.dll" />
+                </Component>
+                <Component Id="vtkexpat.dll" Guid="*">
+                    <File Id="vtkexpat.dll" KeyPath="yes" Source="$(var.vtkDllPath)\vtkexpat.dll" />
+                </Component>
+                <Component Id="vtkFiltering.dll" Guid="*">
+                    <File Id="vtkFiltering.dll" KeyPath="yes" Source="$(var.vtkDllPath)\vtkFiltering.dll" />
+                </Component>
+                <Component Id="vtkfreetype.dll" Guid="*">
+                    <File Id="vtkfreetype.dll" KeyPath="yes" Source="$(var.vtkDllPath)\vtkfreetype.dll" />
+                </Component>
+                <Component Id="vtkftgl.dll" Guid="*">
+                    <File Id="vtkftgl.dll" KeyPath="yes" Source="$(var.vtkDllPath)\vtkftgl.dll" />
+                </Component>
+                <Component Id="vtkGraphics.dll" Guid="*">
+                    <File Id="vtkGraphics.dll" KeyPath="yes" Source="$(var.vtkDllPath)\vtkGraphics.dll" />
+                </Component>
+                <Component Id="vtkHybrid.dll" Guid="*">
+                    <File Id="vtkHybrid.dll" KeyPath="yes" Source="$(var.vtkDllPath)\vtkHybrid.dll" />
+                </Component>
+                <Component Id="vtkImaging.dll" Guid="*">
+                    <File Id="vtkImaging.dll" KeyPath="yes" Source="$(var.vtkDllPath)\vtkImaging.dll" />
+                </Component>
+                <Component Id="vtkIO.dll" Guid="*">
+                    <File Id="vtkIO.dll" KeyPath="yes" Source="$(var.vtkDllPath)\vtkIO.dll" />
+                </Component>
+                <Component Id="vtkjpeg.dll" Guid="*">
+                    <File Id="vtkjpeg.dll" KeyPath="yes" Source="$(var.vtkDllPath)\vtkjpeg.dll" />
+                </Component>
+                <Component Id="vtkmetaio.dll" Guid="*">
+                    <File Id="vtkmetaio.dll" KeyPath="yes" Source="$(var.vtkDllPath)\vtkmetaio.dll" />
+                </Component>
+                <Component Id="vtkMFC.dll" Guid="*">
+                    <File Id="vtkMFC.dll" KeyPath="yes" Source="$(var.vtkDllPath)\vtkMFC.dll" />
+                </Component>
+                <Component Id="vtkNetCDF.dll" Guid="*">
+                    <File Id="vtkNetCDF.dll" KeyPath="yes" Source="$(var.vtkDllPath)\vtkNetCDF.dll" />
+                </Component>
+                <Component Id="vtkParallel.dll" Guid="*">
+                    <File Id="vtkParallel.dll" KeyPath="yes" Source="$(var.vtkDllPath)\vtkParallel.dll" />
+                </Component>
+                <Component Id="vtkpng.dll" Guid="*">
+                    <File Id="vtkpng.dll" KeyPath="yes" Source="$(var.vtkDllPath)\vtkpng.dll" />
+                </Component>
+                <Component Id="vtkRendering.dll" Guid="*">
+                    <File Id="vtkRendering.dll" KeyPath="yes" Source="$(var.vtkDllPath)\vtkRendering.dll" />
+                </Component>
+                <Component Id="vtksys.dll" Guid="*">
+                    <File Id="vtksys.dll" KeyPath="yes" Source="$(var.vtkDllPath)\vtksys.dll" />
+                </Component>
+                <Component Id="vtktiff.dll" Guid="*">
+                    <File Id="vtktiff.dll" KeyPath="yes" Source="$(var.vtkDllPath)\vtktiff.dll" />
+                </Component>
+                <Component Id="vtkverdict.dll" Guid="*">
+                    <File Id="vtkverdict.dll" KeyPath="yes" Source="$(var.vtkDllPath)\vtkverdict.dll" />
+                </Component>
+                <Component Id="vtkWidgets.dll" Guid="*">
+                    <File Id="vtkWidgets.dll" KeyPath="yes" Source="$(var.vtkDllPath)\vtkWidgets.dll" />
+                </Component>
+                <Component Id="vtkzlib.dll" Guid="*">
+                    <File Id="vtkzlib.dll" KeyPath="yes" Source="$(var.vtkDllPath)\vtkzlib.dll" />
+                </Component>
+                <Component Id="WPhast.exe" Guid="*">
+                    <File Id="WPhast.exe" KeyPath="yes" Source="$(var.BinDir)\WPhast.exe" />
+                </Component>
+                <Component Id="xerces_c_2_7.dll" Guid="*">
+                    <File Id="xerces_c_2_7.dll" KeyPath="yes" Source="$(var.xercesDllPath)\xerces-c_2_7.dll" />
+                </Component>
+                <Component Id="zlib1.dll" Guid="*">
+                    <File Id="zlib1.dll" KeyPath="yes" Source="$(var.hdfDllPath)\..\bin\zlib1.dll" />
+                </Component>
+            </Directory>
+        </DirectoryRef>
+    </Fragment>
+</Wix>

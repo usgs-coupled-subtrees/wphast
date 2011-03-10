@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?include Version.wxi?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <Fragment>
+    <DirectoryRef Id="ApplicationProgramsFolder">
+      <Component Id="BinShortcuts" Guid="*" Win64="$(var.Win64)">
+        <Shortcut Id="WPhast.exe" Name="$(var.Shortcut)" Target="[bin]WPhast.exe"/>
+        <RemoveFolder Id="ApplicationProgramsFolder" On="uninstall"/>
+        <RegistryValue Root="HKCU" Key="Software\USGS\$(var.FullName)" Name="installed" Type="integer" Value="1" KeyPath="yes"/>
+      </Component>
+    </DirectoryRef>
+  </Fragment>
+  <Fragment>
+    <DirectoryRef Id="ApplicationProgramsFolder">
+      <Component Id="DocShortcuts" Guid="*">
+        <RegistryValue Root="HKCU" Key="Software\USGS\$(var.FullName)" Name="docs" Type="integer" Value="1" KeyPath="yes"/>
+        <Shortcut Id="phast2_TM6_A35.pdf.lnk"
+                  Name="User's Guide to PHAST 2 (PDF)"
+                  Target="[doc]phast2-TM6-A35.pdf"/>
+        <Shortcut Id="phreeqc.pdf.lnk"
+                  Name="User's Guide to PHREEQC (Version 2 PDF)"
+                  Target="[doc]phreeqc.pdf"/>
+      </Component>
+    </DirectoryRef>
+  </Fragment>
+</Wix>

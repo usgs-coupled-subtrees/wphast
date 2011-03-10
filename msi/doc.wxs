@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <Fragment>
+        <ComponentGroup Id="Doc">
+            <ComponentRef Id="phast.pdf" />
+            <ComponentRef Id="phreeqc.pdf" />
+        </ComponentGroup>
+    </Fragment>
+    <Fragment>
+        <DirectoryRef Id="APPLICATIONFOLDER">
+            <Directory Id="doc" Name="doc">
+                <Component Id="phast.pdf" Guid="*">
+                    <File Id="phast.pdf" KeyPath="yes" Source="phast\doc\phast2-TM6-A35.pdf" />
+                </Component>
+                <Component Id="phreeqc.pdf" Guid="*">
+                    <File Id="phreeqc.pdf" KeyPath="yes" Source="phast\doc\phreeqc.pdf" />
+                </Component>
+            </Directory>
+        </DirectoryRef>
+    </Fragment>
+</Wix>
