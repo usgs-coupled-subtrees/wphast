@@ -108,7 +108,7 @@ HDF_DLLS=\
 all : $(MSI)
 
 $(MSI) : msi.sln  $(WPHAST_EXE) $(WPHAST_FILES)
-	MSBuild.exe msi.sln /t:msi /p:Configuration=Release /p:Platform=x86 /p:TargetName=${FULLPKG} /p:Major=${MAJOR} /p:Minor=${MINOR} /p:Patch=${PATCH} /p:Build=${REL}
+	MSBuild.exe msi.sln /t:msi /p:Configuration=Release /p:Platform=x86 /p:TargetName=${FULLPKG} /p:Major=${MAJOR} /p:Minor=${MINOR} /p:Patch=${PATCH} /p:Build=${REL} /p:phastExePath=${PHAST_EXE_PATH}
 	touch $(MSI)
 
 $(WPHAST_EXE) : $(SLN)
