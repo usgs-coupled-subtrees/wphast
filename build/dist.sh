@@ -134,7 +134,7 @@ else
   REPOS_PATH="`echo $REPOS_PATH | sed 's/^\/*//'`"
 fi
 
-DISTNAME="wphast-${VERSION}${VER_NUMTAG}"
+DISTNAME="phast4windows-${VERSION}${VER_NUMTAG}"
 DIST_SANDBOX=.dist_sandbox
 DISTPATH="$DIST_SANDBOX/$DISTNAME"
 
@@ -149,7 +149,7 @@ rm -rf "$DIST_SANDBOX"
 mkdir "$DIST_SANDBOX"
 echo "Removed and recreated $DIST_SANDBOX"
 
-echo "Exporting revision $REVISION of WPHAST into sandbox..."
+echo "Exporting revision $REVISION of phast4windows into sandbox..."
 (cd "$DIST_SANDBOX" && \
  	${SVN:-svn} export -q $EXTRA_EXPORT_OPTIONS --ignore-externals -r "$REVISION" \
 	     "http://internalbrr.cr.usgs.gov/svn_GW/WPhast/$REPOS_PATH" \
