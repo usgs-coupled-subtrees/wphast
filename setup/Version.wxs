@@ -1,10 +1,12 @@
 <Include>
 <?define Name=Phast for Windows?>
 <?define NameNS=Phast_for_Windows?>
+<?ifdef SKIP ?>
 <?define Major=0?>
 <?define Minor=1?>
 <?define Patch=0?>
 <?define Build=581?>
+<?endif?>
 <?define Manufacturer="U.S. Geological Survey"?>
 <?define UpgradeCode=BB03D5EE-DB02-463D-8CE4-F7724B006ACF?>
 <?ifdef VS2005 ?>

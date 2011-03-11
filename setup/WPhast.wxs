@@ -5,7 +5,7 @@
            Manufacturer='$(var.Manufacturer)'
            Id='*'
            Language='1033'
-           Name='$(var.Name)'
+           Name='$(var.Name) $(var.VersionUserVisible)'
            Version='$(var.VersionInternal)'>
 
 <?ifdef VS2005 ?>
@@ -31,8 +31,10 @@
 <?endif?>
 
     <Upgrade Id='$(var.UpgradeCode)' >
+      <?ifdef SKIP ?>
       <UpgradeVersion Minimum='$(var.VersionInternal)' Property="NEWERPRODUCTFOUND" OnlyDetect="yes" IncludeMinimum="yes" />
       <UpgradeVersion Minimum="0.1.0" Maximum='$(var.VersionInternal)' Property="PREVIOUSVERSIONSINSTALLED" IncludeMinimum="yes" />
+      <?endif?>
     </Upgrade>
 
 <?ifdef VS2005 ?>
@@ -45,7 +47,7 @@
     <Directory Id='TARGETDIR' Name='SourceDir'>
       <Directory Id="ProgramFilesFolder" Name="Program Files">
         <Directory Id='D__USGS' Name='USGS'>
-          <Directory Id='INSTALLLOCATION' Name='$(var.Name)'>
+          <Directory Id='INSTALLLOCATION' Name='$(var.Name) $(var.VersionUserVisible)'>
             <Directory Id="D__bin" Name="bin">
 
 <?ifdef WPHAST_AUTOMATION ?>
