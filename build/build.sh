@@ -37,9 +37,20 @@ tscriptname=`basename $0 .sh`
 export PKG=`echo $tscriptname | sed -e 's/\-[^\-]*\-[^\-]*$//'`
 export VER=`echo $tscriptname | sed -e "s/${PKG}\-//" -e 's/\-[^\-]*$//'`
 export REL=`echo $tscriptname | sed -e "s/${PKG}\-${VER}\-//"`
+export MAJOR=`echo $VER | sed -e 's/\.[^.]*//g'`
+export MINOR=`echo $VER | sed -e 's/[^\.]*\.//' -e 's/\.[^\.]*//'`
+export PATCH=`echo $VER | sed -e 's/[^\.]*\.//' -e 's/[^\.]*\.//' -e 's/\.[^\.]*//'`
 export BASEPKG=${PKG}-${VER}-${REL}
 export FULLPKG=${BASEPKG}
 export DIFF_IGNORE="-x *.aps -x *.ncb -x *.opt -x *.dep -x *.mak -x *.chm"
+
+if [ -e "${MINOR}" ] ; then
+  export MINOR=0
+fi
+
+if [ -e "${PATCH}" ] ; then
+  export PATCH=0
+fi
 
 # determine correct decompression option and tarball filename
 export src_orig_pkg_name=
