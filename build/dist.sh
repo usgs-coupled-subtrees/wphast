@@ -163,12 +163,12 @@ echo "Exporting revision $REVISION of WPHAST into sandbox..."
 (cd "$DIST_SANDBOX" && \
  	${SVN:-svn} export -q $EXTRA_EXPORT_OPTIONS --ignore-externals -r "$REVISION_PHAST" \
 	     "http://internalbrr.cr.usgs.gov/svn_GW/phastpp/trunk/examples" \
-	     "$DISTNAME/setup/phast/examples")
+	     "$DISTNAME/msi/phast/examples")
 
 (cd "$DIST_SANDBOX" && \
  	${SVN:-svn} export -q $EXTRA_EXPORT_OPTIONS --ignore-externals -r "$REVISION_PHAST" \
 	     "http://internalbrr.cr.usgs.gov/svn_GW/phastpp/trunk/doc" \
-	     "$DISTNAME/setup/phast/doc")
+	     "$DISTNAME/msi/phast/doc")
 
 ver_major=`echo $VERSION | cut -d '.' -f 1`
 ver_minor=`echo $VERSION | cut -d '.' -f 2`
@@ -180,8 +180,7 @@ fi
 
 VERSION_LONG="$ver_major.$ver_minor.$ver_patch.$REVISION_SVN"
 
-SED_FILES="$DISTPATH/setup/Version.wxs \
-           $DISTPATH/src/Version.h \
+SED_FILES="$DISTPATH/src/Version.h \
            $DISTPATH/src/WPhast.rc"
 
 for vsn_file in $SED_FILES

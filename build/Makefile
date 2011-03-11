@@ -15,7 +15,7 @@
 # 3g. make finish
 #
 
-NAME := wphast
+NAME := phast4windows
 
 FORCE_UPDATE := $(shell svn up ..)
 

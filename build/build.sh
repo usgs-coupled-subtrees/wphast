@@ -170,7 +170,7 @@ build() {
   extract /Y media.cab phast_ser.exe && \
   mv -f phast_ser.exe phast-ser.exe && \
   export PHAST_EXE_PATH="`cygpath -aw "phast-ser.exe"`" && \
-  cd ${objdir}/setup && \
+  cd ${objdir}/msi && \
   make )
 }
 check() {
@@ -184,10 +184,10 @@ clean() {
 install() {
   (rm -fr ${instdir}/* && \
 # logs
-  /usr/bin/install -m 644 "${objdir}/setup/AutoRelease.log" \
+  /usr/bin/install -m 644 "${objdir}/msi/AutoRelease.log" \
   ${instdir}/. && \
 # MSI file
-  /usr/bin/install -m 755 "${objdir}/setup/WPhast.msi" \
+  /usr/bin/install -m 755 "${objdir}/msi/phast4windows.msi" \
     ${instdir}/${FULLPKG}.msi && \
   if [ -x /usr/bin/md5sum ]; then \
     cd ${instdir} && \
