@@ -187,7 +187,7 @@ install() {
   /usr/bin/install -m 644 "${objdir}/msi/AutoRelease.log" \
   ${instdir}/. && \
 # MSI file
-  /usr/bin/install -m 755 "${objdir}/msi/phast4windows.msi" \
+  /usr/bin/install -m 755 "${objdir}/msi/bin/Release/phast4windows.msi" \
     ${instdir}/${FULLPKG}.msi && \
   if [ -x /usr/bin/md5sum ]; then \
     cd ${instdir} && \
