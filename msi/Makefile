@@ -1,4 +1,4 @@
-# $Id: Makefile 4914 2010-10-28 01:30:53Z charlton $
+# $Id$
 
 MSI := bin/Release/phast4windows.msi
 
@@ -10,16 +10,6 @@ WPHAST_EXE := ../src/AutoRelease/WPhast.exe
 
 VTK_DLL_DIR := ../src/AutoRelease
 HDF_DLL_DIR := ../src/AutoRelease
-
-###CANDLE = candle
-###CANDLE_FLAGS=\
-###	-nologo \
-###	-dWPHAST_AUTOMATION \
-###	-dVS2005
-
-###LIGHT = light
-###LIGHT_FLAGS=\
-###	-nologo
 
 CSCRIPT = cscript
 
@@ -108,7 +98,7 @@ HDF_DLLS=\
 all : $(MSI)
 
 $(MSI) : msi.sln  $(WPHAST_EXE) $(WPHAST_FILES)
-	MSBuild.exe msi.sln /t:msi /p:Configuration=Release /p:Platform=x86 /p:TargetName=${FULLPKG} /p:Major=${MAJOR} /p:Minor=${MINOR} /p:Patch=${PATCH} /p:Build=${REL} /p:phastExePath=${PHAST_EXE_PATH}
+	MSBuild.exe msi.sln /t:msi /p:Configuration=Release /p:Platform=x86 /p:TargetName=phast4windows /p:Major=${MAJOR} /p:Minor=${MINOR} /p:Patch=${PATCH} /p:Build=${REL} /p:phastExePath=${PHAST_EXE_PATH}
 	touch $(MSI)
 
 $(WPHAST_EXE) : $(SLN)
