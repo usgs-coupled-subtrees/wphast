@@ -524,7 +524,8 @@ void CZoneActor::SetBounds(float xMin, float xMax, float yMin, float yMax, float
 	{
 		if (domain)
 		{
-			this->GetPolyhedron() = new Domain(&zone, cs);
+			ASSERT(cs == PHAST_Transform::GRID);
+			this->GetPolyhedron() = new Domain(&zone);
 		}
 		else
 		{
@@ -669,7 +670,9 @@ void CZoneActor::Serialize(bool bStoring, hid_t loc_id, const CWPhastDoc* pWPhas
 			hid_t polytype = CGlobal::HDFCreatePolyhedronDataType();
 
 			Polyhedron::POLYHEDRON_TYPE nValue = this->GetPolyhedron()->get_type();
+			ASSERT(Polyhedron::CUBE <= nValue && nValue <= Polyhedron::GRID_DOMAIN);
 			status = CGlobal::HDFSerialize(bStoring, polyh_id, szType, polytype, 1, &nValue);
+			ASSERT(status >= 0);
 
 			status = H5Tclose(polytype);
 			ASSERT(status >= 0);
@@ -688,7 +691,7 @@ void CZoneActor::Serialize(bool bStoring, hid_t loc_id, const CWPhastDoc* pWPhas
 			status = CGlobal::HDFSerialize(bStoring, polyh_id, szBox, H5T_NATIVE_DOUBLE, 6, xyz);
 			ASSERT(status >= 0);
 
-			if (nValue == Polyhedron::CUBE)
+			if (nValue == Polyhedron::CUBE || nValue == Polyhedron::GRID_DOMAIN)
 			{
 				// coor_sys_type
 				//
@@ -823,6 +826,10 @@ void CZoneActor::Serialize(bool bStoring, hid_t loc_id, const CWPhastDoc* pWPhas
 					ASSERT(status >= 0);
 				}
 			}
+			else
+			{
+				ASSERT(FALSE);
+			}
 
 			// close the polyh group
 			//
@@ -856,6 +863,8 @@ void CZoneActor::Serialize(bool bStoring, hid_t loc_id, const CWPhastDoc* pWPhas
 			Polyhedron::POLYHEDRON_TYPE nValue;
 			hid_t polytype = CGlobal::HDFCreatePolyhedronDataType();
 			status = CGlobal::HDFSerialize(bStoring, polyh_id, szType, polytype, 1, &nValue);
+			ASSERT(status >= 0);
+			ASSERT(Polyhedron::CUBE <= nValue && nValue <= Polyhedron::GRID_DOMAIN);
 
 			status = H5Tclose(polytype);
 			ASSERT(status >= 0);

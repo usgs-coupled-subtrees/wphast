@@ -55,6 +55,10 @@ protected:  // control bar embedded members
 	CBitmap m_UnCheckBitmap;
 #endif
 
+#ifdef COLOR_24BIT
+	CImageList m_imagelist;
+#endif
+
 #endif
 
 

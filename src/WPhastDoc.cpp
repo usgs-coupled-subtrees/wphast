@@ -166,10 +166,12 @@ extern void GetDefaultChemIC(struct chem_ic* p_chem_ic);
 static const TCHAR szZoneFormat[]    = _T("Box %d");
 static const TCHAR szWedgeFormat[]   = _T("Wedge %d");
 static const TCHAR szPrismFormat[]   = _T("Prism %d");
+static const TCHAR szDomainFormat[]  = _T("Domain %d");
 
 static const TCHAR szZoneFind[]      = _T("Box ");
 static const TCHAR szWedgeFind[]     = _T("Wedge ");
 static const TCHAR szPrismFind[]     = _T("Prism ");
+static const TCHAR szDomainFind[]    = _T("Domain ");
 
 
 int error_msg (const char *err_str, const int stop);
@@ -289,6 +291,10 @@ BEGIN_MESSAGE_MAP(CWPhastDoc, CDocument)
 	// ID_TOOLS_NEWPRISM
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_NEWPRISM, OnUpdateToolsNewPrism)
 	ON_COMMAND(ID_TOOLS_NEWPRISM, OnToolsNewPrism)
+
+	// ID_TOOLS_NEWDOMAIN
+	ON_UPDATE_COMMAND_UI(ID_TOOLS_NEWDOMAIN, OnUpdateToolsNewDomain)
+	ON_COMMAND(ID_TOOLS_NEWDOMAIN, OnToolsNewDomain)
 
 	// ID_TOOLS_NEWDRAIN
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_NEWDRAIN, OnUpdateToolsNewDrain)
@@ -2026,22 +2032,29 @@ void CWPhastDoc::ResetCamera(double xmin, double xmax, double ymin, double ymax,
 
 CString CWPhastDoc::GetNextZoneName(void)
 {
-	/*static*/ CString str;
+	CString str;
 	str.Format(szZoneFormat, this->GetNextZoneNumber());
 	return str;
 }
 
 CString CWPhastDoc::GetNextWedgeName(void)
 {
-	/*static*/ CString str;
+	CString str;
 	str.Format(szWedgeFormat, this->GetNextWedgeNumber());
 	return str;
 }
 
 CString CWPhastDoc::GetNextPrismName(void)
 {
-	/*static*/ CString str;
+	CString str;
 	str.Format(szPrismFormat, this->GetNextPrismNumber());
+	return str;
+}
+
+CString CWPhastDoc::GetNextDomainName(void)
+{
+	CString str;
+	str.Format(szDomainFormat, this->GetNextDomainNumber());
 	return str;
 }
 
@@ -2162,7 +2175,7 @@ int CWPhastDoc::GetNextPrismNumber(void)const
 int CWPhastDoc::GetNextZoneFlowRatesNumber(void)const
 {
 	std::set<int> nums;
-	this->GetUsedZoneFlowRates(nums);
+	this->GetUsedZoneFlowRatesNumbers(nums);
 	if (nums.rbegin() != nums.rend())
 	{
 		return (*nums.rbegin()) + 1;
@@ -2173,6 +2186,19 @@ int CWPhastDoc::GetNextZoneFlowRatesNumber(void)const
 	}
 }
 
+int CWPhastDoc::GetNextDomainNumber(void)const
+{
+	std::set<int> nums;
+	this->GetUsedDomainNumbers(nums);
+	if (nums.rbegin() != nums.rend())
+	{
+		return (*nums.rbegin()) + 1;
+	}
+	else
+	{
+		return 1;
+	}
+}
 
 void CWPhastDoc::GetUsedZoneNumbers(std::set<int>& usedNums)const
 {
@@ -2296,7 +2322,7 @@ void CWPhastDoc::GetUsedPrismNumbers(std::set<int>& usedNums)const
 	}
 }
 
-void CWPhastDoc::GetUsedZoneFlowRates(std::set<int>& usedNums)const
+void CWPhastDoc::GetUsedZoneFlowRatesNumbers(std::set<int>& usedNums)const
 {
 	usedNums.clear();
 	if (vtkPropCollection *pPropCollection = this->GetPropAssemblyZoneFlowRates()->GetParts())
@@ -2313,6 +2339,49 @@ void CWPhastDoc::GetUsedZoneFlowRates(std::set<int>& usedNums)const
 				std::pair< std::set<int>::iterator, bool > pr;
 				pr = usedNums.insert( pActor->GetData().Get_n_user() );
 				ASSERT(pr.second); // duplicate?
+			}
+		}
+	}
+}
+
+void CWPhastDoc::GetUsedDomainNumbers(std::set<int>& usedNums)const
+{
+	char *ptr;
+	CZoneActor *pZoneActor;
+	usedNums.clear();
+
+	std::list<vtkPropCollection*> collections;
+	collections.push_back(this->GetPropAssemblyMedia()->GetParts());
+	collections.push_back(this->GetPropAssemblyBC()->GetParts());
+	collections.push_back(this->GetPropAssemblyIC()->GetParts());
+	collections.push_back(this->GetPropAssemblyZoneFlowRates()->GetParts());
+
+	std::list<vtkPropCollection*>::iterator iter = collections.begin();
+	for (; iter != collections.end(); ++iter)
+	{
+		if (vtkPropCollection *pPropCollection = (*iter))
+		{
+			vtkProp *pProp = 0;
+			vtkCollectionSimpleIterator csi;
+			pPropCollection->InitTraversal(csi);
+			for (; (pProp = pPropCollection->GetNextProp(csi)); )
+			{
+				if ((pZoneActor = CZoneActor::SafeDownCast(pProp)))
+				{
+					if (pZoneActor->GetPolyhedronType() == Polyhedron::GRID_DOMAIN)
+					{
+						// store used n_user numbers
+						//
+						std::pair< std::set<int>::iterator, bool > pr;
+						CString str = pZoneActor->GetName();
+						if (str.Find(szDomainFind) == 0)
+						{
+							int n = ::strtol((const char*)str + 6, &ptr, 10);
+							pr = usedNums.insert(n);
+							ASSERT(pr.second); // duplicate?
+						}
+					}
+				}
 			}
 		}
 	}
@@ -2780,31 +2849,66 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 		for (int i = 0; i < ::count_grid_elt_zones; ++i)
 		{
 			const struct grid_elt* grid_elt_ptr = ::grid_elt_zones[i];
-			grid_elt_map[grid_elt_ptr] = grid_elt_ptr->polyh ? grid_elt_ptr->polyh->clone() : 0;
+			if (dynamic_cast<Domain*>(grid_elt_ptr->polyh))
+			{
+				grid_elt_map[grid_elt_ptr] = 0;
+			}
+			else
+			{
+				grid_elt_map[grid_elt_ptr] = grid_elt_ptr->polyh ? grid_elt_ptr->polyh->clone() : 0;
+			}
 		}
 		// BC zones
 		for (int i = 0; i < ::count_bc; ++i)
 		{
 			const struct BC* bc_ptr = ::bc[i];
-			bc_map[bc_ptr] = bc_ptr->polyh ? bc_ptr->polyh->clone() : 0;
+			if (dynamic_cast<Domain*>(bc_ptr->polyh))
+			{
+				bc_map[bc_ptr] = 0;
+			}
+			else
+			{
+				bc_map[bc_ptr] = bc_ptr->polyh ? bc_ptr->polyh->clone() : 0;
+			}
 		}
 		// Zone_budget zones
 		std::map<int, Zone_budget*>::iterator zit = Zone_budget::zone_budget_map.begin();
 		for (; zit != Zone_budget::zone_budget_map.end(); ++zit)
 		{
-			zb_map[zit->second] = zit->second->Get_polyh() ? zit->second->Get_polyh()->clone() : 0;
+			if (dynamic_cast<Domain*>(zit->second->Get_polyh()))
+			{
+				zb_map[zit->second] = 0;
+			}
+			else
+			{
+				zb_map[zit->second] = zit->second->Get_polyh() ? zit->second->Get_polyh()->clone() : 0;
+			}
 		}
 		// IC zones
 		for (int i = 0; i < ::count_head_ic; ++i)
 		{
 			const struct Head_ic* head_ic_ptr = ::head_ic[i];
-			head_ic_map[head_ic_ptr] = head_ic_ptr->polyh ? head_ic_ptr->polyh->clone() : 0;
+			if (dynamic_cast<Domain*>(head_ic_ptr->polyh))
+			{
+				head_ic_map[head_ic_ptr] = 0;
+			}
+			else
+			{
+				head_ic_map[head_ic_ptr] = head_ic_ptr->polyh ? head_ic_ptr->polyh->clone() : 0;
+			}
 		}
 		// CHEMISTRY_IC
 		for (int i = 0; i < ::count_chem_ic; ++i)
 		{
 			const struct chem_ic* chem_ic_ptr = ::chem_ic[i];
-			chem_ic_map[chem_ic_ptr] = chem_ic_ptr->polyh ? chem_ic_ptr->polyh->clone() : 0;
+			if (dynamic_cast<Domain*>(chem_ic_ptr->polyh))
+			{
+				chem_ic_map[chem_ic_ptr] = 0;
+			}
+			else
+			{
+				chem_ic_map[chem_ic_ptr] = chem_ic_ptr->polyh ? chem_ic_ptr->polyh->clone() : 0;
+			}
 		}
 
 		pInput->Accumulate(false);
@@ -2898,10 +3002,6 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 		{
 			// not undoable
 			const struct grid_elt* grid_elt_ptr = ::grid_elt_zones[i];
-			if (grid_elt_ptr->polyh == 0)
-			{
-				const_cast<grid_elt*>(grid_elt_ptr)->polyh = new Domain(&domain, PHAST_Transform::GRID);
-			}
 			ASSERT(grid_elt_ptr->polyh && ::AfxIsValidAddress(grid_elt_ptr->polyh, sizeof(Polyhedron)));
 			if (i == 0 && dynamic_cast<Cube*>(grid_elt_ptr->polyh) && defaultZone == *grid_elt_ptr->polyh->Get_bounding_box())
 			{
@@ -2939,10 +3039,6 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 		for (int i = 0; i < ::count_bc; ++i)
 		{
 			const struct BC* bc_ptr = ::bc[i];
-			if (bc_ptr->polyh == 0)
-			{
-				const_cast<struct BC*>(bc_ptr)->polyh = new Domain(&domain, PHAST_Transform::GRID);
-			}
 			ASSERT(bc_ptr->polyh && ::AfxIsValidAddress(bc_ptr->polyh, sizeof(Polyhedron)));
 
 			// store pre-translated polyh
@@ -3044,10 +3140,6 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 		for (int i = 0; i < ::count_head_ic; ++i)
 		{
 			const struct Head_ic* head_ic_ptr = ::head_ic[i];
-			if (head_ic_ptr->polyh == 0)
-			{
-				const_cast<Head_ic*>(head_ic_ptr)->polyh = new Domain(&domain, PHAST_Transform::GRID);
-			}
 			ASSERT(head_ic_ptr->polyh && ::AfxIsValidAddress(head_ic_ptr->polyh, sizeof(Polyhedron)));
 			if (i == 0 && dynamic_cast<Cube*>(head_ic_ptr->polyh) && defaultZone == *head_ic_ptr->polyh->Get_bounding_box())
 			{
@@ -3084,10 +3176,6 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 		for (int i = 0; i < ::count_chem_ic; ++i)
 		{
 			const struct chem_ic* chem_ic_ptr = ::chem_ic[i];
-			if (chem_ic_ptr->polyh == 0)
-			{
-				const_cast<struct chem_ic*>(chem_ic_ptr)->polyh = new Domain(&domain, PHAST_Transform::GRID);
-			}
 			ASSERT(chem_ic_ptr->polyh && ::AfxIsValidAddress(chem_ic_ptr->polyh, sizeof(Polyhedron)));
 			if (i == 0 && dynamic_cast<Cube*>(chem_ic_ptr->polyh) && defaultZone == *chem_ic_ptr->polyh->Get_bounding_box())
 			{
@@ -3703,7 +3791,7 @@ void CWPhastDoc::New(const CNewModel& model)
 	//
 	CZone zone;
 	this->m_pGridActor->GetDefaultZone(zone);
-	Domain domain(&zone, PHAST_Transform::GRID);
+	Domain domain(&zone);
 
 	// default media
 	//
@@ -6133,7 +6221,7 @@ void CWPhastDoc::NewZoneListener(vtkObject *caller, unsigned long eid, void *cli
 
 			// set used zone flow rate numbers
 			std::set<int> usedZoneFlowRatesNumbers;
-			self->GetUsedZoneFlowRates(usedZoneFlowRatesNumbers);
+			self->GetUsedZoneFlowRatesNumbers(usedZoneFlowRatesNumbers);
 			zoneFlowRateProps.SetUsedZoneFlowRates(usedZoneFlowRatesNumbers);
 
 			// set units
@@ -6410,7 +6498,7 @@ void CWPhastDoc::NewWedgeListener(vtkObject *caller, unsigned long eid, void *cl
 
 			// set used zone flow rate numbers
 			std::set<int> usedZoneFlowRatesNumbers;
-			self->GetUsedZoneFlowRates(usedZoneFlowRatesNumbers);
+			self->GetUsedZoneFlowRatesNumbers(usedZoneFlowRatesNumbers);
 			zoneFlowRateProps.SetUsedZoneFlowRates(usedZoneFlowRatesNumbers);
 
 			sheet.AddPage(&newZone);
@@ -6609,7 +6697,7 @@ void CWPhastDoc::OnToolsNewPrism()
 
 					// set used zone flow rate numbers
 					std::set<int> usedZoneFlowRatesNumbers;
-					this->GetUsedZoneFlowRates(usedZoneFlowRatesNumbers);
+					this->GetUsedZoneFlowRatesNumbers(usedZoneFlowRatesNumbers);
 					zoneFlowRateProps.SetUsedZoneFlowRates(usedZoneFlowRatesNumbers);
 
 					sheet.AddPage(&newZone);
@@ -6824,7 +6912,7 @@ void CWPhastDoc::NewPrismListener(vtkObject *caller, unsigned long eid, void *cl
 
 				// set used zone flow rate numbers
 				std::set<int> usedZoneFlowRatesNumbers;
-				self->GetUsedZoneFlowRates(usedZoneFlowRatesNumbers);
+				self->GetUsedZoneFlowRatesNumbers(usedZoneFlowRatesNumbers);
 				zoneFlowRateProps.SetUsedZoneFlowRates(usedZoneFlowRatesNumbers);
 
 				sheet.AddPage(&newZone);
@@ -6898,6 +6986,109 @@ void CWPhastDoc::NewPrismListener(vtkObject *caller, unsigned long eid, void *cl
 
 			// Note: cannot call EndNewPrism here
 			self->NewPrismWidget->SetInteractor(0);
+		}
+	}
+}
+
+void CWPhastDoc::OnUpdateToolsNewDomain(CCmdUI *pCmdUI)
+{
+	pCmdUI->Enable();
+}
+
+void CWPhastDoc::OnToolsNewDomain()
+{
+	// calc zone
+	CZone zone;
+	this->GetDefaultZone(zone);
+
+	// get type of zone
+	//
+	ETSLayoutPropertySheet        sheet("Domain Wizard", NULL, 0, NULL, false);
+
+	CNewZonePropertyPage          newZone;
+	CMediaPropsPage2              mediaProps;
+	CFluxPropsPage2               fluxProps;
+	CLeakyPropsPage               leakyProps;
+	CSpecifiedHeadPropsPage       specifiedProps;
+	CHeadICPropsPage2             headProps;
+	CICChemPropsPage2             chemICProps;
+	CZoneFlowRatePropertyPage     zoneFlowRateProps;
+
+	// CChemICSpreadPropertyPage only needs the flowonly flag when the zone is a
+	// default zone
+	//
+	bool bFlowOnly = this->GetFlowOnly();
+
+	fluxProps.SetFlowOnly(bFlowOnly);
+	leakyProps.SetFlowOnly(bFlowOnly);
+	specifiedProps.SetFlowOnly(bFlowOnly);
+
+	// set used zone flow rate numbers
+	std::set<int> usedZoneFlowRatesNumbers;
+	this->GetUsedZoneFlowRatesNumbers(usedZoneFlowRatesNumbers);
+	zoneFlowRateProps.SetUsedZoneFlowRates(usedZoneFlowRatesNumbers);
+
+	sheet.AddPage(&newZone);
+	sheet.AddPage(&mediaProps);
+	sheet.AddPage(&fluxProps);
+	sheet.AddPage(&leakyProps);
+	sheet.AddPage(&specifiedProps);
+	sheet.AddPage(&headProps);
+	sheet.AddPage(&chemICProps);
+	sheet.AddPage(&zoneFlowRateProps);
+
+	sheet.SetWizardMode();
+
+	if (sheet.DoModal() == ID_WIZFINISH)
+	{
+		if (newZone.GetType() == ID_ZONE_TYPE_MEDIA)
+		{
+			CGridElt elt;
+			mediaProps.GetProperties(elt);
+			elt.polyh = new Domain(&zone);
+			CMediaZoneActor::Create(this, elt, mediaProps.GetDesc());
+		}
+		else if (newZone.GetType() == ID_ZONE_TYPE_BC_FLUX)
+		{
+			CBC bc;
+			fluxProps.GetProperties(bc);
+			bc.polyh = new Domain(&zone);
+			CBCZoneActor::Create(this, bc, fluxProps.GetDesc());
+		}
+		else if (newZone.GetType() == ID_ZONE_TYPE_BC_LEAKY)
+		{
+			CBC bc;
+			leakyProps.GetProperties(bc);
+			bc.polyh = new Domain(&zone);
+			CBCZoneActor::Create(this, bc, leakyProps.GetDesc());
+		}
+		else if (newZone.GetType() == ID_ZONE_TYPE_BC_SPECIFIED)
+		{
+			CBC bc;
+			specifiedProps.GetProperties(bc);
+			bc.polyh = new Domain(&zone);
+			CBCZoneActor::Create(this, bc, specifiedProps.GetDesc());
+		}
+		else if (newZone.GetType() == ID_ZONE_TYPE_IC_HEAD)
+		{
+			CHeadIC headic;
+			headProps.GetProperties(headic);
+			headic.polyh = new Domain(&zone);
+			CICHeadZoneActor::Create(this, headic, headProps.GetDesc());
+		}
+		else if (newZone.GetType() == ID_ZONE_TYPE_IC_CHEM)
+		{
+			CChemIC chemIC;
+			chemICProps.GetProperties(chemIC);
+			chemIC.polyh = new Domain(&zone);
+			CICChemZoneActor::Create(this, chemIC, chemICProps.GetDesc());
+		}
+		else if (newZone.GetType() == ID_ZONE_TYPE_FLOW_RATE)
+		{
+			Zone_budget zone_budget;
+			zoneFlowRateProps.GetProperties(zone_budget);
+			zone_budget.Set_polyh(new Domain(&zone));
+			CZoneFlowRateZoneActor::Create(this, zone_budget);
 		}
 	}
 }

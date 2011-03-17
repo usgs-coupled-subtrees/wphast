@@ -64,6 +64,7 @@
 #include "ZonePrismResetAction.h"
 #include "PointSelectionObject.h"
 #include "Global.h"
+#include "srcinput/Domain.h"
 
 #include <vtkImplicitPlaneWidget.h>
 
@@ -1316,7 +1317,7 @@ void CWPhastView::Select(vtkProp *pProp)
 		}
 		else if (Cube *c = dynamic_cast<Cube*>(pZoneActor->GetPolyhedron()))
 		{
-			if (pZoneActor->GetDefault())
+			if (pZoneActor->GetDefault() || dynamic_cast<Domain*>(pZoneActor->GetPolyhedron()))
 			{
 				// Highlight Prop
 				//

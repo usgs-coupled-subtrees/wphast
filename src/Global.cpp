@@ -35,6 +35,7 @@
 #include "Units.h"
 #include "srcinput/Data_source.h"
 #include "srcinput/Prism.h"
+#include "srcinput/Domain.h"
 #include "TreePropSheetExSRC.h"
 #include "MediaPropsPage.h"
 #include "FluxPropsPage.h"
@@ -2689,11 +2690,18 @@ void CGlobal::Serialize(Polyhedron **p, CArchive &ar)
 
 		switch (t)
 		{
+		case Polyhedron::GRID_DOMAIN:
+			(*p) = new Domain(&z);
+			ASSERT(cs == PHAST_Transform::GRID);
+			break;
 		case Polyhedron::CUBE:
 			(*p) = new Cube(&z, cs);
 			break;
 		case Polyhedron::WEDGE:
 			(*p) = new Wedge(&z, std::string(c), cs);
+			break;
+		default:
+			ASSERT(FALSE);
 			break;
 		}
 	}
@@ -3867,6 +3875,11 @@ hid_t CGlobal::HDFCreatePolyhedronDataType(void)
 	// Insert the enumerated data
 	nValue = Polyhedron::PRISM;
 	status = H5Tenum_insert(enum_datatype, "PRISM", &nValue);
+	ASSERT(status >= 0);
+
+	// Insert the enumerated data
+	nValue = Polyhedron::GRID_DOMAIN;
+	status = H5Tenum_insert(enum_datatype, "DOMAIN", &nValue);
 	ASSERT(status >= 0);
 
 	return enum_datatype;

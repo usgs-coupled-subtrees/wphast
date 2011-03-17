@@ -376,6 +376,8 @@
 #define IDD_PROP_PROPPAGE2              405
 #define IDR_MAINFRAME3                  405
 #define IDD_PROP_PROPPAGE3              406
+#define IDR_MAINFRAME4                  406
+#define IDR_MAINFRAME2_24BIT            406
 #define IDD_PROP_PROPPAGE4              407
 #define IDD_PROP_PROPPAGE5              408
 #define IDD_PROP_CONSTANT               409
@@ -856,7 +858,6 @@
 #define IDC_WELL_BTN2                   1421
 #define IDC_BG_BTN                      1422
 #define IDC_STATIC_WELL_Y               1423
-#define IDC_BG_BTN2                     1423
 #define IDC_DRAIN_BTN                   1423
 #define IDC_EDIT_WELL_X                 1424
 #define IDC_EDIT_WELL_Y                 1425
@@ -1004,6 +1005,7 @@
 #define ID_TOOLS_ROTATE_GRID            32867
 #define ID_TOOLS_ROTATEGRID             32868
 #define ID_VIEW_RESETVIEWPOINT          32875
+#define ID_TOOLS_NEWDOMAIN              32877
 #define IDW_CONTROLBAR_TREE             59424
 #define IDW_CONTROLBAR_BOXPROPS         59425
 #define IDC_VALUE_STATIC                65535
@@ -1012,8 +1014,8 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        432
-#define _APS_NEXT_COMMAND_VALUE         32877
+#define _APS_NEXT_RESOURCE_VALUE        434
+#define _APS_NEXT_COMMAND_VALUE         32879
 #define _APS_NEXT_CONTROL_VALUE         1524
 #define _APS_NEXT_SYMED_VALUE           127
 #endif

@@ -38,42 +38,19 @@ void TestCproperty::testXYZ(void)
 		z.z1 = -120.;
 		z.z2 = 20.;
 
-		for (int i = 0; i < ::count_head_ic; ++i)
+		if (Domain *d = dynamic_cast<Domain*>(head_ic[0]->polyh))
 		{
-			if (head_ic[i]->polyh == 0)
-			{
-				head_ic[i]->polyh = new Domain(&z, PHAST_Transform::GRID);
-			}
+			d->SetZone(&z);
 		}
 
+		const struct Head_ic* head_ic_ptr = ::head_ic[0];
+		ASSERT(head_ic_ptr->polyh && ::AfxIsValidAddress(head_ic_ptr->polyh, sizeof(Polyhedron)));
 
-		//for (int i = 0; i < ::count_head_ic; ++i)
-		//{
-			const struct Head_ic* head_ic_ptr = ::head_ic[0];
-			ASSERT(head_ic_ptr->polyh && ::AfxIsValidAddress(head_ic_ptr->polyh, sizeof(Polyhedron)));
-
-			// store pre-translated polyh
-			CHeadIC data(*head_ic_ptr);
-			CPPUNIT_ASSERT(data.head);
-			size_t cs = data.head->data_source->Get_user_coordinate_system();
-			CPPUNIT_ASSERT(cs >= PHAST_Transform::MAP && cs <= PHAST_Transform::NONE);
-
-// COMMENT: {9/1/2009 7:30:20 PM}			data.polyh = head_ic_map[head_ic_ptr] ? head_ic_map[head_ic_ptr]->clone() : head_ic_ptr->polyh->clone();
-
-// COMMENT: {9/1/2009 7:30:10 PM}			// not undoable
-// COMMENT: {9/1/2009 7:30:10 PM}			std::auto_ptr< CZoneCreateAction<CICHeadZoneActor> > pAction(
-// COMMENT: {9/1/2009 7:30:10 PM}				new CZoneCreateAction<CICHeadZoneActor>(
-// COMMENT: {9/1/2009 7:30:10 PM}					this,
-// COMMENT: {9/1/2009 7:30:10 PM}					data.polyh,
-// COMMENT: {9/1/2009 7:30:10 PM}					::grid_origin,
-// COMMENT: {9/1/2009 7:30:10 PM}					::grid_angle,
-// COMMENT: {9/1/2009 7:30:10 PM}					data.polyh->Get_description()->c_str()
-// COMMENT: {9/1/2009 7:30:10 PM}					)
-// COMMENT: {9/1/2009 7:30:10 PM}				);
-// COMMENT: {9/1/2009 7:30:10 PM}			pAction->GetZoneActor()->SetData(data);
-		//}
-
-
+		// store pre-translated polyh
+		CHeadIC data(*head_ic_ptr);
+		CPPUNIT_ASSERT(data.head);
+		size_t cs = data.head->data_source->Get_user_coordinate_system();
+		CPPUNIT_ASSERT(cs >= PHAST_Transform::MAP && cs <= PHAST_Transform::NONE);
 
 		pPhastInput->Delete();
 		pPhastInput = NULL;

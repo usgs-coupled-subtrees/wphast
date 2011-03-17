@@ -137,16 +137,19 @@ public:
 	void GetUsedZoneNumbers(std::set<int>& usedNums)const;
 	void GetUsedWedgeNumbers(std::set<int>& usedNums)const;
 	void GetUsedPrismNumbers(std::set<int>& usedNums)const;
-	void GetUsedZoneFlowRates(std::set<int>& usedNums)const;
+	void GetUsedZoneFlowRatesNumbers(std::set<int>& usedNums)const;
+	void GetUsedDomainNumbers(std::set<int>& usedNums)const;
 
 	int GetNextZoneNumber(void)const;
 	int GetNextWedgeNumber(void)const;
 	int GetNextPrismNumber(void)const;
 	int GetNextZoneFlowRatesNumber(void)const;
+	int GetNextDomainNumber(void)const;
 
 	CString GetNextZoneName(void);
 	CString GetNextWedgeName(void);
 	CString GetNextPrismName(void);
+	CString GetNextDomainName(void);
 
 	void Edit(CGridActor* pGridActor);
 	void ModifyGrid(CGridActor* gridActor, CGridElementsSelector* gridElementsSelector);
@@ -511,6 +514,10 @@ public:
 	static void NewPrismListener(vtkObject *caller, unsigned long eid, void *clientdata, void *calldata);
 	vtkCallbackCommand *NewPrismCallbackCommand;
 	CNewPrismWidget    *NewPrismWidget;
+
+	// ID_TOOLS_NEWDOMAIN
+	afx_msg void OnUpdateToolsNewDomain(CCmdUI *pCmdUI);
+	afx_msg void OnToolsNewDomain();
 
 	// ID_TOOLS_NEWDRAIN
 	afx_msg void OnUpdateToolsNewDrain(CCmdUI *pCmdUI);

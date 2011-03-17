@@ -116,7 +116,7 @@ void CZoneFlowRateZoneActor::Edit(CTreeCtrl* pTreeCtrl)
 	ASSERT_VALID(pDoc);
 
 	std::set<int> usedNums;
-	pDoc->GetUsedZoneFlowRates(usedNums);
+	pDoc->GetUsedZoneFlowRatesNumbers(usedNums);
 
 	// remove this well number from used list
 	std::set<int>::iterator iter = usedNums.find(this->m_zone_budget.Get_n_user());

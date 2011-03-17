@@ -6513,6 +6513,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\res\mainfram-24bit.bmp"
+				>
+			</File>
+			<File
 				RelativePath=".\res\mainfram.bmp"
 				>
 			</File>

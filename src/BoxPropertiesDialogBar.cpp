@@ -252,6 +252,7 @@ void CBoxPropertiesDialogBar::Update(IObserver* pSender, LPARAM lHint, CObject* 
 						}
 						break;
 					case Polyhedron::CUBE:
+					case Polyhedron::GRID_DOMAIN:
 						if (this->m_nType == CBoxPropertiesDialogBar::BP_WEDGE)
 						{
 							this->HideWedgeControls();
@@ -483,12 +484,13 @@ void CBoxPropertiesDialogBar::Set(CWPhastView* pView, vtkProp3D* pProp3D, const 
 			this->SetWindowText(caption);
 			break;
 		case Polyhedron::CUBE:
+		case Polyhedron::GRID_DOMAIN:
 			this->m_nType = CBoxPropertiesDialogBar::BP_MIN_MAX;
 			if (Cube *cube = dynamic_cast<Cube*>(pZone->GetPolyhedron()))
 			{
 				this->m_xy_coordinate_system_user = cube->Get_user_coordinate_system();
 			}
-			if (pZone->GetDefault())
+			if (pZone->GetDefault() || pZone->GetPolyhedronType() == Polyhedron::GRID_DOMAIN)
 			{
 				// default zones cannot be changed
 				this->Enable(FALSE);

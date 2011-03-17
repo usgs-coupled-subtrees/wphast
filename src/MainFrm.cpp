@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "WPhast.h"
 
+// COMMENT: {3/15/2011 4:25:20 PM}#define COLOR_24BIT
 #include "MainFrm.h"
 
 #include "WPhastDoc.h"
@@ -144,7 +145,26 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	ASSERT(pContext);
 	CWPhastDoc *pDoc = static_cast<CWPhastDoc*>(pContext->m_pCurrentDoc);
 	ASSERT_VALID(pDoc);
-	
+
+#ifdef COLOR_24BIT
+	HBITMAP hBitmap = (HBITMAP) ::LoadImage(AfxGetInstanceHandle(),
+		MAKEINTRESOURCE(IDR_MAINFRAME2_24BIT), IMAGE_BITMAP,
+		0,0, LR_CREATEDIBSECTION | LR_LOADMAP3DCOLORS);
+	CBitmap bm;
+	VERIFY(bm.Attach(hBitmap));
+
+	VERIFY(m_imagelist.Create(17, 19, ILC_COLOR24, 4, 4));
+	VERIFY(m_imagelist.Add(&bm, (CBitmap*) NULL) == 0);
+
+	if (!m_wndToolBar.CreateEx(this, TBSTYLE_FLAT, WS_CHILD | WS_VISIBLE | CBRS_TOP
+		| CBRS_GRIPPER | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC) ||
+		!m_wndToolBar.LoadToolBar(IDR_MAINFRAME2_24BIT))
+	{
+		TRACE0("Failed to create toolbar\n");
+		return -1;      // fail to create
+	}
+	//VERIFY(m_wndToolBar.GetToolBarCtrl().SetImageList(&m_imagelist));
+#else
 	if (!m_wndToolBar.CreateEx(this, TBSTYLE_FLAT, WS_CHILD | WS_VISIBLE | CBRS_TOP
 		| CBRS_GRIPPER | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC) ||
 		!m_wndToolBar.LoadToolBar(IDR_MAINFRAME2))
@@ -152,6 +172,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		TRACE0("Failed to create toolbar\n");
 		return -1;      // fail to create
 	}
+#endif
 
 	if (!m_wndStatusBar.Create(this) ||
 		!m_wndStatusBar.SetIndicators(indicators,

@@ -97,6 +97,7 @@ IDB_PLUS_MERGE          BITMAP                  "res\\plusmrge.bmp"
 IDR_MAINFRAME2          BITMAP                  "res\\mainfram.bmp"
 IDR_TOOLBAR1            BITMAP                  "res\\toolbar1.bmp"
 IDR_MAINFRAME3          BITMAP                  "res\\mainfram3.bmp"
+IDR_MAINFRAME2_24BIT    BITMAP                  "res\\mainfram-24bit.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -149,6 +150,7 @@ BEGIN
     BUTTON      ID_TOOLS_NEWZONE
     BUTTON      ID_TOOLS_NEWWEDGE
     BUTTON      ID_TOOLS_NEWPRISM
+    BUTTON      ID_TOOLS_NEWDOMAIN
     SEPARATOR
     BUTTON      ID_TOOLS_NEWWELL
     BUTTON      ID_TOOLS_NEWRIVER
@@ -192,6 +194,37 @@ BEGIN
     SEPARATOR
     BUTTON      ID_TOOLS_MOVE_VER_LINE
     BUTTON      ID_TOOLS_MODIFYGRID
+    BUTTON      ID_TOOLS_SELECTOBJECT
+    SEPARATOR
+    BUTTON      ID_FILE_RUN
+END
+
+IDR_MAINFRAME2_24BIT TOOLBAR  17, 19
+BEGIN
+    BUTTON      ID_FILE_NEW
+    BUTTON      ID_FILE_OPEN
+    BUTTON      ID_FILE_SAVE
+    SEPARATOR
+    BUTTON      ID_EDIT_CUT
+    BUTTON      ID_EDIT_COPY
+    BUTTON      ID_EDIT_PASTE
+    SEPARATOR
+    BUTTON      ID_FILE_PRINT
+    BUTTON      ID_APP_ABOUT
+    SEPARATOR
+    BUTTON      ID_TOOLS_NEWZONE
+    BUTTON      ID_TOOLS_NEWWEDGE
+    BUTTON      ID_TOOLS_NEWPRISM
+    BUTTON      ID_TOOLS_NEWDOMAIN
+    SEPARATOR
+    BUTTON      ID_TOOLS_NEWWELL
+    BUTTON      ID_TOOLS_NEWRIVER
+    BUTTON      ID_TOOLS_NEWDRAIN
+    SEPARATOR
+    BUTTON      ID_TOOLS_MOVE_VER_LINE
+    BUTTON      ID_TOOLS_MODIFYGRID
+    BUTTON      ID_TOOLS_ROTATE_GRID
+    SEPARATOR
     BUTTON      ID_TOOLS_SELECTOBJECT
     SEPARATOR
     BUTTON      ID_FILE_RUN
@@ -389,6 +422,7 @@ BEGIN
         MENUITEM "New &Box",                    ID_TOOLS_NEWZONE
         MENUITEM "New W&edge",                  ID_TOOLS_NEWWEDGE
         MENUITEM "New &Prism",                  ID_TOOLS_NEWPRISM
+        MENUITEM "New D&omain",                 ID_TOOLS_NEWDOMAIN
         MENUITEM SEPARATOR
         MENUITEM "New &Drain",                  ID_TOOLS_NEWDRAIN
         MENUITEM "New &River",                  ID_TOOLS_NEWRIVER
@@ -4800,6 +4834,7 @@ END
 STRINGTABLE 
 BEGIN
     ID_TOOLS_ROTATE_GRID    "Rotate grid\nRotate grid"
+    ID_TOOLS_NEWDOMAIN      "Creates a new domain\nCreate new domain"
 END
 
 STRINGTABLE 
