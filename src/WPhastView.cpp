@@ -1206,15 +1206,27 @@ void CWPhastView::Select(vtkProp *pProp)
 
 	// hide zone widget
 	//
-	if (this->BoxWidget) this->BoxWidget->Off();
+	if (this->BoxWidget)
+	{
+		this->BoxWidget->Off();
+		this->BoxWidget->SetProp3D(0);
+	}
 
 	// hide well widget
 	//
-	if (this->PointWidget) this->PointWidget->Off();
+	if (this->PointWidget)
+	{
+		this->PointWidget->Off();
+		this->PointWidget->SetProp3D(0);
+	}
 
 	// hide prism widget
 	//
-	if (this->PrismWidget) this->PrismWidget->Off();
+	if (this->PrismWidget)
+	{
+		this->PrismWidget->Off();
+		this->PrismWidget->SetProp3D(0);
+	}
 
 
 	// disable rivers

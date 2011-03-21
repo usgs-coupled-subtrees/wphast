@@ -2816,6 +2816,7 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 	ifs.seekg(0, std::ios_base::beg);
 	xml.seekg(0, std::ios_base::beg);
 
+	ASSERT(Prism::prism_list.size() == 0);
 	ASSERT(Filedata::file_data_map.size() == 0);
 	CPhastInput* pInput = CPhastInput::New(ifs, strPrefix, false);
 	if (!pInput) return FALSE;
