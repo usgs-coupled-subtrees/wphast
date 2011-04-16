@@ -15,11 +15,28 @@
 		VERIFY(0 <= CGlobal::HDFSerialize(bStoring, loc_id, sz_##name, h5_type, 1, &this->name)); \
 	} while(0)
 
+#define HDF_GETSET_MACRO2(name, old_name, h5_type) \
+	do { \
+		DECL_SZ_MACRO(name); \
+		DECL_SZ_MACRO(old_name); \
+		if (0 > CGlobal::HDFSerializeSafe(bStoring, loc_id, sz_##name, h5_type, 1, &this->name)) { \
+			VERIFY(0 <= CGlobal::HDFSerialize(bStoring, loc_id, sz_##old_name, h5_type, 1, &this->name)); \
+		} \
+	} while(0)
+
 #define HDF_GETSET_DEFINED_MACRO(name, h5_type) \
 	do { \
 		DECL_SZ_DEFINED_MACRO(name); \
 		HDF_GETSET_MACRO(name##_defined, H5T_NATIVE_INT); \
 		HDF_GETSET_MACRO(name, h5_type); \
+	} while (0)
+
+#define HDF_GETSET_DEFINED_MACRO2(name, old_name, h5_type) \
+	do { \
+		DECL_SZ_DEFINED_MACRO(name); \
+		DECL_SZ_DEFINED_MACRO(old_name); \
+		HDF_GETSET_MACRO2(name##_defined, old_name##_defined, H5T_NATIVE_INT); \
+		HDF_GETSET_MACRO2(name, old_name, h5_type); \
 	} while (0)
 
 #define HDF_GET_CHAR_STAR_MACRO(name) \

@@ -5744,6 +5744,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\WPhastMacros.h"
+				>
+			</File>
+			<File
 				RelativePath="WPhastView.h"
 				>
 			</File>

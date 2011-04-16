@@ -262,6 +262,16 @@ CWell& CWell::operator=(const Well& rhs) // copy assignment
 		ASSERT(status >= 0 || this->count_##name == 0); \
 	} while(0)
 
+#define HDF_WELL_INTERVAL_MACRO2(name, old_name) \
+	do { \
+		DECL_SZ_MACRO(name); \
+		if ( 0 < SerializeWellInterval(bStoring, loc_id, sz_##name, this->count_##name, &this->name) ) { \
+			DECL_SZ_MACRO(old_name); \
+			herr_t status = SerializeWellInterval(bStoring, loc_id, sz_##old_name, this->count_##name, &this->name); \
+			ASSERT(status >= 0 || this->count_##name == 0); \
+		} \
+	} while(0)
+
 #define ARC_WELL_INTERVAL_MACRO(archive, name) \
 	do { \
 		SerializeWellInterval(archive, this->count_##name, &this->name); \
@@ -344,18 +354,17 @@ void CWell::Serialize(bool bStoring, hid_t loc_id)
 
 	HDF_GET_CHAR_STAR_MACRO(description);
 
-	HDF_GETSET_DEFINED_MACRO(x_user,        H5T_NATIVE_DOUBLE);
-	HDF_GETSET_DEFINED_MACRO(y_user,        H5T_NATIVE_DOUBLE);
-	HDF_GETSET_DEFINED_MACRO(radius,        H5T_NATIVE_DOUBLE);
-	HDF_GETSET_DEFINED_MACRO(diameter,      H5T_NATIVE_DOUBLE);
-	HDF_GETSET_DEFINED_MACRO(lsd_user,      H5T_NATIVE_DOUBLE);
+	HDF_GETSET_DEFINED_MACRO2(x_user,     x, H5T_NATIVE_DOUBLE);
+	HDF_GETSET_DEFINED_MACRO2(y_user,     y, H5T_NATIVE_DOUBLE);
+	HDF_GETSET_DEFINED_MACRO (radius,        H5T_NATIVE_DOUBLE);
+	HDF_GETSET_DEFINED_MACRO (diameter,      H5T_NATIVE_DOUBLE);
+	HDF_GETSET_DEFINED_MACRO2(lsd_user, lsd, H5T_NATIVE_DOUBLE);
 
-	HDF_WELL_INTERVAL_MACRO(elevation_user);
-	HDF_WELL_INTERVAL_MACRO(depth_user);
-#if 9991 // well w/ grid rotation
+	HDF_WELL_INTERVAL_MACRO2(elevation_user, elevation);
+	HDF_WELL_INTERVAL_MACRO2(depth_user,     depth);
+
 	CGlobal::HDFSerializeXYCoordinateSystem(bStoring, loc_id, this->xy_coordinate_system_user);
 	CGlobal::HDFSerializeZCoordinateSystem(bStoring, loc_id, this->z_coordinate_system_user);	
-#endif // 9991 well w/ grid rotation
 }
 
 void CWell::Serialize(CArchive& ar)
@@ -367,10 +376,10 @@ void CWell::Serialize(CArchive& ar)
 	ARC_GETSET_MACRO(ar, n_user);
 	ARC_GETSET_MACRO(ar, new_def);
 	ARC_GETSET_MACRO(ar, mobility_and_pressure);
-#if 9991 // well w/ grid rotation
+
 	ARC_GETSET_MACRO(ar, (int&)xy_coordinate_system_user);
 	ARC_GETSET_MACRO(ar, (int&)z_coordinate_system_user);
-#endif // 9991 well w/ grid rotation
+
 	ARC_GET_CHAR_STAR_MACRO(ar, description);
 
 	ARC_GETSET_DEFINED_MACRO(ar, x_user);
