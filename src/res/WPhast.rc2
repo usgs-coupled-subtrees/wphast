@@ -36,7 +36,7 @@ BEGIN
         BEGIN
             VALUE "Comments", "Released: " RELEASE_DATE "\0"
             VALUE "CompanyName", "U.S. Geological Survey"
-            VALUE "FileDescription", "WPhast executable"
+            VALUE "FileDescription", "Phast for Windows"
             VALUE "FileVersion", VER_NUM "\0"
             VALUE "InternalName", "WPhast.exe"
             VALUE "LegalCopyright", "public domain"

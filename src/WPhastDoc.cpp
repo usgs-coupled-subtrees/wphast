@@ -30,6 +30,8 @@
 #include <fstream>  // std::ifstream
 #include <sstream>  // std::ostringstream std::istringstream
 
+#include "Version.h"
+
 #include "srcinput/Filedata.h"
 #include "srcinput/Domain.h"
 #include "srcinput/Polyhedron.h"
@@ -685,6 +687,14 @@ void CWPhastDoc::Serialize(CArchive& ar)
 		ASSERT(wphast_id > 0);
 		if (wphast_id > 0)
 		{
+			// store release date
+			char *date = RELEASE_DATE;
+			CGlobal::HDFSerializeStringOrNull(bStoring, wphast_id, "RELEASE_DATE", &date);
+
+			// store svn release
+			char *rev = REVISION;
+			CGlobal::HDFSerializeStringOrNull(bStoring, wphast_id, "REVISION", &rev);
+
 			// store flowonly
 			ASSERT(this->m_pModel);
 			this->m_pModel->m_flowOnly.Serialize(bStoring, wphast_id);

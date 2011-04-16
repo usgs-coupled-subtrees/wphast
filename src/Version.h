@@ -24,3 +24,5 @@
 
 #define VER_NUM_REG                 APR_STRINGIFY(VER_MAJOR) \
                                 "." APR_STRINGIFY(VER_MINOR)
+
+#define REVISION               APR_STRINGIFY(VER_REVISION)
