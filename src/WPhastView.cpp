@@ -902,7 +902,9 @@ BOOL CWPhastView::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 		}
 	}
 
-	if (this->CreatingNewWell() || this->CreatingNewRiver())
+	// TODO when well creation can handle panning and zooming move 
+	// this below the real-time pan cursor lines (like new river)
+	if (this->CreatingNewWell())
 	{
 		::SetCursor(AfxGetApp()->LoadCursor(IDC_NULL));
 		return TRUE;
@@ -918,6 +920,12 @@ BOOL CWPhastView::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 	if (::GetAsyncKeyState(VK_SHIFT) < 0 && ::GetAsyncKeyState(VK_LBUTTON))
 	{
 		::SetCursor(AfxGetApp()->LoadCursor(IDC_PAN_REAL));
+		return TRUE;
+	}
+
+	if (this->CreatingNewRiver())
+	{
+		::SetCursor(AfxGetApp()->LoadCursor(IDC_NULL));
 		return TRUE;
 	}
 
