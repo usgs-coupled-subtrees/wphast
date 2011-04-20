@@ -16,10 +16,6 @@
 vtkCxxRevisionMacro(CNewPrismWidget, "$Revision$");
 vtkStandardNewMacro(CNewPrismWidget);
 
-static int g_cClicks = 0;
-static RECT g_rcClick;
-static DWORD g_tmLastClick;
-
 CNewPrismWidget::CNewPrismWidget(void)
 : State(CNewPrismWidget::Start)
 , Cursor3D(0)
@@ -32,6 +28,7 @@ CNewPrismWidget::CNewPrismWidget(void)
 , PolyData(0)
 , OutlineMapper(0)
 , OutlineActor(0)
+, NumberOfClicks(0)
 {
 	ASSERT(this->EventCallbackCommand);
 	this->EventCallbackCommand->SetCallback(CNewPrismWidget::ProcessEvents);
@@ -71,6 +68,10 @@ CNewPrismWidget::CNewPrismWidget(void)
 
 	this->OutlineActor->GetProperty()->SetRepresentationToWireframe();
 	this->OutlineActor->GetProperty()->SetAmbient(1.0); // this makes the back edges easier to see
+
+#if defined(_MFC_VER)
+	::SetRect(&this->RectClick, 0, 0, 0, 0);
+#endif
 }
 
 CNewPrismWidget::~CNewPrismWidget(void)
@@ -210,9 +211,6 @@ void CNewPrismWidget::ProcessEvents(vtkObject* object, unsigned long event, void
 	case vtkCommand::KeyPressEvent:
 		self->OnKeyPress();
 		break;
-	case vtkCommand::KeyReleaseEvent:
-// COMMENT: {5/28/2008 1:50:06 PM}		self->OnMouseMove();
-		break;
 	}
 }
 
@@ -261,71 +259,29 @@ void CNewPrismWidget::OnLeftButtonDown()
 {
 	TRACE("CNewPrismWidget::OnLeftButtonDown\n");
 
-#ifdef WIN32
+#if defined(_MFC_VER)
 	_AFX_THREAD_STATE *pState = AfxGetThreadState();
 	POINT point = { MAKEPOINTS(pState->m_msgCur.lParam).x, MAKEPOINTS(pState->m_msgCur.lParam).y };
 	DWORD tmClick = GetMessageTime();
-	if (!PtInRect(&g_rcClick, point) || tmClick - g_tmLastClick > GetDoubleClickTime())
+	if (!::PtInRect(&this->RectClick, point) || tmClick - this->TimeLastClick > ::GetDoubleClickTime())
 	{
-		g_cClicks = 0;
+		this->NumberOfClicks = 0;
 	}
-	g_cClicks++;
-	g_tmLastClick = tmClick;
-	SetRect(&g_rcClick, MAKEPOINTS(pState->m_msgCur.lParam).x, MAKEPOINTS(pState->m_msgCur.lParam).y,
+	this->NumberOfClicks++;
+	this->TimeLastClick = tmClick;
+	::SetRect(&this->RectClick, MAKEPOINTS(pState->m_msgCur.lParam).x, MAKEPOINTS(pState->m_msgCur.lParam).y,
 		MAKEPOINTS(pState->m_msgCur.lParam).x, MAKEPOINTS(pState->m_msgCur.lParam).y);
-	InflateRect(&g_rcClick,
-		GetSystemMetrics(SM_CXDOUBLECLK) / 2,
-		GetSystemMetrics(SM_CYDOUBLECLK) / 2);
-	if (g_cClicks > 1)
+	::InflateRect(&this->RectClick,
+		::GetSystemMetrics(SM_CXDOUBLECLK) / 2,
+		::GetSystemMetrics(SM_CYDOUBLECLK) / 2);
+#endif
+	if (this->NumberOfClicks > 1)
 	{
-		// remove last cell
-		//
-		vtkCellArray *ca = vtkCellArray::New();
-		this->CellArray->GetData()->SetNumberOfValues(this->LastCellId*5);
-		ca->SetCells(this->LastCellId, this->CellArray->GetData());
-
-		vtkCellArray *tmp = this->CellArray;
-		this->CellArray = ca;
-		this->PolyData->SetPolys(this->CellArray);
-		tmp->Delete();
-
-		// update connection cell
-		//
-		vtkIdType ids[4];
-		ids[0] = this->LastPointId-3;
-		ids[1] = this->LastPointId-2;
-		ids[2] = 1;
-		ids[3] = 0;
-		this->CellArray->ReplaceCell((this->LastCellId-1)*5, 4, ids);
-
-		// update points
-		//
-		this->Points->SetNumberOfPoints(this->Points->GetNumberOfPoints()-2);
-
 		TRACE("double-click detected\n");
-		// stop forwarding event
-		this->EventCallbackCommand->SetAbortFlag(1);
-		this->Interactor->Render();
-
-		// cancel creation
-
-		this->State = CNewPrismWidget::Start;
-		this->LastPointId = 0;
-
-		this->EndInteraction();
-		this->InvokeEvent(vtkCommand::EndInteractionEvent, NULL);
+		ASSERT(this->State == CNewPrismWidget::CreatingPrism);
+		this->EndNew();
 		return;
 	}
-#endif
-
-// COMMENT: {5/22/2008 1:11:31 PM}	if (this->State != CNewPrismWidget::Start)
-// COMMENT: {5/22/2008 1:11:31 PM}	{
-// COMMENT: {5/22/2008 1:11:31 PM}		// sticky keys hack
-// COMMENT: {5/22/2008 1:11:31 PM}		TRACE("Warning: (this->State != CNewPrismWidget::Start) in CNewPrismWidget::OnLeftButtonDown\n");
-// COMMENT: {5/22/2008 1:11:31 PM}		this->EventCallbackCommand->SetAbortFlag(1);
-// COMMENT: {5/22/2008 1:11:31 PM}		return; 
-// COMMENT: {5/22/2008 1:11:31 PM}	}
-// COMMENT: {5/22/2008 1:11:31 PM}	ASSERT(this->State == CNewPrismWidget::Start);
 
 	// set state
 	//
@@ -490,7 +446,7 @@ void CNewPrismWidget::OnLeftButtonUp()
 	}
 }
 
-#ifdef WIN32
+#if defined(_MFC_VER)
 BOOL CNewPrismWidget::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 {
 	if (this->Enabled)
@@ -500,7 +456,7 @@ BOOL CNewPrismWidget::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 	}
 	return FALSE;
 }
-#endif // WIN32
+#endif
 
 void CNewPrismWidget::PrintSelf(ostream& os, vtkIndent indent)
 {
@@ -548,60 +504,12 @@ void CNewPrismWidget::OnKeyPress()
 		if (::strcmp(keysym, "Escape") == 0)
 		{
 			TRACE("CancelNewPrism\n");
+			this->CancelNew();
 		}
 		else
 		{
 			TRACE("EndNewPrism\n");
-
-			// remove last cell
-			//
-			vtkCellArray *ca = vtkCellArray::New();
-			this->CellArray->GetData()->SetNumberOfValues(this->LastCellId*5);
-			ca->SetCells(this->LastCellId, this->CellArray->GetData());
-
-			vtkCellArray *tmp = this->CellArray;
-			this->CellArray = ca;
-			this->PolyData->SetPolys(this->CellArray);
-			tmp->Delete();
-
-			// update connection cell
-			//
-			vtkIdType ids[4];
-			ids[0] = this->LastPointId-3;
-			ids[1] = this->LastPointId-2;
-			ids[2] = 1;
-			ids[3] = 0;
-			this->CellArray->ReplaceCell((this->LastCellId-1)*5, 4, ids);
-
-			// update points
-			//
-			this->Points->SetNumberOfPoints(this->Points->GetNumberOfPoints()-2);
-
-			// stop forwarding event
-			//
-			this->EventCallbackCommand->SetAbortFlag(1);
-			this->Interactor->Render();
-
-			// cancel creation
-			//
-			this->State = CNewPrismWidget::Start;
-			this->LastPointId = 0;
-
-			// notify
-			//
-			this->EndInteraction();
-			this->InvokeEvent(vtkCommand::EndInteractionEvent, NULL);
-		}
-
-		// stop forwarding event
-		//
-		if (this->EventCallbackCommand)
-		{
-			this->EventCallbackCommand->SetAbortFlag(1);
-		}
-		if (this->Interactor)
-		{
-			this->Interactor->Render();
+			this->EndNew();
 		}
 	}
 
@@ -613,4 +521,66 @@ void CNewPrismWidget::OnKeyPress()
 		::OutputDebugStringA(oss.str().c_str());
 	}
 #endif
+}
+
+void CNewPrismWidget::CancelNew(void)
+{
+	// stop forwarding event
+	//
+	if (this->EventCallbackCommand)
+	{
+		this->EventCallbackCommand->SetAbortFlag(1);
+	}
+	if (this->Interactor)
+	{
+		this->Interactor->Render();
+	}
+}
+
+void CNewPrismWidget::EndNew(void)
+{
+	// remove last cell
+	//
+	vtkCellArray *ca = vtkCellArray::New();
+	this->CellArray->GetData()->SetNumberOfValues(this->LastCellId*5);
+	ca->SetCells(this->LastCellId, this->CellArray->GetData());
+
+	vtkCellArray *tmp = this->CellArray;
+	this->CellArray = ca;
+	this->PolyData->SetPolys(this->CellArray);
+	tmp->Delete();
+
+	// update connection cell
+	//
+	vtkIdType ids[4];
+	ids[0] = this->LastPointId-3;
+	ids[1] = this->LastPointId-2;
+	ids[2] = 1;
+	ids[3] = 0;
+	this->CellArray->ReplaceCell((this->LastCellId-1)*5, 4, ids);
+
+	// update points
+	//
+	this->Points->SetNumberOfPoints(this->Points->GetNumberOfPoints()-2);
+
+	// stop forwarding event
+	//
+	if (this->EventCallbackCommand)
+	{
+		this->EventCallbackCommand->SetAbortFlag(1);
+	}
+	if (this->Interactor)
+	{
+		this->Interactor->Render();
+	}
+
+	// cancel creation
+	//
+	this->State = CNewPrismWidget::Start;
+	this->LastPointId = 0;
+
+	// notify
+	//
+	this->EndInteraction();
+	this->InvokeEvent(vtkCommand::EndInteractionEvent, NULL);
 }

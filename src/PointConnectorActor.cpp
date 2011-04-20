@@ -49,6 +49,7 @@ CPointConnectorActor::CPointConnectorActor(void)
 , GhostPolyDataMapper(0)
 , GhostActor(0)
 , GridAngle(0.0)
+, NumberOfClicks(0)
 {
 	for (size_t i = 0; i < 3; ++i)
 	{
@@ -93,6 +94,10 @@ CPointConnectorActor::CPointConnectorActor(void)
 	}
 
 	this->CreateDefaultProperties();
+
+#if defined(_MFC_VER)
+	::SetRect(&this->RectClick, 0, 0, 0, 0);
+#endif
 
 #ifdef __CPPUNIT__
 	// this->SetDebug(1);
@@ -698,6 +703,29 @@ void CPointConnectorActor::OnLeftButtonDown()
 
 	if (this->State == CPointConnectorActor::CreatingRiver)
 	{
+#if defined(_MFC_VER)
+		_AFX_THREAD_STATE *pState = AfxGetThreadState();
+		POINT point = { MAKEPOINTS(pState->m_msgCur.lParam).x, MAKEPOINTS(pState->m_msgCur.lParam).y };
+		DWORD tmClick = GetMessageTime();
+		if (!::PtInRect(&this->RectClick, point) || tmClick - this->TimeLastClick > ::GetDoubleClickTime())
+		{
+			this->NumberOfClicks = 0;
+		}
+		this->NumberOfClicks++;
+		this->TimeLastClick = tmClick;
+		::SetRect(&this->RectClick, MAKEPOINTS(pState->m_msgCur.lParam).x, MAKEPOINTS(pState->m_msgCur.lParam).y,
+			MAKEPOINTS(pState->m_msgCur.lParam).x, MAKEPOINTS(pState->m_msgCur.lParam).y);
+		::InflateRect(&this->RectClick,
+			GetSystemMetrics(SM_CXDOUBLECLK) / 2,
+			GetSystemMetrics(SM_CYDOUBLECLK) / 2);
+#endif
+		if (this->NumberOfClicks > 1)
+		{
+			TRACE("double-click detected\n");
+			this->EndNew();
+			return;
+		}
+
 		this->Update();
 		this->Cursor3DActor->SetPosition(this->WorldPointXYPlane[0], this->WorldPointXYPlane[1], this->WorldPointXYPlane[2]);
 		this->EventCallbackCommand->SetAbortFlag(1);
@@ -865,7 +893,6 @@ void CPointConnectorActor::OnKeyPress()
 		{
 			this->EndNew();
 		}
-		this->EventCallbackCommand->SetAbortFlag(1);
 	}
 }
 
@@ -1204,7 +1231,7 @@ void CPointConnectorActor::ScaleFromBounds(double bounds[6], vtkRenderer* ren)
 	}
 }
 
-void CPointConnectorActor::CancelNew()
+void CPointConnectorActor::CancelNew(void)
 {
 	if (this->State == CPointConnectorActor::CreatingRiver)
 	{
@@ -1249,14 +1276,21 @@ void CPointConnectorActor::CancelNew()
 			this->ConnectingLineSource->Delete();
 			this->ConnectingLineSource = 0;
 		}
-		this->Interactor->Render();
+		if (this->EventCallbackCommand)
+		{
+			this->EventCallbackCommand->SetAbortFlag(1);
+		}
+		if (this->Interactor)
+		{
+			this->Interactor->Render();
+		}
 		this->InvokeEvent(CPointConnectorActor::CancelNewEvent, NULL);
 	}
 	this->SetEnabled(0);
 	this->State = CPointConnectorActor::None;
 }
 
-void CPointConnectorActor::EndNew()
+void CPointConnectorActor::EndNew(void)
 {
 	if (this->State == CPointConnectorActor::CreatingRiver)
 	{
@@ -1301,7 +1335,17 @@ void CPointConnectorActor::EndNew()
 			this->ConnectingLineSource->Delete();
 			this->ConnectingLineSource = 0;
 		}
-		this->Interactor->Render();
+
+		// stop forwarding event
+		//
+		if (this->EventCallbackCommand)
+		{
+			this->EventCallbackCommand->SetAbortFlag(1);
+		}
+		if (this->Interactor)
+		{
+			this->Interactor->Render();
+		}
 		this->InvokeEvent(CPointConnectorActor::EndNewEvent, NULL);
 	}
 	this->SetEnabled(0);

@@ -25,10 +25,7 @@ public:
 	virtual void PlaceWidget(double bounds[6]);
 	vtkPoints* GetPoints(void) { return Points; };
 
-// COMMENT: {5/21/2008 8:58:23 PM}	double* GetBounds(void) { return this->OutlineActor->GetBounds(); }
-// COMMENT: {5/21/2008 8:58:23 PM}	void GetBounds(double bounds[6]) { this->OutlineActor->GetBounds(bounds); }
-
-#ifdef WIN32
+#if defined(_MFC_VER)
 	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
 #endif
 
@@ -45,6 +42,8 @@ protected:
 	void OnLeftButtonUp();
 	void OnKeyPress(void);
 
+	void CancelNew(void);
+	void EndNew(void);
 
 	// 3D Cursor
 	vtkCursor3D           *Cursor3D;
@@ -61,7 +60,6 @@ protected:
 	// wireframe outline
 	vtkActor             *OutlineActor;
 	vtkPolyDataMapper    *OutlineMapper;
-// COMMENT: {5/21/2008 8:58:01 PM}	srcWedgeSource       *WedgeSource;
 	vtkIdType             LastPointId;
 	vtkIdType             LastCellId;
 	vtkPoints            *Points;
@@ -73,6 +71,13 @@ protected:
 	double                FixedPlanePoint[3];
 	int                   FixedPlane;  // [0-5]
 	int                   FixedCoord;  // [0-2]
+
+	// Double click parameters
+	int   NumberOfClicks;
+#if defined(_MFC_VER)
+	RECT  RectClick;
+	DWORD TimeLastClick;
+#endif
 
 private:
 	CNewPrismWidget(const CNewPrismWidget&);  // Not implemented.

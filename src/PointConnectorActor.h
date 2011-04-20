@@ -228,4 +228,11 @@ protected:
 	double  GridAngle;
 	double  GeometryScale[3];
 	CUnits  Units;
+
+	// Double click parameters
+	int   NumberOfClicks;
+#if defined(_MFC_VER)
+	RECT  RectClick;
+	DWORD TimeLastClick;
+#endif
 };
