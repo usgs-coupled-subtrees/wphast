@@ -12,7 +12,8 @@
 #define IDR_MANIFEST 1024
 #endif
 
-#include "afxres.h"
+#include "afxres.h"
+
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 
@@ -4866,7 +4867,8 @@ LANGUAGE 9, 1
 #endif
 #if defined(WPHAST_AUTOMATION)
 1 TYPELIB "WPhast.tlb"
-#endif
+#endif
+
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
 

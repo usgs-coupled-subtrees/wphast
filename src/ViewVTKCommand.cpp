@@ -211,6 +211,7 @@ void CViewVTKCommand::OnEndInteractionEvent(vtkObject* caller, void* callData)
 				}
 				else
 				{
+					ASSERT(this->m_pView->GetCoordinateMode() == CWPhastView::GridMode);
 					this->Transform->Scale(
 						scale[0] * units.horizontal.input_to_si,
 						scale[1] * units.horizontal.input_to_si,
@@ -233,36 +234,6 @@ void CViewVTKCommand::OnEndInteractionEvent(vtkObject* caller, void* callData)
 			{
 				ASSERT(FALSE);
 			}
-
-
-
-// COMMENT: {1/12/2011 11:42:38 PM}			// well position
-// COMMENT: {1/12/2011 11:42:38 PM}			Point p(
-// COMMENT: {1/12/2011 11:42:38 PM}				widget->GetPosition()[0] / scale[0] / units.horizontal.input_to_si,
-// COMMENT: {1/12/2011 11:42:38 PM}				widget->GetPosition()[1] / scale[1] / units.horizontal.input_to_si,
-// COMMENT: {1/12/2011 11:42:38 PM}				0.0
-// COMMENT: {1/12/2011 11:42:38 PM}				);
-// COMMENT: {1/12/2011 11:42:38 PM}
-// COMMENT: {1/12/2011 11:42:38 PM}#if 9991 // well w/ grid rotation
-// COMMENT: {1/12/2011 11:42:38 PM}			if (pWellActor->GetWell().xy_coordinate_system_user == PHAST_Transform::MAP)
-// COMMENT: {1/12/2011 11:42:38 PM}			{
-// COMMENT: {1/12/2011 11:42:38 PM}				const CGridKeyword& gridKeyword = this->m_pView->GetDocument()->GetGridKeyword();
-// COMMENT: {1/12/2011 11:42:38 PM}				PHAST_Transform t(
-// COMMENT: {1/12/2011 11:42:38 PM}					gridKeyword.m_grid_origin[0],
-// COMMENT: {1/12/2011 11:42:38 PM}					gridKeyword.m_grid_origin[1],
-// COMMENT: {1/12/2011 11:42:38 PM}					gridKeyword.m_grid_origin[2],
-// COMMENT: {1/12/2011 11:42:38 PM}					gridKeyword.m_grid_angle,
-// COMMENT: {1/12/2011 11:42:38 PM}					units.map_horizontal.input_to_si / units.horizontal.input_to_si,
-// COMMENT: {1/12/2011 11:42:38 PM}					units.map_horizontal.input_to_si / units.horizontal.input_to_si,
-// COMMENT: {1/12/2011 11:42:38 PM}					units.map_vertical.input_to_si   / units.vertical.input_to_si
-// COMMENT: {1/12/2011 11:42:38 PM}					);
-// COMMENT: {1/12/2011 11:42:38 PM}				t.Inverse_transform(p);
-// COMMENT: {1/12/2011 11:42:38 PM}			}
-// COMMENT: {1/12/2011 11:42:38 PM}#endif // 9991 well w/ grid rotation
-// COMMENT: {1/12/2011 11:42:38 PM}
-// COMMENT: {1/12/2011 11:42:38 PM}			((CWellSetPositionAction*)this->m_pAction)->SetPosition(p.x(), p.y(), cs);
-// COMMENT: {1/12/2011 11:42:38 PM}			this->m_pView->GetDocument()->Execute(this->m_pAction);
-// COMMENT: {1/12/2011 11:42:38 PM}			this->m_pAction = 0;
 		}
 	}
 }
@@ -691,7 +662,13 @@ void CViewVTKCommand::ComputeWorldToDisplay(double x, double y, double z, double
 
 void CViewVTKCommand::OnLeftButtonPressEvent(vtkObject* caller, void* callData)
 {
-	TRACE("OnLeftButtonPressEvent\n");
+	TRACE("CViewVTKCommand::OnLeftButtonPressEvent\n");
+
+	if (::GetAsyncKeyState(VK_SHIFT) < 0 && ::GetAsyncKeyState(VK_LBUTTON))
+	{
+		TRACE("Panning (early out of CViewVTKCommand::OnLeftButtonPressEvent)\n");
+		return;
+	}
 
 	if (this->m_pView->CreatingNewWell())
 	{
@@ -699,9 +676,13 @@ void CViewVTKCommand::OnLeftButtonPressEvent(vtkObject* caller, void* callData)
 		this->m_pView->GetRenderer()->ResetCameraClippingRange();
 		this->m_pView->GetInteractor()->Render();
 
+		// stop forwarding to Interactor
+		//
+		this->SetAbortFlag(1);
+
 		// update m_WorldPointXYPlane and save starting point
 		//
-		Update2();
+		this->Update2();
 		for (int i = 0; i < 4; ++i)
 		{
 			this->m_BeginPoint[i] = this->m_WorldPointXYPlane[i];
@@ -815,7 +796,7 @@ void CViewVTKCommand::OnMouseMoveEvent(vtkObject* caller, void* callData)
 {
 	Update2();
 
-	if (this->m_pView->CreatingNewWell() || this->m_pView->CreatingNewRiver())
+	if (this->m_pView->CreatingNewWell())
 	{
 		this->m_pView->Cursor3DActor->SetPosition(this->m_WorldPointXYPlane[0], this->m_WorldPointXYPlane[1], this->m_WorldPointXYPlane[2]);
 		this->m_pView->GetRenderer()->ResetCameraClippingRange();
@@ -827,20 +808,19 @@ void CViewVTKCommand::OnKeyPressEvent(vtkObject* caller, void* callData)
 {
 	char* keysym = this->m_pView->GetInteractor()->GetKeySym();
 
-	//{{
-	if (this->m_pView->CreatingNewWell() || this->m_pView->CreatingNewRiver())
+	if (this->m_pView->CreatingNewWell())
 	{
-		ASSERT(FALSE); // Should now be caught by Accelerator
 		if (::_stricmp(keysym, "m") == 0)
 		{
+			ASSERT(FALSE); // Should now be caught by Accelerator
 			this->m_pView->SetMapMode();
 		}
 		if (::_stricmp(keysym, "g") == 0)
 		{
+			ASSERT(FALSE); // Should now be caught by Accelerator
 			this->m_pView->SetGridMode();
 		}
 	}
-	//}}
 
 	if (::strcmp(keysym, "Escape") == 0)
 	{
@@ -865,56 +845,8 @@ void CViewVTKCommand::OnModifiedEvent(vtkObject* caller, void* callData)
 	}
 #endif
 
-// COMMENT: {7/22/2009 9:19:37 PM}	ASSERT(caller && vtkCamera::SafeDownCast(caller));
-// COMMENT: {7/22/2009 9:19:37 PM}	if (vtkBoxWidget *pWidget = this->m_pView->GetBoxWidget())
-// COMMENT: {7/22/2009 9:19:37 PM}	{
-// COMMENT: {7/22/2009 9:19:37 PM}		if (pWidget->GetEnabled())
-// COMMENT: {7/22/2009 9:19:37 PM}		{
-// COMMENT: {7/22/2009 9:19:37 PM}			// this implicitly calls the protected method pWidget->SizeHandles();
-// COMMENT: {7/22/2009 9:19:37 PM}			pWidget->PlaceWidget();
-// COMMENT: {7/22/2009 9:19:37 PM}			pWidget->Modified();
-// COMMENT: {7/22/2009 9:19:37 PM}		}
-// COMMENT: {7/22/2009 9:19:37 PM}	}
-
 	if (vtkRenderer *renderer =  this->m_pView->GetRenderer())
 	{
-// COMMENT: {8/20/2008 10:06:55 PM}		int i;
-// COMMENT: {8/20/2008 10:06:55 PM}		double radius, z;
-// COMMENT: {8/20/2008 10:06:55 PM}		double windowLowerLeft[4], windowUpperRight[4];
-// COMMENT: {8/20/2008 10:06:55 PM}		double *viewport = renderer->GetViewport();
-// COMMENT: {8/20/2008 10:06:55 PM}		int *winSize = renderer->GetRenderWindow()->GetSize();
-// COMMENT: {8/20/2008 10:06:55 PM}		double focalPoint[4];
-// COMMENT: {8/20/2008 10:06:55 PM}
-// COMMENT: {8/20/2008 10:06:55 PM}		// get the focal point in world coordinates
-// COMMENT: {8/20/2008 10:06:55 PM}		//
-// COMMENT: {8/20/2008 10:06:55 PM}		vtkCamera *camera = renderer->GetActiveCamera();	
-// COMMENT: {8/20/2008 10:06:55 PM}		double cameraFP[4];
-// COMMENT: {8/20/2008 10:06:55 PM}		camera->GetFocalPoint((double*)cameraFP); cameraFP[3] = 1.0;
-// COMMENT: {8/20/2008 10:06:55 PM}
-// COMMENT: {8/20/2008 10:06:55 PM}		this->ComputeWorldToDisplay(cameraFP[0],
-// COMMENT: {8/20/2008 10:06:55 PM}									cameraFP[1],
-// COMMENT: {8/20/2008 10:06:55 PM}									cameraFP[2], focalPoint);
-// COMMENT: {8/20/2008 10:06:55 PM}
-// COMMENT: {8/20/2008 10:06:55 PM}		z = focalPoint[2];
-// COMMENT: {8/20/2008 10:06:55 PM}
-// COMMENT: {8/20/2008 10:06:55 PM}		double x = winSize[0] * viewport[0];
-// COMMENT: {8/20/2008 10:06:55 PM}		double y = winSize[1] * viewport[1];
-// COMMENT: {8/20/2008 10:06:55 PM}		this->ComputeDisplayToWorld(x,y,z,windowLowerLeft);
-// COMMENT: {8/20/2008 10:06:55 PM}
-// COMMENT: {8/20/2008 10:06:55 PM}		x = winSize[0] * viewport[2];
-// COMMENT: {8/20/2008 10:06:55 PM}		y = winSize[1] * viewport[3];
-// COMMENT: {8/20/2008 10:06:55 PM}		this->ComputeDisplayToWorld(x,y,z,windowUpperRight);
-// COMMENT: {8/20/2008 10:06:55 PM}
-// COMMENT: {8/20/2008 10:06:55 PM}		for (radius=0.0, i=0; i<3; i++)
-// COMMENT: {8/20/2008 10:06:55 PM}		{
-// COMMENT: {8/20/2008 10:06:55 PM}			radius += (windowUpperRight[i] - windowLowerLeft[i]) *
-// COMMENT: {8/20/2008 10:06:55 PM}				(windowUpperRight[i] - windowLowerLeft[i]);
-// COMMENT: {8/20/2008 10:06:55 PM}		}
-// COMMENT: {8/20/2008 10:06:55 PM}
-// COMMENT: {8/20/2008 10:06:55 PM}		TRACE("CViewVTKCommand::OnModifiedEvent radius = %g\n", ::sqrt(radius));
-// COMMENT: {8/20/2008 10:06:55 PM}		this->m_pView->SizeHandles(::sqrt(radius));
-// COMMENT: {8/20/2008 10:06:55 PM}
-
 		double radius = CGlobal::ComputeRadius(renderer);
 		TRACE("CViewVTKCommand::OnModifiedEvent radius = %g\n", radius);
 		this->m_pView->SizeHandles(radius);

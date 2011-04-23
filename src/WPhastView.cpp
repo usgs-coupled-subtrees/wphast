@@ -798,10 +798,6 @@ void CWPhastView::OnInitialUpdate()
 
 			// set interactor
 			//
-// COMMENT: {9/17/2009 2:45:16 PM}			if (this->InteractorStyle)
-// COMMENT: {9/17/2009 2:45:16 PM}			{
-// COMMENT: {9/17/2009 2:45:16 PM}				this->InteractorStyle->Delete();
-// COMMENT: {9/17/2009 2:45:16 PM}			}
 			ASSERT(this->InteractorStyle == 0);
 			this->InteractorStyle = vtkInteractorStyleTrackballCameraEx::New();
 			this->GetInteractor()->SetInteractorStyle(this->InteractorStyle);
@@ -838,11 +834,11 @@ void CWPhastView::OnInitialUpdate()
 			//
 			ASSERT(this->ViewVTKCommand);
 
-			// mouse events
+			// mouse events (priority 1.0 > 0.0 (Interactor) so that well mouse down can veto)
 			//
-			this->GetInteractor()->AddObserver(vtkCommand::MouseMoveEvent, this->ViewVTKCommand);
-			this->GetInteractor()->AddObserver(vtkCommand::LeftButtonPressEvent, this->ViewVTKCommand);
-			this->GetInteractor()->AddObserver(vtkCommand::LeftButtonReleaseEvent, this->ViewVTKCommand);
+			this->GetInteractor()->AddObserver(vtkCommand::MouseMoveEvent, this->ViewVTKCommand, 1.0);
+			this->GetInteractor()->AddObserver(vtkCommand::LeftButtonPressEvent, this->ViewVTKCommand, 1.0);
+			this->GetInteractor()->AddObserver(vtkCommand::LeftButtonReleaseEvent, this->ViewVTKCommand, 1.0);
 
 			// keyboard events
 			//
@@ -892,7 +888,6 @@ void CWPhastView::DeleteContents(void)
 
 BOOL CWPhastView::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 {
-// COMMENT: {7/15/2008 7:13:33 PM}	TRACE("CWPhastView::OnSetCursor\n");
 	if (vtkInteractorStyleTrackballCameraEx *style = vtkInteractorStyleTrackballCameraEx::SafeDownCast(this->InteractorStyle))
 	{
 		if (style->GetPickWithMouse())
@@ -900,14 +895,6 @@ BOOL CWPhastView::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 			::SetCursor(AfxGetApp()->LoadCursor(IDC_3DGARROW));
 			return TRUE;
 		}
-	}
-
-	// TODO when well creation can handle panning and zooming move 
-	// this below the real-time pan cursor lines (like new river)
-	if (this->CreatingNewWell())
-	{
-		::SetCursor(AfxGetApp()->LoadCursor(IDC_NULL));
-		return TRUE;
 	}
 
 	// set real-time pan cursor
@@ -923,7 +910,14 @@ BOOL CWPhastView::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 		return TRUE;
 	}
 
+	// these are set after (IDC_PAN_REAL) so that the pan cursor overides the null
+	// cursor
 	if (this->CreatingNewRiver())
+	{
+		::SetCursor(AfxGetApp()->LoadCursor(IDC_NULL));
+		return TRUE;
+	}
+	if (this->CreatingNewWell())
 	{
 		::SetCursor(AfxGetApp()->LoadCursor(IDC_NULL));
 		return TRUE;
@@ -936,36 +930,6 @@ BOOL CWPhastView::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 		::SetCursor(AfxGetApp()->LoadCursor(IDC_NULL));
 		return TRUE;
 	}
-
-// COMMENT: {9/7/2005 4:29:33 PM}	if (this->CreatingNewRiver() && nHitTest == HTCLIENT)
-// COMMENT: {9/7/2005 4:29:33 PM}	{
-// COMMENT: {9/7/2005 4:29:33 PM}		::SetCursor(AfxGetApp()->LoadCursor(IDC_NULL));
-// COMMENT: {9/7/2005 4:29:33 PM}		return TRUE;
-// COMMENT: {9/7/2005 4:29:33 PM}	}
-
-// COMMENT: {9/17/2009 4:21:22 PM}	if (this->bMovingGridLine && nHitTest == HTCLIENT)
-// COMMENT: {9/17/2009 4:21:22 PM}	{
-// COMMENT: {9/17/2009 4:21:22 PM}		if (CGridLODActor* pGridLODActor = CGridLODActor::SafeDownCast(this->GetDocument()->GetGridActor()))
-// COMMENT: {9/17/2009 4:21:22 PM}		{
-// COMMENT: {9/17/2009 4:21:22 PM}// COMMENT: {8/4/2005 8:57:01 PM}			extern HCURSOR Test();
-// COMMENT: {9/17/2009 4:21:22 PM}// COMMENT: {8/4/2005 8:57:01 PM}			//{{
-// COMMENT: {9/17/2009 4:21:22 PM}// COMMENT: {8/4/2005 8:57:01 PM}			static HCURSOR s_hcur = 0;
-// COMMENT: {9/17/2009 4:21:22 PM}// COMMENT: {8/4/2005 8:57:01 PM}			if (s_hcur == 0)
-// COMMENT: {9/17/2009 4:21:22 PM}// COMMENT: {8/4/2005 8:57:01 PM}			{
-// COMMENT: {9/17/2009 4:21:22 PM}// COMMENT: {8/4/2005 8:57:01 PM}				s_hcur = Test();
-// COMMENT: {9/17/2009 4:21:22 PM}// COMMENT: {8/4/2005 8:57:01 PM}			}
-// COMMENT: {9/17/2009 4:21:22 PM}// COMMENT: {8/4/2005 8:57:01 PM}			if (s_hcur && (::GetKeyState(VK_CONTROL) < 0))
-// COMMENT: {9/17/2009 4:21:22 PM}// COMMENT: {8/4/2005 8:57:01 PM}			{
-// COMMENT: {9/17/2009 4:21:22 PM}// COMMENT: {8/4/2005 8:57:01 PM}				::SetCursor(s_hcur);
-// COMMENT: {9/17/2009 4:21:22 PM}// COMMENT: {8/4/2005 8:57:01 PM}				return TRUE;
-// COMMENT: {9/17/2009 4:21:22 PM}// COMMENT: {8/4/2005 8:57:01 PM}			}
-// COMMENT: {9/17/2009 4:21:22 PM}// COMMENT: {8/4/2005 8:57:01 PM}			//}}
-// COMMENT: {9/17/2009 4:21:22 PM}			if (pGridLODActor->OnSetCursor(pWnd, nHitTest, message))
-// COMMENT: {9/17/2009 4:21:22 PM}			{
-// COMMENT: {9/17/2009 4:21:22 PM}				return TRUE;
-// COMMENT: {9/17/2009 4:21:22 PM}			}
-// COMMENT: {9/17/2009 4:21:22 PM}		}
-// COMMENT: {9/17/2009 4:21:22 PM}	}
 
 	if (CWPhastDoc* pDoc = this->GetDocument())
 	{
@@ -1547,17 +1511,6 @@ void CWPhastView::StartNewWell(void)
 	//
 	ASSERT(this->WellActor == 0);
 	this->WellActor = CWellActor::New();
-
-	// Disable Interactor
-	//
-	if (vtkInteractorStyle* style = vtkInteractorStyle::SafeDownCast(this->InteractorStyle))
-	{
-		if (vtkInteractorStyleSwitch* switcher = vtkInteractorStyleSwitch::SafeDownCast(style))
-		{
-			style = switcher->GetCurrentStyle();
-		}
-		style->SetInteractor(0);
-	}
 }
 
 void CWPhastView::CancelNewWell(void)
@@ -1573,17 +1526,6 @@ void CWPhastView::EndNewWell(void)
 	// reset cursor
 	//
 	this->Cursor3DActor->VisibilityOff();
-
-	// reattach interactor
-	//
-	if (vtkInteractorStyle* style = vtkInteractorStyle::SafeDownCast(this->InteractorStyle))
-	{
-		if (vtkInteractorStyleSwitch* switcher = vtkInteractorStyleSwitch::SafeDownCast(style))
-		{
-			style = switcher->GetCurrentStyle();
-		}
-		style->SetInteractor(this->GetInteractor());
-	}
 
 	// stop rendering the well actor
 	//
