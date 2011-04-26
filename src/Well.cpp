@@ -265,7 +265,7 @@ CWell& CWell::operator=(const Well& rhs) // copy assignment
 #define HDF_WELL_INTERVAL_MACRO2(name, old_name) \
 	do { \
 		DECL_SZ_MACRO(name); \
-		if ( 0 < SerializeWellInterval(bStoring, loc_id, sz_##name, this->count_##name, &this->name) ) { \
+		if ( 0 > SerializeWellInterval(bStoring, loc_id, sz_##name, this->count_##name, &this->name) ) { \
 			DECL_SZ_MACRO(old_name); \
 			herr_t status = SerializeWellInterval(bStoring, loc_id, sz_##old_name, this->count_##name, &this->name); \
 			ASSERT(status >= 0 || this->count_##name == 0); \
