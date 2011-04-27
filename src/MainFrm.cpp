@@ -208,7 +208,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	// Box properties Bar
 	//
-	if (!m_wndDialogBarBoxProperties.Create(IDD_PROPS_CUBE2, _T("Zone Properties"), this, IDW_CONTROLBAR_BOXPROPS))
+	if (!m_wndDialogBarBoxProperties.Create(IDD_PROPS_ZONEPROPS, _T("Zone Properties"), this, IDW_CONTROLBAR_BOXPROPS))
 	{
 		TRACE0("Failed to create m_wndDialogBarBoxProperties\n");
 		return -1;

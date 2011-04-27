@@ -413,6 +413,8 @@
 #define IDD_NEW_ZONE_PROPPAGE2          441
 #define IDS_IMPORT_PHAST_TRANS_442      442
 #define IDD_UNITS5_PROPPAGE             442
+#define IDD_PROPS_CUBE5                 443
+#define IDD_PROPS_ZONEPROPS             443
 #define IDC_EDIT_X                      1000
 #define IDC_TITLE                       1000
 #define IDC_EDIT_Y                      1001
