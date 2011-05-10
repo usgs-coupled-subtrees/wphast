@@ -1135,11 +1135,12 @@ vtkPoints* CPrismWidget::GetInsertPoints(void)
 		if (pts)
 		{
 			double x[3];
-			for (vtkIdType i = 0; i < pts->GetNumberOfPoints(); ++i)
+			vtkIdType np = pts->GetNumberOfPoints();
+			for (vtkIdType i = np - 1; i >= 0; --i)
 			{
 				pts->GetPoint(i, x);
 				points->InsertNextPoint(x);
-				if (((this->LineIndex / 2) * 2) + 1 == i)
+				if ((((this->LineIndex / 2) * 2) + 2) % np == i)
 				{
 					points->InsertNextPoint(this->PickPoint[0], this->PickPoint[1], 0.0);
 					points->InsertNextPoint(this->PickPoint[0], this->PickPoint[1], 0.0);
@@ -1263,7 +1264,8 @@ vtkPoints* CPrismWidget::GetDeletePoints(void)
 		if (pts)
 		{
 			double x[3];
-			for (vtkIdType i = 0; i < pts->GetNumberOfPoints(); ++i)
+			vtkIdType np = pts->GetNumberOfPoints();
+			for (vtkIdType i = np - 1; i >= 0; --i)
 			{
 				if (i == this->CurrentId[0]) continue;
 				if (i == this->CurrentId[1]) continue;
