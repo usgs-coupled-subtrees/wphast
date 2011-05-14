@@ -90,6 +90,7 @@ public:
 	void EnableConstant(BOOL bEnable);
 	void EnableArcraster(BOOL bEnable);
 	void EnableShape(BOOL bEnable);
+	void EnableXYZ(BOOL bEnable);
 	void EnablePoints(BOOL bEnable);
 	void EnablePrismRadios(BOOL bEnable);
 
@@ -118,6 +119,7 @@ protected:
 	double m_dConstant[3];
 	CString m_sArcraster[3];
 	CString m_sShapefile[3];
+	CString m_sXYZ[3];
 	int m_nShapeAttribute[3];
 	std::list<Point> m_listPoint[3];
 
@@ -170,6 +172,7 @@ protected:
 	afx_msg void OnApply();
 	afx_msg void OnBnClickedArcraster();
 	afx_msg void OnBnClickedShape();
+	afx_msg void OnBnClickedXYZ();
 	afx_msg void OnCbnSelChangeShape();
 	afx_msg void OnEnKillfocusConstant();
 	afx_msg void OnEnChangeConstant();	
@@ -178,6 +181,9 @@ protected:
 	void OnUseMapWell(void);
 	void OnUseMapDrain(void);
 	void OnUseMapRiver(void);
+
+	void OnBnClickedAddPoint(void);
+	void OnBnClickedDeletePoint(void);
 
 	//afx_msg void OnEnKillfocusEditY();
 	//afx_msg void OnEnKillfocusEditZ();
