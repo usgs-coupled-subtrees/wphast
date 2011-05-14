@@ -414,7 +414,6 @@
 #define IDS_IMPORT_PHAST_TRANS_442      442
 #define IDD_UNITS5_PROPPAGE             442
 #define IDD_PROPS_ZONEPROPS             443
-#define IDD_PROPS_CUBE5                 443
 #define IDC_EDIT_X                      1000
 #define IDC_TITLE                       1000
 #define IDC_EDIT_Y                      1001
@@ -895,11 +894,11 @@
 #define IDC_GB_AXIS                     1455
 #define IDC_GB_CORNER                   1456
 #define IDC_TAB                         1457
-#define IDC_RADIO_NONE                  1458
-#define IDC_RADIO_CONSTANT              1459
-#define IDC_RADIO_ARCRASTER             1460
-#define IDC_RADIO_POINTS                1461
-#define IDC_RADIO_SHAPE                 1462
+#define XXX_IDC_RADIO_NONE              1458
+#define XXX_IDC_RADIO_CONSTANT          1459
+#define XXX_IDC_RADIO_ARCRASTER         1460
+#define XXX_IDC_RADIO_POINTS            1461
+#define XXX_IDC_RADIO_SHAPE             1462
 #define IDC_EDIT_CONSTANT               1463
 #define IDC_EDIT_ARCRASTER              1464
 #define IDC_EDIT_SHAPEFILE              1465
@@ -907,6 +906,8 @@
 #define IDC_BUTTON_SHAPE                1467
 #define IDC_COMBO_SHAPE                 1468
 #define IDC_RADIO_PERIM_DRAW            1469
+#define IDC_RADIO_POINTS2               1469
+#define XXX_IDC_RADIO_XYZ               1469
 #define IDC_RADIO_PERIM_SHAPEFILE       1470
 #define IDC_STATIC_CS_GB                1471
 #define IDC_CHECK_USE_MAP               1472
@@ -963,6 +964,14 @@
 #define IDC_SU_SSASSEMBLAGE_COMBO       1521
 #define IDC_SU_KINETICS_COMBO           1522
 #define IDC_SU_GASPHASE_COMBO           1523
+#define IDC_RADIO_NONE                  1524
+#define IDC_RADIO_CONSTANT              1525
+#define IDC_RADIO_ARCRASTER             1526
+#define IDC_RADIO_SHAPE                 1527
+#define IDC_RADIO_XYZ                   1528
+#define IDC_RADIO_POINTS                1529
+#define IDC_BUTTON_ADD_POINT            1535
+#define IDC_BUTTON_DELETE_POINT         1536
 #define IDC_RESIZE_COLUMN               28654
 #define IDC_RESIZE_ROW                  28655
 #define IDR_POPUP                       28656
@@ -1016,9 +1025,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        434
+#define _APS_NEXT_RESOURCE_VALUE        441
 #define _APS_NEXT_COMMAND_VALUE         32879
-#define _APS_NEXT_CONTROL_VALUE         1524
+#define _APS_NEXT_CONTROL_VALUE         1537
 #define _APS_NEXT_SYMED_VALUE           127
 #endif
 #endif
