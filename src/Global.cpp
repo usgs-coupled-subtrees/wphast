@@ -3382,7 +3382,7 @@ herr_t CGlobal::HDFSerializePrism(bool bStoring, hid_t loc_id, Prism &rPrism)
 			return_val = CGlobal::HDFSerialize(bStoring, group_id, szBox, H5T_NATIVE_DOUBLE, 6, xyz);
 			ASSERT(return_val >= 0);
 			struct zone* pzone = rPrism.Get_bounding_box();
-			pzone->zone_defined = 1;
+			pzone->zone_defined = true;
 			pzone->x1 = xyz[0];
 			pzone->y1 = xyz[1];
 			pzone->z1 = xyz[2];
@@ -3817,7 +3817,7 @@ herr_t CGlobal::HDFSerializeData_source(bool bStoring, hid_t loc_id, const char*
 				return_val = CGlobal::HDFSerialize(bStoring, ds_gr_id, szBox, H5T_NATIVE_DOUBLE, 6, xyz);
 				ASSERT(return_val >= 0);
 				struct zone* pzone = rData_source.Get_bounding_box();
-				pzone->zone_defined = 1;
+				pzone->zone_defined = true;
 				pzone->x1 = xyz[0];
 				pzone->y1 = xyz[1];
 				pzone->z1 = xyz[2];
@@ -4970,11 +4970,17 @@ bool CGlobal::PolygonIntersectsSelf(std::vector<Point> &vect)
 					double maxab = (a[k] > b[k]) ? a[k] : b[k];
 					if (minab <= c[k] && c[k] <= maxab)
 					{
-						return true;
+						if (minab != maxab)
+						{
+							return true;
+						}
 					}
 					if (minab <= d[k] && d[k] <= maxab)
 					{
-						return true;
+						if (minab != maxab)
+						{
+							return true;
+						}
 					}
 				}
 			}
