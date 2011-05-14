@@ -255,6 +255,10 @@ void CNewPrismWidget::OnMouseMove()
 	this->Interactor->Render();
 }
 
+static const int VTK_NO_INTERSECTION=0;
+static const int VTK_YES_INTERSECTION=2;
+static const int VTK_ON_LINE=3;
+
 void CNewPrismWidget::OnLeftButtonDown()
 {
 	TRACE("CNewPrismWidget::OnLeftButtonDown\n");
@@ -348,7 +352,7 @@ void CNewPrismWidget::OnLeftButtonDown()
 			{
 				this->Points->GetPoint(i-2, x1);
 				this->Points->GetPoint(i, x2);
-				if (vtkLine::Intersection(p1, p2, x1, x2, u, v) == 2)
+				if (vtkLine::Intersection(p1, p2, x1, x2, u, v) == VTK_YES_INTERSECTION)
 				{
 					TRACE("last point crosses\n");
 #ifdef _DEBUG
