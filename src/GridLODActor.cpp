@@ -556,7 +556,7 @@ void CGridLODActor::GetDefaultZone(CZone& rZone)
 	ASSERT(this->m_gridKeyword.m_grid[1].uniform_expanded == FALSE);
 	ASSERT(this->m_gridKeyword.m_grid[2].uniform_expanded == FALSE);
 
-	rZone.zone_defined = TRUE;
+	rZone.zone_defined = true;
 	rZone.x1 = this->m_gridKeyword.m_grid[0].coord[0];
 	rZone.y1 = this->m_gridKeyword.m_grid[1].coord[0];
 	rZone.z1 = this->m_gridKeyword.m_grid[2].coord[0];

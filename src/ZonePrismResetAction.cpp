@@ -59,6 +59,10 @@ void CZonePrismResetAction::Store()
 	afxDump << "<OriginalPrism>\n";
 	this->OriginalPrism->Dump(afxDump);
 	afxDump << "</OriginalPrism>\n";
+
+	afxDump << "<NewPrism>\n";
+	this->NewPrism->Dump(afxDump);
+	afxDump << "</NewPrism>\n";
 #endif
 	TRACE("%s, out\n", __FUNCTION__);
 }

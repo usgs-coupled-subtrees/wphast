@@ -876,7 +876,7 @@ void CZoneActor::Serialize(bool bStoring, hid_t loc_id, const CWPhastDoc* pWPhas
 			CZone zone;
 			if (status >= 0)
 			{
-				zone.zone_defined = TRUE;
+				zone.zone_defined = true;
 				zone.x1 = xyz[0];
 				zone.y1 = xyz[1];
 				zone.z1 = xyz[2];

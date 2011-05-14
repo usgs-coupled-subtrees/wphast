@@ -217,7 +217,7 @@ void CZoneWidgetResizeAction::Store()
 				//}}
 
 #if defined(_DEBUG)
-				zone.zone_defined = 1;
+				zone.zone_defined = true;
 				std::ostringstream oss;
 				oss << "CZoneWidgetResizeAction::Store -- zone:\n";
 				oss << zone << "\n";
