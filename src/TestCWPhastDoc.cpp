@@ -176,9 +176,10 @@ void TestCWPhastDoc::testCreateObject(void)
 	/// _CrtSetBreakAlloc(102602);
 	oldMemState.Checkpoint();
 	{
+		CMemoryState start, stop, diff;
 		for (int i = 0; i < 10/*0*/; ++i)
 		{
-			oldMemState.Checkpoint();
+			start.Checkpoint();
 
 			CRuntimeClass* pDocClass = RUNTIME_CLASS(CWPhastDoc);
 			CWPhastDoc* pDocument = (CWPhastDoc*)pDocClass->CreateObject();
@@ -201,13 +202,15 @@ void TestCWPhastDoc::testCreateObject(void)
 				break;
 			}
 			pDocument->OnCloseDocument();
-			newMemState.Checkpoint();
-			if( diffMemState.Difference( oldMemState, newMemState ) != 0)
+			stop.Checkpoint();
+			if( diff.Difference( start, stop ) != 0)
 			{
-				diffMemState.DumpStatistics();
-				oldMemState.DumpAllObjectsSince();
+				afxDump << "diff.DumpStatistics()" << "\n";
+				diff.DumpStatistics();
+				afxDump << "start.DumpAllObjectsSince()" << "\n";
+				start.DumpAllObjectsSince();
 			}
-			CPPUNIT_ASSERT(diffMemState.Difference( oldMemState, newMemState ) == 0);
+			CPPUNIT_ASSERT(diff.Difference( start, stop ) == 0);
 		}
 	}
 	newMemState.Checkpoint();
