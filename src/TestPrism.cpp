@@ -227,3 +227,144 @@ void TestPrism::timeMemDebug(void)
 // COMMENT: {12/2/2010 4:50:39 PM}	// restore memory tracking
 // COMMENT: {12/2/2010 4:50:39 PM}	::AfxEnableMemoryTracking(save);
 }
+
+void TestPrism::PolygonIntersectsSelf(void)
+{
+	std::vector<Point> pts;
+	pts.push_back(Point(0, 0, 0));
+	pts.push_back(Point(0, 1, 0));
+	pts.push_back(Point(1, 0, 0));
+	pts.push_back(Point(1, 1, 0));
+	CPPUNIT_ASSERT(Prism::Polygon_intersects_self(pts));
+
+	std::vector<Point> pts2;
+	pts2.push_back(Point(0, 0, 0));
+	pts2.push_back(Point(0, 1, 0));
+	pts2.push_back(Point(1, 0, 0));
+	pts2.push_back(Point(1, 1, 0));
+	pts2.push_back(Point(0, 0, 0));
+	CPPUNIT_ASSERT(Prism::Polygon_intersects_self(pts2));
+
+	std::vector<Point> pts3;
+	pts3.push_back(Point(0, 0, 0));
+	pts3.push_back(Point(0, 1, 0));
+	pts3.push_back(Point(1, 1, 0));
+	pts3.push_back(Point(1, 0, 0));
+	CPPUNIT_ASSERT(!Prism::Polygon_intersects_self(pts3));
+
+	std::vector<Point> pts4;
+	pts4.push_back(Point(0, 0, 0));
+	pts4.push_back(Point(0, 1, 0));
+	pts4.push_back(Point(1, 1, 0));
+	pts4.push_back(Point(1, 0, 0));
+	pts4.push_back(Point(0, 0, 0));
+	CPPUNIT_ASSERT(!Prism::Polygon_intersects_self(pts4));
+
+	std::vector<Point> pts5;
+	pts5.push_back(Point(0, 0, 0));
+	pts5.push_back(Point(0, 1, 0));
+	pts5.push_back(Point(1, 1, 0));
+	CPPUNIT_ASSERT(!Prism::Polygon_intersects_self(pts5));
+
+	std::vector<Point> pts6;
+	CPPUNIT_ASSERT(!Prism::Polygon_intersects_self(pts6));
+
+	// 4 collinear points
+	std::vector<Point> pts7;
+	pts7.push_back(Point(0, 0, 0));
+	pts7.push_back(Point(2, 0, 0));
+	pts7.push_back(Point(1, 0, 0));
+	pts7.push_back(Point(3, 0, 0));
+	CPPUNIT_ASSERT(Prism::Polygon_intersects_self(pts7));
+
+	// 3 collinear points (horiz)
+	std::vector<Point> pts8;
+	pts8.push_back(Point(0, 0, 0));
+	pts8.push_back(Point(2, 0, 0));
+	pts8.push_back(Point(1, 0, 0));
+	CPPUNIT_ASSERT(Prism::Polygon_intersects_self(pts8));
+
+	// 3 collinear points (vert)
+	std::vector<Point> pts9;
+	pts9.push_back(Point(0, 0, 0));
+	pts9.push_back(Point(0, 2, 0));
+	pts9.push_back(Point(0, 1, 0));
+	CPPUNIT_ASSERT(Prism::Polygon_intersects_self(pts9));
+
+	// right triangle
+	std::vector<Point> pts10;
+	pts10.push_back(Point(0, 0, 0));
+	pts10.push_back(Point(0, 1, 0));
+	pts10.push_back(Point(1, 0, 0));
+	CPPUNIT_ASSERT(!Prism::Polygon_intersects_self(pts10));
+
+	// square
+	std::vector<Point> pts11;
+	pts11.push_back(Point(0, 0, 0));
+	pts11.push_back(Point(0, 1, 0));
+	pts11.push_back(Point(1, 1, 0));
+	pts11.push_back(Point(1, 0, 0));
+	CPPUNIT_ASSERT(!Prism::Polygon_intersects_self(pts11));
+
+	// 3 (first==last) collinear points (horiz)
+	std::vector<Point> pts12;
+	pts12.push_back(Point(0, 0, 0));
+	pts12.push_back(Point(2, 0, 0));
+	pts12.push_back(Point(1, 0, 0));
+	pts12.push_back(Point(0, 0, 0));
+	CPPUNIT_ASSERT(Prism::Polygon_intersects_self(pts12));
+
+	// 3 (first==last) collinear points (vert)
+	std::vector<Point> pts13;
+	pts13.push_back(Point(0, 0, 0));
+	pts13.push_back(Point(0, 2, 0));
+	pts13.push_back(Point(0, 1, 0));
+	pts13.push_back(Point(0, 0, 0));
+	CPPUNIT_ASSERT(Prism::Polygon_intersects_self(pts9));
+
+	std::vector<Point> pts14;
+	pts14.push_back(Point(-1,  0, 0));
+	pts14.push_back(Point( 0,  0, 0));
+	pts14.push_back(Point( 0,  1, 0));
+	pts14.push_back(Point( 0, -1, 0));
+	pts14.push_back(Point(-1, -1, 0));
+	pts14.push_back(Point(-1,  0, 0));
+	CPPUNIT_ASSERT(Prism::Polygon_intersects_self(pts14));
+
+	// collinear non-overlapping parallel to xaxis
+	std::vector<Point> pts15;
+	pts15.push_back(Point(0,  0, 0));
+	pts15.push_back(Point(1,  0, 0));
+	pts15.push_back(Point(2,  0, 0));
+	pts15.push_back(Point(3,  0, 0));
+	pts15.push_back(Point(0,  1, 0));
+	CPPUNIT_ASSERT(!Prism::Polygon_intersects_self(pts15));
+
+	// collinear overlapping parallel to xaxis
+	std::vector<Point> pts15a;
+	pts15a.push_back(Point(0,  0, 0));
+	pts15a.push_back(Point(2,  0, 0));
+	pts15a.push_back(Point(1,  0, 0));
+	pts15a.push_back(Point(3,  0, 0));
+	pts15a.push_back(Point(0,  1, 0));
+	CPPUNIT_ASSERT(Prism::Polygon_intersects_self(pts15a));
+
+	// collinear non-overlapping parallel to yaxis
+	std::vector<Point> pts16;
+	pts16.push_back(Point(0,  0, 0));
+	pts16.push_back(Point(0,  1, 0));
+	pts16.push_back(Point(0,  2, 0));
+	pts16.push_back(Point(0,  3, 0));
+	pts16.push_back(Point(1,  0, 0));
+	CPPUNIT_ASSERT(!Prism::Polygon_intersects_self(pts16));
+
+	// collinear overlapping parallel to yaxis
+	std::vector<Point> pts16a;
+	pts16a.push_back(Point(0,  0, 0));
+	pts16a.push_back(Point(0,  2, 0));
+	pts16a.push_back(Point(0,  1, 0));
+	pts16a.push_back(Point(0,  3, 0));
+	pts16a.push_back(Point(1,  0, 0));
+	CPPUNIT_ASSERT(Prism::Polygon_intersects_self(pts16a));
+
+}
