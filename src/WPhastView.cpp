@@ -2673,10 +2673,10 @@ void CWPhastView::PrismWidgetListener(vtkObject *caller, unsigned long eid, void
 						vtkPoints *points = widget->GetPoints();
 						if (points)
 						{
-							vtkIdType i = 0;
+							vtkIdType i = points->GetNumberOfPoints() - 1;
 							Point pt;
 							double *coor = pt.get_coord();
-							for (; i < points->GetNumberOfPoints(); i+=2)
+							for (; i >= 0; i-=2)
 							{
 								points->GetPoint(i, coor);
 								vect.push_back(Point(pt.get_coord()[0], pt.get_coord()[1], pt.get_coord()[2]));
@@ -2697,7 +2697,7 @@ void CWPhastView::PrismWidgetListener(vtkObject *caller, unsigned long eid, void
 								&new_prism
 								);
 
-							if (CGlobal::PolygonIntersectsSelf(vect))
+							if (Prism::Polygon_intersects_self(vect))
 							{
 								::AfxMessageBox(_T("Perimeter cannot cross itself. Resetting original coordinates."));
 								pAction->UnExecute();
@@ -2806,7 +2806,7 @@ void CWPhastView::PrismWidgetListener(vtkObject *caller, unsigned long eid, void
 							self->GetDocument()->GetDefaultZone(::domain);
 							new_prism.Tidy();
 
-							if (CGlobal::PolygonIntersectsSelf(vect))
+							if (Prism::Polygon_intersects_self(vect))
 							{
 								::AfxMessageBox(_T("Deleting this point would cause the perimeter to cross itself. Resetting original coordinates."));
 								return;
