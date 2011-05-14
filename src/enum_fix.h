@@ -4,9 +4,6 @@
 #define ST_FIXED      12 // FIXED
 #define ST_ASSOCIATED 13 // ASSOCIATED
 
-// zone.defined
-#define ZD_UNDEFINED   2 // UNDEFINED
-
 // time.type
 #define TT_UNDEFINED   2 // UNDEFINED
 #define TT_STEP       16 // STEP

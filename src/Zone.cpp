@@ -14,12 +14,12 @@
  * ---------------------------------------------------------------------- */
 CZone::CZone()
 {
-	this->zone_defined = ZD_UNDEFINED;
+	this->zone_defined = false;
 }
 
 CZone::CZone(double x1, double x2, double y1, double y2, double z1, double z2)
 {
-	this->zone_defined = TRUE;
+	this->zone_defined = true;
 	if (x1 <= x2)
 	{
 		this->x1 = x1;
@@ -89,7 +89,7 @@ void CZone::Serialize(bool bStoring, hid_t loc_id)
 #ifdef _DEBUG
 		this->AssertValid();
 #endif
-		ASSERT(this->zone_defined == TRUE);
+		ASSERT(this->zone_defined == true);
 		xyz[0] = this->x1;
 		xyz[1] = this->y1;
 		xyz[2] = this->z1;
@@ -103,11 +103,11 @@ void CZone::Serialize(bool bStoring, hid_t loc_id)
 	}
 	else
 	{
-		this->zone_defined = FALSE;
+		this->zone_defined = false;
 		status = CGlobal::HDFSerialize(bStoring, loc_id, szZone, H5T_NATIVE_DOUBLE, 6, xyz);
 		ASSERT(status >= 0);
 		if (status >= 0) {
-			this->zone_defined = TRUE;
+			this->zone_defined = true;
 			this->x1 = xyz[0];
 			this->y1 = xyz[1];
 			this->z1 = xyz[2];
@@ -155,7 +155,7 @@ void CZone::Serialize(CArchive& ar)
 	if (ar.IsStoring())
 	{
 		// zone_defined
-        ASSERT(this->zone_defined == TRUE);
+        ASSERT(this->zone_defined == true);
 		ar << this->zone_defined;
 
 		// x1
@@ -206,7 +206,7 @@ void CZone::Serialize(CArchive& ar)
 void CZone::AssertValid() const
 {
 	ASSERT(this);
-	ASSERT(this->zone_defined == TRUE);
+	ASSERT(this->zone_defined == true);
 	ASSERT(this->x1 <= this->x2);
 	ASSERT(this->y1 <= this->y2);
 	ASSERT(this->z1 <= this->z2);
@@ -215,19 +215,17 @@ void CZone::AssertValid() const
 void CZone::Dump(CDumpContext& dc)const
 {
 	dc << "<CZone>\n";
-	switch (zone_defined) {
-		case ZD_UNDEFINED:
-			dc << "\tUNDEFINED\n";
-			break;
-		case TRUE:
-			dc << "(" 
-				<< this->x1 << ", " << this->y1 << ", " << this->z1
-				<< ")-("
-				<< this->x2 << ", " << this->y2 << ", " << this->z2
-				<< ")\n";
-				break;
-		default:
-			ASSERT(FALSE);
+	if (this->zone_defined)
+	{
+		dc << "(" 
+			<< this->x1 << ", " << this->y1 << ", " << this->z1
+			<< ")-("
+			<< this->x2 << ", " << this->y2 << ", " << this->z2
+			<< ")\n";
+	}
+	else
+	{
+		dc << "\tUNDEFINED\n";
 	}
 	dc << "</CZone>\n";
 }
@@ -235,7 +233,7 @@ void CZone::Dump(CDumpContext& dc)const
 
 std::ostream& operator<< (std::ostream &os, const CZone &a)
 {
-	ASSERT(a.zone_defined != ZD_UNDEFINED);
+	ASSERT(a.zone_defined);
 	os << "\t" << "-zone"
 		<< " " << a.x1
 		<< " " << a.y1
@@ -246,17 +244,3 @@ std::ostream& operator<< (std::ostream &os, const CZone &a)
 		<< "\n";
 	return os;
 }
-
-// COMMENT: {12/8/2008 4:58:23 PM}bool CZone::operator==(const struct zone& rhs)const throw()
-// COMMENT: {12/8/2008 4:58:23 PM}{
-// COMMENT: {12/8/2008 4:58:23 PM}	if (this->zone_defined == ZD_UNDEFINED || rhs.zone_defined == ZD_UNDEFINED) return false;
-// COMMENT: {12/8/2008 4:58:23 PM}	if (this->zone_defined == FALSE || rhs.zone_defined == FALSE) return false;
-// COMMENT: {12/8/2008 4:58:23 PM}	return (
-// COMMENT: {12/8/2008 4:58:23 PM}		this->x1 == rhs.x1 &&
-// COMMENT: {12/8/2008 4:58:23 PM}		this->x2 == rhs.x2 &&
-// COMMENT: {12/8/2008 4:58:23 PM}		this->y1 == rhs.y1 &&
-// COMMENT: {12/8/2008 4:58:23 PM}		this->y2 == rhs.y2 &&
-// COMMENT: {12/8/2008 4:58:23 PM}		this->z1 == rhs.z1 &&
-// COMMENT: {12/8/2008 4:58:23 PM}		this->z2 == rhs.z2
-// COMMENT: {12/8/2008 4:58:23 PM}		);
-// COMMENT: {12/8/2008 4:58:23 PM}}
