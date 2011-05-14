@@ -3347,10 +3347,13 @@ void TestCPhastInput::testCapeCod(void)
 #define EXTERNAL extern
 #include "srcinput/property.h"
 #include "srcinput/Data_source.h"
+#include "srcinput/Filedata.h"
 #include "property.h"
+
 void TestCPhastInput::testProperty(void)
 {
 	CPhastInput* pInput = NULL;
+	bool called_Clear_file_data_map = false;
 	try
 	{
 		CMemoryState oldMemState, newMemState, diffMemState;
@@ -3392,13 +3395,19 @@ void TestCPhastInput::testProperty(void)
 			pInput->Delete();
 			pInput = NULL;
 		}
+		// clean up file map
+		::Clear_file_data_map();
+		called_Clear_file_data_map = true;
+
 		newMemState.Checkpoint();
-#if defined(SHOW_MEM_LEAKS)
 		CPPUNIT_ASSERT(diffMemState.Difference( oldMemState, newMemState ) == 0);
-#endif
 	}
 	catch (...)
 	{
+		if (!called_Clear_file_data_map)
+		{
+			::Clear_file_data_map();
+		}
 		if (pInput)
 		{
 			LPCTSTR lpsz = pInput->GetErrorMsg();
