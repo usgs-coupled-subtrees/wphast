@@ -56,19 +56,23 @@ public:
 		CWnd* pParentWnd, UINT nID, DWORD dwStyle = WS_CHILD | WS_VISIBLE | CBRS_TOP);
 
 	void HideZoneControls(void);
-	void ShowZoneControls(void);
+	void ShowBoxControls(void);
+	void SizeZoneControls(int cx, int cy);
 
 	void HideWellControls(void);
 	void ShowWellControls(void);
 
 	void ShowRiverControls(void);
 	void HideRiverControls(void);
+	void SizeRiverControls(int cx, int cy);
 
 	void ShowWedgeControls(void);
 	void HideWedgeControls(void);
+	void SizeWedgeControls(int cx, int cy);
 
 	void ShowPrismControls(void);
 	void HidePrismControls(void);
+	void SizePrismControls(int cx, int cy);
 
 	void ShowCheckUseMap(void);
 	void HideCheckUseMap(void);
@@ -80,7 +84,6 @@ public:
 
 	void UpdateUnits(const CUnits& units);
 
-	void SizePrismControls(int cx, int cy);
 	void UpdatePrism(CZoneActor *pZoneActor, bool bForceUpdate = FALSE);
 	void EnablePointsGrid(BOOL bEnable);
 	void ApplyNewPrism(CZoneActor *pZoneActor);
@@ -181,6 +184,10 @@ protected:
 	void OnUseMapWell(void);
 	void OnUseMapDrain(void);
 	void OnUseMapRiver(void);
+
+	void OnChangeCoorSys(void);
+	void OnChangeCoorSysBox(void);
+	void OnChangeCoorSysWedge(void);
 
 	void OnBnClickedAddPoint(void);
 	void OnBnClickedDeletePoint(void);

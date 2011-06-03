@@ -32,6 +32,8 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
 	//ON_COMMAND_EX(ID_VIEW_PROPERIESVIEW, &CFrameWnd::OnBarCheck)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_PROPERIESVIEW, &CMainFrame::OnUpdateViewProperiesview)
 	ON_COMMAND(ID_VIEW_PROPERIESVIEW, &CMainFrame::OnViewProperiesview)
+
+	ON_UPDATE_COMMAND_UI(ID_INDICATOR_COOR, &CMainFrame::OnUpdateCoorIndicator)
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -45,6 +47,7 @@ static UINT indicators[] =
 	ID_INDICATOR_SPACE,     // 
 	ID_INDICATOR_GRID,      // grid units "Grid: %6.2f %s, %6.2f %s, %6.2f %s"
 	ID_INDICATOR_MAP,       // map units "Map: %6.2f %s, %6.2f %s, %6.2f %s"
+	ID_INDICATOR_COOR,      // coor "GRID|MAP "
 // COMMENT: {12/23/2008 6:05:20 PM}	ID_SEPARATOR,           // grid units "Grid: %6.2f %s, %6.2f %s, %6.2f %s"
 // COMMENT: {12/23/2008 6:05:20 PM}	ID_SEPARATOR,           // map units
 //}}
@@ -208,7 +211,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	// Box properties Bar
 	//
-	if (!m_wndDialogBarBoxProperties.Create(IDD_PROPS_ZONEPROPS, _T("Zone Properties"), this, IDW_CONTROLBAR_BOXPROPS))
+	if (!m_wndDialogBarBoxProperties.Create(IDD_PROPS_ZONEPROPS1, _T("Zone Properties"), this, IDW_CONTROLBAR_BOXPROPS))
 	{
 		TRACE0("Failed to create m_wndDialogBarBoxProperties\n");
 		return -1;
@@ -475,6 +478,30 @@ void CMainFrame::OnUpdateViewProperiesview(CCmdUI *pCmdUI)
 		return;
 	}
 	pCmdUI->ContinueRouting();
+}
+
+void CMainFrame::OnUpdateCoorIndicator(CCmdUI *pCmdUI)
+{
+	ENSURE_ARG(pCmdUI != NULL);
+
+	if (CWPhastDoc* pDoc = static_cast<CWPhastDoc*>(this->GetActiveDocument()))
+	{
+		switch (pDoc->GetCoordinateMode())
+		{
+		case CWPhastDoc::GridMode:
+			pCmdUI->SetText("GRID");
+			break;
+		case CWPhastDoc::MapMode:
+			pCmdUI->SetText("MAP ");
+			break;
+		default:
+			ASSERT(FALSE);
+			pCmdUI->SetText("    ");
+			break;
+		}
+	}
+	pCmdUI->Enable(TRUE);
+	ASSERT(pCmdUI->m_bEnableChanged);
 }
 
 void CMainFrame::OnViewProperiesview()

@@ -71,6 +71,10 @@ static int PrismIDs[] = {
 	IDC_BUTTON_ADD_POINT,
 	IDC_BUTTON_DELETE_POINT,
 	IDC_GRID_POINTS,
+
+	//{{
+	IDC_CHECK_USE_MAP2
+	//}}
 };
 
 BOOL IsEditCtrl(HWND hWnd);
@@ -153,6 +157,9 @@ BEGIN_MESSAGE_MAP(CBoxPropertiesDialogBar, CSizingDialogBarCFVS7)
 	ON_NOTIFY(GVN_ENDLABELEDIT, IDC_GRID_POINTS, OnEndLabelEditPointsGrid)
 	ON_NOTIFY(GVN_BEGINLABELEDIT, IDC_GRID_POINTS, OnBeginLabelEditPointsGrid)	
 
+	// grid coords
+	ON_BN_CLICKED(IDC_RADIO_CS_GRID, OnChangeCoorSys)
+	ON_BN_CLICKED(IDC_RADIO_CS_MAP, OnChangeCoorSys)
 END_MESSAGE_MAP()
 
 #ifdef _DEBUG
@@ -229,6 +236,14 @@ void CBoxPropertiesDialogBar::Update(IObserver* pSender, LPARAM lHint, CObject* 
 		{
 			this->OnApply();
 		}
+		if (CWnd *pWnd = this->GetFocus())
+		{
+			if (pWnd->GetParent() == &this->m_wndPointsGrid)
+			{
+				// req'd to end edit
+				this->m_wndPointsGrid.SetFocus();
+			}
+		}
 		break;
 	case WPN_SELCHANGED:
 		TRACE("\t%s, WPN_SELCHANGED\n", __FUNCTION__);
@@ -280,8 +295,8 @@ void CBoxPropertiesDialogBar::Update(IObserver* pSender, LPARAM lHint, CObject* 
 						if (this->m_nType != CBoxPropertiesDialogBar::BP_MIN_MAX)
 						{
 							this->m_nType = CBoxPropertiesDialogBar::BP_MIN_MAX;
-							this->ShowZoneControls();
-							this->ShowCheckUseMap();
+							this->ShowBoxControls();
+							//this->ShowCheckUseMap();
 						}
 						break;
 					case Polyhedron::PRISM:
@@ -669,7 +684,37 @@ void CBoxPropertiesDialogBar::DoDataExchange(CDataExchange* pDX)
 				this->m_xy_coordinate_system_user = PHAST_Transform::GRID;
 				break;
 			}
+			//{{
+			if (this->GetCheckedRadioButton(IDC_RADIO_CS_GRID, IDC_RADIO_CS_MAP) == IDC_RADIO_CS_MAP)
+			{
+				ASSERT(this->m_xy_coordinate_system_user == PHAST_Transform::MAP);
+				this->m_xy_coordinate_system_user = PHAST_Transform::MAP;
+			}
+			else
+			{
+				ASSERT(this->m_xy_coordinate_system_user == PHAST_Transform::GRID);
+				this->m_xy_coordinate_system_user = PHAST_Transform::GRID;
+			}
+			//}}
 		}
+		//{{
+		else
+		{
+			switch (this->m_xy_coordinate_system_user)
+			{
+			case PHAST_Transform::MAP:
+				this->CheckRadioButton(IDC_RADIO_CS_GRID, IDC_RADIO_CS_MAP, IDC_RADIO_CS_MAP);
+				break;
+			case PHAST_Transform::GRID:
+				this->CheckRadioButton(IDC_RADIO_CS_GRID, IDC_RADIO_CS_MAP, IDC_RADIO_CS_GRID);
+				break;
+			default:
+				ASSERT(FALSE);
+				this->CheckRadioButton(IDC_RADIO_CS_GRID, IDC_RADIO_CS_MAP, IDC_RADIO_CS_GRID);
+				break;
+			}
+		}
+		//}}
 	}
 	else if (this->m_nType == CBoxPropertiesDialogBar::BP_WELL)
 	{
@@ -835,6 +880,36 @@ void CBoxPropertiesDialogBar::DoDataExchange(CDataExchange* pDX)
 			this->CheckRadioButton(IDC_RADIO_X, IDC_RADIO_Z, IDC_RADIO_Z);
 			this->CheckRadioButton(IDC_RADIO_1, IDC_RADIO_4, IDC_RADIO_4);
 			break;
+		}
+
+		// coordinate system
+		//
+		if (pDX->m_bSaveAndValidate)
+		{
+			if (this->GetCheckedRadioButton(IDC_RADIO_CS_GRID, IDC_RADIO_CS_MAP) == IDC_RADIO_CS_MAP)
+			{
+				this->m_xy_coordinate_system_user = PHAST_Transform::MAP;
+			}
+			else
+			{
+				this->m_xy_coordinate_system_user = PHAST_Transform::GRID;
+			}
+		}
+		else
+		{			
+			switch (this->m_xy_coordinate_system_user)
+			{
+			case PHAST_Transform::MAP:
+				this->CheckRadioButton(IDC_RADIO_CS_GRID, IDC_RADIO_CS_MAP, IDC_RADIO_CS_MAP);
+				break;
+			case PHAST_Transform::GRID:
+				this->CheckRadioButton(IDC_RADIO_CS_GRID, IDC_RADIO_CS_MAP, IDC_RADIO_CS_GRID);
+				break;
+			default:
+				ASSERT(FALSE);
+				this->CheckRadioButton(IDC_RADIO_CS_GRID, IDC_RADIO_CS_MAP, IDC_RADIO_CS_GRID);
+				break;
+			}
 		}
 	}
 	else if (this->m_nType == CBoxPropertiesDialogBar::BP_PRISM)
@@ -1681,85 +1756,27 @@ static int ZoneIDs[] = {
 	IDC_Y_UNITS_STATIC2,
 	IDC_Z_UNITS_STATIC2,
 // COMMENT: {7/15/2009 10:57:53 PM}	IDC_CHECK_USE_MAP,
+	IDC_GB_COOR_SYS,
+    IDC_RADIO_CS_GRID,
+	IDC_RADIO_CS_MAP
 };
 
-void CBoxPropertiesDialogBar::ShowZoneControls()
+void CBoxPropertiesDialogBar::ShowBoxControls()
 {
 	TRACE("%s, in\n", __FUNCTION__);
-	if (CWnd *pWnd = this->GetDlgItem(IDC_STATIC_MIN))
+
+	CRect rect;
+	this->GetClientRect(&rect);
+	this->SizeZoneControls(rect.Width(), rect.Height());
+
+	for (int i = 0; i < sizeof(ZoneIDs)/sizeof(ZoneIDs[0]); ++i)
 	{
-		pWnd->MoveWindow(54, 24, 18, 13, TRUE);
-		pWnd->ShowWindow(SW_SHOW);
+		if (CWnd *pWnd = this->GetDlgItem(ZoneIDs[i]))
+		{
+			pWnd->ShowWindow(SW_SHOW);
+		}
 	}
-	if (CWnd *pWnd = this->GetDlgItem(IDC_STATIC_MAX))
-	{
-		pWnd->MoveWindow(134, 24, 21, 13, TRUE);
-		pWnd->ShowWindow(SW_SHOW);
-	}
-	if (CWnd *pWnd = this->GetDlgItem(IDC_STATIC_X))
-	{
-		pWnd->MoveWindow(11, 50, 12, 13, TRUE);
-		pWnd->ShowWindow(SW_SHOW);
-	}
-	if (CWnd *pWnd = this->GetDlgItem(IDC_STATIC_Y))
-	{
-		pWnd->MoveWindow(11, 83, 12, 13, TRUE);
-		pWnd->ShowWindow(SW_SHOW);
-	}
-	if (CWnd *pWnd = this->GetDlgItem(IDC_STATIC_Z))
-	{
-		pWnd->MoveWindow(11, 117, 12, 13, TRUE);
-		pWnd->ShowWindow(SW_SHOW);
-	}
-	if (CWnd *pWnd = this->GetDlgItem(IDC_EDIT_XMIN))
-	{
-		pWnd->MoveWindow(29, 47, 69, 20, TRUE);
-		pWnd->ShowWindow(SW_SHOW);
-	}
-	if (CWnd *pWnd = this->GetDlgItem(IDC_EDIT_YMIN))
-	{
-		pWnd->MoveWindow(29, 80, 69, 20, TRUE);
-		pWnd->ShowWindow(SW_SHOW);
-	}
-	if (CWnd *pWnd = this->GetDlgItem(IDC_EDIT_ZMIN))
-	{
-		pWnd->MoveWindow(29, 114, 69, 20, TRUE);
-		pWnd->ShowWindow(SW_SHOW);
-	}
-	if (CWnd *pWnd = this->GetDlgItem(IDC_EDIT_XMAX))
-	{
-		pWnd->MoveWindow(110, 47, 69, 20, TRUE);
-		pWnd->ShowWindow(SW_SHOW);
-	}
-	if (CWnd *pWnd = this->GetDlgItem(IDC_EDIT_YMAX))
-	{
-		pWnd->MoveWindow(110, 80, 69, 20, TRUE);
-		pWnd->ShowWindow(SW_SHOW);
-	}
-	if (CWnd *pWnd = this->GetDlgItem(IDC_EDIT_ZMAX))
-	{
-		pWnd->MoveWindow(110, 114, 69, 20, TRUE);
-		pWnd->ShowWindow(SW_SHOW);
-	}
-	if (CWnd *pWnd = this->GetDlgItem(IDC_X_UNITS_STATIC2))
-	{
-		pWnd->MoveWindow(186, 50, 30, 13, TRUE);
-		pWnd->ShowWindow(SW_SHOW);
-	}
-	if (CWnd *pWnd = this->GetDlgItem(IDC_Y_UNITS_STATIC2))
-	{
-		pWnd->MoveWindow(186, 83, 30, 13, TRUE);
-		pWnd->ShowWindow(SW_SHOW);
-	}
-	if (CWnd *pWnd = this->GetDlgItem(IDC_Z_UNITS_STATIC2))
-	{
-		pWnd->MoveWindow(186, 117, 30, 13, TRUE);
-		pWnd->ShowWindow(SW_SHOW);
-	}
-// COMMENT: {7/15/2009 11:13:54 PM}	if (CWnd *pWnd = this->GetDlgItem(IDC_CHECK_USE_MAP))
-// COMMENT: {7/15/2009 11:13:54 PM}	{
-// COMMENT: {7/15/2009 11:13:54 PM}		pWnd->ShowWindow(SW_SHOW);
-// COMMENT: {7/15/2009 11:13:54 PM}	}
+
 	TRACE("%s, out\n", __FUNCTION__);
 }
 
@@ -1779,6 +1796,141 @@ void CBoxPropertiesDialogBar::HideZoneControls()
 	}
 	TRACE("%s, out\n", __FUNCTION__);
 }
+
+void CBoxPropertiesDialogBar::SizeZoneControls(int cx, int cy)
+{
+	CRect rcMin(54, 24, 72, 37);
+	CRect rcMax(134, 24, 155, 37);
+
+	CRect rcXmin(29, 47, 98, 67);
+	CRect rcYmin(29, 80, 98, 100);
+	CRect rcZmin(29, 114, 98, 134);
+
+	CRect rcXmax(110, 47, 179, 67);
+	CRect rcYmax(110, 80, 179, 100);
+	CRect rcZmax(110, 114, 179, 134);
+
+	CRect rcXU(186, 50, 216, 63);
+	CRect rcYU(186, 83, 216, 96);
+	CRect rcZU(186, 117, 216, 130);
+
+	CRect rcCS;
+	if (CWnd *pWnd = this->GetDlgItem(IDC_GB_COOR_SYS))
+	{
+		pWnd->GetWindowRect(&rcCS);
+		this->ScreenToClient(&rcCS);
+	}
+	CRect rcG;
+	if (CWnd *pWnd = this->GetDlgItem(IDC_RADIO_CS_GRID))
+	{
+		pWnd->GetWindowRect(&rcG);
+		this->ScreenToClient(&rcG);
+	}
+	CRect rcM;
+	if (CWnd *pWnd = this->GetDlgItem(IDC_RADIO_CS_MAP))
+	{
+		pWnd->GetWindowRect(&rcM);
+		this->ScreenToClient(&rcM);
+	}
+
+	// row headings
+	if (CWnd *pWnd = this->GetDlgItem(IDC_STATIC_X))
+	{
+		pWnd->MoveWindow(11, 50, 12, 13, TRUE);
+	}
+	if (CWnd *pWnd = this->GetDlgItem(IDC_STATIC_Y))
+	{
+		pWnd->MoveWindow(11, 83, 12, 13, TRUE);
+	}
+	if (CWnd *pWnd = this->GetDlgItem(IDC_STATIC_Z))
+	{
+		pWnd->MoveWindow(11, 117, 12, 13, TRUE);
+	}
+
+	// column headings
+	const int mpad = 15;
+	if (CWnd *pWnd = this->GetDlgItem(IDC_STATIC_MIN))
+	{
+		pWnd->MoveWindow(rcXmin.left + (cx/2 - mpad - rcXmin.left)/2 - 8, rcMin.top, rcMin.Width(), rcMin.Height());
+	}
+	if (CWnd *pWnd = this->GetDlgItem(IDC_STATIC_MAX))
+	{
+		pWnd->MoveWindow(cx/2 + (cx/2 - mpad - rcXmin.left)/2 - 13, rcMax.top, rcMax.Width(), rcMax.Height());
+	}
+
+	// min
+	if (CWnd *pWnd = this->GetDlgItem(IDC_EDIT_XMIN))
+	{
+		pWnd->MoveWindow(rcXmin.left, rcXmin.top, cx/2 - mpad - rcXmin.left, rcXmin.Height());
+	}
+	if (CWnd *pWnd = this->GetDlgItem(IDC_EDIT_YMIN))
+	{
+		pWnd->MoveWindow(rcYmin.left, rcYmin.top, cx/2 - mpad - rcYmin.left, rcYmin.Height());
+	}
+	if (CWnd *pWnd = this->GetDlgItem(IDC_EDIT_ZMIN))
+	{
+		pWnd->MoveWindow(rcZmin.left, rcZmin.top, cx/2 - mpad - rcZmin.left, rcZmin.Height());
+	}
+
+	// max
+	if (CWnd *pWnd = this->GetDlgItem(IDC_EDIT_XMAX))
+	{
+		pWnd->MoveWindow(cx/2 - 3, rcXmax.top, cx/2 - mpad - rcXmin.left, rcXmax.Height());
+	}
+	if (CWnd *pWnd = this->GetDlgItem(IDC_EDIT_YMAX))
+	{
+		pWnd->MoveWindow(cx/2 - 3, rcYmax.top, cx/2 - mpad - rcYmin.left, rcYmax.Height());
+	}
+	if (CWnd *pWnd = this->GetDlgItem(IDC_EDIT_ZMAX))
+	{
+		pWnd->MoveWindow(cx/2 - 3, rcZmax.top, cx/2 - mpad - rcZmin.left, rcZmax.Height());
+	}
+
+	// units
+	const int upad = 10;
+	if (CWnd *pWnd = this->GetDlgItem(IDC_X_UNITS_STATIC2))
+	{
+		pWnd->MoveWindow(cx - rcXU.Width() - upad, rcXU.top, rcXU.Width(), rcXU.Height());
+	}
+	if (CWnd *pWnd = this->GetDlgItem(IDC_Y_UNITS_STATIC2))
+	{
+		pWnd->MoveWindow(cx - rcYU.Width() - upad, rcYU.top, rcYU.Width(), rcYU.Height());
+	}
+	if (CWnd *pWnd = this->GetDlgItem(IDC_Z_UNITS_STATIC2))
+	{
+		pWnd->MoveWindow(cx - rcZU.Width() - upad, rcZU.top, rcZU.Width(), rcZU.Height());
+	}
+
+	// use map coordinates
+	CRect rcMC;
+	if (CWnd *pWnd = this->GetDlgItem(IDC_CHECK_USE_MAP))
+	{
+		pWnd->GetWindowRect(&rcMC);
+		this->ScreenToClient(&rcMC);
+	}
+
+	// use map coordinates
+	if (CWnd *pWnd = this->GetDlgItem(IDC_CHECK_USE_MAP))
+	{
+		pWnd->MoveWindow((cx - rcMC.Width()) / 2, rcMC.top, rcMC.Width(), rcMC.Height());
+	}
+
+	// coordinate system groupbox
+	const int pad = 9;
+	if (CWnd *pWnd = this->GetDlgItem(IDC_GB_COOR_SYS))
+	{
+		pWnd->MoveWindow(rcCS.left, cy - rcCS.Height() - 5, cx - 2 * rcCS.left, rcCS.Height());
+	}
+	if (CWnd *pWnd = this->GetDlgItem(IDC_RADIO_CS_GRID))
+	{
+		pWnd->MoveWindow(50, cy - rcG.Height() - pad, rcG.Width(), rcG.Height());
+	}
+	if (CWnd *pWnd = this->GetDlgItem(IDC_RADIO_CS_MAP))
+	{
+		pWnd->MoveWindow(cx - rcM.Width() - 50, cy - rcM.Height() - pad, rcM.Width(), rcM.Height());
+	}
+}
+
 
 //{{{7/15/2009 10:54:00 PM}
 void CBoxPropertiesDialogBar::ShowCheckUseMap()
@@ -1855,6 +2007,10 @@ void CBoxPropertiesDialogBar::ShowRiverControls()
 			pWnd->ShowWindow(SW_SHOW);
 		}
 	}
+
+	CRect rect;
+	this->GetClientRect(&rect);
+	this->SizeRiverControls(rect.Width(), rect.Height());
 	TRACE("%s, out\n", __FUNCTION__);
 }
 
@@ -1873,6 +2029,45 @@ void CBoxPropertiesDialogBar::HideRiverControls()
 		}
 	}
 	TRACE("%s, out\n", __FUNCTION__);
+}
+
+void CBoxPropertiesDialogBar::SizeRiverControls(int cx, int cy)
+{
+// COMMENT: {5/17/2011 3:28:12 PM}	CRect rcX;
+// COMMENT: {5/17/2011 3:28:12 PM}	if (CWnd *pWnd = this->GetDlgItem(IDC_RADIO_XYZ))
+// COMMENT: {5/17/2011 3:28:12 PM}	{
+// COMMENT: {5/17/2011 3:28:12 PM}		pWnd->GetWindowRect(&rcX);
+// COMMENT: {5/17/2011 3:28:12 PM}		this->ScreenToClient(&rcX);
+// COMMENT: {5/17/2011 3:28:12 PM}	}
+// COMMENT: {5/17/2011 3:28:12 PM}
+// COMMENT: {5/17/2011 3:28:12 PM}	CRect rcP;
+// COMMENT: {5/17/2011 3:28:12 PM}	if (CWnd *pWnd = this->GetDlgItem(IDC_RADIO_POINTS))
+// COMMENT: {5/17/2011 3:28:12 PM}	{
+// COMMENT: {5/17/2011 3:28:12 PM}		pWnd->GetWindowRect(&rcP);
+// COMMENT: {5/17/2011 3:28:12 PM}		this->ScreenToClient(&rcP);
+// COMMENT: {5/17/2011 3:28:12 PM}	}
+
+	CRect rc;
+	this->m_wndRiverGrid.GetWindowRect(&rc);
+	this->ScreenToClient(&rc);
+
+	CRect rcMC;
+	if (CWnd *pWnd = this->GetDlgItem(IDC_CHECK_USE_MAP2))
+	{
+		pWnd->GetWindowRect(&rcMC);
+		this->ScreenToClient(&rcMC);
+	}
+	this->m_wndRiverGrid.GetWindowRect(&rc);
+	this->ScreenToClient(&rc);
+
+	const int x = rc.left;
+	int y = rc.top;
+	this->m_wndRiverGrid.MoveWindow(x, y, cx-2*x, cy - rcMC.Height() - 10 - x /*rc.Height()*//*cy-y-x*/);
+
+	if (CWnd *pWnd = this->GetDlgItem(IDC_CHECK_USE_MAP2))
+	{
+		pWnd->MoveWindow((cx - rcMC.Width()) / 2/*rcMC.left*/, cy - rcMC.Height() - 5, rcMC.Width(), rcMC.Height());
+	}
 }
 
 static int WedgeIDs[] = {
@@ -1899,83 +2094,93 @@ static int WedgeIDs[] = {
 	IDC_RADIO_4,
 	IDC_GB_AXIS,
 	IDC_GB_CORNER,
+	IDC_GB_COOR_SYS,
+	IDC_RADIO_CS_GRID,
+	IDC_RADIO_CS_MAP
 };
 
 void CBoxPropertiesDialogBar::ShowWedgeControls()
 {
 	TRACE("%s, in\n", __FUNCTION__);
-	const int D1 = 14;
-	const int D2 = 22;
-	const int D3 = 30;
-	const int D4 = 39;
+
+	CRect rect;
+	this->GetClientRect(&rect);
+	this->SizeWedgeControls(rect.Width(), rect.Height());
+
+
+
+// COMMENT: {5/19/2011 11:08:20 PM}	const int D1 = 14;
+// COMMENT: {5/19/2011 11:08:20 PM}	const int D2 = 22;
+// COMMENT: {5/19/2011 11:08:20 PM}	const int D3 = 30;
+// COMMENT: {5/19/2011 11:08:20 PM}	const int D4 = 39;
 	if (CWnd *pWnd = this->GetDlgItem(IDC_STATIC_MIN))
 	{
-		pWnd->MoveWindow(54, 24-D1, 18, 13, TRUE);
+// COMMENT: {5/19/2011 10:20:46 PM}		pWnd->MoveWindow(54, 24-D1, 18, 13, TRUE);
 		pWnd->ShowWindow(SW_SHOW);
 	}
 	if (CWnd *pWnd = this->GetDlgItem(IDC_STATIC_MAX))
 	{
-		pWnd->MoveWindow(134, 24-D1, 21, 13, TRUE);
+// COMMENT: {5/19/2011 10:20:50 PM}		pWnd->MoveWindow(134, 24-D1, 21, 13, TRUE);
 		pWnd->ShowWindow(SW_SHOW);
 	}
 	if (CWnd *pWnd = this->GetDlgItem(IDC_STATIC_X))
 	{
-		pWnd->MoveWindow(11, 50-D2, 12, 13, TRUE);
+// COMMENT: {5/19/2011 10:20:52 PM}		pWnd->MoveWindow(11, 50-D2, 12, 13, TRUE);
 		pWnd->ShowWindow(SW_SHOW);
 	}
 	if (CWnd *pWnd = this->GetDlgItem(IDC_STATIC_Y))
 	{
-		pWnd->MoveWindow(11, 83-D3, 12, 13, TRUE);
+// COMMENT: {5/19/2011 10:20:56 PM}		pWnd->MoveWindow(11, 83-D3, 12, 13, TRUE);
 		pWnd->ShowWindow(SW_SHOW);
 	}
 	if (CWnd *pWnd = this->GetDlgItem(IDC_STATIC_Z))
 	{
-		pWnd->MoveWindow(11, 117-D4, 12, 13, TRUE);
+// COMMENT: {5/19/2011 10:21:00 PM}		pWnd->MoveWindow(11, 117-D4, 12, 13, TRUE);
 		pWnd->ShowWindow(SW_SHOW);
 	}
 	if (CWnd *pWnd = this->GetDlgItem(IDC_EDIT_XMIN))
 	{
-		pWnd->MoveWindow(29, 47-D2, 69, 20, TRUE);
+// COMMENT: {5/19/2011 10:27:56 PM}		pWnd->MoveWindow(29, 47-D2, 69, 20, TRUE);
 		pWnd->ShowWindow(SW_SHOW);
 	}
 	if (CWnd *pWnd = this->GetDlgItem(IDC_EDIT_YMIN))
 	{
-		pWnd->MoveWindow(29, 80-D3, 69, 20, TRUE);
+// COMMENT: {5/19/2011 10:28:00 PM}		pWnd->MoveWindow(29, 80-D3, 69, 20, TRUE);
 		pWnd->ShowWindow(SW_SHOW);
 	}
 	if (CWnd *pWnd = this->GetDlgItem(IDC_EDIT_ZMIN))
 	{
-		pWnd->MoveWindow(29, 114-D4, 69, 20, TRUE);
+// COMMENT: {5/19/2011 10:28:03 PM}		pWnd->MoveWindow(29, 114-D4, 69, 20, TRUE);
 		pWnd->ShowWindow(SW_SHOW);
 	}
 	if (CWnd *pWnd = this->GetDlgItem(IDC_EDIT_XMAX))
 	{
-		pWnd->MoveWindow(110, 47-D2, 69, 20, TRUE);
+// COMMENT: {5/19/2011 10:28:06 PM}		pWnd->MoveWindow(110, 47-D2, 69, 20, TRUE);
 		pWnd->ShowWindow(SW_SHOW);
 	}
 	if (CWnd *pWnd = this->GetDlgItem(IDC_EDIT_YMAX))
 	{
-		pWnd->MoveWindow(110, 80-D3, 69, 20, TRUE);
+// COMMENT: {5/19/2011 10:28:09 PM}		pWnd->MoveWindow(110, 80-D3, 69, 20, TRUE);
 		pWnd->ShowWindow(SW_SHOW);
 	}
 	if (CWnd *pWnd = this->GetDlgItem(IDC_EDIT_ZMAX))
 	{
-		pWnd->MoveWindow(110, 114-D4, 69, 20, TRUE);
+// COMMENT: {5/19/2011 10:28:11 PM}		pWnd->MoveWindow(110, 114-D4, 69, 20, TRUE);
 		pWnd->ShowWindow(SW_SHOW);
 	}
 	if (CWnd *pWnd = this->GetDlgItem(IDC_X_UNITS_STATIC2))
 	{
-		pWnd->MoveWindow(186, 50-D2, 30, 13, TRUE);
+// COMMENT: {5/19/2011 10:28:13 PM}		pWnd->MoveWindow(186, 50-D2, 30, 13, TRUE);
 		pWnd->ShowWindow(SW_SHOW);
 	}
 	if (CWnd *pWnd = this->GetDlgItem(IDC_Y_UNITS_STATIC2))
 	{
-		pWnd->MoveWindow(186, 83-D3, 30, 13, TRUE);
+// COMMENT: {5/19/2011 10:28:16 PM}		pWnd->MoveWindow(186, 83-D3, 30, 13, TRUE);
 		pWnd->ShowWindow(SW_SHOW);
 	}
 	if (CWnd *pWnd = this->GetDlgItem(IDC_Z_UNITS_STATIC2))
 	{
-		pWnd->MoveWindow(186, 117-D4, 30, 13, TRUE);
+// COMMENT: {5/19/2011 10:28:18 PM}		pWnd->MoveWindow(186, 117-D4, 30, 13, TRUE);
 		pWnd->ShowWindow(SW_SHOW);
 	}
 
@@ -2014,11 +2219,26 @@ void CBoxPropertiesDialogBar::ShowWedgeControls()
 	if (CWnd *pWnd = this->GetDlgItem(IDC_GB_AXIS))
 	{
 		pWnd->ShowWindow(SW_SHOW);
+
 	}
 	if (CWnd *pWnd = this->GetDlgItem(IDC_GB_CORNER))
 	{
 		pWnd->ShowWindow(SW_SHOW);
 	}
+
+	if (CWnd *pWnd = this->GetDlgItem(IDC_GB_COOR_SYS))
+	{
+		pWnd->ShowWindow(SW_SHOW);
+	}
+	if (CWnd *pWnd = this->GetDlgItem(IDC_RADIO_CS_GRID))
+	{
+		pWnd->ShowWindow(SW_SHOW);
+	}
+	if (CWnd *pWnd = this->GetDlgItem(IDC_RADIO_CS_MAP))
+	{
+		pWnd->ShowWindow(SW_SHOW);
+	}
+
 
 
 	/*
@@ -2048,6 +2268,167 @@ void CBoxPropertiesDialogBar::HideWedgeControls()
 		}
 	}
 	TRACE("%s, out\n", __FUNCTION__);
+}
+
+void CBoxPropertiesDialogBar::SizeWedgeControls(int cx, int cy)
+{
+	this->SizeZoneControls(cx, cy);
+
+	int bp = 15;
+
+	CRect rcZ;
+	if (CWnd *pWnd = this->GetDlgItem(IDC_EDIT_ZMIN))
+	{
+		pWnd->GetWindowRect(&rcZ);
+		this->ScreenToClient(&rcZ);
+	}
+
+	//
+	// Axis groupbox
+	//
+
+	CRect rcA;
+	if (CWnd *pWnd = this->GetDlgItem(IDC_GB_AXIS))
+	{
+		pWnd->GetWindowRect(&rcA);
+		this->ScreenToClient(&rcA);
+		int w = .5 * (cx - 3 * bp);
+		pWnd->MoveWindow(bp, rcZ.bottom + 10, w, rcA.Height(), TRUE);
+		pWnd->GetWindowRect(&rcA);
+		this->ScreenToClient(&rcA);
+	}
+
+	if (CWnd *pWnd = this->GetDlgItem(IDC_RADIO_X))
+	{
+		CRect rc;
+		pWnd->GetWindowRect(&rc);
+		this->ScreenToClient(&rc);
+		int hpad = (rcA.Width() - rc.Width()) / 2;
+		int vpad = (rcA.Height() - 3 * rc.Height()) / 5;
+		int x = rcA.left + hpad;
+		int y = rcA.top + vpad + .5 * rc.Height();
+		pWnd->MoveWindow(x, y, rc.Width(), rc.Height(), TRUE);
+	}
+	if (CWnd *pWnd = this->GetDlgItem(IDC_RADIO_Y))
+	{
+		CRect rc;
+		pWnd->GetWindowRect(&rc);
+		this->ScreenToClient(&rc);
+		int hpad = (rcA.Width() - rc.Width()) / 2;
+		int vpad = (rcA.Height() - 3 * rc.Height()) / 5;
+		int x = rcA.left + hpad;
+		int y = rcA.top + 2*vpad + 1.5 * rc.Height();
+		pWnd->MoveWindow(x, y, rc.Width(), rc.Height(), TRUE);
+	}
+	if (CWnd *pWnd = this->GetDlgItem(IDC_RADIO_Z))
+	{
+		CRect rc;
+		pWnd->GetWindowRect(&rc);
+		this->ScreenToClient(&rc);
+		int hpad = (rcA.Width() - rc.Width()) / 2;
+		int vpad = (rcA.Height() - 3 * rc.Height()) / 5;
+		int x = rcA.left + hpad;
+		int y = rcA.top + 3*vpad + 2.5 * rc.Height();
+		pWnd->MoveWindow(x, y, rc.Width(), rc.Height(), TRUE);
+	}
+
+	//
+	// Corner groupbox
+	//
+
+	CRect rcC;
+	if (CWnd *pWnd = this->GetDlgItem(IDC_GB_CORNER))
+	{
+		pWnd->GetWindowRect(&rcC);
+		this->ScreenToClient(&rcC);
+		afxDump << "Corner " << rcC << "\n";
+		int w = .5 * (cx - 3 * bp);
+		pWnd->MoveWindow(rcA.right + bp, rcZ.bottom + 10, w, rcC.Height(), TRUE);
+		pWnd->GetWindowRect(&rcC);
+		this->ScreenToClient(&rcC);
+	}
+
+	int xpad = 3;
+	int ypad = 10;
+
+	if (CWnd *pWnd = this->GetDlgItem(IDC_RADIO_4))
+	{
+		CRect rc;
+		pWnd->GetWindowRect(&rc);
+		this->ScreenToClient(&rc);
+		int x = rcC.left + rcC.Width() / 3 - .5 * rc.Width();
+		int y = rcC.top + rcC.Height() / 3 - .5 * rc.Width();
+		pWnd->MoveWindow(x+xpad, y+ypad, rc.Width(), rc.Height(), TRUE);
+	}
+
+	if (CWnd *pWnd = this->GetDlgItem(IDC_RADIO_3))
+	{
+		CRect rc;
+		pWnd->GetWindowRect(&rc);
+		this->ScreenToClient(&rc);
+		int x = rcC.left + 2 * (rcC.Width() / 3) - .5 * rc.Width();
+		int y = rcC.top + rcC.Height() / 3 - .5 * rc.Width();
+		pWnd->MoveWindow(x+xpad+6, y+ypad, rc.Width(), rc.Height(), TRUE);
+	}
+
+	if (CWnd *pWnd = this->GetDlgItem(IDC_RADIO_1))
+	{
+		CRect rc;
+		pWnd->GetWindowRect(&rc);
+		this->ScreenToClient(&rc);
+		int x = rcC.left + rcC.Width() / 3 - .5 * rc.Width();
+		int y = rcC.top + 2 * rcC.Height() / 3 - .5 * rc.Width();
+		pWnd->MoveWindow(x+xpad, y+ypad, rc.Width(), rc.Height(), TRUE);
+	}
+
+	if (CWnd *pWnd = this->GetDlgItem(IDC_RADIO_2))
+	{
+		CRect rc;
+		pWnd->GetWindowRect(&rc);
+		this->ScreenToClient(&rc);
+		int x = rcC.left + 2 * (rcC.Width() / 3) - .5 * rc.Width();
+		int y = rcC.top + 2 * rcC.Height() / 3 - .5 * rc.Width();
+		pWnd->MoveWindow(x+xpad+6, y+ypad, rc.Width(), rc.Height(), TRUE);
+	}
+
+	//
+	// Coordinate system groupbox
+	//
+
+	CRect rcCS;
+	if (CWnd *pWnd = this->GetDlgItem(IDC_GB_COOR_SYS))
+	{
+		pWnd->GetWindowRect(&rcCS);
+		this->ScreenToClient(&rcCS);
+	}
+	CRect rcG;
+	if (CWnd *pWnd = this->GetDlgItem(IDC_RADIO_CS_GRID))
+	{
+		pWnd->GetWindowRect(&rcG);
+		this->ScreenToClient(&rcG);
+	}
+	CRect rcM;
+	if (CWnd *pWnd = this->GetDlgItem(IDC_RADIO_CS_MAP))
+	{
+		pWnd->GetWindowRect(&rcM);
+		this->ScreenToClient(&rcM);
+	}
+
+	const int pad = 4;
+	if (CWnd *pWnd = this->GetDlgItem(IDC_GB_COOR_SYS))
+	{
+		pWnd->MoveWindow(bp, rcA.bottom + bp, cx - 2 * bp, rcCS.Height());
+		pWnd->GetWindowRect(&rcCS);
+		this->ScreenToClient(&rcCS);
+	}
+	if (CWnd *pWnd = this->GetDlgItem(IDC_RADIO_CS_GRID))
+	{
+		pWnd->MoveWindow(50, rcCS.CenterPoint().y + pad - .5 * rcG.Height(), rcG.Width(), rcG.Height());
+	}
+	if (CWnd *pWnd = this->GetDlgItem(IDC_RADIO_CS_MAP))
+	{
+		pWnd->MoveWindow(cx - rcM.Width() - 50, rcCS.CenterPoint().y + pad - .5 * rcG.Height(), rcM.Width(), rcM.Height());
+	}
 }
 
 void CBoxPropertiesDialogBar::ShowApply()
@@ -2589,9 +2970,21 @@ void CBoxPropertiesDialogBar::OnSize(UINT nType, int cx, int cy)
 		this->UpdateBackgroundBrush();    // reqd to redraw radios
 	}
 
+	if (this->m_nType == CBoxPropertiesDialogBar::BP_RIVER)
+	{
+		this->SizeRiverControls(cx, cy);
+	}
 	if (this->m_nType == CBoxPropertiesDialogBar::BP_PRISM)
 	{
 		this->SizePrismControls(cx, cy);
+	}
+	if (this->m_nType == CBoxPropertiesDialogBar::BP_MIN_MAX)
+	{
+		this->SizeZoneControls(cx, cy);
+	}
+	if (this->m_nType == CBoxPropertiesDialogBar::BP_WEDGE)
+	{
+		this->SizeWedgeControls(cx, cy);
 	}
 }
 
@@ -2736,8 +3129,17 @@ void CBoxPropertiesDialogBar::SizePrismControls(int cx, int cy)
 		this->ScreenToClient(&rcP);
 	}
 
+	// use map coordinates
+	CRect rcMC;
+	if (CWnd *pWnd = this->GetDlgItem(IDC_CHECK_USE_MAP2))
+	{
+		pWnd->GetWindowRect(&rcMC);
+		this->ScreenToClient(&rcMC);
+	}
+
 	const int x = 5;
-	int y = rcP.top + rcP.top - rcX.top;
+	//int y = rcP.top + rcP.top - rcX.top;
+	int y = rcP.top + rcP.top - rcX.top + rcMC.Height();
 	this->m_wndPointsGrid.MoveWindow(x, y, cx-2*x, cy-y-x);
 
 	const int border = 3;
@@ -2820,6 +3222,13 @@ void CBoxPropertiesDialogBar::SizePrismControls(int cx, int cy)
 	if (CWnd *pWnd = this->GetDlgItem(IDC_BUTTON_XYZ))
 	{
 		pWnd->MoveWindow(rcEX.right + border, rcBX.top, rcBX.Width(), rcBX.Height());
+	}
+
+	// use map coordinates
+	if (CWnd *pWnd = this->GetDlgItem(IDC_CHECK_USE_MAP2))
+	{
+		//pWnd->MoveWindow(rcP.right + border, rcBX.top, rcBX.Width(), rcBX.Height());
+		pWnd->MoveWindow((cx - rcMC.Width()) / 2, rcP.bottom + 5, rcMC.Width(), rcMC.Height());
 	}
 }
 
@@ -4150,7 +4559,7 @@ void CBoxPropertiesDialogBar::OnBnClickedUseMap(void)
 		break;
 	case CBoxPropertiesDialogBar::BP_RIVER:
 		this->OnUseMapRiver();
-		break;		
+		break;
 	}
 }
 
@@ -4420,6 +4829,238 @@ void CBoxPropertiesDialogBar::OnUseMapRiver(void)
 			}
 			CAction *pAction = new CSetAction<CRiverActor, CRiver>(pRiverActor, river, pWPhastDoc);
 			pWPhastDoc->Execute(pAction);
+		}
+	}
+}
+
+void CBoxPropertiesDialogBar::OnChangeCoorSys(void)
+{
+	switch (this->m_nType)
+	{
+	case CBoxPropertiesDialogBar::BP_MIN_MAX:
+		this->OnChangeCoorSysBox();
+		break;
+	case CBoxPropertiesDialogBar::BP_WEDGE:
+		this->OnChangeCoorSysWedge();
+		break;
+	case CBoxPropertiesDialogBar::BP_WELL:
+		ASSERT(FALSE); // TODO
+		break;
+	case CBoxPropertiesDialogBar::BP_DRAIN:
+		ASSERT(FALSE); // TODO
+		break;
+	case CBoxPropertiesDialogBar::BP_RIVER:
+		ASSERT(FALSE); // TODO
+		break;
+	}
+}
+
+void CBoxPropertiesDialogBar::OnChangeCoorSysBox(void)
+{
+	const CUnits& units = this->m_pView->GetDocument()->GetUnits();
+	const CGridKeyword& gridKeyword = this->m_pView->GetDocument()->GetGridKeyword();
+	PHAST_Transform map2grid(
+		gridKeyword.m_grid_origin[0],
+		gridKeyword.m_grid_origin[1],
+		gridKeyword.m_grid_origin[2],
+		gridKeyword.m_grid_angle,
+		units.map_horizontal.input_to_si/units.horizontal.input_to_si,
+		units.map_horizontal.input_to_si/units.horizontal.input_to_si,
+		units.map_vertical.input_to_si/units.vertical.input_to_si
+		);
+
+	if (this->GetCheckedRadioButton(IDC_RADIO_CS_GRID, IDC_RADIO_CS_MAP) == IDC_RADIO_CS_MAP)
+	{
+		// Grid => Map
+		// Cube => Prism
+		//
+		if (CZoneActor* pZoneActor = this->m_pProp3D ? CZoneActor::SafeDownCast(this->m_pProp3D) : NULL)
+		{
+			ASSERT(pZoneActor->GetPolyhedronType() == Polyhedron::CUBE);
+			if (Cube *pc = dynamic_cast<Cube*>(pZoneActor->GetPolyhedron()))
+			{
+				ASSERT(pc->Get_coordinate_system() == PHAST_Transform::GRID);
+				Prism p1(*pc);
+				Prism p2(*pc);
+
+				ASSERT(p1.perimeter.Get_coordinate_system()      == PHAST_Transform::GRID);
+				ASSERT(p1.perimeter.Get_user_coordinate_system() == PHAST_Transform::GRID);
+				ASSERT(p2.perimeter.Get_coordinate_system()      == PHAST_Transform::GRID);
+				ASSERT(p2.perimeter.Get_user_coordinate_system() == PHAST_Transform::GRID);
+
+				p2.Convert_coordinates(PHAST_Transform::MAP, &map2grid);
+
+				p1.perimeter.Set_points(p2.perimeter.Get_points());
+				p1.top.Set_points(p2.top.Get_points());
+				p1.bottom.Set_points(p2.bottom.Get_points());
+
+				p1.perimeter.Set_coordinate_system(PHAST_Transform::MAP);
+				p1.perimeter.Set_user_coordinate_system(PHAST_Transform::MAP);
+				p1.Tidy();
+
+				ASSERT(p1.perimeter.Get_coordinate_system()      == PHAST_Transform::MAP);
+				ASSERT(p1.perimeter.Get_user_coordinate_system() == PHAST_Transform::MAP);
+
+				CAction *pAction = new CZoneSetPolyAction(
+					this->m_pView,
+					pZoneActor,
+					&p1
+					);
+				if (pAction)
+				{
+					this->m_pView->GetDocument()->Execute(pAction);
+				}
+			}
+			return;
+		}
+	}
+	else
+	{
+		// Map => Grid
+		// Cube => Prism
+		//
+		if (CZoneActor* pZoneActor = this->m_pProp3D ? CZoneActor::SafeDownCast(this->m_pProp3D) : NULL)
+		{
+			ASSERT(pZoneActor->GetPolyhedronType() == Polyhedron::CUBE);
+			if (Cube *pc = dynamic_cast<Cube*>(pZoneActor->GetPolyhedron()))
+			{
+				ASSERT(pc->Get_coordinate_system() == PHAST_Transform::MAP);
+				Prism p1(*pc);
+				Prism p2(*pc);
+
+				ASSERT(p1.perimeter.Get_coordinate_system()      == PHAST_Transform::MAP);
+				ASSERT(p1.perimeter.Get_user_coordinate_system() == PHAST_Transform::MAP);
+				ASSERT(p2.perimeter.Get_coordinate_system()      == PHAST_Transform::MAP);
+				ASSERT(p2.perimeter.Get_user_coordinate_system() == PHAST_Transform::MAP);
+
+				p2.Convert_coordinates(PHAST_Transform::GRID, &map2grid);
+
+				p1.perimeter.Set_points(p2.perimeter.Get_points());
+				p1.top.Set_points(p2.top.Get_points());
+				p1.bottom.Set_points(p2.bottom.Get_points());
+
+				p1.perimeter.Set_coordinate_system(PHAST_Transform::GRID);
+				p1.perimeter.Set_user_coordinate_system(PHAST_Transform::GRID);
+				p1.Tidy();
+
+				ASSERT(p1.perimeter.Get_coordinate_system()      == PHAST_Transform::GRID);
+				ASSERT(p1.perimeter.Get_user_coordinate_system() == PHAST_Transform::GRID);
+
+				CAction *pAction = new CZoneSetPolyAction(
+					this->m_pView,
+					pZoneActor,
+					&p1
+					);
+				if (pAction)
+				{
+					this->m_pView->GetDocument()->Execute(pAction);
+				}
+			}
+		}
+	}
+}
+
+void CBoxPropertiesDialogBar::OnChangeCoorSysWedge(void)
+{
+	const CUnits& units = this->m_pView->GetDocument()->GetUnits();
+	const CGridKeyword& gridKeyword = this->m_pView->GetDocument()->GetGridKeyword();
+	PHAST_Transform map2grid(
+		gridKeyword.m_grid_origin[0],
+		gridKeyword.m_grid_origin[1],
+		gridKeyword.m_grid_origin[2],
+		gridKeyword.m_grid_angle,
+		units.map_horizontal.input_to_si/units.horizontal.input_to_si,
+		units.map_horizontal.input_to_si/units.horizontal.input_to_si,
+		units.map_vertical.input_to_si/units.vertical.input_to_si
+		);
+
+	if (this->GetCheckedRadioButton(IDC_RADIO_CS_GRID, IDC_RADIO_CS_MAP) == IDC_RADIO_CS_MAP)
+	{
+		// Grid => Map
+		// Wedge => Prism
+		//
+		if (CZoneActor* pZoneActor = this->m_pProp3D ? CZoneActor::SafeDownCast(this->m_pProp3D) : NULL)
+		{
+			ASSERT(pZoneActor->GetPolyhedronType() == Polyhedron::WEDGE);
+			if (Wedge *pw = dynamic_cast<Wedge*>(pZoneActor->GetPolyhedron()))
+			{
+				ASSERT(pw->Get_coordinate_system() == PHAST_Transform::GRID);
+				Prism p1(*pw);
+				Prism p2(*pw);
+
+				ASSERT(p1.perimeter.Get_coordinate_system()      == PHAST_Transform::GRID);
+				ASSERT(p1.perimeter.Get_user_coordinate_system() == PHAST_Transform::GRID);
+				ASSERT(p2.perimeter.Get_coordinate_system()      == PHAST_Transform::GRID);
+				ASSERT(p2.perimeter.Get_user_coordinate_system() == PHAST_Transform::GRID);
+
+				p2.Convert_coordinates(PHAST_Transform::MAP, &map2grid);
+
+				p1.perimeter.Set_points(p2.perimeter.Get_points());
+				p1.top.Set_points(p2.top.Get_points());
+				p1.bottom.Set_points(p2.bottom.Get_points());
+
+				p1.perimeter.Set_coordinate_system(PHAST_Transform::MAP);
+				p1.perimeter.Set_user_coordinate_system(PHAST_Transform::MAP);
+				p1.Tidy();
+
+				ASSERT(p1.perimeter.Get_coordinate_system()      == PHAST_Transform::MAP);
+				ASSERT(p1.perimeter.Get_user_coordinate_system() == PHAST_Transform::MAP);
+
+				CAction *pAction = new CZoneSetPolyAction(
+					this->m_pView,
+					pZoneActor,
+					&p1
+					);
+				if (pAction)
+				{
+					this->m_pView->GetDocument()->Execute(pAction);
+				}
+			}
+			return;
+		}
+	}
+	else
+	{
+		// Map => Grid
+		// Wedge => Prism
+		//
+		if (CZoneActor* pZoneActor = this->m_pProp3D ? CZoneActor::SafeDownCast(this->m_pProp3D) : NULL)
+		{
+			ASSERT(pZoneActor->GetPolyhedronType() == Polyhedron::WEDGE);
+			if (Wedge *pw = dynamic_cast<Wedge*>(pZoneActor->GetPolyhedron()))
+			{
+				ASSERT(pw->Get_coordinate_system() == PHAST_Transform::MAP);
+				Prism p1(*pw);
+				Prism p2(*pw);
+
+				ASSERT(p1.perimeter.Get_coordinate_system()      == PHAST_Transform::MAP);
+				ASSERT(p1.perimeter.Get_user_coordinate_system() == PHAST_Transform::MAP);
+				ASSERT(p2.perimeter.Get_coordinate_system()      == PHAST_Transform::MAP);
+				ASSERT(p2.perimeter.Get_user_coordinate_system() == PHAST_Transform::MAP);
+
+				p2.Convert_coordinates(PHAST_Transform::GRID, &map2grid);
+
+				p1.perimeter.Set_points(p2.perimeter.Get_points());
+				p1.top.Set_points(p2.top.Get_points());
+				p1.bottom.Set_points(p2.bottom.Get_points());
+
+				p1.perimeter.Set_coordinate_system(PHAST_Transform::GRID);
+				p1.perimeter.Set_user_coordinate_system(PHAST_Transform::GRID);
+				p1.Tidy();
+
+				ASSERT(p1.perimeter.Get_coordinate_system()      == PHAST_Transform::GRID);
+				ASSERT(p1.perimeter.Get_user_coordinate_system() == PHAST_Transform::GRID);
+
+				CAction *pAction = new CZoneSetPolyAction(
+					this->m_pView,
+					pZoneActor,
+					&p1
+					);
+				if (pAction)
+				{
+					this->m_pView->GetDocument()->Execute(pAction);
+				}
+			}
 		}
 	}
 }

@@ -414,6 +414,9 @@
 #define IDS_IMPORT_PHAST_TRANS_442      442
 #define IDD_UNITS5_PROPPAGE             442
 #define IDD_PROPS_ZONEPROPS             443
+#define IDS_STRING443                   443
+#define ID_INDICATOR_COOR               443
+#define IDD_PROPS_ZONEPROPS1            444
 #define IDC_EDIT_X                      1000
 #define IDC_TITLE                       1000
 #define IDC_EDIT_Y                      1001
@@ -421,6 +424,7 @@
 #define IDC_EDIT_Z                      1002
 #define IDC_RADIO1                      1002
 #define IDC_EDIT_Y2                     1002
+#define IDC_RADIO_MAP                   1003
 #define IDC_XY_GRID_RADIO               1008
 #define IDC_SINGLE_VALUE_RADIO          1009
 #define IDC_EDIT_WIDTH                  1010
@@ -972,6 +976,9 @@
 #define IDC_RADIO_POINTS                1529
 #define IDC_BUTTON_ADD_POINT            1535
 #define IDC_BUTTON_DELETE_POINT         1536
+#define IDC_GB_COOR_SYS                 1537
+#define IDC_RADIO_CS_GRID               1538
+#define IDC_RADIO_CS_MAP                1539
 #define IDC_RESIZE_COLUMN               28654
 #define IDC_RESIZE_ROW                  28655
 #define IDR_POPUP                       28656
@@ -1017,6 +1024,8 @@
 #define ID_TOOLS_ROTATEGRID             32868
 #define ID_VIEW_RESETVIEWPOINT          32875
 #define ID_TOOLS_NEWDOMAIN              32877
+#define ID_MODE_GRID                    32879
+#define ID_MODE_MAP                     32880
 #define IDW_CONTROLBAR_TREE             59424
 #define IDW_CONTROLBAR_BOXPROPS         59425
 #define IDC_VALUE_STATIC                65535
@@ -1026,8 +1035,8 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        441
-#define _APS_NEXT_COMMAND_VALUE         32879
-#define _APS_NEXT_CONTROL_VALUE         1537
+#define _APS_NEXT_COMMAND_VALUE         32881
+#define _APS_NEXT_CONTROL_VALUE         1539
 #define _APS_NEXT_SYMED_VALUE           127
 #endif
 #endif

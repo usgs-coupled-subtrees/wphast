@@ -124,8 +124,6 @@ BEGIN_MESSAGE_MAP(CWPhastView, CView)
 // COMMENT: {8/29/2005 6:46:54 PM}	ON_COMMAND(ID_TOOLS_MODIFYGRID, OnToolsModifyGrid)
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_SELECTOBJECT, OnUpdateToolsSelectObject)
 	ON_COMMAND(ID_TOOLS_SELECTOBJECT, OnToolsSelectObject)
-	ON_COMMAND(ID_SETGRID_MODE, &CWPhastView::OnSetGridMode)
-	ON_COMMAND(ID_SETMAP_MODE, &CWPhastView::OnSetMapMode)
 	ON_COMMAND(ID_CANCEL_MODE, &CWPhastView::OnCancelMode)
 	ON_COMMAND(ID_VIEW_RESETVIEWPOINT, &CWPhastView::OnViewResetviewpoint)
 END_MESSAGE_MAP()
@@ -140,7 +138,6 @@ CWPhastView::CWPhastView()
 , PrismWidget(0)
 , ViewVTKCommand(0)
 , InteractorStyle(0)
-// COMMENT: {9/8/2009 8:42:04 PM}, m_bResetCamera(false)
 , bMovingGridLine(false)
 , bRotatingGrid(false)
 , Cursor3D(0)
@@ -152,7 +149,6 @@ CWPhastView::CWPhastView()
 , CurrentProp(0)
 , RiverCallbackCommand(0)
 , PrismWidgetCallbackCommand(0)
-, CoordinateMode(CWPhastView::GridMode)
 {
 	// Create the renderer
 	//
@@ -1328,10 +1324,6 @@ void CWPhastView::Select(vtkProp *pProp)
 
 					if (c->Get_user_coordinate_system() == PHAST_Transform::MAP)
 					{
-						double *origin = pZoneActor->GetGridOrigin();
-						double angle = pZoneActor->GetGridAngle();
-						double *scale = pZoneActor->GetScale();
-
 						if (Cube *c = dynamic_cast<Cube*>(pZoneActor->GetPolyhedron()))
 						{
 							zone *z = c->Get_bounding_box();
@@ -1401,7 +1393,6 @@ void CWPhastView::Select(vtkProp *pProp)
 
 			if (pWellActor->GetWell().xy_coordinate_system_user == PHAST_Transform::MAP)
 			{
-				this->CoordinateMode = CWPhastView::MapMode;
 				CGridKeyword gridKeyword;
 				this->GetDocument()->GetGridKeyword(gridKeyword);
 				this->Cursor3DActor->SetOrientation(0, 0, -gridKeyword.m_grid_angle);
@@ -1409,7 +1400,6 @@ void CWPhastView::Select(vtkProp *pProp)
 			}
 			else
 			{
-				this->CoordinateMode = CWPhastView::GridMode;
 				this->Cursor3DActor->SetOrientation(0, 0, 0);
 				this->PointWidget->SetOrientation(0, 0, 0);
 			}
@@ -1492,11 +1482,11 @@ void CWPhastView::StartNewWell(void)
 	this->Cursor3DActor->GetProperty()->SetColor(1, 1, 0);
 
 #if 9991 // well w/ grid rotation
-	if (this->CoordinateMode == CWPhastView::GridMode)
+	if (this->GetDocument()->GetCoordinateMode() == CWPhastDoc::GridMode)
 	{
 		this->Cursor3DActor->SetOrientation(0, 0, 0);
 	}
-	else if (this->CoordinateMode == CWPhastView::MapMode)
+	else if (this->GetDocument()->GetCoordinateMode() == CWPhastDoc::MapMode)
 	{
 		CGridKeyword gridKeyword = this->GetDocument()->GetGridKeyword();
 		this->Cursor3DActor->SetOrientation(0, 0, -gridKeyword.m_grid_angle);
@@ -2826,64 +2816,23 @@ void CWPhastView::PrismWidgetListener(vtkObject *caller, unsigned long eid, void
 	}
 }
 
-void CWPhastView::SetMapMode(void)
-{
-	this->SetCoordinateMode(CWPhastView::MapMode);
-}
-
-void CWPhastView::SetGridMode(void)
-{
-	this->SetCoordinateMode(CWPhastView::GridMode);
-}
-
-void CWPhastView::SetCoordinateMode(CoordinateState mode)
-{
-	if (mode == CWPhastView::GridMode)
-	{
-		this->CoordinateMode = CWPhastView::GridMode;
-		this->UpdateWellMode();
-	}
-	else if (mode == CWPhastView::MapMode)
-	{
-		this->CoordinateMode = CWPhastView::MapMode;
-		this->UpdateWellMode();
-	}
-	else
-	{
-		ASSERT(FALSE);
-	}
-}
-
-CWPhastView::CoordinateState CWPhastView::GetCoordinateMode(void)const
-{
-	return this->CoordinateMode;
-}
-
 void CWPhastView::UpdateWellMode(void)
 {
 	if (CWPhastView::CreatingNewWell() || this->PointWidget->GetEnabled())
 	{
-		if (this->CoordinateMode == CWPhastView::GridMode)
+		if (this->GetDocument()->GetCoordinateMode() == CWPhastDoc::GridMode)
 		{
 			this->Cursor3DActor->SetOrientation(0, 0, 0);
-			this->PointWidget->SetOrientation(0, 0, 0);
 		}
-		else if (this->CoordinateMode == CWPhastView::MapMode)
+		else if (this->GetDocument()->GetCoordinateMode() == CWPhastDoc::MapMode)
 		{
 			CGridKeyword gridKeyword = this->GetDocument()->GetGridKeyword();
 			this->Cursor3DActor->SetOrientation(0, 0, -gridKeyword.m_grid_angle);
-			this->PointWidget->SetOrientation(0, 0, -gridKeyword.m_grid_angle);
 		}
 		else
 		{
 			ASSERT(FALSE);
 		}
-#if ((VTK_MAJOR_VERSION >= 5) && (VTK_MINOR_VERSION >= 4))
-// COMMENT: {1/4/2011 5:18:39 PM}		ASSERT(FALSE); // check this
-		this->MFCWindow->GetRenderWindow()->Render();
-#else
-		this->m_RenderWindow->Render();
-#endif
 	}
 }
 
@@ -2898,16 +2847,6 @@ void vtkMFCWindow::Dump(CDumpContext& dc) const
   CWnd::Dump(dc);
 }
 #endif //defined(_DEBUG) && !defined(__CPPUNIT__)
-
-void CWPhastView::OnSetGridMode()
-{
-	this->SetGridMode();
-}
-
-void CWPhastView::OnSetMapMode()
-{
-	this->SetMapMode();
-}
 
 void CWPhastView::OnCancelMode()
 {

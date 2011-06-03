@@ -122,6 +122,14 @@ public:
 	void Execute(CAction* pAction);
 	void New(const CNewModel& model);
 
+	//
+	// coordinate mode
+	enum CoordinateState
+	{
+		GridMode    = 0,
+		MapMode     = 1,
+	};
+
 public:
 
 	// IObserver interface
@@ -284,7 +292,8 @@ protected:
 	CPointConnectorMovePointAction<CDrainActor> *DrainMovePointAction;
 
 	// properties
-	enum ProjectionType ProjectionMode;
+	enum ProjectionType  ProjectionMode;
+	enum CoordinateState CoordinateMode;
 
 	// grid
 	//
@@ -370,6 +379,11 @@ public:
 	void SetPrintInput(const CPrintInput& printInput);
 	const CPrintInput& GetPrintInput(void)const;
 
+	CWPhastDoc::CoordinateState GetCoordinateMode()const;
+	void SetCoordinateMode(CWPhastDoc::CoordinateState mode);
+	void SetMapMode(void);
+	void SetGridMode(void);
+
 	double* GetGridBounds();
 	void SetScale(double x, double y, double z);
 	double* GetScale();
@@ -401,6 +415,13 @@ public:
 	afx_msg void OnViewSitemap();
 	afx_msg void OnViewGrid();
 	afx_msg void OnUpdateViewGrid(CCmdUI *pCmdUI);
+
+	// Mode
+	afx_msg void OnUpdateGridMode(CCmdUI *pCmdUI);
+	afx_msg void OnSetGridMode();
+
+	afx_msg void OnUpdateMapMode(CCmdUI *pCmdUI);
+	afx_msg void OnSetMapMode();
 
 	// Media
 	afx_msg void OnUpdateMediaZonesHideAll(CCmdUI *pCmdUI);

@@ -198,7 +198,7 @@ void CViewVTKCommand::OnEndInteractionEvent(vtkObject* caller, void* callData)
 			if (this->Transform)
 			{
 				this->Transform->Identity();
-				if (this->m_pView->GetCoordinateMode() == CWPhastView::MapMode)
+				if (this->m_pView->GetDocument()->GetCoordinateMode() == CWPhastDoc::MapMode)
 				{
 					const CGridKeyword& gridKeyword = this->m_pView->GetDocument()->GetGridKeyword();
 					this->Transform->Scale(
@@ -211,7 +211,7 @@ void CViewVTKCommand::OnEndInteractionEvent(vtkObject* caller, void* callData)
 				}
 				else
 				{
-					ASSERT(this->m_pView->GetCoordinateMode() == CWPhastView::GridMode);
+					ASSERT(this->m_pView->GetDocument()->GetCoordinateMode() == CWPhastDoc::GridMode);
 					this->Transform->Scale(
 						scale[0] * units.horizontal.input_to_si,
 						scale[1] * units.horizontal.input_to_si,
@@ -726,7 +726,7 @@ void CViewVTKCommand::OnLeftButtonReleaseEvent(vtkObject* caller, void* callData
 		if (this->Transform)
 		{
 			this->Transform->Identity();
-			if (this->m_pView->GetCoordinateMode() == CWPhastView::MapMode)
+			if (this->m_pView->GetDocument()->GetCoordinateMode() == CWPhastDoc::MapMode)
 			{
 				this->Transform->Scale(
 					scale[0] * units.map_horizontal.input_to_si,
@@ -813,12 +813,12 @@ void CViewVTKCommand::OnKeyPressEvent(vtkObject* caller, void* callData)
 		if (::_stricmp(keysym, "m") == 0)
 		{
 			ASSERT(FALSE); // Should now be caught by Accelerator
-			this->m_pView->SetMapMode();
+			this->m_pView->GetDocument()->SetMapMode();
 		}
 		if (::_stricmp(keysym, "g") == 0)
 		{
 			ASSERT(FALSE); // Should now be caught by Accelerator
-			this->m_pView->SetGridMode();
+			this->m_pView->GetDocument()->SetGridMode();
 		}
 	}
 

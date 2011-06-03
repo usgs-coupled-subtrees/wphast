@@ -121,14 +121,6 @@ protected:
 
 	int                             ViewFromDirection;
 
-	//
-	// coordinate mode
-	enum CoordinateState
-	{
-		GridMode    = 0,
-		MapMode     = 1,
-	} CoordinateMode;
-
 	friend class CViewVTKCommand;
 
 // Generated message map functions
@@ -201,13 +193,6 @@ public:
 	//
 	bool SelectingObject(void)const;
 
-	// Coordinate mode
-	// 
-	void SetMapMode(void);
-	void SetGridMode(void);
-	void SetCoordinateMode(CoordinateState mode);
-	CWPhastView::CoordinateState GetCoordinateMode(void)const;
-
 public:
 
 	afx_msg void OnUpdateViewFromNx(CCmdUI *pCmdUI);
@@ -270,8 +255,6 @@ public:
 	afx_msg void OnUpdateToolsSelectObject(CCmdUI *pCmdUI);
 	afx_msg void OnToolsSelectObject();
 	virtual BOOL OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo);
-	afx_msg void OnSetGridMode();
-	afx_msg void OnSetMapMode();
 	afx_msg void OnCancelMode();
 	afx_msg void OnViewResetviewpoint();
 };

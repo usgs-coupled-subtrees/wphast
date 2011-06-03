@@ -79,6 +79,7 @@ public:
 #endif
 	afx_msg void OnUpdateViewProperiesview(CCmdUI *pCmdUI);
 	afx_msg void OnViewProperiesview();
+	afx_msg void OnUpdateCoorIndicator(CCmdUI* pCmdUI);
 };
 
 

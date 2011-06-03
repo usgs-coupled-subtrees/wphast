@@ -217,10 +217,12 @@ BEGIN_MESSAGE_MAP(CWPhastDoc, CDocument)
 	ON_COMMAND(ID_TOOLS_NEWSTRESSPERIOD, OnToolsNewStressPeriod)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_AXES, OnUpdateViewAxes)
 	ON_COMMAND(ID_VIEW_AXES, OnViewAxes)
+
 	ON_UPDATE_COMMAND_UI(ID_SETPROJECTIONTO_PARALLEL, OnUpdateSetprojectiontoParallel)
 	ON_COMMAND(ID_SETPROJECTIONTO_PARALLEL, OnSetprojectiontoParallel)
 	ON_UPDATE_COMMAND_UI(ID_SETPROJECTIONTO_PERSPECTIVE, OnUpdateSetprojectiontoPerspective)
 	ON_COMMAND(ID_SETPROJECTIONTO_PERSPECTIVE, OnSetprojectiontoPerspective)
+
 	ON_UPDATE_COMMAND_UI(ID_VIEW_SITEMAP, OnUpdateViewSitemap)
 	ON_COMMAND(ID_VIEW_SITEMAP, OnViewSitemap)
 	ON_COMMAND(ID_VIEW_GRID, OnViewGrid)
@@ -246,6 +248,13 @@ BEGIN_MESSAGE_MAP(CWPhastDoc, CDocument)
 	ON_COMMAND(ID_BCZONES_SHOWSELECTED, OnBCZonesShowSelected)
 	ON_COMMAND(ID_BCZONES_SELECTALL, OnBCZonesSelectAll)
 	ON_COMMAND(ID_BCZONES_UNSELECTALL, OnBCZonesUnselectAll)
+
+	// MODE
+	ON_UPDATE_COMMAND_UI(ID_SETGRID_MODE, OnUpdateGridMode)
+	ON_COMMAND(ID_SETGRID_MODE, OnSetGridMode)
+
+	ON_UPDATE_COMMAND_UI(ID_SETMAP_MODE, OnUpdateMapMode)
+	ON_COMMAND(ID_SETMAP_MODE, OnSetMapMode)
 
 	// ID_WELLS_HIDEALL
 	ON_UPDATE_COMMAND_UI(ID_WELLS_HIDEALL, OnUpdateWellsHideAll)
@@ -366,6 +375,7 @@ CWPhastDoc::CWPhastDoc()
 , NewDrainActor(0)
 , NewDrainCallbackCommand(0)
 , hGridAccel(0)
+, CoordinateMode(GridMode)
 {
 #if defined(WPHAST_AUTOMATION)
 	EnableAutomation();
@@ -6158,6 +6168,14 @@ void CWPhastDoc::BeginNewZone()
 			this->NewZoneCallbackCommand->SetCallback(CWPhastDoc::NewZoneListener);
 			this->NewZoneWidget->AddObserver(vtkCommand::EndInteractionEvent, this->NewZoneCallbackCommand);
 
+			// set up for gridkeyword
+			CGridKeyword gridKeyword;
+			this->GetGridKeyword(gridKeyword);
+			const CUnits& units = this->GetUnits();
+			this->NewZoneWidget->SetGridKeyword(gridKeyword, units);
+			this->NewZoneWidget->SetScale(this->GetScale()[0], this->GetScale()[1], this->GetScale()[2]);
+			this->NewZoneWidget->SetCoordinateMode(this->GetCoordinateMode());
+
 			// enable widget
 			this->NewZoneWidget->SetEnabled(1);
 		}
@@ -6191,25 +6209,8 @@ void CWPhastDoc::NewZoneListener(vtkObject *caller, unsigned long eid, void *cli
 		CWPhastDoc* self = reinterpret_cast<CWPhastDoc*>(clientdata);
 		if (eid == vtkCommand::EndInteractionEvent)
 		{
-			double scaled_meters[6];
-			self->NewZoneWidget->GetBounds(scaled_meters);
-
-			// calc zone
-			CZone zone;
-			double* scale = self->GetScale();
-			const CUnits& units = self->GetUnits();
-			zone.x1 = scaled_meters[0] / scale[0] / units.horizontal.input_to_si;
-			zone.x2 = scaled_meters[1] / scale[0] / units.horizontal.input_to_si;
-			zone.y1 = scaled_meters[2] / scale[1] / units.horizontal.input_to_si;
-			zone.y2 = scaled_meters[3] / scale[1] / units.horizontal.input_to_si;
-			zone.z1 = scaled_meters[4] / scale[2] / units.vertical.input_to_si;
-			zone.z2 = scaled_meters[5] / scale[2] / units.vertical.input_to_si;
-
-			TRACE("x(%g-%g) y(%g-%g) z(%g-%g)\n", zone.x1, zone.x2, zone.y1, zone.y2, zone.z1, zone.z2);
-
 			// get type of zone
 			//
-// COMMENT: {7/13/2009 2:44:44 PM}			ETSLayoutPropertySheet        sheet("Zone Wizard", NULL, 0, NULL, false);
 			CPropertySheet                sheet("Zone Wizard", NULL, 0, NULL, false);
 
 			CNewZonePropertyPage          newZone;
@@ -6261,49 +6262,49 @@ void CWPhastDoc::NewZoneListener(vtkObject *caller, unsigned long eid, void *cli
 				{
 					CGridElt elt;
 					mediaProps.GetProperties(elt);
-					elt.polyh = new Cube(&zone);
+					elt.polyh = self->NewZoneWidget->GetCube();
 					CMediaZoneActor::Create(self, elt, mediaProps.GetDesc());
 				}
 				else if (newZone.GetType() == ID_ZONE_TYPE_BC_FLUX)
 				{
 					CBC bc;
 					fluxProps.GetProperties(bc);
-					bc.polyh = new Cube(&zone);
+					bc.polyh = self->NewZoneWidget->GetCube();
 					CBCZoneActor::Create(self, bc, fluxProps.GetDesc());
 				}
 				else if (newZone.GetType() == ID_ZONE_TYPE_BC_LEAKY)
 				{
 					CBC bc;
 					leakyProps.GetProperties(bc);
-					bc.polyh = new Cube(&zone);
+					bc.polyh = self->NewZoneWidget->GetCube();
 					CBCZoneActor::Create(self, bc, leakyProps.GetDesc());
 				}
 				else if (newZone.GetType() == ID_ZONE_TYPE_BC_SPECIFIED)
 				{
 					CBC bc;
 					specifiedProps.GetProperties(bc);
-					bc.polyh = new Cube(&zone);
+					bc.polyh = self->NewZoneWidget->GetCube();
 					CBCZoneActor::Create(self, bc, specifiedProps.GetDesc());
 				}
 				else if (newZone.GetType() == ID_ZONE_TYPE_IC_HEAD)
 				{
 					CHeadIC headic;
 					headProps.GetProperties(headic);
-					headic.polyh = new Cube(&zone);
+					headic.polyh = self->NewZoneWidget->GetCube();
 					CICHeadZoneActor::Create(self, headic, headProps.GetDesc());
 				}
 				else if (newZone.GetType() == ID_ZONE_TYPE_IC_CHEM)
 				{
 					CChemIC chemIC;
 					chemICProps.GetProperties(chemIC);
-					chemIC.polyh = new Cube(&zone);
+					chemIC.polyh = self->NewZoneWidget->GetCube();
 					CICChemZoneActor::Create(self, chemIC, chemICProps.GetDesc());
 				}
 				else if (newZone.GetType() == ID_ZONE_TYPE_FLOW_RATE)
 				{
 					Zone_budget zone_budget;
 					zoneFlowRateProps.GetProperties(zone_budget);
-					zone_budget.Set_polyh(new Cube(&zone));
+					zone_budget.Set_polyh(self->NewZoneWidget->GetCube());
 					CZoneFlowRateZoneActor::Create(self, zone_budget);
 				}
 			}
@@ -7633,4 +7634,60 @@ void CWPhastDoc::AddPropAssembly(vtkPropAssembly *pPropAssembly)
 			}
 		}
 	}
+}
+
+CWPhastDoc::CoordinateState CWPhastDoc::GetCoordinateMode()const
+{
+	return this->CoordinateMode;
+}
+
+void CWPhastDoc::SetCoordinateMode(CWPhastDoc::CoordinateState mode)
+{
+	this->CoordinateMode = mode;
+
+	if (this->NewZoneWidget && this->NewZoneWidget->GetEnabled())
+	{
+		this->NewZoneWidget->SetCoordinateMode(mode);
+	}
+
+	POSITION pos = this->GetFirstViewPosition();
+	while (pos != NULL)
+	{
+		CWPhastView *pView = (CWPhastView*) GetNextView(pos);
+		ASSERT_VALID(pView);
+		pView->UpdateWellMode();
+		pView->GetInteractor()->Render();
+	}
+}
+
+void CWPhastDoc::SetMapMode(void)
+{
+	this->SetCoordinateMode(CWPhastDoc::MapMode);
+}
+
+void CWPhastDoc::SetGridMode(void)
+{
+	this->SetCoordinateMode(CWPhastDoc::GridMode);
+}
+
+void CWPhastDoc::OnUpdateGridMode(CCmdUI *pCmdUI)
+{
+	pCmdUI->SetRadio(this->CoordinateMode == CWPhastDoc::GridMode);
+	pCmdUI->Enable(TRUE);
+}
+
+void CWPhastDoc::OnUpdateMapMode(CCmdUI *pCmdUI)
+{
+	pCmdUI->SetRadio(this->CoordinateMode == CWPhastDoc::MapMode);
+	pCmdUI->Enable(TRUE);
+}
+
+void CWPhastDoc::OnSetGridMode()
+{
+	this->SetCoordinateMode(CWPhastDoc::GridMode);
+}
+
+void CWPhastDoc::OnSetMapMode()
+{
+	this->SetCoordinateMode(CWPhastDoc::MapMode);
 }

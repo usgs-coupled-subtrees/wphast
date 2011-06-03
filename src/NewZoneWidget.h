@@ -1,11 +1,16 @@
 #pragma once
 
 #include <vtk3DWidget.h>
+#include "WPhastDoc.h"
+#include "Units.h"
+#include "Zone.h"
 
 class CGridActor;
 class vtkCursor3D;
 class vtkPolyDataMapper;
 class vtkActor;
+class CGridKeyword;
+class Cube;
 
 class CNewZoneWidget : public vtk3DWidget
 {
@@ -24,7 +29,13 @@ public:
 	double* GetBounds(void) { return this->OutlineActor->GetBounds(); }
 	void GetBounds(double bounds[6]) { this->OutlineActor->GetBounds(bounds); }
 
-// COMMENT: {5/10/2006 4:23:30 PM}	vtkSetMacro(GridActor,CGridActor*);
+	Cube* GetCube();	
+
+	CWPhastDoc::CoordinateState GetCoordinateMode(void)const;
+
+	void SetGridKeyword(const CGridKeyword& gridKeyword, const CUnits& units);
+	void SetCoordinateMode(CWPhastDoc::CoordinateState mode);
+	void SetScale(double x, double y, double z);
 
 #ifdef WIN32
 	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
@@ -66,12 +77,13 @@ protected:
 	int                   FixedPlane;  // [0-5]
 	int                   FixedCoord;  // [0-2]
 
-
-	//
-// COMMENT: {5/10/2006 4:23:08 PM}	CGridActor  *GridActor;
-
-// COMMENT: {5/8/2006 7:11:45 PM}	// 
-// COMMENT: {5/8/2006 7:11:45 PM}	CWPhastDoc  *Document;
+	// coordinate system vars
+	double                       GridOrigin[3];
+	double                       GridAngle;
+	double                       GeometryScale[3];
+	CUnits                       Units;
+	CWPhastDoc::CoordinateState  CoordinateMode;
+	CZone                        MapZone;
 
 private:
 	CNewZoneWidget(const CNewZoneWidget&);  // Not implemented.
