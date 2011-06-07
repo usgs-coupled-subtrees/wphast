@@ -2471,7 +2471,6 @@ void CBoxPropertiesDialogBar::SizeWedgeControls(int cx, int cy)
 	{
 		pWnd->GetWindowRect(&rcC);
 		this->ScreenToClient(&rcC);
-		afxDump << "Corner " << rcC << "\n";
 		int w = .5 * (cx - 3 * bp);
 		pWnd->MoveWindow(rcA.right + bp, rcZ.bottom + 10, w, rcC.Height(), TRUE);
 		pWnd->GetWindowRect(&rcC);
