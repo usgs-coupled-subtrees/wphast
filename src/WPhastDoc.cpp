@@ -11,7 +11,6 @@
 #include "PhastInput.h"
 #include "PrintFreqPropertyPage.h"
 
-// #include <vtkPropCollection.h>
 #include <vtkCubeSource.h>
 #include "srcWedgeSource.h"
 #include <vtkPolyDataMapper.h>
@@ -68,7 +67,6 @@
 #include "ISerial.h"
 #include "DelayRedraw.h"
 
-////#include "ZoneLODActor.h"
 #include "GridActor.h"
 #include "AxesActor.h"
 #include "Global.h"
@@ -141,7 +139,6 @@
 #include "HeadIC.h"
 #include "TimeControl2.h"
 #include "MapActor.h"
-// COMMENT: {8/19/2009 6:08:40 PM}#include "MapImageActor3.h"
 #include "WorldTransform.h"
 #include "SiteMap.h"
 #include "NewModel.h"
@@ -197,8 +194,6 @@ struct WPhastDocImpl
 	std::vector<CAction*>::size_type m_lastSaveIndex;
 	std::vector<CZone*>              m_vectorDefaultZones;
 };
-
-
 
 // CWPhastDoc
 
@@ -472,6 +467,7 @@ CWPhastDoc::CWPhastDoc()
 	this->SetDisplayColors(this->DisplayColors);
 }
 
+///////////////////////////////////////////////////////////////////////////////////////
 #define CLEANUP_ASSEMBLY_MACRO(PTR_ASSEMBLY) \
 	ASSERT(PTR_ASSEMBLY); \
 	if (PTR_ASSEMBLY) { \
@@ -482,12 +478,14 @@ CWPhastDoc::CWPhastDoc()
 		PTR_ASSEMBLY->Delete(); \
 		PTR_ASSEMBLY = 0; \
 	}
+///////////////////////////////////////////////////////////////////////////////////////
 #define ASSERT_DELETE_SET_NULL_MACRO(POINTER) \
 	ASSERT(POINTER); \
 	if (POINTER) { \
 		delete POINTER; \
 		POINTER = 0; \
 	}
+///////////////////////////////////////////////////////////////////////////////////////
 
 CWPhastDoc::~CWPhastDoc()
 {
@@ -1302,12 +1300,12 @@ CPropertyTreeControlBar* CWPhastDoc::GetPropertyTreeControlBar() const
 	CFrameWnd* pFrame = (CFrameWnd*)::AfxGetMainWnd();
 	if (!pFrame) return 0;
 
-	if (CPropertyTreeControlBar* pTree = static_cast<CPropertyTreeControlBar*>(pFrame->GetControlBar(IDW_CONTROLBAR_TREE))) {
+	if (CPropertyTreeControlBar* pTree = static_cast<CPropertyTreeControlBar*>(pFrame->GetControlBar(IDW_CONTROLBAR_TREE)))
+	{
 		ASSERT_KINDOF(CPropertyTreeControlBar, pTree);
 		ASSERT_VALID(pTree);
 		return pTree;
 	}
-	///ASSERT(FALSE);
 	return 0;
 }
 
@@ -1391,7 +1389,6 @@ void CWPhastDoc::DeleteContents()
 	// Add your specialized code here and/or call the base class
 	TRACE("CWPhastDoc::DeleteContents()\n");
 
-	//{{
 	// remove old actors
 	if ( vtkPropCollection *props = this->GetPropCollection() )
 	{
@@ -1410,12 +1407,10 @@ void CWPhastDoc::DeleteContents()
 				}
 			}
 			pView->DeleteContents();
-// COMMENT: {9/17/2009 4:12:56 PM}			ASSERT(pView->GetRenderer()->GetViewProps()->GetNumberOfItems() == 0);
 			pView->UpdateWindow();
 			this->UpdateAllViews(0);
 		}
 	}
-	//}}
 
 	ASSERT(this->AxesActor);
 
@@ -1468,34 +1463,6 @@ void CWPhastDoc::DeleteContents()
 	this->m_pGridActor->SetScale(1, 1, 1);
 	this->m_pGridActor->SetPickable(0);
 
-// COMMENT: {9/10/2009 11:22:38 PM}	// update views
-// COMMENT: {9/10/2009 11:22:38 PM}	//
-// COMMENT: {9/10/2009 11:22:38 PM}	POSITION pos = this->GetFirstViewPosition();
-// COMMENT: {9/10/2009 11:22:38 PM}	while (pos != NULL)
-// COMMENT: {9/10/2009 11:22:38 PM}	{
-// COMMENT: {9/10/2009 11:22:38 PM}		CWPhastView *pView = (CWPhastView*) GetNextView(pos);
-// COMMENT: {9/10/2009 11:22:38 PM}		ASSERT_VALID(pView);
-// COMMENT: {9/10/2009 11:22:38 PM}// COMMENT: {9/4/2009 7:49:01 PM}		ASSERT(this->m_pPropCollection);
-// COMMENT: {9/10/2009 11:22:38 PM}// COMMENT: {9/4/2009 7:49:01 PM}		if (this->m_pPropCollection)
-// COMMENT: {9/10/2009 11:22:38 PM}// COMMENT: {9/4/2009 7:49:01 PM}		{
-// COMMENT: {9/10/2009 11:22:38 PM}// COMMENT: {9/4/2009 7:49:01 PM}			// remove all props
-																				///vtkCollectionSimpleIterator csi;
-// COMMENT: {9/10/2009 11:22:38 PM}// COMMENT: {9/4/2009 7:49:01 PM}			this->m_pPropCollection->InitTraversal(csi);
-// COMMENT: {9/10/2009 11:22:38 PM}// COMMENT: {9/4/2009 7:49:01 PM}			for (int i = 0; i < this->m_pPropCollection->GetNumberOfItems(); ++i)
-// COMMENT: {9/10/2009 11:22:38 PM}// COMMENT: {9/4/2009 7:49:01 PM}			{
-// COMMENT: {9/10/2009 11:22:38 PM}// COMMENT: {9/4/2009 7:49:01 PM}				vtkProp* prop = this->m_pPropCollection->GetNextProp(csi);
-// COMMENT: {9/10/2009 11:22:38 PM}// COMMENT: {9/4/2009 7:49:01 PM}				pView->GetRenderer()->GetViewProps()->RemoveItem(prop);
-// COMMENT: {9/10/2009 11:22:38 PM}// COMMENT: {9/4/2009 7:49:01 PM}			}
-// COMMENT: {9/10/2009 11:22:38 PM}// COMMENT: {9/4/2009 7:49:01 PM}		}
-// COMMENT: {9/10/2009 11:22:38 PM}// COMMENT: {9/4/2009 7:49:01 PM}
-// COMMENT: {9/10/2009 11:22:38 PM}// COMMENT: {9/4/2009 7:49:01 PM}		// all vtkProps must release before the Renderer is destroyed
-// COMMENT: {9/10/2009 11:22:38 PM}// COMMENT: {9/4/2009 7:49:01 PM}		// ie when an import fails
-// COMMENT: {9/10/2009 11:22:38 PM}// COMMENT: {9/4/2009 7:49:01 PM}		this->m_pGridActor->ReleaseGraphicsResources(pView->GetRenderer()->GetVTKWindow());
-// COMMENT: {9/10/2009 11:22:38 PM}// COMMENT: {9/4/2009 7:49:01 PM}		this->m_pAxesActor->ReleaseGraphicsResources(pView->GetRenderer()->GetVTKWindow());
-// COMMENT: {9/10/2009 11:22:38 PM}
-// COMMENT: {9/10/2009 11:22:38 PM}		pView->DeleteContents();
-// COMMENT: {9/10/2009 11:22:38 PM}	}
-
 	// clear prop collection
 	//
 	ASSERT(this->m_pPropCollection);
@@ -1541,33 +1508,11 @@ void CWPhastDoc::DeleteContents()
 	this->m_pPropAssemblyDrains->SetVisibility(1);
 	this->m_pPropAssemblyZFR->SetVisibility(1);
 
-	// reset scale
-	//
-
-// COMMENT: {7/28/2005 4:38:34 PM}	//{{
-// COMMENT: {7/28/2005 4:38:34 PM}	// create the grid
-// COMMENT: {7/28/2005 4:38:34 PM}	//
-// COMMENT: {7/28/2005 4:38:34 PM}	if (this->m_pGridActor)
-// COMMENT: {7/28/2005 4:38:34 PM}	{
-// COMMENT: {7/28/2005 4:38:34 PM}		this->m_pGridActor->Delete();
-// COMMENT: {7/28/2005 4:38:34 PM}	}
-// COMMENT: {7/28/2005 4:38:34 PM}	this->m_pGridActor = CGridActor::New();
-// COMMENT: {7/28/2005 4:38:34 PM}	this->m_pGridActor->GetProperty()->SetColor(1.0, 0.8, 0.6);
-// COMMENT: {7/28/2005 4:38:34 PM}	//}}
-// COMMENT: {7/28/2005 4:38:34 PM}	ASSERT(this->m_pGridActor);
-// COMMENT: {7/28/2005 4:38:34 PM}	this->m_pGridActor->SetScale(1, 1, 1);
-
 	if (this->m_pMapActor)
 	{
 		this->m_pMapActor->Delete();
 		this->m_pMapActor = 0;
 	}
-// COMMENT: {8/19/2009 6:09:33 PM}	if (this->MapImageActor3)
-// COMMENT: {8/19/2009 6:09:33 PM}	{
-// COMMENT: {8/19/2009 6:09:33 PM}		this->MapImageActor3->Delete();
-// COMMENT: {8/19/2009 6:09:33 PM}		this->MapImageActor3 = 0;
-// COMMENT: {8/19/2009 6:09:33 PM}	}
-
 	// update geometry property sheet
 	// Note: can't call this->SetScale(1.0f, 1.0f, 1.0f);
 	// Since the this->m_pGridActor contains no data for
@@ -1589,8 +1534,6 @@ void CWPhastDoc::DeleteContents()
 	{
 		pBar->Set(0, 0, this->GetUnits());
 	}
-
-// COMMENT: {9/8/2009 6:10:37 PM}	this->UpdateAllViews(0);
 
 	// cleanup phastinput data
 	//
@@ -1620,15 +1563,6 @@ void CWPhastDoc::Execute(CAction* pAction)
 
 void CWPhastDoc::OnUpdateEditUndo(CCmdUI *pCmdUI)
 {
-// COMMENT: {8/1/2007 1:51:50 PM}	if (CBoxPropertiesDialogBar *pBar = this->GetBoxPropertiesDialogBar())
-// COMMENT: {8/1/2007 1:51:50 PM}	{
-// COMMENT: {8/1/2007 1:51:50 PM}		if (pBar->IsChild(CWnd::GetFocus()))
-// COMMENT: {8/1/2007 1:51:50 PM}		{
-// COMMENT: {8/1/2007 1:51:50 PM}			pBar->OnUpdateEditUndo(pCmdUI);
-// COMMENT: {8/1/2007 1:51:50 PM}			return;
-// COMMENT: {8/1/2007 1:51:50 PM}		}
-// COMMENT: {8/1/2007 1:51:50 PM}	}
-
 	BOOL b = (this->m_pimpl->m_vectorActionsIndex > 0);
 	b = b && (this->m_pGridSheet->GetSafeHwnd() == 0);
 	b = b && (this->m_pGeometrySheet->GetSafeHwnd() == 0);
@@ -1637,15 +1571,6 @@ void CWPhastDoc::OnUpdateEditUndo(CCmdUI *pCmdUI)
 
 void CWPhastDoc::OnUpdateEditRedo(CCmdUI *pCmdUI)
 {
-// COMMENT: {8/1/2007 1:51:59 PM}	if (CBoxPropertiesDialogBar *pBar = this->GetBoxPropertiesDialogBar())
-// COMMENT: {8/1/2007 1:51:59 PM}	{
-// COMMENT: {8/1/2007 1:51:59 PM}		if (pBar->IsChild(CWnd::GetFocus()))
-// COMMENT: {8/1/2007 1:51:59 PM}		{
-// COMMENT: {8/1/2007 1:51:59 PM}			pBar->OnUpdateEditRedo(pCmdUI);
-// COMMENT: {8/1/2007 1:51:59 PM}			return;
-// COMMENT: {8/1/2007 1:51:59 PM}		}
-// COMMENT: {8/1/2007 1:51:59 PM}	}
-
 	BOOL b = (this->m_pimpl->m_vectorActionsIndex < this->m_pimpl->m_vectorActions.size());
 	b = b && (this->m_pGridSheet->GetSafeHwnd() == 0);
 	b = b && (this->m_pGeometrySheet->GetSafeHwnd() == 0);
@@ -1654,15 +1579,6 @@ void CWPhastDoc::OnUpdateEditRedo(CCmdUI *pCmdUI)
 
 void CWPhastDoc::OnEditUndo()
 {
-// COMMENT: {8/1/2007 1:52:07 PM}	if (CBoxPropertiesDialogBar *pBar = this->GetBoxPropertiesDialogBar())
-// COMMENT: {8/1/2007 1:52:07 PM}	{
-// COMMENT: {8/1/2007 1:52:07 PM}		if (pBar->IsChild(CWnd::GetFocus()))
-// COMMENT: {8/1/2007 1:52:07 PM}		{
-// COMMENT: {8/1/2007 1:52:07 PM}			pBar->OnEditUndo();
-// COMMENT: {8/1/2007 1:52:07 PM}			return;
-// COMMENT: {8/1/2007 1:52:07 PM}		}
-// COMMENT: {8/1/2007 1:52:07 PM}	}
-
 	CWaitCursor wait;
 	--(this->m_pimpl->m_vectorActionsIndex);
 	ASSERT(this->m_pimpl->m_vectorActionsIndex >= 0);
@@ -1672,14 +1588,6 @@ void CWPhastDoc::OnEditUndo()
 
 void CWPhastDoc::OnEditRedo() // 57644
 {
-// COMMENT: {8/1/2007 1:52:19 PM}	if (CBoxPropertiesDialogBar *pBar = this->GetBoxPropertiesDialogBar())
-// COMMENT: {8/1/2007 1:52:19 PM}	{
-// COMMENT: {8/1/2007 1:52:19 PM}		if (pBar->IsChild(CWnd::GetFocus()))
-// COMMENT: {8/1/2007 1:52:19 PM}		{
-// COMMENT: {8/1/2007 1:52:19 PM}			pBar->OnEditRedo();
-// COMMENT: {8/1/2007 1:52:19 PM}			return;
-// COMMENT: {8/1/2007 1:52:19 PM}		}
-// COMMENT: {8/1/2007 1:52:19 PM}	}
 	CWaitCursor wait;
 	ASSERT(this->m_pimpl->m_vectorActionsIndex < this->m_pimpl->m_vectorActions.size());
 	this->m_pimpl->m_vectorActions.at(this->m_pimpl->m_vectorActionsIndex)->Execute();
@@ -1730,28 +1638,8 @@ void CWPhastDoc::SetScale(double x, double y, double z)
 	//
 	if (this->m_pMapActor)
 	{
-// COMMENT: {12/9/2010 8:31:48 PM}		//{{
-// COMMENT: {12/9/2010 8:31:48 PM}		CGridKeyword gk;
-// COMMENT: {12/9/2010 8:31:48 PM}		this->GetGridKeyword(gk);
-// COMMENT: {12/9/2010 8:31:48 PM}		vtkTransform *user = vtkTransform::New();
-// COMMENT: {12/9/2010 8:31:48 PM}		user->Scale(x, y, z);
-// COMMENT: {12/9/2010 8:31:48 PM}		user->RotateZ(-gk.m_grid_angle);
-// COMMENT: {12/9/2010 8:31:48 PM}		user->Translate(-gk.m_grid_origin[0], -gk.m_grid_origin[1], -gk.m_grid_origin[2]);
-// COMMENT: {12/9/2010 8:31:48 PM}
-// COMMENT: {12/9/2010 8:31:48 PM}		this->m_pMapActor->SetOrientation(0, 0, 0);
-// COMMENT: {12/9/2010 8:31:48 PM}		this->m_pMapActor->SetOrigin(0, 0, 0);
-// COMMENT: {12/9/2010 8:31:48 PM}		this->m_pMapActor->SetPosition(0, 0, 0);
-// COMMENT: {12/9/2010 8:31:48 PM}		this->m_pMapActor->ComputeMatrix();
-// COMMENT: {12/9/2010 8:31:48 PM}		this->m_pMapActor->SetUserTransform(user);
-// COMMENT: {12/9/2010 8:31:48 PM}		//}}
 		this->m_pMapActor->SetScale(x, y, z);
 	}
-// COMMENT: {8/19/2009 6:09:47 PM}	//{{
-// COMMENT: {8/19/2009 6:09:47 PM}	if (this->MapImageActor3)
-// COMMENT: {8/19/2009 6:09:47 PM}	{
-// COMMENT: {8/19/2009 6:09:47 PM}		this->MapImageActor3->SetScale(x, y, z);
-// COMMENT: {8/19/2009 6:09:47 PM}	}
-// COMMENT: {8/19/2009 6:09:47 PM}	//}}
 
 	// set scale for all zones
 	//
@@ -1778,9 +1666,6 @@ void CWPhastDoc::SetScale(double x, double y, double z)
 						if (vtkProp3D *prop3D = vtkProp3D::SafeDownCast(pProp))
 						{
 							prop3D->SetScale(scale);
-// COMMENT: {12/10/2010 3:49:33 PM}							double m[16];
-// COMMENT: {12/10/2010 3:49:33 PM}							prop3D->GetMatrix(m);
-// COMMENT: {12/10/2010 3:49:33 PM}							TRACE("");
 						}
 					}
 				}
@@ -1788,12 +1673,10 @@ void CWPhastDoc::SetScale(double x, double y, double z)
 		}
 	}
 
-	//{{
 	if (this->NewDrainActor)
 	{
 		this->NewDrainActor->SetScale(scale);
 	}
-	//}}
 
 	// if modifying grid update GridElementsSelector
 	//
@@ -1805,10 +1688,7 @@ void CWPhastDoc::SetScale(double x, double y, double z)
 	}
 
 	this->Notify(0, WPN_SCALE_CHANGED, 0, 0);
-// COMMENT: {5/8/2006 4:32:55 PM}	this->UpdateAllViews(0);
-	//{{
 	this->UpdateAllViews(0);
-	//}}
 }
 
 void CWPhastDoc::SetFlowOnly(const CFlowOnly& flowOnly)
@@ -1939,14 +1819,6 @@ void CWPhastDoc::ResizeGrid(const CGridKeyword& keyword)
 	// Update default zones etc.
 	//
 	this->UpdateGridDomain();
-
-// COMMENT: {1/25/2011 7:07:47 PM}	// update possible selection
-// COMMENT: {1/25/2011 7:07:47 PM}	//
-// COMMENT: {1/25/2011 7:07:47 PM}	this->Notify(this, WPN_DOMAIN_CHANGED, 0, 0);
-// COMMENT: {1/25/2011 7:07:47 PM}
-// COMMENT: {1/25/2011 7:07:47 PM}	// refresh screen
-// COMMENT: {1/25/2011 7:07:47 PM}	//
-// COMMENT: {1/25/2011 7:07:47 PM}	this->UpdateAllViews(0);
 }
 
 void CWPhastDoc::AddDefaultZone(CZone* pZone)
@@ -2647,31 +2519,31 @@ void CWPhastDoc::OnCloseDocument()
 	delete this->m_pGeometrySheet;
 	this->m_pGeometrySheet = 0;
 
-	//{{HACK
-	// this is used to avoid a bug that occurs when a box zone is converted
-	// to a prism and the app is closed causing a vtk referrence crash
-	if (this->GetPropertyTreeControlBar())
-	{
-		CTreeCtrlNode parentNode = this->GetPropertyTreeControlBar()->GetMediaNode();
-		if (parentNode)
-		{
-			int nCount = parentNode.GetChildCount();
-			for (int i = 0; i < nCount; ++i)
-			{
-				if (CZoneActor *pActor = CZoneActor::SafeDownCast((vtkObject*)parentNode.GetChildAt(i).GetData()))
-				{
-					if (pActor->GetPolyhedronType() == Polyhedron::PRISM)
-					{
-						struct zone z;
-						Cube c(&z);
-						CUnits u;
-						pActor->SetPolyhedron(&c, u);
-					}
-				}
-			}
-		}
-	}
-	//}}HACK
+// COMMENT: {6/7/2011 3:04:08 PM}	//{{HACK
+// COMMENT: {6/7/2011 3:04:08 PM}	// this is used to avoid a bug that occurs when a box zone is converted
+// COMMENT: {6/7/2011 3:04:08 PM}	// to a prism and the app is closed causing a vtk reference crash
+// COMMENT: {6/7/2011 3:04:08 PM}	if (this->GetPropertyTreeControlBar())
+// COMMENT: {6/7/2011 3:04:08 PM}	{
+// COMMENT: {6/7/2011 3:04:08 PM}		CTreeCtrlNode parentNode = this->GetPropertyTreeControlBar()->GetMediaNode();
+// COMMENT: {6/7/2011 3:04:08 PM}		if (parentNode)
+// COMMENT: {6/7/2011 3:04:08 PM}		{
+// COMMENT: {6/7/2011 3:04:08 PM}			int nCount = parentNode.GetChildCount();
+// COMMENT: {6/7/2011 3:04:08 PM}			for (int i = 0; i < nCount; ++i)
+// COMMENT: {6/7/2011 3:04:08 PM}			{
+// COMMENT: {6/7/2011 3:04:08 PM}				if (CZoneActor *pActor = CZoneActor::SafeDownCast((vtkObject*)parentNode.GetChildAt(i).GetData()))
+// COMMENT: {6/7/2011 3:04:08 PM}				{
+// COMMENT: {6/7/2011 3:04:08 PM}					if (pActor->GetPolyhedronType() == Polyhedron::PRISM)
+// COMMENT: {6/7/2011 3:04:08 PM}					{
+// COMMENT: {6/7/2011 3:04:08 PM}						struct zone z;
+// COMMENT: {6/7/2011 3:04:08 PM}						Cube c(&z);
+// COMMENT: {6/7/2011 3:04:08 PM}						CUnits u;
+// COMMENT: {6/7/2011 3:04:08 PM}						pActor->SetPolyhedron(&c, u);
+// COMMENT: {6/7/2011 3:04:08 PM}					}
+// COMMENT: {6/7/2011 3:04:08 PM}				}
+// COMMENT: {6/7/2011 3:04:08 PM}			}
+// COMMENT: {6/7/2011 3:04:08 PM}		}
+// COMMENT: {6/7/2011 3:04:08 PM}	}
+// COMMENT: {6/7/2011 3:04:08 PM}	//}}HACK
 
 	CDocument::OnCloseDocument();
 }
@@ -2745,6 +2617,7 @@ void CWPhastDoc::OnFileImport()
 			pTree->RedrawWindow();
 		}
 	}
+
 #if defined(__CPPUNIT__)
 	status = PdhCollectQueryData(hquery);
 	if (status == ERROR_SUCCESS)
@@ -3875,19 +3748,9 @@ void CWPhastDoc::New(const CNewModel& model)
 	{
 		ASSERT(this->m_pMapActor == NULL);
 		this->m_pMapActor = CMapActor::New();   // Note pixel(0,0) is the same size as all other pixels
-// COMMENT: {8/11/2009 3:07:31 PM}		//{{
-// COMMENT: {8/11/2009 3:07:31 PM}		this->m_pMapActor->GetProperty()->SetOpacity(0.3);
-// COMMENT: {8/11/2009 3:07:31 PM}		//}}
 		this->m_pMapActor->SetSiteMap2(model.GetSiteMap2());
 		this->m_pMapActor->SetPickable(0);
 		this->GetPropCollection()->AddItem(this->m_pMapActor);
-// COMMENT: {8/10/2009 6:02:25 PM}		//{{
-// COMMENT: {8/10/2009 6:02:25 PM}		this->MapImageActor3 = CMapImageActor3::New();
-// COMMENT: {8/10/2009 6:02:25 PM}		this->MapImageActor3->SetFileName(model.GetSiteMap().m_fileName.c_str());
-// COMMENT: {8/10/2009 6:02:25 PM}		this->MapImageActor3->SetWorldTransform(model.GetSiteMap().GetWorldTransform());
-// COMMENT: {8/10/2009 6:02:25 PM}		this->MapImageActor3->SetPickable(1);
-// COMMENT: {8/10/2009 6:02:25 PM}		this->GetPropCollection()->AddItem(this->MapImageActor3);
-// COMMENT: {8/10/2009 6:02:25 PM}		//}}
 	}
 
 	// reset tree control
@@ -3916,6 +3779,7 @@ void CWPhastDoc::New(const CNewModel& model)
 void CWPhastDoc::OnFileRun()
 {
 	CWaitCursor wait;
+
 	// this is required to get the prefix
 	//
 	if (this->GetPathName().IsEmpty())
