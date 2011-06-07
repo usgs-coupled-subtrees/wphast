@@ -7,6 +7,7 @@
 
 #include "tree.h"           // CTreeCtrlNode
 #include "Units.h"
+#include "WPhastDoc.h"
 
 class CPropertyTreeControlBar;
 class CTreeMemento;
@@ -35,6 +36,7 @@ public:
 	void SetScale(double x, double y, double z);
 	void SetScale(double scale[3]) { this->SetScale(scale[0], scale[1], scale[2]); }
 	virtual PHAST_Transform::COORDINATE_SYSTEM GetCoordinateSystem(void)const      { return PHAST_Transform::GRID; };
+	void SetCoordinateMode(CWPhastDoc::CoordinateState mode);
 
 	void SetRadius(double radius);
 	double GetRadius(void)const;
@@ -224,10 +226,11 @@ protected:
 	CString HorizonalUnits;
 	CString VerticalUnits;
 
-	double  GridOrigin[3];
-	double  GridAngle;
-	double  GeometryScale[3];
-	CUnits  Units;
+	double                       GridOrigin[3];
+	double                       GridAngle;
+	double                       GeometryScale[3];
+	CUnits                       Units;
+	CWPhastDoc::CoordinateState  CoordinateMode;
 
 	// Double click parameters
 	int   NumberOfClicks;

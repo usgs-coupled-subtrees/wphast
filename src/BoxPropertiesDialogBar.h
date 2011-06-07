@@ -61,6 +61,7 @@ public:
 
 	void HideWellControls(void);
 	void ShowWellControls(void);
+	void SizeWellControls(int cx, int cy);
 
 	void ShowRiverControls(void);
 	void HideRiverControls(void);
@@ -188,12 +189,12 @@ protected:
 	void OnChangeCoorSys(void);
 	void OnChangeCoorSysBox(void);
 	void OnChangeCoorSysWedge(void);
+	void OnChangeCoorSysWell(void);
+	void OnChangeCoorSysDrain(void);
+	void OnChangeCoorSysRiver(void);
 
 	void OnBnClickedAddPoint(void);
 	void OnBnClickedDeletePoint(void);
-
-	//afx_msg void OnEnKillfocusEditY();
-	//afx_msg void OnEnKillfocusEditZ();
 
 protected:
 	void TestPointsGrid(NMHDR *pNotifyStruct, LRESULT *result, BOOL bShowErrors);

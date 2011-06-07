@@ -366,7 +366,6 @@ void CBoxPropertiesDialogBar::Update(IObserver* pSender, LPARAM lHint, CObject* 
 					this->HideWedgeControls();
 					this->HidePrismControls();
 					this->ShowWellControls();
-					this->ShowCheckUseMap();
 					this->ShowApply();
 				}
 
@@ -684,7 +683,6 @@ void CBoxPropertiesDialogBar::DoDataExchange(CDataExchange* pDX)
 				this->m_xy_coordinate_system_user = PHAST_Transform::GRID;
 				break;
 			}
-			//{{
 			if (this->GetCheckedRadioButton(IDC_RADIO_CS_GRID, IDC_RADIO_CS_MAP) == IDC_RADIO_CS_MAP)
 			{
 				ASSERT(this->m_xy_coordinate_system_user == PHAST_Transform::MAP);
@@ -695,9 +693,7 @@ void CBoxPropertiesDialogBar::DoDataExchange(CDataExchange* pDX)
 				ASSERT(this->m_xy_coordinate_system_user == PHAST_Transform::GRID);
 				this->m_xy_coordinate_system_user = PHAST_Transform::GRID;
 			}
-			//}}
 		}
-		//{{
 		else
 		{
 			switch (this->m_xy_coordinate_system_user)
@@ -714,7 +710,6 @@ void CBoxPropertiesDialogBar::DoDataExchange(CDataExchange* pDX)
 				break;
 			}
 		}
-		//}}
 	}
 	else if (this->m_nType == CBoxPropertiesDialogBar::BP_WELL)
 	{
@@ -745,6 +740,32 @@ void CBoxPropertiesDialogBar::DoDataExchange(CDataExchange* pDX)
 				break;
 			default:
 				this->m_xy_coordinate_system_user = PHAST_Transform::GRID;
+				break;
+			}
+			if (this->GetCheckedRadioButton(IDC_RADIO_CS_GRID, IDC_RADIO_CS_MAP) == IDC_RADIO_CS_MAP)
+			{
+				ASSERT(this->m_xy_coordinate_system_user == PHAST_Transform::MAP);
+				this->m_xy_coordinate_system_user = PHAST_Transform::MAP;
+			}
+			else
+			{
+				ASSERT(this->m_xy_coordinate_system_user == PHAST_Transform::GRID);
+				this->m_xy_coordinate_system_user = PHAST_Transform::GRID;
+			}
+		}
+		else
+		{
+			switch (this->m_xy_coordinate_system_user)
+			{
+			case PHAST_Transform::MAP:
+				this->CheckRadioButton(IDC_RADIO_CS_GRID, IDC_RADIO_CS_MAP, IDC_RADIO_CS_MAP);
+				break;
+			case PHAST_Transform::GRID:
+				this->CheckRadioButton(IDC_RADIO_CS_GRID, IDC_RADIO_CS_MAP, IDC_RADIO_CS_GRID);
+				break;
+			default:
+				ASSERT(FALSE);
+				this->CheckRadioButton(IDC_RADIO_CS_GRID, IDC_RADIO_CS_MAP, IDC_RADIO_CS_GRID);
 				break;
 			}
 		}
@@ -782,6 +803,36 @@ void CBoxPropertiesDialogBar::DoDataExchange(CDataExchange* pDX)
 				river.coordinate_system =  PHAST_Transform::GRID;
 				break;
 			}
+
+			if (this->GetCheckedRadioButton(IDC_RADIO_CS_GRID, IDC_RADIO_CS_MAP) == IDC_RADIO_CS_MAP)
+			{
+				river.coordinate_system = PHAST_Transform::MAP;
+			}
+			else if (this->GetCheckedRadioButton(IDC_RADIO_CS_GRID, IDC_RADIO_CS_MAP) == IDC_RADIO_CS_GRID)
+			{
+				river.coordinate_system = PHAST_Transform::GRID;
+			}
+			else
+			{
+				ASSERT(FALSE);
+				river.coordinate_system = PHAST_Transform::GRID;
+			}
+		}
+		else
+		{
+			switch (river.coordinate_system)
+			{
+			case PHAST_Transform::MAP:
+				this->CheckRadioButton(IDC_RADIO_CS_GRID, IDC_RADIO_CS_MAP, IDC_RADIO_CS_MAP);
+				break;
+			case PHAST_Transform::GRID:
+				this->CheckRadioButton(IDC_RADIO_CS_GRID, IDC_RADIO_CS_MAP, IDC_RADIO_CS_GRID);
+				break;
+			default:
+				ASSERT(FALSE);
+				this->CheckRadioButton(IDC_RADIO_CS_GRID, IDC_RADIO_CS_MAP, IDC_RADIO_CS_GRID);
+				break;
+			}
 		}
 	}
 	else if (this->m_nType == CBoxPropertiesDialogBar::BP_DRAIN)
@@ -812,6 +863,36 @@ void CBoxPropertiesDialogBar::DoDataExchange(CDataExchange* pDX)
 				break;
 			default:
 				drain.coordinate_system =  PHAST_Transform::GRID;
+				break;
+			}
+
+			if (this->GetCheckedRadioButton(IDC_RADIO_CS_GRID, IDC_RADIO_CS_MAP) == IDC_RADIO_CS_MAP)
+			{
+				drain.coordinate_system = PHAST_Transform::MAP;
+			}
+			else if (this->GetCheckedRadioButton(IDC_RADIO_CS_GRID, IDC_RADIO_CS_MAP) == IDC_RADIO_CS_GRID)
+			{
+				drain.coordinate_system = PHAST_Transform::GRID;
+			}
+			else
+			{
+				ASSERT(FALSE);
+				drain.coordinate_system = PHAST_Transform::GRID;
+			}
+		}
+		else
+		{
+			switch (drain.coordinate_system)
+			{
+			case PHAST_Transform::MAP:
+				this->CheckRadioButton(IDC_RADIO_CS_GRID, IDC_RADIO_CS_MAP, IDC_RADIO_CS_MAP);
+				break;
+			case PHAST_Transform::GRID:
+				this->CheckRadioButton(IDC_RADIO_CS_GRID, IDC_RADIO_CS_MAP, IDC_RADIO_CS_GRID);
+				break;
+			default:
+				ASSERT(FALSE);
+				this->CheckRadioButton(IDC_RADIO_CS_GRID, IDC_RADIO_CS_MAP, IDC_RADIO_CS_GRID);
 				break;
 			}
 		}
@@ -1740,7 +1821,8 @@ void CBoxPropertiesDialogBar::OnEditRedo()
 	TRACE("%s\n", __FUNCTION__);
 }
 
-static int ZoneIDs[] = {
+static int ZoneIDs[] =
+{
 	IDC_STATIC_MIN,
 	IDC_STATIC_MAX,
 	IDC_STATIC_X,
@@ -1755,7 +1837,6 @@ static int ZoneIDs[] = {
 	IDC_X_UNITS_STATIC2,
 	IDC_Y_UNITS_STATIC2,
 	IDC_Z_UNITS_STATIC2,
-// COMMENT: {7/15/2009 10:57:53 PM}	IDC_CHECK_USE_MAP,
 	IDC_GB_COOR_SYS,
     IDC_RADIO_CS_GRID,
 	IDC_RADIO_CS_MAP
@@ -1931,8 +2012,6 @@ void CBoxPropertiesDialogBar::SizeZoneControls(int cx, int cy)
 	}
 }
 
-
-//{{{7/15/2009 10:54:00 PM}
 void CBoxPropertiesDialogBar::ShowCheckUseMap()
 {
 	if (CWnd *pWnd = this->GetDlgItem(IDC_CHECK_USE_MAP))
@@ -1948,23 +2027,28 @@ void CBoxPropertiesDialogBar::HideCheckUseMap()
 		pWnd->ShowWindow(SW_HIDE);
 	}
 }
-//}}{7/15/2009 10:54:00 PM}
 
-
-static int WellIDs[] = {
-//	IDC_STATIC_LOC,
+static int WellIDs[] =
+{
 	IDC_STATIC_WELL_X,
 	IDC_STATIC_WELL_Y,
 	IDC_EDIT_WELL_X,
 	IDC_EDIT_WELL_Y,
 	IDC_X_UNITS_STATIC,
 	IDC_Y_UNITS_STATIC,
-// COMMENT: {7/15/2009 10:54:00 PM}	IDC_CHECK_USE_MAP,
+	IDC_GB_COOR_SYS,
+    IDC_RADIO_CS_GRID,
+	IDC_RADIO_CS_MAP
 };
 
 void CBoxPropertiesDialogBar::ShowWellControls()
 {
 	TRACE("%s, in\n", __FUNCTION__);
+
+	CRect rect;
+	this->GetClientRect(&rect);
+	this->SizeWellControls(rect.Width(), rect.Height());
+
 	for (int i = 0; i < sizeof(WellIDs)/sizeof(WellIDs[0]); ++i)
 	{
 		if (CWnd *pWnd = this->GetDlgItem(WellIDs[i]))
@@ -1972,6 +2056,7 @@ void CBoxPropertiesDialogBar::ShowWellControls()
 			pWnd->ShowWindow(SW_SHOW);
 		}
 	}
+
 	TRACE("%s, out\n", __FUNCTION__);
 }
 
@@ -1986,15 +2071,54 @@ void CBoxPropertiesDialogBar::HideWellControls()
 			pWnd->ShowWindow(SW_HIDE);
 			pWnd->GetWindowRect(&rc);
 			this->ScreenToClient(&rc);
-			this->InvalidateRect(&rc, TRUE);
 		}
 	}
 	TRACE("%s, out\n", __FUNCTION__);
 }
 
-static int RiverIDs[] = {
+void CBoxPropertiesDialogBar::SizeWellControls(int cx, int cy)
+{
+	CRect rcCS;
+	if (CWnd *pWnd = this->GetDlgItem(IDC_GB_COOR_SYS))
+	{
+		pWnd->GetWindowRect(&rcCS);
+		this->ScreenToClient(&rcCS);
+	}
+	CRect rcG;
+	if (CWnd *pWnd = this->GetDlgItem(IDC_RADIO_CS_GRID))
+	{
+		pWnd->GetWindowRect(&rcG);
+		this->ScreenToClient(&rcG);
+	}
+	CRect rcM;
+	if (CWnd *pWnd = this->GetDlgItem(IDC_RADIO_CS_MAP))
+	{
+		pWnd->GetWindowRect(&rcM);
+		this->ScreenToClient(&rcM);
+	}
+
+	// coordinate system groupbox
+	const int pad = 9;
+	if (CWnd *pWnd = this->GetDlgItem(IDC_GB_COOR_SYS))
+	{
+		pWnd->MoveWindow(rcCS.left, cy - rcCS.Height() - 5, cx - 2 * rcCS.left, rcCS.Height());
+	}
+	if (CWnd *pWnd = this->GetDlgItem(IDC_RADIO_CS_GRID))
+	{
+		pWnd->MoveWindow(50, cy - rcG.Height() - pad, rcG.Width(), rcG.Height());
+	}
+	if (CWnd *pWnd = this->GetDlgItem(IDC_RADIO_CS_MAP))
+	{
+		pWnd->MoveWindow(cx - rcM.Width() - 50, cy - rcM.Height() - pad, rcM.Width(), rcM.Height());
+	}
+}
+
+static int RiverIDs[] =
+{
 	IDC_GRID_RIVER,
-	IDC_CHECK_USE_MAP2,
+	IDC_GB_COOR_SYS,
+    IDC_RADIO_CS_GRID,
+	IDC_RADIO_CS_MAP
 };
 
 void CBoxPropertiesDialogBar::ShowRiverControls()
@@ -2033,44 +2157,51 @@ void CBoxPropertiesDialogBar::HideRiverControls()
 
 void CBoxPropertiesDialogBar::SizeRiverControls(int cx, int cy)
 {
-// COMMENT: {5/17/2011 3:28:12 PM}	CRect rcX;
-// COMMENT: {5/17/2011 3:28:12 PM}	if (CWnd *pWnd = this->GetDlgItem(IDC_RADIO_XYZ))
-// COMMENT: {5/17/2011 3:28:12 PM}	{
-// COMMENT: {5/17/2011 3:28:12 PM}		pWnd->GetWindowRect(&rcX);
-// COMMENT: {5/17/2011 3:28:12 PM}		this->ScreenToClient(&rcX);
-// COMMENT: {5/17/2011 3:28:12 PM}	}
-// COMMENT: {5/17/2011 3:28:12 PM}
-// COMMENT: {5/17/2011 3:28:12 PM}	CRect rcP;
-// COMMENT: {5/17/2011 3:28:12 PM}	if (CWnd *pWnd = this->GetDlgItem(IDC_RADIO_POINTS))
-// COMMENT: {5/17/2011 3:28:12 PM}	{
-// COMMENT: {5/17/2011 3:28:12 PM}		pWnd->GetWindowRect(&rcP);
-// COMMENT: {5/17/2011 3:28:12 PM}		this->ScreenToClient(&rcP);
-// COMMENT: {5/17/2011 3:28:12 PM}	}
+	CRect rcCS;
+	if (CWnd *pWnd = this->GetDlgItem(IDC_GB_COOR_SYS))
+	{
+		pWnd->GetWindowRect(&rcCS);
+		this->ScreenToClient(&rcCS);
+	}
+	CRect rcG;
+	if (CWnd *pWnd = this->GetDlgItem(IDC_RADIO_CS_GRID))
+	{
+		pWnd->GetWindowRect(&rcG);
+		this->ScreenToClient(&rcG);
+	}
+	CRect rcM;
+	if (CWnd *pWnd = this->GetDlgItem(IDC_RADIO_CS_MAP))
+	{
+		pWnd->GetWindowRect(&rcM);
+		this->ScreenToClient(&rcM);
+	}
+
+	// coordinate system groupbox
+	const int pad = 9;
+	if (CWnd *pWnd = this->GetDlgItem(IDC_GB_COOR_SYS))
+	{
+		pWnd->MoveWindow(rcCS.left, cy - rcCS.Height() - 5, cx - 2 * rcCS.left, rcCS.Height());
+	}
+	if (CWnd *pWnd = this->GetDlgItem(IDC_RADIO_CS_GRID))
+	{
+		pWnd->MoveWindow(50, cy - rcG.Height() - pad, rcG.Width(), rcG.Height());
+	}
+	if (CWnd *pWnd = this->GetDlgItem(IDC_RADIO_CS_MAP))
+	{
+		pWnd->MoveWindow(cx - rcM.Width() - 50, cy - rcM.Height() - pad, rcM.Width(), rcM.Height());
+	}
 
 	CRect rc;
 	this->m_wndRiverGrid.GetWindowRect(&rc);
 	this->ScreenToClient(&rc);
 
-	CRect rcMC;
-	if (CWnd *pWnd = this->GetDlgItem(IDC_CHECK_USE_MAP2))
-	{
-		pWnd->GetWindowRect(&rcMC);
-		this->ScreenToClient(&rcMC);
-	}
-	this->m_wndRiverGrid.GetWindowRect(&rc);
-	this->ScreenToClient(&rc);
-
 	const int x = rc.left;
 	int y = rc.top;
-	this->m_wndRiverGrid.MoveWindow(x, y, cx-2*x, cy - rcMC.Height() - 10 - x /*rc.Height()*//*cy-y-x*/);
-
-	if (CWnd *pWnd = this->GetDlgItem(IDC_CHECK_USE_MAP2))
-	{
-		pWnd->MoveWindow((cx - rcMC.Width()) / 2/*rcMC.left*/, cy - rcMC.Height() - 5, rcMC.Width(), rcMC.Height());
-	}
+	this->m_wndRiverGrid.MoveWindow(x, y, cx-2*x, cy - rcCS.Height() - 10 - x);
 }
 
-static int WedgeIDs[] = {
+static int WedgeIDs[] =
+{
 	IDC_STATIC_MIN,
 	IDC_STATIC_MAX,
 	IDC_STATIC_X,
@@ -2264,7 +2395,6 @@ void CBoxPropertiesDialogBar::HideWedgeControls()
 			pWnd->ShowWindow(SW_HIDE);
 			pWnd->GetWindowRect(&rc);
 			this->ScreenToClient(&rc);
-			this->InvalidateRect(&rc, TRUE);
 		}
 	}
 	TRACE("%s, out\n", __FUNCTION__);
@@ -2970,7 +3100,7 @@ void CBoxPropertiesDialogBar::OnSize(UINT nType, int cx, int cy)
 		this->UpdateBackgroundBrush();    // reqd to redraw radios
 	}
 
-	if (this->m_nType == CBoxPropertiesDialogBar::BP_RIVER)
+	if (this->m_nType == CBoxPropertiesDialogBar::BP_RIVER || this->m_nType == CBoxPropertiesDialogBar::BP_DRAIN)
 	{
 		this->SizeRiverControls(cx, cy);
 	}
@@ -2985,6 +3115,10 @@ void CBoxPropertiesDialogBar::OnSize(UINT nType, int cx, int cy)
 	if (this->m_nType == CBoxPropertiesDialogBar::BP_WEDGE)
 	{
 		this->SizeWedgeControls(cx, cy);
+	}
+	if (this->m_nType == CBoxPropertiesDialogBar::BP_WELL)
+	{
+		this->SizeWellControls(cx, cy);
 	}
 }
 
@@ -3246,7 +3380,6 @@ void CBoxPropertiesDialogBar::HidePrismControls(void)
 			pWnd->ShowWindow(SW_HIDE);
 			pWnd->GetWindowRect(&rc);
 			this->ScreenToClient(&rc);
-			this->InvalidateRect(&rc, TRUE);
 		}
 	}
 	TRACE("%s, out\n", __FUNCTION__);
@@ -4844,13 +4977,13 @@ void CBoxPropertiesDialogBar::OnChangeCoorSys(void)
 		this->OnChangeCoorSysWedge();
 		break;
 	case CBoxPropertiesDialogBar::BP_WELL:
-		ASSERT(FALSE); // TODO
+		this->OnChangeCoorSysWell();
 		break;
 	case CBoxPropertiesDialogBar::BP_DRAIN:
-		ASSERT(FALSE); // TODO
+		this->OnChangeCoorSysDrain();
 		break;
 	case CBoxPropertiesDialogBar::BP_RIVER:
-		ASSERT(FALSE); // TODO
+		this->OnChangeCoorSysRiver();
 		break;
 	}
 }
@@ -5061,6 +5194,182 @@ void CBoxPropertiesDialogBar::OnChangeCoorSysWedge(void)
 					this->m_pView->GetDocument()->Execute(pAction);
 				}
 			}
+		}
+	}
+}
+
+void CBoxPropertiesDialogBar::OnChangeCoorSysWell(void)
+{
+	const CUnits& units = this->m_pView->GetDocument()->GetUnits();
+	const CGridKeyword& gridKeyword = this->m_pView->GetDocument()->GetGridKeyword();
+
+	double scale_h = units.map_horizontal.input_to_si/units.horizontal.input_to_si;
+	double scale_v = units.map_vertical.input_to_si/units.vertical.input_to_si;
+
+	vtkTransform *trans = vtkTransform::New();
+	trans->Scale(scale_h, scale_h, scale_v);
+	trans->RotateZ(-gridKeyword.m_grid_angle);
+	trans->Translate(-gridKeyword.m_grid_origin[0], -gridKeyword.m_grid_origin[1], -gridKeyword.m_grid_origin[2]);
+	
+	double pt[3];
+	pt[0] = this->m_XWell;
+	pt[1] = this->m_YWell;
+	pt[2] = 0.0;
+
+	if (this->GetCheckedRadioButton(IDC_RADIO_CS_GRID, IDC_RADIO_CS_MAP) == IDC_RADIO_CS_MAP)
+	{
+		trans->Inverse();
+		trans->TransformPoint(pt, pt);
+		this->m_XWell = pt[0];
+		this->m_YWell = pt[1];
+		this->m_xy_coordinate_system_user = PHAST_Transform::MAP;
+	}
+	else if (this->GetCheckedRadioButton(IDC_RADIO_CS_GRID, IDC_RADIO_CS_MAP) == IDC_RADIO_CS_GRID)
+	{
+		trans->TransformPoint(pt, pt);
+		this->m_XWell = pt[0];
+		this->m_YWell = pt[1];
+		this->m_xy_coordinate_system_user = PHAST_Transform::GRID;
+	}
+	else
+	{
+		ASSERT(FALSE);
+	}
+	
+
+	if (CWellActor* pWellActor = this->m_pProp3D ? CWellActor::SafeDownCast(this->m_pProp3D) : NULL)
+	{
+		CAction *pAction = new CWellSetPositionAction(
+			pWellActor,
+			this->m_pView->GetDocument(),
+			this->m_XWell,
+			this->m_YWell,
+			this->m_xy_coordinate_system_user
+			);
+		if (pAction)
+		{
+			this->m_pView->GetDocument()->Execute(pAction);
+		}
+	}
+	trans->Delete();
+}
+
+void CBoxPropertiesDialogBar::OnChangeCoorSysDrain(void)
+{
+	if (CDrainActor* pDrainActor = this->m_pProp3D ? CDrainActor::SafeDownCast(this->m_pProp3D) : NULL)
+	{
+		if (CWPhastDoc *pWPhastDoc = this->m_pView->GetDocument())
+		{
+			const CUnits& units = this->m_pView->GetDocument()->GetUnits();
+			const CGridKeyword& gridKeyword = this->m_pView->GetDocument()->GetGridKeyword();
+			PHAST_Transform map2grid(
+				gridKeyword.m_grid_origin[0],
+				gridKeyword.m_grid_origin[1],
+				gridKeyword.m_grid_origin[2],
+				gridKeyword.m_grid_angle,
+				units.map_horizontal.input_to_si/units.horizontal.input_to_si,
+				units.map_horizontal.input_to_si/units.horizontal.input_to_si,
+				units.map_vertical.input_to_si/units.vertical.input_to_si
+				);
+
+			CDrain drain = pDrainActor->GetData();
+			if (this->GetCheckedRadioButton(IDC_RADIO_CS_GRID, IDC_RADIO_CS_MAP) == IDC_RADIO_CS_MAP)
+			{
+				drain.coordinate_system = PHAST_Transform::MAP;
+			}
+			else if (this->GetCheckedRadioButton(IDC_RADIO_CS_GRID, IDC_RADIO_CS_MAP) == IDC_RADIO_CS_GRID)
+			{
+				drain.coordinate_system = PHAST_Transform::GRID;
+			}
+			else
+			{
+				ASSERT(FALSE);
+			}
+
+			std::list<CRiverPoint>::iterator it = drain.m_listPoints.begin();
+			for (; it != drain.m_listPoints.end(); ++it)
+			{
+				Point p(
+					it->x_user,
+					it->y_user,
+					0.0
+					);
+
+				if (drain.coordinate_system == PHAST_Transform::MAP)
+				{
+					map2grid.Inverse_transform(p);
+					it->x_user = p.x();
+					it->y_user = p.y();
+				}
+				else
+				{
+					map2grid.Transform(p);
+					it->x_user = p.x();
+					it->y_user = p.y();
+				}
+			}
+			CAction *pAction = new CSetAction<CDrainActor, CDrain>(pDrainActor, drain, pWPhastDoc);
+			pWPhastDoc->Execute(pAction);
+		}
+	}
+}
+
+void CBoxPropertiesDialogBar::OnChangeCoorSysRiver(void)
+{
+	if (CRiverActor* pRiverActor = this->m_pProp3D ? CRiverActor::SafeDownCast(this->m_pProp3D) : NULL)
+	{
+		if (CWPhastDoc *pWPhastDoc = this->m_pView->GetDocument())
+		{
+			const CUnits& units = this->m_pView->GetDocument()->GetUnits();
+			const CGridKeyword& gridKeyword = this->m_pView->GetDocument()->GetGridKeyword();
+			PHAST_Transform map2grid(
+				gridKeyword.m_grid_origin[0],
+				gridKeyword.m_grid_origin[1],
+				gridKeyword.m_grid_origin[2],
+				gridKeyword.m_grid_angle,
+				units.map_horizontal.input_to_si/units.horizontal.input_to_si,
+				units.map_horizontal.input_to_si/units.horizontal.input_to_si,
+				units.map_vertical.input_to_si/units.vertical.input_to_si
+				);
+
+			CRiver river = pRiverActor->GetData();
+			if (this->GetCheckedRadioButton(IDC_RADIO_CS_GRID, IDC_RADIO_CS_MAP) == IDC_RADIO_CS_MAP)
+			{
+				river.coordinate_system = PHAST_Transform::MAP;
+			}
+			else if (this->GetCheckedRadioButton(IDC_RADIO_CS_GRID, IDC_RADIO_CS_MAP) == IDC_RADIO_CS_GRID)
+			{
+				river.coordinate_system = PHAST_Transform::GRID;
+			}
+			else
+			{
+				ASSERT(FALSE);
+			}
+
+			std::list<CRiverPoint>::iterator it = river.m_listPoints.begin();
+			for (; it != river.m_listPoints.end(); ++it)
+			{
+				Point p(
+					it->x_user,
+					it->y_user,
+					0.0
+					);
+
+				if (river.coordinate_system == PHAST_Transform::MAP)
+				{
+					map2grid.Inverse_transform(p);
+					it->x_user = p.x();
+					it->y_user = p.y();
+				}
+				else
+				{
+					map2grid.Transform(p);
+					it->x_user = p.x();
+					it->y_user = p.y();
+				}
+			}
+			CAction *pAction = new CSetAction<CRiverActor, CRiver>(pRiverActor, river, pWPhastDoc);
+			pWPhastDoc->Execute(pAction);
 		}
 	}
 }

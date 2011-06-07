@@ -1512,3 +1512,21 @@ BOOL CPointConnectorActor::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 	return FALSE;
 }
 #endif // WIN32
+
+void CPointConnectorActor::SetCoordinateMode(CWPhastDoc::CoordinateState mode)
+{
+	this->CoordinateMode = mode;
+
+	if (mode == CWPhastDoc::GridMode)
+	{
+		this->Cursor3DActor->SetOrientation(0, 0, 0);
+	}
+	else if (mode == CWPhastDoc::MapMode)
+	{
+		this->Cursor3DActor->SetOrientation(0, 0, -this->GridAngle);
+	}
+	else
+	{
+		ASSERT(FALSE);
+	}
+}

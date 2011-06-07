@@ -63,7 +63,6 @@ public:
 	public:
 	virtual void OnDraw(CDC* pDC);  // overridden to draw this view
 
-// COMMENT: {9/8/2009 8:46:21 PM}	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
 protected:
 	virtual BOOL OnPreparePrinting(CPrintInfo* pInfo);
 	virtual void OnBeginPrinting(CDC* pDC, CPrintInfo* pInfo);
@@ -71,7 +70,6 @@ protected:
 
 // Implementation
 private:
-// COMMENT: {9/8/2009 8:46:10 PM}	void Pipeline( void );
 
 public:
 	virtual ~CWPhastView();
@@ -104,7 +102,6 @@ protected:
 
 	double                          BackgroundColor[3];
 
-// COMMENT: {9/8/2009 8:46:00 PM}	bool                            m_bResetCamera;
 	bool                            bMovingGridLine;
 	bool                            bRotatingGrid;
 
@@ -142,8 +139,7 @@ public:
 #endif
 
 protected:
-// COMMENT: {9/8/2009 8:44:03 PM}	virtual LRESULT WindowProc(UINT message, WPARAM wParam, LPARAM lParam);
-// COMMENT: {9/8/2009 8:44:03 PM}	virtual void OnActivateView(BOOL bActivate, CView* pActivateView, CView* pDeactiveView);
+
 public:
 	void ResetCamera(void);
 	void ResetCamera(double bounds[6]);
@@ -157,8 +153,6 @@ public:
 	void SizeHandles(double size);
 
 	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
-// COMMENT: {9/8/2009 8:44:35 PM}	afx_msg void OnUpdateToolsNewZone(CCmdUI *pCmdUI);
-// COMMENT: {9/8/2009 8:44:35 PM}	afx_msg void OnToolsNewZone();
 
 	// Moving/Copying grid lines
 	//
@@ -217,7 +211,6 @@ public:
 	void ParallelProjectionOn(void);
 
 protected:
-// COMMENT: {9/8/2009 8:45:00 PM}	virtual void OnUpdate(CView* /*pSender*/, LPARAM /*lHint*/, CObject* /*pHint*/);
 
 public:
 	afx_msg void OnUpdateToolsNewRiver(CCmdUI *pCmdUI);
@@ -236,12 +229,10 @@ public:
 	//
 	static void PrismWidgetListener(vtkObject *caller, unsigned long eid, void *clientdata, void *calldata);
 
-	// Wells
+	// coordinate mode (new wells and new rivers)
 	//
-	void UpdateWellMode(void);
+	void SetCoordinateMode(CWPhastDoc::CoordinateState mode);
 
-
-// COMMENT: {9/8/2009 8:45:16 PM}	afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
 	afx_msg void OnDestroy();
 	afx_msg void OnToolsMoveVerLine();
 	afx_msg void OnUpdateToolsMoveVerLine(CCmdUI *pCmdUI);
@@ -250,7 +241,6 @@ public:
 	afx_msg void OnToolsRotateGrid();
 	afx_msg void OnUpdateToolsRotateGrid(CCmdUI *pCmdUI);
 
-// COMMENT: {9/9/2005 6:14:50 PM}	afx_msg void OnUpdateToolsModifyGrid(CCmdUI *pCmdUI);
 	afx_msg void OnToolsModifyGrid();
 	afx_msg void OnUpdateToolsSelectObject(CCmdUI *pCmdUI);
 	afx_msg void OnToolsSelectObject();

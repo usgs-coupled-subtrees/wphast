@@ -7188,6 +7188,7 @@ void CWPhastDoc::BeginNewDrain()
 			// create widget
 			this->NewDrainActor = CDrainActor::StartNewDrain(pView->GetInteractor());
 			this->NewDrainActor->SetDrain(drain, this->GetUnits(), this->GetGridKeyword());
+			this->NewDrainActor->SetCoordinateMode(this->GetCoordinateMode());
 			this->NewDrainActor->AddObserver(CRiverActor::EndNewEvent, this->NewDrainCallbackCommand);
 			this->NewDrainActor->AddObserver(CRiverActor::CancelNewEvent, this->NewDrainCallbackCommand);
 
@@ -7291,6 +7292,39 @@ void CWPhastDoc::OnEndNewDrain(bool bCancel)
 			if (this->NewDrainActor->GetPointCount() > 1)
 			{
 				CDrain drain = this->NewDrainActor->GetDrain();
+
+				ASSERT(drain.coordinate_system == PHAST_Transform::GRID); // new drain default
+				if (this->GetCoordinateMode() == CWPhastDoc::MapMode)
+				{
+					const CUnits& units = this->GetUnits();
+					const CGridKeyword& gridKeyword = this->GetGridKeyword();
+					PHAST_Transform map2grid(
+						gridKeyword.m_grid_origin[0],
+						gridKeyword.m_grid_origin[1],
+						gridKeyword.m_grid_origin[2],
+						gridKeyword.m_grid_angle,
+						units.map_horizontal.input_to_si/units.horizontal.input_to_si,
+						units.map_horizontal.input_to_si/units.horizontal.input_to_si,
+						units.map_vertical.input_to_si/units.vertical.input_to_si
+						);
+
+					drain.coordinate_system = PHAST_Transform::MAP;
+
+					std::list<CRiverPoint>::iterator it = drain.m_listPoints.begin();
+					for (; it != drain.m_listPoints.end(); ++it)
+					{
+						Point p(
+							it->x_user,
+							it->y_user,
+							0.0
+							);
+
+						map2grid.Inverse_transform(p);
+						it->x_user = p.x();
+						it->y_user = p.y();
+					}
+				}
+
 				CString title;
 				title.Format("Drain %d Properties", drain.n_user);
 
@@ -7650,12 +7684,17 @@ void CWPhastDoc::SetCoordinateMode(CWPhastDoc::CoordinateState mode)
 		this->NewZoneWidget->SetCoordinateMode(mode);
 	}
 
+	if (this->NewDrainActor && this->NewDrainActor->GetEnabled())
+	{
+		this->NewDrainActor->SetCoordinateMode(mode);
+	}
+
 	POSITION pos = this->GetFirstViewPosition();
 	while (pos != NULL)
 	{
 		CWPhastView *pView = (CWPhastView*) GetNextView(pos);
 		ASSERT_VALID(pView);
-		pView->UpdateWellMode();
+		pView->SetCoordinateMode(mode);
 		pView->GetInteractor()->Render();
 	}
 }

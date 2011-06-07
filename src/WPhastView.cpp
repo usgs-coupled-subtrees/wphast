@@ -1841,6 +1841,7 @@ void CWPhastView::StartNewRiver(void)
 		river.z_coordinate_system_user = PHAST_Transform::GRID;
 		river.n_user = this->GetDocument()->GetNextRiverNumber();
 		this->RiverActor->SetRiver(river, this->GetDocument()->GetUnits(), this->GetDocument()->GetGridKeyword());
+		this->RiverActor->SetCoordinateMode(this->GetDocument()->GetCoordinateMode());
 
 		this->RiverActor->AddObserver(CRiverActor::EndNewEvent, RiverCallbackCommand);
 		this->RiverActor->AddObserver(CRiverActor::CancelNewEvent, RiverCallbackCommand);
@@ -1958,6 +1959,39 @@ void CWPhastView::OnEndNewRiver(bool bCancel)
 			if (this->RiverActor->GetPointCount() > 1)
 			{
 				CRiver river = this->RiverActor->GetRiver();
+
+				ASSERT(river.coordinate_system == PHAST_Transform::GRID); // new river default
+				if (this->GetDocument()->GetCoordinateMode() == CWPhastDoc::MapMode)
+				{
+					const CUnits& units = this->GetDocument()->GetUnits();
+					const CGridKeyword& gridKeyword = this->GetDocument()->GetGridKeyword();
+					PHAST_Transform map2grid(
+						gridKeyword.m_grid_origin[0],
+						gridKeyword.m_grid_origin[1],
+						gridKeyword.m_grid_origin[2],
+						gridKeyword.m_grid_angle,
+						units.map_horizontal.input_to_si/units.horizontal.input_to_si,
+						units.map_horizontal.input_to_si/units.horizontal.input_to_si,
+						units.map_vertical.input_to_si/units.vertical.input_to_si
+						);
+
+					river.coordinate_system = PHAST_Transform::MAP;
+
+					std::list<CRiverPoint>::iterator it = river.m_listPoints.begin();
+					for (; it != river.m_listPoints.end(); ++it)
+					{
+						Point p(
+							it->x_user,
+							it->y_user,
+							0.0
+							);
+
+						map2grid.Inverse_transform(p);
+						it->x_user = p.x();
+						it->y_user = p.y();
+					}
+				}
+
 				CString title;
 				title.Format("River %d Properties", river.n_user);
 
@@ -2816,15 +2850,15 @@ void CWPhastView::PrismWidgetListener(vtkObject *caller, unsigned long eid, void
 	}
 }
 
-void CWPhastView::UpdateWellMode(void)
+void CWPhastView::SetCoordinateMode(CWPhastDoc::CoordinateState mode)
 {
 	if (CWPhastView::CreatingNewWell() || this->PointWidget->GetEnabled())
 	{
-		if (this->GetDocument()->GetCoordinateMode() == CWPhastDoc::GridMode)
+		if (mode == CWPhastDoc::GridMode)
 		{
 			this->Cursor3DActor->SetOrientation(0, 0, 0);
 		}
-		else if (this->GetDocument()->GetCoordinateMode() == CWPhastDoc::MapMode)
+		else if (mode == CWPhastDoc::MapMode)
 		{
 			CGridKeyword gridKeyword = this->GetDocument()->GetGridKeyword();
 			this->Cursor3DActor->SetOrientation(0, 0, -gridKeyword.m_grid_angle);
@@ -2833,6 +2867,11 @@ void CWPhastView::UpdateWellMode(void)
 		{
 			ASSERT(FALSE);
 		}
+	}
+
+	if (this->RiverActor && this->RiverActor->GetEnabled())
+	{
+		this->RiverActor->SetCoordinateMode(mode);
 	}
 }
 
