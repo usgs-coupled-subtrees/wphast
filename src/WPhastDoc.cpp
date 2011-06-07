@@ -1599,6 +1599,9 @@ void CWPhastDoc::DeleteContents()
 	Clear_file_data_map();
 	Clear_KDtreeList();
 
+	// reset mode
+	this->CoordinateMode = CWPhastDoc::GridMode;
+
 	CDocument::DeleteContents();
 }
 
@@ -3908,12 +3911,6 @@ void CWPhastDoc::New(const CNewModel& model)
 		CWPhastView *pView = (CWPhastView*) GetNextView(pos);
 		pBar->Set(pView, 0, this->GetUnits());
 	}
-
-// COMMENT: {9/4/2009 9:16:25 PM}	// refresh screen
-// COMMENT: {9/4/2009 9:16:25 PM}	//
-// COMMENT: {9/4/2009 9:16:25 PM}	this->ResetCamera();
-// COMMENT: {9/4/2009 9:16:25 PM}	this->UpdateAllViews(0);
-// COMMENT: {9/9/2009 9:26:21 PM}	this->ExecutePipeline();
 }
 
 void CWPhastDoc::OnFileRun()
