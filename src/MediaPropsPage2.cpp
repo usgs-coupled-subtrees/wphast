@@ -310,6 +310,9 @@ void CMediaPropsPage2::SetPropertyDescription()
 	COMPARE_SET(ALPHA_HORIZONTAL, this->m_sAlphaHorizontalRTF);
 	COMPARE_SET(ALPHA_VERTICAL,   this->m_sAlphaVerticalRTF);
 	// TODO COMPARE_SET(TORTUOSITY,       this->m_sTortuosityRTF);
+	// 
+	std::string empty;
+	COMPARE_SET(TORTUOSITY,       empty);
 }
 
 void CMediaPropsPage2::OnEnSetfocusDescEdit()
