@@ -72,6 +72,8 @@
 // #include "CreateZoneAction.h"
 #include "ZoneCreateAction.h"
 
+#define CANCEL_WHEN_GRID_UNCHECKED
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -2121,6 +2123,9 @@ void CWPhastView::OnUpdateToolsMoveVerLine(CCmdUI *pCmdUI)
 		else
 		{
 			pCmdUI->Enable(FALSE);
+#if defined(CANCEL_WHEN_GRID_UNCHECKED)
+			this->CancelMoveGridLine();
+#endif
 		}
 
 		if (this->MovingGridLine())
@@ -2196,6 +2201,9 @@ void CWPhastView::OnUpdateToolsRotateGrid(CCmdUI *pCmdUI)
 		else
 		{
 			pCmdUI->Enable(FALSE);
+#if defined(CANCEL_WHEN_GRID_UNCHECKED)
+			this->CancelRotateGrid();
+#endif
 		}
 
 		if (this->RotatingGrid())

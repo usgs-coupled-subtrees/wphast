@@ -180,6 +180,8 @@ void Clear_NNInterpolatorList(void);
 void Clear_file_data_map(void);
 void Clear_KDtreeList(void);
 
+#define CANCEL_WHEN_GRID_UNCHECKED
+
 // Note: No header files should follow the following three lines
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -5842,6 +5844,12 @@ void CWPhastDoc::OnUpdateToolsModifyGrid(CCmdUI *pCmdUI)
 		else
 		{
 			pCmdUI->Enable(FALSE);
+#if defined(CANCEL_WHEN_GRID_UNCHECKED)
+			if (this->GridElementsSelector && !this->ModifyGridSheet)
+			{
+				this->EndModifyGrid();
+			}
+#endif
 		}
 	}
 	else
