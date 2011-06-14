@@ -6296,6 +6296,14 @@ void CWPhastDoc::BeginNewWedge()
 			this->NewWedgeCallbackCommand->SetCallback(CWPhastDoc::NewWedgeListener);
 			this->NewWedgeWidget->AddObserver(vtkCommand::EndInteractionEvent, this->NewWedgeCallbackCommand);
 
+			// set up for gridkeyword
+			CGridKeyword gridKeyword;
+			this->GetGridKeyword(gridKeyword);
+			const CUnits& units = this->GetUnits();
+			this->NewWedgeWidget->SetGridKeyword(gridKeyword, units);
+			this->NewWedgeWidget->SetScale(this->GetScale()[0], this->GetScale()[1], this->GetScale()[2]);
+			this->NewWedgeWidget->SetCoordinateMode(this->GetCoordinateMode());
+
 			// enable widget
 			this->NewWedgeWidget->SetEnabled(1);
 		}
@@ -6329,24 +6337,6 @@ void CWPhastDoc::NewWedgeListener(vtkObject *caller, unsigned long eid, void *cl
 		CWPhastDoc* self = reinterpret_cast<CWPhastDoc*>(clientdata);
 		if (eid == vtkCommand::EndInteractionEvent)
 		{
-			double scaled_meters[6];
-			self->NewWedgeWidget->GetBounds(scaled_meters);
-
-			// calc zone
-			CZone zone;
-			double* scale = self->GetScale();
-			const CUnits& units = self->GetUnits();
-			zone.x1 = scaled_meters[0] / scale[0] / units.horizontal.input_to_si;
-			zone.x2 = scaled_meters[1] / scale[0] / units.horizontal.input_to_si;
-			zone.y1 = scaled_meters[2] / scale[1] / units.horizontal.input_to_si;
-			zone.y2 = scaled_meters[3] / scale[1] / units.horizontal.input_to_si;
-			zone.z1 = scaled_meters[4] / scale[2] / units.vertical.input_to_si;
-			zone.z2 = scaled_meters[5] / scale[2] / units.vertical.input_to_si;
-
-			TRACE("x(%g-%g) y(%g-%g) z(%g-%g)\n", zone.x1, zone.x2, zone.y1, zone.y2, zone.z1, zone.z2);
-
-			srcWedgeSource::ChopType ct = self->NewWedgeWidget->GetChopType();
-
 			// get type of zone
 			//
 			ETSLayoutPropertySheet        sheet("Wedge Wizard", NULL, 0, NULL, false);
@@ -6391,49 +6381,49 @@ void CWPhastDoc::NewWedgeListener(vtkObject *caller, unsigned long eid, void *cl
 				{
 					CGridElt elt;
 					mediaProps.GetProperties(elt);
-					elt.polyh = new Wedge(&zone, srcWedgeSource::GetWedgeOrientationString(ct));
+					elt.polyh = self->NewWedgeWidget->GetWedge();
 					CMediaZoneActor::Create(self, elt, mediaProps.GetDesc());
 				}
 				else if (newZone.GetType() == ID_ZONE_TYPE_BC_FLUX)
 				{
 					CBC bc;
 					fluxProps.GetProperties(bc);
-					bc.polyh = new Wedge(&zone, srcWedgeSource::GetWedgeOrientationString(ct));
+					bc.polyh = self->NewWedgeWidget->GetWedge();
 					CBCZoneActor::Create(self, bc, fluxProps.GetDesc());
 				}
 				else if (newZone.GetType() == ID_ZONE_TYPE_BC_LEAKY)
 				{
 					CBC bc;
 					leakyProps.GetProperties(bc);
-					bc.polyh = new Wedge(&zone, srcWedgeSource::GetWedgeOrientationString(ct));
+					bc.polyh = self->NewWedgeWidget->GetWedge();
 					CBCZoneActor::Create(self, bc, leakyProps.GetDesc());
 				}
 				else if (newZone.GetType() == ID_ZONE_TYPE_BC_SPECIFIED)
 				{
 					CBC bc;
 					specifiedProps.GetProperties(bc);
-					bc.polyh = new Wedge(&zone, srcWedgeSource::GetWedgeOrientationString(ct));
+					bc.polyh = self->NewWedgeWidget->GetWedge();
 					CBCZoneActor::Create(self, bc, specifiedProps.GetDesc());
 				}
 				else if (newZone.GetType() == ID_ZONE_TYPE_IC_HEAD)
 				{
 					CHeadIC headic;
 					headProps.GetProperties(headic);
-					headic.polyh = new Wedge(&zone, srcWedgeSource::GetWedgeOrientationString(ct));
+					headic.polyh = self->NewWedgeWidget->GetWedge();
 					CICHeadZoneActor::Create(self, headic, headProps.GetDesc());
 				}
 				else if (newZone.GetType() == ID_ZONE_TYPE_IC_CHEM)
 				{
 					CChemIC chemIC;
 					chemICProps.GetProperties(chemIC);
-					chemIC.polyh = new Wedge(&zone, srcWedgeSource::GetWedgeOrientationString(ct));
+					chemIC.polyh = self->NewWedgeWidget->GetWedge();
 					CICChemZoneActor::Create(self, chemIC, chemICProps.GetDesc());
 				}
 				else if (newZone.GetType() == ID_ZONE_TYPE_FLOW_RATE)
 				{
 					Zone_budget zone_budget;
 					zoneFlowRateProps.GetProperties(zone_budget);
-					zone_budget.Set_polyh(new Wedge(&zone, srcWedgeSource::GetWedgeOrientationString(ct)));
+					zone_budget.Set_polyh(self->NewWedgeWidget->GetWedge());
 					CZoneFlowRateZoneActor::Create(self, zone_budget);
 				}
 			}
@@ -7543,6 +7533,10 @@ void CWPhastDoc::SetCoordinateMode(CWPhastDoc::CoordinateState mode)
 	if (this->NewZoneWidget && this->NewZoneWidget->GetEnabled())
 	{
 		this->NewZoneWidget->SetCoordinateMode(mode);
+	}
+	if (this->NewWedgeWidget && this->NewWedgeWidget->GetEnabled())
+	{
+		this->NewWedgeWidget->SetCoordinateMode(mode);
 	}
 
 	if (this->NewDrainActor && this->NewDrainActor->GetEnabled())

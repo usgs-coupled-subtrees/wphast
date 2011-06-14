@@ -2,10 +2,14 @@
 
 #include <vtk3DWidget.h>
 #include "srcWedgeSource.h"
+#include "WPhastDoc.h"
+#include "Units.h"
+#include "Zone.h"
 
 class vtkCursor3D;
 class vtkPolyDataMapper;
 class vtkActor;
+class Wedge;
 
 class CNewWedgeWidget : public vtk3DWidget
 {
@@ -28,6 +32,11 @@ public:
 
 	void SetChopType(enum srcWedgeSource::tagChopType t);
 
+	void SetGridKeyword(const CGridKeyword& gridKeyword, const CUnits& units);
+	void SetCoordinateMode(CWPhastDoc::CoordinateState mode);
+	void SetScale(double x, double y, double z);
+
+	Wedge* GetWedge();
 
 #ifdef WIN32
 	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
@@ -67,6 +76,14 @@ protected:
 	double                FixedPlanePoint[3];
 	int                   FixedPlane;  // [0-5]
 	int                   FixedCoord;  // [0-2]
+
+	// coordinate system vars
+	double                       GridOrigin[3];
+	double                       GridAngle;
+	double                       GeometryScale[3];
+	CUnits                       Units;
+	CWPhastDoc::CoordinateState  CoordinateMode;
+	CZone                        MapZone;
 
 private:
 	CNewWedgeWidget(const CNewWedgeWidget&);  // Not implemented.

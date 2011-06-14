@@ -506,6 +506,10 @@ void CBoxPropertiesDialogBar::Set(CWPhastView* pView, vtkProp3D* pProp3D, const 
 		case Polyhedron::WEDGE:
 			this->m_nType = CBoxPropertiesDialogBar::BP_WEDGE;
 			this->m_nOrientation = srcWedgeSource::ConvertChopType(pZone->GetChopType());
+			if (Wedge *w = dynamic_cast<Wedge*>(pZone->GetPolyhedron()))
+			{
+				this->m_xy_coordinate_system_user = w->Get_user_coordinate_system();
+			}
 			this->Enable(TRUE);
 			this->UpdateData(FALSE);
 

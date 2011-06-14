@@ -440,8 +440,8 @@ BEGIN
     END
     POPUP "&Mode"
     BEGIN
-        MENUITEM "&Grid\tG",                    ID_SETGRID_MODE
-        MENUITEM "&Map\tM",                     ID_SETMAP_MODE
+        MENUITEM "&Grid\tg",                    ID_SETGRID_MODE
+        MENUITEM "&Map\tm",                     ID_SETMAP_MODE
     END
     POPUP "&Help"
     BEGIN

@@ -25,7 +25,15 @@ CNewWedgeWidget::CNewWedgeWidget(void)
 , WedgeSource(0)
 , OutlineMapper(0)
 , OutlineActor(0)
+, GridAngle(0)
+, CoordinateMode(CWPhastDoc::GridMode)
 {
+	for (int i = 0; i < 3; ++i)
+	{
+		this->GridOrigin[i]    = 0;
+		this->GeometryScale[i] = 1;
+	}
+
 	ASSERT(this->EventCallbackCommand);
 	this->EventCallbackCommand->SetCallback(CNewWedgeWidget::ProcessEvents);
 
@@ -253,8 +261,8 @@ void CNewWedgeWidget::OnMouseMove()
 	//    5 => zmax
 	//
 
-	///double* bounds = this->GridActor->GetBounds();
-	double* bounds = this->Prop3D->GetBounds();
+	double bounds[6];
+	this->Prop3D->GetBounds(bounds);
 	CUtilities::GetWorldPointAtFixedPlane(this->Interactor, this->CurrentRenderer, this->FixedCoord, bounds[this->FixedPlane], this->FixedPlanePoint);
 
 	double dim = (bounds[1] - bounds[0]) / 20.0;
@@ -273,6 +281,102 @@ void CNewWedgeWidget::OnMouseMove()
 				bounds[2 * i + 1] = max(this->StartPoint[i], this->FixedPlanePoint[i]);
 			}
 		}
+
+		// world to grid
+		//
+		vtkTransform *grid2world = vtkTransform::New();
+		grid2world->Scale(
+			this->GeometryScale[0],
+			this->GeometryScale[1],
+			this->GeometryScale[2]
+			);
+
+		double pt1[3];
+		grid2world->GetInverse()->TransformPoint(this->StartPoint, pt1);
+
+		double pt2[3];
+		grid2world->GetInverse()->TransformPoint(this->FixedPlanePoint, pt2);
+
+		// grid to map
+		//
+		vtkTransform *map2grid = vtkTransform::New();
+		map2grid->Scale(
+			this->Units.map_horizontal.input_to_si,
+			this->Units.map_horizontal.input_to_si,
+			this->Units.map_vertical.input_to_si
+			);
+		map2grid->RotateZ(-this->GridAngle);
+		map2grid->Translate(-this->GridOrigin[0], -this->GridOrigin[1], -this->GridOrigin[2]);
+
+		map2grid->GetInverse()->TransformPoint(pt1, pt1);
+		map2grid->GetInverse()->TransformPoint(pt2, pt2);
+
+		double min[3];
+		double max[3];
+		for (int i = 0; i < 3; ++i)
+		{
+			if (i == this->FixedCoord)
+			{
+				// world (scaled meters) to map
+				//
+				double pt[3] = {0, 0, 0};
+
+				pt[i] = min(bounds[2 * i], bounds[2 * i + 1]);
+				grid2world->GetInverse()->TransformPoint(pt, pt);
+				map2grid->GetInverse()->TransformPoint(pt, pt);
+				min[i] = pt[i];
+
+				pt[i] = max(bounds[2 * i], bounds[2 * i + 1]);
+				grid2world->GetInverse()->TransformPoint(pt, pt);
+				map2grid->GetInverse()->TransformPoint(pt, pt);
+				max[i] = pt[i];
+
+			}
+			else
+			{
+				min[i] = min(pt1[i], pt2[i]);
+				max[i] = max(pt1[i], pt2[i]);
+			}
+		}
+		this->MapZone.x1 = min[0];
+		this->MapZone.x2 = max[0];
+		this->MapZone.y1 = min[1];
+		this->MapZone.y2 = max[1];
+		this->MapZone.z1 = min[2];
+		this->MapZone.z2 = max[2];
+
+		// world to map
+		double mapStartPoint[3];
+		double mapFixedPlanePoint[3];
+
+		if (this->CoordinateMode == CWPhastDoc::MapMode)
+		{
+			bounds[0] = min[0];
+			bounds[1] = max[0];
+			bounds[2] = min[1];
+			bounds[3] = max[1];
+			bounds[4] = min[2];
+			bounds[5] = max[2];
+
+			// world to map
+			//
+			grid2world->GetInverse()->TransformPoint(this->StartPoint, mapStartPoint);
+			map2grid->GetInverse()->TransformPoint(mapStartPoint, mapStartPoint);
+
+			grid2world->GetInverse()->TransformPoint(this->FixedPlanePoint, mapFixedPlanePoint);
+			map2grid->GetInverse()->TransformPoint(mapFixedPlanePoint, mapFixedPlanePoint);
+		}
+		else if (this->CoordinateMode == CWPhastDoc::GridMode)
+		{
+			for (int i = 0; i < 3; ++i)
+			{
+				mapStartPoint[i]      = this->StartPoint[i];
+				mapFixedPlanePoint[i] = this->FixedPlanePoint[i];
+			}
+		}
+
+		grid2world->Delete();
+		map2grid->Delete();
 
 		enum srcWedgeSource::tagChopType t;
 		bool flip = (this->Interactor->GetShiftKey() != 0);
@@ -295,9 +399,9 @@ void CNewWedgeWidget::OnMouseMove()
             *                         *
 */
 			TRACE("FixedCoord == X-axis\n");
-			if (this->StartPoint[1] < this->FixedPlanePoint[1])
+			if (mapStartPoint[1] < mapFixedPlanePoint[1])
 			{
-				if (this->StartPoint[2] < this->FixedPlanePoint[2])
+				if (mapStartPoint[2] < mapFixedPlanePoint[2])
 				{
 					// +y+z
 					t = flip ? srcWedgeSource::CHOP_MIN_Y_MAX_Z : srcWedgeSource::CHOP_MAX_Y_MIN_Z;
@@ -310,7 +414,7 @@ void CNewWedgeWidget::OnMouseMove()
 			}
 			else
 			{
-				if (this->StartPoint[2] < this->FixedPlanePoint[2])
+				if (mapStartPoint[2] < mapFixedPlanePoint[2])
 				{
 					// -y+z
 					t = flip ? srcWedgeSource::CHOP_MAX_Y_MAX_Z : srcWedgeSource::CHOP_MIN_Y_MIN_Z;
@@ -325,9 +429,9 @@ void CNewWedgeWidget::OnMouseMove()
 		else if (this->FixedCoord == 1)
 		{
 			TRACE("FixedCoord == Y-axis\n");
-			if (this->StartPoint[0] < this->FixedPlanePoint[0])
+			if (mapStartPoint[0] < mapFixedPlanePoint[0])
 			{
-				if (this->StartPoint[2] < this->FixedPlanePoint[2])
+				if (mapStartPoint[2] < mapFixedPlanePoint[2])
 				{
 					// +x+z
 					t = flip ? srcWedgeSource::CHOP_MAX_X_MIN_Z : srcWedgeSource::CHOP_MIN_X_MAX_Z;
@@ -340,7 +444,7 @@ void CNewWedgeWidget::OnMouseMove()
 			}
 			else
 			{
-				if (this->StartPoint[2] < this->FixedPlanePoint[2])
+				if (mapStartPoint[2] < mapFixedPlanePoint[2])
 				{
 					// -x+z
 					t = flip ? srcWedgeSource::CHOP_MIN_X_MIN_Z : srcWedgeSource::CHOP_MAX_X_MAX_Z;
@@ -356,9 +460,9 @@ void CNewWedgeWidget::OnMouseMove()
 		else if (this->FixedCoord == 2)
 		{
 			TRACE("FixedCoord == Z-axis\n");
-			if (this->StartPoint[0] < this->FixedPlanePoint[0])
+			if (mapStartPoint[0] < mapFixedPlanePoint[0])
 			{
-				if (this->StartPoint[1] < this->FixedPlanePoint[1])
+				if (mapStartPoint[1] < mapFixedPlanePoint[1])
 				{
 					// +x+y
 					t = flip ? srcWedgeSource::CHOP_MAX_X_MIN_Y : srcWedgeSource::CHOP_MIN_X_MAX_Y;
@@ -371,7 +475,7 @@ void CNewWedgeWidget::OnMouseMove()
 			}
 			else
 			{
-				if (this->StartPoint[1] < this->FixedPlanePoint[1])
+				if (mapStartPoint[1] < mapFixedPlanePoint[1])
 				{
 					// -x+y
 					t = flip ? srcWedgeSource::CHOP_MIN_X_MIN_Y : srcWedgeSource::CHOP_MAX_X_MAX_Y;
@@ -386,6 +490,26 @@ void CNewWedgeWidget::OnMouseMove()
 
 		this->WedgeSource->SetChopType(t);
 		this->WedgeSource->SetBounds(bounds);
+
+		// validate actor
+		ASSERT(this->OutlineActor->GetPosition()[0]         == 0.0 && this->OutlineActor->GetPosition()[1]         == 0.0 && this->OutlineActor->GetPosition()[2]         == 0.0);
+		ASSERT(this->OutlineActor->GetOrigin()[0]           == 0.0 && this->OutlineActor->GetOrigin()[1]           == 0.0 && this->OutlineActor->GetOrigin()[2]           == 0.0);
+		ASSERT(this->OutlineActor->GetOrientation()[0]      == 0.0 && this->OutlineActor->GetOrientation()[1]      == 0.0 && this->OutlineActor->GetOrientation()[2]      == 0.0);
+		ASSERT(this->OutlineActor->vtkProp3D::GetScale()[0] == 1.0 && this->OutlineActor->vtkProp3D::GetScale()[1] == 1.0 && this->OutlineActor->vtkProp3D::GetScale()[2] == 1.0);
+
+		if (this->CoordinateMode == CWPhastDoc::MapMode)
+		{
+			vtkTransform *user = vtkTransform::New();
+			user->Identity();
+			user->Scale(
+				this->GeometryScale[0] * this->Units.map_horizontal.input_to_si,
+				this->GeometryScale[1] * this->Units.map_horizontal.input_to_si,
+				this->GeometryScale[2] * this->Units.map_vertical.input_to_si);
+			user->RotateZ(-this->GridAngle);
+			user->Translate(-this->GridOrigin[0], -this->GridOrigin[1], -this->GridOrigin[2]);
+			this->OutlineActor->SetUserTransform(user);
+			user->Delete();
+		}
 		this->InvokeEvent(vtkCommand::InteractionEvent, NULL);
 	}
 
@@ -418,7 +542,8 @@ void CNewWedgeWidget::OnLeftButtonDown()
 	//    4 => zmin
 	//    5 => zmax
 	//
-	double* bounds = this->Prop3D->GetBounds();
+	double bounds[6];
+	this->Prop3D->GetBounds(bounds);
 	CUtilities::GetWorldPointAtFixedPlane(this->Interactor, this->CurrentRenderer, this->FixedCoord, bounds[this->FixedPlane], this->StartPoint);
 
 	// set bounds for the outline
@@ -448,7 +573,8 @@ void CNewWedgeWidget::OnLeftButtonUp()
 	TRACE("CNewWedgeWidget::OnLeftButtonUp\n");
 	if ( this->State == CNewWedgeWidget::Selecting )
 	{
-		double* bounds = this->Prop3D->GetBounds();
+		double bounds[6];
+		this->Prop3D->GetBounds(bounds);
 		CUtilities::GetWorldPointAtFixedPlane(this->Interactor, this->CurrentRenderer, this->FixedCoord, bounds[this->FixedPlane], this->FixedPlanePoint);
 		for (int i = 0; i < 3; ++i)
 		{
@@ -458,7 +584,238 @@ void CNewWedgeWidget::OnLeftButtonUp()
 				bounds[2 * i + 1] = max(this->StartPoint[i], this->FixedPlanePoint[i]);
 			}
 		}
+
+		// world to grid
+		//
+		vtkTransform *grid2world = vtkTransform::New();
+		grid2world->Scale(
+			this->GeometryScale[0],
+			this->GeometryScale[1],
+			this->GeometryScale[2]
+			);
+
+		double pt1[3];
+		grid2world->GetInverse()->TransformPoint(this->StartPoint, pt1);
+
+		double pt2[3];
+		grid2world->GetInverse()->TransformPoint(this->FixedPlanePoint, pt2);
+
+		// grid to map
+		//
+		vtkTransform *map2grid = vtkTransform::New();
+		map2grid->Scale(
+			this->Units.map_horizontal.input_to_si,
+			this->Units.map_horizontal.input_to_si,
+			this->Units.map_vertical.input_to_si
+			);
+		map2grid->RotateZ(-this->GridAngle);
+		map2grid->Translate(-this->GridOrigin[0], -this->GridOrigin[1], -this->GridOrigin[2]);
+
+		map2grid->GetInverse()->TransformPoint(pt1, pt1);
+		map2grid->GetInverse()->TransformPoint(pt2, pt2);
+
+		double min[3];
+		double max[3];
+		for (int i = 0; i < 3; ++i)
+		{
+			if (i == this->FixedCoord)
+			{
+				// world (scaled meters) to map
+				//
+				double pt[3] = {0, 0, 0};
+
+				pt[i] = min(bounds[2 * i], bounds[2 * i + 1]);
+				grid2world->GetInverse()->TransformPoint(pt, pt);
+				map2grid->GetInverse()->TransformPoint(pt, pt);
+				min[i] = pt[i];
+
+				pt[i] = max(bounds[2 * i], bounds[2 * i + 1]);
+				grid2world->GetInverse()->TransformPoint(pt, pt);
+				map2grid->GetInverse()->TransformPoint(pt, pt);
+				max[i] = pt[i];
+
+			}
+			else
+			{
+				min[i] = min(pt1[i], pt2[i]);
+				max[i] = max(pt1[i], pt2[i]);
+			}
+		}
+		this->MapZone.x1 = min[0];
+		this->MapZone.x2 = max[0];
+		this->MapZone.y1 = min[1];
+		this->MapZone.y2 = max[1];
+		this->MapZone.z1 = min[2];
+		this->MapZone.z2 = max[2];
+
+		// world to map
+		double mapStartPoint[3];
+		double mapFixedPlanePoint[3];
+
+		if (this->CoordinateMode == CWPhastDoc::MapMode)
+		{
+			bounds[0] = min[0];
+			bounds[1] = max[0];
+			bounds[2] = min[1];
+			bounds[3] = max[1];
+			bounds[4] = min[2];
+			bounds[5] = max[2];
+
+			// world to map
+			//
+			grid2world->GetInverse()->TransformPoint(this->StartPoint, mapStartPoint);
+			map2grid->GetInverse()->TransformPoint(mapStartPoint, mapStartPoint);
+
+			grid2world->GetInverse()->TransformPoint(this->FixedPlanePoint, mapFixedPlanePoint);
+			map2grid->GetInverse()->TransformPoint(mapFixedPlanePoint, mapFixedPlanePoint);
+		}
+		else if (this->CoordinateMode == CWPhastDoc::GridMode)
+		{
+			for (int i = 0; i < 3; ++i)
+			{
+				mapStartPoint[i]      = this->StartPoint[i];
+				mapFixedPlanePoint[i] = this->FixedPlanePoint[i];
+			}
+		}
+
+		grid2world->Delete();
+		map2grid->Delete();
+
+		enum srcWedgeSource::tagChopType t;
+		bool flip = (this->Interactor->GetShiftKey() != 0);
+		if (this->FixedCoord == 0)
+		{
+/*
+            *                         *
+            ***                     ***
+            *****                 *****
+            *******             *******
+            *********         *********
+            ***********     ***********
+            ************* *************
+            ************* *************
+            ***********     ***********
+            *********         *********
+            *******             *******
+            *****                 *****
+            ***                     ***
+            *                         *
+*/
+			TRACE("FixedCoord == X-axis\n");
+			if (mapStartPoint[1] < mapFixedPlanePoint[1])
+			{
+				if (mapStartPoint[2] < mapFixedPlanePoint[2])
+				{
+					// +y+z
+					t = flip ? srcWedgeSource::CHOP_MIN_Y_MAX_Z : srcWedgeSource::CHOP_MAX_Y_MIN_Z;
+				}
+				else
+				{
+					// +y-z
+					t = flip ? srcWedgeSource::CHOP_MIN_Y_MIN_Z : srcWedgeSource::CHOP_MAX_Y_MAX_Z;
+				}
+			}
+			else
+			{
+				if (mapStartPoint[2] < mapFixedPlanePoint[2])
+				{
+					// -y+z
+					t = flip ? srcWedgeSource::CHOP_MAX_Y_MAX_Z : srcWedgeSource::CHOP_MIN_Y_MIN_Z;
+				}
+				else
+				{
+					// -y-z
+					t = flip ? srcWedgeSource::CHOP_MAX_Y_MIN_Z : srcWedgeSource::CHOP_MIN_Y_MAX_Z;
+				}
+			}
+		}
+		else if (this->FixedCoord == 1)
+		{
+			TRACE("FixedCoord == Y-axis\n");
+			if (mapStartPoint[0] < mapFixedPlanePoint[0])
+			{
+				if (mapStartPoint[2] < mapFixedPlanePoint[2])
+				{
+					// +x+z
+					t = flip ? srcWedgeSource::CHOP_MAX_X_MIN_Z : srcWedgeSource::CHOP_MIN_X_MAX_Z;
+				}
+				else
+				{
+					// +x-z
+					t = flip ? srcWedgeSource::CHOP_MAX_X_MAX_Z : srcWedgeSource::CHOP_MIN_X_MIN_Z;
+				}
+			}
+			else
+			{
+				if (mapStartPoint[2] < mapFixedPlanePoint[2])
+				{
+					// -x+z
+					t = flip ? srcWedgeSource::CHOP_MIN_X_MIN_Z : srcWedgeSource::CHOP_MAX_X_MAX_Z;
+				}
+				else
+				{
+					// -x-z
+					t = flip ? srcWedgeSource::CHOP_MIN_X_MAX_Z : srcWedgeSource::CHOP_MAX_X_MIN_Z;
+				}
+			}
+			this->WedgeSource->SetChopType(t);
+		}
+		else if (this->FixedCoord == 2)
+		{
+			TRACE("FixedCoord == Z-axis\n");
+			if (mapStartPoint[0] < mapFixedPlanePoint[0])
+			{
+				if (mapStartPoint[1] < mapFixedPlanePoint[1])
+				{
+					// +x+y
+					t = flip ? srcWedgeSource::CHOP_MAX_X_MIN_Y : srcWedgeSource::CHOP_MIN_X_MAX_Y;
+				}
+				else
+				{
+					// +x-y
+					t = flip ? srcWedgeSource::CHOP_MAX_X_MAX_Y : srcWedgeSource::CHOP_MIN_X_MIN_Y;
+				}
+			}
+			else
+			{
+				if (mapStartPoint[1] < mapFixedPlanePoint[1])
+				{
+					// -x+y
+					t = flip ? srcWedgeSource::CHOP_MIN_X_MIN_Y : srcWedgeSource::CHOP_MAX_X_MAX_Y;
+				}
+				else
+				{
+					// -x-y
+					t = flip ? srcWedgeSource::CHOP_MIN_X_MAX_Y : srcWedgeSource::CHOP_MAX_X_MIN_Y;
+				}
+			}
+		}
+
+		this->WedgeSource->SetChopType(t);
 		this->WedgeSource->SetBounds(bounds);
+
+		// validate actor
+		ASSERT(this->OutlineActor->GetPosition()[0]         == 0.0 && this->OutlineActor->GetPosition()[1]         == 0.0 && this->OutlineActor->GetPosition()[2]         == 0.0);
+		ASSERT(this->OutlineActor->GetOrigin()[0]           == 0.0 && this->OutlineActor->GetOrigin()[1]           == 0.0 && this->OutlineActor->GetOrigin()[2]           == 0.0);
+		ASSERT(this->OutlineActor->GetOrientation()[0]      == 0.0 && this->OutlineActor->GetOrientation()[1]      == 0.0 && this->OutlineActor->GetOrientation()[2]      == 0.0);
+		ASSERT(this->OutlineActor->vtkProp3D::GetScale()[0] == 1.0 && this->OutlineActor->vtkProp3D::GetScale()[1] == 1.0 && this->OutlineActor->vtkProp3D::GetScale()[2] == 1.0);
+
+		vtkTransform *user = vtkTransform::New();
+		user->Identity();
+
+		if (this->CoordinateMode == CWPhastDoc::MapMode)
+		{
+			vtkTransform *user = vtkTransform::New();
+			user->Identity();
+			user->Scale(
+				this->GeometryScale[0] * this->Units.map_horizontal.input_to_si,
+				this->GeometryScale[1] * this->Units.map_horizontal.input_to_si,
+				this->GeometryScale[2] * this->Units.map_vertical.input_to_si);
+			user->RotateZ(-this->GridAngle);
+			user->Translate(-this->GridOrigin[0], -this->GridOrigin[1], -this->GridOrigin[2]);
+			this->OutlineActor->SetUserTransform(user);
+			user->Delete();
+		}
 
 		// stop forwarding event
 		//
@@ -493,4 +850,71 @@ enum srcWedgeSource::tagChopType CNewWedgeWidget::GetChopType()const
 void CNewWedgeWidget::SetChopType(enum srcWedgeSource::tagChopType t)
 {
 	this->WedgeSource->SetChopType(t);
+}
+
+void CNewWedgeWidget::SetGridKeyword(const CGridKeyword& gridKeyword, const CUnits& units)
+{
+	// set up for transform
+	this->GridAngle     = gridKeyword.m_grid_angle;
+	this->GridOrigin[0] = gridKeyword.m_grid_origin[0];
+	this->GridOrigin[1] = gridKeyword.m_grid_origin[1];
+	this->GridOrigin[2] = gridKeyword.m_grid_origin[2];
+	this->Units         = units;
+}
+
+void CNewWedgeWidget::SetScale(double x, double y, double z)
+{
+	this->GeometryScale[0] = x;
+	this->GeometryScale[1] = y;
+	this->GeometryScale[2] = z;
+}
+
+void CNewWedgeWidget::SetCoordinateMode(CWPhastDoc::CoordinateState mode)
+{
+	this->CoordinateMode = mode;
+
+	if (mode == CWPhastDoc::GridMode)
+	{
+		this->Cursor3DActor->SetOrientation(0, 0, 0);
+	}
+	else if (mode == CWPhastDoc::MapMode)
+	{
+		this->Cursor3DActor->SetOrientation(0, 0, -this->GridAngle);
+	}
+	else
+	{
+		ASSERT(FALSE);
+	}
+}
+
+Wedge* CNewWedgeWidget::GetWedge()
+{
+	if (this->CoordinateMode == CWPhastDoc::GridMode)
+	{
+		double scaled_meters[6];
+		this->GetBounds(scaled_meters);
+
+		// calc zone
+		CZone zone;
+		zone.x1 = scaled_meters[0] / this->GeometryScale[0] / this->Units.horizontal.input_to_si;
+		zone.x2 = scaled_meters[1] / this->GeometryScale[0] / this->Units.horizontal.input_to_si;
+		zone.y1 = scaled_meters[2] / this->GeometryScale[1] / this->Units.horizontal.input_to_si;
+		zone.y2 = scaled_meters[3] / this->GeometryScale[1] / this->Units.horizontal.input_to_si;
+		zone.z1 = scaled_meters[4] / this->GeometryScale[2] / this->Units.vertical.input_to_si;
+		zone.z2 = scaled_meters[5] / this->GeometryScale[2] / this->Units.vertical.input_to_si;
+
+		TRACE("x(%g-%g) y(%g-%g) z(%g-%g)\n", zone.x1, zone.x2, zone.y1, zone.y2, zone.z1, zone.z2);
+		return new Wedge(&zone, srcWedgeSource::GetWedgeOrientationString(this->GetChopType()), PHAST_Transform::GRID);
+	}
+	else if (this->CoordinateMode == CWPhastDoc::MapMode)
+	{
+		TRACE("x(%g-%g) y(%g-%g) z(%g-%g)\n", this->MapZone.x1, this->MapZone.x2, this->MapZone.y1, this->MapZone.y2, this->MapZone.z1, this->MapZone.z2);
+		return new Wedge(&this->MapZone, srcWedgeSource::GetWedgeOrientationString(this->GetChopType()), PHAST_Transform::MAP);
+	}
+	else
+	{
+		ASSERT(FALSE);
+		CZone zone;
+		return new Wedge(&zone, srcWedgeSource::GetWedgeOrientationString(this->GetChopType()), PHAST_Transform::GRID);
+	}
 }
