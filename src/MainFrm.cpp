@@ -322,25 +322,6 @@ BOOL CMainFrame::DestroyWindow()
 	return CFrameWnd::DestroyWindow();
 }
 
-// COMMENT: {8/4/2009 5:00:03 PM}void CMainFrame::UpdateGrid(float x, float y, float z, const char* xy_units, const char* z_units)
-// COMMENT: {8/4/2009 5:00:03 PM}{
-// COMMENT: {8/4/2009 5:00:03 PM}	TCHAR buffer[80];
-// COMMENT: {8/4/2009 5:00:03 PM}	::_sntprintf(buffer, 80, _T("Grid: %6.2f %s, %6.2f %s, %6.2f %s"), x, xy_units, y, xy_units, z, z_units);
-// COMMENT: {8/4/2009 5:00:03 PM}	if (::_tcsstr(buffer, _T("#")) == NULL)
-// COMMENT: {8/4/2009 5:00:03 PM}	{
-// COMMENT: {8/4/2009 5:00:03 PM}		m_wndStatusBar.SetPaneText(2, buffer);
-// COMMENT: {8/4/2009 5:00:03 PM}	}
-// COMMENT: {8/4/2009 5:00:03 PM}// COMMENT: {8/3/2009 7:26:45 PM}	this->UpdateMap(x, y, z, xy_units, z_units);
-// COMMENT: {8/4/2009 5:00:03 PM}#ifdef _DEBUG
-// COMMENT: {8/4/2009 5:00:03 PM}	/*
-// COMMENT: {8/4/2009 5:00:03 PM}	int depth = afxDump.GetDepth();
-// COMMENT: {8/4/2009 5:00:03 PM}	afxDump.SetDepth(1);
-// COMMENT: {8/4/2009 5:00:03 PM}	afxDump << this->m_wndStatusBar;
-// COMMENT: {8/4/2009 5:00:03 PM}	afxDump.SetDepth(depth);
-// COMMENT: {8/4/2009 5:00:03 PM}	*/
-// COMMENT: {8/4/2009 5:00:03 PM}#endif
-// COMMENT: {8/4/2009 5:00:03 PM}}
-
 void CMainFrame::UpdateGrid(double x, double y, double z, const char* xy_units, const char* z_units)
 {
 	TCHAR buffer[80];
@@ -349,27 +330,7 @@ void CMainFrame::UpdateGrid(double x, double y, double z, const char* xy_units, 
 	{
 		m_wndStatusBar.SetPaneText(2, buffer);
 	}
-// COMMENT: {8/3/2009 7:26:45 PM}	this->UpdateMap(x, y, z, xy_units, z_units);
-#ifdef _DEBUG
-	/*
-	int depth = afxDump.GetDepth();
-	afxDump.SetDepth(1);
-	afxDump << this->m_wndStatusBar;
-	afxDump.SetDepth(depth);
-	*/
-#endif
 }
-
-
-// COMMENT: {8/4/2009 4:57:45 PM}void CMainFrame::UpdateMap(float x, float y, float z, const char* xy_units, const char* z_units)
-// COMMENT: {8/4/2009 4:57:45 PM}{
-// COMMENT: {8/4/2009 4:57:45 PM}	TCHAR buffer[80];
-// COMMENT: {8/4/2009 4:57:45 PM}	::_sntprintf(buffer, 80, _T("Map: %6.2f %s, %6.2f %s, %6.2f %s"), x, xy_units, y, xy_units, z, z_units);
-// COMMENT: {8/4/2009 4:57:45 PM}	if (::_tcsstr(buffer, _T("#")) == NULL)
-// COMMENT: {8/4/2009 4:57:45 PM}	{
-// COMMENT: {8/4/2009 4:57:45 PM}		m_wndStatusBar.SetPaneText(3, buffer);
-// COMMENT: {8/4/2009 4:57:45 PM}	}
-// COMMENT: {8/4/2009 4:57:45 PM}}
 
 void CMainFrame::UpdateMap(double x, double y, double z, const char* xy_units, const char* z_units)
 {
@@ -503,6 +464,8 @@ void CMainFrame::OnUpdateCoorIndicator(CCmdUI *pCmdUI)
 	pCmdUI->Enable(TRUE);
 	ASSERT(pCmdUI->m_bEnableChanged);
 }
+
+#define TOGGLE_VIEW
 
 void CMainFrame::OnViewProperiesview()
 {
