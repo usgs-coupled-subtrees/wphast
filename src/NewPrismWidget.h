@@ -1,6 +1,8 @@
 #pragma once
 
 #include <vtk3DWidget.h>
+#include "WPhastDoc.h"
+#include "Units.h"
 
 class vtkCursor3D;
 class vtkPolyDataMapper;
@@ -8,6 +10,8 @@ class vtkActor;
 class vtkPoints;
 class vtkCellArray;
 class vtkPolyData;
+class Prism;
+class CGridKeyword;
 
 class CNewPrismWidget : public vtk3DWidget
 {
@@ -24,6 +28,12 @@ public:
 	virtual void SetEnabled(int);
 	virtual void PlaceWidget(double bounds[6]);
 	vtkPoints* GetPoints(void) { return Points; };
+
+	Prism* GetPrism();
+
+	void SetGridKeyword(const CGridKeyword& gridKeyword, const CUnits& units);
+	void SetCoordinateMode(CWPhastDoc::CoordinateState mode);
+	void SetScale(double x, double y, double z);
 
 #if defined(_MFC_VER)
 	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
@@ -71,6 +81,13 @@ protected:
 	double                FixedPlanePoint[3];
 	int                   FixedPlane;  // [0-5]
 	int                   FixedCoord;  // [0-2]
+
+	// coordinate system vars
+	double                       GridOrigin[3];
+	double                       GridAngle;
+	double                       GeometryScale[3];
+	CUnits                       Units;
+	CWPhastDoc::CoordinateState  CoordinateMode;
 
 	// Double click parameters
 	int   NumberOfClicks;

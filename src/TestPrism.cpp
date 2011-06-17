@@ -366,5 +366,38 @@ void TestPrism::PolygonIntersectsSelf(void)
 	pts16a.push_back(Point(0,  3, 0));
 	pts16a.push_back(Point(1,  0, 0));
 	CPPUNIT_ASSERT(Prism::Polygon_intersects_self(pts16a));
+}
 
+void TestPrism::TestPointsCtor(void)
+{
+	std::vector< Point > pts;
+	pts.push_back(Point(0, 0, 0));
+	pts.push_back(Point(1, 0, 0));
+	pts.push_back(Point(1, 1, 0));
+	pts.push_back(Point(0, 1, 0));
+
+	std::ostringstream oss;
+	oss.precision(DBL_DIG);
+	oss << "-perimeter POINTS grid" << std::endl;
+
+	std::vector<Point>::iterator it = pts.begin();
+	for (; it != pts.end(); ++it)
+	{
+		double *pt = (*it).get_coord();
+		oss << pt[0] << " ";
+		oss << pt[1] << " ";
+		oss << pt[2] << std::endl;
+	}
+
+	std::istringstream iss(oss.str());
+	Prism pr;
+	CPPUNIT_ASSERT(pr.Read(iss));
+	pr.bottom.Set_coordinate_system(PHAST_Transform::GRID);
+	pr.top.Set_coordinate_system(PHAST_Transform::GRID);
+	pr.bottom.Set_user_coordinate_system(PHAST_Transform::GRID);
+	pr.top.Set_user_coordinate_system(PHAST_Transform::GRID);
+
+	Prism pc(pts);
+
+	CPPUNIT_ASSERT(pr == pc);
 }

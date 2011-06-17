@@ -13,6 +13,7 @@ class TestPrism : public CppUnit::TestFixture
 	CPPUNIT_TEST( testCopyCtor );
 	CPPUNIT_TEST( timeMemDebug );
 	CPPUNIT_TEST( PolygonIntersectsSelf );
+	CPPUNIT_TEST( TestPointsCtor );
 	CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -24,4 +25,5 @@ protected:
 	void testCopyCtor(void);
 	void timeMemDebug(void);
 	void PolygonIntersectsSelf(void);
+	void TestPointsCtor(void);
 };

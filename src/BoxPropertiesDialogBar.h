@@ -192,6 +192,7 @@ protected:
 	void OnChangeCoorSysWell(void);
 	void OnChangeCoorSysDrain(void);
 	void OnChangeCoorSysRiver(void);
+	void OnChangeCoorSysPrism(void);
 
 	void OnBnClickedAddPoint(void);
 	void OnBnClickedDeletePoint(void);

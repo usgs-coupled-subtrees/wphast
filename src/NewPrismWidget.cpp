@@ -5,6 +5,8 @@
 #include "Resource.h"  // IDC_NULL
 #include <sstream>     // std::ostringstream
 #include <vtkLine.h>
+#include "srcinput/Prism.h"
+#include "GridKeyword.h"
 
 #if defined(USE_INTRINSIC)
 #pragma intrinsic(fabs) // using this inlines fabs and is ~ 4x faster
@@ -29,7 +31,15 @@ CNewPrismWidget::CNewPrismWidget(void)
 , OutlineMapper(0)
 , OutlineActor(0)
 , NumberOfClicks(0)
+, GridAngle(0)
+, CoordinateMode(CWPhastDoc::GridMode)
 {
+	for (int i = 0; i < 3; ++i)
+	{
+		this->GridOrigin[i]    = 0;
+		this->GeometryScale[i] = 0;
+	}
+
 	ASSERT(this->EventCallbackCommand);
 	this->EventCallbackCommand->SetCallback(CNewPrismWidget::ProcessEvents);
 
@@ -587,4 +597,119 @@ void CNewPrismWidget::EndNew(void)
 	//
 	this->EndInteraction();
 	this->InvokeEvent(vtkCommand::EndInteractionEvent, NULL);
+}
+
+void CNewPrismWidget::SetGridKeyword(const CGridKeyword& gridKeyword, const CUnits& units)
+{
+	// set up for transform
+	this->GridAngle     = gridKeyword.m_grid_angle;
+	this->GridOrigin[0] = gridKeyword.m_grid_origin[0];
+	this->GridOrigin[1] = gridKeyword.m_grid_origin[1];
+	this->GridOrigin[2] = gridKeyword.m_grid_origin[2];
+	this->Units         = units;
+}
+
+void CNewPrismWidget::SetScale(double x, double y, double z)
+{
+	this->GeometryScale[0] = x;
+	this->GeometryScale[1] = y;
+	this->GeometryScale[2] = z;
+}
+
+void CNewPrismWidget::SetCoordinateMode(CWPhastDoc::CoordinateState mode)
+{
+	this->CoordinateMode = mode;
+
+	if (mode == CWPhastDoc::GridMode)
+	{
+		this->Cursor3DActor->SetOrientation(0, 0, 0);
+	}
+	else if (mode == CWPhastDoc::MapMode)
+	{
+		this->Cursor3DActor->SetOrientation(0, 0, -this->GridAngle);
+	}
+	else
+	{
+		ASSERT(FALSE);
+	}
+}
+
+Prism* CNewPrismWidget::GetPrism(void)
+{
+	if (this->CoordinateMode == CWPhastDoc::GridMode)
+	{
+		double pt[3];
+		std::vector< Point > pts;
+		vtkPoints *points = this->GetPoints();
+		for (vtkIdType i = 0; i < points->GetNumberOfPoints(); i+=2)
+		{
+			//double *pt = points->GetPoint(i);
+			points->GetPoint(i, pt);
+			pt[0] = pt[0] / this->GeometryScale[0] / this->Units.horizontal.input_to_si;
+			pt[1] = pt[1] / this->GeometryScale[0] / this->Units.horizontal.input_to_si;
+			pt[2] = 0.;
+			pts.push_back(Point(pt[0], pt[1], pt[1]));
+		}
+		Prism *p = new Prism(pts, PHAST_Transform::GRID);
+		ASSERT(p->bottom.Get_user_source_type() == Data_source::NONE);
+		ASSERT(p->top.Get_user_source_type() == Data_source::NONE);
+		ASSERT(p->bottom.Get_user_coordinate_system() == PHAST_Transform::GRID);
+		ASSERT(p->top.Get_user_coordinate_system() == PHAST_Transform::GRID);
+		p->Tidy();
+		return p;
+	}
+	else if (this->CoordinateMode == CWPhastDoc::MapMode)
+	{
+		double pt[3];
+		std::vector< Point > pts;
+		vtkPoints *points = this->GetPoints();
+		for (vtkIdType i = 0; i < points->GetNumberOfPoints(); i+=2)
+		{
+			//double *pt = points->GetPoint(i);
+			points->GetPoint(i, pt);
+			pt[0] = pt[0] / this->GeometryScale[0] / this->Units.horizontal.input_to_si;
+			pt[1] = pt[1] / this->GeometryScale[0] / this->Units.horizontal.input_to_si;
+			pt[2] = 0.;
+			pts.push_back(Point(pt[0], pt[1], pt[1]));
+		}
+		Prism *p = new Prism(pts, PHAST_Transform::GRID);
+
+		// Set up transform
+		double scale_h = this->Units.map_horizontal.input_to_si / this->Units.horizontal.input_to_si;
+		double scale_v = this->Units.map_vertical.input_to_si / this->Units.vertical.input_to_si;
+		PHAST_Transform map2grid(
+			this->GridOrigin[0],
+			this->GridOrigin[1],
+			this->GridOrigin[2],
+			this->GridAngle,
+			scale_h,
+			scale_h,
+			scale_v);
+#if !defined(PERIMETER_ONLY)
+		p->perimeter.Convert_coordinates(PHAST_Transform::MAP, &map2grid);
+		p->perimeter.Set_user_coordinate_system(PHAST_Transform::MAP);
+		p->Tidy();
+		ASSERT(p->bottom.Get_user_source_type() == Data_source::NONE);
+		ASSERT(p->top.Get_user_source_type() == Data_source::NONE);
+		ASSERT(p->bottom.Get_user_coordinate_system() == PHAST_Transform::GRID);
+		ASSERT(p->top.Get_user_coordinate_system() == PHAST_Transform::GRID);
+#else
+		// THIS DOESN'T WORK YET (THE TOPS AND BOTTOMS AREN'T RIGHT WHEN
+		// MAP UNITS AREN'T THE SAME AS GRID UNITS
+		//
+		p->Tidy();
+		p->Convert_coordinates(PHAST_Transform::MAP, &map2grid);
+		p->perimeter.Set_user_coordinate_system(PHAST_Transform::MAP);
+		p->top.Set_user_coordinate_system(PHAST_Transform::MAP);
+		p->bottom.Set_user_coordinate_system(PHAST_Transform::MAP);
+#endif
+		return p;
+	}
+	else
+	{
+		ASSERT(FALSE);
+		Prism *p = new Prism;
+		p->Tidy();
+		return p;
+	}
 }

@@ -34,7 +34,7 @@
 
 TCPPUnit::TCPPUnit(void)
 {
-// COMMENT: {6/13/2011 9:02:40 PM}	this->RunUnitTests();
+	this->RunUnitTests();
 }
 
 TCPPUnit::~TCPPUnit(void)
@@ -70,22 +70,22 @@ void TCPPUnit::RunUnitTests(void)
 		double d1 = 0/z;
 #endif
 
-		runner.addTest(TestCPhastInput::suite());
-		runner.addTest(TestCZone::suite());
-		runner.addTest(TestCGrid::suite());
-		runner.addTest(TestPHAST_Transform::suite());
-		runner.addTest(TestCtime::suite());
-		runner.addTest(TestCBC::suite());
-		runner.addTest(TestCTimeControl::suite());
-		runner.addTest(TestCWPhastDoc::suite());
-		runner.addTest(TestCParser::suite());
-		runner.addTest(TestCPropertyTreeControlBar::suite());
-		runner.addTest(TestCUnits::suite());
-		runner.addTest(TestCPhastInput::suite());
+// COMMENT: {6/16/2011 6:19:18 PM}		runner.addTest(TestCPhastInput::suite());
+// COMMENT: {6/16/2011 6:19:18 PM}		runner.addTest(TestCZone::suite());
+// COMMENT: {6/16/2011 6:19:18 PM}		runner.addTest(TestCGrid::suite());
+// COMMENT: {6/16/2011 6:19:18 PM}		runner.addTest(TestPHAST_Transform::suite());
+// COMMENT: {6/16/2011 6:19:18 PM}		runner.addTest(TestCtime::suite());
+// COMMENT: {6/16/2011 6:19:18 PM}		runner.addTest(TestCBC::suite());
+// COMMENT: {6/16/2011 6:19:18 PM}		runner.addTest(TestCTimeControl::suite());
+// COMMENT: {6/16/2011 6:19:18 PM}		runner.addTest(TestCWPhastDoc::suite());
+// COMMENT: {6/16/2011 6:19:18 PM}		runner.addTest(TestCParser::suite());
+// COMMENT: {6/16/2011 6:19:18 PM}		runner.addTest(TestCPropertyTreeControlBar::suite());
+// COMMENT: {6/16/2011 6:19:18 PM}		runner.addTest(TestCUnits::suite());
+// COMMENT: {6/16/2011 6:19:18 PM}		runner.addTest(TestCPhastInput::suite());
 		runner.addTest(TestPrism::suite());
-		runner.addTest(TestHDFSerializePolyData::suite());
-		runner.addTest(TestUniqueMap::suite());
-		runner.addTest(TestCproperty::suite());
+// COMMENT: {6/16/2011 6:19:22 PM}		runner.addTest(TestHDFSerializePolyData::suite());
+// COMMENT: {6/16/2011 6:19:22 PM}		runner.addTest(TestUniqueMap::suite());
+// COMMENT: {6/16/2011 6:19:22 PM}		runner.addTest(TestCproperty::suite());
 
 		/**********************************************************
 		// the following require user input

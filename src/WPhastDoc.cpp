@@ -6688,6 +6688,14 @@ void CWPhastDoc::BeginNewPrism()
 			this->NewPrismWidget->SetProp3D(this->GetGridActor());
 			this->NewPrismWidget->AddObserver(vtkCommand::EndInteractionEvent, this->NewPrismCallbackCommand);
 
+			// set up for gridkeyword
+			CGridKeyword gridKeyword;
+			this->GetGridKeyword(gridKeyword);
+			const CUnits& units = this->GetUnits();
+			this->NewPrismWidget->SetGridKeyword(gridKeyword, units);
+			this->NewPrismWidget->SetScale(this->GetScale()[0], this->GetScale()[1], this->GetScale()[2]);
+			this->NewPrismWidget->SetCoordinateMode(this->GetCoordinateMode());
+
 			// enable widget
 			this->NewPrismWidget->SetEnabled(1);
 		}
@@ -6722,11 +6730,7 @@ void CWPhastDoc::NewPrismListener(vtkObject *caller, unsigned long eid, void *cl
 
 		if (eid == vtkCommand::EndInteractionEvent)
 		{
-			double* scale = self->GetScale();
-			const CUnits& units = self->GetUnits();
-
 			vtkPoints *points = self->NewPrismWidget->GetPoints();
-
 			if (points->GetNumberOfPoints() < 6)
 			{
 				::AfxMessageBox(_T("Perimeter must be defined by at least 3 points."));
@@ -6736,28 +6740,13 @@ void CWPhastDoc::NewPrismListener(vtkObject *caller, unsigned long eid, void *cl
 				return;
 			}
 
-			std::ostringstream oss;
-			oss.precision(DBL_DIG);
-			oss << "-perimeter POINTS grid" << std::endl;
-			double pt[3];
-			for (vtkIdType i = 0; i < points->GetNumberOfPoints(); i+=2)
-			{
-				//double *pt = points->GetPoint(i);
-				points->GetPoint(i, pt);
-				oss << pt[0] / scale[0] / units.horizontal.input_to_si << " ";
-				oss << pt[1] / scale[1] / units.horizontal.input_to_si << " ";
-				oss << "0.0" << std::endl;
-			}
-			TRACE(oss.str().c_str());
-			std::istringstream iss(oss.str());
-
-			// setup domain
+			// setup domain (reqd before call to Prism::Tidy)
 			self->GetDefaultZone(::domain);
 
-			Prism *p = new Prism();
-			if (p->Read(iss))
+			if (Prism *p = self->NewPrismWidget->GetPrism())
 			{
-				p->Tidy();
+				// DO NOT CALL Tidy here
+				//p->Tidy();
 
 				// get type of zone
 				//
@@ -7546,7 +7535,10 @@ void CWPhastDoc::SetCoordinateMode(CWPhastDoc::CoordinateState mode)
 	{
 		this->NewWedgeWidget->SetCoordinateMode(mode);
 	}
-
+	if (this->NewPrismWidget && this->NewPrismWidget->GetEnabled())
+	{
+		this->NewPrismWidget->SetCoordinateMode(mode);
+	}
 	if (this->NewDrainActor && this->NewDrainActor->GetEnabled())
 	{
 		this->NewDrainActor->SetCoordinateMode(mode);
