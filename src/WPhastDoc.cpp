@@ -6028,6 +6028,7 @@ void CWPhastDoc::BeginNewZone()
 
 			// create widget
 			this->NewZoneWidget = CNewZoneWidget::New();
+			this->NewZoneWidget->SetCursorColor(this->ZoneCursorColor);
 			this->NewZoneWidget->SetInteractor(pView->GetInteractor());
 			this->NewZoneWidget->SetProp3D(this->GetGridActor());
 
@@ -6243,6 +6244,24 @@ void CWPhastDoc::SetDisplayColors(const CDisplayColors& dc)
 		pView->SetBackground(this->DisplayColors.crBackground);
 	}
 
+	// zone cursors
+	this->ZoneCursorColor[0] = (double)GetRValue(this->DisplayColors.crZoneCursor)/255.;
+	this->ZoneCursorColor[1] = (double)GetGValue(this->DisplayColors.crZoneCursor)/255.;
+	this->ZoneCursorColor[2] = (double)GetBValue(this->DisplayColors.crZoneCursor)/255.;
+
+	if (this->NewPrismWidget)
+	{
+		this->NewPrismWidget->SetCursorColor(this->ZoneCursorColor);
+	}
+	if (this->NewWedgeWidget)
+	{
+		this->NewWedgeWidget->SetCursorColor(this->ZoneCursorColor);
+	}
+	if (this->NewZoneWidget)
+	{
+		this->NewZoneWidget->SetCursorColor(this->ZoneCursorColor);
+	}
+
 	// refresh screen
 	//
 	this->UpdateAllViews(0);
@@ -6295,6 +6314,7 @@ void CWPhastDoc::BeginNewWedge()
 
 			// create widget
 			this->NewWedgeWidget = CNewWedgeWidget::New();
+			this->NewWedgeWidget->SetCursorColor(this->ZoneCursorColor);
 			this->NewWedgeWidget->SetInteractor(pView->GetInteractor());
 			this->NewWedgeWidget->SetProp3D(this->GetGridActor());
 
@@ -6684,6 +6704,7 @@ void CWPhastDoc::BeginNewPrism()
 
 			// create widget
 			this->NewPrismWidget = CNewPrismWidget::New();
+			this->NewPrismWidget->SetCursorColor(this->ZoneCursorColor);
 			this->NewPrismWidget->SetInteractor(pView->GetInteractor());
 			this->NewPrismWidget->SetProp3D(this->GetGridActor());
 			this->NewPrismWidget->AddObserver(vtkCommand::EndInteractionEvent, this->NewPrismCallbackCommand);

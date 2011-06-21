@@ -918,3 +918,8 @@ Wedge* CNewWedgeWidget::GetWedge()
 		return new Wedge(&zone, srcWedgeSource::GetWedgeOrientationString(this->GetChopType()), PHAST_Transform::GRID);
 	}
 }
+
+void CNewWedgeWidget::SetCursorColor(double r, double g, double b)
+{
+	this->Cursor3DActor->GetProperty()->SetColor(r, g, b);
+}

@@ -713,3 +713,8 @@ Prism* CNewPrismWidget::GetPrism(void)
 		return p;
 	}
 }
+
+void CNewPrismWidget::SetCursorColor(double r, double g, double b)
+{
+	this->Cursor3DActor->GetProperty()->SetColor(r, g, b);
+}

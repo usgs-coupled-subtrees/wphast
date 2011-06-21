@@ -634,3 +634,8 @@ Cube* CNewZoneWidget::GetCube()
 		return new Cube(PHAST_Transform::GRID);
 	}
 }
+
+void CNewZoneWidget::SetCursorColor(double r, double g, double b)
+{
+	this->Cursor3DActor->GetProperty()->SetColor(r, g, b);
+}

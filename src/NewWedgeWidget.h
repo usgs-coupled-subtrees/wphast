@@ -36,6 +36,9 @@ public:
 	void SetCoordinateMode(CWPhastDoc::CoordinateState mode);
 	void SetScale(double x, double y, double z);
 
+	void SetCursorColor(double r, double g, double b);
+	void SetCursorColor(double a[3]) { this->SetCursorColor(a[0], a[1], a[2]); };
+
 	Wedge* GetWedge();
 
 #ifdef WIN32

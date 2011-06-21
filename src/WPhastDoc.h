@@ -307,6 +307,7 @@ protected:
 
 	// colors
 	CDisplayColors DisplayColors;
+	double         ZoneCursorColor[3];
 
 	// grid keyboard accelerator
 	HACCEL hGridAccel;

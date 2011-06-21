@@ -36,4 +36,5 @@ protected:
     CColourPickerMultiMon m_wellColorPicker;
 	CColourPickerMultiMon m_zoneFlowColorPicker;
     CColourPickerMultiMon m_bgColorPicker;
+    CColourPickerMultiMon m_zoneCursorColorPicker;
 };

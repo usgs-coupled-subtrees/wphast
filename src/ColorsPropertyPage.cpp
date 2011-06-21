@@ -44,7 +44,10 @@ CColorsPropertyPage::CColorsPropertyPage()
 	this->m_zoneFlowColorPicker.SetDefaultText(_T(""));
 
 	// Background (black)
-	this->m_bgColorPicker.SetDefaultText(_T(""));	
+	this->m_bgColorPicker.SetDefaultText(_T(""));
+
+	// Zone cursor (white)
+    this->m_zoneCursorColorPicker.SetDefaultText(_T(""));
 }
 
 CColorsPropertyPage::~CColorsPropertyPage()
@@ -98,6 +101,10 @@ void CColorsPropertyPage::DoDataExchange(CDataExchange* pDX)
 	// Background
     DDX_Control(pDX, IDC_BG_BTN, m_bgColorPicker);
     DDX_ColourPicker(pDX, IDC_BG_BTN, m_colors.crBackground);
+
+	// Zone cursor (white)
+    DDX_Control(pDX, IDC_ZONE_CURSOR_BTN, m_zoneCursorColorPicker);
+    DDX_ColourPicker(pDX, IDC_ZONE_CURSOR_BTN, m_colors.crZoneCursor);
 }
 
 

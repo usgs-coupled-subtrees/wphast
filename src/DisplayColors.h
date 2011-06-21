@@ -18,6 +18,7 @@ public:
     COLORREF crWell;
 	COLORREF crZoneFlowRate;
     COLORREF crBackground;
+    COLORREF crZoneCursor;
 
 	virtual void Serialize(bool bStoring, hid_t loc_id);
 
