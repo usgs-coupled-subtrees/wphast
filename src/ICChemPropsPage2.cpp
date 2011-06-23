@@ -69,8 +69,8 @@ void CICChemPropsPage2::DoDataExchange(CDataExchange* pDX)
 		// setup tree
 		this->SolutionProperty.treeitem          = this->TreeCtrl.InsertItem(PSZ_SOLUTION,           TVI_ROOT, TVI_LAST);
 		this->EquilibriumPhasesProperty.treeitem = this->TreeCtrl.InsertItem(PSZ_EQUILIBRIUM_PHASES, TVI_ROOT, TVI_LAST);
-		this->SurfaceProperty.treeitem           = this->TreeCtrl.InsertItem(PSZ_EXCHANGE,           TVI_ROOT, TVI_LAST);
-		this->ExchangeProperty.treeitem          = this->TreeCtrl.InsertItem(PSZ_SURFACE,            TVI_ROOT, TVI_LAST);
+		this->ExchangeProperty.treeitem          = this->TreeCtrl.InsertItem(PSZ_EXCHANGE,           TVI_ROOT, TVI_LAST);
+		this->SurfaceProperty.treeitem           = this->TreeCtrl.InsertItem(PSZ_SURFACE,            TVI_ROOT, TVI_LAST);
 		this->GasPhaseProperty.treeitem          = this->TreeCtrl.InsertItem(PSZ_GAS_PHASE,          TVI_ROOT, TVI_LAST);
 		this->SolidSolutionsProperty.treeitem    = this->TreeCtrl.InsertItem(PSZ_SOLID_SOLUTIONS,    TVI_ROOT, TVI_LAST);
 		this->KineticsProperty.treeitem          = this->TreeCtrl.InsertItem(PSZ_KINETICS,           TVI_ROOT, TVI_LAST);
