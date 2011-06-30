@@ -414,7 +414,6 @@
 #define IDS_IMPORT_PHAST_TRANS_442      442
 #define IDD_UNITS5_PROPPAGE             442
 #define IDD_PROPS_ZONEPROPS             443
-#define IDS_STRING443                   443
 #define ID_INDICATOR_COOR               443
 #define IDD_PROPS_ZONEPROPS1            444
 #define IDC_EDIT_X                      1000
@@ -865,6 +864,8 @@
 #define IDC_STATIC_WELL_Y               1423
 #define IDC_DRAIN_BTN                   1423
 #define IDC_EDIT_WELL_X                 1424
+#define IDC_BG_BTN2                     1424
+#define IDC_ZONE_CURSOR_BTN             1424
 #define IDC_EDIT_WELL_Y                 1425
 #define IDC_STATIC_LOC                  1426
 #define IDC_GRID_RIVER                  1427
