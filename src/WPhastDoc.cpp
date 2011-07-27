@@ -2521,32 +2521,6 @@ void CWPhastDoc::OnCloseDocument()
 	delete this->m_pGeometrySheet;
 	this->m_pGeometrySheet = 0;
 
-// COMMENT: {6/7/2011 3:04:08 PM}	//{{HACK
-// COMMENT: {6/7/2011 3:04:08 PM}	// this is used to avoid a bug that occurs when a box zone is converted
-// COMMENT: {6/7/2011 3:04:08 PM}	// to a prism and the app is closed causing a vtk reference crash
-// COMMENT: {6/7/2011 3:04:08 PM}	if (this->GetPropertyTreeControlBar())
-// COMMENT: {6/7/2011 3:04:08 PM}	{
-// COMMENT: {6/7/2011 3:04:08 PM}		CTreeCtrlNode parentNode = this->GetPropertyTreeControlBar()->GetMediaNode();
-// COMMENT: {6/7/2011 3:04:08 PM}		if (parentNode)
-// COMMENT: {6/7/2011 3:04:08 PM}		{
-// COMMENT: {6/7/2011 3:04:08 PM}			int nCount = parentNode.GetChildCount();
-// COMMENT: {6/7/2011 3:04:08 PM}			for (int i = 0; i < nCount; ++i)
-// COMMENT: {6/7/2011 3:04:08 PM}			{
-// COMMENT: {6/7/2011 3:04:08 PM}				if (CZoneActor *pActor = CZoneActor::SafeDownCast((vtkObject*)parentNode.GetChildAt(i).GetData()))
-// COMMENT: {6/7/2011 3:04:08 PM}				{
-// COMMENT: {6/7/2011 3:04:08 PM}					if (pActor->GetPolyhedronType() == Polyhedron::PRISM)
-// COMMENT: {6/7/2011 3:04:08 PM}					{
-// COMMENT: {6/7/2011 3:04:08 PM}						struct zone z;
-// COMMENT: {6/7/2011 3:04:08 PM}						Cube c(&z);
-// COMMENT: {6/7/2011 3:04:08 PM}						CUnits u;
-// COMMENT: {6/7/2011 3:04:08 PM}						pActor->SetPolyhedron(&c, u);
-// COMMENT: {6/7/2011 3:04:08 PM}					}
-// COMMENT: {6/7/2011 3:04:08 PM}				}
-// COMMENT: {6/7/2011 3:04:08 PM}			}
-// COMMENT: {6/7/2011 3:04:08 PM}		}
-// COMMENT: {6/7/2011 3:04:08 PM}	}
-// COMMENT: {6/7/2011 3:04:08 PM}	//}}HACK
-
 	CDocument::OnCloseDocument();
 }
 
