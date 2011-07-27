@@ -23,13 +23,37 @@ CZoneSetPolyAction::CZoneSetPolyAction(CWPhastView* pView, CZoneActor* pZoneActo
 	switch (this->NewPoly->get_type())
 	{
 	case Polyhedron::CUBE:
-		this->NewName = pView->GetDocument()->GetNextZoneName();
+		if (this->ZoneActor->GetPolyhedronType() == Polyhedron::CUBE)
+		{
+			this->NewName = this->ZoneActor->GetName();
+		}
+		else
+		{
+			this->NewName = pView->GetDocument()->GetNextZoneName();
+		}
 		break;
 	case Polyhedron::PRISM:
-		this->NewName = pView->GetDocument()->GetNextPrismName();
+		if (this->ZoneActor->GetPolyhedronType() == Polyhedron::PRISM)
+		{
+			this->NewName = this->ZoneActor->GetName();
+		}
+		else
+		{
+			this->NewName = pView->GetDocument()->GetNextPrismName();
+		}
 		break;
 	case Polyhedron::WEDGE:
-		this->NewName = pView->GetDocument()->GetNextWedgeName();
+		if (this->ZoneActor->GetPolyhedronType() == Polyhedron::WEDGE)
+		{
+			this->NewName = this->ZoneActor->GetName();
+		}
+		else
+		{
+			this->NewName = pView->GetDocument()->GetNextWedgeName();
+		}
+		break;
+	default:
+		ASSERT(FALSE);
 		break;
 	}
 
