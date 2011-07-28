@@ -123,9 +123,10 @@ protected:
 	double m_dConstant[3];
 	CString m_sArcraster[3];
 	CString m_sShapefile[3];
-	CString m_sXYZ[3];
 	int m_nShapeAttribute[3];
+	CString m_sXYZ[3];
 	std::list<Point> m_listPoint[3];
+	PHAST_Transform::COORDINATE_SYSTEM m_coordinate_system;
 
 	// river data
 	//

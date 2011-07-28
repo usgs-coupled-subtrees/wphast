@@ -656,6 +656,13 @@ Prism* CNewPrismWidget::GetPrism(void)
 		ASSERT(p->bottom.Get_user_coordinate_system() == PHAST_Transform::GRID);
 		ASSERT(p->top.Get_user_coordinate_system() == PHAST_Transform::GRID);
 		p->Tidy();
+#ifdef _DEBUG
+		{
+			std::ostringstream oss;
+			oss << (*p) << std::endl;
+			TRACE(oss.str().c_str());
+		}
+#endif
 		return p;
 	}
 	else if (this->CoordinateMode == CWPhastDoc::MapMode)
@@ -688,6 +695,9 @@ Prism* CNewPrismWidget::GetPrism(void)
 #if !defined(PERIMETER_ONLY)
 		p->perimeter.Convert_coordinates(PHAST_Transform::MAP, &map2grid);
 		p->perimeter.Set_user_coordinate_system(PHAST_Transform::MAP);
+		//{{
+		p->perimeter.Set_user_points(p->perimeter.Get_points());
+		//}}
 		p->Tidy();
 		ASSERT(p->bottom.Get_user_source_type() == Data_source::NONE);
 		ASSERT(p->top.Get_user_source_type() == Data_source::NONE);
@@ -703,6 +713,13 @@ Prism* CNewPrismWidget::GetPrism(void)
 		p->top.Set_user_coordinate_system(PHAST_Transform::MAP);
 		p->bottom.Set_user_coordinate_system(PHAST_Transform::MAP);
 #endif
+#ifdef _DEBUG
+		{
+			std::ostringstream oss;
+			oss << (*p) << std::endl;
+			TRACE(oss.str().c_str());
+		}
+#endif
 		return p;
 	}
 	else
@@ -710,6 +727,13 @@ Prism* CNewPrismWidget::GetPrism(void)
 		ASSERT(FALSE);
 		Prism *p = new Prism;
 		p->Tidy();
+#ifdef _DEBUG
+		{
+			std::ostringstream oss;
+			oss << (*p) << std::endl;
+			TRACE(oss.str().c_str());
+		}
+#endif
 		return p;
 	}
 }

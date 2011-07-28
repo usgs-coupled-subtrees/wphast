@@ -340,6 +340,7 @@ BEGIN
         MENUITEM "Cu&t\tCtrl+X",                57635
         MENUITEM "&Copy\tCtrl+C",               57634
         MENUITEM "&Paste\tCtrl+V",              57637
+        MENUITEM "&Delete\tDel",                ID_EDIT_CLEAR
         MENUITEM SEPARATOR
         MENUITEM "Properties\tF2",              ID_EDIT_PROPERTIES
     END
@@ -4873,7 +4874,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    ID_EDIT_CLEAR           "Erase the selection\nErase"
+    ID_EDIT_CLEAR           "Delete the selection\nDelete"
     ID_EDIT_CLEAR_ALL       "Erase everything\nErase All"
     ID_EDIT_COPY            "Copy the selection and put it on the Clipboard\nCopy"
     ID_EDIT_CUT             "Cut the selection and put it on the Clipboard\nCut"

@@ -33,14 +33,9 @@ public:
 	CPropertyTreeControlBar(void);
 	virtual ~CPropertyTreeControlBar(void);
 
-	// virtual void Serialize(CArchive& ar);
 	virtual void DeleteContents();
 	virtual void Update(IObserver* pSender = 0, LPARAM lHint = 0L, CObject* pHint = 0, vtkObject* pObject = 0);
 
-	// vtkPropCollection* GetPropCollection() const;
-	// void SetGrid(grid* x, grid* y, grid* z);
-	// float* GetGridBounds();
-	// void SetScale(float x, float y, float z);
 protected:
 
 	CTreeCtrlEx     m_wndTree;
@@ -54,7 +49,6 @@ protected:
 	CTreeCtrlNode   m_nodeMedia;
 	CTreeCtrlNode   m_nodeUnits;
 	CTreeCtrlNode   m_nodeFlowOnly;
-// COMMENT: {6/22/2007 4:26:13 PM}	CTreeCtrlNode   m_nodeTimeControl;
 	CTreeCtrlNode   m_nodeTimeControl2;
 	CTreeCtrlNode   m_nodeSP1;
 	CTreeCtrlNode   m_nodePrintInput;
@@ -80,6 +74,8 @@ protected:
 	afx_msg void OnNMDblClk(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnKeyDown(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnBeginDrag(NMHDR* pNMHDR, LRESULT* pResult);
+
+	afx_msg void OnNMRClk(NMHDR* pNMHDR, LRESULT* pResult);
 
 public:
 	CWPhastDoc* GetDocument(void)const;
@@ -138,10 +134,7 @@ public:
 
 	void SelectGridNode(void);
 	void SetGridActor(CGridActor* pGridActor);
-	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
-	afx_msg void OnContextMenu(CWnd* /*pWnd*/, CPoint /*point*/);
-
-// COMMENT: {6/22/2007 3:06:41 PM}	void EditSelection(LRESULT* pResult, BOOL bJustCheckIfEditable = FALSE);
+	afx_msg void OnContextMenu(CWnd* /*pWnd*/, CPoint point);
 
 protected:
 	friend CPropTreeOleDropTarget;
@@ -151,7 +144,6 @@ protected:
 	CLIPFORMAT m_cfPID;
 
 	bool IsNodeEditable(CTreeCtrlNode &editNode, bool bDoEdit);
-// COMMENT: {8/14/2008 7:07:05 PM}	bool IsNodeDraggable(CTreeCtrlNode dragNode, COleDataSource &oleDataSource);
 	bool IsNodeDraggable(CTreeCtrlNode dragNode, COleDataSource *pOleDataSource);
 	bool IsNodeCopyable(CTreeCtrlNode copyNode, COleDataSource *pOleDataSource);
 	bool IsNodePasteable(CTreeCtrlNode pasteNode, bool bDoPaste);

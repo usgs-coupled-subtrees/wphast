@@ -864,7 +864,6 @@
 #define IDC_STATIC_WELL_Y               1423
 #define IDC_DRAIN_BTN                   1423
 #define IDC_EDIT_WELL_X                 1424
-#define IDC_BG_BTN2                     1424
 #define IDC_ZONE_CURSOR_BTN             1424
 #define IDC_EDIT_WELL_Y                 1425
 #define IDC_STATIC_LOC                  1426
@@ -1027,6 +1026,7 @@
 #define ID_TOOLS_NEWDOMAIN              32877
 #define ID_MODE_GRID                    32879
 #define ID_MODE_MAP                     32880
+#define ID_EDIT_DELETE                  32881
 #define IDW_CONTROLBAR_TREE             59424
 #define IDW_CONTROLBAR_BOXPROPS         59425
 #define IDC_VALUE_STATIC                65535
@@ -1036,7 +1036,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        441
-#define _APS_NEXT_COMMAND_VALUE         32881
+#define _APS_NEXT_COMMAND_VALUE         32882
 #define _APS_NEXT_CONTROL_VALUE         1539
 #define _APS_NEXT_SYMED_VALUE           127
 #endif

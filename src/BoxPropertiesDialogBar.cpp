@@ -482,7 +482,7 @@ void CBoxPropertiesDialogBar::Set(CWPhastView* pView, vtkProp3D* pProp3D, const 
 
 	if (CZoneActor* pZone = this->m_pProp3D ? CZoneActor::SafeDownCast(this->m_pProp3D) : NULL)
 	{
-		float bounds[6];
+		double bounds[6];
 		pZone->GetUserBounds(bounds);
 
 		this->m_XMin = bounds[0];
@@ -656,7 +656,6 @@ void CBoxPropertiesDialogBar::DoDataExchange(CDataExchange* pDX)
 		DDX_Text(pDX, IDC_EDIT_YMAX, m_YMax);
 		DDX_Text(pDX, IDC_EDIT_ZMAX, m_ZMax);
 
-		// Use map coordinates
 		int state = BST_UNCHECKED;
 		switch (this->m_xy_coordinate_system_user)
 		{
@@ -675,6 +674,7 @@ void CBoxPropertiesDialogBar::DoDataExchange(CDataExchange* pDX)
 			ASSERT(FALSE);
 			break;
 		}
+		// Use map coordinates
 		DDX_Check(pDX, IDC_CHECK_USE_MAP, state);
 		if (pDX->m_bSaveAndValidate)
 		{
@@ -915,6 +915,24 @@ void CBoxPropertiesDialogBar::DoDataExchange(CDataExchange* pDX)
 		DDX_Text(pDX, IDC_Y_UNITS_STATIC2, m_strHorizontalUnits);
 		DDX_Text(pDX, IDC_Z_UNITS_STATIC2, m_strVerticalUnits);
 
+		// Use map coordinates
+		switch (this->m_xy_coordinate_system_user)
+		{
+		case PHAST_Transform::MAP:
+			DDX_Text(pDX, IDC_X_UNITS_STATIC2, m_strMapHorizontalUnits);
+			DDX_Text(pDX, IDC_Y_UNITS_STATIC2, m_strMapHorizontalUnits);
+			DDX_Text(pDX, IDC_Z_UNITS_STATIC2, m_strMapVerticalUnits);
+			break;
+		case PHAST_Transform::GRID:
+			DDX_Text(pDX, IDC_X_UNITS_STATIC2, m_strHorizontalUnits);
+			DDX_Text(pDX, IDC_Y_UNITS_STATIC2, m_strHorizontalUnits);
+			DDX_Text(pDX, IDC_Z_UNITS_STATIC2, m_strVerticalUnits);
+			break;
+		default:
+			ASSERT(FALSE);
+			break;
+		}
+
 		switch (this->m_nOrientation)
 		{
 		case Wedge::X1:
@@ -1055,11 +1073,23 @@ void CBoxPropertiesDialogBar::DoDataExchangePoints(CDataExchange* pDX, T &type)
 	else
 	{
 		CString title_x(_T("X "));
-		title_x += this->m_strHorizontalUnits;
-		DDX_TextGridControl(pDX, IDC_GRID_RIVER, 0, 0, title_x);
-
 		CString title_y(_T("Y "));
-		title_y += this->m_strHorizontalUnits;
+
+		switch (type.coordinate_system)
+		{
+		case PHAST_Transform::MAP:
+			title_x += this->m_strMapHorizontalUnits;
+			title_y += this->m_strMapHorizontalUnits;
+			break;
+		case PHAST_Transform::GRID:
+			title_x += this->m_strHorizontalUnits;
+			title_y += this->m_strHorizontalUnits;
+			break;
+		default:
+			ASSERT(FALSE);
+			break;
+		}
+		DDX_TextGridControl(pDX, IDC_GRID_RIVER, 0, 0, title_x);
 		DDX_TextGridControl(pDX, IDC_GRID_RIVER, 0, 1, title_y);
 
 		std::list<CRiverPoint>::iterator iter = type.m_listPoints.begin();
@@ -1110,7 +1140,7 @@ void CBoxPropertiesDialogBar::OnApply()
 			case CBoxPropertiesDialogBar::BP_MIN_MAX:
 				if (CZoneActor* pZoneActor = this->m_pProp3D ? CZoneActor::SafeDownCast(this->m_pProp3D) : NULL)
 				{
-					float bounds[6];					
+					double bounds[6];					
 					pZoneActor->GetUserBounds(bounds);
 					if (bounds[0] != this->m_XMin || bounds[1] != this->m_XMax || bounds[2] != this->m_YMin || 
 						bounds[3] != this->m_YMax || bounds[4] != this->m_ZMin || bounds[5] != this->m_ZMax)
@@ -1204,7 +1234,7 @@ void CBoxPropertiesDialogBar::OnApply()
 			case CBoxPropertiesDialogBar::BP_WEDGE:
 				if (CZoneActor* pZoneActor = this->m_pProp3D ? CZoneActor::SafeDownCast(this->m_pProp3D) : NULL)
 				{
-					float bounds[6];					
+					double bounds[6];					
 					pZoneActor->GetUserBounds(bounds);
 					if (bounds[0] != this->m_XMin || bounds[1] != this->m_XMax || bounds[2] != this->m_YMin || 
 						bounds[3] != this->m_YMax || bounds[4] != this->m_ZMin || bounds[5] != this->m_ZMax)
@@ -2688,7 +2718,7 @@ void CBoxPropertiesDialogBar::UpdateApply()
 		case CBoxPropertiesDialogBar::BP_MIN_MAX:
 			if (CZoneActor* pZone = this->m_pProp3D ? CZoneActor::SafeDownCast(this->m_pProp3D) : NULL)
 			{
-				float bounds[6];
+				double bounds[6];
 				pZone->GetUserBounds(bounds);
 
 				static int aIDs[] = {
@@ -2834,7 +2864,7 @@ void CBoxPropertiesDialogBar::UpdateApply()
 		case CBoxPropertiesDialogBar::BP_WEDGE:
 			if (CZoneActor* pZone = this->m_pProp3D ? CZoneActor::SafeDownCast(this->m_pProp3D) : NULL)
 			{
-				float bounds[6];
+				double bounds[6];
 				pZone->GetUserBounds(bounds);
 
 				static int aIDs[] = {
@@ -3599,30 +3629,37 @@ void CBoxPropertiesDialogBar::UpdatePrism(CZoneActor *pZoneActor, bool bForceUpd
 		else
 #endif SAME_POINTS_AS_PERIMETER
 		{
+			const CUnits& units = this->m_pView->GetDocument()->GetUnits();
+			const CGridKeyword& gridKeyword = this->m_pView->GetDocument()->GetGridKeyword();
+			PHAST_Transform map2grid(
+				gridKeyword.m_grid_origin[0],
+				gridKeyword.m_grid_origin[1],
+				gridKeyword.m_grid_origin[2],
+				gridKeyword.m_grid_angle,
+				units.map_horizontal.input_to_si/units.horizontal.input_to_si,
+				units.map_horizontal.input_to_si/units.horizontal.input_to_si,
+				units.map_vertical.input_to_si/units.vertical.input_to_si
+				);
 			for (int i = 0; i < 3; ++i)
 			{
 				if (this->m_pds[i]->Get_source_type() == Data_source::POINTS)
 				{
-					std::vector<Point>::iterator it = this->m_pds[i]->Get_points().begin();
-					for (; it != this->m_pds[i]->Get_points().end(); ++it)
+					std::vector<Point>::iterator it = this->m_pds[i]->Get_user_points().begin();
+					for (; it != this->m_pds[i]->Get_user_points().end(); ++it)
 					{
 						Point p(*it);
 						this->m_listPoint[i].push_back(p);
 					}
 				}
-				else if (this->m_pds[i]->Get_source_type() == Data_source::NONE ||
-					this->m_pds[i]->Get_source_type() == Data_source::CONSTANT ||
-					this->m_pds[i]->Get_source_type() == Data_source::ARCRASTER
-					)
+				else if (this->m_pds[i]->Get_source_type() == Data_source::NONE)
 				{
-					zone *z = &defzone; // TODO when opening wphast file no bounding_box exists??
-					ASSERT(z->zone_defined);
+					ASSERT(defzone.zone_defined);
 					if (i == PRISM_TOP)
 					{
-						this->m_listPoint[i].push_back(Point(z->x1, z->y1, defzone.z2));
-						this->m_listPoint[i].push_back(Point(z->x2, z->y1, defzone.z2));
-						this->m_listPoint[i].push_back(Point(z->x2, z->y2, defzone.z2));
-						this->m_listPoint[i].push_back(Point(z->x1, z->y2, defzone.z2));
+						this->m_listPoint[i].push_back(Point(defzone.x1, defzone.y1, defzone.z2));
+						this->m_listPoint[i].push_back(Point(defzone.x2, defzone.y1, defzone.z2));
+						this->m_listPoint[i].push_back(Point(defzone.x2, defzone.y2, defzone.z2));
+						this->m_listPoint[i].push_back(Point(defzone.x1, defzone.y2, defzone.z2));
 					}
 					else if (i == PRISM_PERIMETER)
 					{
@@ -3633,13 +3670,60 @@ void CBoxPropertiesDialogBar::UpdatePrism(CZoneActor *pZoneActor, bool bForceUpd
 					}
 					else if (i == PRISM_BOTTOM)
 					{
-						this->m_listPoint[i].push_back(Point(z->x1, z->y1, defzone.z1));
-						this->m_listPoint[i].push_back(Point(z->x2, z->y1, defzone.z1));
-						this->m_listPoint[i].push_back(Point(z->x2, z->y2, defzone.z1));
-						this->m_listPoint[i].push_back(Point(z->x1, z->y2, defzone.z1));
+						this->m_listPoint[i].push_back(Point(defzone.x1, defzone.y1, defzone.z1));
+						this->m_listPoint[i].push_back(Point(defzone.x2, defzone.y1, defzone.z1));
+						this->m_listPoint[i].push_back(Point(defzone.x2, defzone.y2, defzone.z1));
+						this->m_listPoint[i].push_back(Point(defzone.x1, defzone.y2, defzone.z1));
+					}
+					if (this->m_pds[i]->Get_user_coordinate_system() == PHAST_Transform::MAP)
+					{
+						std::list<Point>::iterator pi = this->m_listPoint[i].begin();
+						for (; pi != this->m_listPoint[i].end(); ++pi)
+						{
+							map2grid.Inverse_transform((*pi));
+						}
 					}
 				}
-				else if (this->m_pds[i]->Get_source_type() == Data_source::SHAPE)
+				else if (this->m_pds[i]->Get_source_type() == Data_source::CONSTANT)
+				{
+					ASSERT(defzone.zone_defined);
+					if (i == PRISM_TOP)
+					{
+						this->m_listPoint[i].push_back(Point(defzone.x1, defzone.y1, this->m_dConstant[PRISM_TOP]));
+						this->m_listPoint[i].push_back(Point(defzone.x2, defzone.y1, this->m_dConstant[PRISM_TOP]));
+						this->m_listPoint[i].push_back(Point(defzone.x2, defzone.y2, this->m_dConstant[PRISM_TOP]));
+						this->m_listPoint[i].push_back(Point(defzone.x1, defzone.y2, this->m_dConstant[PRISM_TOP]));
+					}
+					else if (i == PRISM_PERIMETER)
+					{
+						this->m_listPoint[i].push_back(Point(defzone.x1, defzone.y1, 0.0));
+						this->m_listPoint[i].push_back(Point(defzone.x2, defzone.y1, 0.0));
+						this->m_listPoint[i].push_back(Point(defzone.x2, defzone.y2, 0.0));
+						this->m_listPoint[i].push_back(Point(defzone.x1, defzone.y2, 0.0));
+					}
+					else if (i == PRISM_BOTTOM)
+					{
+						this->m_listPoint[i].push_back(Point(defzone.x1, defzone.y1, this->m_dConstant[PRISM_BOTTOM]));
+						this->m_listPoint[i].push_back(Point(defzone.x2, defzone.y1, this->m_dConstant[PRISM_BOTTOM]));
+						this->m_listPoint[i].push_back(Point(defzone.x2, defzone.y2, this->m_dConstant[PRISM_BOTTOM]));
+						this->m_listPoint[i].push_back(Point(defzone.x1, defzone.y2, this->m_dConstant[PRISM_BOTTOM]));
+					}
+					if (this->m_pds[i]->Get_user_coordinate_system() == PHAST_Transform::MAP)
+					{
+						std::list<Point>::iterator pi = this->m_listPoint[i].begin();
+						for (; pi != this->m_listPoint[i].end(); ++pi)
+						{
+							map2grid.Inverse_transform((*pi));
+							if (i == PRISM_TOP || i == PRISM_BOTTOM)
+							{
+								// don't transform z
+								(*pi).set_z(this->m_dConstant[i]);
+							}
+						}
+					}
+				}
+				else if (this->m_pds[i]->Get_source_type() == Data_source::SHAPE ||
+					this->m_pds[i]->Get_source_type() == Data_source::ARCRASTER)
 				{
 					zone *z = this->m_pds[i]->Get_bounding_box();
 					ASSERT(z->zone_defined);
@@ -3864,6 +3948,20 @@ void CBoxPropertiesDialogBar::DoDataExchangePrism(CDataExchange *pDX, Data_sourc
 			}
 			this->m_listPoint[this->m_nPrismPart] = new_points;
 		}
+
+		// coordinate_system
+		switch (this->GetCheckedRadioButton(IDC_RADIO_CS_GRID, IDC_RADIO_CS_MAP))
+		{
+		case IDC_RADIO_CS_GRID:
+			this->m_coordinate_system = PHAST_Transform::GRID;
+			break;
+		case IDC_RADIO_CS_MAP:
+			this->m_coordinate_system = PHAST_Transform::MAP;
+			break;
+		default:
+			ASSERT(FALSE);
+			break;
+		}
 	}
 	else
 	{
@@ -3973,17 +4071,39 @@ void CBoxPropertiesDialogBar::DoDataExchangePrism(CDataExchange *pDX, Data_sourc
 			END_CATCH
 
 			CString title_x(_T("X "));
-			title_x += this->m_strHorizontalUnits;
-			DDX_TextGridControl(pDX, IDC_GRID_POINTS, 0, 0, title_x);
-
 			CString title_y(_T("Y "));
-			title_y += this->m_strHorizontalUnits;
+			switch (pData_source->Get_user_coordinate_system())
+			{
+			case PHAST_Transform::MAP:
+				title_x += this->m_strMapHorizontalUnits;
+				title_y += this->m_strMapHorizontalUnits;
+				break;
+			case PHAST_Transform::GRID:
+				title_x += this->m_strHorizontalUnits;
+				title_y += this->m_strHorizontalUnits;
+				break;
+			default:
+				ASSERT(FALSE);
+				break;
+			}
+			DDX_TextGridControl(pDX, IDC_GRID_POINTS, 0, 0, title_x);
 			DDX_TextGridControl(pDX, IDC_GRID_POINTS, 0, 1, title_y);
 
 			if (this->m_nPrismPart != CBoxPropertiesDialogBar::PRISM_PERIMETER)
 			{
 				CString title_z(_T("Z "));
-				title_z += this->m_strVerticalUnits;
+				switch (pData_source->Get_user_coordinate_system())
+				{
+				case PHAST_Transform::MAP:
+					title_z += this->m_strMapVerticalUnits;
+					break;
+				case PHAST_Transform::GRID:
+					title_z += this->m_strVerticalUnits;
+					break;
+				default:
+					ASSERT(FALSE);
+					break;
+				}
 				DDX_TextGridControl(pDX, IDC_GRID_POINTS, 0, 2, title_z);
 			}
 
@@ -4038,6 +4158,7 @@ void CBoxPropertiesDialogBar::DoDataExchangePrism(CDataExchange *pDX, Data_sourc
 			this->EnablePointsGrid(FALSE);
 		}
 
+		// coordinate_system
 		PHAST_Transform::COORDINATE_SYSTEM cs = pData_source->Get_user_coordinate_system();
 		switch (cs)
 		{
@@ -4062,6 +4183,15 @@ void CBoxPropertiesDialogBar::ApplyNewPrism(CZoneActor *pZoneActor)
 	if (Prism *prism = dynamic_cast<Prism*>(pZoneActor->GetPolyhedron()))
 	{
 		CWaitCursor wait;
+
+#ifdef _DEBUG
+		{
+			TRACE("\n\n\nCBoxPropertiesDialogBar::ApplyNewPrism Original Prism\n");
+			std::ostringstream oss;
+			oss << (*prism) << std::endl;
+			TRACE(oss.str().c_str());
+		}
+#endif
 
 		// Update StatusBar
 		//
@@ -4098,6 +4228,10 @@ void CBoxPropertiesDialogBar::ApplyNewPrism(CZoneActor *pZoneActor)
 				}
 				ds.Set_source_type(Data_source::CONSTANT);
 				ds.Set_user_source_type(Data_source::CONSTANT);
+
+				ds.Set_coordinate_system(this->m_coordinate_system);
+				ds.Set_user_coordinate_system(this->m_coordinate_system);
+
 				std::vector<Point> &pts = ds.Get_points();
 				pts.clear();
 				pts.push_back(Point(0.0, 0.0, this->m_dConstant[this->m_nPrismPart], this->m_dConstant[this->m_nPrismPart]));
@@ -4112,9 +4246,8 @@ void CBoxPropertiesDialogBar::ApplyNewPrism(CZoneActor *pZoneActor)
 					ds.Set_source_type(Data_source::ARCRASTER);
 					ds.Set_user_source_type(Data_source::ARCRASTER);
 
-					PHAST_Transform::COORDINATE_SYSTEM c = PHAST_Transform::MAP;
-					ds.Set_coordinate_system(c);
-					ds.Set_user_coordinate_system(c);
+					ds.Set_coordinate_system(this->m_coordinate_system);
+					ds.Set_user_coordinate_system(this->m_coordinate_system);
 
 					std::string file_name(this->m_sArcraster[this->m_nPrismPart]);
 					ds.Set_file_name(file_name);
@@ -4129,9 +4262,8 @@ void CBoxPropertiesDialogBar::ApplyNewPrism(CZoneActor *pZoneActor)
 					ds.Set_source_type(Data_source::SHAPE);
 					ds.Set_user_source_type(Data_source::SHAPE);
 
-					PHAST_Transform::COORDINATE_SYSTEM c = PHAST_Transform::MAP;
-					ds.Set_coordinate_system(c);
-					ds.Set_user_coordinate_system(c);
+					ds.Set_coordinate_system(this->m_coordinate_system);
+					ds.Set_user_coordinate_system(this->m_coordinate_system);
 
 					std::string file_name(this->m_sShapefile[this->m_nPrismPart]);
 					ds.Set_file_name(file_name);
@@ -4143,9 +4275,8 @@ void CBoxPropertiesDialogBar::ApplyNewPrism(CZoneActor *pZoneActor)
 					ds.Set_source_type(Data_source::SHAPE);
 					ds.Set_user_source_type(Data_source::SHAPE);
 
-					PHAST_Transform::COORDINATE_SYSTEM c = PHAST_Transform::MAP;
-					ds.Set_coordinate_system(c);
-					ds.Set_user_coordinate_system(c);
+					ds.Set_coordinate_system(this->m_coordinate_system);
+					ds.Set_user_coordinate_system(this->m_coordinate_system);
 
 					std::string file_name(this->m_sShapefile[this->m_nPrismPart]);
 					ds.Set_file_name(file_name);
@@ -4164,10 +4295,8 @@ void CBoxPropertiesDialogBar::ApplyNewPrism(CZoneActor *pZoneActor)
 					ds.Set_source_type(Data_source::XYZ);
 					ds.Set_user_source_type(Data_source::XYZ);
 
-					// TODO read coor system from dialog
-					PHAST_Transform::COORDINATE_SYSTEM c = PHAST_Transform::MAP;
-					ds.Set_coordinate_system(c);
-					ds.Set_user_coordinate_system(c);
+					ds.Set_coordinate_system(this->m_coordinate_system);
+					ds.Set_user_coordinate_system(this->m_coordinate_system);
 
 					std::string file_name(this->m_sXYZ[this->m_nPrismPart]);
 					ds.Set_file_name(file_name);
@@ -4180,9 +4309,8 @@ void CBoxPropertiesDialogBar::ApplyNewPrism(CZoneActor *pZoneActor)
 				ds.Set_source_type(Data_source::POINTS);
 				ds.Set_user_source_type(Data_source::POINTS);
 
-				PHAST_Transform::COORDINATE_SYSTEM c = PHAST_Transform::MAP;
-				ds.Set_coordinate_system(c);
-				ds.Set_user_coordinate_system(c);
+				ds.Set_coordinate_system(this->m_coordinate_system);
+				ds.Set_user_coordinate_system(this->m_coordinate_system);
 
 				std::vector<Point> &pts = ds.Get_points();
 				std::vector<Point> &upts = ds.Get_user_points();
@@ -4233,6 +4361,15 @@ void CBoxPropertiesDialogBar::ApplyNewPrism(CZoneActor *pZoneActor)
 		this->m_pView->GetDocument()->GetDefaultZone(::domain);
 
 		new_prism.Tidy();
+
+#ifdef _DEBUG
+		{
+			TRACE("\n\n\nCBoxPropertiesDialogBar::ApplyNewPrism New Prism\n");
+			std::ostringstream oss;
+			oss << new_prism << std::endl;
+			TRACE(oss.str().c_str());
+		}
+#endif
 
 		CZonePrismResetAction *pAction = new CZonePrismResetAction(
 			this->m_pView,
@@ -5290,7 +5427,7 @@ void CBoxPropertiesDialogBar::OnChangeCoorSysPrism(void)
 	if (this->GetCheckedRadioButton(IDC_RADIO_CS_GRID, IDC_RADIO_CS_MAP) == IDC_RADIO_CS_MAP)
 	{
 		// Grid => Map
-		// Wedge => Prism
+		// Prism => Prism
 		//
 		if (CZoneActor* pZoneActor = this->m_pProp3D ? CZoneActor::SafeDownCast(this->m_pProp3D) : NULL)
 		{
@@ -5298,6 +5435,7 @@ void CBoxPropertiesDialogBar::OnChangeCoorSysPrism(void)
 			if (Prism *pp = dynamic_cast<Prism*>(pZoneActor->GetPolyhedron()))
 			{
 				Prism p1(*pp);
+				Prism p2(*pp);
 				switch (this->m_nPrismPart)
 				{
 				case PRISM_TOP:
@@ -5306,7 +5444,9 @@ void CBoxPropertiesDialogBar::OnChangeCoorSysPrism(void)
 					ASSERT(p1.top.Get_coordinate_system()        == PHAST_Transform::GRID);
 					ASSERT(p1.top.Get_user_coordinate_system()   == PHAST_Transform::GRID);
 
-					p1.top.Convert_coordinates(PHAST_Transform::MAP, &map2grid);
+					p2.top.Convert_coordinates(PHAST_Transform::MAP, &map2grid);
+
+					p1.top.Set_points(p2.top.Get_points());
 					p1.top.Set_coordinate_system(PHAST_Transform::MAP);
 					p1.top.Set_user_coordinate_system(PHAST_Transform::MAP);
 					break;
@@ -5317,7 +5457,9 @@ void CBoxPropertiesDialogBar::OnChangeCoorSysPrism(void)
 					ASSERT(p1.perimeter.Get_coordinate_system()        == PHAST_Transform::GRID);
 					ASSERT(p1.perimeter.Get_user_coordinate_system()   == PHAST_Transform::GRID);
 
-					p1.perimeter.Convert_coordinates(PHAST_Transform::MAP, &map2grid);
+					p2.perimeter.Convert_coordinates(PHAST_Transform::MAP, &map2grid);
+
+					p1.perimeter.Set_points(p2.perimeter.Get_points());
 					p1.perimeter.Set_coordinate_system(PHAST_Transform::MAP);
 					p1.perimeter.Set_user_coordinate_system(PHAST_Transform::MAP);
 					break;
@@ -5328,7 +5470,9 @@ void CBoxPropertiesDialogBar::OnChangeCoorSysPrism(void)
 					ASSERT(p1.bottom.Get_coordinate_system()        == PHAST_Transform::GRID);
 					ASSERT(p1.bottom.Get_user_coordinate_system()   == PHAST_Transform::GRID);
 
-					p1.bottom.Convert_coordinates(PHAST_Transform::MAP, &map2grid);
+					p2.bottom.Convert_coordinates(PHAST_Transform::MAP, &map2grid);
+
+					p1.bottom.Set_points(p2.bottom.Get_points());
 					p1.bottom.Set_coordinate_system(PHAST_Transform::MAP);
 					p1.bottom.Set_user_coordinate_system(PHAST_Transform::MAP);
 					break;
@@ -5368,7 +5512,7 @@ void CBoxPropertiesDialogBar::OnChangeCoorSysPrism(void)
 	else
 	{
 		// Map => Grid
-		// Wedge => Prism
+		// Prism => Prism
 		//
 		if (CZoneActor* pZoneActor = this->m_pProp3D ? CZoneActor::SafeDownCast(this->m_pProp3D) : NULL)
 		{
@@ -5376,6 +5520,7 @@ void CBoxPropertiesDialogBar::OnChangeCoorSysPrism(void)
 			if (Prism *pp = dynamic_cast<Prism*>(pZoneActor->GetPolyhedron()))
 			{
 				Prism p1(*pp);
+				Prism p2(*pp);
 
 				switch (this->m_nPrismPart)
 				{
@@ -5385,7 +5530,9 @@ void CBoxPropertiesDialogBar::OnChangeCoorSysPrism(void)
 					ASSERT(p1.top.Get_coordinate_system()       == PHAST_Transform::MAP);
 					ASSERT(p1.top.Get_user_coordinate_system()  == PHAST_Transform::MAP);
 
-					p1.top.Convert_coordinates(PHAST_Transform::GRID, &map2grid);
+					p2.top.Convert_coordinates(PHAST_Transform::GRID, &map2grid);
+
+					p1.top.Set_points(p2.top.Get_points());
 					p1.top.Set_coordinate_system(PHAST_Transform::GRID);
 					p1.top.Set_user_coordinate_system(PHAST_Transform::GRID);
 					break;
@@ -5395,7 +5542,9 @@ void CBoxPropertiesDialogBar::OnChangeCoorSysPrism(void)
 					ASSERT(p1.perimeter.Get_coordinate_system()       == PHAST_Transform::MAP);
 					ASSERT(p1.perimeter.Get_user_coordinate_system()  == PHAST_Transform::MAP);
 
-					p1.perimeter.Convert_coordinates(PHAST_Transform::GRID, &map2grid);
+					p2.perimeter.Convert_coordinates(PHAST_Transform::GRID, &map2grid);
+
+					p1.perimeter.Set_points(p2.perimeter.Get_points());
 					p1.perimeter.Set_coordinate_system(PHAST_Transform::GRID);
 					p1.perimeter.Set_user_coordinate_system(PHAST_Transform::GRID);
 					break;
@@ -5405,7 +5554,9 @@ void CBoxPropertiesDialogBar::OnChangeCoorSysPrism(void)
 					ASSERT(p1.bottom.Get_coordinate_system()       == PHAST_Transform::MAP);
 					ASSERT(p1.bottom.Get_user_coordinate_system()  == PHAST_Transform::MAP);
 
-					p1.bottom.Convert_coordinates(PHAST_Transform::GRID, &map2grid);
+					p2.bottom.Convert_coordinates(PHAST_Transform::GRID, &map2grid);
+
+					p1.bottom.Set_points(p2.bottom.Get_points());
 					p1.bottom.Set_coordinate_system(PHAST_Transform::GRID);
 					p1.bottom.Set_user_coordinate_system(PHAST_Transform::GRID);
 					break;

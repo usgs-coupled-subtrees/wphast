@@ -344,92 +344,8 @@ void CZoneActor::UnSelect(CWPhastView* pView)
 
 void CZoneActor::Select(CWPhastView* pView, bool bReselect)
 {
-	//{{ {8/22/2008 2:50:48 PM}
 	pView->GetDocument()->Select(this);
 	return;
-	//}} {8/22/2008 2:50:48 PM}
-
-// COMMENT: {3/5/2008 4:39:13 PM}	//{{HACK
-// COMMENT: {3/5/2008 4:39:13 PM}	// If creating a new zone cancel now 
-// COMMENT: {3/5/2008 4:39:13 PM}	{
-// COMMENT: {3/5/2008 4:39:13 PM}		ASSERT_VALID(pView);
-// COMMENT: {3/5/2008 4:39:13 PM}		if (pView->CreatingNewZone()) {
-// COMMENT: {3/5/2008 4:39:13 PM}			pView->CancelNewZone();
-// COMMENT: {3/5/2008 4:39:13 PM}		}
-// COMMENT: {3/5/2008 4:39:13 PM}	}
-// COMMENT: {3/5/2008 4:39:13 PM}	//}}HACK
-
-// COMMENT: {9/8/2009 9:00:26 PM}	if (vtkAbstractPropPicker *picker = vtkAbstractPropPicker::SafeDownCast( pView->GetRenderWindowInteractor()->GetPicker() ))
-// COMMENT: {9/8/2009 9:00:26 PM}	{
-// COMMENT: {9/8/2009 9:00:26 PM}		vtkAssemblyPath *path = vtkAssemblyPath::New();
-// COMMENT: {9/8/2009 9:00:26 PM}		path->AddNode(this, this->GetMatrix());
-// COMMENT: {9/8/2009 9:00:26 PM}		picker->SetPath(path);
-// COMMENT: {9/8/2009 9:00:26 PM}		path->Delete();
-// COMMENT: {9/8/2009 9:00:26 PM}	}
-
-	if (this->GetDefault())
-	{
-// COMMENT: {9/8/2009 9:00:41 PM}		ASSERT(!bReselect);
-// COMMENT: {9/8/2009 9:00:41 PM}		if (!bReselect)
-// COMMENT: {9/8/2009 9:00:41 PM}		{
-// COMMENT: {9/8/2009 9:00:41 PM}			pView->HighlightProp(this);
-// COMMENT: {9/8/2009 9:00:41 PM}		}
-// COMMENT: {9/8/2009 9:00:41 PM}
-// COMMENT: {9/8/2009 9:00:41 PM}		// TODO May want to highlight the zone some other way
-// COMMENT: {9/8/2009 9:00:41 PM}		// ie (set selection color to white; change the translucency)
-// COMMENT: {9/8/2009 9:00:41 PM}		pView->GetBoxWidget()->Off();
-// COMMENT: {9/8/2009 9:00:41 PM}		//pView->GetPointWidget()->Off();
-// COMMENT: {9/8/2009 9:00:41 PM}		//pView->GetPrismWidget()->Off();
-	}
-	else
-	{
-		// Clear Widgets
-		//
-		if (!bReselect)
-		{
-			pView->ClearSelection();
-		}
-
-// COMMENT: {9/8/2009 9:01:01 PM}		// Reset BoxWidget
-// COMMENT: {9/8/2009 9:01:01 PM}		//
-// COMMENT: {9/8/2009 9:01:01 PM}		pView->GetBoxWidget()->SetProp3D(this);
-// COMMENT: {9/8/2009 9:01:01 PM}		pView->GetBoxWidget()->PlaceWidget();
-// COMMENT: {9/8/2009 9:01:01 PM}		ASSERT(this == pView->GetBoxWidget()->GetProp3D());
-// COMMENT: {9/8/2009 9:01:01 PM}		pView->GetBoxWidget()->SetEnabled(1);
-
-#if defined(_DEBUG)
-		int n = this->GetNumberOfPaths();
-		TRACE("This selection contains %d paths\\n");
-#endif
-	}
-
-	pView->Invalidate(TRUE);
-
-	// Update StatusBar
-	//
-	const CUnits& units = pView->GetDocument()->GetUnits();
-	float *bounds = this->GetUserBounds();
-	if (CWnd *pWnd = ((CFrameWnd*)::AfxGetMainWnd())->GetMessageBar())
-	{
-		TCHAR buffer[80];
-		::_sntprintf(buffer, 80, "%s (%g[%s] x %g[%s] x %g[%s])",
-			this->GetName(),
-			bounds[1] - bounds[0],
-			units.horizontal.defined ? units.horizontal.input : units.horizontal.si,
-			bounds[3] - bounds[2],
-			units.horizontal.defined ? units.horizontal.input : units.horizontal.si,
-			bounds[5] - bounds[4],
-			units.vertical.defined ? units.vertical.input : units.vertical.si
-			);
-		pWnd->SetWindowText(buffer);
-	}
-
-	// Update BoxPropertiesDialogBar
-	//
-	if (CBoxPropertiesDialogBar *pBar = pView->GetDocument()->GetBoxPropertiesDialogBar())
-	{
-		pBar->Set(pView, this, pView->GetDocument()->GetUnits());
-	}
 }
 
 void CZoneActor::SetName(LPCTSTR name)
@@ -479,7 +395,7 @@ void CZoneActor::UpdateNameDesc()
 	}
 }
 
-void CZoneActor::SetBounds(float xMin, float xMax, float yMin, float yMax, float zMin, float zMax, const CUnits& rUnits)
+void CZoneActor::SetBounds(double xMin, double xMax, double yMin, double yMax, double zMin, double zMax, const CUnits& rUnits)
 {
 	ASSERT(xMin <= xMax);
 	ASSERT(yMin <= yMax);
@@ -490,17 +406,8 @@ void CZoneActor::SetBounds(float xMin, float xMax, float yMin, float yMax, float
 
 	if (Cube *c = dynamic_cast<Cube*>(this->GetPolyhedron()))
 	{
-		this->m_pSource->SetBounds(
-			xMin,
-			xMax,
-			yMin,
-			yMax,
-			zMin,
-			zMax
-			);
+		this->m_pSource->SetBounds(xMin, xMax, yMin, yMax, zMin, zMax);
 	}
-
-	this->SetUnits(rUnits);
 
 	PHAST_Transform::COORDINATE_SYSTEM cs = PHAST_Transform::GRID;
 	bool domain = false;
@@ -537,6 +444,9 @@ void CZoneActor::SetBounds(float xMin, float xMax, float yMin, float yMax, float
 		this->GetPolyhedron() = new Wedge(&zone, srcWedgeSource::GetWedgeOrientationString(this->GetChopType()), cs);
 	}
 	(*this->GetPolyhedron()->Get_description()) = desc;
+
+	this->Units = rUnits;
+	this->UpdateUserTransform(false);
 }
 
 void CZoneActor::SetBounds(const CZone& rZone, const CUnits& rUnits)
@@ -577,7 +487,7 @@ void CZoneActor::SetUnits(const CUnits& rUnits, bool bSetPolyhedron)
 			// TODO may need to rebuild prisms
 			if (p->top.Get_source_type() != Data_source::CONSTANT || p->bottom.Get_source_type() != Data_source::CONSTANT)
 			{
-				this->SetPolyhedron(this->GetPolyhedron(), this->Units);
+				this->SetPolyhedron(this->GetPolyhedron(), this->Units, this->GridOrigin, this->GridAngle);
 			}
 		}
 	}
@@ -587,12 +497,12 @@ void CZoneActor::SetUnits(const CUnits& rUnits, bool bSetPolyhedron)
 	}
 }
 
-void CZoneActor::SetBounds(float bounds[6], const CUnits& units)
+void CZoneActor::SetBounds(double bounds[6], const CUnits& units)
 {
 	this->SetBounds(bounds[0], bounds[1], bounds[2], bounds[3], bounds[4], bounds[5], units);
 }
 
-void CZoneActor::GetUserBounds(float bounds[6])
+void CZoneActor::GetUserBounds(double bounds[6])
 {
 	ASSERT(this->GetPolyhedron() && ::AfxIsValidAddress(this->GetPolyhedron(), sizeof(Polyhedron)));
 	struct zone* pzone = this->GetPolyhedron()->Get_bounding_box();
@@ -605,7 +515,7 @@ void CZoneActor::GetUserBounds(float bounds[6])
 	bounds[5] = pzone->z2;
 }
 
-float* CZoneActor::GetUserBounds()
+double* CZoneActor::GetUserBounds()
 {
 	ASSERT(this->GetPolyhedron() && ::AfxIsValidAddress(this->GetPolyhedron(), sizeof(Polyhedron)));
 	struct zone* pzone = this->GetPolyhedron()->Get_bounding_box();
@@ -1750,11 +1660,6 @@ double CZoneActor::GetGridAngle(void)const
 	return this->GridAngle;
 }
 
-void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits)
-{
-	this->SetPolyhedron(polyh, rUnits, this->GridOrigin, this->GridAngle);
-}
-
 void CZoneActor::SetScale(double _arg1, double _arg2, double _arg3)
 {
 	if (this->GeometryScale[0] != _arg1 ||
@@ -1856,9 +1761,28 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, co
 		this->OutlineActor->SetVisibility(this->Visibility);
 		this->AddPart(this->OutlineActor);
 	}
-	else if (Prism *prism = dynamic_cast<Prism*>(this->GetPolyhedron()))
+	else if (Prism *prism1 = dynamic_cast<Prism*>(this->GetPolyhedron()))
 	{
+		Prism *prism = dynamic_cast<Prism*>(prism1->clone());
 		prism->Tidy();
+
+		if (!prism->Is_homogeneous())
+		{
+			// The top, bottom, and perimeter must all have the same coordinate system
+			// therefore convert all of them to the best coordinate system.
+			//
+			// This converted polyhedron (now homogeneous) is only used for visualization.
+			// It's not stored internally
+
+			// Set up transform
+			double scale_h = rUnits.map_horizontal.input_to_si / rUnits.horizontal.input_to_si;
+			double scale_v = rUnits.map_vertical.input_to_si / rUnits.vertical.input_to_si;
+
+			PHAST_Transform map2grid(this->GridOrigin[0], this->GridOrigin[1], this->GridOrigin[2],
+				this->GridAngle, scale_h, scale_h, scale_v);
+
+			prism->Convert_coordinates(prism->Get_best_coordinate_system(), &map2grid);
+		}
 
 		// cleanup 
 		this->CleanupPrisms();
@@ -1964,25 +1888,11 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, co
 				&&
 				(bot_type == Data_source::CONSTANT || bot_type == Data_source::NONE))
 			{
-				double dTop;
-				if (top_type == Data_source::CONSTANT)
-				{
-					dTop = prism->top.Get_points()[0].z();
-				}
-				else if (top_type == Data_source::NONE)
-				{
-					dTop = grid_zone()->z2;
-				}
+				ASSERT(prism->top.Get_points().size() == 1);
+				double dTop = prism->top.Get_points()[0].z();
 
-				double dBottom; 
-				if (bot_type == Data_source::CONSTANT)
-				{
-					dBottom = prism->bottom.Get_points()[0].z();
-				}
-				else
-				{
-					dBottom = grid_zone()->z1;
-				}
+				ASSERT(prism->bottom.Get_points().size() == 1);
+				double dBottom = prism->bottom.Get_points()[0].z();
 
 				Point ptBottom;
 				Point ptTop;
@@ -2033,15 +1943,9 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, co
 				(bot_type == Data_source::ARCRASTER || bot_type == Data_source::POINTS || bot_type == Data_source::SHAPE || bot_type == Data_source::XYZ)
 				)
 			{
-				double dTop;
-				if (top_type == Data_source::CONSTANT)
-				{
-					dTop = prism->top.Get_points()[0].z();
-				}
-				else
-				{
-					dTop = grid_zone()->z2;
-				}
+				ASSERT(prism->top.Get_points().size() == 1);
+				double dTop = prism->top.Get_points()[0].z();
+
 				double dBottom;
 
 				Point ptBottom;
@@ -2162,15 +2066,9 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, co
 				)
 			{
 				double dTop;
-				double dBottom; 
-				if (bot_type == Data_source::CONSTANT)
-				{
-					dBottom = prism->bottom.Get_points()[0].z();
-				}
-				else
-				{
-					dBottom = grid_zone()->z1;
-				}
+
+				ASSERT(prism->bottom.Get_points().size() == 1);
+				double dBottom = prism->bottom.Get_points()[0].z();
 
 				Point ptBottom;
 				Point ptTop;
@@ -2707,7 +2605,10 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, co
 			transformPolyDataFilter->Delete();
 
 			// finally scale for units
-			this->SetUnits(rUnits, false);
+			this->Units = rUnits;
+			this->UpdateUserTransform(false);
+
+			delete prism;
 		}
 	}
 	TRACE("%s, out\n", __FUNCTION__);
@@ -2815,10 +2716,22 @@ HTREEITEM CZoneActor::GetParentTreeItem(void)const
 	return this->m_hParent;
 }
 
-void CZoneActor::UpdateUserTransform(void)
+void CZoneActor::UpdateUserTransform(bool update_poly)
 {
 	// validate polyhedron
 	ASSERT(this->GetPolyhedron() && ::AfxIsValidAddress(this->GetPolyhedron(), sizeof(Polyhedron)));
+
+	if (update_poly)
+	{
+		if (Prism *p = dynamic_cast<Prism*>(this->GetPolyhedron()))
+		{
+			if (!p->Is_homogeneous())
+			{
+				this->SetPolyhedron(this->GetPolyhedron(), this->Units, this->GridOrigin, this->GridAngle);
+				return;
+			}
+		}
+	}
 
 	// validate actor
 	ASSERT(this->GetPosition()[0]         == 0.0 && this->GetPosition()[1]         == 0.0 && this->GetPosition()[2]         == 0.0);
@@ -2834,6 +2747,10 @@ void CZoneActor::UpdateUserTransform(void)
 	else if (Prism *p = dynamic_cast<Prism*>(this->GetPolyhedron()))
 	{
 		cs = p->perimeter.Get_user_coordinate_system();
+		if (!p->Is_homogeneous())
+		{
+			cs = p->Get_best_coordinate_system();
+		}
 	}
 	else
 	{

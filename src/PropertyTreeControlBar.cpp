@@ -10,9 +10,10 @@
 #undef GetNextSibling       // defined in windowsx.h
 #undef GetPrevSibling       // defined in windowsx.h
 
+#if !defined(_USE_DEFAULT_MENUS_)
+#include "BCMenu/BCMenu.h"
+#endif
 
-
-//// #include "ZoneLODActor.h"
 #include "GridActor.h"
 #include "WPhastDoc.h"
 #include "WPhastView.h"
@@ -106,27 +107,28 @@ static const int TIME_CONTROL_INDEX    = 2;
 IMPLEMENT_DYNAMIC(CPropertyTreeControlBar, baseCPropertyTreeControlBar);
 
 BEGIN_MESSAGE_MAP(CPropertyTreeControlBar, CSizingControlBarCFVS7)
-	ON_WM_CREATE()
+	ON_WM_CREATE()       // OnCreate
+	ON_WM_DESTROY()      // OnDestroy
+	ON_WM_CONTEXTMENU()  // OnContextMenu
 	ON_NOTIFY(TVN_SELCHANGING, IDC_PROPERTY_TREE, OnSelChanging)
 	ON_NOTIFY(TVN_SELCHANGED, IDC_PROPERTY_TREE, OnSelChanged)
 	ON_NOTIFY(NM_CLICK, IDC_PROPERTY_TREE, OnNMClk)
 	ON_NOTIFY(NM_DBLCLK, IDC_PROPERTY_TREE, OnNMDblClk)
 	ON_NOTIFY(TVN_KEYDOWN, IDC_PROPERTY_TREE, OnKeyDown)
 	ON_NOTIFY(TVN_BEGINDRAG, IDC_PROPERTY_TREE, OnBeginDrag)
-	ON_WM_DESTROY()
-// COMMENT: {4/7/2008 10:30:33 PM}	ON_WM_LBUTTONDOWN()
-	ON_WM_CONTEXTMENU()
 	ON_UPDATE_COMMAND_UI(ID_EDIT_COPY, OnUpdateEditCopy)
 	ON_COMMAND(ID_EDIT_COPY, OnEditCopy)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_PASTE, OnUpdateEditPaste)
 	ON_COMMAND(ID_EDIT_PASTE, OnEditPaste)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_CUT, OnUpdateEditCut)
 	ON_COMMAND(ID_EDIT_CUT, OnEditCut)
-	ON_UPDATE_COMMAND_UI(ID_EDIT_CLEAR, OnUpdateEditClear)
+	ON_UPDATE_COMMAND_UI(ID_EDIT_CLEAR, OnUpdateEditCut)
 	ON_COMMAND(ID_EDIT_CLEAR, OnEditClear)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_PROPERTIES, &CPropertyTreeControlBar::OnUpdateEditProperties)
 	ON_COMMAND(ID_EDIT_PROPERTIES, &CPropertyTreeControlBar::OnEditProperties)
+	ON_NOTIFY(NM_RCLICK, IDC_PROPERTY_TREE, OnNMRClk)
 END_MESSAGE_MAP()
+
 /**
 NM_CLICK
 NM_CUSTOMDRAW
@@ -559,14 +561,6 @@ void CPropertyTreeControlBar::SetNodeCheck(CTreeCtrlNode node, UINT nCheckState)
 	}
 	else
 	{
-// COMMENT: {6/19/2008 5:11:09 PM}		ASSERT(
-// COMMENT: {6/19/2008 5:11:09 PM}			node.GetParent() == this->GetMediaNode()  ||
-// COMMENT: {6/19/2008 5:11:09 PM}            node.GetParent() == this->GetICHeadNode() ||
-// COMMENT: {6/19/2008 5:11:09 PM}			node.GetParent() == this->GetICChemNode() ||
-// COMMENT: {6/19/2008 5:11:09 PM}            node.GetParent() == this->GetBCNode()     ||
-// COMMENT: {6/19/2008 5:11:09 PM}            node.GetParent() == this->GetWellsNode()  ||
-// COMMENT: {6/19/2008 5:11:09 PM}            node.GetParent() == this->GetRiversNode()
-// COMMENT: {6/19/2008 5:11:09 PM}				);
 	}
 
 	// set check mark
@@ -585,14 +579,6 @@ void CPropertyTreeControlBar::SetNodeCheck(CTreeCtrlNode node, UINT nCheckState)
 			if (vtkProp3D* pProp3D = vtkProp3D::SafeDownCast((vtkObject*)node.GetData()))
 			{
 				pProp3D->SetVisibility(nCheckState == BST_CHECKED);
-// COMMENT: {7/10/2008 8:53:53 PM}				//{{
-// COMMENT: {7/10/2008 8:53:53 PM}				if (CWPhastDoc* pDoc = this->GetDocument())
-// COMMENT: {7/10/2008 8:53:53 PM}				{
-// COMMENT: {7/10/2008 8:53:53 PM}					// Notify listeners
-// COMMENT: {7/10/2008 8:53:53 PM}					//
-// COMMENT: {7/10/2008 8:53:53 PM}					pDoc->Notify(this, WPN_VISCHANGED, 0, pProp3D);
-// COMMENT: {7/10/2008 8:53:53 PM}				}
-// COMMENT: {7/10/2008 8:53:53 PM}				//}}
 			}
 		}
 		else
@@ -709,14 +695,11 @@ void CPropertyTreeControlBar::OnNMDblClk(NMHDR* pNMHDR, LRESULT* pResult)
 		return;
 	}
 
-	///this->EditSelection(pResult);
-	//{{
 	CTreeCtrlNode node = this->GetTreeCtrlEx()->GetSelectedItem();
 	if (this->IsNodeEditable(node, true))
 	{
 		*pResult = TRUE;
 	}
-	//}}
 	TRACE("%s, out 4\n", __FUNCTION__);
 }
 
@@ -1709,17 +1692,18 @@ void CPropertyTreeControlBar::OnKeyDown(NMHDR* pNMHDR, LRESULT* pResult)
 	TRACE("%s, out 2\n", __FUNCTION__);
 }
 
-void CPropertyTreeControlBar::OnLButtonDown(UINT nFlags, CPoint point)
+void CPropertyTreeControlBar::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 {
-	// Add your message handler code here and/or call default
-	TRACE("CPropertyTreeControlBar::OnLButtonDown\n");
-	CSizingControlBarCFVS7::OnLButtonDown(nFlags, point);
-}
+	BCMenu menu;
+	VERIFY( menu.LoadMenu(IDR_MAINFRAME_SDI) );
 
-void CPropertyTreeControlBar::OnContextMenu(CWnd* /*pWnd*/, CPoint /*point*/)
-{
-	// Add your message handler code here
-	TRACE("CPropertyTreeControlBar::OnContextMenu\n");
+	if (CMenu* pPopup = menu.GetSubMenu(1))
+	{
+		pPopup->RemoveMenu(0, MF_BYPOSITION); // Undo
+		pPopup->RemoveMenu(0, MF_BYPOSITION); // Redo
+		pPopup->RemoveMenu(0, MF_BYPOSITION); // Separator
+		pPopup->TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, point.x, point.y, ::AfxGetMainWnd());
+	}
 }
 
 void CPropertyTreeControlBar::ClearSelection(void)
@@ -2177,59 +2161,45 @@ bool CPropertyTreeControlBar::IsNodeCopyable(CTreeCtrlNode copyNode, COleDataSou
 		{
 			if (CMediaZoneActor* pZone = CMediaZoneActor::SafeDownCast((vtkObject*)copyNode.GetData()))
 			{
-				if (pZone->GetPolyhedronType() != Polyhedron::PRISM)
+				if (pOleDataSource)
 				{
-					if (pOleDataSource)
+					// CF_TEXT
+					//
+					oss << "MEDIA\n";
+					oss << pZone->GetData();
+					oss << "\n";
+
+					std::string s = oss.str();
+					HGLOBAL hGlobal = ::GlobalAlloc(GMEM_MOVEABLE, s.length() + 1);
+					LPTSTR pData = (LPTSTR)::GlobalLock(hGlobal);
+
+					::lstrcpy(pData, s.c_str());
+					::GlobalUnlock(hGlobal);
+
+					pOleDataSource->CacheGlobalData(CF_TEXT, hGlobal);
+
+					// copy Media clip format
+					//
+					CSharedFile globFile;
+					CArchive ar(&globFile, CArchive::store);
+					pZone->GetData().Serialize(ar);
+					ar.Close();
+
+					pOleDataSource->CacheGlobalData(CGridElt::clipFormat, globFile.Detach());
+
+					// Description (CZoneActor::clipFormat)
+					//
+					if (pZone->GetDesc())
 					{
-						CGridElt elt = pZone->GetData();
-
-						//{{ Why?
-						if (pZone->GetDefault() && elt.active == NULL)
-						{
-							elt.active = new Cproperty(1);
-						}
-						//}} Why?
-
-						// CF_TEXT
-						//
-						oss << "MEDIA\n";
-						oss << elt;
-						oss << "\n";
-
-						std::string s = oss.str();
-						HGLOBAL hGlobal = ::GlobalAlloc(GMEM_MOVEABLE, s.length() + 1);
-						LPTSTR pData = (LPTSTR)::GlobalLock(hGlobal);
-
-						::lstrcpy(pData, s.c_str());
-						::GlobalUnlock(hGlobal);
-
-						pOleDataSource->CacheGlobalData(CF_TEXT, hGlobal);
-
-						// copy Media clip format
-						//
-						CSharedFile globFile;
-						CArchive ar(&globFile, CArchive::store);
-						CGridElt elt2 = pZone->GetData();
-						elt.Serialize(ar);
-
-						ar.Close();
-
-						pOleDataSource->CacheGlobalData(CGridElt::clipFormat, globFile.Detach());
-
-						// Description (CZoneActor::clipFormat)
-						//
-						if (pZone->GetDesc())
-						{
-							CSharedFile sf;
-							CArchive arch(&sf, CArchive::store);
-							CString desc(pZone->GetDesc());
-							arch << desc;
-							arch.Close();
-							pOleDataSource->CacheGlobalData(CZoneActor::clipFormat, sf.Detach());
-						}
+						CSharedFile sf;
+						CArchive arch(&sf, CArchive::store);
+						CString desc(pZone->GetDesc());
+						arch << desc;
+						arch.Close();
+						pOleDataSource->CacheGlobalData(CZoneActor::clipFormat, sf.Detach());
 					}
-					return true;
 				}
+				return true;
 			}
 		}
 	}
@@ -2240,47 +2210,44 @@ bool CPropertyTreeControlBar::IsNodeCopyable(CTreeCtrlNode copyNode, COleDataSou
 		{
 			if (CICHeadZoneActor* pZone = CICHeadZoneActor::SafeDownCast((vtkObject*)copyNode.GetData()))
 			{
-				if (pZone->GetPolyhedronType() != Polyhedron::PRISM)
+				if (pOleDataSource)
 				{
-					if (pOleDataSource)
+					// CF_TEXT
+					//
+					oss << pZone->GetData();
+					oss << "\n";
+
+					std::string s = oss.str();
+					HGLOBAL hGlobal = ::GlobalAlloc(GMEM_MOVEABLE, s.length() + 1);
+					LPTSTR pData = (LPTSTR)::GlobalLock(hGlobal);
+
+					::lstrcpy(pData, s.c_str());
+					::GlobalUnlock(hGlobal);
+
+					pOleDataSource->CacheGlobalData(CF_TEXT, hGlobal);
+
+					// copy HeadIC clip format
+					//
+					CSharedFile globFile;
+					CArchive ar(&globFile, CArchive::store);
+					pZone->GetData().Serialize(ar);
+					ar.Close();
+
+					pOleDataSource->CacheGlobalData(CHeadIC::clipFormat, globFile.Detach());
+
+					// Description (CZoneActor::clipFormat)
+					//
+					if (pZone->GetDesc())
 					{
-						// CF_TEXT
-						//
-						oss << pZone->GetData();
-						oss << "\n";
-
-						std::string s = oss.str();
-						HGLOBAL hGlobal = ::GlobalAlloc(GMEM_MOVEABLE, s.length() + 1);
-						LPTSTR pData = (LPTSTR)::GlobalLock(hGlobal);
-
-						::lstrcpy(pData, s.c_str());
-						::GlobalUnlock(hGlobal);
-
-						pOleDataSource->CacheGlobalData(CF_TEXT, hGlobal);
-
-						// copy HeadIC clip format
-						//
-						CSharedFile globFile;
-						CArchive ar(&globFile, CArchive::store);
-						pZone->GetData().Serialize(ar);
-						ar.Close();
-
-						pOleDataSource->CacheGlobalData(CHeadIC::clipFormat, globFile.Detach());
-
-						// Description (CZoneActor::clipFormat)
-						//
-						if (pZone->GetDesc())
-						{
-							CSharedFile sf;
-							CArchive arch(&sf, CArchive::store);
-							CString desc(pZone->GetDesc());
-							arch << desc;
-							arch.Close();
-							pOleDataSource->CacheGlobalData(CZoneActor::clipFormat, sf.Detach());
-						}
+						CSharedFile sf;
+						CArchive arch(&sf, CArchive::store);
+						CString desc(pZone->GetDesc());
+						arch << desc;
+						arch.Close();
+						pOleDataSource->CacheGlobalData(CZoneActor::clipFormat, sf.Detach());
 					}
-					return true;
 				}
+				return true;
 			}
 		}
 	}
@@ -2291,47 +2258,44 @@ bool CPropertyTreeControlBar::IsNodeCopyable(CTreeCtrlNode copyNode, COleDataSou
 		{
 			if (CICChemZoneActor* pZone = CICChemZoneActor::SafeDownCast((vtkObject*)copyNode.GetData()))
 			{
-				if (pZone->GetPolyhedronType() != Polyhedron::PRISM)
+				if (pOleDataSource)
 				{
-					if (pOleDataSource)
+					// CF_TEXT
+					//
+					oss << pZone->GetData();
+					oss << "\n";
+
+					std::string s = oss.str();
+					HGLOBAL hGlobal = ::GlobalAlloc(GMEM_MOVEABLE, s.length() + 1);
+					LPTSTR pData = (LPTSTR)::GlobalLock(hGlobal);
+
+					::lstrcpy(pData, s.c_str());
+					::GlobalUnlock(hGlobal);
+
+					pOleDataSource->CacheGlobalData(CF_TEXT, hGlobal);
+
+					// copy ChemIC clip format
+					//
+					CSharedFile globFile;
+					CArchive ar(&globFile, CArchive::store);
+					pZone->GetData().Serialize(ar);
+					ar.Close();
+
+					pOleDataSource->CacheGlobalData(CChemIC::clipFormat, globFile.Detach());
+
+					// Description (CZoneActor::clipFormat)
+					//
+					if (pZone->GetDesc())
 					{
-						// CF_TEXT
-						//
-						oss << pZone->GetData();
-						oss << "\n";
-
-						std::string s = oss.str();
-						HGLOBAL hGlobal = ::GlobalAlloc(GMEM_MOVEABLE, s.length() + 1);
-						LPTSTR pData = (LPTSTR)::GlobalLock(hGlobal);
-
-						::lstrcpy(pData, s.c_str());
-						::GlobalUnlock(hGlobal);
-
-						pOleDataSource->CacheGlobalData(CF_TEXT, hGlobal);
-
-						// copy ChemIC clip format
-						//
-						CSharedFile globFile;
-						CArchive ar(&globFile, CArchive::store);
-						pZone->GetData().Serialize(ar);
-						ar.Close();
-
-						pOleDataSource->CacheGlobalData(CChemIC::clipFormat, globFile.Detach());
-
-						// Description (CZoneActor::clipFormat)
-						//
-						if (pZone->GetDesc())
-						{
-							CSharedFile sf;
-							CArchive arch(&sf, CArchive::store);
-							CString desc(pZone->GetDesc());
-							arch << desc;
-							arch.Close();
-							pOleDataSource->CacheGlobalData(CZoneActor::clipFormat, sf.Detach());
-						}
+						CSharedFile sf;
+						CArchive arch(&sf, CArchive::store);
+						CString desc(pZone->GetDesc());
+						arch << desc;
+						arch.Close();
+						pOleDataSource->CacheGlobalData(CZoneActor::clipFormat, sf.Detach());
 					}
-					return true;
 				}
+				return true;
 			}
 		}
 	}
@@ -2342,49 +2306,46 @@ bool CPropertyTreeControlBar::IsNodeCopyable(CTreeCtrlNode copyNode, COleDataSou
 		{
 			if (CBCZoneActor* pZone = CBCZoneActor::SafeDownCast((vtkObject*)copyNode.GetData()))
 			{
-				if (pZone->GetPolyhedronType() != Polyhedron::PRISM)
+				if (pOleDataSource)
 				{
-					if (pOleDataSource)
+					CBC bc = pZone->GetBC();
+
+					// CF_TEXT
+					//
+					oss << bc;
+					oss << "\n";
+
+					std::string s = oss.str();
+					HGLOBAL hGlobal = ::GlobalAlloc(GMEM_MOVEABLE, s.length() + 1);
+					LPTSTR pData = (LPTSTR)::GlobalLock(hGlobal);
+
+					::lstrcpy(pData, s.c_str());
+					::GlobalUnlock(hGlobal);
+
+					pOleDataSource->CacheGlobalData(CF_TEXT, hGlobal);
+
+					// copy BC clip format
+					//
+					CSharedFile globFile;
+					CArchive ar(&globFile, CArchive::store);
+					bc.Serialize(ar);
+					ar.Close();
+
+					pOleDataSource->CacheGlobalData(CBC::clipFormat, globFile.Detach());
+
+					// Description (CZoneActor::clipFormat)
+					//
+					if (pZone->GetDesc())
 					{
-						CBC bc = pZone->GetBC();
-
-						// CF_TEXT
-						//
-						oss << bc;
-						oss << "\n";
-
-						std::string s = oss.str();
-						HGLOBAL hGlobal = ::GlobalAlloc(GMEM_MOVEABLE, s.length() + 1);
-						LPTSTR pData = (LPTSTR)::GlobalLock(hGlobal);
-
-						::lstrcpy(pData, s.c_str());
-						::GlobalUnlock(hGlobal);
-
-						pOleDataSource->CacheGlobalData(CF_TEXT, hGlobal);
-
-						// copy BC clip format
-						//
-						CSharedFile globFile;
-						CArchive ar(&globFile, CArchive::store);
-						bc.Serialize(ar);
-						ar.Close();
-
-						pOleDataSource->CacheGlobalData(CBC::clipFormat, globFile.Detach());
-
-						// Description (CZoneActor::clipFormat)
-						//
-						if (pZone->GetDesc())
-						{
-							CSharedFile sf;
-							CArchive arch(&sf, CArchive::store);
-							CString desc(pZone->GetDesc());
-							arch << desc;
-							arch.Close();
-							pOleDataSource->CacheGlobalData(CZoneActor::clipFormat, sf.Detach());
-						}
+						CSharedFile sf;
+						CArchive arch(&sf, CArchive::store);
+						CString desc(pZone->GetDesc());
+						arch << desc;
+						arch.Close();
+						pOleDataSource->CacheGlobalData(CZoneActor::clipFormat, sf.Detach());
 					}
-					return true;
 				}
+				return true;
 			}
 		}
 	}
@@ -2968,6 +2929,7 @@ void CPropertyTreeControlBar::OnEditCut()
 void CPropertyTreeControlBar::OnUpdateEditClear(CCmdUI *pCmdUI)
 {
 	// Add your command update UI handler code here
+	ASSERT(FALSE); // Now handled by OnUpdateEditCut
 	pCmdUI->Enable(TRUE);
 }
 
@@ -3293,5 +3255,17 @@ void CPropertyTreeControlBar::OnEditProperties()
 	{
 		CTreeCtrlNode node = pTreeCtrlEx->GetSelectedItem();
 		this->IsNodeEditable(node, true);
+	}
+}
+
+void CPropertyTreeControlBar::OnNMRClk(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	CPoint pt(CWnd::GetCurrentMessage()->pt);
+	this->m_wndTree.ScreenToClient(&pt);
+	CTreeCtrlNode hitNode = this->m_wndTree.HitTest(pt);
+	if (hitNode != 0)
+	{
+		hitNode.Select();
+		this->m_wndTree.SetFocus();
 	}
 }

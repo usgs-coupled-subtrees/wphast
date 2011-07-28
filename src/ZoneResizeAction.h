@@ -24,8 +24,8 @@ protected:
 	CWPhastView   *m_pView;
 	CZoneActor    *m_pZone;
 	// vtkCubeSource *m_CubeSource;
-	float m_OriginalBounds[6];
-	float m_Bounds[6];
+	double m_OriginalBounds[6];
+	double m_Bounds[6];
 
 #ifdef USE_GET_LENGTHS_CENTER
 	// original values

@@ -2651,22 +2651,32 @@ void CGlobal::Serialize(Polyhedron **p, CArchive &ar)
 
 		if (Cube *c = dynamic_cast<Cube*>(*p))
 		{
+			ASSERT(t == Polyhedron::CUBE || t == Polyhedron::WEDGE || t == Polyhedron::GRID_DOMAIN);
 			ncs = c->Get_user_coordinate_system();
 			ar << ncs;
+
+			CZone z(*(*p)->Get_bounding_box());
+			z.Serialize(ar);
+
+			if (t == Polyhedron::WEDGE)
+			{
+				Wedge *w = static_cast<Wedge*>(*p);
+				CString c(srcWedgeSource::GetWedgeOrientationString(w->orientation).c_str());
+				ar << c;
+			}
+		}
+		else if (Prism *prism = dynamic_cast<Prism*>(*p))
+		{
+			ASSERT(t == Polyhedron::PRISM);
+			std::ostringstream oss;
+			oss.precision(DBL_DIG);
+			oss << (*prism);
+			CString sp(oss.str().c_str());
+			ar << sp;
 		}
 		else
 		{
 			ASSERT(FALSE);
-		}
-
-		CZone z(*(*p)->Get_bounding_box());
-		z.Serialize(ar);
-
-		if (t == Polyhedron::WEDGE)
-		{
-			Wedge *w = static_cast<Wedge*>(*p);
-			CString c(srcWedgeSource::GetWedgeOrientationString(w->orientation).c_str());
-			ar << c;
 		}
 
 	}
@@ -2676,33 +2686,62 @@ void CGlobal::Serialize(Polyhedron **p, CArchive &ar)
 
 		ar >> t;
 
-		ar >> ncs;
-		PHAST_Transform::COORDINATE_SYSTEM cs = static_cast<PHAST_Transform::COORDINATE_SYSTEM>(ncs);
-
-		CZone z;
-		z.Serialize(ar);
-
-		CString c;
-		if (t == Polyhedron::WEDGE)
+		if (t == Polyhedron::CUBE || t == Polyhedron::WEDGE || t == Polyhedron::GRID_DOMAIN)
 		{
-			ar >> c;
+			ar >> ncs;
+			PHAST_Transform::COORDINATE_SYSTEM cs = static_cast<PHAST_Transform::COORDINATE_SYSTEM>(ncs);
+
+			CZone z;
+			z.Serialize(ar);
+
+			CString c;
+			if (t == Polyhedron::WEDGE)
+			{
+				ar >> c;
+			}
+
+			switch (t)
+			{
+			case Polyhedron::GRID_DOMAIN:
+				(*p) = new Domain(&z);
+				ASSERT(cs == PHAST_Transform::GRID);
+				break;
+			case Polyhedron::CUBE:
+				(*p) = new Cube(&z, cs);
+				break;
+			case Polyhedron::WEDGE:
+				(*p) = new Wedge(&z, std::string(c), cs);
+				break;
+			default:
+				ASSERT(FALSE);
+				break;
+			}
 		}
-
-		switch (t)
+		else if (t == Polyhedron::PRISM)
 		{
-		case Polyhedron::GRID_DOMAIN:
-			(*p) = new Domain(&z);
-			ASSERT(cs == PHAST_Transform::GRID);
-			break;
-		case Polyhedron::CUBE:
-			(*p) = new Cube(&z, cs);
-			break;
-		case Polyhedron::WEDGE:
-			(*p) = new Wedge(&z, std::string(c), cs);
-			break;
-		default:
+			CString sp;
+			ar >> sp;
+
+			// load string into stream
+			std::string s(sp);
+			sp.Empty();
+			std::istringstream iss(s);
+
+			// read prism
+			std::string heading;
+			Prism *pp = new Prism();
+			std::getline(iss, heading);
+			ASSERT(heading == "\t-prism");
+			while(pp->Read(iss))
+			{
+				if (iss.rdstate() & std::ios::eofbit) break;
+				iss.clear();
+			}
+			(*p) = pp;
+		}
+		else
+		{
 			ASSERT(FALSE);
-			break;
 		}
 	}
 
@@ -4543,32 +4582,39 @@ double CGlobal::ComputeRadius(vtkRenderer *renderer)
 		double z;
 		double windowLowerLeft[4], windowUpperRight[4];
 		double *viewport = renderer->GetViewport();
+		if (!renderer->GetRenderWindow())
+		{
+			TRACE("WARNING GetRenderWindow is NULL in CGlobal::ComputeRadius\n");
+			return radius;
+		}
 		int *winSize = renderer->GetRenderWindow()->GetSize();
 		double focalPoint[4];
 
 		// get the focal point in world coordinates
 		//
-		vtkCamera *camera = renderer->GetActiveCamera();	
-		double cameraFP[4];
-		camera->GetFocalPoint((double*)cameraFP); cameraFP[3] = 1.0;
-
-		CGlobal::ComputeWorldToDisplay(renderer, cameraFP[0], cameraFP[1], cameraFP[2], focalPoint);
-
-		z = focalPoint[2];
-
-		double x = winSize[0] * viewport[0];
-		double y = winSize[1] * viewport[1];
-		CGlobal::ComputeDisplayToWorld(renderer, x, y, z, windowLowerLeft);
-
-		x = winSize[0] * viewport[2];
-		y = winSize[1] * viewport[3];
-		CGlobal::ComputeDisplayToWorld(renderer, x, y, z, windowUpperRight);
-
-		for (radius=0.0, i=0; i<3; ++i)
+		if (vtkCamera *camera = renderer->GetActiveCamera())
 		{
-			radius += (windowUpperRight[i] - windowLowerLeft[i]) * (windowUpperRight[i] - windowLowerLeft[i]);
+			double cameraFP[4];
+			camera->GetFocalPoint((double*)cameraFP); cameraFP[3] = 1.0;
+
+			CGlobal::ComputeWorldToDisplay(renderer, cameraFP[0], cameraFP[1], cameraFP[2], focalPoint);
+
+			z = focalPoint[2];
+
+			double x = winSize[0] * viewport[0];
+			double y = winSize[1] * viewport[1];
+			CGlobal::ComputeDisplayToWorld(renderer, x, y, z, windowLowerLeft);
+
+			x = winSize[0] * viewport[2];
+			y = winSize[1] * viewport[3];
+			CGlobal::ComputeDisplayToWorld(renderer, x, y, z, windowUpperRight);
+
+			for (radius=0.0, i=0; i<3; ++i)
+			{
+				radius += (windowUpperRight[i] - windowLowerLeft[i]) * (windowUpperRight[i] - windowLowerLeft[i]);
+			}
+			radius = ::sqrt(radius);
 		}
-		radius = ::sqrt(radius);
 	}
 	else
 	{

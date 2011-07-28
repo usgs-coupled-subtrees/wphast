@@ -47,7 +47,10 @@ inline CDelayRedraw::CDelayRedraw(CWnd *pWnd, CDocument *pDoc)
 		{
 			if (CWPhastView *pView = dynamic_cast<CWPhastView*>(this->m_pDoc->GetNextView(pos)))
 			{					
-				pView->GetInteractor()->SetEnableRender(false);
+				if (pView->GetInteractor())
+				{
+					pView->GetInteractor()->SetEnableRender(false);
+				}
 			}
 		}
 	}
@@ -61,7 +64,10 @@ inline CDelayRedraw::~CDelayRedraw(void)
 		{
 			if (CWPhastView *pView = dynamic_cast<CWPhastView*>(this->m_pDoc->GetNextView(pos)))
 			{					
-				pView->GetInteractor()->SetEnableRender(true);
+				if (pView->GetInteractor())
+				{
+					pView->GetInteractor()->SetEnableRender(true);
+				}
 			}
 		}
 	}

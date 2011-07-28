@@ -32,13 +32,10 @@ public:
 	// orientation=(0,0,0). NumberOfCloudPoints is set to 150.
 	// static CZoneActor *New();
 
-	void SetBounds(float xMin, float xMax, float yMin, float yMax, float zMin, float zMax);
-	void SetBounds(float xMin, float xMax, float yMin, float yMax, float zMin, float zMax, const CUnits& units);
-	void SetBounds(float bounds[6]);
-	void SetBounds(float bounds[6], const CUnits& rUnits);
+	void SetBounds(double xMin, double xMax, double yMin, double yMax, double zMin, double zMax, const CUnits& units);
+	void SetBounds(double bounds[6], const CUnits& rUnits);
 	void SetBounds(const CZone& rZone, const CUnits& rUnits);
 
-	virtual void SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits);
 	virtual void SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, const double origin[3], double angle);
 	virtual Polyhedron*& GetPolyhedron(void) = 0;
 
@@ -63,8 +60,8 @@ public:
 	void SetDefault(bool bDefault);
 	bool GetDefault(void)const;
 
-	void GetUserBounds(float bounds[6]);
-	float* GetUserBounds(void);
+	void GetUserBounds(double bounds[6]);
+	double* GetUserBounds(void);
 
 	void SetName(LPCTSTR name);
 	LPCTSTR GetName(void)const;
@@ -111,7 +108,7 @@ public:
 	HTREEITEM GetTreeItem(void)const;
 	HTREEITEM GetParentTreeItem(void)const;
 
-	void UpdateUserTransform(void);
+	void UpdateUserTransform(bool update_poly=true);
 
 	virtual void SetScale(double _arg1, double _arg2, double _arg3);
 	virtual void SetScale (double scale[3])
@@ -175,7 +172,7 @@ protected:
 	HTREEITEM          m_hInsertAfter;
 	DWORD_PTR          m_dwPrevSiblingItemData;
 
-	float              m_ActualBounds[6];
+	double             m_ActualBounds[6];
 
 	bool               m_bDefault;
 
