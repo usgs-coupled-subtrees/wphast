@@ -35,6 +35,6 @@ void CGridDeleteLineAction::Execute()
 
 void CGridDeleteLineAction::UnExecute()
 {
-	VERIFY(this->m_pGridActor->InsertLine(this->m_nGridIndex, this->m_dValue));
+	VERIFY(this->m_pGridActor->InsertLine(this->m_nGridIndex, this->m_dValue) != -1);
 	this->m_pWPhastDoc->UpdateGridDomain();
 }

@@ -490,8 +490,7 @@ void CGridActor::Setup(const CUnits& units)
 	vtkStructuredGrid *sgrid = vtkStructuredGrid::New();
 	sgrid->SetDimensions(this->m_gridKeyword.m_grid[0].count_coord, this->m_gridKeyword.m_grid[1].count_coord, this->m_gridKeyword.m_grid[2].count_coord);
 
-	vtkPoints *points = vtkPoints::New();
-	points->SetDataTypeToDouble();
+	vtkPoints *points = vtkPoints::New(VTK_DOUBLE);
 	points->Allocate(this->m_gridKeyword.m_grid[0].count_coord * this->m_gridKeyword.m_grid[1].count_coord * this->m_gridKeyword.m_grid[2].count_coord);
 
 	// load grid points
@@ -539,31 +538,32 @@ void CGridActor::Setup(const CUnits& units)
 				if (i == 0 && j == 0)
 				{
 					// this insert is ok
-					VERIFY(this->ValueToIndex[2].insert(std::map<float, int>::value_type(t[2], k)).second);
+					VERIFY(this->ValueToIndex[2].insert(std::map<double, int>::value_type(t[2], k)).second);
 #if defined(_DEBUG)
-					std::map<float, int>::iterator setIter = this->ValueToIndex[2].find(t[2]);
+					std::map<double, int>::iterator setIter = this->ValueToIndex[2].find(t[2]);
 					ASSERT(setIter != this->ValueToIndex[2].end());
 #endif
 				}
 				if (i == 0 && k == 0)
 				{
 					// this insert is ok
-					VERIFY(this->ValueToIndex[1].insert(std::map<float, int>::value_type(t[1], j)).second);
+					VERIFY(this->ValueToIndex[1].insert(std::map<double, int>::value_type(t[1], j)).second);
 #if defined(_DEBUG)
-					std::map<float, int>::iterator setIter = this->ValueToIndex[1].find(t[1]);
+					std::map<double, int>::iterator setIter = this->ValueToIndex[1].find(t[1]);
 					ASSERT(setIter != this->ValueToIndex[1].end());
 #endif
 				}
 				if (j == 0 && k == 0)
 				{
 					// this insert is ok
-					VERIFY(this->ValueToIndex[0].insert(std::map<float, int>::value_type(t[0], i)).second);
+					VERIFY(this->ValueToIndex[0].insert(std::map<double, int>::value_type(t[0], i)).second);
 #if defined(_DEBUG)
-					std::map<float, int>::iterator setIter = this->ValueToIndex[0].find(t[0]);
+					std::map<double, int>::iterator setIter = this->ValueToIndex[0].find(t[0]);
 					ASSERT(setIter != this->ValueToIndex[0].end());
 #endif
 				}
 				points->InsertPoint(offset, t);
+				TRACE("%d = (%.*g, %.*g, %.*g)\n", offset, DBL_DIG, t[0], DBL_DIG, t[1], DBL_DIG, t[2]);
 #if defined(_DEBUG)
 				double tt[3];
 				points->GetPoint(offset, tt);
@@ -611,6 +611,42 @@ void CGridActor::Setup(const CUnits& units)
 	sgrid->Delete();
 
 	this->m_pFeatureEdges->SetInput(this->m_pGeometryFilter->GetOutput());
+
+	// load grid points
+	//
+	vtkDataSet* pDataSet = this->m_pPolyDataMapper->GetInput();
+	pDataSet->Update();
+	int n = pDataSet->GetNumberOfPoints();
+	ASSERT(n == this->m_gridKeyword.m_grid[0].count_coord * this->m_gridKeyword.m_grid[1].count_coord * this->m_gridKeyword.m_grid[2].count_coord);
+	double *p;
+
+	std::set<double> sets[3];
+	for (int i = 0; i < n; ++i)
+	{
+		p = pDataSet->GetPoint(i);
+		for (int j = 0; j < 3; ++j)
+		{
+			sets[j].insert(p[j]);
+		}
+	}
+
+	ASSERT(sets[0].size() == this->m_gridKeyword.m_grid[0].count_coord);
+	ASSERT(sets[1].size() == this->m_gridKeyword.m_grid[1].count_coord);
+	ASSERT(sets[2].size() == this->m_gridKeyword.m_grid[2].count_coord);
+
+	for (int i = 0; i < 3; ++i)
+	{
+		this->ValueToIndex[i].clear();
+		std::set<double>::iterator s = sets[i].begin();
+		for (int idx = 0; s != sets[i].end(); ++s, ++idx)
+		{
+			this->ValueToIndex[i].insert(std::map<double, int>::value_type(*s, idx));
+		}
+	}
+
+	ASSERT(this->ValueToIndex[0].size() == this->m_gridKeyword.m_grid[0].count_coord);
+	ASSERT(this->ValueToIndex[1].size() == this->m_gridKeyword.m_grid[1].count_coord);
+	ASSERT(this->ValueToIndex[2].size() == this->m_gridKeyword.m_grid[2].count_coord);
 }
 
 void CGridActor::GetDefaultZone(zone& rZone)
@@ -944,6 +980,26 @@ void CGridActor::OnMouseMove()
 		double* pt = this->LinePicker->GetPickPosition();
 		if (vtkDataSet* pDataSet = this->LinePicker->GetDataSet())
 		{
+			ASSERT(pDataSet == this->m_pPolyDataMapper->GetInput());
+
+#ifdef _DEBUG
+			int npts = pDataSet->GetNumberOfPoints();
+			int ncells = pDataSet->GetNumberOfCells();
+			for (int k = 0; k < this->m_gridKeyword.m_grid[2].count_coord; ++k)
+			{
+				for (int j = 0; j < this->m_gridKeyword.m_grid[1].count_coord; ++j)
+				{
+					for (int i = 0; i < this->m_gridKeyword.m_grid[0].count_coord; ++i)
+					{
+						int kOffset = k * this->m_gridKeyword.m_grid[0].count_coord * this->m_gridKeyword.m_grid[1].count_coord;
+						int jOffset = j * this->m_gridKeyword.m_grid[0].count_coord;
+						int offset = i + jOffset + kOffset;
+						double *pp = pDataSet->GetPoint(offset);
+						TRACE("%d = (%.*g, %.*g, %.*g)\n", offset, DBL_DIG, pp[0], DBL_DIG, pp[1], DBL_DIG, pp[2]);
+					}
+				}
+			}
+#endif
 			vtkCell* pCell = pDataSet->GetCell(n);
 			if (pCell->GetCellType() == VTK_LINE)
 			{
@@ -953,6 +1009,8 @@ void CGridActor::OnMouseMove()
 					pPoints->GetPoint(0, this->CurrentPoint);
 					double* pt0 = this->CurrentPoint;
 					double* pt1 = pPoints->GetPoint(1);
+
+					TRACE("this->CurrentPoint = (%.*g, %.*g, %.*g)\n", DBL_DIG, this->CurrentPoint[0], DBL_DIG, this->CurrentPoint[1], DBL_DIG, this->CurrentPoint[2]);
 
 					ATLTRACE2(GRIDACTOR, 0, "pt0[0] =  %.*g, pt0[1] =  %.*g, pt0[2] =  %.*g\n", DBL_DIG, pt0[0], DBL_DIG, pt0[1], DBL_DIG, pt0[2]);
 					ATLTRACE2(GRIDACTOR, 0, "pt1[0] =  %.*g, pt1[1] =  %.*g, pt1[2] =  %.*g\n", DBL_DIG, pt1[0], DBL_DIG, pt1[1], DBL_DIG, pt1[2]);
@@ -1176,7 +1234,7 @@ void CGridActor::OnKeyPress()
 		if (::strcmp(keysym, "Delete") == 0 && this->AxisIndex != -1)
 		{
 			this->PlaneIndex = -1;
-			std::map<float, int>::iterator i = this->ValueToIndex[this->AxisIndex].find(this->CurrentPoint[this->AxisIndex]);
+			std::map<double, int>::iterator i = this->ValueToIndex[this->AxisIndex].find(this->CurrentPoint[this->AxisIndex]);
 			if (i != this->ValueToIndex[this->AxisIndex].end())
 			{
 				if (this->m_gridKeyword.m_grid[this->AxisIndex].count_coord > 2)
@@ -1311,7 +1369,7 @@ void CGridActor::OnEndInteraction(vtkObject* object)
 
 			// lookup current point and convert to grid index
 			//
-			std::map<float, int>::iterator setIter = this->ValueToIndex[this->AxisIndex].find(this->CurrentPoint[this->AxisIndex]);
+			std::map<double, int>::iterator setIter = this->ValueToIndex[this->AxisIndex].find(this->CurrentPoint[this->AxisIndex]);
 			if (setIter != this->ValueToIndex[this->AxisIndex].end())
 			{
 				int originalPlaneIndex = setIter->second;
@@ -1323,10 +1381,17 @@ void CGridActor::OnEndInteraction(vtkObject* object)
 				double input_to_si = (this->AxisIndex == 2) ? this->m_units.vertical.input_to_si : this->m_units.horizontal.input_to_si;
 				double value = this->PlaneWidget->GetOrigin()[this->AxisIndex] / (this->GetScale()[this->AxisIndex] * input_to_si);
 
-				this->PlaneIndex = this->InsertLine(this->AxisIndex, value);
+				if (this->PlaneWidget->GetOrigin()[this->AxisIndex] == this->CurrentPoint[this->AxisIndex])
+				{
+					this->PlaneIndex = -1;
+				}
+				else
+				{
+					this->PlaneIndex = this->InsertLine(this->AxisIndex, value);
+				}
 				if (bMoving)
 				{
-					std::map<float, int>::iterator setIter = this->ValueToIndex[this->AxisIndex].find(this->CurrentPoint[this->AxisIndex]);
+					std::map<double, int>::iterator setIter = this->ValueToIndex[this->AxisIndex].find(this->CurrentPoint[this->AxisIndex]);
 					if (setIter != this->ValueToIndex[this->AxisIndex].end())
 					{
 						originalPlaneIndex = setIter->second;
@@ -1521,7 +1586,14 @@ BOOL CGridActor::DeleteLine(int nAxisIndex, int nPlaneIndex)
 			VERIFY(coordinates.erase(grid.coord[nPlaneIndex]) == 1);
 
 			// insert new coordinates
-			this->m_gridKeyword.m_grid[nAxisIndex].insert(coordinates.begin(), coordinates.end());
+			if (this->m_gridKeyword.m_grid[nAxisIndex].uniform && (nPlaneIndex == 0 || nPlaneIndex == this->m_gridKeyword.m_grid[nAxisIndex].count_coord - 1))
+			{
+				this->m_gridKeyword.m_grid[nAxisIndex].SetUniformRange(*coordinates.begin(), *coordinates.rbegin(), this->m_gridKeyword.m_grid[nAxisIndex].count_coord - 1);
+			}
+			else
+			{
+				this->m_gridKeyword.m_grid[nAxisIndex].insert(coordinates.begin(), coordinates.end());
+			}
 
 			// update grid data
 			this->Setup(this->m_units);

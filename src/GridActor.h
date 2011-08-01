@@ -176,7 +176,7 @@ protected:
 	int                   AxisIndex;
 	int                   PlaneIndex;
 	double                CurrentPoint[3];
-	std::map<float, int>  ValueToIndex[3];
+	std::map<double, int> ValueToIndex[3];
 
 
 	CGridKeyword        m_gridKeyword;
