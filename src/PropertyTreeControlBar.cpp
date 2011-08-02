@@ -122,7 +122,7 @@ BEGIN_MESSAGE_MAP(CPropertyTreeControlBar, CSizingControlBarCFVS7)
 	ON_COMMAND(ID_EDIT_PASTE, OnEditPaste)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_CUT, OnUpdateEditCut)
 	ON_COMMAND(ID_EDIT_CUT, OnEditCut)
-	ON_UPDATE_COMMAND_UI(ID_EDIT_CLEAR, OnUpdateEditCut)
+	ON_UPDATE_COMMAND_UI(ID_EDIT_CLEAR, OnUpdateEditClear)
 	ON_COMMAND(ID_EDIT_CLEAR, OnEditClear)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_PROPERTIES, &CPropertyTreeControlBar::OnUpdateEditProperties)
 	ON_COMMAND(ID_EDIT_PROPERTIES, &CPropertyTreeControlBar::OnEditProperties)
@@ -1925,6 +1925,42 @@ bool CPropertyTreeControlBar::IsNodeDraggable(CTreeCtrlNode dragNode, COleDataSo
 		}
 		return false;
 	}
+
+	if (dragNode.GetParent() == this->GetDrainsNode())
+	{
+		if (dragNode.GetData())
+		{
+			if (CDrainActor *pDrainActor = CDrainActor::SafeDownCast((vtkObject*)dragNode.GetData()))
+			{
+				if (pOleDataSource)
+				{
+					std::ostringstream oss;
+					oss << pDrainActor->GetDrain();
+
+					std::string s = oss.str();
+					HGLOBAL hGlobal = ::GlobalAlloc(GMEM_MOVEABLE, s.length() + 1);
+					LPTSTR pData = (LPTSTR)::GlobalLock(hGlobal);
+
+					::lstrcpy(pData, s.c_str());
+					::GlobalUnlock(hGlobal);
+
+					pOleDataSource->CacheGlobalData(this->m_cfPID, hGlobal);
+					pOleDataSource->CacheGlobalData(CF_TEXT, hGlobal);
+				}
+				return true;
+			}
+			else
+			{
+				ASSERT(FALSE);
+			}
+		}
+		else
+		{
+			ASSERT(FALSE);
+		}
+		return false;
+	}
+
 	return false;
 }
 
@@ -2424,6 +2460,43 @@ bool CPropertyTreeControlBar::IsNodeCopyable(CTreeCtrlNode copyNode, COleDataSou
 		}
 	}
 
+	if (copyNode.GetParent() == this->GetDrainsNode())
+	{
+		if (copyNode.GetData())
+		{
+			if (CDrainActor* pDrainActor = CDrainActor::SafeDownCast((vtkObject*)copyNode.GetData()))
+			{
+				if (pOleDataSource)
+				{
+					CDrain drain = pDrainActor->GetDrain();
+
+					// CF_TEXT
+					//
+					oss << drain;
+
+					std::string s = oss.str();
+					HGLOBAL hGlobal = ::GlobalAlloc(GMEM_MOVEABLE, s.length() + 1);
+					LPTSTR pData = (LPTSTR)::GlobalLock(hGlobal);
+
+					::lstrcpy(pData, s.c_str());
+					::GlobalUnlock(hGlobal);
+
+					pOleDataSource->CacheGlobalData(CF_TEXT, hGlobal);
+
+					// copy BC clip format
+					//
+					CSharedFile globFile;
+					CArchive ar(&globFile, CArchive::store);
+					drain.Serialize(ar);
+					ar.Close();
+
+					pOleDataSource->CacheGlobalData(CDrain::clipFormat, globFile.Detach());
+				}
+				return true;
+			}
+		}
+	}
+
 	return false;
 }
 
@@ -2515,9 +2588,12 @@ bool CPropertyTreeControlBar::IsNodePasteable(CTreeCtrlNode pasteNode, bool bDoP
 	{
 		return this->IsNodePasteableRiver(pasteNode, bDoPaste);
 	}
+	else if (pasteNode.IsNodeAncestor(this->GetDrainsNode()))
+	{
+		return this->IsNodePasteableDrain(pasteNode, bDoPaste);
+	}
 	else if (pasteNode.IsNodeAncestor(this->GetZoneFlowRatesNode()))
 	{
-// COMMENT: {2/19/2009 8:43:24 PM}		return this->IsNodePasteableRiver(pasteNode, bDoPaste);
 		return this->IsNodePasteable<CZoneFlowRateZoneActor, Zone_budget>(this->GetZoneFlowRatesNode(), pasteNode, bDoPaste);
 	}
 	return false;
@@ -2614,8 +2690,58 @@ bool CPropertyTreeControlBar::IsNodePasteableRiver(CTreeCtrlNode pasteNode, bool
 					}
 				}
 				river.n_user = pWPhastDoc->GetNextRiverNumber();
-				//CRiverCreateAction* pAction = new CRiverCreateAction(pWPhastDoc, river, after);
 				CPointConnectorCreateAction<CRiverActor, CRiver>* pAction = new CPointConnectorCreateAction<CRiverActor, CRiver>(pWPhastDoc, river, after);
+
+				pWPhastDoc->Execute(pAction);
+			}
+		}
+		return true;
+	}
+	return false;
+}
+
+bool CPropertyTreeControlBar::IsNodePasteableDrain(CTreeCtrlNode pasteNode, bool bDoPaste)
+{
+	if (!(HTREEITEM)pasteNode) return false;
+
+	CTreeCtrlNode headNode = this->GetDrainsNode();
+	if (!(HTREEITEM)headNode) return false;
+
+	CLIPFORMAT type = this->GetNativeClipFormat();
+	if (type == CDrain::clipFormat && pasteNode.IsNodeAncestor(headNode))
+	{
+		if (bDoPaste)
+		{
+			COleDataObject dataObject;
+			VERIFY(dataObject.AttachClipboard());
+			HGLOBAL hGlob = dataObject.GetGlobalData(type);
+			if (hGlob == NULL) return false;
+
+			CSharedFile globFile;
+			globFile.SetHandle(hGlob, FALSE);
+			CArchive ar(&globFile, CArchive::load);
+
+			CDrain drain;
+			drain.Serialize(ar);
+			ar.Close();
+
+			if (CWPhastDoc *pWPhastDoc = this->GetDocument())
+			{
+				CTreeCtrlNode after(TVI_LAST, this->GetTreeCtrlEx());
+				if (pasteNode != headNode)
+				{
+					while (pasteNode.GetParent() != headNode)
+					{
+						pasteNode = pasteNode.GetParent();
+						if (!pasteNode) break;
+					}
+					if (pasteNode && pasteNode.GetParent() == headNode)
+					{
+						after = pasteNode;
+					}
+				}
+				drain.n_user = pWPhastDoc->GetNextDrainNumber();
+				CPointConnectorCreateAction<CDrainActor, CDrain>* pAction = new CPointConnectorCreateAction<CDrainActor, CDrain>(pWPhastDoc, drain, after);
 
 				pWPhastDoc->Execute(pAction);
 			}
@@ -2928,9 +3054,86 @@ void CPropertyTreeControlBar::OnEditCut()
 
 void CPropertyTreeControlBar::OnUpdateEditClear(CCmdUI *pCmdUI)
 {
-	// Add your command update UI handler code here
-	ASSERT(FALSE); // Now handled by OnUpdateEditCut
-	pCmdUI->Enable(TRUE);
+	if (CTreeCtrlEx *pTreeCtrlEx = this->GetTreeCtrlEx())
+	{
+		CTreeCtrlNode sel = pTreeCtrlEx->GetSelectedItem();
+		if (this->IsNodeDraggable(sel, NULL) && this->IsNodeCopyable(sel, NULL))
+		{
+			pCmdUI->Enable(TRUE);
+			return;
+		}
+
+		// RIVERS
+		//
+		if (sel.IsNodeAncestor(this->GetRiversNode()))
+		{
+			if (sel != this->GetRiversNode())
+			{
+				CTreeCtrlNode ptNode = sel;
+				while (sel.GetParent() != this->GetRiversNode())
+				{
+					sel = sel.GetParent();
+					if (!sel) break;
+				}
+
+				// determine if point is being deleted
+				//
+				int point = sel.GetIndex(ptNode) - 2;
+
+				if (sel && sel.GetData())
+				{
+					if (CRiverActor* pRiverActor = CRiverActor::SafeDownCast((vtkObject*)sel.GetData()))
+					{
+						CTreeCtrlNode parent = sel.GetParent();
+						if (CWPhastDoc* pDoc = this->GetDocument())
+						{
+							if (point >= 0)
+							{
+								pCmdUI->Enable(TRUE);
+								return;
+							}
+						}
+					}
+				}
+			}
+		}
+
+		// DRAINS
+		//
+		if (sel.IsNodeAncestor(this->GetDrainsNode()))
+		{
+			if (sel != this->GetDrainsNode())
+			{
+				CTreeCtrlNode ptNode = sel;
+				while (sel.GetParent() != this->GetDrainsNode())
+				{
+					sel = sel.GetParent();
+					if (!sel) break;
+				}
+
+				// determine if point is being deleted
+				//
+				int point = sel.GetIndex(ptNode) - 2;
+
+				if (sel && sel.GetData())
+				{
+					if (CDrainActor* pDrainActor = CDrainActor::SafeDownCast((vtkObject*)sel.GetData()))
+					{
+						CTreeCtrlNode parent = sel.GetParent();
+						if (CWPhastDoc* pDoc = this->GetDocument())
+						{
+							if (point >= 0)
+							{
+								pCmdUI->Enable(TRUE);
+								return;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	pCmdUI->Enable(FALSE);
 }
 
 void CPropertyTreeControlBar::OnEditClear()

@@ -149,6 +149,7 @@ protected:
 	bool IsNodePasteable(CTreeCtrlNode pasteNode, bool bDoPaste);
 	bool IsNodePasteableWell(CTreeCtrlNode pasteNode, bool bDoPaste);
 	bool IsNodePasteableRiver(CTreeCtrlNode pasteNode, bool bDoPaste);	
+	bool IsNodePasteableDrain(CTreeCtrlNode pasteNode, bool bDoPaste);	
 
 	template<typename ZT, typename DT>
 	bool IsNodePasteable(CTreeCtrlNode headNode, CTreeCtrlNode pasteNode, bool bDoPaste);
