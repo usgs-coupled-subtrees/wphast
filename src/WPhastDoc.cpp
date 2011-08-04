@@ -4468,7 +4468,19 @@ void CWPhastDoc::InternalAdd(CZoneActor *pZoneActor, bool bAdd, HTREEITEM hInser
 
 	if (bAdd)
 	{
-		this->Notify(0, WPN_SELCHANGED, 0, pZoneActor);
+		if (POSITION pos = this->GetFirstViewPosition())
+		{
+			if (CWPhastView *pView = dynamic_cast<CWPhastView*>(this->GetNextView(pos)))
+			{					
+				if (pView->GetInteractor())
+				{
+					if (pView->GetInteractor()->GetEnableRender())
+					{
+						this->Notify(0, WPN_SELCHANGED, 0, pZoneActor);
+					}
+				}
+			}
+		}
 	}
 
 	// render
