@@ -757,9 +757,6 @@ void CZoneActor::Serialize(bool bStoring, hid_t loc_id, const CWPhastDoc* pWPhas
 		std::string desc(*this->GetPolyhedron()->Get_description());
 		status = CGlobal::HDFSerializeString(bStoring, loc_id, szDesc, desc);
 		ASSERT(status >= 0 || desc.empty());
-
-		// TODO store opacity 
-
 	}
 	else
 	{
@@ -1235,9 +1232,6 @@ void CZoneActor::Serialize(bool bStoring, hid_t loc_id, const CWPhastDoc* pWPhas
 		std::string desc;
 		status = CGlobal::HDFSerializeString(bStoring, loc_id, szDesc, desc);
 		this->SetDesc(desc.c_str());
-
-		// TODO load opacity
-		ASSERT(this->GetProperty()->GetOpacity() == 0.3);
 	}
 }
 
