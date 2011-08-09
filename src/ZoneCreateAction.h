@@ -96,7 +96,7 @@ void CZoneCreateAction<T>::Create(CWPhastDoc* pDoc, CString name, Polyhedron* po
 	//
 	this->m_pZoneActor->SetDesc(desc);
 
-	this->m_pZoneActor->GetProperty()->SetOpacity(0.3);
+// COMMENT: {8/3/2011 4:26:08 PM}	this->m_pZoneActor->GetProperty()->SetOpacity(0.3);
 
 	if (nodeInsertAfter == TVI_LAST)
 	{
