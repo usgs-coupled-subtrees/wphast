@@ -1961,6 +1961,38 @@ bool CPropertyTreeControlBar::IsNodeDraggable(CTreeCtrlNode dragNode, COleDataSo
 		return false;
 	}
 
+	if (dragNode.GetParent() == this->GetZoneFlowRatesNode())
+	{
+		if (dragNode.GetData())
+		{
+			if (CZoneFlowRateZoneActor* pZone = CZoneFlowRateZoneActor::SafeDownCast((vtkObject*)dragNode.GetData()))
+			{
+				if (!pZone->GetDefault())
+				{
+					if (pOleDataSource)
+					{
+						std::ostringstream oss;
+						Zone_budget zb = pZone->GetData();
+						oss << zb;
+						oss << "\n";
+
+						std::string s = oss.str();
+						HGLOBAL hGlobal = ::GlobalAlloc(GMEM_MOVEABLE, s.length() + 1);
+						LPTSTR pData = (LPTSTR)::GlobalLock(hGlobal);
+
+						::lstrcpy(pData, s.c_str());
+						::GlobalUnlock(hGlobal);
+
+						pOleDataSource->CacheGlobalData(this->m_cfPID, hGlobal);
+						pOleDataSource->CacheGlobalData(CF_TEXT, hGlobal);
+					}
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
 	return false;
 }
 
@@ -2409,7 +2441,7 @@ bool CPropertyTreeControlBar::IsNodeCopyable(CTreeCtrlNode copyNode, COleDataSou
 
 					pOleDataSource->CacheGlobalData(CF_TEXT, hGlobal);
 
-					// copy BC clip format
+					// copy clip format
 					//
 					CSharedFile globFile;
 					CArchive ar(&globFile, CArchive::store);
@@ -2446,7 +2478,7 @@ bool CPropertyTreeControlBar::IsNodeCopyable(CTreeCtrlNode copyNode, COleDataSou
 
 					pOleDataSource->CacheGlobalData(CF_TEXT, hGlobal);
 
-					// copy BC clip format
+					// copy clip format
 					//
 					CSharedFile globFile;
 					CArchive ar(&globFile, CArchive::store);
@@ -2483,7 +2515,7 @@ bool CPropertyTreeControlBar::IsNodeCopyable(CTreeCtrlNode copyNode, COleDataSou
 
 					pOleDataSource->CacheGlobalData(CF_TEXT, hGlobal);
 
-					// copy BC clip format
+					// copy clip format
 					//
 					CSharedFile globFile;
 					CArchive ar(&globFile, CArchive::store);
@@ -2491,6 +2523,43 @@ bool CPropertyTreeControlBar::IsNodeCopyable(CTreeCtrlNode copyNode, COleDataSou
 					ar.Close();
 
 					pOleDataSource->CacheGlobalData(CDrain::clipFormat, globFile.Detach());
+				}
+				return true;
+			}
+		}
+	}
+
+	if (copyNode.GetParent() == this->GetZoneFlowRatesNode())
+	{
+		if (copyNode.GetData())
+		{
+			if (CZoneFlowRateZoneActor* pZoneFlowRateZoneActor = CZoneFlowRateZoneActor::SafeDownCast((vtkObject*)copyNode.GetData()))
+			{
+				if (pOleDataSource)
+				{
+					Zone_budget zone_budget = pZoneFlowRateZoneActor->GetData();
+
+					// CF_TEXT
+					//
+					oss << zone_budget;
+
+					std::string s = oss.str();
+					HGLOBAL hGlobal = ::GlobalAlloc(GMEM_MOVEABLE, s.length() + 1);
+					LPTSTR pData = (LPTSTR)::GlobalLock(hGlobal);
+
+					::lstrcpy(pData, s.c_str());
+					::GlobalUnlock(hGlobal);
+
+					pOleDataSource->CacheGlobalData(CF_TEXT, hGlobal);
+
+					// copy clip format
+					//
+					CSharedFile globFile;
+					CArchive ar(&globFile, CArchive::store);
+					zone_budget.Serialize(ar);
+					ar.Close();
+
+					pOleDataSource->CacheGlobalData(Zone_budget::clipFormat, globFile.Detach());
 				}
 				return true;
 			}
@@ -2547,9 +2616,9 @@ CLIPFORMAT CPropertyTreeControlBar::GetZoneClipFormat(void)const
 		{
 			type = CBC::clipFormat;
 		}
-		else if (dataObject.IsDataAvailable(CZoneFlowRateZoneActor::clipFormat))
+		else if (dataObject.IsDataAvailable(Zone_budget::clipFormat))
 		{
-			type = CZoneFlowRateZoneActor::clipFormat;
+			type = Zone_budget::clipFormat;
 		}
 	}
 	return type;
@@ -2799,6 +2868,12 @@ bool CPropertyTreeControlBar::IsNodePasteable(CTreeCtrlNode headNode, CTreeCtrlN
 				CBC bc;
 				bc.Serialize(ar);
 				data.polyh = bc.polyh->clone();
+			}
+			else if (type == Zone_budget::clipFormat)
+			{
+				Zone_budget zb;
+				zb.Serialize(ar);
+				data.polyh = zb.polyh->clone();
 			}
 			else
 			{
