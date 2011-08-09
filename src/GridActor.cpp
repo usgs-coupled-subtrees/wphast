@@ -535,61 +535,14 @@ void CGridActor::Setup(const CUnits& units)
 				}
 				offset = i + jOffset + kOffset;
 				this->ScaleTransform->TransformPoint(x, t);
-				if (i == 0 && j == 0)
-				{
-					// this insert is ok
-					VERIFY(this->ValueToIndex[2].insert(std::map<double, int>::value_type(t[2], k)).second);
-#if defined(_DEBUG)
-					std::map<double, int>::iterator setIter = this->ValueToIndex[2].find(t[2]);
-					ASSERT(setIter != this->ValueToIndex[2].end());
-#endif
-				}
-				if (i == 0 && k == 0)
-				{
-					// this insert is ok
-					VERIFY(this->ValueToIndex[1].insert(std::map<double, int>::value_type(t[1], j)).second);
-#if defined(_DEBUG)
-					std::map<double, int>::iterator setIter = this->ValueToIndex[1].find(t[1]);
-					ASSERT(setIter != this->ValueToIndex[1].end());
-#endif
-				}
-				if (j == 0 && k == 0)
-				{
-					// this insert is ok
-					VERIFY(this->ValueToIndex[0].insert(std::map<double, int>::value_type(t[0], i)).second);
-#if defined(_DEBUG)
-					std::map<double, int>::iterator setIter = this->ValueToIndex[0].find(t[0]);
-					ASSERT(setIter != this->ValueToIndex[0].end());
-#endif
-				}
 				points->InsertPoint(offset, t);
-				TRACE("%d = (%.*g, %.*g, %.*g)\n", offset, DBL_DIG, t[0], DBL_DIG, t[1], DBL_DIG, t[2]);
-#if defined(_DEBUG)
-				double tt[3];
-				points->GetPoint(offset, tt);
-				for (size_t ii = 0; ii < 3; ++ii)
-				{
-					ASSERT(t[ii] == tt[ii]);
-				}
-#endif
 			}
 		}
 	}
-	ASSERT(this->ValueToIndex[0].size() == this->m_gridKeyword.m_grid[0].count_coord);
-	ASSERT(this->ValueToIndex[1].size() == this->m_gridKeyword.m_grid[1].count_coord);
-	ASSERT(this->ValueToIndex[2].size() == this->m_gridKeyword.m_grid[2].count_coord);
 
 	sgrid->SetPoints(points);
 	points->Delete();
 
-	for (i = 0; i < 3; ++i)
-	{
-		this->m_min[i] = this->ValueToIndex[i].begin()->first;
-		this->m_max[i] = this->ValueToIndex[i].rbegin()->first;
-	}
-
-	this->UpdatePoints();
-	
 	if (!this->PlaneWidget)
 	{
 		this->PlaneWidget = CGridLineWidget::New();
@@ -617,9 +570,7 @@ void CGridActor::Setup(const CUnits& units)
 	vtkDataSet* pDataSet = this->m_pPolyDataMapper->GetInput();
 	pDataSet->Update();
 	int n = pDataSet->GetNumberOfPoints();
-	ASSERT(n == this->m_gridKeyword.m_grid[0].count_coord * this->m_gridKeyword.m_grid[1].count_coord * this->m_gridKeyword.m_grid[2].count_coord);
 	double *p;
-
 	std::set<double> sets[3];
 	for (int i = 0; i < n; ++i)
 	{
@@ -647,6 +598,13 @@ void CGridActor::Setup(const CUnits& units)
 	ASSERT(this->ValueToIndex[0].size() == this->m_gridKeyword.m_grid[0].count_coord);
 	ASSERT(this->ValueToIndex[1].size() == this->m_gridKeyword.m_grid[1].count_coord);
 	ASSERT(this->ValueToIndex[2].size() == this->m_gridKeyword.m_grid[2].count_coord);
+
+	for (i = 0; i < 3; ++i)
+	{
+		this->m_min[i] = this->ValueToIndex[i].begin()->first;
+		this->m_max[i] = this->ValueToIndex[i].rbegin()->first;
+	}
+	this->UpdatePoints();
 }
 
 void CGridActor::GetDefaultZone(zone& rZone)
@@ -982,24 +940,6 @@ void CGridActor::OnMouseMove()
 		{
 			ASSERT(pDataSet == this->m_pPolyDataMapper->GetInput());
 
-#ifdef _DEBUG
-			int npts = pDataSet->GetNumberOfPoints();
-			int ncells = pDataSet->GetNumberOfCells();
-			for (int k = 0; k < this->m_gridKeyword.m_grid[2].count_coord; ++k)
-			{
-				for (int j = 0; j < this->m_gridKeyword.m_grid[1].count_coord; ++j)
-				{
-					for (int i = 0; i < this->m_gridKeyword.m_grid[0].count_coord; ++i)
-					{
-						int kOffset = k * this->m_gridKeyword.m_grid[0].count_coord * this->m_gridKeyword.m_grid[1].count_coord;
-						int jOffset = j * this->m_gridKeyword.m_grid[0].count_coord;
-						int offset = i + jOffset + kOffset;
-						double *pp = pDataSet->GetPoint(offset);
-						TRACE("%d = (%.*g, %.*g, %.*g)\n", offset, DBL_DIG, pp[0], DBL_DIG, pp[1], DBL_DIG, pp[2]);
-					}
-				}
-			}
-#endif
 			vtkCell* pCell = pDataSet->GetCell(n);
 			if (pCell->GetCellType() == VTK_LINE)
 			{
