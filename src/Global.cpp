@@ -2668,11 +2668,54 @@ void CGlobal::Serialize(Polyhedron **p, CArchive &ar)
 		else if (Prism *prism = dynamic_cast<Prism*>(*p))
 		{
 			ASSERT(t == Polyhedron::PRISM);
-			std::ostringstream oss;
-			oss.precision(DBL_DIG);
-			oss << (*prism);
-			CString sp(oss.str().c_str());
-			ar << sp;
+
+			// TOP
+			if (prism->top.Get_user_source_type() != Data_source::NONE)
+			{
+				std::ostringstream oss;
+				oss.precision(DBL_DIG);
+				oss << "\t\t-top       " << prism->top;
+
+				CString sp(oss.str().c_str());
+				ar << sp;
+			}
+			else
+			{
+				CString sp("");
+				ar << sp;
+			}
+
+			// BOTTOM
+			if (prism->bottom.Get_user_source_type() != Data_source::NONE)
+			{
+				std::ostringstream oss;
+				oss.precision(DBL_DIG);
+				oss << "\t\t-bottom       " << prism->bottom;
+
+				CString sp(oss.str().c_str());
+				ar << sp;
+			}
+			else
+			{
+				CString sp("");
+				ar << sp;
+			}
+
+			// PERIMETER
+			if (prism->perimeter.Get_user_source_type() != Data_source::NONE)
+			{
+				std::ostringstream oss;
+				oss.precision(DBL_DIG);
+				oss << "\t\t-perimeter       " << prism->perimeter;
+
+				CString sp(oss.str().c_str());
+				ar << sp;
+			}
+			else
+			{
+				CString sp("");
+				ar << sp;
+			}
 		}
 		else
 		{
@@ -2719,24 +2762,75 @@ void CGlobal::Serialize(Polyhedron **p, CArchive &ar)
 		}
 		else if (t == Polyhedron::PRISM)
 		{
-			CString sp;
-			ar >> sp;
-
-			// load string into stream
-			std::string s(sp);
-			sp.Empty();
-			std::istringstream iss(s);
-
-			// read prism
-			std::string heading;
 			Prism *pp = new Prism();
-			std::getline(iss, heading);
-			ASSERT(heading == "\t-prism");
-			while(pp->Read(iss))
+
+			// TOP
 			{
-				if (iss.rdstate() & std::ios::eofbit) break;
-				iss.clear();
+				CString sp;
+				ar >> sp;
+
+				if (!sp.IsEmpty())
+				{
+					// load string into stream
+					std::string s(sp);
+					sp.Empty();
+					std::istringstream iss(s);
+
+					// read top
+					while(pp->Read(iss))
+					{
+						if (iss.rdstate() & std::ios::eofbit) break;
+						iss.clear();
+					}
+					ASSERT(pp->top.Get_defined());
+				}
 			}
+
+			// BOTTOM
+			{
+				CString sp;
+				ar >> sp;
+
+				if (!sp.IsEmpty())
+				{
+					// load string into stream
+					std::string s(sp);
+					sp.Empty();
+					std::istringstream iss(s);
+
+					// read bottom
+					while(pp->Read(iss))
+					{
+						if (iss.rdstate() & std::ios::eofbit) break;
+						iss.clear();
+					}
+					ASSERT(pp->bottom.Get_defined());
+				}
+			}
+
+			// PERIMETER
+			{
+				CString sp;
+				ar >> sp;
+
+				if (!sp.IsEmpty())
+				{
+					// load string into stream
+					std::string s(sp);
+					sp.Empty();
+					std::istringstream iss(s);
+
+					// read perimeter
+					while(pp->Read(iss))
+					{
+						if (iss.rdstate() & std::ios::eofbit) break;
+						iss.clear();
+					}
+					ASSERT(pp->perimeter.Get_defined());
+				}
+			}
+
+			pp->Tidy();
 			(*p) = pp;
 		}
 		else
