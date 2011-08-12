@@ -28,6 +28,9 @@
 #include <sstream>
 #include <vtkAssemblyPath.h>
 #include <vtkAbstractPropPicker.h>
+#include <vtkSmartPointer.h>
+#include <vtkPointSource.h>
+
 
 #include "Global.h"
 #include "srcinput/Domain.h"
@@ -42,6 +45,7 @@
 #include <vtkDelaunay2D.h>
 #include <vtkCutter.h>
 
+#include "vtkDelaunay2DEx.h"
 
 #include "PropertyTreeControlBar.h"
 #include "BoxPropertiesDialogBar.h"
@@ -1757,7 +1761,7 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, co
 	}
 	else if (Prism *prism1 = dynamic_cast<Prism*>(this->GetPolyhedron()))
 	{
-		Prism *prism = dynamic_cast<Prism*>(prism1->clone());
+		std::auto_ptr<Prism> prism(dynamic_cast<Prism*>(prism1->clone()));
 		prism->Tidy();
 
 		ASSERT(prism1->perimeter == prism->perimeter);
@@ -1809,7 +1813,7 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, co
 		this->BottomOutlineActors.resize(npolys);
 		this->BottomOutlineFilters.resize(npolys);
 
-		const double EPS       = 0.0001;
+		const double EPS       = 0; // 0.0001
 		const double ONE_PLUS  = 1. + EPS;
 		const double ONE_MINUS = 1. - EPS;
 
@@ -1841,8 +1845,9 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, co
 				}
 			}
 
-			vtkPoints *pointsSide = vtkPoints::New(VTK_DOUBLE);
-			vtkCellArray *facesSide = vtkCellArray::New();
+			vtkSmartPointer<vtkPoints> pointsSide = vtkSmartPointer<vtkPoints>::New();
+			pointsSide->SetDataTypeToDouble();
+			vtkSmartPointer<vtkCellArray> facesSide = vtkSmartPointer<vtkCellArray>::New();
 
 			Point &back = pts.back();
 			Point &front = pts.front();
@@ -1852,27 +1857,27 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, co
 				pts.pop_back();
 			}
 
-			vtkCellArray *bottomCellArray = vtkCellArray::New();
+			vtkSmartPointer<vtkCellArray> bottomCellArray = vtkSmartPointer<vtkCellArray>::New();
 			bottomCellArray->InsertNextCell(static_cast<int>(pts.size()));
 
-			vtkCellArray *topCellArray = vtkCellArray::New();
+			vtkSmartPointer<vtkCellArray> topCellArray = vtkSmartPointer<vtkCellArray>::New();
 			topCellArray->InsertNextCell(static_cast<int>(pts.size()));
 
 			ASSERT(this->PrismSidesPolyData[poly] == 0);
 			this->PrismSidesPolyData[poly] = vtkPolyData::New();
 
 			// top delaunay
-			vtkDelaunay2D *delaunay2DTop = vtkDelaunay2D::New();
-			vtkPolyData *profileTop = vtkPolyData::New();
-			vtkPolyData *constrainTop = vtkPolyData::New();
+			vtkSmartPointer<vtkDelaunay2DEx> delaunay2DTop = vtkSmartPointer<vtkDelaunay2DEx>::New();
+			vtkSmartPointer<vtkPolyData>     profileTop    = vtkSmartPointer<vtkPolyData>::New();
 
 			// bottom delaunay
-			vtkDelaunay2D *delaunay2DBottom = vtkDelaunay2D::New();
-			vtkPolyData *profileBottom = vtkPolyData::New();
-			vtkPolyData *constrainBottom = vtkPolyData::New();
+			vtkSmartPointer<vtkDelaunay2DEx> delaunay2DBottom = vtkSmartPointer<vtkDelaunay2DEx>::New();
+			vtkSmartPointer<vtkPolyData>     profileBottom    = vtkSmartPointer<vtkPolyData>::New();
 
-			vtkPoints *pointsBottom = vtkPoints::New(VTK_DOUBLE);
-			vtkPoints *pointsTop = vtkPoints::New(VTK_DOUBLE);
+			vtkSmartPointer<vtkPoints> pointsBottom = vtkSmartPointer<vtkPoints>::New();
+			pointsBottom->SetDataTypeToDouble();
+			vtkSmartPointer<vtkPoints> pointsTop = vtkSmartPointer<vtkPoints>::New();
+			pointsTop->SetDataTypeToDouble();
 
 			Data_source::DATA_SOURCE_TYPE top_type = prism->top.Get_source_type();
 			Data_source::DATA_SOURCE_TYPE bot_type = prism->bottom.Get_source_type();
@@ -1908,11 +1913,11 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, co
 
 					// top of perimeter
 					pointsTop->InsertPoint(i, ptTop.x(), ptTop.y(), dTop);
-					topCellArray->InsertNextCell(i);
+					topCellArray->InsertCellPoint(i);
 
 					// bottom of perimeter
 					pointsBottom->InsertPoint(i, ptBottom.x(), ptBottom.y(), dBottom);
-					bottomCellArray->InsertNextCell(i);
+					bottomCellArray->InsertCellPoint(i);
 
 					// side points
 					pointsSide->InsertPoint(i*2, ptBottom.x(), ptBottom.y(), dBottom);
@@ -1975,7 +1980,7 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, co
 
 					// top of perimeter
 					pointsTop->InsertPoint(i, ptTop.x(), ptTop.y(), dTop);
-					topCellArray->InsertNextCell(i);
+					topCellArray->InsertCellPoint(i);
 
 					// bottom of perimeter
 					if (i % 2)
@@ -1986,7 +1991,7 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, co
 					{
 						pointsBottom->InsertPoint(i, ptBottom.x()*ONE_MINUS, ptBottom.y()*ONE_PLUS, dBottom);
 					}
-					bottomCellArray->InsertNextCell(i);
+					bottomCellArray->InsertCellPoint(i);
 
 					// side points
 					pointsSide->InsertPoint(i*2, ptBottom.x(), ptBottom.y(), dBottom);
@@ -2023,7 +2028,7 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, co
 				{
 					bot_poly = new PHAST_polygon(pts, prism->bottom.Get_coordinate_system());
 				}				
-				for (vtkIdType k = i; iterBottom != bottom_pts.end(); ++k, ++iterBottom)
+				for (vtkIdType k = i; iterBottom != bottom_pts.end(); ++iterBottom)
 				{
 					if (npolys > 1)
 					{
@@ -2038,6 +2043,7 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, co
 							{
 								pointsBottom->InsertPoint(k, xd[0]*ONE_MINUS, xd[1]*ONE_PLUS, xd[2]);
 							}
+							++k;
 						}
 					}
 					else
@@ -2053,6 +2059,7 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, co
 							{
 								pointsBottom->InsertPoint(k, xd[0]*ONE_MINUS, xd[1]*ONE_PLUS, xd[2]);
 							}
+							++k;
 						}
 					}
 				}
@@ -2061,20 +2068,16 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, co
 					delete bot_poly;
 				}
 
-				// set points used for delaunay triangulation
-				//
-				profileBottom->SetPoints(pointsBottom);
-
 				// set points and constraining polygon used for delaunay triangulation
 				//
-				constrainBottom->SetPoints(pointsBottom);
-				constrainBottom->SetPolys(bottomCellArray);
+				profileBottom->SetPoints(pointsBottom);
+				profileBottom->SetPolys(bottomCellArray);
 
 				// triangulate bottom
 				//
 				delaunay2DBottom->SetInput(profileBottom);
-				delaunay2DBottom->SetSource(constrainBottom);
-				delaunay2DBottom->Update();
+				delaunay2DBottom->SetSource(profileBottom);
+				CGlobal::UpdateDelaunay2DEx(delaunay2DBottom, pointsBottom);
 
 				// clean-up
 				if (bDestroy_nniBottom) delete nniBottom;
@@ -2118,11 +2121,11 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, co
 					{
 						pointsTop->InsertPoint(i, ptTop.x()*ONE_MINUS, ptTop.y()*ONE_PLUS, dTop);
 					}
-					topCellArray->InsertNextCell(i);
+					topCellArray->InsertCellPoint(i);
 
 					// bottom of perimeter
 					pointsBottom->InsertPoint(i, ptBottom.x(), ptBottom.y(), dBottom);
-					bottomCellArray->InsertNextCell(i);
+					bottomCellArray->InsertCellPoint(i);
 
 					// side points
 					pointsSide->InsertPoint(i*2, ptBottom.x(), ptBottom.y(), dBottom);
@@ -2159,7 +2162,7 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, co
 				{
 					top_poly = new PHAST_polygon(pts, prism->top.Get_coordinate_system());
 				}				
-				for (vtkIdType k = i; iterTop != top_pts.end(); ++k, ++iterTop)
+				for (vtkIdType k = i; iterTop != top_pts.end(); ++iterTop)
 				{
 					if (npolys > 1)
 					{
@@ -2174,6 +2177,7 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, co
 							{
 								pointsTop->InsertPoint(k, xd[0]*ONE_MINUS, xd[1]*ONE_PLUS, xd[2]);
 							}
+							++k;
 						}
 					}
 					else
@@ -2189,6 +2193,7 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, co
 							{
 								pointsTop->InsertPoint(k, xd[0]*ONE_MINUS, xd[1]*ONE_PLUS, xd[2]);
 							}
+							++k;
 						}
 					}
 				}
@@ -2200,17 +2205,13 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, co
 				// set points used for delaunay triangulation
 				//
 				profileTop->SetPoints(pointsTop);
-
-				// set points and constraining polygon used for delaunay triangulation
-				//
-				constrainTop->SetPoints(pointsTop);
-				constrainTop->SetPolys(topCellArray);
+				profileTop->SetPolys(topCellArray);
 
 				// triangulate 
 				//
 				delaunay2DTop->SetInput(profileTop);
-				delaunay2DTop->SetSource(constrainTop);
-				delaunay2DTop->Update();
+				delaunay2DTop->SetSource(profileTop);
+				CGlobal::UpdateDelaunay2DEx(delaunay2DTop, pointsTop);
 
 				// clean-up
 				if (bDestroy_nniTop) delete nniTop;
@@ -2257,7 +2258,7 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, co
 					{
 						pointsTop->InsertPoint(i, ptTop.x()*ONE_MINUS, ptTop.y()*ONE_PLUS, dTop);
 					}
-					topCellArray->InsertNextCell(i);
+					topCellArray->InsertCellPoint(i);
 
 					// bottom of perimeter
 					if (i % 2)
@@ -2268,7 +2269,7 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, co
 					{
 						pointsBottom->InsertPoint(i, ptBottom.x()*ONE_MINUS, ptBottom.y()*ONE_PLUS, dBottom);
 					}
-					bottomCellArray->InsertNextCell(i);
+					bottomCellArray->InsertCellPoint(i);
 
 					// side points
 					pointsSide->InsertPoint(i*2, ptBottom.x(), ptBottom.y(), dBottom);
@@ -2305,7 +2306,7 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, co
 				{
 					top_poly = new PHAST_polygon(pts, prism->top.Get_coordinate_system());
 				}				
-				for (vtkIdType k = i; iterTop != top_pts.end(); ++k, ++iterTop)
+				for (vtkIdType k = i; iterTop != top_pts.end(); ++iterTop)
 				{
 					if (npolys > 1)
 					{
@@ -2320,6 +2321,7 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, co
 							{
 								pointsTop->InsertPoint(k, xd[0]*ONE_MINUS, xd[1]*ONE_PLUS, xd[2]);
 							}
+							++k;
 						}
 					}
 					else
@@ -2335,6 +2337,7 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, co
 							{
 								pointsTop->InsertPoint(k, xd[0]*ONE_MINUS, xd[1]*ONE_PLUS, xd[2]);
 							}
+							++k;
 						}
 					}
 				}
@@ -2353,7 +2356,7 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, co
 				{
 					bot_poly = new PHAST_polygon(pts, prism->bottom.Get_coordinate_system());
 				}				
-				for (vtkIdType k = i; iterBottom != bottom_pts.end(); ++k, ++iterBottom)
+				for (vtkIdType k = i; iterBottom != bottom_pts.end(); ++iterBottom)
 				{
 					if (npolys > 1)
 					{
@@ -2368,6 +2371,7 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, co
 							{
 								pointsBottom->InsertPoint(k, xd[0]*ONE_MINUS, xd[1]*ONE_PLUS, xd[2]);
 							}
+							++k;
 						}
 					}
 					else
@@ -2383,6 +2387,7 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, co
 							{
 								pointsBottom->InsertPoint(k, xd[0]*ONE_MINUS, xd[1]*ONE_PLUS, xd[2]);
 							}
+							++k;
 						}
 					}
 				}
@@ -2391,37 +2396,27 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, co
 					delete bot_poly;
 				}
 
-				// set points used for delaunay triangulation
+				// set points and constraining polygon used for delaunay triangulation
 				//
 				profileTop->SetPoints(pointsTop);
+				profileTop->SetPolys(topCellArray);
 
 				// set points and constraining polygon used for delaunay triangulation
-				//
-				constrainTop->SetPoints(pointsTop);
-				constrainTop->SetPolys(topCellArray);
-
-				// set points used for delaunay triangulation
 				//
 				profileBottom->SetPoints(pointsBottom);
-
-				// set points and constraining polygon used for delaunay triangulation
-				//
-				constrainBottom->SetPoints(pointsBottom);
-				constrainBottom->SetPolys(bottomCellArray);
+				profileBottom->SetPolys(bottomCellArray);
 
 				// triangulate top
 				//
 				delaunay2DTop->SetInput(profileTop);
-				TRACE("profileTop= %d\n", profileTop->GetNumberOfPoints());
-				delaunay2DTop->SetSource(constrainTop);
-				delaunay2DTop->Update();
+				delaunay2DTop->SetSource(profileTop);
+				CGlobal::UpdateDelaunay2DEx(delaunay2DTop, pointsTop);
 
 				// triangulate bottom
 				//
 				delaunay2DBottom->SetInput(profileBottom);
-				TRACE("profileBottom= %d\n", profileBottom->GetNumberOfPoints());
-				delaunay2DBottom->SetSource(constrainBottom);
-				delaunay2DBottom->Update();
+				delaunay2DBottom->SetSource(profileBottom);
+				CGlobal::UpdateDelaunay2DEx(delaunay2DBottom, pointsBottom);
 
 				// clean-up
 				if (bDestroy_nniTop) delete nniTop;
@@ -2458,11 +2453,11 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, co
 			{
 				// solid actor
 				//
-				vtkPolyData *polyData = vtkPolyData::New();
+				vtkSmartPointer<vtkPolyData> polyData = vtkSmartPointer<vtkPolyData>::New();
 				polyData->SetPolys(topCellArray);
 				polyData->SetPoints(pointsTop);
 
-				vtkTriangleFilter *triangleFilter = vtkTriangleFilter::New();
+				vtkSmartPointer<vtkTriangleFilter> triangleFilter = vtkSmartPointer<vtkTriangleFilter>::New();
 				triangleFilter->SetInput(polyData);
 
 				ASSERT(this->TopFilters[poly] == 0);
@@ -2470,7 +2465,7 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, co
 				this->TopFilters[poly]->SetTransform(this->TopUnitsTransform);
 				this->TopFilters[poly]->SetInput(triangleFilter->GetOutput());
 
-				vtkPolyDataMapper *mapper = vtkPolyDataMapper::New();
+				vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
 				mapper->SetInput(this->TopFilters[poly]->GetOutput());
 
 				this->TopActors[poly]->SetMapper(mapper);
@@ -2483,17 +2478,11 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, co
 				this->TopOutlineFilters[poly]->SetTransform(this->TopUnitsTransform);
 				this->TopOutlineFilters[poly]->SetInput(polyData);
 
-				vtkPolyDataMapper *mapperOutline = vtkPolyDataMapper::New();
+				vtkSmartPointer<vtkPolyDataMapper> mapperOutline = vtkSmartPointer<vtkPolyDataMapper>::New();
 				mapperOutline->SetInput(this->TopOutlineFilters[poly]->GetOutput());
 
 				this->TopOutlineActors[poly]->SetMapper(mapperOutline);
 				this->AddPart(this->TopOutlineActors[poly]);
-
-				// clean-up 
-				polyData->Delete();
-				triangleFilter->Delete();
-				mapper->Delete();
-				mapperOutline->Delete();
 			}
 			else if (top_type == Data_source::ARCRASTER || top_type == Data_source::POINTS || top_type == Data_source::SHAPE || top_type == Data_source::XYZ)
 			{
@@ -2505,7 +2494,7 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, co
 				this->TopFilters[poly]->SetTransform(this->TopUnitsTransform);
 				this->TopFilters[poly]->SetInput(delaunay2DTop->GetOutput());
 
-				vtkPolyDataMapper *mapper = vtkPolyDataMapper::New();
+				vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
 				mapper->SetInput(this->TopFilters[poly]->GetOutput());
 
 				this->TopActors[poly]->SetMapper(mapper);
@@ -2513,15 +2502,11 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, co
 
 				// outline actor
 				//
-				vtkPolyDataMapper *mapperOutline = vtkPolyDataMapper::New();
+				vtkSmartPointer<vtkPolyDataMapper> mapperOutline = vtkSmartPointer<vtkPolyDataMapper>::New();
 				mapperOutline->SetInput(this->TopFilters[poly]->GetOutput());
 
 				this->TopOutlineActors[poly]->SetMapper(mapperOutline);
 				this->AddPart(this->TopOutlineActors[poly]);
-
-				// clean-up 
-				mapper->Delete();
-				mapperOutline->Delete();
 			}
 			else
 			{
@@ -2555,11 +2540,11 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, co
 			{
 				// solid actor
 				//
-				vtkPolyData *polyData = vtkPolyData::New();
+				vtkSmartPointer<vtkPolyData> polyData = vtkSmartPointer<vtkPolyData>::New();
 				polyData->SetPolys(bottomCellArray);
 				polyData->SetPoints(pointsBottom);
 
-				vtkTriangleFilter *triangleFilter = vtkTriangleFilter::New();
+				vtkSmartPointer<vtkTriangleFilter> triangleFilter = vtkSmartPointer<vtkTriangleFilter>::New();
 				triangleFilter->SetInput(polyData);
 
 				ASSERT(this->BottomFilters[poly] == 0);
@@ -2567,7 +2552,7 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, co
 				this->BottomFilters[poly]->SetTransform(this->BottomUnitsTransform);
 				this->BottomFilters[poly]->SetInput(triangleFilter->GetOutput());
 
-				vtkPolyDataMapper *mapper = vtkPolyDataMapper::New();
+				vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
 				mapper->SetInput(this->BottomFilters[poly]->GetOutput());
 
 				this->BottomActors[poly]->SetMapper(mapper);
@@ -2580,17 +2565,11 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, co
 				this->BottomOutlineFilters[poly]->SetTransform(this->BottomUnitsTransform);
 				this->BottomOutlineFilters[poly]->SetInput(polyData);
 
-				vtkPolyDataMapper *mapperOutline = vtkPolyDataMapper::New();
+				vtkSmartPointer<vtkPolyDataMapper> mapperOutline = vtkSmartPointer<vtkPolyDataMapper>::New();
 				mapperOutline->SetInput(this->BottomOutlineFilters[poly]->GetOutput());
 
 				this->BottomOutlineActors[poly]->SetMapper(mapperOutline);
 				this->AddPart(this->BottomOutlineActors[poly]);
-
-				// clean-up 
-				polyData->Delete();
-				triangleFilter->Delete();
-				mapper->Delete();
-				mapperOutline->Delete();
 			}
 			else if (bot_type == Data_source::ARCRASTER || bot_type == Data_source::POINTS || bot_type == Data_source::SHAPE || bot_type == Data_source::XYZ)
 			{
@@ -2602,7 +2581,7 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, co
 				this->BottomFilters[poly]->SetTransform(this->BottomUnitsTransform);
 				this->BottomFilters[poly]->SetInput(delaunay2DBottom->GetOutput());
 
-				vtkPolyDataMapper *mapper = vtkPolyDataMapper::New();
+				vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
 				mapper->SetInput(this->BottomFilters[poly]->GetOutput());
 
 				this->BottomActors[poly]->SetMapper(mapper);
@@ -2610,15 +2589,11 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, co
 
 				// outline actor
 				//
-				vtkPolyDataMapper *mapperOutline = vtkPolyDataMapper::New();
+				vtkSmartPointer<vtkPolyDataMapper> mapperOutline = vtkSmartPointer<vtkPolyDataMapper>::New();
 				mapperOutline->SetInput(this->BottomFilters[poly]->GetOutput());
 
 				this->BottomOutlineActors[poly]->SetMapper(mapperOutline);
 				this->AddPart(this->BottomOutlineActors[poly]);
-
-				// clean-up 
-				mapper->Delete();
-				mapperOutline->Delete();
 			}
 			else
 			{
@@ -2626,7 +2601,7 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, co
 			}
 
 			ASSERT(this->UnitsTransform);
-			vtkTransformPolyDataFilter *transformPolyDataFilter = vtkTransformPolyDataFilter::New();
+			vtkSmartPointer<vtkTransformPolyDataFilter> transformPolyDataFilter = vtkSmartPointer<vtkTransformPolyDataFilter>::New();
 			transformPolyDataFilter->SetTransform(this->UnitsTransform);
 			transformPolyDataFilter->SetInput(this->PrismSidesPolyData[poly]);
 
@@ -2662,30 +2637,9 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, co
 				ASSERT(this->Visibility == 0);
 			}
 
-			// cleanup top
-			topCellArray->Delete();
-			profileTop->Delete();
-			constrainTop->Delete();
-			delaunay2DTop->Delete();
-			pointsTop->Delete();
-
-			// cleanup bottom
-			bottomCellArray->Delete();
-			profileBottom->Delete();
-			constrainBottom->Delete();
-			delaunay2DBottom->Delete();
-			pointsBottom->Delete();
-
-			// cleanup sides (perimeter)
-			pointsSide->Delete();
-			facesSide->Delete();
-			transformPolyDataFilter->Delete();
-
 			// finally scale for units
 			this->Units = rUnits;
 			this->UpdateUserTransform(false);
-
-			delete prism;
 		}
 	}
 	TRACE("%s, out\n", __FUNCTION__);
