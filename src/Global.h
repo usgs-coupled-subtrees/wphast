@@ -3,6 +3,9 @@
 class vtkRenderer;
 class vtkRenderWindowInteractor;
 class vtkProp3D;
+class vtkTransform;
+class vtkDelaunay2DEx;
+class vtkPoints;
 
 #if defined(_MT)
 #define _HDF5USEDLL_     /* reqd for Multithreaded run-time library (Win32) */
@@ -28,7 +31,6 @@ class CWPhastDoc;
 class Data_source;
 class CGridElt;
 
-class vtkTransform;
 class CWorldTransform;
 class CTreePropSheetExSRC;
 class TreePropSheet::CTreePropSheetEx;
@@ -201,6 +203,8 @@ public:
 	static void DumpAndLoadPrism(const Prism &src, Prism &dest);
 	static void UpgradePrism(Prism &rPrism, const CGridKeyword &rGridKeyword, const CUnits &rUnits);
 	static void UpgradeDataSourcePoints(Data_source &rData_source, const CGridKeyword &rGridKeyword, const CUnits &rUnits);
+
+	static void UpdateDelaunay2DEx(vtkDelaunay2DEx *delaunay2DEx, vtkPoints *points);
 
 protected:
 	static double CGlobal::RadiusFactor;

@@ -1813,10 +1813,6 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, co
 		this->BottomOutlineActors.resize(npolys);
 		this->BottomOutlineFilters.resize(npolys);
 
-		const double EPS       = 0; // 0.0001
-		const double ONE_PLUS  = 1. + EPS;
-		const double ONE_MINUS = 1. - EPS;
-
 		for (size_t poly = 0; poly < npolys; ++poly)
 		{
 			vtkIdType i = 0;
@@ -1966,8 +1962,6 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, co
 				prism->bottom.Make_nni();
 				NNInterpolator* nniBottom = prism->bottom.Get_nni();
 
-				double* xd;
-
 				// foreach perimeter point determine top and bottom points
 				//
 				std::vector<Point>::reverse_iterator perim_pt_riter = pts.rbegin();
@@ -1983,14 +1977,7 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, co
 					topCellArray->InsertCellPoint(i);
 
 					// bottom of perimeter
-					if (i % 2)
-					{
-						pointsBottom->InsertPoint(i, ptBottom.x()*ONE_PLUS, ptBottom.y()*ONE_MINUS, dBottom);
-					}
-					else
-					{
-						pointsBottom->InsertPoint(i, ptBottom.x()*ONE_MINUS, ptBottom.y()*ONE_PLUS, dBottom);
-					}
+					pointsBottom->InsertPoint(i, ptBottom.x(), ptBottom.y(), dBottom);
 					bottomCellArray->InsertCellPoint(i);
 
 					// side points
@@ -2034,15 +2021,7 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, co
 					{
 						if (bot_poly->Point_in_polygon(*iterBottom))
 						{
-							xd = iterBottom->get_coord();
-							if (k % 2)
-							{
-								pointsBottom->InsertPoint(k, xd[0]*ONE_PLUS, xd[1]*ONE_MINUS, xd[2]);
-							}
-							else
-							{
-								pointsBottom->InsertPoint(k, xd[0]*ONE_MINUS, xd[1]*ONE_PLUS, xd[2]);
-							}
+							pointsBottom->InsertPoint(k, iterBottom->get_coord());
 							++k;
 						}
 					}
@@ -2050,15 +2029,7 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, co
 					{
 						if (prism->perimeter.Get_tree()->Point_in_polygon(*iterBottom))
 						{
-							xd = iterBottom->get_coord();
-							if (k % 2)
-							{
-								pointsBottom->InsertPoint(k, xd[0]*ONE_PLUS, xd[1]*ONE_MINUS, xd[2]);
-							}
-							else
-							{
-								pointsBottom->InsertPoint(k, xd[0]*ONE_MINUS, xd[1]*ONE_PLUS, xd[2]);
-							}
+							pointsBottom->InsertPoint(k, iterBottom->get_coord());
 							++k;
 						}
 					}
@@ -2113,14 +2084,7 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, co
 					dTop = nniTop->interpolate(ptTop);
 
 					// top of perimeter
-					if (i % 2)
-					{
-						pointsTop->InsertPoint(i, ptTop.x()*ONE_PLUS, ptTop.y()*ONE_MINUS, dTop);
-					}
-					else
-					{
-						pointsTop->InsertPoint(i, ptTop.x()*ONE_MINUS, ptTop.y()*ONE_PLUS, dTop);
-					}
+					pointsTop->InsertPoint(i, ptTop.x(), ptTop.y(), dTop);
 					topCellArray->InsertCellPoint(i);
 
 					// bottom of perimeter
@@ -2154,7 +2118,6 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, co
 
 				// add points from the top that are within the perimeter polygon
 				//
-				double* xd;
 				std::vector<Point> &top_pts = prism->top.Get_points();
 				std::vector<Point>::iterator iterTop = top_pts.begin();
 				PHAST_polygon *top_poly = NULL;
@@ -2168,15 +2131,7 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, co
 					{
 						if (top_poly->Point_in_polygon(*iterTop))
 						{
-							xd = iterTop->get_coord();
-							if (k % 2)
-							{
-								pointsTop->InsertPoint(k, xd[0]*ONE_PLUS, xd[1]*ONE_MINUS, xd[2]);
-							}
-							else
-							{
-								pointsTop->InsertPoint(k, xd[0]*ONE_MINUS, xd[1]*ONE_PLUS, xd[2]);
-							}
+							pointsTop->InsertPoint(k, iterTop->get_coord());
 							++k;
 						}
 					}
@@ -2184,15 +2139,7 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, co
 					{
 						if (prism->perimeter.Get_tree()->Point_in_polygon(*iterTop))
 						{
-							xd = iterTop->get_coord();
-							if (k % 2)
-							{
-								pointsTop->InsertPoint(k, xd[0]*ONE_PLUS, xd[1]*ONE_MINUS, xd[2]);
-							}
-							else
-							{
-								pointsTop->InsertPoint(k, xd[0]*ONE_MINUS, xd[1]*ONE_PLUS, xd[2]);
-							}
+							pointsTop->InsertPoint(k, iterTop->get_coord());
 							++k;
 						}
 					}
@@ -2250,25 +2197,11 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, co
 					dBottom = nniBottom->interpolate(ptBottom);
 
 					// top of perimeter
-					if (i % 2)
-					{
-						pointsTop->InsertPoint(i, ptTop.x()*ONE_PLUS, ptTop.y()*ONE_MINUS, dTop);
-					}
-					else
-					{
-						pointsTop->InsertPoint(i, ptTop.x()*ONE_MINUS, ptTop.y()*ONE_PLUS, dTop);
-					}
+					pointsTop->InsertPoint(i, ptTop.x(), ptTop.y(), dTop);
 					topCellArray->InsertCellPoint(i);
 
 					// bottom of perimeter
-					if (i % 2)
-					{
-						pointsBottom->InsertPoint(i, ptBottom.x()*ONE_PLUS, ptBottom.y()*ONE_MINUS, dBottom);
-					}
-					else
-					{
-						pointsBottom->InsertPoint(i, ptBottom.x()*ONE_MINUS, ptBottom.y()*ONE_PLUS, dBottom);
-					}
+					pointsBottom->InsertPoint(i, ptBottom.x(), ptBottom.y(), dBottom);
 					bottomCellArray->InsertCellPoint(i);
 
 					// side points
@@ -2298,7 +2231,6 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, co
 
 				// add points from the top that are within the perimeter polygon
 				//
-				double* xd;
 				std::vector<Point> &top_pts = prism->top.Get_points();
 				std::vector<Point>::iterator iterTop = top_pts.begin();
 				PHAST_polygon *top_poly = NULL;
@@ -2312,15 +2244,7 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, co
 					{
 						if (top_poly->Point_in_polygon(*iterTop))
 						{
-							xd = iterTop->get_coord();
-							if (k % 2)
-							{
-								pointsTop->InsertPoint(k, xd[0]*ONE_PLUS, xd[1]*ONE_MINUS, xd[2]);
-							}
-							else
-							{
-								pointsTop->InsertPoint(k, xd[0]*ONE_MINUS, xd[1]*ONE_PLUS, xd[2]);
-							}
+							pointsTop->InsertPoint(k, iterTop->get_coord());
 							++k;
 						}
 					}
@@ -2328,15 +2252,7 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, co
 					{
 						if (prism->perimeter.Get_tree()->Point_in_polygon(*iterTop))
 						{
-							xd = iterTop->get_coord();
-							if (k % 2)
-							{
-								pointsTop->InsertPoint(k, xd[0]*ONE_PLUS, xd[1]*ONE_MINUS, xd[2]);
-							}
-							else
-							{
-								pointsTop->InsertPoint(k, xd[0]*ONE_MINUS, xd[1]*ONE_PLUS, xd[2]);
-							}
+							pointsTop->InsertPoint(k, iterTop->get_coord());
 							++k;
 						}
 					}
@@ -2362,15 +2278,7 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, co
 					{
 						if (bot_poly->Point_in_polygon(*iterBottom))
 						{
-							xd = iterBottom->get_coord();
-							if (k % 2)
-							{
-								pointsBottom->InsertPoint(k, xd[0]*ONE_PLUS, xd[1]*ONE_MINUS, xd[2]);
-							}
-							else
-							{
-								pointsBottom->InsertPoint(k, xd[0]*ONE_MINUS, xd[1]*ONE_PLUS, xd[2]);
-							}
+							pointsBottom->InsertPoint(k, iterBottom->get_coord());
 							++k;
 						}
 					}
@@ -2378,15 +2286,7 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, co
 					{
 						if (prism->perimeter.Get_tree()->Point_in_polygon(*iterBottom))
 						{
-							xd = iterBottom->get_coord();
-							if (k % 2)
-							{
-								pointsBottom->InsertPoint(k, xd[0]*ONE_PLUS, xd[1]*ONE_MINUS, xd[2]);
-							}
-							else
-							{
-								pointsBottom->InsertPoint(k, xd[0]*ONE_MINUS, xd[1]*ONE_PLUS, xd[2]);
-							}
+							pointsBottom->InsertPoint(k, iterBottom->get_coord());
 							++k;
 						}
 					}

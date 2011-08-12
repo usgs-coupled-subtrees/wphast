@@ -1316,6 +1316,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\vtkDelaunay2DEx.cpp"
+				>
+			</File>
+			<File
 				RelativePath="vtkInteractorStyleImage2.cpp"
 				>
 			</File>
@@ -5673,6 +5677,10 @@
 			</File>
 			<File
 				RelativePath=".\vtkCellPicker2.h"
+				>
+			</File>
+			<File
+				RelativePath=".\vtkDelaunay2DEx.h"
 				>
 			</File>
 			<File

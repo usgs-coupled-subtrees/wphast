@@ -29,6 +29,7 @@
 
 #include <vtkMatrix4x4.h>
 #include <vtkTransform.h>
+#include "vtkDelaunay2DEx.h"
 
 #include "WorldTransform.h"
 
@@ -5070,5 +5071,26 @@ void CGlobal::DumpAndLoadPrism(const Prism &src, Prism &dest)
 			iss.clear();
 		}
 		ASSERT(dest.perimeter.Get_defined());
+	}
+}
+
+void CGlobal::UpdateDelaunay2DEx(vtkDelaunay2DEx *delaunay2DEx, vtkPoints *points)
+{
+	double nudge = 1e-14;
+	delaunay2DEx->Update();
+	while (!delaunay2DEx->IsOK() && nudge < 1e-4)
+	{
+		double factor = 1 + nudge;
+		std::list< std::pair<vtkIdType, vtkIdType> >::const_iterator it = delaunay2DEx->GetBadPoints().begin();
+		for (; it != delaunay2DEx->GetBadPoints().end(); ++it)
+		{
+			double *badpt = points->GetPoint((*it).second);
+			badpt[0] *= factor;
+			badpt[1] *= factor;
+			points->SetPoint((*it).second, badpt);
+		}
+		points->Modified();
+		delaunay2DEx->Update();
+		nudge *= 10;
 	}
 }
