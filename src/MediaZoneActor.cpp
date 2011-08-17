@@ -219,6 +219,14 @@ void CMediaZoneActor::Update(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent)
 		static_cast<Cproperty*>(this->m_grid_elt.tortuosity)->Insert(pTreeCtrl, htiParent, "tortuosity");
 	}
 
+	// shell
+	if (this->m_grid_elt.shell)
+	{
+		CString format;
+		format.Format("shell %g %g %g", this->m_grid_elt.shell_width[0], this->m_grid_elt.shell_width[1], this->m_grid_elt.shell_width[2]);
+		pTreeCtrl->InsertItem(format, htiParent);
+	}
+
 	if (pFrame)
 	{
 		this->m_grid_elt = absolute_elt;
@@ -267,17 +275,7 @@ void CMediaZoneActor::Edit(CTreeCtrl* pTreeCtrl)
 		mediaProps.GetProperties(GridElt);
 		ASSERT(GridElt.polyh);
 
-// COMMENT: {4/28/2009 10:13:54 PM}		//{{
-// COMMENT: {4/28/2009 10:13:54 PM}		CFrameWnd *pFrame = (CFrameWnd*)::AfxGetApp()->m_pMainWnd;
-// COMMENT: {4/28/2009 10:13:54 PM}		ASSERT_VALID(pFrame);
-// COMMENT: {4/28/2009 10:13:54 PM}		CWPhastDoc* pDoc = reinterpret_cast<CWPhastDoc*>(pFrame->GetActiveDocument());
-// COMMENT: {4/28/2009 10:13:54 PM}		ASSERT_VALID(pDoc);
-// COMMENT: {4/28/2009 10:13:54 PM}
-// COMMENT: {4/28/2009 10:13:54 PM}		CGlobal::PathsAbsoluteToRelative(pDoc->GetPathName(), pDoc, GridElt);
-// COMMENT: {4/28/2009 10:13:54 PM}		//}}
-
 		pDoc->Execute(new CSetMediaAction(this, pTreeCtrl, GridElt, mediaProps.GetDesc()));
-
 	}
 }
 

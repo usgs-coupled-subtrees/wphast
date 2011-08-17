@@ -118,6 +118,71 @@ void CMediaPropsPage2::DoDataExchange(CDataExchange* pDX)
 	}
 	this->DDX_Single(pDX);
 
+	// shell
+	if (pDX->m_bSaveAndValidate)
+	{
+		if (this->IsDlgButtonChecked(IDC_CHECK_SHELL))
+		{
+			this->GridElt.shell = true;
+			
+			CString str;
+
+			// x width
+			::DDX_Text(pDX, IDC_EDIT_XW, str);
+			if (str.IsEmpty())
+			{
+				 this->GridElt.shell_width[0] = 0;
+			}
+			else
+			{
+				::DDX_Text(pDX, IDC_EDIT_XW, this->GridElt.shell_width[0]);
+			}
+
+			// y width
+			::DDX_Text(pDX, IDC_EDIT_YW, str);
+			if (str.IsEmpty())
+			{
+				 this->GridElt.shell_width[1] = 0;
+			}
+			else
+			{
+				::DDX_Text(pDX, IDC_EDIT_YW, this->GridElt.shell_width[1]);
+			}
+
+			// z width
+			::DDX_Text(pDX, IDC_EDIT_ZW, str);
+			if (str.IsEmpty())
+			{
+				 this->GridElt.shell_width[2] = 0;
+			}
+			else
+			{
+				::DDX_Text(pDX, IDC_EDIT_ZW, this->GridElt.shell_width[2]);
+			}
+		}
+		else
+		{
+			this->GridElt.shell = false;
+		}
+	}
+	else
+	{
+		if (this->GridElt.shell)
+		{
+			this->CheckDlgButton(IDC_CHECK_SHELL, BST_CHECKED);
+		}
+		else
+		{
+			this->CheckDlgButton(IDC_CHECK_SHELL, BST_UNCHECKED);
+		}
+		::DDX_Text(pDX, IDC_EDIT_XW, this->GridElt.shell_width[0]);
+		::DDX_Text(pDX, IDC_EDIT_YW, this->GridElt.shell_width[1]);
+		::DDX_Text(pDX, IDC_EDIT_ZW, this->GridElt.shell_width[2]);
+
+		// shell controls
+		this->OnBnClickedShell();
+	}
+
 	TRACE("Out %s\n", __FUNCTION__);
 }
 
@@ -281,6 +346,9 @@ BEGIN_MESSAGE_MAP(CMediaPropsPage2, CPropsPropertyPage)
 
 	// IDC_CHECK_MIXTURE
 	ON_BN_CLICKED(IDC_CHECK_MIXTURE, OnBnClickedCheckMixture)
+
+	// IDC_CHECK_SHELL
+	ON_BN_CLICKED(IDC_CHECK_SHELL, OnBnClickedShell)
 
 	// DDX failure
 	ON_MESSAGE(UM_DDX_FAILURE, OnUM_DDXFailure)
@@ -496,6 +564,33 @@ void CMediaPropsPage2::OnBnClickedCheckMixture()
 		else
 		{
 			ASSERT(FALSE);
+		}
+	}
+}
+
+void CMediaPropsPage2::OnBnClickedShell()
+{
+	static UINT IDs[] =
+	{
+		IDC_STATIC_XW,
+		IDC_EDIT_XW,
+		IDC_STATIC_YW,
+		IDC_EDIT_YW,
+		IDC_STATIC_ZW,
+		IDC_EDIT_ZW,
+	};
+
+	size_t n = sizeof(IDs) / sizeof(IDs[0]);
+
+	CWnd *pWnd;
+	BOOL bEnable = this->IsDlgButtonChecked(IDC_CHECK_SHELL);
+	for (size_t i = 0; i < n; ++i)
+	{
+		pWnd = this->GetDlgItem(IDs[i]);
+		ASSERT(pWnd && pWnd->GetSafeHwnd());
+		if (pWnd)
+		{
+			pWnd->EnableWindow(bEnable);
 		}
 	}
 }

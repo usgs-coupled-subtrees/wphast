@@ -73,6 +73,9 @@ protected:
 	// face checkbox
 	afx_msg void OnBnClickedCheckFace();
 
+	// shell checkbox
+	afx_msg void OnBnClickedShell();
+
 	// property controllers
 	CGridTimeSeries ActiveProperty;          // single
 	CGridTimeSeries KxProperty;              // single

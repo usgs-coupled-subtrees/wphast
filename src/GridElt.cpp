@@ -122,6 +122,11 @@ CGridElt CGridElt::NewDefaults(bool bFlowOnly)
 		elt.tortuosity->count_v       = 1;
 		elt.tortuosity->v[0]          = 1.0;
 	}
+	// shell
+	ASSERT(!elt.shell);
+	ASSERT(elt.shell_width[0] == 0.0);
+	ASSERT(elt.shell_width[1] == 0.0);
+	ASSERT(elt.shell_width[2] == 0.0);
 	return elt;
 }
 
