@@ -8,12 +8,9 @@
 #include <vtkPropAssembly.h>
 
 #include "PropertyTreeControlBar.h"
-#include "BCFluxPropertyPage2.h"
 #include "FluxPropsPage.h"
 #include "FluxPropsPage2.h"
-#include "BCLeakyPropertyPage2.h"
 #include "LeakyPropsPage.h"
-#include "BCSpecifiedHeadPropertyPage.h"
 #include "SpecifiedHeadPropsPage.h"
 #include "ETSLayout/ETSLayout.h"
 

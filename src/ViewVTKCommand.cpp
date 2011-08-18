@@ -28,12 +28,6 @@
 #include "NewZonePropertyPage.h"
 #include "MediaPropertyPage.h"
 
-#include "BCFluxPropertyPage2.h"
-
-#include "BCLeakyPropertyPage2.h"
-
-#include "BCSpecifiedHeadPropertyPage.h"
-
 #include "ICHeadPropertyPage.h"
 #include "ICHeadSpreadPropertyPage.h"
 #include "ChemICPropertyPage.h"

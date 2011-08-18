@@ -436,18 +436,6 @@
 				>
 			</File>
 			<File
-				RelativePath="BCFluxPropertyPage2.cpp"
-				>
-			</File>
-			<File
-				RelativePath="BCLeakyPropertyPage2.cpp"
-				>
-			</File>
-			<File
-				RelativePath="BCSpecifiedHeadPropertyPage.cpp"
-				>
-			</File>
-			<File
 				RelativePath="BCTypeDialog.cpp"
 				>
 			</File>
@@ -725,10 +713,6 @@
 			</File>
 			<File
 				RelativePath="HeadIC.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\HeadICPropsPage.cpp"
 				>
 			</File>
 			<File
@@ -3934,34 +3918,6 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="TestCBCSpecifiedHeadPropertyPage.cpp"
-					>
-					<FileConfiguration
-						Name="AutoRelease|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="AutoDebug|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="ReleaseRelease|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-				</File>
-				<File
 					RelativePath="TestCGrid.cpp"
 					>
 					<FileConfiguration
@@ -4881,10 +4837,6 @@
 			</File>
 			<File
 				RelativePath="BCFluxPropertyPage2.h"
-				>
-			</File>
-			<File
-				RelativePath="BCLeakyPropertyPage2.h"
 				>
 			</File>
 			<File
@@ -5812,10 +5764,6 @@
 				</File>
 				<File
 					RelativePath="TestCBC.h"
-					>
-				</File>
-				<File
-					RelativePath="TestCBCSpecifiedHeadPropertyPage.h"
 					>
 				</File>
 				<File

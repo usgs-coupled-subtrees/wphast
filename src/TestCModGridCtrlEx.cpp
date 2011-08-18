@@ -2,8 +2,6 @@
 #include "TestCModGridCtrlEx.h"
 #include "TestCModGridCtrlExPage.h"
 #include "ETSLayout/ETSLayout.h"
-#include "BCSpecifiedHeadPropertyPage.h"
-#include "BCFluxPropertyPage2.h"
 #include "TimeControlMultiPropertyPage2.h"
 
 

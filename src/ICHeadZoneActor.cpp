@@ -4,7 +4,6 @@
 #include "resource.h"
 #include "PropertyTreeControlBar.h"
 #include "ICHeadSpreadPropertyPage.h"
-#include "HeadICPropsPage.h"
 #include "HeadICPropsPage2.h"
 
 
