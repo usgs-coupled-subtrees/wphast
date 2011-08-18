@@ -3642,7 +3642,7 @@ void CBoxPropertiesDialogBar::UpdatePrism(CZoneActor *pZoneActor, bool bForceUpd
 				);
 			for (int i = 0; i < 3; ++i)
 			{
-				if (this->m_pds[i]->Get_source_type() == Data_source::POINTS)
+				if (this->m_pds[i]->Get_user_source_type() == Data_source::POINTS)
 				{
 					std::vector<Point>::iterator it = this->m_pds[i]->Get_user_points().begin();
 					for (; it != this->m_pds[i]->Get_user_points().end(); ++it)
@@ -3651,7 +3651,7 @@ void CBoxPropertiesDialogBar::UpdatePrism(CZoneActor *pZoneActor, bool bForceUpd
 						this->m_listPoint[i].push_back(p);
 					}
 				}
-				else if (this->m_pds[i]->Get_source_type() == Data_source::NONE)
+				else if (this->m_pds[i]->Get_user_source_type() == Data_source::NONE)
 				{
 					ASSERT(defzone.zone_defined);
 					if (i == PRISM_TOP)
@@ -3684,7 +3684,7 @@ void CBoxPropertiesDialogBar::UpdatePrism(CZoneActor *pZoneActor, bool bForceUpd
 						}
 					}
 				}
-				else if (this->m_pds[i]->Get_source_type() == Data_source::CONSTANT)
+				else if (this->m_pds[i]->Get_user_source_type() == Data_source::CONSTANT)
 				{
 					ASSERT(defzone.zone_defined);
 					if (i == PRISM_TOP)
@@ -3722,8 +3722,8 @@ void CBoxPropertiesDialogBar::UpdatePrism(CZoneActor *pZoneActor, bool bForceUpd
 						}
 					}
 				}
-				else if (this->m_pds[i]->Get_source_type() == Data_source::SHAPE ||
-					this->m_pds[i]->Get_source_type() == Data_source::ARCRASTER)
+				else if (this->m_pds[i]->Get_user_source_type() == Data_source::SHAPE ||
+					this->m_pds[i]->Get_user_source_type() == Data_source::ARCRASTER)
 				{
 					zone *z = this->m_pds[i]->Get_bounding_box();
 					ASSERT(z->zone_defined);
