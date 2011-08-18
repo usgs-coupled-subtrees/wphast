@@ -6,6 +6,7 @@
 #include "Global.h"
 #include "srcinput/NNInterpolator/NNInterpolator.h"
 #include "srcinput/Filedata.h"
+#include "FakeFiledata.h"
 extern int input_error;
 
 #include <vtkDebugLeaks.h>
@@ -131,6 +132,7 @@ void TestPrism::testHDFSerialize(void)
 	CPPUNIT_ASSERT(prism == cp);
 
 	Clear_NNInterpolatorList();
+	FakeFiledata::Clear_fake_file_data_list();
 	Clear_file_data_map();
 	Clear_KDtreeList();
 }
@@ -173,6 +175,7 @@ void TestPrism::testCopyCtor(void)
 	CPPUNIT_ASSERT(cp.Point_in_polyhedron(Point(281536., 820145., 10.)));
 
 	Clear_NNInterpolatorList();
+	FakeFiledata::Clear_fake_file_data_list();
 	Clear_file_data_map();
 	Clear_KDtreeList();
 	::domain = zone(0, 0, 0, 0, 0, 0);
@@ -215,6 +218,7 @@ void TestPrism::timeMemDebug(void)
 // COMMENT: {12/2/2010 4:50:39 PM}	prism.Point_in_polyhedron(Point(277760., 819191., 5.));
 // COMMENT: {12/2/2010 4:50:39 PM}
 // COMMENT: {12/2/2010 4:50:39 PM}	Clear_NNInterpolatorList();
+// COMMENT: {8/9/2011 6:49:41 PM}	FakeFiledata::Clear_fake_file_data_list();
 // COMMENT: {12/2/2010 4:50:39 PM}	Clear_file_data_map();
 // COMMENT: {12/2/2010 4:50:39 PM}	Clear_KDtreeList();
 // COMMENT: {12/2/2010 4:50:39 PM}	::domain = zone(0, 0, 0, 0, 0, 0);
