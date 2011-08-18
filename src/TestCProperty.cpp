@@ -6,6 +6,10 @@
 #include "srcinput/Data_source.h"
 #include "srcinput/Domain.h"
 
+#include "srcinput/NNInterpolator/NNInterpolator.h"
+#include "srcinput/Filedata.h"
+#include "FakeFiledata.h"
+
 //int read_time_control(void);
 //int check_time_units(struct time *time_ptr, int required, char *errstr);
 
@@ -54,6 +58,11 @@ void TestCproperty::testXYZ(void)
 
 		pPhastInput->Delete();
 		pPhastInput = NULL;
+
+		Clear_NNInterpolatorList();
+		FakeFiledata::Clear_fake_file_data_list();
+		Clear_file_data_map();
+		Clear_KDtreeList();
 	}
 	catch (...)
 	{
