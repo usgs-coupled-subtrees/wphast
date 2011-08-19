@@ -38,19 +38,15 @@ CDrainPropertyPage::CDrainPropertyPage()
 
 	// load property descriptions
 	//
-	CGlobal::LoadRTFString(this->m_sNumRTF,      IDR_RIVER_NUM_RTF);
-	CGlobal::LoadRTFString(this->m_sDescRTF,     IDR_RIVER_DESC_RTF);
-	CGlobal::LoadRTFString(this->m_sLocRTF,      IDR_RIVER_LOC_RTF);
-	CGlobal::LoadRTFString(this->m_sWidthRTF,    IDR_RIVER_WIDTH_RTF);
-	CGlobal::LoadRTFString(this->m_sHydCondRTF,  IDR_RIVER_HYD_COND_RTF);
-	CGlobal::LoadRTFString(this->m_sThickRTF,    IDR_RIVER_THICK_RTF);
-	CGlobal::LoadRTFString(this->m_sDepthRTF,    IDR_RIVER_DEPTH_RTF);
-	CGlobal::LoadRTFString(this->m_sBottomRTF,   IDR_RIVER_BOTTOM_RTF);
-	CGlobal::LoadRTFString(this->m_sStartRTF,    IDR_RIVER_START_RTF);
-	CGlobal::LoadRTFString(this->m_sUnitsRTF,    IDR_RIVER_UNITS_RTF);
-	CGlobal::LoadRTFString(this->m_sHeadRTF,     IDR_RIVER_HEAD_RTF);
-	CGlobal::LoadRTFString(this->m_sSolutionRTF, IDR_RIVER_SOLUTION_RTF);
-
+	CGlobal::LoadRTFString(this->m_sNumRTF,      IDR_DRAIN_NUM_RTF);
+	CGlobal::LoadRTFString(this->m_sDescRTF,     IDR_DRAIN_DESC_RTF);
+	CGlobal::LoadRTFString(this->m_sLocRTF,      IDR_DRAIN_LOC_RTF);
+	CGlobal::LoadRTFString(this->m_sUseMapXYRTF, IDR_DRAIN_USE_MAP_XY_RTF);
+	CGlobal::LoadRTFString(this->m_sWidthRTF,    IDR_DRAIN_WIDTH_RTF);
+	CGlobal::LoadRTFString(this->m_sHydCondRTF,  IDR_DRAIN_HYD_COND_RTF);
+	CGlobal::LoadRTFString(this->m_sThickRTF,    IDR_DRAIN_THICK_RTF);
+	CGlobal::LoadRTFString(this->m_sZRTF,        IDR_DRAIN_Z_RTF);
+	CGlobal::LoadRTFString(this->m_sUseMapZRTF,  IDR_DRAIN_USE_MAP_Z_RTF);
 }
 
 CDrainPropertyPage::~CDrainPropertyPage()
@@ -461,6 +457,8 @@ BEGIN_MESSAGE_MAP(CDrainPropertyPage, CPropertyPage)
 	ON_EN_SETFOCUS(IDC_RIVER_K_EDIT, OnEnSetfocusRiverKEdit)
 	ON_EN_SETFOCUS(IDC_RIVER_THICK_EDIT, OnEnSetfocusRiverThickEdit)
 	ON_BN_CLICKED(IDC_CHECK_USE_MAP, OnBnClickedUseMap)
+	ON_EN_SETFOCUS(IDC_DRAIN_Z_EDIT, &CDrainPropertyPage::OnEnSetfocusDrainZEdit)
+	ON_BN_SETFOCUS(IDC_CHECK_USE_MAP, &CDrainPropertyPage::OnBnSetfocusCheckUseMap)
 END_MESSAGE_MAP()
 
 
@@ -665,26 +663,6 @@ void CDrainPropertyPage::OnEnSetfocusRiverThickEdit()
 	this->m_wndRichEditCtrl.SetWindowText(this->m_sThickRTF.c_str());
 }
 
-void CDrainPropertyPage::OnBnSetfocusRadioDepth()
-{
-	this->m_wndRichEditCtrl.SetWindowText(this->m_sDepthRTF.c_str());
-}
-
-void CDrainPropertyPage::OnBnSetfocusRadioBottom()
-{
-	this->m_wndRichEditCtrl.SetWindowText(this->m_sBottomRTF.c_str());
-}
-
-void CDrainPropertyPage::OnEnSetfocusDepthEdit()
-{
-	this->m_wndRichEditCtrl.SetWindowText(this->m_sDepthRTF.c_str());
-}
-
-void CDrainPropertyPage::OnEnSetfocusBottomEdit()
-{
-	this->m_wndRichEditCtrl.SetWindowText(this->m_sBottomRTF.c_str());
-}
-
 void CDrainPropertyPage::OnBnClickedUseMap()
 {
 	const CUnits& units = this->m_units;
@@ -742,4 +720,14 @@ void CDrainPropertyPage::SetGridKeyword(const CGridKeyword& gridKeyword)
 {
 	this->m_gridKeyword = gridKeyword;
 	this->m_gridKeyword.m_grid[2].Setup();
+}
+
+void CDrainPropertyPage::OnEnSetfocusDrainZEdit()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sZRTF.c_str());
+}
+
+void CDrainPropertyPage::OnBnSetfocusCheckUseMap()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sUseMapXYRTF.c_str());
 }

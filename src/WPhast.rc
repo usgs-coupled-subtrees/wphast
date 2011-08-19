@@ -2008,6 +2008,7 @@ BEGIN
     LTEXT           "&Y:",-1,166,35,8,8
     EDITTEXT        IDC_Y_EDIT,177,33,54,12,ES_AUTOHSCROLL
     LTEXT           "(ft)",IDC_Y_UNITS_STATIC,234,35,17,8
+    CONTROL         "Use map coordinates",IDC_CHECK_USE_MAP,"Button",BS_AUTOCHECKBOX | BS_MULTILINE | BS_NOTIFY | WS_TABSTOP,256,34,83,10
     GROUPBOX        "Static parameters",-1,73,51,278,82
     LTEXT           "&Width",-1,80,65,20,8
     EDITTEXT        IDC_WIDTH_EDIT,170,63,43,12,ES_AUTOHSCROLL
@@ -2018,11 +2019,10 @@ BEGIN
     LTEXT           "&Thickness",-1,80,98,34,8
     EDITTEXT        IDC_RIVER_THICK_EDIT,170,96,43,12,ES_AUTOHSCROLL
     LTEXT           "(ft)",IDC_RIVER_THICK_UNITS_STATIC,218,98,17,8
-    CONTROL         "",IDC_DESC_RICHEDIT,"RichEdit20A",ES_MULTILINE | ES_AUTOHSCROLL | ES_READONLY | WS_BORDER | WS_VSCROLL | WS_HSCROLL,7,138,344,67
     LTEXT           "Z",-1,80,114,8,8
     EDITTEXT        IDC_DRAIN_Z_EDIT,170,113,43,12,ES_AUTOHSCROLL
     LTEXT           "(ft)",IDC_DEPTH_UNITS_STATIC,218,114,17,8
-    CONTROL         "Use map coordinates",IDC_CHECK_USE_MAP,"Button",BS_AUTOCHECKBOX | BS_MULTILINE | WS_TABSTOP,256,34,83,10
+    CONTROL         "",IDC_DESC_RICHEDIT,"RichEdit20A",ES_MULTILINE | ES_AUTOHSCROLL | ES_READONLY | WS_BORDER | WS_VSCROLL | WS_HSCROLL,7,138,344,67
 END
 
 IDD_UNITS1_PROPPAGE DIALOGEX 0, 0, 317, 143
@@ -4494,7 +4494,15 @@ IDR_TC_TE_TIME_END_RTF  RTF                     "res\\TC_TE_TIME_END.rtf"
 IDR_TC_TE_TIME_END_UNITS_RTF RTF                     "res\\TC_TE_TIME_END_UNITS.rtf"
 IDR_SM_REBALANCE_BY_CELL_RTF RTF                     "res\\SM_REBALANCE_BY_CELL.rtf"
 IDR_MEDIA_SHELL_RTF     RTF                     "res\\MEDIA_SHELL.rtf"
-IDR_MEDIA_TORTUOSITY_RTF RTF                     "res\\MEDIA_TORT.rtf"
+IDR_DRAIN_NUM_RTF       RTF                     "res\\DRAIN_NUM.rtf"
+IDR_DRAIN_DESC_RTF      RTF                     "res\\DRAIN_DESC.rtf"
+IDR_DRAIN_LOC_RTF       RTF                     "res\\DRAIN_LOC.rtf"
+IDR_DRAIN_USE_MAP_XY_RTF RTF                     "res\\DRAIN_USE_MAP_XY.rtf"
+IDR_DRAIN_WIDTH_RTF     RTF                     "res\\DRAIN_WIDTH.rtf"
+IDR_DRAIN_HYD_COND_RTF  RTF                     "res\\DRAIN_HYD_COND.rtf"
+IDR_DRAIN_THICK_RTF     RTF                     "res\\DRAIN_THICK.rtf"
+IDR_DRAIN_Z_RTF         RTF                     "res\\DRAIN_Z.rtf"
+IDR_DRAIN_USE_MAP_Z_RTF RTF                     "res\\DRAIN_USE_MAP_Z.rtf"
 
 /////////////////////////////////////////////////////////////////////////////
 //

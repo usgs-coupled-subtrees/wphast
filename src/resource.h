@@ -418,6 +418,15 @@
 #define IDD_PROPS_ZONEPROPS1            445
 #define IDR_MEDIA_SHELL_RTF             446
 #define IDR_MEDIA_TORTUOSITY_RTF        447
+#define IDR_DRAIN_NUM_RTF               448
+#define IDR_DRAIN_DESC_RTF              449
+#define IDR_DRAIN_LOC_RTF               450
+#define IDR_DRAIN_USE_MAP_XY_RTF        451
+#define IDR_DRAIN_WIDTH_RTF             452
+#define IDR_DRAIN_HYD_COND_RTF          453
+#define IDR_DRAIN_THICK_RTF             454
+#define IDR_DRAIN_Z_RTF                 455
+#define IDR_DRAIN_USE_MAP_Z_RTF         456
 #define IDC_EDIT_X                      1000
 #define IDC_TITLE                       1000
 #define IDC_EDIT_Y                      1001
@@ -1044,7 +1053,7 @@
 //
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        448
+#define _APS_NEXT_RESOURCE_VALUE        457
 #define _APS_NEXT_COMMAND_VALUE         32882
 #define _APS_NEXT_CONTROL_VALUE         1542
 #define _APS_NEXT_SYMED_VALUE           127

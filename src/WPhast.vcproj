@@ -6349,6 +6349,42 @@
 				>
 			</File>
 			<File
+				RelativePath=".\res\DRAIN_DESC.rtf"
+				>
+			</File>
+			<File
+				RelativePath=".\res\DRAIN_HYD_COND.rtf"
+				>
+			</File>
+			<File
+				RelativePath=".\res\DRAIN_LOC.rtf"
+				>
+			</File>
+			<File
+				RelativePath=".\res\DRAIN_NUM.rtf"
+				>
+			</File>
+			<File
+				RelativePath=".\res\DRAIN_THICK.rtf"
+				>
+			</File>
+			<File
+				RelativePath=".\res\DRAIN_USE_MAP_XY.rtf"
+				>
+			</File>
+			<File
+				RelativePath=".\res\DRAIN_USE_MAP_Z.rtf"
+				>
+			</File>
+			<File
+				RelativePath=".\res\DRAIN_WIDTH.rtf"
+				>
+			</File>
+			<File
+				RelativePath=".\res\DRAIN_Z.rtf"
+				>
+			</File>
+			<File
 				RelativePath="res\eyes_tre.bmp"
 				>
 			</File>
