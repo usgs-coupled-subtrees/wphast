@@ -568,15 +568,15 @@
 				>
 			</File>
 			<File
-				RelativePath="FlowOnly.cpp"
+				RelativePath=".\FlowOnly.cpp"
 				>
 			</File>
 			<File
-				RelativePath="FlowOnlyPropertyPage.cpp"
+				RelativePath=".\FlowOnlyPropertyPage.cpp"
 				>
 			</File>
 			<File
-				RelativePath="FlowOnlyPropertyPage2.cpp"
+				RelativePath=".\FlowOnlyPropertyPage2.cpp"
 				>
 			</File>
 			<File
