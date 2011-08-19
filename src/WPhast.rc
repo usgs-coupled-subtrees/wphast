@@ -2945,7 +2945,7 @@ BEGIN
     EDITTEXT        IDC_EDIT_I,306,124,63,12,ES_AUTOHSCROLL | WS_DISABLED
     LTEXT           "j",IDC_STATIC_J,393,126,8,8,WS_DISABLED
     EDITTEXT        IDC_EDIT_J,403,124,63,12,ES_AUTOHSCROLL | WS_DISABLED
-    CONTROL         "Shell",IDC_CHECK_SHELL,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,156,31,10
+    CONTROL         "Shell",IDC_CHECK_SHELL,"Button",BS_AUTOCHECKBOX | BS_NOTIFY | WS_TABSTOP,7,156,31,10
     LTEXT           "x_width",IDC_STATIC_XW,46,156,26,8
     EDITTEXT        IDC_EDIT_XW,76,154,40,12,ES_AUTOHSCROLL
     LTEXT           "y_width",IDC_STATIC_YW,123,156,26,8
@@ -4493,6 +4493,8 @@ IDR_TC_TS_TIME_STEP_UNITS_RTF RTF                     "res\\TC_TS_TIME_STEP_UNIT
 IDR_TC_TE_TIME_END_RTF  RTF                     "res\\TC_TE_TIME_END.rtf"
 IDR_TC_TE_TIME_END_UNITS_RTF RTF                     "res\\TC_TE_TIME_END_UNITS.rtf"
 IDR_SM_REBALANCE_BY_CELL_RTF RTF                     "res\\SM_REBALANCE_BY_CELL.rtf"
+IDR_MEDIA_SHELL_RTF     RTF                     "res\\MEDIA_SHELL.rtf"
+IDR_MEDIA_TORTUOSITY_RTF RTF                     "res\\MEDIA_TORT.rtf"
 
 /////////////////////////////////////////////////////////////////////////////
 //

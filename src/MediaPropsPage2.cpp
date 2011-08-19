@@ -60,7 +60,8 @@ CMediaPropsPage2::CMediaPropsPage2()
 	CGlobal::LoadRTFString(this->m_sAlphaLongRTF,       IDR_MEDIA_LONG_DISP_RTF);
 	CGlobal::LoadRTFString(this->m_sAlphaHorizontalRTF, IDR_MEDIA_ALPHA_HORZ_RTF);
 	CGlobal::LoadRTFString(this->m_sAlphaVerticalRTF,   IDR_MEDIA_ALPHA_VERT_RTF);
-	// TODO CGlobal::LoadRTFString(this->m_sTortuosityRTF,   IDR_MEDIA_TORTUOSITY_RTF);
+	CGlobal::LoadRTFString(this->m_sShellRTF,           IDR_MEDIA_SHELL_RTF);
+	CGlobal::LoadRTFString(this->m_sTortuosityRTF,      IDR_MEDIA_TORTUOSITY_RTF);
 
 	TRACE("Out %s\n", __FUNCTION__);
 }
@@ -180,7 +181,7 @@ void CMediaPropsPage2::DoDataExchange(CDataExchange* pDX)
 		::DDX_Text(pDX, IDC_EDIT_ZW, this->GridElt.shell_width[2]);
 
 		// shell controls
-		this->OnBnClickedShell();
+		this->OnBnClickedCheckShell();
 	}
 
 	TRACE("Out %s\n", __FUNCTION__);
@@ -348,10 +349,16 @@ BEGIN_MESSAGE_MAP(CMediaPropsPage2, CPropsPropertyPage)
 	ON_BN_CLICKED(IDC_CHECK_MIXTURE, OnBnClickedCheckMixture)
 
 	// IDC_CHECK_SHELL
-	ON_BN_CLICKED(IDC_CHECK_SHELL, OnBnClickedShell)
+	ON_BN_CLICKED(IDC_CHECK_SHELL, OnBnClickedCheckShell)
 
 	// DDX failure
 	ON_MESSAGE(UM_DDX_FAILURE, OnUM_DDXFailure)
+
+	// shell
+	ON_EN_SETFOCUS(IDC_EDIT_XW, &CMediaPropsPage2::OnEnSetfocusEditXw)
+	ON_EN_SETFOCUS(IDC_EDIT_YW, &CMediaPropsPage2::OnEnSetfocusEditYw)
+	ON_EN_SETFOCUS(IDC_EDIT_ZW, &CMediaPropsPage2::OnEnSetfocusEditZw)
+	ON_BN_SETFOCUS(IDC_CHECK_SHELL, &CMediaPropsPage2::OnBnSetfocusCheckShell)
 END_MESSAGE_MAP()
 
 
@@ -377,10 +384,7 @@ void CMediaPropsPage2::SetPropertyDescription()
 	COMPARE_SET(ALPHA_LONG,       this->m_sAlphaLongRTF);
 	COMPARE_SET(ALPHA_HORIZONTAL, this->m_sAlphaHorizontalRTF);
 	COMPARE_SET(ALPHA_VERTICAL,   this->m_sAlphaVerticalRTF);
-	// TODO COMPARE_SET(TORTUOSITY,       this->m_sTortuosityRTF);
-	// 
-	std::string empty;
-	COMPARE_SET(TORTUOSITY,       empty);
+	COMPARE_SET(TORTUOSITY,       this->m_sTortuosityRTF);
 }
 
 void CMediaPropsPage2::OnEnSetfocusDescEdit()
@@ -568,7 +572,7 @@ void CMediaPropsPage2::OnBnClickedCheckMixture()
 	}
 }
 
-void CMediaPropsPage2::OnBnClickedShell()
+void CMediaPropsPage2::OnBnClickedCheckShell()
 {
 	static UINT IDs[] =
 	{
@@ -593,4 +597,24 @@ void CMediaPropsPage2::OnBnClickedShell()
 			pWnd->EnableWindow(bEnable);
 		}
 	}
+	this->RichEditCtrl.SetWindowText(this->m_sShellRTF.c_str());
+}
+void CMediaPropsPage2::OnEnSetfocusEditXw()
+{
+	this->RichEditCtrl.SetWindowText(this->m_sShellRTF.c_str());
+}
+
+void CMediaPropsPage2::OnEnSetfocusEditYw()
+{
+	this->RichEditCtrl.SetWindowText(this->m_sShellRTF.c_str());
+}
+
+void CMediaPropsPage2::OnEnSetfocusEditZw()
+{
+	this->RichEditCtrl.SetWindowText(this->m_sShellRTF.c_str());
+}
+
+void CMediaPropsPage2::OnBnSetfocusCheckShell()
+{
+	this->RichEditCtrl.SetWindowText(this->m_sShellRTF.c_str());
 }

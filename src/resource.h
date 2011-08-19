@@ -401,21 +401,23 @@
 #define IDD_DIALOG3                     428
 #define IDD_DIALOG4                     429
 #define IDD_PROPS_SPECIFIED_HEAD        430
-#define IDD_PROPS_MIXTURE               432
-#define IDD_PROPS_LEAKY                 433
-#define IDD_PROPS_TIMESERIES            434
-#define IDD_PROPS_SPECIFIED_HEAD2       435
-#define IDD_PROPS_FLUX_3                436
-#define IDD_PROPS_MEDIA2                437
-#define IDD_PROPS_HEADIC2               438
-#define IDD_PROPS_ICCHEM2               439
-#define IDD_FLOW_RATE_PROPPAGE2         440
-#define IDD_NEW_ZONE_PROPPAGE2          441
-#define IDS_IMPORT_PHAST_TRANS_442      442
+#define IDD_PROPS_MIXTURE               431
+#define IDD_PROPS_LEAKY                 432
+#define IDD_PROPS_TIMESERIES            433
+#define IDD_PROPS_SPECIFIED_HEAD2       434
+#define IDD_PROPS_FLUX_3                435
+#define IDD_PROPS_MEDIA2                436
+#define IDD_PROPS_HEADIC2               437
+#define IDD_PROPS_ICCHEM2               438
+#define IDD_FLOW_RATE_PROPPAGE2         439
+#define IDD_NEW_ZONE_PROPPAGE2          440
+#define IDS_IMPORT_PHAST_TRANS_442      441
 #define IDD_UNITS5_PROPPAGE             442
 #define IDD_PROPS_ZONEPROPS             443
-#define ID_INDICATOR_COOR               443
-#define IDD_PROPS_ZONEPROPS1            444
+#define ID_INDICATOR_COOR               444
+#define IDD_PROPS_ZONEPROPS1            445
+#define IDR_MEDIA_SHELL_RTF             446
+#define IDR_MEDIA_TORTUOSITY_RTF        447
 #define IDC_EDIT_X                      1000
 #define IDC_TITLE                       1000
 #define IDC_EDIT_Y                      1001
@@ -1039,10 +1041,10 @@
 #define IDC_VALUE_STATIC                65535
 
 // Next default values for new objects
-// 
+//
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        441
+#define _APS_NEXT_RESOURCE_VALUE        448
 #define _APS_NEXT_COMMAND_VALUE         32882
 #define _APS_NEXT_CONTROL_VALUE         1542
 #define _APS_NEXT_SYMED_VALUE           127

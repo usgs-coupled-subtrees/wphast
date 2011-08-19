@@ -6281,10 +6281,6 @@
 				>
 			</File>
 			<File
-				RelativePath="res\bc_speci.bin"
-				>
-			</File>
-			<File
 				RelativePath="res\BC_SPECIFIED_HEAD.rtf"
 				>
 			</File>
@@ -6298,10 +6294,6 @@
 			</File>
 			<File
 				RelativePath="res\BC_SPECIFIED_SOL_FIX.rtf"
-				>
-			</File>
-			<File
-				RelativePath="res\bin00001.bin"
 				>
 			</File>
 			<File
@@ -6485,10 +6477,6 @@
 				>
 			</File>
 			<File
-				RelativePath="res\manifest.bin"
-				>
-			</File>
-			<File
 				RelativePath="res\MAXIMUM_TIME_STEP.rtf"
 				>
 			</File>
@@ -6517,7 +6505,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\res\MEDIA_SHELL.rtf"
+				>
+			</File>
+			<File
 				RelativePath="res\MEDIA_SPEC_STORAGE.rtf"
+				>
+			</File>
+			<File
+				RelativePath=".\res\MEDIA_TORT.rtf"
 				>
 			</File>
 			<File
@@ -6762,22 +6758,6 @@
 			</File>
 			<File
 				RelativePath="res\RIVER_WIDTH.rtf"
-				>
-			</File>
-			<File
-				RelativePath="res\rt_manif.bin"
-				>
-			</File>
-			<File
-				RelativePath="res\rtf2.bin"
-				>
-			</File>
-			<File
-				RelativePath="res\rtf2.rtf"
-				>
-			</File>
-			<File
-				RelativePath=".\res\rtf4.bin"
 				>
 			</File>
 			<File

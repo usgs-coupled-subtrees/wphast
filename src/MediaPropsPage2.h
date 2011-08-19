@@ -74,7 +74,7 @@ protected:
 	afx_msg void OnBnClickedCheckFace();
 
 	// shell checkbox
-	afx_msg void OnBnClickedShell();
+	afx_msg void OnBnClickedCheckShell();
 
 	// property controllers
 	CGridTimeSeries ActiveProperty;          // single
@@ -99,6 +99,7 @@ protected:
 	std::string m_sStorageRTF;           // IDR_MEDIA_SPEC_STORAGE_RTF
 	std::string m_sAlphaHorizontalRTF;   // IDR_MEDIA_ALPHA_HORZ_RTF
 	std::string m_sAlphaVerticalRTF;     // IDR_MEDIA_ALPHA_VERT_RTF
+	std::string m_sShellRTF;             // IDR_MEDIA_SHELL_RTF
 	std::string m_sTortuosityRTF;        // IDR_MEDIA_TORTUOSITY_RTF
 
 	// should be member of superclass
@@ -111,4 +112,9 @@ protected:
 protected:
 	// data
 	CGridElt GridElt;
+public:
+	afx_msg void OnEnSetfocusEditXw();
+	afx_msg void OnEnSetfocusEditYw();
+	afx_msg void OnEnSetfocusEditZw();
+	afx_msg void OnBnSetfocusCheckShell();
 };
