@@ -1474,8 +1474,7 @@ void CWPhastView::StartNewWell(void)
 {
 	// set size of 3D cursor
 	//
-	double* bounds = this->GetDocument()->GetGridBounds();
-	double dim = (bounds[1] - bounds[0]) / 20.0;
+	double dim = 0.016 * CGlobal::ComputeRadius(this->GetRenderer());
 	this->Cursor3D->SetModelBounds(-dim, dim, -dim, dim, -dim, dim);
 	this->Cursor3DActor->VisibilityOn();
 

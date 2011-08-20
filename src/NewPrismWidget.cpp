@@ -1,6 +1,7 @@
 #include "StdAfx.h"
 #include "NewPrismWidget.h"
 
+#include "Global.h"    // CGlobal::ComputeRadius
 #include "Utilities.h" // CUtilities::GetWorldPointAtFixedPlane
 #include "Resource.h"  // IDC_NULL
 #include <sstream>     // std::ostringstream
@@ -256,7 +257,7 @@ void CNewPrismWidget::OnMouseMove()
 		this->Points->Modified();
 	}
 
-	double dim = (bounds[1] - bounds[0]) / 20.0;
+	double dim = 0.016 * CGlobal::ComputeRadius(this->CurrentRenderer);
 	this->Cursor3D->SetModelBounds(-dim, dim, -dim, dim, -dim, dim);
 
 	this->Cursor3DActor->SetPosition(this->FixedPlanePoint);

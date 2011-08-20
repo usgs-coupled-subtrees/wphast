@@ -1,6 +1,7 @@
 #include "StdAfx.h"
 #include "NewZoneWidget.h"
 
+#include "Global.h"    // CGlobal::ComputeRadius
 #include "GridActor.h"
 #include "Utilities.h"
 #include "Resource.h"  // IDC_NULL
@@ -250,7 +251,7 @@ void CNewZoneWidget::OnMouseMove()
 	this->Prop3D->GetBounds(bounds);
 	CUtilities::GetWorldPointAtFixedPlane(this->Interactor, this->CurrentRenderer, this->FixedCoord, bounds[this->FixedPlane], this->FixedPlanePoint);
 
-	double dim = (bounds[1] - bounds[0]) / 20.0;
+	double dim = 0.016 * CGlobal::ComputeRadius(this->CurrentRenderer);
 	this->Cursor3D->SetModelBounds(-dim, dim, -dim, dim, -dim, dim);
 
 	this->Cursor3DActor->SetPosition(this->FixedPlanePoint);
