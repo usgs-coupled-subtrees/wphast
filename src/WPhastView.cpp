@@ -2715,6 +2715,7 @@ void CWPhastView::PrismWidgetListener(vtkObject *caller, unsigned long eid, void
 
 							// load new prism
 							Prism new_prism;
+							copy.perimeter.Set_user_source_type(Data_source::POINTS);
 							CGlobal::DumpAndLoadPrism(copy, new_prism);
 							ASSERT(new_prism.perimeter.Get_user_source_type() == Data_source::NONE || new_prism.perimeter.Get_user_source_type() == Data_source::POINTS);
 
