@@ -801,9 +801,6 @@ void CNewWedgeWidget::OnLeftButtonUp()
 		ASSERT(this->OutlineActor->GetOrientation()[0]      == 0.0 && this->OutlineActor->GetOrientation()[1]      == 0.0 && this->OutlineActor->GetOrientation()[2]      == 0.0);
 		ASSERT(this->OutlineActor->vtkProp3D::GetScale()[0] == 1.0 && this->OutlineActor->vtkProp3D::GetScale()[1] == 1.0 && this->OutlineActor->vtkProp3D::GetScale()[2] == 1.0);
 
-		vtkTransform *user = vtkTransform::New();
-		user->Identity();
-
 		if (this->CoordinateMode == CWPhastDoc::MapMode)
 		{
 			vtkTransform *user = vtkTransform::New();
