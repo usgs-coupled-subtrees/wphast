@@ -179,7 +179,6 @@ void CGridPropertyPage2::DoDataExchange(CDataExchange* pDX)
 			DDX_Text(pDX, IDC_EDIT_U_NODES, this->m_gridKeyword.m_grid[this->m_nIndex].count_coord);
 			DDX_Text(pDX, IDC_EDIT_N_NODES, this->m_gridKeyword.m_grid[this->m_nIndex].count_coord);
 
-
 			// Nonuniform grid
 			//
 			CGrid expandedGrid = this->m_gridKeyword.m_grid[this->m_nIndex];
@@ -267,9 +266,7 @@ void CGridPropertyPage2::DoDataExchange(CDataExchange* pDX)
 			this->EnableUniform(FALSE);
 		}
 
-		//{{
 		this->Invalidate(); // Note: this causes flashing but the grid might disappear otherwise
-		//}}
 	}
 
 	// snap
@@ -355,17 +352,6 @@ BOOL CGridPropertyPage2::OnInitDialog()
 	// Add extra initialization here
 	this->m_spinUnified.SetRange32(2, INT_MAX);
 	this->m_spinNonunified.SetRange32(2, INT_MAX);
-
-// COMMENT: {3/31/2006 5:16:45 PM}	// Layout controls
-// COMMENT: {3/31/2006 5:16:45 PM}	this->CreateRoot(VERTICAL)
-// COMMENT: {3/31/2006 5:16:45 PM}		<< (paneTab(&this->m_tabCtrl, VERTICAL, GREEDY, nDefaultBorder, 10, 10)
-// COMMENT: {3/31/2006 5:16:45 PM}			<< (paneCtrl(IDC_UNIFORM_GB, HORIZONTAL, NORESIZE)
-// COMMENT: {3/31/2006 5:16:45 PM}				<< item(IDC_STATIC_MIN, GREEDY)
-// COMMENT: {3/31/2006 5:16:45 PM}				)
-// COMMENT: {3/31/2006 5:16:45 PM}			)
-// COMMENT: {3/31/2006 5:16:45 PM}		;
-// COMMENT: {3/31/2006 5:16:45 PM}	UpdateLayout();
-
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
@@ -464,7 +450,6 @@ void CGridPropertyPage2::EnableNonuniform(BOOL bEnable)
 		}
 		this->m_wndNonuniformGrid.SetFixedTextColor(::GetSysColor(COLOR_GRAYTEXT));
 	}
-// COMMENT: {4/7/2006 9:50:24 PM}	this->m_wndNonuniformGrid.RedrawWindow();
 	this->m_wndNonuniformGrid.Invalidate(TRUE);
 	this->OnSelChangedNonuniform(NULL, NULL);
 }
@@ -619,7 +604,6 @@ void CGridPropertyPage2::OnBnClickedButtonIns()
 	this->m_wndNonuniformGrid.SetCurrentFocusCell(cell.row, cell.col);
 	this->m_wndNonuniformGrid.SetSelectedRange(range);
 	this->SetDlgItemInt(IDC_EDIT_N_NODES, (UINT)this->m_wndNonuniformGrid.GetRowCount() - 1, FALSE);
-// COMMENT: {4/5/2006 6:10:00 PM}	this->m_wndNonuniformGrid.RedrawWindow();
 	this->m_wndNonuniformGrid.Invalidate(TRUE);
 }
 
@@ -648,9 +632,7 @@ void CGridPropertyPage2::OnBnClickedButtonDel()
 			VERIFY(this->m_wndNonuniformGrid.SetItemText(row, 0, str));
 		}
 	}
-// COMMENT: {4/5/2006 4:08:52 PM}	this->m_wndNonuniformGrid.SetSelectedRange(-1, -1, -1, -1);
 	this->m_wndNonuniformGrid.SetCurrentFocusCell(cell.row, cell.col);
-// COMMENT: {4/10/2006 3:00:14 PM}	this->m_wndNonuniformGrid.SetSelectedRange(range);
 	range.SetMinRow(max(range.GetMinRow(), this->m_wndNonuniformGrid.GetFixedRowCount()));
 	range.SetMaxRow(min(range.GetMaxRow(), this->m_wndNonuniformGrid.GetRowCount() - 1));
 	range.SetMinCol(max(range.GetMinCol(), this->m_wndNonuniformGrid.GetFixedColumnCount()));
@@ -665,7 +647,6 @@ void CGridPropertyPage2::OnBnClickedButtonDel()
 	}
 	
 	this->SetDlgItemInt(IDC_EDIT_N_NODES, (UINT)this->m_wndNonuniformGrid.GetRowCount() - 1, FALSE);
-// COMMENT: {4/5/2006 6:10:00 PM}	this->m_wndNonuniformGrid.RedrawWindow();
 	this->m_wndNonuniformGrid.Invalidate(TRUE);
 	this->OnSelChangedNonuniform(NULL, NULL);
 }
@@ -734,7 +715,6 @@ void CGridPropertyPage2::OnBnClickedButtonSeries()
 
 		this->m_wndNonuniformGrid.SetCurrentFocusCell(cell.row, cell.col);
 		this->m_wndNonuniformGrid.SetSelectedRange(range);
-// COMMENT: {4/7/2006 9:50:11 PM}		this->m_wndNonuniformGrid.RedrawWindow();
 		this->m_wndNonuniformGrid.Invalidate(TRUE);
 	}	
 
@@ -787,7 +767,6 @@ void CGridPropertyPage2::OnBnClickedButtonSubdivide()
 		}
 
 		CString str;
-		///for (int row = range.GetMinRow() + 1; row < this->m_wndNonuniformGrid.GetRowCount(); ++row)
 		for (int row = range.GetMinRow(); row < this->m_wndNonuniformGrid.GetRowCount(); ++row)
 		{
 			if (count != 0)
