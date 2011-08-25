@@ -428,6 +428,8 @@
 #define IDR_DRAIN_USE_MAP_Z_RTF         456
 #define IDR_BC_LEAKY_ELEVATION_RTF      457
 #define IDR_BC_LEAKY_USE_MAP_Z_RTF      458
+#define IDR_GRID_ORIGIN_RTF             459
+#define IDR_GRID_ANGLE_RTF              460
 #define IDC_EDIT_X                      1000
 #define IDC_TITLE                       1000
 #define IDC_EDIT_Y                      1001
@@ -1056,10 +1058,10 @@
 #define IDC_VALUE_STATIC                65535
 
 // Next default values for new objects
-// 
+//
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        459
+#define _APS_NEXT_RESOURCE_VALUE        461
 #define _APS_NEXT_COMMAND_VALUE         32882
 #define _APS_NEXT_CONTROL_VALUE         1543
 #define _APS_NEXT_SYMED_VALUE           127

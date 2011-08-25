@@ -34,6 +34,8 @@ CGridPropertyPage2::CGridPropertyPage2()
 	CGlobal::LoadRTFString(this->m_sGridSnap,      IDR_GRID_SNAP_RTF);
 	CGlobal::LoadRTFString(this->m_sGridOrient,    IDR_GRID_ORIENT_RTF);
 	CGlobal::LoadRTFString(this->m_sGridChemDims,  IDR_GRID_CHEM_DIMS_RTF);
+	CGlobal::LoadRTFString(this->m_sGridOrigin,    IDR_GRID_ORIGIN_RTF);
+	CGlobal::LoadRTFString(this->m_sGridAngle,     IDR_GRID_ANGLE_RTF);
 }
 
 CGridPropertyPage2::~CGridPropertyPage2()
@@ -45,11 +47,13 @@ void CGridPropertyPage2::DoDataExchange(CDataExchange* pDX)
 {
 	baseCGridPropertyPage2::DoDataExchange(pDX);
 
-	DDX_Control(pDX, IDC_DESC_RICHEDIT, m_wndRichEditCtrl);
+	DDX_Control(pDX, IDC_DESC_RICHEDIT, this->m_wndRichEditCtrl);
+	
+	// wrap richedit to window
+	this->m_wndRichEditCtrl.SetTargetDevice(NULL, 0);
+
 	if (this->m_bFirstSetActive)
 	{
-		// wrap richedit to window
-		this->m_wndRichEditCtrl.SetTargetDevice(NULL, 0);
 		this->m_wndRichEditCtrl.SetWindowText(this->m_sGridUni.c_str());
 	}
 
@@ -131,7 +135,6 @@ void CGridPropertyPage2::DoDataExchange(CDataExchange* pDX)
 			// Number of nodes
 			DDX_Text(pDX, IDC_EDIT_U_NODES, this->m_gridKeyword.m_grid[this->m_nIndex].count_coord);
 			DDV_MinMaxInt(pDX, this->m_gridKeyword.m_grid[this->m_nIndex].count_coord, 2, INT_MAX);
-
 		}
 		else
 		{
@@ -309,6 +312,14 @@ void CGridPropertyPage2::DoDataExchange(CDataExchange* pDX)
 			pDX->Fail();
 		}
 	}
+
+	// grid_origin
+	DDX_Text(pDX, IDC_EDIT_ORIG_X, this->m_gridKeyword.m_grid_origin[0]);
+	DDX_Text(pDX, IDC_EDIT_ORIG_Y, this->m_gridKeyword.m_grid_origin[1]);
+	DDX_Text(pDX, IDC_EDIT_ORIG_Z, this->m_gridKeyword.m_grid_origin[2]);
+
+	// grid_angle
+	DDX_Text(pDX, IDC_EDIT_GRID_ANGLE, this->m_gridKeyword.m_grid_angle);
 }
 
 
@@ -340,6 +351,10 @@ BEGIN_MESSAGE_MAP(CGridPropertyPage2, baseCGridPropertyPage2)
 	ON_BN_SETFOCUS(IDC_CHECK_Z, OnBnSetfocusCheckZ)
 	ON_BN_SETFOCUS(IDC_RADIO_XY, OnBnSetfocusRadioXy)
 	ON_BN_SETFOCUS(IDC_RADIO_XZ, OnBnSetfocusRadioXz)
+	ON_EN_SETFOCUS(IDC_EDIT_ORIG_X, &CGridPropertyPage2::OnEnSetfocusEditOrigX)
+	ON_EN_SETFOCUS(IDC_EDIT_ORIG_Y, &CGridPropertyPage2::OnEnSetfocusEditOrigY)
+	ON_EN_SETFOCUS(IDC_EDIT_ORIG_Z, &CGridPropertyPage2::OnEnSetfocusEditOrigZ)
+	ON_EN_SETFOCUS(IDC_EDIT_GRID_ANGLE, &CGridPropertyPage2::OnEnSetfocusEditGridAngle)
 END_MESSAGE_MAP()
 
 
@@ -907,4 +922,24 @@ void CGridPropertyPage2::OnBnSetfocusRadioXy()
 void CGridPropertyPage2::OnBnSetfocusRadioXz()
 {
 	this->m_wndRichEditCtrl.SetWindowText(this->m_sGridOrient.c_str());
+}
+
+void CGridPropertyPage2::OnEnSetfocusEditOrigX()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sGridOrigin.c_str());
+}
+
+void CGridPropertyPage2::OnEnSetfocusEditOrigY()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sGridOrigin.c_str());
+}
+
+void CGridPropertyPage2::OnEnSetfocusEditOrigZ()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sGridOrigin.c_str());
+}
+
+void CGridPropertyPage2::OnEnSetfocusEditGridAngle()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sGridAngle.c_str());
 }
