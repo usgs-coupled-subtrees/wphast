@@ -56,7 +56,6 @@
 #define IDS_UNITS1_SUBTITLE_139         139
 #define IDS_UNITS2_CAPTION_140          140
 #define IDS_UNITS2_TITLE_141            141
-#define IDR_RTF1                        142
 #define IDR_MEDIA_KX_RTF                142
 #define IDS_UNITS2_SUBTITLE_142         142
 #define IDR_MEDIA_ACTIVE_RTF            143
@@ -427,9 +426,7 @@
 #define IDR_DRAIN_THICK_RTF             454
 #define IDR_DRAIN_Z_RTF                 455
 #define IDR_DRAIN_USE_MAP_Z_RTF         456
-#define IDR_RTF2                        457
 #define IDR_BC_LEAKY_ELEVATION_RTF      457
-#define IDR_RTF3                        458
 #define IDR_BC_LEAKY_USE_MAP_Z_RTF      458
 #define IDC_EDIT_X                      1000
 #define IDC_TITLE                       1000
@@ -748,13 +745,17 @@
 #define IDC_STATIC_SPACE                1293
 #define IDC_STATIC_N_NODES              1294
 #define IDC_STATIC_TIME                 1295
+#define IDC_EDIT_ORIG_X                 1295
 #define IDC_EDIT_MAX                    1296
 #define IDC_EDIT_U_NODES                1297
 #define IDC_EDIT_SPACE                  1298
+#define IDC_EDIT_ORIG_Y                 1298
 #define IDC_SPIN_U_NODES                1299
 #define IDC_EDIT_TIME                   1300
+#define IDC_EDIT_ORIG_Z                 1300
 #define IDC_SPIN_N_NODES                1301
 #define IDC_EDIT_MAX_I                  1302
+#define IDC_EDIT_GRID_ANGLE             1302
 #define IDC_STATIC_REBAL                1303
 #define IDC_EDIT_SNAP                   1304
 #define IDC_SPIN_MAX_I                  1305
