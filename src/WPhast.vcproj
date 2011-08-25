@@ -6261,6 +6261,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\res\BC_LEAKY_ELEV.rtf"
+				>
+			</File>
+			<File
 				RelativePath="res\BC_LEAKY_FACE.rtf"
 				>
 			</File>
@@ -6274,6 +6278,10 @@
 			</File>
 			<File
 				RelativePath="res\BC_LEAKY_THICKNESS.rtf"
+				>
+			</File>
+			<File
+				RelativePath=".\res\BC_LEAKY_USE_MAP_Z.rtf"
 				>
 			</File>
 			<File

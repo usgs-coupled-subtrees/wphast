@@ -13,7 +13,7 @@
 #define new DEBUG_NEW
 #endif
 
-CLIPFORMAT CBC::clipFormat = (CLIPFORMAT)::RegisterClipboardFormat(_T("WPhast:CBC:2"));
+CLIPFORMAT CBC::clipFormat = (CLIPFORMAT)::RegisterClipboardFormat(_T("WPhast:CBC:3"));
 
 CBC::CBC() // ctor
 {
@@ -60,6 +60,13 @@ void CBC::InternalCopy(const struct BC& src)
 	this->bc_thick = 0;
 	Cproperty::CopyProperty(&this->bc_thick, src.bc_thick);
 
+	// bc_z_user
+	this->bc_z_user = 0;
+	Cproperty::CopyProperty(&this->bc_z_user, src.bc_z_user);
+
+	// bc_z_coordinate_system_user
+	this->bc_z_coordinate_system_user = src.bc_z_coordinate_system_user;
+
 	// face
 	this->face = src.face;
 
@@ -92,6 +99,7 @@ void CBC::InternalDelete(void)
 	this->m_bc_flux.clear();
 	delete static_cast<Cproperty*>(this->bc_k);
 	delete static_cast<Cproperty*>(this->bc_thick);
+	delete static_cast<Cproperty*>(this->bc_z_user);
 	this->m_bc_solution.clear();
 
 	delete static_cast<Cproperty*>(this->current_bc_flux);
@@ -110,6 +118,8 @@ void CBC::InternalInit(void)
 	this->current_bc_flux     = 0;
 	this->bc_k                = 0;
 	this->bc_thick            = 0;
+	this->bc_z_user           = 0;
+	this->bc_z_coordinate_system_user = PHAST_Transform::GRID;
 	this->face                = -1;
 	this->cell_face           = CF_UNKNOWN;
 	this->face_defined        = FALSE;
@@ -117,6 +127,7 @@ void CBC::InternalInit(void)
 	this->bc_solution         = 0;
 	this->current_bc_solution = 0;
 	this->current_bc_head     = 0;
+
 	ASSERT(this->m_bc_head.empty());
 	ASSERT(this->m_bc_flux.empty());
 	ASSERT(this->m_bc_solution.empty());
@@ -506,6 +517,9 @@ void CBC::Serialize(bool bStoring, hid_t loc_id)
 		status = H5Tclose(cellface);
 		ASSERT(status >= 0);
 
+		// bc_z_coordinate_system_user
+		CGlobal::HDFSerializeZCoordinateSystem(bStoring, loc_id, this->bc_z_coordinate_system_user);
+
 		// bc_solution_type
 		status = CGlobal::HDFSerialize(bStoring, loc_id, szSolType, H5T_NATIVE_INT, 1, &this->bc_solution_type);
 
@@ -517,7 +531,6 @@ void CBC::Serialize(bool bStoring, hid_t loc_id)
 		CTimeSeries<Cproperty>::SerializeCreate(szFlux,     this->m_bc_flux,     loc_id);
 		CTimeSeries<Cproperty>::SerializeCreate(szHead,     this->m_bc_head,     loc_id);
 		CTimeSeries<Cproperty>::SerializeCreate(szSolution, this->m_bc_solution, loc_id);
-
 	}
 	else
 	{
@@ -537,6 +550,9 @@ void CBC::Serialize(bool bStoring, hid_t loc_id)
 		status = H5Tclose(cellface);
 		ASSERT(status >= 0);
 
+		// bc_z_coordinate_system_user
+		CGlobal::HDFSerializeZCoordinateSystem(bStoring, loc_id, this->bc_z_coordinate_system_user);
+
 		// bc_solution_type
 		status = CGlobal::HDFSerialize(bStoring, loc_id, szSolType, H5T_NATIVE_INT, 1, &this->bc_solution_type);
 
@@ -554,7 +570,7 @@ void CBC::Serialize(bool bStoring, hid_t loc_id)
 void CBC::Serialize(CArchive& ar)
 {
 	static const char szCBC[] = "CBC";
-	static int version = 2;
+	static int version = 3;
 
 	CString type;
 	int ver = version;
@@ -608,7 +624,7 @@ void CBC::Serialize(CArchive& ar)
 		this->bc_type = static_cast<BC_info::BC_TYPE>(n);
 	}
 
-	if (ver == 2)
+	if (ver >= 2)
 	{
 		// face_defined
 		if (ar.IsStoring())
@@ -618,6 +634,22 @@ void CBC::Serialize(CArchive& ar)
 		else
 		{
 			ar >> this->face_defined;
+		}
+	}
+	
+	if (ver >= 3)
+	{
+		// z_coordinate_system_user
+		if (ar.IsStoring())
+		{
+			int n = this->bc_z_coordinate_system_user;
+			ar << n;
+		}
+		else
+		{
+			int n;
+			ar >> n;
+			this->bc_z_coordinate_system_user = static_cast<PHAST_Transform::COORDINATE_SYSTEM>(n);
 		}
 	}
 
@@ -631,7 +663,7 @@ void CBC::Serialize(CArchive& ar)
 		ar >> this->face;
 	}
 
-	if (ver == 2)
+	if (ver >= 2)
 	{
 		// cell_face
 		if (ar.IsStoring())
@@ -848,11 +880,28 @@ std::ostream& operator<< (std::ostream &os, const CBC &a)
 			}
 		}
 
-		// associated_solution
-		if (a.m_bc_solution.size() && a.bc_solution_type == ST_ASSOCIATED)
+		// thickness
+		if (a.bc_thick && a.bc_thick->type != PROP_UNDEFINED)
 		{
-			os << "\t\t-associated_solution\n";
-			os << a.m_bc_solution;
+			os << "\t\t-thickness               " << static_cast<Cproperty>(*a.bc_thick);
+		}
+
+		// hydraulic_conductivity
+		if (a.bc_k && a.bc_k->type != PROP_UNDEFINED)
+		{
+			os << "\t\t-hydraulic_conductivity  " << static_cast<Cproperty>(*a.bc_k);
+		}
+
+		// elevation
+		if (a.bc_z_user && a.bc_z_user->type != PROP_UNDEFINED)
+		{
+			os << "\t\t-elevation               " << static_cast<Cproperty>(*a.bc_z_user);
+		}
+
+		// z_coordinate_system
+		if (a.bc_z_coordinate_system_user == PHAST_Transform::MAP)
+		{
+			os << "\t\t-z_coordinate_system    map\n";
 		}
 
 		// head
@@ -862,16 +911,11 @@ std::ostream& operator<< (std::ostream &os, const CBC &a)
 			os << a.m_bc_head;
 		}
 
-		// hydraulic_conductivity
-		if (a.bc_k && a.bc_k->type != PROP_UNDEFINED)
+		// associated_solution
+		if (a.m_bc_solution.size() && a.bc_solution_type == ST_ASSOCIATED)
 		{
-			os << "\t\t-hydraulic_conductivity  " << static_cast<Cproperty>(*a.bc_k);
-		}
-
-		// thickness
-		if (a.bc_thick && a.bc_thick->type != PROP_UNDEFINED)
-		{
-			os << "\t\t-thickness               " << static_cast<Cproperty>(*a.bc_thick);
+			os << "\t\t-associated_solution\n";
+			os << a.m_bc_solution;
 		}
 		break;
 

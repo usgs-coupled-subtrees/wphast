@@ -13,6 +13,7 @@ IMPLEMENT_DYNAMIC(CPropsPropertyPage, CPropertyPage)
 
 CPropsPropertyPage::CPropsPropertyPage(UINT nIDTemplate, UINT nIDCaption, DWORD dwSize)
 : CPropertyPage(nIDTemplate, nIDCaption, dwSize)
+, LastValidation(false)
 {
 }
 
@@ -81,8 +82,13 @@ BOOL CPropsPropertyPage::OnKillActive()
 		TRACE("Out %s \n", __FUNCTION__);
 		return TRUE;
 	}
+// COMMENT: {8/23/2011 5:34:38 PM}	TRACE("Out %s \n", __FUNCTION__);
+// COMMENT: {8/23/2011 5:34:38 PM}	return CPropertyPage::OnKillActive();
+	this->LastValidation = true;
+	BOOL bReturn = CPropertyPage::OnKillActive();
+	this->LastValidation = false;
 	TRACE("Out %s \n", __FUNCTION__);
-	return CPropertyPage::OnKillActive();
+	return bReturn;
 }
 
 LRESULT CPropsPropertyPage::OnWizardNext()
@@ -108,6 +114,14 @@ LRESULT CPropsPropertyPage::OnWizardBack()
 	this->DDV_SoftValidate();
 	TRACE("Out %s \n", __FUNCTION__);
 	return CPropertyPage::OnWizardBack();
+}
+
+BOOL CPropsPropertyPage::OnWizardFinish() 
+{
+	this->LastValidation = true;
+	BOOL bReturn = CPropertyPage::OnWizardFinish();
+	this->LastValidation = false;
+	return bReturn;
 }
 
 void CPropsPropertyPage::OnTreeSelChanging(NMHDR *pNotifyStruct, LRESULT *pResult)

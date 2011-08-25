@@ -202,24 +202,6 @@ void CBCZoneActor::Update(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent, const CBC& 
 			break;
 
 		case BC_info::BC_LEAKY:
-			// head
-			crBC.m_bc_head.InsertItem(pTreeCtrl, "head", htiParent);
-
-			// associated_solution
-			crBC.m_bc_solution.InsertItem(pTreeCtrl, "associated_solution", htiParent);
-
-			// thickness
-			if (crBC.bc_thick && crBC.bc_thick->type != PROP_UNDEFINED)
-			{
-				static_cast<Cproperty*>(crBC.bc_thick)->Insert(pTreeCtrl, htiParent, "thickness");
-			}
-
-			// hydraulic_conductivity
-			if (crBC.bc_k && crBC.bc_k->type != PROP_UNDEFINED)
-			{
-				static_cast<Cproperty*>(crBC.bc_k)->Insert(pTreeCtrl, htiParent, "hydraulic_conductivity");
-			}
-
 			// face
 			if (crBC.face_defined)
 			{
@@ -236,6 +218,37 @@ void CBCZoneActor::Update(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent, const CBC& 
 						break;
 				}
 			}
+
+			// thickness
+			if (crBC.bc_thick && crBC.bc_thick->type != PROP_UNDEFINED)
+			{
+				static_cast<Cproperty*>(crBC.bc_thick)->Insert(pTreeCtrl, htiParent, "thickness");
+			}
+
+			// hydraulic_conductivity
+			if (crBC.bc_k && crBC.bc_k->type != PROP_UNDEFINED)
+			{
+				static_cast<Cproperty*>(crBC.bc_k)->Insert(pTreeCtrl, htiParent, "hydraulic_conductivity");
+			}
+
+			// elevation
+			if (crBC.bc_z_user && crBC.bc_z_user->type != PROP_UNDEFINED)
+			{
+				static_cast<Cproperty*>(crBC.bc_z_user)->Insert(pTreeCtrl, htiParent, "elevation");
+			}
+
+			// z_coordinate_system
+			if (crBC.bc_z_coordinate_system_user == PHAST_Transform::MAP)
+			{
+				pTreeCtrl->InsertItem(_T("z_coordinate_system    map"), htiParent);						
+			}
+
+			// head
+			crBC.m_bc_head.InsertItem(pTreeCtrl, "head", htiParent);
+
+			// associated_solution
+			crBC.m_bc_solution.InsertItem(pTreeCtrl, "associated_solution", htiParent);
+
 			break;
 
 		default:

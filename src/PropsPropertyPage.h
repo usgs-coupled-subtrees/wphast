@@ -26,6 +26,9 @@ protected:
 	virtual BOOL OnKillActive();
 	virtual LRESULT OnWizardNext();
 	virtual LRESULT OnWizardBack();
+	//{{
+	virtual BOOL OnWizardFinish( );
+	//}}
 
 	DECLARE_MESSAGE_MAP()
 
@@ -40,4 +43,5 @@ protected:
 	CTreeCtrl      TreeCtrl;
 
 	HTREEITEM      ItemDDX;
+	bool           LastValidation;
 };

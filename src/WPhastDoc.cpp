@@ -6087,6 +6087,9 @@ void CWPhastDoc::NewZoneListener(vtkObject *caller, unsigned long eid, void *cli
 			leakyProps.SetFlowOnly(bFlowOnly);
 			specifiedProps.SetFlowOnly(bFlowOnly);
 
+			bool bFreeSufurface = self->GetFreeSurface();
+			leakyProps.SetFreeSurface(bFreeSufurface);
+
 			// set used zone flow rate numbers
 			std::set<int> usedZoneFlowRatesNumbers;
 			self->GetUsedZoneFlowRatesNumbers(usedZoneFlowRatesNumbers);
@@ -6373,6 +6376,9 @@ void CWPhastDoc::NewWedgeListener(vtkObject *caller, unsigned long eid, void *cl
 			leakyProps.SetFlowOnly(bFlowOnly);
 			specifiedProps.SetFlowOnly(bFlowOnly);
 
+			bool bFreeSufurface = self->GetFreeSurface();
+			leakyProps.SetFreeSurface(bFreeSufurface);
+
 			// set used zone flow rate numbers
 			std::set<int> usedZoneFlowRatesNumbers;
 			self->GetUsedZoneFlowRatesNumbers(usedZoneFlowRatesNumbers);
@@ -6571,6 +6577,9 @@ void CWPhastDoc::OnToolsNewPrism()
 					fluxProps.SetFlowOnly(bFlowOnly);
 					leakyProps.SetFlowOnly(bFlowOnly);
 					specifiedProps.SetFlowOnly(bFlowOnly);
+
+					bool bFreeSufurface = this->GetFreeSurface();
+					leakyProps.SetFreeSurface(bFreeSufurface);
 
 					// set used zone flow rate numbers
 					std::set<int> usedZoneFlowRatesNumbers;
@@ -6777,6 +6786,9 @@ void CWPhastDoc::NewPrismListener(vtkObject *caller, unsigned long eid, void *cl
 				leakyProps.SetFlowOnly(bFlowOnly);
 				specifiedProps.SetFlowOnly(bFlowOnly);
 
+				bool bFreeSufurface = self->GetFreeSurface();
+				leakyProps.SetFreeSurface(bFreeSufurface);
+
 				// set used zone flow rate numbers
 				std::set<int> usedZoneFlowRatesNumbers;
 				self->GetUsedZoneFlowRatesNumbers(usedZoneFlowRatesNumbers);
@@ -6889,6 +6901,9 @@ void CWPhastDoc::OnToolsNewDomain()
 	fluxProps.SetFlowOnly(bFlowOnly);
 	leakyProps.SetFlowOnly(bFlowOnly);
 	specifiedProps.SetFlowOnly(bFlowOnly);
+
+	bool bFreeSufurface = this->GetFreeSurface();
+	leakyProps.SetFreeSurface(bFreeSufurface);
 
 	// set used zone flow rate numbers
 	std::set<int> usedZoneFlowRatesNumbers;

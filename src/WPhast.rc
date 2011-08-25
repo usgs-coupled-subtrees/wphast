@@ -661,7 +661,7 @@ STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CLIPSIBLINGS | WS
 CAPTION "About Phast for Windows"
 FONT 8, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
-    ICON            IDR_MAINFRAME,IDC_STATIC,7,14,21,20
+    ICON            IDR_MAINFRAME,IDC_STATIC,7,14,20,20
     LTEXT           "Phast for Windows Version @VERSION_LONG@",IDC_STATIC,37,13,163,8,SS_NOPREFIX
     DEFPUSHBUTTON   "OK",IDOK,200,7,50,16,WS_GROUP
     LTEXT           "Released: @RELEASE_DATE@",IDC_STATIC,37,30,98,8
@@ -2760,6 +2760,8 @@ BEGIN
     CONTROL         "Y",IDC_FACE_Y_RADIO,"Button",BS_AUTORADIOBUTTON | BS_NOTIFY,51,155,20,10
     CONTROL         "Z",IDC_FACE_Z_RADIO,"Button",BS_AUTORADIOBUTTON | BS_NOTIFY,73,155,20,10
     CONTROL         "",IDC_DESC_RICHEDIT,"RichEdit20A",ES_MULTILINE | ES_AUTOHSCROLL | ES_READONLY | WS_BORDER | WS_VSCROLL | WS_HSCROLL,7,171,480,61
+    CONTROL         "Use map coordinates (Z coordinate system)",IDC_USE_MAP_COOR_Z,
+                    "Button",BS_AUTOCHECKBOX | BS_NOTIFY | WS_TABSTOP,329,155,155,10
 END
 
 IDD_PROPS_TIMESERIES DIALOGEX 0, 0, 494, 239
@@ -4371,6 +4373,7 @@ IDR_BC_LEAKY_HEAD_RTF   RTF                     "res\\BC_LEAKY_HEAD.rtf"
 IDR_BC_LEAKY_THICKNESS_RTF RTF                     "res\\BC_LEAKY_THICKNESS.rtf"
 IDR_BC_LEAKY_HYD_COND_RTF RTF                     "res\\BC_LEAKY_HYD_COND.rtf"
 IDR_BC_LEAKY_ASSOC_SOL_RTF RTF                     "res\\BC_LEAKY_ASSOC_SOL.rtf"
+IDR_BC_LEAKY_ELEVATION_RTF RTF                     "res\\BC_LEAKY_ELEV.rtf"
 IDR_BC_SPECIFIED_HEAD_RTF RTF                     "res\\BC_SPECIFIED_HEAD.rtf"
 IDR_BC_SPECIFIED_SOL_RTF RTF                     "res\\BC_SPECIFIED_SOL.rtf"
 IDR_IC_HEAD_MASK_RTF    RTF                     "res\\IC_HEAD_MASK.rtf"
@@ -4503,6 +4506,7 @@ IDR_DRAIN_HYD_COND_RTF  RTF                     "res\\DRAIN_HYD_COND.rtf"
 IDR_DRAIN_THICK_RTF     RTF                     "res\\DRAIN_THICK.rtf"
 IDR_DRAIN_Z_RTF         RTF                     "res\\DRAIN_Z.rtf"
 IDR_DRAIN_USE_MAP_Z_RTF RTF                     "res\\DRAIN_USE_MAP_Z.rtf"
+IDR_BC_LEAKY_USE_MAP_Z_RTF RTF                     "res\\BC_LEAKY_USE_MAP_Z.rtf"
 
 /////////////////////////////////////////////////////////////////////////////
 //

@@ -427,6 +427,10 @@
 #define IDR_DRAIN_THICK_RTF             454
 #define IDR_DRAIN_Z_RTF                 455
 #define IDR_DRAIN_USE_MAP_Z_RTF         456
+#define IDR_RTF2                        457
+#define IDR_BC_LEAKY_ELEVATION_RTF      457
+#define IDR_RTF3                        458
+#define IDR_BC_LEAKY_USE_MAP_Z_RTF      458
 #define IDC_EDIT_X                      1000
 #define IDC_TITLE                       1000
 #define IDC_EDIT_Y                      1001
@@ -994,6 +998,7 @@
 #define IDC_STATIC_XW                   1540
 #define IDC_EDIT_XW                     1541
 #define IDC_STATIC_YW                   1542
+#define IDC_USE_MAP_COOR_Z              1542
 #define IDC_EDIT_YW                     1543
 #define IDC_STATIC_ZW                   1544
 #define IDC_EDIT_ZW                     1545
@@ -1050,12 +1055,12 @@
 #define IDC_VALUE_STATIC                65535
 
 // Next default values for new objects
-//
+// 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        457
+#define _APS_NEXT_RESOURCE_VALUE        459
 #define _APS_NEXT_COMMAND_VALUE         32882
-#define _APS_NEXT_CONTROL_VALUE         1542
+#define _APS_NEXT_CONTROL_VALUE         1543
 #define _APS_NEXT_SYMED_VALUE           127
 #endif
 #endif

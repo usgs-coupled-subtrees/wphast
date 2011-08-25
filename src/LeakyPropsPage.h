@@ -25,6 +25,9 @@ public:
 	void SetFlowOnly(bool flowOnly)      { this->FlowOnly = flowOnly; }
 	bool GetFlowOnly(void)const          { return this->FlowOnly; }
 
+	void SetFreeSurface(bool freeSurface){ this->FreeSurface = freeSurface; }
+	bool SetFreeSurface(void)const       { return this->FreeSurface; }
+
 	void SetDefault(bool bDefault)       { this->Default = bDefault; }
 	bool GetDefault(void)const           { return this->Default; }
 
@@ -92,14 +95,17 @@ protected:
 	CGridTimeSeries HydCondProperty;   // single
 	CGridTimeSeries HeadSeries;
 	CGridTimeSeries SolutionSeries;
+	CGridTimeSeries ElevationProperty; // single
 
 	// RTF strings
 	std::string m_sDescriptionRTF;   // IDR_DESCRIPTION_RTF
-	std::string m_sHeadRTF;          // IDR_DESCRIPTION_RTF
+	std::string m_sHeadRTF;          // 
 	std::string m_sThicknessRTF;     // IDR_BC_LEAKY_THICKNESS_RTF
 	std::string m_sHydCondRTF;       // IDR_BC_LEAKY_HYD_COND_RTF
 	std::string m_sAssocSolutionRTF; // IDR_BC_LEAKY_ASSOC_SOL_RTF
+	std::string m_sElevationRTF;     // IDR_BC_LEAKY_ELEVATION_RTF
 	std::string m_sFaceRTF;          // IDR_BC_LEAKY_FACE_RTF
+	std::string m_sUseMapZRTF;       // IDR_BC_LEAKY_USE_MAP_Z_RTF
 
 	// should be member of superclass
 	CString Description;
@@ -108,8 +114,11 @@ protected:
 	bool FlowOnly;
 	bool Default;
 	bool bSkipFaceValidation;
+	bool FreeSurface;
 
 protected:
 	// data
 	CBC BC;
+public:
+	afx_msg void OnBnSetfocusUseMapCoorZ();
 };

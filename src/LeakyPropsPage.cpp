@@ -14,6 +14,8 @@ const TCHAR PSZ_THICKNESS[] = _T("Thickness");
 const TCHAR PSZ_HYD_COND[]  = _T("Hydraulic conductivity");
 const TCHAR PSZ_HEAD[]      = _T("Head");
 const TCHAR PSZ_SOLUTION[]  = _T("Solution");
+const TCHAR PSZ_ELEVATION[] = _T("Elevation");
+
 
 const int SELECTED = 0;
 const int SINGLE = 0;
@@ -31,7 +33,9 @@ CLeakyPropsPage::CLeakyPropsPage()
 	, SolutionSeries(this, false, true)
 	, ThicknessProperty(this, true, false)
 	, HydCondProperty(this, true, false)
+	, ElevationProperty(this, true, false)
 	, bSkipFaceValidation(false)
+	, FreeSurface(false)
 {
 	TRACE("In %s\n", __FUNCTION__);
 
@@ -41,7 +45,9 @@ CLeakyPropsPage::CLeakyPropsPage()
 	CGlobal::LoadRTFString(this->m_sThicknessRTF,     IDR_BC_LEAKY_THICKNESS_RTF);
 	CGlobal::LoadRTFString(this->m_sHydCondRTF,       IDR_BC_LEAKY_HYD_COND_RTF);
 	CGlobal::LoadRTFString(this->m_sAssocSolutionRTF, IDR_BC_LEAKY_ASSOC_SOL_RTF);
+	CGlobal::LoadRTFString(this->m_sElevationRTF,     IDR_BC_LEAKY_ELEVATION_RTF);
 	CGlobal::LoadRTFString(this->m_sFaceRTF,          IDR_BC_LEAKY_FACE_RTF);
+	CGlobal::LoadRTFString(this->m_sUseMapZRTF,       IDR_BC_LEAKY_USE_MAP_Z_RTF);
 
 	// init properties
 	this->SetFlowOnly(false);
@@ -71,10 +77,11 @@ void CLeakyPropsPage::DoDataExchange(CDataExchange* pDX)
 	if (this->TreeCtrl.GetCount() == 0)
 	{
 		// setup tree
-		this->HeadSeries.treeitem      = this->TreeCtrl.InsertItem(PSZ_HEAD,      TVI_ROOT, TVI_LAST);
-		this->SolutionSeries.treeitem  = this->TreeCtrl.InsertItem(PSZ_SOLUTION,  TVI_ROOT, TVI_LAST);
-		this->ThicknessProperty.treeitem = this->TreeCtrl.InsertItem(PSZ_THICKNESS, TVI_ROOT, TVI_LAST);
-		this->HydCondProperty.treeitem   = this->TreeCtrl.InsertItem(PSZ_HYD_COND,  TVI_ROOT, TVI_LAST);
+		this->HeadSeries.treeitem          = this->TreeCtrl.InsertItem(PSZ_HEAD,      TVI_ROOT, TVI_LAST);
+		this->SolutionSeries.treeitem      = this->TreeCtrl.InsertItem(PSZ_SOLUTION,  TVI_ROOT, TVI_LAST);
+		this->ThicknessProperty.treeitem   = this->TreeCtrl.InsertItem(PSZ_THICKNESS, TVI_ROOT, TVI_LAST);
+		this->HydCondProperty.treeitem     = this->TreeCtrl.InsertItem(PSZ_HYD_COND,  TVI_ROOT, TVI_LAST);
+		this->ElevationProperty.treeitem   = this->TreeCtrl.InsertItem(PSZ_ELEVATION, TVI_ROOT, TVI_LAST);
 
 		// setup tree selection
 		this->ItemDDX = this->HeadSeries.treeitem;
@@ -90,6 +97,7 @@ void CLeakyPropsPage::DoDataExchange(CDataExchange* pDX)
 		this->SolutionSeries.SetPointsGrid(&this->PointsGrid);
 		this->ThicknessProperty.SetPointsGrid(&this->PointsGrid);
 		this->HydCondProperty.SetPointsGrid(&this->PointsGrid);
+		this->ElevationProperty.SetPointsGrid(&this->PointsGrid);
 	}
 
 	// description
@@ -143,6 +151,35 @@ void CLeakyPropsPage::DoDataExchange(CDataExchange* pDX)
 		}
 	}
 
+	// z_coordinate_system
+	if (pDX->m_bSaveAndValidate)
+	{
+		if (this->IsDlgButtonChecked(IDC_USE_MAP_COOR_Z) == BST_CHECKED)
+		{
+			this->BC.bc_z_coordinate_system_user = PHAST_Transform::MAP;
+		}
+		else
+		{
+			this->BC.bc_z_coordinate_system_user = PHAST_Transform::GRID;
+		}
+	}
+	else
+	{
+		switch(this->BC.bc_z_coordinate_system_user)
+		{
+		case PHAST_Transform::MAP:
+			this->CheckDlgButton(IDC_USE_MAP_COOR_Z, BST_CHECKED);
+			break;
+		case PHAST_Transform::GRID:
+			this->CheckDlgButton(IDC_USE_MAP_COOR_Z, BST_UNCHECKED);
+			break;
+		default:
+			ASSERT(FALSE);
+			this->CheckDlgButton(IDC_USE_MAP_COOR_Z, BST_UNCHECKED);
+			break;
+		}
+	}
+
 	// solution type
 	if (pDX->m_bSaveAndValidate)
 	{
@@ -156,6 +193,63 @@ void CLeakyPropsPage::DoDataExchange(CDataExchange* pDX)
 	}
 	this->DDX_Series(pDX);
 	this->DDX_Single(pDX);
+
+	if (pDX->m_bSaveAndValidate && this->LastValidation)
+	{
+		// check req'd properties
+		//
+
+		this->HeadSeries.GetSeries(this->BC.m_bc_head);
+		if (this->BC.m_bc_head.size() == 0)
+		{
+			this->ItemDDX = this->HeadSeries.treeitem;
+			this->TreeCtrl.SelectItem(this->ItemDDX);
+			CDataExchange dx(this, FALSE);
+			this->DDX_Series(&dx);
+			this->DDX_Series(pDX);
+		}
+
+		this->SolutionSeries.GetSeries(this->BC.m_bc_solution);
+		if (this->BC.m_bc_solution.size() == 0)
+		{
+			this->ItemDDX = this->SolutionSeries.treeitem;
+			this->TreeCtrl.SelectItem(this->ItemDDX);
+			CDataExchange dx(this, FALSE);
+			this->DDX_Series(&dx);
+			this->DDX_Series(pDX);
+		}
+
+		this->ThicknessProperty.GetProperty(this->BC.bc_thick);
+		if (this->BC.bc_thick == 0)
+		{
+			this->ItemDDX = this->ThicknessProperty.treeitem;
+			this->TreeCtrl.SelectItem(this->ItemDDX);
+			CDataExchange dx(this, FALSE);
+			this->DDX_Single(&dx);
+			this->DDX_Single(pDX);
+		}
+
+		this->HydCondProperty.GetProperty(this->BC.bc_k);
+		if (this->BC.bc_k == 0)
+		{
+			this->ItemDDX = this->HydCondProperty.treeitem;
+			this->TreeCtrl.SelectItem(this->ItemDDX);
+			CDataExchange dx(this, FALSE);
+			this->DDX_Single(&dx);
+			this->DDX_Single(pDX);
+		}
+
+		ASSERT(this->BC.face_defined);
+		this->ElevationProperty.GetProperty(this->BC.bc_z_user);
+		if (this->BC.bc_z_user == 0 && (this->BC.face == 2) && this->FreeSurface)
+		{
+			this->ItemDDX = this->ElevationProperty.treeitem;
+			this->TreeCtrl.SelectItem(this->ItemDDX);
+			CDataExchange dx(this, FALSE);
+			this->DDX_Single(&dx);
+			this->DDX_Single(pDX);
+		}
+	}
 
 	TRACE("Out %s\n", __FUNCTION__);
 }
@@ -206,6 +300,10 @@ void CLeakyPropsPage::DDV_SoftValidate()
 		{
 			this->HydCondProperty.DDV_SoftValidate();
 		}
+		else if (this->ItemDDX == this->ElevationProperty.treeitem)
+		{
+			this->ElevationProperty.DDV_SoftValidate();
+		}
 	}
 }
 
@@ -218,13 +316,13 @@ void CLeakyPropsPage::DDX_Series(CDataExchange* pDX)
 			// time series
 			if (this->ItemDDX == this->HeadSeries.treeitem)
 			{
-				this->HeadSeries.DDX_Series(pDX);
+				this->HeadSeries.DDX_Series(pDX, this->LastValidation);
 				ASSERT(!this->SolutionSeries.grid.IsWindowVisible());
 				ASSERT(this->HeadSeries.grid.IsWindowVisible());
 			}
 			else if (this->ItemDDX == this->SolutionSeries.treeitem)
 			{
-				this->SolutionSeries.DDX_Series(pDX, !this->FlowOnly);
+				this->SolutionSeries.DDX_Series(pDX, (!this->FlowOnly && this->LastValidation));
 				ASSERT(this->SolutionSeries.grid.IsWindowVisible());
 				ASSERT(!this->HeadSeries.grid.IsWindowVisible());
 			}
@@ -242,7 +340,7 @@ void CLeakyPropsPage::DDX_Series(CDataExchange* pDX)
 			}
 			else if (this->ItemDDX == this->SolutionSeries.treeitem)
 			{
-				this->SolutionSeries.DDX_Series(pDX, !this->FlowOnly);
+				this->SolutionSeries.DDX_Series(pDX);
 
 				this->HeadSeries.grid.ShowWindow(SW_HIDE);
 				CGridTimeSeries::ShowSingleProperty(this, SW_HIDE);
@@ -259,7 +357,7 @@ void CLeakyPropsPage::DDX_Single(CDataExchange* pDX)
 		// properties
 		if (this->ItemDDX == this->ThicknessProperty.treeitem)
 		{
-			this->ThicknessProperty.DDX_Single(pDX);
+			this->ThicknessProperty.DDX_Single(pDX, this->LastValidation);
 
 			this->HeadSeries.grid.ShowWindow(SW_HIDE);
 			this->SolutionSeries.grid.ShowWindow(SW_HIDE);
@@ -270,7 +368,18 @@ void CLeakyPropsPage::DDX_Single(CDataExchange* pDX)
 		}
 		else if (this->ItemDDX == this->HydCondProperty.treeitem)
 		{
-			this->HydCondProperty.DDX_Single(pDX);
+			this->HydCondProperty.DDX_Single(pDX, this->LastValidation);
+
+			this->HeadSeries.grid.ShowWindow(SW_HIDE);
+			this->SolutionSeries.grid.ShowWindow(SW_HIDE);
+			if (!pDX->m_bSaveAndValidate)
+			{
+				CGridTimeSeries::ShowSingleProperty(this, SW_SHOW);
+			}
+		}
+		else if (this->ItemDDX == this->ElevationProperty.treeitem)
+		{
+			this->ElevationProperty.DDX_Single(pDX, this->LastValidation);
 
 			this->HeadSeries.grid.ShowWindow(SW_HIDE);
 			this->SolutionSeries.grid.ShowWindow(SW_HIDE);
@@ -296,6 +405,7 @@ void CLeakyPropsPage::SetProperties(const CBC& rBC)
 	// single properties
 	this->ThicknessProperty.SetProperty(rBC.bc_thick);
 	this->HydCondProperty.SetProperty(rBC.bc_k);
+	this->ElevationProperty.SetProperty(rBC.bc_z_user);
 
 	TRACE("Out %s\n", __FUNCTION__);
 }
@@ -303,19 +413,7 @@ void CLeakyPropsPage::SetProperties(const CBC& rBC)
 void CLeakyPropsPage::GetProperties(CBC& rBC)const
 {
 	TRACE("In %s\n", __FUNCTION__);
-
 	rBC = this->BC;
-
-	// series
-	this->HeadSeries.GetSeries(rBC.m_bc_head);
-	this->SolutionSeries.GetSeries(rBC.m_bc_solution);
-
-	// single properties
-	this->ThicknessProperty.GetProperty(rBC.bc_thick);
-	ASSERT(rBC.bc_thick);
-	this->HydCondProperty.GetProperty(rBC.bc_k);
-	ASSERT(rBC.bc_k);
-
 	TRACE("Out %s\n", __FUNCTION__);
 }
 
@@ -352,6 +450,7 @@ BEGIN_MESSAGE_MAP(CLeakyPropsPage, CPropsPropertyPage)
 
 	// DDX failure
 	ON_MESSAGE(UM_DDX_FAILURE, OnUM_DDXFailure)
+	ON_BN_SETFOCUS(IDC_USE_MAP_COOR_Z, &CLeakyPropsPage::OnBnSetfocusUseMapCoorZ)
 END_MESSAGE_MAP()
 
 
@@ -390,8 +489,11 @@ void CLeakyPropsPage::SetPropertyDescription()
 	{
 		CString strItem = this->TreeCtrl.GetItemText(this->ItemDDX);
 
-		COMPARE_SET(PSZ_HEAD,     this->m_sHeadRTF);
-		COMPARE_SET(PSZ_SOLUTION, this->m_sAssocSolutionRTF);
+		COMPARE_SET(PSZ_HEAD,      this->m_sHeadRTF);
+		COMPARE_SET(PSZ_SOLUTION,  this->m_sAssocSolutionRTF);
+		COMPARE_SET(PSZ_THICKNESS, this->m_sThicknessRTF);
+		COMPARE_SET(PSZ_HYD_COND,  this->m_sHydCondRTF);
+		COMPARE_SET(PSZ_ELEVATION, this->m_sElevationRTF);
 	}
 }
 
@@ -455,6 +557,10 @@ void CLeakyPropsPage::OnBnClickedButtonXYZ()
 		{
 			this->HydCondProperty.OnBnClickedButtonXYZ();
 		}
+		else if (this->ItemDDX == this->ElevationProperty.treeitem)
+		{
+			this->ElevationProperty.OnBnClickedButtonXYZ();
+		}
 	}
 }
 
@@ -464,6 +570,7 @@ void CLeakyPropsPage::SetUnits(const CUnits &u)
 	this->SolutionSeries.SetUnits(u);
 	this->ThicknessProperty.SetUnits(u);
 	this->HydCondProperty.SetUnits(u);
+	this->ElevationProperty.SetUnits(u);
 }
 
 void CLeakyPropsPage::OnCbnSelchangeComboProptype()
@@ -486,41 +593,27 @@ void CLeakyPropsPage::OnCbnSelchangeComboProptype()
 		{
 			this->HydCondProperty.OnCbnSelchangeComboProptype();
 		}
+		else if (this->ItemDDX == this->ElevationProperty.treeitem)
+		{
+			this->ElevationProperty.OnCbnSelchangeComboProptype();
+		}
 	}
 }
 
 void CLeakyPropsPage::OnBnClickedCheckFace()
 {
-// COMMENT: {7/15/2009 4:39:48 PM}	if (this->IsDlgButtonChecked(IDC_CHECK_FACE))
+	if (CWnd *pWnd = this->GetDlgItem(IDC_FACE_X_RADIO))
 	{
-		if (CWnd *pWnd = this->GetDlgItem(IDC_FACE_X_RADIO))
-		{
-			pWnd->EnableWindow(TRUE);
-		}
-		if (CWnd *pWnd = this->GetDlgItem(IDC_FACE_Y_RADIO))
-		{
-			pWnd->EnableWindow(TRUE);
-		}
-		if (CWnd *pWnd = this->GetDlgItem(IDC_FACE_Z_RADIO))
-		{
-			pWnd->EnableWindow(TRUE);
-		}
+		pWnd->EnableWindow(TRUE);
 	}
-// COMMENT: {7/15/2009 4:39:58 PM}	else
-// COMMENT: {7/15/2009 4:39:58 PM}	{
-// COMMENT: {7/15/2009 4:39:58 PM}		if (CWnd *pWnd = this->GetDlgItem(IDC_FACE_X_RADIO))
-// COMMENT: {7/15/2009 4:39:58 PM}		{
-// COMMENT: {7/15/2009 4:39:58 PM}			pWnd->EnableWindow(FALSE);
-// COMMENT: {7/15/2009 4:39:58 PM}		}
-// COMMENT: {7/15/2009 4:39:58 PM}		if (CWnd *pWnd = this->GetDlgItem(IDC_FACE_Y_RADIO))
-// COMMENT: {7/15/2009 4:39:58 PM}		{
-// COMMENT: {7/15/2009 4:39:58 PM}			pWnd->EnableWindow(FALSE);
-// COMMENT: {7/15/2009 4:39:58 PM}		}
-// COMMENT: {7/15/2009 4:39:58 PM}		if (CWnd *pWnd = this->GetDlgItem(IDC_FACE_Z_RADIO))
-// COMMENT: {7/15/2009 4:39:58 PM}		{
-// COMMENT: {7/15/2009 4:39:58 PM}			pWnd->EnableWindow(FALSE);
-// COMMENT: {7/15/2009 4:39:58 PM}		}
-// COMMENT: {7/15/2009 4:39:58 PM}	}
+	if (CWnd *pWnd = this->GetDlgItem(IDC_FACE_Y_RADIO))
+	{
+		pWnd->EnableWindow(TRUE);
+	}
+	if (CWnd *pWnd = this->GetDlgItem(IDC_FACE_Z_RADIO))
+	{
+		pWnd->EnableWindow(TRUE);
+	}
 	this->OnBnSetfocusCheckFace();
 }
 
@@ -544,6 +637,10 @@ void CLeakyPropsPage::OnBnClickedCheckMixture()
 		{
 			this->HydCondProperty.OnBnClickedCheckMixture();
 		}
+		else if (this->ItemDDX == this->ElevationProperty.treeitem)
+		{
+			this->ElevationProperty.OnBnClickedCheckMixture();
+		}
 		else
 		{
 			ASSERT(FALSE);
@@ -561,4 +658,9 @@ void CLeakyPropsPage::OnTreeSelChanging(NMHDR *pNotifyStruct, LRESULT *pResult)
 	this->bSkipFaceValidation = true;
 	CPropsPropertyPage::OnTreeSelChanging(pNotifyStruct, pResult);
 	this->bSkipFaceValidation = false;
+}
+
+void CLeakyPropsPage::OnBnSetfocusUseMapCoorZ()
+{
+	this->RichEditCtrl.SetWindowText(this->m_sUseMapZRTF.c_str());
 }
