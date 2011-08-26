@@ -86,4 +86,6 @@ public:
 	afx_msg void OnBnClickedUseMap();
 	afx_msg void OnEnSetfocusDrainZEdit();
 	afx_msg void OnBnSetfocusCheckUseMap();
+	afx_msg void OnBnClickedUseMapCoorZ();
+	afx_msg void OnBnSetfocusUseMapCoorZ();
 };

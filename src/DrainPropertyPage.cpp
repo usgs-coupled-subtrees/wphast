@@ -94,6 +94,36 @@ void CDrainPropertyPage::DoDataExchange(CDataExchange* pDX)
 			break;
 		}
 		DDX_Check(pDX, IDC_CHECK_USE_MAP, state);
+
+		// z
+		if (pPt->z_user_defined)
+		{
+			DDX_Text(pDX, IDC_DRAIN_Z_EDIT, pPt->z_user);
+		}
+		else
+		{
+			CString empty;
+			DDX_Text(pDX, IDC_DRAIN_Z_EDIT, empty);
+		}
+
+		// z grid/map coordinates
+		//
+		state = BST_UNCHECKED;
+		switch (this->Drain.z_coordinate_system)
+		{
+		case PHAST_Transform::MAP:
+			state = BST_CHECKED;
+			DDX_Text(pDX, IDC_DEPTH_UNITS_STATIC, this->m_strMapVerticalUnits);
+			break;
+		case PHAST_Transform::GRID:
+			DDX_Text(pDX, IDC_DEPTH_UNITS_STATIC, this->m_strVerticalUnits);
+			break;
+		default:
+			ASSERT(FALSE);
+			DDX_Text(pDX, IDC_DEPTH_UNITS_STATIC, this->m_strVerticalUnits);
+			break;
+		}
+		DDX_Check(pDX, IDC_USE_MAP_COOR_Z, state);
 		return;
 	}
 
@@ -105,7 +135,6 @@ void CDrainPropertyPage::DoDataExchange(CDataExchange* pDX)
 	}
 
 	DDX_Text(pDX, IDC_WIDTH_UNITS_STATIC, this->m_strHorizontalUnits);
-	DDX_Text(pDX, IDC_DEPTH_UNITS_STATIC, this->m_strVerticalUnits);	
 	DDX_Text(pDX, IDC_RIVER_K_UNITS_STATIC, this->m_strDrainKUnits);
 	DDX_Text(pDX, IDC_RIVER_THICK_UNITS_STATIC, this->m_strDrainThicknessUnits);
 
@@ -400,6 +429,43 @@ void CDrainPropertyPage::DoDataExchange(CDataExchange* pDX)
 		}
 	}
 
+	// z_coordinate_system
+	//
+	if (pDX->m_bSaveAndValidate)
+	{
+		switch (this->IsDlgButtonChecked(IDC_USE_MAP_COOR_Z))
+		{
+		case BST_CHECKED:
+			this->Drain.z_coordinate_system = PHAST_Transform::MAP;
+			break;
+		case BST_UNCHECKED:
+			this->Drain.z_coordinate_system = PHAST_Transform::GRID;
+			break;
+		default:
+			ASSERT(FALSE);
+			this->Drain.z_coordinate_system = PHAST_Transform::GRID;
+			break;
+		}
+	}
+	else
+	{
+		switch (this->Drain.z_coordinate_system)
+		{
+		case PHAST_Transform::MAP:
+			DDX_Text(pDX, IDC_DEPTH_UNITS_STATIC, this->m_strMapVerticalUnits);
+			this->CheckDlgButton(IDC_USE_MAP_COOR_Z, BST_CHECKED);
+			break;
+		case PHAST_Transform::GRID:
+			DDX_Text(pDX, IDC_DEPTH_UNITS_STATIC, this->m_strVerticalUnits);
+			this->CheckDlgButton(IDC_USE_MAP_COOR_Z, BST_UNCHECKED);
+			break;
+		default:
+			ASSERT(FALSE);
+			DDX_Text(pDX, IDC_DEPTH_UNITS_STATIC, this->m_strVerticalUnits);
+			this->CheckDlgButton(IDC_USE_MAP_COOR_Z, BST_UNCHECKED);
+			break;
+		}
+	}
 
 	if (pDX->m_bSaveAndValidate && this->m_bFullVerify)
 	{
@@ -459,6 +525,8 @@ BEGIN_MESSAGE_MAP(CDrainPropertyPage, CPropertyPage)
 	ON_BN_CLICKED(IDC_CHECK_USE_MAP, OnBnClickedUseMap)
 	ON_EN_SETFOCUS(IDC_DRAIN_Z_EDIT, &CDrainPropertyPage::OnEnSetfocusDrainZEdit)
 	ON_BN_SETFOCUS(IDC_CHECK_USE_MAP, &CDrainPropertyPage::OnBnSetfocusCheckUseMap)
+	ON_BN_CLICKED(IDC_USE_MAP_COOR_Z, &CDrainPropertyPage::OnBnClickedUseMapCoorZ)
+	ON_BN_SETFOCUS(IDC_USE_MAP_COOR_Z, &CDrainPropertyPage::OnBnSetfocusUseMapCoorZ)
 END_MESSAGE_MAP()
 
 
@@ -730,4 +798,63 @@ void CDrainPropertyPage::OnEnSetfocusDrainZEdit()
 void CDrainPropertyPage::OnBnSetfocusCheckUseMap()
 {
 	this->m_wndRichEditCtrl.SetWindowText(this->m_sUseMapXYRTF.c_str());
+}
+
+void CDrainPropertyPage::OnBnClickedUseMapCoorZ()
+{
+	const CUnits& units = this->m_units;
+	const CGridKeyword& gridKeyword = this->m_gridKeyword;
+	PHAST_Transform map2grid(
+		gridKeyword.m_grid_origin[0],
+		gridKeyword.m_grid_origin[1],
+		gridKeyword.m_grid_origin[2],
+		gridKeyword.m_grid_angle,
+		units.map_horizontal.input_to_si/units.horizontal.input_to_si,
+		units.map_horizontal.input_to_si/units.horizontal.input_to_si,
+		units.map_vertical.input_to_si/units.vertical.input_to_si
+		);
+
+	bool bChecked = (this->IsDlgButtonChecked(IDC_USE_MAP_COOR_Z) == BST_CHECKED);
+	if (bChecked)
+	{
+		this->Drain.z_coordinate_system = PHAST_Transform::MAP;
+	}
+	else
+	{
+		this->Drain.z_coordinate_system = PHAST_Transform::GRID;
+	}
+
+	std::list<CRiverPoint>::iterator it = this->Drain.m_listPoints.begin();
+	for (; it != this->Drain.m_listPoints.end(); ++it)
+	{
+		if ((*it).z_user_defined)
+		{
+			Point p(
+				0.0,
+				0.0,
+				(*it).z_user
+				);
+
+			if (bChecked)
+			{
+				map2grid.Inverse_transform(p);
+				(*it).z_user = p.z();
+			}
+			else
+			{
+				map2grid.Transform(p);
+				(*it).z_user = p.z();
+			}
+		}
+	}
+
+	ASSERT(this->m_bUpdatePositionOnly == FALSE);
+	this->m_bUpdatePositionOnly = TRUE;
+	this->UpdateData(FALSE);
+	this->m_bUpdatePositionOnly = FALSE;
+}
+
+void CDrainPropertyPage::OnBnSetfocusUseMapCoorZ()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sUseMapZRTF.c_str());
 }

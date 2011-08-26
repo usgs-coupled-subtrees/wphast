@@ -162,7 +162,6 @@ std::ostream& operator<< (std::ostream &os, const CDrain &a)
 		os << (*it);
 		// z for drain points
 		//
-// COMMENT: {12/19/2008 4:17:28 PM}		if ((*it).z_input_defined)
 		if ((*it).z_user_defined)
 		{
 			os << "\t\t-z                           " << (*it).z_user << "\n";
