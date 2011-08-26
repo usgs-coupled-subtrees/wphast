@@ -5,19 +5,7 @@
 
 #include "WPhastMacros.h"
 
-// COMMENT: {12/19/2008 3:46:00 PM}#define x             x_user
-// COMMENT: {12/19/2008 3:48:12 PM}#define x_defined     x_user_defined
-// COMMENT: {12/19/2008 3:47:08 PM}#define y             y_user
-// COMMENT: {12/19/2008 3:48:15 PM}#define y_defined     y_user_defined
-// COMMENT: {12/19/2008 3:49:44 PM}#define width         width_user
-// COMMENT: {12/19/2008 3:49:44 PM}#define width_defined width_user_defined
-#define depth         depth_user
-#define depth_defined depth_user_defined
-#define z             z_user
-#define z_defined     z_user_defined
-
-
-CLIPFORMAT CRiver::clipFormat = (CLIPFORMAT)::RegisterClipboardFormat(_T("WPhast:CRiver"));
+CLIPFORMAT CRiver::clipFormat = (CLIPFORMAT)::RegisterClipboardFormat(_T("WPhast:CRiver:2"));
 
 CRiver::CRiver(void)
 : coordinate_system(PHAST_Transform::MAP)
@@ -160,14 +148,14 @@ void CRiver::Serialize(CArchive& ar)
 CRiverPoint::CRiverPoint(void)
 : x_user_defined(0)
 , y_user_defined(0)
-, z_defined(0)
-, depth_defined(0)
+, z_user_defined(0)
+, depth_user_defined(0)
 , k_defined(0)
 , width_user_defined(0)
 , thickness_defined(0)
 , x_user(0.0)
 , y_user(0.0)
-, z(0.0)
+, z_user(0.0)
 , x_grid(0.0)
 , y_grid(0.0)
 , z_grid(0.0)
@@ -177,23 +165,20 @@ CRiverPoint::CRiverPoint(void)
 CRiverPoint::CRiverPoint(const River_Point& rp)
 : x_user_defined(rp.x_user_defined)
 , y_user_defined(rp.y_user_defined)
-// COMMENT: {12/19/2008 3:41:15 PM}, z_defined(rp.z_input_defined)
 , z_user_defined(rp.z_user_defined)
-, depth_defined(rp.depth_defined)
+, depth_user_defined(rp.depth_user_defined)
 , k_defined(rp.k_defined)
 , width_user_defined(rp.width_user_defined)
 , thickness_defined(rp.thickness_defined)
-// COMMENT: {12/19/2008 3:44:08 PM}, z_input_defined(rp.z_input_defined)
 , x_grid(rp.x_grid)
 , y_grid(rp.y_grid)
 , width_grid(rp.width_grid)
 , z_grid(rp.z_grid)
-
 {
 	if (this->x_user_defined)     this->x_user     = rp.x_user;
 	if (this->y_user_defined)     this->y_user     = rp.y_user;
-	if (this->z_defined)          this->z          = rp.z;
-	if (this->depth_defined)      this->depth      = rp.depth;
+	if (this->z_user_defined)     this->z_user     = rp.z_user;
+	if (this->depth_user_defined) this->depth_user = rp.depth_user;
 	if (this->k_defined)          this->k          = rp.k;
 	if (this->width_user_defined) this->width_user = rp.width_user;
 	if (this->thickness_defined) this->thickness = rp.thickness;
@@ -234,7 +219,7 @@ void CRiverPoint::Insert(const Ctime& time, const CRiverState& state)
 
 bool CRiverPoint::IsAnyThingDefined(void)const
 {
-	return (this->depth_defined || this->k_defined || this->width_user_defined || this->thickness_defined || !this->m_riverSchedule.empty());
+	return (this->depth_user_defined || this->k_defined || this->width_user_defined || this->thickness_defined || !this->m_riverSchedule.empty());
 }
 
 void CRiverPoint::Serialize(bool bStoring, hid_t loc_id)
@@ -263,8 +248,8 @@ void CRiverPoint::Serialize(CArchive& ar)
 {
 	ARC_GETSET_DEFINED_MACRO(ar, x_user);
 	ARC_GETSET_DEFINED_MACRO(ar, y_user);
-	ARC_GETSET_DEFINED_MACRO(ar, z);
-	ARC_GETSET_DEFINED_MACRO(ar, depth);
+	ARC_GETSET_DEFINED_MACRO(ar, z_user);
+	ARC_GETSET_DEFINED_MACRO(ar, depth_user);
 	ARC_GETSET_DEFINED_MACRO(ar, k);
 	ARC_GETSET_DEFINED_MACRO(ar, width_user);
 	ARC_GETSET_DEFINED_MACRO(ar, thickness);
@@ -385,7 +370,7 @@ std::ostream& operator<< (std::ostream &os, const CRiverPoint &a)
 		os << "\t\t-bed_hydraulic_conductivity  " << a.k << "\n";
 	}
 
-	// bed_hydraulic_conductivity
+	// bed_thickness
 	//
 	if (a.thickness_defined)
 	{
@@ -394,19 +379,19 @@ std::ostream& operator<< (std::ostream &os, const CRiverPoint &a)
 
 	// depth
 	//
-	if (a.depth_defined)
+	if (a.depth_user_defined)
 	{
-		os << "\t\t-depth                       " << a.depth << "\n";
+		ASSERT(!a.z_user_defined);
+		os << "\t\t-depth                       " << a.depth_user << "\n";
 	}
 
-	/**************
 	// bottom
 	//
-	if (a.z_defined)
+	if (a.z_user_defined)
 	{
-		os << "\t\t-bottom                      " << a.z << "\n";
+		ASSERT(!a.depth_user_defined);
+		os << "\t\t-bottom                      " << a.z_user << "\n";
 	}
-	***************/
 
 	return os;
 }

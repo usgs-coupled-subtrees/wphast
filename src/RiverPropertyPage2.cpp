@@ -45,7 +45,8 @@ CRiverPropertyPage2::CRiverPropertyPage2()
 	CGlobal::LoadRTFString(this->m_sUnitsRTF,    IDR_RIVER_UNITS_RTF);
 	CGlobal::LoadRTFString(this->m_sHeadRTF,     IDR_RIVER_HEAD_RTF);
 	CGlobal::LoadRTFString(this->m_sSolutionRTF, IDR_RIVER_SOLUTION_RTF);
-
+	CGlobal::LoadRTFString(this->m_sUseMapXYRTF, IDR_RIVER_USE_MAP_XY_RTF);
+	CGlobal::LoadRTFString(this->m_sUseMapZRTF,  IDR_RIVER_USE_MAP_Z_RTF);
 }
 
 CRiverPropertyPage2::~CRiverPropertyPage2()
@@ -94,6 +95,36 @@ void CRiverPropertyPage2::DoDataExchange(CDataExchange* pDX)
 			break;
 		}
 		DDX_Check(pDX, IDC_CHECK_USE_MAP, state);
+
+		// z
+		if (pPt->z_user_defined)
+		{
+			DDX_Text(pDX, IDC_BOTTOM_EDIT, pPt->z_user);
+		}
+		else
+		{
+			CString empty;
+			DDX_Text(pDX, IDC_BOTTOM_EDIT, empty);
+		}
+
+		// z grid/map coordinates
+		//
+		state = BST_UNCHECKED;
+		switch (this->m_river.z_coordinate_system_user)
+		{
+		case PHAST_Transform::MAP:
+			state = BST_CHECKED;
+			DDX_Text(pDX, IDC_BOTTOM_UNITS_STATIC, this->m_strMapVerticalUnits);
+			break;
+		case PHAST_Transform::GRID:
+			DDX_Text(pDX, IDC_BOTTOM_UNITS_STATIC, this->m_strVerticalUnits);
+			break;
+		default:
+			ASSERT(FALSE);
+			DDX_Text(pDX, IDC_BOTTOM_UNITS_STATIC, this->m_strVerticalUnits);
+			break;
+		}
+		DDX_Check(pDX, IDC_USE_MAP_COOR_Z, state);
 		return;
 	}
 
@@ -799,6 +830,9 @@ BEGIN_MESSAGE_MAP(CRiverPropertyPage2, CPropertyPage)
 	ON_NOTIFY(GVN_SELCHANGED, IDC_GRID_SCHEDULES, OnSelChangedSchedule)
 	ON_NOTIFY(GVN_SETFOCUS, IDC_GRID_SCHEDULES, OnSelChangedSchedule)
 	ON_BN_CLICKED(IDC_CHECK_USE_MAP, OnBnClickedUseMap)
+	ON_BN_CLICKED(IDC_USE_MAP_COOR_Z, &CRiverPropertyPage2::OnBnClickedUseMapCoorZ)
+	ON_BN_SETFOCUS(IDC_USE_MAP_COOR_Z, &CRiverPropertyPage2::OnBnSetfocusUseMapCoorZ)
+	ON_BN_SETFOCUS(IDC_CHECK_USE_MAP, &CRiverPropertyPage2::OnBnSetfocusCheckUseMap)
 END_MESSAGE_MAP()
 
 
@@ -813,6 +847,12 @@ void CRiverPropertyPage2::SetUnits(const CUnits& units)
 
 	this->m_strVerticalUnits.Format("(%s)", this->m_units.vertical.defined ? this->m_units.vertical.input : this->m_units.vertical.si);
 	CGlobal::MinimizeLengthUnits(this->m_strVerticalUnits);
+
+	this->m_strMapHorizontalUnits.Format("(%s)", this->m_units.map_horizontal.defined ? this->m_units.map_horizontal.input : this->m_units.map_horizontal.si);
+	CGlobal::MinimizeLengthUnits(this->m_strMapHorizontalUnits);
+
+	this->m_strMapVerticalUnits.Format("(%s)", this->m_units.map_vertical.defined ? this->m_units.map_vertical.input : this->m_units.map_vertical.si);
+	CGlobal::MinimizeLengthUnits(this->m_strMapVerticalUnits);
 
 	this->m_strHeadUnits.Format("(%s)", this->m_units.head.defined ? this->m_units.head.input : this->m_units.head.si);
 	CGlobal::MinimizeLengthUnits(this->m_strHeadUnits);
@@ -984,6 +1024,7 @@ void CRiverPropertyPage2::OnBnClickedRadioDepth()
 	{
 		pWnd->EnableWindow(TRUE);
 	}
+
 	if (CWnd* pWnd = this->GetDlgItem(IDC_BOTTOM_EDIT))
 	{
 		pWnd->EnableWindow(FALSE);
@@ -992,6 +1033,10 @@ void CRiverPropertyPage2::OnBnClickedRadioDepth()
 	{
 		pWnd->EnableWindow(FALSE);
 	}	
+	if (CWnd* pWnd = this->GetDlgItem(IDC_USE_MAP_COOR_Z))
+	{
+		pWnd->EnableWindow(FALSE);
+	}
 }
 
 void CRiverPropertyPage2::OnBnClickedRadioBottom()
@@ -1004,11 +1049,16 @@ void CRiverPropertyPage2::OnBnClickedRadioBottom()
 	{
 		pWnd->EnableWindow(FALSE);
 	}
+
 	if (CWnd* pWnd = this->GetDlgItem(IDC_BOTTOM_EDIT))
 	{
 		pWnd->EnableWindow(TRUE);
 	}
 	if (CWnd* pWnd = this->GetDlgItem(IDC_BOTTOM_UNITS_STATIC))
+	{
+		pWnd->EnableWindow(TRUE);
+	}
+	if (CWnd* pWnd = this->GetDlgItem(IDC_USE_MAP_COOR_Z))
 	{
 		pWnd->EnableWindow(TRUE);
 	}
@@ -1154,4 +1204,68 @@ void CRiverPropertyPage2::SetGridKeyword(const CGridKeyword& gridKeyword)
 {
 	this->m_gridKeyword = gridKeyword;
 	this->m_gridKeyword.m_grid[2].Setup();
+}
+
+void CRiverPropertyPage2::OnBnClickedUseMapCoorZ()
+{
+	const CUnits& units = this->m_units;
+	const CGridKeyword& gridKeyword = this->m_gridKeyword;
+	PHAST_Transform map2grid(
+		gridKeyword.m_grid_origin[0],
+		gridKeyword.m_grid_origin[1],
+		gridKeyword.m_grid_origin[2],
+		gridKeyword.m_grid_angle,
+		units.map_horizontal.input_to_si/units.horizontal.input_to_si,
+		units.map_horizontal.input_to_si/units.horizontal.input_to_si,
+		units.map_vertical.input_to_si/units.vertical.input_to_si
+		);
+
+	bool bChecked = (this->IsDlgButtonChecked(IDC_USE_MAP_COOR_Z) == BST_CHECKED);
+	if (bChecked)
+	{
+		this->m_river.z_coordinate_system_user = PHAST_Transform::MAP;
+	}
+	else
+	{
+		this->m_river.z_coordinate_system_user = PHAST_Transform::GRID;
+	}
+
+	std::list<CRiverPoint>::iterator it = this->m_river.m_listPoints.begin();
+	for (; it != this->m_river.m_listPoints.end(); ++it)
+	{
+		if ((*it).z_user_defined)
+		{
+			Point p(
+				0.0,
+				0.0,
+				(*it).z_user
+				);
+
+			if (bChecked)
+			{
+				map2grid.Inverse_transform(p);
+				(*it).z_user = p.z();
+			}
+			else
+			{
+				map2grid.Transform(p);
+				(*it).z_user = p.z();
+			}
+		}
+	}
+
+	ASSERT(this->m_bUpdatePositionOnly == FALSE);
+	this->m_bUpdatePositionOnly = TRUE;
+	this->UpdateData(FALSE);
+	this->m_bUpdatePositionOnly = FALSE;
+}
+
+void CRiverPropertyPage2::OnBnSetfocusUseMapCoorZ()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sUseMapZRTF.c_str());
+}
+
+void CRiverPropertyPage2::OnBnSetfocusCheckUseMap()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sUseMapXYRTF.c_str());
 }

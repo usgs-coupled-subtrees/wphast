@@ -74,6 +74,8 @@ protected:
 	std::string m_sUnitsRTF;    // IDR_RIVER_UNITS_RTF
 	std::string m_sHeadRTF;     // IDR_RIVER_HEAD_RTF
 	std::string m_sSolutionRTF; // IDR_RIVER_SOLUTION_RTF
+	std::string m_sUseMapXYRTF; // IDR_RIVER_USE_MAP_XY_RTF
+	std::string m_sUseMapZRTF;  // IDR_RIVER_USE_MAP_Z_RTF
 
 public:
 	afx_msg void OnTvnSelchangingPropTree(NMHDR *pNMHDR, LRESULT *pResult);
@@ -96,4 +98,7 @@ public:
 	afx_msg void OnEnSetfocusDepthEdit();
 	afx_msg void OnEnSetfocusBottomEdit();
 	afx_msg void OnBnClickedUseMap();
+	afx_msg void OnBnClickedUseMapCoorZ();
+	afx_msg void OnBnSetfocusUseMapCoorZ();
+	afx_msg void OnBnSetfocusCheckUseMap();
 };
