@@ -15,8 +15,6 @@
 #include "TestCPhastInput.h"
 #include "TestCPrintFreqPropertyPage.h"
 #include "TestCPropertyTreeControlBar.h"
-#include "TestCTimeControl.h"
-#include "TestCTimeControlMultiPropertyPage.h"
 #include "TestCUnits.h"
 #include "TestCWPhastDoc.h"
 #include "TestCWellPropertyPage.h"
@@ -33,7 +31,7 @@
 
 TCPPUnit::TCPPUnit(void)
 {
-// COMMENT: {8/18/2011 10:28:19 PM}	this->RunUnitTests();
+	this->RunUnitTests();
 }
 
 TCPPUnit::~TCPPUnit(void)
@@ -69,29 +67,26 @@ void TCPPUnit::RunUnitTests(void)
 		double d1 = 0/z;
 #endif
 
-// COMMENT: {8/15/2011 9:17:10 PM}		runner.addTest(TestCPhastInput::suite());
-// COMMENT: {8/15/2011 9:17:10 PM}		runner.addTest(TestCZone::suite());
-// COMMENT: {8/15/2011 9:17:10 PM}		runner.addTest(TestCGrid::suite());
-// COMMENT: {8/15/2011 9:17:10 PM}		runner.addTest(TestPHAST_Transform::suite());
-// COMMENT: {8/15/2011 9:17:10 PM}		runner.addTest(TestCtime::suite());
-// COMMENT: {8/15/2011 9:17:10 PM}		runner.addTest(TestCBC::suite());
-// COMMENT: {8/15/2011 9:17:10 PM}		runner.addTest(TestCTimeControl::suite());
+		runner.addTest(TestCPhastInput::suite());
+		runner.addTest(TestCZone::suite());
+		runner.addTest(TestCGrid::suite());
+		runner.addTest(TestPHAST_Transform::suite());
+		runner.addTest(TestCtime::suite());
+		runner.addTest(TestCBC::suite());
 		runner.addTest(TestCWPhastDoc::suite());
-// COMMENT: {8/15/2011 9:17:10 PM}		runner.addTest(TestCParser::suite());
-// COMMENT: {8/15/2011 9:17:10 PM}		runner.addTest(TestCPropertyTreeControlBar::suite());
-// COMMENT: {8/15/2011 9:17:10 PM}		runner.addTest(TestCUnits::suite());
-// COMMENT: {8/15/2011 9:17:10 PM}		runner.addTest(TestCPhastInput::suite());
-// COMMENT: {8/15/2011 9:17:10 PM}		runner.addTest(TestPrism::suite());
-// COMMENT: {8/15/2011 9:17:10 PM}		runner.addTest(TestHDFSerializePolyData::suite());
-// COMMENT: {8/15/2011 9:17:10 PM}		runner.addTest(TestUniqueMap::suite());
-// COMMENT: {8/15/2011 9:17:10 PM}		runner.addTest(TestCproperty::suite());
+		runner.addTest(TestCParser::suite());
+		runner.addTest(TestCPropertyTreeControlBar::suite());
+		runner.addTest(TestCUnits::suite());
+		runner.addTest(TestCPhastInput::suite());
+		runner.addTest(TestPrism::suite());
+		runner.addTest(TestHDFSerializePolyData::suite());
+		runner.addTest(TestUniqueMap::suite());
+		runner.addTest(TestCproperty::suite());
 
 		/**********************************************************
 		// the following require user input
 		//
 		runner.addTest(TestCModGridCtrlEx::suite());
-		runner.addTest(TestCTimeControlMultiPropertyPage::suite());
-		runner.addTest(TestCTimeControlMultiPropertyPage2::suite());
 		runner.addTest(TestCMapDialog::suite());	
 		runner.addTest(TestCMapActor::suite());	
 		runner.addTest(TestCGridLODActor::suite());	

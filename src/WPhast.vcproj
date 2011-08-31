@@ -420,10 +420,6 @@
 				>
 			</File>
 			<File
-				RelativePath="AddStressPeriodAction.cpp"
-				>
-			</File>
-			<File
 				RelativePath="AxesActor.cpp"
 				>
 			</File>
@@ -1184,15 +1180,7 @@
 				>
 			</File>
 			<File
-				RelativePath="TimeControl.cpp"
-				>
-			</File>
-			<File
 				RelativePath="TimeControl2.cpp"
-				>
-			</File>
-			<File
-				RelativePath="TimeControlMultiPropertyPage.cpp"
 				>
 			</File>
 			<File
@@ -4318,62 +4306,6 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="TestCTimeControl.cpp"
-					>
-					<FileConfiguration
-						Name="AutoRelease|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="AutoDebug|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="ReleaseRelease|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath="TestCTimeControlMultiPropertyPage.cpp"
-					>
-					<FileConfiguration
-						Name="AutoRelease|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="AutoDebug|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="ReleaseRelease|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-				</File>
-				<File
 					RelativePath="TestCTimeControlMultiPropertyPage2.cpp"
 					>
 					<FileConfiguration
@@ -4813,10 +4745,6 @@
 			>
 			<File
 				RelativePath="Action.h"
-				>
-			</File>
-			<File
-				RelativePath="AddStressPeriodAction.h"
 				>
 			</File>
 			<File
@@ -5536,10 +5464,6 @@
 				>
 			</File>
 			<File
-				RelativePath="TimeControl.h"
-				>
-			</File>
-			<File
 				RelativePath="TimeControl2.h"
 				>
 			</File>
@@ -5820,14 +5744,6 @@
 				</File>
 				<File
 					RelativePath="TestCtime.h"
-					>
-				</File>
-				<File
-					RelativePath="TestCTimeControl.h"
-					>
-				</File>
-				<File
-					RelativePath="TestCTimeControlMultiPropertyPage.h"
 					>
 				</File>
 				<File
@@ -6849,10 +6765,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\res\STEADY_FLOW_GROWTH.rtf"
-				>
-			</File>
-			<File
 				RelativePath="res\scale_obj.cur"
 				>
 			</File>
@@ -6906,6 +6818,10 @@
 			</File>
 			<File
 				RelativePath="res\STEADY_FLOW.rtf"
+				>
+			</File>
+			<File
+				RelativePath=".\res\STEADY_FLOW_GROWTH.rtf"
 				>
 			</File>
 			<File
