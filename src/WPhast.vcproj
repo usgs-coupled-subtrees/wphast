@@ -6821,6 +6821,26 @@
 				>
 			</File>
 			<File
+				RelativePath=".\res\PR_FREQ_RESTART.rtf"
+				>
+			</File>
+			<File
+				RelativePath=".\res\PR_FREQ_EOP_DEFAULT.rtf"
+				>
+			</File>
+			<File
+				RelativePath=".\res\PR_FREQ_ZF_HEADS.rtf"
+				>
+			</File>
+			<File
+				RelativePath=".\res\PR_FREQ_ZF.rtf"
+				>
+			</File>
+			<File
+				RelativePath=".\res\PR_FREQ_ZF_TSV.rtf"
+				>
+			</File>
+			<File
 				RelativePath="res\scale_obj.cur"
 				>
 			</File>

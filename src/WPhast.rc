@@ -1098,18 +1098,18 @@ BEGIN
     CONTROL         "Confined flow",IDC_CONFINED_FLOW_RADIO,"Button",BS_AUTORADIOBUTTON | BS_NOTIFY,38,49,119,10
 END
 
-IDD_PRINT_FREQUENCY_EXT_PROPPAGE DIALOGEX 0, 0, 418, 386
+IDD_PRINT_FREQUENCY_EXT_PROPPAGE DIALOGEX 0, 0, 418, 403
 STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
-CAPTION "Print Frequency Properties"
+CAPTION " "
 FONT 8, "MS Sans Serif", 400, 0, 0x0
 BEGIN
     CONTROL         "Custom1",IDC_GRID,"MFCGridCtrl",WS_BORDER | WS_TABSTOP,7,7,404,275
     LTEXT           "NOTE: This invisible control is needed so that the background of the dialog is painted correctly.",IDC_STATIC,75,77,159,22,NOT WS_VISIBLE
-    CONTROL         "",IDC_DESC_RICHEDIT,"RichEdit20A",ES_MULTILINE | ES_AUTOHSCROLL | ES_READONLY | WS_BORDER | WS_VSCROLL | WS_HSCROLL,7,305,404,74
-    PUSHBUTTON      "Add",IDC_BUTTON_ADD,7,290,50,14
-    PUSHBUTTON      "Insert",IDC_BUTTON_INSERT,61,290,50,14
-    PUSHBUTTON      "Delete",IDC_BUTTON_DELETE,117,290,50,14
-    CONTROL         "Save final heads",IDC_CHECK_SAVE_HEADS,"Button",BS_AUTOCHECKBOX | BS_NOTIFY | WS_TABSTOP,342,294,69,10
+    CONTROL         "",IDC_DESC_RICHEDIT,"RichEdit20A",ES_MULTILINE | ES_AUTOHSCROLL | ES_READONLY | WS_BORDER | WS_VSCROLL | WS_HSCROLL,7,322,404,74
+    PUSHBUTTON      "Add",IDC_BUTTON_ADD,7,307,50,14
+    PUSHBUTTON      "Insert",IDC_BUTTON_INSERT,61,307,50,14
+    PUSHBUTTON      "Delete",IDC_BUTTON_DELETE,117,307,50,14
+    CONTROL         "Save final heads",IDC_CHECK_SAVE_HEADS,"Button",BS_AUTOCHECKBOX | BS_NOTIFY | WS_TABSTOP,342,311,69,10
 END
 
 IDD_STARTUP_INTRO DIALOGEX 0, 0, 276, 86
@@ -3487,7 +3487,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 411
         TOPMARGIN, 7
-        BOTTOMMARGIN, 379
+        BOTTOMMARGIN, 396
     END
 
     IDD_STARTUP_INTRO, DIALOG
@@ -4523,6 +4523,11 @@ IDR_GRID_ORIGIN_RTF     RTF                     "res\\GRID_ORIGIN.rtf"
 IDR_GRID_ANGLE_RTF      RTF                     "res\\GRID_ANGLE.rtf"
 IDR_RIVER_USE_MAP_XY_RTF RTF                     "res\\RIVER_USE_MAP_XY.rtf"
 IDR_RIVER_USE_MAP_Z_RTF RTF                     "res\\RIVER_USE_MAP_Z.rtf"
+IDR_PR_FREQ_RESTART_RTF RTF                     "res\\PR_FREQ_RESTART.rtf"
+IDR_PR_FREQ_EOP_DEFAULT_RTF RTF                     "res\\PR_FREQ_EOP_DEFAULT.rtf"
+IDR_PR_FREQ_ZF_HEADS_RTF RTF                     "res\\PR_FREQ_ZF_HEADS.rtf"
+IDR_PR_FREQ_ZF_RTF      RTF                     "res\\PR_FREQ_ZF.rtf"
+IDR_PR_FREQ_ZF_TSV_RTF  RTF                     "res\\PR_FREQ_ZF_TSV.rtf"
 
 /////////////////////////////////////////////////////////////////////////////
 //

@@ -30,36 +30,36 @@ public:
 	static void OutputCtimeSeries(std::ostream &os, const CTimeSeries<Ctime>& timeSeries, const Ctime& time, LPCTSTR lpName);
 	static void OutputCtimeSeries(std::ostream &os, const CTimeSeries<int>& timeSeries, const Ctime& time, LPCTSTR lpName);
 
-
-// COMMENT: {4/11/2005 1:42:37 PM}	void Edit(CTreeCtrl* pTreeCtrl, int nStressPeriod = 1);
 	void Edit(CTreeCtrl* pTreeCtrl);
 	HTREEITEM GetTreeItem(void)const { return m_htiPrintFreq; }
 
 public:
 	// Ctime => std::map<Ctime, Ctime>
-	CTimeSeries<Ctime> print_bc_flow;         //  2
-	CTimeSeries<int>   print_bc;              //  3
-	CTimeSeries<Ctime> print_comp;            //  4
-	CTimeSeries<Ctime> print_conductances;    //  5
-	CTimeSeries<int>   print_end_of_period;   //  6 NEW
-	CTimeSeries<Ctime> print_flow_balance;    //  7
-	CTimeSeries<Ctime> print_force_chem;      //  8
-	CTimeSeries<Ctime> print_hdf_chem;        //  9
-	CTimeSeries<Ctime> print_hdf_head;        // 10
-	CTimeSeries<Ctime> print_hdf_velocity;    // 11
-	CTimeSeries<Ctime> print_head;            // 12
-	CTimeSeries<Ctime> print_statistics;      // 13
-	CTimeSeries<Ctime> print_restart;         // 14 NEW
-	int save_final_heads;                     // 15
-	CTimeSeries<Ctime> print_zone_budget_tsv; // 16 NEW
-	CTimeSeries<Ctime> print_velocity;        // 17
-	CTimeSeries<Ctime> print_wells;           // 18
-	CTimeSeries<Ctime> print_xyz_chem;        // 19
-	CTimeSeries<Ctime> print_xyz_comp;        // 20
-	CTimeSeries<Ctime> print_xyz_head;        // 21
-	CTimeSeries<Ctime> print_xyz_velocity;    // 22 
-	CTimeSeries<Ctime> print_xyz_wells;       // 23
-	CTimeSeries<Ctime> print_zone_budget;     // 24 NEW
+	CTimeSeries<int>   print_bc;                //  2
+	CTimeSeries<Ctime> print_comp;              //  3
+	CTimeSeries<Ctime> print_conductances;      //  4
+	CTimeSeries<int>   print_end_of_period;     //  5
+	CTimeSeries<Ctime> print_flow_balance;      //  6
+	CTimeSeries<Ctime> print_bc_flow;           //  7
+	CTimeSeries<Ctime> print_force_chem;        //  8
+	CTimeSeries<Ctime> print_hdf_chem;          //  9
+	CTimeSeries<Ctime> print_hdf_head;          // 10
+	CTimeSeries<Ctime> print_hdf_velocity;      // 11
+	CTimeSeries<Ctime> print_head;              // 12
+	CTimeSeries<Ctime> print_statistics;        // 13
+	CTimeSeries<Ctime> print_restart;           // 14
+	CTimeSeries<Ctime> print_velocity;          // 15
+	CTimeSeries<Ctime> print_wells;             // 16
+	CTimeSeries<Ctime> print_xyz_chem;          // 17
+	CTimeSeries<Ctime> print_xyz_comp;          // 18
+	CTimeSeries<Ctime> print_xyz_head;          // 19
+	CTimeSeries<Ctime> print_xyz_velocity;      // 20 
+	CTimeSeries<Ctime> print_xyz_wells;         // 21
+	CTimeSeries<Ctime> print_zone_budget_heads; // 22
+	CTimeSeries<Ctime> print_zone_budget;       // 23
+	CTimeSeries<Ctime> print_zone_budget_tsv;   // 24
+
+	int save_final_heads;                       
 
 protected:
 	HTREEITEM m_htiPrintFreq;

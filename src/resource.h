@@ -432,6 +432,11 @@
 #define IDR_GRID_ANGLE_RTF              460
 #define IDR_RIVER_USE_MAP_XY_RTF        461
 #define IDR_RIVER_USE_MAP_Z_RTF         462
+#define IDR_PR_FREQ_RESTART_RTF         463
+#define IDR_PR_FREQ_EOP_DEFAULT_RTF     464
+#define IDR_PR_FREQ_ZF_HEADS_RTF        465
+#define IDR_PR_FREQ_ZF_RTF              466
+#define IDR_PR_FREQ_ZF_TSV_RTF          467
 #define IDC_EDIT_X                      1000
 #define IDC_TITLE                       1000
 #define IDC_EDIT_Y                      1001
@@ -1063,7 +1068,7 @@
 //
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        463
+#define _APS_NEXT_RESOURCE_VALUE        468
 #define _APS_NEXT_COMMAND_VALUE         32882
 #define _APS_NEXT_CONTROL_VALUE         1543
 #define _APS_NEXT_SYMED_VALUE           127
