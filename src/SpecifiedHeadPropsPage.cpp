@@ -33,7 +33,8 @@ CSpecifiedHeadPropsPage::CSpecifiedHeadPropsPage()
 	CGlobal::LoadRTFString(this->m_sHeadRTF,          IDR_BC_SPECIFIED_HEAD_RTF);
 	CGlobal::LoadRTFString(this->m_sSolutionAssocRTF, IDR_BC_SPECIFIED_SOL_ASSOC_RTF);
 	CGlobal::LoadRTFString(this->m_sSolutionFixRTF,   IDR_BC_SPECIFIED_SOL_FIX_RTF);	
-	CGlobal::LoadRTFString(this->m_sSolTypeRTF,       IDR_BC_SOL_TYPE_RTF); // ???
+	CGlobal::LoadRTFString(this->m_sSolTypeRTF,       IDR_BC_SOL_TYPE_RTF);
+	CGlobal::LoadRTFString(this->m_sExtCellsRTF,      IDR_BC_SPECIFIED_EXT_CELLS_RTF);
 
 	// init properties
 	this->SetFlowOnly(false);
@@ -364,6 +365,11 @@ BEGIN_MESSAGE_MAP(CSpecifiedHeadPropsPage, CPropsPropertyPage)
 
 	// DDX failure
 	ON_MESSAGE(UM_DDX_FAILURE, OnUM_DDXFailure)
+	ON_BN_SETFOCUS(IDC_CHECK_EXTERIOR_ONLY, &CSpecifiedHeadPropsPage::OnBnSetfocusCheckExteriorOnly)
+	ON_BN_SETFOCUS(IDC_RADIO_EC_ALL, &CSpecifiedHeadPropsPage::OnBnSetfocusRadioEcAll)
+	ON_BN_SETFOCUS(IDC_RADIO_EC_X, &CSpecifiedHeadPropsPage::OnBnSetfocusRadioEcX)
+	ON_BN_SETFOCUS(IDC_RADIO_EC_Y, &CSpecifiedHeadPropsPage::OnBnSetfocusRadioEcY)
+	ON_BN_SETFOCUS(IDC_RADIO_EC_Z, &CSpecifiedHeadPropsPage::OnBnSetfocusRadioEcZ)
 END_MESSAGE_MAP()
 
 
@@ -555,4 +561,29 @@ void CSpecifiedHeadPropsPage::OnBnClickedSolutionRadios()
 	{
 		this->RichEditCtrl.SetWindowText(this->m_sSolutionFixRTF.c_str());
 	}
+}
+
+void CSpecifiedHeadPropsPage::OnBnSetfocusCheckExteriorOnly()
+{
+	this->RichEditCtrl.SetWindowText(this->m_sExtCellsRTF.c_str());
+}
+
+void CSpecifiedHeadPropsPage::OnBnSetfocusRadioEcAll()
+{
+	this->RichEditCtrl.SetWindowText(this->m_sExtCellsRTF.c_str());
+}
+
+void CSpecifiedHeadPropsPage::OnBnSetfocusRadioEcX()
+{
+	this->RichEditCtrl.SetWindowText(this->m_sExtCellsRTF.c_str());
+}
+
+void CSpecifiedHeadPropsPage::OnBnSetfocusRadioEcY()
+{
+	this->RichEditCtrl.SetWindowText(this->m_sExtCellsRTF.c_str());
+}
+
+void CSpecifiedHeadPropsPage::OnBnSetfocusRadioEcZ()
+{
+	this->RichEditCtrl.SetWindowText(this->m_sExtCellsRTF.c_str());
 }

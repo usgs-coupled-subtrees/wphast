@@ -95,6 +95,7 @@ protected:
 	std::string m_sSolutionAssocRTF; // IDR_BC_SPECIFIED_SOL_ASSOC_RTF
 	std::string m_sSolutionFixRTF;   // IDR_BC_SPECIFIED_SOL_FIX_RTF
 	std::string m_sSolTypeRTF;       // IDR_BC_SOL_TYPE_RTF
+	std::string m_sExtCellsRTF;      // IDR_BC_SPECIFIED_EXT_CELLS_RTF
 
 	// should be member of superclass
 	CString Description;
@@ -110,4 +111,9 @@ public:
 	afx_msg void OnBnSetfocusAssocRadio();
 	afx_msg void OnBnSetfocusFixedRadio();
 	afx_msg void OnBnClickedFixedRadio();
+	afx_msg void OnBnSetfocusCheckExteriorOnly();
+	afx_msg void OnBnSetfocusRadioEcAll();
+	afx_msg void OnBnSetfocusRadioEcX();
+	afx_msg void OnBnSetfocusRadioEcY();
+	afx_msg void OnBnSetfocusRadioEcZ();
 };

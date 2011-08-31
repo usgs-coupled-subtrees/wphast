@@ -6733,6 +6733,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\res\PR_INIT_HDF_MEDIA.rtf"
+				>
+			</File>
+			<File
 				RelativePath="res\PR_INIT_HDF_VEL.rtf"
 				>
 			</File>
@@ -6841,7 +6845,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\res\PR_INIT_HDF_MEDIA.rtf"
+				RelativePath=".\res\BC_SPECIFIED_EXT_CELLS.rtf"
 				>
 			</File>
 			<File
