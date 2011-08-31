@@ -6613,6 +6613,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\res\PR_FREQ_EOP_DEFAULT.rtf"
+				>
+			</File>
+			<File
 				RelativePath="res\PR_FREQ_FLOW_BAL.rtf"
 				>
 			</File>
@@ -6642,6 +6646,10 @@
 			</File>
 			<File
 				RelativePath="res\PR_FREQ_PROG.rtf"
+				>
+			</File>
+			<File
+				RelativePath=".\res\PR_FREQ_RESTART.rtf"
 				>
 			</File>
 			<File
@@ -6678,6 +6686,18 @@
 			</File>
 			<File
 				RelativePath="res\PR_FREQ_XYZ_WELLS.rtf"
+				>
+			</File>
+			<File
+				RelativePath=".\res\PR_FREQ_ZF.rtf"
+				>
+			</File>
+			<File
+				RelativePath=".\res\PR_FREQ_ZF_HEADS.rtf"
+				>
+			</File>
+			<File
+				RelativePath=".\res\PR_FREQ_ZF_TSV.rtf"
 				>
 			</File>
 			<File
@@ -6821,23 +6841,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\res\PR_FREQ_RESTART.rtf"
-				>
-			</File>
-			<File
-				RelativePath=".\res\PR_FREQ_EOP_DEFAULT.rtf"
-				>
-			</File>
-			<File
-				RelativePath=".\res\PR_FREQ_ZF_HEADS.rtf"
-				>
-			</File>
-			<File
-				RelativePath=".\res\PR_FREQ_ZF.rtf"
-				>
-			</File>
-			<File
-				RelativePath=".\res\PR_FREQ_ZF_TSV.rtf"
+				RelativePath=".\res\PR_INIT_HDF_MEDIA.rtf"
 				>
 			</File>
 			<File

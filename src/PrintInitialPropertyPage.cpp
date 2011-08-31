@@ -48,7 +48,7 @@ CPrintInitialPropertyPage::~CPrintInitialPropertyPage()
 	MACRO(GRID, _T("Force chemistry print"),      _T("*.O.chem"),    force_chem,    IDR_PR_INIT_FORCE_RTF); \
 	MACRO(GRID, _T("HDF chemistry"),              _T("*.h5"),        hdf_chem,      IDR_PR_INIT_HDF_CHEM_RTF); \
 	MACRO(GRID, _T("HDF heads"),                  _T("*.h5"),        hdf_head,      IDR_PR_INIT_HDF_HEAD_RTF); \
-	MACRO(GRID, _T("HDF media"),                  _T("*.h5"),        hdf_media,     IDR_PR_INIT_HDF_VEL_RTF); \
+	MACRO(GRID, _T("HDF media"),                  _T("*.h5"),        hdf_media,     IDR_PR_INIT_HDF_MEDIA_RTF); \
 	MACRO(GRID, _T("HDF steady flow velocities"), _T("*.h5"),        hdf_ss_vel,    IDR_PR_INIT_HDF_VEL_RTF); \
 
 #define EXPAND_RIGHT_MACRO(GRID, MACRO) \
@@ -138,11 +138,10 @@ void CPrintInitialPropertyPage::DoDataExchange(CDataExchange* pDX)
 		EXPAND_LEFT_MACRO(m_GridLeft, SET_ROW_MACRO1);
 		END_EXPAND_MACRO();
 
-		this->m_GridLeft.AutoSizeColumns();
-
 		// manually resize grid
-		this->m_GridLeft.SetColumnWidth(0, this->m_GridLeft.GetColumnWidth(0) * 0.85);
-		this->m_GridLeft.SetColumnWidth(2, this->m_GridLeft.GetColumnWidth(2) * 4.45);
+		this->m_GridLeft.SetColumnWidth(0, 146);
+		this->m_GridLeft.SetColumnWidth(1, 76);
+		this->m_GridLeft.SetColumnWidth(2, 53);
 	}
 	if (this->m_GridRight.GetColumnCount() == 0)
 	{
@@ -190,11 +189,10 @@ void CPrintInitialPropertyPage::DoDataExchange(CDataExchange* pDX)
 		EXPAND_RIGHT_MACRO(m_GridRight, SET_ROW_MACRO1);
 		END_EXPAND_MACRO();
 
-		this->m_GridRight.AutoSizeColumns();
-
 		// manually resize grid
-		this->m_GridRight.SetColumnWidth(0, this->m_GridRight.GetColumnWidth(0) * 0.85);
-		this->m_GridRight.SetColumnWidth(2, this->m_GridRight.GetColumnWidth(2) * 4.5);
+		this->m_GridRight.SetColumnWidth(0, 141);
+		this->m_GridRight.SetColumnWidth(1, 80);
+		this->m_GridRight.SetColumnWidth(2, 54);
 	}
 
 	if (pDX->m_bSaveAndValidate)

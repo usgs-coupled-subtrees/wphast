@@ -437,6 +437,7 @@
 #define IDR_PR_FREQ_ZF_HEADS_RTF        465
 #define IDR_PR_FREQ_ZF_RTF              466
 #define IDR_PR_FREQ_ZF_TSV_RTF          467
+#define IDR_PR_INIT_HDF_MEDIA_RTF       468
 #define IDC_EDIT_X                      1000
 #define IDC_TITLE                       1000
 #define IDC_EDIT_Y                      1001
@@ -1068,7 +1069,7 @@
 //
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        468
+#define _APS_NEXT_RESOURCE_VALUE        469
 #define _APS_NEXT_COMMAND_VALUE         32882
 #define _APS_NEXT_CONTROL_VALUE         1543
 #define _APS_NEXT_SYMED_VALUE           127

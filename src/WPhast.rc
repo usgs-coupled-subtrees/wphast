@@ -4528,6 +4528,7 @@ IDR_PR_FREQ_EOP_DEFAULT_RTF RTF                     "res\\PR_FREQ_EOP_DEFAULT.rt
 IDR_PR_FREQ_ZF_HEADS_RTF RTF                     "res\\PR_FREQ_ZF_HEADS.rtf"
 IDR_PR_FREQ_ZF_RTF      RTF                     "res\\PR_FREQ_ZF.rtf"
 IDR_PR_FREQ_ZF_TSV_RTF  RTF                     "res\\PR_FREQ_ZF_TSV.rtf"
+IDR_PR_INIT_HDF_MEDIA_RTF RTF                     "res\\PR_INIT_HDF_MEDIA.rtf"
 
 /////////////////////////////////////////////////////////////////////////////
 //
