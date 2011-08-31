@@ -439,6 +439,7 @@
 #define IDR_PR_FREQ_ZF_TSV_RTF          467
 #define IDR_PR_INIT_HDF_MEDIA_RTF       468
 #define IDR_BC_SPECIFIED_EXT_CELLS_RTF  469
+#define IDR_STEADY_FLOW_GROWTH_RTF      470
 #define IDC_EDIT_X                      1000
 #define IDC_TITLE                       1000
 #define IDC_EDIT_Y                      1001
@@ -1070,7 +1071,7 @@
 //
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        470
+#define _APS_NEXT_RESOURCE_VALUE        471
 #define _APS_NEXT_COMMAND_VALUE         32882
 #define _APS_NEXT_CONTROL_VALUE         1543
 #define _APS_NEXT_SYMED_VALUE           127

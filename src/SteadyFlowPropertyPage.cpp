@@ -33,6 +33,7 @@ CSteadyFlowPropertyPage::CSteadyFlowPropertyPage()
 	CGlobal::LoadRTFString(this->m_sMaximumTimeStepRTF,      IDR_MAXIMUM_TIME_STEP_RTF);
 	CGlobal::LoadRTFString(this->m_sHeadChangeTargetRTF,     IDR_HEAD_CHANGE_TARGET_RTF);
 	CGlobal::LoadRTFString(this->m_sIterationsRTF,           IDR_ITERATIONS_RTF);
+	CGlobal::LoadRTFString(this->m_sGrowthRTF,               IDR_STEADY_FLOW_GROWTH_RTF);
 }
 
 CSteadyFlowPropertyPage::~CSteadyFlowPropertyPage()
@@ -306,6 +307,7 @@ BEGIN_MESSAGE_MAP(CSteadyFlowPropertyPage, CPropertyPage)
 	ON_BN_SETFOCUS(IDC_HCT_CHECK, OnBnSetfocusHctCheck)
 	ON_CBN_SETFOCUS(IDC_MIN_TS_COMBO, OnCbnSetfocusMinTsCombo)
 	ON_CBN_SETFOCUS(IDC_MAX_TS_COMBO, OnCbnSetfocusMaxTsCombo)
+	ON_EN_SETFOCUS(IDC_GROWTH_EDIT, &CSteadyFlowPropertyPage::OnEnSetfocusGrowthEdit)
 END_MESSAGE_MAP()
 
 
@@ -516,4 +518,9 @@ void CSteadyFlowPropertyPage::OnCbnSetfocusMinTsCombo()
 void CSteadyFlowPropertyPage::OnCbnSetfocusMaxTsCombo()
 {
 	this->OnEnSetfocusMaxTsEdit();
+}
+
+void CSteadyFlowPropertyPage::OnEnSetfocusGrowthEdit()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sGrowthRTF.c_str());
 }

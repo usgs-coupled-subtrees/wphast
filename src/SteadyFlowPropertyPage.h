@@ -51,6 +51,7 @@ protected:
 	std::string   m_sMaximumTimeStepRTF;      // IDR_MAXIMUM_TIME_STEP_RTF
 	std::string   m_sHeadChangeTargetRTF;     // IDR_HEAD_CHANGE_TARGET_RTF
 	std::string   m_sIterationsRTF;           // IDR_ITERATIONS_RTF
+	std::string   m_sGrowthRTF;               // IDR_STEADY_FLOW_GROWTH_RTF
 
 	virtual BOOL OnInitDialog();
 
@@ -73,5 +74,6 @@ public:
 	afx_msg void OnBnSetfocusHctCheck();
 	afx_msg void OnCbnSetfocusMinTsCombo();
 	afx_msg void OnCbnSetfocusMaxTsCombo();
+	afx_msg void OnEnSetfocusGrowthEdit();
 };
 

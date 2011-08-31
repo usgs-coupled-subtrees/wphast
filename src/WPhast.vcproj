@@ -6289,6 +6289,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\res\BC_SPECIFIED_EXT_CELLS.rtf"
+				>
+			</File>
+			<File
 				RelativePath="res\BC_SPECIFIED_HEAD.rtf"
 				>
 			</File>
@@ -6845,7 +6849,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\res\BC_SPECIFIED_EXT_CELLS.rtf"
+				RelativePath=".\res\STEADY_FLOW_GROWTH.rtf"
 				>
 			</File>
 			<File
