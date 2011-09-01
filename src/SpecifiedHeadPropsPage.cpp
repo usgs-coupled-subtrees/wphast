@@ -362,6 +362,8 @@ BEGIN_MESSAGE_MAP(CSpecifiedHeadPropsPage, CPropsPropertyPage)
 	// solution type radios
 	ON_BN_CLICKED(IDC_FIXED_RADIO, OnBnClickedSolutionRadios)
 	ON_BN_CLICKED(IDC_ASSOC_RADIO, OnBnClickedSolutionRadios)
+	ON_BN_SETFOCUS(IDC_FIXED_RADIO, OnBnSetfocusFixedRadio)
+	ON_BN_SETFOCUS(IDC_ASSOC_RADIO, OnBnSetfocusAssocRadio)
 
 	// DDX failure
 	ON_MESSAGE(UM_DDX_FAILURE, OnUM_DDXFailure)
@@ -586,4 +588,14 @@ void CSpecifiedHeadPropsPage::OnBnSetfocusRadioEcY()
 void CSpecifiedHeadPropsPage::OnBnSetfocusRadioEcZ()
 {
 	this->RichEditCtrl.SetWindowText(this->m_sExtCellsRTF.c_str());
+}
+
+void CSpecifiedHeadPropsPage::OnBnSetfocusFixedRadio()
+{
+	this->RichEditCtrl.SetWindowText(this->m_sSolutionFixRTF.c_str());
+}
+
+void CSpecifiedHeadPropsPage::OnBnSetfocusAssocRadio()
+{
+	this->RichEditCtrl.SetWindowText(this->m_sSolutionAssocRTF.c_str());
 }
