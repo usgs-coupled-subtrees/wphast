@@ -73,6 +73,8 @@ protected:
 	std::string      m_sWellLSDRTF;         // IDR_WELL_LSD_RTF
 	std::string      m_sWellNumberRTF;      // IDR_WELL_NUMBER_RTF
 	std::string      m_sWellRadiusRTF;      // IDR_WELL_RADIUS_RTF
+	std::string      m_sWellUseMapXYRTF;    // IDR_WELL_USE_MAP_XY_RTF
+	std::string      m_sWellUseMapZRTF;     // IDR_WELL_USE_MAP_Z_RTF
 
 	bool             m_bFlowOnly;
 
@@ -108,5 +110,7 @@ public:
 	afx_msg void OnBnSetfocusRadiusRadio();
 	afx_msg void OnBnClickedUseMap();
 	afx_msg void OnBnClickedUseMapZ();
+	afx_msg void OnBnSetfocusCheckUseMap();
+	afx_msg void OnBnSetfocusCheckUseMapZ();
 };
 

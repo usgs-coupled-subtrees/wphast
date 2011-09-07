@@ -12,7 +12,6 @@ IMPLEMENT_DYNAMIC(CStartupDialog, CDialog)
 CStartupDialog::CStartupDialog(CWnd* pParent /*=NULL*/)
 	: CDialog(CStartupDialog::IDD, pParent)
 	, m_nAction(CStartupDialog::SDA_OPEN_FILE)
-	, m_strFileName("C:\\Documents and Settings\\charlton\\My Documents\\Visual Studio Projects\\WPhast-dev\\Test\\ok_flow.wphast")
 {
 }
 
@@ -43,9 +42,9 @@ void CStartupDialog::DoDataExchange(CDataExchange* pDX)
 					pDX->Fail();
 				}
 
-				// m_strFileName
+				// m_strPathName
 				//
-				this->m_strFileName = fileDlg.GetFileName();
+				this->m_strPathName = fileDlg.GetPathName();
 			}
 			break;
 
@@ -63,9 +62,9 @@ void CStartupDialog::DoDataExchange(CDataExchange* pDX)
 					pDX->Fail();
 				}
 
-				// m_strFileName
+				// m_strPathName
 				//
-				this->m_strFileName = fileDlg.GetFileName();
+				this->m_strPathName = fileDlg.GetPathName();
 			}
 			break;
 

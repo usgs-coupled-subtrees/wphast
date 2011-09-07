@@ -440,6 +440,13 @@
 #define IDR_PR_INIT_HDF_MEDIA_RTF       468
 #define IDR_BC_SPECIFIED_EXT_CELLS_RTF  469
 #define IDR_STEADY_FLOW_GROWTH_RTF      470
+#define IDR_TC_START_RTF                471
+#define IDR_WELL_USE_MAP_XY_RTF         472
+#define IDR_WELL_USE_MAP_Z_RTF          473
+#define IDR_ZF_NUMBER_RTF               474
+#define IDR_ZF_DESC_RTF                 475
+#define IDR_ZF_COMBO_RTF                476
+#define IDR_ZF_HEADS_XYZT_RTF           477
 #define IDC_EDIT_X                      1000
 #define IDC_TITLE                       1000
 #define IDC_EDIT_Y                      1001
@@ -1013,8 +1020,11 @@
 #define IDC_STATIC_YW                   1542
 #define IDC_USE_MAP_COOR_Z              1542
 #define IDC_EDIT_YW                     1543
+#define IDC_CHECK_WRITE_HEADS           1543
 #define IDC_STATIC_ZW                   1544
+#define IDC_EDIT_WRITE_HEADS            1544
 #define IDC_EDIT_ZW                     1545
+#define IDC_BUTTON_BROWSE               1545
 #define IDC_RESIZE_COLUMN               28654
 #define IDC_RESIZE_ROW                  28655
 #define IDR_POPUP                       28656
@@ -1071,9 +1081,9 @@
 //
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        471
+#define _APS_NEXT_RESOURCE_VALUE        478
 #define _APS_NEXT_COMMAND_VALUE         32882
-#define _APS_NEXT_CONTROL_VALUE         1543
+#define _APS_NEXT_CONTROL_VALUE         1546
 #define _APS_NEXT_SYMED_VALUE           127
 #endif
 #endif

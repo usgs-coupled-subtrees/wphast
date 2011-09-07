@@ -42,6 +42,19 @@ protected:
 
 	CListCtrl CombinationList;
 
+	std::string ZFNumberRTF;       // IDR_ZF_NUMBER_RTF
+	std::string ZFDescRTF;         // IDR_ZF_DESC_RTF
+	std::string ZFComboRTF;        // IDR_ZF_COMBO_RTF
+	std::string ZFHeadsXYZTRTF;    // IDR_ZF_HEADS_XYZT_RTF
+
 public:
 	virtual BOOL OnInitDialog();
+	afx_msg void OnEnSetfocusNumEdit();
+	afx_msg void OnEnSetfocusDescEdit();
+	afx_msg void OnNMSetfocusCombinationList(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnBnClickedCheckWriteHeads();
+	afx_msg void OnBnSetfocusCheckWriteHeads();
+	afx_msg void OnEnSetfocusEditWriteHeads();
+	afx_msg void OnBnClickedButtonBrowse();
+	afx_msg void OnBnSetfocusButtonBrowse();
 };

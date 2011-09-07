@@ -131,16 +131,27 @@ void CBCZoneActor::Update(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent, const CBC& 
 	//
 	pTreeCtrl->SetItemText(htiParent, this->GetTreeHeading());
 
-	switch (crBC.bc_type)
+	CBC relative(crBC);
+	CFrameWnd *pFrame = (CFrameWnd*)::AfxGetApp()->m_pMainWnd;
+	if (pFrame)
+	{
+		ASSERT_VALID(pFrame);
+		CWPhastDoc* pDoc = reinterpret_cast<CWPhastDoc*>(pFrame->GetActiveDocument());
+		ASSERT_VALID(pDoc);
+
+		CGlobal::PathsAbsoluteToRelative(pDoc->GetDefaultPathName(), pDoc, relative);
+	}
+
+	switch (relative.bc_type)
 	{
 		case BC_info::BC_UNDEFINED:
 			ASSERT(FALSE);
 			break;
 
 		case BC_info::BC_SPECIFIED:
-			if (crBC.face_defined)
+			if (relative.face_defined)
 			{
-				switch(crBC.cell_face)
+				switch(relative.cell_face)
 				{
 				case CF_X:
 					pTreeCtrl->InsertItem("exterior_cells_only  X", htiParent);
@@ -161,32 +172,32 @@ void CBCZoneActor::Update(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent, const CBC& 
 			}
 
 			// head
-			crBC.m_bc_head.InsertItem(pTreeCtrl, "head", htiParent);
+			relative.m_bc_head.InsertItem(pTreeCtrl, "head", htiParent);
 
 			// associated_solution
-			if (crBC.bc_solution_type == ST_ASSOCIATED)
+			if (relative.bc_solution_type == ST_ASSOCIATED)
 			{
-				crBC.m_bc_solution.InsertItem(pTreeCtrl, "associated_solution", htiParent);
+				relative.m_bc_solution.InsertItem(pTreeCtrl, "associated_solution", htiParent);
 			}
 
 			// fixed_solution
-			if (crBC.bc_solution_type == ST_FIXED)
+			if (relative.bc_solution_type == ST_FIXED)
 			{
-				crBC.m_bc_solution.InsertItem(pTreeCtrl, "fixed_solution", htiParent);
+				relative.m_bc_solution.InsertItem(pTreeCtrl, "fixed_solution", htiParent);
 			}
 			break;
 
 		case BC_info::BC_FLUX:
 			// flux
-			crBC.m_bc_flux.InsertItem(pTreeCtrl, "flux", htiParent);
+			relative.m_bc_flux.InsertItem(pTreeCtrl, "flux", htiParent);
 
 			// associated_solution
-			crBC.m_bc_solution.InsertItem(pTreeCtrl, "associated_solution", htiParent);
+			relative.m_bc_solution.InsertItem(pTreeCtrl, "associated_solution", htiParent);
 
 			// face
-			if (crBC.face_defined)
+			if (relative.face_defined)
 			{
-				switch (crBC.face)
+				switch (relative.face)
 				{
 					case 0:
 						pTreeCtrl->InsertItem(_T("face X"), htiParent);						
@@ -203,9 +214,9 @@ void CBCZoneActor::Update(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent, const CBC& 
 
 		case BC_info::BC_LEAKY:
 			// face
-			if (crBC.face_defined)
+			if (relative.face_defined)
 			{
-				switch (crBC.face)
+				switch (relative.face)
 				{
 					case 0:
 						pTreeCtrl->InsertItem(_T("face X"), htiParent);						
@@ -220,34 +231,34 @@ void CBCZoneActor::Update(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent, const CBC& 
 			}
 
 			// thickness
-			if (crBC.bc_thick && crBC.bc_thick->type != PROP_UNDEFINED)
+			if (relative.bc_thick && relative.bc_thick->type != PROP_UNDEFINED)
 			{
-				static_cast<Cproperty*>(crBC.bc_thick)->Insert(pTreeCtrl, htiParent, "thickness");
+				static_cast<Cproperty*>(relative.bc_thick)->Insert(pTreeCtrl, htiParent, "thickness");
 			}
 
 			// hydraulic_conductivity
-			if (crBC.bc_k && crBC.bc_k->type != PROP_UNDEFINED)
+			if (relative.bc_k && relative.bc_k->type != PROP_UNDEFINED)
 			{
-				static_cast<Cproperty*>(crBC.bc_k)->Insert(pTreeCtrl, htiParent, "hydraulic_conductivity");
+				static_cast<Cproperty*>(relative.bc_k)->Insert(pTreeCtrl, htiParent, "hydraulic_conductivity");
 			}
 
 			// elevation
-			if (crBC.bc_z_user && crBC.bc_z_user->type != PROP_UNDEFINED)
+			if (relative.bc_z_user && relative.bc_z_user->type != PROP_UNDEFINED)
 			{
-				static_cast<Cproperty*>(crBC.bc_z_user)->Insert(pTreeCtrl, htiParent, "elevation");
+				static_cast<Cproperty*>(relative.bc_z_user)->Insert(pTreeCtrl, htiParent, "elevation");
 			}
 
 			// z_coordinate_system
-			if (crBC.bc_z_coordinate_system_user == PHAST_Transform::MAP)
+			if (relative.bc_z_coordinate_system_user == PHAST_Transform::MAP)
 			{
 				pTreeCtrl->InsertItem(_T("z_coordinate_system    map"), htiParent);						
 			}
 
 			// head
-			crBC.m_bc_head.InsertItem(pTreeCtrl, "head", htiParent);
+			relative.m_bc_head.InsertItem(pTreeCtrl, "head", htiParent);
 
 			// associated_solution
-			crBC.m_bc_solution.InsertItem(pTreeCtrl, "associated_solution", htiParent);
+			relative.m_bc_solution.InsertItem(pTreeCtrl, "associated_solution", htiParent);
 
 			break;
 

@@ -14,6 +14,10 @@ IMPLEMENT_DYNAMIC(CZoneFlowRatePropertyPage, baseCZoneFlowRatePropertyPage)
 CZoneFlowRatePropertyPage::CZoneFlowRatePropertyPage()
 	: baseCZoneFlowRatePropertyPage(CZoneFlowRatePropertyPage::IDD)
 {
+	CGlobal::LoadRTFString(this->ZFNumberRTF,    IDR_ZF_NUMBER_RTF);
+	CGlobal::LoadRTFString(this->ZFDescRTF,      IDR_ZF_DESC_RTF);
+	CGlobal::LoadRTFString(this->ZFComboRTF,     IDR_ZF_COMBO_RTF);
+	CGlobal::LoadRTFString(this->ZFHeadsXYZTRTF, IDR_ZF_HEADS_XYZT_RTF);
 }
 
 CZoneFlowRatePropertyPage::~CZoneFlowRatePropertyPage()
@@ -25,7 +29,10 @@ void CZoneFlowRatePropertyPage::DoDataExchange(CDataExchange* pDX)
 	// skip CPropsPropertyPage::DoDataExchange
 	CPropertyPage::DoDataExchange(pDX);
 
-	DDX_Control(pDX, IDC_COMBINATION_LIST, this->CombinationList);
+	::DDX_Control(pDX, IDC_DESC_RICHEDIT, this->RichEditCtrl);
+	this->RichEditCtrl.SetTargetDevice(NULL, 0);
+
+	::DDX_Control(pDX, IDC_COMBINATION_LIST, this->CombinationList);
 	this->CombinationList.SetExtendedStyle(LVS_EX_CHECKBOXES);
 	if (!pDX->m_bSaveAndValidate && (this->CombinationList.GetItemCount() != this->m_usedZoneFlowRatesNumbers.size()))
 	{
@@ -60,7 +67,7 @@ void CZoneFlowRatePropertyPage::DoDataExchange(CDataExchange* pDX)
 	{
 		// zone_budget.n_user
 		int n_user;
-		DDX_Text(pDX, IDC_NUM_EDIT, n_user);
+		::DDX_Text(pDX, IDC_NUM_EDIT, n_user);
 
 		std::set<int>::iterator iter = this->m_usedZoneFlowRatesNumbers.find(n_user);
 		if (iter != this->m_usedZoneFlowRatesNumbers.end())
@@ -72,8 +79,36 @@ void CZoneFlowRatePropertyPage::DoDataExchange(CDataExchange* pDX)
 
 		// zone_budget.description
 		CString str;
-		DDX_Text(pDX, IDC_DESC_EDIT, str);
+		::DDX_Text(pDX, IDC_DESC_EDIT, str);
 		zone_budget.Set_description((const char*)str);
+
+		// zone_budget.write_heads
+		if (this->IsDlgButtonChecked(IDC_CHECK_WRITE_HEADS))
+		{
+			zone_budget.Set_write_heads(true);
+
+			// zone_budget.filename_heads
+			CString filename;
+			::DDX_Text(pDX, IDC_EDIT_WRITE_HEADS, filename);
+			if (filename.IsEmpty())
+			{
+				::AfxMessageBox("No filename given.");
+				pDX->Fail();
+			}
+			else
+			{
+				char buf[MAX_PATH+1];
+				if (!::PathSearchAndQualify(filename, buf, MAX_PATH))  // uses cwd if filename is relative
+				{
+					TRACE("PathSearchAndQualify failed\n");
+				}
+				zone_budget.Get_filename_heads() = buf;
+			}
+		}
+		else
+		{
+			zone_budget.Set_write_heads(false);
+		}
 
 		// zone_budget.combo
 		zone_budget.Get_combo().clear();
@@ -94,11 +129,27 @@ void CZoneFlowRatePropertyPage::DoDataExchange(CDataExchange* pDX)
 	{
 		// zone_budget.n_user
 		int n_user = zone_budget.Get_n_user();
-		DDX_Text(pDX, IDC_NUM_EDIT, n_user);
+		::DDX_Text(pDX, IDC_NUM_EDIT, n_user);
 
 		// zone_budget.description
 		CString str(zone_budget.Get_description().c_str());
-		DDX_Text(pDX, IDC_DESC_EDIT, str);
+		::DDX_Text(pDX, IDC_DESC_EDIT, str);
+
+		// zone_budget.write_heads
+		if (zone_budget.Get_write_heads())
+		{
+			this->CheckDlgButton(IDC_CHECK_WRITE_HEADS, BST_CHECKED);
+		}
+		else
+		{
+			this->CheckDlgButton(IDC_CHECK_WRITE_HEADS, BST_UNCHECKED);
+		}
+
+		// zone_budget.filename_heads
+		CString filename(zone_budget.Get_filename_heads().c_str());
+		::DDX_Text(pDX, IDC_EDIT_WRITE_HEADS, filename);
+		
+		this->OnBnClickedCheckWriteHeads();
 
 		// zone_budget.combo (see above)
 	}
@@ -144,6 +195,14 @@ void CZoneFlowRatePropertyPage::DDV_SoftValidate()
 
 
 BEGIN_MESSAGE_MAP(CZoneFlowRatePropertyPage, baseCZoneFlowRatePropertyPage)
+	ON_EN_SETFOCUS(IDC_NUM_EDIT, &CZoneFlowRatePropertyPage::OnEnSetfocusNumEdit)
+	ON_EN_SETFOCUS(IDC_DESC_EDIT, &CZoneFlowRatePropertyPage::OnEnSetfocusDescEdit)
+	ON_NOTIFY(NM_SETFOCUS, IDC_COMBINATION_LIST, &CZoneFlowRatePropertyPage::OnNMSetfocusCombinationList)
+	ON_BN_CLICKED(IDC_CHECK_WRITE_HEADS, &CZoneFlowRatePropertyPage::OnBnClickedCheckWriteHeads)
+	ON_BN_SETFOCUS(IDC_CHECK_WRITE_HEADS, &CZoneFlowRatePropertyPage::OnBnSetfocusCheckWriteHeads)
+	ON_EN_SETFOCUS(IDC_EDIT_WRITE_HEADS, &CZoneFlowRatePropertyPage::OnEnSetfocusEditWriteHeads)
+	ON_BN_CLICKED(IDC_BUTTON_BROWSE, &CZoneFlowRatePropertyPage::OnBnClickedButtonBrowse)
+	ON_BN_SETFOCUS(IDC_BUTTON_BROWSE, &CZoneFlowRatePropertyPage::OnBnSetfocusButtonBrowse)
 END_MESSAGE_MAP()
 
 // CZoneFlowRatePropertyPage message handlers
@@ -201,4 +260,70 @@ void CZoneFlowRatePropertyPage::SetUsedZoneFlowRates(const std::set<int>& used)
 	{
 		this->m_zone_budget.Set_n_user(1);
 	}
+}
+
+void CZoneFlowRatePropertyPage::OnEnSetfocusNumEdit()
+{
+	this->RichEditCtrl.SetWindowText(this->ZFNumberRTF.c_str());
+}
+
+void CZoneFlowRatePropertyPage::OnEnSetfocusDescEdit()
+{
+	this->RichEditCtrl.SetWindowText(this->ZFDescRTF.c_str());
+}
+
+void CZoneFlowRatePropertyPage::OnNMSetfocusCombinationList(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	this->RichEditCtrl.SetWindowText(this->ZFComboRTF.c_str());
+	*pResult = 0;
+}
+
+void CZoneFlowRatePropertyPage::OnBnClickedCheckWriteHeads()
+{
+	static UINT IDs[] =
+	{
+		IDC_EDIT_WRITE_HEADS,
+		IDC_BUTTON_BROWSE,
+	};
+
+	BOOL bOn = this->IsDlgButtonChecked(IDC_CHECK_WRITE_HEADS);
+
+	size_t n = sizeof(IDs) / sizeof(IDs[0]);
+	for (size_t i = 0; i < n; ++i)
+	{
+		if (CWnd *pWnd = this->GetDlgItem(IDs[i]))
+		{
+			pWnd->EnableWindow(bOn);
+		}
+	}
+	TRACE("Out %s\n", __FUNCTION__);
+}
+
+void CZoneFlowRatePropertyPage::OnBnClickedButtonBrowse()
+{
+	CString filename;
+	this->GetDlgItemTextA(IDC_EDIT_WRITE_HEADS, filename);
+
+	CFileDialog fileDlg(FALSE, NULL, (filename.IsEmpty()) ? NULL : filename,
+		OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, NULL, this);
+
+	if( fileDlg.DoModal() == IDOK )
+	{
+		this->GetDlgItem(IDC_EDIT_WRITE_HEADS)->SetWindowText(fileDlg.GetPathName());
+	}
+}
+
+void CZoneFlowRatePropertyPage::OnBnSetfocusCheckWriteHeads()
+{
+	this->RichEditCtrl.SetWindowText(this->ZFHeadsXYZTRTF.c_str());
+}
+
+void CZoneFlowRatePropertyPage::OnEnSetfocusEditWriteHeads()
+{
+	this->RichEditCtrl.SetWindowText(this->ZFHeadsXYZTRTF.c_str());
+}
+
+void CZoneFlowRatePropertyPage::OnBnSetfocusButtonBrowse()
+{
+	this->RichEditCtrl.SetWindowText(this->ZFHeadsXYZTRTF.c_str());
 }

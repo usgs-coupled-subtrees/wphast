@@ -43,6 +43,8 @@ CWellPropertyPage::CWellPropertyPage()
 	CGlobal::LoadRTFString(this->m_sWellLSDRTF,       IDR_WELL_LSD_RTF);
 	CGlobal::LoadRTFString(this->m_sWellNumberRTF,    IDR_WELL_NUMBER_RTF);
 	CGlobal::LoadRTFString(this->m_sWellRadiusRTF,    IDR_WELL_RADIUS_RTF);
+	CGlobal::LoadRTFString(this->m_sWellUseMapXYRTF,  IDR_WELL_USE_MAP_XY_RTF);
+	CGlobal::LoadRTFString(this->m_sWellUseMapZRTF,   IDR_WELL_USE_MAP_Z_RTF);
 }
 
 CWellPropertyPage::~CWellPropertyPage()
@@ -733,6 +735,8 @@ BEGIN_MESSAGE_MAP(CWellPropertyPage, CPropertyPage)
 	ON_BN_SETFOCUS(IDC_RADIUS_RADIO, OnBnSetfocusRadiusRadio)
 	ON_BN_CLICKED(IDC_CHECK_USE_MAP, OnBnClickedUseMap)
 	ON_BN_CLICKED(IDC_CHECK_USE_MAP_Z, OnBnClickedUseMapZ)
+	ON_BN_SETFOCUS(IDC_CHECK_USE_MAP, &CWellPropertyPage::OnBnSetfocusCheckUseMap)
+	ON_BN_SETFOCUS(IDC_CHECK_USE_MAP_Z, &CWellPropertyPage::OnBnSetfocusCheckUseMapZ)
 END_MESSAGE_MAP()
 
 
@@ -1014,7 +1018,14 @@ void CWellPropertyPage::OnEndLabelEditScreen(NMHDR *pNotifyStruct, LRESULT *resu
 
 void CWellPropertyPage::OnSelChangedScreen(NMHDR *pNotifyStruct, LRESULT *result)
 {
-	TRACE("OnSelChangedScreen\n");
+	if (this->GetCheckedRadioButton(IDC_ELEVATION_RADIO, IDC_DEPTH_RADIO) == IDC_ELEVATION_RADIO)
+	{
+		this->m_wndRichEditCtrl.SetWindowText(this->m_sWellElevationRTF.c_str());
+	}
+	else
+	{
+		this->m_wndRichEditCtrl.SetWindowText(this->m_sWellDepthRTF.c_str());
+	}
 }
 
 void CWellPropertyPage::OnSelChangedSchedules(NMHDR *pNotifyStruct, LRESULT *result)
@@ -1462,3 +1473,12 @@ void CWellPropertyPage::OnBnClickedUseMapZ()
 	this->m_bUpdateZOnly = FALSE;
 }
 
+void CWellPropertyPage::OnBnSetfocusCheckUseMap()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sWellUseMapXYRTF.c_str());
+}
+
+void CWellPropertyPage::OnBnSetfocusCheckUseMapZ()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sWellUseMapZRTF.c_str());
+}

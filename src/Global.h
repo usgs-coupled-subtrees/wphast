@@ -30,6 +30,7 @@ class CWPhastView;
 class CWPhastDoc;
 class Data_source;
 class CGridElt;
+class Zone_budget;
 
 class CWorldTransform;
 class CTreePropSheetExSRC;
@@ -187,11 +188,13 @@ public:
 	static void PathsRelativeToAbsolute(LPCTSTR lpszPathName, CWPhastDoc* pDoc, CBC& bc);
 	static void PathsRelativeToAbsolute(LPCTSTR lpszPathName, CWPhastDoc* pDoc, CChemIC& chemIC);
 	static void PathsRelativeToAbsolute(LPCTSTR lpszPathName, CWPhastDoc* pDoc, CHeadIC& headIC);
+	static void PathsRelativeToAbsolute(LPCTSTR lpszPathName, CWPhastDoc* pDoc, Zone_budget& zb);
 
 	static void PathsAbsoluteToRelative(LPCTSTR lpszPathName, CWPhastDoc* pDoc, CGridElt& elt);
 	static void PathsAbsoluteToRelative(LPCTSTR lpszPathName, CWPhastDoc* pDoc, CBC& bc);
 	static void PathsAbsoluteToRelative(LPCTSTR lpszPathName, CWPhastDoc* pDoc, CChemIC& chemIC);
 	static void PathsAbsoluteToRelative(LPCTSTR lpszPathName, CWPhastDoc* pDoc, CHeadIC& headIC);
+	static void PathsAbsoluteToRelative(LPCTSTR lpszPathName, CWPhastDoc* pDoc, Zone_budget& zb);
 
 	static void DDX_Text_Safe(CDataExchange* pDX, int nIDC, float& value);
 	static void DDX_Text_Safe(CDataExchange *pDX, int nIDC, double &value);

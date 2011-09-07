@@ -19,12 +19,12 @@ public:
 	SDA_ACTION_TYPE GetAction(void)          {  return m_nAction;    }
 	void SetAction(SDA_ACTION_TYPE nAction)  {  m_nAction = nAction; }
 
-	CString GetFileName(void)const           { return m_strFileName;     }
-	void SetFileName(CString fileName)       { m_strFileName = fileName; }
+	CString GetPathName(void)const           { return m_strPathName;     }
+	void SetPathName(CString fileName)       { m_strPathName = fileName; }
 
 protected:
 	enum SDA_ACTION_TYPE m_nAction;
-	CString m_strFileName;
+	CString m_strPathName;
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support

@@ -140,8 +140,7 @@ void CMediaZoneActor::Update(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent)
 
 	CString format;
 
-	CGridElt relative_elt(this->m_grid_elt);
-	CGridElt absolute_elt(relative_elt);
+	CGridElt relative(this->m_grid_elt);
 	CFrameWnd *pFrame = (CFrameWnd*)::AfxGetApp()->m_pMainWnd;
 	if (pFrame)
 	{
@@ -149,15 +148,13 @@ void CMediaZoneActor::Update(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent)
 		CWPhastDoc* pDoc = reinterpret_cast<CWPhastDoc*>(pFrame->GetActiveDocument());
 		ASSERT_VALID(pDoc);
 
-		CGlobal::PathsAbsoluteToRelative(pDoc->GetPathName(), pDoc, relative_elt);
-
-		this->m_grid_elt = relative_elt;
+		CGlobal::PathsAbsoluteToRelative(pDoc->GetDefaultPathName(), pDoc, relative);
 	}
 
 	// active
-	if (this->m_grid_elt.active)
+	if (relative.active)
 	{
-		static_cast<Cproperty*>(this->m_grid_elt.active)->Insert(pTreeCtrl, htiParent, "active");
+		static_cast<Cproperty*>(relative.active)->Insert(pTreeCtrl, htiParent, "active");
 	}
 	else if (this->GetDefault())
 	{
@@ -166,70 +163,65 @@ void CMediaZoneActor::Update(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent)
 	}
 
 	// kx
-	if (this->m_grid_elt.kx)
+	if (relative.kx)
 	{
-		static_cast<Cproperty*>(this->m_grid_elt.kx)->Insert(pTreeCtrl, htiParent, "Kx");
+		static_cast<Cproperty*>(relative.kx)->Insert(pTreeCtrl, htiParent, "Kx");
 	}
 
 	// ky
-	if (this->m_grid_elt.ky)
+	if (relative.ky)
 	{
-		static_cast<Cproperty*>(this->m_grid_elt.ky)->Insert(pTreeCtrl, htiParent, "Ky");
+		static_cast<Cproperty*>(relative.ky)->Insert(pTreeCtrl, htiParent, "Ky");
 	}
 
 	// kz
-	if (this->m_grid_elt.kz)
+	if (relative.kz)
 	{
-		static_cast<Cproperty*>(this->m_grid_elt.kz)->Insert(pTreeCtrl, htiParent, "Kz");
+		static_cast<Cproperty*>(relative.kz)->Insert(pTreeCtrl, htiParent, "Kz");
 	}
 
 	// porosity
-	if (this->m_grid_elt.porosity)
+	if (relative.porosity)
 	{
-		static_cast<Cproperty*>(this->m_grid_elt.porosity)->Insert(pTreeCtrl, htiParent, "porosity");
+		static_cast<Cproperty*>(relative.porosity)->Insert(pTreeCtrl, htiParent, "porosity");
 	}
 
 	// storage
-	if (this->m_grid_elt.storage)
+	if (relative.storage)
 	{
-		static_cast<Cproperty*>(this->m_grid_elt.storage)->Insert(pTreeCtrl, htiParent, "specific_storage");
+		static_cast<Cproperty*>(relative.storage)->Insert(pTreeCtrl, htiParent, "specific_storage");
 	}
 
 	// alpha_long
-	if (this->m_grid_elt.alpha_long)
+	if (relative.alpha_long)
 	{
-		static_cast<Cproperty*>(this->m_grid_elt.alpha_long)->Insert(pTreeCtrl, htiParent, "long_dispersivity");
+		static_cast<Cproperty*>(relative.alpha_long)->Insert(pTreeCtrl, htiParent, "long_dispersivity");
 	}
 
 	// alpha_horizontal
-	if (this->m_grid_elt.alpha_horizontal)
+	if (relative.alpha_horizontal)
 	{
-		static_cast<Cproperty*>(this->m_grid_elt.alpha_horizontal)->Insert(pTreeCtrl, htiParent, "horizontal_dispersivity");
+		static_cast<Cproperty*>(relative.alpha_horizontal)->Insert(pTreeCtrl, htiParent, "horizontal_dispersivity");
 	}
 
 	// alpha_vertical
-	if (this->m_grid_elt.alpha_vertical)
+	if (relative.alpha_vertical)
 	{
-		static_cast<Cproperty*>(this->m_grid_elt.alpha_vertical)->Insert(pTreeCtrl, htiParent, "vertical_dispersivity");
+		static_cast<Cproperty*>(relative.alpha_vertical)->Insert(pTreeCtrl, htiParent, "vertical_dispersivity");
 	}
 
 	// tortuosity
-	if (this->m_grid_elt.tortuosity)
+	if (relative.tortuosity)
 	{
-		static_cast<Cproperty*>(this->m_grid_elt.tortuosity)->Insert(pTreeCtrl, htiParent, "tortuosity");
+		static_cast<Cproperty*>(relative.tortuosity)->Insert(pTreeCtrl, htiParent, "tortuosity");
 	}
 
 	// shell
-	if (this->m_grid_elt.shell)
+	if (relative.shell)
 	{
 		CString format;
-		format.Format("shell %g %g %g", this->m_grid_elt.shell_width[0], this->m_grid_elt.shell_width[1], this->m_grid_elt.shell_width[2]);
+		format.Format("shell %g %g %g", relative.shell_width[0], relative.shell_width[1], relative.shell_width[2]);
 		pTreeCtrl->InsertItem(format, htiParent);
-	}
-
-	if (pFrame)
-	{
-		this->m_grid_elt = absolute_elt;
 	}
 }
 

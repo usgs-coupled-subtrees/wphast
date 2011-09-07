@@ -94,10 +94,21 @@ void CICHeadZoneActor::Update(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent)
 
 	pTreeCtrl->SetItemText(htiParent, this->GetNameDesc());
 
-	// head
-	if (this->m_headIC.head)
+	CHeadIC relative(this->m_headIC);
+	CFrameWnd *pFrame = (CFrameWnd*)::AfxGetApp()->m_pMainWnd;
+	if (pFrame)
 	{
-		static_cast<Cproperty*>(this->m_headIC.head)->Insert(pTreeCtrl, htiParent, "head");
+		ASSERT_VALID(pFrame);
+		CWPhastDoc* pDoc = reinterpret_cast<CWPhastDoc*>(pFrame->GetActiveDocument());
+		ASSERT_VALID(pDoc);
+
+		CGlobal::PathsAbsoluteToRelative(pDoc->GetDefaultPathName(), pDoc, relative);
+	}
+
+	// head
+	if (relative.head)
+	{
+		static_cast<Cproperty*>(relative.head)->Insert(pTreeCtrl, htiParent, "head");
 	}
 }
 

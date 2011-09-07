@@ -49,6 +49,7 @@ protected:
 	std::string m_sTSUnitsRTF;         // IDR_TC_TS_UNITS_RTF
 	std::string m_sTSTimeStepRTF;      // IDR_TC_TS_TIME_STEP_RTF
 	std::string m_sTSTimeStepUnitsRTF; // IDR_TC_TS_TIME_STEP_UNITS_RTF
+	std::string m_sTSTimeStartRTF;     // IDR_TC_START_RTF
 
 	afx_msg void OnSelChangedTimeEnd(NMHDR *pNotifyStruct, LRESULT *result);
 	afx_msg void OnSelChangedTimeStep(NMHDR *pNotifyStruct, LRESULT *result);
@@ -56,4 +57,6 @@ protected:
 public:
 	virtual BOOL OnInitDialog();
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
+	afx_msg void OnEnSetfocusStarttimeEdit();
+	afx_msg void OnCbnSetfocusStarttimeCombo();
 };

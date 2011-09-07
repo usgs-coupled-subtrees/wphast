@@ -312,6 +312,9 @@ protected:
 	// grid keyboard accelerator
 	HACCEL hGridAccel;
 
+	// store imported file path
+	CString ImportPathName;
+
 protected:
 	template<typename ACTOR>
 	void SerializeActors(bool bStoring, hid_t loc_id, CTreeCtrlNode parentNode, const char* szNamesListHeading);
@@ -396,6 +399,8 @@ public:
 	void ResetCamera(void);
 	void ResetCamera(double bounds[6]);
 	void ResetCamera(double xmin, double xmax, double ymin, double ymax, double zmin, double zmax);
+
+	CString CWPhastDoc::GetDefaultPathName()const;
 
 private:
 	void AddDefaultZone(CZone* pZone);

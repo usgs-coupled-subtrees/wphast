@@ -92,48 +92,57 @@ void CICChemZoneActor::Update(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent)
 {
 	CZoneActor::Update(pTreeCtrl, htiParent);
 
-	pTreeCtrl->SetItemText(htiParent, this->GetNameDesc());
+	CChemIC relative(this->m_chemIC);
+	CFrameWnd *pFrame = (CFrameWnd*)::AfxGetApp()->m_pMainWnd;
+	if (pFrame)
+	{
+		ASSERT_VALID(pFrame);
+		CWPhastDoc* pDoc = reinterpret_cast<CWPhastDoc*>(pFrame->GetActiveDocument());
+		ASSERT_VALID(pDoc);
+
+		CGlobal::PathsAbsoluteToRelative(pDoc->GetDefaultPathName(), pDoc, relative);
+	}
 
 	// solution
-	if (this->m_chemIC.solution)
+	if (relative.solution)
 	{
-		static_cast<Cproperty*>(this->m_chemIC.solution)->Insert(pTreeCtrl, htiParent, "solution");
+		static_cast<Cproperty*>(relative.solution)->Insert(pTreeCtrl, htiParent, "solution");
 	}
 
 	// equilibrium_phases
-	if (this->m_chemIC.equilibrium_phases)
+	if (relative.equilibrium_phases)
 	{
-		static_cast<Cproperty*>(this->m_chemIC.equilibrium_phases)->Insert(pTreeCtrl, htiParent, "equilibrium_phases");
+		static_cast<Cproperty*>(relative.equilibrium_phases)->Insert(pTreeCtrl, htiParent, "equilibrium_phases");
 	}
 
 	// exchange
-	if (this->m_chemIC.exchange)
+	if (relative.exchange)
 	{
-		static_cast<Cproperty*>(this->m_chemIC.exchange)->Insert(pTreeCtrl, htiParent, "exchange");
+		static_cast<Cproperty*>(relative.exchange)->Insert(pTreeCtrl, htiParent, "exchange");
 	}
 
 	// surface
-	if (this->m_chemIC.surface)
+	if (relative.surface)
 	{
-		static_cast<Cproperty*>(this->m_chemIC.surface)->Insert(pTreeCtrl, htiParent, "surface");
+		static_cast<Cproperty*>(relative.surface)->Insert(pTreeCtrl, htiParent, "surface");
 	}
 
 	// gas_phase
-	if (this->m_chemIC.gas_phase)
+	if (relative.gas_phase)
 	{
-		static_cast<Cproperty*>(this->m_chemIC.gas_phase)->Insert(pTreeCtrl, htiParent, "gas_phase");
+		static_cast<Cproperty*>(relative.gas_phase)->Insert(pTreeCtrl, htiParent, "gas_phase");
 	}
 
 	// solid_solutions
-	if (this->m_chemIC.solid_solutions)
+	if (relative.solid_solutions)
 	{
-		static_cast<Cproperty*>(this->m_chemIC.solid_solutions)->Insert(pTreeCtrl, htiParent, "solid_solutions");
+		static_cast<Cproperty*>(relative.solid_solutions)->Insert(pTreeCtrl, htiParent, "solid_solutions");
 	}
 
 	// kinetics
-	if (this->m_chemIC.kinetics)
+	if (relative.kinetics)
 	{
-		static_cast<Cproperty*>(this->m_chemIC.kinetics)->Insert(pTreeCtrl, htiParent, "kinetics");
+		static_cast<Cproperty*>(relative.kinetics)->Insert(pTreeCtrl, htiParent, "kinetics");
 	}
 }
 

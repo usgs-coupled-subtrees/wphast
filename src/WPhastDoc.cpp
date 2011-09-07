@@ -41,6 +41,7 @@
 #include "SetChemICAction.h"
 #include "SetHeadICAction.h"
 #include "GridRotateAction.h"
+#include "SetZoneBudgetAction.h"
 
 #include "SetDisplayColorsAction.h"
 #include "ZoneActor.h"
@@ -1542,6 +1543,9 @@ void CWPhastDoc::DeleteContents()
 	// reset mode
 	this->CoordinateMode = CWPhastDoc::GridMode;
 
+	// reset import file name
+	this->ImportPathName.Empty();
+
 	CDocument::DeleteContents();
 }
 
@@ -2325,6 +2329,12 @@ void CWPhastDoc::DataSourcePathsRelativeToAbsolute(LPCTSTR lpszPathName)
 						CGlobal::PathsAbsoluteToRelative(lpszPathName, this, headIC);
 						pICHeadZoneActor->SetData(headIC);
 					}
+					if (CZoneFlowRateZoneActor *pZoneFlowActor = CZoneFlowRateZoneActor::SafeDownCast(pZoneActor))
+					{
+						Zone_budget zb = pZoneFlowActor->GetData();
+						CGlobal::PathsRelativeToAbsolute(lpszPathName, this, zb);
+						pZoneFlowActor->SetData(zb);
+					}
 					if (pZoneActor->GetPolyhedronType() == Polyhedron::PRISM)
 					{
 						if (Prism *p = dynamic_cast<Prism*>(pZoneActor->GetPolyhedron()))
@@ -2415,6 +2425,16 @@ void CWPhastDoc::DataSourcePathsAbsoluteToRelative(LPCTSTR lpszPathName)
 						pAction->Execute();
 						delete pAction;
 					}
+					if (CZoneFlowRateZoneActor *pZoneFlowActor = CZoneFlowRateZoneActor::SafeDownCast(pZoneActor))
+					{
+						Zone_budget zb = pZoneFlowActor->GetData();
+						CGlobal::PathsAbsoluteToRelative(lpszPathName, this, zb);
+
+						CTreeCtrl *pTreeCtrl = this->GetPropertyTreeControlBar()->GetTreeCtrl();
+						CAction *pAction = new CSetZoneBudgetAction(pZoneFlowActor, pTreeCtrl, zb);
+						pAction->Execute();
+						delete pAction;
+					}
 					if (pZoneActor->GetPolyhedronType() == Polyhedron::PRISM)
 					{
 						if (Prism *p = dynamic_cast<Prism*>(pZoneActor->GetPolyhedron()))
@@ -2453,6 +2473,10 @@ std::string CWPhastDoc::GetRelativePath(LPCTSTR lpszPathName, const std::string 
 		VERIFY(::PathCanonicalize(szOut, cp_src_path.c_str()));
 		cp_src_path = szOut;
 		VERIFY(::PathRelativePathTo(szOut, lpszPathName, FILE_ATTRIBUTE_NORMAL, cp_src_path.c_str(), FILE_ATTRIBUTE_NORMAL));
+		if (::strlen(szOut) > 2 && szOut[0] == '.' && szOut[1] == '\\')
+		{
+			return std::string(szOut+2);
+		}
 		return std::string(szOut);
 	}
 	return src_path;
@@ -3181,6 +3205,9 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 			pWnd->SetWindowText(status);
 		}
 	}
+
+	// store path
+	this->ImportPathName = lpszPathName;
 
 	return bReturnValue;
 
@@ -7601,4 +7628,14 @@ void CWPhastDoc::OnSetGridMode()
 void CWPhastDoc::OnSetMapMode()
 {
 	this->SetCoordinateMode(CWPhastDoc::MapMode);
+}
+
+CString CWPhastDoc::GetDefaultPathName()const
+{
+	CString path(this->GetPathName());
+	if (path.IsEmpty())
+	{
+		return this->ImportPathName;
+	}
+	return path;
 }

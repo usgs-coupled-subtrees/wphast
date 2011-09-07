@@ -37,6 +37,7 @@
 #include "srcinput/Data_source.h"
 #include "srcinput/Prism.h"
 #include "srcinput/Domain.h"
+#include "srcinput/Zone_budget.h"
 #include "TreePropSheetExSRC.h"
 #include "MediaPropsPage.h"
 #include "FluxPropsPage.h"
@@ -4764,6 +4765,19 @@ void CGlobal::PathsRelativeToAbsolute(LPCTSTR lpszPathName, CWPhastDoc* pDoc, CG
 	GET_ABS_PATH_MACRO(pDoc, elt, alpha_vertical);
 }
 
+void CGlobal::PathsRelativeToAbsolute(LPCTSTR lpszPathName, CWPhastDoc* pDoc, Zone_budget& zb)
+{
+	if (zb.Get_write_heads())
+	{
+		std::string filename = zb.Get_filename_heads();
+		if (filename.length() > 0)
+		{
+			zb.Get_filename_heads() = pDoc->GetAbsolutePath(lpszPathName, filename);
+		}
+	}
+}
+
+
 #define GET_ABS_PATH_TIMESERIES_MACRO(D, C, TS) \
 do { \
 	CTimeSeries<Cproperty>::iterator it = C.TS.begin(); \
@@ -4833,6 +4847,18 @@ void CGlobal::PathsAbsoluteToRelative(LPCTSTR lpszPathName, CWPhastDoc* pDoc, CG
 	GET_REL_PATH_MACRO(pDoc, elt, alpha_trans);
 	GET_REL_PATH_MACRO(pDoc, elt, alpha_horizontal);
 	GET_REL_PATH_MACRO(pDoc, elt, alpha_vertical);
+}
+
+void CGlobal::PathsAbsoluteToRelative(LPCTSTR lpszPathName, CWPhastDoc* pDoc, Zone_budget& zb)
+{
+	if (zb.Get_write_heads())
+	{
+		std::string filename = zb.Get_filename_heads();
+		if (filename.length() > 0)
+		{
+			zb.Get_filename_heads() = pDoc->GetRelativePath(lpszPathName, filename);
+		}
+	}
 }
 
 #define GET_REL_PATH_TIMESERIES_MACRO(D, C, TS) \

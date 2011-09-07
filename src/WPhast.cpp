@@ -358,7 +358,7 @@ void CWPhastApp::OnFileNew()
 				if (dlg.GetAction() == CStartupDialog::SDA_OPEN_FILE)
 				{
 					pDoc->SetModifiedFlag(FALSE);
-					pDoc = static_cast<CWPhastDoc*> (pTemplate->OpenDocumentFile(dlg.GetFileName()));
+					pDoc = static_cast<CWPhastDoc*> (pTemplate->OpenDocumentFile(dlg.GetPathName()));
 					return;
 				}
 				else if (dlg.GetAction() == CStartupDialog::SDA_CREATE_DEFAULT)
@@ -380,7 +380,7 @@ void CWPhastApp::OnFileNew()
 					CDelayRedraw box(pDoc->GetBoxPropertiesDialogBar());
 					CDelayRedraw mainwnd(0, pDoc);
 
-					pDoc->DoImport(dlg.GetFileName());
+					pDoc->DoImport(dlg.GetPathName());
 					pDoc->ExecutePipeline();
 					return;
 				}

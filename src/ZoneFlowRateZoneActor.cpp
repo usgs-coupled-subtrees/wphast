@@ -11,6 +11,7 @@
 #include "Global.h"
 #include "GridKeyword.h"
 #include "WPhastMacros.h"
+#include "SetZoneBudgetAction.h"
 
 #include <vtkPropAssembly.h>
 #include <vtkObjectFactory.h> // reqd by vtkStandardNewMacro
@@ -80,25 +81,36 @@ void CZoneFlowRateZoneActor::Update(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent)
 {
 	CZoneActor::Update(pTreeCtrl, htiParent);
 
+	Zone_budget relative(this->m_zone_budget);
+	CFrameWnd *pFrame = (CFrameWnd*)::AfxGetApp()->m_pMainWnd;
+	if (pFrame)
+	{
+		ASSERT_VALID(pFrame);
+		CWPhastDoc* pDoc = reinterpret_cast<CWPhastDoc*>(pFrame->GetActiveDocument());
+		ASSERT_VALID(pDoc);
+
+		CGlobal::PathsAbsoluteToRelative(pDoc->GetDefaultPathName(), pDoc, relative);
+	}
+
 	// update description
 	//
 	CString str;
-	if (this->m_zone_budget.Get_description().size())
+	if (relative.Get_description().size())
 	{
-		str.Format("Zone flow rate %d - %s", this->m_zone_budget.Get_n_user(), this->m_zone_budget.Get_description().c_str());
+		str.Format("Zone flow rate %d - %s", relative.Get_n_user(), relative.Get_description().c_str());
 	}
 	else
 	{
-		str.Format("Zone flow rate %d", this->m_zone_budget.Get_n_user());
+		str.Format("Zone flow rate %d", relative.Get_n_user());
 	}
 	pTreeCtrl->SetItemText(htiParent, str);
 
-	if (this->m_zone_budget.combo.size())
+	if (relative.combo.size())
 	{
 		CString str("combination");
 		CString app;
-		std::vector<int>::const_iterator cit = this->m_zone_budget.combo.begin();
-		for (; cit != this->m_zone_budget.combo.end(); ++cit)
+		std::vector<int>::const_iterator cit = relative.combo.begin();
+		for (; cit != relative.combo.end(); ++cit)
 		{
 			app.Format(" %d", (*cit));
 			str += app;
@@ -106,6 +118,12 @@ void CZoneFlowRateZoneActor::Update(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent)
 		pTreeCtrl->InsertItem(str, htiParent);
 	}
 
+	if (relative.Get_write_heads())
+	{
+		CString str;
+		str.Format("write_heads_xyzt  %s", relative.Get_filename_heads().c_str());
+		pTreeCtrl->InsertItem(str, htiParent);
+	}
 }
 
 void CZoneFlowRateZoneActor::Edit(CTreeCtrl* pTreeCtrl)
@@ -140,11 +158,12 @@ void CZoneFlowRateZoneActor::Edit(CTreeCtrl* pTreeCtrl)
 		Zone_budget zone_budget;
 		page.GetProperties(zone_budget);
 		ASSERT(zone_budget.polyh);
-		//pDoc->Execute(new CSetMediaAction(this, pTreeCtrl, grid_elt, mediaSpreadProps.GetDesc()));
-		//{{
-		this->SetData(zone_budget);
-		this->Update(pTreeCtrl, this->m_hti);
-		//}}
+// COMMENT: {9/2/2011 8:47:40 PM}		//pDoc->Execute(new CSetMediaAction(this, pTreeCtrl, grid_elt, mediaSpreadProps.GetDesc()));
+// COMMENT: {9/2/2011 8:47:40 PM}		//{{
+// COMMENT: {9/2/2011 8:47:40 PM}		this->SetData(zone_budget);
+// COMMENT: {9/2/2011 8:47:40 PM}		this->Update(pTreeCtrl, this->m_hti);
+// COMMENT: {9/2/2011 8:47:40 PM}		//}}
+		pDoc->Execute(new CSetZoneBudgetAction(this, pTreeCtrl, zone_budget));
 	}
 }
 
@@ -251,11 +270,7 @@ Zone_budget CZoneFlowRateZoneActor::GetData(void)const
 void CZoneFlowRateZoneActor::Create(CWPhastDoc* pWPhastDoc, const Zone_budget& zone_budget)
 {
 	ASSERT(zone_budget.polyh && ::AfxIsValidAddress(zone_budget.polyh, sizeof(Polyhedron)));
-// COMMENT: {1/18/2011 5:47:50 PM}	CZoneCreateAction<CZoneFlowRateZoneActor>* pAction = new CZoneCreateAction<CZoneFlowRateZoneActor>(
-// COMMENT: {1/18/2011 5:47:50 PM}		pWPhastDoc,
-// COMMENT: {1/18/2011 5:47:50 PM}		zone_budget.polyh,
-// COMMENT: {1/18/2011 5:47:50 PM}		""
-// COMMENT: {1/18/2011 5:47:50 PM}		);
+
 	CGridKeyword gk;
 	pWPhastDoc->GetGridKeyword(gk);
 	CZoneCreateAction<CZoneFlowRateZoneActor>* pAction = new CZoneCreateAction<CZoneFlowRateZoneActor>(
@@ -291,12 +306,21 @@ void CZoneFlowRateZoneActor::Serialize(bool bStoring, hid_t loc_id, const CWPhas
 	}
 }
 
+HTREEITEM CZoneFlowRateZoneActor::GetHTreeItem(void)const
+{
+	ASSERT(this->m_hti);
+	return this->m_hti;
+}
+
 void Zone_budget::Serialize(bool bStoring, hid_t loc_id)
 {
 	HDF_GETSET_MACRO(n_user, H5T_NATIVE_INT);
 	HDF_STD_STRING_MACRO(description);
 
 	static const char szCombination[] = "combination";
+	static const char szWriteHeads[]  = "write_heads";
+	static const char szFNHeads[]     = "filename_heads";
+
 	herr_t status;
 	hsize_t count;
 	if (bStoring)
@@ -330,12 +354,23 @@ void Zone_budget::Serialize(bool bStoring, hid_t loc_id)
 		}
 		delete[] numbers;
 	}
+
+	// write_heads_xyzt
+	status = CGlobal::HDFSerializeBool(bStoring, loc_id, szWriteHeads, this->write_heads);
+	ASSERT(!bStoring || status >= 0); // if storing assert status is valid
+
+	// filename_heads
+	if (this->write_heads)
+	{
+		status = CGlobal::HDFSerializeString(bStoring, loc_id, szFNHeads, this->filename_heads);
+		ASSERT(!bStoring || status >= 0); // if storing assert status is valid
+	}
 }
 
 void Zone_budget::Serialize(CArchive& ar)
 {
 	static const char szZone_budget[] = "Zone_budget";
-	static int version = 1;
+	static int version = 2;
 
 	CString type;
 	int ver = version;
@@ -364,6 +399,25 @@ void Zone_budget::Serialize(CArchive& ar)
 	}
 
 	CGlobal::Serialize(&(this->polyh), ar);
+
+	if (version >= 2)
+	{
+		if (ar.IsStoring())
+		{
+			ar << this->write_heads;
+
+			CString str(this->filename_heads.c_str());
+			ar << str;
+		}
+		else
+		{
+			ar >> this->write_heads;
+
+			CString str;
+			ar >> str;
+			this->filename_heads = str;
+		}
+	}
 
 	// type and version footer
 	//

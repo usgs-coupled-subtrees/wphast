@@ -26,6 +26,7 @@ CTimeControlMultiPropertyPage2::CTimeControlMultiPropertyPage2()
 	CGlobal::LoadRTFString(this->m_sTSUnitsRTF,         IDR_TC_TS_UNITS_RTF);
 	CGlobal::LoadRTFString(this->m_sTSTimeStepRTF,      IDR_TC_TS_TIME_STEP_RTF);
 	CGlobal::LoadRTFString(this->m_sTSTimeStepUnitsRTF, IDR_TC_TS_TIME_STEP_UNITS_RTF);
+	CGlobal::LoadRTFString(this->m_sTSTimeStartRTF,     IDR_TC_START_RTF);
 }
 
 CTimeControlMultiPropertyPage2::~CTimeControlMultiPropertyPage2()
@@ -233,6 +234,9 @@ BEGIN_MESSAGE_MAP(CTimeControlMultiPropertyPage2, baseCTimeControlMultiPropertyP
 
 	ON_NOTIFY(GVN_SELCHANGED, IDC_TIMEEND_GRID, OnSelChangedTimeEnd)
 	ON_NOTIFY(GVN_SETFOCUS, IDC_TIMEEND_GRID, OnSelChangedTimeEnd)
+
+	ON_EN_SETFOCUS(IDC_STARTTIME_EDIT, &CTimeControlMultiPropertyPage2::OnEnSetfocusStarttimeEdit)
+	ON_CBN_SETFOCUS(IDC_STARTTIME_COMBO, &CTimeControlMultiPropertyPage2::OnCbnSetfocusStarttimeCombo)
 END_MESSAGE_MAP()
 
 
@@ -419,4 +423,14 @@ BOOL CTimeControlMultiPropertyPage2::PreTranslateMessage(MSG* pMsg)
 		}
 	}
 	return ETSLayoutPropertyPageXP::PreTranslateMessage(pMsg);
+}
+
+void CTimeControlMultiPropertyPage2::OnEnSetfocusStarttimeEdit()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sTSTimeStartRTF.c_str());
+}
+
+void CTimeControlMultiPropertyPage2::OnCbnSetfocusStarttimeCombo()
+{
+	this->m_wndRichEditCtrl.SetWindowText(this->m_sTSTimeStartRTF.c_str());
 }

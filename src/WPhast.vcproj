@@ -1076,6 +1076,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\SetZoneBudgetAction.cpp"
+				>
+			</File>
+			<File
 				RelativePath="SiteMap.cpp"
 				>
 			</File>
@@ -5396,6 +5400,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\SetZoneBudgetAction.h"
+				>
+			</File>
+			<File
 				RelativePath="SiteMap.h"
 				>
 			</File>
@@ -6825,6 +6833,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\res\TC_START.rtf"
+				>
+			</File>
+			<File
 				RelativePath="res\TC_TE_TIME_END.rtf"
 				>
 			</File>
@@ -6921,6 +6933,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\res\WELL_USE_MAP_XY.rtf"
+				>
+			</File>
+			<File
+				RelativePath=".\res\WELL_USE_MAP_Z.rtf"
+				>
+			</File>
+			<File
 				RelativePath="res\WPhast.ico"
 				>
 			</File>
@@ -6970,6 +6990,22 @@
 			</File>
 			<File
 				RelativePath="res\WPhastDoc.ico"
+				>
+			</File>
+			<File
+				RelativePath=".\res\ZF_COMBO.rtf"
+				>
+			</File>
+			<File
+				RelativePath=".\res\ZF_DESC.rtf"
+				>
+			</File>
+			<File
+				RelativePath=".\res\ZF_HEADS_XYZT.rtf"
+				>
+			</File>
+			<File
+				RelativePath=".\res\ZF_NUMBER.rtf"
 				>
 			</File>
 			<File
