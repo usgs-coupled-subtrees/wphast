@@ -2794,7 +2794,7 @@ void TestCPhastInput::testRadial(void)
 				TRACE("%s\n", pInput->GetWarningMsg());
 				TRACE("%s\n", pInput->GetErrorMsg());
 			}
-			CPPUNIT_ASSERT(pInput->GetErrorCount()   == 0);
+			CPPUNIT_ASSERT(pInput->GetErrorCount()   == 8);
 
 			pInput->Delete();
 			pInput = NULL;
