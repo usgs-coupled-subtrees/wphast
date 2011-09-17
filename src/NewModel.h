@@ -15,6 +15,7 @@
 #include "ChemIC.h"
 #include "Snap.h"
 #include "SolutionMethod.h"
+#include "Title.h"
 
 class CNewModel
 {
@@ -28,6 +29,7 @@ public:
 	static CNewModel Default();
 
 public:
+	CTitle           m_title;
 	CFlowOnly        m_flowOnly;
 	CSteadyFlow      m_steadyFlow;
 	CFreeSurface     m_freeSurface;

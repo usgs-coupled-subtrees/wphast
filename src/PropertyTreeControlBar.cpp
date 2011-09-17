@@ -53,6 +53,7 @@
 #include "RiverPropertyPage2.h"
 #include "DrainPropertyPage.h"
 #include "PointSelectionObject.h"
+#include "Title.h"
 
 // Actions
 #include "ResizeGridAction.h"
@@ -97,6 +98,7 @@ static const TCHAR szPRINT_INITIAL[]       = _T("PRINT_INITIAL");
 static const TCHAR szPRINT_FREQUENCY[]     = _T("PRINT_FREQUENCY");
 static const TCHAR szTIME_CONTROL[]        = _T("TIME_CONTROL");
 static const TCHAR szZONE_FLOW[]           = _T("ZONE_FLOW");
+static const TCHAR szTITLE[]               = _T("TITLE");
 
 static const int BC_INDEX              = 0;
 static const int PRINT_FREQUENCY_INDEX = 1;
@@ -713,6 +715,22 @@ bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode &editNode, bool bDoEd
 	HTREEITEM hParent = parent;
 
 
+	// TITLE
+	//
+	if (item.IsNodeAncestor(this->m_nodeTitle))
+	{
+		CTitle *pTitle = reinterpret_cast<CTitle*>(this->m_nodeTitle.GetData());
+		if (!pTitle) return false;  // can occur on failed import
+
+		if (bDoEdit)
+		{
+			pTitle->Edit(&this->m_wndTree);
+		}
+		editNode = this->m_nodeTitle;
+		return true;
+	}
+
+
 	// FLOW_ONLY
 	//
 	if (item.IsNodeAncestor(this->m_nodeFlowOnly))
@@ -1299,6 +1317,11 @@ void CPropertyTreeControlBar::SetFreeSurface(CFreeSurface *pFreeSurface)
 	pFreeSurface->Insert(&this->m_wndTree, this->m_nodeFreeSurface);
 }
 
+void CPropertyTreeControlBar::SetCTitle(CTitle *pT)
+{
+	pT->Insert(&this->m_wndTree, this->m_nodeTitle);
+}
+
 void CPropertyTreeControlBar::SetSolutionMethod(CSolutionMethod *pSolutionMethod)
 {
 	pSolutionMethod->Insert(&this->m_wndTree, this->m_nodeSolutionMethod);
@@ -1311,6 +1334,7 @@ void CPropertyTreeControlBar::SetSteadyFlow(CSteadyFlow *pSteadyFlow)
 
 void CPropertyTreeControlBar::SetModel(CNewModel* pModel)
 {
+	this->SetCTitle(&pModel->m_title);
 	this->SetFlowOnly(&pModel->m_flowOnly);
 	this->SetFreeSurface(&pModel->m_freeSurface);
 	this->SetSteadyFlow(&pModel->m_steadyFlow);
@@ -1404,6 +1428,7 @@ void CPropertyTreeControlBar::DeleteContents()
 	this->m_wndTree.DeleteAllItems();
 
 	// populate static properties
+	this->m_nodeTitle          = this->m_wndTree.InsertItem(szTITLE              );
 	this->m_nodeFlowOnly       = this->m_wndTree.InsertItem(szFLOW_ONLY          );
 	this->m_nodeSteadyFlow     = this->m_wndTree.InsertItem(szSTEADY_FLOW        );
 	this->m_nodeFreeSurface    = this->m_wndTree.InsertItem(szFREE_SURFACE_BC    );

@@ -44,6 +44,7 @@ class CTimeControl2;
 class CPrintInput;
 class CPrintFreq;
 class CNewModel;
+class CTitle;
 
 class CModelessPropertySheet;
 class CScalePropertyPage;
@@ -367,6 +368,9 @@ public:
 
 	CNewModel* GetModel(void);
 	void SetModel(const CNewModel &model);
+
+	void SetCTitle(const CTitle &t);
+	CTitle GetCTitle(void)const;
 
 	// CUnits GetUnits(void);
 	const CUnits& GetUnits(void)const;

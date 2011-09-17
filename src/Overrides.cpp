@@ -39,6 +39,9 @@ extern char * string_duplicate (const char *token);
 extern int well_free (Well *well_ptr);
 extern int write_hst(void);
 extern int write_thru(int thru);
+extern int next_keyword_or_option(const char **opt_list, int count_opt_list);
+extern int read_line_doubles_delimited(char *next_char, double **d,
+									   int *count_d, int *count_alloc);
 
 extern int copy_token (char *token_ptr, char **ptr, int *length);
 ///extern int error_msg (const char *err_str, const int stop);
@@ -332,12 +335,112 @@ int read_lines_doubles(char *next_char, double **d, int *count_d, int *count_all
 			return(ERROR);
 		}
 	}
-	////{{
+
 	++input_error;
 	error_msg("Properties cannot be defined using the \"by_element\" or \"by_cell\" option.", CONTINUE);
-	return ERROR;
-	////}}
-	return(OK);
+	return (ERROR);
+}
+
+/* ---------------------------------------------------------------------- */
+int
+read_lines_doubles_delimited(char *next_char, double **d, int *count_d,
+							 int *count_alloc, const char **opt_list,
+							 int count_opt_list, int *opt)
+/* ---------------------------------------------------------------------- */
+{
+/*
+ *      Reads doubles on line starting at next_char
+ *      and on succeeding lines. Appends to d.
+ *      Doubles are delimited by <>.
+ #
+ *      Expets < to start. Stops at ">". Reads next line.
+ *
+ *      Input Arguments:
+ *         next_char    points to line to read from
+ *         d            points to array of doubles, must be malloced
+ *         count_d      number of elements in array
+ *         count_alloc  number of elements malloced
+ *
+ *      Output Arguments:
+ *         d            points to array of doubles, may have been
+ *                          realloced
+ *         count_d      updated number of elements in array
+ *         count_alloc  updated of elements malloced
+ *
+ *      Returns:
+ *         KEYWORD
+ *         OPTION
+ *         EOF
+ *         ERROR if any errors reading doubles
+ */
+	int j, l;
+	char token[MAX_LENGTH];
+
+	replace("<", "< ", next_char);
+	j = copy_token(token, &next_char, &l);
+	while (j == EMPTY)
+	{
+		*opt = get_option(opt_list, count_opt_list, &next_char);
+		if (*opt == OPTION_KEYWORD || *opt == OPTION_EOF
+			|| *opt == OPTION_ERROR || *opt >= 0)
+		{
+			input_error++;
+			error_msg("List of values missing for property\n", CONTINUE);
+			return (ERROR);
+		}
+		replace("<", "< ", next_char);
+		j = copy_token(token, &next_char, &l);
+	}
+	/*
+	 *  Should start with "<"
+	 */
+	if (token[0] != '<')
+	{
+		input_error++;
+		error_msg("Starting \"<\" missing in list of values for property\n",
+				  CONTINUE);
+		*opt = next_keyword_or_option(opt_list, count_opt_list);
+		return (ERROR);
+	}
+	if ((j =
+		 read_line_doubles_delimited(next_char, d, count_d,
+									 count_alloc)) == ERROR)
+	{
+		return (ERROR);
+	}
+	else if (j == DONE)
+	{
+		*opt = get_option(opt_list, count_opt_list, &next_char);
+		++input_error;
+		error_msg("Properties cannot be defined using the \"by_element\" or \"by_cell\" option.", CONTINUE);
+		return (ERROR);
+	}
+	for (;;)
+	{
+		*opt = get_option(opt_list, count_opt_list, &next_char);
+		if (*opt == OPTION_KEYWORD || *opt == OPTION_EOF
+			|| *opt == OPTION_ERROR || *opt >= 0)
+		{
+			break;
+		}
+		next_char = line;
+		if ((j =
+			 read_line_doubles_delimited(next_char, d, count_d,
+										 count_alloc)) == ERROR)
+		{
+			return (ERROR);
+		}
+		else if (j == DONE)
+		{
+			*opt = get_option(opt_list, count_opt_list, &next_char);
+			++input_error;
+			error_msg("Properties cannot be defined using the \"by_element\" or \"by_cell\" option.", CONTINUE);
+			return (ERROR);
+		}
+	}
+	++input_error;
+	error_msg("Properties cannot be defined using the \"by_element\" or \"by_cell\" option.", CONTINUE);
+	return (ERROR);
 }
 
 void GetDefaultMedia(struct grid_elt* p_grid_elt)

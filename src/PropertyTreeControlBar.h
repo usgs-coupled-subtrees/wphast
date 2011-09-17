@@ -20,6 +20,7 @@ class CZoneActor;
 class CWPhastDoc;
 class CGridActor;
 class CModelessPropertySheet;
+class CTitle;
 
 
 #ifndef baseCPropertyTreeControlBar
@@ -60,6 +61,7 @@ protected:
 	CTreeCtrlNode   m_nodeRivers;
 	CTreeCtrlNode   m_nodeDrains;
 	CTreeCtrlNode   m_nodeZFRates;
+	CTreeCtrlNode   m_nodeTitle;
 	
 	bool            m_bSelectingProp;
 
@@ -88,6 +90,7 @@ public:
 	void SetFreeSurface(CFreeSurface *pFreeSurface);
 	void SetSteadyFlow(CSteadyFlow *pSteadyFlow);
 	void SetSolutionMethod(CSolutionMethod *pSolutionMethod);
+	void SetCTitle(CTitle *pT);
 
 	void SetTimeControl2(CTimeControl2* pTimeControl2);
 	CTimeControl2* GetTimeControl2(void);

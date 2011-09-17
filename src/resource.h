@@ -416,6 +416,7 @@
 #define ID_INDICATOR_COOR               444
 #define IDD_PROPS_ZONEPROPS1            445
 #define IDR_MEDIA_SHELL_RTF             446
+#define IDD_FLOW_RATE_PROPPAGE3         446
 #define IDR_MEDIA_TORTUOSITY_RTF        447
 #define IDR_DRAIN_NUM_RTF               448
 #define IDR_DRAIN_DESC_RTF              449
@@ -447,6 +448,8 @@
 #define IDR_ZF_DESC_RTF                 475
 #define IDR_ZF_COMBO_RTF                476
 #define IDR_ZF_HEADS_XYZT_RTF           477
+#define IDD_TITLE_PROPPAGE              478
+#define IDR_TITLE_RTF                   479
 #define IDC_EDIT_X                      1000
 #define IDC_TITLE                       1000
 #define IDC_EDIT_Y                      1001
@@ -1025,6 +1028,7 @@
 #define IDC_EDIT_WRITE_HEADS            1544
 #define IDC_EDIT_ZW                     1545
 #define IDC_BUTTON_BROWSE               1545
+#define IDC_EDIT_TITLE                  1546
 #define IDC_RESIZE_COLUMN               28654
 #define IDC_RESIZE_ROW                  28655
 #define IDR_POPUP                       28656
@@ -1081,9 +1085,9 @@
 //
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        478
+#define _APS_NEXT_RESOURCE_VALUE        480
 #define _APS_NEXT_COMMAND_VALUE         32882
-#define _APS_NEXT_CONTROL_VALUE         1546
+#define _APS_NEXT_CONTROL_VALUE         1547
 #define _APS_NEXT_SYMED_VALUE           127
 #endif
 #endif

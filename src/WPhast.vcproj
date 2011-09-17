@@ -1068,6 +1068,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\SetTitleAction.cpp"
+				>
+			</File>
+			<File
 				RelativePath="SetUnitsAction.cpp"
 				>
 			</File>
@@ -1197,6 +1201,14 @@
 			</File>
 			<File
 				RelativePath="TimeSeries.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Title.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\TitlePropertyPage.cpp"
 				>
 			</File>
 			<File
@@ -5392,6 +5404,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\SetTitleAction.h"
+				>
+			</File>
+			<File
 				RelativePath="SetUnitsAction.h"
 				>
 			</File>
@@ -5489,6 +5505,14 @@
 			</File>
 			<File
 				RelativePath="TimeSeries.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Title.h"
+				>
+			</File>
+			<File
+				RelativePath=".\TitlePropertyPage.h"
 				>
 			</File>
 			<File
@@ -6858,6 +6882,10 @@
 			</File>
 			<File
 				RelativePath="res\TC_TS_UNITS.rtf"
+				>
+			</File>
+			<File
+				RelativePath=".\res\TITLE.rtf"
 				>
 			</File>
 			<File

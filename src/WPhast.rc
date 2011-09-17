@@ -3240,6 +3240,16 @@ BEGIN
     CONTROL         "",IDC_DESC_RICHEDIT,"RichEdit20A",ES_MULTILINE | ES_AUTOHSCROLL | ES_READONLY | WS_BORDER | WS_VSCROLL | WS_HSCROLL,7,116,350,48
 END
 
+IDD_TITLE_PROPPAGE DIALOGEX 0, 0, 380, 160
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Title"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    EDITTEXT        IDC_EDIT_TITLE,7,7,366,78,ES_MULTILINE | ES_AUTOHSCROLL | ES_WANTRETURN
+    CONTROL         "",IDC_DESC_RICHEDIT,"RichEdit20A",ES_MULTILINE | ES_AUTOHSCROLL | ES_READONLY | WS_BORDER | WS_VSCROLL | WS_HSCROLL,7,92,366,61
+    LTEXT           "NOTE: This invisible control is needed so that the background of the dialog is painted correctly.",IDC_STATIC,99,32,159,22,NOT WS_VISIBLE
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -4373,6 +4383,14 @@ BEGIN
         TOPMARGIN, 7
         BOTTOMMARGIN, 164
     END
+
+    IDD_TITLE_PROPPAGE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 373
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 153
+    END
 END
 #endif    // APSTUDIO_INVOKED
 
@@ -4566,6 +4584,7 @@ IDR_ZF_NUMBER_RTF       RTF                     "res\\ZF_NUMBER.rtf"
 IDR_ZF_DESC_RTF         RTF                     "res\\ZF_DESC.rtf"
 IDR_ZF_COMBO_RTF        RTF                     "res\\ZF_COMBO.rtf"
 IDR_ZF_HEADS_XYZT_RTF   RTF                     "res\\ZF_HEADS_XYZT.rtf"
+IDR_TITLE_RTF           RTF                     "res\\TITLE.rtf"
 
 /////////////////////////////////////////////////////////////////////////////
 //

@@ -33,6 +33,8 @@ CPointConnectorActor::CPointConnectorActor(void)
 , CurrentHandle(0)
 , CurrentSource(0)
 , CurrentId(-1)
+, DeleteHandle(0)
+, DeleteId(-1)
 , SelectedHandleProperty(0)
 , EnabledHandleProperty(0)
 , State(CPointConnectorActor::None)
@@ -418,7 +420,8 @@ void CPointConnectorActor::UpdatePoints(void)
 
 void CPointConnectorActor::ClearPoints(void)
 {
-	this->CurrentHandle = NULL;
+	this->CurrentHandle = 0;
+	this->DeleteHandle = 0;
 
 	this->Points->Initialize();
 	ASSERT(this->Points->GetNumberOfPoints() == 0);
@@ -609,10 +612,12 @@ void CPointConnectorActor::ProcessEvents(vtkObject* vtkNotUsed(object),
 
 	case vtkCommand::RightButtonPressEvent:
 		TRACE("vtkCommand::RightButtonPressEvent\n");
+		self->OnRightButtonDown();
 		break;
 
 	case vtkCommand::RightButtonReleaseEvent:
 		TRACE("vtkCommand::RightButtonReleaseEvent\n");
+		self->OnRightButtonUp();
 		break;
 
 	case vtkCommand::KeyPressEvent:
@@ -646,7 +651,7 @@ void CPointConnectorActor::OnLeftButtonDown()
 	int X = this->Interactor->GetEventPosition()[0];
 	int Y = this->Interactor->GetEventPosition()[1];
 
-	vtkRenderer *ren = this->Interactor->FindPokedRenderer(X,Y);
+	vtkRenderer *ren = this->Interactor->FindPokedRenderer(X, Y);
 	if ( ren != this->CurrentRenderer )
 	{
 		return;
@@ -715,9 +720,7 @@ void CPointConnectorActor::OnLeftButtonDown()
 		this->TimeLastClick = tmClick;
 		::SetRect(&this->RectClick, MAKEPOINTS(pState->m_msgCur.lParam).x, MAKEPOINTS(pState->m_msgCur.lParam).y,
 			MAKEPOINTS(pState->m_msgCur.lParam).x, MAKEPOINTS(pState->m_msgCur.lParam).y);
-		::InflateRect(&this->RectClick,
-			GetSystemMetrics(SM_CXDOUBLECLK) / 2,
-			GetSystemMetrics(SM_CYDOUBLECLK) / 2);
+		::InflateRect(&this->RectClick, ::GetSystemMetrics(SM_CXDOUBLECLK) / 2, ::GetSystemMetrics(SM_CYDOUBLECLK) / 2);
 #endif
 		if (this->NumberOfClicks > 1)
 		{
@@ -835,6 +838,28 @@ void CPointConnectorActor::OnMouseMove()
 		}
 		this->Interactor->Render();
 	}
+
+	if (this->State == CPointConnectorActor::DeletingPoint)
+	{
+		this->CellPicker->Pick(X, Y, 0.0, ren);
+		if (vtkAssemblyPath *path = this->CellPicker->GetPath())
+		{
+			if (this->DeleteHandle == vtkActor::SafeDownCast(path->GetFirstNode()->GetViewProp()))
+			{
+				this->HighlightHandle(this->DeleteHandle);
+			}
+			else
+			{
+				this->HighlightHandle(0);
+			}
+		}
+		else
+		{
+			this->HighlightHandle(0);
+		}
+		this->Interactor->Render();
+	}
+
 }
 
 void CPointConnectorActor::OnLeftButtonUp()
@@ -992,6 +1017,10 @@ void CPointConnectorActor::SetEnabled(int enabling)
 		i->AddObserver(vtkCommand::KeyPressEvent,
 			this->EventCallbackCommand, 10);
 		i->AddObserver(vtkCommand::DeleteEvent,       // this doesn't seem to be working
+			this->EventCallbackCommand, 10);
+		i->AddObserver(vtkCommand::RightButtonPressEvent,
+			this->EventCallbackCommand, 10);
+		i->AddObserver(vtkCommand::RightButtonReleaseEvent,
 			this->EventCallbackCommand, 10);
 
 		std::list<vtkActor*>::iterator iterActor = this->Actors.begin();
@@ -1528,5 +1557,77 @@ void CPointConnectorActor::SetCoordinateMode(CWPhastDoc::CoordinateState mode)
 	else
 	{
 		ASSERT(FALSE);
+	}
+}
+
+vtkIdType CPointConnectorActor::GetDeletePointId(void)const
+{
+	return this->DeleteId;
+}
+
+void CPointConnectorActor::OnRightButtonDown()
+{
+	if (!this->Interactor) return;
+
+	int X = this->Interactor->GetEventPosition()[0];
+	int Y = this->Interactor->GetEventPosition()[1];
+
+	vtkRenderer *ren = this->Interactor->FindPokedRenderer(X, Y);
+	if ( ren != this->CurrentRenderer )
+	{
+		return;
+	}
+
+	if (this->State == CPointConnectorActor::None)
+	{
+		this->CellPicker->Pick(X, Y, 0.0, ren);
+		if (vtkAssemblyPath *path = this->CellPicker->GetPath())
+		{
+			if (this->DeleteHandle = vtkActor::SafeDownCast(path->GetFirstNode()->GetViewProp()))
+			{
+				this->DeleteId = this->HighlightHandle(this->DeleteHandle);
+				this->EventCallbackCommand->SetAbortFlag(1);
+				this->State = CPointConnectorActor::DeletingPoint;
+				this->Interactor->Render();
+				return;
+			}
+		}
+	}
+}
+
+void CPointConnectorActor::OnRightButtonUp()
+{
+	if (!this->Interactor) return;
+
+	int X = this->Interactor->GetEventPosition()[0];
+	int Y = this->Interactor->GetEventPosition()[1];
+
+	vtkRenderer *ren = this->Interactor->FindPokedRenderer(X, Y);
+	if ( ren != this->CurrentRenderer )
+	{
+		return;
+	}
+
+	if (this->State == CPointConnectorActor::DeletingPoint)
+	{
+		// update WorldPointXYPlane
+		//
+		this->Update();
+
+		this->CellPicker->Pick(X, Y, 0.0, ren);
+
+		this->EventCallbackCommand->SetAbortFlag(1);
+		this->State = CPointConnectorActor::None;
+
+		if (vtkAssemblyPath *path = this->CellPicker->GetPath())
+		{
+			if (this->DeleteHandle == vtkActor::SafeDownCast(path->GetFirstNode()->GetViewProp()))
+			{
+				this->HighlightHandle(0);
+				this->InvokeEvent(CPointConnectorActor::DeletePointEvent, &this->DeleteId);
+				this->Interactor->Render();
+			}
+		}
+		this->DeleteHandle = 0;
 	}
 }

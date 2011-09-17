@@ -128,6 +128,8 @@ public:
 	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
 #endif
 
+	vtkIdType GetDeletePointId(void)const;
+
 protected:
 	CPointConnectorActor(void);
 	~CPointConnectorActor(void);
@@ -140,6 +142,7 @@ protected:
 		None,
 		MovingPoint,
 		CreatingRiver,
+		DeletingPoint
 	} State;
 
 	// ghost point
@@ -167,6 +170,8 @@ protected:
 	void OnLeftButtonDown(void);
 	void OnLeftButtonUp(void);
 	void OnKeyPress(void);
+	void OnRightButtonDown(void);
+	void OnRightButtonUp(void);
 
 	//
 	void Update(void);
@@ -213,6 +218,9 @@ protected:
 	vtkActor        *CurrentHandle;
 	vtkSphereSource *CurrentSource;
 	vtkIdType        CurrentId;
+
+	vtkActor        *DeleteHandle;
+	vtkIdType        DeleteId;
 
 	CTreeCtrlNode       Node;
 	CTreeMemento       *TreeMemento;

@@ -36,7 +36,7 @@ public:
 		LINEAR   = 2,
 		POINTS   = 3,
 		XYZ      = 4,
-		XYZT     = 5,
+		XYZT     = 5
 	};
 
 public:

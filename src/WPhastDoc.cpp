@@ -111,6 +111,7 @@
 #include "PointConnectorCreateAction.h"
 #include "PointConnectorMovePointAction.h"
 #include "PointConnectorInsertPointAction.h"
+#include "PointConnectorDeletePointAction.h"
 #include "GridDeleteLineAction.h"
 #include "GridInsertLineAction.h"
 #include "GridMoveLineAction.h"
@@ -703,6 +704,7 @@ void CWPhastDoc::Serialize(CArchive& ar)
 
 			// store flowonly
 			ASSERT(this->m_pModel);
+			this->m_pModel->m_title.Serialize(bStoring, wphast_id);
 			this->m_pModel->m_flowOnly.Serialize(bStoring, wphast_id);
 			this->m_pModel->m_freeSurface.Serialize(bStoring, wphast_id);
 			this->m_pModel->m_steadyFlow.Serialize(bStoring, wphast_id);
@@ -804,6 +806,7 @@ void CWPhastDoc::Serialize(CArchive& ar)
 
 			// load model (flowonly freeSurface steadyFlow)
 			ASSERT(this->m_pModel);
+			this->m_pModel->m_title.Serialize(bStoring, wphast_id);
 			this->m_pModel->m_flowOnly.Serialize(bStoring, wphast_id);
 			this->m_pModel->m_freeSurface.Serialize(bStoring, wphast_id);
 			this->m_pModel->m_steadyFlow.Serialize(bStoring, wphast_id);
@@ -1732,6 +1735,20 @@ void CWPhastDoc::SetFreeSurface(const CFreeSurface &freeSurface)
 CFreeSurface CWPhastDoc::GetFreeSurface(void)const
 {
 	return this->m_pModel->m_freeSurface;
+}
+
+void CWPhastDoc::SetCTitle(const CTitle &t)
+{
+	this->m_pModel->m_title = t;
+	if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar())
+	{
+		pTree->SetCTitle(&this->m_pModel->m_title);
+	}
+}
+
+CTitle CWPhastDoc::GetCTitle(void)const
+{
+	return this->m_pModel->m_title;
 }
 
 CNewModel* CWPhastDoc::GetModel(void)
@@ -2815,6 +2832,10 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 
 		// start loading data
 
+		// TITLE
+		//
+		CTitle t(::title_x);
+
 		// FLOW_ONLY
 		//
 		CFlowOnly flowOnly(::flow_only != 0);
@@ -2865,6 +2886,7 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 
 		// create new document
 		//
+		model.m_title          = t;
 		model.m_flowOnly       = flowOnly;
 		model.m_freeSurface    = (::free_surface != 0);
 		model.m_steadyFlow     = steadyFlow;
@@ -3338,6 +3360,9 @@ BOOL CWPhastDoc::WriteTransDat(std::ostream& os)
 	int nCount;
 
 	os.precision(DBL_DIG);
+
+	// TITLE
+	os << this->m_pModel->m_title;
 
 	// FLOW_ONLY
 	os << this->m_pModel->m_flowOnly;
@@ -5036,6 +5061,7 @@ void CWPhastDoc::Add(CRiverActor *pRiverActor, HTREEITEM hInsertAfter)
 	pRiverActor->AddObserver(CRiverActor::MovingPointEvent,    this->RiverCallbackCommand);
 	pRiverActor->AddObserver(CRiverActor::EndMovePointEvent,   this->RiverCallbackCommand);
 	pRiverActor->AddObserver(CRiverActor::InsertPointEvent,    this->RiverCallbackCommand);
+	pRiverActor->AddObserver(CRiverActor::DeletePointEvent,    this->RiverCallbackCommand);
 
 	// render
 	//
@@ -5271,15 +5297,18 @@ void CWPhastDoc::RiverListener(vtkObject* caller, unsigned long eid, void* clien
 	ASSERT(caller->IsA("CRiverActor"));
 	ASSERT(clientdata);
 
-	if (CRiverActor* river = CRiverActor::SafeDownCast(caller))
+	if (CRiverActor* riverActor = CRiverActor::SafeDownCast(caller))
 	{
 		CWPhastDoc* self = reinterpret_cast<CWPhastDoc*>(clientdata);
 
 		switch (eid)
 		{
 		case CRiverActor::StartMovePointEvent:
-			ASSERT(self->RiverMovePointAction == 0);
-			self->RiverMovePointAction = new CPointConnectorMovePointAction<CRiverActor>(river, self, river->GetCurrentPointId(), river->GetCurrentPointPosition()[0], river->GetCurrentPointPosition()[1]);
+			{
+				ASSERT(self->RiverMovePointAction == 0);
+				double* pos = riverActor->GetCurrentPointPosition();
+				self->RiverMovePointAction = new CPointConnectorMovePointAction<CRiverActor>(riverActor, self, riverActor->GetCurrentPointId(), pos[0], pos[1]);
+			}
 			break;
 
 		case CRiverActor::MovingPointEvent:
@@ -5301,19 +5330,37 @@ void CWPhastDoc::RiverListener(vtkObject* caller, unsigned long eid, void* clien
 			break;
 
 		case CRiverActor::EndMovePointEvent:
-			ASSERT(self->RiverMovePointAction != 0);
-			self->RiverMovePointAction->SetPoint(river->GetCurrentPointPosition()[0], river->GetCurrentPointPosition()[1]);
-			self->Execute(self->RiverMovePointAction);
-			self->RiverMovePointAction = 0;
+			{
+				ASSERT(self->RiverMovePointAction != 0);
+				double* pos = riverActor->GetCurrentPointPosition();
+				self->RiverMovePointAction->SetPoint(pos[0], pos[1]);
+				self->Execute(self->RiverMovePointAction);
+				self->RiverMovePointAction = 0;
+			}
 			break;
 
 		case CRiverActor::InsertPointEvent:
 			{
-				double* pos = river->GetCurrentPointPosition();
-				vtkIdType id = river->GetCurrentPointId() - 1;
+				double* pos = riverActor->GetCurrentPointPosition();
+				vtkIdType id = riverActor->GetCurrentPointId() - 1;
 				CPointConnectorInsertPointAction<CRiverActor, CRiverPoint>* pRiverInsertPointAction =
-					new CPointConnectorInsertPointAction<CRiverActor, CRiverPoint>(river, self, id, pos[0], pos[1], pos[2], true);
+					new CPointConnectorInsertPointAction<CRiverActor, CRiverPoint>(riverActor, self, id, pos[0], pos[1], pos[2], true);
 				self->Execute(pRiverInsertPointAction);
+			}
+			break;
+
+		case CRiverActor::DeletePointEvent:
+			{
+				ASSERT(calldata);
+				vtkIdType point = *((vtkIdType*)calldata);
+				if (point == 0 || point == riverActor->GetPointCount() - 1)
+				{
+					::AfxMessageBox("The first and the last river points cannot be deleted.");
+				}
+				else
+				{
+					self->Execute(new CPointConnectorDeletePointAction<CRiverActor, CRiverPoint>(riverActor, self, point));
+				}
 			}
 			break;
 
@@ -7356,6 +7403,7 @@ void CWPhastDoc::Add(CDrainActor *pDrainActor, HTREEITEM hInsertAfter)
 	pDrainActor->AddObserver(CDrainActor::MovingPointEvent,    this->DrainCallbackCommand);
 	pDrainActor->AddObserver(CDrainActor::EndMovePointEvent,   this->DrainCallbackCommand);
 	pDrainActor->AddObserver(CDrainActor::InsertPointEvent,    this->DrainCallbackCommand);
+	pDrainActor->AddObserver(CDrainActor::DeletePointEvent,    this->DrainCallbackCommand);
 
 	// render
 	//
@@ -7463,6 +7511,21 @@ void CWPhastDoc::DrainListener(vtkObject* caller, unsigned long eid, void* clien
 				CPointConnectorInsertPointAction<CDrainActor, CRiverPoint>* pDrainInsertPointAction =
 					new CPointConnectorInsertPointAction<CDrainActor, CRiverPoint>(drainActor, self, id, pos[0], pos[1], pos[2], true);
 				self->Execute(pDrainInsertPointAction);
+			}
+			break;
+
+		case CDrainActor::DeletePointEvent:
+			{
+				ASSERT(calldata);
+				vtkIdType point = *((vtkIdType*)calldata);
+				if (point == 0 || point == drainActor->GetPointCount() - 1)
+				{
+					::AfxMessageBox("The first and the last drain points cannot be deleted.");
+				}
+				else
+				{
+					self->Execute(new CPointConnectorDeletePointAction<CDrainActor, CRiverPoint>(drainActor, self, point));
+				}
 			}
 			break;
 

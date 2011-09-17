@@ -21,9 +21,6 @@ const TCHAR PSZ_YEAR[] = _T("years");
 
 const TCHAR PSZ_UNDEFINED[] = _T("UNDEFINED");
 
-// COMMENT: {7/8/2009 7:30:58 PM}const int TIME_COLUMN = 0;
-// COMMENT: {7/8/2009 7:30:58 PM}const int UNIT_COLUMN = 1;
-// COMMENT: {7/8/2009 7:30:58 PM}const int TYPE_COLUMN = 2;
 const int ITEM_COLUMN = 0;
 const int TIME_COLUMN = 1;
 const int UNIT_COLUMN = 2;
@@ -564,6 +561,16 @@ void CGridTimeSeries::SetSeries(const CTimeSeries<Cproperty> &series)
 		{
 			mt = XYZT;
 			(*this->vv_props[SELECTED])[row] = new Cproperty((*fit).second);
+		}
+		else if ((*fit).second.type == PROP_ZONE)
+		{
+			ASSERT(FALSE);
+			continue;  // for safety
+		}
+		else
+		{
+			ASSERT(FALSE);
+			continue;  // for safety
 		}
 
 		// mix
