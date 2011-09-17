@@ -4815,6 +4815,8 @@ void CBoxPropertiesDialogBar::TestPointsGrid(NMHDR *pNotifyStruct, LRESULT *resu
 			ASSERT(vect.size() > 2);
 			if (Prism::Polygon_intersects_self(vect))
 			{
+				// this should never occur, but somehow it does
+				// (see email dated 9/8/2011: Subject: Fw: question beta Testing PHAST for Windows)
 				ASSERT(FALSE);
 				*result = 1;
 				return;
