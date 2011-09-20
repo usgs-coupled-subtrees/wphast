@@ -450,6 +450,8 @@
 #define IDR_ZF_HEADS_XYZT_RTF           477
 #define IDD_TITLE_PROPPAGE              478
 #define IDR_TITLE_RTF                   479
+#define IDD_IC_HEAD_INT_PROPPAGE1       479
+#define IDD_IC_HEAD_INT_PROPPAGE2       479
 #define IDC_EDIT_X                      1000
 #define IDC_TITLE                       1000
 #define IDC_EDIT_Y                      1001
@@ -1082,7 +1084,7 @@
 #define IDC_VALUE_STATIC                65535
 
 // Next default values for new objects
-//
+// 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        480

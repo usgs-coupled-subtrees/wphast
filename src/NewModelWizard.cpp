@@ -108,6 +108,15 @@ CUnits CNewModelWizard::GetUnits(void)const
 	return units;
 }
 
+void CNewModelWizard::SetUnits(const CUnits& units)
+{
+	this->m_units1Page.SetProperties(units);
+	this->m_units2Page.SetProperties(units);
+	this->m_units3Page.SetProperties(units);
+	this->m_units4Page.SetProperties(units);
+	this->m_units5Page.SetProperties(units);
+}
+
 CGrid CNewModelWizard::GetGridX(void)const
 {
 	CGrid grid(this->m_gridPage.GridKeyword.m_grid[0]);

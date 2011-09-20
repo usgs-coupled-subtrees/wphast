@@ -732,6 +732,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ICHeadPropertyPage2.cpp"
+				>
+			</File>
+			<File
 				RelativePath="ICHeadSpreadPropertyPage.cpp"
 				>
 			</File>
@@ -5032,6 +5036,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ICHeadPropertyPage2.h"
+				>
+			</File>
+			<File
 				RelativePath="ICHeadSpreadPropertyPage.h"
 				>
 			</File>
@@ -6521,6 +6529,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\res\MEDIA_TORT.rtf"
+				>
+			</File>
+			<File
 				RelativePath="res\MEDIA_TRANS_DISP.rtf"
 				>
 			</File>
@@ -6794,10 +6806,6 @@
 			</File>
 			<File
 				RelativePath="res\RIVER_WIDTH.rtf"
-				>
-			</File>
-			<File
-				RelativePath=".\res\MEDIA_TORT.rtf"
 				>
 			</File>
 			<File

@@ -69,6 +69,8 @@ public:
 	// Cproperty
 	static void DDX_Property(CDataExchange* pDX, CCheckTreeCtrl* pTree, HTREEITEM hti, Cproperty* value, Cproperty* fixed, Cproperty* linear);
 	static void DDX_Property(CDataExchange* pDX, int nIDC, int nRow, struct property* pProperty, bool bRequired);
+	static void DDX_Property(CDataExchange* pDX, int nIDC, int row, Cproperty* prop, std::string &units, bool bRequired);
+
 // COMMENT: {5/28/2009 6:46:43 PM}	static void DDX_Property(CDataExchange* pDX, CTreePropSheetExSRC* pTreeProp, HTREEITEM hti, std::vector<Cproperty*> &props, std::vector<CPropertyPage*> &pages);
 	static void DDX_Property(CDataExchange* pDX, TreePropSheet::CTreePropSheetEx* pTreeProp, HTREEITEM hti, std::vector<Cproperty*> &props, std::vector<CPropertyPage*> &pages);
 	static void DDX_PropertyM(CDataExchange* pDX, TreePropSheet::CTreePropSheetEx* pTreeProp, HTREEITEM hti, std::vector<Cproperty*> &props, std::vector<CPropertyPage*> &pages);
@@ -150,6 +152,7 @@ private:
 public:
 	static int AddLengthUnits(CComboBox* pCombo);
 	static std::string GetStdLengthUnits(const char* unit);
+	static void GetLengthUnits(std::vector<LPCTSTR> &vec);
 
 	static int AddTimeUnits(CComboBox* pCombo);
 	static std::string GetStdTimeUnits(const char* unit);

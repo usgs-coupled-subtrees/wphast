@@ -9,7 +9,7 @@
 #include "ImportMapPropertyPage.h"
 #include "GridPropertyPage.h"
 #include "MediaPropertyPage.h"
-#include "ICHeadPropertyPage.h"
+#include "ICHeadPropertyPage2.h"
 #include "ChemICPropertyPage.h"
 #include "TimeControlPropertyPage.h"
 #include "NewModel.h"
@@ -40,6 +40,7 @@ public:
 	void SetGridElt(const CGridElt& rGridElt);
 	void SetHeadIC(const CHeadIC& rHeadIC);
 	void SetChemIC(const CChemIC& chemIC);
+	void SetUnits(const CUnits& units);
 
 // COMMENT: {6/1/2004 1:49:02 PM}	void SetFlowOnly(const CFlowOnly &flowOnly);
 
@@ -54,7 +55,7 @@ public:
 	CImportMapPropertyPage   m_importPage;
 	CGridPropertyPage        m_gridPage;
 	CMediaPropertyPage       m_mediaPage;
-	CICHeadPropertyPage      m_icHeadPage;
+	CICHeadPropertyPage2     m_icHeadPage;
 	CChemICPropertyPage      m_chemICPage;
 	CTimeControlPropertyPage m_tcPage;
 

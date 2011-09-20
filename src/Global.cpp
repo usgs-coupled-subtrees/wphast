@@ -909,6 +909,63 @@ void CGlobal::DDX_Property(CDataExchange* pDX, CCheckTreeCtrl* pTree, HTREEITEM 
 	}
 }
 
+void CGlobal::DDX_Property(CDataExchange* pDX, int nIDC, int row, Cproperty* prop, std::string &units, bool bRequired)
+{
+	static const int COL_VALUE = 1;
+	static const int COL_UNITS = 2;
+
+	CModGridCtrlEx* grid = static_cast<CModGridCtrlEx*>(pDX->m_pDlgWnd->GetDlgItem(nIDC));
+	if (!grid || !prop) return;
+
+	if (pDX->m_bSaveAndValidate)
+	{
+		prop->type = PROP_UNDEFINED;
+
+		// value
+		//
+		CString value;
+		::DDX_TextGridControl(pDX, nIDC, row, COL_VALUE, value);
+		value.Trim();
+		if (value.IsEmpty())
+		{
+			if (bRequired)
+			{
+				::DDX_GridControlFail(pDX, nIDC, row, COL_VALUE, "No value specified.");
+			}
+			return;
+		}
+		::DDX_TextGridControl(pDX, nIDC, row, COL_VALUE, prop->v[0]);
+
+		prop->type    = PROP_FIXED;
+		prop->count_v = 1;
+
+		// units
+		//
+		::DDX_TextGridControl(pDX, nIDC, row, COL_UNITS, value);
+		value.Trim();
+		if (value.IsEmpty())
+		{
+			if (bRequired)
+			{
+				::DDX_GridControlFail(pDX, nIDC, row, COL_UNITS, "No units specified.");
+			}
+			return;
+		}
+		units = value;
+	}
+	else
+	{
+		ASSERT(prop->type == PROP_UNDEFINED || prop->type == PROP_FIXED);
+		if (prop->type == PROP_FIXED)
+		{
+			::DDX_TextGridControl(pDX, nIDC, row, COL_VALUE, prop->v[0]);
+		}
+
+		CString value(units.c_str());
+		::DDX_TextGridControl(pDX, nIDC, row, COL_UNITS, value);
+	}
+}
+
 void CGlobal::DDX_Property(CDataExchange* pDX, TreePropSheet::CTreePropSheetEx* pTreeProp, HTREEITEM hti, std::vector<Cproperty*> &props, std::vector<CPropertyPage*> &pages)
 {
 	const int PAGE_NONE   = 0;
@@ -1586,6 +1643,14 @@ int CGlobal::AddLengthUnits(CComboBox* pCombo)
 		pCombo->InsertString(-1, s_length_units[i]);
 	}
 	return 0;
+}
+
+void CGlobal::GetLengthUnits(std::vector<LPCTSTR> &vec)
+{
+	for (size_t i = 0; i < sizeof(s_length_units) / sizeof(s_length_units[0]); ++i)
+	{
+		vec.push_back(s_length_units[i]);
+	}
 }
 
 std::string CGlobal::GetStdLengthUnits(const char* unit)
