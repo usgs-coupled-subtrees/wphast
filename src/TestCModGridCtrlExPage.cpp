@@ -47,7 +47,7 @@ BOOL TestCModGridCtrlExPage::OnInitDialog()
 		this->m_Grid.SetFixedColumnCount(0);
 		this->m_Grid.EnableTitleTips(FALSE);
 
-		std::vector<LPCTSTR> options;
+		std::vector<CString> options;
 		options.push_back(_T("seconds"));
 		options.push_back(_T("minutes"));
 		options.push_back(_T("hours"));

@@ -139,7 +139,7 @@ void CICHeadPropertyPage2::DoDataExchange(CDataExchange* pDX)
 		this->Grid.SetColumnWidth(2, 294);
 
 		// units column
-		std::vector<LPCTSTR> vecHeadUnits;
+		std::vector<CString> vecHeadUnits;
 		CGlobal::GetLengthUnits(vecHeadUnits);
 		this->Grid.SetColumnOptions(2, vecHeadUnits);
 
@@ -195,4 +195,48 @@ void CICHeadPropertyPage2::OnSelChanged(NMHDR *pNotifyStruct, LRESULT *result)
 	this->RichEditCtrl.SetWindowText(this->HeadRTF.c_str());
 
 	TRACE("Out %s\n", __FUNCTION__);
+}
+
+BOOL CICHeadPropertyPage2::OnSetActive()
+{
+	BOOL bRet = CPropertyPage::OnSetActive();
+	CPropertySheet* pSheet = static_cast<CPropertySheet*>(this->GetParent());
+	ASSERT_KINDOF(CPropertySheet, pSheet);
+	if (pSheet->IsWizard())
+	{
+		if (pSheet->IsKindOf(RUNTIME_CLASS(CNewModelWizard)))
+		{
+			pSheet->SetWizardButtons(PSWIZB_BACK|PSWIZB_NEXT);
+		}
+		else
+		{
+			pSheet->SetWizardButtons(PSWIZB_BACK|PSWIZB_FINISH);
+		}
+	}
+	return bRet;
+}
+
+BOOL CICHeadPropertyPage2::OnKillActive()
+{
+	CPropertySheet* pSheet = static_cast<CPropertySheet*>(this->GetParent());
+	ASSERT_KINDOF(CPropertySheet, pSheet);
+	if (pSheet->IsWizard())
+	{
+		return TRUE;
+	}
+	return CPropertyPage::OnKillActive();
+}
+
+LRESULT CICHeadPropertyPage2::OnWizardNext()
+{
+	CPropertySheet* pSheet = static_cast<CPropertySheet*>(this->GetParent());
+	ASSERT_KINDOF(CPropertySheet, pSheet);
+	if (pSheet->IsWizard())
+	{
+		if (!this->UpdateData(TRUE))
+		{
+			return -1; // return –1 to prevent the page from changing 
+		}
+	}
+	return CPropertyPage::OnWizardNext();
 }

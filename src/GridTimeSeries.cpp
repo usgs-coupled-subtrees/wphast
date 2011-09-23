@@ -287,7 +287,7 @@ void CGridTimeSeries::InitializeGrid(CDataExchange* pDX)
 			this->grid.SetItemText(1, TYPE_COLUMN, PSZ_NONE);
 
 			// units column
-			std::vector<LPCTSTR> vecTimeUnits;
+			std::vector<CString> vecTimeUnits;
 			vecTimeUnits.push_back(PSZ_SECS);
 			vecTimeUnits.push_back(PSZ_MINS);
 			vecTimeUnits.push_back(PSZ_HOUR);
@@ -296,7 +296,7 @@ void CGridTimeSeries::InitializeGrid(CDataExchange* pDX)
 			this->grid.SetColumnOptions(UNIT_COLUMN, vecTimeUnits);
 
 			// type column
-			std::vector<LPCTSTR> vecPropType;
+			std::vector<CString> vecPropType;
 			vecPropType.push_back(PSZ_NONE);
 			vecPropType.push_back(PSZ_CONSTANT);
 			vecPropType.push_back(PSZ_LINEAR);

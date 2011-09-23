@@ -450,8 +450,10 @@
 #define IDR_ZF_HEADS_XYZT_RTF           477
 #define IDD_TITLE_PROPPAGE              478
 #define IDR_TITLE_RTF                   479
-#define IDD_IC_HEAD_INT_PROPPAGE1       479
-#define IDD_IC_HEAD_INT_PROPPAGE2       479
+#define IDD_IC_HEAD_INT_PROPPAGE2       480
+#define IDD_IC_CHEM_INT_PROPPAGE        481
+#define IDD_IC_CHEM_INT_PROPPAGE1       482
+#define IDD_MEDIA_INT_PROPPAGE2         483
 #define IDC_EDIT_X                      1000
 #define IDC_TITLE                       1000
 #define IDC_EDIT_Y                      1001
@@ -541,7 +543,6 @@
 #define IDC_PROP_TREE2                  1068
 #define IDC_TREE1                       1069
 #define IDC_LIST2                       1070
-#define IDC_EXPLORER1                   1071
 #define IDC_ASSOC_RADIO                 1072
 #define IDC_FIXED_RADIO                 1073
 #define IDC_SOL_TYPE_STATIC             1074
@@ -1087,7 +1088,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        480
+#define _APS_NEXT_RESOURCE_VALUE        484
 #define _APS_NEXT_COMMAND_VALUE         32882
 #define _APS_NEXT_CONTROL_VALUE         1547
 #define _APS_NEXT_SYMED_VALUE           127

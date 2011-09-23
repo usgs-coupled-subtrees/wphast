@@ -55,7 +55,7 @@ void CRiverPointPropertyPage::DoDataExchange(CDataExchange* pDX)
 			// this->m_wndScheduleGrid.EnableSelection(FALSE); // this breaks CutSelectedText
 			this->m_wndScheduleGrid.SetCurrentFocusCell(1, 2);
 
-			std::vector<LPCTSTR> options;
+			std::vector<CString> options;
 			options.push_back(_T("seconds"));
 			options.push_back(_T("minutes"));
 			options.push_back(_T("hours"));

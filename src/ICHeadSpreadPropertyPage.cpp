@@ -129,7 +129,7 @@ void CICHeadSpreadPropertyPage::SetProperties(const CHeadIC& r_headIC)
 
 BOOL CICHeadSpreadPropertyPage::SetupGrids(void)
 {
-	std::vector<LPCTSTR> vecDirection;
+	std::vector<CString> vecDirection;
 	vecDirection.push_back(_T("X"));
 	vecDirection.push_back(_T("Y"));
 	vecDirection.push_back(_T("Z"));

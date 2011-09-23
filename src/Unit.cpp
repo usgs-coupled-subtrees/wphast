@@ -252,20 +252,10 @@ void CUnit::InsertT(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent, LPCTSTR heading, 
 
 void CUnit::InsertL_T(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent, LPCTSTR heading, int nID)const
 {
-	// split
-	std::string sInput((this->defined == TRUE) ? this->input : this->si);
-	ASSERT(!sInput.empty());
-	std::string::size_type n = sInput.find('/');
-	ASSERT(n != std::string::npos);
-	std::string sNumer = sInput.substr(0, n);
-	std::string sDenom = sInput.substr(n+1, std::string::npos);
-
-	// concat
-	std::string sOutput = CGlobal::GetStdLengthUnits(sNumer.c_str());
-	sOutput += "/";
-	sOutput += CGlobal::GetStdTimeUnitsDenom(sDenom.c_str());
+	std::string sOutput = CGlobal::GetStdL_T((this->defined == TRUE) ? this->input : this->si);
 
 	// format
+	ASSERT(heading);
 	std::string sTreeItem = heading;
 	sTreeItem += " ";
 	sTreeItem += sOutput;
@@ -306,19 +296,10 @@ void CUnit::InsertL3_T(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent, LPCTSTR headin
 
 void CUnit::Insert1_L(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent, LPCTSTR heading, int nID)const
 {
-	// split
-	std::string sInput((this->defined == TRUE) ? this->input : this->si);
-	ASSERT(!sInput.empty());
-	std::string::size_type n = sInput.find('/');
-	ASSERT(n != std::string::npos);
-	std::string sNumer = sInput.substr(0, n);
-	std::string sDenom = sInput.substr(n+1, std::string::npos);
-
-	// concat
-	std::string sOutput("1/");
-	sOutput += CGlobal::GetStdLengthUnitsDenom(sDenom.c_str());
+	std::string sOutput = CGlobal::GetStd1_L((this->defined == TRUE) ? this->input : this->si);
 
 	// format
+	ASSERT(heading);
 	std::string sTreeItem = heading;
 	sTreeItem += " ";
 	sTreeItem += sOutput;

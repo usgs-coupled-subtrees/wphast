@@ -101,7 +101,7 @@ void CPropConstant::DoDataExchange(CDataExchange* pDX)
 			this->m_wndTimesGrid.SetItemText(1, 2, _T("Constant"));
 
 			//{{
-			std::vector<LPCTSTR> vecTimeUnits;
+			std::vector<CString> vecTimeUnits;
 			vecTimeUnits.push_back(_T("seconds"));
 			vecTimeUnits.push_back(_T("minutes"));
 			vecTimeUnits.push_back(_T("hours"));
@@ -112,7 +112,7 @@ void CPropConstant::DoDataExchange(CDataExchange* pDX)
 			//}}
 
 			//{{
-			std::vector<LPCTSTR> vecPropType;
+			std::vector<CString> vecPropType;
 			vecPropType.push_back(_T("None"));
 			vecPropType.push_back(_T("Constant"));
 			vecPropType.push_back(_T("Linear"));

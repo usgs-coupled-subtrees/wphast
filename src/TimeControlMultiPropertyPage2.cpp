@@ -316,7 +316,7 @@ BOOL CTimeControlMultiPropertyPage2::SetupGrids(void)
 		return FALSE;
 	}
 
-	std::vector<LPCTSTR> vecTimeUnits;
+	std::vector<CString> vecTimeUnits;
 	vecTimeUnits.push_back(_T("seconds"));
 	vecTimeUnits.push_back(_T("minutes"));
 	vecTimeUnits.push_back(_T("hours"));

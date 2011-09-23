@@ -42,4 +42,8 @@ protected:
 	CUnits       Units;
 	std::string  MaskRTF;    // IDR_IC_HEAD_MASK_RTF  -- not supported
 	std::string  HeadRTF;    // IDR_IC_HEAD_HEAD_RTF
+public:
+	virtual BOOL OnSetActive();
+	virtual BOOL OnKillActive();
+	virtual LRESULT OnWizardNext();
 };

@@ -186,7 +186,7 @@ void CWellPropertyPage::DoDataExchange(CDataExchange* pDX)
 			// this->m_wndPumpSchedGrid.EnableSelection(FALSE); // this breaks CutSelectedText
 			this->m_wndPumpSchedGrid.SetCurrentFocusCell(1, 2);
 
-			std::vector<LPCTSTR> options;
+			std::vector<CString> options;
 			options.push_back(_T("seconds"));
 			options.push_back(_T("minutes"));
 			options.push_back(_T("hours"));

@@ -112,7 +112,7 @@ void CPrintFreqPropertyPage::DoDataExchange(CDataExchange* pDX)
 			this->m_Grid.SetRowResize(FALSE);
 			this->m_Grid.SetCurrentFocusCell(2, 2);
 
-			std::vector<LPCTSTR> options;
+			std::vector<CString> options;
 			options.push_back(_T("default"));
 			options.push_back(_T("seconds"));
 			options.push_back(_T("minutes"));
@@ -123,7 +123,7 @@ void CPrintFreqPropertyPage::DoDataExchange(CDataExchange* pDX)
 			options.push_back(_T("end"));
 			this->m_Grid.SetColumnOptions(3, options);
 
-			std::vector<LPCTSTR> times;
+			std::vector<CString> times;
 			times.push_back(_T("default"));
 			times.push_back(_T("seconds"));
 			times.push_back(_T("minutes"));

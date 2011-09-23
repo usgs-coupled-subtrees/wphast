@@ -152,7 +152,7 @@ private:
 public:
 	static int AddLengthUnits(CComboBox* pCombo);
 	static std::string GetStdLengthUnits(const char* unit);
-	static void GetLengthUnits(std::vector<LPCTSTR> &vec);
+	static void GetLengthUnits(std::vector<CString> &vec);
 
 	static int AddTimeUnits(CComboBox* pCombo);
 	static std::string GetStdTimeUnits(const char* unit);
@@ -170,6 +170,12 @@ public:
 	static int AddSolidUnits(CComboBox* pCombo);
 	static SOLID_UNITS CGlobal::GetSolidUnits(const CComboBox* pCombo);
 	static void SetSolidUnits(CComboBox* pCombo, SOLID_UNITS su);
+
+	static std::string GetStd1_L(const char* unit);
+	static void Insert1_L(std::vector<CString> &vec);
+
+	static std::string GetStdL_T(const char* unit);
+	static void InsertL_T(std::vector<CString> &vec);
 
 	static int ExtractXMLStream(std::istream &is, std::iostream &ios);
 

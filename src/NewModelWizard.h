@@ -8,9 +8,9 @@
 #include "Units5PropertyPage.h"
 #include "ImportMapPropertyPage.h"
 #include "GridPropertyPage.h"
-#include "MediaPropertyPage.h"
+#include "MediaPropertyPage2.h"
 #include "ICHeadPropertyPage2.h"
-#include "ChemICPropertyPage.h"
+#include "ChemICPropertyPage2.h"
 #include "TimeControlPropertyPage.h"
 #include "NewModel.h"
 
@@ -54,9 +54,9 @@ public:
 	CUnits5PropertyPage      m_units5Page;
 	CImportMapPropertyPage   m_importPage;
 	CGridPropertyPage        m_gridPage;
-	CMediaPropertyPage       m_mediaPage;
+	CMediaPropertyPage2      m_mediaPage;
 	CICHeadPropertyPage2     m_icHeadPage;
-	CChemICPropertyPage      m_chemICPage;
+	CChemICPropertyPage2     m_chemICPage;
 	CTimeControlPropertyPage m_tcPage;
 
 protected:

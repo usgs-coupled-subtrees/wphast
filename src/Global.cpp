@@ -961,8 +961,11 @@ void CGlobal::DDX_Property(CDataExchange* pDX, int nIDC, int row, Cproperty* pro
 			::DDX_TextGridControl(pDX, nIDC, row, COL_VALUE, prop->v[0]);
 		}
 
-		CString value(units.c_str());
-		::DDX_TextGridControl(pDX, nIDC, row, COL_UNITS, value);
+		if (units.size())
+		{
+			CString value(units.c_str());
+			::DDX_TextGridControl(pDX, nIDC, row, COL_UNITS, value);
+		}
 	}
 }
 
@@ -1645,7 +1648,7 @@ int CGlobal::AddLengthUnits(CComboBox* pCombo)
 	return 0;
 }
 
-void CGlobal::GetLengthUnits(std::vector<LPCTSTR> &vec)
+void CGlobal::GetLengthUnits(std::vector<CString> &vec)
 {
 	for (size_t i = 0; i < sizeof(s_length_units) / sizeof(s_length_units[0]); ++i)
 	{
@@ -1802,6 +1805,27 @@ std::string CGlobal::GetStdTimeUnitsDenom(const char* unit)
 	return s_time_units_denom[0];
 }
 
+void CGlobal::InsertL_T(std::vector<CString> &vec)
+{
+#ifdef _DEBUG
+	CUnits units;
+#endif
+
+	for (size_t j = 0; j < sizeof(s_length_units) / sizeof(s_length_units[0]); ++j)
+	{
+		for (size_t i = 0; i < sizeof(s_time_units_denom) / sizeof(s_time_units_denom[0]); ++i)
+		{
+			std::string str(s_length_units[j]);
+			str += "/";
+			str += s_time_units_denom[i];
+#ifdef _DEBUG
+			ASSERT(units.k.set_input(str.c_str()) == OK);
+#endif
+			vec.push_back(str.c_str());
+		}
+	}
+}
+
 static const char* s_length_units_denom[] = {"inch", "foot", "mile", "millimeter", "centimeter", "meter", "kilometer"};
 
 int CGlobal::AddLengthUnitsDenom(CComboBox* pCombo)
@@ -1818,6 +1842,23 @@ int CGlobal::AddLengthUnitsDenom(CComboBox* pCombo)
 		pCombo->InsertString(-1, s_length_units_denom[i]);
 	}
 	return 0;
+}
+
+void CGlobal::Insert1_L(std::vector<CString> &vec)
+{
+#ifdef _DEBUG
+	CUnits units;
+#endif
+
+	for (size_t i = 0; i < sizeof(s_length_units_denom) / sizeof(s_length_units_denom[0]); ++i)
+	{
+		std::string str("1/");
+		str += s_length_units_denom[i];
+#ifdef _DEBUG
+		ASSERT(units.s.set_input(str.c_str()) == OK);
+#endif
+		vec.push_back(str.c_str());
+	}
 }
 
 std::string CGlobal::GetStdLengthUnitsDenom(const char* unit)
@@ -1837,6 +1878,43 @@ std::string CGlobal::GetStdLengthUnitsDenom(const char* unit)
 	ASSERT(FALSE);
 	return s_length_units_denom[0];
 }
+
+std::string CGlobal::GetStd1_L(const char* unit)
+{
+	// split
+	std::string sInput(unit);
+	ASSERT(!sInput.empty());
+	std::string::size_type n = sInput.find('/');
+	ASSERT(n != std::string::npos);
+	std::string sNumer = sInput.substr(0, n);
+	std::string sDenom = sInput.substr(n+1, std::string::npos);
+
+	// concat
+	std::string sOutput("1/");
+	sOutput += CGlobal::GetStdLengthUnitsDenom(sDenom.c_str());
+	return sOutput;
+}
+
+std::string CGlobal::GetStdL_T(const char* unit)
+{
+	ASSERT(unit);
+	if (!unit) return std::string("");
+
+	// split
+	std::string sInput(unit);
+	ASSERT(!sInput.empty());
+	std::string::size_type n = sInput.find('/');
+	ASSERT(n != std::string::npos);
+	std::string sNumer = sInput.substr(0, n);
+	std::string sDenom = sInput.substr(n+1, std::string::npos);
+
+	// concat
+	std::string sOutput = CGlobal::GetStdLengthUnits(sNumer.c_str());
+	sOutput += "/";
+	sOutput += CGlobal::GetStdTimeUnitsDenom(sDenom.c_str());
+	return sOutput;
+}
+
 
 static const char* s_solid_units[] = {"UNKNOWN", "WATER", "ROCK"};
 
