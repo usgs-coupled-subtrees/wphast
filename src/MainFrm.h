@@ -80,6 +80,8 @@ public:
 	afx_msg void OnUpdateViewProperiesview(CCmdUI *pCmdUI);
 	afx_msg void OnViewProperiesview();
 	afx_msg void OnUpdateCoorIndicator(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateViewDimensionsview(CCmdUI *pCmdUI);
+	afx_msg void OnViewDimensionsview();
 };
 
 

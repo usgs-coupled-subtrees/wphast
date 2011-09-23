@@ -1080,6 +1080,7 @@
 #define ID_MODE_GRID                    32879
 #define ID_MODE_MAP                     32880
 #define ID_EDIT_DELETE                  32881
+#define ID_VIEW_DIMENSIONSVIEW          32882
 #define IDW_CONTROLBAR_TREE             59424
 #define IDW_CONTROLBAR_BOXPROPS         59425
 #define IDC_VALUE_STATIC                65535
@@ -1089,7 +1090,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        484
-#define _APS_NEXT_COMMAND_VALUE         32882
+#define _APS_NEXT_COMMAND_VALUE         32883
 #define _APS_NEXT_CONTROL_VALUE         1547
 #define _APS_NEXT_SYMED_VALUE           127
 #endif

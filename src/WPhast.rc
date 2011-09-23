@@ -348,13 +348,14 @@ BEGIN
     BEGIN
         MENUITEM "&Toolbar",                    59392
         MENUITEM "&Status Bar",                 59393
+        MENUITEM "Dim&ensions View",            ID_VIEW_DIMENSIONSVIEW
         MENUITEM "Properties View",             ID_VIEW_PROPERIESVIEW
         MENUITEM SEPARATOR
         MENUITEM "A&xes",                       ID_VIEW_AXES
         MENUITEM "&Grid",                       ID_VIEW_GRID
         MENUITEM "S&ite Map",                   ID_VIEW_SITEMAP
         MENUITEM SEPARATOR
-        POPUP "IC Zones"
+        POPUP "&IC Zones"
         BEGIN
             MENUITEM "Hide All",                    ID_ICZONES_HIDEALL
             MENUITEM "Show Selected",               ID_ICZONES_SHOWSELECTED
@@ -362,7 +363,7 @@ BEGIN
             MENUITEM "Select All",                  ID_ICZONES_SELECTALL
             MENUITEM "Unselect All",                ID_ICZONES_UNSELECTALL
         END
-        POPUP "BC Zones"
+        POPUP "&BC Zones"
         BEGIN
             MENUITEM "Hide All",                    ID_BCZONES_HIDEALL
             MENUITEM "Show Selected",               ID_BCZONES_SHOWSELECTED
@@ -378,7 +379,7 @@ BEGIN
             MENUITEM "Select All",                  ID_MEDIAZONES_SELECTALL
             MENUITEM "Unselect All",                ID_MEDIAZONES_UNSELECTALL
         END
-        POPUP "Rivers"
+        POPUP "&Rivers"
         BEGIN
             MENUITEM "Hide All",                    ID_RIVERS_HIDEALL
             MENUITEM "Show Selected",               ID_RIVERS_SHOWSELECTED
@@ -416,7 +417,7 @@ BEGIN
             MENUITEM "&Perspective\tCtrl+Shift+L",  ID_SETPROJECTIONTO_PERSPECTIVE
         END
         MENUITEM SEPARATOR
-        MENUITEM "&Reset Default Layout",       ID_VIEW_RESETDEFAULTLAYOUT
+        MENUITEM "Reset De&fault Layout",       ID_VIEW_RESETDEFAULTLAYOUT
     END
     POPUP "&Tools"
     BEGIN

@@ -34,6 +34,8 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
 	ON_COMMAND(ID_VIEW_PROPERIESVIEW, &CMainFrame::OnViewProperiesview)
 
 	ON_UPDATE_COMMAND_UI(ID_INDICATOR_COOR, &CMainFrame::OnUpdateCoorIndicator)
+	ON_UPDATE_COMMAND_UI(ID_VIEW_DIMENSIONSVIEW, &CMainFrame::OnUpdateViewDimensionsview)
+	ON_COMMAND(ID_VIEW_DIMENSIONSVIEW, &CMainFrame::OnViewDimensionsview)
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -500,5 +502,28 @@ void CMainFrame::OnViewProperiesview()
 			}
 		}
 #endif
+	}
+}
+
+void CMainFrame::OnUpdateViewDimensionsview(CCmdUI *pCmdUI)
+{
+	CControlBar* pBar = GetControlBar(IDW_CONTROLBAR_BOXPROPS);
+	if (pBar != NULL)
+	{
+		pCmdUI->SetCheck((pBar->GetStyle() & WS_VISIBLE) != 0);
+		return;
+	}
+	pCmdUI->ContinueRouting();
+}
+
+void CMainFrame::OnViewDimensionsview()
+{
+	CControlBar* pBar = GetControlBar(IDW_CONTROLBAR_BOXPROPS);
+	if (pBar != NULL)
+	{
+		// this toggles the view so that if the view is visible
+		// then the view is hidden
+		BOOL bShow = (pBar->GetStyle() & WS_VISIBLE) == 0;
+		this->ShowControlBar(pBar, bShow, FALSE);
 	}
 }
