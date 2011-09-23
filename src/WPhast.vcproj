@@ -460,6 +460,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ChemICPropertyPage2.cpp"
+				>
+			</File>
+			<File
 				RelativePath="ChemICSpreadPropertyPage.cpp"
 				>
 			</File>
@@ -801,6 +805,10 @@
 			</File>
 			<File
 				RelativePath=".\MediaPropertyPage.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\MediaPropertyPage2.cpp"
 				>
 			</File>
 			<File
@@ -4820,6 +4828,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ChemICPropertyPage2.h"
+				>
+			</File>
+			<File
 				RelativePath="ChemICSpreadPropertyPage.h"
 				>
 			</File>
@@ -5109,6 +5121,10 @@
 			</File>
 			<File
 				RelativePath=".\MediaPropertyPage.h"
+				>
+			</File>
+			<File
+				RelativePath=".\MediaPropertyPage2.h"
 				>
 			</File>
 			<File
