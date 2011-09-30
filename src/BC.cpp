@@ -50,7 +50,6 @@ void CBC::InternalCopy(const struct BC& src)
 
 	// current_bc_flux
 	this->current_bc_flux = 0;
-	Cproperty::CopyProperty(&this->current_bc_flux, src.current_bc_flux);
 
 	// bc_k
 	this->bc_k = 0;
@@ -84,10 +83,9 @@ void CBC::InternalCopy(const struct BC& src)
 
 	// current_bc_solution
 	this->current_bc_solution = 0;
-	Cproperty::CopyProperty(&this->current_bc_solution, src.current_bc_solution);
 
 	// current_bc_head
-	//this->current_bc_head = 0;
+	this->current_bc_head = 0;
 }
 
 void CBC::InternalDelete(void)
@@ -102,8 +100,8 @@ void CBC::InternalDelete(void)
 	delete static_cast<Cproperty*>(this->bc_z_user);
 	this->m_bc_solution.clear();
 
-	delete static_cast<Cproperty*>(this->current_bc_flux);
-	delete static_cast<Cproperty*>(this->current_bc_solution);
+	ASSERT(this->current_bc_flux == 0);
+	ASSERT(this->current_bc_solution == 0);
 }
 
 void CBC::InternalInit(void)
@@ -1044,9 +1042,26 @@ void CBC::RemoveMutableProperties(void)
 	// TODO for now this is the same as ClearProperties
 	// (ie for LEAKY may not want to remove bc_k and bc_thick)
 	delete static_cast<Cproperty*>(this->mask);        this->mask        = 0;
-// COMMENT: {2/23/2005 1:24:17 PM}	delete static_cast<Cproperty*>(this->bc_head);     this->bc_head     = 0;
-// COMMENT: {2/23/2005 1:24:20 PM}	delete static_cast<Cproperty*>(this->bc_flux);     this->bc_flux     = 0;
 	delete static_cast<Cproperty*>(this->bc_k);        this->bc_k        = 0;
 	delete static_cast<Cproperty*>(this->bc_thick);    this->bc_thick    = 0;
-// COMMENT: {2/23/2005 1:24:25 PM}	delete static_cast<Cproperty*>(this->bc_solution); this->bc_solution = 0;
+}
+
+bool CBC::RemovePropZones(void)
+{
+	bool removed = false;
+
+	ASSERT(this->current_bc_head     == 0);
+	ASSERT(this->current_bc_flux     == 0);
+	ASSERT(this->current_bc_solution == 0);
+
+	removed |= Cproperty::RemovePropZones(&this->mask);
+	removed |= Cproperty::RemovePropZones(&this->bc_k);
+	removed |= Cproperty::RemovePropZones(&this->bc_thick);
+	removed |= Cproperty::RemovePropZones(&this->bc_z_user);
+
+	removed |= this->m_bc_head.RemovePropZones();
+	removed |= this->m_bc_flux.RemovePropZones();
+	removed |= this->m_bc_solution.RemovePropZones();
+
+	return removed;
 }

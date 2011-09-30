@@ -895,13 +895,40 @@ BOOL CWPhastView::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 		}
 	}
 
+	// set real-time zoom cursor
+	// (ctrl + shift + left button is for zooming)
+	if (::GetAsyncKeyState(VK_SHIFT) < 0 && ::GetAsyncKeyState(VK_CONTROL) && ::GetAsyncKeyState(VK_LBUTTON))
+	{
+		::SetCursor(AfxGetApp()->LoadCursor(IDC_ZOOM_REAL));
+		return TRUE;
+	}
+
+	// set real-time rotate cursor
+	// (ctrl + left button for spinning)
+	if (::GetAsyncKeyState(VK_CONTROL) && ::GetAsyncKeyState(VK_LBUTTON))
+	{
+		::SetCursor(AfxGetApp()->LoadCursor(IDC_ROTATE));
+		return TRUE;
+	}
+
+	// set real-time zoom cursor
+	// (right button)
+	if (::GetAsyncKeyState(VK_RBUTTON) < 0)
+	{
+		::SetCursor(AfxGetApp()->LoadCursor(IDC_ZOOM_REAL));
+		return TRUE;
+	}
+
 	// set real-time pan cursor
-	//
+	// (middle button)
 	if (::GetAsyncKeyState(VK_MBUTTON) < 0)
 	{
 		::SetCursor(AfxGetApp()->LoadCursor(IDC_PAN_REAL));
 		return TRUE;
 	}
+
+	// set real-time pan cursor
+	// (shift + left button)
 	if (::GetAsyncKeyState(VK_SHIFT) < 0 && ::GetAsyncKeyState(VK_LBUTTON))
 	{
 		::SetCursor(AfxGetApp()->LoadCursor(IDC_PAN_REAL));

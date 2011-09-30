@@ -36,6 +36,7 @@ public:
 	void ClearProperties(void);
 	bool ContainsProperties(void)const;
 	void RemoveMutableProperties(void);
+	bool RemovePropZones(void);
 
 	friend std::ostream& operator<< (std::ostream &os, const CBC &a);
 

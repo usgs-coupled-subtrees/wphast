@@ -760,6 +760,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ImportWarningDialog.cpp"
+				>
+			</File>
+			<File
 				RelativePath="IntroPropertyPage.cpp"
 				>
 			</File>
@@ -5072,6 +5076,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ImportWarningDialog.h"
+				>
+			</File>
+			<File
 				RelativePath="IntroPropertyPage.h"
 				>
 			</File>
@@ -6822,6 +6830,10 @@
 			</File>
 			<File
 				RelativePath="res\RIVER_WIDTH.rtf"
+				>
+			</File>
+			<File
+				RelativePath=".\res\rotate.cur"
 				>
 			</File>
 			<File

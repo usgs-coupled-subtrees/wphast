@@ -454,6 +454,9 @@
 #define IDD_IC_CHEM_INT_PROPPAGE        481
 #define IDD_IC_CHEM_INT_PROPPAGE1       482
 #define IDD_MEDIA_INT_PROPPAGE2         483
+#define IDC_ROTATE                      484
+#define IDD_IMPORT_ERROR_DIALOG1        484
+#define IDD_IMPORT_WARNING_DIALOG       484
 #define IDC_EDIT_X                      1000
 #define IDC_TITLE                       1000
 #define IDC_EDIT_Y                      1001
@@ -1089,7 +1092,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        484
+#define _APS_NEXT_RESOURCE_VALUE        485
 #define _APS_NEXT_COMMAND_VALUE         32883
 #define _APS_NEXT_CONTROL_VALUE         1547
 #define _APS_NEXT_SYMED_VALUE           127

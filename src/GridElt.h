@@ -41,6 +41,8 @@ public:
 	void Serialize(CArchive& ar);
 	void Fill(std::vector<CPropStruct>& v)const;
 
+	bool RemovePropZones(void);
+
 	friend std::ostream& operator<< (std::ostream &os, const CGridElt &a);
 
 private:

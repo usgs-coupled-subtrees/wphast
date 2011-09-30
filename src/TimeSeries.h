@@ -29,6 +29,8 @@ public:
 	static void SerializeOpen(const char *heading, CTimeSeries& series, hid_t loc_id);
 
 	HTREEITEM InsertItem(CTreeCtrl* pTreeCtrl, LPCTSTR lpszHeading, HTREEITEM hParent = TVI_ROOT, HTREEITEM hInsertAfter = TVI_LAST)const;
+	
+	bool RemovePropZones(void);
 };
 
 template<typename T>

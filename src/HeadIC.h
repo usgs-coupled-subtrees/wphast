@@ -31,6 +31,8 @@ public:
 	static CHeadIC NewDefaults(void);
 	static CHeadIC Full(void);
 
+	bool RemovePropZones(void);
+
 	void Serialize(bool bStoring, hid_t loc_id);
 	void Serialize(CArchive& ar);
 	friend std::ostream& operator<< (std::ostream &os, const CHeadIC &a);

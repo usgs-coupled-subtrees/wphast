@@ -43,6 +43,7 @@ public:
 	static void SerializeCreate(const char *heading, Cproperty* prop, hid_t loc_id);
 	static void SerializeOpen(const char *heading, Cproperty** prop, hid_t loc_id);
 	static void CopyProperty(struct property** dest, const struct property* src);
+	static bool RemovePropZones(struct property** p);
 
 	friend std::ostream& operator<< (std::ostream &os, const Cproperty &a);
 	friend bool operator==(const property& lhs, const property& rhs);
@@ -134,6 +135,17 @@ inline void Cproperty::CopyProperty(struct property** dest, const struct propert
 		}
 		(*dest) = 0;
 	}
+}
+
+inline bool Cproperty::RemovePropZones(struct property** p)
+{
+	if (*p && ((*p)->type == PROP_ZONE))
+	{
+		delete static_cast<Cproperty*>(*p);
+		(*p) = 0;
+		return true;
+	}
+	return false;
 }
 
 inline bool operator!=(const property& lhs, const property& rhs)

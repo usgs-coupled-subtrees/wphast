@@ -640,3 +640,23 @@ void CGridElt::Fill(std::vector<CPropStruct>& v)const
 	COPY_PROP_MACRO("Horizontal dispersivity",   alpha_horizontal);
 	COPY_PROP_MACRO("Vertical dispersivity",     alpha_vertical);
 }
+
+bool CGridElt::RemovePropZones(void)
+{
+	bool removed = false;
+
+	removed |= Cproperty::RemovePropZones(&this->mask);
+	removed |= Cproperty::RemovePropZones(&this->active);
+	removed |= Cproperty::RemovePropZones(&this->porosity);
+	removed |= Cproperty::RemovePropZones(&this->kx);
+	removed |= Cproperty::RemovePropZones(&this->ky);
+	removed |= Cproperty::RemovePropZones(&this->kz);
+	removed |= Cproperty::RemovePropZones(&this->storage);
+	removed |= Cproperty::RemovePropZones(&this->alpha_long);
+	removed |= Cproperty::RemovePropZones(&this->alpha_trans);
+	removed |= Cproperty::RemovePropZones(&this->alpha_horizontal);
+	removed |= Cproperty::RemovePropZones(&this->alpha_vertical);
+	removed |= Cproperty::RemovePropZones(&this->tortuosity);
+
+	return removed;
+}

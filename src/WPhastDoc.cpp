@@ -73,6 +73,7 @@
 #include "Global.h"
 
 #include "ImportErrorDialog.h"
+#include "ImportWarningDialog.h"
 #include "RunDialog.h"
 #include "PerimeterDlg.h"
 
@@ -2855,16 +2856,19 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 		size_t n = sizeof(gridElt);
 		ASSERT(n == 80);
 		::GetDefaultMedia(&gridElt);
+		ASSERT(!gridElt.RemovePropZones());
 
 		// HEAD_IC
 		//
 		CHeadIC headIC = CHeadIC::Full();
 		::GetDefaultHeadIC(&headIC);
+		ASSERT(!headIC.RemovePropZones());
 
 		// CHEMISTRY_IC
 		//
 		CChemIC chemIC = CChemIC::Full();
 		::GetDefaultChemIC(&chemIC);
+		ASSERT(!chemIC.RemovePropZones());
 
 		// PRINT_INITIAL
 		//
@@ -2929,6 +2933,8 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 
 			// store pre-translated polyh
 			CGridElt data(*grid_elt_ptr);
+			data.RemovePropZones();
+
 			std::auto_ptr<Polyhedron> ap(data.polyh);
 			ASSERT(grid_elt_map.find(grid_elt_ptr) != grid_elt_map.end());
 			data.polyh = grid_elt_map[grid_elt_ptr] ? grid_elt_map[grid_elt_ptr]->clone() : grid_elt_ptr->polyh->clone();
@@ -2957,6 +2963,8 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 
 			// store pre-translated polyh
 			CBC data(*bc_ptr);
+			data.RemovePropZones();
+
 			std::auto_ptr<Polyhedron> ap(data.polyh);
 			ASSERT(bc_map.find(bc_ptr) != bc_map.end());
 			data.polyh = bc_map[bc_ptr] ? bc_map[bc_ptr]->clone() : bc_ptr->polyh->clone();
@@ -3067,6 +3075,8 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 
 			// store pre-translated polyh
 			CHeadIC data(*head_ic_ptr);
+			data.RemovePropZones();
+
 			std::auto_ptr<Polyhedron> ap(data.polyh);
 			ASSERT(head_ic_map.find(head_ic_ptr) != head_ic_map.end());
 			data.polyh = head_ic_map[head_ic_ptr] ? head_ic_map[head_ic_ptr]->clone() : head_ic_ptr->polyh->clone();
@@ -3113,6 +3123,8 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 							if (CTreeCtrl *pTreeCtrl = this->GetPropertyTreeControlBar()->GetTreeCtrl())
 							{
 								CChemIC chemIC(*chem_ic_ptr);
+								chemIC.RemovePropZones();
+
 								CSetChemICAction* a = new CSetChemICAction(pZone, pTreeCtrl, chemIC, pZone->GetDesc());
 								a->Execute();
 								delete a;
@@ -3125,6 +3137,8 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 
 			// store pre-translated polyh
 			CChemIC data(*chem_ic_ptr);
+			data.RemovePropZones();
+
 			std::auto_ptr<Polyhedron> ap(data.polyh);
 			ASSERT(chem_ic_map.find(chem_ic_ptr) != chem_ic_map.end());
 			data.polyh = chem_ic_map[chem_ic_ptr] ? chem_ic_map[chem_ic_ptr]->clone() : chem_ic_ptr->polyh->clone();
@@ -3144,6 +3158,17 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 		}
 		// convert all relative paths to absolute paths
 		this->DataSourcePathsRelativeToAbsolute(lpszPathName);
+
+		if (::AfxGetMainWnd() && ::AfxGetMainWnd()->IsWindowVisible())
+		{
+			// display warnings if any
+			if (pInput->GetWarningCount() != 0)
+			{
+				CImportWarningDialog dlg;
+				dlg.WarningMessages = pInput->GetWarningMsg();
+				dlg.DoModal();
+			}
+		}
 	}
 	catch (int)
 	{
@@ -3153,7 +3178,10 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 			dlg.m_lpszErrorMessages = pInput->GetErrorMsg();
 			dlg.DoModal();
 		}
-		bReturnValue = FALSE;
+
+		// load a default model
+		CNewModel model;
+		this->New(model);
 	}
 	catch (const char * error)
 	{
@@ -3161,7 +3189,11 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 		{
 			::AfxMessageBox(error, MB_OK|MB_ICONEXCLAMATION);
 		}
-		bReturnValue = FALSE;
+
+		// load a default model
+		CNewModel model;
+		this->New(model);
+		bReturnValue = TRUE;
 	}
 #if !defined(_DEBUG)
 	catch (...)
@@ -3170,7 +3202,10 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 		{
 			::AfxMessageBox("An unknown error occurred during import", MB_OK|MB_ICONEXCLAMATION);
 		}
-		bReturnValue = FALSE;
+
+		// load a default model
+		CNewModel model;
+		this->New(model);
 	}
 #endif
 
@@ -3232,13 +3267,6 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 	this->ImportPathName = lpszPathName;
 
 	return bReturnValue;
-
-//ImportError:
-//	CImportErrorDialog dlg;
-//	dlg.m_lpszErrorMessages = pInput->GetErrorMsg();
-//	dlg.DoModal();
-//	pInput->Delete();
-//	return FALSE;
 }
 
 void CWPhastDoc::OnFileExport()

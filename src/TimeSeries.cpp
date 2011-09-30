@@ -523,6 +523,32 @@ CTimeSeries<CRiverState>& CTimeSeries<CRiverState>::Append(const struct time_ser
 	return *this;
 }
 
+template<typename T>
+bool CTimeSeries<T>::RemovePropZones(void)
+{
+	ASSERT(FALSE); // no-op except for Cproperty
+	return false;
+}
+
+// specialization for Cproperty
+template<>
+bool CTimeSeries<Cproperty>::RemovePropZones(void)
+{
+	bool b = false;
+	CTimeSeries<Cproperty>::iterator iter = this->begin();
+	for (; iter != this->end(); ++iter)
+	{
+		ASSERT((*iter).second.type != PROP_UNDEFINED);
+		if ((*iter).second.type == PROP_ZONE)
+		{
+			b = true;
+			this->erase(iter);
+			iter = this->begin();
+			if (iter == this->end()) break;
+		}
+	}
+	return b;
+}
 
 //
 // explicit template instantiations

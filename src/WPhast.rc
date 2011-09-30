@@ -780,7 +780,7 @@ FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK,128,126,50,14
     LTEXT           "The file contains the following errors:",IDC_STATIC,41,7,258,20,SS_CENTERIMAGE | SS_WORDELLIPSIS
-    CONTROL         "",IDC_ERRORS_RICHEDIT,"RichEdit20A",ES_MULTILINE | ES_AUTOHSCROLL | WS_BORDER | WS_VSCROLL | WS_TABSTOP,7,37,292,85
+    CONTROL         "",IDC_ERRORS_RICHEDIT,"RichEdit20A",ES_MULTILINE | ES_AUTOVSCROLL | ES_AUTOHSCROLL | WS_BORDER | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP,7,37,292,85
 END
 
 OLD_UNITS1_PROPPAGE DIALOGEX 0, 0, 317, 143
@@ -3278,6 +3278,16 @@ BEGIN
     CONTROL         "Custom1",IDC_GRID,"MFCGridCtrl",WS_BORDER | WS_TABSTOP,7,7,303,86
 END
 
+IDD_IMPORT_WARNING_DIALOG DIALOGEX 0, 0, 306, 147
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Input Contains Warnings"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,128,126,50,14
+    LTEXT           "The file contains the following warnings:",IDC_STATIC,41,7,258,20,SS_CENTERIMAGE | SS_WORDELLIPSIS
+    CONTROL         "",IDC_ERRORS_RICHEDIT,"RichEdit20A",ES_MULTILINE | ES_AUTOVSCROLL | ES_AUTOHSCROLL | WS_BORDER | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP,7,37,292,85
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -4443,6 +4453,14 @@ BEGIN
         TOPMARGIN, 7
         BOTTOMMARGIN, 136
     END
+
+    IDD_IMPORT_WARNING_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 299
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 140
+    END
 END
 #endif    // APSTUDIO_INVOKED
 
@@ -4463,6 +4481,7 @@ IDC_VE_SPLIT            CURSOR                  "res\\ve_split.cur"
 IDC_HO_SPLIT            CURSOR                  "res\\ho_split.cur"
 IDC_4WAY02              CURSOR                  "res\\4way02.cur"
 IDC_3DGARROW            CURSOR                  "res\\3dgarro.cur"
+IDC_ROTATE              CURSOR                  "res\\rotate.cur"
 
 /////////////////////////////////////////////////////////////////////////////
 //

@@ -214,3 +214,13 @@ bool CHeadIC::operator==(const Head_ic& rhs)const
 
 	return true;
 }
+
+bool CHeadIC::RemovePropZones(void)
+{
+	bool removed = false;
+
+	removed |= Cproperty::RemovePropZones(&this->mask);
+	removed |= Cproperty::RemovePropZones(&this->head);
+
+	return removed;
+}

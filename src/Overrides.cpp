@@ -56,14 +56,17 @@ extern char  *line;
 int setup_grid(void);
 void Tidy_prisms(void);
  
-int get_logical_line(FILE *fp, int *l);
+int add_char_to_line(int *i, char c);
+int error_msg (const char *err_str, const int stop);
 int get_line(FILE *fp);
-int read_file_doubles(char *next_char, double **d, int *count_d, int *count_alloc);
-int phast_input(bool bWritePhastTmp);
+int get_line_wphast(FILE * fp);
+int get_logical_line(FILE *fp, int *l);
+int get_logical_line_wphast(FILE * fp, int *l);
 int load(bool bWritePhastTmp);
 int load_first_sim(bool bWritePhastTmp);
 int load_next_sim(bool bWritePhastTmp);
-int error_msg (const char *err_str, const int stop);
+int phast_input(bool bWritePhastTmp);
+int read_file_doubles(char *next_char, double **d, int *count_d, int *count_alloc);
 
 #if !defined(__WPHAST__)
 #error __WPHAST__ must be set
@@ -286,9 +289,80 @@ int get_line(FILE *fp)
 int read_file_doubles(char *next_char, double **d, int *count_d, int *count_alloc)
 /* ---------------------------------------------------------------------- */
 {
-	++input_error;
-	error_msg("Properties cannot be defined using the \"file\" option.", CONTINUE);
-	return ERROR;
+
+/*
+ *      Reads doubles from a file
+ *      next_char contains file name
+ *      Appends to d.
+ *      Stops at EOF or ERROR
+ *
+ *      Input Arguments:
+ *         next_char    points to file name
+ *         d            points to array of doubles, must be malloced
+ *         count_d      number of elements in array
+ *         count_alloc  number of elements malloced
+ *
+ *      Output Arguments:
+ *         d            points to array of doubles, may have been
+ *                          realloced
+ *         count_d      updated number of elements in array
+ *         count_alloc  updated of elements malloced
+ *
+ *      Returns:
+ *         OK
+ *         ERROR if any errors reading doubles
+ */
+	int j, l, return_value;
+	char token[MAX_LENGTH], name[MAX_LENGTH], property_file_name[MAX_LENGTH];
+	FILE *file_ptr;
+/*
+ *    open file
+ */
+	return_value = OK;
+	j = copy_token(token, &next_char, &l);
+	if ((file_ptr = fopen(token, "r")) == NULL)
+	{
+		sprintf(error_string, "Can't open file, %s.", token);
+		error_msg(error_string, STOP);
+		return (ERROR);
+	}
+	strcpy(property_file_name, token);
+	strcpy(name, prefix);
+	strcat(name, ".head.dat");
+	if (strcmp(property_file_name, name) == 0)
+	{
+		head_ic_file_warning = TRUE;
+	}
+/*
+ *   read doubles
+ */
+	for (;;)
+	{
+		j = get_line_wphast(file_ptr);
+		if (j == EMPTY)
+		{
+			continue;
+		}
+		else if (j == EOF)
+		{
+			break;
+		}
+		next_char = line;
+		if (read_line_doubles(next_char, d, count_d, count_alloc) == ERROR)
+		{
+			sprintf(error_string, "Reading from file %s\n%s", token, line);
+			error_msg(error_string, CONTINUE);
+			return_value = ERROR;
+		}
+	}
+	if (*count_d > 0)
+	{
+		*d = (double *) realloc(*d, (size_t) * count_d * sizeof(double));
+		*count_alloc = *count_d;
+	}
+	fclose(file_ptr);
+	warning_msg("Phast for windows doesn't support properties defined using the \"file\" option.");
+	return (return_value);
 }
 
 /* ---------------------------------------------------------------------- */
@@ -336,9 +410,8 @@ int read_lines_doubles(char *next_char, double **d, int *count_d, int *count_all
 		}
 	}
 
-	++input_error;
-	error_msg("Properties cannot be defined using the \"by_element\" or \"by_cell\" option.", CONTINUE);
-	return (ERROR);
+	warning_msg("Phast for windows doesn't support properties defined using the \"by_element\" or \"by_cell\" option.");
+	return (OK);
 }
 
 /* ---------------------------------------------------------------------- */
@@ -411,9 +484,8 @@ read_lines_doubles_delimited(char *next_char, double **d, int *count_d,
 	else if (j == DONE)
 	{
 		*opt = get_option(opt_list, count_opt_list, &next_char);
-		++input_error;
-		error_msg("Properties cannot be defined using the \"by_element\" or \"by_cell\" option.", CONTINUE);
-		return (ERROR);
+		warning_msg("Phast for windows doesn't support properties defined using the \"by_element\" or \"by_cell\" option.");
+		return (DONE);
 	}
 	for (;;)
 	{
@@ -433,14 +505,12 @@ read_lines_doubles_delimited(char *next_char, double **d, int *count_d,
 		else if (j == DONE)
 		{
 			*opt = get_option(opt_list, count_opt_list, &next_char);
-			++input_error;
-			error_msg("Properties cannot be defined using the \"by_element\" or \"by_cell\" option.", CONTINUE);
-			return (ERROR);
+			warning_msg("Phast for windows doesn't support properties defined using the \"by_element\" or \"by_cell\" option.");
+			return (DONE);
 		}
 	}
-	++input_error;
-	error_msg("Properties cannot be defined using the \"by_element\" or \"by_cell\" option.", CONTINUE);
-	return (ERROR);
+	warning_msg("Phast for windows doesn't support properties defined using the \"by_element\" or \"by_cell\" option.");
+	return (OK);
 }
 
 void GetDefaultMedia(struct grid_elt* p_grid_elt)
@@ -648,4 +718,195 @@ void GetDefaultChemIC(struct chem_ic* p_chem_ic)
 			}
 		}
 	}
+}
+
+/* ---------------------------------------------------------------------- */
+int
+get_line_wphast(FILE * fp)
+/* ---------------------------------------------------------------------- */
+{
+	extern int check_key(char *str);
+/*
+ *   Read a line from input file put in "line".
+ *   Copy of input line is stored in "line_save".
+ *   Characters after # are discarded in line but retained in "line_save"
+ *
+ *   Arguments:
+ *      fp is file name
+ *   Returns:
+ *      EMPTY,
+ *      EOF,
+ *      KEYWORD,
+ *      OK,
+ *      OPTION
+ */
+	int i, return_value, empty, l;
+	size_t j;
+	char *ptr;
+	char token[MAX_LENGTH];
+
+	return_value = EMPTY;
+	while (return_value == EMPTY)
+	{
+/*
+ *   Eliminate all characters after # sign as a comment
+ */
+		i = -1;
+		j = 0;
+		empty = TRUE;
+/*
+ *   Get line, check for eof
+ */
+		if (get_logical_line_wphast(fp, &l) == EOF)
+		{
+			i = feof(fp);
+			if (!i)
+			{
+				error_msg("Reading input file.", CONTINUE);
+				error_msg("fgetc returned an error.", STOP);
+			}
+			else
+			{
+				next_keyword = 0;
+				return (EOF);
+			}
+		}
+/*
+ *   Get long lines
+ */
+		j = l;
+		ptr = strchr(line_save, '#');
+		if (ptr != NULL)
+		{
+			j = ptr - line_save;
+		}
+		strncpy(line, line_save, (unsigned) j);
+		line[j] = '\0';
+		for (i = 0; i < (int) j; i++)
+		{
+			if (!isspace((int) line[i]))
+			{
+				empty = FALSE;
+				break;
+			}
+		}
+/*
+ *   New line character encountered
+ */
+
+		if (empty == TRUE)
+		{
+			return_value = EMPTY;
+		}
+		else
+		{
+			return_value = OK;
+		}
+	}
+/*
+ *   Determine return_value
+ */
+	if (return_value == OK)
+	{
+		if (check_key(line) == TRUE)
+		{
+			return_value = KEYWORD;
+		}
+		else
+		{
+			ptr = line;
+			copy_token(token, &ptr, &i);
+			if (token[0] == '-' && isalpha((int) token[1]))
+			{
+				return_value = OPTION;
+			}
+		}
+	}
+	return (return_value);
+}
+
+/* ---------------------------------------------------------------------- */
+int
+get_logical_line_wphast(FILE * fp, int *l)
+/* ---------------------------------------------------------------------- */
+{
+/*
+ *   Reads file fp until end of line, ";", or eof
+ *   stores characters in line_save
+ *   reallocs line_save and line if more space is needed
+ *
+ *   returns:
+ *           EOF on empty line on end of file or
+ *           OK otherwise
+ *           *l returns length of line
+ */
+	int i, j;
+	int pos;
+	char c;
+	i = 0;
+	while ((j = getc(fp)) != EOF)
+	{
+		c = (char) j;
+		if (c == '#')
+		{
+			/* ignore all chars after # until newline */
+			do
+			{
+				c = (char) j;
+				if (c == '\n')
+				{
+					break;
+				}
+				add_char_to_line(&i, c);
+			}
+			while ((j = getc(fp)) != EOF);
+		}
+		if (c == ';')
+			break;
+		if (c == '\n')
+		{
+			break;
+		}
+		if (c == '\\')
+		{
+			pos = i;
+			add_char_to_line(&i, c);
+			while ((j = getc(fp)) != EOF)
+			{
+				c = (char) j;
+				if (c == '\\')
+				{
+					pos = i;
+					add_char_to_line(&i, c);
+					continue;
+				}
+				if (c == '\n')
+				{
+					/* remove '\\' */
+					for (; pos < i; pos++)
+					{
+						line_save[pos] = line_save[pos + 1];
+					}
+					i--;
+					break;
+				}
+				add_char_to_line(&i, c);
+				if (!isspace(j))
+					break;
+			}
+		}
+		else
+		{
+			add_char_to_line(&i, c);
+		}
+	}
+	if (j == EOF && i == 0)
+	{
+		*l = 0;
+		line_save[i] = '\0';
+		return (EOF);
+	}
+	line_save[i] = '\0';
+	*l = i;
+	return (OK);
 }

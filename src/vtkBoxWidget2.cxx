@@ -37,6 +37,9 @@
 #include <vtkRenderer.h>
 #include <vtkSphereSource.h>
 #include <vtkTransform.h>
+#if 1
+#include "resource.h"
+#endif
 
 vtkCxxRevisionMacro(vtkBoxWidget2, "$Revision: 1.27 $");
 vtkStandardNewMacro(vtkBoxWidget2);
@@ -344,9 +347,11 @@ void vtkBoxWidget2::ProcessEvents(vtkObject* vtkNotUsed(object),
     case vtkCommand::MiddleButtonReleaseEvent:
       self->OnMiddleButtonUp();
       break;
-    case vtkCommand::RightButtonPressEvent:
+#if 0
+	case vtkCommand::RightButtonPressEvent:
       self->OnRightButtonDown();
       break;
+#endif
     case vtkCommand::RightButtonReleaseEvent:
       self->OnRightButtonUp();
       break;
@@ -563,6 +568,7 @@ void vtkBoxWidget2::OnLeftButtonDown()
     }
   
   vtkAssemblyPath *path;
+#if 0
   this->HandlePicker->Pick(X,Y,0.0,this->CurrentRenderer);
   path = this->HandlePicker->GetPath();
   if ( path != NULL )
@@ -574,6 +580,7 @@ void vtkBoxWidget2::OnLeftButtonDown()
     this->ValidPick = 1;
     }
   else
+#endif
     {
     this->HexPicker->Pick(X,Y,0.0,this->CurrentRenderer);
     path = this->HexPicker->GetPath();
@@ -803,6 +810,15 @@ void vtkBoxWidget2::OnMouseMove()
 
       if ( this->SpinEnabled && this->CurrentHandle == this->HexFace )
         {
+#if 1
+		if (::GetAsyncKeyState(VK_LBUTTON))
+		{
+			if (HCURSOR c = ::AfxGetApp()->LoadCursor(IDC_ROTATE))
+			{
+				::SetCursor(c);
+			}
+		}
+#endif
         camera->GetViewPlaneNormal(vpn);
         this->Spin(X, Y, prevPickPoint, pickPoint, vpn);
         }

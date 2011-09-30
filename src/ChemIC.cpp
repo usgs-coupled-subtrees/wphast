@@ -345,3 +345,19 @@ bool CChemIC::operator==(const struct chem_ic& rhs)const
 
 	return true;
 }
+
+bool CChemIC::RemovePropZones(void)
+{
+	bool removed = false;
+
+	removed |= Cproperty::RemovePropZones(&this->mask);
+	removed |= Cproperty::RemovePropZones(&this->solution);
+	removed |= Cproperty::RemovePropZones(&this->equilibrium_phases);
+	removed |= Cproperty::RemovePropZones(&this->exchange);
+	removed |= Cproperty::RemovePropZones(&this->surface);
+	removed |= Cproperty::RemovePropZones(&this->gas_phase);
+	removed |= Cproperty::RemovePropZones(&this->solid_solutions);
+	removed |= Cproperty::RemovePropZones(&this->kinetics);
+
+	return removed;
+}

@@ -30,6 +30,7 @@ public:
 
 	bool operator==(const struct chem_ic& rhs)const;
 
+	bool RemovePropZones(void);
 
 	void Serialize(bool bStoring, hid_t loc_id);
 	void Serialize(CArchive& ar);
