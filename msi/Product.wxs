@@ -54,11 +54,15 @@
       <Merge Id="CRT Policy" Language="1033" SourceFile="$(var.MergeDir)\policy_8_0_Microsoft_VC80_CRT_x86_x64.msm" DiskId="1" />
       <Merge Id="ATL" Language="1033" SourceFile="$(var.MergeDir)\Microsoft_VC80_ATL_x86_x64.msm" DiskId="1" />
       <Merge Id="ATL Policy" Language="1033" SourceFile="$(var.MergeDir)\policy_8_0_Microsoft_VC80_ATL_x86_x64.msm" DiskId="1" />
+      <Merge Id='MFC' Language='0' SourceFile='$(var.MergeDir)\Microsoft_VC80_MFC_x86_x64.msm' DiskId='1' />
+      <Merge Id='MFC Policy' Language='0' SourceFile='$(var.MergeDir)\policy_8_0_Microsoft_VC80_MFC_x86_x64.msm' DiskId='1' />
       <?else?>
       <Merge Id="CRT" Language="1033" SourceFile="$(var.MergeDir)\Microsoft_VC80_CRT_x86.msm" DiskId="1" />
       <Merge Id="CRT Policy" Language="1033" SourceFile="$(var.MergeDir)\policy_8_0_Microsoft_VC80_CRT_x86.msm" DiskId="1" />
       <Merge Id="ATL" Language="1033" SourceFile="$(var.MergeDir)\Microsoft_VC80_ATL_x86.msm" DiskId="1" />
       <Merge Id="ATL Policy" Language="1033" SourceFile="$(var.MergeDir)\policy_8_0_Microsoft_VC80_ATL_x86.msm" DiskId="1" />
+      <Merge Id='MFC' Language='0' SourceFile='$(var.MergeDir)\Microsoft_VC80_MFC_x86.msm' DiskId='1' />
+      <Merge Id='MFC Policy' Language='0' SourceFile='$(var.MergeDir)\policy_8_0_Microsoft_VC80_MFC_x86.msm' DiskId='1' />
       <?endif?>
     </DirectoryRef>
 
@@ -70,6 +74,8 @@
       <MergeRef Id="CRT Policy" />
       <MergeRef Id="ATL" />
       <MergeRef Id="ATL Policy" />
+      <MergeRef Id="MFC" />
+      <MergeRef Id="MFC Policy" />
       <Feature Id="Documentation" Title="Documentation" Description="This component contains brief, summary documentation as well as the full, formal program documentation." AllowAdvertise="no" Level="1">
         <ComponentGroupRef Id="Doc" />
         <ComponentRef Id="DocShortcuts"/>
