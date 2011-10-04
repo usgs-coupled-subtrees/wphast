@@ -10,7 +10,7 @@
   <!-- build has a maximum value of 65535 -->
   <!-- ?define Version=$(var.Major).$(var.Minor).$(var.Build)? -->
   <?define VersionInternal=$(var.Major).$(var.Minor).$(var.Build)?>
-  <?define VersionUserVisible=$(var.Major).$(var.Minor).$(var.Patch).$(var.Build)?>
+  <?define VersionUserVisible=$(var.Major).$(var.Minor).$(var.Patch)?>
 
   <?define Manufacturer="U.S. Geological Survey"?>  
 
@@ -20,11 +20,11 @@
   <?define IPhreeqcCOMDllGuid="{376BD8D8-C835-407b-A68C-D3B1425C13B5}"?>
   <?define IPhreeqcCOMTlbGuid="{D72C7BD3-1DD2-491b-9234-201BAD163D99}"?>
   <?define WPhastExeGuid="{D8873219-3288-403d-AA6D-E65A406D263D}"?>
-  <?define Description="USGS $(var.Name) x64 $(var.VersionInternal) Installer"?>
-  <?define FeatureTitle="$(var.Name) x64 $(var.Major).$(var.Minor).$(var.Build)"?>
-  <?define FullName="$(var.Name) x64 $(var.VersionInternal)"?>
+  <?define Description="USGS $(var.Name) x64 $(var.VersionUserVisible) Installer"?>
+  <?define FeatureTitle="$(var.Name) x64 $(var.VersionUserVisible)"?>
+  <?define FullName="$(var.Name) x64 $(var.VersionUserVisible)"?>
   <?define Comments="$(var.Name) x64 component"?>
-  <?define PrgMenu="$(var.Name) x64 $(var.VersionInternal)"?>
+  <?define PrgMenu="$(var.Name) x64 $(var.VersionUserVisible)"?>
   <?define Cabinet=phast4winx64.cab?>
   <?define Win64="yes"?>
   <?else?>
@@ -33,18 +33,18 @@
   <?define IPhreeqcCOMDllGuid="{06BF6C6E-F4AF-4275-90C2-DD00ED65231C}"?>
   <?define IPhreeqcCOMTlbGuid="{42F5AA81-DF9B-419c-ABC0-05945505B4F4}"?>
   <?define WPhastExeGuid="{206FAB29-05E0-4ff8-BAB3-29F3B0AB3E4F}"?>
-  <?define Description="USGS $(var.Name) $(var.VersionInternal) Installer"?>
-  <?define FeatureTitle="$(var.Name) $(var.VersionInternal)"?>
-  <?define FullName="$(var.Name) $(var.VersionInternal)"?>
+  <?define Description="USGS $(var.Name) $(var.VersionUserVisible) Installer"?>
+  <?define FeatureTitle="$(var.Name) $(var.VersionUserVisible)"?>
+  <?define FullName="$(var.Name) $(var.VersionUserVisible)"?>
   <?define Comments="$(var.Name) component"?>
-  <?define PrgMenu="$(var.Name) $(var.VersionInternal)"?>
+  <?define PrgMenu="$(var.Name) $(var.VersionUserVisible)"?>
   <?define Cabinet=phast4win.cab?>
   <?define Win64="no"?>
   <?endif?>
 
-  <?define DiskPrompt="USGS $(var.Name) $(var.VersionInternal) Installation [1]"?>
-  <?define Shortcut="$(var.Name) $(var.VersionInternal)"?>
-  <?define Directory="$(var.Name) $(var.VersionInternal)"?>
+  <?define DiskPrompt="USGS $(var.Name) $(var.VersionUserVisible) Installation [1]"?>
+  <?define Shortcut="$(var.Name) $(var.VersionUserVisible)"?>
+  <?define Directory="$(var.Name) $(var.VersionUserVisible)"?>
 
   <?if $(env.PROCESSOR_ARCHITECTURE)=x86 ?>
   <?define MergeDir="$(env.CommonProgramFiles)\Merge Modules"?>
