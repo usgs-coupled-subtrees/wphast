@@ -37,13 +37,13 @@ CSaveCurrentDirectory::CSaveCurrentDirectory(LPCTSTR lpszNewPath)
 	VERIFY(::_tsplitpath_s(lpszNewPath, szDrive, _MAX_DRIVE, szDir, _MAX_DIR, szFName, _MAX_FNAME, szExt, _MAX_EXT) == 0);
 
 	TCHAR szNewDir[_MAX_PATH];
-	VERIFY(::_tmakepath_s(szNewDir, _MAX_PATH, szDrive, szDir, NULL, _T(".tfw")) == 0);
-	this->SetCurrentDirectory(szNewDir);
+	VERIFY(::_tmakepath_s(szNewDir, _MAX_PATH, szDrive, szDir, NULL, NULL) == 0);
+	VERIFY(this->SetCurrentDirectory(szNewDir));
 }
 
 CSaveCurrentDirectory::~CSaveCurrentDirectory(void)
 {
-	this->SetCurrentDirectory(this->path);
+	VERIFY(this->SetCurrentDirectory(this->path));
 	delete this->path;
 	this->path = NULL;
 }
