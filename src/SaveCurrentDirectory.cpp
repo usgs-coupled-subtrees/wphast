@@ -38,12 +38,20 @@ CSaveCurrentDirectory::CSaveCurrentDirectory(LPCTSTR lpszNewPath)
 
 	TCHAR szNewDir[_MAX_PATH];
 	VERIFY(::_tmakepath_s(szNewDir, _MAX_PATH, szDrive, szDir, NULL, NULL) == 0);
-	VERIFY(this->SetCurrentDirectory(szNewDir));
+	this->SetCurrentDirectory(szNewDir);
 }
 
 CSaveCurrentDirectory::~CSaveCurrentDirectory(void)
 {
-	VERIFY(this->SetCurrentDirectory(this->path));
+	if (this->path)
+	{
+		BOOL bRet = ::SetCurrentDirectory(this->path);
+		if (bRet == 0)
+		{
+			TRACE("::SetCurrentDirectory(%s) failed (%d)\n", this->path, ::GetLastError());
+			ASSERT(FALSE);
+		}
+	}
 	delete this->path;
 	this->path = NULL;
 }
@@ -63,12 +71,22 @@ BOOL CSaveCurrentDirectory::SetCurrentDirectory(LPCTSTR lpPathName)
 			if(::_tcscmp(current, lpPathName) != 0)
 			{
 				bRet = ::SetCurrentDirectory(lpPathName);
+				if (bRet == 0)
+				{
+					TRACE("::SetCurrentDirectory failed (%d)\n", ::GetLastError());
+					ASSERT(FALSE);
+				}
 			}
 			delete current;
 		}
 		else
 		{
 			bRet = ::SetCurrentDirectory(lpPathName);
+			if (bRet == 0)
+			{
+				TRACE("::SetCurrentDirectory failed (%d)\n", ::GetLastError());
+				ASSERT(FALSE);
+			}
 		}
 	}
 	return bRet;
