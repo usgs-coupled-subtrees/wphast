@@ -89,7 +89,6 @@ void CTitle::Serialize(bool bStoring, hid_t loc_id)
 	if (group_id > 0)
 	{
 		status = CGlobal::HDFSerializeString(bStoring, group_id, szText, this->text);
-		ASSERT(status >= 0);
 
 		// close the szTitle group
 		status = ::H5Gclose(group_id);

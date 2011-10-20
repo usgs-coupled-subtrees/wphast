@@ -4478,6 +4478,41 @@
 					</FileConfiguration>
 				</File>
 				<File
+					RelativePath=".\TestHDFFile.cpp"
+					>
+					<FileConfiguration
+						Name="cppunit|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="AutoRelease|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="AutoDebug|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
 					RelativePath=".\TestHDFSerializePolyData.cpp"
 					>
 					<FileConfiguration
@@ -5828,6 +5863,10 @@
 				</File>
 				<File
 					RelativePath="TestCZone.h"
+					>
+				</File>
+				<File
+					RelativePath=".\TestHDFFile.h"
 					>
 				</File>
 				<File

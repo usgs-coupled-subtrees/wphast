@@ -46,7 +46,9 @@
 
 
 #include <afxmt.h>
-#include <atlpath.h> // ATL::ATLPath::FileExists
+#include <atlpath.h>   // ATL::ATLPath::FileExists
+#include <atlcrypt.h>  // CCryptProv CCryptMD5Hash
+
 static CCriticalSection  critSect;
 
 // Note: No header files should follow the following three lines
@@ -3610,7 +3612,7 @@ herr_t CGlobal::HDFSerializePrism(bool bStoring, hid_t loc_id, Prism &rPrism)
 		{
 			// box
 			//
-			struct zone* pzone = rPrism.Get_bounding_box();
+			const struct zone* pzone = rPrism.Get_bounding_box();
 			ASSERT(pzone->zone_defined);
 			xyz[0] = pzone->x1;
 			xyz[1] = pzone->y1;
@@ -3842,7 +3844,9 @@ herr_t CGlobal::HDFSerializeData_source(bool bStoring, hid_t loc_id, const char*
 					case Data_source::CONSTANT:
 						{
 							std::vector<Point> &pts = rData_source.Get_points();
+							std::vector<Point> &upts = rData_source.Get_user_points();
 							ASSERT(pts.size() == 1);
+							ASSERT(upts.size() == 1 || (upts.size() == 0 && nUserValue == Data_source::NONE));
 							hsize_t count = 3;							
 							//double *points = new double[count];
 							pts.front().get_coord();
@@ -5262,4 +5266,261 @@ void CGlobal::UpdateDelaunay2DEx(vtkDelaunay2DEx *delaunay2DEx, vtkPoints *point
 		delaunay2DEx->Update();
 		nudge *= 10;
 	}
+}
+
+herr_t CGlobal::HDFFile(bool bStoring, hid_t loc_id, const char* szName, std::string &sRelativePath, std::string &sMD5, FILETIME &ftWrite)
+{
+	/*
+	<file0(szName)>
+		<Modified DimSize="2"/>
+		<MD5/>
+		<RelativePath/>
+		<Data DimSize="<filesize>"/>
+	</file0>
+	*/
+
+	CCryptProv prov;
+	HRESULT hr = prov.Initialize(PROV_RSA_FULL, NULL, MS_DEF_PROV , CRYPT_VERIFYCONTEXT | CRYPT_SILENT);
+	if (hr == NTE_KEYSET_NOT_DEF)
+	{
+		hr = prov.Initialize(PROV_RSA_FULL, NULL, MS_DEF_PROV, CRYPT_VERIFYCONTEXT | CRYPT_SILENT | CRYPT_NEWKEYSET);
+	}
+	ASSERT(SUCCEEDED(hr));
+
+	CCryptMD5Hash hash;
+	hr = hash.Initialize(prov);
+	ASSERT(SUCCEEDED(hr));
+
+	static const char PSZ_DATA[]         = "Data";
+	static const char PSZ_MD5[]          = "MD5";
+	static const char PSZ_RELATIVEPATH[] = "RelativePath";
+	static const char PSZ_MODIFIED[]     = "Modified";
+
+	hid_t    dspace_id = 0;
+	hid_t    memspace_id = 0;
+	hid_t    dset_id = 0;
+	herr_t   status = -1;
+	herr_t   return_status = -1;
+
+	hsize_t  dims[1];
+    hsize_t  count[1];
+    hsize_t  offset[1];
+	hsize_t  moffset[1];
+
+	hid_t byte_id = H5T_NATIVE_CHAR;
+
+	HANDLE hFile;
+	BYTE buff[4096];
+
+	if (bStoring)
+	{
+		// store relative pathname
+		status = CGlobal::HDFSerializeString(bStoring, loc_id, PSZ_RELATIVEPATH, sRelativePath);
+		ASSERT(status >= 0);
+
+		DWORD dwBytesRead;
+		LARGE_INTEGER liFileSize;
+
+		hFile = ::CreateFile(
+			sRelativePath.c_str(), // file to open
+			GENERIC_READ,          // open for reading
+			FILE_SHARE_READ,       // share for reading
+			NULL,                  // default security
+			OPEN_EXISTING,         // existing file only
+			FILE_ATTRIBUTE_NORMAL, // normal file
+			NULL);                 // no attr. template
+
+		if (hFile != INVALID_HANDLE_VALUE)
+		{
+			// retrieve and store the file times for the file.
+			if (::GetFileTime(hFile, NULL, NULL, &ftWrite))
+			{
+				DWORD lowhigh[2];
+				lowhigh[0] = ftWrite.dwLowDateTime;
+				lowhigh[1] = ftWrite.dwHighDateTime;
+				status = CGlobal::HDFSerialize(bStoring, loc_id, PSZ_MODIFIED, H5T_NATIVE_ULONG, 2, lowhigh);
+				ASSERT(status >= 0);
+			}
+
+			// read file size
+			VERIFY(::GetFileSizeEx(hFile, &liFileSize));
+
+			// create the memory dataspace
+			dims[0] = sizeof(buff);
+			memspace_id = ::H5Screate_simple(1, dims, NULL);  
+			ASSERT(memspace_id > 0);
+
+			// create the file dataspace
+			dims[0] = liFileSize.QuadPart;
+			dspace_id = ::H5Screate_simple(1, dims, NULL);
+			ASSERT(dspace_id > 0);
+
+			// create the "Data" dataset
+			dset_id = ::H5Dcreate(loc_id, PSZ_DATA, byte_id, dspace_id, H5P_DEFAULT);
+			ASSERT(dset_id > 0);
+
+			offset[0] = 0;
+			do
+			{
+				if (::ReadFile(hFile, buff, sizeof(buff), &dwBytesRead, NULL))
+				{
+					// add to hash
+					hash.AddData(buff, dwBytesRead);
+
+					// length
+					count[0] = dwBytesRead;
+
+					// select the memory dataspace hyperslab
+					moffset[0] = 0;
+					status = ::H5Sselect_hyperslab(memspace_id, H5S_SELECT_SET, moffset, NULL, count, NULL);
+					ASSERT(status >= 0);
+
+					// select the dataset dataspace hyperslab
+					status = ::H5Sselect_hyperslab(dspace_id, H5S_SELECT_SET, offset, NULL, count, NULL);
+					ASSERT(status >= 0);
+
+					// write the dataset
+					status = ::H5Dwrite(dset_id, H5T_NATIVE_CHAR, memspace_id, dspace_id, H5P_DEFAULT, buff);
+					ASSERT(status >= 0);
+
+					// increment offset
+					offset[0] += dwBytesRead;
+				}
+			} while (dwBytesRead == sizeof(buff));
+
+			status = ::H5Sclose(memspace_id);
+			ASSERT(status >= 0);
+
+			status = ::H5Sclose(dspace_id);
+			ASSERT(status >= 0);
+
+			status = ::H5Dclose(dset_id);
+			ASSERT(status >= 0);
+
+			VERIFY(::CloseHandle(hFile));
+
+			// create and store MD5
+			DWORD dw = 32;
+			BYTE val[32];
+			hr = hash.GetValue(val, &dw);
+			ASSERT(SUCCEEDED(hr));
+
+			char ch[4];
+			sMD5.clear();
+			for (int i = 0; i < 16; ++i)
+			{
+				sprintf(ch, "%02x", val[i]);
+				sMD5.append(ch);
+			}
+			status = CGlobal::HDFSerializeString(bStoring, loc_id, PSZ_MD5, sMD5);
+			ASSERT(status >= 0);
+		}
+	}
+	else
+	{
+		// load relative pathname
+		status = CGlobal::HDFSerializeString(bStoring, loc_id, PSZ_RELATIVEPATH, sRelativePath);
+		ASSERT(status >= 0);
+
+		// open "Data" dataset
+		dset_id = ::H5Dopen(loc_id, PSZ_DATA);
+		ASSERT(dset_id > 0);
+
+		// open dataset dataspace
+		dspace_id  = ::H5Dget_space(dset_id);    /* dataspace handle */
+		int rank   = ::H5Sget_simple_extent_ndims(dspace_id);
+		status     = ::H5Sget_simple_extent_dims(dspace_id, dims, NULL);
+		hsize_t fs = dims[0];
+
+		// create the memory dataspace
+		dims[0] = sizeof(buff);
+		memspace_id = ::H5Screate_simple(1, dims, NULL);  
+		ASSERT(memspace_id > 0);
+
+		hFile = ::CreateFile(
+			sRelativePath.c_str(), // file to create
+			GENERIC_WRITE,         // open for writing
+			0,                     // do not share
+			NULL,                  // default security
+			CREATE_NEW,            // fails if file exists
+			FILE_ATTRIBUTE_NORMAL, // normal file
+			NULL);                 // no attr. template
+
+		if (hFile != INVALID_HANDLE_VALUE)
+		{
+			DWORD dwBytesWritten;
+			offset[0] = 0;
+			count[0] = sizeof(buff);
+			do
+			{
+				// select the dataset dataspace hyperslab
+				count[0] = min(sizeof(buff), fs - offset[0]);
+				status = ::H5Sselect_hyperslab(dspace_id, H5S_SELECT_SET, offset, NULL, count, NULL);
+				ASSERT(status >= 0);
+
+				// select the memory dataspace hyperslab
+				moffset[0] = 0;
+				status = ::H5Sselect_hyperslab(memspace_id, H5S_SELECT_SET, moffset, NULL, count, NULL);
+				ASSERT(status >= 0);
+				DWORD dwNumberOfBytesToWrite = (DWORD)count[0];
+
+				// write the dataset
+				status = ::H5Dread(dset_id, byte_id, memspace_id, dspace_id, H5P_DEFAULT, buff);
+				ASSERT(status >= 0);
+
+				// add to hash
+				hash.AddData(buff, count[0]);
+
+				// write to file
+				::WriteFile(hFile, buff, dwNumberOfBytesToWrite, &dwBytesWritten, NULL);
+
+				// increment offset
+				offset[0] += count[0];
+
+			} while (dwBytesWritten == sizeof(buff));
+
+			// set the file times for the file.
+			DWORD lowhigh[2];
+			if (CGlobal::HDFSerialize(bStoring, loc_id, PSZ_MODIFIED, H5T_NATIVE_ULONG, 2, lowhigh) >= 0)
+			{
+				ftWrite.dwLowDateTime  = lowhigh[0];
+				ftWrite.dwHighDateTime = lowhigh[1];
+				VERIFY(::SetFileTime(hFile, NULL, NULL, &ftWrite));
+			}
+
+			// close file
+			VERIFY(::CloseHandle(hFile));
+
+			// close the memory dataspace
+			status = ::H5Sclose(memspace_id);
+			ASSERT(status >= 0);
+
+			// close the file dataspace
+			status = ::H5Sclose(dspace_id);
+			ASSERT(status >= 0);
+
+			// close dataset
+			status = ::H5Dclose(dset_id);
+			ASSERT(status >= 0);
+
+			// load and compare MD5
+			DWORD dw = 32;
+			BYTE val[32];
+			hr = hash.GetValue(val, &dw);
+			ASSERT(SUCCEEDED(hr));
+
+			char ch[4];
+			std::string md5actual;
+			for (int i = 0; i < 16; ++i)
+			{
+				sprintf(ch, "%02x", val[i]);
+				md5actual.append(ch);
+			}
+
+			status = CGlobal::HDFSerializeString(bStoring, loc_id, PSZ_MD5, sMD5);
+			ASSERT(status >= 0);
+			ASSERT(sMD5.compare(md5actual) == 0);
+		}
+	}
+	return return_status;
 }

@@ -112,6 +112,7 @@ public:
 	static herr_t HDFSerializeXYCoordinateSystem(bool bStoring, hid_t loc_id, PHAST_Transform::COORDINATE_SYSTEM &coor_sys);
 	static herr_t HDFSerializeZCoordinateSystem(bool bStoring, hid_t loc_id, PHAST_Transform::COORDINATE_SYSTEM &coor_sys);
 
+	static herr_t HDFFile(bool bStoring, hid_t loc_id, const char* szName, std::string &sRelativePath, std::string &sMD5, FILETIME &ftWrite);
 
 
 

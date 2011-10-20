@@ -81,6 +81,7 @@ class CPropertyTreeControlBar;
 class CBoxPropertiesDialogBar;
 
 class CTreeCtrlNode;
+class CHDFMirrorFile;
 
 enum ProjectionType {
 	PT_PERSPECTIVE = 0,
@@ -327,6 +328,10 @@ protected:
 	void SerializeRivers(bool bStoring, hid_t loc_id);
 	void SerializeDrains(bool bStoring, hid_t loc_id);
 	void SerializeZoneFlowRates(bool bStoring, hid_t loc_id);
+
+	int ValidateData_sources(CHDFMirrorFile* file, std::string &errors);
+	static herr_t H5GIterateStatic(hid_t loc_id, const char *name, void *opdata);
+	herr_t H5GIterate(hid_t loc_id, const char *name);
 
 // Generated message map functions
 protected:

@@ -156,9 +156,14 @@
 #include "SaveCurrentDirectory.h"
 #include "XMLSerializer.h"
 
+#include <atlpath.h> // ATL::ATLPath::FileExists
+
+
 extern void GetDefaultMedia(struct grid_elt* p_grid_elt);
 extern void GetDefaultHeadIC(struct Head_ic* p_head_ic);
 extern void GetDefaultChemIC(struct chem_ic* p_chem_ic);
+
+static const char szWPhast[] = "WPhast";
 
 static const TCHAR szZoneFormat[]    = _T("Box %d");
 static const TCHAR szWedgeFormat[]   = _T("Wedge %d");
@@ -642,7 +647,6 @@ BOOL CWPhastDoc::OnNewDocument()
 
 void CWPhastDoc::Serialize(CArchive& ar)
 {
-	static const char szWPhast[] = "WPhast";
 	herr_t status;
 
 #if defined(__CPPUNIT__)
@@ -755,6 +759,14 @@ void CWPhastDoc::Serialize(CArchive& ar)
 			status = ::H5Gclose(wphast_id);
 			ASSERT(status >= 0);
 		}
+// COMMENT: {10/18/2011 11:06:40 PM}		//{{{{
+// COMMENT: {10/18/2011 11:06:40 PM}		std::string errors;
+// COMMENT: {10/18/2011 11:06:40 PM}		if (this->ValidateData_sources(pFile, errors))
+// COMMENT: {10/18/2011 11:06:40 PM}		{
+// COMMENT: {10/18/2011 11:06:40 PM}			//::AfxMessageBox(errors.c_str());
+// COMMENT: {10/18/2011 11:06:40 PM}			//::AfxThrowUserException();
+// COMMENT: {10/18/2011 11:06:40 PM}		}
+// COMMENT: {10/18/2011 11:06:40 PM}		//}}}}
 	}
 	else
 	{
@@ -796,106 +808,132 @@ void CWPhastDoc::Serialize(CArchive& ar)
 		ASSERT(pFile->GetHID() > 0);
 		if (pFile->GetHID() < 0) return;
 
+		// Check for missing files
+		std::string errors;
+		if (this->ValidateData_sources(pFile, errors))
+		{
+			::AfxMessageBox(errors.c_str());
+			::AfxThrowUserException();
+		}
+
 		// Open the "/WPhast" group
 		//
 		hid_t wphast_id = ::H5Gopen(pFile->GetHID(), szWPhast);
 		ASSERT(wphast_id > 0);
 		if (wphast_id > 0)
 		{
-			// Note: can't call this->New(...) here since the defaults are unknown
-			// until this->SerializeMedia and this->SerializeIC are called
-
-			// load model (flowonly freeSurface steadyFlow)
-			ASSERT(this->m_pModel);
-			this->m_pModel->m_title.Serialize(bStoring, wphast_id);
-			this->m_pModel->m_flowOnly.Serialize(bStoring, wphast_id);
-			this->m_pModel->m_freeSurface.Serialize(bStoring, wphast_id);
-			this->m_pModel->m_steadyFlow.Serialize(bStoring, wphast_id);
-			this->m_pModel->m_solutionMethod.Serialize(bStoring, wphast_id);
-			this->m_pModel->m_printInput.Serialize(bStoring, wphast_id);
-			this->m_pModel->m_printFreq.Serialize(bStoring, wphast_id);
-			this->m_pModel->m_timeControl2.Serialize(bStoring, wphast_id);
-
-			// update properties bar
-			this->SetModel(*this->m_pModel);
-
-			// load units
-			ASSERT(this->m_pUnits);
-			this->m_pUnits->Serialize(bStoring, wphast_id);
-			// update properties bar
-			if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar())
+			std::istringstream iss("");
+			CPhastInput* pInput = CPhastInput::New(iss, "Serialize", false);
+			try
 			{
-				pTree->SetUnits(this->m_pUnits);
+				// Note: can't call this->New(...) here since the defaults are unknown
+				// until this->SerializeMedia and this->SerializeIC are called
+
+				// load model (flowonly freeSurface steadyFlow)
+				ASSERT(this->m_pModel);
+				this->m_pModel->m_title.Serialize(bStoring, wphast_id);
+				this->m_pModel->m_flowOnly.Serialize(bStoring, wphast_id);
+				this->m_pModel->m_freeSurface.Serialize(bStoring, wphast_id);
+				this->m_pModel->m_steadyFlow.Serialize(bStoring, wphast_id);
+				this->m_pModel->m_solutionMethod.Serialize(bStoring, wphast_id);
+				this->m_pModel->m_printInput.Serialize(bStoring, wphast_id);
+				this->m_pModel->m_printFreq.Serialize(bStoring, wphast_id);
+				this->m_pModel->m_timeControl2.Serialize(bStoring, wphast_id);
+
+				// update properties bar
+				this->SetModel(*this->m_pModel);
+
+				// load units
+				ASSERT(this->m_pUnits);
+				this->m_pUnits->Serialize(bStoring, wphast_id);
+				// update properties bar
+				if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar())
+				{
+					pTree->SetUnits(this->m_pUnits);
+				}
+
+				// load grid
+				this->m_pGridActor->Serialize(bStoring, wphast_id);
+
+				// set grid
+				CGrid x, y, z;
+				this->m_pGridActor->GetGrid(x, y, z);
+				this->ResizeGrid(x, y, z);
+
+				// load axes
+				//this->m_pAxesActor->Serialize(bStoring, wphast_id); // not implemented
+				this->GetPropCollection()->AddItem(this->AxesActor);
+
+				// load site map
+				ASSERT(this->m_pMapActor == NULL);
+				this->m_pMapActor = CMapActor::New();
+				this->m_pMapActor->Serialize(bStoring, wphast_id);
+				CSiteMap2 siteMap2 = this->m_pMapActor->GetSiteMap2();
+				if (siteMap2.FileName.empty())
+				{
+					this->m_pMapActor->Delete();
+					this->m_pMapActor = 0;
+				}
+				else
+				{
+					this->m_pMapActor->SetPickable(0);
+					this->GetPropCollection()->AddItem(this->m_pMapActor);
+				}
+
+				// load display colors
+				this->DisplayColors.Serialize(bStoring, wphast_id);
+				this->SetDisplayColors(this->DisplayColors);
+
+				// load media
+				this->SerializeMedia(bStoring, wphast_id);
+
+				// load ICs
+				this->SerializeIC(bStoring, wphast_id);
+
+				// load BCs
+				this->SerializeBC(bStoring, wphast_id);
+
+				// load wells
+				this->SerializeWells(bStoring, wphast_id);
+
+				// load rivers
+				this->SerializeRivers(bStoring, wphast_id);
+
+				// load drains
+				this->SerializeDrains(bStoring, wphast_id);
+
+				// load zone flow rates
+				this->SerializeZoneFlowRates(bStoring, wphast_id);
+
+				// update properties bar
+				if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar())
+				{
+					pTree->SetPrintFrequency(&this->m_pModel->m_printFreq);
+				}
+
+				// update properties bar
+				if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar())
+				{
+					pTree->SetTimeControl2(&this->m_pModel->m_timeControl2);
+				}
+			}
+			catch (int)
+			{
+				::AfxMessageBox(pInput->GetErrorMsg());
+				pInput->Delete();
+				::AfxThrowUserException();
 			}
 
-			// load grid
-			this->m_pGridActor->Serialize(bStoring, wphast_id);
-
-			// set grid
-			CGrid x, y, z;
-			this->m_pGridActor->GetGrid(x, y, z);
-			this->ResizeGrid(x, y, z);
-
-			// load axes
-			//this->m_pAxesActor->Serialize(bStoring, wphast_id); // not implemented
-			this->GetPropCollection()->AddItem(this->AxesActor);
-
-			// load site map
-			ASSERT(this->m_pMapActor == NULL);
-			this->m_pMapActor = CMapActor::New();
-			this->m_pMapActor->Serialize(bStoring, wphast_id);
-			CSiteMap2 siteMap2 = this->m_pMapActor->GetSiteMap2();
-			if (siteMap2.FileName.empty())
-			{
-				this->m_pMapActor->Delete();
-				this->m_pMapActor = 0;
-			}
-			else
-			{
-				this->m_pMapActor->SetPickable(0);
-				this->GetPropCollection()->AddItem(this->m_pMapActor);
-			}
-
-			// load display colors
-			this->DisplayColors.Serialize(bStoring, wphast_id);
-			this->SetDisplayColors(this->DisplayColors);
-
-			// load media
-			this->SerializeMedia(bStoring, wphast_id);
-
-			// load ICs
-			this->SerializeIC(bStoring, wphast_id);
-
-			// load BCs
-			this->SerializeBC(bStoring, wphast_id);
-
-			// load wells
-			this->SerializeWells(bStoring, wphast_id);
-
-			// load rivers
-			this->SerializeRivers(bStoring, wphast_id);
-
-			// load drains
-			this->SerializeDrains(bStoring, wphast_id);
-
-			// load zone flow rates
-			this->SerializeZoneFlowRates(bStoring, wphast_id);
-
-			// update properties bar
-			if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar())
-			{
-				pTree->SetPrintFrequency(&this->m_pModel->m_printFreq);
-			}
-
-			// update properties bar
-			if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar())
-			{
-				pTree->SetTimeControl2(&this->m_pModel->m_timeControl2);
-			}
+			pInput->Delete();
 
 			// close WPhast group
 			status = ::H5Gclose(wphast_id);
 			ASSERT(status >= 0);
+		}
+		else
+		{
+			::AfxMessageBox("Unable to open file");
+			::AfxThrowUserException();
 		}
 
 		// set scale for all zones, wells ...
@@ -2379,6 +2417,15 @@ void CWPhastDoc::DataSourcePathsRelativeToAbsolute(LPCTSTR lpszPathName)
 			}
 		}
 	}
+
+	std::map< std::string, Filedata * > temp;
+	std::map< std::string, Filedata * >::iterator it = Filedata::file_data_map.begin();
+	for (; it != Filedata::file_data_map.end(); ++it)
+	{
+		std::string absolute = this->GetAbsolutePath(lpszPathName, (*it).first);
+		temp.insert(std::map< std::string, Filedata * >::value_type(absolute, (*it).second));		
+	}
+	Filedata::file_data_map.swap(temp);
 }
 
 void CWPhastDoc::DataSourcePathsAbsoluteToRelative(LPCTSTR lpszPathName)
@@ -5711,6 +5758,11 @@ void CWPhastDoc::UpdateGridDomain(void)
 		this->m_pGridActor->GetDefaultZone(bounds);
 		vtkCollectionSimpleIterator csi;
 		pCollection->InitTraversal(csi);
+
+		// setup domain
+		this->GetDefaultZone(::domain);
+		CGridKeyword k = this->GetGridKeyword();
+
 		for (int i = 0; i < pCollection->GetNumberOfItems(); ++i)
 		{
 			vtkProp* prop = pCollection->GetNextProp(csi);
@@ -5729,6 +5781,37 @@ void CWPhastDoc::UpdateGridDomain(void)
 							{
 								pZone->SetBounds(bounds, this->GetUnits());
 							}
+							if (dynamic_cast<Prism*>(pZone->GetPolyhedron()))
+							{
+								// if any parts of the prism are Data_source::NONE
+								// the polyhedron must be updated
+
+								bool bNeedToResetPoly = false;
+								Prism p(*dynamic_cast<Prism*>(pZone->GetPolyhedron()));
+
+								if (p.top.Get_user_source_type() == Data_source::NONE)
+								{
+									bNeedToResetPoly = true;
+									p.top.Set_source_type(Data_source::NONE);
+									p.top.Get_points().clear();
+								}
+								if (p.perimeter.Get_user_source_type() == Data_source::NONE)
+								{
+									bNeedToResetPoly = true;
+									p.perimeter.Set_source_type(Data_source::NONE);
+									p.perimeter.Get_points().clear();
+								}
+								if (p.bottom.Get_user_source_type() == Data_source::NONE)
+								{
+									bNeedToResetPoly = true;
+									p.bottom.Set_source_type(Data_source::NONE);
+									p.bottom.Get_points().clear();
+								}
+								if (bNeedToResetPoly)
+								{
+									pZone->SetPolyhedron(&p, this->GetUnits(), k.m_grid_origin, k.m_grid_angle);
+								}
+							}
 						}
 					}
 				}
@@ -5739,6 +5822,7 @@ void CWPhastDoc::UpdateGridDomain(void)
 				{
 					pZone->SetBounds(bounds, this->GetUnits());
 				}
+				ASSERT(FALSE); // otherwise need to check to reset polyhedron
 			}
 		}
 	}
@@ -7729,4 +7813,303 @@ CString CWPhastDoc::GetDefaultPathName()const
 		return this->ImportPathName;
 	}
 	return path;
+}
+
+int CWPhastDoc::ValidateData_sources(CHDFMirrorFile* file, std::string &errors)
+{
+	//{{
+	ASSERT(file->GetHID() > 0);
+	if (file->GetHID() < 0)
+	{
+		errors = "Unable to open " + file->GetFilePath() + ", the file may be corrupted.";
+		return 1;
+	}
+
+	// the pair is used to combine hdf_path and path2fileMap
+	// into a single variable that can be passed as a cookie
+	// to the H5Ginterate callback
+	//
+	std::pair< CString, std::map<CString, CString> > apair;
+
+	CString &hdf_path = apair.first;
+	std::map<CString, CString> &path2fileMap = apair.second;
+
+	// hdf_path holds the current (group) path to the given group
+	// always starts with /WPhast/
+	//
+	hdf_path = "/";
+	hdf_path += szWPhast;
+	herr_t status = ::H5Giterate(file->GetHID(), szWPhast, NULL, CWPhastDoc::H5GIterateStatic, (void *)&apair);
+	ASSERT(status >= 0);
+	if (status < 0)
+	{
+		errors = "Unable to read " + file->GetFilePath() + ", the file may be corrupted.";
+		return 1;
+	}
+
+	// make a unique list of all files
+	std::set<CString> files;
+	std::map<CString, CString>::const_iterator cit = path2fileMap.begin();
+	for (; cit != path2fileMap.end(); ++cit)
+	{
+		files.insert((*cit).second);
+	}
+
+	// make a list of missing files
+	std::set<CString> missing;
+	std::set<CString>::iterator it = files.begin();
+	for (; it != files.end(); ++it)
+	{
+		if (!ATL::ATLPath::FileExists(*it))
+		{
+			missing.insert((*it));
+		}
+	}
+
+	// report missing files
+	if (missing.size())
+	{
+		errors = "The following files could not be found:\n";
+		std::set< CString>::const_iterator cit = missing.begin();
+		for (; cit != missing.end(); ++cit)
+		{
+			errors += (*cit) + "\n";
+		}
+		return (int)missing.size();
+	}
+
+	// no missing files
+	return 0;
+	//}}
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	ASSERT(file->GetHID() > 0);
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	if (file->GetHID() < 0)
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	{
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}		errors = "Unable to open " + file->GetFilePath() + ", the file may be corrupted.";
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}		return 1;
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	}
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	// the pair is used to combine hdf_path and path2fileMap
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	// into a single variable that can be passed as a cookie
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	// to the H5Ginterate callback
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	//
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	std::pair< CString, std::map<CString, CString> > apair;
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	CString &hdf_path = apair.first;
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	std::map<CString, CString> &path2fileMap = apair.second;
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	// hdf_path holds the current (group) path to the given group
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	// always starts with /WPhast/
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	//
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	hdf_path = "/";
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	hdf_path += szWPhast;
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	herr_t status = ::H5Giterate(file->GetHID(), szWPhast, NULL, CWPhastDoc::H5GIterateStatic, (void *)&apair);
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	ASSERT(status >= 0);
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	if (status < 0)
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	{
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}		errors = "Unable to read " + file->GetFilePath() + ", the file may be corrupted.";
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}		return 1;
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	}
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	// make a unique list of all files
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	std::set<CString> files;
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	std::map<CString, CString>::const_iterator cit = path2fileMap.begin();
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	for (; cit != path2fileMap.end(); ++cit)
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	{
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}		files.insert((*cit).second);
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	}
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	// make a list of missing files
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	std::set<CString> missing;
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	std::set<CString>::iterator it = files.begin();
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	for (; it != files.end(); ++it)
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	{
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}		if (!ATL::ATLPath::FileExists(*it))
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}		{
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}			missing.insert((*it));
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}		}
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	}
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	// report missing files
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	if (missing.size())
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	{
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}		errors = "The following files could not be found:\n";
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}		std::set< CString>::const_iterator cit = missing.begin();
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}		for (; cit != missing.end(); ++cit)
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}		{
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}			errors += (*cit) + "\n";
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}		}
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}		return (int)missing.size();
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	}
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	// no missing files
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	return 0;
+// COMMENT: {10/11/2011 3:40:58 PM}
+// COMMENT: {10/11/2011 3:40:58 PM}	// the pair is used to combine hdf_path and path2fileMap
+// COMMENT: {10/11/2011 3:40:58 PM}	// into a single variable that can be passed as a cookie
+// COMMENT: {10/11/2011 3:40:58 PM}	// to the H5Ginterate callback
+// COMMENT: {10/11/2011 3:40:58 PM}	//
+// COMMENT: {10/11/2011 3:40:58 PM}	std::pair< CString, std::map<CString, CString> > apair;
+// COMMENT: {10/11/2011 3:40:58 PM}
+// COMMENT: {10/11/2011 3:40:58 PM}	CString &hdf_path = apair.first;
+// COMMENT: {10/11/2011 3:40:58 PM}	std::map<CString, CString> &path2fileMap = apair.second;
+// COMMENT: {10/11/2011 3:40:58 PM}
+// COMMENT: {10/11/2011 3:40:58 PM}	// hdf_path holds the current (group) path to the given group
+// COMMENT: {10/11/2011 3:40:58 PM}	// always starts with /WPhast/
+// COMMENT: {10/11/2011 3:40:58 PM}	//
+// COMMENT: {10/11/2011 3:40:58 PM}	hdf_path = "/";
+// COMMENT: {10/11/2011 3:40:58 PM}	hdf_path += szWPhast;
+// COMMENT: {10/11/2011 3:40:58 PM}	herr_t status = ::H5Giterate(file->GetHID(), szWPhast, NULL, CWPhastDoc::H5GIterateStatic, (void *)&apair);
+// COMMENT: {10/11/2011 3:40:58 PM}	ASSERT(status >= 0);
+// COMMENT: {10/11/2011 3:40:58 PM}	if (status < 0)
+// COMMENT: {10/11/2011 3:40:58 PM}	{
+// COMMENT: {10/11/2011 3:40:58 PM}		errors = "Unable to read " + file->GetFilePath() + ", the file may be corrupted.";
+// COMMENT: {10/11/2011 3:40:58 PM}		return 1;
+// COMMENT: {10/11/2011 3:40:58 PM}	}
+// COMMENT: {10/11/2011 3:40:58 PM}
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:49:36 PM}	// make a unique list of all files
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:49:36 PM}	std::set<CString> files;
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:49:36 PM}	std::map<CString, CString>::const_iterator cit = path2fileMap.begin();
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:49:36 PM}	for (; cit != path2fileMap.end(); ++cit)
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:49:36 PM}	{
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:49:36 PM}		files.insert((*cit).second);
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:49:36 PM}	}
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:49:36 PM}
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:49:36 PM}	// make a list of missing files
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:49:36 PM}	std::set<CString> missing;
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:49:36 PM}	std::set<CString>::iterator it = files.begin();
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:49:36 PM}	for (; it != files.end(); ++it)
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:49:36 PM}	{
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:49:36 PM}		if (!ATL::ATLPath::FileExists(*it))
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:49:36 PM}		{
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:49:36 PM}			missing.insert((*it));
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:49:36 PM}		}
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:49:36 PM}	}
+// COMMENT: {10/11/2011 3:40:58 PM}
+// COMMENT: {10/11/2011 3:40:58 PM}
+// COMMENT: {10/11/2011 3:40:58 PM}	// Create the "/WPhast" group
+// COMMENT: {10/11/2011 3:40:58 PM}	//
+// COMMENT: {10/11/2011 3:40:58 PM}	hid_t files_id = ::H5Gcreate(file->GetHID(), "Files", 0);
+// COMMENT: {10/11/2011 3:40:58 PM}	ASSERT(files_id > 0);
+// COMMENT: {10/11/2011 3:40:58 PM}	if (files_id > 0)
+// COMMENT: {10/11/2011 3:40:58 PM}	{
+// COMMENT: {10/11/2011 3:40:58 PM}		// make a unique list of all files
+// COMMENT: {10/11/2011 3:40:58 PM}		std::set<CString> files;
+// COMMENT: {10/11/2011 3:40:58 PM}		std::map<CString, CString>::const_iterator cit = path2fileMap.begin();
+// COMMENT: {10/11/2011 3:40:58 PM}		for (; cit != path2fileMap.end(); ++cit)
+// COMMENT: {10/11/2011 3:40:58 PM}		{
+// COMMENT: {10/11/2011 3:40:58 PM}			if (ATL::ATLPath::FileExists((*cit).second))
+// COMMENT: {10/11/2011 3:40:58 PM}			{
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}				if (::strcmp_nocase(ATLPath::FindExtension((*cit).second), ".shp") == 0)
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}				{
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}					char path[MAX_PATH];
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}					::strcpy(path, (*cit).second);
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}					ATL::ATLPath::RenameExtension(path, ".shp");
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}					if (ATL::ATLPath::FileExists(path))
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}					{
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}						//{{
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}						FILETIME ftCreate, ftAccess, ftWrite;
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}						SYSTEMTIME stUTC, stLocal;
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}						TCHAR string[100];
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}						HANDLE hFile = ::CreateFile(
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}							path,                  // file to open
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}							GENERIC_READ,          // open for reading
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}							FILE_SHARE_READ,       // share for reading
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}							NULL,                  // default security
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}							OPEN_EXISTING,         // existing file only
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}							FILE_ATTRIBUTE_NORMAL, // normal file
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}							NULL);                 // no attr. template
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}						if (hFile)
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}						{
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}							// Retrieve the file times for the file.
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}							if (::GetFileTime(hFile, &ftCreate, &ftAccess, &ftWrite))
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}							{
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}								// Convert the last-write time to local time.
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}								VERIFY(::FileTimeToSystemTime(&ftWrite, &stUTC));
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}								VERIFY(::SystemTimeToTzSpecificLocalTime(NULL, &stUTC, &stLocal));
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}								// Build a string showing the date and time.
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}								::wsprintf(string, TEXT("%02d/%02d/%d  %02d:%02d"),
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}									stLocal.wMonth, stLocal.wDay, stLocal.wYear,
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}									stLocal.wHour, stLocal.wMinute);
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}							}
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}							VERIFY(::CloseHandle(hFile));
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}						}
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}						//}}
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}						CGlobal::HDFSerializeBinaryFile(true, files_id, "File0", path);
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}					}
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}					ATL::ATLPath::RenameExtension(path, ".shx");
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}					if (ATL::ATLPath::FileExists(path))
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}					{
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}						///CGlobal::HDFSerializeBinaryFile(true, files_id, "File1", (*cit).second);
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}						HDFFile(true, files_id, "File1", path);
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}					}
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}					ATL::ATLPath::RenameExtension(path, ".dbf");
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}					if (ATL::ATLPath::FileExists(path))
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}					{
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}						CGlobal::HDFSerializeBinaryFile(true, files_id, "File2", path);
+// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}					}
+// COMMENT: {10/11/2011 3:40:58 PM}				}
+// COMMENT: {10/11/2011 3:40:58 PM}				else
+// COMMENT: {10/11/2011 3:40:58 PM}				{
+// COMMENT: {10/11/2011 3:40:58 PM}					CGlobal::HDFSerializeBinaryFile(true, files_id, "File0", (*cit).second);
+// COMMENT: {10/11/2011 3:40:58 PM}				}
+// COMMENT: {10/11/2011 3:40:58 PM}			}
+// COMMENT: {10/11/2011 3:40:58 PM}		}
+// COMMENT: {10/11/2011 3:40:58 PM}		// close WPhast group
+// COMMENT: {10/11/2011 3:40:58 PM}		status = ::H5Gclose(files_id);
+// COMMENT: {10/11/2011 3:40:58 PM}		ASSERT(status >= 0);
+// COMMENT: {10/11/2011 3:40:58 PM}	}
+
+	return 0;
+}
+
+herr_t CWPhastDoc::H5GIterateStatic(hid_t loc_id, const char *name, void *cookie)
+{
+	// this is called recursively to build the pathways to all of
+	// the "file_name" datasets (see ValidateData_sources)
+
+	static const char szFileName[] = "file_name";
+
+	ASSERT(cookie);
+	std::pair< CString, std::map<CString, CString> > *ppair =
+		static_cast< std::pair< CString, std::map<CString, CString> > *>(cookie);
+
+	CString &hdf_path = ppair->first;
+	std::map<CString, CString> &path2fileMap = ppair->second;
+
+    H5G_stat_t statbuf;
+	herr_t status = ::H5Gget_objinfo(loc_id, name, FALSE, &statbuf);
+	ASSERT(status >= 0);
+
+	switch (statbuf.type)
+	{
+	case H5G_GROUP:
+		hdf_path += "/";
+		hdf_path += name;
+		status = ::H5Giterate(loc_id, name, NULL, CWPhastDoc::H5GIterateStatic, (void *)cookie);
+		hdf_path = hdf_path.Left(hdf_path.GetLength() - (int)::strlen(name) - 1);
+		break;
+	case H5G_DATASET:
+		if (::strcmp(szFileName, name) == 0)
+		{
+			std::string filename;
+			status = CGlobal::HDFSerializeString(false, loc_id, szFileName, filename);
+			ASSERT(status >= 0);
+
+			CString path(hdf_path);
+			path += "/";
+			path += name;
+			path2fileMap.insert(std::map<CString, CString>::value_type(path, CString(filename.c_str()))); 
+		}
+		break;
+	case H5G_TYPE:
+		break;
+	default:
+		break;
+	}
+
+	return 0; // continue iterating
 }

@@ -1349,7 +1349,7 @@ void CWPhastView::Select(vtkProp *pProp)
 					// Reset BoxWidget
 					//
 					this->BoxWidget->SetProp3D(pZoneActor);
-					struct zone *z = pZoneActor->GetPolyhedron()->Get_bounding_box();
+					const struct zone *z = pZoneActor->GetPolyhedron()->Get_bounding_box();
 
 					if (c->Get_user_coordinate_system() == PHAST_Transform::MAP)
 					{
@@ -1758,7 +1758,7 @@ void CWPhastView::Update(IObserver* pSender, LPARAM lHint, CObject* pHint, vtkOb
 				{
 					const CUnits &units = this->GetDocument()->GetUnits();
 					double* scale = this->GetDocument()->GetScale();
-					struct zone *z = pZoneActor->GetPolyhedron()->Get_bounding_box();
+					const struct zone *z = pZoneActor->GetPolyhedron()->Get_bounding_box();
 
 					if (Cube *c = dynamic_cast<Cube*>(pZoneActor->GetPolyhedron()))
 					{

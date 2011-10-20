@@ -509,7 +509,7 @@ void CZoneActor::SetBounds(double bounds[6], const CUnits& units)
 void CZoneActor::GetUserBounds(double bounds[6])
 {
 	ASSERT(this->GetPolyhedron() && ::AfxIsValidAddress(this->GetPolyhedron(), sizeof(Polyhedron)));
-	struct zone* pzone = this->GetPolyhedron()->Get_bounding_box();
+	const struct zone* pzone = this->GetPolyhedron()->Get_bounding_box();
 
 	bounds[0] = pzone->x1;
 	bounds[1] = pzone->x2;
@@ -522,7 +522,7 @@ void CZoneActor::GetUserBounds(double bounds[6])
 double* CZoneActor::GetUserBounds()
 {
 	ASSERT(this->GetPolyhedron() && ::AfxIsValidAddress(this->GetPolyhedron(), sizeof(Polyhedron)));
-	struct zone* pzone = this->GetPolyhedron()->Get_bounding_box();
+	const struct zone* pzone = this->GetPolyhedron()->Get_bounding_box();
 	this->m_ActualBounds[0] = pzone->x1;
 	this->m_ActualBounds[1] = pzone->x2;
 	this->m_ActualBounds[2] = pzone->y1;
@@ -594,7 +594,7 @@ void CZoneActor::Serialize(bool bStoring, hid_t loc_id, const CWPhastDoc* pWPhas
 			// Polyhedron box
 			//
 			ASSERT(this->GetPolyhedron() && ::AfxIsValidAddress(this->GetPolyhedron(), sizeof(Polyhedron)));
-			struct zone* pzone = this->GetPolyhedron()->Get_bounding_box();
+			const struct zone* pzone = this->GetPolyhedron()->Get_bounding_box();
 			ASSERT(pzone->zone_defined);
 			xyz[0] = pzone->x1;
 			xyz[1] = pzone->y1;
@@ -1154,27 +1154,19 @@ void CZoneActor::Serialize(bool bStoring, hid_t loc_id, const CWPhastDoc* pWPhas
 					ASSERT(status >= 0);
 				}
 
-				//{{ {1/14/2011 12:08:25 AM}
 				if (prism)
 				{
-					// set up unit transforms
-					// TODO need to test if file exists ???
-					////{{
-
-					// THIS IS KIND OF UGLY SHOULD PROBABLY CLEAN UP [ ??? this->SetupUserTransform(CGridKeyword, CUnits, GeometryScale) ==> this->UpdateUserTransform() ??? ]
-					// ALSO NEED TO CHECK OUT IF POLYDATA WAS EVER STORED
-					// PRE GRID ROTATED
-
+					// setup the UserTransform
 					CGridKeyword gk;
 					pWPhastDoc->GetGridKeyword(gk);
-					this->GridAngle = gk.m_grid_angle;
+					this->GridAngle     = gk.m_grid_angle;
 					this->GridOrigin[0] = gk.m_grid_origin[0];
 					this->GridOrigin[1] = gk.m_grid_origin[1];
 					this->GridOrigin[2] = gk.m_grid_origin[2];
-					////}}
-					this->SetUnits(pWPhastDoc->GetUnits(), false);
+					this->Units         = pWPhastDoc->GetUnits();
+					const_cast<CWPhastDoc*>(pWPhastDoc)->GetScale(this->GeometryScale);
+					this->UpdateUserTransform(false);
 				}
-				//}} {1/14/2011 12:08:25 AM}
 			}
 			else
 			{
@@ -1669,7 +1661,7 @@ void CZoneActor::SetScale(double _arg1, double _arg2, double _arg3)
 		this->GeometryScale[1] = _arg2;
 		this->GeometryScale[2] = _arg3;
 
-		this->UpdateUserTransform();
+		this->UpdateUserTransform(false);
 	}
 }
 
@@ -1735,7 +1727,7 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, co
 
 		// size
 		//
-		struct zone *pzone = this->GetPolyhedron()->Get_bounding_box();
+		const struct zone *pzone = this->GetPolyhedron()->Get_bounding_box();
 		this->SetBounds(
 			pzone->x1,
 			pzone->x2,
@@ -1763,10 +1755,6 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, co
 	{
 		std::auto_ptr<Prism> prism(dynamic_cast<Prism*>(prism1->clone()));
 		prism->Tidy();
-
-		ASSERT(prism1->perimeter == prism->perimeter);
-		ASSERT(prism1->top       == prism->top);
-		ASSERT(prism1->bottom    == prism->bottom);
 
 		if (!prism->Is_homogeneous())
 		{
@@ -1902,6 +1890,7 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, co
 
 				// foreach perimeter point determine top and bottom points
 				//
+				ASSERT(prism->perimeter.Get_user_source_type() != Data_source::NONE || pts.size() == 4);
 				std::vector<Point>::reverse_iterator perim_pt_riter = pts.rbegin();
 				for (i = 0; perim_pt_riter != pts.rend(); ++i, ++perim_pt_riter)
 				{
@@ -1960,10 +1949,11 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, co
 				//
 				bool bDestroy_nniBottom = false;
 				prism->bottom.Make_nni();
-				NNInterpolator* nniBottom = prism->bottom.Get_nni();
+				const NNInterpolator* nniBottom = prism->bottom.Get_nni();
 
 				// foreach perimeter point determine top and bottom points
 				//
+				ASSERT(prism->perimeter.Get_user_source_type() != Data_source::NONE || pts.size() == 4);
 				std::vector<Point>::reverse_iterator perim_pt_riter = pts.rbegin();
 				for (i = 0; perim_pt_riter != pts.rend(); ++i, ++perim_pt_riter)
 				{
@@ -2071,10 +2061,11 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, co
 
 				bool bDestroy_nniTop = false;
 				prism->top.Make_nni();
-				NNInterpolator* nniTop = prism->top.Get_nni();
+				const NNInterpolator* nniTop = prism->top.Get_nni();
 
 				// foreach perimeter point determine top and bottom points
 				//
+				ASSERT(prism->perimeter.Get_user_source_type() != Data_source::NONE || pts.size() == 4);
 				std::vector<Point>::reverse_iterator perim_pt_riter = pts.rbegin();
 				for (i = 0; perim_pt_riter != pts.rend(); ++i, ++perim_pt_riter)
 				{
@@ -2179,15 +2170,16 @@ void CZoneActor::SetPolyhedron(const Polyhedron *polyh, const CUnits& rUnits, co
 
 				bool bDestroy_nniTop = false;
 				prism->top.Make_nni();
-				NNInterpolator* nniTop = prism->top.Get_nni();
+				const NNInterpolator* nniTop = prism->top.Get_nni();
 
 				bool bDestroy_nniBottom = false;
 				prism->bottom.Make_nni();
-				NNInterpolator* nniBottom = prism->bottom.Get_nni();
+				const NNInterpolator* nniBottom = prism->bottom.Get_nni();
 
 
 				// foreach perimeter point determine top and bottom points
 				//
+				ASSERT(prism->perimeter.Get_user_source_type() != Data_source::NONE || pts.size() == 4);
 				std::vector<Point>::reverse_iterator perim_pt_riter = pts.rbegin();
 				for (i = 0; perim_pt_riter != pts.rend(); ++i, ++perim_pt_riter)
 				{

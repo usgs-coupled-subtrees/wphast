@@ -128,10 +128,15 @@ BOOL CHDFMirrorFile::Open(LPCTSTR lpszFileName, UINT nOpenFlags,
 	if (nOpenFlags == (CFile::modeRead|CFile::shareDenyWrite)) // opened for reading
 	{
 		BOOL b = CFile::Open(lpszFileName, nOpenFlags, pError);
-		if (!b) return b;
+		CString filepath = this->GetFilePath();
+		if (!b)
+		{
+			return b;
+		}
 		CFile::Close();
+		this->SetFilePath(filepath);
 
-		m_hidFile = ::H5Fopen(lpszFileName, H5F_ACC_RDONLY, H5P_DEFAULT);		
+		m_hidFile = ::H5Fopen(filepath, H5F_ACC_RDONLY, H5P_DEFAULT);		
 		if (m_hidFile > 0) return TRUE;
 
 		pError->m_cause = CFileException::genericException;

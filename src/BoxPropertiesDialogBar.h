@@ -97,6 +97,7 @@ public:
 	void EnableXYZ(BOOL bEnable);
 	void EnablePoints(BOOL bEnable);
 	void EnablePrismRadios(BOOL bEnable);
+	void EnableCoorRadios(BOOL bEnable);
 
 protected:
 	CWPhastView   *m_pView;

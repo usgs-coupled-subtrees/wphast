@@ -511,6 +511,7 @@ void CBoxPropertiesDialogBar::Set(CWPhastView* pView, vtkProp3D* pProp3D, const 
 				this->m_xy_coordinate_system_user = w->Get_user_coordinate_system();
 			}
 			this->Enable(TRUE);
+			this->EnableCoorRadios(TRUE);
 			this->UpdateData(FALSE);
 
 			caption.Format(_T("Wedge dimensions (%s)"), pZone->GetName());
@@ -527,11 +528,13 @@ void CBoxPropertiesDialogBar::Set(CWPhastView* pView, vtkProp3D* pProp3D, const 
 			{
 				// default zones cannot be changed
 				this->Enable(FALSE);
+				this->EnableCoorRadios(FALSE);
 				this->UpdateData(FALSE);
 			}
 			else
 			{
 				this->Enable(TRUE);
+				this->EnableCoorRadios(TRUE);
 				this->UpdateData(FALSE);
 			}
 			caption.Format(_T("Zone dimensions (%s)"), pZone->GetName());
@@ -557,6 +560,7 @@ void CBoxPropertiesDialogBar::Set(CWPhastView* pView, vtkProp3D* pProp3D, const 
 
 		this->m_xy_coordinate_system_user = pWell->GetWell().xy_coordinate_system_user;
 
+		this->EnableCoorRadios(TRUE);
 		this->UpdateData(FALSE);
 
 		CString caption;
@@ -567,6 +571,7 @@ void CBoxPropertiesDialogBar::Set(CWPhastView* pView, vtkProp3D* pProp3D, const 
 	{
 		this->m_nType = CBoxPropertiesDialogBar::BP_RIVER;
 
+		this->EnableCoorRadios(TRUE);
 		this->UpdateData(FALSE);
 
 		CString caption;
@@ -577,6 +582,7 @@ void CBoxPropertiesDialogBar::Set(CWPhastView* pView, vtkProp3D* pProp3D, const 
 	{
 		this->m_nType = CBoxPropertiesDialogBar::BP_DRAIN;
 
+		this->EnableCoorRadios(TRUE);
 		this->UpdateData(FALSE);
 
 		CString caption;
@@ -4521,6 +4527,22 @@ void CBoxPropertiesDialogBar::EnablePrismRadios(BOOL bEnable)
 	}
 }
 
+void CBoxPropertiesDialogBar::EnableCoorRadios(BOOL bEnable)
+{
+	if (CWnd* pWnd = this->GetDlgItem(IDC_GB_COOR_SYS))
+	{
+		pWnd->EnableWindow(bEnable);
+	}
+	if (CWnd* pWnd = this->GetDlgItem(IDC_RADIO_CS_GRID))
+	{
+		pWnd->EnableWindow(bEnable);
+	}
+	if (CWnd* pWnd = this->GetDlgItem(IDC_RADIO_CS_MAP))
+	{
+		pWnd->EnableWindow(bEnable);
+	}
+}
+
 void CBoxPropertiesDialogBar::OnBnClickedArcraster(void)
 {
 	static char szFilters[] =
@@ -4651,6 +4673,7 @@ void CBoxPropertiesDialogBar::UpdatePrismControls(void)
 		this->EnableXYZ(FALSE);
 		this->EnablePoints(FALSE);
 		this->EnablePrismRadios(TRUE);
+		this->EnableCoorRadios(TRUE);
 		break;
 	case IDC_RADIO_CONSTANT:
 		if (this->m_nPrismPart == CBoxPropertiesDialogBar::PRISM_PERIMETER)
@@ -4666,6 +4689,7 @@ void CBoxPropertiesDialogBar::UpdatePrismControls(void)
 			this->EnableXYZ(FALSE);
 			this->EnablePoints(FALSE);
 			this->EnablePrismRadios(TRUE);
+			this->EnableCoorRadios(TRUE);
 		}
 		break;
 	case IDC_RADIO_ARCRASTER:
@@ -4682,6 +4706,7 @@ void CBoxPropertiesDialogBar::UpdatePrismControls(void)
 			this->EnableXYZ(FALSE);
 			this->EnablePoints(FALSE);
 			this->EnablePrismRadios(TRUE);
+			this->EnableCoorRadios(TRUE);
 		}
 		break;
 	case IDC_RADIO_SHAPE:
@@ -4699,6 +4724,7 @@ void CBoxPropertiesDialogBar::UpdatePrismControls(void)
 			this->EnableXYZ(FALSE);
 			this->EnablePoints(FALSE);
 			this->EnablePrismRadios(FALSE);
+			this->EnableCoorRadios(FALSE);
 		}
 		else
 		{
@@ -4709,6 +4735,7 @@ void CBoxPropertiesDialogBar::UpdatePrismControls(void)
 			this->EnableXYZ(FALSE);
 			this->EnablePoints(FALSE);
 			this->EnablePrismRadios(TRUE);
+			this->EnableCoorRadios(TRUE);
 		}
 		break;
 	case IDC_RADIO_XYZ:
@@ -4719,6 +4746,7 @@ void CBoxPropertiesDialogBar::UpdatePrismControls(void)
 		this->EnableXYZ(TRUE);
 		this->EnablePoints(FALSE);
 		this->EnablePrismRadios(TRUE);
+		this->EnableCoorRadios(TRUE);
 		break;
 	case IDC_RADIO_POINTS:
 		this->EnableNone(FALSE);
@@ -4728,6 +4756,7 @@ void CBoxPropertiesDialogBar::UpdatePrismControls(void)
 		this->EnableXYZ(FALSE);
 		this->EnablePoints(TRUE);
 		this->EnablePrismRadios(TRUE);
+		this->EnableCoorRadios(TRUE);
 		break;
 	default:
 		ASSERT(FALSE);
@@ -5539,6 +5568,9 @@ void CBoxPropertiesDialogBar::OnChangeCoorSysPrism(void)
 					p1.top.Set_user_coordinate_system(PHAST_Transform::GRID);
 					break;
 				case PRISM_PERIMETER:
+					ASSERT(pp->perimeter.Get_source_type()            != Data_source::SHAPE);
+					ASSERT(pp->perimeter.Get_user_source_type()       != Data_source::SHAPE);
+
 					ASSERT(pp->perimeter.Get_coordinate_system()      == PHAST_Transform::MAP);
 					ASSERT(pp->perimeter.Get_user_coordinate_system() == PHAST_Transform::MAP);
 					ASSERT(p1.perimeter.Get_coordinate_system()       == PHAST_Transform::MAP);

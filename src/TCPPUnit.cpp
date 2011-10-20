@@ -27,6 +27,7 @@
 #include "TestUniqueMap.h"
 #include "TestCproperty.h"
 #include "TestPHAST_Transform.h"
+#include "TestHDFFile.h"
 
 
 TCPPUnit::TCPPUnit(void)
@@ -67,21 +68,22 @@ void TCPPUnit::RunUnitTests(void)
 		double d1 = 0/z;
 #endif
 
-		runner.addTest(TestCPhastInput::suite());
-		runner.addTest(TestCZone::suite());
-		runner.addTest(TestCGrid::suite());
-		runner.addTest(TestPHAST_Transform::suite());
-		runner.addTest(TestCtime::suite());
-		runner.addTest(TestCBC::suite());
-		runner.addTest(TestCWPhastDoc::suite());
-		runner.addTest(TestCParser::suite());
-		runner.addTest(TestCPropertyTreeControlBar::suite());
-		runner.addTest(TestCUnits::suite());
-		runner.addTest(TestCPhastInput::suite());
-		runner.addTest(TestPrism::suite());
-		runner.addTest(TestHDFSerializePolyData::suite());
-		runner.addTest(TestUniqueMap::suite());
-		runner.addTest(TestCproperty::suite());
+// COMMENT: {10/14/2011 9:39:08 PM}		runner.addTest(TestCPhastInput::suite());
+// COMMENT: {10/14/2011 9:39:08 PM}		runner.addTest(TestCZone::suite());
+// COMMENT: {10/14/2011 9:39:08 PM}		runner.addTest(TestCGrid::suite());
+// COMMENT: {10/14/2011 9:39:08 PM}		runner.addTest(TestPHAST_Transform::suite());
+// COMMENT: {10/14/2011 9:39:08 PM}		runner.addTest(TestCtime::suite());
+// COMMENT: {10/14/2011 9:39:08 PM}		runner.addTest(TestCBC::suite());
+// COMMENT: {10/14/2011 9:39:08 PM}		runner.addTest(TestCWPhastDoc::suite());
+// COMMENT: {10/14/2011 9:39:08 PM}		runner.addTest(TestCParser::suite());
+// COMMENT: {10/14/2011 9:39:08 PM}		runner.addTest(TestCPropertyTreeControlBar::suite());
+// COMMENT: {10/14/2011 9:39:08 PM}		runner.addTest(TestCUnits::suite());
+// COMMENT: {10/14/2011 9:39:08 PM}		runner.addTest(TestCPhastInput::suite());
+// COMMENT: {10/14/2011 9:39:08 PM}		runner.addTest(TestPrism::suite());
+// COMMENT: {10/14/2011 9:39:08 PM}		runner.addTest(TestHDFSerializePolyData::suite());
+// COMMENT: {10/14/2011 9:39:08 PM}		runner.addTest(TestUniqueMap::suite());
+// COMMENT: {10/14/2011 9:39:08 PM}		runner.addTest(TestCproperty::suite());		
+		runner.addTest(TestHDFFile::suite());
 
 		/**********************************************************
 		// the following require user input
@@ -112,5 +114,5 @@ void TCPPUnit::RunUnitTests(void)
 			DebugBreak();
 		}
 	}
-// COMMENT: {8/18/2011 12:09:47 AM}	exit(0);
+// COMMENT: {10/17/2011 5:36:13 PM}	exit(0);
 }
