@@ -1,5 +1,6 @@
 #pragma once
 
+#include <map>
 #include "WPhastDoc.h"
 #include "WPhastView.h"
 

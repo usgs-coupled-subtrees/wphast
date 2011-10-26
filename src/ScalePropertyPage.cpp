@@ -5,6 +5,7 @@
 #include "WPhast.h"
 #include "ScalePropertyPage.h"
 
+#include <map>
 #include "WPhastDoc.h"
 #include "ModelessPropertySheet.h"
 #include "SetScaleAction.h"

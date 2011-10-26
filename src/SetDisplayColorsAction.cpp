@@ -1,6 +1,7 @@
 #include "StdAfx.h"
 #include "SetDisplayColorsAction.h"
 
+#include <map>
 #include "WPhastDoc.h"
 
 CSetDisplayColorsAction::CSetDisplayColorsAction(CWPhastDoc* pDoc, const CDisplayColors& dc)

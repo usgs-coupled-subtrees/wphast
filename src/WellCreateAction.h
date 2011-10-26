@@ -1,10 +1,11 @@
 #pragma once
 #include "Action.h"
 
-#include "WPhastDoc.h"
+#include "Tree.h"
 #include "WellSchedule.h"
-#include "WellActor.h"
 
+class CWPhastDoc;
+class CWellActor;
 
 class CWellCreateAction : public CAction
 {

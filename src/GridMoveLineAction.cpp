@@ -1,6 +1,8 @@
 #include "StdAfx.h"
 #include "GridMoveLineAction.h"
 
+#include <map>
+
 #include "WPhastDoc.h"
 #include "GridActor.h"
 

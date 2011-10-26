@@ -3,6 +3,8 @@
 #include "ViewVTKCommand.h"
 #include "resource.h"
 
+#include <map>
+
 #include "WPhastDoc.h"
 #include "WPhastView.h"
 #include "BoxPropertiesDialogBar.h"

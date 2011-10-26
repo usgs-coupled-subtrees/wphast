@@ -1,6 +1,7 @@
 #include "StdAfx.h"
 #include "SetPrintInputAction.h"
 
+#include <map>
 #include "WPhastDoc.h"
 
 CSetPrintInputAction::CSetPrintInputAction(CWPhastDoc* pDoc, const CPrintInput& newPrintInput)

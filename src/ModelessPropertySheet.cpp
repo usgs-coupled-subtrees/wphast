@@ -2,6 +2,9 @@
 //
 
 #include "stdafx.h"
+
+#include <map>
+
 #include "WPhast.h"
 #include "ModelessPropertySheet.h"
 #include "WPhastDoc.h"

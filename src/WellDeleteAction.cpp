@@ -1,6 +1,10 @@
 #include "StdAfx.h"
 #include "WellDeleteAction.h"
 
+#include <map>
+#include "WPhastDoc.h"
+#include "WellActor.h"
+
 CWellDeleteAction::CWellDeleteAction(CWPhastDoc* pDoc, CWellActor* pWellActor)
 : m_pDoc(pDoc)
 , m_pWellActor(pWellActor)

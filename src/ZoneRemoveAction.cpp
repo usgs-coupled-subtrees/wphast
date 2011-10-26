@@ -1,6 +1,7 @@
 #include "StdAfx.h"
 #include "ZoneRemoveAction.h"
 
+#include <map>
 #include "WPhastDoc.h"
 #include "ZoneActor.h"
 #include <vtkPropCollection.h>

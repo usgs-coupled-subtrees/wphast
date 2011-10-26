@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vtk3DWidget.h>
+#include <map>
 #include "WPhastDoc.h"
 #include "Units.h"
 

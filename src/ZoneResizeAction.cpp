@@ -1,6 +1,7 @@
 #include "StdAfx.h"
 #include "ZoneResizeAction.h"
 
+#include <map>
 #include "resource.h"
 #include "WPhastDoc.h"
 #include "WPhastView.h"

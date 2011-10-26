@@ -1,6 +1,7 @@
 #include "StdAfx.h"
 #include "SetFreeSurfaceAction.h"
 
+#include <map>
 #include "WPhastDoc.h"
 #include "WPhastView.h"
 

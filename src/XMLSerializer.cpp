@@ -1,6 +1,7 @@
 #include "StdAfx.h"
 #include "XMLSerializer.h"
 
+#include <map>
 #include <sstream>
 
 #include <xercesc/dom/DOM.hpp>

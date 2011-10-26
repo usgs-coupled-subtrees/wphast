@@ -1,5 +1,8 @@
 #include "StdAfx.h"
 #include "ETSLayoutModelessPropertySheet.h"
+
+#include <map>
+
 #include "WPhastDoc.h"
 #include "MacroAction.h"
 

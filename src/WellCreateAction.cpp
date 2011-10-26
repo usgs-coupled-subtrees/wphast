@@ -1,5 +1,10 @@
 #include "StdAfx.h"
 #include "WellCreateAction.h"
+
+#include <map>
+
+#include "WPhastDoc.h"
+#include "WellActor.h"
 #include "GridKeyword.h"
 
 CWellCreateAction::CWellCreateAction(CWPhastDoc* pDoc, const CWellSchedule &well, CTreeCtrlNode nodeInsertAfter)

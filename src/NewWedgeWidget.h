@@ -1,5 +1,6 @@
 #pragma once
 
+#include <map>
 #include <vtk3DWidget.h>
 #include "srcWedgeSource.h"
 #include "WPhastDoc.h"

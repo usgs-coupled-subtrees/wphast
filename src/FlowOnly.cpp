@@ -1,6 +1,7 @@
 #include "StdAfx.h"
 #include "FlowOnly.h"
 
+#include <map>
 #include <ostream>
 
 #include "resource.h"
