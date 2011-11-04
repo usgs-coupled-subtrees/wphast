@@ -316,6 +316,8 @@ void CBoxPropertiesDialogBar::Update(IObserver* pSender, LPARAM lHint, CObject* 
 							this->ShowPrismControls();
 						}
 						break;
+					case Polyhedron::NONE:						
+						break;
 					default:
 						ASSERT(FALSE);
 					}
@@ -546,6 +548,12 @@ void CBoxPropertiesDialogBar::Set(CWPhastView* pView, vtkProp3D* pProp3D, const 
 			this->UpdateData(FALSE);
 			caption.Format(_T("Prism dimensions (%s)"), pZone->GetName());
 			this->SetWindowText(caption);
+			break;
+		case Polyhedron::NONE:
+			this->m_nType = CBoxPropertiesDialogBar::BP_NONE;		
+			this->UpdateData(FALSE);
+			this->Enable(FALSE);
+			this->SetWindowText(_T(""));
 			break;
 		default:
 			ASSERT(FALSE);

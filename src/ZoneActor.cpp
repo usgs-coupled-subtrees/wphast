@@ -38,6 +38,7 @@
 #include "srcinput/NNInterpolator/NNInterpolator.h"
 #include "srcinput/KDtree/KDtree.h"
 #include "srcinput/Filedata.h"
+#include "NullPolyhedron.h"
 
 #include "vtkImplicitFunctionNNInterpolator.h"
 #include <vtkImplicitBoolean.h>
@@ -584,7 +585,7 @@ void CZoneActor::Serialize(bool bStoring, hid_t loc_id, const CWPhastDoc* pWPhas
 			hid_t polytype = CGlobal::HDFCreatePolyhedronDataType();
 
 			Polyhedron::POLYHEDRON_TYPE nValue = this->GetPolyhedron()->get_type();
-			ASSERT(Polyhedron::CUBE <= nValue && nValue <= Polyhedron::GRID_DOMAIN);
+			ASSERT(Polyhedron::CUBE <= nValue && nValue <= Polyhedron::NONE);
 			status = CGlobal::HDFSerialize(bStoring, polyh_id, szType, polytype, 1, &nValue);
 			ASSERT(status >= 0);
 
@@ -740,6 +741,10 @@ void CZoneActor::Serialize(bool bStoring, hid_t loc_id, const CWPhastDoc* pWPhas
 					ASSERT(status >= 0);
 				}
 			}
+			else if (nValue == Polyhedron::NONE)
+			{
+				// do nothing
+			}
 			else
 			{
 				ASSERT(FALSE);
@@ -775,7 +780,7 @@ void CZoneActor::Serialize(bool bStoring, hid_t loc_id, const CWPhastDoc* pWPhas
 			hid_t polytype = CGlobal::HDFCreatePolyhedronDataType();
 			status = CGlobal::HDFSerialize(bStoring, polyh_id, szType, polytype, 1, &nValue);
 			ASSERT(status >= 0);
-			ASSERT(Polyhedron::CUBE <= nValue && nValue <= Polyhedron::GRID_DOMAIN);
+			ASSERT(Polyhedron::CUBE <= nValue && nValue <= Polyhedron::NONE);
 
 			status = H5Tclose(polytype);
 			ASSERT(status >= 0);
@@ -1166,6 +1171,20 @@ void CZoneActor::Serialize(bool bStoring, hid_t loc_id, const CWPhastDoc* pWPhas
 					this->Units         = pWPhastDoc->GetUnits();
 					const_cast<CWPhastDoc*>(pWPhastDoc)->GetScale(this->GeometryScale);
 					this->UpdateUserTransform(false);
+				}
+			}
+			else if (nValue == Polyhedron::NONE)
+			{
+				if (this->GetPolyhedron())
+				{
+					::AfxIsValidAddress(this->GetPolyhedron(), sizeof(Polyhedron));
+					delete this->GetPolyhedron();
+				}
+				if (NullPolyhedron *nullpoly = new NullPolyhedron())
+				{
+					CGridKeyword gridKeyword = pWPhastDoc->GetGridKeyword();
+					this->SetPolyhedron(nullpoly, pWPhastDoc->GetUnits(), gridKeyword.m_grid_origin, gridKeyword.m_grid_angle);
+					delete nullpoly;
 				}
 			}
 			else
@@ -2674,6 +2693,11 @@ void CZoneActor::UpdateUserTransform(bool update_poly)
 		{
 			cs = p->Get_best_coordinate_system();
 		}
+	}
+	else if (dynamic_cast<NullPolyhedron*>(this->GetPolyhedron()))
+	{
+		// nothing to do
+		return;
 	}
 	else
 	{

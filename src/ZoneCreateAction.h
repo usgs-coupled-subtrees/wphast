@@ -60,6 +60,9 @@ CZoneCreateAction<T>::CZoneCreateAction(CWPhastDoc* pDoc, Polyhedron* polyh, con
 	case Polyhedron::GRID_DOMAIN:
 		name = pDoc->GetNextDomainName();
 		break;
+	case Polyhedron::NONE:
+		name = pDoc->GetNextNullName();
+		break;
 	default:
 		ASSERT(FALSE);
 		name = "Unknown Polyhedron type";

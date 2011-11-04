@@ -370,7 +370,7 @@ void Zone_budget::Serialize(bool bStoring, hid_t loc_id)
 void Zone_budget::Serialize(CArchive& ar)
 {
 	static const char szZone_budget[] = "Zone_budget";
-	static int version = 2;
+	static int version = 3;
 
 	CString type;
 	int ver = version;
@@ -416,6 +416,51 @@ void Zone_budget::Serialize(CArchive& ar)
 			CString str;
 			ar >> str;
 			this->filename_heads = str;
+		}
+	}
+
+	if (version >= 3)
+	{
+		if (ar.IsStoring())
+		{
+			type = "<combos>";
+			ar << type;
+
+			unsigned int n = (unsigned int)this->Get_combo().size();
+			ar << n;
+
+			if (this->Get_combo().size())
+			{
+				std::vector<int>::const_iterator cit = this->Get_combo().begin();
+				for (; cit != this->Get_combo().end(); ++cit)
+				{
+					int n = (*cit);
+					ar << n;
+				}
+			}
+
+			type = "</combos>";
+			ar << type;
+		}
+		else
+		{
+			ar >> type;
+			ASSERT(type.Compare("<combos>") == 0);
+
+			unsigned int n;
+			ar >> n;
+			if (n > 0)
+			{
+				int v;
+				for (unsigned int i = 0; i < n; ++i)
+				{					
+					ar >> v;
+					this->Get_combo().push_back(v);
+				}
+			}
+
+			ar >> type;
+			ASSERT(type.Compare("</combos>") == 0);
 		}
 	}
 

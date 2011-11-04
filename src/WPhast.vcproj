@@ -568,6 +568,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\FileRecreateDialog.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\FlowOnly.cpp"
 				>
 			</File>
@@ -873,6 +877,10 @@
 			</File>
 			<File
 				RelativePath="NewZoneWidget.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\NullPolyhedron.cpp"
 				>
 			</File>
 			<File
@@ -4481,13 +4489,6 @@
 					RelativePath=".\TestHDFFile.cpp"
 					>
 					<FileConfiguration
-						Name="cppunit|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
 						Name="AutoRelease|Win32"
 						ExcludedFromBuild="true"
 						>
@@ -4943,6 +4944,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\FileRecreateDialog.h"
+				>
+			</File>
+			<File
 				RelativePath="FlowOnly.h"
 				>
 			</File>
@@ -5220,6 +5225,10 @@
 			</File>
 			<File
 				RelativePath="NewZoneWidget.h"
+				>
+			</File>
+			<File
+				RelativePath=".\NullPolyhedron.h"
 				>
 			</File>
 			<File

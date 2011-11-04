@@ -106,20 +106,18 @@ public:
 	static herr_t HDFSerializeCells(bool bStoring, hid_t loc_id, const char* szName, vtkCellArray *&pCells);
 
 	static herr_t HDFSerializeData_source(bool bStoring, hid_t loc_id, const char* szName, Data_source &rData_source);
-// COMMENT: {10/21/2008 3:15:49 PM}	static herr_t HDFSerializePerimeterOption(bool bStoring, hid_t loc_id, Prism::PERIMETER_OPTION &perimeter_option);
 	static herr_t HDFSerializeCoordinateSystem(bool bStoring, hid_t loc_id, PHAST_Transform::COORDINATE_SYSTEM &coor_sys);
 	static herr_t HDFSerializeCoordinateSystemUser(bool bStoring, hid_t loc_id, PHAST_Transform::COORDINATE_SYSTEM &coor_sys);
 	static herr_t HDFSerializeXYCoordinateSystem(bool bStoring, hid_t loc_id, PHAST_Transform::COORDINATE_SYSTEM &coor_sys);
 	static herr_t HDFSerializeZCoordinateSystem(bool bStoring, hid_t loc_id, PHAST_Transform::COORDINATE_SYSTEM &coor_sys);
 
 	static herr_t HDFFile(bool bStoring, hid_t loc_id, const char* szName, std::string &sRelativePath, std::string &sMD5, FILETIME &ftWrite);
-
-
+	static herr_t HDFFile2(bool bStoring, hid_t loc_id, std::string &sRelativePath, std::string &sMD5, FILETIME &ftWrite);
+	static herr_t HDFFileEx(bool bStoring, hid_t loc_id, const char* szName, std::string &sRelativePath, std::string &sMD5, FILETIME &ftWrite);
 
 	static hid_t HDFCreatePolyhedronDataType(void);
 	static hid_t HDFCreateWidgetOrientationDataType(void);
 	static hid_t HDFCreateDataSourceType(void);
-// COMMENT: {10/21/2008 3:16:17 PM}	static hid_t HDFCreatePerimeterOptionType(void);
 	static hid_t HDFCreateCoordinateSystemType(void);	
 	static hid_t HDFCreatePropType(void);
 	static hid_t HDFCreateCellFace(void);

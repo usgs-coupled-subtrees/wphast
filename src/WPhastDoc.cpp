@@ -3,6 +3,12 @@
 #include "stdafx.h"
 #include "WPhast.h"
 
+#include <map>      // std::map
+#include <vector>   // std::vector
+#include <list>     // std::list
+#include <fstream>  // std::ifstream
+#include <sstream>  // std::ostringstream std::istringstream
+
 #include "WPhastDoc.h"
 #include "WPhastView.h"
 
@@ -24,16 +30,13 @@
 #include <vtkProp3DCollection.h>
 #include <vtkOutlineFilter.h>
 
-#include <vector>
-#include <list>
-#include <fstream>  // std::ifstream
-#include <sstream>  // std::ostringstream std::istringstream
 
 #include "Version.h"
 
 #include "srcinput/Filedata.h"
 #include "srcinput/Domain.h"
 #include "srcinput/Polyhedron.h"
+#include "NullPolyhedron.h"
 
 #include "Action.h"
 #include "SetMediaAction.h"
@@ -76,6 +79,7 @@
 #include "ImportWarningDialog.h"
 #include "RunDialog.h"
 #include "PerimeterDlg.h"
+#include "FileRecreateDialog.h"
 
 #include "DisplayColors.h"
 #include "PropertyTreeControlBar.h"
@@ -164,16 +168,19 @@ extern void GetDefaultHeadIC(struct Head_ic* p_head_ic);
 extern void GetDefaultChemIC(struct chem_ic* p_chem_ic);
 
 static const char szWPhast[] = "WPhast";
+static const char szFiles[]  = "Files";
 
 static const TCHAR szZoneFormat[]    = _T("Box %d");
 static const TCHAR szWedgeFormat[]   = _T("Wedge %d");
 static const TCHAR szPrismFormat[]   = _T("Prism %d");
 static const TCHAR szDomainFormat[]  = _T("Domain %d");
+static const TCHAR szNullFormat[]    = _T("Null %d");
 
 static const TCHAR szZoneFind[]      = _T("Box ");
 static const TCHAR szWedgeFind[]     = _T("Wedge ");
 static const TCHAR szPrismFind[]     = _T("Prism ");
 static const TCHAR szDomainFind[]    = _T("Domain ");
+static const TCHAR szNullFind[]      = _T("Null ");
 
 
 int error_msg (const char *err_str, const int stop);
@@ -759,14 +766,11 @@ void CWPhastDoc::Serialize(CArchive& ar)
 			status = ::H5Gclose(wphast_id);
 			ASSERT(status >= 0);
 		}
-// COMMENT: {10/18/2011 11:06:40 PM}		//{{{{
-// COMMENT: {10/18/2011 11:06:40 PM}		std::string errors;
-// COMMENT: {10/18/2011 11:06:40 PM}		if (this->ValidateData_sources(pFile, errors))
-// COMMENT: {10/18/2011 11:06:40 PM}		{
-// COMMENT: {10/18/2011 11:06:40 PM}			//::AfxMessageBox(errors.c_str());
-// COMMENT: {10/18/2011 11:06:40 PM}			//::AfxThrowUserException();
-// COMMENT: {10/18/2011 11:06:40 PM}		}
-// COMMENT: {10/18/2011 11:06:40 PM}		//}}}}
+
+		// pull in the external files
+		//
+		std::map<CString, CString> notused;
+		this->SerializeFiles(bStoring, pFile->GetHID(), notused);
 	}
 	else
 	{
@@ -808,10 +812,23 @@ void CWPhastDoc::Serialize(CArchive& ar)
 		ASSERT(pFile->GetHID() > 0);
 		if (pFile->GetHID() < 0) return;
 
+		// push out the external files (if missing)
+		ASSERT(this->GetOriginal2New().size() == 0);
+		this->GetOriginal2New().clear();
+		this->SerializeFiles(bStoring, pFile->GetHID(), this->GetOriginal2New());
+
 		// Check for missing files
 		std::string errors;
-		if (this->ValidateData_sources(pFile, errors))
+		if (this->ValidateData_sourceFiles(pFile, this->GetOriginal2New(), errors))
 		{
+			// Update StatusBar
+			//
+			if (CWnd* pWnd = ((CFrameWnd*)::AfxGetMainWnd())->GetMessageBar())
+			{
+				CString status;
+				status.LoadString(AFX_IDS_IDLEMESSAGE);
+				pWnd->SetWindowText(status);
+			}
 			::AfxMessageBox(errors.c_str());
 			::AfxThrowUserException();
 		}
@@ -954,6 +971,17 @@ void CWPhastDoc::Serialize(CArchive& ar)
 			pTree->GetDrainsNode().Expand(TVE_COLLAPSE);
 			pTree->GetZoneFlowRatesNode().Expand(TVE_COLLAPSE);
 			this->ClearSelection();
+		}
+
+		// display if files were created
+		if (::AfxGetMainWnd() && ::AfxGetMainWnd()->IsWindowVisible())
+		{
+			if (this->GetOriginal2New().size())
+			{
+				CFileRecreateDialog dlg;
+				dlg.SetOriginal2New(this->GetOriginal2New());
+				dlg.DoModal();
+			}
 		}
 	}
 
@@ -1385,7 +1413,15 @@ BOOL CWPhastDoc::OnOpenDocument(LPCTSTR lpszPathName)
 	TRACE("CWPhastDoc::OnOpenDocument(%s) GetCurrentDirectory = %s\n", lpszPathName, curdir);
 
 	BOOL bOk = CDocument::OnOpenDocument(lpszPathName);
-	this->DataSourcePathsRelativeToAbsolute(lpszPathName);
+	if (bOk)
+	{
+		if (this->GetOriginal2New().size())
+		{
+			this->SetModifiedFlag();
+		}
+		this->DataSourcePathsRelativeToAbsolute(lpszPathName);
+		this->GetOriginal2New().clear();
+	}
 
 #if ((VTK_MAJOR_VERSION >= 5) && (VTK_MINOR_VERSION >= 4))
 	this->ExecutePipeline();
@@ -2010,6 +2046,13 @@ CString CWPhastDoc::GetNextDomainName(void)
 	return str;
 }
 
+CString CWPhastDoc::GetNextNullName(void)
+{
+	CString str;
+	str.Format(szNullFormat, this->GetNextNullNumber());
+	return str;
+}
+
 int CWPhastDoc::GetNextWellNumber(void)
 {
 	std::set<int> wellNums;
@@ -2142,6 +2185,20 @@ int CWPhastDoc::GetNextDomainNumber(void)const
 {
 	std::set<int> nums;
 	this->GetUsedDomainNumbers(nums);
+	if (nums.rbegin() != nums.rend())
+	{
+		return (*nums.rbegin()) + 1;
+	}
+	else
+	{
+		return 1;
+	}
+}
+
+int CWPhastDoc::GetNextNullNumber(void)const
+{
+	std::set<int> nums;
+	this->GetUsedNullNumbers(nums);
 	if (nums.rbegin() != nums.rend())
 	{
 		return (*nums.rbegin()) + 1;
@@ -2339,6 +2396,49 @@ void CWPhastDoc::GetUsedDomainNumbers(std::set<int>& usedNums)const
 	}
 }
 
+void CWPhastDoc::GetUsedNullNumbers(std::set<int>& usedNums)const
+{
+	char *ptr;
+	CZoneActor *pZoneActor;
+	usedNums.clear();
+
+	std::list<vtkPropCollection*> collections;
+	collections.push_back(this->GetPropAssemblyMedia()->GetParts());
+	collections.push_back(this->GetPropAssemblyBC()->GetParts());
+	collections.push_back(this->GetPropAssemblyIC()->GetParts());
+	collections.push_back(this->GetPropAssemblyZoneFlowRates()->GetParts());
+
+	std::list<vtkPropCollection*>::iterator iter = collections.begin();
+	for (; iter != collections.end(); ++iter)
+	{
+		if (vtkPropCollection *pPropCollection = (*iter))
+		{
+			vtkProp *pProp = 0;
+			vtkCollectionSimpleIterator csi;
+			pPropCollection->InitTraversal(csi);
+			for (; (pProp = pPropCollection->GetNextProp(csi)); )
+			{
+				if ((pZoneActor = CZoneActor::SafeDownCast(pProp)))
+				{
+					if (pZoneActor->GetPolyhedronType() == Polyhedron::NONE)
+					{
+						// store used n_user numbers
+						//
+						std::pair< std::set<int>::iterator, bool > pr;
+						CString str = pZoneActor->GetName();
+						if (str.Find(szNullFind) == 0)
+						{
+							int n = ::strtol((const char*)str + 6, &ptr, 10);
+							pr = usedNums.insert(n);
+							ASSERT(pr.second); // duplicate?
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
 void CWPhastDoc::DataSourcePathsRelativeToAbsolute(LPCTSTR lpszPathName)
 {
 	CZoneActor *pZoneActor;
@@ -2382,7 +2482,7 @@ void CWPhastDoc::DataSourcePathsRelativeToAbsolute(LPCTSTR lpszPathName)
 					if (CICHeadZoneActor *pICHeadZoneActor = CICHeadZoneActor::SafeDownCast(pZoneActor))
 					{
 						CHeadIC headIC = pICHeadZoneActor->GetData();
-						CGlobal::PathsAbsoluteToRelative(lpszPathName, this, headIC);
+						CGlobal::PathsRelativeToAbsolute(lpszPathName, this, headIC);
 						pICHeadZoneActor->SetData(headIC);
 					}
 					if (CZoneFlowRateZoneActor *pZoneFlowActor = CZoneFlowRateZoneActor::SafeDownCast(pZoneActor))
@@ -2399,16 +2499,43 @@ void CWPhastDoc::DataSourcePathsRelativeToAbsolute(LPCTSTR lpszPathName)
 							filename = p->perimeter.Get_file_name();
 							if (filename.length() > 0)
 							{
+								if (this->GetOriginal2New().size())
+								{
+									// get new filename
+									std::map<CString, CString>::iterator it = this->GetOriginal2New().find(filename.c_str());
+									if (it != this->GetOriginal2New().end())
+									{
+										filename = it->second;
+									}
+								}
 								p->perimeter.Set_file_name(this->GetAbsolutePath(lpszPathName, filename));
 							}
 							filename = p->top.Get_file_name();
 							if (filename.length() > 0)
 							{
+								if (this->GetOriginal2New().size())
+								{
+									// get new filename
+									std::map<CString, CString>::iterator it = this->GetOriginal2New().find(filename.c_str());
+									if (it != this->GetOriginal2New().end())
+									{
+										filename = it->second;
+									}
+								}
 								p->top.Set_file_name(this->GetAbsolutePath(lpszPathName, filename));
 							}
 							filename = p->bottom.Get_file_name();
 							if (filename.length() > 0)
 							{
+								if (this->GetOriginal2New().size())
+								{
+									// get new filename
+									std::map<CString, CString>::iterator it = this->GetOriginal2New().find(filename.c_str());
+									if (it != this->GetOriginal2New().end())
+									{
+										filename = it->second;
+									}
+								}
 								p->bottom.Set_file_name(this->GetAbsolutePath(lpszPathName, filename));
 							}
 						}
@@ -2422,7 +2549,13 @@ void CWPhastDoc::DataSourcePathsRelativeToAbsolute(LPCTSTR lpszPathName)
 	std::map< std::string, Filedata * >::iterator it = Filedata::file_data_map.begin();
 	for (; it != Filedata::file_data_map.end(); ++it)
 	{
-		std::string absolute = this->GetAbsolutePath(lpszPathName, (*it).first);
+		std::string relative(it->first);
+		std::map<CString, CString>::iterator oit = this->GetOriginal2New().find(it->first.c_str());
+		if (oit != this->GetOriginal2New().end())
+		{
+			relative = oit->second;
+		}
+		std::string absolute = this->GetAbsolutePath(lpszPathName, relative);
 		temp.insert(std::map< std::string, Filedata * >::value_type(absolute, (*it).second));		
 	}
 	Filedata::file_data_map.swap(temp);
@@ -2692,8 +2825,6 @@ void CWPhastDoc::OnFileImport()
 	}
 #endif
 }
-
-int setup_grid(void);
 
 BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 {
@@ -3077,17 +3208,15 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 			// store pre-translated polyh
 			Zone_budget data(*it->second);
 			ASSERT(zb_map.find(it->second) != zb_map.end());
-			ASSERT(zb_map[it->second] || it->second->Get_polyh());
-			if (zb_map[it->second] == 0 && it->second->Get_polyh() == 0)
 			{
-				if (::AfxGetMainWnd()->IsWindowVisible())
+				if (zb_map[it->second] || it->second->Get_polyh())
 				{
-					::AfxMessageBox(_T("Warning: Empty ZONE_FLOW Not Implemented"));
+					data.Set_polyh(zb_map[it->second] ? zb_map[it->second]->clone() : it->second->Get_polyh()->clone());
 				}
-			}
-			else
-			{
-				data.Set_polyh(zb_map[it->second] ? zb_map[it->second]->clone() : it->second->Get_polyh()->clone());
+				else
+				{
+					data.Set_polyh(new NullPolyhedron());
+				}
 
 				// not undoable
 				std::auto_ptr< CZoneCreateAction<CZoneFlowRateZoneActor> > pAction(
@@ -3096,7 +3225,7 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 						data.Get_polyh(),
 						::grid_origin,
 						::grid_angle,
-						it->second->Get_polyh()->Get_description()->c_str()
+						data.Get_description().c_str()
 						)
 					);
 				pAction->GetZoneActor()->SetData(data);
@@ -7815,9 +7944,8 @@ CString CWPhastDoc::GetDefaultPathName()const
 	return path;
 }
 
-int CWPhastDoc::ValidateData_sources(CHDFMirrorFile* file, std::string &errors)
+int CWPhastDoc::ValidateData_sourceFiles(CHDFMirrorFile* file, std::map<CString, CString> &orig2new, std::string &errors)
 {
-	//{{
 	ASSERT(file->GetHID() > 0);
 	if (file->GetHID() < 0)
 	{
@@ -7825,6 +7953,130 @@ int CWPhastDoc::ValidateData_sources(CHDFMirrorFile* file, std::string &errors)
 		return 1;
 	}
 
+	std::map<CString, CString> path2fileMap;
+	if (this->GetMapOfData_sourceFiles(file->GetHID(), szWPhast, path2fileMap) != 0)
+	{
+		errors = "Unable to read " + file->GetFilePath() + ", the file may be corrupted.";
+		return 1;
+	}
+
+	// make a unique list of all files
+	std::set<CString> files;
+	std::map<CString, CString>::const_iterator cit = path2fileMap.begin();
+	for (; cit != path2fileMap.end(); ++cit)
+	{
+		std::map<CString, CString>::iterator o2nit = orig2new.find(cit->second);
+		if (o2nit == orig2new.end())
+		{
+			files.insert(cit->second);
+		}
+		else
+		{
+			files.insert(o2nit->second);
+		}
+	}
+
+	// make a list of missing files
+	std::set<CString> missing;
+	std::set<CString>::iterator it = files.begin();
+	for (; it != files.end(); ++it)
+	{
+		if (::_stricmp(ATL::ATLPath::FindExtension(*it), ".shp") == 0)
+		{
+			TCHAR path[MAX_PATH];
+			::strcpy(path, *it);
+
+			bool bShp = true;
+			bool bShx = true;
+			bool bDbf = true;
+			ATL::ATLPath::RenameExtension(path, ".shp");
+			if (ATL::ATLPath::FileExists(path))
+			{
+				bShp = false;
+			}
+			ATL::ATLPath::RenameExtension(path, ".shx");
+			if (ATL::ATLPath::FileExists(path))
+			{
+				bShx = false;
+			}
+			ATL::ATLPath::RenameExtension(path, ".dbf");
+			if (ATL::ATLPath::FileExists(path))
+			{
+				bDbf = false;
+			}
+
+			if (bShp)
+			{
+				if (bShx)
+				{
+					if (bDbf)
+					{
+						ATL::ATLPath::RenameExtension(path, ".[shp,shx,dbf]");
+					}
+					else
+					{
+						ATL::ATLPath::RenameExtension(path, ".[shp,shx]");
+					}
+					missing.insert(path);
+				}
+				else
+				{
+					if (bDbf)
+					{
+						ATL::ATLPath::RenameExtension(path, ".[shp,dbf]");
+					}
+					else
+					{
+						ATL::ATLPath::RenameExtension(path, ".shp");
+					}
+					missing.insert(path);
+				}
+			}
+			else if (bShx)
+			{
+				if (bDbf)
+				{
+					ATL::ATLPath::RenameExtension(path, ".[shx,dbf]");
+				}
+				else
+				{
+					ATL::ATLPath::RenameExtension(path, ".shx");
+				}
+				missing.insert(path);
+			}
+			else if (bDbf)
+			{
+				ATL::ATLPath::RenameExtension(path, ".dbf");
+				missing.insert(path);
+			}
+		}
+		else
+		{
+			if (!ATL::ATLPath::FileExists(*it))
+			{
+				missing.insert((*it));
+			}
+		}
+	}
+
+	// report missing files
+	if (missing.size())
+	{
+		errors = "The following files could not be found:\n";
+		std::set< CString >::const_iterator cit = missing.begin();
+		for (; cit != missing.end(); ++cit)
+		{
+			errors += (*cit) + "\n";
+		}
+		return (int)missing.size();
+	}
+
+	// no missing files
+	return 0;
+}
+
+int CWPhastDoc::GetListOfData_sourceFiles(hid_t loc_id, std::set< CString > &files)
+{
 	// the pair is used to combine hdf_path and path2fileMap
 	// into a single variable that can be passed as a cookie
 	// to the H5Ginterate callback
@@ -7839,231 +8091,594 @@ int CWPhastDoc::ValidateData_sources(CHDFMirrorFile* file, std::string &errors)
 	//
 	hdf_path = "/";
 	hdf_path += szWPhast;
-	herr_t status = ::H5Giterate(file->GetHID(), szWPhast, NULL, CWPhastDoc::H5GIterateStatic, (void *)&apair);
+	herr_t status = ::H5Giterate(loc_id, szWPhast, NULL, CWPhastDoc::H5GIterateStatic, (void *)&apair);
 	ASSERT(status >= 0);
 	if (status < 0)
 	{
-		errors = "Unable to read " + file->GetFilePath() + ", the file may be corrupted.";
-		return 1;
+		return EXIT_FAILURE;
 	}
 
 	// make a unique list of all files
-	std::set<CString> files;
 	std::map<CString, CString>::const_iterator cit = path2fileMap.begin();
 	for (; cit != path2fileMap.end(); ++cit)
 	{
 		files.insert((*cit).second);
 	}
 
-	// make a list of missing files
-	std::set<CString> missing;
-	std::set<CString>::iterator it = files.begin();
-	for (; it != files.end(); ++it)
+	return EXIT_SUCCESS;
+}
+
+int CWPhastDoc::GetMapOfData_sourceFiles(hid_t loc_id, const char *name, std::map<CString, CString> &rpath2fileMap)
+{
+	// the pair is used to combine hdf_path and path2fileMap
+	// into a single variable that can be passed as a cookie
+	// to the H5Ginterate callback
+	//
+	std::pair< CString, std::map<CString, CString> > apair;
+
+	CString &hdf_path = apair.first;
+	std::map<CString, CString> &path2fileMap = apair.second;
+
+	// hdf_path holds the current (group) path to the given group
+	// always starts with /WPhast/
+	//
+	hdf_path = "/";
+	hdf_path += name;
+	herr_t status = ::H5Giterate(loc_id, name, NULL, CWPhastDoc::H5GIterateStatic, (void *)&apair);
+	ASSERT(status >= 0);
+	if (status < 0)
 	{
-		if (!ATL::ATLPath::FileExists(*it))
-		{
-			missing.insert((*it));
-		}
+		return EXIT_FAILURE;
 	}
 
-	// report missing files
-	if (missing.size())
+	rpath2fileMap.swap(path2fileMap);
+	return EXIT_SUCCESS;
+}
+
+int CWPhastDoc::GetMapOfExternalFiles(hid_t loc_id, const char *name, std::map<CString, CString> &rpath2fileMap)
+{
+	// the pair is used to combine hdf_path and path2fileMap
+	// into a single variable that can be passed as a cookie
+	// to the H5Ginterate callback
+	//
+	std::pair< CString, std::map<CString, CString> > apair;
+
+	CString &hdf_path = apair.first;
+	std::map<CString, CString> &path2fileMap = apair.second;
+
+	// hdf_path holds the current (group) path to the given group
+	// always starts with /WPhast/
+	//
+	hdf_path = "/";
+	hdf_path += name;
+	herr_t status = ::H5Giterate(loc_id, name, NULL, CWPhastDoc::H5GIterateStatic2, (void *)&apair);
+	ASSERT(status >= 0);
+	if (status < 0)
 	{
-		errors = "The following files could not be found:\n";
-		std::set< CString>::const_iterator cit = missing.begin();
-		for (; cit != missing.end(); ++cit)
-		{
-			errors += (*cit) + "\n";
-		}
-		return (int)missing.size();
+		return EXIT_FAILURE;
 	}
 
-	// no missing files
-	return 0;
-	//}}
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	ASSERT(file->GetHID() > 0);
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	if (file->GetHID() < 0)
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	{
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}		errors = "Unable to open " + file->GetFilePath() + ", the file may be corrupted.";
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}		return 1;
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	}
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	// the pair is used to combine hdf_path and path2fileMap
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	// into a single variable that can be passed as a cookie
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	// to the H5Ginterate callback
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	//
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	std::pair< CString, std::map<CString, CString> > apair;
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	CString &hdf_path = apair.first;
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	std::map<CString, CString> &path2fileMap = apair.second;
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	// hdf_path holds the current (group) path to the given group
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	// always starts with /WPhast/
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	//
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	hdf_path = "/";
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	hdf_path += szWPhast;
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	herr_t status = ::H5Giterate(file->GetHID(), szWPhast, NULL, CWPhastDoc::H5GIterateStatic, (void *)&apair);
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	ASSERT(status >= 0);
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	if (status < 0)
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	{
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}		errors = "Unable to read " + file->GetFilePath() + ", the file may be corrupted.";
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}		return 1;
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	}
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	// make a unique list of all files
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	std::set<CString> files;
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	std::map<CString, CString>::const_iterator cit = path2fileMap.begin();
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	for (; cit != path2fileMap.end(); ++cit)
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	{
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}		files.insert((*cit).second);
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	}
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	// make a list of missing files
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	std::set<CString> missing;
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	std::set<CString>::iterator it = files.begin();
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	for (; it != files.end(); ++it)
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	{
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}		if (!ATL::ATLPath::FileExists(*it))
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}		{
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}			missing.insert((*it));
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}		}
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	}
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	// report missing files
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	if (missing.size())
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	{
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}		errors = "The following files could not be found:\n";
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}		std::set< CString>::const_iterator cit = missing.begin();
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}		for (; cit != missing.end(); ++cit)
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}		{
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}			errors += (*cit) + "\n";
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}		}
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}		return (int)missing.size();
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	}
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	// no missing files
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:46:02 PM}	return 0;
-// COMMENT: {10/11/2011 3:40:58 PM}
-// COMMENT: {10/11/2011 3:40:58 PM}	// the pair is used to combine hdf_path and path2fileMap
-// COMMENT: {10/11/2011 3:40:58 PM}	// into a single variable that can be passed as a cookie
-// COMMENT: {10/11/2011 3:40:58 PM}	// to the H5Ginterate callback
-// COMMENT: {10/11/2011 3:40:58 PM}	//
-// COMMENT: {10/11/2011 3:40:58 PM}	std::pair< CString, std::map<CString, CString> > apair;
-// COMMENT: {10/11/2011 3:40:58 PM}
-// COMMENT: {10/11/2011 3:40:58 PM}	CString &hdf_path = apair.first;
-// COMMENT: {10/11/2011 3:40:58 PM}	std::map<CString, CString> &path2fileMap = apair.second;
-// COMMENT: {10/11/2011 3:40:58 PM}
-// COMMENT: {10/11/2011 3:40:58 PM}	// hdf_path holds the current (group) path to the given group
-// COMMENT: {10/11/2011 3:40:58 PM}	// always starts with /WPhast/
-// COMMENT: {10/11/2011 3:40:58 PM}	//
-// COMMENT: {10/11/2011 3:40:58 PM}	hdf_path = "/";
-// COMMENT: {10/11/2011 3:40:58 PM}	hdf_path += szWPhast;
-// COMMENT: {10/11/2011 3:40:58 PM}	herr_t status = ::H5Giterate(file->GetHID(), szWPhast, NULL, CWPhastDoc::H5GIterateStatic, (void *)&apair);
-// COMMENT: {10/11/2011 3:40:58 PM}	ASSERT(status >= 0);
-// COMMENT: {10/11/2011 3:40:58 PM}	if (status < 0)
-// COMMENT: {10/11/2011 3:40:58 PM}	{
-// COMMENT: {10/11/2011 3:40:58 PM}		errors = "Unable to read " + file->GetFilePath() + ", the file may be corrupted.";
-// COMMENT: {10/11/2011 3:40:58 PM}		return 1;
-// COMMENT: {10/11/2011 3:40:58 PM}	}
-// COMMENT: {10/11/2011 3:40:58 PM}
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:49:36 PM}	// make a unique list of all files
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:49:36 PM}	std::set<CString> files;
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:49:36 PM}	std::map<CString, CString>::const_iterator cit = path2fileMap.begin();
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:49:36 PM}	for (; cit != path2fileMap.end(); ++cit)
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:49:36 PM}	{
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:49:36 PM}		files.insert((*cit).second);
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:49:36 PM}	}
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:49:36 PM}
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:49:36 PM}	// make a list of missing files
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:49:36 PM}	std::set<CString> missing;
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:49:36 PM}	std::set<CString>::iterator it = files.begin();
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:49:36 PM}	for (; it != files.end(); ++it)
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:49:36 PM}	{
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:49:36 PM}		if (!ATL::ATLPath::FileExists(*it))
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:49:36 PM}		{
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:49:36 PM}			missing.insert((*it));
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:49:36 PM}		}
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/6/2011 8:49:36 PM}	}
-// COMMENT: {10/11/2011 3:40:58 PM}
-// COMMENT: {10/11/2011 3:40:58 PM}
-// COMMENT: {10/11/2011 3:40:58 PM}	// Create the "/WPhast" group
-// COMMENT: {10/11/2011 3:40:58 PM}	//
-// COMMENT: {10/11/2011 3:40:58 PM}	hid_t files_id = ::H5Gcreate(file->GetHID(), "Files", 0);
-// COMMENT: {10/11/2011 3:40:58 PM}	ASSERT(files_id > 0);
-// COMMENT: {10/11/2011 3:40:58 PM}	if (files_id > 0)
-// COMMENT: {10/11/2011 3:40:58 PM}	{
-// COMMENT: {10/11/2011 3:40:58 PM}		// make a unique list of all files
-// COMMENT: {10/11/2011 3:40:58 PM}		std::set<CString> files;
-// COMMENT: {10/11/2011 3:40:58 PM}		std::map<CString, CString>::const_iterator cit = path2fileMap.begin();
-// COMMENT: {10/11/2011 3:40:58 PM}		for (; cit != path2fileMap.end(); ++cit)
-// COMMENT: {10/11/2011 3:40:58 PM}		{
-// COMMENT: {10/11/2011 3:40:58 PM}			if (ATL::ATLPath::FileExists((*cit).second))
-// COMMENT: {10/11/2011 3:40:58 PM}			{
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}				if (::strcmp_nocase(ATLPath::FindExtension((*cit).second), ".shp") == 0)
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}				{
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}					char path[MAX_PATH];
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}					::strcpy(path, (*cit).second);
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}					ATL::ATLPath::RenameExtension(path, ".shp");
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}					if (ATL::ATLPath::FileExists(path))
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}					{
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}						//{{
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}						FILETIME ftCreate, ftAccess, ftWrite;
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}						SYSTEMTIME stUTC, stLocal;
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}						TCHAR string[100];
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}						HANDLE hFile = ::CreateFile(
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}							path,                  // file to open
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}							GENERIC_READ,          // open for reading
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}							FILE_SHARE_READ,       // share for reading
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}							NULL,                  // default security
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}							OPEN_EXISTING,         // existing file only
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}							FILE_ATTRIBUTE_NORMAL, // normal file
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}							NULL);                 // no attr. template
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}						if (hFile)
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}						{
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}							// Retrieve the file times for the file.
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}							if (::GetFileTime(hFile, &ftCreate, &ftAccess, &ftWrite))
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}							{
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}								// Convert the last-write time to local time.
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}								VERIFY(::FileTimeToSystemTime(&ftWrite, &stUTC));
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}								VERIFY(::SystemTimeToTzSpecificLocalTime(NULL, &stUTC, &stLocal));
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}								// Build a string showing the date and time.
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}								::wsprintf(string, TEXT("%02d/%02d/%d  %02d:%02d"),
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}									stLocal.wMonth, stLocal.wDay, stLocal.wYear,
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}									stLocal.wHour, stLocal.wMinute);
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}							}
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}							VERIFY(::CloseHandle(hFile));
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}						}
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}						//}}
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}						CGlobal::HDFSerializeBinaryFile(true, files_id, "File0", path);
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}					}
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}					ATL::ATLPath::RenameExtension(path, ".shx");
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}					if (ATL::ATLPath::FileExists(path))
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}					{
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}						///CGlobal::HDFSerializeBinaryFile(true, files_id, "File1", (*cit).second);
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}						HDFFile(true, files_id, "File1", path);
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}					}
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}					ATL::ATLPath::RenameExtension(path, ".dbf");
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}					if (ATL::ATLPath::FileExists(path))
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}					{
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}						CGlobal::HDFSerializeBinaryFile(true, files_id, "File2", path);
-// COMMENT: {10/11/2011 3:40:58 PM}// COMMENT: {10/11/2011 3:39:46 PM}					}
-// COMMENT: {10/11/2011 3:40:58 PM}				}
-// COMMENT: {10/11/2011 3:40:58 PM}				else
-// COMMENT: {10/11/2011 3:40:58 PM}				{
-// COMMENT: {10/11/2011 3:40:58 PM}					CGlobal::HDFSerializeBinaryFile(true, files_id, "File0", (*cit).second);
-// COMMENT: {10/11/2011 3:40:58 PM}				}
-// COMMENT: {10/11/2011 3:40:58 PM}			}
-// COMMENT: {10/11/2011 3:40:58 PM}		}
-// COMMENT: {10/11/2011 3:40:58 PM}		// close WPhast group
-// COMMENT: {10/11/2011 3:40:58 PM}		status = ::H5Gclose(files_id);
-// COMMENT: {10/11/2011 3:40:58 PM}		ASSERT(status >= 0);
-// COMMENT: {10/11/2011 3:40:58 PM}	}
+	rpath2fileMap.swap(path2fileMap);
+	return EXIT_SUCCESS;
+}
 
-	return 0;
+void CWPhastDoc::SerializeFiles(bool bStoring, hid_t loc_id, std::map<CString, CString> &orig2new)
+{
+	herr_t status;
+
+	ASSERT(loc_id > 0);
+	if (loc_id < 0)
+	{
+		return;
+	}
+
+	if (bStoring)
+	{
+		// Create the "/Files" group
+		//
+		hid_t files_id = ::H5Gcreate(loc_id, szFiles, 0);
+		ASSERT(files_id > 0);
+		if (files_id > 0)
+		{
+			std::map<CString, CString> path2fileMap;
+			if (this->GetMapOfData_sourceFiles(loc_id, szWPhast, path2fileMap) == 0)
+			{
+				// make unique list of files
+				std::set<CString> ufiles;
+				std::map<CString, CString>::const_iterator cit = path2fileMap.begin();
+				for (; cit != path2fileMap.end(); ++cit)
+				{
+					ufiles.insert(cit->second);
+					TRACE("%s = %s\n", cit->first, cit->second);
+				}
+
+// COMMENT: {11/2/2011 4:30:28 PM}				size_t i = 0;
+// COMMENT: {11/2/2011 4:30:28 PM}				std::string md5;
+// COMMENT: {11/2/2011 4:30:28 PM}				FILETIME ftWrite;
+// COMMENT: {11/2/2011 4:30:28 PM}				std::set<CString>::iterator it = ufiles.begin();
+// COMMENT: {11/2/2011 4:30:28 PM}				for (; it != ufiles.end(); ++it)
+// COMMENT: {11/2/2011 4:30:28 PM}				{
+// COMMENT: {11/2/2011 4:30:28 PM}					if (::_stricmp(ATL::ATLPath::FindExtension(*it), ".shp") == 0)
+// COMMENT: {11/2/2011 4:30:28 PM}					{
+// COMMENT: {11/2/2011 4:30:28 PM}						TCHAR path[MAX_PATH];
+// COMMENT: {11/2/2011 4:30:28 PM}						::strcpy(path, *it);
+// COMMENT: {11/2/2011 4:30:28 PM}
+// COMMENT: {11/2/2011 4:30:28 PM}						ATL::ATLPath::RenameExtension(path, ".shp");
+// COMMENT: {11/2/2011 4:30:28 PM}						ostringstream oss;
+// COMMENT: {11/2/2011 4:30:28 PM}						oss << "file" << i++;
+// COMMENT: {11/2/2011 4:30:28 PM}						std::string rel_path(path);
+// COMMENT: {11/2/2011 4:30:28 PM}						status = CGlobal::HDFFile(bStoring, files_id, oss.str().c_str(), rel_path, md5, ftWrite);
+// COMMENT: {11/2/2011 4:30:28 PM}						ASSERT(status >= 0);
+// COMMENT: {11/2/2011 4:30:28 PM}						TRACE("%s = %s\n", oss.str().c_str(), rel_path.c_str());
+// COMMENT: {11/2/2011 4:30:28 PM}
+// COMMENT: {11/2/2011 4:30:28 PM}						ATL::ATLPath::RenameExtension(path, ".shx");
+// COMMENT: {11/2/2011 4:30:28 PM}						ostringstream oss2;
+// COMMENT: {11/2/2011 4:30:28 PM}						oss2 << "file" << i++;
+// COMMENT: {11/2/2011 4:30:28 PM}						rel_path = path;
+// COMMENT: {11/2/2011 4:30:28 PM}						status = CGlobal::HDFFile(bStoring, files_id, oss2.str().c_str(), rel_path, md5, ftWrite);
+// COMMENT: {11/2/2011 4:30:28 PM}						ASSERT(status >= 0);
+// COMMENT: {11/2/2011 4:30:28 PM}						TRACE("%s = %s\n", oss.str().c_str(), rel_path.c_str());
+// COMMENT: {11/2/2011 4:30:28 PM}
+// COMMENT: {11/2/2011 4:30:28 PM}						ATL::ATLPath::RenameExtension(path, ".dbf");
+// COMMENT: {11/2/2011 4:30:28 PM}						ostringstream oss3;
+// COMMENT: {11/2/2011 4:30:28 PM}						oss3 << "file" << i++;
+// COMMENT: {11/2/2011 4:30:28 PM}						rel_path = path;
+// COMMENT: {11/2/2011 4:30:28 PM}						status = CGlobal::HDFFile(bStoring, files_id, oss3.str().c_str(), rel_path, md5, ftWrite);
+// COMMENT: {11/2/2011 4:30:28 PM}						ASSERT(status >= 0);
+// COMMENT: {11/2/2011 4:30:28 PM}						TRACE("%s = %s\n", oss.str().c_str(), rel_path.c_str());
+// COMMENT: {11/2/2011 4:30:28 PM}					}
+// COMMENT: {11/2/2011 4:30:28 PM}					else
+// COMMENT: {11/2/2011 4:30:28 PM}					{
+// COMMENT: {11/2/2011 4:30:28 PM}						ostringstream oss;
+// COMMENT: {11/2/2011 4:30:28 PM}						oss << "file" << i++;
+// COMMENT: {11/2/2011 4:30:28 PM}						std::string rel_path(*it);
+// COMMENT: {11/2/2011 4:30:28 PM}						status = CGlobal::HDFFile(bStoring, files_id, oss.str().c_str(), rel_path, md5, ftWrite);
+// COMMENT: {11/2/2011 4:30:28 PM}						ASSERT(status >= 0);
+// COMMENT: {11/2/2011 4:30:28 PM}						TRACE("%s = %s\n", oss.str().c_str(), rel_path.c_str());
+// COMMENT: {11/2/2011 4:30:28 PM}					}
+// COMMENT: {11/2/2011 4:30:28 PM}				}
+
+				size_t i = 0;
+				std::string md5;
+				FILETIME ftWrite;
+				std::set<CString>::iterator it = ufiles.begin();
+				for (; it != ufiles.end(); ++it)
+				{
+					ostringstream oss;
+					oss << "file" << i++;
+					std::string rel_path(*it);
+					status = CGlobal::HDFFileEx(bStoring, files_id, oss.str().c_str(), rel_path, md5, ftWrite);
+					ASSERT(status >= 0);
+					TRACE("%s = %s\n", oss.str().c_str(), rel_path.c_str());
+				}
+			}
+			// close the /Files group
+			status = ::H5Gclose(files_id);
+			ASSERT(status >= 0);
+		}
+	}
+	else
+	{
+		// make listing of missing files
+		// 
+		// path2fileMap["hdf_path"]     = "relative_path or fullpath if different drive or network share"
+		// contains all external files
+		// --------------------------------------------------------------------------------------------
+		// path2fileMap["/Files/file0"] = "..\CapeCodPhast\ArcData\ModelExtent.shp"
+		// path2fileMap["/Files/file1"] = "D:\Documents and Settings\charlton\ModelExtent.shp"
+		// path2fileMap["/Files/file2"] = "\\srv2rcolkr\charlton\programs\phreeqc\phastpp-trunk\examples\capecod\ArcData\ModelOutline.shp"
+		//
+		// missingMap["hdf_path"]       = "relative_path or fullpath if different drive or network share"
+		// contains missing external files
+		// --------------------------------------------------------------------------------------------
+		// missingMap["/Files/file0"]   = "..\CapeCodPhast\ArcData\ModelExtent.shp"
+		// missingMap["/Files/file1"]   = "D:\Documents and Settings\charlton\ModelExtent.shp"
+		// missingMap["/Files/file2"]   = "\\srv2rcolkr\charlton\programs\phreeqc\phastpp-trunk\examples\capecod\ArcData\ModelOutline.shp"
+		//
+		std::set<CString> unique;
+		std::map<CString, CString> path2fileMap;
+		std::map<CString, CString> missingMap;
+		if (this->GetMapOfExternalFiles(loc_id, szFiles, path2fileMap) == 0)
+		{
+			std::map<CString, CString>::iterator it = path2fileMap.begin();
+			for (; it != path2fileMap.end(); ++it)
+			{
+				TRACE("%s\n", it->second);
+				if (ATL::ATLPath::FileExists(it->second))
+				{
+					VERIFY(unique.insert(it->second).second);
+				}
+				else
+				{
+					VERIFY(missingMap.insert(std::map<CString, CString>::value_type(it->first, it->second)).second);
+				}
+			}
+		}
+
+		if (missingMap.size() == 0) return; // nothing to do
+
+		// CWD
+		TCHAR cwd[MAX_PATH];
+		VERIFY(::GetCurrentDirectory(MAX_PATH, cwd));
+		const TCHAR* const szCwd = cwd;
+
+		// set new missingMap paths
+		// missingMap["hdf_path"]     = "new_path"
+		// --------------------------------------------------------------------------------------------
+		// missingMap["/Files/file0"] = "CapeCodPhast\ArcData\ModelExtent.shp"
+		// missingMap["/Files/file1"] = "..\CapeCodPhast\ArcData\ModelExtent.shp"
+		// missingMap["/Files/file2"] = "D:\Documents and Settings\charlton\ModelExtent.shp"
+		// missingMap["/Files/file3"] = "\\srv2rcolkr\charlton\programs\phreeqc\phastpp-trunk\examples\capecod\ArcData\ModelOutline.shp"
+		// becomes
+		// missingMap["/Files/file0"] = "CapeCodPhast\ArcData\ModelExtent.shp"
+		// missingMap["/Files/file1"] = "CapeCodPhast\ArcData\ModelExtent.1.shp"
+		// missingMap["/Files/file2"] = "D\ModelExtent.shp"
+		// missingMap["/Files/file3"] = "srv2rcolkr\charlton\ModelOutline.shp"
+		//
+		// create orig2new
+		// orig2new["orig_path"] = "new_path"
+		// --------------------------------------------------------------------------------------------
+		// orig2new["CapeCodPhast\ArcData\ModelExtent.shp"]   =   "CapeCodPhast\ArcData\ModelExtent.shp"
+		// orig2new["..\CapeCodPhast\ArcData\ModelExtent.shp"]   =   "CapeCodPhast\ArcData\ModelExtent.1.shp"
+		// orig2new["D:\Documents and Settings\charlton\ModelExtent.shp"]   =   "D\ModelExtent.shp"
+		// orig2new["\\srv2rcolkr\charlton\programs\phreeqc\phastpp-trunk\examples\capecod\ArcData\ModelOutline.shp"]   =   "srv2rcolkr\charlton\ModelOutline.shp"
+		//
+		// create unique -- contains list of existing files and files that
+		// will exist
+		// --------------------------------------------------------------------------------------------
+		// unique["CapeCodPhast\ArcData\ModelExtent.shp"]
+		// unique["CapeCodPhast\ArcData\ModelExtent.1.shp"]
+		// unique["CapeCodPhast\ArcData\ModelExtent.2.shp"]
+		//
+		std::map<CString, CString>::iterator mit = missingMap.begin();
+		for (; mit != missingMap.end(); ++mit)
+		{
+			CString orig_name(mit->second);
+			CString new_name;
+			TCHAR szDrive[_MAX_DRIVE];
+			TCHAR szDir[_MAX_DIR];
+			TCHAR szFName[_MAX_FNAME];
+			TCHAR szExt[_MAX_EXT];
+			do
+			{
+				// remove '..' from missing files if path doesn't exist
+				std::string r(mit->second);
+				VERIFY(::_tsplitpath_s(r.c_str(), szDrive, _MAX_DRIVE, szDir, _MAX_DIR, szFName, _MAX_FNAME, szExt, _MAX_EXT) == 0);
+				std::string d = CGlobal::FullPath(szDir);
+				if (!ATL::ATLPath::IsDirectory(d.c_str()))
+				{
+					if (r.find("..") == 0 && r.size() > 3)
+					{
+						mit->second = r.substr(3).c_str();
+						new_name = mit->second;
+					}
+					else
+					{
+						break;
+					}
+				}
+				else
+				{
+					break;
+				}
+			}
+			while (true);
+
+			// check if file is on a different drive or network share
+			if (!ATL::ATLPath::IsRelative(mit->second))
+			{
+				// file is on another drive or a network share
+
+				// FullPath
+				TCHAR szFullPath[MAX_PATH];
+				::strcpy_s(szFullPath, MAX_PATH, szCwd);
+
+				VERIFY(::_tsplitpath_s(mit->second, szDrive, _MAX_DRIVE, szDir, _MAX_DIR, szFName, _MAX_FNAME, szExt, _MAX_EXT) == 0);
+
+				if (ATL::ATLPath::IsUNC(mit->second))
+				{
+					//
+					// \\srv2rcolkr\charlton\programs\phreeqc\phastpp-trunk\examples\capecod\ArcData\ModelOutline.shp
+					// becomes
+					// <CWD>\srv2rcolkr\charlton\ModelOutline.shp
+					//
+
+					CString drive(szDrive);
+					ASSERT(drive.IsEmpty());
+
+					// \\srv2rcolkr\charlton (the share name)
+					TCHAR root[MAX_PATH];
+					::strcpy_s(root, MAX_PATH, mit->second);
+					ATL::ATLPath::StripToRoot(root);
+					ASSERT(::strlen(root) > 2 && root[0] == '\\' && root[1] == '\\');
+					TRACE("%s\n", root);
+
+					// <CWD>\srv2rcolkr\charlton
+					VERIFY(ATL::ATLPath::Append(ATL::ATLPath::AddBackslash(szFullPath), root+2));
+					TRACE("%s\n", szFullPath);
+
+					// ModelOutline.shp
+					TCHAR fn[MAX_PATH];
+					::strcpy_s(fn, MAX_PATH, mit->second);
+					ATL::ATLPath::StripPath(fn);
+					TRACE("%s\n", fn);
+
+					// <CWD>\srv2rcolkr\charlton\ModelOutline.shp
+					VERIFY(ATL::ATLPath::Append(ATL::ATLPath::AddBackslash(szFullPath), fn));
+					TRACE("%s\n", szFullPath);
+
+					// final new name
+					// srv2rcolkr\charlton\ModelOutline.shp
+					TCHAR szRelative[MAX_PATH];
+					VERIFY(ATL::ATLPath::RelativePathTo(szRelative, szCwd, FILE_ATTRIBUTE_DIRECTORY, szFullPath, FILE_ATTRIBUTE_NORMAL));
+					if (::strlen(szRelative) > 2 && szRelative[0] == '.' && szRelative[1] == '\\')
+					{
+						new_name = szRelative+2;
+					}
+					else
+					{
+						new_name = szRelative;
+					}
+					TRACE("%s\n", new_name);
+				}
+				else
+				{
+					//
+					// D:\Documents and Settings\charlton\ModelExtent.shp
+					// becomes
+					// <CWD>\D\ModelExtent.shp
+					//
+
+					// D (drive)
+					CString drive(szDrive);
+					ASSERT(drive.GetLength() == 2 && drive[1] == ':');
+					TRACE("%s\n", (const char*)drive.Mid(0, 1));
+
+					// <CWD>\D
+					VERIFY(ATL::ATLPath::Append(ATL::ATLPath::AddBackslash(szFullPath), drive.Mid(0, 1)));
+					TRACE("%s\n", szFullPath);
+
+					// ModelExtent.shp
+					TCHAR fn[MAX_PATH];
+					::strcpy_s(fn, MAX_PATH, mit->second);
+					ATL::ATLPath::StripPath(fn);
+					TRACE("%s\n", fn);
+
+					// <CWD>\D\ModelExtent.shp
+					VERIFY(ATL::ATLPath::Append(ATL::ATLPath::AddBackslash(szFullPath), fn));
+					TRACE("%s\n", szFullPath);
+
+					// final new name
+					// srv2rcolkr\charlton\ModelOutline.shp
+					TCHAR szRelative[MAX_PATH];
+					VERIFY(ATL::ATLPath::RelativePathTo(szRelative, szCwd, FILE_ATTRIBUTE_DIRECTORY, szFullPath, FILE_ATTRIBUTE_NORMAL));
+					if (::strlen(szRelative) > 2 && szRelative[0] == '.' && szRelative[1] == '\\')
+					{
+						new_name = szRelative+2;
+					}
+					else
+					{
+						new_name = szRelative;
+					}
+					TRACE("%s\n", new_name);
+				}
+			}
+
+			if (new_name.IsEmpty())
+			{
+				ASSERT(ATL::ATLPath::IsRelative(orig_name));
+				if (unique.find(orig_name) != unique.end())
+				{
+					// orig_name is going to exist after serializing
+					// so must rename
+
+					VERIFY(::_tsplitpath_s(orig_name, szDrive, _MAX_DRIVE, szDir, _MAX_DIR, szFName, _MAX_FNAME, szExt, _MAX_EXT) == 0);
+
+					BOOL bExists;
+					TCHAR szRelative[MAX_PATH];
+					if (::_stricmp(szExt, "shp") == 0)
+					{
+						///TCHAR szRelativeSHP[MAX_PATH];
+						TCHAR szRelativeSHX[MAX_PATH];
+						TCHAR szRelativeDBF[MAX_PATH];
+						int i = 0;
+						do
+						{
+							new_name.Format("%s.%d", szFName, ++i);		
+							VERIFY(::_tmakepath_s(szRelative,    MAX_PATH, szDrive, szDir, new_name, "shp") == 0);
+							VERIFY(::_tmakepath_s(szRelativeSHX, MAX_PATH, szDrive, szDir, new_name, "shx") == 0);
+							VERIFY(::_tmakepath_s(szRelativeDBF, MAX_PATH, szDrive, szDir, new_name, "dbf") == 0);
+							bExists = ATL::ATLPath::FileExists(szRelative)
+								|| ATL::ATLPath::FileExists(szRelativeSHX)
+								|| ATL::ATLPath::FileExists(szRelativeDBF);
+						}
+						while (bExists || unique.find(szRelative) != unique.end());
+					}
+					else
+					{
+						int i = 0;
+						do
+						{
+							new_name.Format("%s.%d", szFName, ++i);		
+							VERIFY(::_tmakepath_s(szRelative, MAX_PATH, szDrive, szDir, new_name, szExt) == 0);
+							bExists = ATL::ATLPath::FileExists(szRelative);
+						}
+						while (bExists || unique.find(szRelative) != unique.end());
+					}
+					
+					// check and strip '.\' from beginning
+					if (::strlen(szRelative) > 2 && szRelative[0] == '.' && szRelative[1] == '\\')
+					{
+						new_name = szRelative+2;
+					}
+					else
+					{
+						new_name = szRelative;
+					}
+					TRACE("%s\n", new_name);
+
+					// add to list of files
+					ASSERT(ATL::ATLPath::IsRelative(new_name));
+					VERIFY(unique.insert(new_name).second);
+
+					// swap new_names in orig2new
+					std::map<CString, CString>::iterator search = orig2new.begin();
+					for (; search != orig2new.end(); ++search)
+					{
+						if (search->second.Compare(orig_name) == 0)
+						{
+							search->second = new_name;
+							break;
+						}
+					}
+					// swap new_names in missingMap
+					search = missingMap.begin();
+					for (; search != missingMap.end(); ++search)
+					{
+						if (search->second.Compare(orig_name) == 0)
+						{
+							search->second = new_name;
+							break;
+						}
+					}
+
+					// map original name to new name
+					VERIFY(orig2new.insert(std::map<CString, CString>::value_type(orig_name, orig_name)).second);
+				}
+				else
+				{
+					// add to list of files
+					VERIFY(unique.insert(orig_name).second);
+					ASSERT(mit->second.Compare(orig_name) == 0);
+
+					// map original name to new name
+					VERIFY(orig2new.insert(std::map<CString, CString>::value_type(orig_name, orig_name)).second);
+				}
+			}
+			else
+			{
+				if (unique.find(new_name) != unique.end() || ATL::ATLPath::FileExists(new_name))
+				{
+					// new_name already exists or is going to exist after serializing
+					// so must rename file
+
+					VERIFY(::_tsplitpath_s(new_name, szDrive, _MAX_DRIVE, szDir, _MAX_DIR, szFName, _MAX_FNAME, szExt, _MAX_EXT) == 0);
+
+					BOOL bExists;
+					TCHAR szRelative[MAX_PATH];
+					if (::_stricmp(szExt, "shp") == 0)
+					{
+						///TCHAR szRelativeSHP[MAX_PATH];
+						TCHAR szRelativeSHX[MAX_PATH];
+						TCHAR szRelativeDBF[MAX_PATH];
+						int i = 0;
+						do
+						{
+							new_name.Format("%s.%d", szFName, ++i);		
+							VERIFY(::_tmakepath_s(szRelative,    MAX_PATH, szDrive, szDir, new_name, "shp") == 0);
+							VERIFY(::_tmakepath_s(szRelativeSHX, MAX_PATH, szDrive, szDir, new_name, "shx") == 0);
+							VERIFY(::_tmakepath_s(szRelativeDBF, MAX_PATH, szDrive, szDir, new_name, "dbf") == 0);
+							bExists = ATL::ATLPath::FileExists(szRelative)
+								|| ATL::ATLPath::FileExists(szRelativeSHX)
+								|| ATL::ATLPath::FileExists(szRelativeDBF);
+						}
+						while (bExists || unique.find(szRelative) != unique.end());
+					}
+					else
+					{
+						int i = 0;
+						do
+						{
+							new_name.Format("%s.%d", szFName, ++i);		
+							VERIFY(::_tmakepath_s(szRelative, MAX_PATH, szDrive, szDir, new_name, szExt) == 0);
+							bExists = ATL::ATLPath::FileExists(szRelative);
+						}
+						while (bExists || unique.find(szRelative) != unique.end());
+					}
+
+// COMMENT: {11/3/2011 3:14:51 PM}					TCHAR szRelative[MAX_PATH];
+// COMMENT: {11/3/2011 3:14:51 PM}					int i = 0;
+// COMMENT: {11/3/2011 3:14:51 PM}					do
+// COMMENT: {11/3/2011 3:14:51 PM}					{
+// COMMENT: {11/3/2011 3:14:51 PM}						new_name.Format("%s.%d", szFName, ++i);		
+// COMMENT: {11/3/2011 3:14:51 PM}						VERIFY(::_tmakepath_s(szRelative, MAX_PATH, szDrive, szDir, new_name, szExt) == 0);
+// COMMENT: {11/3/2011 3:14:51 PM}					}
+// COMMENT: {11/3/2011 3:14:51 PM}					while (ATL::ATLPath::FileExists(szRelative) || unique.find(szRelative) != unique.end());
+
+					// make new_name relative to CWD
+					if (::strlen(szRelative) > 2 && szRelative[0] == '.' && szRelative[1] == '\\')
+					{
+						new_name = szRelative+2;
+					}
+					else
+					{
+						new_name = szRelative;
+					}
+					TRACE("%s\n", new_name);
+					ASSERT(ATL::ATLPath::IsRelative(new_name));
+				}
+				// add to list of files
+				ASSERT(ATL::ATLPath::IsRelative(new_name));
+				VERIFY(unique.insert(new_name).second);
+
+				// map original name to new name
+				VERIFY(orig2new.insert(std::map<CString, CString>::value_type(orig_name, new_name)).second);
+				mit->second = new_name;
+			}
+		}
+
+		// create directories that don't exist
+		// SHCreateDirectoryEx creates all paths including missing children
+		std::map<CString, CString>::iterator it = missingMap.begin();
+		for (; it != missingMap.end(); ++it)
+		{
+			if (it->first.Find("/SHX/") != -1) continue;
+			if (it->first.Find("/DBF/") != -1) continue;
+
+			ASSERT(std::string(it->second).find("..") != 0);
+			TCHAR szDrive[_MAX_DRIVE];
+			TCHAR szDir[_MAX_DIR];
+			TCHAR szFName[_MAX_FNAME];
+			TCHAR szExt[_MAX_EXT];
+
+			VERIFY(::_tsplitpath_s(it->second, szDrive, _MAX_DRIVE, szDir, _MAX_DIR, szFName, _MAX_FNAME, szExt, _MAX_EXT) == 0);
+			std::string d = CGlobal::FullPath(szDir);
+			if (!ATL::ATLPath::IsDirectory(d.c_str()))
+			{
+				int n = ::SHCreateDirectoryEx(0, d.c_str(), 0);
+				if (n != ERROR_SUCCESS)
+				{
+					ASSERT(FALSE);
+				}
+			}
+		}
+
+		// Open the "/Files" group
+		hid_t files_id = ::H5Gopen(loc_id, szFiles);
+		ASSERT(files_id > 0);
+		if (files_id > 0)
+		{
+			// write missing files
+			std::map<CString, CString>::iterator it = missingMap.begin();
+			for (; it != missingMap.end(); ++it)
+			{
+				if (it->first.Find("/SHX/") != -1) continue;
+				if (it->first.Find("/DBF/") != -1) continue;
+
+				std::string md5;
+				FILETIME ftWrite;
+				std::string rel_path(it->second);
+				ASSERT(ATL::ATLPath::IsRelative(it->second));
+// COMMENT: {11/3/2011 3:16:06 PM}				status = CGlobal::HDFFile(bStoring, files_id, it->first, rel_path, md5, ftWrite);
+				status = CGlobal::HDFFileEx(bStoring, files_id, it->first, rel_path, md5, ftWrite);
+				ASSERT(status >= 0);
+			}
+
+			// close the /Files group
+			status = ::H5Gclose(files_id);
+			ASSERT(status >= 0);
+		}
+	}
 }
 
 herr_t CWPhastDoc::H5GIterateStatic(hid_t loc_id, const char *name, void *cookie)
@@ -8112,4 +8727,59 @@ herr_t CWPhastDoc::H5GIterateStatic(hid_t loc_id, const char *name, void *cookie
 	}
 
 	return 0; // continue iterating
+}
+
+herr_t CWPhastDoc::H5GIterateStatic2(hid_t loc_id, const char *name, void *cookie)
+{
+	// this is called recursively to build the pathways to all of
+	// the "RelativePath" datasets (see ValidateData_sources)
+	// skips over DBF and SHX groups
+
+	static const char szRelativePath[] = "RelativePath";
+
+	ASSERT(cookie);
+	std::pair< CString, std::map<CString, CString> > *ppair =
+		static_cast< std::pair< CString, std::map<CString, CString> > *>(cookie);
+
+	CString &hdf_path = ppair->first;
+	std::map<CString, CString> &path2fileMap = ppair->second;
+
+    H5G_stat_t statbuf;
+	herr_t status = ::H5Gget_objinfo(loc_id, name, FALSE, &statbuf);
+	ASSERT(status >= 0);
+
+	switch (statbuf.type)
+	{
+	case H5G_GROUP:
+		hdf_path += "/";
+		hdf_path += name;
+		if (::strcmp(name, "DBF") && ::strcmp(name, "SHX"))
+		{
+			status = ::H5Giterate(loc_id, name, NULL, CWPhastDoc::H5GIterateStatic2, (void *)cookie);
+		}
+		hdf_path = hdf_path.Left(hdf_path.GetLength() - (int)::strlen(name) - 1);
+		break;
+	case H5G_DATASET:
+		if (::strcmp(szRelativePath, name) == 0)
+		{
+			std::string filename;
+			status = CGlobal::HDFSerializeString(false, loc_id, szRelativePath, filename);
+			ASSERT(status >= 0);
+
+			CString path(hdf_path);
+			path2fileMap.insert(std::map<CString, CString>::value_type(path, CString(filename.c_str()))); 
+		}
+		break;
+	case H5G_TYPE:
+		break;
+	default:
+		break;
+	}
+
+	return 0; // continue iterating
+}
+
+std::map<CString, CString>& CWPhastDoc::GetOriginal2New(void)
+{
+	return this->Original2New;
 }

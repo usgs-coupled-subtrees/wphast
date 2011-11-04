@@ -465,6 +465,155 @@ void CTimeSeries<T>::Serialize(bool bStoring, hid_t loc_id)
 	}
 }
 
+// specialization for Cproperty
+// different from template by minimizing series 
+// with XYZT types
+//
+template<>
+void CTimeSeries<Cproperty>::Serialize(bool bStoring, hid_t loc_id)
+{
+	static const char szSteps[]       = "Steps";
+	static const char szStepsFormat[] = "Step %d";
+
+	static const char szCtime[]       = "Ctime";
+	static const char szCproperty[]   = "Cproperty";
+
+
+	hid_t  step_id;
+	hid_t  time_id;
+	hid_t  prop_id;
+
+	herr_t status;
+
+  	ASSERT(this);
+
+	if (bStoring)
+	{
+		if (this->size())
+		{
+			std::list<LPCTSTR> listNames;
+			CString* arrName = new CString[this->size()];
+
+			std::string fname;
+			bool bLastWasXYZT = false;
+			CTimeSeries<Cproperty>::iterator iter = this->begin();
+			for (size_t i = 0; iter != this->end(); ++iter)
+			{
+				ASSERT(iter->second.type != PROP_UNDEFINED);
+				if (iter->second.type == PROP_UNDEFINED) continue;
+				if (bLastWasXYZT && iter->second.type == PROP_XYZT && (fname == iter->second.data_source->Get_file_name())) continue;
+
+				arrName[i].Format(szStepsFormat, i++);
+
+				// Create the "Step %d" group
+				step_id = ::H5Gcreate(loc_id, arrName[i], 0);
+				ASSERT(step_id > 0);
+				if (step_id > 0)
+				{
+					// Create the szCtime group
+					time_id = ::H5Gcreate(step_id, szCtime, 0);
+					ASSERT(time_id > 0);
+					if (time_id > 0)
+					{
+						// first is const
+						Ctime t(iter->first);
+						t.Serialize(bStoring, time_id);
+						status = ::H5Gclose(time_id);
+						ASSERT(status >= 0);
+					}
+					else
+					{
+						continue;
+					}
+
+					// Create the szCproperty group
+					prop_id = ::H5Gcreate(step_id, szCproperty, 0);
+					ASSERT(prop_id > 0);
+					if (prop_id > 0)
+					{
+						iter->second.Serialize(bStoring, prop_id);
+						status = ::H5Gclose(prop_id);
+						ASSERT(status >= 0);
+					}
+					else
+					{
+						continue;
+					}
+
+					status = ::H5Gclose(step_id);
+					ASSERT(status >= 0);
+
+					listNames.push_back(arrName[i]);
+				}
+
+				if (iter->second.type == PROP_XYZT)
+				{
+					fname = iter->second.data_source->Get_file_name();
+					ASSERT(fname.size());
+					bLastWasXYZT = true;
+				}
+				else
+				{
+					bLastWasXYZT = false;
+				}
+			}
+
+			CGlobal::WriteList(loc_id, szSteps, listNames);
+			delete[] arrName;
+		}
+	}
+	else
+	{
+		std::list<std::string> listNames;
+		CGlobal::ReadList(loc_id, szSteps, listNames);
+		std::list<std::string>::iterator iter = listNames.begin();
+		for (; iter != listNames.end(); ++iter)
+		{
+			Ctime t;
+			Cproperty p;
+
+			// Open the "Step %d" group
+			step_id = ::H5Gopen(loc_id, (*iter).c_str());
+			ASSERT(step_id > 0);
+			if (step_id > 0)
+			{
+				// Open the szCtime group
+				time_id = ::H5Gopen(step_id, szCtime);
+				ASSERT(time_id > 0);
+				if (time_id > 0)
+				{
+					t.Serialize(bStoring, time_id);
+					status = ::H5Gclose(time_id);
+					ASSERT(status >= 0);
+				}
+				else
+				{
+					continue;
+				}
+
+				// Open the szCproperty group
+				prop_id = ::H5Gopen(step_id, szCproperty);
+				ASSERT(prop_id > 0);
+				if (prop_id > 0)
+				{
+					p.Serialize(bStoring, prop_id);
+					status = ::H5Gclose(prop_id);
+					ASSERT(status >= 0);
+				}
+				else
+				{
+					continue;
+				}
+
+				status = ::H5Gclose(step_id);
+				ASSERT(status >= 0);
+
+				(*this)[t] = p;
+			}
+		}
+	}
+}
+
 template<typename T>
 void CTimeSeries<T>::Serialize(CArchive& ar)
 {

@@ -149,17 +149,20 @@ public:
 	void GetUsedPrismNumbers(std::set<int>& usedNums)const;
 	void GetUsedZoneFlowRatesNumbers(std::set<int>& usedNums)const;
 	void GetUsedDomainNumbers(std::set<int>& usedNums)const;
+	void GetUsedNullNumbers(std::set<int>& usedNums)const;
 
 	int GetNextZoneNumber(void)const;
 	int GetNextWedgeNumber(void)const;
 	int GetNextPrismNumber(void)const;
 	int GetNextZoneFlowRatesNumber(void)const;
 	int GetNextDomainNumber(void)const;
+	int GetNextNullNumber(void)const;
 
 	CString GetNextZoneName(void);
 	CString GetNextWedgeName(void);
 	CString GetNextPrismName(void);
 	CString GetNextDomainName(void);
+	CString GetNextNullName(void);
 
 	void Edit(CGridActor* pGridActor);
 	void ModifyGrid(CGridActor* gridActor, CGridElementsSelector* gridElementsSelector);
@@ -219,6 +222,8 @@ public:
 	void DataSourcePathsAbsoluteToRelative(LPCTSTR lpszPathName);
 	std::string GetRelativePath(LPCTSTR lpszPathName, const std::string src_path)const;
 	std::string GetAbsolutePath(LPCTSTR lpszPathName, const std::string relative_path)const;
+
+	std::map<CString, CString>& GetOriginal2New(void);
 
 protected:
 	void InternalAdd(CZoneActor *pZoneActor, bool bAdd, HTREEITEM hInsertAfter = TVI_LAST);
@@ -328,10 +333,17 @@ protected:
 	void SerializeRivers(bool bStoring, hid_t loc_id);
 	void SerializeDrains(bool bStoring, hid_t loc_id);
 	void SerializeZoneFlowRates(bool bStoring, hid_t loc_id);
+	
+	void SerializeFiles(bool bStoring, hid_t loc_id, std::map<CString, CString> &orig2new);
 
-	int ValidateData_sources(CHDFMirrorFile* file, std::string &errors);
+	int GetListOfData_sourceFiles(hid_t loc_id, std::set< CString > &files);
+	int GetMapOfData_sourceFiles(hid_t loc_id, const char *name, std::map< CString, CString > &hdf2rel);
+	int GetMapOfExternalFiles(hid_t loc_id, const char *name, std::map< CString, CString > &hdf2rel);
+	int ValidateData_sourceFiles(CHDFMirrorFile* file, std::map<CString, CString> &orig2new, std::string &errors);
 	static herr_t H5GIterateStatic(hid_t loc_id, const char *name, void *opdata);
+	static herr_t H5GIterateStatic2(hid_t loc_id, const char *name, void *opdata);
 	herr_t H5GIterate(hid_t loc_id, const char *name);
+	std::map<CString, CString> Original2New;
 
 // Generated message map functions
 protected:

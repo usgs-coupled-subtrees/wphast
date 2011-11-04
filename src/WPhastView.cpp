@@ -66,6 +66,7 @@
 #include "PointSelectionObject.h"
 #include "Global.h"
 #include "srcinput/Domain.h"
+#include "NullPolyhedron.h"
 
 #include <vtkImplicitPlaneWidget.h>
 
@@ -1400,6 +1401,10 @@ void CWPhastView::Select(vtkProp *pProp)
 					this->BoxWidget->On();
 				}
 			}
+		}
+		else if (dynamic_cast<NullPolyhedron*>(pZoneActor->GetPolyhedron()))
+		{
+			this->HighlightProp(0);
 		}
 		else
 		{
