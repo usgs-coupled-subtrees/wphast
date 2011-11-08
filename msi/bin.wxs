@@ -118,7 +118,7 @@
                 <Component Id="WPhast.exe" Guid="*">
                     <File Id="WPhast.exe" KeyPath="yes" Source="$(var.BinDir)\WPhast.exe" />
                     <Class Id="36353903-2137-43FD-9AD6-40B65A96A839" Context="LocalServer32" Description="Phast for Windows Document" Advertise="yes">
-                      <ProgId Id="Phast.Document" Description="Phast.Document">
+                      <ProgId Id="Phast.Document" Description="Phast for Windows Document">
                         <Extension Id="wphast">
                           <Verb Id="open" Argument='"%1"'/>
                           <Verb Id="print" Argument='/p "%1"'/>
