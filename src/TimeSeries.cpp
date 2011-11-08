@@ -232,15 +232,15 @@ void CTimeSeries<CWellRate>::Serialize(bool bStoring, hid_t loc_id)
 		if (this->size())
 		{
 			std::list<LPCTSTR> listNames;
-			CString* arrName = new CString[this->size()];
+			CString name;
 
 			CTimeSeries<CWellRate>::iterator iter = this->begin();
 			for (size_t i = 0; iter != this->end(); ++iter, ++i)
 			{
-				arrName[i].Format(szStepsFormat, i);
+				name.Format(szStepsFormat, i);
 
 				// Create the "Step %d" group
-				step_id = ::H5Gcreate(loc_id, arrName[i], 0);
+				step_id = ::H5Gcreate(loc_id, name, 0);
 				ASSERT(step_id > 0);
 				if (step_id > 0)
 				{
@@ -277,12 +277,11 @@ void CTimeSeries<CWellRate>::Serialize(bool bStoring, hid_t loc_id)
 					status = ::H5Gclose(step_id);
 					ASSERT(status >= 0);
 
-					listNames.push_back(arrName[i]);
+					listNames.push_back(name);
 				}
 			}
 
 			CGlobal::WriteList(loc_id, szSteps, listNames);
-			delete[] arrName;
 		}
 	}
 	else
@@ -360,15 +359,15 @@ void CTimeSeries<T>::Serialize(bool bStoring, hid_t loc_id)
 		if (this->size())
 		{
 			std::list<LPCTSTR> listNames;
-			CString* arrName = new CString[this->size()];
+			CString name;
 
 			CTimeSeries<T>::iterator iter = this->begin();
 			for (size_t i = 0; iter != this->end(); ++iter, ++i)
 			{
-				arrName[i].Format(szStepsFormat, i);
+				name.Format(szStepsFormat, i);
 
 				// Create the "Step %d" group
-				step_id = ::H5Gcreate(loc_id, arrName[i], 0);
+				step_id = ::H5Gcreate(loc_id, name, 0);
 				ASSERT(step_id > 0);
 				if (step_id > 0)
 				{
@@ -405,12 +404,11 @@ void CTimeSeries<T>::Serialize(bool bStoring, hid_t loc_id)
 					status = ::H5Gclose(step_id);
 					ASSERT(status >= 0);
 
-					listNames.push_back(arrName[i]);
+					listNames.push_back(name);
 				}
 			}
 
 			CGlobal::WriteList(loc_id, szSteps, listNames);
-			delete[] arrName;
 		}
 	}
 	else
@@ -492,7 +490,7 @@ void CTimeSeries<Cproperty>::Serialize(bool bStoring, hid_t loc_id)
 		if (this->size())
 		{
 			std::list<LPCTSTR> listNames;
-			CString* arrName = new CString[this->size()];
+			CString name;
 
 			std::string fname;
 			bool bLastWasXYZT = false;
@@ -503,10 +501,10 @@ void CTimeSeries<Cproperty>::Serialize(bool bStoring, hid_t loc_id)
 				if (iter->second.type == PROP_UNDEFINED) continue;
 				if (bLastWasXYZT && iter->second.type == PROP_XYZT && (fname == iter->second.data_source->Get_file_name())) continue;
 
-				arrName[i].Format(szStepsFormat, i++);
+				name.Format(szStepsFormat, i++);
 
 				// Create the "Step %d" group
-				step_id = ::H5Gcreate(loc_id, arrName[i], 0);
+				step_id = ::H5Gcreate(loc_id, name, 0);
 				ASSERT(step_id > 0);
 				if (step_id > 0)
 				{
@@ -543,7 +541,7 @@ void CTimeSeries<Cproperty>::Serialize(bool bStoring, hid_t loc_id)
 					status = ::H5Gclose(step_id);
 					ASSERT(status >= 0);
 
-					listNames.push_back(arrName[i]);
+					listNames.push_back(name);
 				}
 
 				if (iter->second.type == PROP_XYZT)
@@ -559,7 +557,6 @@ void CTimeSeries<Cproperty>::Serialize(bool bStoring, hid_t loc_id)
 			}
 
 			CGlobal::WriteList(loc_id, szSteps, listNames);
-			delete[] arrName;
 		}
 	}
 	else
@@ -706,8 +703,8 @@ template class CTimeSeries<Cproperty>;
 template class CTimeSeries<Ctime>;
 template class CTimeSeries<CWellRate>;
 template class CTimeSeries<CRiverState>;
-///template class CTimeSeries<int>;
 
+// specialization for int
 template<>
 void CTimeSeries<int>::Serialize(bool bStoring, hid_t loc_id)
 {
@@ -731,15 +728,15 @@ void CTimeSeries<int>::Serialize(bool bStoring, hid_t loc_id)
 		if (this->size())
 		{
 			std::list<LPCTSTR> listNames;
-			CString* arrName = new CString[this->size()];
+			CString name;
 
 			CTimeSeries<int>::iterator iter = this->begin();
 			for (size_t i = 0; iter != this->end(); ++iter, ++i)
 			{
-				arrName[i].Format(szStepsFormat, i);
+				name.Format(szStepsFormat, i);
 
 				// Create the "Step %d" group
-				step_id = ::H5Gcreate(loc_id, arrName[i], 0);
+				step_id = ::H5Gcreate(loc_id, name, 0);
 				ASSERT(step_id > 0);
 				if (step_id > 0)
 				{
@@ -777,12 +774,11 @@ void CTimeSeries<int>::Serialize(bool bStoring, hid_t loc_id)
 					status = ::H5Gclose(step_id);
 					ASSERT(status >= 0);
 
-					listNames.push_back(arrName[i]);
+					listNames.push_back(name);
 				}
 			}
 
 			CGlobal::WriteList(loc_id, szSteps, listNames);
-			delete[] arrName;
 		}
 	}
 	else
