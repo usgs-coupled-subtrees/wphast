@@ -63,9 +63,9 @@ WPHAST_FILES=\
 	$(EXAMPLES)/ex4/ex4.wphast\
 	$(EXAMPLES)/ex4_ddl/ex4_ddl.wphast\
 	$(EXAMPLES)/ex4_noedl/ex4_noedl.wphast\
-	$(EXAMPLES)/ex4restart/ex4restart.wphast\
 	$(EXAMPLES)/ex4_start_time/ex4_start_time.wphast\
 	$(EXAMPLES)/ex4_transient/ex4_transient.wphast\
+	$(EXAMPLES)/ex4restart/ex4restart.wphast\
 	$(EXAMPLES)/ex5/ex5.wphast\
 	$(EXAMPLES)/ex6/ex6.wphast\
 	$(EXAMPLES)/kindred4.4/kindred4.4.wphast\
@@ -76,15 +76,14 @@ WPHAST_FILES=\
 	$(EXAMPLES)/linear_bc/linear_bc.wphast\
 	$(EXAMPLES)/linear_ic/linear_ic.wphast\
 	$(EXAMPLES)/phrqex11/phrqex11.wphast\
+	$(EXAMPLES)/property/property.wphast\
+	$(EXAMPLES)/radial/radial.wphast\
 	$(EXAMPLES)/river/river.wphast\
 	$(EXAMPLES)/shell/shell.wphast\
 	$(EXAMPLES)/simple/simple.wphast\
 	$(EXAMPLES)/unconf/unconf.wphast\
 	$(EXAMPLES)/well/well.wphast\
 	$(EXAMPLES)/zf/zf.wphast
-	
-###	$(EXAMPLES)/radial/radial.wphast\
-###	$(EXAMPLES)/property/property.wphast\
 	
 VTK_DLLS=\
 	$(VTK_DLL_DIR)/vtkCommon.dll\
@@ -147,3 +146,5 @@ dlls : $(HDF_DLLS) $(VTK_DLLS)
 
 dll_clean :
 	rm -rf $(HDF_DLLS) $(VTK_DLLS)
+
+WPHAST_FILES : $(WPHAST_FILES)
