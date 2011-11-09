@@ -2710,6 +2710,10 @@ std::string CWPhastDoc::GetAbsolutePath(LPCTSTR lpszPathName, const std::string 
 
 BOOL CWPhastDoc::OnSaveDocument(LPCTSTR lpszPathName)
 {
+	// Need to change directory in order to serialize external
+	// files with relative paths (especially when using automation)
+	CSaveCurrentDirectory save(lpszPathName);
+
 	// Add your specialized code here and/or call the base class
 	this->m_pimpl->m_lastSaveIndex = this->m_pimpl->m_vectorActionsIndex;
 
