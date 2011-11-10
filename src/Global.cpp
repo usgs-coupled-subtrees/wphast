@@ -5808,106 +5808,110 @@ herr_t CGlobal::HDFFile2(bool bStoring, hid_t loc_id, /*const char* szName,*/ st
 			dset_id = ::H5Dopen(loc_id, PSZ_DATA);
 			ASSERT(dset_id > 0);
 
-			// open dataset dataspace
-			dspace_id     = ::H5Dget_space(dset_id);    /* dataspace handle */
-			int rank      = ::H5Sget_simple_extent_ndims(dspace_id);
-			return_status = ::H5Sget_simple_extent_dims(dspace_id, dims, NULL);
-			hsize_t fs = dims[0];
-
-			// create the memory dataspace
-			dims[0] = sizeof(buff);
-			memspace_id = ::H5Screate_simple(1, dims, NULL);  
-			ASSERT(memspace_id > 0);
-
-			hFile = ::CreateFile(
-				sRelativePath.c_str(), // file to create
-				GENERIC_WRITE,         // open for writing
-				0,                     // do not share
-				NULL,                  // default security
-				CREATE_NEW,            // fails if file exists
-				FILE_ATTRIBUTE_NORMAL, // normal file
-				NULL);                 // no attr. template
-
-			if (hFile != INVALID_HANDLE_VALUE)
+			if (dset_id > 0)
 			{
-				DWORD dwBytesWritten;
-				offset[0] = 0;
-				count[0] = sizeof(buff);
-				do
+				// open dataset dataspace
+				dspace_id     = ::H5Dget_space(dset_id);    /* dataspace handle */
+				int rank      = ::H5Sget_simple_extent_ndims(dspace_id);
+				return_status = ::H5Sget_simple_extent_dims(dspace_id, dims, NULL);
+				hsize_t fs = dims[0];
+
+				// create the memory dataspace
+				dims[0] = sizeof(buff);
+				memspace_id = ::H5Screate_simple(1, dims, NULL);  
+				ASSERT(memspace_id > 0);
+
+				hFile = ::CreateFile(
+					sRelativePath.c_str(), // file to create
+					GENERIC_WRITE,         // open for writing
+					0,                     // do not share
+					NULL,                  // default security
+					CREATE_NEW,            // fails if file exists
+					FILE_ATTRIBUTE_NORMAL, // normal file
+					NULL);                 // no attr. template
+
+				if (hFile != INVALID_HANDLE_VALUE)
 				{
-					// select the dataset dataspace hyperslab
-					count[0] = min(sizeof(buff), fs - offset[0]);
-					return_status = ::H5Sselect_hyperslab(dspace_id, H5S_SELECT_SET, offset, NULL, count, NULL);
-					ASSERT(return_status >= 0);
+					DWORD dwBytesWritten = 0;
+					offset[0] = 0;
+					count[0] = sizeof(buff);
+					do
+					{
+						// select the dataset dataspace hyperslab
+						count[0] = min(sizeof(buff), fs - offset[0]);
+						return_status = ::H5Sselect_hyperslab(dspace_id, H5S_SELECT_SET, offset, NULL, count, NULL);
+						ASSERT(return_status >= 0);
+						if (return_status < 0) break;
 
-					// select the memory dataspace hyperslab
-					moffset[0] = 0;
-					return_status = ::H5Sselect_hyperslab(memspace_id, H5S_SELECT_SET, moffset, NULL, count, NULL);
-					ASSERT(return_status >= 0);
-					DWORD dwNumberOfBytesToWrite = (DWORD)count[0];
+						// select the memory dataspace hyperslab
+						moffset[0] = 0;
+						return_status = ::H5Sselect_hyperslab(memspace_id, H5S_SELECT_SET, moffset, NULL, count, NULL);
+						ASSERT(return_status >= 0);
+						DWORD dwNumberOfBytesToWrite = (DWORD)count[0];
 
-					// write the dataset
-					return_status = ::H5Dread(dset_id, byte_id, memspace_id, dspace_id, H5P_DEFAULT, buff);
-					ASSERT(return_status >= 0);
+						// write the dataset
+						return_status = ::H5Dread(dset_id, byte_id, memspace_id, dspace_id, H5P_DEFAULT, buff);
+						ASSERT(return_status >= 0);
+						if (return_status < 0) break;
 
 #if !defined(NO_CRYPTO)
-					// add to hash
-					hash.AddData(buff, count[0]);
+						// add to hash
+						hash.AddData(buff, count[0]);
 #endif
 
-					// write to file
-					::WriteFile(hFile, buff, dwNumberOfBytesToWrite, &dwBytesWritten, NULL);
+						// write to file
+						::WriteFile(hFile, buff, dwNumberOfBytesToWrite, &dwBytesWritten, NULL);
 
-					// increment offset
-					offset[0] += count[0];
+						// increment offset
+						offset[0] += count[0];
+					}
+					while (dwBytesWritten == sizeof(buff));
 
-				}
-				while (dwBytesWritten == sizeof(buff));
+					// set the file times for the file.
+					DWORD lowhigh[2];
+					if (CGlobal::HDFSerialize(bStoring, loc_id, PSZ_MODIFIED, H5T_NATIVE_ULONG, 2, lowhigh) >= 0)
+					{
+						ftWrite.dwLowDateTime  = lowhigh[0];
+						ftWrite.dwHighDateTime = lowhigh[1];
+						VERIFY(::SetFileTime(hFile, NULL, NULL, &ftWrite));
+					}
 
-				// set the file times for the file.
-				DWORD lowhigh[2];
-				if (CGlobal::HDFSerialize(bStoring, loc_id, PSZ_MODIFIED, H5T_NATIVE_ULONG, 2, lowhigh) >= 0)
-				{
-					ftWrite.dwLowDateTime  = lowhigh[0];
-					ftWrite.dwHighDateTime = lowhigh[1];
-					VERIFY(::SetFileTime(hFile, NULL, NULL, &ftWrite));
-				}
-
-				// close file
-				VERIFY(::CloseHandle(hFile));
+					// close file
+					VERIFY(::CloseHandle(hFile));
 
 #if !defined(NO_CRYPTO)
-				// load and compare MD5
-				DWORD dw = 32;
-				BYTE val[32];
-				hr = hash.GetValue(val, &dw);
-				ASSERT(SUCCEEDED(hr));
+					// load and compare MD5
+					DWORD dw = 32;
+					BYTE val[32];
+					hr = hash.GetValue(val, &dw);
+					ASSERT(SUCCEEDED(hr));
 
-				char ch[4];
-				std::string md5actual;
-				for (int i = 0; i < 16; ++i)
-				{
-					sprintf(ch, "%02x", val[i]);
-					md5actual.append(ch);
+					char ch[4];
+					std::string md5actual;
+					for (int i = 0; i < 16; ++i)
+					{
+						sprintf(ch, "%02x", val[i]);
+						md5actual.append(ch);
+					}
+
+					return_status = CGlobal::HDFSerializeString(bStoring, loc_id, PSZ_MD5, sMD5);
+					ASSERT(return_status >= 0);
+					ASSERT(sMD5.compare(md5actual) == 0);
+#endif
 				}
 
-				return_status = CGlobal::HDFSerializeString(bStoring, loc_id, PSZ_MD5, sMD5);
+				// close the memory dataspace
+				return_status = ::H5Sclose(memspace_id);
 				ASSERT(return_status >= 0);
-				ASSERT(sMD5.compare(md5actual) == 0);
-#endif
+
+				// close the file dataspace
+				return_status = ::H5Sclose(dspace_id);
+				ASSERT(return_status >= 0);
+
+				// close dataset
+				return_status = ::H5Dclose(dset_id);
+				ASSERT(return_status >= 0);
 			}
-
-			// close the memory dataspace
-			return_status = ::H5Sclose(memspace_id);
-			ASSERT(return_status >= 0);
-
-			// close the file dataspace
-			return_status = ::H5Sclose(dspace_id);
-			ASSERT(return_status >= 0);
-
-			// close dataset
-			return_status = ::H5Dclose(dset_id);
-			ASSERT(return_status >= 0);
 		}
 	}
 	return return_status;

@@ -1417,7 +1417,20 @@ BOOL CWPhastDoc::OnOpenDocument(LPCTSTR lpszPathName)
 	{
 		if (this->GetOriginal2New().size())
 		{
-			this->SetModifiedFlag();
+			bool modified = false;
+			std::map< CString, CString >::const_iterator cit = this->GetOriginal2New().begin();
+			for (; cit != this->GetOriginal2New().end(); ++cit)
+			{
+				if (cit->first.CompareNoCase(cit->second) != 0)
+				{
+					modified = true;
+					break;
+				}
+			}
+			if (modified)
+			{
+				this->SetModifiedFlag();
+			}
 		}
 		this->DataSourcePathsRelativeToAbsolute(lpszPathName);
 		this->GetOriginal2New().clear();
@@ -8647,7 +8660,7 @@ void CWPhastDoc::SerializeFiles(bool bStoring, hid_t loc_id, std::map<CString, C
 
 			VERIFY(::_tsplitpath_s(it->second, szDrive, _MAX_DRIVE, szDir, _MAX_DIR, szFName, _MAX_FNAME, szExt, _MAX_EXT) == 0);
 			std::string d = CGlobal::FullPath(szDir);
-			if (!ATL::ATLPath::IsDirectory(d.c_str()))
+			if (!d.empty() && !ATL::ATLPath::IsDirectory(d.c_str()))
 			{
 				int n = ::SHCreateDirectoryEx(0, d.c_str(), 0);
 				if (n != ERROR_SUCCESS)
