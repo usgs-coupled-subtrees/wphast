@@ -1035,6 +1035,8 @@
 #define IDC_EDIT_ZW                     1545
 #define IDC_BUTTON_BROWSE               1545
 #define IDC_EDIT_TITLE                  1546
+#define IDC_EDIT_VTK                    1547
+#define IDC_STATIC_VTK                  1548
 #define IDC_RESIZE_COLUMN               28654
 #define IDC_RESIZE_ROW                  28655
 #define IDR_POPUP                       28656
@@ -1094,7 +1096,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        485
 #define _APS_NEXT_COMMAND_VALUE         32883
-#define _APS_NEXT_CONTROL_VALUE         1547
+#define _APS_NEXT_CONTROL_VALUE         1549
 #define _APS_NEXT_SYMED_VALUE           128
 #endif
 #endif

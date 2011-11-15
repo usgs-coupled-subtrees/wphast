@@ -26,6 +26,7 @@
 #endif
 
 #include "afxcmn.h"
+#include "afxwin.h"
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -156,7 +157,7 @@ BOOL CWPhastApp::InitInstance()
 	// Change the registry key under which our settings are stored
 	// TODO: You should modify this string to be something appropriate
 	// such as the name of your company or organization
-	SetRegistryKey(_T("Local AppWizard-Generated Applications"));
+	SetRegistryKey(_T("USGS"));
 	LoadStdProfileSettings(4);  // Load standard INI file options (including MRU)
 	// Register the application's document templates.  Document templates
 	//  serve as the connection between documents, frame windows and views
@@ -286,15 +287,23 @@ protected:
 protected:
 	DECLARE_MESSAGE_MAP()
 public:
+	CString VTKLicense;
+	CStatic VTKStatic;
 };
 
 CAboutDlg::CAboutDlg() : CDialog(CAboutDlg::IDD)
+, VTKLicense(_T("VTK is an open-source toolkit licensed under the BSD license.\n\nCopyright (c) 1993-2008 Ken Martin, Will Schroeder, Bill Lorensen\nAll rights reserved.\n\nRedistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:\n\n  ·  Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.\n  ·  Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.\n  ·  Neither name of Ken Martin, Will Schroeder, or Bill Lorensen nor the names of any contributors may be used to endorse or promote products derived from this software without specific prior written permission.\n\nTHIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHORS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."))
 {
 }
 
 void CAboutDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
+	DDX_Control(pDX, IDC_STATIC_VTK, VTKStatic);
+	if (!pDX->m_bSaveAndValidate)
+	{
+		this->VTKStatic.SetWindowTextA(this->VTKLicense);
+	}
 }
 
 BEGIN_MESSAGE_MAP(CAboutDlg, CDialog)
