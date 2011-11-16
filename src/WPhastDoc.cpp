@@ -770,7 +770,7 @@ void CWPhastDoc::Serialize(CArchive& ar)
 		// pull in the external files
 		//
 		std::map<CString, CString> notused;
-		this->SerializeFiles(bStoring, pFile->GetHID(), notused);
+		this->SerializeFiles(bStoring, pFile, notused);
 	}
 	else
 	{
@@ -815,7 +815,7 @@ void CWPhastDoc::Serialize(CArchive& ar)
 		// push out the external files (if missing)
 		ASSERT(this->GetOriginal2New().size() == 0);
 		this->GetOriginal2New().clear();
-		this->SerializeFiles(bStoring, pFile->GetHID(), this->GetOriginal2New());
+		this->SerializeFiles(bStoring, pFile, this->GetOriginal2New());
 
 		// Check for missing files
 		std::string errors;
@@ -1245,7 +1245,7 @@ void CWPhastDoc::SerializeActors(bool bStoring, hid_t loc_id, CTreeCtrlNode pare
 		if (group_id > 0)
 		{
 			int nCount;
-			std::list<LPCTSTR> listNames;
+			std::list< std::string > listNames;
 			std::list<ACTOR*> listActors;
 
 			// get actors and actors names
@@ -8179,10 +8179,17 @@ int CWPhastDoc::GetMapOfExternalFiles(hid_t loc_id, const char *name, std::map<C
 	return EXIT_SUCCESS;
 }
 
-void CWPhastDoc::SerializeFiles(bool bStoring, hid_t loc_id, std::map<CString, CString> &orig2new)
+void CWPhastDoc::SerializeFiles(bool bStoring, CHDFMirrorFile* file, std::map<CString, CString> &orig2new)
 {
 	herr_t status;
 
+	ASSERT(file);
+	if (!file)
+	{
+		return;
+	}
+
+	hid_t loc_id = file->GetHID();
 	ASSERT(loc_id > 0);
 	if (loc_id < 0)
 	{
@@ -8209,51 +8216,38 @@ void CWPhastDoc::SerializeFiles(bool bStoring, hid_t loc_id, std::map<CString, C
 					TRACE("%s = %s\n", cit->first, cit->second);
 				}
 
-// COMMENT: {11/2/2011 4:30:28 PM}				size_t i = 0;
-// COMMENT: {11/2/2011 4:30:28 PM}				std::string md5;
-// COMMENT: {11/2/2011 4:30:28 PM}				FILETIME ftWrite;
-// COMMENT: {11/2/2011 4:30:28 PM}				std::set<CString>::iterator it = ufiles.begin();
-// COMMENT: {11/2/2011 4:30:28 PM}				for (; it != ufiles.end(); ++it)
-// COMMENT: {11/2/2011 4:30:28 PM}				{
-// COMMENT: {11/2/2011 4:30:28 PM}					if (::_stricmp(ATL::ATLPath::FindExtension(*it), ".shp") == 0)
-// COMMENT: {11/2/2011 4:30:28 PM}					{
-// COMMENT: {11/2/2011 4:30:28 PM}						TCHAR path[MAX_PATH];
-// COMMENT: {11/2/2011 4:30:28 PM}						::strcpy(path, *it);
-// COMMENT: {11/2/2011 4:30:28 PM}
-// COMMENT: {11/2/2011 4:30:28 PM}						ATL::ATLPath::RenameExtension(path, ".shp");
-// COMMENT: {11/2/2011 4:30:28 PM}						ostringstream oss;
-// COMMENT: {11/2/2011 4:30:28 PM}						oss << "file" << i++;
-// COMMENT: {11/2/2011 4:30:28 PM}						std::string rel_path(path);
-// COMMENT: {11/2/2011 4:30:28 PM}						status = CGlobal::HDFFile(bStoring, files_id, oss.str().c_str(), rel_path, md5, ftWrite);
-// COMMENT: {11/2/2011 4:30:28 PM}						ASSERT(status >= 0);
-// COMMENT: {11/2/2011 4:30:28 PM}						TRACE("%s = %s\n", oss.str().c_str(), rel_path.c_str());
-// COMMENT: {11/2/2011 4:30:28 PM}
-// COMMENT: {11/2/2011 4:30:28 PM}						ATL::ATLPath::RenameExtension(path, ".shx");
-// COMMENT: {11/2/2011 4:30:28 PM}						ostringstream oss2;
-// COMMENT: {11/2/2011 4:30:28 PM}						oss2 << "file" << i++;
-// COMMENT: {11/2/2011 4:30:28 PM}						rel_path = path;
-// COMMENT: {11/2/2011 4:30:28 PM}						status = CGlobal::HDFFile(bStoring, files_id, oss2.str().c_str(), rel_path, md5, ftWrite);
-// COMMENT: {11/2/2011 4:30:28 PM}						ASSERT(status >= 0);
-// COMMENT: {11/2/2011 4:30:28 PM}						TRACE("%s = %s\n", oss.str().c_str(), rel_path.c_str());
-// COMMENT: {11/2/2011 4:30:28 PM}
-// COMMENT: {11/2/2011 4:30:28 PM}						ATL::ATLPath::RenameExtension(path, ".dbf");
-// COMMENT: {11/2/2011 4:30:28 PM}						ostringstream oss3;
-// COMMENT: {11/2/2011 4:30:28 PM}						oss3 << "file" << i++;
-// COMMENT: {11/2/2011 4:30:28 PM}						rel_path = path;
-// COMMENT: {11/2/2011 4:30:28 PM}						status = CGlobal::HDFFile(bStoring, files_id, oss3.str().c_str(), rel_path, md5, ftWrite);
-// COMMENT: {11/2/2011 4:30:28 PM}						ASSERT(status >= 0);
-// COMMENT: {11/2/2011 4:30:28 PM}						TRACE("%s = %s\n", oss.str().c_str(), rel_path.c_str());
-// COMMENT: {11/2/2011 4:30:28 PM}					}
-// COMMENT: {11/2/2011 4:30:28 PM}					else
-// COMMENT: {11/2/2011 4:30:28 PM}					{
-// COMMENT: {11/2/2011 4:30:28 PM}						ostringstream oss;
-// COMMENT: {11/2/2011 4:30:28 PM}						oss << "file" << i++;
-// COMMENT: {11/2/2011 4:30:28 PM}						std::string rel_path(*it);
-// COMMENT: {11/2/2011 4:30:28 PM}						status = CGlobal::HDFFile(bStoring, files_id, oss.str().c_str(), rel_path, md5, ftWrite);
-// COMMENT: {11/2/2011 4:30:28 PM}						ASSERT(status >= 0);
-// COMMENT: {11/2/2011 4:30:28 PM}						TRACE("%s = %s\n", oss.str().c_str(), rel_path.c_str());
-// COMMENT: {11/2/2011 4:30:28 PM}					}
-// COMMENT: {11/2/2011 4:30:28 PM}				}
+				// split path "C:\Users\charlton\Documents\Visual Studio 2005\Projects\WPhast-trunk\Bugs\extents.1.wphast"
+				TCHAR szDrive[_MAX_DRIVE];
+				TCHAR szDir[_MAX_DIR];
+				TCHAR szFName[_MAX_FNAME];
+				TCHAR szExt[_MAX_EXT];
+				VERIFY(::_tsplitpath_s(file->GetFilePath(), szDrive, _MAX_DRIVE, szDir, _MAX_DIR, szFName, _MAX_FNAME, szExt, _MAX_EXT) == 0);
+
+				// chem.dat file (extents.1.chem.dat)
+				CString newName;
+				newName.Format("%s.chem.dat", szFName);
+
+				// wphast file working directory
+				TCHAR cwd[MAX_PATH];
+				VERIFY(::_tmakepath_s(cwd, MAX_PATH, szDrive, szDir, NULL, NULL) == 0);
+
+				// set in CWPhastDoc::OnSaveDocument
+				TCHAR curdir[MAX_PATH];
+				::GetCurrentDirectory(MAX_PATH, curdir);
+				ATL::ATLPath::AddBackslash(curdir);
+				ASSERT(::_stricmp(cwd, curdir) == 0);
+
+				// add *.chem.dat if it exists
+				if (ATL::ATLPath::FileExists(newName))
+				{
+					ufiles.insert(newName);
+				}
+
+				// always add phast.dat if it exists
+				if (ATL::ATLPath::FileExists("phast.dat"))
+				{
+					ufiles.insert("phast.dat");
+				}
 
 				size_t i = 0;
 				std::string md5;
@@ -8613,15 +8607,6 @@ void CWPhastDoc::SerializeFiles(bool bStoring, hid_t loc_id, std::map<CString, C
 						while (bExists || unique.find(szRelative) != unique.end());
 					}
 
-// COMMENT: {11/3/2011 3:14:51 PM}					TCHAR szRelative[MAX_PATH];
-// COMMENT: {11/3/2011 3:14:51 PM}					int i = 0;
-// COMMENT: {11/3/2011 3:14:51 PM}					do
-// COMMENT: {11/3/2011 3:14:51 PM}					{
-// COMMENT: {11/3/2011 3:14:51 PM}						new_name.Format("%s.%d", szFName, ++i);		
-// COMMENT: {11/3/2011 3:14:51 PM}						VERIFY(::_tmakepath_s(szRelative, MAX_PATH, szDrive, szDir, new_name, szExt) == 0);
-// COMMENT: {11/3/2011 3:14:51 PM}					}
-// COMMENT: {11/3/2011 3:14:51 PM}					while (ATL::ATLPath::FileExists(szRelative) || unique.find(szRelative) != unique.end());
-
 					// make new_name relative to CWD
 					if (::strlen(szRelative) > 2 && szRelative[0] == '.' && szRelative[1] == '\\')
 					{
@@ -8686,7 +8671,6 @@ void CWPhastDoc::SerializeFiles(bool bStoring, hid_t loc_id, std::map<CString, C
 				FILETIME ftWrite;
 				std::string rel_path(it->second);
 				ASSERT(ATL::ATLPath::IsRelative(it->second));
-// COMMENT: {11/3/2011 3:16:06 PM}				status = CGlobal::HDFFile(bStoring, files_id, it->first, rel_path, md5, ftWrite);
 				status = CGlobal::HDFFileEx(bStoring, files_id, it->first, rel_path, md5, ftWrite);
 				ASSERT(status >= 0);
 			}

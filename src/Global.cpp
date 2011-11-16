@@ -434,11 +434,11 @@ herr_t CGlobal::HDFSerializeAllocate(bool bStoring, hid_t loc_id, const char* sz
 	return CGlobal::HDFSerializeAllocate<int>(bStoring, loc_id, szName, H5T_NATIVE_INT, count, buffer);
 }
 
-void CGlobal::WriteList(hid_t loc_id, const char *name, std::list<LPCTSTR> &rlist)
+void CGlobal::WriteList(hid_t loc_id, const char *name, std::list< std::string > &rlist)
 {
 	herr_t status;
 	hsize_t dims[1];
-	std::list<LPCTSTR>::iterator iter;
+	std::list< std::string >::iterator iter;
 	size_t len;
 
 	hid_t dspace_id = 0;
@@ -450,8 +450,9 @@ void CGlobal::WriteList(hid_t loc_id, const char *name, std::list<LPCTSTR> &rlis
 	// determine max length string
 	ASSERT(!rlist.empty());
 	iter = rlist.begin();
-	for (; iter != rlist.end(); ++iter) {
-		len = ::strlen(*iter);
+	for (; iter != rlist.end(); ++iter)
+	{
+		len = (*iter).size();
 		maxlen = (len > maxlen) ? len : maxlen;
 	}
 
@@ -485,8 +486,9 @@ void CGlobal::WriteList(hid_t loc_id, const char *name, std::list<LPCTSTR> &rlis
 	::memset(szNames, 0, (maxlen + 1) * rlist.size());
 
 	iter = rlist.begin();
-	for (int i = 0; iter != rlist.end(); ++iter, ++i) {
-		::strcpy(szNames + i * (maxlen + 1), *iter);
+	for (int i = 0; iter != rlist.end(); ++iter, ++i)
+	{
+		::strcpy(szNames + i * (maxlen + 1), iter->c_str());
 	}
 
     // write the dataset
@@ -2612,16 +2614,16 @@ herr_t CGlobal::HDFSerializeSetOfTimes(bool bStoring, hid_t loc_id, std::set<Cti
 	{
 		if (!setOfTimes.empty())
 		{
-			std::list<LPCTSTR> listNames;
-			CString* arrName = new CString[setOfTimes.size()];
+			std::list< std::string > listNames;
+			CString name;
 
 			std::set<Ctime>::iterator iter = setOfTimes.begin();
 			for (size_t i = 0; iter != setOfTimes.end(); ++iter, ++i)
 			{
-				arrName[i].Format(szStepsFormat, i);
+				name.Format(szStepsFormat, i);
 
 				// Create the "Step %d" group
-				step_id = ::H5Gcreate(loc_id, arrName[i], 0);
+				step_id = ::H5Gcreate(loc_id, name, 0);
 				ASSERT(step_id > 0);
 				if (step_id > 0)
 				{
@@ -2635,14 +2637,13 @@ herr_t CGlobal::HDFSerializeSetOfTimes(bool bStoring, hid_t loc_id, std::set<Cti
 						t.Serialize(bStoring, time_id);
 						status = ::H5Gclose(time_id);
 						ASSERT(status >= 0);
-						listNames.push_back(arrName[i]);
+						listNames.push_back(std::string(name));
 					}
 					status = ::H5Gclose(step_id);
 					ASSERT(status >= 0);
 				}
 			}
 			CGlobal::WriteList(loc_id, szSteps, listNames);
-			delete[] arrName;
 		}
 	}
 	else

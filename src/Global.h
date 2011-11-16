@@ -50,8 +50,8 @@ public:
 	static void PickProp(vtkProp3D* pProp3D, vtkRenderer* pRenderer, vtkRenderWindowInteractor* pRenderWindowInteractor);
 	static void UnPickProp(vtkProp3D* pProp3D, vtkRenderer* pRenderer, vtkRenderWindowInteractor* pRenderWindowInteractor);
 	static void LoadRTFString(std::string& str, UINT nID);
-	static void ReadList(hid_t loc_id, const char *name, std::list<std::string> &rlist);
-	static void WriteList(hid_t loc_id, const char *name, std::list<LPCTSTR> &rlist);
+	static void ReadList(hid_t loc_id, const char *name, std::list< std::string > &rlist);
+	static void WriteList(hid_t loc_id, const char *name, std::list< std::string > &rlist);
 	static herr_t HDFSerialize(bool bStoring, hid_t loc_id, const char* szName, hid_t mem_type_id, hsize_t count, void* buf);
 	static herr_t HDFSerializeSafe(bool bStoring, hid_t loc_id, const char* szName, hid_t mem_type_id, hsize_t count, void* buf);
 
@@ -71,7 +71,6 @@ public:
 	static void DDX_Property(CDataExchange* pDX, int nIDC, int nRow, struct property* pProperty, bool bRequired);
 	static void DDX_Property(CDataExchange* pDX, int nIDC, int row, Cproperty* prop, std::string &units, bool bRequired);
 
-// COMMENT: {5/28/2009 6:46:43 PM}	static void DDX_Property(CDataExchange* pDX, CTreePropSheetExSRC* pTreeProp, HTREEITEM hti, std::vector<Cproperty*> &props, std::vector<CPropertyPage*> &pages);
 	static void DDX_Property(CDataExchange* pDX, TreePropSheet::CTreePropSheetEx* pTreeProp, HTREEITEM hti, std::vector<Cproperty*> &props, std::vector<CPropertyPage*> &pages);
 	static void DDX_PropertyM(CDataExchange* pDX, TreePropSheet::CTreePropSheetEx* pTreeProp, HTREEITEM hti, std::vector<Cproperty*> &props, std::vector<CPropertyPage*> &pages);
 

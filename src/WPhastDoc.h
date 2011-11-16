@@ -334,7 +334,7 @@ protected:
 	void SerializeDrains(bool bStoring, hid_t loc_id);
 	void SerializeZoneFlowRates(bool bStoring, hid_t loc_id);
 	
-	void SerializeFiles(bool bStoring, hid_t loc_id, std::map<CString, CString> &orig2new);
+	void SerializeFiles(bool bStoring, CHDFMirrorFile* file, std::map<CString, CString> &orig2new);
 
 	int GetListOfData_sourceFiles(hid_t loc_id, std::set< CString > &files);
 	int GetMapOfData_sourceFiles(hid_t loc_id, const char *name, std::map< CString, CString > &hdf2rel);

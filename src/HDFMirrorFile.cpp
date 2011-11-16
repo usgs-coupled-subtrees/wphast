@@ -46,9 +46,9 @@ BOOL CHDFMirrorFile::Open(LPCTSTR lpszFileName, UINT nOpenFlags,
 	CFileException* pError)
 {
 	ASSERT(lpszFileName != NULL);
+#if defined(BREAK_HARD_LINKS)
 	m_strMirrorName.Empty();
 
-#if defined(BREAK_HARD_LINKS)
 	CFileStatus status;
 	if (nOpenFlags & CFile::modeCreate) //opened for writing
 	{
@@ -115,8 +115,13 @@ BOOL CHDFMirrorFile::Open(LPCTSTR lpszFileName, UINT nOpenFlags,
 	if (nOpenFlags & CFile::modeCreate) //opened for writing
 	{
 		BOOL b = CFile::Open(lpszFileName, nOpenFlags, pError);
-		if (!b) return b;
+		CString filepath = this->GetFilePath();
+		if (!b)
+		{
+			return b;
+		}
 		CFile::Close();
+		this->SetFilePath(filepath);
 
 		m_hidFile = ::H5Fcreate(lpszFileName, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 		if (m_hidFile > 0) return TRUE;
@@ -167,10 +172,12 @@ void CHDFMirrorFile::Close()
 	CString strName = m_strFileName; //file close empties string
 	// CFile::Close();
 	ASSERT(this->m_hidFile > 0);
-	if (this->m_hidFile > 0) {
+	if (this->m_hidFile > 0)
+	{
 		status = ::H5Fclose(this->m_hidFile);
 		ASSERT(status >= 0);
 		this->m_hidFile = -1;
+		this->m_strFileName.Empty();
 	}
 	if (!m_strMirrorName.IsEmpty())
 	{

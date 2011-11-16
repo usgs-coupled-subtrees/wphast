@@ -231,7 +231,7 @@ void CTimeSeries<CWellRate>::Serialize(bool bStoring, hid_t loc_id)
 	{
 		if (this->size())
 		{
-			std::list<LPCTSTR> listNames;
+			std::list< std::string > listNames;
 			CString name;
 
 			CTimeSeries<CWellRate>::iterator iter = this->begin();
@@ -277,7 +277,7 @@ void CTimeSeries<CWellRate>::Serialize(bool bStoring, hid_t loc_id)
 					status = ::H5Gclose(step_id);
 					ASSERT(status >= 0);
 
-					listNames.push_back(name);
+					listNames.push_back(std::string(name));
 				}
 			}
 
@@ -358,7 +358,7 @@ void CTimeSeries<T>::Serialize(bool bStoring, hid_t loc_id)
 	{
 		if (this->size())
 		{
-			std::list<LPCTSTR> listNames;
+			std::list< std::string > listNames;
 			CString name;
 
 			CTimeSeries<T>::iterator iter = this->begin();
@@ -404,7 +404,7 @@ void CTimeSeries<T>::Serialize(bool bStoring, hid_t loc_id)
 					status = ::H5Gclose(step_id);
 					ASSERT(status >= 0);
 
-					listNames.push_back(name);
+					listNames.push_back(std::string(name));
 				}
 			}
 
@@ -489,7 +489,7 @@ void CTimeSeries<Cproperty>::Serialize(bool bStoring, hid_t loc_id)
 	{
 		if (this->size())
 		{
-			std::list<LPCTSTR> listNames;
+			std::list< std::string > listNames;
 			CString name;
 
 			std::string fname;
@@ -541,7 +541,7 @@ void CTimeSeries<Cproperty>::Serialize(bool bStoring, hid_t loc_id)
 					status = ::H5Gclose(step_id);
 					ASSERT(status >= 0);
 
-					listNames.push_back(name);
+					listNames.push_back(std::string(name));
 				}
 
 				if (iter->second.type == PROP_XYZT)
@@ -727,7 +727,7 @@ void CTimeSeries<int>::Serialize(bool bStoring, hid_t loc_id)
 	{
 		if (this->size())
 		{
-			std::list<LPCTSTR> listNames;
+			std::list< std::string > listNames;
 			CString name;
 
 			CTimeSeries<int>::iterator iter = this->begin();
@@ -774,7 +774,7 @@ void CTimeSeries<int>::Serialize(bool bStoring, hid_t loc_id)
 					status = ::H5Gclose(step_id);
 					ASSERT(status >= 0);
 
-					listNames.push_back(name);
+					listNames.push_back(std::string(name));
 				}
 			}
 
