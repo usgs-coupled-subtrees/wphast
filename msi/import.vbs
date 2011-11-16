@@ -39,7 +39,7 @@ Set Sh = CreateObject("WScript.Shell")
 Sh.RegRead("HKEY_CLASSES_ROOT\Phast.Document\CLSID")
 If Err <> 0 Then
 	WScript.Echo "Phast for Windows is already installed."
-	WScript.Quit 1;
+	WScript.Quit 1
 End If
 
 
