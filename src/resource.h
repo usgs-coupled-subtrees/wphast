@@ -1035,7 +1035,6 @@
 #define IDC_EDIT_ZW                     1545
 #define IDC_BUTTON_BROWSE               1545
 #define IDC_EDIT_TITLE                  1546
-#define IDC_EDIT_VTK                    1547
 #define IDC_STATIC_VTK                  1548
 #define IDC_RESIZE_COLUMN               28654
 #define IDC_RESIZE_ROW                  28655
@@ -1086,6 +1085,16 @@
 #define ID_MODE_MAP                     32880
 #define ID_EDIT_DELETE                  32881
 #define ID_VIEW_DIMENSIONSVIEW          32882
+#define ID_VIEW_DRAINS                  32883
+#define ID_DRAINS_HIDEALL               32884
+#define ID_DRAINS_SHOWSELECTED          32885
+#define ID_DRAINS_SELECTALL             32886
+#define ID_DRAINS_UNSELECTALL           32887
+#define ID_VIEW_ZONEFLOWZONES           32888
+#define ID_ZONE_FLOW_HIDEALL            32889
+#define ID_ZONE_FLOW_SHOWSELECTED       32890
+#define ID_ZONE_FLOW_SELECTALL          32891
+#define ID_ZONE_FLOW_UNSELECTALL        32892
 #define IDW_CONTROLBAR_TREE             59424
 #define IDW_CONTROLBAR_BOXPROPS         59425
 #define IDC_VALUE_STATIC                65535
@@ -1095,7 +1104,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        485
-#define _APS_NEXT_COMMAND_VALUE         32883
+#define _APS_NEXT_COMMAND_VALUE         32893
 #define _APS_NEXT_CONTROL_VALUE         1549
 #define _APS_NEXT_SYMED_VALUE           128
 #endif

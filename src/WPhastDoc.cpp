@@ -291,6 +291,34 @@ BEGIN_MESSAGE_MAP(CWPhastDoc, CDocument)
 	// ID_RIVERS_UNSELECTALL
 	ON_COMMAND(ID_RIVERS_UNSELECTALL, OnRiversUnselectAll)
 
+	// ID_DRAINS_HIDEALL
+	ON_UPDATE_COMMAND_UI(ID_DRAINS_HIDEALL, OnUpdateDrainsHideAll)
+	ON_COMMAND(ID_DRAINS_HIDEALL, OnDrainsHideAll)
+
+	// ID_DRAINS_SHOWSELECTED
+	ON_UPDATE_COMMAND_UI(ID_DRAINS_SHOWSELECTED, OnUpdateDrainsShowSelected)
+	ON_COMMAND(ID_DRAINS_SHOWSELECTED, OnDrainsShowSelected)
+
+	// ID_DRAINS_SELECTALL
+	ON_COMMAND(ID_DRAINS_SELECTALL, OnDrainsSelectAll)
+
+	// ID_DRAINS_UNSELECTALL
+	ON_COMMAND(ID_DRAINS_UNSELECTALL, OnDrainsUnselectAll)
+
+	// ID_ZONE_FLOW_HIDEALL
+	ON_UPDATE_COMMAND_UI(ID_ZONE_FLOW_HIDEALL, OnUpdateZoneFlowHideAll)
+	ON_COMMAND(ID_ZONE_FLOW_HIDEALL, OnZoneFlowHideAll)
+
+	// ID_ZONE_FLOW_SHOWSELECTED
+	ON_UPDATE_COMMAND_UI(ID_ZONE_FLOW_SHOWSELECTED, OnUpdateZoneFlowShowSelected)
+	ON_COMMAND(ID_ZONE_FLOW_SHOWSELECTED, OnZoneFlowShowSelected)
+
+	// ID_ZONE_FLOW_SELECTALL
+	ON_COMMAND(ID_ZONE_FLOW_SELECTALL, OnZoneFlowSelectAll)
+
+	// ID_ZONE_FLOW_UNSELECTALL
+	ON_COMMAND(ID_ZONE_FLOW_UNSELECTALL, OnZoneFlowUnselectAll)
+
 	ON_COMMAND(ID_VIEW_HIDEALL, OnViewHideAll)
 	ON_COMMAND(ID_VIEW_SHOWALL, OnViewShowAll)
 
@@ -6052,8 +6080,8 @@ void CWPhastDoc::OnViewHideAll()
 	if (CPropertyTreeControlBar *pTree = this->GetPropertyTreeControlBar())
 	{
 		pTree->SetMediaCheck(BST_UNCHECKED);
-		pTree->SetBCCheck(BST_UNCHECKED);
 		pTree->SetICCheck(BST_UNCHECKED);
+		pTree->SetBCCheck(BST_UNCHECKED);
 		pTree->SetNodeCheck(pTree->GetWellsNode(), BST_UNCHECKED);
 		pTree->SetNodeCheck(pTree->GetRiversNode(), BST_UNCHECKED);
 		pTree->SetNodeCheck(pTree->GetDrainsNode(), BST_UNCHECKED);
@@ -8783,4 +8811,170 @@ herr_t CWPhastDoc::H5GIterateStatic2(hid_t loc_id, const char *name, void *cooki
 std::map<CString, CString>& CWPhastDoc::GetOriginal2New(void)
 {
 	return this->Original2New;
+}
+
+void CWPhastDoc::OnUpdateDrainsHideAll(CCmdUI *pCmdUI)
+{
+	if (vtkPropAssembly *pPropAssembly = this->GetPropAssemblyDrains())
+	{
+		if (pPropAssembly->GetVisibility())
+		{
+			pCmdUI->SetRadio(FALSE);
+		}
+		else
+		{
+			pCmdUI->SetRadio(TRUE);
+		}
+	}
+}
+
+void CWPhastDoc::OnDrainsHideAll()
+{
+	if (CPropertyTreeControlBar *pTree = this->GetPropertyTreeControlBar())
+	{
+		pTree->SetNodeCheck(pTree->GetDrainsNode(), BST_UNCHECKED);
+	}
+	this->UpdateAllViews(0);
+}
+
+void CWPhastDoc::OnUpdateDrainsShowSelected(CCmdUI *pCmdUI)
+{
+	if (CPropertyTreeControlBar *pTree = this->GetPropertyTreeControlBar())
+	{
+		switch (pTree->GetNodeCheck(pTree->GetDrainsNode()))
+		{
+		case BST_UNCHECKED:
+			// currently unchecked
+			pCmdUI->SetRadio(FALSE);
+			break;
+		case BST_CHECKED:
+			// currently checked
+			pCmdUI->SetRadio(TRUE);
+			break;
+		default:
+			ASSERT(FALSE);
+			pCmdUI->Enable(FALSE);
+			break;
+		}
+	}
+}
+
+void CWPhastDoc::OnDrainsShowSelected()
+{
+	if (CPropertyTreeControlBar *pTree = this->GetPropertyTreeControlBar())
+	{
+		pTree->SetNodeCheck(pTree->GetDrainsNode(), BST_CHECKED);
+	}
+	this->UpdateAllViews(0);
+}
+
+void CWPhastDoc::OnDrainsSelectAll()
+{
+	if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar())
+	{
+		CTreeCtrlNode node = pTree->GetDrainsNode();
+		int nCount = node.GetChildCount();
+		for (int i = 0; i < nCount; ++i)
+		{
+			pTree->SetNodeCheck(node.GetChildAt(i), BST_CHECKED);
+		}
+	}
+	this->UpdateAllViews(0);
+}
+
+void CWPhastDoc::OnDrainsUnselectAll()
+{
+	if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar())
+	{
+		CTreeCtrlNode node = pTree->GetDrainsNode();
+		int nCount = node.GetChildCount();
+		for (int i = 0; i < nCount; ++i)
+		{
+			pTree->SetNodeCheck(node.GetChildAt(i), BST_UNCHECKED);
+		}
+	}
+	this->UpdateAllViews(0);
+}
+
+void CWPhastDoc::OnUpdateZoneFlowHideAll(CCmdUI *pCmdUI)
+{
+	if (vtkPropAssembly *pPropAssembly = this->GetPropAssemblyZoneFlowRates())
+	{
+		if (pPropAssembly->GetVisibility())
+		{
+			pCmdUI->SetRadio(FALSE);
+		}
+		else
+		{
+			pCmdUI->SetRadio(TRUE);
+		}
+	}
+}
+
+void CWPhastDoc::OnZoneFlowHideAll()
+{
+	if (CPropertyTreeControlBar *pTree = this->GetPropertyTreeControlBar())
+	{
+		pTree->SetNodeCheck(pTree->GetZoneFlowRatesNode(), BST_UNCHECKED);
+	}
+	this->UpdateAllViews(0);
+}
+
+void CWPhastDoc::OnUpdateZoneFlowShowSelected(CCmdUI *pCmdUI)
+{
+	if (CPropertyTreeControlBar *pTree = this->GetPropertyTreeControlBar())
+	{
+		switch (pTree->GetNodeCheck(pTree->GetZoneFlowRatesNode()))
+		{
+		case BST_UNCHECKED:
+			// currently unchecked
+			pCmdUI->SetRadio(FALSE);
+			break;
+		case BST_CHECKED:
+			// currently checked
+			pCmdUI->SetRadio(TRUE);
+			break;
+		default:
+			ASSERT(FALSE);
+			pCmdUI->Enable(FALSE);
+			break;
+		}
+	}
+}
+
+void CWPhastDoc::OnZoneFlowShowSelected()
+{
+	if (CPropertyTreeControlBar *pTree = this->GetPropertyTreeControlBar())
+	{
+		pTree->SetNodeCheck(pTree->GetZoneFlowRatesNode(), BST_CHECKED);
+	}
+	this->UpdateAllViews(0);
+}
+
+void CWPhastDoc::OnZoneFlowSelectAll()
+{
+	if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar())
+	{
+		CTreeCtrlNode node = pTree->GetZoneFlowRatesNode();
+		int nCount = node.GetChildCount();
+		for (int i = 0; i < nCount; ++i)
+		{
+			pTree->SetNodeCheck(node.GetChildAt(i), BST_CHECKED);
+		}
+	}
+	this->UpdateAllViews(0);
+}
+
+void CWPhastDoc::OnZoneFlowUnselectAll()
+{
+	if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar())
+	{
+		CTreeCtrlNode node = pTree->GetZoneFlowRatesNode();
+		int nCount = node.GetChildCount();
+		for (int i = 0; i < nCount; ++i)
+		{
+			pTree->SetNodeCheck(node.GetChildAt(i), BST_UNCHECKED);
+		}
+	}
+	this->UpdateAllViews(0);
 }

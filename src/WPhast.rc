@@ -328,7 +328,7 @@ BEGIN
         MENUITEM "Print Pre&view",              57609
         MENUITEM "P&rint Setup...",             57606
         MENUITEM SEPARATOR
-        MENUITEM "Recent File",                 57616, GRAYED
+        MENUITEM "Recent File",                 57616
         MENUITEM SEPARATOR
         MENUITEM "E&xit",                       57665
     END
@@ -348,13 +348,21 @@ BEGIN
     BEGIN
         MENUITEM "&Toolbar",                    59392
         MENUITEM "&Status Bar",                 59393
-        MENUITEM "Dim&ensions View",            ID_VIEW_DIMENSIONSVIEW
-        MENUITEM "Properties View",             ID_VIEW_PROPERIESVIEW
+        MENUITEM "Spatial Details",             ID_VIEW_DIMENSIONSVIEW
+        MENUITEM "Data Definition Tree",        ID_VIEW_PROPERIESVIEW
         MENUITEM SEPARATOR
         MENUITEM "A&xes",                       ID_VIEW_AXES
         MENUITEM "&Grid",                       ID_VIEW_GRID
         MENUITEM "S&ite Map",                   ID_VIEW_SITEMAP
         MENUITEM SEPARATOR
+        POPUP "&Media Zones"
+        BEGIN
+            MENUITEM "Hide All",                    ID_MEDIAZONES_HIDEALL
+            MENUITEM "Show Selected",               ID_MEDIAZONES_SHOWSELECTED
+            MENUITEM SEPARATOR
+            MENUITEM "Select All",                  ID_MEDIAZONES_SELECTALL
+            MENUITEM "Unselect All",                ID_MEDIAZONES_UNSELECTALL
+        END
         POPUP "&IC Zones"
         BEGIN
             MENUITEM "Hide All",                    ID_ICZONES_HIDEALL
@@ -371,13 +379,13 @@ BEGIN
             MENUITEM "Select All",                  ID_BCZONES_SELECTALL
             MENUITEM "Unselect All",                ID_BCZONES_UNSELECTALL
         END
-        POPUP "&Media Zones"
+        POPUP "&Wells"
         BEGIN
-            MENUITEM "Hide All",                    ID_MEDIAZONES_HIDEALL
-            MENUITEM "Show Selected",               ID_MEDIAZONES_SHOWSELECTED
+            MENUITEM "Hide All",                    ID_WELLS_HIDEALL
+            MENUITEM "Show Selected",               ID_WELLS_SHOWSELECTED
             MENUITEM SEPARATOR
-            MENUITEM "Select All",                  ID_MEDIAZONES_SELECTALL
-            MENUITEM "Unselect All",                ID_MEDIAZONES_UNSELECTALL
+            MENUITEM "Select All",                  ID_WELLS_SELECTALL
+            MENUITEM "Unselect All",                ID_WELLS_UNSELECTALL
         END
         POPUP "&Rivers"
         BEGIN
@@ -387,13 +395,21 @@ BEGIN
             MENUITEM "Select All",                  ID_RIVERS_SELECTALL
             MENUITEM "Unselect All",                ID_RIVERS_UNSELECTALL
         END
-        POPUP "&Wells"
+        POPUP "&Drains"
         BEGIN
-            MENUITEM "Hide All",                    ID_WELLS_HIDEALL
-            MENUITEM "Show Selected",               ID_WELLS_SHOWSELECTED
+            MENUITEM "Hide All",                    ID_DRAINS_HIDEALL
+            MENUITEM "Show Selected",               ID_DRAINS_SHOWSELECTED
             MENUITEM SEPARATOR
-            MENUITEM "Select All",                  ID_WELLS_SELECTALL
-            MENUITEM "Unselect All",                ID_WELLS_UNSELECTALL
+            MENUITEM "Select All",                  ID_DRAINS_SELECTALL
+            MENUITEM "Unselect All",                ID_DRAINS_UNSELECTALL
+        END
+        POPUP "&Zone Flow Zones"
+        BEGIN
+            MENUITEM "Hide All",                    ID_ZONE_FLOW_HIDEALL
+            MENUITEM "Show Selected",               ID_ZONE_FLOW_SHOWSELECTED
+            MENUITEM SEPARATOR
+            MENUITEM "Select All",                  ID_ZONE_FLOW_SELECTALL
+            MENUITEM "Unselect All",                ID_ZONE_FLOW_UNSELECTALL
         END
         MENUITEM "&Hide All\tCtrl+H",           ID_VIEW_HIDEALL
         MENUITEM "Show &All\tCtrl+Shift+H",     ID_VIEW_SHOWALL

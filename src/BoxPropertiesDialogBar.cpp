@@ -602,7 +602,7 @@ void CBoxPropertiesDialogBar::Set(CWPhastView* pView, vtkProp3D* pProp3D, const 
 		this->m_nType = CBoxPropertiesDialogBar::BP_NONE;		
 		this->UpdateData(FALSE);
 		this->Enable(FALSE);
-		this->SetWindowText(_T(""));
+		this->SetWindowText(_T("Spatial details"));
 	}
 
 	TRACE("%s, out\n", __FUNCTION__);

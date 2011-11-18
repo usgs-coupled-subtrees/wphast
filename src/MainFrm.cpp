@@ -194,7 +194,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	// TreeCtrl Bar
 	//
-	if (!m_wndTreeControlBar.Create(_T("Properties"), this, IDW_CONTROLBAR_TREE))
+	if (!m_wndTreeControlBar.Create(_T("Data definition tree"), this, IDW_CONTROLBAR_TREE))
 	{
 		TRACE0("Failed to create instant bar\n");
 		return -1;		// fail to create
@@ -213,7 +213,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	// Box properties Bar
 	//
-	if (!m_wndDialogBarBoxProperties.Create(IDD_PROPS_ZONEPROPS1, _T("Zone Properties"), this, IDW_CONTROLBAR_BOXPROPS))
+	if (!m_wndDialogBarBoxProperties.Create(IDD_PROPS_ZONEPROPS1, _T("Spatial details"), this, IDW_CONTROLBAR_BOXPROPS))
 	{
 		TRACE0("Failed to create m_wndDialogBarBoxProperties\n");
 		return -1;

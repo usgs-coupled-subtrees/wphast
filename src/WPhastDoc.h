@@ -531,6 +531,34 @@ public:
 	// ID_RIVERS_UNSELECTALL handlers
 	afx_msg void OnRiversUnselectAll();
 
+	// ID_DRAINS_HIDEALL handlers
+	afx_msg void OnUpdateDrainsHideAll(CCmdUI *pCmdUI);
+	afx_msg void OnDrainsHideAll();
+
+	// ID_DRAINS_SHOWSELECTED handlers
+	afx_msg void OnUpdateDrainsShowSelected(CCmdUI *pCmdUI);
+	afx_msg void OnDrainsShowSelected();
+
+	// ID_DRAINS_SELECTALL handlers
+	afx_msg void OnDrainsSelectAll();
+
+	// ID_DRAINS_UNSELECTALL handlers
+	afx_msg void OnDrainsUnselectAll();
+
+	// ID_ZONE_FLOW_HIDEALL handlers
+	afx_msg void OnUpdateZoneFlowHideAll(CCmdUI *pCmdUI);
+	afx_msg void OnZoneFlowHideAll();
+
+	// ID_ZONE_FLOW_SHOWSELECTED handlers
+	afx_msg void OnUpdateZoneFlowShowSelected(CCmdUI *pCmdUI);
+	afx_msg void OnZoneFlowShowSelected();
+
+	// ID_ZONE_FLOW_SELECTALL handlers
+	afx_msg void OnZoneFlowSelectAll();
+
+	// ID_ZONE_FLOW_UNSELECTALL handlers
+	afx_msg void OnZoneFlowUnselectAll();
+
 	// ID_TOOLS_MODIFYGRID
 	afx_msg void OnUpdateToolsModifyGrid(CCmdUI *pCmdUI);
 	afx_msg void OnToolsModifyGrid();
