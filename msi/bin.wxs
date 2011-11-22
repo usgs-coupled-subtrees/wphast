@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <?include Version.wxi?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
     <Fragment>
@@ -29,7 +29,7 @@
             <ComponentRef Id="vtkverdict.dll" />
             <ComponentRef Id="vtkWidgets.dll" />
             <ComponentRef Id="vtkzlib.dll" />
-            <ComponentRef Id="WPhast.exe" />
+            <ComponentRef Id="P4W.exe" />
             <ComponentRef Id="xerces_c_2_7.dll" />
             <ComponentRef Id="zlib1.dll" />
         </ComponentGroup>
@@ -115,11 +115,11 @@
                 <Component Id="vtkzlib.dll" Guid="*">
                     <File Id="vtkzlib.dll" KeyPath="yes" Source="$(var.vtkDllPath)\vtkzlib.dll" />
                 </Component>
-                <Component Id="WPhast.exe" Guid="*">
-                    <File Id="WPhast.exe" KeyPath="yes" Source="$(var.BinDir)\WPhast.exe" />
+                <Component Id="P4W.exe" Guid="*">
+                    <File Id="P4W.exe" KeyPath="yes" Source="$(var.BinDir)\P4W.exe" />
                     <Class Id="36353903-2137-43FD-9AD6-40B65A96A839" Context="LocalServer32" Description="Phast for Windows Document" Advertise="yes">
                       <ProgId Id="Phast.Document" Description="Phast for Windows Document">
-                        <Extension Id="wphast">
+                        <Extension Id="p4w">
                           <Verb Id="open" Argument='"%1"'/>
                           <Verb Id="print" Argument='/p "%1"'/>
                           <Verb Id="printto" Argument='/pt "%1" "%2" "%3" "%4"'/>

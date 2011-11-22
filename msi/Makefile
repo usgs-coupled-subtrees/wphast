@@ -6,7 +6,7 @@ DEVENV := devenv
 
 SLN := ../WPhast.sln
 
-WPHAST_EXE := ../src/AutoRelease/WPhast.exe
+P4W_EXE := ../src/AutoRelease/P4W.exe
 
 VTK_DLL_DIR := ../src/AutoRelease
 HDF_DLL_DIR := ../src/AutoRelease
@@ -24,44 +24,43 @@ DEV_VTK42_VS8_DLL_BIN_CYG = /cygdrive/c/PROGRA~1/VTK-4-~1/bin
 DEV_HDF5_LIBDLL_CYG = /cygdrive/c/3RDPARTY/HDF5/5-143-~1/c/release/dll
 
 
-%.wphast : %.trans.dat $(WPHAST_EXE) $(HDF_DLLS) $(VTK_DLLS)
+%.p4w : %.trans.dat $(P4W_EXE) $(HDF_DLLS) $(VTK_DLLS)
 	$(CSCRIPT) /NOLOGO import.vbs $<
 
 
 EXAMPLES = phast/examples
 	
-WPHAST_FILES=\
-	$(EXAMPLES)/diffusion1d/diffusion1d.wphast\
-	$(EXAMPLES)/diffusion2d/diffusion2d.wphast\
-	$(EXAMPLES)/disp2d/disp2d.wphast\
-	$(EXAMPLES)/ex1/ex1.wphast\
-	$(EXAMPLES)/ex2/ex2.wphast\
-	$(EXAMPLES)/ex3/ex3.wphast\
-	$(EXAMPLES)/ex4/ex4.wphast\
-	$(EXAMPLES)/ex4_ddl/ex4_ddl.wphast\
-	$(EXAMPLES)/ex4_noedl/ex4_noedl.wphast\
-	$(EXAMPLES)/ex4restart/ex4restart.wphast\
-	$(EXAMPLES)/ex4_start_time/ex4_start_time.wphast\
-	$(EXAMPLES)/ex4_transient/ex4_transient.wphast\
-	$(EXAMPLES)/ex5/ex5.wphast\
-	$(EXAMPLES)/ex6/ex6.wphast\
-	$(EXAMPLES)/kindred4.4/kindred4.4.wphast\
-	$(EXAMPLES)/leaky/leaky.wphast\
-	$(EXAMPLES)/leakysurface/leakysurface.wphast\
-	$(EXAMPLES)/leakyx/leakyx.wphast\
-	$(EXAMPLES)/leakyz/leakyz.wphast\
-	$(EXAMPLES)/linear_bc/linear_bc.wphast\
-	$(EXAMPLES)/linear_ic/linear_ic.wphast\
-	$(EXAMPLES)/phrqex11/phrqex11.wphast\
-	$(EXAMPLES)/river/river.wphast\
-	$(EXAMPLES)/shell/shell.wphast\
-	$(EXAMPLES)/simple/simple.wphast\
-	$(EXAMPLES)/unconf/unconf.wphast\
-	$(EXAMPLES)/well/well.wphast\
-	$(EXAMPLES)/zf/zf.wphast
-	
-###	$(EXAMPLES)/radial/radial.wphast\
-###	$(EXAMPLES)/property/property.wphast\
+P4W_FILES=\
+	$(EXAMPLES)/diffusion1d/diffusion1d.p4w\
+	$(EXAMPLES)/diffusion2d/diffusion2d.p4w\
+	$(EXAMPLES)/disp2d/disp2d.p4w\
+	$(EXAMPLES)/ex1/ex1.p4w\
+	$(EXAMPLES)/ex2/ex2.p4w\
+	$(EXAMPLES)/ex3/ex3.p4w\
+	$(EXAMPLES)/ex4/ex4.p4w\
+	$(EXAMPLES)/ex4_ddl/ex4_ddl.p4w\
+	$(EXAMPLES)/ex4_noedl/ex4_noedl.p4w\
+	$(EXAMPLES)/ex4restart/ex4restart.p4w\
+	$(EXAMPLES)/ex4_start_time/ex4_start_time.p4w\
+	$(EXAMPLES)/ex4_transient/ex4_transient.p4w\
+	$(EXAMPLES)/ex5/ex5.p4w\
+	$(EXAMPLES)/ex6/ex6.p4w\
+	$(EXAMPLES)/kindred4.4/kindred4.4.p4w\
+	$(EXAMPLES)/leaky/leaky.p4w\
+	$(EXAMPLES)/leakysurface/leakysurface.p4w\
+	$(EXAMPLES)/leakyx/leakyx.p4w\
+	$(EXAMPLES)/leakyz/leakyz.p4w\
+	$(EXAMPLES)/linear_bc/linear_bc.p4w\
+	$(EXAMPLES)/linear_ic/linear_ic.p4w\
+	$(EXAMPLES)/phrqex11/phrqex11.p4w\
+	$(EXAMPLES)/property/property.p4w\
+	$(EXAMPLES)/radial/radial.p4w\
+	$(EXAMPLES)/river/river.p4w\
+	$(EXAMPLES)/shell/shell.p4w\
+	$(EXAMPLES)/simple/simple.p4w\
+	$(EXAMPLES)/unconf/unconf.p4w\
+	$(EXAMPLES)/well/well.p4w\
+	$(EXAMPLES)/zf/zf.p4w
 	
 VTK_DLLS=\
 	$(VTK_DLL_DIR)/vtkCommon.dll\
@@ -97,11 +96,11 @@ HDF_DLLS=\
 
 all : $(MSI)
 
-$(MSI) : msi.sln  $(WPHAST_EXE) $(WPHAST_FILES)
+$(MSI) : msi.sln  $(P4W) $(P4W_FILES)
 	MSBuild.exe msi.sln /t:msi /p:Configuration=Release /p:Platform=x86 /p:TargetName=phast4windows /p:Major=${MAJOR} /p:Minor=${MINOR} /p:Patch=${PATCH} /p:Build=${REL} /p:phastExePath=${PHAST_EXE_PATH}
 	touch $(MSI)
 
-$(WPHAST_EXE) : $(SLN)
+$(P4W_EXE) : $(SLN)
 	@rm -rf AutoRelease.log
 	$(DEVENV) /out AutoRelease.log /build AutoRelease $(SLN)
 	@cat AutoRelease.log
@@ -115,11 +114,11 @@ uninstall :
 check : $(MSI)
 	$(MSIVAL2) $(MSI) 'C:\Program Files\MsiVal2\logo.cub' -f
 
-import : $(WPHAST_EXE) $(HDF_DLLS) $(VTK_DLLS)
+import : $(P4W_EXE) $(HDF_DLLS) $(VTK_DLLS)
 	$(CSCRIPT) /NOLOGO import_files.vbs
 
 import_clean :
-	rm -rf $(WPHAST_FILES)
+	rm -rf $(P4W_FILES)
 
 .SECONDARY : $(VTK_DLLS) $(HDF_DLLS)
 

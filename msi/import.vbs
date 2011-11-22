@@ -20,7 +20,7 @@ scriptdir = Mid(WScript.ScriptFullName, 1, Len(WScript.ScriptFullName) - Len(WSc
 clsid = "{36353903-2137-43FD-9AD6-40B65A96A839}"
 classes = "HKEY_CURRENT_USER\Software\Classes\"
 doc = "Testing.WPhast.Document"
-exepath = scriptdir & "..\src\AutoRelease\WPhast.exe"
+exepath = scriptdir & "..\src\AutoRelease\P4W.exe"
 
 Set Fso = CreateObject("Scripting.FileSystemObject")
 exepath  = Fso.GetAbsolutePathName(exepath)
@@ -38,7 +38,7 @@ Set Sh = CreateObject("WScript.Shell")
 '
 Sh.RegRead("HKEY_CLASSES_ROOT\Phast.Document\CLSID")
 If Err = 0 Then
-	WScript.Echo "Phast for Windows is already installed."
+	WScript.Echo "Phast for Windows cannot be installed."
 	WScript.Quit 1
 End If
 
@@ -55,7 +55,6 @@ If bCreateDoc Then
 	' @="Testing.WPhast.Document"
 	'
 	Sh.RegWrite classes & doc & "\", doc
-	WScript.Echo classes & doc & "\", doc
 End If
 
 
@@ -71,7 +70,6 @@ If bCreateDocCLSID Then
 	' @="{36353903-2137-43FD-9AD6-40B65A96A839}"
 	'
 	Sh.RegWrite classes & doc & "\CLSID\", clsid
-	WScript.Echo classes & doc & "\CLSID\", clsid
 End If
 
 
@@ -91,7 +89,6 @@ If bCreateClassCLSID Then
 	'''Sh.RegWrite "HKEY_CURRENT_USER\Software\Classes\Wow6432Node\CLSID\{00000000-0000-0000-0000-000000001234}\", doc
 	'''WScript.Echo classes & "CLSID\" & clsid & "\", doc
 	Sh.RegWrite classes & "CLSID\" & clsid & "\", doc
-	WScript.Echo classes & "CLSID\" & clsid & "\", doc	
 End If
 
 
@@ -107,7 +104,6 @@ If bCreateLocalServer32 Then
 	' @="<scriptdir>..\src\AutoRelease\WPhast.exe
 	'
 	Sh.RegWrite classes & "CLSID\" & clsid & "\LocalServer32\", exepath
-	WScript.Echo classes & "CLSID\" & clsid & "\LocalServer32\", exepath
 End If
 
 
@@ -122,8 +118,7 @@ If bCreateProgID Then
 	' [HKEY_CURRENT_USER\Software\Classes\CLSID\{36353903-2137-43FD-9AD6-40B65A96A839}\ProgID]
 	' @="Testing.WPhast.Document"
 	'
-	'''Sh.RegWrite classes & "\CLSID\" & clsid & "\ProgID\", doc
-	WScript.Echo classes & "CLSID\" & clsid & "\ProgID\", doc
+	Sh.RegWrite classes & "\CLSID\" & clsid & "\ProgID\", doc
 End If
 
 
@@ -133,7 +128,7 @@ End If
 On Error GoTo 0
 
 Set trans_dat_file = Fso.GetFile(WScript.Arguments(0))
-wphast_file = Mid(trans_dat_file, 1, Len(trans_dat_file) - Len(".trans.dat")) & ".wphast"
+wphast_file = Mid(trans_dat_file, 1, Len(trans_dat_file) - Len(".trans.dat")) & ".p4w"
 
 Set WPhast = WScript.CreateObject("Testing.WPhast.Document")
 

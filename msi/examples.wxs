@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
     <Fragment>
         <ComponentGroup Id="Examples">
@@ -12,52 +12,52 @@
             <ComponentRef Id="phast.dat_1" />
             <ComponentRef Id="disp2d.chem.dat" />
             <ComponentRef Id="disp2d.trans.dat" />
-            <ComponentRef Id="disp2d.wphast" />
+            <ComponentRef Id="disp2d.p4w" />
             <ComponentRef Id="phast.dat_2" />
             <ComponentRef Id="ex1.chem.dat" />
             <ComponentRef Id="ex1.trans.dat" />
-            <ComponentRef Id="ex1.wphast" />
+            <ComponentRef Id="ex1.p4w" />
             <ComponentRef Id="phast.dat_3" />
             <ComponentRef Id="ex2.chem.dat" />
             <ComponentRef Id="ex2.trans.dat" />
-            <ComponentRef Id="ex2.wphast" />
+            <ComponentRef Id="ex2.p4w" />
             <ComponentRef Id="phast.dat_4" />
             <ComponentRef Id="ex3.chem.dat" />
             <ComponentRef Id="ex3.trans.dat" />
-            <ComponentRef Id="ex3.wphast" />
+            <ComponentRef Id="ex3.p4w" />
             <ComponentRef Id="phast.dat_5" />
             <ComponentRef Id="ex4.chem.dat" />
             <ComponentRef Id="ex4.trans.dat" />
-            <ComponentRef Id="ex4.wphast" />
+            <ComponentRef Id="ex4.p4w" />
             <ComponentRef Id="phast.dat_6" />
             <ComponentRef Id="ex4.head.dat" />
             <ComponentRef Id="ex4.restart.gz" />
             <ComponentRef Id="ex4restart.chem.dat" />
             <ComponentRef Id="ex4restart.head.dat" />
             <ComponentRef Id="ex4restart.trans.dat" />
-            <ComponentRef Id="ex4restart.wphast" />
+            <ComponentRef Id="ex4restart.p4w" />
             <ComponentRef Id="phast.dat_7" />
             <ComponentRef Id="ex4_ddl.chem.dat" />
             <ComponentRef Id="ex4_ddl.trans.dat" />
-            <ComponentRef Id="ex4_ddl.wphast" />
+            <ComponentRef Id="ex4_ddl.p4w" />
             <ComponentRef Id="phast.dat_8" />
             <ComponentRef Id="ex4_noedl.chem.dat" />
             <ComponentRef Id="ex4_noedl.trans.dat" />
-            <ComponentRef Id="ex4_noedl.wphast" />
+            <ComponentRef Id="ex4_noedl.p4w" />
             <ComponentRef Id="phast.dat_9" />
             <ComponentRef Id="ex4_start_time.chem.dat" />
             <ComponentRef Id="ex4_start_time.trans.dat" />
-            <ComponentRef Id="ex4_start_time.wphast" />
+            <ComponentRef Id="ex4_start_time.p4w" />
             <ComponentRef Id="phast.dat_10" />
             <ComponentRef Id="ex4.head.dat_1" />
             <ComponentRef Id="ex4_transient.chem.dat" />
             <ComponentRef Id="ex4_transient.trans.dat" />
-            <ComponentRef Id="ex4_transient.wphast" />
+            <ComponentRef Id="ex4_transient.p4w" />
             <ComponentRef Id="initial.head.dat" />
             <ComponentRef Id="phast.dat_11" />
             <ComponentRef Id="ex5.head.200.dat" />
             <ComponentRef Id="ex5.trans.dat" />
-            <ComponentRef Id="ex5.wphast" />
+            <ComponentRef Id="ex5.p4w" />
             <ComponentRef Id="Ashumet.dbf" />
             <ComponentRef Id="Ashumet.shp" />
             <ComponentRef Id="Ashumet.shx" />
@@ -90,51 +90,51 @@
             <ComponentRef Id="kz_meters" />
             <ComponentRef Id="ex6.chem.dat" />
             <ComponentRef Id="ex6.trans.dat" />
-            <ComponentRef Id="ex6.wphast" />
+            <ComponentRef Id="ex6.p4w" />
             <ComponentRef Id="phast.dat_12" />
             <ComponentRef Id="kindred4.4.chem.dat" />
             <ComponentRef Id="kindred4.4.trans.dat" />
-            <ComponentRef Id="kindred4.4.wphast" />
+            <ComponentRef Id="kindred4.4.p4w" />
             <ComponentRef Id="phast.dat_13" />
             <ComponentRef Id="leaky.trans.dat" />
-            <ComponentRef Id="leaky.wphast" />
+            <ComponentRef Id="leaky.p4w" />
             <ComponentRef Id="leakysurface.trans.dat" />
-            <ComponentRef Id="leakysurface.wphast" />
+            <ComponentRef Id="leakysurface.p4w" />
             <ComponentRef Id="leakyx.trans.dat" />
-            <ComponentRef Id="leakyx.wphast" />
+            <ComponentRef Id="leakyx.p4w" />
             <ComponentRef Id="leakyz.trans.dat" />
-            <ComponentRef Id="leakyz.wphast" />
+            <ComponentRef Id="leakyz.p4w" />
             <ComponentRef Id="linear_bc.chem.dat" />
             <ComponentRef Id="linear_bc.trans.dat" />
-            <ComponentRef Id="linear_bc.wphast" />
+            <ComponentRef Id="linear_bc.p4w" />
             <ComponentRef Id="phast.dat_14" />
             <ComponentRef Id="linear_ic.chem.dat" />
             <ComponentRef Id="linear_ic.trans.dat" />
-            <ComponentRef Id="linear_ic.wphast" />
+            <ComponentRef Id="linear_ic.p4w" />
             <ComponentRef Id="phast.dat_15" />
             <ComponentRef Id="phast.dat_16" />
             <ComponentRef Id="phrqex11.chem.dat" />
             <ComponentRef Id="phrqex11.trans.dat" />
-            <ComponentRef Id="phrqex11.wphast" />
+            <ComponentRef Id="phrqex11.p4w" />
             <ComponentRef Id="river.trans.dat" />
-            <ComponentRef Id="river.wphast" />
+            <ComponentRef Id="river.p4w" />
             <ComponentRef Id="phast.dat_17" />
             <ComponentRef Id="shell.chem.dat" />
             <ComponentRef Id="shell.trans.dat" />
-            <ComponentRef Id="shell.wphast" />
+            <ComponentRef Id="shell.p4w" />
             <ComponentRef Id="phast.dat_18" />
             <ComponentRef Id="simple.chem.dat" />
             <ComponentRef Id="simple.trans.dat" />
-            <ComponentRef Id="simple.wphast" />
+            <ComponentRef Id="simple.p4w" />
             <ComponentRef Id="unconf.trans.dat" />
-            <ComponentRef Id="unconf.wphast" />
+            <ComponentRef Id="unconf.p4w" />
             <ComponentRef Id="phast.dat_19" />
             <ComponentRef Id="well.trans.dat" />
-            <ComponentRef Id="well.wphast" />
+            <ComponentRef Id="well.p4w" />
             <ComponentRef Id="phast.dat_20" />
             <ComponentRef Id="zf.chem.dat" />
             <ComponentRef Id="zf.trans.dat" />
-            <ComponentRef Id="zf.wphast" />
+            <ComponentRef Id="zf.p4w" />
         </ComponentGroup>
     </Fragment>
     <Fragment>
@@ -175,8 +175,8 @@
                     <Component Id="disp2d.trans.dat" Guid="*">
                         <File Id="disp2d.trans.dat" KeyPath="yes" Source="$(var.ExampleDir)\disp2d\disp2d.trans.dat" />
                     </Component>
-                    <Component Id="disp2d.wphast" Guid="*">
-                        <File Id="disp2d.wphast" KeyPath="yes" Source="$(var.ExampleDir)\disp2d\disp2d.wphast" />
+                    <Component Id="disp2d.p4w" Guid="*">
+                        <File Id="disp2d.p4w" KeyPath="yes" Source="$(var.ExampleDir)\disp2d\disp2d.p4w" />
                     </Component>
                     <Component Id="phast.dat_2" Guid="*">
                         <File Id="phast.dat_2" KeyPath="yes" Source="$(var.ExampleDir)\disp2d\phast.dat" />
@@ -189,8 +189,8 @@
                     <Component Id="ex1.trans.dat" Guid="*">
                         <File Id="ex1.trans.dat" KeyPath="yes" Source="$(var.ExampleDir)\ex1\ex1.trans.dat" />
                     </Component>
-                    <Component Id="ex1.wphast" Guid="*">
-                        <File Id="ex1.wphast" KeyPath="yes" Source="$(var.ExampleDir)\ex1\ex1.wphast" />
+                    <Component Id="ex1.p4w" Guid="*">
+                        <File Id="ex1.p4w" KeyPath="yes" Source="$(var.ExampleDir)\ex1\ex1.p4w" />
                     </Component>
                     <Component Id="phast.dat_3" Guid="*">
                         <File Id="phast.dat_3" KeyPath="yes" Source="$(var.ExampleDir)\ex1\phast.dat" />
@@ -203,8 +203,8 @@
                     <Component Id="ex2.trans.dat" Guid="*">
                         <File Id="ex2.trans.dat" KeyPath="yes" Source="$(var.ExampleDir)\ex2\ex2.trans.dat" />
                     </Component>
-                    <Component Id="ex2.wphast" Guid="*">
-                        <File Id="ex2.wphast" KeyPath="yes" Source="$(var.ExampleDir)\ex2\ex2.wphast" />
+                    <Component Id="ex2.p4w" Guid="*">
+                        <File Id="ex2.p4w" KeyPath="yes" Source="$(var.ExampleDir)\ex2\ex2.p4w" />
                     </Component>
                     <Component Id="phast.dat_4" Guid="*">
                         <File Id="phast.dat_4" KeyPath="yes" Source="$(var.ExampleDir)\ex2\phast.dat" />
@@ -217,8 +217,8 @@
                     <Component Id="ex3.trans.dat" Guid="*">
                         <File Id="ex3.trans.dat" KeyPath="yes" Source="$(var.ExampleDir)\ex3\ex3.trans.dat" />
                     </Component>
-                    <Component Id="ex3.wphast" Guid="*">
-                        <File Id="ex3.wphast" KeyPath="yes" Source="$(var.ExampleDir)\ex3\ex3.wphast" />
+                    <Component Id="ex3.p4w" Guid="*">
+                        <File Id="ex3.p4w" KeyPath="yes" Source="$(var.ExampleDir)\ex3\ex3.p4w" />
                     </Component>
                     <Component Id="phast.dat_5" Guid="*">
                         <File Id="phast.dat_5" KeyPath="yes" Source="$(var.ExampleDir)\ex3\phast.dat" />
@@ -231,8 +231,8 @@
                     <Component Id="ex4.trans.dat" Guid="*">
                         <File Id="ex4.trans.dat" KeyPath="yes" Source="$(var.ExampleDir)\ex4\ex4.trans.dat" />
                     </Component>
-                    <Component Id="ex4.wphast" Guid="*">
-                        <File Id="ex4.wphast" KeyPath="yes" Source="$(var.ExampleDir)\ex4\ex4.wphast" />
+                    <Component Id="ex4.p4w" Guid="*">
+                        <File Id="ex4.p4w" KeyPath="yes" Source="$(var.ExampleDir)\ex4\ex4.p4w" />
                     </Component>
                     <Component Id="phast.dat_6" Guid="*">
                         <File Id="phast.dat_6" KeyPath="yes" Source="$(var.ExampleDir)\ex4\phast.dat" />
@@ -254,8 +254,8 @@
                     <Component Id="ex4restart.trans.dat" Guid="*">
                         <File Id="ex4restart.trans.dat" KeyPath="yes" Source="$(var.ExampleDir)\ex4restart\ex4restart.trans.dat" />
                     </Component>
-                    <Component Id="ex4restart.wphast" Guid="*">
-                        <File Id="ex4restart.wphast" KeyPath="yes" Source="$(var.ExampleDir)\ex4restart\ex4restart.wphast" />
+                    <Component Id="ex4restart.p4w" Guid="*">
+                        <File Id="ex4restart.p4w" KeyPath="yes" Source="$(var.ExampleDir)\ex4restart\ex4restart.p4w" />
                     </Component>
                     <Component Id="phast.dat_7" Guid="*">
                         <File Id="phast.dat_7" KeyPath="yes" Source="$(var.ExampleDir)\ex4restart\phast.dat" />
@@ -268,8 +268,8 @@
                     <Component Id="ex4_ddl.trans.dat" Guid="*">
                         <File Id="ex4_ddl.trans.dat" KeyPath="yes" Source="$(var.ExampleDir)\ex4_ddl\ex4_ddl.trans.dat" />
                     </Component>
-                    <Component Id="ex4_ddl.wphast" Guid="*">
-                        <File Id="ex4_ddl.wphast" KeyPath="yes" Source="$(var.ExampleDir)\ex4_ddl\ex4_ddl.wphast" />
+                    <Component Id="ex4_ddl.p4w" Guid="*">
+                        <File Id="ex4_ddl.p4w" KeyPath="yes" Source="$(var.ExampleDir)\ex4_ddl\ex4_ddl.p4w" />
                     </Component>
                     <Component Id="phast.dat_8" Guid="*">
                         <File Id="phast.dat_8" KeyPath="yes" Source="$(var.ExampleDir)\ex4_ddl\phast.dat" />
@@ -282,8 +282,8 @@
                     <Component Id="ex4_noedl.trans.dat" Guid="*">
                         <File Id="ex4_noedl.trans.dat" KeyPath="yes" Source="$(var.ExampleDir)\ex4_noedl\ex4_noedl.trans.dat" />
                     </Component>
-                    <Component Id="ex4_noedl.wphast" Guid="*">
-                        <File Id="ex4_noedl.wphast" KeyPath="yes" Source="$(var.ExampleDir)\ex4_noedl\ex4_noedl.wphast" />
+                    <Component Id="ex4_noedl.p4w" Guid="*">
+                        <File Id="ex4_noedl.p4w" KeyPath="yes" Source="$(var.ExampleDir)\ex4_noedl\ex4_noedl.p4w" />
                     </Component>
                     <Component Id="phast.dat_9" Guid="*">
                         <File Id="phast.dat_9" KeyPath="yes" Source="$(var.ExampleDir)\ex4_noedl\phast.dat" />
@@ -296,8 +296,8 @@
                     <Component Id="ex4_start_time.trans.dat" Guid="*">
                         <File Id="ex4_start_time.trans.dat" KeyPath="yes" Source="$(var.ExampleDir)\ex4_start_time\ex4_start_time.trans.dat" />
                     </Component>
-                    <Component Id="ex4_start_time.wphast" Guid="*">
-                        <File Id="ex4_start_time.wphast" KeyPath="yes" Source="$(var.ExampleDir)\ex4_start_time\ex4_start_time.wphast" />
+                    <Component Id="ex4_start_time.p4w" Guid="*">
+                        <File Id="ex4_start_time.p4w" KeyPath="yes" Source="$(var.ExampleDir)\ex4_start_time\ex4_start_time.p4w" />
                     </Component>
                     <Component Id="phast.dat_10" Guid="*">
                         <File Id="phast.dat_10" KeyPath="yes" Source="$(var.ExampleDir)\ex4_start_time\phast.dat" />
@@ -313,8 +313,8 @@
                     <Component Id="ex4_transient.trans.dat" Guid="*">
                         <File Id="ex4_transient.trans.dat" KeyPath="yes" Source="$(var.ExampleDir)\ex4_transient\ex4_transient.trans.dat" />
                     </Component>
-                    <Component Id="ex4_transient.wphast" Guid="*">
-                        <File Id="ex4_transient.wphast" KeyPath="yes" Source="$(var.ExampleDir)\ex4_transient\ex4_transient.wphast" />
+                    <Component Id="ex4_transient.p4w" Guid="*">
+                        <File Id="ex4_transient.p4w" KeyPath="yes" Source="$(var.ExampleDir)\ex4_transient\ex4_transient.p4w" />
                     </Component>
                     <Component Id="initial.head.dat" Guid="*">
                         <File Id="initial.head.dat" KeyPath="yes" Source="$(var.ExampleDir)\ex4_transient\initial.head.dat" />
@@ -330,8 +330,8 @@
                     <Component Id="ex5.trans.dat" Guid="*">
                         <File Id="ex5.trans.dat" KeyPath="yes" Source="$(var.ExampleDir)\ex5\ex5.trans.dat" />
                     </Component>
-                    <Component Id="ex5.wphast" Guid="*">
-                        <File Id="ex5.wphast" KeyPath="yes" Source="$(var.ExampleDir)\ex5\ex5.wphast" />
+                    <Component Id="ex5.p4w" Guid="*">
+                        <File Id="ex5.p4w" KeyPath="yes" Source="$(var.ExampleDir)\ex5\ex5.p4w" />
                     </Component>
                   <Directory Id="ArcData" Name="ArcData">
                         <Component Id="Ashumet.dbf" Guid="*">
@@ -438,8 +438,8 @@
                     <Component Id="phast.dat_12" Guid="*">
                         <File Id="phast.dat_12" KeyPath="yes" Source="$(var.ExampleDir)\ex6\phast.dat" />
                     </Component>
-                  <Component Id="ex6.wphast" Guid="*">
-                    <File Id="ex6.wphast" KeyPath="yes" Source="$(var.ExampleDir)\ex6\ex6.wphast" />
+                  <Component Id="ex6.p4w" Guid="*">
+                    <File Id="ex6.p4w" KeyPath="yes" Source="$(var.ExampleDir)\ex6\ex6.p4w" />
                   </Component>
                 </Directory>
                 <Directory Id="kindred4.4" Name="kindred4.4">
@@ -449,8 +449,8 @@
                     <Component Id="kindred4.4.trans.dat" Guid="*">
                         <File Id="kindred4.4.trans.dat" KeyPath="yes" Source="$(var.ExampleDir)\kindred4.4\kindred4.4.trans.dat" />
                     </Component>
-                    <Component Id="kindred4.4.wphast" Guid="*">
-                        <File Id="kindred4.4.wphast" KeyPath="yes" Source="$(var.ExampleDir)\kindred4.4\kindred4.4.wphast" />
+                    <Component Id="kindred4.4.p4w" Guid="*">
+                        <File Id="kindred4.4.p4w" KeyPath="yes" Source="$(var.ExampleDir)\kindred4.4\kindred4.4.p4w" />
                     </Component>
                     <Component Id="phast.dat_13" Guid="*">
                         <File Id="phast.dat_13" KeyPath="yes" Source="$(var.ExampleDir)\kindred4.4\phast.dat" />
@@ -460,32 +460,32 @@
                     <Component Id="leaky.trans.dat" Guid="*">
                         <File Id="leaky.trans.dat" KeyPath="yes" Source="$(var.ExampleDir)\leaky\leaky.trans.dat" />
                     </Component>
-                    <Component Id="leaky.wphast" Guid="*">
-                        <File Id="leaky.wphast" KeyPath="yes" Source="$(var.ExampleDir)\leaky\leaky.wphast" />
+                    <Component Id="leaky.p4w" Guid="*">
+                        <File Id="leaky.p4w" KeyPath="yes" Source="$(var.ExampleDir)\leaky\leaky.p4w" />
                     </Component>
                 </Directory>
                 <Directory Id="leakysurface" Name="leakysurface">
                     <Component Id="leakysurface.trans.dat" Guid="*">
                         <File Id="leakysurface.trans.dat" KeyPath="yes" Source="$(var.ExampleDir)\leakysurface\leakysurface.trans.dat" />
                     </Component>
-                    <Component Id="leakysurface.wphast" Guid="*">
-                        <File Id="leakysurface.wphast" KeyPath="yes" Source="$(var.ExampleDir)\leakysurface\leakysurface.wphast" />
+                    <Component Id="leakysurface.p4w" Guid="*">
+                        <File Id="leakysurface.p4w" KeyPath="yes" Source="$(var.ExampleDir)\leakysurface\leakysurface.p4w" />
                     </Component>
                 </Directory>
                 <Directory Id="leakyx" Name="leakyx">
                     <Component Id="leakyx.trans.dat" Guid="*">
                         <File Id="leakyx.trans.dat" KeyPath="yes" Source="$(var.ExampleDir)\leakyx\leakyx.trans.dat" />
                     </Component>
-                    <Component Id="leakyx.wphast" Guid="*">
-                        <File Id="leakyx.wphast" KeyPath="yes" Source="$(var.ExampleDir)\leakyx\leakyx.wphast" />
+                    <Component Id="leakyx.p4w" Guid="*">
+                        <File Id="leakyx.p4w" KeyPath="yes" Source="$(var.ExampleDir)\leakyx\leakyx.p4w" />
                     </Component>
                 </Directory>
                 <Directory Id="leakyz" Name="leakyz">
                     <Component Id="leakyz.trans.dat" Guid="*">
                         <File Id="leakyz.trans.dat" KeyPath="yes" Source="$(var.ExampleDir)\leakyz\leakyz.trans.dat" />
                     </Component>
-                    <Component Id="leakyz.wphast" Guid="*">
-                        <File Id="leakyz.wphast" KeyPath="yes" Source="$(var.ExampleDir)\leakyz\leakyz.wphast" />
+                    <Component Id="leakyz.p4w" Guid="*">
+                        <File Id="leakyz.p4w" KeyPath="yes" Source="$(var.ExampleDir)\leakyz\leakyz.p4w" />
                     </Component>
                 </Directory>
                 <Directory Id="linear_bc" Name="linear_bc">
@@ -495,8 +495,8 @@
                     <Component Id="linear_bc.trans.dat" Guid="*">
                         <File Id="linear_bc.trans.dat" KeyPath="yes" Source="$(var.ExampleDir)\linear_bc\linear_bc.trans.dat" />
                     </Component>
-                    <Component Id="linear_bc.wphast" Guid="*">
-                        <File Id="linear_bc.wphast" KeyPath="yes" Source="$(var.ExampleDir)\linear_bc\linear_bc.wphast" />
+                    <Component Id="linear_bc.p4w" Guid="*">
+                        <File Id="linear_bc.p4w" KeyPath="yes" Source="$(var.ExampleDir)\linear_bc\linear_bc.p4w" />
                     </Component>
                     <Component Id="phast.dat_14" Guid="*">
                         <File Id="phast.dat_14" KeyPath="yes" Source="$(var.ExampleDir)\linear_bc\phast.dat" />
@@ -509,8 +509,8 @@
                     <Component Id="linear_ic.trans.dat" Guid="*">
                         <File Id="linear_ic.trans.dat" KeyPath="yes" Source="$(var.ExampleDir)\linear_ic\linear_ic.trans.dat" />
                     </Component>
-                    <Component Id="linear_ic.wphast" Guid="*">
-                        <File Id="linear_ic.wphast" KeyPath="yes" Source="$(var.ExampleDir)\linear_ic\linear_ic.wphast" />
+                    <Component Id="linear_ic.p4w" Guid="*">
+                        <File Id="linear_ic.p4w" KeyPath="yes" Source="$(var.ExampleDir)\linear_ic\linear_ic.p4w" />
                     </Component>
                     <Component Id="phast.dat_15" Guid="*">
                         <File Id="phast.dat_15" KeyPath="yes" Source="$(var.ExampleDir)\linear_ic\phast.dat" />
@@ -526,16 +526,16 @@
                     <Component Id="phrqex11.trans.dat" Guid="*">
                         <File Id="phrqex11.trans.dat" KeyPath="yes" Source="$(var.ExampleDir)\phrqex11\phrqex11.trans.dat" />
                     </Component>
-                    <Component Id="phrqex11.wphast" Guid="*">
-                        <File Id="phrqex11.wphast" KeyPath="yes" Source="$(var.ExampleDir)\phrqex11\phrqex11.wphast" />
+                    <Component Id="phrqex11.p4w" Guid="*">
+                        <File Id="phrqex11.p4w" KeyPath="yes" Source="$(var.ExampleDir)\phrqex11\phrqex11.p4w" />
                     </Component>
                 </Directory>
                 <Directory Id="river" Name="river">
                     <Component Id="river.trans.dat" Guid="*">
                         <File Id="river.trans.dat" KeyPath="yes" Source="$(var.ExampleDir)\river\river.trans.dat" />
                     </Component>
-                    <Component Id="river.wphast" Guid="*">
-                        <File Id="river.wphast" KeyPath="yes" Source="$(var.ExampleDir)\river\river.wphast" />
+                    <Component Id="river.p4w" Guid="*">
+                        <File Id="river.p4w" KeyPath="yes" Source="$(var.ExampleDir)\river\river.p4w" />
                     </Component>
                 </Directory>
                 <Directory Id="shell" Name="shell">
@@ -548,8 +548,8 @@
                     <Component Id="shell.trans.dat" Guid="*">
                         <File Id="shell.trans.dat" KeyPath="yes" Source="$(var.ExampleDir)\shell\shell.trans.dat" />
                     </Component>
-                    <Component Id="shell.wphast" Guid="*">
-                        <File Id="shell.wphast" KeyPath="yes" Source="$(var.ExampleDir)\shell\shell.wphast" />
+                    <Component Id="shell.p4w" Guid="*">
+                        <File Id="shell.p4w" KeyPath="yes" Source="$(var.ExampleDir)\shell\shell.p4w" />
                     </Component>
                 </Directory>
                 <Directory Id="simple" Name="simple">
@@ -562,16 +562,16 @@
                     <Component Id="simple.trans.dat" Guid="*">
                         <File Id="simple.trans.dat" KeyPath="yes" Source="$(var.ExampleDir)\simple\simple.trans.dat" />
                     </Component>
-                    <Component Id="simple.wphast" Guid="*">
-                        <File Id="simple.wphast" KeyPath="yes" Source="$(var.ExampleDir)\simple\simple.wphast" />
+                    <Component Id="simple.p4w" Guid="*">
+                        <File Id="simple.p4w" KeyPath="yes" Source="$(var.ExampleDir)\simple\simple.p4w" />
                     </Component>
                 </Directory>
                 <Directory Id="unconf" Name="unconf">
                     <Component Id="unconf.trans.dat" Guid="*">
                         <File Id="unconf.trans.dat" KeyPath="yes" Source="$(var.ExampleDir)\unconf\unconf.trans.dat" />
                     </Component>
-                    <Component Id="unconf.wphast" Guid="*">
-                        <File Id="unconf.wphast" KeyPath="yes" Source="$(var.ExampleDir)\unconf\unconf.wphast" />
+                    <Component Id="unconf.p4w" Guid="*">
+                        <File Id="unconf.p4w" KeyPath="yes" Source="$(var.ExampleDir)\unconf\unconf.p4w" />
                     </Component>
                 </Directory>
                 <Directory Id="well" Name="well">
@@ -581,8 +581,8 @@
                     <Component Id="well.trans.dat" Guid="*">
                         <File Id="well.trans.dat" KeyPath="yes" Source="$(var.ExampleDir)\well\well.trans.dat" />
                     </Component>
-                    <Component Id="well.wphast" Guid="*">
-                        <File Id="well.wphast" KeyPath="yes" Source="$(var.ExampleDir)\well\well.wphast" />
+                    <Component Id="well.p4w" Guid="*">
+                        <File Id="well.p4w" KeyPath="yes" Source="$(var.ExampleDir)\well\well.p4w" />
                     </Component>
                 </Directory>
                 <Directory Id="zf" Name="zf">
@@ -595,8 +595,8 @@
                     <Component Id="zf.trans.dat" Guid="*">
                         <File Id="zf.trans.dat" KeyPath="yes" Source="$(var.ExampleDir)\zf\zf.trans.dat" />
                     </Component>
-                    <Component Id="zf.wphast" Guid="*">
-                        <File Id="zf.wphast" KeyPath="yes" Source="$(var.ExampleDir)\zf\zf.wphast" />
+                    <Component Id="zf.p4w" Guid="*">
+                        <File Id="zf.p4w" KeyPath="yes" Source="$(var.ExampleDir)\zf\zf.p4w" />
                     </Component>
                 </Directory>
             </Directory>

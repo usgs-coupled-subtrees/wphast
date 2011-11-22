@@ -4,7 +4,7 @@
   <Fragment>
     <DirectoryRef Id="ApplicationProgramsFolder">
       <Component Id="BinShortcuts" Guid="*" Win64="$(var.Win64)">
-        <Shortcut Id="WPhast.exe" Name="$(var.Shortcut)" Target="[bin]WPhast.exe"/>
+        <Shortcut Id="P4W.exe" Name="$(var.Shortcut)" Target="[bin]P4W.exe"/>
         <RemoveFolder Id="ApplicationProgramsFolder" On="uninstall"/>
         <RegistryValue Root="HKCU" Key="Software\USGS\$(var.FullName)" Name="installed" Type="integer" Value="1" KeyPath="yes"/>
       </Component>
