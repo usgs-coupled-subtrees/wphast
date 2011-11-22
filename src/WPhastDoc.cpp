@@ -1200,7 +1200,7 @@ void CWPhastDoc::SerializeIC(bool bStoring, hid_t loc_id)
 			}
 			else
 			{
-				// read old format (this .wphast file was written by a version older than
+				// read old format (this .p4w file was written by a version older than
 				// or equal to 669)
 				//
 				status = ::H5Dclose(old_id);
@@ -3502,7 +3502,7 @@ void CWPhastDoc::OnFileExport()
 
 	VERIFY(::_tsplitpath_s(newName.GetBuffer(), szDrive, _MAX_DRIVE, szDir, _MAX_DIR, szFName, _MAX_FNAME, szExt, _MAX_EXT) == 0);
 	newName = szFName;
-	if (::_tcsicmp(szExt, _T(".wphast")) != 0)
+	if (::_tcsicmp(szExt, _T(".p4w")) != 0)
 	{
 		newName += szExt;
 	}
@@ -8244,7 +8244,7 @@ void CWPhastDoc::SerializeFiles(bool bStoring, CHDFMirrorFile* file, std::map<CS
 					TRACE("%s = %s\n", cit->first, cit->second);
 				}
 
-				// split path "C:\Users\charlton\Documents\Visual Studio 2005\Projects\WPhast-trunk\Bugs\extents.1.wphast"
+				// split path "C:\Users\charlton\Documents\Visual Studio 2005\Projects\WPhast-trunk\Bugs\extents.1.p4w"
 				TCHAR szDrive[_MAX_DRIVE];
 				TCHAR szDir[_MAX_DIR];
 				TCHAR szFName[_MAX_FNAME];

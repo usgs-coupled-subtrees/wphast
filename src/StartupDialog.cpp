@@ -32,9 +32,9 @@ void CStartupDialog::DoDataExchange(CDataExchange* pDX)
 		case IDC_OPEN_FILE:
 			this->m_nAction = CStartupDialog::SDA_OPEN_FILE;
 			{
-				char szFilters[] = "Phast for Windows Files (*.wphast)|*.wphast|All Files (*.*)|*.*||";
+				char szFilters[] = "Phast for Windows Files (*.p4w)|*.p4w|All Files (*.*)|*.*||";
 
-				CFileDialog fileDlg(TRUE, "wphast", "*.wphast",
+				CFileDialog fileDlg(TRUE, "p4w", "*.p4w",
 					OFN_FILEMUSTEXIST | OFN_HIDEREADONLY, szFilters, this, 0);
 
 				if (fileDlg.DoModal() != IDOK) {

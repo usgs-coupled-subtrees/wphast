@@ -4995,7 +4995,7 @@ BEGIN
     IDR_WPhastTYPE          "\nWPhast\nWPhast\nWPhast Files (*.wphast)\n.wphast\nWPhast.Document\nWPhast.Document"
     ID_VIEW_RESETDEFAULTLAYOUT "Resets all toolbars to their original state"
     ID_INDICATOR_XYZ        "                                                                                "
-    IDR_MAINFRAME_SDI       "Phast for Windows\n\nPhast for Windows\nPhast for Windows Files (*.wphast)\n.wphast\nPhast.Document\nPhast for Windows Document"
+    IDR_MAINFRAME_SDI       "Phast for Windows\n\nPhast for Windows\nPhast for Windows Files (*.p4w)\n.p4w\nPhast.Document\nPhast for Windows Document"
     ID_TOOLS_NEWZONE        "Creates a new box\nCreate new box"
     IDS_MEDIA_PROPS_WIZ_135 "Define media properties for this zone"
     IDS_EXPORT_PHAST_TRANS_136 "Select Phast Transport File to Export to"
