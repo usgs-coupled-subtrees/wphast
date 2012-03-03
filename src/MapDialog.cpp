@@ -366,7 +366,7 @@ void CMapDialog::DDX_Point2(CDataExchange* pDX)
 
 			this->m_worldTransform.SetDataSpacing(spacing[0], spacing[1], spacing[2]);
 			this->m_worldTransform.SetUpperLeft(upperleft[0], upperleft[1], upperleft[2]);
-			this->m_siteMap2.SetWorldTransform(this->m_worldTransform);
+			this->m_siteMap3.SetWorldTransform(this->m_worldTransform);
 		}
 	}
 }
@@ -374,8 +374,8 @@ void CMapDialog::DDX_Point2(CDataExchange* pDX)
 void CMapDialog::DDX_Grid(CDataExchange* pDX)
 {
 	// Angle
-	::DDX_Text(pDX, IDC_EDIT_MO_ANGLE, this->m_siteMap2.Angle);
-	this->GridKeyword.m_grid_angle = this->m_siteMap2.Angle;
+	::DDX_Text(pDX, IDC_EDIT_MO_ANGLE, this->m_siteMap3.Angle);
+	this->GridKeyword.m_grid_angle = this->m_siteMap3.Angle;
 
 	if (pDX->m_bSaveAndValidate)
 	{
@@ -445,9 +445,9 @@ void CMapDialog::DDX_Grid(CDataExchange* pDX)
 		}
 
 		// set placement
-		this->m_siteMap2.Origin[0] = map_coor[0];
-		this->m_siteMap2.Origin[1] = map_coor[1];
-		this->m_siteMap2.Origin[2] = 0.0;
+		this->m_siteMap3.Origin[0] = map_coor[0];
+		this->m_siteMap3.Origin[1] = map_coor[1];
+		this->m_siteMap3.Origin[2] = 0.0;
 	}
 	else
 	{
@@ -637,7 +637,7 @@ int CMapDialog::SetFileName(const char *filename)
 	{
 		this->m_Renderer->AddActor( this->m_MapImageActor2 );
 		// BUGBUG: consolidate SetFileName and SetWorldFileName into SetSiteMap
-		this->m_siteMap2.FileName = filename;
+		this->m_siteMap3.FileName = filename;
 		return 1; // success
 	}
 	return 0; // failure
@@ -658,7 +658,7 @@ int CMapDialog::SetWorldFileName(const char *filename)
 		{
 			// TODO get rid of this->m_worldTransform
 			this->m_worldTransform = wtrans;
-			this->m_siteMap2.SetWorldTransform(wtrans);
+			this->m_siteMap3.SetWorldTransform(wtrans);
 			this->m_Widget->SetInput( this->m_MapImageActor2->GetInput() );
 			this->m_Widget->PlaceWidget();
 			this->m_bHaveWorld = true;
@@ -1293,8 +1293,8 @@ void CMapDialog::UpdatePoint1(void)
 	}
 
 	double point[3];
-	point[0] = this->m_point1.x * this->m_siteMap2.GetWorldTransform().GetDataSpacing()[0];
-	point[1] = this->m_point1.y * this->m_siteMap2.GetWorldTransform().GetDataSpacing()[1];
+	point[0] = this->m_point1.x * this->m_siteMap3.GetWorldTransform().GetDataSpacing()[0];
+	point[1] = this->m_point1.y * this->m_siteMap3.GetWorldTransform().GetDataSpacing()[1];
 	point[2] = 0;
 
 	this->m_Point1Actor->SetPoint(point);
@@ -1332,8 +1332,8 @@ void CMapDialog::UpdatePoint2(void)
 	}
 
 	double point[3];
-	point[0] = this->m_point2.x * this->m_siteMap2.GetWorldTransform().GetDataSpacing()[0];
-	point[1] = this->m_point2.y * this->m_siteMap2.GetWorldTransform().GetDataSpacing()[1];
+	point[0] = this->m_point2.x * this->m_siteMap3.GetWorldTransform().GetDataSpacing()[0];
+	point[1] = this->m_point2.y * this->m_siteMap3.GetWorldTransform().GetDataSpacing()[1];
 	point[2] = 0;
 
 	this->m_Point2Actor->SetPoint(point);

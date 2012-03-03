@@ -19,7 +19,7 @@
 
 #include "GridLODActor.h"
 #include "Units.h"
-#include "SiteMap.h"
+#include "SiteMap3.h"
 
 
 #ifdef _DEBUG
@@ -46,15 +46,15 @@ void TestCMapActor::testSpin(void)
 	CMapActor *actor = CMapActor::New();
 	CPPUNIT_ASSERT(actor != NULL);
 
-	CSiteMap2 siteMap2;
-	siteMap2.FileName      = "ok1.bmp";
+	CSiteMap3 siteMap3;
+	siteMap3.FileName      = "ok1.bmp";
 
 	CWorldTransform wtrans;
 	wtrans.LoadWorldFile("ok1.bpw");
-	siteMap2.SetWorldTransform(wtrans);
+	siteMap3.SetWorldTransform(wtrans);
 	// siteMap.SetWorldFileName("ok1.bpw"); // siteMap.m_worldFileName = "ok1.bpw";
 
-	actor->SetSiteMap2(siteMap2); // may throw
+	actor->SetSiteMap3(siteMap3); // may throw
 // COMMENT: {5/20/2004 2:54:06 PM}	CPPUNIT_ASSERT(actor->SetFileName("ok1.bmp") == 1);
 // COMMENT: {5/20/2004 2:54:06 PM}	CPPUNIT_ASSERT(actor->SetWorldFileName("ok1.bpw") == 1);
 

@@ -7,7 +7,7 @@
 #include "GridElt.h"
 #include "HeadIC.h"
 #include "TimeControl2.h"
-#include "SiteMap2.h"
+#include "SiteMap3.h"
 #include "SteadyFlow.h"
 #include "FreeSurface.h"
 #include "PrintInput.h"
@@ -23,9 +23,9 @@ public:
 	CNewModel(void);
 	~CNewModel(void);
 
-	bool HasSiteMap2(void)const;
-	void SetSiteMap2(const CSiteMap2 &siteMap2);
-	CSiteMap2 GetSiteMap2()const;
+	bool HasSiteMap3(void)const;
+	void SetSiteMap3(const CSiteMap3 &siteMap3);
+	CSiteMap3 GetSiteMap3()const;
 	static CNewModel Default();
 
 public:
@@ -44,6 +44,6 @@ public:
 	CSolutionMethod  m_solutionMethod;
 
 protected:
-	CSiteMap2        m_siteMap2;
-	bool             m_bHaveSiteMap2;
+	CSiteMap3        m_siteMap3;
+	bool             m_bHaveSiteMap3;
 };

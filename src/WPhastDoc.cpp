@@ -143,6 +143,8 @@
 #include "MapActor.h"
 #include "WorldTransform.h"
 #include "SiteMap.h"
+#include "SiteMap2.h"
+#include "SiteMap3.h"
 #include "NewModel.h"
 
 #include "WellActor.h"
@@ -913,14 +915,24 @@ void CWPhastDoc::Serialize(CArchive& ar)
 				ASSERT(this->m_pMapActor == NULL);
 				this->m_pMapActor = CMapActor::New();
 				this->m_pMapActor->Serialize(bStoring, wphast_id);
-				CSiteMap2 siteMap2 = this->m_pMapActor->GetSiteMap2();
-				if (siteMap2.FileName.empty())
+				CSiteMap3 siteMap3 = this->m_pMapActor->GetSiteMap3();
+				if (siteMap3.FileName.empty())
 				{
 					this->m_pMapActor->Delete();
 					this->m_pMapActor = 0;
 				}
 				else
 				{
+					if (this->SiteMap3.FileName.empty())
+					{
+						this->m_pMapActor->SetSiteMap3(siteMap3);
+					}
+					else
+					{
+						// SiteMap files were recreated so reset
+						// pathnames
+						this->m_pMapActor->SetSiteMap3(this->SiteMap3);
+					}
 					this->m_pMapActor->SetPickable(0);
 					this->GetPropCollection()->AddItem(this->m_pMapActor);
 				}
@@ -1460,7 +1472,7 @@ BOOL CWPhastDoc::OnOpenDocument(LPCTSTR lpszPathName)
 				this->SetModifiedFlag();
 			}
 		}
-		this->DataSourcePathsRelativeToAbsolute(lpszPathName);
+		this->PathsRelativeToAbsolute(lpszPathName);
 		this->GetOriginal2New().clear();
 	}
 
@@ -1917,10 +1929,10 @@ void CWPhastDoc::ResizeGrid(const CGridKeyword& keyword)
 
 	if (this->m_pMapActor)
 	{
-		CSiteMap2 siteMap2 = this->m_pMapActor->GetSiteMap2();
-		siteMap2.Angle     = keyword.m_grid_angle;
-		siteMap2.Origin[0] = keyword.m_grid_origin[0];
-		siteMap2.Origin[1] = keyword.m_grid_origin[1];
+		CSiteMap3 siteMap3 = this->m_pMapActor->GetSiteMap3();
+		siteMap3.Angle     = keyword.m_grid_angle;
+		siteMap3.Origin[0] = keyword.m_grid_origin[0];
+		siteMap3.Origin[1] = keyword.m_grid_origin[1];
 
 		double pt[3] = {0.0, 0.0, 0.0};
 		CGrid z = keyword.m_grid[2];
@@ -1934,10 +1946,10 @@ void CWPhastDoc::ResizeGrid(const CGridKeyword& keyword)
 			units.horizontal.input_to_si,
 			units.vertical.input_to_si);
 		trans->TransformPoint(pt, pt);
-		siteMap2.Origin[2] = pt[2];
+		siteMap3.Origin[2] = pt[2];
 		trans->Delete();
 
-		this->m_pMapActor->SetSiteMap2(siteMap2);
+		this->m_pMapActor->SetSiteMap3(siteMap3);
 	}
 
 	// reset the grid
@@ -2758,9 +2770,9 @@ BOOL CWPhastDoc::OnSaveDocument(LPCTSTR lpszPathName)
 	// Add your specialized code here and/or call the base class
 	this->m_pimpl->m_lastSaveIndex = this->m_pimpl->m_vectorActionsIndex;
 
-	this->DataSourcePathsAbsoluteToRelative(lpszPathName);
+	this->PathsAbsoluteToRelative(lpszPathName);
 	BOOL bOk = CDocument::OnSaveDocument(lpszPathName);
-	this->DataSourcePathsRelativeToAbsolute(lpszPathName);
+	this->PathsRelativeToAbsolute(lpszPathName);
 	return bOk;
 }
 
@@ -3377,8 +3389,9 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 			pAction->GetZoneActor()->SetData(data);
 			pAction->Execute();
 		}
+
 		// convert all relative paths to absolute paths
-		this->DataSourcePathsRelativeToAbsolute(lpszPathName);
+		this->PathsRelativeToAbsolute(lpszPathName);
 
 		if (::AfxGetMainWnd() && ::AfxGetMainWnd()->IsWindowVisible())
 		{
@@ -3533,12 +3546,12 @@ void CWPhastDoc::OnFileExport()
 		strPath += _T(".trans.dat");
 	}
 
-	this->DataSourcePathsAbsoluteToRelative(strPath);
+	this->PathsAbsoluteToRelative(strPath);
 	if (!this->DoExport(strPath))
 	{
 		::AfxMessageBox(_T("An error occurred during the export"), MB_OK);
 	}
-	this->DataSourcePathsRelativeToAbsolute(strPath);
+	this->PathsRelativeToAbsolute(strPath);
 }
 
 BOOL CWPhastDoc::DoExport(LPCTSTR lpszPathName)
@@ -4016,11 +4029,11 @@ void CWPhastDoc::New(const CNewModel& model)
 		pTree->SetTimeControl2(&this->m_pModel->m_timeControl2);
 	}
 
-	if (model.HasSiteMap2())
+	if (model.HasSiteMap3())
 	{
 		ASSERT(this->m_pMapActor == NULL);
 		this->m_pMapActor = CMapActor::New();   // Note pixel(0,0) is the same size as all other pixels
-		this->m_pMapActor->SetSiteMap2(model.GetSiteMap2());
+		this->m_pMapActor->SetSiteMap3(model.GetSiteMap3());
 		this->m_pMapActor->SetPickable(0);
 		this->GetPropCollection()->AddItem(this->m_pMapActor);
 	}
@@ -4081,9 +4094,9 @@ void CWPhastDoc::OnFileRun()
 	CString strPrefix(szFName);
 
 	std::ostringstream oss;
-	this->DataSourcePathsAbsoluteToRelative(szPhastTmp);
+	this->PathsAbsoluteToRelative(szPhastTmp);
 	this->WriteTransDat(oss);
-	this->DataSourcePathsRelativeToAbsolute(szPhastTmp);
+	this->PathsRelativeToAbsolute(szPhastTmp);
 
 	std::string str = oss.str();
 	std::istringstream iss(str);
@@ -5688,10 +5701,10 @@ void CWPhastDoc::RotateGrid(const CGridKeyword& gridKeyword)
 	{
 		if (this->m_pMapActor)
 		{
-			CSiteMap2 siteMap2 = this->m_pMapActor->GetSiteMap2();
-			siteMap2.Angle     = gridKeyword.m_grid_angle;
-			siteMap2.Origin[0] = gridKeyword.m_grid_origin[0];
-			siteMap2.Origin[1] = gridKeyword.m_grid_origin[1];
+			CSiteMap3 siteMap3 = this->m_pMapActor->GetSiteMap3();
+			siteMap3.Angle     = gridKeyword.m_grid_angle;
+			siteMap3.Origin[0] = gridKeyword.m_grid_origin[0];
+			siteMap3.Origin[1] = gridKeyword.m_grid_origin[1];
 
 			double pt[3] = {0.0, 0.0, 0.0};
 			CGrid z = gridKeyword.m_grid[2];
@@ -5705,10 +5718,10 @@ void CWPhastDoc::RotateGrid(const CGridKeyword& gridKeyword)
 				units.horizontal.input_to_si,
 				units.vertical.input_to_si);
 			trans->TransformPoint(pt, pt);
-			siteMap2.Origin[2] = pt[2];
+			siteMap3.Origin[2] = pt[2];
 			trans->Delete();
 
-			this->m_pMapActor->SetSiteMap2(siteMap2);
+			this->m_pMapActor->SetSiteMap3(siteMap3);
 		}
 
 		// reset the grid
@@ -6657,27 +6670,29 @@ void CWPhastDoc::BeginNewWedge()
 			pView->CancelMode();
 
 			// create widget
-			this->NewWedgeWidget = CNewWedgeWidget::New();
-			this->NewWedgeWidget->SetCursorColor(this->ZoneCursorColor);
-			this->NewWedgeWidget->SetInteractor(pView->GetInteractor());
-			this->NewWedgeWidget->SetProp3D(this->GetGridActor());
+			if (this->NewWedgeWidget = CNewWedgeWidget::New())
+			{			
+				this->NewWedgeWidget->SetCursorColor(this->ZoneCursorColor);
+				this->NewWedgeWidget->SetInteractor(pView->GetInteractor());
+				this->NewWedgeWidget->SetProp3D(this->GetGridActor());
 
-			// add listener callback
-			this->NewWedgeCallbackCommand = vtkCallbackCommand::New();
-			this->NewWedgeCallbackCommand->SetClientData(this);
-			this->NewWedgeCallbackCommand->SetCallback(CWPhastDoc::NewWedgeListener);
-			this->NewWedgeWidget->AddObserver(vtkCommand::EndInteractionEvent, this->NewWedgeCallbackCommand);
+				// add listener callback
+				this->NewWedgeCallbackCommand = vtkCallbackCommand::New();
+				this->NewWedgeCallbackCommand->SetClientData(this);
+				this->NewWedgeCallbackCommand->SetCallback(CWPhastDoc::NewWedgeListener);
+				this->NewWedgeWidget->AddObserver(vtkCommand::EndInteractionEvent, this->NewWedgeCallbackCommand);
 
-			// set up for gridkeyword
-			CGridKeyword gridKeyword;
-			this->GetGridKeyword(gridKeyword);
-			const CUnits& units = this->GetUnits();
-			this->NewWedgeWidget->SetGridKeyword(gridKeyword, units);
-			this->NewWedgeWidget->SetScale(this->GetScale()[0], this->GetScale()[1], this->GetScale()[2]);
-			this->NewWedgeWidget->SetCoordinateMode(this->GetCoordinateMode());
+				// set up for gridkeyword
+				CGridKeyword gridKeyword;
+				this->GetGridKeyword(gridKeyword);
+				const CUnits& units = this->GetUnits();
+				this->NewWedgeWidget->SetGridKeyword(gridKeyword, units);
+				this->NewWedgeWidget->SetScale(this->GetScale()[0], this->GetScale()[1], this->GetScale()[2]);
+				this->NewWedgeWidget->SetCoordinateMode(this->GetCoordinateMode());
 
-			// enable widget
-			this->NewWedgeWidget->SetEnabled(1);
+				// enable widget
+				this->NewWedgeWidget->SetEnabled(1);
+			}
 		}
 	}
 }
@@ -8209,6 +8224,9 @@ int CWPhastDoc::GetMapOfExternalFiles(hid_t loc_id, const char *name, std::map<C
 
 void CWPhastDoc::SerializeFiles(bool bStoring, CHDFMirrorFile* file, std::map<CString, CString> &orig2new)
 {
+	this->SiteMap3.FileName      = "";
+	this->SiteMap3.WorldFileName = "";
+
 	herr_t status;
 
 	ASSERT(file);
@@ -8233,7 +8251,8 @@ void CWPhastDoc::SerializeFiles(bool bStoring, CHDFMirrorFile* file, std::map<CS
 		if (files_id > 0)
 		{
 			std::map<CString, CString> path2fileMap;
-			if (this->GetMapOfData_sourceFiles(loc_id, szWPhast, path2fileMap) == 0)
+			VERIFY(this->GetMapOfData_sourceFiles(loc_id, szWPhast, path2fileMap) == 0);
+			VERIFY(this->GetMapOfSiteMapFiles(loc_id, szWPhast, path2fileMap) == 0);
 			{
 				// make unique list of files
 				std::set<CString> ufiles;
@@ -8317,7 +8336,11 @@ void CWPhastDoc::SerializeFiles(bool bStoring, CHDFMirrorFile* file, std::map<CS
 		std::set<CString> unique;
 		std::map<CString, CString> path2fileMap;
 		std::map<CString, CString> missingMap;
-		if (this->GetMapOfExternalFiles(loc_id, szFiles, path2fileMap) == 0)
+
+		this->GetMapOfExternalFiles(loc_id, szFiles, path2fileMap);
+		this->CheckSiteMaps(file, path2fileMap);
+
+		if (path2fileMap.size())
 		{
 			std::map<CString, CString>::iterator it = path2fileMap.begin();
 			for (; it != path2fileMap.end(); ++it)
@@ -8382,19 +8405,10 @@ void CWPhastDoc::SerializeFiles(bool bStoring, CHDFMirrorFile* file, std::map<CS
 			{
 				// remove '..' from missing files if path doesn't exist
 				std::string r(mit->second);
-				VERIFY(::_tsplitpath_s(r.c_str(), szDrive, _MAX_DRIVE, szDir, _MAX_DIR, szFName, _MAX_FNAME, szExt, _MAX_EXT) == 0);
-				std::string d = CGlobal::FullPath(szDir);
-				if (!ATL::ATLPath::IsDirectory(d.c_str()))
+				if (r.find("..") == 0 && r.size() > 3)
 				{
-					if (r.find("..") == 0 && r.size() > 3)
-					{
-						mit->second = r.substr(3).c_str();
-						new_name = mit->second;
-					}
-					else
-					{
-						break;
-					}
+					mit->second = r.substr(3).c_str();
+					new_name = mit->second;
 				}
 				else
 				{
@@ -8692,8 +8706,13 @@ void CWPhastDoc::SerializeFiles(bool bStoring, CHDFMirrorFile* file, std::map<CS
 			std::map<CString, CString>::iterator it = missingMap.begin();
 			for (; it != missingMap.end(); ++it)
 			{
-				if (it->first.Find("/SHX/") != -1) continue;
-				if (it->first.Find("/DBF/") != -1) continue;
+				if (it->first.Find("/SHX/")           != -1) continue;
+				if (it->first.Find("/DBF/")           != -1) continue;
+				if (it->first.Find("/WPhast/SiteMap") != -1)
+				{
+					this->CreateSiteMapFiles(loc_id, it->first, it->second);
+					continue;					
+				}
 
 				std::string md5;
 				FILETIME ftWrite;
@@ -8706,6 +8725,24 @@ void CWPhastDoc::SerializeFiles(bool bStoring, CHDFMirrorFile* file, std::map<CS
 			// close the /Files group
 			status = ::H5Gclose(files_id);
 			ASSERT(status >= 0);
+		}
+		else
+		{
+			// This is for backwards compatibility
+			// if here /Files group doesn't exist and only
+			// Sitemap files are created
+			std::map<CString, CString>::iterator it = missingMap.begin();
+			for (; it != missingMap.end(); ++it)
+			{
+				if (it->first.Find("/WPhast/SiteMap") != -1)
+				{
+					this->CreateSiteMapFiles(loc_id, it->first, it->second);
+				}
+				else
+				{
+					ASSERT(FALSE);
+				}
+			}
 		}
 	}
 }
@@ -8977,4 +9014,236 @@ void CWPhastDoc::OnZoneFlowUnselectAll()
 		}
 	}
 	this->UpdateAllViews(0);
+}
+
+void CWPhastDoc::CheckSiteMaps(CHDFMirrorFile* file, std::map<CString, CString> &path2fileMap)
+{
+	static const char szSiteMap[]       = "/WPhast/SiteMap";
+	static const char szSiteMap2[]      = "/WPhast/SiteMap2";
+	static const char szFileName[]      = "FileName";
+	static const char szWorldFileName[] = "WorldFileName";
+
+	hid_t loc_id = file->GetHID();
+	ASSERT(loc_id > 0);
+	if (loc_id < 0)
+	{
+		return;
+	}
+
+	CString hdf, path;
+	CString whdf, wpath;
+	int version = 0;
+	hid_t sitemap_id = 0;
+
+	// Open the szSiteMap2 group
+	sitemap_id = ::H5Gopen(loc_id, szSiteMap2);
+	if (sitemap_id < 0)
+	{
+		version = 1;
+		// Open the szSiteMap group
+		sitemap_id = ::H5Gopen(loc_id, szSiteMap);
+	}
+	else
+	{
+		version = 2;
+	}
+
+	if (sitemap_id > 0)
+	{
+		switch (version)
+		{
+		case 1:
+			{
+				CSiteMap sitemap;
+				sitemap.Serialize(false, sitemap_id);
+
+				hdf = szSiteMap;
+				hdf += "/";
+				whdf = hdf;
+
+				hdf += szFileName;
+				whdf += szWorldFileName;
+
+				path = sitemap.m_fileName.c_str();
+				wpath = CGlobal::GetWorldFileName(path);
+			}
+			break;
+		case 2:
+			{
+				CSiteMap2 sitemap2;
+				sitemap2.Serialize(false, sitemap_id);
+
+				hdf = szSiteMap2;
+				hdf += "/";
+				whdf = hdf;
+
+				hdf += szFileName;
+				whdf += szWorldFileName;
+
+				path = sitemap2.FileName.c_str();
+				wpath = CGlobal::GetWorldFileName(path);
+			}
+			break;
+		default:
+			ASSERT(FALSE);
+			break;
+		}
+
+		// close the szSiteMap group
+		herr_t status = ::H5Gclose(sitemap_id);
+		ASSERT(status >= 0);
+
+		// get relative filenames
+		std::string filename(path);
+		if (filename.length() > 0)
+		{
+			filename = this->GetRelativePath(file->GetFilePath(), filename);
+			path2fileMap[hdf] = filename.c_str();
+		}
+	}
+}
+
+int CWPhastDoc::GetMapOfSiteMapFiles(hid_t loc_id, const char *name, std::map<CString, CString> &rpath2fileMap)
+{
+	if (this->m_pMapActor)
+	{
+		CSiteMap3 sitemap3 = this->m_pMapActor->GetSiteMap3();
+		rpath2fileMap["/WPhast/SiteMap3/FileName"]      = sitemap3.FileName.c_str();
+		rpath2fileMap["/WPhast/SiteMap3/WorldFileName"] = sitemap3.WorldFileName.c_str();
+	}
+	return EXIT_SUCCESS;
+}
+
+void CWPhastDoc::SiteMapPathsRelativeToAbsolute(LPCTSTR lpszPathName)
+{
+	if (this->m_pMapActor)
+	{
+		CSiteMap3 siteMap3 = this->m_pMapActor->GetSiteMap3();
+		std::string filename = this->GetRelativePath(lpszPathName, siteMap3.FileName);
+		std::string wfilename = this->GetRelativePath(lpszPathName, siteMap3.WorldFileName);
+
+		if (this->GetOriginal2New().size())
+		{
+			std::map<CString, CString>::iterator it = this->GetOriginal2New().find(filename.c_str());
+			if (it != this->GetOriginal2New().end())
+			{
+				filename = it->second;
+			}
+		}
+		if (filename.length() > 0)
+		{
+			this->m_pMapActor->UpdateFileName(this->GetAbsolutePath(lpszPathName, filename).c_str());
+		}
+		if (wfilename.length() > 0)
+		{
+			this->m_pMapActor->UpdateWorldFileName(this->GetAbsolutePath(lpszPathName, wfilename).c_str());
+		}
+	}
+}
+
+void CWPhastDoc::SiteMapPathsAbsoluteToRelative(LPCTSTR lpszPathName)
+{
+	if (this->m_pMapActor)
+	{
+		CSiteMap3 siteMap3 = this->m_pMapActor->GetSiteMap3();
+		std::string filename = siteMap3.FileName;
+		std::string wfilename = siteMap3.WorldFileName;
+
+		if (filename.length() > 0)
+		{
+			this->m_pMapActor->UpdateFileName(this->GetRelativePath(lpszPathName, filename).c_str());
+		}
+		if (wfilename.length() > 0)
+		{
+			this->m_pMapActor->UpdateWorldFileName(this->GetRelativePath(lpszPathName, wfilename).c_str());
+		}
+	}
+}
+
+void CWPhastDoc::PathsRelativeToAbsolute(LPCTSTR lpszPathName)
+{
+	this->DataSourcePathsRelativeToAbsolute(lpszPathName);
+	this->SiteMapPathsRelativeToAbsolute(lpszPathName);
+}
+
+void CWPhastDoc::PathsAbsoluteToRelative(LPCTSTR lpszPathName)
+{
+	this->DataSourcePathsAbsoluteToRelative(lpszPathName);
+	this->SiteMapPathsAbsoluteToRelative(lpszPathName);
+}
+
+void CWPhastDoc::CreateSiteMapFiles(hid_t loc_id, CString hdf, CString filename)
+{
+	// This is only used for backwards compatibility
+	//
+
+	if (hdf.Find("/WPhast/SiteMap2") != -1)
+	{
+		hid_t sitemap_id = ::H5Gopen(loc_id, "/WPhast/SiteMap2");
+		if (sitemap_id > 0)
+		{
+			try 
+			{
+				herr_t status = CGlobal::HDFSerializeBinaryFile(false, sitemap_id, "Image", filename);
+				ASSERT(status >= 0);
+
+				CSiteMap2 sitemap2;
+				sitemap2.Serialize(false, sitemap_id);
+
+				CString strWorldFileName = CGlobal::GetWorldFileName(filename);
+				CGlobal::WriteWorldFile(strWorldFileName, sitemap2.GetWorldTransform());
+
+				this->SiteMap3.FileName      = filename;
+				this->SiteMap3.WorldFileName = strWorldFileName;
+				this->SiteMap3.SetWorldTransform(sitemap2.GetWorldTransform());
+
+				this->SiteMap3.Angle = sitemap2.Angle;
+				this->SiteMap3.Origin[0] = sitemap2.Origin[0];
+				this->SiteMap3.Origin[1] = sitemap2.Origin[1];
+				this->SiteMap3.Origin[2] = sitemap2.Origin[2];
+			}
+			catch(...)
+			{
+			}
+
+			// close the "/WPhast/SiteMap2" group
+			herr_t status = ::H5Gclose(sitemap_id);
+			ASSERT(status >= 0);
+
+		}
+	}
+	else if (hdf.Find("/WPhast/SiteMap") != -1)
+	{
+		hid_t sitemap_id = ::H5Gopen(loc_id, "/WPhast/SiteMap");
+		if (sitemap_id > 0)
+		{
+			try 
+			{
+				herr_t status = CGlobal::HDFSerializeBinaryFile(false, sitemap_id, "Image", filename);
+				ASSERT(status >= 0);
+
+				CSiteMap sitemap;
+				sitemap.Serialize(false, sitemap_id);
+
+				CString strWorldFileName = CGlobal::GetWorldFileName(filename);
+				CGlobal::WriteWorldFile(strWorldFileName, sitemap.GetWorldTransform());
+
+				this->SiteMap3.FileName      = filename;
+				this->SiteMap3.WorldFileName = strWorldFileName;
+				this->SiteMap3.SetWorldTransform(sitemap.GetWorldTransform());
+
+				this->SiteMap3.Angle = sitemap.m_angle;
+				this->SiteMap3.Origin[0] = sitemap.m_placement[0];
+				this->SiteMap3.Origin[1] = sitemap.m_placement[1];
+				this->SiteMap3.Origin[2] = sitemap.m_placement[2];
+			}
+			catch(...)
+			{
+			}
+
+			// close the "/WPhast/SiteMap" group
+			herr_t status = ::H5Gclose(sitemap_id);
+			ASSERT(status >= 0);
+		}
+	}
 }

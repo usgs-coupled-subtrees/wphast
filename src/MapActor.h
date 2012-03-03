@@ -1,6 +1,6 @@
 #pragma once
 #include <vtkOpenGLActor.h>
-#include "SiteMap2.h"
+#include "SiteMap3.h"
 
 class vtkImageReader2;
 class vtkTexture;
@@ -15,14 +15,17 @@ public:
 	vtkTypeRevisionMacro(CMapActor,vtkOpenGLActor);
 	static CMapActor *New();
 
-	void SetSiteMap2(const CSiteMap2 &siteMap2); // throws LPTCSTR
-	CSiteMap2 GetSiteMap2(void)const { return SiteMap2; }
+	void SetSiteMap3(const CSiteMap3 &siteMap3); // throws LPTCSTR
+	CSiteMap3 GetSiteMap3(void)const { return SiteMap3; }
 
 	void Serialize(bool bStoring, hid_t loc_id);
 	friend class CXMLSerializer;
 
 	int SetFileName(const char *filename);
 	int SetWorldTransform(const CWorldTransform &wtrans);
+
+	void UpdateFileName(const char *filename);
+	void UpdateWorldFileName(const char *filename);
 
 	double *GetDataSpacing()const;
 	double *GetDataOrigin()const;
@@ -70,8 +73,7 @@ public:
 protected:
 	double m_UpperLeft[3];
 	double m_DataSpacing[3];
-	CSiteMap2 SiteMap2;
-	TCHAR m_szTempFileName[MAX_PATH];
+	CSiteMap3 SiteMap3;
 private:
 	CMapActor(const CMapActor&);  // Not implemented.
 	void operator=(const CMapActor&);  // Not implemented.

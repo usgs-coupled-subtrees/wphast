@@ -14,6 +14,8 @@
 #include "Global.h"
 #include "WorldTransform.h"
 #include "SiteMap.h"
+#include "SiteMap2.h"
+#include "SiteMap3.h"
 
 vtkCxxRevisionMacro(CMapActor, "$Revision$");
 vtkStandardNewMacro(CMapActor);
@@ -32,11 +34,6 @@ CMapActor::CMapActor(void)
 	this->m_PlaneSource = vtkPlaneSource::New();
 	this->m_PolyDataMapper = vtkPolyDataMapper::New();
 	this->m_PolyDataMapper->SetInput(this->m_PlaneSource->GetOutput());
-
-	// get temp file
-	TCHAR szTempDirectory[MAX_PATH];
-	VERIFY(::GetTempPath(MAX_PATH, szTempDirectory));
-	VERIFY(::GetTempFileName(szTempDirectory, _T("WPH"), 0, this->m_szTempFileName));
 }
 
 CMapActor::~CMapActor(void)
@@ -49,15 +46,6 @@ CMapActor::~CMapActor(void)
 	if (this->m_ImageReader2)   this->m_ImageReader2->Delete();
 	if (this->m_PlaneSource)    this->m_PlaneSource->Delete();
 	if (this->m_PolyDataMapper) this->m_PolyDataMapper->Delete();
-	try
-	{
-		CFile::Remove(this->m_szTempFileName);
-	}
-	catch (CFileException* pEx)
-	{
-		ASSERT(FALSE);
-		pEx->Delete();
-	}
 }
 
 int CMapActor::SetFileName(const char *filename)
@@ -70,12 +58,7 @@ int CMapActor::SetFileName(const char *filename)
 
 	if (this->m_ImageReader2)
 	{
-		if (::strcmp(filename, this->m_szTempFileName) != 0)
-		{
-			VERIFY(::CopyFile(filename, this->m_szTempFileName, FALSE));
-		}
-
-		this->m_ImageReader2->SetFileName( this->m_szTempFileName );
+		this->m_ImageReader2->SetFileName( filename );
 		this->m_ImageReader2->Update( );
 		this->m_Texture->SetInput( this->m_ImageReader2->GetOutput() );
 
@@ -197,32 +180,33 @@ int CMapActor::PlaceMap(double xPos, double yPos, double zPos, double angle)
 	return 1;
 }
 
-void CMapActor::SetSiteMap2(const CSiteMap2 &siteMap2)
+void CMapActor::SetSiteMap3(const CSiteMap3 &siteMap3)
 {
-	if (this->SetFileName(siteMap2.FileName.c_str()) != 1)
+	if (this->SetFileName(siteMap3.FileName.c_str()) != 1)
 	{
 		std::string err("Bad file name: ");
-		err += siteMap2.FileName.c_str();
+		err += siteMap3.FileName.c_str();
 		throw err;
 	}
 
-	this->SetWorldTransform(siteMap2.GetWorldTransform());
+	this->SetWorldTransform(siteMap3.GetWorldTransform());
 
-	if (this->PlaceMap(siteMap2.Origin[0], siteMap2.Origin[1], siteMap2.Origin[2],
-		siteMap2.Angle) != 1)
+	if (this->PlaceMap(siteMap3.Origin[0], siteMap3.Origin[1], siteMap3.Origin[2],
+		siteMap3.Angle) != 1)
 	{
 		std::string err("Unable to place map.");
 		throw err;
 	}
 
 	// OK if here
-	this->SiteMap2 = siteMap2;
+	this->SiteMap3 = siteMap3;
 }
 
 void CMapActor::Serialize(bool bStoring, hid_t loc_id)
 {
 	static const char szSiteMap[]  = "SiteMap";
 	static const char szSiteMap2[] = "SiteMap2";
+	static const char szSiteMap3[] = "SiteMap3";
 
 	ASSERT(loc_id > 0);
 	if (loc_id <= 0) return;
@@ -234,33 +218,39 @@ void CMapActor::Serialize(bool bStoring, hid_t loc_id)
 	if (bStoring)
 	{
 		// Create the szSiteMap group
-		sitemap_id = ::H5Gcreate(loc_id, szSiteMap2, 0);
+		sitemap_id = ::H5Gcreate(loc_id, szSiteMap3, 0);
 		ASSERT(sitemap_id > 0);
 	}
 	else
 	{
-		// Open the szSiteMap2 group
-		sitemap_id = ::H5Gopen(loc_id, szSiteMap2);
+		// Open the szSiteMap3 group
+		sitemap_id = ::H5Gopen(loc_id, szSiteMap3);
 		if (sitemap_id < 0)
 		{
-			version = 1;
-			// Open the szSiteMap group
-			sitemap_id = ::H5Gopen(loc_id, szSiteMap);
+			// Open the szSiteMap2 group
+			sitemap_id = ::H5Gopen(loc_id, szSiteMap2);
+			if (sitemap_id < 0)
+			{
+				version = 1;
+				// Open the szSiteMap group
+				sitemap_id = ::H5Gopen(loc_id, szSiteMap);
+			}
+			else
+			{
+				version = 2;
+			}
 		}
 		else
 		{
-			version = 2;
+			version = 3;
 		}
 	}
 
 	if (sitemap_id > 0)
 	{
-		status = CGlobal::HDFSerializeBinaryFile(bStoring, sitemap_id, "Image", this->m_szTempFileName);
-		ASSERT(status >= 0);
-
 		if (bStoring)
 		{
-			this->SiteMap2.Serialize(bStoring, sitemap_id);
+			this->SiteMap3.Serialize(bStoring, sitemap_id);
 		}
 		else
 		{
@@ -271,18 +261,32 @@ void CMapActor::Serialize(bool bStoring, hid_t loc_id)
 					CSiteMap sitemap;
 					sitemap.Serialize(bStoring, sitemap_id);
 
-					this->SiteMap2.Angle    = sitemap.m_angle;
-					this->SiteMap2.FileName = sitemap.m_fileName;
+					this->SiteMap3.Angle    = sitemap.m_angle;
+					this->SiteMap3.FileName = sitemap.m_fileName;
 					for (int i = 0; i < 3; ++i)
 					{
-						this->SiteMap2.Origin[i] = sitemap.m_placement[i];
+						this->SiteMap3.Origin[i] = sitemap.m_placement[i];
 					}
-					this->SiteMap2.SetWorldTransform(sitemap.GetWorldTransform());
+					this->SiteMap3.SetWorldTransform(sitemap.GetWorldTransform());
 				}
 				break;
 			case 2:
 				{
-					this->SiteMap2.Serialize(bStoring, sitemap_id);
+					CSiteMap2 sitemap2;
+					sitemap2.Serialize(bStoring, sitemap_id);
+
+					this->SiteMap3.Angle    = sitemap2.Angle;
+					this->SiteMap3.FileName = sitemap2.FileName;
+					for (int i = 0; i < 3; ++i)
+					{
+						this->SiteMap3.Origin[i] = sitemap2.Origin[i];
+					}
+					this->SiteMap3.SetWorldTransform(sitemap2.GetWorldTransform());
+				}
+				break;
+			case 3:
+				{
+					this->SiteMap3.Serialize(bStoring, sitemap_id);
 				}
 				break;
 			default:
@@ -293,19 +297,6 @@ void CMapActor::Serialize(bool bStoring, hid_t loc_id)
 		// close the szSiteMap group
 		status = ::H5Gclose(sitemap_id);
 		ASSERT(status >= 0);
-
-		if (!bStoring)
-		{
-			if (this->SetFileName(this->m_szTempFileName) == 1)
-			{
-				this->SetWorldTransform(this->SiteMap2.GetWorldTransform());
-				this->PlaceMap(
-					this->SiteMap2.Origin[0],
-					this->SiteMap2.Origin[1],
-					this->SiteMap2.Origin[2],
-					this->SiteMap2.Angle);
-			}
-		}
 	}
 }
 
@@ -366,4 +357,14 @@ void CMapActor::SetDataSpacing(double x, double y, double z)
 	{
 		ASSERT(FALSE);
 	}
+}
+
+void CMapActor::UpdateFileName(const char *filename)
+{
+	this->SiteMap3.FileName = filename;
+}
+
+void CMapActor::UpdateWorldFileName(const char *filename)
+{
+	this->SiteMap3.WorldFileName = filename;
 }

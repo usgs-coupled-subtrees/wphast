@@ -14,6 +14,7 @@
 #include "Subject.h"
 #include "IObserver.h"
 #include "DisplayColors.h"
+#include "SiteMap3.h"
 
 #include "PointConnectorMovePointAction.h"
 
@@ -218,10 +219,17 @@ public:
 	void SetDisplayColors(const CDisplayColors& dc);
 	CDisplayColors GetDisplayColors()const;
 
+	void PathsRelativeToAbsolute(LPCTSTR lpszPathName);
+	void PathsAbsoluteToRelative(LPCTSTR lpszPathName);
+
 	void DataSourcePathsRelativeToAbsolute(LPCTSTR lpszPathName);
 	void DataSourcePathsAbsoluteToRelative(LPCTSTR lpszPathName);
+
 	std::string GetRelativePath(LPCTSTR lpszPathName, const std::string src_path)const;
 	std::string GetAbsolutePath(LPCTSTR lpszPathName, const std::string relative_path)const;
+
+	void SiteMapPathsRelativeToAbsolute(LPCTSTR lpszPathName);
+	void SiteMapPathsAbsoluteToRelative(LPCTSTR lpszPathName);
 
 	std::map<CString, CString>& GetOriginal2New(void);
 
@@ -316,6 +324,9 @@ protected:
 	CDisplayColors DisplayColors;
 	double         ZoneCursorColor[3];
 
+	// store new file names
+	CSiteMap3 SiteMap3;
+
 	// grid keyboard accelerator
 	HACCEL hGridAccel;
 
@@ -335,9 +346,12 @@ protected:
 	void SerializeZoneFlowRates(bool bStoring, hid_t loc_id);
 	
 	void SerializeFiles(bool bStoring, CHDFMirrorFile* file, std::map<CString, CString> &orig2new);
+	void CheckSiteMaps(CHDFMirrorFile* file, std::map<CString, CString> &path2fileMap);	
+	void CreateSiteMapFiles(hid_t loc_id, CString hdf, CString filename);
 
 	int GetListOfData_sourceFiles(hid_t loc_id, std::set< CString > &files);
 	int GetMapOfData_sourceFiles(hid_t loc_id, const char *name, std::map< CString, CString > &hdf2rel);
+	int GetMapOfSiteMapFiles(hid_t loc_id, const char *name, std::map< CString, CString > &hdf2rel);
 	int GetMapOfExternalFiles(hid_t loc_id, const char *name, std::map< CString, CString > &hdf2rel);
 	int ValidateData_sourceFiles(CHDFMirrorFile* file, std::map<CString, CString> &orig2new, std::string &errors);
 	static herr_t H5GIterateStatic(hid_t loc_id, const char *name, void *opdata);

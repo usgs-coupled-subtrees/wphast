@@ -70,8 +70,9 @@ CNewModel CNewModelWizard::GetModel(void)const
 	this->m_units5Page.GetProperties(model.m_units);
 	if (this->m_importPage.m_bImport)
 	{
-		CSiteMap2 siteMap2 = this->m_importPage.GetSiteMap2();
-		siteMap2.FileName = (LPCTSTR)this->m_importPage.m_strMapFileName;
+		CSiteMap3 siteMap3 = this->m_importPage.GetSiteMap3();
+		siteMap3.FileName      = (LPCTSTR)this->m_importPage.m_strMapFileName;
+		siteMap3.WorldFileName = (LPCTSTR)this->m_importPage.m_strWorldFileName;
 		double pt[3] = {0.0, 0.0, 0.0};
 		pt[2] = this->m_gridPage.GridKeyword.m_grid[2].coord[0] - .01 *(this->m_gridPage.GridKeyword.m_grid[2].coord[1] - this->m_gridPage.GridKeyword.m_grid[2].coord[0]);
 		vtkTransform *trans = vtkTransform::New();
@@ -80,9 +81,9 @@ CNewModel CNewModelWizard::GetModel(void)const
 			model.m_units.horizontal.input_to_si,
 			model.m_units.vertical.input_to_si);
 		trans->TransformPoint(pt, pt);
-		siteMap2.Origin[2] = pt[2];
+		siteMap3.Origin[2] = pt[2];
 		trans->Delete();
-		model.SetSiteMap2(siteMap2);
+		model.SetSiteMap3(siteMap3);
 	}
 	model.m_gridKeyword = this->m_gridPage.GridKeyword;
 	this->m_mediaPage.GetProperties(model.m_media);

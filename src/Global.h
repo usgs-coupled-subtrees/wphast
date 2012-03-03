@@ -114,6 +114,8 @@ public:
 	static herr_t HDFFile2(bool bStoring, hid_t loc_id, std::string &sRelativePath, std::string &sMD5, FILETIME &ftWrite);
 	static herr_t HDFFileEx(bool bStoring, hid_t loc_id, const char* szName, std::string &sRelativePath, std::string &sMD5, FILETIME &ftWrite);
 
+	static CString GetWorldFileName(CString pathName);
+
 	static hid_t HDFCreatePolyhedronDataType(void);
 	static hid_t HDFCreateWidgetOrientationDataType(void);
 	static hid_t HDFCreateDataSourceType(void);

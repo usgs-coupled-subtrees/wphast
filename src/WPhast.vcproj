@@ -1116,6 +1116,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\SiteMap3.cpp"
+				>
+			</File>
+			<File
 				RelativePath="Snap.cpp"
 				>
 			</File>
@@ -5501,6 +5505,10 @@
 			</File>
 			<File
 				RelativePath=".\SiteMap2.h"
+				>
+			</File>
+			<File
+				RelativePath=".\SiteMap3.h"
 				>
 			</File>
 			<File

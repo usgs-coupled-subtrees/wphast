@@ -6055,3 +6055,62 @@ herr_t CGlobal::HDFFileEx(bool bStoring, hid_t loc_id, const char* szName, std::
 
 	return status;
 }
+
+CString CGlobal::GetWorldFileName(CString pathName)
+{
+	// create default world file name
+	//
+	// BIL (band interleaved by line): world file extension = (.blw) 
+	// BIP (band interleaved by pixel): world file extension = (.bpw) 
+	// BMP (Windows bitmap image file): world file extension = (.bpw) 
+	// BSQ (band sequential): world file extension = (.bqw) 
+	// GIF (CompuServe Graphics Interchange Format): world file extension = (.gfw) 
+	// IMG (ERDAS Imagine image file): world file extension = (.igw) 
+	// JPEG (Joint Photographic Experts Group): world file extension = (.jgw) 
+	// MCP (MacPaint): world file extension = (.mpw) 
+	// RLC (IMPELL Bitmaps Run-length compressed files): world file extension = (.rcw) 
+	// RS (raster snapshot | Sun rasterfile): world file extension = (.rsw) 
+	// SID (MrSID image file): world file extension = (.sdw) 
+	// TIFF (Tag Image Format file): world file extension = (.tfw) 
+	// WMF (Windows Metafile): world file extension = (.wfw) 
+	// XBM (X Bitmap): world file extension = (.xmw) 
+
+	TCHAR szDrive[_MAX_DRIVE];
+	TCHAR szDir[_MAX_DIR];
+	TCHAR szFName[_MAX_FNAME];
+	TCHAR szExt[_MAX_EXT];
+	TCHAR szWorldFileName[_MAX_PATH];
+
+	VERIFY(::_tsplitpath_s(pathName, szDrive, _MAX_DRIVE, szDir, _MAX_DIR, szFName, _MAX_FNAME, szExt, _MAX_EXT) == 0);
+
+	CString strExt(szExt);
+	CString strWorldFileName;
+	if (strExt.CompareNoCase(_T(".bmp")) == 0)
+	{
+		VERIFY(::_tmakepath_s(szWorldFileName, _MAX_PATH, szDrive, szDir, szFName, _T(".bpw")) == 0);
+		strWorldFileName = szWorldFileName;
+	}
+	else if (strExt.CompareNoCase(_T(".jpg")) == 0 || strExt.CompareNoCase(_T(".jpeg")) == 0)
+	{
+		VERIFY(::_tmakepath_s(szWorldFileName, _MAX_PATH, szDrive, szDir, szFName, _T(".jgw")) == 0);
+		strWorldFileName = szWorldFileName;
+	}
+	else if (strExt.CompareNoCase(_T(".png")) == 0)
+	{
+		VERIFY(::_tmakepath_s(szWorldFileName, _MAX_PATH, szDrive, szDir, szFName, _T(".pgw")) == 0);
+		strWorldFileName = szWorldFileName;
+	}
+	else if (strExt.CompareNoCase(_T(".tif")) == 0 || strExt.CompareNoCase(_T(".tiff")) == 0)
+	{
+		VERIFY(::_tmakepath_s(szWorldFileName, _MAX_PATH, szDrive, szDir, szFName, _T(".tfw")) == 0);
+		strWorldFileName = szWorldFileName;
+	}
+	else
+	{
+		ASSERT(FALSE);
+		VERIFY(::_tmakepath_s(szWorldFileName, _MAX_PATH, szDrive, szDir, szFName, _T(".wf")) == 0);
+		strWorldFileName = szWorldFileName;
+	}
+	return strWorldFileName;
+}
+

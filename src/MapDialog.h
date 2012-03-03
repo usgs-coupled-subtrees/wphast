@@ -23,7 +23,7 @@ class CMapActor;
 #include "afxcmn.h"
 #include "GridKeyword.h"
 #include "WorldTransform.h"
-#include "SiteMap2.h"
+#include "SiteMap3.h"
 
 class CGridPoint : public CPoint
 {
@@ -67,7 +67,7 @@ public:
 	DECLARE_LAYOUT();
 	virtual CRect GetRect();
 
-	CSiteMap2 GetSiteMap2(void)const { return m_siteMap2; }
+	CSiteMap3 GetSiteMap3(void)const { return m_siteMap3; }
 
 	// BUGBUG should these be public?
 	CGridKeyword  GridKeyword;
@@ -193,7 +193,7 @@ public:
 
 	afx_msg LRESULT OnShowCoorDlg(WPARAM wParam, LPARAM lParam);
 
-	CSiteMap2 m_siteMap2;
+	CSiteMap3 m_siteMap3;
 
 	double m_xMin;
 	double m_yMin;
