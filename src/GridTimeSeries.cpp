@@ -979,6 +979,23 @@ void CGridTimeSeries::DDV_SoftValidate()
 			ASSERT((*this->vv_props[SELECTED])[row]);
 			ASSERT((*this->vv_props[LINEAR])[row]);
 
+			// direction
+			int id = this->DlgWnd->GetCheckedRadioButton(IDC_X_RADIO, IDC_Z_RADIO);
+			switch (this->DlgWnd->GetCheckedRadioButton(IDC_X_RADIO, IDC_Z_RADIO))
+			{
+			case IDC_X_RADIO:
+				(*this->vv_props[SELECTED])[row]->coord = 'x';
+				break;
+			case IDC_Y_RADIO:
+				(*this->vv_props[SELECTED])[row]->coord = 'y';
+				break;
+			case IDC_Z_RADIO:
+				(*this->vv_props[SELECTED])[row]->coord = 'z';
+				break;
+			default:
+				break;
+			}
+
 			// value1 dist1 value2 dist2
 			CGlobal::DDX_Text_Safe(&dx, IDC_VALUE1_EDIT,    (*this->vv_props[SELECTED])[row]->v[0]);
 			CGlobal::DDX_Text_Safe(&dx, IDC_DISTANCE1_EDIT, (*this->vv_props[SELECTED])[row]->dist1);
