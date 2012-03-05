@@ -9,6 +9,10 @@ int read_leaky_bc(void);
 int read_river(void);
 int read_well(void);
 
+#define EXTERNAL extern
+#include "srcinput/hstinpt.h"
+#undef EXTERNAL
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -979,11 +983,18 @@ void TestCPhastInput::testDecay(void)
 		throw;
 	}
 }
+
 void TestCPhastInput::testDisp2d(void)
 {
 	CPhastInput* pInput = NULL;
 	try
 	{
+		// reserve globals so that there's no memory difference
+		TRACE("bc_list_of_cells capacity = %d\n", (int)::bc_list_of_cells.capacity());
+		TRACE("bc_face_areas capacity = %d\n", (int)::bc_face_areas.capacity());
+		::bc_list_of_cells.reserve(4);
+		::bc_face_areas.reserve(4);
+
 		CMemoryState oldMemState, newMemState, diffMemState;
 		oldMemState.Checkpoint();
 		{
@@ -1090,6 +1101,10 @@ void TestCPhastInput::testDisp2d(void)
 			pInput = NULL;
 		}
 		newMemState.Checkpoint();
+
+		TRACE("bc_list_of_cells capacity = %d\n", (int)::bc_list_of_cells.capacity());
+		TRACE("bc_face_areas capacity = %d\n", (int)::bc_face_areas.capacity());
+
 		CPPUNIT_ASSERT(diffMemState.Difference( oldMemState, newMemState ) == 0);
 	}
 	catch (...)
