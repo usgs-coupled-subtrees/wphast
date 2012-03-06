@@ -11,9 +11,11 @@
 IMPLEMENT_DYNAMIC(CFileRecreateDialog, CDialog)
 
 CFileRecreateDialog::CFileRecreateDialog(CWnd* pParent /*=NULL*/)
-	: CDialog(CFileRecreateDialog::IDD, pParent)
+: CDialog(CFileRecreateDialog::IDD, pParent)
+, MinRect(0, 0, 0, 0)
+, HGap(11)
+, VGap(11)
 {
-
 }
 
 CFileRecreateDialog::~CFileRecreateDialog()
@@ -92,8 +94,8 @@ void CFileRecreateDialog::OnGetMinMaxInfo(MINMAXINFO* lpMMI)
 	// Add your message handler code here and/or call default
 	if (this->MinRect.Width())
 	{
-		lpMMI->ptMinTrackSize.x = this->MinRect.Width();
-		lpMMI->ptMinTrackSize.y = this->MinRect.Height();
+		lpMMI->ptMinTrackSize.x = min(this->MinRect.Width(), lpMMI->ptMaxSize.x);
+		lpMMI->ptMinTrackSize.y = min(this->MinRect.Height(), lpMMI->ptMaxSize.y);
 	}
 
 	CDialog::OnGetMinMaxInfo(lpMMI);
