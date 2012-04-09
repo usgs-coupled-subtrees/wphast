@@ -316,13 +316,13 @@ void CLeakyPropsPage::DDX_Series(CDataExchange* pDX)
 			// time series
 			if (this->ItemDDX == this->HeadSeries.treeitem)
 			{
-				this->HeadSeries.DDX_Series(pDX, this->LastValidation);
+				this->HeadSeries.DDX_Series(pDX, false);
 				ASSERT(!this->SolutionSeries.grid.IsWindowVisible());
 				ASSERT(this->HeadSeries.grid.IsWindowVisible());
 			}
 			else if (this->ItemDDX == this->SolutionSeries.treeitem)
 			{
-				this->SolutionSeries.DDX_Series(pDX, (!this->FlowOnly && this->LastValidation));
+				this->SolutionSeries.DDX_Series(pDX, false);
 				ASSERT(this->SolutionSeries.grid.IsWindowVisible());
 				ASSERT(!this->HeadSeries.grid.IsWindowVisible());
 			}

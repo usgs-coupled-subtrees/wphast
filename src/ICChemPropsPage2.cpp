@@ -160,7 +160,7 @@ void CICChemPropsPage2::DDX_Single(CDataExchange* pDX)
 		// DDX_Single selected property
 		if (this->ItemDDX == this->SolutionProperty.treeitem)
 		{
-			this->SolutionProperty.DDX_Single(pDX);
+			this->SolutionProperty.DDX_Single(pDX, this->Default);
 		}
 		else if (this->ItemDDX == this->EquilibriumPhasesProperty.treeitem)
 		{

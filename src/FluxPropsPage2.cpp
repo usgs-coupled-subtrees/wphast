@@ -195,13 +195,13 @@ void CFluxPropsPage2::DDX_Series(CDataExchange* pDX)
 		{
 			if (this->ItemDDX == this->FluxSeries.treeitem)
 			{
-				this->FluxSeries.DDX_Series(pDX);
+				this->FluxSeries.DDX_Series(pDX, false);
 				ASSERT(!this->SolutionSeries.grid.IsWindowVisible());
 				ASSERT(this->FluxSeries.grid.IsWindowVisible());
 			}
 			else if (this->ItemDDX == this->SolutionSeries.treeitem)
 			{
-				this->SolutionSeries.DDX_Series(pDX, !this->FlowOnly);
+				this->SolutionSeries.DDX_Series(pDX, false);
 				ASSERT(this->SolutionSeries.grid.IsWindowVisible());
 				ASSERT(!this->FluxSeries.grid.IsWindowVisible());
 			}
@@ -216,7 +216,7 @@ void CFluxPropsPage2::DDX_Series(CDataExchange* pDX)
 			}
 			else if (this->ItemDDX == this->SolutionSeries.treeitem)
 			{
-				this->SolutionSeries.DDX_Series(pDX, !this->FlowOnly);
+				this->SolutionSeries.DDX_Series(pDX);
 				this->FluxSeries.grid.ShowWindow(SW_HIDE);
 				this->SolutionSeries.grid.ShowWindow(SW_SHOW);
 			}

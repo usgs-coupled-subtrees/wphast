@@ -279,13 +279,13 @@ void CSpecifiedHeadPropsPage::DDX_Series(CDataExchange* pDX)
 		{
 			if (this->ItemDDX == this->HeadSeries.treeitem)
 			{
-				this->HeadSeries.DDX_Series(pDX);
+				this->HeadSeries.DDX_Series(pDX, false);
 				ASSERT(!this->SolutionSeries.grid.IsWindowVisible());
 				ASSERT(this->HeadSeries.grid.IsWindowVisible());
 			}
 			else if (this->ItemDDX == this->SolutionSeries.treeitem)
 			{
-				this->SolutionSeries.DDX_Series(pDX, !this->FlowOnly);
+				this->SolutionSeries.DDX_Series(pDX, false);
 				ASSERT(this->SolutionSeries.grid.IsWindowVisible());
 				ASSERT(!this->HeadSeries.grid.IsWindowVisible());
 			}
@@ -300,7 +300,7 @@ void CSpecifiedHeadPropsPage::DDX_Series(CDataExchange* pDX)
 			}
 			else if (this->ItemDDX == this->SolutionSeries.treeitem)
 			{
-				this->SolutionSeries.DDX_Series(pDX, !this->FlowOnly);
+				this->SolutionSeries.DDX_Series(pDX);
 				this->HeadSeries.grid.ShowWindow(SW_HIDE);
 				this->SolutionSeries.grid.ShowWindow(SW_SHOW);
 			}
