@@ -625,6 +625,7 @@ public:
 
 public:
 	afx_msg void OnToolsColors();
+	afx_msg void OnHelpUserGuidePdf();
 };
 
 inline vtkPropAssembly* CWPhastDoc::GetPropAssemblyMedia() const

@@ -463,6 +463,8 @@ BEGIN
     END
     POPUP "&Help"
     BEGIN
+        MENUITEM "User's Guide to PHAST 2 (PDF)", ID_HELP_USER_GUIDE_PDF
+        MENUITEM SEPARATOR
         MENUITEM "&About Phast for Windows...", 57664
     END
 END

@@ -1095,6 +1095,8 @@
 #define ID_ZONE_FLOW_SHOWSELECTED       32890
 #define ID_ZONE_FLOW_SELECTALL          32891
 #define ID_ZONE_FLOW_UNSELECTALL        32892
+#define ID_HELP_USER                    32893
+#define ID_HELP_USER_GUIDE_PDF          32894
 #define IDW_CONTROLBAR_TREE             59424
 #define IDW_CONTROLBAR_BOXPROPS         59425
 #define IDC_VALUE_STATIC                65535
@@ -1104,7 +1106,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        485
-#define _APS_NEXT_COMMAND_VALUE         32893
+#define _APS_NEXT_COMMAND_VALUE         32895
 #define _APS_NEXT_CONTROL_VALUE         1549
 #define _APS_NEXT_SYMED_VALUE           128
 #endif

@@ -32,7 +32,7 @@
 
 TCPPUnit::TCPPUnit(void)
 {
-	this->RunUnitTests();
+// COMMENT: {4/9/2012 4:10:26 PM}	this->RunUnitTests();
 }
 
 TCPPUnit::~TCPPUnit(void)

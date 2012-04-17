@@ -350,7 +350,10 @@ BEGIN_MESSAGE_MAP(CWPhastDoc, CDocument)
 
 	// ID_TOOLS_COLORS
 	ON_COMMAND(ID_TOOLS_COLORS, &CWPhastDoc::OnToolsColors)
-END_MESSAGE_MAP()
+
+	// ID_HELP_USER_GUIDE_PDF
+	ON_COMMAND(ID_HELP_USER_GUIDE_PDF, &CWPhastDoc::OnHelpUserGuidePdf)
+	END_MESSAGE_MAP()
 
 #if defined(WPHAST_AUTOMATION)
 BEGIN_DISPATCH_MAP(CWPhastDoc, CDocument)
@@ -9245,5 +9248,35 @@ void CWPhastDoc::CreateSiteMapFiles(hid_t loc_id, CString hdf, CString filename)
 			herr_t status = ::H5Gclose(sitemap_id);
 			ASSERT(status >= 0);
 		}
+	}
+}
+
+void CWPhastDoc::OnHelpUserGuidePdf()
+{
+	TCHAR szPath[MAX_PATH];
+	if (!::GetModuleFileName(0, szPath, MAX_PATH))
+	{
+		TRACE("GetModuleFileName failed (%d)\n", ::GetLastError()); 
+		return;
+	}
+
+	TCHAR szDrive[_MAX_DRIVE];
+	TCHAR szDir[_MAX_DIR];
+	TCHAR szFName[_MAX_FNAME];
+	TCHAR szExt[_MAX_EXT];
+
+	VERIFY(::_tsplitpath_s(szPath, szDrive, _MAX_DRIVE, szDir, _MAX_DIR, szFName, _MAX_FNAME, szExt, _MAX_EXT) == 0);
+	VERIFY(::_tmakepath_s(szPath, _MAX_DIR, szDrive, szDir, NULL, NULL) == 0);
+	VERIFY(::PathAppend(szPath, "..\\doc\\phast2-TM6-A35.pdf"));
+
+	TCHAR szOut[MAX_PATH];
+	VERIFY(::PathCanonicalize(szOut, szPath));
+
+	if (!::ShellExecute(0, "open", szOut, 0, 0, 0))
+	{
+		TRACE("ShellExecute failed (%d)\n", ::GetLastError()); 
+		char buffer[2048];
+		::sprintf_s(buffer, sizeof(buffer), "Unable to open \"%s\"", szPath);
+		::AfxMessageBox(buffer);
 	}
 }
