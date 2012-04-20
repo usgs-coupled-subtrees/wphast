@@ -159,6 +159,11 @@ echo "Exporting revision $REVISION of phast4windows into sandbox..."
  	${SVN:-svn} export -q $EXTRA_EXPORT_OPTIONS --ignore-externals -r "$REVISION_PHAST" \
 	     "http://internalbrr.cr.usgs.gov/svn_GW/phastpp/trunk/src/phastinput" \
 	     "$DISTNAME/src/srcinput")
+	     
+(cd "$DIST_SANDBOX" && \
+ 	${SVN:-svn} export -q $EXTRA_EXPORT_OPTIONS --ignore-externals -r "$REVISION_PHAST" \
+	     "http://internalbrr.cr.usgs.gov/svn_GW/phreeqc3/trunk/src" \
+	     "$DISTNAME/src/phreeqc3")	     
 
 (cd "$DIST_SANDBOX" && \
  	${SVN:-svn} export -q $EXTRA_EXPORT_OPTIONS --ignore-externals -r "$REVISION_PHAST" \
