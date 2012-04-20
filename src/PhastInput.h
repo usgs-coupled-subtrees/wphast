@@ -2,7 +2,7 @@
 
 #include <string>
 #include <list>
-#include "Parser.h"
+#include "WParser.h"
 
 class Prism;
 
@@ -11,7 +11,7 @@ class CPhastInput
 public:
 	static CPhastInput* New(std::istream& is, const char *szPrefix, bool save_prisms = true);
 	void Delete(void);
-	static CParser* GetParser() {return (s_instance) ? &s_instance->m_parser : 0;} 
+	static CWParser* GetParser() {return (s_instance) ? &s_instance->m_parser : 0;} 
 	void Run(void);
 	void WritePhastTmp(const char* szPhastTmp);
 
@@ -34,7 +34,7 @@ private:
 	void DoCleanUp(void);
 private:
 	static CPhastInput* s_instance;
-	CParser m_parser;
+	CWParser m_parser;
 	std::string m_prefix;
 	// static CParser* s_pParser;
 	std::string m_s_error;

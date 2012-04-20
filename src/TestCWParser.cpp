@@ -1,5 +1,5 @@
 #include "StdAfx.h"
-#include "TestCParser.h"
+#include "TestCWParser.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

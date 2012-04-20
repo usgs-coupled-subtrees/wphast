@@ -3,7 +3,7 @@
 #include <cppunit/extensions/HelperMacros.h>
 #include <cppunit/TestFixture.h>
 
-#include "Parser.h"
+#include "WParser.h"
 
 class TestCWParser : public CppUnit::TestFixture
 {

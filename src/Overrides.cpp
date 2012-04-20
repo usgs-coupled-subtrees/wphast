@@ -2,7 +2,7 @@
 #include <fstream> // std::ifstream
 #include <cassert>
 
-#include "Parser.h"
+#include "WParser.h"
 #include "PhastInput.h"
 
 #define EXTERNAL extern

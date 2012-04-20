@@ -11,7 +11,7 @@
 #include "TestCMapDialog.h"
 #include "TestCModGridCtrlEx.h"
 #include "TestCNewModelWizard.h"
-#include "TestCParser.h"
+#include "TestCWParser.h"
 #include "TestCPhastInput.h"
 #include "TestCPrintFreqPropertyPage.h"
 #include "TestCPropertyTreeControlBar.h"
