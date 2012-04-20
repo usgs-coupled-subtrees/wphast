@@ -32,7 +32,7 @@
 
 TCPPUnit::TCPPUnit(void)
 {
-// COMMENT: {4/9/2012 4:10:26 PM}	this->RunUnitTests();
+	this->RunUnitTests();
 }
 
 TCPPUnit::~TCPPUnit(void)
@@ -75,7 +75,7 @@ void TCPPUnit::RunUnitTests(void)
 		runner.addTest(TestCtime::suite());
 		runner.addTest(TestCBC::suite());
 		runner.addTest(TestCWPhastDoc::suite());
-		runner.addTest(TestCParser::suite());
+		runner.addTest(TestCWParser::suite());
 		runner.addTest(TestCPropertyTreeControlBar::suite());
 		runner.addTest(TestCUnits::suite());
 		runner.addTest(TestCPhastInput::suite());

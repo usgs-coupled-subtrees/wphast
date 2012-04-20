@@ -17,18 +17,18 @@ extern int copy_token (char *token_ptr, char **ptr, int *length);
 
 int add_char_to_line(int *i, char c);
 
-CParser::CParser(std::istream& input)
+CWParser::CWParser(std::istream& input)
 : m_input_stream(input)
 , m_output_stream(std::cout)
 , m_error_stream(std::cerr)
 {
 }
 
-CParser::~CParser(void)
+CWParser::~CWParser(void)
 {
 }
 
-int CParser::get_logical_line(int *l)
+int CWParser::get_logical_line(int *l)
 {
 /*
  *   Reads file fp until end of line, ";", or eof
@@ -133,7 +133,7 @@ add_char_to_line (int *i, char c)
 }
 
 /* ---------------------------------------------------------------------- */
-int CParser::get_line(void)
+int CWParser::get_line(void)
 /* ---------------------------------------------------------------------- */
 {
 /*
@@ -213,7 +213,7 @@ int CParser::get_line(void)
 }
 
 // COMMENT: {2/25/2005 2:12:55 PM}/* ---------------------------------------------------------------------- */
-// COMMENT: {2/25/2005 2:12:55 PM}int CParser::error_msg (const char *err_str, const int stop)
+// COMMENT: {2/25/2005 2:12:55 PM}int CWParser::error_msg (const char *err_str, const int stop)
 // COMMENT: {2/25/2005 2:12:55 PM}/* ---------------------------------------------------------------------- */
 // COMMENT: {2/25/2005 2:12:55 PM}{
 // COMMENT: {2/25/2005 2:12:55 PM}	this->m_errors += "ERROR: ";
@@ -226,7 +226,7 @@ int CParser::get_line(void)
 // COMMENT: {2/25/2005 2:12:55 PM}	return OK;
 // COMMENT: {2/25/2005 2:12:55 PM}}
 
-// COMMENT: {2/25/2005 2:13:00 PM}LPCTSTR CParser::GetErrorMsg(void)
+// COMMENT: {2/25/2005 2:13:00 PM}LPCTSTR CWParser::GetErrorMsg(void)
 // COMMENT: {2/25/2005 2:13:00 PM}{
 // COMMENT: {2/25/2005 2:13:00 PM}	return this->m_errors.c_str();
 // COMMENT: {2/25/2005 2:13:00 PM}}

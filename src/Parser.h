@@ -36,11 +36,11 @@ DWORD GetExceptionCode(VOID);
 #define OPTION_DEFAULT -4
 #define OPTION_DEFAULT2 -5
 
-class CParser
+class CWParser
 {
 public:
-	CParser(std::istream& input);
-	virtual ~CParser(void);
+	CWParser(std::istream& input);
+	virtual ~CWParser(void);
 
 // COMMENT: {2/25/2005 2:11:44 PM}	LPCTSTR GetErrorMsg(void);
 

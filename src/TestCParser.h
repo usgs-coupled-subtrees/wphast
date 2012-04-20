@@ -5,10 +5,9 @@
 
 #include "Parser.h"
 
-class TestCParser :
-	public CppUnit::TestFixture
+class TestCWParser : public CppUnit::TestFixture
 {
-	CPPUNIT_TEST_SUITE( TestCParser );
+	CPPUNIT_TEST_SUITE( TestCWParser );
 	CPPUNIT_TEST( test );
 	CPPUNIT_TEST_SUITE_END();
 

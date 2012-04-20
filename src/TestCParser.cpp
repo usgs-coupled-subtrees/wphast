@@ -6,11 +6,11 @@
 #endif
 
 
-void TestCParser::test(void)
+void TestCWParser::test(void)
 {
 	std::string str("END");
 	std::istringstream iss(str);
-	CParser* pParser = new CParser(iss);
+	CWParser* pParser = new CWParser(iss);
 	CPPUNIT_ASSERT(pParser != NULL);
 	delete pParser;
 }
