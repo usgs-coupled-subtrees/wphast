@@ -231,7 +231,7 @@ void CPrintFreqPropertyPage::DoDataExchange(CDataExchange* pDX)
 		this->m_Grid.SetItemText(NR_XYW, 0, _T("XYZ wells"));
 		this->m_Grid.SetItemText(NR_XYW, 1, _T("*.wel.xyz.tsv"));
 
-		this->m_Grid.SetItemText(NR_ZFH, 0, _T("Zone flow heads"));
+		this->m_Grid.SetItemText(NR_ZFH, 0, _T("Zone flow xyzt"));
 		this->m_Grid.SetItemText(NR_ZFH, 1, _T("(user defined)"));
 
 		this->m_Grid.SetItemText(NR_ZFX, 0, _T("Zone flow information"));
@@ -277,7 +277,7 @@ void CPrintFreqPropertyPage::DoDataExchange(CDataExchange* pDX)
 		this->m_printFreq.print_xyz_velocity.clear();
 		this->m_printFreq.print_xyz_wells.clear();
 		this->m_printFreq.print_zone_budget.clear();
-		this->m_printFreq.print_zone_budget_heads.clear();
+		this->m_printFreq.print_zone_budget_xyzt.clear();
 		this->m_printFreq.print_zone_budget_tsv.clear();
 	}
 
@@ -305,7 +305,7 @@ void CPrintFreqPropertyPage::DoDataExchange(CDataExchange* pDX)
 	this->DDX_PRINT(pDX, NR_XYV, 2, this->m_printFreq.print_xyz_velocity[zero]);
 	this->DDX_PRINT(pDX, NR_XYW, 2, this->m_printFreq.print_xyz_wells[zero]);
 	this->DDX_PRINT(pDX, NR_ZFX, 2, this->m_printFreq.print_zone_budget[zero]);
-	this->DDX_PRINT(pDX, NR_ZFH, 2, this->m_printFreq.print_zone_budget_heads[zero]);
+	this->DDX_PRINT(pDX, NR_ZFH, 2, this->m_printFreq.print_zone_budget_xyzt[zero]);
 
 
 	if (this->m_bFirstSetActive)
@@ -340,7 +340,7 @@ void CPrintFreqPropertyPage::DoDataExchange(CDataExchange* pDX)
 		COLLECT_TIMES_MACRO(this->m_printFreq.print_xyz_velocity);
 		COLLECT_TIMES_MACRO(this->m_printFreq.print_xyz_wells);
 		COLLECT_TIMES_MACRO(this->m_printFreq.print_zone_budget);
-		COLLECT_TIMES_MACRO(this->m_printFreq.print_zone_budget_heads);
+		COLLECT_TIMES_MACRO(this->m_printFreq.print_zone_budget_xyzt);
 
 		std::set<Ctime>::const_iterator s = times.begin();
 		for (++s; s != times.end(); ++s)
@@ -381,7 +381,7 @@ void CPrintFreqPropertyPage::DoDataExchange(CDataExchange* pDX)
 			this->DDX_PRINT(pDX, NR_XYV, nCols, this->m_printFreq.print_xyz_velocity, *s);
 			this->DDX_PRINT(pDX, NR_XYW, nCols, this->m_printFreq.print_xyz_wells, *s);
 			this->DDX_PRINT(pDX, NR_ZFX, nCols, this->m_printFreq.print_zone_budget, *s);
-			this->DDX_PRINT(pDX, NR_ZFH, nCols, this->m_printFreq.print_zone_budget_heads, *s);
+			this->DDX_PRINT(pDX, NR_ZFH, nCols, this->m_printFreq.print_zone_budget_xyzt, *s);
 		}	
 	}
 
@@ -434,7 +434,7 @@ void CPrintFreqPropertyPage::DoDataExchange(CDataExchange* pDX)
 			this->DDX_PRINT(pDX, NR_XYW, nCol, this->m_printFreq.print_xyz_wells, time);
 			this->DDX_PRINT(pDX, NR_PRO, nCol, this->m_printFreq.print_bc, time);
 			this->DDX_PRINT(pDX, NR_ZFX, nCol, this->m_printFreq.print_zone_budget, time);
-			this->DDX_PRINT(pDX, NR_ZFH, nCol, this->m_printFreq.print_zone_budget_heads, time);
+			this->DDX_PRINT(pDX, NR_ZFH, nCol, this->m_printFreq.print_zone_budget_xyzt, time);
 		}
 	}
 }

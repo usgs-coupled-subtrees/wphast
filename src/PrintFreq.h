@@ -55,7 +55,7 @@ public:
 	CTimeSeries<Ctime> print_xyz_head;          // 19
 	CTimeSeries<Ctime> print_xyz_velocity;      // 20 
 	CTimeSeries<Ctime> print_xyz_wells;         // 21
-	CTimeSeries<Ctime> print_zone_budget_heads; // 22
+	CTimeSeries<Ctime> print_zone_budget_xyzt;  // 22
 	CTimeSeries<Ctime> print_zone_budget;       // 23
 	CTimeSeries<Ctime> print_zone_budget_tsv;   // 24
 

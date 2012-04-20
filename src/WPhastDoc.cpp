@@ -33,6 +33,7 @@
 
 #include "Version.h"
 
+#include "WPhast_io.h"
 #include "srcinput/Filedata.h"
 #include "srcinput/Domain.h"
 #include "srcinput/Polyhedron.h"
@@ -8291,6 +8292,13 @@ void CWPhastDoc::SerializeFiles(bool bStoring, CHDFMirrorFile* file, std::map<CS
 				if (ATL::ATLPath::FileExists(newName))
 				{
 					ufiles.insert(newName);
+					std::ifstream ifs(newName);
+					if (ifs.is_open())
+					{
+						WPhast_io io(ufiles);
+						io.push_istream(&ifs, false);
+						while(io.get_line() != WPhast_io::LT_EOF);
+					}
 				}
 
 				// always add phast.dat if it exists

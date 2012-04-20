@@ -92,7 +92,7 @@ void CZoneFlowRatePropertyPage::DoDataExchange(CDataExchange* pDX)
 			::DDX_Text(pDX, IDC_EDIT_WRITE_HEADS, filename);
 			if (filename.IsEmpty())
 			{
-				::AfxMessageBox("No filename given.");
+				::AfxMessageBox("No filename prefix given.");
 				pDX->Fail();
 			}
 			else

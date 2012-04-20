@@ -87,7 +87,7 @@ void CPrintFreq::Insert(CTreeCtrl* pTreeCtrl, HTREEITEM htiPrintFreq)
 	COLLECT_TIMES_MACRO(this->print_xyz_velocity);
 	COLLECT_TIMES_MACRO(this->print_xyz_wells);
 	COLLECT_TIMES_MACRO(this->print_zone_budget);
-	COLLECT_TIMES_MACRO(this->print_zone_budget_heads);
+	COLLECT_TIMES_MACRO(this->print_zone_budget_xyzt);
 	COLLECT_TIMES_MACRO(this->print_zone_budget_tsv);
 
 	this->InsertCtime(pTreeCtrl, this->m_htiPrintFreq, this->save_final_heads, "save_final_heads");
@@ -127,7 +127,7 @@ void CPrintFreq::Insert(CTreeCtrl* pTreeCtrl, HTREEITEM htiPrintFreq)
 		this->InsertCtimeSeries(pTreeCtrl, hTime, this->print_xyz_velocity,      *s, "xyz_velocities        ");
 		this->InsertCtimeSeries(pTreeCtrl, hTime, this->print_xyz_wells,         *s, "xyz_wells             ");
 		this->InsertCtimeSeries(pTreeCtrl, hTime, this->print_zone_budget,       *s, "zone_flow             ");
-		this->InsertCtimeSeries(pTreeCtrl, hTime, this->print_zone_budget_heads, *s, "zone_flow_heads       ");
+		this->InsertCtimeSeries(pTreeCtrl, hTime, this->print_zone_budget_xyzt,  *s, "zone_flow_heads       ");
 		this->InsertCtimeSeries(pTreeCtrl, hTime, this->print_zone_budget_tsv,   *s, "zone_flow_tsv         ");
 	}	
 }
@@ -237,7 +237,7 @@ std::ostream& operator<< (std::ostream &os, const CPrintFreq& pf)
 	COLLECT_TIMES_MACRO(pf.print_xyz_velocity);
 	COLLECT_TIMES_MACRO(pf.print_xyz_wells);
 	COLLECT_TIMES_MACRO(pf.print_zone_budget);
-	COLLECT_TIMES_MACRO(pf.print_zone_budget_heads);
+	COLLECT_TIMES_MACRO(pf.print_zone_budget_xyzt);
 	COLLECT_TIMES_MACRO(pf.print_zone_budget_tsv);
 
 	std::set<Ctime>::const_iterator s = times.begin();
@@ -272,7 +272,7 @@ std::ostream& operator<< (std::ostream &os, const CPrintFreq& pf)
 		pf.OutputCtimeSeries(os, pf.print_xyz_velocity,      *s, "xyz_velocities        ");
 		pf.OutputCtimeSeries(os, pf.print_xyz_wells,         *s, "xyz_wells             ");
 		pf.OutputCtimeSeries(os, pf.print_zone_budget,       *s, "zone_flow             ");
-		pf.OutputCtimeSeries(os, pf.print_zone_budget_heads, *s, "zone_flow_heads       ");
+		pf.OutputCtimeSeries(os, pf.print_zone_budget_xyzt,  *s, "zone_flow_xyzt        ");
 		pf.OutputCtimeSeries(os, pf.print_zone_budget_tsv,   *s, "zone_flow_tsv         ");
 	}
 	return os;
@@ -698,7 +698,7 @@ void CPrintFreq::Serialize(bool bStoring, hid_t loc_id)
 		}
 		if (print_zone_budget_heads_id > 0) {
 			// serialize print_zone_budget_heads
-			this->print_zone_budget_heads.Serialize(bStoring, print_zone_budget_heads_id);
+			this->print_zone_budget_xyzt.Serialize(bStoring, print_zone_budget_heads_id);
 			status = ::H5Gclose(print_zone_budget_heads_id);
 			ASSERT(status >= 0);
 		}
@@ -773,7 +773,7 @@ void CPrintFreq::SyncWithSrcInput(void)
 	this->print_xyz_velocity.Append(::print_xyz_velocity);
 	this->print_xyz_wells.Append(::print_xyz_wells);
 	this->print_zone_budget.Append(::print_zone_budget);
-	this->print_zone_budget_heads.Append(::print_zone_budget_heads);
+	this->print_zone_budget_xyzt.Append(::print_zone_budget_heads);
 	this->print_zone_budget_tsv.Append(::print_zone_budget_tsv);
 }
 
@@ -816,7 +816,7 @@ void CPrintFreq::InitSync(CPhastInput* input/*= NULL*/)
 			this->print_xyz_velocity[zero]      = ::current_print_xyz_velocity;
 			this->print_xyz_wells[zero]         = ::current_print_xyz_wells;
 			this->print_zone_budget[zero]       = ::current_print_zone_budget;
-			this->print_zone_budget_heads[zero] = ::current_print_zone_budget_heads;
+			this->print_zone_budget_xyzt[zero]  = ::current_print_zone_budget_heads;
 			this->print_zone_budget_tsv[zero]   = ::current_print_zone_budget_tsv;
 
 			if (!bPhastInputIn)
