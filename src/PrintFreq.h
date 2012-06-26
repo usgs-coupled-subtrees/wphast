@@ -58,6 +58,7 @@ public:
 	CTimeSeries<Ctime> print_zone_budget_xyzt;  // 22
 	CTimeSeries<Ctime> print_zone_budget;       // 23
 	CTimeSeries<Ctime> print_zone_budget_tsv;   // 24
+	CTimeSeries<Ctime> print_hdf_intermediate;  // 25
 
 	int save_final_heads;                       
 

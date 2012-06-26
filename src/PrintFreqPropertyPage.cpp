@@ -23,22 +23,23 @@ const int NR_BCF =  7; // print_bc_flow
 const int NR_CHE =  8; // print_force_chem
 const int NR_H5C =  9; // print_hdf_chem
 const int NR_H5H = 10; // print_hdf_head
-const int NR_H5V = 11; // print_hdf_velocity
-const int NR_HEA = 12; // print_head
-const int NR_LOG = 13; // print_statistics
-const int NR_RES = 14; // print_restart
-const int NR_VEL = 15; // print_velocity
-const int NR_WEL = 16; // print_wells
-const int NR_XYC = 17; // print_xyz_chem
-const int NR_XYO = 18; // print_xyz_comp
-const int NR_XYH = 19; // print_xyz_head
-const int NR_XYV = 20; // print_xyz_velocity
-const int NR_XYW = 21; // print_xyz_wells
-const int NR_ZFH = 22; // print_zone_budget_heads
-const int NR_ZFX = 23; // print_zone_budget
-const int NR_ZFT = 24; // print_zone_budget_tsv
+const int NR_H5I = 11; // print_hdf_intermediate
+const int NR_H5V = 12; // print_hdf_velocity
+const int NR_HEA = 13; // print_head
+const int NR_LOG = 14; // print_statistics
+const int NR_RES = 15; // print_restart
+const int NR_VEL = 16; // print_velocity
+const int NR_WEL = 17; // print_wells
+const int NR_XYC = 18; // print_xyz_chem
+const int NR_XYO = 19; // print_xyz_comp
+const int NR_XYH = 20; // print_xyz_head
+const int NR_XYV = 21; // print_xyz_velocity
+const int NR_XYW = 22; // print_xyz_wells
+const int NR_ZFH = 23; // print_zone_budget_heads
+const int NR_ZFX = 24; // print_zone_budget
+const int NR_ZFT = 25; // print_zone_budget_tsv
 
-const int NROWS  = 25;
+const int NROWS  = 26;
 
 
 IMPLEMENT_DYNAMIC(CPrintFreqPropertyPage, baseCPrintFreqPropertyPage)
@@ -197,6 +198,9 @@ void CPrintFreqPropertyPage::DoDataExchange(CDataExchange* pDX)
 		
 		this->m_Grid.SetItemText(NR_H5H, 0, _T("HDF heads"));
 		this->m_Grid.SetItemText(NR_H5H, 1, _T("*.h5"));
+
+		this->m_Grid.SetItemText(NR_H5I, 0, _T("HDF intermediate"));
+		this->m_Grid.SetItemText(NR_H5I, 1, _T("*.intermediate.h5"));
 		
 		this->m_Grid.SetItemText(NR_H5V, 0, _T("HDF velocities"));
 		this->m_Grid.SetItemText(NR_H5V, 1, _T("*.h5"));
@@ -279,6 +283,7 @@ void CPrintFreqPropertyPage::DoDataExchange(CDataExchange* pDX)
 		this->m_printFreq.print_zone_budget.clear();
 		this->m_printFreq.print_zone_budget_xyzt.clear();
 		this->m_printFreq.print_zone_budget_tsv.clear();
+		this->m_printFreq.print_hdf_intermediate.clear();
 	}
 
 	Ctime zero;
@@ -305,7 +310,8 @@ void CPrintFreqPropertyPage::DoDataExchange(CDataExchange* pDX)
 	this->DDX_PRINT(pDX, NR_XYV, 2, this->m_printFreq.print_xyz_velocity[zero]);
 	this->DDX_PRINT(pDX, NR_XYW, 2, this->m_printFreq.print_xyz_wells[zero]);
 	this->DDX_PRINT(pDX, NR_ZFX, 2, this->m_printFreq.print_zone_budget[zero]);
-	this->DDX_PRINT(pDX, NR_ZFH, 2, this->m_printFreq.print_zone_budget_xyzt[zero]);
+	this->DDX_PRINT(pDX, NR_ZFH, 2, this->m_printFreq.print_zone_budget_xyzt[zero]);	
+	this->DDX_PRINT(pDX, NR_H5I, 2, this->m_printFreq.print_hdf_intermediate[zero]);
 
 
 	if (this->m_bFirstSetActive)
@@ -341,6 +347,7 @@ void CPrintFreqPropertyPage::DoDataExchange(CDataExchange* pDX)
 		COLLECT_TIMES_MACRO(this->m_printFreq.print_xyz_wells);
 		COLLECT_TIMES_MACRO(this->m_printFreq.print_zone_budget);
 		COLLECT_TIMES_MACRO(this->m_printFreq.print_zone_budget_xyzt);
+		COLLECT_TIMES_MACRO(this->m_printFreq.print_hdf_intermediate);
 
 		std::set<Ctime>::const_iterator s = times.begin();
 		for (++s; s != times.end(); ++s)
@@ -382,6 +389,7 @@ void CPrintFreqPropertyPage::DoDataExchange(CDataExchange* pDX)
 			this->DDX_PRINT(pDX, NR_XYW, nCols, this->m_printFreq.print_xyz_wells, *s);
 			this->DDX_PRINT(pDX, NR_ZFX, nCols, this->m_printFreq.print_zone_budget, *s);
 			this->DDX_PRINT(pDX, NR_ZFH, nCols, this->m_printFreq.print_zone_budget_xyzt, *s);
+			this->DDX_PRINT(pDX, NR_H5I, nCols, this->m_printFreq.print_hdf_intermediate, *s);
 		}	
 	}
 
@@ -435,6 +443,7 @@ void CPrintFreqPropertyPage::DoDataExchange(CDataExchange* pDX)
 			this->DDX_PRINT(pDX, NR_PRO, nCol, this->m_printFreq.print_bc, time);
 			this->DDX_PRINT(pDX, NR_ZFX, nCol, this->m_printFreq.print_zone_budget, time);
 			this->DDX_PRINT(pDX, NR_ZFH, nCol, this->m_printFreq.print_zone_budget_xyzt, time);
+			this->DDX_PRINT(pDX, NR_H5I, nCol, this->m_printFreq.print_hdf_intermediate, time);
 		}
 	}
 }
@@ -849,6 +858,9 @@ void CPrintFreqPropertyPage::OnSelChangedGrid(NMHDR *pNotifyStruct, LRESULT *res
 		break;
 	case NR_H5H:
 		CGlobal::LoadRTFString(s, IDR_PR_FREQ_HDF_HEAD_RTF);
+		break;
+	case NR_H5I:
+		CGlobal::LoadRTFString(s, IDR_PR_FREQ_HDF_INTERM_RTF);
 		break;
 	case NR_H5V:
 		CGlobal::LoadRTFString(s, IDR_PR_FREQ_HDF_VEL_RTF);

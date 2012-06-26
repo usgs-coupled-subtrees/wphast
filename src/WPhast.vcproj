@@ -6897,6 +6897,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\res\PR_FREQ_HDF_INTERM.rtf"
+				>
+			</File>
+			<File
+				RelativePath=".\res\pr_freq_hdf_iterm.rtf"
+				>
+			</File>
+			<File
 				RelativePath="res\PR_FREQ_HDF_VEL.rtf"
 				>
 			</File>

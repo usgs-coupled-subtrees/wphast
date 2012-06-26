@@ -88,7 +88,8 @@ void CPrintFreq::Insert(CTreeCtrl* pTreeCtrl, HTREEITEM htiPrintFreq)
 	COLLECT_TIMES_MACRO(this->print_xyz_wells);
 	COLLECT_TIMES_MACRO(this->print_zone_budget);
 	COLLECT_TIMES_MACRO(this->print_zone_budget_xyzt);
-	COLLECT_TIMES_MACRO(this->print_zone_budget_tsv);
+	COLLECT_TIMES_MACRO(this->print_zone_budget_tsv);	
+	COLLECT_TIMES_MACRO(this->print_hdf_intermediate);
 
 	this->InsertCtime(pTreeCtrl, this->m_htiPrintFreq, this->save_final_heads, "save_final_heads");
 
@@ -115,6 +116,7 @@ void CPrintFreq::Insert(CTreeCtrl* pTreeCtrl, HTREEITEM htiPrintFreq)
 		this->InsertCtimeSeries(pTreeCtrl, hTime, this->print_force_chem,        *s, "force_chemistry_print ");
 		this->InsertCtimeSeries(pTreeCtrl, hTime, this->print_hdf_chem,          *s, "HDF_chemistry         ");
 		this->InsertCtimeSeries(pTreeCtrl, hTime, this->print_hdf_head,          *s, "HDF_heads             ");
+		this->InsertCtimeSeries(pTreeCtrl, hTime, this->print_hdf_intermediate,  *s, "HDF_intermediate      ");
 		this->InsertCtimeSeries(pTreeCtrl, hTime, this->print_hdf_velocity,      *s, "HDF_velocities        ");
 		this->InsertCtimeSeries(pTreeCtrl, hTime, this->print_head,              *s, "heads                 ");
 		this->InsertCtimeSeries(pTreeCtrl, hTime, this->print_statistics,        *s, "progress_statistics   ");
@@ -239,6 +241,7 @@ std::ostream& operator<< (std::ostream &os, const CPrintFreq& pf)
 	COLLECT_TIMES_MACRO(pf.print_zone_budget);
 	COLLECT_TIMES_MACRO(pf.print_zone_budget_xyzt);
 	COLLECT_TIMES_MACRO(pf.print_zone_budget_tsv);
+	COLLECT_TIMES_MACRO(pf.print_hdf_intermediate);
 
 	std::set<Ctime>::const_iterator s = times.begin();
 	for (; s != times.end(); ++s)
@@ -274,6 +277,7 @@ std::ostream& operator<< (std::ostream &os, const CPrintFreq& pf)
 		pf.OutputCtimeSeries(os, pf.print_zone_budget,       *s, "zone_flow             ");
 		pf.OutputCtimeSeries(os, pf.print_zone_budget_xyzt,  *s, "zone_flow_xyzt        ");
 		pf.OutputCtimeSeries(os, pf.print_zone_budget_tsv,   *s, "zone_flow_tsv         ");
+		pf.OutputCtimeSeries(os, pf.print_hdf_intermediate,  *s, "hdf_intermediate      ");
 	}
 	return os;
 }
@@ -355,6 +359,7 @@ void CPrintFreq::Serialize(bool bStoring, hid_t loc_id)
 	static const char szPRINT_ZONE_BUDGET[]       = "print_zone_budget";
 	static const char szPRINT_ZONE_BUDGET_HEADS[] = "print_zone_budget_heads";
 	static const char szPRINT_ZONE_BUDGET_TSV[]   = "print_zone_budget_tsv";
+	static const char szPRINT_HDF_INTERMEDIATE[]  = "print_hdf_intermediate";
 
 	hid_t print_frequency_id = 0;
 
@@ -382,6 +387,7 @@ void CPrintFreq::Serialize(bool bStoring, hid_t loc_id)
 	hid_t print_zone_budget_id       = 0;
 	hid_t print_zone_budget_heads_id = 0;
 	hid_t print_zone_budget_tsv_id   = 0;
+	hid_t print_hdf_intermediate_id  = 0;
 
 	herr_t status;
 
@@ -484,6 +490,10 @@ void CPrintFreq::Serialize(bool bStoring, hid_t loc_id)
 			// Create the szPRINT_ZONE_BUDGET_TSV group
 			print_zone_budget_tsv_id = ::H5Gcreate(print_frequency_id, szPRINT_ZONE_BUDGET_TSV, 0);
 			ASSERT(print_zone_budget_tsv_id > 0);
+
+			// Create the szPRINT_HDF_INTERMEDIATE group
+			print_hdf_intermediate_id = ::H5Gcreate(print_frequency_id, szPRINT_HDF_INTERMEDIATE, 0);
+			ASSERT(print_hdf_intermediate_id > 0);
 		}
 	}
 	else
@@ -562,6 +572,9 @@ void CPrintFreq::Serialize(bool bStoring, hid_t loc_id)
 
 			// Open the szPRINT_ZONE_BUDGET_TSV group
 			print_zone_budget_tsv_id = ::H5Gopen(print_frequency_id, szPRINT_ZONE_BUDGET_TSV);
+
+			// Open the szPRINT_HDF_INTERMEDIATE group
+			print_hdf_intermediate_id = ::H5Gopen(print_frequency_id, szPRINT_HDF_INTERMEDIATE);
 		}
 	}
 
@@ -708,6 +721,12 @@ void CPrintFreq::Serialize(bool bStoring, hid_t loc_id)
 			status = ::H5Gclose(print_zone_budget_tsv_id);
 			ASSERT(status >= 0);
 		}
+		if (print_hdf_intermediate_id > 0) {
+			// serialize print_hdf_intermediate
+			this->print_hdf_intermediate.Serialize(bStoring, print_hdf_intermediate_id);
+			status = ::H5Gclose(print_hdf_intermediate_id);
+			ASSERT(status >= 0);
+		}
 
 		// close the szPrintFreq group
 		status = ::H5Gclose(print_frequency_id);
@@ -775,6 +794,7 @@ void CPrintFreq::SyncWithSrcInput(void)
 	this->print_zone_budget.Append(::print_zone_budget);
 	this->print_zone_budget_xyzt.Append(::print_zone_budget_heads);
 	this->print_zone_budget_tsv.Append(::print_zone_budget_tsv);
+	this->print_hdf_intermediate.Append(::print_hdf_intermediate);
 }
 
 void CPrintFreq::InitSync(CPhastInput* input/*= NULL*/)
@@ -787,7 +807,7 @@ void CPrintFreq::InitSync(CPhastInput* input/*= NULL*/)
 		std::istringstream iss(str);
 		if (!bPhastInputIn)
 		{
-			pInput = CPhastInput::New(iss, "CPrintFreq::InitSync");
+			pInput = CPhastInput::New(iss, "CPrintFreq::InitSync", "phast.dat");
 			ASSERT(pInput != NULL);
 		}
 		if (bPhastInputIn || pInput)
@@ -818,6 +838,7 @@ void CPrintFreq::InitSync(CPhastInput* input/*= NULL*/)
 			this->print_zone_budget[zero]       = ::current_print_zone_budget;
 			this->print_zone_budget_xyzt[zero]  = ::current_print_zone_budget_heads;
 			this->print_zone_budget_tsv[zero]   = ::current_print_zone_budget_tsv;
+			this->print_hdf_intermediate[zero]  = ::current_print_hdf_intermediate;
 
 			if (!bPhastInputIn)
 			{

@@ -452,6 +452,8 @@
 #define IDD_TITLE_PROPPAGE              478
 #define IDR_TITLE_RTF                   479
 #define IDD_IC_HEAD_INT_PROPPAGE2       480
+#define IDR_PR_FREQ_HDF_CHEM_RTF1       480
+#define IDR_PR_FREQ_HDF_INTERM_RTF      480
 #define IDD_IC_CHEM_INT_PROPPAGE        481
 #define IDD_IC_CHEM_INT_PROPPAGE1       482
 #define IDD_MEDIA_INT_PROPPAGE2         483
