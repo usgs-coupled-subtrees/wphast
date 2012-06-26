@@ -24,7 +24,7 @@ void TestCPhastInput::test(void)
 	{
 		std::string str("END");
 		std::istringstream iss(str);
-		pInput = CPhastInput::New(iss, "TEST");
+		pInput = CPhastInput::New(iss, "TEST", "phast.dat");
 		CPPUNIT_ASSERT(pInput != NULL);
 		pInput->Delete();
 	}
@@ -46,7 +46,7 @@ void TestCPhastInput::testWriteMinimal(void)
 		ifs.open("Test/minimal.trans.dat");
 		CPPUNIT_ASSERT(ifs.is_open());
 
-		pInput = CPhastInput::New(ifs, "minimal");
+		pInput = CPhastInput::New(ifs, "minimal", "phast.dat");
 		CPPUNIT_ASSERT(pInput != NULL);
 
 		pInput->WritePhastTmp("Test/WPhast.tmp");
@@ -65,13 +65,13 @@ void TestCPhastInput::testWriteMinimal(void)
 			std::getline(expected, str_expected, '\n');
 			std::getline(actual,   str_actual,   '\n');
 
-			//::OutputDebugString("Expected:\n");
-			//::OutputDebugString(str_expected.c_str());
-			//::OutputDebugString("\n");
-
-			//::OutputDebugString("Actual:\n");
-			//::OutputDebugString(str_actual.c_str());
-			//::OutputDebugString("\n");
+// COMMENT: {6/26/2012 4:04:09 PM}			::OutputDebugString("Expected:\n");
+// COMMENT: {6/26/2012 4:04:09 PM}			::OutputDebugString(str_expected.c_str());
+// COMMENT: {6/26/2012 4:04:09 PM}			::OutputDebugString("\n");
+// COMMENT: {6/26/2012 4:04:09 PM}
+// COMMENT: {6/26/2012 4:04:09 PM}			::OutputDebugString("Actual:\n");
+// COMMENT: {6/26/2012 4:04:09 PM}			::OutputDebugString(str_actual.c_str());
+// COMMENT: {6/26/2012 4:04:09 PM}			::OutputDebugString("\n");
 			CPPUNIT_ASSERT( str_expected == str_actual );
 		}
 		CPPUNIT_ASSERT( expected.eof() && actual.eof() );
@@ -97,7 +97,7 @@ void TestCPhastInput::testWritePulse(void)
 		ifs.open("Test/pulse.trans.dat");
 		CPPUNIT_ASSERT(ifs.is_open());
 
-		pInput = CPhastInput::New(ifs, "pulse");
+		pInput = CPhastInput::New(ifs, "pulse", "phast.dat");
 		CPPUNIT_ASSERT(pInput != NULL);
 
 		pInput->WritePhastTmp("Test/WPhast.tmp");
@@ -158,7 +158,7 @@ void TestCPhastInput::testEqualTimeEndsMinimal(void)
 		// add duplicate TIME_CONTROL
 		oss << "TIME_CONTROL\n\t-time_step	100\n\t-time_change	100\nEND\n";
 		std::istringstream iss(oss.str());
-		pInput = CPhastInput::New(iss, "minimal");
+		pInput = CPhastInput::New(iss, "minimal", "phast.dat");
 
 // COMMENT: {3/31/2005 6:22:23 PM}		pInput->LoadFirstStressPeriod();
 		CPPUNIT_ASSERT(pInput->GetErrorCount() == 0);
@@ -194,7 +194,7 @@ void TestCPhastInput::testMemoryLeaks(void)
 				ifs.open("Test/minimal.trans.dat");
 				CPPUNIT_ASSERT(ifs.is_open());
 
-				pInput = CPhastInput::New(ifs, "minimal");
+				pInput = CPhastInput::New(ifs, "minimal", "phast.dat");
 				CPPUNIT_ASSERT(pInput != NULL);
 
 				pInput->WritePhastTmp("Test/WPhast.tmp");
@@ -238,7 +238,7 @@ void TestCPhastInput::testCannotChangeBCSolutionType(void)
 				ifs.open("Test/CannotChangeBCSolutionType.trans.dat");
 				CPPUNIT_ASSERT(ifs.is_open());
 
-				pInput = CPhastInput::New(ifs, "CannotChangeBCSolutionType");
+				pInput = CPhastInput::New(ifs, "CannotChangeBCSolutionType", "phast.dat");
 				CPPUNIT_ASSERT(pInput != NULL);
 
 				pInput->Load();
@@ -298,7 +298,7 @@ void TestCPhastInput::testRedefineSolution(void)
 				);
 			std::istringstream iss(str);
 
-			pInput = CPhastInput::New(iss, "testRedefineSolution");
+			pInput = CPhastInput::New(iss, "testRedefineSolution", "phast.dat");
 			CPPUNIT_ASSERT(pInput != NULL);
 
 			CPPUNIT_ASSERT(::read_specified_value_bc() == EOF);
@@ -343,7 +343,7 @@ void TestCPhastInput::testRedefineSolution2(void)
 				);
 			std::istringstream iss(str);
 
-			pInput = CPhastInput::New(iss, "testRedefineSolution2");
+			pInput = CPhastInput::New(iss, "testRedefineSolution2", "phast.dat");
 			CPPUNIT_ASSERT(pInput != NULL);
 
 			CPPUNIT_ASSERT(::read_specified_value_bc() == EOF);
@@ -387,7 +387,7 @@ void TestCPhastInput::testRedefineSolution3(void)
 				);
 			std::istringstream iss(str);
 
-			pInput = CPhastInput::New(iss, "testRedefineSolution3");
+			pInput = CPhastInput::New(iss, "testRedefineSolution3", "phast.dat");
 			CPPUNIT_ASSERT(pInput != NULL);
 
 			CPPUNIT_ASSERT(::read_flux_bc() == EOF);
@@ -431,7 +431,7 @@ void TestCPhastInput::testRedefineSolution4(void)
 				);
 			std::istringstream iss(str);
 
-			pInput = CPhastInput::New(iss, "testRedefineSolution4");
+			pInput = CPhastInput::New(iss, "testRedefineSolution4", "phast.dat");
 			CPPUNIT_ASSERT(pInput != NULL);
 
 			CPPUNIT_ASSERT(::read_leaky_bc() == EOF);
@@ -486,7 +486,7 @@ void TestCPhastInput::testRedefineSolution5(void)
 				);
 			std::istringstream iss(str);
 
-			pInput = CPhastInput::New(iss, "testRedefineSolution5");
+			pInput = CPhastInput::New(iss, "testRedefineSolution5", "phast.dat");
 			CPPUNIT_ASSERT(pInput != NULL);
 
 			// reqd for keywords that use read_number_description
@@ -545,7 +545,7 @@ void TestCPhastInput::testRedefineSolution6(void)
 				);
 			std::istringstream iss(str);
 
-			pInput = CPhastInput::New(iss, "testRedefineSolution5");
+			pInput = CPhastInput::New(iss, "testRedefineSolution5", "phast.dat");
 			CPPUNIT_ASSERT(pInput != NULL);
 
 			// reqd for keywords that use read_number_description
@@ -593,7 +593,7 @@ void TestCPhastInput::testRedefineHead(void)
 				);
 			std::istringstream iss(str);
 
-			pInput = CPhastInput::New(iss, "testRedefineHead");
+			pInput = CPhastInput::New(iss, "testRedefineHead", "phast.dat");
 			CPPUNIT_ASSERT(pInput != NULL);
 
 			CPPUNIT_ASSERT(::read_specified_value_bc() == EOF);
@@ -637,7 +637,7 @@ void TestCPhastInput::testRedefineHead2(void)
 				);
 			std::istringstream iss(str);
 
-			pInput = CPhastInput::New(iss, "testRedefineHead");
+			pInput = CPhastInput::New(iss, "testRedefineHead", "phast.dat");
 			CPPUNIT_ASSERT(pInput != NULL);
 
 			CPPUNIT_ASSERT(::read_leaky_bc() == EOF);
@@ -692,7 +692,7 @@ void TestCPhastInput::testRedefineHead3(void)
 				);
 			std::istringstream iss(str);
 
-			pInput = CPhastInput::New(iss, "testRedefineSolution5");
+			pInput = CPhastInput::New(iss, "testRedefineSolution5", "phast.dat");
 			CPPUNIT_ASSERT(pInput != NULL);
 
 			//{{
@@ -740,7 +740,7 @@ void TestCPhastInput::testRedefineFlux(void)
 				);
 			std::istringstream iss(str);
 
-			pInput = CPhastInput::New(iss, "testRedefineHead");
+			pInput = CPhastInput::New(iss, "testRedefineHead", "phast.dat");
 			CPPUNIT_ASSERT(pInput != NULL);
 
 			CPPUNIT_ASSERT(::read_flux_bc() == EOF);
@@ -796,7 +796,7 @@ void TestCPhastInput::testRedefineRate(void)
 				);
 			std::istringstream iss(str);
 
-			pInput = CPhastInput::New(iss, "testRedefineRate");
+			pInput = CPhastInput::New(iss, "testRedefineRate", "phast.dat");
 			CPPUNIT_ASSERT(pInput != NULL);
 
 			// reqd for keywords that use read_number_description
@@ -853,7 +853,7 @@ void TestCPhastInput::testRedefineRate2(void)
 				);
 			std::istringstream iss(str);
 
-			pInput = CPhastInput::New(iss, "testRedefineRate2");
+			pInput = CPhastInput::New(iss, "testRedefineRate2", "phast.dat");
 			CPPUNIT_ASSERT(pInput != NULL);
 
 			// reqd for keywords that use read_number_description
@@ -956,7 +956,7 @@ void TestCPhastInput::testDecay(void)
 				);
 			std::istringstream iss(str);
 
-			pInput = CPhastInput::New(iss, "testDecay");
+			pInput = CPhastInput::New(iss, "testDecay", "phast.dat");
 			CPPUNIT_ASSERT(pInput != NULL);
 
 			pInput->Load();
@@ -1085,7 +1085,7 @@ void TestCPhastInput::testDisp2d(void)
 				);
 			std::istringstream iss(str);
 
-			pInput = CPhastInput::New(iss, "testDisp2d");
+			pInput = CPhastInput::New(iss, "testDisp2d", "phast.dat");
 			CPPUNIT_ASSERT(pInput != NULL);
 
 			pInput->Load();
@@ -1195,7 +1195,7 @@ void TestCPhastInput::testEx1(void)
 				);
 			std::istringstream iss(str);
 
-			pInput = CPhastInput::New(iss, "testEx1");
+			pInput = CPhastInput::New(iss, "testEx1", "phast.dat");
 			CPPUNIT_ASSERT(pInput != NULL);
 
 			pInput->Load();
@@ -1310,7 +1310,7 @@ void TestCPhastInput::testEx2(void)
 				);
 			std::istringstream iss(str);
 
-			pInput = CPhastInput::New(iss, "testEx2");
+			pInput = CPhastInput::New(iss, "testEx2", "phast.dat");
 			CPPUNIT_ASSERT(pInput != NULL);
 
 			pInput->Load();
@@ -1411,7 +1411,7 @@ void TestCPhastInput::testEx3(void)
 			);
 			std::istringstream iss(str);
 
-			pInput = CPhastInput::New(iss, "testEx1");
+			pInput = CPhastInput::New(iss, "testEx1", "phast.dat");
 			CPPUNIT_ASSERT(pInput != NULL);
 
 			pInput->Load();
@@ -1598,7 +1598,7 @@ void TestCPhastInput::testEx4(void)
 				);
 			std::istringstream iss(str);
 
-			pInput = CPhastInput::New(iss, "testEx1");
+			pInput = CPhastInput::New(iss, "testEx1", "phast.dat");
 			CPPUNIT_ASSERT(pInput != NULL);
 
 			pInput->Load();
@@ -1728,7 +1728,7 @@ void TestCPhastInput::testFree(void)
 				);
 			std::istringstream iss(str);
 
-			pInput = CPhastInput::New(iss, "testFree");
+			pInput = CPhastInput::New(iss, "testFree", "phast.dat");
 			CPPUNIT_ASSERT(pInput != NULL);
 
 			pInput->Load();
@@ -1838,7 +1838,7 @@ void TestCPhastInput::testKindred4_4(void)
 				);
 			std::istringstream iss(str);
 
-			pInput = CPhastInput::New(iss, "testKindred4_4");
+			pInput = CPhastInput::New(iss, "testKindred4_4", "phast.dat");
 			CPPUNIT_ASSERT(pInput != NULL);
 
 			pInput->Load();
@@ -1936,7 +1936,7 @@ void TestCPhastInput::testLeaky(void)
 				);
 			std::istringstream iss(str);
 
-			pInput = CPhastInput::New(iss, "testLeaky");
+			pInput = CPhastInput::New(iss, "testLeaky", "phast.dat");
 			CPPUNIT_ASSERT(pInput != NULL);
 
 			pInput->Load();
@@ -2033,7 +2033,7 @@ void TestCPhastInput::testLeakyx(void)
 				);
 			std::istringstream iss(str);
 
-			pInput = CPhastInput::New(iss, "testLeakyx");
+			pInput = CPhastInput::New(iss, "testLeakyx", "phast.dat");
 			CPPUNIT_ASSERT(pInput != NULL);
 
 			pInput->Load();
@@ -2131,7 +2131,7 @@ void TestCPhastInput::testLeakyz(void)
 				);
 			std::istringstream iss(str);
 
-			pInput = CPhastInput::New(iss, "testLeakyz");
+			pInput = CPhastInput::New(iss, "testLeakyz", "phast.dat");
 			CPPUNIT_ASSERT(pInput != NULL);
 
 			pInput->Load();
@@ -2234,7 +2234,7 @@ void TestCPhastInput::testLinear_bc(void)
 				);
 			std::istringstream iss(str);
 
-			pInput = CPhastInput::New(iss, "testLinear_bc");
+			pInput = CPhastInput::New(iss, "testLinear_bc", "phast.dat");
 			CPPUNIT_ASSERT(pInput != NULL);
 
 			pInput->Load();
@@ -2348,7 +2348,7 @@ void TestCPhastInput::testLinear_ic(void)
 				);
 			std::istringstream iss(str);
 
-			pInput = CPhastInput::New(iss, "testLinear_ic");
+			pInput = CPhastInput::New(iss, "testLinear_ic", "phast.dat");
 			CPPUNIT_ASSERT(pInput != NULL);
 
 			pInput->Load();
@@ -2456,7 +2456,7 @@ void TestCPhastInput::testPhrqex11(void)
 				);
 			std::istringstream iss(str);
 
-			pInput = CPhastInput::New(iss, "testPhrqex11");
+			pInput = CPhastInput::New(iss, "testPhrqex11", "phast.dat");
 			CPPUNIT_ASSERT(pInput != NULL);
 
 			pInput->Load();
@@ -2799,7 +2799,7 @@ void TestCPhastInput::testRadial(void)
 				);
 			std::istringstream iss(str);
 
-			pInput = CPhastInput::New(iss, "testRadial");
+			pInput = CPhastInput::New(iss, "testRadial", "phast.dat");
 			CPPUNIT_ASSERT(pInput != NULL);
 
 			pInput->Load();
@@ -2908,7 +2908,7 @@ void TestCPhastInput::testRiver(void)
 				);
 			std::istringstream iss(str);
 
-			pInput = CPhastInput::New(iss, "testRiver");
+			pInput = CPhastInput::New(iss, "testRiver", "phast.dat");
 			CPPUNIT_ASSERT(pInput != NULL);
 
 			pInput->Load();
@@ -3005,7 +3005,7 @@ void TestCPhastInput::testUnconf(void)
 				);
 			std::istringstream iss(str);
 
-			pInput = CPhastInput::New(iss, "testUnconf");
+			pInput = CPhastInput::New(iss, "testUnconf", "phast.dat");
 			CPPUNIT_ASSERT(pInput != NULL);
 
 			pInput->Load();
@@ -3107,7 +3107,7 @@ void TestCPhastInput::testWell(void)
 				);
 			std::istringstream iss(str);
 
-			pInput = CPhastInput::New(iss, "testWell");
+			pInput = CPhastInput::New(iss, "testWell", "phast.dat");
 			CPPUNIT_ASSERT(pInput != NULL);
 
 			pInput->Load();
@@ -3235,7 +3235,7 @@ void TestCPhastInput::testNoFileProperties(void)
 				);
 			std::istringstream iss(str);
 
-			pInput = CPhastInput::New(iss, "testNoFileProperties");
+			pInput = CPhastInput::New(iss, "testNoFileProperties", "phast.dat");
 			CPPUNIT_ASSERT(pInput != NULL);
 
 			pInput->Load();
@@ -3282,7 +3282,7 @@ void TestCPhastInput::testUnknownOptionReadingProperty(void)
 				);
 			std::istringstream iss(str);
 
-			pInput = CPhastInput::New(iss, "testUnknownOptionReadingProperty");
+			pInput = CPhastInput::New(iss, "testUnknownOptionReadingProperty", "phast.dat");
 			CPPUNIT_ASSERT(pInput != NULL);
 
 			pInput->Load();
@@ -3327,7 +3327,7 @@ void TestCPhastInput::testCapeCod(void)
 			ifs.open("C:\\cygwin\\home\\charlton\\programs\\phreeqc\\wphast-prism\\setup\\phast\\examples\\CapeCod\\capecod-90.trans.dat");
 			CPPUNIT_ASSERT(ifs.is_open());
 
-			pInput = CPhastInput::New(ifs, "testCapeCod");
+			pInput = CPhastInput::New(ifs, "testCapeCod", "phast.dat");
 			CPPUNIT_ASSERT(pInput != NULL);
 
 			pInput->Load();
@@ -3382,7 +3382,7 @@ void TestCPhastInput::testProperty(void)
 				);
 			std::istringstream iss(str);
 
-			pInput = CPhastInput::New(iss, "testProperty");
+			pInput = CPhastInput::New(iss, "testProperty", "phast.dat");
 			CPPUNIT_ASSERT(pInput != NULL);
 
 			//pInput->Load();
@@ -3592,7 +3592,7 @@ void TestCPhastInput::testWellDefinedThenUndefined(void)
 				);
 			std::istringstream iss(str);
 
-			pInput = CPhastInput::New(iss, "testEx1");
+			pInput = CPhastInput::New(iss, "testEx1", "phast.dat");
 			CPPUNIT_ASSERT(pInput != NULL);
 
 			pInput->Load();
@@ -3678,7 +3678,7 @@ void TestCPhastInput::testWellDefinedThenUndefined(void)
 				);
 			std::istringstream iss(str);
 
-			pInput = CPhastInput::New(iss, "testKindred4_4");
+			pInput = CPhastInput::New(iss, "testKindred4_4", "phast.dat");
 			CPPUNIT_ASSERT(pInput != NULL);
 
 			pInput->Load();
@@ -3720,7 +3720,7 @@ void TestCPhastInput::testDescription(void)
 				);
 			std::istringstream iss(str);
 
-			pInput = CPhastInput::New(iss, "testDescription");
+			pInput = CPhastInput::New(iss, "testDescription", "phast.dat");
 			CPPUNIT_ASSERT(pInput != NULL);
 
 			pInput->Read();
