@@ -238,19 +238,8 @@ void vtkPlaneWidget2::OnCtrlLeftButtonDown(void)
 	}
 	else
 	{
-		this->PlanePicker->Pick(X, Y, 0.0, this->CurrentRenderer);
-		path = this->PlanePicker->GetPath();
-		if (path != NULL)
-		{
-			this->State = vtkPlaneWidget2::Spinning;
-			this->HighlightPlane(1);
-		}
-		else
-		{
-			this->State = vtkPlaneWidget::Outside;
-			this->HighlightHandle(NULL);
-			return;
-		}
+		this->State = vtkPlaneWidget2::Spinning;
+		this->HighlightHandle(NULL);
 	}
 
 	this->EventCallbackCommand->SetAbortFlag(1);
