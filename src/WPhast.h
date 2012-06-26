@@ -16,6 +16,20 @@
 class CWPhastApp : public CWinApp
 {
 public:
+	class CSettings
+	{
+	public:
+		CSettings() : bRunParallel(FALSE) {};
+		CString strDatabase;
+		CString strCommand;
+		CString strCommandArgs;
+		BOOL bRunParallel;
+		virtual ~CSettings(){};
+	};
+	CSettings settings;
+
+
+public:
 	CWPhastApp();
 
 
@@ -33,6 +47,9 @@ public:
 	afx_msg void OnFileNew();
 protected:
 	BOOL m_bShellFileNew;
+public:
+	afx_msg void OnToolsRunOptions();
+	BOOL LoadMoreProfileSettings(void);
 };
 
 extern CWPhastApp theApp;

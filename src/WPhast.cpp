@@ -14,6 +14,8 @@
 #include "NewModel.h"
 #include "DelayRedraw.h"
 
+#include "RunTypeDlg.h"
+
 #if defined(_DEBUG)
 // see CWPhastApp::InitInstance()
 #include <../atlmfc/src/atl/atls/Common.h>
@@ -41,6 +43,7 @@ BEGIN_MESSAGE_MAP(CWPhastApp, CWinApp)
 	// Standard print setup command
 	ON_COMMAND(ID_FILE_PRINT_SETUP, CWinApp::OnFilePrintSetup)
 	ON_COMMAND(ID_FILE_NEW, OnFileNew)
+	ON_COMMAND(ID_TOOLS_RUNOPTIONS, &CWPhastApp::OnToolsRunOptions)
 END_MESSAGE_MAP()
 
 // CWPhastApp construction
@@ -159,6 +162,8 @@ BOOL CWPhastApp::InitInstance()
 	// such as the name of your company or organization
 	SetRegistryKey(_T("USGS"));
 	LoadStdProfileSettings(4);  // Load standard INI file options (including MRU)
+	LoadMoreProfileSettings();  // Load run options
+
 	// Register the application's document templates.  Document templates
 	//  serve as the connection between documents, frame windows and views
 	CSingleDocTemplate* pDocTemplate;
@@ -425,4 +430,54 @@ void CWPhastApp::OnFileNew()
 			}
 		}
 	}
+}
+
+void CWPhastApp::OnToolsRunOptions()
+{
+	CRunTypeDlg dlg;
+	dlg.strDatabase     = this->settings.strDatabase;
+	dlg.bParallel       = this->settings.bRunParallel;
+	dlg.strCommand      = this->settings.strCommand;
+	dlg.strCommandArgs  = this->settings.strCommandArgs;
+
+	if (dlg.DoModal() == IDOK)
+	{
+		this->settings.strDatabase  = dlg.strDatabase;
+		this->settings.bRunParallel = dlg.bParallel;
+
+		WriteProfileString(_T("Settings"), _T("Database"), this->settings.strDatabase);
+		WriteProfileInt(_T("Settings"), _T("RunParallel"), this->settings.bRunParallel);
+
+		if (dlg.bParallel)
+		{
+			this->settings.strCommand     = dlg.strCommand;
+			this->settings.strCommandArgs = dlg.strCommandArgs;
+
+			WriteProfileString(_T("Settings"), _T("RunCommand"), this->settings.strCommand);
+			WriteProfileString(_T("Settings"), _T("RunCommandArgs"), this->settings.strCommandArgs);
+		}
+	}
+}
+
+BOOL CWPhastApp::LoadMoreProfileSettings(void)
+{
+	ASSERT_VALID(this);
+
+	// build phast-mpich cmd
+	TCHAR szCmd[2*MAX_PATH+100];
+	::GetModuleFileName(NULL, szCmd, MAX_PATH);
+	*(_tcsrchr(szCmd, _TEXT('\\')) + 1) = 0;
+	_stprintf(_tcschr(szCmd, 0), __TEXT("phast-mpich.exe"));
+
+	// build mpiexec args
+	TCHAR szCmdArgs[2*MAX_PATH+100];
+	_stprintf(szCmdArgs, _T("%s %s"), _T("-localonly %NUMBER_OF_PROCESSORS%"), szCmd);
+
+	// Get default database from registry
+	this->settings.strDatabase    = GetProfileString(_T("Settings"), _T("Database"),       _T("phast.dat")                           );
+	this->settings.bRunParallel   = GetProfileInt   (_T("Settings"), _T("RunParallel"),    0                                         );
+	this->settings.strCommand     = GetProfileString(_T("Settings"), _T("RunCommand"),     _T("%PROGRAMFILES%\\MPICH2\\bin\\mpiexec"));
+	this->settings.strCommandArgs = GetProfileString(_T("Settings"), _T("RunCommandArgs"), szCmdArgs                                 );
+
+	return TRUE;
 }

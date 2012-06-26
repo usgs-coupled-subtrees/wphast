@@ -17,8 +17,8 @@
 	<Configurations>
 		<Configuration
 			Name="cppunit|Win32"
-			OutputDirectory="cppunit"
-			IntermediateDirectory="cppunit"
+			OutputDirectory="$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC70.vsprops;.\OutputName.vsprops"
 			UseOfMFC="2"
@@ -112,8 +112,8 @@
 		</Configuration>
 		<Configuration
 			Name="AutoRelease|Win32"
-			OutputDirectory="AutoRelease"
-			IntermediateDirectory="AutoRelease"
+			OutputDirectory="$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC70.vsprops;.\OutputName.vsprops"
 			UseOfMFC="2"
@@ -213,8 +213,8 @@
 		</Configuration>
 		<Configuration
 			Name="AutoDebug|Win32"
-			OutputDirectory="AutoDebug"
-			IntermediateDirectory="AutoDebug"
+			OutputDirectory="$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC70.vsprops;.\OutputName.vsprops"
 			UseOfMFC="2"
@@ -1013,6 +1013,10 @@
 			</File>
 			<File
 				RelativePath="RunDialog.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\RunTypeDlg.cpp"
 				>
 			</File>
 			<File
@@ -5593,6 +5597,10 @@
 			</File>
 			<File
 				RelativePath="RunDialog.h"
+				>
+			</File>
+			<File
+				RelativePath=".\RunTypeDlg.h"
 				>
 			</File>
 			<File
