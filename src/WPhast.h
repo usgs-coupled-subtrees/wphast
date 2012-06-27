@@ -50,6 +50,7 @@ protected:
 public:
 	afx_msg void OnToolsRunOptions();
 	BOOL LoadMoreProfileSettings(void);
+	INT_PTR RunTypeDlgDoModal();
 };
 
 extern CWPhastApp theApp;

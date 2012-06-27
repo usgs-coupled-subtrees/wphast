@@ -432,7 +432,7 @@ void CWPhastApp::OnFileNew()
 	}
 }
 
-void CWPhastApp::OnToolsRunOptions()
+INT_PTR CWPhastApp::RunTypeDlgDoModal()
 {
 	CRunTypeDlg dlg;
 	dlg.strDatabase     = this->settings.strDatabase;
@@ -440,7 +440,8 @@ void CWPhastApp::OnToolsRunOptions()
 	dlg.strCommand      = this->settings.strCommand;
 	dlg.strCommandArgs  = this->settings.strCommandArgs;
 
-	if (dlg.DoModal() == IDOK)
+	INT_PTR rval = dlg.DoModal();
+	if (rval == IDOK)
 	{
 		this->settings.strDatabase  = dlg.strDatabase;
 		this->settings.bRunParallel = dlg.bParallel;
@@ -457,6 +458,12 @@ void CWPhastApp::OnToolsRunOptions()
 			WriteProfileString(_T("Settings"), _T("RunCommandArgs"), this->settings.strCommandArgs);
 		}
 	}
+	return rval;
+}
+
+void CWPhastApp::OnToolsRunOptions()
+{
+	this->RunTypeDlgDoModal();
 }
 
 BOOL CWPhastApp::LoadMoreProfileSettings(void)
