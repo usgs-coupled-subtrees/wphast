@@ -4,7 +4,8 @@
     <Fragment>
         <ComponentGroup Id="Bin">
             <ComponentRef Id="hdf5dll.dll" />
-            <ComponentRef Id="phast.exe" />
+            <ComponentRef Id="phast_ser.exe" />
+            <ComponentRef Id="phast_mpich2.exe" />
             <ComponentRef Id="szlibdll.dll" />
             <ComponentRef Id="vtkCommon.dll" />
             <ComponentRef Id="vtkDICOMParser.dll" />
@@ -30,6 +31,7 @@
             <ComponentRef Id="vtkWidgets.dll" />
             <ComponentRef Id="vtkzlib.dll" />
             <ComponentRef Id="P4W.exe" />
+            <ComponentRef Id="spawnc.exe" />
             <ComponentRef Id="xerces_c_2_7.dll" />
             <ComponentRef Id="zlib1.dll" />
         </ComponentGroup>
@@ -40,8 +42,11 @@
                 <Component Id="hdf5dll.dll" Guid="*">
                     <File Id="hdf5dll.dll" KeyPath="yes" Source="$(var.hdfDllPath)\hdf5dll.dll" />
                 </Component>
-                <Component Id="phast.exe" Guid="*">
-                    <File Id="phast.exe" KeyPath="yes" Source="$(var.phastExePath)" />
+                <Component Id="phast_ser.exe" Guid="*">
+                    <File Id="phast_ser.exe" Name="phast-ser.exe" KeyPath="yes" Source="$(var.phastSerExePath)" />
+                </Component>
+                <Component Id="phast_mpich2.exe" Guid="*">
+                    <File Id="phast_mpich2.exe" Name="phast-mpich2.exe" KeyPath="yes" Source="$(var.phastMPICH2ExePath)" />
                 </Component>
                 <Component Id="szlibdll.dll" Guid="*">
                     <File Id="szlibdll.dll" KeyPath="yes" Source="$(var.hdfDllPath)\..\bin\szlibdll.dll" />
@@ -126,6 +131,9 @@
                         </Extension>
                       </ProgId>
                     </Class>
+                </Component>
+                <Component Id="spawnc.exe" Guid="*">
+                    <File Id="spawnc.exe" KeyPath="yes" Source="$(var.BinDir)\spawnc.exe" />
                 </Component>
                 <Component Id="xerces_c_2_7.dll" Guid="*">
                     <File Id="xerces_c_2_7.dll" KeyPath="yes" Source="$(var.xercesDllPath)\xerces-c_2_7.dll" />

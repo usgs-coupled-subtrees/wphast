@@ -1,4 +1,4 @@
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
@@ -18,12 +18,12 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <OutputPath>bin\$(Configuration)\</OutputPath>
     <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
-    <DefineConstants>Debug;Major=$(Major);Minor=$(Minor);Build=$(Build);phastExePath=C:\cygwin\home\charlton\programs\phreeqc\phastpp-trunk\src\phast\vs2005\ser\phast.exe;BinDir=..\src\AutoRelease;phast\examples</DefineConstants>
+    <DefineConstants>Debug;Major=$(Major);Minor=$(Minor);Build=$(Build);phastSerExePath=C:\cygwin\home\charlton\programs\phreeqc\phastpp-trunk\src\phast\vs2005\ser\phast.exe;phastMPICH2ExePath=C:\cygwin\home\charlton\programs\phreeqc\phastpp-trunk\src\phast\vs2005\merge\phast.exe;BinDir=..\src\AutoRelease;phast\examples</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <OutputPath>bin\$(Configuration)\</OutputPath>
     <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
-    <DefineConstants>Major=$(Major);Minor=$(Minor);Patch=$(Patch);Build=$(Build);phastExePath=C:\cygwin\home\charlton\programs\phreeqc\phastpp-trunk\src\phast\vs2005\ser\phast.exe;BinDir=..\src\AutoRelease;ExampleDir=phast\examples</DefineConstants>
+    <DefineConstants>Major=$(Major);Minor=$(Minor);Patch=$(Patch);Build=$(Build);phastSerExePath=C:\cygwin\home\charlton\programs\phreeqc\phastpp-trunk\src\phast\vs2005\ser\phast.exe;phastMPICH2ExePath=C:\cygwin\home\charlton\programs\phreeqc\phastpp-trunk\src\phast\vs2005\merge\phast.exe;BinDir=..\src\AutoRelease;ExampleDir=phast\examples</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="bin.wxs" />

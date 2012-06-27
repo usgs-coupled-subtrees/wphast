@@ -97,7 +97,7 @@ HDF_DLLS=\
 all : $(MSI)
 
 $(MSI) : msi.sln  $(P4W) $(P4W_FILES)
-	MSBuild.exe msi.sln /t:msi /p:Configuration=Release /p:Platform=x86 /p:TargetName=phast4windows /p:Major=${MAJOR} /p:Minor=${MINOR} /p:Patch=${PATCH} /p:Build=${REL} /p:phastExePath=${PHAST_EXE_PATH}
+	MSBuild.exe msi.sln /t:msi /p:Configuration=Release /p:Platform=x86 /p:TargetName=phast4windows /p:Major=${MAJOR} /p:Minor=${MINOR} /p:Patch=${PATCH} /p:Build=${REL} /p:phastSerExePath=${PHAST_SER_EXE_PATH} /p:phastMPICH2ExePath=${PHAST_MPICH2_EXE_PATH}
 	touch $(MSI)
 
 $(P4W_EXE) : $(SLN)

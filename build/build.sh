@@ -169,7 +169,10 @@ build() {
   7z x -y $phast_msi media.cab && \
   extract /Y media.cab phast_ser.exe && \
   mv -f phast_ser.exe phast-ser.exe && \
-  export PHAST_EXE_PATH="`cygpath -aw "phast-ser.exe"`" && \
+  extract /Y media.cab phast_mpich2.exe && \
+  mv -f phast_mpich2.exe phast-mpich2.exe && \
+  export PHAST_SER_EXE_PATH="`cygpath -aw "phast-ser.exe"`" && \
+  export PHAST_MPICH2_EXE_PATH="`cygpath -aw "phast-mpich2.exe"`" && \
   cd ${objdir}/msi && \
   make )
 }
