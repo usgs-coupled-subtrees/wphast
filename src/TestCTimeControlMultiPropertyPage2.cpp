@@ -32,7 +32,7 @@ void TestCTimeControlMultiPropertyPage2::testDoModal(void)
 			"		1 yr\n"
 			"		2 yr\n"
 			);
-		CPhastInput* pPhastInput = CPhastInput::New(iss, "TestCTimeControlMultiPropertyPage2");
+		CPhastInput* pPhastInput = CPhastInput::New(iss, "TestCTimeControlMultiPropertyPage2", "phast.dat");
 		CPPUNIT_ASSERT(::read_time_control() == EOF);
 		CPPUNIT_ASSERT(pPhastInput->GetErrorCount() == 0);
 
@@ -54,7 +54,7 @@ void TestCTimeControlMultiPropertyPage2::testDoModal(void)
 		//
 		pPhastInput->Delete();
 		pPhastInput = NULL;
-		pPhastInput = CPhastInput::New(iss, "TestCTimeControlMultiPropertyPage2");
+		pPhastInput = CPhastInput::New(iss, "TestCTimeControlMultiPropertyPage2", "phast.dat");
 
 		CPPUNIT_ASSERT(::count_time_end == 0);
 		CPPUNIT_ASSERT(::time_step.count_properties == 0);

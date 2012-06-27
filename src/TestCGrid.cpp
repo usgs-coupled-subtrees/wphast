@@ -136,7 +136,7 @@ void TestCGrid::testUniformCtor(void)
 			"-uniform X 0. 1000. 6\n"
 			);
 
-		pPhastInput = CPhastInput::New(iss, "testUniformCtor");
+		pPhastInput = CPhastInput::New(iss, "testUniformCtor", "phast.dat");
 		CPPUNIT_ASSERT(::read_input() == OK);
 		CPPUNIT_ASSERT(pPhastInput->GetErrorCount() == 0);
 		{

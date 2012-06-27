@@ -51,9 +51,10 @@ CPhastInput* CPhastInput::s_instance = 0;
 
 static _se_translator_function prev_se_translator_function = 0;
 
-CPhastInput::CPhastInput(std::istream& is, const char *szPrefix, bool save_prisms)
+CPhastInput::CPhastInput(std::istream& is, const char *szPrefix, const char *szDatabase, bool save_prisms)
 : m_parser(is)
 , m_prefix(szPrefix)
+, m_database(szDatabase)
 , m_save_prisms(save_prisms)
 {
 	prev_se_translator_function = _set_se_translator(CSeException::SeTranslator);	
@@ -111,6 +112,10 @@ void CPhastInput::DoInitialize(void)
 	::initialize();
 
 	::prefix = ::string_duplicate(this->m_prefix.c_str());
+	if (!this->m_database.empty())
+	{
+		::database_name = ::string_duplicate(this->m_database.c_str());
+	}
 }
 
 void CPhastInput::DoCleanUp(void)
@@ -132,7 +137,7 @@ void CPhastInput::DoCleanUp(void)
 // COMMENT: {12/2/2008 3:00:12 PM}#endif
 }
 
-CPhastInput* CPhastInput::New(std::istream& is, const char *pcsz_prefix, bool save_prisms /*= true*/)
+CPhastInput* CPhastInput::New(std::istream& is, const std::string sPrefix, const std::string sDatabase, bool save_prisms /*= true*/)
 {
 	if (CPhastInput::s_instance)
 	{
@@ -140,7 +145,7 @@ CPhastInput* CPhastInput::New(std::istream& is, const char *pcsz_prefix, bool sa
 		return 0;
 	}
 
-	CPhastInput::s_instance = new CPhastInput(is, pcsz_prefix, save_prisms);
+	CPhastInput::s_instance = new CPhastInput(is, sPrefix.c_str(), sDatabase.c_str(), save_prisms);
 	return CPhastInput::s_instance;
 }
 
@@ -172,7 +177,6 @@ void CPhastInput::Load(void)
 		::strcat(name, ".chem.dat");
 		::chemistry_name = ::string_duplicate(name);
 	}
-	assert(database_name == NULL);
 	if (::database_name == NULL)
 	{
 		::database_name = ::string_duplicate("phast.dat");
@@ -194,7 +198,6 @@ void CPhastInput::Read(void)
 		::strcat(name, ".chem.dat");
 		::chemistry_name = ::string_duplicate(name);
 	}
-	assert(database_name == NULL);
 	if (::database_name == NULL)
 	{
 		::database_name = ::string_duplicate("phast.dat");
@@ -222,7 +225,6 @@ void CPhastInput::WritePhastTmp(const char* szPhastTmp)
 		::strcat(name, ".chem.dat");
 		::chemistry_name = ::string_duplicate(name);
 	}
-	assert(::database_name == NULL);
 	if (::database_name == NULL)
 	{
 		::database_name = ::string_duplicate("phast.dat");

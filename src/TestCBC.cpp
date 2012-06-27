@@ -124,7 +124,7 @@ void TestCBC::testMerge(void)
 			"-associated 0 1\n"
 			);
 
-		pPhastInput = CPhastInput::New(iss, "testMerge");
+		pPhastInput = CPhastInput::New(iss, "testMerge", "phast.dat");
 		CPPUNIT_ASSERT(pPhastInput);
 		CPPUNIT_ASSERT(::read_specified_value_bc() == EOF);
 		CPPUNIT_ASSERT(pPhastInput->GetErrorCount() == 0);
@@ -199,7 +199,7 @@ void TestCBC::testMergeDifferentSolutionTypes(void)
 			"-fixed 0 1\n"
 			);
 
-		pPhastInput = CPhastInput::New(iss, "testMerge");
+		pPhastInput = CPhastInput::New(iss, "testMerge", "phast.dat");
 		CPPUNIT_ASSERT(pPhastInput);
 		CPPUNIT_ASSERT(::read_specified_value_bc() == EOF);
 		CPPUNIT_ASSERT(pPhastInput->GetErrorCount() == 0);
@@ -282,7 +282,7 @@ void TestCBC::testAssertValid(void)
 			"-associated 0 2\n"
 			);
 
-		pPhastInput = CPhastInput::New(iss, "testAssertValid");
+		pPhastInput = CPhastInput::New(iss, "testAssertValid", "phast.dat");
 		CPPUNIT_ASSERT(::read_specified_value_bc() == EOF);
 		CPPUNIT_ASSERT(pPhastInput->GetErrorCount() == 0);
 		CMemoryState oldMemState, newMemState, diffMemState;
@@ -336,7 +336,7 @@ void TestCBC::testAssertValidSimGreaterThan1(void)
 			"-associated 0 2\n"
 			);
 
-		pPhastInput = CPhastInput::New(iss, "testAssertValid");
+		pPhastInput = CPhastInput::New(iss, "testAssertValid", "phast.dat");
 		CPPUNIT_ASSERT(::read_specified_value_bc() == EOF);
 		CPPUNIT_ASSERT(pPhastInput->GetErrorCount() == 0);
 		CMemoryState oldMemState, newMemState, diffMemState;
@@ -395,7 +395,7 @@ void TestCBC::testAssertValidFluxBC(void)
 			"  -face Z\n"
 			);
 
-		pPhastInput = CPhastInput::New(iss, "testAssertValidFluxBC");
+		pPhastInput = CPhastInput::New(iss, "testAssertValidFluxBC", "phast.dat");
 		CPPUNIT_ASSERT(::read_flux_bc() == EOF);
 		CPPUNIT_ASSERT(pPhastInput->GetErrorCount() == 0);
 		CMemoryState oldMemState, newMemState, diffMemState;
@@ -471,7 +471,7 @@ void TestCBC::testAssertValidLeakyBC(void)
 		);
 
 
-	CPhastInput* pPhastInput = CPhastInput::New(iss, "testAssertValidLeakyBC");
+	CPhastInput* pPhastInput = CPhastInput::New(iss, "testAssertValidLeakyBC", "phast.dat");
 	try 
 	{
 		::simulation = 0;
@@ -557,7 +557,7 @@ void TestCBC::testAssertValidSpecifiedValueBC(void)
 			"###  -mask file mask.file\n"
 			);
 
-		CPhastInput* pPhastInput = CPhastInput::New(iss, "testAssertValidSpecifiedValueBC");
+		CPhastInput* pPhastInput = CPhastInput::New(iss, "testAssertValidSpecifiedValueBC", "phast.dat");
 		CPPUNIT_ASSERT(::read_specified_value_bc() == EOF);
 		CPPUNIT_ASSERT(pPhastInput->GetErrorCount() == 0);
 		CMemoryState oldMemState, newMemState, diffMemState;
@@ -703,7 +703,7 @@ void TestCBC::testAssertValidSpecifiedValueBC2(void)
 			"      0 6\n"
 			);
 
-		CPhastInput* pPhastInput = CPhastInput::New(iss, "testAssertValidSpecifiedValueBC");
+		CPhastInput* pPhastInput = CPhastInput::New(iss, "testAssertValidSpecifiedValueBC", "phast.dat");
 		CPPUNIT_ASSERT(::read_specified_value_bc() == EOF);
 		CPPUNIT_ASSERT(pPhastInput->GetErrorCount() == 0);
 		CMemoryState oldMemState, newMemState, diffMemState;

@@ -79,6 +79,7 @@
 #include "ImportErrorDialog.h"
 #include "ImportWarningDialog.h"
 #include "RunDialog.h"
+#include "RunTypeDlg.h"
 #include "PerimeterDlg.h"
 #include "FileRecreateDialog.h"
 
@@ -874,7 +875,7 @@ void CWPhastDoc::Serialize(CArchive& ar)
 		if (wphast_id > 0)
 		{
 			std::istringstream iss("");
-			CPhastInput* pInput = CPhastInput::New(iss, "Serialize", false);
+			CPhastInput* pInput = CPhastInput::New(iss, "Serialize", "phast.dat", false);
 			try
 			{
 				// Note: can't call this->New(...) here since the defaults are unknown
@@ -2966,7 +2967,7 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 
 	ASSERT(Prism::prism_list.size() == 0);
 	ASSERT(Filedata::file_data_map.size() == 0);
-	CPhastInput* pInput = CPhastInput::New(ifs, strPrefix, false);
+	CPhastInput* pInput = CPhastInput::New(ifs, (LPCTSTR)strPrefix, "phast.dat", false);
 	if (!pInput) return FALSE;
 
 	// save
@@ -4105,7 +4106,12 @@ void CWPhastDoc::OnFileRun()
 	std::string str = oss.str();
 	std::istringstream iss(str);
 
-	CPhastInput* pInput = CPhastInput::New(iss, strPrefix);
+	if (((CWPhastApp*)::AfxGetApp())->RunTypeDlgDoModal() != IDOK)
+	{
+		return;
+	}
+
+	CPhastInput* pInput = CPhastInput::New(iss, (LPCTSTR)strPrefix, (LPCTSTR)((CWPhastApp*)::AfxGetApp())->settings.strDatabase);
 	if (!pInput) return;
 
 	// Update StatusBar
@@ -4171,6 +4177,9 @@ void CWPhastDoc::OnFileRun()
 
 		CRunDialog run;
 		run.SetWorkingDirectory(szPhastTmpDir);
+		run.bParallel      = ((CWPhastApp*)::AfxGetApp())->settings.bRunParallel;
+		run.strCommand     = ((CWPhastApp*)::AfxGetApp())->settings.strCommand;
+		run.strCommandArgs = ((CWPhastApp*)::AfxGetApp())->settings.strCommandArgs;
 		run.DoModal();
 	}
 }
@@ -6880,7 +6889,7 @@ void CWPhastDoc::OnToolsNewPrism()
 				//
 
 				std::istringstream emptyiss;
-				CPhastInput* pInput = CPhastInput::New(emptyiss, "OnToolsNewPrism", false);
+				CPhastInput* pInput = CPhastInput::New(emptyiss, "OnToolsNewPrism", "phast.dat", false);
 
 				std::ostringstream oss;
 				oss << "-perimeter SHAPE map " << dlg.m_strShapefile;

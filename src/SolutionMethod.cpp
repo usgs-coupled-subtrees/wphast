@@ -86,7 +86,7 @@ void CSolutionMethod::InitSync(CPhastInput* input/*= NULL*/)
 		std::istringstream iss(str);
 		if (!bPhastInputIn)
 		{
-			pInput = CPhastInput::New(iss, "CSolutionMethod::InitSync");
+			pInput = CPhastInput::New(iss, "CSolutionMethod::InitSync", "phast.dat");
 			ASSERT(pInput != NULL);
 		}
 		if (bPhastInputIn || pInput)

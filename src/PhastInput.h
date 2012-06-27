@@ -9,7 +9,7 @@ class Prism;
 class CPhastInput
 {
 public:
-	static CPhastInput* New(std::istream& is, const char *szPrefix, bool save_prisms = true);
+	static CPhastInput* New(std::istream& is, const std::string sPrefix, const std::string sDatabase, bool save_prisms = true);
 	void Delete(void);
 	static CWParser* GetParser() {return (s_instance) ? &s_instance->m_parser : 0;} 
 	void Run(void);
@@ -28,7 +28,7 @@ public:
 	static int Output(const int type, const char *err_str, const int stop, void *cookie, const char *format, va_list args);
 
 private:
-	CPhastInput(std::istream& is, const char *pcsz_prefix, bool save_prisms);
+	explicit CPhastInput(std::istream& is, const char *szPrefix, const char *szDatabase, bool save_prisms);
 	~CPhastInput(void);
 	void DoInitialize(void);
 	void DoCleanUp(void);
@@ -36,6 +36,7 @@ private:
 	static CPhastInput* s_instance;
 	CWParser m_parser;
 	std::string m_prefix;
+	std::string m_database;
 	// static CParser* s_pParser;
 	std::string m_s_error;
 	std::string m_s_warning;

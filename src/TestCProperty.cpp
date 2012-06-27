@@ -28,7 +28,7 @@ void TestCproperty::testXYZ(void)
 			"    -head      XYZ        GRID   Test/ex5.head.200.dat\n"
 			);
 
-		pPhastInput = CPhastInput::New(iss, "testXYZ");
+		pPhastInput = CPhastInput::New(iss, "testXYZ", "phast.dat");
 
 		pPhastInput->Read();
 		CPPUNIT_ASSERT(pPhastInput->GetErrorCount() == 0);

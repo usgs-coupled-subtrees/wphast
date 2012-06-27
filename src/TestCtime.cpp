@@ -25,7 +25,7 @@ void TestCtime::testReadTimeControl(void)
 			"        2 yr\n"
 			);
 
-		pPhastInput = CPhastInput::New(iss, "TEST");
+		pPhastInput = CPhastInput::New(iss, "TEST", "phast.dat");
 		::read_time_control();
 
 		CPPUNIT_ASSERT(::time_end);
