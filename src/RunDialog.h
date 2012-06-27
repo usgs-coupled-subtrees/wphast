@@ -17,13 +17,18 @@ public:
 // Dialog Data
 	enum { IDD = IDD_RUN_OUTPUT_DIALOG };
 
+public:
+	BOOL    bParallel;
+	CString strCommand;
+	CString strCommandArgs;
+
 protected:
 	TCHAR m_szOriginalDir[_MAX_PATH];
 
 	HANDLE m_hChildProcess;
 	HANDLE m_hStdIn; // Handle to parents std input.
 	BOOL m_bRunThread;
-
+	HANDLE eventTerminateProcessGroup;
 
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 

@@ -15,6 +15,7 @@ CRunDialog::CRunDialog(CWnd* pParent /*=NULL*/)
 	, m_hChildProcess(NULL)
 	, m_hStdIn(NULL) // Handle to parents std input.
 	, m_bRunThread(TRUE)
+	, eventTerminateProcessGroup(NULL)
 {
 	VERIFY(::GetCurrentDirectory(_MAX_PATH, this->m_szOriginalDir));
 }
@@ -75,23 +76,36 @@ void CRunDialog::PrepAndLaunchRedirectedChild(HANDLE hChildStdOut,
 	// Note that dwFlags must include STARTF_USESHOWWINDOW if you want to
 	// use the wShowWindow flags.
 
-// COMMENT: {5/25/2004 8:53:16 PM}	// BUGBUG 
-// COMMENT: {5/25/2004 8:53:16 PM}	// check existance of phast.exe
-	/*const*/ TCHAR szPhastExe[] = _T("phast.exe");
-// COMMENT: {5/25/2004 8:53:16 PM}	if (!ATL::ATLPath::FileExists(szPhastExe)) {
-// COMMENT: {5/25/2004 8:53:16 PM}		TCHAR cwd[_MAX_PATH + 1];
-// COMMENT: {5/25/2004 8:53:16 PM}		VERIFY(::GetCurrentDirectory(_MAX_PATH, cwd));
-// COMMENT: {5/25/2004 8:53:16 PM}
-// COMMENT: {5/25/2004 8:53:16 PM}		TCHAR buf[4*_MAX_PATH];
-// COMMENT: {5/25/2004 8:53:16 PM}		::_sntprintf(buf, 4*_MAX_PATH, _T("Cannot find %s in :%s\n"), szPhastExe, cwd);
-// COMMENT: {5/25/2004 8:53:16 PM}// COMMENT: {5/25/2004 7:51:47 PM}		::AfxMessageBox(buf);
-// COMMENT: {5/25/2004 8:53:16 PM}		TRACE(buf);
-// COMMENT: {5/25/2004 8:53:16 PM}		/// return;
-// COMMENT: {5/25/2004 8:53:16 PM}	}
+	TCHAR szPhastExe[] = _T("phast-ser.exe");
+
+	TCHAR szCmdLine[2*MAX_PATH+100];
+	TCHAR szExpandedCmdLine[2*MAX_PATH+100];
+
+
+	// Create an inheritable event handle to use as our IPC mechanism
+	// to terminate the processes in the process group
+	// NOTE: Keep this handle for the entire lifetime of this application
+	this->eventTerminateProcessGroup = ::CreateEvent(NULL, TRUE, FALSE, NULL);
+	::SetHandleInformation(this->eventTerminateProcessGroup, HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
+
+	::ResetEvent(this->eventTerminateProcessGroup);   // Do this before each spawn
+
+	::GetModuleFileName(NULL, szCmdLine, MAX_PATH);
+	*(_tcsrchr(szCmdLine, _TEXT('\\')) + 1) = 0; // truncate EXE filename
+
+	if (this->bParallel)
+	{
+		::_stprintf(::_tcschr(szCmdLine, 0), _TEXT("spawnc.exe %d %s %s"), (int)this->eventTerminateProcessGroup, this->strCommand, this->strCommandArgs);
+	}
+	else
+	{
+		::_stprintf(::_tcschr(szCmdLine, 0), _TEXT("spawnc.exe %d %s"), (int)this->eventTerminateProcessGroup, szPhastExe);
+	}
+	::ExpandEnvironmentStrings(szCmdLine, szExpandedCmdLine, 2*MAX_PATH+100);
 
 	if (!::CreateProcess(
 		NULL,
-		szPhastExe,
+		szExpandedCmdLine,
 		NULL,
 		NULL,
 		TRUE,
@@ -384,11 +398,10 @@ LRESULT CRunDialog::OnRunFinished(WPARAM, LPARAM)
 
 void CRunDialog::OnBnClickedAbort()
 {
-	if (this->m_hChildProcess) {
+	if (this->m_hChildProcess)
+	{
+		::SetEvent(this->eventTerminateProcessGroup);
 		this->SetWindowText("Aborting");
 		this->RedrawWindow();
-		if (::TerminateProcess(this->m_hChildProcess, 0)) {
-			this->m_hChildProcess = 0;
-		}
 	}
 }
