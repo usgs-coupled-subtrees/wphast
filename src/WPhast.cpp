@@ -474,7 +474,7 @@ BOOL CWPhastApp::LoadMoreProfileSettings(void)
 	TCHAR szCmd[2*MAX_PATH+100];
 	::GetModuleFileName(NULL, szCmd, MAX_PATH);
 	*(_tcsrchr(szCmd, _TEXT('\\')) + 1) = 0;
-	_stprintf(_tcschr(szCmd, 0), __TEXT("phast-mpich.exe"));
+	_stprintf(_tcschr(szCmd, 0), __TEXT("phast-mpich2.exe"));
 
 	// build mpiexec args
 	TCHAR szCmdArgs[2*MAX_PATH+100];
