@@ -164,6 +164,7 @@ build() {
     echo "Error: PHAST_BUILD is not set"; \
     exit 1; \
   fi && \
+  cd ${objdir} && \
   export phast_msi="`tar tvjf ${PHAST_BUILD} | egrep phast.*.msi | egrep -v x64 | sed 's/.* //'`" && \
   tar xvjf ${PHAST_BUILD} $phast_msi && \
   7z x -y $phast_msi media.cab && \
@@ -171,8 +172,8 @@ build() {
   mv -f phast_ser.exe phast-ser.exe && \
   extract /Y media.cab phast_mpich2.exe && \
   mv -f phast_mpich2.exe phast-mpich2.exe && \
-  export PHAST_SER_EXE_PATH="`cygpath -aw "phast-ser.exe"`" && \
-  export PHAST_MPICH2_EXE_PATH="`cygpath -aw "phast-mpich2.exe"`" && \
+  export PHAST_SER_EXE_PATH="`cygpath -aw phast-ser.exe`" && \
+  export PHAST_MPICH2_EXE_PATH="`cygpath -aw phast-mpich2.exe`" && \
   cd ${objdir}/msi && \
   make )
 }
