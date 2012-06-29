@@ -174,6 +174,11 @@ echo "Exporting revision $REVISION of phast4windows into sandbox..."
  	${SVN:-svn} export -q $EXTRA_EXPORT_OPTIONS --ignore-externals -r "$REVISION_PHAST" \
 	     "http://internalbrr.cr.usgs.gov/svn_GW/phastpp/trunk/doc" \
 	     "$DISTNAME/msi/phast/doc")
+	     
+(cd "$DIST_SANDBOX" && \
+ 	${SVN:-svn} export -q $EXTRA_EXPORT_OPTIONS --ignore-externals -r "$REVISION_PHAST" \
+	     "http://internalbrr.cr.usgs.gov/svn_GW/phreeqc/trunk/database" \
+	     "$DISTNAME/msi/phast/database")	     
 
 ver_major=`echo $VERSION | cut -d '.' -f 1`
 ver_minor=`echo $VERSION | cut -d '.' -f 2`

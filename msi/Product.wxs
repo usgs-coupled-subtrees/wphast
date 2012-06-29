@@ -69,6 +69,7 @@
     <!-- features -->
     <Feature Id="ProgramFiles" Title="Program Files" Description="This component contains the program executables, files required during execution, and minimal informal documentation." AllowAdvertise="no" Level="1" Display="expand">
       <ComponentGroupRef Id="Bin" />
+      <ComponentGroupRef Id="Database" />
       <ComponentRef Id="BinShortcuts"/>
       <MergeRef Id="CRT" />
       <MergeRef Id="CRT Policy" />

@@ -1,4 +1,4 @@
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
@@ -13,7 +13,8 @@
     <Minor Condition=" '$(Minor)' == '' ">0</Minor>
     <Patch Condition=" '$(Patch)' == '' ">0</Patch>
     <Build Condition=" '$(Build)' == '' ">0</Build>
-    <phastExePath Condition=" '$(phastExePath)' == '' ">c:\</phastExePath>
+    <phastSerExePath Condition=" '$(phastSerExePath)' == '' ">C:\cygwin\home\charlton\programs\phreeqc\phastpp-trunk\src\phast\vs2005\ser\phast.exe</phastSerExePath>
+    <phastMPICH2ExePath Condition=" '$(phastMPICH2ExePath)' == '' ">C:\cygwin\home\charlton\programs\phreeqc\phastpp-trunk\src\phast\vs2005\merge\phast.exe</phastMPICH2ExePath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <OutputPath>bin\$(Configuration)\</OutputPath>
@@ -23,10 +24,11 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <OutputPath>bin\$(Configuration)\</OutputPath>
     <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
-    <DefineConstants>Major=$(Major);Minor=$(Minor);Patch=$(Patch);Build=$(Build);phastSerExePath=$(phastSerExePath);phastMPICH2ExePath=$(phastMPICH2ExePath);BinDir=..\src\AutoRelease;ExampleDir=phast\examples</DefineConstants>
+    <DefineConstants>Major=$(Major);Minor=$(Minor);Patch=$(Patch);Build=$(Build);phastSerExePath=$(phastSerExePath);phastMPICH2ExePath=$(phastMPICH2ExePath);BinDir=..\src\AutoRelease;ExampleDir=phast\examples;DbDir=phast\database</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="bin.wxs" />
+    <Compile Include="database.wxs" />
     <Compile Include="doc.wxs" />
     <Compile Include="examples.wxs" />
     <Compile Include="Product.wxs" />
