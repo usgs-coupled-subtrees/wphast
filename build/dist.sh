@@ -180,6 +180,9 @@ echo "Exporting revision $REVISION of phast4windows into sandbox..."
 	     "http://internalbrr.cr.usgs.gov/svn_GW/phreeqc/trunk/database" \
 	     "$DISTNAME/msi/phast/database")	     
 
+echo "Renaming phreeqc.dat to phast.dat"
+mv "$DISTPATH/msi/phast/database/phreeqc.dat" "$DISTPATH/msi/phast/database/phast.dat"
+
 ver_major=`echo $VERSION | cut -d '.' -f 1`
 ver_minor=`echo $VERSION | cut -d '.' -f 2`
 ver_patch=`echo $VERSION | cut -d '.' -f 3`
