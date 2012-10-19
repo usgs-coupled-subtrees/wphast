@@ -40,28 +40,28 @@ CPrintInitialPropertyPage::~CPrintInitialPropertyPage()
 
 
 #define EXPAND_LEFT_MACRO(GRID, MACRO) \
-	MACRO(GRID, _T("Boundary conditions"),        _T("*.O.probdef"), bc,            IDR_PR_INIT_BC_RTF); \
-	MACRO(GRID, _T("Components"),                 _T("*.O.comps"),   comp,          IDR_PR_INIT_COMPS_RTF); \
-	MACRO(GRID, _T("Conductance"),                _T("*.O.kd"),      conductances,  IDR_PR_INIT_COND_RTF); \
-	MACRO(GRID, _T("Echo input"),                 _T("*.log"),       echo_input,    IDR_PR_INIT_ECHO_RTF); \
-	MACRO(GRID, _T("Fluid properties"),           _T("*.O.probdef"), fluid,         IDR_PR_INIT_FLUID_RTF); \
-	MACRO(GRID, _T("Force chemistry print"),      _T("*.O.chem"),    force_chem,    IDR_PR_INIT_FORCE_RTF); \
-	MACRO(GRID, _T("HDF chemistry"),              _T("*.h5"),        hdf_chem,      IDR_PR_INIT_HDF_CHEM_RTF); \
-	MACRO(GRID, _T("HDF heads"),                  _T("*.h5"),        hdf_head,      IDR_PR_INIT_HDF_HEAD_RTF); \
-	MACRO(GRID, _T("HDF media"),                  _T("*.h5"),        hdf_media,     IDR_PR_INIT_HDF_MEDIA_RTF); \
-	MACRO(GRID, _T("HDF steady flow velocities"), _T("*.h5"),        hdf_ss_vel,    IDR_PR_INIT_HDF_VEL_RTF); \
+	MACRO(GRID, _T("Boundary conditions"),        _T("*.probdef.txt"),   bc,            IDR_PR_INIT_BC_RTF); \
+	MACRO(GRID, _T("Components"),                 _T("*.comps.txt"),     comp,          IDR_PR_INIT_COMPS_RTF); \
+	MACRO(GRID, _T("Conductance"),                _T("*.kd.txt"),        conductances,  IDR_PR_INIT_COND_RTF); \
+	MACRO(GRID, _T("Echo input"),                 _T("*.log.txt"),       echo_input,    IDR_PR_INIT_ECHO_RTF); \
+	MACRO(GRID, _T("Fluid properties"),           _T("*.probdef.txt"),   fluid,         IDR_PR_INIT_FLUID_RTF); \
+	MACRO(GRID, _T("Force chemistry print"),      _T("*.chem.txt"),      force_chem,    IDR_PR_INIT_FORCE_RTF); \
+	MACRO(GRID, _T("HDF chemistry"),              _T("*.h5"),            hdf_chem,      IDR_PR_INIT_HDF_CHEM_RTF); \
+	MACRO(GRID, _T("HDF heads"),                  _T("*.h5"),            hdf_head,      IDR_PR_INIT_HDF_HEAD_RTF); \
+	MACRO(GRID, _T("HDF media"),                  _T("*.h5"),            hdf_media,     IDR_PR_INIT_HDF_MEDIA_RTF); \
+	MACRO(GRID, _T("HDF steady flow velocities"), _T("*.h5"),            hdf_ss_vel,    IDR_PR_INIT_HDF_VEL_RTF); \
 
 #define EXPAND_RIGHT_MACRO(GRID, MACRO) \
-	MACRO(GRID, _T("Heads"),                      _T("*.O.head"),    head,          IDR_PR_INIT_HEADS_RTF); \
-	MACRO(GRID, _T("Media properties"),           _T("*.O.probdef"), media,         IDR_PR_INIT_MEDIA_RTF); \
-	MACRO(GRID, _T("Solution method"),            _T("*.O.probdef"), method,        IDR_PR_INIT_SOL_METH_RTF); \
-	MACRO(GRID, _T("Steady flow velocities"),     _T("*.O.vel"),     ss_vel,        IDR_PR_INIT_SSFLOW_RTF); \
-	MACRO(GRID, _T("Wells"),                      _T("*.O.wel"),     wells,         IDR_PR_INIT_WELLS_RTF); \
-	MACRO(GRID, _T("XYZ chemistry"),              _T("*.xyz.chem"),  xyz_chem,      IDR_PR_INIT_XYZ_CHEM_RTF); \
-	MACRO(GRID, _T("XYZ components"),             _T("*.xyz.comps"), xyz_comp,      IDR_PR_INIT_XYZ_COMPS_RTF); \
-	MACRO(GRID, _T("XYZ heads"),                  _T("*.xyz.head"),  xyz_head,      IDR_PR_INIT_XYZ_HEADS_RTF); \
-	MACRO(GRID, _T("XYZ steady flow velocities"), _T("*.xyz.vel"),   xyz_ss_vel,    IDR_PR_INIT_XYZ_SSVEL_RTF); \
-	MACRO(GRID, _T("XYZ wells"),                  _T("*.xyz.wel"),   xyz_wells,     IDR_PR_INIT_XYZ_WELLS_RTF); \
+	MACRO(GRID, _T("Heads"),                      _T("*.head.txt"),      head,          IDR_PR_INIT_HEADS_RTF); \
+	MACRO(GRID, _T("Media properties"),           _T("*.probdef.txt"),   media,         IDR_PR_INIT_MEDIA_RTF); \
+	MACRO(GRID, _T("Solution method"),            _T("*.probdef.txt"),   method,        IDR_PR_INIT_SOL_METH_RTF); \
+	MACRO(GRID, _T("Steady flow velocities"),     _T("*.vel.txt"),       ss_vel,        IDR_PR_INIT_SSFLOW_RTF); \
+	MACRO(GRID, _T("Wells"),                      _T("*.wel.txt"),       wells,         IDR_PR_INIT_WELLS_RTF); \
+	MACRO(GRID, _T("XYZ chemistry"),              _T("*.chem.xyz.tsv"),  xyz_chem,      IDR_PR_INIT_XYZ_CHEM_RTF); \
+	MACRO(GRID, _T("XYZ components"),             _T("*.comps.xyz.tsv"), xyz_comp,      IDR_PR_INIT_XYZ_COMPS_RTF); \
+	MACRO(GRID, _T("XYZ heads"),                  _T("*.head.xyz.tsv"),  xyz_head,      IDR_PR_INIT_XYZ_HEADS_RTF); \
+	MACRO(GRID, _T("XYZ steady flow velocities"), _T("*.vel.xyz.tsv"),   xyz_ss_vel,    IDR_PR_INIT_XYZ_SSVEL_RTF); \
+	MACRO(GRID, _T("XYZ wells"),                  _T("*.wel.xyz.tsv"),   xyz_wells,     IDR_PR_INIT_XYZ_WELLS_RTF); \
 
 #define START_EXPAND_MACRO()  { int nRow = 0
 #define END_EXPAND_MACRO() }
@@ -191,8 +191,8 @@ void CPrintInitialPropertyPage::DoDataExchange(CDataExchange* pDX)
 
 		// manually resize grid
 		this->m_GridRight.SetColumnWidth(0, 141);
-		this->m_GridRight.SetColumnWidth(1, 80);
-		this->m_GridRight.SetColumnWidth(2, 54);
+		this->m_GridRight.SetColumnWidth(1, 86);
+		this->m_GridRight.SetColumnWidth(2, 48);
 	}
 
 	if (pDX->m_bSaveAndValidate)
