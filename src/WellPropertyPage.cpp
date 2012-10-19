@@ -364,7 +364,6 @@ void CWellPropertyPage::DoDataExchange(CDataExchange* pDX)
 	{
 		if (well.lsd_user_defined)
 		{
-			ASSERT(this->m_bByDepth);
 			this->m_wndWellCtrl.SetLSD(well.lsd_user);
 			DDX_Text(pDX, IDC_LSD_EDIT, well.lsd_user);
 		}
@@ -755,8 +754,12 @@ void CWellPropertyPage::GetProperties(CWellSchedule& well)const
 void CWellPropertyPage::SetProperties(const CWellSchedule& well)
 {
 	this->m_well = well;
+	this->m_bByDepth = FALSE;
+	if (this->m_well.count_depth_user > 0 && this->m_well.lsd_user_defined == TRUE)
+	{
+		this->m_bByDepth = TRUE;
+	}
 	this->m_well.Reduce();
-	this->m_bByDepth = (this->m_well.lsd_user_defined);
 }
 
 void CWellPropertyPage::SetScreenHeadings(BOOL bByDepth)

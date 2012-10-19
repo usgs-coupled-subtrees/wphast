@@ -12,67 +12,7 @@ IMPLEMENT_DYNAMIC(CWellCtrl, CStatic)
 CWellCtrl::CWellCtrl()
 : m_bByDepth(FALSE)
 {
-// COMMENT: {8/2/2004 1:47:09 PM}	this->SetZRange(0.0, 1.0);
 	this->m_grid.SetUniformRange(0.0, 1.0, 2);
-#if defined(_DEBUG)
-	// TESTING {{
-	this->m_grid.SetUniformRange(    -100.0, 100.0, 5);
-	this->m_grid.SetUniformRange(-1660000.0,   0.0, 5);
-	this->m_grid.SetUniformRange(       0.0, 400.0, 5);
-	this->m_grid.SetUniformRange(    -400.0,   0.0, 5);
-	this->m_grid.SetUniformRange(    -100.0,   0.0, 5);
-	this->m_grid.SetUniformRange(       0.0,  10.0, 5);
-	this->m_grid.SetUniformRange(       0.0, 100.0, 5);
-	this->m_grid.SetUniformRange(    -100.0, 100.0, 5);
-
-	//this->m_grid.SetUniformRange(0.0, 400.0, 5);
-// COMMENT: {7/30/2004 7:34:39 PM}	VERIFY(this->SetZRange(-1660000.0,   0.0));
-// COMMENT: {7/30/2004 7:34:39 PM}	VERIFY(this->SetZRange(       0.0, 400.0));
-// COMMENT: {7/30/2004 7:34:39 PM}	VERIFY(this->SetZRange(    -400.0,   0.0));
-// COMMENT: {7/30/2004 7:34:39 PM}	VERIFY(this->SetZRange(    -100.0,   0.0));
-// COMMENT: {7/30/2004 7:34:39 PM}	VERIFY(this->SetZRange(       0.0,  10.0));
-// COMMENT: {7/30/2004 7:34:39 PM}	VERIFY(this->SetZRange(       0.0, 100.0));
-// COMMENT: {7/30/2004 7:34:39 PM}	VERIFY(this->SetZRange(    -100.0, 100.0));
-// COMMENT: {7/30/2004 7:34:39 PM}
-// COMMENT: {7/30/2004 7:34:39 PM}
-// COMMENT: {7/30/2004 7:34:39 PM}	VERIFY(this->AddScreen(
-// COMMENT: {7/30/2004 7:34:39 PM}		this->m_zMax - 0.8 * (this->m_zMax - this->m_zMin),
-// COMMENT: {7/30/2004 7:34:39 PM}		this->m_zMax - 0.7 * (this->m_zMax - this->m_zMin)
-// COMMENT: {7/30/2004 7:34:39 PM}		));
-// COMMENT: {7/30/2004 7:34:39 PM}	ASSERT(this->GetScreenCount() == 1);
-// COMMENT: {7/30/2004 7:34:39 PM}
-// COMMENT: {7/30/2004 7:34:39 PM}
-// COMMENT: {7/30/2004 7:34:39 PM}
-// COMMENT: {7/30/2004 7:34:39 PM}	VERIFY(this->AddScreen(
-// COMMENT: {7/30/2004 7:34:39 PM}		this->m_zMax - 0.55 * (this->m_zMax - this->m_zMin),
-// COMMENT: {7/30/2004 7:34:39 PM}		this->m_zMax - 0.45 * (this->m_zMax - this->m_zMin)
-// COMMENT: {7/30/2004 7:34:39 PM}		));
-// COMMENT: {7/30/2004 7:34:39 PM}	ASSERT(this->GetScreenCount() == 2);
-// COMMENT: {7/30/2004 7:34:39 PM}
-// COMMENT: {7/30/2004 7:34:39 PM}	VERIFY(this->AddScreen(
-// COMMENT: {7/30/2004 7:34:39 PM}		this->m_zMax - 0.55 * (this->m_zMax - this->m_zMin),
-// COMMENT: {7/30/2004 7:34:39 PM}		this->m_zMax - 0.45 * (this->m_zMax - this->m_zMin)
-// COMMENT: {7/30/2004 7:34:39 PM}		));
-// COMMENT: {7/30/2004 7:34:39 PM}	ASSERT(this->GetScreenCount() == 3);
-// COMMENT: {7/30/2004 7:34:39 PM}
-// COMMENT: {7/30/2004 7:34:39 PM}	VERIFY(this->RemoveScreen(
-// COMMENT: {7/30/2004 7:34:39 PM}		this->m_zMax - 0.55 * (this->m_zMax - this->m_zMin),
-// COMMENT: {7/30/2004 7:34:39 PM}		this->m_zMax - 0.45 * (this->m_zMax - this->m_zMin)
-// COMMENT: {7/30/2004 7:34:39 PM}		));
-// COMMENT: {7/30/2004 7:34:39 PM}	ASSERT(this->GetScreenCount() == 2);
-// COMMENT: {7/30/2004 7:34:39 PM}
-// COMMENT: {7/30/2004 7:34:39 PM}	VERIFY(!this->RemoveScreen(
-// COMMENT: {7/30/2004 7:34:39 PM}		this->m_zMax - 0.99 * (this->m_zMax - this->m_zMin),
-// COMMENT: {7/30/2004 7:34:39 PM}		this->m_zMax - 0.88 * (this->m_zMax - this->m_zMin)
-// COMMENT: {7/30/2004 7:34:39 PM}		));
-// COMMENT: {7/30/2004 7:34:39 PM}	ASSERT(this->GetScreenCount() == 2);
-// COMMENT: {7/30/2004 7:34:39 PM}
-// COMMENT: {7/30/2004 7:34:39 PM}	// TODO does (zMin <= lsd <= zMax) ???
-// COMMENT: {7/30/2004 7:34:39 PM}
-// COMMENT: {7/30/2004 7:34:39 PM}	double zLSD = 0.95 * (this->m_zMax - this->m_zMin) + this->m_zMin;
-// COMMENT: {7/30/2004 7:34:39 PM}	VERIFY(this->SetLSD(zLSD));
-	// TESTING }}
-#endif
 }
 
 CWellCtrl::~CWellCtrl()
@@ -93,8 +33,10 @@ void CWellCtrl::OnPaint()
 	// Do not call CStatic::OnPaint() for painting messages
 
 	LPCTSTR LABEL_FORMAT = _T(" %1.4g");
+	LPCTSTR ELEVATION    = _T("Elevation");
+	LPCTSTR DEPTH        = _T("Depth");
 
-	const int top_border        = 20;
+	const int top_border        = 35;
 	const int ground_height     = 15;
 	const int bottom_border     = 14;
 	const int pipe_inner_radius = 8;
@@ -132,8 +74,10 @@ void CWellCtrl::OnPaint()
 	CDC *pDC = &memDC;
 	pDC->FillSolidRect(&rcClient, clrWhite);
 
-	// determine label indent
-	int indent;
+	// determine depth label indent
+	//
+	int indent_right = 0;
+
 	if (this->m_bByDepth)
 	{
 		int nSavedDC = pDC->SaveDC();
@@ -141,36 +85,33 @@ void CWellCtrl::OnPaint()
 		CString strLabel;
 		CSize extent;
 		CSize max_extent(0, 0);
-		//int max_extent = 0;
 		for (int i = 0; i < this->m_grid.count_coord; ++i)
 		{
-#if 1
-			if (((this->m_grid.coord[i] - this->m_zLSD) < 1e-12) && (this->m_grid.coord[i] > 1e-4))
+			if (((this->m_zLSD - this->m_grid.coord[i]) < 1e-12) && (this->m_grid.coord[i] > 1e-4))
 			{
 				strLabel.Format(LABEL_FORMAT, 0.0);
 			}
 			else
 			{
-				strLabel.Format(LABEL_FORMAT, this->m_grid.coord[i] - this->m_zLSD);
+				strLabel.Format(LABEL_FORMAT, this->m_zLSD - this->m_grid.coord[i]);
 			}
-#else
-			strLabel.Format(LABEL_FORMAT, this->m_grid.coord[i] - this->m_zLSD);
-#endif
 			extent = pDC->GetTextExtent(strLabel);
 			max_extent.cx = __max(max_extent.cx, extent.cx);
 			max_extent.cy = __max(max_extent.cy, extent.cy);
 		}
-		indent = max_extent.cx + 4 + 3;
+		indent_right = max_extent.cx + 3;
 		pDC->RestoreDC(nSavedDC);
 	}
-	else
+
+	// determine elevation label indent
+	//
+	int indent_left = 0;
 	{
 		int nSavedDC = pDC->SaveDC();
 		pDC->SelectObject(CFont::FromHandle((HFONT)::GetStockObject(DEFAULT_GUI_FONT)));
 		CString strLabel;
 		CSize extent;
 		CSize max_extent(0, 0);
-		//int max_extent = 0;
 		for (int i = 0; i < this->m_grid.count_coord; ++i)
 		{
 			strLabel.Format(LABEL_FORMAT, this->m_grid.coord[i]);
@@ -178,17 +119,19 @@ void CWellCtrl::OnPaint()
 			max_extent.cx = __max(max_extent.cx, extent.cx);
 			max_extent.cy = __max(max_extent.cy, extent.cy);
 		}
-		indent = max_extent.cx + 4 + 3;
+		indent_left = max_extent.cx + 4 + 3;
 		pDC->RestoreDC(nSavedDC);
 	}
 
 	// Determine dashed lines modulus
 	//
 	int line_modulus = 1;
-	if (this->m_grid.count_coord >= 200) {
+	if (this->m_grid.count_coord >= 200)
+	{
 		line_modulus = this->m_grid.count_coord / 20;
 	}
-	else if (this->m_grid.count_coord >= 80) {
+	else if (this->m_grid.count_coord >= 80)
+	{
 		line_modulus = 5;
 	}
 
@@ -201,21 +144,21 @@ void CWellCtrl::OnPaint()
 		pDC->SelectObject(pen);
 
 		// top
-		pDC->MoveTo(indent          , top_border);
-		pDC->LineTo(rcClient.Width(), top_border);
+		pDC->MoveTo(indent_left                    , top_border);
+		pDC->LineTo(rcClient.Width() - indent_right, top_border);
 
 		// middle points
 		for (int i = line_modulus; i < this->m_grid.count_coord - 1; i += line_modulus)
 		{
 			int cy = rcClient.Height() - top_border - bottom_border;
 			int y = top_border + int( cy * ( (zMax - this->m_grid.coord[i]) / (zMax - zMin) ) );
-			pDC->MoveTo(indent          , y);
-			pDC->LineTo(rcClient.Width(), y);
+			pDC->MoveTo(indent_left                    , y);
+			pDC->LineTo(rcClient.Width() - indent_right, y);
 		}
 
 		// bottom
-		pDC->MoveTo(indent          , rcClient.Height() - bottom_border);
-		pDC->LineTo(rcClient.Width(), rcClient.Height() - bottom_border);
+		pDC->MoveTo(indent_left                    , rcClient.Height() - bottom_border);
+		pDC->LineTo(rcClient.Width() - indent_right, rcClient.Height() - bottom_border);
 
 		pDC->RestoreDC(nSavedDC);
 	}
@@ -223,20 +166,25 @@ void CWellCtrl::OnPaint()
 	// Determine label modulus
 	//
 	int modulus = 1;
-	if (this->m_grid.count_coord >= 200) {
+	if (this->m_grid.count_coord >= 200)
+	{
 		modulus = this->m_grid.count_coord / 10;
 	}
-	else if (this->m_grid.count_coord >= 80) {
+	else if (this->m_grid.count_coord >= 80)
+	{
 		modulus = 10;
 	}
-	else if (this->m_grid.count_coord >= 40) {
+	else if (this->m_grid.count_coord >= 40)
+	{
 		modulus = 5;
 	}
-	else if (this->m_grid.count_coord >= 20) {
+	else if (this->m_grid.count_coord >= 20)
+	{
 		modulus = 2;
 	}
 
-	// Draw Z Labels
+
+	// Draw Depth Labels
 	//
 	if (this->m_bByDepth)
 	{
@@ -252,23 +200,20 @@ void CWellCtrl::OnPaint()
 		CSize extent;
 
 		// top
-#if 1
-		if (((zMax - this->m_zLSD) < 1e-12) && (zMax > 1e-4))
+		if (((this->m_zLSD - zMax) < 1e-12) && (zMax > 1e-4))
 		{
 			strLabel.Format(LABEL_FORMAT, 0.0);
 		}
 		else
 		{
-			strLabel.Format(LABEL_FORMAT, zMax - this->m_zLSD);
+			strLabel.Format(LABEL_FORMAT, this->m_zLSD - zMax);
 		}
-#else
-		strLabel.Format(LABEL_FORMAT, zMax - this->m_zLSD);
-#endif
+
 		extent = pDC->GetTextExtent(strLabel);
 		int yLast = top_border;
 
 		// bottom
-		strLabel.Format(LABEL_FORMAT, zMin - this->m_zLSD);
+		strLabel.Format(LABEL_FORMAT, this->m_zLSD - zMin);
 		extent = pDC->GetTextExtent(strLabel);
 
 		// middle points
@@ -276,25 +221,26 @@ void CWellCtrl::OnPaint()
 		for (int i = this->m_grid.count_coord - 1; i >= 0; i -= modulus)
 		{
 			int y = top_border + int( cy * ( (zMax - this->m_grid.coord[i]) / (zMax - zMin) ) );
-			strLabel.Format(LABEL_FORMAT, this->m_grid.coord[i] - this->m_zLSD);
+			strLabel.Format(LABEL_FORMAT, this->m_zLSD - this->m_grid.coord[i]);
 			extent = pDC->GetTextExtent(strLabel);
-			pDC->TextOut(indent - extent.cx - 3, y - extent.cy / 2, strLabel);
+			pDC->TextOut(rcClient.Width() - extent.cx - 3, y - extent.cy / 2, strLabel);
 		}
 
 		// bottom
-		strLabel.Format(LABEL_FORMAT, zMin - this->m_zLSD);
+		strLabel.Format(LABEL_FORMAT, this->m_zLSD - zMin);
 		extent = pDC->GetTextExtent(strLabel);
-		pDC->TextOut(indent - extent.cx - 3, rcClient.Height() - bottom_border - extent.cy / 2, strLabel);
+		pDC->TextOut(rcClient.Width() - extent.cx - 3, rcClient.Height() - bottom_border - extent.cy / 2, strLabel);
 
 		// top
-		strLabel.Format(LABEL_FORMAT, zMax - this->m_zLSD);
+		strLabel.Format(LABEL_FORMAT, this->m_zLSD - zMax);
 		extent = pDC->GetTextExtent(strLabel);
-		pDC->TextOut(indent - extent.cx - 3, top_border - extent.cy / 2, strLabel);
-
+		pDC->TextOut(rcClient.Width() - extent.cx - 3, top_border - extent.cy / 2, strLabel);
 
 		pDC->RestoreDC(nSavedDC);
 	}
-	else
+
+	// Draw Elevation Labels
+	//
 	{
 		int nSavedDC = pDC->SaveDC();
 
@@ -308,41 +254,37 @@ void CWellCtrl::OnPaint()
 		CSize extent;
 
 		// middle points
-		//// for (int i = 1; i < this->m_grid.count_coord - 1; /*++i*/ i+=3) {
-		///  for (int i = 2; i < this->m_grid.count_coord - 1; /*++i*/ i+=2) {
 		for (int i = modulus; i < this->m_grid.count_coord - 1; /*++i*/ i += modulus)
 		{
 			int cy = rcClient.Height() - top_border - bottom_border;
 			int y = top_border + int( cy * ( (zMax - this->m_grid.coord[i]) / (zMax - zMin) ) );
 			strLabel.Format(LABEL_FORMAT, this->m_grid.coord[i]);
 			extent = pDC->GetTextExtent(strLabel);
-			pDC->TextOut(indent - extent.cx - 3, y - extent.cy / 2, strLabel);
+			pDC->TextOut(indent_left - extent.cx - 3, y - extent.cy / 2, strLabel);
 		}
 
 		// top
 		strLabel.Format(LABEL_FORMAT, zMax);
 		extent = pDC->GetTextExtent(strLabel);
-		pDC->TextOut(indent - extent.cx - 3, top_border - extent.cy / 2, strLabel);
-
+		pDC->TextOut(indent_left - extent.cx - 3, top_border - extent.cy / 2, strLabel);
 
 		// bottom
 		strLabel.Format(LABEL_FORMAT, zMin);
 		extent = pDC->GetTextExtent(strLabel);
-		pDC->TextOut(indent - extent.cx - 3, rcClient.Height() - bottom_border - extent.cy / 2, strLabel);
+		pDC->TextOut(indent_left - extent.cx - 3, rcClient.Height() - bottom_border - extent.cy / 2, strLabel);
 
 		pDC->RestoreDC(nSavedDC);
 	}
 
 	// Draw ground
 	//
+	int yTotal = (rcClient.Height() - top_border - bottom_border);
+	int yGround = top_border + int( yTotal * ( (zMax - this->m_zLSD) / (zMax - zMin) ) );
 	if (this->m_bByDepth)
 	{
-		int yTotal = (rcClient.Height() - top_border - bottom_border);
-		int yGround = top_border + int( yTotal * ( (zMax - this->m_zLSD) / (zMax - zMin) ) );
+		int ground_left = indent_left + (((zMax - this->m_zLSD) == 0) ? ground_indent : 0);
 
-		int ground_left = indent + (((zMax - this->m_zLSD) == 0) ? ground_indent : 0);
-
-		CRect rcGround(ground_left, yGround, rcClient.Width(), yGround + ground_height);
+		CRect rcGround(indent_left, yGround, rcClient.Width() - indent_right, yGround + ground_height);
 		CBrush brGround;
 
 		// draw ground hatch
@@ -350,15 +292,20 @@ void CWellCtrl::OnPaint()
 		pDC->FillRect(&rcGround, &brGround);
 
 		// draw ground edge
-		pDC->MoveTo(ground_left      , yGround);
-		pDC->LineTo(rcClient.Width() , yGround);
+		pDC->MoveTo(indent_left                    , yGround);
+		pDC->LineTo(rcClient.Width() - indent_right, yGround);
 	}
+
+	// Determine the top of the well
+	//
+	int well_top = (this->m_bByDepth) ? __max(top_border, yGround) : top_border;
+
 
 	// Erase pipe background
 	//
 	{
 		// Set outer pipe rectangle
-		CRect rcPipe( rcClient.Width() / 2 - pipe_outer_radius, top_border, rcClient.Width() / 2 + pipe_outer_radius, rcClient.Height() - bottom_border);
+		CRect rcPipe( rcClient.Width() / 2 - pipe_outer_radius, well_top, rcClient.Width() / 2 + pipe_outer_radius, rcClient.Height() - bottom_border);
 		pDC->FillSolidRect(&rcPipe, clrWhite);
 	}
 
@@ -370,7 +317,7 @@ void CWellCtrl::OnPaint()
 		CRect rcBand;
 
 		// Set inner pipe rectangle
-		rcPipe.SetRect(rcClient.Width() / 2 - pipe_inner_radius, top_border, rcClient.Width() / 2 + pipe_inner_radius, rcClient.Height() - bottom_border);
+		rcPipe.SetRect(rcClient.Width() / 2 - pipe_inner_radius, well_top, rcClient.Width() / 2 + pipe_inner_radius, rcClient.Height() - bottom_border);
 
 		// Determine how large each band should be in order to cover the
 		// client with 100 bands
@@ -436,21 +383,36 @@ void CWellCtrl::OnPaint()
 		}
 	}
 
-
-
 	// Draw pipe outline
 	//
-	pDC->MoveTo(rcClient.Width() / 2 - pipe_outer_radius,                        top_border);  // UpperLeft
-	pDC->LineTo(rcClient.Width() / 2 + pipe_outer_radius,                        top_border);  // UpperRight
+	pDC->MoveTo(rcClient.Width() / 2 - pipe_outer_radius,                          well_top);  // UpperLeft
+	pDC->LineTo(rcClient.Width() / 2 + pipe_outer_radius,                          well_top);  // UpperRight
 	pDC->LineTo(rcClient.Width() / 2 + pipe_outer_radius, rcClient.Height() - bottom_border);  // LowerRight
 	pDC->LineTo(rcClient.Width() / 2 - pipe_outer_radius, rcClient.Height() - bottom_border);  // LowerLeft
-	pDC->LineTo(rcClient.Width() / 2 - pipe_outer_radius,                        top_border);  // UpperLeft
+	pDC->LineTo(rcClient.Width() / 2 - pipe_outer_radius,                          well_top);  // UpperLeft
 
-	pDC->MoveTo(rcClient.Width() / 2 - pipe_inner_radius,                        top_border);
+	pDC->MoveTo(rcClient.Width() / 2 - pipe_inner_radius,                          well_top);
 	pDC->LineTo(rcClient.Width() / 2 - pipe_inner_radius, rcClient.Height() - bottom_border);
 
-	pDC->MoveTo(rcClient.Width() / 2 + pipe_inner_radius,                        top_border);
+	pDC->MoveTo(rcClient.Width() / 2 + pipe_inner_radius,                          well_top);
 	pDC->LineTo(rcClient.Width() / 2 + pipe_inner_radius, rcClient.Height() - bottom_border);
+
+
+	// Draw axis titles
+	//
+	{
+		int nSavedDC = pDC->SaveDC();
+		pDC->SetTextColor(clrBlue);
+		pDC->SelectObject(CFont::FromHandle((HFONT)::GetStockObject(DEFAULT_GUI_FONT)));
+		pDC->TextOut(3, 3, ELEVATION);
+		if (this->m_bByDepth)
+		{
+			CSize extent;
+			extent = pDC->GetTextExtent(DEPTH);
+			pDC->TextOut(rcClient.Width() - extent.cx - 3, 3, DEPTH);
+		}
+		pDC->RestoreDC(nSavedDC);
+	}
 
 	// Draw client frame
 	//
@@ -458,7 +420,8 @@ void CWellCtrl::OnPaint()
 
 	// Send result to the display
 	//
-	if (memDC.GetSafeHdc() != NULL) {
+	if (memDC.GetSafeHdc() != NULL)
+	{
 		dc.BitBlt(0, 0, rcClient.Width(), rcClient.Height(), &memDC, 0, 0, SRCCOPY);
 	}
 	memDC.SelectObject(oldBitmap);
@@ -469,18 +432,6 @@ BOOL CWellCtrl::SetGrid(const struct grid &g)
 	this->m_grid = g;
 	return TRUE; // ok
 }
-
-// COMMENT: {8/2/2004 1:47:17 PM}BOOL CWellCtrl::SetZRange(double zMin, double zMax)
-// COMMENT: {8/2/2004 1:47:17 PM}{
-// COMMENT: {8/2/2004 1:47:17 PM}	ASSERT(zMin < zMax);
-// COMMENT: {8/2/2004 1:47:17 PM}	if (!(zMin < zMax)) return FALSE; // error
-// COMMENT: {8/2/2004 1:47:17 PM}
-// COMMENT: {8/2/2004 1:47:17 PM}	this->m_zMin = zMin;
-// COMMENT: {8/2/2004 1:47:17 PM}	this->m_zMax = zMax;
-// COMMENT: {8/2/2004 1:47:17 PM}
-// COMMENT: {8/2/2004 1:47:17 PM}	if (this->GetSafeHwnd()) this->Invalidate();
-// COMMENT: {8/2/2004 1:47:17 PM}	return TRUE; // ok
-// COMMENT: {8/2/2004 1:47:17 PM}}
 
 BOOL CWellCtrl::SetLSD(double zLSD)
 {
