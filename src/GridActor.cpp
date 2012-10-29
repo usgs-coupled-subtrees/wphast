@@ -385,6 +385,7 @@ void CGridActor::Serialize(bool bStoring, hid_t loc_id)
 void CGridActor::Insert(CTreeCtrlNode node)
 {
 	ASSERT(node);
+	if (!node) return;
 
 	// delay the refresh
 	//
