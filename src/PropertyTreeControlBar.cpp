@@ -1304,7 +1304,7 @@ int CPropertyTreeControlBar::OnCreate(LPCREATESTRUCT lpCreateStruct)
 void CPropertyTreeControlBar::SetUnits(CUnits* pUnits)
 {
 	pUnits->Insert(&this->m_wndTree, this->m_nodeUnits);
-	ASSERT(reinterpret_cast<CUnits*>(this->m_nodeUnits.GetData()) == pUnits);
+	ASSERT(this->m_nodeUnits.GetWnd() && reinterpret_cast<CUnits*>(this->m_nodeUnits.GetData()) == pUnits);
 }
 
 void CPropertyTreeControlBar::SetFlowOnly(CFlowOnly* pFlowOnly)

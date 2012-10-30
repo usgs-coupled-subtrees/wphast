@@ -108,8 +108,13 @@ protected: // create from serialization only
 
 // Attributes
 public:
+
+	CFrameWnd* GetFrameWnd(void)const;
+	void SetFrameWnd(CFrameWnd* pWnd);
 	CPropertyTreeControlBar* GetPropertyTreeControlBar() const;
+	void SetPropertyTreeControlBar(CPropertyTreeControlBar* pBar);
 	CBoxPropertiesDialogBar* GetBoxPropertiesDialogBar() const;
+	void SetBoxPropertiesDialogBar(CBoxPropertiesDialogBar* pBar);
 
 	vtkPropCollection *GetPropCollection() const;
 	vtkPropCollection *GetRemovedPropCollection() const;
@@ -332,6 +337,10 @@ protected:
 
 	// store imported file path
 	CString ImportPathName;
+
+	CFrameWnd               *FrameWnd;
+	CPropertyTreeControlBar *PropertyTreeControlBar;
+	CBoxPropertiesDialogBar *BoxPropertiesDialogBar;
 
 protected:
 	template<typename ACTOR>

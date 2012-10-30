@@ -460,6 +460,9 @@
 #define IDC_ROTATE                      484
 #define IDD_IMPORT_WARNING_DIALOG       484
 #define IDD_RUNTYPEDLG                  485
+#define IDD_WELL_PROPPAGE3              486
+#define IDD_PRINT_FREQUENCY_EXT_PROPPAGE1 487
+#define IDD_PRINT_FREQUENCY_EXT_PROPPAGE2 487
 #define IDC_EDIT_X                      1000
 #define IDC_TITLE                       1000
 #define IDC_EDIT_Y                      1001
@@ -1048,6 +1051,8 @@
 #define IDC_CMD_ARGS_STATIC             1554
 #define IDC_DB_EDIT                     1555
 #define IDC_DB_STATIC                   1556
+#define IDC_DB_COMBO                    1557
+#define IDC_DB_BROWSE                   1558
 #define IDC_RESIZE_COLUMN               28654
 #define IDC_RESIZE_ROW                  28655
 #define IDR_POPUP                       28656
@@ -1120,7 +1125,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        486
 #define _APS_NEXT_COMMAND_VALUE         32896
-#define _APS_NEXT_CONTROL_VALUE         1555
+#define _APS_NEXT_CONTROL_VALUE         1559
 #define _APS_NEXT_SYMED_VALUE           128
 #endif
 #endif

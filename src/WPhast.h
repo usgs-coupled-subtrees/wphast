@@ -8,6 +8,7 @@
 
 #include "resource.h"       // main symbols
 
+#include "RecentFileList2.h"
 
 // CWPhastApp:
 // See WPhast.cpp for the implementation of this class
@@ -31,7 +32,7 @@ public:
 
 public:
 	CWPhastApp();
-
+	virtual ~CWPhastApp();
 
 // Overrides
 public:
@@ -47,10 +48,12 @@ public:
 	afx_msg void OnFileNew();
 protected:
 	BOOL m_bShellFileNew;
+	CRecentFileList *pRecentDBFileList;
 public:
 	afx_msg void OnToolsRunOptions();
 	BOOL LoadMoreProfileSettings(void);
 	INT_PTR RunTypeDlgDoModal();
+	virtual int ExitInstance();
 };
 
 extern CWPhastApp theApp;

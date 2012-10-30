@@ -16,6 +16,10 @@
 
 #include "RunTypeDlg.h"
 
+#include <atlpath.h> // ATL::ATLPath::FileExists
+
+#include "Version.h"
+
 #if defined(_DEBUG)
 // see CWPhastApp::InitInstance()
 #include <../atlmfc/src/atl/atls/Common.h>
@@ -50,11 +54,16 @@ END_MESSAGE_MAP()
 
 CWPhastApp::CWPhastApp()
 : m_bShellFileNew(FALSE)
+, pRecentDBFileList(0)
 {
 	// add construction code here,
 	// Place all significant initialization in InitInstance
 }
 
+CWPhastApp::~CWPhastApp()
+{
+	ASSERT(this->pRecentDBFileList == NULL);
+}
 
 // The one and only CWPhastApp object
 
@@ -78,6 +87,32 @@ const WORD _wVerMinor = 0;
 
 BOOL CWPhastApp::InitInstance()
 {
+	// get path "C:\Program Files (x86)\USGS\Phast for Windows 1.0.1\bin\P4W.exe"
+	TCHAR szPath[2*MAX_PATH+100];
+	::GetModuleFileName(NULL, szPath, 2*MAX_PATH+100);
+
+	// split path "C:\Program Files (x86)\USGS\Phast for Windows 1.0.1\bin\P4W.exe"
+	TCHAR szDrive[_MAX_DRIVE];
+	TCHAR szDir[_MAX_DIR];
+	TCHAR szFName[_MAX_FNAME];
+	TCHAR szExt[_MAX_EXT];
+	VERIFY(::_tsplitpath_s(szPath, szDrive, _MAX_DRIVE, szDir, _MAX_DIR, szFName, _MAX_FNAME, szExt, _MAX_EXT) == 0);
+
+	// trim off P4W.exe "C:\Program Files (x86)\USGS\Phast for Windows 1.0.1\bin"
+	*(_tcsrchr(szDir, _TEXT('\\'))) = 0; // truncate EXE filename
+
+	// trim off bin "C:\Program Files (x86)\USGS\Phast for Windows 1.0.1"
+	*(_tcsrchr(szDir, _TEXT('\\'))) = 0; // truncate EXE filename
+
+	// makepath "C:\Program Files (x86)\USGS\Phast for Windows 1.0.1"
+	VERIFY(::_tmakepath_s(szPath, _MAX_DIR, szDrive, szDir, NULL, NULL) == 0);
+	PathRemoveBackslash(szPath);
+
+	VERIFY(::SetEnvironmentVariable(_T("APPLICATIONFOLDER"), szPath));
+	VERIFY(::SetEnvironmentVariable(_T("INSTALLDIR"), szPath));
+	VERIFY(::SetEnvironmentVariable(_T("P4W_TOPDIR"), szPath));
+	VERIFY(::SetEnvironmentVariable(_T("P4W_INSTALLDIR"), szPath));
+
 #if defined(__CPPUNIT__)
 	{
 // COMMENT: {12/1/2010 7:33:18 PM}		// turn off memory tracking
@@ -160,7 +195,30 @@ BOOL CWPhastApp::InitInstance()
 	// Change the registry key under which our settings are stored
 	// TODO: You should modify this string to be something appropriate
 	// such as the name of your company or organization
+#if defined(_DEBUG)
+	SetRegistryKey(_T("USGS_DEBUG"));
+
+	// must set after calling SetRegistryKey
+	BOOL bEnable = AfxEnableMemoryTracking(FALSE);
+	free((void*)m_pszProfileName);
+	m_pszProfileName = _tcsdup(_T("Phast for Windows\\1.0"));
+	AfxEnableMemoryTracking(bEnable);
+#else
 	SetRegistryKey(_T("USGS"));
+
+	// must set after calling SetRegistryKey
+#pragma push_macro("free")
+#pragma warning(disable:4005)
+#define free free
+	BOOL bEnable = AfxEnableMemoryTracking(FALSE);
+	free((void*)m_pszProfileName);
+	m_pszProfileName = _tcsdup(_T("Phast for Windows\\")
+		_T(APR_STRINGIFY(VER_MAJOR))
+		_T(".") _T(APR_STRINGIFY(VER_MINOR)));
+	AfxEnableMemoryTracking(bEnable);
+#pragma warning(default:4005)
+#pragma pop_macro("free")
+#endif
 	LoadStdProfileSettings(4);  // Load standard INI file options (including MRU)
 	LoadMoreProfileSettings();  // Load run options
 
@@ -435,15 +493,22 @@ void CWPhastApp::OnFileNew()
 INT_PTR CWPhastApp::RunTypeDlgDoModal()
 {
 	CRunTypeDlg dlg;
-	dlg.strDatabase     = this->settings.strDatabase;
-	dlg.bParallel       = this->settings.bRunParallel;
-	dlg.strCommand      = this->settings.strCommand;
-	dlg.strCommandArgs  = this->settings.strCommandArgs;
+	dlg.pRecentDBFileList = this->pRecentDBFileList;
+	dlg.strDatabase       = this->settings.strDatabase;
+	dlg.bParallel         = this->settings.bRunParallel;
+	dlg.strCommand        = this->settings.strCommand;
+	dlg.strCommandArgs    = this->settings.strCommandArgs;
 
 	INT_PTR rval = dlg.DoModal();
 	if (rval == IDOK)
 	{
 		this->settings.strDatabase  = dlg.strDatabase;
+		if (this->pRecentDBFileList)
+		{
+			this->pRecentDBFileList->Add(dlg.strDatabase);
+			this->pRecentDBFileList->WriteList();
+		}
+
 		this->settings.bRunParallel = dlg.bParallel;
 
 		WriteProfileString(_T("Settings"), _T("Database"), this->settings.strDatabase);
@@ -474,17 +539,54 @@ BOOL CWPhastApp::LoadMoreProfileSettings(void)
 	TCHAR szCmd[2*MAX_PATH+100];
 	::GetModuleFileName(NULL, szCmd, MAX_PATH);
 	*(_tcsrchr(szCmd, _TEXT('\\')) + 1) = 0;
-	_stprintf(_tcschr(szCmd, 0), __TEXT("phast-mpich2.exe"));
+	_stprintf(_tcschr(szCmd, 0), _T("phast-mpich2.exe"));
 
 	// build mpiexec args
 	TCHAR szCmdArgs[2*MAX_PATH+100];
 	_stprintf(szCmdArgs, _T("%s %s"), _T("-localonly %NUMBER_OF_PROCESSORS%"), szCmd);
 
+
+	if (this->pRecentDBFileList == 0)
+	{
+		// create file MRU since nMaxMRU not zero
+		this->pRecentDBFileList = new CRecentFileList2(0,
+			_T("MRU DB"), _T("DB%d"),
+			10);
+		this->pRecentDBFileList->ReadList();
+
+		if ((*this->pRecentDBFileList)[0].IsEmpty())
+		{
+			TCHAR szPath[2*MAX_PATH+100];
+			::ExpandEnvironmentStrings(_T("%INSTALLDIR%\\database\\phast.dat"), szPath, 2*MAX_PATH+100);
+			if (ATL::ATLPath::FileExists(szPath))
+			{
+				this->pRecentDBFileList->Add(_T("%INSTALLDIR%\\database\\phast.dat"));
+			}
+		}
+	}
+
 	// Get default database from registry
-	this->settings.strDatabase    = GetProfileString(_T("Settings"), _T("Database"),       _T("phast.dat")                           );
+	this->settings.strDatabase    = (this->pRecentDBFileList->GetSize()) ? (*this->pRecentDBFileList)[0] : _T("%INSTALLDIR%\\database\\phast.dat");
 	this->settings.bRunParallel   = GetProfileInt   (_T("Settings"), _T("RunParallel"),    0                                         );
 	this->settings.strCommand     = GetProfileString(_T("Settings"), _T("RunCommand"),     _T("%PROGRAMFILES%\\MPICH2\\bin\\mpiexec"));
 	this->settings.strCommandArgs = GetProfileString(_T("Settings"), _T("RunCommandArgs"), szCmdArgs                                 );
 
 	return TRUE;
+}
+
+int CWPhastApp::ExitInstance()
+{
+	// Add your specialized code here and/or call the base class
+
+	// Save database MRU list
+	if (this->pRecentDBFileList != NULL)
+	{
+		// written on each run (see CWPhastApp::RunTypeDlgDoModal)
+		delete this->pRecentDBFileList;
+		this->pRecentDBFileList = NULL;
+	}
+
+	::OutputDebugString("CWPhastApp: About to call CWinApp::ExitInstance\n");
+
+	return CWinApp::ExitInstance();
 }

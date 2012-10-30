@@ -14,6 +14,8 @@ BOOL SRCAPI SrcFullPath(LPTSTR lpszPathOut, LPCTSTR lpszFileIn);
 //void AFXAPI AfxGetRoot(LPCTSTR lpszPath, CString& strRoot);
 void SRCAPI SrcGetRoot(LPCTSTR lpszPath, CString& strRoot);
 
+//BOOL AFXAPI AfxComparePath(LPCTSTR lpszPath1, LPCTSTR lpszPath2)
+BOOL SRCAPI SrcComparePath(LPCTSTR lpszPath1, LPCTSTR lpszPath2);
 
 #ifndef _AFX_NO_OLE_SUPPORT
 class SRC_COM

@@ -33,7 +33,7 @@ public:
 	bool GetFlowOnly(void)const          { return m_bFlowOnly; }
 
 // Dialog Data
-	enum { IDD = IDD_WELL_PROPPAGE2 };
+	enum { IDD = IDD_WELL_PROPPAGE3 };
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support

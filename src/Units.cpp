@@ -104,7 +104,7 @@ void CUnits::Insert(CTreeCtrl* pTreeCtrl, HTREEITEM htiUnits)
 	CUnit::InsertSolidUnits(this->kinetics_units,     pTreeCtrl, htiUnits, "kinetics",           IDC_SU_KINETICS_COMBO);
 	CUnit::InsertSolidUnits(this->gasphase_units,     pTreeCtrl, htiUnits, "gas_phase",          IDC_SU_GASPHASE_COMBO);
 
-	VERIFY(pTreeCtrl->SetItemData(htiUnits, (DWORD_PTR)this));
+	VERIFY(htiUnits && pTreeCtrl->SetItemData(htiUnits, (DWORD_PTR)this));
 	this->m_htiUnits = htiUnits;
 }
 

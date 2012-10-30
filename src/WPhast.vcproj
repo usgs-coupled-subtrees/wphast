@@ -980,6 +980,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\RecentFileList2.cpp"
+				>
+			</File>
+			<File
 				RelativePath="RedrawOnDtor.cpp"
 				>
 			</File>
@@ -5557,6 +5561,10 @@
 			</File>
 			<File
 				RelativePath=".\Protect.h"
+				>
+			</File>
+			<File
+				RelativePath=".\RecentFileList2.h"
 				>
 			</File>
 			<File

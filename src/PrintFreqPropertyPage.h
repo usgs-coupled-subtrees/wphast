@@ -27,7 +27,7 @@ public:
 	CUnits     m_units;
 
 // Dialog Data
-	enum { IDD = IDD_PRINT_FREQUENCY_EXT_PROPPAGE };
+	enum { IDD = IDD_PRINT_FREQUENCY_EXT_PROPPAGE2 };
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support

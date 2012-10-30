@@ -94,7 +94,7 @@ void CPhastInput::DoInitialize(void)
 {
 	::std_error = ::fopen("NUL", "w");
 	::input     = ::fopen("NUL", "w");
-	::echo_file = ::fopen("NUL", "w");
+// COMMENT: {10/29/2012 11:16:36 PM}	::echo_file = ::fopen("NUL", "w");
 	::hst_file  = ::fopen("NUL", "w");
 
 	::prefix         = NULL;

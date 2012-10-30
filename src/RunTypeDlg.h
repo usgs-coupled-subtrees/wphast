@@ -1,4 +1,5 @@
 #pragma once
+#include "afxwin.h"
 
 
 // CRunTypeDlg dialog
@@ -18,6 +19,7 @@ public:
 	BOOL bParallel;
 	CString strCommand;
 	CString strCommandArgs;
+	CRecentFileList* pRecentDBFileList;
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
@@ -26,4 +28,7 @@ protected:
 
 public:
 	afx_msg void OnBnClickedRadio();
+	virtual BOOL OnInitDialog();
+	CComboBox cboDB;
+	afx_msg void OnBnClickedDbBrowse();
 };

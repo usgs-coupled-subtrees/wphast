@@ -93,6 +93,7 @@ public:
 	BOOL Delete();
 
 	BOOL Expand(UINT nCode = TVE_EXPAND);
+	BOOL ExpandSafe(UINT nCode);
 	BOOL Select(UINT nCode);
 	BOOL Select();
 	BOOL SelectDropTarget();

@@ -37,6 +37,7 @@
 #include "srcinput/Filedata.h"
 #include "srcinput/Domain.h"
 #include "srcinput/Polyhedron.h"
+#include "srcinput/message.h"
 #include "NullPolyhedron.h"
 
 #include "Action.h"
@@ -418,6 +419,9 @@ CWPhastDoc::CWPhastDoc()
 , NewDrainCallbackCommand(0)
 , hGridAccel(0)
 , CoordinateMode(GridMode)
+, FrameWnd(0)
+, PropertyTreeControlBar(0)
+, BoxPropertiesDialogBar(0)
 {
 #if defined(WPHAST_AUTOMATION)
 	EnableAutomation();
@@ -1408,32 +1412,34 @@ void CWPhastDoc::Dump(CDumpContext& dc) const
 
 #endif //_DEBUG
 
-CPropertyTreeControlBar* CWPhastDoc::GetPropertyTreeControlBar() const
+CFrameWnd* CWPhastDoc::GetFrameWnd(void)const
 {
-	CFrameWnd* pFrame = (CFrameWnd*)::AfxGetMainWnd();
-	if (!pFrame) return 0;
+	return this->FrameWnd;
+}
 
-	if (CPropertyTreeControlBar* pTree = static_cast<CPropertyTreeControlBar*>(pFrame->GetControlBar(IDW_CONTROLBAR_TREE)))
-	{
-		ASSERT_KINDOF(CPropertyTreeControlBar, pTree);
-		ASSERT_VALID(pTree);
-		return pTree;
-	}
-	return 0;
+void CWPhastDoc::SetFrameWnd(CFrameWnd* pWnd)
+{
+	this->FrameWnd = pWnd;
+}
+
+CPropertyTreeControlBar* CWPhastDoc::GetPropertyTreeControlBar(void)const
+{
+	return this->PropertyTreeControlBar;
+}
+
+void CWPhastDoc::SetPropertyTreeControlBar(CPropertyTreeControlBar* pBar)
+{
+	this->PropertyTreeControlBar = pBar;
 }
 
 CBoxPropertiesDialogBar* CWPhastDoc::GetBoxPropertiesDialogBar() const
 {
-	CFrameWnd* pFrame = (CFrameWnd*)::AfxGetMainWnd();
-	if (!pFrame) return 0;
+	return this->BoxPropertiesDialogBar;
+}
 
-	if (CBoxPropertiesDialogBar* pBar = static_cast<CBoxPropertiesDialogBar*>(pFrame->GetControlBar(IDW_CONTROLBAR_BOXPROPS))) {
-		ASSERT_KINDOF(CBoxPropertiesDialogBar, pBar);
-		ASSERT_VALID(pBar);
-		return pBar;
-	}
-	ASSERT(FALSE);
-	return 0;
+void CWPhastDoc::SetBoxPropertiesDialogBar(CBoxPropertiesDialogBar* pBar)
+{
+	this->BoxPropertiesDialogBar = pBar;
 }
 
 vtkPropCollection* CWPhastDoc::GetPropCollection() const
@@ -4047,12 +4053,12 @@ void CWPhastDoc::New(const CNewModel& model)
 	//
 	if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar())
 	{
-		pTree->GetGridNode().Expand(TVE_COLLAPSE);
-		pTree->GetMediaNode().Expand(TVE_COLLAPSE);
-		pTree->GetICNode().Expand(TVE_COLLAPSE);
-		pTree->GetBCNode().Expand(TVE_COLLAPSE);
-		pTree->GetWellsNode().Expand(TVE_COLLAPSE);
-		pTree->GetRiversNode().Expand(TVE_COLLAPSE);
+		pTree->GetGridNode().ExpandSafe(TVE_COLLAPSE);
+		pTree->GetMediaNode().ExpandSafe(TVE_COLLAPSE);
+		pTree->GetICNode().ExpandSafe(TVE_COLLAPSE);
+		pTree->GetBCNode().ExpandSafe(TVE_COLLAPSE);
+		pTree->GetWellsNode().ExpandSafe(TVE_COLLAPSE);
+		pTree->GetRiversNode().ExpandSafe(TVE_COLLAPSE);
 		pTree->ClearSelection();
 	}
 
@@ -4103,6 +4109,12 @@ void CWPhastDoc::OnFileRun()
 	this->WriteTransDat(oss);
 	this->PathsRelativeToAbsolute(szPhastTmp);
 
+	// fully qualify the path name
+	TCHAR szExpanded[2*_MAX_PATH];
+	VERIFY(::ExpandEnvironmentStrings((LPCTSTR)((CWPhastApp*)::AfxGetApp())->settings.strDatabase, szExpanded, 2*_MAX_PATH));
+	CString strDB;
+	strDB.Format("%s", szExpanded);
+
 	std::string str = oss.str();
 	std::istringstream iss(str);
 
@@ -4111,8 +4123,22 @@ void CWPhastDoc::OnFileRun()
 		return;
 	}
 
-	CPhastInput* pInput = CPhastInput::New(iss, (LPCTSTR)strPrefix, (LPCTSTR)((CWPhastApp*)::AfxGetApp())->settings.strDatabase);
+	CPhastInput* pInput = CPhastInput::New(iss, (LPCTSTR)strPrefix, (LPCTSTR)strDB);
 	if (!pInput) return;
+
+	// Open file for echo output
+	//
+	extern FILE* echo_file;
+	std::string echo_file_name((LPCTSTR)strPrefix);
+	echo_file_name.append(".log.txt");
+	echo_file = fopen(echo_file_name.c_str(), "w");
+	if (echo_file == NULL)
+	{
+		sprintf(error_string, "Can't open input echo file, %s.", echo_file_name.c_str());
+		::AfxMessageBox(error_string, MB_OK|MB_ICONEXCLAMATION);
+		return;
+	}
+	output_msg(OUTPUT_STDERR, "\tEcho with errors file: %s\n", echo_file_name.c_str());
 
 	// Update StatusBar
 	//

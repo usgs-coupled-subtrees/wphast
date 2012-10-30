@@ -77,6 +77,8 @@ TREE_INLINE BOOL CTreeCtrlNode::Delete()
 	{ return m_pTree->DeleteItem(m_hTreeItem); }
 TREE_INLINE BOOL CTreeCtrlNode::Expand(UINT nCode)
 	{ return m_pTree->Expand(m_hTreeItem,nCode); }
+TREE_INLINE BOOL CTreeCtrlNode::ExpandSafe(UINT nCode)
+	{ return (m_pTree) ? m_pTree->Expand(m_hTreeItem,nCode) : FALSE ; }
 TREE_INLINE BOOL CTreeCtrlNode::Select(UINT nCode)
 	{ return m_pTree->Select(m_hTreeItem,nCode); }
 TREE_INLINE BOOL CTreeCtrlNode::Select()

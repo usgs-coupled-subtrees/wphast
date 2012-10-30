@@ -150,6 +150,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	ASSERT(pContext);
 	CWPhastDoc *pDoc = static_cast<CWPhastDoc*>(pContext->m_pCurrentDoc);
 	ASSERT_VALID(pDoc);
+	pDoc->SetFrameWnd(this);
 
 #ifdef COLOR_24BIT
 	HBITMAP hBitmap = (HBITMAP) ::LoadImage(AfxGetInstanceHandle(),
@@ -204,6 +205,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_wndTreeControlBar.SetBarStyle(m_wndTreeControlBar.GetBarStyle() |
 		CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC);
 	pDoc->Attach(&this->m_wndTreeControlBar);
+	pDoc->SetPropertyTreeControlBar(&this->m_wndTreeControlBar);
 
 	//{{
 	///ASSERT(IDW_CONTROLBAR_TREE == ID_VIEW_PROPERIESVIEW);
@@ -222,6 +224,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC);
 	m_wndDialogBarBoxProperties.EnableDocking(CBRS_ALIGN_ANY);
 	pDoc->Attach(&this->m_wndDialogBarBoxProperties);
+	pDoc->SetBoxPropertiesDialogBar(&this->m_wndDialogBarBoxProperties);
 
 
 	// Delete these three lines if you don't want the toolbar to be dockable
@@ -320,6 +323,14 @@ BOOL CMainFrame::DestroyWindow()
 	CString sProfile = _T("BarState");
 	CSizingControlBar::GlobalSaveState(this, sProfile);
 	SaveBarState(sProfile);
+
+	if (CWPhastDoc* pDoc = static_cast<CWPhastDoc*>(this->GetActiveDocument()))
+	{
+		ASSERT_VALID(pDoc);
+		pDoc->SetFrameWnd(0);
+		pDoc->SetPropertyTreeControlBar(0);
+		pDoc->SetBoxPropertiesDialogBar(0);
+	}
 
 	return CFrameWnd::DestroyWindow();
 }
