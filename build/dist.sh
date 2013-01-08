@@ -154,31 +154,55 @@ echo "Exporting revision $REVISION of phast4windows into sandbox..."
  	${SVN:-svn} export -q $EXTRA_EXPORT_OPTIONS --ignore-externals -r "$REVISION" \
 	     "http://internalbrr.cr.usgs.gov/svn_GW/WPhast/$REPOS_PATH" \
 	     "$DISTNAME")
+if [ $? != 0 ] ; then
+  echo "svn checkout error"
+  exit $?;
+fi
 
 (cd "$DIST_SANDBOX" && \
  	${SVN:-svn} export -q $EXTRA_EXPORT_OPTIONS --ignore-externals -r "$REVISION_PHAST" \
 	     "http://internalbrr.cr.usgs.gov/svn_GW/phastpp/trunk/src/phastinput" \
 	     "$DISTNAME/src/srcinput")
+if [ $? != 0 ] ; then
+  echo "svn checkout error"
+  exit $?;
+fi
 	     
 (cd "$DIST_SANDBOX" && \
  	${SVN:-svn} export -q $EXTRA_EXPORT_OPTIONS --ignore-externals -r "$REVISION_PHAST" \
 	     "http://internalbrr.cr.usgs.gov/svn_GW/phreeqc3/trunk/src" \
 	     "$DISTNAME/src/phreeqc3")	     
+if [ $? != 0 ] ; then
+  echo "svn checkout error"
+  exit $?;
+fi
 
 (cd "$DIST_SANDBOX" && \
  	${SVN:-svn} export -q $EXTRA_EXPORT_OPTIONS --ignore-externals -r "$REVISION_PHAST" \
 	     "http://internalbrr.cr.usgs.gov/svn_GW/phastpp/trunk/examples" \
 	     "$DISTNAME/msi/phast/examples")
+if [ $? != 0 ] ; then
+  echo "svn checkout error"
+  exit $?;
+fi
 
 (cd "$DIST_SANDBOX" && \
  	${SVN:-svn} export -q $EXTRA_EXPORT_OPTIONS --ignore-externals -r "$REVISION_PHAST" \
 	     "http://internalbrr.cr.usgs.gov/svn_GW/phastpp/trunk/doc" \
 	     "$DISTNAME/msi/phast/doc")
+if [ $? != 0 ] ; then
+  echo "svn checkout error"
+  exit $?;
+fi
 	     
 (cd "$DIST_SANDBOX" && \
  	${SVN:-svn} export -q $EXTRA_EXPORT_OPTIONS --ignore-externals -r "$REVISION_PHAST" \
 	     "http://internalbrr.cr.usgs.gov/svn_GW/phreeqc/trunk/database" \
 	     "$DISTNAME/msi/phast/database")	     
+if [ $? != 0 ] ; then
+  echo "svn checkout error"
+  exit $?;
+fi
 
 echo "Renaming phreeqc.dat to phast.dat"
 mv "$DISTPATH/msi/phast/database/phreeqc.dat" "$DISTPATH/msi/phast/database/phast.dat"
