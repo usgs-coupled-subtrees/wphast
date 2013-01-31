@@ -3,14 +3,14 @@
   <?define Name="Phast for Windows"?>
 
   <!-- Note Major Minor and Build are set on the command line -->
-  <!-- ie MSBuild.exe phreeqc.sln /p:Major=2 /p:Minor=17 /p:Build=3976 -->
+  <!-- ie MSBuild.exe phreeqc.sln /p:Major=2 /p:Minor=17 /p:Patch=3 /p:Build=3976 -->
 
   <!-- format must be major.minor.build -->
   <!-- major and minor have a maximum value of 255 -->
   <!-- build has a maximum value of 65535 -->
   <!-- ?define Version=$(var.Major).$(var.Minor).$(var.Build)? -->
   <?define VersionInternal=$(var.Major).$(var.Minor).$(var.Build)?>
-  <?define VersionUserVisible=$(var.Major).$(var.Minor).$(var.Patch)?>
+  <?define VersionUserVisible=$(var.Major).$(var.Minor).$(var.Patch)-$(var.Build)?>
 
   <?define Manufacturer="U.S. Geological Survey"?>  
 
