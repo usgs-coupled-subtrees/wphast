@@ -161,7 +161,11 @@ CWPhastView::CWPhastView()
 	// is deleted early (see dtor)
 	//
 	this->Renderer = vtkRenderer::New();
-	this->Renderer->SetReferenceCount(10);    // delay deletion
+#ifdef _DEBUG
+	ASSERT(this->Renderer->GetReferenceCount() == 1);
+#else
+	this->Renderer->SetReferenceCount(100);    // delay deletion
+#endif
 
 	// Command/Observer
 	//
@@ -350,6 +354,9 @@ CWPhastView::~CWPhastView()
 
 	if (this->Renderer)
 	{
+#ifdef _DEBUG
+		ASSERT(this->Renderer->GetReferenceCount() == 1);
+#endif
 		TRACE("Deleting this->Renderer = %p\n", this->Renderer);
 		TRACE("this->Renderer->GetReferenceCount() = %d\n",  this->Renderer->GetReferenceCount());
 		this->Renderer->SetReferenceCount(1);

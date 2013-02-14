@@ -76,6 +76,7 @@ CGridElementsSelector::~CGridElementsSelector(void)
 	this->OutlineSource->Delete();
 	this->OutlineMapper->Delete();
 	this->OutlineActor->Delete();
+	// may want to call this->SetEnabled(0);
 }
 
 void CGridElementsSelector::SetEnabled(int enabling)
@@ -97,9 +98,9 @@ void CGridElementsSelector::SetEnabled(int enabling)
 
 		if ( ! this->CurrentRenderer )
 		{
-			this->CurrentRenderer = this->Interactor->FindPokedRenderer(
+			this->SetCurrentRenderer(this->Interactor->FindPokedRenderer(
 				this->Interactor->GetLastEventPosition()[0],
-				this->Interactor->GetLastEventPosition()[1]);
+				this->Interactor->GetLastEventPosition()[1]));
 			if (this->CurrentRenderer == NULL)
 			{
 				return;
@@ -135,7 +136,15 @@ void CGridElementsSelector::SetEnabled(int enabling)
 
 		// don't listen for events any more
 		this->Interactor->RemoveObserver(this->EventCallbackCommand);
-		this->InvokeEvent(vtkCommand::DisableEvent, NULL);		
+
+		if (this->CurrentRenderer)
+		{
+			this->CurrentRenderer->RemoveActor(this->Actor);
+			this->CurrentRenderer->RemoveActor(this->OutlineActor);
+		}
+
+		this->InvokeEvent(vtkCommand::DisableEvent, NULL);
+		this->SetCurrentRenderer(NULL);
 	}
 
 	this->Interactor->Render();
@@ -398,7 +407,6 @@ void CGridElementsSelector::OnLeftButtonUp(void)
 		this->State = CGridElementsSelector::Start;
 		this->EventCallbackCommand->SetAbortFlag(1);
 		this->OutlineActor->SetVisibility(0);
-		this->SetEnabled(0);
 		this->Interactor->Render();
 		TRACE("X(%d, %d)\n", this->Min[0], this->Max[0]);
 		TRACE("Y(%d, %d)\n", this->Min[1], this->Max[1]);

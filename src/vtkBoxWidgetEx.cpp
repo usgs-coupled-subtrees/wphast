@@ -37,9 +37,9 @@ void vtkBoxWidgetEx::SetEnabled(int enabling)
     
     if ( ! this->CurrentRenderer )
       {
-      this->CurrentRenderer = this->Interactor->FindPokedRenderer(
+      this->SetCurrentRenderer(this->Interactor->FindPokedRenderer(
         this->Interactor->GetLastEventPosition()[0],
-        this->Interactor->GetLastEventPosition()[1]);
+        this->Interactor->GetLastEventPosition()[1]));
       if (this->CurrentRenderer == NULL)
         {
         return;
@@ -104,22 +104,25 @@ void vtkBoxWidgetEx::SetEnabled(int enabling)
     // don't listen for events any more
     this->Interactor->RemoveObserver(this->EventCallbackCommand);
 
-    // turn off the outline
-    this->CurrentRenderer->RemoveActor(this->HexActor);
-    this->CurrentRenderer->RemoveActor(this->HexOutline);
+	if (this->CurrentRenderer)
+	{
+		// turn off the outline
+		this->CurrentRenderer->RemoveActor(this->HexActor);
+		this->CurrentRenderer->RemoveActor(this->HexOutline);
 
-    // turn off the hex face
-    this->CurrentRenderer->RemoveActor(this->HexFace);
+		// turn off the hex face
+		this->CurrentRenderer->RemoveActor(this->HexFace);
 
-    // turn off the handles
-    for (int i=0; i<7; i++)
-      {
-      this->CurrentRenderer->RemoveActor(this->Handle[i]);
-      }
+		// turn off the handles
+		for (int i=0; i<7; i++)
+		  {
+		  this->CurrentRenderer->RemoveActor(this->Handle[i]);
+		  }
+	}
 
     this->CurrentHandle = NULL;
     this->InvokeEvent(vtkCommand::DisableEvent,NULL);
-    this->CurrentRenderer = NULL;
+	this->SetCurrentRenderer(NULL);
     }
   
   this->Interactor->Render();
@@ -241,7 +244,7 @@ void vtkBoxWidgetEx::SizeHandles()
 	{
 		int X = this->Interactor->GetEventPosition()[0];
 		int Y = this->Interactor->GetEventPosition()[1];
-		this->CurrentRenderer = this->Interactor->FindPokedRenderer(X, Y);
+		this->SetCurrentRenderer(this->Interactor->FindPokedRenderer(X, Y));
 	}
 
 	double radius = this->SizeHandles(1.5);

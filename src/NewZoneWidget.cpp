@@ -112,9 +112,9 @@ void CNewZoneWidget::SetEnabled(int enabling)
 
 		if ( ! this->CurrentRenderer )
 		{
-			this->CurrentRenderer = this->Interactor->FindPokedRenderer(
+			this->SetCurrentRenderer(this->Interactor->FindPokedRenderer(
 				this->Interactor->GetLastEventPosition()[0],
-				this->Interactor->GetLastEventPosition()[1]);
+				this->Interactor->GetLastEventPosition()[1]));
 			if (this->CurrentRenderer == NULL)
 			{
 				return;
@@ -159,6 +159,7 @@ void CNewZoneWidget::SetEnabled(int enabling)
 		// don't listen for events any more
 		this->Interactor->RemoveObserver(this->EventCallbackCommand);
 		this->InvokeEvent(vtkCommand::DisableEvent, NULL);
+		this->SetCurrentRenderer(NULL);
 	}
 
 	this->Interactor->Render();
