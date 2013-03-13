@@ -648,7 +648,7 @@ Prism* CNewPrismWidget::GetPrism(void)
 			//double *pt = points->GetPoint(i);
 			points->GetPoint(i, pt);
 			pt[0] = pt[0] / this->GeometryScale[0] / this->Units.horizontal.input_to_si;
-			pt[1] = pt[1] / this->GeometryScale[0] / this->Units.horizontal.input_to_si;
+			pt[1] = pt[1] / this->GeometryScale[1] / this->Units.horizontal.input_to_si;
 			pt[2] = 0.;
 			pts.push_back(Point(pt[0], pt[1], pt[1]));
 		}
@@ -677,7 +677,7 @@ Prism* CNewPrismWidget::GetPrism(void)
 			//double *pt = points->GetPoint(i);
 			points->GetPoint(i, pt);
 			pt[0] = pt[0] / this->GeometryScale[0] / this->Units.horizontal.input_to_si;
-			pt[1] = pt[1] / this->GeometryScale[0] / this->Units.horizontal.input_to_si;
+			pt[1] = pt[1] / this->GeometryScale[1] / this->Units.horizontal.input_to_si;
 			pt[2] = 0.;
 			pts.push_back(Point(pt[0], pt[1], pt[1]));
 		}
