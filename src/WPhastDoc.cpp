@@ -923,27 +923,35 @@ void CWPhastDoc::Serialize(CArchive& ar)
 				// load site map
 				ASSERT(this->m_pMapActor == NULL);
 				this->m_pMapActor = CMapActor::New();
-				this->m_pMapActor->Serialize(bStoring, wphast_id);
-				CSiteMap3 siteMap3 = this->m_pMapActor->GetSiteMap3();
-				if (siteMap3.FileName.empty())
+				if (this->m_pMapActor->Serialize(bStoring, wphast_id))
 				{
-					this->m_pMapActor->Delete();
-					this->m_pMapActor = 0;
+					this->m_pMapActor->SetPickable(0);
+					this->GetPropCollection()->AddItem(this->m_pMapActor);
 				}
 				else
 				{
-					if (this->SiteMap3.FileName.empty())
+					if (this->m_pMapActor->GetSiteMap3().FileName.empty())
 					{
-						this->m_pMapActor->SetSiteMap3(siteMap3);
+						this->m_pMapActor->Delete();
+						this->m_pMapActor = 0;
 					}
 					else
 					{
-						// SiteMap files were recreated so reset
-						// pathnames
-						this->m_pMapActor->SetSiteMap3(this->SiteMap3);
+						CWPhastDoc::SiteMapPathsRelativeToAbsolute(pFile->GetFilePath());
+						CSiteMap3 siteMap3 = this->m_pMapActor->GetSiteMap3();
+						if (this->SiteMap3.FileName.empty())
+						{
+							this->m_pMapActor->SetSiteMap3(siteMap3);
+						}
+						else
+						{
+							// SiteMap files were recreated so reset
+							// pathnames
+							this->m_pMapActor->SetSiteMap3(this->SiteMap3);
+						}
+						this->m_pMapActor->SetPickable(0);
+						this->GetPropCollection()->AddItem(this->m_pMapActor);
 					}
-					this->m_pMapActor->SetPickable(0);
-					this->GetPropCollection()->AddItem(this->m_pMapActor);
 				}
 
 				// load display colors
@@ -986,6 +994,12 @@ void CWPhastDoc::Serialize(CArchive& ar)
 			catch (int)
 			{
 				::AfxMessageBox(pInput->GetErrorMsg());
+				pInput->Delete();
+				::AfxThrowUserException();
+			}
+			catch (std::string s)
+			{
+				::AfxMessageBox(s.c_str());
 				pInput->Delete();
 				::AfxThrowUserException();
 			}
@@ -8765,7 +8779,10 @@ void CWPhastDoc::SerializeFiles(bool bStoring, CHDFMirrorFile* file, std::map<CS
 				std::string rel_path(it->second);
 				ASSERT(ATL::ATLPath::IsRelative(it->second));
 				status = CGlobal::HDFFileEx(bStoring, files_id, it->first, rel_path, md5, ftWrite);
-				ASSERT(status >= 0);
+				if (status < 0)
+				{
+					this->CreateWorldFile(loc_id, it->first, it->second);
+				}
 			}
 
 			// close the /Files group
@@ -9175,6 +9192,11 @@ void CWPhastDoc::SiteMapPathsRelativeToAbsolute(LPCTSTR lpszPathName)
 			{
 				filename = it->second;
 			}
+			it = this->GetOriginal2New().find(wfilename.c_str());
+			if (it != this->GetOriginal2New().end())
+			{
+				wfilename = it->second;
+			}
 		}
 		if (filename.length() > 0)
 		{
@@ -9290,6 +9312,31 @@ void CWPhastDoc::CreateSiteMapFiles(hid_t loc_id, CString hdf, CString filename)
 			// close the "/WPhast/SiteMap" group
 			herr_t status = ::H5Gclose(sitemap_id);
 			ASSERT(status >= 0);
+		}
+	}
+}
+
+void CWPhastDoc::CreateWorldFile(hid_t loc_id, CString hdf, CString filename)
+{
+	static const char szSiteMap3[] = "/WPhast/SiteMap3";
+
+	// load site map
+
+	// Open the szSiteMap3 group
+	hid_t sitemap_id = 0;
+	sitemap_id = ::H5Gopen(loc_id, szSiteMap3);
+	if (sitemap_id > 0)
+	{
+		CSiteMap3 siteMap3;
+		siteMap3.Serialize(false, sitemap_id);
+
+		herr_t status = ::H5Gclose(sitemap_id);
+		ASSERT(status >= 0);
+
+		if (!siteMap3.WorldFileName.empty() && filename.GetLength())
+		{
+			int n = CGlobal::WriteWorldFile(filename, siteMap3.GetWorldTransform());
+			ASSERT(n == 0);
 		}
 	}
 }

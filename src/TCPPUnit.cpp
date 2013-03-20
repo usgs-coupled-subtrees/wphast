@@ -28,6 +28,7 @@
 #include "TestCproperty.h"
 #include "TestPHAST_Transform.h"
 #include "TestHDFFile.h"
+#include "TestHDFSerializeImageData.h"
 
 
 TCPPUnit::TCPPUnit(void)
@@ -84,6 +85,7 @@ void TCPPUnit::RunUnitTests(void)
 		runner.addTest(TestUniqueMap::suite());
 		runner.addTest(TestCproperty::suite());		
 		runner.addTest(TestHDFFile::suite());
+		runner.addTest(TestHDFSerializeImageData::suite());
 
 		/**********************************************************
 		// the following require user input

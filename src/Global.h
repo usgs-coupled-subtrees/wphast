@@ -101,6 +101,7 @@ public:
 
 	static herr_t HDFSerializePrism(bool bStoring, hid_t loc_id, Prism &rPrism);
 	static herr_t HDFSerializePolyData(bool bStoring, hid_t loc_id, const char* szName, vtkPolyData *&pPolyData);
+	static herr_t HDFSerializeImageData(bool bStoring, hid_t loc_id, const char* szName, vtkImageData *&pImageData);
 	static herr_t HDFSerializePoints(bool bStoring, hid_t loc_id, vtkPoints *&pPoints);
 	static herr_t HDFSerializeCells(bool bStoring, hid_t loc_id, const char* szName, vtkCellArray *&pCells);
 

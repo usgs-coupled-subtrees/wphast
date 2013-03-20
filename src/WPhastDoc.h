@@ -357,6 +357,7 @@ protected:
 	void SerializeFiles(bool bStoring, CHDFMirrorFile* file, std::map<CString, CString> &orig2new);
 	void CheckSiteMaps(CHDFMirrorFile* file, std::map<CString, CString> &path2fileMap);	
 	void CreateSiteMapFiles(hid_t loc_id, CString hdf, CString filename);
+	static void CreateWorldFile(hid_t loc_id, CString hdf, CString filename);
 
 	int GetListOfData_sourceFiles(hid_t loc_id, std::set< CString > &files);
 	int GetMapOfData_sourceFiles(hid_t loc_id, const char *name, std::map< CString, CString > &hdf2rel);

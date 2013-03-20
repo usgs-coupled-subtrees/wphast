@@ -7,6 +7,7 @@ class vtkTexture;
 class vtkPlaneSource;
 class vtkPolyDataMapper;
 class CWorldTransform;
+class vtkImageData;
 // class CSiteMap;
 
 class CMapActor : public vtkOpenGLActor
@@ -18,7 +19,7 @@ public:
 	void SetSiteMap3(const CSiteMap3 &siteMap3); // throws LPTCSTR
 	CSiteMap3 GetSiteMap3(void)const { return SiteMap3; }
 
-	void Serialize(bool bStoring, hid_t loc_id);
+	bool Serialize(bool bStoring, hid_t loc_id);
 	friend class CXMLSerializer;
 
 	int SetFileName(const char *filename);
@@ -39,8 +40,6 @@ protected:
 	virtual ~CMapActor(void);
 
 	int PlaceMap(double xPos, double yPos, double zPos, double angle);
-// COMMENT: {8/11/2009 2:52:54 PM}	int SetFileName(const char *filename);
-// COMMENT: {8/11/2009 2:56:55 PM}	int SetWorldTransform(const CWorldTransform &wtrans);
 	int SetWorldFileName(const char *filename);
 
 	// Description:
@@ -51,10 +50,10 @@ protected:
 	void InterpolateOff() { this->SetInterpolate((int)0); };
 
 protected:
-	vtkImageReader2    *m_ImageReader2;
 	vtkTexture         *m_Texture;
 	vtkPlaneSource     *m_PlaneSource;
 	vtkPolyDataMapper  *m_PolyDataMapper;
+	vtkImageData       *ImageData;
 
 public:
 	double m_XDataSpacing;

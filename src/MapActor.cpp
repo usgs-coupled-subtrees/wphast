@@ -10,6 +10,7 @@
 #include <vtkTexture.h>
 #include <vtkTransform.h>
 #include <vtkObjectFactory.h>
+#include <vtkImageReader2.h>
 
 #include "Global.h"
 #include "WorldTransform.h"
@@ -22,10 +23,10 @@ vtkStandardNewMacro(CMapActor);
 
 
 CMapActor::CMapActor(void)
-: m_ImageReader2(0)
-, m_Texture(0)
+: m_Texture(0)
 , m_PlaneSource(0)
 , m_PolyDataMapper(0)
+, ImageData(0)
 {
 	this->m_Texture = vtkTexture::New();
 	this->m_Texture->InterpolateOff();
@@ -43,24 +44,28 @@ CMapActor::~CMapActor(void)
 	this->SetTexture(NULL);
 
 	if (this->m_Texture)        this->m_Texture->Delete();
-	if (this->m_ImageReader2)   this->m_ImageReader2->Delete();
 	if (this->m_PlaneSource)    this->m_PlaneSource->Delete();
 	if (this->m_PolyDataMapper) this->m_PolyDataMapper->Delete();
+	if (this->ImageData)        this->ImageData->Delete();
 }
 
 int CMapActor::SetFileName(const char *filename)
 {
-	if (this->m_ImageReader2) this->m_ImageReader2->Delete();
-
 	vtkImageReader2Factory *factory = vtkImageReader2Factory::New();
-	this->m_ImageReader2 = factory->CreateImageReader2(filename);
+	vtkImageReader2 *pImageReader2 = factory->CreateImageReader2(filename);
 	factory->Delete();
 
-	if (this->m_ImageReader2)
+	if (pImageReader2)
 	{
-		this->m_ImageReader2->SetFileName( filename );
-		this->m_ImageReader2->Update( );
-		this->m_Texture->SetInput( this->m_ImageReader2->GetOutput() );
+		pImageReader2->SetFileName( filename );
+		pImageReader2->Update( );
+
+		ASSERT(this->ImageData == 0);
+		if (this->ImageData = vtkImageData::New())
+		{
+			this->ImageData->DeepCopy( pImageReader2->GetOutput() );
+			this->m_Texture->SetInput( this->ImageData );
+		}
 
 #if USE_FILTER
 		std::ostrstream oss1;
@@ -79,6 +84,8 @@ int CMapActor::SetFileName(const char *filename)
 		this->SetMapper( this->m_PolyDataMapper );
 		this->SetTexture( this->m_Texture );
 
+		pImageReader2->Delete();
+
 		return 1; // success
 	}
 	return 0; // failure
@@ -86,7 +93,7 @@ int CMapActor::SetFileName(const char *filename)
 
 int CMapActor::SetWorldTransform(const CWorldTransform &wtrans)
 {
-	if (this->m_ImageReader2)
+	if (this->ImageData)
 	{
 		const double *dataSpacing = wtrans.GetDataSpacing();
 		const double *upperLeft = wtrans.GetUpperLeft();
@@ -96,10 +103,10 @@ int CMapActor::SetWorldTransform(const CWorldTransform &wtrans)
 		this->m_XUpperLeft   = upperLeft[0];
 		this->m_YUpperLeft   = upperLeft[1];
 
-		this->m_ImageReader2->Update();
-		this->m_ImageReader2->SetDataSpacing(this->m_XDataSpacing, this->m_YDataSpacing, 1);
+		this->ImageData->Update();
+		this->ImageData->SetSpacing(this->m_XDataSpacing, this->m_YDataSpacing, 1);
 
-		int *dataExtent = this->m_ImageReader2->GetDataExtent();
+		int *dataExtent = this->ImageData->GetExtent();
 		int cx = dataExtent[1] - dataExtent[0];
 		int cy = dataExtent[3] - dataExtent[2];
 		int cz = dataExtent[5] - dataExtent[4];
@@ -202,14 +209,18 @@ void CMapActor::SetSiteMap3(const CSiteMap3 &siteMap3)
 	this->SiteMap3 = siteMap3;
 }
 
-void CMapActor::Serialize(bool bStoring, hid_t loc_id)
+bool CMapActor::Serialize(bool bStoring, hid_t loc_id)
 {
 	static const char szSiteMap[]  = "SiteMap";
 	static const char szSiteMap2[] = "SiteMap2";
 	static const char szSiteMap3[] = "SiteMap3";
 
+	static const char szImageData[] = "ImageData";
+
+	bool bHaveImageData = false;
+
 	ASSERT(loc_id > 0);
-	if (loc_id <= 0) return;
+	if (loc_id <= 0) return bHaveImageData;
 
 	hid_t sitemap_id = 0;
 	herr_t status;
@@ -251,6 +262,13 @@ void CMapActor::Serialize(bool bStoring, hid_t loc_id)
 		if (bStoring)
 		{
 			this->SiteMap3.Serialize(bStoring, sitemap_id);
+
+			herr_t e = CGlobal::HDFSerializeImageData(bStoring, sitemap_id, szImageData, this->ImageData);
+			ASSERT(e >= 0);
+			if (e >= 0)
+			{
+				bHaveImageData = true;
+			}
 		}
 		else
 		{
@@ -287,6 +305,19 @@ void CMapActor::Serialize(bool bStoring, hid_t loc_id)
 			case 3:
 				{
 					this->SiteMap3.Serialize(bStoring, sitemap_id);
+					ASSERT(this->ImageData == 0);
+					herr_t e = CGlobal::HDFSerializeImageData(bStoring, sitemap_id, szImageData, this->ImageData);
+					if (e >= 0)
+					{
+						bHaveImageData = true;
+
+						this->m_Texture->SetInput( this->ImageData );
+						this->SetMapper( this->m_PolyDataMapper );
+						this->SetTexture( this->m_Texture );
+
+						this->SetWorldTransform(this->SiteMap3.GetWorldTransform());
+						this->PlaceMap(this->SiteMap3.Origin[0], this->SiteMap3.Origin[1], this->SiteMap3.Origin[2], this->SiteMap3.Angle);
+					}
 				}
 				break;
 			default:
@@ -298,15 +329,16 @@ void CMapActor::Serialize(bool bStoring, hid_t loc_id)
 		status = ::H5Gclose(sitemap_id);
 		ASSERT(status >= 0);
 	}
+	return bHaveImageData;
 }
 
 int* CMapActor::GetDataExtent(void)const
 {
 	static const int extent[6];
-	if (this->m_ImageReader2)
+	if (this->ImageData)
 	{
-		this->m_ImageReader2->Update();
-		return this->m_ImageReader2->GetDataExtent();
+		this->ImageData->Update();
+		return this->ImageData->GetExtent();
 	}
 	return (int*)extent;
 }
@@ -314,10 +346,10 @@ int* CMapActor::GetDataExtent(void)const
 double* CMapActor::GetDataSpacing(void)const
 {
 	static const double spacing[3];
-	if (this->m_ImageReader2)
+	if (this->ImageData)
 	{
-		this->m_ImageReader2->Update();
-		return this->m_ImageReader2->GetDataSpacing();
+		this->ImageData->Update();
+		return this->ImageData->GetSpacing();
 	}
 	return (double*)spacing;
 }
@@ -325,20 +357,20 @@ double* CMapActor::GetDataSpacing(void)const
 double* CMapActor::GetDataOrigin(void)const
 {
 	static const double origin[3];
-	if (this->m_ImageReader2)
+	if (this->ImageData)
 	{
-		this->m_ImageReader2->Update();
-		return this->m_ImageReader2->GetDataOrigin();
+		this->ImageData->Update();
+		return this->ImageData->GetOrigin();
 	}
 	return (double*)origin;
 }
 
 void CMapActor::SetDataOrigin(double x, double y, double z)
 {
-	if (this->m_ImageReader2)
+	if (this->ImageData)
 	{
-		this->m_ImageReader2->Update();
-		return this->m_ImageReader2->SetDataOrigin(x, y, z);
+		this->ImageData->Update();
+		return this->ImageData->SetOrigin(x, y, z);
 	}
 	else
 	{
@@ -348,10 +380,10 @@ void CMapActor::SetDataOrigin(double x, double y, double z)
 
 void CMapActor::SetDataSpacing(double x, double y, double z)
 {
-	if (this->m_ImageReader2)
+	if (this->ImageData)
 	{
-		this->m_ImageReader2->Update();
-		return this->m_ImageReader2->SetDataSpacing(x, y, z);
+		this->ImageData->Update();
+		return this->ImageData->SetSpacing(x, y, z);
 	}
 	else
 	{

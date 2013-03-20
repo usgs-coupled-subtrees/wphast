@@ -29,7 +29,10 @@
 
 #include <vtkMatrix4x4.h>
 #include <vtkTransform.h>
+#include <vtkXMLImageDataWriter.h>
 #include "vtkDelaunay2DEx.h"
+#include "srcXMLImageDataWriter.h"
+#include "srcXMLImageDataReader.h"
 
 #include "WorldTransform.h"
 
@@ -1487,6 +1490,7 @@ herr_t CGlobal::HDFSerializeString(bool bStoring, hid_t loc_id, const char* szNa
 			{
 				::strcpy(szCopy, str.c_str());
 				status = HDFSerializeStringOrNull(bStoring, loc_id, szName, &szCopy);
+				ASSERT(status >= 0);
 				delete[] szCopy;
 			}
 		}
@@ -1495,6 +1499,11 @@ herr_t CGlobal::HDFSerializeString(bool bStoring, hid_t loc_id, const char* szNa
 	{
 		char *szCopy = NULL;
 		status = HDFSerializeStringOrNull(bStoring, loc_id, szName, &szCopy);
+		ASSERT(status >= 0
+			|| ::strcmp(szName, "Description") == 0
+			|| ::strcmp(szName, "description") == 0
+			|| ::strcmp(szName, "text") == 0);
+
 		if (szCopy == NULL)
 		{
 			str.clear();
@@ -3301,6 +3310,89 @@ herr_t CGlobal::HDFSerializePolyData(bool bStoring, hid_t loc_id, const char* sz
 			return_val = H5Gclose(group_id);
 		}
 
+	}
+	return return_val;
+}
+
+herr_t CGlobal::HDFSerializeImageData(bool bStoring, hid_t loc_id, const char* szName, vtkImageData *&pImageData)
+{
+	hid_t group_id;
+	herr_t return_val = 0;
+
+	static const char szXML[]           = "XMLImageData";
+
+	if (bStoring)
+	{
+		ASSERT(pImageData != 0);
+		group_id = ::H5Gcreate(loc_id, szName, 0);
+		if (group_id > 0)
+		{
+			srcXMLImageDataWriter* writer = srcXMLImageDataWriter::New();
+			
+			// Note the ostringstream MUST be initialized with a string
+			// otherwize the Write call will due to a call to seekp.
+			// Seems that seekp(0) causes the stream to fail if it doesn't
+			// contain any output
+
+			std::ostringstream oss("<?xml version=\"1.0\"?>");
+			writer->SetOstream(&oss);
+			oss.seekp(0);
+
+			writer->SetInput(pImageData);
+			writer->SetDataModeToBinary();
+
+			VERIFY(writer->Write() == 1);
+
+			herr_t e = CGlobal::HDFSerializeString(bStoring, group_id, szXML, oss.str());
+			ASSERT(e >= 0); // unable to serialize
+
+			writer->Delete();
+
+			return_val = H5Gclose(group_id);
+			ASSERT(return_val >= 0);
+		}
+		else
+		{
+			// error
+			return_val = group_id;
+		}
+	}
+	else
+	{
+		ASSERT(pImageData == 0);
+
+		group_id = ::H5Gopen(loc_id, szName);
+		if (group_id > 0)
+		{
+			std::string str;
+			if (CGlobal::HDFSerializeString(bStoring, group_id, szXML, str) >= 0)
+			{
+				if (srcXMLImageDataReader *reader = srcXMLImageDataReader::New())
+				{
+					std::istringstream iss(str);
+					reader->SetIstream(&iss);
+					reader->Update(); // force read
+
+					pImageData = vtkImageData::New();
+					pImageData->DeepCopy(reader->GetOutput());
+
+					reader->Delete();
+				}
+				else
+				{
+					return_val = -1;
+				}
+			}
+			else
+			{
+				return_val = -1;
+			}
+			return_val = H5Gclose(group_id);
+		}
+		else
+		{
+			return_val = -1;
+		}
 	}
 	return return_val;
 }
@@ -6001,7 +6093,11 @@ herr_t CGlobal::HDFFileEx(bool bStoring, hid_t loc_id, const char* szName, std::
 		if (group_id > 0)
 		{
 			status = CGlobal::HDFFile2(bStoring, group_id, sRelativePath, sMD5, ftWrite);
-			ASSERT(status >= 0);
+			if (status < 0)
+			{
+				VERIFY(0 <= ::H5Gclose(group_id));
+				return status;
+			}
 
 			if (::_stricmp(ATL::ATLPath::FindExtension(sRelativePath.c_str()), ".shp") == 0)
 			{

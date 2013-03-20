@@ -112,7 +112,7 @@ void TestHDFSerializePolyData::testHDF(void)
 		CPPUNIT_ASSERT(e >= 0);
 
 		herr_t s = H5Fclose(file_id);
-		CPPUNIT_ASSERT(e >= 0);
+		CPPUNIT_ASSERT(s >= 0);
 
 
 		/* Create a new file using default properties. */

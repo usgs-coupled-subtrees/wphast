@@ -1152,6 +1152,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\srcXMLImageDataReader.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\srcXMLImageDataWriter.cpp"
+				>
+			</File>
+			<File
 				RelativePath="Startup.cpp"
 				>
 			</File>
@@ -4526,6 +4534,41 @@
 					</FileConfiguration>
 				</File>
 				<File
+					RelativePath=".\TestHDFSerializeImageData.cpp"
+					>
+					<FileConfiguration
+						Name="cppunit|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="AutoRelease|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="AutoDebug|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
 					RelativePath=".\TestHDFSerializePolyData.cpp"
 					>
 					<FileConfiguration
@@ -5032,19 +5075,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\srcinput\basePolyhedron.h"
-				>
-			</File>
-			<File
 				RelativePath="BC.h"
-				>
-			</File>
-			<File
-				RelativePath="BCFluxPropertyPage2.h"
-				>
-			</File>
-			<File
-				RelativePath=".\BCSpecHeadZoneActor.h"
 				>
 			</File>
 			<File
@@ -5273,10 +5304,6 @@
 			</File>
 			<File
 				RelativePath="HeadIC.h"
-				>
-			</File>
-			<File
-				RelativePath=".\HeadICPropsPage.h"
 				>
 			</File>
 			<File
@@ -5744,6 +5771,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\srcXMLImageDataReader.h"
+				>
+			</File>
+			<File
+				RelativePath=".\srcXMLImageDataWriter.h"
+				>
+			</File>
+			<File
 				RelativePath="Startup.h"
 				>
 			</File>
@@ -6096,6 +6131,10 @@
 				</File>
 				<File
 					RelativePath=".\TestHDFFile.h"
+					>
+				</File>
+				<File
+					RelativePath=".\TestHDFSerializeImageData.h"
 					>
 				</File>
 				<File
