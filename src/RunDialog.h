@@ -6,7 +6,13 @@
 
 // CRunDialog dialog
 
-class CRunDialog : public CDialog
+#include "ETSLayout/ETSLayout.h"
+
+#ifndef baseCRunDialog
+#define baseCRunDialog ETSLayoutDialog
+#endif
+
+class CRunDialog : public baseCRunDialog
 {
 	DECLARE_DYNAMIC(CRunDialog)
 

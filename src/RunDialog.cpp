@@ -9,9 +9,9 @@
 #include <atlpath.h> // ATL::ATLPath::FileExists
 // CRunDialog dialog
 
-IMPLEMENT_DYNAMIC(CRunDialog, CDialog)
+IMPLEMENT_DYNAMIC(CRunDialog, baseCRunDialog)
 CRunDialog::CRunDialog(CWnd* pParent /*=NULL*/)
-	: CDialog(CRunDialog::IDD, pParent)
+	: baseCRunDialog(CRunDialog::IDD, pParent)
 	, m_hChildProcess(NULL)
 	, m_hStdIn(NULL) // Handle to parents std input.
 	, m_bRunThread(TRUE)
@@ -27,14 +27,14 @@ CRunDialog::~CRunDialog()
 
 void CRunDialog::DoDataExchange(CDataExchange* pDX)
 {
-	CDialog::DoDataExchange(pDX);
+	baseCRunDialog::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_ERRORS_RICHEDIT, m_wndOutputRichEditCtrl);
 	DDX_Control(pDX, IDOK, m_wndOKButton);
 	DDX_Control(pDX, IDC_ABORT, m_wndAbortButton);
 }
 
 
-BEGIN_MESSAGE_MAP(CRunDialog, CDialog)
+BEGIN_MESSAGE_MAP(CRunDialog, baseCRunDialog)
     ON_MESSAGE(WM_RUN_FINISHED, OnRunFinished)
 	ON_BN_CLICKED(IDC_ABORT, OnBnClickedAbort)
 END_MESSAGE_MAP()
@@ -49,7 +49,7 @@ void CRunDialog::SetWorkingDirectory(LPCTSTR pstrDirName)
 
 INT_PTR CRunDialog::DoModal()
 {
-	return CDialog::DoModal();
+	return baseCRunDialog::DoModal();
 }
 
 /////////////////////////////////////////////////////////////////////// 
@@ -184,10 +184,20 @@ void CRunDialog::ReadAndHandleOutput(HANDLE hPipeRead)
 
 BOOL CRunDialog::OnInitDialog()
 {
-	CDialog::OnInitDialog();
+	baseCRunDialog::OnInitDialog();
+	CreateRoot(VERTICAL, 5, 6)
+		<< item(IDC_ERRORS_RICHEDIT, GREEDY)
+		<< (pane(HORIZONTAL)
+			<< itemGrowing(HORIZONTAL)
+			<< item(IDOK, NORESIZE)
+			<< item(IDC_ABORT, NORESIZE)
+		)
+		;
+	UpdateLayout();
 
 	CWinThread* pWinThread = ::AfxBeginThread(RunThreadProc, this);
-	if (pWinThread){
+	if (pWinThread)
+	{
 		this->ModifyStyle(WS_SYSMENU, 0);
 		this->m_wndOKButton.EnableWindow(FALSE);
 	}
