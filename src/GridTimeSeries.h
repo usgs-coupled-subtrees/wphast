@@ -22,7 +22,7 @@ class CGridTimeSeries
 public:
 	CGridTimeSeries(CWnd* pWnd);
 #if defined(NEW_SINGLE_PROPERTY)
-	CGridTimeSeries(CWnd* pWnd, bool bSingle, bool bMixture);
+	CGridTimeSeries(CWnd* pWnd, bool bSingle, bool bMixture, bool bRestart = false);
 #endif
 
 	~CGridTimeSeries(void);
@@ -36,7 +36,8 @@ public:
 		LINEAR   = 2,
 		POINTS   = 3,
 		XYZ      = 4,
-		XYZT     = 5
+		XYZT     = 5,
+		RESTART  = 6
 	};
 
 public:
@@ -51,6 +52,7 @@ public:
 	static void ShowSingleProperty(CWnd *pDlgWnd, int nShow);
 	void ShowMixture(bool show);
 	void EnableMixture(BOOL bEnable);
+	void ShowRestart(bool show);
 #endif
 
 	void SetSeries(const CTimeSeries<Cproperty> &series);
@@ -100,8 +102,10 @@ protected:
 	std::vector<Cproperty*> v_constant;
 	std::vector<Cproperty*> v_linear;
 	std::vector<Cproperty*> v_points;
+	std::vector<Cproperty*> v_restart;
 	std::vector<Cproperty*> v_xyz;	
 	std::vector<Cproperty*> v_xyzt;
 
+	const bool bEnableRestart;
 	CString DefaultTimeUnits;
 };
