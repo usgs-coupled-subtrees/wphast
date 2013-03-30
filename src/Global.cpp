@@ -4690,6 +4690,36 @@ BOOL CGlobal::IsValidArcraster(CString filename)
 	return FALSE;
 }
 
+BOOL CGlobal::IsValidRestartFile(CString filename, CDataExchange* pDX /* = NULL */)
+{
+	filename.Trim();
+	if (!filename.IsEmpty())
+	{
+		TCHAR path[MAX_PATH];
+		::strcpy(path, filename);
+		if (ATL::ATLPath::FileExists(path))
+		{
+			return TRUE;
+		}
+		else
+		{
+			if (pDX)
+			{
+				CString str;
+				str.Format("Restart file \"%s\" not found.\n", path);
+				::AfxMessageBox(str);
+				pDX->Fail(); // throws
+			}
+		}
+	}
+	if (pDX)
+	{
+		::AfxMessageBox("Please select restart file.");
+		pDX->Fail(); // throws
+	}
+	return FALSE;
+}
+
 BOOL CGlobal::IsValidXYZFile(CString filename, CDataExchange* pDX /* = NULL */)
 {
 	filename.Trim();
@@ -4764,6 +4794,7 @@ hid_t CGlobal::HDFCreatePropType(void)
 	ASSERT(PROP_POINTS    == 105);
 	ASSERT(PROP_XYZ       == 106);
 	ASSERT(PROP_XYZT      == 110);
+	ASSERT(PROP_RESTART   == 112);
 
 	herr_t status;
 
@@ -4816,6 +4847,11 @@ hid_t CGlobal::HDFCreatePropType(void)
 	// Insert the enumerated data
 	nValue = PROP_XYZT;
 	status = H5Tenum_insert(enum_datatype, "PROP_XYZT", &nValue);
+	ASSERT(status >= 0);
+
+	// Insert the enumerated data
+	nValue = PROP_RESTART;
+	status = H5Tenum_insert(enum_datatype, "PROP_RESTART", &nValue);
 	ASSERT(status >= 0);
 
 	return enum_datatype;

@@ -130,6 +130,7 @@ public:
 	static void InsertHeadings(CComboBox &combo, std::vector< std::string > headings);
 	static BOOL IsValidShapefile(CString filename, CDataExchange* pDX = NULL);
 	static BOOL IsValidArcraster(CString filename);
+	static BOOL IsValidRestartFile(CString filename, CDataExchange* pDX = NULL);
 	static BOOL IsValidXYZFile(CString filename, CDataExchange* pDX = NULL);
 	static BOOL IsValidXYZTFile(CString filename, CDataExchange* pDX = NULL);
 
