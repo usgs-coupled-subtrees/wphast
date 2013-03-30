@@ -4537,13 +4537,6 @@
 					RelativePath=".\TestHDFSerializeImageData.cpp"
 					>
 					<FileConfiguration
-						Name="cppunit|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
 						Name="AutoRelease|Win32"
 						ExcludedFromBuild="true"
 						>

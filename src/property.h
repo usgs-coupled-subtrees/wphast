@@ -18,9 +18,7 @@ public:
 	Cproperty();             // type == UNDEFINED
 	Cproperty(int value);    // type == FIXED
 	Cproperty(double value); // type == FIXED
-	//{{
 	Cproperty(enum PROP_TYPE pt);
-	//}}
 
 	// Cproperty(double val1, double val2, int direction); // type == LINEAR
 	// dtor
@@ -34,6 +32,7 @@ public:
 	void Insert(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent, LPCTSTR heading)const;
 	void Serialize(bool bStoring, hid_t loc_id);
 	void Serialize(CArchive& ar);
+
 #ifdef _DEBUG
 	void AssertValid() const;
 	void Dump(CDumpContext& dc)const;
@@ -43,6 +42,7 @@ public:
 	static void SerializeCreate(const char *heading, Cproperty* prop, hid_t loc_id);
 	static void SerializeOpen(const char *heading, Cproperty** prop, hid_t loc_id);
 	static void CopyProperty(struct property** dest, const struct property* src);
+	static void CheckForRestart(const struct property* p);
 	static bool RemovePropZones(struct property** p);
 
 	friend std::ostream& operator<< (std::ostream &os, const Cproperty &a);

@@ -2,7 +2,9 @@
 #include "TestCproperty.h"
 
 #include "PhastInput.h"
+#include "property.h"
 #include "HeadIC.h"
+#include "ChemIC.h"
 #include "srcinput/Data_source.h"
 #include "srcinput/Domain.h"
 
@@ -63,6 +65,60 @@ void TestCproperty::testXYZ(void)
 		FakeFiledata::Clear_fake_file_data_list();
 		Clear_file_data_map();
 		Clear_KDtreeList();
+	}
+	catch (...)
+	{
+		if (pPhastInput)
+		{
+			LPCTSTR lpsz = pPhastInput->GetErrorMsg();
+			if (lpsz) TRACE("%s\n", lpsz);
+			pPhastInput->Delete();
+		}
+		throw;
+	}
+}
+
+void TestCproperty::testRestart(void)
+{
+	CPPUNIT_ASSERT(::count_chem_ic == 0);
+	CPPUNIT_ASSERT(::FileMap.size() == 0);
+
+	CPhastInput* pPhastInput = NULL;
+	try
+	{
+		std::string input(
+			"CHEMISTRY_IC\n"
+			"	-box 0 0 0 90000 48000 400 GRID\n"
+			"		-solution            restart ex4.0.restart.gz\n"
+			"		-equilibrium_phases  restart ex4.1.restart.gz\n"
+			"		-exchange            restart ex4.2.restart.gz\n"
+			"		-surface             restart ex4.3.restart.gz\n"
+			);
+		std::istringstream iss(input);
+
+		pPhastInput = CPhastInput::New(iss, "testRestart", "phast.dat");
+
+		pPhastInput->Read();
+		CPPUNIT_ASSERT(pPhastInput->GetErrorCount() == 0);
+		CPPUNIT_ASSERT(::count_chem_ic == 1);
+		CPPUNIT_ASSERT(::FileMap.size() == 4);
+
+		const struct chem_ic* chem_ic_ptr = ::chem_ic[0];
+		ASSERT(chem_ic_ptr->polyh && ::AfxIsValidAddress(chem_ic_ptr->polyh, sizeof(Polyhedron)));
+
+		CChemIC cic(*chem_ic_ptr);
+		CPPUNIT_ASSERT_EQUAL(cic.solution->restart_filename,           std::string("ex4.0.restart.gz"));
+		CPPUNIT_ASSERT_EQUAL(cic.equilibrium_phases->restart_filename, std::string("ex4.1.restart.gz"));
+		CPPUNIT_ASSERT_EQUAL(cic.exchange->restart_filename,           std::string("ex4.2.restart.gz"));
+		CPPUNIT_ASSERT_EQUAL(cic.surface->restart_filename,            std::string("ex4.3.restart.gz"));
+
+		std::ostringstream oss;
+		oss << cic;
+		TRACE("%s", oss.str().c_str());
+		CPPUNIT_ASSERT_EQUAL(input, oss.str());
+
+		pPhastInput->Delete();
+		pPhastInput = NULL;
 	}
 	catch (...)
 	{

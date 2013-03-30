@@ -287,10 +287,14 @@ BOOL CTimeControlMultiPropertyPage2::OnInitDialog()
 
 BOOL CTimeControlMultiPropertyPage2::SetupGrids(void)
 {
-	const int MIN_ROW_COUNT = 100;
+#if defined(_DEBUG)
+	const int MIN_ROW_COUNT = 655;
+#else
+	const int MIN_ROW_COUNT = 65536;
+#endif
 
-	int nTimeEndRows  = MIN_ROW_COUNT;
-	int nTimeStepRows = MIN_ROW_COUNT;
+	int nTimeEndRows  = max(2 * this->m_tc2.m_timeEnd.size(), MIN_ROW_COUNT);
+	int nTimeStepRows = max(2 * this->m_tc2.m_timeStep.size(), MIN_ROW_COUNT);;
 
 	try
 	{

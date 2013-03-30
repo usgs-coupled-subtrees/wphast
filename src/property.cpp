@@ -46,7 +46,6 @@ Cproperty::Cproperty(double value)
 	this->count_v = 1;
 }
 
-//{{
 Cproperty::Cproperty(enum PROP_TYPE pt)
 {
 	const TCHAR PSZ_UNDEFINED[] = _T("UNDEFINED");
@@ -89,6 +88,17 @@ Cproperty::Cproperty(enum PROP_TYPE pt)
 		this->mix1        = std::numeric_limits<double>::signaling_NaN();
 		this->mix2        = std::numeric_limits<double>::signaling_NaN();
 	}
+	else if (pt == PROP_RESTART)
+	{
+		this->type        = PROP_RESTART;
+		this->count_alloc = 2;
+		this->v           = new double[this->count_alloc];
+		ASSERT(this->v);
+		this->v[0]        = std::numeric_limits<double>::signaling_NaN();
+		this->count_v     = 1;
+		this->mix1        = std::numeric_limits<double>::signaling_NaN();
+		this->mix2        = std::numeric_limits<double>::signaling_NaN();
+	}
 	else if (pt == PROP_XYZ)
 	{
 		this->type = PROP_XYZ;
@@ -118,7 +128,6 @@ Cproperty::Cproperty(enum PROP_TYPE pt)
 		ASSERT(FALSE);
 	}
 }
-//}}
 
 Cproperty::~Cproperty()
 {
@@ -166,15 +175,17 @@ void Cproperty::InternalCopy(const property& src)
 	{
 		this->v[i] = src.v[i];
 	}
-	this->count_v = src.count_v;
-	this->type    = src.type;
-	this->coord   = src.coord;
-	this->icoord  = src.icoord;
-	this->dist1   = src.dist1;
-	this->dist2   = src.dist2;
-	this->mix     = src.mix;
-	this->mix1    = src.mix1;
-	this->mix2    = src.mix2;
+	this->new_def          = src.new_def;
+	this->count_v          = src.count_v;
+	this->type             = src.type;
+	this->coord            = src.coord;
+	this->icoord           = src.icoord;
+	this->dist1            = src.dist1;
+	this->dist2            = src.dist2;
+	this->mix              = src.mix;
+	this->mix1             = src.mix1;
+	this->mix2             = src.mix2;
+	this->restart_filename = src.restart_filename;
 
 	if (src.data_source)
 	{
@@ -268,6 +279,9 @@ void Cproperty::AssertValid() const
 		ASSERT(this->data_source->Get_defined());
 		ASSERT(this->data_source->Get_points().size());
 		break;
+	case PROP_RESTART:
+		ASSERT(this->data_source == 0);
+		break;
 	case PROP_XYZ:
 		ASSERT(this->count_v == 0);
 		ASSERT(this->data_source);
@@ -328,6 +342,9 @@ void Cproperty::Dump(CDumpContext& dc)const
 				dc << "\t\t<\\POINTS>\n";
 			}
 			break;
+		case PROP_RESTART:
+			dc << "\t\t<RESTART \'filename\'=\"" << this->restart_filename.c_str() << "\"\\>\n";
+			break;
 		case PROP_XYZ:
 			dc << "\t\t<XYZ \'filename\'=\"" << this->data_source->Get_file_name().c_str() << "\"\\>\n";
 			break;
@@ -353,6 +370,7 @@ void Cproperty::Serialize(bool bStoring, hid_t loc_id)
 	static const char szMixture[]    = "mixture";
 	static const char szMix1[]       = "mix1";
 	static const char szMix2[]       = "mix2";
+	static const char szRestart[]    = "restart_fname";
 
 	const int _LINEAR = 11;
 	const int _FIXED  = 12;
@@ -368,7 +386,7 @@ void Cproperty::Serialize(bool bStoring, hid_t loc_id)
 		// prop_type
 		//
   		ASSERT(this->type == PROP_FIXED || this->type == PROP_LINEAR || this->type == PROP_POINTS
-			|| this->type == PROP_XYZ || this->type == PROP_XYZT);
+			|| this->type == PROP_XYZ || this->type == PROP_XYZT || this->type == PROP_RESTART);
 
 		hid_t proptype = CGlobal::HDFCreatePropType();
 		status = CGlobal::HDFSerialize(bStoring, loc_id, szPropType, proptype, 1, &this->type);
@@ -382,6 +400,13 @@ void Cproperty::Serialize(bool bStoring, hid_t loc_id)
 			//
 			hsize_t count = this->count_v;
 			status = CGlobal::HDFSerializeWithSize(bStoring, loc_id, szV, H5T_NATIVE_DOUBLE, count, this->v);
+			ASSERT(status >= 0);
+		}
+
+		// restart
+		if (this->type == PROP_RESTART)
+		{
+			status = CGlobal::HDFSerializeString(bStoring, loc_id, szRestart, this->restart_filename);
 			ASSERT(status >= 0);
 		}
 
@@ -439,6 +464,8 @@ void Cproperty::Serialize(bool bStoring, hid_t loc_id)
 					ASSERT(status >= 0);
 				}
 				break;
+			case PROP_RESTART:
+				break;
 			default:
 				ASSERT(FALSE);
 				break;
@@ -453,7 +480,7 @@ void Cproperty::Serialize(bool bStoring, hid_t loc_id)
 		if (CGlobal::HDFSerializeSafe(bStoring, loc_id, szPropType, proptype, 1, &this->type) >= 0)
 		{
   			ASSERT(this->type == PROP_FIXED || this->type == PROP_LINEAR || this->type == PROP_POINTS
-				|| this->type == PROP_XYZ || this->type == PROP_XYZT);
+				|| this->type == PROP_XYZ || this->type == PROP_XYZT || this->type == PROP_RESTART);
 		}
 		else
 		{
@@ -486,6 +513,13 @@ void Cproperty::Serialize(bool bStoring, hid_t loc_id)
 			hsize_t count;
 			status = CGlobal::HDFSerializeWithSize(bStoring, loc_id, szV, H5T_NATIVE_DOUBLE, count, this->v);
 			this->count_v = (int)count;
+			ASSERT(status >= 0);
+		}
+
+		// restart
+		if (this->type == PROP_RESTART)
+		{
+			status = CGlobal::HDFSerializeString(bStoring, loc_id, szRestart, this->restart_filename);
 			ASSERT(status >= 0);
 		}
 
@@ -566,6 +600,8 @@ void Cproperty::Serialize(bool bStoring, hid_t loc_id)
 					status = CGlobal::HDFSerializeData_source(bStoring, loc_id, szDataSource, *this->data_source);
 					ASSERT(status >= 0);
 				}
+				break;
+			case PROP_RESTART:
 				break;
 			default:
 				ASSERT(FALSE);
@@ -701,7 +737,7 @@ void Cproperty::Serialize(CArchive& ar)
 			//
 			if (ar.IsStoring())
 			{
-				ASSERT(this->type == PROP_FIXED || this->type == PROP_LINEAR || this->type == PROP_POINTS || this->type == PROP_XYZ || this->type == PROP_XYZT);
+				ASSERT(this->type == PROP_FIXED || this->type == PROP_LINEAR || this->type == PROP_POINTS || this->type == PROP_XYZ || this->type == PROP_XYZT || this->type == PROP_RESTART);
 				ar << this->type;
 			}
 			else
@@ -709,7 +745,7 @@ void Cproperty::Serialize(CArchive& ar)
 				int i;
 				ar >> i;
 				this->type = static_cast<PROP_TYPE>(i);
-				ASSERT(this->type == PROP_FIXED || this->type == PROP_LINEAR || this->type == PROP_POINTS || this->type == PROP_XYZ || this->type == PROP_XYZT);
+				ASSERT(this->type == PROP_FIXED || this->type == PROP_LINEAR || this->type == PROP_POINTS || this->type == PROP_XYZ || this->type == PROP_XYZT || this->type == PROP_RESTART);
 			}
 
 			// count_v
@@ -936,6 +972,26 @@ void Cproperty::Serialize(CArchive& ar)
 					this->data_source->Get_filedata()->Set_coordinate_system(cs);
 				}
 			}
+
+			// restart filename
+			//
+			if (ar.IsStoring())
+			{
+				if (this->type == PROP_RESTART)
+				{
+					CString filename(this->restart_filename.c_str());
+					ar << filename;
+				}
+			}
+			else
+			{
+				if (this->type == PROP_RESTART)
+				{
+					CString filename;
+					ar >> filename;
+					this->restart_filename = filename;
+				}
+			}
 		}
 	}
 
@@ -1026,6 +1082,9 @@ void Cproperty::Insert(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent, LPCTSTR headin
 				format.Format("%s POINTS %s", heading, coor_name[cs]);
 			}
 			break;
+		case PROP_RESTART:
+			format.Format("%s restart %s", heading, this->restart_filename.c_str());
+			break;
 		case PROP_XYZ:
 			ASSERT(this->data_source);
 			cs = this->data_source->Get_user_coordinate_system();
@@ -1111,6 +1170,9 @@ std::ostream& operator<< (std::ostream &os, const Cproperty &a)
 				os << "\t\t\t\tend_points" << std::endl;
 			}
 			break;
+		case PROP_RESTART:
+			os << "restart " << a.restart_filename << std::endl;
+			break;
 		case PROP_XYZ:
 			ASSERT(a.data_source);
 			cs = a.data_source->Get_user_coordinate_system();
@@ -1177,6 +1239,9 @@ bool operator==(const property& lhs, const property& rhs)
 				}
 			}
 			break;
+		case PROP_RESTART:
+			return (lhs.restart_filename == rhs.restart_filename);
+			break;
 		case PROP_XYZ:
 			if (lhs.data_source->Get_file_name() != rhs.data_source->Get_file_name())
 			{
@@ -1206,3 +1271,5 @@ bool operator==(const property& lhs, const property& rhs)
 	}
 	return false;
 }
+
+
