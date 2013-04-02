@@ -4,7 +4,13 @@
 
 // CRunTypeDlg dialog
 
-class CRunTypeDlg : public CDialog
+#include "ETSLayout/ETSLayout.h"
+
+#ifndef baseCRunTypeDlg
+#define baseCRunTypeDlg ETSLayoutDialog
+#endif
+
+class CRunTypeDlg : public baseCRunTypeDlg
 {
 	DECLARE_DYNAMIC(CRunTypeDlg)
 

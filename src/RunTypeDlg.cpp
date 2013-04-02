@@ -10,10 +10,10 @@
 
 // CRunTypeDlg dialog
 
-IMPLEMENT_DYNAMIC(CRunTypeDlg, CDialog)
+IMPLEMENT_DYNAMIC(CRunTypeDlg, baseCRunTypeDlg)
 
 CRunTypeDlg::CRunTypeDlg(CWnd* pParent /*=NULL*/)
-: CDialog(CRunTypeDlg::IDD, pParent)
+: baseCRunTypeDlg(CRunTypeDlg::IDD, pParent)
 , pRecentDBFileList(0)
 {
 
@@ -25,7 +25,7 @@ CRunTypeDlg::~CRunTypeDlg()
 
 void CRunTypeDlg::DoDataExchange(CDataExchange* pDX)
 {
-	CDialog::DoDataExchange(pDX);
+	baseCRunTypeDlg::DoDataExchange(pDX);
 
 	::DDX_Control(pDX, IDC_DB_COMBO, this->cboDB);
 
@@ -69,7 +69,7 @@ void CRunTypeDlg::DoDataExchange(CDataExchange* pDX)
 }
 
 
-BEGIN_MESSAGE_MAP(CRunTypeDlg, CDialog)
+BEGIN_MESSAGE_MAP(CRunTypeDlg, baseCRunTypeDlg)
 	ON_BN_CLICKED(IDC_SERIAL_RADIO, &CRunTypeDlg::OnBnClickedRadio)	
 	ON_BN_CLICKED(IDC_PARALLEL_RADIO, &CRunTypeDlg::OnBnClickedRadio)
 	ON_BN_CLICKED(IDC_DB_BROWSE, &CRunTypeDlg::OnBnClickedDbBrowse)
@@ -129,7 +129,42 @@ void CRunTypeDlg::OnBnClickedRadio()
 
 BOOL CRunTypeDlg::OnInitDialog()
 {
-	CDialog::OnInitDialog();
+	baseCRunTypeDlg::OnInitDialog();
+	CreateRoot(VERTICAL, 5, 6)
+		<< ( pane(HORIZONTAL)
+			<< item(IDC_DB_STATIC, NORESIZE | ALIGN_VCENTER )
+			<< item(IDC_DB_COMBO, ABSOLUTE_VERT | ALIGN_VCENTER )
+			<< item(IDC_DB_BROWSE, NORESIZE | ALIGN_VCENTER )
+		)
+		<< itemFixed(VERTICAL, 2)
+		<< 	( paneCtrl(IDC_STATIC_RT_GB, VERTICAL, GREEDY, nDefaultBorder, 10, 10 )
+			<< itemFixed(VERTICAL, 1)
+			<< (pane(HORIZONTAL)
+				<< item(IDC_SERIAL_RADIO, NORESIZE | ALIGN_VCENTER )
+				<< item(IDC_PARALLEL_RADIO, NORESIZE | ALIGN_VCENTER )
+			)
+			<< itemFixed(VERTICAL, 6)
+			<< (pane(HORIZONTAL)
+				<< item(IDC_COMMAND_STATIC, NORESIZE | ALIGN_VCENTER )
+				<< item(IDC_COMMAND_EDIT, ABSOLUTE_VERT | ALIGN_VCENTER )
+			)
+			<< itemFixed(VERTICAL, 6)
+			<< (pane(HORIZONTAL)
+				<< item(IDC_CMD_ARGS_STATIC, NORESIZE | ALIGN_VCENTER )
+				<< item(IDC_CMD_ARGS_EDIT, ABSOLUTE_VERT | ALIGN_VCENTER )
+			)
+		)
+		<< itemFixed(VERTICAL, 6)
+		<< (pane(HORIZONTAL)
+			<< itemGrowing(HORIZONTAL)
+			<< item(IDOK, NORESIZE | ALIGN_VCENTER )
+			<< itemFixed(HORIZONTAL, 6)
+			<< item(IDCANCEL, NORESIZE | ALIGN_VCENTER )
+			<< itemGrowing(HORIZONTAL)
+		)
+		<< itemFixed(VERTICAL, 6)
+		;
+	UpdateLayout();
 
 	// Add extra initialization here
 	if (this->pRecentDBFileList)
