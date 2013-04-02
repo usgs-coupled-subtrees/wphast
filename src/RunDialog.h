@@ -35,6 +35,7 @@ protected:
 	HANDLE m_hStdIn; // Handle to parents std input.
 	BOOL m_bRunThread;
 	HANDLE eventTerminateProcessGroup;
+	CHARFORMAT cf;
 
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 

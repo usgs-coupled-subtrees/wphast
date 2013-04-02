@@ -18,6 +18,19 @@ CRunDialog::CRunDialog(CWnd* pParent /*=NULL*/)
 	, eventTerminateProcessGroup(NULL)
 {
 	VERIFY(::GetCurrentDirectory(_MAX_PATH, this->m_szOriginalDir));
+
+	// set default font
+	this->cf.cbSize = sizeof(CHARFORMAT);
+	this->cf.dwMask = CFM_FACE|CFM_BOLD|CFM_ITALIC|CFM_SIZE|CFM_OFFSET|CFM_COLOR;
+	this->cf.dwEffects = CFE_AUTOCOLOR;
+	this->cf.yHeight = 200;	// 10 points
+	this->cf.yHeight = 160;	// 8 points
+	this->cf.yOffset = 0;
+	this->cf.crTextColor = ::GetSysColor(COLOR_WINDOWTEXT);
+	this->cf.bCharSet = 0;
+	this->cf.bPitchAndFamily = DEFAULT_PITCH | FF_DONTCARE;
+	// Note: CHARFORMAT.szFaceName is char[] even when _UNICODE is defined
+	strncpy(this->cf.szFaceName, "Courier New", LF_FACESIZE);
 }
 
 CRunDialog::~CRunDialog()
@@ -194,6 +207,9 @@ BOOL CRunDialog::OnInitDialog()
 		)
 		;
 	UpdateLayout();
+
+	// Set default font
+	this->m_wndOutputRichEditCtrl.SendMessage(EM_SETCHARFORMAT, 0, (LPARAM)&this->cf);
 
 	CWinThread* pWinThread = ::AfxBeginThread(RunThreadProc, this);
 	if (pWinThread)
