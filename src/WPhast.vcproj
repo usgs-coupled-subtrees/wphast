@@ -3801,78 +3801,6 @@
 					>
 				</File>
 				<File
-					RelativePath="gridctrl\GridCell.cpp"
-					>
-					<FileConfiguration
-						Name="cppunit|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="AutoRelease|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="AutoDebug|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="ReleaseRelease|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath="gridctrl\GridCellBase.cpp"
-					>
-					<FileConfiguration
-						Name="cppunit|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="AutoRelease|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="AutoDebug|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="ReleaseRelease|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-				</File>
-				<File
 					RelativePath="gridctrl\GridCtrl.cpp"
 					>
 				</File>
@@ -5360,10 +5288,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\ISerializable.h"
-				>
-			</File>
-			<File
 				RelativePath=".\LeakyPropsPage.h"
 				>
 			</File>
@@ -6175,14 +6099,6 @@
 					>
 				</File>
 				<File
-					RelativePath="gridctrl\GridCell.h"
-					>
-				</File>
-				<File
-					RelativePath="gridctrl\GridCellBase.h"
-					>
-				</File>
-				<File
 					RelativePath="gridctrl\GridCtrl.h"
 					>
 				</File>
@@ -6601,15 +6517,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\res\bmp00001.bmp"
-				>
-			</File>
-			<File
 				RelativePath="res\checks.bmp"
-				>
-			</File>
-			<File
-				RelativePath="res\checks_t.bmp"
 				>
 			</File>
 			<File
@@ -6686,10 +6594,6 @@
 			</File>
 			<File
 				RelativePath=".\res\DRAIN_Z.rtf"
-				>
-			</File>
-			<File
-				RelativePath="res\eyes_tre.bmp"
 				>
 			</File>
 			<File
@@ -6781,14 +6685,6 @@
 				>
 			</File>
 			<File
-				RelativePath="res\icon1.ico"
-				>
-			</File>
-			<File
-				RelativePath="res\IDR_CHEM_IC_SOLUTION.rtf"
-				>
-			</File>
-			<File
 				RelativePath="res\idr_main.ico"
 				>
 			</File>
@@ -6798,10 +6694,6 @@
 			</File>
 			<File
 				RelativePath="res\IDR_TC_TIME_STEP.rtf"
-				>
-			</File>
-			<File
-				RelativePath="res\IDR_WELL_RATE.rtf"
 				>
 			</File>
 			<File
@@ -6881,14 +6773,6 @@
 				>
 			</File>
 			<File
-				RelativePath="res\null_tree.bmp"
-				>
-			</File>
-			<File
-				RelativePath="res\obj_scale.cur"
-				>
-			</File>
-			<File
 				RelativePath="res\pan_real.cur"
 				>
 			</File>
@@ -6938,10 +6822,6 @@
 			</File>
 			<File
 				RelativePath=".\res\PR_FREQ_HDF_INTERM.rtf"
-				>
-			</File>
-			<File
-				RelativePath=".\res\pr_freq_hdf_iterm.rtf"
 				>
 			</File>
 			<File
@@ -7407,10 +7287,6 @@
 		</File>
 		<File
 			RelativePath="Notes.txt"
-			>
-		</File>
-		<File
-			RelativePath=".\setup\phast\doc\phast.pdf"
 			>
 		</File>
 		<File
