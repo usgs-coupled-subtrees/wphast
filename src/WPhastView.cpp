@@ -389,6 +389,14 @@ void CWPhastView::OnDraw(CDC* pDC)
 #if ((VTK_MAJOR_VERSION >= 5) && (VTK_MINOR_VERSION >= 4))
 	if (this->MFCWindow)
 	{
+		// force a rescale of the rivers/drains/wells
+		if (vtkRenderer *renderer =  this->GetRenderer())
+		{
+			double radius = CGlobal::ComputeRadius(renderer);
+			TRACE("CWPhastView::OnDraw radius = %g\n", radius);
+			this->SizeHandles(radius);
+		}
+
 		if (pDC->IsPrinting())
 		{
 			this->MFCWindow->DrawDC(pDC);

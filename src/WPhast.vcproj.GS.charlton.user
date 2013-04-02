@@ -11,7 +11,7 @@
 			<DebugSettings
 				Command="$(TargetPath)"
 				WorkingDirectory=""
-				CommandArguments=""
+				CommandArguments="&quot;C:\Users\charlton\Documents\Visual Studio 2005\Projects\phastpp-trunk\examples\ex4restart\ex4restart.p4w&quot;"
 				Attach="false"
 				DebuggerType="3"
 				Remote="1"
