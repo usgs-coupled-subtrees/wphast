@@ -6,14 +6,14 @@
       <Component Id="BinShortcuts" Guid="*" Win64="$(var.Win64)">
         <Shortcut Id="P4W.exe" Name="$(var.Shortcut)" Target="[bin]P4W.exe"/>
         <RemoveFolder Id="ApplicationProgramsFolder" On="uninstall"/>
-        <RegistryValue Root="HKCU" Key="Software\USGS\$(var.FullName)" Name="installed" Type="integer" Value="1" KeyPath="yes"/>
+        <RegistryValue Root="HKCU" Key="Software\USGS\$(var.Name)-$(var.Build)" Name="installed" Type="integer" Value="1" KeyPath="yes"/>
       </Component>
     </DirectoryRef>
   </Fragment>
   <Fragment>
     <DirectoryRef Id="ApplicationProgramsFolder">
       <Component Id="DocShortcuts" Guid="*">
-        <RegistryValue Root="HKCU" Key="Software\USGS\$(var.FullName)" Name="docs" Type="integer" Value="1" KeyPath="yes"/>
+        <RegistryValue Root="HKCU" Key="Software\USGS\$(var.Name)-$(var.Build)" Name="docs" Type="integer" Value="1" KeyPath="yes"/>
         <Shortcut Id="phast2_TM6_A35.pdf.lnk"
                   Name="User's Guide to PHAST 2 (PDF)"
                   Target="[doc]phast2-TM6-A35.pdf"/>
