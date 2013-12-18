@@ -405,3 +405,49 @@ void TestPrism::TestPointsCtor(void)
 
 	CPPUNIT_ASSERT(pr == pc);
 }
+
+void TestPrism::testOperatorEquals(void)
+{
+	const char input[] =
+		"\t-perimeter SHAPE      GRID   ..\\setup\\phast\\examples\\ex5\\ArcData\\SimplePonds.shp\n"
+		"\t-top       CONSTANT   GRID   20\n"
+		"\t-bottom    SHAPE      GRID   ..\\setup\\phast\\examples\\ex5\\ArcData\\SimpleBath.shp 10\n";
+
+	// Set_bounding_box requires the domain to be set
+	//
+	::domain = zone(275000, 810000, -120, 285000, 830000, 20);
+	::input_error = 0;
+	std::istringstream iss(input);
+
+	Prism prism;
+	while(prism.Read(iss))
+	{
+		if (iss.rdstate() & std::ios::eofbit) break;
+		iss.clear();
+	}
+	CPPUNIT_ASSERT(::input_error == 0);
+	prism.Tidy();
+	CPPUNIT_ASSERT(::input_error == 0);
+
+	CPPUNIT_ASSERT(prism.Point_in_polyhedron(Point(277760., 819191., 10.)));
+	CPPUNIT_ASSERT(prism.Point_in_polyhedron(Point(280300., 820760., 10.)));
+	CPPUNIT_ASSERT(prism.Point_in_polyhedron(Point(281536., 820145., 10.)));
+
+	Prism equals;
+	equals = prism;
+
+	CPPUNIT_ASSERT(prism == equals);
+
+	CPPUNIT_ASSERT(equals.Point_in_polyhedron(Point(277760., 819191., 10.)));
+	CPPUNIT_ASSERT(equals.Point_in_polyhedron(Point(280300., 820760., 10.)));
+	CPPUNIT_ASSERT(equals.Point_in_polyhedron(Point(281536., 820145., 10.)));
+
+	Clear_NNInterpolatorList();
+	FakeFiledata::Clear_fake_file_data_list();
+	Clear_file_data_map();
+	Clear_KDtreeList();
+	::domain = zone(0, 0, 0, 0, 0, 0);
+
+	delete ::map_to_grid;
+	::map_to_grid = 0;
+}

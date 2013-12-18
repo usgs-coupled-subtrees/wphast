@@ -14,6 +14,7 @@ class TestPrism : public CppUnit::TestFixture
 	CPPUNIT_TEST( timeMemDebug );
 	CPPUNIT_TEST( PolygonIntersectsSelf );
 	CPPUNIT_TEST( TestPointsCtor );
+	CPPUNIT_TEST( testOperatorEquals );
 	CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -26,4 +27,5 @@ protected:
 	void timeMemDebug(void);
 	void PolygonIntersectsSelf(void);
 	void TestPointsCtor(void);
+	void testOperatorEquals(void);
 };
