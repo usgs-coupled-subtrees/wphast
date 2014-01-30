@@ -97,12 +97,20 @@ void CZoneFlowRatePropertyPage::DoDataExchange(CDataExchange* pDX)
 			}
 			else
 			{
-				char buf[MAX_PATH+1];
-				if (!::PathSearchAndQualify(filename, buf, MAX_PATH))  // uses cwd if filename is relative
+				if (::PathIsRelative(filename))
 				{
-					TRACE("PathSearchAndQualify failed\n");
+					std::string s((LPCTSTR)filename);
+					zone_budget.Set_filename_heads(s);
 				}
-				zone_budget.Get_filename_heads() = buf;
+				else
+				{
+					char buf[MAX_PATH+1];
+					if (!::PathSearchAndQualify(filename, buf, MAX_PATH))  // uses cwd if filename is relative
+					{
+						TRACE("PathSearchAndQualify failed\n");
+					}
+					zone_budget.Set_filename_heads(buf);
+				}
 			}
 		}
 		else
