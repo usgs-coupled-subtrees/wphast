@@ -4639,7 +4639,7 @@ BOOL CGlobal::IsValidShapefile(CString filename, CDataExchange* pDX /* = NULL */
 				}
 				else
 				{
-					if (pDX)
+					if (pDX && pDX->m_bSaveAndValidate)
 					{
 						CString str;
 						str.Format("Shape file component \"%s\" not found.\n", path);
@@ -4650,7 +4650,7 @@ BOOL CGlobal::IsValidShapefile(CString filename, CDataExchange* pDX /* = NULL */
 			}
 			else
 			{
-				if (pDX)
+				if (pDX && pDX->m_bSaveAndValidate)
 				{
 					CString str;
 					str.Format("Shape file component \"%s\" not found.\n", path);
@@ -4661,7 +4661,7 @@ BOOL CGlobal::IsValidShapefile(CString filename, CDataExchange* pDX /* = NULL */
 		}
 		else
 		{
-			if (pDX)
+			if (pDX && pDX->m_bSaveAndValidate)
 			{
 				CString str;
 				str.Format("Shape file \"%s\" not found.\n", path);
@@ -4670,7 +4670,7 @@ BOOL CGlobal::IsValidShapefile(CString filename, CDataExchange* pDX /* = NULL */
 			}
 		}
 	}
-	if (pDX)
+	if (pDX && pDX->m_bSaveAndValidate)
 	{
 		::AfxMessageBox("Please select a shape file.");
 		pDX->Fail(); // throws
@@ -4703,7 +4703,7 @@ BOOL CGlobal::IsValidRestartFile(CString filename, CDataExchange* pDX /* = NULL 
 		}
 		else
 		{
-			if (pDX)
+			if (pDX && pDX->m_bSaveAndValidate)
 			{
 				CString str;
 				str.Format("Restart file \"%s\" not found.\n", path);
@@ -4712,7 +4712,7 @@ BOOL CGlobal::IsValidRestartFile(CString filename, CDataExchange* pDX /* = NULL 
 			}
 		}
 	}
-	if (pDX)
+	if (pDX && pDX->m_bSaveAndValidate)
 	{
 		::AfxMessageBox("Please select restart file.");
 		pDX->Fail(); // throws
@@ -4733,7 +4733,7 @@ BOOL CGlobal::IsValidXYZFile(CString filename, CDataExchange* pDX /* = NULL */)
 		}
 		else
 		{
-			if (pDX)
+			if (pDX && pDX->m_bSaveAndValidate)
 			{
 				CString str;
 				str.Format("XYZ file \"%s\" not found.\n", path);
@@ -4742,7 +4742,7 @@ BOOL CGlobal::IsValidXYZFile(CString filename, CDataExchange* pDX /* = NULL */)
 			}
 		}
 	}
-	if (pDX)
+	if (pDX && pDX->m_bSaveAndValidate)
 	{
 		::AfxMessageBox("Please select an XYZ file.");
 		pDX->Fail(); // throws
@@ -4763,7 +4763,7 @@ BOOL CGlobal::IsValidXYZTFile(CString filename, CDataExchange* pDX /* = NULL */)
 		}
 		else
 		{
-			if (pDX)
+			if (pDX && pDX->m_bSaveAndValidate)
 			{
 				CString str;
 				str.Format("XYZT file \"%s\" not found.\n", path);
@@ -4772,9 +4772,40 @@ BOOL CGlobal::IsValidXYZTFile(CString filename, CDataExchange* pDX /* = NULL */)
 			}
 		}
 	}
-	if (pDX)
+	if (pDX && pDX->m_bSaveAndValidate)
 	{
 		::AfxMessageBox("Please select an XYZT file.");
+		pDX->Fail(); // throws
+	}
+	return FALSE;
+}
+
+BOOL CGlobal::IsValidDatabaseFile(CString filename, CDataExchange* pDX /* = NULL */)
+{
+	filename.Trim();
+	if (!filename.IsEmpty())
+	{
+		TCHAR szExpanded[2*_MAX_PATH];
+		VERIFY(::ExpandEnvironmentStrings((LPCTSTR)filename, szExpanded, 2*_MAX_PATH));
+
+		if (ATL::ATLPath::FileExists(szExpanded))
+		{
+			return TRUE;
+		}
+		else
+		{
+			if (pDX && pDX->m_bSaveAndValidate)
+			{
+				CString str;
+				str.Format("Database file \"%s\" not found.\n", szExpanded);
+				::AfxMessageBox(str);
+				pDX->Fail(); // throws
+			}
+		}
+	}
+	if (pDX && pDX->m_bSaveAndValidate)
+	{
+		::AfxMessageBox("Please select an database file.");
 		pDX->Fail(); // throws
 	}
 	return FALSE;
@@ -6246,3 +6277,16 @@ CString CGlobal::GetWorldFileName(CString pathName)
 	return strWorldFileName;
 }
 
+BOOL CGlobal::SetEnvironmentVariableSafe(LPCSTR lpName, LPCSTR lpValue)
+{
+	BOOL retval = TRUE;
+	TCHAR buffer[20];
+
+	// only attempt to set if currently unset
+	DWORD dw = ::GetEnvironmentVariable(lpName, buffer, 20);
+	if ((0 == dw) && (ERROR_ENVVAR_NOT_FOUND == ::GetLastError()))
+	{
+		retval = ::SetEnvironmentVariable(lpName, lpValue);
+	}
+	return retval;
+}

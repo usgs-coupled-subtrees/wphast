@@ -4123,12 +4123,6 @@ void CWPhastDoc::OnFileRun()
 	this->WriteTransDat(oss);
 	this->PathsRelativeToAbsolute(szPhastTmp);
 
-	// fully qualify the path name
-	TCHAR szExpanded[2*_MAX_PATH];
-	VERIFY(::ExpandEnvironmentStrings((LPCTSTR)((CWPhastApp*)::AfxGetApp())->settings.strDatabase, szExpanded, 2*_MAX_PATH));
-	CString strDB;
-	strDB.Format("%s", szExpanded);
-
 	std::string str = oss.str();
 	std::istringstream iss(str);
 
@@ -4136,6 +4130,12 @@ void CWPhastDoc::OnFileRun()
 	{
 		return;
 	}
+
+	// fully qualify the path name
+	TCHAR szExpanded[2*_MAX_PATH];
+	VERIFY(::ExpandEnvironmentStrings((LPCTSTR)((CWPhastApp*)::AfxGetApp())->settings.strDatabase, szExpanded, 2*_MAX_PATH));
+	CString strDB;
+	strDB.Format("%s", szExpanded);
 
 	CPhastInput* pInput = CPhastInput::New(iss, (LPCTSTR)strPrefix, (LPCTSTR)strDB);
 	if (!pInput) return;

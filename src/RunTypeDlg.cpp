@@ -7,6 +7,7 @@
 
 #include "srcimpl.h"
 #include "SaveCurrentDirectory.h"
+#include "Global.h"
 
 // CRunTypeDlg dialog
 
@@ -31,6 +32,7 @@ void CRunTypeDlg::DoDataExchange(CDataExchange* pDX)
 
 	// database
 	::DDX_Text(pDX, IDC_DB_COMBO, this->strDatabase);
+	CGlobal::IsValidDatabaseFile(this->strDatabase, pDX);
 
 	// serial or parallel
 	if (pDX->m_bSaveAndValidate)

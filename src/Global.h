@@ -133,9 +133,11 @@ public:
 	static BOOL IsValidRestartFile(CString filename, CDataExchange* pDX = NULL);
 	static BOOL IsValidXYZFile(CString filename, CDataExchange* pDX = NULL);
 	static BOOL IsValidXYZTFile(CString filename, CDataExchange* pDX = NULL);
+	static BOOL IsValidDatabaseFile(CString filename, CDataExchange* pDX = NULL);
 
 	static BOOL FileExists(CString filename);
 
+	static BOOL SetEnvironmentVariableSafe(LPCSTR lpName, LPCSTR lpValue);
 
 public:
 	static herr_t HDFSerializeAllocate(bool bStoring, hid_t loc_id, const char* szName, hsize_t& count, float** buffer);

@@ -98,6 +98,12 @@ BOOL CWPhastApp::InitInstance()
 	TCHAR szExt[_MAX_EXT];
 	VERIFY(::_tsplitpath_s(szPath, szDrive, _MAX_DRIVE, szDir, _MAX_DIR, szFName, _MAX_FNAME, szExt, _MAX_EXT) == 0);
 
+	if (!ATL::ATLPath::IsUNC(szPath))
+	{
+		// capitalize drive
+		if (szDrive[0]) szDrive[0] = toupper(szDrive[0]);
+	}
+
 	// trim off P4W.exe "C:\Program Files (x86)\USGS\Phast for Windows 1.0.1\bin"
 	*(_tcsrchr(szDir, _TEXT('\\'))) = 0; // truncate EXE filename
 
@@ -108,10 +114,10 @@ BOOL CWPhastApp::InitInstance()
 	VERIFY(::_tmakepath_s(szPath, _MAX_DIR, szDrive, szDir, NULL, NULL) == 0);
 	PathRemoveBackslash(szPath);
 
-	VERIFY(::SetEnvironmentVariable(_T("APPLICATIONFOLDER"), szPath));
-	VERIFY(::SetEnvironmentVariable(_T("INSTALLDIR"), szPath));
-	VERIFY(::SetEnvironmentVariable(_T("P4W_TOPDIR"), szPath));
-	VERIFY(::SetEnvironmentVariable(_T("P4W_INSTALLDIR"), szPath));
+	VERIFY(CGlobal::SetEnvironmentVariableSafe(_T("APPLICATIONFOLDER"), szPath));
+	VERIFY(CGlobal::SetEnvironmentVariableSafe(_T("INSTALLDIR"), szPath));
+	VERIFY(CGlobal::SetEnvironmentVariableSafe(_T("P4W_TOPDIR"), szPath));
+	VERIFY(CGlobal::SetEnvironmentVariableSafe(_T("P4W_INSTALLDIR"), szPath));
 
 #if defined(__CPPUNIT__)
 	{
