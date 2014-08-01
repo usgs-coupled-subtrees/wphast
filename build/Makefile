@@ -66,11 +66,11 @@ spkg : check_args
 finish : check_args
 	time ./$(BUILD_SCRIPT) finish 2>&1 | tee finish-$(RELEASE).log
 
-$(BIN_PACKAGE) : $(TARBALL) $(BUILD_SCRIPT) $(PHAST_BUILD)
+$(BIN_PACKAGE) : check_phast_build $(TARBALL) $(BUILD_SCRIPT) $(PHAST_BUILD)
 	@echo "Building package $(BIN_PACKAGE) / $(SRC_PACKAGE)"	
 	time ./$(BUILD_SCRIPT) all 2>&1 | tee all-$(RELEASE).log
 	
-source : check_args $(TARBALL)
+source : check_version check_date $(TARBALL)
 	@echo "created $(TARBALL)"
 
 $(TARBALL) : dist.sh $(DATE_STAMP).tstamp
