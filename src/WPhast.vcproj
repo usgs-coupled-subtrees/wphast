@@ -1488,7 +1488,7 @@
 				Filter="c;cpp"
 				>
 				<File
-					RelativePath="srcinput\accumulate.c"
+					RelativePath=".\srcinput\accumulate.cpp"
 					>
 					<FileConfiguration
 						Name="cppunit|Win32"
@@ -1496,7 +1496,6 @@
 						<Tool
 							Name="VCCLCompilerTool"
 							UsePrecompiledHeader="0"
-							CompileAs="2"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -1505,7 +1504,6 @@
 						<Tool
 							Name="VCCLCompilerTool"
 							UsePrecompiledHeader="0"
-							CompileAs="2"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -1514,7 +1512,6 @@
 						<Tool
 							Name="VCCLCompilerTool"
 							UsePrecompiledHeader="0"
-							CompileAs="2"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -1523,7 +1520,6 @@
 						<Tool
 							Name="VCCLCompilerTool"
 							UsePrecompiledHeader="0"
-							CompileAs="2"
 						/>
 					</FileConfiguration>
 				</File>
@@ -1600,7 +1596,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="srcinput\check.c"
+					RelativePath=".\srcinput\check.cpp"
 					>
 					<FileConfiguration
 						Name="cppunit|Win32"
@@ -1608,7 +1604,6 @@
 						<Tool
 							Name="VCCLCompilerTool"
 							UsePrecompiledHeader="0"
-							CompileAs="2"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -1617,7 +1612,6 @@
 						<Tool
 							Name="VCCLCompilerTool"
 							UsePrecompiledHeader="0"
-							CompileAs="2"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -1626,7 +1620,6 @@
 						<Tool
 							Name="VCCLCompilerTool"
 							UsePrecompiledHeader="0"
-							CompileAs="2"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -1635,7 +1628,6 @@
 						<Tool
 							Name="VCCLCompilerTool"
 							UsePrecompiledHeader="0"
-							CompileAs="2"
 						/>
 					</FileConfiguration>
 				</File>
@@ -1856,7 +1848,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="srcinput\getopt.c"
+					RelativePath=".\srcinput\gpc.cpp"
 					>
 					<FileConfiguration
 						Name="cppunit|Win32"
@@ -1864,7 +1856,6 @@
 						<Tool
 							Name="VCCLCompilerTool"
 							UsePrecompiledHeader="0"
-							CompileAs="2"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -1873,7 +1864,6 @@
 						<Tool
 							Name="VCCLCompilerTool"
 							UsePrecompiledHeader="0"
-							CompileAs="2"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -1882,7 +1872,6 @@
 						<Tool
 							Name="VCCLCompilerTool"
 							UsePrecompiledHeader="0"
-							CompileAs="2"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -1891,12 +1880,11 @@
 						<Tool
 							Name="VCCLCompilerTool"
 							UsePrecompiledHeader="0"
-							CompileAs="2"
 						/>
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="srcinput\gpc.c"
+					RelativePath=".\srcinput\gpc_helper.cpp"
 					>
 					<FileConfiguration
 						Name="cppunit|Win32"
@@ -1904,7 +1892,6 @@
 						<Tool
 							Name="VCCLCompilerTool"
 							UsePrecompiledHeader="0"
-							CompileAs="2"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -1913,7 +1900,6 @@
 						<Tool
 							Name="VCCLCompilerTool"
 							UsePrecompiledHeader="0"
-							CompileAs="2"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -1922,7 +1908,6 @@
 						<Tool
 							Name="VCCLCompilerTool"
 							UsePrecompiledHeader="0"
-							CompileAs="2"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -1931,12 +1916,11 @@
 						<Tool
 							Name="VCCLCompilerTool"
 							UsePrecompiledHeader="0"
-							CompileAs="2"
 						/>
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath=".\srcinput\gpc_helper.c"
+					RelativePath=".\srcinput\main.cpp"
 					>
 					<FileConfiguration
 						Name="cppunit|Win32"
@@ -1944,7 +1928,6 @@
 						<Tool
 							Name="VCCLCompilerTool"
 							UsePrecompiledHeader="0"
-							CompileAs="2"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -1953,7 +1936,6 @@
 						<Tool
 							Name="VCCLCompilerTool"
 							UsePrecompiledHeader="0"
-							CompileAs="2"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -1962,7 +1944,6 @@
 						<Tool
 							Name="VCCLCompilerTool"
 							UsePrecompiledHeader="0"
-							CompileAs="2"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -1971,12 +1952,11 @@
 						<Tool
 							Name="VCCLCompilerTool"
 							UsePrecompiledHeader="0"
-							CompileAs="2"
 						/>
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="srcinput\main.c"
+					RelativePath=".\srcinput\message.cpp"
 					>
 					<FileConfiguration
 						Name="cppunit|Win32"
@@ -1984,7 +1964,6 @@
 						<Tool
 							Name="VCCLCompilerTool"
 							UsePrecompiledHeader="0"
-							CompileAs="2"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -1993,7 +1972,6 @@
 						<Tool
 							Name="VCCLCompilerTool"
 							UsePrecompiledHeader="0"
-							CompileAs="2"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -2002,7 +1980,6 @@
 						<Tool
 							Name="VCCLCompilerTool"
 							UsePrecompiledHeader="0"
-							CompileAs="2"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -2011,47 +1988,6 @@
 						<Tool
 							Name="VCCLCompilerTool"
 							UsePrecompiledHeader="0"
-							CompileAs="2"
-						/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath="srcinput\message.c"
-					>
-					<FileConfiguration
-						Name="cppunit|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="0"
-							CompileAs="2"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="AutoRelease|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="0"
-							CompileAs="2"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="AutoDebug|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="0"
-							CompileAs="2"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="ReleaseRelease|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="0"
-							CompileAs="2"
 						/>
 					</FileConfiguration>
 				</File>
@@ -2348,7 +2284,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="srcinput\read.c"
+					RelativePath=".\srcinput\read.cpp"
 					>
 					<FileConfiguration
 						Name="cppunit|Win32"
@@ -2356,7 +2292,6 @@
 						<Tool
 							Name="VCCLCompilerTool"
 							UsePrecompiledHeader="0"
-							CompileAs="2"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -2365,7 +2300,6 @@
 						<Tool
 							Name="VCCLCompilerTool"
 							UsePrecompiledHeader="0"
-							CompileAs="2"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -2374,7 +2308,6 @@
 						<Tool
 							Name="VCCLCompilerTool"
 							UsePrecompiledHeader="0"
-							CompileAs="2"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -2383,12 +2316,11 @@
 						<Tool
 							Name="VCCLCompilerTool"
 							UsePrecompiledHeader="0"
-							CompileAs="2"
 						/>
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="srcinput\rivers.c"
+					RelativePath=".\srcinput\rivers.cpp"
 					>
 					<FileConfiguration
 						Name="cppunit|Win32"
@@ -2396,7 +2328,6 @@
 						<Tool
 							Name="VCCLCompilerTool"
 							UsePrecompiledHeader="0"
-							CompileAs="2"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -2405,7 +2336,6 @@
 						<Tool
 							Name="VCCLCompilerTool"
 							UsePrecompiledHeader="0"
-							CompileAs="2"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -2414,7 +2344,6 @@
 						<Tool
 							Name="VCCLCompilerTool"
 							UsePrecompiledHeader="0"
-							CompileAs="2"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -2423,12 +2352,11 @@
 						<Tool
 							Name="VCCLCompilerTool"
 							UsePrecompiledHeader="0"
-							CompileAs="2"
 						/>
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="srcinput\structures.c"
+					RelativePath=".\srcinput\structures.cpp"
 					>
 					<FileConfiguration
 						Name="cppunit|Win32"
@@ -2436,7 +2364,6 @@
 						<Tool
 							Name="VCCLCompilerTool"
 							UsePrecompiledHeader="0"
-							CompileAs="2"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -2445,7 +2372,6 @@
 						<Tool
 							Name="VCCLCompilerTool"
 							UsePrecompiledHeader="0"
-							CompileAs="2"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -2454,7 +2380,6 @@
 						<Tool
 							Name="VCCLCompilerTool"
 							UsePrecompiledHeader="0"
-							CompileAs="2"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -2463,12 +2388,11 @@
 						<Tool
 							Name="VCCLCompilerTool"
 							UsePrecompiledHeader="0"
-							CompileAs="2"
 						/>
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="srcinput\time.c"
+					RelativePath=".\srcinput\time.cpp"
 					>
 					<FileConfiguration
 						Name="cppunit|Win32"
@@ -2476,8 +2400,8 @@
 						<Tool
 							Name="VCCLCompilerTool"
 							UsePrecompiledHeader="0"
-							ObjectFile="$(IntDir)/$(InputName)1.obj"
-							CompileAs="2"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -2486,8 +2410,8 @@
 						<Tool
 							Name="VCCLCompilerTool"
 							UsePrecompiledHeader="0"
-							ObjectFile="$(IntDir)/$(InputName)1.obj"
-							CompileAs="2"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -2496,8 +2420,8 @@
 						<Tool
 							Name="VCCLCompilerTool"
 							UsePrecompiledHeader="0"
-							ObjectFile="$(IntDir)/$(InputName)1.obj"
-							CompileAs="2"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -2506,8 +2430,8 @@
 						<Tool
 							Name="VCCLCompilerTool"
 							UsePrecompiledHeader="0"
-							ObjectFile="$(IntDir)/$(InputName)1.obj"
-							CompileAs="2"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
 						/>
 					</FileConfiguration>
 				</File>
@@ -2584,7 +2508,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="srcinput\utilities.c"
+					RelativePath=".\srcinput\utilities.cpp"
 					>
 					<FileConfiguration
 						Name="cppunit|Win32"
@@ -2592,7 +2516,6 @@
 						<Tool
 							Name="VCCLCompilerTool"
 							UsePrecompiledHeader="0"
-							CompileAs="2"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -2601,7 +2524,6 @@
 						<Tool
 							Name="VCCLCompilerTool"
 							UsePrecompiledHeader="0"
-							CompileAs="2"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -2610,7 +2532,6 @@
 						<Tool
 							Name="VCCLCompilerTool"
 							UsePrecompiledHeader="0"
-							CompileAs="2"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -2619,7 +2540,6 @@
 						<Tool
 							Name="VCCLCompilerTool"
 							UsePrecompiledHeader="0"
-							CompileAs="2"
 						/>
 					</FileConfiguration>
 				</File>
@@ -2660,7 +2580,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="srcinput\wells.c"
+					RelativePath=".\srcinput\wells.cpp"
 					>
 					<FileConfiguration
 						Name="cppunit|Win32"
@@ -2668,7 +2588,6 @@
 						<Tool
 							Name="VCCLCompilerTool"
 							UsePrecompiledHeader="0"
-							CompileAs="2"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -2677,7 +2596,6 @@
 						<Tool
 							Name="VCCLCompilerTool"
 							UsePrecompiledHeader="0"
-							CompileAs="2"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -2686,7 +2604,6 @@
 						<Tool
 							Name="VCCLCompilerTool"
 							UsePrecompiledHeader="0"
-							CompileAs="2"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -2695,7 +2612,6 @@
 						<Tool
 							Name="VCCLCompilerTool"
 							UsePrecompiledHeader="0"
-							CompileAs="2"
 						/>
 					</FileConfiguration>
 				</File>
@@ -2736,7 +2652,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="srcinput\write.c"
+					RelativePath=".\srcinput\write.cpp"
 					>
 					<FileConfiguration
 						Name="cppunit|Win32"
@@ -2744,7 +2660,6 @@
 						<Tool
 							Name="VCCLCompilerTool"
 							UsePrecompiledHeader="0"
-							CompileAs="2"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -2753,7 +2668,6 @@
 						<Tool
 							Name="VCCLCompilerTool"
 							UsePrecompiledHeader="0"
-							CompileAs="2"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -2762,7 +2676,6 @@
 						<Tool
 							Name="VCCLCompilerTool"
 							UsePrecompiledHeader="0"
-							CompileAs="2"
 						/>
 					</FileConfiguration>
 					<FileConfiguration
@@ -2771,7 +2684,6 @@
 						<Tool
 							Name="VCCLCompilerTool"
 							UsePrecompiledHeader="0"
-							CompileAs="2"
 						/>
 					</FileConfiguration>
 				</File>

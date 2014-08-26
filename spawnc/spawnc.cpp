@@ -13,11 +13,11 @@ int _tmain(int argc, _TCHAR* argv[])
 	}
 
 	// Construct the full command line
-	TCHAR szCmdLine[MAX_PATH] = { 0 };
+	TCHAR szCmdLine[5*MAX_PATH] = { 0 };
 	for (int x = 2; x < argc; x++)
 	{
-		_tcscat_s(szCmdLine, MAX_PATH, argv[x]);
-		_tcscat_s(szCmdLine, MAX_PATH, __TEXT(" "));
+		_tcscat_s(szCmdLine, 5*MAX_PATH, argv[x]);
+		_tcscat_s(szCmdLine, 5*MAX_PATH, __TEXT(" "));
 	}
 
 	STARTUPINFO         si = { sizeof(si) };
@@ -25,7 +25,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	DWORD dwExitCode = 0;
 
 	HANDLE h[2];
-	h[0] = (HANDLE) _ttoi(argv[1]);  // The inherited event handle
+	h[0] = (HANDLE)(ULONG_PTR)_ttoi(argv[1]);  // The inherited event handle
 
 	// Spawn the other processes as part of this Process Group
 	BOOL f = CreateProcess(
@@ -61,6 +61,33 @@ int _tmain(int argc, _TCHAR* argv[])
 			 break;
 		}
 		CloseHandle(pi.hProcess);
+	}
+	else
+	{
+		LPVOID lpMsgBuf;
+		FormatMessage( 
+			FORMAT_MESSAGE_ALLOCATE_BUFFER | 
+			FORMAT_MESSAGE_FROM_SYSTEM | 
+			FORMAT_MESSAGE_IGNORE_INSERTS,
+			NULL,
+			GetLastError(),
+			MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
+			(LPTSTR) &lpMsgBuf,
+			0,
+			NULL 
+		);
+
+		static TCHAR message[] = _TEXT("CreateProcess failed:\n");
+		DWORD dwWritten;
+		if (HANDLE hStdError = GetStdHandle(STD_ERROR_HANDLE))
+		{
+			WriteFile(hStdError, message, (DWORD)::_tcslen(message), &dwWritten, NULL);
+			WriteFile(hStdError, lpMsgBuf, (DWORD)::_tcslen((LPCTSTR)lpMsgBuf), &dwWritten, NULL);
+			CloseHandle(hStdError);
+		}
+
+		// Free the buffer.
+		LocalFree( lpMsgBuf );
 	}
 	CloseHandle(h[0]);   // Close the inherited event handle
 	return dwExitCode;
