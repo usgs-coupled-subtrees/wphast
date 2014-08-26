@@ -23,7 +23,7 @@ DWORD GetExceptionCode(VOID);
 #define TRUE 1
 #define FALSE 0
 #define OK 1
-#define MAX_LENGTH 100
+#define MAX_LENGTH 256
 #define EMPTY 2
 #define OPTION 8
 #define STOP 1
