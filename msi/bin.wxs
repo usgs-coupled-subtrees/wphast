@@ -38,6 +38,7 @@
         <ComponentGroup Id="Bin64">
             <ComponentRef Id="hdf5dll.dll_64" />
             <ComponentRef Id="libifcoremd.dll_64" />            
+            <ComponentRef Id="libmmd.dll_64" />            
             <ComponentRef Id="szlibdll.dll_64" />
             <ComponentRef Id="zlib1.dll_64" />
             <ComponentRef Id="phast_mt.exe" />
@@ -157,6 +158,9 @@
                 </Component>
                 <Component Id="libifcoremd.dll_64" Guid="*">
                     <File Id="libifcoremd.dll_64" KeyPath="yes" Source="C:\cygwin\home\charlton\programs\phreeqc\wphast-phastpp3-worker\build\libifcoremd.dll" />
+                </Component>
+                <Component Id="libmmd.dll_64" Guid="*">
+                    <File Id="libmmd.dll_64" KeyPath="yes" Source="C:\cygwin\home\charlton\programs\phreeqc\wphast-phastpp3-worker\build\libmmd.dll" />
                 </Component>
                 <Component Id="szlibdll.dll_64" Guid="*">
                     <File Id="szlibdll.dll_64" KeyPath="yes" Source="C:\cygwin\home\charlton\programs\phreeqc\wphast-phastpp3-worker\build\szlibdll.dll" />
