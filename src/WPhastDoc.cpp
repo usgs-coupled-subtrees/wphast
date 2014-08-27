@@ -4217,9 +4217,22 @@ void CWPhastDoc::OnFileRun()
 
 		CRunDialog run;
 		run.SetWorkingDirectory(szPhastTmpDir);
-		run.bParallel      = ((CWPhastApp*)::AfxGetApp())->settings.bRunParallel;
-		run.strCommand     = ((CWPhastApp*)::AfxGetApp())->settings.strCommand;
-		run.strCommandArgs = ((CWPhastApp*)::AfxGetApp())->settings.strCommandArgs;
+		if (((CWPhastApp*)::AfxGetApp())->settings.bRunMPI)
+		{
+			run.strCommand     = ((CWPhastApp*)::AfxGetApp())->settings.strMPICommand;
+			run.strCommandArgs = ((CWPhastApp*)::AfxGetApp())->settings.strCommandArgs;
+		}
+		else
+		{
+			// expand environmentals
+			TCHAR szCommand[2*_MAX_PATH];
+			VERIFY(::ExpandEnvironmentStrings((LPCTSTR)((CWPhastApp*)::AfxGetApp())->settings.strMTCommand, szCommand, 2*_MAX_PATH));
+			run.strCommand = szCommand;
+
+			char buffer[10];
+			sprintf(buffer, "%d", ((CWPhastApp*)::AfxGetApp())->settings.nThreads); 
+			run.strCommandArgs = buffer;
+		}
 		run.DoModal();
 	}
 }

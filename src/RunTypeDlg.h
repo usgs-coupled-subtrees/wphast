@@ -22,8 +22,10 @@ public:
 	enum { IDD = IDD_RUNTYPEDLG };
 
 	CString strDatabase;
-	BOOL bParallel;
-	CString strCommand;
+	int nThreads;
+	BOOL bRunMPI;
+	CString strMPICommand;
+	CString strMTCommand;
 	CString strCommandArgs;
 	CRecentFileList* pRecentDBFileList;
 

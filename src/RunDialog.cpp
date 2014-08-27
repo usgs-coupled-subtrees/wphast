@@ -89,11 +89,7 @@ void CRunDialog::PrepAndLaunchRedirectedChild(HANDLE hChildStdOut,
 	// Note that dwFlags must include STARTF_USESHOWWINDOW if you want to
 	// use the wShowWindow flags.
 
-	TCHAR szPhastExe[] = _T("phast-ser.exe");
-
-	TCHAR szCmdLine[2*MAX_PATH+100];
-	TCHAR szExpandedCmdLine[2*MAX_PATH+100];
-
+	TCHAR szCmdLine[5*MAX_PATH+100];
 
 	// Create an inheritable event handle to use as our IPC mechanism
 	// to terminate the processes in the process group
@@ -106,19 +102,11 @@ void CRunDialog::PrepAndLaunchRedirectedChild(HANDLE hChildStdOut,
 	::GetModuleFileName(NULL, szCmdLine, MAX_PATH);
 	*(_tcsrchr(szCmdLine, _TEXT('\\')) + 1) = 0; // truncate EXE filename
 
-	if (this->bParallel)
-	{
-		::_stprintf(::_tcschr(szCmdLine, 0), _TEXT("spawnc.exe %d %s %s"), (int)this->eventTerminateProcessGroup, this->strCommand, this->strCommandArgs);
-	}
-	else
-	{
-		::_stprintf(::_tcschr(szCmdLine, 0), _TEXT("spawnc.exe %d %s"), (int)this->eventTerminateProcessGroup, szPhastExe);
-	}
-	::ExpandEnvironmentStrings(szCmdLine, szExpandedCmdLine, 2*MAX_PATH+100);
+	::_stprintf(::_tcschr(szCmdLine, 0), _TEXT("spawnc.exe %d %s %s"), (int)this->eventTerminateProcessGroup, this->strCommand, this->strCommandArgs);
 
 	if (!::CreateProcess(
 		NULL,
-		szExpandedCmdLine,
+		szCmdLine,
 		NULL,
 		NULL,
 		TRUE,

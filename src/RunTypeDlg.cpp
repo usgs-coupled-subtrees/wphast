@@ -11,11 +11,15 @@
 
 // CRunTypeDlg dialog
 
+#undef IDC_SERIAL_RADIO    // -> IDC_MT_RADIO
+#undef IDC_PARALLEL_RADIO  // -> IDC_MPI_RADIO
+
 IMPLEMENT_DYNAMIC(CRunTypeDlg, baseCRunTypeDlg)
 
 CRunTypeDlg::CRunTypeDlg(CWnd* pParent /*=NULL*/)
 : baseCRunTypeDlg(CRunTypeDlg::IDD, pParent)
 , pRecentDBFileList(0)
+, nThreads(1)
 {
 
 }
@@ -37,13 +41,13 @@ void CRunTypeDlg::DoDataExchange(CDataExchange* pDX)
 	// serial or parallel
 	if (pDX->m_bSaveAndValidate)
 	{
-		switch (this->GetCheckedRadioButton(IDC_PARALLEL_RADIO, IDC_SERIAL_RADIO))
+		switch (this->GetCheckedRadioButton(IDC_MPI_RADIO, IDC_MT_RADIO))
 		{
-		case IDC_SERIAL_RADIO:
-			this->bParallel = FALSE;
+		case IDC_MT_RADIO:
+			this->bRunMPI = FALSE;
 			break;
-		case IDC_PARALLEL_RADIO:
-			this->bParallel = TRUE;
+		case IDC_MPI_RADIO:
+			this->bRunMPI = TRUE;
 			break;
 		default:
 			ASSERT(FALSE);
@@ -52,28 +56,41 @@ void CRunTypeDlg::DoDataExchange(CDataExchange* pDX)
 	}
 	else
 	{
-		if (this->bParallel)
+		if (this->bRunMPI)
 		{
-			this->CheckRadioButton(IDC_PARALLEL_RADIO, IDC_SERIAL_RADIO, IDC_PARALLEL_RADIO);
+			this->CheckRadioButton(IDC_MPI_RADIO, IDC_MT_RADIO, IDC_MPI_RADIO);
 		}
 		else
 		{
-			this->CheckRadioButton(IDC_PARALLEL_RADIO, IDC_SERIAL_RADIO, IDC_SERIAL_RADIO);
+			this->CheckRadioButton(IDC_MPI_RADIO, IDC_MT_RADIO, IDC_MT_RADIO);
 		}
 		this->OnBnClickedRadio();
 	}
 
-	// run command
-	::DDX_Text(pDX, IDC_COMMAND_EDIT, this->strCommand);
+	if (this->bRunMPI)
+	{
+		// run command
+		::DDX_Text(pDX, IDC_COMMAND_EDIT, this->strMPICommand);
 
-	// run command
-	::DDX_Text(pDX, IDC_CMD_ARGS_EDIT, this->strCommandArgs);
+		// run command
+		::DDX_Text(pDX, IDC_CMD_ARGS_EDIT, this->strCommandArgs);
+	}
+	else
+	{
+		// run command
+		::DDX_Text(pDX, IDC_COMMAND_EDIT, this->strMTCommand);
+
+		// threads
+		::DDX_Text(pDX, IDC_THREADS_EDIT, this->nThreads);
+		::DDV_MinMaxInt(pDX, this->nThreads, 1, INT_MAX);
+	}
+
 }
 
 
 BEGIN_MESSAGE_MAP(CRunTypeDlg, baseCRunTypeDlg)
-	ON_BN_CLICKED(IDC_SERIAL_RADIO, &CRunTypeDlg::OnBnClickedRadio)	
-	ON_BN_CLICKED(IDC_PARALLEL_RADIO, &CRunTypeDlg::OnBnClickedRadio)
+	ON_BN_CLICKED(IDC_MT_RADIO, &CRunTypeDlg::OnBnClickedRadio)	
+	ON_BN_CLICKED(IDC_MPI_RADIO, &CRunTypeDlg::OnBnClickedRadio)
 	ON_BN_CLICKED(IDC_DB_BROWSE, &CRunTypeDlg::OnBnClickedDbBrowse)
 END_MESSAGE_MAP()
 
@@ -82,16 +99,16 @@ END_MESSAGE_MAP()
 
 void CRunTypeDlg::OnBnClickedRadio()
 {
-	switch (this->GetCheckedRadioButton(IDC_PARALLEL_RADIO, IDC_SERIAL_RADIO))
+	switch (this->GetCheckedRadioButton(IDC_MPI_RADIO, IDC_MT_RADIO))
 	{
-	case IDC_SERIAL_RADIO:
+	case IDC_MT_RADIO:
 		if (CWnd *pWnd = this->GetDlgItem(IDC_COMMAND_STATIC))
 		{
-			pWnd->EnableWindow(FALSE);
+			pWnd->EnableWindow(TRUE);
 		}
 		if (CWnd *pWnd = this->GetDlgItem(IDC_COMMAND_EDIT))
 		{
-			pWnd->EnableWindow(FALSE);
+			pWnd->EnableWindow(TRUE);
 		}
 
 		if (CWnd *pWnd = this->GetDlgItem(IDC_CMD_ARGS_STATIC))
@@ -101,9 +118,18 @@ void CRunTypeDlg::OnBnClickedRadio()
 		if (CWnd *pWnd = this->GetDlgItem(IDC_CMD_ARGS_EDIT))
 		{
 			pWnd->EnableWindow(FALSE);
+		}
+
+		if (CWnd *pWnd = this->GetDlgItem(IDC_THREADS_STATIC))
+		{
+			pWnd->EnableWindow(TRUE);
+		}
+		if (CWnd *pWnd = this->GetDlgItem(IDC_THREADS_EDIT))
+		{
+			pWnd->EnableWindow(TRUE);
 		}
 		break;
-	case IDC_PARALLEL_RADIO:
+	case IDC_MPI_RADIO:
 		if (CWnd *pWnd = this->GetDlgItem(IDC_COMMAND_STATIC))
 		{
 			pWnd->EnableWindow(TRUE);
@@ -120,6 +146,15 @@ void CRunTypeDlg::OnBnClickedRadio()
 		if (CWnd *pWnd = this->GetDlgItem(IDC_CMD_ARGS_EDIT))
 		{
 			pWnd->EnableWindow(TRUE);
+		}
+
+		if (CWnd *pWnd = this->GetDlgItem(IDC_THREADS_STATIC))
+		{
+			pWnd->EnableWindow(FALSE);
+		}
+		if (CWnd *pWnd = this->GetDlgItem(IDC_THREADS_EDIT))
+		{
+			pWnd->EnableWindow(FALSE);
 		}
 		break;
 	default:
@@ -142,8 +177,12 @@ BOOL CRunTypeDlg::OnInitDialog()
 		<< 	( paneCtrl(IDC_STATIC_RT_GB, VERTICAL, GREEDY, nDefaultBorder, 10, 10 )
 			<< itemFixed(VERTICAL, 1)
 			<< (pane(HORIZONTAL)
-				<< item(IDC_SERIAL_RADIO, NORESIZE | ALIGN_VCENTER )
-				<< item(IDC_PARALLEL_RADIO, NORESIZE | ALIGN_VCENTER )
+				<< item(IDC_MT_RADIO, NORESIZE | ALIGN_VCENTER )
+				<< item(IDC_THREADS_STATIC, NORESIZE | ALIGN_VCENTER )
+				<< item(IDC_THREADS_EDIT, NORESIZE | ALIGN_VCENTER )
+				<< itemGrowing(HORIZONTAL)
+				<< item(IDC_MPI_RADIO, NORESIZE | ALIGN_VCENTER )
+				<< itemGrowing(HORIZONTAL)
 			)
 			<< itemFixed(VERTICAL, 6)
 			<< (pane(HORIZONTAL)

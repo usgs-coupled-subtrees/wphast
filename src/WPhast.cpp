@@ -498,12 +498,17 @@ void CWPhastApp::OnFileNew()
 
 INT_PTR CWPhastApp::RunTypeDlgDoModal()
 {
+	// only run mt for now
+	this->settings.bRunMPI = FALSE;
+
 	CRunTypeDlg dlg;
 	dlg.pRecentDBFileList = this->pRecentDBFileList;
 	dlg.strDatabase       = this->settings.strDatabase;
-	dlg.bParallel         = this->settings.bRunParallel;
-	dlg.strCommand        = this->settings.strCommand;
+	dlg.bRunMPI           = this->settings.bRunMPI;
+	dlg.strMPICommand     = this->settings.strMPICommand;
+	dlg.strMTCommand      = this->settings.strMTCommand;
 	dlg.strCommandArgs    = this->settings.strCommandArgs;
+	dlg.nThreads          = this->settings.nThreads;
 
 	INT_PTR rval = dlg.DoModal();
 	if (rval == IDOK)
@@ -515,18 +520,26 @@ INT_PTR CWPhastApp::RunTypeDlgDoModal()
 			this->pRecentDBFileList->WriteList();
 		}
 
-		this->settings.bRunParallel = dlg.bParallel;
+		this->settings.bRunMPI = dlg.bRunMPI;
 
 		WriteProfileString(_T("Settings"), _T("Database"), this->settings.strDatabase);
-		WriteProfileInt(_T("Settings"), _T("RunParallel"), this->settings.bRunParallel);
+		WriteProfileInt(_T("Settings"),    _T("RunMPI"),   this->settings.bRunMPI);
 
-		if (dlg.bParallel)
+		if (dlg.bRunMPI)
 		{
-			this->settings.strCommand     = dlg.strCommand;
+			this->settings.strMPICommand  = dlg.strMPICommand;
 			this->settings.strCommandArgs = dlg.strCommandArgs;
 
-			WriteProfileString(_T("Settings"), _T("RunCommand"), this->settings.strCommand);
+			WriteProfileString(_T("Settings"), _T("RunMPICommand"),  this->settings.strMPICommand);
 			WriteProfileString(_T("Settings"), _T("RunCommandArgs"), this->settings.strCommandArgs);
+		}
+		else
+		{
+			this->settings.strMTCommand = dlg.strMTCommand;
+			this->settings.nThreads     = dlg.nThreads;
+
+			WriteProfileString(_T("Settings"), _T("RunMTCommand"), this->settings.strMTCommand);
+			WriteProfileInt(_T("Settings"),    _T("Threads"),      this->settings.nThreads);
 		}
 	}
 	return rval;
@@ -571,11 +584,18 @@ BOOL CWPhastApp::LoadMoreProfileSettings(void)
 		}
 	}
 
+	SYSTEM_INFO sysinfo;
+	::GetSystemInfo(&sysinfo);
+	int threads = (int) sysinfo.dwNumberOfProcessors;
+
 	// Get default database from registry
 	this->settings.strDatabase    = (this->pRecentDBFileList->GetSize()) ? (*this->pRecentDBFileList)[0] : _T("%INSTALLDIR%\\database\\phast.dat");
-	this->settings.bRunParallel   = GetProfileInt   (_T("Settings"), _T("RunParallel"),    0                                         );
-	this->settings.strCommand     = GetProfileString(_T("Settings"), _T("RunCommand"),     _T("%PROGRAMFILES%\\MPICH2\\bin\\mpiexec"));
-	this->settings.strCommandArgs = GetProfileString(_T("Settings"), _T("RunCommandArgs"), szCmdArgs                                 );
+	
+	this->settings.bRunMPI        = GetProfileInt   (_T("Settings"), _T("RunMPI"),          0                                             );
+	this->settings.nThreads       = GetProfileInt   (_T("Settings"), _T("Threads"),         threads                                       );
+	this->settings.strMPICommand  = GetProfileString(_T("Settings"), _T("RunMPICommand"),   _T("%PROGRAMFILES%\\MPICH2\\bin\\mpiexec.exe"));
+	this->settings.strMTCommand   = GetProfileString(_T("Settings"), _T("RunMTCommand"),    _T("%INSTALLDIR%\\bin64\\phast_mt.exe")       );
+	this->settings.strCommandArgs = GetProfileString(_T("Settings"), _T("RunCommandArgs"),  szCmdArgs                                     );
 
 	return TRUE;
 }
