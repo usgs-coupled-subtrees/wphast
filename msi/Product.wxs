@@ -50,12 +50,20 @@
     <!-- merge modules -->
     <DirectoryRef Id="APPLICATIONFOLDER">
       <?if $(sys.BUILDARCH)=x64 ?>
+      <!--
       <Merge Id="CRT" Language="1033" SourceFile="$(var.MergeDir)\Microsoft_VC80_CRT_x86_x64.msm" DiskId="1" />
       <Merge Id="CRT Policy" Language="1033" SourceFile="$(var.MergeDir)\policy_8_0_Microsoft_VC80_CRT_x86_x64.msm" DiskId="1" />
       <Merge Id="ATL" Language="1033" SourceFile="$(var.MergeDir)\Microsoft_VC80_ATL_x86_x64.msm" DiskId="1" />
       <Merge Id="ATL Policy" Language="1033" SourceFile="$(var.MergeDir)\policy_8_0_Microsoft_VC80_ATL_x86_x64.msm" DiskId="1" />
       <Merge Id='MFC' Language='0' SourceFile='$(var.MergeDir)\Microsoft_VC80_MFC_x86_x64.msm' DiskId='1' />
       <Merge Id='MFC Policy' Language='0' SourceFile='$(var.MergeDir)\policy_8_0_Microsoft_VC80_MFC_x86_x64.msm' DiskId='1' />
+      -->
+      <Merge Id="CRT" Language="1033" SourceFile="$(var.MergeDir)\Microsoft_VC80_CRT_x86.msm" DiskId="1" />
+      <Merge Id="CRT Policy" Language="1033" SourceFile="$(var.MergeDir)\policy_8_0_Microsoft_VC80_CRT_x86.msm" DiskId="1" />
+      <Merge Id="ATL" Language="1033" SourceFile="$(var.MergeDir)\Microsoft_VC80_ATL_x86.msm" DiskId="1" />
+      <Merge Id="ATL Policy" Language="1033" SourceFile="$(var.MergeDir)\policy_8_0_Microsoft_VC80_ATL_x86.msm" DiskId="1" />
+      <Merge Id='MFC' Language='0' SourceFile='$(var.MergeDir)\Microsoft_VC80_MFC_x86.msm' DiskId='1' />
+      <Merge Id='MFC Policy' Language='0' SourceFile='$(var.MergeDir)\policy_8_0_Microsoft_VC80_MFC_x86.msm' DiskId='1' />
       <Merge Id='VC110_CRT_x64' Language='0' SourceFile='C:\cygwin\home\charlton\programs\phreeqc\wphast-phastpp3-worker\build\Microsoft_VC110_CRT_x64.msm' DiskId='1' />
       <Merge Id='VC110_OpenMP_x64' Language='0' SourceFile='C:\cygwin\home\charlton\programs\phreeqc\wphast-phastpp3-worker\build\Microsoft_VC110_OpenMP_x64.msm' DiskId='1' />
       <?else?>
