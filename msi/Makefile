@@ -1,6 +1,6 @@
 # $Id$
 
-MSI := bin/Release/phast4windows.msi
+MSI := bin/x64/Release/phast4windows.msi
 
 DEVENV := devenv
 
