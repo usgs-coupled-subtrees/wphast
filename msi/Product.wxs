@@ -48,7 +48,8 @@
     </Directory>
 
     <!-- merge modules -->
-    <DirectoryRef Id="APPLICATIONFOLDER">
+    <!-- <DirectoryRef Id="APPLICATIONFOLDER">-->
+    <DirectoryRef Id="TARGETDIR">
       <?if $(sys.BUILDARCH)=x64 ?>
       <!--
       <Merge Id="CRT" Language="1033" SourceFile="$(var.MergeDir)\Microsoft_VC80_CRT_x86_x64.msm" DiskId="1" />
