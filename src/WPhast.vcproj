@@ -46,7 +46,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(DEV_CPPUNIT_1.10)\include&quot;;&quot;$(DEV_VTK_542_MEM_VS8_INC)&quot;;&quot;$(DEV_HDF5_INC)&quot;;&quot;$(DEV_XERCES)/include&quot;;&quot;$(DEV_BOOST)&quot;"
+				AdditionalIncludeDirectories="&quot;$(DEV_CPPUNIT_1.10)\include&quot;;&quot;$(DEV_VTK_542_MEM_VS8_INC)&quot;;&quot;$(DEV_HDF5_INC)&quot;;&quot;$(DEV_XERCES)/include&quot;;&quot;$(DEV_BOOST)&quot;;phreeqc3/PhreeqcKeywords"
 				PreprocessorDefinitions="__CPPUNIT__;WPHAST_AUTOMATION;WIN32;_WINDOWS;_DEBUG;__WPHAST__;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_WARNINGS;ANSI_DECLARATORS;WINVER=0x0400"
 				MinimalRebuild="false"
 				ExceptionHandling="2"
@@ -147,7 +147,7 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				OmitFramePointers="true"
-				AdditionalIncludeDirectories="&quot;$(DEV_VTK_542_VS8_DLL_INC)&quot;;&quot;$(DEV_HDF5_INC)&quot;;&quot;$(DEV_XERCES)/include&quot;;&quot;$(DEV_BOOST)&quot;"
+				AdditionalIncludeDirectories="&quot;$(DEV_VTK_542_VS8_DLL_INC)&quot;;&quot;$(DEV_HDF5_INC)&quot;;&quot;$(DEV_XERCES)/include&quot;;&quot;$(DEV_BOOST)&quot;;phreeqc3/PhreeqcKeywords"
 				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;__WPHAST__;WPHAST_AUTOMATION;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_WARNINGS;ANSI_DECLARATORS"
 				StringPooling="true"
 				MinimalRebuild="false"
@@ -241,7 +241,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(DEV_VTK_542_VS8_DLL_INC)&quot;;&quot;$(DEV_HDF5_INC)&quot;;&quot;$(DEV_XERCES)/include&quot;;&quot;$(DEV_BOOST)&quot;"
+				AdditionalIncludeDirectories="&quot;$(DEV_VTK_542_VS8_DLL_INC)&quot;;&quot;$(DEV_HDF5_INC)&quot;;&quot;$(DEV_XERCES)/include&quot;;&quot;$(DEV_BOOST)&quot;;phreeqc3/PhreeqcKeywords"
 				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;__WPHAST__;WPHAST_AUTOMATION;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_WARNINGS;ANSI_DECLARATORS;WINVER=0x0400"
 				MinimalRebuild="true"
 				ExceptionHandling="2"
@@ -342,7 +342,7 @@
 				OmitFramePointers="true"
 				EnableFiberSafeOptimizations="true"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories="&quot;$(DEV_VTK_542_VS8_DLL_INC)&quot;;&quot;$(DEV_HDF5_INC)&quot;;&quot;$(DEV_XERCES)/include&quot;;&quot;$(DEV_BOOST)&quot;"
+				AdditionalIncludeDirectories="&quot;$(DEV_VTK_542_VS8_DLL_INC)&quot;;&quot;$(DEV_HDF5_INC)&quot;;&quot;$(DEV_XERCES)/include&quot;;&quot;$(DEV_BOOST)&quot;;phreeqc3/PhreeqcKeywords"
 				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;__WPHAST__;WPHAST_AUTOMATION;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_WARNINGS;ANSI_DECLARATORS"
 				StringPooling="true"
 				MinimalRebuild="false"
@@ -4698,7 +4698,7 @@
 				Name="phreeqc3"
 				>
 				<File
-					RelativePath=".\phreeqc3\Keywords.cpp"
+					RelativePath=".\phreeqc3\PhreeqcKeywords\Keywords.cpp"
 					>
 					<FileConfiguration
 						Name="cppunit|Win32"
