@@ -498,9 +498,6 @@ void CWPhastApp::OnFileNew()
 
 INT_PTR CWPhastApp::RunTypeDlgDoModal()
 {
-	// only run mt for now
-	this->settings.bRunMPI = FALSE;
-
 	CRunTypeDlg dlg;
 	dlg.pRecentDBFileList = this->pRecentDBFileList;
 	dlg.strDatabase       = this->settings.strDatabase;
@@ -554,15 +551,15 @@ BOOL CWPhastApp::LoadMoreProfileSettings(void)
 {
 	ASSERT_VALID(this);
 
-	// build phast-mpich cmd
+	// build phast-msmpi cmd
 	TCHAR szCmd[2*MAX_PATH+100];
 	::GetModuleFileName(NULL, szCmd, MAX_PATH);
 	*(_tcsrchr(szCmd, _TEXT('\\')) + 1) = 0;
-	_stprintf(_tcschr(szCmd, 0), _T("phast-mpich2.exe"));
+	_stprintf(_tcschr(szCmd, 0), _T("phast-msmpi.exe"));
 
 	// build mpiexec args
 	TCHAR szCmdArgs[2*MAX_PATH+100];
-	_stprintf(szCmdArgs, _T("%s %s"), _T("-localonly %NUMBER_OF_PROCESSORS%"), szCmd);
+	//_stprintf(szCmdArgs, _T("%s %s"), _T("-localonly %NUMBER_OF_PROCESSORS%"), szCmd);
 
 
 	if (this->pRecentDBFileList == 0)
@@ -588,13 +585,19 @@ BOOL CWPhastApp::LoadMoreProfileSettings(void)
 	::GetSystemInfo(&sysinfo);
 	int threads = (int) sysinfo.dwNumberOfProcessors;
 
+	_stprintf(szCmdArgs, _T("-n %d %s"), threads, _T("\"%INSTALLDIR%\\bin64\\phast-msmpi.exe\""));
+
 	// Get default database from registry
 	this->settings.strDatabase    = (this->pRecentDBFileList->GetSize()) ? (*this->pRecentDBFileList)[0] : _T("%INSTALLDIR%\\database\\phast.dat");
+	if (this->settings.strDatabase.IsEmpty())
+	{
+		this->settings.strDatabase = _T("%INSTALLDIR%\\database\\phast.dat");
+	}
 	
 	this->settings.bRunMPI        = GetProfileInt   (_T("Settings"), _T("RunMPI"),          0                                             );
 	this->settings.nThreads       = GetProfileInt   (_T("Settings"), _T("Threads"),         threads                                       );
-	this->settings.strMPICommand  = GetProfileString(_T("Settings"), _T("RunMPICommand"),   _T("%PROGRAMFILES%\\MPICH2\\bin\\mpiexec.exe"));
-	this->settings.strMTCommand   = GetProfileString(_T("Settings"), _T("RunMTCommand"),    _T("%INSTALLDIR%\\bin64\\phast_mt.exe")       );
+	this->settings.strMPICommand  = GetProfileString(_T("Settings"), _T("RunMPICommand"),   _T("\"%MSMPI_BIN%\\mpiexec.exe\"")            );
+	this->settings.strMTCommand   = GetProfileString(_T("Settings"), _T("RunMTCommand"),    _T("\"%INSTALLDIR%\\bin64\\phast-mt.exe\"")   );
 	this->settings.strCommandArgs = GetProfileString(_T("Settings"), _T("RunCommandArgs"),  szCmdArgs                                     );
 
 	return TRUE;

@@ -4132,8 +4132,8 @@ void CWPhastDoc::OnFileRun()
 	}
 
 	// fully qualify the path name
-	TCHAR szExpanded[2*_MAX_PATH];
-	VERIFY(::ExpandEnvironmentStrings((LPCTSTR)((CWPhastApp*)::AfxGetApp())->settings.strDatabase, szExpanded, 2*_MAX_PATH));
+	TCHAR szExpanded[10*_MAX_PATH];
+	VERIFY(::ExpandEnvironmentStrings((LPCTSTR)((CWPhastApp*)::AfxGetApp())->settings.strDatabase, szExpanded, 9*_MAX_PATH));
 	CString strDB;
 	strDB.Format("%s", szExpanded);
 
@@ -4219,14 +4219,19 @@ void CWPhastDoc::OnFileRun()
 		run.SetWorkingDirectory(szPhastTmpDir);
 		if (((CWPhastApp*)::AfxGetApp())->settings.bRunMPI)
 		{
-			run.strCommand     = ((CWPhastApp*)::AfxGetApp())->settings.strMPICommand;
-			run.strCommandArgs = ((CWPhastApp*)::AfxGetApp())->settings.strCommandArgs;
+			// expand environmentals
+			TCHAR szCommand[10*_MAX_PATH];
+			VERIFY(::ExpandEnvironmentStrings((LPCTSTR)((CWPhastApp*)::AfxGetApp())->settings.strMPICommand, szCommand, 9*_MAX_PATH));
+			run.strCommand = szCommand;
+
+			VERIFY(::ExpandEnvironmentStrings((LPCTSTR)((CWPhastApp*)::AfxGetApp())->settings.strCommandArgs, szCommand, 9*_MAX_PATH));
+			run.strCommandArgs = szCommand;
 		}
 		else
 		{
 			// expand environmentals
-			TCHAR szCommand[2*_MAX_PATH];
-			VERIFY(::ExpandEnvironmentStrings((LPCTSTR)((CWPhastApp*)::AfxGetApp())->settings.strMTCommand, szCommand, 2*_MAX_PATH));
+			TCHAR szCommand[10*_MAX_PATH];
+			VERIFY(::ExpandEnvironmentStrings((LPCTSTR)((CWPhastApp*)::AfxGetApp())->settings.strMTCommand, szCommand, 9*_MAX_PATH));
 			run.strCommand = szCommand;
 
 			char buffer[10];

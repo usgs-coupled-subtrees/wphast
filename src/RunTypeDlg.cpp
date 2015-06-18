@@ -74,6 +74,12 @@ void CRunTypeDlg::DoDataExchange(CDataExchange* pDX)
 
 		// run command
 		::DDX_Text(pDX, IDC_CMD_ARGS_EDIT, this->strCommandArgs);
+
+		if (!pDX->m_bSaveAndValidate)
+		{
+			// threads
+			::DDX_Text(pDX, IDC_THREADS_EDIT, this->nThreads);
+		}
 	}
 	else
 	{
@@ -109,6 +115,7 @@ void CRunTypeDlg::OnBnClickedRadio()
 		if (CWnd *pWnd = this->GetDlgItem(IDC_COMMAND_EDIT))
 		{
 			pWnd->EnableWindow(TRUE);
+			pWnd->SetWindowTextA(this->strMTCommand);
 		}
 
 		if (CWnd *pWnd = this->GetDlgItem(IDC_CMD_ARGS_STATIC))
@@ -117,6 +124,7 @@ void CRunTypeDlg::OnBnClickedRadio()
 		}
 		if (CWnd *pWnd = this->GetDlgItem(IDC_CMD_ARGS_EDIT))
 		{
+			pWnd->SetWindowTextA(_T(""));
 			pWnd->EnableWindow(FALSE);
 		}
 
@@ -126,6 +134,14 @@ void CRunTypeDlg::OnBnClickedRadio()
 		}
 		if (CWnd *pWnd = this->GetDlgItem(IDC_THREADS_EDIT))
 		{
+			CString str;
+			pWnd->GetWindowTextA(str);
+			str.Trim();
+			if (str.IsEmpty())
+			{
+				str.Format(_T("%d"), this->nThreads);
+				pWnd->SetWindowTextA(str);
+			}
 			pWnd->EnableWindow(TRUE);
 		}
 		break;
@@ -137,6 +153,7 @@ void CRunTypeDlg::OnBnClickedRadio()
 		if (CWnd *pWnd = this->GetDlgItem(IDC_COMMAND_EDIT))
 		{
 			pWnd->EnableWindow(TRUE);
+			pWnd->SetWindowTextA(this->strMPICommand);
 		}
 
 		if (CWnd *pWnd = this->GetDlgItem(IDC_CMD_ARGS_STATIC))
@@ -146,6 +163,7 @@ void CRunTypeDlg::OnBnClickedRadio()
 		if (CWnd *pWnd = this->GetDlgItem(IDC_CMD_ARGS_EDIT))
 		{
 			pWnd->EnableWindow(TRUE);
+			pWnd->SetWindowTextA(this->strCommandArgs);
 		}
 
 		if (CWnd *pWnd = this->GetDlgItem(IDC_THREADS_STATIC))
