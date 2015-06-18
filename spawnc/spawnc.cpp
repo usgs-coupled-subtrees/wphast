@@ -16,7 +16,9 @@ int _tmain(int argc, _TCHAR* argv[])
 	TCHAR szCmdLine[5*MAX_PATH] = { 0 };
 	for (int x = 2; x < argc; x++)
 	{
+		_tcscat_s(szCmdLine, 5*MAX_PATH, __TEXT("\""));
 		_tcscat_s(szCmdLine, 5*MAX_PATH, argv[x]);
+		_tcscat_s(szCmdLine, 5*MAX_PATH, __TEXT("\""));
 		_tcscat_s(szCmdLine, 5*MAX_PATH, __TEXT(" "));
 	}
 
