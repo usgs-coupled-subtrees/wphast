@@ -26,6 +26,16 @@
     <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
     <DefineConstants>Major=$(Major);Minor=$(Minor);Patch=$(Patch);Build=$(Build);phastSerExePath=$(phastSerExePath);phastMPICH2ExePath=$(phastMPICH2ExePath);BinDir=..\src\AutoRelease;ExampleDir=phast\examples;DbDir=phast\database</DefineConstants>
   </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
+    <DefineConstants>Debug;Major=$(Major);Minor=$(Minor);Build=$(Build);phastSerExePath=$(phastSerExePath);phastMPICH2ExePath=$(phastMPICH2ExePath);BinDir=..\src\AutoRelease;phast\examples</DefineConstants>
+    <OutputPath>bin\$(Platform)\$(Configuration)\</OutputPath>
+    <IntermediateOutputPath>obj\$(Platform)\$(Configuration)\</IntermediateOutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
+    <DefineConstants>Major=$(Major);Minor=$(Minor);Patch=$(Patch);Build=$(Build);phastSerExePath=$(phastSerExePath);phastMPICH2ExePath=$(phastMPICH2ExePath);BinDir=..\src\AutoRelease;ExampleDir=phast\examples;DbDir=phast\database</DefineConstants>
+    <OutputPath>bin\$(Platform)\$(Configuration)\</OutputPath>
+    <IntermediateOutputPath>obj\$(Platform)\$(Configuration)\</IntermediateOutputPath>
+  </PropertyGroup>
   <ItemGroup>
     <Compile Include="bin.wxs" />
     <Compile Include="database.wxs" />

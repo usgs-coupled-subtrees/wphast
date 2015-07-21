@@ -160,20 +160,7 @@ reconf() {
 }
 build() {
   (cd ${topdir} && \
-  if [ -z "$PHAST_BUILD" ]; then \
-    echo "Error: PHAST_BUILD is not set"; \
-    exit 1; \
-  fi && \
   cd ${objdir} && \
-  export phast_msi="`tar tvjf ${PHAST_BUILD} | egrep phast.*.msi | egrep -v x64 | sed 's/.* //'`" && \
-  tar xvjf ${PHAST_BUILD} $phast_msi && \
-  7z x -y $phast_msi media.cab && \
-  extract /Y media.cab phast_ser.exe && \
-  mv -f phast_ser.exe phast-ser.exe && \
-  extract /Y media.cab phast_mpich2.exe && \
-  mv -f phast_mpich2.exe phast-mpich2.exe && \
-  export PHAST_SER_EXE_PATH="`cygpath -aw phast-ser.exe`" && \
-  export PHAST_MPICH2_EXE_PATH="`cygpath -aw phast-mpich2.exe`" && \
   cd ${objdir}/msi && \
   make )
 }
@@ -191,7 +178,7 @@ install() {
   /usr/bin/install -m 644 "${objdir}/msi/AutoRelease.log" \
   ${instdir}/. && \
 # MSI file
-  /usr/bin/install -m 755 "${objdir}/msi/bin/Release/phast4windows.msi" \
+  /usr/bin/install -m 755 "${objdir}/msi/bin/x64/Release/phast4windows.msi" \
     ${instdir}/${FULLPKG}.msi && \
   if [ -x /usr/bin/md5sum ]; then \
     cd ${instdir} && \

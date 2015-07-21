@@ -66,7 +66,7 @@ spkg : check_args
 finish : check_args
 	time ./$(BUILD_SCRIPT) finish 2>&1 | tee finish-$(RELEASE).log
 
-$(BIN_PACKAGE) : check_phast_build $(TARBALL) $(BUILD_SCRIPT) $(PHAST_BUILD)
+$(BIN_PACKAGE) : $(TARBALL) $(BUILD_SCRIPT) $(PHAST_BUILD)
 	@echo "Building package $(BIN_PACKAGE) / $(SRC_PACKAGE)"	
 	time ./$(BUILD_SCRIPT) all 2>&1 | tee all-$(RELEASE).log
 	
@@ -87,7 +87,7 @@ $(DATE_STAMP).tstamp :
 	rm -rf *.tstamp
 	touch $(DATE_STAMP).tstamp
 	
-check_args : check_version check_phast_build check_date
+check_args : check_version check_date
 	
 check_version :
 ifeq ($(strip $(VERSION)),)

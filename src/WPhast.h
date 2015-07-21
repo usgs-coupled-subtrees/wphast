@@ -20,11 +20,13 @@ public:
 	class CSettings
 	{
 	public:
-		CSettings() : bRunParallel(FALSE) {};
+		CSettings() : bRunMPI(FALSE) {};
 		CString strDatabase;
-		CString strCommand;
+		CString strMTCommand;
+		CString strMPICommand;
 		CString strCommandArgs;
-		BOOL bRunParallel;
+		BOOL bRunMPI;
+		int nThreads;
 		virtual ~CSettings(){};
 	};
 	CSettings settings;

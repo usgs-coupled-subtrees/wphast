@@ -24,7 +24,6 @@ public:
 	enum { IDD = IDD_RUN_OUTPUT_DIALOG };
 
 public:
-	BOOL    bParallel;
 	CString strCommand;
 	CString strCommandArgs;
 
