@@ -160,10 +160,6 @@ reconf() {
 }
 build() {
   (cd ${topdir} && \
-  if [ -z "$PHAST_BUILD" ]; then \
-    echo "Error: PHAST_BUILD is not set"; \
-    exit 1; \
-  fi && \
   cd ${objdir} && \
   cd ${objdir}/msi && \
   make )
@@ -182,7 +178,7 @@ install() {
   /usr/bin/install -m 644 "${objdir}/msi/AutoRelease.log" \
   ${instdir}/. && \
 # MSI file
-  /usr/bin/install -m 755 "${objdir}/msi/bin/Release/phast4windows.msi" \
+  /usr/bin/install -m 755 "${objdir}/msi/bin/x64/Release/phast4windows.msi" \
     ${instdir}/${FULLPKG}.msi && \
   if [ -x /usr/bin/md5sum ]; then \
     cd ${instdir} && \
