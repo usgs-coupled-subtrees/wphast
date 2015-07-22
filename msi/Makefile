@@ -99,8 +99,7 @@ HDF_DLLS=\
 all : $(BOOT)
 
 $(BOOT) : $(MSI)
-	cd ../Bootstapper
-	MSBuild.exe msi.sln /t:Bootstrapper /p:Configuration=Release /p:Platform=x64 /p:Major=${MAJOR} /p:Minor=${MINOR} /p:Patch=${PATCH} /p:Build=${REL}"
+	cd ../Bootstrapper ; MSBuild.exe Bootstrapper.sln /t:Bootstrapper /p:Configuration=Release /p:Platform=x64 /p:Major=${MAJOR} /p:Minor=${MINOR} /p:Patch=${PATCH} /p:Build=${REL}
 
 $(MSI) : msi.sln  $(P4W) $(P4W_FILES)
 	MSBuild.exe msi.sln /t:msi /p:Configuration=Release /p:Platform=x64 /p:Major=${MAJOR} /p:Minor=${MINOR} /p:Patch=${PATCH} /p:Build=${REL} /p:phastSerExePath="${PHAST_SER_EXE_PATH}" /p:phastMPICH2ExePath="${PHAST_MPICH2_EXE_PATH}"
