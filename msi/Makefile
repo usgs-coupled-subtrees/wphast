@@ -1,6 +1,8 @@
 # $Id$
 
-MSI := bin/x64/Release/phast4windows.msi
+BOOT := ../Bootstrapper/bin/x64/Release/phast4windows-$(MAJOR).$(MINOR).$(PATCH)-$(REL)-x64.exe
+
+MSI := bin/x64/Release/phast4windows-$(MAJOR).$(MINOR).$(PATCH)-$(REL)-x64.msi
 
 DEVENV := devenv
 
@@ -94,11 +96,14 @@ HDF_DLLS=\
 	$(HDF_DLL_DIR)/zlib.dll
 
 
-all : $(MSI)
+all : $(BOOT)
+
+$(BOOT) : $(MSI)
+	cd ../Bootstapper
+	MSBuild.exe msi.sln /t:Bootstrapper /p:Configuration=Release /p:Platform=x64 /p:Major=${MAJOR} /p:Minor=${MINOR} /p:Patch=${PATCH} /p:Build=${REL}"
 
 $(MSI) : msi.sln  $(P4W) $(P4W_FILES)
-	MSBuild.exe msi.sln /t:msi /p:Configuration=Release /p:Platform=x64 /p:TargetName=phast4windows /p:Major=${MAJOR} /p:Minor=${MINOR} /p:Patch=${PATCH} /p:Build=${REL} /p:phastSerExePath="${PHAST_SER_EXE_PATH}" /p:phastMPICH2ExePath="${PHAST_MPICH2_EXE_PATH}"
-	touch $(MSI)
+	MSBuild.exe msi.sln /t:msi /p:Configuration=Release /p:Platform=x64 /p:Major=${MAJOR} /p:Minor=${MINOR} /p:Patch=${PATCH} /p:Build=${REL} /p:phastSerExePath="${PHAST_SER_EXE_PATH}" /p:phastMPICH2ExePath="${PHAST_MPICH2_EXE_PATH}"
 
 $(P4W_EXE) : $(SLN)
 	@rm -rf AutoRelease.log
