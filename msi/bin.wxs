@@ -36,12 +36,11 @@
     </Fragment>
     <Fragment>
         <ComponentGroup Id="Bin64">
-            <ComponentRef Id="hdf5dll.dll_64" />
-            <ComponentRef Id="libifcoremd.dll_64" />            
-            <ComponentRef Id="libmmd.dll_64" />            
-            <ComponentRef Id="szlibdll.dll_64" />
-            <ComponentRef Id="zlib1.dll_64" />
+            <ComponentRef Id="hdf5.dll_64" />
+            <ComponentRef Id="szip.dll_64" />
+            <ComponentRef Id="zlib.dll_64" />
             <ComponentRef Id="phast_mt.exe" />
+            <ComponentRef Id="phast_msmpi.exe" />
         </ComponentGroup>
     </Fragment>
     <Fragment>
@@ -153,23 +152,20 @@
                 </Component>
             </Directory>
             <Directory Id="bin64" Name="bin64">
-                <Component Id="hdf5dll.dll_64" Guid="*">
-                    <File Id="hdf5dll.dll_64" KeyPath="yes" Source="C:\cygwin\home\charlton\programs\phreeqc\wphast-phastpp3-worker\build\hdf5dll.dll" />
+                <Component Id="hdf5.dll_64" Guid="*">
+                    <File Id="hdf5.dll_64" KeyPath="yes" Source="..\_build_mt_x64\INSTALL\bin\hdf5.dll" />
                 </Component>
-                <Component Id="libifcoremd.dll_64" Guid="*">
-                    <File Id="libifcoremd.dll_64" KeyPath="yes" Source="C:\cygwin\home\charlton\programs\phreeqc\wphast-phastpp3-worker\build\libifcoremd.dll" />
+                <Component Id="szip.dll_64" Guid="*">
+                    <File Id="szip.dll_64" KeyPath="yes" Source="..\_build_mt_x64\INSTALL\bin\szip.dll" />
                 </Component>
-                <Component Id="libmmd.dll_64" Guid="*">
-                    <File Id="libmmd.dll_64" KeyPath="yes" Source="C:\cygwin\home\charlton\programs\phreeqc\wphast-phastpp3-worker\build\libmmd.dll" />
-                </Component>
-                <Component Id="szlibdll.dll_64" Guid="*">
-                    <File Id="szlibdll.dll_64" KeyPath="yes" Source="C:\cygwin\home\charlton\programs\phreeqc\wphast-phastpp3-worker\build\szlibdll.dll" />
-                </Component>
-                <Component Id="zlib1.dll_64" Guid="*">
-                    <File Id="zlib1.dll_64" KeyPath="yes" Source="C:\cygwin\home\charlton\programs\phreeqc\wphast-phastpp3-worker\build\zlib1.dll" />
+                <Component Id="zlib.dll_64" Guid="*">
+                    <File Id="zlib.dll_64" KeyPath="yes" Source="..\_build_mt_x64\INSTALL\bin\zlib.dll" />
                 </Component>
                 <Component Id="phast_mt.exe" Guid="*">
-                    <File Id="phast_mt.exe" Name="phast_mt.exe" KeyPath="yes" Source="C:\cygwin\home\charlton\programs\phreeqc\wphast-phastpp3-worker\build\phast_mt.exe"/>
+                    <File Id="phast_mt.exe" Name="phast-mt.exe" KeyPath="yes" Source="..\_build_mt_x64\INSTALL\bin\phast3.exe"/>
+                </Component>
+                <Component Id="phast_msmpi.exe" Guid="*">
+                    <File Id="phast_msmpi.exe" Name="phast-msmpi.exe" KeyPath="yes" Source="..\_build_mpi_x64\INSTALL\bin\phast3.exe"/>
                 </Component>
             </Directory>
         </DirectoryRef>
