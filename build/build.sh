@@ -178,8 +178,8 @@ install() {
   /usr/bin/install -m 644 "${objdir}/msi/AutoRelease.log" \
   ${instdir}/. && \
 # MSI file
-  /usr/bin/install -m 755 "${objdir}/msi/bin/x64/Release/phast4windows.msi" \
-    ${instdir}/${FULLPKG}-x64.msi && \
+  /usr/bin/install -m 755 "${objdir}/msi/bin/x64/Release/${FULLPKG}-x64.msi" \
+    ${instdir}/. && \
   if [ -x /usr/bin/md5sum ]; then \
     cd ${instdir} && \
     find . -type f ! -name md5sum | sed 's/^/\"/' | sed 's/$/\"/' | xargs md5sum > md5sum ; \
