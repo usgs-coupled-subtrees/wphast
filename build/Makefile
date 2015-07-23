@@ -66,6 +66,24 @@ spkg : check_args
 finish : check_args
 	time ./$(BUILD_SCRIPT) finish 2>&1 | tee finish-$(RELEASE).log
 
+upto-conf : check_args source script
+	time ./$(BUILD_SCRIPT) upto-conf 2>&1 | tee upto-conf-$(RELEASE).log
+	
+upto-build : check_args source script
+	time ./$(BUILD_SCRIPT) upto-build 2>&1 | tee upto-build-$(RELEASE).log
+
+upto-install : check_args source script
+	time ./$(BUILD_SCRIPT) upto-install 2>&1 | tee upto-install-$(RELEASE).log
+
+upto-pkg : check_args source script
+	time ./$(BUILD_SCRIPT) upto-pkg 2>&1 | tee upto-pkg-$(RELEASE).log
+	
+upto-spkg : check_args source script
+	time ./$(BUILD_SCRIPT) upto-spkg 2>&1 | tee upto-spkg-$(RELEASE).log	
+
+build-finish : check_args source script
+	time ./$(BUILD_SCRIPT) build-finish 2>&1 | tee build-finish-$(RELEASE).log	
+
 $(BIN_PACKAGE) : $(TARBALL) $(BUILD_SCRIPT) $(PHAST_BUILD)
 	@echo "Building package $(BIN_PACKAGE) / $(SRC_PACKAGE)"	
 	time ./$(BUILD_SCRIPT) all 2>&1 | tee all-$(RELEASE).log

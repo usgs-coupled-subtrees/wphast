@@ -309,6 +309,18 @@ while test -n "$1" ; do
     finish)		finish ; STATUS=$? ;;
     checksig)		checksig ; STATUS=$? ;;
     first)		mkdirs && spkg && finish ; STATUS=$? ;;
+    upto-conf)    prep && conf; STATUS=$? ;;
+    upto-build)   prep && conf && build; STATUS=$? ;;
+    upto-install) prep && conf && build && install; STATUS=$? ;;
+    upto-pkg)     prep && conf && build && install && \
+			      strip && pkg ; \
+			      STATUS=$? ;;
+    upto-spkg)    prep && conf && build && install && \
+			      strip && pkg && spkg ; \
+			      STATUS=$? ;;
+    build-finish) build && install && \
+            strip && pkg && spkg && finish ; \
+			STATUS=$? ;;
     all)		checksig && prep && conf && build && install && \
 			strip && pkg && spkg && finish ; \
 			STATUS=$? ;;
