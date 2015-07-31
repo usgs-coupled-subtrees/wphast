@@ -32,19 +32,6 @@
 
     <Chain>
       <ExePackage
-        Id="MSMpi"
-        Name="MS-MPI Setup"
-        InstallCommand="-unattend"
-        Cache="yes"
-        Compressed="yes"
-        PerMachine="yes"
-        Permanent="yes"
-        Vital="yes"
-        SourceFile="C:\Documents and Settings\All Users\Documents\Downloads\MSMpiSetup.exe"
-        DetectCondition="(MSMPI64Version = &quot;6.0.12436.10&quot;)"
-        />
-
-      <ExePackage
         Id="ModView"
         Name="Model Viewer 1.6 Setup"
         InstallCommand="/SILENT"
@@ -64,6 +51,19 @@
         Name="Phast for Windows x64 Setup"
         SourceFile="..\msi\bin\x64\Release\phast4windows-$(var.Major).$(var.Minor).$(var.Patch)-$(var.Build)-x64.msi"
         ForcePerMachine="yes"
+        />
+
+      <ExePackage
+        Id="MSMpi"
+        Name="MS-MPI Setup"
+        InstallCommand="-unattend"
+        Cache="yes"
+        Compressed="yes"
+        PerMachine="yes"
+        Permanent="yes"
+        Vital="yes"
+        SourceFile="C:\Documents and Settings\All Users\Documents\Downloads\MSMpiSetup.exe"
+        DetectCondition="(MSMPI64Version = &quot;6.0.12436.10&quot;)"
         />
     </Chain>
 	</Bundle>
