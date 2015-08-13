@@ -1,8 +1,8 @@
 #include "StdAfx.h"
 #include "WPhast_io.h"
 
-#include "phreeqc3/Utils.h"
-#include "phreeqc3/Parser.h"
+#include "Utils.h"
+#include "Parser.h"
 
 
 WPhast_io::WPhast_io(std::set<CString> &files)

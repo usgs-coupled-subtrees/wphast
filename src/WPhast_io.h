@@ -1,7 +1,7 @@
 #pragma once
 
 #include <set>
-#include "phreeqc3/phrq_io.h"
+#include "phrq_io.h"
 
 class WPhast_io : public PHRQ_io
 {

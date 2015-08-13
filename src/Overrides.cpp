@@ -278,12 +278,14 @@ int phast_input(bool bWritePhastTmp)
 	return 0;
 }
 
+#ifdef SKIP_WPHAST
 /* ---------------------------------------------------------------------- */
 int get_line(FILE *fp)
 /* ---------------------------------------------------------------------- */
 {
 	return CPhastInput::GetParser()->get_line();
 }
+#endif /* SKIP_WPHAST */
 
 /* ---------------------------------------------------------------------- */
 int read_file_doubles(char *next_char, double **d, int *count_d, int *count_alloc)

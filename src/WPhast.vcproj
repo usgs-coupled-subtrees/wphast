@@ -46,7 +46,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(DEV_CPPUNIT_1.10)\include&quot;;&quot;$(DEV_VTK_542_MEM_VS8_INC)&quot;;&quot;$(DEV_HDF5_INC)&quot;;&quot;$(DEV_XERCES)/include&quot;;&quot;$(DEV_BOOST)&quot;;phreeqc3/PhreeqcKeywords"
+				AdditionalIncludeDirectories="&quot;$(DEV_CPPUNIT_1.10)\include&quot;;&quot;$(DEV_VTK_542_MEM_VS8_INC)&quot;;&quot;$(DEV_HDF5_INC)&quot;;&quot;$(DEV_XERCES)/include&quot;;&quot;$(DEV_BOOST)&quot;;srcinput/common;srcinput/PhastKeywords"
 				PreprocessorDefinitions="__CPPUNIT__;WPHAST_AUTOMATION;WIN32;_WINDOWS;_DEBUG;__WPHAST__;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_WARNINGS;ANSI_DECLARATORS;WINVER=0x0400"
 				MinimalRebuild="false"
 				ExceptionHandling="2"
@@ -147,7 +147,7 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				OmitFramePointers="true"
-				AdditionalIncludeDirectories="&quot;$(DEV_VTK_542_VS8_DLL_INC)&quot;;&quot;$(DEV_HDF5_INC)&quot;;&quot;$(DEV_XERCES)/include&quot;;&quot;$(DEV_BOOST)&quot;;phreeqc3/PhreeqcKeywords"
+				AdditionalIncludeDirectories="&quot;$(DEV_VTK_542_VS8_DLL_INC)&quot;;&quot;$(DEV_HDF5_INC)&quot;;&quot;$(DEV_XERCES)/include&quot;;&quot;$(DEV_BOOST)&quot;;srcinput/common;srcinput/PhastKeywords"
 				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;__WPHAST__;WPHAST_AUTOMATION;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_WARNINGS;ANSI_DECLARATORS"
 				StringPooling="true"
 				MinimalRebuild="false"
@@ -241,7 +241,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(DEV_VTK_542_VS8_DLL_INC)&quot;;&quot;$(DEV_HDF5_INC)&quot;;&quot;$(DEV_XERCES)/include&quot;;&quot;$(DEV_BOOST)&quot;;phreeqc3/PhreeqcKeywords"
+				AdditionalIncludeDirectories="&quot;$(DEV_VTK_542_VS8_DLL_INC)&quot;;&quot;$(DEV_HDF5_INC)&quot;;&quot;$(DEV_XERCES)/include&quot;;&quot;$(DEV_BOOST)&quot;;srcinput/common;srcinput/PhastKeywords"
 				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;__WPHAST__;WPHAST_AUTOMATION;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_WARNINGS;ANSI_DECLARATORS;WINVER=0x0400"
 				MinimalRebuild="true"
 				ExceptionHandling="2"
@@ -342,7 +342,7 @@
 				OmitFramePointers="true"
 				EnableFiberSafeOptimizations="true"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories="&quot;$(DEV_VTK_542_VS8_DLL_INC)&quot;;&quot;$(DEV_HDF5_INC)&quot;;&quot;$(DEV_XERCES)/include&quot;;&quot;$(DEV_BOOST)&quot;;phreeqc3/PhreeqcKeywords"
+				AdditionalIncludeDirectories="&quot;$(DEV_VTK_542_VS8_DLL_INC)&quot;;&quot;$(DEV_HDF5_INC)&quot;;&quot;$(DEV_XERCES)/include&quot;;&quot;$(DEV_BOOST)&quot;;srcinput/common;srcinput/PhastKeywords"
 				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;__WPHAST__;WPHAST_AUTOMATION;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_WARNINGS;ANSI_DECLARATORS"
 				StringPooling="true"
 				MinimalRebuild="false"
@@ -4698,7 +4698,7 @@
 				Name="phreeqc3"
 				>
 				<File
-					RelativePath=".\phreeqc3\PhreeqcKeywords\Keywords.cpp"
+					RelativePath=".\srcinput\PhastKeywords\Keywords.cpp"
 					>
 					<FileConfiguration
 						Name="cppunit|Win32"
@@ -4734,51 +4734,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath=".\phreeqc3\Parser.cxx"
-					>
-					<FileConfiguration
-						Name="cppunit|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="0"
-							ObjectFile="$(IntDir)\$(InputName)1.obj"
-							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="AutoRelease|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="0"
-							ObjectFile="$(IntDir)\$(InputName)1.obj"
-							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="AutoDebug|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="0"
-							ObjectFile="$(IntDir)\$(InputName)1.obj"
-							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="ReleaseRelease|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							UsePrecompiledHeader="0"
-							ObjectFile="$(IntDir)\$(InputName)1.obj"
-							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
-						/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\phreeqc3\PHRQ_base.cxx"
+					RelativePath=".\srcinput\common\Parser.cxx"
 					>
 					<FileConfiguration
 						Name="cppunit|Win32"
@@ -4814,7 +4770,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath=".\phreeqc3\PHRQ_io.cpp"
+					RelativePath=".\srcinput\common\PHRQ_base.cxx"
 					>
 					<FileConfiguration
 						Name="cppunit|Win32"
@@ -4850,7 +4806,43 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath=".\phreeqc3\Utils.cxx"
+					RelativePath=".\srcinput\common\PHRQ_io.cpp"
+					>
+					<FileConfiguration
+						Name="cppunit|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="AutoRelease|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="AutoDebug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="ReleaseRelease|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\srcinput\common\Utils.cxx"
 					>
 					<FileConfiguration
 						Name="cppunit|Win32"
@@ -6335,7 +6327,27 @@
 				Name="phreeqc3"
 				>
 				<File
-					RelativePath=".\phreeqc3\PHRQ_io.h"
+					RelativePath=".\srcinput\PhastKeywords\Keywords.h"
+					>
+				</File>
+				<File
+					RelativePath=".\srcinput\common\Parser.h"
+					>
+				</File>
+				<File
+					RelativePath=".\srcinput\common\PHRQ_base.h"
+					>
+				</File>
+				<File
+					RelativePath=".\srcinput\common\PHRQ_io.h"
+					>
+				</File>
+				<File
+					RelativePath=".\srcinput\common\phrqtype.h"
+					>
+				</File>
+				<File
+					RelativePath=".\srcinput\common\Utils.h"
 					>
 				</File>
 				<File

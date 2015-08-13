@@ -13,6 +13,10 @@ int read_well(void);
 #include "srcinput/hstinpt.h"
 #undef EXTERNAL
 
+//#define STATIC
+extern int get_line();
+//#undef STATIC
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -490,7 +494,8 @@ void TestCPhastInput::testRedefineSolution5(void)
 			CPPUNIT_ASSERT(pInput != NULL);
 
 			// reqd for keywords that use read_number_description
-			pInput->GetParser()->get_line();
+// COMMENT: {8/13/2015 12:44:50 AM}			pInput->GetParser()->get_line();
+			::get_line();
 
 			CPPUNIT_ASSERT(::read_river() == EOF);
 			CPPUNIT_ASSERT(pInput->GetErrorCount()   == 0);
@@ -550,7 +555,8 @@ void TestCPhastInput::testRedefineSolution6(void)
 
 			// reqd for keywords that use read_number_description
 			//
-			pInput->GetParser()->get_line();
+// COMMENT: {8/13/2015 12:47:49 AM}			pInput->GetParser()->get_line();
+			::get_line();
 
 			CPPUNIT_ASSERT(::read_well() == EOF);
 			CPPUNIT_ASSERT(pInput->GetErrorCount()   == 0);
@@ -697,7 +703,8 @@ void TestCPhastInput::testRedefineHead3(void)
 
 			//{{
 			// reqd for keywords that use read_number_description
-			pInput->GetParser()->get_line();
+// COMMENT: {8/13/2015 12:48:07 AM}			pInput->GetParser()->get_line();
+			::get_line();
 			//}}
 			CPPUNIT_ASSERT(::read_river() == EOF);
 			CPPUNIT_ASSERT(pInput->GetErrorCount()   == 0);
@@ -801,7 +808,8 @@ void TestCPhastInput::testRedefineRate(void)
 
 			// reqd for keywords that use read_number_description
 			//
-			pInput->GetParser()->get_line();
+// COMMENT: {8/13/2015 12:48:20 AM}			pInput->GetParser()->get_line();
+			::get_line();
 
 			CPPUNIT_ASSERT(::read_well() == EOF);
 			CPPUNIT_ASSERT(pInput->GetErrorCount()   == 0);
@@ -858,7 +866,8 @@ void TestCPhastInput::testRedefineRate2(void)
 
 			// reqd for keywords that use read_number_description
 			//
-			pInput->GetParser()->get_line();
+// COMMENT: {8/13/2015 12:48:38 AM}			pInput->GetParser()->get_line();
+			::get_line();
 
 			CPPUNIT_ASSERT(::read_well() == EOF);
 			CPPUNIT_ASSERT(pInput->GetErrorCount()   == 0);

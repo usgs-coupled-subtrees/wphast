@@ -1,3 +1,4 @@
+#ifdef SKIP_WPHAST
 #include <windows.h>
 #include "WParser.h"
 
@@ -17,18 +18,25 @@ extern int copy_token (char *token_ptr, char **ptr, int *length);
 
 int add_char_to_line(int *i, char c);
 
-CWParser::CWParser(std::istream& input)
-: m_input_stream(input)
-, m_output_stream(std::cout)
+CWParser::CWParser(void)
+: m_output_stream(std::cout)
 , m_error_stream(std::cerr)
 {
+}
+
+CWParser::CWParser(std::istream& input)
+: m_output_stream(std::cout)
+, m_error_stream(std::cerr)
+
+{
+	this->push_istream(&input, false);
 }
 
 CWParser::~CWParser(void)
 {
 }
 
-int CWParser::get_logical_line(int *l)
+PHRQ_io::LINE_TYPE CWParser::get_logical_line(int *l)
 {
 /*
  *   Reads file fp until end of line, ";", or eof
@@ -104,11 +112,11 @@ int CWParser::get_logical_line(int *l)
 	{
 		*l = 0;
 		line_save[i] = '\0';
-		return (EOF);
+		return (PHRQ_io::LT_EOF);
 	}
 	line_save[i] = '\0';
 	*l = i;
-	return (OK);
+	return (PHRQ_io::LT_OK);
 }
 
 /* ---------------------------------------------------------------------- */
@@ -133,7 +141,7 @@ add_char_to_line (int *i, char c)
 }
 
 /* ---------------------------------------------------------------------- */
-int CWParser::get_line(void)
+PHRQ_io::LINE_TYPE CWParser::get_line(void)
 /* ---------------------------------------------------------------------- */
 {
 /*
@@ -150,12 +158,13 @@ int CWParser::get_line(void)
  *      OK,
  *      OPTION
  */
- 	int i, j, return_value, empty, l;
+ 	int i, j, empty, l;
+	PHRQ_io::LINE_TYPE return_value;
 	char *ptr;
 	char token[MAX_LENGTH];
 
-	return_value = EMPTY;
-	while (return_value == EMPTY) {
+	return_value = PHRQ_io::LT_EMPTY;
+	while (return_value == PHRQ_io::LT_EMPTY) {
 /*
  *   Eliminate all characters after # sign as a comment
  */
@@ -167,7 +176,7 @@ int CWParser::get_line(void)
  */
 		if (this->get_logical_line(&l) == EOF) {
 			next_keyword=0;
-			return (EOF);
+			return (PHRQ_io::LT_EOF);
 		}
 /*
  *   Get long lines
@@ -190,22 +199,22 @@ int CWParser::get_line(void)
  */
 
 		if (empty == TRUE) {
-			return_value=EMPTY;
+			return_value=PHRQ_io::LT_EMPTY;
 		} else {
-			return_value=OK;
+			return_value=PHRQ_io::LT_OK;
 		}
 	}
 /*
  *   Determine return_value
  */
-	if (return_value == OK) {
-		if ( check_key(line) == TRUE) {
-			return_value=KEYWORD;
+	if (return_value == PHRQ_io::LT_OK) {
+		if ( ::check_key(line) == TRUE) {
+			return_value=PHRQ_io::LT_KEYWORD;
 		} else {
 			ptr = line;
 			copy_token(token, &ptr, &i);
 			if (token[0] == '-' && isalpha((int)token[1])) {
-				return_value = OPTION;
+				return_value = PHRQ_io::LT_OPTION;
 			}
 		}
 	}
@@ -231,3 +240,4 @@ int CWParser::get_line(void)
 // COMMENT: {2/25/2005 2:13:00 PM}	return this->m_errors.c_str();
 // COMMENT: {2/25/2005 2:13:00 PM}}
 
+#endif /* SKIP_WPHAST */

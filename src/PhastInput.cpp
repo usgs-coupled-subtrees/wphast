@@ -16,6 +16,7 @@
 #include "SeException.h"
 #include "srcinput/wphast.h"  /* must be last */
 
+extern PHRQ_io input_phrq_io;
 
 extern char  *prefix, *transport_name, *chemistry_name, *database_name;
 extern int   input_error;
@@ -23,7 +24,6 @@ extern int   simulation;
 extern int   count_warnings;
 
 extern FILE  *input_file;
-extern FILE  *input;
 extern FILE  *database_file;
 extern FILE  *log_file;
 extern FILE  *echo_file;
@@ -51,8 +51,8 @@ CPhastInput* CPhastInput::s_instance = 0;
 
 static _se_translator_function prev_se_translator_function = 0;
 
-CPhastInput::CPhastInput(std::istream& is, const char *szPrefix, const char *szDatabase, bool save_prisms)
-: m_parser(is)
+CPhastInput::CPhastInput(PHRQ_io& io, const char *szPrefix, const char *szDatabase, bool save_prisms)
+: m_io(io)
 , m_prefix(szPrefix)
 , m_database(szDatabase)
 , m_save_prisms(save_prisms)
@@ -93,8 +93,6 @@ CPhastInput::~CPhastInput(void)
 void CPhastInput::DoInitialize(void)
 {
 	::std_error = ::fopen("NUL", "w");
-	::input     = ::fopen("NUL", "w");
-// COMMENT: {10/29/2012 11:16:36 PM}	::echo_file = ::fopen("NUL", "w");
 	::hst_file  = ::fopen("NUL", "w");
 
 	::prefix         = NULL;
@@ -144,8 +142,9 @@ CPhastInput* CPhastInput::New(std::istream& is, const std::string sPrefix, const
 		assert(false);  // only one instance allowed
 		return 0;
 	}
-
-	CPhastInput::s_instance = new CPhastInput(is, sPrefix.c_str(), sDatabase.c_str(), save_prisms);
+	
+	input_phrq_io.push_istream(&is, false);
+	CPhastInput::s_instance = new CPhastInput(input_phrq_io, sPrefix.c_str(), sDatabase.c_str(), save_prisms);
 	return CPhastInput::s_instance;
 }
 
