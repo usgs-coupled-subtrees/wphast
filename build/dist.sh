@@ -161,7 +161,7 @@ fi
 
 (cd "$DIST_SANDBOX" && \
  	${SVN:-svn} export -q $EXTRA_EXPORT_OPTIONS --ignore-externals -r "$REVISION_PHAST" \
-	     "http://internalbrr.cr.usgs.gov/svn_GW/phastpp/branches/phastpp3-worker/src/phastinput" \
+	     "http://internalbrr.cr.usgs.gov/svn_GW/phast3/trunk/src/phastinput" \
 	     "$DISTNAME/src/srcinput")
 if [ $? != 0 ] ; then
   echo "svn checkout error"
@@ -170,16 +170,7 @@ fi
 	     
 (cd "$DIST_SANDBOX" && \
  	${SVN:-svn} export -q $EXTRA_EXPORT_OPTIONS --ignore-externals -r "$REVISION_PHAST" \
-	     "http://internalbrr.cr.usgs.gov/svn_GW/phreeqc3/trunk/src" \
-	     "$DISTNAME/src/phreeqc3")	     
-if [ $? != 0 ] ; then
-  echo "svn checkout error"
-  exit $?;
-fi
-
-(cd "$DIST_SANDBOX" && \
- 	${SVN:-svn} export -q $EXTRA_EXPORT_OPTIONS --ignore-externals -r "$REVISION_PHAST" \
-	     "http://internalbrr.cr.usgs.gov/svn_GW/phastpp/branches/phastpp3-worker/examples" \
+	     "http://internalbrr.cr.usgs.gov/svn_GW/phast3/trunk/examples" \
 	     "$DISTNAME/msi/phast/examples")
 if [ $? != 0 ] ; then
   echo "svn checkout error"
@@ -188,7 +179,7 @@ fi
 
 (cd "$DIST_SANDBOX" && \
  	${SVN:-svn} export -q $EXTRA_EXPORT_OPTIONS --ignore-externals -r "$REVISION_PHAST" \
-	     "http://internalbrr.cr.usgs.gov/svn_GW/phastpp/branches/phastpp3-worker/doc" \
+	     "http://internalbrr.cr.usgs.gov/svn_GW/phast3/trunk/doc" \
 	     "$DISTNAME/msi/phast/doc")
 if [ $? != 0 ] ; then
   echo "svn checkout error"
