@@ -167,6 +167,15 @@ if [ $? != 0 ] ; then
   echo "svn checkout error"
   exit $?;
 fi
+
+(cd "$DIST_SANDBOX" && \
+ 	${SVN:-svn} export -q $EXTRA_EXPORT_OPTIONS --ignore-externals -r "$REVISION_PHAST" \
+	     "http://internalbrr.cr.usgs.gov/svn_GW/phreeqc3/trunk/src/common" \
+	     "$DISTNAME/src/srcinput/common")
+if [ $? != 0 ] ; then
+  echo "svn checkout error"
+  exit $?;
+fi
 	     
 (cd "$DIST_SANDBOX" && \
  	${SVN:-svn} export -q $EXTRA_EXPORT_OPTIONS --ignore-externals -r "$REVISION_PHAST" \
