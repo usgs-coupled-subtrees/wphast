@@ -194,6 +194,24 @@ if [ $? != 0 ] ; then
   echo "svn checkout error"
   exit $?;
 fi
+
+(cd "$DIST_SANDBOX" && \
+ 	${SVN:-svn} export -q $EXTRA_EXPORT_OPTIONS --ignore-externals -r "$REVISION_PHAST" \
+	     "http://internalbrr.cr.usgs.gov/svn_GW/phast3/trunk/RELEASE" \
+	     "$DISTNAME/msi/phast/")
+if [ $? != 0 ] ; then
+  echo "svn checkout error"
+  exit $?;
+fi
+
+(cd "$DIST_SANDBOX" && \
+ 	${SVN:-svn} export -q $EXTRA_EXPORT_OPTIONS --ignore-externals -r "$REVISION_PHAST" \
+	     "http://internalbrr.cr.usgs.gov/svn_GW/phreeqc3/trunk/doc" \
+	     "$DISTNAME/msi/phast/doc/phreeqc3-doc")
+if [ $? != 0 ] ; then
+  echo "svn checkout error"
+  exit $?;
+fi
 	     
 (cd "$DIST_SANDBOX" && \
  	${SVN:-svn} export -q $EXTRA_EXPORT_OPTIONS --ignore-externals -r "$REVISION_PHAST" \
@@ -204,8 +222,8 @@ if [ $? != 0 ] ; then
   exit $?;
 fi
 
-echo "Renaming phreeqc.dat to phast.dat"
-mv "$DISTPATH/msi/phast/database/phreeqc.dat" "$DISTPATH/msi/phast/database/phast.dat"
+##echo "Renaming phreeqc.dat to phast.dat"
+##mv "$DISTPATH/msi/phast/database/phreeqc.dat" "$DISTPATH/msi/phast/database/phast.dat"
 
 ver_major=`echo $VERSION | cut -d '.' -f 1`
 ver_minor=`echo $VERSION | cut -d '.' -f 2`

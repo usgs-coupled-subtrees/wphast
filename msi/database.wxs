@@ -36,7 +36,7 @@
                     <File Id="minteq.v4.dat" KeyPath="yes" Source="$(var.DbDir)\minteq.v4.dat" />
                 </Component>
                 <Component Id="phreeqc.dat" Guid="*">
-                    <File Id="phreeqc.dat" KeyPath="yes" Source="$(var.DbDir)\phast.dat" />
+                    <File Id="phreeqc.dat" KeyPath="yes" Source="$(var.DbDir)\phreeqc.dat" Name="phast.dat"/>
                 </Component>
                 <Component Id="pitzer.dat" Guid="*">
                     <File Id="pitzer.dat" KeyPath="yes" Source="$(var.DbDir)\pitzer.dat" />
