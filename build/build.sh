@@ -177,8 +177,11 @@ install() {
 # logs
   /usr/bin/install -m 644 "${objdir}/msi/AutoRelease.log" \
   ${instdir}/. && \
-# MSI file
+# the x64 MSI file
   /usr/bin/install -m 755 "${objdir}/msi/bin/x64/Release/${FULLPKG}-x64.msi" \
+    ${instdir}/. && \
+# the x64 EXE
+  /usr/bin/install -m 755 "${objdir}/Bootstrapper/bin/x64/Release/${FULLPKG}-x64.exe" \
     ${instdir}/. && \
   if [ -x /usr/bin/md5sum ]; then \
     cd ${instdir} && \
