@@ -55,4 +55,7 @@
   <?define hdfDllPath="$(env.DEV_HDF5_LIBDLL)"?>
   <?define vtkDllPath="$(env.DEV_VTK_542_VS8_DLL_BIN)"?>
   <?define xercesDllPath="$(env.DEV_XERCES)\bin"?>
+
+  <?define CMakeBinaryDir="C:\cygwin\home\charlton\programs\phreeqc"?>
+  <?define Merge64Dir="C:\cygwin\home\charlton\programs\phreeqc"?>
 </Include>
