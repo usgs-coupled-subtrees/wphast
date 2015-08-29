@@ -74,13 +74,13 @@ public:
 	int load(std::istream& is, CNewModel& model);
 
 protected:
-	void AddCommentNode(xercesc_2_7::DOMDocument* doc, CWPhastDoc* wphastDoc, LPCTSTR lpszPathName);
-	int AddSiteMapNode(CMapActor* actor, const char* prefix, xercesc_2_7::DOMElement* element);
-	void AddSiteMapNode(xercesc_2_7::DOMDocument* doc, CWPhastDoc* wphastDoc, const char* prefix);
+	void AddCommentNode(xercesc::DOMDocument* doc, CWPhastDoc* wphastDoc, LPCTSTR lpszPathName);
+	int AddSiteMapNode(CMapActor* actor, const char* prefix, xercesc::DOMElement* element);
+	void AddSiteMapNode(xercesc::DOMDocument* doc, CWPhastDoc* wphastDoc, const char* prefix);
 
-	int LoadSiteMap(xercesc_2_7::DOMDocument* doc, CSiteMap& siteMap);
+	int LoadSiteMap(xercesc::DOMDocument* doc, CSiteMap& siteMap);
 
 protected:
 	bool bInitialized;
-	xercesc_2_7::MemBufFormatTarget* formatTarget;
+	xercesc::MemBufFormatTarget* formatTarget;
 };

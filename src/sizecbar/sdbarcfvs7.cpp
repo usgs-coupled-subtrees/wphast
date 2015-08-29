@@ -83,7 +83,11 @@ BOOL CSizingDialogBarCFVS7::Create(UINT nIDTemplate,
 
 #pragma warning( disable : 4311 ) // 'type cast' : pointer truncation from 'HBRUSH' to 'LONG'
     // set the background color
+#ifdef _WIN64
+	::SetClassLongPtr(this->m_hWnd, GCLP_HBRBACKGROUND,
+#else
 	::SetClassLong(this->m_hWnd, GCL_HBRBACKGROUND,
+#endif
 		(LONG)::GetSysColorBrush(COLOR_BTNFACE));
 #pragma warning( default : 4311 )
 	return TRUE;
@@ -121,7 +125,11 @@ void CSizingDialogBarCFVS7::OnNcPaint()
     // erase the NC background
 #pragma warning( disable : 4312 ) // 'type cast' : conversion from 'DWORD' to 'HBRUSH' of greater size
     mdc.FillRect(rcDraw, CBrush::FromHandle(
+#ifdef _WIN64
+        (HBRUSH) GetClassLongPtr(m_hWnd, GCLP_HBRBACKGROUND)));
+#else
         (HBRUSH) GetClassLong(m_hWnd, GCL_HBRBACKGROUND)));
+#endif
 #pragma warning( default : 4312 )
 
     if (m_dwSCBStyle & SCBS_SHOWEDGES)

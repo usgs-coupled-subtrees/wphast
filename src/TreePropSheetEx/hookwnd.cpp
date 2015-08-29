@@ -240,7 +240,11 @@ void CHookWnd::Add(CHookWnd* pWnd)
   else
   {
     //Not found, subclass the window and store away the original wndproc
+#ifdef _WIN64
+    pWnd->m_pOriginalWndProc = (WNDPROC) ::SetWindowLongPtr(pWnd->m_pOriginalWnd->m_hWnd, GWLP_WNDPROC, (LONG) HookProc);
+#else
     pWnd->m_pOriginalWndProc = (WNDPROC) ::SetWindowLong(pWnd->m_pOriginalWnd->m_hWnd, GWL_WNDPROC, (LONG) HookProc);
+#endif
   }
 
   ASSERT(pWnd->m_pOriginalWndProc);
@@ -278,7 +282,11 @@ void CHookWnd::Remove(CHookWnd* pWnd)
       VERIFY(::RemoveProp(pHook->m_pOriginalWnd->m_hWnd, g_pszHookWndData));
 
       //Also restore the original window proc
+#ifdef _WIN64
+      ::SetWindowLongPtr(pHook->m_pOriginalWnd->m_hWnd, GWLP_WNDPROC, (LONG) pHook->m_pOriginalWndProc);
+#else
       ::SetWindowLong(pHook->m_pOriginalWnd->m_hWnd, GWL_WNDPROC, (LONG) pHook->m_pOriginalWndProc);
+#endif
     }
   }
   else

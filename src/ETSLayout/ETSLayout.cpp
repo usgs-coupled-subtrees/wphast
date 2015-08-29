@@ -564,7 +564,11 @@ void ETSLayoutMgr::EraseBkgnd(CDC* pDC)
 	}
 
 
+#ifdef _WIN64
+	HBRUSH hBrBack = (HBRUSH) ::GetClassLongPtr(GetWnd()->GetSafeHwnd(), GCLP_HBRBACKGROUND) ;
+#else
 	HBRUSH hBrBack = (HBRUSH) ::GetClassLong(GetWnd()->GetSafeHwnd(), GCL_HBRBACKGROUND) ;
+#endif
 	if( hBrBack == 0 )
 		hBrBack = ::GetSysColorBrush(COLOR_BTNFACE);
 

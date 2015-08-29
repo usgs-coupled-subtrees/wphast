@@ -535,7 +535,11 @@ void CSizingControlBar::OnNcPaint()
 #pragma warning( disable : 4312 ) 
     // erase the NC background
     mdc.FillRect(rcDraw, CBrush::FromHandle(
+#ifdef _WIN64
+        (HBRUSH) GetClassLongPtr(m_hWnd, GCLP_HBRBACKGROUND)));
+#else
         (HBRUSH) GetClassLong(m_hWnd, GCL_HBRBACKGROUND)));
+#endif
 #pragma warning( default : 4312 ) 
 
     if (m_dwSCBStyle & SCBS_SHOWEDGES)

@@ -8,17 +8,6 @@
 #endif
 
 
-void SrcGetRoot(LPCTSTR lpszPath, CString& strRoot)
-{
-	ASSERT(lpszPath != NULL);
-
-	LPTSTR lpszRoot = strRoot.GetBuffer(_MAX_PATH);
-	memset(lpszRoot, 0, _MAX_PATH);
-	lstrcpyn(lpszRoot, lpszPath, _MAX_PATH);
-	::PathStripToRoot(lpszRoot);
-	strRoot.ReleaseBuffer();
-}
-
 void SrcTimeToFileTime(const CTime& time, LPFILETIME pFileTime)
 {
 	SYSTEMTIME sysTime;

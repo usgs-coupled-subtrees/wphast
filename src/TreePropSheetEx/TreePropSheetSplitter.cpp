@@ -280,7 +280,11 @@ void CTreePropSheetSplitter::SetAllowUserResizing(const bool bAllowUserResizing)
   // If the window exists, reset the cursor.
   if( ::IsWindow( GetSafeHwnd() ) )
   {
+#ifdef _WIN64
+    ::SetClassLongPtr( GetSafeHwnd(), GCLP_HCURSOR, (LONG)GetCursorHandle() );
+#else
     ::SetClassLong( GetSafeHwnd(), GCL_HCURSOR, (LONG)GetCursorHandle() );
+#endif
   }
 }
 
