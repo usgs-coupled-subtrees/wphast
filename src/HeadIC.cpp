@@ -206,7 +206,11 @@ std::ostream& operator<< (std::ostream &os, const CHeadIC &a)
 bool CHeadIC::operator==(const Head_ic& rhs)const
 {
 	size_t s = sizeof(Head_ic);
+#ifdef _WIN64
+	ASSERT(sizeof(Head_ic) == 32); // need to modify if this changes
+#else
 	ASSERT(sizeof(Head_ic) == 16); // need to modify if this changes
+#endif
 
 	COMPARE_PROPERTY_MACRO(mask);
 	if (this->ic_type != rhs.ic_type) return false;

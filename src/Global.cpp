@@ -3158,6 +3158,7 @@ herr_t CGlobal::HDFSerializeSafe(bool bStoring, hid_t loc_id, const char* szName
 						status = ::H5Dread(dset_id, mem_type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
 						if (status < 0)
 						{
+							ASSERT(FALSE);
 							return_val = status;
 							goto HDFSerializeError;
 						}
@@ -3167,12 +3168,14 @@ herr_t CGlobal::HDFSerializeSafe(bool bStoring, hid_t loc_id, const char* szName
 					}
 					else
 					{
+						ASSERT(FALSE);
 						return_val = -1;
 						goto HDFSerializeError;
 					}
 				}
 				else
 				{
+					ASSERT(FALSE);
 					return_val = n_dims;
 					goto HDFSerializeError;
 				}
@@ -3182,12 +3185,14 @@ herr_t CGlobal::HDFSerializeSafe(bool bStoring, hid_t loc_id, const char* szName
 			}
 			else
 			{
+				ASSERT(FALSE);
 				return_val = dspace_id;
 				goto HDFSerializeError;
 			}
 		}
 		else
 		{
+			ASSERT(FALSE);
 			return_val = dset_id;
 			goto HDFSerializeError;
 		}
@@ -3512,6 +3517,12 @@ herr_t CGlobal::HDFSerializeCells(bool bStoring, hid_t loc_id, const char* szNam
 	static const char szConnectivity[]  = "connectivity";
 	static const char szOffsets[]       = "offsets";
 
+#ifdef _WIN64
+	hid_t MEM_TYPE_ID = H5T_NATIVE_LLONG;  // vtkIdType
+#else
+	hid_t MEM_TYPE_ID = H5T_NATIVE_INT;    // vtkIdType
+#endif
+
 	if (bStoring)
 	{
 		ASSERT(pCells);
@@ -3548,8 +3559,8 @@ herr_t CGlobal::HDFSerializeCells(bool bStoring, hid_t loc_id, const char* szNam
 				*outCellOffset++ = outCellPoints - outCellPointsBase;
 			}
 
-			return_val = CGlobal::HDFSerializeSafe(bStoring, group_id, szConnectivity, H5T_NATIVE_INT, cellPoints->GetNumberOfTuples(), cellPoints->GetPointer(0));
-			return_val = CGlobal::HDFSerializeSafe(bStoring, group_id, szOffsets, H5T_NATIVE_INT, cellOffsets->GetNumberOfTuples(), cellOffsets->GetPointer(0));
+			return_val = CGlobal::HDFSerializeSafe(bStoring, group_id, szConnectivity, MEM_TYPE_ID, cellPoints->GetNumberOfTuples(), cellPoints->GetPointer(0));
+			return_val = CGlobal::HDFSerializeSafe(bStoring, group_id, szOffsets, MEM_TYPE_ID, cellOffsets->GetNumberOfTuples(), cellOffsets->GetPointer(0));
 
 			cellPoints->Delete();
 			cellOffsets->Delete();
@@ -3570,16 +3581,16 @@ herr_t CGlobal::HDFSerializeCells(bool bStoring, hid_t loc_id, const char* szNam
 			vtkIdTypeArray *cellOffsets = vtkIdTypeArray::New();
 			ASSERT(cellOffsets);
 
-			hsize_t sizec = HDFGetSize(group_id, szConnectivity, H5T_NATIVE_INT);
+			hsize_t sizec = HDFGetSize(group_id, szConnectivity, MEM_TYPE_ID);
 			cellPoints->SetNumberOfTuples(sizec);
 
-			hsize_t sizeo = HDFGetSize(group_id, szOffsets, H5T_NATIVE_INT);
-			cellOffsets->SetNumberOfTuples(sizec);
+			hsize_t sizeo = HDFGetSize(group_id, szOffsets, MEM_TYPE_ID);
+			cellOffsets->SetNumberOfTuples(sizeo);
 
 			if (sizec*sizeo)
 			{
-				return_val = CGlobal::HDFSerializeSafe(bStoring, group_id, szConnectivity, H5T_NATIVE_INT, sizec, cellPoints->GetPointer(0));
-				return_val = CGlobal::HDFSerializeSafe(bStoring, group_id, szOffsets, H5T_NATIVE_INT, sizeo, cellOffsets->GetPointer(0));
+				return_val = CGlobal::HDFSerializeSafe(bStoring, group_id, szConnectivity, MEM_TYPE_ID, sizec, cellPoints->GetPointer(0));
+				return_val = CGlobal::HDFSerializeSafe(bStoring, group_id, szOffsets, MEM_TYPE_ID, sizeo, cellOffsets->GetPointer(0));
 
 				pCells = vtkCellArray::New();
 				if (pCells)

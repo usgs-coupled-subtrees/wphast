@@ -594,7 +594,11 @@ void CGridElt::Serialize(CArchive& ar)
 bool CGridElt::operator==(const grid_elt& rhs)const
 {
 	size_t s = sizeof(grid_elt);
-	ASSERT(s == 80); // need to modify if this changes
+#ifdef _WIN64
+	ASSERT(s == 136); // need to modify if this changes
+#else
+	ASSERT(s == 80);  // need to modify if this changes
+#endif
 
 	COMPARE_PROPERTY_MACRO(mask);
 	COMPARE_PROPERTY_MACRO(active);

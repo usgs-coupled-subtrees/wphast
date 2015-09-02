@@ -332,7 +332,11 @@ CChemIC CChemIC::Full(void)
 bool CChemIC::operator==(const struct chem_ic& rhs)const
 {
 	size_t s = sizeof(chem_ic);
+#ifdef _WIN64
+	ASSERT(sizeof(chem_ic) == 8); // need to modify if this changes
+#else
 	ASSERT(sizeof(chem_ic) == 4); // need to modify if this changes
+#endif
 
 	COMPARE_PROPERTY_MACRO(mask);
 	COMPARE_PROPERTY_MACRO(solution);

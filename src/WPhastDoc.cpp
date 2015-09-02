@@ -3114,7 +3114,11 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 		//
 		CGridElt gridElt = CGridElt::Full();
 		size_t n = sizeof(gridElt);
+#ifdef _WIN64
+		ASSERT(n == 136);
+#else
 		ASSERT(n == 80);
+#endif
 		::GetDefaultMedia(&gridElt);
 		ASSERT(!gridElt.RemovePropZones());
 
