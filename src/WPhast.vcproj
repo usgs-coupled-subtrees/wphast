@@ -165,7 +165,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="_DEBUG"
+				PreprocessorDefinitions="_DEBUG;_WIN64"
 				Culture="1033"
 				AdditionalIncludeDirectories="$(IntDir)"
 			/>
@@ -312,7 +312,7 @@
 		</Configuration>
 		<Configuration
 			Name="AutoRelease|x64"
-			OutputDirectory="$(PlatformName)\$(ConfigurationName)"
+			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC70.vsprops;.\OutputName.vsprops;.\HDF5.vsprops"
@@ -366,7 +366,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="NDEBUG;WPHAST_AUTOMATION"
+				PreprocessorDefinitions="NDEBUG;WPHAST_AUTOMATION;_WIN64"
 				Culture="1033"
 				AdditionalIncludeDirectories="$(IntDir)"
 			/>
@@ -550,7 +550,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="_DEBUG;WPHAST_AUTOMATION"
+				PreprocessorDefinitions="_DEBUG;WPHAST_AUTOMATION;_WIN64"
 				Culture="1033"
 				AdditionalIncludeDirectories="$(IntDir)"
 			/>
@@ -759,7 +759,7 @@
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="NDEBUG;WPHAST_AUTOMATION"
+				PreprocessorDefinitions="NDEBUG;WPHAST_AUTOMATION;_WIN64"
 				Culture="1033"
 				AdditionalIncludeDirectories="$(IntDir)"
 			/>

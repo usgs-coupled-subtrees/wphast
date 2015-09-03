@@ -218,9 +218,15 @@ BOOL CWPhastApp::InitInstance()
 #define free free
 	BOOL bEnable = AfxEnableMemoryTracking(FALSE);
 	free((void*)m_pszProfileName);
+#ifdef _WIN64
+	m_pszProfileName = _tcsdup(_T("Phast for Windows x64\\")
+		_T(APR_STRINGIFY(VER_MAJOR))
+		_T(".") _T(APR_STRINGIFY(VER_MINOR)));
+#else
 	m_pszProfileName = _tcsdup(_T("Phast for Windows\\")
 		_T(APR_STRINGIFY(VER_MAJOR))
 		_T(".") _T(APR_STRINGIFY(VER_MINOR)));
+#endif
 	AfxEnableMemoryTracking(bEnable);
 #pragma warning(default:4005)
 #pragma pop_macro("free")
@@ -585,7 +591,11 @@ BOOL CWPhastApp::LoadMoreProfileSettings(void)
 	::GetSystemInfo(&sysinfo);
 	int threads = (int) sysinfo.dwNumberOfProcessors;
 
+#ifdef _WIN64
+	_stprintf(szCmdArgs, _T("-n %d %s"), threads, _T("\"%INSTALLDIR%\\bin\\phast-msmpi.exe\""));
+#else
 	_stprintf(szCmdArgs, _T("-n %d %s"), threads, _T("\"%INSTALLDIR%\\bin64\\phast-msmpi.exe\""));
+#endif
 
 	// Get default database from registry
 	this->settings.strDatabase    = (this->pRecentDBFileList->GetSize()) ? (*this->pRecentDBFileList)[0] : _T("%INSTALLDIR%\\database\\phast.dat");
@@ -597,7 +607,11 @@ BOOL CWPhastApp::LoadMoreProfileSettings(void)
 	this->settings.bRunMPI        = GetProfileInt   (_T("Settings"), _T("RunMPI"),          0                                             );
 	this->settings.nThreads       = GetProfileInt   (_T("Settings"), _T("Threads"),         threads                                       );
 	this->settings.strMPICommand  = GetProfileString(_T("Settings"), _T("RunMPICommand"),   _T("\"%MSMPI_BIN%\\mpiexec.exe\"")            );
+#ifdef _WIN64
+	this->settings.strMTCommand   = GetProfileString(_T("Settings"), _T("RunMTCommand"),    _T("\"%INSTALLDIR%\\bin\\phast-mt.exe\"")   );
+#else
 	this->settings.strMTCommand   = GetProfileString(_T("Settings"), _T("RunMTCommand"),    _T("\"%INSTALLDIR%\\bin64\\phast-mt.exe\"")   );
+#endif
 	this->settings.strCommandArgs = GetProfileString(_T("Settings"), _T("RunCommandArgs"),  szCmdArgs                                     );
 
 	return TRUE;

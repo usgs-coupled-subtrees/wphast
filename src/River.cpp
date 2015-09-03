@@ -42,6 +42,13 @@ void CRiver::Serialize(bool bStoring, hid_t loc_id)
 	static const char szPointsFormat[]  = "Point %d";
 	static const char sz_count_points[] = "count_points";
 
+#ifdef _WIN64
+	hid_t MEM_TYPE_ID = H5T_NATIVE_LLONG;  // size_t
+#else
+	hid_t MEM_TYPE_ID = H5T_NATIVE_INT;    // size_t
+#endif
+
+
 	HDF_GETSET_MACRO(n_user, H5T_NATIVE_INT);
 	HDF_STD_STRING_MACRO(description);
 
@@ -56,7 +63,7 @@ void CRiver::Serialize(bool bStoring, hid_t loc_id)
 	if (bStoring)
 	{
 		size_t count_points = this->m_listPoints.size();
-		VERIFY(0 <= CGlobal::HDFSerialize(bStoring, loc_id, sz_count_points, H5T_NATIVE_INT, 1, &count_points));
+		VERIFY(0 <= CGlobal::HDFSerialize(bStoring, loc_id, sz_count_points, MEM_TYPE_ID, 1, &count_points));
 
 		std::list<CRiverPoint>::iterator iter = this->m_listPoints.begin();
 		for (size_t i = 0; iter != this->m_listPoints.end(); ++iter, ++i)
@@ -78,7 +85,7 @@ void CRiver::Serialize(bool bStoring, hid_t loc_id)
 	else
 	{
 		size_t count_points;
-		if (0 > CGlobal::HDFSerialize(bStoring, loc_id, sz_count_points, H5T_NATIVE_INT, 1, &count_points))
+		if (0 > CGlobal::HDFSerialize(bStoring, loc_id, sz_count_points, MEM_TYPE_ID, 1, &count_points))
 		{
 			count_points = 0;
 		}
@@ -99,6 +106,10 @@ void CRiver::Serialize(bool bStoring, hid_t loc_id)
 
 				status = ::H5Gclose(point_id);
 				ASSERT(status >= 0);
+			}
+			else
+			{
+				break;
 			}
 		}
 	}

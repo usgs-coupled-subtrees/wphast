@@ -99,3 +99,18 @@ void TestHDFFile::TestImage(void)
 
 	CPPUNIT_ASSERT( ::rename("Test/article.jpg", "Test/article.jpg.orig") == 0 );
 }
+
+#include "srcinput/BC_info.h"
+
+void TestHDFFile::TestSizes(void)
+{
+	CPPUNIT_ASSERT_EQUAL(H5Tget_size(H5T_NATIVE_INT),   sizeof(int));
+
+	CPPUNIT_ASSERT_EQUAL(H5Tget_size(H5T_NATIVE_INT),   sizeof(BC_info::BC_TYPE));
+
+#ifdef _WIN64
+	CPPUNIT_ASSERT_EQUAL(H5Tget_size(H5T_NATIVE_LLONG), sizeof(size_t));
+#else
+	CPPUNIT_ASSERT_EQUAL(H5Tget_size(H5T_NATIVE_INT), sizeof(size_t));
+#endif
+}
