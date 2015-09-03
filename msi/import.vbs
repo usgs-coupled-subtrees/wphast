@@ -20,7 +20,7 @@ scriptdir = Mid(WScript.ScriptFullName, 1, Len(WScript.ScriptFullName) - Len(WSc
 clsid = "{36353903-2137-43FD-9AD6-40B65A96A839}"
 classes = "HKEY_CURRENT_USER\Software\Classes\"
 doc = "Testing.WPhast.Document"
-exepath = scriptdir & "..\src\AutoRelease\P4W.exe"
+exepath = scriptdir & "..\x64\autorelease\P4W.exe"
 
 Set Fso = CreateObject("Scripting.FileSystemObject")
 exepath  = Fso.GetAbsolutePathName(exepath)

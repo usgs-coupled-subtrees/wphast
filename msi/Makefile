@@ -4,14 +4,16 @@ BOOT := ../Bootstrapper/bin/x64/Release/phast4windows-$(MAJOR).$(MINOR).$(PATCH)
 
 MSI := bin/x64/Release/phast4windows-$(MAJOR).$(MINOR).$(PATCH)-$(REL)-x64.msi
 
-DEVENV := devenv
+DEVENV := /cygdrive/c/Program\ Files\ \(x86\)/Microsoft\ Visual\ Studio\ 8/Common7/IDE/devenv.exe
+
+MSBUILD := /cygdrive/c/WINDOWS/Microsoft.NET/Framework/v2.0.50727/MsBuild.exe
 
 SLN := ../WPhast.sln
 
-P4W_EXE := ../src/AutoRelease/P4W.exe
+P4W_EXE := ../x64/autorelease/P4W.exe
 
-VTK_DLL_DIR := ../src/AutoRelease
-HDF_DLL_DIR := ../src/AutoRelease
+VTK_DLL_DIR := ../x64/autorelease
+HDF_DLL_DIR := ../x64/autorelease
 
 CSCRIPT = cscript
 
@@ -19,11 +21,11 @@ MSIVAL2 := /cygdrive/c/Program\ Files/MsiVal2/msival2
 
 MSIEXEC := msiexec
 
-PHAST := $(PHAST_EXE_PATH)
+##PHAST := $(PHAST_EXE_PATH)
 
-DEV_VTK42_VS8_DLL_BIN_CYG = /cygdrive/c/PROGRA~1/VTK-4-~1/bin
+##DEV_VTK42_VS8_DLL_BIN_CYG = /cygdrive/c/PROGRA~1/VTK-4-~1/bin
 
-DEV_HDF5_LIBDLL_CYG = /cygdrive/c/3RDPARTY/HDF5/5-143-~1/c/release/dll
+##DEV_HDF5_LIBDLL_CYG = /cygdrive/c/3RDPARTY/HDF5/5-143-~1/c/release/dll
 
 
 %.p4w : %.trans.dat $(P4W_EXE) $(HDF_DLLS) $(VTK_DLLS)
@@ -99,15 +101,15 @@ HDF_DLLS=\
 all : $(BOOT)
 
 $(BOOT) : $(MSI)
-	cd ../Bootstrapper ; MSBuild.exe Bootstrapper.sln /t:Bootstrapper /p:Configuration=Release /p:Platform=x64 /p:Major=${MAJOR} /p:Minor=${MINOR} /p:Patch=${PATCH} /p:Build=${REL}
+	cd ../Bootstrapper ; $(MSBUILD) Bootstrapper.sln /t:Bootstrapper /p:Configuration=Release /p:Platform=x64 /p:Major=${MAJOR} /p:Minor=${MINOR} /p:Patch=${PATCH} /p:Build=${REL}
 
 $(MSI) : msi.sln  $(P4W) $(P4W_FILES)
-	MSBuild.exe msi.sln /t:msi /p:Configuration=Release /p:Platform=x64 /p:Major=${MAJOR} /p:Minor=${MINOR} /p:Patch=${PATCH} /p:Build=${REL} /p:phastSerExePath="${PHAST_SER_EXE_PATH}" /p:phastMPICH2ExePath="${PHAST_MPICH2_EXE_PATH}"
+	$(MSBUILD) msi.sln /t:msi /p:Configuration=Release /p:Platform=x64 /p:Major=${MAJOR} /p:Minor=${MINOR} /p:Patch=${PATCH} /p:Build=${REL} /p:phastSerExePath="${PHAST_SER_EXE_PATH}" /p:phastMPICH2ExePath="${PHAST_MPICH2_EXE_PATH}"
 
 $(P4W_EXE) : $(SLN)
 	@rm -rf AutoRelease.log
-	$(DEVENV) /out AutoRelease.log /build AutoRelease $(SLN)
-	@cat AutoRelease.log
+	$(DEVENV) /out AutoRelease-x64.log /build "AutoRelease|x64" $(SLN)
+	@cat AutoRelease-x64.log
 	
 install :
 	$(MSIEXEC) /i `cygpath -w $(MSI)` /qn+ APPLICATIONFOLDER=C:\\DOCUME~1\\charlton\\PROGRA~1\\WPhast /log WPhast.log

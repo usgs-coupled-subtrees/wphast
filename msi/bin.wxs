@@ -32,10 +32,7 @@
             <ComponentRef Id="spawnc.exe" />
             <ComponentRef Id="xerces_c_2_7.dll" />
             <ComponentRef Id="zlib1.dll" />
-        </ComponentGroup>
-    </Fragment>
-    <Fragment>
-        <ComponentGroup Id="Bin64">
+            <!-- phast console versions -->
             <ComponentRef Id="hdf5.dll_64" />
             <ComponentRef Id="szip.dll_64" />
             <ComponentRef Id="zlib.dll_64" />
@@ -150,8 +147,7 @@
                 <Component Id="zlib1.dll" Guid="*">
                     <File Id="zlib1.dll" KeyPath="yes" Source="$(var.hdfDllPath)\..\bin\zlib1.dll" />
                 </Component>
-            </Directory>
-            <Directory Id="bin64" Name="bin64">
+                <!-- phast console versions -->
                 <Component Id="hdf5.dll_64" Guid="*">
                     <File Id="hdf5.dll_64" KeyPath="yes" Source="$(var.CMakeBinaryDir)\_build_mt_x64\INSTALL\bin\hdf5.dll" />
                 </Component>

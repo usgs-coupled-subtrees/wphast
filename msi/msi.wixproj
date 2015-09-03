@@ -1,11 +1,11 @@
-﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Major Condition=" '$(Major)' == '' ">2</Major>
     <Minor Condition=" '$(Minor)' == '' ">1</Minor>
     <Patch Condition=" '$(Patch)' == '' ">0</Patch>
     <Build Condition=" '$(Build)' == '' ">1111</Build>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <Platform Condition=" '$(Platform)' == '' ">x64</Platform>
     <ProductVersion>3.0</ProductVersion>
     <ProjectGuid>{4dd3382e-7da2-4e79-9be1-51e246426261}</ProjectGuid>
     <SchemaVersion>2.0</SchemaVersion>
@@ -30,9 +30,12 @@
     <IntermediateOutputPath>obj\$(Platform)\$(Configuration)\</IntermediateOutputPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
-    <DefineConstants>Major=$(Major);Minor=$(Minor);Patch=$(Patch);Build=$(Build);phastSerExePath=$(phastSerExePath);phastMPICH2ExePath=$(phastMPICH2ExePath);BinDir=..\src\AutoRelease;ExampleDir=phast\examples;DbDir=phast\database</DefineConstants>
+    <DefineConstants>Major=$(Major);Minor=$(Minor);Patch=$(Patch);Build=$(Build);phastSerExePath=$(phastSerExePath);phastMPICH2ExePath=$(phastMPICH2ExePath);BinDir=..\x64\AutoRelease;ExampleDir=phast\examples;DbDir=phast\database</DefineConstants>
     <OutputPath>bin\$(Platform)\$(Configuration)\</OutputPath>
     <IntermediateOutputPath>obj\$(Platform)\$(Configuration)\</IntermediateOutputPath>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SuppressValidation>true</SuppressValidation>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="bin.wxs" />

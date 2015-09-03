@@ -17,8 +17,6 @@
   <?if $(sys.BUILDARCH)=x64 ?>
   <?define UpgradeGuid="{B102320F-FFAD-4ff0-9EE3-397B897E53E7}"?>
   <?define DatabaseGuid="{B12C1B05-5FFB-4b3f-8ED3-945BCB019DC6}"?>
-  <?define IPhreeqcCOMDllGuid="{376BD8D8-C835-407b-A68C-D3B1425C13B5}"?>
-  <?define IPhreeqcCOMTlbGuid="{D72C7BD3-1DD2-491b-9234-201BAD163D99}"?>
   <?define WPhastExeGuid="{D8873219-3288-403d-AA6D-E65A406D263D}"?>
   <?define Description="USGS $(var.Name) x64 $(var.VersionUserVisible) Installer"?>
   <?define FeatureTitle="$(var.Name) x64 $(var.VersionUserVisible)"?>
@@ -30,8 +28,6 @@
   <?else?>
   <?define UpgradeGuid="{8A362F30-6189-4d92-8700-F4B01CB7A4E7}"?>
   <?define DatabaseGuid="{A6B18FDD-82C1-45b6-81C8-603416333146}"?>
-  <?define IPhreeqcCOMDllGuid="{06BF6C6E-F4AF-4275-90C2-DD00ED65231C}"?>
-  <?define IPhreeqcCOMTlbGuid="{42F5AA81-DF9B-419c-ABC0-05945505B4F4}"?>
   <?define WPhastExeGuid="{206FAB29-05E0-4ff8-BAB3-29F3B0AB3E4F}"?>
   <?define Description="USGS $(var.Name) $(var.VersionUserVisible) Installer"?>
   <?define FeatureTitle="$(var.Name) $(var.VersionUserVisible)"?>
@@ -51,10 +47,16 @@
   <?else?>
   <?define MergeDir="$(env.CommonProgramFiles(x86))\Merge Modules"?>
   <?endif?>
-  
+
+  <?if $(sys.BUILDARCH)=x64 ?>
+  <?define hdfDllPath="$(env.DEV_HDF5_X64_LIBDLL)"?>
+  <?define vtkDllPath="$(env.DEV_VTK_542_VS8_DLL_X64_BIN)"?>
+  <?define xercesDllPath="$(env.DEV_XERCES)\bin64"?>
+  <?else?>
   <?define hdfDllPath="$(env.DEV_HDF5_LIBDLL)"?>
   <?define vtkDllPath="$(env.DEV_VTK_542_VS8_DLL_BIN)"?>
   <?define xercesDllPath="$(env.DEV_XERCES)\bin"?>
+  <?endif?>
 
   <?define CMakeBinaryDir="C:\cygwin\home\charlton\programs\phreeqc"?>
   <?define Merge64Dir="C:\cygwin\home\charlton\programs\phreeqc"?>
