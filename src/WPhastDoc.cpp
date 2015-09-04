@@ -6370,7 +6370,7 @@ void CWPhastDoc::OnViewShowAll()
 
 void CWPhastDoc::SizeHandles(double size)
 {
-	if (size != size) return;
+	if (::_isnan(size)) return;
 	TRACE("SizeHandles = %g\n", size);
 
 	// size handles for wells/rivers/drains
