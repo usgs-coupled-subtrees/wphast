@@ -15,7 +15,7 @@ P4W_EXE := ../x64/autorelease/P4W.exe
 VTK_DLL_DIR := ../x64/autorelease
 HDF_DLL_DIR := ../x64/autorelease
 
-CSCRIPT = cscript
+CSCRIPT = /cygdrive/c/Windows/Sysnative/cscript.exe
 
 MSIVAL2 := /cygdrive/c/Program\ Files/MsiVal2/msival2
 
