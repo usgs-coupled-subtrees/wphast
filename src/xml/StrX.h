@@ -15,12 +15,12 @@ public :
 	StrX(const XMLCh* const toTranscode)
 	{
 		// Call the private transcoding method
-		fLocalForm = xercesc_2_7::XMLString::transcode(toTranscode);
+		fLocalForm = xercesc::XMLString::transcode(toTranscode);
 	}
 
 	~StrX()
 	{
-		xercesc_2_7::XMLString::release(&fLocalForm);
+		xercesc::XMLString::release(&fLocalForm);
 	}
 
 

@@ -14,12 +14,12 @@ public :
 	XStr(const char* const toTranscode)
 	{
 		// Call the private transcoding method
-		fUnicodeForm = xercesc_2_7::XMLString::transcode(toTranscode);
+		fUnicodeForm = xercesc::XMLString::transcode(toTranscode);
 	}
 
 	~XStr()
 	{
-		xercesc_2_7::XMLString::release(&fUnicodeForm);
+		xercesc::XMLString::release(&fUnicodeForm);
 	}
 
 
