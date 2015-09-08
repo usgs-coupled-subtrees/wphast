@@ -175,7 +175,7 @@ clean() {
 install() {
   (rm -fr ${instdir}/* && \
 # logs
-  /usr/bin/install -m 644 "${objdir}/msi/AutoRelease.log" \
+  /usr/bin/install -m 644 "${objdir}/msi/AutoRelease-x64.log" \
   ${instdir}/. && \
 # the x64 MSI file
   /usr/bin/install -m 755 "${objdir}/msi/bin/x64/Release/${FULLPKG}-x64.msi" \
