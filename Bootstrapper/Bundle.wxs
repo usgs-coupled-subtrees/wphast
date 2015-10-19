@@ -16,7 +16,8 @@
     Name="$(var.FullName)"
     Version="$(var.Version)"
     Manufacturer="$(var.Manufacturer)"
-    UpgradeCode="$(var.UpgradeGuid)">
+    UpgradeCode="$(var.UpgradeGuid)"
+    Condition="VersionNT64">
     
     <!--
     <BootstrapperApplicationRef Id="WixStandardBootstrapperApplication.RtfLicense" />
@@ -53,6 +54,7 @@
         ForcePerMachine="yes"
         />
 
+      <RollbackBoundary />
       <ExePackage
         Id="MSMpi"
         Name="MS-MPI Setup"
