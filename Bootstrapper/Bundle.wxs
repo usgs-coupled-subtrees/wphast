@@ -54,6 +54,13 @@
         ForcePerMachine="yes"
         />
 
+      <!--
+      The DetectCondition shouldn't need '>=' since the '-unattend' seems
+      to not set an error condition when installing an older version.
+      And from https://msdn.microsoft.com/en-us/library/aa368012.aspx and     
+      https://msdn.microsoft.com/en-us/library/aa368561(v=vs.85).aspx
+      it looks like version comparisons can not be done anyway.
+      -->
       <ExePackage
         Id="MSMpi"
         Name="MS-MPI Setup"
@@ -64,7 +71,7 @@
         Permanent="yes"
         Vital="no"
         SourceFile="C:\Users\Public\Downloads\MSMpiSetup.exe"
-        DetectCondition="(MSMPI64Version = &quot;6.9.12436.10&quot;)"
+        DetectCondition="(MSMPI64Version = &quot;6.0.12436.10&quot;)"
         />
     </Chain>
 	</Bundle>
