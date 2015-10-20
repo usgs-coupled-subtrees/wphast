@@ -65,7 +65,7 @@
         Permanent="yes"
         Vital="yes"
         SourceFile="C:\Users\Public\Downloads\MSMpiSetup.exe"
-        DetectCondition="(MSMPI64Version = &quot;6.0.12436.10&quot;)"
+        DetectCondition="(MSMPI64Version = &quot;6.9.12436.10&quot;)"
         />
     </Chain>
 	</Bundle>
