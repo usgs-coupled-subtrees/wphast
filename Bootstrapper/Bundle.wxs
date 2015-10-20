@@ -40,7 +40,7 @@
         Compressed="yes"
         PerMachine="yes"
         Permanent="yes"
-        Vital="yes"
+        Vital="no"
         SourceFile="C:\Users\Public\Downloads\modview1_6.exe"
         DetectCondition="(ModViewDisplayName = &quot;Model Viewer 1.6&quot;)"
         />
@@ -54,16 +54,15 @@
         ForcePerMachine="yes"
         />
 
-      <RollbackBoundary />
       <ExePackage
         Id="MSMpi"
         Name="MS-MPI Setup"
-        InstallCommand=""
+        InstallCommand="-unattend"
         Cache="yes"
         Compressed="yes"
         PerMachine="yes"
         Permanent="yes"
-        Vital="yes"
+        Vital="no"
         SourceFile="C:\Users\Public\Downloads\MSMpiSetup.exe"
         DetectCondition="(MSMPI64Version = &quot;6.9.12436.10&quot;)"
         />
