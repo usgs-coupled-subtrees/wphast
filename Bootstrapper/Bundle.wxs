@@ -58,7 +58,7 @@
       <ExePackage
         Id="MSMpi"
         Name="MS-MPI Setup"
-        InstallCommand="-unattend"
+        InstallCommand=""
         Cache="yes"
         Compressed="yes"
         PerMachine="yes"
