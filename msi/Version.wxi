@@ -58,6 +58,6 @@
   <?define xercesDllPath="$(env.DEV_XERCES)\bin"?>
   <?endif?>
 
-  <?define CMakeBinaryDir="C:\cygwin\home\charlton\programs\phreeqc"?>
-  <?define Merge64Dir="C:\cygwin\home\charlton\programs\phreeqc"?>
+  <?define CMakeBinaryDir=".."?>
+  <?define Merge64Dir="$(env.DEV_MERGE_DIR)"?>
 </Include>
