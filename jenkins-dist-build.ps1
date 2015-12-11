@@ -131,15 +131,9 @@ foreach ($ex in $examples) {
 }
 
 # build msi
-[string]${msi_opts}=".\msi\msi.sln /t:msi /p:Configuration=Release /p:Platform=x64 `
-                     /p:Major=${Env:ver_major} /p:Minor=${Env:ver_minor} `
-                     /p:Patch=${Env:ver_patch} /p:Build=${Env:REL}"
+[string]${msi_opts}=".\msi\msi.sln /t:msi /p:Configuration=Release /p:Platform=x64 /p:Major=${Env:ver_major} /p:Minor=${Env:ver_minor} /p:Patch=${Env:ver_patch} /p:Build=${Env:REL}"
 Invoke-Expression "${MsBuild} ${msi_opts}"
 
 # build bootstrap
-[string]$boot_opts=".\Bootstrapper\Bootstrapper.sln /t:Bootstrapper `
-                    /p:Configuration=Release /p:Platform=x64 `
-                    /p:TargetName=${Env:FULLPKG}-x64 /p:Major=${Env:ver_major} `
-                    /p:Minor=${Env:ver_minor} /p:Patch=${Env:ver_patch} `
-                    /p:Build=${Env:REL} /verbosity:detailed"
+[string]$boot_opts=".\Bootstrapper\Bootstrapper.sln /t:Bootstrapper /p:Configuration=Release /p:Platform=x64 /p:TargetName=${Env:FULLPKG}-x64 /p:Major=${Env:ver_major} /p:Minor=${Env:ver_minor} /p:Patch=${Env:ver_patch} /p:Build=${Env:REL} /verbosity:detailed"
 Invoke-Expression "${MsBuild} ${boot_opts}"
