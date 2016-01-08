@@ -106,24 +106,21 @@ do {
 } until($building -contains 'false')
 
 ##{{
-# download all artifacts as zip
-Copy-Item ".\freeStyleBuild.xml" ".\freeStyleBuild.xml.save"
-throw "*** done for now ***`n"
-##}}
-
 [string]$url=(Select-Xml -Path .\freeStyleBuild.xml -XPath "/freeStyleBuild/url").Node.InnerText
-[string]$file=((Select-Xml -Path .\freeStyleBuild.xml -XPath "/freeStyleBuild/artifact") | Select-Object -First 1).Node.relativePath
-[string]$download="${url}artifact/${file}"
+$artifacts=(Select-Xml -Path .\freeStyleBuild.xml -XPath "/freeStyleBuild/artifact")
 
-Write-Output "url=$url"
-Write-Output "file=$file"
-Write-Output "download=$download"
-
-# download cmake tar.gz file
-if (Test-Path -Path "${Env:FULLPKG}.tar.gz" -PathType Leaf) {
-  Remove-Item ".\${Env:FULLPKG}.tar.gz"
+foreach($art in $artifacts) {
+  $path=Split-Path ${art}.Node.relativePath
+  if (!(Test-Path -Path "${path}" -PathType Container)) {
+    New-Item -ItemType directory -Path "${path}"
+  }
+  Push-Location ${path}
+  ${relPath}=${art}.Node.relativePath
+  wget "${url}artifact/${relPath}" 2> $null
+  Pop-Location 
 }
-wget $download 2> $null
+throw "STOP`n"
+##}}
 #######################}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 # duplicate build/dist.sh
