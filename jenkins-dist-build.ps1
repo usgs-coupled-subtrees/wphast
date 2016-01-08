@@ -68,7 +68,6 @@ Write-Output "Env:DOWNLOADS=${Env:DOWNLOADS}"
 
 Write-Output "2 LastExitCode=$LastExitCode"
 
-#######################{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 # create phast-dist-windows build URL
 [string]$trigger = 'http://136.177.112.8:8081/job/phast-dist-windows/buildWithParameters'
 $trigger += '?DATE='
@@ -105,11 +104,10 @@ do {
   Write-Output "building=$building"
 } until($building -contains 'false')
 
-##{{
 [string]$url=(Select-Xml -Path .\freeStyleBuild.xml -XPath "/freeStyleBuild/url").Node.InnerText
 $artifacts=(Select-Xml -Path .\freeStyleBuild.xml -XPath "/freeStyleBuild/artifact")
 
-foreach($art in $artifacts) {
+foreach ($art in $artifacts) {
   $path=Split-Path ${art}.Node.relativePath
   if (!(Test-Path -Path "${path}" -PathType Container)) {
     New-Item -ItemType directory -Path "${path}"
@@ -119,9 +117,6 @@ foreach($art in $artifacts) {
   wget "${url}artifact/${relPath}" 2> $null
   Pop-Location 
 }
-throw "STOP`n"
-##}}
-#######################}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 # duplicate build/dist.sh
 $sed_files=@('src/Version.h', `
