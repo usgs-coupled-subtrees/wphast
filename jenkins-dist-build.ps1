@@ -63,6 +63,63 @@ Write-Output "Env:DOWNLOADS=${Env:DOWNLOADS}"
 
 Write-Output "2 LastExitCode=$LastExitCode"
 
+#######################{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
+# create phast-dist-windows build URL
+[string]$trigger = 'http://136.177.112.8:8081/job/phast-dist-windows/buildWithParameters'
+$trigger += '?DATE='
+$trigger += ${Env:DATE} -replace '/','%2f'
+$trigger += '&REL='
+$trigger += ${Env:REL}
+$trigger += '&VER='
+$trigger += ${Env:VER}
+$trigger += '&delay=0sec'
+Write-Output "trigger=$trigger"
+
+# trigger build
+wget -S $trigger -O start.html 2> queue.out
+[string]$location="$((-Split (cat .\queue.out | Select-String "Location"))[1])api/xml"
+Write-Output "location=$location"
+
+# wget until <waitingItem> changes to <leftItem>
+do {
+  Start-Sleep -s 2
+  wget $location -O leftItem.xml 2> $null
+} until ((Select-Xml -Path .\leftItem.xml -XPath "/leftItem"))
+
+[string]$build="$((Select-Xml -Path .\leftItem.xml -XPath "/leftItem/executable/url").Node.InnerText)"
+if ([string]::IsNullOrEmpty($build)) {
+  throw "*** phast-dist-windows cannot be built ***`n"
+}
+Write-Output "build=$build"
+
+# wget until <freeStyleBuild><building>false</building></freeStyleBuild>
+do {
+  Start-Sleep -s 20
+  wget "${build}api/xml" -O freeStyleBuild.xml 2> $null
+  [string]$building = (Select-Xml -Path .\freeStyleBuild.xml -XPath "/freeStyleBuild/building").Node.InnerText
+  Write-Output "building=$building"
+} until($building -contains 'false')
+
+##{{
+# download all artifacts as zip
+Copy-Item ".\freeStyleBuild.xml" ".\freeStyleBuild.xml.save"
+throw "*** done for now ***`n"
+##}}
+
+[string]$url=(Select-Xml -Path .\freeStyleBuild.xml -XPath "/freeStyleBuild/url").Node.InnerText
+[string]$file=((Select-Xml -Path .\freeStyleBuild.xml -XPath "/freeStyleBuild/artifact") | Select-Object -First 1).Node.relativePath
+[string]$download="${url}artifact/${file}"
+
+Write-Output "url=$url"
+Write-Output "file=$file"
+Write-Output "download=$download"
+
+# download cmake tar.gz file
+if (Test-Path -Path "${Env:FULLPKG}.tar.gz" -PathType Leaf) {
+  Remove-Item ".\${Env:FULLPKG}.tar.gz"
+}
+wget $download 2> $null
+#######################}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 # duplicate build/dist.sh
 $sed_files=@('src/Version.h', `
