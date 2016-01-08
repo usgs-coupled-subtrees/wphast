@@ -1,3 +1,8 @@
+# use gnuwin32 wget NOT alias (wget -> Invoke-WebRequest)
+While (Test-Path Alias:wget) {
+  Remove-Item Alias:wget
+}
+
 # export msi/phast/RELEASE
 ${config_dir}="C:\Users\jenkins\svn-jenkins"
 svn --config-dir ${config_dir} export --force `
