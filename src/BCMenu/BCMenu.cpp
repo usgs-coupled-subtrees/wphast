@@ -169,6 +169,7 @@ BCMenu::BCMenu()
 BCMenu::~BCMenu()
 {
 	DestroyMenu();
+	ASSERT(this->m_MenuList.GetSize() == 0);
 }
 
 BOOL BCMenu::IsNewShell ()
