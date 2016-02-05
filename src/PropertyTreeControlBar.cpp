@@ -98,6 +98,9 @@ static const TCHAR szPRINT_INITIAL[]       = _T("PRINT_INITIAL");
 static const TCHAR szPRINT_FREQUENCY[]     = _T("PRINT_FREQUENCY");
 static const TCHAR szTIME_CONTROL[]        = _T("TIME_CONTROL");
 static const TCHAR szZONE_FLOW[]           = _T("ZONE_FLOW");
+static const TCHAR szPRINT_LOCATIONS[]     = _T("PRINT_LOCATIONS");
+static const TCHAR szPL_CHEM[]             = _T("CHEMISTRY");
+static const TCHAR szPL_XYZCHEM[]          = _T("XYZ_CHEMISTRY");
 static const TCHAR szTITLE[]               = _T("TITLE");
 
 static const int BC_INDEX              = 0;
@@ -224,7 +227,7 @@ void CPropertyTreeControlBar::OnSelChanged(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 	if (this->IsNodeEditable(editable, false))
 	{
 		HTREEITEM hParent = editable.GetParent();
-		if (hParent == this->m_nodeMedia || hParent == this->m_nodeBC || hParent == this->m_nodeICHead || hParent == this->m_nodeICChem || hParent == this->m_nodeZFRates)
+		if (hParent == this->m_nodeMedia || hParent == this->m_nodeBC || hParent == this->m_nodeICHead || hParent == this->m_nodeICChem || hParent == this->m_nodeZFRates || hParent == this->m_nodePLChem || hParent == this->m_nodePLXYZChem)
 		{
 			ASSERT(editable.GetData());
 			CZoneActor* pZone = reinterpret_cast<CZoneActor*>(editable.GetData());
@@ -560,6 +563,13 @@ void CPropertyTreeControlBar::SetNodeCheck(CTreeCtrlNode node, UINT nCheckState)
 			pDoc->OnViewGrid();
 		}
 		return;
+	}
+	else if (node == this->GetPrintLocationsNode())
+	{
+		if (!((pDoc = this->GetDocument()) && (pPropAssembly = pDoc->GetPropAssemblyPrintLocations())))
+		{
+			return;
+		}
 	}
 	else
 	{
@@ -1071,6 +1081,33 @@ bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode &editNode, bool bDoEd
 		return false;
 	}
 
+	// Print Locations
+	//
+	if (item.IsNodeAncestor(this->m_nodePrintLocs))
+	{
+		if (item != this->m_nodePrintLocs && item != this->m_nodePLChem && item != this->m_nodePLXYZChem)
+		{
+			while (item.GetParent() != this->m_nodePLChem && item.GetParent() != this->m_nodePLXYZChem)
+			{
+				item = item.GetParent();
+				if (!item) break;
+			}
+			if (item.GetData())
+			{
+				if (CZoneActor* pZone = CZoneActor::SafeDownCast((vtkObject*)item.GetData()))
+				{
+					if (bDoEdit)
+					{
+						pZone->Edit(&this->m_wndTree);
+					}
+					editNode = item;
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
 	// PRINT_INITIAL
 	//
 	if (item.IsNodeAncestor(this->m_nodePrintInput))
@@ -1447,19 +1484,25 @@ void CPropertyTreeControlBar::DeleteContents()
 	this->m_nodeRivers       = this->m_wndTree.InsertItem(szRIVERS              );
 	this->m_nodeDrains       = this->m_wndTree.InsertItem(szDRAINS              );
 	this->m_nodeZFRates      = this->m_wndTree.InsertItem(szZONE_FLOW           );
+	this->m_nodePrintLocs    = this->m_wndTree.InsertItem(szPRINT_LOCATIONS     );
+	this->m_nodePLChem       = this->m_nodePrintLocs.AddTail(szPL_CHEM);
+	this->m_nodePLXYZChem    = this->m_nodePrintLocs.AddTail(szPL_XYZCHEM);
+
 	this->m_nodePrintInput   = this->m_wndTree.InsertItem(szPRINT_INITIAL       );
 	this->m_nodePF           = this->m_wndTree.InsertItem(szPRINT_FREQUENCY     );
 	this->m_nodeTimeControl2 = this->m_wndTree.InsertItem(szTIME_CONTROL        );
+	
 
 	// set initial checkmark states (eyes)
-	this->m_wndTree.SetItemState(this->m_nodeMedia,   INDEXTOSTATEIMAGEMASK(BST_CHECKED + 1), TVIS_STATEIMAGEMASK);
-	this->m_wndTree.SetItemState(this->m_nodeGrid,    INDEXTOSTATEIMAGEMASK(BST_CHECKED + 1), TVIS_STATEIMAGEMASK);
-	this->m_wndTree.SetItemState(this->m_nodeIC,      INDEXTOSTATEIMAGEMASK(BST_CHECKED + 1), TVIS_STATEIMAGEMASK);
-	this->m_wndTree.SetItemState(this->m_nodeBC,      INDEXTOSTATEIMAGEMASK(BST_CHECKED + 1), TVIS_STATEIMAGEMASK);
-	this->m_wndTree.SetItemState(this->m_nodeWells,   INDEXTOSTATEIMAGEMASK(BST_CHECKED + 1), TVIS_STATEIMAGEMASK);
-	this->m_wndTree.SetItemState(this->m_nodeRivers,  INDEXTOSTATEIMAGEMASK(BST_CHECKED + 1), TVIS_STATEIMAGEMASK);
-	this->m_wndTree.SetItemState(this->m_nodeDrains,  INDEXTOSTATEIMAGEMASK(BST_CHECKED + 1), TVIS_STATEIMAGEMASK);
-	this->m_wndTree.SetItemState(this->m_nodeZFRates, INDEXTOSTATEIMAGEMASK(BST_CHECKED + 1), TVIS_STATEIMAGEMASK);
+	this->m_wndTree.SetItemState(this->m_nodeMedia,    INDEXTOSTATEIMAGEMASK(BST_CHECKED + 1), TVIS_STATEIMAGEMASK);
+	this->m_wndTree.SetItemState(this->m_nodeGrid,     INDEXTOSTATEIMAGEMASK(BST_CHECKED + 1), TVIS_STATEIMAGEMASK);
+	this->m_wndTree.SetItemState(this->m_nodeIC,       INDEXTOSTATEIMAGEMASK(BST_CHECKED + 1), TVIS_STATEIMAGEMASK);
+	this->m_wndTree.SetItemState(this->m_nodeBC,       INDEXTOSTATEIMAGEMASK(BST_CHECKED + 1), TVIS_STATEIMAGEMASK);
+	this->m_wndTree.SetItemState(this->m_nodeWells,    INDEXTOSTATEIMAGEMASK(BST_CHECKED + 1), TVIS_STATEIMAGEMASK);
+	this->m_wndTree.SetItemState(this->m_nodeRivers,   INDEXTOSTATEIMAGEMASK(BST_CHECKED + 1), TVIS_STATEIMAGEMASK);
+	this->m_wndTree.SetItemState(this->m_nodeDrains,   INDEXTOSTATEIMAGEMASK(BST_CHECKED + 1), TVIS_STATEIMAGEMASK);
+	this->m_wndTree.SetItemState(this->m_nodeZFRates,  INDEXTOSTATEIMAGEMASK(BST_CHECKED + 1), TVIS_STATEIMAGEMASK);
+	this->m_wndTree.SetItemState(this->m_nodePrintLocs,INDEXTOSTATEIMAGEMASK(BST_CHECKED + 1), TVIS_STATEIMAGEMASK);
 }
 
 void CPropertyTreeControlBar::Update(IObserver* pSender, LPARAM lHint, CObject* pHint, vtkObject* pObject)
@@ -1539,6 +1582,36 @@ void CPropertyTreeControlBar::Update(IObserver* pSender, LPARAM lHint, CObject* 
 					}
 				}
 				parent = this->GetZoneFlowRatesNode();
+				for (int i = 0; !bFound && i < parent.GetChildCount(); ++i)
+				{
+					CTreeCtrlNode node = parent.GetChildAt(i);
+					if (node.GetData())
+					{
+						CZoneActor *pZoneActor = (CZoneActor*)node.GetData();
+						if (pZoneActor == pObject)
+						{
+							node.Select();
+							bFound = true;
+							break;
+						}
+					}
+				}
+				parent = this->GetPLChemNode();
+				for (int i = 0; !bFound && i < parent.GetChildCount(); ++i)
+				{
+					CTreeCtrlNode node = parent.GetChildAt(i);
+					if (node.GetData())
+					{
+						CZoneActor *pZoneActor = (CZoneActor*)node.GetData();
+						if (pZoneActor == pObject)
+						{
+							node.Select();
+							bFound = true;
+							break;
+						}
+					}
+				}
+				parent = this->GetPLXYZChemNode();
 				for (int i = 0; !bFound && i < parent.GetChildCount(); ++i)
 				{
 					CTreeCtrlNode node = parent.GetChildAt(i);

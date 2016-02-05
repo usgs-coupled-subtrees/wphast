@@ -1387,6 +1387,18 @@
 				>
 			</File>
 			<File
+				RelativePath=".\PrintLoc.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\PrintZone.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\PrintZoneActor.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\PrismWidget.cpp"
 				>
 			</File>
@@ -8740,6 +8752,18 @@
 			</File>
 			<File
 				RelativePath="PrintInput.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PrintLoc.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PrintZone.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PrintZoneActor.h"
 				>
 			</File>
 			<File

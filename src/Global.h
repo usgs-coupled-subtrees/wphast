@@ -31,6 +31,7 @@ class CWPhastDoc;
 class Data_source;
 class CGridElt;
 class Zone_budget;
+class CPrintZone;
 
 class CWorldTransform;
 class CTreePropSheetExSRC;
@@ -208,6 +209,7 @@ public:
 	static void PathsAbsoluteToRelative(LPCTSTR lpszPathName, CWPhastDoc* pDoc, CChemIC& chemIC);
 	static void PathsAbsoluteToRelative(LPCTSTR lpszPathName, CWPhastDoc* pDoc, CHeadIC& headIC);
 	static void PathsAbsoluteToRelative(LPCTSTR lpszPathName, CWPhastDoc* pDoc, Zone_budget& zb);
+	static void PathsAbsoluteToRelative(LPCTSTR lpszPathName, CWPhastDoc* pDoc, CPrintZone& pz);
 
 	static void DDX_Text_Safe(CDataExchange* pDX, int nIDC, float& value);
 	static void DDX_Text_Safe(CDataExchange *pDX, int nIDC, double &value);

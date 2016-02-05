@@ -14,6 +14,7 @@ CDisplayColors::CDisplayColors(void)
 , crDrain(        RGB(   0, 255,   0) )  // green
 , crWell(         RGB( 255, 255,   0) )  // yellow
 , crZoneFlowRate( RGB( 255,   0, 255) )  // pink
+, crPrintLocs(    RGB( 192, 192, 192) )  // gray
 , crBackground(   RGB(   0,   0,   0) )  // black
 , crZoneCursor(   RGB( 255, 255, 255) )  // white
 {
@@ -38,6 +39,7 @@ void CDisplayColors::Serialize(bool bStoring, hid_t loc_id)
 	static const char szSpecHead[]     = "SpecHead";
 	static const char szWell[]         = "Well";
 	static const char szZoneFlowRate[] = "ZoneFlowRate";
+	static const char szPrintLocs[]    = "PrintLocs";
 	static const char szBackground[]   = "Background";
 	static const char szZoneCursor[]   = "ZoneCursor";
 
@@ -83,6 +85,7 @@ void CDisplayColors::Serialize(bool bStoring, hid_t loc_id)
 		status = CGlobal::HDFSerializeCOLORREF(bStoring, colors_id, szSpecHead,     this->crSpecHead);     ASSERT(status >= 0);
 		status = CGlobal::HDFSerializeCOLORREF(bStoring, colors_id, szWell,         this->crWell);         ASSERT(status >= 0);
 		status = CGlobal::HDFSerializeCOLORREF(bStoring, colors_id, szZoneFlowRate, this->crZoneFlowRate);
+		status = CGlobal::HDFSerializeCOLORREF(bStoring, colors_id, szPrintLocs,    this->crPrintLocs);
 		status = CGlobal::HDFSerializeCOLORREF(bStoring, colors_id, szBackground,   this->crBackground);
 		status = CGlobal::HDFSerializeCOLORREF(bStoring, colors_id, szZoneCursor,   this->crZoneCursor);
 

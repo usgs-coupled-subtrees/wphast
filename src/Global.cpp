@@ -10,6 +10,7 @@
 #include "BC.h"
 #include "ChemIC.h"
 #include "HeadIC.h"
+#include "PrintZone.h"
 
 #include "property.h"
 #include "CheckTreeCtrl.h"
@@ -5213,6 +5214,12 @@ void CGlobal::PathsAbsoluteToRelative(LPCTSTR lpszPathName, CWPhastDoc* pDoc, Zo
 			zb.Get_filename_heads() = pDoc->GetRelativePath(lpszPathName, filename);
 		}
 	}
+}
+
+void CGlobal::PathsAbsoluteToRelative(LPCTSTR lpszPathName, CWPhastDoc* pDoc, CPrintZone& pz)
+{
+	GET_REL_PATH_MACRO(pDoc, pz, print);
+	GET_REL_PATH_MACRO(pDoc, pz, mask);
 }
 
 #define GET_REL_PATH_TIMESERIES_MACRO(D, C, TS) \

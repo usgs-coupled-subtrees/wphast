@@ -60,6 +60,7 @@
 #include "ICHeadZoneActor.h"
 #include "ICChemZoneActor.h"
 #include "ZoneFlowRateZoneActor.h"
+#include "PrintZoneActor.h"
 
 #include "MediaPropsPage2.h"
 #include "FluxPropsPage2.h"
@@ -398,6 +399,7 @@ CWPhastDoc::CWPhastDoc()
 , m_pPropAssemblyRivers(0)
 , m_pPropAssemblyDrains(0)
 , m_pPropAssemblyZFR(0)
+, m_pPropAssemblyPL(0)
 , RiverCallbackCommand(0)
 , GridCallbackCommand(0)
 , RiverMovePointAction(0)
@@ -455,6 +457,7 @@ CWPhastDoc::CWPhastDoc()
 	ASSERT(this->m_pPropAssemblyRivers == 0);
 	ASSERT(this->m_pPropAssemblyDrains == 0);
 	ASSERT(this->m_pPropAssemblyZFR    == 0);
+	ASSERT(this->m_pPropAssemblyPL     == 0);
 
 	this->m_pPropAssemblyMedia  = vtkPropAssembly::New();
 	this->m_pPropAssemblyIC     = vtkPropAssembly::New();
@@ -463,6 +466,7 @@ CWPhastDoc::CWPhastDoc()
 	this->m_pPropAssemblyRivers = vtkPropAssembly::New();
 	this->m_pPropAssemblyDrains = vtkPropAssembly::New();	
 	this->m_pPropAssemblyZFR    = vtkPropAssembly::New();
+	this->m_pPropAssemblyPL     = vtkPropAssembly::New();
 
 	// create the axes
 	//
@@ -589,6 +593,7 @@ CWPhastDoc::~CWPhastDoc()
 	CLEANUP_ASSEMBLY_MACRO(this->m_pPropAssemblyRivers);
 	CLEANUP_ASSEMBLY_MACRO(this->m_pPropAssemblyDrains);
 	CLEANUP_ASSEMBLY_MACRO(this->m_pPropAssemblyZFR);
+	CLEANUP_ASSEMBLY_MACRO(this->m_pPropAssemblyPL);
 	
 
 	ASSERT(this->AxesActor);
@@ -1651,6 +1656,7 @@ void CWPhastDoc::DeleteContents()
 	CLEAR_PROP_ASSEMBLY_MACRO(this->m_pPropAssemblyRivers);
 	CLEAR_PROP_ASSEMBLY_MACRO(this->m_pPropAssemblyDrains);
 	CLEAR_PROP_ASSEMBLY_MACRO(this->m_pPropAssemblyZFR);
+	CLEAR_PROP_ASSEMBLY_MACRO(this->m_pPropAssemblyPL);
 
 	// Turn-all on by default
 	//
@@ -1661,6 +1667,7 @@ void CWPhastDoc::DeleteContents()
 	this->m_pPropAssemblyRivers->SetVisibility(1);
 	this->m_pPropAssemblyDrains->SetVisibility(1);
 	this->m_pPropAssemblyZFR->SetVisibility(1);
+	this->m_pPropAssemblyPL->SetVisibility(1);
 
 	if (this->m_pMapActor)
 	{
@@ -2096,6 +2103,17 @@ void CWPhastDoc::ResetCamera(double xmin, double xmax, double ymin, double ymax,
 	this->ResetCamera(bounds);
 }
 
+std::list<vtkPropCollection*> CWPhastDoc::GetPropAssemblyParts(void)const
+{
+	std::list<vtkPropCollection*> collections;
+	collections.push_back(this->GetPropAssemblyMedia()->GetParts());
+	collections.push_back(this->GetPropAssemblyBC()->GetParts());
+	collections.push_back(this->GetPropAssemblyIC()->GetParts());
+	collections.push_back(this->GetPropAssemblyZoneFlowRates()->GetParts());
+	collections.push_back(this->GetPropAssemblyPrintLocations()->GetParts());
+	return collections;
+}
+
 CString CWPhastDoc::GetNextZoneName(void)
 {
 	CString str;
@@ -2293,11 +2311,7 @@ void CWPhastDoc::GetUsedZoneNumbers(std::set<int>& usedNums)const
 	CZoneActor *pZoneActor;
 	usedNums.clear();
 
-	std::list<vtkPropCollection*> collections;
-	collections.push_back(this->GetPropAssemblyMedia()->GetParts());
-	collections.push_back(this->GetPropAssemblyBC()->GetParts());
-	collections.push_back(this->GetPropAssemblyIC()->GetParts());
-	collections.push_back(this->GetPropAssemblyZoneFlowRates()->GetParts());
+	std::list<vtkPropCollection*> collections = this->GetPropAssemblyParts();
 
 	std::list<vtkPropCollection*>::iterator iter = collections.begin();
 	for (; iter != collections.end(); ++iter)
@@ -2333,11 +2347,7 @@ void CWPhastDoc::GetUsedWedgeNumbers(std::set<int>& usedNums)const
 	CZoneActor *pZoneActor;
 	usedNums.clear();
 
-	std::list<vtkPropCollection*> collections;
-	collections.push_back(this->GetPropAssemblyMedia()->GetParts());
-	collections.push_back(this->GetPropAssemblyBC()->GetParts());
-	collections.push_back(this->GetPropAssemblyIC()->GetParts());
-	collections.push_back(this->GetPropAssemblyZoneFlowRates()->GetParts());
+	std::list<vtkPropCollection*> collections = this->GetPropAssemblyParts();
 
 	std::list<vtkPropCollection*>::iterator iter = collections.begin();
 	for (; iter != collections.end(); ++iter)
@@ -2372,11 +2382,7 @@ void CWPhastDoc::GetUsedPrismNumbers(std::set<int>& usedNums)const
 	CZoneActor *pZoneActor;
 	usedNums.clear();
 
-	std::list<vtkPropCollection*> collections;
-	collections.push_back(this->GetPropAssemblyMedia()->GetParts());
-	collections.push_back(this->GetPropAssemblyBC()->GetParts());
-	collections.push_back(this->GetPropAssemblyIC()->GetParts());
-	collections.push_back(this->GetPropAssemblyZoneFlowRates()->GetParts());
+	std::list<vtkPropCollection*> collections = this->GetPropAssemblyParts();
 
 	std::list<vtkPropCollection*>::iterator iter = collections.begin();
 	for (; iter != collections.end(); ++iter)
@@ -2437,11 +2443,7 @@ void CWPhastDoc::GetUsedDomainNumbers(std::set<int>& usedNums)const
 	CZoneActor *pZoneActor;
 	usedNums.clear();
 
-	std::list<vtkPropCollection*> collections;
-	collections.push_back(this->GetPropAssemblyMedia()->GetParts());
-	collections.push_back(this->GetPropAssemblyBC()->GetParts());
-	collections.push_back(this->GetPropAssemblyIC()->GetParts());
-	collections.push_back(this->GetPropAssemblyZoneFlowRates()->GetParts());
+	std::list<vtkPropCollection*> collections = this->GetPropAssemblyParts();
 
 	std::list<vtkPropCollection*>::iterator iter = collections.begin();
 	for (; iter != collections.end(); ++iter)
@@ -2480,11 +2482,7 @@ void CWPhastDoc::GetUsedNullNumbers(std::set<int>& usedNums)const
 	CZoneActor *pZoneActor;
 	usedNums.clear();
 
-	std::list<vtkPropCollection*> collections;
-	collections.push_back(this->GetPropAssemblyMedia()->GetParts());
-	collections.push_back(this->GetPropAssemblyBC()->GetParts());
-	collections.push_back(this->GetPropAssemblyIC()->GetParts());
-	collections.push_back(this->GetPropAssemblyZoneFlowRates()->GetParts());
+	std::list<vtkPropCollection*> collections = this->GetPropAssemblyParts();
 
 	std::list<vtkPropCollection*>::iterator iter = collections.begin();
 	for (; iter != collections.end(); ++iter)
@@ -2521,11 +2519,7 @@ void CWPhastDoc::DataSourcePathsRelativeToAbsolute(LPCTSTR lpszPathName)
 {
 	CZoneActor *pZoneActor;
 
-	std::list<vtkPropCollection*> collections;
-	collections.push_back(this->GetPropAssemblyMedia()->GetParts());
-	collections.push_back(this->GetPropAssemblyBC()->GetParts());
-	collections.push_back(this->GetPropAssemblyIC()->GetParts());
-	collections.push_back(this->GetPropAssemblyZoneFlowRates()->GetParts());
+	std::list<vtkPropCollection*> collections = this->GetPropAssemblyParts();
 
 	std::list<vtkPropCollection*>::iterator iter = collections.begin();
 	for (; iter != collections.end(); ++iter)
@@ -2643,11 +2637,7 @@ void CWPhastDoc::DataSourcePathsAbsoluteToRelative(LPCTSTR lpszPathName)
 {
 	CZoneActor *pZoneActor;
 
-	std::list<vtkPropCollection*> collections;
-	collections.push_back(this->GetPropAssemblyMedia()->GetParts());
-	collections.push_back(this->GetPropAssemblyBC()->GetParts());
-	collections.push_back(this->GetPropAssemblyIC()->GetParts());
-	collections.push_back(this->GetPropAssemblyZoneFlowRates()->GetParts());
+	std::list<vtkPropCollection*> collections = this->GetPropAssemblyParts();
 
 	std::list<vtkPropCollection*>::iterator iter = collections.begin();
 	for (; iter != collections.end(); ++iter)
@@ -2991,11 +2981,13 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 	if (!pInput) return FALSE;
 
 	// save
-	std::map<const struct grid_elt*, Polyhedron*> grid_elt_map;
-	std::map<const struct BC*,       Polyhedron*> bc_map;
-	std::map<const Zone_budget*,     Polyhedron*> zb_map;
-	std::map<const struct Head_ic*,  Polyhedron*> head_ic_map;
-	std::map<const struct chem_ic*,  Polyhedron*> chem_ic_map;
+	std::map<const struct grid_elt*,     Polyhedron*> grid_elt_map;
+	std::map<const struct BC*,           Polyhedron*> bc_map;
+	std::map<const Zone_budget*,         Polyhedron*> zb_map;
+	std::map<const struct Head_ic*,      Polyhedron*> head_ic_map;
+	std::map<const struct chem_ic*,      Polyhedron*> chem_ic_map;
+	std::map<const struct print_zones*,  Polyhedron*> print_loc_chem_map;
+	std::map<const struct print_zones*,  Polyhedron*> print_loc_xyz_map;
 
 	BOOL bReturnValue = TRUE;
 	try
@@ -3078,6 +3070,37 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 			else
 			{
 				chem_ic_map[chem_ic_ptr] = chem_ic_ptr->polyh ? chem_ic_ptr->polyh->clone() : 0;
+			}
+		}
+
+		// PRINT_LOCATIONS
+		{
+			// print_zones_chem
+			for (int i = 0; i < ::print_zones_chem.count_print_zones; ++i)
+			{
+				const struct print_zones* print_zones_ptr = &::print_zones_chem.print_zones[i];
+				if (dynamic_cast<Domain*>(print_zones_ptr->polyh))
+				{
+					print_loc_chem_map[print_zones_ptr] = 0;
+				}
+				else
+				{
+					print_loc_chem_map[print_zones_ptr] = print_zones_ptr->polyh ? print_zones_ptr->polyh->clone() : 0;
+				}
+			}
+
+			// print_zones_xyz
+			for (int i = 0; i < print_zones_xyz.count_print_zones; ++i)
+			{
+				const struct print_zones* print_zones_ptr = &::print_zones_xyz.print_zones[i];
+				if (dynamic_cast<Domain*>(print_zones_ptr->polyh))
+				{
+					print_loc_xyz_map[print_zones_ptr] = 0;
+				}
+				else
+				{
+					print_loc_xyz_map[print_zones_ptr] = print_zones_ptr->polyh ? print_zones_ptr->polyh->clone() : 0;
+				}
 			}
 		}
 
@@ -3408,6 +3431,68 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 			// not undoable
 			std::auto_ptr< CZoneCreateAction<CICChemZoneActor> > pAction(
 				new CZoneCreateAction<CICChemZoneActor>(
+					this,
+					data.polyh,
+					::grid_origin,
+					::grid_angle,
+					data.polyh->Get_description()->c_str()
+					)
+				);
+			pAction->GetZoneActor()->SetData(data);
+			pAction->Execute();
+		}
+
+		// PRINT_LOCATIONS (chemistry)
+		//
+		for (int i = 0; i < ::print_zones_chem.count_print_zones; ++i)
+		{
+			// not undoable
+			const struct print_zones* print_zones_ptr = &::print_zones_chem.print_zones[i];
+			ASSERT(print_zones_ptr->polyh && ::AfxIsValidAddress(print_zones_ptr->polyh, sizeof(Polyhedron)));
+
+			// store pre-translated polyh
+			CPrintZone data(*print_zones_ptr);
+			data.RemovePropZones();
+
+			std::auto_ptr<Polyhedron> ap(data.polyh);
+			print_loc_chem_map[print_zones_ptr] = 0;
+			ASSERT(print_loc_chem_map.find(print_zones_ptr) != print_loc_chem_map.end());
+			data.polyh = print_loc_chem_map[print_zones_ptr] ? print_loc_chem_map[print_zones_ptr]->clone() : print_zones_ptr->polyh->clone();
+
+			// not undoable
+			std::auto_ptr< CZoneCreateAction<CPrintZoneActor> > pAction(
+				new CZoneCreateAction<CPrintZoneActor>(
+					this,
+					data.polyh,
+					::grid_origin,
+					::grid_angle,
+					data.polyh->Get_description()->c_str()
+					)
+				);
+			pAction->GetZoneActor()->SetData(data);
+			pAction->Execute();
+		}
+
+		// PRINT_LOCATIONS (xyz_chemistry)
+		//
+		for (int i = 0; i < ::print_zones_xyz.count_print_zones; ++i)
+		{
+			// not undoable
+			const struct print_zones* print_zones_ptr = &::print_zones_xyz.print_zones[i];
+			ASSERT(print_zones_ptr->polyh && ::AfxIsValidAddress(print_zones_ptr->polyh, sizeof(Polyhedron)));
+
+			// store pre-translated polyh
+			CPrintZone data(*print_zones_ptr);
+			data.RemovePropZones();
+
+			std::auto_ptr<Polyhedron> ap(data.polyh);
+			print_loc_chem_map[print_zones_ptr] = 0;
+			ASSERT(print_loc_chem_map.find(print_zones_ptr) != print_loc_chem_map.end());
+			data.polyh = print_loc_chem_map[print_zones_ptr] ? print_loc_chem_map[print_zones_ptr]->clone() : print_zones_ptr->polyh->clone();
+
+			// not undoable
+			std::auto_ptr< CZoneCreateAction<CPrintZoneActor> > pAction(
+				new CZoneCreateAction<CPrintZoneActor>(
 					this,
 					data.polyh,
 					::grid_origin,
@@ -6667,6 +6752,7 @@ void CWPhastDoc::SetDisplayColors(const CDisplayColors& dc)
 	CBCZoneActor::SetStaticColor(BC_info::BC_SPECIFIED, this->DisplayColors.crSpecHead);
 	CWellActor::SetStaticColor(this->DisplayColors.crWell);
 	CZoneFlowRateZoneActor::SetStaticColor(this->DisplayColors.crZoneFlowRate);
+	CPrintZoneActor::SetStaticColor(this->DisplayColors.crPrintLocs);
 
 	POSITION pos = this->GetFirstViewPosition();
 	if (pos != NULL)

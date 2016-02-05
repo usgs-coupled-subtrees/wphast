@@ -62,6 +62,9 @@ protected:
 	CTreeCtrlNode   m_nodeDrains;
 	CTreeCtrlNode   m_nodeZFRates;
 	CTreeCtrlNode   m_nodeTitle;
+	CTreeCtrlNode   m_nodePrintLocs;
+	CTreeCtrlNode   m_nodePLChem;
+	CTreeCtrlNode   m_nodePLXYZChem;
 	
 	bool            m_bSelectingProp;
 
@@ -120,6 +123,9 @@ public:
 	CTreeCtrlNode GetTimeControl2Node(void)   {return m_nodeTimeControl2;}
 	CTreeCtrlNode GetPrintInitialNode(void)   {return m_nodePrintInput;}
 	CTreeCtrlNode GetPrintFrequencyNode(void) {return m_nodePF;}
+	CTreeCtrlNode GetPrintLocationsNode(void) {return m_nodePrintLocs;}
+	CTreeCtrlNode GetPLChemNode(void)         {return m_nodePLChem;}
+	CTreeCtrlNode GetPLXYZChemNode(void)      {return m_nodePLXYZChem;}
 
 	void SetNodeCheck(CTreeCtrlNode node, UINT nCheckState);
 	void SetBCCheck(UINT nCheckState);

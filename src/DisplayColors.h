@@ -17,6 +17,7 @@ public:
 	COLORREF crDrain;
     COLORREF crWell;
 	COLORREF crZoneFlowRate;
+	COLORREF crPrintLocs;
     COLORREF crBackground;
     COLORREF crZoneCursor;
 

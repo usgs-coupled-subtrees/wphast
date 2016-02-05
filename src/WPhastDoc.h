@@ -284,6 +284,7 @@ protected:
 	vtkPropAssembly   *m_pPropAssemblyRivers;
 	vtkPropAssembly   *m_pPropAssemblyDrains;
 	vtkPropAssembly   *m_pPropAssemblyZFR;
+	vtkPropAssembly   *m_pPropAssemblyPL;
 
 	// grid
 	CGridActor *m_pGridActor;
@@ -505,6 +506,9 @@ public:
 	vtkPropAssembly* GetPropAssemblyRivers(void)const;
 	vtkPropAssembly* GetPropAssemblyDrains(void)const;
 	vtkPropAssembly* GetPropAssemblyZoneFlowRates(void)const;
+	vtkPropAssembly* GetPropAssemblyPrintLocations(void)const;
+
+	std::list<vtkPropCollection*> GetPropAssemblyParts(void)const;
 
 	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
 
@@ -658,3 +662,6 @@ inline vtkPropAssembly* CWPhastDoc::GetPropAssemblyDrains() const
 
 inline vtkPropAssembly* CWPhastDoc::GetPropAssemblyZoneFlowRates() const
 { return this->m_pPropAssemblyZFR; }
+
+inline vtkPropAssembly* CWPhastDoc::GetPropAssemblyPrintLocations() const
+{ return this->m_pPropAssemblyPL; }
