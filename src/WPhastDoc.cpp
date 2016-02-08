@@ -3582,6 +3582,16 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 	{
 		delete ci->second;
 	}
+	std::map<const struct print_zones*,  Polyhedron*>::iterator pzi = print_loc_chem_map.begin();
+	for(; pzi != print_loc_chem_map.end(); ++pzi)
+	{
+		delete pzi->second;
+	}
+	pzi = print_loc_xyz_map.begin();
+	for(; pzi != print_loc_xyz_map.end(); ++pzi)
+	{
+		delete pzi->second;
+	}
 
 	// reset tree control
 	//
