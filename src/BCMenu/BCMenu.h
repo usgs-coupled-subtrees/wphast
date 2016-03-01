@@ -106,46 +106,46 @@ public:
 	void LoadCheckmarkBitmap(int unselect,int select); // custom check mark bitmaps
 	
 	// functions for appending a menu option, use the AppendMenu call (see above define)
-	BOOL AppendMenuA(UINT nFlags,UINT nIDNewItem=0,const char *lpszNewItem=NULL,int nIconNormal=-1);
-	BOOL AppendMenuA(UINT nFlags,UINT nIDNewItem,const char *lpszNewItem,CImageList *il,int xoffset);
-	BOOL AppendMenuA(UINT nFlags,UINT nIDNewItem,const char *lpszNewItem,CBitmap *bmp);
-	BOOL AppendMenuW(UINT nFlags,UINT nIDNewItem=0,wchar_t *lpszNewItem=NULL,int nIconNormal=-1);
-	BOOL AppendMenuW(UINT nFlags,UINT nIDNewItem,wchar_t *lpszNewItem,CImageList *il,int xoffset);
-	BOOL AppendMenuW(UINT nFlags,UINT nIDNewItem,wchar_t *lpszNewItem,CBitmap *bmp);
-	BOOL AppendODMenuA(LPCSTR lpstrText,UINT nFlags = MF_OWNERDRAW,UINT nID = 0,int nIconNormal = -1);  
-	BOOL AppendODMenuW(wchar_t *lpstrText,UINT nFlags = MF_OWNERDRAW,UINT nID = 0,int nIconNormal = -1);  
-	BOOL AppendODMenuA(LPCSTR lpstrText,UINT nFlags,UINT nID,CImageList *il,int xoffset);
-	BOOL AppendODMenuW(wchar_t *lpstrText,UINT nFlags,UINT nID,CImageList *il,int xoffset);
+	BOOL AppendMenuA(UINT nFlags,UINT_PTR nIDNewItem=0,const char *lpszNewItem=NULL,int nIconNormal=-1);
+	BOOL AppendMenuA(UINT nFlags,UINT_PTR nIDNewItem,const char *lpszNewItem,CImageList *il,int xoffset);
+	BOOL AppendMenuA(UINT nFlags,UINT_PTR nIDNewItem,const char *lpszNewItem,CBitmap *bmp);
+	BOOL AppendMenuW(UINT nFlags,UINT_PTR nIDNewItem=0,wchar_t *lpszNewItem=NULL,int nIconNormal=-1);
+	BOOL AppendMenuW(UINT nFlags,UINT_PTR nIDNewItem,wchar_t *lpszNewItem,CImageList *il,int xoffset);
+	BOOL AppendMenuW(UINT nFlags,UINT_PTR nIDNewItem,wchar_t *lpszNewItem,CBitmap *bmp);
+	BOOL AppendODMenuA(LPCSTR lpstrText,UINT nFlags = MF_OWNERDRAW,UINT_PTR nID = 0,int nIconNormal = -1);  
+	BOOL AppendODMenuW(wchar_t *lpstrText,UINT nFlags = MF_OWNERDRAW,UINT_PTR nID = 0,int nIconNormal = -1);  
+	BOOL AppendODMenuA(LPCSTR lpstrText,UINT nFlags,UINT_PTR nID,CImageList *il,int xoffset);
+	BOOL AppendODMenuW(wchar_t *lpstrText,UINT nFlags,UINT_PTR nID,CImageList *il,int xoffset);
 	
 	// for appending a popup menu (see example application)
 	BCMenu* AppendODPopupMenuA(LPCSTR lpstrText);
 	BCMenu* AppendODPopupMenuW(wchar_t *lpstrText);
 
 	// functions for inserting a menu option, use the InsertMenu call (see above define)
-	BOOL InsertMenuA(UINT nPosition,UINT nFlags,UINT nIDNewItem=0,const char *lpszNewItem=NULL,int nIconNormal=-1);
-	BOOL InsertMenuA(UINT nPosition,UINT nFlags,UINT nIDNewItem,const char *lpszNewItem,CImageList *il,int xoffset);
-	BOOL InsertMenuA(UINT nPosition,UINT nFlags,UINT nIDNewItem,const char *lpszNewItem,CBitmap *bmp);
-	BOOL InsertMenuW(UINT nPosition,UINT nFlags,UINT nIDNewItem=0,wchar_t *lpszNewItem=NULL,int nIconNormal=-1);
-	BOOL InsertMenuW(UINT nPosition,UINT nFlags,UINT nIDNewItem,wchar_t *lpszNewItem,CImageList *il,int xoffset);
-	BOOL InsertMenuW(UINT nPosition,UINT nFlags,UINT nIDNewItem,wchar_t *lpszNewItem,CBitmap *bmp);
-	BOOL InsertODMenuA(UINT nPosition,LPCSTR lpstrText,UINT nFlags = MF_OWNERDRAW,UINT nID = 0,int nIconNormal = -1); 
-	BOOL InsertODMenuW(UINT nPosition,wchar_t *lpstrText,UINT nFlags = MF_OWNERDRAW,UINT nID = 0,int nIconNormal = -1);  
-	BOOL InsertODMenuA(UINT nPosition,LPCSTR lpstrText,UINT nFlags,UINT nID,CImageList *il,int xoffset);
-	BOOL InsertODMenuW(UINT nPosition,wchar_t *lpstrText,UINT nFlags,UINT nID,CImageList *il,int xoffset);
+	BOOL InsertMenuA(UINT nPosition,UINT nFlags,UINT_PTR nIDNewItem=0,const char *lpszNewItem=NULL,int nIconNormal=-1);
+	BOOL InsertMenuA(UINT nPosition,UINT nFlags,UINT_PTR nIDNewItem,const char *lpszNewItem,CImageList *il,int xoffset);
+	BOOL InsertMenuA(UINT nPosition,UINT nFlags,UINT_PTR nIDNewItem,const char *lpszNewItem,CBitmap *bmp);
+	BOOL InsertMenuW(UINT nPosition,UINT nFlags,UINT_PTR nIDNewItem=0,wchar_t *lpszNewItem=NULL,int nIconNormal=-1);
+	BOOL InsertMenuW(UINT nPosition,UINT nFlags,UINT_PTR nIDNewItem,wchar_t *lpszNewItem,CImageList *il,int xoffset);
+	BOOL InsertMenuW(UINT nPosition,UINT nFlags,UINT_PTR nIDNewItem,wchar_t *lpszNewItem,CBitmap *bmp);
+	BOOL InsertODMenuA(UINT nPosition,LPCSTR lpstrText,UINT nFlags = MF_OWNERDRAW,UINT_PTR nID = 0,int nIconNormal = -1); 
+	BOOL InsertODMenuW(UINT nPosition,wchar_t *lpstrText,UINT nFlags = MF_OWNERDRAW,UINT_PTR nID = 0,int nIconNormal = -1);  
+	BOOL InsertODMenuA(UINT nPosition,LPCSTR lpstrText,UINT nFlags,UINT_PTR nID,CImageList *il,int xoffset);
+	BOOL InsertODMenuW(UINT nPosition,wchar_t *lpstrText,UINT nFlags,UINT_PTR nID,CImageList *il,int xoffset);
 	
 	// functions for modifying a menu option, use the ModifyODMenu call (see above define)
-	BOOL ModifyODMenuA(const char *lpstrText,UINT nID=0,int nIconNormal=-1);
-	BOOL ModifyODMenuA(const char *lpstrText,UINT nID,CImageList *il,int xoffset);
-	BOOL ModifyODMenuA(const char *lpstrText,UINT nID,CBitmap *bmp);
+	BOOL ModifyODMenuA(const char *lpstrText,UINT_PTR nID=0,int nIconNormal=-1);
+	BOOL ModifyODMenuA(const char *lpstrText,UINT_PTR nID,CImageList *il,int xoffset);
+	BOOL ModifyODMenuA(const char *lpstrText,UINT_PTR nID,CBitmap *bmp);
 	BOOL ModifyODMenuA(const char *lpstrText,const char *OptionText,int nIconNormal);
-	BOOL ModifyODMenuW(wchar_t *lpstrText,UINT nID=0,int nIconNormal=-1);
-	BOOL ModifyODMenuW(wchar_t *lpstrText,UINT nID,CImageList *il,int xoffset);
-	BOOL ModifyODMenuW(wchar_t *lpstrText,UINT nID,CBitmap *bmp);
+	BOOL ModifyODMenuW(wchar_t *lpstrText,UINT_PTR nID=0,int nIconNormal=-1);
+	BOOL ModifyODMenuW(wchar_t *lpstrText,UINT_PTR nID,CImageList *il,int xoffset);
+	BOOL ModifyODMenuW(wchar_t *lpstrText,UINT_PTR nID,CBitmap *bmp);
 	BOOL ModifyODMenuW(wchar_t *lpstrText,wchar_t *OptionText,int nIconNormal);
 	// use this method for adding a solid/hatched colored square beside a menu option
 	// courtesy of Warren Stevens
-	BOOL ModifyODMenuA(const char *lpstrText,UINT nID,COLORREF fill,COLORREF border,int hatchstyle=-1,CSize *pSize=NULL);
-	BOOL ModifyODMenuW(wchar_t *lpstrText,UINT nID,COLORREF fill,COLORREF border,int hatchstyle=-1,CSize *pSize=NULL);
+	BOOL ModifyODMenuA(const char *lpstrText,UINT_PTR nID,COLORREF fill,COLORREF border,int hatchstyle=-1,CSize *pSize=NULL);
+	BOOL ModifyODMenuW(wchar_t *lpstrText,UINT_PTR nID,COLORREF fill,COLORREF border,int hatchstyle=-1,CSize *pSize=NULL);
 	
 	// for deleting and removing menu options
 	BOOL	RemoveMenu(UINT uiId,UINT nFlags);
