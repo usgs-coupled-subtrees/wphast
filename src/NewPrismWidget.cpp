@@ -19,6 +19,11 @@
 vtkCxxRevisionMacro(CNewPrismWidget, "$Revision$");
 vtkStandardNewMacro(CNewPrismWidget);
 
+// Note: No header files should follow the following three lines
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#endif
+
 CNewPrismWidget::CNewPrismWidget(void)
 : State(CNewPrismWidget::Start)
 , Cursor3D(0)
