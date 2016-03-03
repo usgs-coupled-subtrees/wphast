@@ -17,6 +17,10 @@
 vtkCxxRevisionMacro(CNewWedgeWidget, "$Revision$");
 vtkStandardNewMacro(CNewWedgeWidget);
 
+// Note: No header files should follow the following three lines
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#endif
 
 CNewWedgeWidget::CNewWedgeWidget(void)
 : State(CNewWedgeWidget::Start)
