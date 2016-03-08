@@ -470,6 +470,14 @@ void CPropertyTreeControlBar::OnNMClk(NMHDR* pNMHDR, LRESULT* pResult)
 	//
 	this->SetNodeCheck(item, nNewState);
 
+	// fake a node select
+	// req'd when the check state changes of an item that's already selected
+	NMTREEVIEW nmtv;
+	nmtv.itemOld.hItem = item;
+	nmtv.itemNew.hItem = item;
+	LRESULT result;
+	this->OnSelChanged((NMHDR*)&nmtv, &result);
+
 	// re-render
 	//
 	if (CWPhastDoc *pDoc = this->GetDocument())
@@ -1794,8 +1802,14 @@ void CPropertyTreeControlBar::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 {
 	BCMenu menu;
 	VERIFY( menu.LoadMenu(IDR_MAINFRAME_SDI) );
-
-	if (CMenu* pPopup = menu.GetSubMenu(1))
+	if (BCMenu* pPopup = dynamic_cast<BCMenu*>(menu.GetSubMenu(1)))
+	{
+		pPopup->RemoveMenu(0, MF_BYPOSITION); // Undo
+		pPopup->RemoveMenu(0, MF_BYPOSITION); // Redo
+		pPopup->RemoveMenu(0, MF_BYPOSITION); // Separator
+		pPopup->TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, point.x, point.y, ::AfxGetMainWnd());
+	}
+	else if (CMenu* pPopup = menu.GetSubMenu(1))
 	{
 		pPopup->RemoveMenu(0, MF_BYPOSITION); // Undo
 		pPopup->RemoveMenu(0, MF_BYPOSITION); // Redo
