@@ -20,6 +20,7 @@ CNewZonePropertyPage::CNewZonePropertyPage()
 , m_htiICHead(0)
 , m_htiChemIC(0)
 , m_htiFlowRate(0)
+, m_htiPrintLocs(0)
 {
 }
 
@@ -34,24 +35,30 @@ void CNewZonePropertyPage::DoDataExchange(CDataExchange* pDX)
 
 	if (this->m_bFirstSetActive)
 	{
-		this->m_htiMedia    = this->m_wndTree.InsertItem(_T("MEDIA"));
-		this->m_htiIC       = this->m_wndTree.InsertItem(_T("INITIAL_CONDITIONS"));
-		this->m_htiBC       = this->m_wndTree.InsertItem(_T("BOUNDARY_CONDITIONS"));
-		this->m_htiFlowRate = this->m_wndTree.InsertItem(_T("ZONE_FLOW"));
+		this->m_htiMedia     = this->m_wndTree.InsertItem(_T("MEDIA"));
+		this->m_htiIC        = this->m_wndTree.InsertItem(_T("INITIAL_CONDITIONS"));
+		this->m_htiBC        = this->m_wndTree.InsertItem(_T("BOUNDARY_CONDITIONS"));
+		this->m_htiFlowRate  = this->m_wndTree.InsertItem(_T("ZONE_FLOW"));
+		this->m_htiPrintLocs = this->m_wndTree.InsertItem(_T("PRINT_LOCATION"));
 
 		// IC
-		this->m_htiICHead   = this->m_wndTree.InsertItem(_T("HEAD_IC"), this->m_htiIC);
-		this->m_htiChemIC   = this->m_wndTree.InsertItem(_T("CHEMISTRY_IC"), this->m_htiIC);
+		this->m_htiICHead    = this->m_wndTree.InsertItem(_T("HEAD_IC"), this->m_htiIC);
+		this->m_htiChemIC    = this->m_wndTree.InsertItem(_T("CHEMISTRY_IC"), this->m_htiIC);
 
 		// BC
-		this->m_htiBCFlux   = this->m_wndTree.InsertItem(_T("FLUX_BC"), this->m_htiBC);
-		this->m_htiBCLeaky  = this->m_wndTree.InsertItem(_T("LEAKY_BC"), this->m_htiBC);
-		this->m_htiBCSpec   = this->m_wndTree.InsertItem(_T("SPECIFIED_HEAD_BC"), this->m_htiBC);
+		this->m_htiBCFlux    = this->m_wndTree.InsertItem(_T("FLUX_BC"), this->m_htiBC);
+		this->m_htiBCLeaky   = this->m_wndTree.InsertItem(_T("LEAKY_BC"), this->m_htiBC);
+		this->m_htiBCSpec    = this->m_wndTree.InsertItem(_T("SPECIFIED_HEAD_BC"), this->m_htiBC);
+
+		// PRINT_LOCATIONS
+		this->m_htiPLChem    = this->m_wndTree.InsertItem(_T("CHEMISTRY"), this->m_htiPrintLocs);
+		this->m_htiPLXYZChem = this->m_wndTree.InsertItem(_T("XYZ_CHEMISTRY"), this->m_htiPrintLocs);
 
 		this->m_wndTree.EnsureVisible(this->m_htiBCFlux);
 		this->m_wndTree.EnsureVisible(this->m_htiICHead);
 		this->m_wndTree.EnsureVisible(this->m_htiMedia);
 		this->m_wndTree.EnsureVisible(this->m_htiFlowRate);
+		this->m_wndTree.EnsureVisible(this->m_htiPLXYZChem);
 	}
 
 	if (pDX->m_bSaveAndValidate)
@@ -67,13 +74,26 @@ void CNewZonePropertyPage::DoDataExchange(CDataExchange* pDX)
 		}
 		else if (hti == this->m_htiBC)
 		{
-			::AfxMessageBox("Please choose the type of boundary condition.", MB_OK);
+			::AfxMessageBox("Please choose the type of boundary condition (flux_bc, leaky_bc or specified_head_bc).", MB_OK);
 			pDX->Fail();
 		}
 		else if (hti == this->m_htiIC)
 		{
-			::AfxMessageBox("Please choose the type of initial condition.", MB_OK);
+			::AfxMessageBox("Please choose the type of initial condition (head_ic or chemistry_ic).", MB_OK);
 			pDX->Fail();
+		}
+		else if (hti == this->m_htiPrintLocs)
+		{
+			::AfxMessageBox("Please choose the type of print location (chemistry or xyz_chemistry).", MB_OK);
+			pDX->Fail();
+		}
+		else if (hti == this->m_htiPLChem)
+		{
+			this->m_type = ID_ZONE_TYPE_PL_CHEMISTRY;
+		}
+		else if (hti == this->m_htiPLXYZChem)
+		{
+			this->m_type = ID_ZONE_TYPE_PL_XYZ_CHEMISTRY;
 		}
 		else if (hti == this->m_htiBCFlux)
 		{
@@ -130,7 +150,15 @@ void CNewZonePropertyPage::DoDataExchange(CDataExchange* pDX)
 		else if (this->m_type == ID_ZONE_TYPE_IC_CHEM)
 		{
 			this->m_wndTree.SelectItem(this->m_htiChemIC);
-		}		
+		}
+		else if (this->m_type == ID_ZONE_TYPE_PL_CHEMISTRY)
+		{
+			this->m_wndTree.SelectItem(this->m_htiICHead);
+		}
+		else if (this->m_type == ID_ZONE_TYPE_PL_XYZ_CHEMISTRY)
+		{
+			this->m_wndTree.SelectItem(this->m_htiPLXYZChem);
+		}
 		else
 		{
 			this->m_wndTree.SelectItem(this->m_htiMedia);
@@ -152,20 +180,21 @@ BOOL CNewZonePropertyPage::OnInitDialog()
 	// Add extra initialization here
 
 	// Store pointers to all the pages in m_PropPageArray.
-	// 0 : this page        CNewZonePropertyPage
-	// 1 : media page       CMediaPropertyPage
-	// 2 : flux page        CBCFluxPropertyPage/CBCFluxPropertyPage2
-	// 3 : leaky page       CBCLeakyPropertyPage/CBCLeakyPropertyPage2
-	// 4 : specified page   CBCSpecifiedPropertyPage/CBCSpecifiedHeadPropertyPage
-	// 5 : head_ic page     CICHeadPropertyPage
-	// 6 : chem_ic page     CChemICPropertyPage/CChemICSpreadPropertyPage
-	// 7 : zone_flow page   CZoneFlowRatePropertyPage
+	// 0 : this page            CNewZonePropertyPage
+	// 1 : media page           CMediaPropertyPage
+	// 2 : flux page            CBCFluxPropertyPage/CBCFluxPropertyPage2
+	// 3 : leaky page           CBCLeakyPropertyPage/CBCLeakyPropertyPage2
+	// 4 : specified page       CBCSpecifiedPropertyPage/CBCSpecifiedHeadPropertyPage
+	// 5 : head_ic page         CICHeadPropertyPage
+	// 6 : chem_ic page         CChemICPropertyPage/CChemICSpreadPropertyPage
+	// 7 : zone_flow page       CZoneFlowRatePropertyPage
+	// 8 : print_locations page CPrintLocsPropsPage
 	
 	CPropertySheet* pSheet = (CPropertySheet*) this->GetParent();   
 	if (pSheet->IsWizard())
 	{
 		int nCount = pSheet->GetPageCount();
-		ASSERT(nCount == 8);
+		ASSERT(nCount == 9);
 		for (int i = 0; i < nCount; ++i)
 		{
 			this->m_PropPageArray.Add(pSheet->GetPage(i));
@@ -222,14 +251,15 @@ LRESULT CNewZonePropertyPage::OnWizardNext()
 	// Add your specialized code here and/or call the base class
 	CPropertySheet* pSheet = (CPropertySheet*) this->GetParent();
 
-	// 0 : this page        CNewZonePropertyPage
-	// 1 : media page       CMediaPropertyPage
-	// 2 : flux page        CBCFluxPropertyPage/CBCFluxPropertyPage2
-	// 3 : leaky page       CBCLeakyPropertyPage/CBCLeakyPropertyPage2
-	// 4 : specified page   CBCSpecifiedPropertyPage/CBCSpecifiedHeadPropertyPage
-	// 5 : head_ic page     CICHeadPropertyPage
-	// 6 : chem_ic page     CChemICPropertyPage/CChemICSpreadPropertyPage
-	// 7 : zone_flow page   CZoneFlowRatePropertyPage
+	// 0 : this page            CNewZonePropertyPage
+	// 1 : media page           CMediaPropertyPage
+	// 2 : flux page            CBCFluxPropertyPage/CBCFluxPropertyPage2
+	// 3 : leaky page           CBCLeakyPropertyPage/CBCLeakyPropertyPage2
+	// 4 : specified page       CBCSpecifiedPropertyPage/CBCSpecifiedHeadPropertyPage
+	// 5 : head_ic page         CICHeadPropertyPage
+	// 6 : chem_ic page         CChemICPropertyPage/CChemICSpreadPropertyPage
+	// 7 : zone_flow page       CZoneFlowRatePropertyPage
+	// 8 : print_locations page CPrintLocsPropsPage
 
 	// remove all but this page
 	int nCount = pSheet->GetPageCount();
@@ -263,6 +293,13 @@ LRESULT CNewZonePropertyPage::OnWizardNext()
 			break;
 		case ID_ZONE_TYPE_FLOW_RATE:
 			pSheet->AddPage(this->m_PropPageArray[7]);
+			break;
+		case ID_ZONE_TYPE_PL_CHEMISTRY:
+		case ID_ZONE_TYPE_PL_XYZ_CHEMISTRY:
+			pSheet->AddPage(this->m_PropPageArray[8]);
+			break;
+		default:
+			ASSERT(FALSE);
 			break;
 		}
 		return baseCNewZonePropertyPage::OnWizardNext();

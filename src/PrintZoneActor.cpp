@@ -3,7 +3,7 @@
 #include "PrintZoneActor.h"
 #include "PropertyTreeControlBar.h"
 #include "ZoneCreateAction.h"
-// COMMENT: {2/2/2016 5:55:06 PM}#include "ZoneFlowRatePropertyPage.h"
+#include "PrintLocsPropsPage.h"
 #include "property.h"
 
 #include "WPhastDoc.h"
@@ -11,15 +11,15 @@
 #include "Global.h"
 #include "GridKeyword.h"
 #include "WPhastMacros.h"
-// COMMENT: {2/2/2016 5:55:14 PM}#include "SetZoneBudgetAction.h"
+#include "SetPrintZoneAction.h"
 
 #include <vtkPropAssembly.h>
 #include <vtkObjectFactory.h> // reqd by vtkStandardNewMacro
 
-vtkCxxRevisionMacro(CPrintZoneActor, "$Revision: 3286 $");
+vtkCxxRevisionMacro(CPrintZoneActor, "$Revision$");
 vtkStandardNewMacro(CPrintZoneActor);
 
-const char CPrintZoneActor::szHeading[] = "ZoneFlowRates";
+const char CPrintZoneActor::szHeading[] = "PrintLocations";
 double CPrintZoneActor::s_color[3] = {0., 0., 0.};
 vtkProperty* CPrintZoneActor::s_Property = 0;
 vtkProperty* CPrintZoneActor::s_OutlineProperty = 0;
@@ -38,21 +38,6 @@ CPrintZoneActor::CPrintZoneActor(void)
 
 	// outline
 	this->OutlineActor->SetProperty(CPrintZoneActor::s_OutlineProperty);
-
-	//{{ HACK
-// COMMENT: {2/2/2016 5:59:29 PM}	if (this->m_zone_budget.Get_n_user() == 0)
-// COMMENT: {2/2/2016 5:59:29 PM}	{
-// COMMENT: {2/2/2016 5:59:29 PM}		if (CFrameWnd *pFrame = (CFrameWnd*)::AfxGetApp()->m_pMainWnd)
-// COMMENT: {2/2/2016 5:59:29 PM}		{
-// COMMENT: {2/2/2016 5:59:29 PM}			ASSERT_VALID(pFrame);
-// COMMENT: {2/2/2016 5:59:29 PM}			if (CWPhastDoc* pDoc = reinterpret_cast<CWPhastDoc*>(pFrame->GetActiveDocument()))
-// COMMENT: {2/2/2016 5:59:29 PM}			{
-// COMMENT: {2/2/2016 5:59:29 PM}				ASSERT_VALID(pDoc);
-// COMMENT: {2/2/2016 5:59:29 PM}				this->m_zone_budget.Set_n_user(pDoc->GetNextZoneFlowRatesNumber());
-// COMMENT: {2/2/2016 5:59:29 PM}			}
-// COMMENT: {2/2/2016 5:59:29 PM}		}
-// COMMENT: {2/2/2016 5:59:29 PM}	}
-	//}} HACK
 }
 
 CPrintZoneActor::~CPrintZoneActor(void)
@@ -66,8 +51,25 @@ Polyhedron*& CPrintZoneActor::GetPolyhedron(void)
 
 void CPrintZoneActor::Insert(CPropertyTreeControlBar* pTreeControlBar, HTREEITEM hInsertAfter)
 {
+	ASSERT(FALSE);  // should never be called
 	CTreeCtrl* pTreeCtrl = pTreeControlBar->GetTreeCtrl();
 	HTREEITEM htiParent = pTreeControlBar->GetPLChemNode();
+	/***
+	instead of this use inheritance at the actor level
+	switch (this->m_printZone.zone_type)
+	{
+	case CPrintZone::ZT_CHEMISTRY:
+		htiParent = pTreeControlBar->GetPLChemNode();
+		break;
+	case CPrintZone::ZT_XYZ_CHEMISTRY:
+		htiParent = pTreeControlBar->GetPLXYZChemNode();
+		break;
+	default:
+		ASSERT(FALSE);
+		htiParent = pTreeControlBar->GetPLChemNode();
+		break;
+	}
+	***/
 	this->InsertAt(pTreeCtrl, htiParent, hInsertAfter);
 	CTreeCtrlNode node(this->m_hti, pTreeControlBar->GetTreeCtrlEx());
 	pTreeControlBar->SetNodeCheck(node, BST_CHECKED);
@@ -77,7 +79,6 @@ void CPrintZoneActor::Update(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent)
 {
 	CZoneActor::Update(pTreeCtrl, htiParent);
 
-// COMMENT: {2/2/2016 6:02:31 PM}	Zone_budget relative(this->m_zone_budget);
 	CPrintZone relative(this->m_printZone);
 	CFrameWnd *pFrame = (CFrameWnd*)::AfxGetApp()->m_pMainWnd;
 	if (pFrame)
@@ -89,38 +90,11 @@ void CPrintZoneActor::Update(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent)
 		CGlobal::PathsAbsoluteToRelative(pDoc->GetDefaultPathName(), pDoc, relative);
 	}
 
-// COMMENT: {2/2/2016 6:24:00 PM}	// update description
-// COMMENT: {2/2/2016 6:24:00 PM}	//
-// COMMENT: {2/2/2016 6:24:00 PM}	CString str;
-// COMMENT: {2/2/2016 6:24:00 PM}	if (relative.Get_description().size())
-// COMMENT: {2/2/2016 6:24:00 PM}	{
-// COMMENT: {2/2/2016 6:24:00 PM}		str.Format("Zone flow rate %d - %s", relative.Get_n_user(), relative.Get_description().c_str());
-// COMMENT: {2/2/2016 6:24:00 PM}	}
-// COMMENT: {2/2/2016 6:24:00 PM}	else
-// COMMENT: {2/2/2016 6:24:00 PM}	{
-// COMMENT: {2/2/2016 6:24:00 PM}		str.Format("Zone flow rate %d", relative.Get_n_user());
-// COMMENT: {2/2/2016 6:24:00 PM}	}
-// COMMENT: {2/2/2016 6:24:00 PM}	pTreeCtrl->SetItemText(htiParent, str);
-
-// COMMENT: {2/2/2016 6:24:26 PM}	if (relative.combo.size())
-// COMMENT: {2/2/2016 6:24:26 PM}	{
-// COMMENT: {2/2/2016 6:24:26 PM}		CString str("combination");
-// COMMENT: {2/2/2016 6:24:26 PM}		CString app;
-// COMMENT: {2/2/2016 6:24:26 PM}		std::vector<int>::const_iterator cit = relative.combo.begin();
-// COMMENT: {2/2/2016 6:24:26 PM}		for (; cit != relative.combo.end(); ++cit)
-// COMMENT: {2/2/2016 6:24:26 PM}		{
-// COMMENT: {2/2/2016 6:24:26 PM}			app.Format(" %d", (*cit));
-// COMMENT: {2/2/2016 6:24:26 PM}			str += app;
-// COMMENT: {2/2/2016 6:24:26 PM}		}
-// COMMENT: {2/2/2016 6:24:26 PM}		pTreeCtrl->InsertItem(str, htiParent);
-// COMMENT: {2/2/2016 6:24:26 PM}	}
-// COMMENT: {2/2/2016 6:24:26 PM}
-// COMMENT: {2/2/2016 6:24:26 PM}	if (relative.Get_write_heads())
-// COMMENT: {2/2/2016 6:24:26 PM}	{
-// COMMENT: {2/2/2016 6:24:26 PM}		CString str;
-// COMMENT: {2/2/2016 6:24:26 PM}		str.Format("write_heads_xyzt  %s", relative.Get_filename_heads().c_str());
-// COMMENT: {2/2/2016 6:24:26 PM}		pTreeCtrl->InsertItem(str, htiParent);
-// COMMENT: {2/2/2016 6:24:26 PM}	}
+	// print
+	if (relative.print)
+	{
+		static_cast<Cproperty*>(relative.print)->Insert(pTreeCtrl, htiParent, "print");
+	}
 }
 
 void CPrintZoneActor::Edit(CTreeCtrl* pTreeCtrl)
@@ -130,38 +104,23 @@ void CPrintZoneActor::Edit(CTreeCtrl* pTreeCtrl)
 	CWPhastDoc* pDoc = reinterpret_cast<CWPhastDoc*>(pFrame->GetActiveDocument());
 	ASSERT_VALID(pDoc);
 
-// COMMENT: {2/2/2016 6:26:17 PM}	std::set<int> usedNums;
-// COMMENT: {2/2/2016 6:26:17 PM}	pDoc->GetUsedZoneFlowRatesNumbers(usedNums);
-// COMMENT: {2/2/2016 6:26:17 PM}
-// COMMENT: {2/2/2016 6:26:17 PM}	// remove this well number from used list
-// COMMENT: {2/2/2016 6:26:17 PM}	std::set<int>::iterator iter = usedNums.find(this->m_zone_budget.Get_n_user());
-// COMMENT: {2/2/2016 6:26:17 PM}	ASSERT(iter != usedNums.end());
-// COMMENT: {2/2/2016 6:26:17 PM}	if (iter != usedNums.end())
-// COMMENT: {2/2/2016 6:26:17 PM}	{
-// COMMENT: {2/2/2016 6:26:17 PM}		usedNums.erase(iter);
-// COMMENT: {2/2/2016 6:26:17 PM}	}
-// COMMENT: {2/2/2016 6:26:17 PM}
-// COMMENT: {2/2/2016 6:26:17 PM}	CZoneFlowRatePropertyPage page;
-// COMMENT: {2/2/2016 6:26:17 PM}	page.SetUsedZoneFlowRates(usedNums);
-// COMMENT: {2/2/2016 6:26:17 PM}	page.SetProperties(this->m_zone_budget);
-// COMMENT: {2/2/2016 6:26:17 PM}
-// COMMENT: {2/2/2016 6:26:17 PM}	CString str;
-// COMMENT: {2/2/2016 6:26:17 PM}	str.Format(_T("Zone Flow Rate %d Properties"), this->m_zone_budget.Get_n_user());
-// COMMENT: {2/2/2016 6:26:17 PM}	CPropertySheet props(str);
-// COMMENT: {2/2/2016 6:26:17 PM}	props.AddPage(&page);
-// COMMENT: {2/2/2016 6:26:17 PM}
-// COMMENT: {2/2/2016 6:26:17 PM}	if (props.DoModal() == IDOK)
-// COMMENT: {2/2/2016 6:26:17 PM}	{
-// COMMENT: {2/2/2016 6:26:17 PM}		Zone_budget zone_budget;
-// COMMENT: {2/2/2016 6:26:17 PM}		page.GetProperties(zone_budget);
-// COMMENT: {2/2/2016 6:26:17 PM}		ASSERT(zone_budget.polyh);
-// COMMENT: {2/2/2016 6:26:17 PM}// COMMENT: {9/2/2011 8:47:40 PM}		//pDoc->Execute(new CSetMediaAction(this, pTreeCtrl, grid_elt, mediaSpreadProps.GetDesc()));
-// COMMENT: {2/2/2016 6:26:17 PM}// COMMENT: {9/2/2011 8:47:40 PM}		//{{
-// COMMENT: {2/2/2016 6:26:17 PM}// COMMENT: {9/2/2011 8:47:40 PM}		this->SetData(zone_budget);
-// COMMENT: {2/2/2016 6:26:17 PM}// COMMENT: {9/2/2011 8:47:40 PM}		this->Update(pTreeCtrl, this->m_hti);
-// COMMENT: {2/2/2016 6:26:17 PM}// COMMENT: {9/2/2011 8:47:40 PM}		//}}
-// COMMENT: {2/2/2016 6:26:17 PM}		pDoc->Execute(new CSetZoneBudgetAction(this, pTreeCtrl, zone_budget));
-// COMMENT: {2/2/2016 6:26:17 PM}	}
+	CPrintLocsPropsPage page;
+	page.SetProperties(this->m_printZone);
+	page.SetDesc(this->GetDesc());
+
+	CString str;
+	str.Format(_T("%s Properties"), this->GetName());
+	CPropertySheet props(str);
+	props.AddPage(&page);
+
+	if (props.DoModal() == IDOK)
+	{
+		CPrintZone printZone;
+		page.GetProperties(printZone);
+		ASSERT(printZone.polyh);
+
+		pDoc->Execute(new CSetPrintZoneAction(this, pTreeCtrl, printZone, page.GetDesc()));
+	}
 }
 
 void CPrintZoneActor::InsertAt(CTreeCtrl* pTreeCtrl, HTREEITEM hParent, HTREEITEM hInsertAfter)
@@ -242,22 +201,7 @@ void CPrintZoneActor::SetData(const CPrintZone& printZone)
 	// NOTE: Use SetBounds to set the zone
 	//
 	CProtect protect(this->m_printZone.polyh);
-// COMMENT: {2/2/2016 9:35:54 PM}	this->m_zone_budget = zone_budget;
 	this->m_printZone = printZone;
-	//{{ HACK
-// COMMENT: {2/2/2016 9:36:48 PM}	if (this->m_zone_budget.Get_n_user() == 0)
-// COMMENT: {2/2/2016 9:36:48 PM}	{
-// COMMENT: {2/2/2016 9:36:48 PM}		if (CFrameWnd *pFrame = (CFrameWnd*)::AfxGetApp()->m_pMainWnd)
-// COMMENT: {2/2/2016 9:36:48 PM}		{
-// COMMENT: {2/2/2016 9:36:48 PM}			ASSERT_VALID(pFrame);
-// COMMENT: {2/2/2016 9:36:48 PM}			if (CWPhastDoc* pDoc = reinterpret_cast<CWPhastDoc*>(pFrame->GetActiveDocument()))
-// COMMENT: {2/2/2016 9:36:48 PM}			{
-// COMMENT: {2/2/2016 9:36:48 PM}				ASSERT_VALID(pDoc);
-// COMMENT: {2/2/2016 9:36:48 PM}				this->m_zone_budget.Set_n_user(pDoc->GetNextZoneFlowRatesNumber());
-// COMMENT: {2/2/2016 9:36:48 PM}			}
-// COMMENT: {2/2/2016 9:36:48 PM}		}
-// COMMENT: {2/2/2016 9:36:48 PM}	}
-	//}} HACK
 }
 
 CPrintZone CPrintZoneActor::GetData(void)const
@@ -309,179 +253,3 @@ HTREEITEM CPrintZoneActor::GetHTreeItem(void)const
 	ASSERT(this->m_hti);
 	return this->m_hti;
 }
-
-// COMMENT: {2/2/2016 5:48:58 PM}void Zone_budget::Serialize(bool bStoring, hid_t loc_id)
-// COMMENT: {2/2/2016 5:48:58 PM}{
-// COMMENT: {2/2/2016 5:48:58 PM}	HDF_GETSET_MACRO(n_user, H5T_NATIVE_INT);
-// COMMENT: {2/2/2016 5:48:58 PM}	HDF_STD_STRING_MACRO(description);
-// COMMENT: {2/2/2016 5:48:58 PM}
-// COMMENT: {2/2/2016 5:48:58 PM}	static const char szCombination[] = "combination";
-// COMMENT: {2/2/2016 5:48:58 PM}	static const char szWriteHeads[]  = "write_heads";
-// COMMENT: {2/2/2016 5:48:58 PM}	static const char szFNHeads[]     = "filename_heads";
-// COMMENT: {2/2/2016 5:48:58 PM}
-// COMMENT: {2/2/2016 5:48:58 PM}	herr_t status;
-// COMMENT: {2/2/2016 5:48:58 PM}	hsize_t count;
-// COMMENT: {2/2/2016 5:48:58 PM}	if (bStoring)
-// COMMENT: {2/2/2016 5:48:58 PM}	{
-// COMMENT: {2/2/2016 5:48:58 PM}		if (this->combo.size())
-// COMMENT: {2/2/2016 5:48:58 PM}		{
-// COMMENT: {2/2/2016 5:48:58 PM}			count = this->combo.size();
-// COMMENT: {2/2/2016 5:48:58 PM}			int *numbers = new int[count];
-// COMMENT: {2/2/2016 5:48:58 PM}
-// COMMENT: {2/2/2016 5:48:58 PM}			std::vector<int>::const_iterator cit = this->combo.begin();
-// COMMENT: {2/2/2016 5:48:58 PM}			for (size_t i = 0; cit != this->combo.end(); ++cit, ++i)
-// COMMENT: {2/2/2016 5:48:58 PM}			{
-// COMMENT: {2/2/2016 5:48:58 PM}				numbers[i] = *cit;
-// COMMENT: {2/2/2016 5:48:58 PM}			}
-// COMMENT: {2/2/2016 5:48:58 PM}			status = CGlobal::HDFSerializeWithSize(bStoring, loc_id, szCombination, H5T_NATIVE_INT, count, numbers);
-// COMMENT: {2/2/2016 5:48:58 PM}			delete[] numbers;
-// COMMENT: {2/2/2016 5:48:58 PM}		}
-// COMMENT: {2/2/2016 5:48:58 PM}	}
-// COMMENT: {2/2/2016 5:48:58 PM}	else
-// COMMENT: {2/2/2016 5:48:58 PM}	{
-// COMMENT: {2/2/2016 5:48:58 PM}		ASSERT(this->combo.size() == 0);
-// COMMENT: {2/2/2016 5:48:58 PM}		this->combo.clear();
-// COMMENT: {2/2/2016 5:48:58 PM}		int *numbers = NULL;
-// COMMENT: {2/2/2016 5:48:58 PM}		status = CGlobal::HDFSerializeAllocate(bStoring, loc_id, szCombination, count, &numbers);
-// COMMENT: {2/2/2016 5:48:58 PM}		if (status >= 0)
-// COMMENT: {2/2/2016 5:48:58 PM}		{
-// COMMENT: {2/2/2016 5:48:58 PM}			for (size_t i = 0; i < count; ++i)
-// COMMENT: {2/2/2016 5:48:58 PM}			{
-// COMMENT: {2/2/2016 5:48:58 PM}				this->combo.push_back(numbers[i]);
-// COMMENT: {2/2/2016 5:48:58 PM}			}
-// COMMENT: {2/2/2016 5:48:58 PM}		}
-// COMMENT: {2/2/2016 5:48:58 PM}		delete[] numbers;
-// COMMENT: {2/2/2016 5:48:58 PM}	}
-// COMMENT: {2/2/2016 5:48:58 PM}
-// COMMENT: {2/2/2016 5:48:58 PM}	// write_heads_xyzt
-// COMMENT: {2/2/2016 5:48:58 PM}	status = CGlobal::HDFSerializeBool(bStoring, loc_id, szWriteHeads, this->write_heads);
-// COMMENT: {2/2/2016 5:48:58 PM}	ASSERT(!bStoring || status >= 0); // if storing assert status is valid
-// COMMENT: {2/2/2016 5:48:58 PM}
-// COMMENT: {2/2/2016 5:48:58 PM}	// filename_heads
-// COMMENT: {2/2/2016 5:48:58 PM}	if (this->write_heads)
-// COMMENT: {2/2/2016 5:48:58 PM}	{
-// COMMENT: {2/2/2016 5:48:58 PM}		status = CGlobal::HDFSerializeString(bStoring, loc_id, szFNHeads, this->filename_heads);
-// COMMENT: {2/2/2016 5:48:58 PM}		ASSERT(!bStoring || status >= 0); // if storing assert status is valid
-// COMMENT: {2/2/2016 5:48:58 PM}	}
-// COMMENT: {2/2/2016 5:48:58 PM}}
-// COMMENT: {2/2/2016 5:48:58 PM}
-// COMMENT: {2/2/2016 5:48:58 PM}void Zone_budget::Serialize(CArchive& ar)
-// COMMENT: {2/2/2016 5:48:58 PM}{
-// COMMENT: {2/2/2016 5:48:58 PM}	static const char szZone_budget[] = "Zone_budget";
-// COMMENT: {2/2/2016 5:48:58 PM}	static int version = 3;
-// COMMENT: {2/2/2016 5:48:58 PM}
-// COMMENT: {2/2/2016 5:48:58 PM}	CString type;
-// COMMENT: {2/2/2016 5:48:58 PM}	int ver = version;
-// COMMENT: {2/2/2016 5:48:58 PM}
-// COMMENT: {2/2/2016 5:48:58 PM}	// type and version header
-// COMMENT: {2/2/2016 5:48:58 PM}	//
-// COMMENT: {2/2/2016 5:48:58 PM}	if (ar.IsStoring())
-// COMMENT: {2/2/2016 5:48:58 PM}	{
-// COMMENT: {2/2/2016 5:48:58 PM}		// store type as string
-// COMMENT: {2/2/2016 5:48:58 PM}		//
-// COMMENT: {2/2/2016 5:48:58 PM}		type = szZone_budget;
-// COMMENT: {2/2/2016 5:48:58 PM}		ar << type;
-// COMMENT: {2/2/2016 5:48:58 PM}
-// COMMENT: {2/2/2016 5:48:58 PM}		// store version in case changes need to be made
-// COMMENT: {2/2/2016 5:48:58 PM}		ar << version;
-// COMMENT: {2/2/2016 5:48:58 PM}	}
-// COMMENT: {2/2/2016 5:48:58 PM}	else
-// COMMENT: {2/2/2016 5:48:58 PM}	{
-// COMMENT: {2/2/2016 5:48:58 PM}		// read type as string
-// COMMENT: {2/2/2016 5:48:58 PM}		//
-// COMMENT: {2/2/2016 5:48:58 PM}		ar >> type;
-// COMMENT: {2/2/2016 5:48:58 PM}		ASSERT(type.Compare(szZone_budget) == 0);
-// COMMENT: {2/2/2016 5:48:58 PM}
-// COMMENT: {2/2/2016 5:48:58 PM}		// read version in case changes need to be made
-// COMMENT: {2/2/2016 5:48:58 PM}		ar >> ver;
-// COMMENT: {2/2/2016 5:48:58 PM}	}
-// COMMENT: {2/2/2016 5:48:58 PM}
-// COMMENT: {2/2/2016 5:48:58 PM}	CGlobal::Serialize(&(this->polyh), ar);
-// COMMENT: {2/2/2016 5:48:58 PM}
-// COMMENT: {2/2/2016 5:48:58 PM}	if (version >= 2)
-// COMMENT: {2/2/2016 5:48:58 PM}	{
-// COMMENT: {2/2/2016 5:48:58 PM}		if (ar.IsStoring())
-// COMMENT: {2/2/2016 5:48:58 PM}		{
-// COMMENT: {2/2/2016 5:48:58 PM}			ar << this->write_heads;
-// COMMENT: {2/2/2016 5:48:58 PM}
-// COMMENT: {2/2/2016 5:48:58 PM}			CString str(this->filename_heads.c_str());
-// COMMENT: {2/2/2016 5:48:58 PM}			ar << str;
-// COMMENT: {2/2/2016 5:48:58 PM}		}
-// COMMENT: {2/2/2016 5:48:58 PM}		else
-// COMMENT: {2/2/2016 5:48:58 PM}		{
-// COMMENT: {2/2/2016 5:48:58 PM}			ar >> this->write_heads;
-// COMMENT: {2/2/2016 5:48:58 PM}
-// COMMENT: {2/2/2016 5:48:58 PM}			CString str;
-// COMMENT: {2/2/2016 5:48:58 PM}			ar >> str;
-// COMMENT: {2/2/2016 5:48:58 PM}			this->filename_heads = str;
-// COMMENT: {2/2/2016 5:48:58 PM}		}
-// COMMENT: {2/2/2016 5:48:58 PM}	}
-// COMMENT: {2/2/2016 5:48:58 PM}
-// COMMENT: {2/2/2016 5:48:58 PM}	if (version >= 3)
-// COMMENT: {2/2/2016 5:48:58 PM}	{
-// COMMENT: {2/2/2016 5:48:58 PM}		if (ar.IsStoring())
-// COMMENT: {2/2/2016 5:48:58 PM}		{
-// COMMENT: {2/2/2016 5:48:58 PM}			type = "<combos>";
-// COMMENT: {2/2/2016 5:48:58 PM}			ar << type;
-// COMMENT: {2/2/2016 5:48:58 PM}
-// COMMENT: {2/2/2016 5:48:58 PM}			unsigned int n = (unsigned int)this->Get_combo().size();
-// COMMENT: {2/2/2016 5:48:58 PM}			ar << n;
-// COMMENT: {2/2/2016 5:48:58 PM}
-// COMMENT: {2/2/2016 5:48:58 PM}			if (this->Get_combo().size())
-// COMMENT: {2/2/2016 5:48:58 PM}			{
-// COMMENT: {2/2/2016 5:48:58 PM}				std::vector<int>::const_iterator cit = this->Get_combo().begin();
-// COMMENT: {2/2/2016 5:48:58 PM}				for (; cit != this->Get_combo().end(); ++cit)
-// COMMENT: {2/2/2016 5:48:58 PM}				{
-// COMMENT: {2/2/2016 5:48:58 PM}					int n = (*cit);
-// COMMENT: {2/2/2016 5:48:58 PM}					ar << n;
-// COMMENT: {2/2/2016 5:48:58 PM}				}
-// COMMENT: {2/2/2016 5:48:58 PM}			}
-// COMMENT: {2/2/2016 5:48:58 PM}
-// COMMENT: {2/2/2016 5:48:58 PM}			type = "</combos>";
-// COMMENT: {2/2/2016 5:48:58 PM}			ar << type;
-// COMMENT: {2/2/2016 5:48:58 PM}		}
-// COMMENT: {2/2/2016 5:48:58 PM}		else
-// COMMENT: {2/2/2016 5:48:58 PM}		{
-// COMMENT: {2/2/2016 5:48:58 PM}			ar >> type;
-// COMMENT: {2/2/2016 5:48:58 PM}			ASSERT(type.Compare("<combos>") == 0);
-// COMMENT: {2/2/2016 5:48:58 PM}
-// COMMENT: {2/2/2016 5:48:58 PM}			unsigned int n;
-// COMMENT: {2/2/2016 5:48:58 PM}			ar >> n;
-// COMMENT: {2/2/2016 5:48:58 PM}			if (n > 0)
-// COMMENT: {2/2/2016 5:48:58 PM}			{
-// COMMENT: {2/2/2016 5:48:58 PM}				int v;
-// COMMENT: {2/2/2016 5:48:58 PM}				for (unsigned int i = 0; i < n; ++i)
-// COMMENT: {2/2/2016 5:48:58 PM}				{					
-// COMMENT: {2/2/2016 5:48:58 PM}					ar >> v;
-// COMMENT: {2/2/2016 5:48:58 PM}					this->Get_combo().push_back(v);
-// COMMENT: {2/2/2016 5:48:58 PM}				}
-// COMMENT: {2/2/2016 5:48:58 PM}			}
-// COMMENT: {2/2/2016 5:48:58 PM}
-// COMMENT: {2/2/2016 5:48:58 PM}			ar >> type;
-// COMMENT: {2/2/2016 5:48:58 PM}			ASSERT(type.Compare("</combos>") == 0);
-// COMMENT: {2/2/2016 5:48:58 PM}		}
-// COMMENT: {2/2/2016 5:48:58 PM}	}
-// COMMENT: {2/2/2016 5:48:58 PM}
-// COMMENT: {2/2/2016 5:48:58 PM}	// type and version footer
-// COMMENT: {2/2/2016 5:48:58 PM}	//
-// COMMENT: {2/2/2016 5:48:58 PM}	if (ar.IsStoring())
-// COMMENT: {2/2/2016 5:48:58 PM}	{
-// COMMENT: {2/2/2016 5:48:58 PM}		// store type as string
-// COMMENT: {2/2/2016 5:48:58 PM}		//
-// COMMENT: {2/2/2016 5:48:58 PM}		type = szZone_budget;
-// COMMENT: {2/2/2016 5:48:58 PM}		ar << type;
-// COMMENT: {2/2/2016 5:48:58 PM}
-// COMMENT: {2/2/2016 5:48:58 PM}		// store version in case changes need to be made
-// COMMENT: {2/2/2016 5:48:58 PM}		ar << version;
-// COMMENT: {2/2/2016 5:48:58 PM}	}
-// COMMENT: {2/2/2016 5:48:58 PM}	else
-// COMMENT: {2/2/2016 5:48:58 PM}	{
-// COMMENT: {2/2/2016 5:48:58 PM}		// read type as string
-// COMMENT: {2/2/2016 5:48:58 PM}		//
-// COMMENT: {2/2/2016 5:48:58 PM}		ar >> type;
-// COMMENT: {2/2/2016 5:48:58 PM}		ASSERT(type.Compare(szZone_budget) == 0);
-// COMMENT: {2/2/2016 5:48:58 PM}
-// COMMENT: {2/2/2016 5:48:58 PM}		// read version in case changes need to be made
-// COMMENT: {2/2/2016 5:48:58 PM}		ar >> ver;
-// COMMENT: {2/2/2016 5:48:58 PM}	}
-// COMMENT: {2/2/2016 5:48:58 PM}}

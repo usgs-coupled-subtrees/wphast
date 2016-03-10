@@ -25,20 +25,29 @@ CPrintZone::~CPrintZone(void)
 
 void CPrintZone::InternalInit(void)
 {
-	this->polyh = 0;
-	this->print = 0;
-	this->mask  = 0;
+	/***
+	instead of this use inheritance at the actor level
+	this->zone_type = CPrintZone::ZT_UNDEFINED;
+	***/
+	this->polyh     = 0;
+	this->print     = 0;
+	this->mask      = 0;
 }
 
 void CPrintZone::InternalDelete(void)
 {
 	delete this->polyh;
 	delete static_cast<Cproperty*>(this->print);
-	delete static_cast<Cproperty*>(this->mask);
 }
 
 CPrintZone::CPrintZone(const CPrintZone& src) // copy ctor
 {
+	/***
+	instead of this use inheritance at the actor level
+	// zone_type
+	this->zone_type = src.zone_type;
+	***/
+
 	this->InternalCopy(src);
 }
 
@@ -60,15 +69,12 @@ void CPrintZone::InternalCopy(const struct print_zones& src)
 	// print
 	this->print = 0;
 	Cproperty::CopyProperty(&this->print, src.print);
-
-	// mask
-	this->mask = 0;
-	Cproperty::CopyProperty(&this->mask, src.mask);
 }
 
 CPrintZone& CPrintZone::operator=(const CPrintZone& rhs) // copy assignment
 {
-	if (this != &rhs) {
+	if (this != &rhs)
+	{
 		this->InternalDelete();
 		this->InternalInit();
 		this->InternalCopy(rhs);
@@ -80,20 +86,15 @@ std::ostream& operator<< (std::ostream &os, const CPrintZone &a)
 {
 	// zone
 	ASSERT(a.polyh && ::AfxIsValidAddress(a.polyh, sizeof(Polyhedron)));
-	os << (*a.polyh);
+	os << "\t" << (*a.polyh);
 
 	Cproperty* property_ptr;
 
 	// print
 	property_ptr = static_cast<Cproperty*>(a.print);
-	if (property_ptr && property_ptr->type != PROP_UNDEFINED) {
-		os << "\t\t-print               " << (*property_ptr);
-	}
-
-	// mask
-	property_ptr = static_cast<Cproperty*>(a.mask);
-	if (property_ptr && property_ptr->type != PROP_UNDEFINED) {
-		os << "\t\t-mask                " << (*property_ptr);
+	if (property_ptr && property_ptr->type != PROP_UNDEFINED)
+	{
+		os << "\t\t\t-print               " << (*property_ptr);
 	}
 
 	return os;
@@ -102,17 +103,14 @@ std::ostream& operator<< (std::ostream &os, const CPrintZone &a)
 void CPrintZone::Serialize(bool bStoring, hid_t loc_id)
 {
 	static const char szPrint[] = "print";
-	static const char szMask[]  = "mask";
 
 	if (bStoring)
 	{
 		Cproperty::SerializeCreate(szPrint, static_cast<Cproperty*>(this->print), loc_id);
-		Cproperty::SerializeCreate(szMask,  static_cast<Cproperty*>(this->mask),  loc_id);
 	}
 	else
 	{
 		Cproperty::SerializeOpen(szPrint, (Cproperty**)&this->print, loc_id);
-		Cproperty::SerializeOpen(szMask,  (Cproperty**)&this->mask,  loc_id);
 	}
 }
 
@@ -153,10 +151,8 @@ void CPrintZone::Serialize(CArchive& ar)
 
 	// properties
 	static const char szPrint[] = "print";
-	static const char szMask[]  = "mask";
 
 	Cproperty::Serial(ar, szPrint, &this->print);
-	Cproperty::Serial(ar, szMask,  &this->mask);
 
 	// type and version footer
 	//
@@ -201,7 +197,6 @@ CPrintZone CPrintZone::Full(void)
 	CPrintZone printZone;
 
 	printZone.print = new Cproperty();
-	printZone.mask  = new Cproperty();
 
 	return printZone;
 }
@@ -218,7 +213,6 @@ bool CPrintZone::operator==(const struct print_zones& rhs)const
 	// No need to check the poly ???
 
 	COMPARE_PROPERTY_MACRO(print);
-	COMPARE_PROPERTY_MACRO(mask);
 	return true;
 }
 
@@ -227,7 +221,6 @@ bool CPrintZone::RemovePropZones(void)
 	bool removed = false;
 
 	removed |= Cproperty::RemovePropZones(&this->print);
-	removed |= Cproperty::RemovePropZones(&this->mask);
 
 	return removed;
 }

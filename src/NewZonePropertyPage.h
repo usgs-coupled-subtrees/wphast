@@ -42,6 +42,10 @@ protected:
 	HTREEITEM m_htiICHead;
 	HTREEITEM m_htiChemIC;
 	HTREEITEM m_htiFlowRate;
+	HTREEITEM m_htiPrintLocs;
+	HTREEITEM m_htiPLChem;
+	HTREEITEM m_htiPLXYZChem;
+
 	
 	UINT m_type;
 	CArray<CPropertyPage*, CPropertyPage*> m_PropPageArray;

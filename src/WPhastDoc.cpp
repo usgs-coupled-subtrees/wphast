@@ -60,7 +60,8 @@
 #include "ICHeadZoneActor.h"
 #include "ICChemZoneActor.h"
 #include "ZoneFlowRateZoneActor.h"
-#include "PrintZoneActor.h"
+#include "PrintZoneChemActor.h"
+#include "PrintZoneXYZChemActor.h"
 
 #include "MediaPropsPage2.h"
 #include "FluxPropsPage2.h"
@@ -68,6 +69,7 @@
 #include "HeadICPropsPage2.h"
 #include "SpecifiedHeadPropsPage.h"
 #include "ICChemPropsPage2.h"
+#include "PrintLocsPropsPage.h"
 
 #include "SeException.h"
 
@@ -806,6 +808,9 @@ void CWPhastDoc::Serialize(CArchive& ar)
 			// store zone flow rates
 			this->SerializeZoneFlowRates(bStoring, wphast_id);
 
+			// store print_locations
+			this->SerializePrintLocs(bStoring, wphast_id);
+
 			// close WPhast group
 			status = ::H5Gclose(wphast_id);
 			ASSERT(status >= 0);
@@ -984,6 +989,9 @@ void CWPhastDoc::Serialize(CArchive& ar)
 				// load zone flow rates
 				this->SerializeZoneFlowRates(bStoring, wphast_id);
 
+				// load print_locations
+				this->SerializePrintLocs(bStoring, wphast_id);
+
 				// update properties bar
 				if (CPropertyTreeControlBar* pTree = this->GetPropertyTreeControlBar())
 				{
@@ -1125,6 +1133,58 @@ void CWPhastDoc::SerializeZoneFlowRates(bool bStoring, hid_t loc_id)
 		this->SerializeActors<CZoneFlowRateZoneActor>(bStoring, loc_id, pBar->GetZoneFlowRatesNode(), "Zones");
 	}
 }
+
+void CWPhastDoc::SerializePrintLocs(bool bStoring, hid_t loc_id)
+{
+	static const char szPrintLocs[] = "PRINT_LOCATIONS";
+	static const char szZones[]     = "Zones";
+
+	hid_t pl_id;
+	herr_t status;
+
+	if (bStoring)
+	{
+		// Create the szPrintLocs group
+		pl_id = ::H5Gcreate(loc_id, szPrintLocs, 0); // always created even if empty
+		ASSERT(pl_id > 0);
+		if (pl_id > 0)
+		{
+			if (CPropertyTreeControlBar *pBar = this->GetPropertyTreeControlBar())
+			{
+				// chemistry
+				this->SerializeActors<CPrintZoneChemActor>(bStoring, pl_id, pBar->GetPLChemNode(), szZones);
+				this->SerializeThinGrid<CPrintZoneChemActor>(bStoring, pl_id, pBar->GetPLChemNode());
+
+				// xyz_chemistry
+				this->SerializeActors<CPrintZoneXYZChemActor>(bStoring, pl_id, pBar->GetPLXYZChemNode(), szZones);
+				this->SerializeThinGrid<CPrintZoneXYZChemActor>(bStoring, pl_id, pBar->GetPLXYZChemNode());
+			}
+
+			// close the szPrintLocs group
+			status = ::H5Gclose(pl_id);
+			ASSERT(status >= 0);
+		}
+	}
+	else
+	{
+		// Open the szPrintLocs group
+		pl_id = ::H5Gopen(loc_id, szPrintLocs);
+		ASSERT(pl_id > 0);
+		if (pl_id > 0)
+		{
+			if (CPropertyTreeControlBar *pBar = this->GetPropertyTreeControlBar())
+			{
+				this->SerializeActors<CPrintZoneChemActor>(bStoring, pl_id, pBar->GetICHeadNode(), szZones);
+				this->SerializeActors<CPrintZoneXYZChemActor>(bStoring, pl_id, pBar->GetICChemNode(), szZones);
+			}
+
+			// close the szPrintLocs group
+			status = ::H5Gclose(pl_id);
+			ASSERT(status >= 0);
+		}
+	}
+}
+
 
 void CWPhastDoc::SerializeIC(bool bStoring, hid_t loc_id)
 {
@@ -1321,6 +1381,15 @@ void CWPhastDoc::SerializeActors(bool bStoring, hid_t loc_id, CTreeCtrlNode pare
 			nCount = parentNode.GetChildCount();
 			for (int i = 0; i < nCount; ++i)
 			{
+				if (parentNode.GetChildAt(i).GetData() == 0)
+				{
+					ASSERT(
+						::strcmp(ACTOR::szHeading, CPrintZoneChemActor::szHeading) == 0
+						||
+						::strcmp(ACTOR::szHeading, CPrintZoneXYZChemActor::szHeading) == 0
+						);
+					continue;
+				}
 				if (ACTOR *pActor = ACTOR::SafeDownCast((vtkObject*)parentNode.GetChildAt(i).GetData()))
 				{
 					listActors.push_back(pActor);
@@ -1410,6 +1479,80 @@ void CWPhastDoc::SerializeActors(bool bStoring, hid_t loc_id, CTreeCtrlNode pare
 			ASSERT(status >= 0);
 		}
 	}
+}
+
+template<typename ACTOR>
+void CWPhastDoc::SerializeThinGrid(bool bStoring, hid_t loc_id, CTreeCtrlNode parentNode)
+{
+	static const char szThinGrid[] = "thin_grid";
+	hid_t group_id;
+	herr_t status;
+
+	if (bStoring)
+	{
+		// STORING
+
+		// open the ACTOR::szHeading group
+		group_id = ::H5Gopen(loc_id, ACTOR::szHeading); // should be created in SerializeActors
+		ASSERT(group_id > 0);
+		if (group_id > 0)
+		{
+			// store thin_grid
+			//
+			status = CGlobal::HDFSerialize(bStoring, group_id, szThinGrid, H5T_NATIVE_INT, 3, ACTOR::thin_grid);
+			ASSERT(status >= 0);
+
+			// close the ACTOR::szHeading group
+			//
+			status = ::H5Gclose(group_id);
+			ASSERT(status >= 0);
+		}
+	}
+	else
+	{
+		// LOADING
+
+		// open the ACTOR::szHeading group
+		//
+		group_id = ::H5Gopen(loc_id, ACTOR::szHeading);
+		ASSERT(group_id > 0);
+		if (group_id > 0)
+		{
+			// load thin_grid
+			//
+			status = CGlobal::HDFSerialize(bStoring, group_id, szThinGrid, H5T_NATIVE_INT, 3, ACTOR::thin_grid);
+			ASSERT(status >= 0);
+
+			// close the ACTOR::szHeading group
+			//
+			status = ::H5Gclose(group_id);
+			ASSERT(status >= 0);
+		}
+	}
+}
+
+bool CWPhastDoc::PrintLocsDefined(CPropertyTreeControlBar *pBar)
+{
+	bool retval = false;
+	retval = retval || CWPhastDoc::PLDefined<CPrintZoneChemActor>(pBar->GetPLChemNode());
+	retval = retval || CWPhastDoc::PLDefined<CPrintZoneXYZChemActor>(pBar->GetPLXYZChemNode());
+	return retval;
+}
+
+template<typename PL_ACTOR>
+bool CWPhastDoc::PLDefined(CTreeCtrlNode node)
+{
+	for (int i = 0; i < 3; ++i)
+	{
+		if (PL_ACTOR::thin_grid[i] > 1) return true;
+	}
+
+	int count = node.GetChildCount();
+	for (int i = 0; i < count; ++i)
+	{
+		if (node.GetChildAt(i).GetData() != 0) return true;
+	}
+	return false;
 }
 
 // CWPhastDoc diagnostics
@@ -3442,6 +3585,13 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 			pAction->Execute();
 		}
 
+		// PRINT_LOCATIONS (thin_grid)
+		for (int i = 0; i < 3; ++i)
+		{
+			CPrintZoneChemActor::thin_grid[i]    = ::print_zones_chem.thin_grid[i];
+			CPrintZoneXYZChemActor::thin_grid[i] = ::print_zones_xyz.thin_grid[i];
+		}
+
 		// PRINT_LOCATIONS (chemistry)
 		//
 		for (int i = 0; i < ::print_zones_chem.count_print_zones; ++i)
@@ -3453,6 +3603,10 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 			// store pre-translated polyh
 			CPrintZone data(*print_zones_ptr);
 			data.RemovePropZones();
+			/***
+			instead of this use inheritance at the actor level
+			data.zone_type = CPrintZone::ZT_CHEMISTRY;
+			***/
 
 			std::auto_ptr<Polyhedron> ap(data.polyh);
 			print_loc_chem_map[print_zones_ptr] = 0;
@@ -3460,8 +3614,8 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 			data.polyh = print_loc_chem_map[print_zones_ptr] ? print_loc_chem_map[print_zones_ptr]->clone() : print_zones_ptr->polyh->clone();
 
 			// not undoable
-			std::auto_ptr< CZoneCreateAction<CPrintZoneActor> > pAction(
-				new CZoneCreateAction<CPrintZoneActor>(
+			std::auto_ptr< CZoneCreateAction<CPrintZoneChemActor> > pAction(
+				new CZoneCreateAction<CPrintZoneChemActor>(
 					this,
 					data.polyh,
 					::grid_origin,
@@ -3484,6 +3638,10 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 			// store pre-translated polyh
 			CPrintZone data(*print_zones_ptr);
 			data.RemovePropZones();
+			/***
+			instead of this use inheritance at the actor level
+			data.zone_type = CPrintZone::ZT_XYZ_CHEMISTRY;
+			***/
 
 			std::auto_ptr<Polyhedron> ap(data.polyh);
 			print_loc_chem_map[print_zones_ptr] = 0;
@@ -3491,8 +3649,8 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 			data.polyh = print_loc_chem_map[print_zones_ptr] ? print_loc_chem_map[print_zones_ptr]->clone() : print_zones_ptr->polyh->clone();
 
 			// not undoable
-			std::auto_ptr< CZoneCreateAction<CPrintZoneActor> > pAction(
-				new CZoneCreateAction<CPrintZoneActor>(
+			std::auto_ptr< CZoneCreateAction<CPrintZoneXYZChemActor> > pAction(
+				new CZoneCreateAction<CPrintZoneXYZChemActor>(
 					this,
 					data.polyh,
 					::grid_origin,
@@ -3605,6 +3763,7 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 		pTree->GetRiversNode().Expand(TVE_COLLAPSE);
 		pTree->GetDrainsNode().Expand(TVE_COLLAPSE);
 		pTree->GetZoneFlowRatesNode().Expand(TVE_COLLAPSE);
+		pTree->GetPrintLocationsNode().Expand(TVE_COLLAPSE);
 		this->ClearSelection();
 	}
 
@@ -3859,6 +4018,60 @@ BOOL CWPhastDoc::WriteTransDat(std::ostream& os)
 		if (CZoneFlowRateZoneActor *pZone = CZoneFlowRateZoneActor::SafeDownCast((vtkObject*)nodeZoneFlowRates.GetChildAt(i).GetData()))
 		{
 			os << pZone->GetData();
+		}
+	}
+
+	// PRINT_LOCATIONS
+	if (CWPhastDoc::PrintLocsDefined(this->GetPropertyTreeControlBar()))
+	{
+		char coor[] = {'X', 'Y', 'Z'};
+
+		CPropertyTreeControlBar *pBar = this->GetPropertyTreeControlBar();
+
+		os << "PRINT_LOCATIONS" << std::endl;
+
+		// -chemistry
+		if (CWPhastDoc::PLDefined<CPrintZoneChemActor>(pBar->GetPLChemNode()))
+		{
+			os << "\t" << "-chemistry" << std::endl;
+			for (int i = 0; i < 3; ++i)
+			{
+				if (CPrintZoneChemActor::thin_grid[i] > 1)
+				{
+					os << "\t\t" << "-sample " << coor[i] << " " << CPrintZoneChemActor::thin_grid[i] << std::endl;
+				}
+			}
+			int count = pBar->GetPLChemNode().GetChildCount();
+			for (int i = 0; i < count; ++i)
+			{
+				if (pBar->GetPLChemNode().GetChildAt(i).GetData() == 0) continue;
+				if (CPrintZoneActor *pActor = CPrintZoneActor::SafeDownCast((vtkObject*)pBar->GetPLChemNode().GetChildAt(i).GetData()))
+				{
+					os << pActor->GetData();
+				}
+			}
+		}
+
+		// -xyz_chemistry
+		if (CWPhastDoc::PLDefined<CPrintZoneXYZChemActor>(pBar->GetPLXYZChemNode()))
+		{
+			os << "\t" << "-xyz_chemistry" << std::endl;
+			for (int i = 0; i < 3; ++i)
+			{
+				if (CPrintZoneXYZChemActor::thin_grid[i] > 1)
+				{
+					os << "\t\t" << "-sample " << coor[i] << " " << CPrintZoneXYZChemActor::thin_grid[i] << std::endl;
+				}
+			}
+			int count = pBar->GetPLXYZChemNode().GetChildCount();
+			for (int i = 0; i < count; ++i)
+			{
+				if (pBar->GetPLXYZChemNode().GetChildAt(i).GetData() == 0) continue;
+				if (CPrintZoneActor *pActor = CPrintZoneActor::SafeDownCast((vtkObject*)pBar->GetPLXYZChemNode().GetChildAt(i).GetData()))
+				{
+					os << pActor->GetData();
+				}
+			}
 		}
 	}
 
@@ -6269,6 +6482,7 @@ void CWPhastDoc::OnViewHideAll()
 		pTree->SetNodeCheck(pTree->GetRiversNode(), BST_UNCHECKED);
 		pTree->SetNodeCheck(pTree->GetDrainsNode(), BST_UNCHECKED);
 		pTree->SetNodeCheck(pTree->GetZoneFlowRatesNode(), BST_UNCHECKED);
+		pTree->SetNodeCheck(pTree->GetPrintLocationsNode(), BST_UNCHECKED);
 		pTree->GetGridNode().Select();
 	}
 	this->UpdateAllViews(0);
@@ -6458,6 +6672,7 @@ void CWPhastDoc::OnViewShowAll()
 		pTree->SetNodeCheck(pTree->GetRiversNode(), BST_CHECKED);
 		pTree->SetNodeCheck(pTree->GetDrainsNode(), BST_CHECKED);
 		pTree->SetNodeCheck(pTree->GetZoneFlowRatesNode(), BST_CHECKED);
+		pTree->SetNodeCheck(pTree->GetPrintLocationsNode(), BST_CHECKED);
 		pTree->GetGridNode().Select();
 	}
 	this->UpdateAllViews(0);
@@ -6593,6 +6808,148 @@ void CWPhastDoc::EndNewZone()
 	}
 }
 
+void CWPhastDoc::NewZoneWizard(LPCTSTR pszCaption, Polyhedron *polyh, LPCTSTR pszStatus)
+{
+	// get type of zone
+	//
+	CPropertySheet                sheet(pszCaption, NULL, 0, NULL, false);
+
+	CNewZonePropertyPage          newZone;
+	CMediaPropsPage2              mediaProps;
+	CFluxPropsPage2               fluxProps;
+	CLeakyPropsPage               leakyProps;
+	CSpecifiedHeadPropsPage       specifiedProps;
+	CHeadICPropsPage2             headProps;
+	CICChemPropsPage2             chemICProps;
+	CZoneFlowRatePropertyPage     zoneFlowRateProps;
+	CPrintLocsPropsPage           printLocsProps;
+
+	// CChemICSpreadPropertyPage only needs the flowonly flag when the zone is a
+	// default zone
+	//
+	bool bFlowOnly = this->GetFlowOnly();
+
+	fluxProps.SetFlowOnly(bFlowOnly);
+	leakyProps.SetFlowOnly(bFlowOnly);
+	specifiedProps.SetFlowOnly(bFlowOnly);
+
+	bool bFreeSufurface = this->GetFreeSurface();
+	leakyProps.SetFreeSurface(bFreeSufurface);
+
+	// set used zone flow rate numbers
+	std::set<int> usedZoneFlowRatesNumbers;
+	this->GetUsedZoneFlowRatesNumbers(usedZoneFlowRatesNumbers);
+	zoneFlowRateProps.SetUsedZoneFlowRates(usedZoneFlowRatesNumbers);
+
+	// set units
+	mediaProps.SetUnits(this->GetUnits());
+	fluxProps.SetUnits(this->GetUnits());
+	leakyProps.SetUnits(this->GetUnits());
+	specifiedProps.SetUnits(this->GetUnits());
+	headProps.SetUnits(this->GetUnits());
+	chemICProps.SetUnits(this->GetUnits());
+	//zoneFlowRateProps.SetUnits(this->GetUnits());
+
+	sheet.AddPage(&newZone);
+	sheet.AddPage(&mediaProps);
+	sheet.AddPage(&fluxProps);
+	sheet.AddPage(&leakyProps);
+	sheet.AddPage(&specifiedProps);
+	sheet.AddPage(&headProps);
+	sheet.AddPage(&chemICProps);
+	sheet.AddPage(&zoneFlowRateProps);
+	sheet.AddPage(&printLocsProps);
+
+	sheet.SetWizardMode();
+
+	if (sheet.DoModal() == ID_WIZFINISH)
+	{
+		if (pszStatus)
+		{
+			this->UpdateAllViews(0);
+			CWaitCursor wait;
+			if (CWnd* pWnd = ((CFrameWnd*)::AfxGetMainWnd())->GetMessageBar())
+			{
+				CString status(pszStatus);
+				pWnd->SetWindowText(status);
+			}
+			::Sleep(100);
+		}
+		if (newZone.GetType() == ID_ZONE_TYPE_MEDIA)
+		{
+			CGridElt elt;
+			mediaProps.GetProperties(elt);
+			elt.polyh = polyh;
+			CMediaZoneActor::Create(this, elt, mediaProps.GetDesc());
+		}
+		else if (newZone.GetType() == ID_ZONE_TYPE_BC_FLUX)
+		{
+			CBC bc;
+			fluxProps.GetProperties(bc);
+			bc.polyh = polyh;
+			CBCZoneActor::Create(this, bc, fluxProps.GetDesc());
+		}
+		else if (newZone.GetType() == ID_ZONE_TYPE_BC_LEAKY)
+		{
+			CBC bc;
+			leakyProps.GetProperties(bc);
+			bc.polyh = polyh;
+			CBCZoneActor::Create(this, bc, leakyProps.GetDesc());
+		}
+		else if (newZone.GetType() == ID_ZONE_TYPE_BC_SPECIFIED)
+		{
+			CBC bc;
+			specifiedProps.GetProperties(bc);
+			bc.polyh = polyh;
+			CBCZoneActor::Create(this, bc, specifiedProps.GetDesc());
+		}
+		else if (newZone.GetType() == ID_ZONE_TYPE_IC_HEAD)
+		{
+			CHeadIC headic;
+			headProps.GetProperties(headic);
+			headic.polyh = polyh;
+			CICHeadZoneActor::Create(this, headic, headProps.GetDesc());
+		}
+		else if (newZone.GetType() == ID_ZONE_TYPE_IC_CHEM)
+		{
+			CChemIC chemIC;
+			chemICProps.GetProperties(chemIC);
+			chemIC.polyh = polyh;
+			CICChemZoneActor::Create(this, chemIC, chemICProps.GetDesc());
+		}
+		else if (newZone.GetType() == ID_ZONE_TYPE_FLOW_RATE)
+		{
+			Zone_budget zone_budget;
+			zoneFlowRateProps.GetProperties(zone_budget);
+			zone_budget.Set_polyh(polyh);
+			CZoneFlowRateZoneActor::Create(this, zone_budget);
+		}
+		else if (newZone.GetType() == ID_ZONE_TYPE_PL_CHEMISTRY)
+		{
+			CPrintZone printZone;
+			printLocsProps.GetProperties(printZone);
+			printZone.polyh = polyh;
+			CPrintZoneChemActor::Create(this, printZone);
+		}
+		else if (newZone.GetType() == ID_ZONE_TYPE_PL_XYZ_CHEMISTRY)
+		{
+			CPrintZone printZone;
+			printLocsProps.GetProperties(printZone);
+			printZone.polyh = polyh;
+			CPrintZoneXYZChemActor::Create(this, printZone);
+		}
+		else
+		{
+			ASSERT(FALSE);
+		}
+	}
+	else
+	{
+		ASSERT(polyh && ::AfxIsValidAddress(polyh, sizeof(Polyhedron)));
+		delete polyh;
+	}
+}
+
 void CWPhastDoc::NewZoneListener(vtkObject *caller, unsigned long eid, void *clientdata, void *calldata)
 {
 	ASSERT(caller->IsA("CNewZoneWidget"));
@@ -6603,108 +6960,7 @@ void CWPhastDoc::NewZoneListener(vtkObject *caller, unsigned long eid, void *cli
 		CWPhastDoc* self = reinterpret_cast<CWPhastDoc*>(clientdata);
 		if (eid == vtkCommand::EndInteractionEvent)
 		{
-			// get type of zone
-			//
-			CPropertySheet                sheet("Zone Wizard", NULL, 0, NULL, false);
-
-			CNewZonePropertyPage          newZone;
-			CMediaPropsPage2              mediaProps;
-			CFluxPropsPage2               fluxProps;
-			CLeakyPropsPage               leakyProps;
-			CSpecifiedHeadPropsPage       specifiedProps;
-			CHeadICPropsPage2             headProps;
-			CICChemPropsPage2             chemICProps;
-			CZoneFlowRatePropertyPage     zoneFlowRateProps;
-
-			// CChemICSpreadPropertyPage only needs the flowonly flag when the zone is a
-			// default zone
-			//
-			bool bFlowOnly = self->GetFlowOnly();
-
-			fluxProps.SetFlowOnly(bFlowOnly);
-			leakyProps.SetFlowOnly(bFlowOnly);
-			specifiedProps.SetFlowOnly(bFlowOnly);
-
-			bool bFreeSufurface = self->GetFreeSurface();
-			leakyProps.SetFreeSurface(bFreeSufurface);
-
-			// set used zone flow rate numbers
-			std::set<int> usedZoneFlowRatesNumbers;
-			self->GetUsedZoneFlowRatesNumbers(usedZoneFlowRatesNumbers);
-			zoneFlowRateProps.SetUsedZoneFlowRates(usedZoneFlowRatesNumbers);
-
-			// set units
-			mediaProps.SetUnits(self->GetUnits());
-			fluxProps.SetUnits(self->GetUnits());
-			leakyProps.SetUnits(self->GetUnits());
-			specifiedProps.SetUnits(self->GetUnits());
-			headProps.SetUnits(self->GetUnits());
-			chemICProps.SetUnits(self->GetUnits());
-			//zoneFlowRateProps.SetUnits(self->GetUnits());
-
-			sheet.AddPage(&newZone);
-			sheet.AddPage(&mediaProps);
-			sheet.AddPage(&fluxProps);
-			sheet.AddPage(&leakyProps);
-			sheet.AddPage(&specifiedProps);
-			sheet.AddPage(&headProps);
-			sheet.AddPage(&chemICProps);
-			sheet.AddPage(&zoneFlowRateProps);
-
-			sheet.SetWizardMode();
-
-			if (sheet.DoModal() == ID_WIZFINISH)
-			{
-				if (newZone.GetType() == ID_ZONE_TYPE_MEDIA)
-				{
-					CGridElt elt;
-					mediaProps.GetProperties(elt);
-					elt.polyh = self->NewZoneWidget->GetCube();
-					CMediaZoneActor::Create(self, elt, mediaProps.GetDesc());
-				}
-				else if (newZone.GetType() == ID_ZONE_TYPE_BC_FLUX)
-				{
-					CBC bc;
-					fluxProps.GetProperties(bc);
-					bc.polyh = self->NewZoneWidget->GetCube();
-					CBCZoneActor::Create(self, bc, fluxProps.GetDesc());
-				}
-				else if (newZone.GetType() == ID_ZONE_TYPE_BC_LEAKY)
-				{
-					CBC bc;
-					leakyProps.GetProperties(bc);
-					bc.polyh = self->NewZoneWidget->GetCube();
-					CBCZoneActor::Create(self, bc, leakyProps.GetDesc());
-				}
-				else if (newZone.GetType() == ID_ZONE_TYPE_BC_SPECIFIED)
-				{
-					CBC bc;
-					specifiedProps.GetProperties(bc);
-					bc.polyh = self->NewZoneWidget->GetCube();
-					CBCZoneActor::Create(self, bc, specifiedProps.GetDesc());
-				}
-				else if (newZone.GetType() == ID_ZONE_TYPE_IC_HEAD)
-				{
-					CHeadIC headic;
-					headProps.GetProperties(headic);
-					headic.polyh = self->NewZoneWidget->GetCube();
-					CICHeadZoneActor::Create(self, headic, headProps.GetDesc());
-				}
-				else if (newZone.GetType() == ID_ZONE_TYPE_IC_CHEM)
-				{
-					CChemIC chemIC;
-					chemICProps.GetProperties(chemIC);
-					chemIC.polyh = self->NewZoneWidget->GetCube();
-					CICChemZoneActor::Create(self, chemIC, chemICProps.GetDesc());
-				}
-				else if (newZone.GetType() == ID_ZONE_TYPE_FLOW_RATE)
-				{
-					Zone_budget zone_budget;
-					zoneFlowRateProps.GetProperties(zone_budget);
-					zone_budget.Set_polyh(self->NewZoneWidget->GetCube());
-					CZoneFlowRateZoneActor::Create(self, zone_budget);
-				}
-			}
+			self->NewZoneWizard(_T("Zone Wizard"), self->NewZoneWidget->GetCube());
 
 			// Note: cannot call EndNewZone here
 			self->NewZoneWidget->SetInteractor(0);
@@ -6895,99 +7151,7 @@ void CWPhastDoc::NewWedgeListener(vtkObject *caller, unsigned long eid, void *cl
 		CWPhastDoc* self = reinterpret_cast<CWPhastDoc*>(clientdata);
 		if (eid == vtkCommand::EndInteractionEvent)
 		{
-			// get type of zone
-			//
-			ETSLayoutPropertySheet        sheet("Wedge Wizard", NULL, 0, NULL, false);
-
-			CNewZonePropertyPage          newZone;
-			CMediaPropsPage2              mediaProps;
-			CFluxPropsPage2               fluxProps;
-			CLeakyPropsPage               leakyProps;
-			CSpecifiedHeadPropsPage       specifiedProps;
-			CHeadICPropsPage2             headProps;
-			CICChemPropsPage2             chemICProps;
-			CZoneFlowRatePropertyPage     zoneFlowRateProps;
-
-			// CChemICSpreadPropertyPage only needs the flowonly flag when the zone is a
-			// default zone
-			//
-			bool bFlowOnly = self->GetFlowOnly();
-
-			fluxProps.SetFlowOnly(bFlowOnly);
-			leakyProps.SetFlowOnly(bFlowOnly);
-			specifiedProps.SetFlowOnly(bFlowOnly);
-
-			bool bFreeSufurface = self->GetFreeSurface();
-			leakyProps.SetFreeSurface(bFreeSufurface);
-
-			// set used zone flow rate numbers
-			std::set<int> usedZoneFlowRatesNumbers;
-			self->GetUsedZoneFlowRatesNumbers(usedZoneFlowRatesNumbers);
-			zoneFlowRateProps.SetUsedZoneFlowRates(usedZoneFlowRatesNumbers);
-
-			sheet.AddPage(&newZone);
-			sheet.AddPage(&mediaProps);
-			sheet.AddPage(&fluxProps);
-			sheet.AddPage(&leakyProps);
-			sheet.AddPage(&specifiedProps);
-			sheet.AddPage(&headProps);
-			sheet.AddPage(&chemICProps);
-			sheet.AddPage(&zoneFlowRateProps);
-
-			sheet.SetWizardMode();
-
-			if (sheet.DoModal() == ID_WIZFINISH)
-			{
-				if (newZone.GetType() == ID_ZONE_TYPE_MEDIA)
-				{
-					CGridElt elt;
-					mediaProps.GetProperties(elt);
-					elt.polyh = self->NewWedgeWidget->GetWedge();
-					CMediaZoneActor::Create(self, elt, mediaProps.GetDesc());
-				}
-				else if (newZone.GetType() == ID_ZONE_TYPE_BC_FLUX)
-				{
-					CBC bc;
-					fluxProps.GetProperties(bc);
-					bc.polyh = self->NewWedgeWidget->GetWedge();
-					CBCZoneActor::Create(self, bc, fluxProps.GetDesc());
-				}
-				else if (newZone.GetType() == ID_ZONE_TYPE_BC_LEAKY)
-				{
-					CBC bc;
-					leakyProps.GetProperties(bc);
-					bc.polyh = self->NewWedgeWidget->GetWedge();
-					CBCZoneActor::Create(self, bc, leakyProps.GetDesc());
-				}
-				else if (newZone.GetType() == ID_ZONE_TYPE_BC_SPECIFIED)
-				{
-					CBC bc;
-					specifiedProps.GetProperties(bc);
-					bc.polyh = self->NewWedgeWidget->GetWedge();
-					CBCZoneActor::Create(self, bc, specifiedProps.GetDesc());
-				}
-				else if (newZone.GetType() == ID_ZONE_TYPE_IC_HEAD)
-				{
-					CHeadIC headic;
-					headProps.GetProperties(headic);
-					headic.polyh = self->NewWedgeWidget->GetWedge();
-					CICHeadZoneActor::Create(self, headic, headProps.GetDesc());
-				}
-				else if (newZone.GetType() == ID_ZONE_TYPE_IC_CHEM)
-				{
-					CChemIC chemIC;
-					chemICProps.GetProperties(chemIC);
-					chemIC.polyh = self->NewWedgeWidget->GetWedge();
-					CICChemZoneActor::Create(self, chemIC, chemICProps.GetDesc());
-				}
-				else if (newZone.GetType() == ID_ZONE_TYPE_FLOW_RATE)
-				{
-					Zone_budget zone_budget;
-					zoneFlowRateProps.GetProperties(zone_budget);
-					zone_budget.Set_polyh(self->NewWedgeWidget->GetWedge());
-					CZoneFlowRateZoneActor::Create(self, zone_budget);
-				}
-			}
+			self->NewZoneWizard(_T("Wedge Wizard"), self->NewWedgeWidget->GetWedge());
 
 			// Note: cannot call EndNewWedge here
 			self->NewWedgeWidget->SetInteractor(0);
@@ -7089,7 +7253,7 @@ void CWPhastDoc::OnToolsNewPrism()
 				}
 				catch (...)
 				{
-					::AfxMessageBox("An unknown error occurred while loading perimeter file.", MB_OK|MB_ICONEXCLAMATION);
+					::AfxMessageBox(_T("An unknown error occurred while loading perimeter file."), MB_OK|MB_ICONEXCLAMATION);
 					delete p;
 				}
 
@@ -7099,110 +7263,7 @@ void CWPhastDoc::OnToolsNewPrism()
 				{
 					// get type of zone
 					//
-					ETSLayoutPropertySheet        sheet("Prism Wizard", NULL, 0, NULL, false);
-
-					CNewZonePropertyPage          newZone;
-					CMediaPropsPage2              mediaProps;
-					CFluxPropsPage2               fluxProps;
-					CLeakyPropsPage               leakyProps;
-					CSpecifiedHeadPropsPage       specifiedProps;
-					CHeadICPropsPage2             headProps;
-					CICChemPropsPage2             chemICProps;
-					CZoneFlowRatePropertyPage     zoneFlowRateProps;
-
-					// CChemICSpreadPropertyPage only needs the flowonly flag when the zone is a
-					// default zone
-					//
-					bool bFlowOnly = this->GetFlowOnly();
-
-					fluxProps.SetFlowOnly(bFlowOnly);
-					leakyProps.SetFlowOnly(bFlowOnly);
-					specifiedProps.SetFlowOnly(bFlowOnly);
-
-					bool bFreeSufurface = this->GetFreeSurface();
-					leakyProps.SetFreeSurface(bFreeSufurface);
-
-					// set used zone flow rate numbers
-					std::set<int> usedZoneFlowRatesNumbers;
-					this->GetUsedZoneFlowRatesNumbers(usedZoneFlowRatesNumbers);
-					zoneFlowRateProps.SetUsedZoneFlowRates(usedZoneFlowRatesNumbers);
-
-					sheet.AddPage(&newZone);
-					sheet.AddPage(&mediaProps);
-					sheet.AddPage(&fluxProps);
-					sheet.AddPage(&leakyProps);
-					sheet.AddPage(&specifiedProps);
-					sheet.AddPage(&headProps);
-					sheet.AddPage(&chemICProps);
-					sheet.AddPage(&zoneFlowRateProps);
-
-					sheet.SetWizardMode();
-
-					if (sheet.DoModal() == ID_WIZFINISH)
-					{
-						this->UpdateAllViews(0);
-						CWaitCursor wait;
-						if (CWnd* pWnd = ((CFrameWnd*)::AfxGetMainWnd())->GetMessageBar())
-						{
-							CString status(_T("Creating new prism..."));
-							pWnd->SetWindowText(status);
-						}
-						::Sleep(100);
-
-						if (newZone.GetType() == ID_ZONE_TYPE_MEDIA)
-						{
-							CGridElt elt;
-							mediaProps.GetProperties(elt);
-							elt.polyh = p;
-							CMediaZoneActor::Create(this, elt, mediaProps.GetDesc());
-						}
-						else if (newZone.GetType() == ID_ZONE_TYPE_BC_FLUX)
-						{
-							CBC bc;
-							fluxProps.GetProperties(bc);
-							bc.polyh = p;
-							CBCZoneActor::Create(this, bc, fluxProps.GetDesc());
-						}
-						else if (newZone.GetType() == ID_ZONE_TYPE_BC_LEAKY)
-						{
-							CBC bc;
-							leakyProps.GetProperties(bc);
-							bc.polyh = p;
-							CBCZoneActor::Create(this, bc, leakyProps.GetDesc());
-						}
-						else if (newZone.GetType() == ID_ZONE_TYPE_BC_SPECIFIED)
-						{
-							CBC bc;
-							specifiedProps.GetProperties(bc);
-							bc.polyh = p;
-							CBCZoneActor::Create(this, bc, specifiedProps.GetDesc());
-						}
-						else if (newZone.GetType() == ID_ZONE_TYPE_IC_HEAD)
-						{
-							CHeadIC headic;
-							headProps.GetProperties(headic);
-							headic.polyh = p;
-							CICHeadZoneActor::Create(this, headic, headProps.GetDesc());
-						}
-						else if (newZone.GetType() == ID_ZONE_TYPE_IC_CHEM)
-						{
-							CChemIC chemIC;
-							chemICProps.GetProperties(chemIC);
-							chemIC.polyh = p;
-							CICChemZoneActor::Create(this, chemIC, chemICProps.GetDesc());
-						}
-						else if (newZone.GetType() == ID_ZONE_TYPE_FLOW_RATE)
-						{
-							Zone_budget zone_budget;
-							zoneFlowRateProps.GetProperties(zone_budget);
-							zone_budget.Set_polyh(p);
-							CZoneFlowRateZoneActor::Create(this, zone_budget);
-						}
-					}
-					else
-					{
-						delete p;
-					}
+					this->NewZoneWizard(_T("Prism Wizard"), p, _T("Creating new prism..."));
 
 					// refresh screen
 					//
@@ -7302,106 +7363,7 @@ void CWPhastDoc::NewPrismListener(vtkObject *caller, unsigned long eid, void *cl
 
 			if (Prism *p = self->NewPrismWidget->GetPrism())
 			{
-				// DO NOT CALL Tidy here
-				//p->Tidy();
-
-				// get type of zone
-				//
-				ETSLayoutPropertySheet        sheet("Prism Wizard", NULL, 0, NULL, false);
-
-				CNewZonePropertyPage          newZone;
-				CMediaPropsPage2              mediaProps;
-				CFluxPropsPage2               fluxProps;
-				CLeakyPropsPage               leakyProps;
-				CSpecifiedHeadPropsPage       specifiedProps;
-				CHeadICPropsPage2             headProps;
-				CICChemPropsPage2             chemICProps;
-				CZoneFlowRatePropertyPage     zoneFlowRateProps;
-
-				// CChemICSpreadPropertyPage only needs the flowonly flag when the zone is a
-				// default zone
-				//
-				bool bFlowOnly = self->GetFlowOnly();
-
-				fluxProps.SetFlowOnly(bFlowOnly);
-				leakyProps.SetFlowOnly(bFlowOnly);
-				specifiedProps.SetFlowOnly(bFlowOnly);
-
-				bool bFreeSufurface = self->GetFreeSurface();
-				leakyProps.SetFreeSurface(bFreeSufurface);
-
-				// set used zone flow rate numbers
-				std::set<int> usedZoneFlowRatesNumbers;
-				self->GetUsedZoneFlowRatesNumbers(usedZoneFlowRatesNumbers);
-				zoneFlowRateProps.SetUsedZoneFlowRates(usedZoneFlowRatesNumbers);
-
-				sheet.AddPage(&newZone);
-				sheet.AddPage(&mediaProps);
-				sheet.AddPage(&fluxProps);
-				sheet.AddPage(&leakyProps);
-				sheet.AddPage(&specifiedProps);
-				sheet.AddPage(&headProps);
-				sheet.AddPage(&chemICProps);
-				sheet.AddPage(&zoneFlowRateProps);
-
-				sheet.SetWizardMode();
-
-				if (sheet.DoModal() == ID_WIZFINISH)
-				{
-					if (newZone.GetType() == ID_ZONE_TYPE_MEDIA)
-					{
-						CGridElt elt;
-						mediaProps.GetProperties(elt);
-						elt.polyh = p;
-						CMediaZoneActor::Create(self, elt, mediaProps.GetDesc());
-					}
-					else if (newZone.GetType() == ID_ZONE_TYPE_BC_FLUX)
-					{
-						CBC bc;
-						fluxProps.GetProperties(bc);
-						bc.polyh = p;
-						CBCZoneActor::Create(self, bc, fluxProps.GetDesc());
-					}
-					else if (newZone.GetType() == ID_ZONE_TYPE_BC_LEAKY)
-					{
-						CBC bc;
-						leakyProps.GetProperties(bc);
-						bc.polyh = p;
-						CBCZoneActor::Create(self, bc, leakyProps.GetDesc());
-					}
-					else if (newZone.GetType() == ID_ZONE_TYPE_BC_SPECIFIED)
-					{
-						CBC bc;
-						specifiedProps.GetProperties(bc);
-						bc.polyh = p;
-						CBCZoneActor::Create(self, bc, specifiedProps.GetDesc());
-					}
-					else if (newZone.GetType() == ID_ZONE_TYPE_IC_HEAD)
-					{
-						CHeadIC headic;
-						headProps.GetProperties(headic);
-						headic.polyh = p;
-						CICHeadZoneActor::Create(self, headic, headProps.GetDesc());
-					}
-					else if (newZone.GetType() == ID_ZONE_TYPE_IC_CHEM)
-					{
-						CChemIC chemIC;
-						chemICProps.GetProperties(chemIC);
-						chemIC.polyh = p;
-						CICChemZoneActor::Create(self, chemIC, chemICProps.GetDesc());
-					}
-					else if (newZone.GetType() == ID_ZONE_TYPE_FLOW_RATE)
-					{
-						Zone_budget zone_budget;
-						zoneFlowRateProps.GetProperties(zone_budget);
-						zone_budget.Set_polyh(p);
-						CZoneFlowRateZoneActor::Create(self, zone_budget);
-					}
-				}
-				else
-				{
-					delete p;
-				}
+				self->NewZoneWizard(_T("Prism Wizard"), p);
 			}
 
 			// Note: cannot call EndNewPrism here
@@ -7421,99 +7383,7 @@ void CWPhastDoc::OnToolsNewDomain()
 	CZone zone;
 	this->GetDefaultZone(zone);
 
-	// get type of zone
-	//
-	ETSLayoutPropertySheet        sheet("Domain Wizard", NULL, 0, NULL, false);
-
-	CNewZonePropertyPage          newZone;
-	CMediaPropsPage2              mediaProps;
-	CFluxPropsPage2               fluxProps;
-	CLeakyPropsPage               leakyProps;
-	CSpecifiedHeadPropsPage       specifiedProps;
-	CHeadICPropsPage2             headProps;
-	CICChemPropsPage2             chemICProps;
-	CZoneFlowRatePropertyPage     zoneFlowRateProps;
-
-	// CChemICSpreadPropertyPage only needs the flowonly flag when the zone is a
-	// default zone
-	//
-	bool bFlowOnly = this->GetFlowOnly();
-
-	fluxProps.SetFlowOnly(bFlowOnly);
-	leakyProps.SetFlowOnly(bFlowOnly);
-	specifiedProps.SetFlowOnly(bFlowOnly);
-
-	bool bFreeSufurface = this->GetFreeSurface();
-	leakyProps.SetFreeSurface(bFreeSufurface);
-
-	// set used zone flow rate numbers
-	std::set<int> usedZoneFlowRatesNumbers;
-	this->GetUsedZoneFlowRatesNumbers(usedZoneFlowRatesNumbers);
-	zoneFlowRateProps.SetUsedZoneFlowRates(usedZoneFlowRatesNumbers);
-
-	sheet.AddPage(&newZone);
-	sheet.AddPage(&mediaProps);
-	sheet.AddPage(&fluxProps);
-	sheet.AddPage(&leakyProps);
-	sheet.AddPage(&specifiedProps);
-	sheet.AddPage(&headProps);
-	sheet.AddPage(&chemICProps);
-	sheet.AddPage(&zoneFlowRateProps);
-
-	sheet.SetWizardMode();
-
-	if (sheet.DoModal() == ID_WIZFINISH)
-	{
-		if (newZone.GetType() == ID_ZONE_TYPE_MEDIA)
-		{
-			CGridElt elt;
-			mediaProps.GetProperties(elt);
-			elt.polyh = new Domain(&zone);
-			CMediaZoneActor::Create(this, elt, mediaProps.GetDesc());
-		}
-		else if (newZone.GetType() == ID_ZONE_TYPE_BC_FLUX)
-		{
-			CBC bc;
-			fluxProps.GetProperties(bc);
-			bc.polyh = new Domain(&zone);
-			CBCZoneActor::Create(this, bc, fluxProps.GetDesc());
-		}
-		else if (newZone.GetType() == ID_ZONE_TYPE_BC_LEAKY)
-		{
-			CBC bc;
-			leakyProps.GetProperties(bc);
-			bc.polyh = new Domain(&zone);
-			CBCZoneActor::Create(this, bc, leakyProps.GetDesc());
-		}
-		else if (newZone.GetType() == ID_ZONE_TYPE_BC_SPECIFIED)
-		{
-			CBC bc;
-			specifiedProps.GetProperties(bc);
-			bc.polyh = new Domain(&zone);
-			CBCZoneActor::Create(this, bc, specifiedProps.GetDesc());
-		}
-		else if (newZone.GetType() == ID_ZONE_TYPE_IC_HEAD)
-		{
-			CHeadIC headic;
-			headProps.GetProperties(headic);
-			headic.polyh = new Domain(&zone);
-			CICHeadZoneActor::Create(this, headic, headProps.GetDesc());
-		}
-		else if (newZone.GetType() == ID_ZONE_TYPE_IC_CHEM)
-		{
-			CChemIC chemIC;
-			chemICProps.GetProperties(chemIC);
-			chemIC.polyh = new Domain(&zone);
-			CICChemZoneActor::Create(this, chemIC, chemICProps.GetDesc());
-		}
-		else if (newZone.GetType() == ID_ZONE_TYPE_FLOW_RATE)
-		{
-			Zone_budget zone_budget;
-			zoneFlowRateProps.GetProperties(zone_budget);
-			zone_budget.Set_polyh(new Domain(&zone));
-			CZoneFlowRateZoneActor::Create(this, zone_budget);
-		}
-	}
+	this->NewZoneWizard(_T("Domain Wizard"), new Domain(&zone));
 }
 
 void CWPhastDoc::GetDefaultZone(zone &z)const

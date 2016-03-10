@@ -41,6 +41,8 @@
 #include "ICChemZoneActor.h"
 #include "BCZoneActor.h"
 #include "ZoneFlowRateZoneActor.h"
+#include "PrintZoneChemActor.h"
+#include "PrintZoneXYZChemActor.h"
 #include "Units.h"
 #include "NewModel.h"
 #include "FlowOnly.h"
@@ -2678,6 +2680,103 @@ bool CPropertyTreeControlBar::IsNodeCopyable(CTreeCtrlNode copyNode, COleDataSou
 		}
 	}
 
+	if (copyNode.GetParent() == this->GetPLChemNode())
+	{
+		if (copyNode.GetData())
+		{
+			if (CPrintZoneChemActor* pPrintZoneChemActor = CPrintZoneChemActor::SafeDownCast((vtkObject*)copyNode.GetData()))
+			{
+				if (pOleDataSource)
+				{
+					char coor[] = {'X', 'Y', 'Z'};
+
+					CPrintZone printZone = pPrintZoneChemActor->GetData();
+
+					// CF_TEXT
+					//
+					oss << "PRINT_LOCATIONS" << std::endl;
+					oss << "\t" << "-chemistry" << std::endl;
+					for (int i = 0; i < 3; ++i)
+					{
+						if (CPrintZoneChemActor::thin_grid[i] > 1)
+						{
+							oss << "\t\t" << "-sample " << coor[i] << " " << CPrintZoneChemActor::thin_grid[i] << std::endl;
+						}
+					}
+					oss << printZone;
+
+					std::string s = oss.str();
+					HGLOBAL hGlobal = ::GlobalAlloc(GMEM_MOVEABLE, s.length() + 1);
+					LPTSTR pData = (LPTSTR)::GlobalLock(hGlobal);
+
+					::lstrcpy(pData, s.c_str());
+					::GlobalUnlock(hGlobal);
+
+					pOleDataSource->CacheGlobalData(CF_TEXT, hGlobal);
+
+
+					// copy clip format
+					//
+					CSharedFile globFile;
+					CArchive ar(&globFile, CArchive::store);
+					printZone.Serialize(ar);
+					ar.Close();
+
+					pOleDataSource->CacheGlobalData(CPrintZone::clipFormat, globFile.Detach());
+				}
+				return true;
+			}
+		}
+	}
+
+	if (copyNode.GetParent() == this->GetPLXYZChemNode())
+	{
+		if (copyNode.GetData())
+		{
+			if (CPrintZoneXYZChemActor* pPrintZoneXYZChemActor = CPrintZoneXYZChemActor::SafeDownCast((vtkObject*)copyNode.GetData()))
+			{
+				if (pOleDataSource)
+				{
+					char coor[] = {'X', 'Y', 'Z'};
+
+					CPrintZone printZone = pPrintZoneXYZChemActor->GetData();
+
+					// CF_TEXT
+					//
+					oss << "PRINT_LOCATIONS" << std::endl;
+					oss << "\t" << "-xyz_chemistry" << std::endl;
+					for (int i = 0; i < 3; ++i)
+					{
+						if (CPrintZoneXYZChemActor::thin_grid[i] > 1)
+						{
+							oss << "\t\t" << "-sample " << coor[i] << " " << CPrintZoneXYZChemActor::thin_grid[i] << std::endl;
+						}
+					}
+					oss << printZone;
+
+					std::string s = oss.str();
+					HGLOBAL hGlobal = ::GlobalAlloc(GMEM_MOVEABLE, s.length() + 1);
+					LPTSTR pData = (LPTSTR)::GlobalLock(hGlobal);
+
+					::lstrcpy(pData, s.c_str());
+					::GlobalUnlock(hGlobal);
+
+					pOleDataSource->CacheGlobalData(CF_TEXT, hGlobal);
+
+					// copy clip format
+					//
+					CSharedFile globFile;
+					CArchive ar(&globFile, CArchive::store);
+					printZone.Serialize(ar);
+					ar.Close();
+
+					pOleDataSource->CacheGlobalData(CPrintZone::clipFormat, globFile.Detach());
+				}
+				return true;
+			}
+		}
+	}
+
 	return false;
 }
 
@@ -2732,6 +2831,10 @@ CLIPFORMAT CPropertyTreeControlBar::GetZoneClipFormat(void)const
 		{
 			type = Zone_budget::clipFormat;
 		}
+		else if (dataObject.IsDataAvailable(CPrintZone::clipFormat))
+		{
+			type = CPrintZone::clipFormat;
+		}
 	}
 	return type;
 }
@@ -2776,6 +2879,14 @@ bool CPropertyTreeControlBar::IsNodePasteable(CTreeCtrlNode pasteNode, bool bDoP
 	else if (pasteNode.IsNodeAncestor(this->GetZoneFlowRatesNode()))
 	{
 		return this->IsNodePasteable<CZoneFlowRateZoneActor, Zone_budget>(this->GetZoneFlowRatesNode(), pasteNode, bDoPaste);
+	}
+	else if (pasteNode.IsNodeAncestor(this->GetPLChemNode()))
+	{
+		return this->IsNodePasteable<CPrintZoneChemActor, CPrintZone>(this->GetPLChemNode(), pasteNode, bDoPaste);
+	}
+	else if (pasteNode.IsNodeAncestor(this->GetPLXYZChemNode()))
+	{
+		return this->IsNodePasteable<CPrintZoneXYZChemActor, CPrintZone>(this->GetPLXYZChemNode(), pasteNode, bDoPaste);
 	}
 	return false;
 }
@@ -2986,6 +3097,12 @@ bool CPropertyTreeControlBar::IsNodePasteable(CTreeCtrlNode headNode, CTreeCtrlN
 				Zone_budget zb;
 				zb.Serialize(ar);
 				data.polyh = zb.polyh->clone();
+			}
+			else if (type == CPrintZone::clipFormat)
+			{
+				CPrintZone pz;
+				pz.Serialize(ar);
+				data.polyh = pz.polyh->clone();
 			}
 			else
 			{

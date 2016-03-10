@@ -1387,7 +1387,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\PrintLoc.cpp"
+				RelativePath=".\PrintLocsPropsPage.cpp"
 				>
 			</File>
 			<File
@@ -1396,6 +1396,14 @@
 			</File>
 			<File
 				RelativePath=".\PrintZoneActor.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\PrintZoneChemActor.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\PrintZoneXYZChemActor.cpp"
 				>
 			</File>
 			<File
@@ -1564,6 +1572,10 @@
 			</File>
 			<File
 				RelativePath="SetPrintInputAction.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\SetPrintZoneAction.cpp"
 				>
 			</File>
 			<File
@@ -8755,7 +8767,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\PrintLoc.h"
+				RelativePath=".\PrintLocsPropsPage.h"
 				>
 			</File>
 			<File
@@ -8764,6 +8776,14 @@
 			</File>
 			<File
 				RelativePath=".\PrintZoneActor.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PrintZoneChemActor.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PrintZoneXYZChemActor.h"
 				>
 			</File>
 			<File
@@ -8948,6 +8968,10 @@
 			</File>
 			<File
 				RelativePath="SetPrintInputAction.h"
+				>
+			</File>
+			<File
+				RelativePath=".\SetPrintZoneAction.h"
 				>
 			</File>
 			<File
@@ -10136,6 +10160,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\res\pr_freq_.bin"
+				>
+			</File>
+			<File
 				RelativePath="res\PR_FREQ_BC.rtf"
 				>
 			</File>
@@ -10317,6 +10345,18 @@
 			</File>
 			<File
 				RelativePath="res\PR_INIT_XYZ_WELLS.rtf"
+				>
+			</File>
+			<File
+				RelativePath=".\res\PR_LOC_CHEM.rtf"
+				>
+			</File>
+			<File
+				RelativePath=".\res\PR_LOC_PRINT.rtf"
+				>
+			</File>
+			<File
+				RelativePath=".\res\PR_LOC_XYZ_CHEM.rtf"
 				>
 			</File>
 			<File

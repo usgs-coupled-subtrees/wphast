@@ -5219,7 +5219,7 @@ void CGlobal::PathsAbsoluteToRelative(LPCTSTR lpszPathName, CWPhastDoc* pDoc, Zo
 void CGlobal::PathsAbsoluteToRelative(LPCTSTR lpszPathName, CWPhastDoc* pDoc, CPrintZone& pz)
 {
 	GET_REL_PATH_MACRO(pDoc, pz, print);
-	GET_REL_PATH_MACRO(pDoc, pz, mask);
+	///GET_REL_PATH_MACRO(pDoc, pz, mask);
 }
 
 #define GET_REL_PATH_TIMESERIES_MACRO(D, C, TS) \

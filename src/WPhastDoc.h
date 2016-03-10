@@ -347,6 +347,14 @@ protected:
 	template<typename ACTOR>
 	void SerializeActors(bool bStoring, hid_t loc_id, CTreeCtrlNode parentNode, const char* szNamesListHeading);
 
+	template<typename ACTOR>
+	void SerializeThinGrid(bool bStoring, hid_t loc_id, CTreeCtrlNode parentNode);
+
+	template<typename PL_ACTOR>
+	static bool PLDefined(CTreeCtrlNode node);
+
+	static bool PrintLocsDefined(CPropertyTreeControlBar *pBar);
+
 	void SerializeMedia(bool bStoring, hid_t loc_id);
 	void SerializeIC(bool bStoring, hid_t loc_id);
 	void SerializeBC(bool bStoring, hid_t loc_id);
@@ -354,6 +362,7 @@ protected:
 	void SerializeRivers(bool bStoring, hid_t loc_id);
 	void SerializeDrains(bool bStoring, hid_t loc_id);
 	void SerializeZoneFlowRates(bool bStoring, hid_t loc_id);
+	void SerializePrintLocs(bool bStoring, hid_t loc_id);
 	
 	void SerializeFiles(bool bStoring, CHDFMirrorFile* file, std::map<CString, CString> &orig2new);
 	void CheckSiteMaps(CHDFMirrorFile* file, std::map<CString, CString> &path2fileMap);	
@@ -586,6 +595,8 @@ public:
 
 	// ID_ZONE_FLOW_UNSELECTALL handlers
 	afx_msg void OnZoneFlowUnselectAll();
+
+	void NewZoneWizard(LPCTSTR pszCaption, Polyhedron *polyh, LPCTSTR pszStatus = NULL);
 
 	// ID_TOOLS_MODIFYGRID
 	afx_msg void OnUpdateToolsModifyGrid(CCmdUI *pCmdUI);

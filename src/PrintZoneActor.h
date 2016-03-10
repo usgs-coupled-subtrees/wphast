@@ -68,7 +68,7 @@ private:
 			{
 				CPrintZoneActor::s_Property = vtkProperty::New();
 				CPrintZoneActor::s_Property->SetColor(CPrintZoneActor::s_color);
-				CPrintZoneActor::s_Property->SetOpacity(0.3);
+				CPrintZoneActor::s_Property->SetOpacity(0.1);
 			}
 			if (CPrintZoneActor::s_OutlineProperty == 0)
 			{

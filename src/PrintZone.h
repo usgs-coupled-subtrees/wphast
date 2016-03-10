@@ -19,6 +19,16 @@ public:
 	CPrintZone(void);
 	// dtor
 	~CPrintZone(void);
+
+	/***
+	instead of this use inheritance at the actor level
+	typedef enum tagZONE_TYPE {
+		ZT_UNDEFINED      = 0,
+		ZT_CHEMISTRY      = 1,
+		ZT_XYZ_CHEMISTRY  = 2
+	} ZONE_TYPE;
+	***/
+
 	// copy ctor
 	CPrintZone(const struct print_zones& src);
 	CPrintZone(const CPrintZone& src);
@@ -37,6 +47,11 @@ public:
 	friend std::ostream& operator<< (std::ostream &os, const CPrintZone &a);
 
 	static CLIPFORMAT clipFormat;
+
+	/***
+	instead of this use inheritance at the actor level
+	ZONE_TYPE zone_type;
+	***/
 
 private:
 	void InternalCopy(const struct print_zones& src);
