@@ -1519,10 +1519,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\SampleDlg.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\SamplePg.cpp"
 				>
 			</File>
@@ -8916,10 +8912,6 @@
 			</File>
 			<File
 				RelativePath=".\RunTypeDlg.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SampleDlg.h"
 				>
 			</File>
 			<File
