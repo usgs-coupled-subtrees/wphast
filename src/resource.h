@@ -459,7 +459,6 @@
 #define IDD_IC_CHEM_INT_PROPPAGE1       482
 #define IDR_PR_LOC_XYZ_CHEM_RTF         482
 #define IDD_MEDIA_INT_PROPPAGE2         483
-#define IDR_PR_LOC_XYZ_CHEM_RTF1        483
 #define IDR_PR_LOC_PRINT_RTF            483
 #define IDC_ROTATE                      484
 #define IDD_IMPORT_WARNING_DIALOG       484
@@ -467,6 +466,8 @@
 #define IDD_WELL_PROPPAGE3              486
 #define IDD_PRINT_FREQUENCY_EXT_PROPPAGE2 487
 #define IDD_PROPS_PRINT_LOCS            488
+#define IDD_GRID_COARSEN1               489
+#define IDD_PL_SAMPLE                   489
 #define IDC_EDIT_X                      1000
 #define IDC_TITLE                       1000
 #define IDC_EDIT_Y                      1001

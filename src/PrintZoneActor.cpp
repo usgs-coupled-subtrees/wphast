@@ -52,27 +52,6 @@ Polyhedron*& CPrintZoneActor::GetPolyhedron(void)
 void CPrintZoneActor::Insert(CPropertyTreeControlBar* pTreeControlBar, HTREEITEM hInsertAfter)
 {
 	ASSERT(FALSE);  // should never be called
-	CTreeCtrl* pTreeCtrl = pTreeControlBar->GetTreeCtrl();
-	HTREEITEM htiParent = pTreeControlBar->GetPLChemNode();
-	/***
-	instead of this use inheritance at the actor level
-	switch (this->m_printZone.zone_type)
-	{
-	case CPrintZone::ZT_CHEMISTRY:
-		htiParent = pTreeControlBar->GetPLChemNode();
-		break;
-	case CPrintZone::ZT_XYZ_CHEMISTRY:
-		htiParent = pTreeControlBar->GetPLXYZChemNode();
-		break;
-	default:
-		ASSERT(FALSE);
-		htiParent = pTreeControlBar->GetPLChemNode();
-		break;
-	}
-	***/
-	this->InsertAt(pTreeCtrl, htiParent, hInsertAfter);
-	CTreeCtrlNode node(this->m_hti, pTreeControlBar->GetTreeCtrlEx());
-	pTreeControlBar->SetNodeCheck(node, BST_CHECKED);
 }
 
 void CPrintZoneActor::Update(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent)

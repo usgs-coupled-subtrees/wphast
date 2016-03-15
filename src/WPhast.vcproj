@@ -1519,6 +1519,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\SampleDlg.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\SamplePg.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\SaveCurrentDirectory.cpp"
 				>
 			</File>
@@ -1588,6 +1596,10 @@
 			</File>
 			<File
 				RelativePath="SetSteadyFlowAction.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\SetThinGridAction.cpp"
 				>
 			</File>
 			<File
@@ -8907,6 +8919,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\SampleDlg.h"
+				>
+			</File>
+			<File
+				RelativePath=".\SamplePg.h"
+				>
+			</File>
+			<File
 				RelativePath=".\SaveCurrentDirectory.h"
 				>
 			</File>
@@ -8984,6 +9004,10 @@
 			</File>
 			<File
 				RelativePath="SetSteadyFlowAction.h"
+				>
+			</File>
+			<File
+				RelativePath=".\SetThinGridAction.h"
 				>
 			</File>
 			<File

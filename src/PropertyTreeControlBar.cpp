@@ -229,7 +229,7 @@ void CPropertyTreeControlBar::OnSelChanged(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 	if (this->IsNodeEditable(editable, false))
 	{
 		HTREEITEM hParent = editable.GetParent();
-		if (hParent == this->m_nodeMedia || hParent == this->m_nodeBC || hParent == this->m_nodeICHead || hParent == this->m_nodeICChem || hParent == this->m_nodeZFRates || hParent == this->m_nodePLChem || hParent == this->m_nodePLXYZChem)
+		if (hParent == this->m_nodeMedia || hParent == this->m_nodeBC || hParent == this->m_nodeICHead || hParent == this->m_nodeICChem || hParent == this->m_nodeZFRates || (hParent == this->m_nodePLChem && editable.GetData()) || (hParent == this->m_nodePLXYZChem && editable.GetData()))
 		{
 			ASSERT(editable.GetData());
 			CZoneActor* pZone = reinterpret_cast<CZoneActor*>(editable.GetData());
@@ -1095,6 +1095,22 @@ bool CPropertyTreeControlBar::IsNodeEditable(CTreeCtrlNode &editNode, bool bDoEd
 	//
 	if (item.IsNodeAncestor(this->m_nodePrintLocs))
 	{
+		if ((item == this->m_nodePLChem) || (item.GetParent() == this->m_nodePLChem && item.GetData() == 0))
+		{
+			if (bDoEdit)
+			{
+				CPrintZoneChemActor::EditThinGrid(this);
+			}
+			return true;
+		}
+		if ((item == this->m_nodePLXYZChem) || (item.GetParent() == this->m_nodePLXYZChem && item.GetData() == 0))
+		{
+			if (bDoEdit)
+			{
+				CPrintZoneXYZChemActor::EditThinGrid(this);
+			}
+			return true;
+		}
 		if (item != this->m_nodePrintLocs && item != this->m_nodePLChem && item != this->m_nodePLXYZChem)
 		{
 			while (item.GetParent() != this->m_nodePLChem && item.GetParent() != this->m_nodePLXYZChem)
@@ -2698,7 +2714,7 @@ bool CPropertyTreeControlBar::IsNodeCopyable(CTreeCtrlNode copyNode, COleDataSou
 					oss << "\t" << "-chemistry" << std::endl;
 					for (int i = 0; i < 3; ++i)
 					{
-						if (CPrintZoneChemActor::thin_grid[i] > 1)
+						if (CPrintZoneChemActor::thin_grid[i] > 0)
 						{
 							oss << "\t\t" << "-sample " << coor[i] << " " << CPrintZoneChemActor::thin_grid[i] << std::endl;
 						}
@@ -2747,7 +2763,7 @@ bool CPropertyTreeControlBar::IsNodeCopyable(CTreeCtrlNode copyNode, COleDataSou
 					oss << "\t" << "-xyz_chemistry" << std::endl;
 					for (int i = 0; i < 3; ++i)
 					{
-						if (CPrintZoneXYZChemActor::thin_grid[i] > 1)
+						if (CPrintZoneXYZChemActor::thin_grid[i] > 0)
 						{
 							oss << "\t\t" << "-sample " << coor[i] << " " << CPrintZoneXYZChemActor::thin_grid[i] << std::endl;
 						}

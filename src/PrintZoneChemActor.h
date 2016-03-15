@@ -11,6 +11,8 @@ public:
 
 	virtual void Insert(CPropertyTreeControlBar* pTreeControlBar, HTREEITEM hInsertAfter);
 
+	static void EditThinGrid(CPropertyTreeControlBar* pTreeControlBar);
+
 	static const char szHeading[];
 	static int thin_grid[3];
 

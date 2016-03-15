@@ -127,6 +127,7 @@
 #include "GridInsertLineAction.h"
 #include "GridMoveLineAction.h"
 #include "SetChemICAction.h"
+#include "SetThinGridAction.h"
 
 
 // zone property pages
@@ -1544,7 +1545,7 @@ bool CWPhastDoc::PLDefined(CTreeCtrlNode node)
 {
 	for (int i = 0; i < 3; ++i)
 	{
-		if (PL_ACTOR::thin_grid[i] > 1) return true;
+		if (PL_ACTOR::thin_grid[i] > 0) return true;
 	}
 
 	int count = node.GetChildCount();
@@ -1788,6 +1789,11 @@ void CWPhastDoc::DeleteContents()
 	{
 		ASSERT_VALID(pTree);
 		pTree->DeleteContents();
+	}
+	for (int i = 0; i < 3; ++i)
+	{
+		CPrintZoneChemActor::thin_grid[i] = 0;
+		CPrintZoneXYZChemActor::thin_grid[i] = 0;
 	}
 
 	// clear the zone prop-assemblies
@@ -3585,11 +3591,32 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 			pAction->Execute();
 		}
 
-		// PRINT_LOCATIONS (thin_grid)
-		for (int i = 0; i < 3; ++i)
+		// PRINT_LOCATIONS (thin_grid) (chemistry)
 		{
-			CPrintZoneChemActor::thin_grid[i]    = ::print_zones_chem.thin_grid[i];
-			CPrintZoneXYZChemActor::thin_grid[i] = ::print_zones_xyz.thin_grid[i];
+			// not undoable
+			std::auto_ptr< CSetThinGridAction > pAction(
+				new CSetThinGridAction(
+					this->GetPropertyTreeControlBar(),
+					this->GetPropertyTreeControlBar()->GetPLChemNode(),
+					::print_zones_chem.thin_grid,
+					CPrintZoneChemActor::thin_grid
+					)
+				);
+			pAction->Execute();
+		}
+
+		// PRINT_LOCATIONS (thin_grid) (xyz_chemistry)
+		{
+			// not undoable
+			std::auto_ptr< CSetThinGridAction > pAction(
+				new CSetThinGridAction(
+					this->GetPropertyTreeControlBar(),
+					this->GetPropertyTreeControlBar()->GetPLXYZChemNode(),
+					::print_zones_xyz.thin_grid,
+					CPrintZoneXYZChemActor::thin_grid
+					)
+				);
+			pAction->Execute();
 		}
 
 		// PRINT_LOCATIONS (chemistry)
@@ -4036,7 +4063,7 @@ BOOL CWPhastDoc::WriteTransDat(std::ostream& os)
 			os << "\t" << "-chemistry" << std::endl;
 			for (int i = 0; i < 3; ++i)
 			{
-				if (CPrintZoneChemActor::thin_grid[i] > 1)
+				if (CPrintZoneChemActor::thin_grid[i] > 0)
 				{
 					os << "\t\t" << "-sample " << coor[i] << " " << CPrintZoneChemActor::thin_grid[i] << std::endl;
 				}
@@ -4058,7 +4085,7 @@ BOOL CWPhastDoc::WriteTransDat(std::ostream& os)
 			os << "\t" << "-xyz_chemistry" << std::endl;
 			for (int i = 0; i < 3; ++i)
 			{
-				if (CPrintZoneXYZChemActor::thin_grid[i] > 1)
+				if (CPrintZoneXYZChemActor::thin_grid[i] > 0)
 				{
 					os << "\t\t" << "-sample " << coor[i] << " " << CPrintZoneXYZChemActor::thin_grid[i] << std::endl;
 				}
