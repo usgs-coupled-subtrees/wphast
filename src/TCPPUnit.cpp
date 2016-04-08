@@ -80,9 +80,9 @@ void TCPPUnit::RunUnitTests(void)
 
 		runner.addTest(TestCPhastInput::suite());
 		runner.addTest(TestCZone::suite());
-// COMMENT: {4/8/2016 3:11:30 PM}		runner.addTest(TestCGrid::suite());
-// COMMENT: {4/8/2016 3:11:30 PM}		runner.addTest(TestPHAST_Transform::suite());
-// COMMENT: {4/8/2016 3:11:30 PM}		runner.addTest(TestCtime::suite());
+		runner.addTest(TestCGrid::suite());
+		runner.addTest(TestPHAST_Transform::suite());
+		runner.addTest(TestCtime::suite());
 // COMMENT: {4/8/2016 3:11:30 PM}		runner.addTest(TestCBC::suite());
 // COMMENT: {4/8/2016 3:11:30 PM}		runner.addTest(TestCWPhastDoc::suite());
 // COMMENT: {4/8/2016 3:11:30 PM}		runner.addTest(TestCWParser::suite());
