@@ -21,7 +21,7 @@ void TestCPropertyTreeControlBar::test(void)
 	//pFrame->ActivateFrame();
 	//pFrame->ShowControlBar(pBar, TRUE, FALSE);
 
-	::Sleep(5000);
+// COMMENT: {4/8/2016 4:08:52 PM}	::Sleep(5000);
 	CPPUNIT_ASSERT(pFrame->DestroyWindow() != 0);
 	delete pBar;
 }
