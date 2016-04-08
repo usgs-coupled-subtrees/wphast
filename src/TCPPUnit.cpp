@@ -78,7 +78,7 @@ void TCPPUnit::RunUnitTests(void)
 		size_t szu = sizeof(UINT);
 		size_t szuu = sizeof(UINT_PTR);
 
-// COMMENT: {4/8/2016 3:11:30 PM}		runner.addTest(TestCPhastInput::suite());
+		runner.addTest(TestCPhastInput::suite());
 		runner.addTest(TestCZone::suite());
 // COMMENT: {4/8/2016 3:11:30 PM}		runner.addTest(TestCGrid::suite());
 // COMMENT: {4/8/2016 3:11:30 PM}		runner.addTest(TestPHAST_Transform::suite());
