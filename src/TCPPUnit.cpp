@@ -90,11 +90,11 @@ void TCPPUnit::RunUnitTests(void)
 		runner.addTest(TestCUnits::suite());
 		runner.addTest(TestCPhastInput::suite());
 		runner.addTest(TestPrism::suite());
-// COMMENT: {4/7/2016 11:57:35 PM}		runner.addTest(TestHDFSerializePolyData::suite());
+		runner.addTest(TestHDFSerializePolyData::suite());
 		runner.addTest(TestUniqueMap::suite());
 		runner.addTest(TestCproperty::suite());		
-// COMMENT: {4/7/2016 11:57:51 PM}		runner.addTest(TestHDFFile::suite());
-// COMMENT: {4/7/2016 11:57:51 PM}		runner.addTest(TestHDFSerializeImageData::suite());
+		runner.addTest(TestHDFFile::suite());
+		runner.addTest(TestHDFSerializeImageData::suite());
 
 		/**********************************************************
 		// the following require user input
