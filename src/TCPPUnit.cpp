@@ -87,14 +87,14 @@ void TCPPUnit::RunUnitTests(void)
 		runner.addTest(TestCWPhastDoc::suite());
 		runner.addTest(TestCWParser::suite());
 		runner.addTest(TestCPropertyTreeControlBar::suite());
-// COMMENT: {4/8/2016 3:11:30 PM}		runner.addTest(TestCUnits::suite());
-// COMMENT: {4/8/2016 3:11:30 PM}		runner.addTest(TestCPhastInput::suite());
-// COMMENT: {4/8/2016 3:11:30 PM}		runner.addTest(TestPrism::suite());
-// COMMENT: {4/8/2016 3:11:30 PM}// COMMENT: {4/7/2016 11:57:35 PM}		runner.addTest(TestHDFSerializePolyData::suite());
-// COMMENT: {4/8/2016 3:11:30 PM}		runner.addTest(TestUniqueMap::suite());
-// COMMENT: {4/8/2016 3:11:30 PM}		runner.addTest(TestCproperty::suite());		
-// COMMENT: {4/8/2016 3:11:30 PM}// COMMENT: {4/7/2016 11:57:51 PM}		runner.addTest(TestHDFFile::suite());
-// COMMENT: {4/8/2016 3:11:30 PM}// COMMENT: {4/7/2016 11:57:51 PM}		runner.addTest(TestHDFSerializeImageData::suite());
+		runner.addTest(TestCUnits::suite());
+		runner.addTest(TestCPhastInput::suite());
+		runner.addTest(TestPrism::suite());
+// COMMENT: {4/7/2016 11:57:35 PM}		runner.addTest(TestHDFSerializePolyData::suite());
+		runner.addTest(TestUniqueMap::suite());
+		runner.addTest(TestCproperty::suite());		
+// COMMENT: {4/7/2016 11:57:51 PM}		runner.addTest(TestHDFFile::suite());
+// COMMENT: {4/7/2016 11:57:51 PM}		runner.addTest(TestHDFSerializeImageData::suite());
 
 		/**********************************************************
 		// the following require user input
