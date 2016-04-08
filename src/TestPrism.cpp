@@ -137,6 +137,60 @@ void TestPrism::testHDFSerialize(void)
 	Clear_KDtreeList();
 }
 
+void TestPrism::testHDFSerializeNoPerimeter(void)
+{
+	const char input[] =
+		"\t-top       CONSTANT   GRID 20\n"
+		"\t-bottom    ARCRASTER  GRID Test\\bedrock.txt\n";
+
+	::input_error = 0;
+	std::istringstream iss(input);
+
+	// need domain when no perimeter is defined
+	::domain = zone(280350., 817500., -90., 280450., 821000., 20.);
+
+	Prism prism;
+	while(prism.Read(iss))
+	{
+		if (iss.rdstate() & std::ios::eofbit) break;
+		iss.clear();
+	}
+	CPPUNIT_ASSERT_EQUAL(0, ::input_error);
+	prism.Tidy();
+	CPPUNIT_ASSERT_EQUAL(0, ::input_error);
+
+	hid_t file_id = H5Fcreate("Test/prism-no-perimeter.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+	CPPUNIT_ASSERT(file_id > 0);
+
+	herr_t e = CGlobal::HDFSerializePrism(true, file_id, prism);
+	CPPUNIT_ASSERT(e >= 0);
+
+	herr_t s = H5Fclose(file_id);
+	CPPUNIT_ASSERT(e >= 0);
+
+	file_id = H5Fopen("Test/prism-no-perimeter.h5", H5F_ACC_RDONLY, H5P_DEFAULT);
+	CPPUNIT_ASSERT(file_id > 0);
+
+	Prism cp;
+	e = CGlobal::HDFSerializePrism(false, file_id, cp);
+	CPPUNIT_ASSERT(e >= 0);
+	cp.Tidy();
+
+	s = H5Fclose(file_id);
+	CPPUNIT_ASSERT(e >= 0);
+
+	CPPUNIT_ASSERT(prism == cp);
+
+	Clear_NNInterpolatorList();
+	FakeFiledata::Clear_fake_file_data_list();
+	Clear_file_data_map();
+	Clear_KDtreeList();
+
+	// reset domain
+	::domain = zone(0, 0, 0, 0, 0, 0);
+}
+
+
 #include "StopWatch.h"
 
 void TestPrism::testCopyCtor(void)

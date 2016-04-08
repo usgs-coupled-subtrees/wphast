@@ -127,6 +127,7 @@ BOOL CWPhastApp::InitInstance()
 // COMMENT: {12/1/2010 7:33:18 PM}		::afxMemDF = 0;
 
 		TCPPUnit theTests;  // TCPPUnit must be constructed after/within theApp.InitInstance()
+		return FALSE;
 		// CWPhastApp anotherApp; // this will ASSERT
 		/***
 		CMapDialog dlg;

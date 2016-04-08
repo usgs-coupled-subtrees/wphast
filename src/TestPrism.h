@@ -10,6 +10,7 @@ class TestPrism : public CppUnit::TestFixture
 	CPPUNIT_TEST_SUITE( TestPrism );
 	CPPUNIT_TEST( testOStream );
 	CPPUNIT_TEST( testHDFSerialize );
+	CPPUNIT_TEST( testHDFSerializeNoPerimeter );
 	CPPUNIT_TEST( testCopyCtor );
 	CPPUNIT_TEST( timeMemDebug );
 	CPPUNIT_TEST( PolygonIntersectsSelf );
@@ -23,6 +24,7 @@ public:
 protected:
 	void testOStream(void);
 	void testHDFSerialize(void);
+	void testHDFSerializeNoPerimeter(void);
 	void testCopyCtor(void);
 	void timeMemDebug(void);
 	void PolygonIntersectsSelf(void);

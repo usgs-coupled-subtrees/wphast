@@ -3962,7 +3962,8 @@ herr_t CGlobal::HDFSerializeData_source(bool bStoring, hid_t loc_id, const char*
 							std::vector<Point> &pts = rData_source.Get_points();
 							std::vector<Point> &upts = rData_source.Get_user_points();
 							ASSERT(pts.size() == 1);
-							ASSERT(upts.size() == 1 || (upts.size() == 0 && nUserValue == Data_source::NONE));
+// COMMENT: {4/7/2016 6:15:02 PM}							ASSERT(upts.size() == 1 || (upts.size() == 0 && nUserValue == Data_source::NONE));
+							ASSERT(upts.size() == 1);
 							hsize_t count = 3;							
 							//double *points = new double[count];
 							pts.front().get_coord();
@@ -3971,31 +3972,54 @@ herr_t CGlobal::HDFSerializeData_source(bool bStoring, hid_t loc_id, const char*
 						break;
 					case Data_source::POINTS:
 						{
-							std::vector<Point> &pts = rData_source.Get_points();
-							std::vector<Point> &upts = rData_source.Get_user_points();
-							ASSERT(pts.size() == upts.size());
-
-							hsize_t count = 4 * pts.size();							
-							double *points = new double[count];
-							double *upoints = new double[count];
-							for (size_t i = 0; i < pts.size(); ++i)
+							if (nUserValue == Data_source::NONE)
 							{
-								double *d = pts[i].get_coord();
-								double *u = upts[i].get_coord();
-								for (size_t n = 0; n < 3; ++n)
+								ASSERT(rData_source.Get_user_points().size() == 0);
+								std::vector<Point> &pts = rData_source.Get_points();
+
+								hsize_t count = 4 * pts.size();							
+								double *points = new double[count];
+								for (size_t i = 0; i < pts.size(); ++i)
 								{
-									points[i*4+n] = d[n];
-									upoints[i*4+n] = u[n];
+									double *d = pts[i].get_coord();
+									for (size_t n = 0; n < 3; ++n)
+									{
+										points[i*4+n] = d[n];
+									}
+									points[i*4+3] = pts[i].get_v();
 								}
-								points[i*4+3] = pts[i].get_v();
-								upoints[i*4+3] = upts[i].get_v();
+								status = CGlobal::HDFSerializeWithSize(bStoring, ds_gr_id, szPoints4, H5T_NATIVE_DOUBLE, count, points);
+								ASSERT(status >= 0);
+								delete[] points;
 							}
-							status = CGlobal::HDFSerializeWithSize(bStoring, ds_gr_id, szPoints4, H5T_NATIVE_DOUBLE, count, points);
-							ASSERT(status >= 0);
-							status = CGlobal::HDFSerializeWithSize(bStoring, ds_gr_id, szUPoints4, H5T_NATIVE_DOUBLE, count, upoints);
-							ASSERT(status >= 0);
-							delete[] points;
-							delete[] upoints;
+							else
+							{
+								std::vector<Point> &pts = rData_source.Get_points();
+								std::vector<Point> &upts = rData_source.Get_user_points();
+								ASSERT(pts.size() == upts.size());
+
+								hsize_t count = 4 * pts.size();							
+								double *points = new double[count];
+								double *upoints = new double[count];
+								for (size_t i = 0; i < pts.size(); ++i)
+								{
+									double *d = pts[i].get_coord();
+									double *u = upts[i].get_coord();
+									for (size_t n = 0; n < 3; ++n)
+									{
+										points[i*4+n] = d[n];
+										upoints[i*4+n] = u[n];
+									}
+									points[i*4+3] = pts[i].get_v();
+									upoints[i*4+3] = upts[i].get_v();
+								}
+								status = CGlobal::HDFSerializeWithSize(bStoring, ds_gr_id, szPoints4, H5T_NATIVE_DOUBLE, count, points);
+								ASSERT(status >= 0);
+								status = CGlobal::HDFSerializeWithSize(bStoring, ds_gr_id, szUPoints4, H5T_NATIVE_DOUBLE, count, upoints);
+								ASSERT(status >= 0);
+								delete[] points;
+								delete[] upoints;
+							}
 						}
 						break;
 					case Data_source::NONE:
@@ -4118,6 +4142,7 @@ herr_t CGlobal::HDFSerializeData_source(bool bStoring, hid_t loc_id, const char*
 							ASSERT(status >= 0);
 							ASSERT(count == 3);
 							pts.push_back(Point(data[0], data[1], data[2], data[2]));
+							rData_source.Get_user_points() = pts;
 							delete[] data;
 						}
 						break;

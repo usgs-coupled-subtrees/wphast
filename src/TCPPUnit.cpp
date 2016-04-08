@@ -3,6 +3,10 @@
 
 #include <cppunit/ui/text/TestRunner.h>
 #include <cppunit/CompilerOutputter.h>
+#include <cppunit/TestResult.h>
+#include <cppunit/TestResultCollector.h>
+#include <cppunit/BriefTestProgressListener.h>
+#include <cppunit/XmlOutputter.h>
 
 #include "TestCBC.h"
 #include "TestCGrid.h"
@@ -46,15 +50,12 @@ void TCPPUnit::RunUnitTests(void)
 {
 	{
 		CppUnit::TextUi::TestRunner runner;
+        CppUnit::TestResult testresult;
+        CppUnit::TestResultCollector collectedresults;
+        testresult.addListener(&collectedresults);
 
-// COMMENT: {5/22/2006 6:20:43 PM}		//{{
-// COMMENT: {5/22/2006 6:20:43 PM}		{
-// COMMENT: {5/22/2006 6:20:43 PM}			CPrintInput pi;
-// COMMENT: {5/22/2006 6:20:43 PM}			std::ostringstream oss_out;
-// COMMENT: {5/22/2006 6:20:43 PM}			oss_out << pi;
-// COMMENT: {5/22/2006 6:20:43 PM}			TRACE("%s\n", oss_out.str().c_str());
-// COMMENT: {5/22/2006 6:20:43 PM}		}
-// COMMENT: {5/22/2006 6:20:43 PM}		//}}
+        CppUnit::BriefTestProgressListener progress;
+        testresult.addListener(&progress);
 
 #ifdef FLOAT_EXCEPT
 		_clearfp();
@@ -68,6 +69,14 @@ void TCPPUnit::RunUnitTests(void)
 		double d = 1/z;
 		double d1 = 0/z;
 #endif
+		size_t szm = sizeof(MENUITEMTEMPLATEHEADER);
+		size_t szb = sizeof(BYTE);
+		size_t szw = sizeof(WORD);
+		size_t szv = sizeof(void*);
+		size_t szuc = sizeof(unsigned char);
+		size_t szh = sizeof(HMENU);
+		size_t szu = sizeof(UINT);
+		size_t szuu = sizeof(UINT_PTR);
 
 		runner.addTest(TestCPhastInput::suite());
 		runner.addTest(TestCZone::suite());
@@ -105,15 +114,11 @@ void TCPPUnit::RunUnitTests(void)
 		int n = ::_fcloseall();
 		CPPUNIT_ASSERT(n == 0);
 
-		std::ostringstream oss_out;
-		runner.setOutputter(CppUnit::CompilerOutputter::defaultOutputter(&runner.result(), oss_out));
-		bool bOk = runner.run("", false);
-		TRACE("%s\n", oss_out.str().c_str());
-		if (!bOk)
-		{
-			::AfxMessageBox("Unit Tests Failed", MB_OK);
-			::AfxAbort();
-			DebugBreak();
-		}
+		runner.run(testresult);
+
+        // output xml for jenkins
+        std::ofstream xml("results.xml");
+        CppUnit::XmlOutputter xmlOut(&collectedresults, xml);
+        xmlOut.write();
 	}
 }
