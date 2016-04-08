@@ -3592,6 +3592,7 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 		}
 
 		// PRINT_LOCATIONS (thin_grid) (chemistry)
+		if (this->GetPropertyTreeControlBar())
 		{
 			// not undoable
 			std::auto_ptr< CSetThinGridAction > pAction(
@@ -3606,6 +3607,7 @@ BOOL CWPhastDoc::DoImport(LPCTSTR lpszPathName)
 		}
 
 		// PRINT_LOCATIONS (thin_grid) (xyz_chemistry)
+		if (this->GetPropertyTreeControlBar())
 		{
 			// not undoable
 			std::auto_ptr< CSetThinGridAction > pAction(
