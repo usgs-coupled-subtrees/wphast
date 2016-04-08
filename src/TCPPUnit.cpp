@@ -78,14 +78,14 @@ void TCPPUnit::RunUnitTests(void)
 		size_t szu = sizeof(UINT);
 		size_t szuu = sizeof(UINT_PTR);
 
-// COMMENT: {4/7/2016 10:32:41 PM}		runner.addTest(TestCPhastInput::suite());
-		runner.addTest(TestCZone::suite());
-		runner.addTest(TestCGrid::suite());
-		runner.addTest(TestPHAST_Transform::suite());
-		runner.addTest(TestCtime::suite());
-		runner.addTest(TestCBC::suite());
-		runner.addTest(TestCWPhastDoc::suite());
-		runner.addTest(TestCWParser::suite());
+// COMMENT: {4/7/2016 11:22:29 PM}		runner.addTest(TestCPhastInput::suite());
+// COMMENT: {4/7/2016 11:22:29 PM}		runner.addTest(TestCZone::suite());
+// COMMENT: {4/7/2016 11:22:29 PM}		runner.addTest(TestCGrid::suite());
+// COMMENT: {4/7/2016 11:22:29 PM}		runner.addTest(TestPHAST_Transform::suite());
+// COMMENT: {4/7/2016 11:22:29 PM}		runner.addTest(TestCtime::suite());
+// COMMENT: {4/7/2016 11:22:29 PM}		runner.addTest(TestCBC::suite());
+// COMMENT: {4/7/2016 11:22:29 PM}		runner.addTest(TestCWPhastDoc::suite());
+// COMMENT: {4/7/2016 11:22:29 PM}		runner.addTest(TestCWParser::suite());
 		runner.addTest(TestCPropertyTreeControlBar::suite());
 		runner.addTest(TestCUnits::suite());
 		runner.addTest(TestCPhastInput::suite());
