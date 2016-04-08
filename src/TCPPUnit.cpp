@@ -86,7 +86,7 @@ void TCPPUnit::RunUnitTests(void)
 		runner.addTest(TestCBC::suite());
 		runner.addTest(TestCWPhastDoc::suite());
 		runner.addTest(TestCWParser::suite());
-// COMMENT: {4/8/2016 3:51:42 PM}		runner.addTest(TestCPropertyTreeControlBar::suite());
+		runner.addTest(TestCPropertyTreeControlBar::suite());
 // COMMENT: {4/8/2016 3:11:30 PM}		runner.addTest(TestCUnits::suite());
 // COMMENT: {4/8/2016 3:11:30 PM}		runner.addTest(TestCPhastInput::suite());
 // COMMENT: {4/8/2016 3:11:30 PM}		runner.addTest(TestPrism::suite());
