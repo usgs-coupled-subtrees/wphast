@@ -80,21 +80,21 @@ void TCPPUnit::RunUnitTests(void)
 
 // COMMENT: {4/7/2016 10:32:41 PM}		runner.addTest(TestCPhastInput::suite());
 		runner.addTest(TestCZone::suite());
-// COMMENT: {4/7/2016 10:32:41 PM}		runner.addTest(TestCGrid::suite());
-// COMMENT: {4/7/2016 10:32:41 PM}		runner.addTest(TestPHAST_Transform::suite());
-// COMMENT: {4/7/2016 10:32:41 PM}		runner.addTest(TestCtime::suite());
-// COMMENT: {4/7/2016 10:32:41 PM}		runner.addTest(TestCBC::suite());
-// COMMENT: {4/7/2016 10:32:41 PM}		runner.addTest(TestCWPhastDoc::suite());
-// COMMENT: {4/7/2016 10:32:41 PM}		runner.addTest(TestCWParser::suite());
-// COMMENT: {4/7/2016 10:32:41 PM}		runner.addTest(TestCPropertyTreeControlBar::suite());
-// COMMENT: {4/7/2016 10:32:41 PM}		runner.addTest(TestCUnits::suite());
-// COMMENT: {4/7/2016 10:32:41 PM}		runner.addTest(TestCPhastInput::suite());
-// COMMENT: {4/7/2016 10:32:41 PM}		runner.addTest(TestPrism::suite());
-// COMMENT: {4/7/2016 10:32:41 PM}		runner.addTest(TestHDFSerializePolyData::suite());
-// COMMENT: {4/7/2016 10:32:41 PM}		runner.addTest(TestUniqueMap::suite());
-// COMMENT: {4/7/2016 10:32:41 PM}		runner.addTest(TestCproperty::suite());		
-// COMMENT: {4/7/2016 10:32:41 PM}		runner.addTest(TestHDFFile::suite());
-// COMMENT: {4/7/2016 10:32:41 PM}		runner.addTest(TestHDFSerializeImageData::suite());
+		runner.addTest(TestCGrid::suite());
+		runner.addTest(TestPHAST_Transform::suite());
+		runner.addTest(TestCtime::suite());
+		runner.addTest(TestCBC::suite());
+		runner.addTest(TestCWPhastDoc::suite());
+		runner.addTest(TestCWParser::suite());
+		runner.addTest(TestCPropertyTreeControlBar::suite());
+		runner.addTest(TestCUnits::suite());
+		runner.addTest(TestCPhastInput::suite());
+		runner.addTest(TestPrism::suite());
+		runner.addTest(TestHDFSerializePolyData::suite());
+		runner.addTest(TestUniqueMap::suite());
+		runner.addTest(TestCproperty::suite());		
+		runner.addTest(TestHDFFile::suite());
+		runner.addTest(TestHDFSerializeImageData::suite());
 
 		/**********************************************************
 		// the following require user input
