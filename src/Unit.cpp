@@ -310,7 +310,7 @@ void CUnit::Insert1_L(CTreeCtrl* pTreeCtrl, HTREEITEM htiParent, LPCTSTR heading
 
 void CUnit::InsertSolidUnits(SOLID_UNITS su, CTreeCtrl* pTreeCtrl, HTREEITEM htiParent, LPCTSTR heading, int nID)
 {
-	const char *solid_units[] = { " UNKNOWN", " WATER", " ROCK" };
+	const char *solid_units[] = { " CELL", " WATER", " ROCK" };
 
 	std::string sTreeItem = heading;
 	sTreeItem += solid_units[su];

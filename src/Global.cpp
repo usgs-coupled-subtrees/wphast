@@ -1933,13 +1933,13 @@ std::string CGlobal::GetStdL_T(const char* unit)
 }
 
 
-static const char* s_solid_units[] = {"UNKNOWN", "WATER", "ROCK"};
+static const char* s_solid_units[] = {"CELL", "WATER", "ROCK"};
 
 int CGlobal::AddSolidUnits(CComboBox* pCombo)
 {
 	if (pCombo->GetCount() == 0)
 	{
-		for (size_t i = 1; i < sizeof(s_solid_units) / sizeof(s_solid_units[0]); ++i)
+		for (size_t i = 0; i < sizeof(s_solid_units) / sizeof(s_solid_units[0]); ++i)
 		{
 			pCombo->InsertString(-1, s_solid_units[i]);
 		}
@@ -1953,9 +1953,12 @@ SOLID_UNITS CGlobal::GetSolidUnits(const CComboBox* pCombo)
 	switch (pCombo->GetCurSel())
 	{
 	case 0:
-		su = WATER;
+		su = CELL;
 		break;
 	case 1:
+		su = WATER;
+		break;
+	case 2:
 		su = ROCK;
 		break;
 	default:
@@ -1967,18 +1970,21 @@ SOLID_UNITS CGlobal::GetSolidUnits(const CComboBox* pCombo)
 
 void CGlobal::SetSolidUnits(CComboBox* pCombo, SOLID_UNITS su)
 {
-	ASSERT(pCombo->GetCount() == 2);
+	ASSERT(pCombo->GetCount() == 3);
 	switch (su)
 	{
-	case WATER:
+	case CELL:
 		pCombo->SetCurSel(0);
 		break;
-	case ROCK:
+	case WATER:
 		pCombo->SetCurSel(1);
+		break;
+	case ROCK:
+		pCombo->SetCurSel(2);
 		break;
 	default:
 		ASSERT(FALSE);
-		pCombo->SetCurSel(0);
+		pCombo->SetCurSel(1);
 		break;
 	}
 }
@@ -4476,6 +4482,11 @@ hid_t CGlobal::HDFCreateSolidUnitsType(void)
 	ASSERT(enum_datatype >= 0);
 
 	SOLID_UNITS nValue;
+
+	// Insert the enumerated data
+	nValue = CELL;
+	status = H5Tenum_insert(enum_datatype, "CELL", &nValue);
+	ASSERT(status >= 0);
 
 	// Insert the enumerated data
 	nValue = WATER;

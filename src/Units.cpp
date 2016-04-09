@@ -301,12 +301,12 @@ std::ostream& operator<< (std::ostream &os, const CUnits &a)
 	os << "\t" << szDrainThickness    << szSpace << (a.drain_bed_thickness.defined ? a.drain_bed_thickness.input : a.drain_bed_thickness.si) << "\n";
 	os << "\t" << szDrainWidth        << szSpace << (a.drain_width.defined         ? a.drain_width.input         : a.drain_width.si)         << "\n";
 
-	os << "\t" << szEquilibriumPhases << szSpace << (a.ppassemblage_units == ROCK  ? "ROCK"                      : "WATER")                  << "\n";
-	os << "\t" << szExchange          << szSpace << (a.exchange_units     == ROCK  ? "ROCK"                      : "WATER")                  << "\n";
-	os << "\t" << szSurface           << szSpace << (a.surface_units      == ROCK  ? "ROCK"                      : "WATER")                  << "\n";
-	os << "\t" << szSolidSolutions    << szSpace << (a.ssassemblage_units == ROCK  ? "ROCK"                      : "WATER")                  << "\n";
-	os << "\t" << szKinetics          << szSpace << (a.kinetics_units     == ROCK  ? "ROCK"                      : "WATER")                  << "\n";
-	os << "\t" << szGasPhase          << szSpace << (a.gasphase_units     == ROCK  ? "ROCK"                      : "WATER")                  << "\n";
+	os << "\t" << szEquilibriumPhases << szSpace << (a.ppassemblage_units == ROCK  ? "ROCK" : (a.ppassemblage_units == CELL  ? "CELL" : "WATER")) << "\n";
+	os << "\t" << szExchange          << szSpace << (a.exchange_units     == ROCK  ? "ROCK" : (a.exchange_units     == CELL  ? "CELL" : "WATER")) << "\n";
+	os << "\t" << szSurface           << szSpace << (a.surface_units      == ROCK  ? "ROCK" : (a.surface_units      == CELL  ? "CELL" : "WATER")) << "\n";
+	os << "\t" << szSolidSolutions    << szSpace << (a.ssassemblage_units == ROCK  ? "ROCK" : (a.ssassemblage_units == CELL  ? "CELL" : "WATER")) << "\n";
+	os << "\t" << szKinetics          << szSpace << (a.kinetics_units     == ROCK  ? "ROCK" : (a.kinetics_units     == CELL  ? "CELL" : "WATER")) << "\n";
+	os << "\t" << szGasPhase          << szSpace << (a.gasphase_units     == ROCK  ? "ROCK" : (a.gasphase_units     == CELL  ? "CELL" : "WATER")) << "\n";
 
 	return os;
 }
