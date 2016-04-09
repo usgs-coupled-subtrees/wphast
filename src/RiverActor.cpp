@@ -15,7 +15,7 @@
 vtkCxxRevisionMacro(CRiverActor, "$Revision$");
 vtkStandardNewMacro(CRiverActor);
 
-#ifdef __CPPUNIT__
+#if defined(__CPPUNIT__) || defined(__VTKDEBUGLEAKS__)
 //  this must be included before CRiverActor::StaticInit
 //  otherwise vtkDebugLeaks::CriticalSection will be NULL
 #include <vtkDebugLeaks.h>

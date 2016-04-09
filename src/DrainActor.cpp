@@ -15,7 +15,7 @@
 vtkCxxRevisionMacro(CDrainActor, "$Revision$");
 vtkStandardNewMacro(CDrainActor);
 
-#ifdef __CPPUNIT__
+#if defined(__CPPUNIT__) || defined(__VTKDEBUGLEAKS__)
 //  this must be included before CDrainActor::StaticInit
 //  otherwise vtkDebugLeaks::CriticalSection will be NULL
 #include <vtkDebugLeaks.h>

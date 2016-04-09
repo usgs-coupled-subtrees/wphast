@@ -806,6 +806,197 @@
 				CommandLine="REM ********************************************************************************************&#x0D;&#x0A;REM                                         VTK&#x0D;&#x0A;REM ********************************************************************************************&#x0D;&#x0A;REM ********************************************************************************************&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_X64_BIN)\vtkCommon.dll&quot;       &quot;$(TargetDir)vtkCommon.dll&quot;       &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_X64_BIN)\vtkDICOMParser.dll&quot;  &quot;$(TargetDir)vtkDICOMParser.dll&quot;  &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_X64_BIN)\vtkexoIIc.dll&quot;       &quot;$(TargetDir)vtkexoIIc.dll&quot;       &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_X64_BIN)\vtkexpat.dll&quot;        &quot;$(TargetDir)vtkexpat.dll&quot;        &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_X64_BIN)\vtkFiltering.dll&quot;    &quot;$(TargetDir)vtkFiltering.dll&quot;    &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_X64_BIN)\vtkfreetype.dll&quot;     &quot;$(TargetDir)vtkfreetype.dll&quot;     &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_X64_BIN)\vtkftgl.dll&quot;         &quot;$(TargetDir)vtkftgl.dll&quot;         &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_X64_BIN)\vtkGraphics.dll&quot;     &quot;$(TargetDir)vtkGraphics.dll&quot;     &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_X64_BIN)\vtkHybrid.dll&quot;       &quot;$(TargetDir)vtkHybrid.dll&quot;       &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_X64_BIN)\vtkImaging.dll&quot;      &quot;$(TargetDir)vtkImaging.dll&quot;      &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_X64_BIN)\vtkIO.dll&quot;           &quot;$(TargetDir)vtkIO.dll&quot;           &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_X64_BIN)\vtkjpeg.dll&quot;         &quot;$(TargetDir)vtkjpeg.dll&quot;         &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_X64_BIN)\vtkmetaio.dll&quot;       &quot;$(TargetDir)vtkmetaio.dll&quot;       &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_X64_BIN)\vtkNetCDF.dll&quot;       &quot;$(TargetDir)vtkNetCDF.dll&quot;       &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_X64_BIN)\vtkParallel.dll&quot;     &quot;$(TargetDir)vtkParallel.dll&quot;     &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_X64_BIN)\vtkpng.dll&quot;          &quot;$(TargetDir)vtkpng.dll&quot;          &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_X64_BIN)\vtkRendering.dll&quot;    &quot;$(TargetDir)vtkRendering.dll&quot;    &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_X64_BIN)\vtksys.dll&quot;          &quot;$(TargetDir)vtksys.dll&quot;          &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_X64_BIN)\vtktiff.dll&quot;         &quot;$(TargetDir)vtktiff.dll&quot;         &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_X64_BIN)\vtkverdict.dll&quot;      &quot;$(TargetDir)vtkverdict.dll&quot;      &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_X64_BIN)\vtkWidgets.dll&quot;      &quot;$(TargetDir)vtkWidgets.dll&quot;      &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_X64_BIN)\vtkzlib.dll&quot;         &quot;$(TargetDir)vtkzlib.dll&quot;         &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_VTK_542_VS8_DLL_X64_BIN)\vtkMFC.dll&quot;          &quot;$(TargetDir)vtkMFC.dll&quot;          &gt; NUL&#x0D;&#x0A;REM ********************************************************************************************&#x0D;&#x0A;REM                                        HDF5&#x0D;&#x0A;REM ********************************************************************************************&#x0D;&#x0A;copy /Y &quot;$(DEV_HDF5_X64_LIBDLL)\hdf5dll.dll&quot;                 &quot;$(TargetDir)hdf5dll.dll&quot;         &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_HDF5_X64_LIBDLL)\..\bin\zlib1.dll&quot;            &quot;$(TargetDir)zlib1.dll&quot;           &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_HDF5_X64_LIBDLL)\..\bin\szlibdll.dll&quot;         &quot;$(TargetDir)szlibdll.dll&quot;        &gt; NUL&#x0D;&#x0A;REM ********************************************************************************************&#x0D;&#x0A;REM                                       XERCES&#x0D;&#x0A;REM ********************************************************************************************&#x0D;&#x0A;copy /Y &quot;$(DEV_XERCES)\bin64\xerces-c_2_7.dll&quot;               &quot;$(TargetDir)xerces-c_2_7.dll&quot;    &gt; NUL&#x0D;&#x0A;"
 			/>
 		</Configuration>
+		<Configuration
+			Name="vtkDebugLeaks|Win32"
+			OutputDirectory="$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="1"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC70.vsprops;.\OutputName.vsprops"
+			UseOfMFC="2"
+			CharacterSet="2"
+			DeleteExtensionsOnClean="*.obj;*.ilk;*.tlb;*.tli;*.tlh;*.tmp;*.rsp;*.pgc;*.pgd;*.dll;$(TargetPath)"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				PreprocessorDefinitions="_DEBUG"
+				MkTypLibCompatible="false"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions="/MP"
+				Optimization="0"
+				AdditionalIncludeDirectories="&quot;$(DEV_CPPUNIT_1.10)\include&quot;;&quot;$(DEV_VTK_542_MEM_VS8_INC)&quot;;&quot;$(DEV_HDF5_INC)&quot;;&quot;$(DEV_XERCES)/include&quot;;&quot;$(DEV_BOOST)&quot;;srcinput/common;srcinput/PhastKeywords"
+				PreprocessorDefinitions="_CRTDBG_MAP_ALLOC;__VTKDEBUGLEAKS__;WPHAST_AUTOMATION;WIN32;_WINDOWS;_DEBUG;__WPHAST__;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_WARNINGS;ANSI_DECLARATORS;WINVER=0x0400"
+				MinimalRebuild="false"
+				ExceptionHandling="2"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="3"
+				FloatingPointModel="0"
+				FloatingPointExceptions="false"
+				TreatWChar_tAsBuiltInType="true"
+				UsePrecompiledHeader="2"
+				BrowseInformation="1"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="true"
+				DebugInformationFormat="4"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="_DEBUG"
+				Culture="1033"
+				AdditionalIncludeDirectories="$(IntDir)"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="Pdh.lib UxTheme.lib cppunitd.lib hdf5dll.lib $(DEV_VTK_542_ADDL_DEPS) vtkMFC.lib Vfw32.lib xerces-c_2.lib"
+				LinkIncremental="2"
+				AdditionalLibraryDirectories="&quot;$(DEV_CPPUNIT_1.10)/lib&quot;;&quot;$(DEV_VTK_542_MEM_VS8_LIB)&quot;;&quot;$(DEV_HDF5_LIBDLL)&quot;;&quot;$(DEV_XERCES)/lib&quot;"
+				DelayLoadDLLs=""
+				GenerateDebugInformation="true"
+				SubSystem="2"
+				TargetMachine="1"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+				Description="copying dlls"
+				CommandLine="copy /Y &quot;$(DEV_VTK_542_MEM_VS8)\bin\vtkMFC.dll&quot;         &quot;$(TargetDir)vtkMFC.dll&quot;         &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_HDF5_LIBDLL)\hdf5dll.dll&quot;           &quot;$(TargetDir)hdf5dll.dll&quot;   &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_HDF5_LIBDLL)\..\bin\zlib1.dll&quot;           &quot;$(TargetDir)zlib1.dll&quot;   &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_HDF5_LIBDLL)\..\bin\szlibdll.dll&quot;           &quot;$(TargetDir)szlibdll.dll&quot;   &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_XERCES)\bin\xerces-c_2_7.dll&quot;        &quot;$(TargetDir)xerces-c_2_7.dll&quot; &gt; NUL&#x0D;&#x0A;&#x0D;&#x0A;"
+			/>
+		</Configuration>
+		<Configuration
+			Name="vtkDebugLeaks|x64"
+			OutputDirectory="$(PlatformName)\$(ConfigurationName)"
+			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
+			ConfigurationType="1"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC70.vsprops;.\OutputName.vsprops;.\HDF5.vsprops"
+			UseOfMFC="2"
+			CharacterSet="2"
+			DeleteExtensionsOnClean="*.obj;*.ilk;*.tlb;*.tli;*.tlh;*.tmp;*.rsp;*.pgc;*.pgd;*.dll;$(TargetPath)"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				PreprocessorDefinitions="_DEBUG"
+				MkTypLibCompatible="false"
+				TargetEnvironment="3"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions="/MP"
+				Optimization="0"
+				AdditionalIncludeDirectories="&quot;$(DEV_CPPUNIT_VS2005)/include&quot;;&quot;$(DEV_VTK_542_MEM_VS8_X64_INC)&quot;;&quot;$(DEV_HDF5_X64_INC)&quot;;&quot;$(DEV_XERCES)/include&quot;;&quot;$(DEV_BOOST)&quot;;srcinput/common;srcinput/PhastKeywords"
+				PreprocessorDefinitions="_CRTDBG_MAP_ALLOC;__VTKDEBUGLEAKS__;WPHAST_AUTOMATION;WIN32;_WINDOWS;_DEBUG;__WPHAST__;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_WARNINGS;ANSI_DECLARATORS;WINVER=0x0400"
+				MinimalRebuild="false"
+				ExceptionHandling="2"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="3"
+				FloatingPointModel="0"
+				FloatingPointExceptions="false"
+				TreatWChar_tAsBuiltInType="true"
+				UsePrecompiledHeader="2"
+				BrowseInformation="1"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="true"
+				DebugInformationFormat="3"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="_DEBUG;_WIN64"
+				Culture="1033"
+				AdditionalIncludeDirectories="$(IntDir)"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="Pdh.lib UxTheme.lib cppunitd.lib hdf5dll.lib $(DEV_VTK_542_ADDL_DEPS) vtkMFC.lib Vfw32.lib xerces-c_2.lib"
+				LinkIncremental="2"
+				AdditionalLibraryDirectories="&quot;$(DEV_CPPUNIT_VS2005)/libx64&quot;;&quot;$(DEV_VTK_542_MEM_VS8_X64_LIB)&quot;;&quot;$(DEV_HDF5_X64_LIBDLL)&quot;;&quot;$(DEV_XERCES)/lib64&quot;"
+				DelayLoadDLLs=""
+				GenerateDebugInformation="true"
+				SubSystem="2"
+				TargetMachine="17"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+				Description="copying dlls"
+				CommandLine="copy /Y &quot;$(DEV_VTK_542_MEM_VS8_X64)\bin\vtkMFC.dll&quot;   &quot;$(TargetDir)vtkMFC.dll&quot;       &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_HDF5_X64_LIBDLL)\hdf5dll.dll&quot;          &quot;$(TargetDir)hdf5dll.dll&quot;      &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_HDF5_X64_LIBDLL)\..\bin\zlib1.dll&quot;     &quot;$(TargetDir)zlib1.dll&quot;        &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_HDF5_X64_LIBDLL)\..\bin\szlibdll.dll&quot;  &quot;$(TargetDir)szlibdll.dll&quot;     &gt; NUL&#x0D;&#x0A;copy /Y &quot;$(DEV_XERCES)\bin64\xerces-c_2_7.dll&quot;        &quot;$(TargetDir)xerces-c_2_7.dll&quot; &gt; NUL&#x0D;&#x0A;"
+			/>
+		</Configuration>
 	</Configurations>
 	<References>
 	</References>
@@ -981,6 +1172,24 @@
 						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
 					/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="vtkDebugLeaks|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="vtkDebugLeaks|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)\$(InputName)1.obj"
+						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\DrainActor.cpp"
@@ -1099,6 +1308,22 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="ReleaseRelease|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="vtkDebugLeaks|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="vtkDebugLeaks|x64"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1339,6 +1564,22 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="cppunit|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						GeneratePreprocessedFile="0"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="vtkDebugLeaks|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						GeneratePreprocessedFile="0"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="vtkDebugLeaks|x64"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1741,6 +1982,22 @@
 						UsePrecompiledHeader="1"
 					/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="vtkDebugLeaks|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="vtkDebugLeaks|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="SteadyFlow.cpp"
@@ -1901,6 +2158,22 @@
 						ObjectFile="$(IntDir)/$(InputName)1.obj"
 					/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="vtkDebugLeaks|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="vtkDebugLeaks|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						ObjectFile="$(IntDir)/$(InputName)1.obj"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="ViewVTKCommand.cpp"
@@ -1999,6 +2272,22 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="cppunit|x64"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCMIDLTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="vtkDebugLeaks|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCMIDLTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="vtkDebugLeaks|x64"
 					ExcludedFromBuild="true"
 					>
 					<Tool
@@ -2133,6 +2422,22 @@
 							UsePrecompiledHeader="0"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\srcinput\ArcRaster.cpp"
@@ -2195,6 +2500,22 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="ReleaseRelease|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -2269,6 +2590,22 @@
 							UsePrecompiledHeader="0"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\srcinput\check.cpp"
@@ -2331,6 +2668,22 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="ReleaseRelease|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -2405,6 +2758,22 @@
 							UsePrecompiledHeader="0"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\srcinput\Data_source.cpp"
@@ -2467,6 +2836,22 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="ReleaseRelease|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -2541,6 +2926,22 @@
 							UsePrecompiledHeader="0"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\srcinput\Drain.cpp"
@@ -2603,6 +3004,22 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="ReleaseRelease|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -2677,6 +3094,22 @@
 							UsePrecompiledHeader="0"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\srcinput\Filedata.cpp"
@@ -2739,6 +3172,22 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="ReleaseRelease|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -2813,6 +3262,22 @@
 							UsePrecompiledHeader="0"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\srcinput\gpc_helper.cpp"
@@ -2875,6 +3340,22 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="ReleaseRelease|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -2949,6 +3430,22 @@
 							UsePrecompiledHeader="0"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\srcinput\message.cpp"
@@ -3011,6 +3508,22 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="ReleaseRelease|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -3085,6 +3598,22 @@
 							UsePrecompiledHeader="0"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\srcinput\PHAST_polygon.cpp"
@@ -3147,6 +3676,22 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="ReleaseRelease|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -3221,6 +3766,22 @@
 							UsePrecompiledHeader="0"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="PhastInput.cpp"
@@ -3283,6 +3844,22 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="ReleaseRelease|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -3365,6 +3942,24 @@
 							CompileAs="2"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+							CompileAs="2"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+							CompileAs="2"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\srcinput\Polygon_tree.cpp"
@@ -3427,6 +4022,22 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="ReleaseRelease|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -3501,6 +4112,22 @@
 							UsePrecompiledHeader="0"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\srcinput\Prism.cpp"
@@ -3563,6 +4190,22 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="ReleaseRelease|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -3637,6 +4280,22 @@
 							UsePrecompiledHeader="0"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\srcinput\rivers.cpp"
@@ -3705,6 +4364,22 @@
 							UsePrecompiledHeader="0"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\srcinput\structures.cpp"
@@ -3767,6 +4442,22 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="ReleaseRelease|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -3857,6 +4548,26 @@
 							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\srcinput\unit_impl.cxx"
@@ -3919,6 +4630,22 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="ReleaseRelease|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -3993,6 +4720,22 @@
 							UsePrecompiledHeader="0"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\srcinput\utilities.cpp"
@@ -4055,6 +4798,22 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="ReleaseRelease|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -4129,6 +4888,22 @@
 							UsePrecompiledHeader="0"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\srcinput\wells.cpp"
@@ -4191,6 +4966,22 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="ReleaseRelease|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -4265,6 +5056,22 @@
 							UsePrecompiledHeader="0"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\srcinput\write.cpp"
@@ -4327,6 +5134,22 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="ReleaseRelease|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -4401,6 +5224,22 @@
 							UsePrecompiledHeader="0"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\srcinput\XYZTfile.cpp"
@@ -4463,6 +5302,22 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="ReleaseRelease|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -4553,6 +5408,26 @@
 							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\srcinput\Zone_budget.cpp"
@@ -4615,6 +5490,22 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="ReleaseRelease|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -4708,6 +5599,26 @@
 								DisableSpecificWarnings="4267"
 							/>
 						</FileConfiguration>
+						<FileConfiguration
+							Name="vtkDebugLeaks|Win32"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								UsePrecompiledHeader="0"
+								CompileAs="2"
+								DisableSpecificWarnings="4267"
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="vtkDebugLeaks|x64"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								UsePrecompiledHeader="0"
+								CompileAs="2"
+								DisableSpecificWarnings="4267"
+							/>
+						</FileConfiguration>
 					</File>
 					<File
 						RelativePath=".\srcinput\Shapefiles\Shapefile.cpp"
@@ -4770,6 +5681,22 @@
 						</FileConfiguration>
 						<FileConfiguration
 							Name="ReleaseRelease|x64"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								UsePrecompiledHeader="0"
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="vtkDebugLeaks|Win32"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								UsePrecompiledHeader="0"
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="vtkDebugLeaks|x64"
 							>
 							<Tool
 								Name="VCCLCompilerTool"
@@ -4860,6 +5787,26 @@
 								DisableSpecificWarnings="4267"
 							/>
 						</FileConfiguration>
+						<FileConfiguration
+							Name="vtkDebugLeaks|Win32"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								UsePrecompiledHeader="0"
+								CompileAs="2"
+								DisableSpecificWarnings="4267"
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="vtkDebugLeaks|x64"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								UsePrecompiledHeader="0"
+								CompileAs="2"
+								DisableSpecificWarnings="4267"
+							/>
+						</FileConfiguration>
 					</File>
 					<File
 						RelativePath=".\srcinput\Shapefiles\shptree.c"
@@ -4936,6 +5883,24 @@
 								CompileAs="2"
 							/>
 						</FileConfiguration>
+						<FileConfiguration
+							Name="vtkDebugLeaks|Win32"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								UsePrecompiledHeader="0"
+								CompileAs="2"
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="vtkDebugLeaks|x64"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								UsePrecompiledHeader="0"
+								CompileAs="2"
+							/>
+						</FileConfiguration>
 					</File>
 				</Filter>
 				<Filter
@@ -5002,6 +5967,22 @@
 						</FileConfiguration>
 						<FileConfiguration
 							Name="ReleaseRelease|x64"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								UsePrecompiledHeader="0"
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="vtkDebugLeaks|Win32"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								UsePrecompiledHeader="0"
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="vtkDebugLeaks|x64"
 							>
 							<Tool
 								Name="VCCLCompilerTool"
@@ -5084,6 +6065,24 @@
 								DisableSpecificWarnings="4267"
 							/>
 						</FileConfiguration>
+						<FileConfiguration
+							Name="vtkDebugLeaks|Win32"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								UsePrecompiledHeader="0"
+								DisableSpecificWarnings="4267"
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="vtkDebugLeaks|x64"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								UsePrecompiledHeader="0"
+								DisableSpecificWarnings="4267"
+							/>
+						</FileConfiguration>
 					</File>
 					<File
 						RelativePath=".\srcinput\KDtree\Point.cpp"
@@ -5146,6 +6145,22 @@
 						</FileConfiguration>
 						<FileConfiguration
 							Name="ReleaseRelease|x64"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								UsePrecompiledHeader="0"
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="vtkDebugLeaks|Win32"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								UsePrecompiledHeader="0"
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="vtkDebugLeaks|x64"
 							>
 							<Tool
 								Name="VCCLCompilerTool"
@@ -5232,6 +6247,24 @@
 								CompileAs="2"
 							/>
 						</FileConfiguration>
+						<FileConfiguration
+							Name="vtkDebugLeaks|Win32"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								UsePrecompiledHeader="0"
+								CompileAs="2"
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="vtkDebugLeaks|x64"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								UsePrecompiledHeader="0"
+								CompileAs="2"
+							/>
+						</FileConfiguration>
 					</File>
 					<File
 						RelativePath=".\srcinput\NNInterpolator\hash.c"
@@ -5301,6 +6334,24 @@
 						</FileConfiguration>
 						<FileConfiguration
 							Name="ReleaseRelease|x64"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								UsePrecompiledHeader="0"
+								CompileAs="2"
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="vtkDebugLeaks|Win32"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								UsePrecompiledHeader="0"
+								CompileAs="2"
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="vtkDebugLeaks|x64"
 							>
 							<Tool
 								Name="VCCLCompilerTool"
@@ -5384,6 +6435,24 @@
 								CompileAs="2"
 							/>
 						</FileConfiguration>
+						<FileConfiguration
+							Name="vtkDebugLeaks|Win32"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								UsePrecompiledHeader="0"
+								CompileAs="2"
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="vtkDebugLeaks|x64"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								UsePrecompiledHeader="0"
+								CompileAs="2"
+							/>
+						</FileConfiguration>
 					</File>
 					<File
 						RelativePath=".\srcinput\NNInterpolator\nncommon-vulnerable.c"
@@ -5453,6 +6522,24 @@
 						</FileConfiguration>
 						<FileConfiguration
 							Name="ReleaseRelease|x64"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								UsePrecompiledHeader="0"
+								CompileAs="2"
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="vtkDebugLeaks|Win32"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								UsePrecompiledHeader="0"
+								CompileAs="2"
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="vtkDebugLeaks|x64"
 							>
 							<Tool
 								Name="VCCLCompilerTool"
@@ -5536,6 +6623,24 @@
 								CompileAs="2"
 							/>
 						</FileConfiguration>
+						<FileConfiguration
+							Name="vtkDebugLeaks|Win32"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								UsePrecompiledHeader="0"
+								CompileAs="2"
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="vtkDebugLeaks|x64"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								UsePrecompiledHeader="0"
+								CompileAs="2"
+							/>
+						</FileConfiguration>
 					</File>
 					<File
 						RelativePath=".\srcinput\NNInterpolator\NNInterpolator.cpp"
@@ -5598,6 +6703,22 @@
 						</FileConfiguration>
 						<FileConfiguration
 							Name="ReleaseRelease|x64"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								UsePrecompiledHeader="0"
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="vtkDebugLeaks|Win32"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								UsePrecompiledHeader="0"
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="vtkDebugLeaks|x64"
 							>
 							<Tool
 								Name="VCCLCompilerTool"
@@ -5673,6 +6794,24 @@
 						</FileConfiguration>
 						<FileConfiguration
 							Name="ReleaseRelease|x64"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								UsePrecompiledHeader="0"
+								CompileAs="2"
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="vtkDebugLeaks|Win32"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								UsePrecompiledHeader="0"
+								CompileAs="2"
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="vtkDebugLeaks|x64"
 							>
 							<Tool
 								Name="VCCLCompilerTool"
@@ -5756,6 +6895,24 @@
 								CompileAs="2"
 							/>
 						</FileConfiguration>
+						<FileConfiguration
+							Name="vtkDebugLeaks|Win32"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								UsePrecompiledHeader="0"
+								CompileAs="2"
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="vtkDebugLeaks|x64"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								UsePrecompiledHeader="0"
+								CompileAs="2"
+							/>
+						</FileConfiguration>
 					</File>
 				</Filter>
 				<Filter
@@ -5828,6 +6985,22 @@
 								Name="VCCLCompilerTool"
 							/>
 						</FileConfiguration>
+						<FileConfiguration
+							Name="vtkDebugLeaks|Win32"
+							ExcludedFromBuild="true"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="vtkDebugLeaks|x64"
+							ExcludedFromBuild="true"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+							/>
+						</FileConfiguration>
 					</File>
 					<File
 						RelativePath=".\srcinput\shep5d\Shep2d.cpp"
@@ -5890,6 +7063,22 @@
 						</FileConfiguration>
 						<FileConfiguration
 							Name="ReleaseRelease|x64"
+							ExcludedFromBuild="true"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="vtkDebugLeaks|Win32"
+							ExcludedFromBuild="true"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="vtkDebugLeaks|x64"
 							ExcludedFromBuild="true"
 							>
 							<Tool
@@ -5970,6 +7159,22 @@
 							ObjectFile="$(IntDir)/$(InputName)1.obj"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)/$(InputName)1.obj"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)/$(InputName)1.obj"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="sizecbar\scbarcfvs7.cpp"
@@ -6032,6 +7237,22 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="ReleaseRelease|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)/$(InputName)1.obj"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)/$(InputName)1.obj"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -6106,6 +7327,22 @@
 							ObjectFile="$(IntDir)/$(InputName)1.obj"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)/$(InputName)1.obj"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)/$(InputName)1.obj"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="sizecbar\sdbarcfvs7.cpp"
@@ -6174,6 +7411,22 @@
 							ObjectFile="$(IntDir)/$(InputName)1.obj"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)/$(InputName)1.obj"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)/$(InputName)1.obj"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="sizecbar\sizecbar.cpp"
@@ -6236,6 +7489,22 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="ReleaseRelease|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)/$(InputName)1.obj"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)/$(InputName)1.obj"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -6339,6 +7608,22 @@
 							Name="VCCLCompilerTool"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="TestCBC.cpp"
@@ -6385,6 +7670,22 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="ReleaseRelease|x64"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
 						ExcludedFromBuild="true"
 						>
 						<Tool
@@ -6459,6 +7760,24 @@
 							Name="VCCLCompilerTool"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="2"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="2"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="TestCGridLODActor.cpp"
@@ -6505,6 +7824,22 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="ReleaseRelease|x64"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
 						ExcludedFromBuild="true"
 						>
 						<Tool
@@ -6563,6 +7898,22 @@
 							Name="VCCLCompilerTool"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="TestCMapDialog.cpp"
@@ -6609,6 +7960,22 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="ReleaseRelease|x64"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
 						ExcludedFromBuild="true"
 						>
 						<Tool
@@ -6667,6 +8034,22 @@
 							Name="VCCLCompilerTool"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="TestCModGridCtrlExPage.cpp"
@@ -6713,6 +8096,22 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="ReleaseRelease|x64"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
 						ExcludedFromBuild="true"
 						>
 						<Tool
@@ -6771,6 +8170,22 @@
 							Name="VCCLCompilerTool"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="TestCPhastInput.cpp"
@@ -6817,6 +8232,22 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="ReleaseRelease|x64"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
 						ExcludedFromBuild="true"
 						>
 						<Tool
@@ -6875,6 +8306,22 @@
 							Name="VCCLCompilerTool"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="TestCPrintInitialPropertyPage.cpp"
@@ -6921,6 +8368,22 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="ReleaseRelease|x64"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
 						ExcludedFromBuild="true"
 						>
 						<Tool
@@ -6979,6 +8442,22 @@
 							Name="VCCLCompilerTool"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="TestCPropertyTreeControlBar.cpp"
@@ -7025,6 +8504,22 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="ReleaseRelease|x64"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
 						ExcludedFromBuild="true"
 						>
 						<Tool
@@ -7083,6 +8578,22 @@
 							Name="VCCLCompilerTool"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="TestCTimeControlMultiPropertyPage2.cpp"
@@ -7129,6 +8640,22 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="ReleaseRelease|x64"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
 						ExcludedFromBuild="true"
 						>
 						<Tool
@@ -7187,6 +8714,22 @@
 							Name="VCCLCompilerTool"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="TestCWellPropertyPage.cpp"
@@ -7233,6 +8776,22 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="ReleaseRelease|x64"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
 						ExcludedFromBuild="true"
 						>
 						<Tool
@@ -7291,6 +8850,22 @@
 							Name="VCCLCompilerTool"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="TestCWPhastDoc.cpp"
@@ -7337,6 +8912,22 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="ReleaseRelease|x64"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
 						ExcludedFromBuild="true"
 						>
 						<Tool
@@ -7395,6 +8986,22 @@
 							Name="VCCLCompilerTool"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\TestHDFFile.cpp"
@@ -7441,6 +9048,22 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="ReleaseRelease|x64"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
 						ExcludedFromBuild="true"
 						>
 						<Tool
@@ -7499,6 +9122,22 @@
 							Name="VCCLCompilerTool"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\TestHDFSerializePolyData.cpp"
@@ -7545,6 +9184,22 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="ReleaseRelease|x64"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
 						ExcludedFromBuild="true"
 						>
 						<Tool
@@ -7603,6 +9258,22 @@
 							Name="VCCLCompilerTool"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\TestPrism.cpp"
@@ -7649,6 +9320,22 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="ReleaseRelease|x64"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
 						ExcludedFromBuild="true"
 						>
 						<Tool
@@ -7707,6 +9394,22 @@
 							Name="VCCLCompilerTool"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\TestUniqueMap.cpp"
@@ -7759,6 +9462,22 @@
 							Name="VCCLCompilerTool"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="TestVTKDialog.cpp"
@@ -7805,6 +9524,22 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="ReleaseRelease|x64"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
 						ExcludedFromBuild="true"
 						>
 						<Tool
@@ -7885,6 +9620,22 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="ReleaseRelease|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							DisableSpecificWarnings="4267"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							DisableSpecificWarnings="4267"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -8039,6 +9790,22 @@
 							UsePrecompiledHeader="0"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\srcinput\common\Parser.cxx"
@@ -8101,6 +9868,22 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="ReleaseRelease|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -8175,6 +9958,22 @@
 							UsePrecompiledHeader="0"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\srcinput\common\PHRQ_io.cpp"
@@ -8243,6 +10042,22 @@
 							UsePrecompiledHeader="0"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\srcinput\common\Utils.cxx"
@@ -8305,6 +10120,22 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="ReleaseRelease|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="vtkDebugLeaks|x64"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -10680,6 +12511,22 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="ReleaseRelease|x64"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="vtkDebugLeaks|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="vtkDebugLeaks|x64"
 					ExcludedFromBuild="true"
 					>
 					<Tool
