@@ -145,7 +145,7 @@ void CRiverActor::Update(CTreeCtrlNode node)
 							headNode = pointBranch.AddTail("head");
 						}
 						strItem.Format(" %g", rate.head);
-						headNode.AddHead(strTime + strItem);
+						headNode.AddTail(strTime + strItem);
 					}
 
 					if (rate.solution_defined)
