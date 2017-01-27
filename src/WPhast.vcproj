@@ -1740,15 +1740,7 @@
 				>
 			</File>
 			<File
-				RelativePath="RiverPointPropertyPage.cpp"
-				>
-			</File>
-			<File
 				RelativePath="RiverPropertyPage2.cpp"
-				>
-			</File>
-			<File
-				RelativePath="RiverPropertySheet.cpp"
 				>
 			</File>
 			<File
@@ -10726,15 +10718,7 @@
 				>
 			</File>
 			<File
-				RelativePath="RiverPointPropertyPage.h"
-				>
-			</File>
-			<File
 				RelativePath="RiverPropertyPage2.h"
-				>
-			</File>
-			<File
-				RelativePath="RiverPropertySheet.h"
 				>
 			</File>
 			<File
