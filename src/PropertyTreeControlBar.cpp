@@ -19,7 +19,6 @@
 #include "WPhastView.h"
 #include "MediaPropertyPage.h"
 #include "GridPropertyPage.h"
-#include "RiverPropertySheet.h"
 #include "SetAction.h"
 #include "PointConnectorDeleteAction.h"
 #include "PointConnectorDeletePointAction.h"
