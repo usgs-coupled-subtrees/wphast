@@ -178,6 +178,7 @@ void CRiverPropertyPage2::DoDataExchange(CDataExchange* pDX)
 			const int MIN_ROWS = 100;
 			TRY
 			{
+				this->m_wndScheduleGrid.SetResizeRowsOnPaste(true);
 				this->m_wndScheduleGrid.SetRowCount(MIN_ROWS);
 				this->m_wndScheduleGrid.SetColumnCount(4);
 				this->m_wndScheduleGrid.SetFixedRowCount(1);
