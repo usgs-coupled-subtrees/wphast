@@ -80,14 +80,16 @@ $trigger += '&delay=0sec'
 Write-Output "trigger=$trigger"
 
 # trigger build
-wget -S $trigger -O start.html 2> queue.out
+PASS8081="c798ee5a2259a5ae001f90dd8772f6c3"
+AUTH="--auth-no-challenge --http-user=charlton --http-password=${PASS8081}"
+wget ${AUTH} -S ${trigger} -O start.html 2> queue.out
 [string]$location="$((-Split (cat .\queue.out | Select-String "Location"))[1])api/xml"
 Write-Output "location=$location"
 
 # wget until <waitingItem> changes to <leftItem>
 do {
   Start-Sleep -s 2
-  wget $location -O leftItem.xml 2> $null
+  wget ${AUTH} $location -O leftItem.xml 2> $null
 } until ((Select-Xml -Path .\leftItem.xml -XPath "/leftItem"))
 
 [string]$build="$((Select-Xml -Path .\leftItem.xml -XPath "/leftItem/executable/url").Node.InnerText)"
@@ -99,7 +101,7 @@ Write-Output "build=$build"
 # wget until <freeStyleBuild><building>false</building></freeStyleBuild>
 do {
   Start-Sleep -s 20
-  wget "${build}api/xml" -O freeStyleBuild.xml 2> $null
+  wget ${AUTH} "${build}api/xml" -O freeStyleBuild.xml 2> $null
   [string]$building = (Select-Xml -Path .\freeStyleBuild.xml -XPath "/freeStyleBuild/building").Node.InnerText
   Write-Output "building=$building"
 } until($building -contains 'false')
@@ -114,7 +116,7 @@ foreach ($art in $artifacts) {
   }
   Push-Location ${path}
   ${relPath}=${art}.Node.relativePath
-  wget "${url}artifact/${relPath}" 2> $null
+  wget ${AUTH} "${url}artifact/${relPath}" 2> $null
   Pop-Location 
 }
 
