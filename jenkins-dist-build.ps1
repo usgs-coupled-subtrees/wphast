@@ -69,6 +69,8 @@ Write-Output "Env:DOWNLOADS=${Env:DOWNLOADS}"
 Write-Output "2 LastExitCode=$LastExitCode"
 
 # create phast-dist-windows build URL
+[string]$PASS8081="c798ee5a2259a5ae001f90dd8772f6c3"
+[string]$TOKEN = 'ABCDEFG'
 [string]$trigger = 'http://136.177.112.8:8081/job/phast-dist-windows/buildWithParameters'
 $trigger += '?DATE='
 $trigger += ${Env:DATE} -replace '/','%2f'
@@ -77,10 +79,10 @@ $trigger += ${Env:REL}
 $trigger += '&VER='
 $trigger += ${Env:VER}
 $trigger += '&delay=0sec'
+$trigger += "&token=${TOKEN}"
 Write-Output "trigger=$trigger"
 
 # trigger build
-[string]$PASS8081="c798ee5a2259a5ae001f90dd8772f6c3"
 [string]$AUTH="--auth-no-challenge --http-user=charlton --http-password=${PASS8081}"
 wget ${AUTH} -S ${trigger} -O start.html 2> queue.out
 [string]$location="$((-Split (cat .\queue.out | Select-String "Location"))[1])api/xml"
