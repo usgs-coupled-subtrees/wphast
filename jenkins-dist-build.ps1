@@ -80,8 +80,8 @@ $trigger += '&delay=0sec'
 Write-Output "trigger=$trigger"
 
 # trigger build
-PASS8081="c798ee5a2259a5ae001f90dd8772f6c3"
-AUTH="--auth-no-challenge --http-user=charlton --http-password=${PASS8081}"
+[string]$PASS8081="c798ee5a2259a5ae001f90dd8772f6c3"
+[string]$AUTH="--auth-no-challenge --http-user=charlton --http-password=${PASS8081}"
 wget ${AUTH} -S ${trigger} -O start.html 2> queue.out
 [string]$location="$((-Split (cat .\queue.out | Select-String "Location"))[1])api/xml"
 Write-Output "location=$location"
