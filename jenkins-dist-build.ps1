@@ -83,7 +83,7 @@ $trigger += "&token=${TOKEN}"
 Write-Output "trigger=$trigger"
 
 # trigger build
-[string]$AUTH="--auth-no-challenge --http-user=charlton --http-password=${PASS8081}"
+[string[]]$AUTH="--auth-no-challenge","--http-user=charlton","--http-password=${PASS8081}"
 wget ${AUTH} -S ${trigger} -O start.html 2> queue.out
 [string]$location="$((-Split (cat .\queue.out | Select-String "Location"))[1])api/xml"
 Write-Output "location=$location"
