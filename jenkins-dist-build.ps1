@@ -72,7 +72,7 @@ Write-Output "2 LastExitCode=$LastExitCode"
 [string]$IP=(dig +short myip.opendns.com `@resolver1.opendns.com)
 [string]$PASS8081="c798ee5a2259a5ae001f90dd8772f6c3"
 [string]$TOKEN = 'ABCDEFG'
-[string]$trigger = 'http://${IP}:8081/job/phast-dist-windows/buildWithParameters'
+[string]$trigger = "http://${IP}:8081/job/phast-dist-windows/buildWithParameters"
 $trigger += '?DATE='
 $trigger += ${Env:DATE} -replace '/','%2f'
 $trigger += '&REL='
