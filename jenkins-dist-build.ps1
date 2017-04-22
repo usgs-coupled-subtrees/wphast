@@ -69,9 +69,10 @@ Write-Output "Env:DOWNLOADS=${Env:DOWNLOADS}"
 Write-Output "2 LastExitCode=$LastExitCode"
 
 # create phast-dist-windows build URL
+[string]$IP=(dig +short myip.opendns.com `@resolver1.opendns.com)
 [string]$PASS8081="c798ee5a2259a5ae001f90dd8772f6c3"
 [string]$TOKEN = 'ABCDEFG'
-[string]$trigger = 'http://136.177.112.8:8081/job/phast-dist-windows/buildWithParameters'
+[string]$trigger = 'http://${IP}:8081/job/phast-dist-windows/buildWithParameters'
 $trigger += '?DATE='
 $trigger += ${Env:DATE} -replace '/','%2f'
 $trigger += '&REL='
