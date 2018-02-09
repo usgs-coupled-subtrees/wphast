@@ -1,0 +1,58 @@
+
+# /
+/WPhast.ncb
+/WPhast.suo
+
+# /build/
+/build/*.log
+/build/*.log.gz
+/build/*.tar.bz2
+/build/*.tar.gz
+/build/wphast-*.sh
+/build/phast4windows-*.sh
+/build/*.tstamp
+/build/*.sig
+/build/*.patch
+/build/*.msi
+
+# /msi/
+/msi/bin
+/msi/msi.suo
+/msi/obj
+
+# /setup/
+/setup/*.msi
+/setup/*.wixobj
+/setup/*.msi
+/setup/*.log
+/setup/*.tstamp
+/setup/*.gz
+/setup/*.bz2
+
+# /spawnc/
+/spawnc/Debug
+/spawnc/Release
+
+# /src/
+/src/*.aps
+/src/Debug
+/src/Release
+/src/cppunitRelease
+/src/vtkMemDebug
+/src/cppunit
+/src/AutoDebug
+/src/AutoRelease
+/src/WPhast_h.h
+/src/WPhast_i.c
+/src/cppunit4.4
+/src/WPhast.vcproj.VIC.charlton.user
+/src/doc
+/src/ReleaseRelease
+/src/cppunit_skip_accum
+/src/autorelease
+
+# /src/Test/
+/src/Test/article.h5
+/src/Test/imagedata.h5
+/src/Test/polydata.h5
+/src/Test/prism.h5
