@@ -1,6 +1,7 @@
 #
 # https://code.chs.usgs.gov/coupled/wphast
 # SRC 2020-12-02T18:39:55-07:00
+# SRC 2021-10-30T14:30:15-06:00 -- changed pull to squash -- HEAD:5148078b4c1ceba454932038c8b6c3228f916564
 #
 image: ${CI_REGISTRY}/coupled/containers/buildpack-deps:bionic-scm
 
@@ -93,7 +94,8 @@ subtree-sync:
       export GIT_EDITOR=true
 
       for remote in "${!urls[@]}"; do
-        git_subtree "pull" "${prefixes[$remote]}" "$remote" "${urls[$remote]}"
+        #git_subtree "pull" "${prefixes[$remote]}" "$remote" "${urls[$remote]}"
+        git subtree pull --prefix "${prefixes[$remote]}" --squash "${urls[$remote]}" master
       done
 
       for remote in "${!urls[@]}"; do
