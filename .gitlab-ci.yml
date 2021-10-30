@@ -1,7 +1,7 @@
 #
 # https://code.chs.usgs.gov/coupled/wphast
 # SRC 2020-12-02T18:39:55-07:00
-# XXXSRC 2021-10-30T14:30:15-06:00 -- changed pull to squash -- HEAD:5148078b4c1ceba454932038c8b6c3228f916564
+# SRC 2021-10-30T15:35:02-06:00 -- changed pull to squash -- HEAD:5148078b4c1ceba454932038c8b6c3228f916564
 #
 image: ${CI_REGISTRY}/coupled/containers/buildpack-deps:bionic-scm
 
@@ -41,12 +41,8 @@ subtree-sync:
     ##
     - cd ..
     - rm -rf ${CI_PROJECT_NAME}
-    - echo about to clone
-    - echo git clone git@${CI_SERVER_HOST}:${CI_PROJECT_PATH}.git
     - git clone git@${CI_SERVER_HOST}:${CI_PROJECT_PATH}.git
-    - echo finished clone
     - cd ${CI_PROJECT_NAME}
-    - exit 9
     
     ##
     ## Sync subtrees
@@ -98,7 +94,8 @@ subtree-sync:
       export GIT_EDITOR=true
 
       for remote in "${!urls[@]}"; do
-        git_subtree "pull" "${prefixes[$remote]}" "$remote" "${urls[$remote]}"
+        # git_subtree "pull" "${prefixes[$remote]}" "$remote" "${urls[$remote]}"
+        git subtree pull --prefix "${prefixes[$remote]}" --squash "${urls[$remote]}" master
       done
 
       for remote in "${!urls[@]}"; do
