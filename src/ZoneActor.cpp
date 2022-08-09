@@ -660,7 +660,7 @@ void CZoneActor::Serialize(bool bStoring, hid_t loc_id, const CWPhastDoc* pWPhas
 					{
 						char szName[80];
 						size_t npolys = this->BottomActors.size();
-						CGlobal::HDFSerialize(bStoring, bottom_id, szNPOLYS, H5T_NATIVE_UINT, 1, &npolys);
+						CGlobal::HDFSerialize(bStoring, bottom_id, szNPOLYS, H5T_NATIVE_ULLONG, 1, &npolys);
 						for (size_t poly = 0; poly < npolys; ++poly)
 						{
 							::sprintf(szName, szPFormat, poly);
@@ -688,7 +688,7 @@ void CZoneActor::Serialize(bool bStoring, hid_t loc_id, const CWPhastDoc* pWPhas
 					{
 						char szName[80];
 						size_t npolys = this->TopActors.size();
-						CGlobal::HDFSerialize(bStoring, top_id, szNPOLYS, H5T_NATIVE_UINT, 1, &npolys);
+						CGlobal::HDFSerialize(bStoring, top_id, szNPOLYS, H5T_NATIVE_ULLONG, 1, &npolys);
 						for (size_t poly = 0; poly < npolys; ++poly)
 						{
 							::sprintf(szName, szPFormat, poly);
@@ -716,7 +716,7 @@ void CZoneActor::Serialize(bool bStoring, hid_t loc_id, const CWPhastDoc* pWPhas
 					{
 						char szName[80];
 						size_t npolys = this->PrismSidesPolyData.size();
-						CGlobal::HDFSerialize(bStoring, perim_id, szNPOLYS, H5T_NATIVE_UINT, 1, &npolys);
+						CGlobal::HDFSerialize(bStoring, perim_id, szNPOLYS, H5T_NATIVE_ULLONG, 1, &npolys);
 						for (size_t poly = 0; poly < npolys; ++poly)
 						{
 							::sprintf(szName, szPFormat, poly);
@@ -869,7 +869,7 @@ void CZoneActor::Serialize(bool bStoring, hid_t loc_id, const CWPhastDoc* pWPhas
 					if (perim_id)
 					{
 						size_t npolys;
-						CGlobal::HDFSerialize(bStoring, perim_id, szNPOLYS, H5T_NATIVE_UINT, 1, &npolys);
+						CGlobal::HDFSerialize(bStoring, perim_id, szNPOLYS, H5T_NATIVE_ULLONG, 1, &npolys);
 						ASSERT(0 < npolys);
 						this->PrismSidesPolyData.resize(npolys);
 						this->SolidPerimeterMappers.resize(npolys);
@@ -932,7 +932,7 @@ void CZoneActor::Serialize(bool bStoring, hid_t loc_id, const CWPhastDoc* pWPhas
 					if (bottom_id)
 					{
 						size_t npolys;
-						CGlobal::HDFSerialize(bStoring, bottom_id, szNPOLYS, H5T_NATIVE_UINT, 1, &npolys);
+						CGlobal::HDFSerialize(bStoring, bottom_id, szNPOLYS, H5T_NATIVE_ULLONG, 1, &npolys);
 						ASSERT(0 < npolys);
 						this->BottomFilters.resize(npolys);
 						this->BottomActors.resize(npolys);
@@ -1046,7 +1046,7 @@ void CZoneActor::Serialize(bool bStoring, hid_t loc_id, const CWPhastDoc* pWPhas
 					if (top_id)
 					{
 						size_t npolys;
-						CGlobal::HDFSerialize(bStoring, top_id, szNPOLYS, H5T_NATIVE_UINT, 1, &npolys);
+						CGlobal::HDFSerialize(bStoring, top_id, szNPOLYS, H5T_NATIVE_ULLONG, 1, &npolys);
 						ASSERT(0 < npolys);
 						this->TopFilters.resize(npolys);
 						this->TopActors.resize(npolys);
