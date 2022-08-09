@@ -58,6 +58,23 @@ CWPhastApp::CWPhastApp()
 {
 	// add construction code here,
 	// Place all significant initialization in InitInstance
+	size_t n;
+	ASSERT(sizeof(n) == 8);
+
+	n = H5Tget_size(H5T_NATIVE_UINT);
+	ASSERT(n == 4);
+
+	DWORD dword;
+	n = sizeof(dword);
+	ASSERT(n == 4);
+
+	n = H5Tget_size(H5T_NATIVE_ULONG);
+	ASSERT(n == 4);
+
+	n = H5Tget_size(H5T_NATIVE_ULLONG);
+	ASSERT(n == 8);
+
+	ASSERT(sizeof(COLORREF) <= H5Tget_size(H5T_NATIVE_ULONG));
 }
 
 CWPhastApp::~CWPhastApp()
