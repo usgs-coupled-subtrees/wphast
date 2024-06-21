@@ -48,10 +48,10 @@ extern int copy_token (char *token_ptr, char **ptr, int *length);
 extern int read_line_doubles(char *next_char, double **d, int *count_d, int *count_alloc);
 int read_lines_doubles(char *next_char, double **d, int *count_d, int *count_alloc, const char **opt_list, int count_opt_list, int *opt);
 
-extern char  error_string[10*MAX_LENGTH];
-extern char  *prefix, *transport_name, *chemistry_name, *database_name;
-extern int   head_ic_file_warning;
-extern char  *line;
+//extern char  error_string[11*MAX_LENGTH];
+//extern char  *prefix, *transport_name, *chemistry_name, *database_name;
+//extern int   head_ic_file_warning;
+//extern char  *line;
 
 int setup_grid(void);
 void Tidy_prisms(void);
