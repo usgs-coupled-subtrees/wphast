@@ -1,0 +1,32 @@
+[
+  {
+    "prefix": "msi/phast/database",
+    "url": "git@${CI_SERVER_HOST}:${GROUP}-subtrees/phreeqc3-database.git",
+    "repo": "usgs-coupled-subtrees/phreeqc3-database"
+  },
+  {
+    "prefix": "msi/phast/doc",
+    "url": "git@${CI_SERVER_HOST}:${GROUP}-subtrees/phast3-doc.git",
+    "repo": "usgs-coupled-subtrees/phast3-doc"
+  },
+  {
+    "prefix": "msi/phast/examples",
+    "url": "git@${CI_SERVER_HOST}:${GROUP}-subtrees/phast3-examples.git",
+    "repo": "usgs-coupled-subtrees/phast3-examples"
+  },
+  {
+    "prefix": "src/gridctrl",
+    "url": "git@${CI_SERVER_HOST}:${GROUP}-subtrees/wphast-src-gridctrl.git",
+    "repo": "usgs-coupled-subtrees/wphast-src-gridctrl"
+  },
+  {
+    "prefix": "src/phast/PhreeqcRM/src/IPhreeqcPhast/IPhreeqc/phreeqcpp/common",
+    "url": "git@${CI_SERVER_HOST}:${GROUP}-subtrees/phreeqc3-src-common.git",
+    "repo": "usgs-coupled-subtrees/phreeqc3-src-common"
+  },
+  {
+    "prefix": "src/srcinput",
+    "url": "git@${CI_SERVER_HOST}:${GROUP}-subtrees/phast3-src-phastinput.git",
+    "repo": "usgs-coupled-subtrees/phast3-src-phastinput"
+  }
+]
