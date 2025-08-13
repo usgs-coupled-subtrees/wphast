@@ -1,8 +1,0 @@
-{
-  "usgs-coupled-subtrees/phreeqc3-examples": {
-    "superprojects": [
-      "usgs-coupled-subtrees/phast3",
-      "usgs-coupled-subtrees/wphast"
-    ]
-  }
-}
