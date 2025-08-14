@@ -1,0 +1,8 @@
+{
+  "usgs-coupled-subtrees/wphast-src-gridctrl": {
+    "superprojects": [
+      "usgs-coupled-subtrees/phreeqci",
+      "usgs-coupled-subtrees/wphast"
+    ]
+  }
+}
